@@ -1,0 +1,51 @@
+/* Incremental changes from CellTable.css */
+
+.cellTableWidget {
+    border-collapse: initial;
+}
+
+.cellTableHeader {
+    border-bottom: 1px solid rgba(167, 169, 172, 0.5);
+}
+
+.cellTableHeader,.cellTableFooter {
+    white-space: nowrap;
+    font-family: 'Ubuntu', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 500;
+    text-shadow: none !important;
+}
+
+.cellTableFooter {
+    border-top: 4px solid #eee;
+}
+
+.cellTableWidget {
+    border-style: none;
+}
+
+.cellTableSelectedRow {
+    background-color: #90c0dd !important;
+}
+
+.cellTableKeyboardSelectedRow {
+    background: none;
+}
+
+.cellTableKeyboardSelectedCell {
+    border: none;
+}
+
+.cellTableSelectedRowCell {
+    border: 2px solid #90c0dd !important;
+}
+
+.cellTableHoveredRow {
+    cursor: pointer;
+}
+
+.cellTableCell {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 1.3rem;
+}

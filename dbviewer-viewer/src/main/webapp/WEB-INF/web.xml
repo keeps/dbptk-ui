@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE web-app
+        PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+        "http://java.sun.com/dtd/web-app_2_3.dtd">
+
+<web-app>
+
+    <!-- Servlets -->
+    <servlet>
+        <servlet-name>browseServlet</servlet-name>
+        <servlet-class>com.databasepreservation.dbviewer.server.BrowserServiceImpl</servlet-class>
+    </servlet>
+
+    <servlet>
+        <servlet-name>ClientLogger</servlet-name>
+        <servlet-class>com.databasepreservation.dbviewer.shared.server.ClientLoggerImpl</servlet-class>
+        <!-- <init-param> -->
+        <!-- <param-name>log4j-init-file</param-name> -->
+        <!-- <param-value>WEB-INF/classes/config/log4j.xml</param-value> -->
+        <!-- </init-param> -->
+        <load-on-startup>2</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>browseServlet</servlet-name>
+        <url-pattern>/dbviewer/browse</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ClientLogger</servlet-name>
+        <url-pattern>/dbviewer/weblogger</url-pattern>
+    </servlet-mapping>
+
+    <!-- Default page to serve -->
+    <welcome-file-list>
+        <welcome-file>dbviewer.html</welcome-file>
+    </welcome-file-list>
+
+</web-app>
