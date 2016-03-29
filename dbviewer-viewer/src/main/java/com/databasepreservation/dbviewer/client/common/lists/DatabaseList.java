@@ -33,7 +33,8 @@ public class DatabaseList extends AsyncTableCell<ViewerDatabase> {
   private final ClientLogger logger = new ClientLogger(getClass().getName());
 
   private Column<ViewerDatabase, SafeHtml> levelColumn;
-  private TextColumn<ViewerDatabase> idColumn;
+  private TextColumn<ViewerDatabase> nameColumn;
+  private TextColumn<ViewerDatabase> archivalDateColumn;
 
   public DatabaseList() {
     this(null, null, null, false);
@@ -61,24 +62,33 @@ public class DatabaseList extends AsyncTableCell<ViewerDatabase> {
       }
     };
 
-    idColumn = new TextColumn<ViewerDatabase>() {
-
+    nameColumn = new TextColumn<ViewerDatabase>() {
       @Override
       public String getValue(ViewerDatabase database) {
-        return database != null ? database.getUUID() : null;
+        return database != null ? database.getMetadata().getName() : null;
       }
     };
 
-    levelColumn.setSortable(true);
-    idColumn.setSortable(true);
+    archivalDateColumn = new TextColumn<ViewerDatabase>() {
+      @Override
+      public String getValue(ViewerDatabase database) {
+        return database != null ? database.getMetadata().getArchivalDate().substring(0, 10) : null;
+      }
+    };
+
+    levelColumn.setSortable(false);
+    nameColumn.setSortable(true);
+    archivalDateColumn.setSortable(true);
 
     // TODO externalize strings into constants
     display.addColumn(levelColumn, SafeHtmlUtils.fromSafeConstant("<i class='fa fa-tag'></i>"));
-    display.addColumn(idColumn, "DB id");
+    display.addColumn(nameColumn, "Database name");
+    display.addColumn(archivalDateColumn, "Archival date");
     display.setColumnWidth(levelColumn, "35px");
+    display.setColumnWidth(nameColumn, "100%");
+    display.setColumnWidth(nameColumn, "70px");
     Label emptyInfo = new Label("No items to display");
     display.setEmptyTableWidget(emptyInfo);
-    display.setColumnWidth(idColumn, "100%");
 
     // define default sorting
     // display.getColumnSortList().push(new ColumnSortInfo(datesColumn, false));
@@ -95,8 +105,9 @@ public class DatabaseList extends AsyncTableCell<ViewerDatabase> {
     Filter filter = getFilter();
 
     Map<Column<ViewerDatabase, ?>, List<String>> columnSortingKeyMap = new HashMap<Column<ViewerDatabase, ?>, List<String>>();
-    columnSortingKeyMap.put(levelColumn, Arrays.asList("level"));
-    columnSortingKeyMap.put(idColumn, Arrays.asList("id"));
+    // columnSortingKeyMap.put(levelColumn, Arrays.asList("level"));
+    columnSortingKeyMap.put(nameColumn, Arrays.asList("id"));
+    columnSortingKeyMap.put(archivalDateColumn, Arrays.asList("archivalList"));
 
     Sorter sorter = createSorter(columnSortList, columnSortingKeyMap);
 

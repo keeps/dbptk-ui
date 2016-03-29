@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.dbviewer.ViewerConstants;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerDatabase;
+import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerMetadata;
+import com.databasepreservation.dbviewer.exceptions.ViewerException;
 import com.databasepreservation.dbviewer.utils.ViewerUtils;
 
 /**
@@ -26,17 +28,37 @@ public class SolrTransformer {
   private SolrTransformer() {
   }
 
-  public static SolrInputDocument fromDatabase(ViewerDatabase viewerDatabase) {
+  /***********************************************************************************
+   * Database viewer structures to solr documents
+   **********************************************************************************/
+
+  public static SolrInputDocument fromDatabase(ViewerDatabase viewerDatabase) throws ViewerException {
     SolrInputDocument doc = new SolrInputDocument();
     doc.addField(ViewerConstants.SOLR_DATABASE_ID, viewerDatabase.getUUID());
+    doc.addField(ViewerConstants.SOLR_DATABASE_METADATA, metadataAsJsonString(viewerDatabase.getMetadata()));
+
     // TODO: add more fields
     return doc;
   }
 
-  public static ViewerDatabase toDatabase(SolrDocument doc) {
+  private static String metadataAsJsonString(ViewerMetadata viewerMetadata) throws ViewerException {
+    return JsonTransformer.getJsonFromObject(viewerMetadata);
+  }
+
+  /***********************************************************************************
+   * Solr documents to Database viewer structures
+   **********************************************************************************/
+
+  public static ViewerDatabase toDatabase(SolrDocument doc) throws ViewerException {
     ViewerDatabase viewerDatabase = new ViewerDatabase();
     viewerDatabase.setUuid(objectToString(doc.get(ViewerConstants.SOLR_DATABASE_ID)));
+    viewerDatabase.setMetadata(toMetadata(doc));
     return viewerDatabase;
+  }
+
+  public static ViewerMetadata toMetadata(SolrDocument doc) throws ViewerException {
+    String metadataAsJsonString = objectToString(doc.get(ViewerConstants.SOLR_DATABASE_METADATA));
+    return JsonTransformer.getObjectFromJson(metadataAsJsonString, ViewerMetadata.class);
   }
 
   private static String objectToString(Object object) {

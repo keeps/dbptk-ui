@@ -10,7 +10,6 @@ import org.roda.core.data.adapter.facet.Facets;
 import org.roda.core.data.adapter.filter.Filter;
 import org.roda.core.data.adapter.sort.Sorter;
 import org.roda.core.data.adapter.sublist.Sublist;
-import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RequestNotValidException;
 import org.roda.core.data.v2.index.IndexResult;
@@ -102,17 +101,17 @@ public class SolrManager {
   }
 
   public <T extends IsIndexed> IndexResult<T> find(RodaUser user, Class<T> classToReturn, Filter filter, Sorter sorter,
-    Sublist sublist, Facets facets) throws GenericException, RequestNotValidException {
+    Sublist sublist, Facets facets) throws org.roda.core.data.exceptions.GenericException, RequestNotValidException {
     return SolrUtils.find(client, classToReturn, filter, sorter, sublist, facets);
   }
 
   public <T extends IsIndexed> Long count(RodaUser user, Class<T> classToReturn, Filter filter)
-    throws GenericException, RequestNotValidException {
+    throws org.roda.core.data.exceptions.GenericException, RequestNotValidException {
     return SolrUtils.count(client, classToReturn, filter);
   }
 
   public <T extends IsIndexed> T retrieve(RodaUser user, Class<T> classToReturn, String id) throws NotFoundException,
-    GenericException {
+    org.roda.core.data.exceptions.GenericException {
     return SolrUtils.retrieve(client, classToReturn, id);
   }
 }

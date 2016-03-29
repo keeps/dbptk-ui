@@ -1,3 +1,7 @@
+/**
+ * The contents of this file are based on those found at https://github.com/keeps/roda
+ * and are subject to the license and copyright detailed in https://github.com/keeps/roda
+ */
 package com.databasepreservation.dbviewer.utils;
 
 import java.io.IOException;
@@ -53,13 +57,11 @@ import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.dbviewer.ViewerConstants;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerDatabase;
+import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerMetadata;
+import com.databasepreservation.dbviewer.exceptions.ViewerException;
 import com.databasepreservation.dbviewer.transformers.SolrTransformer;
 
 /**
- * See <a href=
- * "https://github.com/keeps/roda/blob/master/roda-core/roda-core/src/main/java/org/roda/core/index/utils/SolrUtils.java"
- * >SolrUtils.java</a>
- * 
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class SolrUtils {
@@ -77,10 +79,16 @@ public class SolrUtils {
   // TODO: Handle Viewer datatypes
   private static <T> T solrDocumentTo(Class<T> resultClass, SolrDocument doc) throws GenericException {
     T ret = null;
-    if (resultClass.equals(ViewerDatabase.class)) {
-      ret = resultClass.cast(SolrTransformer.toDatabase(doc));
-    } else {
-      throw new GenericException("Cannot find class index name: " + resultClass.getName());
+    try {
+      if (resultClass.equals(ViewerDatabase.class)) {
+        ret = resultClass.cast(SolrTransformer.toDatabase(doc));
+      } else if (resultClass.equals(ViewerMetadata.class)) {
+        ret = resultClass.cast(SolrTransformer.toMetadata(doc));
+      } else {
+        throw new GenericException("Cannot find class index name: " + resultClass.getName());
+      }
+    } catch (ViewerException e) {
+      throw new GenericException("Cannot retrieve " + resultClass.getName(), e);
     }
 
     // if (resultClass.equals(IndexedAIP.class)) {

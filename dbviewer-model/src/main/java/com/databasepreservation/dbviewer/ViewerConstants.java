@@ -15,6 +15,7 @@ public class ViewerConstants {
    * DATABASE FIELDS
    */
   public static final String SOLR_DATABASE_ID = "id";
+  public static final String SOLR_DATABASE_METADATA = "metadata";
 
   /*
    * Misc

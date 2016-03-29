@@ -23,7 +23,8 @@ public class ViewerMetadata implements Serializable {
 
   // private String producerApplication;
 
-  // private String archivalDate;
+  // this date is in UTC
+  private String archivalDate;
 
   // private String clientMachine;
 
@@ -53,5 +54,13 @@ public class ViewerMetadata implements Serializable {
 
   public void setSchemas(List<ViewerSchema> schemas) {
     this.schemas = schemas;
+  }
+
+  public String getArchivalDate() {
+    return archivalDate;
+  }
+
+  public void setArchivalDate(String archivalDate) {
+    this.archivalDate = archivalDate;
   }
 }

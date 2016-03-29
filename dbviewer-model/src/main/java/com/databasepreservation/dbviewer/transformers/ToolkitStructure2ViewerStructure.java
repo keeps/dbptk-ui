@@ -3,11 +3,14 @@ package com.databasepreservation.dbviewer.transformers;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.joda.time.DateTimeZone;
+
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerMetadata;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerSchema;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerTable;
 import com.databasepreservation.dbviewer.utils.SolrUtils;
+import com.databasepreservation.dbviewer.utils.ViewerUtils;
 import com.databasepreservation.model.structure.DatabaseStructure;
 import com.databasepreservation.model.structure.SchemaStructure;
 import com.databasepreservation.model.structure.TableStructure;
@@ -35,15 +38,20 @@ public class ToolkitStructure2ViewerStructure {
   public static ViewerDatabase getDatabase(DatabaseStructure structure) {
     ViewerDatabase result = new ViewerDatabase();
     result.setUuid(SolrUtils.randomUUID());
-    // result.setMetadata(getMetadata(structure));
+    result.setMetadata(getMetadata(structure));
     return result;
   }
 
   private static ViewerMetadata getMetadata(DatabaseStructure structure) {
     ViewerMetadata result = new ViewerMetadata();
     result.setName(structure.getName());
+    result.setArchivalDate(getArchivalDate(structure));
     result.setSchemas(getSchemas(structure.getSchemas()));
     return result;
+  }
+
+  private static String getArchivalDate(DatabaseStructure structure) {
+    return ViewerUtils.dateToString(structure.getArchivalDate().withZone(DateTimeZone.UTC).toDate());
   }
 
   private static List<ViewerSchema> getSchemas(List<SchemaStructure> schemas) {

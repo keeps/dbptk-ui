@@ -4,6 +4,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
+
 import com.databasepreservation.dbviewer.ViewerConstants;
 
 /**
@@ -19,5 +23,26 @@ public class ViewerUtils {
       ret = null;
     }
     return ret;
+  }
+
+  public static String dateToString(Date date) {
+    String ret;
+    if (date != null) {
+      SimpleDateFormat iso8601DateFormat = new SimpleDateFormat(ViewerConstants.ISO8601);
+      ret = iso8601DateFormat.format(date);
+    } else {
+      ret = null;
+    }
+
+    return ret;
+  }
+
+  public static String jodaDateTimeToString(DateTime dateTime) {
+    DateTimeFormatter formatterWithOriginalTimezone = ISODateTimeFormat.dateTime().withZone(dateTime.getZone());
+    return dateTime.toString(formatterWithOriginalTimezone);
+  }
+
+  public static DateTime parseJodaDateTime(String dateTime) {
+    return DateTime.parse(dateTime);
   }
 }

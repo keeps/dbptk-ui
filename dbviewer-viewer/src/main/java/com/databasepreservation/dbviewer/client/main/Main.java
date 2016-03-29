@@ -7,7 +7,6 @@ import com.databasepreservation.dbviewer.client.browse.DatabasePanel;
 import com.databasepreservation.dbviewer.shared.client.ClientLogger;
 import com.databasepreservation.dbviewer.shared.client.HistoryManager;
 import com.google.gwt.core.client.EntryPoint;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.History;
