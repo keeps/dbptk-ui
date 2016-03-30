@@ -45,5 +45,4 @@ public class ViewerDatabase implements Serializable, IsIndexed {
   public void setMetadata(ViewerMetadata metadata) {
     this.metadata = metadata;
   }
-
 }

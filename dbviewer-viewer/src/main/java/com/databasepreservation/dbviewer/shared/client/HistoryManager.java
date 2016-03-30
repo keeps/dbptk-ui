@@ -11,8 +11,8 @@ import com.google.gwt.user.client.Window;
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class HistoryManager {
-  public static final String REST_DATABASE = "database";
-  public static final String REST_TABLE = "table";
+  public static final String ROUTE_DATABASE = "database";
+  public static final String ROUTE_TABLE = "table";
 
   public static final String HISTORY_SEP = "/";
   public static final String HISTORY_SEP_REGEX = "/";
@@ -23,15 +23,15 @@ public class HistoryManager {
   }
 
   public static void gotoDatabaseList() {
-    newHistory(Arrays.asList(REST_DATABASE));
+    newHistory(Arrays.asList(ROUTE_DATABASE));
   }
 
   public static void gotoDatabase(String databaseId) {
-    newHistory(Arrays.asList(REST_DATABASE, databaseId));
+    newHistory(Arrays.asList(ROUTE_DATABASE, databaseId));
   }
 
   public static void gotoTable(String databaseId, String tableId) {
-    newHistory(Arrays.asList(REST_TABLE, databaseId, tableId));
+    newHistory(Arrays.asList(ROUTE_TABLE, databaseId, tableId));
   }
 
   private static void newHistory(List<String> path) {
@@ -70,5 +70,9 @@ public class HistoryManager {
     }
 
     return tokens;
+  }
+
+  public static String linkToTable(String database_uuid, String table_uuid) {
+    return createHistoryToken(Arrays.asList(ROUTE_TABLE, database_uuid, table_uuid));
   }
 }

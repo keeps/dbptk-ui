@@ -6,7 +6,9 @@ import java.io.Serializable;
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class ViewerColumn implements Serializable {
-  private String name;
+  private String solrName;
+
+  private String displayName;
 
   private ViewerType type;
 
@@ -18,12 +20,20 @@ public class ViewerColumn implements Serializable {
 
   private Boolean isAutoIncrement;
 
-  public String getName() {
-    return name;
+  public String getSolrName() {
+    return solrName;
   }
 
-  public void setName(String name) {
-    this.name = name;
+  public void setSolrName(String solrName) {
+    this.solrName = solrName;
+  }
+
+  public String getDisplayName() {
+    return displayName;
+  }
+
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
   }
 
   public String getDescription() {
@@ -66,10 +76,18 @@ public class ViewerColumn implements Serializable {
     isAutoIncrement = autoIncrement;
   }
 
+  /**
+   * @return true if the column should be sortable when displayed in a UI table
+   */
+  public boolean sortable() {
+    // TODO: add some logic to decide if the column should be sortable
+    return true;
+  }
+
   @Override
   public String toString() {
-    return "ViewerColumn{" + "defaultValue='" + defaultValue + '\'' + ", name='" + name + '\'' + ", type=" + type
-      + ", nillable=" + nillable + ", description='" + description + '\'' + ", isAutoIncrement=" + isAutoIncrement
-      + '}';
+    return "ViewerColumn{" + "defaultValue='" + defaultValue + '\'' + ", displayName='" + displayName + '\''
+      + ", type=" + type + ", nillable=" + nillable + ", description='" + description + '\'' + ", isAutoIncrement="
+      + isAutoIncrement + '}';
   }
 }

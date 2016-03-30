@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.databasepreservation.dbviewer.client.browse.DatabaseListPanel;
 import com.databasepreservation.dbviewer.client.browse.DatabasePanel;
+import com.databasepreservation.dbviewer.client.browse.TablePanel;
 import com.databasepreservation.dbviewer.shared.client.ClientLogger;
 import com.databasepreservation.dbviewer.shared.client.HistoryManager;
 import com.google.gwt.core.client.EntryPoint;
@@ -60,7 +61,7 @@ public class Main implements EntryPoint {
     if (currentHistoryPath.isEmpty()) {
       // #
       content.setWidget(getDatabaseListPanel());
-    } else if (HistoryManager.REST_DATABASE.equals(currentHistoryPath.get(0))) {
+    } else if (HistoryManager.ROUTE_DATABASE.equals(currentHistoryPath.get(0))) {
       if (currentHistoryPath.size() == 1) {
         // #database
         content.setWidget(getDatabaseListPanel());
@@ -70,6 +71,18 @@ public class Main implements EntryPoint {
         content.setWidget(panel);
       } else {
         // #database/<id>/...
+        HistoryManager.gotoRoot();
+      }
+    } else if (HistoryManager.ROUTE_TABLE.equals(currentHistoryPath.get(0))){
+      if(currentHistoryPath.size() == 3){
+        // #table/<database_uuid>/<table_uuid>
+        String database_uuid = currentHistoryPath.get(1);
+        String table_uuid = currentHistoryPath.get(2);
+        TablePanel panel = new TablePanel(database_uuid, table_uuid);
+        content.setWidget(panel);
+      }else{
+        // #table/...
+        // (except the case above)
         HistoryManager.gotoRoot();
       }
     }

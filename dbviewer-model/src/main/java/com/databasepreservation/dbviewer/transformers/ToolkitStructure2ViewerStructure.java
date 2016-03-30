@@ -116,7 +116,7 @@ public class ToolkitStructure2ViewerStructure {
   private static ViewerColumn getColumn(ColumnStructure column) throws ViewerException {
     ViewerColumn result = new ViewerColumn();
 
-    result.setName(column.getName());
+    result.setDisplayName(column.getName());
     result.setDescription(column.getDescription());
     result.setAutoIncrement(column.getIsAutoIncrement());
     result.setDefaultValue(column.getDefaultValue());

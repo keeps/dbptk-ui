@@ -40,6 +40,10 @@ public class ViewerMetadata implements Serializable {
 
   // private List<DbvPrivilege> privileges;
 
+  //+++++++++++++++++++++++++++++++++++++++++++++++++++++
+  // Getters and setters
+  //+++++++++++++++++++++++++++++++++++++++++++++++++++++
+  
   public String getName() {
     return name;
   }
@@ -62,5 +66,20 @@ public class ViewerMetadata implements Serializable {
 
   public void setArchivalDate(String archivalDate) {
     this.archivalDate = archivalDate;
+  }
+  
+  //+++++++++++++++++++++++++++++++++++++++++++++++++++++
+  // Behaviour
+  //+++++++++++++++++++++++++++++++++++++++++++++++++++++
+  
+  public ViewerTable getTable(String tableUUID){
+    for (ViewerSchema schema : schemas) {
+      for (ViewerTable table : schema.getTables()) {
+        if(tableUUID.equals(table.getUUID())){
+          return table;
+        }
+      }
+    }
+    return null;
   }
 }

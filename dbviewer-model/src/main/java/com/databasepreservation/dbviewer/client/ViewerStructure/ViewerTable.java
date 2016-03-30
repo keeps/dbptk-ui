@@ -8,7 +8,7 @@ import org.roda.core.data.v2.index.IsIndexed;
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class ViewerTable implements Serializable, IsIndexed {
+public class ViewerTable implements Serializable {
   // used to identify the collection containing data from this table
   private String uuid;
 
@@ -34,7 +34,6 @@ public class ViewerTable implements Serializable, IsIndexed {
 
   // private HashMap<String, String> udtAlias;
 
-  @Override
   public String getUUID() {
     return uuid;
   }
