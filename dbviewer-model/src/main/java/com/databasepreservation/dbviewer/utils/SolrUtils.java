@@ -76,6 +76,10 @@ public class SolrUtils {
     return UUID.randomUUID().toString();
   }
 
+  public static String getColumnSolrName(int index){
+    return ViewerConstants.SOLR_TABLE_COLUMN_PREFIX + index;
+  }
+
   // TODO: Handle Viewer datatypes
   private static <T> T solrDocumentTo(Class<T> resultClass, SolrDocument doc) throws GenericException {
     T ret = null;

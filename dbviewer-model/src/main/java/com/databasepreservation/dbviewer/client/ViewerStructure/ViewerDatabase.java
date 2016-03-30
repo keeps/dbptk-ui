@@ -1,6 +1,7 @@
 package com.databasepreservation.dbviewer.client.ViewerStructure;
 
 import java.io.Serializable;
+import java.util.Map;
 
 import org.roda.core.data.v2.index.IsIndexed;
 

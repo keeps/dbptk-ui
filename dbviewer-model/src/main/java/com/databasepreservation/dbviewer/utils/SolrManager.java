@@ -18,6 +18,7 @@ import org.roda.core.data.v2.user.RodaUser;
 
 import com.databasepreservation.dbviewer.ViewerConstants;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerDatabase;
+import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerTable;
 import com.databasepreservation.dbviewer.exceptions.ViewerException;
 import com.databasepreservation.dbviewer.transformers.SolrTransformer;
 
@@ -55,6 +56,16 @@ public class SolrManager {
     } catch (IOException e) {
       throw new ViewerException(e);
     }
+  }
+
+  /**
+   * Creates a new table collection in solr for the specified table
+   *
+   * @param table
+   *          the table which data is going to be saved in this collections
+   */
+  public void addTable(ViewerTable table) {
+    collectionsToCommit.add(ViewerConstants.SOLR_INDEX_TABLE_PREFIX + table.getUUID());
   }
 
   /**

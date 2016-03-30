@@ -3,7 +3,9 @@ package com.databasepreservation.dbviewer.transformers;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.databasepreservation.dbviewer.ViewerConstants;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerColumn;
+import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerDatabaseFromToolkit;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerType;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerTypeArray;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerTypeStructure;
@@ -52,18 +54,18 @@ public class ToolkitStructure2ViewerStructure {
    *          the database structure used by Database Preservation Toolkit
    * @return an equivalent database that can be used by Database Viewer
    */
-  public static ViewerDatabase getDatabase(DatabaseStructure structure) throws ViewerException {
-    ViewerDatabase result = new ViewerDatabase();
+  public static ViewerDatabaseFromToolkit getDatabase(DatabaseStructure structure) throws ViewerException {
+    ViewerDatabaseFromToolkit result = new ViewerDatabaseFromToolkit();
     result.setUuid(SolrUtils.randomUUID());
-    result.setMetadata(getMetadata(structure));
+    result.setMetadata(getMetadata(result, structure));
     return result;
   }
 
-  private static ViewerMetadata getMetadata(DatabaseStructure structure) throws ViewerException {
+  private static ViewerMetadata getMetadata(ViewerDatabaseFromToolkit vdb, DatabaseStructure structure) throws ViewerException {
     ViewerMetadata result = new ViewerMetadata();
     result.setName(structure.getName());
     result.setArchivalDate(getArchivalDate(structure));
-    result.setSchemas(getSchemas(structure.getSchemas()));
+    result.setSchemas(getSchemas(vdb, structure.getSchemas()));
     return result;
   }
 
@@ -71,30 +73,32 @@ public class ToolkitStructure2ViewerStructure {
     return ViewerUtils.dateToString(structure.getArchivalDate().withZone(DateTimeZone.UTC).toDate());
   }
 
-  private static List<ViewerSchema> getSchemas(List<SchemaStructure> schemas) throws ViewerException {
+  private static List<ViewerSchema> getSchemas(ViewerDatabaseFromToolkit vdb, List<SchemaStructure> schemas) throws ViewerException {
     List<ViewerSchema> result = new ArrayList<>();
     for (SchemaStructure schema : schemas) {
-      result.add(getSchema(schema));
+      result.add(getSchema(vdb, schema));
     }
     return result;
   }
 
-  private static ViewerSchema getSchema(SchemaStructure schema) throws ViewerException {
+  private static ViewerSchema getSchema(ViewerDatabaseFromToolkit vdb, SchemaStructure schema) throws ViewerException {
     ViewerSchema result = new ViewerSchema();
     result.setName(schema.getName());
-    result.setTables(getTables(schema.getTables()));
+    result.setTables(getTables(vdb, schema.getTables()));
+
+    vdb.putSchema(schema.getName(), result);
     return result;
   }
 
-  private static List<ViewerTable> getTables(List<TableStructure> tables) throws ViewerException {
+  private static List<ViewerTable> getTables(ViewerDatabaseFromToolkit vdb, List<TableStructure> tables) throws ViewerException {
     List<ViewerTable> result = new ArrayList<>();
     for (TableStructure table : tables) {
-      result.add(getTable(table));
+      result.add(getTable(vdb, table));
     }
     return result;
   }
 
-  private static ViewerTable getTable(TableStructure table) throws ViewerException {
+  private static ViewerTable getTable(ViewerDatabaseFromToolkit vdb, TableStructure table) throws ViewerException {
     ViewerTable result = new ViewerTable();
     result.setUuid(SolrUtils.randomUUID());
     result.setName(table.getName());
@@ -102,21 +106,25 @@ public class ToolkitStructure2ViewerStructure {
     result.setCountRows(table.getRows());
     result.setSchema(table.getSchema());
     result.setColumns(getColumns(table.getColumns()));
+
+    vdb.putTable(table.getId(), result);
     return result;
   }
 
   private static List<ViewerColumn> getColumns(List<ColumnStructure> columns) throws ViewerException {
     List<ViewerColumn> result = new ArrayList<>();
+    int index = 0;
     for (ColumnStructure column : columns) {
-      result.add(getColumn(column));
+      result.add(getColumn(column, index++));
     }
     return result;
   }
 
-  private static ViewerColumn getColumn(ColumnStructure column) throws ViewerException {
+  private static ViewerColumn getColumn(ColumnStructure column, int index) throws ViewerException {
     ViewerColumn result = new ViewerColumn();
 
     result.setDisplayName(column.getName());
+    result.setSolrName(SolrUtils.getColumnSolrName(index));
     result.setDescription(column.getDescription());
     result.setAutoIncrement(column.getIsAutoIncrement());
     result.setDefaultValue(column.getDefaultValue());
