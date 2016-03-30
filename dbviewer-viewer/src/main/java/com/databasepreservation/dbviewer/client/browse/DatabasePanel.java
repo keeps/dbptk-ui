@@ -1,5 +1,6 @@
 package com.databasepreservation.dbviewer.client.browse;
 
+import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerColumn;
 import org.roda.core.data.v2.index.IsIndexed;
 
 import com.databasepreservation.dbviewer.client.BrowserService;
@@ -51,10 +52,13 @@ public class DatabasePanel extends Composite {
           metadata = database.getMetadata();
 
           // just output something interesting
-          String tables = "";
+          String tables = "\n";
           for (ViewerSchema viewerSchema : metadata.getSchemas()) {
             for (ViewerTable viewerTable : viewerSchema.getTables()) {
-              tables += "[" + viewerSchema.getName() + "." + viewerTable.getName() + "]; ";
+              tables += "[" + viewerSchema.getName() + "." + viewerTable.getName() + "]: \n";
+              for (ViewerColumn viewerColumn : viewerTable.getColumns()) {
+                tables += "   " + viewerColumn.toString() + "\n";
+              }
             }
           }
 
