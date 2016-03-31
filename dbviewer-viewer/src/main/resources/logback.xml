@@ -24,7 +24,7 @@
         <appender-ref ref="STDOUT"/>
     </logger>
 
-    <root level="warn">
+    <root level="debug">
         <appender-ref ref="STDOUT"/>
     </root>
 </configuration>

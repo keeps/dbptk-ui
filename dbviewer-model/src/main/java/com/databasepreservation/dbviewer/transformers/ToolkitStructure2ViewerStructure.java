@@ -4,13 +4,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.databasepreservation.dbviewer.ViewerConstants;
+import org.joda.time.DateTimeZone;
+
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerColumn;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerDatabaseFromToolkit;
+import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerMetadata;
+import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerSchema;
+import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerTable;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerType;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerTypeArray;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerTypeStructure;
 import com.databasepreservation.dbviewer.exceptions.ViewerException;
+import com.databasepreservation.dbviewer.utils.SolrUtils;
+import com.databasepreservation.dbviewer.utils.ViewerUtils;
 import com.databasepreservation.model.structure.ColumnStructure;
+import com.databasepreservation.model.structure.DatabaseStructure;
+import com.databasepreservation.model.structure.SchemaStructure;
+import com.databasepreservation.model.structure.TableStructure;
 import com.databasepreservation.model.structure.type.ComposedTypeArray;
 import com.databasepreservation.model.structure.type.ComposedTypeStructure;
 import com.databasepreservation.model.structure.type.SimpleTypeBinary;
@@ -22,17 +32,6 @@ import com.databasepreservation.model.structure.type.SimpleTypeNumericApproximat
 import com.databasepreservation.model.structure.type.SimpleTypeNumericExact;
 import com.databasepreservation.model.structure.type.SimpleTypeString;
 import com.databasepreservation.model.structure.type.Type;
-import org.joda.time.DateTimeZone;
-
-import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerDatabase;
-import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerMetadata;
-import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerSchema;
-import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerTable;
-import com.databasepreservation.dbviewer.utils.SolrUtils;
-import com.databasepreservation.dbviewer.utils.ViewerUtils;
-import com.databasepreservation.model.structure.DatabaseStructure;
-import com.databasepreservation.model.structure.SchemaStructure;
-import com.databasepreservation.model.structure.TableStructure;
 
 /**
  * Utility class used to convert a DatabaseStructure (used in Database
@@ -61,7 +60,8 @@ public class ToolkitStructure2ViewerStructure {
     return result;
   }
 
-  private static ViewerMetadata getMetadata(ViewerDatabaseFromToolkit vdb, DatabaseStructure structure) throws ViewerException {
+  private static ViewerMetadata getMetadata(ViewerDatabaseFromToolkit vdb, DatabaseStructure structure)
+    throws ViewerException {
     ViewerMetadata result = new ViewerMetadata();
     result.setName(structure.getName());
     result.setArchivalDate(getArchivalDate(structure));
@@ -73,7 +73,8 @@ public class ToolkitStructure2ViewerStructure {
     return ViewerUtils.dateToString(structure.getArchivalDate().withZone(DateTimeZone.UTC).toDate());
   }
 
-  private static List<ViewerSchema> getSchemas(ViewerDatabaseFromToolkit vdb, List<SchemaStructure> schemas) throws ViewerException {
+  private static List<ViewerSchema> getSchemas(ViewerDatabaseFromToolkit vdb, List<SchemaStructure> schemas)
+    throws ViewerException {
     List<ViewerSchema> result = new ArrayList<>();
     for (SchemaStructure schema : schemas) {
       result.add(getSchema(vdb, schema));
@@ -90,7 +91,8 @@ public class ToolkitStructure2ViewerStructure {
     return result;
   }
 
-  private static List<ViewerTable> getTables(ViewerDatabaseFromToolkit vdb, List<TableStructure> tables) throws ViewerException {
+  private static List<ViewerTable> getTables(ViewerDatabaseFromToolkit vdb, List<TableStructure> tables)
+    throws ViewerException {
     List<ViewerTable> result = new ArrayList<>();
     for (TableStructure table : tables) {
       result.add(getTable(vdb, table));
@@ -124,7 +126,7 @@ public class ToolkitStructure2ViewerStructure {
     ViewerColumn result = new ViewerColumn();
 
     result.setDisplayName(column.getName());
-    result.setSolrName(SolrUtils.getColumnSolrName(index));
+    result.setSolrName(getColumnSolrName(index, column.getType()));
     result.setDescription(column.getDescription());
     result.setAutoIncrement(column.getIsAutoIncrement());
     result.setDefaultValue(column.getDefaultValue());
@@ -134,31 +136,70 @@ public class ToolkitStructure2ViewerStructure {
     return result;
   }
 
+  private static String getColumnSolrName(int index, Type type) throws ViewerException {
+    String suffix = null;
+
+    if (type instanceof SimpleTypeBinary) {
+      suffix = ViewerConstants.SOLR_DYN_STRING;
+    } else if (type instanceof SimpleTypeBoolean) {
+      suffix = ViewerConstants.SOLR_DYN_BOOLEAN;
+    } else if (type instanceof SimpleTypeDateTime) {
+      suffix = ViewerConstants.SOLR_DYN_TDATE;
+    } else if (type instanceof SimpleTypeEnumeration) {
+      suffix = ViewerConstants.SOLR_DYN_STRING;
+    } else if (type instanceof SimpleTypeInterval) {
+      suffix = ViewerConstants.SOLR_DYN_TDATES; // TODO: review chosen type
+    } else if (type instanceof SimpleTypeNumericApproximate) {
+      suffix = ViewerConstants.SOLR_DYN_TDOUBLE;
+    } else if (type instanceof SimpleTypeNumericExact) {
+      SimpleTypeNumericExact exact = (SimpleTypeNumericExact) type;
+      if (exact.getScale() > 0) {
+        suffix = ViewerConstants.SOLR_DYN_TDOUBLE;
+      } else {
+        suffix = ViewerConstants.SOLR_DYN_TLONG;
+      }
+    } else if (type instanceof SimpleTypeString) {
+      suffix = ViewerConstants.SOLR_DYN_STRING;
+    } else if (type instanceof ComposedTypeArray) {
+      throw new ViewerException("Arrays are not yet supported.");
+    } else if (type instanceof ComposedTypeStructure) {
+      throw new ViewerException("Composed types are not yet supported.");
+    } else {
+      throw new ViewerException("Unknown type: " + type.toString());
+    }
+
+    if (suffix == null) {
+      throw new ViewerException("Could not get a solr column suffix for " + type.toString());
+    }
+
+    return ViewerConstants.SOLR_TABLE_COLUMN_PREFIX + index + suffix;
+  }
+
   private static ViewerType getType(Type type) throws ViewerException {
     ViewerType result = new ViewerType();
 
-    if(type instanceof SimpleTypeBinary){
+    if (type instanceof SimpleTypeBinary) {
       result.setDbType(ViewerType.dbTypes.BINARY);
-    } else if(type instanceof SimpleTypeBoolean){
+    } else if (type instanceof SimpleTypeBoolean) {
       result.setDbType(ViewerType.dbTypes.BOOLEAN);
-    } else if(type instanceof SimpleTypeDateTime){
+    } else if (type instanceof SimpleTypeDateTime) {
       result.setDbType(ViewerType.dbTypes.DATETIME);
-    } else if(type instanceof SimpleTypeEnumeration){
+    } else if (type instanceof SimpleTypeEnumeration) {
       result.setDbType(ViewerType.dbTypes.ENUMERATION);
-    } else if(type instanceof SimpleTypeInterval){
+    } else if (type instanceof SimpleTypeInterval) {
       result.setDbType(ViewerType.dbTypes.INTERVAL);
-    } else if(type instanceof SimpleTypeNumericApproximate){
+    } else if (type instanceof SimpleTypeNumericApproximate) {
       result.setDbType(ViewerType.dbTypes.NUMERIC_APPROXIMATE);
-    } else if(type instanceof SimpleTypeNumericExact){
+    } else if (type instanceof SimpleTypeNumericExact) {
       result.setDbType(ViewerType.dbTypes.NUMERIC_EXACT);
-    } else if(type instanceof SimpleTypeString){
+    } else if (type instanceof SimpleTypeString) {
       result.setDbType(ViewerType.dbTypes.STRING);
-    } else if(type instanceof ComposedTypeArray){
+    } else if (type instanceof ComposedTypeArray) {
       result = new ViewerTypeArray();
       result.setDbType(ViewerType.dbTypes.COMPOSED_ARRAY);
       // set type of elements in the array
-      ((ViewerTypeArray)result).setElementType(getType(((ComposedTypeArray)type).getElementType()));
-    } else if(type instanceof ComposedTypeStructure){
+      ((ViewerTypeArray) result).setElementType(getType(((ComposedTypeArray) type).getElementType()));
+    } else if (type instanceof ComposedTypeStructure) {
       result = new ViewerTypeStructure();
       result.setDbType(ViewerType.dbTypes.COMPOSED_STRUCTURE);
     } else {

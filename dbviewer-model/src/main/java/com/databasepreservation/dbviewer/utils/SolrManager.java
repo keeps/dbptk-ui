@@ -1,11 +1,17 @@
 package com.databasepreservation.dbviewer.utils;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
+import org.apache.solr.client.solrj.impl.XMLResponseParser;
+import org.apache.solr.client.solrj.request.CollectionAdminRequest;
+import org.apache.solr.common.util.NamedList;
 import org.roda.core.data.adapter.facet.Facets;
 import org.roda.core.data.adapter.filter.Filter;
 import org.roda.core.data.adapter.sort.Sorter;
@@ -15,6 +21,8 @@ import org.roda.core.data.exceptions.RequestNotValidException;
 import org.roda.core.data.v2.index.IndexResult;
 import org.roda.core.data.v2.index.IsIndexed;
 import org.roda.core.data.v2.user.RodaUser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.dbviewer.ViewerConstants;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerDatabase;
@@ -28,8 +36,12 @@ import com.databasepreservation.dbviewer.transformers.SolrTransformer;
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class SolrManager {
+  private static final Logger LOGGER = LoggerFactory.getLogger(SolrManager.class);
+
   private final HttpSolrClient client;
   private final Set<String> collectionsToCommit;
+
+
 
   public SolrManager(String url) {
     client = new HttpSolrClient(url);
@@ -51,9 +63,7 @@ public class SolrManager {
     collectionsToCommit.add(ViewerConstants.SOLR_INDEX_DATABASE);
     try {
       client.add(ViewerConstants.SOLR_INDEX_DATABASE, SolrTransformer.fromDatabase(database));
-    } catch (SolrServerException e) {
-      throw new ViewerException(e);
-    } catch (IOException e) {
+    } catch (SolrServerException | IOException e) {
       throw new ViewerException(e);
     }
   }
@@ -64,8 +74,36 @@ public class SolrManager {
    * @param table
    *          the table which data is going to be saved in this collections
    */
-  public void addTable(ViewerTable table) {
-    collectionsToCommit.add(ViewerConstants.SOLR_INDEX_TABLE_PREFIX + table.getUUID());
+  public void addTable(ViewerTable table) throws ViewerException {
+    String collectionName = SolrUtils.getTableCollectionName(table.getUUID());
+    CollectionAdminRequest.Create request = new CollectionAdminRequest.Create();
+    request.setCollectionName(collectionName);
+    request.setNumShards(1);
+
+    XMLResponseParser responseParser = new XMLResponseParser();
+    try {
+      LOGGER.debug("Creating collection for table " + table.getName() + " with id " + table.getUUID());
+      NamedList<Object> response = client.request(request);
+      LOGGER.debug("Response from server (create collection for table with id " + table.getUUID() + "): "
+        + response.toString());
+    } catch (SolrServerException | IOException e) {
+      throw new ViewerException("Error creating collection " + collectionName, e);
+    }
+    collectionsToCommit.add(collectionName);
+  }
+
+  private List<String> getCoreListFromSolrResponse(NamedList<Object> response) throws ViewerException {
+    Map tree = response.asMap(0);
+
+    // check if response status was OK
+    Map responseHeader = (Map) tree.get("responseHeader");
+    Integer status = (Integer)responseHeader.get("status");
+    if(status != 0){
+      throw new ViewerException("Get non-zero status in response: "+response.toString());
+    }
+
+    // get core names
+    return Arrays.asList("nope");
   }
 
   /**
@@ -78,9 +116,7 @@ public class SolrManager {
       for (String collection : collectionsToCommit) {
         client.commit(collection);
       }
-    } catch (IOException e) {
-      throw new ViewerException("Error committing collection", e);
-    } catch (SolrServerException e) {
+    } catch (IOException | SolrServerException e) {
       throw new ViewerException("Error committing collection", e);
     }
 
@@ -88,9 +124,7 @@ public class SolrManager {
       for (String collection : collectionsToCommit) {
         client.optimize(collection);
       }
-    } catch (IOException e) {
-      throw new ViewerException("Error optimizing collection", e);
-    } catch (SolrServerException e) {
+    } catch (IOException | SolrServerException e) {
       throw new ViewerException("Error optimizing collection", e);
     }
 

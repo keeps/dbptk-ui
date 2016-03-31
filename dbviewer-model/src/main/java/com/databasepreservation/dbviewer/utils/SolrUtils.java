@@ -60,6 +60,17 @@ import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerMetadata;
 import com.databasepreservation.dbviewer.exceptions.ViewerException;
 import com.databasepreservation.dbviewer.transformers.SolrTransformer;
+import com.databasepreservation.model.structure.type.ComposedTypeArray;
+import com.databasepreservation.model.structure.type.ComposedTypeStructure;
+import com.databasepreservation.model.structure.type.SimpleTypeBinary;
+import com.databasepreservation.model.structure.type.SimpleTypeBoolean;
+import com.databasepreservation.model.structure.type.SimpleTypeDateTime;
+import com.databasepreservation.model.structure.type.SimpleTypeEnumeration;
+import com.databasepreservation.model.structure.type.SimpleTypeInterval;
+import com.databasepreservation.model.structure.type.SimpleTypeNumericApproximate;
+import com.databasepreservation.model.structure.type.SimpleTypeNumericExact;
+import com.databasepreservation.model.structure.type.SimpleTypeString;
+import com.databasepreservation.model.structure.type.Type;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -76,8 +87,8 @@ public class SolrUtils {
     return UUID.randomUUID().toString();
   }
 
-  public static String getColumnSolrName(int index){
-    return ViewerConstants.SOLR_TABLE_COLUMN_PREFIX + index;
+  public static String getTableCollectionName(String tableUUID){
+    return ViewerConstants.SOLR_INDEX_TABLE_PREFIX + tableUUID;
   }
 
   // TODO: Handle Viewer datatypes
@@ -336,7 +347,7 @@ public class SolrUtils {
     } else if (parameter instanceof EmptyKeyFilterParameter) {
       EmptyKeyFilterParameter param = (EmptyKeyFilterParameter) parameter;
       appendANDOperator(ret, true);
-      ret.append("(*:* NOT " + param.getName() + ":*)");
+      ret.append("(*:* NOT ").append(param.getName()).append(":*)");
     } else if (parameter instanceof DateRangeFilterParameter) {
       DateRangeFilterParameter param = (DateRangeFilterParameter) parameter;
       appendRange(ret, param.getName(), Date.class, param.getFromValue(), String.class,
@@ -543,7 +554,7 @@ public class SolrUtils {
     ret.append("(");
     for (int i = 0; i < split.length; i++) {
       if (i != 0 && operator != null) {
-        ret.append(" " + operator + " ");
+        ret.append(" ").append(operator).append(" ");
       }
       if (split[i].matches("(AND|OR|NOT)")) {
         ret.append(key).append(": \"").append(split[i]).append("\"");
