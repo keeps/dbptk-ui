@@ -1,15 +1,11 @@
 package com.databasepreservation.dbviewer.utils;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
-import org.apache.solr.client.solrj.impl.XMLResponseParser;
 import org.apache.solr.client.solrj.request.CollectionAdminRequest;
 import org.apache.solr.common.util.NamedList;
 import org.roda.core.data.adapter.facet.Facets;
@@ -26,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.dbviewer.ViewerConstants;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerDatabase;
+import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerRow;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerTable;
 import com.databasepreservation.dbviewer.exceptions.ViewerException;
 import com.databasepreservation.dbviewer.transformers.SolrTransformer;
@@ -40,8 +37,7 @@ public class SolrManager {
 
   private final HttpSolrClient client;
   private final Set<String> collectionsToCommit;
-
-
+  private boolean setupDone = false;
 
   public SolrManager(String url) {
     client = new HttpSolrClient(url);
@@ -49,6 +45,8 @@ public class SolrManager {
     // allowCompression defaults to false.
     // Server side must support gzip or deflate for this to have any effect.
     // solrDBList.setAllowCompression(true);
+
+    // TODO: ensure that solr is running in cloud mode before execution
 
     collectionsToCommit = new HashSet<>();
   }
@@ -60,11 +58,29 @@ public class SolrManager {
    *          the new database
    */
   public void addDatabase(ViewerDatabase database) throws ViewerException {
+    // creates databases collection, skipping if it is present
+    CollectionAdminRequest.Create request = new CollectionAdminRequest.Create();
+    request.setCollectionName(ViewerConstants.SOLR_INDEX_DATABASE);
+    request.setConfigName(ViewerConstants.SOLR_CONFIGSET_DATABASE);
+    request.setNumShards(1);
+    try {
+      NamedList<Object> response = client.request(request);
+    } catch (SolrServerException | IOException e) {
+      throw new ViewerException("Error creating collection " + ViewerConstants.SOLR_INDEX_DATABASE, e);
+    } catch (HttpSolrClient.RemoteSolrException e) {
+      if (e.getMessage().contains("collection already exists: " + ViewerConstants.SOLR_INDEX_DATABASE)) {
+        LOGGER.info("collection " + ViewerConstants.SOLR_INDEX_DATABASE + " already exists.");
+      } else {
+        throw new ViewerException("Error creating collection " + ViewerConstants.SOLR_INDEX_DATABASE, e);
+      }
+    }
+
+    // add this database to the collection
     collectionsToCommit.add(ViewerConstants.SOLR_INDEX_DATABASE);
     try {
       client.add(ViewerConstants.SOLR_INDEX_DATABASE, SolrTransformer.fromDatabase(database));
     } catch (SolrServerException | IOException e) {
-      throw new ViewerException(e);
+      throw new ViewerException("Error adding database", e);
     }
   }
 
@@ -78,9 +94,9 @@ public class SolrManager {
     String collectionName = SolrUtils.getTableCollectionName(table.getUUID());
     CollectionAdminRequest.Create request = new CollectionAdminRequest.Create();
     request.setCollectionName(collectionName);
+    request.setConfigName(ViewerConstants.SOLR_CONFIGSET_TABLE);
     request.setNumShards(1);
 
-    XMLResponseParser responseParser = new XMLResponseParser();
     try {
       LOGGER.debug("Creating collection for table " + table.getName() + " with id " + table.getUUID());
       NamedList<Object> response = client.request(request);
@@ -92,18 +108,13 @@ public class SolrManager {
     collectionsToCommit.add(collectionName);
   }
 
-  private List<String> getCoreListFromSolrResponse(NamedList<Object> response) throws ViewerException {
-    Map tree = response.asMap(0);
-
-    // check if response status was OK
-    Map responseHeader = (Map) tree.get("responseHeader");
-    Integer status = (Integer)responseHeader.get("status");
-    if(status != 0){
-      throw new ViewerException("Get non-zero status in response: "+response.toString());
+  public void addRow(ViewerTable table, ViewerRow row) throws ViewerException {
+    String collectionName = SolrUtils.getTableCollectionName(table.getUUID());
+    try {
+      client.add(collectionName, SolrTransformer.fromRow(table, row));
+    } catch (SolrServerException | IOException e) {
+      throw new ViewerException("Error adding row", e);
     }
-
-    // get core names
-    return Arrays.asList("nope");
   }
 
   /**
@@ -112,6 +123,13 @@ public class SolrManager {
    * @throws ViewerException
    */
   public void commitAll() throws ViewerException {
+    // TODO: replace with better solution
+    try {
+      Thread.sleep(3000);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+
     try {
       for (String collection : collectionsToCommit) {
         client.commit(collection);

@@ -1,14 +1,27 @@
 package com.databasepreservation.dbviewer.transformers;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.databasepreservation.dbviewer.ViewerConstants;
+import com.databasepreservation.model.exception.ModuleException;
+import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTimeZone;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.databasepreservation.dbviewer.ViewerConstants;
+import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerCell;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerColumn;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerDatabaseFromToolkit;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerMetadata;
+import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerRow;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerSchema;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerTable;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerType;
@@ -17,6 +30,12 @@ import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerTypeStruct
 import com.databasepreservation.dbviewer.exceptions.ViewerException;
 import com.databasepreservation.dbviewer.utils.SolrUtils;
 import com.databasepreservation.dbviewer.utils.ViewerUtils;
+import com.databasepreservation.model.data.BinaryCell;
+import com.databasepreservation.model.data.Cell;
+import com.databasepreservation.model.data.ComposedCell;
+import com.databasepreservation.model.data.NullCell;
+import com.databasepreservation.model.data.Row;
+import com.databasepreservation.model.data.SimpleCell;
 import com.databasepreservation.model.structure.ColumnStructure;
 import com.databasepreservation.model.structure.DatabaseStructure;
 import com.databasepreservation.model.structure.SchemaStructure;
@@ -40,6 +59,8 @@ import com.databasepreservation.model.structure.type.Type;
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class ToolkitStructure2ViewerStructure {
+  private static final Logger LOGGER = LoggerFactory.getLogger(ToolkitStructure2ViewerStructure.class);
+
   /**
    * Private empty constructor
    */
@@ -48,7 +69,7 @@ public class ToolkitStructure2ViewerStructure {
 
   /**
    * Deep-convert a DatabaseStructure to a ViewerDatabase
-   * 
+   *
    * @param structure
    *          the database structure used by Database Preservation Toolkit
    * @return an equivalent database that can be used by Database Viewer
@@ -136,8 +157,19 @@ public class ToolkitStructure2ViewerStructure {
     return result;
   }
 
+  /**
+   * Gets a column name for a type, including the dynamic type suffix
+   * 
+   * @param index
+   *          zero based index
+   * @param type
+   *          the type from database preservation toolkit
+   * @return the column name
+   * @throws ViewerException
+   */
   private static String getColumnSolrName(int index, Type type) throws ViewerException {
-    String suffix = null;
+    // suffix must always be set before being used
+    String suffix;
 
     if (type instanceof SimpleTypeBinary) {
       suffix = ViewerConstants.SOLR_DYN_STRING;
@@ -168,10 +200,6 @@ public class ToolkitStructure2ViewerStructure {
       throw new ViewerException("Unknown type: " + type.toString());
     }
 
-    if (suffix == null) {
-      throw new ViewerException("Could not get a solr column suffix for " + type.toString());
-    }
-
     return ViewerConstants.SOLR_TABLE_COLUMN_PREFIX + index + suffix;
   }
 
@@ -189,9 +217,13 @@ public class ToolkitStructure2ViewerStructure {
     } else if (type instanceof SimpleTypeInterval) {
       result.setDbType(ViewerType.dbTypes.INTERVAL);
     } else if (type instanceof SimpleTypeNumericApproximate) {
-      result.setDbType(ViewerType.dbTypes.NUMERIC_APPROXIMATE);
+      result.setDbType(ViewerType.dbTypes.NUMERIC_FLOATING_POINT);
     } else if (type instanceof SimpleTypeNumericExact) {
-      result.setDbType(ViewerType.dbTypes.NUMERIC_EXACT);
+      if (((SimpleTypeNumericExact) type).getScale() == 0) {
+        result.setDbType(ViewerType.dbTypes.NUMERIC_INTEGER);
+      } else {
+        result.setDbType(ViewerType.dbTypes.NUMERIC_FLOATING_POINT);
+      }
     } else if (type instanceof SimpleTypeString) {
       result.setDbType(ViewerType.dbTypes.STRING);
     } else if (type instanceof ComposedTypeArray) {
@@ -210,6 +242,67 @@ public class ToolkitStructure2ViewerStructure {
     result.setTypeName(type.getSql2003TypeName());
     result.setOriginalTypeName(type.getOriginalTypeName());
 
+    return result;
+  }
+
+  public static ViewerRow getRow(ViewerTable table, Row row, int rowIndex) throws ViewerException {
+    ViewerRow result = new ViewerRow();
+    result.setUUID(SolrUtils.randomUUID());
+    result.setCells(getCells(table, row, rowIndex));
+    return result;
+  }
+
+  private static List<ViewerCell> getCells(ViewerTable table, Row row, int rowIndex) throws ViewerException {
+    List<ViewerCell> result = new ArrayList<>();
+    int colIndex = 0;
+    for (Cell cell : row.getCells()) {
+      result.add(getCell(table, cell, rowIndex, colIndex++));
+    }
+    return result;
+  }
+
+  private static ViewerCell getCell(ViewerTable table, Cell cell, int rowIndex, int colIndex) throws ViewerException {
+    ViewerCell result = new ViewerCell();
+    if (cell instanceof BinaryCell) {
+      BinaryCell binaryCell = (BinaryCell) cell;
+
+      String lobFilename = "blob"+colIndex+"_"+rowIndex+".bin";
+
+      // copy blob to a file at <USER_LOCAL_DIR>/<table_UUID>/blob<column_index>_<row_index>.bin
+      try {
+        Path outputPath = ViewerConstants.USER_LOCAL_DIR.resolve(table.getUUID()+"/");
+        outputPath = Files.createDirectories(outputPath);
+        outputPath = outputPath.resolve(lobFilename);
+        InputStream stream = binaryCell.createInputstream();
+        Files.copy(stream, outputPath, StandardCopyOption.REPLACE_EXISTING);
+        try {
+          stream.close();
+        }catch(IOException e){
+          LOGGER.debug("could not close binaryCell input stream", e);
+        }
+
+        try {
+          binaryCell.cleanResources();
+        }catch(IOException e){
+          LOGGER.debug("could not free binary cell resources", e);
+        }
+      } catch (IOException | ModuleException e) {
+        throw new ViewerException("Could not copy blob to user directory");
+      }
+
+      result.setValue(lobFilename);
+    } else if (cell instanceof ComposedCell) {
+      ComposedCell composedCell = (ComposedCell) cell;
+      LOGGER.debug("composed cell not supported yet");
+      // TODO: composed cell
+    } else if (cell instanceof SimpleCell) {
+      SimpleCell simpleCell = (SimpleCell) cell;
+      result.setValue(simpleCell.getSimpleData());
+    } else if (cell instanceof NullCell) {
+      // nothing to do for null cells
+    } else {
+      throw new ViewerException("Unexpected cell type");
+    }
     return result;
   }
 }

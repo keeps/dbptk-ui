@@ -4,18 +4,29 @@
  */
 package com.databasepreservation.dbviewer.utils;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.impl.CloudSolrClient;
 import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
@@ -60,17 +71,7 @@ import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerMetadata;
 import com.databasepreservation.dbviewer.exceptions.ViewerException;
 import com.databasepreservation.dbviewer.transformers.SolrTransformer;
-import com.databasepreservation.model.structure.type.ComposedTypeArray;
-import com.databasepreservation.model.structure.type.ComposedTypeStructure;
-import com.databasepreservation.model.structure.type.SimpleTypeBinary;
-import com.databasepreservation.model.structure.type.SimpleTypeBoolean;
-import com.databasepreservation.model.structure.type.SimpleTypeDateTime;
-import com.databasepreservation.model.structure.type.SimpleTypeEnumeration;
-import com.databasepreservation.model.structure.type.SimpleTypeInterval;
-import com.databasepreservation.model.structure.type.SimpleTypeNumericApproximate;
-import com.databasepreservation.model.structure.type.SimpleTypeNumericExact;
-import com.databasepreservation.model.structure.type.SimpleTypeString;
-import com.databasepreservation.model.structure.type.Type;
+import com.databasepreservation.utils.FileUtils;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -87,8 +88,109 @@ public class SolrUtils {
     return UUID.randomUUID().toString();
   }
 
-  public static String getTableCollectionName(String tableUUID){
+  public static String getTableCollectionName(String tableUUID) {
     return ViewerConstants.SOLR_INDEX_TABLE_PREFIX + tableUUID;
+  }
+
+  public static void setupSolrCloudConfigsets(String zkHost) {
+    // before anything else, try to get a zookeeper client
+    CloudSolrClient zkClient = new CloudSolrClient(zkHost);
+
+    // get resources and copy them to a temporary directory
+    Path databaseDir = null;
+    Path tableDir = null;
+    try {
+      final File jarFile = new File(SolrManager.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+
+      // if it is a directory the application in being run from an IDE
+      // in that case do not setup (assuming setup is done)
+      if (!jarFile.isDirectory()) {
+        databaseDir = Files.createTempDirectory("dbv_db_");
+        tableDir = Files.createTempDirectory("dbv_tab_");
+        final JarFile jar = new JarFile(jarFile);
+        final Enumeration<JarEntry> entries = jar.entries();
+
+        while (entries.hasMoreElements()) {
+          JarEntry entry = entries.nextElement();
+          String name = entry.getName();
+
+          String nameWithoutOriginPart = null;
+          Path destination = null;
+          if (name.startsWith(ViewerConstants.SOLR_CONFIGSET_DATABASE_RESOURCE + "/")) {
+            nameWithoutOriginPart = name.substring(ViewerConstants.SOLR_CONFIGSET_DATABASE_RESOURCE.length() + 1);
+            destination = databaseDir;
+          } else if (name.startsWith(ViewerConstants.SOLR_CONFIGSET_TABLE_RESOURCE + "/")) {
+            nameWithoutOriginPart = name.substring(ViewerConstants.SOLR_CONFIGSET_TABLE_RESOURCE.length() + 1);
+            destination = tableDir;
+          } else {
+            continue;
+          }
+
+          Path output = destination.resolve(nameWithoutOriginPart);
+          if (name.endsWith("/")) {
+            Files.createDirectories(output);
+          } else {
+            InputStream inputStream = SolrManager.class.getResourceAsStream("/" + name);
+            output = Files.createFile(output);
+            OutputStream outputStream = Files.newOutputStream(output, StandardOpenOption.CREATE,
+              StandardOpenOption.WRITE);
+            IOUtils.copy(inputStream, outputStream);
+            inputStream.close();
+            outputStream.close();
+          }
+        }
+        jar.close();
+      }
+    } catch (IOException e) {
+      LOGGER.error("Could not extract Solr configset", e);
+      if (databaseDir != null) {
+        try {
+          FileUtils.deleteDirectoryRecursive(databaseDir);
+        } catch (IOException e1) {
+          LOGGER.debug("IO error deleting temporary folder: " + databaseDir, e1);
+        }
+      }
+      if (tableDir != null) {
+        try {
+          FileUtils.deleteDirectoryRecursive(tableDir);
+        } catch (IOException e1) {
+          LOGGER.debug("IO error deleting temporary folder: " + tableDir, e1);
+        }
+      }
+      databaseDir = null;
+      tableDir = null;
+    }
+
+    // copy configurations to solr
+    if (databaseDir != null && tableDir != null) {
+      try {
+        zkClient.uploadConfig(databaseDir, ViewerConstants.SOLR_CONFIGSET_DATABASE);
+      } catch (IOException e) {
+        LOGGER.debug("IO error uploading database config to solr cloud", e);
+      }
+      try {
+        zkClient.uploadConfig(tableDir, ViewerConstants.SOLR_CONFIGSET_TABLE);
+      } catch (IOException e) {
+        LOGGER.debug("IO error uploading table config to solr cloud", e);
+      }
+
+      try {
+        FileUtils.deleteDirectoryRecursive(databaseDir);
+      } catch (IOException e1) {
+        LOGGER.debug("IO error deleting temporary folder: " + databaseDir, e1);
+      }
+      try {
+        FileUtils.deleteDirectoryRecursive(tableDir);
+      } catch (IOException e1) {
+        LOGGER.debug("IO error deleting temporary folder: " + tableDir, e1);
+      }
+    }
+
+    try {
+      zkClient.close();
+    } catch (IOException e) {
+      LOGGER.debug("IO error closing connection to solr cloud", e);
+    }
   }
 
   // TODO: Handle Viewer datatypes

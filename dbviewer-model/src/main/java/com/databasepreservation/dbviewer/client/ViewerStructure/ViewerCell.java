@@ -8,6 +8,11 @@ import java.io.Serializable;
 public class ViewerCell implements Serializable {
   private String value;
 
+  /**
+   * Gets the value of this cell as string
+   * 
+   * @return the value or null if the database cell value was NULL
+   */
   public String getValue() {
     return value;
   }

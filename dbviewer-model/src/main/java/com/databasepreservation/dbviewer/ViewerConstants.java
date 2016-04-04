@@ -1,5 +1,8 @@
 package com.databasepreservation.dbviewer;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 /**
  * Constants used in Database Viewer
  * 
@@ -7,11 +10,18 @@ package com.databasepreservation.dbviewer;
  */
 public class ViewerConstants {
   /*
+   * CONFIGSETS
+   */
+  public static final String SOLR_CONFIGSET_DATABASE_RESOURCE = "solr-configset/dbviewer_database";
+  public static final String SOLR_CONFIGSET_TABLE_RESOURCE = "solr-configset/dbviewer_table";
+  public static final String SOLR_CONFIGSET_DATABASE = "dbviewer_database";
+  public static final String SOLR_CONFIGSET_TABLE = "dbviewer_table";
+
+  /*
    * INDEX NAMES
    */
   public static final String SOLR_INDEX_DATABASE = "dblist";
   public static final String SOLR_INDEX_TABLE_PREFIX = "tab-";
-
 
   /*
    * DATABASE FIELDS
@@ -23,12 +33,12 @@ public class ViewerConstants {
    * TABLE FIELDS
    */
   public static final String SOLR_TABLE_ID = "id";
-  public static final String SOLR_TABLE_COLUMN_PREFIX = "col_";
+  public static final String SOLR_TABLE_COLUMN_PREFIX = "col";
 
   /*
    * DYNAMIC FIELD TYPES (suffixes)
    */
-  //indexed, stored
+  // indexed, stored
   public static final String SOLR_DYN_BOOLEAN = "_b";
   public static final String SOLR_DYN_DATE = "_dt";
   public static final String SOLR_DYN_DOUBLE = "_d";
@@ -40,7 +50,7 @@ public class ViewerConstants {
   public static final String SOLR_DYN_STRING = "_s";
   public static final String SOLR_DYN_TEXT_GENERAL = "_txt";
 
-  //indexed, stored, multiValued
+  // indexed, stored, multiValued
   public static final String SOLR_DYN_BOOLEANS = "_bs";
   public static final String SOLR_DYN_DATES = "_dts";
   public static final String SOLR_DYN_DOUBLES = "_ds";
@@ -64,6 +74,10 @@ public class ViewerConstants {
   public static final String SOLR_DYN_TINTS = "_tis";
   public static final String SOLR_DYN_TLONGS = "_tls";
 
+  /*
+   * LOCAL USER DATA
+   */
+  public static final Path USER_LOCAL_DIR = Paths.get(System.getProperty("java.home"), ".dbviewer");
 
   /*
    * Misc

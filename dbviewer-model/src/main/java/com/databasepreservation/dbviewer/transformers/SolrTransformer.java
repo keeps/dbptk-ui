@@ -3,6 +3,7 @@ package com.databasepreservation.dbviewer.transformers;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.solr.common.SolrDocument;
@@ -11,8 +12,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.dbviewer.ViewerConstants;
+import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerCell;
+import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerColumn;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerMetadata;
+import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerRow;
+import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerTable;
 import com.databasepreservation.dbviewer.exceptions.ViewerException;
 import com.databasepreservation.dbviewer.utils.ViewerUtils;
 
@@ -36,13 +41,35 @@ public class SolrTransformer {
     SolrInputDocument doc = new SolrInputDocument();
     doc.addField(ViewerConstants.SOLR_DATABASE_ID, viewerDatabase.getUUID());
     doc.addField(ViewerConstants.SOLR_DATABASE_METADATA, metadataAsJsonString(viewerDatabase.getMetadata()));
-
-    // TODO: add more fields
     return doc;
   }
 
   private static String metadataAsJsonString(ViewerMetadata viewerMetadata) throws ViewerException {
     return JsonTransformer.getJsonFromObject(viewerMetadata);
+  }
+
+  public static SolrInputDocument fromRow(ViewerTable table, ViewerRow row) throws ViewerException {
+    SolrInputDocument doc = new SolrInputDocument();
+
+    Iterator<ViewerColumn> columnIterator = table.getColumns().iterator();
+    Iterator<ViewerCell> cellIterator = row.getCells().iterator();
+
+    while (columnIterator.hasNext() && cellIterator.hasNext()) {
+      ViewerColumn column = columnIterator.next();
+      ViewerCell cell = cellIterator.next();
+
+      // TODO: act differently for multivalued cases
+      doc.addField(column.getSolrName(), cell.getValue());
+    }
+
+    if (columnIterator.hasNext() || cellIterator.hasNext()) {
+      LOGGER.debug("columns list size (" + table.getColumns().size() + ") is different than cells list size ("
+        + row.getCells().size() + ").");
+      LOGGER.debug("Columns: " + table.getColumns().toString());
+      LOGGER.debug("Cells: " + row.getCells().toString());
+    }
+
+    return doc;
   }
 
   /***********************************************************************************
