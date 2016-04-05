@@ -1,8 +1,8 @@
 package com.databasepreservation.dbviewer.client.ViewerStructure;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.roda.core.data.v2.index.IsIndexed;
 
@@ -11,26 +11,10 @@ import org.roda.core.data.v2.index.IsIndexed;
  */
 public class ViewerRow implements Serializable, IsIndexed {
   private String UUID;
-  private List<ViewerCell> cells;
+  private Map<String, ViewerCell> cells;
 
   public ViewerRow() {
-    cells = new ArrayList<>();
-  }
-
-  public ViewerCell cellAt(int index) {
-    if (index < cells.size()) {
-      return cells.get(index);
-    } else {
-      return null;
-    }
-  }
-
-  public List<ViewerCell> getCells() {
-    return cells;
-  }
-
-  public void setCells(List<ViewerCell> cells) {
-    this.cells = cells;
+    cells = new HashMap<>();
   }
 
   @Override
@@ -40,5 +24,13 @@ public class ViewerRow implements Serializable, IsIndexed {
 
   public void setUUID(String UUID) {
     this.UUID = UUID;
+  }
+
+  public Map<String, ViewerCell> getCells() {
+    return cells;
+  }
+
+  public void setCells(Map<String, ViewerCell> cells) {
+    this.cells = cells;
   }
 }

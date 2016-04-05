@@ -2,11 +2,14 @@ package com.databasepreservation.dbviewer.utils;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.request.CollectionAdminRequest;
+import org.apache.solr.client.solrj.response.UpdateResponse;
+import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.util.NamedList;
 import org.roda.core.data.adapter.facet.Facets;
 import org.roda.core.data.adapter.filter.Filter;
@@ -34,6 +37,7 @@ import com.databasepreservation.dbviewer.transformers.SolrTransformer;
  */
 public class SolrManager {
   private static final Logger LOGGER = LoggerFactory.getLogger(SolrManager.class);
+  private static final long insertDocumentTimeout = 30000; // 30 seconds
 
   private final HttpSolrClient client;
   private final Set<String> collectionsToCommit;
@@ -60,28 +64,24 @@ public class SolrManager {
   public void addDatabase(ViewerDatabase database) throws ViewerException {
     // creates databases collection, skipping if it is present
     CollectionAdminRequest.Create request = new CollectionAdminRequest.Create();
-    request.setCollectionName(ViewerConstants.SOLR_INDEX_DATABASE);
+    request.setCollectionName(ViewerConstants.SOLR_INDEX_DATABASE_COLLECTION_NAME);
     request.setConfigName(ViewerConstants.SOLR_CONFIGSET_DATABASE);
     request.setNumShards(1);
     try {
       NamedList<Object> response = client.request(request);
     } catch (SolrServerException | IOException e) {
-      throw new ViewerException("Error creating collection " + ViewerConstants.SOLR_INDEX_DATABASE, e);
+      throw new ViewerException("Error creating collection " + ViewerConstants.SOLR_INDEX_DATABASE_COLLECTION_NAME, e);
     } catch (HttpSolrClient.RemoteSolrException e) {
-      if (e.getMessage().contains("collection already exists: " + ViewerConstants.SOLR_INDEX_DATABASE)) {
-        LOGGER.info("collection " + ViewerConstants.SOLR_INDEX_DATABASE + " already exists.");
+      if (e.getMessage().contains("collection already exists: " + ViewerConstants.SOLR_INDEX_DATABASE_COLLECTION_NAME)) {
+        LOGGER.info("collection " + ViewerConstants.SOLR_INDEX_DATABASE_COLLECTION_NAME + " already exists.");
       } else {
-        throw new ViewerException("Error creating collection " + ViewerConstants.SOLR_INDEX_DATABASE, e);
+        throw new ViewerException("Error creating collection " + ViewerConstants.SOLR_INDEX_DATABASE_COLLECTION_NAME, e);
       }
     }
 
     // add this database to the collection
-    collectionsToCommit.add(ViewerConstants.SOLR_INDEX_DATABASE);
-    try {
-      client.add(ViewerConstants.SOLR_INDEX_DATABASE, SolrTransformer.fromDatabase(database));
-    } catch (SolrServerException | IOException e) {
-      throw new ViewerException("Error adding database", e);
-    }
+    collectionsToCommit.add(ViewerConstants.SOLR_INDEX_DATABASE_COLLECTION_NAME);
+    insertDocument(ViewerConstants.SOLR_INDEX_DATABASE_COLLECTION_NAME, SolrTransformer.fromDatabase(database));
   }
 
   /**
@@ -110,48 +110,24 @@ public class SolrManager {
 
   public void addRow(ViewerTable table, ViewerRow row) throws ViewerException {
     String collectionName = SolrUtils.getTableCollectionName(table.getUUID());
-    try {
-      client.add(collectionName, SolrTransformer.fromRow(table, row));
-    } catch (SolrServerException | IOException e) {
-      throw new ViewerException("Error adding row", e);
-    }
+    insertDocument(collectionName, SolrTransformer.fromRow(table, row));
   }
 
   /**
    * Commits all changes to all modified collections and optimizes them
-   * 
+   *
    * @throws ViewerException
    */
   public void commitAll() throws ViewerException {
-    // TODO: replace with better solution
-    try {
-      Thread.sleep(3000);
-    } catch (InterruptedException e) {
-      e.printStackTrace();
+    for (String collection : collectionsToCommit) {
+      commitAndOptimize(collection);
     }
-
-    try {
-      for (String collection : collectionsToCommit) {
-        client.commit(collection);
-      }
-    } catch (IOException | SolrServerException e) {
-      throw new ViewerException("Error committing collection", e);
-    }
-
-    try {
-      for (String collection : collectionsToCommit) {
-        client.optimize(collection);
-      }
-    } catch (IOException | SolrServerException e) {
-      throw new ViewerException("Error optimizing collection", e);
-    }
-
     collectionsToCommit.clear();
   }
 
   /**
    * Frees resources created by this SolrManager object
-   * 
+   *
    * @throws ViewerException
    *           in case some resource could not be closed successfully
    */
@@ -176,5 +152,111 @@ public class SolrManager {
   public <T extends IsIndexed> T retrieve(RodaUser user, Class<T> classToReturn, String id) throws NotFoundException,
     org.roda.core.data.exceptions.GenericException {
     return SolrUtils.retrieve(client, classToReturn, id);
+  }
+
+  public <T extends IsIndexed> IndexResult<T> findRows(RodaUser user, Class<T> classToReturn, String tableUUID,
+    Filter filter, Sorter sorter, Sublist sublist, Facets facets)
+    throws org.roda.core.data.exceptions.GenericException, RequestNotValidException {
+    return SolrUtils.find(client, classToReturn, tableUUID, filter, sorter, sublist, facets);
+  }
+
+  public <T extends IsIndexed> Long countRows(RodaUser user, Class<T> classToReturn, String tableUUID, Filter filter)
+    throws org.roda.core.data.exceptions.GenericException, RequestNotValidException {
+    return SolrUtils.count(client, classToReturn, tableUUID, filter);
+  }
+
+  public <T extends IsIndexed> T retrieveRows(RodaUser user, Class<T> classToReturn, String tableUUID, String rowUUID)
+    throws NotFoundException, org.roda.core.data.exceptions.GenericException {
+    return SolrUtils.retrieve(client, classToReturn, tableUUID, rowUUID);
+  }
+
+  private void insertDocument(String collection, SolrInputDocument doc) throws ViewerException {
+    if (doc == null) {
+      throw new ViewerException("Attempted to insert null document into collection " + collection);
+    }
+    insertDocumentOrCommitAndOptimize(collection, doc);
+  }
+
+  private void commitAndOptimize(String collection) throws ViewerException {
+    insertDocumentOrCommitAndOptimize(collection, null);
+  }
+
+  /**
+   * The collections are not immediately available after creation, this method
+   * makes sequential attempts to insert a document before giving up (by
+   * timeout)
+   *
+   * Do not use this method, use insertDocument and commitAndOptimize instead.
+   *
+   * @param collection
+   *          the collection to insert the document or commit and optimize
+   * @param doc
+   *          the document to insert (to commit and optimize, this must be null)
+   * @throws ViewerException
+   */
+  private void insertDocumentOrCommitAndOptimize(String collection, SolrInputDocument doc) throws ViewerException {
+    long start = System.currentTimeMillis();
+    int tries = 0;
+    while (System.currentTimeMillis() - start < 30000) {
+      UpdateResponse response;
+      try {
+        if (doc != null) {
+          // add document
+          try {
+            response = client.add(collection, doc);
+            if (response.getStatus() == 0) {
+              return;
+            } else {
+              throw new ViewerException("Could not insert document {" + doc + "} in collection " + collection);
+            }
+          } catch (SolrServerException | IOException e) {
+            throw new ViewerException("Problem inserting document", e);
+          }
+        } else {
+          // commit and optimize
+          try {
+            response = client.commit(collection);
+            if (response.getStatus() != 0) {
+              throw new ViewerException("Could not commit collection " + collection);
+            }
+          } catch (SolrServerException | IOException e) {
+            throw new ViewerException("Problem committing collection " + collection, e);
+          }
+
+          try {
+            response = client.optimize(collection);
+            if (response.getStatus() == 0) {
+              return;
+            } else {
+              throw new ViewerException("Could not optimize collection " + collection);
+            }
+          } catch (SolrServerException | IOException e) {
+            throw new ViewerException("Problem optimizing collection " + collection, e);
+          }
+        }
+      } catch (HttpSolrClient.RemoteSolrException e) {
+        if (e.getMessage().contains("<title>Error 404 Not Found</title>")) {
+          // this means that the collection does not exist yet. retry
+          LOGGER.debug("Collection " + collection + " does not exist. Retrying (" + tries + ")");
+        } else {
+          throw e;
+        }
+      }
+
+      try {
+        Thread.sleep(1000);
+      } catch (InterruptedException e) {
+        LOGGER.debug("insertDocument sleep was interrupted", e);
+      }
+      tries++;
+    }
+
+    if (doc != null) {
+      throw new ViewerException("insertDocument {" + doc + "} in collection " + collection + " timed out after "
+        + tries + " attempts.");
+    } else {
+      throw new ViewerException("commit and optimize collection " + collection + " timed out after " + tries
+        + " attempts.");
+    }
   }
 }

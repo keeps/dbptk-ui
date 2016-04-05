@@ -4,14 +4,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.databasepreservation.model.exception.ModuleException;
-import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -200,7 +199,7 @@ public class ToolkitStructure2ViewerStructure {
       throw new ViewerException("Unknown type: " + type.toString());
     }
 
-    return ViewerConstants.SOLR_TABLE_COLUMN_PREFIX + index + suffix;
+    return ViewerConstants.SOLR_INDEX_ROW_COLUMN_NAME_PREFIX + index + suffix;
   }
 
   private static ViewerType getType(Type type) throws ViewerException {
@@ -252,12 +251,16 @@ public class ToolkitStructure2ViewerStructure {
     return result;
   }
 
-  private static List<ViewerCell> getCells(ViewerTable table, Row row, int rowIndex) throws ViewerException {
-    List<ViewerCell> result = new ArrayList<>();
+  private static Map<String, ViewerCell> getCells(ViewerTable table, Row row, int rowIndex) throws ViewerException {
+    HashMap<String, ViewerCell> result = new HashMap<>();
+
     int colIndex = 0;
-    for (Cell cell : row.getCells()) {
-      result.add(getCell(table, cell, rowIndex, colIndex++));
+    List<Cell> toolkitCells = row.getCells();
+    for (ViewerColumn viewerColumn : table.getColumns()) {
+      String solrColumnName = viewerColumn.getSolrName();
+      result.put(solrColumnName, getCell(table, toolkitCells.get(colIndex), rowIndex, colIndex++));
     }
+
     return result;
   }
 
@@ -268,9 +271,9 @@ public class ToolkitStructure2ViewerStructure {
 
       String lobFilename = "blob"+colIndex+"_"+rowIndex+".bin";
 
-      // copy blob to a file at <USER_LOCAL_DIR>/<table_UUID>/blob<column_index>_<row_index>.bin
+      // copy blob to a file at <USER_DBVIEWER_DIR>/<table_UUID>/blob<column_index>_<row_index>.bin
       try {
-        Path outputPath = ViewerConstants.USER_LOCAL_DIR.resolve(table.getUUID()+"/");
+        Path outputPath = ViewerConstants.USER_DBVIEWER_DIR.resolve(table.getUUID()+"/");
         outputPath = Files.createDirectories(outputPath);
         outputPath = outputPath.resolve(lobFilename);
         InputStream stream = binaryCell.createInputstream();
@@ -303,6 +306,8 @@ public class ToolkitStructure2ViewerStructure {
     } else {
       throw new ViewerException("Unexpected cell type");
     }
+
+
     return result;
   }
 }

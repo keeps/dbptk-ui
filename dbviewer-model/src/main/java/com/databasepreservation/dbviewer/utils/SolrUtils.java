@@ -68,7 +68,7 @@ import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.dbviewer.ViewerConstants;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerDatabase;
-import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerMetadata;
+import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerRow;
 import com.databasepreservation.dbviewer.exceptions.ViewerException;
 import com.databasepreservation.dbviewer.transformers.SolrTransformer;
 import com.databasepreservation.utils.FileUtils;
@@ -89,7 +89,7 @@ public class SolrUtils {
   }
 
   public static String getTableCollectionName(String tableUUID) {
-    return ViewerConstants.SOLR_INDEX_TABLE_PREFIX + tableUUID;
+    return ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + tableUUID;
   }
 
   public static void setupSolrCloudConfigsets(String zkHost) {
@@ -199,8 +199,8 @@ public class SolrUtils {
     try {
       if (resultClass.equals(ViewerDatabase.class)) {
         ret = resultClass.cast(SolrTransformer.toDatabase(doc));
-      } else if (resultClass.equals(ViewerMetadata.class)) {
-        ret = resultClass.cast(SolrTransformer.toMetadata(doc));
+      } else if (resultClass.equals(ViewerRow.class)) {
+        ret = resultClass.cast(SolrTransformer.toRow(doc));
       } else {
         throw new GenericException("Cannot find class index name: " + resultClass.getName());
       }
@@ -224,7 +224,9 @@ public class SolrUtils {
   private static <T> String getIndexName(Class<T> resultClass) throws GenericException {
     String indexName = null;
     if (resultClass.equals(ViewerDatabase.class)) {
-      indexName = ViewerConstants.SOLR_INDEX_DATABASE;
+      indexName = ViewerConstants.SOLR_INDEX_DATABASE_COLLECTION_NAME;
+    } else if (resultClass.equals(ViewerRow.class)) {
+      throw new GenericException("Can not determine collection name from " + ViewerRow.class.getName() + " class name");
     } else {
       throw new GenericException("Cannot find class index name: " + resultClass.getName());
     }
@@ -272,6 +274,32 @@ public class SolrUtils {
 
     try {
       QueryResponse response = index.query(getIndexName(classToRetrieve), query);
+      ret = queryResponseToIndexResult(response, classToRetrieve, facets);
+    } catch (SolrServerException | IOException e) {
+      throw new GenericException("Could not query index", e);
+    }
+
+    return ret;
+  }
+
+  public static <T extends Serializable> IndexResult<T> find(SolrClient index, Class<T> classToRetrieve,
+    String tableUUID, Filter filter, Sorter sorter, Sublist sublist) throws GenericException, RequestNotValidException {
+    return find(index, classToRetrieve, tableUUID, filter, sorter, sublist, null);
+  }
+
+  public static <T extends Serializable> IndexResult<T> find(SolrClient index, Class<T> classToRetrieve,
+    String tableUUID, Filter filter, Sorter sorter, Sublist sublist, Facets facets) throws GenericException,
+    RequestNotValidException {
+    IndexResult<T> ret;
+    SolrQuery query = new SolrQuery();
+    query.setQuery(parseFilter(filter));
+    query.setSorts(parseSorter(sorter));
+    query.setStart(sublist.getFirstElementIndex());
+    query.setRows(sublist.getMaximumElementCount());
+    parseAndConfigureFacets(facets, query);
+
+    try {
+      QueryResponse response = index.query(getTableCollectionName(tableUUID), query);
       ret = queryResponseToIndexResult(response, classToRetrieve, facets);
     } catch (SolrServerException | IOException e) {
       throw new GenericException("Could not query index", e);
@@ -357,6 +385,11 @@ public class SolrUtils {
 
   public static <T extends Serializable> IndexResult<T> queryResponseToIndexResult(QueryResponse response,
     Class<T> responseClass, Facets facets) throws GenericException {
+    return queryResponseToIndexResult(response, responseClass, null, facets);
+  }
+
+  public static <T extends Serializable> IndexResult<T> queryResponseToIndexResult(QueryResponse response,
+    Class<T> responseClass, List<String> columnNames, Facets facets) throws GenericException {
     final SolrDocumentList docList = response.getResults();
     final List<FacetFieldResult> facetResults = processFacetFields(facets, response.getFacetFields());
     final long offset = docList.getStart();
@@ -365,7 +398,8 @@ public class SolrUtils {
     final List<T> docs = new ArrayList<T>();
 
     for (SolrDocument doc : docList) {
-      T result = solrDocumentTo(responseClass, doc);
+      T result;
+      result = solrDocumentTo(responseClass, doc);
       docs.add(result);
     }
 
@@ -400,6 +434,11 @@ public class SolrUtils {
     return find(index, classToRetrieve, filter, null, new Sublist(0, 0), null, user, showInactive).getTotalCount();
   }
 
+  public static <T extends Serializable> Long count(SolrClient index, Class<T> classToRetrieve, String tableUUID,
+    Filter filter) throws GenericException, RequestNotValidException {
+    return find(index, classToRetrieve, tableUUID, filter, null, new Sublist(0, 0)).getTotalCount();
+  }
+
   public static <T> T retrieve(SolrClient index, Class<T> classToRetrieve, String id) throws NotFoundException,
     GenericException {
     T ret;
@@ -409,6 +448,22 @@ public class SolrUtils {
         ret = solrDocumentTo(classToRetrieve, doc);
       } else {
         throw new NotFoundException("Could not find document " + id);
+      }
+    } catch (SolrServerException | IOException e) {
+      throw new GenericException("Could not retrieve AIP from index", e);
+    }
+    return ret;
+  }
+
+  public static <T> T retrieve(SolrClient index, Class<T> classToRetrieve, String tableUUID, String rowUUID)
+    throws NotFoundException, GenericException {
+    T ret;
+    try {
+      SolrDocument doc = index.getById(getTableCollectionName(tableUUID), rowUUID);
+      if (doc != null) {
+        ret = solrDocumentTo(classToRetrieve, doc);
+      } else {
+        throw new NotFoundException("Could not find document " + rowUUID);
       }
     } catch (SolrServerException | IOException e) {
       throw new GenericException("Could not retrieve AIP from index", e);

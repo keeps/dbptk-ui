@@ -3,11 +3,14 @@ package com.databasepreservation.dbviewer.transformers;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.SolrInputField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,24 +54,14 @@ public class SolrTransformer {
   public static SolrInputDocument fromRow(ViewerTable table, ViewerRow row) throws ViewerException {
     SolrInputDocument doc = new SolrInputDocument();
 
-    Iterator<ViewerColumn> columnIterator = table.getColumns().iterator();
-    Iterator<ViewerCell> cellIterator = row.getCells().iterator();
+    for (Map.Entry<String, ViewerCell> cellEntry : row.getCells().entrySet()) {
+      String solrColumnName = cellEntry.getKey();
+      String cellValue = cellEntry.getValue().getValue();
 
-    while (columnIterator.hasNext() && cellIterator.hasNext()) {
-      ViewerColumn column = columnIterator.next();
-      ViewerCell cell = cellIterator.next();
-
-      // TODO: act differently for multivalued cases
-      doc.addField(column.getSolrName(), cell.getValue());
+      doc.addField(solrColumnName, cellValue);
     }
 
-    if (columnIterator.hasNext() || cellIterator.hasNext()) {
-      LOGGER.debug("columns list size (" + table.getColumns().size() + ") is different than cells list size ("
-        + row.getCells().size() + ").");
-      LOGGER.debug("Columns: " + table.getColumns().toString());
-      LOGGER.debug("Cells: " + row.getCells().toString());
-    }
-
+    doc.setField(ViewerConstants.SOLR_ROW_ID, row.getUUID());
     return doc;
   }
 
@@ -83,9 +76,26 @@ public class SolrTransformer {
     return viewerDatabase;
   }
 
-  public static ViewerMetadata toMetadata(SolrDocument doc) throws ViewerException {
+  private static ViewerMetadata toMetadata(SolrDocument doc) throws ViewerException {
     String metadataAsJsonString = objectToString(doc.get(ViewerConstants.SOLR_DATABASE_METADATA));
     return JsonTransformer.getObjectFromJson(metadataAsJsonString, ViewerMetadata.class);
+  }
+
+  public static ViewerRow toRow(SolrDocument doc) {
+    ViewerRow viewerRow = new ViewerRow();
+    viewerRow.setUUID(objectToString(doc.get(ViewerConstants.SOLR_ROW_ID)));
+
+    HashMap<String, ViewerCell> cells = new HashMap<>();
+    for (String columnName : doc.keySet()) {
+      if(columnName.startsWith(ViewerConstants.SOLR_INDEX_ROW_COLUMN_NAME_PREFIX)){
+        ViewerCell viewerCell = new ViewerCell();
+        viewerCell.setValue(doc.get(columnName).toString());
+        cells.put(columnName, viewerCell);
+      }
+    }
+    viewerRow.setCells(cells);
+
+    return viewerRow;
   }
 
   private static String objectToString(Object object) {

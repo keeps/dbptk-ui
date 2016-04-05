@@ -29,7 +29,7 @@ import com.google.gwt.user.client.ui.Label;
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class DatabaseList extends AsyncTableCell<ViewerDatabase> {
+public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
   private final ClientLogger logger = new ClientLogger(getClass().getName());
 
   private Column<ViewerDatabase, SafeHtml> levelColumn;

@@ -18,10 +18,11 @@ public class ViewerConstants {
   public static final String SOLR_CONFIGSET_TABLE = "dbviewer_table";
 
   /*
-   * INDEX NAMES
+   * COLLECTION STRUCTURE
    */
-  public static final String SOLR_INDEX_DATABASE = "dblist";
-  public static final String SOLR_INDEX_TABLE_PREFIX = "tab-";
+  public static final String SOLR_INDEX_DATABASE_COLLECTION_NAME = "dbv-database";
+  public static final String SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX = "dbv-table-";
+  public static final String SOLR_INDEX_ROW_COLUMN_NAME_PREFIX = "col";
 
   /*
    * DATABASE FIELDS
@@ -30,10 +31,9 @@ public class ViewerConstants {
   public static final String SOLR_DATABASE_METADATA = "metadata";
 
   /*
-   * TABLE FIELDS
+   * ROW FIELDS
    */
-  public static final String SOLR_TABLE_ID = "id";
-  public static final String SOLR_TABLE_COLUMN_PREFIX = "col";
+  public static final String SOLR_ROW_ID = "id";
 
   /*
    * DYNAMIC FIELD TYPES (suffixes)
@@ -77,7 +77,7 @@ public class ViewerConstants {
   /*
    * LOCAL USER DATA
    */
-  public static final Path USER_LOCAL_DIR = Paths.get(System.getProperty("java.home"), ".dbviewer");
+  public static final Path USER_DBVIEWER_DIR = Paths.get(System.getProperty("java.home"), ".dbviewer");
 
   /*
    * Misc

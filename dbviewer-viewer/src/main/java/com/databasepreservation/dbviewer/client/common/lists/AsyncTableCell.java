@@ -55,7 +55,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 
 // import config.i18n.client.BrowseMessages;
 
-public abstract class AsyncTableCell<T extends IsIndexed> extends FlowPanel implements
+public abstract class AsyncTableCell<T extends IsIndexed,O> extends FlowPanel implements
   HasValueChangeHandlers<IndexResult<T>> {
 
   // private static final BrowseMessages messages =
@@ -87,20 +87,23 @@ public abstract class AsyncTableCell<T extends IsIndexed> extends FlowPanel impl
   private int initialPageSize = 20;
   private int pageSizeIncrement = 100;
 
+  private final O object;
+
   public AsyncTableCell() {
-    this(null, null, null, false, 20, 100);
+    this(null, null, null, false, 20, 100,null);
   }
 
-  public AsyncTableCell(Filter filter, Facets facets, String summary, boolean selectable) {
-    this(filter, facets, summary, selectable, 20, 100);
+  public AsyncTableCell(Filter filter, Facets facets, String summary, boolean selectable, O object) {
+    this(filter, facets, summary, selectable, 20, 100, object);
   }
 
   public AsyncTableCell(Filter filter, Facets facets, String summary, boolean selectable, int initialPageSize,
-    int pageSizeIncrement) {
+    int pageSizeIncrement, O object) {
     super();
 
     this.initialPageSize = initialPageSize;
     this.pageSizeIncrement = pageSizeIncrement;
+    this.object = object;
 
     if (summary == null) {
       summary = "summary" + Random.nextInt(1000);
@@ -557,4 +560,7 @@ public abstract class AsyncTableCell<T extends IsIndexed> extends FlowPanel impl
     return selectAllCheckBox.getValue();
   }
 
+  public O getObject() {
+    return object;
+  }
 }
