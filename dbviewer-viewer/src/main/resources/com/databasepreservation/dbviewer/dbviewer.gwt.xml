@@ -9,6 +9,9 @@
     <!-- Inherit logging functionality -->
     <inherits name='com.google.gwt.logging.Logging'/>
 
+    <!-- Inherit required libraries -->
+    <inherits name="com.bytebybyte.gwt.fontawesome.FontAwesomeLib" />
+
     <!-- Inherit the default GWT style sheet.  You can change       -->
     <!-- the theme of your GWT application by uncommenting          -->
     <!-- any one of the following lines.                            -->

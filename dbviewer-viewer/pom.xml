@@ -39,6 +39,10 @@
             <artifactId>gwt-dev</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.bytebybyte.gwt</groupId>
+            <artifactId>fontawesome-lib</artifactId>
+        </dependency>
 
         <!-- other -->
         <dependency>
