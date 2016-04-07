@@ -1,6 +1,8 @@
 package com.databasepreservation.dbviewer.client.browse;
 
+import com.databasepreservation.dbviewer.ViewerConstants;
 import com.google.gwt.user.client.ui.Widget;
+import org.roda.core.data.adapter.filter.Filter;
 import org.roda.core.data.v2.index.IsIndexed;
 
 import com.databasepreservation.dbviewer.client.BrowserService;
@@ -12,7 +14,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 
 /**
@@ -23,17 +24,24 @@ public class TablePanel extends Composite {
   }
 
   @UiField
-  SimplePanel container;
+  SimplePanel tableContainer;
+
+  @UiField
+  SimplePanel searchContainer;
 
   private ViewerDatabase database;
   private ViewerTable table;
 
   private TableRowList tableRowList;
+  private SearchPanel searchPanel;
 
   private static TablePanelUiBinder ourUiBinder = GWT.create(TablePanelUiBinder.class);
 
   public TablePanel(final String databaseUUID, final String tableUUID) {
+
+
     initWidget(ourUiBinder.createAndBindUi(this));
+
 
     BrowserService.Util.getInstance().retrieve(ViewerDatabase.class.getName(), databaseUUID,
       new AsyncCallback<IsIndexed>() {
@@ -54,6 +62,12 @@ public class TablePanel extends Composite {
 
   private void init() {
     tableRowList = new TableRowList(database, table);
-    container.setWidget(tableRowList);
+
+    searchPanel = new SearchPanel(new Filter(), ViewerConstants.SOLR_ROW_SEARCH, "search placeholder", false, false);
+    searchPanel.setList(tableRowList);
+    searchPanel.setDefaultFilterIncremental(true);
+
+    searchContainer.setWidget(searchPanel);
+    tableContainer.setWidget(tableRowList);
   }
 }

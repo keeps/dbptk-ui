@@ -34,6 +34,7 @@ public class ViewerConstants {
    * ROW FIELDS
    */
   public static final String SOLR_ROW_ID = "id";
+  public static final String SOLR_ROW_SEARCH = "search";
 
   /*
    * DYNAMIC FIELD TYPES (suffixes)

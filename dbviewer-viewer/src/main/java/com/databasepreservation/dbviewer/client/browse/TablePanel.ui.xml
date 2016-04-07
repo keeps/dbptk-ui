@@ -1,5 +1,7 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-             xmlns:g='urn:import:com.google.gwt.user.client.ui'
-             xmlns:lists="urn:import:com.databasepreservation.dbviewer.client.common.lists">
-    <g:SimplePanel ui:field="container" />
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <g:FlowPanel>
+        <g:SimplePanel ui:field="searchContainer"/>
+        <g:SimplePanel ui:field="tableContainer"/>
+    </g:FlowPanel>
 </ui:UiBinder>
