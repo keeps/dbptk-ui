@@ -5,6 +5,7 @@
 
     <!-- Inherit some roda functionality -->
     <inherits name='org.roda.core.Core'/>
+    <inherits name='com.databasepreservation.dbviewer.dbviewer-model'/>
 
     <!-- Inherit logging functionality -->
     <inherits name='com.google.gwt.logging.Logging'/>
