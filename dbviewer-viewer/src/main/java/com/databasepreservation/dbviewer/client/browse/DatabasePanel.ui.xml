@@ -1,4 +1,6 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
-    <g:VerticalPanel ui:field="vPanel"/>
+    <g:FlowPanel addStyleNames="col_2 sidebar">
+        <g:VerticalPanel ui:field="vPanel"/>
+    </g:FlowPanel>
 </ui:UiBinder>

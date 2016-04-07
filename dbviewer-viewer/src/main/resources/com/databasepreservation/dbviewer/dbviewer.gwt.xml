@@ -23,6 +23,7 @@
 
     <!-- Specify the app entry point class.                         -->
     <entry-point class='com.databasepreservation.dbviewer.client.main.Main'/>
+    <stylesheet src="main.css" />
 
     <!-- Specify the paths for translatable code                    -->
     <source path='client'/>

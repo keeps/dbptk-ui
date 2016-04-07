@@ -1,7 +1,11 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
-    <g:FlowPanel>
-        <g:SimplePanel ui:field="searchContainer"/>
-        <g:SimplePanel ui:field="tableContainer"/>
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:b='urn:import:com.databasepreservation.dbviewer.client.browse'>
+    <g:FlowPanel addStyleNames="row full_width skip_padding">
+        <b:DatabasePanel ui:field="databasePanel"/>
+        <g:FlowPanel addStyleNames="col_10 last content">
+            <g:SimplePanel ui:field="searchContainer"/>
+            <g:SimplePanel ui:field="tableContainer"/>
+        </g:FlowPanel>
     </g:FlowPanel>
 </ui:UiBinder>

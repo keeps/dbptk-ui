@@ -81,7 +81,7 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
     archivalDateColumn.setSortable(true);
 
     // TODO externalize strings into constants
-    display.addColumn(levelColumn, SafeHtmlUtils.fromSafeConstant("<i class='fa fa-tag'></i>"));
+    //display.addColumn(levelColumn, SafeHtmlUtils.fromSafeConstant("<i class='fa fa-tag'></i>"));
     display.addColumn(nameColumn, "Database name");
     display.addColumn(archivalDateColumn, "Archival date");
     display.setColumnWidth(levelColumn, "35px");
@@ -106,8 +106,8 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
 
     Map<Column<ViewerDatabase, ?>, List<String>> columnSortingKeyMap = new HashMap<Column<ViewerDatabase, ?>, List<String>>();
     // columnSortingKeyMap.put(levelColumn, Arrays.asList("level"));
-    columnSortingKeyMap.put(nameColumn, Arrays.asList("id"));
-    columnSortingKeyMap.put(archivalDateColumn, Arrays.asList("archivalList"));
+    //columnSortingKeyMap.put(nameColumn, Arrays.asList("id"));
+    //columnSortingKeyMap.put(archivalDateColumn, Arrays.asList("archivalList"));
 
     Sorter sorter = createSorter(columnSortList, columnSortingKeyMap);
 

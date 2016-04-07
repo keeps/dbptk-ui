@@ -1,10 +1,9 @@
 package com.databasepreservation.dbviewer.client.browse;
 
-import com.databasepreservation.dbviewer.ViewerConstants;
-import com.google.gwt.user.client.ui.Widget;
 import org.roda.core.data.adapter.filter.Filter;
 import org.roda.core.data.v2.index.IsIndexed;
 
+import com.databasepreservation.dbviewer.ViewerConstants;
 import com.databasepreservation.dbviewer.client.BrowserService;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerTable;
@@ -15,6 +14,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -29,6 +29,9 @@ public class TablePanel extends Composite {
   @UiField
   SimplePanel searchContainer;
 
+  @UiField(provided = true)
+  DatabasePanel databasePanel;
+
   private ViewerDatabase database;
   private ViewerTable table;
 
@@ -38,10 +41,8 @@ public class TablePanel extends Composite {
   private static TablePanelUiBinder ourUiBinder = GWT.create(TablePanelUiBinder.class);
 
   public TablePanel(final String databaseUUID, final String tableUUID) {
-
-
+    databasePanel = new DatabasePanel(databaseUUID);
     initWidget(ourUiBinder.createAndBindUi(this));
-
 
     BrowserService.Util.getInstance().retrieve(ViewerDatabase.class.getName(), databaseUUID,
       new AsyncCallback<IsIndexed>() {

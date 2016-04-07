@@ -43,6 +43,11 @@
             <groupId>com.bytebybyte.gwt</groupId>
             <artifactId>fontawesome-lib</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.gwtbootstrap3</groupId>
+            <artifactId>gwtbootstrap3</artifactId>
+            <scope>provided</scope>
+        </dependency>
 
         <!-- other -->
         <dependency>

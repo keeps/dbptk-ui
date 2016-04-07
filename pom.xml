@@ -150,6 +150,12 @@
                 <artifactId>fontawesome-lib</artifactId>
                 <version>4.3.0</version>
             </dependency>
+            <dependency>
+                <groupId>org.gwtbootstrap3</groupId>
+                <artifactId>gwtbootstrap3</artifactId>
+                <version>0.9.3</version>
+                <scope>provided</scope>
+            </dependency>
 
             <!-- other -->
             <dependency>
