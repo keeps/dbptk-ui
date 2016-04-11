@@ -1,5 +1,6 @@
 package com.databasepreservation.dbviewer.client.main;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.databasepreservation.dbviewer.client.browse.DatabaseListPanel;
@@ -10,12 +11,9 @@ import com.databasepreservation.dbviewer.shared.client.HistoryManager;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -23,33 +21,39 @@ import com.google.gwt.user.client.ui.SimplePanel;
 public class Main implements EntryPoint {
   private ClientLogger logger = new ClientLogger(getClass().getName());
 
-  private HTMLPanel header;
-  private FlowPanel contentRow;
-  private FlowPanel contentCol;
-  private SimplePanel content;
-  private HTMLPanel footer;
+  private MainPanel mainPanel;
+  private Footer footer;
 
   private DatabaseListPanel databaseListPanel = null;
+
+  private void setContent(Widget w) {
+    mainPanel.contentPanel.updateContent(w);
+  }
 
   /**
    * Create a new main
    */
   public Main() {
-    header = new HTMLPanel(new SafeHtml() {
-      @Override public String asString() {
-        return "<h2 style=\"padding-left:2em;padding-right:2em;border-bottom:2px solid black;margin-bottom:0px\">Database Viewer (prototype)</h2>";
-      }
-    });
+    mainPanel = new MainPanel();
+    footer = new Footer();
 
-    contentRow = new FlowPanel();
-    contentRow.addStyleName("row full_width skip_padding");
-
-    contentCol = new FlowPanel();
-    contentCol.addStyleName("col_12 last");
-
-
-    footer = new HTMLPanel("div", "<p style=\"text-align:center\">footer</p>");
-    footer.addStyleName("footer");
+    // header = new HTMLPanel(new SafeHtml() {
+    // @Override public String asString() {
+    // return
+    // "<h2 style=\"padding-left:2em;padding-right:2em;border-bottom:2px solid black;margin-bottom:0px\">Database Viewer (prototype)</h2>";
+    // }
+    // });
+    //
+    // contentRow = new FlowPanel();
+    // contentRow.addStyleName("row full_width skip_padding");
+    //
+    // contentCol = new FlowPanel();
+    // contentCol.addStyleName("col_12 last");
+    //
+    //
+    // footer = new HTMLPanel("div",
+    // "<p style=\"text-align:center\">footer</p>");
+    // footer.addStyleName("footer");
   }
 
   public DatabaseListPanel getDatabaseListPanel() {
@@ -65,18 +69,13 @@ public class Main implements EntryPoint {
    */
   @Override
   public void onModuleLoad() {
-    content = new SimplePanel();
-    RootPanel.get().add(header);
 
-    contentCol.add(content);
-    contentRow.add(contentCol);
-    RootPanel.get().add(contentRow);
-
+    RootPanel.get().add(mainPanel);
     RootPanel.get().add(footer);
+    RootPanel.get().addStyleName("roda");
 
     onHistoryChanged(History.getToken());
     History.addValueChangeHandler(new ValueChangeHandler<String>() {
-
       @Override
       public void onValueChange(ValueChangeEvent<String> event) {
         onHistoryChanged(event.getValue());
@@ -86,20 +85,26 @@ public class Main implements EntryPoint {
 
   private void onHistoryChanged(String token) {
     List<String> currentHistoryPath = HistoryManager.getCurrentHistoryPath();
+    List<BreadcrumbItem> breadcrumbItemList = new ArrayList<>();
+
     if (currentHistoryPath.isEmpty()) {
       // #
-      content.setWidget(getDatabaseListPanel());
+      setContent(getDatabaseListPanel());
+
     } else if (HistoryManager.ROUTE_DATABASE.equals(currentHistoryPath.get(0))) {
       if (currentHistoryPath.size() == 1) {
         // #database
-        content.setWidget(getDatabaseListPanel());
+        setContent(getDatabaseListPanel());
+
       } else if (currentHistoryPath.size() == 2) {
         // #database/<id>
         DatabasePanel panel = new DatabasePanel(currentHistoryPath.get(1));
-        content.setWidget(panel);
+        setContent(panel);
+
       } else {
         // #database/<id>/...
         HistoryManager.gotoRoot();
+
       }
     } else if (HistoryManager.ROUTE_TABLE.equals(currentHistoryPath.get(0))) {
       if (currentHistoryPath.size() == 3) {
@@ -107,11 +112,13 @@ public class Main implements EntryPoint {
         String database_uuid = currentHistoryPath.get(1);
         String table_uuid = currentHistoryPath.get(2);
         TablePanel panel = new TablePanel(database_uuid, table_uuid);
-        content.setWidget(panel);
+        setContent(panel);
+
       } else {
         // #table/...
         // (except the case above)
         HistoryManager.gotoRoot();
+
       }
     }
   }

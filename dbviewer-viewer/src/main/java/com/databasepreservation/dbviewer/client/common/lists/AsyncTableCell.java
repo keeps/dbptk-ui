@@ -164,10 +164,10 @@ public abstract class AsyncTableCell<T extends IsIndexed,O> extends FlowPanel im
     columnSortHandler = new AsyncHandler(display);
     display.addColumnSortHandler(columnSortHandler);
 
-    // addStyleName("my-asyncdatagrid");
-    // resultsPager.addStyleName("my-asyncdatagrid-pager-results");
-    // pageSizePager.addStyleName("my-asyncdatagrid-pager-pagesize");
-    // display.addStyleName("my-asyncdatagrid-display");
+     addStyleName("my-asyncdatagrid");
+     resultsPager.addStyleName("my-asyncdatagrid-pager-results");
+     pageSizePager.addStyleName("my-asyncdatagrid-pager-pagesize");
+     display.addStyleName("my-asyncdatagrid-display");
 
     addValueChangeHandler(new ValueChangeHandler<IndexResult<T>>() {
       @Override
@@ -529,8 +529,8 @@ public abstract class AsyncTableCell<T extends IsIndexed,O> extends FlowPanel im
     selectAllPanel.add(selectAllPanelBody);
     selectAllPanel.setVisible(false);
 
-    // selectAllPanel.addStyleName("panel");
-    // selectAllPanelBody.addStyleName("panel-body");
+     selectAllPanel.addStyleName("panel");
+     selectAllPanelBody.addStyleName("panel-body");
 
     selectAllCheckBox.addValueChangeHandler(new ValueChangeHandler<Boolean>() {
 

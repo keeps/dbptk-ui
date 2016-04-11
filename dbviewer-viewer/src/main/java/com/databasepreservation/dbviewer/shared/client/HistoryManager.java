@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.databasepreservation.dbviewer.client.main.BreadcrumbItem;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Window;
 
@@ -26,12 +27,12 @@ public class HistoryManager {
     newHistory(Arrays.asList(ROUTE_DATABASE));
   }
 
-  public static void gotoDatabase(String databaseId) {
-    newHistory(Arrays.asList(ROUTE_DATABASE, databaseId));
+  public static void gotoDatabase(String databaseUUID) {
+    newHistory(Arrays.asList(ROUTE_DATABASE, databaseUUID));
   }
 
-  public static void gotoTable(String databaseId, String tableId) {
-    newHistory(Arrays.asList(ROUTE_TABLE, databaseId, tableId));
+  public static void gotoTable(String databaseUUID, String tableUUID) {
+    newHistory(Arrays.asList(ROUTE_TABLE, databaseUUID, tableUUID));
   }
 
   private static void newHistory(List<String> path) {

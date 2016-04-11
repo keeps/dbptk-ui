@@ -35,6 +35,10 @@ public class DatabasePanel extends Composite {
   @UiField
   VerticalPanel vPanel;
 
+  public static void DatabasePanel() {
+
+  }
+
   public DatabasePanel(final String databaseID) {
     this.databaseID = databaseID;
 
