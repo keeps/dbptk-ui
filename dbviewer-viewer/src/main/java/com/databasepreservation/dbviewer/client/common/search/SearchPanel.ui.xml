@@ -1,6 +1,7 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:b="urn:import:com.databasepreservation.dbviewer.client.browse"
+             xmlns:s="urn:import:com.databasepreservation.dbviewer.client.common.search"
              xmlns:wcag="urn:import:com.databasepreservation.dbviewer.shared.client.widgets.wcag">
     <ui:style>
     </ui:style>
@@ -8,7 +9,7 @@
     <g:FlowPanel>
         <g:FlowPanel styleName="searchPanel" ui:field="searchPanel">
             <g:FlowPanel styleName="searchPanelLeft">
-                <b:Dropdown ui:field="searchInputListBox"
+                <s:Dropdown ui:field="searchInputListBox"
                                  addStyleNames="searchInputListBox"/>
 
                 <g:FlowPanel styleName="searchPanelLeftInput">

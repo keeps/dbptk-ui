@@ -16,7 +16,7 @@
 
         <!-- Content -->
         <g:FlowPanel addStyleNames="contentPanel">
-            <m:ContentPanel ui:field="contentPanel" />
+            <g:SimplePanel ui:field="contentPanel" />
         </g:FlowPanel>
     </g:FlowPanel>
 </ui:UiBinder>

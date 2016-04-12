@@ -1,8 +1,10 @@
-package com.databasepreservation.dbviewer.client.main;
+package com.databasepreservation.dbviewer.shared.client.Tools;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import com.databasepreservation.dbviewer.client.main.BreadcrumbItem;
+import com.databasepreservation.dbviewer.client.main.BreadcrumbPanel;
 import com.databasepreservation.dbviewer.shared.client.HistoryManager;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.client.Command;
@@ -11,6 +13,11 @@ import com.google.gwt.user.client.Command;
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class BreadcrumbManager {
+  public static void updateBreadcrumb(BreadcrumbPanel breadcrumb, List<BreadcrumbItem> items){
+    breadcrumb.updatePath(items);
+    breadcrumb.setVisible(true);
+  }
+
   public static List<BreadcrumbItem> forDatabases() {
     List<BreadcrumbItem> items = new ArrayList<>();
     items.add(new BreadcrumbItem(new SafeHtml() {

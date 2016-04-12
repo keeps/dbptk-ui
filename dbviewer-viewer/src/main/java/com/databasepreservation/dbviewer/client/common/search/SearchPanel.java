@@ -1,5 +1,6 @@
-package com.databasepreservation.dbviewer.client.browse;
+package com.databasepreservation.dbviewer.client.common.search;
 
+import com.databasepreservation.dbviewer.client.common.search.Dropdown;
 import org.roda.core.data.adapter.filter.BasicSearchFilterParameter;
 import org.roda.core.data.adapter.filter.Filter;
 
@@ -37,8 +38,7 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
   @UiField
   FlowPanel searchPanel;
 
-  @UiField
-  Dropdown searchInputListBox;
+  @UiField Dropdown searchInputListBox;
 
   @UiField
   TextBox searchInputBox;

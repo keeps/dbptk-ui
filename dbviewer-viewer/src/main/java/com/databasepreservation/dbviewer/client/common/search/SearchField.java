@@ -2,7 +2,7 @@
  * The contents of this file are based on those found at https://github.com/keeps/roda
  * and are subject to the license and copyright detailed in https://github.com/keeps/roda
  */
-package com.databasepreservation.dbviewer.client.browse;
+package com.databasepreservation.dbviewer.client.common.search;
 
 import java.io.Serializable;
 import java.util.List;

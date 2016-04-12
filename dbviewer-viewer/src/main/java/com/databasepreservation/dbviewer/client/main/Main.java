@@ -27,7 +27,7 @@ public class Main implements EntryPoint {
   private DatabaseListPanel databaseListPanel = null;
 
   private void setContent(Widget w) {
-    mainPanel.contentPanel.updateContent(w);
+    mainPanel.contentPanel.setWidget(w);
   }
 
   /**
