@@ -98,7 +98,7 @@ public class Main implements EntryPoint {
 
       } else if (currentHistoryPath.size() == 2) {
         // #database/<id>
-        DatabasePanel panel = new DatabasePanel(currentHistoryPath.get(1));
+        DatabasePanel panel = DatabasePanel.getInstance(currentHistoryPath.get(1));
         setContent(panel);
 
       } else {
@@ -111,7 +111,7 @@ public class Main implements EntryPoint {
         // #table/<database_uuid>/<table_uuid>
         String database_uuid = currentHistoryPath.get(1);
         String table_uuid = currentHistoryPath.get(2);
-        TablePanel panel = new TablePanel(database_uuid, table_uuid);
+        TablePanel panel = TablePanel.getInstance(database_uuid, table_uuid);
         setContent(panel);
 
       } else {

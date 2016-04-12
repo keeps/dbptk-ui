@@ -19,10 +19,26 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class TablePanel extends Composite {
+  private static Map<String,TablePanel> instances = new HashMap<>();
+  public static TablePanel getInstance(String databaseUUID, String tableUUID) {
+    String separator = "/";
+    String code = databaseUUID + separator + tableUUID;
+
+    TablePanel instance = instances.get(code);
+    if(instance == null){
+      instance = new TablePanel(databaseUUID, tableUUID);
+      instances.put(code, instance);
+    }
+    return instance;
+  }
+
   interface TablePanelUiBinder extends UiBinder<Widget, TablePanel> {
   }
 
@@ -46,7 +62,7 @@ public class TablePanel extends Composite {
 
   private static TablePanelUiBinder ourUiBinder = GWT.create(TablePanelUiBinder.class);
 
-  public TablePanel(final String databaseUUID, final String tableUUID) {
+  private TablePanel(final String databaseUUID, final String tableUUID) {
     dbSearchPanel = new SearchPanel(new Filter(), "", "Search in all tables", false, false);
     initWidget(ourUiBinder.createAndBindUi(this));
 
