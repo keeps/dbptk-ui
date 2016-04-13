@@ -1,6 +1,7 @@
 package com.databasepreservation.dbviewer.client.ViewerStructure;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.roda.core.data.v2.index.IsIndexed;
@@ -33,6 +34,10 @@ public class ViewerTable implements Serializable {
   private String schema;
 
   // private HashMap<String, String> udtAlias;
+
+  public ViewerTable() {
+    columns = new ArrayList<>();
+  }
 
   public String getUUID() {
     return uuid;

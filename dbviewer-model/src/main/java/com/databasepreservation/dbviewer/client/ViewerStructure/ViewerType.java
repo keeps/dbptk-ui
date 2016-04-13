@@ -16,6 +16,9 @@ public class ViewerType implements Serializable {
   private String typeName;
   private dbTypes dbType;
 
+  public ViewerType() {
+  }
+
   public String getDescription() {
     return description;
   }

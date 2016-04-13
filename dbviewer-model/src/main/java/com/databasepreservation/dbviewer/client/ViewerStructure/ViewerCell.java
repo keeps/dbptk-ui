@@ -8,6 +8,9 @@ import java.io.Serializable;
 public class ViewerCell implements Serializable {
   private String value;
 
+  public ViewerCell() {
+  }
+
   /**
    * Gets the value of this cell as string
    * 

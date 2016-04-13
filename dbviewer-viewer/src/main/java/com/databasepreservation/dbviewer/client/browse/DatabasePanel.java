@@ -1,5 +1,8 @@
 package com.databasepreservation.dbviewer.client.browse;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.roda.core.data.adapter.filter.Filter;
 import org.roda.core.data.v2.index.IsIndexed;
 
@@ -23,19 +26,17 @@ import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class DatabasePanel extends Composite {
-  private static Map<String,DatabasePanel> instances = new HashMap<>();
+  private static Map<String, DatabasePanel> instances = new HashMap<>();
+
   public static DatabasePanel getInstance(String databaseUUID) {
     String code = databaseUUID;
 
     DatabasePanel instance = instances.get(code);
-    if(instance == null){
+    if (instance == null) {
       instance = new DatabasePanel(databaseUUID);
       instances.put(code, instance);
     }
@@ -56,19 +57,22 @@ public class DatabasePanel extends Composite {
   @UiField
   BreadcrumbPanel breadcrumb;
   @UiField(provided = true)
-  SearchPanel searchPanel;
+  SearchPanel dbSearchPanel;
+  @UiField(provided = true)
+  DatabaseSidebar sidebar;
 
-  private DatabasePanel(final String databaseID) {
-    searchPanel = new SearchPanel(new Filter(), "", "Search in all tables", false, false);
+  private DatabasePanel(final String databaseUUID) {
+    dbSearchPanel = new SearchPanel(new Filter(), "", "Search in all tables", false, false);
+    sidebar = DatabaseSidebar.getInstance(databaseUUID);
 
     initWidget(uiBinder.createAndBindUi(this));
 
     vPanel.setSpacing(5);
     vPanel.setVisible(true);
 
-    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forDatabase("loading...", databaseID));
+    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forDatabase("loading...", databaseUUID));
 
-    BrowserService.Util.getInstance().retrieve(ViewerDatabase.class.getName(), databaseID,
+    BrowserService.Util.getInstance().retrieve(ViewerDatabase.class.getName(), databaseUUID,
       new AsyncCallback<IsIndexed>() {
         @Override
         public void onFailure(Throwable caught) {
@@ -103,20 +107,8 @@ public class DatabasePanel extends Composite {
     vPanel.add(new HTML(new SafeHtml() {
       @Override
       public String asString() {
-        return "<h4>Database: " + database.getMetadata().getName() + "</h4>";
+        return "<span>" + database.getMetadata().getName() + " metadata placeholder</span>";
       }
     }));
-
-    for (final ViewerSchema schema : metadata.getSchemas()) {
-      vPanel.add(new HTML(new SafeHtml() {
-        @Override
-        public String asString() {
-          return "<h5>Schema: " + schema.getName() + "</h5>";
-        }
-      }));
-      for (ViewerTable table : schema.getTables()) {
-        vPanel.add(getHyperlink(table.getName(), database.getUUID(), table.getUUID()));
-      }
-    }
   }
 }

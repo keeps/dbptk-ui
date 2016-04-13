@@ -20,6 +20,9 @@ public class ViewerColumn implements Serializable {
 
   private Boolean isAutoIncrement;
 
+  public ViewerColumn() {
+  }
+
   public String getSolrName() {
     return solrName;
   }

@@ -1,7 +1,6 @@
 package com.databasepreservation.dbviewer.client.ViewerStructure;
 
 import java.io.Serializable;
-import java.util.Map;
 
 import org.roda.core.data.v2.index.IsIndexed;
 
@@ -11,6 +10,9 @@ import org.roda.core.data.v2.index.IsIndexed;
 public class ViewerDatabase implements Serializable, IsIndexed {
   private String uuid;
   private ViewerMetadata metadata;
+
+  public ViewerDatabase() {
+  }
 
   /**
    * @return the uuid used by solr to identify this database

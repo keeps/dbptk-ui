@@ -192,8 +192,102 @@
     line-height: 1.1em;
 }
 
+/**********************************************
+				SIDEBAR
+************************************************/
+.leftSidebar-facet-title {
+    color: inherit;
+    margin-bottom: 5px;
+    /*font-size: 1.8rem;*/
+}
 
+.leftSidebar-facet-label {
+    display: block;
+    white-space: nowrap;
+    margin-bottom: 5px;
+    font-size: 1.2rem;
+}
 
+.leftSidebar-facet-input {
+    padding: 2px;
+}
 
+.leftSidebar-facet-input-date {
+    width: 45%;
+}
+
+.leftSidebar-facet-date-separator {
+    display: inline-block;
+    margin-left: 2px;
+    margin-right: 2px;
+    color: #999;
+}
+
+.leftSidebar-facet-panel.facet-empty {
+    display: none;
+}
+
+.leftSidebar .fade-out:after {
+    background: -webkit-linear-gradient(right, #eee 30%, rgba(255, 255, 255, 0) 100%);
+    background: linear-gradient(-90deg, #eee 30%, rgba(255, 255, 255, 0) 100%);
+}
+
+.leftSidebar {
+    padding: 2rem;
+}
+
+.leftSidebar .btn {
+    width: 160px;
+    margin-right: 10px;
+    margin-bottom: 7px;
+}
+
+.leftSidebar .h1, .leftSidebar .h2, .leftSidebar .h3, .leftSidebar .h4, .leftSidebar .h5,
+.leftSidebar .h6 {
+    margin-bottom: 0.6rem;
+    margin-top: 0.5em;
+    line-height: normal;
+}
+
+.leftSidebar .indent0 {
+    margin-left: 0;
+}
+
+.leftSidebar .indent1 {
+    margin-left: 0.5rem;
+}
+
+.leftSidebar .indent2 {
+    margin-left: 1rem;
+}
+
+.leftSidebar .indent3 {
+    margin-left: 1.5rem;
+}
+
+.leftSidebar .indent4 {
+    margin-left: 2rem;
+}
+
+.leftSidebar .indent5 {
+    margin-left: 2.5rem;
+}
+
+.leftSidebar .indent6 {
+    margin-left: 3rem;
+}
+
+.leftSidebar .h1:before, .leftSidebar .h2:before, .leftSidebar .h3:before, .leftSidebar .h4:before, .leftSidebar .h5:before,
+.leftSidebar .h6:before {
+    display: inline-block;
+    font: normal normal normal 14px/1 FontAwesome;
+    font-size: inherit;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    float: left;
+    padding-right: 0.2em;
+    margin-top: 0.1em;
+}
 
 

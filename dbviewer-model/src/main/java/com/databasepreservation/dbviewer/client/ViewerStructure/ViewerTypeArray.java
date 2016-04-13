@@ -13,6 +13,7 @@ public class ViewerTypeArray extends ViewerType {
   private ViewerType elementType;
 
   public ViewerTypeArray() {
+    super();
     setDbType(dbTypes.COMPOSED_ARRAY);
   }
 

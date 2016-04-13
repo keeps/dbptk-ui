@@ -1,6 +1,7 @@
 package com.databasepreservation.dbviewer.client.ViewerStructure;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -18,6 +19,10 @@ public class ViewerSchema implements Serializable {
   // private List<DbvRoutine> routines;
 
   // private List<DbvComposedType> userDefinedTypes;
+
+  public ViewerSchema() {
+    tables = new ArrayList<>();
+  }
 
   public String getName() {
     return name;

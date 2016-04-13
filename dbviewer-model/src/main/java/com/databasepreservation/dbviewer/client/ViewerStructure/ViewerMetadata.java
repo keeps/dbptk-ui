@@ -1,6 +1,7 @@
 package com.databasepreservation.dbviewer.client.ViewerStructure;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -43,7 +44,11 @@ public class ViewerMetadata implements Serializable {
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++
   // Getters and setters
   //+++++++++++++++++++++++++++++++++++++++++++++++++++++
-  
+
+  public ViewerMetadata() {
+    schemas = new ArrayList<>();
+  }
+
   public String getName() {
     return name;
   }

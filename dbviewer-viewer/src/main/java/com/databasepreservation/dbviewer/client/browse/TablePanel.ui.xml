@@ -13,9 +13,7 @@
                 <g:cell>
                     <g:FlowPanel addStyleNames="browseContentFilesPanel">
                         <s:SearchPanel ui:field="dbSearchPanel"/>
-                        <g:FlowPanel addStyleNames="fileListScroll">
-                            <!--<lists:SimpleFileList ui:field="filesList" />-->
-                        </g:FlowPanel>
+                        <b:DatabaseSidebar ui:field="sidebar" />
                     </g:FlowPanel>
                 </g:cell>
                 <!-- RIGHT PANEL -->

@@ -76,4 +76,8 @@ public class HistoryManager {
   public static String linkToTable(String database_uuid, String table_uuid) {
     return createHistoryToken(Arrays.asList(ROUTE_TABLE, database_uuid, table_uuid));
   }
+
+  public static String linkToDatabase(String database_uuid) {
+    return createHistoryToken(Arrays.asList(ROUTE_DATABASE, database_uuid));
+  }
 }

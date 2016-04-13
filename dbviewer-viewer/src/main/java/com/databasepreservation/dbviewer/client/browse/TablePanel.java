@@ -1,6 +1,8 @@
 package com.databasepreservation.dbviewer.client.browse;
 
-import com.databasepreservation.dbviewer.shared.client.Tools.BreadcrumbManager;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.roda.core.data.adapter.filter.Filter;
 import org.roda.core.data.v2.index.IsIndexed;
 
@@ -11,6 +13,7 @@ import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerTable;
 import com.databasepreservation.dbviewer.client.common.lists.TableRowList;
 import com.databasepreservation.dbviewer.client.common.search.SearchPanel;
 import com.databasepreservation.dbviewer.client.main.BreadcrumbPanel;
+import com.databasepreservation.dbviewer.shared.client.Tools.BreadcrumbManager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -19,20 +22,18 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class TablePanel extends Composite {
-  private static Map<String,TablePanel> instances = new HashMap<>();
+  private static Map<String, TablePanel> instances = new HashMap<>();
+
   public static TablePanel getInstance(String databaseUUID, String tableUUID) {
     String separator = "/";
     String code = databaseUUID + separator + tableUUID;
 
     TablePanel instance = instances.get(code);
-    if(instance == null){
+    if (instance == null) {
       instance = new TablePanel(databaseUUID, tableUUID);
       instances.put(code, instance);
     }
@@ -55,18 +56,23 @@ public class TablePanel extends Composite {
   @UiField(provided = true)
   SearchPanel dbSearchPanel;
 
+  @UiField(provided = true)
+  DatabaseSidebar sidebar;
+
   private ViewerDatabase database;
   private ViewerTable table;
 
   private TableRowList tableRowList;
 
-  private static TablePanelUiBinder ourUiBinder = GWT.create(TablePanelUiBinder.class);
+  private static TablePanelUiBinder uiBinder = GWT.create(TablePanelUiBinder.class);
 
   private TablePanel(final String databaseUUID, final String tableUUID) {
     dbSearchPanel = new SearchPanel(new Filter(), "", "Search in all tables", false, false);
-    initWidget(ourUiBinder.createAndBindUi(this));
+    sidebar = DatabaseSidebar.getInstance(databaseUUID);
+    initWidget(uiBinder.createAndBindUi(this));
 
-    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forTable("Database (loading)", databaseUUID, "Table (loading)", tableUUID));
+    BreadcrumbManager.updateBreadcrumb(breadcrumb,
+      BreadcrumbManager.forTable("Database (loading)", databaseUUID, "Table (loading)", tableUUID));
 
     BrowserService.Util.getInstance().retrieve(ViewerDatabase.class.getName(), databaseUUID,
       new AsyncCallback<IsIndexed>() {
@@ -80,7 +86,8 @@ public class TablePanel extends Composite {
           database = (ViewerDatabase) result;
           table = database.getMetadata().getTable(tableUUID);
 
-          BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forTable(database.getMetadata().getName(), databaseUUID, table.getName(), tableUUID));
+          BreadcrumbManager.updateBreadcrumb(breadcrumb,
+            BreadcrumbManager.forTable(database.getMetadata().getName(), databaseUUID, table.getName(), tableUUID));
 
           init();
         }

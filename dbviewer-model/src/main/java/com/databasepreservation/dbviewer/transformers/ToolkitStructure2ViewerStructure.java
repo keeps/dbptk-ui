@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import com.databasepreservation.dbviewer.ViewerConstants;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerCell;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerColumn;
-import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerDatabaseFromToolkit;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerMetadata;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerRow;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerSchema;

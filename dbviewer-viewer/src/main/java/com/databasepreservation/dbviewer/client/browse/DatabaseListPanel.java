@@ -33,10 +33,10 @@ public class DatabaseListPanel extends Composite {
   @UiField
   BreadcrumbPanel breadcrumb;
 
-  @UiField(provided = true) SearchPanel searchPanel;
+  @UiField(provided = true) SearchPanel dbSearchPanel;
 
   public DatabaseListPanel() {
-    searchPanel = new SearchPanel(new Filter(), "", "(unused)", false, false);
+    dbSearchPanel = new SearchPanel(new Filter(), "", "(unused)", false, false);
 
     databaseList = new DatabaseList();
     initWidget(uiBinder.createAndBindUi(this));
