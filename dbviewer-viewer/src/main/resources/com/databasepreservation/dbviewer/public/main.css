@@ -1,4 +1,13 @@
 /***********************************************
+   Ungrouped
+************************************************/
+
+.db-info-th {
+    font-weight: bolder;
+    padding-right: 1rem;
+}
+
+/***********************************************
    BrowseContent (based on ViewRepresentation)
 ************************************************/
 .browseContentTitle {

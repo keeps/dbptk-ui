@@ -23,7 +23,7 @@
                             <m:BreadcrumbPanel ui:field="breadcrumb" addStyleNames="browseContentBreadcrumb"/>
                         </g:FlowPanel>
                         <g:FlowPanel addStyleNames="col_12 content">
-                            <g:VerticalPanel ui:field="vPanel"/>
+                            <g:FlexTable ui:field="table" />
                         </g:FlowPanel>
                     </g:FlowPanel>
                 </g:cell>

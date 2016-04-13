@@ -10,7 +10,7 @@ import java.util.List;
 public class ViewerSchema implements Serializable {
   private String name;
 
-  // private String description;
+  private String description;
 
   private List<ViewerTable> tables;
 
@@ -38,5 +38,13 @@ public class ViewerSchema implements Serializable {
 
   public void setTables(List<ViewerTable> tables) {
     this.tables = tables;
+  }
+
+  public String getDescription() {
+    return description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
   }
 }

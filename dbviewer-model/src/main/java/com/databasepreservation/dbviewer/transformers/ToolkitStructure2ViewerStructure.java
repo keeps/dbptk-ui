@@ -10,7 +10,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerDatabaseFromToolkit;
 import com.databasepreservation.model.exception.ModuleException;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,9 +85,27 @@ public class ToolkitStructure2ViewerStructure {
     throws ViewerException {
     ViewerMetadata result = new ViewerMetadata();
     result.setName(structure.getName());
+    result.setArchiver(structure.getArchiver());
+    result.setArchiverContact(structure.getArchiverContact());
+    result.setClientMachine(structure.getClientMachine());
+    result.setDatabaseProduct(getDatabaseProduct(structure));
+    result.setDatabaseUser(structure.getDatabaseUser());
+    result.setDataOriginTimespan(structure.getDataOriginTimespan());
+    result.setDataOwner(structure.getDataOwner());
+    result.setDescription(structure.getDescription());
+    result.setProducerApplication(structure.getProducerApplication());
+
     result.setArchivalDate(getArchivalDate(structure));
     result.setSchemas(getSchemas(vdb, structure.getSchemas()));
     return result;
+  }
+
+  private static String getDatabaseProduct(DatabaseStructure structure) {
+    if(StringUtils.isNotBlank(structure.getProductVersion())) {
+      return structure.getProductName() + " v" + structure.getProductVersion();
+    }else{
+      return structure.getProductName();
+    }
   }
 
   private static String getArchivalDate(DatabaseStructure structure) {
@@ -104,6 +124,7 @@ public class ToolkitStructure2ViewerStructure {
   private static ViewerSchema getSchema(ViewerDatabaseFromToolkit vdb, SchemaStructure schema) throws ViewerException {
     ViewerSchema result = new ViewerSchema();
     result.setName(schema.getName());
+    result.setDescription(schema.getDescription());
     result.setTables(getTables(vdb, schema.getTables()));
 
     vdb.putSchema(schema.getName(), result);

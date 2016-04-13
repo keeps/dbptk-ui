@@ -1,4 +1,4 @@
-package com.databasepreservation.dbviewer.transformers;
+package com.databasepreservation.dbviewer.client.ViewerStructure;
 
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerSchema;
