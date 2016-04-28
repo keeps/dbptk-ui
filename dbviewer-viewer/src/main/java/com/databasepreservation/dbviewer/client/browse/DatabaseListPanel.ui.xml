@@ -25,6 +25,7 @@
                                 <m:BreadcrumbPanel ui:field="breadcrumb" addStyleNames="browseContentBreadcrumb"/>
                             </g:FlowPanel>
                             <g:FlowPanel addStyleNames="col_12 content">
+                                <g:Label addStyleNames="h1"><ui:msg>Database listing</ui:msg></g:Label>
                                 <lists:DatabaseList ui:field="databaseList"/>
                             </g:FlowPanel>
                         </g:FlowPanel>

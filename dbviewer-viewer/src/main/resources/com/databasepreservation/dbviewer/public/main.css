@@ -245,6 +245,22 @@
     padding: 2rem;
 }
 
+.leftSidebar .sidebar-hyperlink a {
+    font-size: 1.4rem;
+    color: inherit;
+}
+
+.leftSidebar .sidebar-hyperlink {
+    font-size: 1.4rem;
+    color: #222;
+}
+
+.leftSidebar .sidebar-hyperlink :hover{
+    color: #089de3;
+}
+
+
+
 .leftSidebar .btn {
     width: 160px;
     margin-right: 10px;
@@ -260,6 +276,11 @@
 
 .leftSidebar .indent0 {
     margin-left: 0;
+    margin-top: 1.5rem;
+}
+
+.leftSidebar-facet-title :first-child {
+    margin-top: 0;
 }
 
 .leftSidebar .indent1 {
@@ -295,7 +316,7 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     float: left;
-    padding-right: 0.2em;
+    padding-right: 0.5em;
     margin-top: 0.1em;
 }
 

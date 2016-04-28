@@ -81,9 +81,17 @@ h6, .h6 {
     letter-spacing: 0;
 }
 
+.field {
+    margin-bottom: 10px;
+}
+
 .label {
-    font-weight: 400;
-    color: #999;
+
+}
+
+.value {
+    font-size: 1.4rem;
+    color: rgb(88, 89, 91);
 }
 
 .label-success {

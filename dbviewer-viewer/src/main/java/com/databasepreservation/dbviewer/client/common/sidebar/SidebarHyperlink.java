@@ -22,6 +22,7 @@ public class SidebarHyperlink extends SidebarItem {
     initWidget(uiBinder.createAndBindUi(this));
     setTargetHistoryToken(targetHistoryToken);
     setText(text);
+    label.addStyleName("sidebar-hyperlink");
   }
 
   public SidebarHyperlink setTargetHistoryToken(String targetHistoryToken) {

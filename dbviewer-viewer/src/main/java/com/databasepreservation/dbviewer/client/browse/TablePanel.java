@@ -19,6 +19,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -88,7 +89,6 @@ public class TablePanel extends Composite {
 
           BreadcrumbManager.updateBreadcrumb(breadcrumb,
             BreadcrumbManager.forTable(database.getMetadata().getName(), databaseUUID, table.getName(), tableUUID));
-
           init();
         }
       });
@@ -97,7 +97,7 @@ public class TablePanel extends Composite {
   private void init() {
     tableRowList = new TableRowList(database, table);
 
-    searchPanel = new SearchPanel(new Filter(), ViewerConstants.SOLR_ROW_SEARCH, "search placeholder", false, false);
+    searchPanel = new SearchPanel(new Filter(), ViewerConstants.SOLR_ROW_SEARCH, "Search...", false, false);
     searchPanel.setList(tableRowList);
     searchPanel.setDefaultFilterIncremental(true);
 
