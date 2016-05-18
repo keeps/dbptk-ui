@@ -258,7 +258,7 @@ public class ToolkitStructure2ViewerStructure {
     }
 
     result.setDescription(type.getDescription());
-    result.setTypeName(type.getSql2003TypeName());
+    result.setTypeName(type.getSql2008TypeName());
     result.setOriginalTypeName(type.getOriginalTypeName());
 
     return result;

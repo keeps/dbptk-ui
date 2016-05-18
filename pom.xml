@@ -115,7 +115,7 @@
             <dependency>
                 <groupId>com.databasepreservation</groupId>
                 <artifactId>dbptk-model</artifactId>
-                <version>2.0.0-beta4.0</version>
+                <version>2.0.0-beta4.3</version>
             </dependency>
             <dependency>
                 <groupId>org.roda-project</groupId>
