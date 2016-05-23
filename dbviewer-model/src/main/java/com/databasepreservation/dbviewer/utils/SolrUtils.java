@@ -12,6 +12,7 @@ import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
@@ -32,7 +33,6 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.params.FacetParams;
-import org.apache.solr.common.util.DateUtil;
 import org.roda.core.data.adapter.facet.FacetParameter;
 import org.roda.core.data.adapter.facet.Facets;
 import org.roda.core.data.adapter.facet.RangeFacetParameter;
@@ -554,7 +554,8 @@ public class SolrUtils {
     final String ret;
 
     if (fromValue != null) {
-      return DateUtil.getThreadLocalDateFormat().format(fromValue);
+      Instant instant = Instant.ofEpochMilli(fromValue.getTime());
+      return instant.toString();
     } else {
       ret = "*";
     }
@@ -570,7 +571,7 @@ public class SolrUtils {
     final String ret;
     StringBuilder sb = new StringBuilder();
     if (toValue != null) {
-      sb.append(DateUtil.getThreadLocalDateFormat().format(toValue));
+      sb.append(Instant.ofEpochMilli(toValue.getTime()).toString());
       switch (granularity) {
         case YEAR:
           sb.append("+1YEAR-1MILLISECOND");
@@ -604,7 +605,7 @@ public class SolrUtils {
   private static <T extends Serializable> void generateRangeValue(StringBuilder ret, Class<T> valueClass, T value) {
     if (value != null) {
       if (valueClass.equals(Date.class)) {
-        String date = DateUtil.getThreadLocalDateFormat().format(Date.class.cast(value));
+        String date = Instant.ofEpochMilli((Date.class.cast(value).getTime())).toString();
         LOGGER.trace("Appending date value \"{}\" to range", date);
         ret.append(date);
       } else if (valueClass.equals(Long.class)) {
