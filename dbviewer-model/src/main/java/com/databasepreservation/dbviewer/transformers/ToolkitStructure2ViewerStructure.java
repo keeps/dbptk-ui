@@ -264,14 +264,14 @@ public class ToolkitStructure2ViewerStructure {
     return result;
   }
 
-  public static ViewerRow getRow(ViewerTable table, Row row, int rowIndex) throws ViewerException {
+  public static ViewerRow getRow(ViewerTable table, Row row, long rowIndex) throws ViewerException {
     ViewerRow result = new ViewerRow();
     result.setUUID(SolrUtils.randomUUID());
     result.setCells(getCells(table, row, rowIndex));
     return result;
   }
 
-  private static Map<String, ViewerCell> getCells(ViewerTable table, Row row, int rowIndex) throws ViewerException {
+  private static Map<String, ViewerCell> getCells(ViewerTable table, Row row, long rowIndex) throws ViewerException {
     HashMap<String, ViewerCell> result = new HashMap<>();
 
     int colIndex = 0;
@@ -284,7 +284,7 @@ public class ToolkitStructure2ViewerStructure {
     return result;
   }
 
-  private static ViewerCell getCell(ViewerTable table, Cell cell, int rowIndex, int colIndex) throws ViewerException {
+  private static ViewerCell getCell(ViewerTable table, Cell cell, long rowIndex, int colIndex) throws ViewerException {
     ViewerCell result = new ViewerCell();
     if (cell instanceof BinaryCell) {
       BinaryCell binaryCell = (BinaryCell) cell;

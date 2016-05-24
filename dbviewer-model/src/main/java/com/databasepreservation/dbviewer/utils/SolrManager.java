@@ -1,10 +1,14 @@
 package com.databasepreservation.dbviewer.utils;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerSchema;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.request.CollectionAdminRequest;
@@ -37,10 +41,13 @@ import com.databasepreservation.dbviewer.transformers.SolrTransformer;
  */
 public class SolrManager {
   private static final Logger LOGGER = LoggerFactory.getLogger(SolrManager.class);
-  private static final long insertDocumentTimeout = 30000; // 30 seconds
+  private static final long INSERT_DOCUMENT_TIMEOUT = 30000; // 30 seconds
+  private static final int MAX_CACHED_DOCUMENTS_PER_COLLECTION = 10;
+  private static final int MAX_CACHED_COLLECTIONS = 10;
 
   private final HttpSolrClient client;
   private final Set<String> collectionsToCommit;
+  private Map<String, List<SolrInputDocument>> docsByCollection = new HashMap<>();
   private boolean setupDone = false;
 
   public SolrManager(String url) {
@@ -82,6 +89,37 @@ public class SolrManager {
     // add this database to the collection
     collectionsToCommit.add(ViewerConstants.SOLR_INDEX_DATABASE_COLLECTION_NAME);
     insertDocument(ViewerConstants.SOLR_INDEX_DATABASE_COLLECTION_NAME, SolrTransformer.fromDatabase(database));
+
+    // prepare tables to create the collection
+    final List<ViewerTable> tables = new ArrayList<>();
+    for (ViewerSchema viewerSchema : database.getMetadata().getSchemas()) {
+      for (ViewerTable viewerTable : viewerSchema.getTables()) {
+        tables.add(viewerTable);
+      }
+    }
+
+    Thread tableCollectionCreator = new Thread(){
+      public void run(){
+        for (ViewerTable table : tables) {
+          String collectionName = SolrUtils.getTableCollectionName(table.getUUID());
+          CollectionAdminRequest.Create request = new CollectionAdminRequest.Create();
+          request.setCollectionName(collectionName);
+          request.setConfigName(ViewerConstants.SOLR_CONFIGSET_TABLE);
+          request.setNumShards(1);
+
+          try {
+            LOGGER.debug("Creating collection for table " + table.getName() + " with id " + table.getUUID());
+            NamedList<Object> response = client.request(request);
+            LOGGER.debug("Response from server (create collection for table with id " + table.getUUID() + "): "
+              + response.toString());
+          } catch (SolrServerException | IOException e) {
+            LOGGER.error("Error creating collection " + collectionName, e);
+          }
+        }
+      }
+    };
+
+    tableCollectionCreator.start();
   }
 
   /**
@@ -92,19 +130,6 @@ public class SolrManager {
    */
   public void addTable(ViewerTable table) throws ViewerException {
     String collectionName = SolrUtils.getTableCollectionName(table.getUUID());
-    CollectionAdminRequest.Create request = new CollectionAdminRequest.Create();
-    request.setCollectionName(collectionName);
-    request.setConfigName(ViewerConstants.SOLR_CONFIGSET_TABLE);
-    request.setNumShards(1);
-
-    try {
-      LOGGER.debug("Creating collection for table " + table.getName() + " with id " + table.getUUID());
-      NamedList<Object> response = client.request(request);
-      LOGGER.debug("Response from server (create collection for table with id " + table.getUUID() + "): "
-        + response.toString());
-    } catch (SolrServerException | IOException e) {
-      throw new ViewerException("Error creating collection " + collectionName, e);
-    }
     collectionsToCommit.add(collectionName);
   }
 
@@ -195,24 +220,46 @@ public class SolrManager {
    * @throws ViewerException
    */
   private void insertDocumentOrCommitAndOptimize(String collection, SolrInputDocument doc) throws ViewerException {
+    if (doc != null) {
+      if (!docsByCollection.containsKey(collection)) {
+        docsByCollection.put(collection, new ArrayList<SolrInputDocument>());
+      }
+      List<SolrInputDocument> docs = docsByCollection.get(collection);
+      docs.add(doc);
+      if (docs.size() < MAX_CACHED_DOCUMENTS_PER_COLLECTION && docsByCollection.size() < MAX_CACHED_COLLECTIONS) {
+        return;
+      }
+    }
+
     long start = System.currentTimeMillis();
     int tries = 0;
-    while (System.currentTimeMillis() - start < 30000) {
+    while (System.currentTimeMillis() - start < INSERT_DOCUMENT_TIMEOUT) {
       UpdateResponse response;
       try {
-        if (doc != null) {
-          // add document
+        if (docsByCollection.size() > 0) {
+          // add documents, either because there is going to be a commit or the
+          // cache limits were reached
           try {
-            response = client.add(collection, doc);
-            if (response.getStatus() == 0) {
-              return;
-            } else {
-              throw new ViewerException("Could not insert document {" + doc + "} in collection " + collection);
+
+            for (Map.Entry<String, List<SolrInputDocument>> collectionAndDocuments : docsByCollection.entrySet()) {
+              List<SolrInputDocument> docs = collectionAndDocuments.getValue();
+              if (!docs.isEmpty()) {
+                String currentCollection = collectionAndDocuments.getKey();
+                response = client.add(currentCollection, docs);
+                if (response.getStatus() == 0) {
+                  docsByCollection.remove(currentCollection);
+                  return;
+                } else {
+                  throw new ViewerException("Could not insert document {" + doc + "} in collection " + collection);
+                }
+              }
             }
           } catch (SolrServerException | IOException e) {
             throw new ViewerException("Problem inserting document", e);
           }
-        } else {
+        }
+
+        if (doc == null) {
           // commit and optimize
           try {
             response = client.commit(collection);

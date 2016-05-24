@@ -338,8 +338,9 @@
          have some sort of hard autoCommit to limit the log size.
       -->
     <autoCommit>
-      <maxTime>${solr.autoCommit.maxTime:15000}</maxTime>
-      <openSearcher>false</openSearcher>
+      <maxTime>30000</maxTime>
+      <maxDocs>200000</maxDocs>
+      <openSearcher>true</openSearcher>
     </autoCommit>
 
     <!-- softAutoCommit is like autoCommit except it causes a
@@ -348,9 +349,9 @@
          faster and more near-realtime friendly than a hard commit.
       -->
 
-    <autoSoftCommit>
-      <maxTime>${solr.autoSoftCommit.maxTime:-1}</maxTime>
-    </autoSoftCommit>
+    <!--<autoSoftCommit>-->
+      <!--<maxTime>${solr.autoSoftCommit.maxTime:-1}</maxTime>-->
+    <!--</autoSoftCommit>-->
 
     <!-- Update Related Event Listeners
          
