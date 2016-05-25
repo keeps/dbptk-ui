@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerSchema;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.request.CollectionAdminRequest;
@@ -30,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import com.databasepreservation.dbviewer.ViewerConstants;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerRow;
+import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerSchema;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerTable;
 import com.databasepreservation.dbviewer.exceptions.ViewerException;
 import com.databasepreservation.dbviewer.transformers.SolrTransformer;
@@ -41,9 +41,9 @@ import com.databasepreservation.dbviewer.transformers.SolrTransformer;
  */
 public class SolrManager {
   private static final Logger LOGGER = LoggerFactory.getLogger(SolrManager.class);
-  private static final long INSERT_DOCUMENT_TIMEOUT = 30000; // 30 seconds
-  private static final int MAX_CACHED_DOCUMENTS_PER_COLLECTION = 10;
-  private static final int MAX_CACHED_COLLECTIONS = 10;
+  private static final long INSERT_DOCUMENT_TIMEOUT = 60000; // 60 seconds
+  private static final int MAX_BUFFERED_DOCUMENTS_PER_COLLECTION = 10;
+  private static final int MAX_BUFFERED_COLLECTIONS = 10;
 
   private final HttpSolrClient client;
   private final Set<String> collectionsToCommit;
@@ -63,7 +63,8 @@ public class SolrManager {
   }
 
   /**
-   * Adds a database to the databases collection
+   * Adds a database to the databases collection and asynchronously creates
+   * collections for its tables
    * 
    * @param database
    *          the new database
@@ -98,8 +99,8 @@ public class SolrManager {
       }
     }
 
-    Thread tableCollectionCreator = new Thread(){
-      public void run(){
+    Thread tableCollectionCreator = new Thread("tabC") {
+      public void run() {
         for (ViewerTable table : tables) {
           String collectionName = SolrUtils.getTableCollectionName(table.getUUID());
           CollectionAdminRequest.Create request = new CollectionAdminRequest.Create();
@@ -108,12 +109,17 @@ public class SolrManager {
           request.setNumShards(1);
 
           try {
-            LOGGER.debug("Creating collection for table " + table.getName() + " with id " + table.getUUID());
+            LOGGER.info("Table collection creator: Creating collection for table " + table.getName() + " with id "
+              + table.getUUID());
             NamedList<Object> response = client.request(request);
-            LOGGER.debug("Response from server (create collection for table with id " + table.getUUID() + "): "
-              + response.toString());
-          } catch (SolrServerException | IOException e) {
-            LOGGER.error("Error creating collection " + collectionName, e);
+            LOGGER.debug("Table collection creator: Response from server (create collection for table with id "
+              + table.getUUID() + "): " + response.toString());
+          } catch (HttpSolrClient.RemoteSolrException e) {
+            LOGGER.error("Table collection creator: Error in Solr server while creating collection " + collectionName,
+              e);
+          } catch (Exception e) {
+            // mainly: SolrServerException and IOException
+            LOGGER.error("Table collection creator: Error creating collection " + collectionName, e);
           }
         }
       }
@@ -199,11 +205,18 @@ public class SolrManager {
     if (doc == null) {
       throw new ViewerException("Attempted to insert null document into collection " + collection);
     }
-    insertDocumentOrCommitAndOptimize(collection, doc);
-  }
 
-  private void commitAndOptimize(String collection) throws ViewerException {
-    insertDocumentOrCommitAndOptimize(collection, null);
+    // add document to buffer
+    if (!docsByCollection.containsKey(collection)) {
+      docsByCollection.put(collection, new ArrayList<SolrInputDocument>());
+    }
+    List<SolrInputDocument> docs = docsByCollection.get(collection);
+    docs.add(doc);
+
+    // if buffer limit has been reached, "flush" it to solr
+    if (docs.size() >= MAX_BUFFERED_DOCUMENTS_PER_COLLECTION && docsByCollection.size() >= MAX_BUFFERED_COLLECTIONS) {
+      insertPendingDocuments();
+    }
   }
 
   /**
@@ -211,66 +224,90 @@ public class SolrManager {
    * makes sequential attempts to insert a document before giving up (by
    * timeout)
    *
-   * Do not use this method, use insertDocument and commitAndOptimize instead.
-   *
-   * @param collection
-   *          the collection to insert the document or commit and optimize
-   * @param doc
-   *          the document to insert (to commit and optimize, this must be null)
    * @throws ViewerException
+   *           in case of a fatal error
    */
-  private void insertDocumentOrCommitAndOptimize(String collection, SolrInputDocument doc) throws ViewerException {
-    if (doc != null) {
-      if (!docsByCollection.containsKey(collection)) {
-        docsByCollection.put(collection, new ArrayList<SolrInputDocument>());
+  private void insertPendingDocuments() throws ViewerException {
+    long start = System.currentTimeMillis();
+    int tries = 0;
+    while (System.currentTimeMillis() - start < INSERT_DOCUMENT_TIMEOUT) {
+      UpdateResponse response = null;
+      try {
+        // add documents, because the buffer limits were reached
+        for (Map.Entry<String, List<SolrInputDocument>> collectionAndDocuments : docsByCollection.entrySet()) {
+          List<SolrInputDocument> docs = collectionAndDocuments.getValue();
+          if (!docs.isEmpty()) {
+            String currentCollection = collectionAndDocuments.getKey();
+            try {
+              response = client.add(currentCollection, docs);
+              if (response.getStatus() == 0) {
+                docsByCollection.remove(currentCollection);
+                return;
+              } else {
+                throw new ViewerException("Could not insert a document batch in collection " + currentCollection
+                  + ". Response: " + response.toString());
+              }
+            } catch (HttpSolrClient.RemoteSolrException e) {
+              if (e.getMessage().contains("<title>Error 404 Not Found</title>")) {
+                // this means that the collection does not exist yet. retry
+                LOGGER.debug("Collection " + currentCollection + " does not exist (yet). Retrying (" + tries + ")");
+              } else {
+                throw new ViewerException("Could not insert a document batch in collection" + currentCollection
+                  + ". Last response (if any): " + String.valueOf(response), e);
+              }
+            }
+          }
+        }
+      } catch (SolrServerException | IOException e) {
+        throw new ViewerException("Problem adding or committing information", e);
       }
-      List<SolrInputDocument> docs = docsByCollection.get(collection);
-      docs.add(doc);
-      if (docs.size() < MAX_CACHED_DOCUMENTS_PER_COLLECTION && docsByCollection.size() < MAX_CACHED_COLLECTIONS) {
-        return;
+
+      try {
+        Thread.sleep(1000);
+      } catch (InterruptedException e) {
+        LOGGER.debug("insertDocument sleep was interrupted", e);
       }
+      tries++;
     }
 
+    throw new ViewerException(
+      "Could not insert a document batch in collection. Reason: Timeout reached while waiting for collection to be available.");
+  }
+
+  private void commitAndOptimize(String collection) throws ViewerException {
+    // insert any pending documents before optimizing
+    insertPendingDocuments();
+    commit(collection, true);
+  }
+
+  /**
+   * The collections are not immediately available after creation, this method
+   * makes sequential attempts to commit (and possibly optimize) a collection
+   * before giving up (by timeout)
+   *
+   * @throws ViewerException
+   *           in case of a fatal error
+   */
+  private void commit(String collection, boolean optimize) throws ViewerException {
     long start = System.currentTimeMillis();
     int tries = 0;
     while (System.currentTimeMillis() - start < INSERT_DOCUMENT_TIMEOUT) {
       UpdateResponse response;
       try {
-        if (docsByCollection.size() > 0) {
-          // add documents, either because there is going to be a commit or the
-          // cache limits were reached
-          try {
-
-            for (Map.Entry<String, List<SolrInputDocument>> collectionAndDocuments : docsByCollection.entrySet()) {
-              List<SolrInputDocument> docs = collectionAndDocuments.getValue();
-              if (!docs.isEmpty()) {
-                String currentCollection = collectionAndDocuments.getKey();
-                response = client.add(currentCollection, docs);
-                if (response.getStatus() == 0) {
-                  docsByCollection.remove(currentCollection);
-                  return;
-                } else {
-                  throw new ViewerException("Could not insert document {" + doc + "} in collection " + collection);
-                }
-              }
-            }
-          } catch (SolrServerException | IOException e) {
-            throw new ViewerException("Problem inserting document", e);
+        // commit
+        try {
+          response = client.commit(collection);
+          client.commit();
+          if (response.getStatus() != 0) {
+            throw new ViewerException("Could not commit collection " + collection);
           }
+        } catch (SolrServerException | IOException e) {
+          throw new ViewerException("Problem committing collection " + collection, e);
         }
 
-        if (doc == null) {
-          // commit and optimize
+        if (optimize) {
           try {
-            response = client.commit(collection);
-            if (response.getStatus() != 0) {
-              throw new ViewerException("Could not commit collection " + collection);
-            }
-          } catch (SolrServerException | IOException e) {
-            throw new ViewerException("Problem committing collection " + collection, e);
-          }
-
-          try {
+            client.optimize();
             response = client.optimize(collection);
             if (response.getStatus() == 0) {
               return;
@@ -280,6 +317,8 @@ public class SolrManager {
           } catch (SolrServerException | IOException e) {
             throw new ViewerException("Problem optimizing collection " + collection, e);
           }
+        } else {
+          return;
         }
       } catch (HttpSolrClient.RemoteSolrException e) {
         if (e.getMessage().contains("<title>Error 404 Not Found</title>")) {
@@ -298,12 +337,14 @@ public class SolrManager {
       tries++;
     }
 
-    if (doc != null) {
-      throw new ViewerException("insertDocument {" + doc + "} in collection " + collection + " timed out after "
-        + tries + " attempts.");
+    // INSERT_DOCUMENT_TIMEOUT reached
+    if (optimize) {
+      throw new ViewerException("Failed to commit and optimize collection " + collection
+        + ". Reason: Timeout reached while waiting for collection to be available, ran " + tries + " attempts.");
     } else {
-      throw new ViewerException("commit and optimize collection " + collection + " timed out after " + tries
-        + " attempts.");
+      throw new ViewerException("Failed to commit collection " + collection
+        + ". Reason: Timeout reached while waiting for collection to be available, ran " + tries + " attempts.");
     }
+
   }
 }

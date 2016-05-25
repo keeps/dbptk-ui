@@ -10,9 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerDatabaseFromToolkit;
-import com.databasepreservation.model.exception.ModuleException;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import com.databasepreservation.dbviewer.ViewerConstants;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerCell;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerColumn;
+import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerDatabaseFromToolkit;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerMetadata;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerRow;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerSchema;
@@ -36,6 +36,7 @@ import com.databasepreservation.model.data.ComposedCell;
 import com.databasepreservation.model.data.NullCell;
 import com.databasepreservation.model.data.Row;
 import com.databasepreservation.model.data.SimpleCell;
+import com.databasepreservation.model.exception.ModuleException;
 import com.databasepreservation.model.structure.ColumnStructure;
 import com.databasepreservation.model.structure.DatabaseStructure;
 import com.databasepreservation.model.structure.SchemaStructure;
@@ -51,6 +52,7 @@ import com.databasepreservation.model.structure.type.SimpleTypeNumericApproximat
 import com.databasepreservation.model.structure.type.SimpleTypeNumericExact;
 import com.databasepreservation.model.structure.type.SimpleTypeString;
 import com.databasepreservation.model.structure.type.Type;
+import com.databasepreservation.utils.JodaUtils;
 
 /**
  * Utility class used to convert a DatabaseStructure (used in Database
@@ -101,9 +103,9 @@ public class ToolkitStructure2ViewerStructure {
   }
 
   private static String getDatabaseProduct(DatabaseStructure structure) {
-    if(StringUtils.isNotBlank(structure.getProductVersion())) {
+    if (StringUtils.isNotBlank(structure.getProductVersion())) {
       return structure.getProductName() + " v" + structure.getProductVersion();
-    }else{
+    } else {
       return structure.getProductName();
     }
   }
@@ -191,7 +193,7 @@ public class ToolkitStructure2ViewerStructure {
     String suffix;
 
     if (type instanceof SimpleTypeBinary) {
-      suffix = ViewerConstants.SOLR_DYN_STRING;
+      suffix = ViewerConstants.SOLR_DYN_TEXT_GENERAL;
     } else if (type instanceof SimpleTypeBoolean) {
       suffix = ViewerConstants.SOLR_DYN_BOOLEAN;
     } else if (type instanceof SimpleTypeDateTime) {
@@ -210,7 +212,7 @@ public class ToolkitStructure2ViewerStructure {
         suffix = ViewerConstants.SOLR_DYN_TLONG;
       }
     } else if (type instanceof SimpleTypeString) {
-      suffix = ViewerConstants.SOLR_DYN_STRING;
+      suffix = ViewerConstants.SOLR_DYN_TEXT_GENERAL;
     } else if (type instanceof ComposedTypeArray) {
       throw new ViewerException("Arrays are not yet supported.");
     } else if (type instanceof ComposedTypeStructure) {
@@ -230,7 +232,13 @@ public class ToolkitStructure2ViewerStructure {
     } else if (type instanceof SimpleTypeBoolean) {
       result.setDbType(ViewerType.dbTypes.BOOLEAN);
     } else if (type instanceof SimpleTypeDateTime) {
-      result.setDbType(ViewerType.dbTypes.DATETIME);
+      if ("TIME WITH TIME ZONE".equalsIgnoreCase(type.getSql2008TypeName())
+        || "TIME".equalsIgnoreCase(type.getSql2008TypeName())) {
+        // solr does not have a time type, use string
+        result.setDbType(ViewerType.dbTypes.STRING);
+      } else {
+        result.setDbType(ViewerType.dbTypes.DATETIME);
+      }
     } else if (type instanceof SimpleTypeEnumeration) {
       result.setDbType(ViewerType.dbTypes.ENUMERATION);
     } else if (type instanceof SimpleTypeInterval) {
@@ -286,27 +294,31 @@ public class ToolkitStructure2ViewerStructure {
 
   private static ViewerCell getCell(ViewerTable table, Cell cell, long rowIndex, int colIndex) throws ViewerException {
     ViewerCell result = new ViewerCell();
+
+    ViewerType columnType = table.getColumns().get(colIndex).getType();
+
     if (cell instanceof BinaryCell) {
       BinaryCell binaryCell = (BinaryCell) cell;
 
-      String lobFilename = "blob"+colIndex+"_"+rowIndex+".bin";
+      String lobFilename = "blob" + colIndex + "_" + rowIndex + ".bin";
 
-      // copy blob to a file at <USER_DBVIEWER_DIR>/<table_UUID>/blob<column_index>_<row_index>.bin
+      // copy blob to a file at
+      // <USER_DBVIEWER_DIR>/<table_UUID>/blob<column_index>_<row_index>.bin
       try {
-        Path outputPath = ViewerConstants.USER_DBVIEWER_DIR.resolve(table.getUUID()+"/");
+        Path outputPath = ViewerConstants.USER_DBVIEWER_DIR.resolve(table.getUUID() + "/");
         outputPath = Files.createDirectories(outputPath);
         outputPath = outputPath.resolve(lobFilename);
         InputStream stream = binaryCell.createInputstream();
         Files.copy(stream, outputPath, StandardCopyOption.REPLACE_EXISTING);
         try {
           stream.close();
-        }catch(IOException e){
+        } catch (IOException e) {
           LOGGER.debug("could not close binaryCell input stream", e);
         }
 
         try {
           binaryCell.cleanResources();
-        }catch(IOException e){
+        } catch (IOException e) {
           LOGGER.debug("could not free binary cell resources", e);
         }
       } catch (IOException | ModuleException e) {
@@ -320,13 +332,32 @@ public class ToolkitStructure2ViewerStructure {
       // TODO: composed cell
     } else if (cell instanceof SimpleCell) {
       SimpleCell simpleCell = (SimpleCell) cell;
-      result.setValue(simpleCell.getSimpleData());
+
+      if (ViewerType.dbTypes.DATETIME.equals(columnType.getDbType())) {
+        // modify dates because solr only supports datetime
+        DateTime dateTime = null;
+        if ("DATE".equalsIgnoreCase(columnType.getTypeName())) {
+          // XML type xs:date
+          dateTime = JodaUtils.xs_date_parse(simpleCell.getSimpleData());
+        } else if ("TIMESTAMP WITH TIME ZONE".equalsIgnoreCase(columnType.getTypeName())
+          || "TIMESTAMP".equalsIgnoreCase(columnType.getTypeName())) {
+          // XML type xs:dateTime
+          dateTime = JodaUtils.xs_datetime_parse(simpleCell.getSimpleData());
+        }
+
+        if (dateTime != null) {
+          result.setValue(dateTime.withZone(DateTimeZone.UTC).toString());
+        } else {
+          result.setValue(simpleCell.getSimpleData());
+        }
+      } else {
+        result.setValue(simpleCell.getSimpleData());
+      }
     } else if (cell instanceof NullCell) {
       // nothing to do for null cells
     } else {
       throw new ViewerException("Unexpected cell type");
     }
-
 
     return result;
   }
