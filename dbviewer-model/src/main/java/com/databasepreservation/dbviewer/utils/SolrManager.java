@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
@@ -29,7 +30,6 @@ import org.slf4j.LoggerFactory;
 import com.databasepreservation.dbviewer.ViewerConstants;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerRow;
-import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerSchema;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerTable;
 import com.databasepreservation.dbviewer.exceptions.ViewerException;
 import com.databasepreservation.dbviewer.transformers.SolrTransformer;
@@ -47,6 +47,8 @@ public class SolrManager {
 
   private final HttpSolrClient client;
   private final Set<String> collectionsToCommit;
+  // private final LinkedHashMap<String, String> tablesUUIDandName = new
+  // LinkedHashMap<>();
   private Map<String, List<SolrInputDocument>> docsByCollection = new HashMap<>();
   private boolean setupDone = false;
 
@@ -92,40 +94,11 @@ public class SolrManager {
     insertDocument(ViewerConstants.SOLR_INDEX_DATABASE_COLLECTION_NAME, SolrTransformer.fromDatabase(database));
 
     // prepare tables to create the collection
-    final List<ViewerTable> tables = new ArrayList<>();
-    for (ViewerSchema viewerSchema : database.getMetadata().getSchemas()) {
-      for (ViewerTable viewerTable : viewerSchema.getTables()) {
-        tables.add(viewerTable);
-      }
-    }
-
-    Thread tableCollectionCreator = new Thread("tabC") {
-      public void run() {
-        for (ViewerTable table : tables) {
-          String collectionName = SolrUtils.getTableCollectionName(table.getUUID());
-          CollectionAdminRequest.Create request = new CollectionAdminRequest.Create();
-          request.setCollectionName(collectionName);
-          request.setConfigName(ViewerConstants.SOLR_CONFIGSET_TABLE);
-          request.setNumShards(1);
-
-          try {
-            LOGGER.info("Table collection creator: Creating collection for table " + table.getName() + " with id "
-              + table.getUUID());
-            NamedList<Object> response = client.request(request);
-            LOGGER.debug("Table collection creator: Response from server (create collection for table with id "
-              + table.getUUID() + "): " + response.toString());
-          } catch (HttpSolrClient.RemoteSolrException e) {
-            LOGGER.error("Table collection creator: Error in Solr server while creating collection " + collectionName,
-              e);
-          } catch (Exception e) {
-            // mainly: SolrServerException and IOException
-            LOGGER.error("Table collection creator: Error creating collection " + collectionName, e);
-          }
-        }
-      }
-    };
-
-    tableCollectionCreator.start();
+    // for (ViewerSchema viewerSchema : database.getMetadata().getSchemas()) {
+    // for (ViewerTable viewerTable : viewerSchema.getTables()) {
+    // tablesUUIDandName.put(viewerTable.getUUID(), viewerTable.getName());
+    // }
+    // }
   }
 
   /**
@@ -136,6 +109,27 @@ public class SolrManager {
    */
   public void addTable(ViewerTable table) throws ViewerException {
     String collectionName = SolrUtils.getTableCollectionName(table.getUUID());
+    CollectionAdminRequest.Create request = new CollectionAdminRequest.Create();
+    request.setCollectionName(collectionName);
+    request.setConfigName(ViewerConstants.SOLR_CONFIGSET_TABLE);
+    request.setNumShards(1);
+
+    try {
+      LOGGER.info("Creating collection for table " + table.getName() + " with id " + table.getUUID());
+      NamedList<Object> response = client.request(request);
+      LOGGER.debug("Response from server (create collection for table with id " + table.getUUID() + "): "
+        + response.toString());
+      Object duration = response.findRecursive("responseHeader", "QTime");
+      if (duration != null) {
+        LOGGER.info("Created in " + duration + " ms");
+      }
+    } catch (HttpSolrClient.RemoteSolrException e) {
+      LOGGER.error("Error in Solr server while creating collection " + collectionName, e);
+    } catch (Exception e) {
+      // mainly: SolrServerException and IOException
+      LOGGER.error("Error creating collection " + collectionName, e);
+    }
+
     collectionsToCommit.add(collectionName);
   }
 
@@ -211,10 +205,11 @@ public class SolrManager {
       docsByCollection.put(collection, new ArrayList<SolrInputDocument>());
     }
     List<SolrInputDocument> docs = docsByCollection.get(collection);
+    // LOGGER.info("~~ AddedBatch doc to collection " + collection);
     docs.add(doc);
 
     // if buffer limit has been reached, "flush" it to solr
-    if (docs.size() >= MAX_BUFFERED_DOCUMENTS_PER_COLLECTION && docsByCollection.size() >= MAX_BUFFERED_COLLECTIONS) {
+    if (docs.size() >= MAX_BUFFERED_DOCUMENTS_PER_COLLECTION || docsByCollection.size() >= MAX_BUFFERED_COLLECTIONS) {
       insertPendingDocuments();
     }
   }
@@ -228,31 +223,35 @@ public class SolrManager {
    *           in case of a fatal error
    */
   private void insertPendingDocuments() throws ViewerException {
-    long start = System.currentTimeMillis();
+    long timeoutStart = System.currentTimeMillis();
     int tries = 0;
-    while (System.currentTimeMillis() - start < INSERT_DOCUMENT_TIMEOUT) {
+    boolean insertedAllDocuments;
+    do {
       UpdateResponse response = null;
       try {
         // add documents, because the buffer limits were reached
-        for (Map.Entry<String, List<SolrInputDocument>> collectionAndDocuments : docsByCollection.entrySet()) {
-          List<SolrInputDocument> docs = collectionAndDocuments.getValue();
+        for (String currentCollection : docsByCollection.keySet()) {
+          List<SolrInputDocument> docs = docsByCollection.get(currentCollection);
           if (!docs.isEmpty()) {
-            String currentCollection = collectionAndDocuments.getKey();
             try {
               response = client.add(currentCollection, docs);
               if (response.getStatus() == 0) {
-                docsByCollection.remove(currentCollection);
-                return;
+                // LOGGER.info("~~ Inserted " + docs.size() +
+                // " into collection " + currentCollection);
+                collectionsToCommit.add(currentCollection);
+                docs.clear();
+                // reset the timeout when something is inserted
+                timeoutStart = System.currentTimeMillis();
               } else {
-                throw new ViewerException("Could not insert a document batch in collection " + currentCollection
-                  + ". Response: " + response.toString());
+                LOGGER.warn("Could not insert a document batch in collection " + currentCollection + ". Response: "
+                  + response.toString());
               }
             } catch (HttpSolrClient.RemoteSolrException e) {
               if (e.getMessage().contains("<title>Error 404 Not Found</title>")) {
                 // this means that the collection does not exist yet. retry
                 LOGGER.debug("Collection " + currentCollection + " does not exist (yet). Retrying (" + tries + ")");
               } else {
-                throw new ViewerException("Could not insert a document batch in collection" + currentCollection
+                LOGGER.warn("Could not insert a document batch in collection" + currentCollection
                   + ". Last response (if any): " + String.valueOf(response), e);
               }
             }
@@ -262,16 +261,36 @@ public class SolrManager {
         throw new ViewerException("Problem adding or committing information", e);
       }
 
-      try {
-        Thread.sleep(1000);
-      } catch (InterruptedException e) {
-        LOGGER.debug("insertDocument sleep was interrupted", e);
+      // check if something still needs to be inserted
+      insertedAllDocuments = true;
+      for (List<SolrInputDocument> docs : docsByCollection.values()) {
+        if (!docs.isEmpty()) {
+          insertedAllDocuments = false;
+          break;
+        }
       }
-      tries++;
-    }
 
-    throw new ViewerException(
-      "Could not insert a document batch in collection. Reason: Timeout reached while waiting for collection to be available.");
+      if (!insertedAllDocuments) {
+        // wait a moment and then retry (or reach timeout and fail)
+        try {
+          Thread.sleep(1000);
+        } catch (InterruptedException e) {
+          LOGGER.debug("insertDocument sleep was interrupted", e);
+        }
+        tries++;
+      }
+    } while (System.currentTimeMillis() - timeoutStart < INSERT_DOCUMENT_TIMEOUT && !insertedAllDocuments);
+
+    if (insertedAllDocuments) {
+      docsByCollection.entrySet().removeIf(new Predicate<Map.Entry<String, List<SolrInputDocument>>>() {
+        @Override public boolean test(Map.Entry<String, List<SolrInputDocument>> entry) {
+          return entry.getValue() == null || entry.getValue().isEmpty();
+        }
+      });
+    } else {
+      throw new ViewerException(
+        "Could not insert a document batch in collection. Reason: Timeout reached while waiting for collection to be available.");
+    }
   }
 
   private void commitAndOptimize(String collection) throws ViewerException {
@@ -289,9 +308,9 @@ public class SolrManager {
    *           in case of a fatal error
    */
   private void commit(String collection, boolean optimize) throws ViewerException {
-    long start = System.currentTimeMillis();
+    long timeoutStart = System.currentTimeMillis();
     int tries = 0;
-    while (System.currentTimeMillis() - start < INSERT_DOCUMENT_TIMEOUT) {
+    while (System.currentTimeMillis() - timeoutStart < INSERT_DOCUMENT_TIMEOUT) {
       UpdateResponse response;
       try {
         // commit
