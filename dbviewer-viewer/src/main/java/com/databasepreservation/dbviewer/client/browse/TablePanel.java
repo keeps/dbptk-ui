@@ -3,6 +3,7 @@ package com.databasepreservation.dbviewer.client.browse;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerSchema;
 import org.roda.core.data.adapter.filter.Filter;
 import org.roda.core.data.v2.index.IsIndexed;
 
@@ -19,7 +20,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -61,6 +61,7 @@ public class TablePanel extends Composite {
   DatabaseSidebar sidebar;
 
   private ViewerDatabase database;
+  private ViewerSchema schema;
   private ViewerTable table;
 
   private TableRowList tableRowList;
@@ -73,7 +74,7 @@ public class TablePanel extends Composite {
     initWidget(uiBinder.createAndBindUi(this));
 
     BreadcrumbManager.updateBreadcrumb(breadcrumb,
-      BreadcrumbManager.forTable("Database (loading)", databaseUUID, "Table (loading)", tableUUID));
+      BreadcrumbManager.forTable("Database (loading)", databaseUUID, "Schema (loading)", "", "Table (loading)", tableUUID));
 
     BrowserService.Util.getInstance().retrieve(ViewerDatabase.class.getName(), databaseUUID,
       new AsyncCallback<IsIndexed>() {
@@ -86,9 +87,10 @@ public class TablePanel extends Composite {
         public void onSuccess(IsIndexed result) {
           database = (ViewerDatabase) result;
           table = database.getMetadata().getTable(tableUUID);
+          schema = database.getMetadata().getSchemaFromTableUUID(tableUUID);
 
           BreadcrumbManager.updateBreadcrumb(breadcrumb,
-            BreadcrumbManager.forTable(database.getMetadata().getName(), databaseUUID, table.getName(), tableUUID));
+            BreadcrumbManager.forTable(database.getMetadata().getName(), databaseUUID, schema.getName(), schema.getUUID(), table.getName(), tableUUID));
           init();
         }
       });

@@ -50,9 +50,25 @@ public class BreadcrumbManager {
     return items;
   }
 
-  public static List<BreadcrumbItem> forTable(final String databaseName, final String databaseUUID,
-    final String tableName, final String tableUUID) {
+  public static List<BreadcrumbItem> forSchema(final String databaseName, final String databaseUUID, final String schemaName, final String schemaUUID) {
     List<BreadcrumbItem> items = forDatabase(databaseName, databaseUUID);
+    items.add(new BreadcrumbItem(new SafeHtml() {
+      @Override
+      public String asString() {
+        return "<i class=\"fa fa-cube\"></i> " + schemaName;
+      }
+    }, new Command() {
+      @Override
+      public void execute() {
+        HistoryManager.gotoSchema(databaseUUID, schemaUUID);
+      }
+    }));
+    return items;
+  }
+
+  public static List<BreadcrumbItem> forTable(final String databaseName, final String databaseUUID, final String schemaName, final String schemaUUID,
+    final String tableName, final String tableUUID) {
+    List<BreadcrumbItem> items = forSchema(databaseName, databaseUUID, schemaName, schemaUUID);
     items.add(new BreadcrumbItem(new SafeHtml() {
       @Override
       public String asString() {

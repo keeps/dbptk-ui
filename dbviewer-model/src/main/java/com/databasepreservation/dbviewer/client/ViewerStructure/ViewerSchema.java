@@ -8,6 +8,8 @@ import java.util.List;
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class ViewerSchema implements Serializable {
+  private String uuid;
+
   private String name;
 
   private String description;
@@ -46,5 +48,13 @@ public class ViewerSchema implements Serializable {
 
   public void setDescription(String description) {
     this.description = description;
+  }
+
+  public String getUUID() {
+    return uuid;
+  }
+
+  public void setUUID(String uuid) {
+    this.uuid = uuid;
   }
 }

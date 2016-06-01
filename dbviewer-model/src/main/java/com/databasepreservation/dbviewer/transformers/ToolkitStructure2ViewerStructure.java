@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
@@ -20,10 +22,14 @@ import com.databasepreservation.dbviewer.ViewerConstants;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerCell;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerColumn;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerDatabaseFromToolkit;
+import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerForeignKey;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerMetadata;
+import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerPrimaryKey;
+import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerReference;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerRow;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerSchema;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerTable;
+import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerTrigger;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerType;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerTypeArray;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerTypeStructure;
@@ -39,8 +45,12 @@ import com.databasepreservation.model.data.SimpleCell;
 import com.databasepreservation.model.exception.ModuleException;
 import com.databasepreservation.model.structure.ColumnStructure;
 import com.databasepreservation.model.structure.DatabaseStructure;
+import com.databasepreservation.model.structure.ForeignKey;
+import com.databasepreservation.model.structure.PrimaryKey;
+import com.databasepreservation.model.structure.Reference;
 import com.databasepreservation.model.structure.SchemaStructure;
 import com.databasepreservation.model.structure.TableStructure;
+import com.databasepreservation.model.structure.Trigger;
 import com.databasepreservation.model.structure.type.ComposedTypeArray;
 import com.databasepreservation.model.structure.type.ComposedTypeStructure;
 import com.databasepreservation.model.structure.type.SimpleTypeBinary;
@@ -98,7 +108,10 @@ public class ToolkitStructure2ViewerStructure {
     result.setProducerApplication(structure.getProducerApplication());
 
     result.setArchivalDate(getArchivalDate(structure));
-    result.setSchemas(getSchemas(vdb, structure.getSchemas()));
+
+    ReferenceHolder references = new ReferenceHolder(structure);
+
+    result.setSchemas(getSchemas(vdb, structure.getSchemas(), references));
     return result;
   }
 
@@ -114,44 +127,123 @@ public class ToolkitStructure2ViewerStructure {
     return ViewerUtils.dateToString(structure.getArchivalDate().withZone(DateTimeZone.UTC).toDate());
   }
 
-  private static List<ViewerSchema> getSchemas(ViewerDatabaseFromToolkit vdb, List<SchemaStructure> schemas)
-    throws ViewerException {
+  private static List<ViewerSchema> getSchemas(ViewerDatabaseFromToolkit vdb, List<SchemaStructure> schemas,
+    ReferenceHolder references) throws ViewerException {
     List<ViewerSchema> result = new ArrayList<>();
     for (SchemaStructure schema : schemas) {
-      result.add(getSchema(vdb, schema));
+      result.add(getSchema(vdb, schema, references));
     }
     return result;
   }
 
-  private static ViewerSchema getSchema(ViewerDatabaseFromToolkit vdb, SchemaStructure schema) throws ViewerException {
+  private static ViewerSchema getSchema(ViewerDatabaseFromToolkit vdb, SchemaStructure schema,
+    ReferenceHolder references) throws ViewerException {
     ViewerSchema result = new ViewerSchema();
+    result.setUUID(SolrUtils.randomUUID());
     result.setName(schema.getName());
     result.setDescription(schema.getDescription());
-    result.setTables(getTables(vdb, schema.getTables()));
+    result.setTables(getTables(vdb, schema.getTables(), references));
 
     vdb.putSchema(schema.getName(), result);
     return result;
   }
 
-  private static List<ViewerTable> getTables(ViewerDatabaseFromToolkit vdb, List<TableStructure> tables)
-    throws ViewerException {
+  private static List<ViewerTable> getTables(ViewerDatabaseFromToolkit vdb, List<TableStructure> tables,
+    ReferenceHolder references) throws ViewerException {
     List<ViewerTable> result = new ArrayList<>();
     for (TableStructure table : tables) {
-      result.add(getTable(vdb, table));
+      result.add(getTable(vdb, table, references));
     }
     return result;
   }
 
-  private static ViewerTable getTable(ViewerDatabaseFromToolkit vdb, TableStructure table) throws ViewerException {
+  private static ViewerTable getTable(ViewerDatabaseFromToolkit vdb, TableStructure table, ReferenceHolder references)
+    throws ViewerException {
     ViewerTable result = new ViewerTable();
-    result.setUuid(SolrUtils.randomUUID());
+    result.setUuid(references.getTableUUID(table.getId()));
     result.setName(table.getName());
     result.setDescription(table.getDescription());
     result.setCountRows(table.getRows());
     result.setSchema(table.getSchema());
     result.setColumns(getColumns(table.getColumns()));
+    result.setTriggers(getTriggers(table.getTriggers()));
+    result.setPrimaryKey(getPrimaryKey(table, references));
+    result.setForeignKeys(getForeignKeys(table, references));
 
     vdb.putTable(table.getId(), result);
+    return result;
+  }
+
+  private static List<ViewerForeignKey> getForeignKeys(TableStructure table, ReferenceHolder references) {
+    List<ViewerForeignKey> result = new ArrayList<>();
+    for (ForeignKey foreignKey : table.getForeignKeys()) {
+      result.add(getForeignKey(foreignKey, table, references));
+    }
+    return result;
+  }
+
+  private static ViewerForeignKey getForeignKey(ForeignKey foreignKey, TableStructure table,
+    ReferenceHolder referenceHolder) {
+    ViewerForeignKey result = new ViewerForeignKey();
+
+    result.setName(foreignKey.getName());
+    result.setDescription(foreignKey.getDescription());
+    result.setDeleteAction(foreignKey.getDeleteAction());
+    result.setUpdateAction(foreignKey.getUpdateAction());
+    result.setMatchType(foreignKey.getMatchType());
+
+    result.setReferencedTableUUID(referenceHolder.getTableUUID(foreignKey.getReferencedSchema(),
+      foreignKey.getReferencedTable()));
+
+    List<ViewerReference> resultReferences = new ArrayList<>();
+    for (Reference reference : foreignKey.getReferences()) {
+      ViewerReference resultReference = new ViewerReference();
+
+      resultReference.setSourceColumnIndex(referenceHolder.getIndexForColumn(table.getId(), reference.getColumn()));
+      resultReference.setReferencedColumnIndex(referenceHolder.getIndexForColumn(foreignKey.getReferencedSchema(),
+        foreignKey.getReferencedTable(), reference.getReferenced()));
+
+      resultReferences.add(resultReference);
+    }
+    result.setReferences(resultReferences);
+
+    return result;
+  }
+
+  private static ViewerPrimaryKey getPrimaryKey(TableStructure table, ReferenceHolder references) {
+    PrimaryKey pk = table.getPrimaryKey();
+    if(pk != null) {
+      ViewerPrimaryKey result = new ViewerPrimaryKey();
+      result.setName(pk.getName());
+      result.setDescription(pk.getDescription());
+
+      List<Integer> columnIndexesInTable = new ArrayList<>();
+      for (String columnName : pk.getColumnNames()) {
+        columnIndexesInTable.add(references.getIndexForColumn(table.getId(), columnName));
+      }
+      result.setColumnIndexesInViewerTable(columnIndexesInTable);
+      return result;
+    }else{
+      return null;
+    }
+  }
+
+  private static List<ViewerTrigger> getTriggers(List<Trigger> triggers) {
+    List<ViewerTrigger> result = new ArrayList<>();
+    for (Trigger trigger : triggers) {
+      result.add(getTrigger(trigger));
+    }
+    return result;
+  }
+
+  private static ViewerTrigger getTrigger(Trigger trigger) {
+    ViewerTrigger result = new ViewerTrigger();
+    result.setActionTime(trigger.getActionTime());
+    result.setAliasList(trigger.getAliasList());
+    result.setDescription(trigger.getDescription());
+    result.setName(trigger.getName());
+    result.setTriggeredAction(trigger.getTriggeredAction());
+    result.setTriggerEvent(trigger.getTriggerEvent());
     return result;
   }
 
@@ -360,5 +452,58 @@ public class ToolkitStructure2ViewerStructure {
     }
 
     return result;
+  }
+
+  /**
+   * Helper class to hold references to tables and columns, even in different
+   * schemas
+   */
+  private static class ReferenceHolder {
+    // tableID -> (tableUUID, columnName -> columnIndex)
+    private HashMap<String, Pair<String, HashMap<String, Integer>>> infoByTableID;
+
+    /**
+     * build references from the database
+     * 
+     * @param database
+     *          the database from DBPTK
+     */
+    public ReferenceHolder(DatabaseStructure database) {
+      infoByTableID = new HashMap<>();
+      for (SchemaStructure schema : database.getSchemas()) {
+        for (TableStructure table : schema.getTables()) {
+          String tableID = table.getId();
+          String tableUUID = SolrUtils.randomUUID();
+
+          int index = 0;
+          HashMap<String, Integer> columnNamesAndIndexes = new HashMap<>();
+          for (ColumnStructure column : table.getColumns()) {
+            columnNamesAndIndexes.put(column.getName(), index++);
+          }
+
+          infoByTableID.put(tableID, new ImmutablePair<>(tableUUID, columnNamesAndIndexes));
+        }
+      }
+    }
+
+    public String getTableUUID(String schemaName, String tableName) {
+      return getTableUUID(getIdFromNames(schemaName, tableName));
+    }
+
+    public String getTableUUID(String tableID) {
+      return infoByTableID.get(tableID).getKey();
+    }
+
+    public Integer getIndexForColumn(String tableID, String columnName) {
+      return infoByTableID.get(tableID).getValue().get(columnName);
+    }
+
+    public Integer getIndexForColumn(String schemaName, String tableName, String columnName) {
+      return infoByTableID.get(getIdFromNames(schemaName, tableName)).getValue().get(columnName);
+    }
+
+    private String getIdFromNames(String schemaName, String tableName) {
+      return schemaName + "." + tableName;
+    }
   }
 }

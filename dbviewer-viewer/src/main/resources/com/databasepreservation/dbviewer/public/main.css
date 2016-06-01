@@ -246,12 +246,12 @@
 }
 
 .leftSidebar .sidebar-hyperlink a {
-    font-size: 1.4rem;
+    /*font-size: 1.4rem;*/
     color: inherit;
 }
 
 .leftSidebar .sidebar-hyperlink {
-    font-size: 1.4rem;
+    /*font-size: 1.4rem;*/
     color: #222;
 }
 

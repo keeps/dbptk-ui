@@ -49,7 +49,7 @@ public class ViewerConstants {
   public static final String SOLR_DYN_LOCATION_RPT = "_srpt";
   public static final String SOLR_DYN_LONG = "_l";
   public static final String SOLR_DYN_STRING = "_s";
-  public static final String SOLR_DYN_TEXT_GENERAL = "_txt";
+  public static final String SOLR_DYN_TEXT_GENERAL = "_t";
 
   // indexed, stored, multiValued
   public static final String SOLR_DYN_BOOLEANS = "_bs";

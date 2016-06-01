@@ -4,8 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.roda.core.data.v2.index.IsIndexed;
-
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
@@ -18,16 +16,16 @@ public class ViewerTable implements Serializable {
   private String description;
 
   private List<ViewerColumn> columns;
-  //
-  // private PrimaryKey primaryKey;
-  //
-  // private List<ForeignKey> foreignKeys;
-  //
+
+  private ViewerPrimaryKey primaryKey;
+
+  private List<ViewerForeignKey> foreignKeys;
+
   // private List<CandidateKey> candidateKeys;
   //
   // private List<CheckConstraint> checkConstraints;
-  //
-  // private List<Trigger> triggers;
+
+  private List<ViewerTrigger> triggers;
 
   private long countRows;
 
@@ -85,5 +83,29 @@ public class ViewerTable implements Serializable {
 
   public void setSchema(String schema) {
     this.schema = schema;
+  }
+
+  public List<ViewerTrigger> getTriggers() {
+    return triggers;
+  }
+
+  public void setTriggers(List<ViewerTrigger> triggers) {
+    this.triggers = triggers;
+  }
+
+  public ViewerPrimaryKey getPrimaryKey() {
+    return primaryKey;
+  }
+
+  public void setPrimaryKey(ViewerPrimaryKey primaryKey) {
+    this.primaryKey = primaryKey;
+  }
+
+  public List<ViewerForeignKey> getForeignKeys() {
+    return foreignKeys;
+  }
+
+  public void setForeignKeys(List<ViewerForeignKey> foreignKeys) {
+    this.foreignKeys = foreignKeys;
   }
 }

@@ -159,4 +159,24 @@ public class ViewerMetadata implements Serializable {
     }
     return null;
   }
+
+  public ViewerSchema getSchemaFromTableUUID(String tableUUID) {
+    for (ViewerSchema schema : schemas) {
+      for (ViewerTable table : schema.getTables()) {
+        if (tableUUID.equals(table.getUUID())) {
+          return schema;
+        }
+      }
+    }
+    return null;
+  }
+
+  public ViewerSchema getSchema(String schemaUUID) {
+    for (ViewerSchema schema : schemas) {
+      if (schemaUUID.equals(schema.getUUID())) {
+        return schema;
+      }
+    }
+    return null;
+  }
 }
