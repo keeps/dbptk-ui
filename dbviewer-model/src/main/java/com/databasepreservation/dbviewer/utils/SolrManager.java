@@ -316,7 +316,6 @@ public class SolrManager {
         // commit
         try {
           response = client.commit(collection);
-          client.commit();
           if (response.getStatus() != 0) {
             throw new ViewerException("Could not commit collection " + collection);
           }
@@ -326,7 +325,6 @@ public class SolrManager {
 
         if (optimize) {
           try {
-            client.optimize();
             response = client.optimize(collection);
             if (response.getStatus() == 0) {
               return;
