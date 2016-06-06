@@ -1,8 +1,11 @@
 package com.databasepreservation.dbviewer.client.common.search;
 
-import com.databasepreservation.dbviewer.client.common.search.Dropdown;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.roda.core.data.adapter.filter.BasicSearchFilterParameter;
 import org.roda.core.data.adapter.filter.Filter;
+import org.roda.core.data.adapter.filter.FilterParameter;
 
 import com.databasepreservation.dbviewer.client.common.lists.AsyncTableCell;
 import com.databasepreservation.dbviewer.shared.client.widgets.wcag.AccessibleFocusPanel;
@@ -21,10 +24,6 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import org.roda.core.data.adapter.filter.FilterParameter;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -38,7 +37,8 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
   @UiField
   FlowPanel searchPanel;
 
-  @UiField Dropdown searchInputListBox;
+  @UiField
+  Dropdown searchInputListBox;
 
   @UiField
   TextBox searchInputBox;

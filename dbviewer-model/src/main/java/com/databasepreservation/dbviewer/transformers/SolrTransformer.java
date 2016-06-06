@@ -4,19 +4,16 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
-import org.apache.solr.common.SolrInputField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.dbviewer.ViewerConstants;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerCell;
-import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerColumn;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerMetadata;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerRow;
@@ -87,7 +84,7 @@ public class SolrTransformer {
 
     HashMap<String, ViewerCell> cells = new HashMap<>();
     for (String columnName : doc.keySet()) {
-      if(columnName.startsWith(ViewerConstants.SOLR_INDEX_ROW_COLUMN_NAME_PREFIX)){
+      if (columnName.startsWith(ViewerConstants.SOLR_INDEX_ROW_COLUMN_NAME_PREFIX)) {
         ViewerCell viewerCell = new ViewerCell();
         viewerCell.setValue(doc.get(columnName).toString());
         cells.put(columnName, viewerCell);

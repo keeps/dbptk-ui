@@ -283,7 +283,8 @@ public class SolrManager {
 
     if (insertedAllDocuments) {
       docsByCollection.entrySet().removeIf(new Predicate<Map.Entry<String, List<SolrInputDocument>>>() {
-        @Override public boolean test(Map.Entry<String, List<SolrInputDocument>> entry) {
+        @Override
+        public boolean test(Map.Entry<String, List<SolrInputDocument>> entry) {
           return entry.getValue() == null || entry.getValue().isEmpty();
         }
       });

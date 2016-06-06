@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.databasepreservation.dbviewer.client.main.BreadcrumbItem;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Window;
 
@@ -86,7 +85,7 @@ public class HistoryManager {
     return createHistoryToken(Arrays.asList(ROUTE_DATABASE, database_uuid));
   }
 
-  public static String linkToSchema(String database_uuid, String schema_uuid){
+  public static String linkToSchema(String database_uuid, String schema_uuid) {
     return createHistoryToken(Arrays.asList(ROUTE_SCHEMA, database_uuid, schema_uuid));
   }
 }

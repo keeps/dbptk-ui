@@ -1,6 +1,7 @@
 package com.databasepreservation.dbviewer.client.browse;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -10,6 +11,9 @@ import org.roda.core.data.v2.index.IsIndexed;
 import com.databasepreservation.dbviewer.client.BrowserService;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerColumn;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerDatabase;
+import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerForeignKey;
+import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerPrimaryKey;
+import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerReference;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerSchema;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerTable;
 import com.databasepreservation.dbviewer.client.common.search.SearchPanel;
@@ -17,6 +21,7 @@ import com.databasepreservation.dbviewer.client.main.BreadcrumbPanel;
 import com.databasepreservation.dbviewer.shared.client.HistoryManager;
 import com.databasepreservation.dbviewer.shared.client.Tools.BreadcrumbManager;
 import com.databasepreservation.dbviewer.shared.client.Tools.ViewerStringUtils;
+import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -24,6 +29,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
@@ -112,42 +118,46 @@ public class SchemaPanel extends Composite {
     contentItems.add(new HTMLPanel(getFieldHTML("Schema name", schema.getName())));
     if (ViewerStringUtils.isNotBlank(schema.getDescription())) {
       contentItems.add(new HTMLPanel(getFieldHTML("Schema description", schema.getDescription())));
-    } else {
-      contentItems.add(new HTMLPanel(getFieldHTML("Schema description",
-        "A description for this schema is not available.")));
     }
 
     Label tablesHeader = new Label("Tables");
     tablesHeader.addStyleName("h2");
     contentItems.add(tablesHeader);
 
-    SafeHtmlBuilder b = new SafeHtmlBuilder();
     for (ViewerTable viewerTable : schema.getTables()) {
-      b.append(getTableDescriptionItemHTML(viewerTable));
+      contentItems.add(new HTMLPanel(getTableDescriptionItemHTML(viewerTable)));
+
+      if (viewerTable.getForeignKeys() != null && viewerTable.getForeignKeys().size() > 0) {
+        Label infoColumnsHeader = new Label("Columns");
+        infoColumnsHeader.addStyleName("h4");
+        contentItems.add(infoColumnsHeader);
+      }
+      contentItems.add(getColumnsInfoTable(viewerTable));
+
+      if (viewerTable.getForeignKeys() != null && viewerTable.getForeignKeys().size() > 0) {
+        Label infoForeignKeysHeader = new Label("Foreign Keys");
+        infoForeignKeysHeader.addStyleName("h4");
+        contentItems.add(infoForeignKeysHeader);
+        contentItems.add(getForeignKeysInfoTable(viewerTable));
+      }
     }
 
-    contentItems.add(new HTMLPanel(b.toSafeHtml()));
   }
 
   private SafeHtml getTableDescriptionItemHTML(ViewerTable table) {
     SafeHtmlBuilder b = new SafeHtmlBuilder();
 
-    Hyperlink hyperlink = new Hyperlink(table.getName(),
-      HistoryManager.linkToTable(database.getUUID(), table.getUUID()));
+    Hyperlink hyperlink = new Hyperlink("Table " + table.getName(), HistoryManager.linkToTable(database.getUUID(),
+      table.getUUID()));
+    hyperlink.addStyleName("h3");
 
     b.append(SafeHtmlUtils.fromSafeConstant("<div class=\"field\">"));
     b.append(SafeHtmlUtils.fromSafeConstant(hyperlink.toString()));
     if (ViewerStringUtils.isNotBlank(table.getDescription())) {
-      b.append(SafeHtmlUtils.fromSafeConstant("<div class=\"value\">"));
+      b.append(SafeHtmlUtils.fromSafeConstant("<div class=\"value\">Description: "));
       b.append(SafeHtmlUtils.fromString(table.getDescription()));
       b.append(SafeHtmlUtils.fromSafeConstant("</div>"));
-    } else {
-      b.append(SafeHtmlUtils.fromSafeConstant("<div class=\"value\">"));
-      b.append(SafeHtmlUtils.fromString("A description for this table is not available"));
-      b.append(SafeHtmlUtils.fromSafeConstant("</div>"));
     }
-
-    b.append(getInfoTable(table));
 
     b.append(SafeHtmlUtils.fromSafeConstant("</div>"));
 
@@ -169,9 +179,24 @@ public class SchemaPanel extends Composite {
     return b.toSafeHtml();
   }
 
-  private SafeHtml getInfoTable(ViewerTable viewerTable) {
+  private CellTable getColumnsInfoTable(final ViewerTable viewerTable) {
+    final ViewerPrimaryKey pk = viewerTable.getPrimaryKey();
+
     // Create a CellTable.
     CellTable<ViewerColumn> table = new CellTable<>();
+
+    SafeHtmlCell primaryKeyColumnCell = new SafeHtmlCell();
+    Column<ViewerColumn, SafeHtml> primaryKeyColumn = new Column<ViewerColumn, SafeHtml>(primaryKeyColumnCell) {
+      @Override
+      public SafeHtml getValue(ViewerColumn column) {
+        if (pk.getColumnIndexesInViewerTable().contains(column.getColumnIndexInEnclosingTable())) {
+          return SafeHtmlUtils.fromSafeConstant("<i class=\"fa fa-key\"></i>");
+        } else {
+          return new SafeHtmlBuilder().toSafeHtml();
+        }
+      }
+    };
+    primaryKeyColumn.setCellStyleNames("primary-key-col");
 
     // Create name column.
     TextColumn<ViewerColumn> nameColumn = new TextColumn<ViewerColumn>() {
@@ -212,7 +237,7 @@ public class SchemaPanel extends Composite {
         if (ViewerStringUtils.isNotBlank(column.getDescription())) {
           return column.getDescription();
         } else {
-          return "A description for this type is not available.";
+          return "";
         }
       }
     };
@@ -224,9 +249,10 @@ public class SchemaPanel extends Composite {
     // descriptionColumn.setSortable(true);
 
     // Add the columns.
+    table.addColumn(primaryKeyColumn);
     table.addColumn(nameColumn, "Column name");
     table.addColumn(typeColumn, "Type name");
-    table.addColumn(typeOriginalColumn, "Type name (original)");
+    table.addColumn(typeOriginalColumn, "Original type name");
     table.addColumn(nullableColumn, "Nullable");
     table.addColumn(descriptionColumn, "Description");
 
@@ -266,6 +292,117 @@ public class SchemaPanel extends Composite {
     // We know that the data is sorted alphabetically by default.
     // table.getColumnSortList().push(nameColumn);
 
-    return SafeHtmlUtils.fromSafeConstant(table.toString());
+    table.addStyleName("table-info");
+
+    return table;
+  }
+
+  private CellTable getForeignKeysInfoTable(final ViewerTable viewerTable) {
+    // Create a CellTable.
+    CellTable<ViewerForeignKey> table = new CellTable<>();
+
+    TextColumn<ViewerForeignKey> nameColumn = new TextColumn<ViewerForeignKey>() {
+      @Override
+      public String getValue(ViewerForeignKey foreignKey) {
+        return foreignKey.getName();
+      }
+    };
+
+    TextColumn<ViewerForeignKey> referencedSchemaColumn = new TextColumn<ViewerForeignKey>() {
+      @Override
+      public String getValue(ViewerForeignKey foreignKey) {
+        return database.getMetadata().getTable(foreignKey.getReferencedTableUUID()).getSchemaName();
+      }
+    };
+
+    TextColumn<ViewerForeignKey> referencedTableColumn = new TextColumn<ViewerForeignKey>() {
+      @Override
+      public String getValue(ViewerForeignKey foreignKey) {
+        return database.getMetadata().getTable(foreignKey.getReferencedTableUUID()).getName();
+      }
+    };
+
+    SafeHtmlCell referencedColumnsColumnCell = new SafeHtmlCell();
+    Column<ViewerForeignKey, SafeHtml> referencedColumnsColumn = new Column<ViewerForeignKey, SafeHtml>(
+      referencedColumnsColumnCell) {
+      @Override
+      public SafeHtml getValue(ViewerForeignKey foreignKey) {
+        ViewerTable referencedTable = database.getMetadata().getTable(foreignKey.getReferencedTableUUID());
+
+        SafeHtmlBuilder builder = new SafeHtmlBuilder();
+        for (Iterator<ViewerReference> i = foreignKey.getReferences().iterator(); i.hasNext();) {
+          ViewerReference reference = i.next();
+
+          builder.appendEscaped(viewerTable.getColumns().get(reference.getSourceColumnIndex()).getDisplayName())
+            .appendHtmlConstant(" <i class=\"fa fa-arrow-right\"></i> ")
+            .appendEscaped(referencedTable.getColumns().get(reference.getReferencedColumnIndex()).getDisplayName());
+
+          if (i.hasNext()) {
+            builder.appendHtmlConstant("<br/>");
+          }
+        }
+        return builder.toSafeHtml();
+      }
+    };
+
+    TextColumn<ViewerForeignKey> matchTypeColumn = new TextColumn<ViewerForeignKey>() {
+      @Override
+      public String getValue(ViewerForeignKey foreignKey) {
+        return foreignKey.getMatchType();
+      }
+    };
+
+    TextColumn<ViewerForeignKey> updateActionColumn = new TextColumn<ViewerForeignKey>() {
+      @Override
+      public String getValue(ViewerForeignKey foreignKey) {
+        return foreignKey.getUpdateAction();
+      }
+    };
+
+    TextColumn<ViewerForeignKey> deleteActionColumn = new TextColumn<ViewerForeignKey>() {
+      @Override
+      public String getValue(ViewerForeignKey foreignKey) {
+        return foreignKey.getDeleteAction();
+      }
+    };
+
+    TextColumn<ViewerForeignKey> descriptionColumn = new TextColumn<ViewerForeignKey>() {
+      @Override
+      public String getValue(ViewerForeignKey foreignKey) {
+        if (ViewerStringUtils.isNotBlank(foreignKey.getDescription())) {
+          return foreignKey.getDescription();
+        } else {
+          return "";
+        }
+      }
+    };
+
+    // Add the columns.
+    table.addColumn(nameColumn, "Column name");
+    table.addColumn(descriptionColumn, "Description");
+    table.addColumn(referencedSchemaColumn, "Referenced Schema");
+    table.addColumn(referencedTableColumn, "Referenced Table");
+    table.addColumn(referencedColumnsColumn,
+      SafeHtmlUtils.fromSafeConstant("Mapping (Source <i class=\"fa fa-arrow-right\"></i> Referenced)"));
+    table.addColumn(matchTypeColumn, "Match type");
+    table.addColumn(updateActionColumn, "Update action");
+    table.addColumn(deleteActionColumn, "Delete action");
+
+    // Create a data provider.
+    ListDataProvider<ViewerForeignKey> dataProvider = new ListDataProvider<ViewerForeignKey>();
+
+    // Connect the table to the data provider.
+    dataProvider.addDataDisplay(table);
+
+    // Add the data to the data provider, which automatically pushes it to the
+    // widget.
+    List<ViewerForeignKey> list = dataProvider.getList();
+    for (ViewerForeignKey viewerForeignKey : viewerTable.getForeignKeys()) {
+      list.add(viewerForeignKey);
+    }
+
+    table.addStyleName("table-info");
+
+    return table;
   }
 }

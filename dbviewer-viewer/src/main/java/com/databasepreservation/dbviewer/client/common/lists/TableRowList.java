@@ -65,13 +65,13 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
           if (row == null) {
             logger.error("Trying to display a NULL ViewerRow");
             ret = null;
-          } else if(row.getCells() == null){
+          } else if (row.getCells() == null) {
             logger.error("Trying to display NULL Cells");
             ret = null;
-          } else if(row.getCells().get(solrColumnName) == null){
+          } else if (row.getCells().get(solrColumnName) == null) {
             logger.error("Trying to display NULL value");
             ret = null;
-          }else {
+          } else {
             ret = SafeHtmlUtils.fromString(row.getCells().get(solrColumnName).getValue());
           }
           return ret;

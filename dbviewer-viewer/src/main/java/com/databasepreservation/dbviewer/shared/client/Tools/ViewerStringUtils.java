@@ -2,6 +2,7 @@ package com.databasepreservation.dbviewer.shared.client.Tools;
 
 /**
  * Utilities class to handle Strings. Can be used with/in GWT.
+ * 
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class ViewerStringUtils {

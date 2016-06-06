@@ -11,7 +11,6 @@ import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerMetadata;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerSchema;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerTable;
 import com.databasepreservation.dbviewer.client.common.sidebar.SidebarHyperlink;
-import com.databasepreservation.dbviewer.client.common.sidebar.SidebarItem;
 import com.databasepreservation.dbviewer.shared.client.HistoryManager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -98,7 +97,8 @@ public class DatabaseSidebar extends Composite {
     // database metadata
     final ViewerMetadata metadata = database.getMetadata();
 
-    sidebarGroup.add(new SidebarHyperlink("Database " + metadata.getName(), HistoryManager.linkToDatabase(database.getUUID())).addIcon("database").setH5().setIndent0());
+    sidebarGroup.add(new SidebarHyperlink("Database " + metadata.getName(), HistoryManager.linkToDatabase(database
+      .getUUID())).addIcon("database").setH5().setIndent0());
     for (final ViewerSchema schema : metadata.getSchemas()) {
       sidebarGroup.add(new SidebarHyperlink("Schema " + schema.getName(), HistoryManager.linkToSchema(
         database.getUUID(), schema.getUUID())).addIcon("cube").setH5().setIndent1());

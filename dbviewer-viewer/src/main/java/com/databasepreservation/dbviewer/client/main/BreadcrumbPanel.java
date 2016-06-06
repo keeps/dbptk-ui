@@ -1,6 +1,5 @@
 package com.databasepreservation.dbviewer.client.main;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Stack;
 
@@ -176,7 +175,7 @@ public class BreadcrumbPanel extends FlowPanel {
     }
 
     protected String getTargetHistoryToken(String[] path) {
-      return null;//return Tools.join(path, ".");
+      return null;// return Tools.join(path, ".");
     }
 
   }

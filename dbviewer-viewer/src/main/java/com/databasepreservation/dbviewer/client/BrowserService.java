@@ -16,8 +16,6 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.google.gwt.user.client.rpc.ServiceDefTarget;
 
-import java.util.List;
-
 /**
  * The client side stub for the browser service.
  */
@@ -55,14 +53,13 @@ public interface BrowserService extends RemoteService {
   <T extends IsIndexed> T retrieve(String classNameToReturn, String id) throws AuthorizationDeniedException,
     GenericException, NotFoundException;
 
-  <T extends IsIndexed> IndexResult<T> findRows(String classNameToReturn, String tableUUID,
-    Filter filter, Sorter sorter, Sublist sublist, Facets facets, String localeString) throws GenericException, AuthorizationDeniedException,
-    RequestNotValidException;
+  <T extends IsIndexed> IndexResult<T> findRows(String classNameToReturn, String tableUUID, Filter filter,
+    Sorter sorter, Sublist sublist, Facets facets, String localeString) throws GenericException,
+    AuthorizationDeniedException, RequestNotValidException;
 
-  <T extends IsIndexed> Long countRows(String classNameToReturn, String tableUUID, Filter filter) throws AuthorizationDeniedException,
-    GenericException, RequestNotValidException;
+  <T extends IsIndexed> Long countRows(String classNameToReturn, String tableUUID, Filter filter)
+    throws AuthorizationDeniedException, GenericException, RequestNotValidException;
 
-  <T extends IsIndexed> T retrieveRows(String classNameToReturn, String tableUUID,
-    String rowUUID) throws AuthorizationDeniedException,
-    GenericException, NotFoundException;
+  <T extends IsIndexed> T retrieveRows(String classNameToReturn, String tableUUID, String rowUUID)
+    throws AuthorizationDeniedException, GenericException, NotFoundException;
 }

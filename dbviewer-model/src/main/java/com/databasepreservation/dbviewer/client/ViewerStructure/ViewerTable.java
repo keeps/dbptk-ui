@@ -29,7 +29,9 @@ public class ViewerTable implements Serializable {
 
   private long countRows;
 
-  private String schema;
+  private String schemaUUID;
+
+  private String schemaName;
 
   // private HashMap<String, String> udtAlias;
 
@@ -77,12 +79,12 @@ public class ViewerTable implements Serializable {
     this.countRows = countRows;
   }
 
-  public String getSchema() {
-    return schema;
+  public String getSchemaUUID() {
+    return schemaUUID;
   }
 
-  public void setSchema(String schema) {
-    this.schema = schema;
+  public void setSchemaUUID(String schemaUUID) {
+    this.schemaUUID = schemaUUID;
   }
 
   public List<ViewerTrigger> getTriggers() {
@@ -107,5 +109,13 @@ public class ViewerTable implements Serializable {
 
   public void setForeignKeys(List<ViewerForeignKey> foreignKeys) {
     this.foreignKeys = foreignKeys;
+  }
+
+  public String getSchemaName() {
+    return schemaName;
+  }
+
+  public void setSchemaName(String schemaName) {
+    this.schemaName = schemaName;
   }
 }

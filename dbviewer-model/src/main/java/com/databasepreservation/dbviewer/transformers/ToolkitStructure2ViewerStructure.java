@@ -142,9 +142,10 @@ public class ToolkitStructure2ViewerStructure {
     result.setUUID(SolrUtils.randomUUID());
     result.setName(schema.getName());
     result.setDescription(schema.getDescription());
-    result.setTables(getTables(vdb, schema.getTables(), references));
 
     vdb.putSchema(schema.getName(), result);
+    result.setTables(getTables(vdb, schema.getTables(), references));
+
     return result;
   }
 
@@ -164,7 +165,8 @@ public class ToolkitStructure2ViewerStructure {
     result.setName(table.getName());
     result.setDescription(table.getDescription());
     result.setCountRows(table.getRows());
-    result.setSchema(table.getSchema());
+    result.setSchemaName(table.getSchema());
+    result.setSchemaUUID(vdb.getSchema(result.getSchemaName()).getUUID());
     result.setColumns(getColumns(table.getColumns()));
     result.setTriggers(getTriggers(table.getTriggers()));
     result.setPrimaryKey(getPrimaryKey(table, references));
@@ -212,7 +214,7 @@ public class ToolkitStructure2ViewerStructure {
 
   private static ViewerPrimaryKey getPrimaryKey(TableStructure table, ReferenceHolder references) {
     PrimaryKey pk = table.getPrimaryKey();
-    if(pk != null) {
+    if (pk != null) {
       ViewerPrimaryKey result = new ViewerPrimaryKey();
       result.setName(pk.getName());
       result.setDescription(pk.getDescription());
@@ -223,7 +225,7 @@ public class ToolkitStructure2ViewerStructure {
       }
       result.setColumnIndexesInViewerTable(columnIndexesInTable);
       return result;
-    }else{
+    } else {
       return null;
     }
   }
@@ -261,6 +263,7 @@ public class ToolkitStructure2ViewerStructure {
 
     result.setDisplayName(column.getName());
     result.setSolrName(getColumnSolrName(index, column.getType()));
+    result.setColumnIndexInEnclosingTable(index);
     result.setDescription(column.getDescription());
     result.setAutoIncrement(column.getIsAutoIncrement());
     result.setDefaultValue(column.getDefaultValue());

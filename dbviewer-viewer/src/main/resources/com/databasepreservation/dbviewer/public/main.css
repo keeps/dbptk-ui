@@ -7,6 +7,10 @@
     padding-right: 1rem;
 }
 
+.hidden {
+    visibility: hidden;
+}
+
 /***********************************************
    BrowseContent (based on ViewRepresentation)
 ************************************************/
@@ -255,11 +259,9 @@
     color: #222;
 }
 
-.leftSidebar .sidebar-hyperlink :hover{
+.leftSidebar .sidebar-hyperlink :hover {
     color: #089de3;
 }
-
-
 
 .leftSidebar .btn {
     width: 160px;
@@ -320,4 +322,16 @@
     margin-top: 0.1em;
 }
 
+/**********************************************
+				TABLES
+************************************************/
 
+/* used in schema page to show table column information */
+.table-info {
+    min-width: 100%;
+}
+
+.table-info .primary-key-col {
+    width: 1px;
+    max-width: 1px;
+}

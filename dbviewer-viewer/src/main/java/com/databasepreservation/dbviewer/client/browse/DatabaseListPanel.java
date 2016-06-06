@@ -1,5 +1,7 @@
 package com.databasepreservation.dbviewer.client.browse;
 
+import org.roda.core.data.adapter.filter.Filter;
+
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.dbviewer.client.common.lists.DatabaseList;
 import com.databasepreservation.dbviewer.client.common.search.SearchPanel;
@@ -12,7 +14,6 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
-import org.roda.core.data.adapter.filter.Filter;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -33,10 +34,11 @@ public class DatabaseListPanel extends Composite {
   @UiField
   BreadcrumbPanel breadcrumb;
 
-  @UiField(provided = true) SearchPanel dbSearchPanel;
+  @UiField(provided = true)
+  SearchPanel dbSearchPanel;
 
   public DatabaseListPanel() {
-    dbSearchPanel = new SearchPanel(new Filter(), "", "(unused)", false, false);
+    dbSearchPanel = new SearchPanel(new Filter(), "", "", false, false);
 
     databaseList = new DatabaseList();
     initWidget(uiBinder.createAndBindUi(this));

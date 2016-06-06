@@ -17,8 +17,6 @@ import com.databasepreservation.dbviewer.shared.FieldVerifier;
 import com.databasepreservation.dbviewer.shared.ViewerFactory;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
-import java.util.List;
-
 /**
  * The server side implementation of the RPC service.
  */
@@ -85,31 +83,29 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
   }
 
   @Override
-  public <T extends IsIndexed> IndexResult<T> findRows(String classNameToReturn, String tableUUID, Filter filter, Sorter sorter,
-    Sublist sublist, Facets facets, String localeString) throws GenericException, AuthorizationDeniedException,
-    RequestNotValidException {
+  public <T extends IsIndexed> IndexResult<T> findRows(String classNameToReturn, String tableUUID, Filter filter,
+    Sorter sorter, Sublist sublist, Facets facets, String localeString) throws GenericException,
+    AuthorizationDeniedException, RequestNotValidException {
     RodaUser user = null;
     Class<T> classToReturn = parseClass(classNameToReturn);
     return ViewerFactory.getSolrManager().findRows(user, classToReturn, tableUUID, filter, sorter, sublist, facets);
   }
 
   @Override
-  public <T extends IsIndexed> Long countRows(String classNameToReturn, String tableUUID, Filter filter) throws AuthorizationDeniedException,
-    GenericException, RequestNotValidException {
+  public <T extends IsIndexed> Long countRows(String classNameToReturn, String tableUUID, Filter filter)
+    throws AuthorizationDeniedException, GenericException, RequestNotValidException {
     RodaUser user = null;
     Class<T> classToReturn = parseClass(classNameToReturn);
     return ViewerFactory.getSolrManager().countRows(user, classToReturn, tableUUID, filter);
   }
 
   @Override
-  public <T extends IsIndexed> T retrieveRows(String classNameToReturn, String tableUUID, String rowUUID) throws AuthorizationDeniedException,
-    GenericException, NotFoundException {
+  public <T extends IsIndexed> T retrieveRows(String classNameToReturn, String tableUUID, String rowUUID)
+    throws AuthorizationDeniedException, GenericException, NotFoundException {
     RodaUser user = null;
     Class<T> classToReturn = parseClass(classNameToReturn);
     return ViewerFactory.getSolrManager().retrieveRows(user, classToReturn, tableUUID, rowUUID);
   }
-
-
 
   @SuppressWarnings("unchecked")
   private <T extends IsIndexed> Class<T> parseClass(String classNameToReturn) throws GenericException {

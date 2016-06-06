@@ -1,6 +1,5 @@
 package com.databasepreservation.dbviewer.client.main;
 
-import com.databasepreservation.dbviewer.client.browse.DatabaseListPanel;
 import com.databasepreservation.dbviewer.shared.client.HistoryManager;
 import com.databasepreservation.dbviewer.shared.client.widgets.wcag.AccessibleFocusPanel;
 import com.google.gwt.core.client.GWT;
@@ -22,7 +21,8 @@ public class MainPanel extends Composite {
   interface MainPanelUiBinder extends UiBinder<Widget, MainPanel> {
   }
 
-  @UiField SimplePanel contentPanel;
+  @UiField
+  SimplePanel contentPanel;
 
   @UiField
   AccessibleFocusPanel homeLinkArea;

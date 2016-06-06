@@ -13,7 +13,7 @@ import com.google.gwt.user.client.Command;
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class BreadcrumbManager {
-  public static void updateBreadcrumb(BreadcrumbPanel breadcrumb, List<BreadcrumbItem> items){
+  public static void updateBreadcrumb(BreadcrumbPanel breadcrumb, List<BreadcrumbItem> items) {
     breadcrumb.updatePath(items);
     breadcrumb.setVisible(true);
   }
@@ -50,7 +50,8 @@ public class BreadcrumbManager {
     return items;
   }
 
-  public static List<BreadcrumbItem> forSchema(final String databaseName, final String databaseUUID, final String schemaName, final String schemaUUID) {
+  public static List<BreadcrumbItem> forSchema(final String databaseName, final String databaseUUID,
+    final String schemaName, final String schemaUUID) {
     List<BreadcrumbItem> items = forDatabase(databaseName, databaseUUID);
     items.add(new BreadcrumbItem(new SafeHtml() {
       @Override
@@ -66,8 +67,8 @@ public class BreadcrumbManager {
     return items;
   }
 
-  public static List<BreadcrumbItem> forTable(final String databaseName, final String databaseUUID, final String schemaName, final String schemaUUID,
-    final String tableName, final String tableUUID) {
+  public static List<BreadcrumbItem> forTable(final String databaseName, final String databaseUUID,
+    final String schemaName, final String schemaUUID, final String tableName, final String tableUUID) {
     List<BreadcrumbItem> items = forSchema(databaseName, databaseUUID, schemaName, schemaUUID);
     items.add(new BreadcrumbItem(new SafeHtml() {
       @Override

@@ -3,13 +3,13 @@ package com.databasepreservation.dbviewer.client.browse;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerSchema;
 import org.roda.core.data.adapter.filter.Filter;
 import org.roda.core.data.v2.index.IsIndexed;
 
 import com.databasepreservation.dbviewer.ViewerConstants;
 import com.databasepreservation.dbviewer.client.BrowserService;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerDatabase;
+import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerSchema;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerTable;
 import com.databasepreservation.dbviewer.client.common.lists.TableRowList;
 import com.databasepreservation.dbviewer.client.common.search.SearchPanel;
@@ -20,6 +20,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -60,6 +61,9 @@ public class TablePanel extends Composite {
   @UiField(provided = true)
   DatabaseSidebar sidebar;
 
+  @UiField
+  Label mainHeader;
+
   private ViewerDatabase database;
   private ViewerSchema schema;
   private ViewerTable table;
@@ -73,8 +77,8 @@ public class TablePanel extends Composite {
     sidebar = DatabaseSidebar.getInstance(databaseUUID);
     initWidget(uiBinder.createAndBindUi(this));
 
-    BreadcrumbManager.updateBreadcrumb(breadcrumb,
-      BreadcrumbManager.forTable("Database (loading)", databaseUUID, "Schema (loading)", "", "Table (loading)", tableUUID));
+    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forTable("Database (loading)", databaseUUID,
+      "Schema (loading)", "", "Table (loading)", tableUUID));
 
     BrowserService.Util.getInstance().retrieve(ViewerDatabase.class.getName(), databaseUUID,
       new AsyncCallback<IsIndexed>() {
@@ -89,8 +93,12 @@ public class TablePanel extends Composite {
           table = database.getMetadata().getTable(tableUUID);
           schema = database.getMetadata().getSchemaFromTableUUID(tableUUID);
 
-          BreadcrumbManager.updateBreadcrumb(breadcrumb,
-            BreadcrumbManager.forTable(database.getMetadata().getName(), databaseUUID, schema.getName(), schema.getUUID(), table.getName(), tableUUID));
+          mainHeader.setText("Searching table `" + table.getName() + "`");
+          mainHeader.removeStyleName("hidden");
+          BreadcrumbManager.updateBreadcrumb(
+            breadcrumb,
+            BreadcrumbManager.forTable(database.getMetadata().getName(), databaseUUID, schema.getName(),
+              schema.getUUID(), table.getName(), tableUUID));
           init();
         }
       });

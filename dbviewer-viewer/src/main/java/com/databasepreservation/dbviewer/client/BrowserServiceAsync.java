@@ -1,8 +1,9 @@
 package com.databasepreservation.dbviewer.client;
 
+import org.roda.core.data.v2.index.IsIndexed;
+
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import org.roda.core.data.v2.index.IsIndexed;
 
 public interface BrowserServiceAsync {
 
@@ -61,8 +62,8 @@ public interface BrowserServiceAsync {
    * 
    * @see com.databasepreservation.dbviewer.client.BrowserService
    */
-  <T extends IsIndexed> void retrieveRows(java.lang.String classNameToReturn, java.lang.String tableUUID, java.lang.String rowUUID,
-    AsyncCallback<T> callback);
+  <T extends IsIndexed> void retrieveRows(java.lang.String classNameToReturn, java.lang.String tableUUID,
+    java.lang.String rowUUID, AsyncCallback<T> callback);
 
   /**
    * Utility class to get the RPC Async interface from client-side code

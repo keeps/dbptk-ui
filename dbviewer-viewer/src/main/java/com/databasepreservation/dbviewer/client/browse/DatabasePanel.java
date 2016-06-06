@@ -3,7 +3,6 @@ package com.databasepreservation.dbviewer.client.browse;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.databasepreservation.dbviewer.shared.client.Tools.ViewerStringUtils;
 import org.roda.core.data.adapter.filter.Filter;
 import org.roda.core.data.v2.index.IsIndexed;
 
@@ -14,6 +13,7 @@ import com.databasepreservation.dbviewer.client.common.search.SearchPanel;
 import com.databasepreservation.dbviewer.client.main.BreadcrumbPanel;
 import com.databasepreservation.dbviewer.shared.client.HistoryManager;
 import com.databasepreservation.dbviewer.shared.client.Tools.BreadcrumbManager;
+import com.databasepreservation.dbviewer.shared.client.Tools.ViewerStringUtils;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -106,9 +106,9 @@ public class DatabasePanel extends Composite {
     b.append(getFieldHTML("Database user", metadata.getDatabaseUser()));
     b.append(getFieldHTML("Data origin time span", metadata.getDataOriginTimespan()));
     b.append(getFieldHTML("Data owner", metadata.getDataOwner()));
-    if(ViewerStringUtils.isNotBlank(metadata.getDescription())) {
+    if (ViewerStringUtils.isNotBlank(metadata.getDescription())) {
       b.append(getFieldHTML("Description", metadata.getDescription()));
-    }else{
+    } else {
       b.append(getFieldHTML("Description", "A description for this database is not available."));
     }
     b.append(getFieldHTML("Producer application", metadata.getProducerApplication()));

@@ -20,6 +20,8 @@ public class ViewerColumn implements Serializable {
 
   private Boolean isAutoIncrement;
 
+  private int columnIndexInEnclosingTable;
+
   public ViewerColumn() {
   }
 
@@ -92,5 +94,13 @@ public class ViewerColumn implements Serializable {
     return "ViewerColumn{" + "defaultValue='" + defaultValue + '\'' + ", displayName='" + displayName + '\''
       + ", type=" + type + ", nillable=" + nillable + ", description='" + description + '\'' + ", isAutoIncrement="
       + isAutoIncrement + '}';
+  }
+
+  public int getColumnIndexInEnclosingTable() {
+    return columnIndexInEnclosingTable;
+  }
+
+  public void setColumnIndexInEnclosingTable(int columnIndexInEnclosingTable) {
+    this.columnIndexInEnclosingTable = columnIndexInEnclosingTable;
   }
 }
