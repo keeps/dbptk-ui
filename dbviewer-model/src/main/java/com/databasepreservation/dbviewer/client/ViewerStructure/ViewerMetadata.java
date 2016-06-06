@@ -1,8 +1,10 @@
 package com.databasepreservation.dbviewer.client.ViewerStructure;
 
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -33,7 +35,9 @@ public class ViewerMetadata implements Serializable {
 
   private String databaseUser;
 
-  private List<ViewerSchema> schemas;
+  private Map<String, ViewerSchema> schemas;
+
+  private Map<String, ViewerTable> tables;
 
   // private List<DbvUser> users;
 
@@ -46,7 +50,8 @@ public class ViewerMetadata implements Serializable {
   // +++++++++++++++++++++++++++++++++++++++++++++++++++++
 
   public ViewerMetadata() {
-    schemas = new ArrayList<>();
+    schemas = new HashMap<>();
+    tables = new HashMap<>();
   }
 
   public String getName() {
@@ -57,12 +62,19 @@ public class ViewerMetadata implements Serializable {
     this.name = name;
   }
 
-  public List<ViewerSchema> getSchemas() {
-    return schemas;
+  public Collection<ViewerSchema> getSchemas() {
+    return schemas.values();
   }
 
-  public void setSchemas(List<ViewerSchema> schemas) {
-    this.schemas = schemas;
+  public void setSchemas(List<ViewerSchema> schemaList) {
+    schemas = new HashMap<>();
+    tables = new HashMap<>();
+    for (ViewerSchema schema : schemaList) {
+      schemas.put(schema.getUUID(), schema);
+      for (ViewerTable table : schema.getTables()) {
+        tables.put(table.getUUID(), table);
+      }
+    }
   }
 
   public String getArchivalDate() {
@@ -150,33 +162,14 @@ public class ViewerMetadata implements Serializable {
   // +++++++++++++++++++++++++++++++++++++++++++++++++++++
 
   public ViewerTable getTable(String tableUUID) {
-    for (ViewerSchema schema : schemas) {
-      for (ViewerTable table : schema.getTables()) {
-        if (tableUUID.equals(table.getUUID())) {
-          return table;
-        }
-      }
-    }
-    return null;
+    return tables.get(tableUUID);
   }
 
   public ViewerSchema getSchemaFromTableUUID(String tableUUID) {
-    for (ViewerSchema schema : schemas) {
-      for (ViewerTable table : schema.getTables()) {
-        if (tableUUID.equals(table.getUUID())) {
-          return schema;
-        }
-      }
-    }
-    return null;
+    return getSchema(tables.get(tableUUID).getSchemaUUID());
   }
 
   public ViewerSchema getSchema(String schemaUUID) {
-    for (ViewerSchema schema : schemas) {
-      if (schemaUUID.equals(schema.getUUID())) {
-        return schema;
-      }
-    }
-    return null;
+    return schemas.get(schemaUUID);
   }
 }

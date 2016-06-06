@@ -21,6 +21,7 @@ import com.databasepreservation.dbviewer.client.main.BreadcrumbPanel;
 import com.databasepreservation.dbviewer.shared.client.HistoryManager;
 import com.databasepreservation.dbviewer.shared.client.Tools.BreadcrumbManager;
 import com.databasepreservation.dbviewer.shared.client.Tools.ViewerStringUtils;
+import com.databasepreservation.dbviewer.shared.client.widgets.MyCellTableResources;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -30,10 +31,12 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
@@ -147,7 +150,7 @@ public class SchemaPanel extends Composite {
   private SafeHtml getTableDescriptionItemHTML(ViewerTable table) {
     SafeHtmlBuilder b = new SafeHtmlBuilder();
 
-    Hyperlink hyperlink = new Hyperlink("Table " + table.getName(), HistoryManager.linkToTable(database.getUUID(),
+    Hyperlink hyperlink = new Hyperlink("Table `" + table.getName() + "`", HistoryManager.linkToTable(database.getUUID(),
       table.getUUID()));
     hyperlink.addStyleName("h3");
 
@@ -183,7 +186,13 @@ public class SchemaPanel extends Composite {
     final ViewerPrimaryKey pk = viewerTable.getPrimaryKey();
 
     // Create a CellTable.
-    CellTable<ViewerColumn> table = new CellTable<>();
+    CellTable<ViewerColumn> table = new CellTable<ViewerColumn>(Integer.MAX_VALUE,
+      (MyCellTableResources) GWT.create(MyCellTableResources.class));
+    table.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
+    table
+      .setLoadingIndicator(new HTML(
+        SafeHtmlUtils
+          .fromSafeConstant("<div class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>")));
 
     SafeHtmlCell primaryKeyColumnCell = new SafeHtmlCell();
     Column<ViewerColumn, SafeHtml> primaryKeyColumn = new Column<ViewerColumn, SafeHtml>(primaryKeyColumnCell) {
@@ -299,7 +308,13 @@ public class SchemaPanel extends Composite {
 
   private CellTable getForeignKeysInfoTable(final ViewerTable viewerTable) {
     // Create a CellTable.
-    CellTable<ViewerForeignKey> table = new CellTable<>();
+    CellTable<ViewerForeignKey> table = new CellTable<ViewerForeignKey>(Integer.MAX_VALUE,
+      (MyCellTableResources) GWT.create(MyCellTableResources.class));
+    table.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
+    table
+      .setLoadingIndicator(new HTML(
+        SafeHtmlUtils
+          .fromSafeConstant("<div class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>")));
 
     TextColumn<ViewerForeignKey> nameColumn = new TextColumn<ViewerForeignKey>() {
       @Override
