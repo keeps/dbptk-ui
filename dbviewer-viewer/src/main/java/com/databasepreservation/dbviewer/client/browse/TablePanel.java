@@ -9,11 +9,13 @@ import org.roda.core.data.v2.index.IsIndexed;
 import com.databasepreservation.dbviewer.ViewerConstants;
 import com.databasepreservation.dbviewer.client.BrowserService;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerDatabase;
+import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerRow;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerSchema;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerTable;
 import com.databasepreservation.dbviewer.client.common.lists.TableRowList;
 import com.databasepreservation.dbviewer.client.common.search.SearchPanel;
 import com.databasepreservation.dbviewer.client.main.BreadcrumbPanel;
+import com.databasepreservation.dbviewer.shared.client.HistoryManager;
 import com.databasepreservation.dbviewer.shared.client.Tools.BreadcrumbManager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -23,6 +25,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.SelectionChangeEvent;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -39,6 +42,7 @@ public class TablePanel extends Composite {
       instance = new TablePanel(databaseUUID, tableUUID);
       instances.put(code, instance);
     }
+
     return instance;
   }
 
@@ -77,8 +81,7 @@ public class TablePanel extends Composite {
     sidebar = DatabaseSidebar.getInstance(databaseUUID);
     initWidget(uiBinder.createAndBindUi(this));
 
-    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forTable("Database (loading)", databaseUUID,
-      "Schema (loading)", "", "Table (loading)", tableUUID));
+    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.loadingTable(databaseUUID, tableUUID));
 
     BrowserService.Util.getInstance().retrieve(ViewerDatabase.class.getName(), databaseUUID,
       new AsyncCallback<IsIndexed>() {
@@ -110,6 +113,16 @@ public class TablePanel extends Composite {
     searchPanel = new SearchPanel(new Filter(), ViewerConstants.SOLR_ROW_SEARCH, "Search...", false, false);
     searchPanel.setList(tableRowList);
     searchPanel.setDefaultFilterIncremental(true);
+
+    tableRowList.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+      @Override
+      public void onSelectionChange(SelectionChangeEvent event) {
+        ViewerRow record = tableRowList.getSelectionModel().getSelectedObject();
+        if (record != null) {
+          HistoryManager.gotoRecord(database.getUUID(), table.getUUID(), record.getUUID());
+        }
+      }
+    });
 
     searchContainer.setWidget(searchPanel);
     tableContainer.setWidget(tableRowList);

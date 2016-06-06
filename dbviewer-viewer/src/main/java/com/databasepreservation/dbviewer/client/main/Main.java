@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.databasepreservation.dbviewer.client.browse.DatabaseListPanel;
 import com.databasepreservation.dbviewer.client.browse.DatabasePanel;
+import com.databasepreservation.dbviewer.client.browse.RecordPanel;
 import com.databasepreservation.dbviewer.client.browse.SchemaPanel;
 import com.databasepreservation.dbviewer.client.browse.TablePanel;
 import com.databasepreservation.dbviewer.shared.client.ClientLogger;
@@ -117,6 +118,21 @@ public class Main implements EntryPoint {
 
       } else {
         // #table/...
+        // (except the case above)
+        HistoryManager.gotoRoot();
+
+      }
+    } else if (HistoryManager.ROUTE_RECORD.equals(currentHistoryPath.get(0))) {
+      if (currentHistoryPath.size() == 4) {
+        // #record/<database_uuid>/<table_uuid>/<record_uuid>
+        String database_uuid = currentHistoryPath.get(1);
+        String table_uuid = currentHistoryPath.get(2);
+        String record_uuid = currentHistoryPath.get(3);
+        RecordPanel panel = RecordPanel.getInstance(database_uuid, table_uuid, record_uuid);
+        setContent(panel);
+
+      } else {
+        // #record/...
         // (except the case above)
         HistoryManager.gotoRoot();
 

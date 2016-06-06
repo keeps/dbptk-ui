@@ -86,8 +86,7 @@ public class SchemaPanel extends Composite {
 
     initWidget(uiBinder.createAndBindUi(this));
 
-    BreadcrumbManager.updateBreadcrumb(breadcrumb,
-      BreadcrumbManager.forSchema("Database (loading)", databaseUUID, "Schema (loading)", schemaUUID));
+    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.loadingSchema(databaseUUID, schemaUUID));
 
     BrowserService.Util.getInstance().retrieve(ViewerDatabase.class.getName(), databaseUUID,
       new AsyncCallback<IsIndexed>() {
@@ -150,8 +149,8 @@ public class SchemaPanel extends Composite {
   private SafeHtml getTableDescriptionItemHTML(ViewerTable table) {
     SafeHtmlBuilder b = new SafeHtmlBuilder();
 
-    Hyperlink hyperlink = new Hyperlink("Table `" + table.getName() + "`", HistoryManager.linkToTable(database.getUUID(),
-      table.getUUID()));
+    Hyperlink hyperlink = new Hyperlink("Table `" + table.getName() + "`", HistoryManager.linkToTable(
+      database.getUUID(), table.getUUID()));
     hyperlink.addStyleName("h3");
 
     b.append(SafeHtmlUtils.fromSafeConstant("<div class=\"field\">"));

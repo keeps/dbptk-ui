@@ -116,4 +116,10 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
     BrowserService.Util.getInstance().findRows(ViewerRow.class.getName(), table.getUUID(), filter, sorter, sublist,
       getFacets(), LocaleInfo.getCurrentLocale().getLocaleName(), callback);
   }
+
+  @Override
+  protected void onLoad() {
+    super.onLoad();
+    this.getSelectionModel().clear();
+  }
 }

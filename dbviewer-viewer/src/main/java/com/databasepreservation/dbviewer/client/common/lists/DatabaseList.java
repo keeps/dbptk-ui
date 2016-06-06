@@ -118,4 +118,10 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
       LocaleInfo.getCurrentLocale().getLocaleName(), callback);
 
   }
+
+  @Override
+  protected void onLoad() {
+    super.onLoad();
+    this.getSelectionModel().clear();
+  }
 }

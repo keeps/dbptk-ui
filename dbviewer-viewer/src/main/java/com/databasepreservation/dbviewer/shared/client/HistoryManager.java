@@ -14,6 +14,7 @@ public class HistoryManager {
   public static final String ROUTE_DATABASE = "database";
   public static final String ROUTE_SCHEMA = "schema";
   public static final String ROUTE_TABLE = "table";
+  public static final String ROUTE_RECORD = "record";
 
   public static final String HISTORY_SEP = "/";
   public static final String HISTORY_SEP_REGEX = "/";
@@ -37,6 +38,10 @@ public class HistoryManager {
 
   public static void gotoTable(String databaseUUID, String tableUUID) {
     newHistory(Arrays.asList(ROUTE_TABLE, databaseUUID, tableUUID));
+  }
+
+  public static void gotoRecord(String databaseUUID, String tableUUID, String recordUUID) {
+    newHistory(Arrays.asList(ROUTE_RECORD, databaseUUID, tableUUID, recordUUID));
   }
 
   private static void newHistory(List<String> path) {
@@ -75,6 +80,10 @@ public class HistoryManager {
     }
 
     return tokens;
+  }
+
+  public static String linkToRecord(String database_uuid, String table_uuid, String record_uuid) {
+    return createHistoryToken(Arrays.asList(ROUTE_TABLE, database_uuid, table_uuid, record_uuid));
   }
 
   public static String linkToTable(String database_uuid, String table_uuid) {
