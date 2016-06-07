@@ -26,10 +26,17 @@ public class ViewerRow implements Serializable, IsIndexed {
     this.UUID = UUID;
   }
 
+  /**
+   * @return Map of solrColumnName to cell value as string
+   */
   public Map<String, ViewerCell> getCells() {
     return cells;
   }
 
+  /**
+   * @param cells
+   *          Map of solrColumnName to value as String
+   */
   public void setCells(Map<String, ViewerCell> cells) {
     this.cells = cells;
   }

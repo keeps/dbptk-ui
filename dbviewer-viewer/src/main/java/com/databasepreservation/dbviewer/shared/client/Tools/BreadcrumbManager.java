@@ -16,6 +16,7 @@ public class BreadcrumbManager {
   private static String LOADING_DATABASE = "Database (loading)";
   private static String LOADING_SCHEMA = "Schema (loading)";
   private static String LOADING_TABLE = "Table (loading)";
+  private static String LOADING_REFERENCES = "References (loading)";
 
   public static void updateBreadcrumb(BreadcrumbPanel breadcrumb, List<BreadcrumbItem> items) {
     breadcrumb.updatePath(items);
@@ -106,6 +107,25 @@ public class BreadcrumbManager {
     return items;
   }
 
+  public static List<BreadcrumbItem> forReferences(final String databaseName, final String databaseUUID,
+    final String schemaName, final String schemaUUID, final String tableName, final String tableUUID,
+    final String recordUUID, final String columnNameInTable, final String columnIndexInTable) {
+    List<BreadcrumbItem> items = forRecord(databaseName, databaseUUID, schemaName, schemaUUID, tableName, tableUUID,
+      recordUUID);
+    items.add(new BreadcrumbItem(new SafeHtml() {
+      @Override
+      public String asString() {
+        return "<i class=\"fa fa-exchange\"></i> References for " + columnNameInTable;
+      }
+    }, new Command() {
+      @Override
+      public void execute() {
+        HistoryManager.gotoReferences(databaseUUID, tableUUID, recordUUID, columnIndexInTable);
+      }
+    }));
+    return items;
+  }
+
   public static List<BreadcrumbItem> loadingDatabase(final String databaseUUID) {
     List<BreadcrumbItem> items = forDatabases();
     items.add(new BreadcrumbItem(new SafeHtml() {
@@ -181,6 +201,23 @@ public class BreadcrumbManager {
       @Override
       public void execute() {
         HistoryManager.gotoRecord(databaseUUID, tableUUID, recordUUID);
+      }
+    }));
+    return items;
+  }
+
+  public static List<BreadcrumbItem> loadingReferences(final String databaseUUID, final String tableUUID,
+    final String recordUUID, final String columnIndexInTable) {
+    List<BreadcrumbItem> items = loadingRecord(databaseUUID, tableUUID, recordUUID);
+    items.add(new BreadcrumbItem(new SafeHtml() {
+      @Override
+      public String asString() {
+        return "<i class=\"fa fa-exchange\"></i> " + LOADING_REFERENCES;
+      }
+    }, new Command() {
+      @Override
+      public void execute() {
+        HistoryManager.gotoReferences(databaseUUID, tableUUID, recordUUID, columnIndexInTable);
       }
     }));
     return items;

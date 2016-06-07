@@ -6,6 +6,7 @@ import java.util.List;
 import com.databasepreservation.dbviewer.client.browse.DatabaseListPanel;
 import com.databasepreservation.dbviewer.client.browse.DatabasePanel;
 import com.databasepreservation.dbviewer.client.browse.RecordPanel;
+import com.databasepreservation.dbviewer.client.browse.ReferencesPanel;
 import com.databasepreservation.dbviewer.client.browse.SchemaPanel;
 import com.databasepreservation.dbviewer.client.browse.TablePanel;
 import com.databasepreservation.dbviewer.shared.client.ClientLogger;
@@ -108,6 +109,20 @@ public class Main implements EntryPoint {
         HistoryManager.gotoRoot();
 
       }
+    } else if (HistoryManager.ROUTE_SCHEMA.equals(currentHistoryPath.get(0))) {
+      if (currentHistoryPath.size() == 3) {
+        // #schema/<database_uuid>/<schema_uuid>
+        String database_uuid = currentHistoryPath.get(1);
+        String schema_uuid = currentHistoryPath.get(2);
+        SchemaPanel panel = SchemaPanel.getInstance(database_uuid, schema_uuid);
+        setContent(panel);
+
+      } else {
+        // #schema/...
+        // (except the case above)
+        HistoryManager.gotoRoot();
+
+      }
     } else if (HistoryManager.ROUTE_TABLE.equals(currentHistoryPath.get(0))) {
       if (currentHistoryPath.size() == 3) {
         // #table/<database_uuid>/<table_uuid>
@@ -137,16 +152,18 @@ public class Main implements EntryPoint {
         HistoryManager.gotoRoot();
 
       }
-    } else if (HistoryManager.ROUTE_SCHEMA.equals(currentHistoryPath.get(0))) {
-      if (currentHistoryPath.size() == 3) {
-        // #schema/<database_uuid>/<schema_uuid>
+    } else if (HistoryManager.ROUTE_REFERENCES.equals(currentHistoryPath.get(0))) {
+      if (currentHistoryPath.size() == 5) {
+        // #references/<database_uuid>/<table_uuid>/<record_uuid>/<columnIndex>
         String database_uuid = currentHistoryPath.get(1);
-        String schema_uuid = currentHistoryPath.get(2);
-        SchemaPanel panel = SchemaPanel.getInstance(database_uuid, schema_uuid);
+        String table_uuid = currentHistoryPath.get(2);
+        String record_uuid = currentHistoryPath.get(3);
+        String columnIndex = currentHistoryPath.get(4);
+        ReferencesPanel panel = ReferencesPanel.getInstance(database_uuid, table_uuid, record_uuid, columnIndex);
         setContent(panel);
 
       } else {
-        // #schema/...
+        // #references/...
         // (except the case above)
         HistoryManager.gotoRoot();
 
