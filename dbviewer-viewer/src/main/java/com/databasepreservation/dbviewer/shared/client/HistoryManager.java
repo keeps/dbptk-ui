@@ -89,7 +89,8 @@ public class HistoryManager {
 
   public static String linkToReferences(String database_uuid, String table_uuid, String record_uuid,
     String columnIndexInTable) {
-    return createHistoryToken(Arrays.asList(ROUTE_REFERENCES, database_uuid, table_uuid, record_uuid));
+    return createHistoryToken(Arrays.asList(ROUTE_REFERENCES, database_uuid, table_uuid, record_uuid,
+      columnIndexInTable));
   }
 
   public static String linkToRecord(String database_uuid, String table_uuid, String record_uuid) {

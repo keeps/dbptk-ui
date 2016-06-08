@@ -80,6 +80,9 @@ public class ReferencesPanel extends Composite {
   @UiField
   Label mainHeader;
 
+  @UiField
+  Label cellValue;
+
   private ReferencesPanel(final String databaseUUID, final String tableUUID, final String recordUUID,
     final String columnIndexInTable) {
     this.recordUUID = recordUUID;
@@ -132,36 +135,76 @@ public class ReferencesPanel extends Composite {
       columnName = table.getColumns().get(columnIndexInTable).getDisplayName();
     }
 
+    mainHeader.setText("References for `" + table.getSchemaName() + "`.`" + table.getName() + "`.`"
+      + table.getColumns().get(columnIndexInTable).getDisplayName() + "`");
+
     // breadcrumb
     BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forReferences(database.getMetadata().getName(),
       database.getUUID(), table.getSchemaName(), table.getSchemaUUID(), table.getName(), table.getUUID(), recordUUID,
       columnName, columnIndexInTable.toString()));
 
-    // update title
-    mainHeader.setText("References for `" + table.getSchemaName() + "`.`" + table.getName() + "`");
-
     if (record != null) {
+      // update title
+      String value = "NULL";
+      ViewerCell cell = record.getCells().get(table.getColumns().get(columnIndexInTable).getSolrName());
+      if (cell != null && ViewerStringUtils.isNotBlank(cell.getValue())) {
+        value = cell.getValue();
+      }
+      cellValue.setText(value);
+
       TreeMap<Reference, TableRowList> references = new TreeMap<>();
 
       // get references where this column is source in foreign keys
-      for (ViewerForeignKey fk : table.getForeignKeys()) {
-        Reference reference = new Reference(database.getMetadata().getTable(fk.getReferencedTableUUID()), fk);
-        references.put(reference, createTableRowListFromReference(reference));
-      }
+      // for (ViewerForeignKey fk : table.getForeignKeys()) {
+      // for (ViewerReference viewerReference : fk.getReferences()) {
+      // if (viewerReference.getSourceColumnIndex().equals(columnIndexInTable))
+      // {
+      // Reference reference = new Reference(table, fk);
+      // references.put(reference, createTableRowListFromReference(reference));
+      // break;
+      // }
+      // }
+      // }
 
       // get references where this column is (at least one of) the target of
-      // foreign keys
+      // foreign keys or is (at least one of) the sources of the foreign keys
       for (ViewerSchema viewerSchema : database.getMetadata().getSchemas()) {
         for (ViewerTable viewerTable : viewerSchema.getTables()) {
           for (ViewerForeignKey viewerForeignKey : viewerTable.getForeignKeys()) {
-            if (viewerForeignKey.getReferencedTableUUID().equals(table.getUUID())) {
-              for (ViewerReference viewerReference : viewerForeignKey.getReferences()) {
-                if (viewerReference.getReferencedColumnIndex().equals(columnIndexInTable)) {
-                  Reference reference = new Reference(viewerTable, viewerForeignKey);
-                  if (!references.containsKey(reference)) {
-                    references.put(reference, createTableRowListFromReference(reference));
-                  }
-                  break;
+
+            boolean fkSourceIsCurrentTable = viewerTable.equals(table);
+            boolean fkTargetIsCurrentTable = viewerForeignKey.getReferencedTableUUID().equals(table.getUUID());
+
+            // the table that is different than the current table, to use in the
+            // reference
+            ViewerTable otherTable;
+            if (fkSourceIsCurrentTable && fkTargetIsCurrentTable) {
+              // cyclic foreign key
+              otherTable = table;
+            } else if (fkSourceIsCurrentTable) {
+              otherTable = database.getMetadata().getTable(viewerForeignKey.getReferencedTableUUID());
+            } else if (fkTargetIsCurrentTable) {
+              otherTable = viewerTable;
+            } else {
+              // if the current table is not target nor source for the foreign
+              // key, skip the foreign key
+              continue;
+            }
+
+            for (ViewerReference viewerReference : viewerForeignKey.getReferences()) {
+              int columnIndexOnCurrentTable;
+              if (fkSourceIsCurrentTable) {
+                columnIndexOnCurrentTable = viewerReference.getSourceColumnIndex();
+              } else {
+                // fkTargetIsCurrentTable equals true
+                columnIndexOnCurrentTable = viewerReference.getReferencedColumnIndex();
+              }
+
+              if (columnIndexOnCurrentTable == columnIndexInTable) {
+                Reference reference = new Reference(otherTable, viewerForeignKey);
+                if (!references.containsKey(reference)) {
+                  references.put(reference, createTableRowListFromReference(reference));
+                  break; // its selected. avoid checking more columns
                 }
               }
             }
@@ -345,7 +388,13 @@ public class ReferencesPanel extends Composite {
       if (o == null || getClass() != o.getClass())
         return false;
       Reference reference = (Reference) o;
-      return Objects.equals(table, reference.table) && Objects.equals(foreignKey, reference.foreignKey);
+
+      if (table == reference.table && foreignKey == reference.foreignKey) {
+        return true;
+      }
+
+      return table.getSchemaName().equals(reference.table.getSchemaName())
+        && foreignKey.getName().equals(reference.foreignKey.getName());
     }
 
     @Override
@@ -355,9 +404,14 @@ public class ReferencesPanel extends Composite {
 
     @Override
     public int compareTo(Reference o) {
-      int nameComparison = this.table.getName().compareTo(o.table.getName());
+      int nameComparison = this.table.getSchemaName().compareTo(o.table.getSchemaName());
       if (nameComparison == 0) {
-        return this.foreignKey.getName().compareTo(o.foreignKey.getName());
+        nameComparison = this.table.getName().compareTo(o.table.getName());
+        if (nameComparison == 0) {
+          return this.foreignKey.getName().compareTo(o.foreignKey.getName());
+        } else {
+          return nameComparison;
+        }
       } else {
         return nameComparison;
       }

@@ -1,7 +1,9 @@
 package com.databasepreservation.dbviewer.client.browse;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.roda.core.data.adapter.filter.Filter;
 import org.roda.core.data.v2.index.IsIndexed;
@@ -10,7 +12,10 @@ import com.databasepreservation.dbviewer.client.BrowserService;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerCell;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerColumn;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerDatabase;
+import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerForeignKey;
+import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerReference;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerRow;
+import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerSchema;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerTable;
 import com.databasepreservation.dbviewer.client.common.search.SearchPanel;
 import com.databasepreservation.dbviewer.client.main.BreadcrumbPanel;
@@ -25,6 +30,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Hyperlink;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -57,6 +63,9 @@ public class RecordPanel extends Composite {
   DatabaseSidebar sidebar;
   @UiField
   HTML content;
+
+  @UiField
+  Label headerLabel;
 
   private RecordPanel(final String databaseUUID, final String tableUUID, final String recordUUID) {
     this.recordUUID = recordUUID;
@@ -115,18 +124,44 @@ public class RecordPanel extends Composite {
         table.getSchemaUUID(), table.getName(), table.getUUID(), recordUUID));
 
     if (record != null) {
+      headerLabel.setText("Record " + record.getUUID());
+
+      Set<Integer> columnIndexesContainingForeignKeyRelations = new HashSet<>();
+
+      // get references where this column is source in foreign keys
+      for (ViewerForeignKey fk : table.getForeignKeys()) {
+        for (ViewerReference viewerReference : fk.getReferences()) {
+          columnIndexesContainingForeignKeyRelations.add(viewerReference.getSourceColumnIndex());
+        }
+      }
+
+      // get references where this column is (at least one of) the target of
+      // foreign keys
+      for (ViewerSchema viewerSchema : database.getMetadata().getSchemas()) {
+        for (ViewerTable viewerTable : viewerSchema.getTables()) {
+          for (ViewerForeignKey viewerForeignKey : viewerTable.getForeignKeys()) {
+            if (viewerForeignKey.getReferencedTableUUID().equals(table.getUUID())) {
+              for (ViewerReference viewerReference : viewerForeignKey.getReferences()) {
+                columnIndexesContainingForeignKeyRelations.add(viewerReference.getReferencedColumnIndex());
+              }
+            }
+          }
+        }
+      }
+
       // record data
       SafeHtmlBuilder b = new SafeHtmlBuilder();
 
       for (ViewerColumn column : table.getColumns()) {
-        b.append(getCellHTML(column));
+        b.append(getCellHTML(column,
+          columnIndexesContainingForeignKeyRelations.contains(column.getColumnIndexInEnclosingTable())));
       }
 
       content.setHTML(b.toSafeHtml());
     }
   }
 
-  private SafeHtml getCellHTML(ViewerColumn column) {
+  private SafeHtml getCellHTML(ViewerColumn column, boolean hasForeignKeyRelations) {
     String label = column.getDisplayName();
 
     String value = "NULL";
@@ -141,6 +176,12 @@ public class RecordPanel extends Composite {
     b.appendHtmlConstant("<div class=\"field\">");
     b.appendHtmlConstant("<div class=\"label\">");
     b.appendEscaped(label);
+    if (hasForeignKeyRelations) {
+      Hyperlink hyperlink = new Hyperlink("Explore related records", HistoryManager.linkToReferences(
+        database.getUUID(), table.getUUID(), recordUUID, String.valueOf(column.getColumnIndexInEnclosingTable())));
+      hyperlink.addStyleName("related-records-link");
+      b.appendHtmlConstant(hyperlink.toString());
+    }
     b.appendHtmlConstant("</div>");
     b.appendHtmlConstant("<div class=\"value\">");
     b.appendEscaped(value);

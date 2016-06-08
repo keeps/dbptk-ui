@@ -24,6 +24,14 @@
                         </g:FlowPanel>
                         <g:FlowPanel addStyleNames="col_12 content" >
                             <g:Label addStyleNames="h1" ui:field="mainHeader"><ui:msg>References</ui:msg></g:Label>
+                            <g:FlowPanel addStyleNames="field">
+                                <g:Label addStyleNames="label">
+                                    <ui:msg>With value</ui:msg>
+                                </g:Label>
+                                <g:Label addStyleNames="value" ui:field="cellValue">
+                                    <ui:msg>Loading...</ui:msg>
+                                </g:Label>
+                            </g:FlowPanel>
                             <g:FlowPanel ui:field="content"/>
                         </g:FlowPanel>
                     </g:FlowPanel>

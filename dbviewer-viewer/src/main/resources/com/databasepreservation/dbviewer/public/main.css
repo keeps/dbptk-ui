@@ -335,3 +335,13 @@
     width: 1px;
     max-width: 1px;
 }
+
+/**********************************************
+	       SINGLE RECORD PAGE
+************************************************/
+
+.field .label .related-records-link {
+    font-size: 75%; /*equivalent to .small*/
+    margin-left: .5rem;
+    display: inline;
+}
