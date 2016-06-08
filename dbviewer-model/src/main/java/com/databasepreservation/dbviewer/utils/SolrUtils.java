@@ -56,6 +56,7 @@ import org.roda.core.data.exceptions.RequestNotValidException;
 import org.roda.core.data.v2.index.FacetFieldResult;
 import org.roda.core.data.v2.index.IndexResult;
 import org.roda.core.data.v2.ip.AIP;
+import org.roda.core.data.v2.ip.AIPState;
 import org.roda.core.data.v2.ip.IndexedAIP;
 import org.roda.core.data.v2.ip.IndexedFile;
 import org.roda.core.data.v2.ip.IndexedRepresentation;
@@ -363,7 +364,7 @@ public class SolrUtils {
       || resultClass.equals(IndexedFile.class) || resultClass.equals(IndexedPreservationEvent.class);
   }
 
-  private static String getFilterQueries(RodaUser user, boolean showInactive) {
+  private static String getFilterQueries(RodaUser user, boolean justActive) {
 
     StringBuilder fq = new StringBuilder();
 
@@ -376,8 +377,8 @@ public class SolrUtils {
       appendValuesUsingOROperator(fq, groupsKey, new ArrayList<>(user.getAllGroups()), true);
     }
 
-    if (!showInactive) {
-      appendExactMatch(fq, RodaConstants.ACTIVE, Boolean.TRUE.toString(), true, true);
+    if (justActive) {
+      appendExactMatch(fq, RodaConstants.STATE, AIPState.ACTIVE.toString(), true, true);
     }
 
     return fq.toString();

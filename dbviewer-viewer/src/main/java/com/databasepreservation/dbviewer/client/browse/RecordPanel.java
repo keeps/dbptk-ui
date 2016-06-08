@@ -176,15 +176,15 @@ public class RecordPanel extends Composite {
     b.appendHtmlConstant("<div class=\"field\">");
     b.appendHtmlConstant("<div class=\"label\">");
     b.appendEscaped(label);
+    b.appendHtmlConstant("</div>");
+    b.appendHtmlConstant("<div class=\"value\">");
+    b.appendEscaped(value);
     if (hasForeignKeyRelations) {
       Hyperlink hyperlink = new Hyperlink("Explore related records", HistoryManager.linkToReferences(
         database.getUUID(), table.getUUID(), recordUUID, String.valueOf(column.getColumnIndexInEnclosingTable())));
       hyperlink.addStyleName("related-records-link");
       b.appendHtmlConstant(hyperlink.toString());
     }
-    b.appendHtmlConstant("</div>");
-    b.appendHtmlConstant("<div class=\"value\">");
-    b.appendEscaped(value);
     b.appendHtmlConstant("</div>");
     b.appendHtmlConstant("</div>");
     return b.toSafeHtml();

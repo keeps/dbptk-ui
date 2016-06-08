@@ -44,7 +44,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
 
   public TableRowList(ViewerDatabase database, ViewerTable table, Filter filter, Facets facets, String summary,
     boolean selectable) {
-    super(filter, facets, summary, selectable, new Pair<ViewerDatabase, ViewerTable>(database, table));
+    super(filter, false, facets, summary, selectable, new Pair<ViewerDatabase, ViewerTable>(database, table));
   }
 
   @Override
@@ -78,9 +78,14 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
         }
       };
       column.setSortable(viewerColumn.sortable());
-      display.addColumn(column, viewerColumn.getDisplayName());
+      //column.setCellStyleNames("nowrap");
+
+      //display.addColumn(column, viewerColumn.getDisplayName());
+
+      addColumn(column, viewerColumn.getDisplayName(), true, false, 50);
+
       columns.put(viewerColumn, column);
-      // display.setColumnWidth(column, "100%");
+      //display.setColumnWidth(column, "100%");
     }
 
     Label emptyInfo = new Label("No items to display");

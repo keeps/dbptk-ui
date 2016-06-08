@@ -11,6 +11,15 @@
     visibility: hidden;
 }
 
+.label {
+    color: #222;
+}
+
+.value {
+    font-size: 1.4rem;
+    color: rgb(88, 89, 91);
+}
+
 /***********************************************
    BrowseContent (based on ViewRepresentation)
 ************************************************/
@@ -340,7 +349,7 @@
 	       SINGLE RECORD PAGE
 ************************************************/
 
-.field .label .related-records-link {
+.field .value .related-records-link {
     font-size: 75%; /*equivalent to .small*/
     margin-left: .5rem;
     display: inline;

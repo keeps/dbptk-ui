@@ -5,6 +5,7 @@
 package com.databasepreservation.dbviewer.client.common.lists;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import org.roda.core.data.adapter.sublist.Sublist;
 import org.roda.core.data.v2.index.IndexResult;
@@ -23,6 +24,7 @@ public abstract class MyAsyncDataProvider<T extends Serializable> extends AsyncD
   private final CellTable<T> display;
   private final IndexResultDataProvider<T> dataProvider;
   private int rowCount;
+  private Date date;
 
   public MyAsyncDataProvider(CellTable<T> display, IndexResultDataProvider<T> dataProvider) {
     super();
@@ -36,8 +38,8 @@ public abstract class MyAsyncDataProvider<T extends Serializable> extends AsyncD
 
       @Override
       public void onFailure(Throwable caught) {
-        // Toast.showError("Error getting data from server: [" +
-        // caught.getClass().getName() + "] " + caught.getMessage());
+        //AsyncCallbackUtils.defaultFailureTreatment(caught);
+        throw new RuntimeException(caught);
       }
 
       @Override
@@ -68,6 +70,7 @@ public abstract class MyAsyncDataProvider<T extends Serializable> extends AsyncD
       public void onSuccess(IndexResult<T> result) {
         if (result != null) {
           rowCount = (int) result.getTotalCount();
+          date = result.getDate();
           updateRowData((int) result.getOffset(), result.getResults());
           updateRowCount(rowCount, true);
           // ValueChangeEvent.fire(AsyncTableCell.this, result);
@@ -91,8 +94,8 @@ public abstract class MyAsyncDataProvider<T extends Serializable> extends AsyncD
 
       @Override
       public void onFailure(Throwable caught) {
-        // Toast.showError("Error getting data from server: [" +
-        // caught.getClass().getName() + "] " + caught.getMessage());
+        //AsyncCallbackUtils.defaultFailureTreatment(caught);
+        throw new RuntimeException(caught);
       }
 
       @Override
@@ -104,6 +107,10 @@ public abstract class MyAsyncDataProvider<T extends Serializable> extends AsyncD
 
   public int getRowCount() {
     return rowCount;
+  }
+
+  public Date getDate() {
+    return date;
   }
 
 }

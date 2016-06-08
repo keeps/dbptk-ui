@@ -35,6 +35,10 @@ select {
     font-size: 1.3rem;
 }
 
+.not-visible {
+    display: none;
+}
+
 .clickable {
     cursor: pointer;
 }
@@ -81,25 +85,44 @@ h6, .h6 {
     letter-spacing: 0;
 }
 
-.field {
-    margin-bottom: 10px;
+.label {
+    font-size: 1.5rem;
+    font-weight: 300;
+    color: #999;
 }
 
-.label {
-
+.associative-label {
+    display: inline;
+    margin-right: 0.5rem;
 }
 
 .value {
-    font-size: 1.4rem;
+    font-size: 1.6rem;
     color: rgb(88, 89, 91);
+}
+
+.field {
+    margin-bottom: 1rem;
+}
+
+.errormessage {
+    margin-top: 0.5rem;
+}
+
+.text-area-whitespace-wrap {
+    white-space: pre-wrap;
+}
+
+table .label-success, table .label-danger, table .label-warning, table .label-info, table .label-default {
+    font-size: 1.2rem;
 }
 
 .label-success {
     background-color: #5cb85c;
     display: inline;
     padding: .2em .6em .3em;
-    font-size: 75%;
-    font-weight: 700;
+    /*     font-size: 75%; */
+    /*     font-weight: 700; */
     line-height: 1;
     color: #fff;
     text-align: center;
@@ -112,8 +135,8 @@ h6, .h6 {
     background-color: #d9534f;
     display: inline;
     padding: .2em .6em .3em;
-    font-size: 75%;
-    font-weight: 700;
+    /*     font-size: 75%; */
+    /*     font-weight: 700; */
     line-height: 1;
     color: #fff;
     text-align: center;
@@ -126,8 +149,8 @@ h6, .h6 {
     background-color: #f0ad4e;
     display: inline;
     padding: .2em .6em .3em;
-    font-size: 75%;
-    font-weight: 700;
+    /*font-size: 75%;
+    font-weight: 700;*/
     line-height: 1;
     color: #fff;
     text-align: center;
@@ -140,8 +163,8 @@ h6, .h6 {
     background-color: #337ab7;
     display: inline;
     padding: .2em .6em .3em;
-    font-size: 75%;
-    font-weight: 700;
+    /*     font-size: 75%; */
+    /*     font-weight: 700; */
     line-height: 1;
     color: #fff;
     text-align: center;
@@ -154,8 +177,8 @@ h6, .h6 {
     background-color: #777;
     display: inline;
     padding: .2em .6em .3em;
-    font-size: 75%;
-    font-weight: 700;
+    /*     font-size: 75%; */
+    /*     font-weight: 700; */
     line-height: 1;
     color: #fff;
     text-align: center;
@@ -166,6 +189,26 @@ h6, .h6 {
 
 .small {
     font-size: 75%;
+}
+
+.xsmall {
+    font-size: 60%;
+}
+
+.gray {
+    color: #a7a9ac;
+}
+
+.inline {
+    display: inline;
+}
+
+div.inline {
+    display: inline-block;
+}
+
+.inline + .inline {
+    margin-left: 0.5em;
 }
 
 .fade-out {
@@ -324,7 +367,7 @@ pre>code {
     margin-bottom: 5px;
 }
 
-.fieldTextBox, .form-textbox {
+.fieldTextBox, .form-textbox, .form-selectbox {
     width: 100%;
     color: #58595b;
     padding: 5px;
@@ -332,6 +375,20 @@ pre>code {
     border-radius: 1px;
     box-sizing: border-box;
     margin-bottom: 5px;
+    background-color: #f5f5f5;
+    font-size: 1.5rem;
+    font-family: "Ubuntu", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-weight: 300;
+}
+
+.searchAdvancedPanel .fieldTextBox, .searchAdvancedPanel .form-textbox, .loginPanel .fieldTextBox {
+    border: 1px solid #ccc;
+    background-color: #fff;
+}
+
+.content .fieldTextBox, .content .form-textbox {
+    border: 0;
+    border-left: 2px solid #089de3;
 }
 
 .form-listbox {
@@ -382,6 +439,10 @@ pre>code {
 .form-textbox-small+.form-textbox-small,
 .form-textbox-small+.form-listbox {
     margin-left: 5px;
+}
+
+.form-textbox-medium {
+    width: 50%;
 }
 
 .form-button {
@@ -452,18 +513,46 @@ pre>code {
 }
 
 .btn:hover {
-    background-color: #3998d0;
+    background-color: #2988c0;
     cursor: pointer;
     cursor: hand;
     cursor: pointer;
 }
 
+.btn-default {
+    background-color: #777;
+}
+
+.btn-default:hover {
+    background-color: #666;
+}
+
+.btn-danger {
+    background-color: #d9534f;
+}
+
+.btn-danger:hover {
+    background-color: #c9302c;
+}
+
+
+.btn-link {
+    background-color: transparent;
+    color: #337ab7;
+}
+
+.btn-link:hover {
+    color: #23527c;
+    text-decoration: underline;
+    background-color: transparent;
+}
+
 .btn:disabled {
-    background-color: #ccc;
+    background-color: #ddd;
 }
 
 .btn:active {
-    background-color: #5bbeff;
+    opacity: 0.9;
     cursor: pointer;
     cursor: hand;
 }
@@ -488,6 +577,10 @@ pre>code {
     float: right;
     margin-top: 1px;
     padding-left: 5px;
+}
+
+.btn-link:after {
+    display: none;
 }
 
 .btn-plus:after {
@@ -566,6 +659,16 @@ pre>code {
     content: "\f0a8";
 }
 
+.btn-exclamation-triangle:after {
+    content: "\f071";
+}
+
+.btn-incremental-list-add {
+    margin-top: 2px;
+    margin-bottom: 10px;
+    padding: 3px 10px;
+}
+
 .toolbarLink {
     display: inline-block;
     font-size: 20px;
@@ -605,7 +708,7 @@ pre>code {
     margin-bottom: 20px;
     border: 1px solid #ddd;
     background-color: #089de3;
-    padding-left: 5px;
+    padding-left: 2px;
 }
 
 .panel-heading {
@@ -661,13 +764,20 @@ pre>code {
 }
 
 .my-asyncdatagrid-pager-results {
-    margin-right: 0px;
-    margin-left: auto;
+    display: inline-block;
+    line-height: 1;
+    font-size: 1.3rem;
+}
+
+.my-asyncdatagrid-pager-results img{
+    vertical-align: middle;
 }
 
 .my-asyncdatagrid-pager-pagesize {
-    margin-left: auto;
-    margin-top: 5px;
+    /*margin-left: auto; */
+    /* margin-top: 5px; */
+    display: inline-block;
+    float: right;
 }
 
 .my-asyncdatagrid-pager-pagesize a {
@@ -688,6 +798,7 @@ pre>code {
 
 .my-asyncdatagrid-display {
     width: 100%;
+    table-layout:fixed;
 }
 
 .my-asyncdatagrid .panel {
@@ -1467,6 +1578,7 @@ td.datePickerMonth, td.datePickerYear {
 
 .sidebar-facet-input-date {
     width: 45%;
+    font-size: 1.2rem;
 }
 
 .sidebar-facet-date-separator {
@@ -1665,6 +1777,12 @@ td.datePickerMonth, td.datePickerYear {
 /*******************************************************************/
 
 /* Browser v2*/
+
+.browse.under_appraisal, .browse.deleted, .browse.created, .browse.ingest_processing {
+    background-color: #efefef;
+    background-image: repeating-linear-gradient(-45deg, transparent, transparent 35px, rgba(255,255,255,.5) 35px, rgba(255,255,255,.5) 70px);
+}
+
 .browseTitle {
     margin-bottom: 10px !important;
 }
@@ -1727,8 +1845,6 @@ td.datePickerMonth, td.datePickerYear {
 }
 
 .browseSearchListTitle {
-    float: left;
-    margin: 0 0 0 0;
 }
 
 .browseItemMetadata {
@@ -1745,7 +1861,7 @@ td.datePickerMonth, td.datePickerYear {
 }
 
 .browseItemMetadata .gwt-TabPanelBottom {
-    background-color: white;
+    background-color: transparent;
     padding: 5px 10px;
     margin-bottom: 20px;
     min-height: 25px;
@@ -1798,7 +1914,7 @@ td.datePickerMonth, td.datePickerYear {
 }
 
 .browseItemMetadata .addTabWrapper {
-    background-color: white;
+    background-color: transparent;
     color: #089de3;
 }
 
@@ -1840,7 +1956,7 @@ td.datePickerMonth, td.datePickerYear {
 
 .browseItemMetadata .gwt-TabBarItem-selected {
     margin: 0;
-    background-color: white;
+    background-color: transparent;
     border-bottom: none;
     color: #089de3;
 }
@@ -1856,7 +1972,7 @@ td.datePickerMonth, td.datePickerYear {
 }
 
 .descriptiveMetadata {
-    font-size: 1.3rem;
+    padding-top: 25px;
 }
 
 .descriptiveMetadata .title, .preservationMetadata .title {
@@ -1875,15 +1991,6 @@ td.datePickerMonth, td.datePickerYear {
 
 .descriptiveMetadata-field {
     margin-bottom: 10px;
-}
-
-.descriptiveMetadata-field-key {
-    font-weight: 300;
-    color: #999;
-}
-
-.descriptiveMetadata-field-value {
-
 }
 
 .browseDownload {
@@ -2105,7 +2212,7 @@ td.datePickerMonth, td.datePickerYear {
 .content>.field {
     display: block;
     line-height: 1.6rem;
-    margin-bottom: 0.5rem;
+    margin-bottom: 10px;
 }
 
 .content>.field .field-label {
@@ -2793,7 +2900,7 @@ td.datePickerMonth, td.datePickerYear {
 }
 
 .searchInputListBoxPopup .dropdown-item:hover {
-    background-color: #3998d0;
+    background-color: #2988c0;
     color: white;
 }
 
@@ -2968,6 +3075,19 @@ td.datePickerMonth, td.datePickerYear {
     color: rgba(0,0,0, 0.5);
 }
 
+.search-field-dialog {
+    font-size: 1.2rem;
+    width: 20px;
+    margin-right: -20px;
+    margin-left: 20px;
+    margin-top: 7px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    cursor: hand;
+    color: rgba(0,0,0, 0.5);
+}
+
 .search-field-left-panel .form-textbox-small {
     max-width: 85px;
     vertical-align: top;
@@ -3034,6 +3154,9 @@ td.datePickerMonth, td.datePickerYear {
 
 .wui-dialog-layout {
     padding: 10px;
+}
+.wui-dialog-layout-footer {
+    text-align: right;
 }
 
 .wui-dialog-message {
@@ -3244,28 +3367,12 @@ td.datePickerMonth, td.datePickerYear {
 }
 
 .login-buttons {
-    height: 50px;
+    margin-top: 20px;
 }
 
 .login-button {
-    margin-top: 20px;
-    width: 120px;
-    float: left;
-}
-
-.login-link {
-    display: inline;
+    min-width: 12rem;
     float: right;
-    color: #089de3;
-    margin-top: 25px;
-    margin-left: 15px;
-    font-size: 1.2rem;
-}
-
-.login-link:hover {
-    text-decoration: underline;
-    cursor: hand;
-    cursor: pointer;
 }
 
 .login-error {
@@ -3300,12 +3407,7 @@ td.datePickerMonth, td.datePickerYear {
 }
 
 .recover-link {
-    display: inline;
-    float: right;
-    color: #089de3;
-    margin-top: 25px;
-    margin-left: 15px;
-    font-size: 1.2rem;
+    margin-top: 20px;
 }
 
 .recover-link:hover {
@@ -3538,6 +3640,10 @@ td.datePickerMonth, td.datePickerYear {
     background-color: transparent;
 }
 
+.viewRepresentation .searchPanelRight {
+    position: absolute;
+}
+
 .viewRepresentation .searchButton-html {
     font-size: 14px;
 }
@@ -3596,10 +3702,6 @@ td.datePickerMonth, td.datePickerYear {
     position: relative;
 }
 
-.wui-ingest-transfer .searchPanel {
-    margin-bottom: 20px;
-    margin-top: 10px;
-}
 
 .ingest-transfer-lastscanned {
     font-size: 1.1rem;
@@ -3774,6 +3876,15 @@ td.datePickerMonth, td.datePickerYear {
     background-color: #EFBBBB !important;
 }
 
+.ingest-process-failed-column {
+    color: #d9534f;
+    font-weight: bolder;
+}
+
+.ingest-process-counter-0 {
+    color: #999;
+}
+
 /**********************************************
 				SHOW JOB
 ************************************************/
@@ -3791,6 +3902,49 @@ td.datePickerMonth, td.datePickerYear {
     font-size: 1.1rem;
     line-height: 1.1rem;
     color: #089de3;
+}
+
+.report .entry, .report .valid{
+    /* 	border-bottom: 1px solid #ddd; */
+}
+
+.report .entry {
+
+}
+
+.report .entry_attr {
+    display: inline;
+}
+
+.report .entry_attr .label {
+    display: none;
+}
+
+.report .entry_attr.valid .label {
+    display: inline;
+    margin-right: 1rem;
+}
+
+.report .entry_attr .value {
+    display: inline;
+    margin-right: 0.5em;
+    font-weight: 300;
+    font-size: 90%;
+}
+
+.report .entry_attr.level .value {
+    font-size: inherit;
+    display: inline-block;
+    font-weight: 400;
+    width: 3.5em;
+}
+
+.report .level_error .entry_attr.level .value {
+    color: red;
+}
+
+.report .entry_attr.related .value {
+    font-weight: 500;
 }
 
 /**********************************************
@@ -4115,6 +4269,30 @@ td.datePickerMonth, td.datePickerYear {
     cursor: default;
     margin-left: 3px;
     color: #999;
+}
+
+.permission {
+    margin-bottom: 10px;
+}
+
+.permission-group .panel-body {
+}
+
+.permission .permission-type {
+    display: inline;
+}
+
+.permission .permission-type, .permission-name, .permission-edit {
+    display: inline;
+    margin-right: 10px;
+}
+
+.permission-edit {
+    margin-right: 5rem;
+}
+
+.permission-edit-checkbox {
+    margin-left: 10px;
 }
 
 /** Create/Edit User **/
@@ -4650,10 +4828,11 @@ td.datePickerMonth, td.datePickerYear {
     margin-bottom: 20px;
 }
 
+/*
 .selectAip .selectAipResultsPanel .my-asyncdatagrid-pager-results,
 .selectAip .selectAipResultsPanel thead {
-    display: none;
-}
+	display: none;
+}*/
 
 @media (max-width: 800px) {
     .selectAip .selectAipResultsPanel {

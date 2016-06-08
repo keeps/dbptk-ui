@@ -5,11 +5,13 @@
 package com.databasepreservation.dbviewer.client.common.lists;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.gwt.user.client.ui.ScrollPanel;
 import org.roda.core.data.adapter.facet.Facets;
 import org.roda.core.data.adapter.filter.Filter;
 import org.roda.core.data.adapter.sort.SortParameter;
@@ -17,6 +19,9 @@ import org.roda.core.data.adapter.sort.Sorter;
 import org.roda.core.data.adapter.sublist.Sublist;
 import org.roda.core.data.v2.index.IndexResult;
 import org.roda.core.data.v2.index.IsIndexed;
+import org.roda.core.data.v2.index.SelectedItems;
+import org.roda.core.data.v2.index.SelectedItemsFilter;
+import org.roda.core.data.v2.index.SelectedItemsList;
 
 import com.databasepreservation.dbviewer.shared.client.ClientLogger;
 import com.databasepreservation.dbviewer.shared.client.widgets.MyCellTableResources;
@@ -26,10 +31,12 @@ import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.shared.GWT;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
@@ -39,6 +46,8 @@ import com.google.gwt.user.cellview.client.ColumnSortList.ColumnSortInfo;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy.KeyboardSelectionPolicy;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.PageSizePager;
+import com.google.gwt.user.cellview.client.SafeHtmlHeader;
+import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -79,6 +88,7 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel i
   private final List<CheckboxSelectionListener<T>> listeners = new ArrayList<AsyncTableCell.CheckboxSelectionListener<T>>();
 
   private Filter filter;
+  private boolean justActive;
   private Facets facets;
   private boolean selectable;
 
@@ -87,18 +97,19 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel i
   private int initialPageSize = 20;
   private int pageSizeIncrement = 100;
 
+  private Class<T> selectedClass;
   private final O object;
 
   public AsyncTableCell() {
-    this(null, null, null, false, 20, 100, null);
+    this(null, false, null, null, false, 20, 100, null);
   }
 
-  public AsyncTableCell(Filter filter, Facets facets, String summary, boolean selectable, O object) {
-    this(filter, facets, summary, selectable, 20, 100, object);
+  public AsyncTableCell(Filter filter, boolean justActive, Facets facets, String summary, boolean selectable, O object) {
+    this(filter, justActive, facets, summary, selectable, 20, 100, object);
   }
 
-  public AsyncTableCell(Filter filter, Facets facets, String summary, boolean selectable, int initialPageSize,
-    int pageSizeIncrement, O object) {
+  public AsyncTableCell(Filter filter, boolean justActive, Facets facets, String summary, boolean selectable,
+    int initialPageSize, int pageSizeIncrement, O object) {
     super();
 
     this.initialPageSize = initialPageSize;
@@ -110,6 +121,7 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel i
     }
 
     this.filter = filter;
+    this.justActive = justActive;
     this.facets = facets;
     this.selectable = selectable;
 
@@ -139,7 +151,9 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel i
 
     dataProvider.addDataDisplay(display);
 
-    resultsPager = new AccessibleSimplePager(AccessibleSimplePager.TextLocation.RIGHT, false, true);
+    resultsPager = new AccessibleSimplePager(AccessibleSimplePager.TextLocation.LEFT,
+      (SimplePager.Resources) GWT.create(SimplePager.Resources.class), false, initialPageSize, false, false,
+      (SimplePager.ImageButtonsConstants) GWT.create(SimplePager.ImageButtonsConstants.class));
     resultsPager.setDisplay(display);
 
     pageSizePager = new PageSizePager(getPageSizePagerIncrement());
@@ -147,9 +161,9 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel i
 
     createSelectAllPanel();
 
-    add(resultsPager);
     add(selectAllPanel);
-    add(display);
+    add(new ScrollPanel(display));
+    add(resultsPager);
     add(pageSizePager);
 
     selectionModel = new SingleSelectionModel<>(getKeyProvider());
@@ -176,6 +190,9 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel i
         hideSelectAllPanel();
       }
     });
+
+    Label emptyInfo = new Label("No items to display");
+    display.setEmptyTableWidget(emptyInfo);
   }
 
   private void configure(final CellTable<T> display) {
@@ -240,7 +257,7 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel i
       });
 
       display.addColumn(selectColumn, selectHeader);
-      display.setColumnWidth(selectColumn, "35px");
+      display.setColumnWidth(selectColumn, "45px");
     }
     configureDisplay(display);
   }
@@ -347,6 +364,10 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel i
 
   public Filter getFilter() {
     return filter;
+  }
+
+  public boolean getJustActive() {
+    return justActive;
   }
 
   public void setFilter(Filter filter) {
@@ -481,9 +502,15 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel i
   public SelectedItems<T> getSelected() {
     SelectedItems<T> ret;
     if (isAllSelected()) {
-      ret = new SelectedItemsFilter<T>(getFilter());
+      ret = new SelectedItemsFilter<T>(getFilter(), selectedClass.getName(), getJustActive());
     } else {
-      ret = new SelectedItemsSet<T>(selected);
+      List<String> ids = new ArrayList<>();
+
+      for (T item : selected) {
+        ids.add(item.getUUID());
+      }
+
+      ret = new SelectedItemsList<T>(ids, selectedClass.getName());
     }
 
     return ret;
@@ -492,6 +519,12 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel i
   public void setSelected(Set<T> newSelected) {
     selected.clear();
     selected.addAll(newSelected);
+    redraw();
+    fireOnCheckboxSelectionChanged();
+  }
+
+  public void clearSelected() {
+    selected.clear();
     redraw();
     fireOnCheckboxSelectionChanged();
   }
@@ -563,4 +596,53 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel i
   public O getObject() {
     return object;
   }
+
+  public int getRowCount() {
+    return dataProvider.getRowCount();
+  }
+
+  public Date getDate() {
+    return dataProvider.getDate();
+  }
+
+  public List<CheckboxSelectionListener<T>> getListeners() {
+    return this.listeners;
+  }
+
+  public Class<T> getSelectedClass() {
+    return this.selectedClass;
+  }
+
+  public void setSelectedClass(Class<T> selectedClass) {
+    this.selectedClass = selectedClass;
+  }
+
+  protected void addColumn(Column<T, ?> column, SafeHtml headerHTML, boolean nowrap, boolean alignRight) {
+    SafeHtmlHeader header = new SafeHtmlHeader(headerHTML);
+
+    display.addColumn(column, header);
+
+    if (nowrap && alignRight) {
+      header.setHeaderStyleNames("nowrap text-align-right");
+      column.setCellStyleNames("nowrap text-align-right");
+    } else if (nowrap) {
+      header.setHeaderStyleNames("cellTableFadeOut");
+      column.setCellStyleNames("cellTableFadeOut");
+    }
+  }
+
+  protected void addColumn(Column<T, ?> column, SafeHtml headerHTML, boolean nowrap, boolean alignRight,
+    double fixedSize) {
+    addColumn(column, headerHTML, nowrap, alignRight);
+    display.setColumnWidth(column, fixedSize, Style.Unit.EM);
+  }
+
+  protected void addColumn(Column<T, ?> column, String headerText, boolean nowrap, boolean alignRight) {
+    addColumn(column, SafeHtmlUtils.fromString(headerText), nowrap, alignRight);
+  }
+
+  protected void addColumn(Column<T, ?> column, String headerText, boolean nowrap, boolean alignRight, double fixedSize) {
+    addColumn(column, SafeHtmlUtils.fromString(headerText), nowrap, alignRight, fixedSize);
+  }
+
 }
