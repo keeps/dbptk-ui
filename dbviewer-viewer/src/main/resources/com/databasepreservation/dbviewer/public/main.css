@@ -20,6 +20,12 @@
     color: rgb(88, 89, 91);
 }
 
+/* allows tables to scroll correctly and not go beyond the page limits */
+.browseContentPreviewPanel > tbody > tr:nth-child(1) > td:nth-child(2) {
+    max-width: 1px;
+    width: 100%;
+}
+
 /***********************************************
    BrowseContent (based on ViewRepresentation)
 ************************************************/

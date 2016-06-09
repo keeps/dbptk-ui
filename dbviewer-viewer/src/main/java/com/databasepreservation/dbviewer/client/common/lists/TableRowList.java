@@ -78,14 +78,8 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
         }
       };
       column.setSortable(viewerColumn.sortable());
-      //column.setCellStyleNames("nowrap");
-
-      //display.addColumn(column, viewerColumn.getDisplayName());
-
-      addColumn(column, viewerColumn.getDisplayName(), true, false, 50);
-
+      addColumn(column, viewerColumn.getDisplayName(), true, false, 10);
       columns.put(viewerColumn, column);
-      //display.setColumnWidth(column, "100%");
     }
 
     Label emptyInfo = new Label("No items to display");
