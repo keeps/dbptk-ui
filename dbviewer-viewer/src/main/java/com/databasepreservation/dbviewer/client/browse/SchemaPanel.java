@@ -24,6 +24,7 @@ import com.databasepreservation.dbviewer.shared.client.Tools.ViewerStringUtils;
 import com.databasepreservation.dbviewer.shared.client.widgets.MyCellTableResources;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -32,6 +33,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
+import com.google.gwt.user.cellview.client.SafeHtmlHeader;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
@@ -40,6 +42,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 
@@ -134,13 +137,13 @@ public class SchemaPanel extends Composite {
         infoColumnsHeader.addStyleName("h4");
         contentItems.add(infoColumnsHeader);
       }
-      contentItems.add(getColumnsInfoTable(viewerTable));
+      contentItems.add(new ScrollPanel(getColumnsInfoTable(viewerTable)));
 
       if (viewerTable.getForeignKeys() != null && viewerTable.getForeignKeys().size() > 0) {
         Label infoForeignKeysHeader = new Label("Foreign Keys");
         infoForeignKeysHeader.addStyleName("h4");
         contentItems.add(infoForeignKeysHeader);
-        contentItems.add(getForeignKeysInfoTable(viewerTable));
+        contentItems.add(new ScrollPanel(getForeignKeysInfoTable(viewerTable)));
       }
     }
 
@@ -257,12 +260,12 @@ public class SchemaPanel extends Composite {
     // descriptionColumn.setSortable(true);
 
     // Add the columns.
-    table.addColumn(primaryKeyColumn);
-    table.addColumn(nameColumn, "Column name");
-    table.addColumn(typeColumn, "Type name");
-    table.addColumn(typeOriginalColumn, "Original type name");
-    table.addColumn(nullableColumn, "Nullable");
-    table.addColumn(descriptionColumn, "Description");
+    addColumnToTable(table, primaryKeyColumn, 2.2, new SafeHtmlBuilder().toSafeHtml());
+    addColumnToTable(table, nameColumn, 15, "Column name");
+    addColumnToTable(table, typeColumn, 15, "Type name");
+    addColumnToTable(table, typeOriginalColumn, 15, "Original type name");
+    addColumnToTable(table, nullableColumn, 8, "Nullable");
+    addColumnToTable(table, descriptionColumn, 35, "Description");
 
     // Create a data provider.
     ListDataProvider<ViewerColumn> dataProvider = new ListDataProvider<ViewerColumn>();
@@ -300,7 +303,7 @@ public class SchemaPanel extends Composite {
     // We know that the data is sorted alphabetically by default.
     // table.getColumnSortList().push(nameColumn);
 
-    table.addStyleName("table-info");
+    table.addStyleName("table-info my-asyncdatagrid-display");
 
     return table;
   }
@@ -392,15 +395,15 @@ public class SchemaPanel extends Composite {
     };
 
     // Add the columns.
-    table.addColumn(nameColumn, "Column name");
-    table.addColumn(descriptionColumn, "Description");
-    table.addColumn(referencedSchemaColumn, "Referenced Schema");
-    table.addColumn(referencedTableColumn, "Referenced Table");
-    table.addColumn(referencedColumnsColumn,
+    addColumnToTable(table, nameColumn, 15, "Name");
+    addColumnToTable(table, referencedSchemaColumn, 15, "Referenced Schema");
+    addColumnToTable(table, referencedTableColumn, 15, "Referenced Table");
+    addColumnToTable(table, referencedColumnsColumn, 20,
       SafeHtmlUtils.fromSafeConstant("Mapping (Source <i class=\"fa fa-arrow-right\"></i> Referenced)"));
-    table.addColumn(matchTypeColumn, "Match type");
-    table.addColumn(updateActionColumn, "Update action");
-    table.addColumn(deleteActionColumn, "Delete action");
+    addColumnToTable(table, matchTypeColumn, 10, "Match type");
+    addColumnToTable(table, updateActionColumn, 9, "Update action");
+    addColumnToTable(table, deleteActionColumn, 9, "Delete action");
+    addColumnToTable(table, descriptionColumn, 35, "Description");
 
     // Create a data provider.
     ListDataProvider<ViewerForeignKey> dataProvider = new ListDataProvider<ViewerForeignKey>();
@@ -415,8 +418,26 @@ public class SchemaPanel extends Composite {
       list.add(viewerForeignKey);
     }
 
-    table.addStyleName("table-info");
+    table.addStyleName("table-info my-asyncdatagrid-display");
 
     return table;
+  }
+
+  private void addColumnToTable(CellTable table, Column column, double size, SafeHtml headerHTML) {
+    SafeHtmlHeader header = new SafeHtmlHeader(headerHTML);
+    table.addColumn(column, header);
+    // header.setHeaderStyleNames("cellTableFadeOut");
+    // column.setCellStyleNames("cellTableFadeOut");
+
+    // if(size != 0) {
+    table.setColumnWidth(column, size, Style.Unit.EM);
+    // }else{
+    // header.setHeaderStyleNames("filler-column");
+    // column.setCellStyleNames("filler-column");
+    // }
+  }
+
+  private void addColumnToTable(CellTable table, Column column, double size, String headerString) {
+    addColumnToTable(table, column, size, SafeHtmlUtils.fromString(headerString));
   }
 }
