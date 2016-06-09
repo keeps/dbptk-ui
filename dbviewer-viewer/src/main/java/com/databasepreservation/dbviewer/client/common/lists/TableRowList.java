@@ -19,10 +19,12 @@ import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerRow;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerTable;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerType;
 import com.databasepreservation.dbviewer.shared.client.ClientLogger;
+import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
@@ -59,6 +61,27 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
       final String solrColumnName = viewerColumn.getSolrName();
 
       Column<ViewerRow, SafeHtml> column = new Column<ViewerRow, SafeHtml>(new SafeHtmlCell()) {
+        /**
+         * Render the object into the cell, providing the full content in a
+         * tooltip
+         *
+         * @param context
+         *          the cell context
+         * @param object
+         *          the object to render
+         * @param sb
+         *          the buffer to render into
+         */
+        @Override
+        public void render(Cell.Context context, ViewerRow object, SafeHtmlBuilder sb) {
+          SafeHtml value = getValue(object);
+          if (value != null) {
+            sb.appendHtmlConstant("<div title=\"" + SafeHtmlUtils.htmlEscape(value.asString()) + "\">");
+            sb.append(value);
+            sb.appendHtmlConstant("</div");
+          }
+        }
+
         @Override
         public SafeHtml getValue(ViewerRow row) {
           SafeHtml ret;
