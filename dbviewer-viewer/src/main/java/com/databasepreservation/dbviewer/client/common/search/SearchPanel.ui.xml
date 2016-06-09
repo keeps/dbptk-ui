@@ -10,10 +10,9 @@
         <g:FlowPanel styleName="searchPanel" ui:field="searchPanel">
             <g:FlowPanel styleName="searchPanelLeft">
                 <s:Dropdown ui:field="searchInputListBox"
-                                 addStyleNames="searchInputListBox"/>
-
+                                 addStyleNames="searchInputListBox" />
                 <g:FlowPanel styleName="searchPanelLeftInput">
-                    <g:TextBox ui:field="searchInputBox" addStyleNames="searchBox"/>
+                    <g:TextBox ui:field="searchInputBox" addStyleNames="searchBox" />
                 </g:FlowPanel>
             </g:FlowPanel>
             <g:FlowPanel styleName="searchPanelRight">
@@ -41,12 +40,11 @@
                          ui:field="searchAdvancedPanelButtons">
                 <g:Button styleName="btn btn-plus advancedAddButton"
                           ui:field="searchAdvancedFieldOptionsAdd">Add search
-                    field
-                </g:Button>
+                    field</g:Button>
                 <g:Button styleName="btn btn-search advancedSearchButton"
-                          ui:field="searchAdvancedGo" enabled="false">Search
-                </g:Button>
+                          ui:field="searchAdvancedGo" enabled="false">Search</g:Button>
             </g:FlowPanel>
         </g:FlowPanel>
+        <g:FlowPanel addStyleNames="searchPreFilters" ui:field="searchPreFilters"/>
     </g:FlowPanel>
 </ui:UiBinder>

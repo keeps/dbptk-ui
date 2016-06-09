@@ -1,3 +1,7 @@
+/**
+ * The contents of this file are based on those found at https://github.com/keeps/roda
+ * and are subject to the license and copyright detailed in https://github.com/keeps/roda
+ */
 package com.databasepreservation.dbviewer.client.common.search;
 
 import java.util.ArrayList;
@@ -12,6 +16,9 @@ import com.databasepreservation.dbviewer.shared.client.widgets.wcag.AccessibleFo
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -22,6 +29,7 @@ import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -29,10 +37,15 @@ import com.google.gwt.user.client.ui.Widget;
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class SearchPanel extends Composite implements HasValueChangeHandlers<String> {
-  interface SearchPanelUiBinder extends UiBinder<Widget, SearchPanel> {
-  }
+  private static final String FILTER_ICON = "<i class='fa fa-filter' aria-hidden='true'></i>";
 
-  private static SearchPanelUiBinder binder = GWT.create(SearchPanelUiBinder.class);
+  // private static final BrowseMessages messages =
+  // GWT.create(BrowseMessages.class);
+
+  private static final Binder binder = GWT.create(Binder.class);
+
+  interface Binder extends UiBinder<Widget, SearchPanel> {
+  }
 
   @UiField
   FlowPanel searchPanel;
@@ -61,6 +74,9 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
   @UiField
   Button searchAdvancedGo;
 
+  @UiField
+  FlowPanel searchPreFilters;
+
   private Filter defaultFilter;
   private String allFilter;
   private boolean defaultFilterIncremental = false;
@@ -83,11 +99,13 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
     searchAdvancedDisclosureButton.setVisible(showSearchAdvancedDisclosureButton);
     searchAdvancedPanel.setVisible(false);
 
-    searchInputBox.addValueChangeHandler(new ValueChangeHandler<String>() {
+    searchInputBox.addKeyDownHandler(new KeyDownHandler() {
 
       @Override
-      public void onValueChange(ValueChangeEvent<String> event) {
-        doSearch();
+      public void onKeyDown(KeyDownEvent event) {
+        if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+          doSearch();
+        }
       }
     });
 
@@ -117,6 +135,51 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
 
     if (showSearchAdvancedDisclosureButton) {
       searchPanel.addStyleName("searchPanelAdvanced");
+    }
+
+    searchPreFilters.setVisible(!defaultFilter.getParameters().isEmpty());
+    drawSearchPreFilters();
+  }
+
+  private void drawSearchPreFilters() {
+    searchPreFilters.clear();
+
+    for (FilterParameter parameter : defaultFilter.getParameters()) {
+      // HTML header = new HTML(SafeHtmlUtils.fromSafeConstant(FILTER_ICON));
+      // header.addStyleName("inline gray");
+      // searchPreFilters.add(header);
+
+      HTML html = null;
+
+      /*
+       * Unused in DBViewer, for now if (parameter instanceof
+       * SimpleFilterParameter) { SimpleFilterParameter p =
+       * (SimpleFilterParameter) parameter; html = new
+       * HTML(messages.searchPreFilterSimpleFilterParameter
+       * (messages.searchPreFilterName(p.getName()),
+       * messages.searchPreFilterValue(p.getValue()))); } else if (parameter
+       * instanceof BasicSearchFilterParameter) { BasicSearchFilterParameter p =
+       * (BasicSearchFilterParameter) parameter; // TODO put '*' in some
+       * constant, see Search if (!"*".equals(p.getValue())) { html = new
+       * HTML(messages
+       * .searchPreFilterBasicSearchFilterParameter(messages.searchPreFilterName
+       * (p.getName()), messages.searchPreFilterValue(p.getValue()))); } } else
+       * if (parameter instanceof NotSimpleFilterParameter) {
+       * NotSimpleFilterParameter p = (NotSimpleFilterParameter) parameter; html
+       * = new HTML(messages.searchPreFilterNotSimpleFilterParameter(messages.
+       * searchPreFilterName(p.getName()),
+       * messages.searchPreFilterValue(p.getValue()))); } else if (parameter
+       * instanceof EmptyKeyFilterParameter) { EmptyKeyFilterParameter p =
+       * (EmptyKeyFilterParameter) parameter; html = new
+       * HTML(messages.searchPreFilterEmptyKeyFilterParameter
+       * (messages.searchPreFilterName(p.getName()))); } else { html = new
+       * HTML(SafeHtmlUtils.fromString(parameter.getClass().getSimpleName())); }
+       */
+
+      if (html != null) {
+        html.addStyleName("xsmall gray inline nowrap");
+        searchPreFilters.add(html);
+      }
     }
   }
 
@@ -149,10 +212,16 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
     if (defaultFilterIncremental) {
       filter = new Filter(defaultFilter);
       filter.add(parameters);
+      searchPreFilters.setVisible(defaultFilter.getParameters().size() > 0);
+      GWT.log("Incremental filter: " + filter);
     } else if (parameters.size() == 0) {
       filter = defaultFilter;
+      searchPreFilters.setVisible(defaultFilter.getParameters().size() > 0);
+      GWT.log("Default filter: " + filter);
     } else {
       filter = new Filter(parameters);
+      searchPreFilters.setVisible(false);
+      GWT.log("New filter: " + filter);
     }
 
     return filter;
@@ -196,6 +265,7 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
 
   public void setDefaultFilter(Filter defaultFilter) {
     this.defaultFilter = defaultFilter;
+    drawSearchPreFilters();
   }
 
   public void setAllFilter(String allFilter) {

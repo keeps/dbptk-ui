@@ -1,5 +1,7 @@
 package com.databasepreservation.dbviewer.client;
 
+import java.util.List;
+
 import org.roda.core.data.adapter.facet.Facets;
 import org.roda.core.data.adapter.filter.Filter;
 import org.roda.core.data.adapter.sort.Sorter;
@@ -11,6 +13,8 @@ import org.roda.core.data.exceptions.RequestNotValidException;
 import org.roda.core.data.v2.index.IndexResult;
 import org.roda.core.data.v2.index.IsIndexed;
 
+import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerTable;
+import com.databasepreservation.dbviewer.client.common.search.SearchField;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
@@ -43,6 +47,8 @@ public interface BrowserService extends RemoteService {
   }
 
   String greetServer(String name) throws IllegalArgumentException;
+
+  List<SearchField> getSearchFields(ViewerTable viewerTable) throws GenericException;
 
   <T extends IsIndexed> IndexResult<T> find(String classNameToReturn, Filter filter, Sorter sorter, Sublist sublist,
     Facets facets, String localeString) throws GenericException, AuthorizationDeniedException, RequestNotValidException;

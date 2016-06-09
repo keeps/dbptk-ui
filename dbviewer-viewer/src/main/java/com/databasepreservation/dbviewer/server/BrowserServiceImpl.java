@@ -1,9 +1,14 @@
 package com.databasepreservation.dbviewer.server;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.roda.core.data.adapter.facet.Facets;
 import org.roda.core.data.adapter.filter.Filter;
 import org.roda.core.data.adapter.sort.Sorter;
 import org.roda.core.data.adapter.sublist.Sublist;
+import org.roda.core.data.common.RodaConstants;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
@@ -13,6 +18,9 @@ import org.roda.core.data.v2.index.IsIndexed;
 import org.roda.core.data.v2.user.RodaUser;
 
 import com.databasepreservation.dbviewer.client.BrowserService;
+import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerColumn;
+import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerTable;
+import com.databasepreservation.dbviewer.client.common.search.SearchField;
 import com.databasepreservation.dbviewer.shared.FieldVerifier;
 import com.databasepreservation.dbviewer.shared.ViewerFactory;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
@@ -105,6 +113,23 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
     RodaUser user = null;
     Class<T> classToReturn = parseClass(classNameToReturn);
     return ViewerFactory.getSolrManager().retrieveRows(user, classToReturn, tableUUID, rowUUID);
+  }
+
+  @Override
+  public List<SearchField> getSearchFields(ViewerTable viewerTable) throws GenericException {
+    List<SearchField> searchFields = new ArrayList<>();
+
+    for (ViewerColumn viewerColumn : viewerTable.getColumns()) {
+      SearchField searchField = new SearchField(viewerTable.getUUID() + "-"
+        + viewerColumn.getColumnIndexInEnclosingTable(), Arrays.asList(viewerColumn.getSolrName()),
+        viewerColumn.getDisplayName(), RodaConstants.SEARCH_FIELD_TYPE_TEXT);
+      searchField.setFixed(true);
+      // fixme: use ViewerType.dbTypes instead of treating everything as text
+
+      searchFields.add(searchField);
+    }
+
+    return searchFields;
   }
 
   @SuppressWarnings("unchecked")

@@ -38,7 +38,7 @@ public abstract class MyAsyncDataProvider<T extends Serializable> extends AsyncD
 
       @Override
       public void onFailure(Throwable caught) {
-        //AsyncCallbackUtils.defaultFailureTreatment(caught);
+        // AsyncCallbackUtils.defaultFailureTreatment(caught);
         throw new RuntimeException(caught);
       }
 
@@ -94,7 +94,7 @@ public abstract class MyAsyncDataProvider<T extends Serializable> extends AsyncD
 
       @Override
       public void onFailure(Throwable caught) {
-        //AsyncCallbackUtils.defaultFailureTreatment(caught);
+        // AsyncCallbackUtils.defaultFailureTreatment(caught);
         throw new RuntimeException(caught);
       }
 
