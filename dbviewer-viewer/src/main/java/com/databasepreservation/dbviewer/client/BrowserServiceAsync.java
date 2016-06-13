@@ -16,13 +16,6 @@ public interface BrowserServiceAsync {
    * 
    * @see com.databasepreservation.dbviewer.client.BrowserService
    */
-  void greetServer(java.lang.String name, AsyncCallback<java.lang.String> callback);
-
-  /**
-   * GWT-RPC service asynchronous (client-side) interface
-   * 
-   * @see com.databasepreservation.dbviewer.client.BrowserService
-   */
   <T extends IsIndexed> void find(java.lang.String classNameToReturn, org.roda.core.data.adapter.filter.Filter filter,
     org.roda.core.data.adapter.sort.Sorter sorter, org.roda.core.data.adapter.sublist.Sublist sublist,
     org.roda.core.data.adapter.facet.Facets facets, java.lang.String localeString,

@@ -25,6 +25,8 @@ import com.databasepreservation.dbviewer.shared.client.Tools.BreadcrumbManager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -89,6 +91,8 @@ public class TablePanel extends Composite {
 
   private final Map<String, SearchField> searchFields = new HashMap<String, SearchField>();
 
+  private final Map<String, Boolean> columnDisplayNameToVisibleState = new HashMap<>();
+
   private static final Filter DEFAULT_FILTER = new Filter(new BasicSearchFilterParameter(
     ViewerConstants.SOLR_ROW_SEARCH, "*"));
 
@@ -133,6 +137,7 @@ public class TablePanel extends Composite {
 
   private void init() {
     tableRowList = new TableRowList(database, table);
+    tableRowList.setColumnVisibility(columnDisplayNameToVisibleState);
 
     searchPanel = new SearchPanel(new Filter(), ViewerConstants.SOLR_ROW_SEARCH, "Search...", false, true);
     searchPanel.setList(tableRowList);
@@ -194,9 +199,15 @@ public class TablePanel extends Composite {
 
         for (SearchField searchField : searchFields) {
           if (searchField.isFixed()) {
-            SearchFieldPanel searchFieldPanel = new SearchFieldPanel();
+            final SearchFieldPanel searchFieldPanel = new SearchFieldPanel();
             searchFieldPanel.setSearchAdvancedFields(searchAdvancedFieldOptions);
             searchFieldPanel.setSearchFields(TablePanel.this.searchFields);
+            searchFieldPanel.setVisibilityChangedHandler(new ValueChangeHandler<Boolean>() {
+              @Override
+              public void onValueChange(ValueChangeEvent<Boolean> event) {
+                handleColumnVisibilityChanges(searchFieldPanel, event);
+              }
+            });
             addSearchFieldPanel(searchFieldPanel);
             searchFieldPanel.selectSearchField(searchField.getId());
           }
@@ -205,9 +216,15 @@ public class TablePanel extends Composite {
         searchPanel.addSearchAdvancedFieldAddHandler(new ClickHandler() {
           @Override
           public void onClick(ClickEvent event) {
-            SearchFieldPanel searchFieldPanel = new SearchFieldPanel();
+            final SearchFieldPanel searchFieldPanel = new SearchFieldPanel();
             searchFieldPanel.setSearchAdvancedFields(searchAdvancedFieldOptions);
             searchFieldPanel.setSearchFields(TablePanel.this.searchFields);
+            searchFieldPanel.setVisibilityChangedHandler(new ValueChangeHandler<Boolean>() {
+              @Override
+              public void onValueChange(ValueChangeEvent<Boolean> event) {
+                handleColumnVisibilityChanges(searchFieldPanel, event);
+              }
+            });
             searchFieldPanel.selectFirstSearchField();
             addSearchFieldPanel(searchFieldPanel);
           }
@@ -220,5 +237,12 @@ public class TablePanel extends Composite {
     searchPanel.setVariables(DEFAULT_FILTER, ViewerConstants.SOLR_ROW_SEARCH, tableRowList,
       itemsSearchAdvancedFieldsPanel);
     searchPanel.setSearchAdvancedFieldOptionsAddVisible(true);
+  }
+
+  private void handleColumnVisibilityChanges(SearchFieldPanel searchFieldPanel, ValueChangeEvent<Boolean> event) {
+    String columnDisplayName = searchFieldPanel.getSearchField().getLabel();
+    columnDisplayNameToVisibleState.put(columnDisplayName, event.getValue());
+    GWT.log("visible state changed: " + columnDisplayName + " is now " + event.getValue());
+    tableRowList.refreshColumnVisibility();
   }
 }

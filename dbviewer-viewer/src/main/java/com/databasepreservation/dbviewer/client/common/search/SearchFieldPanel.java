@@ -21,6 +21,7 @@ import com.databasepreservation.dbviewer.shared.client.Tools.Humanize;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -28,6 +29,7 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.datepicker.client.DateBox;
 
@@ -54,6 +56,10 @@ public class SearchFieldPanel extends Composite {
   // Complex search field
   private ListBox searchAdvancedFields;
   private Map<String, SearchField> searchFields;
+
+  // Column visibility in results
+  private SimplePanel columnVisibilityPanel;
+  private final CheckBox columnVisibility;
 
   // Text
   private TextBox inputText;
@@ -83,6 +89,10 @@ public class SearchFieldPanel extends Composite {
     inputPanel = new FlowPanel();
     fieldLabel = new Label();
     searchAdvancedFields = new ListBox();
+    columnVisibility = new CheckBox();
+    columnVisibility.setValue(true, false);
+
+    columnVisibilityPanel = new SimplePanel(columnVisibility);
 
     DateBox.DefaultFormat dateFormat = new DateBox.DefaultFormat(DateTimeFormat.getFormat("yyyy-MM-dd"));
 
@@ -134,10 +144,13 @@ public class SearchFieldPanel extends Composite {
     initWidget(panel);
 
     searchAdvancedFields.addChangeHandler(new ChangeHandler() {
-
       @Override
       public void onChange(ChangeEvent event) {
         listBoxSearchField(searchAdvancedFields.getSelectedValue());
+        // make sure the column in shown by making sure the checkbox
+        // "changed to true" event is triggered
+        columnVisibility.setValue(false, false);
+        columnVisibility.setValue(true, true);
       }
     });
 
@@ -148,6 +161,8 @@ public class SearchFieldPanel extends Composite {
     remove.addStyleName("search-field-remove");
     fieldLabel.addStyleName("search-field-label");
     searchAdvancedFields.addStyleName("form-listbox");
+    // columnVisibilityPanel.setStyleName("form-listbox search-field-input-panel");
+    columnVisibility.setStyleName("visibility-checkbox");
 
     inputText.addStyleName("form-textbox");
     inputDateBox.addStyleName("form-textbox form-textbox-small");
@@ -246,6 +261,7 @@ public class SearchFieldPanel extends Composite {
     setSearchField(searchField);
 
     leftPanel.clear();
+    leftPanel.add(columnVisibility);
     leftPanel.add(searchAdvancedFields);
     leftPanel.add(inputPanel);
     setInputPanel(searchField.getType());
@@ -261,6 +277,7 @@ public class SearchFieldPanel extends Composite {
     fieldLabel.setText(label);
     leftPanel.clear();
     leftPanel.add(fieldLabel);
+    leftPanel.add(columnVisibilityPanel);
     leftPanel.add(inputPanel);
     setInputPanel(type);
     panel.addStyleName("full_width");
@@ -351,5 +368,9 @@ public class SearchFieldPanel extends Composite {
     }
 
     return valid;
+  }
+
+  public void setVisibilityChangedHandler(ValueChangeHandler<Boolean> handler) {
+    columnVisibility.addValueChangeHandler(handler);
   }
 }

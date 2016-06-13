@@ -351,6 +351,12 @@
     max-width: 1px;
 }
 
+.search-field-left-panel .visibility-checkbox {
+    display: table-cell;
+    vertical-align: top;
+    padding-top: 0.3rem;
+}
+
 /**********************************************
 	       SINGLE RECORD PAGE
 ************************************************/

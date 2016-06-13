@@ -46,8 +46,6 @@ public interface BrowserService extends RemoteService {
     }
   }
 
-  String greetServer(String name) throws IllegalArgumentException;
-
   List<SearchField> getSearchFields(ViewerTable viewerTable) throws GenericException;
 
   <T extends IsIndexed> IndexResult<T> find(String classNameToReturn, Filter filter, Sorter sorter, Sublist sublist,

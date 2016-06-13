@@ -13,11 +13,9 @@ import org.roda.core.data.v2.index.IndexResult;
 import com.databasepreservation.dbviewer.client.BrowserService;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.dbviewer.shared.client.ClientLogger;
-import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortList;
@@ -45,22 +43,6 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
 
   @Override
   protected void configureDisplay(CellTable<ViewerDatabase> display) {
-    levelColumn = new Column<ViewerDatabase, SafeHtml>(new SafeHtmlCell()) {
-      @Override
-      public SafeHtml getValue(ViewerDatabase database) {
-        SafeHtml ret;
-        if (database == null) {
-          logger.error("Trying to display a NULL item");
-          ret = null;
-        } else {
-          // ret =
-          // DescriptionLevelUtils.getElementLevelIconSafeHtml(database.getLevel());
-          ret = SafeHtmlUtils.fromSafeConstant("someicon?");
-        }
-        return ret;
-      }
-    };
-
     nameColumn = new TextColumn<ViewerDatabase>() {
       @Override
       public String getValue(ViewerDatabase database) {
@@ -75,18 +57,12 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
       }
     };
 
-    levelColumn.setSortable(false);
     nameColumn.setSortable(true);
     archivalDateColumn.setSortable(true);
 
-    // TODO externalize strings into constants
-    // display.addColumn(levelColumn,
-    // SafeHtmlUtils.fromSafeConstant("<i class='fa fa-tag'></i>"));
-    display.addColumn(nameColumn, "Database name");
-    display.addColumn(archivalDateColumn, "Archival date");
-    display.setColumnWidth(levelColumn, "35px");
-    display.setColumnWidth(nameColumn, "100%");
-    display.setColumnWidth(nameColumn, "70px");
+    addColumn(nameColumn, "Database name", true, false);
+    addColumn(archivalDateColumn, "Archival date", true, false, 20);
+
     Label emptyInfo = new Label("No items to display");
     display.setEmptyTableWidget(emptyInfo);
 

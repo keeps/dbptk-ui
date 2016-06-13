@@ -2,6 +2,7 @@ package com.databasepreservation.dbviewer.client.common.lists;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -38,7 +39,10 @@ import com.google.gwt.user.client.ui.Label;
 public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase, ViewerTable>> {
   private final ClientLogger logger = new ClientLogger(getClass().getName());
 
-  private Map<ViewerColumn, Column<ViewerRow, ?>> columns;
+  private LinkedHashMap<ViewerColumn, Column<ViewerRow, ?>> columns;
+  private Map<String, Boolean> columnDisplayNameToVisibleState = new HashMap<>();
+
+  private CellTable<ViewerRow> display;
 
   public TableRowList(ViewerDatabase database, ViewerTable table) {
     this(database, table, null, null, null, false);
@@ -49,10 +53,30 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
     super(filter, false, facets, summary, selectable, new Pair<ViewerDatabase, ViewerTable>(database, table));
   }
 
+  public void setColumnVisibility(Map<String, Boolean> columnDisplayNameToVisibleState) {
+    this.columnDisplayNameToVisibleState = columnDisplayNameToVisibleState;
+  }
+
+  /**
+   * Checks if the column should be displayed. When uncertain, show it.
+   * 
+   * @param column
+   *          the column
+   * @return the visible state
+   */
+  protected boolean isColumnVisible(ViewerColumn column) {
+    // NULL -> true (show)
+    // true -> true (show)
+    // false -> false (hide)
+    Boolean visibleState = columnDisplayNameToVisibleState.get(column.getDisplayName());
+    return visibleState == null || visibleState;
+  }
+
   @Override
   protected void configureDisplay(CellTable<ViewerRow> display) {
+    this.display = display;
     ViewerTable table = getObject().getSecond();
-    columns = new HashMap<>(table.getColumns().size());
+    columns = new LinkedHashMap<>(table.getColumns().size());
 
     int columnIndex = 0;
     for (ViewerColumn viewerColumn : table.getColumns()) {
@@ -92,7 +116,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
             logger.error("Trying to display NULL Cells");
             ret = null;
           } else if (row.getCells().get(solrColumnName) == null) {
-            logger.error("Trying to display NULL value");
+            // logger.error("Trying to display NULL value");
             ret = null;
           } else {
             ret = SafeHtmlUtils.fromString(row.getCells().get(solrColumnName).getValue());
@@ -101,6 +125,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
         }
       };
       column.setSortable(viewerColumn.sortable());
+
       addColumn(column, viewerColumn.getDisplayName(), true, false, 10);
       columns.put(viewerColumn, column);
     }
@@ -143,5 +168,20 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
   protected void onLoad() {
     super.onLoad();
     this.getSelectionModel().clear();
+  }
+
+  public void refreshColumnVisibility() {
+    int count = display.getColumnCount();
+    for (int i = 0; i < count; i++) {
+      display.removeColumn(0);
+    }
+
+    for (ViewerColumn viewerColumn : columns.keySet()) {
+      Column<ViewerRow, ?> displayColumn = columns.get(viewerColumn);
+
+      if (isColumnVisible(viewerColumn)) {
+        addColumn(displayColumn, viewerColumn.getDisplayName(), true, false, 10);
+      }
+    }
   }
 }
