@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.dbviewer.shared.client.Tools.ViewerStringUtils;
 import org.roda.core.data.adapter.facet.Facets;
 import org.roda.core.data.adapter.filter.Filter;
 import org.roda.core.data.adapter.sort.Sorter;
@@ -126,7 +127,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
       };
       column.setSortable(viewerColumn.sortable());
 
-      addColumn(column, viewerColumn.getDisplayName(), true, false, 10);
+      addColumn(viewerColumn, column);
       columns.put(viewerColumn, column);
     }
 
@@ -180,8 +181,28 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
       Column<ViewerRow, ?> displayColumn = columns.get(viewerColumn);
 
       if (isColumnVisible(viewerColumn)) {
-        addColumn(displayColumn, viewerColumn.getDisplayName(), true, false, 10);
+        addColumn(viewerColumn, displayColumn);
       }
     }
+  }
+
+  private void addColumn(ViewerColumn viewerColumn, Column<ViewerRow, ?> displayColumn) {
+    SafeHtmlBuilder headerTextBuilder = new SafeHtmlBuilder();
+
+    headerTextBuilder.appendEscaped(viewerColumn.getDisplayName());
+
+    StringBuilder description = new StringBuilder(" <i class=\"fa fa-info-circle\" title=\"");
+    description.append("Type: ").append(viewerColumn.getType().getTypeName()).append(";&#10;");
+    description.append("Description: ");
+      if(ViewerStringUtils.isNotBlank(viewerColumn.getDescription())){
+        description.append(viewerColumn.getDescription());
+      }else{
+        description.append("A description for this column was not provided.");
+      }
+    description.append("\"></i>");
+
+    headerTextBuilder.appendHtmlConstant(description.toString());
+
+    addColumn(displayColumn, headerTextBuilder.toSafeHtml(), true, false, 10);
   }
 }
