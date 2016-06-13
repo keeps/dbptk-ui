@@ -5,6 +5,7 @@
 package com.databasepreservation.dbviewer.client.common.search;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -59,7 +60,7 @@ public class SearchFieldPanel extends Composite {
 
   // Column visibility in results
   private SimplePanel columnVisibilityPanel;
-  private final CheckBox columnVisibility;
+  private CheckBox columnVisibility;
 
   // Text
   private TextBox inputText;
@@ -83,6 +84,13 @@ public class SearchFieldPanel extends Composite {
   // Suggestion
   // private SearchSuggestBox<?> inputSearchSuggestBox = null;
 
+  private Map<String, Boolean> columnDisplayNameToVisibleState = new HashMap<>();
+
+  public SearchFieldPanel(Map<String, Boolean> columnDisplayNameToVisibleState) {
+    this();
+    this.columnDisplayNameToVisibleState = columnDisplayNameToVisibleState;
+  }
+
   public SearchFieldPanel() {
     panel = new FlowPanel();
     leftPanel = new FlowPanel();
@@ -90,7 +98,8 @@ public class SearchFieldPanel extends Composite {
     fieldLabel = new Label();
     searchAdvancedFields = new ListBox();
     columnVisibility = new CheckBox();
-    columnVisibility.setValue(true, false);
+
+    setVisibilityCheckboxValue(true, false);
 
     columnVisibilityPanel = new SimplePanel(columnVisibility);
 
@@ -147,10 +156,14 @@ public class SearchFieldPanel extends Composite {
       @Override
       public void onChange(ChangeEvent event) {
         listBoxSearchField(searchAdvancedFields.getSelectedValue());
-        // make sure the column in shown by making sure the checkbox
-        // "changed to true" event is triggered
-        columnVisibility.setValue(false, false);
-        columnVisibility.setValue(true, true);
+
+        // handle checkbox
+        String columnDisplayName = getSearchField().getLabel();
+        if (columnDisplayNameToVisibleState.containsKey(columnDisplayName)) {
+          columnVisibility.setValue(columnDisplayNameToVisibleState.get(columnDisplayName), false);
+        } else {
+          columnVisibility.setValue(true, false);
+        }
       }
     });
 
@@ -183,6 +196,9 @@ public class SearchFieldPanel extends Composite {
 
   public void setSearchField(SearchField searchField) {
     this.searchField = searchField;
+
+    Boolean visibleState = columnDisplayNameToVisibleState.get(searchField.getLabel());
+    setVisibilityCheckboxValue(visibleState == null || visibleState, false);
   }
 
   public void setSearchAdvancedFields(ListBox searchAdvancedFieldOptions) {
@@ -372,5 +388,13 @@ public class SearchFieldPanel extends Composite {
 
   public void setVisibilityChangedHandler(ValueChangeHandler<Boolean> handler) {
     columnVisibility.addValueChangeHandler(handler);
+  }
+
+  public void setVisibilityCheckboxValue(boolean value, boolean triggerEvents) {
+    columnVisibility.setValue(value, triggerEvents);
+  }
+
+  public Boolean getVisibilityCheckboxValue() {
+    return columnVisibility.getValue();
   }
 }

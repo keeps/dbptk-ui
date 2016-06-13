@@ -199,7 +199,7 @@ public class TablePanel extends Composite {
 
         for (SearchField searchField : searchFields) {
           if (searchField.isFixed()) {
-            final SearchFieldPanel searchFieldPanel = new SearchFieldPanel();
+            final SearchFieldPanel searchFieldPanel = new SearchFieldPanel(columnDisplayNameToVisibleState);
             searchFieldPanel.setSearchAdvancedFields(searchAdvancedFieldOptions);
             searchFieldPanel.setSearchFields(TablePanel.this.searchFields);
             searchFieldPanel.setVisibilityChangedHandler(new ValueChangeHandler<Boolean>() {
@@ -216,7 +216,7 @@ public class TablePanel extends Composite {
         searchPanel.addSearchAdvancedFieldAddHandler(new ClickHandler() {
           @Override
           public void onClick(ClickEvent event) {
-            final SearchFieldPanel searchFieldPanel = new SearchFieldPanel();
+            final SearchFieldPanel searchFieldPanel = new SearchFieldPanel(columnDisplayNameToVisibleState);
             searchFieldPanel.setSearchAdvancedFields(searchAdvancedFieldOptions);
             searchFieldPanel.setSearchFields(TablePanel.this.searchFields);
             searchFieldPanel.setVisibilityChangedHandler(new ValueChangeHandler<Boolean>() {
@@ -244,5 +244,14 @@ public class TablePanel extends Composite {
     columnDisplayNameToVisibleState.put(columnDisplayName, event.getValue());
     GWT.log("visible state changed: " + columnDisplayName + " is now " + event.getValue());
     tableRowList.refreshColumnVisibility();
+
+    // update other references
+    for (int i = 0; i < itemsSearchAdvancedFieldsPanel.getWidgetCount(); i++) {
+      SearchFieldPanel otherSearchFieldPanel = (SearchFieldPanel) itemsSearchAdvancedFieldsPanel.getWidget(i);
+      if (searchFieldPanel != otherSearchFieldPanel
+        && searchFieldPanel.getSearchField().getLabel().equals(otherSearchFieldPanel.getSearchField().getLabel())) {
+        otherSearchFieldPanel.setVisibilityCheckboxValue(searchFieldPanel.getVisibilityCheckboxValue(), false);
+      }
+    }
   }
 }
