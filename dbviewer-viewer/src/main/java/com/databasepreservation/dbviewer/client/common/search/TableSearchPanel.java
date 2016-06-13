@@ -54,6 +54,8 @@ public class TableSearchPanel extends Composite {
   FlowPanel itemsSearchAdvancedFieldsPanel;
   ListBox searchAdvancedFieldOptions;
 
+  private Filter initialFilter;
+
   private final Map<String, SearchField> searchFields = new HashMap<String, SearchField>();
 
   private final Map<String, Boolean> columnDisplayNameToVisibleState = new HashMap<>();
@@ -78,13 +80,16 @@ public class TableSearchPanel extends Composite {
     if (initialFilter == null) {
       initialFilter = DEFAULT_FILTER;
     }
+    this.initialFilter = initialFilter;
     this.database = database;
     this.table = table;
 
-    tableRowList = new TableRowList(database, table);
+    tableRowList = new TableRowList(database, table, initialFilter, null, null, false);
     tableRowList.setColumnVisibility(columnDisplayNameToVisibleState);
 
-    searchPanel = new SearchPanel(new Filter(), ViewerConstants.SOLR_ROW_SEARCH, "Search...", false, true);
+    GWT.log("initial filter: " + initialFilter.toString());
+
+    searchPanel = new SearchPanel(initialFilter, ViewerConstants.SOLR_ROW_SEARCH, "Search...", false, true);
     searchPanel.setList(tableRowList);
     searchPanel.setDefaultFilterIncremental(true);
     showSearchAdvancedFieldsPanel();
@@ -179,7 +184,7 @@ public class TableSearchPanel extends Composite {
   }
 
   public void showSearchAdvancedFieldsPanel() {
-    searchPanel.setVariables(DEFAULT_FILTER, ViewerConstants.SOLR_ROW_SEARCH, tableRowList,
+    searchPanel.setVariables(initialFilter, ViewerConstants.SOLR_ROW_SEARCH, tableRowList,
       itemsSearchAdvancedFieldsPanel);
     searchPanel.setSearchAdvancedFieldOptionsAddVisible(true);
   }

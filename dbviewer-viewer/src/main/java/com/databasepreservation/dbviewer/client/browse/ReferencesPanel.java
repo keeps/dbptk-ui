@@ -23,8 +23,8 @@ import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerReference;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerRow;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerSchema;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerTable;
-import com.databasepreservation.dbviewer.client.common.lists.TableRowList;
 import com.databasepreservation.dbviewer.client.common.search.SearchPanel;
+import com.databasepreservation.dbviewer.client.common.search.TableSearchPanel;
 import com.databasepreservation.dbviewer.client.main.BreadcrumbPanel;
 import com.databasepreservation.dbviewer.shared.client.HistoryManager;
 import com.databasepreservation.dbviewer.shared.client.Tools.BreadcrumbManager;
@@ -41,7 +41,6 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.SelectionChangeEvent;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -152,7 +151,7 @@ public class ReferencesPanel extends Composite {
       }
       cellValue.setText(value);
 
-      TreeMap<Reference, TableRowList> references = new TreeMap<>();
+      TreeMap<Reference, TableSearchPanel> references = new TreeMap<>();
 
       // get references where this column is source in foreign keys
       // for (ViewerForeignKey fk : table.getForeignKeys()) {
@@ -203,7 +202,7 @@ public class ReferencesPanel extends Composite {
               if (columnIndexOnCurrentTable == columnIndexInTable) {
                 Reference reference = new Reference(otherTable, viewerForeignKey);
                 if (!references.containsKey(reference)) {
-                  references.put(reference, createTableRowListFromReference(reference));
+                  references.put(reference, createTableSearchPanelFromReference(reference));
                   break; // its selected. avoid checking more columns
                 }
               }
@@ -212,13 +211,13 @@ public class ReferencesPanel extends Composite {
         }
       }
 
-      for (Map.Entry<Reference, TableRowList> entry : references.entrySet()) {
+      for (Map.Entry<Reference, TableSearchPanel> entry : references.entrySet()) {
         addReferenceTable(entry.getKey(), entry.getValue());
       }
     }
   }
 
-  private void addReferenceTable(Reference reference, TableRowList table) {
+  private void addReferenceTable(Reference reference, TableSearchPanel table) {
     content.add(getReferenceHeaderPanel(reference));
     content.add(table);
   }
@@ -302,7 +301,7 @@ public class ReferencesPanel extends Composite {
     return header;
   }
 
-  private TableRowList createTableRowListFromReference(Reference reference) {
+  private TableSearchPanel createTableSearchPanelFromReference(Reference reference) {
     final ViewerTable otherTable = reference.table;
 
     // create filter to look for record values in other tables related to this
@@ -334,19 +333,10 @@ public class ReferencesPanel extends Composite {
     Filter filter = new Filter(filterParameters);
 
     // create the table with the filter
-    final TableRowList tableRowList = new TableRowList(database, otherTable, filter, null, null, false);
+    final TableSearchPanel tableSearchPanel = new TableSearchPanel();
+    tableSearchPanel.provideSource(database, otherTable, filter);
 
-    tableRowList.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-      @Override
-      public void onSelectionChange(SelectionChangeEvent event) {
-        ViewerRow otherRecord = tableRowList.getSelectionModel().getSelectedObject();
-        if (otherRecord != null) {
-          HistoryManager.gotoRecord(database.getUUID(), otherTable.getUUID(), otherRecord.getUUID());
-        }
-      }
-    });
-
-    return tableRowList;
+    return tableSearchPanel;
   }
 
   private SafeHtml getCellHTML(ViewerColumn column) {
