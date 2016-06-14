@@ -30,6 +30,22 @@
 }
 
 /***********************************************
+              Table search panel
+************************************************/
+
+.TableSearchPanel-search .searchAdvancedPanel {
+    margin-bottom: 0;
+}
+
+.TableSearchPanel-search {
+    margin-bottom: 20px;
+}
+
+.TableSearchPanel-table {
+    /*nothing yet since most of it is defined for all AsyncTableCells*/
+}
+
+/***********************************************
    BrowseContent (based on ViewRepresentation)
 ************************************************/
 .browseContentTitle {

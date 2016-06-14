@@ -7,7 +7,7 @@
     </ui:style>
 
     <g:FlowPanel>
-        <g:SimplePanel ui:field="searchContainer"/>
-        <g:SimplePanel ui:field="tableContainer"/>
+        <g:SimplePanel ui:field="searchContainer" addStyleNames="TableSearchPanel-search"/>
+        <g:SimplePanel ui:field="tableContainer"  addStyleNames="TableSearchPanel-table"/>
     </g:FlowPanel>
 </ui:UiBinder>

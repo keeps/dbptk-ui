@@ -132,11 +132,6 @@ public class SchemaPanel extends Composite {
     for (ViewerTable viewerTable : schema.getTables()) {
       contentItems.add(new HTMLPanel(getTableDescriptionItemHTML(viewerTable)));
 
-      if (viewerTable.getForeignKeys() != null && viewerTable.getForeignKeys().size() > 0) {
-        Label infoColumnsHeader = new Label("Columns");
-        infoColumnsHeader.addStyleName("h4");
-        contentItems.add(infoColumnsHeader);
-      }
       contentItems.add(new ScrollPanel(getColumnsInfoTable(viewerTable)));
 
       if (viewerTable.getForeignKeys() != null && viewerTable.getForeignKeys().size() > 0) {

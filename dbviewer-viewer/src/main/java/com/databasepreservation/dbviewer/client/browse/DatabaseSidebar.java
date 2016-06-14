@@ -97,14 +97,14 @@ public class DatabaseSidebar extends Composite {
     // database metadata
     final ViewerMetadata metadata = database.getMetadata();
 
-    sidebarGroup.add(new SidebarHyperlink("Database " + metadata.getName(), HistoryManager.linkToDatabase(database
-      .getUUID())).addIcon("database").setH5().setIndent0());
+    sidebarGroup.add(new SidebarHyperlink("Database information", HistoryManager.linkToDatabase(database.getUUID()))
+      .addIcon("database").setH5().setIndent0());
     for (final ViewerSchema schema : metadata.getSchemas()) {
       sidebarGroup.add(new SidebarHyperlink("Schema " + schema.getName(), HistoryManager.linkToSchema(
-        database.getUUID(), schema.getUUID())).addIcon("cube").setH5().setIndent1());
+        database.getUUID(), schema.getUUID())).addIcon("cube").setH5().setIndent0());
       for (ViewerTable table : schema.getTables()) {
         sidebarGroup.add(new SidebarHyperlink(table.getName(), HistoryManager.linkToTable(database.getUUID(),
-          table.getUUID())).addIcon("table").setH6().setIndent2());
+          table.getUUID())).addIcon("table").setH6().setIndent1());
       }
     }
   }

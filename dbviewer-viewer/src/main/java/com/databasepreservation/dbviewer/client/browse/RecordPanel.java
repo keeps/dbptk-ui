@@ -30,7 +30,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Hyperlink;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -63,9 +62,6 @@ public class RecordPanel extends Composite {
   DatabaseSidebar sidebar;
   @UiField
   HTML content;
-
-  @UiField
-  Label headerLabel;
 
   private RecordPanel(final String databaseUUID, final String tableUUID, final String recordUUID) {
     this.recordUUID = recordUUID;
@@ -124,8 +120,6 @@ public class RecordPanel extends Composite {
         table.getSchemaUUID(), table.getName(), table.getUUID(), recordUUID));
 
     if (record != null) {
-      headerLabel.setText("Record " + record.getUUID());
-
       Set<Integer> columnIndexesContainingForeignKeyRelations = new HashSet<>();
 
       // get references where this column is source in foreign keys
