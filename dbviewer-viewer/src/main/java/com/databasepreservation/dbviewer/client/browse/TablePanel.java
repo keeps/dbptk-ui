@@ -87,7 +87,7 @@ public class TablePanel extends Composite {
           table = database.getMetadata().getTable(tableUUID);
           schema = database.getMetadata().getSchemaFromTableUUID(tableUUID);
 
-          mainHeader.setText("Searching table `" + table.getName() + "`");
+          mainHeader.setText("Table: " + table.getName());
           mainHeader.removeStyleName("hidden");
           BreadcrumbManager.updateBreadcrumb(
             breadcrumb,

@@ -148,7 +148,7 @@ public class SchemaPanel extends Composite {
   private SafeHtml getTableDescriptionItemHTML(ViewerTable table) {
     SafeHtmlBuilder b = new SafeHtmlBuilder();
 
-    Hyperlink hyperlink = new Hyperlink("Table `" + table.getName() + "`", HistoryManager.linkToTable(
+    Hyperlink hyperlink = new Hyperlink("Table: " + table.getName(), HistoryManager.linkToTable(
       database.getUUID(), table.getUUID()));
     hyperlink.addStyleName("h3");
 
@@ -206,7 +206,7 @@ public class SchemaPanel extends Composite {
         if (pk.getColumnIndexesInViewerTable().contains(column.getColumnIndexInEnclosingTable())) {
           return SafeHtmlUtils.fromSafeConstant("<i class='fa fa-key' title='Primary Key'></i>");
         } else if(columnIndexesWithForeignKeys.contains(column.getColumnIndexInEnclosingTable())) {
-          return SafeHtmlUtils.fromSafeConstant("<i class='fa fa-reply' title='Part of one or more Foreign Keys'></i>");
+          return SafeHtmlUtils.fromSafeConstant("<i class='fa fa-exchange' title='Used by a Foreign Key relation'></i>");
         }else{
           return SafeHtmlUtils.EMPTY_SAFE_HTML;
         }
