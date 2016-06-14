@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerRoutine;
+import com.databasepreservation.model.structure.RoutineStructure;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -25,7 +27,9 @@ import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerDatabaseFr
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerForeignKey;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerMetadata;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerPrimaryKey;
+import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerPrivilegeStructure;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerReference;
+import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerRoleStructure;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerRow;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerSchema;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerTable;
@@ -33,6 +37,7 @@ import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerTrigger;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerType;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerTypeArray;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerTypeStructure;
+import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerUserStructure;
 import com.databasepreservation.dbviewer.exceptions.ViewerException;
 import com.databasepreservation.dbviewer.utils.SolrUtils;
 import com.databasepreservation.dbviewer.utils.ViewerUtils;
@@ -47,10 +52,13 @@ import com.databasepreservation.model.structure.ColumnStructure;
 import com.databasepreservation.model.structure.DatabaseStructure;
 import com.databasepreservation.model.structure.ForeignKey;
 import com.databasepreservation.model.structure.PrimaryKey;
+import com.databasepreservation.model.structure.PrivilegeStructure;
 import com.databasepreservation.model.structure.Reference;
+import com.databasepreservation.model.structure.RoleStructure;
 import com.databasepreservation.model.structure.SchemaStructure;
 import com.databasepreservation.model.structure.TableStructure;
 import com.databasepreservation.model.structure.Trigger;
+import com.databasepreservation.model.structure.UserStructure;
 import com.databasepreservation.model.structure.type.ComposedTypeArray;
 import com.databasepreservation.model.structure.type.ComposedTypeStructure;
 import com.databasepreservation.model.structure.type.SimpleTypeBinary;
@@ -107,11 +115,71 @@ public class ToolkitStructure2ViewerStructure {
     result.setDescription(structure.getDescription());
     result.setProducerApplication(structure.getProducerApplication());
 
+    result.setUsers(getUsers(structure.getUsers()));
+    result.setRoles(getRoles(structure.getRoles()));
+    result.setPrivileges(getPrivileges(structure.getPrivileges()));
+
     result.setArchivalDate(getArchivalDate(structure));
 
     ReferenceHolder references = new ReferenceHolder(structure);
 
     result.setSchemas(getSchemas(vdb, structure.getSchemas(), references));
+    return result;
+  }
+
+  private static List<ViewerPrivilegeStructure> getPrivileges(List<PrivilegeStructure> privileges) {
+    ArrayList<ViewerPrivilegeStructure> result = new ArrayList<>();
+    if (privileges != null) {
+      for (PrivilegeStructure privilege : privileges) {
+        result.add(getPrivilege(privilege));
+      }
+    }
+    return result;
+  }
+
+  private static ViewerPrivilegeStructure getPrivilege(PrivilegeStructure privilege) {
+    ViewerPrivilegeStructure result = new ViewerPrivilegeStructure();
+    result.setType(privilege.getType());
+    result.setDescription(privilege.getDescription());
+    result.setGrantee(privilege.getGrantee());
+    result.setGrantor(privilege.getGrantor());
+    result.setObject(privilege.getObject());
+    result.setOption(privilege.getOption());
+    return result;
+  }
+
+  private static List<ViewerRoleStructure> getRoles(List<RoleStructure> roles) {
+    ArrayList<ViewerRoleStructure> result = new ArrayList<>();
+    if (roles != null) {
+      for (RoleStructure role : roles) {
+        result.add(getRole(role));
+      }
+    }
+    return result;
+  }
+
+  private static ViewerRoleStructure getRole(RoleStructure role) {
+    ViewerRoleStructure result = new ViewerRoleStructure();
+    result.setName(role.getName());
+    result.setAdmin(role.getAdmin());
+    result.setDescription(role.getDescription());
+    return result;
+  }
+
+  private static List<ViewerUserStructure> getUsers(List<UserStructure> users) {
+    ArrayList<ViewerUserStructure> result = new ArrayList<>();
+    if (users != null) {
+      for (UserStructure user : users) {
+        result.add(getUser(user));
+      }
+    }
+    return result;
+  }
+
+  private static ViewerUserStructure getUser(UserStructure user) {
+    ViewerUserStructure result = new ViewerUserStructure();
+    result.setName(user.getName());
+    result.setDescription(user.getDescription());
     return result;
   }
 
@@ -143,9 +211,20 @@ public class ToolkitStructure2ViewerStructure {
     result.setName(schema.getName());
     result.setDescription(schema.getDescription());
 
+    result.setRoutines(getRoutines(schema.getRoutines()));
+    result.setViews(getViews(schema.getViews()));
+
     vdb.putSchema(schema.getName(), result);
     result.setTables(getTables(vdb, schema.getTables(), references));
 
+    return result;
+  }
+
+  private static List<ViewerRoutine> getRoutines(List<RoutineStructure> routines) {
+    ArrayList<ViewerRoutine> result = new ArrayList<>();
+    for (RoutineStructure routine : routines) {
+      result.add(getRoutine(routine));
+    }
     return result;
   }
 

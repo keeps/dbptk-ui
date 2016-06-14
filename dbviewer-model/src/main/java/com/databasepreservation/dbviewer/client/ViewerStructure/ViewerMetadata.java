@@ -2,7 +2,7 @@ package com.databasepreservation.dbviewer.client.ViewerStructure;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -39,19 +39,19 @@ public class ViewerMetadata implements Serializable {
 
   private Map<String, ViewerTable> tables;
 
-  // private List<DbvUser> users;
+  private List<ViewerUserStructure> users;
 
-  // private List<DbvRole> roles;
+  private List<ViewerRoleStructure> roles;
 
-  // private List<DbvPrivilege> privileges;
+  private List<ViewerPrivilegeStructure> privileges;
 
   // +++++++++++++++++++++++++++++++++++++++++++++++++++++
   // Getters and setters
   // +++++++++++++++++++++++++++++++++++++++++++++++++++++
 
   public ViewerMetadata() {
-    schemas = new HashMap<>();
-    tables = new HashMap<>();
+    schemas = new LinkedHashMap<>();
+    tables = new LinkedHashMap<>();
   }
 
   public String getName() {
@@ -67,8 +67,8 @@ public class ViewerMetadata implements Serializable {
   }
 
   public void setSchemas(List<ViewerSchema> schemaList) {
-    schemas = new HashMap<>();
-    tables = new HashMap<>();
+    schemas = new LinkedHashMap<>();
+    tables = new LinkedHashMap<>();
     for (ViewerSchema schema : schemaList) {
       schemas.put(schema.getUUID(), schema);
       for (ViewerTable table : schema.getTables()) {
@@ -155,6 +155,30 @@ public class ViewerMetadata implements Serializable {
 
   public void setProducerApplication(String producerApplication) {
     this.producerApplication = producerApplication;
+  }
+
+  public List<ViewerUserStructure> getUsers() {
+    return users;
+  }
+
+  public void setUsers(List<ViewerUserStructure> users) {
+    this.users = users;
+  }
+
+  public List<ViewerRoleStructure> getRoles() {
+    return roles;
+  }
+
+  public void setRoles(List<ViewerRoleStructure> roles) {
+    this.roles = roles;
+  }
+
+  public List<ViewerPrivilegeStructure> getPrivileges() {
+    return privileges;
+  }
+
+  public void setPrivileges(List<ViewerPrivilegeStructure> privileges) {
+    this.privileges = privileges;
   }
 
   // +++++++++++++++++++++++++++++++++++++++++++++++++++++

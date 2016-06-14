@@ -16,9 +16,9 @@ public class ViewerSchema implements Serializable {
 
   private List<ViewerTable> tables;
 
-  // private List<DbvView> views;
+  private List<ViewerView> views;
 
-  // private List<DbvRoutine> routines;
+  private List<ViewerRoutine> routines;
 
   // private List<DbvComposedType> userDefinedTypes;
 
@@ -56,5 +56,21 @@ public class ViewerSchema implements Serializable {
 
   public void setUUID(String uuid) {
     this.uuid = uuid;
+  }
+
+  public List<ViewerView> getViews() {
+    return views;
+  }
+
+  public void setViews(List<ViewerView> views) {
+    this.views = views;
+  }
+
+  public List<ViewerRoutine> getRoutines() {
+    return routines;
+  }
+
+  public void setRoutines(List<ViewerRoutine> routines) {
+    this.routines = routines;
   }
 }
