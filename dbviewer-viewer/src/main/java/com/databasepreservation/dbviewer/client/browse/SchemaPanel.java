@@ -1,6 +1,7 @@
 package com.databasepreservation.dbviewer.client.browse;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -191,14 +192,23 @@ public class SchemaPanel extends Composite {
         SafeHtmlUtils
           .fromSafeConstant("<div class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>")));
 
+    final HashSet<Integer> columnIndexesWithForeignKeys = new HashSet<>();
+    for (ViewerForeignKey viewerForeignKey : viewerTable.getForeignKeys()) {
+      for (ViewerReference viewerReference : viewerForeignKey.getReferences()) {
+        columnIndexesWithForeignKeys.add(viewerReference.getSourceColumnIndex());
+      }
+    }
+
     SafeHtmlCell primaryKeyColumnCell = new SafeHtmlCell();
     Column<ViewerColumn, SafeHtml> primaryKeyColumn = new Column<ViewerColumn, SafeHtml>(primaryKeyColumnCell) {
       @Override
       public SafeHtml getValue(ViewerColumn column) {
         if (pk.getColumnIndexesInViewerTable().contains(column.getColumnIndexInEnclosingTable())) {
-          return SafeHtmlUtils.fromSafeConstant("<i class=\"fa fa-key\"></i>");
-        } else {
-          return new SafeHtmlBuilder().toSafeHtml();
+          return SafeHtmlUtils.fromSafeConstant("<i class='fa fa-key' title='Primary Key'></i>");
+        } else if(columnIndexesWithForeignKeys.contains(column.getColumnIndexInEnclosingTable())) {
+          return SafeHtmlUtils.fromSafeConstant("<i class='fa fa-reply' title='Part of one or more Foreign Keys'></i>");
+        }else{
+          return SafeHtmlUtils.EMPTY_SAFE_HTML;
         }
       }
     };
@@ -346,7 +356,7 @@ public class SchemaPanel extends Composite {
           ViewerReference reference = i.next();
 
           builder.appendEscaped(viewerTable.getColumns().get(reference.getSourceColumnIndex()).getDisplayName())
-            .appendHtmlConstant(" <i class=\"fa fa-arrow-right\"></i> ")
+            .appendHtmlConstant(" <i class='fa fa-arrow-right'></i> ")
             .appendEscaped(referencedTable.getColumns().get(reference.getReferencedColumnIndex()).getDisplayName());
 
           if (i.hasNext()) {

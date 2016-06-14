@@ -79,8 +79,9 @@ public class ReferencesPanel extends Composite {
   @UiField
   Label mainHeader;
 
-  @UiField
-  Label cellValue;
+  @UiField Label cellSchema;
+  @UiField Label cellTable;
+  @UiField Label cellColumn;
 
   private ReferencesPanel(final String databaseUUID, final String tableUUID, final String recordUUID,
     final String columnIndexInTable) {
@@ -134,8 +135,9 @@ public class ReferencesPanel extends Composite {
       columnName = table.getColumns().get(columnIndexInTable).getDisplayName();
     }
 
-    mainHeader.setText("References for `" + table.getSchemaName() + "`.`" + table.getName() + "`.`"
-      + table.getColumns().get(columnIndexInTable).getDisplayName() + "`");
+    cellTable.setText(table.getSchemaName());
+    cellSchema.setText(table.getName());
+    cellColumn.setText(columnName);
 
     // breadcrumb
     BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forReferences(database.getMetadata().getName(),
@@ -149,7 +151,7 @@ public class ReferencesPanel extends Composite {
       if (cell != null && ViewerStringUtils.isNotBlank(cell.getValue())) {
         value = cell.getValue();
       }
-      cellValue.setText(value);
+      mainHeader.setText("References for value \"" + value + "\"");
 
       TreeMap<Reference, TableSearchPanel> references = new TreeMap<>();
 
@@ -230,12 +232,68 @@ public class ReferencesPanel extends Composite {
     FlowPanel header = new FlowPanel();
     header.addStyleName("field");
 
-    Hyperlink hyperlink = new Hyperlink("Related table `" + otherTable.getSchemaName() + "`.`" + otherTable.getName()
-      + "`", HistoryManager.linkToTable(database.getUUID(), otherTable.getUUID()));
-    hyperlink.addStyleName("h3");
-    header.add(hyperlink);
+    SafeHtmlBuilder relationNameBuilder = new SafeHtmlBuilder();
+    relationNameBuilder.appendHtmlConstant("Relation: ");
+    // relation source
+    if (currentTableIsReferencedTableInForeignKey) {
+      relationNameBuilder.appendEscaped(otherTable.getName()).appendHtmlConstant(" (");
+      for (Iterator<ViewerReference> i = fk.getReferences().iterator(); i.hasNext();) {
+        ViewerReference viewerReference = i.next();
+        relationNameBuilder.appendEscaped(otherTable.getColumns().get(viewerReference.getSourceColumnIndex())
+          .getDisplayName());
+        if (i.hasNext()) {
+          relationNameBuilder.appendHtmlConstant(", ");
+        }
+      }
+    } else {
+      relationNameBuilder.appendEscaped(table.getName()).appendHtmlConstant(" (");
+      for (Iterator<ViewerReference> i = fk.getReferences().iterator(); i.hasNext();) {
+        ViewerReference viewerReference = i.next();
+        relationNameBuilder.appendEscaped(table.getColumns().get(viewerReference.getSourceColumnIndex())
+          .getDisplayName());
+        if (i.hasNext()) {
+          relationNameBuilder.appendHtmlConstant(", ");
+        }
+      }
+    }
+    relationNameBuilder.appendHtmlConstant(") <i class=\"fa fa-arrow-right small\"></i> ");
+
+    // relation target
+    if (currentTableIsReferencedTableInForeignKey) {
+      relationNameBuilder.appendEscaped(table.getName()).appendHtmlConstant(" (");
+      for (Iterator<ViewerReference> i = fk.getReferences().iterator(); i.hasNext();) {
+        ViewerReference viewerReference = i.next();
+        relationNameBuilder.appendEscaped(table.getColumns().get(viewerReference.getReferencedColumnIndex())
+          .getDisplayName());
+        if (i.hasNext()) {
+          relationNameBuilder.appendHtmlConstant(", ");
+        }
+      }
+    } else {
+      relationNameBuilder.appendEscaped(otherTable.getName()).appendHtmlConstant(" (");
+      for (Iterator<ViewerReference> i = fk.getReferences().iterator(); i.hasNext();) {
+        ViewerReference viewerReference = i.next();
+        relationNameBuilder.appendEscaped(otherTable.getColumns().get(viewerReference.getReferencedColumnIndex())
+          .getDisplayName());
+        if (i.hasNext()) {
+          relationNameBuilder.appendHtmlConstant(", ");
+        }
+      }
+    }
+    relationNameBuilder.appendHtmlConstant(")");
+
+    HTMLPanel relName = new HTMLPanel(relationNameBuilder.toSafeHtml());
+    relName.addStyleName("h4");
+    header.add(relName);
 
     SafeHtmlBuilder descriptionBuilder = new SafeHtmlBuilder();
+
+    descriptionBuilder.appendHtmlConstant("<div class=\"label\">Related table</div>");
+    descriptionBuilder
+      .appendHtmlConstant("<div class=\"value\">")
+      .appendHtmlConstant(
+        new Hyperlink(otherTable.getSchemaName() + " . " + otherTable.getName(), HistoryManager.linkToTable(
+          database.getUUID(), otherTable.getUUID())).toString()).appendHtmlConstant("</div>");
 
     descriptionBuilder.appendHtmlConstant("<div class=\"label\">Foreign key name</div>");
     descriptionBuilder.appendHtmlConstant("<div class=\"value\">").appendEscaped(fk.getName())
@@ -246,56 +304,6 @@ public class ReferencesPanel extends Composite {
       descriptionBuilder.appendHtmlConstant("<div class=\"value\">").appendEscaped(fk.getDescription())
         .appendHtmlConstant("</div>");
     }
-
-    descriptionBuilder.appendHtmlConstant("<div class=\"label\">Relation</div><div class=\"value\">Table ");
-
-    // relation source
-    if (currentTableIsReferencedTableInForeignKey) {
-      descriptionBuilder.appendEscaped(otherTable.getName()).appendHtmlConstant(" (");
-      for (Iterator<ViewerReference> i = fk.getReferences().iterator(); i.hasNext();) {
-        ViewerReference viewerReference = i.next();
-        descriptionBuilder.appendEscaped(otherTable.getColumns().get(viewerReference.getSourceColumnIndex())
-          .getDisplayName());
-        if (i.hasNext()) {
-          descriptionBuilder.appendHtmlConstant(", ");
-        }
-      }
-    } else {
-      descriptionBuilder.appendEscaped(table.getName()).appendHtmlConstant(" (");
-      for (Iterator<ViewerReference> i = fk.getReferences().iterator(); i.hasNext();) {
-        ViewerReference viewerReference = i.next();
-        descriptionBuilder.appendEscaped(table.getColumns().get(viewerReference.getSourceColumnIndex())
-          .getDisplayName());
-        if (i.hasNext()) {
-          descriptionBuilder.appendHtmlConstant(", ");
-        }
-      }
-    }
-    descriptionBuilder.appendHtmlConstant(") <i class=\"fa fa-arrow-right\"></i> ");
-
-    // relation target
-    if (currentTableIsReferencedTableInForeignKey) {
-      descriptionBuilder.appendEscaped(table.getName()).appendHtmlConstant(" (");
-      for (Iterator<ViewerReference> i = fk.getReferences().iterator(); i.hasNext();) {
-        ViewerReference viewerReference = i.next();
-        descriptionBuilder.appendEscaped(table.getColumns().get(viewerReference.getReferencedColumnIndex())
-          .getDisplayName());
-        if (i.hasNext()) {
-          descriptionBuilder.appendHtmlConstant(", ");
-        }
-      }
-    } else {
-      descriptionBuilder.appendEscaped(otherTable.getName()).appendHtmlConstant(" (");
-      for (Iterator<ViewerReference> i = fk.getReferences().iterator(); i.hasNext();) {
-        ViewerReference viewerReference = i.next();
-        descriptionBuilder.appendEscaped(otherTable.getColumns().get(viewerReference.getReferencedColumnIndex())
-          .getDisplayName());
-        if (i.hasNext()) {
-          descriptionBuilder.appendHtmlConstant(", ");
-        }
-      }
-    }
-    descriptionBuilder.appendHtmlConstant(")</div>");
 
     header.add(new HTMLPanel(descriptionBuilder.toSafeHtml()));
     return header;

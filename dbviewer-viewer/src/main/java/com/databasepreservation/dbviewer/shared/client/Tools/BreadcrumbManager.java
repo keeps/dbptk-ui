@@ -115,7 +115,7 @@ public class BreadcrumbManager {
     items.add(new BreadcrumbItem(new SafeHtml() {
       @Override
       public String asString() {
-        return "<i class=\"fa fa-exchange\"></i> References for " + columnNameInTable;
+        return "<i class=\"fa fa-exchange\"></i> References for column " + columnNameInTable;
       }
     }, new Command() {
       @Override

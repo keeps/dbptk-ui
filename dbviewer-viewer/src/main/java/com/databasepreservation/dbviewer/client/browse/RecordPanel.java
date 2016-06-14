@@ -158,7 +158,7 @@ public class RecordPanel extends Composite {
   private SafeHtml getCellHTML(ViewerColumn column, boolean hasForeignKeyRelations) {
     String label = column.getDisplayName();
 
-    String value = "NULL";
+    String value = null;
     ViewerCell cell = record.getCells().get(column.getSolrName());
     if (cell != null) {
       if (cell.getValue() != null) {
@@ -172,8 +172,12 @@ public class RecordPanel extends Composite {
     b.appendEscaped(label);
     b.appendHtmlConstant("</div>");
     b.appendHtmlConstant("<div class=\"value\">");
-    b.appendEscaped(value);
-    if (hasForeignKeyRelations) {
+    if(value == null){
+      b.appendEscaped("NULL");
+    }else {
+      b.appendEscaped(value);
+    }
+    if (hasForeignKeyRelations && value != null) {
       Hyperlink hyperlink = new Hyperlink("Explore related records", HistoryManager.linkToReferences(
         database.getUUID(), table.getUUID(), recordUUID, String.valueOf(column.getColumnIndexInEnclosingTable())));
       hyperlink.addStyleName("related-records-link");

@@ -26,9 +26,25 @@
                             <g:Label addStyleNames="h1" ui:field="mainHeader"><ui:msg>References</ui:msg></g:Label>
                             <g:FlowPanel addStyleNames="field">
                                 <g:Label addStyleNames="label">
-                                    <ui:msg>With value</ui:msg>
+                                    <ui:msg>In schema</ui:msg>
                                 </g:Label>
-                                <g:Label addStyleNames="value" ui:field="cellValue">
+                                <g:Label addStyleNames="value" ui:field="cellSchema">
+                                    <ui:msg>Loading...</ui:msg>
+                                </g:Label>
+                            </g:FlowPanel>
+                            <g:FlowPanel addStyleNames="field">
+                                <g:Label addStyleNames="label">
+                                    <ui:msg>In table</ui:msg>
+                                </g:Label>
+                                <g:Label addStyleNames="value" ui:field="cellTable">
+                                    <ui:msg>Loading...</ui:msg>
+                                </g:Label>
+                            </g:FlowPanel>
+                            <g:FlowPanel addStyleNames="field">
+                                <g:Label addStyleNames="label">
+                                    <ui:msg>In column</ui:msg>
+                                </g:Label>
+                                <g:Label addStyleNames="value" ui:field="cellColumn">
                                     <ui:msg>Loading...</ui:msg>
                                 </g:Label>
                             </g:FlowPanel>
