@@ -10,8 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerRoutine;
-import com.databasepreservation.model.structure.RoutineStructure;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -30,6 +28,8 @@ import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerPrimaryKey
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerPrivilegeStructure;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerReference;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerRoleStructure;
+import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerRoutine;
+import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerRoutineParameter;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerRow;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerSchema;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerTable;
@@ -38,6 +38,7 @@ import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerType;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerTypeArray;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerTypeStructure;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerUserStructure;
+import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerView;
 import com.databasepreservation.dbviewer.exceptions.ViewerException;
 import com.databasepreservation.dbviewer.utils.SolrUtils;
 import com.databasepreservation.dbviewer.utils.ViewerUtils;
@@ -51,14 +52,17 @@ import com.databasepreservation.model.exception.ModuleException;
 import com.databasepreservation.model.structure.ColumnStructure;
 import com.databasepreservation.model.structure.DatabaseStructure;
 import com.databasepreservation.model.structure.ForeignKey;
+import com.databasepreservation.model.structure.Parameter;
 import com.databasepreservation.model.structure.PrimaryKey;
 import com.databasepreservation.model.structure.PrivilegeStructure;
 import com.databasepreservation.model.structure.Reference;
 import com.databasepreservation.model.structure.RoleStructure;
+import com.databasepreservation.model.structure.RoutineStructure;
 import com.databasepreservation.model.structure.SchemaStructure;
 import com.databasepreservation.model.structure.TableStructure;
 import com.databasepreservation.model.structure.Trigger;
 import com.databasepreservation.model.structure.UserStructure;
+import com.databasepreservation.model.structure.ViewStructure;
 import com.databasepreservation.model.structure.type.ComposedTypeArray;
 import com.databasepreservation.model.structure.type.ComposedTypeStructure;
 import com.databasepreservation.model.structure.type.SimpleTypeBinary;
@@ -220,11 +224,78 @@ public class ToolkitStructure2ViewerStructure {
     return result;
   }
 
+  private static List<ViewerView> getViews(List<ViewStructure> views) {
+    ArrayList<ViewerView> result = new ArrayList<>();
+    if (views != null) {
+      for (ViewStructure view : views) {
+        result.add(getView(view));
+      }
+    }
+    return result;
+  }
+
+  private static ViewerView getView(ViewStructure view) {
+    ViewerView result = new ViewerView();
+    result.setName(view.getName());
+    try {
+      result.setColumns(getColumns(view.getColumns()));
+    } catch (ViewerException e) {
+      LOGGER.error("Could not convert the columns for view " + view.toString(), e);
+      result.setColumns(new ArrayList<ViewerColumn>());
+    }
+
+    result.setQuery(view.getQuery());
+    result.setQueryOriginal(view.getQueryOriginal());
+    result.setDescription(view.getDescription());
+
+    return result;
+  }
+
   private static List<ViewerRoutine> getRoutines(List<RoutineStructure> routines) {
     ArrayList<ViewerRoutine> result = new ArrayList<>();
     for (RoutineStructure routine : routines) {
       result.add(getRoutine(routine));
     }
+    return result;
+  }
+
+  private static ViewerRoutine getRoutine(RoutineStructure routine) {
+    ViewerRoutine result = new ViewerRoutine();
+    result.setName(routine.getName());
+
+    result.setDescription(routine.getDescription());
+    result.setSource(routine.getSource());
+    result.setBody(routine.getBody());
+    result.setCharacteristic(routine.getCharacteristic());
+    result.setReturnType(routine.getReturnType());
+
+    result.setParameters(getRoutineParameters(routine.getParameters()));
+
+    return result;
+  }
+
+  private static List<ViewerRoutineParameter> getRoutineParameters(List<Parameter> parameters) {
+    ArrayList<ViewerRoutineParameter> result = new ArrayList<>();
+    if (parameters != null) {
+      for (Parameter parameter : parameters) {
+        result.add(getRoutineParameter(parameter));
+      }
+    }
+    return result;
+  }
+
+  private static ViewerRoutineParameter getRoutineParameter(Parameter parameter) {
+    ViewerRoutineParameter result = new ViewerRoutineParameter();
+    result.setName(parameter.getName());
+    result.setMode(parameter.getMode());
+    result.setDescription(parameter.getDescription());
+
+    try {
+      result.setType(getType(parameter.getType()));
+    } catch (ViewerException e) {
+      LOGGER.debug("Could not convert routine parameter type", e);
+    }
+
     return result;
   }
 

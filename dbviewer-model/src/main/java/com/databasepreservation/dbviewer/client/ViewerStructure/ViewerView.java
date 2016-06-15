@@ -9,7 +9,7 @@ public class ViewerView {
   // mandatory in SIARD2
   private String name;
   // "columns" in SIARD metadata.xml
-  private List<Integer> columnIndexesInViewerTable;
+  private List<ViewerColumn> columns;
 
   // optional in SIARD2
   private String query;
@@ -19,12 +19,12 @@ public class ViewerView {
   public ViewerView() {
   }
 
-  public List<Integer> getColumnIndexesInViewerTable() {
-    return columnIndexesInViewerTable;
+  public List<ViewerColumn> getColumns() {
+    return columns;
   }
 
-  public void setColumnIndexesInViewerTable(List<Integer> columnIndexesInViewerTable) {
-    this.columnIndexesInViewerTable = columnIndexesInViewerTable;
+  public void setColumns(List<ViewerColumn> columns) {
+    this.columns = columns;
   }
 
   public String getDescription() {
