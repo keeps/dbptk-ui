@@ -1,4 +1,4 @@
-package com.databasepreservation.dbviewer.shared.client;
+package com.databasepreservation.dbviewer.shared.client.Tools;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,6 +13,10 @@ import com.google.gwt.user.client.Window;
 public class HistoryManager {
   public static final String ROUTE_DATABASE = "database";
   public static final String ROUTE_SCHEMA = "schema";
+  public static final String ROUTE_SCHEMA_STRUCTURE = "structure";
+  public static final String ROUTE_SCHEMA_ROUTINES = "routines";
+  public static final String ROUTE_SCHEMA_TRIGGERS = "triggers";
+  public static final String ROUTE_SCHEMA_VIEWS = "views";
   public static final String ROUTE_TABLE = "table";
   public static final String ROUTE_RECORD = "record";
   public static final String ROUTE_REFERENCES = "references";
@@ -35,6 +39,22 @@ public class HistoryManager {
 
   public static void gotoSchema(String databaseUUID, String schemaUUID) {
     newHistory(Arrays.asList(ROUTE_SCHEMA, databaseUUID, schemaUUID));
+  }
+
+  public static void gotoSchemaStructure(String databaseUUID, String schemaUUID) {
+    newHistory(Arrays.asList(ROUTE_SCHEMA, databaseUUID, schemaUUID, ROUTE_SCHEMA_STRUCTURE));
+  }
+
+  public static void gotoSchemaRoutines(String databaseUUID, String schemaUUID) {
+    newHistory(Arrays.asList(ROUTE_SCHEMA, databaseUUID, schemaUUID, ROUTE_SCHEMA_ROUTINES));
+  }
+
+  public static void gotoSchemaTriggers(String databaseUUID, String schemaUUID) {
+    newHistory(Arrays.asList(ROUTE_SCHEMA, databaseUUID, schemaUUID, ROUTE_SCHEMA_TRIGGERS));
+  }
+
+  public static void gotoSchemaViews(String databaseUUID, String schemaUUID) {
+    newHistory(Arrays.asList(ROUTE_SCHEMA, databaseUUID, schemaUUID, ROUTE_SCHEMA_VIEWS));
   }
 
   public static void gotoTable(String databaseUUID, String tableUUID) {
@@ -107,5 +127,21 @@ public class HistoryManager {
 
   public static String linkToSchema(String database_uuid, String schema_uuid) {
     return createHistoryToken(Arrays.asList(ROUTE_SCHEMA, database_uuid, schema_uuid));
+  }
+
+  public static String linkToSchemaStructure(String database_uuid, String schema_uuid) {
+    return createHistoryToken(Arrays.asList(ROUTE_SCHEMA, database_uuid, schema_uuid, ROUTE_SCHEMA_STRUCTURE));
+  }
+
+  public static String linkToSchemaRoutines(String database_uuid, String schema_uuid) {
+    return createHistoryToken(Arrays.asList(ROUTE_SCHEMA, database_uuid, schema_uuid, ROUTE_SCHEMA_ROUTINES));
+  }
+
+  public static String linkToSchemaTriggers(String database_uuid, String schema_uuid) {
+    return createHistoryToken(Arrays.asList(ROUTE_SCHEMA, database_uuid, schema_uuid, ROUTE_SCHEMA_TRIGGERS));
+  }
+
+  public static String linkToSchemaViews(String database_uuid, String schema_uuid) {
+    return createHistoryToken(Arrays.asList(ROUTE_SCHEMA, database_uuid, schema_uuid, ROUTE_SCHEMA_VIEWS));
   }
 }

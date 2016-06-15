@@ -107,16 +107,4 @@ public class SidebarHyperlink extends SidebarItem {
     label.addStyleName("indent4");
     return this;
   }
-
-  @Override
-  public SidebarItem setIndent5() {
-    label.addStyleName("indent5");
-    return this;
-  }
-
-  @Override
-  public SidebarItem setIndent6() {
-    label.addStyleName("indent6");
-    return this;
-  }
 }

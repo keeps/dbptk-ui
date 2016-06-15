@@ -1,4 +1,4 @@
-package com.databasepreservation.dbviewer.client.browse;
+package com.databasepreservation.dbviewer.client.common.sidebar;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,8 +10,8 @@ import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerMetadata;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerSchema;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerTable;
-import com.databasepreservation.dbviewer.client.common.sidebar.SidebarHyperlink;
-import com.databasepreservation.dbviewer.shared.client.HistoryManager;
+import com.databasepreservation.dbviewer.shared.client.Tools.FontAwesomeIconManager;
+import com.databasepreservation.dbviewer.shared.client.Tools.HistoryManager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -97,14 +97,35 @@ public class DatabaseSidebar extends Composite {
     // database metadata
     final ViewerMetadata metadata = database.getMetadata();
 
-    sidebarGroup.add(new SidebarHyperlink("Database information", HistoryManager.linkToDatabase(database.getUUID()))
-      .addIcon("database").setH5().setIndent0());
+    sidebarGroup.add(new SidebarItem("Database").addIcon(FontAwesomeIconManager.DATABASE).setH5()
+      .setIndent0());
+
+    sidebarGroup.add(new SidebarHyperlink("Information", HistoryManager.linkToDatabase(database.getUUID()))
+      .addIcon(FontAwesomeIconManager.DATABASE_INFORMATION).setH6().setIndent1());
+
+    sidebarGroup.add(new SidebarHyperlink("Users & Roles", HistoryManager.linkToDatabase(database.getUUID()))
+      .addIcon(FontAwesomeIconManager.DATABASE_USERS).setH6().setIndent1());
+
     for (final ViewerSchema schema : metadata.getSchemas()) {
-      sidebarGroup.add(new SidebarHyperlink("Schema " + schema.getName(), HistoryManager.linkToSchema(
-        database.getUUID(), schema.getUUID())).addIcon("cube").setH5().setIndent0());
+      sidebarGroup.add(new SidebarItem("Schema " + schema.getName()).addIcon(FontAwesomeIconManager.SCHEMA).setH5().setIndent0());
+
+      sidebarGroup.add(new SidebarHyperlink("Structure", HistoryManager.linkToSchemaStructure(database.getUUID(),
+        schema.getUUID())).addIcon(FontAwesomeIconManager.SCHEMA_STRUCTURE).setH6().setIndent1());
+
+      sidebarGroup.add(new SidebarHyperlink("Routines", HistoryManager.linkToSchemaRoutines(database.getUUID(),
+        schema.getUUID())).addIcon(FontAwesomeIconManager.SCHEMA_ROUTINES).setH6().setIndent1());
+
+      sidebarGroup.add(new SidebarHyperlink("Triggers", HistoryManager.linkToSchemaTriggers(database.getUUID(),
+        schema.getUUID())).addIcon(FontAwesomeIconManager.SCHEMA_TRIGGERS).setH6().setIndent1());
+
+      sidebarGroup.add(new SidebarHyperlink("Views", HistoryManager.linkToSchemaViews(database.getUUID(), schema.getUUID()))
+        .addIcon(FontAwesomeIconManager.SCHEMA_VIEWS).setH6().setIndent1());
+
+      sidebarGroup.add(new SidebarItem("Data").addIcon(FontAwesomeIconManager.SCHEMA_DATA).setH6().setIndent1());
+
       for (ViewerTable table : schema.getTables()) {
         sidebarGroup.add(new SidebarHyperlink(table.getName(), HistoryManager.linkToTable(database.getUUID(),
-          table.getUUID())).addIcon("table").setH6().setIndent1());
+          table.getUUID())).addIcon(FontAwesomeIconManager.TABLE).setH6().setIndent2());
       }
     }
   }

@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.databasepreservation.dbviewer.client.main.BreadcrumbItem;
 import com.databasepreservation.dbviewer.client.main.BreadcrumbPanel;
-import com.databasepreservation.dbviewer.shared.client.HistoryManager;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.client.Command;
 
@@ -28,7 +27,7 @@ public class BreadcrumbManager {
     items.add(new BreadcrumbItem(new SafeHtml() {
       @Override
       public String asString() {
-        return "<i class=\"fa fa-server\"></i> Databases";
+        return FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASES) + " Databases";
       }
     }, new Command() {
       @Override
@@ -44,7 +43,7 @@ public class BreadcrumbManager {
     items.add(new BreadcrumbItem(new SafeHtml() {
       @Override
       public String asString() {
-        return "<i class=\"fa fa-database\"></i> " + databaseName;
+        return FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE) + " " + databaseName;
       }
     }, new Command() {
       @Override
@@ -61,7 +60,7 @@ public class BreadcrumbManager {
     items.add(new BreadcrumbItem(new SafeHtml() {
       @Override
       public String asString() {
-        return "<i class=\"fa fa-cube\"></i> " + schemaName;
+        return FontAwesomeIconManager.getTag(FontAwesomeIconManager.SCHEMA) + " " + schemaName;
       }
     }, new Command() {
       @Override
@@ -78,7 +77,7 @@ public class BreadcrumbManager {
     items.add(new BreadcrumbItem(new SafeHtml() {
       @Override
       public String asString() {
-        return "<i class=\"fa fa-table\"></i> " + tableName;
+        return FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE) + " " + tableName;
       }
     }, new Command() {
       @Override
@@ -96,7 +95,7 @@ public class BreadcrumbManager {
     items.add(new BreadcrumbItem(new SafeHtml() {
       @Override
       public String asString() {
-        return "<i class=\"fa fa-file-o\"></i> Record";
+        return FontAwesomeIconManager.getTag(FontAwesomeIconManager.RECORD) + " Record";
       }
     }, new Command() {
       @Override
@@ -115,7 +114,8 @@ public class BreadcrumbManager {
     items.add(new BreadcrumbItem(new SafeHtml() {
       @Override
       public String asString() {
-        return "<i class=\"fa fa-exchange\"></i> References for column " + columnNameInTable;
+        return FontAwesomeIconManager.getTag(FontAwesomeIconManager.REFERENCE) + " References for column "
+          + columnNameInTable;
       }
     }, new Command() {
       @Override
@@ -131,7 +131,7 @@ public class BreadcrumbManager {
     items.add(new BreadcrumbItem(new SafeHtml() {
       @Override
       public String asString() {
-        return "<i class=\"fa fa-database\"></i> " + LOADING_DATABASE;
+        return FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE) + " " + LOADING_DATABASE;
       }
     }, new Command() {
       @Override
@@ -147,7 +147,7 @@ public class BreadcrumbManager {
     items.add(new BreadcrumbItem(new SafeHtml() {
       @Override
       public String asString() {
-        return "<i class=\"fa fa-cube\"></i> " + LOADING_SCHEMA;
+        return FontAwesomeIconManager.getTag(FontAwesomeIconManager.SCHEMA) + " " + LOADING_SCHEMA;
       }
     }, new Command() {
       @Override
@@ -162,7 +162,7 @@ public class BreadcrumbManager {
     items.add(new BreadcrumbItem(new SafeHtml() {
       @Override
       public String asString() {
-        return "<i class=\"fa fa-cube\"></i> " + LOADING_SCHEMA;
+        return FontAwesomeIconManager.getTag(FontAwesomeIconManager.SCHEMA) + " " + LOADING_SCHEMA;
       }
     }, new Command() {
       @Override
@@ -178,7 +178,7 @@ public class BreadcrumbManager {
     items.add(new BreadcrumbItem(new SafeHtml() {
       @Override
       public String asString() {
-        return "<i class=\"fa fa-table\"></i> " + LOADING_TABLE;
+        return FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE) + " " + LOADING_TABLE;
       }
     }, new Command() {
       @Override
@@ -195,7 +195,7 @@ public class BreadcrumbManager {
     items.add(new BreadcrumbItem(new SafeHtml() {
       @Override
       public String asString() {
-        return "<i class=\"fa fa-file-o\"></i> Record";
+        return FontAwesomeIconManager.getTag(FontAwesomeIconManager.RECORD) + " Record";
       }
     }, new Command() {
       @Override
@@ -212,7 +212,7 @@ public class BreadcrumbManager {
     items.add(new BreadcrumbItem(new SafeHtml() {
       @Override
       public String asString() {
-        return "<i class=\"fa fa-exchange\"></i> " + LOADING_REFERENCES;
+        return FontAwesomeIconManager.getTag(FontAwesomeIconManager.REFERENCE) + " " + LOADING_REFERENCES;
       }
     }, new Command() {
       @Override

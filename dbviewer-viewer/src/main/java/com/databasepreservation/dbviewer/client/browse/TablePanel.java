@@ -3,6 +3,7 @@ package com.databasepreservation.dbviewer.client.browse;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.databasepreservation.dbviewer.client.common.sidebar.DatabaseSidebar;
 import org.roda.core.data.adapter.filter.Filter;
 import org.roda.core.data.v2.index.IsIndexed;
 
@@ -50,8 +51,7 @@ public class TablePanel extends Composite {
   @UiField(provided = true)
   SearchPanel dbSearchPanel;
 
-  @UiField(provided = true)
-  DatabaseSidebar sidebar;
+  @UiField(provided = true) DatabaseSidebar sidebar;
 
   @UiField
   Label mainHeader;

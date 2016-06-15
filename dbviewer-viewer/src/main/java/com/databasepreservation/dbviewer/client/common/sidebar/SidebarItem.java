@@ -91,14 +91,4 @@ public class SidebarItem extends Composite {
     label.addStyleName("indent4");
     return this;
   }
-
-  public SidebarItem setIndent5() {
-    label.addStyleName("indent5");
-    return this;
-  }
-
-  public SidebarItem setIndent6() {
-    label.addStyleName("indent6");
-    return this;
-  }
 }

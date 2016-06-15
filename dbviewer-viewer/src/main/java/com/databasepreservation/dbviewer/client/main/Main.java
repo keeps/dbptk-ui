@@ -7,10 +7,11 @@ import com.databasepreservation.dbviewer.client.browse.DatabaseListPanel;
 import com.databasepreservation.dbviewer.client.browse.DatabasePanel;
 import com.databasepreservation.dbviewer.client.browse.RecordPanel;
 import com.databasepreservation.dbviewer.client.browse.ReferencesPanel;
-import com.databasepreservation.dbviewer.client.browse.SchemaPanel;
+import com.databasepreservation.dbviewer.client.browse.SchemaRoutinesPanel;
+import com.databasepreservation.dbviewer.client.browse.SchemaStructurePanel;
 import com.databasepreservation.dbviewer.client.browse.TablePanel;
 import com.databasepreservation.dbviewer.shared.client.ClientLogger;
-import com.databasepreservation.dbviewer.shared.client.HistoryManager;
+import com.databasepreservation.dbviewer.shared.client.Tools.HistoryManager;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -114,8 +115,39 @@ public class Main implements EntryPoint {
         // #schema/<database_uuid>/<schema_uuid>
         String database_uuid = currentHistoryPath.get(1);
         String schema_uuid = currentHistoryPath.get(2);
-        SchemaPanel panel = SchemaPanel.getInstance(database_uuid, schema_uuid);
+        SchemaStructurePanel panel = SchemaStructurePanel.getInstance(database_uuid, schema_uuid);
         setContent(panel);
+
+      } else if (currentHistoryPath.size() == 4) {
+        // #schema/<database_uuid>/<schema_uuid>/structure
+        // #schema/<database_uuid>/<schema_uuid>/routines
+        // #schema/<database_uuid>/<schema_uuid>/triggers
+        // #schema/<database_uuid>/<schema_uuid>/views
+        String database_uuid = currentHistoryPath.get(1);
+        String schema_uuid = currentHistoryPath.get(2);
+        String pageSpec = currentHistoryPath.get(3);
+
+        Widget pageWidget = null;
+        switch (pageSpec){
+          case HistoryManager.ROUTE_SCHEMA_STRUCTURE:
+            pageWidget = SchemaStructurePanel.getInstance(database_uuid, schema_uuid);
+            break;
+          case HistoryManager.ROUTE_SCHEMA_ROUTINES:
+            pageWidget = SchemaRoutinesPanel.getInstance(database_uuid, schema_uuid);
+            break;
+          case HistoryManager.ROUTE_SCHEMA_TRIGGERS:
+            pageWidget = SchemaStructurePanel.getInstance(database_uuid, schema_uuid);
+            break;
+          case HistoryManager.ROUTE_SCHEMA_VIEWS:
+            pageWidget = SchemaStructurePanel.getInstance(database_uuid, schema_uuid);
+            break;
+        }
+        if(pageWidget != null) {
+          setContent(pageWidget);
+        }else{
+          // #schema/<database_uuid>/<schema_uuid>/*invalid-page*
+          HistoryManager.gotoRoot();
+        }
 
       } else {
         // #schema/...

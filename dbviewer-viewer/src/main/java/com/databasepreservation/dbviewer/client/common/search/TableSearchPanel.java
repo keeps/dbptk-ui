@@ -14,7 +14,7 @@ import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerRow;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerTable;
 import com.databasepreservation.dbviewer.client.common.lists.TableRowList;
 import com.databasepreservation.dbviewer.client.common.utils.ListboxUtils;
-import com.databasepreservation.dbviewer.shared.client.HistoryManager;
+import com.databasepreservation.dbviewer.shared.client.Tools.HistoryManager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;

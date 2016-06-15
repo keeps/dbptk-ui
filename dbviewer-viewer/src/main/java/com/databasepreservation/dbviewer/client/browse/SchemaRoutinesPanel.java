@@ -14,13 +14,17 @@ import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerForeignKey;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerPrimaryKey;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerReference;
+import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerRoutine;
+import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerRoutineParameter;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerSchema;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerTable;
 import com.databasepreservation.dbviewer.client.common.lists.BasicTablePanel;
 import com.databasepreservation.dbviewer.client.common.search.SearchPanel;
+import com.databasepreservation.dbviewer.client.common.sidebar.DatabaseSidebar;
+import com.databasepreservation.dbviewer.client.common.utils.CommonClientUtils;
 import com.databasepreservation.dbviewer.client.main.BreadcrumbPanel;
-import com.databasepreservation.dbviewer.shared.client.HistoryManager;
 import com.databasepreservation.dbviewer.shared.client.Tools.BreadcrumbManager;
+import com.databasepreservation.dbviewer.shared.client.Tools.HistoryManager;
 import com.databasepreservation.dbviewer.shared.client.Tools.ViewerStringUtils;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
@@ -42,22 +46,22 @@ import com.google.gwt.user.client.ui.Widget;
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class SchemaPanel extends Composite {
-  private static Map<String, SchemaPanel> instances = new HashMap<>();
+public class SchemaRoutinesPanel extends Composite {
+  private static Map<String, SchemaRoutinesPanel> instances = new HashMap<>();
 
-  public static SchemaPanel getInstance(String databaseUUID, String schemaUUID) {
+  public static SchemaRoutinesPanel getInstance(String databaseUUID, String schemaUUID) {
     String separator = "/";
     String code = databaseUUID + separator + schemaUUID;
 
-    SchemaPanel instance = instances.get(code);
+    SchemaRoutinesPanel instance = instances.get(code);
     if (instance == null) {
-      instance = new SchemaPanel(databaseUUID, schemaUUID);
+      instance = new SchemaRoutinesPanel(databaseUUID, schemaUUID);
       instances.put(code, instance);
     }
     return instance;
   }
 
-  interface DatabasePanelUiBinder extends UiBinder<Widget, SchemaPanel> {
+  interface DatabasePanelUiBinder extends UiBinder<Widget, SchemaRoutinesPanel> {
   }
 
   private static DatabasePanelUiBinder uiBinder = GWT.create(DatabasePanelUiBinder.class);
@@ -76,7 +80,7 @@ public class SchemaPanel extends Composite {
   @UiField
   FlowPanel contentItems;
 
-  private SchemaPanel(final String databaseUUID, final String schemaUUID) {
+  private SchemaRoutinesPanel(final String databaseUUID, final String schemaUUID) {
     dbSearchPanel = new SearchPanel(new Filter(), "", "Search in all tables", false, false);
     sidebar = DatabaseSidebar.getInstance(databaseUUID);
 
@@ -107,23 +111,124 @@ public class SchemaPanel extends Composite {
       BreadcrumbManager.forSchema(database.getMetadata().getName(), database.getUUID(), schema.getName(),
         schema.getUUID()));
 
-    contentItems.add(new HTMLPanel(getFieldHTML("Schema name", schema.getName())));
-    if (ViewerStringUtils.isNotBlank(schema.getDescription())) {
-      contentItems.add(new HTMLPanel(getFieldHTML("Schema description", schema.getDescription())));
-    }
+    CommonClientUtils.addSchemaInfoToFlowPanel(contentItems, schema);
 
-    // Tables and their information
-    Label tablesHeader = new Label("Tables");
-    tablesHeader.addStyleName("h2");
-    contentItems.add(tablesHeader);
+    // Routines and their information
+    // Label tablesHeader = new Label("Routines");
+    // tablesHeader.addStyleName("h2");
+    // contentItems.add(tablesHeader);
 
-    for (ViewerTable viewerTable : schema.getTables()) {
-      contentItems.add(getBasicTablePanelForTableColumns(viewerTable));
-      if (viewerTable.getForeignKeys() != null && viewerTable.getForeignKeys().size() > 0) {
-        contentItems.add(getBasicTablePanelForTableForeignKeys(viewerTable));
+    if(schema.getRoutines().isEmpty()){
+      GWT.log("empty");
+      Label noRoutinesMsg = new Label("This schema does not have any routines.");
+      noRoutinesMsg.addStyleName("strong");
+      contentItems.add(noRoutinesMsg);
+    }else {
+      GWT.log("not empty");
+      for (ViewerRoutine viewerRoutine : schema.getRoutines()) {
+        if (viewerRoutine.getParameters().isEmpty()) {
+          addRoutineHeaderAndDescription(viewerRoutine);
+        } else {
+          contentItems.add(getBasicTablePanelForSchemaRoutines(viewerRoutine));
+        }
       }
     }
+  }
 
+  private HTMLPanel getRoutineDescription(ViewerRoutine viewerRoutine) {
+    SafeHtmlBuilder descriptionBuilder = new SafeHtmlBuilder();
+
+    if (ViewerStringUtils.isNotBlank(viewerRoutine.getName())) {
+      descriptionBuilder.append(CommonClientUtils.getFieldHTML("Name", viewerRoutine.getName()));
+    }
+    if (ViewerStringUtils.isNotBlank(viewerRoutine.getDescription())) {
+      descriptionBuilder.append(CommonClientUtils.getFieldHTML("Description", viewerRoutine.getDescription()));
+    }
+    if (ViewerStringUtils.isNotBlank(viewerRoutine.getSource())) {
+      descriptionBuilder.append(CommonClientUtils.getFieldHTML("Source", viewerRoutine.getSource()));
+    }
+    if (ViewerStringUtils.isNotBlank(viewerRoutine.getBody())) {
+      descriptionBuilder.append(CommonClientUtils.getFieldHTML("Body", viewerRoutine.getBody()));
+    }
+    if (ViewerStringUtils.isNotBlank(viewerRoutine.getCharacteristic())) {
+      descriptionBuilder.append(CommonClientUtils.getFieldHTML("Characteristic", viewerRoutine.getCharacteristic()));
+    }
+    if (ViewerStringUtils.isNotBlank(viewerRoutine.getReturnType())) {
+      descriptionBuilder.append(CommonClientUtils.getFieldHTML("Return type", viewerRoutine.getReturnType()));
+    }
+
+    return new HTMLPanel(descriptionBuilder.toSafeHtml());
+  }
+
+  private void addRoutineHeaderAndDescription(ViewerRoutine routine) {
+    Label header = new Label("...");
+    header.addStyleName("h4");
+
+    HTMLPanel info = getRoutineDescription(routine);
+
+    contentItems.add(header);
+    contentItems.add(info);
+  }
+
+  private BasicTablePanel<ViewerRoutineParameter> getBasicTablePanelForSchemaRoutines(final ViewerRoutine routine) {
+    Label header = new Label("...");
+    header.addStyleName("h4");
+
+    HTMLPanel info = getRoutineDescription(routine);
+
+    return new BasicTablePanel<ViewerRoutineParameter>(header, info, routine.getParameters().iterator(),
+
+    new BasicTablePanel.ColumnInfo<>("Name", 15, new TextColumn<ViewerRoutineParameter>() {
+      @Override
+      public String getValue(ViewerRoutineParameter viewerRoutineParameter) {
+        return viewerRoutineParameter.getName();
+      }
+    }),
+
+    new BasicTablePanel.ColumnInfo<>("Mode", 15, new TextColumn<ViewerRoutineParameter>() {
+      @Override
+      public String getValue(ViewerRoutineParameter viewerRoutineParameter) {
+        return viewerRoutineParameter.getMode();
+      }
+    }),
+
+    new BasicTablePanel.ColumnInfo<>("Type name", 15, new TextColumn<ViewerRoutineParameter>() {
+      @Override
+      public String getValue(ViewerRoutineParameter viewerRoutineParameter) {
+        if (viewerRoutineParameter.getType() != null) {
+          if (ViewerStringUtils.isNotBlank(viewerRoutineParameter.getType().getTypeName())) {
+            return viewerRoutineParameter.getType().getTypeName();
+          }
+        }
+        return "";
+      }
+    }),
+
+    new BasicTablePanel.ColumnInfo<>("Original type name", 15, new TextColumn<ViewerRoutineParameter>() {
+      @Override
+      public String getValue(ViewerRoutineParameter viewerRoutineParameter) {
+        if (viewerRoutineParameter.getType() != null) {
+          if (ViewerStringUtils.isNotBlank(viewerRoutineParameter.getType().getOriginalTypeName())) {
+            return viewerRoutineParameter.getType().getOriginalTypeName();
+          }
+        }
+        return "";
+      }
+    }),
+
+    new BasicTablePanel.ColumnInfo<>("Description", 35, new TextColumn<ViewerRoutineParameter>() {
+      @Override
+      public String getValue(ViewerRoutineParameter viewerRoutineParameter) {
+        if (viewerRoutineParameter.getType() != null) {
+          if (ViewerStringUtils.isNotBlank(viewerRoutineParameter.getDescription())) {
+            return viewerRoutineParameter.getDescription();
+          }
+        }
+        return "";
+      }
+    })
+
+    );
   }
 
   private BasicTablePanel<ViewerForeignKey> getBasicTablePanelForTableForeignKeys(final ViewerTable table) {

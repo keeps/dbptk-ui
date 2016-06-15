@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.databasepreservation.dbviewer.client.common.sidebar.DatabaseSidebar;
 import org.roda.core.data.adapter.filter.Filter;
 import org.roda.core.data.v2.index.IsIndexed;
 
@@ -19,7 +20,7 @@ import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerSchema;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerTable;
 import com.databasepreservation.dbviewer.client.common.search.SearchPanel;
 import com.databasepreservation.dbviewer.client.main.BreadcrumbPanel;
-import com.databasepreservation.dbviewer.shared.client.HistoryManager;
+import com.databasepreservation.dbviewer.shared.client.Tools.HistoryManager;
 import com.databasepreservation.dbviewer.shared.client.Tools.BreadcrumbManager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -58,8 +59,7 @@ public class RecordPanel extends Composite {
   @UiField(provided = true)
   SearchPanel dbSearchPanel;
 
-  @UiField(provided = true)
-  DatabaseSidebar sidebar;
+  @UiField(provided = true) DatabaseSidebar sidebar;
   @UiField
   HTML content;
 

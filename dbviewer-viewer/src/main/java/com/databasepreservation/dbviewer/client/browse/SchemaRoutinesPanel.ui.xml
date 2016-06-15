@@ -3,6 +3,7 @@
              xmlns:m='urn:import:com.databasepreservation.dbviewer.client.main'
              xmlns:b='urn:import:com.databasepreservation.dbviewer.client.browse'
              xmlns:s='urn:import:com.databasepreservation.dbviewer.client.common.search'
+             xmlns:sb='urn:import:com.databasepreservation.dbviewer.client.common.sidebar'
              xmlns:lists="urn:import:com.databasepreservation.dbviewer.client.common.lists">
 
 <g:FlowPanel addStyleNames="browseContent wrapper skip_padding">
@@ -13,7 +14,7 @@
                 <g:cell>
                     <g:FlowPanel addStyleNames="browseContentFilesPanel">
                         <s:SearchPanel ui:field="dbSearchPanel"/>
-                        <b:DatabaseSidebar ui:field="sidebar" />
+                        <sb:DatabaseSidebar ui:field="sidebar" />
                     </g:FlowPanel>
                 </g:cell>
                 <!-- RIGHT PANEL -->
@@ -23,7 +24,8 @@
                             <m:BreadcrumbPanel ui:field="breadcrumb" addStyleNames="browseContentBreadcrumb"/>
                         </g:FlowPanel>
                         <g:FlowPanel addStyleNames="col_12 content" >
-                            <g:Label addStyleNames="h1"><ui:msg>Schema information</ui:msg></g:Label>
+                            <g:Label addStyleNames="h1"><ui:msg>Routines</ui:msg></g:Label>
+                            <g:Label><ui:msg>Including "Stored procedures" and "Functions"</ui:msg></g:Label>
                             <g:FlowPanel ui:field="contentItems"/>
                         </g:FlowPanel>
                     </g:FlowPanel>

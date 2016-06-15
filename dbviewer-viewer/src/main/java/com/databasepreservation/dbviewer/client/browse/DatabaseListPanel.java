@@ -6,7 +6,7 @@ import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.dbviewer.client.common.lists.DatabaseList;
 import com.databasepreservation.dbviewer.client.common.search.SearchPanel;
 import com.databasepreservation.dbviewer.client.main.BreadcrumbPanel;
-import com.databasepreservation.dbviewer.shared.client.HistoryManager;
+import com.databasepreservation.dbviewer.shared.client.Tools.HistoryManager;
 import com.databasepreservation.dbviewer.shared.client.Tools.BreadcrumbManager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;

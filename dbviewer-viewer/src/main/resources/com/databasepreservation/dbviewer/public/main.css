@@ -320,27 +320,19 @@
 }
 
 .leftSidebar .indent1 {
-    margin-left: 0.5rem;
-}
-
-.leftSidebar .indent2 {
-    margin-left: 1rem;
-}
-
-.leftSidebar .indent3 {
     margin-left: 1.5rem;
 }
 
-.leftSidebar .indent4 {
-    margin-left: 2rem;
-}
-
-.leftSidebar .indent5 {
-    margin-left: 2.5rem;
-}
-
-.leftSidebar .indent6 {
+.leftSidebar .indent2 {
     margin-left: 3rem;
+}
+
+.leftSidebar .indent3 {
+    margin-left: 4.5rem;
+}
+
+.leftSidebar .indent4 {
+    margin-left: 6rem;
 }
 
 .leftSidebar .h1:before, .leftSidebar .h2:before, .leftSidebar .h3:before, .leftSidebar .h4:before, .leftSidebar .h5:before,
@@ -354,6 +346,8 @@
     float: left;
     padding-right: 0.5em;
     margin-top: 0.1em;
+    width: 1.5rem;
+    text-align: center;
 }
 
 /**********************************************

@@ -1,9 +1,11 @@
 package com.databasepreservation.dbviewer.client.ViewerStructure;
 
+import java.io.Serializable;
+
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class ViewerUserStructure {
+public class ViewerUserStructure implements Serializable {
   // mandatory in SIARD2
   private String name;
 

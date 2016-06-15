@@ -3,6 +3,7 @@
              xmlns:m='urn:import:com.databasepreservation.dbviewer.client.main'
              xmlns:b='urn:import:com.databasepreservation.dbviewer.client.browse'
              xmlns:s='urn:import:com.databasepreservation.dbviewer.client.common.search'
+             xmlns:sb='urn:import:com.databasepreservation.dbviewer.client.common.sidebar'
              xmlns:lists="urn:import:com.databasepreservation.dbviewer.client.common.lists">
 
 <g:FlowPanel addStyleNames="browseContent wrapper skip_padding">
@@ -13,7 +14,7 @@
                 <g:cell>
                     <g:FlowPanel addStyleNames="browseContentFilesPanel">
                         <s:SearchPanel ui:field="dbSearchPanel"/>
-                        <b:DatabaseSidebar ui:field="sidebar" />
+                        <sb:DatabaseSidebar ui:field="sidebar" />
                     </g:FlowPanel>
                 </g:cell>
                 <!-- RIGHT PANEL -->
