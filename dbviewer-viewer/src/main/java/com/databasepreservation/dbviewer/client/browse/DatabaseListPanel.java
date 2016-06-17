@@ -1,10 +1,7 @@
 package com.databasepreservation.dbviewer.client.browse;
 
-import org.roda.core.data.adapter.filter.Filter;
-
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.dbviewer.client.common.lists.DatabaseList;
-import com.databasepreservation.dbviewer.client.common.search.SearchPanel;
 import com.databasepreservation.dbviewer.client.main.BreadcrumbPanel;
 import com.databasepreservation.dbviewer.shared.client.Tools.BreadcrumbManager;
 import com.databasepreservation.dbviewer.shared.client.Tools.HistoryManager;
@@ -34,11 +31,11 @@ public class DatabaseListPanel extends Composite {
   @UiField
   BreadcrumbPanel breadcrumb;
 
-  @UiField(provided = true)
-  SearchPanel dbSearchPanel;
+  // @UiField(provided = true)
+  // SearchPanel dbSearchPanel;
 
   public DatabaseListPanel() {
-    dbSearchPanel = new SearchPanel(new Filter(), "", "", false, false);
+    // dbSearchPanel = new SearchPanel(new Filter(), "", "", false, false);
 
     databaseList = new DatabaseList();
     initWidget(uiBinder.createAndBindUi(this));
