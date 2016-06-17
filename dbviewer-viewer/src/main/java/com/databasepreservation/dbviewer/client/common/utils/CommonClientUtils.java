@@ -23,22 +23,39 @@ public class CommonClientUtils {
     boolean blankLabel = ViewerStringUtils.isBlank(label);
     boolean blankValue = ViewerStringUtils.isBlank(value);
 
-    if (blankLabel && blankValue) {
+    if (blankLabel || blankValue) {
       return SafeHtmlUtils.EMPTY_SAFE_HTML;
 
     } else {
       SafeHtmlBuilder b = new SafeHtmlBuilder();
       b.append(SafeHtmlUtils.fromSafeConstant("<div class=\"field\">"));
-      if (!blankLabel) {
-        b.append(SafeHtmlUtils.fromSafeConstant("<div class=\"label\">"));
-        b.append(SafeHtmlUtils.fromString(label));
-        b.append(SafeHtmlUtils.fromSafeConstant("</div>"));
-      }
-      if (!blankValue) {
-        b.append(SafeHtmlUtils.fromSafeConstant("<div class=\"value\">"));
-        b.append(SafeHtmlUtils.fromString(value));
-        b.append(SafeHtmlUtils.fromSafeConstant("</div>"));
-      }
+      b.append(SafeHtmlUtils.fromSafeConstant("<div class=\"label\">"));
+      b.append(SafeHtmlUtils.fromString(label));
+      b.append(SafeHtmlUtils.fromSafeConstant("</div>"));
+      b.append(SafeHtmlUtils.fromSafeConstant("<div class=\"value\">"));
+      b.append(SafeHtmlUtils.fromString(value));
+      b.append(SafeHtmlUtils.fromSafeConstant("</div>"));
+      b.append(SafeHtmlUtils.fromSafeConstant("</div>"));
+      return b.toSafeHtml();
+    }
+  }
+
+  public static SafeHtml getFieldHTML(String label, SafeHtml value) {
+    boolean blankLabel = ViewerStringUtils.isBlank(label);
+    boolean blankValue = value == null || value == SafeHtmlUtils.EMPTY_SAFE_HTML;
+
+    if (blankLabel || blankValue) {
+      return SafeHtmlUtils.EMPTY_SAFE_HTML;
+
+    } else {
+      SafeHtmlBuilder b = new SafeHtmlBuilder();
+      b.append(SafeHtmlUtils.fromSafeConstant("<div class=\"field\">"));
+      b.append(SafeHtmlUtils.fromSafeConstant("<div class=\"label\">"));
+      b.append(SafeHtmlUtils.fromString(label));
+      b.append(SafeHtmlUtils.fromSafeConstant("</div>"));
+      b.append(SafeHtmlUtils.fromSafeConstant("<div class=\"value\">"));
+      b.append(value);
+      b.append(SafeHtmlUtils.fromSafeConstant("</div>"));
       b.append(SafeHtmlUtils.fromSafeConstant("</div>"));
       return b.toSafeHtml();
     }

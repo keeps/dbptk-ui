@@ -17,12 +17,13 @@ public class FontAwesomeIconManager {
   public static final String SCHEMA_TRIGGERS = "clock-o";
   public static final String SCHEMA_VIEWS = "filter";
   public static final String SCHEMA_DATA = "th-large";
+  public static final String SCHEMA_CHECK_CONSTRAINTS = "compress";
 
-  public static String getTag(String icon){
-    return "<i class=\"fa fa-"+icon+"\"></i>";
+  public static String getTag(String icon) {
+    return "<i class=\"fa fa-" + icon + "\"></i>";
   }
 
-  public static String getTag(String icon, String tooltip){
-    return "<i class=\"fa fa-"+icon+"\"></i>";
+  public static String getTag(String icon, String tooltip) {
+    return "<i class=\"fa fa-" + icon + "\"></i>";
   }
 }

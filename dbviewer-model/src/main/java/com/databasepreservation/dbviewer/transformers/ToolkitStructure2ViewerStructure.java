@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.dbviewer.ViewerConstants;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerCell;
+import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerCheckConstraint;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerColumn;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerDatabaseFromToolkit;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerForeignKey;
@@ -49,6 +50,7 @@ import com.databasepreservation.model.data.NullCell;
 import com.databasepreservation.model.data.Row;
 import com.databasepreservation.model.data.SimpleCell;
 import com.databasepreservation.model.exception.ModuleException;
+import com.databasepreservation.model.structure.CheckConstraint;
 import com.databasepreservation.model.structure.ColumnStructure;
 import com.databasepreservation.model.structure.DatabaseStructure;
 import com.databasepreservation.model.structure.ForeignKey;
@@ -75,6 +77,7 @@ import com.databasepreservation.model.structure.type.SimpleTypeNumericExact;
 import com.databasepreservation.model.structure.type.SimpleTypeString;
 import com.databasepreservation.model.structure.type.Type;
 import com.databasepreservation.utils.JodaUtils;
+import com.databasepreservation.utils.XMLUtils;
 
 /**
  * Utility class used to convert a DatabaseStructure (used in Database
@@ -321,8 +324,27 @@ public class ToolkitStructure2ViewerStructure {
     result.setTriggers(getTriggers(table.getTriggers()));
     result.setPrimaryKey(getPrimaryKey(table, references));
     result.setForeignKeys(getForeignKeys(table, references));
+    result.setCheckConstraints(getCheckConstraints(table.getCheckConstraints()));
 
     vdb.putTable(table.getId(), result);
+    return result;
+  }
+
+  private static List<ViewerCheckConstraint> getCheckConstraints(List<CheckConstraint> constraints) {
+    ArrayList<ViewerCheckConstraint> result = new ArrayList<>();
+    if (constraints != null) {
+      for (CheckConstraint constraint : constraints) {
+        result.add(getCheckConstraint(constraint));
+      }
+    }
+    return result;
+  }
+
+  private static ViewerCheckConstraint getCheckConstraint(CheckConstraint constraint) {
+    ViewerCheckConstraint result = new ViewerCheckConstraint();
+    result.setName(constraint.getName());
+    result.setCondition(constraint.getCondition());
+    result.setDescription(constraint.getCondition());
     return result;
   }
 
@@ -394,7 +416,7 @@ public class ToolkitStructure2ViewerStructure {
     result.setAliasList(trigger.getAliasList());
     result.setDescription(trigger.getDescription());
     result.setName(trigger.getName());
-    result.setTriggeredAction(trigger.getTriggeredAction());
+    result.setTriggeredAction(XMLUtils.decode(trigger.getTriggeredAction()));
     result.setTriggerEvent(trigger.getTriggerEvent());
     return result;
   }

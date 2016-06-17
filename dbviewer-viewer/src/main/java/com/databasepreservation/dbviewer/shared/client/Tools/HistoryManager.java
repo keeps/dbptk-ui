@@ -12,6 +12,7 @@ import com.google.gwt.user.client.Window;
  */
 public class HistoryManager {
   public static final String ROUTE_DATABASE = "database";
+  public static final String ROUTE_DATABASE_USERS = "users";
   public static final String ROUTE_SCHEMA = "schema";
   public static final String ROUTE_SCHEMA_STRUCTURE = "structure";
   public static final String ROUTE_SCHEMA_ROUTINES = "routines";
@@ -20,6 +21,7 @@ public class HistoryManager {
   public static final String ROUTE_TABLE = "table";
   public static final String ROUTE_RECORD = "record";
   public static final String ROUTE_REFERENCES = "references";
+  public static final String ROUTE_SCHEMA_CHECK_CONSTRAINTS = "constraints";
 
   public static final String HISTORY_SEP = "/";
   public static final String HISTORY_SEP_REGEX = "/";
@@ -35,6 +37,10 @@ public class HistoryManager {
 
   public static void gotoDatabase(String databaseUUID) {
     newHistory(Arrays.asList(ROUTE_DATABASE, databaseUUID));
+  }
+
+  public static void gotoDatabaseUsers(String databaseUUID) {
+    newHistory(Arrays.asList(ROUTE_DATABASE, databaseUUID, ROUTE_DATABASE_USERS));
   }
 
   public static void gotoSchema(String databaseUUID, String schemaUUID) {
@@ -55,6 +61,10 @@ public class HistoryManager {
 
   public static void gotoSchemaViews(String databaseUUID, String schemaUUID) {
     newHistory(Arrays.asList(ROUTE_SCHEMA, databaseUUID, schemaUUID, ROUTE_SCHEMA_VIEWS));
+  }
+
+  public static void gotoSchemaCheckConstraints(String databaseUUID, String schemaUUID) {
+    newHistory(Arrays.asList(ROUTE_SCHEMA, databaseUUID, schemaUUID, ROUTE_SCHEMA_CHECK_CONSTRAINTS));
   }
 
   public static void gotoTable(String databaseUUID, String tableUUID) {
@@ -125,6 +135,10 @@ public class HistoryManager {
     return createHistoryToken(Arrays.asList(ROUTE_DATABASE, database_uuid));
   }
 
+  public static String linkToDatabaseUsers(String database_uuid) {
+    return createHistoryToken(Arrays.asList(ROUTE_DATABASE, database_uuid, ROUTE_DATABASE_USERS));
+  }
+
   public static String linkToSchema(String database_uuid, String schema_uuid) {
     return createHistoryToken(Arrays.asList(ROUTE_SCHEMA, database_uuid, schema_uuid));
   }
@@ -139,6 +153,10 @@ public class HistoryManager {
 
   public static String linkToSchemaTriggers(String database_uuid, String schema_uuid) {
     return createHistoryToken(Arrays.asList(ROUTE_SCHEMA, database_uuid, schema_uuid, ROUTE_SCHEMA_TRIGGERS));
+  }
+
+  public static String linkToSchemaCheckConstraints(String database_uuid, String schema_uuid) {
+    return createHistoryToken(Arrays.asList(ROUTE_SCHEMA, database_uuid, schema_uuid, ROUTE_SCHEMA_CHECK_CONSTRAINTS));
   }
 
   public static String linkToSchemaViews(String database_uuid, String schema_uuid) {

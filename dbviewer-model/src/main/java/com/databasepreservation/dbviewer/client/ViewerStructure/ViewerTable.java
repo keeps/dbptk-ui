@@ -22,8 +22,8 @@ public class ViewerTable implements Serializable {
   private List<ViewerForeignKey> foreignKeys;
 
   // private List<CandidateKey> candidateKeys;
-  //
-  // private List<CheckConstraint> checkConstraints;
+
+  private List<ViewerCheckConstraint> checkConstraints;
 
   private List<ViewerTrigger> triggers;
 
@@ -117,5 +117,13 @@ public class ViewerTable implements Serializable {
 
   public void setSchemaName(String schemaName) {
     this.schemaName = schemaName;
+  }
+
+  public List<ViewerCheckConstraint> getCheckConstraints() {
+    return checkConstraints;
+  }
+
+  public void setCheckConstraints(List<ViewerCheckConstraint> checkConstraints) {
+    this.checkConstraints = checkConstraints;
   }
 }

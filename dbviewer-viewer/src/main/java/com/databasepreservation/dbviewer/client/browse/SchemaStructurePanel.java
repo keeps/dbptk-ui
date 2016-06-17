@@ -5,8 +5,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
-import com.databasepreservation.dbviewer.client.common.sidebar.DatabaseSidebar;
-import com.databasepreservation.dbviewer.client.common.utils.CommonClientUtils;
 import org.roda.core.data.adapter.filter.Filter;
 import org.roda.core.data.v2.index.IsIndexed;
 
@@ -20,9 +18,11 @@ import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerSchema;
 import com.databasepreservation.dbviewer.client.ViewerStructure.ViewerTable;
 import com.databasepreservation.dbviewer.client.common.lists.BasicTablePanel;
 import com.databasepreservation.dbviewer.client.common.search.SearchPanel;
+import com.databasepreservation.dbviewer.client.common.sidebar.DatabaseSidebar;
+import com.databasepreservation.dbviewer.client.common.utils.CommonClientUtils;
 import com.databasepreservation.dbviewer.client.main.BreadcrumbPanel;
-import com.databasepreservation.dbviewer.shared.client.Tools.HistoryManager;
 import com.databasepreservation.dbviewer.shared.client.Tools.BreadcrumbManager;
+import com.databasepreservation.dbviewer.shared.client.Tools.HistoryManager;
 import com.databasepreservation.dbviewer.shared.client.Tools.ViewerStringUtils;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
@@ -72,7 +72,8 @@ public class SchemaStructurePanel extends Composite {
   @UiField(provided = true)
   SearchPanel dbSearchPanel;
 
-  @UiField(provided = true) DatabaseSidebar sidebar;
+  @UiField(provided = true)
+  DatabaseSidebar sidebar;
   @UiField
   FlowPanel contentItems;
 
