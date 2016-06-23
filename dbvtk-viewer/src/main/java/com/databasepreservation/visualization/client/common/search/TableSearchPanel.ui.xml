@@ -1,0 +1,13 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:b="urn:import:com.databasepreservation.visualization.client.browse"
+             xmlns:s="urn:import:com.databasepreservation.visualization.client.common.search"
+             xmlns:wcag="urn:import:com.databasepreservation.visualization.shared.client.widgets.wcag">
+    <ui:style>
+    </ui:style>
+
+    <g:FlowPanel>
+        <g:SimplePanel ui:field="searchContainer" addStyleNames="TableSearchPanel-search"/>
+        <g:SimplePanel ui:field="tableContainer"  addStyleNames="TableSearchPanel-table"/>
+    </g:FlowPanel>
+</ui:UiBinder>

@@ -5,11 +5,11 @@
         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.databasepreservation.dbviewer</groupId>
-    <artifactId>dbviewer</artifactId>
+    <groupId>com.databasepreservation.visualization</groupId>
+    <artifactId>dbvtk</artifactId>
     <packaging>pom</packaging>
     <version>1.0.0-SNAPSHOT</version>
-    <name>Database Viewer</name>
+    <name>Database Visualization Toolkit</name>
 
     <description>A viewer and explorer for preserved databases</description>
     <scm>
@@ -58,8 +58,8 @@
     </prerequisites>
 
     <modules>
-        <module>dbviewer-model</module>
-        <module>dbviewer-viewer</module>
+        <module>dbvtk-model</module>
+        <module>dbvtk-viewer</module>
     </modules>
 
     <build>
@@ -103,13 +103,13 @@
         <dependencies>
             <!-- internal -->
             <dependency>
-                <groupId>com.databasepreservation.dbviewer</groupId>
-                <artifactId>dbviewer-model</artifactId>
+                <groupId>com.databasepreservation.visualization</groupId>
+                <artifactId>dbvtk-model</artifactId>
                 <version>1.0.0-SNAPSHOT</version>
             </dependency>
             <dependency>
-                <groupId>com.databasepreservation.dbviewer</groupId>
-                <artifactId>dbviewer-model</artifactId>
+                <groupId>com.databasepreservation.visualization</groupId>
+                <artifactId>dbvtk-model</artifactId>
                 <version>1.0.0-SNAPSHOT</version>
                 <classifier>sources</classifier>
             </dependency>

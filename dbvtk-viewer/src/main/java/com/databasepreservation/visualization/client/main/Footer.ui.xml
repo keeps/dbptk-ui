@@ -1,0 +1,54 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <g:HTMLPanel>
+        <div class="footer skip_padding static-page max-width">
+            <div class="row no_padding full_width">
+                <div class="col_3">
+                    <h3>About Database Viewer</h3>
+                    <ul>
+                        <li>
+                            <a href="http://www.database-preservation.com/">What is DB Viewer?</a>
+                        </li>
+                        <li>
+                            <a href="http://www.database-preservation.com/#license">License</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col_3">
+                    <h3>Download</h3>
+                    <ul>
+                        <li>
+                            <a href="https://github.com/keeps/db-visualization-toolkit/releases"
+                               target="_blank">Binary
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://github.com/keeps/db-visualization-toolkit" target="_blank">Source
+                                code
+                            </a>
+                        </li>
+                    </ul>
+
+                </div>
+                <div class="col_3">
+                    <h3>Development</h3>
+                    <ul>
+                        <li>
+                            <a href="https://github.com/keeps/db-visualization-toolkit/issues/new"
+                               target="_blank">Bug reporting
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col_3 last">
+                    <h3>Contact us</h3>
+                    <ul>
+                        <li>
+                            <a href="http://www.database-preservation.com/#information--commercial-support">Information &amp; Commercial support</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </g:HTMLPanel>
+</ui:UiBinder>

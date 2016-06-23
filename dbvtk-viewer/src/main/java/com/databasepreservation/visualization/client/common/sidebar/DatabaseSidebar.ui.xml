@@ -1,0 +1,7 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:sb='urn:import:com.databasepreservation.visualization.client.common.sidebar'>
+    <g:FlowPanel addStyleNames="leftSidebar">
+        <g:FlowPanel styleName="leftSidebar-group" ui:field="sidebarGroup" />
+    </g:FlowPanel>
+</ui:UiBinder>
