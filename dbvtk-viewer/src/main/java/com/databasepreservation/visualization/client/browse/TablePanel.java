@@ -13,13 +13,16 @@ import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable
 import com.databasepreservation.visualization.client.common.search.SearchPanel;
 import com.databasepreservation.visualization.client.common.search.TableSearchPanel;
 import com.databasepreservation.visualization.client.common.sidebar.DatabaseSidebar;
+import com.databasepreservation.visualization.client.common.utils.CommonClientUtils;
 import com.databasepreservation.visualization.client.main.BreadcrumbPanel;
 import com.databasepreservation.visualization.shared.client.Tools.BreadcrumbManager;
+import com.databasepreservation.visualization.shared.client.Tools.ViewerStringUtils;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -59,6 +62,9 @@ public class TablePanel extends Composite {
 
   @UiField(provided = true)
   TableSearchPanel tableSearchPanel;
+
+  @UiField
+  HTML description;
 
   private ViewerDatabase database;
   private ViewerSchema schema;
@@ -100,6 +106,9 @@ public class TablePanel extends Composite {
   }
 
   private void init() {
+    if (ViewerStringUtils.isNotBlank(table.getDescription())) {
+      description.setHTML(CommonClientUtils.getFieldHTML("Description", table.getDescription()));
+    }
     tableSearchPanel.provideSource(database, table);
   }
 }
