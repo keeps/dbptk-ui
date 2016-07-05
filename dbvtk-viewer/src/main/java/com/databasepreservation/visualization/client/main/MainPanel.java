@@ -38,7 +38,8 @@ public class MainPanel extends Composite {
     bannerLogo.add(new HTMLPanel(new SafeHtml() {
       @Override
       public String asString() {
-        return "<div class=\"homeText\">Database Viewer <span style=\"font-size:0.5em\">(preview release)</span></div>";
+        return "<div class=\"homeText\">Database Visualization Toolkit</div>";
+        // <span style="font-size:0.5em">(preview release)</span>
       }
     }));
 
