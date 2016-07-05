@@ -31,6 +31,7 @@
 
         <!-- Convenience properties to set versions -->
         <gwtVersion>2.7.0</gwtVersion>
+        <version.dbptk-model>2.0.0-beta4.4</version.dbptk-model>
         <version.roda-common-data>2.0.0-alpha7.1</version.roda-common-data>
     </properties>
     <repositories>
@@ -53,14 +54,36 @@
         </repository>
     </repositories>
 
+    <distributionManagement>
+        <repository>
+            <id>keeps_artifactory</id>
+            <name>KEEP Artifacts-releases</name>
+            <url>http://artifactory.keep.pt/keep</url>
+        </repository>
+    </distributionManagement>
+
     <prerequisites>
         <maven>2.2.1</maven>
     </prerequisites>
 
-    <modules>
-        <module>dbvtk-model</module>
-        <module>dbvtk-viewer</module>
-    </modules>
+    <profiles>
+        <profile>
+            <id>default</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>dbvtk-model</module>
+                <module>dbvtk-viewer</module>
+            </modules>
+        </profile>
+        <profile>
+            <id>common</id>
+            <modules>
+                <module>dbvtk-model</module>
+            </modules>
+        </profile>
+    </profiles>
 
     <build>
         <pluginManagement>
@@ -116,7 +139,13 @@
             <dependency>
                 <groupId>com.databasepreservation</groupId>
                 <artifactId>dbptk-model</artifactId>
-                <version>2.0.0-beta4.3</version>
+                <version>${version.dbptk-model}</version>
+                <classifier>sources</classifier>
+            </dependency>
+            <dependency>
+                <groupId>com.databasepreservation</groupId>
+                <artifactId>dbptk-model</artifactId>
+                <version>${version.dbptk-model}</version>
             </dependency>
             <dependency>
                 <groupId>org.roda-project</groupId>
