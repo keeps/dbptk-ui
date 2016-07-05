@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -101,7 +102,7 @@ public class SolrUtils {
     Path databaseDir = null;
     Path tableDir = null;
     try {
-      final File jarFile = new File(SolrManager.class.getProtectionDomain().getCodeSource().getLocation().getPath());
+      final File jarFile = new File(SolrManager.class.getProtectionDomain().getCodeSource().getLocation().toURI());
 
       // if it is a directory the application in being run from an IDE
       // in that case do not setup (assuming setup is done)
@@ -142,7 +143,7 @@ public class SolrUtils {
         }
         jar.close();
       }
-    } catch (IOException e) {
+    } catch (IOException | URISyntaxException e) {
       LOGGER.error("Could not extract Solr configset", e);
       if (databaseDir != null) {
         try {
