@@ -80,6 +80,56 @@ public class ViewerConstants {
    */
   public static final Path USER_DBVIEWER_DIR = Paths.get(System.getProperty("java.home"), ".db-visualization-toolkit");
 
+
+  /*
+   * API related (from RODA)
+   */
+  public static final String API_SEP = "/";
+  public static final String API_REST_V1_AIPS = "api/v1/aips/";
+  public static final String API_REST_V1_REPRESENTATIONS = "api/v1/representations/";
+  public static final String API_REST_V1_FILES = "api/v1/files/";
+  public static final String API_REST_V1_TRANSFERRED = "api/v1/transferred";
+  public static final String API_REST_V1_THEME = "api/v1/theme";
+  // sub-resources strings
+  public static final String API_DATA = "data";
+  public static final Object API_FILE = "file";
+  public static final String API_DESCRIPTIVE_METADATA = "descriptive_metadata";
+  public static final String API_PRESERVATION_METADATA = "preservation_metadata";
+  // "http query string" related strings
+  public static final String API_QUERY_START = "?";
+  public static final String API_QUERY_ASSIGN_SYMBOL = "=";
+  public static final String API_QUERY_SEP = "&";
+  public static final String API_QUERY_KEY_ACCEPT_FORMAT = "acceptFormat";
+  public static final String API_QUERY_VALUE_ACCEPT_FORMAT_BIN = "bin";
+  public static final String API_QUERY_VALUE_ACCEPT_FORMAT_XML = "xml";
+  public static final String API_QUERY_VALUE_ACCEPT_FORMAT_HTML = "html";
+  public static final String API_QUERY_VALUE_ACCEPT_FORMAT_JSON = "json";
+  public static final String API_QUERY_KEY_LANG = "lang";
+  public static final String API_QUERY_VALUE_LANG_DEFAULT = ViewerConstants.API_QUERY_VALUE_LANG_PT_PT;
+  public static final String API_QUERY_VALUE_LANG_PT_PT = "pt_PT";
+  public static final String API_QUERY_VALUE_LANG_EN_US = "en_US";
+  public static final String API_QUERY_KEY_START = "start";
+  public static final String API_QUERY_KEY_LIMIT = "limit";
+  // "http path param" related strings
+  public static final String API_PATH_PARAM_AIP_ID = "aip_id";
+  public static final String API_PATH_PARAM_REPRESENTATION_ID = "representation_id";
+  public static final String API_PATH_PARAM_FILE_UUID = "file_uuid";
+  public static final String API_PATH_PARAM_METADATA_ID = "metadata_id";
+  public static final String API_QUERY_PARAM_VERSION = "version";
+  // http headers used
+  public static final String API_HTTP_HEADER_ACCEPT = "Accept";
+  // job related params
+  public static final String API_PATH_PARAM_JOB_ID = "jobId";
+  public static final String API_PATH_PARAM_JOB_JUST_FAILED = "jobJustFailed";
+
+  /*
+   * API related (for DBVTK)
+   */
+  public static final String API_PATH_PARAM_DATABASE_UUID = "databaseUUID";
+  public static final String API_PATH_PARAM_TABLE_UUID = "tableUUID";
+  public static final String API_PATH_PARAM_SOLR_COLLECTION = "collection";
+  public static final String API_PATH_PARAM_SOLR_QUERY = "query";
+
   /*
    * Misc
    */

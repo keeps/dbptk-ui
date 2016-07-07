@@ -605,7 +605,7 @@ public class ToolkitStructure2ViewerStructure {
         DateTime dateTime = null;
         if ("DATE".equalsIgnoreCase(columnType.getTypeName())) {
           // XML type xs:date
-          dateTime = JodaUtils.xs_date_parse(simpleCell.getSimpleData());
+          dateTime = JodaUtils.xs_date_parse(simpleCell.getSimpleData()).withTime(0,0,0,0);
         } else if ("TIMESTAMP WITH TIME ZONE".equalsIgnoreCase(columnType.getTypeName())
           || "TIMESTAMP".equalsIgnoreCase(columnType.getTypeName())) {
           // XML type xs:dateTime

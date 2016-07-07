@@ -1,6 +1,7 @@
 package com.databasepreservation.visualization.utils;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -183,6 +184,12 @@ public class SolrManager {
     Filter filter, Sorter sorter, Sublist sublist, Facets facets)
     throws org.roda.core.data.exceptions.GenericException, RequestNotValidException {
     return SolrUtils.find(client, classToReturn, tableUUID, filter, sorter, sublist, facets);
+  }
+
+  public InputStream findRowsCSV(RodaUser user, String collection, String query, String filterQuery, String fields, String sort,
+    String start, String rows) throws org.roda.core.data.exceptions.GenericException, RequestNotValidException {
+
+    return SolrUtils.findCSV(client, collection, query, filterQuery, fields, sort, start, rows);
   }
 
   public <T extends IsIndexed> Long countRows(RodaUser user, Class<T> classToReturn, String tableUUID, Filter filter)

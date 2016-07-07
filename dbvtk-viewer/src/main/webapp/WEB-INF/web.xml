@@ -5,7 +5,9 @@
 
 <web-app>
 
-    <!-- Servlets -->
+    <!-- ************************************* -->
+    <!-- GWT related servlets/servlet-mappings -->
+    <!-- ************************************* -->
     <servlet>
         <servlet-name>browseServlet</servlet-name>
         <servlet-class>com.databasepreservation.visualization.server.BrowserServiceImpl</servlet-class>
@@ -34,5 +36,24 @@
     <welcome-file-list>
         <welcome-file>index.html</welcome-file>
     </welcome-file-list>
+
+
+    <!-- ************************************** -->
+    <!-- REST related servlets/servlet-mappings -->
+    <!-- ************************************** -->
+    <servlet>
+        <servlet-name>rest_api</servlet-name>
+        <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
+        <init-param>
+            <param-name>javax.ws.rs.Application</param-name>
+            <param-value>com.databasepreservation.visualization.api.RestApplication</param-value>
+        </init-param>
+        <load-on-startup>2</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>rest_api</servlet-name>
+        <url-pattern>/api/*</url-pattern>
+    </servlet-mapping>
 
 </web-app>

@@ -1,5 +1,8 @@
 package com.databasepreservation.visualization.client.ViewerStructure;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -9,6 +12,8 @@ import java.util.Map;
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
+@XmlRootElement(name = "metadata")
+@JsonInclude(JsonInclude.Include.ALWAYS)
 public class ViewerMetadata implements Serializable {
   private String name;
 

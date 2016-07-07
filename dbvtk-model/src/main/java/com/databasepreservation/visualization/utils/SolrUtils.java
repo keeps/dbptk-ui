@@ -29,6 +29,8 @@ import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CloudSolrClient;
+import org.apache.solr.client.solrj.impl.InputStreamResponseParser;
+import org.apache.solr.client.solrj.request.QueryRequest;
 import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
@@ -68,12 +70,12 @@ import org.roda.core.data.v2.user.RodaUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.databasepreservation.utils.FileUtils;
 import com.databasepreservation.visualization.ViewerConstants;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerRow;
 import com.databasepreservation.visualization.exceptions.ViewerException;
 import com.databasepreservation.visualization.transformers.SolrTransformer;
-import com.databasepreservation.utils.FileUtils;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -298,6 +300,7 @@ public class SolrUtils {
     query.setSorts(parseSorter(sorter));
     query.setStart(sublist.getFirstElementIndex());
     query.setRows(sublist.getMaximumElementCount());
+
     parseAndConfigureFacets(facets, query);
 
     try {
@@ -308,6 +311,51 @@ public class SolrUtils {
     }
 
     return ret;
+  }
+
+  public static InputStream findCSV(SolrClient index, String collection, String query, String filterQuery,
+    String fields, String sort, String start, String rows) throws GenericException {
+    SolrQuery solrQuery = new SolrQuery();
+
+    if (StringUtils.isNotBlank(query)) {
+      solrQuery.setParam("q", query);
+    }
+
+    if (StringUtils.isNotBlank(filterQuery)) {
+      solrQuery.setParam("fq", filterQuery);
+    }
+
+    if (StringUtils.isNotBlank(fields)) {
+      solrQuery.setParam("fl", fields);
+    }
+
+    if (StringUtils.isNotBlank(sort)) {
+      solrQuery.setParam("sort", sort);
+    }
+
+    if (StringUtils.isNotBlank(start)) {
+      solrQuery.setParam("start", start);
+    }
+
+    if (StringUtils.isNotBlank(rows)) {
+      solrQuery.setParam("rows", rows);
+    }
+
+    try {
+      QueryRequest queryRequest = new QueryRequest(solrQuery);
+      queryRequest.setResponseParser(new InputStreamResponseParser("csv"));
+      QueryResponse response = queryRequest.process(index, collection);
+
+      Object stream = response.getResponse().get("stream");
+      if (stream instanceof InputStream) {
+        return (InputStream) stream;
+      } else {
+        throw new GenericException("Result was not an input stream. Its string representation was: "
+          + stream.toString());
+      }
+    } catch (SolrServerException | IOException e) {
+      throw new GenericException("Could not query index", e);
+    }
   }
 
   public static List<SolrQuery.SortClause> parseSorter(Sorter sorter) {
