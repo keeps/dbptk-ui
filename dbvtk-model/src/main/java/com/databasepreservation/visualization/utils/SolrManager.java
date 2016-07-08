@@ -186,10 +186,9 @@ public class SolrManager {
     return SolrUtils.find(client, classToReturn, tableUUID, filter, sorter, sublist, facets);
   }
 
-  public InputStream findRowsCSV(RodaUser user, String collection, String query, String filterQuery, String fields, String sort,
-    String start, String rows) throws org.roda.core.data.exceptions.GenericException, RequestNotValidException {
-
-    return SolrUtils.findCSV(client, collection, query, filterQuery, fields, sort, start, rows);
+  public InputStream findRowsCSV(RodaUser user, String tableUUID, Filter filter, Sorter sorter, Sublist sublist, List<String> fields)
+    throws org.roda.core.data.exceptions.GenericException, RequestNotValidException {
+    return SolrUtils.findCSV(client, SolrUtils.getTableCollectionName(tableUUID), filter, sorter, sublist, fields);
   }
 
   public <T extends IsIndexed> Long countRows(RodaUser user, Class<T> classToReturn, String tableUUID, Filter filter)

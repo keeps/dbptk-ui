@@ -204,4 +204,8 @@ public class TableSearchPanel extends Composite {
       }
     }
   }
+
+  public String getExportURL() {
+    return tableRowList.getExportURL();
+  }
 }

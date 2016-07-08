@@ -100,4 +100,8 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
     super.onLoad();
     this.getSelectionModel().clear();
   }
+
+  @Override public String getExportURL() {
+    return null;
+  }
 }

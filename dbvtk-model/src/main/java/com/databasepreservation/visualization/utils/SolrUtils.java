@@ -313,36 +313,20 @@ public class SolrUtils {
     return ret;
   }
 
-  public static InputStream findCSV(SolrClient index, String collection, String query, String filterQuery,
-    String fields, String sort, String start, String rows) throws GenericException {
-    SolrQuery solrQuery = new SolrQuery();
+  public static InputStream findCSV(SolrClient index, String collection, Filter filter, Sorter sorter, Sublist sublist,
+    List<String> fields) throws GenericException, RequestNotValidException {
+    SolrQuery query = new SolrQuery();
+    query.setQuery(parseFilter(filter));
+    query.setSorts(parseSorter(sorter));
+    query.setStart(sublist.getFirstElementIndex());
+    query.setRows(sublist.getMaximumElementCount());
+    query.setFields(fields.toArray(new String[0]));
 
-    if (StringUtils.isNotBlank(query)) {
-      solrQuery.setParam("q", query);
-    }
-
-    if (StringUtils.isNotBlank(filterQuery)) {
-      solrQuery.setParam("fq", filterQuery);
-    }
-
-    if (StringUtils.isNotBlank(fields)) {
-      solrQuery.setParam("fl", fields);
-    }
-
-    if (StringUtils.isNotBlank(sort)) {
-      solrQuery.setParam("sort", sort);
-    }
-
-    if (StringUtils.isNotBlank(start)) {
-      solrQuery.setParam("start", start);
-    }
-
-    if (StringUtils.isNotBlank(rows)) {
-      solrQuery.setParam("rows", rows);
-    }
+    LOGGER.debug("CSV export query object: " + query.toString());
+    LOGGER.debug("CSV export query: " + query.toQueryString());
 
     try {
-      QueryRequest queryRequest = new QueryRequest(solrQuery);
+      QueryRequest queryRequest = new QueryRequest(query);
       queryRequest.setResponseParser(new InputStreamResponseParser("csv"));
       QueryResponse response = queryRequest.process(index, collection);
 
@@ -519,6 +503,18 @@ public class SolrUtils {
       throw new GenericException("Could not retrieve AIP from index", e);
     }
     return ret;
+  }
+
+  public static String getSolrQuery(Filter filter, Sorter sorter, Sublist sublist, Facets facets)
+    throws GenericException, RequestNotValidException {
+    SolrQuery query = new SolrQuery();
+    query.setQuery(parseFilter(filter));
+    // query.setSorts(parseSorter(sorter));
+    query.setStart(sublist.getFirstElementIndex());
+    query.setRows(sublist.getMaximumElementCount());
+    // parseAndConfigureFacets(facets, query);
+
+    return query.toQueryString();
   }
 
   public static String parseFilter(Filter filter) throws RequestNotValidException {

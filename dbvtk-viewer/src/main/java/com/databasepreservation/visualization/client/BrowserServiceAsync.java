@@ -2,6 +2,12 @@ package com.databasepreservation.visualization.client;
 
 import java.util.List;
 
+import org.roda.core.data.adapter.facet.Facets;
+import org.roda.core.data.adapter.filter.Filter;
+import org.roda.core.data.adapter.sort.Sorter;
+import org.roda.core.data.adapter.sublist.Sublist;
+import org.roda.core.data.exceptions.GenericException;
+import org.roda.core.data.exceptions.RequestNotValidException;
 import org.roda.core.data.v2.index.IsIndexed;
 
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable;
@@ -63,6 +69,9 @@ public interface BrowserServiceAsync {
     java.lang.String rowUUID, AsyncCallback<T> callback);
 
   void getSearchFields(ViewerTable viewerTable, AsyncCallback<List<SearchField>> async);
+
+  void getSolrQueryString(Filter filter, Sorter sorter, Sublist sublist, Facets facets, AsyncCallback<String> async)
+    throws GenericException, RequestNotValidException;
 
   /**
    * Utility class to get the RPC Async interface from client-side code

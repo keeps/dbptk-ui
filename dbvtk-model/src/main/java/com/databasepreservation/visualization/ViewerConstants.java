@@ -125,8 +125,15 @@ public class ViewerConstants {
   /*
    * API related (for DBVTK)
    */
+  public static final String API_SERVLET = "api";
+  public static final String API_V1_EXPORT_RESOURCE = "/v1/exports";
   public static final String API_PATH_PARAM_DATABASE_UUID = "databaseUUID";
   public static final String API_PATH_PARAM_TABLE_UUID = "tableUUID";
+  public static final String API_QUERY_PARAM_FIELDS = "fl";
+  public static final String API_QUERY_PARAM_FILTER = "f";
+  public static final String API_QUERY_PARAM_SORTER = "s";
+  public static final String API_QUERY_PARAM_SUBLIST = "sl";
+
   public static final String API_PATH_PARAM_SOLR_COLLECTION = "collection";
   public static final String API_PATH_PARAM_SOLR_QUERY = "query";
 

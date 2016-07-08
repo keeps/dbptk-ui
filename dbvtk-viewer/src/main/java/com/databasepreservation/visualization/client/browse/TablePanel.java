@@ -3,6 +3,12 @@ package com.databasepreservation.visualization.client.browse;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Hyperlink;
 import org.roda.core.data.adapter.filter.Filter;
 import org.roda.core.data.v2.index.IsIndexed;
 
@@ -109,6 +115,14 @@ public class TablePanel extends Composite {
     if (ViewerStringUtils.isNotBlank(table.getDescription())) {
       description.setHTML(CommonClientUtils.getFieldHTML("Description", table.getDescription()));
     }
+
     tableSearchPanel.provideSource(database, table);
+
+    description.setHTML(SafeHtmlUtils.htmlEscape("export"));
+    description.addClickHandler(new ClickHandler() {
+      @Override public void onClick(ClickEvent event) {
+        Window.Location.assign(TablePanel.this.tableSearchPanel.getExportURL());
+      }
+    });
   }
 }

@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.gwt.user.client.ui.Button;
 import org.roda.core.data.adapter.facet.Facets;
 import org.roda.core.data.adapter.filter.Filter;
 import org.roda.core.data.adapter.sort.SortParameter;
@@ -164,6 +165,7 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel i
     add(selectAllPanel);
     add(new ScrollPanel(display));
     add(resultsPager);
+    add(new Button("x"));
     add(pageSizePager);
 
     selectionModel = new SingleSelectionModel<>(getKeyProvider());
@@ -645,4 +647,7 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel i
     addColumn(column, SafeHtmlUtils.fromString(headerText), nowrap, alignRight, fixedSize);
   }
 
+  public abstract String getExportURL();
+  // TODO: create link with command action that uses the link provided by
+  // getExportURL
 }

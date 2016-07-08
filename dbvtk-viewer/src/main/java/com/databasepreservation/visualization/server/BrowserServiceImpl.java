@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.databasepreservation.visualization.utils.SolrUtils;
 import org.roda.core.data.adapter.facet.Facets;
 import org.roda.core.data.adapter.filter.Filter;
 import org.roda.core.data.adapter.sort.Sorter;
@@ -92,6 +93,11 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
     RodaUser user = null;
     Class<T> classToReturn = parseClass(classNameToReturn);
     return ViewerFactory.getSolrManager().retrieveRows(user, classToReturn, tableUUID, rowUUID);
+  }
+
+  @Override public String getSolrQueryString(Filter filter, Sorter sorter, Sublist sublist, Facets facets)
+    throws GenericException, RequestNotValidException {
+    return SolrUtils.getSolrQuery(filter, sorter, sublist, facets);
   }
 
   @Override

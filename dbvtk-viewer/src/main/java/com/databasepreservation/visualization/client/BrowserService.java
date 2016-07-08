@@ -66,4 +66,7 @@ public interface BrowserService extends RemoteService {
 
   <T extends IsIndexed> T retrieveRows(String classNameToReturn, String tableUUID, String rowUUID)
     throws AuthorizationDeniedException, GenericException, NotFoundException;
+
+  String getSolrQueryString(Filter filter, Sorter sorter, Sublist sublist, Facets facets)
+    throws GenericException, RequestNotValidException;
 }

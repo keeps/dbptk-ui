@@ -3,9 +3,10 @@
     <!-- Inherit the core Web Toolkit stuff.                        -->
     <inherits name='com.google.gwt.user.User'/>
 
-    <!-- Inherit some roda functionality -->
+    <!-- Inherit some internal functionality -->
     <inherits name='org.roda.core.Core'/>
     <inherits name='com.databasepreservation.visualization.dbvtk-model'/>
+    <inherits name="com.github.nmorel.gwtjackson.GwtJackson" />
 
     <!-- Inherit logging functionality -->
     <inherits name='com.google.gwt.logging.Logging'/>
