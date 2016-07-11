@@ -1,18 +1,12 @@
 package com.databasepreservation.visualization.client.common.lists;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.visualization.shared.client.Tools.ViewerJsonUtils;
-import com.google.gwt.safehtml.shared.UriUtils;
 import org.roda.core.data.adapter.facet.Facets;
 import org.roda.core.data.adapter.filter.Filter;
 import org.roda.core.data.adapter.sort.Sorter;
@@ -28,6 +22,7 @@ import com.databasepreservation.visualization.client.ViewerStructure.ViewerRow;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerType;
 import com.databasepreservation.visualization.shared.client.ClientLogger;
+import com.databasepreservation.visualization.shared.client.Tools.ViewerJsonUtils;
 import com.databasepreservation.visualization.shared.client.Tools.ViewerStringUtils;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.SafeHtmlCell;
@@ -36,9 +31,11 @@ import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortList;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
 
@@ -57,12 +54,13 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
   private Sorter currentSorter;
 
   public TableRowList(ViewerDatabase database, ViewerTable table) {
-    this(database, table, null, null, null, false);
+    this(database, table, null, null, null, false, false);
   }
 
   public TableRowList(ViewerDatabase database, ViewerTable table, Filter filter, Facets facets, String summary,
-    boolean selectable) {
-    super(filter, false, facets, summary, selectable, new Pair<ViewerDatabase, ViewerTable>(database, table));
+    boolean selectable, boolean exportable) {
+    super(filter, false, facets, summary, selectable, exportable,
+      new Pair<ViewerDatabase, ViewerTable>(database, table));
   }
 
   public void setColumnVisibility(Map<String, Boolean> columnDisplayNameToVisibleState) {
@@ -173,8 +171,8 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
 
     GWT.log("Filter: " + filter);
 
-    BrowserService.Util.getInstance().findRows(ViewerRow.class.getName(), table.getUUID(), filter, currentSorter, sublist,
-      getFacets(), LocaleInfo.getCurrentLocale().getLocaleName(), callback);
+    BrowserService.Util.getInstance().findRows(ViewerRow.class.getName(), table.getUUID(), filter, currentSorter,
+      sublist, getFacets(), LocaleInfo.getCurrentLocale().getLocaleName(), callback);
   }
 
   @Override
@@ -236,7 +234,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
       }
     }
     // if all columns are hidden, export all
-    if(solrColumns.isEmpty()){
+    if (solrColumns.isEmpty()) {
       for (ViewerColumn viewerColumn : table.getColumns()) {
         solrColumns.add(viewerColumn.getSolrName());
       }
@@ -244,15 +242,18 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
 
     // add parameter: field list
     String paramFieldList = ViewerJsonUtils.getStringListMapper().write(solrColumns);
-    urlBuilder.append(ViewerConstants.API_QUERY_PARAM_FIELDS).append("=").append(UriUtils.encode(paramFieldList)).append("&");
+    urlBuilder.append(ViewerConstants.API_QUERY_PARAM_FIELDS).append("=").append(UriUtils.encode(paramFieldList))
+      .append("&");
 
     // add parameter: filter
     String paramFilter = ViewerJsonUtils.getFilterMapper().write(getFilter());
-    urlBuilder.append(ViewerConstants.API_QUERY_PARAM_FILTER).append("=").append(UriUtils.encode(paramFilter)).append("&");
+    urlBuilder.append(ViewerConstants.API_QUERY_PARAM_FILTER).append("=").append(UriUtils.encode(paramFilter))
+      .append("&");
 
     // add parameter: subList
     String paramSubList = ViewerJsonUtils.getSubListMapper().write(currentSubList);
-    urlBuilder.append(ViewerConstants.API_QUERY_PARAM_SUBLIST).append("=").append(UriUtils.encode(paramSubList)).append("&");
+    urlBuilder.append(ViewerConstants.API_QUERY_PARAM_SUBLIST).append("=").append(UriUtils.encode(paramSubList))
+      .append("&");
 
     // add parameter: sorter
     String paramSorter = ViewerJsonUtils.getSorterMapper().write(currentSorter);
@@ -261,5 +262,10 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
     GWT.log(urlBuilder.toString());
 
     return urlBuilder.toString();
+  }
+
+  @Override
+  public void exportClickHandler() {
+    Window.Location.assign(getExportURL());
   }
 }

@@ -117,12 +117,5 @@ public class TablePanel extends Composite {
     }
 
     tableSearchPanel.provideSource(database, table);
-
-    description.setHTML(SafeHtmlUtils.htmlEscape("export"));
-    description.addClickHandler(new ClickHandler() {
-      @Override public void onClick(ClickEvent event) {
-        Window.Location.assign(TablePanel.this.tableSearchPanel.getExportURL());
-      }
-    });
   }
 }

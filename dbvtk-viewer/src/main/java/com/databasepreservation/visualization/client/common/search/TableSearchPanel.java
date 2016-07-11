@@ -84,7 +84,7 @@ public class TableSearchPanel extends Composite {
     this.database = database;
     this.table = table;
 
-    tableRowList = new TableRowList(database, table, initialFilter, null, null, false);
+    tableRowList = new TableRowList(database, table, initialFilter, null, null, false, true);
     tableRowList.setColumnVisibility(columnDisplayNameToVisibleState);
 
     GWT.log("initial filter: " + initialFilter.toString());
@@ -203,9 +203,5 @@ public class TableSearchPanel extends Composite {
         otherSearchFieldPanel.setVisibilityCheckboxValue(searchFieldPanel.getVisibilityCheckboxValue(), false);
       }
     }
-  }
-
-  public String getExportURL() {
-    return tableRowList.getExportURL();
   }
 }

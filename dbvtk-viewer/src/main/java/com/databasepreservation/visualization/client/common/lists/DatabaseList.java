@@ -34,11 +34,11 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
   private TextColumn<ViewerDatabase> archivalDateColumn;
 
   public DatabaseList() {
-    this(null, null, null, false);
+    this(null, null, null, false, false);
   }
 
-  public DatabaseList(Filter filter, Facets facets, String summary, boolean selectable) {
-    super(filter, facets, summary, selectable);
+  public DatabaseList(Filter filter, Facets facets, String summary, boolean selectable, boolean exportable) {
+    super(filter, facets, summary, selectable, exportable);
   }
 
   @Override
@@ -101,7 +101,13 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
     this.getSelectionModel().clear();
   }
 
-  @Override public String getExportURL() {
+  @Override
+  public String getExportURL() {
     return null;
+  }
+
+  @Override
+  public void exportClickHandler() {
+
   }
 }

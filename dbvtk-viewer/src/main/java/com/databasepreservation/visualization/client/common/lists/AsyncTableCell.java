@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.gwt.user.client.ui.Button;
 import org.roda.core.data.adapter.facet.Facets;
 import org.roda.core.data.adapter.filter.Filter;
 import org.roda.core.data.adapter.sort.SortParameter;
@@ -32,6 +31,8 @@ import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -51,6 +52,7 @@ import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
@@ -78,6 +80,7 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel i
   private final AccessibleSimplePager resultsPager;
   private final PageSizePager pageSizePager;
   private final CellTable<T> display;
+  private final Button exportButton;
 
   private FlowPanel selectAllPanel;
   private FlowPanel selectAllPanelBody;
@@ -102,15 +105,16 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel i
   private final O object;
 
   public AsyncTableCell() {
-    this(null, false, null, null, false, 20, 100, null);
-  }
-
-  public AsyncTableCell(Filter filter, boolean justActive, Facets facets, String summary, boolean selectable, O object) {
-    this(filter, justActive, facets, summary, selectable, 20, 100, object);
+    this(null, false, null, null, false, false, 20, 100, null);
   }
 
   public AsyncTableCell(Filter filter, boolean justActive, Facets facets, String summary, boolean selectable,
-    int initialPageSize, int pageSizeIncrement, O object) {
+    boolean exportable, O object) {
+    this(filter, justActive, facets, summary, selectable, exportable, 20, 100, object);
+  }
+
+  public AsyncTableCell(Filter filter, boolean justActive, Facets facets, String summary, boolean selectable,
+    boolean exportable, int initialPageSize, int pageSizeIncrement, O object) {
     super();
 
     this.initialPageSize = initialPageSize;
@@ -152,6 +156,17 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel i
 
     dataProvider.addDataDisplay(display);
 
+    if (exportable) {
+      exportButton = new Button("Export visible", new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          AsyncTableCell.this.exportClickHandler();
+        }
+      });
+    } else {
+      exportButton = null;
+    }
+
     resultsPager = new AccessibleSimplePager(AccessibleSimplePager.TextLocation.LEFT,
       (SimplePager.Resources) GWT.create(SimplePager.Resources.class), false, initialPageSize, false, false,
       (SimplePager.ImageButtonsConstants) GWT.create(SimplePager.ImageButtonsConstants.class));
@@ -165,7 +180,9 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel i
     add(selectAllPanel);
     add(new ScrollPanel(display));
     add(resultsPager);
-    add(new Button("x"));
+    if (exportButton != null) {
+      add(exportButton);
+    }
     add(pageSizePager);
 
     selectionModel = new SingleSelectionModel<>(getKeyProvider());
@@ -184,6 +201,9 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel i
     resultsPager.addStyleName("my-asyncdatagrid-pager-results");
     pageSizePager.addStyleName("my-asyncdatagrid-pager-pagesize");
     display.addStyleName("my-asyncdatagrid-display");
+    if (exportButton != null) {
+      exportButton.addStyleName("btn btn-export");
+    }
 
     addValueChangeHandler(new ValueChangeHandler<IndexResult<T>>() {
       @Override
@@ -648,6 +668,6 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel i
   }
 
   public abstract String getExportURL();
-  // TODO: create link with command action that uses the link provided by
-  // getExportURL
+
+  public abstract void exportClickHandler();
 }

@@ -45,6 +45,20 @@
     /*nothing yet since most of it is defined for all AsyncTableCells*/
 }
 
+.btn-export {
+    padding: 4px 8px 4px 8px;
+    font-size: 11px;
+    font-weight: 400;
+    float: right;
+    margin-top: 3px;
+    border-radius: 0px;
+    margin-left: 5px;
+    display: inline-block;
+    font-family: "Ubuntu", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    text-transform: none;
+    width: 8.4rem;
+}
+
 /***********************************************
    BrowseContent (based on ViewRepresentation)
 ************************************************/
