@@ -22,6 +22,7 @@ import com.databasepreservation.visualization.client.common.sidebar.DatabaseSide
 import com.databasepreservation.visualization.client.common.utils.CommonClientUtils;
 import com.databasepreservation.visualization.client.main.BreadcrumbPanel;
 import com.databasepreservation.visualization.shared.client.Tools.BreadcrumbManager;
+import com.databasepreservation.visualization.shared.client.Tools.FontAwesomeIconManager;
 import com.databasepreservation.visualization.shared.client.Tools.HistoryManager;
 import com.databasepreservation.visualization.shared.client.Tools.ViewerStringUtils;
 import com.google.gwt.cell.client.SafeHtmlCell;
@@ -210,8 +211,8 @@ public class SchemaStructurePanel extends Composite {
   }
 
   private BasicTablePanel<ViewerColumn> getBasicTablePanelForTableColumns(ViewerTable table) {
-    Hyperlink header = new Hyperlink("Table: " + table.getName(), HistoryManager.linkToTable(database.getUUID(),
-      table.getUUID()));
+    Hyperlink header = new Hyperlink(FontAwesomeIconManager.loaded(FontAwesomeIconManager.TABLE, table.getName()),
+      HistoryManager.linkToTable(database.getUUID(), table.getUUID()));
     header.addStyleName("h3");
 
     SafeHtmlBuilder infoBuilder = new SafeHtmlBuilder();
