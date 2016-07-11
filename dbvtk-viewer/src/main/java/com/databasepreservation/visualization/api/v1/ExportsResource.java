@@ -90,7 +90,10 @@ public class ExportsResource {
     Filter filter = JsonUtils.getObjectFromJson(filterParam, Filter.class);
     List<String> fields = JsonUtils.getListFromJson(fieldsListParam, String.class);
     Sorter sorter = JsonUtils.getObjectFromJson(sorterParam, Sorter.class);
-    Sublist sublist = JsonUtils.getObjectFromJson(subListParam, Sublist.class);
+    Sublist sublist = null;
+    if(StringUtils.isNotBlank(subListParam)) {
+      sublist = JsonUtils.getObjectFromJson(subListParam, Sublist.class);
+    }
 
     // TODO: use viewerTable to convert solrColumnNames into displayColumnNames
     InputStream rowsCSV = solrManager.findRowsCSV(null, tableUUID, filter, sorter, sublist, fields);

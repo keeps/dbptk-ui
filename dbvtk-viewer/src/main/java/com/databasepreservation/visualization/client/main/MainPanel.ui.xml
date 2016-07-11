@@ -6,8 +6,8 @@
         <!-- Header -->
         <g:FlowPanel styleName="banner">
             <wcag:AccessibleFocusPanel styleName="homeLink" ui:field="homeLinkArea">
-                <g:FlowPanel ui:field="bannerLogo">
-                </g:FlowPanel>
+                <g:SimplePanel ui:field="bannerLogo">
+                </g:SimplePanel>
             </wcag:AccessibleFocusPanel>
         </g:FlowPanel>
 

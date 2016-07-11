@@ -318,8 +318,10 @@ public class SolrUtils {
     SolrQuery query = new SolrQuery();
     query.setQuery(parseFilter(filter));
     query.setSorts(parseSorter(sorter));
-    query.setStart(sublist.getFirstElementIndex());
-    query.setRows(sublist.getMaximumElementCount());
+    if(sublist != null) {
+      query.setStart(sublist.getFirstElementIndex());
+      query.setRows(sublist.getMaximumElementCount());
+    }
     query.setFields(fields.toArray(new String[0]));
 
     LOGGER.debug("CSV export query object: " + query.toString());

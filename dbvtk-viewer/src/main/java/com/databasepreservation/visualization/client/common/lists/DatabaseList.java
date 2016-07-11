@@ -102,12 +102,11 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
   }
 
   @Override
-  public String getExportURL() {
-    return null;
-  }
+  public void exportVisibleClickHandler() {
 
+  }
   @Override
-  public void exportClickHandler() {
+  public void exportAllClickHandler() {
 
   }
 }

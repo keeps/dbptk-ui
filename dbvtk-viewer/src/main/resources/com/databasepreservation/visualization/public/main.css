@@ -59,6 +59,14 @@
     width: 8.4rem;
 }
 
+.btn-export-all {
+    width: 8.4rem;
+}
+
+.btn-export-visible {
+    width: 8.4rem;
+}
+
 /***********************************************
    BrowseContent (based on ViewRepresentation)
 ************************************************/

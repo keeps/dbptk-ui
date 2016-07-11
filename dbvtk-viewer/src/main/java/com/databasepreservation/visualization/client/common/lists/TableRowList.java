@@ -208,8 +208,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
     }
   }
 
-  @Override
-  public String getExportURL() {
+  public String getExportURL(boolean all) {
     ViewerDatabase database = getObject().getFirst();
     ViewerTable table = getObject().getSecond();
 
@@ -250,10 +249,12 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
     urlBuilder.append(ViewerConstants.API_QUERY_PARAM_FILTER).append("=").append(UriUtils.encode(paramFilter))
       .append("&");
 
-    // add parameter: subList
-    String paramSubList = ViewerJsonUtils.getSubListMapper().write(currentSubList);
-    urlBuilder.append(ViewerConstants.API_QUERY_PARAM_SUBLIST).append("=").append(UriUtils.encode(paramSubList))
-      .append("&");
+    if (!all) {
+      // add parameter: subList
+      String paramSubList = ViewerJsonUtils.getSubListMapper().write(currentSubList);
+      urlBuilder.append(ViewerConstants.API_QUERY_PARAM_SUBLIST).append("=").append(UriUtils.encode(paramSubList))
+        .append("&");
+    }
 
     // add parameter: sorter
     String paramSorter = ViewerJsonUtils.getSorterMapper().write(currentSorter);
@@ -265,7 +266,12 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
   }
 
   @Override
-  public void exportClickHandler() {
-    Window.Location.assign(getExportURL());
+  public void exportVisibleClickHandler() {
+    Window.Location.assign(getExportURL(false));
+  }
+
+  @Override
+  public void exportAllClickHandler() {
+    Window.Location.assign(getExportURL(true));
   }
 }

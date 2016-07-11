@@ -21,6 +21,7 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -95,6 +96,7 @@ public class Main implements EntryPoint {
     List<String> currentHistoryPath = HistoryManager.getCurrentHistoryPath();
     List<BreadcrumbItem> breadcrumbItemList = new ArrayList<>();
 
+    changeHeader(currentHistoryPath);
     if (currentHistoryPath.isEmpty()) {
       // #
       setContent(getDatabaseListPanel());
@@ -116,9 +118,8 @@ public class Main implements EntryPoint {
         setContent(panel);
 
       } else {
-        // #database/<id>/...
-        HistoryManager.gotoRoot();
-
+        // #database/...
+        handleErrorPath(currentHistoryPath);
       }
     } else if (HistoryManager.ROUTE_SCHEMA.equals(currentHistoryPath.get(0))) {
       if (currentHistoryPath.size() == 3) {
@@ -159,13 +160,12 @@ public class Main implements EntryPoint {
           setContent(pageWidget);
         } else {
           // #schema/<database_uuid>/<schema_uuid>/*invalid-page*
-          HistoryManager.gotoRoot();
+          handleErrorPath(currentHistoryPath);
         }
 
       } else {
         // #schema/...
-        // (except the case above)
-        HistoryManager.gotoRoot();
+        handleErrorPath(currentHistoryPath);
 
       }
     } else if (HistoryManager.ROUTE_TABLE.equals(currentHistoryPath.get(0))) {
@@ -178,8 +178,7 @@ public class Main implements EntryPoint {
 
       } else {
         // #table/...
-        // (except the case above)
-        HistoryManager.gotoRoot();
+        handleErrorPath(currentHistoryPath);
 
       }
     } else if (HistoryManager.ROUTE_RECORD.equals(currentHistoryPath.get(0))) {
@@ -193,8 +192,7 @@ public class Main implements EntryPoint {
 
       } else {
         // #record/...
-        // (except the case above)
-        HistoryManager.gotoRoot();
+        handleErrorPath(currentHistoryPath);
 
       }
     } else if (HistoryManager.ROUTE_REFERENCES.equals(currentHistoryPath.get(0))) {
@@ -209,10 +207,31 @@ public class Main implements EntryPoint {
 
       } else {
         // #references/...
-        // (except the case above)
-        HistoryManager.gotoRoot();
+        handleErrorPath(currentHistoryPath);
 
       }
+    }
+  }
+
+  private void changeHeader(String databaseUUID) {
+    mainPanel.reSetHeader(databaseUUID);
+  }
+
+  private void changeHeader(List<String> currentHistoryPath) {
+    if (currentHistoryPath.size() >= 2) {
+      changeHeader(currentHistoryPath.get(1));
+    } else {
+      changeHeader((String) null);
+    }
+  }
+
+  private void handleErrorPath(List<String> currentHistoryPath) {
+    if (currentHistoryPath.size() >= 2) {
+      String database_uuid = currentHistoryPath.get(1);
+      changeHeader(database_uuid);
+      HistoryManager.gotoDatabase(database_uuid);
+    } else {
+      HistoryManager.gotoRoot();
     }
   }
 }

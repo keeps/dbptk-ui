@@ -80,7 +80,8 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel i
   private final AccessibleSimplePager resultsPager;
   private final PageSizePager pageSizePager;
   private final CellTable<T> display;
-  private final Button exportButton;
+  private Button exportVisibleButton;
+  private Button exportAllButton;
 
   private FlowPanel selectAllPanel;
   private FlowPanel selectAllPanelBody;
@@ -157,14 +158,18 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel i
     dataProvider.addDataDisplay(display);
 
     if (exportable) {
-      exportButton = new Button("Export visible", new ClickHandler() {
+      exportVisibleButton = new Button("Export visible", new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          AsyncTableCell.this.exportClickHandler();
+          AsyncTableCell.this.exportVisibleClickHandler();
         }
       });
-    } else {
-      exportButton = null;
+      exportAllButton = new Button("Export all", new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          AsyncTableCell.this.exportAllClickHandler();
+        }
+      });
     }
 
     resultsPager = new AccessibleSimplePager(AccessibleSimplePager.TextLocation.LEFT,
@@ -180,8 +185,9 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel i
     add(selectAllPanel);
     add(new ScrollPanel(display));
     add(resultsPager);
-    if (exportButton != null) {
-      add(exportButton);
+    if (exportVisibleButton != null) {
+      add(exportVisibleButton);
+      add(exportAllButton);
     }
     add(pageSizePager);
 
@@ -201,8 +207,9 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel i
     resultsPager.addStyleName("my-asyncdatagrid-pager-results");
     pageSizePager.addStyleName("my-asyncdatagrid-pager-pagesize");
     display.addStyleName("my-asyncdatagrid-display");
-    if (exportButton != null) {
-      exportButton.addStyleName("btn btn-export");
+    if (exportVisibleButton != null) {
+      exportVisibleButton.addStyleName("btn btn-export btn-export-visible");
+      exportAllButton.addStyleName("btn btn-export btn-export-all");
     }
 
     addValueChangeHandler(new ValueChangeHandler<IndexResult<T>>() {
@@ -667,7 +674,7 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel i
     addColumn(column, SafeHtmlUtils.fromString(headerText), nowrap, alignRight, fixedSize);
   }
 
-  public abstract String getExportURL();
+  public abstract void exportVisibleClickHandler();
 
-  public abstract void exportClickHandler();
+  public abstract void exportAllClickHandler();
 }
