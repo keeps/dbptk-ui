@@ -411,3 +411,25 @@
     margin-top: -1rem;
     margin-bottom: 1rem;
 }
+
+.rowData .label:before {
+    display: inline-block;
+    font: normal normal normal 14px/1 FontAwesome;
+    font-size: inherit;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    float: left;
+    padding-right: 0.5rem;
+    margin-top: 0.1em;
+    width: 1.5rem;
+    text-align: center;
+}
+
+.rowData .label.noicon {
+    margin-left: 2rem;
+}
+
+.rowData .value {
+    margin-left: 2rem;
+}

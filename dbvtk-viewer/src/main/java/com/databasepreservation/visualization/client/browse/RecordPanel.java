@@ -164,14 +164,15 @@ public class RecordPanel extends Composite {
 
       for (ViewerColumn column : table.getColumns()) {
         b.append(getCellHTML(column,
-          columnIndexesContainingForeignKeyRelations.contains(column.getColumnIndexInEnclosingTable())));
+          columnIndexesContainingForeignKeyRelations.contains(column.getColumnIndexInEnclosingTable()), table
+            .getPrimaryKey().getColumnIndexesInViewerTable().contains(column.getColumnIndexInEnclosingTable())));
       }
 
       content.setHTML(b.toSafeHtml());
     }
   }
 
-  private SafeHtml getCellHTML(ViewerColumn column, boolean hasForeignKeyRelations) {
+  private SafeHtml getCellHTML(ViewerColumn column, boolean hasForeignKeyRelations, boolean isPrimaryKeyColumn) {
     String label = column.getDisplayName();
 
     String value = null;
@@ -184,7 +185,11 @@ public class RecordPanel extends Composite {
 
     SafeHtmlBuilder b = new SafeHtmlBuilder();
     b.appendHtmlConstant("<div class=\"field\">");
-    b.appendHtmlConstant("<div class=\"label\">");
+    if (isPrimaryKeyColumn) {
+      b.appendHtmlConstant("<div class=\"label fa-key\">");
+    } else {
+      b.appendHtmlConstant("<div class=\"label noicon\">");
+    }
     b.appendEscaped(label);
     b.appendHtmlConstant("</div>");
     b.appendHtmlConstant("<div class=\"value\">");
