@@ -318,7 +318,7 @@ public class SolrUtils {
     SolrQuery query = new SolrQuery();
     query.setQuery(parseFilter(filter));
     query.setSorts(parseSorter(sorter));
-    if(sublist != null) {
+    if (sublist != null) {
       query.setStart(sublist.getFirstElementIndex());
       query.setRows(sublist.getMaximumElementCount());
     }

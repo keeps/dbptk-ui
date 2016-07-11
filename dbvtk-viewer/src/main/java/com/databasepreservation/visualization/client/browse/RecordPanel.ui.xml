@@ -24,7 +24,8 @@
                             <m:BreadcrumbPanel ui:field="breadcrumb" addStyleNames="browseContentBreadcrumb"/>
                         </g:FlowPanel>
                         <g:FlowPanel addStyleNames="col_12 content" >
-                            <g:Label addStyleNames="h1"><ui:msg>Record details</ui:msg></g:Label>
+                            <g:HTML addStyleNames="h1" ui:field="tableName" />
+                            <g:HTML addStyleNames="browseItemId recordId" ui:field="rowID" />
                             <g:HTML ui:field="content"/>
                         </g:FlowPanel>
                     </g:FlowPanel>

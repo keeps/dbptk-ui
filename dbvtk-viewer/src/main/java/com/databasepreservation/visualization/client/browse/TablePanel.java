@@ -3,12 +3,6 @@ package com.databasepreservation.visualization.client.browse;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
-import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Hyperlink;
 import org.roda.core.data.adapter.filter.Filter;
 import org.roda.core.data.v2.index.IsIndexed;
 
@@ -22,6 +16,7 @@ import com.databasepreservation.visualization.client.common.sidebar.DatabaseSide
 import com.databasepreservation.visualization.client.common.utils.CommonClientUtils;
 import com.databasepreservation.visualization.client.main.BreadcrumbPanel;
 import com.databasepreservation.visualization.shared.client.Tools.BreadcrumbManager;
+import com.databasepreservation.visualization.shared.client.Tools.FontAwesomeIconManager;
 import com.databasepreservation.visualization.shared.client.Tools.ViewerStringUtils;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -29,7 +24,6 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -64,7 +58,7 @@ public class TablePanel extends Composite {
   DatabaseSidebar sidebar;
 
   @UiField
-  Label mainHeader;
+  HTML mainHeader;
 
   @UiField(provided = true)
   TableSearchPanel tableSearchPanel;
@@ -85,6 +79,8 @@ public class TablePanel extends Composite {
 
     initWidget(uiBinder.createAndBindUi(this));
 
+    mainHeader.setHTML(FontAwesomeIconManager.loading(FontAwesomeIconManager.TABLE));
+
     BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.loadingTable(databaseUUID, tableUUID));
 
     BrowserService.Util.getInstance().retrieve(ViewerDatabase.class.getName(), databaseUUID,
@@ -99,19 +95,19 @@ public class TablePanel extends Composite {
           database = (ViewerDatabase) result;
           table = database.getMetadata().getTable(tableUUID);
           schema = database.getMetadata().getSchemaFromTableUUID(tableUUID);
-
-          mainHeader.setText("Table: " + table.getName());
-          mainHeader.removeStyleName("hidden");
-          BreadcrumbManager.updateBreadcrumb(
-            breadcrumb,
-            BreadcrumbManager.forTable(database.getMetadata().getName(), databaseUUID, schema.getName(),
-              schema.getUUID(), table.getName(), tableUUID));
           init();
         }
       });
   }
 
   private void init() {
+    mainHeader.setHTML(FontAwesomeIconManager.loaded(FontAwesomeIconManager.TABLE, table.getName()));
+
+    BreadcrumbManager.updateBreadcrumb(
+      breadcrumb,
+      BreadcrumbManager.forTable(database.getMetadata().getName(), database.getUUID(), schema.getName(),
+        schema.getUUID(), table.getName(), table.getUUID()));
+
     if (ViewerStringUtils.isNotBlank(table.getDescription())) {
       description.setHTML(CommonClientUtils.getFieldHTML("Description", table.getDescription()));
     }

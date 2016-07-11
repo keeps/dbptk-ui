@@ -1,5 +1,8 @@
 package com.databasepreservation.visualization.shared.client.Tools;
 
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
@@ -25,5 +28,14 @@ public class FontAwesomeIconManager {
 
   public static String getTag(String icon, String tooltip) {
     return "<i class=\"fa fa-" + icon + "\"></i>";
+  }
+
+  public static SafeHtml loading(String icon){
+    return SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(icon) + " <span class=\"loadingText\">loading...</span>");
+  }
+
+  public static SafeHtml loaded(String icon, String text){
+    return SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(icon) + " "
+      + SafeHtmlUtils.htmlEscape(text));
   }
 }

@@ -21,10 +21,12 @@ import com.databasepreservation.visualization.client.common.search.SearchPanel;
 import com.databasepreservation.visualization.client.common.sidebar.DatabaseSidebar;
 import com.databasepreservation.visualization.client.main.BreadcrumbPanel;
 import com.databasepreservation.visualization.shared.client.Tools.BreadcrumbManager;
+import com.databasepreservation.visualization.shared.client.Tools.FontAwesomeIconManager;
 import com.databasepreservation.visualization.shared.client.Tools.HistoryManager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -61,8 +63,15 @@ public class RecordPanel extends Composite {
 
   @UiField(provided = true)
   DatabaseSidebar sidebar;
+
   @UiField
   HTML content;
+
+  @UiField
+  HTML tableName;
+
+  @UiField
+  HTML rowID;
 
   private RecordPanel(final String databaseUUID, final String tableUUID, final String recordUUID) {
     this.recordUUID = recordUUID;
@@ -70,6 +79,10 @@ public class RecordPanel extends Composite {
     sidebar = DatabaseSidebar.getInstance(databaseUUID);
 
     initWidget(uiBinder.createAndBindUi(this));
+
+    rowID.setHTML(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.RECORD) + " "
+      + SafeHtmlUtils.htmlEscape(recordUUID)));
+    tableName.setHTML(FontAwesomeIconManager.loading(FontAwesomeIconManager.TABLE));
 
     BreadcrumbManager
       .updateBreadcrumb(breadcrumb, BreadcrumbManager.loadingRecord(databaseUUID, tableUUID, recordUUID));
@@ -119,6 +132,8 @@ public class RecordPanel extends Composite {
       breadcrumb,
       BreadcrumbManager.forRecord(database.getMetadata().getName(), database.getUUID(), table.getSchemaName(),
         table.getSchemaUUID(), table.getName(), table.getUUID(), recordUUID));
+
+    tableName.setHTML(FontAwesomeIconManager.loaded(FontAwesomeIconManager.TABLE, table.getName()));
 
     if (record != null) {
       Set<Integer> columnIndexesContainingForeignKeyRelations = new HashSet<>();

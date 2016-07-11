@@ -29,6 +29,11 @@
     width: 100%;
 }
 
+.loadingText {
+    font-size: 75%;
+    color: #a7a9ac;
+}
+
 /***********************************************
               Table search panel
 ************************************************/
@@ -400,4 +405,9 @@
     font-size: 75%; /*equivalent to .small*/
     margin-left: .5rem;
     display: inline;
+}
+
+.recordId {
+    margin-top: -1rem;
+    margin-bottom: 1rem;
 }

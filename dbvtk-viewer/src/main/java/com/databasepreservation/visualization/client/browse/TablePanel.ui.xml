@@ -24,7 +24,7 @@
                             <m:BreadcrumbPanel ui:field="breadcrumb" addStyleNames="browseContentBreadcrumb"/>
                         </g:FlowPanel>
                         <g:FlowPanel addStyleNames="col_12 content">
-                            <g:Label addStyleNames="h1 hidden" ui:field="mainHeader"><ui:msg>Loading table contents</ui:msg></g:Label>
+                            <g:HTML addStyleNames="h1" ui:field="mainHeader"><ui:msg>Loading table contents</ui:msg></g:HTML>
                             <g:HTML ui:field="description"/>
                             <s:TableSearchPanel ui:field="tableSearchPanel"/>
                         </g:FlowPanel>
