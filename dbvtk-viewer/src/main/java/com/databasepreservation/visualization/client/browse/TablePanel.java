@@ -46,6 +46,9 @@ public class TablePanel extends Composite {
       instances.put(code, instance);
     } else if (searchInfoJson != null) {
       instance.applySearchInfoJson(searchInfoJson);
+    } else if (instance.tableSearchPanel.isSearchInfoDefined()) {
+      instance = new TablePanel(databaseUUID, tableUUID);
+      instances.put(code, instance);
     }
 
     return instance;

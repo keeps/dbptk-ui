@@ -71,7 +71,6 @@ public class TableSearchPanel extends Composite {
   private ViewerTable table;
 
   private SearchInfo currentSearchInfo = null;
-  private List<SearchField> currentSearchFields = null;
 
   public TableSearchPanel(String searchInfoJson) {
     this();
@@ -250,7 +249,6 @@ public class TableSearchPanel extends Composite {
   }
 
   private void updateSearchFields(List<SearchField> newSearchFields) {
-    currentSearchFields = newSearchFields;
     for (SearchField searchField : newSearchFields) {
       if (searchField.isFixed()) {
         final SearchFieldPanel searchFieldPanel = new SearchFieldPanel(columnDisplayNameToVisibleState);
@@ -293,9 +291,8 @@ public class TableSearchPanel extends Composite {
    *          the SearchInfo object provided as Json
    */
   private void setCurrentSearchInfoFromJson(String searchInfoJson) {
-    // convert json to SearchInfo
-    SearchInfo searchInfo = null;
     try {
+      SearchInfo searchInfo = null;
       searchInfo = ViewerJsonUtils.getSearchInfoMapper().read(searchInfoJson);
       if (SearchInfo.isPresentAndValid(searchInfo)) {
         currentSearchInfo = searchInfo;
@@ -316,5 +313,9 @@ public class TableSearchPanel extends Composite {
     searchInfo.fieldParameters = searchPanel.getAdvancedSearchFilterParameters();
     searchInfo.fieldVisibility = columnDisplayNameToVisibleState;
     return searchInfo;
+  }
+
+  public boolean isSearchInfoDefined() {
+    return currentSearchInfo != null;
   }
 }
