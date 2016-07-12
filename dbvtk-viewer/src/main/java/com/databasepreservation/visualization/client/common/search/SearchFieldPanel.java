@@ -19,6 +19,7 @@ import org.roda.core.data.common.RodaConstants;
 import com.databasepreservation.visualization.client.common.utils.ListboxUtils;
 import com.databasepreservation.visualization.shared.client.ClientLogger;
 import com.databasepreservation.visualization.shared.client.Tools.Humanize;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -226,6 +227,14 @@ public class SearchFieldPanel extends Composite {
 
   public String getField() {
     return searchAdvancedFields.getSelectedValue();
+  }
+
+  public void setInputFromFilterParam(FilterParameter filterParam) {
+    if (filterParam instanceof BasicSearchFilterParameter) {
+      BasicSearchFilterParameter basicSearchFilterParameter = (BasicSearchFilterParameter) filterParam;
+      inputText.setValue(basicSearchFilterParameter.getValue());
+      GWT.log("set " + getField() + " to " + basicSearchFilterParameter.getValue());
+    }
   }
 
   public FilterParameter getFilter() {

@@ -33,13 +33,19 @@ public class TablePanel extends Composite {
   private static Map<String, TablePanel> instances = new HashMap<>();
 
   public static TablePanel getInstance(String databaseUUID, String tableUUID) {
+    return getInstance(databaseUUID, tableUUID, null);
+  }
+
+  public static TablePanel getInstance(String databaseUUID, String tableUUID, String searchInfoJson) {
     String separator = "/";
     String code = databaseUUID + separator + tableUUID;
 
     TablePanel instance = instances.get(code);
     if (instance == null) {
-      instance = new TablePanel(databaseUUID, tableUUID);
+      instance = new TablePanel(databaseUUID, tableUUID, searchInfoJson);
       instances.put(code, instance);
+    } else if (searchInfoJson != null) {
+      instance.applySearchInfoJson(searchInfoJson);
     }
 
     return instance;
@@ -73,9 +79,17 @@ public class TablePanel extends Composite {
   private static TablePanelUiBinder uiBinder = GWT.create(TablePanelUiBinder.class);
 
   private TablePanel(final String databaseUUID, final String tableUUID) {
+    this(databaseUUID, tableUUID, null);
+  }
+
+  private TablePanel(final String databaseUUID, final String tableUUID, String searchInfoJson) {
     dbSearchPanel = new SearchPanel(new Filter(), "", "Search in all tables", false, false);
     sidebar = DatabaseSidebar.getInstance(databaseUUID);
-    tableSearchPanel = new TableSearchPanel();
+    if (searchInfoJson != null) {
+      tableSearchPanel = new TableSearchPanel(searchInfoJson);
+    } else {
+      tableSearchPanel = new TableSearchPanel();
+    }
 
     initWidget(uiBinder.createAndBindUi(this));
 
@@ -113,5 +127,9 @@ public class TablePanel extends Composite {
     }
 
     tableSearchPanel.provideSource(database, table);
+  }
+
+  private void applySearchInfoJson(String searchInfoJson) {
+    tableSearchPanel.applySearchInfoJson(searchInfoJson);
   }
 }

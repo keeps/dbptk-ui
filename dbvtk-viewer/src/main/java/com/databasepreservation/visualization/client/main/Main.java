@@ -21,7 +21,6 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -174,6 +173,14 @@ public class Main implements EntryPoint {
         String database_uuid = currentHistoryPath.get(1);
         String table_uuid = currentHistoryPath.get(2);
         TablePanel panel = TablePanel.getInstance(database_uuid, table_uuid);
+        setContent(panel);
+
+      } else if (currentHistoryPath.size() == 4) {
+        // #table/<database_uuid>/<table_uuid>/<searchInfoJSON>
+        String database_uuid = currentHistoryPath.get(1);
+        String table_uuid = currentHistoryPath.get(2);
+        String searchInfo = currentHistoryPath.get(3);
+        TablePanel panel = TablePanel.getInstance(database_uuid, table_uuid, searchInfo);
         setContent(panel);
 
       } else {

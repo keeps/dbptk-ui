@@ -248,6 +248,16 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
     }
   }
 
+  public void openSearchAdvancedPanel() {
+    if (!searchAdvancedPanel.isVisible()) {
+      searchAdvancedPanel.setVisible(true);
+    }
+
+    if (searchAdvancedPanel.isVisible()) {
+      searchAdvancedDisclosureButton.addStyleName("open");
+    }
+  }
+
   public void addDropdownPopupStyleName(String styleName) {
     searchInputListBox.addPopupStyleName(styleName);
   }
@@ -311,5 +321,58 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
 
   protected void onChange() {
     ValueChangeEvent.fire(this, searchInputListBox.getSelectedValue());
+  }
+
+  public void updateSearchPanel(SearchInfo searchInfo) {
+    if (SearchInfo.isPresentAndValid(searchInfo)) {
+      this.defaultFilter = searchInfo.defaultFilter;
+      this.searchInputBox.setText(searchInfo.currentFilter);
+
+      openSearchAdvancedPanel();
+      if (fieldsPanel != null && fieldsPanel.getParent() != null && fieldsPanel.getParent().isVisible()) {
+        for (int i = 0; i < fieldsPanel.getWidgetCount(); i++) {
+          SearchFieldPanel searchAdvancedFieldPanel = (SearchFieldPanel) fieldsPanel.getWidget(i);
+          searchAdvancedFieldPanel.setInputFromFilterParam(searchInfo.fieldParameters.get(i));
+        }
+      }
+
+      doSearch();
+    }
+  }
+
+  public Filter getDefaultFilter() {
+    return defaultFilter;
+  }
+
+  public String getCurrentFilter() {
+    return searchInputBox.getText();
+  }
+
+  public List<FilterParameter> getAdvancedSearchFilterParameters() {
+    List<FilterParameter> parameters = new ArrayList<>();
+
+    if (fieldsPanel != null && fieldsPanel.getParent() != null && fieldsPanel.getParent().isVisible()) {
+      for (int i = 0; i < fieldsPanel.getWidgetCount(); i++) {
+        SearchFieldPanel searchAdvancedFieldPanel = (SearchFieldPanel) fieldsPanel.getWidget(i);
+
+        parameters.add(searchAdvancedFieldPanel.getFilter());
+      }
+    }
+
+    return parameters;
+  }
+
+  public List<SearchField> getAdvancedSearchSearchFields() {
+    List<SearchField> searchFields = new ArrayList<>();
+
+    if (fieldsPanel != null && fieldsPanel.getParent() != null && fieldsPanel.getParent().isVisible()) {
+      for (int i = 0; i < fieldsPanel.getWidgetCount(); i++) {
+        SearchFieldPanel searchAdvancedFieldPanel = (SearchFieldPanel) fieldsPanel.getWidget(i);
+
+        searchFields.add(searchAdvancedFieldPanel.getSearchField());
+      }
+    }
+
+    return searchFields;
   }
 }
