@@ -14,13 +14,13 @@ import org.roda.core.data.adapter.sublist.Sublist;
 import org.roda.core.data.v2.common.Pair;
 import org.roda.core.data.v2.index.IndexResult;
 
-import com.databasepreservation.visualization.ViewerConstants;
 import com.databasepreservation.visualization.client.BrowserService;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerColumn;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerRow;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerType;
+import com.databasepreservation.visualization.shared.ViewerSafeConstants;
 import com.databasepreservation.visualization.shared.client.ClientLogger;
 import com.databasepreservation.visualization.shared.client.Tools.ViewerJsonUtils;
 import com.databasepreservation.visualization.shared.client.Tools.ViewerStringUtils;
@@ -216,8 +216,8 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
     // http://hostname:port/api/v1/exports/csv/databaseUUID/tableUUID?
     StringBuilder urlBuilder = new StringBuilder();
     String base = com.google.gwt.core.client.GWT.getHostPageBaseURL();
-    String servlet = ViewerConstants.API_SERVLET;
-    String resource = ViewerConstants.API_V1_EXPORT_RESOURCE;
+    String servlet = ViewerSafeConstants.API_SERVLET;
+    String resource = ViewerSafeConstants.API_V1_EXPORT_RESOURCE;
     String method = "/csv/";
     String databaseUUID = database.getUUID();
     String tableUUID = table.getUUID();
@@ -241,24 +241,24 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
 
     // add parameter: field list
     String paramFieldList = ViewerJsonUtils.getStringListMapper().write(solrColumns);
-    urlBuilder.append(ViewerConstants.API_QUERY_PARAM_FIELDS).append("=").append(UriUtils.encode(paramFieldList))
+    urlBuilder.append(ViewerSafeConstants.API_QUERY_PARAM_FIELDS).append("=").append(UriUtils.encode(paramFieldList))
       .append("&");
 
     // add parameter: filter
     String paramFilter = ViewerJsonUtils.getFilterMapper().write(getFilter());
-    urlBuilder.append(ViewerConstants.API_QUERY_PARAM_FILTER).append("=").append(UriUtils.encode(paramFilter))
+    urlBuilder.append(ViewerSafeConstants.API_QUERY_PARAM_FILTER).append("=").append(UriUtils.encode(paramFilter))
       .append("&");
 
     if (!all) {
       // add parameter: subList
       String paramSubList = ViewerJsonUtils.getSubListMapper().write(currentSubList);
-      urlBuilder.append(ViewerConstants.API_QUERY_PARAM_SUBLIST).append("=").append(UriUtils.encode(paramSubList))
+      urlBuilder.append(ViewerSafeConstants.API_QUERY_PARAM_SUBLIST).append("=").append(UriUtils.encode(paramSubList))
         .append("&");
     }
 
     // add parameter: sorter
     String paramSorter = ViewerJsonUtils.getSorterMapper().write(currentSorter);
-    urlBuilder.append(ViewerConstants.API_QUERY_PARAM_SORTER).append("=").append(UriUtils.encode(paramSorter));
+    urlBuilder.append(ViewerSafeConstants.API_QUERY_PARAM_SORTER).append("=").append(UriUtils.encode(paramSorter));
 
     GWT.log(urlBuilder.toString());
 

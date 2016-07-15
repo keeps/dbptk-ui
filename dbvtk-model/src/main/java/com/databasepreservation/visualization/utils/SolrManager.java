@@ -28,11 +28,11 @@ import org.roda.core.data.v2.user.RodaUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.databasepreservation.visualization.ViewerConstants;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerRow;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable;
 import com.databasepreservation.visualization.exceptions.ViewerException;
+import com.databasepreservation.visualization.shared.ViewerSafeConstants;
 import com.databasepreservation.visualization.transformers.SolrTransformer;
 
 /**
@@ -75,24 +75,27 @@ public class SolrManager {
   public void addDatabase(ViewerDatabase database) throws ViewerException {
     // creates databases collection, skipping if it is present
     CollectionAdminRequest.Create request = new CollectionAdminRequest.Create();
-    request.setCollectionName(ViewerConstants.SOLR_INDEX_DATABASE_COLLECTION_NAME);
-    request.setConfigName(ViewerConstants.SOLR_CONFIGSET_DATABASE);
+    request.setCollectionName(ViewerSafeConstants.SOLR_INDEX_DATABASE_COLLECTION_NAME);
+    request.setConfigName(ViewerSafeConstants.SOLR_CONFIGSET_DATABASE);
     request.setNumShards(1);
     try {
       NamedList<Object> response = client.request(request);
     } catch (SolrServerException | IOException e) {
-      throw new ViewerException("Error creating collection " + ViewerConstants.SOLR_INDEX_DATABASE_COLLECTION_NAME, e);
+      throw new ViewerException("Error creating collection " + ViewerSafeConstants.SOLR_INDEX_DATABASE_COLLECTION_NAME,
+        e);
     } catch (HttpSolrClient.RemoteSolrException e) {
-      if (e.getMessage().contains("collection already exists: " + ViewerConstants.SOLR_INDEX_DATABASE_COLLECTION_NAME)) {
-        LOGGER.info("collection " + ViewerConstants.SOLR_INDEX_DATABASE_COLLECTION_NAME + " already exists.");
+      if (e.getMessage().contains(
+        "collection already exists: " + ViewerSafeConstants.SOLR_INDEX_DATABASE_COLLECTION_NAME)) {
+        LOGGER.info("collection " + ViewerSafeConstants.SOLR_INDEX_DATABASE_COLLECTION_NAME + " already exists.");
       } else {
-        throw new ViewerException("Error creating collection " + ViewerConstants.SOLR_INDEX_DATABASE_COLLECTION_NAME, e);
+        throw new ViewerException("Error creating collection "
+          + ViewerSafeConstants.SOLR_INDEX_DATABASE_COLLECTION_NAME, e);
       }
     }
 
     // add this database to the collection
-    collectionsToCommit.add(ViewerConstants.SOLR_INDEX_DATABASE_COLLECTION_NAME);
-    insertDocument(ViewerConstants.SOLR_INDEX_DATABASE_COLLECTION_NAME, SolrTransformer.fromDatabase(database));
+    collectionsToCommit.add(ViewerSafeConstants.SOLR_INDEX_DATABASE_COLLECTION_NAME);
+    insertDocument(ViewerSafeConstants.SOLR_INDEX_DATABASE_COLLECTION_NAME, SolrTransformer.fromDatabase(database));
 
     // prepare tables to create the collection
     // for (ViewerSchema viewerSchema : database.getMetadata().getSchemas()) {
@@ -112,7 +115,7 @@ public class SolrManager {
     String collectionName = SolrUtils.getTableCollectionName(table.getUUID());
     CollectionAdminRequest.Create request = new CollectionAdminRequest.Create();
     request.setCollectionName(collectionName);
-    request.setConfigName(ViewerConstants.SOLR_CONFIGSET_TABLE);
+    request.setConfigName(ViewerSafeConstants.SOLR_CONFIGSET_TABLE);
     request.setNumShards(1);
 
     try {
@@ -186,8 +189,8 @@ public class SolrManager {
     return SolrUtils.find(client, classToReturn, tableUUID, filter, sorter, sublist, facets);
   }
 
-  public InputStream findRowsCSV(RodaUser user, String tableUUID, Filter filter, Sorter sorter, Sublist sublist, List<String> fields)
-    throws org.roda.core.data.exceptions.GenericException, RequestNotValidException {
+  public InputStream findRowsCSV(RodaUser user, String tableUUID, Filter filter, Sorter sorter, Sublist sublist,
+    List<String> fields) throws org.roda.core.data.exceptions.GenericException, RequestNotValidException {
     return SolrUtils.findCSV(client, SolrUtils.getTableCollectionName(tableUUID), filter, sorter, sublist, fields);
   }
 

@@ -10,6 +10,7 @@ import com.databasepreservation.visualization.client.BrowserService;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerSchema;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable;
+import com.databasepreservation.visualization.client.common.search.SearchInfo;
 import com.databasepreservation.visualization.client.common.search.SearchPanel;
 import com.databasepreservation.visualization.client.common.search.TableSearchPanel;
 import com.databasepreservation.visualization.client.common.sidebar.DatabaseSidebar;
@@ -54,6 +55,10 @@ public class TablePanel extends Composite {
     return instance;
   }
 
+  public static TablePanel createInstance(ViewerDatabase database, ViewerTable table, SearchInfo searchInfo) {
+    return new TablePanel(database, table, searchInfo);
+  }
+
   interface TablePanelUiBinder extends UiBinder<Widget, TablePanel> {
   }
 
@@ -81,10 +86,60 @@ public class TablePanel extends Composite {
 
   private static TablePanelUiBinder uiBinder = GWT.create(TablePanelUiBinder.class);
 
+  /**
+   * Synchronous Table panel that receives the data and does not need to
+   * asynchronously query solr
+   * 
+   * @param database
+   *          the database
+   * @param table
+   *          the table
+   * @param searchInfo
+   *          the predefined search
+   */
+  private TablePanel(ViewerDatabase database, ViewerTable table, SearchInfo searchInfo) {
+    dbSearchPanel = new SearchPanel(new Filter(), "", "Search in all tables", false, false);
+    sidebar = DatabaseSidebar.getInstance(database.getUUID());
+
+    tableSearchPanel = new TableSearchPanel(searchInfo);
+
+    initWidget(uiBinder.createAndBindUi(this));
+
+    mainHeader.setHTML(FontAwesomeIconManager.loading(FontAwesomeIconManager.TABLE));
+
+    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.loadingTable(database.getUUID(), table.getUUID()));
+
+    this.database = database;
+    this.table = table;
+    this.schema = database.getMetadata().getSchemaFromTableUUID(table.getUUID());
+    init();
+  }
+
+  /**
+   * Asynchronous table panel that receives UUIDs and needs to get the objects
+   * from solr
+   * 
+   * @param databaseUUID
+   *          the database UUID
+   * @param tableUUID
+   *          the table UUID
+   */
   private TablePanel(final String databaseUUID, final String tableUUID) {
     this(databaseUUID, tableUUID, null);
   }
 
+  /**
+   * Asynchronous table panel that receives UUIDs and needs to get the objects
+   * from solr. This method supports a predefined search (SearchInfo instance)
+   * as a JSON String.
+   *
+   * @param databaseUUID
+   *          the database UUID
+   * @param tableUUID
+   *          the table UUID
+   * @param searchInfoJson
+   *          the SearchInfo instance as a JSON String
+   */
   private TablePanel(final String databaseUUID, final String tableUUID, String searchInfoJson) {
     dbSearchPanel = new SearchPanel(new Filter(), "", "Search in all tables", false, false);
     sidebar = DatabaseSidebar.getInstance(databaseUUID);

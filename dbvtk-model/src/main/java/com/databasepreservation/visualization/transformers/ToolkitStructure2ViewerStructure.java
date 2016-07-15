@@ -18,31 +18,6 @@ import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.databasepreservation.visualization.ViewerConstants;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerCell;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerCheckConstraint;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerColumn;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabaseFromToolkit;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerForeignKey;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerMetadata;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerPrimaryKey;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerPrivilegeStructure;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerReference;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerRoleStructure;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerRoutine;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerRoutineParameter;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerRow;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerSchema;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerTrigger;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerType;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerTypeArray;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerTypeStructure;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerUserStructure;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerView;
-import com.databasepreservation.visualization.exceptions.ViewerException;
-import com.databasepreservation.visualization.utils.SolrUtils;
-import com.databasepreservation.visualization.utils.ViewerUtils;
 import com.databasepreservation.model.data.BinaryCell;
 import com.databasepreservation.model.data.Cell;
 import com.databasepreservation.model.data.ComposedCell;
@@ -78,6 +53,32 @@ import com.databasepreservation.model.structure.type.SimpleTypeString;
 import com.databasepreservation.model.structure.type.Type;
 import com.databasepreservation.utils.JodaUtils;
 import com.databasepreservation.utils.XMLUtils;
+import com.databasepreservation.visualization.ViewerConstants;
+import com.databasepreservation.visualization.client.ViewerStructure.ViewerCell;
+import com.databasepreservation.visualization.client.ViewerStructure.ViewerCheckConstraint;
+import com.databasepreservation.visualization.client.ViewerStructure.ViewerColumn;
+import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabaseFromToolkit;
+import com.databasepreservation.visualization.client.ViewerStructure.ViewerForeignKey;
+import com.databasepreservation.visualization.client.ViewerStructure.ViewerMetadata;
+import com.databasepreservation.visualization.client.ViewerStructure.ViewerPrimaryKey;
+import com.databasepreservation.visualization.client.ViewerStructure.ViewerPrivilegeStructure;
+import com.databasepreservation.visualization.client.ViewerStructure.ViewerReference;
+import com.databasepreservation.visualization.client.ViewerStructure.ViewerRoleStructure;
+import com.databasepreservation.visualization.client.ViewerStructure.ViewerRoutine;
+import com.databasepreservation.visualization.client.ViewerStructure.ViewerRoutineParameter;
+import com.databasepreservation.visualization.client.ViewerStructure.ViewerRow;
+import com.databasepreservation.visualization.client.ViewerStructure.ViewerSchema;
+import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable;
+import com.databasepreservation.visualization.client.ViewerStructure.ViewerTrigger;
+import com.databasepreservation.visualization.client.ViewerStructure.ViewerType;
+import com.databasepreservation.visualization.client.ViewerStructure.ViewerTypeArray;
+import com.databasepreservation.visualization.client.ViewerStructure.ViewerTypeStructure;
+import com.databasepreservation.visualization.client.ViewerStructure.ViewerUserStructure;
+import com.databasepreservation.visualization.client.ViewerStructure.ViewerView;
+import com.databasepreservation.visualization.exceptions.ViewerException;
+import com.databasepreservation.visualization.shared.ViewerSafeConstants;
+import com.databasepreservation.visualization.utils.SolrUtils;
+import com.databasepreservation.visualization.utils.ViewerUtils;
 
 /**
  * Utility class used to convert a DatabaseStructure (used in Database
@@ -460,26 +461,26 @@ public class ToolkitStructure2ViewerStructure {
     String suffix;
 
     if (type instanceof SimpleTypeBinary) {
-      suffix = ViewerConstants.SOLR_DYN_TEXT_GENERAL;
+      suffix = ViewerSafeConstants.SOLR_DYN_TEXT_GENERAL;
     } else if (type instanceof SimpleTypeBoolean) {
-      suffix = ViewerConstants.SOLR_DYN_BOOLEAN;
+      suffix = ViewerSafeConstants.SOLR_DYN_BOOLEAN;
     } else if (type instanceof SimpleTypeDateTime) {
-      suffix = ViewerConstants.SOLR_DYN_TDATE;
+      suffix = ViewerSafeConstants.SOLR_DYN_TDATE;
     } else if (type instanceof SimpleTypeEnumeration) {
-      suffix = ViewerConstants.SOLR_DYN_STRING;
+      suffix = ViewerSafeConstants.SOLR_DYN_STRING;
     } else if (type instanceof SimpleTypeInterval) {
-      suffix = ViewerConstants.SOLR_DYN_TDATES; // TODO: review chosen type
+      suffix = ViewerSafeConstants.SOLR_DYN_TDATES; // TODO: review chosen type
     } else if (type instanceof SimpleTypeNumericApproximate) {
-      suffix = ViewerConstants.SOLR_DYN_TDOUBLE;
+      suffix = ViewerSafeConstants.SOLR_DYN_TDOUBLE;
     } else if (type instanceof SimpleTypeNumericExact) {
       SimpleTypeNumericExact exact = (SimpleTypeNumericExact) type;
       if (exact.getScale() > 0) {
-        suffix = ViewerConstants.SOLR_DYN_TDOUBLE;
+        suffix = ViewerSafeConstants.SOLR_DYN_TDOUBLE;
       } else {
-        suffix = ViewerConstants.SOLR_DYN_TLONG;
+        suffix = ViewerSafeConstants.SOLR_DYN_TLONG;
       }
     } else if (type instanceof SimpleTypeString) {
-      suffix = ViewerConstants.SOLR_DYN_TEXT_GENERAL;
+      suffix = ViewerSafeConstants.SOLR_DYN_TEXT_GENERAL;
     } else if (type instanceof ComposedTypeArray) {
       throw new ViewerException("Arrays are not yet supported.");
     } else if (type instanceof ComposedTypeStructure) {
@@ -488,7 +489,7 @@ public class ToolkitStructure2ViewerStructure {
       throw new ViewerException("Unknown type: " + type.toString());
     }
 
-    return ViewerConstants.SOLR_INDEX_ROW_COLUMN_NAME_PREFIX + index + suffix;
+    return ViewerSafeConstants.SOLR_INDEX_ROW_COLUMN_NAME_PREFIX + index + suffix;
   }
 
   private static ViewerType getType(Type type) throws ViewerException {
@@ -605,7 +606,7 @@ public class ToolkitStructure2ViewerStructure {
         DateTime dateTime = null;
         if ("DATE".equalsIgnoreCase(columnType.getTypeName())) {
           // XML type xs:date
-          dateTime = JodaUtils.xs_date_parse(simpleCell.getSimpleData()).withTime(0,0,0,0);
+          dateTime = JodaUtils.xs_date_parse(simpleCell.getSimpleData()).withTime(0, 0, 0, 0);
         } else if ("TIMESTAMP WITH TIME ZONE".equalsIgnoreCase(columnType.getTypeName())
           || "TIMESTAMP".equalsIgnoreCase(columnType.getTypeName())) {
           // XML type xs:dateTime

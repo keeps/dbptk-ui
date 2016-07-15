@@ -38,22 +38,26 @@ import com.google.gwt.user.client.ui.Widget;
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class RecordPanel extends Composite {
-  private static Map<String, RecordPanel> instances = new HashMap<>();
+public class RowPanel extends Composite {
+  private static Map<String, RowPanel> instances = new HashMap<>();
 
-  public static RecordPanel getInstance(String databaseUUID, String tableUUID, String recordUUID) {
-    return new RecordPanel(databaseUUID, tableUUID, recordUUID);
+  public static RowPanel createInstance(String databaseUUID, String tableUUID, String rowUUID) {
+    return new RowPanel(databaseUUID, tableUUID, rowUUID);
   }
 
-  interface DatabasePanelUiBinder extends UiBinder<Widget, RecordPanel> {
+  public static RowPanel createInstance(ViewerDatabase database, ViewerTable table, ViewerRow row) {
+    return new RowPanel(database, table, row);
+  }
+
+  interface DatabasePanelUiBinder extends UiBinder<Widget, RowPanel> {
   }
 
   private static DatabasePanelUiBinder uiBinder = GWT.create(DatabasePanelUiBinder.class);
 
   private ViewerDatabase database;
   private ViewerTable table;
-  private final String recordUUID;
-  private ViewerRow record;
+  private final String rowUUID;
+  private ViewerRow row;
 
   @UiField
   BreadcrumbPanel breadcrumb;
@@ -73,19 +77,39 @@ public class RecordPanel extends Composite {
   @UiField
   HTML rowID;
 
-  private RecordPanel(final String databaseUUID, final String tableUUID, final String recordUUID) {
-    this.recordUUID = recordUUID;
+  private RowPanel(ViewerDatabase database, ViewerTable table, ViewerRow row) {
+    this.rowUUID = row.getUUID();
+    dbSearchPanel = new SearchPanel(new Filter(), "", "Search in all tables", false, false);
+    sidebar = DatabaseSidebar.getInstance(database.getUUID());
+
+    initWidget(uiBinder.createAndBindUi(this));
+
+    rowID.setHTML(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.ROW) + " "
+      + SafeHtmlUtils.htmlEscape(rowUUID)));
+    tableName.setHTML(FontAwesomeIconManager.loading(FontAwesomeIconManager.TABLE));
+
+    BreadcrumbManager.updateBreadcrumb(breadcrumb,
+      BreadcrumbManager.loadingRow(database.getUUID(), table.getUUID(), rowUUID));
+
+    this.database = database;
+    this.table = table;
+    this.row = row;
+
+    init();
+  }
+
+  private RowPanel(final String databaseUUID, final String tableUUID, final String rowUUID) {
+    this.rowUUID = rowUUID;
     dbSearchPanel = new SearchPanel(new Filter(), "", "Search in all tables", false, false);
     sidebar = DatabaseSidebar.getInstance(databaseUUID);
 
     initWidget(uiBinder.createAndBindUi(this));
 
-    rowID.setHTML(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.RECORD) + " "
-      + SafeHtmlUtils.htmlEscape(recordUUID)));
+    rowID.setHTML(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.ROW) + " "
+      + SafeHtmlUtils.htmlEscape(rowUUID)));
     tableName.setHTML(FontAwesomeIconManager.loading(FontAwesomeIconManager.TABLE));
 
-    BreadcrumbManager
-      .updateBreadcrumb(breadcrumb, BreadcrumbManager.loadingRecord(databaseUUID, tableUUID, recordUUID));
+    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.loadingRow(databaseUUID, tableUUID, rowUUID));
 
     BrowserService.Util.getInstance().retrieve(ViewerDatabase.class.getName(), databaseUUID,
       new AsyncCallback<IsIndexed>() {
@@ -102,7 +126,7 @@ public class RecordPanel extends Composite {
         }
       });
 
-    BrowserService.Util.getInstance().retrieveRows(ViewerRow.class.getName(), tableUUID, recordUUID,
+    BrowserService.Util.getInstance().retrieveRows(ViewerRow.class.getName(), tableUUID, rowUUID,
       new AsyncCallback<IsIndexed>() {
         @Override
         public void onFailure(Throwable caught) {
@@ -111,7 +135,7 @@ public class RecordPanel extends Composite {
 
         @Override
         public void onSuccess(IsIndexed result) {
-          record = (ViewerRow) result;
+          row = (ViewerRow) result;
           init();
         }
       });
@@ -130,12 +154,12 @@ public class RecordPanel extends Composite {
     // breadcrumb
     BreadcrumbManager.updateBreadcrumb(
       breadcrumb,
-      BreadcrumbManager.forRecord(database.getMetadata().getName(), database.getUUID(), table.getSchemaName(),
-        table.getSchemaUUID(), table.getName(), table.getUUID(), recordUUID));
+      BreadcrumbManager.forRow(database.getMetadata().getName(), database.getUUID(), table.getSchemaName(),
+        table.getSchemaUUID(), table.getName(), table.getUUID(), rowUUID));
 
     tableName.setHTML(FontAwesomeIconManager.loaded(FontAwesomeIconManager.TABLE, table.getName()));
 
-    if (record != null) {
+    if (row != null) {
       Set<Integer> columnIndexesContainingForeignKeyRelations = new HashSet<>();
 
       // get references where this column is source in foreign keys
@@ -159,7 +183,7 @@ public class RecordPanel extends Composite {
         }
       }
 
-      // record data
+      // row data
       SafeHtmlBuilder b = new SafeHtmlBuilder();
 
       for (ViewerColumn column : table.getColumns()) {
@@ -176,7 +200,7 @@ public class RecordPanel extends Composite {
     String label = column.getDisplayName();
 
     String value = null;
-    ViewerCell cell = record.getCells().get(column.getSolrName());
+    ViewerCell cell = row.getCells().get(column.getSolrName());
     if (cell != null) {
       if (cell.getValue() != null) {
         value = cell.getValue();
@@ -200,11 +224,21 @@ public class RecordPanel extends Composite {
     }
     if (hasForeignKeyRelations && value != null) {
       Hyperlink hyperlink = new Hyperlink("Explore related records", HistoryManager.linkToReferences(
-        database.getUUID(), table.getUUID(), recordUUID, String.valueOf(column.getColumnIndexInEnclosingTable())));
+        database.getUUID(), table.getUUID(), rowUUID, String.valueOf(column.getColumnIndexInEnclosingTable())));
       hyperlink.addStyleName("related-records-link");
       b.appendHtmlConstant(hyperlink.toString());
     }
     b.appendHtmlConstant("</div>");
+
+    if (hasForeignKeyRelations && value != null) {
+      b.appendHtmlConstant("<div class=\"value\">");
+      Hyperlink hyperlink = new Hyperlink("Explore related records", HistoryManager.linkToReferences(
+        database.getUUID(), table.getUUID(), rowUUID, String.valueOf(column.getColumnIndexInEnclosingTable())));
+      hyperlink.addStyleName("related-records-link");
+      b.appendHtmlConstant(hyperlink.toString());
+      b.appendHtmlConstant("</div>");
+    }
+
     b.appendHtmlConstant("</div>");
     return b.toSafeHtml();
   }

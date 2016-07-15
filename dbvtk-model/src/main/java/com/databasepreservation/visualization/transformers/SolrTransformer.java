@@ -12,13 +12,13 @@ import org.apache.solr.common.SolrInputDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.databasepreservation.visualization.ViewerConstants;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerCell;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerMetadata;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerRow;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable;
 import com.databasepreservation.visualization.exceptions.ViewerException;
+import com.databasepreservation.visualization.shared.ViewerSafeConstants;
 import com.databasepreservation.visualization.utils.ViewerUtils;
 
 /**
@@ -39,8 +39,8 @@ public class SolrTransformer {
 
   public static SolrInputDocument fromDatabase(ViewerDatabase viewerDatabase) throws ViewerException {
     SolrInputDocument doc = new SolrInputDocument();
-    doc.addField(ViewerConstants.SOLR_DATABASE_ID, viewerDatabase.getUUID());
-    doc.addField(ViewerConstants.SOLR_DATABASE_METADATA, metadataAsJsonString(viewerDatabase.getMetadata()));
+    doc.addField(ViewerSafeConstants.SOLR_DATABASE_ID, viewerDatabase.getUUID());
+    doc.addField(ViewerSafeConstants.SOLR_DATABASE_METADATA, metadataAsJsonString(viewerDatabase.getMetadata()));
     return doc;
   }
 
@@ -58,7 +58,7 @@ public class SolrTransformer {
       doc.addField(solrColumnName, cellValue);
     }
 
-    doc.setField(ViewerConstants.SOLR_ROW_ID, row.getUUID());
+    doc.setField(ViewerSafeConstants.SOLR_ROW_ID, row.getUUID());
     return doc;
   }
 
@@ -68,23 +68,23 @@ public class SolrTransformer {
 
   public static ViewerDatabase toDatabase(SolrDocument doc) throws ViewerException {
     ViewerDatabase viewerDatabase = new ViewerDatabase();
-    viewerDatabase.setUuid(objectToString(doc.get(ViewerConstants.SOLR_DATABASE_ID)));
+    viewerDatabase.setUuid(objectToString(doc.get(ViewerSafeConstants.SOLR_DATABASE_ID)));
     viewerDatabase.setMetadata(toMetadata(doc));
     return viewerDatabase;
   }
 
   private static ViewerMetadata toMetadata(SolrDocument doc) throws ViewerException {
-    String metadataAsJsonString = objectToString(doc.get(ViewerConstants.SOLR_DATABASE_METADATA));
+    String metadataAsJsonString = objectToString(doc.get(ViewerSafeConstants.SOLR_DATABASE_METADATA));
     return JsonTransformer.getObjectFromJson(metadataAsJsonString, ViewerMetadata.class);
   }
 
   public static ViewerRow toRow(SolrDocument doc) {
     ViewerRow viewerRow = new ViewerRow();
-    viewerRow.setUUID(objectToString(doc.get(ViewerConstants.SOLR_ROW_ID)));
+    viewerRow.setUUID(objectToString(doc.get(ViewerSafeConstants.SOLR_ROW_ID)));
 
     HashMap<String, ViewerCell> cells = new HashMap<>();
     for (String columnName : doc.keySet()) {
-      if (columnName.startsWith(ViewerConstants.SOLR_INDEX_ROW_COLUMN_NAME_PREFIX)) {
+      if (columnName.startsWith(ViewerSafeConstants.SOLR_INDEX_ROW_COLUMN_NAME_PREFIX)) {
         ViewerCell viewerCell = new ViewerCell();
         viewerCell.setValue(doc.get(columnName).toString());
         cells.put(columnName, viewerCell);

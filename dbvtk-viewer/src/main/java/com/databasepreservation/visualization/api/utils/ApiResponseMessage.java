@@ -76,4 +76,3 @@ public class ApiResponseMessage {
     this.message = message;
   }
 }
-

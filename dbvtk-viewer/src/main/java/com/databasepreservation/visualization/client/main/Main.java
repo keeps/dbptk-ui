@@ -6,8 +6,9 @@ import java.util.List;
 import com.databasepreservation.visualization.client.browse.DatabaseListPanel;
 import com.databasepreservation.visualization.client.browse.DatabasePanel;
 import com.databasepreservation.visualization.client.browse.DatabaseUsersPanel;
-import com.databasepreservation.visualization.client.browse.RecordPanel;
+import com.databasepreservation.visualization.client.browse.ForeignKeyPanel;
 import com.databasepreservation.visualization.client.browse.ReferencesPanel;
+import com.databasepreservation.visualization.client.browse.RowPanel;
 import com.databasepreservation.visualization.client.browse.SchemaCheckConstraintsPanel;
 import com.databasepreservation.visualization.client.browse.SchemaRoutinesPanel;
 import com.databasepreservation.visualization.client.browse.SchemaStructurePanel;
@@ -194,7 +195,7 @@ public class Main implements EntryPoint {
         String database_uuid = currentHistoryPath.get(1);
         String table_uuid = currentHistoryPath.get(2);
         String record_uuid = currentHistoryPath.get(3);
-        RecordPanel panel = RecordPanel.getInstance(database_uuid, table_uuid, record_uuid);
+        RowPanel panel = RowPanel.createInstance(database_uuid, table_uuid, record_uuid);
         setContent(panel);
 
       } else {
@@ -216,6 +217,19 @@ public class Main implements EntryPoint {
         // #references/...
         handleErrorPath(currentHistoryPath);
 
+      }
+    } else if (HistoryManager.ROUTE_FOREIGN_KEY.equals(currentHistoryPath.get(0))) {
+      if (currentHistoryPath.size() >= 5) {
+        // #foreignkey/<database_uuid>/<table_uuid>/<col1>/<val1>/<col2>/<val2>/<colN>/<valN>/...
+        // minimum: #foreignkey/<database_uuid>/<table_uuid>/<col1>/<val1>
+        String database_uuid = currentHistoryPath.get(1);
+        String table_uuid = currentHistoryPath.get(2);
+        List<String> columnsAndValues = currentHistoryPath.subList(3, currentHistoryPath.size());
+
+        ForeignKeyPanel panel = ForeignKeyPanel.createInstance(database_uuid, table_uuid, columnsAndValues);
+        setContent(panel);
+      } else {
+        handleErrorPath(currentHistoryPath);
       }
     }
   }

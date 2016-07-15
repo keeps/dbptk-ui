@@ -4,16 +4,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.roda.core.data.adapter.filter.BasicSearchFilterParameter;
 import org.roda.core.data.adapter.filter.Filter;
 
-import com.databasepreservation.visualization.ViewerConstants;
 import com.databasepreservation.visualization.client.BrowserService;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerRow;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable;
 import com.databasepreservation.visualization.client.common.lists.TableRowList;
 import com.databasepreservation.visualization.client.common.utils.ListboxUtils;
+import com.databasepreservation.visualization.shared.ViewerSafeConstants;
 import com.databasepreservation.visualization.shared.client.Tools.HistoryManager;
 import com.databasepreservation.visualization.shared.client.Tools.ViewerJsonUtils;
 import com.github.nmorel.gwtjackson.client.exception.JsonDeserializationException;
@@ -22,7 +21,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -38,9 +36,6 @@ import com.google.gwt.view.client.SelectionChangeEvent;
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class TableSearchPanel extends Composite {
-  private static final Filter DEFAULT_FILTER = new Filter(new BasicSearchFilterParameter(
-    ViewerConstants.SOLR_ROW_SEARCH, "*"));
-
   private static final Binder uiBinder = GWT.create(Binder.class);
 
   interface Binder extends UiBinder<Widget, TableSearchPanel> {
@@ -72,11 +67,27 @@ public class TableSearchPanel extends Composite {
 
   private SearchInfo currentSearchInfo = null;
 
+  /**
+   * Table search panel with a SearchInfo predefined search
+   */
+  public TableSearchPanel(SearchInfo searchInfo) {
+    this();
+    if (SearchInfo.isPresentAndValid(searchInfo)) {
+      currentSearchInfo = searchInfo;
+    }
+  }
+
+  /**
+   * Table search panel with a SearchInfo (as JSON string) predefined search
+   */
   public TableSearchPanel(String searchInfoJson) {
     this();
     setCurrentSearchInfoFromJson(searchInfoJson);
   }
 
+  /**
+   * Table search panel without a predefined search
+   */
   public TableSearchPanel() {
     itemsSearchAdvancedFieldsPanel = new FlowPanel();
     searchAdvancedFieldOptions = new ListBox();
@@ -87,9 +98,9 @@ public class TableSearchPanel extends Composite {
       @Override
       public void onClick(ClickEvent event) {
         GWT.log("----- BEGIN");
-        GWT.log(ViewerJsonUtils.getSearchInfoMapper().write(createSearchInfo()));
+        GWT.log(createSearchInfo().asJson());
         GWT.log("----- encoded:");
-        GWT.log(UriUtils.encode(ViewerJsonUtils.getSearchInfoMapper().write(createSearchInfo())));
+        GWT.log(createSearchInfo().asUrlEncodedJson());
         GWT.log("----- END");
       }
     });
@@ -103,7 +114,7 @@ public class TableSearchPanel extends Composite {
 
   public void provideSource(final ViewerDatabase database, final ViewerTable table, Filter initialFilter) {
     if (initialFilter == null) {
-      initialFilter = DEFAULT_FILTER;
+      initialFilter = ViewerSafeConstants.DEFAULT_FILTER;
     }
     this.initialFilter = initialFilter;
     this.database = database;
@@ -114,7 +125,7 @@ public class TableSearchPanel extends Composite {
 
     GWT.log("initial filter: " + initialFilter.toString());
 
-    searchPanel = new SearchPanel(initialFilter, ViewerConstants.SOLR_ROW_SEARCH, "Search...", false, true);
+    searchPanel = new SearchPanel(initialFilter, ViewerSafeConstants.SOLR_ROW_SEARCH, "Search...", false, true);
     searchPanel.setList(tableRowList);
     searchPanel.setDefaultFilterIncremental(true);
     showSearchAdvancedFieldsPanel();
@@ -124,7 +135,7 @@ public class TableSearchPanel extends Composite {
       public void onSelectionChange(SelectionChangeEvent event) {
         ViewerRow record = tableRowList.getSelectionModel().getSelectedObject();
         if (record != null) {
-          HistoryManager.gotoRecord(database.getUUID(), table.getUUID(), record.getUUID());
+          HistoryManager.gotoRow(database.getUUID(), table.getUUID(), record.getUUID());
         }
       }
     });
@@ -182,7 +193,7 @@ public class TableSearchPanel extends Composite {
   }
 
   public void showSearchAdvancedFieldsPanel() {
-    searchPanel.setVariables(initialFilter, ViewerConstants.SOLR_ROW_SEARCH, tableRowList,
+    searchPanel.setVariables(initialFilter, ViewerSafeConstants.SOLR_ROW_SEARCH, tableRowList,
       itemsSearchAdvancedFieldsPanel);
     searchPanel.setSearchAdvancedFieldOptionsAddVisible(true);
   }
@@ -217,13 +228,13 @@ public class TableSearchPanel extends Composite {
 
       // handle creating / editing search fields
       this.searchFields.clear();
-      for (SearchField searchField : currentSearchInfo.fields) {
+      for (SearchField searchField : currentSearchInfo.getFields()) {
         ListboxUtils.insertItemByAlphabeticOrder(searchAdvancedFieldOptions, searchField.getLabel(),
           searchField.getId());
         this.searchFields.put(searchField.getId(), searchField);
       }
 
-      updateSearchFields(currentSearchInfo.fields);
+      updateSearchFields(currentSearchInfo.getFields());
 
       // update search panel and trigger a search
       searchPanel.updateSearchPanel(currentSearchInfo);
@@ -233,7 +244,7 @@ public class TableSearchPanel extends Composite {
         SearchFieldPanel searchFieldPanel = (SearchFieldPanel) itemsSearchAdvancedFieldsPanel.getWidget(i);
 
         String columnDisplayName = searchFieldPanel.getSearchField().getLabel();
-        Boolean visibility = currentSearchInfo.fieldVisibility.get(columnDisplayName);
+        Boolean visibility = currentSearchInfo.getFieldVisibility().get(columnDisplayName);
         if (visibility == null) {
           visibility = true;
         }
@@ -243,7 +254,7 @@ public class TableSearchPanel extends Composite {
 
       // show only visible columns
       columnDisplayNameToVisibleState.clear();
-      columnDisplayNameToVisibleState.putAll(currentSearchInfo.fieldVisibility);
+      columnDisplayNameToVisibleState.putAll(currentSearchInfo.getFieldVisibility());
       tableRowList.refreshColumnVisibility();
     }
   }
@@ -307,11 +318,11 @@ public class TableSearchPanel extends Composite {
 
   private SearchInfo createSearchInfo() {
     SearchInfo searchInfo = new SearchInfo();
-    searchInfo.defaultFilter = searchPanel.getDefaultFilter();
-    searchInfo.currentFilter = searchPanel.getCurrentFilter();
-    searchInfo.fields = searchPanel.getAdvancedSearchSearchFields();
-    searchInfo.fieldParameters = searchPanel.getAdvancedSearchFilterParameters();
-    searchInfo.fieldVisibility = columnDisplayNameToVisibleState;
+    searchInfo.setDefaultFilter(searchPanel.getDefaultFilter());
+    searchInfo.setCurrentFilter(searchPanel.getCurrentFilter());
+    searchInfo.setFields(searchPanel.getAdvancedSearchSearchFields());
+    searchInfo.setFieldParameters(searchPanel.getAdvancedSearchFilterParameters());
+    searchInfo.setFieldVisibility(columnDisplayNameToVisibleState);
     return searchInfo;
   }
 

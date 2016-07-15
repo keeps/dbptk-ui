@@ -105,6 +105,7 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
   public void exportVisibleClickHandler() {
 
   }
+
   @Override
   public void exportAllClickHandler() {
 

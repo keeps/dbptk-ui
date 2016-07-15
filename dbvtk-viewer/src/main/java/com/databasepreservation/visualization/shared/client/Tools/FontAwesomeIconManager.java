@@ -11,7 +11,7 @@ public class FontAwesomeIconManager {
   public static final String DATABASE = "database";
   public static final String SCHEMA = "cube";
   public static final String TABLE = "table";
-  public static final String RECORD = "file-o";
+  public static final String ROW = "file-o";
   public static final String REFERENCE = "exchange";
   public static final String DATABASE_INFORMATION = "info-circle";
   public static final String DATABASE_USERS = "users";
@@ -30,12 +30,12 @@ public class FontAwesomeIconManager {
     return "<i class=\"fa fa-" + icon + "\"></i>";
   }
 
-  public static SafeHtml loading(String icon){
-    return SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(icon) + " <span class=\"loadingText\">loading...</span>");
+  public static SafeHtml loading(String icon) {
+    return SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(icon)
+      + " <span class=\"loadingText\">loading...</span>");
   }
 
-  public static SafeHtml loaded(String icon, String text){
-    return SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(icon) + " "
-      + SafeHtmlUtils.htmlEscape(text));
+  public static SafeHtml loaded(String icon, String text) {
+    return SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(icon) + " " + SafeHtmlUtils.htmlEscape(text));
   }
 }

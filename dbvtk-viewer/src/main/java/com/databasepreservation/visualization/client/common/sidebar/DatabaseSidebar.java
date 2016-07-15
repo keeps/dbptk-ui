@@ -106,8 +106,7 @@ public class DatabaseSidebar extends Composite {
       .addIcon(FontAwesomeIconManager.DATABASE_USERS).setH6().setIndent1());
 
     for (final ViewerSchema schema : metadata.getSchemas()) {
-      sidebarGroup.add(new SidebarItem(schema.getName()).addIcon(FontAwesomeIconManager.SCHEMA).setH5()
-        .setIndent0());
+      sidebarGroup.add(new SidebarItem(schema.getName()).addIcon(FontAwesomeIconManager.SCHEMA).setH5().setIndent0());
 
       sidebarGroup.add(new SidebarHyperlink("Structure", HistoryManager.linkToSchemaStructure(database.getUUID(),
         schema.getUUID())).addIcon(FontAwesomeIconManager.SCHEMA_STRUCTURE).setH6().setIndent1());

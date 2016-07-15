@@ -1,15 +1,11 @@
 package com.databasepreservation.visualization.server;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import com.databasepreservation.visualization.utils.SolrUtils;
 import org.roda.core.data.adapter.facet.Facets;
 import org.roda.core.data.adapter.filter.Filter;
 import org.roda.core.data.adapter.sort.Sorter;
 import org.roda.core.data.adapter.sublist.Sublist;
-import org.roda.core.data.common.RodaConstants;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
@@ -19,10 +15,11 @@ import org.roda.core.data.v2.index.IsIndexed;
 import org.roda.core.data.v2.user.RodaUser;
 
 import com.databasepreservation.visualization.client.BrowserService;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerColumn;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable;
 import com.databasepreservation.visualization.client.common.search.SearchField;
+import com.databasepreservation.visualization.shared.BrowserServiceUtils;
 import com.databasepreservation.visualization.shared.ViewerFactory;
+import com.databasepreservation.visualization.utils.SolrUtils;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 /**
@@ -95,26 +92,15 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
     return ViewerFactory.getSolrManager().retrieveRows(user, classToReturn, tableUUID, rowUUID);
   }
 
-  @Override public String getSolrQueryString(Filter filter, Sorter sorter, Sublist sublist, Facets facets)
+  @Override
+  public String getSolrQueryString(Filter filter, Sorter sorter, Sublist sublist, Facets facets)
     throws GenericException, RequestNotValidException {
     return SolrUtils.getSolrQuery(filter, sorter, sublist, facets);
   }
 
   @Override
   public List<SearchField> getSearchFields(ViewerTable viewerTable) throws GenericException {
-    List<SearchField> searchFields = new ArrayList<>();
-
-    for (ViewerColumn viewerColumn : viewerTable.getColumns()) {
-      SearchField searchField = new SearchField(viewerTable.getUUID() + "-"
-        + viewerColumn.getColumnIndexInEnclosingTable(), Arrays.asList(viewerColumn.getSolrName()),
-        viewerColumn.getDisplayName(), RodaConstants.SEARCH_FIELD_TYPE_TEXT);
-      searchField.setFixed(true);
-      // fixme: use ViewerType.dbTypes instead of treating everything as text
-
-      searchFields.add(searchField);
-    }
-
-    return searchFields;
+    return BrowserServiceUtils.getSearchFieldsFromTable(viewerTable);
   }
 
   @SuppressWarnings("unchecked")

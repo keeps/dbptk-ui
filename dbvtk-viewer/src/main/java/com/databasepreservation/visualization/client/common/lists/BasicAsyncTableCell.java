@@ -12,8 +12,8 @@ public abstract class BasicAsyncTableCell<T extends IsIndexed> extends AsyncTabl
     super();
   }
 
-  public BasicAsyncTableCell(Filter filter, Facets facets, String summary, boolean selectable, boolean exportable, int initialPageSize,
-    int pageSizeIncrement) {
+  public BasicAsyncTableCell(Filter filter, Facets facets, String summary, boolean selectable, boolean exportable,
+    int initialPageSize, int pageSizeIncrement) {
     super(filter, false, facets, summary, selectable, exportable, initialPageSize, pageSizeIncrement, null);
   }
 

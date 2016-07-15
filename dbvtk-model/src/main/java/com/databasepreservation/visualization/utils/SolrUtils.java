@@ -71,10 +71,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.utils.FileUtils;
-import com.databasepreservation.visualization.ViewerConstants;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerRow;
 import com.databasepreservation.visualization.exceptions.ViewerException;
+import com.databasepreservation.visualization.shared.ViewerSafeConstants;
 import com.databasepreservation.visualization.transformers.SolrTransformer;
 
 /**
@@ -93,7 +93,7 @@ public class SolrUtils {
   }
 
   public static String getTableCollectionName(String tableUUID) {
-    return ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + tableUUID;
+    return ViewerSafeConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + tableUUID;
   }
 
   public static void setupSolrCloudConfigsets(String zkHost) {
@@ -120,11 +120,11 @@ public class SolrUtils {
 
           String nameWithoutOriginPart = null;
           Path destination = null;
-          if (name.startsWith(ViewerConstants.SOLR_CONFIGSET_DATABASE_RESOURCE + "/")) {
-            nameWithoutOriginPart = name.substring(ViewerConstants.SOLR_CONFIGSET_DATABASE_RESOURCE.length() + 1);
+          if (name.startsWith(ViewerSafeConstants.SOLR_CONFIGSET_DATABASE_RESOURCE + "/")) {
+            nameWithoutOriginPart = name.substring(ViewerSafeConstants.SOLR_CONFIGSET_DATABASE_RESOURCE.length() + 1);
             destination = databaseDir;
-          } else if (name.startsWith(ViewerConstants.SOLR_CONFIGSET_TABLE_RESOURCE + "/")) {
-            nameWithoutOriginPart = name.substring(ViewerConstants.SOLR_CONFIGSET_TABLE_RESOURCE.length() + 1);
+          } else if (name.startsWith(ViewerSafeConstants.SOLR_CONFIGSET_TABLE_RESOURCE + "/")) {
+            nameWithoutOriginPart = name.substring(ViewerSafeConstants.SOLR_CONFIGSET_TABLE_RESOURCE.length() + 1);
             destination = tableDir;
           } else {
             continue;
@@ -168,12 +168,12 @@ public class SolrUtils {
     // copy configurations to solr
     if (databaseDir != null && tableDir != null) {
       try {
-        zkClient.uploadConfig(databaseDir, ViewerConstants.SOLR_CONFIGSET_DATABASE);
+        zkClient.uploadConfig(databaseDir, ViewerSafeConstants.SOLR_CONFIGSET_DATABASE);
       } catch (IOException e) {
         LOGGER.debug("IO error uploading database config to solr cloud", e);
       }
       try {
-        zkClient.uploadConfig(tableDir, ViewerConstants.SOLR_CONFIGSET_TABLE);
+        zkClient.uploadConfig(tableDir, ViewerSafeConstants.SOLR_CONFIGSET_TABLE);
       } catch (IOException e) {
         LOGGER.debug("IO error uploading table config to solr cloud", e);
       }
@@ -228,7 +228,7 @@ public class SolrUtils {
   private static <T> String getIndexName(Class<T> resultClass) throws GenericException {
     String indexName = null;
     if (resultClass.equals(ViewerDatabase.class)) {
-      indexName = ViewerConstants.SOLR_INDEX_DATABASE_COLLECTION_NAME;
+      indexName = ViewerSafeConstants.SOLR_INDEX_DATABASE_COLLECTION_NAME;
     } else if (resultClass.equals(ViewerRow.class)) {
       throw new GenericException("Can not determine collection name from " + ViewerRow.class.getName() + " class name");
     } else {
