@@ -20,7 +20,7 @@ public class HistoryManager {
   public static final String ROUTE_SCHEMA_VIEWS = "views";
   public static final String ROUTE_TABLE = "table";
   public static final String ROUTE_RECORD = "record";
-  public static final String ROUTE_FOREIGN_KEY = "foreignkey";
+  public static final String ROUTE_FOREIGN_KEY = "relation";
   public static final String ROUTE_REFERENCES = "references";
   public static final String ROUTE_SCHEMA_CHECK_CONSTRAINTS = "constraints";
 
@@ -72,7 +72,7 @@ public class HistoryManager {
     newHistory(Arrays.asList(ROUTE_TABLE, databaseUUID, tableUUID));
   }
 
-  public static void gotoRow(String databaseUUID, String tableUUID, String recordUUID) {
+  public static void gotoRecord(String databaseUUID, String tableUUID, String recordUUID) {
     newHistory(Arrays.asList(ROUTE_RECORD, databaseUUID, tableUUID, recordUUID));
   }
 
@@ -170,9 +170,9 @@ public class HistoryManager {
     return createHistoryToken(Arrays.asList(ROUTE_SCHEMA, database_uuid, schema_uuid, ROUTE_SCHEMA_VIEWS));
   }
 
-  public static String linkToForeignKey(String database_uuid, String table_uuid, String... solrColumnsAndValues) {
-    List<String> params = Arrays.asList(ROUTE_REFERENCES, database_uuid, table_uuid);
-    params.addAll(Arrays.asList(solrColumnsAndValues));
+  public static String linkToForeignKey(String database_uuid, String table_uuid, List<String> solrColumnsAndValues) {
+    List<String> params = new ArrayList<>(Arrays.asList(ROUTE_FOREIGN_KEY, database_uuid, table_uuid));
+    params.addAll(solrColumnsAndValues);
     return createHistoryToken(params);
   }
 }

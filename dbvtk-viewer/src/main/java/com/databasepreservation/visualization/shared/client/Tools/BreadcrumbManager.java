@@ -15,7 +15,7 @@ public class BreadcrumbManager {
   private static String LOADING_DATABASE = "Database (loading)";
   private static String LOADING_SCHEMA = "Schema (loading)";
   private static String LOADING_TABLE = "Table (loading)";
-  private static String LOADING_ROWS = "Rows (loading)";
+  private static String LOADING_RECORDS = "Records (loading)";
 
   public static void updateBreadcrumb(BreadcrumbPanel breadcrumb, List<BreadcrumbItem> items) {
     breadcrumb.updatePath(items);
@@ -88,19 +88,19 @@ public class BreadcrumbManager {
     return items;
   }
 
-  public static List<BreadcrumbItem> forRow(final String databaseName, final String databaseUUID,
+  public static List<BreadcrumbItem> forRecord(final String databaseName, final String databaseUUID,
     final String schemaName, final String schemaUUID, final String tableName, final String tableUUID,
-    final String rowUUID) {
+    final String recordUUID) {
     List<BreadcrumbItem> items = forTable(databaseName, databaseUUID, schemaName, schemaUUID, tableName, tableUUID);
     items.add(new BreadcrumbItem(new SafeHtml() {
       @Override
       public String asString() {
-        return FontAwesomeIconManager.getTag(FontAwesomeIconManager.ROW) + " Row";
+        return FontAwesomeIconManager.getTag(FontAwesomeIconManager.RECORD) + " Record";
       }
     }, new Command() {
       @Override
       public void execute() {
-        HistoryManager.gotoRow(databaseUUID, tableUUID, rowUUID);
+        HistoryManager.gotoRecord(databaseUUID, tableUUID, recordUUID);
       }
     }));
     return items;
@@ -108,9 +108,9 @@ public class BreadcrumbManager {
 
   public static List<BreadcrumbItem> forReferences(final String databaseName, final String databaseUUID,
     final String schemaName, final String schemaUUID, final String tableName, final String tableUUID,
-    final String rowUUID, final String columnNameInTable, final String columnIndexInTable) {
-    List<BreadcrumbItem> items = forRow(databaseName, databaseUUID, schemaName, schemaUUID, tableName, tableUUID,
-      rowUUID);
+    final String recordUUID, final String columnNameInTable, final String columnIndexInTable) {
+    List<BreadcrumbItem> items = forRecord(databaseName, databaseUUID, schemaName, schemaUUID, tableName, tableUUID,
+      recordUUID);
     items.add(new BreadcrumbItem(new SafeHtml() {
       @Override
       public String asString() {
@@ -120,7 +120,7 @@ public class BreadcrumbManager {
     }, new Command() {
       @Override
       public void execute() {
-        HistoryManager.gotoReferences(databaseUUID, tableUUID, rowUUID, columnIndexInTable);
+        HistoryManager.gotoReferences(databaseUUID, tableUUID, recordUUID, columnIndexInTable);
       }
     }));
     return items;
@@ -189,34 +189,34 @@ public class BreadcrumbManager {
     return items;
   }
 
-  public static List<BreadcrumbItem> loadingRow(final String databaseUUID, final String tableUUID, final String rowUUID) {
+  public static List<BreadcrumbItem> loadingRecord(final String databaseUUID, final String tableUUID, final String recordUUID) {
     List<BreadcrumbItem> items = loadingTable(databaseUUID, tableUUID);
     items.add(new BreadcrumbItem(new SafeHtml() {
       @Override
       public String asString() {
-        return FontAwesomeIconManager.getTag(FontAwesomeIconManager.ROW) + " Row";
+        return FontAwesomeIconManager.getTag(FontAwesomeIconManager.RECORD) + " Record";
       }
     }, new Command() {
       @Override
       public void execute() {
-        HistoryManager.gotoRow(databaseUUID, tableUUID, rowUUID);
+        HistoryManager.gotoRecord(databaseUUID, tableUUID, recordUUID);
       }
     }));
     return items;
   }
 
   public static List<BreadcrumbItem> loadingReferences(final String databaseUUID, final String tableUUID,
-    final String rowUUID, final String columnIndexInTable) {
-    List<BreadcrumbItem> items = loadingRow(databaseUUID, tableUUID, rowUUID);
+    final String recordUUID, final String columnIndexInTable) {
+    List<BreadcrumbItem> items = loadingRecord(databaseUUID, tableUUID, recordUUID);
     items.add(new BreadcrumbItem(new SafeHtml() {
       @Override
       public String asString() {
-        return FontAwesomeIconManager.getTag(FontAwesomeIconManager.REFERENCE) + " " + LOADING_ROWS;
+        return FontAwesomeIconManager.getTag(FontAwesomeIconManager.REFERENCE) + " " + LOADING_RECORDS;
       }
     }, new Command() {
       @Override
       public void execute() {
-        HistoryManager.gotoReferences(databaseUUID, tableUUID, rowUUID, columnIndexInTable);
+        HistoryManager.gotoReferences(databaseUUID, tableUUID, recordUUID, columnIndexInTable);
       }
     }));
     return items;

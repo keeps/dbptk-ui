@@ -48,8 +48,8 @@ public class TableSearchPanel extends Composite {
   @UiField
   SimplePanel tableContainer;
 
-  @UiField
-  Button logJsonSearch;
+//  @UiField
+//  Button logJsonSearch;
 
   private TableRowList tableRowList;
 
@@ -94,16 +94,16 @@ public class TableSearchPanel extends Composite {
 
     initWidget(uiBinder.createAndBindUi(this));
 
-    logJsonSearch.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        GWT.log("----- BEGIN");
-        GWT.log(createSearchInfo().asJson());
-        GWT.log("----- encoded:");
-        GWT.log(createSearchInfo().asUrlEncodedJson());
-        GWT.log("----- END");
-      }
-    });
+    // logJsonSearch.addClickHandler(new ClickHandler() {
+    // @Override
+    // public void onClick(ClickEvent event) {
+    // GWT.log("----- BEGIN");
+    // GWT.log(createSearchInfo().asJson());
+    // GWT.log("----- encoded:");
+    // GWT.log(createSearchInfo().asUrlEncodedJson());
+    // GWT.log("----- END");
+    // }
+    // });
 
     itemsSearchAdvancedFieldsPanel.addStyleName("searchAdvancedFieldsPanel empty");
   }
@@ -135,7 +135,7 @@ public class TableSearchPanel extends Composite {
       public void onSelectionChange(SelectionChangeEvent event) {
         ViewerRow record = tableRowList.getSelectionModel().getSelectedObject();
         if (record != null) {
-          HistoryManager.gotoRow(database.getUUID(), table.getUUID(), record.getUUID());
+          HistoryManager.gotoRecord(database.getUUID(), table.getUUID(), record.getUUID());
         }
       }
     });

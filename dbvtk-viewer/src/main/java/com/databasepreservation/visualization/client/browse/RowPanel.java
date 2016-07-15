@@ -1,9 +1,15 @@
 package com.databasepreservation.visualization.client.browse;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.roda.core.data.adapter.filter.Filter;
 import org.roda.core.data.v2.index.IsIndexed;
@@ -13,6 +19,7 @@ import com.databasepreservation.visualization.client.ViewerStructure.ViewerCell;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerColumn;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerForeignKey;
+import com.databasepreservation.visualization.client.ViewerStructure.ViewerMetadata;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerReference;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerRow;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerSchema;
@@ -84,12 +91,12 @@ public class RowPanel extends Composite {
 
     initWidget(uiBinder.createAndBindUi(this));
 
-    rowID.setHTML(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.ROW) + " "
+    rowID.setHTML(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.RECORD) + " "
       + SafeHtmlUtils.htmlEscape(rowUUID)));
     tableName.setHTML(FontAwesomeIconManager.loading(FontAwesomeIconManager.TABLE));
 
     BreadcrumbManager.updateBreadcrumb(breadcrumb,
-      BreadcrumbManager.loadingRow(database.getUUID(), table.getUUID(), rowUUID));
+      BreadcrumbManager.loadingRecord(database.getUUID(), table.getUUID(), rowUUID));
 
     this.database = database;
     this.table = table;
@@ -105,11 +112,11 @@ public class RowPanel extends Composite {
 
     initWidget(uiBinder.createAndBindUi(this));
 
-    rowID.setHTML(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.ROW) + " "
+    rowID.setHTML(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.RECORD) + " "
       + SafeHtmlUtils.htmlEscape(rowUUID)));
     tableName.setHTML(FontAwesomeIconManager.loading(FontAwesomeIconManager.TABLE));
 
-    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.loadingRow(databaseUUID, tableUUID, rowUUID));
+    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.loadingRecord(databaseUUID, tableUUID, rowUUID));
 
     BrowserService.Util.getInstance().retrieve(ViewerDatabase.class.getName(), databaseUUID,
       new AsyncCallback<IsIndexed>() {
@@ -154,18 +161,32 @@ public class RowPanel extends Composite {
     // breadcrumb
     BreadcrumbManager.updateBreadcrumb(
       breadcrumb,
-      BreadcrumbManager.forRow(database.getMetadata().getName(), database.getUUID(), table.getSchemaName(),
+      BreadcrumbManager.forRecord(database.getMetadata().getName(), database.getUUID(), table.getSchemaName(),
         table.getSchemaUUID(), table.getName(), table.getUUID(), rowUUID));
 
     tableName.setHTML(FontAwesomeIconManager.loaded(FontAwesomeIconManager.TABLE, table.getName()));
 
     if (row != null) {
-      Set<Integer> columnIndexesContainingForeignKeyRelations = new HashSet<>();
+      Set<Ref> recordRelatedTo = new TreeSet<>();
+      Set<Ref> recordReferencedBy = new TreeSet<>();
+
+      Map<Integer, Set<Ref>> colIndexRelatedTo = new HashMap<>();
+      Map<Integer, Set<Ref>> colIndexReferencedBy = new HashMap<>();
+
+      ViewerMetadata metadata = database.getMetadata();
 
       // get references where this column is source in foreign keys
       for (ViewerForeignKey fk : table.getForeignKeys()) {
-        for (ViewerReference viewerReference : fk.getReferences()) {
-          columnIndexesContainingForeignKeyRelations.add(viewerReference.getSourceColumnIndex());
+        Ref ref = new Ref(metadata.getTable(fk.getReferencedTableUUID()), fk);
+        if (fk.getReferences().size() == 1) {
+          Set<Ref> refs = colIndexRelatedTo.get(ref.getSingleColumnIndex());
+          if (refs == null) {
+            refs = new TreeSet<>();
+            colIndexRelatedTo.put(ref.getSingleColumnIndex(), refs);
+          }
+          refs.add(ref);
+        } else {
+          recordRelatedTo.add(ref);
         }
       }
 
@@ -173,10 +194,18 @@ public class RowPanel extends Composite {
       // foreign keys
       for (ViewerSchema viewerSchema : database.getMetadata().getSchemas()) {
         for (ViewerTable viewerTable : viewerSchema.getTables()) {
-          for (ViewerForeignKey viewerForeignKey : viewerTable.getForeignKeys()) {
-            if (viewerForeignKey.getReferencedTableUUID().equals(table.getUUID())) {
-              for (ViewerReference viewerReference : viewerForeignKey.getReferences()) {
-                columnIndexesContainingForeignKeyRelations.add(viewerReference.getReferencedColumnIndex());
+          for (ViewerForeignKey fk : viewerTable.getForeignKeys()) {
+            if (fk.getReferencedTableUUID().equals(table.getUUID())) {
+              Ref ref = new Ref(viewerTable, fk);
+              if (fk.getReferences().size() == 1) {
+                Set<Ref> refs = colIndexReferencedBy.get(ref.getSingleColumnIndex());
+                if (refs == null) {
+                  refs = new TreeSet<>();
+                  colIndexReferencedBy.put(ref.getSingleColumnIndex(), refs);
+                }
+                refs.add(ref);
+              } else {
+                recordReferencedBy.add(ref);
               }
             }
           }
@@ -186,9 +215,21 @@ public class RowPanel extends Composite {
       // row data
       SafeHtmlBuilder b = new SafeHtmlBuilder();
 
+      // foreign key relations first
+      if (!recordRelatedTo.isEmpty() || !recordReferencedBy.isEmpty()) {
+        b.appendHtmlConstant("<div class=\"field\">");
+        if (!recordRelatedTo.isEmpty()) {
+          b.append(getForeignKeyHTML("This record is related to", recordRelatedTo, row));
+        }
+        if (!recordReferencedBy.isEmpty()) {
+          b.append(getForeignKeyHTML("This record is referenced by", recordReferencedBy, row));
+        }
+        b.appendHtmlConstant("</div>");
+      }
+
       for (ViewerColumn column : table.getColumns()) {
         b.append(getCellHTML(column,
-          columnIndexesContainingForeignKeyRelations.contains(column.getColumnIndexInEnclosingTable()), table
+          colIndexRelatedTo.get(column.getColumnIndexInEnclosingTable()), colIndexReferencedBy.get(column.getColumnIndexInEnclosingTable()), table
             .getPrimaryKey().getColumnIndexesInViewerTable().contains(column.getColumnIndexInEnclosingTable())));
       }
 
@@ -196,7 +237,31 @@ public class RowPanel extends Composite {
     }
   }
 
-  private SafeHtml getCellHTML(ViewerColumn column, boolean hasForeignKeyRelations, boolean isPrimaryKeyColumn) {
+  private SafeHtml getForeignKeyHTML(String prefix, Set<Ref> refs, ViewerRow row) {
+    SafeHtmlBuilder b = new SafeHtmlBuilder();
+    b.appendHtmlConstant("<div class=\"value related-records\">");
+    b.appendEscaped(prefix);
+    b.appendEscaped(" ");
+
+    Iterator<Ref> iterator = refs.iterator();
+    while (iterator.hasNext()) {
+      Ref ref = iterator.next();
+      Hyperlink hyperlink = new Hyperlink(ref.getSchemaAndTableName(), HistoryManager.linkToForeignKey(
+        database.getUUID(), ref.refTable.getUUID(), ref.getColumnNamesAndValues(row)));
+      hyperlink.addStyleName("related-records-link");
+
+      b.appendHtmlConstant(hyperlink.toString());
+
+      if (iterator.hasNext()) {
+        b.appendHtmlConstant(", ");
+      }
+    }
+    b.appendHtmlConstant("</div>");
+
+    return b.toSafeHtml();
+  }
+
+  private SafeHtml getCellHTML(ViewerColumn column, Set<Ref> relatedTo, Set<Ref> referencedBy, boolean isPrimaryKeyColumn) {
     String label = column.getDisplayName();
 
     String value = null;
@@ -222,24 +287,113 @@ public class RowPanel extends Composite {
     } else {
       b.appendEscaped(value);
     }
-    if (hasForeignKeyRelations && value != null) {
-      Hyperlink hyperlink = new Hyperlink("Explore related records", HistoryManager.linkToReferences(
-        database.getUUID(), table.getUUID(), rowUUID, String.valueOf(column.getColumnIndexInEnclosingTable())));
-      hyperlink.addStyleName("related-records-link");
-      b.appendHtmlConstant(hyperlink.toString());
-    }
     b.appendHtmlConstant("</div>");
 
-    if (hasForeignKeyRelations && value != null) {
-      b.appendHtmlConstant("<div class=\"value\">");
-      Hyperlink hyperlink = new Hyperlink("Explore related records", HistoryManager.linkToReferences(
-        database.getUUID(), table.getUUID(), rowUUID, String.valueOf(column.getColumnIndexInEnclosingTable())));
-      hyperlink.addStyleName("related-records-link");
-      b.appendHtmlConstant(hyperlink.toString());
-      b.appendHtmlConstant("</div>");
+    if(relatedTo != null && !relatedTo.isEmpty()){
+      b.append(getForeignKeyHTML("Is related to", relatedTo, row));
     }
 
-    b.appendHtmlConstant("</div>");
+    if(referencedBy != null && !referencedBy.isEmpty()){
+      b.append(getForeignKeyHTML("Is referenced by", referencedBy, row));
+    }
+
     return b.toSafeHtml();
+  }
+
+  /**
+   * A foreign key reference from which to generate an ordered list of links to
+   * foreign key relation values
+   *
+   * Note: this class has a natural ordering that is inconsistent with equals.
+   */
+  private static class Ref implements Comparable<Ref> {
+    ViewerTable refTable;
+    Map<String, Integer> solrColumnToRowColumnIndex;
+
+    Ref(ViewerTable otherTable, ViewerForeignKey foreignKey) {
+      refTable = otherTable;
+      solrColumnToRowColumnIndex = new TreeMap<>();
+
+      // tableUUID to use in URL is always otherTable.getUUID()
+      if (foreignKey.getReferencedTableUUID().equals(otherTable.getUUID())) {
+        // related to
+        // currentTable -> otherTable
+        // fk belongs to current table, fk target is otherTable
+        // get column names from fk target (use otherTable to map indexes to
+        // names)
+        // get column indexes from fk source
+        for (ViewerReference viewerReference : foreignKey.getReferences()) {
+          String solrColumnName = otherTable.getColumns().get(viewerReference.getReferencedColumnIndex())
+            .getSolrName();
+          Integer columnIndexToGetValue = viewerReference.getSourceColumnIndex();
+          solrColumnToRowColumnIndex.put(solrColumnName, columnIndexToGetValue);
+        }
+      } else {
+        // referenced by
+        // currentTable <- otherTable
+        // fk belongs to otherTable, fk target is current table
+        // get column names from source (use otherTable to map indexes to names)
+        // get column indexes from fk target
+        for (ViewerReference viewerReference : foreignKey.getReferences()) {
+          solrColumnToRowColumnIndex.put(otherTable.getColumns().get(viewerReference.getSourceColumnIndex())
+            .getSolrName(), viewerReference.getReferencedColumnIndex());
+        }
+      }
+    }
+
+    public List<String> getColumnNamesAndValues(ViewerRow row) {
+      List<String> params = new ArrayList<>();
+      for (String colName : solrColumnToRowColumnIndex.keySet()) {
+        String value = row.getCells().get(colName).getValue();
+        params.add(colName);
+        params.add(value);
+      }
+      return params;
+    }
+
+    public String getSchemaAndTableName() {
+      return refTable.getSchemaName() + "." + refTable.getName();
+    }
+
+    public Integer getSingleColumnIndex() {
+      for (Integer index : solrColumnToRowColumnIndex.values()) {
+        return index;
+      }
+      return 0;
+    }
+
+    /**
+     * Uses schema name and table name to compare instances (for ordering)
+     *
+     * @param o
+     *          the object to be compared.
+     * @return a negative integer, zero, or a positive integer as this object is
+     *         less than, equal to, or greater than the specified object.
+     */
+    @Override
+    public int compareTo(Ref o) {
+      int schemaCompare = refTable.getSchemaName().compareTo(o.refTable.getSchemaName());
+      if (schemaCompare == 0) {
+        return refTable.getName().compareTo(o.refTable.getName());
+      } else {
+        return schemaCompare;
+      }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o)
+        return true;
+      if (o == null || getClass() != o.getClass())
+        return false;
+      Ref ref = (Ref) o;
+      return Objects.equals(refTable.getUUID(), ref.refTable.getUUID())
+        && Objects.equals(solrColumnToRowColumnIndex, ref.solrColumnToRowColumnIndex);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(refTable.getUUID(), solrColumnToRowColumnIndex);
+    }
   }
 }

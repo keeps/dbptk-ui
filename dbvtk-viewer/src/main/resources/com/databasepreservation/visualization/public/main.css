@@ -398,13 +398,15 @@
 }
 
 /**********************************************
-	       SINGLE ROW PAGE
+	       SINGLE RECORD PAGE
 ************************************************/
 
-.field .value .related-records-link {
-    font-size: 75%; /*equivalent to .small*/
-    margin-left: .5rem;
+.field .value.related-records .related-records-link {
     display: inline;
+}
+
+.field .value.related-records {
+    font-size: 75%; /*equivalent to .small*/
 }
 
 .recordId {
