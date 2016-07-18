@@ -414,6 +414,10 @@
     margin-bottom: 1rem;
 }
 
+.rowData .label {
+    margin-top: 1rem;
+}
+
 .rowData .label:before {
     display: inline-block;
     font: normal normal normal 14px/1 FontAwesome;

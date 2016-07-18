@@ -2,8 +2,6 @@ package com.databasepreservation.visualization.client.browse;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -170,14 +168,14 @@ public class RowPanel extends Composite {
       Set<Ref> recordRelatedTo = new TreeSet<>();
       Set<Ref> recordReferencedBy = new TreeSet<>();
 
-      Map<Integer, Set<Ref>> colIndexRelatedTo = new HashMap<>();
-      Map<Integer, Set<Ref>> colIndexReferencedBy = new HashMap<>();
+      Map<String, Set<Ref>> colIndexRelatedTo = new HashMap<>();
+      Map<String, Set<Ref>> colIndexReferencedBy = new HashMap<>();
 
       ViewerMetadata metadata = database.getMetadata();
 
       // get references where this column is source in foreign keys
       for (ViewerForeignKey fk : table.getForeignKeys()) {
-        Ref ref = new Ref(metadata.getTable(fk.getReferencedTableUUID()), fk);
+        Ref ref = new Ref(table, metadata.getTable(fk.getReferencedTableUUID()), fk);
         if (fk.getReferences().size() == 1) {
           Set<Ref> refs = colIndexRelatedTo.get(ref.getSingleColumnIndex());
           if (refs == null) {
@@ -196,7 +194,7 @@ public class RowPanel extends Composite {
         for (ViewerTable viewerTable : viewerSchema.getTables()) {
           for (ViewerForeignKey fk : viewerTable.getForeignKeys()) {
             if (fk.getReferencedTableUUID().equals(table.getUUID())) {
-              Ref ref = new Ref(viewerTable, fk);
+              Ref ref = new Ref(table, viewerTable, fk);
               if (fk.getReferences().size() == 1) {
                 Set<Ref> refs = colIndexReferencedBy.get(ref.getSingleColumnIndex());
                 if (refs == null) {
@@ -228,9 +226,9 @@ public class RowPanel extends Composite {
       }
 
       for (ViewerColumn column : table.getColumns()) {
-        b.append(getCellHTML(column,
-          colIndexRelatedTo.get(column.getColumnIndexInEnclosingTable()), colIndexReferencedBy.get(column.getColumnIndexInEnclosingTable()), table
-            .getPrimaryKey().getColumnIndexesInViewerTable().contains(column.getColumnIndexInEnclosingTable())));
+        b.append(getCellHTML(column, colIndexRelatedTo.get(column.getSolrName()),
+          colIndexReferencedBy.get(column.getSolrName()), table.getPrimaryKey().getColumnIndexesInViewerTable()
+            .contains(column.getColumnIndexInEnclosingTable())));
       }
 
       content.setHTML(b.toSafeHtml());
@@ -238,30 +236,41 @@ public class RowPanel extends Composite {
   }
 
   private SafeHtml getForeignKeyHTML(String prefix, Set<Ref> refs, ViewerRow row) {
+    boolean firstRef = true;
+    int nonNullReferenceCounter = 0;
+
     SafeHtmlBuilder b = new SafeHtmlBuilder();
     b.appendHtmlConstant("<div class=\"value related-records\">");
     b.appendEscaped(prefix);
     b.appendEscaped(" ");
 
-    Iterator<Ref> iterator = refs.iterator();
-    while (iterator.hasNext()) {
-      Ref ref = iterator.next();
-      Hyperlink hyperlink = new Hyperlink(ref.getSchemaAndTableName(), HistoryManager.linkToForeignKey(
-        database.getUUID(), ref.refTable.getUUID(), ref.getColumnNamesAndValues(row)));
-      hyperlink.addStyleName("related-records-link");
+    for (Ref ref : refs) {
+      List<String> columnNamesAndValues = ref.getColumnNamesAndValues(row);
 
-      b.appendHtmlConstant(hyperlink.toString());
+      if (!columnNamesAndValues.isEmpty()) {
+        if (!firstRef) {
+          b.appendHtmlConstant(", ");
+        }
 
-      if (iterator.hasNext()) {
-        b.appendHtmlConstant(", ");
+        Hyperlink hyperlink = new Hyperlink(ref.getSchemaAndTableName(), HistoryManager.linkToForeignKey(
+          database.getUUID(), ref.refTable.getUUID(), columnNamesAndValues));
+        hyperlink.addStyleName("related-records-link");
+        b.appendHtmlConstant(hyperlink.toString());
+        firstRef = false;
+        nonNullReferenceCounter++;
       }
     }
     b.appendHtmlConstant("</div>");
 
-    return b.toSafeHtml();
+    if (nonNullReferenceCounter > 0) {
+      return b.toSafeHtml();
+    } else {
+      return SafeHtmlUtils.EMPTY_SAFE_HTML;
+    }
   }
 
-  private SafeHtml getCellHTML(ViewerColumn column, Set<Ref> relatedTo, Set<Ref> referencedBy, boolean isPrimaryKeyColumn) {
+  private SafeHtml getCellHTML(ViewerColumn column, Set<Ref> relatedTo, Set<Ref> referencedBy,
+    boolean isPrimaryKeyColumn) {
     String label = column.getDisplayName();
 
     String value = null;
@@ -273,7 +282,7 @@ public class RowPanel extends Composite {
     }
 
     SafeHtmlBuilder b = new SafeHtmlBuilder();
-    b.appendHtmlConstant("<div class=\"field\">");
+    b.appendHtmlConstant("<div class=\"field field-margin\">");
     if (isPrimaryKeyColumn) {
       b.appendHtmlConstant("<div class=\"label fa-key\">");
     } else {
@@ -289,11 +298,11 @@ public class RowPanel extends Composite {
     }
     b.appendHtmlConstant("</div>");
 
-    if(relatedTo != null && !relatedTo.isEmpty()){
+    if (relatedTo != null && !relatedTo.isEmpty()) {
       b.append(getForeignKeyHTML("Is related to", relatedTo, row));
     }
 
-    if(referencedBy != null && !referencedBy.isEmpty()){
+    if (referencedBy != null && !referencedBy.isEmpty()) {
       b.append(getForeignKeyHTML("Is referenced by", referencedBy, row));
     }
 
@@ -308,11 +317,11 @@ public class RowPanel extends Composite {
    */
   private static class Ref implements Comparable<Ref> {
     ViewerTable refTable;
-    Map<String, Integer> solrColumnToRowColumnIndex;
+    Map<String, String> foreignSolrColumnToRowSolrColumn;
 
-    Ref(ViewerTable otherTable, ViewerForeignKey foreignKey) {
+    Ref(ViewerTable currentTable, ViewerTable otherTable, ViewerForeignKey foreignKey) {
       refTable = otherTable;
-      solrColumnToRowColumnIndex = new TreeMap<>();
+      foreignSolrColumnToRowSolrColumn = new TreeMap<>();
 
       // tableUUID to use in URL is always otherTable.getUUID()
       if (foreignKey.getReferencedTableUUID().equals(otherTable.getUUID())) {
@@ -323,10 +332,10 @@ public class RowPanel extends Composite {
         // names)
         // get column indexes from fk source
         for (ViewerReference viewerReference : foreignKey.getReferences()) {
-          String solrColumnName = otherTable.getColumns().get(viewerReference.getReferencedColumnIndex())
-            .getSolrName();
+          String solrColumnName = otherTable.getColumns().get(viewerReference.getReferencedColumnIndex()).getSolrName();
           Integer columnIndexToGetValue = viewerReference.getSourceColumnIndex();
-          solrColumnToRowColumnIndex.put(solrColumnName, columnIndexToGetValue);
+          String solrColumnNameToGetValue = currentTable.getColumns().get(columnIndexToGetValue).getSolrName();
+          foreignSolrColumnToRowSolrColumn.put(solrColumnName, solrColumnNameToGetValue);
         }
       } else {
         // referenced by
@@ -335,18 +344,24 @@ public class RowPanel extends Composite {
         // get column names from source (use otherTable to map indexes to names)
         // get column indexes from fk target
         for (ViewerReference viewerReference : foreignKey.getReferences()) {
-          solrColumnToRowColumnIndex.put(otherTable.getColumns().get(viewerReference.getSourceColumnIndex())
-            .getSolrName(), viewerReference.getReferencedColumnIndex());
+          String solrColumnName = otherTable.getColumns().get(viewerReference.getSourceColumnIndex()).getSolrName();
+          Integer columnIndexToGetValue = viewerReference.getReferencedColumnIndex();
+          String solrColumnNameToGetValue = currentTable.getColumns().get(columnIndexToGetValue).getSolrName();
+          foreignSolrColumnToRowSolrColumn.put(solrColumnName, solrColumnNameToGetValue);
         }
       }
     }
 
     public List<String> getColumnNamesAndValues(ViewerRow row) {
       List<String> params = new ArrayList<>();
-      for (String colName : solrColumnToRowColumnIndex.keySet()) {
-        String value = row.getCells().get(colName).getValue();
-        params.add(colName);
-        params.add(value);
+      for (String colName : foreignSolrColumnToRowSolrColumn.keySet()) {
+        String rowColName = foreignSolrColumnToRowSolrColumn.get(colName);
+        ViewerCell viewerCell = row.getCells().get(rowColName);
+        if (viewerCell != null) {
+          String value = viewerCell.getValue();
+          params.add(colName);
+          params.add(value);
+        }
       }
       return params;
     }
@@ -355,11 +370,11 @@ public class RowPanel extends Composite {
       return refTable.getSchemaName() + "." + refTable.getName();
     }
 
-    public Integer getSingleColumnIndex() {
-      for (Integer index : solrColumnToRowColumnIndex.values()) {
-        return index;
+    public String getSingleColumnIndex() {
+      for (String colName : foreignSolrColumnToRowSolrColumn.values()) {
+        return colName;
       }
-      return 0;
+      return null;
     }
 
     /**
@@ -388,12 +403,12 @@ public class RowPanel extends Composite {
         return false;
       Ref ref = (Ref) o;
       return Objects.equals(refTable.getUUID(), ref.refTable.getUUID())
-        && Objects.equals(solrColumnToRowColumnIndex, ref.solrColumnToRowColumnIndex);
+        && Objects.equals(foreignSolrColumnToRowSolrColumn, ref.foreignSolrColumnToRowSolrColumn);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(refTable.getUUID(), solrColumnToRowColumnIndex);
+      return Objects.hash(refTable.getUUID(), foreignSolrColumnToRowSolrColumn);
     }
   }
 }
