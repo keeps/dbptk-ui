@@ -52,8 +52,9 @@ import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
@@ -80,8 +81,9 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel i
   private final AccessibleSimplePager resultsPager;
   private final PageSizePager pageSizePager;
   private final CellTable<T> display;
-  private Button exportVisibleButton;
-  private Button exportAllButton;
+  private FlexTable exportButtons;
+  private Anchor exportVisibleButton;
+  private Anchor exportAllButton;
 
   private FlowPanel selectAllPanel;
   private FlowPanel selectAllPanelBody;
@@ -158,18 +160,30 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel i
     dataProvider.addDataDisplay(display);
 
     if (exportable) {
-      exportVisibleButton = new Button("Export visible", new ClickHandler() {
+      // mimic PageSizePager
+      exportButtons = new FlexTable();
+      exportButtons.setCellPadding(0);
+      exportButtons.setCellSpacing(0);
+
+      exportVisibleButton = new Anchor("Export visible");
+      exportVisibleButton.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
           AsyncTableCell.this.exportVisibleClickHandler();
         }
       });
-      exportAllButton = new Button("Export all", new ClickHandler() {
+
+      exportAllButton = new Anchor("Export all");
+      exportAllButton.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
           AsyncTableCell.this.exportAllClickHandler();
         }
       });
+
+      exportButtons.setWidget(0, 0, exportVisibleButton);
+      exportButtons.setText(0, 1, " | ");
+      exportButtons.setWidget(0, 2, exportAllButton);
     }
 
     resultsPager = new AccessibleSimplePager(AccessibleSimplePager.TextLocation.LEFT,
@@ -185,9 +199,8 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel i
     add(selectAllPanel);
     add(new ScrollPanel(display));
     add(resultsPager);
-    if (exportVisibleButton != null) {
-      add(exportVisibleButton);
-      add(exportAllButton);
+    if (exportButtons != null) {
+      add(exportButtons);
     }
     add(pageSizePager);
 
@@ -207,9 +220,10 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel i
     resultsPager.addStyleName("my-asyncdatagrid-pager-results");
     pageSizePager.addStyleName("my-asyncdatagrid-pager-pagesize");
     display.addStyleName("my-asyncdatagrid-display");
-    if (exportVisibleButton != null) {
-      exportVisibleButton.addStyleName("btn btn-export btn-export-visible");
-      exportAllButton.addStyleName("btn btn-export btn-export-all");
+    if (exportButtons != null) {
+      exportButtons.addStyleName("my-asyncdatagrid-pager-pagesize");
+      // exportVisibleButton.addStyleName("btn btn-export btn-export-visible");
+      // exportAllButton.addStyleName("btn btn-export btn-export-all");
     }
 
     addValueChangeHandler(new ValueChangeHandler<IndexResult<T>>() {

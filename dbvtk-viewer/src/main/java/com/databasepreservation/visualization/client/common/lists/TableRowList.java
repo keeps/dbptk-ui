@@ -249,12 +249,15 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
     urlBuilder.append(ViewerSafeConstants.API_QUERY_PARAM_FILTER).append("=").append(UriUtils.encode(paramFilter))
       .append("&");
 
+    // add parameter: subList
+    String paramSubList;
     if (!all) {
-      // add parameter: subList
-      String paramSubList = ViewerJsonUtils.getSubListMapper().write(currentSubList);
-      urlBuilder.append(ViewerSafeConstants.API_QUERY_PARAM_SUBLIST).append("=").append(UriUtils.encode(paramSubList))
-        .append("&");
+      paramSubList = ViewerJsonUtils.getSubListMapper().write(currentSubList);
+    } else {
+      paramSubList = ViewerJsonUtils.getSubListMapper().write(new Sublist(0, Integer.MAX_VALUE));
     }
+    urlBuilder.append(ViewerSafeConstants.API_QUERY_PARAM_SUBLIST).append("=").append(UriUtils.encode(paramSubList))
+      .append("&");
 
     // add parameter: sorter
     String paramSorter = ViewerJsonUtils.getSorterMapper().write(currentSorter);
