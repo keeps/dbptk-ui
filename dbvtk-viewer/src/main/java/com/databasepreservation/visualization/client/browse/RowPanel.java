@@ -68,9 +68,6 @@ public class RowPanel extends Composite {
   BreadcrumbPanel breadcrumb;
 
   @UiField(provided = true)
-  SearchPanel dbSearchPanel;
-
-  @UiField(provided = true)
   DatabaseSidebar sidebar;
 
   @UiField
@@ -84,7 +81,6 @@ public class RowPanel extends Composite {
 
   private RowPanel(ViewerDatabase database, ViewerTable table, ViewerRow row) {
     this.rowUUID = row.getUUID();
-    dbSearchPanel = new SearchPanel(new Filter(), "", "Search in all tables", false, false);
     sidebar = DatabaseSidebar.getInstance(database.getUUID());
 
     initWidget(uiBinder.createAndBindUi(this));
@@ -105,7 +101,6 @@ public class RowPanel extends Composite {
 
   private RowPanel(final String databaseUUID, final String tableUUID, final String rowUUID) {
     this.rowUUID = rowUUID;
-    dbSearchPanel = new SearchPanel(new Filter(), "", "Search in all tables", false, false);
     sidebar = DatabaseSidebar.getInstance(databaseUUID);
 
     initWidget(uiBinder.createAndBindUi(this));

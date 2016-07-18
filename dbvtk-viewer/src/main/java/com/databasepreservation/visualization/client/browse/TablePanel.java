@@ -66,9 +66,6 @@ public class TablePanel extends Composite {
   BreadcrumbPanel breadcrumb;
 
   @UiField(provided = true)
-  SearchPanel dbSearchPanel;
-
-  @UiField(provided = true)
   DatabaseSidebar sidebar;
 
   @UiField
@@ -98,7 +95,6 @@ public class TablePanel extends Composite {
    *          the predefined search
    */
   private TablePanel(ViewerDatabase database, ViewerTable table, SearchInfo searchInfo) {
-    dbSearchPanel = new SearchPanel(new Filter(), "", "Search in all tables", false, false);
     sidebar = DatabaseSidebar.getInstance(database.getUUID());
 
     tableSearchPanel = new TableSearchPanel(searchInfo);
@@ -141,7 +137,6 @@ public class TablePanel extends Composite {
    *          the SearchInfo instance as a JSON String
    */
   private TablePanel(final String databaseUUID, final String tableUUID, String searchInfoJson) {
-    dbSearchPanel = new SearchPanel(new Filter(), "", "Search in all tables", false, false);
     sidebar = DatabaseSidebar.getInstance(databaseUUID);
     if (searchInfoJson != null) {
       tableSearchPanel = new TableSearchPanel(searchInfoJson);

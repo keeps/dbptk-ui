@@ -69,9 +69,6 @@ public class ReferencesPanel extends Composite {
   BreadcrumbPanel breadcrumb;
 
   @UiField(provided = true)
-  SearchPanel dbSearchPanel;
-
-  @UiField(provided = true)
   DatabaseSidebar sidebar;
 
   @UiField
@@ -91,7 +88,6 @@ public class ReferencesPanel extends Composite {
     final String columnIndexInTable) {
     this.recordUUID = recordUUID;
     this.columnIndexInTable = Integer.valueOf(columnIndexInTable);
-    dbSearchPanel = new SearchPanel(new Filter(), "", "Search in all tables", false, false);
     sidebar = DatabaseSidebar.getInstance(databaseUUID);
 
     initWidget(uiBinder.createAndBindUi(this));

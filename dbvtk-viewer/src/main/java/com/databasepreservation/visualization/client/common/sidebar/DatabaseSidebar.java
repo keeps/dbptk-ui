@@ -1,7 +1,11 @@
 package com.databasepreservation.visualization.client.common.sidebar;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.roda.core.data.v2.index.IsIndexed;
 
@@ -12,18 +16,29 @@ import com.databasepreservation.visualization.client.ViewerStructure.ViewerSchem
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable;
 import com.databasepreservation.visualization.shared.client.Tools.FontAwesomeIconManager;
 import com.databasepreservation.visualization.shared.client.Tools.HistoryManager;
+import com.databasepreservation.visualization.shared.client.Tools.ViewerStringUtils;
+import com.databasepreservation.visualization.shared.client.widgets.wcag.AccessibleFocusPanel;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyDownEvent;
+import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class DatabaseSidebar extends Composite {
+  private static String SEARCH_PLACEHOLDER = "Filter this list";
   private static Map<String, DatabaseSidebar> instances = new HashMap<>();
 
   /**
@@ -57,6 +72,15 @@ public class DatabaseSidebar extends Composite {
   @UiField
   FlowPanel sidebarGroup;
 
+  @UiField
+  FlowPanel searchPanel;
+
+  @UiField
+  TextBox searchInputBox;
+
+  @UiField
+  AccessibleFocusPanel searchInputButton;
+
   private ViewerDatabase database;
 
   /**
@@ -77,6 +101,7 @@ public class DatabaseSidebar extends Composite {
    */
   private DatabaseSidebar(String databaseUUID) {
     initWidget(uiBinder.createAndBindUi(this));
+    searchInit();
 
     BrowserService.Util.getInstance().retrieve(ViewerDatabase.class.getName(), databaseUUID,
       new AsyncCallback<IsIndexed>() {
@@ -129,6 +154,65 @@ public class DatabaseSidebar extends Composite {
       for (ViewerTable table : schema.getTables()) {
         sidebarGroup.add(new SidebarHyperlink(table.getName(), HistoryManager.linkToTable(database.getUUID(),
           table.getUUID())).addIcon(FontAwesomeIconManager.TABLE).setH6().setIndent2());
+      }
+
+      searchInit();
+    }
+  }
+
+  private void searchInit() {
+    searchInputBox.getElement().setPropertyString("placeholder", SEARCH_PLACEHOLDER);
+
+    searchInputBox.addChangeHandler(new ChangeHandler() {
+      @Override
+      public void onChange(ChangeEvent event) {
+        doSearch();
+      }
+    });
+
+    searchInputBox.addKeyDownHandler(new KeyDownHandler() {
+      @Override
+      public void onKeyDown(KeyDownEvent event) {
+        if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+          doSearch();
+        }
+      }
+    });
+
+    searchInputButton.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        doSearch();
+      }
+    });
+  }
+
+  private void doSearch() {
+    String searchValue = searchInputBox.getValue();
+
+    if (ViewerStringUtils.isBlank(searchValue)) {
+      // show all
+      for (Widget widget : sidebarGroup) {
+        widget.setVisible(true);
+      }
+    } else {
+      // show matching
+
+      Set<SidebarItem> parents = new HashSet<>();
+      List<SidebarItem> parentIndents = new ArrayList<>();
+
+
+      for (Widget widget : sidebarGroup) {
+        if (widget instanceof SidebarItem) {
+          SidebarItem sidebarItem = (SidebarItem) widget;
+          if (sidebarItem.getText().contains(searchValue)) {
+            widget.setVisible(true);
+          } else {
+            widget.setVisible(false);
+          }
+        } else {
+          widget.setVisible(true);
+        }
       }
     }
   }

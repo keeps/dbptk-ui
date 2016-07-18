@@ -42,6 +42,10 @@ public class SidebarHyperlink extends SidebarItem {
     return this;
   }
 
+  public String getText(){
+    return label.getText();
+  }
+
   @Override
   public SidebarItem setH1() {
     label.addStyleName("h1");

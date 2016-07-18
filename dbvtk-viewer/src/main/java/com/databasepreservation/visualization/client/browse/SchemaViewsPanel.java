@@ -61,15 +61,11 @@ public class SchemaViewsPanel extends Composite {
   BreadcrumbPanel breadcrumb;
 
   @UiField(provided = true)
-  SearchPanel dbSearchPanel;
-
-  @UiField(provided = true)
   DatabaseSidebar sidebar;
   @UiField
   FlowPanel contentItems;
 
   private SchemaViewsPanel(final String databaseUUID, final String schemaUUID) {
-    dbSearchPanel = new SearchPanel(new Filter(), "", "Search in all tables", false, false);
     sidebar = DatabaseSidebar.getInstance(databaseUUID);
 
     initWidget(uiBinder.createAndBindUi(this));

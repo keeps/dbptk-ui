@@ -37,6 +37,10 @@ public class SidebarItem extends Composite {
     return this;
   }
 
+  public String getText(){
+    return label.getText();
+  }
+
   public SidebarItem setH1() {
     label.addStyleName("h1");
     return this;
@@ -90,5 +94,13 @@ public class SidebarItem extends Composite {
   public SidebarItem setIndent4() {
     label.addStyleName("indent4");
     return this;
+  }
+
+  public void hide(){
+    setVisible(false);
+  }
+
+  public void show(){
+    setVisible(true);
   }
 }
