@@ -10,27 +10,26 @@ import org.roda.core.data.adapter.filter.FilterParameter;
 import org.roda.core.data.adapter.filter.SimpleFilterParameter;
 import org.roda.core.data.adapter.sublist.Sublist;
 import org.roda.core.data.v2.index.IndexResult;
-import org.roda.core.data.v2.index.IsIndexed;
 
 import com.databasepreservation.visualization.client.BrowserService;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerRow;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable;
 import com.databasepreservation.visualization.client.common.search.SearchInfo;
+import com.databasepreservation.visualization.client.main.BreadcrumbPanel;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class ForeignKeyPanel extends Composite {
-  public static ForeignKeyPanel createInstance(String databaseUUID, String tableUUID, List<String> columnsAndValues) {
-    return new ForeignKeyPanel(databaseUUID, tableUUID, columnsAndValues);
+public class ForeignKeyPanel extends RightPanel {
+  public static ForeignKeyPanel createInstance(ViewerDatabase database, String tableUUID, List<String> columnsAndValues) {
+    return new ForeignKeyPanel(database, tableUUID, columnsAndValues);
   }
 
   interface ForeignKeyPanelUiBinder extends UiBinder<Widget, ForeignKeyPanel> {
@@ -44,27 +43,17 @@ public class ForeignKeyPanel extends Composite {
   private Long rowCount;
   private ViewerRow row;
 
+  private RightPanel innerRightPanel = null;
+  private BreadcrumbPanel breadcrumb = null;
+
   @UiField
   SimplePanel panel;
 
-  private ForeignKeyPanel(final String databaseUUID, final String tableUUID, List<String> columnsAndValues) {
+  private ForeignKeyPanel(ViewerDatabase viewerDatabase, final String tableUUID, List<String> columnsAndValues) {
+    database = viewerDatabase;
+    table = database.getMetadata().getTable(tableUUID);
+
     initWidget(uiBinder.createAndBindUi(this));
-
-    // get database and table info early on
-    BrowserService.Util.getInstance().retrieve(ViewerDatabase.class.getName(), databaseUUID,
-      new AsyncCallback<IsIndexed>() {
-        @Override
-        public void onFailure(Throwable caught) {
-          throw new RuntimeException(caught);
-        }
-
-        @Override
-        public void onSuccess(IsIndexed result) {
-          database = (ViewerDatabase) result;
-          table = database.getMetadata().getTable(tableUUID);
-          init();
-        }
-      });
 
     // prepare search
     columnAndValueMapping = new HashMap<>();
@@ -101,19 +90,43 @@ public class ForeignKeyPanel extends Composite {
   }
 
   /**
+   * Delegates the method to the innerRightPanel
+   *
+   * @param breadcrumb
+   *          the BreadcrumbPanel for this database
+   */
+  @Override
+  public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
+    // set this in case handleBreadcrumb happens before init
+    if (breadcrumb != null) {
+      this.breadcrumb = breadcrumb;
+    }
+
+    // this will be true if init has already run when handleBreadcrumb is called
+    // externally; or handleBreadcrumb was called first and init is finishing up
+    if (innerRightPanel != null && breadcrumb != null) {
+      innerRightPanel.handleBreadcrumb(breadcrumb);
+    }
+  }
+
+  /**
    * Choose and display the correct panel: a RowPanel when search returns one
    * result, otherwise show a TablePanel
    */
   private void init() {
-    if (database != null && rowCount != null) {
+    if (rowCount != null) {
       if (rowCount == 1) {
         // display a RowPanel
-        panel.setWidget(RowPanel.createInstance(database.getUUID(), table.getUUID(), row.getUUID()));
+        innerRightPanel = RowPanel.createInstance(database, table, row);
+
       } else {
         // display a TablePanel
         SearchInfo searchInfo = new SearchInfo(table, columnAndValueMapping);
-        panel.setWidget(TablePanel.createInstance(database, table, searchInfo));
+        innerRightPanel = TablePanel.createInstance(database, table, searchInfo);
       }
+
+      handleBreadcrumb(breadcrumb);
+      panel.setWidget(innerRightPanel);
     }
   }
 }

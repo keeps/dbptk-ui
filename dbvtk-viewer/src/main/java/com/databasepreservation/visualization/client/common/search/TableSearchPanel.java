@@ -24,7 +24,6 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.ListBox;
@@ -48,8 +47,8 @@ public class TableSearchPanel extends Composite {
   @UiField
   SimplePanel tableContainer;
 
-//  @UiField
-//  Button logJsonSearch;
+  // @UiField
+  // Button logJsonSearch;
 
   private TableRowList tableRowList;
 

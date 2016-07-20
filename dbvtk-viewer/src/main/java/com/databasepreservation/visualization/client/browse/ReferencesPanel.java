@@ -23,9 +23,7 @@ import com.databasepreservation.visualization.client.ViewerStructure.ViewerRefer
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerRow;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerSchema;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable;
-import com.databasepreservation.visualization.client.common.search.SearchPanel;
 import com.databasepreservation.visualization.client.common.search.TableSearchPanel;
-import com.databasepreservation.visualization.client.common.sidebar.DatabaseSidebar;
 import com.databasepreservation.visualization.client.main.BreadcrumbPanel;
 import com.databasepreservation.visualization.shared.client.Tools.BreadcrumbManager;
 import com.databasepreservation.visualization.shared.client.Tools.HistoryManager;
@@ -36,7 +34,6 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
@@ -46,12 +43,12 @@ import com.google.gwt.user.client.ui.Widget;
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class ReferencesPanel extends Composite {
+public class ReferencesPanel extends RightPanel {
   private static Map<String, ReferencesPanel> instances = new HashMap<>();
 
-  public static ReferencesPanel getInstance(String databaseUUID, String tableUUID, String recordUUID,
+  public static ReferencesPanel getInstance(ViewerDatabase database, String tableUUID, String recordUUID,
     String columnIndexInTable) {
-    return new ReferencesPanel(databaseUUID, tableUUID, recordUUID, columnIndexInTable);
+    return new ReferencesPanel(database, tableUUID, recordUUID, columnIndexInTable);
   }
 
   interface DatabasePanelUiBinder extends UiBinder<Widget, ReferencesPanel> {
@@ -64,12 +61,7 @@ public class ReferencesPanel extends Composite {
   private final String recordUUID;
   private ViewerRow record;
   private Integer columnIndexInTable;
-
-  @UiField
-  BreadcrumbPanel breadcrumb;
-
-  @UiField(provided = true)
-  DatabaseSidebar sidebar;
+  private String columnName;
 
   @UiField
   FlowPanel content;
@@ -84,31 +76,23 @@ public class ReferencesPanel extends Composite {
   @UiField
   Label cellColumn;
 
-  private ReferencesPanel(final String databaseUUID, final String tableUUID, final String recordUUID,
-    final String columnIndexInTable) {
+  private ReferencesPanel(ViewerDatabase viewerDatabase, final String tableUUID, final String recordUUID,
+    final String columnIndexInTableAsString) {
     this.recordUUID = recordUUID;
-    this.columnIndexInTable = Integer.valueOf(columnIndexInTable);
-    sidebar = DatabaseSidebar.getInstance(databaseUUID);
+    this.columnIndexInTable = Integer.valueOf(columnIndexInTableAsString);
+    this.database = viewerDatabase;
+    table = database.getMetadata().getTable(tableUUID);
+
+    columnName = "<unknown>";
+    if (columnIndexInTable >= 0 && columnIndexInTable < table.getColumns().size()) {
+      columnName = table.getColumns().get(columnIndexInTable).getDisplayName();
+    }
 
     initWidget(uiBinder.createAndBindUi(this));
 
-    BreadcrumbManager.updateBreadcrumb(breadcrumb,
-      BreadcrumbManager.loadingReferences(databaseUUID, tableUUID, recordUUID, columnIndexInTable));
-
-    BrowserService.Util.getInstance().retrieve(ViewerDatabase.class.getName(), databaseUUID,
-      new AsyncCallback<IsIndexed>() {
-        @Override
-        public void onFailure(Throwable caught) {
-          throw new RuntimeException(caught);
-        }
-
-        @Override
-        public void onSuccess(IsIndexed result) {
-          database = (ViewerDatabase) result;
-          table = database.getMetadata().getTable(tableUUID);
-          init();
-        }
-      });
+    cellTable.setText(table.getSchemaName());
+    cellSchema.setText(table.getName());
+    cellColumn.setText(columnName);
 
     BrowserService.Util.getInstance().retrieveRows(ViewerRow.class.getName(), tableUUID, recordUUID,
       new AsyncCallback<IsIndexed>() {
@@ -125,97 +109,84 @@ public class ReferencesPanel extends Composite {
       });
   }
 
-  private void init() {
-    if (database == null) {
-      return;
-    }
-
-    String columnName = "<unknown>";
-    if (columnIndexInTable >= 0 && columnIndexInTable < table.getColumns().size()) {
-      columnName = table.getColumns().get(columnIndexInTable).getDisplayName();
-    }
-
-    cellTable.setText(table.getSchemaName());
-    cellSchema.setText(table.getName());
-    cellColumn.setText(columnName);
-
-    // breadcrumb
+  @Override
+  public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
     BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forReferences(database.getMetadata().getName(),
       database.getUUID(), table.getSchemaName(), table.getSchemaUUID(), table.getName(), table.getUUID(), recordUUID,
       columnName, columnIndexInTable.toString()));
+  }
 
-    if (record != null) {
-      // update title
-      String value = "NULL";
-      ViewerCell cell = record.getCells().get(table.getColumns().get(columnIndexInTable).getSolrName());
-      if (cell != null && ViewerStringUtils.isNotBlank(cell.getValue())) {
-        value = cell.getValue();
-      }
-      mainHeader.setText("References for value \"" + value + "\"");
+  private void init() {
+    // update title
+    String value = "NULL";
+    ViewerCell cell = record.getCells().get(table.getColumns().get(columnIndexInTable).getSolrName());
+    if (cell != null && ViewerStringUtils.isNotBlank(cell.getValue())) {
+      value = cell.getValue();
+    }
+    mainHeader.setText("References for value \"" + value + "\"");
 
-      TreeMap<Reference, TableSearchPanel> references = new TreeMap<>();
+    TreeMap<Reference, TableSearchPanel> references = new TreeMap<>();
 
-      // get references where this column is source in foreign keys
-      // for (ViewerForeignKey fk : table.getForeignKeys()) {
-      // for (ViewerReference viewerReference : fk.getReferences()) {
-      // if (viewerReference.getSourceColumnIndex().equals(columnIndexInTable))
-      // {
-      // Reference reference = new Reference(table, fk);
-      // references.put(reference, createTableRowListFromReference(reference));
-      // break;
-      // }
-      // }
-      // }
+    // get references where this column is source in foreign keys
+    // for (ViewerForeignKey fk : table.getForeignKeys()) {
+    // for (ViewerReference viewerReference : fk.getReferences()) {
+    // if (viewerReference.getSourceColumnIndex().equals(columnIndexInTable))
+    // {
+    // Reference reference = new Reference(table, fk);
+    // references.put(reference, createTableRowListFromReference(reference));
+    // break;
+    // }
+    // }
+    // }
 
-      // get references where this column is (at least one of) the target of
-      // foreign keys or is (at least one of) the sources of the foreign keys
-      for (ViewerSchema viewerSchema : database.getMetadata().getSchemas()) {
-        for (ViewerTable viewerTable : viewerSchema.getTables()) {
-          for (ViewerForeignKey viewerForeignKey : viewerTable.getForeignKeys()) {
+    // get references where this column is (at least one of) the target of
+    // foreign keys or is (at least one of) the sources of the foreign keys
+    for (ViewerSchema viewerSchema : database.getMetadata().getSchemas()) {
+      for (ViewerTable viewerTable : viewerSchema.getTables()) {
+        for (ViewerForeignKey viewerForeignKey : viewerTable.getForeignKeys()) {
 
-            boolean fkSourceIsCurrentTable = viewerTable.equals(table);
-            boolean fkTargetIsCurrentTable = viewerForeignKey.getReferencedTableUUID().equals(table.getUUID());
+          boolean fkSourceIsCurrentTable = viewerTable.equals(table);
+          boolean fkTargetIsCurrentTable = viewerForeignKey.getReferencedTableUUID().equals(table.getUUID());
 
-            // the table that is different than the current table, to use in the
-            // reference
-            ViewerTable otherTable;
-            if (fkSourceIsCurrentTable && fkTargetIsCurrentTable) {
-              // cyclic foreign key
-              otherTable = table;
-            } else if (fkSourceIsCurrentTable) {
-              otherTable = database.getMetadata().getTable(viewerForeignKey.getReferencedTableUUID());
-            } else if (fkTargetIsCurrentTable) {
-              otherTable = viewerTable;
+          // the table that is different than the current table, to use in the
+          // reference
+          ViewerTable otherTable;
+          if (fkSourceIsCurrentTable && fkTargetIsCurrentTable) {
+            // cyclic foreign key
+            otherTable = table;
+          } else if (fkSourceIsCurrentTable) {
+            otherTable = database.getMetadata().getTable(viewerForeignKey.getReferencedTableUUID());
+          } else if (fkTargetIsCurrentTable) {
+            otherTable = viewerTable;
+          } else {
+            // if the current table is not target nor source for the foreign
+            // key, skip the foreign key
+            continue;
+          }
+
+          for (ViewerReference viewerReference : viewerForeignKey.getReferences()) {
+            int columnIndexOnCurrentTable;
+            if (fkSourceIsCurrentTable) {
+              columnIndexOnCurrentTable = viewerReference.getSourceColumnIndex();
             } else {
-              // if the current table is not target nor source for the foreign
-              // key, skip the foreign key
-              continue;
+              // fkTargetIsCurrentTable equals true
+              columnIndexOnCurrentTable = viewerReference.getReferencedColumnIndex();
             }
 
-            for (ViewerReference viewerReference : viewerForeignKey.getReferences()) {
-              int columnIndexOnCurrentTable;
-              if (fkSourceIsCurrentTable) {
-                columnIndexOnCurrentTable = viewerReference.getSourceColumnIndex();
-              } else {
-                // fkTargetIsCurrentTable equals true
-                columnIndexOnCurrentTable = viewerReference.getReferencedColumnIndex();
-              }
-
-              if (columnIndexOnCurrentTable == columnIndexInTable) {
-                Reference reference = new Reference(otherTable, viewerForeignKey);
-                if (!references.containsKey(reference)) {
-                  references.put(reference, createTableSearchPanelFromReference(reference));
-                  break; // its selected. avoid checking more columns
-                }
+            if (columnIndexOnCurrentTable == columnIndexInTable) {
+              Reference reference = new Reference(otherTable, viewerForeignKey);
+              if (!references.containsKey(reference)) {
+                references.put(reference, createTableSearchPanelFromReference(reference));
+                break; // its selected. avoid checking more columns
               }
             }
           }
         }
       }
+    }
 
-      for (Map.Entry<Reference, TableSearchPanel> entry : references.entrySet()) {
-        addReferenceTable(entry.getKey(), entry.getValue());
-      }
+    for (Map.Entry<Reference, TableSearchPanel> entry : references.entrySet()) {
+      addReferenceTable(entry.getKey(), entry.getValue());
     }
   }
 

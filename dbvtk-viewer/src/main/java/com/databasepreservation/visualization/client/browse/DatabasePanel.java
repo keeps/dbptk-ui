@@ -3,28 +3,20 @@ package com.databasepreservation.visualization.client.browse;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.roda.core.data.adapter.filter.Filter;
 import org.roda.core.data.v2.index.IsIndexed;
 
 import com.databasepreservation.visualization.client.BrowserService;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerMetadata;
-import com.databasepreservation.visualization.client.common.search.SearchPanel;
 import com.databasepreservation.visualization.client.common.sidebar.DatabaseSidebar;
+import com.databasepreservation.visualization.client.common.utils.RightPanelLoader;
 import com.databasepreservation.visualization.client.main.BreadcrumbPanel;
 import com.databasepreservation.visualization.shared.client.Tools.BreadcrumbManager;
-import com.databasepreservation.visualization.shared.client.Tools.HistoryManager;
-import com.databasepreservation.visualization.shared.client.Tools.ViewerStringUtils;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Hyperlink;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -49,81 +41,57 @@ public class DatabasePanel extends Composite {
 
   private static DatabasePanelUiBinder uiBinder = GWT.create(DatabasePanelUiBinder.class);
 
-  private ViewerDatabase database;
-
   @UiField
   BreadcrumbPanel breadcrumb;
 
   @UiField(provided = true)
   DatabaseSidebar sidebar;
-  @UiField
-  HTML metadatahtml;
 
-  private DatabasePanel(final String databaseUUID) {
-    sidebar = DatabaseSidebar.getInstance(databaseUUID);
+  @UiField
+  SimplePanel rightPanelContainer;
+
+  private String databaseUUID;
+  private ViewerDatabase database;
+
+  private DatabasePanel(String databaseUUID) {
+    this.databaseUUID = databaseUUID;
+    this.sidebar = DatabaseSidebar.getInstance(databaseUUID);
 
     initWidget(uiBinder.createAndBindUi(this));
 
     BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.loadingDatabase(databaseUUID));
+  }
 
+  public void load(RightPanelLoader rightPanelLoader) {
+    if (database == null) {
+      loadPanelWithDatabase(rightPanelLoader);
+    } else {
+      loadPanel(rightPanelLoader);
+    }
+  }
+
+  private void loadPanelWithDatabase(final RightPanelLoader rightPanelLoader) {
     BrowserService.Util.getInstance().retrieve(ViewerDatabase.class.getName(), databaseUUID,
       new AsyncCallback<IsIndexed>() {
         @Override
-        public void onFailure(Throwable caught) {
+        public void onFailure(final Throwable caught) {
           throw new RuntimeException(caught);
         }
 
         @Override
         public void onSuccess(IsIndexed result) {
           database = (ViewerDatabase) result;
-          init();
+          loadPanel(rightPanelLoader);
         }
       });
   }
 
-  private Hyperlink getHyperlink(String display_text, String database_uuid, String table_uuid) {
-    Hyperlink link = new Hyperlink(display_text, HistoryManager.linkToTable(database_uuid, table_uuid));
-    return link;
-  }
+  private void loadPanel(RightPanelLoader rightPanelLoader) {
+    RightPanel rightPanel = rightPanelLoader.load(database);
 
-  private void init() {
-    // breadcrumb
-    BreadcrumbManager.updateBreadcrumb(breadcrumb,
-      BreadcrumbManager.forDatabase(database.getMetadata().getName(), database.getUUID()));
-
-    // database metadata
-    ViewerMetadata metadata = database.getMetadata();
-    SafeHtmlBuilder b = new SafeHtmlBuilder();
-    b.append(getFieldHTML("Database Name", metadata.getName()));
-    b.append(getFieldHTML("Archival Date", metadata.getArchivalDate()));
-    b.append(getFieldHTML("Archivist", metadata.getArchiver()));
-    b.append(getFieldHTML("Archivist contact", metadata.getArchiverContact()));
-    b.append(getFieldHTML("Client machine", metadata.getClientMachine()));
-    b.append(getFieldHTML("Database product", metadata.getDatabaseProduct()));
-    b.append(getFieldHTML("Database user", metadata.getDatabaseUser()));
-    b.append(getFieldHTML("Data origin time span", metadata.getDataOriginTimespan()));
-    b.append(getFieldHTML("Data owner", metadata.getDataOwner()));
-    if (ViewerStringUtils.isNotBlank(metadata.getDescription())) {
-      b.append(getFieldHTML("Description", metadata.getDescription()));
-    } else {
-      b.append(getFieldHTML("Description", "A description for this database is not available."));
+    if (rightPanel != null) {
+      rightPanel.handleBreadcrumb(breadcrumb);
+      rightPanelContainer.setWidget(rightPanel);
     }
-    b.append(getFieldHTML("Producer application", metadata.getProducerApplication()));
-    metadatahtml.setHTML(b.toSafeHtml());
-  }
-
-  private SafeHtml getFieldHTML(String label, String value) {
-    SafeHtmlBuilder b = new SafeHtmlBuilder();
-    if (value != null) {
-      b.append(SafeHtmlUtils.fromSafeConstant("<div class=\"field\">"));
-      b.append(SafeHtmlUtils.fromSafeConstant("<div class=\"label\">"));
-      b.append(SafeHtmlUtils.fromString(label));
-      b.append(SafeHtmlUtils.fromSafeConstant("</div>"));
-      b.append(SafeHtmlUtils.fromSafeConstant("<div class=\"value\">"));
-      b.append(SafeHtmlUtils.fromString(value));
-      b.append(SafeHtmlUtils.fromSafeConstant("</div>"));
-      b.append(SafeHtmlUtils.fromSafeConstant("</div>"));
-    }
-    return b.toSafeHtml();
   }
 }

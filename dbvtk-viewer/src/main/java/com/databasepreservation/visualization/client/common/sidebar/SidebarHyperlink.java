@@ -18,6 +18,11 @@ public class SidebarHyperlink extends SidebarItem {
   @UiField
   Hyperlink label;
 
+  @Override
+  protected Widget getLabelAsWidget() {
+    return label;
+  }
+
   public SidebarHyperlink(String text, String targetHistoryToken) {
     initWidget(uiBinder.createAndBindUi(this));
     setTargetHistoryToken(targetHistoryToken);
@@ -31,84 +36,13 @@ public class SidebarHyperlink extends SidebarItem {
   }
 
   @Override
-  public SidebarItem addIcon(String iconName) {
-    label.addStyleName("fa-" + iconName);
-    return this;
-  }
-
-  @Override
   public SidebarItem setText(String text) {
     label.setText(text);
     return this;
   }
 
-  public String getText(){
+  @Override
+  public String getText() {
     return label.getText();
-  }
-
-  @Override
-  public SidebarItem setH1() {
-    label.addStyleName("h1");
-    return this;
-  }
-
-  @Override
-  public SidebarItem setH2() {
-    label.addStyleName("h2");
-    return this;
-  }
-
-  @Override
-  public SidebarItem setH3() {
-    label.addStyleName("h3");
-    return this;
-  }
-
-  @Override
-  public SidebarItem setH4() {
-    label.addStyleName("h4");
-    return this;
-  }
-
-  @Override
-  public SidebarItem setH5() {
-    label.addStyleName("h5");
-    return this;
-  }
-
-  @Override
-  public SidebarItem setH6() {
-    label.addStyleName("h6");
-    return this;
-  }
-
-  @Override
-  public SidebarItem setIndent0() {
-    label.addStyleName("indent0");
-    return this;
-  }
-
-  @Override
-  public SidebarItem setIndent1() {
-    label.addStyleName("indent1");
-    return this;
-  }
-
-  @Override
-  public SidebarItem setIndent2() {
-    label.addStyleName("indent2");
-    return this;
-  }
-
-  @Override
-  public SidebarItem setIndent3() {
-    label.addStyleName("indent3");
-    return this;
-  }
-
-  @Override
-  public SidebarItem setIndent4() {
-    label.addStyleName("indent4");
-    return this;
   }
 }

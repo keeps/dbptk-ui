@@ -20,10 +20,7 @@
                         <g:FlowPanel addStyleNames="filePreviewToolbar">
                             <m:BreadcrumbPanel ui:field="breadcrumb" addStyleNames="browseContentBreadcrumb"/>
                         </g:FlowPanel>
-                        <g:FlowPanel addStyleNames="col_12 content" >
-                            <g:Label addStyleNames="h1"><ui:msg>Database information</ui:msg></g:Label>
-                            <g:HTML ui:field="metadatahtml"/>
-                        </g:FlowPanel>
+                        <g:SimplePanel addStyleNames="col_12 content" ui:field="rightPanelContainer" />
                     </g:FlowPanel>
                 </g:cell>
             </g:HorizontalPanel>

@@ -6,52 +6,32 @@
              xmlns:sb='urn:import:com.databasepreservation.visualization.client.common.sidebar'
              xmlns:lists="urn:import:com.databasepreservation.visualization.client.common.lists">
 
-<g:FlowPanel addStyleNames="browseContent wrapper skip_padding">
-    <g:FlowPanel addStyleNames="row full_width skip_padding">
-        <g:FocusPanel addStyleNames="browseContentFocusPanel">
-            <g:HorizontalPanel addStyleNames="browseContentPreviewPanel">
-                <!-- LEFT PANEL -->
-                <g:cell>
-                    <sb:DatabaseSidebar ui:field="sidebar" />
-                </g:cell>
-                <!-- RIGHT PANEL -->
-                <g:cell width="100%">
-                    <g:FlowPanel addStyleNames="browseContentFilePreviewPanel">
-                        <g:FlowPanel addStyleNames="filePreviewToolbar">
-                            <m:BreadcrumbPanel ui:field="breadcrumb" addStyleNames="browseContentBreadcrumb"/>
-                        </g:FlowPanel>
-                        <g:FlowPanel addStyleNames="col_12 content" >
-                            <g:Label addStyleNames="h1" ui:field="mainHeader"><ui:msg>References</ui:msg></g:Label>
-                            <g:FlowPanel addStyleNames="field">
-                                <g:Label addStyleNames="label">
-                                    <ui:msg>In schema</ui:msg>
-                                </g:Label>
-                                <g:Label addStyleNames="value" ui:field="cellSchema">
-                                    <ui:msg>Loading...</ui:msg>
-                                </g:Label>
-                            </g:FlowPanel>
-                            <g:FlowPanel addStyleNames="field">
-                                <g:Label addStyleNames="label">
-                                    <ui:msg>In table</ui:msg>
-                                </g:Label>
-                                <g:Label addStyleNames="value" ui:field="cellTable">
-                                    <ui:msg>Loading...</ui:msg>
-                                </g:Label>
-                            </g:FlowPanel>
-                            <g:FlowPanel addStyleNames="field">
-                                <g:Label addStyleNames="label">
-                                    <ui:msg>In column</ui:msg>
-                                </g:Label>
-                                <g:Label addStyleNames="value" ui:field="cellColumn">
-                                    <ui:msg>Loading...</ui:msg>
-                                </g:Label>
-                            </g:FlowPanel>
-                            <g:FlowPanel ui:field="content"/>
-                        </g:FlowPanel>
-                    </g:FlowPanel>
-                </g:cell>
-            </g:HorizontalPanel>
-        </g:FocusPanel>
+    <g:FlowPanel>
+        <g:Label addStyleNames="h1" ui:field="mainHeader"><ui:msg>References</ui:msg></g:Label>
+        <g:FlowPanel addStyleNames="field">
+            <g:Label addStyleNames="label">
+                <ui:msg>In schema</ui:msg>
+            </g:Label>
+            <g:Label addStyleNames="value" ui:field="cellSchema">
+                <ui:msg>Loading...</ui:msg>
+            </g:Label>
+        </g:FlowPanel>
+        <g:FlowPanel addStyleNames="field">
+            <g:Label addStyleNames="label">
+                <ui:msg>In table</ui:msg>
+            </g:Label>
+            <g:Label addStyleNames="value" ui:field="cellTable">
+                <ui:msg>Loading...</ui:msg>
+            </g:Label>
+        </g:FlowPanel>
+        <g:FlowPanel addStyleNames="field">
+            <g:Label addStyleNames="label">
+                <ui:msg>In column</ui:msg>
+            </g:Label>
+            <g:Label addStyleNames="value" ui:field="cellColumn">
+                <ui:msg>Loading...</ui:msg>
+            </g:Label>
+        </g:FlowPanel>
+        <g:FlowPanel ui:field="content"/>
     </g:FlowPanel>
-</g:FlowPanel>
 </ui:UiBinder>

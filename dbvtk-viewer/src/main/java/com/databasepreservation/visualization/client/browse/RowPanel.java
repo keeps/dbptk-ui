@@ -9,7 +9,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.roda.core.data.adapter.filter.Filter;
 import org.roda.core.data.v2.index.IsIndexed;
 
 import com.databasepreservation.visualization.client.BrowserService;
@@ -22,8 +21,6 @@ import com.databasepreservation.visualization.client.ViewerStructure.ViewerRefer
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerRow;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerSchema;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable;
-import com.databasepreservation.visualization.client.common.search.SearchPanel;
-import com.databasepreservation.visualization.client.common.sidebar.DatabaseSidebar;
 import com.databasepreservation.visualization.client.main.BreadcrumbPanel;
 import com.databasepreservation.visualization.shared.client.Tools.BreadcrumbManager;
 import com.databasepreservation.visualization.shared.client.Tools.FontAwesomeIconManager;
@@ -35,7 +32,6 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Widget;
@@ -43,11 +39,11 @@ import com.google.gwt.user.client.ui.Widget;
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class RowPanel extends Composite {
+public class RowPanel extends RightPanel {
   private static Map<String, RowPanel> instances = new HashMap<>();
 
-  public static RowPanel createInstance(String databaseUUID, String tableUUID, String rowUUID) {
-    return new RowPanel(databaseUUID, tableUUID, rowUUID);
+  public static RowPanel createInstance(ViewerDatabase database, String tableUUID, String rowUUID) {
+    return new RowPanel(database, tableUUID, rowUUID);
   }
 
   public static RowPanel createInstance(ViewerDatabase database, ViewerTable table, ViewerRow row) {
@@ -65,12 +61,6 @@ public class RowPanel extends Composite {
   private ViewerRow row;
 
   @UiField
-  BreadcrumbPanel breadcrumb;
-
-  @UiField(provided = true)
-  DatabaseSidebar sidebar;
-
-  @UiField
   HTML content;
 
   @UiField
@@ -81,50 +71,29 @@ public class RowPanel extends Composite {
 
   private RowPanel(ViewerDatabase database, ViewerTable table, ViewerRow row) {
     this.rowUUID = row.getUUID();
-    sidebar = DatabaseSidebar.getInstance(database.getUUID());
-
-    initWidget(uiBinder.createAndBindUi(this));
-
-    rowID.setHTML(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.RECORD) + " "
-      + SafeHtmlUtils.htmlEscape(rowUUID)));
-    tableName.setHTML(FontAwesomeIconManager.loading(FontAwesomeIconManager.TABLE));
-
-    BreadcrumbManager.updateBreadcrumb(breadcrumb,
-      BreadcrumbManager.loadingRecord(database.getUUID(), table.getUUID(), rowUUID));
-
     this.database = database;
     this.table = table;
     this.row = row;
 
+    initWidget(uiBinder.createAndBindUi(this));
+
+    rowID.setHTML(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.RECORD) + " "
+      + SafeHtmlUtils.htmlEscape(rowUUID)));
+    tableName.setHTML(FontAwesomeIconManager.loaded(FontAwesomeIconManager.TABLE, table.getName()));
+
     init();
   }
 
-  private RowPanel(final String databaseUUID, final String tableUUID, final String rowUUID) {
+  private RowPanel(ViewerDatabase viewerDatabase, final String tableUUID, final String rowUUID) {
     this.rowUUID = rowUUID;
-    sidebar = DatabaseSidebar.getInstance(databaseUUID);
+    this.database = viewerDatabase;
+    this.table = database.getMetadata().getTable(tableUUID);
 
     initWidget(uiBinder.createAndBindUi(this));
 
     rowID.setHTML(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.RECORD) + " "
       + SafeHtmlUtils.htmlEscape(rowUUID)));
-    tableName.setHTML(FontAwesomeIconManager.loading(FontAwesomeIconManager.TABLE));
-
-    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.loadingRecord(databaseUUID, tableUUID, rowUUID));
-
-    BrowserService.Util.getInstance().retrieve(ViewerDatabase.class.getName(), databaseUUID,
-      new AsyncCallback<IsIndexed>() {
-        @Override
-        public void onFailure(Throwable caught) {
-          throw new RuntimeException(caught);
-        }
-
-        @Override
-        public void onSuccess(IsIndexed result) {
-          database = (ViewerDatabase) result;
-          table = database.getMetadata().getTable(tableUUID);
-          init();
-        }
-      });
+    tableName.setHTML(FontAwesomeIconManager.loaded(FontAwesomeIconManager.TABLE, table.getName()));
 
     BrowserService.Util.getInstance().retrieveRows(ViewerRow.class.getName(), tableUUID, rowUUID,
       new AsyncCallback<IsIndexed>() {
@@ -141,93 +110,82 @@ public class RowPanel extends Composite {
       });
   }
 
-  private Hyperlink getHyperlink(String display_text, String database_uuid, String table_uuid) {
-    Hyperlink link = new Hyperlink(display_text, HistoryManager.linkToTable(database_uuid, table_uuid));
-    return link;
-  }
-
-  private void init() {
-    if (database == null) {
-      return;
-    }
-
-    // breadcrumb
+  @Override
+  public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
     BreadcrumbManager.updateBreadcrumb(
       breadcrumb,
       BreadcrumbManager.forRecord(database.getMetadata().getName(), database.getUUID(), table.getSchemaName(),
         table.getSchemaUUID(), table.getName(), table.getUUID(), rowUUID));
+  }
 
-    tableName.setHTML(FontAwesomeIconManager.loaded(FontAwesomeIconManager.TABLE, table.getName()));
+  private void init() {
+    Set<Ref> recordRelatedTo = new TreeSet<>();
+    Set<Ref> recordReferencedBy = new TreeSet<>();
 
-    if (row != null) {
-      Set<Ref> recordRelatedTo = new TreeSet<>();
-      Set<Ref> recordReferencedBy = new TreeSet<>();
+    Map<String, Set<Ref>> colIndexRelatedTo = new HashMap<>();
+    Map<String, Set<Ref>> colIndexReferencedBy = new HashMap<>();
 
-      Map<String, Set<Ref>> colIndexRelatedTo = new HashMap<>();
-      Map<String, Set<Ref>> colIndexReferencedBy = new HashMap<>();
+    ViewerMetadata metadata = database.getMetadata();
 
-      ViewerMetadata metadata = database.getMetadata();
-
-      // get references where this column is source in foreign keys
-      for (ViewerForeignKey fk : table.getForeignKeys()) {
-        Ref ref = new Ref(table, metadata.getTable(fk.getReferencedTableUUID()), fk);
-        if (fk.getReferences().size() == 1) {
-          Set<Ref> refs = colIndexRelatedTo.get(ref.getSingleColumnIndex());
-          if (refs == null) {
-            refs = new TreeSet<>();
-            colIndexRelatedTo.put(ref.getSingleColumnIndex(), refs);
-          }
-          refs.add(ref);
-        } else {
-          recordRelatedTo.add(ref);
+    // get references where this column is source in foreign keys
+    for (ViewerForeignKey fk : table.getForeignKeys()) {
+      Ref ref = new Ref(table, metadata.getTable(fk.getReferencedTableUUID()), fk);
+      if (fk.getReferences().size() == 1) {
+        Set<Ref> refs = colIndexRelatedTo.get(ref.getSingleColumnIndex());
+        if (refs == null) {
+          refs = new TreeSet<>();
+          colIndexRelatedTo.put(ref.getSingleColumnIndex(), refs);
         }
+        refs.add(ref);
+      } else {
+        recordRelatedTo.add(ref);
       }
+    }
 
-      // get references where this column is (at least one of) the target of
-      // foreign keys
-      for (ViewerSchema viewerSchema : database.getMetadata().getSchemas()) {
-        for (ViewerTable viewerTable : viewerSchema.getTables()) {
-          for (ViewerForeignKey fk : viewerTable.getForeignKeys()) {
-            if (fk.getReferencedTableUUID().equals(table.getUUID())) {
-              Ref ref = new Ref(table, viewerTable, fk);
-              if (fk.getReferences().size() == 1) {
-                Set<Ref> refs = colIndexReferencedBy.get(ref.getSingleColumnIndex());
-                if (refs == null) {
-                  refs = new TreeSet<>();
-                  colIndexReferencedBy.put(ref.getSingleColumnIndex(), refs);
-                }
-                refs.add(ref);
-              } else {
-                recordReferencedBy.add(ref);
+    // get references where this column is (at least one of) the target of
+    // foreign keys
+    for (ViewerSchema viewerSchema : database.getMetadata().getSchemas()) {
+      for (ViewerTable viewerTable : viewerSchema.getTables()) {
+        for (ViewerForeignKey fk : viewerTable.getForeignKeys()) {
+          if (fk.getReferencedTableUUID().equals(table.getUUID())) {
+            Ref ref = new Ref(table, viewerTable, fk);
+            if (fk.getReferences().size() == 1) {
+              Set<Ref> refs = colIndexReferencedBy.get(ref.getSingleColumnIndex());
+              if (refs == null) {
+                refs = new TreeSet<>();
+                colIndexReferencedBy.put(ref.getSingleColumnIndex(), refs);
               }
+              refs.add(ref);
+            } else {
+              recordReferencedBy.add(ref);
             }
           }
         }
       }
-
-      // row data
-      SafeHtmlBuilder b = new SafeHtmlBuilder();
-
-      // foreign key relations first
-      if (!recordRelatedTo.isEmpty() || !recordReferencedBy.isEmpty()) {
-        b.appendHtmlConstant("<div class=\"field\">");
-        if (!recordRelatedTo.isEmpty()) {
-          b.append(getForeignKeyHTML("This record is related to", recordRelatedTo, row));
-        }
-        if (!recordReferencedBy.isEmpty()) {
-          b.append(getForeignKeyHTML("This record is referenced by", recordReferencedBy, row));
-        }
-        b.appendHtmlConstant("</div>");
-      }
-
-      for (ViewerColumn column : table.getColumns()) {
-        b.append(getCellHTML(column, colIndexRelatedTo.get(column.getSolrName()),
-          colIndexReferencedBy.get(column.getSolrName()), table.getPrimaryKey().getColumnIndexesInViewerTable()
-            .contains(column.getColumnIndexInEnclosingTable())));
-      }
-
-      content.setHTML(b.toSafeHtml());
     }
+
+    // row data
+    SafeHtmlBuilder b = new SafeHtmlBuilder();
+
+    // foreign key relations first
+    if (!recordRelatedTo.isEmpty() || !recordReferencedBy.isEmpty()) {
+      b.appendHtmlConstant("<div class=\"field\">");
+      if (!recordRelatedTo.isEmpty()) {
+        b.append(getForeignKeyHTML("This record is related to", recordRelatedTo, row));
+      }
+      if (!recordReferencedBy.isEmpty()) {
+        b.append(getForeignKeyHTML("This record is referenced by", recordReferencedBy, row));
+      }
+      b.appendHtmlConstant("</div>");
+    }
+
+    for (ViewerColumn column : table.getColumns()) {
+      b.append(getCellHTML(column, colIndexRelatedTo.get(column.getSolrName()),
+        colIndexReferencedBy.get(column.getSolrName()),
+        table.getPrimaryKey().getColumnIndexesInViewerTable().contains(column.getColumnIndexInEnclosingTable())));
+    }
+
+    content.setHTML(b.toSafeHtml());
   }
 
   private SafeHtml getForeignKeyHTML(String prefix, Set<Ref> refs, ViewerRow row) {

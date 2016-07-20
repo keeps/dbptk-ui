@@ -3,17 +3,11 @@ package com.databasepreservation.visualization.client.browse;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.roda.core.data.adapter.filter.Filter;
-import org.roda.core.data.v2.index.IsIndexed;
-
-import com.databasepreservation.visualization.client.BrowserService;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerSchema;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable;
 import com.databasepreservation.visualization.client.common.search.SearchInfo;
-import com.databasepreservation.visualization.client.common.search.SearchPanel;
 import com.databasepreservation.visualization.client.common.search.TableSearchPanel;
-import com.databasepreservation.visualization.client.common.sidebar.DatabaseSidebar;
 import com.databasepreservation.visualization.client.common.utils.CommonClientUtils;
 import com.databasepreservation.visualization.client.main.BreadcrumbPanel;
 import com.databasepreservation.visualization.shared.client.Tools.BreadcrumbManager;
@@ -22,33 +16,31 @@ import com.databasepreservation.visualization.shared.client.Tools.ViewerStringUt
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class TablePanel extends Composite {
+public class TablePanel extends RightPanel {
   private static Map<String, TablePanel> instances = new HashMap<>();
 
-  public static TablePanel getInstance(String databaseUUID, String tableUUID) {
-    return getInstance(databaseUUID, tableUUID, null);
+  public static TablePanel getInstance(ViewerDatabase database, String tableUUID) {
+    return getInstance(database, tableUUID, null);
   }
 
-  public static TablePanel getInstance(String databaseUUID, String tableUUID, String searchInfoJson) {
+  public static TablePanel getInstance(ViewerDatabase database, String tableUUID, String searchInfoJson) {
     String separator = "/";
-    String code = databaseUUID + separator + tableUUID;
+    String code = database.getUUID() + separator + tableUUID;
 
     TablePanel instance = instances.get(code);
     if (instance == null) {
-      instance = new TablePanel(databaseUUID, tableUUID, searchInfoJson);
+      instance = new TablePanel(database, tableUUID, searchInfoJson);
       instances.put(code, instance);
     } else if (searchInfoJson != null) {
       instance.applySearchInfoJson(searchInfoJson);
     } else if (instance.tableSearchPanel.isSearchInfoDefined()) {
-      instance = new TablePanel(databaseUUID, tableUUID);
+      instance = new TablePanel(database, tableUUID);
       instances.put(code, instance);
     }
 
@@ -61,12 +53,6 @@ public class TablePanel extends Composite {
 
   interface TablePanelUiBinder extends UiBinder<Widget, TablePanel> {
   }
-
-  @UiField
-  BreadcrumbPanel breadcrumb;
-
-  @UiField(provided = true)
-  DatabaseSidebar sidebar;
 
   @UiField
   HTML mainHeader;
@@ -95,15 +81,11 @@ public class TablePanel extends Composite {
    *          the predefined search
    */
   private TablePanel(ViewerDatabase database, ViewerTable table, SearchInfo searchInfo) {
-    sidebar = DatabaseSidebar.getInstance(database.getUUID());
-
     tableSearchPanel = new TableSearchPanel(searchInfo);
 
     initWidget(uiBinder.createAndBindUi(this));
 
     mainHeader.setHTML(FontAwesomeIconManager.loading(FontAwesomeIconManager.TABLE));
-
-    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.loadingTable(database.getUUID(), table.getUUID()));
 
     this.database = database;
     this.table = table;
@@ -114,14 +96,14 @@ public class TablePanel extends Composite {
   /**
    * Asynchronous table panel that receives UUIDs and needs to get the objects
    * from solr
-   * 
-   * @param databaseUUID
-   *          the database UUID
+   *
+   * @param viewerDatabase
+   *          the database
    * @param tableUUID
    *          the table UUID
    */
-  private TablePanel(final String databaseUUID, final String tableUUID) {
-    this(databaseUUID, tableUUID, null);
+  private TablePanel(ViewerDatabase viewerDatabase, final String tableUUID) {
+    this(viewerDatabase, tableUUID, null);
   }
 
   /**
@@ -129,15 +111,18 @@ public class TablePanel extends Composite {
    * from solr. This method supports a predefined search (SearchInfo instance)
    * as a JSON String.
    *
-   * @param databaseUUID
-   *          the database UUID
+   * @param viewerDatabase
+   *          the database
    * @param tableUUID
    *          the table UUID
    * @param searchInfoJson
    *          the SearchInfo instance as a JSON String
    */
-  private TablePanel(final String databaseUUID, final String tableUUID, String searchInfoJson) {
-    sidebar = DatabaseSidebar.getInstance(databaseUUID);
+  private TablePanel(ViewerDatabase viewerDatabase, final String tableUUID, String searchInfoJson) {
+    database = viewerDatabase;
+    table = database.getMetadata().getTable(tableUUID);
+    schema = database.getMetadata().getSchemaFromTableUUID(tableUUID);
+
     if (searchInfoJson != null) {
       tableSearchPanel = new TableSearchPanel(searchInfoJson);
     } else {
@@ -148,32 +133,19 @@ public class TablePanel extends Composite {
 
     mainHeader.setHTML(FontAwesomeIconManager.loading(FontAwesomeIconManager.TABLE));
 
-    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.loadingTable(databaseUUID, tableUUID));
-
-    BrowserService.Util.getInstance().retrieve(ViewerDatabase.class.getName(), databaseUUID,
-      new AsyncCallback<IsIndexed>() {
-        @Override
-        public void onFailure(Throwable caught) {
-          throw new RuntimeException(caught);
-        }
-
-        @Override
-        public void onSuccess(IsIndexed result) {
-          database = (ViewerDatabase) result;
-          table = database.getMetadata().getTable(tableUUID);
-          schema = database.getMetadata().getSchemaFromTableUUID(tableUUID);
-          init();
-        }
-      });
+    init();
   }
 
-  private void init() {
-    mainHeader.setHTML(FontAwesomeIconManager.loaded(FontAwesomeIconManager.TABLE, table.getName()));
-
+  @Override
+  public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
     BreadcrumbManager.updateBreadcrumb(
       breadcrumb,
       BreadcrumbManager.forTable(database.getMetadata().getName(), database.getUUID(), schema.getName(),
         schema.getUUID(), table.getName(), table.getUUID()));
+  }
+
+  private void init() {
+    mainHeader.setHTML(FontAwesomeIconManager.loaded(FontAwesomeIconManager.TABLE, table.getName()));
 
     if (ViewerStringUtils.isNotBlank(table.getDescription())) {
       description.setHTML(CommonClientUtils.getFieldHTML("Description", table.getDescription()));

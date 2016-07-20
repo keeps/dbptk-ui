@@ -3,17 +3,11 @@ package com.databasepreservation.visualization.client.browse;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.roda.core.data.adapter.filter.Filter;
-import org.roda.core.data.v2.index.IsIndexed;
-
-import com.databasepreservation.visualization.client.BrowserService;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerCheckConstraint;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerSchema;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable;
 import com.databasepreservation.visualization.client.common.lists.BasicTablePanel;
-import com.databasepreservation.visualization.client.common.search.SearchPanel;
-import com.databasepreservation.visualization.client.common.sidebar.DatabaseSidebar;
 import com.databasepreservation.visualization.client.common.utils.CommonClientUtils;
 import com.databasepreservation.visualization.client.main.BreadcrumbPanel;
 import com.databasepreservation.visualization.shared.client.Tools.BreadcrumbManager;
@@ -22,8 +16,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -32,16 +24,16 @@ import com.google.gwt.user.client.ui.Widget;
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class SchemaCheckConstraintsPanel extends Composite {
+public class SchemaCheckConstraintsPanel extends RightPanel {
   private static Map<String, SchemaCheckConstraintsPanel> instances = new HashMap<>();
 
-  public static SchemaCheckConstraintsPanel getInstance(String databaseUUID, String schemaUUID) {
+  public static SchemaCheckConstraintsPanel getInstance(ViewerDatabase database, String schemaUUID) {
     String separator = "/";
-    String code = databaseUUID + separator + schemaUUID;
+    String code = database.getUUID() + separator + schemaUUID;
 
     SchemaCheckConstraintsPanel instance = instances.get(code);
     if (instance == null) {
-      instance = new SchemaCheckConstraintsPanel(databaseUUID, schemaUUID);
+      instance = new SchemaCheckConstraintsPanel(database, schemaUUID);
       instances.put(code, instance);
     }
     return instance;
@@ -56,43 +48,25 @@ public class SchemaCheckConstraintsPanel extends Composite {
   private ViewerSchema schema;
 
   @UiField
-  BreadcrumbPanel breadcrumb;
-
-  @UiField(provided = true)
-  DatabaseSidebar sidebar;
-  @UiField
   FlowPanel contentItems;
 
-  private SchemaCheckConstraintsPanel(final String databaseUUID, final String schemaUUID) {
-    sidebar = DatabaseSidebar.getInstance(databaseUUID);
+  private SchemaCheckConstraintsPanel(ViewerDatabase viewerDatabase, final String schemaUUID) {
+    database = viewerDatabase;
+    schema = database.getMetadata().getSchema(schemaUUID);
 
     initWidget(uiBinder.createAndBindUi(this));
-
-    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.loadingSchema(databaseUUID, schemaUUID));
-
-    BrowserService.Util.getInstance().retrieve(ViewerDatabase.class.getName(), databaseUUID,
-      new AsyncCallback<IsIndexed>() {
-        @Override
-        public void onFailure(Throwable caught) {
-          throw new RuntimeException(caught);
-        }
-
-        @Override
-        public void onSuccess(IsIndexed result) {
-          database = (ViewerDatabase) result;
-          schema = database.getMetadata().getSchema(schemaUUID);
-          init();
-        }
-      });
+    init();
   }
 
-  private void init() {
-    // breadcrumb
+  @Override
+  public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
     BreadcrumbManager.updateBreadcrumb(
       breadcrumb,
       BreadcrumbManager.forSchema(database.getMetadata().getName(), database.getUUID(), schema.getName(),
         schema.getUUID()));
+  }
 
+  private void init() {
     CommonClientUtils.addSchemaInfoToFlowPanel(contentItems, schema);
 
     boolean atLeastOneConstraint = false;

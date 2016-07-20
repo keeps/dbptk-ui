@@ -23,9 +23,8 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyDownEvent;
-import com.google.gwt.event.dom.client.KeyDownHandler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -38,7 +37,6 @@ import com.google.gwt.user.client.ui.Widget;
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class DatabaseSidebar extends Composite {
-  private static String SEARCH_PLACEHOLDER = "Filter this list";
   private static Map<String, DatabaseSidebar> instances = new HashMap<>();
 
   /**
@@ -93,6 +91,7 @@ public class DatabaseSidebar extends Composite {
   private DatabaseSidebar(DatabaseSidebar other) {
     initWidget(uiBinder.createAndBindUi(this));
     database = other.database;
+    searchInputBox.setText(other.searchInputBox.getText());
     init();
   }
 
@@ -161,7 +160,7 @@ public class DatabaseSidebar extends Composite {
   }
 
   private void searchInit() {
-    searchInputBox.getElement().setPropertyString("placeholder", SEARCH_PLACEHOLDER);
+    searchInputBox.getElement().setPropertyString("placeholder", "Filter this list");
 
     searchInputBox.addChangeHandler(new ChangeHandler() {
       @Override
@@ -170,12 +169,10 @@ public class DatabaseSidebar extends Composite {
       }
     });
 
-    searchInputBox.addKeyDownHandler(new KeyDownHandler() {
+    searchInputBox.addKeyUpHandler(new KeyUpHandler() {
       @Override
-      public void onKeyDown(KeyDownEvent event) {
-        if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-          doSearch();
-        }
+      public void onKeyUp(KeyUpEvent event) {
+        doSearch();
       }
     });
 
@@ -196,23 +193,35 @@ public class DatabaseSidebar extends Composite {
         widget.setVisible(true);
       }
     } else {
-      // show matching
+      // show matching and their parents
 
-      Set<SidebarItem> parents = new HashSet<>();
-      List<SidebarItem> parentIndents = new ArrayList<>();
-
+      Set<SidebarItem> parentsThatShouldBeVisible = new HashSet<>();
+      List<SidebarItem> parentsList = new ArrayList<>();
 
       for (Widget widget : sidebarGroup) {
         if (widget instanceof SidebarItem) {
           SidebarItem sidebarItem = (SidebarItem) widget;
-          if (sidebarItem.getText().contains(searchValue)) {
+
+          int indent = sidebarItem.getIndent();
+          if (indent >= 0) {
+            parentsList.add(indent, sidebarItem);
+          }
+
+          if (sidebarItem.getText().toLowerCase().contains(searchValue.toLowerCase())) {
             widget.setVisible(true);
+            for (int i = 0; i < indent; i++) {
+              parentsThatShouldBeVisible.add(parentsList.get(i));
+            }
           } else {
             widget.setVisible(false);
           }
         } else {
           widget.setVisible(true);
         }
+      }
+
+      for (SidebarItem sidebarItem : parentsThatShouldBeVisible) {
+        sidebarItem.setVisible(true);
       }
     }
   }

@@ -6,28 +6,8 @@
              xmlns:sb='urn:import:com.databasepreservation.visualization.client.common.sidebar'
              xmlns:lists="urn:import:com.databasepreservation.visualization.client.common.lists">
 
-<g:FlowPanel addStyleNames="browseContent wrapper skip_padding">
-    <g:FlowPanel addStyleNames="row full_width skip_padding">
-        <g:FocusPanel addStyleNames="browseContentFocusPanel">
-            <g:HorizontalPanel addStyleNames="browseContentPreviewPanel">
-                <!-- LEFT PANEL -->
-                <g:cell>
-                    <sb:DatabaseSidebar ui:field="sidebar" />
-                </g:cell>
-                <!-- RIGHT PANEL -->
-                <g:cell width="100%">
-                    <g:FlowPanel addStyleNames="browseContentFilePreviewPanel">
-                        <g:FlowPanel addStyleNames="filePreviewToolbar">
-                            <m:BreadcrumbPanel ui:field="breadcrumb" addStyleNames="browseContentBreadcrumb"/>
-                        </g:FlowPanel>
-                        <g:FlowPanel addStyleNames="col_12 content" >
-                            <g:Label addStyleNames="h1"><ui:msg>Views</ui:msg></g:Label>
-                            <g:FlowPanel ui:field="contentItems"/>
-                        </g:FlowPanel>
-                    </g:FlowPanel>
-                </g:cell>
-            </g:HorizontalPanel>
-        </g:FocusPanel>
+    <g:FlowPanel>
+        <g:Label addStyleNames="h1"><ui:msg>Views</ui:msg></g:Label>
+        <g:FlowPanel ui:field="contentItems"/>
     </g:FlowPanel>
-</g:FlowPanel>
 </ui:UiBinder>

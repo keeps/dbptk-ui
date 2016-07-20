@@ -19,6 +19,10 @@ public class SidebarItem extends Composite {
   @UiField
   Label label;
 
+  protected Widget getLabelAsWidget() {
+    return label;
+  }
+
   protected SidebarItem() {
   }
 
@@ -28,7 +32,7 @@ public class SidebarItem extends Composite {
   }
 
   public SidebarItem addIcon(String iconName) {
-    label.addStyleName("fa-" + iconName);
+    getLabelAsWidget().addStyleName("fa-" + iconName);
     return this;
   }
 
@@ -37,70 +41,72 @@ public class SidebarItem extends Composite {
     return this;
   }
 
-  public String getText(){
+  public String getText() {
     return label.getText();
   }
 
   public SidebarItem setH1() {
-    label.addStyleName("h1");
+    getLabelAsWidget().addStyleName("h1");
     return this;
   }
 
   public SidebarItem setH2() {
-    label.addStyleName("h2");
+    getLabelAsWidget().addStyleName("h2");
     return this;
   }
 
   public SidebarItem setH3() {
-    label.addStyleName("h3");
+    getLabelAsWidget().addStyleName("h3");
     return this;
   }
 
   public SidebarItem setH4() {
-    label.addStyleName("h4");
+    getLabelAsWidget().addStyleName("h4");
     return this;
   }
 
   public SidebarItem setH5() {
-    label.addStyleName("h5");
+    getLabelAsWidget().addStyleName("h5");
     return this;
   }
 
   public SidebarItem setH6() {
-    label.addStyleName("h6");
+    getLabelAsWidget().addStyleName("h6");
     return this;
   }
 
   public SidebarItem setIndent0() {
-    label.addStyleName("indent0");
+    getLabelAsWidget().addStyleName("indent0");
     return this;
   }
 
   public SidebarItem setIndent1() {
-    label.addStyleName("indent1");
+    getLabelAsWidget().addStyleName("indent1");
     return this;
   }
 
   public SidebarItem setIndent2() {
-    label.addStyleName("indent2");
+    getLabelAsWidget().addStyleName("indent2");
     return this;
   }
 
   public SidebarItem setIndent3() {
-    label.addStyleName("indent3");
+    getLabelAsWidget().addStyleName("indent3");
     return this;
   }
 
   public SidebarItem setIndent4() {
-    label.addStyleName("indent4");
+    getLabelAsWidget().addStyleName("indent4");
     return this;
   }
 
-  public void hide(){
-    setVisible(false);
-  }
-
-  public void show(){
-    setVisible(true);
+  public int getIndent() {
+    String styles = getLabelAsWidget().getStyleName();
+    int indentIndex = styles.indexOf("indent") + 6;
+    try {
+      return Integer.valueOf(styles.substring(indentIndex, indentIndex + 1));
+    } catch (NumberFormatException e) {
+      return -1;
+    }
   }
 }

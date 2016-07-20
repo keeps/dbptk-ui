@@ -189,7 +189,8 @@ public class BreadcrumbManager {
     return items;
   }
 
-  public static List<BreadcrumbItem> loadingRecord(final String databaseUUID, final String tableUUID, final String recordUUID) {
+  public static List<BreadcrumbItem> loadingRecord(final String databaseUUID, final String tableUUID,
+    final String recordUUID) {
     List<BreadcrumbItem> items = loadingTable(databaseUUID, tableUUID);
     items.add(new BreadcrumbItem(new SafeHtml() {
       @Override
