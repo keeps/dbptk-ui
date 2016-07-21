@@ -397,6 +397,62 @@
     padding-top: 0.3rem;
 }
 
+.my-asyncdatagrid-display-scroll-wrapper {
+    position: relative;
+}
+
+/* hide right shadow */
+.my-asyncdatagrid-display-scroll-wrapper:after {
+    box-shadow: inset -10px 0 10px -8px rgba(0,0,0,0.5);
+
+    content: "";
+    display: block;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 20px;
+    height: 100%;
+    pointer-events: none;
+    z-index: 100;
+
+    opacity: 0;
+    transition: opacity .25s ease-in-out;
+    -moz-transition: opacity .25s ease-in-out;
+    -webkit-transition: opacity .25s ease-in-out;
+}
+
+/* show right shadow */
+.my-asyncdatagrid-display-scroll-wrapper-right:after {
+    opacity: 1;
+}
+
+/* hide left shadow */
+.my-asyncdatagrid-display-scroll-wrapper:before {
+    box-shadow: inset 10px 0 10px -8px rgba(0,0,0,0.5);
+
+    content: "";
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 20px;
+    height: 100%;
+    pointer-events: none;
+    z-index: 100;
+
+    opacity: 0;
+    transition: opacity .25s ease-in-out;
+    -moz-transition: opacity .25s ease-in-out;
+    -webkit-transition: opacity .25s ease-in-out;
+}
+
+/* show left shadow */
+.my-asyncdatagrid-display-scroll-wrapper-left:before {
+    opacity: 1;
+}
+
 /**********************************************
 	       SINGLE RECORD PAGE
 ************************************************/

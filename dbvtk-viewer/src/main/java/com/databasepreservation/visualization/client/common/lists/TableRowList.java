@@ -194,6 +194,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
         addColumn(viewerColumn, displayColumn);
       }
     }
+    handleScrollChanges();
   }
 
   private void addColumn(ViewerColumn viewerColumn, Column<ViewerRow, ?> displayColumn) {

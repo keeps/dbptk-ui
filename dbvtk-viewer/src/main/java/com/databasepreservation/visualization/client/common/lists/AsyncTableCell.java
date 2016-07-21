@@ -33,6 +33,8 @@ import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.ScrollEvent;
+import com.google.gwt.event.dom.client.ScrollHandler;
 import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -46,6 +48,7 @@ import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.cellview.client.ColumnSortList.ColumnSortInfo;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy.KeyboardSelectionPolicy;
 import com.google.gwt.user.cellview.client.Header;
+import com.google.gwt.user.cellview.client.LoadingStateChangeEvent;
 import com.google.gwt.user.cellview.client.PageSizePager;
 import com.google.gwt.user.cellview.client.SafeHtmlHeader;
 import com.google.gwt.user.cellview.client.SimplePager;
@@ -59,6 +62,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.CellPreviewEvent.Handler;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
@@ -84,6 +88,9 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel i
   private FlexTable exportButtons;
   private Anchor exportVisibleButton;
   private Anchor exportAllButton;
+
+  private ScrollPanel displayScroll;
+  private SimplePanel displayScrollWrapper;
 
   private FlowPanel selectAllPanel;
   private FlowPanel selectAllPanelBody;
@@ -196,8 +203,11 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel i
 
     createSelectAllPanel();
 
+    displayScroll = new ScrollPanel(display);
+    displayScrollWrapper = new SimplePanel(displayScroll);
+
     add(selectAllPanel);
-    add(new ScrollPanel(display));
+    add(displayScrollWrapper);
     add(resultsPager);
     if (exportButtons != null) {
       add(exportButtons);
@@ -216,15 +226,33 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel i
     columnSortHandler = new AsyncHandler(display);
     display.addColumnSortHandler(columnSortHandler);
 
+    display.addLoadingStateChangeHandler(new LoadingStateChangeEvent.Handler() {
+      @Override
+      public void onLoadingStateChanged(LoadingStateChangeEvent event) {
+        if (LoadingStateChangeEvent.LoadingState.LOADED.equals(event.getLoadingState())) {
+          handleScrollChanges();
+        }
+      }
+    });
+
     addStyleName("my-asyncdatagrid");
     resultsPager.addStyleName("my-asyncdatagrid-pager-results");
     pageSizePager.addStyleName("my-asyncdatagrid-pager-pagesize");
+    displayScrollWrapper.addStyleName("my-asyncdatagrid-display-scroll-wrapper");
+    displayScroll.addStyleName("my-asyncdatagrid-display-scroll");
     display.addStyleName("my-asyncdatagrid-display");
     if (exportButtons != null) {
       exportButtons.addStyleName("my-asyncdatagrid-pager-pagesize");
       // exportVisibleButton.addStyleName("btn btn-export btn-export-visible");
       // exportAllButton.addStyleName("btn btn-export btn-export-all");
     }
+
+    displayScroll.addScrollHandler(new ScrollHandler() {
+      @Override
+      public void onScroll(ScrollEvent event) {
+        handleScrollChanges();
+      }
+    });
 
     addValueChangeHandler(new ValueChangeHandler<IndexResult<T>>() {
       @Override
@@ -236,6 +264,35 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel i
 
     Label emptyInfo = new Label("No items to display");
     display.setEmptyTableWidget(emptyInfo);
+  }
+
+  protected void handleScrollChanges() {
+    if (displayScroll.getMaximumHorizontalScrollPosition() > 0) {
+      double percent = displayScroll.getHorizontalScrollPosition() * 100F
+        / displayScroll.getMaximumHorizontalScrollPosition();
+
+      GWT.log(String.valueOf(percent));
+
+      if (percent > 0) {
+        // show left shadow
+        displayScrollWrapper.addStyleName("my-asyncdatagrid-display-scroll-wrapper-left");
+      } else {
+        // hide left shadow
+        displayScrollWrapper.removeStyleName("my-asyncdatagrid-display-scroll-wrapper-left");
+      }
+
+      if (percent < 100) {
+        // show right shadow
+        displayScrollWrapper.addStyleName("my-asyncdatagrid-display-scroll-wrapper-right");
+      } else {
+        // hide right shadow
+        displayScrollWrapper.removeStyleName("my-asyncdatagrid-display-scroll-wrapper-right");
+      }
+    } else {
+      // hide both shadows
+      displayScrollWrapper.removeStyleName("my-asyncdatagrid-display-scroll-wrapper-left");
+      displayScrollWrapper.removeStyleName("my-asyncdatagrid-display-scroll-wrapper-right");
+    }
   }
 
   private void configure(final CellTable<T> display) {
