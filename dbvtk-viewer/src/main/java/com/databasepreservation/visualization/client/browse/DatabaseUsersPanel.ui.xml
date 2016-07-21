@@ -8,6 +8,6 @@
 
     <g:FlowPanel>
         <g:Label addStyleNames="h1"><ui:msg>Users and permissions</ui:msg></g:Label>
-        <g:HTML ui:field="metadatahtml"/>
+        <g:FlowPanel ui:field="contentItems"/>
     </g:FlowPanel>
 </ui:UiBinder>

@@ -239,7 +239,6 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel i
     resultsPager.addStyleName("my-asyncdatagrid-pager-results");
     pageSizePager.addStyleName("my-asyncdatagrid-pager-pagesize");
     displayScrollWrapper.addStyleName("my-asyncdatagrid-display-scroll-wrapper");
-    displayScroll.addStyleName("my-asyncdatagrid-display-scroll");
     display.addStyleName("my-asyncdatagrid-display");
     if (exportButtons != null) {
       exportButtons.addStyleName("my-asyncdatagrid-pager-pagesize");
