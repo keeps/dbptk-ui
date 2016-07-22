@@ -148,7 +148,8 @@ public class DatabaseSidebar extends Composite {
       sidebarGroup.add(new SidebarHyperlink("Views", HistoryManager.linkToSchemaViews(database.getUUID(),
         schema.getUUID())).addIcon(FontAwesomeIconManager.SCHEMA_VIEWS).setH6().setIndent1());
 
-      sidebarGroup.add(new SidebarItem("Data").addIcon(FontAwesomeIconManager.SCHEMA_DATA).setH6().setIndent1());
+      sidebarGroup.add(new SidebarHyperlink("Data", HistoryManager.linkToSchemaData(database.getUUID(),
+        schema.getUUID())).addIcon(FontAwesomeIconManager.SCHEMA_DATA).setH6().setIndent1());
 
       for (ViewerTable table : schema.getTables()) {
         sidebarGroup.add(new SidebarHyperlink(table.getName(), HistoryManager.linkToTable(database.getUUID(),

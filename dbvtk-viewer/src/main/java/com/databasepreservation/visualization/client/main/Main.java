@@ -13,6 +13,7 @@ import com.databasepreservation.visualization.client.browse.ReferencesPanel;
 import com.databasepreservation.visualization.client.browse.RightPanel;
 import com.databasepreservation.visualization.client.browse.RowPanel;
 import com.databasepreservation.visualization.client.browse.SchemaCheckConstraintsPanel;
+import com.databasepreservation.visualization.client.browse.SchemaDataPanel;
 import com.databasepreservation.visualization.client.browse.SchemaRoutinesPanel;
 import com.databasepreservation.visualization.client.browse.SchemaStructurePanel;
 import com.databasepreservation.visualization.client.browse.SchemaTriggersPanel;
@@ -200,6 +201,14 @@ public class Main implements EntryPoint {
               @Override
               public RightPanel load(ViewerDatabase database) {
                 return SchemaCheckConstraintsPanel.getInstance(database, schema_uuid);
+              }
+            });
+            break;
+          case HistoryManager.ROUTE_SCHEMA_DATA:
+            setContent(databaseUUID, new RightPanelLoader() {
+              @Override
+              public RightPanel load(ViewerDatabase database) {
+                return SchemaDataPanel.getInstance(database, schema_uuid);
               }
             });
             break;

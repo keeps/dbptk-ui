@@ -134,6 +134,19 @@ public class BreadcrumbManager {
     return items;
   }
 
+  public static List<BreadcrumbItem> forSchemaData(final String databaseName, final String databaseUUID,
+    final String schemaName, final String schemaUUID) {
+    List<BreadcrumbItem> items = forDatabase(databaseName, databaseUUID);
+    items.add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager
+      .getTag(FontAwesomeIconManager.SCHEMA_DATA) + SafeHtmlUtils.htmlEscape(" Data")), new Command() {
+      @Override
+      public void execute() {
+        HistoryManager.gotoSchemaData(databaseUUID, schemaUUID);
+      }
+    }));
+    return items;
+  }
+
   public static List<BreadcrumbItem> forTable(final String databaseName, final String databaseUUID,
     final String schemaName, final String schemaUUID, final String tableName, final String tableUUID) {
     List<BreadcrumbItem> items = forSchema(databaseName, databaseUUID, schemaName, schemaUUID);

@@ -18,6 +18,7 @@ public class HistoryManager {
   public static final String ROUTE_SCHEMA_ROUTINES = "routines";
   public static final String ROUTE_SCHEMA_TRIGGERS = "triggers";
   public static final String ROUTE_SCHEMA_VIEWS = "views";
+  public static final String ROUTE_SCHEMA_DATA = "data";
   public static final String ROUTE_TABLE = "table";
   public static final String ROUTE_RECORD = "record";
   public static final String ROUTE_FOREIGN_KEY = "relation";
@@ -62,6 +63,10 @@ public class HistoryManager {
 
   public static void gotoSchemaViews(String databaseUUID, String schemaUUID) {
     newHistory(Arrays.asList(ROUTE_SCHEMA, databaseUUID, schemaUUID, ROUTE_SCHEMA_VIEWS));
+  }
+
+  public static void gotoSchemaData(String databaseUUID, String schemaUUID) {
+    newHistory(Arrays.asList(ROUTE_SCHEMA, databaseUUID, schemaUUID, ROUTE_SCHEMA_DATA));
   }
 
   public static void gotoSchemaCheckConstraints(String databaseUUID, String schemaUUID) {
@@ -168,6 +173,10 @@ public class HistoryManager {
 
   public static String linkToSchemaViews(String database_uuid, String schema_uuid) {
     return createHistoryToken(Arrays.asList(ROUTE_SCHEMA, database_uuid, schema_uuid, ROUTE_SCHEMA_VIEWS));
+  }
+
+  public static String linkToSchemaData(String database_uuid, String schema_uuid) {
+    return createHistoryToken(Arrays.asList(ROUTE_SCHEMA, database_uuid, schema_uuid, ROUTE_SCHEMA_DATA));
   }
 
   public static String linkToForeignKey(String database_uuid, String table_uuid, List<String> solrColumnsAndValues) {
