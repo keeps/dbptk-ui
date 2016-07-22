@@ -13,6 +13,7 @@ import com.google.gwt.user.client.Window;
 public class HistoryManager {
   public static final String ROUTE_DATABASE = "database";
   public static final String ROUTE_DATABASE_USERS = "users";
+  public static final String ROUTE_DATABASE_SEARCH = "search";
   public static final String ROUTE_SCHEMA = "schema";
   public static final String ROUTE_SCHEMA_STRUCTURE = "structure";
   public static final String ROUTE_SCHEMA_ROUTINES = "routines";
@@ -43,6 +44,10 @@ public class HistoryManager {
 
   public static void gotoDatabaseUsers(String databaseUUID) {
     newHistory(Arrays.asList(ROUTE_DATABASE, databaseUUID, ROUTE_DATABASE_USERS));
+  }
+
+  public static void gotoDatabaseSearch(String databaseUUID) {
+    newHistory(Arrays.asList(ROUTE_DATABASE, databaseUUID, ROUTE_DATABASE_SEARCH));
   }
 
   public static void gotoSchema(String databaseUUID, String schemaUUID) {
@@ -149,6 +154,10 @@ public class HistoryManager {
 
   public static String linkToDatabaseUsers(String database_uuid) {
     return createHistoryToken(Arrays.asList(ROUTE_DATABASE, database_uuid, ROUTE_DATABASE_USERS));
+  }
+
+  public static String linkToDatabaseSearch(String database_uuid) {
+    return createHistoryToken(Arrays.asList(ROUTE_DATABASE, database_uuid, ROUTE_DATABASE_SEARCH));
   }
 
   public static String linkToSchema(String database_uuid, String schema_uuid) {

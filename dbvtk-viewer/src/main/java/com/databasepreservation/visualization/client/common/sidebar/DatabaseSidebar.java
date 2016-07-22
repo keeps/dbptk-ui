@@ -129,6 +129,9 @@ public class DatabaseSidebar extends Composite {
     sidebarGroup.add(new SidebarHyperlink("Users & Roles", HistoryManager.linkToDatabaseUsers(database.getUUID()))
       .addIcon(FontAwesomeIconManager.DATABASE_USERS).setH6().setIndent1());
 
+    sidebarGroup.add(new SidebarHyperlink("Search whole database", HistoryManager.linkToDatabaseSearch(database.getUUID()))
+      .addIcon(FontAwesomeIconManager.DATABASE_SEARCH).setH6().setIndent1());
+
     for (final ViewerSchema schema : metadata.getSchemas()) {
       sidebarGroup.add(new SidebarItem(schema.getName()).addIcon(FontAwesomeIconManager.SCHEMA).setH5().setIndent0());
 

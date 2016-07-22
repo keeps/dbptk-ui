@@ -7,6 +7,7 @@ import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatab
 import com.databasepreservation.visualization.client.browse.DatabaseInformationPanel;
 import com.databasepreservation.visualization.client.browse.DatabaseListPanel;
 import com.databasepreservation.visualization.client.browse.DatabasePanel;
+import com.databasepreservation.visualization.client.browse.DatabaseSearchPanel;
 import com.databasepreservation.visualization.client.browse.DatabaseUsersPanel;
 import com.databasepreservation.visualization.client.browse.ForeignKeyPanel;
 import com.databasepreservation.visualization.client.browse.ReferencesPanel;
@@ -135,6 +136,17 @@ public class Main implements EntryPoint {
           @Override
           public RightPanel load(ViewerDatabase database) {
             return DatabaseUsersPanel.getInstance(database);
+          }
+        });
+
+      } else if (currentHistoryPath.size() == 3
+        && currentHistoryPath.get(2).equals(HistoryManager.ROUTE_DATABASE_SEARCH)) {
+        // #database/<id>/search
+        String databaseUUID = currentHistoryPath.get(1);
+        setContent(databaseUUID, new RightPanelLoader() {
+          @Override
+          public RightPanel load(ViewerDatabase database) {
+            return DatabaseSearchPanel.getInstance(database);
           }
         });
 

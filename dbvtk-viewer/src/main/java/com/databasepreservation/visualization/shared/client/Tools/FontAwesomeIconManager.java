@@ -15,6 +15,7 @@ public class FontAwesomeIconManager {
   public static final String REFERENCE = "exchange";
   public static final String DATABASE_INFORMATION = "info-circle";
   public static final String DATABASE_USERS = "users";
+  public static final String DATABASE_SEARCH = "search";
   public static final String SCHEMA_STRUCTURE = "sitemap";
   public static final String SCHEMA_ROUTINES = "cog";
   public static final String SCHEMA_TRIGGERS = "clock-o";
