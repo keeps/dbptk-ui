@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.databasepreservation.visualization.client.main.BreadcrumbItem;
 import com.databasepreservation.visualization.client.main.BreadcrumbPanel;
-import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.Command;
 
 /**
@@ -13,9 +13,6 @@ import com.google.gwt.user.client.Command;
  */
 public class BreadcrumbManager {
   private static String LOADING_DATABASE = "Database (loading)";
-  private static String LOADING_SCHEMA = "Schema (loading)";
-  private static String LOADING_TABLE = "Table (loading)";
-  private static String LOADING_RECORDS = "Records (loading)";
 
   public static void updateBreadcrumb(BreadcrumbPanel breadcrumb, List<BreadcrumbItem> items) {
     breadcrumb.updatePath(items);
@@ -24,12 +21,8 @@ public class BreadcrumbManager {
 
   public static List<BreadcrumbItem> forDatabases() {
     List<BreadcrumbItem> items = new ArrayList<>();
-    items.add(new BreadcrumbItem(new SafeHtml() {
-      @Override
-      public String asString() {
-        return FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASES) + " Databases";
-      }
-    }, new Command() {
+    items.add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager
+      .getTag(FontAwesomeIconManager.DATABASES) + SafeHtmlUtils.htmlEscape(" Databases")), new Command() {
       @Override
       public void execute() {
         HistoryManager.gotoDatabaseList();
@@ -40,12 +33,8 @@ public class BreadcrumbManager {
 
   public static List<BreadcrumbItem> forDatabase(final String databaseName, final String databaseUUID) {
     List<BreadcrumbItem> items = forDatabases();
-    items.add(new BreadcrumbItem(new SafeHtml() {
-      @Override
-      public String asString() {
-        return FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE) + " " + databaseName;
-      }
-    }, new Command() {
+    items.add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager
+      .getTag(FontAwesomeIconManager.DATABASE) + SafeHtmlUtils.htmlEscape(" " + databaseName)), new Command() {
       @Override
       public void execute() {
         HistoryManager.gotoDatabase(databaseUUID);
@@ -54,15 +43,23 @@ public class BreadcrumbManager {
     return items;
   }
 
+  public static List<BreadcrumbItem> forDatabaseUsers(final String databaseName, final String databaseUUID) {
+    List<BreadcrumbItem> items = forDatabase(databaseName, databaseUUID);
+    items.add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager
+      .getTag(FontAwesomeIconManager.DATABASE_USERS) + SafeHtmlUtils.htmlEscape(" Users")), new Command() {
+      @Override
+      public void execute() {
+        HistoryManager.gotoDatabaseUsers(databaseUUID);
+      }
+    }));
+    return items;
+  }
+
   public static List<BreadcrumbItem> forSchema(final String databaseName, final String databaseUUID,
     final String schemaName, final String schemaUUID) {
     List<BreadcrumbItem> items = forDatabase(databaseName, databaseUUID);
-    items.add(new BreadcrumbItem(new SafeHtml() {
-      @Override
-      public String asString() {
-        return FontAwesomeIconManager.getTag(FontAwesomeIconManager.SCHEMA) + " " + schemaName;
-      }
-    }, new Command() {
+    items.add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager
+      .getTag(FontAwesomeIconManager.SCHEMA) + SafeHtmlUtils.htmlEscape(" " + schemaName)), new Command() {
       @Override
       public void execute() {
         HistoryManager.gotoSchema(databaseUUID, schemaUUID);
@@ -71,15 +68,77 @@ public class BreadcrumbManager {
     return items;
   }
 
+  public static List<BreadcrumbItem> forSchemaStructure(final String databaseName, final String databaseUUID,
+    final String schemaName, final String schemaUUID) {
+    List<BreadcrumbItem> items = forSchema(databaseName, databaseUUID, schemaName, schemaUUID);
+    items.add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager
+      .getTag(FontAwesomeIconManager.SCHEMA_STRUCTURE) + SafeHtmlUtils.htmlEscape(" Structure")), new Command() {
+      @Override
+      public void execute() {
+        HistoryManager.gotoSchemaStructure(databaseUUID, schemaUUID);
+      }
+    }));
+    return items;
+  }
+
+  public static List<BreadcrumbItem> forSchemaRoutines(final String databaseName, final String databaseUUID,
+    final String schemaName, final String schemaUUID) {
+    List<BreadcrumbItem> items = forSchema(databaseName, databaseUUID, schemaName, schemaUUID);
+    items.add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager
+      .getTag(FontAwesomeIconManager.SCHEMA_ROUTINES) + SafeHtmlUtils.htmlEscape(" Routines")), new Command() {
+      @Override
+      public void execute() {
+        HistoryManager.gotoSchemaRoutines(databaseUUID, schemaUUID);
+      }
+    }));
+    return items;
+  }
+
+  public static List<BreadcrumbItem> forSchemaTriggers(final String databaseName, final String databaseUUID,
+    final String schemaName, final String schemaUUID) {
+    List<BreadcrumbItem> items = forSchema(databaseName, databaseUUID, schemaName, schemaUUID);
+    items.add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager
+      .getTag(FontAwesomeIconManager.SCHEMA_TRIGGERS) + SafeHtmlUtils.htmlEscape(" Triggers")), new Command() {
+      @Override
+      public void execute() {
+        HistoryManager.gotoSchemaTriggers(databaseUUID, schemaUUID);
+      }
+    }));
+    return items;
+  }
+
+  public static List<BreadcrumbItem> forSchemaCheckConstraints(final String databaseName, final String databaseUUID,
+    final String schemaName, final String schemaUUID) {
+    List<BreadcrumbItem> items = forSchema(databaseName, databaseUUID, schemaName, schemaUUID);
+    items.add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager
+      .getTag(FontAwesomeIconManager.SCHEMA_CHECK_CONSTRAINTS) + SafeHtmlUtils.htmlEscape(" Check constraints")),
+      new Command() {
+        @Override
+        public void execute() {
+          HistoryManager.gotoSchemaCheckConstraints(databaseUUID, schemaUUID);
+        }
+      }));
+    return items;
+  }
+
+  public static List<BreadcrumbItem> forSchemaViews(final String databaseName, final String databaseUUID,
+    final String schemaName, final String schemaUUID) {
+    List<BreadcrumbItem> items = forSchema(databaseName, databaseUUID, schemaName, schemaUUID);
+    items.add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager
+      .getTag(FontAwesomeIconManager.SCHEMA_VIEWS) + SafeHtmlUtils.htmlEscape(" Views")), new Command() {
+      @Override
+      public void execute() {
+        HistoryManager.gotoSchemaViews(databaseUUID, schemaUUID);
+      }
+    }));
+    return items;
+  }
+
   public static List<BreadcrumbItem> forTable(final String databaseName, final String databaseUUID,
     final String schemaName, final String schemaUUID, final String tableName, final String tableUUID) {
     List<BreadcrumbItem> items = forSchema(databaseName, databaseUUID, schemaName, schemaUUID);
-    items.add(new BreadcrumbItem(new SafeHtml() {
-      @Override
-      public String asString() {
-        return FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE) + " " + tableName;
-      }
-    }, new Command() {
+    items.add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager
+      .getTag(FontAwesomeIconManager.TABLE) + SafeHtmlUtils.htmlEscape(" " + tableName)), new Command() {
       @Override
       public void execute() {
         HistoryManager.gotoTable(databaseUUID, tableUUID);
@@ -92,12 +151,8 @@ public class BreadcrumbManager {
     final String schemaName, final String schemaUUID, final String tableName, final String tableUUID,
     final String recordUUID) {
     List<BreadcrumbItem> items = forTable(databaseName, databaseUUID, schemaName, schemaUUID, tableName, tableUUID);
-    items.add(new BreadcrumbItem(new SafeHtml() {
-      @Override
-      public String asString() {
-        return FontAwesomeIconManager.getTag(FontAwesomeIconManager.RECORD) + " Record";
-      }
-    }, new Command() {
+    items.add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager
+      .getTag(FontAwesomeIconManager.RECORD) + SafeHtmlUtils.htmlEscape(" Record")), new Command() {
       @Override
       public void execute() {
         HistoryManager.gotoRecord(databaseUUID, tableUUID, recordUUID);
@@ -111,13 +166,9 @@ public class BreadcrumbManager {
     final String recordUUID, final String columnNameInTable, final String columnIndexInTable) {
     List<BreadcrumbItem> items = forRecord(databaseName, databaseUUID, schemaName, schemaUUID, tableName, tableUUID,
       recordUUID);
-    items.add(new BreadcrumbItem(new SafeHtml() {
-      @Override
-      public String asString() {
-        return FontAwesomeIconManager.getTag(FontAwesomeIconManager.REFERENCE) + " References for column "
-          + columnNameInTable;
-      }
-    }, new Command() {
+    items.add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager
+      .getTag(FontAwesomeIconManager.REFERENCE)
+      + SafeHtmlUtils.htmlEscape(" References for column " + columnNameInTable)), new Command() {
       @Override
       public void execute() {
         HistoryManager.gotoReferences(databaseUUID, tableUUID, recordUUID, columnIndexInTable);
@@ -128,96 +179,11 @@ public class BreadcrumbManager {
 
   public static List<BreadcrumbItem> loadingDatabase(final String databaseUUID) {
     List<BreadcrumbItem> items = forDatabases();
-    items.add(new BreadcrumbItem(new SafeHtml() {
-      @Override
-      public String asString() {
-        return FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE) + " " + LOADING_DATABASE;
-      }
-    }, new Command() {
+    items.add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager
+      .getTag(FontAwesomeIconManager.DATABASE) + SafeHtmlUtils.htmlEscape(" " + LOADING_DATABASE)), new Command() {
       @Override
       public void execute() {
         HistoryManager.gotoDatabase(databaseUUID);
-      }
-    }));
-    return items;
-  }
-
-  public static List<BreadcrumbItem> loadingSchema(final String databaseUUID) {
-    List<BreadcrumbItem> items = loadingDatabase(databaseUUID);
-    items.add(new BreadcrumbItem(new SafeHtml() {
-      @Override
-      public String asString() {
-        return FontAwesomeIconManager.getTag(FontAwesomeIconManager.SCHEMA) + " " + LOADING_SCHEMA;
-      }
-    }, new Command() {
-      @Override
-      public void execute() {
-      }
-    }));
-    return items;
-  }
-
-  public static List<BreadcrumbItem> loadingSchema(final String databaseUUID, final String schemaUUID) {
-    List<BreadcrumbItem> items = loadingDatabase(databaseUUID);
-    items.add(new BreadcrumbItem(new SafeHtml() {
-      @Override
-      public String asString() {
-        return FontAwesomeIconManager.getTag(FontAwesomeIconManager.SCHEMA) + " " + LOADING_SCHEMA;
-      }
-    }, new Command() {
-      @Override
-      public void execute() {
-        HistoryManager.gotoSchema(databaseUUID, schemaUUID);
-      }
-    }));
-    return items;
-  }
-
-  public static List<BreadcrumbItem> loadingTable(final String databaseUUID, final String tableUUID) {
-    List<BreadcrumbItem> items = loadingSchema(databaseUUID);
-    items.add(new BreadcrumbItem(new SafeHtml() {
-      @Override
-      public String asString() {
-        return FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE) + " " + LOADING_TABLE;
-      }
-    }, new Command() {
-      @Override
-      public void execute() {
-        HistoryManager.gotoTable(databaseUUID, tableUUID);
-      }
-    }));
-    return items;
-  }
-
-  public static List<BreadcrumbItem> loadingRecord(final String databaseUUID, final String tableUUID,
-    final String recordUUID) {
-    List<BreadcrumbItem> items = loadingTable(databaseUUID, tableUUID);
-    items.add(new BreadcrumbItem(new SafeHtml() {
-      @Override
-      public String asString() {
-        return FontAwesomeIconManager.getTag(FontAwesomeIconManager.RECORD) + " Record";
-      }
-    }, new Command() {
-      @Override
-      public void execute() {
-        HistoryManager.gotoRecord(databaseUUID, tableUUID, recordUUID);
-      }
-    }));
-    return items;
-  }
-
-  public static List<BreadcrumbItem> loadingReferences(final String databaseUUID, final String tableUUID,
-    final String recordUUID, final String columnIndexInTable) {
-    List<BreadcrumbItem> items = loadingRecord(databaseUUID, tableUUID, recordUUID);
-    items.add(new BreadcrumbItem(new SafeHtml() {
-      @Override
-      public String asString() {
-        return FontAwesomeIconManager.getTag(FontAwesomeIconManager.REFERENCE) + " " + LOADING_RECORDS;
-      }
-    }, new Command() {
-      @Override
-      public void execute() {
-        HistoryManager.gotoReferences(databaseUUID, tableUUID, recordUUID, columnIndexInTable);
       }
     }));
     return items;

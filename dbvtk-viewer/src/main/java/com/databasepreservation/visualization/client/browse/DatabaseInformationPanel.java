@@ -45,15 +45,16 @@ public class DatabaseInformationPanel extends RightPanel {
   HTML metadatahtml;
 
   private DatabaseInformationPanel(ViewerDatabase database) {
+    this.database = database;
     initWidget(uiBinder.createAndBindUi(this));
 
-    this.database = database;
     init();
   }
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    BreadcrumbManager.forDatabase(database.getMetadata().getName(), database.getUUID());
+    BreadcrumbManager.updateBreadcrumb(breadcrumb,
+      BreadcrumbManager.forDatabase(database.getMetadata().getName(), database.getUUID()));
   }
 
   private void init() {

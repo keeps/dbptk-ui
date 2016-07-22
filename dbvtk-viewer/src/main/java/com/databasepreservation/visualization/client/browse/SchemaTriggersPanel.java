@@ -65,10 +65,8 @@ public class SchemaTriggersPanel extends RightPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    BreadcrumbManager.updateBreadcrumb(
-      breadcrumb,
-      BreadcrumbManager.forSchema(database.getMetadata().getName(), database.getUUID(), schema.getName(),
-        schema.getUUID()));
+    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forSchemaTriggers(
+      database.getMetadata().getName(), database.getUUID(), schema.getName(), schema.getUUID()));
   }
 
   private void init() {

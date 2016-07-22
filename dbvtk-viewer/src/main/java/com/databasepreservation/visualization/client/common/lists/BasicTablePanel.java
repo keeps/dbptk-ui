@@ -7,6 +7,7 @@ import com.databasepreservation.visualization.shared.client.widgets.MyCellTableR
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -75,6 +76,23 @@ public class BasicTablePanel<C> extends Composite {
     header.setWidget(headerContent);
     info.setWidget(infoContent);
     table.setWidget(new ScrollPanel(createTable(rowItems, columns)));
+  }
+
+  public BasicTablePanel(Widget headerContent, String infoContent) {
+    initWidget(uiBinder.createAndBindUi(this));
+
+    // set widgets
+    header.setWidget(headerContent);
+
+    SafeHtmlBuilder b = new SafeHtmlBuilder();
+    b.append(SafeHtmlUtils.fromSafeConstant("<div class=\"field\">"));
+    b.append(SafeHtmlUtils.fromSafeConstant("<div class=\"label\">"));
+    b.append(SafeHtmlUtils.fromString(infoContent));
+    b.append(SafeHtmlUtils.fromSafeConstant("</div>"));
+    b.append(SafeHtmlUtils.fromSafeConstant("</div>"));
+    info.setWidget(new HTMLPanel(b.toSafeHtml()));
+
+    table.setVisible(false);
   }
 
   @SafeVarargs

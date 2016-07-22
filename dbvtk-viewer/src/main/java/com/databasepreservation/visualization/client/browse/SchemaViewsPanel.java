@@ -64,7 +64,7 @@ public class SchemaViewsPanel extends RightPanel {
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
     BreadcrumbManager.updateBreadcrumb(
       breadcrumb,
-      BreadcrumbManager.forSchema(database.getMetadata().getName(), database.getUUID(), schema.getName(),
+      BreadcrumbManager.forSchemaViews(database.getMetadata().getName(), database.getUUID(), schema.getName(),
         schema.getUUID()));
   }
 
