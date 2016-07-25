@@ -28,6 +28,8 @@ import org.roda.core.data.v2.user.RodaUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.databasepreservation.utils.JodaUtils;
+import com.databasepreservation.visualization.client.SavedSearch;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerRow;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable;
@@ -202,6 +204,55 @@ public class SolrManager {
   public <T extends IsIndexed> T retrieveRows(RodaUser user, Class<T> classToReturn, String tableUUID, String rowUUID)
     throws NotFoundException, org.roda.core.data.exceptions.GenericException {
     return SolrUtils.retrieve(client, classToReturn, tableUUID, rowUUID);
+  }
+
+  public void addSavedSearch(RodaUser user, SavedSearch savedSearch) throws NotFoundException,
+    org.roda.core.data.exceptions.GenericException {
+    try {
+      createSavedSearchesCollection();
+    } catch (ViewerException e) {
+      LOGGER.error("Error creating saved searches collection", e);
+    }
+
+    SolrInputDocument doc = new SolrInputDocument();
+    doc.addField(ViewerSafeConstants.SOLR_SEARCHES_ID, SolrUtils.randomUUID());
+    doc.addField(ViewerSafeConstants.SOLR_SEARCHES_NAME, savedSearch.getName());
+    doc.addField(ViewerSafeConstants.SOLR_SEARCHES_DESCRIPTION, savedSearch.getDescription());
+    doc.addField(ViewerSafeConstants.SOLR_SEARCHES_DATE_ADDED,
+      JodaUtils.solr_date_format(savedSearch.getOrCreateDateAdded()));
+    doc.addField(ViewerSafeConstants.SOLR_SEARCHES_DATABASE_UUID, savedSearch.getDatabaseUUID());
+    doc.addField(ViewerSafeConstants.SOLR_SEARCHES_TABLE_UUID, savedSearch.getTableUUID());
+    doc.addField(ViewerSafeConstants.SOLR_SEARCHES_SEARCH_INFO_JSON, savedSearch.getSearchInfoJson());
+
+    try {
+      client.add(ViewerSafeConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME, doc);
+    } catch (SolrServerException e) {
+      LOGGER.debug("SolrServerException while attempting to save search", e);
+    } catch (IOException e) {
+      LOGGER.debug("IOException while attempting to save search", e);
+    }
+  }
+
+  private void createSavedSearchesCollection() throws ViewerException {
+    // creates saved searches collection, skipping if it is present
+    CollectionAdminRequest.Create request = new CollectionAdminRequest.Create();
+    request.setCollectionName(ViewerSafeConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME);
+    request.setConfigName(ViewerSafeConstants.SOLR_CONFIGSET_SEARCHES);
+    request.setNumShards(1);
+    try {
+      NamedList<Object> response = client.request(request);
+    } catch (SolrServerException | IOException e) {
+      throw new ViewerException("Error creating collection " + ViewerSafeConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME,
+        e);
+    } catch (HttpSolrClient.RemoteSolrException e) {
+      if (e.getMessage().contains(
+        "collection already exists: " + ViewerSafeConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME)) {
+        LOGGER.info("collection " + ViewerSafeConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME + " already exists.");
+      } else {
+        throw new ViewerException("Error creating collection "
+          + ViewerSafeConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME, e);
+      }
+    }
   }
 
   private void insertDocument(String collection, SolrInputDocument doc) throws ViewerException {

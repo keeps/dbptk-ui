@@ -2,6 +2,7 @@ package com.databasepreservation.visualization.server;
 
 import java.util.List;
 
+import com.databasepreservation.visualization.client.SavedSearch;
 import org.roda.core.data.adapter.facet.Facets;
 import org.roda.core.data.adapter.filter.Filter;
 import org.roda.core.data.adapter.sort.Sorter;
@@ -10,6 +11,7 @@ import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RequestNotValidException;
+import org.roda.core.data.utils.JsonUtils;
 import org.roda.core.data.v2.index.IndexResult;
 import org.roda.core.data.v2.index.IsIndexed;
 import org.roda.core.data.v2.user.RodaUser;
@@ -17,6 +19,7 @@ import org.roda.core.data.v2.user.RodaUser;
 import com.databasepreservation.visualization.client.BrowserService;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable;
 import com.databasepreservation.visualization.client.common.search.SearchField;
+import com.databasepreservation.visualization.client.common.search.SearchInfo;
 import com.databasepreservation.visualization.shared.BrowserServiceUtils;
 import com.databasepreservation.visualization.shared.ViewerFactory;
 import com.databasepreservation.visualization.utils.SolrUtils;
@@ -96,6 +99,22 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
   public String getSolrQueryString(Filter filter, Sorter sorter, Sublist sublist, Facets facets)
     throws GenericException, RequestNotValidException {
     return SolrUtils.getSolrQuery(filter, sorter, sublist, facets);
+  }
+
+  @Override
+  public void saveQuery(String name, String description, String tableUUID, String databaseUUID, SearchInfo searchInfo)
+    throws AuthorizationDeniedException, GenericException, RequestNotValidException, NotFoundException {
+    RodaUser user = null;
+    String searchInfoJson = JsonUtils.getJsonFromObject(searchInfo);
+
+    SavedSearch savedSearch = new SavedSearch();
+    savedSearch.setName(name);
+    savedSearch.setDescription(description);
+    savedSearch.setDatabaseUUID(databaseUUID);
+    savedSearch.setTableUUID(tableUUID);
+    savedSearch.setSearchInfoJson(searchInfoJson);
+
+    ViewerFactory.getSolrManager().addSavedSearch(user, savedSearch);
   }
 
   @Override

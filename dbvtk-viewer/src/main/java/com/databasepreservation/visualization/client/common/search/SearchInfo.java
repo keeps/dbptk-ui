@@ -1,5 +1,6 @@
 package com.databasepreservation.visualization.client.common.search;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,7 +22,7 @@ import com.google.gwt.safehtml.shared.UriUtils;
  * 
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class SearchInfo {
+public class SearchInfo implements Serializable{
   private Filter defaultFilter;
   private String currentFilter;
   private Map<String, Boolean> fieldVisibility;

@@ -2,6 +2,7 @@ package com.databasepreservation.visualization.client;
 
 import java.util.List;
 
+import com.databasepreservation.visualization.client.common.search.SearchInfo;
 import org.roda.core.data.adapter.facet.Facets;
 import org.roda.core.data.adapter.filter.Filter;
 import org.roda.core.data.adapter.sort.Sorter;
@@ -67,6 +68,9 @@ public interface BrowserService extends RemoteService {
   <T extends IsIndexed> T retrieveRows(String classNameToReturn, String tableUUID, String rowUUID)
     throws AuthorizationDeniedException, GenericException, NotFoundException;
 
-  String getSolrQueryString(Filter filter, Sorter sorter, Sublist sublist, Facets facets) throws GenericException,
+  String getSolrQueryString(Filter filter, Sorter sorter, Sublist sublist, Facets facets) throws AuthorizationDeniedException, GenericException,
     RequestNotValidException;
+
+  void saveQuery(String name, String description, String tableUUID, String databaseUUID, SearchInfo searchInfo) throws AuthorizationDeniedException, GenericException,
+    RequestNotValidException, NotFoundException;
 }

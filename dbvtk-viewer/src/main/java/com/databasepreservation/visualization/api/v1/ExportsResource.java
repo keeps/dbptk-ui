@@ -25,8 +25,6 @@ import org.slf4j.LoggerFactory;
 import com.databasepreservation.visualization.api.utils.ApiUtils;
 import com.databasepreservation.visualization.api.utils.DownloadUtils;
 import com.databasepreservation.visualization.api.utils.StreamResponse;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerMetadata;
 import com.databasepreservation.visualization.shared.ViewerFactory;
 import com.databasepreservation.visualization.shared.ViewerSafeConstants;
 import com.databasepreservation.visualization.utils.SolrManager;
@@ -50,23 +48,28 @@ public class ExportsResource {
   @Context
   private HttpServletRequest request;
 
-  @GET
-  @Path("/{" + ViewerSafeConstants.API_PATH_PARAM_DATABASE_UUID + "}")
-  @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
-  @ApiOperation(value = "Get metadata", notes = "Gets database metadata.", response = ViewerMetadata.class, responseContainer = "Metadata")
-  public Response getMetadata(@PathParam(ViewerSafeConstants.API_PATH_PARAM_DATABASE_UUID) String databaseUUID,
-    @QueryParam(ViewerSafeConstants.API_QUERY_KEY_ACCEPT_FORMAT) String acceptFormat) throws RODAException {
-    String mediaType = ApiUtils.getMediaType(acceptFormat, request);
-
-    // get user
-    // RodaUser user = UserUtility.getApiUser(request);
-
-    // delegate action to controller
-    // Jobs jobs = JobsHelper.getJobsFromIndexResult(user, start, limit);
-    ViewerDatabase database = ViewerFactory.getSolrManager().retrieve(null, ViewerDatabase.class, databaseUUID);
-
-    return Response.ok(database.getMetadata(), mediaType).build();
-  }
+  // @GET
+  // @Path("/{" + ViewerSafeConstants.API_PATH_PARAM_DATABASE_UUID + "}")
+  // @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+  // @ApiOperation(value = "Get metadata", notes = "Gets database metadata.",
+  // response = ViewerMetadata.class, responseContainer = "Metadata")
+  // public Response
+  // getMetadata(@PathParam(ViewerSafeConstants.API_PATH_PARAM_DATABASE_UUID)
+  // String databaseUUID,
+  // @QueryParam(ViewerSafeConstants.API_QUERY_KEY_ACCEPT_FORMAT) String
+  // acceptFormat) throws RODAException {
+  // String mediaType = ApiUtils.getMediaType(acceptFormat, request);
+  //
+  // // get user
+  // // RodaUser user = UserUtility.getApiUser(request);
+  //
+  // // delegate action to controller
+  // // Jobs jobs = JobsHelper.getJobsFromIndexResult(user, start, limit);
+  // ViewerDatabase database = ViewerFactory.getSolrManager().retrieve(null,
+  // ViewerDatabase.class, databaseUUID);
+  //
+  // return Response.ok(database.getMetadata(), mediaType).build();
+  // }
 
   @GET
   @Path("/csv/{" + ViewerSafeConstants.API_PATH_PARAM_DATABASE_UUID + "}/{"

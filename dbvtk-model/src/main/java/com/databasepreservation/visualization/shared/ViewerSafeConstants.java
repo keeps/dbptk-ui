@@ -14,13 +14,16 @@ public class ViewerSafeConstants {
    */
   public static final String SOLR_CONFIGSET_DATABASE_RESOURCE = "solr-configset/dbvtk_database";
   public static final String SOLR_CONFIGSET_TABLE_RESOURCE = "solr-configset/dbvtk_table";
+  public static final String SOLR_CONFIGSET_SEARCHES_RESOURCE = "solr-configset/dbvtk_searches";
   public static final String SOLR_CONFIGSET_DATABASE = "dbvtk_database";
   public static final String SOLR_CONFIGSET_TABLE = "dbvtk_table";
+  public static final String SOLR_CONFIGSET_SEARCHES = "dbvtk_searches";
 
   /*
    * COLLECTION STRUCTURE
    */
   public static final String SOLR_INDEX_DATABASE_COLLECTION_NAME = "dbv-database";
+  public static final String SOLR_INDEX_SEARCHES_COLLECTION_NAME = "dbv-searches";
   public static final String SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX = "dbv-table-";
   public static final String SOLR_INDEX_ROW_COLUMN_NAME_PREFIX = "col";
 
@@ -29,6 +32,17 @@ public class ViewerSafeConstants {
    */
   public static final String SOLR_DATABASE_ID = "id";
   public static final String SOLR_DATABASE_METADATA = "metadata";
+
+  /*
+   * SEARCHES FIELDS
+   */
+  public static final String SOLR_SEARCHES_ID = "id";
+  public static final String SOLR_SEARCHES_NAME = "name";
+  public static final String SOLR_SEARCHES_DESCRIPTION = "description";
+  public static final String SOLR_SEARCHES_DATE_ADDED = "date_added";
+  public static final String SOLR_SEARCHES_DATABASE_UUID = "database_uuid";
+  public static final String SOLR_SEARCHES_TABLE_UUID = "table_uuid";
+  public static final String SOLR_SEARCHES_SEARCH_INFO_JSON = "search_info_json";
 
   /*
    * ROW FIELDS

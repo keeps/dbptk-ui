@@ -786,4 +786,8 @@ public class SolrUtils {
   public static String escapeSolrSpecialChars(String string) {
     return string.replaceAll("([+&|!(){}\\[\\]\\^\\\\~?:\"])", "\\\\$1");
   }
+
+  public static boolean addSavedSearch(String searchInfoJson) {
+    return false;
+  }
 }
