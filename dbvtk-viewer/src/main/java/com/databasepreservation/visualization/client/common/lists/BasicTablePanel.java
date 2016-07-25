@@ -6,6 +6,8 @@ import java.util.List;
 import com.databasepreservation.visualization.shared.client.widgets.MyCellTableResources;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ScrollEvent;
+import com.google.gwt.event.dom.client.ScrollHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -36,6 +38,9 @@ public class BasicTablePanel<C> extends Composite {
   }
 
   private static BasicTablePanelUiBinder uiBinder = GWT.create(BasicTablePanelUiBinder.class);
+
+  private ScrollPanel displayScroll;
+  private SimplePanel displayScrollWrapper;
 
   public static class ColumnInfo<C> {
     private Column<C, ?> column;
@@ -75,7 +80,55 @@ public class BasicTablePanel<C> extends Composite {
     // set widgets
     header.setWidget(headerContent);
     info.setWidget(infoContent);
-    table.setWidget(new ScrollPanel(createTable(rowItems, columns)));
+
+    displayScroll = new ScrollPanel(createTable(rowItems, columns));
+    displayScrollWrapper = new SimplePanel(displayScroll);
+    displayScrollWrapper.addStyleName("my-asyncdatagrid-display-scroll-wrapper");
+    table.setWidget(displayScrollWrapper);
+
+    displayScroll.addScrollHandler(new ScrollHandler() {
+      @Override
+      public void onScroll(ScrollEvent event) {
+        handleScrollChanges();
+      }
+    });
+    handleScrollChanges();
+  }
+
+  @Override
+  public void setVisible(boolean visible) {
+    super.setVisible(visible);
+    handleScrollChanges();
+  }
+
+  public void handleScrollChanges() {
+    GWT.log("maximum: " + displayScroll.getMaximumHorizontalScrollPosition());
+    if (displayScroll.getMaximumHorizontalScrollPosition() > 0) {
+      double percent = displayScroll.getHorizontalScrollPosition() * 100F
+        / displayScroll.getMaximumHorizontalScrollPosition();
+
+      com.google.gwt.core.shared.GWT.log(String.valueOf(percent));
+
+      if (percent > 0) {
+        // show left shadow
+        displayScrollWrapper.addStyleName("my-asyncdatagrid-display-scroll-wrapper-left");
+      } else {
+        // hide left shadow
+        displayScrollWrapper.removeStyleName("my-asyncdatagrid-display-scroll-wrapper-left");
+      }
+
+      if (percent < 100) {
+        // show right shadow
+        displayScrollWrapper.addStyleName("my-asyncdatagrid-display-scroll-wrapper-right");
+      } else {
+        // hide right shadow
+        displayScrollWrapper.removeStyleName("my-asyncdatagrid-display-scroll-wrapper-right");
+      }
+    } else {
+      // hide both shadows
+      displayScrollWrapper.removeStyleName("my-asyncdatagrid-display-scroll-wrapper-left");
+      displayScrollWrapper.removeStyleName("my-asyncdatagrid-display-scroll-wrapper-right");
+    }
   }
 
   public BasicTablePanel(Widget headerContent, String infoContent) {

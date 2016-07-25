@@ -92,6 +92,7 @@ public class DatabasePanel extends Composite {
     if (rightPanel != null) {
       rightPanel.handleBreadcrumb(breadcrumb);
       rightPanelContainer.setWidget(rightPanel);
+      rightPanel.setVisible(true);
     }
   }
 }

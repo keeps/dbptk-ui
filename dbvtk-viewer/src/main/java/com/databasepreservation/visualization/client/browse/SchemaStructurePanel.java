@@ -80,12 +80,27 @@ public class SchemaStructurePanel extends RightPanel {
     CommonClientUtils.addSchemaInfoToFlowPanel(contentItems, schema);
 
     for (ViewerTable viewerTable : schema.getTables()) {
-      contentItems.add(getBasicTablePanelForTableColumns(viewerTable));
+      BasicTablePanel<ViewerColumn> basicTablePanelForTableColumns = getBasicTablePanelForTableColumns(viewerTable);
+      contentItems.add(basicTablePanelForTableColumns);
+      basicTablePanelForTableColumns.handleScrollChanges();
       if (viewerTable.getForeignKeys() != null && !viewerTable.getForeignKeys().isEmpty()) {
-        contentItems.add(getBasicTablePanelForTableForeignKeys(viewerTable));
+        BasicTablePanel<ViewerForeignKey> basicTablePanelForTableForeignKeys = getBasicTablePanelForTableForeignKeys(viewerTable);
+        contentItems.add(basicTablePanelForTableForeignKeys);
+        basicTablePanelForTableForeignKeys.handleScrollChanges();
       }
     }
+  }
 
+  @Override
+  public void setVisible(boolean visible) {
+    super.setVisible(visible);
+
+    for (Widget widget : contentItems) {
+      if (widget instanceof BasicTablePanel) {
+        BasicTablePanel basicTablePanel = (BasicTablePanel) widget;
+        basicTablePanel.setVisible(true);
+      }
+    }
   }
 
   private BasicTablePanel<ViewerForeignKey> getBasicTablePanelForTableForeignKeys(final ViewerTable table) {
