@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.event.shared.HandlerRegistration;
 import org.roda.core.data.adapter.filter.Filter;
 
 import com.databasepreservation.visualization.client.BrowserService;
@@ -31,7 +30,6 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
-import org.roda.core.data.v2.index.IndexResult;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>

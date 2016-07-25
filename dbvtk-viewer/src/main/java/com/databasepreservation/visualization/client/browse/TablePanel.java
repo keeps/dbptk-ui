@@ -11,12 +11,12 @@ import com.databasepreservation.visualization.client.common.search.TableSearchPa
 import com.databasepreservation.visualization.client.common.utils.CommonClientUtils;
 import com.databasepreservation.visualization.client.main.BreadcrumbPanel;
 import com.databasepreservation.visualization.shared.client.Tools.BreadcrumbManager;
-import com.databasepreservation.visualization.shared.client.Tools.FontAwesomeIconManager;
 import com.databasepreservation.visualization.shared.client.Tools.ViewerStringUtils;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -55,7 +55,7 @@ public class TablePanel extends RightPanel {
   }
 
   @UiField
-  HTML mainHeader;
+  SimplePanel mainHeader;
 
   @UiField(provided = true)
   TableSearchPanel tableSearchPanel;
@@ -84,8 +84,6 @@ public class TablePanel extends RightPanel {
     tableSearchPanel = new TableSearchPanel(searchInfo);
 
     initWidget(uiBinder.createAndBindUi(this));
-
-    mainHeader.setHTML(FontAwesomeIconManager.loading(FontAwesomeIconManager.TABLE));
 
     this.database = database;
     this.table = table;
@@ -131,8 +129,6 @@ public class TablePanel extends RightPanel {
 
     initWidget(uiBinder.createAndBindUi(this));
 
-    mainHeader.setHTML(FontAwesomeIconManager.loading(FontAwesomeIconManager.TABLE));
-
     init();
   }
 
@@ -145,7 +141,7 @@ public class TablePanel extends RightPanel {
   }
 
   private void init() {
-    mainHeader.setHTML(FontAwesomeIconManager.loaded(FontAwesomeIconManager.TABLE, table.getName()));
+    mainHeader.setWidget(CommonClientUtils.getSchemaAndTableHeader(database.getUUID(), table, "h1"));
 
     if (ViewerStringUtils.isNotBlank(table.getDescription())) {
       description.setHTML(CommonClientUtils.getFieldHTML("Description", table.getDescription()));

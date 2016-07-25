@@ -391,6 +391,33 @@
     max-width: 1px;
 }
 
+.schema-table-header {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+}
+
+.schema-table-header > div {
+    display: inline;
+}
+
+.schema-table-header > div > a:hover {
+    text-decoration: underline;
+}
+
+.schema-table-header i {
+    font-size: 0.7em !important;
+}
+
+.schema-table-header > :nth-child(1) {
+    padding-right: 1rem;
+}
+
+.schema-table-header > :nth-child(3) {
+    padding-right: .5rem;
+    padding-left: .5rem;
+    color: #ccc;
+}
+
 .search-field-left-panel .visibility-checkbox {
     display: table-cell;
     vertical-align: top;

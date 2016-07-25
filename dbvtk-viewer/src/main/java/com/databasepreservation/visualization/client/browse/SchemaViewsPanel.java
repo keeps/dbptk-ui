@@ -20,7 +20,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -79,8 +78,7 @@ public class SchemaViewsPanel extends RightPanel {
   }
 
   private BasicTablePanel<ViewerColumn> getBasicTablePanelForViewColumns(ViewerView view) {
-    Label header = new Label(view.getName());
-    header.addStyleName("h3");
+    FlowPanel header = CommonClientUtils.getSchemaAndViewHeader(database.getUUID(), schema, view, "h3");
 
     SafeHtmlBuilder infoBuilder = new SafeHtmlBuilder();
     infoBuilder.append(CommonClientUtils.getFieldHTML("Description", view.getDescription()));

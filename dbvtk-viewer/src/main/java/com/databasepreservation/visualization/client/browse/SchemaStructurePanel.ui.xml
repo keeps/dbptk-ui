@@ -7,7 +7,7 @@
              xmlns:lists="urn:import:com.databasepreservation.visualization.client.common.lists">
 
     <g:FlowPanel>
-        <g:Label addStyleNames="h1"><ui:msg>Schema structure</ui:msg></g:Label>
+        <g:Label addStyleNames="h1"><ui:msg>Structure</ui:msg></g:Label>
         <g:FlowPanel ui:field="contentItems"/>
     </g:FlowPanel>
 </ui:UiBinder>

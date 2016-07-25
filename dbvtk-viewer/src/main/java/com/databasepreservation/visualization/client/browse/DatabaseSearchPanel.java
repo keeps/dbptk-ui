@@ -5,16 +5,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.roda.core.data.adapter.filter.BasicSearchFilterParameter;
+import org.roda.core.data.adapter.filter.Filter;
+import org.roda.core.data.v2.index.IndexResult;
+
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerRow;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerSchema;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable;
 import com.databasepreservation.visualization.client.common.lists.TableRowList;
-import com.databasepreservation.visualization.client.common.search.TableSearchPanel;
+import com.databasepreservation.visualization.client.common.utils.CommonClientUtils;
 import com.databasepreservation.visualization.client.main.BreadcrumbPanel;
 import com.databasepreservation.visualization.shared.ViewerSafeConstants;
 import com.databasepreservation.visualization.shared.client.Tools.BreadcrumbManager;
-import com.databasepreservation.visualization.shared.client.Tools.FontAwesomeIconManager;
+import com.databasepreservation.visualization.shared.client.Tools.HistoryManager;
 import com.databasepreservation.visualization.shared.client.Tools.ViewerStringUtils;
 import com.databasepreservation.visualization.shared.client.widgets.wcag.AccessibleFocusPanel;
 import com.google.gwt.core.client.GWT;
@@ -25,19 +29,13 @@ import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import org.roda.core.data.adapter.filter.BasicSearchFilterParameter;
-import org.roda.core.data.adapter.filter.Filter;
-import org.roda.core.data.adapter.filter.SimpleFilterParameter;
-import org.roda.core.data.v2.index.IndexResult;
+import com.google.gwt.view.client.SelectionChangeEvent;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -133,9 +131,9 @@ public class DatabaseSearchPanel extends RightPanel {
     // start searching
     Filter filter;
     String searchText = searchInputBox.getText();
-    if(ViewerStringUtils.isBlank(searchText)){
+    if (ViewerStringUtils.isBlank(searchText)) {
       filter = ViewerSafeConstants.DEFAULT_FILTER;
-    }else{
+    } else {
       filter = new Filter(new BasicSearchFilterParameter(ViewerSafeConstants.SOLR_ROW_SEARCH, searchText));
     }
 
@@ -149,45 +147,51 @@ public class DatabaseSearchPanel extends RightPanel {
     private final ViewerDatabase database;
     private final ViewerTable table;
 
-    public TableSearchPanelContainer(ViewerDatabase database, ViewerTable table){
+    public TableSearchPanelContainer(ViewerDatabase database, ViewerTable table) {
       super();
       this.setVisible(false);
       this.database = database;
       this.table = table;
     }
 
-    public void init(Filter filter){
-      if(filter == null){
+    public void init(Filter filter) {
+      if (filter == null) {
         filter = ViewerSafeConstants.DEFAULT_FILTER;
       }
 
       tableRowList = new TableRowList(database, table, filter, null, null, false, false);
 
-      HTML header = new HTML(new SafeHtmlBuilder().append(
-        FontAwesomeIconManager.loaded(FontAwesomeIconManager.SCHEMA, table.getSchemaName())).appendHtmlConstant("<br/>").append(
-        FontAwesomeIconManager.loaded(FontAwesomeIconManager.TABLE, table.getName())).toSafeHtml());
-      header.addStyleName("h3");
-
-      add(header);
+      add(CommonClientUtils.getSchemaAndTableHeader(database.getUUID(), table, "h3"));
       add(tableRowList);
 
       tableRowList.addValueChangeHandler(new ValueChangeHandler<IndexResult<ViewerRow>>() {
-        @Override public void onValueChange(ValueChangeEvent<IndexResult<ViewerRow>> event) {
+        @Override
+        public void onValueChange(ValueChangeEvent<IndexResult<ViewerRow>> event) {
           searchCompletedEventHandler(event);
+        }
+      });
+
+      tableRowList.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+        @Override
+        public void onSelectionChange(SelectionChangeEvent event) {
+          ViewerRow record = tableRowList.getSelectionModel().getSelectedObject();
+          if (record != null) {
+            HistoryManager.gotoRecord(database.getUUID(), table.getUUID(), record.getUUID());
+          }
         }
       });
     }
 
-    private void searchCompletedEventHandler(ValueChangeEvent<IndexResult<ViewerRow>> event){
+    private void searchCompletedEventHandler(ValueChangeEvent<IndexResult<ViewerRow>> event) {
       long resultCount = event.getValue().getTotalCount();
       GWT.log(table.getName() + " got " + resultCount + " results");
       setVisible(resultCount > 0);
     }
 
     public void doSearch(Filter filter) {
-      if(tableRowList == null){
+      if (tableRowList == null) {
         init(filter);
-      }else{
+      } else {
         tableRowList.setFilter(filter);
       }
     }

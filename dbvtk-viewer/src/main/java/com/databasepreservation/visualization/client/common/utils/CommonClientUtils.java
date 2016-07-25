@@ -1,12 +1,19 @@
 package com.databasepreservation.visualization.client.common.utils;
 
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerSchema;
+import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable;
+import com.databasepreservation.visualization.client.ViewerStructure.ViewerView;
+import com.databasepreservation.visualization.shared.client.Tools.FontAwesomeIconManager;
+import com.databasepreservation.visualization.shared.client.Tools.HistoryManager;
 import com.databasepreservation.visualization.shared.client.Tools.ViewerStringUtils;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.Hyperlink;
+import com.google.gwt.user.client.ui.Label;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -17,6 +24,69 @@ public class CommonClientUtils {
     if (ViewerStringUtils.isNotBlank(schema.getDescription())) {
       panel.add(new HTMLPanel(getFieldHTML("Schema description", schema.getDescription())));
     }
+  }
+
+  public static FlowPanel getSchemaAndTableHeader(String databaseUUID, ViewerTable table, String hClass) {
+    FlowPanel panel = new FlowPanel();
+    panel.addStyleName("schema-table-header");
+
+    // add icon
+    String iconTag = FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE);
+    HTML html = new HTML(SafeHtmlUtils.fromSafeConstant(iconTag));
+    html.addStyleName(hClass);
+    panel.add(html);
+
+    // add link schema
+    Hyperlink schemaLink = new Hyperlink(table.getSchemaName(), HistoryManager.linkToSchema(databaseUUID,
+      table.getSchemaUUID()));
+    schemaLink.addStyleName(hClass);
+    panel.add(schemaLink);
+
+    // add /
+    // Label slashSeparator = new Label("/");
+    // slashSeparator.addStyleName(hClass);
+    // panel.add(slashSeparator);
+
+    iconTag = FontAwesomeIconManager.getTag(FontAwesomeIconManager.SCHEMA_TABLE_SEPARATOR);
+    html = new HTML(SafeHtmlUtils.fromSafeConstant(iconTag));
+    html.addStyleName(hClass);
+    panel.add(html);
+
+    // add link table
+    Hyperlink tableLink = new Hyperlink(table.getName(), HistoryManager.linkToTable(databaseUUID, table.getUUID()));
+    tableLink.addStyleName(hClass);
+    panel.add(tableLink);
+
+    return panel;
+  }
+
+  public static FlowPanel getSchemaAndViewHeader(String databaseUUID, ViewerSchema schema, ViewerView view,
+    String hClass) {
+    FlowPanel panel = new FlowPanel();
+    panel.addStyleName("schema-table-header");
+
+    // add icon
+    String iconTag = FontAwesomeIconManager.getTag(FontAwesomeIconManager.SCHEMA_VIEWS);
+    HTML html = new HTML(SafeHtmlUtils.fromSafeConstant(iconTag));
+    html.addStyleName(hClass);
+    panel.add(html);
+
+    // add link schema
+    Hyperlink schemaLink = new Hyperlink(schema.getName(), HistoryManager.linkToSchema(databaseUUID, schema.getUUID()));
+    schemaLink.addStyleName(hClass);
+    panel.add(schemaLink);
+
+    iconTag = FontAwesomeIconManager.getTag(FontAwesomeIconManager.SCHEMA_TABLE_SEPARATOR);
+    html = new HTML(SafeHtmlUtils.fromSafeConstant(iconTag));
+    html.addStyleName(hClass);
+    panel.add(html);
+
+    // add view name
+    Label viewLink = new Label(view.getName());
+    viewLink.addStyleName(hClass);
+    panel.add(viewLink);
+
+    return panel;
   }
 
   public static SafeHtml getFieldHTML(String label, String value) {

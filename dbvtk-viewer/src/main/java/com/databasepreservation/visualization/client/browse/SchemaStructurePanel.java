@@ -16,8 +16,6 @@ import com.databasepreservation.visualization.client.common.lists.BasicTablePane
 import com.databasepreservation.visualization.client.common.utils.CommonClientUtils;
 import com.databasepreservation.visualization.client.main.BreadcrumbPanel;
 import com.databasepreservation.visualization.shared.client.Tools.BreadcrumbManager;
-import com.databasepreservation.visualization.shared.client.Tools.FontAwesomeIconManager;
-import com.databasepreservation.visualization.shared.client.Tools.HistoryManager;
 import com.databasepreservation.visualization.shared.client.Tools.ViewerStringUtils;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
@@ -29,7 +27,6 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -82,14 +79,9 @@ public class SchemaStructurePanel extends RightPanel {
   private void init() {
     CommonClientUtils.addSchemaInfoToFlowPanel(contentItems, schema);
 
-    // Tables and their information
-    Label tablesHeader = new Label("Tables");
-    tablesHeader.addStyleName("h2");
-    contentItems.add(tablesHeader);
-
     for (ViewerTable viewerTable : schema.getTables()) {
       contentItems.add(getBasicTablePanelForTableColumns(viewerTable));
-      if (viewerTable.getForeignKeys() != null && viewerTable.getForeignKeys().size() > 0) {
+      if (viewerTable.getForeignKeys() != null && !viewerTable.getForeignKeys().isEmpty()) {
         contentItems.add(getBasicTablePanelForTableForeignKeys(viewerTable));
       }
     }
@@ -98,7 +90,7 @@ public class SchemaStructurePanel extends RightPanel {
 
   private BasicTablePanel<ViewerForeignKey> getBasicTablePanelForTableForeignKeys(final ViewerTable table) {
     Label header = new Label("Foreign Keys");
-    header.addStyleName("h4");
+    header.addStyleName("h5");
 
     return new BasicTablePanel<>(header, SafeHtmlUtils.EMPTY_SAFE_HTML, table.getForeignKeys().iterator(),
 
@@ -124,7 +116,7 @@ public class SchemaStructurePanel extends RightPanel {
     }),
 
     new BasicTablePanel.ColumnInfo<>(
-      SafeHtmlUtils.fromSafeConstant("Mapping (Source <i class=\"fa fa-arrow-right\"></i> Referenced)"), 20,
+      SafeHtmlUtils.fromSafeConstant("Mapping (Source <i class=\"fa fa-long-arrow-right\"></i> Referenced)"), 20,
       new Column<ViewerForeignKey, SafeHtml>(new SafeHtmlCell()) {
         @Override
         public SafeHtml getValue(ViewerForeignKey foreignKey) {
@@ -135,7 +127,7 @@ public class SchemaStructurePanel extends RightPanel {
             ViewerReference reference = i.next();
 
             builder.appendEscaped(table.getColumns().get(reference.getSourceColumnIndex()).getDisplayName())
-              .appendHtmlConstant(" <i class='fa fa-arrow-right'></i> ")
+              .appendHtmlConstant(" <i class='fa fa-long-arrow-right'></i> ")
               .appendEscaped(referencedTable.getColumns().get(reference.getReferencedColumnIndex()).getDisplayName());
 
             if (i.hasNext()) {
@@ -182,9 +174,7 @@ public class SchemaStructurePanel extends RightPanel {
   }
 
   private BasicTablePanel<ViewerColumn> getBasicTablePanelForTableColumns(ViewerTable table) {
-    Hyperlink header = new Hyperlink(FontAwesomeIconManager.loaded(FontAwesomeIconManager.TABLE, table.getName()),
-      HistoryManager.linkToTable(database.getUUID(), table.getUUID()));
-    header.addStyleName("h3");
+    FlowPanel header = CommonClientUtils.getSchemaAndTableHeader(database.getUUID(), table, "h4");
 
     SafeHtmlBuilder infoBuilder = new SafeHtmlBuilder();
     if (ViewerStringUtils.isNotBlank(table.getDescription())) {

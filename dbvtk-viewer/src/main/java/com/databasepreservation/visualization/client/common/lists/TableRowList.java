@@ -59,8 +59,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
 
   public TableRowList(ViewerDatabase database, ViewerTable table, Filter filter, Facets facets, String summary,
     boolean selectable, boolean exportable) {
-    super(filter, false, facets, summary, selectable, exportable,
-      new Pair<ViewerDatabase, ViewerTable>(database, table));
+    super(filter, false, facets, summary, selectable, exportable, new Pair<>(database, table));
   }
 
   public void setColumnVisibility(Map<String, Boolean> columnDisplayNameToVisibleState) {

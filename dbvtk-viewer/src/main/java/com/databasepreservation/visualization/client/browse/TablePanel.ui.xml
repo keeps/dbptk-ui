@@ -7,7 +7,9 @@
              xmlns:lists="urn:import:com.databasepreservation.visualization.client.common.lists">
 
     <g:FlowPanel>
-        <g:HTML addStyleNames="h1" ui:field="mainHeader"><ui:msg>Loading table contents</ui:msg></g:HTML>
+        <g:SimplePanel addStyleNames="h1" ui:field="mainHeader">
+            <g:Label><ui:msg>Loading table information</ui:msg></g:Label>
+        </g:SimplePanel>
         <g:HTML ui:field="description"/>
         <s:TableSearchPanel ui:field="tableSearchPanel"/>
     </g:FlowPanel>
