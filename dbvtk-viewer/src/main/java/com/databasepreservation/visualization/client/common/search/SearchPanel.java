@@ -83,14 +83,12 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
   private Filter defaultFilter;
   private String allFilter;
   private boolean defaultFilterIncremental = false;
-  private SaveQueryCallback saveQueryCallback;
 
   private FlowPanel fieldsPanel;
   private AsyncTableCell<?, ?> list;
 
   public SearchPanel(Filter defaultFilter, String allFilter, String placeholder, boolean showSearchInputListBox,
     boolean showSearchAdvancedDisclosureButton, final SaveQueryCallback saveQueryCallback) {
-    this.saveQueryCallback = saveQueryCallback;
     this.defaultFilter = defaultFilter;
     this.allFilter = allFilter;
 
@@ -142,11 +140,13 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
       searchPanel.addStyleName("searchPanelAdvanced");
     }
 
+    saveSearchButton.addStyleName("searchPanelAdvancedSaveSearchButton");
     saveSearchButton.setEnabled(saveQueryCallback != null);
     saveSearchButton.setVisible(saveQueryCallback != null);
     saveSearchButton.addClickHandler(new ClickHandler() {
-      @Override public void onClick(ClickEvent event) {
-        if(saveQueryCallback != null){
+      @Override
+      public void onClick(ClickEvent event) {
+        if (saveQueryCallback != null) {
           saveQueryCallback.saveQuery();
         }
       }

@@ -2,7 +2,6 @@ package com.databasepreservation.visualization.client;
 
 import java.util.List;
 
-import com.databasepreservation.visualization.client.common.search.SearchInfo;
 import org.roda.core.data.adapter.facet.Facets;
 import org.roda.core.data.adapter.filter.Filter;
 import org.roda.core.data.adapter.sort.Sorter;
@@ -16,6 +15,7 @@ import org.roda.core.data.v2.index.IsIndexed;
 
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable;
 import com.databasepreservation.visualization.client.common.search.SearchField;
+import com.databasepreservation.visualization.client.common.search.SearchInfo;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
@@ -68,9 +68,10 @@ public interface BrowserService extends RemoteService {
   <T extends IsIndexed> T retrieveRows(String classNameToReturn, String tableUUID, String rowUUID)
     throws AuthorizationDeniedException, GenericException, NotFoundException;
 
-  String getSolrQueryString(Filter filter, Sorter sorter, Sublist sublist, Facets facets) throws AuthorizationDeniedException, GenericException,
-    RequestNotValidException;
+  String getSolrQueryString(Filter filter, Sorter sorter, Sublist sublist, Facets facets)
+    throws AuthorizationDeniedException, GenericException, RequestNotValidException;
 
-  void saveQuery(String name, String description, String tableUUID, String databaseUUID, SearchInfo searchInfo) throws AuthorizationDeniedException, GenericException,
-    RequestNotValidException, NotFoundException;
+  void saveQuery(String name, String description, String tableUUID, String tableName, String databaseUUID,
+    SearchInfo searchInfo) throws AuthorizationDeniedException, GenericException, RequestNotValidException,
+    NotFoundException;
 }

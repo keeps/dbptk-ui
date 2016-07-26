@@ -7,11 +7,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.databasepreservation.utils.JodaUtils;
+import com.databasepreservation.visualization.client.SavedSearch;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerCell;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerMetadata;
@@ -19,6 +24,7 @@ import com.databasepreservation.visualization.client.ViewerStructure.ViewerRow;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable;
 import com.databasepreservation.visualization.exceptions.ViewerException;
 import com.databasepreservation.visualization.shared.ViewerSafeConstants;
+import com.databasepreservation.visualization.utils.SolrUtils;
 import com.databasepreservation.visualization.utils.ViewerUtils;
 
 /**
@@ -36,6 +42,24 @@ public class SolrTransformer {
   /***********************************************************************************
    * Database viewer structures to solr documents
    **********************************************************************************/
+
+  public static SolrInputDocument fromSavedSearch(SavedSearch savedSearch) {
+    SolrInputDocument doc = new SolrInputDocument();
+
+    if (StringUtils.isBlank(savedSearch.getDateAdded())) {
+      savedSearch.setDateAdded(JodaUtils.solr_date_format(DateTime.now(DateTimeZone.UTC)));
+    }
+
+    doc.addField(ViewerSafeConstants.SOLR_SEARCHES_ID, SolrUtils.randomUUID());
+    doc.addField(ViewerSafeConstants.SOLR_SEARCHES_NAME, savedSearch.getName());
+    doc.addField(ViewerSafeConstants.SOLR_SEARCHES_DESCRIPTION, savedSearch.getDescription());
+    doc.addField(ViewerSafeConstants.SOLR_SEARCHES_DATE_ADDED, savedSearch.getDateAdded());
+    doc.addField(ViewerSafeConstants.SOLR_SEARCHES_DATABASE_UUID, savedSearch.getDatabaseUUID());
+    doc.addField(ViewerSafeConstants.SOLR_SEARCHES_TABLE_UUID, savedSearch.getTableUUID());
+    doc.addField(ViewerSafeConstants.SOLR_SEARCHES_TABLE_NAME, savedSearch.getTableName());
+    doc.addField(ViewerSafeConstants.SOLR_SEARCHES_SEARCH_INFO_JSON, savedSearch.getSearchInfoJson());
+    return doc;
+  }
 
   public static SolrInputDocument fromDatabase(ViewerDatabase viewerDatabase) throws ViewerException {
     SolrInputDocument doc = new SolrInputDocument();
@@ -65,6 +89,19 @@ public class SolrTransformer {
   /***********************************************************************************
    * Solr documents to Database viewer structures
    **********************************************************************************/
+
+  public static SavedSearch toSavedSearch(SolrDocument doc) {
+    SavedSearch savedSearch = new SavedSearch();
+    savedSearch.setUUID(objectToString(doc.get(ViewerSafeConstants.SOLR_SEARCHES_ID)));
+    savedSearch.setName(objectToString(doc.get(ViewerSafeConstants.SOLR_SEARCHES_NAME)));
+    savedSearch.setDescription(objectToString(doc.get(ViewerSafeConstants.SOLR_SEARCHES_DESCRIPTION)));
+    savedSearch.setDateAdded(objectToString(doc.get(ViewerSafeConstants.SOLR_SEARCHES_DATE_ADDED)));
+    savedSearch.setDatabaseUUID(objectToString(doc.get(ViewerSafeConstants.SOLR_SEARCHES_DATABASE_UUID)));
+    savedSearch.setTableUUID(objectToString(doc.get(ViewerSafeConstants.SOLR_SEARCHES_TABLE_UUID)));
+    savedSearch.setTableName(objectToString(doc.get(ViewerSafeConstants.SOLR_SEARCHES_TABLE_NAME)));
+    savedSearch.setSearchInfoJson(objectToString(doc.get(ViewerSafeConstants.SOLR_SEARCHES_SEARCH_INFO_JSON)));
+    return savedSearch;
+  }
 
   public static ViewerDatabase toDatabase(SolrDocument doc) throws ViewerException {
     ViewerDatabase viewerDatabase = new ViewerDatabase();
@@ -106,6 +143,25 @@ public class SolrTransformer {
       ret = object.toString();
     }
     return ret;
+  }
+
+  private static DateTime objectToDateTime(Object object, DateTime defaultValue) {
+    DateTime ret;
+    if (object == null) {
+      ret = null;
+    } else if (object instanceof String) {
+      ret = JodaUtils.solr_date_parse((String) object);
+    } else if (object instanceof DateTime) {
+      ret = (DateTime) object;
+    } else {
+      LOGGER.warn("Could not convert Solr object to DateTime, unsupported class: {}", object.getClass().getName());
+      ret = defaultValue;
+    }
+    return ret;
+  }
+
+  private static DateTime objectToDateTime(Object object) {
+    return objectToDateTime(object, null);
   }
 
   private static List<String> objectToListString(Object object) {

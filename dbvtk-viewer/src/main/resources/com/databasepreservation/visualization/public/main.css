@@ -50,6 +50,15 @@
     /*nothing yet since most of it is defined for all AsyncTableCells*/
 }
 
+.searchPanelAdvancedSaveSearchButton {
+    margin-right: 1rem;
+    float: right;
+}
+
+.btn-save:after {
+    content: "\f0c7";
+}
+
 .btn-export {
     padding: 4px 8px 4px 8px;
     font-size: 11px;

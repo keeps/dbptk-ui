@@ -2,7 +2,6 @@ package com.databasepreservation.visualization.server;
 
 import java.util.List;
 
-import com.databasepreservation.visualization.client.SavedSearch;
 import org.roda.core.data.adapter.facet.Facets;
 import org.roda.core.data.adapter.filter.Filter;
 import org.roda.core.data.adapter.sort.Sorter;
@@ -17,6 +16,7 @@ import org.roda.core.data.v2.index.IsIndexed;
 import org.roda.core.data.v2.user.RodaUser;
 
 import com.databasepreservation.visualization.client.BrowserService;
+import com.databasepreservation.visualization.client.SavedSearch;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable;
 import com.databasepreservation.visualization.client.common.search.SearchField;
 import com.databasepreservation.visualization.client.common.search.SearchInfo;
@@ -102,8 +102,9 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
   }
 
   @Override
-  public void saveQuery(String name, String description, String tableUUID, String databaseUUID, SearchInfo searchInfo)
-    throws AuthorizationDeniedException, GenericException, RequestNotValidException, NotFoundException {
+  public void saveQuery(String name, String description, String tableUUID, String tableName, String databaseUUID,
+    SearchInfo searchInfo) throws AuthorizationDeniedException, GenericException, RequestNotValidException,
+    NotFoundException {
     RodaUser user = null;
     String searchInfoJson = JsonUtils.getJsonFromObject(searchInfo);
 
@@ -112,6 +113,7 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
     savedSearch.setDescription(description);
     savedSearch.setDatabaseUUID(databaseUUID);
     savedSearch.setTableUUID(tableUUID);
+    savedSearch.setTableName(tableName);
     savedSearch.setSearchInfoJson(searchInfoJson);
 
     ViewerFactory.getSolrManager().addSavedSearch(user, savedSearch);

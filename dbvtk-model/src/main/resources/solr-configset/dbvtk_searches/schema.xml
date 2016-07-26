@@ -45,7 +45,7 @@
     that avoids logging every request
 -->
 
-<schema name="dblist" version="1.5">
+<schema name="searches" version="1.5">
     <!-- attribute "name" is the name of this schema and is only used for display purposes.
          version="x.y" is Solr's version number for the schema syntax and
          semantics.  It should not normally be changed by applications.
@@ -127,13 +127,14 @@
       in a compatible way. Any analysis applied to the <uniqueKey> should _not_ produce multiple
       tokens
     -->
-    <field name="id" type="string" indexed="true" stored="true" required="true" multiValued="false" />
-    <field name="name" type="text_general" indexed="true" stored="true" required="true" multiValued="false" />
-    <field name="description" type="text_general" indexed="true" stored="true" required="true" multiValued="false" />
-    <field name="date_added" type="date" indexed="false" stored="true" required="true" multiValued="false" />
-    <field name="database_uuid" type="string" indexed="true" stored="true" required="true" multiValued="false" />
-    <field name="table_uuid" type="string" indexed="true" stored="true" required="true" multiValued="false" />
-    <field name="search_info_json" type="string" indexed="false" stored="true" required="true" multiValued="false" />
+    <field name="id" type="string" indexed="true" stored="true" required="true" multiValued="false"/>
+    <field name="name" type="text_general" indexed="true" stored="true" required="true" multiValued="false"/>
+    <field name="table_name" type="string" indexed="true" stored="true" required="true" multiValued="false"/>
+    <field name="description" type="text_general" indexed="true" stored="true" required="true" multiValued="false"/>
+    <field name="date_added" type="date" indexed="false" stored="true" required="true" multiValued="false"/>
+    <field name="database_uuid" type="string" indexed="true" stored="true" required="true" multiValued="false"/>
+    <field name="table_uuid" type="string" indexed="true" stored="true" required="true" multiValued="false"/>
+    <field name="search_info_json" type="string" indexed="false" stored="true" required="true" multiValued="false"/>
 
 
     <!--

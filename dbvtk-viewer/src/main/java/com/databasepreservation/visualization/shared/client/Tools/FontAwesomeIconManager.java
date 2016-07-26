@@ -23,6 +23,7 @@ public class FontAwesomeIconManager {
   public static final String SCHEMA_DATA = "th-large";
   public static final String SCHEMA_CHECK_CONSTRAINTS = "compress";
   public static final String SCHEMA_TABLE_SEPARATOR = "angle-right";
+  public static final String SAVED_SEARCH = "floppy-o";
 
   public static String getTag(String icon) {
     return "<i class=\"fa fa-" + icon + "\"></i>";

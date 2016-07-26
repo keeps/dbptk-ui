@@ -28,7 +28,6 @@ import org.roda.core.data.v2.user.RodaUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.databasepreservation.utils.JodaUtils;
 import com.databasepreservation.visualization.client.SavedSearch;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerRow;
@@ -98,6 +97,13 @@ public class SolrManager {
     // add this database to the collection
     collectionsToCommit.add(ViewerSafeConstants.SOLR_INDEX_DATABASE_COLLECTION_NAME);
     insertDocument(ViewerSafeConstants.SOLR_INDEX_DATABASE_COLLECTION_NAME, SolrTransformer.fromDatabase(database));
+
+    // create collection needed to store saved searches
+    try {
+      createSavedSearchesCollection();
+    } catch (ViewerException e) {
+      LOGGER.error("Error creating saved searches collection", e);
+    }
 
     // prepare tables to create the collection
     // for (ViewerSchema viewerSchema : database.getMetadata().getSchemas()) {
@@ -214,15 +220,7 @@ public class SolrManager {
       LOGGER.error("Error creating saved searches collection", e);
     }
 
-    SolrInputDocument doc = new SolrInputDocument();
-    doc.addField(ViewerSafeConstants.SOLR_SEARCHES_ID, SolrUtils.randomUUID());
-    doc.addField(ViewerSafeConstants.SOLR_SEARCHES_NAME, savedSearch.getName());
-    doc.addField(ViewerSafeConstants.SOLR_SEARCHES_DESCRIPTION, savedSearch.getDescription());
-    doc.addField(ViewerSafeConstants.SOLR_SEARCHES_DATE_ADDED,
-      JodaUtils.solr_date_format(savedSearch.getOrCreateDateAdded()));
-    doc.addField(ViewerSafeConstants.SOLR_SEARCHES_DATABASE_UUID, savedSearch.getDatabaseUUID());
-    doc.addField(ViewerSafeConstants.SOLR_SEARCHES_TABLE_UUID, savedSearch.getTableUUID());
-    doc.addField(ViewerSafeConstants.SOLR_SEARCHES_SEARCH_INFO_JSON, savedSearch.getSearchInfoJson());
+    SolrInputDocument doc = SolrTransformer.fromSavedSearch(savedSearch);
 
     try {
       client.add(ViewerSafeConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME, doc);

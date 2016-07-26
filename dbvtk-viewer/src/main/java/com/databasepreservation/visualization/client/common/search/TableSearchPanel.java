@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.visualization.utils.SolrManager;
 import org.roda.core.data.adapter.filter.Filter;
 
 import com.databasepreservation.visualization.client.BrowserService;
@@ -125,11 +124,13 @@ public class TableSearchPanel extends Composite {
 
     GWT.log("initial filter: " + initialFilter.toString());
 
-    searchPanel = new SearchPanel(initialFilter, ViewerSafeConstants.SOLR_ROW_SEARCH, "Search...", false, true, new SaveQueryCallback() {
-      @Override public void saveQuery() {
-        TableSearchPanel.this.saveQuery();
-      }
-    });
+    searchPanel = new SearchPanel(initialFilter, ViewerSafeConstants.SOLR_ROW_SEARCH, "Search...", false, true,
+      new SaveQueryCallback() {
+        @Override
+        public void saveQuery() {
+          TableSearchPanel.this.saveQuery();
+        }
+      });
     searchPanel.setList(tableRowList);
     searchPanel.setDefaultFilterIncremental(true);
     showSearchAdvancedFieldsPanel();
@@ -334,15 +335,17 @@ public class TableSearchPanel extends Composite {
     return currentSearchInfo != null;
   }
 
-  private void saveQuery(){
+  private void saveQuery() {
     SearchInfo currentSearchInfo = createSearchInfo();
-    BrowserService.Util.getInstance().saveQuery("some query", "some description", table.getUUID(), database.getUUID(),
-      currentSearchInfo, new AsyncCallback<Void>() {
-        @Override public void onFailure(Throwable caught) {
+    BrowserService.Util.getInstance().saveQuery("some query", "some description", table.getUUID(), table.getName(),
+      database.getUUID(), currentSearchInfo, new AsyncCallback<Void>() {
+        @Override
+        public void onFailure(Throwable caught) {
           GWT.log("ERROR: did not save search");
         }
 
-        @Override public void onSuccess(Void result) {
+        @Override
+        public void onSuccess(Void result) {
           GWT.log("SUCCESS: saved search");
         }
       });

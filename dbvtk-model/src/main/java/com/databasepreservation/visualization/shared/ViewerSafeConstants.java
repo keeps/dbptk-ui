@@ -42,6 +42,7 @@ public class ViewerSafeConstants {
   public static final String SOLR_SEARCHES_DATE_ADDED = "date_added";
   public static final String SOLR_SEARCHES_DATABASE_UUID = "database_uuid";
   public static final String SOLR_SEARCHES_TABLE_UUID = "table_uuid";
+  public static final String SOLR_SEARCHES_TABLE_NAME = "table_name";
   public static final String SOLR_SEARCHES_SEARCH_INFO_JSON = "search_info_json";
 
   /*

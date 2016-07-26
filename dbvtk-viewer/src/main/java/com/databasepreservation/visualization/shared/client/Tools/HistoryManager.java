@@ -25,6 +25,7 @@ public class HistoryManager {
   public static final String ROUTE_FOREIGN_KEY = "relation";
   public static final String ROUTE_REFERENCES = "references";
   public static final String ROUTE_SCHEMA_CHECK_CONSTRAINTS = "constraints";
+  public static final String ROUTE_SAVED_SEARCHES = "searches";
 
   public static final String HISTORY_SEP = "/";
   public static final String HISTORY_SEP_REGEX = "/";
@@ -76,6 +77,14 @@ public class HistoryManager {
 
   public static void gotoSchemaCheckConstraints(String databaseUUID, String schemaUUID) {
     newHistory(Arrays.asList(ROUTE_SCHEMA, databaseUUID, schemaUUID, ROUTE_SCHEMA_CHECK_CONSTRAINTS));
+  }
+
+  public static void gotoSavedSearches(String databaseUUID) {
+    newHistory(Arrays.asList(ROUTE_SAVED_SEARCHES, databaseUUID));
+  }
+
+  public static void gotoSavedSearch(String databaseUUID, String savedSearchUUID) {
+    newHistory(Arrays.asList(ROUTE_SAVED_SEARCHES, databaseUUID, savedSearchUUID));
   }
 
   public static void gotoTable(String databaseUUID, String tableUUID) {
@@ -182,6 +191,14 @@ public class HistoryManager {
 
   public static String linkToSchemaViews(String database_uuid, String schema_uuid) {
     return createHistoryToken(Arrays.asList(ROUTE_SCHEMA, database_uuid, schema_uuid, ROUTE_SCHEMA_VIEWS));
+  }
+
+  public static String linkToSavedSearches(String database_uuid) {
+    return createHistoryToken(Arrays.asList(ROUTE_SAVED_SEARCHES, database_uuid));
+  }
+
+  public static String linkToSavedSearch(String database_uuid, String saved_search_uuid) {
+    return createHistoryToken(Arrays.asList(ROUTE_SAVED_SEARCHES, database_uuid, saved_search_uuid));
   }
 
   public static String linkToSchemaData(String database_uuid, String schema_uuid) {

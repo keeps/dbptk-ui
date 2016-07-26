@@ -32,4 +32,9 @@
     <source path='client'/>
     <source path='shared'/>
 
+    <!-- better stack trace, http://www.summa.com/blog/2012/06/11/7-tips-for-exception-handling-in-gwt -->
+    <!--<set-property name="compiler.stackMode" value="emulated" />-->
+    <!--<set-configuration-property name="compiler.emulatedStack.recordLineNumbers" value="true"/>-->
+    <!--<set-configuration-property name="compiler.emulatedStack.recordFileNames" value="true"/>-->
+
 </module>

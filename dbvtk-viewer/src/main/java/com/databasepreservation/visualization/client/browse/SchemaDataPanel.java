@@ -1,5 +1,8 @@
 package com.databasepreservation.visualization.client.browse;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,7 +77,17 @@ public class SchemaDataPanel extends RightPanel {
 
   private BasicTablePanel<ViewerTable> getBasicTablePanelForTableInfo(final ViewerMetadata metadata,
     final ViewerSchema schema) {
-    List<ViewerTable> tables = schema.getTables();
+
+    List<ViewerTable> tables = new ArrayList<>(schema.getTables());
+
+    Collections.sort(tables, new Comparator<ViewerTable>() {
+      @Override
+      public int compare(ViewerTable o1, ViewerTable o2) {
+        Long r1 = o1.getCountRows();
+        Long r2 = o2.getCountRows();
+        return r2.compareTo(r1);
+      }
+    });
 
     return new BasicTablePanel<>(new HTMLPanel(SafeHtmlUtils.EMPTY_SAFE_HTML), new HTMLPanel(
       SafeHtmlUtils.EMPTY_SAFE_HTML), tables.iterator(),
@@ -86,7 +99,32 @@ public class SchemaDataPanel extends RightPanel {
       }
     }),
 
-    new BasicTablePanel.ColumnInfo<>("Foreign keys to other tables", 14, new TextColumn<ViewerTable>() {
+    new BasicTablePanel.ColumnInfo<>("Number of rows", 7, new TextColumn<ViewerTable>() {
+      @Override
+      public String getValue(ViewerTable table) {
+        return String.valueOf(table.getCountRows());
+      }
+    }),
+
+    new BasicTablePanel.ColumnInfo<>("Number of columns", 8, new TextColumn<ViewerTable>() {
+      @Override
+      public String getValue(ViewerTable table) {
+        return String.valueOf(table.getColumns().size());
+      }
+    }),
+
+    new BasicTablePanel.ColumnInfo<>("Description", 35, new TextColumn<ViewerTable>() {
+      @Override
+      public String getValue(ViewerTable table) {
+        if (table.getDescription() != null) {
+          return table.getDescription();
+        } else {
+          return "";
+        }
+      }
+    }),
+
+    new BasicTablePanel.ColumnInfo<>("Relations (out)", 7, new TextColumn<ViewerTable>() {
       @Override
       public String getValue(ViewerTable table) {
         int outboundForeignKeys = table.getForeignKeys().size();
@@ -98,7 +136,7 @@ public class SchemaDataPanel extends RightPanel {
       }
     }),
 
-    new BasicTablePanel.ColumnInfo<>("Foreign keys referring this table", 15, new TextColumn<ViewerTable>() {
+    new BasicTablePanel.ColumnInfo<>("Relations (in)", 7, new TextColumn<ViewerTable>() {
       @Override
       public String getValue(ViewerTable table) {
         int inboundForeignKeys = 0;
@@ -116,31 +154,6 @@ public class SchemaDataPanel extends RightPanel {
           return String.valueOf(inboundForeignKeys);
         } else {
           return "none";
-        }
-      }
-    }),
-
-    new BasicTablePanel.ColumnInfo<>("Degree (# Columns)", 10, new TextColumn<ViewerTable>() {
-      @Override
-      public String getValue(ViewerTable table) {
-        return String.valueOf(table.getColumns().size());
-      }
-    }),
-
-    new BasicTablePanel.ColumnInfo<>("Cardinality (# Rows)", 10, new TextColumn<ViewerTable>() {
-      @Override
-      public String getValue(ViewerTable table) {
-        return String.valueOf(table.getCountRows());
-      }
-    }),
-
-    new BasicTablePanel.ColumnInfo<>("Description", 35, new TextColumn<ViewerTable>() {
-      @Override
-      public String getValue(ViewerTable table) {
-        if (table.getDescription() != null) {
-          return table.getDescription();
-        } else {
-          return "";
         }
       }
     })

@@ -71,6 +71,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.utils.FileUtils;
+import com.databasepreservation.visualization.client.SavedSearch;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerRow;
 import com.databasepreservation.visualization.exceptions.ViewerException;
@@ -205,6 +206,8 @@ public class SolrUtils {
         ret = resultClass.cast(SolrTransformer.toDatabase(doc));
       } else if (resultClass.equals(ViewerRow.class)) {
         ret = resultClass.cast(SolrTransformer.toRow(doc));
+      } else if (resultClass.equals(SavedSearch.class)) {
+        ret = resultClass.cast(SolrTransformer.toSavedSearch(doc));
       } else {
         throw new GenericException("Cannot find class index name: " + resultClass.getName());
       }
@@ -229,6 +232,8 @@ public class SolrUtils {
     String indexName = null;
     if (resultClass.equals(ViewerDatabase.class)) {
       indexName = ViewerSafeConstants.SOLR_INDEX_DATABASE_COLLECTION_NAME;
+    } else if (resultClass.equals(SavedSearch.class)) {
+      indexName = ViewerSafeConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME;
     } else if (resultClass.equals(ViewerRow.class)) {
       throw new GenericException("Can not determine collection name from " + ViewerRow.class.getName() + " class name");
     } else {

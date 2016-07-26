@@ -2,8 +2,6 @@ package com.databasepreservation.visualization.client;
 
 import java.io.Serializable;
 
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.roda.core.data.v2.index.IsIndexed;
 
 /**
@@ -13,8 +11,9 @@ public class SavedSearch implements Serializable, IsIndexed {
   private String uuid;
   private String name;
   private String description;
-  private DateTime dateAdded;
+  private String dateAdded;
   private String tableUUID;
+  private String tableName;
   private String databaseUUID;
   private String searchInfoJson;
 
@@ -29,18 +28,11 @@ public class SavedSearch implements Serializable, IsIndexed {
     this.databaseUUID = databaseUUID;
   }
 
-  public DateTime getDateAdded() {
+  public String getDateAdded() {
     return dateAdded;
   }
 
-  public DateTime getOrCreateDateAdded() {
-    if (dateAdded == null) {
-      dateAdded = DateTime.now(DateTimeZone.UTC);
-    }
-    return dateAdded;
-  }
-
-  public void setDateAdded(DateTime dateAdded) {
+  public void setDateAdded(String dateAdded) {
     this.dateAdded = dateAdded;
   }
 
@@ -83,5 +75,13 @@ public class SavedSearch implements Serializable, IsIndexed {
 
   public void setUUID(String uuid) {
     this.uuid = uuid;
+  }
+
+  public String getTableName() {
+    return tableName;
+  }
+
+  public void setTableName(String tableName) {
+    this.tableName = tableName;
   }
 }

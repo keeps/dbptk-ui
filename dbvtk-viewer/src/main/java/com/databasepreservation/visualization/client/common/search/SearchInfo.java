@@ -22,7 +22,7 @@ import com.google.gwt.safehtml.shared.UriUtils;
  * 
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class SearchInfo implements Serializable{
+public class SearchInfo implements Serializable {
   private Filter defaultFilter;
   private String currentFilter;
   private Map<String, Boolean> fieldVisibility;

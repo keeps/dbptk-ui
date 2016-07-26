@@ -76,7 +76,7 @@ public class DatabaseUsersPanel extends RightPanel {
 
     HTMLPanel info = new HTMLPanel("");
     if (users.isEmpty()) {
-      return new BasicTablePanel<>(header, "User information is not available.");
+      return new BasicTablePanel<>(header, "Database does not contain users.");
     } else {
       return new BasicTablePanel<>(header, info, users.iterator(),
 
@@ -107,7 +107,7 @@ public class DatabaseUsersPanel extends RightPanel {
     HTMLPanel info = new HTMLPanel("");
 
     if (roles.isEmpty()) {
-      return new BasicTablePanel<>(header, "Role information is not available.");
+      return new BasicTablePanel<>(header, "Database does not contain roles.");
     } else {
       return new BasicTablePanel<>(header, info, roles.iterator(),
 
@@ -139,13 +139,13 @@ public class DatabaseUsersPanel extends RightPanel {
   private BasicTablePanel<ViewerPrivilegeStructure> getBasicTablePanelForPrivileges(ViewerMetadata metadata) {
     final List<ViewerPrivilegeStructure> privileges = metadata.getPrivileges();
 
-    Label header = new Label("Roles");
+    Label header = new Label("Privileges");
     header.addStyleName("h4");
 
     HTMLPanel info = new HTMLPanel("");
 
     if (privileges.isEmpty()) {
-      return new BasicTablePanel<>(header, "Privilege information is not available.");
+      return new BasicTablePanel<>(header, "Database does not contain privileges.");
     } else {
       return new BasicTablePanel<>(header, info, privileges.iterator(),
 

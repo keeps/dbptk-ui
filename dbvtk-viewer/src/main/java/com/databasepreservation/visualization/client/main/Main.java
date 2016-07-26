@@ -8,6 +8,7 @@ import com.databasepreservation.visualization.client.browse.DatabaseInformationP
 import com.databasepreservation.visualization.client.browse.DatabaseListPanel;
 import com.databasepreservation.visualization.client.browse.DatabasePanel;
 import com.databasepreservation.visualization.client.browse.DatabaseSearchPanel;
+import com.databasepreservation.visualization.client.browse.DatabaseSearchesPanel;
 import com.databasepreservation.visualization.client.browse.DatabaseUsersPanel;
 import com.databasepreservation.visualization.client.browse.ForeignKeyPanel;
 import com.databasepreservation.visualization.client.browse.ReferencesPanel;
@@ -20,6 +21,7 @@ import com.databasepreservation.visualization.client.browse.SchemaStructurePanel
 import com.databasepreservation.visualization.client.browse.SchemaTriggersPanel;
 import com.databasepreservation.visualization.client.browse.SchemaViewsPanel;
 import com.databasepreservation.visualization.client.browse.TablePanel;
+import com.databasepreservation.visualization.client.browse.TableSavedSearchPanel;
 import com.databasepreservation.visualization.client.common.utils.RightPanelLoader;
 import com.databasepreservation.visualization.shared.client.ClientLogger;
 import com.databasepreservation.visualization.shared.client.Tools.HistoryManager;
@@ -311,6 +313,31 @@ public class Main implements EntryPoint {
           @Override
           public RightPanel load(ViewerDatabase database) {
             return ForeignKeyPanel.createInstance(database, tableUUID, columnsAndValues);
+          }
+        });
+
+      } else {
+        handleErrorPath(currentHistoryPath);
+      }
+    } else if (HistoryManager.ROUTE_SAVED_SEARCHES.equals(currentHistoryPath.get(0))) {
+      if (currentHistoryPath.size() == 2) {
+        // #searches/<databaseUUID>
+        final String databaseUUID = currentHistoryPath.get(1);
+        setContent(databaseUUID, new RightPanelLoader() {
+          @Override
+          public RightPanel load(ViewerDatabase database) {
+            return DatabaseSearchesPanel.getInstance(database);
+          }
+        });
+
+      } else if (currentHistoryPath.size() == 3) {
+        // #searches/<databaseUUID>/<searchUUID>
+        final String databaseUUID = currentHistoryPath.get(1);
+        final String searchUUID = currentHistoryPath.get(2);
+        setContent(databaseUUID, new RightPanelLoader() {
+          @Override
+          public RightPanel load(ViewerDatabase database) {
+            return TableSavedSearchPanel.createInstance(database, searchUUID);
           }
         });
 
