@@ -6,12 +6,17 @@ import com.databasepreservation.visualization.client.BrowserService;
 import com.databasepreservation.visualization.client.SavedSearch;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.visualization.client.common.search.SearchInfo;
+import com.databasepreservation.visualization.client.common.search.TableSearchPanel;
+import com.databasepreservation.visualization.client.common.utils.CommonClientUtils;
 import com.databasepreservation.visualization.client.main.BreadcrumbPanel;
+import com.databasepreservation.visualization.shared.client.Tools.BreadcrumbManager;
 import com.databasepreservation.visualization.shared.client.Tools.ViewerJsonUtils;
+import com.databasepreservation.visualization.shared.client.Tools.ViewerStringUtils;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -32,17 +37,24 @@ public class TableSavedSearchPanel extends RightPanel {
   private String savedSearchUUID;
   private SavedSearch savedSearch;
 
-  private RightPanel innerRightPanel = null;
-  private BreadcrumbPanel breadcrumb = null;
+  @UiField
+  SimplePanel mainHeader;
 
   @UiField
-  SimplePanel panel;
+  HTML description;
+
+  @UiField
+  SimplePanel tableSearchPanelContainer;
+
+  private TableSearchPanel tableSearchPanel;
 
   private TableSavedSearchPanel(ViewerDatabase viewerDatabase, final String savedSearchUUID) {
     database = viewerDatabase;
     this.savedSearchUUID = savedSearchUUID;
 
     initWidget(uiBinder.createAndBindUi(this));
+
+    mainHeader.setWidget(CommonClientUtils.getSavedSearchHeader(database.getUUID(), "Loading..."));
 
     // search (count)
     BrowserService.Util.getInstance().retrieve(SavedSearch.class.getName(), savedSearchUUID,
@@ -68,16 +80,8 @@ public class TableSavedSearchPanel extends RightPanel {
    */
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    // set this in case handleBreadcrumb happens before init
-    if (breadcrumb != null) {
-      this.breadcrumb = breadcrumb;
-    }
-
-    // this will be true if init has already run when handleBreadcrumb is called
-    // externally; or handleBreadcrumb was called first and init is finishing up
-    if (innerRightPanel != null && breadcrumb != null) {
-      innerRightPanel.handleBreadcrumb(breadcrumb);
-    }
+    BreadcrumbManager.updateBreadcrumb(breadcrumb,
+      BreadcrumbManager.forDatabaseSavedSearch(database.getMetadata().getName(), database.getUUID(), savedSearchUUID));
   }
 
   /**
@@ -85,14 +89,19 @@ public class TableSavedSearchPanel extends RightPanel {
    * result, otherwise show a TablePanel
    */
   private void init() {
-    // display a RowPanel
     String tableUUID = savedSearch.getTableUUID();
 
+    // set UI
+    mainHeader.setWidget(CommonClientUtils.getSavedSearchHeader(database.getUUID(), savedSearch.getName()));
+    if (ViewerStringUtils.isNotBlank(savedSearch.getDescription())) {
+      description.setHTML(CommonClientUtils.getFieldHTML("Description", savedSearch.getDescription()));
+    }
+
+    // set searchForm and table
     SearchInfo searchInfo = ViewerJsonUtils.getSearchInfoMapper().read(savedSearch.getSearchInfoJson());
     if (SearchInfo.isPresentAndValid(searchInfo)) {
-      innerRightPanel = TablePanel.createInstance(database, database.getMetadata().getTable(tableUUID), searchInfo);
-      handleBreadcrumb(breadcrumb);
-      panel.setWidget(innerRightPanel);
+      tableSearchPanel = new TableSearchPanel(searchInfo);
+      tableSearchPanelContainer.setWidget(tableSearchPanel);
     } else {
       GWT.log("search info was invalid. JSON: " + savedSearch.getSearchInfoJson());
     }

@@ -60,6 +60,25 @@ public class CommonClientUtils {
     return panel;
   }
 
+  public static FlowPanel getSavedSearchHeader(String databaseUUID, String savedSearchName) {
+    FlowPanel panel = new FlowPanel();
+    panel.addStyleName("schema-table-header");
+    String hClass = "h1";
+
+    // add icon
+    String iconTag = FontAwesomeIconManager.getTag(FontAwesomeIconManager.SAVED_SEARCH);
+    HTML html = new HTML(SafeHtmlUtils.fromSafeConstant(iconTag));
+    html.addStyleName(hClass);
+    panel.add(html);
+
+    // add view name
+    Label savedSearchLabel = new Label(savedSearchName);
+    savedSearchLabel.addStyleName(hClass);
+    panel.add(savedSearchLabel);
+
+    return panel;
+  }
+
   public static FlowPanel getSchemaAndViewHeader(String databaseUUID, ViewerSchema schema, ViewerView view,
     String hClass) {
     FlowPanel panel = new FlowPanel();

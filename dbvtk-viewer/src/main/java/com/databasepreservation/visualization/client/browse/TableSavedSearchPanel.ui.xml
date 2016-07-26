@@ -6,6 +6,11 @@
              xmlns:sb='urn:import:com.databasepreservation.visualization.client.common.sidebar'
              xmlns:lists="urn:import:com.databasepreservation.visualization.client.common.lists">
 
-<g:SimplePanel ui:field="panel">
-</g:SimplePanel>
+    <g:FlowPanel>
+        <g:SimplePanel addStyleNames="h1" ui:field="mainHeader">
+            <g:Label><ui:msg>Loading table information</ui:msg></g:Label>
+        </g:SimplePanel>
+        <g:HTML ui:field="description"/>
+        <g:SimplePanel ui:field="tableSearchPanelContainer"/>
+    </g:FlowPanel>
 </ui:UiBinder>

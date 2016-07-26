@@ -55,6 +55,31 @@ public class BreadcrumbManager {
     return items;
   }
 
+  public static List<BreadcrumbItem> forDatabaseSavedSearches(final String databaseName, final String databaseUUID) {
+    List<BreadcrumbItem> items = forDatabase(databaseName, databaseUUID);
+    items.add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager
+      .getTag(FontAwesomeIconManager.SAVED_SEARCH) + SafeHtmlUtils.htmlEscape(" Saved searches")), new Command() {
+      @Override
+      public void execute() {
+        HistoryManager.gotoSavedSearches(databaseUUID);
+      }
+    }));
+    return items;
+  }
+
+  public static List<BreadcrumbItem> forDatabaseSavedSearch(final String databaseName, final String databaseUUID,
+    final String savedSearchUUID) {
+    List<BreadcrumbItem> items = forDatabaseSavedSearches(databaseName, databaseUUID);
+    items.add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager
+      .getTag(FontAwesomeIconManager.SAVED_SEARCH) + SafeHtmlUtils.htmlEscape(" Saved search")), new Command() {
+      @Override
+      public void execute() {
+        HistoryManager.gotoSavedSearch(databaseUUID, savedSearchUUID);
+      }
+    }));
+    return items;
+  }
+
   public static List<BreadcrumbItem> forSchema(final String databaseName, final String databaseUUID,
     final String schemaName, final String schemaUUID) {
     List<BreadcrumbItem> items = forDatabase(databaseName, databaseUUID);
