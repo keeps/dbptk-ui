@@ -101,6 +101,7 @@ public class TableSavedSearchPanel extends RightPanel {
     SearchInfo searchInfo = ViewerJsonUtils.getSearchInfoMapper().read(savedSearch.getSearchInfoJson());
     if (SearchInfo.isPresentAndValid(searchInfo)) {
       tableSearchPanel = new TableSearchPanel(searchInfo);
+      tableSearchPanel.provideSource(database, database.getMetadata().getTable(tableUUID));
       tableSearchPanelContainer.setWidget(tableSearchPanel);
     } else {
       GWT.log("search info was invalid. JSON: " + savedSearch.getSearchInfoJson());

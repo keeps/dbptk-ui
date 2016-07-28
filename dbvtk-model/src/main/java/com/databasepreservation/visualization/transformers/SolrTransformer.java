@@ -1,11 +1,14 @@
 package com.databasepreservation.visualization.transformers;
 
+import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.common.SolrDocument;
@@ -95,7 +98,7 @@ public class SolrTransformer {
     savedSearch.setUUID(objectToString(doc.get(ViewerSafeConstants.SOLR_SEARCHES_ID)));
     savedSearch.setName(objectToString(doc.get(ViewerSafeConstants.SOLR_SEARCHES_NAME)));
     savedSearch.setDescription(objectToString(doc.get(ViewerSafeConstants.SOLR_SEARCHES_DESCRIPTION)));
-    savedSearch.setDateAdded(objectToString(doc.get(ViewerSafeConstants.SOLR_SEARCHES_DATE_ADDED)));
+    savedSearch.setDateAdded(dateToIsoDateString(objectToDate(doc.get(ViewerSafeConstants.SOLR_SEARCHES_DATE_ADDED))));
     savedSearch.setDatabaseUUID(objectToString(doc.get(ViewerSafeConstants.SOLR_SEARCHES_DATABASE_UUID)));
     savedSearch.setTableUUID(objectToString(doc.get(ViewerSafeConstants.SOLR_SEARCHES_TABLE_UUID)));
     savedSearch.setTableName(objectToString(doc.get(ViewerSafeConstants.SOLR_SEARCHES_TABLE_NAME)));
@@ -261,6 +264,13 @@ public class SolrTransformer {
     }
 
     return ret;
+  }
+
+  private static String dateToIsoDateString(Date date) {
+    TimeZone tz = TimeZone.getTimeZone("UTC");
+    DateFormat df = new SimpleDateFormat("yyyy-MM-dd' 'HH:mm:ss' UTC'");
+    df.setTimeZone(tz);
+    return df.format(date);
   }
 
   private static Boolean objectToBoolean(Object object) {
