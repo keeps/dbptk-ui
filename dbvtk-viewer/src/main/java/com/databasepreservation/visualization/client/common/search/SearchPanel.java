@@ -26,10 +26,12 @@ import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -76,6 +78,7 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
 
   @UiField
   Button saveSearchButton;
+  AsyncCallback<Void> saveQueryCallback;
 
   @UiField
   FlowPanel searchPreFilters;
@@ -88,7 +91,8 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
   private AsyncTableCell<?, ?> list;
 
   public SearchPanel(Filter defaultFilter, String allFilter, String placeholder, boolean showSearchInputListBox,
-    boolean showSearchAdvancedDisclosureButton, final SaveQueryCallback saveQueryCallback) {
+    boolean showSearchAdvancedDisclosureButton, final AsyncCallback<Void> saveQueryCallback) {
+    this.saveQueryCallback = saveQueryCallback;
     this.defaultFilter = defaultFilter;
     this.allFilter = allFilter;
 
@@ -140,17 +144,7 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
       searchPanel.addStyleName("searchPanelAdvanced");
     }
 
-    saveSearchButton.addStyleName("searchPanelAdvancedSaveSearchButton");
-    saveSearchButton.setEnabled(saveQueryCallback != null);
-    saveSearchButton.setVisible(saveQueryCallback != null);
-    saveSearchButton.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        if (saveQueryCallback != null) {
-          saveQueryCallback.saveQuery();
-        }
-      }
-    });
+    saveSearchReset();
 
     searchPreFilters.setVisible(!defaultFilter.getParameters().isEmpty());
     drawSearchPreFilters();
@@ -389,5 +383,24 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
     }
 
     return searchFields;
+  }
+
+  private void saveSearchReset() {
+    saveSearchButton.setText("Save search");
+    saveSearchButton.addStyleName("searchPanelAdvancedSaveSearchButton");
+    saveSearchButton.setEnabled(saveQueryCallback != null);
+    saveSearchButton.setVisible(saveQueryCallback != null);
+  }
+
+  @UiHandler("saveSearchButton")
+  void saveSearchOpenPanel(ClickEvent e) {
+    saveSearchButton.setEnabled(false);
+    saveSearchButton.setText("Saving...");
+    saveQueryCallback.onSuccess(null);
+  }
+
+  public void querySavedHandler(String savedSearchUUID) {
+    saveSearchReset();
+    GWT.log("saved with uuid " + savedSearchUUID);
   }
 }

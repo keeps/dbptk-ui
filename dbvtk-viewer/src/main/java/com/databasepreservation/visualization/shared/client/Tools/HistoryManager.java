@@ -26,6 +26,7 @@ public class HistoryManager {
   public static final String ROUTE_REFERENCES = "references";
   public static final String ROUTE_SCHEMA_CHECK_CONSTRAINTS = "constraints";
   public static final String ROUTE_SAVED_SEARCHES = "searches";
+  public static final String ROUTE_SAVED_SEARCHES_EDIT = "edit";
 
   public static final String HISTORY_SEP = "/";
   public static final String HISTORY_SEP_REGEX = "/";
@@ -85,6 +86,10 @@ public class HistoryManager {
 
   public static void gotoSavedSearch(String databaseUUID, String savedSearchUUID) {
     newHistory(Arrays.asList(ROUTE_SAVED_SEARCHES, databaseUUID, savedSearchUUID));
+  }
+
+  public static void gotoEditSavedSearch(String databaseUUID, String savedSearchUUID) {
+    newHistory(Arrays.asList(ROUTE_SAVED_SEARCHES, databaseUUID, savedSearchUUID, ROUTE_SAVED_SEARCHES_EDIT));
   }
 
   public static void gotoTable(String databaseUUID, String tableUUID) {

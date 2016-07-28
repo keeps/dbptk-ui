@@ -21,6 +21,7 @@ import com.databasepreservation.visualization.client.browse.SchemaStructurePanel
 import com.databasepreservation.visualization.client.browse.SchemaTriggersPanel;
 import com.databasepreservation.visualization.client.browse.SchemaViewsPanel;
 import com.databasepreservation.visualization.client.browse.TablePanel;
+import com.databasepreservation.visualization.client.browse.TableSavedSearchEditPanel;
 import com.databasepreservation.visualization.client.browse.TableSavedSearchPanel;
 import com.databasepreservation.visualization.client.common.utils.RightPanelLoader;
 import com.databasepreservation.visualization.shared.client.ClientLogger;
@@ -338,6 +339,17 @@ public class Main implements EntryPoint {
           @Override
           public RightPanel load(ViewerDatabase database) {
             return TableSavedSearchPanel.createInstance(database, searchUUID);
+          }
+        });
+
+      } else if (currentHistoryPath.size() == 4 && HistoryManager.ROUTE_SAVED_SEARCHES_EDIT.equals(currentHistoryPath.get(3))) {
+        // #searches/<databaseUUID>/<searchUUID>/edit
+        final String databaseUUID = currentHistoryPath.get(1);
+        final String searchUUID = currentHistoryPath.get(2);
+        setContent(databaseUUID, new RightPanelLoader() {
+          @Override
+          public RightPanel load(ViewerDatabase database) {
+            return TableSavedSearchEditPanel.createInstance(database, searchUUID);
           }
         });
 

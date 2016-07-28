@@ -8,7 +8,7 @@
 
     <g:FlowPanel>
         <g:SimplePanel addStyleNames="h1" ui:field="mainHeader">
-            <g:Label><ui:msg>Loading table information</ui:msg></g:Label>
+            <g:Label><ui:msg>Loading...</ui:msg></g:Label>
         </g:SimplePanel>
         <g:HTML ui:field="description"/>
         <g:SimplePanel ui:field="tableSearchPanelContainer"/>

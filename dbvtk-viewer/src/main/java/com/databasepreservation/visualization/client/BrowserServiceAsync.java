@@ -75,7 +75,9 @@ public interface BrowserServiceAsync {
     throws GenericException, RequestNotValidException;
 
   void saveQuery(String name, String description, String tableUUID, String tableName, String databaseUUID,
-    SearchInfo searchInfo, AsyncCallback<Void> async);
+    SearchInfo searchInfo, AsyncCallback<String> async);
+
+  void editQuery(String savedSearchUUID, String name, String description, AsyncCallback<Void> async);
 
   /**
    * Utility class to get the RPC Async interface from client-side code

@@ -44,7 +44,7 @@
                 <g:Button styleName="btn btn-search advancedSearchButton"
                           ui:field="searchAdvancedGo" enabled="false">Search</g:Button>
                 <g:Button styleName="btn btn-save searchPanelAdvancedSaveSearchButton"
-                          ui:field="saveSearchButton" enabled="false" visible="false">Save search</g:Button>
+                          ui:field="saveSearchButton" enabled="false" visible="false" />
             </g:FlowPanel>
         </g:FlowPanel>
         <g:FlowPanel addStyleNames="searchPreFilters" ui:field="searchPreFilters"/>

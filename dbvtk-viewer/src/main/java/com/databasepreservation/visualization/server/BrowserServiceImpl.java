@@ -102,13 +102,14 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
   }
 
   @Override
-  public void saveQuery(String name, String description, String tableUUID, String tableName, String databaseUUID,
+  public String saveQuery(String name, String description, String tableUUID, String tableName, String databaseUUID,
     SearchInfo searchInfo) throws AuthorizationDeniedException, GenericException, RequestNotValidException,
     NotFoundException {
     RodaUser user = null;
     String searchInfoJson = JsonUtils.getJsonFromObject(searchInfo);
 
     SavedSearch savedSearch = new SavedSearch();
+    savedSearch.setUUID(SolrUtils.randomUUID());
     savedSearch.setName(name);
     savedSearch.setDescription(description);
     savedSearch.setDatabaseUUID(databaseUUID);
@@ -117,6 +118,16 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
     savedSearch.setSearchInfoJson(searchInfoJson);
 
     ViewerFactory.getSolrManager().addSavedSearch(user, savedSearch);
+
+    return savedSearch.getUUID();
+  }
+
+  @Override
+  public void editQuery(String savedSearchUUID, String name, String description) throws AuthorizationDeniedException, GenericException, RequestNotValidException,
+    NotFoundException {
+    RodaUser user = null;
+
+    ViewerFactory.getSolrManager().editSavedSearch(user, savedSearchUUID, name, description);
   }
 
   @Override

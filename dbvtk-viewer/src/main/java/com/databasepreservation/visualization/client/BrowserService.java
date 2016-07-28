@@ -71,7 +71,10 @@ public interface BrowserService extends RemoteService {
   String getSolrQueryString(Filter filter, Sorter sorter, Sublist sublist, Facets facets)
     throws AuthorizationDeniedException, GenericException, RequestNotValidException;
 
-  void saveQuery(String name, String description, String tableUUID, String tableName, String databaseUUID,
+  String saveQuery(String name, String description, String tableUUID, String tableName, String databaseUUID,
     SearchInfo searchInfo) throws AuthorizationDeniedException, GenericException, RequestNotValidException,
+    NotFoundException;
+
+  void editQuery(String savedSearchUUID, String name, String description) throws AuthorizationDeniedException, GenericException, RequestNotValidException,
     NotFoundException;
 }

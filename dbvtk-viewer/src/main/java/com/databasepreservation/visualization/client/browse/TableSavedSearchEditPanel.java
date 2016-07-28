@@ -1,5 +1,10 @@
 package com.databasepreservation.visualization.client.browse;
 
+import com.databasepreservation.visualization.shared.client.Tools.HistoryManager;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Label;
 import org.roda.core.data.v2.index.IsIndexed;
 
 import com.databasepreservation.visualization.client.BrowserService;
@@ -11,27 +16,28 @@ import com.databasepreservation.visualization.client.common.utils.CommonClientUt
 import com.databasepreservation.visualization.client.main.BreadcrumbPanel;
 import com.databasepreservation.visualization.shared.client.Tools.BreadcrumbManager;
 import com.databasepreservation.visualization.shared.client.Tools.ViewerJsonUtils;
-import com.databasepreservation.visualization.shared.client.Tools.ViewerStringUtils;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.TextArea;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class TableSavedSearchPanel extends RightPanel {
-  public static TableSavedSearchPanel createInstance(ViewerDatabase database, String savedSearchUUID) {
-    return new TableSavedSearchPanel(database, savedSearchUUID);
+public class TableSavedSearchEditPanel extends RightPanel {
+  public static TableSavedSearchEditPanel createInstance(ViewerDatabase database, String savedSearchUUID) {
+    return new TableSavedSearchEditPanel(database, savedSearchUUID);
   }
 
-  interface TableSavedSearchPanelUiBinder extends UiBinder<Widget, TableSavedSearchPanel> {
+  interface TableSavedSearchEditPanelUiBinder extends UiBinder<Widget, TableSavedSearchEditPanel> {
   }
 
-  private static TableSavedSearchPanelUiBinder uiBinder = GWT.create(TableSavedSearchPanelUiBinder.class);
+  private static TableSavedSearchEditPanelUiBinder uiBinder = GWT.create(TableSavedSearchEditPanelUiBinder.class);
 
   private ViewerDatabase database;
   private String savedSearchUUID;
@@ -41,14 +47,18 @@ public class TableSavedSearchPanel extends RightPanel {
   SimplePanel mainHeader;
 
   @UiField
-  HTML description;
+  TextArea textAreaDescription;
 
   @UiField
-  SimplePanel tableSearchPanelContainer;
+  TextBox textBoxName;
 
-  private TableSearchPanel tableSearchPanel;
+  @UiField
+  Button buttonApply;
 
-  private TableSavedSearchPanel(ViewerDatabase viewerDatabase, final String savedSearchUUID) {
+  @UiField
+  Button buttonCancel;
+
+  private TableSavedSearchEditPanel(ViewerDatabase viewerDatabase, final String savedSearchUUID) {
     database = viewerDatabase;
     this.savedSearchUUID = savedSearchUUID;
 
@@ -80,7 +90,7 @@ public class TableSavedSearchPanel extends RightPanel {
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
     BreadcrumbManager.updateBreadcrumb(breadcrumb,
-      BreadcrumbManager.forDatabaseSavedSearch(database.getMetadata().getName(), database.getUUID(), savedSearchUUID));
+      BreadcrumbManager.forDatabaseSavedSearchEdit(database.getMetadata().getName(), database.getUUID(), savedSearchUUID));
   }
 
   /**
@@ -91,19 +101,49 @@ public class TableSavedSearchPanel extends RightPanel {
     String tableUUID = savedSearch.getTableUUID();
 
     // set UI
-    mainHeader.setWidget(CommonClientUtils.getSavedSearchHeader(database.getUUID(), savedSearch.getName()));
-    if (ViewerStringUtils.isNotBlank(savedSearch.getDescription())) {
-      description.setHTML(CommonClientUtils.getFieldHTML("Description", savedSearch.getDescription()));
-    }
+    Label savedSearchLabel = new Label("Editing saved search");
+    savedSearchLabel.addStyleName("h1");
+    mainHeader.setWidget(savedSearchLabel);
 
     // set searchForm and table
     SearchInfo searchInfo = ViewerJsonUtils.getSearchInfoMapper().read(savedSearch.getSearchInfoJson());
     if (SearchInfo.isPresentAndValid(searchInfo)) {
-      tableSearchPanel = new TableSearchPanel(searchInfo);
-      tableSearchPanel.provideSource(database, database.getMetadata().getTable(tableUUID));
-      tableSearchPanelContainer.setWidget(tableSearchPanel);
+      textBoxName.setText(savedSearch.getName());
+      textAreaDescription.setText(savedSearch.getDescription());
     } else {
       GWT.log("search info was invalid. JSON: " + savedSearch.getSearchInfoJson());
     }
+  }
+
+  @UiHandler("buttonApply")
+  void handleButtonApply(ClickEvent e){
+    buttonApply.setEnabled(false);
+    buttonCancel.setEnabled(false);
+
+    // update info & commit
+    BrowserService.Util.getInstance().editQuery(savedSearchUUID, textBoxName.getText(), textAreaDescription.getText(),
+      new AsyncCallback<Void>() {
+        @Override public void onFailure(Throwable caught) {
+          // error, don't go anywhere
+          GWT.log("error updating", caught);
+          buttonApply.setEnabled(true);
+          buttonCancel.setEnabled(true);
+        }
+
+        @Override public void onSuccess(Void result) {
+          buttonApply.setEnabled(true);
+          buttonCancel.setEnabled(true);
+
+          // goto show on success
+          HistoryManager.gotoSavedSearch(database.getUUID(), savedSearchUUID);
+        }
+      });
+
+  }
+
+  @UiHandler("buttonCancel")
+  void handleButtonCancel(ClickEvent e){
+    // goto list
+    HistoryManager.gotoSavedSearches(database.getUUID());
   }
 }

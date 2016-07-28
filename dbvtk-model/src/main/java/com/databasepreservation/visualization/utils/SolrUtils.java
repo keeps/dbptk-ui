@@ -17,6 +17,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -792,7 +793,14 @@ public class SolrUtils {
     return string.replaceAll("([+&|!(){}\\[\\]\\^\\\\~?:\"])", "\\\\$1");
   }
 
-  public static boolean addSavedSearch(String searchInfoJson) {
-    return false;
+  public static Map<String, Object> asValueUpdate(Object value) {
+    Map<String, Object> fieldModifier = new HashMap<>(1);
+    // 20160511 this workaround fixes solr wrong behaviour with partial update
+    // of empty lists
+    if (value instanceof List && ((List<?>) value).isEmpty()) {
+      value = null;
+    }
+    fieldModifier.put("set", value);
+    return fieldModifier;
   }
 }

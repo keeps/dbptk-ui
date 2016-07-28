@@ -224,6 +224,31 @@ public class SolrManager {
 
     try {
       client.add(ViewerSafeConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME, doc);
+      client.commit(ViewerSafeConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME, true, true);
+    } catch (SolrServerException e) {
+      LOGGER.debug("SolrServerException while attempting to save search", e);
+    } catch (IOException e) {
+      LOGGER.debug("IOException while attempting to save search", e);
+    }
+  }
+
+  public void editSavedSearch(RodaUser user, String uuid, String name, String description) throws NotFoundException,
+    org.roda.core.data.exceptions.GenericException {
+    try {
+      createSavedSearchesCollection();
+    } catch (ViewerException e) {
+      LOGGER.error("Error creating saved searches collection", e);
+    }
+
+    SolrInputDocument doc = new SolrInputDocument();
+
+    doc.addField(ViewerSafeConstants.SOLR_SEARCHES_ID, uuid);
+    doc.addField(ViewerSafeConstants.SOLR_SEARCHES_NAME, SolrUtils.asValueUpdate(name));
+    doc.addField(ViewerSafeConstants.SOLR_SEARCHES_DESCRIPTION, SolrUtils.asValueUpdate(description));
+
+    try {
+      client.add(ViewerSafeConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME, doc);
+      client.commit(ViewerSafeConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME, true, true);
     } catch (SolrServerException e) {
       LOGGER.debug("SolrServerException while attempting to save search", e);
     } catch (IOException e) {

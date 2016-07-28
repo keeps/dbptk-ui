@@ -125,9 +125,14 @@ public class TableSearchPanel extends Composite {
     GWT.log("initial filter: " + initialFilter.toString());
 
     searchPanel = new SearchPanel(initialFilter, ViewerSafeConstants.SOLR_ROW_SEARCH, "Search...", false, true,
-      new SaveQueryCallback() {
+      new AsyncCallback<Void>() {
         @Override
-        public void saveQuery() {
+        public void onFailure(Throwable caught) {
+          // do nothing
+        }
+
+        @Override
+        public void onSuccess(Void result) {
           TableSearchPanel.this.saveQuery();
         }
       });
@@ -337,16 +342,16 @@ public class TableSearchPanel extends Composite {
 
   private void saveQuery() {
     SearchInfo currentSearchInfo = createSearchInfo();
-    BrowserService.Util.getInstance().saveQuery("some query", "some description", table.getUUID(), table.getName(),
-      database.getUUID(), currentSearchInfo, new AsyncCallback<Void>() {
+    BrowserService.Util.getInstance().saveQuery("<no title>", "<no description>", table.getUUID(), table.getName(),
+      database.getUUID(), currentSearchInfo, new AsyncCallback<String>() {
         @Override
         public void onFailure(Throwable caught) {
-          GWT.log("ERROR: did not save search");
+          searchPanel.querySavedHandler(null);
         }
 
         @Override
-        public void onSuccess(Void result) {
-          GWT.log("SUCCESS: saved search");
+        public void onSuccess(String savedSearchUUID) {
+          searchPanel.querySavedHandler(savedSearchUUID);
         }
       });
   }
