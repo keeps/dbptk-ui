@@ -31,7 +31,7 @@
 
         <!-- Convenience properties to set versions -->
         <gwtVersion>2.7.0</gwtVersion>
-        <version.dbptk-model>2.0.0-beta5</version.dbptk-model>
+        <version.dbptk-model>2.0.0-SNAPSHOT</version.dbptk-model>
         <version.roda-common-data>2.0.0-alpha7.1</version.roda-common-data>
 
 
