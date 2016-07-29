@@ -327,7 +327,7 @@ public class Main implements EntryPoint {
         setContent(databaseUUID, new RightPanelLoader() {
           @Override
           public RightPanel load(ViewerDatabase database) {
-            return DatabaseSearchesPanel.getInstance(database);
+            return DatabaseSearchesPanel.createInstance(database);
           }
         });
 

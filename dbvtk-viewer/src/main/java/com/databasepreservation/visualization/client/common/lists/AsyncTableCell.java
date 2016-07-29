@@ -455,6 +455,7 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel i
       autoUpdateTimer.scheduleRepeating(autoUpdateTimerMillis);
     }
     super.onLoad();
+    getSelectionModel().clear();
   }
 
   public void redraw() {

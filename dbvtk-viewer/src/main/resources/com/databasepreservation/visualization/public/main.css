@@ -38,6 +38,14 @@
     margin-right: 1rem;
 }
 
+.btn-cell-action {
+    padding: 1px 5px;
+    font-size: 12px;
+    line-height: 1.5;
+    border-radius: 3px;
+    margin-right: 5px;
+}
+
 /***********************************************
               Table search panel
 ************************************************/

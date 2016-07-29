@@ -85,16 +85,10 @@ public class SavedSearch implements Serializable, IsIndexed {
     this.tableName = tableName;
   }
 
-  @Override public String toString() {
-    return "SavedSearch{" +
-      "databaseUUID='" + databaseUUID + '\'' +
-      ", uuid='" + uuid + '\'' +
-      ", name='" + name + '\'' +
-      ", description='" + description + '\'' +
-      ", dateAdded='" + dateAdded + '\'' +
-      ", tableUUID='" + tableUUID + '\'' +
-      ", tableName='" + tableName + '\'' +
-      ", searchInfoJson='" + searchInfoJson + '\'' +
-      '}';
+  @Override
+  public String toString() {
+    return "SavedSearch{" + "databaseUUID='" + databaseUUID + '\'' + ", uuid='" + uuid + '\'' + ", name='" + name
+      + '\'' + ", description='" + description + '\'' + ", dateAdded='" + dateAdded + '\'' + ", tableUUID='"
+      + tableUUID + '\'' + ", tableName='" + tableName + '\'' + ", searchInfoJson='" + searchInfoJson + '\'' + '}';
   }
 }

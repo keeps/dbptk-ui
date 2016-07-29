@@ -27,7 +27,6 @@ import com.databasepreservation.visualization.client.ViewerStructure.ViewerRow;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable;
 import com.databasepreservation.visualization.exceptions.ViewerException;
 import com.databasepreservation.visualization.shared.ViewerSafeConstants;
-import com.databasepreservation.visualization.utils.SolrUtils;
 import com.databasepreservation.visualization.utils.ViewerUtils;
 
 /**

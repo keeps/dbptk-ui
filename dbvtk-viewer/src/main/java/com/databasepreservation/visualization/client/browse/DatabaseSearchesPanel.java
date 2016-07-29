@@ -24,17 +24,8 @@ import com.google.gwt.view.client.SelectionChangeEvent;
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class DatabaseSearchesPanel extends RightPanel {
-  private static Map<String, DatabaseSearchesPanel> instances = new HashMap<>();
-
-  public static DatabaseSearchesPanel getInstance(ViewerDatabase database) {
-    String code = database.getUUID();
-
-    DatabaseSearchesPanel instance = instances.get(code);
-    if (instance == null) {
-      instance = new DatabaseSearchesPanel(database);
-      instances.put(code, instance);
-    }
-    return instance;
+  public static DatabaseSearchesPanel createInstance(ViewerDatabase database) {
+    return new DatabaseSearchesPanel(database);
   }
 
   interface DatabaseInformationPanelUiBinder extends UiBinder<Widget, DatabaseSearchesPanel> {

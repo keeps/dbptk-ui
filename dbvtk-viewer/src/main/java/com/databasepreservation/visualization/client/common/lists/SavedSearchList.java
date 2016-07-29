@@ -1,10 +1,13 @@
 package com.databasepreservation.visualization.client.common.lists;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.visualization.shared.client.Tools.FontAwesomeIconManager;
+import com.databasepreservation.visualization.shared.client.Tools.HistoryManager;
 import org.roda.core.data.adapter.facet.Facets;
 import org.roda.core.data.adapter.filter.Filter;
 import org.roda.core.data.adapter.sort.Sorter;
@@ -15,6 +18,11 @@ import com.databasepreservation.visualization.client.BrowserService;
 import com.databasepreservation.visualization.client.SavedSearch;
 import com.databasepreservation.visualization.shared.ViewerSafeConstants;
 import com.databasepreservation.visualization.shared.client.ClientLogger;
+import com.google.gwt.cell.client.ActionCell;
+import com.google.gwt.cell.client.Cell;
+import com.google.gwt.cell.client.CompositeCell;
+import com.google.gwt.cell.client.FieldUpdater;
+import com.google.gwt.cell.client.HasCell;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.cellview.client.CellTable;
@@ -23,6 +31,8 @@ import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.view.client.CellPreviewEvent;
+import com.google.gwt.view.client.DefaultSelectionEventManager;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -34,6 +44,7 @@ public class SavedSearchList extends BasicAsyncTableCell<SavedSearch> {
   private TextColumn<SavedSearch> descriptionColumn;
   private TextColumn<SavedSearch> dateAddedColumn;
   private TextColumn<SavedSearch> tableNameColumn;
+  private Column<SavedSearch, SavedSearch> actionsColumn;
 
   public SavedSearchList(Filter filter, Facets facets, String summary, boolean selectable, boolean exportable) {
     super(filter, facets, summary, selectable, exportable);
@@ -69,15 +80,42 @@ public class SavedSearchList extends BasicAsyncTableCell<SavedSearch> {
       }
     };
 
+    // column with 2 buttons (edit and delete)
+    ArrayList<HasCell<SavedSearch, ?>> cells = new ArrayList<>();
+    cells.add(new ActionsCell("Edit", FontAwesomeIconManager.ACTION_EDIT, new FontAwesomeActionCell.Delegate<SavedSearch>() {
+      @Override
+      public void execute(SavedSearch object) {
+        HistoryManager.gotoEditSavedSearch(object.getDatabaseUUID(), object.getUUID());
+      }
+    }));
+    cells.add(new ActionsCell("Delete", FontAwesomeIconManager.ACTION_DELETE, "btn-danger", new FontAwesomeActionCell.Delegate<SavedSearch>() {
+      @Override
+      public void execute(SavedSearch object) {
+        com.google.gwt.core.client.GWT.log("delete click!");
+      }
+    }));
+    CompositeCell<SavedSearch> compositeCell = new CompositeCell<>(cells);
+
+    actionsColumn = new Column<SavedSearch, SavedSearch>(compositeCell) {
+      @Override
+      public SavedSearch getValue(SavedSearch object) {
+        // return
+        // SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE));
+        return object;
+      }
+    };
+
     nameColumn.setSortable(true);
     tableNameColumn.setSortable(true);
     descriptionColumn.setSortable(true);
     dateAddedColumn.setSortable(true);
+    actionsColumn.setSortable(false);
 
     addColumn(nameColumn, "Search name", true, false, 15);
     addColumn(tableNameColumn, "Table", true, false, 15);
     addColumn(dateAddedColumn, "Created", true, false, 15);
     addColumn(descriptionColumn, "Description", true, false);
+    addColumn(actionsColumn, "Actions", false, false, 6);
 
     Label emptyInfo = new Label("There are no saved searches.");
     display.setEmptyTableWidget(emptyInfo);
@@ -90,6 +128,10 @@ public class SavedSearchList extends BasicAsyncTableCell<SavedSearch> {
     // addStyleName("my-collections-table");
     // emptyInfo.addStyleName("my-collections-empty-info");
 
+  }
+
+  protected CellPreviewEvent.Handler<SavedSearch> getSelectionEventManager() {
+    return DefaultSelectionEventManager.createBlacklistManager(4);
   }
 
   @Override
@@ -120,5 +162,36 @@ public class SavedSearchList extends BasicAsyncTableCell<SavedSearch> {
   @Override
   public void exportAllClickHandler() {
 
+  }
+
+  /**
+   * Edit and delete cells, in a way that they can be added to a CompositeCell.
+   * based on this code http://stackoverflow.com/a/9119496/1483200
+   */
+  private static class ActionsCell implements HasCell<SavedSearch, SavedSearch> {
+    private FontAwesomeActionCell<SavedSearch> cell;
+
+    public ActionsCell(String tooltip, String icon, String extraButtonClasses, FontAwesomeActionCell.Delegate<SavedSearch> delegate) {
+      cell = new FontAwesomeActionCell<>(tooltip, icon, extraButtonClasses, delegate);
+    }
+
+    public ActionsCell(String tooltip, String icon, FontAwesomeActionCell.Delegate<SavedSearch> delegate) {
+      cell = new FontAwesomeActionCell<>(tooltip, icon, delegate);
+    }
+
+    @Override
+    public Cell<SavedSearch> getCell() {
+      return cell;
+    }
+
+    @Override
+    public FieldUpdater<SavedSearch, SavedSearch> getFieldUpdater() {
+      return null;
+    }
+
+    @Override
+    public SavedSearch getValue(SavedSearch object) {
+      return object;
+    }
   }
 }
