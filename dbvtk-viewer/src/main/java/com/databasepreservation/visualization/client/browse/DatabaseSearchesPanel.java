@@ -1,8 +1,5 @@
 package com.databasepreservation.visualization.client.browse;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.roda.core.data.adapter.filter.BasicSearchFilterParameter;
 import org.roda.core.data.adapter.filter.Filter;
 

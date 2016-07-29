@@ -342,7 +342,7 @@ public class TableSearchPanel extends Composite {
 
   private void saveQuery() {
     SearchInfo currentSearchInfo = createSearchInfo();
-    BrowserService.Util.getInstance().saveQuery("<no title>", "<no description>", table.getUUID(), table.getName(),
+    BrowserService.Util.getInstance().saveSearch("<no title>", "<no description>", table.getUUID(), table.getName(),
       database.getUUID(), currentSearchInfo, new AsyncCallback<String>() {
         @Override
         public void onFailure(Throwable caught) {

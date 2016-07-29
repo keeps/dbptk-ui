@@ -119,7 +119,7 @@ public class TableSavedSearchEditPanel extends RightPanel {
     buttonCancel.setEnabled(false);
 
     // update info & commit
-    BrowserService.Util.getInstance().editQuery(savedSearchUUID, textBoxName.getText(), textAreaDescription.getText(),
+    BrowserService.Util.getInstance().editSearch(savedSearchUUID, textBoxName.getText(), textAreaDescription.getText(),
       new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {

@@ -256,6 +256,17 @@ public class SolrManager {
     }
   }
 
+  public void deleteSavedSearch(RodaUser user, String uuid) throws NotFoundException,
+    org.roda.core.data.exceptions.GenericException {
+    try {
+      client.deleteById(ViewerSafeConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME, uuid);
+    } catch (SolrServerException e) {
+      LOGGER.debug("SolrServerException while attempting to delete search", e);
+    } catch (IOException e) {
+      LOGGER.debug("IOException while attempting to delete search", e);
+    }
+  }
+
   private void createSavedSearchesCollection() throws ViewerException {
     // creates saved searches collection, skipping if it is present
     CollectionAdminRequest.Create request = new CollectionAdminRequest.Create();

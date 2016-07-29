@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.visualization.shared.client.Tools.FontAwesomeIconManager;
-import com.databasepreservation.visualization.shared.client.Tools.HistoryManager;
 import org.roda.core.data.adapter.facet.Facets;
 import org.roda.core.data.adapter.filter.Filter;
 import org.roda.core.data.adapter.sort.Sorter;
@@ -18,7 +16,8 @@ import com.databasepreservation.visualization.client.BrowserService;
 import com.databasepreservation.visualization.client.SavedSearch;
 import com.databasepreservation.visualization.shared.ViewerSafeConstants;
 import com.databasepreservation.visualization.shared.client.ClientLogger;
-import com.google.gwt.cell.client.ActionCell;
+import com.databasepreservation.visualization.shared.client.Tools.FontAwesomeIconManager;
+import com.databasepreservation.visualization.shared.client.Tools.HistoryManager;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.CompositeCell;
 import com.google.gwt.cell.client.FieldUpdater;
@@ -82,18 +81,31 @@ public class SavedSearchList extends BasicAsyncTableCell<SavedSearch> {
 
     // column with 2 buttons (edit and delete)
     ArrayList<HasCell<SavedSearch, ?>> cells = new ArrayList<>();
-    cells.add(new ActionsCell("Edit", FontAwesomeIconManager.ACTION_EDIT, new FontAwesomeActionCell.Delegate<SavedSearch>() {
-      @Override
-      public void execute(SavedSearch object) {
-        HistoryManager.gotoEditSavedSearch(object.getDatabaseUUID(), object.getUUID());
-      }
-    }));
-    cells.add(new ActionsCell("Delete", FontAwesomeIconManager.ACTION_DELETE, "btn-danger", new FontAwesomeActionCell.Delegate<SavedSearch>() {
-      @Override
-      public void execute(SavedSearch object) {
-        com.google.gwt.core.client.GWT.log("delete click!");
-      }
-    }));
+    cells.add(new ActionsCell("Edit", FontAwesomeIconManager.ACTION_EDIT,
+      new FontAwesomeActionCell.Delegate<SavedSearch>() {
+        @Override
+        public void execute(SavedSearch object) {
+          HistoryManager.gotoEditSavedSearch(object.getDatabaseUUID(), object.getUUID());
+        }
+      }));
+    cells.add(new ActionsCell("Delete", FontAwesomeIconManager.ACTION_DELETE, "btn-danger",
+      new FontAwesomeActionCell.Delegate<SavedSearch>() {
+        @Override
+        public void execute(final SavedSearch object) {
+          BrowserService.Util.getInstance().deleteSearch(object.getUUID(), new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+              GWT.log("error deleting search.", caught);
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+              GWT.log("deleted " + object.getUUID());
+              SavedSearchList.this.refresh();
+            }
+          });
+        }
+      }));
     CompositeCell<SavedSearch> compositeCell = new CompositeCell<>(cells);
 
     actionsColumn = new Column<SavedSearch, SavedSearch>(compositeCell) {
@@ -171,7 +183,8 @@ public class SavedSearchList extends BasicAsyncTableCell<SavedSearch> {
   private static class ActionsCell implements HasCell<SavedSearch, SavedSearch> {
     private FontAwesomeActionCell<SavedSearch> cell;
 
-    public ActionsCell(String tooltip, String icon, String extraButtonClasses, FontAwesomeActionCell.Delegate<SavedSearch> delegate) {
+    public ActionsCell(String tooltip, String icon, String extraButtonClasses,
+      FontAwesomeActionCell.Delegate<SavedSearch> delegate) {
       cell = new FontAwesomeActionCell<>(tooltip, icon, extraButtonClasses, delegate);
     }
 

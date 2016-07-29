@@ -74,10 +74,12 @@ public interface BrowserServiceAsync {
   void getSolrQueryString(Filter filter, Sorter sorter, Sublist sublist, Facets facets, AsyncCallback<String> async)
     throws GenericException, RequestNotValidException;
 
-  void saveQuery(String name, String description, String tableUUID, String tableName, String databaseUUID,
+  void saveSearch(String name, String description, String tableUUID, String tableName, String databaseUUID,
     SearchInfo searchInfo, AsyncCallback<String> async);
 
-  void editQuery(String savedSearchUUID, String name, String description, AsyncCallback<Void> async);
+  void editSearch(String savedSearchUUID, String name, String description, AsyncCallback<Void> async);
+
+  void deleteSearch(String savedSearchUUID, AsyncCallback<Void> async);
 
   /**
    * Utility class to get the RPC Async interface from client-side code
