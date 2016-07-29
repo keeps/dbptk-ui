@@ -11,7 +11,9 @@ import org.roda.core.data.adapter.filter.BasicSearchFilterParameter;
 import org.roda.core.data.adapter.filter.Filter;
 import org.roda.core.data.adapter.filter.FilterParameter;
 
+import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.visualization.client.common.lists.AsyncTableCell;
+import com.databasepreservation.visualization.shared.client.Tools.HistoryManager;
 import com.databasepreservation.visualization.shared.client.widgets.wcag.AccessibleFocusPanel;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -31,7 +33,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -399,8 +400,13 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
     saveQueryCallback.onSuccess(null);
   }
 
-  public void querySavedHandler(String savedSearchUUID) {
+  public void querySavedHandler(boolean succeeded, ViewerDatabase database, String savedSearchUUID) {
     saveSearchReset();
-    GWT.log("saved with uuid " + savedSearchUUID);
+
+    if (succeeded) {
+      HistoryManager.gotoEditSavedSearch(database.getUUID(), savedSearchUUID);
+    } else {
+      GWT.log("there was an error saving the query");
+    }
   }
 }

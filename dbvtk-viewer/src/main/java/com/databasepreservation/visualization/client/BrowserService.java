@@ -75,6 +75,6 @@ public interface BrowserService extends RemoteService {
     SearchInfo searchInfo) throws AuthorizationDeniedException, GenericException, RequestNotValidException,
     NotFoundException;
 
-  void editQuery(String savedSearchUUID, String name, String description) throws AuthorizationDeniedException, GenericException, RequestNotValidException,
-    NotFoundException;
+  void editQuery(String savedSearchUUID, String name, String description) throws AuthorizationDeniedException,
+    GenericException, RequestNotValidException, NotFoundException;
 }

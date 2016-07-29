@@ -224,7 +224,7 @@ public class SolrManager {
 
     try {
       client.add(ViewerSafeConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME, doc);
-      client.commit(ViewerSafeConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME, true, true);
+      client.commit(ViewerSafeConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME, true, true, true);
     } catch (SolrServerException e) {
       LOGGER.debug("SolrServerException while attempting to save search", e);
     } catch (IOException e) {

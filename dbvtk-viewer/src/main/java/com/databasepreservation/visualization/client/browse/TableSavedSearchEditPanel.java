@@ -1,26 +1,24 @@
 package com.databasepreservation.visualization.client.browse;
 
-import com.databasepreservation.visualization.shared.client.Tools.HistoryManager;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.Label;
 import org.roda.core.data.v2.index.IsIndexed;
 
 import com.databasepreservation.visualization.client.BrowserService;
 import com.databasepreservation.visualization.client.SavedSearch;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.visualization.client.common.search.SearchInfo;
-import com.databasepreservation.visualization.client.common.search.TableSearchPanel;
 import com.databasepreservation.visualization.client.common.utils.CommonClientUtils;
 import com.databasepreservation.visualization.client.main.BreadcrumbPanel;
 import com.databasepreservation.visualization.shared.client.Tools.BreadcrumbManager;
+import com.databasepreservation.visualization.shared.client.Tools.HistoryManager;
 import com.databasepreservation.visualization.shared.client.Tools.ViewerJsonUtils;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
@@ -89,8 +87,8 @@ public class TableSavedSearchEditPanel extends RightPanel {
    */
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    BreadcrumbManager.updateBreadcrumb(breadcrumb,
-      BreadcrumbManager.forDatabaseSavedSearchEdit(database.getMetadata().getName(), database.getUUID(), savedSearchUUID));
+    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forDatabaseSavedSearchEdit(database.getMetadata()
+      .getName(), database.getUUID(), savedSearchUUID));
   }
 
   /**
@@ -116,21 +114,23 @@ public class TableSavedSearchEditPanel extends RightPanel {
   }
 
   @UiHandler("buttonApply")
-  void handleButtonApply(ClickEvent e){
+  void handleButtonApply(ClickEvent e) {
     buttonApply.setEnabled(false);
     buttonCancel.setEnabled(false);
 
     // update info & commit
     BrowserService.Util.getInstance().editQuery(savedSearchUUID, textBoxName.getText(), textAreaDescription.getText(),
       new AsyncCallback<Void>() {
-        @Override public void onFailure(Throwable caught) {
+        @Override
+        public void onFailure(Throwable caught) {
           // error, don't go anywhere
           GWT.log("error updating", caught);
           buttonApply.setEnabled(true);
           buttonCancel.setEnabled(true);
         }
 
-        @Override public void onSuccess(Void result) {
+        @Override
+        public void onSuccess(Void result) {
           buttonApply.setEnabled(true);
           buttonCancel.setEnabled(true);
 
@@ -142,7 +142,7 @@ public class TableSavedSearchEditPanel extends RightPanel {
   }
 
   @UiHandler("buttonCancel")
-  void handleButtonCancel(ClickEvent e){
+  void handleButtonCancel(ClickEvent e) {
     // goto list
     HistoryManager.gotoSavedSearches(database.getUUID());
   }

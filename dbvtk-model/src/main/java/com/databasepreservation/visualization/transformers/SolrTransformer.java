@@ -53,7 +53,7 @@ public class SolrTransformer {
       savedSearch.setDateAdded(JodaUtils.solr_date_format(DateTime.now(DateTimeZone.UTC)));
     }
 
-    doc.addField(ViewerSafeConstants.SOLR_SEARCHES_ID, SolrUtils.randomUUID());
+    doc.addField(ViewerSafeConstants.SOLR_SEARCHES_ID, savedSearch.getUUID());
     doc.addField(ViewerSafeConstants.SOLR_SEARCHES_NAME, savedSearch.getName());
     doc.addField(ViewerSafeConstants.SOLR_SEARCHES_DESCRIPTION, savedSearch.getDescription());
     doc.addField(ViewerSafeConstants.SOLR_SEARCHES_DATE_ADDED, savedSearch.getDateAdded());

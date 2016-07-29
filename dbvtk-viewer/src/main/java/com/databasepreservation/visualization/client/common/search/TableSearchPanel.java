@@ -346,12 +346,12 @@ public class TableSearchPanel extends Composite {
       database.getUUID(), currentSearchInfo, new AsyncCallback<String>() {
         @Override
         public void onFailure(Throwable caught) {
-          searchPanel.querySavedHandler(null);
+          searchPanel.querySavedHandler(false, database, null);
         }
 
         @Override
         public void onSuccess(String savedSearchUUID) {
-          searchPanel.querySavedHandler(savedSearchUUID);
+          searchPanel.querySavedHandler(true, database, savedSearchUUID);
         }
       });
   }

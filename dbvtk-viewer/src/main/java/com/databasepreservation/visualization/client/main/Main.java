@@ -342,7 +342,8 @@ public class Main implements EntryPoint {
           }
         });
 
-      } else if (currentHistoryPath.size() == 4 && HistoryManager.ROUTE_SAVED_SEARCHES_EDIT.equals(currentHistoryPath.get(3))) {
+      } else if (currentHistoryPath.size() == 4
+        && HistoryManager.ROUTE_SAVED_SEARCHES_EDIT.equals(currentHistoryPath.get(3))) {
         // #searches/<databaseUUID>/<searchUUID>/edit
         final String databaseUUID = currentHistoryPath.get(1);
         final String searchUUID = currentHistoryPath.get(2);
