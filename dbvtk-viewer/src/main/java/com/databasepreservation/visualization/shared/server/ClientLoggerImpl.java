@@ -15,15 +15,8 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
  * Client logging servlet implementation
  *
  * @author Luis Faria
- *
  */
 public class ClientLoggerImpl extends RemoteServiceServlet implements ClientLoggerService {
-
-  private static final long serialVersionUID = 3694771724613537482L;
-
-  private static final String LOG_ACTION_WUI_ERROR = "RODAWUI.error";
-  private static final String LOG_ACTION_WUI_PAGEHIT = "RODAWUI.pageHit";
-
   private String getUserInfo() {
     String ret;
     String address = this.getThreadLocalRequest().getRemoteAddr();

@@ -7,12 +7,9 @@ package com.databasepreservation.visualization.shared.client;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.roda.core.data.exceptions.AuthorizationDeniedException;
-
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.logging.client.DevelopmentModeLogHandler;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
@@ -303,11 +300,7 @@ public class ClientLogger implements IsSerializable {
   public void error(final String message, final Throwable error) {
     // FIXME should this be done if internal authentication is being used? I
     // don't think so
-    if (error instanceof AuthorizationDeniedException) {
-      String windowLocation = Window.Location.getHref();
-      // CasForwardDialog cfd = new CasForwardDialog(windowLocation);
-      // cfd.show();
-    } else if (CURRENT_LOG_LEVEL <= ERROR) {
+    if (CURRENT_LOG_LEVEL <= ERROR) {
       AsyncCallback<Void> errorcallback = new AsyncCallback<Void>() {
         public void onFailure(Throwable caught) {
           logger.log(Level.SEVERE, message, error);

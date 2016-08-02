@@ -29,7 +29,7 @@
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>ClientLogger</servlet-name>
-        <url-pattern>/dbvtk/weblogger</url-pattern>
+        <url-pattern>/dbvtkviewer/weblogger</url-pattern>
     </servlet-mapping>
 
     <!-- Default page to serve -->
