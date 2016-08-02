@@ -23,6 +23,7 @@ import com.databasepreservation.visualization.client.ViewerStructure.ViewerRefer
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerRow;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerSchema;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable;
+import com.databasepreservation.visualization.client.common.DefaultAsyncCallback;
 import com.databasepreservation.visualization.client.common.search.TableSearchPanel;
 import com.databasepreservation.visualization.client.main.BreadcrumbPanel;
 import com.databasepreservation.visualization.shared.client.Tools.BreadcrumbManager;
@@ -33,7 +34,6 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
@@ -95,12 +95,7 @@ public class ReferencesPanel extends RightPanel {
     cellColumn.setText(columnName);
 
     BrowserService.Util.getInstance().retrieveRows(ViewerRow.class.getName(), tableUUID, recordUUID,
-      new AsyncCallback<IsIndexed>() {
-        @Override
-        public void onFailure(Throwable caught) {
-          throw new RuntimeException(caught);
-        }
-
+      new DefaultAsyncCallback<IsIndexed>() {
         @Override
         public void onSuccess(IsIndexed result) {
           record = (ViewerRow) result;

@@ -14,6 +14,7 @@ import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatab
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerMetadata;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerSchema;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable;
+import com.databasepreservation.visualization.client.common.DefaultAsyncCallback;
 import com.databasepreservation.visualization.shared.client.Tools.FontAwesomeIconManager;
 import com.databasepreservation.visualization.shared.client.Tools.HistoryManager;
 import com.databasepreservation.visualization.shared.client.Tools.ViewerStringUtils;
@@ -27,7 +28,6 @@ import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.TextBox;
@@ -103,12 +103,7 @@ public class DatabaseSidebar extends Composite {
     searchInit();
 
     BrowserService.Util.getInstance().retrieve(ViewerDatabase.class.getName(), databaseUUID,
-      new AsyncCallback<IsIndexed>() {
-        @Override
-        public void onFailure(final Throwable caught) {
-          throw new RuntimeException(caught);
-        }
-
+      new DefaultAsyncCallback<IsIndexed>() {
         @Override
         public void onSuccess(IsIndexed result) {
           database = (ViewerDatabase) result;

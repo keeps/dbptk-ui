@@ -15,12 +15,12 @@ import com.databasepreservation.visualization.client.BrowserService;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerRow;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable;
+import com.databasepreservation.visualization.client.common.DefaultAsyncCallback;
 import com.databasepreservation.visualization.client.common.search.SearchInfo;
 import com.databasepreservation.visualization.client.main.BreadcrumbPanel;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -72,12 +72,7 @@ public class ForeignKeyPanel extends RightPanel {
 
     // search (count)
     BrowserService.Util.getInstance().findRows(ViewerRow.class.getName(), tableUUID, filter, null, new Sublist(0, 1),
-      null, null, new AsyncCallback<IndexResult<ViewerRow>>() {
-        @Override
-        public void onFailure(Throwable caught) {
-          throw new RuntimeException(caught);
-        }
-
+      null, null, new DefaultAsyncCallback<IndexResult<ViewerRow>>() {
         @Override
         public void onSuccess(IndexResult<ViewerRow> result) {
           rowCount = result.getTotalCount();

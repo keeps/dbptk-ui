@@ -5,6 +5,7 @@ import org.roda.core.data.v2.index.IsIndexed;
 import com.databasepreservation.visualization.client.BrowserService;
 import com.databasepreservation.visualization.client.SavedSearch;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
+import com.databasepreservation.visualization.client.common.DefaultAsyncCallback;
 import com.databasepreservation.visualization.client.common.search.SearchInfo;
 import com.databasepreservation.visualization.client.common.search.TableSearchPanel;
 import com.databasepreservation.visualization.client.common.utils.CommonClientUtils;
@@ -15,7 +16,6 @@ import com.databasepreservation.visualization.shared.client.Tools.ViewerStringUt
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -57,12 +57,7 @@ public class TableSavedSearchPanel extends RightPanel {
     mainHeader.setWidget(CommonClientUtils.getSavedSearchHeader(database.getUUID(), "Loading..."));
 
     BrowserService.Util.getInstance().retrieve(SavedSearch.class.getName(), savedSearchUUID,
-      new AsyncCallback<IsIndexed>() {
-        @Override
-        public void onFailure(Throwable caught) {
-          throw new RuntimeException(caught);
-        }
-
+      new DefaultAsyncCallback<IsIndexed>() {
         @Override
         public void onSuccess(IsIndexed result) {
           savedSearch = (SavedSearch) result;

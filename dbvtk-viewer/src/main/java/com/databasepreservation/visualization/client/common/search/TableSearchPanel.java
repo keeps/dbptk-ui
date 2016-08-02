@@ -10,6 +10,7 @@ import com.databasepreservation.visualization.client.BrowserService;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerRow;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable;
+import com.databasepreservation.visualization.client.common.DefaultAsyncCallback;
 import com.databasepreservation.visualization.client.common.lists.TableRowList;
 import com.databasepreservation.visualization.client.common.utils.ListboxUtils;
 import com.databasepreservation.visualization.shared.ViewerSafeConstants;
@@ -23,7 +24,6 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.ListBox;
@@ -125,12 +125,7 @@ public class TableSearchPanel extends Composite {
     GWT.log("initial filter: " + initialFilter.toString());
 
     searchPanel = new SearchPanel(initialFilter, ViewerSafeConstants.SOLR_ROW_SEARCH, "Search...", false, true,
-      new AsyncCallback<Void>() {
-        @Override
-        public void onFailure(Throwable caught) {
-          // do nothing
-        }
-
+      new DefaultAsyncCallback<Void>() {
         @Override
         public void onSuccess(Void result) {
           TableSearchPanel.this.saveQuery();
@@ -182,12 +177,7 @@ public class TableSearchPanel extends Composite {
   }
 
   private void initAdvancedSearch() {
-    BrowserService.Util.getInstance().getSearchFields(table, new AsyncCallback<List<SearchField>>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        GWT.log("Error getting search fields", caught);
-      }
-
+    BrowserService.Util.getInstance().getSearchFields(table, new DefaultAsyncCallback<List<SearchField>>() {
       @Override
       public void onSuccess(List<SearchField> searchFields) {
         TableSearchPanel.this.searchFields.clear();
@@ -343,10 +333,11 @@ public class TableSearchPanel extends Composite {
   private void saveQuery() {
     SearchInfo currentSearchInfo = createSearchInfo();
     BrowserService.Util.getInstance().saveSearch("<no title>", "<no description>", table.getUUID(), table.getName(),
-      database.getUUID(), currentSearchInfo, new AsyncCallback<String>() {
+      database.getUUID(), currentSearchInfo, new DefaultAsyncCallback<String>() {
         @Override
         public void onFailure(Throwable caught) {
           searchPanel.querySavedHandler(false, database, null);
+          super.onFailure(caught);
         }
 
         @Override

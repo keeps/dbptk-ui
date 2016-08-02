@@ -5,6 +5,7 @@ import org.roda.core.data.v2.index.IsIndexed;
 import com.databasepreservation.visualization.client.BrowserService;
 import com.databasepreservation.visualization.client.SavedSearch;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
+import com.databasepreservation.visualization.client.common.DefaultAsyncCallback;
 import com.databasepreservation.visualization.client.common.search.SearchInfo;
 import com.databasepreservation.visualization.client.common.utils.CommonClientUtils;
 import com.databasepreservation.visualization.client.main.BreadcrumbPanel;
@@ -16,7 +17,6 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -65,12 +65,7 @@ public class TableSavedSearchEditPanel extends RightPanel {
     mainHeader.setWidget(CommonClientUtils.getSavedSearchHeader(database.getUUID(), "Loading..."));
 
     BrowserService.Util.getInstance().retrieve(SavedSearch.class.getName(), savedSearchUUID,
-      new AsyncCallback<IsIndexed>() {
-        @Override
-        public void onFailure(Throwable caught) {
-          throw new RuntimeException(caught);
-        }
-
+      new DefaultAsyncCallback<IsIndexed>() {
         @Override
         public void onSuccess(IsIndexed result) {
           savedSearch = (SavedSearch) result;
@@ -120,13 +115,13 @@ public class TableSavedSearchEditPanel extends RightPanel {
 
     // update info & commit
     BrowserService.Util.getInstance().editSearch(savedSearchUUID, textBoxName.getText(), textAreaDescription.getText(),
-      new AsyncCallback<Void>() {
+      new DefaultAsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {
           // error, don't go anywhere
-          GWT.log("error updating", caught);
           buttonApply.setEnabled(true);
           buttonCancel.setEnabled(true);
+          super.onFailure(caught);
         }
 
         @Override

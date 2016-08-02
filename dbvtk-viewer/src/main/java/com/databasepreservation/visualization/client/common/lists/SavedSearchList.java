@@ -14,6 +14,7 @@ import org.roda.core.data.v2.index.IndexResult;
 
 import com.databasepreservation.visualization.client.BrowserService;
 import com.databasepreservation.visualization.client.SavedSearch;
+import com.databasepreservation.visualization.client.common.DefaultAsyncCallback;
 import com.databasepreservation.visualization.shared.ViewerSafeConstants;
 import com.databasepreservation.visualization.shared.client.ClientLogger;
 import com.databasepreservation.visualization.shared.client.Tools.FontAwesomeIconManager;
@@ -92,12 +93,7 @@ public class SavedSearchList extends BasicAsyncTableCell<SavedSearch> {
       new FontAwesomeActionCell.Delegate<SavedSearch>() {
         @Override
         public void execute(final SavedSearch object) {
-          BrowserService.Util.getInstance().deleteSearch(object.getUUID(), new AsyncCallback<Void>() {
-            @Override
-            public void onFailure(Throwable caught) {
-              GWT.log("error deleting search.", caught);
-            }
-
+          BrowserService.Util.getInstance().deleteSearch(object.getUUID(), new DefaultAsyncCallback<Void>() {
             @Override
             public void onSuccess(Void result) {
               GWT.log("deleted " + object.getUUID());

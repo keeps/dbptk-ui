@@ -143,7 +143,7 @@ public class ClientLoggerImpl extends RemoteServiceServlet implements ClientLogg
     // RODAClient rodaClient = RodaClientFactory.getRodaWuiClient();
     // String username = RodaClientFactory.getRodaClient(
     // this.getThreadLocalRequest().getSession()).getUsername();
-    // List<LogEntryParameter> parameters = new Vector<LogEntryParameter>();
+    // List<LogEntryParameter> parameters = new Vector<>();
     // parameters.add(new LogEntryParameter("hostname",
     // getThreadLocalRequest().getRemoteHost()));
     // parameters.add(new LogEntryParameter("address",
@@ -153,14 +153,13 @@ public class ClientLoggerImpl extends RemoteServiceServlet implements ClientLogg
     // parameters.add(new LogEntryParameter("classname", classname));
     // parameters.add(new LogEntryParameter("error", message));
     // if (error != null) {
-    // parameters.add(new LogEntryParameter("message", error
-    // .getMessage()));
+    // parameters.add(new LogEntryParameter("message", error.getMessage()));
     // }
-    //
+    // //
     // LogEntry logEntry = new LogEntry();
     // logEntry.setAction(LOG_ACTION_WUI_ERROR);
-    // logEntry.setParameters(parameters
-    // .toArray(new LogEntryParameter[parameters.size()]));
+    // logEntry.setParameters(parameters.toArray(new
+    // LogEntryParameter[parameters.size()]));
     // logEntry.setUsername(username);
     //
     // rodaClient.getLoggerService().addLogEntry(logEntry);

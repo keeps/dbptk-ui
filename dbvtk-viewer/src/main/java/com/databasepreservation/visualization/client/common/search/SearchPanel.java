@@ -405,8 +405,6 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
 
     if (succeeded) {
       HistoryManager.gotoEditSavedSearch(database.getUUID(), savedSearchUUID);
-    } else {
-      GWT.log("there was an error saving the query");
     }
   }
 }

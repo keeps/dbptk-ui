@@ -7,6 +7,7 @@ import org.roda.core.data.v2.index.IsIndexed;
 
 import com.databasepreservation.visualization.client.BrowserService;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
+import com.databasepreservation.visualization.client.common.DefaultAsyncCallback;
 import com.databasepreservation.visualization.shared.client.Tools.FontAwesomeIconManager;
 import com.databasepreservation.visualization.shared.client.Tools.HistoryManager;
 import com.databasepreservation.visualization.shared.client.widgets.wcag.AccessibleFocusPanel;
@@ -16,7 +17,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -57,12 +57,7 @@ public class MainPanel extends Composite {
       reSetHeader();
 
       BrowserService.Util.getInstance().retrieve(ViewerDatabase.class.getName(), databaseUUID,
-        new AsyncCallback<IsIndexed>() {
-          @Override
-          public void onFailure(Throwable caught) {
-            throw new RuntimeException(caught);
-          }
-
+        new DefaultAsyncCallback<IsIndexed>() {
           @Override
           public void onSuccess(IsIndexed result) {
             ViewerDatabase database = (ViewerDatabase) result;

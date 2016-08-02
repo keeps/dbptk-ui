@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
+import com.google.gwt.core.shared.SerializableThrowable;
 import com.google.gwt.logging.client.DevelopmentModeLogHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.IsSerializable;
@@ -129,7 +130,8 @@ public class ClientLogger implements IsSerializable {
           GWT.log(message, error);
         }
       };
-      ClientLoggerService.Util.getInstance().trace(classname, message, errorcallback);
+      ClientLoggerService.Util.getInstance().trace(classname, message, SerializableThrowable.fromThrowable(error),
+        errorcallback);
     }
   }
 
@@ -174,7 +176,8 @@ public class ClientLogger implements IsSerializable {
           GWT.log(object, error);
         }
       };
-      ClientLoggerService.Util.getInstance().debug(classname, object, errorcallback);
+      ClientLoggerService.Util.getInstance().debug(classname, object, SerializableThrowable.fromThrowable(error),
+        errorcallback);
     }
   }
 
@@ -218,7 +221,8 @@ public class ClientLogger implements IsSerializable {
           GWT.log(message, error);
         }
       };
-      ClientLoggerService.Util.getInstance().info(classname, message, errorcallback);
+      ClientLoggerService.Util.getInstance().info(classname, message, SerializableThrowable.fromThrowable(error),
+        errorcallback);
     }
   }
 
@@ -261,7 +265,8 @@ public class ClientLogger implements IsSerializable {
           GWT.log(message, error);
         }
       };
-      ClientLoggerService.Util.getInstance().warn(classname, message, errorcallback);
+      ClientLoggerService.Util.getInstance().warn(classname, message, SerializableThrowable.fromThrowable(error),
+        errorcallback);
     }
   }
 
@@ -312,7 +317,8 @@ public class ClientLogger implements IsSerializable {
         }
       };
 
-      ClientLoggerService.Util.getInstance().error(classname, message, errorcallback);
+      ClientLoggerService.Util.getInstance().error(classname, message, SerializableThrowable.fromThrowable(error),
+        errorcallback);
       // if (SHOW_ERROR_MESSAGES) {
       // Toast.showError(message, error.getMessage()
       // + (error.getCause() != null ? "\nCause: " +
@@ -368,7 +374,8 @@ public class ClientLogger implements IsSerializable {
         }
       };
 
-      ClientLoggerService.Util.getInstance().fatal(classname, message, errorcallback);
+      ClientLoggerService.Util.getInstance().fatal(classname, message, SerializableThrowable.fromThrowable(error),
+        errorcallback);
 
       // if (SHOW_ERROR_MESSAGES) {
       // Toast.showError(message, error.getMessage()

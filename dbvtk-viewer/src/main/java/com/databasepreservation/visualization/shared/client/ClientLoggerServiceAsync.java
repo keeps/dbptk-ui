@@ -1,8 +1,6 @@
 package com.databasepreservation.visualization.shared.client;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.rpc.ServiceDefTarget;
 
 public interface ClientLoggerServiceAsync {
 
@@ -100,24 +98,4 @@ public interface ClientLoggerServiceAsync {
    * @see com.databasepreservation.visualization.shared.client.ClientLoggerService
    */
   void pagehit(java.lang.String pagename, AsyncCallback<Void> callback);
-
-  /**
-   * Utility class to get the RPC Async interface from client-side code
-   */
-  public static final class Util {
-    private static ClientLoggerServiceAsync instance;
-
-    public static final ClientLoggerServiceAsync getInstance() {
-      if (instance == null) {
-        instance = (ClientLoggerServiceAsync) GWT.create(ClientLoggerService.class);
-        ServiceDefTarget target = (ServiceDefTarget) instance;
-        target.setServiceEntryPoint(GWT.getModuleBaseURL() + "ClientLoggerService");
-      }
-      return instance;
-    }
-
-    private Util() {
-      // Utility class should not be instantiated
-    }
-  }
 }

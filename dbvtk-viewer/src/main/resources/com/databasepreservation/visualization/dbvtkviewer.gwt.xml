@@ -2,14 +2,12 @@
 <module rename-to='dbvtkviewer'>
     <!-- Inherit the core Web Toolkit stuff.                        -->
     <inherits name='com.google.gwt.user.User'/>
+    <inherits name='com.google.gwt.logging.Logging'/>
 
     <!-- Inherit some internal functionality -->
     <inherits name='org.roda.core.Core'/>
     <inherits name='com.databasepreservation.visualization.dbvtk-model'/>
     <inherits name="com.github.nmorel.gwtjackson.GwtJackson" />
-
-    <!-- Inherit logging functionality -->
-    <inherits name='com.google.gwt.logging.Logging'/>
 
     <!-- Inherit required libraries -->
     <inherits name="com.bytebybyte.gwt.fontawesome.FontAwesomeLib" />
@@ -20,6 +18,16 @@
     <!--<inherits name='com.google.gwt.user.theme.standard.Standard'/>-->
     <!-- <inherits name='com.google.gwt.user.theme.chrome.Chrome'/> -->
     <!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
+
+    <!-- I18N: internals -->
+    <inherits name="com.google.gwt.i18n.I18N" />
+    <inherits name="config.i18n.I18N" />
+    <set-configuration-property name="locale.useragent" value="Y"/>
+    <set-configuration-property name="locale.searchorder" value="queryparam,cookie,meta,useragent"/>
+    <!-- I18N: languages -->
+    <extend-property name="locale" values="en" />
+    <extend-property name="locale" values="pt_PT" />
+    <set-property-fallback name="locale" value="en"/>
 
     <!-- Other module inherits                                      -->
 
@@ -36,5 +44,6 @@
     <!--<set-property name="compiler.stackMode" value="emulated" />-->
     <!--<set-configuration-property name="compiler.emulatedStack.recordLineNumbers" value="true"/>-->
     <!--<set-configuration-property name="compiler.emulatedStack.recordFileNames" value="true"/>-->
+
 
 </module>

@@ -10,6 +10,7 @@ import java.util.Date;
 import org.roda.core.data.adapter.sublist.Sublist;
 import org.roda.core.data.v2.index.IndexResult;
 
+import com.databasepreservation.visualization.client.common.DefaultAsyncCallback;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -34,14 +35,7 @@ public abstract class MyAsyncDataProvider<T extends Serializable> extends AsyncD
 
   @Override
   protected void onRangeChanged(HasData<T> display) {
-    fetch(display, new AsyncCallback<Void>() {
-
-      @Override
-      public void onFailure(Throwable caught) {
-        // AsyncCallbackUtils.defaultFailureTreatment(caught);
-        throw new RuntimeException(caught);
-      }
-
+    fetch(display, new DefaultAsyncCallback<Void>() {
       @Override
       public void onSuccess(Void result) {
         // do nothing
@@ -90,14 +84,7 @@ public abstract class MyAsyncDataProvider<T extends Serializable> extends AsyncD
   }
 
   public void update() {
-    update(new AsyncCallback<Void>() {
-
-      @Override
-      public void onFailure(Throwable caught) {
-        // AsyncCallbackUtils.defaultFailureTreatment(caught);
-        throw new RuntimeException(caught);
-      }
-
+    update(new DefaultAsyncCallback<Void>() {
       @Override
       public void onSuccess(Void result) {
         // do nothing

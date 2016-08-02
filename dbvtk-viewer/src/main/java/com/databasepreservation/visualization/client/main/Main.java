@@ -29,6 +29,7 @@ import com.databasepreservation.visualization.shared.client.Tools.HistoryManager
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -93,6 +94,12 @@ public class Main implements EntryPoint {
    */
   @Override
   public void onModuleLoad() {
+
+    // Set uncaught exception handler
+    ClientLogger.setUncaughtExceptionHandler();
+
+    // Remove loading image
+    RootPanel.getBodyElement().removeChild(DOM.getElementById("loading"));
 
     RootPanel.get().add(mainPanel);
     RootPanel.get().add(footer);
