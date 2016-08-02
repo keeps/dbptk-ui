@@ -260,6 +260,7 @@ public class SolrManager {
     org.roda.core.data.exceptions.GenericException {
     try {
       client.deleteById(ViewerSafeConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME, uuid);
+      client.commit(ViewerSafeConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME, true, true);
     } catch (SolrServerException e) {
       LOGGER.debug("SolrServerException while attempting to delete search", e);
     } catch (IOException e) {
