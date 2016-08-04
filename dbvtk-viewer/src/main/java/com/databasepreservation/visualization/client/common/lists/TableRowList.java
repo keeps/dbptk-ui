@@ -199,7 +199,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
   private void addColumn(ViewerColumn viewerColumn, Column<ViewerRow, ?> displayColumn) {
     if (ViewerStringUtils.isNotBlank(viewerColumn.getDescription())) {
       StringBuilder description = new StringBuilder("<span title=\"")
-        .append(SafeHtmlUtils.fromString(viewerColumn.getDisplayName()).asString()).append("; description: ")
+        .append(SafeHtmlUtils.fromString(viewerColumn.getDisplayName()).asString()).append(": ")
         .append(SafeHtmlUtils.fromString(viewerColumn.getDescription()).asString()).append("\">")
         .append(SafeHtmlUtils.fromString(viewerColumn.getDisplayName()).asString()).append("</span>");
 
