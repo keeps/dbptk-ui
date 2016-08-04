@@ -105,6 +105,7 @@ public class SolrUtils {
     // get resources and copy them to a temporary directory
     Path databaseDir = null;
     Path tableDir = null;
+    Path savedSearchesDir = null;
     try {
       final File jarFile = new File(SolrManager.class.getProtectionDomain().getCodeSource().getLocation().toURI());
 
@@ -113,6 +114,7 @@ public class SolrUtils {
       if (!jarFile.isDirectory()) {
         databaseDir = Files.createTempDirectory("dbv_db_");
         tableDir = Files.createTempDirectory("dbv_tab_");
+        savedSearchesDir = Files.createTempDirectory("dbv_tab_");
         final JarFile jar = new JarFile(jarFile);
         final Enumeration<JarEntry> entries = jar.entries();
 
@@ -128,6 +130,9 @@ public class SolrUtils {
           } else if (name.startsWith(ViewerSafeConstants.SOLR_CONFIGSET_TABLE_RESOURCE + "/")) {
             nameWithoutOriginPart = name.substring(ViewerSafeConstants.SOLR_CONFIGSET_TABLE_RESOURCE.length() + 1);
             destination = tableDir;
+          } else if (name.startsWith(ViewerSafeConstants.SOLR_CONFIGSET_SEARCHES_RESOURCE + "/")) {
+            nameWithoutOriginPart = name.substring(ViewerSafeConstants.SOLR_CONFIGSET_SEARCHES_RESOURCE.length() + 1);
+            destination = savedSearchesDir;
           } else {
             continue;
           }
@@ -179,6 +184,11 @@ public class SolrUtils {
       } catch (IOException e) {
         LOGGER.debug("IO error uploading table config to solr cloud", e);
       }
+      try {
+        zkClient.uploadConfig(savedSearchesDir, ViewerSafeConstants.SOLR_CONFIGSET_SEARCHES);
+      } catch (IOException e) {
+        LOGGER.debug("IO error uploading saved searches config to solr cloud", e);
+      }
 
       try {
         FileUtils.deleteDirectoryRecursive(databaseDir);
@@ -189,6 +199,11 @@ public class SolrUtils {
         FileUtils.deleteDirectoryRecursive(tableDir);
       } catch (IOException e1) {
         LOGGER.debug("IO error deleting temporary folder: " + tableDir, e1);
+      }
+      try {
+        FileUtils.deleteDirectoryRecursive(savedSearchesDir);
+      } catch (IOException e1) {
+        LOGGER.debug("IO error deleting temporary folder: " + savedSearchesDir, e1);
       }
     }
 
