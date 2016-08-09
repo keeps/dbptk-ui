@@ -43,4 +43,16 @@ public interface ClientMessages extends Messages {
   String titleObject();
 
   String titleOption();
+
+  String searchFieldDatePlaceHolder();
+
+  String searchFieldDateFromPlaceHolder();
+
+  String searchFieldDateToPlaceHolder();
+
+  String searchFieldNumericPlaceHolder();
+
+  String searchFieldNumericFromPlaceHolder();
+
+  String searchFieldNumericToPlaceHolder();
 }

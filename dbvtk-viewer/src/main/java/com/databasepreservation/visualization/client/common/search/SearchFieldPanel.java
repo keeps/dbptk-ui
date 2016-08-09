@@ -35,12 +35,13 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.datepicker.client.DateBox;
 
+import config.i18n.client.ClientMessages;
+
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class SearchFieldPanel extends Composite {
-  // private static final BrowseMessages messages =
-  // GWT.create(BrowseMessages.class);
+  private static final ClientMessages messages = GWT.create(ClientMessages.class);
 
   @SuppressWarnings("unused")
   private ClientLogger LOGGER = new ClientLogger(getClass().getName());
@@ -112,35 +113,35 @@ public class SearchFieldPanel extends Composite {
     inputDateBox.setFormat(dateFormat);
     inputDateBox.getDatePicker().setYearArrowsVisible(true);
     inputDateBox.setFireNullValues(true);
-    inputDateBox.getElement().setPropertyString("placeholder", "searchFieldDatePlaceHolder");
+    inputDateBox.getElement().setPropertyString("placeholder", messages.searchFieldDatePlaceHolder());
 
     inputDateBoxFrom = new DateBox();
     inputDateBoxFrom.setFormat(dateFormat);
     inputDateBoxFrom.getDatePicker().setYearArrowsVisible(true);
     inputDateBoxFrom.setFireNullValues(true);
-    inputDateBoxFrom.getElement().setPropertyString("placeholder", "searchFieldDateFromPlaceHolder");
+    inputDateBoxFrom.getElement().setPropertyString("placeholder", messages.searchFieldDateFromPlaceHolder());
 
     inputDateBoxTo = new DateBox();
     inputDateBoxTo.setFormat(dateFormat);
     inputDateBoxTo.getDatePicker().setYearArrowsVisible(true);
     inputDateBoxTo.setFireNullValues(true);
-    inputDateBoxTo.getElement().setPropertyString("placeholder", "searchFieldDateToPlaceHolder");
+    inputDateBoxTo.getElement().setPropertyString("placeholder", messages.searchFieldDateToPlaceHolder());
 
     inputNumeric = new TextBox();
-    inputNumeric.getElement().setPropertyString("placeholder", "searchFieldNumericPlaceHolder");
+    inputNumeric.getElement().setPropertyString("placeholder", messages.searchFieldNumericPlaceHolder());
     inputNumeric.getElement().setAttribute("type", "number");
     inputNumericFrom = new TextBox();
-    inputNumericFrom.getElement().setPropertyString("placeholder", "searchFieldNumericFromPlaceHolder");
+    inputNumericFrom.getElement().setPropertyString("placeholder", messages.searchFieldNumericFromPlaceHolder());
     inputNumericFrom.getElement().setAttribute("type", "number");
     inputNumericTo = new TextBox();
-    inputNumericTo.getElement().setPropertyString("placeholder", "searchFieldNumericToPlaceHolder");
+    inputNumericTo.getElement().setPropertyString("placeholder", messages.searchFieldNumericToPlaceHolder());
     inputNumericTo.getElement().setAttribute("type", "number");
 
     inputStorageSizeFrom = new TextBox();
-    inputStorageSizeFrom.getElement().setPropertyString("placeholder", "searchFieldNumericFromPlaceHolder");
+    inputStorageSizeFrom.getElement().setPropertyString("placeholder", messages.searchFieldNumericFromPlaceHolder());
     inputStorageSizeFrom.getElement().setAttribute("type", "number");
     inputStorageSizeTo = new TextBox();
-    inputStorageSizeTo.getElement().setPropertyString("placeholder", "searchFieldNumericToPlaceHolder");
+    inputStorageSizeTo.getElement().setPropertyString("placeholder", messages.searchFieldNumericToPlaceHolder());
     inputStorageSizeTo.getElement().setAttribute("type", "number");
     inputStorageSizeList = new ListBox();
     for (String unit : Humanize.UNITS) {

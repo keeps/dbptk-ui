@@ -511,7 +511,7 @@ public class ToolkitStructure2ViewerStructure {
     } else if (type instanceof SimpleTypeEnumeration) {
       result.setDbType(ViewerType.dbTypes.ENUMERATION);
     } else if (type instanceof SimpleTypeInterval) {
-      result.setDbType(ViewerType.dbTypes.INTERVAL);
+      result.setDbType(ViewerType.dbTypes.TIME_INTERVAL);
     } else if (type instanceof SimpleTypeNumericApproximate) {
       result.setDbType(ViewerType.dbTypes.NUMERIC_FLOATING_POINT);
     } else if (type instanceof SimpleTypeNumericExact) {
