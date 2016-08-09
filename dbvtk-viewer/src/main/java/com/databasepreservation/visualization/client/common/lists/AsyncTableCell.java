@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import config.i18n.client.ClientMessages;
 import org.roda.core.data.adapter.facet.Facets;
 import org.roda.core.data.adapter.filter.Filter;
 import org.roda.core.data.adapter.sort.SortParameter;
@@ -75,8 +76,7 @@ import com.google.gwt.view.client.SingleSelectionModel;
 public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel implements
   HasValueChangeHandlers<IndexResult<T>> {
 
-  // private static final BrowseMessages messages =
-  // GWT.create(BrowseMessages.class);
+  private static final ClientMessages messages = GWT.create(ClientMessages.class);
 
   private final MyAsyncDataProvider<T> dataProvider;
   private final SingleSelectionModel<T> selectionModel;
@@ -261,7 +261,7 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel i
       }
     });
 
-    Label emptyInfo = new Label("No items to display");
+    Label emptyInfo = new Label(messages.noItemsToDisplay());
     display.setEmptyTableWidget(emptyInfo);
   }
 

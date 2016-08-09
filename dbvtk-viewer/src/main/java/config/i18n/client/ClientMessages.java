@@ -13,4 +13,34 @@ public interface ClientMessages extends Messages {
   String alertErrorTitle();
 
   String executingTaskMessage();
+
+  String noItemsToDisplay();
+
+  String databaseDoesNotContainUsers();
+
+  String databaseDoesNotContainRoles();
+
+  String databaseDoesNotContainPrivileges();
+
+  String titleUsers();
+
+  String titleName();
+
+  String titleDescription();
+
+  String titleAdmin();
+
+  String titleRoles();
+
+  String titleType();
+
+  String titlePrivileges();
+
+  String titleGrantor();
+
+  String titleGrantee();
+
+  String titleObject();
+
+  String titleOption();
 }
