@@ -23,11 +23,12 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
+import com.google.gwt.view.client.SingleSelectionModel;
 
 /**
  * Widget with a title widget, a description or information widget and a
  * synchronous table (a CellTable using a ListDataProvider).
- * 
+ *
  * @author Bruno Ferreira <bferreira@keep.pt>
  * @param <C>
  *          Type for the column, used by inner class ColumnInfo as Column<C,
@@ -38,6 +39,8 @@ public class BasicTablePanel<C> extends Composite {
   }
 
   private static BasicTablePanelUiBinder uiBinder = GWT.create(BasicTablePanelUiBinder.class);
+
+  private final SingleSelectionModel<C> selectionModel;
 
   private ScrollPanel displayScroll;
   private SimplePanel displayScrollWrapper;
@@ -81,7 +84,11 @@ public class BasicTablePanel<C> extends Composite {
     header.setWidget(headerContent);
     info.setWidget(infoContent);
 
-    displayScroll = new ScrollPanel(createTable(rowItems, columns));
+    CellTable<C> display = createTable(rowItems, columns);
+    selectionModel = new SingleSelectionModel<>();
+    display.setSelectionModel(selectionModel);
+
+    displayScroll = new ScrollPanel(display);
     displayScrollWrapper = new SimplePanel(displayScroll);
     displayScrollWrapper.addStyleName("my-asyncdatagrid-display-scroll-wrapper");
     table.setWidget(displayScrollWrapper);
@@ -93,6 +100,24 @@ public class BasicTablePanel<C> extends Composite {
       }
     });
     handleScrollChanges();
+  }
+
+  public BasicTablePanel(Widget headerContent, String infoContent) {
+    initWidget(uiBinder.createAndBindUi(this));
+
+    // set widgets
+    header.setWidget(headerContent);
+
+    SafeHtmlBuilder b = new SafeHtmlBuilder();
+    b.append(SafeHtmlUtils.fromSafeConstant("<div class=\"field\">"));
+    b.append(SafeHtmlUtils.fromSafeConstant("<div class=\"label\">"));
+    b.append(SafeHtmlUtils.fromString(infoContent));
+    b.append(SafeHtmlUtils.fromSafeConstant("</div>"));
+    b.append(SafeHtmlUtils.fromSafeConstant("</div>"));
+    info.setWidget(new HTMLPanel(b.toSafeHtml()));
+
+    table.setVisible(false);
+    selectionModel = null;
   }
 
   @Override
@@ -131,23 +156,6 @@ public class BasicTablePanel<C> extends Composite {
     }
   }
 
-  public BasicTablePanel(Widget headerContent, String infoContent) {
-    initWidget(uiBinder.createAndBindUi(this));
-
-    // set widgets
-    header.setWidget(headerContent);
-
-    SafeHtmlBuilder b = new SafeHtmlBuilder();
-    b.append(SafeHtmlUtils.fromSafeConstant("<div class=\"field\">"));
-    b.append(SafeHtmlUtils.fromSafeConstant("<div class=\"label\">"));
-    b.append(SafeHtmlUtils.fromString(infoContent));
-    b.append(SafeHtmlUtils.fromSafeConstant("</div>"));
-    b.append(SafeHtmlUtils.fromSafeConstant("</div>"));
-    info.setWidget(new HTMLPanel(b.toSafeHtml()));
-
-    table.setVisible(false);
-  }
-
   @SafeVarargs
   private final CellTable<C> createTable(Iterator<C> rowItems, ColumnInfo<C>... columns) {
     // create table
@@ -176,5 +184,15 @@ public class BasicTablePanel<C> extends Composite {
     }
 
     return cellTable;
+  }
+
+  public SingleSelectionModel<C> getSelectionModel() {
+    return selectionModel;
+  }
+
+  @Override
+  protected void onLoad() {
+    super.onLoad();
+    this.getSelectionModel().clear();
   }
 }

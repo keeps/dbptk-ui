@@ -16,6 +16,7 @@ import com.databasepreservation.visualization.client.common.lists.BasicTablePane
 import com.databasepreservation.visualization.client.common.utils.CommonClientUtils;
 import com.databasepreservation.visualization.client.main.BreadcrumbPanel;
 import com.databasepreservation.visualization.shared.client.Tools.BreadcrumbManager;
+import com.databasepreservation.visualization.shared.client.Tools.HistoryManager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -24,6 +25,7 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.SelectionChangeEvent;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -72,7 +74,18 @@ public class SchemaDataPanel extends RightPanel {
 
   private void init() {
     CommonClientUtils.addSchemaInfoToFlowPanel(contentItems, schema);
-    contentItems.add(getBasicTablePanelForTableInfo(database.getMetadata(), schema));
+
+    final BasicTablePanel<ViewerTable> table = getBasicTablePanelForTableInfo(database.getMetadata(), schema);
+    table.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+      @Override
+      public void onSelectionChange(SelectionChangeEvent event) {
+        ViewerTable item = table.getSelectionModel().getSelectedObject();
+        if (item != null) {
+          HistoryManager.gotoTable(database.getUUID(), item.getUUID());
+        }
+      }
+    });
+    contentItems.add(table);
   }
 
   private BasicTablePanel<ViewerTable> getBasicTablePanelForTableInfo(final ViewerMetadata metadata,

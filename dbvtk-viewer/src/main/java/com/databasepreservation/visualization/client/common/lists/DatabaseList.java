@@ -96,12 +96,6 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
   }
 
   @Override
-  protected void onLoad() {
-    super.onLoad();
-    this.getSelectionModel().clear();
-  }
-
-  @Override
   public void exportVisibleClickHandler() {
 
   }
