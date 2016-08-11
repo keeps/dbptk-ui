@@ -49,7 +49,7 @@ public class SolrTransformer {
     SolrInputDocument doc = new SolrInputDocument();
 
     if (StringUtils.isBlank(savedSearch.getDateAdded())) {
-      savedSearch.setDateAdded(JodaUtils.solr_date_format(DateTime.now(DateTimeZone.UTC)));
+      savedSearch.setDateAdded(JodaUtils.solrDateFormat(DateTime.now(DateTimeZone.UTC)));
     }
 
     doc.addField(ViewerSafeConstants.SOLR_SEARCHES_ID, savedSearch.getUUID());
@@ -152,7 +152,7 @@ public class SolrTransformer {
     if (object == null) {
       ret = null;
     } else if (object instanceof String) {
-      ret = JodaUtils.solr_date_parse((String) object);
+      ret = JodaUtils.solrDateParse((String) object);
     } else if (object instanceof DateTime) {
       ret = (DateTime) object;
     } else {
