@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -576,21 +577,12 @@ public class ToolkitStructure2ViewerStructure {
         Path outputPath = ViewerConstants.USER_DBVIEWER_DIR.resolve(table.getUUID() + "/");
         outputPath = Files.createDirectories(outputPath);
         outputPath = outputPath.resolve(lobFilename);
-        InputStream stream = binaryCell.createInputstream();
+        InputStream stream = binaryCell.createInputStream();
         Files.copy(stream, outputPath, StandardCopyOption.REPLACE_EXISTING);
-        try {
-          stream.close();
-        } catch (IOException e) {
-          LOGGER.debug("could not close binaryCell input stream", e);
-        }
-
-        try {
-          binaryCell.cleanResources();
-        } catch (IOException e) {
-          LOGGER.debug("could not free binary cell resources", e);
-        }
+        IOUtils.closeQuietly(stream);
+        binaryCell.cleanResources();
       } catch (IOException | ModuleException e) {
-        throw new ViewerException("Could not copy blob to user directory");
+        throw new ViewerException("Could not copy blob to user directory", e);
       }
 
       result.setValue(lobFilename);
