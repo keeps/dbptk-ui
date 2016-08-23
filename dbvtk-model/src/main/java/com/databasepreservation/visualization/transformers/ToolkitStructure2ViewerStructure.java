@@ -555,7 +555,11 @@ public class ToolkitStructure2ViewerStructure {
     List<Cell> toolkitCells = row.getCells();
     for (ViewerColumn viewerColumn : table.getColumns()) {
       String solrColumnName = viewerColumn.getSolrName();
-      result.put(solrColumnName, getCell(table, toolkitCells.get(colIndex), rowIndex, colIndex++));
+      try {
+        result.put(solrColumnName, getCell(table, toolkitCells.get(colIndex), rowIndex, colIndex++));
+      } catch (ViewerException e) {
+        LOGGER.error("Problem converting cell, omitted it (as if it were NULL)", e);
+      }
     }
 
     return result;
@@ -573,16 +577,18 @@ public class ToolkitStructure2ViewerStructure {
 
       // copy blob to a file at
       // <USER_DBVIEWER_DIR>/<table_UUID>/blob<column_index>_<row_index>.bin
+      InputStream stream = null;
       try {
         Path outputPath = ViewerConstants.USER_DBVIEWER_DIR.resolve(table.getUUID() + "/");
         outputPath = Files.createDirectories(outputPath);
         outputPath = outputPath.resolve(lobFilename);
-        InputStream stream = binaryCell.createInputStream();
+        stream = binaryCell.createInputStream();
         Files.copy(stream, outputPath, StandardCopyOption.REPLACE_EXISTING);
-        IOUtils.closeQuietly(stream);
-        binaryCell.cleanResources();
       } catch (IOException | ModuleException e) {
         throw new ViewerException("Could not copy blob to user directory", e);
+      } finally {
+        IOUtils.closeQuietly(stream);
+        binaryCell.cleanResources();
       }
 
       result.setValue(lobFilename);
