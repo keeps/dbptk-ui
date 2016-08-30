@@ -575,13 +575,16 @@ public class ToolkitStructure2ViewerStructure {
     if (cell instanceof BinaryCell) {
       BinaryCell binaryCell = (BinaryCell) cell;
 
+      String thousands = (rowIndex / 1000) + "/";
+
       String lobFilename = "blob" + colIndex + "_" + rowIndex + ".bin";
 
       // copy blob to a file at
-      // <USER_DBVIEWER_DIR>/<table_UUID>/blob<column_index>_<row_index>.bin
+      // <USER_DBVIEWER_DIR>/<table_UUID>/<thousands>/blob<column_index>_<row_index>.bin
+      // thousands is 0 for rows 0 to 999, 1 for rows 1000 to 1999, etc
       InputStream stream = null;
       try {
-        Path outputPath = ViewerConstants.USER_DBVIEWER_DIR.resolve(table.getUUID() + "/");
+        Path outputPath = ViewerConstants.USER_DBVIEWER_DIR.resolve(table.getUUID() + "/" + thousands);
         outputPath = Files.createDirectories(outputPath);
         outputPath = outputPath.resolve(lobFilename);
         stream = binaryCell.createInputStream();
@@ -593,7 +596,7 @@ public class ToolkitStructure2ViewerStructure {
         binaryCell.cleanResources();
       }
 
-      result.setValue(lobFilename);
+      result.setValue(thousands + lobFilename);
     } else if (cell instanceof ComposedCell) {
       ComposedCell composedCell = (ComposedCell) cell;
       LOGGER.debug("composed cell not supported yet");
