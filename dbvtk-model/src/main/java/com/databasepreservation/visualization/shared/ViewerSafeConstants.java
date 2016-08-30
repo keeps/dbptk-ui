@@ -5,7 +5,9 @@ import org.roda.core.data.adapter.filter.Filter;
 
 /**
  * GWT-safe constants used in Database Viewer
- * 
+ *
+ * @see com.databasepreservation.visualization.ViewerConstants for the non
+ *      GWT-safe constants
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class ViewerSafeConstants {
@@ -26,6 +28,7 @@ public class ViewerSafeConstants {
   public static final String SOLR_INDEX_SEARCHES_COLLECTION_NAME = "dbv-searches";
   public static final String SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX = "dbv-table-";
   public static final String SOLR_INDEX_ROW_COLUMN_NAME_PREFIX = "col";
+  public static final String SOLR_INDEX_ROW_LOB_COLUMN_NAME_PREFIX = "lob";
 
   /*
    * DATABASE FIELDS

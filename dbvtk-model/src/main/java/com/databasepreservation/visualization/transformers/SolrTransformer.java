@@ -127,6 +127,10 @@ public class SolrTransformer {
         ViewerCell viewerCell = new ViewerCell();
         viewerCell.setValue(doc.get(columnName).toString());
         cells.put(columnName, viewerCell);
+      } else if (columnName.startsWith(ViewerSafeConstants.SOLR_INDEX_ROW_LOB_COLUMN_NAME_PREFIX)) {
+        ViewerCell viewerCell = new ViewerCell();
+        viewerCell.setValue(doc.get(columnName).toString());
+        cells.put(columnName, viewerCell);
       }
     }
     viewerRow.setCells(cells);

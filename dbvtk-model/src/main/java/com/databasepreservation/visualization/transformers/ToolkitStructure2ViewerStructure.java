@@ -460,9 +460,11 @@ public class ToolkitStructure2ViewerStructure {
   private static String getColumnSolrName(int index, Type type) throws ViewerException {
     // suffix must always be set before being used
     String suffix;
+    String prefix = ViewerSafeConstants.SOLR_INDEX_ROW_COLUMN_NAME_PREFIX;
 
     if (type instanceof SimpleTypeBinary) {
-      suffix = ViewerSafeConstants.SOLR_DYN_TEXT_GENERAL;
+      suffix = ViewerSafeConstants.SOLR_DYN_STRING;
+      prefix = ViewerSafeConstants.SOLR_INDEX_ROW_LOB_COLUMN_NAME_PREFIX;
     } else if (type instanceof SimpleTypeBoolean) {
       suffix = ViewerSafeConstants.SOLR_DYN_BOOLEAN;
     } else if (type instanceof SimpleTypeDateTime) {
@@ -490,7 +492,7 @@ public class ToolkitStructure2ViewerStructure {
       throw new ViewerException("Unknown type: " + type.toString());
     }
 
-    return ViewerSafeConstants.SOLR_INDEX_ROW_COLUMN_NAME_PREFIX + index + suffix;
+    return prefix + index + suffix;
   }
 
   private static ViewerType getType(Type type) throws ViewerException {
