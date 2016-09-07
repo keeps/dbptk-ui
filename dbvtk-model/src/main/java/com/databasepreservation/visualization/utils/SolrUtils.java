@@ -276,8 +276,14 @@ public class SolrUtils {
     try {
       QueryResponse response = index.query(getIndexName(classToRetrieve), query);
       ret = queryResponseToIndexResult(response, classToRetrieve, facets);
-    } catch (SolrServerException | IOException e) {
-      throw new GenericException("Could not query index", e);
+    } catch (SolrServerException | IOException | org.apache.solr.client.solrj.impl.HttpSolrClient.RemoteSolrException e) {
+      String message = e.getMessage();
+      String bodytag = "<body>";
+      if(message != null && message.contains(bodytag)){
+        message = message.substring(message.indexOf(bodytag) + bodytag.length(), message.indexOf("</body>"));
+        message = message.replaceAll("\\<[^>]*?>","");
+      }
+      throw new GenericException("Could not query index, message: " + message, e);
     }
 
     return ret;
