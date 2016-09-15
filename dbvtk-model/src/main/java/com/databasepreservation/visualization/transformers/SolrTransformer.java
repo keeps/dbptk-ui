@@ -125,7 +125,23 @@ public class SolrTransformer {
     for (String columnName : doc.keySet()) {
       if (columnName.startsWith(ViewerSafeConstants.SOLR_INDEX_ROW_COLUMN_NAME_PREFIX)) {
         ViewerCell viewerCell = new ViewerCell();
-        viewerCell.setValue(doc.get(columnName).toString());
+        Object value = doc.get(columnName);
+
+        if (value instanceof Date) {
+          DateTime date = new DateTime(value, JodaUtils.DEFAULT_CHRONOLOGY);
+          if (columnName.endsWith(ViewerSafeConstants.SOLR_DYN_TDATE)) {
+            viewerCell.setValue(JodaUtils.solrDateDisplay(date));
+          } else if (columnName.endsWith(ViewerSafeConstants.SOLR_DYN_TTIME)) {
+            viewerCell.setValue(JodaUtils.solrTimeDisplay(date));
+          } else if (columnName.endsWith(ViewerSafeConstants.SOLR_DYN_TDATETIME)) {
+            viewerCell.setValue(JodaUtils.solrDateTimeDisplay(date));
+          } else {
+            viewerCell.setValue(value.toString());
+          }
+        } else {
+          viewerCell.setValue(value.toString());
+        }
+
         cells.put(columnName, viewerCell);
       } else if (columnName.startsWith(ViewerSafeConstants.SOLR_INDEX_ROW_LOB_COLUMN_NAME_PREFIX)) {
         ViewerCell viewerCell = new ViewerCell();

@@ -3,6 +3,8 @@ package com.databasepreservation.visualization;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * Non GWT-safe constants used in Database Viewer.
  *
@@ -11,8 +13,32 @@ import java.nio.file.Paths;
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class ViewerConstants {
-  /*
-   * LOCAL USER DATA
-   */
-  public static final Path USER_DBVIEWER_DIR = Paths.get(System.getProperty("user.home"), ".db-visualization-toolkit");
+  private static final String NAME_DBVTK_WORKSPACE = "DBVTK_WORKSPACE";
+
+  private static Path workspaceDirectory = null;
+
+  public static Path getWorkspaceDirectory() {
+    if (workspaceDirectory == null) {
+      String property = System.getProperty(NAME_DBVTK_WORKSPACE);
+      String env = System.getenv(NAME_DBVTK_WORKSPACE);
+
+      if (StringUtils.isNotBlank(property)) {
+        workspaceDirectory = Paths.get(property);
+      } else if (StringUtils.isNotBlank(env)) {
+        workspaceDirectory = Paths.get(env);
+      } else {
+        workspaceDirectory = Paths.get(System.getProperty("user.home"), ".db-visualization-toolkit");
+      }
+    }
+    return workspaceDirectory;
+  }
+
+  private static Path workspaceForLobs = null;
+
+  public static Path getWorkspaceForLobs() {
+    if (workspaceForLobs == null) {
+      workspaceForLobs = getWorkspaceDirectory().resolve("lobs");
+    }
+    return workspaceForLobs;
+  }
 }

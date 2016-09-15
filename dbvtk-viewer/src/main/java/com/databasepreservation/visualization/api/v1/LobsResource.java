@@ -12,6 +12,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.databasepreservation.visualization.utils.LobPathManager;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RODAException;
 import org.slf4j.Logger;
@@ -57,20 +58,14 @@ public class LobsResource {
     @PathParam(ViewerSafeConstants.API_PATH_PARAM_COLUMN_ID) Integer columnID) throws RODAException {
     SolrManager solrManager = ViewerFactory.getSolrManager();
 
-    ViewerDatabase database = solrManager.retrieve(null, ViewerDatabase.class, databaseUUID);
+    //ViewerDatabase database = solrManager.retrieve(null, ViewerDatabase.class, databaseUUID);
     ViewerRow row = solrManager.retrieveRows(null, ViewerRow.class, tableUUID, rowUUID);
 
     if (row != null) {
-      String lobPathEnding = row.getCells()
-        .get(database.getMetadata().getTable(tableUUID).getColumns().get(columnID).getSolrName()).getValue();
-      java.nio.file.Path lobPath = ViewerConstants.USER_DBVIEWER_DIR.resolve(tableUUID + "/" + lobPathEnding);
-      String downloadFileName = lobPathEnding;
-      if (downloadFileName.contains("/")) {
-        downloadFileName = downloadFileName.substring(downloadFileName.indexOf('/'));
-      }
+      String fileName = rowUUID + "-" + columnID + ".bin";
       try {
-        return ApiUtils.okResponse(new StreamResponse(downloadFileName, MediaType.APPLICATION_OCTET_STREAM,
-          DownloadUtils.stream(Files.newInputStream(lobPath))));
+        return ApiUtils.okResponse(new StreamResponse(fileName, MediaType.APPLICATION_OCTET_STREAM,
+          DownloadUtils.stream(Files.newInputStream(LobPathManager.getPath(tableUUID, columnID, rowUUID)))));
       } catch (IOException e) {
         throw new RODAException("There was an IO problem retrieving the LOB.", e);
       }

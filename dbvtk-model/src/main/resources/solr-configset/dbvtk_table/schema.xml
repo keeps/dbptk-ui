@@ -165,6 +165,12 @@
     <dynamicField name="*_td" type="tdouble" indexed="true" stored="true"/>
     <dynamicField name="*_tdt" type="tdate" indexed="true" stored="true"/>
 
+    <!-- same as *_tdt except this type is used for Time only -->
+    <dynamicField name="*_tdt_t" type="tdate" indexed="true" stored="true"/>
+
+    <!-- same as *_tdt except this type is used for Date only -->
+    <dynamicField name="*_tdt_d" type="tdate" indexed="true" stored="true"/>
+
     <dynamicField name="*_c" type="currency" indexed="true" stored="true"/>
 
     <dynamicField name="ignored_*" type="ignored" multiValued="true"/>

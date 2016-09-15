@@ -2,6 +2,7 @@ package com.databasepreservation.visualization.shared;
 
 import org.roda.core.data.adapter.filter.BasicSearchFilterParameter;
 import org.roda.core.data.adapter.filter.Filter;
+import org.roda.core.data.common.RodaConstants;
 
 /**
  * GWT-safe constants used in Database Viewer
@@ -80,7 +81,9 @@ public class ViewerSafeConstants {
 
   // indexed, stored, trie-based
   public static final String SOLR_DYN_CURRENCY = "_c";
-  public static final String SOLR_DYN_TDATE = "_tdt";
+  public static final String SOLR_DYN_TDATETIME = "_tdt";
+  public static final String SOLR_DYN_TDATE = "_tdt_d";
+  public static final String SOLR_DYN_TTIME = "_tdt_t";
   public static final String SOLR_DYN_TDOUBLE = "_td";
   public static final String SOLR_DYN_TFLOAT = "_tf";
   public static final String SOLR_DYN_TINT = "_ti";
@@ -159,6 +162,20 @@ public class ViewerSafeConstants {
   public static final String API_PATH_PARAM_SOLR_QUERY = "query";
 
   /*
+   * Search field types from RODA, plus a few new ones
+   */
+  public static final String SEARCH_FIELD_TYPE_TEXT = RodaConstants.SEARCH_FIELD_TYPE_TEXT;
+  public static final String SEARCH_FIELD_TYPE_DATE_INTERVAL = RodaConstants.SEARCH_FIELD_TYPE_DATE_INTERVAL;
+  public static final String SEARCH_FIELD_TYPE_NUMERIC = RodaConstants.SEARCH_FIELD_TYPE_NUMERIC;
+  public static final String SEARCH_FIELD_TYPE_NUMERIC_INTERVAL = RodaConstants.SEARCH_FIELD_TYPE_NUMERIC_INTERVAL;
+  public static final String SEARCH_FIELD_TYPE_STORAGE = RodaConstants.SEARCH_FIELD_TYPE_STORAGE;
+  public static final String SEARCH_FIELD_TYPE_BOOLEAN = RodaConstants.SEARCH_FIELD_TYPE_BOOLEAN;
+  public static final String SEARCH_FIELD_TYPE_SUGGEST = RodaConstants.SEARCH_FIELD_TYPE_SUGGEST;
+  public static final String SEARCH_FIELD_TYPE_DATETIME = RodaConstants.SEARCH_FIELD_TYPE_DATE;
+  public static final String SEARCH_FIELD_TYPE_DATE = RodaConstants.SEARCH_FIELD_TYPE_DATE + "justdate";
+  public static final String SEARCH_FIELD_TYPE_TIME = RodaConstants.SEARCH_FIELD_TYPE_DATE + "justtime";
+
+  /*
    * Misc
    */
   public static final String ISO8601 = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
@@ -166,6 +183,7 @@ public class ViewerSafeConstants {
   public static final String SHA1 = "SHA-1";
   public static final String SHA256 = "SHA-256";
   public static final String MD5 = "MD5";
+  public static final Long MILLISECONDS_IN_A_DAY = 86400000L;
 
   /**
    * private constructor

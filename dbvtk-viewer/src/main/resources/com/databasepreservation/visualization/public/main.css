@@ -93,6 +93,10 @@
     width: 8.4rem;
 }
 
+.search-field-left-panel .form-textbox-small {
+    max-width: 100px;
+}
+
 /***********************************************
    BrowseContent (based on ViewRepresentation)
 ************************************************/

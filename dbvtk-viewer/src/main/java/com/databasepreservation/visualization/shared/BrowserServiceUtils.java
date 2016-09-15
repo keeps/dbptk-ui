@@ -33,18 +33,23 @@ public class BrowserServiceUtils {
     ViewerType.dbTypes dbType = viewerType.getDbType();
 
     switch (dbType) {
+
       case BOOLEAN:
-        return RodaConstants.SEARCH_FIELD_TYPE_BOOLEAN;
+        return ViewerSafeConstants.SEARCH_FIELD_TYPE_BOOLEAN;
       case DATETIME:
-        return RodaConstants.SEARCH_FIELD_TYPE_DATE;
+        return ViewerSafeConstants.SEARCH_FIELD_TYPE_DATETIME;
+      case DATETIME_JUST_DATE:
+        return ViewerSafeConstants.SEARCH_FIELD_TYPE_DATE;
+      case DATETIME_JUST_TIME:
+        return ViewerSafeConstants.SEARCH_FIELD_TYPE_TIME;
       case TIME_INTERVAL:
-        return RodaConstants.SEARCH_FIELD_TYPE_DATE_INTERVAL;
+        return ViewerSafeConstants.SEARCH_FIELD_TYPE_DATE_INTERVAL;
       case NUMERIC_FLOATING_POINT:
       case NUMERIC_INTEGER:
-        return RodaConstants.SEARCH_FIELD_TYPE_NUMERIC_INTERVAL;
+        return ViewerSafeConstants.SEARCH_FIELD_TYPE_NUMERIC_INTERVAL;
       case ENUMERATION:
       case STRING:
-        return RodaConstants.SEARCH_FIELD_TYPE_TEXT;
+        return ViewerSafeConstants.SEARCH_FIELD_TYPE_TEXT;
       case BINARY:
       case COMPOSED_STRUCTURE:
       case COMPOSED_ARRAY:

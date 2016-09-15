@@ -2,6 +2,7 @@ package com.databasepreservation.visualization.client.common.lists;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -14,6 +15,7 @@ import org.roda.core.data.adapter.sublist.Sublist;
 import org.roda.core.data.v2.common.Pair;
 import org.roda.core.data.v2.index.IndexResult;
 
+import com.databasepreservation.utils.JodaUtils;
 import com.databasepreservation.visualization.client.BrowserService;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerColumn;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
@@ -22,6 +24,7 @@ import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerType;
 import com.databasepreservation.visualization.shared.ViewerSafeConstants;
 import com.databasepreservation.visualization.shared.client.ClientLogger;
+import com.databasepreservation.visualization.shared.client.Tools.FontAwesomeIconManager;
 import com.databasepreservation.visualization.shared.client.Tools.ViewerJsonUtils;
 import com.databasepreservation.visualization.shared.client.Tools.ViewerStringUtils;
 import com.google.gwt.cell.client.Cell;
@@ -84,12 +87,12 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
   @Override
   protected void configureDisplay(CellTable<ViewerRow> display) {
     this.display = display;
-    ViewerTable table = getObject().getSecond();
+    final ViewerTable table = getObject().getSecond();
     columns = new LinkedHashMap<>(table.getColumns().size());
 
     int columnIndex = 0;
     for (ViewerColumn viewerColumn : table.getColumns()) {
-      ViewerType viewerColumnType = viewerColumn.getType();
+      final ViewerType viewerColumnType = viewerColumn.getType();
       final int thisColumnIndex = columnIndex++;
       final String solrColumnName = viewerColumn.getSolrName();
 
@@ -117,18 +120,42 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
 
         @Override
         public SafeHtml getValue(ViewerRow row) {
-          SafeHtml ret;
+          SafeHtml ret = null;
           if (row == null) {
             logger.error("Trying to display a NULL ViewerRow");
-            ret = null;
           } else if (row.getCells() == null) {
             logger.error("Trying to display NULL Cells");
-            ret = null;
-          } else if (row.getCells().get(solrColumnName) == null) {
-            // logger.error("Trying to display NULL value");
-            ret = null;
-          } else {
-            ret = SafeHtmlUtils.fromString(row.getCells().get(solrColumnName).getValue());
+          } else if (row.getCells().get(solrColumnName) != null) {
+            ViewerType.dbTypes type = viewerColumnType.getDbType();
+            String value = row.getCells().get(solrColumnName).getValue();
+
+            // if it exists in Solr, it is not null
+            switch (type) {
+              case BINARY:
+                ret = SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.BLOB,
+                  "Large binary object"));
+                break;
+//              case DATETIME:
+//                ret = SafeHtmlUtils.fromString(JodaUtils.solrDateTimeDisplay(JodaUtils.solrDateParse(value)));
+//                break;
+//              case DATETIME_JUST_DATE:
+//                ret = SafeHtmlUtils.fromString(JodaUtils.solrDateDisplay(JodaUtils.solrDateParse(value)));
+//                break;
+//              case DATETIME_JUST_TIME:
+//                ret = SafeHtmlUtils.fromString(JodaUtils.solrTimeDisplay(JodaUtils.solrDateParse(value)));
+//                ret = SafeHtmlUtils.fromString(new Date().)
+//                break;
+              case BOOLEAN:
+              case ENUMERATION:
+              case TIME_INTERVAL:
+              case NUMERIC_FLOATING_POINT:
+              case NUMERIC_INTEGER:
+              case COMPOSED_STRUCTURE:
+              case COMPOSED_ARRAY:
+              case STRING:
+              default:
+                ret = SafeHtmlUtils.fromString(value);
+            }
           }
           return ret;
         }

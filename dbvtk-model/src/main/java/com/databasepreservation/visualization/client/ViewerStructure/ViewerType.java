@@ -1,14 +1,15 @@
 package com.databasepreservation.visualization.client.ViewerStructure;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class ViewerType implements Serializable {
   public enum dbTypes {
-    BINARY, BOOLEAN, DATETIME, ENUMERATION, TIME_INTERVAL, NUMERIC_FLOATING_POINT, NUMERIC_INTEGER, STRING,
-    COMPOSED_STRUCTURE, COMPOSED_ARRAY
+    BINARY, BOOLEAN, DATETIME, DATETIME_JUST_DATE, DATETIME_JUST_TIME, ENUMERATION, TIME_INTERVAL,
+    NUMERIC_FLOATING_POINT, NUMERIC_INTEGER, STRING, COMPOSED_STRUCTURE, COMPOSED_ARRAY
   }
 
   private String originalTypeName;
@@ -55,5 +56,10 @@ public class ViewerType implements Serializable {
   public String toString() {
     return "ViewerType{" + "dbType=" + dbType + ", originalTypeName='" + originalTypeName + '\'' + ", description='"
       + description + '\'' + ", typeName='" + typeName + '\'' + '}';
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(originalTypeName, description, typeName, dbType);
   }
 }
