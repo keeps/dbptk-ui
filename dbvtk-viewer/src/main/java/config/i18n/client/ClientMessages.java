@@ -55,4 +55,8 @@ public interface ClientMessages extends Messages {
   String searchFieldNumericFromPlaceHolder();
 
   String searchFieldNumericToPlaceHolder();
+
+  String searchFieldTimeFromPlaceHolder();
+
+  String searchFieldTimeToPlaceHolder();
 }

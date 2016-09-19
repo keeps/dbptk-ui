@@ -15,6 +15,7 @@ import org.roda.core.data.adapter.filter.DateRangeFilterParameter;
 import org.roda.core.data.adapter.filter.FilterParameter;
 import org.roda.core.data.adapter.filter.LongRangeFilterParameter;
 import org.roda.core.data.adapter.filter.SimpleFilterParameter;
+import org.roda.core.data.common.RodaConstants;
 
 import com.databasepreservation.visualization.client.common.utils.ListboxUtils;
 import com.databasepreservation.visualization.shared.ViewerSafeConstants;
@@ -45,6 +46,8 @@ import config.i18n.client.ClientMessages;
  */
 public class SearchFieldPanel extends Composite {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
+  private static final DateTimeFormat timeFormat = DateTimeFormat
+    .getFormat(DateTimeFormat.PredefinedFormat.HOUR24_MINUTE_SECOND);
 
   @SuppressWarnings("unused")
   private ClientLogger LOGGER = new ClientLogger(getClass().getName());
@@ -136,7 +139,8 @@ public class SearchFieldPanel extends Composite {
     inputDateFromForDateTime.getDateBox().setFireNullValues(true);
     inputDateFromForDateTime.getElement().setPropertyString("placeholder", messages.searchFieldDateFromPlaceHolder());
 
-    inputTimeFromForDateTime = new UTCTimeBox();
+    inputTimeFromForDateTime = new UTCTimeBox(timeFormat);
+    inputTimeFromForDateTime.getElement().setPropertyString("placeholder", messages.searchFieldTimeFromPlaceHolder());
 
     inputDateToForDateTime = new UTCDateBox();
     inputDateToForDateTime.getDateBox().setFormat(dateFormat);
@@ -144,10 +148,14 @@ public class SearchFieldPanel extends Composite {
     inputDateToForDateTime.getDateBox().setFireNullValues(true);
     inputDateToForDateTime.getElement().setPropertyString("placeholder", messages.searchFieldDateToPlaceHolder());
 
-    inputTimeToForDateTime = new UTCTimeBox();
+    inputTimeToForDateTime = new UTCTimeBox(timeFormat);
+    inputTimeToForDateTime.getElement().setPropertyString("placeholder", messages.searchFieldTimeToPlaceHolder());
 
-    inputTimeFromForTime = new UTCTimeBox();
-    inputTimeToForTime = new UTCTimeBox();
+    inputTimeFromForTime = new UTCTimeBox(timeFormat);
+    inputTimeFromForTime.getElement().setPropertyString("placeholder", messages.searchFieldTimeFromPlaceHolder());
+
+    inputTimeToForTime = new UTCTimeBox(timeFormat);
+    inputTimeToForTime.getElement().setPropertyString("placeholder", messages.searchFieldTimeToPlaceHolder());
 
     inputNumeric = new TextBox();
     inputNumeric.getElement().setPropertyString("placeholder", messages.searchFieldNumericPlaceHolder());
@@ -277,10 +285,7 @@ public class SearchFieldPanel extends Composite {
         && dateIntervalValid(inputDateFromForDate, inputDateToForDate)) {
         Date begin = getDateFromInput(inputDateFromForDate);
         Date end = getDateFromInput(inputDateToForDate);
-        if (begin.equals(end)) {
-          end = getDateFromInput(inputDateToForDate, ViewerSafeConstants.MILLISECONDS_IN_A_DAY - 1);
-        }
-        filterParameter = new DateRangeFilterParameter(field, begin, end);
+        filterParameter = new DateRangeFilterParameter(field, begin, end, RodaConstants.DateGranularity.DAY);
         // } else if
         // (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_DATE_INTERVAL)
         // && dateIntervalValid(inputDateFromForDate, inputDateToForDate) &&
@@ -299,20 +304,13 @@ public class SearchFieldPanel extends Composite {
         && dateIntervalValid(inputTimeFromForTime, inputTimeToForTime)) {
         Date begin = getDateFromInput(inputTimeFromForTime);
         Date end = getDateFromInput(inputTimeToForTime);
-        if (begin.equals(end)) {
-          // add one millisecond to have a range
-          end =getDateFromInput(inputTimeToForTime, 1);
-        }
-        filterParameter = new DateRangeFilterParameter(field, begin, end);
+        filterParameter = new DateRangeFilterParameter(field, begin, end, RodaConstants.DateGranularity.MILLISECOND);
       } else if (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_DATETIME)
-        && dateIntervalValid(inputDateFromForDateTime, inputTimeFromForDateTime, inputDateToForDateTime, inputTimeToForDateTime)) {
-        Date begin = getDateFromInput(inputDateFromForDateTime,inputTimeFromForDateTime);
-        Date end = getDateFromInput(inputDateToForDateTime,inputTimeToForDateTime);
-        if (begin.equals(end)) {
-          // add one millisecond to have a range
-          end = getDateFromInput(inputDateToForDateTime,inputTimeToForDateTime, 1);
-        }
-        filterParameter = new DateRangeFilterParameter(field, begin, end);
+        && dateIntervalValid(inputDateFromForDateTime, inputTimeFromForDateTime, inputDateToForDateTime,
+          inputTimeToForDateTime)) {
+        Date begin = getDateFromInput(inputDateFromForDateTime, inputTimeFromForDateTime);
+        Date end = getDateFromInput(inputDateToForDateTime, inputTimeToForDateTime);
+        filterParameter = new DateRangeFilterParameter(field, begin, end, RodaConstants.DateGranularity.MILLISECOND);
       } else if (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_NUMERIC) && valid(inputNumeric)) {
         filterParameter = new BasicSearchFilterParameter(field, inputNumeric.getValue());
       } else if (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_NUMERIC_INTERVAL)
@@ -343,24 +341,12 @@ public class SearchFieldPanel extends Composite {
     return new Date(dateBox.getValue());
   }
 
-  private Date getDateFromInput(UTCDateBox dateBox, long add) {
-    return new Date(dateBox.getValue()+add);
-  }
-
   private Date getDateFromInput(UTCTimeBox timeBox) {
     return new Date(timeBox.getValue());
   }
 
-  private Date getDateFromInput(UTCTimeBox timeBox, long add) {
-    return new Date(timeBox.getValue()+add);
-  }
-
   private Date getDateFromInput(UTCDateBox dateBox, UTCTimeBox timeBox) {
     return new Date(dateBox.getValue() + timeBox.getValue());
-  }
-
-  private Date getDateFromInput(UTCDateBox dateBox, UTCTimeBox timeBox, long add) {
-    return new Date(dateBox.getValue() + timeBox.getValue() + add);
   }
 
   public void listBoxSearchField(String field) {
@@ -438,8 +424,8 @@ public class SearchFieldPanel extends Composite {
   }
 
   private boolean dateIntervalValid(UTCDateBox dateFrom, UTCTimeBox timeFrom, UTCDateBox dateTo, UTCTimeBox timeTo) {
-    if(dateFrom.getValue() != null && timeFrom.getValue() != null && dateTo.getValue() != null
-      && timeTo.getValue() != null){
+    if (dateFrom.getValue() != null && timeFrom.getValue() != null && dateTo.getValue() != null
+      && timeTo.getValue() != null) {
       return dateFrom.getValue() + timeFrom.getValue() <= dateTo.getValue() + timeTo.getValue();
     }
     return false;
