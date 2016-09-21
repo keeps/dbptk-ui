@@ -127,8 +127,9 @@ public class DatabaseSidebar extends Composite {
     sidebarGroup.add(new SidebarHyperlink("Saved searches", HistoryManager.linkToSavedSearches(database.getUUID()))
       .addIcon(FontAwesomeIconManager.SAVED_SEARCH).setH6().setIndent1());
 
-    sidebarGroup.add(new SidebarHyperlink("Search whole database", HistoryManager.linkToDatabaseSearch(database
-      .getUUID())).addIcon(FontAwesomeIconManager.DATABASE_SEARCH).setH6().setIndent1());
+    sidebarGroup
+      .add(new SidebarHyperlink("Search all records", HistoryManager.linkToDatabaseSearch(database.getUUID()))
+        .addIcon(FontAwesomeIconManager.DATABASE_SEARCH).setH6().setIndent1());
 
     for (final ViewerSchema schema : metadata.getSchemas()) {
       sidebarGroup.add(new SidebarItem(schema.getName()).addIcon(FontAwesomeIconManager.SCHEMA).setH5().setIndent0());

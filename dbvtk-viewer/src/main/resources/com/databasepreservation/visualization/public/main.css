@@ -547,3 +547,18 @@
 .rowData .value {
     margin-left: 2rem;
 }
+
+
+
+/**********************************************
+	       DATABASE SEARCH PAGE
+************************************************/
+
+.database-search-panel .spinner {
+    position: relative;
+    top: 0;
+    left: 0;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 2rem;
+}

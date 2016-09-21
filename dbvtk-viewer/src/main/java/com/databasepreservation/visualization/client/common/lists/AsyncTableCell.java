@@ -67,6 +67,7 @@ import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.Range;
+import com.google.gwt.view.client.RowCountChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.gwt.view.client.CellPreviewEvent.Handler;
 
@@ -267,7 +268,8 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel i
   }
 
   protected void handleScrollChanges() {
-    if (displayScroll.getMaximumHorizontalScrollPosition() > 0) {
+    int maximumHorizontalScrollPosition = displayScroll.getMaximumHorizontalScrollPosition();
+    if (maximumHorizontalScrollPosition > 0) {
       double percent = displayScroll.getHorizontalScrollPosition() * 100F
         / displayScroll.getMaximumHorizontalScrollPosition();
 

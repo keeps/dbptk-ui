@@ -2,13 +2,14 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:m='urn:import:com.databasepreservation.visualization.client.main'
              xmlns:b='urn:import:com.databasepreservation.visualization.client.browse'
+             xmlns:c='urn:import:com.databasepreservation.visualization.client.common'
              xmlns:s='urn:import:com.databasepreservation.visualization.client.common.search'
              xmlns:sb='urn:import:com.databasepreservation.visualization.client.common.sidebar'
              xmlns:lists="urn:import:com.databasepreservation.visualization.client.common.lists"
              xmlns:wcag="urn:import:com.databasepreservation.visualization.shared.client.widgets.wcag">
 
     <g:FlowPanel>
-        <g:HTML addStyleNames="h1" ui:field="mainHeader"><ui:msg>Search whole database</ui:msg></g:HTML>
+        <g:HTML addStyleNames="h1" ui:field="mainHeader"><ui:msg>Search all records</ui:msg></g:HTML>
 
         <g:FlowPanel styleName="searchPanel" ui:field="searchPanel">
             <g:FlowPanel styleName="searchPanelLeft">
@@ -29,6 +30,9 @@
         </g:FlowPanel>
 
         <g:HTML ui:field="description"/>
-        <g:FlowPanel ui:field="content"/>
+        <g:FlowPanel ui:field="content">
+            <g:Label visible="false" ui:field="noResults">No records match the search terms.</g:Label>
+            <c:LoadingDiv addStyleNames="database-search-panel" visible="false" ui:field="loading"/>
+        </g:FlowPanel>
     </g:FlowPanel>
 </ui:UiBinder>

@@ -266,11 +266,51 @@ public class SearchFieldPanel extends Composite {
   }
 
   public void setInputFromFilterParam(FilterParameter filterParam) {
-    if (filterParam instanceof BasicSearchFilterParameter) {
+    if (filterParam instanceof DateRangeFilterParameter) {
+      DateRangeFilterParameter dateRangeFilterParameter = (DateRangeFilterParameter) filterParam;
+
+      long begin = UTCDateBox.date2utc(dateRangeFilterParameter.getFromValue());
+      long end = UTCDateBox.date2utc(dateRangeFilterParameter.getToValue());
+
+      if (filterParam.getName().endsWith(ViewerSafeConstants.SOLR_DYN_TDATE)) {
+        inputDateFromForDate.setValue(begin);
+        inputDateToForDate.setValue(end);
+      } else if (filterParam.getName().endsWith(ViewerSafeConstants.SOLR_DYN_TTIME)) {
+        inputTimeFromForTime.setValue(begin);
+        inputTimeToForTime.setValue(end);
+      } else if (filterParam.getName().endsWith(ViewerSafeConstants.SOLR_DYN_TDATETIME)) {
+        inputDateFromForDateTime.setValue(begin);
+        inputTimeFromForDateTime.setValue(extractTimePartWithTimeZone(dateRangeFilterParameter.getFromValue(),
+          inputDateFromForDateTime));
+        inputDateToForDateTime.setValue(end);
+        inputTimeToForDateTime.setValue(extractTimePartWithTimeZone(dateRangeFilterParameter.getToValue(),
+          inputDateToForDateTime));
+      }
+    } else if (filterParam instanceof LongRangeFilterParameter) {
+      LongRangeFilterParameter longRangeFilterParameter = (LongRangeFilterParameter) filterParam;
+
+      Long begin = longRangeFilterParameter.getFromValue();
+      Long end = longRangeFilterParameter.getToValue();
+
+      if (begin != null && end != null) {
+        inputNumericFrom.setValue(String.valueOf(begin));
+        inputNumericTo.setValue(String.valueOf(end));
+      }
+    } else if (filterParam instanceof BasicSearchFilterParameter) {
       BasicSearchFilterParameter basicSearchFilterParameter = (BasicSearchFilterParameter) filterParam;
       inputText.setValue(basicSearchFilterParameter.getValue());
       GWT.log("set " + getField() + " to " + basicSearchFilterParameter.getValue());
     }
+  }
+
+  /**
+   * Removes the date part (year, month, day) from a Date that contains date and
+   * time (keeping whichever timezone is on the passed Date)
+   */
+  private long extractTimePartWithTimeZone(Date dateAndTime, UTCDateBox sameDateInDateBox) {
+    // sameDateInDateBox.getValue returns UTC time, subtracting them obtains a
+    // time with timezone.
+    return dateAndTime.getTime() - sameDateInDateBox.getValue();
   }
 
   public FilterParameter getFilter() {
