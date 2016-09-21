@@ -52,9 +52,8 @@
             <artifactId>fontawesome-lib</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.gwtbootstrap3</groupId>
-            <artifactId>gwtbootstrap3</artifactId>
-            <scope>provided</scope>
+            <groupId>com.tractionsoftware</groupId>
+            <artifactId>gwt-traction</artifactId>
         </dependency>
 
         <!-- REST API related dependencies - start -->

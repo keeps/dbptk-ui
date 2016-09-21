@@ -14,7 +14,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +53,6 @@ import com.databasepreservation.model.structure.type.SimpleTypeString;
 import com.databasepreservation.model.structure.type.Type;
 import com.databasepreservation.utils.JodaUtils;
 import com.databasepreservation.utils.XMLUtils;
-import com.databasepreservation.visualization.ViewerConstants;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerCell;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerCheckConstraint;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerColumn;
@@ -78,6 +76,7 @@ import com.databasepreservation.visualization.client.ViewerStructure.ViewerUserS
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerView;
 import com.databasepreservation.visualization.exceptions.ViewerException;
 import com.databasepreservation.visualization.shared.ViewerSafeConstants;
+import com.databasepreservation.visualization.utils.LobPathManager;
 import com.databasepreservation.visualization.utils.SolrUtils;
 import com.databasepreservation.visualization.utils.ViewerUtils;
 
@@ -434,15 +433,17 @@ public class ToolkitStructure2ViewerStructure {
 
   private static ViewerColumn getColumn(ColumnStructure column, int index) throws ViewerException {
     ViewerColumn result = new ViewerColumn();
+    Type columnType = column.getType();
+    ViewerType columnViewerType = getType(columnType);
 
     result.setDisplayName(column.getName());
-    result.setSolrName(getColumnSolrName(index, column.getType()));
+    result.setType(columnViewerType);
+    result.setSolrName(getColumnSolrName(index, columnType, columnViewerType));
     result.setColumnIndexInEnclosingTable(index);
     result.setDescription(column.getDescription());
     result.setAutoIncrement(column.getIsAutoIncrement());
     result.setDefaultValue(column.getDefaultValue());
     result.setNillable(column.getNillable());
-    result.setType(getType(column.getType()));
 
     return result;
   }
@@ -457,16 +458,28 @@ public class ToolkitStructure2ViewerStructure {
    * @return the column name
    * @throws ViewerException
    */
-  private static String getColumnSolrName(int index, Type type) throws ViewerException {
+  private static String getColumnSolrName(int index, Type type, ViewerType viewerType) throws ViewerException {
     // suffix must always be set before being used
     String suffix;
+    String prefix = ViewerSafeConstants.SOLR_INDEX_ROW_COLUMN_NAME_PREFIX;
 
     if (type instanceof SimpleTypeBinary) {
-      suffix = ViewerSafeConstants.SOLR_DYN_TEXT_GENERAL;
+      suffix = ViewerSafeConstants.SOLR_DYN_STRING;
+      prefix = ViewerSafeConstants.SOLR_INDEX_ROW_LOB_COLUMN_NAME_PREFIX;
     } else if (type instanceof SimpleTypeBoolean) {
       suffix = ViewerSafeConstants.SOLR_DYN_BOOLEAN;
     } else if (type instanceof SimpleTypeDateTime) {
-      suffix = ViewerSafeConstants.SOLR_DYN_TDATE;
+      switch(viewerType.getDbType()){
+        case DATETIME_JUST_DATE:
+          suffix = ViewerSafeConstants.SOLR_DYN_TDATE;
+          break;
+        case DATETIME_JUST_TIME:
+          suffix = ViewerSafeConstants.SOLR_DYN_TTIME;
+          break;
+        case DATETIME:
+        default:
+          suffix = ViewerSafeConstants.SOLR_DYN_TDATETIME;
+      }
     } else if (type instanceof SimpleTypeEnumeration) {
       suffix = ViewerSafeConstants.SOLR_DYN_STRING;
     } else if (type instanceof SimpleTypeInterval) {
@@ -490,7 +503,7 @@ public class ToolkitStructure2ViewerStructure {
       throw new ViewerException("Unknown type: " + type.toString());
     }
 
-    return ViewerSafeConstants.SOLR_INDEX_ROW_COLUMN_NAME_PREFIX + index + suffix;
+    return prefix + index + suffix;
   }
 
   private static ViewerType getType(Type type) throws ViewerException {
@@ -504,14 +517,16 @@ public class ToolkitStructure2ViewerStructure {
       if ("TIME WITH TIME ZONE".equalsIgnoreCase(type.getSql2008TypeName())
         || "TIME".equalsIgnoreCase(type.getSql2008TypeName())) {
         // solr does not have a time type, use string
-        result.setDbType(ViewerType.dbTypes.STRING);
+        result.setDbType(ViewerType.dbTypes.DATETIME_JUST_TIME);
+      } else if ("DATE".equalsIgnoreCase(type.getSql2008TypeName())) {
+        result.setDbType(ViewerType.dbTypes.DATETIME_JUST_DATE);
       } else {
         result.setDbType(ViewerType.dbTypes.DATETIME);
       }
     } else if (type instanceof SimpleTypeEnumeration) {
       result.setDbType(ViewerType.dbTypes.ENUMERATION);
     } else if (type instanceof SimpleTypeInterval) {
-      result.setDbType(ViewerType.dbTypes.INTERVAL);
+      result.setDbType(ViewerType.dbTypes.TIME_INTERVAL);
     } else if (type instanceof SimpleTypeNumericApproximate) {
       result.setDbType(ViewerType.dbTypes.NUMERIC_FLOATING_POINT);
     } else if (type instanceof SimpleTypeNumericExact) {
@@ -543,12 +558,14 @@ public class ToolkitStructure2ViewerStructure {
 
   public static ViewerRow getRow(ViewerTable table, Row row, long rowIndex) throws ViewerException {
     ViewerRow result = new ViewerRow();
-    result.setUUID(SolrUtils.randomUUID());
-    result.setCells(getCells(table, row, rowIndex));
+    String rowUUID = SolrUtils.randomUUID();
+    result.setUUID(rowUUID);
+    result.setCells(getCells(table, row, rowIndex, rowUUID));
     return result;
   }
 
-  private static Map<String, ViewerCell> getCells(ViewerTable table, Row row, long rowIndex) throws ViewerException {
+  private static Map<String, ViewerCell> getCells(ViewerTable table, Row row, long rowIndex, String rowUUID)
+    throws ViewerException {
     HashMap<String, ViewerCell> result = new HashMap<>();
 
     int colIndex = 0;
@@ -556,7 +573,7 @@ public class ToolkitStructure2ViewerStructure {
     for (ViewerColumn viewerColumn : table.getColumns()) {
       String solrColumnName = viewerColumn.getSolrName();
       try {
-        result.put(solrColumnName, getCell(table, toolkitCells.get(colIndex), rowIndex, colIndex++));
+        result.put(solrColumnName, getCell(table, toolkitCells.get(colIndex), rowIndex, colIndex++, rowUUID));
       } catch (ViewerException e) {
         LOGGER.error("Problem converting cell, omitted it (as if it were NULL)", e);
       }
@@ -565,7 +582,8 @@ public class ToolkitStructure2ViewerStructure {
     return result;
   }
 
-  private static ViewerCell getCell(ViewerTable table, Cell cell, long rowIndex, int colIndex) throws ViewerException {
+  private static ViewerCell getCell(ViewerTable table, Cell cell, long rowIndex, int colIndex, String rowUUID)
+    throws ViewerException {
     ViewerCell result = new ViewerCell();
 
     ViewerType columnType = table.getColumns().get(colIndex).getType();
@@ -573,15 +591,10 @@ public class ToolkitStructure2ViewerStructure {
     if (cell instanceof BinaryCell) {
       BinaryCell binaryCell = (BinaryCell) cell;
 
-      String lobFilename = "blob" + colIndex + "_" + rowIndex + ".bin";
-
-      // copy blob to a file at
-      // <USER_DBVIEWER_DIR>/<table_UUID>/blob<column_index>_<row_index>.bin
       InputStream stream = null;
       try {
-        Path outputPath = ViewerConstants.USER_DBVIEWER_DIR.resolve(table.getUUID() + "/");
-        outputPath = Files.createDirectories(outputPath);
-        outputPath = outputPath.resolve(lobFilename);
+        Path outputPath = LobPathManager.getPath(table.getUUID(), colIndex, rowUUID);
+        Files.createDirectories(outputPath.getParent());
         stream = binaryCell.createInputStream();
         Files.copy(stream, outputPath, StandardCopyOption.REPLACE_EXISTING);
       } catch (IOException | ModuleException e) {
@@ -591,37 +604,30 @@ public class ToolkitStructure2ViewerStructure {
         binaryCell.cleanResources();
       }
 
-      result.setValue(lobFilename);
+      result.setValue("dummy");
     } else if (cell instanceof ComposedCell) {
       ComposedCell composedCell = (ComposedCell) cell;
       LOGGER.debug("composed cell not supported yet");
       // TODO: composed cell
     } else if (cell instanceof SimpleCell) {
       SimpleCell simpleCell = (SimpleCell) cell;
+      String simpleData = simpleCell.getSimpleData();
 
-      if (ViewerType.dbTypes.DATETIME.equals(columnType.getDbType())) {
-        // modify dates because solr only supports datetime
-        DateTime dateTime = null;
-        if ("DATE".equalsIgnoreCase(columnType.getTypeName())) {
-          // XML type xs:date
-          dateTime = JodaUtils.xsDateParse(simpleCell.getSimpleData()).withTime(0, 0, 0, 0);
-        } else if ("TIMESTAMP WITH TIME ZONE".equalsIgnoreCase(columnType.getTypeName())
-          || "TIMESTAMP".equalsIgnoreCase(columnType.getTypeName())) {
-          // XML type xs:dateTime
-          dateTime = JodaUtils.xsDatetimeParse(simpleCell.getSimpleData());
-        }
-
-        if (dateTime != null) {
-          result.setValue(dateTime.withZone(DateTimeZone.UTC).toString());
-        } else {
+      switch (columnType.getDbType()) {
+        case DATETIME:
+          result.setValue(JodaUtils.xsDatetimeParse(simpleData).withZone(DateTimeZone.UTC).toString());
+          break;
+        case DATETIME_JUST_DATE:
+          result.setValue(JodaUtils.xsDateParse(simpleData).withTime(0, 0, 0, 0).withZone(DateTimeZone.UTC).toString());
+          break;
+        case DATETIME_JUST_TIME:
+          result.setValue(JodaUtils.xsTimeParse(simpleData).withDate(1970, 1, 1).withZone(DateTimeZone.UTC).toString());
+          break;
+        default:
           result.setValue(simpleCell.getSimpleData());
-        }
-      } else {
-        result.setValue(simpleCell.getSimpleData());
       }
-    } else if (cell instanceof NullCell) {
+    } else if (!(cell instanceof NullCell)) {
       // nothing to do for null cells
-    } else {
       throw new ViewerException("Unexpected cell type");
     }
 

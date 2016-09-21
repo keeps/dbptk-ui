@@ -7,31 +7,23 @@
 
     <g:FlowPanel addStyleNames="browseContent wrapper skip_padding">
         <g:FlowPanel addStyleNames="row full_width skip_padding">
-            <g:FocusPanel addStyleNames="browseContentFocusPanel">
-                <g:HorizontalPanel addStyleNames="browseContentPreviewPanel">
-                    <!-- LEFT PANEL -->
-                    <!--<g:cell>-->
-                        <!--<g:FlowPanel addStyleNames="browseContentFilesPanel">-->
-                            <!--<s:SearchPanel ui:field="dbSearchPanel"/>-->
-                            <!--<g:FlowPanel addStyleNames="fileListScroll">-->
-                                <!--&lt;!&ndash;<lists:SimpleFileList ui:field="filesList" />&ndash;&gt;-->
-                            <!--</g:FlowPanel>-->
-                        <!--</g:FlowPanel>-->
-                    <!--</g:cell>-->
-                    <!-- RIGHT PANEL -->
-                    <g:cell width="100%">
-                        <g:FlowPanel addStyleNames="browseContentFilePreviewPanel">
-                            <g:FlowPanel addStyleNames="filePreviewToolbar">
-                                <m:BreadcrumbPanel ui:field="breadcrumb" addStyleNames="browseContentBreadcrumb"/>
-                            </g:FlowPanel>
-                            <g:FlowPanel addStyleNames="col_12 content">
-                                <g:Label addStyleNames="h1"><ui:msg>Database listing</ui:msg></g:Label>
-                                <lists:DatabaseList ui:field="databaseList"/>
-                            </g:FlowPanel>
+            <g:FlowPanel addStyleNames="browseContentFocusPanel">
+                <g:FlowPanel addStyleNames="browseContentPreviewPanel">
+                    <g:FlowPanel addStyleNames="browseContentFilePreviewPanel">
+                        <g:FlowPanel addStyleNames="filePreviewToolbar">
+                            <m:BreadcrumbPanel ui:field="breadcrumb" addStyleNames="browseContentBreadcrumb"/>
                         </g:FlowPanel>
-                    </g:cell>
-                </g:HorizontalPanel>
-            </g:FocusPanel>
+                        <g:SimplePanel addStyleNames="col_12 content">
+                            <g:FlowPanel>
+                                <g:Label addStyleNames="h1"><ui:msg>Database listing</ui:msg></g:Label>
+                                <g:SimplePanel>
+                                    <lists:DatabaseList ui:field="databaseList"/>
+                                </g:SimplePanel>
+                            </g:FlowPanel>
+                        </g:SimplePanel>
+                    </g:FlowPanel>
+                </g:FlowPanel>
+            </g:FlowPanel>
         </g:FlowPanel>
     </g:FlowPanel>
 </ui:UiBinder>

@@ -13,6 +13,7 @@ import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatab
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerRow;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerSchema;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable;
+import com.databasepreservation.visualization.client.common.LoadingDiv;
 import com.databasepreservation.visualization.client.common.lists.TableRowList;
 import com.databasepreservation.visualization.client.common.utils.CommonClientUtils;
 import com.databasepreservation.visualization.client.main.BreadcrumbPanel;
@@ -21,6 +22,7 @@ import com.databasepreservation.visualization.shared.client.Tools.BreadcrumbMana
 import com.databasepreservation.visualization.shared.client.Tools.HistoryManager;
 import com.databasepreservation.visualization.shared.client.Tools.ViewerStringUtils;
 import com.databasepreservation.visualization.shared.client.widgets.wcag.AccessibleFocusPanel;
+import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -33,6 +35,8 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
@@ -76,7 +80,13 @@ public class DatabaseSearchPanel extends RightPanel {
   @UiField
   AccessibleFocusPanel searchInputButton;
 
-  List<TableSearchPanelContainer> tableSearchPanelContainers;
+  @UiField
+  Label noResults;
+
+  @UiField
+  LoadingDiv loading;
+
+  final List<TableSearchPanelContainer> tableSearchPanelContainers;
 
   private ViewerDatabase database;
 
@@ -87,9 +97,36 @@ public class DatabaseSearchPanel extends RightPanel {
 
     initWidget(uiBinder.createAndBindUi(this));
 
+    Callback<TableSearchPanelContainer, Void> searchCompletedCallback = new Callback<TableSearchPanelContainer, Void>() {
+      @Override
+      public void onFailure(Void reason) {
+        // do nothing. errors have already been handled
+      }
+
+      @Override
+      public void onSuccess(TableSearchPanelContainer eventTriggerer) {
+
+        boolean foundRecords = false;
+        for (TableSearchPanelContainer table : tableSearchPanelContainers) {
+          if (table.stillSearching()) {
+            return;
+          }
+          foundRecords = foundRecords || table.foundRecords();
+        }
+
+        // all searches finished
+        loading.setVisible(false);
+        if (!foundRecords) {
+          // and no records were found.
+          noResults.setVisible(true);
+        }
+      }
+    };
+
     for (ViewerSchema viewerSchema : database.getMetadata().getSchemas()) {
       for (ViewerTable viewerTable : viewerSchema.getTables()) {
-        TableSearchPanelContainer tableSearchPanelContainer = new TableSearchPanelContainer(database, viewerTable);
+        TableSearchPanelContainer tableSearchPanelContainer = new TableSearchPanelContainer(database, viewerTable,
+          searchCompletedCallback);
         tableSearchPanelContainers.add(tableSearchPanelContainer);
         content.add(tableSearchPanelContainer);
       }
@@ -124,8 +161,10 @@ public class DatabaseSearchPanel extends RightPanel {
 
   private void doSearch() {
     // hide everything
+    noResults.setVisible(false);
+    loading.setVisible(true);
     for (TableSearchPanelContainer tableSearchPanelContainer : tableSearchPanelContainers) {
-      tableSearchPanelContainer.setVisible(false);
+      tableSearchPanelContainer.hideEverything();
     }
 
     // start searching
@@ -140,18 +179,34 @@ public class DatabaseSearchPanel extends RightPanel {
     for (TableSearchPanelContainer tableSearchPanelContainer : tableSearchPanelContainers) {
       tableSearchPanelContainer.doSearch(filter);
     }
+
   }
 
   private static class TableSearchPanelContainer extends FlowPanel {
+    private final Widget header;
+    private final SimplePanel tableContainer;
     private TableRowList tableRowList;
     private final ViewerDatabase database;
     private final ViewerTable table;
+    private final Callback<TableSearchPanelContainer, Void> searchCompletedCallback;
+    private boolean foundRecords = false;
+    private boolean stillSearching = false;
 
-    public TableSearchPanelContainer(ViewerDatabase database, ViewerTable table) {
+    public TableSearchPanelContainer(ViewerDatabase database, ViewerTable table,
+      Callback<TableSearchPanelContainer, Void> searchCompletedEvent) {
       super();
-      this.setVisible(false);
       this.database = database;
       this.table = table;
+      this.searchCompletedCallback = searchCompletedEvent;
+
+      tableContainer = new SimplePanel();
+      tableContainer.setVisible(false);
+
+      header = CommonClientUtils.getSchemaAndTableHeader(database.getUUID(), table, "h3");
+      header.setVisible(false);
+
+      add(header);
+      add(tableContainer);
     }
 
     public void init(Filter filter) {
@@ -161,8 +216,7 @@ public class DatabaseSearchPanel extends RightPanel {
 
       tableRowList = new TableRowList(database, table, filter, null, null, false, false);
 
-      add(CommonClientUtils.getSchemaAndTableHeader(database.getUUID(), table, "h3"));
-      add(tableRowList);
+      tableContainer.setWidget(tableRowList);
 
       tableRowList.addValueChangeHandler(new ValueChangeHandler<IndexResult<ViewerRow>>() {
         @Override
@@ -185,15 +239,38 @@ public class DatabaseSearchPanel extends RightPanel {
     private void searchCompletedEventHandler(ValueChangeEvent<IndexResult<ViewerRow>> event) {
       long resultCount = event.getValue().getTotalCount();
       GWT.log(table.getName() + " got " + resultCount + " results");
-      setVisible(resultCount > 0);
+      hideLoading(resultCount > 0);
+      searchCompletedCallback.onSuccess(this);
     }
 
-    public void doSearch(Filter filter) {
+    private void hideEverything() {
+      header.setVisible(false);
+      tableContainer.setVisible(false);
+      stillSearching = true;
+      foundRecords = false;
+    }
+
+    private void hideLoading(boolean andShowTheTable) {
+      header.setVisible(andShowTheTable);
+      tableContainer.setVisible(andShowTheTable);
+      foundRecords = andShowTheTable;
+      stillSearching = false;
+    }
+
+    void doSearch(Filter filter) {
       if (tableRowList == null) {
         init(filter);
       } else {
         tableRowList.setFilter(filter);
       }
+    }
+
+    boolean stillSearching() {
+      return stillSearching;
+    }
+
+    boolean foundRecords() {
+      return foundRecords;
     }
   }
 }

@@ -5,18 +5,20 @@
 package com.databasepreservation.visualization.client.common.search;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.roda.core.data.adapter.filter.BasicSearchFilterParameter;
-import org.roda.core.data.adapter.filter.DateIntervalFilterParameter;
+import org.roda.core.data.adapter.filter.DateRangeFilterParameter;
 import org.roda.core.data.adapter.filter.FilterParameter;
 import org.roda.core.data.adapter.filter.LongRangeFilterParameter;
 import org.roda.core.data.adapter.filter.SimpleFilterParameter;
 import org.roda.core.data.common.RodaConstants;
 
 import com.databasepreservation.visualization.client.common.utils.ListboxUtils;
+import com.databasepreservation.visualization.shared.ViewerSafeConstants;
 import com.databasepreservation.visualization.shared.client.ClientLogger;
 import com.databasepreservation.visualization.shared.client.Tools.Humanize;
 import com.google.gwt.core.client.GWT;
@@ -34,13 +36,18 @@ import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.datepicker.client.DateBox;
+import com.tractionsoftware.gwt.user.client.ui.UTCDateBox;
+import com.tractionsoftware.gwt.user.client.ui.UTCTimeBox;
+
+import config.i18n.client.ClientMessages;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class SearchFieldPanel extends Composite {
-  // private static final BrowseMessages messages =
-  // GWT.create(BrowseMessages.class);
+  private static final ClientMessages messages = GWT.create(ClientMessages.class);
+  private static final DateTimeFormat timeFormat = DateTimeFormat
+    .getFormat(DateTimeFormat.PredefinedFormat.HOUR24_MINUTE_SECOND);
 
   @SuppressWarnings("unused")
   private ClientLogger LOGGER = new ClientLogger(getClass().getName());
@@ -65,11 +72,17 @@ public class SearchFieldPanel extends Composite {
 
   // Text
   private TextBox inputText;
-  // Date
-  private DateBox inputDateBox;
   // Date interval
-  private DateBox inputDateBoxFrom;
-  private DateBox inputDateBoxTo;
+  private UTCDateBox inputDateFromForDate;
+  private UTCDateBox inputDateToForDate;
+  // DateTime interval
+  private UTCDateBox inputDateFromForDateTime;
+  private UTCTimeBox inputTimeFromForDateTime;
+  private UTCDateBox inputDateToForDateTime;
+  private UTCTimeBox inputTimeToForDateTime;
+  // Time interval
+  private UTCTimeBox inputTimeFromForTime;
+  private UTCTimeBox inputTimeToForTime;
   // Numeric
   private TextBox inputNumeric;
   // Numeric interval
@@ -108,39 +121,57 @@ public class SearchFieldPanel extends Composite {
 
     inputText = new TextBox();
 
-    inputDateBox = new DateBox();
-    inputDateBox.setFormat(dateFormat);
-    inputDateBox.getDatePicker().setYearArrowsVisible(true);
-    inputDateBox.setFireNullValues(true);
-    inputDateBox.getElement().setPropertyString("placeholder", "searchFieldDatePlaceHolder");
+    inputDateFromForDate = new UTCDateBox();
+    inputDateFromForDate.getDateBox().setFormat(dateFormat);
+    inputDateFromForDate.getDateBox().getDatePicker().setYearArrowsVisible(true);
+    inputDateFromForDate.getDateBox().setFireNullValues(true);
+    inputDateFromForDate.getElement().setPropertyString("placeholder", messages.searchFieldDateFromPlaceHolder());
 
-    inputDateBoxFrom = new DateBox();
-    inputDateBoxFrom.setFormat(dateFormat);
-    inputDateBoxFrom.getDatePicker().setYearArrowsVisible(true);
-    inputDateBoxFrom.setFireNullValues(true);
-    inputDateBoxFrom.getElement().setPropertyString("placeholder", "searchFieldDateFromPlaceHolder");
+    inputDateToForDate = new UTCDateBox();
+    inputDateToForDate.getDateBox().setFormat(dateFormat);
+    inputDateToForDate.getDateBox().getDatePicker().setYearArrowsVisible(true);
+    inputDateToForDate.getDateBox().setFireNullValues(true);
+    inputDateToForDate.getElement().setPropertyString("placeholder", messages.searchFieldDateToPlaceHolder());
 
-    inputDateBoxTo = new DateBox();
-    inputDateBoxTo.setFormat(dateFormat);
-    inputDateBoxTo.getDatePicker().setYearArrowsVisible(true);
-    inputDateBoxTo.setFireNullValues(true);
-    inputDateBoxTo.getElement().setPropertyString("placeholder", "searchFieldDateToPlaceHolder");
+    inputDateFromForDateTime = new UTCDateBox();
+    inputDateFromForDateTime.getDateBox().setFormat(dateFormat);
+    inputDateFromForDateTime.getDateBox().getDatePicker().setYearArrowsVisible(true);
+    inputDateFromForDateTime.getDateBox().setFireNullValues(true);
+    inputDateFromForDateTime.getElement().setPropertyString("placeholder", messages.searchFieldDateFromPlaceHolder());
+
+    inputTimeFromForDateTime = new UTCTimeBox(timeFormat);
+    inputTimeFromForDateTime.getElement().setPropertyString("placeholder", messages.searchFieldTimeFromPlaceHolder());
+
+    inputDateToForDateTime = new UTCDateBox();
+    inputDateToForDateTime.getDateBox().setFormat(dateFormat);
+    inputDateToForDateTime.getDateBox().getDatePicker().setYearArrowsVisible(true);
+    inputDateToForDateTime.getDateBox().setFireNullValues(true);
+    inputDateToForDateTime.getElement().setPropertyString("placeholder", messages.searchFieldDateToPlaceHolder());
+
+    inputTimeToForDateTime = new UTCTimeBox(timeFormat);
+    inputTimeToForDateTime.getElement().setPropertyString("placeholder", messages.searchFieldTimeToPlaceHolder());
+
+    inputTimeFromForTime = new UTCTimeBox(timeFormat);
+    inputTimeFromForTime.getElement().setPropertyString("placeholder", messages.searchFieldTimeFromPlaceHolder());
+
+    inputTimeToForTime = new UTCTimeBox(timeFormat);
+    inputTimeToForTime.getElement().setPropertyString("placeholder", messages.searchFieldTimeToPlaceHolder());
 
     inputNumeric = new TextBox();
-    inputNumeric.getElement().setPropertyString("placeholder", "searchFieldNumericPlaceHolder");
+    inputNumeric.getElement().setPropertyString("placeholder", messages.searchFieldNumericPlaceHolder());
     inputNumeric.getElement().setAttribute("type", "number");
     inputNumericFrom = new TextBox();
-    inputNumericFrom.getElement().setPropertyString("placeholder", "searchFieldNumericFromPlaceHolder");
+    inputNumericFrom.getElement().setPropertyString("placeholder", messages.searchFieldNumericFromPlaceHolder());
     inputNumericFrom.getElement().setAttribute("type", "number");
     inputNumericTo = new TextBox();
-    inputNumericTo.getElement().setPropertyString("placeholder", "searchFieldNumericToPlaceHolder");
+    inputNumericTo.getElement().setPropertyString("placeholder", messages.searchFieldNumericToPlaceHolder());
     inputNumericTo.getElement().setAttribute("type", "number");
 
     inputStorageSizeFrom = new TextBox();
-    inputStorageSizeFrom.getElement().setPropertyString("placeholder", "searchFieldNumericFromPlaceHolder");
+    inputStorageSizeFrom.getElement().setPropertyString("placeholder", messages.searchFieldNumericFromPlaceHolder());
     inputStorageSizeFrom.getElement().setAttribute("type", "number");
     inputStorageSizeTo = new TextBox();
-    inputStorageSizeTo.getElement().setPropertyString("placeholder", "searchFieldNumericToPlaceHolder");
+    inputStorageSizeTo.getElement().setPropertyString("placeholder", messages.searchFieldNumericToPlaceHolder());
     inputStorageSizeTo.getElement().setAttribute("type", "number");
     inputStorageSizeList = new ListBox();
     for (String unit : Humanize.UNITS) {
@@ -179,9 +210,14 @@ public class SearchFieldPanel extends Composite {
     columnVisibility.setStyleName("visibility-checkbox");
 
     inputText.addStyleName("form-textbox");
-    inputDateBox.addStyleName("form-textbox form-textbox-small");
-    inputDateBoxFrom.addStyleName("form-textbox form-textbox-small");
-    inputDateBoxTo.addStyleName("form-textbox form-textbox-small");
+    inputDateFromForDate.addStyleName("form-textbox form-textbox-small");
+    inputDateToForDate.addStyleName("form-textbox form-textbox-small");
+    inputDateFromForDateTime.addStyleName("form-textbox form-textbox-small");
+    inputDateToForDateTime.addStyleName("form-textbox form-textbox-small");
+    inputTimeFromForDateTime.addStyleName("form-textbox form-textbox-small");
+    inputTimeToForDateTime.addStyleName("form-textbox form-textbox-small");
+    inputTimeFromForTime.addStyleName("form-textbox form-textbox-small");
+    inputTimeToForTime.addStyleName("form-textbox form-textbox-small");
     inputNumeric.addStyleName("form-textbox form-textbox-small");
     inputNumericFrom.addStyleName("form-textbox form-textbox-small");
     inputNumericTo.addStyleName("form-textbox form-textbox-small");
@@ -230,11 +266,51 @@ public class SearchFieldPanel extends Composite {
   }
 
   public void setInputFromFilterParam(FilterParameter filterParam) {
-    if (filterParam instanceof BasicSearchFilterParameter) {
+    if (filterParam instanceof DateRangeFilterParameter) {
+      DateRangeFilterParameter dateRangeFilterParameter = (DateRangeFilterParameter) filterParam;
+
+      long begin = UTCDateBox.date2utc(dateRangeFilterParameter.getFromValue());
+      long end = UTCDateBox.date2utc(dateRangeFilterParameter.getToValue());
+
+      if (filterParam.getName().endsWith(ViewerSafeConstants.SOLR_DYN_TDATE)) {
+        inputDateFromForDate.setValue(begin);
+        inputDateToForDate.setValue(end);
+      } else if (filterParam.getName().endsWith(ViewerSafeConstants.SOLR_DYN_TTIME)) {
+        inputTimeFromForTime.setValue(begin);
+        inputTimeToForTime.setValue(end);
+      } else if (filterParam.getName().endsWith(ViewerSafeConstants.SOLR_DYN_TDATETIME)) {
+        inputDateFromForDateTime.setValue(begin);
+        inputTimeFromForDateTime.setValue(extractTimePartWithTimeZone(dateRangeFilterParameter.getFromValue(),
+          inputDateFromForDateTime));
+        inputDateToForDateTime.setValue(end);
+        inputTimeToForDateTime.setValue(extractTimePartWithTimeZone(dateRangeFilterParameter.getToValue(),
+          inputDateToForDateTime));
+      }
+    } else if (filterParam instanceof LongRangeFilterParameter) {
+      LongRangeFilterParameter longRangeFilterParameter = (LongRangeFilterParameter) filterParam;
+
+      Long begin = longRangeFilterParameter.getFromValue();
+      Long end = longRangeFilterParameter.getToValue();
+
+      if (begin != null && end != null) {
+        inputNumericFrom.setValue(String.valueOf(begin));
+        inputNumericTo.setValue(String.valueOf(end));
+      }
+    } else if (filterParam instanceof BasicSearchFilterParameter) {
       BasicSearchFilterParameter basicSearchFilterParameter = (BasicSearchFilterParameter) filterParam;
       inputText.setValue(basicSearchFilterParameter.getValue());
       GWT.log("set " + getField() + " to " + basicSearchFilterParameter.getValue());
     }
+  }
+
+  /**
+   * Removes the date part (year, month, day) from a Date that contains date and
+   * time (keeping whichever timezone is on the passed Date)
+   */
+  private long extractTimePartWithTimeZone(Date dateAndTime, UTCDateBox sameDateInDateBox) {
+    // sameDateInDateBox.getValue returns UTC time, subtracting them obtains a
+    // time with timezone.
+    return dateAndTime.getTime() - sameDateInDateBox.getValue();
   }
 
   public FilterParameter getFilter() {
@@ -245,31 +321,51 @@ public class SearchFieldPanel extends Composite {
     if (searchFields != null && searchFields.size() >= 1) {
       String field = searchFields.get(0);
 
-      if (type.equals(RodaConstants.SEARCH_FIELD_TYPE_DATE) && dateValid(inputDateBox)) {
-        filterParameter = new SimpleFilterParameter(field, inputDateBox.getValue().toString());
-      } else if (type.equals(RodaConstants.SEARCH_FIELD_TYPE_DATE_INTERVAL)
-        && dateIntervalValid(inputDateBoxFrom, inputDateBoxTo) && searchFields.size() >= 2) {
-        String fieldTo = searchField.getSearchFields().get(1);
-        filterParameter = new DateIntervalFilterParameter(field, fieldTo, inputDateBoxFrom.getValue(),
-          inputDateBoxTo.getValue());
-      } else if (type.equals(RodaConstants.SEARCH_FIELD_TYPE_DATE_INTERVAL)
-        && dateIntervalValid(inputDateBoxFrom, inputDateBoxTo)) {
-        filterParameter = new DateIntervalFilterParameter(field, field, inputDateBoxFrom.getValue(),
-          inputDateBoxTo.getValue());
-      } else if (type.equals(RodaConstants.SEARCH_FIELD_TYPE_NUMERIC) && valid(inputNumeric)) {
+      if (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_DATE)
+        && dateIntervalValid(inputDateFromForDate, inputDateToForDate)) {
+        Date begin = getDateFromInput(inputDateFromForDate);
+        Date end = getDateFromInput(inputDateToForDate);
+        filterParameter = new DateRangeFilterParameter(field, begin, end, RodaConstants.DateGranularity.DAY);
+        // } else if
+        // (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_DATE_INTERVAL)
+        // && dateIntervalValid(inputDateFromForDate, inputDateToForDate) &&
+        // searchFields.size() >= 2) {
+        // String fieldTo = searchField.getSearchFields().get(1);
+        // filterParameter = new DateIntervalFilterParameter(field, fieldTo,
+        // inputDateBoxFrom.getValue(),
+        // inputDateBoxTo.getValue());
+        // } else if
+        // (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_DATE_INTERVAL)
+        // && dateIntervalValid(inputDateBoxFrom, inputDateBoxTo)) {
+        // filterParameter = new DateIntervalFilterParameter(field, field,
+        // inputDateBoxFrom.getValue(),
+        // inputDateBoxTo.getValue());
+      } else if (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_TIME)
+        && dateIntervalValid(inputTimeFromForTime, inputTimeToForTime)) {
+        Date begin = getDateFromInput(inputTimeFromForTime);
+        Date end = getDateFromInput(inputTimeToForTime);
+        filterParameter = new DateRangeFilterParameter(field, begin, end, RodaConstants.DateGranularity.MILLISECOND);
+      } else if (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_DATETIME)
+        && dateIntervalValid(inputDateFromForDateTime, inputTimeFromForDateTime, inputDateToForDateTime,
+          inputTimeToForDateTime)) {
+        Date begin = getDateFromInput(inputDateFromForDateTime, inputTimeFromForDateTime);
+        Date end = getDateFromInput(inputDateToForDateTime, inputTimeToForDateTime);
+        filterParameter = new DateRangeFilterParameter(field, begin, end, RodaConstants.DateGranularity.MILLISECOND);
+      } else if (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_NUMERIC) && valid(inputNumeric)) {
         filterParameter = new BasicSearchFilterParameter(field, inputNumeric.getValue());
-      } else if (type.equals(RodaConstants.SEARCH_FIELD_TYPE_NUMERIC_INTERVAL)
+      } else if (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_NUMERIC_INTERVAL)
         && intervalValid(inputNumericFrom, inputNumericTo)) {
         filterParameter = new LongRangeFilterParameter(field, Long.valueOf(inputNumericFrom.getValue()),
           Long.valueOf(inputNumericTo.getValue()));
-      } else if (type.equals(RodaConstants.SEARCH_FIELD_TYPE_STORAGE)
+      } else if (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_STORAGE)
         && intervalValid(inputStorageSizeFrom, inputStorageSizeTo)) {
         filterParameter = new LongRangeFilterParameter(field, Humanize.parseFileSize(inputStorageSizeFrom.getValue(),
           inputStorageSizeList.getSelectedValue()), Humanize.parseFileSize(inputStorageSizeTo.getValue(),
           inputStorageSizeList.getSelectedValue()));
-      } else if (type.equals(RodaConstants.SEARCH_FIELD_TYPE_BOOLEAN) && valid(inputCheckBox)) {
+      } else if (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_BOOLEAN) && valid(inputCheckBox)) {
         filterParameter = new SimpleFilterParameter(field, Boolean.toString(inputCheckBox.getValue()));
-        // } else if (type.equals(RodaConstants.SEARCH_FIELD_TYPE_SUGGEST) &&
+        // } else if (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_SUGGEST)
+        // &&
         // valid(inputSearchSuggestBox)) {
         // filterParameter = new SimpleFilterParameter(field,
         // inputSearchSuggestBox.getValue());
@@ -279,6 +375,18 @@ public class SearchFieldPanel extends Composite {
     }
 
     return filterParameter;
+  }
+
+  private Date getDateFromInput(UTCDateBox dateBox) {
+    return new Date(dateBox.getValue());
+  }
+
+  private Date getDateFromInput(UTCTimeBox timeBox) {
+    return new Date(timeBox.getValue());
+  }
+
+  private Date getDateFromInput(UTCDateBox dateBox, UTCTimeBox timeBox) {
+    return new Date(dateBox.getValue() + timeBox.getValue());
   }
 
   public void listBoxSearchField(String field) {
@@ -312,23 +420,31 @@ public class SearchFieldPanel extends Composite {
     inputPanel.clear();
     inputPanel.removeStyleName("full_width");
 
-    if (type.equals(RodaConstants.SEARCH_FIELD_TYPE_DATE)) {
-      inputPanel.add(inputDateBox);
-    } else if (type.equals(RodaConstants.SEARCH_FIELD_TYPE_DATE_INTERVAL)) {
-      inputPanel.add(inputDateBoxFrom);
-      inputPanel.add(inputDateBoxTo);
-    } else if (type.equals(RodaConstants.SEARCH_FIELD_TYPE_NUMERIC)) {
+    if (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_DATE)) {
+      inputPanel.add(inputDateFromForDate);
+      inputPanel.add(inputDateToForDate);
+    } else if (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_TIME)) {
+      inputPanel.add(inputTimeFromForTime);
+      inputPanel.add(inputTimeToForTime);
+    } else if (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_DATETIME)) {
+      inputPanel.add(inputDateFromForDateTime);
+      inputPanel.add(inputTimeFromForDateTime);
+      inputPanel.add(inputDateToForDateTime);
+      inputPanel.add(inputTimeToForDateTime);
+    } else if (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_DATE_INTERVAL)) {
+      // TODO: support date interval
+    } else if (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_NUMERIC)) {
       inputPanel.add(inputNumeric);
-    } else if (type.equals(RodaConstants.SEARCH_FIELD_TYPE_NUMERIC_INTERVAL)) {
+    } else if (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_NUMERIC_INTERVAL)) {
       inputPanel.add(inputNumericFrom);
       inputPanel.add(inputNumericTo);
-    } else if (type.equals(RodaConstants.SEARCH_FIELD_TYPE_STORAGE)) {
+    } else if (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_STORAGE)) {
       inputPanel.add(inputStorageSizeFrom);
       inputPanel.add(inputStorageSizeTo);
       inputPanel.add(inputStorageSizeList);
-    } else if (type.equals(RodaConstants.SEARCH_FIELD_TYPE_BOOLEAN)) {
+    } else if (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_BOOLEAN)) {
       inputPanel.add(inputCheckBox);
-    } else if (type.equals(RodaConstants.SEARCH_FIELD_TYPE_SUGGEST)) {
+    } else if (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_SUGGEST)) {
     } else {
       inputPanel.add(inputText);
       inputPanel.addStyleName("full_width");
@@ -343,21 +459,23 @@ public class SearchFieldPanel extends Composite {
   // inputPanel.addStyleName("full_width");
   // }
 
-  private boolean dateIntervalValid(DateBox inputFrom, DateBox inputTo) {
-    boolean valid = false;
-
-    if (inputFrom.getValue() != null && inputTo.getValue() != null) {
-      valid = true;
-    } else if (inputFrom.getValue() != null && inputTo.getTextBox().getText().isEmpty()) {
-      valid = true;
-    } else if (inputFrom.getTextBox().getText().isEmpty() && inputTo.getValue() != null) {
-      valid = true;
-    }
-
-    return valid;
+  private boolean dateIntervalValid(UTCDateBox inputFrom, UTCDateBox inputTo) {
+    return inputFrom.getValue() != null && inputTo.getValue() != null && inputFrom.getValue() <= inputTo.getValue();
   }
 
-  private boolean dateValid(DateBox input) {
+  private boolean dateIntervalValid(UTCDateBox dateFrom, UTCTimeBox timeFrom, UTCDateBox dateTo, UTCTimeBox timeTo) {
+    if (dateFrom.getValue() != null && timeFrom.getValue() != null && dateTo.getValue() != null
+      && timeTo.getValue() != null) {
+      return dateFrom.getValue() + timeFrom.getValue() <= dateTo.getValue() + timeTo.getValue();
+    }
+    return false;
+  }
+
+  private boolean dateIntervalValid(UTCTimeBox inputFrom, UTCTimeBox inputTo) {
+    return inputFrom.getValue() != null && inputTo.getValue() != null && inputFrom.getValue() <= inputTo.getValue();
+  }
+
+  private boolean dateValid(UTCDateBox input) {
     return (input.getValue() != null);
   }
 

@@ -178,10 +178,9 @@
                 <version>4.3.0</version>
             </dependency>
             <dependency>
-                <groupId>org.gwtbootstrap3</groupId>
-                <artifactId>gwtbootstrap3</artifactId>
-                <version>0.9.3</version>
-                <scope>provided</scope>
+                <groupId>com.tractionsoftware</groupId>
+                <artifactId>gwt-traction</artifactId>
+                <version>1.6.0</version>
             </dependency>
 
             <!-- REST API related dependencies - start -->

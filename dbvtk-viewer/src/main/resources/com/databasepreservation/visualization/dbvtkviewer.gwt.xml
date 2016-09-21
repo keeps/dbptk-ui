@@ -4,6 +4,10 @@
     <inherits name='com.google.gwt.user.User'/>
     <inherits name='com.google.gwt.logging.Logging'/>
 
+    <!-- date and time pickers -->
+    <inherits name="com.tractionsoftware.gwt.user.UserNoCss" />
+    <inherits name="com.tractionsoftware.gwt.user.UTCDateTime" />
+
     <!-- Inherit some internal functionality -->
     <inherits name='org.roda.core.Core'/>
     <inherits name='com.databasepreservation.visualization.dbvtk-model'/>
@@ -44,6 +48,5 @@
     <!--<set-property name="compiler.stackMode" value="emulated" />-->
     <!--<set-configuration-property name="compiler.emulatedStack.recordLineNumbers" value="true"/>-->
     <!--<set-configuration-property name="compiler.emulatedStack.recordFileNames" value="true"/>-->
-
 
 </module>

@@ -21,9 +21,11 @@ import com.databasepreservation.visualization.client.ViewerStructure.ViewerRefer
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerRow;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerSchema;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable;
+import com.databasepreservation.visualization.client.ViewerStructure.ViewerType;
 import com.databasepreservation.visualization.client.common.DefaultAsyncCallback;
 import com.databasepreservation.visualization.client.common.utils.CommonClientUtils;
 import com.databasepreservation.visualization.client.main.BreadcrumbPanel;
+import com.databasepreservation.visualization.shared.ViewerSafeConstants;
 import com.databasepreservation.visualization.shared.client.Tools.BreadcrumbManager;
 import com.databasepreservation.visualization.shared.client.Tools.FontAwesomeIconManager;
 import com.databasepreservation.visualization.shared.client.Tools.HistoryManager;
@@ -244,7 +246,20 @@ public class RowPanel extends RightPanel {
     if (value == null) {
       b.appendEscaped("NULL");
     } else {
-      b.appendEscaped(value);
+      if (column.getType().getDbType().equals(ViewerType.dbTypes.BINARY)) {
+        StringBuilder urlBuilder = new StringBuilder();
+        String base = com.google.gwt.core.client.GWT.getHostPageBaseURL();
+        String servlet = ViewerSafeConstants.API_SERVLET;
+        String resource = ViewerSafeConstants.API_V1_LOBS_RESOURCE;
+        String databaseUUID = database.getUUID();
+        String tableUUID = table.getUUID();
+        urlBuilder.append(base).append(servlet).append(resource).append("/").append(databaseUUID).append("/")
+          .append(tableUUID).append("/").append(row.getUUID()).append("/")
+          .append(column.getColumnIndexInEnclosingTable());
+        b.appendHtmlConstant("<a href=\"" + urlBuilder.toString() + "\">Download LOB</a>");
+      } else {
+        b.appendEscaped(value);
+      }
     }
     b.appendHtmlConstant("</div>");
 

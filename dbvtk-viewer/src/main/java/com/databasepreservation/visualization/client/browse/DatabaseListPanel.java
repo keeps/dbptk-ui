@@ -21,22 +21,13 @@ public class DatabaseListPanel extends Composite {
 
   private static DatabaseListPanelUiBinder uiBinder = GWT.create(DatabaseListPanelUiBinder.class);
 
-  // public DatabaseListPanel() {
-  // Widget rootElement = ourUiBinder.createAndBindUi(this);
-  // }
-
   @UiField(provided = true)
   DatabaseList databaseList;
 
   @UiField
   BreadcrumbPanel breadcrumb;
 
-  // @UiField(provided = true)
-  // SearchPanel dbSearchPanel;
-
   public DatabaseListPanel() {
-    // dbSearchPanel = new SearchPanel(new Filter(), "", "", false, false);
-
     databaseList = new DatabaseList();
     initWidget(uiBinder.createAndBindUi(this));
 

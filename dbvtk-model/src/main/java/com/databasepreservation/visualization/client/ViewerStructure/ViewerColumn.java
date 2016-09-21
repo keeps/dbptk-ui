@@ -1,6 +1,7 @@
 package com.databasepreservation.visualization.client.ViewerStructure;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>

@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -377,12 +378,14 @@ public class SolrManager {
     } while (System.currentTimeMillis() - timeoutStart < INSERT_DOCUMENT_TIMEOUT && !insertedAllDocuments);
 
     if (insertedAllDocuments) {
-      docsByCollection.entrySet().removeIf(new Predicate<Map.Entry<String, List<SolrInputDocument>>>() {
-        @Override
-        public boolean test(Map.Entry<String, List<SolrInputDocument>> entry) {
-          return entry.getValue() == null || entry.getValue().isEmpty();
+      // remove empty or null lists
+      for (Iterator<String> iter = docsByCollection.keySet().iterator(); iter.hasNext(); ) {
+        String key = iter.next();
+        if(docsByCollection.get(key) == null || docsByCollection.get(key).isEmpty()){
+          iter.remove();
         }
-      });
+      }
+
     } else {
       throw new ViewerException(
         "Could not insert a document batch in collection. Reason: Timeout reached while waiting for collection to be available.");
