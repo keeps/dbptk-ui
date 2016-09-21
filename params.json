@@ -1,0 +1,6 @@
+{
+  "name": "db-visualization-toolkit",
+  "tagline": "Relational Database Viewer for databases based on SIARD 2",
+  "body": "# Database Viewer\r\n\r\nLightweight web viewer for relational databases, specially if preserved in SIARD 2, that uses SOLR as a backend, and allows browsing, search, and export. It uses the [Database Preservation Toolkit](https://github.com/keeps/db-preservation-toolkit) to process new relational databases that are in the SIARD2 format or on the original live DBMS.\r\n\r\nA compreensive list of features, screenshots and other documentation will be produced soon and available here.\r\n",
+  "note": "Don't delete this file! It's used internally to help with page regeneration."
+}
