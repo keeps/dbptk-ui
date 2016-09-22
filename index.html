@@ -2,7 +2,7 @@
 <html lang="en-us">
   <head>
     <meta charset="UTF-8">
-    <title>db-visualization-toolkit by keeps</title>
+    <title>Database Visualization Toolkit by keeps</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
@@ -11,7 +11,7 @@
   </head>
   <body>
     <section class="page-header">
-      <h1 class="project-name">db-visualization-toolkit</h1>
+      <h1 class="project-name">Database Visualization Toolkit</h1>
       <h2 class="project-tagline">Relational Database Viewer for databases based on SIARD 2</h2>
       <a href="https://github.com/keeps/db-visualization-toolkit" class="btn">View on GitHub</a>
       <a href="https://github.com/keeps/db-visualization-toolkit/zipball/master" class="btn">Download .zip</a>
@@ -20,14 +20,246 @@
 
     <section class="main-content">
       <h1>
-<a id="database-viewer" class="anchor" href="#database-viewer" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Database Viewer</h1>
+<a id="database-visualization-toolkit" class="anchor" href="#database-visualization-toolkit" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Database Visualization Toolkit</h1>
 
 <p>Lightweight web viewer for relational databases, specially if preserved in SIARD 2, that uses SOLR as a backend, and allows browsing, search, and export. It uses the <a href="https://github.com/keeps/db-preservation-toolkit">Database Preservation Toolkit</a> to process new relational databases that are in the SIARD2 format or on the original live DBMS.</p>
 
 <p>A compreensive list of features, screenshots and other documentation will be produced soon and available here.</p>
 
+<h2>
+<a id="setting-up-the-database-visualization-toolkit" class="anchor" href="#setting-up-the-database-visualization-toolkit" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Setting up the Database Visualization Toolkit</h2>
+
+<p>The Database Visualization Toolkit is a web application. To run it you need to download the appropriate ZIP package file for your operating system at <a href="https://github.com/keeps/db-preservation-toolkit/releases">https://github.com/keeps/db-preservation-toolkit/releases</a></p>
+
+<p>For instance, if you are using Windows, you should download the most recent version of the <code>dbvtk-{version}-windows.zip</code> file.</p>
+
+<blockquote>
+<p>(optional) MD5, SHA1 and SHA256 checksum files are provided for all release files. You can use them to check if the downloaded file is corrupt. Instructions are available for <a href="http://superuser.com/a/898377">Windows</a>, <a href="https://help.ubuntu.com/community/HowToMD5SUM">Linux (Ubuntu)</a> and <a href="https://support.apple.com/HT201259">Mac OS X</a>.</p>
+</blockquote>
+
+<p>You can then extract the contents of the ZIP file. And follow these instructions to start and stop the application:</p>
+
+<h3>
+<a id="to-start-the-server" class="anchor" href="#to-start-the-server" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>To start the server</h3>
+
+<ul>
+<li><p><strong>On Windows</strong>: double click <code>start.bat</code></p></li>
+<li><p><strong>On MacOS</strong>: double click <code>start.command</code></p></li>
+<li><p><strong>On Linux</strong>: open a command line and run <code>./start.sh</code></p></li>
+</ul>
+
+<h3>
+<a id="to-add-more-databases-to-dbvtk" class="anchor" href="#to-add-more-databases-to-dbvtk" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>To add more databases to DBVTK</h3>
+
+<p>After starting the server, you can add more databases using the command that is shown in the command line. The command uses the <a href="http://database-preservation.com">Database Preservation Toolkit</a> to add a SIARD 2 database to the Viewer.</p>
+
+<p>The DBVTK currently supports adding databases that are in SIARD2 and you can use the <a href="http://database-preservation.com">Database Preservation Toolkit</a> to convert databases to the SIARD 2 format. Other input systems and formats may work but have not been tested.</p>
+
+<h3>
+<a id="to-stop-the-server" class="anchor" href="#to-stop-the-server" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>To stop the server</h3>
+
+<ul>
+<li><p><strong>On Windows</strong>: double click <code>stop.bat</code></p></li>
+<li><p><strong>On MacOS</strong>: double click <code>stop.command</code></p></li>
+<li><p><strong>On Linux</strong>: open a command line and run <code>./stop.sh</code></p></li>
+</ul>
+
+<h2>
+<a id="more-information" class="anchor" href="#more-information" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>More information</h2>
+
+<p>For more information about these tools can be found at <a href="http://database-preservation.com">http://database-preservation.com</a></p>
+
+<h2>
+<a id="to-report-a-problem-or-make-a-suggestion" class="anchor" href="#to-report-a-problem-or-make-a-suggestion" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>To report a problem or make a suggestion</h2>
+
+<p>Create a new issue at <a href="https://github.com/keeps/db-visualization-toolkit/issues/new">https://github.com/keeps/db-visualization-toolkit/issues/new</a></p>
+
+<p>Or if the problem/suggestion is related to the Database Preservation Toolkit, create the issue at <a href="https://github.com/keeps/db-preservation-toolkit/issues/new">https://github.com/keeps/db-preservation-toolkit/issues/new</a></p>
+
+<h2>
+<a id="information--commercial-support" class="anchor" href="#information--commercial-support" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Information &amp; Commercial support</h2>
+
+<p>For more information or commercial support, contact <a href="http://www.keep.pt/contactos/?lang=en">KEEP SOLUTIONS</a>.</p>
+
+<h2>
+<a id="development-" class="anchor" href="#development-" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Development <a href="https://travis-ci.org/keeps/db-visualization-toolkit"><img src="https://travis-ci.org/keeps/db-visualization-toolkit.png?branch=master" alt="Build Status"></a>
+</h2>
+
+<h2>
+<a id="license" class="anchor" href="#license" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>License</h2>
+
+<p>Database Visualization Toolkit licence is <a href="http://www.gnu.org/licenses/lgpl-3.0.html">LGPLv3</a></p>
+
+<pre><code>                   GNU LESSER GENERAL PUBLIC LICENSE
+                       Version 3, 29 June 2007
+
+ Copyright (C) 2007 Free Software Foundation, Inc. &lt;http://fsf.org/&gt;
+ Everyone is permitted to copy and distribute verbatim copies
+ of this license document, but changing it is not allowed.
+
+
+  This version of the GNU Lesser General Public License incorporates
+the terms and conditions of version 3 of the GNU General Public
+License, supplemented by the additional permissions listed below.
+
+  0. Additional Definitions.
+
+  As used herein, "this License" refers to version 3 of the GNU Lesser
+General Public License, and the "GNU GPL" refers to version 3 of the GNU
+General Public License.
+
+  "The Library" refers to a covered work governed by this License,
+other than an Application or a Combined Work as defined below.
+
+  An "Application" is any work that makes use of an interface provided
+by the Library, but which is not otherwise based on the Library.
+Defining a subclass of a class defined by the Library is deemed a mode
+of using an interface provided by the Library.
+
+  A "Combined Work" is a work produced by combining or linking an
+Application with the Library.  The particular version of the Library
+with which the Combined Work was made is also called the "Linked
+Version".
+
+  The "Minimal Corresponding Source" for a Combined Work means the
+Corresponding Source for the Combined Work, excluding any source code
+for portions of the Combined Work that, considered in isolation, are
+based on the Application, and not on the Linked Version.
+
+  The "Corresponding Application Code" for a Combined Work means the
+object code and/or source code for the Application, including any data
+and utility programs needed for reproducing the Combined Work from the
+Application, but excluding the System Libraries of the Combined Work.
+
+  1. Exception to Section 3 of the GNU GPL.
+
+  You may convey a covered work under sections 3 and 4 of this License
+without being bound by section 3 of the GNU GPL.
+
+  2. Conveying Modified Versions.
+
+  If you modify a copy of the Library, and, in your modifications, a
+facility refers to a function or data to be supplied by an Application
+that uses the facility (other than as an argument passed when the
+facility is invoked), then you may convey a copy of the modified
+version:
+
+   a) under this License, provided that you make a good faith effort to
+   ensure that, in the event an Application does not supply the
+   function or data, the facility still operates, and performs
+   whatever part of its purpose remains meaningful, or
+
+   b) under the GNU GPL, with none of the additional permissions of
+   this License applicable to that copy.
+
+  3. Object Code Incorporating Material from Library Header Files.
+
+  The object code form of an Application may incorporate material from
+a header file that is part of the Library.  You may convey such object
+code under terms of your choice, provided that, if the incorporated
+material is not limited to numerical parameters, data structure
+layouts and accessors, or small macros, inline functions and templates
+(ten or fewer lines in length), you do both of the following:
+
+   a) Give prominent notice with each copy of the object code that the
+   Library is used in it and that the Library and its use are
+   covered by this License.
+
+   b) Accompany the object code with a copy of the GNU GPL and this license
+   document.
+
+  4. Combined Works.
+
+  You may convey a Combined Work under terms of your choice that,
+taken together, effectively do not restrict modification of the
+portions of the Library contained in the Combined Work and reverse
+engineering for debugging such modifications, if you also do each of
+the following:
+
+   a) Give prominent notice with each copy of the Combined Work that
+   the Library is used in it and that the Library and its use are
+   covered by this License.
+
+   b) Accompany the Combined Work with a copy of the GNU GPL and this license
+   document.
+
+   c) For a Combined Work that displays copyright notices during
+   execution, include the copyright notice for the Library among
+   these notices, as well as a reference directing the user to the
+   copies of the GNU GPL and this license document.
+
+   d) Do one of the following:
+
+       0) Convey the Minimal Corresponding Source under the terms of this
+       License, and the Corresponding Application Code in a form
+       suitable for, and under terms that permit, the user to
+       recombine or relink the Application with a modified version of
+       the Linked Version to produce a modified Combined Work, in the
+       manner specified by section 6 of the GNU GPL for conveying
+       Corresponding Source.
+
+       1) Use a suitable shared library mechanism for linking with the
+       Library.  A suitable mechanism is one that (a) uses at run time
+       a copy of the Library already present on the user's computer
+       system, and (b) will operate properly with a modified version
+       of the Library that is interface-compatible with the Linked
+       Version.
+
+   e) Provide Installation Information, but only if you would otherwise
+   be required to provide such information under section 6 of the
+   GNU GPL, and only to the extent that such information is
+   necessary to install and execute a modified version of the
+   Combined Work produced by recombining or relinking the
+   Application with a modified version of the Linked Version. (If
+   you use option 4d0, the Installation Information must accompany
+   the Minimal Corresponding Source and Corresponding Application
+   Code. If you use option 4d1, you must provide the Installation
+   Information in the manner specified by section 6 of the GNU GPL
+   for conveying Corresponding Source.)
+
+  5. Combined Libraries.
+
+  You may place library facilities that are a work based on the
+Library side by side in a single library together with other library
+facilities that are not Applications and are not covered by this
+License, and convey such a combined library under terms of your
+choice, if you do both of the following:
+
+   a) Accompany the combined library with a copy of the same work based
+   on the Library, uncombined with any other library facilities,
+   conveyed under the terms of this License.
+
+   b) Give prominent notice with the combined library that part of it
+   is a work based on the Library, and explaining where to find the
+   accompanying uncombined form of the same work.
+
+  6. Revised Versions of the GNU Lesser General Public License.
+
+  The Free Software Foundation may publish revised and/or new versions
+of the GNU Lesser General Public License from time to time. Such new
+versions will be similar in spirit to the present version, but may
+differ in detail to address new problems or concerns.
+
+  Each version is given a distinguishing version number. If the
+Library as you received it specifies that a certain numbered version
+of the GNU Lesser General Public License "or any later version"
+applies to it, you have the option of following the terms and
+conditions either of that published version or of any later version
+published by the Free Software Foundation. If the Library as you
+received it does not specify a version number of the GNU Lesser
+General Public License, you may choose any version of the GNU Lesser
+General Public License ever published by the Free Software Foundation.
+
+  If the Library as you received it specifies that a proxy can decide
+whether future versions of the GNU Lesser General Public License shall
+apply, that proxy's public statement of acceptance of any version is
+permanent authorization for you to choose that version for the
+Library.
+
+</code></pre>
+
       <footer class="site-footer">
-        <span class="site-footer-owner"><a href="https://github.com/keeps/db-visualization-toolkit">db-visualization-toolkit</a> is maintained by <a href="https://github.com/keeps">keeps</a>.</span>
+        <span class="site-footer-owner"><a href="https://github.com/keeps/db-visualization-toolkit">Database Visualization Toolkit</a> is maintained by <a href="https://github.com/keeps">keeps</a>.</span>
 
         <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
       </footer>
