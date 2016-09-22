@@ -19,7 +19,7 @@ NOTE: These are technical instructions to build the distribution package.
 13. extract dbvtk-viewer/target/dbvtk-viewer-1.0.0-SNAPSHOT.war to the destination subfolder apache-tomcat/webapps/ROOT/
 14. create destination subfolder dbvtk-data/
 15. start solr server (on linux: solr/bin/solr start -c)
-16. convert Sakila SIARD2 to Solr (on linux: jre/linux/bin/java "-Dfile.encoding=UTF-8" "-Ddbvtk.workspace=./dbvtk-data/" -jar dbptk-app.jar -e solr -i siard-2 -if sakila.siard)
+16. convert Sakila SIARD2 to Solr (on linux: java "-Dfile.encoding=UTF-8" "-Ddbvtk.workspace=./dbvtk-data/" -jar dbptk-app.jar -e solr -i siard-2 -if sakila.siard)
 17. stop solr server (on linux: solr/bin/solr stop)
 16. remove logs and reports generated during the Sakila conversion
 17. remove HOW_TO_BUILD.md
