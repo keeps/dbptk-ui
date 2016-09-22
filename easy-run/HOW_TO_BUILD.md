@@ -10,6 +10,7 @@ NOTE: These are technical instructions to build the distribution package.
 5. create a folder where the distribution package will be assembled, henceforth called the destination folder
 6. copy everything in DBVTK `easy-run` folder to the destination folder
 7. download appropriate solr version from [here](http://lucene.apache.org/solr/downloads.html) and extract it in the destination folder to a subfolder called solr
+7. extra: remove folder docs and example from solr directory
 8. download tomcat8 zip from [here](https://tomcat.apache.org/download-80.cgi) and extract it to a folder named `apache-tomcat`
 9. copy dbvtk-model/src/main/resources/solr-configset to the destination folder
 10. copy dbptk-core/target/dbptk-app-X.Y.Z.jar to the destination folder and rename it to dbptk-app.jar
