@@ -10,13 +10,21 @@ done
 DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 cd "$DIR" || (echo "could not change directory to $DIR" && exit)
 
-# shutdown solr
+# setup environment
+DBPTK=dbptk-app.jar
+export DBVTK_WORKSPACE=$DIR/dbvtk-data
+export JAVA_HOME=$DIR/jre/linux
+[ "$(uname -s)" = "Darwin" ] && export JAVA_HOME=$DIR/jre/mac
+export CATALINA_HOME=$DIR/apache-tomcat
+
+# shutdown
 echo "Shutting down Solr server"
 solr/bin/solr stop -all
 
 echo "Shutting down tomcat server"
 apache-tomcat/bin/shutdown.sh
 
+# clean
 echo "Cleaning up"
 rm -rf log
 rm -f dbptk-app-*.log.txt

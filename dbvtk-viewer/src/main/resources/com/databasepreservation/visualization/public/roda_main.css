@@ -1361,6 +1361,8 @@ td.datePickerMonth, td.datePickerYear {
     font-size: 58px;
     line-height: 110px;
     text-align: left;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 .languageSwitcher {

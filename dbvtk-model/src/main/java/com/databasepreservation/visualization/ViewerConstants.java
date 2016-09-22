@@ -13,14 +13,15 @@ import org.apache.commons.lang3.StringUtils;
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class ViewerConstants {
-  private static final String NAME_DBVTK_WORKSPACE = "DBVTK_WORKSPACE";
+  private static final String ENV_DBVTK_WORKSPACE = "DBVTK_WORKSPACE";
+  private static final String PROP_DBVTK_WORKSPACE = "dbvtk.workspace";
 
   private static Path workspaceDirectory = null;
 
   public static Path getWorkspaceDirectory() {
     if (workspaceDirectory == null) {
-      String property = System.getProperty(NAME_DBVTK_WORKSPACE);
-      String env = System.getenv(NAME_DBVTK_WORKSPACE);
+      String property = System.getProperty(PROP_DBVTK_WORKSPACE);
+      String env = System.getenv(ENV_DBVTK_WORKSPACE);
 
       if (StringUtils.isNotBlank(property)) {
         workspaceDirectory = Paths.get(property);
