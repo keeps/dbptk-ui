@@ -17,11 +17,11 @@ You can then extract the contents of the ZIP file. And follow these instructions
 
 ### To start the server
 
-**On Windows**: double click `start.bat`
+* **On Windows**: double click `start.bat`
 
-**On MacOS**: double click `start.command`
+* **On MacOS**: double click `start.command`
 
-**On Linux**: open a command line and run `./start.sh`
+* **On Linux**: open a command line and run `./start.sh`
 
 ### To add more databases to DBVTK
 
@@ -31,11 +31,11 @@ The DBVTK currently supports adding databases that are in SIARD2 and you can use
 
 ### To stop the server
 
-**On Windows**: double click `stop.bat`
+* **On Windows**: double click `stop.bat`
 
-**On MacOS**: double click `stop.command`
+* **On MacOS**: double click `stop.command`
 
-**On Linux**: open a command line and run `./stop.sh`
+* **On Linux**: open a command line and run `./stop.sh`
 
 ## More information
 
