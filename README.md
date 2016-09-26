@@ -7,7 +7,7 @@ A compreensive list of features, screenshots and other documentation will be pro
 
 ## Setting up the Database Visualization Toolkit
 
-The Database Visualization Toolkit is a web application. To run it you need to download the appropriate ZIP package file for your operating system at https://github.com/keeps/db-preservation-toolkit/releases
+The Database Visualization Toolkit is a web application. To run it you need to download the appropriate ZIP package file for your operating system at https://github.com/keeps/db-visualization-toolkit/releases
 
 For instance, if you are using Windows, you should download the most recent version of the `dbvtk-{version}-windows.zip` file.
 
