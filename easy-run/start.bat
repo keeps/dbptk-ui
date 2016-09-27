@@ -12,8 +12,8 @@ SET JAVA_HOME=%SDIR%\jre\windows
 SET CATALINA_HOME=%SDIR%\apache-tomcat
 
 REM start
-CALL solr/bin/solr.cmd start -c
-CALL apache-tomcat/bin/startup.bat
+CALL solr\bin\solr.cmd start -c
+CALL apache-tomcat\bin\startup.bat
 
 REM provide instructions
 echo The Database Visualization Toolkit will be available at: http://127.0.0.1:8080

@@ -13,10 +13,10 @@ SET CATALINA_HOME=%SDIR%\apache-tomcat
 
 REM shutdown
 echo "Shutting down Solr server"
-CALL solr/bin/solr.cmd stop -all
+CALL solr\bin\solr.cmd stop -all
 
 echo "Shutting down tomcat server"
-CALL apache-tomcat/bin/shutdown.bat
+CALL apache-tomcat\bin\shutdown.bat
 
 REM clean
 echo "Cleaning up"
