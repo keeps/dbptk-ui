@@ -9,12 +9,13 @@ import java.util.Map;
 import org.roda.core.data.adapter.filter.BasicSearchFilterParameter;
 import org.roda.core.data.adapter.filter.Filter;
 import org.roda.core.data.adapter.filter.FilterParameter;
+import org.roda.core.data.adapter.filter.LongRangeFilterParameter;
 
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerColumn;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable;
 import com.databasepreservation.visualization.shared.BrowserServiceUtils;
 import com.databasepreservation.visualization.shared.ViewerSafeConstants;
 import com.databasepreservation.visualization.shared.client.Tools.ViewerJsonUtils;
+import com.databasepreservation.visualization.shared.client.Tools.ViewerStringUtils;
 import com.google.gwt.safehtml.shared.UriUtils;
 
 /**
@@ -52,13 +53,33 @@ public class SearchInfo implements Serializable {
     fields = BrowserServiceUtils.getSearchFieldsFromTable(viewerTable);
 
     fieldParameters = new ArrayList<>();
-    for (ViewerColumn viewerColumn : viewerTable.getColumns()) {
-      String solrColumnName = viewerColumn.getSolrName();
-      if (solrColumnAndValue.containsKey(solrColumnName)) {
-        fieldParameters.add(new BasicSearchFilterParameter(solrColumnName, solrColumnAndValue.get(solrColumnName)));
-      } else {
-        fieldParameters.add(null);
+    for (SearchField field : fields) {
+      String solrColumnName = field.getSearchFields().get(0);
+      FilterParameter fieldParameter = null;
+
+      String value = solrColumnAndValue.get(solrColumnName);
+      if (ViewerStringUtils.isNotBlank(value)) {
+        // try to handle different types in different ways
+        if(field.getType().equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_NUMERIC_INTERVAL)){
+          fieldParameter = new LongRangeFilterParameter(solrColumnName, Long.valueOf(value), Long.valueOf(value));
+        } else if(field.getType().equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_DATETIME)){
+          //TODO: handle DATETIME keys
+        } else if(field.getType().equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_DATE)){
+          //TODO: handle DATE keys
+        } else if(field.getType().equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_TIME)){
+          //TODO: handle TIME keys
+        } else if(field.getType().equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_DATE_INTERVAL)){
+          //TODO: handle DATE INTERVAL keys
+        } else if(field.getType().equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_BOOLEAN)){
+          //TODO: handle BOOLEAN keys
+        }
+
+        // default: set is as a BasicSearchFilterParameter
+        if(fieldParameter == null){
+          fieldParameter = new BasicSearchFilterParameter(solrColumnName, solrColumnAndValue.get(solrColumnName));
+        }
       }
+      fieldParameters.add(fieldParameter);
     }
   }
 

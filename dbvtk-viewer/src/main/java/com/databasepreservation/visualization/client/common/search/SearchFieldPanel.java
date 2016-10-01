@@ -4,17 +4,9 @@
  */
 package com.databasepreservation.visualization.client.common.search;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import org.roda.core.data.adapter.filter.BasicSearchFilterParameter;
-import org.roda.core.data.adapter.filter.DateRangeFilterParameter;
-import org.roda.core.data.adapter.filter.FilterParameter;
-import org.roda.core.data.adapter.filter.LongRangeFilterParameter;
-import org.roda.core.data.adapter.filter.SimpleFilterParameter;
+import org.roda.core.data.adapter.filter.*;
 import org.roda.core.data.common.RodaConstants;
 
 import com.databasepreservation.visualization.client.common.utils.ListboxUtils;
@@ -27,14 +19,7 @@ import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ListBox;
-import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.datepicker.client.DateBox;
 import com.tractionsoftware.gwt.user.client.ui.UTCDateBox;
 import com.tractionsoftware.gwt.user.client.ui.UTCTimeBox;
@@ -70,6 +55,9 @@ public class SearchFieldPanel extends Composite {
   private SimplePanel columnVisibilityPanel;
   private CheckBox columnVisibility;
 
+  // any range
+  private Label labelTo;
+
   // Text
   private TextBox inputText;
   // Date interval
@@ -80,6 +68,8 @@ public class SearchFieldPanel extends Composite {
   private UTCTimeBox inputTimeFromForDateTime;
   private UTCDateBox inputDateToForDateTime;
   private UTCTimeBox inputTimeToForDateTime;
+  private Label labelAt1;
+  private Label labelAt2;
   // Time interval
   private UTCTimeBox inputTimeFromForTime;
   private UTCTimeBox inputTimeToForTime;
@@ -180,6 +170,10 @@ public class SearchFieldPanel extends Composite {
 
     inputCheckBox = new CheckBox();
 
+    labelTo = new Label("to");
+    labelAt1 = new Label("at");
+    labelAt2 = new Label("at");
+
     panel.add(leftPanel);
 
     initWidget(panel);
@@ -209,6 +203,9 @@ public class SearchFieldPanel extends Composite {
     // columnVisibilityPanel.setStyleName("form-listbox search-field-input-panel");
     columnVisibility.setStyleName("visibility-checkbox");
 
+    labelTo.addStyleName("label");
+    labelAt1.addStyleName("label");
+    labelAt2.addStyleName("label");
     inputText.addStyleName("form-textbox");
     inputDateFromForDate.addStyleName("form-textbox form-textbox-small");
     inputDateToForDate.addStyleName("form-textbox form-textbox-small");
@@ -322,41 +319,109 @@ public class SearchFieldPanel extends Composite {
       String field = searchFields.get(0);
 
       if (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_DATE)
-        && dateIntervalValid(inputDateFromForDate, inputDateToForDate)) {
-        Date begin = getDateFromInput(inputDateFromForDate);
-        Date end = getDateFromInput(inputDateToForDate);
-        filterParameter = new DateRangeFilterParameter(field, begin, end, RodaConstants.DateGranularity.DAY);
-        // } else if
-        // (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_DATE_INTERVAL)
-        // && dateIntervalValid(inputDateFromForDate, inputDateToForDate) &&
-        // searchFields.size() >= 2) {
-        // String fieldTo = searchField.getSearchFields().get(1);
-        // filterParameter = new DateIntervalFilterParameter(field, fieldTo,
-        // inputDateBoxFrom.getValue(),
-        // inputDateBoxTo.getValue());
-        // } else if
-        // (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_DATE_INTERVAL)
-        // && dateIntervalValid(inputDateBoxFrom, inputDateBoxTo)) {
-        // filterParameter = new DateIntervalFilterParameter(field, field,
-        // inputDateBoxFrom.getValue(),
-        // inputDateBoxTo.getValue());
+        && (inputDateFromForDate.getValue() != null || inputDateToForDate.getValue() != null) ) {
+
+        if(inputDateFromForDate.getValue() == null){
+          inputDateFromForDate.setValue(inputDateToForDate.getValue());
+        }else if(inputDateToForDate.getValue() == null){
+          inputDateToForDate.setValue(inputDateFromForDate.getValue());
+        }
+
+        if(dateIntervalValid(inputDateFromForDate, inputDateToForDate)){
+          Date begin = getDateFromInput(inputDateFromForDate);
+          Date end = getDateFromInput(inputDateToForDate);
+          filterParameter = new DateRangeFilterParameter(field, begin, end, RodaConstants.DateGranularity.DAY);
+          // } else if
+          // (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_DATE_INTERVAL)
+          // && dateIntervalValid(inputDateFromForDate, inputDateToForDate) &&
+          // searchFields.size() >= 2) {
+          // String fieldTo = searchField.getSearchFields().get(1);
+          // filterParameter = new DateIntervalFilterParameter(field, fieldTo,
+          // inputDateBoxFrom.getValue(),
+          // inputDateBoxTo.getValue());
+          // } else if
+          // (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_DATE_INTERVAL)
+          // && dateIntervalValid(inputDateBoxFrom, inputDateBoxTo)) {
+          // filterParameter = new DateIntervalFilterParameter(field, field,
+          // inputDateBoxFrom.getValue(),
+          // inputDateBoxTo.getValue());
+        }else{
+          GWT.log("date interval was invalid");
+        }
       } else if (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_TIME)
-        && dateIntervalValid(inputTimeFromForTime, inputTimeToForTime)) {
-        Date begin = getDateFromInput(inputTimeFromForTime);
-        Date end = getDateFromInput(inputTimeToForTime);
-        filterParameter = new DateRangeFilterParameter(field, begin, end, RodaConstants.DateGranularity.MILLISECOND);
+        && (inputTimeFromForTime.getValue() != null || inputTimeToForTime != null)) {
+
+        if(inputTimeFromForTime.getValue() == null){
+          inputTimeFromForTime.setValue(inputTimeToForTime.getValue());
+        } else if(inputTimeToForTime.getValue() == null){
+          inputTimeToForTime.setValue(inputTimeFromForTime.getValue());
+        }
+
+        if(dateIntervalValid(inputTimeFromForTime, inputTimeToForTime)) {
+          Date begin = getDateFromInput(inputTimeFromForTime);
+          Date end = getDateFromInput(inputTimeToForTime);
+          filterParameter = new DateRangeFilterParameter(field, begin, end, RodaConstants.DateGranularity.MILLISECOND);
+        }else{
+          GWT.log("time interval was invalid");
+        }
       } else if (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_DATETIME)
-        && dateIntervalValid(inputDateFromForDateTime, inputTimeFromForDateTime, inputDateToForDateTime,
-          inputTimeToForDateTime)) {
-        Date begin = getDateFromInput(inputDateFromForDateTime, inputTimeFromForDateTime);
-        Date end = getDateFromInput(inputDateToForDateTime, inputTimeToForDateTime);
-        filterParameter = new DateRangeFilterParameter(field, begin, end, RodaConstants.DateGranularity.MILLISECOND);
+        && (inputDateFromForDateTime.getValue() != null || inputDateToForDateTime.getValue() != null)) {
+
+        if(inputDateFromForDateTime.getValue() == null){
+          inputDateFromForDateTime.setValue(inputDateToForDateTime.getValue());
+        } else if(inputDateToForDateTime.getValue() == null){
+          inputDateToForDateTime.setValue(inputDateFromForDateTime.getValue());
+        }
+
+        if(inputDateFromForDateTime.getValue().equals(inputDateToForDateTime.getValue())){
+          // dates are equal
+          // if we have one of the times, use it for both times
+          // if we have no times, use 00:00:00.000 to 23:59:59.999
+          // if the times are both defined, let them be
+          if(inputTimeFromForDateTime.getValue() == null && inputTimeToForDateTime.getValue() != null){
+            inputTimeFromForDateTime.setValue(inputTimeToForDateTime.getValue());
+          }else if(inputTimeFromForDateTime.getValue() != null && inputTimeToForDateTime.getValue() == null){
+            inputTimeToForDateTime.setValue(inputTimeFromForDateTime.getValue());
+          }else if(inputTimeFromForDateTime.getValue() == null && inputTimeToForDateTime.getValue() == null){
+            inputTimeFromForDateTime.setValue(0L);
+            inputTimeToForDateTime.setValue(ViewerSafeConstants.MILLISECONDS_IN_A_DAY-1);
+          }
+        }else{
+          // dates are different
+          // use 00:00:00.000 for the "from" if it is missing
+          // use 23:59:59.999 for the "to" if it is missing
+          if(inputTimeFromForDateTime.getValue() == null){
+            inputTimeFromForDateTime.setValue(0L);
+          }
+
+          if(inputTimeToForDateTime.getValue() == null){
+            inputTimeToForDateTime.setValue(ViewerSafeConstants.MILLISECONDS_IN_A_DAY-1);
+          }
+        }
+
+        if(dateIntervalValid(inputDateFromForDateTime, inputTimeFromForDateTime, inputDateToForDateTime, inputTimeToForDateTime)){
+          Date begin = getDateFromInput(inputDateFromForDateTime, inputTimeFromForDateTime);
+          Date end = getDateFromInput(inputDateToForDateTime, inputTimeToForDateTime);
+          filterParameter = new DateRangeFilterParameter(field, begin, end, RodaConstants.DateGranularity.MILLISECOND);
+        }else{
+          GWT.log("datetime interval was invalid");
+        }
       } else if (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_NUMERIC) && valid(inputNumeric)) {
         filterParameter = new BasicSearchFilterParameter(field, inputNumeric.getValue());
       } else if (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_NUMERIC_INTERVAL)
-        && intervalValid(inputNumericFrom, inputNumericTo)) {
-        filterParameter = new LongRangeFilterParameter(field, Long.valueOf(inputNumericFrom.getValue()),
-          Long.valueOf(inputNumericTo.getValue()));
+        && (!inputNumericFrom.getValue().isEmpty() || !inputNumericTo.getValue().isEmpty())) {
+
+        if(inputNumericFrom.getValue().isEmpty()){
+          inputNumericFrom.setValue(inputNumericTo.getValue());
+        } else if(inputNumericTo.getValue().isEmpty()){
+          inputNumericTo.setValue(inputNumericFrom.getValue());
+        }
+
+        if(intervalValid(inputNumericFrom, inputNumericTo)){
+          filterParameter = new LongRangeFilterParameter(field, Long.valueOf(inputNumericFrom.getValue()), Long.valueOf(inputNumericTo.getValue()));
+        }else{
+          GWT.log("numeric interval was invalid");
+        }
       } else if (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_STORAGE)
         && intervalValid(inputStorageSizeFrom, inputStorageSizeTo)) {
         filterParameter = new LongRangeFilterParameter(field, Humanize.parseFileSize(inputStorageSizeFrom.getValue(),
@@ -422,14 +487,19 @@ public class SearchFieldPanel extends Composite {
 
     if (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_DATE)) {
       inputPanel.add(inputDateFromForDate);
+      inputPanel.add(labelTo);
       inputPanel.add(inputDateToForDate);
     } else if (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_TIME)) {
       inputPanel.add(inputTimeFromForTime);
+      inputPanel.add(labelTo);
       inputPanel.add(inputTimeToForTime);
     } else if (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_DATETIME)) {
       inputPanel.add(inputDateFromForDateTime);
+      inputPanel.add(labelAt1);
       inputPanel.add(inputTimeFromForDateTime);
+      inputPanel.add(labelTo);
       inputPanel.add(inputDateToForDateTime);
+      inputPanel.add(labelAt2);
       inputPanel.add(inputTimeToForDateTime);
     } else if (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_DATE_INTERVAL)) {
       // TODO: support date interval
@@ -437,6 +507,7 @@ public class SearchFieldPanel extends Composite {
       inputPanel.add(inputNumeric);
     } else if (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_NUMERIC_INTERVAL)) {
       inputPanel.add(inputNumericFrom);
+      inputPanel.add(labelTo);
       inputPanel.add(inputNumericTo);
     } else if (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_STORAGE)) {
       inputPanel.add(inputStorageSizeFrom);

@@ -97,6 +97,12 @@
     max-width: 100px;
 }
 
+.search-field-left-panel .label {
+    display: inline;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
 /***********************************************
    BrowseContent (based on ViewRepresentation)
 ************************************************/
