@@ -104,9 +104,9 @@ public class ErDiagram extends Composite {
         int minRows = Integer.MAX_VALUE;
         int minRelationsIn = Integer.MAX_VALUE;
         int minRelationsOut = Integer.MAX_VALUE;
-        int minRelationsTotalBiggerThanZero = Integer.MAX_VALUE;
+        int minRelationsTotal = Integer.MAX_VALUE;
         int minColumns = Integer.MAX_VALUE;
-        int minColumnsAndRows = Integer.MAX_VALUE;
+        int minColumnsAndRowsBiggerThanZero = Integer.MAX_VALUE;
 
         for (ViewerTable viewerTable : schema.getTables()) {
           VisNode visNode = new VisNode(viewerTable.getUUID(), viewerTable.getName(), viewerTable.getDescription());
@@ -159,11 +159,11 @@ public class ErDiagram extends Composite {
           if (minRelationsIn > visNode.numRelationsIn) {
             minRelationsIn = visNode.numRelationsIn;
           }
-          if (minRelationsTotalBiggerThanZero > visNode.numRelationsTotal && visNode.numRelationsTotal > 0) {
-            minRelationsTotalBiggerThanZero = visNode.numRelationsTotal;
+          if (minRelationsTotal > visNode.numRelationsTotal) {
+            minRelationsTotal = visNode.numRelationsTotal;
           }
-          if (minColumnsAndRows > visNode.numColumnsAndRows) {
-            minColumnsAndRows = visNode.numColumnsAndRows;
+          if (minColumnsAndRowsBiggerThanZero > visNode.numColumnsAndRows && visNode.numColumnsAndRows > 0) {
+            minColumnsAndRowsBiggerThanZero = visNode.numColumnsAndRows;
           }
 
           visNodeList.add(visNode);
@@ -181,14 +181,14 @@ public class ErDiagram extends Composite {
           // .adjustSize(getNormalizedValue(visNode.numRelationsTotal,
           // minRelationsTotal, maxRelationsTotal, 10, 50));
 
-          visNode.adjustBackgroundColor(getNormalizedValue(visNode.numRelationsTotal, minRelationsTotalBiggerThanZero,
+          visNode.adjustBackgroundColor(getNormalizedValue(visNode.numRelationsTotal, minRelationsTotal,
             maxRelationsTotal, 0.01, 0.70));
 
           if (visNode.numColumnsAndRows == 0) {
             visNode.adjustSize(20);
           } else {
-            Double normNumColumnsAndRows = getNormalizedValue(visNode.numColumnsAndRows, minColumnsAndRows,
-              maxColumnsAndRows, normMinColumnsAndRows, normMaxColumnsAndRows);
+            Double normNumColumnsAndRows = getNormalizedValue(visNode.numColumnsAndRows,
+              minColumnsAndRowsBiggerThanZero, maxColumnsAndRows, normMinColumnsAndRows, normMaxColumnsAndRows);
 
             Double normResult = Math.asin(normNumColumnsAndRows - 1) + 1.5;
 
