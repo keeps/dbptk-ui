@@ -74,7 +74,7 @@ public class ErDiagram extends Composite {
         CommonClientUtils
           .getFieldHTML(
             "Using the diagram",
-            "The diagram shows the tables and relations in this schema. Each circle in the diagram represents a table, and darker circles indicate more rows and columns while their size indicates the number of relations to other tables (bigger means more relations).")));
+            "The diagram shows the tables and relations in this schema. Each circle in the diagram represents a table, where bigger circles represent tables with more rows and columns and their colour is darker when they have more relations to other tables.")));
 
     SimplePanel config = new SimplePanel();
     config.getElement().setId("erconfig");
@@ -104,7 +104,7 @@ public class ErDiagram extends Composite {
         int minRows = Integer.MAX_VALUE;
         int minRelationsIn = Integer.MAX_VALUE;
         int minRelationsOut = Integer.MAX_VALUE;
-        int minRelationsTotal = Integer.MAX_VALUE;
+        int minRelationsTotalBiggerThanZero = Integer.MAX_VALUE;
         int minColumns = Integer.MAX_VALUE;
         int minColumnsAndRows = Integer.MAX_VALUE;
 
@@ -159,8 +159,8 @@ public class ErDiagram extends Composite {
           if (minRelationsIn > visNode.numRelationsIn) {
             minRelationsIn = visNode.numRelationsIn;
           }
-          if (minRelationsTotal > visNode.numRelationsTotal) {
-            minRelationsTotal = visNode.numRelationsTotal;
+          if (minRelationsTotalBiggerThanZero > visNode.numRelationsTotal && visNode.numRelationsTotal > 0) {
+            minRelationsTotalBiggerThanZero = visNode.numRelationsTotal;
           }
           if (minColumnsAndRows > visNode.numColumnsAndRows) {
             minColumnsAndRows = visNode.numColumnsAndRows;
@@ -173,27 +173,40 @@ public class ErDiagram extends Composite {
           }
         }
 
-        Double logMinColumnsAndRows = Math.log(minColumnsAndRows);
-        if (logMinColumnsAndRows.isInfinite() || logMinColumnsAndRows.isNaN()) {
-          logMinColumnsAndRows = 0.0;
-        }
-
-        Double logMaxColumnsAndRows = Math.log(maxColumnsAndRows);
-        if (logMaxColumnsAndRows.isInfinite() || logMaxColumnsAndRows.isNaN()) {
-          logMaxColumnsAndRows = 0.0;
-        }
+        Double normMinColumnsAndRows = 0.0;
+        Double normMaxColumnsAndRows = 2.0; // N
 
         for (VisNode visNode : visNodeList) {
-          visNode
-            .adjustSize(getNormalizedValue(visNode.numRelationsTotal, minRelationsTotal, maxRelationsTotal, 10, 50));
+          // visNode
+          // .adjustSize(getNormalizedValue(visNode.numRelationsTotal,
+          // minRelationsTotal, maxRelationsTotal, 10, 50));
 
-          Double logColumnsAndRows = Math.log(visNode.numColumnsAndRows);
-          if (logColumnsAndRows.isInfinite() || logColumnsAndRows.isNaN()) {
-            logColumnsAndRows = 0.0;
+          visNode.adjustBackgroundColor(getNormalizedValue(visNode.numRelationsTotal, minRelationsTotalBiggerThanZero,
+            maxRelationsTotal, 0.01, 0.70));
+
+          if (visNode.numColumnsAndRows == 0) {
+            visNode.adjustSize(20);
+          } else {
+            Double normNumColumnsAndRows = getNormalizedValue(visNode.numColumnsAndRows, minColumnsAndRows,
+              maxColumnsAndRows, normMinColumnsAndRows, normMaxColumnsAndRows);
+
+            Double normResult = Math.asin(normNumColumnsAndRows - 1) + 1.5;
+
+            visNode.adjustSize(getNormalizedValue(normResult, 0, 3, 40, 150).intValue());
           }
 
-          visNode.adjustBackgroundColor(((double) getNormalizedValue(logColumnsAndRows, logMinColumnsAndRows,
-            logMaxColumnsAndRows, 1, 70)) / 100);
+          // Double logColumnsAndRows = Math.log(visNode.numColumnsAndRows);
+          // if (logColumnsAndRows.isInfinite() || logColumnsAndRows.isNaN()) {
+          // logColumnsAndRows = 0.0;
+          // }
+          // visNode
+          // .adjustSize(getNormalizedValue(visNode.numColumnsAndRows,
+          // minColumnsAndRows,
+          // maxColumnsAndRows, 20, 150));
+
+          // visNode.adjustBackgroundColor(((double)
+          // getNormalizedValue(logColumnsAndRows, logMinColumnsAndRows,
+          // logMaxColumnsAndRows, 1, 70)) / 100);
         }
 
         String nodes = visNodeMapper.write(visNodeList);
@@ -205,13 +218,12 @@ public class ErDiagram extends Composite {
     contentItems.add(diagram);
   }
 
-  private int getNormalizedValue(double value, double min, double max, double minNorm, double maxNorm) {
+  private Double getNormalizedValue(double value, double min, double max, double minNorm, double maxNorm) {
     double range = max - min;
     double zeroToOne = (value - min) / range;
 
     double range2 = maxNorm - minNorm;
-    Double result = (zeroToOne * range2) + minNorm;
-    return result.intValue();
+    return (zeroToOne * range2) + minNorm;
   }
 
   private int getVisNodeSize(ViewerDatabase database, ViewerTable table) {
@@ -518,17 +530,6 @@ public class ErDiagram extends Composite {
                     "face": "Ubuntu, HelveticaNeue, Helvetica Neue, Helvetica, Arial, sans-serif"
                 },
                 "shape": "dot",
-                scaling: {
-                    min: 15,
-                    max: 50,
-                    label: {
-                        enabled: true,
-                        min: 15,
-                        max: 50,
-                        maxVisible: 60,
-                        drawThreshold: 5
-                    }
-                },
                 "color": {
                     "hover": {
                         "border": "#a19b4b",
