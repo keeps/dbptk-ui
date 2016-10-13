@@ -10,16 +10,13 @@ import com.databasepreservation.visualization.client.ViewerStructure.ViewerForei
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerSchema;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable;
 import com.databasepreservation.visualization.client.common.utils.CommonClientUtils;
+import com.databasepreservation.visualization.shared.client.Tools.ViewerStringUtils;
 import com.github.nmorel.gwtjackson.client.ObjectMapper;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -69,12 +66,8 @@ public class ErDiagram extends Composite {
     databaseUUID = database.getUUID();
     initWidget(uiBinder.createAndBindUi(this));
 
-    contentItems
-      .add(new HTMLPanel(
-        CommonClientUtils
-          .getFieldHTML(
-            "Using the diagram",
-            "The diagram shows the tables and relations in this schema. Each circle in the diagram represents a table, where bigger circles represent tables with more rows and columns and their colour is darker when they have more relations to other tables.")));
+    contentItems.add(new HTMLPanel(CommonClientUtils.getFieldHTML("Using the diagram",
+      "The diagram shows the tables and relations in this schema. Each circle in the diagram represents a table, where bigger circles represent tables with more rows and columns and their colour is darker when they have more relations to other tables.")));
 
     SimplePanel config = new SimplePanel();
     config.getElement().setId("erconfig");
@@ -109,7 +102,7 @@ public class ErDiagram extends Composite {
         int minColumnsAndRowsBiggerThanZero = Integer.MAX_VALUE;
 
         for (ViewerTable viewerTable : schema.getTables()) {
-          VisNode visNode = new VisNode(viewerTable.getUUID(), viewerTable.getName(), viewerTable.getDescription());
+          VisNode visNode = new VisNode(viewerTable.getUUID(), viewerTable.getName());
 
           visNode.numColumns = viewerTable.getColumns().size();
           visNode.numRows = new Long(viewerTable.getCountRows()).intValue();
@@ -166,6 +159,36 @@ public class ErDiagram extends Composite {
             minColumnsAndRowsBiggerThanZero = visNode.numColumnsAndRows;
           }
 
+          // create tooltip with table information
+          StringBuilder tooltip = new StringBuilder();
+          if (ViewerStringUtils.isNotBlank(viewerTable.getDescription())) {
+            if (viewerTable.getDescription().length() > 50) {
+              String trimmed = viewerTable.getDescription().substring(0, 47);
+              int indexOfSpace = trimmed.lastIndexOf(' ');
+              if (indexOfSpace > 25) {
+                trimmed = trimmed.substring(0, indexOfSpace);
+              }
+              tooltip.append(trimmed).append("...");
+            } else {
+              tooltip.append(viewerTable.getDescription());
+            }
+            tooltip.append("<br/>");
+          }
+          tooltip.append("This table has ");
+          if (visNode.numRelationsTotal > 0) {
+            tooltip.append(visNode.numRelationsTotal).append(" relations (").append(visNode.numRelationsIn)
+              .append(" in, ").append(visNode.numRelationsOut).append(" out)");
+          } else {
+            tooltip.append("no relations to other tables");
+          }
+          tooltip.append("<br/>This table has ").append(visNode.numColumns).append(" columns");
+          if (visNode.numRows > 0) {
+            tooltip.append(" and ").append(visNode.numRows).append(" rows");
+          } else {
+            tooltip.append(" but no rows");
+          }
+          visNode.setTitle(tooltip.toString());
+
           visNodeList.add(visNode);
 
           for (ViewerForeignKey viewerForeignKey : viewerTable.getForeignKeys()) {
@@ -181,8 +204,8 @@ public class ErDiagram extends Composite {
           // .adjustSize(getNormalizedValue(visNode.numRelationsTotal,
           // minRelationsTotal, maxRelationsTotal, 10, 50));
 
-          visNode.adjustBackgroundColor(getNormalizedValue(visNode.numRelationsTotal, minRelationsTotal,
-            maxRelationsTotal, 0.01, 0.70));
+          visNode.adjustBackgroundColor(
+            getNormalizedValue(visNode.numRelationsTotal, minRelationsTotal, maxRelationsTotal, 0.01, 0.70));
 
           if (visNode.numColumnsAndRows == 0) {
             visNode.adjustSize(20);
@@ -264,12 +287,11 @@ public class ErDiagram extends Composite {
     int numColumns;
     int numColumnsAndRows;
 
-    public VisNode(String id, String label, String title) {
+    public VisNode(String id, String label) {
       this.id = id;
       this.label = label;
       this.font = new VisNodeFont(25);
       this.size = 20;
-      this.title = title;
       this.color = new VisNodeColor();
     }
 
@@ -501,10 +523,10 @@ public class ErDiagram extends Composite {
     (function erdiagramload(){
         // network container
         var container = $wnd.document.getElementById('erdiagram');
-
+  
         // avoid setting up the diagram more than once
         container.className += ' initialized-erdiagram';
-
+  
         // create an array with nodes
         var rawNodes = eval(nodesJson);
         var rawNodesLen = rawNodes.length;
@@ -514,10 +536,10 @@ public class ErDiagram extends Composite {
             }
         }
         var nodes = new $wnd.vis.DataSet(rawNodes);
-
+  
         // create an array with edges
         var edges = new $wnd.vis.DataSet(eval(edgesJson));
-
+  
         // provide the data in the vis format
         var data = {
           nodes: nodes,
@@ -568,14 +590,14 @@ public class ErDiagram extends Composite {
                 },
             }//, configure: {enabled: true, showButton: true, container: $wnd.document.getElementById('erconfig')}
         };
-
+  
         // initialize your network!
         var network = new $wnd.vis.Network(container, data, options);
-
+  
         network.on("selectNode", function (params) {
             //params.event = "[original event]";
             //console.log(params);
-
+  
             if(params.nodes.length == 1) {
                 //console.log("go to db" + dbuuid + " and table " + params.nodes[0]);
                 var tableuuid = params.nodes[0];
@@ -583,14 +605,14 @@ public class ErDiagram extends Composite {
                 @com.databasepreservation.visualization.shared.client.Tools.HistoryManager::gotoTable(Ljava/lang/String;Ljava/lang/String;)(dbuuid, tableuuid);
             }
         });
-
+  
         network.on("stabilized", function (params) {
             if(params.iterations > 1){
                 options.physics.enabled = false;
                 network.setOptions(options);
             }
         });
-
+  
         network.on("dragEnd", function (params) {
             network.unselectAll();
         });
