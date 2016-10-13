@@ -286,7 +286,16 @@
                 <artifactId>commons-lang3</artifactId>
                 <version>3.3.2</version>
             </dependency>
-
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-configuration2</artifactId>
+                <version>2.1</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-beanutils</groupId>
+                <artifactId>commons-beanutils</artifactId>
+                <version>1.9.3</version>
+            </dependency>
 
             <!-- testing -->
             <dependency>

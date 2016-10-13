@@ -4,11 +4,7 @@ import java.io.InputStream;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -25,7 +21,7 @@ import org.slf4j.LoggerFactory;
 import com.databasepreservation.visualization.api.utils.ApiUtils;
 import com.databasepreservation.visualization.api.utils.DownloadUtils;
 import com.databasepreservation.visualization.api.utils.StreamResponse;
-import com.databasepreservation.visualization.shared.ViewerFactory;
+import com.databasepreservation.visualization.server.ViewerFactory;
 import com.databasepreservation.visualization.shared.ViewerSafeConstants;
 import com.databasepreservation.visualization.utils.SolrManager;
 
@@ -98,7 +94,7 @@ public class ExportsResource {
     // TODO: use viewerTable to convert solrColumnNames into displayColumnNames
     InputStream rowsCSV = solrManager.findRowsCSV(null, tableUUID, filter, sorter, sublist, fields);
 
-    return ApiUtils.okResponse(new StreamResponse("file.csv", MediaType.APPLICATION_OCTET_STREAM, DownloadUtils
-      .stream(rowsCSV)));
+    return ApiUtils
+      .okResponse(new StreamResponse("file.csv", MediaType.APPLICATION_OCTET_STREAM, DownloadUtils.stream(rowsCSV)));
   }
 }

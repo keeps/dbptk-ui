@@ -12,20 +12,18 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import com.databasepreservation.visualization.utils.LobPathManager;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RODAException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.databasepreservation.visualization.ViewerConstants;
 import com.databasepreservation.visualization.api.utils.ApiUtils;
 import com.databasepreservation.visualization.api.utils.DownloadUtils;
 import com.databasepreservation.visualization.api.utils.StreamResponse;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerRow;
-import com.databasepreservation.visualization.shared.ViewerFactory;
+import com.databasepreservation.visualization.server.ViewerFactory;
 import com.databasepreservation.visualization.shared.ViewerSafeConstants;
+import com.databasepreservation.visualization.utils.LobPathManager;
 import com.databasepreservation.visualization.utils.SolrManager;
 
 import io.swagger.annotations.Api;
@@ -58,7 +56,8 @@ public class LobsResource {
     @PathParam(ViewerSafeConstants.API_PATH_PARAM_COLUMN_ID) Integer columnID) throws RODAException {
     SolrManager solrManager = ViewerFactory.getSolrManager();
 
-    //ViewerDatabase database = solrManager.retrieve(null, ViewerDatabase.class, databaseUUID);
+    // ViewerDatabase database = solrManager.retrieve(null,
+    // ViewerDatabase.class, databaseUUID);
     ViewerRow row = solrManager.retrieveRows(null, ViewerRow.class, tableUUID, rowUUID);
 
     if (row != null) {

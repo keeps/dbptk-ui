@@ -21,7 +21,6 @@ import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable
 import com.databasepreservation.visualization.client.common.search.SearchField;
 import com.databasepreservation.visualization.client.common.search.SearchInfo;
 import com.databasepreservation.visualization.shared.BrowserServiceUtils;
-import com.databasepreservation.visualization.shared.ViewerFactory;
 import com.databasepreservation.visualization.utils.SolrUtils;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
@@ -47,24 +46,24 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
 
   @Override
   public <T extends IsIndexed> IndexResult<T> find(String classNameToReturn, Filter filter, Sorter sorter,
-    Sublist sublist, Facets facets, String localeString) throws GenericException, AuthorizationDeniedException,
-    RequestNotValidException {
+    Sublist sublist, Facets facets, String localeString)
+    throws GenericException, AuthorizationDeniedException, RequestNotValidException {
     RodaUser user = null;
     Class<T> classToReturn = parseClass(classNameToReturn);
     return ViewerFactory.getSolrManager().find(user, classToReturn, filter, sorter, sublist, facets);
   }
 
   @Override
-  public <T extends IsIndexed> Long count(String classNameToReturn, Filter filter) throws AuthorizationDeniedException,
-    GenericException, RequestNotValidException {
+  public <T extends IsIndexed> Long count(String classNameToReturn, Filter filter)
+    throws AuthorizationDeniedException, GenericException, RequestNotValidException {
     RodaUser user = null;
     Class<T> classToReturn = parseClass(classNameToReturn);
     return ViewerFactory.getSolrManager().count(user, classToReturn, filter);
   }
 
   @Override
-  public <T extends IsIndexed> T retrieve(String classNameToReturn, String id) throws AuthorizationDeniedException,
-    GenericException, NotFoundException {
+  public <T extends IsIndexed> T retrieve(String classNameToReturn, String id)
+    throws AuthorizationDeniedException, GenericException, NotFoundException {
     RodaUser user = null;
     Class<T> classToReturn = parseClass(classNameToReturn);
     return ViewerFactory.getSolrManager().retrieve(user, classToReturn, id);
@@ -72,8 +71,8 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
 
   @Override
   public <T extends IsIndexed> IndexResult<T> findRows(String classNameToReturn, String tableUUID, Filter filter,
-    Sorter sorter, Sublist sublist, Facets facets, String localeString) throws GenericException,
-    AuthorizationDeniedException, RequestNotValidException {
+    Sorter sorter, Sublist sublist, Facets facets, String localeString)
+    throws GenericException, AuthorizationDeniedException, RequestNotValidException {
     RodaUser user = null;
     Class<T> classToReturn = parseClass(classNameToReturn);
     return ViewerFactory.getSolrManager().findRows(user, classToReturn, tableUUID, filter, sorter, sublist, facets);
@@ -103,8 +102,8 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
 
   @Override
   public String saveSearch(String name, String description, String tableUUID, String tableName, String databaseUUID,
-    SearchInfo searchInfo) throws AuthorizationDeniedException, GenericException, RequestNotValidException,
-    NotFoundException {
+    SearchInfo searchInfo)
+    throws AuthorizationDeniedException, GenericException, RequestNotValidException, NotFoundException {
     RodaUser user = null;
     String searchInfoJson = JsonUtils.getJsonFromObject(searchInfo);
 
@@ -123,16 +122,16 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
   }
 
   @Override
-  public void editSearch(String savedSearchUUID, String name, String description) throws AuthorizationDeniedException,
-    GenericException, RequestNotValidException, NotFoundException {
+  public void editSearch(String savedSearchUUID, String name, String description)
+    throws AuthorizationDeniedException, GenericException, RequestNotValidException, NotFoundException {
     RodaUser user = null;
 
     ViewerFactory.getSolrManager().editSavedSearch(user, savedSearchUUID, name, description);
   }
 
   @Override
-  public void deleteSearch(String savedSearchUUID) throws AuthorizationDeniedException, GenericException,
-    RequestNotValidException, NotFoundException {
+  public void deleteSearch(String savedSearchUUID)
+    throws AuthorizationDeniedException, GenericException, RequestNotValidException, NotFoundException {
     RodaUser user = null;
 
     ViewerFactory.getSolrManager().deleteSavedSearch(user, savedSearchUUID);

@@ -16,6 +16,9 @@ public class ViewerConstants {
   private static final String ENV_DBVTK_WORKSPACE = "DBVTK_WORKSPACE";
   private static final String PROP_DBVTK_WORKSPACE = "dbvtk.workspace";
 
+  // Solr url used as default
+  public static final String DEFAULT_SOLR_URL = "http://127.0.0.1:8983/solr/";
+
   private static Path workspaceDirectory = null;
 
   public static Path getWorkspaceDirectory() {
@@ -41,5 +44,14 @@ public class ViewerConstants {
       workspaceForLobs = getWorkspaceDirectory().resolve("lobs");
     }
     return workspaceForLobs;
+  }
+
+  private static Path workspaceForConfig = null;
+
+  public static Path getWorkspaceForConfig() {
+    if (workspaceForConfig == null) {
+      workspaceForConfig = getWorkspaceDirectory().resolve("config");
+    }
+    return workspaceForConfig;
   }
 }

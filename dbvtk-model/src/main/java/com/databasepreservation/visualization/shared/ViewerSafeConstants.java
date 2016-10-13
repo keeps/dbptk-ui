@@ -176,6 +176,12 @@ public class ViewerSafeConstants {
   public static final String SEARCH_FIELD_TYPE_TIME = RodaConstants.SEARCH_FIELD_TYPE_DATE + "justtime";
 
   /*
+   * Installation related
+   */
+  public static final String CLASSPATH_CONFIG_FOLDER = "dbvtk-config";
+  public static final String CLASSPATH_CONFIG_FILE = "dbvtk.properties";
+
+  /*
    * Misc
    */
   public static final String ISO8601 = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
