@@ -1,7 +1,6 @@
 package com.databasepreservation.visualization.client.ViewerStructure;
 
 import java.io.Serializable;
-import java.util.Objects;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -92,15 +91,22 @@ public class ViewerColumn implements Serializable {
 
   @Override
   public String toString() {
-    return "ViewerColumn{" + "defaultValue='" + defaultValue + '\'' + ", displayName='" + displayName + '\''
-      + ", type=" + type + ", nillable=" + nillable + ", description='" + description + '\'' + ", isAutoIncrement="
+    return "ViewerColumn{" + "defaultValue='" + defaultValue + '\'' + ", displayName='" + displayName + '\'' + ", type="
+      + type + ", nillable=" + nillable + ", description='" + description + '\'' + ", isAutoIncrement="
       + isAutoIncrement + '}';
   }
 
+  /**
+   * @return zero-based index
+   */
   public int getColumnIndexInEnclosingTable() {
     return columnIndexInEnclosingTable;
   }
 
+  /**
+   * @param columnIndexInEnclosingTable
+   *          zero-based index
+   */
   public void setColumnIndexInEnclosingTable(int columnIndexInEnclosingTable) {
     this.columnIndexInEnclosingTable = columnIndexInEnclosingTable;
   }

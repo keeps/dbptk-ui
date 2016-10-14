@@ -35,7 +35,6 @@ public class ViewerFactory {
 
   private static boolean instantiated = false;
   private static SolrManager solr;
-  private static Path workspace;
 
   public static void instantiate() {
     viewerConfiguration = new CompositeConfiguration();
@@ -45,15 +44,58 @@ public class ViewerFactory {
       LOGGER.error("Error while loading DBVTK properties", e);
     }
 
-    String solrUrl = getPropertyAsString("solr", "url");
-    if (solrUrl == null) {
-      solrUrl = ViewerConstants.DEFAULT_SOLR_URL;
+    String solrUrl = ViewerConstants.DEFAULT_SOLR_URL;
+    if (StringUtils.isNotBlank(Config.getSolrEndpoint()) && StringUtils.isNotBlank(Config.getSolrHostname())
+      && StringUtils.isNotBlank(Config.getZookeeperHostname()) && Config.getSolrPort() > 0
+      && Config.getZookeeperPort() > 0) {
+
+      solrUrl = "http://" + Config.getSolrHostname() + ":" + Config.getSolrPort() + "/" + Config.getSolrEndpoint()
+        + "/";
+    } else {
+      LOGGER.debug("There was a problem reading solrURL and default was used. Bad value: http://{}:{}/{}/}",
+        Config.getSolrHostname(), Config.getSolrPort(), Config.getSolrEndpoint());
     }
     instantiateSolrManager(solrUrl);
   }
 
   public static void shutdown() throws IOException {
 
+  }
+
+  public static class Config {
+    private static String solrHostname;
+    private static Integer solrPort;
+    private static String solrEndpoint;
+
+    private static String zookeeperHostname;
+    private static Integer zookeeperPort;
+
+    private static String dbvtkLob;
+
+    public static String getSolrHostname() {
+      return solrHostname != null ? solrHostname : (solrHostname = getPropertyAsString("solr", "hostname"));
+    }
+
+    public static Integer getSolrPort() {
+      return solrPort != null ? solrPort : (solrPort = getPropertyAsInt("solr", "port"));
+    }
+
+    public static String getSolrEndpoint() {
+      return solrEndpoint != null ? solrEndpoint : (solrEndpoint = getPropertyAsString("solr", "endpoint"));
+    }
+
+    public static String getZookeeperHostname() {
+      return zookeeperHostname != null ? zookeeperHostname
+        : (zookeeperHostname = getPropertyAsString("zookeeper", "hostname"));
+    }
+
+    public static Integer getZookeeperPort() {
+      return zookeeperPort != null ? zookeeperPort : (zookeeperPort = getPropertyAsInt("zookeeper", "port"));
+    }
+
+    public static String getDbvtkLob() {
+      return dbvtkLob != null ? dbvtkLob : (dbvtkLob = getPropertyAsString("dbvtk", "lob"));
+    }
   }
 
   private static void instantiateSolrManager(String solrUrl) {
@@ -119,15 +161,19 @@ public class ViewerFactory {
     return sb.toString();
   }
 
-  public static String getPropertyAsString(String... keyParts) {
+  private static String getPropertyAsString(String... keyParts) {
     return viewerConfiguration.getString(getPropertyKey(keyParts));
   }
 
-  public static int getPropertyAsInt(String... keyParts) {
-    return viewerConfiguration.getInt(getPropertyKey(keyParts), 0);
+  private static int getPropertyAsInt(int defaultValue, String... keyParts) {
+    return viewerConfiguration.getInt(getPropertyKey(keyParts), defaultValue);
   }
 
-  public static List<String> getPropertyAsList(String... keyParts) {
+  private static int getPropertyAsInt(String... keyParts) {
+    return getPropertyAsInt(0, keyParts);
+  }
+
+  private static List<String> getPropertyAsList(String... keyParts) {
     String[] array = viewerConfiguration.getStringArray(getPropertyKey(keyParts));
     List<String> list = Lists.newArrayList(array);
 

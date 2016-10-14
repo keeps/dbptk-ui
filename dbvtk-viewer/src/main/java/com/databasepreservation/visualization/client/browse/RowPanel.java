@@ -1,27 +1,11 @@
 package com.databasepreservation.visualization.client.browse;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
 
 import org.roda.core.data.v2.index.IsIndexed;
 
 import com.databasepreservation.visualization.client.BrowserService;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerCell;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerColumn;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerForeignKey;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerMetadata;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerReference;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerRow;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerSchema;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerType;
+import com.databasepreservation.visualization.client.ViewerStructure.*;
 import com.databasepreservation.visualization.client.common.DefaultAsyncCallback;
 import com.databasepreservation.visualization.client.common.utils.CommonClientUtils;
 import com.databasepreservation.visualization.client.main.BreadcrumbPanel;
@@ -81,8 +65,8 @@ public class RowPanel extends RightPanel {
 
     initWidget(uiBinder.createAndBindUi(this));
 
-    rowID.setHTML(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.RECORD) + " "
-      + SafeHtmlUtils.htmlEscape(rowUUID)));
+    rowID.setHTML(SafeHtmlUtils.fromSafeConstant(
+      FontAwesomeIconManager.getTag(FontAwesomeIconManager.RECORD) + " " + SafeHtmlUtils.htmlEscape(rowUUID)));
     recordHeader.setWidget(CommonClientUtils.getSchemaAndTableHeader(database.getUUID(), table, "h1"));
 
     init();
@@ -95,8 +79,8 @@ public class RowPanel extends RightPanel {
 
     initWidget(uiBinder.createAndBindUi(this));
 
-    rowID.setHTML(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.RECORD) + " "
-      + SafeHtmlUtils.htmlEscape(rowUUID)));
+    rowID.setHTML(SafeHtmlUtils.fromSafeConstant(
+      FontAwesomeIconManager.getTag(FontAwesomeIconManager.RECORD) + " " + SafeHtmlUtils.htmlEscape(rowUUID)));
     recordHeader.setWidget(CommonClientUtils.getSchemaAndTableHeader(database.getUUID(), table, "h1"));
 
     BrowserService.Util.getInstance().retrieveRows(ViewerRow.class.getName(), tableUUID, rowUUID,
@@ -111,10 +95,8 @@ public class RowPanel extends RightPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    BreadcrumbManager.updateBreadcrumb(
-      breadcrumb,
-      BreadcrumbManager.forRecord(database.getMetadata().getName(), database.getUUID(), table.getSchemaName(),
-        table.getSchemaUUID(), table.getName(), table.getUUID(), rowUUID));
+    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forRecord(database.getMetadata().getName(),
+      database.getUUID(), table.getSchemaName(), table.getSchemaUUID(), table.getName(), table.getUUID(), rowUUID));
   }
 
   private void init() {
@@ -179,9 +161,9 @@ public class RowPanel extends RightPanel {
     }
 
     for (ViewerColumn column : table.getColumns()) {
-      b.append(getCellHTML(column, colIndexRelatedTo.get(column.getSolrName()),
-        colIndexReferencedBy.get(column.getSolrName()),
-        table.getPrimaryKey().getColumnIndexesInViewerTable().contains(column.getColumnIndexInEnclosingTable())));
+      b.append(
+        getCellHTML(column, colIndexRelatedTo.get(column.getSolrName()), colIndexReferencedBy.get(column.getSolrName()),
+          table.getPrimaryKey().getColumnIndexesInViewerTable().contains(column.getColumnIndexInEnclosingTable())));
     }
 
     content.setHTML(b.toSafeHtml());
@@ -204,8 +186,8 @@ public class RowPanel extends RightPanel {
           b.appendHtmlConstant(", ");
         }
 
-        Hyperlink hyperlink = new Hyperlink(ref.getSchemaAndTableName(), HistoryManager.linkToForeignKey(
-          database.getUUID(), ref.refTable.getUUID(), columnNamesAndValues));
+        Hyperlink hyperlink = new Hyperlink(ref.getSchemaAndTableName(),
+          HistoryManager.linkToForeignKey(database.getUUID(), ref.refTable.getUUID(), columnNamesAndValues));
         hyperlink.addStyleName("related-records-link");
         b.appendHtmlConstant(hyperlink.toString());
         firstRef = false;
@@ -247,12 +229,14 @@ public class RowPanel extends RightPanel {
       b.appendEscaped("NULL");
     } else {
       if (column.getType().getDbType().equals(ViewerType.dbTypes.BINARY)) {
-        StringBuilder urlBuilder = new StringBuilder();
+
         String base = com.google.gwt.core.client.GWT.getHostPageBaseURL();
         String servlet = ViewerSafeConstants.API_SERVLET;
         String resource = ViewerSafeConstants.API_V1_LOBS_RESOURCE;
         String databaseUUID = database.getUUID();
         String tableUUID = table.getUUID();
+
+        StringBuilder urlBuilder = new StringBuilder();
         urlBuilder.append(base).append(servlet).append(resource).append("/").append(databaseUUID).append("/")
           .append(tableUUID).append("/").append(row.getUUID()).append("/")
           .append(column.getColumnIndexInEnclosingTable());

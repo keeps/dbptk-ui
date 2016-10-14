@@ -18,62 +18,13 @@ import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.databasepreservation.model.data.BinaryCell;
-import com.databasepreservation.model.data.Cell;
-import com.databasepreservation.model.data.ComposedCell;
-import com.databasepreservation.model.data.NullCell;
-import com.databasepreservation.model.data.Row;
-import com.databasepreservation.model.data.SimpleCell;
+import com.databasepreservation.model.data.*;
 import com.databasepreservation.model.exception.ModuleException;
-import com.databasepreservation.model.structure.CheckConstraint;
-import com.databasepreservation.model.structure.ColumnStructure;
-import com.databasepreservation.model.structure.DatabaseStructure;
-import com.databasepreservation.model.structure.ForeignKey;
-import com.databasepreservation.model.structure.Parameter;
-import com.databasepreservation.model.structure.PrimaryKey;
-import com.databasepreservation.model.structure.PrivilegeStructure;
-import com.databasepreservation.model.structure.Reference;
-import com.databasepreservation.model.structure.RoleStructure;
-import com.databasepreservation.model.structure.RoutineStructure;
-import com.databasepreservation.model.structure.SchemaStructure;
-import com.databasepreservation.model.structure.TableStructure;
-import com.databasepreservation.model.structure.Trigger;
-import com.databasepreservation.model.structure.UserStructure;
-import com.databasepreservation.model.structure.ViewStructure;
-import com.databasepreservation.model.structure.type.ComposedTypeArray;
-import com.databasepreservation.model.structure.type.ComposedTypeStructure;
-import com.databasepreservation.model.structure.type.SimpleTypeBinary;
-import com.databasepreservation.model.structure.type.SimpleTypeBoolean;
-import com.databasepreservation.model.structure.type.SimpleTypeDateTime;
-import com.databasepreservation.model.structure.type.SimpleTypeEnumeration;
-import com.databasepreservation.model.structure.type.SimpleTypeInterval;
-import com.databasepreservation.model.structure.type.SimpleTypeNumericApproximate;
-import com.databasepreservation.model.structure.type.SimpleTypeNumericExact;
-import com.databasepreservation.model.structure.type.SimpleTypeString;
-import com.databasepreservation.model.structure.type.Type;
+import com.databasepreservation.model.structure.*;
+import com.databasepreservation.model.structure.type.*;
 import com.databasepreservation.utils.JodaUtils;
 import com.databasepreservation.utils.XMLUtils;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerCell;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerCheckConstraint;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerColumn;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabaseFromToolkit;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerForeignKey;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerMetadata;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerPrimaryKey;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerPrivilegeStructure;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerReference;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerRoleStructure;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerRoutine;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerRoutineParameter;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerRow;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerSchema;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerTrigger;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerType;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerTypeArray;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerTypeStructure;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerUserStructure;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerView;
+import com.databasepreservation.visualization.client.ViewerStructure.*;
 import com.databasepreservation.visualization.exceptions.ViewerException;
 import com.databasepreservation.visualization.shared.ViewerSafeConstants;
 import com.databasepreservation.visualization.utils.LobPathManager;
@@ -367,8 +318,8 @@ public class ToolkitStructure2ViewerStructure {
     result.setUpdateAction(foreignKey.getUpdateAction());
     result.setMatchType(foreignKey.getMatchType());
 
-    result.setReferencedTableUUID(referenceHolder.getTableUUID(foreignKey.getReferencedSchema(),
-      foreignKey.getReferencedTable()));
+    result.setReferencedTableUUID(
+      referenceHolder.getTableUUID(foreignKey.getReferencedSchema(), foreignKey.getReferencedTable()));
 
     List<ViewerReference> resultReferences = new ArrayList<>();
     for (Reference reference : foreignKey.getReferences()) {
@@ -469,7 +420,7 @@ public class ToolkitStructure2ViewerStructure {
     } else if (type instanceof SimpleTypeBoolean) {
       suffix = ViewerSafeConstants.SOLR_DYN_BOOLEAN;
     } else if (type instanceof SimpleTypeDateTime) {
-      switch(viewerType.getDbType()){
+      switch (viewerType.getDbType()) {
         case DATETIME_JUST_DATE:
           suffix = ViewerSafeConstants.SOLR_DYN_TDATE;
           break;
@@ -560,6 +511,7 @@ public class ToolkitStructure2ViewerStructure {
     ViewerRow result = new ViewerRow();
     String rowUUID = SolrUtils.randomUUID();
     result.setUUID(rowUUID);
+    result.setOriginalRowIndex(rowIndex);
     result.setCells(getCells(table, row, rowIndex, rowUUID));
     return result;
   }

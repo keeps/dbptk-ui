@@ -11,6 +11,7 @@ import org.roda.core.data.v2.index.IsIndexed;
  */
 public class ViewerRow implements Serializable, IsIndexed {
   private String UUID;
+  private long originalRowIndex;
   private Map<String, ViewerCell> cells;
 
   public ViewerRow() {
@@ -39,5 +40,20 @@ public class ViewerRow implements Serializable, IsIndexed {
    */
   public void setCells(Map<String, ViewerCell> cells) {
     this.cells = cells;
+  }
+
+  /**
+   * @return the row index, the first row has index 1
+   */
+  public long getOriginalRowIndex() {
+    return originalRowIndex;
+  }
+
+  /**
+   * @param originalRowIndex
+   *          the row index, the first row should have index 1
+   */
+  public void setOriginalRowIndex(long originalRowIndex) {
+    this.originalRowIndex = originalRowIndex;
   }
 }
