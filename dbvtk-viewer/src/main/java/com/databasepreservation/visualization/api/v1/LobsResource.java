@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import com.databasepreservation.visualization.api.utils.ApiUtils;
 import com.databasepreservation.visualization.api.utils.DownloadUtils;
 import com.databasepreservation.visualization.api.utils.StreamResponse;
+import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerRow;
 import com.databasepreservation.visualization.server.ViewerFactory;
 import com.databasepreservation.visualization.shared.ViewerSafeConstants;
@@ -58,17 +59,23 @@ public class LobsResource {
     @PathParam(ViewerSafeConstants.API_PATH_PARAM_COLUMN_ID) Integer columnID) throws RODAException {
 
     SolrManager solrManager = ViewerFactory.getSolrManager();
-    // ViewerDatabase database = solrManager.retrieve(null,
-    // ViewerDatabase.class, databaseUUID);
     ViewerRow row = solrManager.retrieveRows(null, ViewerRow.class, tableUUID, rowUUID);
 
     String format = ViewerFactory.Config.getDbvtkLob();
     if (StringUtils.isNotBlank(format)) {
-      String uri = format.replace("{DATABASE}", databaseUUID).replace("{TABLE}", tableUUID)
-        .replace("{ROW}", row.getUUID()).replace("{ROW-INDEX-0}", String.valueOf(row.getOriginalRowIndex() - 1))
+      ViewerDatabase database = solrManager.retrieve(null, ViewerDatabase.class, databaseUUID);
+
+      String uri = format
+
+        .replace("{DATABASE}", databaseUUID).replace("{TABLE}", tableUUID).replace("{ROW}", row.getUUID())
+
+        .replace("{ROW-INDEX-0}", String.valueOf(row.getOriginalRowIndex() - 1))
         .replace("{ROW-INDEX-1}", String.valueOf(row.getOriginalRowIndex()))
-        .replace("{COLUMN-INDEX-0}", String.valueOf(columnID))
-        .replace("{COLUMN-INDEX-1}", String.valueOf(columnID + 1));
+
+        .replace("{COLUMN-INDEX-0}", String.valueOf(columnID)).replace("{COLUMN-INDEX-1}", String.valueOf(columnID + 1))
+
+        .replace("{TABLE-INDEX-0}", String.valueOf(database.getMetadata().getTable(tableUUID).getTableIndex() - 1))
+        .replace("{TABLE-INDEX-1}", String.valueOf(database.getMetadata().getTable(tableUUID).getTableIndex()));
       return Response.temporaryRedirect(URI.create(uri)).build();
     } else {
       if (row != null) {

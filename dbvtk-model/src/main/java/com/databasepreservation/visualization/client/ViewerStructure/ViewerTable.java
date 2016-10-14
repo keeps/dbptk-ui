@@ -2,9 +2,7 @@ package com.databasepreservation.visualization.client.ViewerStructure;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -34,6 +32,8 @@ public class ViewerTable implements Serializable {
   private String schemaUUID;
 
   private String schemaName;
+
+  private int tableIndex;
 
   // private HashMap<String, String> udtAlias;
 
@@ -127,5 +127,20 @@ public class ViewerTable implements Serializable {
 
   public void setCheckConstraints(List<ViewerCheckConstraint> checkConstraints) {
     this.checkConstraints = checkConstraints;
+  }
+
+  /**
+   * @return the table index, the first table has index 1
+   */
+  public int getTableIndex() {
+    return tableIndex;
+  }
+
+  /**
+   * @param tableIndex
+   *          the table index, the first table should have index 1
+   */
+  public void setTableIndex(int tableIndex) {
+    this.tableIndex = tableIndex;
   }
 }

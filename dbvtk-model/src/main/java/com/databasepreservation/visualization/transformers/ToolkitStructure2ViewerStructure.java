@@ -268,6 +268,7 @@ public class ToolkitStructure2ViewerStructure {
     ViewerTable result = new ViewerTable();
     result.setUuid(references.getTableUUID(table.getId()));
     result.setName(table.getName());
+    result.setTableIndex(table.getIndex());
     result.setDescription(table.getDescription());
     result.setCountRows(table.getRows());
     result.setSchemaName(table.getSchema());
