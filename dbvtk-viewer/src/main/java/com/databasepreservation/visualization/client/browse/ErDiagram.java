@@ -174,19 +174,9 @@ public class ErDiagram extends Composite {
             }
             tooltip.append("<br/>");
           }
-          tooltip.append("This table has ");
-          if (visNode.numRelationsTotal > 0) {
-            tooltip.append(visNode.numRelationsTotal).append(" relations (").append(visNode.numRelationsIn)
-              .append(" in, ").append(visNode.numRelationsOut).append(" out)");
-          } else {
-            tooltip.append("no relations to other tables");
-          }
-          tooltip.append("<br/>This table has ").append(visNode.numColumns).append(" columns");
-          if (visNode.numRows > 0) {
-            tooltip.append(" and ").append(visNode.numRows).append(" rows");
-          } else {
-            tooltip.append(" but no rows");
-          }
+          tooltip.append(visNode.numRows).append(" rows, ").append(visNode.numColumns).append(" columns, ")
+            .append(visNode.numRelationsTotal).append(" relations.");
+
           visNode.setTitle(tooltip.toString());
 
           visNodeList.add(visNode);
@@ -247,25 +237,6 @@ public class ErDiagram extends Composite {
 
     double range2 = maxNorm - minNorm;
     return (zeroToOne * range2) + minNorm;
-  }
-
-  private int getVisNodeSize(ViewerDatabase database, ViewerTable table) {
-    int inboundForeignKeys = 0;
-    for (ViewerSchema viewerSchema : database.getMetadata().getSchemas()) {
-      for (ViewerTable viewerTable : viewerSchema.getTables()) {
-        for (ViewerForeignKey viewerForeignKey : viewerTable.getForeignKeys()) {
-          if (viewerForeignKey.getReferencedTableUUID().equals(table.getUUID())) {
-            inboundForeignKeys++;
-          }
-        }
-      }
-    }
-
-    // assign a weight to the table node
-    Double weight = Math.log(table.getCountRows() * table.getColumns().size()) + 1.5 * table.getForeignKeys().size()
-      + inboundForeignKeys;
-
-    return weight.intValue();
   }
 
   /**
