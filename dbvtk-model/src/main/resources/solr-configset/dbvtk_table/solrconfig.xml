@@ -636,6 +636,8 @@
       -->
     <maxWarmingSearchers>2</maxWarmingSearchers>
 
+    <!-- log slow queries as WARN -->
+    <slowQueryThresholdMillis>5000</slowQueryThresholdMillis>
   </query>
 
 
