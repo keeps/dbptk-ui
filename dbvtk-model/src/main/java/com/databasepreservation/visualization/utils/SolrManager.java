@@ -9,8 +9,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Predicate;
 
+import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.request.CollectionAdminRequest;
@@ -76,10 +76,10 @@ public class SolrManager {
    */
   public void addDatabase(ViewerDatabase database) throws ViewerException {
     // creates databases collection, skipping if it is present
-    CollectionAdminRequest.Create request = new CollectionAdminRequest.Create();
-    request.setCollectionName(ViewerSafeConstants.SOLR_INDEX_DATABASE_COLLECTION_NAME);
-    request.setConfigName(ViewerSafeConstants.SOLR_CONFIGSET_DATABASE);
-    request.setNumShards(1);
+
+    SolrRequest request = CollectionAdminRequest.createCollection(
+      ViewerSafeConstants.SOLR_INDEX_DATABASE_COLLECTION_NAME, ViewerSafeConstants.SOLR_CONFIGSET_DATABASE, 1, 1);
+
     try {
       NamedList<Object> response = client.request(request);
     } catch (SolrServerException | IOException e) {
@@ -379,9 +379,9 @@ public class SolrManager {
 
     if (insertedAllDocuments) {
       // remove empty or null lists
-      for (Iterator<String> iter = docsByCollection.keySet().iterator(); iter.hasNext(); ) {
+      for (Iterator<String> iter = docsByCollection.keySet().iterator(); iter.hasNext();) {
         String key = iter.next();
-        if(docsByCollection.get(key) == null || docsByCollection.get(key).isEmpty()){
+        if (docsByCollection.get(key) == null || docsByCollection.get(key).isEmpty()) {
           iter.remove();
         }
       }
