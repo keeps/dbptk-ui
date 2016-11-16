@@ -13,11 +13,13 @@ import com.databasepreservation.visualization.client.ViewerStructure.ViewerRouti
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerSchema;
 import com.databasepreservation.visualization.client.common.lists.BasicTablePanel;
 import com.databasepreservation.visualization.client.common.utils.CommonClientUtils;
+import com.databasepreservation.visualization.client.common.utils.JavascriptUtils;
 import com.databasepreservation.visualization.client.main.BreadcrumbPanel;
 import com.databasepreservation.visualization.shared.client.Tools.BreadcrumbManager;
 import com.databasepreservation.visualization.shared.client.Tools.ViewerStringUtils;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -99,6 +101,8 @@ public class SchemaRoutinesPanel extends RightPanel {
         }
       }
     }
+
+    JavascriptUtils.runHighlighter(contentItems.getElement());
   }
 
   private HTMLPanel getRoutineDescription(ViewerRoutine viewerRoutine) {
@@ -114,7 +118,10 @@ public class SchemaRoutinesPanel extends RightPanel {
       descriptionBuilder.append(CommonClientUtils.getFieldHTML("Source", viewerRoutine.getSource()));
     }
     if (ViewerStringUtils.isNotBlank(viewerRoutine.getBody())) {
-      descriptionBuilder.append(CommonClientUtils.getFieldHTML("Body", viewerRoutine.getBody()));
+      descriptionBuilder.append(CommonClientUtils.getFieldHTML(
+        "Body",
+        SafeHtmlUtils.fromSafeConstant("<pre><code>" + SafeHtmlUtils.htmlEscape(viewerRoutine.getBody())
+          + "</code></pre>")));
     }
     if (ViewerStringUtils.isNotBlank(viewerRoutine.getCharacteristic())) {
       descriptionBuilder.append(CommonClientUtils.getFieldHTML("Characteristic", viewerRoutine.getCharacteristic()));

@@ -1,0 +1,11 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:m='urn:import:com.databasepreservation.visualization.client.main'
+             xmlns:b='urn:import:com.databasepreservation.visualization.client.browse'
+             xmlns:s='urn:import:com.databasepreservation.visualization.client.common.search'
+             xmlns:sb='urn:import:com.databasepreservation.visualization.client.common.sidebar'
+             xmlns:lists="urn:import:com.databasepreservation.visualization.client.common.lists">
+
+<g:FlowPanel ui:field="contentItems">
+</g:FlowPanel>
+</ui:UiBinder>

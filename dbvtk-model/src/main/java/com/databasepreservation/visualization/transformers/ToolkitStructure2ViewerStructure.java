@@ -103,8 +103,16 @@ public class ToolkitStructure2ViewerStructure {
    * @return an equivalent database that can be used by Database Viewer
    */
   public static ViewerDatabaseFromToolkit getDatabase(DatabaseStructure structure) throws ViewerException {
+    return getDatabase(structure, null);
+  }
+
+  public static ViewerDatabaseFromToolkit getDatabase(DatabaseStructure structure, String databaseUUID) throws ViewerException {
     ViewerDatabaseFromToolkit result = new ViewerDatabaseFromToolkit();
-    result.setUuid(SolrUtils.randomUUID());
+    if(databaseUUID == null) {
+      result.setUuid(SolrUtils.randomUUID());
+    }else{
+      result.setUuid(databaseUUID);
+    }
     result.setMetadata(getMetadata(result, structure));
     return result;
   }

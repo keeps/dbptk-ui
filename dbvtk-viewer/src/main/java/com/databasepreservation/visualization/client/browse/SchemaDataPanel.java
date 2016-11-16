@@ -75,6 +75,8 @@ public class SchemaDataPanel extends RightPanel {
   private void init() {
     CommonClientUtils.addSchemaInfoToFlowPanel(contentItems, schema);
 
+    contentItems.add(ErDiagram.getInstance(database, schema));
+
     final BasicTablePanel<ViewerTable> table = getBasicTablePanelForTableInfo(database.getMetadata(), schema);
     table.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
       @Override
