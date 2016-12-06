@@ -4,7 +4,6 @@
  */
 package com.databasepreservation.visualization.shared.server;
 
-import org.apache.log4j.LogManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
