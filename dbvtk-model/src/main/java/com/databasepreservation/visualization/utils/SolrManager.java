@@ -3,6 +3,7 @@ package com.databasepreservation.visualization.utils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -19,8 +20,10 @@ import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.util.NamedList;
 import org.roda.core.data.adapter.facet.Facets;
 import org.roda.core.data.adapter.filter.Filter;
+import org.roda.core.data.adapter.filter.SimpleFilterParameter;
 import org.roda.core.data.adapter.sort.Sorter;
 import org.roda.core.data.adapter.sublist.Sublist;
+import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RequestNotValidException;
 import org.roda.core.data.v2.index.IndexResult;
@@ -32,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import com.databasepreservation.visualization.client.SavedSearch;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerRow;
+import com.databasepreservation.visualization.client.ViewerStructure.ViewerSchema;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable;
 import com.databasepreservation.visualization.exceptions.ViewerException;
 import com.databasepreservation.visualization.shared.ViewerSafeConstants;
@@ -112,6 +116,42 @@ public class SolrManager {
     // tablesUUIDandName.put(viewerTable.getUUID(), viewerTable.getName());
     // }
     // }
+  }
+
+  public void removeDatabase(ViewerDatabase database) throws ViewerException {
+    // delete related table collections
+    for (ViewerSchema viewerSchema : database.getMetadata().getSchemas()) {
+      for (ViewerTable viewerTable : viewerSchema.getTables()) {
+        String collectionName = SolrUtils.getTableCollectionName(viewerTable.getUUID());
+        SolrRequest request = CollectionAdminRequest.deleteCollection(collectionName);
+        try {
+          client.request(request);
+          LOGGER.debug("Deleted collection " + collectionName);
+        } catch (SolrServerException | IOException | HttpSolrClient.RemoteSolrException e) {
+          throw new ViewerException("Error deleting collection " + collectionName, e);
+        }
+      }
+    }
+
+    // delete related saved searches
+    Filter savedSearchFilter = new Filter(new SimpleFilterParameter(ViewerSafeConstants.SOLR_SEARCHES_DATABASE_UUID,
+      database.getUUID()));
+    try {
+      SolrUtils.delete(client, SavedSearch.class, savedSearchFilter);
+      commit(ViewerSafeConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME, false);
+      LOGGER.debug("Deleted saved searches for database " + database.getUUID());
+    } catch (GenericException | RequestNotValidException e) {
+      throw new ViewerException("Error deleting saved searches for database " + database.getUUID(), e);
+    }
+
+    // delete the database item
+    try {
+      SolrUtils.delete(client, ViewerDatabase.class, Arrays.asList(database.getUUID()));
+      commit(ViewerSafeConstants.SOLR_INDEX_DATABASE_COLLECTION_NAME, false);
+      LOGGER.debug("Deleted database " + database.getUUID());
+    } catch (GenericException e) {
+      throw new ViewerException("Error deleting the database " + database.getUUID(), e);
+    }
   }
 
   /**

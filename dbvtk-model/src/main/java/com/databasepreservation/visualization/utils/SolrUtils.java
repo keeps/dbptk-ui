@@ -59,6 +59,7 @@ import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RequestNotValidException;
 import org.roda.core.data.v2.index.FacetFieldResult;
 import org.roda.core.data.v2.index.IndexResult;
+import org.roda.core.data.v2.index.IsIndexed;
 import org.roda.core.data.v2.ip.AIP;
 import org.roda.core.data.v2.ip.AIPState;
 import org.roda.core.data.v2.ip.IndexedAIP;
@@ -279,9 +280,9 @@ public class SolrUtils {
     } catch (SolrServerException | IOException | org.apache.solr.client.solrj.impl.HttpSolrClient.RemoteSolrException e) {
       String message = e.getMessage();
       String bodytag = "<body>";
-      if(message != null && message.contains(bodytag)){
+      if (message != null && message.contains(bodytag)) {
         message = message.substring(message.indexOf(bodytag) + bodytag.length(), message.indexOf("</body>"));
-        message = message.replaceAll("\\<[^>]*?>","");
+        message = message.replaceAll("\\<[^>]*?>", "");
       }
       throw new GenericException("Could not query index, message: " + message, e);
     }
@@ -823,5 +824,23 @@ public class SolrUtils {
     }
     fieldModifier.put("set", value);
     return fieldModifier;
+  }
+
+  public static <T extends IsIndexed> void delete(SolrClient index, Class<T> classToDelete, Filter filter)
+    throws GenericException, RequestNotValidException {
+    try {
+      index.deleteByQuery(getIndexName(classToDelete), parseFilter(filter));
+    } catch (SolrServerException | IOException e) {
+      throw new GenericException("Could not delete items", e);
+    }
+  }
+
+  public static <T extends IsIndexed> void delete(SolrClient index, Class<T> classToDelete, List<String> ids)
+    throws GenericException {
+    try {
+      index.deleteById(getIndexName(classToDelete), ids);
+    } catch (SolrServerException | IOException e) {
+      throw new GenericException("Could not delete items", e);
+    }
   }
 }

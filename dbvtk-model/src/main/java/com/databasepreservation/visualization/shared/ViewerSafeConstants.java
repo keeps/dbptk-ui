@@ -141,6 +141,15 @@ public class ViewerSafeConstants {
   // job related params
   public static final String API_PATH_PARAM_JOB_ID = "jobId";
   public static final String API_PATH_PARAM_JOB_JUST_FAILED = "jobJustFailed";
+  // api method allowable values
+  public static final String API_LIST_MEDIA_TYPES = "json, xml";
+  public static final String API_GET_MEDIA_TYPES = "json, xml";
+  public static final String API_GET_LIST_MEDIA_TYPES = "json, xml, zip";
+  public static final String API_GET_FILE_MEDIA_TYPES = "json, xml, bin";
+  public static final String API_POST_PUT_MEDIA_TYPES = "json, xml";
+  public static final String API_DELETE_MEDIA_TYPES = "json, xml";
+  public static final String API_GET_DESCRIPTIVE_METADATA_MEDIA_TYPES = "json, xml, html, bin";
+  public static final String API_DESCRIPTIVE_METADATA_LANGUAGES = "pt_PT, en_US";
 
   /*
    * API related (for DBVTK)
@@ -160,6 +169,8 @@ public class ViewerSafeConstants {
 
   public static final String API_PATH_PARAM_SOLR_COLLECTION = "collection";
   public static final String API_PATH_PARAM_SOLR_QUERY = "query";
+
+  public static final String API_V1_MANAGE_RESOURCE = "/v1/manage";
 
   /*
    * Search field types from RODA, plus a few new ones
