@@ -21,7 +21,7 @@
                     <g:TextArea ui:field="textAreaDescription" addStyleNames="form-textbox" />
 
                     <g:Button addStyleNames="btn btn-play btn-margin-right" ui:field="buttonApply">
-                        <ui:msg>Apply</ui:msg>
+                        <ui:msg>Save</ui:msg>
                     </g:Button>
 
                     <g:Button addStyleNames="btn btn-times-circle" ui:field="buttonCancel">
