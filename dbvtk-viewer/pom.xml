@@ -7,12 +7,12 @@
     <modelVersion>4.0.0</modelVersion>
     <name>dbvtk-viewer</name>
     <artifactId>dbvtk-viewer</artifactId>
-    <version>0.2.1</version>
+    <version>0.2.2</version>
     <packaging>war</packaging>
     <parent>
         <groupId>com.databasepreservation.visualization</groupId>
         <artifactId>dbvtk</artifactId>
-        <version>0.2.1</version>
+        <version>0.2.2</version>
         <relativePath>..</relativePath>
     </parent>
 
@@ -138,7 +138,7 @@
         <dependency>
             <groupId>com.databasepreservation.visualization</groupId>
             <artifactId>dbvtk-model</artifactId>
-            <version>0.2.1</version>
+            <version>0.2.2</version>
         </dependency>
         <dependency>
             <groupId>log4j</groupId>
