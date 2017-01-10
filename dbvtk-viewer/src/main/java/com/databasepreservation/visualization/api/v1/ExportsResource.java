@@ -14,9 +14,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang3.StringUtils;
-import org.roda.core.data.adapter.filter.Filter;
-import org.roda.core.data.adapter.sort.Sorter;
-import org.roda.core.data.adapter.sublist.Sublist;
+import org.roda.core.data.v2.index.filter.Filter;
+import org.roda.core.data.v2.index.sort.Sorter;
+import org.roda.core.data.v2.index.sublist.Sublist;
 import org.roda.core.data.exceptions.RODAException;
 import org.roda.core.data.utils.JsonUtils;
 import org.slf4j.Logger;
@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 import com.databasepreservation.visualization.api.utils.ApiUtils;
 import com.databasepreservation.visualization.api.utils.DownloadUtils;
 import com.databasepreservation.visualization.api.utils.StreamResponse;
-import com.databasepreservation.visualization.shared.ViewerFactory;
+import com.databasepreservation.visualization.server.ViewerFactory;
 import com.databasepreservation.visualization.shared.ViewerSafeConstants;
 import com.databasepreservation.visualization.utils.SolrManager;
 

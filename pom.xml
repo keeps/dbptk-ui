@@ -8,7 +8,7 @@
     <groupId>com.databasepreservation.visualization</groupId>
     <artifactId>dbvtk</artifactId>
     <packaging>pom</packaging>
-    <version>0.2.3</version>
+    <version>0.2.4</version>
     <name>Database Visualization Toolkit</name>
 
     <description>A viewer and explorer for preserved databases</description>
@@ -21,23 +21,24 @@
     </organization>
 
     <properties>
-        <version.java>1.7</version.java>
+        <version.java>1.8</version.java>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <projectLocalRepository>${project.basedir}/vendor-libs/repository</projectLocalRepository>
 
         <!-- GWT needs at least java 1.6 -->
-        <maven.compiler.source>1.7</maven.compiler.source>
-        <maven.compiler.target>1.7</maven.compiler.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
 
         <!-- Convenience properties to set versions -->
         <gwtVersion>2.7.0</gwtVersion>
-        <version.dbptk-model>2.0.0-beta6.2</version.dbptk-model>
-        <version.roda-common-data>2.0.0-alpha7.1</version.roda-common-data>
+        <version.dbptk-model>2.0.0-beta6.7</version.dbptk-model>
+        <version.roda>2.0.0-alpha20.2</version.roda>
 
 
         <version.jersey>2.23</version.jersey>
         <version.swagger>1.5.9</version.swagger>
         <version.jackson>2.7.4</version.jackson>
+        <cas.client.version>3.4.1</cas.client.version>
     </properties>
     <repositories>
         <repository>
@@ -133,12 +134,12 @@
             <dependency>
                 <groupId>com.databasepreservation.visualization</groupId>
                 <artifactId>dbvtk-model</artifactId>
-                <version>0.2.3</version>
+                <version>0.2.4</version>
             </dependency>
             <dependency>
                 <groupId>com.databasepreservation.visualization</groupId>
                 <artifactId>dbvtk-model</artifactId>
-                <version>0.2.3</version>
+                <version>0.2.4</version>
                 <classifier>sources</classifier>
             </dependency>
             <dependency>
@@ -155,16 +156,33 @@
             <dependency>
                 <groupId>org.roda-project</groupId>
                 <artifactId>roda-common-data</artifactId>
-                <version>${version.roda-common-data}</version>
+                <version>${version.roda}</version>
                 <classifier>sources</classifier>
             </dependency>
             <dependency>
                 <groupId>org.roda-project</groupId>
                 <artifactId>roda-common-data</artifactId>
-                <version>${version.roda-common-data}</version>
+                <version>${version.roda}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.roda-project</groupId>
+                <artifactId>roda-common-utils</artifactId>
+                <version>${version.roda}</version>
+                <classifier>sources</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.roda-project</groupId>
+                <artifactId>roda-common-utils</artifactId>
+                <version>${version.roda}</version>
             </dependency>
 
             <!-- viewer -->
+            <dependency>
+                <groupId>com.github.nmorel.gwtjackson</groupId>
+                <artifactId>gwt-jackson</artifactId>
+                <version>0.13.0</version>
+                <scope>provided</scope>
+            </dependency>
             <dependency>
                 <groupId>com.google.gwt</groupId>
                 <artifactId>gwt</artifactId>
@@ -181,6 +199,29 @@
                 <groupId>com.tractionsoftware</groupId>
                 <artifactId>gwt-traction</artifactId>
                 <version>1.6.0</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-httpclient</groupId>
+                <artifactId>commons-httpclient</artifactId>
+                <version>3.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jasig.cas.client</groupId>
+                <artifactId>cas-client-core</artifactId>
+                <version>${cas.client.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>javax.servlet</groupId>
+                        <artifactId>servlet-api</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.directory.server</groupId>
+                <artifactId>apacheds-all</artifactId>
+                <!-- 20160818 hsilva: versions M22 & M23 don't work properly with RODA
+                    code base -->
+                <version>2.0.0-M21</version>
             </dependency>
 
             <!-- REST API related dependencies - start -->
@@ -285,6 +326,16 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
                 <version>3.3.2</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-configuration</groupId>
+                <artifactId>commons-configuration</artifactId>
+                <version>1.10</version>
+            </dependency>
+            <dependency>
+                <groupId>org.w3c</groupId>
+                <artifactId>w3c-utils</artifactId>
+                <version>1.0.0</version>
             </dependency>
 
 

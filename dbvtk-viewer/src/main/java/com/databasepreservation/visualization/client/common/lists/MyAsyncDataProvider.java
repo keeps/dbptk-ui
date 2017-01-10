@@ -7,7 +7,7 @@ package com.databasepreservation.visualization.client.common.lists;
 import java.io.Serializable;
 import java.util.Date;
 
-import org.roda.core.data.adapter.sublist.Sublist;
+import org.roda.core.data.v2.index.sublist.Sublist;
 import org.roda.core.data.v2.index.IndexResult;
 
 import com.databasepreservation.visualization.client.common.DefaultAsyncCallback;

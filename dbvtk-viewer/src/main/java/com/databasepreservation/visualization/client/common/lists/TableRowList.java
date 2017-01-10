@@ -8,10 +8,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.roda.core.data.adapter.facet.Facets;
-import org.roda.core.data.adapter.filter.Filter;
-import org.roda.core.data.adapter.sort.Sorter;
-import org.roda.core.data.adapter.sublist.Sublist;
+import org.roda.core.data.v2.index.facet.Facets;
+import org.roda.core.data.v2.index.filter.Filter;
+import org.roda.core.data.v2.index.sort.Sorter;
+import org.roda.core.data.v2.index.sublist.Sublist;
 import org.roda.core.data.v2.common.Pair;
 import org.roda.core.data.v2.index.IndexResult;
 

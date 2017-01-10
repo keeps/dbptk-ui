@@ -37,6 +37,178 @@
         <welcome-file>index.html</welcome-file>
     </welcome-file-list>
 
+    <!-- ********************************************** -->
+    <!-- Authentication related filters/filter-mappings -->
+    <!-- ********************************************** -->
+    <filter>
+        <filter-name>InternalWebAuthFilter</filter-name>
+        <filter-class>com.databasepreservation.visualization.filter.OnOffFilter</filter-class>
+        <init-param>
+            <param-name>inner-filter-class</param-name>
+            <param-value>com.databasepreservation.visualization.filter.InternalWebAuthFilter</param-value>
+        </init-param>
+        <init-param>
+            <param-name>config-prefix</param-name>
+            <param-value>ui.filter.internal</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>InternalWebAuthFilter</filter-name>
+        <url-pattern>/login</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>InternalWebAuthFilter</filter-name>
+        <url-pattern>/logout</url-pattern>
+    </filter-mapping>
+
+    <filter>
+        <filter-name>InternalApiAuthFilter</filter-name>
+        <filter-class>com.databasepreservation.visualization.filter.OnOffFilter</filter-class>
+        <init-param>
+            <param-name>inner-filter-class</param-name>
+            <param-value>com.databasepreservation.visualization.filter.InternalApiAuthFilter</param-value>
+        </init-param>
+        <init-param>
+            <param-name>config-prefix</param-name>
+            <param-value>ui.filter.internal</param-value>
+        </init-param>
+        <init-param>
+            <description>Realm to be used</description>
+            <param-name>realm</param-name>
+            <param-value>RODA REST API</param-value>
+        </init-param>
+        <init-param>
+            <description>comma separated list of relative paths to exclude in filter logic (using regular expressions for extra power)</description>
+            <param-name>exclusions</param-name>
+            <param-value>^/swagger.json,^/v1/theme/?</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>InternalApiAuthFilter</filter-name>
+        <url-pattern>/api/*</url-pattern>
+    </filter-mapping>
+
+    <filter>
+        <filter-name>CASAuthenticationFilter</filter-name>
+        <filter-class>com.databasepreservation.visualization.filter.OnOffFilter</filter-class>
+        <init-param>
+            <param-name>inner-filter-class</param-name>
+            <param-value>org.jasig.cas.client.authentication.AuthenticationFilter</param-value>
+        </init-param>
+        <init-param>
+            <param-name>config-prefix</param-name>
+            <param-value>ui.filter.cas</param-value>
+        </init-param>
+        <init-param>
+            <param-name>casServerLoginUrl</param-name>
+            <param-value>https://localhost:8443/cas/login</param-value>
+        </init-param>
+        <init-param>
+            <param-name>serverName</param-name>
+            <param-value>http://localhost:8888</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>CASAuthenticationFilter</filter-name>
+        <url-pattern>/login</url-pattern>
+    </filter-mapping>
+
+    <filter>
+        <filter-name>CasApiAuthFilter</filter-name>
+        <filter-class>com.databasepreservation.visualization.filter.OnOffFilter</filter-class>
+        <init-param>
+            <param-name>inner-filter-class</param-name>
+            <param-value>com.databasepreservation.visualization.filter.CasApiAuthFilter</param-value>
+        </init-param>
+        <init-param>
+            <param-name>config-prefix</param-name>
+            <param-value>ui.filter.cas</param-value>
+        </init-param>
+        <init-param>
+            <param-name>casServerUrlPrefix</param-name>
+            <param-value>https://localhost:8443/cas</param-value>
+        </init-param>
+        <init-param>
+            <description>comma separated list of relative paths to exclude in filter logic (using regular expressions for extra power)</description>
+            <param-name>exclusions</param-name>
+            <param-value>^/swagger.json,^/v1/theme/?,^/v1/auth/ticket?</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>CasApiAuthFilter</filter-name>
+        <url-pattern>/api/v1/*</url-pattern>
+    </filter-mapping>
+
+    <filter>
+        <filter-name>CASValidationFilter</filter-name>
+        <filter-class>com.databasepreservation.visualization.filter.OnOffFilter</filter-class>
+        <init-param>
+            <param-name>inner-filter-class</param-name>
+            <param-value>org.jasig.cas.client.validation.Cas30ProxyReceivingTicketValidationFilter</param-value>
+        </init-param>
+        <init-param>
+            <param-name>config-prefix</param-name>
+            <param-value>ui.filter.cas</param-value>
+        </init-param>
+        <init-param>
+            <param-name>casServerUrlPrefix</param-name>
+            <param-value>https://localhost:8443/cas</param-value>
+        </init-param>
+        <init-param>
+            <param-name>serverName</param-name>
+            <param-value>http://localhost:8888</param-value>
+        </init-param>
+        <init-param>
+            <param-name>exceptionOnValidationFailure</param-name>
+            <param-value>false</param-value>
+        </init-param>
+        <init-param>
+            <param-name>redirectAfterValidation</param-name>
+            <param-value>false</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>CASValidationFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <filter>
+        <filter-name>CASRequestWrapperFilter</filter-name>
+        <filter-class>com.databasepreservation.visualization.filter.OnOffFilter</filter-class>
+        <init-param>
+            <param-name>inner-filter-class</param-name>
+            <param-value>org.jasig.cas.client.util.HttpServletRequestWrapperFilter</param-value>
+        </init-param>
+        <init-param>
+            <param-name>config-prefix</param-name>
+            <param-value>ui.filter.cas</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>CASRequestWrapperFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <filter>
+        <filter-name>CasWebAuthFilter</filter-name>
+        <filter-class>com.databasepreservation.visualization.filter.OnOffFilter</filter-class>
+        <init-param>
+            <param-name>inner-filter-class</param-name>
+            <param-value>com.databasepreservation.visualization.filter.CasWebAuthFilter</param-value>
+        </init-param>
+        <init-param>
+            <param-name>config-prefix</param-name>
+            <param-value>ui.filter.cas</param-value>
+        </init-param>
+        <init-param>
+            <param-name>casServerUrlPrefix</param-name>
+            <param-value>https://localhost:8443/cas</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>CasWebAuthFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
 
     <!-- ************************************** -->
     <!-- REST related servlets/servlet-mappings -->

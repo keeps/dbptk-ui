@@ -6,10 +6,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.roda.core.data.adapter.filter.BasicSearchFilterParameter;
-import org.roda.core.data.adapter.filter.Filter;
-import org.roda.core.data.adapter.filter.FilterParameter;
-import org.roda.core.data.adapter.filter.LongRangeFilterParameter;
+import org.roda.core.data.v2.index.filter.BasicSearchFilterParameter;
+import org.roda.core.data.v2.index.filter.Filter;
+import org.roda.core.data.v2.index.filter.FilterParameter;
+import org.roda.core.data.v2.index.filter.LongRangeFilterParameter;
 
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable;
 import com.databasepreservation.visualization.shared.BrowserServiceUtils;

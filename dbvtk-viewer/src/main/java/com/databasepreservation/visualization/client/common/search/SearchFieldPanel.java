@@ -6,7 +6,7 @@ package com.databasepreservation.visualization.client.common.search;
 
 import java.util.*;
 
-import org.roda.core.data.adapter.filter.*;
+import org.roda.core.data.v2.index.filter.*;
 import org.roda.core.data.common.RodaConstants;
 
 import com.databasepreservation.visualization.client.common.utils.ListboxUtils;

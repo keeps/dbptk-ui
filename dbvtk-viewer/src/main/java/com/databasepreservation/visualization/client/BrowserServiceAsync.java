@@ -2,10 +2,10 @@ package com.databasepreservation.visualization.client;
 
 import java.util.List;
 
-import org.roda.core.data.adapter.facet.Facets;
-import org.roda.core.data.adapter.filter.Filter;
-import org.roda.core.data.adapter.sort.Sorter;
-import org.roda.core.data.adapter.sublist.Sublist;
+import org.roda.core.data.v2.index.facet.Facets;
+import org.roda.core.data.v2.index.filter.Filter;
+import org.roda.core.data.v2.index.sort.Sorter;
+import org.roda.core.data.v2.index.sublist.Sublist;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.RequestNotValidException;
 import org.roda.core.data.v2.index.IsIndexed;
@@ -23,9 +23,9 @@ public interface BrowserServiceAsync {
    * 
    * @see com.databasepreservation.visualization.client.BrowserService
    */
-  <T extends IsIndexed> void find(java.lang.String classNameToReturn, org.roda.core.data.adapter.filter.Filter filter,
-    org.roda.core.data.adapter.sort.Sorter sorter, org.roda.core.data.adapter.sublist.Sublist sublist,
-    org.roda.core.data.adapter.facet.Facets facets, java.lang.String localeString,
+  <T extends IsIndexed> void find(java.lang.String classNameToReturn, Filter filter,
+    Sorter sorter, Sublist sublist,
+    Facets facets, java.lang.String localeString,
     AsyncCallback<org.roda.core.data.v2.index.IndexResult<T>> callback);
 
   /**
@@ -33,7 +33,7 @@ public interface BrowserServiceAsync {
    * 
    * @see com.databasepreservation.visualization.client.BrowserService
    */
-  void count(java.lang.String classNameToReturn, org.roda.core.data.adapter.filter.Filter filter,
+  void count(java.lang.String classNameToReturn, Filter filter,
     AsyncCallback<java.lang.Long> callback);
 
   /**
@@ -49,8 +49,8 @@ public interface BrowserServiceAsync {
    * @see com.databasepreservation.visualization.client.BrowserService
    */
   <T extends IsIndexed> void findRows(java.lang.String classNameToReturn, java.lang.String tableUUID,
-    org.roda.core.data.adapter.filter.Filter filter, org.roda.core.data.adapter.sort.Sorter sorter,
-    org.roda.core.data.adapter.sublist.Sublist sublist, org.roda.core.data.adapter.facet.Facets facets,
+    Filter filter, Sorter sorter,
+    Sublist sublist, Facets facets,
     java.lang.String localeString, AsyncCallback<org.roda.core.data.v2.index.IndexResult<T>> callback);
 
   /**
@@ -59,7 +59,7 @@ public interface BrowserServiceAsync {
    * @see com.databasepreservation.visualization.client.BrowserService
    */
   void countRows(java.lang.String classNameToReturn, java.lang.String tableUUID,
-    org.roda.core.data.adapter.filter.Filter filter, AsyncCallback<java.lang.Long> callback);
+    Filter filter, AsyncCallback<java.lang.Long> callback);
 
   /**
    * GWT-RPC service asynchronous (client-side) interface

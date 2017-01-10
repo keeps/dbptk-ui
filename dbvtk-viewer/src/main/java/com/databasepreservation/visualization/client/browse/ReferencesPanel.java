@@ -8,10 +8,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
 
-import org.roda.core.data.adapter.filter.EmptyKeyFilterParameter;
-import org.roda.core.data.adapter.filter.Filter;
-import org.roda.core.data.adapter.filter.FilterParameter;
-import org.roda.core.data.adapter.filter.SimpleFilterParameter;
+import org.roda.core.data.v2.index.filter.EmptyKeyFilterParameter;
+import org.roda.core.data.v2.index.filter.Filter;
+import org.roda.core.data.v2.index.filter.FilterParameter;
+import org.roda.core.data.v2.index.filter.SimpleFilterParameter;
 import org.roda.core.data.v2.index.IsIndexed;
 
 import com.databasepreservation.visualization.client.BrowserService;

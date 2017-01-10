@@ -1,7 +1,9 @@
 package com.databasepreservation.visualization.client.ViewerStructure;
 
 import java.io.Serializable;
+import java.util.List;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.roda.core.data.v2.index.IsIndexed;
 
 /**
@@ -47,5 +49,26 @@ public class ViewerDatabase implements Serializable, IsIndexed {
    */
   public void setMetadata(ViewerMetadata metadata) {
     this.metadata = metadata;
+  }
+
+
+  @Override
+  public String getId() {
+    return getUUID();
+  }
+
+  @Override
+  public List<String> toCsvHeaders() {
+    throw new NotImplementedException("#toCsvHeaders is not implemented");
+  }
+
+  @Override
+  public List<Object> toCsvValues() {
+    throw new NotImplementedException("#toCsvValues is not implemented");
+  }
+
+  @Override
+  public List<String> liteFields() {
+    throw new NotImplementedException("#liteFields is not implemented");
   }
 }

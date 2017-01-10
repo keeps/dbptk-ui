@@ -3,14 +3,12 @@ package com.databasepreservation.visualization.utils;
 import java.io.File;
 import java.nio.file.Path;
 
-import com.databasepreservation.visualization.ViewerConstants;
-
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class LobPathManager {
-  public static Path getPath(String tableUUID, int columnIndex, String rowUUID) {
-    Path tmpPath = ViewerConstants.getWorkspaceForLobs().resolve(tableUUID).resolve(String.valueOf(columnIndex));
+  public static Path getPath(ViewerAbstractConfiguration configuration, String tableUUID, int columnIndex, String rowUUID) {
+    Path tmpPath = configuration.getLobPath().resolve(tableUUID).resolve(String.valueOf(columnIndex));
 
     // example:
     // for uuid:

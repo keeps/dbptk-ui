@@ -7,9 +7,9 @@ package com.databasepreservation.visualization.client.common.search;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.roda.core.data.adapter.filter.BasicSearchFilterParameter;
-import org.roda.core.data.adapter.filter.Filter;
-import org.roda.core.data.adapter.filter.FilterParameter;
+import org.roda.core.data.v2.index.filter.BasicSearchFilterParameter;
+import org.roda.core.data.v2.index.filter.Filter;
+import org.roda.core.data.v2.index.filter.FilterParameter;
 
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.visualization.client.common.lists.AsyncTableCell;

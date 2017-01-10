@@ -19,7 +19,7 @@ import com.databasepreservation.visualization.api.utils.ApiResponseMessage;
 import com.databasepreservation.visualization.api.utils.ApiUtils;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.visualization.exceptions.ViewerException;
-import com.databasepreservation.visualization.shared.ViewerFactory;
+import com.databasepreservation.visualization.server.ViewerFactory;
 import com.databasepreservation.visualization.shared.ViewerSafeConstants;
 import com.databasepreservation.visualization.utils.SolrManager;
 

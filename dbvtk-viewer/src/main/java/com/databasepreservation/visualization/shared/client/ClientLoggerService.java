@@ -4,7 +4,6 @@
  */
 package com.databasepreservation.visualization.shared.client;
 
-import org.roda.core.data.common.LoginException;
 import org.roda.core.data.exceptions.LoggerException;
 
 import com.google.gwt.core.client.GWT;
@@ -20,7 +19,7 @@ public interface ClientLoggerService extends RemoteService {
   /**
    * logger service URI
    */
-  public static final String SERVICE_URI = "weblogger";
+  public static final String SERVICE_URI = "wuilogger";
 
   /**
    * Utilities
@@ -151,6 +150,6 @@ public interface ClientLoggerService extends RemoteService {
    * @throws LoginException
    * @throws LoggerException
    */
-  public void pagehit(String pagename) throws LoginException, LoggerException;
+  public void pagehit(String pagename) throws LoggerException;
 
 }

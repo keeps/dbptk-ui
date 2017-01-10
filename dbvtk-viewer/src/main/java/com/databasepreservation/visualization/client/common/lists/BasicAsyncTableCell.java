@@ -1,7 +1,7 @@
 package com.databasepreservation.visualization.client.common.lists;
 
-import org.roda.core.data.adapter.facet.Facets;
-import org.roda.core.data.adapter.filter.Filter;
+import org.roda.core.data.v2.index.facet.Facets;
+import org.roda.core.data.v2.index.filter.Filter;
 import org.roda.core.data.v2.index.IsIndexed;
 
 /**

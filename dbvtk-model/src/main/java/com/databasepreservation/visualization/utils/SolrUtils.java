@@ -37,29 +37,29 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.params.FacetParams;
-import org.roda.core.data.adapter.facet.FacetParameter;
-import org.roda.core.data.adapter.facet.Facets;
-import org.roda.core.data.adapter.facet.RangeFacetParameter;
-import org.roda.core.data.adapter.facet.SimpleFacetParameter;
-import org.roda.core.data.adapter.filter.BasicSearchFilterParameter;
-import org.roda.core.data.adapter.filter.DateIntervalFilterParameter;
-import org.roda.core.data.adapter.filter.DateRangeFilterParameter;
-import org.roda.core.data.adapter.filter.EmptyKeyFilterParameter;
-import org.roda.core.data.adapter.filter.Filter;
-import org.roda.core.data.adapter.filter.FilterParameter;
-import org.roda.core.data.adapter.filter.LongRangeFilterParameter;
-import org.roda.core.data.adapter.filter.OneOfManyFilterParameter;
-import org.roda.core.data.adapter.filter.SimpleFilterParameter;
-import org.roda.core.data.adapter.sort.SortParameter;
-import org.roda.core.data.adapter.sort.Sorter;
-import org.roda.core.data.adapter.sublist.Sublist;
 import org.roda.core.data.common.RodaConstants;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RequestNotValidException;
-import org.roda.core.data.v2.index.FacetFieldResult;
 import org.roda.core.data.v2.index.IndexResult;
 import org.roda.core.data.v2.index.IsIndexed;
+import org.roda.core.data.v2.index.facet.FacetFieldResult;
+import org.roda.core.data.v2.index.facet.FacetParameter;
+import org.roda.core.data.v2.index.facet.Facets;
+import org.roda.core.data.v2.index.facet.RangeFacetParameter;
+import org.roda.core.data.v2.index.facet.SimpleFacetParameter;
+import org.roda.core.data.v2.index.filter.BasicSearchFilterParameter;
+import org.roda.core.data.v2.index.filter.DateIntervalFilterParameter;
+import org.roda.core.data.v2.index.filter.DateRangeFilterParameter;
+import org.roda.core.data.v2.index.filter.EmptyKeyFilterParameter;
+import org.roda.core.data.v2.index.filter.Filter;
+import org.roda.core.data.v2.index.filter.FilterParameter;
+import org.roda.core.data.v2.index.filter.LongRangeFilterParameter;
+import org.roda.core.data.v2.index.filter.OneOfManyFilterParameter;
+import org.roda.core.data.v2.index.filter.SimpleFilterParameter;
+import org.roda.core.data.v2.index.sort.SortParameter;
+import org.roda.core.data.v2.index.sort.Sorter;
+import org.roda.core.data.v2.index.sublist.Sublist;
 import org.roda.core.data.v2.ip.AIP;
 import org.roda.core.data.v2.ip.AIPState;
 import org.roda.core.data.v2.ip.IndexedAIP;
@@ -68,7 +68,7 @@ import org.roda.core.data.v2.ip.IndexedRepresentation;
 import org.roda.core.data.v2.ip.Permissions;
 import org.roda.core.data.v2.ip.Representation;
 import org.roda.core.data.v2.ip.metadata.IndexedPreservationEvent;
-import org.roda.core.data.v2.user.RodaUser;
+import org.roda.core.data.v2.user.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -291,7 +291,7 @@ public class SolrUtils {
   }
 
   public static <T extends Serializable> IndexResult<T> find(SolrClient index, Class<T> classToRetrieve, Filter filter,
-    Sorter sorter, Sublist sublist, Facets facets, RodaUser user, boolean showInactive) throws GenericException,
+    Sorter sorter, Sublist sublist, Facets facets, User user, boolean showInactive) throws GenericException,
     RequestNotValidException {
     IndexResult<T> ret;
     SolrQuery query = new SolrQuery();
@@ -427,26 +427,6 @@ public class SolrUtils {
       || resultClass.equals(IndexedFile.class) || resultClass.equals(IndexedPreservationEvent.class);
   }
 
-  private static String getFilterQueries(RodaUser user, boolean justActive) {
-
-    StringBuilder fq = new StringBuilder();
-
-    // TODO find a better way to define admin super powers
-    if (user != null && !user.getName().equals("admin")) {
-      String usersKey = RodaConstants.INDEX_PERMISSION_USERS_PREFIX + Permissions.PermissionType.READ;
-      appendExactMatch(fq, usersKey, user.getId(), true, false);
-
-      String groupsKey = RodaConstants.INDEX_PERMISSION_GROUPS_PREFIX + Permissions.PermissionType.READ;
-      appendValuesUsingOROperator(fq, groupsKey, new ArrayList<>(user.getAllGroups()), true);
-    }
-
-    if (justActive) {
-      appendExactMatch(fq, RodaConstants.STATE, AIPState.ACTIVE.toString(), true, true);
-    }
-
-    return fq.toString();
-  }
-
   public static <T extends Serializable> IndexResult<T> queryResponseToIndexResult(QueryResponse response,
     Class<T> responseClass, Facets facets) throws GenericException {
     return queryResponseToIndexResult(response, responseClass, null, facets);
@@ -494,7 +474,7 @@ public class SolrUtils {
   }
 
   public static <T extends Serializable> Long count(SolrClient index, Class<T> classToRetrieve, Filter filter,
-    RodaUser user, boolean showInactive) throws GenericException, RequestNotValidException {
+    User user, boolean showInactive) throws GenericException, RequestNotValidException {
     return find(index, classToRetrieve, filter, null, new Sublist(0, 0), null, user, showInactive).getTotalCount();
   }
 
@@ -841,6 +821,53 @@ public class SolrUtils {
       index.deleteById(getIndexName(classToDelete), ids);
     } catch (SolrServerException | IOException e) {
       throw new GenericException("Could not delete items", e);
+    }
+  }
+
+  /*
+   * Roda user > Apache Solr filter query
+   * ____________________________________________________________________________________________________________________
+   */
+  private static String getFilterQueries(User user, boolean justActive) {
+
+    StringBuilder fq = new StringBuilder();
+
+    // TODO find a better way to define admin super powers
+    if (user != null && !user.getName().equals("admin")) {
+      fq.append("(");
+      String usersKey = RodaConstants.INDEX_PERMISSION_USERS_PREFIX + Permissions.PermissionType.READ;
+      appendExactMatch(fq, usersKey, user.getId(), true, false);
+
+      String groupsKey = RodaConstants.INDEX_PERMISSION_GROUPS_PREFIX + Permissions.PermissionType.READ;
+      appendValuesUsingOROperatorForQuery(fq, groupsKey, new ArrayList<>(user.getGroups()), true);
+
+      fq.append(")");
+    }
+
+    if (justActive) {
+      appendExactMatch(fq, RodaConstants.STATE, AIPState.ACTIVE.toString(), true, true);
+    }
+
+    return fq.toString();
+  }
+
+  private static void appendValuesUsingOROperatorForQuery(StringBuilder ret, String key, List<String> values,
+    boolean prependWithOrIfNeeded) {
+    if (!values.isEmpty()) {
+      if (prependWithOrIfNeeded) {
+        appendOROperator(ret, true);
+      } else {
+        appendANDOperator(ret, true);
+      }
+
+      ret.append("(");
+      for (int i = 0; i < values.size(); i++) {
+        if (i != 0) {
+          ret.append(" OR ");
+        }
+        appendExactMatch(ret, key, values.get(i), true, false);
+      }
+      ret.append(")");
     }
   }
 }

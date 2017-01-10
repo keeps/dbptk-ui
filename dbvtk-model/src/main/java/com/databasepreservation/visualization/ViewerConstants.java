@@ -13,33 +13,18 @@ import org.apache.commons.lang3.StringUtils;
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class ViewerConstants {
-  private static final String ENV_DBVTK_WORKSPACE = "DBVTK_WORKSPACE";
-  private static final String PROP_DBVTK_WORKSPACE = "dbvtk.workspace";
+  /*
+   * DBVTK CONFIG
+   */
+  public static final String INSTALL_FOLDER_SYSTEM_PROPERTY = "dbvtk.home";
+  public static final String INSTALL_FOLDER_ENVIRONMENT_VARIABLE = "DBVTK_HOME";
+  public static final String INSTALL_FOLDER_DEFAULT_SUBFOLDER_UNDER_HOME = ".db-visualization-toolkit";
 
-  private static Path workspaceDirectory = null;
-
-  public static Path getWorkspaceDirectory() {
-    if (workspaceDirectory == null) {
-      String property = System.getProperty(PROP_DBVTK_WORKSPACE);
-      String env = System.getenv(ENV_DBVTK_WORKSPACE);
-
-      if (StringUtils.isNotBlank(property)) {
-        workspaceDirectory = Paths.get(property);
-      } else if (StringUtils.isNotBlank(env)) {
-        workspaceDirectory = Paths.get(env);
-      } else {
-        workspaceDirectory = Paths.get(System.getProperty("user.home"), ".db-visualization-toolkit");
-      }
-    }
-    return workspaceDirectory;
-  }
-
-  private static Path workspaceForLobs = null;
-
-  public static Path getWorkspaceForLobs() {
-    if (workspaceForLobs == null) {
-      workspaceForLobs = getWorkspaceDirectory().resolve("lobs");
-    }
-    return workspaceForLobs;
-  }
+  public static final String DEFAULT_ENCODING = "UTF-8";
+  public static final String VIEWER_CONFIG_FOLDER = "config";
+  public static final String CORE_LOG_FOLDER = "log";
+  public static final String VIEWER_EXAMPLE_CONFIG_FOLDER = "example-config";
+  public static final String VIEWER_I18N_FOLDER = "i18n";
+  public static final String VIEWER_LOG_FOLDER = "log";
+  public static final String VIEWER_LOBS_FOLDER = "lobs";
 }

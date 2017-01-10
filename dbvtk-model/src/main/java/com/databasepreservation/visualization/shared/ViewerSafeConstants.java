@@ -1,7 +1,7 @@
 package com.databasepreservation.visualization.shared;
 
-import org.roda.core.data.adapter.filter.BasicSearchFilterParameter;
-import org.roda.core.data.adapter.filter.Filter;
+import org.roda.core.data.v2.index.filter.BasicSearchFilterParameter;
+import org.roda.core.data.v2.index.filter.Filter;
 import org.roda.core.data.common.RodaConstants;
 
 /**
@@ -13,7 +13,7 @@ import org.roda.core.data.common.RodaConstants;
  */
 public class ViewerSafeConstants {
   /*
-   * CONFIGSETS
+   * SOLR CONFIGSETS
    */
   public static final String SOLR_CONFIGSET_DATABASE_RESOURCE = "solr-configset/dbvtk_database";
   public static final String SOLR_CONFIGSET_TABLE_RESOURCE = "solr-configset/dbvtk_table";

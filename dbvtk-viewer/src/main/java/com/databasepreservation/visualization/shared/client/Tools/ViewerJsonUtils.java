@@ -2,9 +2,9 @@ package com.databasepreservation.visualization.shared.client.Tools;
 
 import java.util.List;
 
-import org.roda.core.data.adapter.filter.Filter;
-import org.roda.core.data.adapter.sort.Sorter;
-import org.roda.core.data.adapter.sublist.Sublist;
+import org.roda.core.data.v2.index.filter.Filter;
+import org.roda.core.data.v2.index.sort.Sorter;
+import org.roda.core.data.v2.index.sublist.Sublist;
 
 import com.databasepreservation.visualization.client.common.search.SearchInfo;
 import com.github.nmorel.gwtjackson.client.ObjectMapper;

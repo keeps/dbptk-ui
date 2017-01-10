@@ -78,6 +78,7 @@ import com.databasepreservation.visualization.exceptions.ViewerException;
 import com.databasepreservation.visualization.shared.ViewerSafeConstants;
 import com.databasepreservation.visualization.utils.LobPathManager;
 import com.databasepreservation.visualization.utils.SolrUtils;
+import com.databasepreservation.visualization.utils.ViewerAbstractConfiguration;
 import com.databasepreservation.visualization.utils.ViewerUtils;
 
 /**
@@ -106,11 +107,12 @@ public class ToolkitStructure2ViewerStructure {
     return getDatabase(structure, null);
   }
 
-  public static ViewerDatabaseFromToolkit getDatabase(DatabaseStructure structure, String databaseUUID) throws ViewerException {
+  public static ViewerDatabaseFromToolkit getDatabase(DatabaseStructure structure, String databaseUUID)
+    throws ViewerException {
     ViewerDatabaseFromToolkit result = new ViewerDatabaseFromToolkit();
-    if(databaseUUID == null) {
+    if (databaseUUID == null) {
       result.setUuid(SolrUtils.randomUUID());
-    }else{
+    } else {
       result.setUuid(databaseUUID);
     }
     result.setMetadata(getMetadata(result, structure));
@@ -477,7 +479,7 @@ public class ToolkitStructure2ViewerStructure {
     } else if (type instanceof SimpleTypeBoolean) {
       suffix = ViewerSafeConstants.SOLR_DYN_BOOLEAN;
     } else if (type instanceof SimpleTypeDateTime) {
-      switch(viewerType.getDbType()){
+      switch (viewerType.getDbType()) {
         case DATETIME_JUST_DATE:
           suffix = ViewerSafeConstants.SOLR_DYN_TDATE;
           break;
@@ -564,16 +566,17 @@ public class ToolkitStructure2ViewerStructure {
     return result;
   }
 
-  public static ViewerRow getRow(ViewerTable table, Row row, long rowIndex) throws ViewerException {
+  public static ViewerRow getRow(ViewerAbstractConfiguration configuration, ViewerTable table, Row row, long rowIndex)
+    throws ViewerException {
     ViewerRow result = new ViewerRow();
     String rowUUID = SolrUtils.randomUUID();
     result.setUUID(rowUUID);
-    result.setCells(getCells(table, row, rowIndex, rowUUID));
+    result.setCells(getCells(configuration, table, row, rowIndex, rowUUID));
     return result;
   }
 
-  private static Map<String, ViewerCell> getCells(ViewerTable table, Row row, long rowIndex, String rowUUID)
-    throws ViewerException {
+  private static Map<String, ViewerCell> getCells(ViewerAbstractConfiguration configuration, ViewerTable table,
+    Row row, long rowIndex, String rowUUID) throws ViewerException {
     HashMap<String, ViewerCell> result = new HashMap<>();
 
     int colIndex = 0;
@@ -581,7 +584,8 @@ public class ToolkitStructure2ViewerStructure {
     for (ViewerColumn viewerColumn : table.getColumns()) {
       String solrColumnName = viewerColumn.getSolrName();
       try {
-        result.put(solrColumnName, getCell(table, toolkitCells.get(colIndex), rowIndex, colIndex++, rowUUID));
+        result.put(solrColumnName,
+          getCell(configuration, table, toolkitCells.get(colIndex), rowIndex, colIndex++, rowUUID));
       } catch (ViewerException e) {
         LOGGER.error("Problem converting cell, omitted it (as if it were NULL)", e);
       }
@@ -590,8 +594,8 @@ public class ToolkitStructure2ViewerStructure {
     return result;
   }
 
-  private static ViewerCell getCell(ViewerTable table, Cell cell, long rowIndex, int colIndex, String rowUUID)
-    throws ViewerException {
+  private static ViewerCell getCell(ViewerAbstractConfiguration configuration, ViewerTable table, Cell cell,
+    long rowIndex, int colIndex, String rowUUID) throws ViewerException {
     ViewerCell result = new ViewerCell();
 
     ViewerType columnType = table.getColumns().get(colIndex).getType();
@@ -601,7 +605,7 @@ public class ToolkitStructure2ViewerStructure {
 
       InputStream stream = null;
       try {
-        Path outputPath = LobPathManager.getPath(table.getUUID(), colIndex, rowUUID);
+        Path outputPath = LobPathManager.getPath(configuration, table.getUUID(), colIndex, rowUUID);
         Files.createDirectories(outputPath.getParent());
         stream = binaryCell.createInputStream();
         Files.copy(stream, outputPath, StandardCopyOption.REPLACE_EXISTING);

@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.roda.core.data.adapter.filter.Filter;
+import org.roda.core.data.v2.index.filter.Filter;
 
 import com.databasepreservation.visualization.client.BrowserService;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;

@@ -1,7 +1,7 @@
 package com.databasepreservation.visualization.client.browse;
 
-import org.roda.core.data.adapter.filter.BasicSearchFilterParameter;
-import org.roda.core.data.adapter.filter.Filter;
+import org.roda.core.data.v2.index.filter.BasicSearchFilterParameter;
+import org.roda.core.data.v2.index.filter.Filter;
 
 import com.databasepreservation.visualization.client.SavedSearch;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
