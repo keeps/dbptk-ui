@@ -7,8 +7,6 @@ package com.databasepreservation.visualization.filter;
 import java.nio.charset.Charset;
 import java.util.Base64;
 
-
-import org.apache.commons.lang3.StringUtils;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
@@ -46,8 +44,7 @@ public class BasicAuthRequestWrapper extends HttpServletRequestWrapper {
     if (authorization != null && authorization.startsWith("Basic")) {
       String credentials = authorization;
       credentials = credentials.replaceFirst("[B|b]asic ", "");
-      credentials = new String(Base64.getDecoder().decode(credentials),
-        Charset.forName(RodaConstants.DEFAULT_ENCODING));
+      credentials = new String(Base64.getDecoder().decode(credentials), Charset.forName(RodaConstants.DEFAULT_ENCODING));
       final String[] values = credentials.split(":", 2);
       if (values[0] != null && values[1] != null) {
         ret = new Pair<>(values[0], values[1]);

@@ -5,25 +5,11 @@
              xmlns:s='urn:import:com.databasepreservation.visualization.client.common.search'
              xmlns:lists="urn:import:com.databasepreservation.visualization.client.common.lists">
 
-    <g:FlowPanel addStyleNames="browseContent wrapper skip_padding">
-        <g:FlowPanel addStyleNames="row full_width skip_padding">
-            <g:FlowPanel addStyleNames="browseContentFocusPanel">
-                <g:FlowPanel addStyleNames="browseContentPreviewPanel">
-                    <g:FlowPanel addStyleNames="browseContentFilePreviewPanel">
-                        <g:FlowPanel addStyleNames="filePreviewToolbar">
-                            <m:BreadcrumbPanel ui:field="breadcrumb" addStyleNames="browseContentBreadcrumb"/>
-                        </g:FlowPanel>
-                        <g:SimplePanel addStyleNames="col_12 content">
-                            <g:FlowPanel>
-                                <g:Label addStyleNames="h1"><ui:msg>Database listing</ui:msg></g:Label>
-                                <g:SimplePanel>
-                                    <lists:DatabaseList ui:field="databaseList"/>
-                                </g:SimplePanel>
-                            </g:FlowPanel>
-                        </g:SimplePanel>
-                    </g:FlowPanel>
-                </g:FlowPanel>
-            </g:FlowPanel>
-        </g:FlowPanel>
+
+    <g:FlowPanel>
+        <g:Label addStyleNames="h1"><ui:msg>Database listing</ui:msg></g:Label>
+        <g:SimplePanel>
+            <lists:DatabaseList ui:field="databaseList"/>
+        </g:SimplePanel>
     </g:FlowPanel>
 </ui:UiBinder>

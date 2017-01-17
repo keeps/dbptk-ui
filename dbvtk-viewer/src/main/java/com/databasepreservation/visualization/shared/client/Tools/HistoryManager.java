@@ -11,6 +11,7 @@ import com.google.gwt.user.client.Window;
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class HistoryManager {
+  public static final String ROUTE_LOGIN = "login";
   public static final String ROUTE_DATABASE = "database";
   public static final String ROUTE_DATABASE_USERS = "users";
   public static final String ROUTE_DATABASE_SEARCH = "search";
@@ -34,6 +35,28 @@ public class HistoryManager {
 
   public static void gotoRoot() {
     newHistory(new ArrayList<String>());
+  }
+
+  public static void returnFromLogin() {
+    List<String> currentPath = getCurrentHistoryPath();
+    List<String> loginPath = pathLogin();
+
+    // check if the current path starts with the login path
+    if (currentPath.size() > 1 && currentPath.size() > loginPath.size()
+      && currentPath.subList(0, loginPath.size()).equals(loginPath)) {
+      newHistory(currentPath.subList(1, currentPath.size()));
+    } else {
+      // in case something is wrong or has been tampered with, go to root
+      gotoRoot();
+    }
+  }
+
+  public static void gotoLogin() {
+    newHistory(pathLogin());
+  }
+
+  private static List<String> pathLogin() {
+    return Arrays.asList(ROUTE_LOGIN);
   }
 
   public static void gotoDatabaseList() {
@@ -156,6 +179,10 @@ public class HistoryManager {
 
   public static String linkToRecord(String database_uuid, String table_uuid, String record_uuid) {
     return createHistoryToken(Arrays.asList(ROUTE_TABLE, database_uuid, table_uuid, record_uuid));
+  }
+
+  public static String linkToLogin() {
+    return createHistoryToken(pathLogin());
   }
 
   public static String linkToTable(String database_uuid, String table_uuid) {

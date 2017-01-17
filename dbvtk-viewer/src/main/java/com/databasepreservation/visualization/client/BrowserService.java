@@ -2,16 +2,19 @@ package com.databasepreservation.visualization.client;
 
 import java.util.List;
 
+import org.roda.core.data.exceptions.AuthenticationDeniedException;
+import org.roda.core.data.exceptions.AuthorizationDeniedException;
+import org.roda.core.data.exceptions.GenericException;
+import org.roda.core.data.exceptions.NotFoundException;
+import org.roda.core.data.exceptions.RODAException;
+import org.roda.core.data.exceptions.RequestNotValidException;
+import org.roda.core.data.v2.index.IndexResult;
+import org.roda.core.data.v2.index.IsIndexed;
 import org.roda.core.data.v2.index.facet.Facets;
 import org.roda.core.data.v2.index.filter.Filter;
 import org.roda.core.data.v2.index.sort.Sorter;
 import org.roda.core.data.v2.index.sublist.Sublist;
-import org.roda.core.data.exceptions.AuthorizationDeniedException;
-import org.roda.core.data.exceptions.GenericException;
-import org.roda.core.data.exceptions.NotFoundException;
-import org.roda.core.data.exceptions.RequestNotValidException;
-import org.roda.core.data.v2.index.IndexResult;
-import org.roda.core.data.v2.index.IsIndexed;
+import org.roda.core.data.v2.user.User;
 
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable;
 import com.databasepreservation.visualization.client.common.search.SearchField;
@@ -80,4 +83,8 @@ public interface BrowserService extends RemoteService {
 
   void deleteSearch(String savedSearchUUID) throws AuthorizationDeniedException, GenericException,
     RequestNotValidException, NotFoundException;
+
+  User getAuthenticatedUser() throws RODAException;
+
+  User login(String username, String password) throws AuthenticationDeniedException, GenericException;
 }

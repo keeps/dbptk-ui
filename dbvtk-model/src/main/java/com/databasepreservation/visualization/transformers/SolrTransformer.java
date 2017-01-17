@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
-import com.databasepreservation.visualization.utils.ViewerAbstractConfiguration;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;

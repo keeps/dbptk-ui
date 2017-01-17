@@ -1,10 +1,5 @@
 package com.databasepreservation.visualization;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
-import org.apache.commons.lang3.StringUtils;
-
 /**
  * Non GWT-safe constants used in Database Viewer.
  *

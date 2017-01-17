@@ -19,6 +19,10 @@ public class BreadcrumbManager {
     breadcrumb.setVisible(true);
   }
 
+  public static List<BreadcrumbItem> empty() {
+    return new ArrayList<>();
+  }
+
   public static List<BreadcrumbItem> forDatabases() {
     List<BreadcrumbItem> items = new ArrayList<>();
     items.add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager

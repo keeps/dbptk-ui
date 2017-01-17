@@ -1,56 +1,125 @@
 package com.databasepreservation.visualization.client.browse;
 
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
-import com.databasepreservation.visualization.client.common.lists.DatabaseList;
+import org.roda.core.data.v2.user.User;
+
+import com.databasepreservation.visualization.client.common.UserLogin;
 import com.databasepreservation.visualization.client.main.BreadcrumbPanel;
 import com.databasepreservation.visualization.shared.client.Tools.BreadcrumbManager;
 import com.databasepreservation.visualization.shared.client.Tools.HistoryManager;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyPressEvent;
+import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.PasswordTextBox;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.SelectionChangeEvent;
+
+import config.i18n.client.ClientMessages;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class LoginPanel extends Composite {
-  interface DatabaseListPanelUiBinder extends UiBinder<Widget, LoginPanel> {
+public class LoginPanel extends RightPanel {
+  private static final ClientMessages messages = GWT.create(ClientMessages.class);
+
+  private static LoginPanelUiBinder uiBinder = GWT.create(LoginPanelUiBinder.class);
+
+  interface LoginPanelUiBinder extends UiBinder<Widget, LoginPanel> {
   }
 
-  private static DatabaseListPanelUiBinder uiBinder = GWT.create(DatabaseListPanelUiBinder.class);
+  private static LoginPanel instance = null;
 
-  @UiField(provided = true)
-  DatabaseList databaseList;
+  public static LoginPanel getInstance() {
+    if (instance == null) {
+      instance = new LoginPanel();
+    }
+    return instance;
+  }
 
   @UiField
-  BreadcrumbPanel breadcrumb;
+  TextBox username;
+
+  @UiField
+  PasswordTextBox password;
+
+  @UiField
+  Button login;
+
+  @UiField
+  Label error;
 
   public LoginPanel() {
-    databaseList = new DatabaseList();
     initWidget(uiBinder.createAndBindUi(this));
+    addAttachHandler(new AttachEvent.Handler() {
 
-    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forDatabases());
-
-    databaseList.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
       @Override
-      public void onSelectionChange(SelectionChangeEvent event) {
-        ViewerDatabase selected = databaseList.getSelectionModel().getSelectedObject();
-        if (selected != null) {
-          HistoryManager.gotoDatabase(selected.getUUID());
+      public void onAttachOrDetach(AttachEvent event) {
+        if (event.isAttached()) {
+          username.setFocus(true);
         }
       }
     });
   }
 
+  @UiHandler("login")
+  void handleLogin(ClickEvent e) {
+    doLogin();
+  }
+
+  @UiHandler("username")
+  void handleUsernameKeyPress(KeyPressEvent event) {
+    tryToLoginWhenEnterIsPressed(event);
+  }
+
+  @UiHandler("password")
+  void handlePasswordKeyPress(KeyPressEvent event) {
+    tryToLoginWhenEnterIsPressed(event);
+  }
+
   /**
-   * This method is called immediately after a widget becomes attached to the
-   * browser's document.
+   * Uses BreadcrumbManager to show available information in the breadcrumbPanel
+   *
+   * @param breadcrumb
+   *          the BreadcrumbPanel for this database
    */
   @Override
-  protected void onLoad() {
-    super.onLoad();
-    databaseList.getSelectionModel().clear();
+  public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
+    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.empty());
+  }
+
+  private void tryToLoginWhenEnterIsPressed(KeyPressEvent event) {
+    if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ENTER) {
+      doLogin();
+    }
+  }
+
+  private void doLogin() {
+    String usernameText = username.getText();
+    String passwordText = password.getText();
+    error.setText("");
+
+    if (usernameText.trim().length() == 0 || passwordText.trim().length() == 0) {
+      error.setText(messages.fillUsernameAndPasswordMessage());
+    } else {
+
+      UserLogin.getInstance().login(usernameText, passwordText, new AsyncCallback<User>() {
+        @Override
+        public void onFailure(Throwable caught) {
+          error.setText(messages.couldNotLoginWithTheProvidedCredentials());
+        }
+
+        @Override
+        public void onSuccess(User user) {
+          HistoryManager.returnFromLogin();
+        }
+      });
+    }
   }
 }

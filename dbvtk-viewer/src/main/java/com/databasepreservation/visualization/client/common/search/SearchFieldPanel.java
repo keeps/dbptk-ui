@@ -4,10 +4,18 @@
  */
 package com.databasepreservation.visualization.client.common.search;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import org.roda.core.data.v2.index.filter.*;
 import org.roda.core.data.common.RodaConstants;
+import org.roda.core.data.v2.index.filter.BasicSearchFilterParameter;
+import org.roda.core.data.v2.index.filter.DateRangeFilterParameter;
+import org.roda.core.data.v2.index.filter.FilterParameter;
+import org.roda.core.data.v2.index.filter.LongRangeFilterParameter;
+import org.roda.core.data.v2.index.filter.SimpleFilterParameter;
 
 import com.databasepreservation.visualization.client.common.utils.ListboxUtils;
 import com.databasepreservation.visualization.shared.ViewerSafeConstants;
@@ -19,7 +27,14 @@ import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.datepicker.client.DateBox;
 import com.tractionsoftware.gwt.user.client.ui.UTCDateBox;
 import com.tractionsoftware.gwt.user.client.ui.UTCTimeBox;
@@ -319,15 +334,15 @@ public class SearchFieldPanel extends Composite {
       String field = searchFields.get(0);
 
       if (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_DATE)
-        && (inputDateFromForDate.getValue() != null || inputDateToForDate.getValue() != null) ) {
+        && (inputDateFromForDate.getValue() != null || inputDateToForDate.getValue() != null)) {
 
-        if(inputDateFromForDate.getValue() == null){
+        if (inputDateFromForDate.getValue() == null) {
           inputDateFromForDate.setValue(inputDateToForDate.getValue());
-        }else if(inputDateToForDate.getValue() == null){
+        } else if (inputDateToForDate.getValue() == null) {
           inputDateToForDate.setValue(inputDateFromForDate.getValue());
         }
 
-        if(dateIntervalValid(inputDateFromForDate, inputDateToForDate)){
+        if (dateIntervalValid(inputDateFromForDate, inputDateToForDate)) {
           Date begin = getDateFromInput(inputDateFromForDate);
           Date end = getDateFromInput(inputDateToForDate);
           filterParameter = new DateRangeFilterParameter(field, begin, end, RodaConstants.DateGranularity.DAY);
@@ -345,65 +360,66 @@ public class SearchFieldPanel extends Composite {
           // filterParameter = new DateIntervalFilterParameter(field, field,
           // inputDateBoxFrom.getValue(),
           // inputDateBoxTo.getValue());
-        }else{
+        } else {
           GWT.log("date interval was invalid");
         }
       } else if (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_TIME)
         && (inputTimeFromForTime.getValue() != null || inputTimeToForTime != null)) {
 
-        if(inputTimeFromForTime.getValue() == null){
+        if (inputTimeFromForTime.getValue() == null) {
           inputTimeFromForTime.setValue(inputTimeToForTime.getValue());
-        } else if(inputTimeToForTime.getValue() == null){
+        } else if (inputTimeToForTime.getValue() == null) {
           inputTimeToForTime.setValue(inputTimeFromForTime.getValue());
         }
 
-        if(dateIntervalValid(inputTimeFromForTime, inputTimeToForTime)) {
+        if (dateIntervalValid(inputTimeFromForTime, inputTimeToForTime)) {
           Date begin = getDateFromInput(inputTimeFromForTime);
           Date end = getDateFromInput(inputTimeToForTime);
           filterParameter = new DateRangeFilterParameter(field, begin, end, RodaConstants.DateGranularity.MILLISECOND);
-        }else{
+        } else {
           GWT.log("time interval was invalid");
         }
       } else if (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_DATETIME)
         && (inputDateFromForDateTime.getValue() != null || inputDateToForDateTime.getValue() != null)) {
 
-        if(inputDateFromForDateTime.getValue() == null){
+        if (inputDateFromForDateTime.getValue() == null) {
           inputDateFromForDateTime.setValue(inputDateToForDateTime.getValue());
-        } else if(inputDateToForDateTime.getValue() == null){
+        } else if (inputDateToForDateTime.getValue() == null) {
           inputDateToForDateTime.setValue(inputDateFromForDateTime.getValue());
         }
 
-        if(inputDateFromForDateTime.getValue().equals(inputDateToForDateTime.getValue())){
+        if (inputDateFromForDateTime.getValue().equals(inputDateToForDateTime.getValue())) {
           // dates are equal
           // if we have one of the times, use it for both times
           // if we have no times, use 00:00:00.000 to 23:59:59.999
           // if the times are both defined, let them be
-          if(inputTimeFromForDateTime.getValue() == null && inputTimeToForDateTime.getValue() != null){
+          if (inputTimeFromForDateTime.getValue() == null && inputTimeToForDateTime.getValue() != null) {
             inputTimeFromForDateTime.setValue(inputTimeToForDateTime.getValue());
-          }else if(inputTimeFromForDateTime.getValue() != null && inputTimeToForDateTime.getValue() == null){
+          } else if (inputTimeFromForDateTime.getValue() != null && inputTimeToForDateTime.getValue() == null) {
             inputTimeToForDateTime.setValue(inputTimeFromForDateTime.getValue());
-          }else if(inputTimeFromForDateTime.getValue() == null && inputTimeToForDateTime.getValue() == null){
+          } else if (inputTimeFromForDateTime.getValue() == null && inputTimeToForDateTime.getValue() == null) {
             inputTimeFromForDateTime.setValue(0L);
-            inputTimeToForDateTime.setValue(ViewerSafeConstants.MILLISECONDS_IN_A_DAY-1);
+            inputTimeToForDateTime.setValue(ViewerSafeConstants.MILLISECONDS_IN_A_DAY - 1);
           }
-        }else{
+        } else {
           // dates are different
           // use 00:00:00.000 for the "from" if it is missing
           // use 23:59:59.999 for the "to" if it is missing
-          if(inputTimeFromForDateTime.getValue() == null){
+          if (inputTimeFromForDateTime.getValue() == null) {
             inputTimeFromForDateTime.setValue(0L);
           }
 
-          if(inputTimeToForDateTime.getValue() == null){
-            inputTimeToForDateTime.setValue(ViewerSafeConstants.MILLISECONDS_IN_A_DAY-1);
+          if (inputTimeToForDateTime.getValue() == null) {
+            inputTimeToForDateTime.setValue(ViewerSafeConstants.MILLISECONDS_IN_A_DAY - 1);
           }
         }
 
-        if(dateIntervalValid(inputDateFromForDateTime, inputTimeFromForDateTime, inputDateToForDateTime, inputTimeToForDateTime)){
+        if (dateIntervalValid(inputDateFromForDateTime, inputTimeFromForDateTime, inputDateToForDateTime,
+          inputTimeToForDateTime)) {
           Date begin = getDateFromInput(inputDateFromForDateTime, inputTimeFromForDateTime);
           Date end = getDateFromInput(inputDateToForDateTime, inputTimeToForDateTime);
           filterParameter = new DateRangeFilterParameter(field, begin, end, RodaConstants.DateGranularity.MILLISECOND);
-        }else{
+        } else {
           GWT.log("datetime interval was invalid");
         }
       } else if (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_NUMERIC) && valid(inputNumeric)) {
@@ -411,15 +427,16 @@ public class SearchFieldPanel extends Composite {
       } else if (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_NUMERIC_INTERVAL)
         && (!inputNumericFrom.getValue().isEmpty() || !inputNumericTo.getValue().isEmpty())) {
 
-        if(inputNumericFrom.getValue().isEmpty()){
+        if (inputNumericFrom.getValue().isEmpty()) {
           inputNumericFrom.setValue(inputNumericTo.getValue());
-        } else if(inputNumericTo.getValue().isEmpty()){
+        } else if (inputNumericTo.getValue().isEmpty()) {
           inputNumericTo.setValue(inputNumericFrom.getValue());
         }
 
-        if(intervalValid(inputNumericFrom, inputNumericTo)){
-          filterParameter = new LongRangeFilterParameter(field, Long.valueOf(inputNumericFrom.getValue()), Long.valueOf(inputNumericTo.getValue()));
-        }else{
+        if (intervalValid(inputNumericFrom, inputNumericTo)) {
+          filterParameter = new LongRangeFilterParameter(field, Long.valueOf(inputNumericFrom.getValue()),
+            Long.valueOf(inputNumericTo.getValue()));
+        } else {
           GWT.log("numeric interval was invalid");
         }
       } else if (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_STORAGE)

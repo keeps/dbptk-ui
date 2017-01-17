@@ -59,4 +59,14 @@ public interface ClientMessages extends Messages {
   String searchFieldTimeFromPlaceHolder();
 
   String searchFieldTimeToPlaceHolder();
+
+  String fillUsernameAndPasswordMessage();
+
+  String couldNotLoginWithTheProvidedCredentials();
+
+  String loginProfile();
+
+  String loginLogout();
+
+  String loginLogin();
 }

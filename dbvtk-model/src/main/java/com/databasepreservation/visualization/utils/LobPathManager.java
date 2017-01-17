@@ -7,7 +7,8 @@ import java.nio.file.Path;
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class LobPathManager {
-  public static Path getPath(ViewerAbstractConfiguration configuration, String tableUUID, int columnIndex, String rowUUID) {
+  public static Path getPath(ViewerAbstractConfiguration configuration, String tableUUID, int columnIndex,
+    String rowUUID) {
     Path tmpPath = configuration.getLobPath().resolve(tableUUID).resolve(String.valueOf(columnIndex));
 
     // example:

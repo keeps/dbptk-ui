@@ -18,17 +18,16 @@ import org.apache.solr.client.solrj.request.CollectionAdminRequest;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.util.NamedList;
-import org.roda.core.data.v2.index.facet.Facets;
-import org.roda.core.data.v2.index.filter.Filter;
-import org.roda.core.data.v2.index.filter.SimpleFilterParameter;
-import org.roda.core.data.v2.index.sort.Sorter;
-import org.roda.core.data.v2.index.sublist.Sublist;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RequestNotValidException;
 import org.roda.core.data.v2.index.IndexResult;
 import org.roda.core.data.v2.index.IsIndexed;
-import org.roda.core.data.v2.user.User;
+import org.roda.core.data.v2.index.facet.Facets;
+import org.roda.core.data.v2.index.filter.Filter;
+import org.roda.core.data.v2.index.filter.SimpleFilterParameter;
+import org.roda.core.data.v2.index.sort.Sorter;
+import org.roda.core.data.v2.index.sublist.Sublist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -217,43 +216,43 @@ public class SolrManager {
     }
   }
 
-  public <T extends IsIndexed> IndexResult<T> find(User user, Class<T> classToReturn, Filter filter, Sorter sorter,
+  public <T extends IsIndexed> IndexResult<T> find(Class<T> classToReturn, Filter filter, Sorter sorter,
     Sublist sublist, Facets facets) throws org.roda.core.data.exceptions.GenericException, RequestNotValidException {
     return SolrUtils.find(client, classToReturn, filter, sorter, sublist, facets);
   }
 
-  public <T extends IsIndexed> Long count(User user, Class<T> classToReturn, Filter filter)
+  public <T extends IsIndexed> Long count(Class<T> classToReturn, Filter filter)
     throws org.roda.core.data.exceptions.GenericException, RequestNotValidException {
     return SolrUtils.count(client, classToReturn, filter);
   }
 
-  public <T extends IsIndexed> T retrieve(User user, Class<T> classToReturn, String id) throws NotFoundException,
+  public <T extends IsIndexed> T retrieve(Class<T> classToReturn, String id) throws NotFoundException,
     org.roda.core.data.exceptions.GenericException {
     return SolrUtils.retrieve(client, classToReturn, id);
   }
 
-  public <T extends IsIndexed> IndexResult<T> findRows(User user, Class<T> classToReturn, String tableUUID,
-    Filter filter, Sorter sorter, Sublist sublist, Facets facets)
-    throws org.roda.core.data.exceptions.GenericException, RequestNotValidException {
+  public <T extends IsIndexed> IndexResult<T> findRows(Class<T> classToReturn, String tableUUID, Filter filter,
+    Sorter sorter, Sublist sublist, Facets facets) throws org.roda.core.data.exceptions.GenericException,
+    RequestNotValidException {
     return SolrUtils.find(client, classToReturn, tableUUID, filter, sorter, sublist, facets);
   }
 
-  public InputStream findRowsCSV(User user, String tableUUID, Filter filter, Sorter sorter, Sublist sublist,
-    List<String> fields) throws org.roda.core.data.exceptions.GenericException, RequestNotValidException {
+  public InputStream findRowsCSV(String tableUUID, Filter filter, Sorter sorter, Sublist sublist, List<String> fields)
+    throws org.roda.core.data.exceptions.GenericException, RequestNotValidException {
     return SolrUtils.findCSV(client, SolrUtils.getTableCollectionName(tableUUID), filter, sorter, sublist, fields);
   }
 
-  public <T extends IsIndexed> Long countRows(User user, Class<T> classToReturn, String tableUUID, Filter filter)
+  public <T extends IsIndexed> Long countRows(Class<T> classToReturn, String tableUUID, Filter filter)
     throws org.roda.core.data.exceptions.GenericException, RequestNotValidException {
     return SolrUtils.count(client, classToReturn, tableUUID, filter);
   }
 
-  public <T extends IsIndexed> T retrieveRows(User user, Class<T> classToReturn, String tableUUID, String rowUUID)
+  public <T extends IsIndexed> T retrieveRows(Class<T> classToReturn, String tableUUID, String rowUUID)
     throws NotFoundException, org.roda.core.data.exceptions.GenericException {
     return SolrUtils.retrieve(client, classToReturn, tableUUID, rowUUID);
   }
 
-  public void addSavedSearch(User user, SavedSearch savedSearch) throws NotFoundException,
+  public void addSavedSearch(SavedSearch savedSearch) throws NotFoundException,
     org.roda.core.data.exceptions.GenericException {
     try {
       createSavedSearchesCollection();
@@ -273,7 +272,7 @@ public class SolrManager {
     }
   }
 
-  public void editSavedSearch(User user, String uuid, String name, String description) throws NotFoundException,
+  public void editSavedSearch(String uuid, String name, String description) throws NotFoundException,
     org.roda.core.data.exceptions.GenericException {
     try {
       createSavedSearchesCollection();
@@ -297,8 +296,7 @@ public class SolrManager {
     }
   }
 
-  public void deleteSavedSearch(User user, String uuid) throws NotFoundException,
-    org.roda.core.data.exceptions.GenericException {
+  public void deleteSavedSearch(String uuid) throws NotFoundException, org.roda.core.data.exceptions.GenericException {
     try {
       client.deleteById(ViewerSafeConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME, uuid);
       client.commit(ViewerSafeConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME, true, true);

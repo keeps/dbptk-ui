@@ -27,6 +27,7 @@ public class FontAwesomeIconManager {
   public static final String ACTION_EDIT = "pencil";
   public static final String ACTION_DELETE = "trash-o";
   public static final String BLOB = "file";
+  public static final String USER = "user";
 
   public static String getTag(String icon) {
     return "<i class=\"fa fa-" + icon + "\"></i>";

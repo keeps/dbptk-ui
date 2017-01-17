@@ -14,11 +14,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang3.StringUtils;
+import org.roda.core.data.exceptions.RODAException;
+import org.roda.core.data.utils.JsonUtils;
 import org.roda.core.data.v2.index.filter.Filter;
 import org.roda.core.data.v2.index.sort.Sorter;
 import org.roda.core.data.v2.index.sublist.Sublist;
-import org.roda.core.data.exceptions.RODAException;
-import org.roda.core.data.utils.JsonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,7 +96,7 @@ public class ExportsResource {
     }
 
     // TODO: use viewerTable to convert solrColumnNames into displayColumnNames
-    InputStream rowsCSV = solrManager.findRowsCSV(null, tableUUID, filter, sorter, sublist, fields);
+    InputStream rowsCSV = solrManager.findRowsCSV(tableUUID, filter, sorter, sublist, fields);
 
     return ApiUtils.okResponse(new StreamResponse("file.csv", MediaType.APPLICATION_OCTET_STREAM, DownloadUtils
       .stream(rowsCSV)));

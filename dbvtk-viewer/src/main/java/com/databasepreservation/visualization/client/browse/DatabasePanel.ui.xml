@@ -19,6 +19,8 @@
                     <g:FlowPanel addStyleNames="browseContentFilePreviewPanel">
                         <g:FlowPanel addStyleNames="filePreviewToolbar">
                             <m:BreadcrumbPanel ui:field="breadcrumb" addStyleNames="browseContentBreadcrumb"/>
+                            <g:MenuBar ui:field="menu" />
+                            <g:SimplePanel addStyleNames="clear-both" />
                         </g:FlowPanel>
                         <g:SimplePanel addStyleNames="col_12 content" ui:field="rightPanelContainer" />
                     </g:FlowPanel>

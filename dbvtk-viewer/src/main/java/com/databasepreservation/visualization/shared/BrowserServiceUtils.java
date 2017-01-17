@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.roda.core.data.common.RodaConstants;
-
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerColumn;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerType;

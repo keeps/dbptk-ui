@@ -4,6 +4,10 @@
    Ungrouped
 ************************************************/
 
+.clear-both {
+    clear: both;
+}
+
 .db-info-th {
     font-weight: bolder;
     padding-right: 1rem;
@@ -178,16 +182,24 @@
 .browseContentFilePreviewPanel .filePreviewToolbar {
     min-height: 35px;
     background-color: #eee;
-    position: relative;
 }
 
 .browseContentFilePreviewPanel .filePreviewToolbar .browseContentBreadcrumb {
-    padding: 5px 70px 5px 20px;
+    padding: 5px 20px 5px 20px;
     margin: 0;
+    float: left;
 }
 
 .browseContentFilePreviewPanel.single .filePreviewToolbar .browseContentBreadcrumb {
     margin-left: 35px;
+}
+
+.main .wui-breadcrumbPanel .breadcrumb-user {
+    position: relative;
+    top: 0.3rem;
+    float: right;
+    color: #404142;
+    text-decoration: none;
 }
 
 .browseContentFilePreviewPanel .filePreviewToolbar .filePreviewToolbarIcons {
@@ -408,10 +420,6 @@
     text-align: center;
 }
 
-/**********************************************
-				TABLES
-************************************************/
-
 /* used in schema page to show table column information */
 .table-info {
     min-width: 100%;
@@ -579,4 +587,32 @@
     margin-left: auto;
     margin-right: auto;
     margin-top: 2rem;
+}
+
+/***********************************************
+   Login page
+************************************************/
+.loginPanel {
+    max-width: 500px;
+    min-width: 400px;
+}
+
+/**********************************************
+				MENU
+************************************************/
+.gwt-MenuBar {
+    float: right;
+    height: 35px;
+    background: none;
+}
+
+.gwt-MenuBar .gwt-MenuItem {
+    line-height: 2.5rem;
+    color: #404142;
+}
+
+.gwt-MenuBar .gwt-MenuItem-selected {
+    line-height: 2.5rem;
+    background-color: #5bbeff;
+    color: #fff;
 }

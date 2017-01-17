@@ -58,7 +58,7 @@ public class ManageResource {
     String mediaType = ApiUtils.getMediaType(acceptFormat, request);
     SolrManager solrManager = ViewerFactory.getSolrManager();
 
-    ViewerDatabase database = solrManager.retrieve(null, ViewerDatabase.class, databaseUUID);
+    ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
     if (database != null) {
       try {
         solrManager.removeDatabase(database);

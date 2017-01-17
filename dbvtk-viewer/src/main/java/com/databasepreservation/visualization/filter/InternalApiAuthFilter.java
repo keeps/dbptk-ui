@@ -17,7 +17,6 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.databasepreservation.visualization.utils.UserUtility;
 import org.apache.commons.lang3.StringUtils;
 import org.roda.core.data.common.RodaConstants;
 import org.roda.core.data.exceptions.AuthenticationDeniedException;
@@ -26,6 +25,8 @@ import org.roda.core.data.v2.common.Pair;
 import org.roda.core.data.v2.user.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.databasepreservation.visualization.utils.UserUtility;
 
 /**
  * Internal authentication filter for API requests.
@@ -89,8 +90,8 @@ public class InternalApiAuthFilter implements Filter {
    * @throws GenericException
    *           if some other error occurs.
    */
-  private User getBasicAuthUser(final HttpServletRequest request)
-    throws AuthenticationDeniedException, GenericException {
+  private User getBasicAuthUser(final HttpServletRequest request) throws AuthenticationDeniedException,
+    GenericException {
     final Pair<String, String> credentials = new BasicAuthRequestWrapper(request).getCredentials();
     if (credentials == null) {
       throw new AuthenticationDeniedException("No credentials!");

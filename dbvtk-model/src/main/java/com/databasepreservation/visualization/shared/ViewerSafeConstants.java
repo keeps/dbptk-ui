@@ -1,8 +1,8 @@
 package com.databasepreservation.visualization.shared;
 
+import org.roda.core.data.common.RodaConstants;
 import org.roda.core.data.v2.index.filter.BasicSearchFilterParameter;
 import org.roda.core.data.v2.index.filter.Filter;
-import org.roda.core.data.common.RodaConstants;
 
 /**
  * GWT-safe constants used in Database Viewer

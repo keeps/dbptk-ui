@@ -14,9 +14,6 @@ import org.slf4j.LoggerFactory;
 public class UserUtility {
   private static final Logger LOGGER = LoggerFactory.getLogger(UserUtility.class);
   public static final String RODA_USER = "RODA_USER";
-  private static String REGISTER_ACTIVE_PROPERTY = "ui.register.active";
-  private static String REGISTER_DEFAULT_GROUPS = "ui.register.defaultGroups";
-  private static String REGISTER_DEFAULT_ROLES = "ui.register.defaultRoles";
 
   private static LdapUtility LDAP_UTILITY;
 

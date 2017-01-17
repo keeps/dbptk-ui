@@ -60,22 +60,22 @@ public class SearchInfo implements Serializable {
       String value = solrColumnAndValue.get(solrColumnName);
       if (ViewerStringUtils.isNotBlank(value)) {
         // try to handle different types in different ways
-        if(field.getType().equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_NUMERIC_INTERVAL)){
+        if (field.getType().equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_NUMERIC_INTERVAL)) {
           fieldParameter = new LongRangeFilterParameter(solrColumnName, Long.valueOf(value), Long.valueOf(value));
-        } else if(field.getType().equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_DATETIME)){
-          //TODO: handle DATETIME keys
-        } else if(field.getType().equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_DATE)){
-          //TODO: handle DATE keys
-        } else if(field.getType().equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_TIME)){
-          //TODO: handle TIME keys
-        } else if(field.getType().equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_DATE_INTERVAL)){
-          //TODO: handle DATE INTERVAL keys
-        } else if(field.getType().equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_BOOLEAN)){
-          //TODO: handle BOOLEAN keys
+        } else if (field.getType().equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_DATETIME)) {
+          // TODO: handle DATETIME keys
+        } else if (field.getType().equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_DATE)) {
+          // TODO: handle DATE keys
+        } else if (field.getType().equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_TIME)) {
+          // TODO: handle TIME keys
+        } else if (field.getType().equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_DATE_INTERVAL)) {
+          // TODO: handle DATE INTERVAL keys
+        } else if (field.getType().equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_BOOLEAN)) {
+          // TODO: handle BOOLEAN keys
         }
 
         // default: set is as a BasicSearchFilterParameter
-        if(fieldParameter == null){
+        if (fieldParameter == null) {
           fieldParameter = new BasicSearchFilterParameter(solrColumnName, solrColumnAndValue.get(solrColumnName));
         }
       }

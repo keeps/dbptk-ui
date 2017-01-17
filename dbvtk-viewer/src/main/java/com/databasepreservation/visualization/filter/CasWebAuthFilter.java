@@ -18,11 +18,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jasig.cas.client.util.CommonUtils;
+import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.v2.user.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.databasepreservation.visualization.shared.client.Tools.HistoryManager;
 import com.databasepreservation.visualization.utils.UserUtility;
 
 /**
@@ -88,8 +88,7 @@ public class CasWebAuthFilter implements Filter {
 
     final Principal principal = httpRequest.getUserPrincipal();
     if (principal != null) {
-      User user = new User(principal.getName());
-      UserUtility.setUser(httpRequest, user);
+      UserUtility.setUser(httpRequest, getUser(principal.getName()));
     }
 
     if (url.endsWith("/login")) {
@@ -112,18 +111,26 @@ public class CasWebAuthFilter implements Filter {
       UserUtility.logout(httpRequest);
 
       final StringBuilder b = new StringBuilder();
-      b.append(url.substring(0, url.indexOf("logout")));
-      if (StringUtils.isNotBlank(locale)) {
-        b.append("?locale=").append(locale);
-      }
-      b.append("#").append(HistoryManager.linkToDatabaseList());
+      b.append(url.substring(0, url.indexOf("logout"))).append("#");
 
-      httpResponse.sendRedirect(CommonUtils.constructRedirectUrl(casLogoutURL, "service",
-        b.toString(), false, false));
+      httpResponse.sendRedirect(CommonUtils.constructRedirectUrl(casLogoutURL, "service", b.toString(), false, false));
 
     } else {
       chain.doFilter(request, response);
     }
 
+  }
+
+  private User getUser(final String name) {
+    User user;
+    try {
+      user = UserUtility.getLdapUtility().getUser(name);
+      LOGGER.debug("User principal and user exist (" + name + ")");
+    } catch (final GenericException e) {
+      LOGGER.debug("Error getting user '" + name + "' - " + e.getMessage(), e);
+      LOGGER.debug("User principal exist but user doesn't (" + name + ")");
+      user = UserUtility.getGuest();
+    }
+    return user;
   }
 }

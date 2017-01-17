@@ -70,7 +70,6 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
       LOGGER.debug("Finished instantiating essential directories");
 
       // load core configurations
-      viewerConfiguration = new CompositeConfiguration();
       configurationFiles = new ArrayList<String>();
       viewerPropertiesCache = new HashMap<>();
       addConfiguration("dbvtk-viewer.properties");

@@ -42,13 +42,17 @@ public class DatabaseSidebar extends Composite {
   /**
    * Creates a new DatabaseSidebar, rarely hitting the database more than once
    * for each database.
-   * 
+   *
    * @param databaseUUID
    *          the database UUID
    * @return a new DatabaseSidebar
    */
   public static DatabaseSidebar getInstance(String databaseUUID) {
     String code = databaseUUID;
+
+    if (code == null) {
+      return getEmptyInstance();
+    }
 
     DatabaseSidebar instance = instances.get(code);
     if (instance == null || instance.database == null) {
@@ -60,6 +64,16 @@ public class DatabaseSidebar extends Composite {
       return new DatabaseSidebar(instance);
     }
     return instance;
+  }
+
+  /**
+   * Creates a new (dummy) DatabaseSidebar that is not visible. This method
+   * exists so that pages can opt for not using a sidebar at all.
+   *
+   * @return a new invisible DatabaseSidebar
+   */
+  public static DatabaseSidebar getEmptyInstance() {
+    return new DatabaseSidebar();
   }
 
   interface DatabaseSidebarUiBinder extends UiBinder<Widget, DatabaseSidebar> {
@@ -84,7 +98,7 @@ public class DatabaseSidebar extends Composite {
   /**
    * Clone constructor, because the same DatabaseSidebar can not be child in
    * more than one widget
-   * 
+   *
    * @param other
    *          the DatabaseSidebar used in another widget
    */
@@ -93,6 +107,14 @@ public class DatabaseSidebar extends Composite {
     database = other.database;
     searchInputBox.setText(other.searchInputBox.getText());
     init();
+  }
+
+  /**
+   * Empty constructor, for pages that do not have a sidebar
+   */
+  private DatabaseSidebar() {
+    initWidget(uiBinder.createAndBindUi(this));
+    this.setVisible(false);
   }
 
   /**

@@ -22,6 +22,11 @@
             <groupId>com.databasepreservation.visualization</groupId>
             <artifactId>dbvtk-model</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.databasepreservation.visualization</groupId>
+            <artifactId>dbvtk-model</artifactId>
+            <classifier>sources</classifier>
+        </dependency>
 
         <!-- gwt -->
         <dependency>
@@ -144,6 +149,11 @@
             <artifactId>roda-common-data</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.roda-project</groupId>
+            <artifactId>roda-common-data</artifactId>
+            <classifier>sources</classifier>
+        </dependency>
+        <dependency>
             <groupId>org.w3c</groupId>
             <artifactId>w3c-utils</artifactId>
         </dependency>
@@ -172,7 +182,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>gwt-maven-plugin</artifactId>
-                <version>2.7.0</version>
+                <version>${gwtVersion}</version>
                 <executions>
                     <execution>
                         <goals>
@@ -185,6 +195,7 @@
                   gwt-maven-plugin documentation at codehaus.org -->
                 <configuration>
                     <runTarget>index.html</runTarget>
+                    <sourceLevel>1.7</sourceLevel>
                     <modules>
                         <module>com.databasepreservation.visualization.dbvtkviewer</module>
                     </modules>

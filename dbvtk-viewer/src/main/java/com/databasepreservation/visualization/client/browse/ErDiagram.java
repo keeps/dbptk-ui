@@ -16,7 +16,11 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -66,8 +70,12 @@ public class ErDiagram extends Composite {
     databaseUUID = database.getUUID();
     initWidget(uiBinder.createAndBindUi(this));
 
-    contentItems.add(new HTMLPanel(CommonClientUtils.getFieldHTML("Using the diagram",
-      "The diagram shows the tables and relations in this schema. Each circle in the diagram represents a table, where bigger circles represent tables with more rows and columns and their colour is darker when they have more relations to other tables.")));
+    contentItems
+      .add(new HTMLPanel(
+        CommonClientUtils
+          .getFieldHTML(
+            "Using the diagram",
+            "The diagram shows the tables and relations in this schema. Each circle in the diagram represents a table, where bigger circles represent tables with more rows and columns and their colour is darker when they have more relations to other tables.")));
 
     SimplePanel config = new SimplePanel();
     config.getElement().setId("erconfig");
@@ -194,8 +202,8 @@ public class ErDiagram extends Composite {
           // .adjustSize(getNormalizedValue(visNode.numRelationsTotal,
           // minRelationsTotal, maxRelationsTotal, 10, 50));
 
-          visNode.adjustBackgroundColor(
-            getNormalizedValue(visNode.numRelationsTotal, minRelationsTotal, maxRelationsTotal, 0.01, 0.70));
+          visNode.adjustBackgroundColor(getNormalizedValue(visNode.numRelationsTotal, minRelationsTotal,
+            maxRelationsTotal, 0.01, 0.70));
 
           if (visNode.numColumnsAndRows == 0) {
             visNode.adjustSize(20);

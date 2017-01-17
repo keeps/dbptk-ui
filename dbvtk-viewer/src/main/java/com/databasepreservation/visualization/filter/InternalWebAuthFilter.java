@@ -15,11 +15,12 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.databasepreservation.visualization.shared.client.Tools.HistoryManager;
-import com.databasepreservation.visualization.utils.UserUtility;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.databasepreservation.visualization.shared.client.Tools.HistoryManager;
+import com.databasepreservation.visualization.utils.UserUtility;
 
 /**
  * Internal authentication filter for web requests.
@@ -70,16 +71,8 @@ public class InternalWebAuthFilter implements Filter {
       UserUtility.logout(httpRequest);
 
       final StringBuilder b = new StringBuilder();
-      b.append("/");
-
-      if (StringUtils.isNotBlank(locale)) {
-        b.append("?locale=").append(locale);
-      }
-
-      b.append("#").append(HistoryManager.linkToDatabaseList());
-
+      b.append("/").append("#");
       httpResponse.sendRedirect(b.toString());
-
     } else {
       chain.doFilter(request, response);
     }

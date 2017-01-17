@@ -3,6 +3,7 @@ package com.databasepreservation.visualization.client.main;
 import java.util.List;
 import java.util.Stack;
 
+import com.databasepreservation.visualization.shared.client.ClientLogger;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Event;
@@ -14,6 +15,7 @@ import com.google.gwt.user.client.ui.Widget;
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class BreadcrumbPanel extends FlowPanel {
+  private ClientLogger logger = new ClientLogger(getClass().getName());
 
   private List<BreadcrumbItem> currentpath;
 
@@ -83,7 +85,6 @@ public class BreadcrumbPanel extends FlowPanel {
       breadcrumb.setLast(i == breadcrumbs.size() - 1);
       add(breadcrumb);
     }
-
   }
 
   protected class Breadcrumb extends HTML {

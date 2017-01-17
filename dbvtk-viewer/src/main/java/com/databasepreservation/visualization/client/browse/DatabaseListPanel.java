@@ -8,15 +8,34 @@ import com.databasepreservation.visualization.shared.client.Tools.HistoryManager
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class DatabaseListPanel extends Composite {
+public class DatabaseListPanel extends RightPanel {
+  /**
+   * Uses BreadcrumbManager to show available information in the breadcrumbPanel
+   *
+   * @param breadcrumb
+   *          the BreadcrumbPanel for this database
+   */
+  @Override
+  public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
+    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forDatabases());
+  }
+
   interface DatabaseListPanelUiBinder extends UiBinder<Widget, DatabaseListPanel> {
+  }
+
+  private static DatabaseListPanel instance = null;
+
+  public static DatabaseListPanel getInstance() {
+    if (instance == null) {
+      instance = new DatabaseListPanel();
+    }
+    return instance;
   }
 
   private static DatabaseListPanelUiBinder uiBinder = GWT.create(DatabaseListPanelUiBinder.class);
@@ -24,14 +43,9 @@ public class DatabaseListPanel extends Composite {
   @UiField(provided = true)
   DatabaseList databaseList;
 
-  @UiField
-  BreadcrumbPanel breadcrumb;
-
   public DatabaseListPanel() {
     databaseList = new DatabaseList();
     initWidget(uiBinder.createAndBindUi(this));
-
-    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forDatabases());
 
     databaseList.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
       @Override

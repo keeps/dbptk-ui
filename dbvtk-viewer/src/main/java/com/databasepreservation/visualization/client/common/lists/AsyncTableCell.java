@@ -11,16 +11,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.roda.core.data.v2.index.facet.Facets;
-import org.roda.core.data.v2.index.filter.Filter;
-import org.roda.core.data.v2.index.sort.SortParameter;
-import org.roda.core.data.v2.index.sort.Sorter;
-import org.roda.core.data.v2.index.sublist.Sublist;
 import org.roda.core.data.v2.index.IndexResult;
 import org.roda.core.data.v2.index.IsIndexed;
+import org.roda.core.data.v2.index.facet.Facets;
+import org.roda.core.data.v2.index.filter.Filter;
 import org.roda.core.data.v2.index.select.SelectedItems;
 import org.roda.core.data.v2.index.select.SelectedItemsFilter;
 import org.roda.core.data.v2.index.select.SelectedItemsList;
+import org.roda.core.data.v2.index.sort.SortParameter;
+import org.roda.core.data.v2.index.sort.Sorter;
+import org.roda.core.data.v2.index.sublist.Sublist;
 
 import com.databasepreservation.visualization.shared.client.ClientLogger;
 import com.databasepreservation.visualization.shared.client.widgets.MyCellTableResources;
@@ -67,7 +67,6 @@ import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.Range;
-import com.google.gwt.view.client.RowCountChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.google.gwt.view.client.CellPreviewEvent.Handler;
 

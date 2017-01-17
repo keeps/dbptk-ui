@@ -6,8 +6,8 @@ package com.databasepreservation.visualization.client.common.lists;
 
 import java.io.Serializable;
 
-import org.roda.core.data.v2.index.sublist.Sublist;
 import org.roda.core.data.v2.index.IndexResult;
+import org.roda.core.data.v2.index.sublist.Sublist;
 
 import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.client.rpc.AsyncCallback;

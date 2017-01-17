@@ -5,33 +5,23 @@
              xmlns:s='urn:import:com.databasepreservation.visualization.client.common.search'
              xmlns:lists="urn:import:com.databasepreservation.visualization.client.common.lists">
 
-
-    loginUsername: Username
-    loginPassword: Password
-    loginRecoverPassword: Recover password
-    loginRegister: Sign up
-    loginLogin: Login
-
-
     <g:FlowPanel addStyleNames="browseContent wrapper skip_padding">
         <g:FlowPanel addStyleNames="row full_width skip_padding">
 
             <g:FlowPanel addStyleNames="loginPanel">
                 <g:HTML>
-                    <h1><ui:text>Login</ui:text></h1>
+                    <h1><ui:msg>Login</ui:msg></h1>
                 </g:HTML>
                 <g:FlowPanel>
-                    <g:Label addStyleNames="form-label"><ui:text>Username</ui:text></g:Label>
-                    <g:TextBox ui:field="username" addStyleNames="fieldTextBox"></g:TextBox>
-                    <g:Label addStyleNames="form-label"><ui:text>Password</ui:text></g:Label>
+                    <g:Label addStyleNames="form-label"><ui:msg>Username</ui:msg></g:Label>
+                    <g:TextBox ui:field="username" addStyleNames="fieldTextBox"/>
+                    <g:Label addStyleNames="form-label"><ui:msg>Password</ui:msg></g:Label>
                     <g:PasswordTextBox ui:field="password"
-                                       addStyleNames="fieldTextBox"></g:PasswordTextBox>
+                                       addStyleNames="fieldTextBox"/>
                 </g:FlowPanel>
-                <g:Label ui:field="error" addStyleNames="login-error"></g:Label>
+                <g:Label ui:field="error" addStyleNames="login-error"/>
                 <g:FlowPanel addStyleNames="login-buttons">
-                    <g:Button ui:field="recover" addStyleNames="btn btn-link login-link"><ui:text>Recover password</ui:text></g:Button>
-                    <g:Button ui:field="register" addStyleNames="btn btn-link login-link"><ui:text>Sign up</ui:text></g:Button>
-                    <g:Button ui:field="login" addStyleNames="btn btn-play login-button"><ui:text>Login</ui:text></g:Button>
+                    <g:Button ui:field="login" addStyleNames="btn btn-play login-button"><ui:msg>Login</ui:msg></g:Button>
                 </g:FlowPanel>
             </g:FlowPanel>
 

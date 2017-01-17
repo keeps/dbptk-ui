@@ -2,20 +2,18 @@ package com.databasepreservation.visualization.client.common.lists;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.roda.core.data.v2.common.Pair;
+import org.roda.core.data.v2.index.IndexResult;
 import org.roda.core.data.v2.index.facet.Facets;
 import org.roda.core.data.v2.index.filter.Filter;
 import org.roda.core.data.v2.index.sort.Sorter;
 import org.roda.core.data.v2.index.sublist.Sublist;
-import org.roda.core.data.v2.common.Pair;
-import org.roda.core.data.v2.index.IndexResult;
 
-import com.databasepreservation.utils.JodaUtils;
 import com.databasepreservation.visualization.client.BrowserService;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerColumn;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
@@ -135,16 +133,19 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
                 ret = SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.BLOB,
                   "Large binary object"));
                 break;
-//              case DATETIME:
-//                ret = SafeHtmlUtils.fromString(JodaUtils.solrDateTimeDisplay(JodaUtils.solrDateParse(value)));
-//                break;
-//              case DATETIME_JUST_DATE:
-//                ret = SafeHtmlUtils.fromString(JodaUtils.solrDateDisplay(JodaUtils.solrDateParse(value)));
-//                break;
-//              case DATETIME_JUST_TIME:
-//                ret = SafeHtmlUtils.fromString(JodaUtils.solrTimeDisplay(JodaUtils.solrDateParse(value)));
-//                ret = SafeHtmlUtils.fromString(new Date().)
-//                break;
+              // case DATETIME:
+              // ret =
+              // SafeHtmlUtils.fromString(JodaUtils.solrDateTimeDisplay(JodaUtils.solrDateParse(value)));
+              // break;
+              // case DATETIME_JUST_DATE:
+              // ret =
+              // SafeHtmlUtils.fromString(JodaUtils.solrDateDisplay(JodaUtils.solrDateParse(value)));
+              // break;
+              // case DATETIME_JUST_TIME:
+              // ret =
+              // SafeHtmlUtils.fromString(JodaUtils.solrTimeDisplay(JodaUtils.solrDateParse(value)));
+              // ret = SafeHtmlUtils.fromString(new Date().)
+              // break;
               case BOOLEAN:
               case ENUMERATION:
               case TIME_INTERVAL:
