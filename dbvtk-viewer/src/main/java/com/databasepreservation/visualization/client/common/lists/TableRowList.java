@@ -54,13 +54,12 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
   private Sublist currentSubList;
   private Sorter currentSorter;
 
-  public TableRowList(ViewerDatabase database, ViewerTable table) {
-    this(database, table, null, null, null, false, false);
-  }
+  private final ViewerDatabase database;
 
   public TableRowList(ViewerDatabase database, ViewerTable table, Filter filter, Facets facets, String summary,
     boolean selectable, boolean exportable) {
     super(filter, false, facets, summary, selectable, exportable, new Pair<>(database, table));
+    this.database = database;
   }
 
   public void setColumnVisibility(Map<String, Boolean> columnDisplayNameToVisibleState) {
@@ -198,8 +197,8 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
 
     GWT.log("Filter: " + filter);
 
-    BrowserService.Util.getInstance().findRows(ViewerRow.class.getName(), table.getUUID(), filter, currentSorter,
-      sublist, getFacets(), LocaleInfo.getCurrentLocale().getLocaleName(), callback);
+    BrowserService.Util.getInstance().findRows(database.getUUID(), table.getUUID(), filter, currentSorter, sublist,
+      getFacets(), LocaleInfo.getCurrentLocale().getLocaleName(), callback);
   }
 
   @Override

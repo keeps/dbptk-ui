@@ -124,7 +124,7 @@ public class DatabaseSidebar extends Composite {
     initWidget(uiBinder.createAndBindUi(this));
     searchInit();
 
-    BrowserService.Util.getInstance().retrieve(ViewerDatabase.class.getName(), databaseUUID,
+    BrowserService.Util.getInstance().retrieve(databaseUUID, ViewerDatabase.class.getName(), databaseUUID,
       new DefaultAsyncCallback<IsIndexed>() {
         @Override
         public void onSuccess(IsIndexed result) {

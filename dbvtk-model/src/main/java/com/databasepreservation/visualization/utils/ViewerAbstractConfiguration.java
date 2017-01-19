@@ -42,13 +42,21 @@ public abstract class ViewerAbstractConfiguration {
     return configuration.getInt(getConfigurationKey(keyParts), defaultValue);
   }
 
+  public int getViewerConfigurationAsInt(String... keyParts) {
+    return getViewerConfigurationAsInt(0, keyParts);
+  }
+
+  public boolean getViewerConfigurationAsBoolean(boolean defaultValue, String... keyParts) {
+    return configuration.getBoolean(getConfigurationKey(keyParts), defaultValue);
+  }
+
+  public boolean getViewerConfigurationAsBoolean(String... keyParts) {
+    return getViewerConfigurationAsBoolean(false, keyParts);
+  }
+
   public List<String> getViewerConfigurationAsList(String... keyParts) {
     String[] array = configuration.getStringArray(getConfigurationKey(keyParts));
     return Arrays.asList(array).stream().filter(v -> StringUtils.isNotBlank(v)).collect(Collectors.toList());
-  }
-
-  public int getViewerConfigurationAsInt(String... keyParts) {
-    return getViewerConfigurationAsInt(0, keyParts);
   }
 
   /*

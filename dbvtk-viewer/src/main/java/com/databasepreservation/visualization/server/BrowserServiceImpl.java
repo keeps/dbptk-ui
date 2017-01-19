@@ -21,6 +21,8 @@ import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.visualization.client.BrowserService;
 import com.databasepreservation.visualization.client.SavedSearch;
+import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
+import com.databasepreservation.visualization.client.ViewerStructure.ViewerRow;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable;
 import com.databasepreservation.visualization.client.common.search.SearchField;
 import com.databasepreservation.visualization.client.common.search.SearchInfo;
@@ -51,59 +53,68 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
     return html.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
   }
 
+  public IndexResult<ViewerDatabase> findDatabases(Filter filter, Sorter sorter, Sublist sublist, Facets facets,
+    String localeString) throws GenericException, AuthorizationDeniedException, RequestNotValidException {
+    UserUtility.Authorization.allowIfAdmin(getThreadLocalRequest());
+    return ViewerFactory.getSolrManager().find(ViewerDatabase.class, filter, sorter, sublist, facets);
+  }
+
+  public IndexResult<SavedSearch> findSavedSearches(String databaseUUID, Filter filter, Sorter sorter, Sublist sublist,
+    Facets facets, String localeString) throws GenericException, AuthorizationDeniedException,
+    RequestNotValidException, NotFoundException {
+    UserUtility.Authorization
+      .checkFilteringPermission(getThreadLocalRequest(), databaseUUID, filter, SavedSearch.class);
+    return ViewerFactory.getSolrManager().find(SavedSearch.class, filter, sorter, sublist, facets);
+  }
+
   @Override
-  public <T extends IsIndexed> IndexResult<T> find(String classNameToReturn, Filter filter, Sorter sorter,
+  public <T extends IsIndexed> T retrieve(String databaseUUID, String classNameToReturn, String id)
+    throws AuthorizationDeniedException, GenericException, NotFoundException {
+    Class<T> classToReturn = parseClass(classNameToReturn);
+    T result = ViewerFactory.getSolrManager().retrieve(classToReturn, id);
+    UserUtility.Authorization.checkRetrievalPermission(getThreadLocalRequest(), databaseUUID, classToReturn, result);
+    return result;
+  }
+
+  @Override
+  public IndexResult<ViewerRow> findRows(String databaseUUID, String tableUUID, Filter filter, Sorter sorter,
     Sublist sublist, Facets facets, String localeString) throws GenericException, AuthorizationDeniedException,
     RequestNotValidException {
-    User user = UserUtility.getUser(getThreadLocalRequest());
-    Class<T> classToReturn = parseClass(classNameToReturn);
-    return ViewerFactory.getSolrManager().find(classToReturn, filter, sorter, sublist, facets);
+    try {
+      ViewerDatabase database = ViewerFactory.getSolrManager().retrieve(ViewerDatabase.class, databaseUUID);
+      UserUtility.Authorization.checkTableAccessPermission(getThreadLocalRequest(), database, tableUUID);
+    } catch (NotFoundException e) {
+      throw new RequestNotValidException("Invalid database UUID: " + databaseUUID, e);
+    }
+
+    return ViewerFactory.getSolrManager().findRows(ViewerRow.class, tableUUID, filter, sorter, sublist, facets);
   }
 
   @Override
-  public <T extends IsIndexed> Long count(String classNameToReturn, Filter filter) throws AuthorizationDeniedException,
+  public Long countRows(String databaseUUID, String tableUUID, Filter filter) throws AuthorizationDeniedException,
     GenericException, RequestNotValidException {
-    User user = UserUtility.getUser(getThreadLocalRequest());
-    Class<T> classToReturn = parseClass(classNameToReturn);
-    return ViewerFactory.getSolrManager().count(classToReturn, filter);
+    try {
+      ViewerDatabase database = ViewerFactory.getSolrManager().retrieve(ViewerDatabase.class, databaseUUID);
+      UserUtility.Authorization.checkTableAccessPermission(getThreadLocalRequest(), database, tableUUID);
+    } catch (NotFoundException e) {
+      throw new RequestNotValidException("Invalid database UUID: " + databaseUUID, e);
+    }
+
+    return ViewerFactory.getSolrManager().countRows(ViewerRow.class, tableUUID, filter);
   }
 
   @Override
-  public <T extends IsIndexed> T retrieve(String classNameToReturn, String id) throws AuthorizationDeniedException,
-    GenericException, NotFoundException {
-    User user = UserUtility.getUser(getThreadLocalRequest());
-    Class<T> classToReturn = parseClass(classNameToReturn);
-    return ViewerFactory.getSolrManager().retrieve(classToReturn, id);
-  }
-
-  @Override
-  public <T extends IsIndexed> IndexResult<T> findRows(String classNameToReturn, String tableUUID, Filter filter,
-    Sorter sorter, Sublist sublist, Facets facets, String localeString) throws GenericException,
-    AuthorizationDeniedException, RequestNotValidException {
-    User user = UserUtility.getUser(getThreadLocalRequest());
-    Class<T> classToReturn = parseClass(classNameToReturn);
-    return ViewerFactory.getSolrManager().findRows(classToReturn, tableUUID, filter, sorter, sublist, facets);
-  }
-
-  @Override
-  public <T extends IsIndexed> Long countRows(String classNameToReturn, String tableUUID, Filter filter)
-    throws AuthorizationDeniedException, GenericException, RequestNotValidException {
-    User user = UserUtility.getUser(getThreadLocalRequest());
-    Class<T> classToReturn = parseClass(classNameToReturn);
-    return ViewerFactory.getSolrManager().countRows(classToReturn, tableUUID, filter);
-  }
-
-  @Override
-  public <T extends IsIndexed> T retrieveRows(String classNameToReturn, String tableUUID, String rowUUID)
+  public ViewerRow retrieveRows(String databaseUUID, String tableUUID, String rowUUID)
     throws AuthorizationDeniedException, GenericException, NotFoundException {
-    User user = UserUtility.getUser(getThreadLocalRequest());
-    Class<T> classToReturn = parseClass(classNameToReturn);
-    return ViewerFactory.getSolrManager().retrieveRows(classToReturn, tableUUID, rowUUID);
+    ViewerDatabase database = ViewerFactory.getSolrManager().retrieve(ViewerDatabase.class, databaseUUID);
+    UserUtility.Authorization.checkTableAccessPermission(getThreadLocalRequest(), database, tableUUID);
+    return ViewerFactory.getSolrManager().retrieveRows(ViewerRow.class, tableUUID, rowUUID);
   }
 
   @Override
   public String getSolrQueryString(Filter filter, Sorter sorter, Sublist sublist, Facets facets)
     throws GenericException, RequestNotValidException {
+    // does not retrieve data from index => safe to ignore authorization
     return SolrUtils.getSolrQuery(filter, sorter, sublist, facets);
   }
 
@@ -111,7 +122,9 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
   public String saveSearch(String name, String description, String tableUUID, String tableName, String databaseUUID,
     SearchInfo searchInfo) throws AuthorizationDeniedException, GenericException, RequestNotValidException,
     NotFoundException {
-    User user = UserUtility.getUser(getThreadLocalRequest());
+    ViewerDatabase database = ViewerFactory.getSolrManager().retrieve(ViewerDatabase.class, databaseUUID);
+    UserUtility.Authorization.checkTableAccessPermission(getThreadLocalRequest(), database, tableUUID);
+
     String searchInfoJson = JsonUtils.getJsonFromObject(searchInfo);
 
     SavedSearch savedSearch = new SavedSearch();
@@ -129,23 +142,34 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
   }
 
   @Override
-  public void editSearch(String savedSearchUUID, String name, String description) throws AuthorizationDeniedException,
-    GenericException, RequestNotValidException, NotFoundException {
-    User user = UserUtility.getUser(getThreadLocalRequest());
+  public void editSearch(String databaseUUID, String savedSearchUUID, String name, String description)
+    throws AuthorizationDeniedException, GenericException, RequestNotValidException, NotFoundException {
+    // get the saved search
+    SavedSearch savedSearch = ViewerFactory.getSolrManager().retrieve(SavedSearch.class, savedSearchUUID);
+    // authorise viewing the saved search
+    UserUtility.Authorization.checkSavedSearchPermission(getThreadLocalRequest(), databaseUUID, savedSearch);
+    // authorise editing the saved search
+    UserUtility.Authorization.allowIfAdminOrManager(getThreadLocalRequest());
 
     ViewerFactory.getSolrManager().editSavedSearch(savedSearchUUID, name, description);
   }
 
   @Override
-  public void deleteSearch(String savedSearchUUID) throws AuthorizationDeniedException, GenericException,
-    RequestNotValidException, NotFoundException {
-    User user = UserUtility.getUser(getThreadLocalRequest());
+  public void deleteSearch(String databaseUUID, String savedSearchUUID) throws AuthorizationDeniedException,
+    GenericException, RequestNotValidException, NotFoundException {
+    // get the saved search
+    SavedSearch savedSearch = ViewerFactory.getSolrManager().retrieve(SavedSearch.class, savedSearchUUID);
+    // authorise viewing the saved search
+    UserUtility.Authorization.checkSavedSearchPermission(getThreadLocalRequest(), databaseUUID, savedSearch);
+    // authorise editing the saved search
+    UserUtility.Authorization.allowIfAdminOrManager(getThreadLocalRequest());
 
     ViewerFactory.getSolrManager().deleteSavedSearch(savedSearchUUID);
   }
 
   @Override
   public List<SearchField> getSearchFields(ViewerTable viewerTable) throws GenericException {
+    // does not retrieve data from index => safe to ignore authorization
     return BrowserServiceUtils.getSearchFieldsFromTable(viewerTable);
   }
 

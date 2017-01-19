@@ -128,7 +128,7 @@ public class DatabasePanel extends Composite {
   }
 
   private void loadPanelWithDatabase(final RightPanelLoader rightPanelLoader) {
-    BrowserService.Util.getInstance().retrieve(ViewerDatabase.class.getName(), databaseUUID,
+    BrowserService.Util.getInstance().retrieve(databaseUUID, ViewerDatabase.class.getName(), databaseUUID,
       new DefaultAsyncCallback<IsIndexed>() {
         @Override
         public void onSuccess(IsIndexed result) {

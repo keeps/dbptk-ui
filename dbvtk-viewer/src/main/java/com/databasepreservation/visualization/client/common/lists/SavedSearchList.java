@@ -46,8 +46,12 @@ public class SavedSearchList extends BasicAsyncTableCell<SavedSearch> {
   private TextColumn<SavedSearch> tableNameColumn;
   private Column<SavedSearch, SavedSearch> actionsColumn;
 
-  public SavedSearchList(Filter filter, Facets facets, String summary, boolean selectable, boolean exportable) {
+  private final String databaseUUID;
+
+  public SavedSearchList(String databaseUUID, Filter filter, Facets facets, String summary, boolean selectable,
+    boolean exportable) {
     super(filter, facets, summary, selectable, exportable);
+    this.databaseUUID = databaseUUID;
   }
 
   @Override
@@ -93,13 +97,14 @@ public class SavedSearchList extends BasicAsyncTableCell<SavedSearch> {
       new FontAwesomeActionCell.Delegate<SavedSearch>() {
         @Override
         public void execute(final SavedSearch object) {
-          BrowserService.Util.getInstance().deleteSearch(object.getUUID(), new DefaultAsyncCallback<Void>() {
-            @Override
-            public void onSuccess(Void result) {
-              GWT.log("deleted " + object.getUUID());
-              SavedSearchList.this.refresh();
-            }
-          });
+          BrowserService.Util.getInstance().deleteSearch(databaseUUID, object.getUUID(),
+            new DefaultAsyncCallback<Void>() {
+              @Override
+              public void onSuccess(Void result) {
+                GWT.log("deleted " + object.getUUID());
+                SavedSearchList.this.refresh();
+              }
+            });
         }
       }));
     CompositeCell<SavedSearch> compositeCell = new CompositeCell<>(cells);
@@ -157,7 +162,7 @@ public class SavedSearchList extends BasicAsyncTableCell<SavedSearch> {
 
     GWT.log("Filter: " + filter);
 
-    BrowserService.Util.getInstance().find(SavedSearch.class.getName(), filter, sorter, sublist, getFacets(),
+    BrowserService.Util.getInstance().findSavedSearches(databaseUUID, filter, sorter, sublist, getFacets(),
       LocaleInfo.getCurrentLocale().getLocaleName(), callback);
 
   }

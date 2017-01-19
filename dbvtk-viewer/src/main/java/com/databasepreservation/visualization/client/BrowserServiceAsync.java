@@ -12,6 +12,8 @@ import org.roda.core.data.v2.index.sort.Sorter;
 import org.roda.core.data.v2.index.sublist.Sublist;
 import org.roda.core.data.v2.user.User;
 
+import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
+import com.databasepreservation.visualization.client.ViewerStructure.ViewerRow;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable;
 import com.databasepreservation.visualization.client.common.search.SearchField;
 import com.databasepreservation.visualization.client.common.search.SearchInfo;
@@ -37,52 +39,32 @@ public interface BrowserServiceAsync {
     }
   }
 
-  /**
-   * GWT-RPC service asynchronous (client-side) interface
-   * 
-   * @see com.databasepreservation.visualization.client.BrowserService
-   */
-  <T extends IsIndexed> void find(java.lang.String classNameToReturn, Filter filter, Sorter sorter, Sublist sublist,
-    Facets facets, java.lang.String localeString, AsyncCallback<org.roda.core.data.v2.index.IndexResult<T>> callback);
+  // databases
 
-  /**
-   * GWT-RPC service asynchronous (client-side) interface
-   * 
-   * @see com.databasepreservation.visualization.client.BrowserService
-   */
-  void count(java.lang.String classNameToReturn, Filter filter, AsyncCallback<java.lang.Long> callback);
+  void findDatabases(Filter filter, Sorter sorter, Sublist sublist, Facets facets, java.lang.String localeString,
+    AsyncCallback<org.roda.core.data.v2.index.IndexResult<ViewerDatabase>> callback);
 
-  /**
-   * GWT-RPC service asynchronous (client-side) interface
-   * 
-   * @see com.databasepreservation.visualization.client.BrowserService
-   */
-  <T extends IsIndexed> void retrieve(java.lang.String classNameToReturn, java.lang.String id, AsyncCallback<T> callback);
+  // saved searches
 
-  /**
-   * GWT-RPC service asynchronous (client-side) interface
-   * 
-   * @see com.databasepreservation.visualization.client.BrowserService
-   */
-  <T extends IsIndexed> void findRows(java.lang.String classNameToReturn, java.lang.String tableUUID, Filter filter,
+  void findSavedSearches(java.lang.String databaseUUID, Filter filter, Sorter sorter, Sublist sublist, Facets facets,
+    java.lang.String localeString, AsyncCallback<org.roda.core.data.v2.index.IndexResult<SavedSearch>> callback);
+
+  // Any kind
+
+  <T extends IsIndexed> void retrieve(String databaseUUID, java.lang.String classNameToReturn, java.lang.String id,
+    AsyncCallback<T> callback);
+
+  // rows
+
+  <T extends IsIndexed> void findRows(java.lang.String databaseUUID, java.lang.String tableUUID, Filter filter,
     Sorter sorter, Sublist sublist, Facets facets, java.lang.String localeString,
-    AsyncCallback<org.roda.core.data.v2.index.IndexResult<T>> callback);
+    AsyncCallback<org.roda.core.data.v2.index.IndexResult<ViewerRow>> callback);
 
-  /**
-   * GWT-RPC service asynchronous (client-side) interface
-   * 
-   * @see com.databasepreservation.visualization.client.BrowserService
-   */
-  void countRows(java.lang.String classNameToReturn, java.lang.String tableUUID, Filter filter,
+  void countRows(java.lang.String databaseUUID, java.lang.String tableUUID, Filter filter,
     AsyncCallback<java.lang.Long> callback);
 
-  /**
-   * GWT-RPC service asynchronous (client-side) interface
-   * 
-   * @see com.databasepreservation.visualization.client.BrowserService
-   */
-  <T extends IsIndexed> void retrieveRows(java.lang.String classNameToReturn, java.lang.String tableUUID,
-    java.lang.String rowUUID, AsyncCallback<T> callback);
+  void retrieveRows(java.lang.String databaseUUID, java.lang.String tableUUID, java.lang.String rowUUID,
+    AsyncCallback<ViewerRow> callback);
 
   void getSearchFields(ViewerTable viewerTable, AsyncCallback<List<SearchField>> async);
 
@@ -92,9 +74,10 @@ public interface BrowserServiceAsync {
   void saveSearch(String name, String description, String tableUUID, String tableName, String databaseUUID,
     SearchInfo searchInfo, AsyncCallback<String> async);
 
-  void editSearch(String savedSearchUUID, String name, String description, AsyncCallback<Void> async);
+  void editSearch(String databaseUUID, String savedSearchUUID, String name, String description,
+    AsyncCallback<Void> async);
 
-  void deleteSearch(String savedSearchUUID, AsyncCallback<Void> async);
+  void deleteSearch(String databaseUUID, String savedSearchUUID, AsyncCallback<Void> async);
 
   /**
    * Get the authenticated user

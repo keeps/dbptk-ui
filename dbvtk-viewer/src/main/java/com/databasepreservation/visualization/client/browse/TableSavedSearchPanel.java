@@ -56,7 +56,7 @@ public class TableSavedSearchPanel extends RightPanel {
 
     mainHeader.setWidget(CommonClientUtils.getSavedSearchHeader(database.getUUID(), "Loading..."));
 
-    BrowserService.Util.getInstance().retrieve(SavedSearch.class.getName(), savedSearchUUID,
+    BrowserService.Util.getInstance().retrieve(database.getUUID(), SavedSearch.class.getName(), savedSearchUUID,
       new DefaultAsyncCallback<IsIndexed>() {
         @Override
         public void onSuccess(IsIndexed result) {

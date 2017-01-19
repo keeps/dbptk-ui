@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
 
-import org.roda.core.data.v2.index.IsIndexed;
 import org.roda.core.data.v2.index.filter.EmptyKeyFilterParameter;
 import org.roda.core.data.v2.index.filter.Filter;
 import org.roda.core.data.v2.index.filter.FilterParameter;
@@ -94,11 +93,11 @@ public class ReferencesPanel extends RightPanel {
     cellSchema.setText(table.getName());
     cellColumn.setText(columnName);
 
-    BrowserService.Util.getInstance().retrieveRows(ViewerRow.class.getName(), tableUUID, recordUUID,
-      new DefaultAsyncCallback<IsIndexed>() {
+    BrowserService.Util.getInstance().retrieveRows(database.getUUID(), tableUUID, recordUUID,
+      new DefaultAsyncCallback<ViewerRow>() {
         @Override
-        public void onSuccess(IsIndexed result) {
-          record = (ViewerRow) result;
+        public void onSuccess(ViewerRow result) {
+          record = result;
           init();
         }
       });

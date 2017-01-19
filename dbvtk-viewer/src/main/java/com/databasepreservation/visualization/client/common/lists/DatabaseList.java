@@ -122,9 +122,8 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
 
     GWT.log("Filter: " + filter);
 
-    BrowserService.Util.getInstance().find(ViewerDatabase.class.getName(), filter, sorter, sublist, getFacets(),
+    BrowserService.Util.getInstance().findDatabases(filter, sorter, sublist, getFacets(),
       LocaleInfo.getCurrentLocale().getLocaleName(), callback);
-
   }
 
   @Override

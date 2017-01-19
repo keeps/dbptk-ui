@@ -64,7 +64,7 @@ public class TableSavedSearchEditPanel extends RightPanel {
 
     mainHeader.setWidget(CommonClientUtils.getSavedSearchHeader(database.getUUID(), "Loading..."));
 
-    BrowserService.Util.getInstance().retrieve(SavedSearch.class.getName(), savedSearchUUID,
+    BrowserService.Util.getInstance().retrieve(database.getUUID(), SavedSearch.class.getName(), savedSearchUUID,
       new DefaultAsyncCallback<IsIndexed>() {
         @Override
         public void onSuccess(IsIndexed result) {
@@ -114,8 +114,8 @@ public class TableSavedSearchEditPanel extends RightPanel {
     buttonCancel.setEnabled(false);
 
     // update info & commit
-    BrowserService.Util.getInstance().editSearch(savedSearchUUID, textBoxName.getText(), textAreaDescription.getText(),
-      new DefaultAsyncCallback<Void>() {
+    BrowserService.Util.getInstance().editSearch(database.getUUID(), savedSearchUUID, textBoxName.getText(),
+      textAreaDescription.getText(), new DefaultAsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {
           // error, don't go anywhere

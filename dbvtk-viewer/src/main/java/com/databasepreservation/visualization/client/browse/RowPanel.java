@@ -9,8 +9,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.roda.core.data.v2.index.IsIndexed;
-
 import com.databasepreservation.visualization.client.BrowserService;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerCell;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerColumn;
@@ -99,11 +97,11 @@ public class RowPanel extends RightPanel {
       + SafeHtmlUtils.htmlEscape(rowUUID)));
     recordHeader.setWidget(CommonClientUtils.getSchemaAndTableHeader(database.getUUID(), table, "h1"));
 
-    BrowserService.Util.getInstance().retrieveRows(ViewerRow.class.getName(), tableUUID, rowUUID,
-      new DefaultAsyncCallback<IsIndexed>() {
+    BrowserService.Util.getInstance().retrieveRows(database.getUUID(), tableUUID, rowUUID,
+      new DefaultAsyncCallback<ViewerRow>() {
         @Override
-        public void onSuccess(IsIndexed result) {
-          row = (ViewerRow) result;
+        public void onSuccess(ViewerRow result) {
+          row = result;
           init();
         }
       });

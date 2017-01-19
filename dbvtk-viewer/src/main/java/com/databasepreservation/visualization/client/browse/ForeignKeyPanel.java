@@ -71,8 +71,8 @@ public class ForeignKeyPanel extends RightPanel {
     Filter filter = new Filter(filterParameters);
 
     // search (count)
-    BrowserService.Util.getInstance().findRows(ViewerRow.class.getName(), tableUUID, filter, null, new Sublist(0, 1),
-      null, null, new DefaultAsyncCallback<IndexResult<ViewerRow>>() {
+    BrowserService.Util.getInstance().findRows(database.getUUID(), tableUUID, filter, null, new Sublist(0, 1), null,
+      null, new DefaultAsyncCallback<IndexResult<ViewerRow>>() {
         @Override
         public void onSuccess(IndexResult<ViewerRow> result) {
           rowCount = result.getTotalCount();

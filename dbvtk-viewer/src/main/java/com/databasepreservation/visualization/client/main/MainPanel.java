@@ -415,7 +415,7 @@ public class MainPanel extends Composite {
     } else {
       reSetHeader();
 
-      BrowserService.Util.getInstance().retrieve(ViewerDatabase.class.getName(), databaseUUID,
+      BrowserService.Util.getInstance().retrieve(databaseUUID, ViewerDatabase.class.getName(), databaseUUID,
         new AsyncCallback<IsIndexed>() {
           @Override
           public void onSuccess(IsIndexed result) {

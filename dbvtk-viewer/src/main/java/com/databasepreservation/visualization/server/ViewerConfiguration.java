@@ -40,6 +40,21 @@ import com.databasepreservation.visualization.utils.ViewerAbstractConfiguration;
 public class ViewerConfiguration extends ViewerAbstractConfiguration {
   private static final Logger LOGGER = LoggerFactory.getLogger(ViewerConfiguration.class);
 
+  public static final String[] PROPERTY_AUTHORIZATION_ENABLED = new String[] {"ui", "authorization", "enabled"};
+  public static final String[] PROPERTY_AUTHORIZATION_ADMINS = new String[] {"ui", "authorization", "users", "admin"};
+  public static final String[] PROPERTY_AUTHORIZATION_MANAGERS = new String[] {"ui", "authorization", "users",
+    "manager"};
+
+  public static final String[] PROPERTY_RODA_ADDRESS = new String[] {"ui", "filter", "internal", "server"};
+  public static final String[] PROPERTY_RODA_PATH = new String[] {"ui", "filter", "internal", "path"};
+
+  public static final String[] PROPERTY_QUERY_USER_USERNAME = new String[] {"ui", "authorization", "query", "user",
+    "username"};
+  public static final String[] PROPERTY_QUERY_USER_PASSWORD = new String[] {"ui", "authorization", "query", "user",
+    "password"};
+  public static final String[] PROPERTY_QUERY_PATH = new String[] {"ui", "authorization", "query", "path"};
+  public static final String[] PROPERTY_QUERY_PARAMETERS = new String[] {"ui", "authorization", "query", "parameters"};
+
   private static boolean instantiatedWithoutErrors = true;
 
   // configurable paths related objects
