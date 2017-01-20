@@ -197,8 +197,8 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
 
     GWT.log("Filter: " + filter);
 
-    BrowserService.Util.getInstance().findRows(database.getUUID(), table.getUUID(), filter, currentSorter, sublist,
-      getFacets(), LocaleInfo.getCurrentLocale().getLocaleName(), callback);
+    BrowserService.Util.getInstance().findRows(getObject().getFirst().getUUID(), table.getUUID(), filter,
+      currentSorter, sublist, getFacets(), LocaleInfo.getCurrentLocale().getLocaleName(), callback);
   }
 
   @Override
