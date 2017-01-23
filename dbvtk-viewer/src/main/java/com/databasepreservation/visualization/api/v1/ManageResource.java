@@ -22,6 +22,7 @@ import com.databasepreservation.visualization.exceptions.ViewerException;
 import com.databasepreservation.visualization.server.ViewerFactory;
 import com.databasepreservation.visualization.shared.ViewerSafeConstants;
 import com.databasepreservation.visualization.utils.SolrManager;
+import com.databasepreservation.visualization.utils.UserUtility;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -57,6 +58,8 @@ public class ManageResource {
     throws RODAException, NotFoundException {
     String mediaType = ApiUtils.getMediaType(acceptFormat, request);
     SolrManager solrManager = ViewerFactory.getSolrManager();
+
+    UserUtility.Authorization.allowIfAdmin(request);
 
     ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
     if (database != null) {

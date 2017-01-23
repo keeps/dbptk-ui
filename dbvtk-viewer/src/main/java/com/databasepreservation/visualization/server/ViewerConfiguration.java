@@ -49,13 +49,14 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   public static final String[] PROPERTY_RODA_ADDRESS = new String[] {"ui", "filter", "internal", "server"};
   public static final String[] PROPERTY_RODA_PATH = new String[] {"ui", "filter", "internal", "path"};
 
-  public static final String[] PROPERTY_QUERY_USER_USERNAME = new String[] {"ui", "authorization", "roda", "query",
-    "user", "username"};
-  public static final String[] PROPERTY_QUERY_USER_PASSWORD = new String[] {"ui", "authorization", "roda", "query",
-    "user", "password"};
-  public static final String[] PROPERTY_QUERY_PATH = new String[] {"ui", "authorization", "roda", "query", "path"};
-  public static final String[] PROPERTY_QUERY_PARAMETERS = new String[] {"ui", "authorization", "roda", "query",
-    "parameters"};
+  public static final String[] PROPERTY_AUTHORIZATION_QUERY_USER_USERNAME = new String[] {"ui", "authorization",
+    "roda", "query", "user", "username"};
+  public static final String[] PROPERTY_AUTHORIZATION_QUERY_USER_PASSWORD = new String[] {"ui", "authorization",
+    "roda", "query", "user", "password"};
+  public static final String[] PROPERTY_AUTHORIZATION_QUERY_PATH = new String[] {"ui", "authorization", "roda",
+    "query", "path"};
+  public static final String[] PROPERTY_AUTHORIZATION_QUERY_PARAMETERS = new String[] {"ui", "authorization", "roda",
+    "query", "parameters"};
 
   private static boolean instantiatedWithoutErrors = true;
 

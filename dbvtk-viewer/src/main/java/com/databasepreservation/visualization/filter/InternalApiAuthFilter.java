@@ -26,6 +26,7 @@ import org.roda.core.data.v2.user.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.databasepreservation.visualization.server.UserLoginController;
 import com.databasepreservation.visualization.utils.UserUtility;
 
 /**
@@ -96,8 +97,7 @@ public class InternalApiAuthFilter implements Filter {
     if (credentials == null) {
       throw new AuthenticationDeniedException("No credentials!");
     } else {
-      final User user = UserUtility.getLdapUtility().getAuthenticatedUser(credentials.getFirst(),
-        credentials.getSecond());
+      User user = UserLoginController.login(credentials.getFirst(), credentials.getSecond(), request);
       user.setIpAddress(request.getRemoteAddr());
       return user;
     }

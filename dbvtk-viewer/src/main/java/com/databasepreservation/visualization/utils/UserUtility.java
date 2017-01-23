@@ -97,19 +97,19 @@ public class UserUtility {
       ViewerConfiguration.PROPERTY_RODA_ADDRESS);
 
     String userPermissionPath = ViewerConfiguration.getInstance().getViewerConfigurationAsString(
-      ViewerConfiguration.PROPERTY_QUERY_PATH);
+      ViewerConfiguration.PROPERTY_AUTHORIZATION_QUERY_PATH);
     userPermissionPath = userPermissionPath.replaceAll("\\{username\\}", user.getName()).replaceAll(
       "\\{databaseUUID\\}", databaseUUID);
 
     String userPermissionParameters = ViewerConfiguration.getInstance().getViewerConfigurationAsString(
-      ViewerConfiguration.PROPERTY_QUERY_PARAMETERS);
+      ViewerConfiguration.PROPERTY_AUTHORIZATION_QUERY_PARAMETERS);
     userPermissionParameters = userPermissionParameters.replaceAll("\\{username\\}", user.getName()).replaceAll(
       "\\{databaseUUID\\}", databaseUUID);
 
     String dbvtkUser = ViewerConfiguration.getInstance().getViewerConfigurationAsString(
-      ViewerConfiguration.PROPERTY_QUERY_USER_USERNAME);
+      ViewerConfiguration.PROPERTY_AUTHORIZATION_QUERY_USER_USERNAME);
     String dbvtkPass = ViewerConfiguration.getInstance().getViewerConfigurationAsString(
-      ViewerConfiguration.PROPERTY_QUERY_USER_PASSWORD);
+      ViewerConfiguration.PROPERTY_AUTHORIZATION_QUERY_USER_PASSWORD);
 
     // TODO: cache DIP permissions
     HttpAuthenticationFeature basicAuth = HttpAuthenticationFeature.basic(dbvtkUser, dbvtkPass);

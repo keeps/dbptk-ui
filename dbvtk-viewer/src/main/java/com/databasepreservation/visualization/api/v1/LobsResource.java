@@ -20,11 +20,13 @@ import org.slf4j.LoggerFactory;
 import com.databasepreservation.visualization.api.utils.ApiUtils;
 import com.databasepreservation.visualization.api.utils.DownloadUtils;
 import com.databasepreservation.visualization.api.utils.StreamResponse;
+import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerRow;
 import com.databasepreservation.visualization.server.ViewerFactory;
 import com.databasepreservation.visualization.shared.ViewerSafeConstants;
 import com.databasepreservation.visualization.utils.LobPathManager;
 import com.databasepreservation.visualization.utils.SolrManager;
+import com.databasepreservation.visualization.utils.UserUtility;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -56,8 +58,9 @@ public class LobsResource {
     @PathParam(ViewerSafeConstants.API_PATH_PARAM_COLUMN_ID) Integer columnID) throws RODAException {
     SolrManager solrManager = ViewerFactory.getSolrManager();
 
-    // ViewerDatabase database = solrManager.retrieve(null,
-    // ViewerDatabase.class, databaseUUID);
+    ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
+    UserUtility.Authorization.checkTableAccessPermission(this.request, database, tableUUID);
+
     ViewerRow row = solrManager.retrieveRows(ViewerRow.class, tableUUID, rowUUID);
 
     if (row != null) {

@@ -25,9 +25,11 @@ import org.slf4j.LoggerFactory;
 import com.databasepreservation.visualization.api.utils.ApiUtils;
 import com.databasepreservation.visualization.api.utils.DownloadUtils;
 import com.databasepreservation.visualization.api.utils.StreamResponse;
+import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.visualization.server.ViewerFactory;
 import com.databasepreservation.visualization.shared.ViewerSafeConstants;
 import com.databasepreservation.visualization.utils.SolrManager;
+import com.databasepreservation.visualization.utils.UserUtility;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -94,6 +96,9 @@ public class ExportsResource {
     if (StringUtils.isNotBlank(subListParam)) {
       sublist = JsonUtils.getObjectFromJson(subListParam, Sublist.class);
     }
+
+    ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
+    UserUtility.Authorization.checkTableAccessPermission(this.request, database, tableUUID);
 
     // TODO: use viewerTable to convert solrColumnNames into displayColumnNames
     InputStream rowsCSV = solrManager.findRowsCSV(tableUUID, filter, sorter, sublist, fields);
