@@ -18,8 +18,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jasig.cas.client.util.CommonUtils;
-import org.roda.core.data.exceptions.GenericException;
-import org.roda.core.data.v2.user.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,7 +86,8 @@ public class CasWebAuthFilter implements Filter {
 
     final Principal principal = httpRequest.getUserPrincipal();
     if (principal != null) {
-      UserUtility.setUser(httpRequest, getUser(principal.getName()));
+      // TODO: CAS is not yet implemented
+      // UserUtility.setUser(httpRequest, getUser(principal.getName()));
     }
 
     if (url.endsWith("/login")) {
@@ -119,18 +118,5 @@ public class CasWebAuthFilter implements Filter {
       chain.doFilter(request, response);
     }
 
-  }
-
-  private User getUser(final String name) {
-    User user;
-    try {
-      user = UserUtility.getLdapUtility().getUser(name);
-      LOGGER.debug("User principal and user exist (" + name + ")");
-    } catch (final GenericException e) {
-      LOGGER.debug("Error getting user '" + name + "' - " + e.getMessage(), e);
-      LOGGER.debug("User principal exist but user doesn't (" + name + ")");
-      user = UserUtility.getGuest();
-    }
-    return user;
   }
 }

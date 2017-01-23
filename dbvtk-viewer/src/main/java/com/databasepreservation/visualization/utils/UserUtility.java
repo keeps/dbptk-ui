@@ -6,6 +6,8 @@ package com.databasepreservation.visualization.utils;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.NotAuthorizedException;
@@ -22,6 +24,7 @@ import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.utils.JsonUtils;
 import org.roda.core.data.v2.common.ObjectPermission;
 import org.roda.core.data.v2.common.ObjectPermissionResult;
+import org.roda.core.data.v2.common.Pair;
 import org.roda.core.data.v2.index.IsIndexed;
 import org.roda.core.data.v2.index.filter.Filter;
 import org.roda.core.data.v2.index.filter.SimpleFilterParameter;
@@ -33,24 +36,24 @@ import com.databasepreservation.visualization.client.SavedSearch;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.visualization.server.ViewerConfiguration;
 import com.databasepreservation.visualization.shared.ViewerSafeConstants;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 
 public class UserUtility {
   private static final Logger LOGGER = LoggerFactory.getLogger(UserUtility.class);
   public static final String RODA_USER = "RODA_USER";
 
-  private static LdapUtility LDAP_UTILITY;
+  private static LoadingCache<Pair<String, User>, Boolean> databasePermissions = CacheBuilder
+    .newBuilder()
+    .expireAfterWrite(
+      ViewerConfiguration.getInstance().getViewerConfigurationAsInt(60,
+        ViewerConfiguration.PROPERTY_AUTHORIZATION_CACHE_TTL), TimeUnit.SECONDS)
+    .build(new DatabasePermissionsCacheLoader());
 
   /** Private empty constructor */
   private UserUtility() {
 
-  }
-
-  public static LdapUtility getLdapUtility() {
-    return LDAP_UTILITY;
-  }
-
-  public static void setLdapUtility(LdapUtility ldapUtility) {
-    LDAP_UTILITY = ldapUtility;
   }
 
   public static User getApiUser(final HttpServletRequest request) throws AuthorizationDeniedException {
@@ -93,52 +96,10 @@ public class UserUtility {
 
   private static boolean userCanAccessDatabase(User user, String databaseUUID) throws AuthorizationDeniedException,
     NotFoundException, GenericException {
-    String rodaAddress = ViewerConfiguration.getInstance().getViewerConfigurationAsString(
-      ViewerConfiguration.PROPERTY_RODA_ADDRESS);
-
-    String userPermissionPath = ViewerConfiguration.getInstance().getViewerConfigurationAsString(
-      ViewerConfiguration.PROPERTY_AUTHORIZATION_QUERY_PATH);
-    userPermissionPath = userPermissionPath.replaceAll("\\{username\\}", user.getName()).replaceAll(
-      "\\{databaseUUID\\}", databaseUUID);
-
-    String userPermissionParameters = ViewerConfiguration.getInstance().getViewerConfigurationAsString(
-      ViewerConfiguration.PROPERTY_AUTHORIZATION_QUERY_PARAMETERS);
-    userPermissionParameters = userPermissionParameters.replaceAll("\\{username\\}", user.getName()).replaceAll(
-      "\\{databaseUUID\\}", databaseUUID);
-
-    String dbvtkUser = ViewerConfiguration.getInstance().getViewerConfigurationAsString(
-      ViewerConfiguration.PROPERTY_AUTHORIZATION_QUERY_USER_USERNAME);
-    String dbvtkPass = ViewerConfiguration.getInstance().getViewerConfigurationAsString(
-      ViewerConfiguration.PROPERTY_AUTHORIZATION_QUERY_USER_PASSWORD);
-
-    // TODO: cache DIP permissions
-    HttpAuthenticationFeature basicAuth = HttpAuthenticationFeature.basic(dbvtkUser, dbvtkPass);
-    Client client = ClientBuilder.newClient().register(basicAuth);
-    UriBuilder uri = client.target(rodaAddress).path(userPermissionPath).getUriBuilder();
-    uri.replaceQuery(userPermissionParameters);
-    WebTarget target = client.target(uri);
     try {
-      String jsonObj = target.request(MediaType.APPLICATION_JSON_TYPE).get(String.class);
-
-      ObjectPermissionResult permissions = JsonUtils.getObjectFromJson(jsonObj, ObjectPermissionResult.class);
-
-      boolean allowed = false;
-      for (ObjectPermission objectPermission : permissions.getObjects()) {
-        if (databaseUUID.equals(objectPermission.getObjectId())) {
-          allowed = true;
-          break;
-        }
-      }
-
-      return allowed;
-    } catch (NotAuthorizedException e) {
-      throw new AuthorizationDeniedException("Could not login with the provided DBVTK username and password", e);
-    } catch (javax.ws.rs.NotFoundException e) {
-      LOGGER.error("link {}/{}", rodaAddress, userPermissionPath);
-      LOGGER.error("Could not find the specified DIP", e);
-      throw new NotFoundException("Could not find the specified DIP", e);
-    } catch (GenericException e) {
-      throw new GenericException("Could not understand the server response", e);
+      return databasePermissions.get(new Pair<>(databaseUUID, user));
+    } catch (ExecutionException e) {
+      throw new GenericException(e.getMessage(), e);
     }
   }
 
@@ -158,6 +119,7 @@ public class UserUtility {
 
   public static class Authorization {
     private static final Map<Class, String> filterParameterDatabaseUUID;
+
     static {
       filterParameterDatabaseUUID = new HashMap<>();
       filterParameterDatabaseUUID.put(SavedSearch.class, ViewerSafeConstants.SOLR_SEARCHES_DATABASE_UUID);
@@ -268,6 +230,78 @@ public class UserUtility {
       }
 
       throw error(user, "saved search", savedSearch.getUUID());
+    }
+  }
+
+  private static class DatabasePermissionsCacheLoader extends CacheLoader<Pair<String, User>, Boolean> {
+
+    /**
+     * Computes or retrieves the value corresponding to the databaseUUID/user
+     * {@code pair}.
+     *
+     * @param pair
+     *          the non-null databaseUUID/user pair whose value should be loaded
+     * @return the value associated with the databaseUUID/user {@code pair};
+     *         <b>must not be null</b>
+     * @throws Exception
+     *           if unable to load the result
+     * @throws InterruptedException
+     *           if this method is interrupted. {@code InterruptedException} is
+     *           treated like any other {@code Exception} in all respects except
+     *           that, when it is caught, the thread's interrupt status is set
+     */
+    @Override
+    public Boolean load(Pair<String, User> pair) throws Exception {
+      String databaseUUID = pair.getFirst();
+      User user = pair.getSecond();
+
+      String rodaAddress = ViewerConfiguration.getInstance().getViewerConfigurationAsString(
+        ViewerConfiguration.PROPERTY_RODA_ADDRESS);
+
+      String userPermissionPath = ViewerConfiguration.getInstance().getViewerConfigurationAsString(
+        ViewerConfiguration.PROPERTY_AUTHORIZATION_QUERY_PATH);
+      userPermissionPath = userPermissionPath.replaceAll("\\{username\\}", user.getName()).replaceAll(
+        "\\{databaseUUID\\}", databaseUUID);
+
+      String userPermissionParameters = ViewerConfiguration.getInstance().getViewerConfigurationAsString(
+        ViewerConfiguration.PROPERTY_AUTHORIZATION_QUERY_PARAMETERS);
+      userPermissionParameters = userPermissionParameters.replaceAll("\\{username\\}", user.getName()).replaceAll(
+        "\\{databaseUUID\\}", databaseUUID);
+
+      String dbvtkUser = ViewerConfiguration.getInstance().getViewerConfigurationAsString(
+        ViewerConfiguration.PROPERTY_AUTHORIZATION_QUERY_USER_USERNAME);
+      String dbvtkPass = ViewerConfiguration.getInstance().getViewerConfigurationAsString(
+        ViewerConfiguration.PROPERTY_AUTHORIZATION_QUERY_USER_PASSWORD);
+
+      // TODO: cache DIP permissions
+      HttpAuthenticationFeature basicAuth = HttpAuthenticationFeature.basic(dbvtkUser, dbvtkPass);
+      Client client = ClientBuilder.newClient().register(basicAuth);
+      UriBuilder uri = client.target(rodaAddress).path(userPermissionPath).getUriBuilder();
+      uri.replaceQuery(userPermissionParameters);
+      WebTarget target = client.target(uri);
+      try {
+        String jsonObj = target.request(MediaType.APPLICATION_JSON_TYPE).get(String.class);
+
+        ObjectPermissionResult permissions = JsonUtils.getObjectFromJson(jsonObj, ObjectPermissionResult.class);
+
+        boolean allowed = false;
+        for (ObjectPermission objectPermission : permissions.getObjects()) {
+          if (databaseUUID.equals(objectPermission.getObjectId()) && objectPermission.isHasPermission()) {
+            allowed = true;
+            break;
+          }
+        }
+
+        return allowed;
+      } catch (NotAuthorizedException e) {
+        throw new AuthorizationDeniedException("Could not login with the provided DBVTK username and password", e);
+      } catch (javax.ws.rs.NotFoundException e) {
+        LOGGER.error("link {}/{}", rodaAddress, userPermissionPath);
+        LOGGER.error("Could not find the specified DIP", e);
+        throw new NotFoundException("Could not find the specified DIP", e);
+      } catch (GenericException e) {
+        throw new GenericException("Could not understand the server response", e);
+      }
     }
   }
 }

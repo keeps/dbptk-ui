@@ -37,7 +37,7 @@ import com.google.gwt.view.client.DefaultSelectionEventManager;
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class SavedSearchList extends BasicAsyncTableCell<SavedSearch> {
+public class SavedSearchList extends AsyncTableCell<SavedSearch, String> {
   private final ClientLogger LOGGER = new ClientLogger(getClass().getName());
 
   private TextColumn<SavedSearch> nameColumn;
@@ -46,12 +46,13 @@ public class SavedSearchList extends BasicAsyncTableCell<SavedSearch> {
   private TextColumn<SavedSearch> tableNameColumn;
   private Column<SavedSearch, SavedSearch> actionsColumn;
 
-  private final String databaseUUID;
-
   public SavedSearchList(String databaseUUID, Filter filter, Facets facets, String summary, boolean selectable,
     boolean exportable) {
-    super(filter, facets, summary, selectable, exportable);
-    this.databaseUUID = databaseUUID;
+    super(filter, false, facets, summary, selectable, exportable, databaseUUID);
+  }
+
+  private String getDatabaseUUID() {
+    return getObject();
   }
 
   @Override
@@ -97,7 +98,7 @@ public class SavedSearchList extends BasicAsyncTableCell<SavedSearch> {
       new FontAwesomeActionCell.Delegate<SavedSearch>() {
         @Override
         public void execute(final SavedSearch object) {
-          BrowserService.Util.getInstance().deleteSearch(databaseUUID, object.getUUID(),
+          BrowserService.Util.getInstance().deleteSearch(getDatabaseUUID(), object.getUUID(),
             new DefaultAsyncCallback<Void>() {
               @Override
               public void onSuccess(Void result) {
@@ -162,7 +163,7 @@ public class SavedSearchList extends BasicAsyncTableCell<SavedSearch> {
 
     GWT.log("Filter: " + filter);
 
-    BrowserService.Util.getInstance().findSavedSearches(databaseUUID, filter, sorter, sublist, getFacets(),
+    BrowserService.Util.getInstance().findSavedSearches(getDatabaseUUID(), filter, sorter, sublist, getFacets(),
       LocaleInfo.getCurrentLocale().getLocaleName(), callback);
 
   }

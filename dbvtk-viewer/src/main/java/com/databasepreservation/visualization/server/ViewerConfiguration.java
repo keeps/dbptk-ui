@@ -57,6 +57,8 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     "query", "path"};
   public static final String[] PROPERTY_AUTHORIZATION_QUERY_PARAMETERS = new String[] {"ui", "authorization", "roda",
     "query", "parameters"};
+  public static final String[] PROPERTY_AUTHORIZATION_CACHE_TTL = new String[] {"ui", "authorization", "roda", "cache",
+    "ttl"};
 
   private static boolean instantiatedWithoutErrors = true;
 
