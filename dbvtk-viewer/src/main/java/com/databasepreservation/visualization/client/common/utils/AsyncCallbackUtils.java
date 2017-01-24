@@ -33,14 +33,20 @@ public class AsyncCallbackUtils {
       }
       treatedError = true;
     } else if (caught instanceof AuthorizationDeniedException) {
-      UserLogin.getInstance().login();
+      Dialogs.showInformationDialog(messages.dialogPermissionDenied(), caught.getMessage(), messages.dialogLogin(),
+        new DefaultAsyncCallback<Void>() {
+          @Override
+          public void onSuccess(Void result) {
+            UserLogin.getInstance().login();
+          }
+        });
       treatedError = true;
     } else if (caught instanceof NotFoundException) {
       Dialogs.showInformationDialog(messages.dialogResourceNotFound(), caught.getMessage(),
         messages.dialogNotFoundGoToHome(), new DefaultAsyncCallback<Void>() {
           @Override
           public void onSuccess(Void result) {
-            HistoryManager.gotoRoot();
+            HistoryManager.gotoHome();
           }
         });
       treatedError = true;

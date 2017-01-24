@@ -47,7 +47,7 @@ public class HistoryManager {
       newHistory(currentPath.subList(1, currentPath.size()));
     } else {
       // in case something is wrong or has been tampered with, go to root
-      gotoRoot();
+      gotoHome();
     }
   }
 
@@ -61,6 +61,10 @@ public class HistoryManager {
 
   public static void gotoDatabaseList() {
     newHistory(Arrays.asList(ROUTE_DATABASE));
+  }
+
+  public static void gotoHome() {
+    gotoRoot();
   }
 
   public static void gotoDatabase(String databaseUUID) {

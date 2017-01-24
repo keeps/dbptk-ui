@@ -7,6 +7,8 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class FontAwesomeIconManager {
+  public static final String HOME = "home";
+  public static final String LOGIN = "sign-in";
   public static final String DATABASES = "server";
   public static final String DATABASE = "database";
   public static final String SCHEMA = "cube";

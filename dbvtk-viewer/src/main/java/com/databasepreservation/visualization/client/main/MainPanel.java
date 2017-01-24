@@ -16,6 +16,7 @@ import com.databasepreservation.visualization.client.browse.DatabaseSearchPanel;
 import com.databasepreservation.visualization.client.browse.DatabaseSearchesPanel;
 import com.databasepreservation.visualization.client.browse.DatabaseUsersPanel;
 import com.databasepreservation.visualization.client.browse.ForeignKeyPanel;
+import com.databasepreservation.visualization.client.browse.HomePanel;
 import com.databasepreservation.visualization.client.browse.LoginPanel;
 import com.databasepreservation.visualization.client.browse.ReferencesPanel;
 import com.databasepreservation.visualization.client.browse.RightPanel;
@@ -101,7 +102,7 @@ public class MainPanel extends Composite {
       setContent(new RightPanelLoader() {
         @Override
         public RightPanel load(ViewerDatabase database) {
-          return DatabaseListPanel.getInstance();
+          return HomePanel.getInstance();
         }
       });
 
@@ -369,7 +370,7 @@ public class MainPanel extends Composite {
       reSetHeader(databaseUUID);
       HistoryManager.gotoDatabase(databaseUUID);
     } else {
-      HistoryManager.gotoRoot();
+      HistoryManager.gotoHome();
     }
   }
 
@@ -381,11 +382,17 @@ public class MainPanel extends Composite {
     HTMLPanel headerText = new HTMLPanel(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager
       .getTag(FontAwesomeIconManager.DATABASE) + " Database Visualization Toolkit"));
     headerText.addStyleName("homeText");
+
+    // HTMLPanel headerContent = new HTMLPanel(
+    // SafeHtmlUtils
+    // .fromSafeConstant("<img title=\"Database Visualization Toolkit\" class=\"homeLogo\" src=\"/img/dbptk_logo.png\"/>\n"
+    // + "<div class=\"homeText\">DBVTK</div>"));
+
     bannerLogo.setWidget(headerText);
 
     homeLinkArea.addClickHandler(new ClickHandler() {
       public void onClick(ClickEvent event) {
-        HistoryManager.gotoRoot();
+        HistoryManager.gotoHome();
       }
     });
 

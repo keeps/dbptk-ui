@@ -23,6 +23,30 @@ public class BreadcrumbManager {
     return new ArrayList<>();
   }
 
+  public static List<BreadcrumbItem> forHome() {
+    List<BreadcrumbItem> items = new ArrayList<>();
+    items.add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager
+      .getTag(FontAwesomeIconManager.HOME) + SafeHtmlUtils.htmlEscape(" Home")), new Command() {
+      @Override
+      public void execute() {
+        HistoryManager.gotoHome();
+      }
+    }));
+    return items;
+  }
+
+  public static List<BreadcrumbItem> forLogin() {
+    List<BreadcrumbItem> items = new ArrayList<>();
+    items.add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager
+      .getTag(FontAwesomeIconManager.LOGIN) + SafeHtmlUtils.htmlEscape(" Login")), new Command() {
+      @Override
+      public void execute() {
+        HistoryManager.gotoLogin();
+      }
+    }));
+    return items;
+  }
+
   public static List<BreadcrumbItem> forDatabases() {
     List<BreadcrumbItem> items = new ArrayList<>();
     items.add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager

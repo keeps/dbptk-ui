@@ -91,7 +91,7 @@ public class LoginPanel extends RightPanel {
    */
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.empty());
+    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forLogin());
   }
 
   private void tryToLoginWhenEnterIsPressed(KeyPressEvent event) {

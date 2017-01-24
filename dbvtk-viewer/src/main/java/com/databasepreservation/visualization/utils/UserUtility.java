@@ -144,8 +144,8 @@ public class UserUtility {
     }
 
     private static AuthorizationDeniedException errorAdmin(User user, String action) {
-      return new AuthorizationDeniedException("Only administrators can " + action + ", and " + user.getName()
-        + " is not an administrator.");
+      return new AuthorizationDeniedException("Only administrators can " + action + ", and the current user("
+        + user.getName() + ") is not an administrator.");
     }
 
     public static boolean isEnabled() {
