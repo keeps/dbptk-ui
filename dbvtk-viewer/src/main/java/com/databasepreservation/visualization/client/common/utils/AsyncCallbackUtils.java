@@ -5,8 +5,13 @@
 package com.databasepreservation.visualization.client.common.utils;
 
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
+import org.roda.core.data.exceptions.NotFoundException;
 
+import com.databasepreservation.visualization.client.common.DefaultAsyncCallback;
+import com.databasepreservation.visualization.client.common.UserLogin;
+import com.databasepreservation.visualization.client.common.dialogs.Dialogs;
 import com.databasepreservation.visualization.shared.client.ClientLogger;
+import com.databasepreservation.visualization.shared.client.Tools.HistoryManager;
 import com.databasepreservation.visualization.shared.client.widgets.Toast;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.StatusCodeException;
@@ -28,8 +33,17 @@ public class AsyncCallbackUtils {
       }
       treatedError = true;
     } else if (caught instanceof AuthorizationDeniedException) {
-      // UserLogin.getInstance().login();
-      // treatedError = true;
+      UserLogin.getInstance().login();
+      treatedError = true;
+    } else if (caught instanceof NotFoundException) {
+      Dialogs.showInformationDialog(messages.dialogResourceNotFound(), caught.getMessage(),
+        messages.dialogNotFoundGoToHome(), new DefaultAsyncCallback<Void>() {
+          @Override
+          public void onSuccess(Void result) {
+            HistoryManager.gotoRoot();
+          }
+        });
+      treatedError = true;
     }
     return treatedError;
   }

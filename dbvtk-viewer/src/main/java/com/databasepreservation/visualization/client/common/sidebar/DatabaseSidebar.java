@@ -7,14 +7,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.roda.core.data.v2.index.IsIndexed;
-
-import com.databasepreservation.visualization.client.BrowserService;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerMetadata;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerSchema;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable;
-import com.databasepreservation.visualization.client.common.DefaultAsyncCallback;
 import com.databasepreservation.visualization.shared.client.Tools.FontAwesomeIconManager;
 import com.databasepreservation.visualization.shared.client.Tools.HistoryManager;
 import com.databasepreservation.visualization.shared.client.Tools.ViewerStringUtils;
@@ -94,6 +90,7 @@ public class DatabaseSidebar extends Composite {
   AccessibleFocusPanel searchInputButton;
 
   private ViewerDatabase database;
+  private String databaseUUID;
 
   /**
    * Clone constructor, because the same DatabaseSidebar can not be child in
@@ -104,9 +101,8 @@ public class DatabaseSidebar extends Composite {
    */
   private DatabaseSidebar(DatabaseSidebar other) {
     initWidget(uiBinder.createAndBindUi(this));
-    database = other.database;
     searchInputBox.setText(other.searchInputBox.getText());
-    init();
+    init(other.database);
   }
 
   /**
@@ -121,17 +117,16 @@ public class DatabaseSidebar extends Composite {
    * Use DatabaseSidebar.getInstance to obtain an instance
    */
   private DatabaseSidebar(String databaseUUID) {
-    initWidget(uiBinder.createAndBindUi(this));
-    searchInit();
+    this();
+    this.databaseUUID = databaseUUID;
+  }
 
-    BrowserService.Util.getInstance().retrieve(databaseUUID, ViewerDatabase.class.getName(), databaseUUID,
-      new DefaultAsyncCallback<IsIndexed>() {
-        @Override
-        public void onSuccess(IsIndexed result) {
-          database = (ViewerDatabase) result;
-          init();
-        }
-      });
+  public void init(ViewerDatabase db) {
+    if (database == null && db != null && (databaseUUID == null || databaseUUID.equals(db.getUUID()))) {
+      database = db;
+      databaseUUID = db.getUUID();
+      init();
+    }
   }
 
   private void init() {
@@ -182,6 +177,8 @@ public class DatabaseSidebar extends Composite {
 
       searchInit();
     }
+
+    setVisible(true);
   }
 
   private void searchInit() {

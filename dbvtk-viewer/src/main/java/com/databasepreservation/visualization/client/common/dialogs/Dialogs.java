@@ -1,9 +1,13 @@
 /**
- * The contents of this file are based on those found at https://github.com/keeps/roda
- * and are subject to the license and copyright detailed in https://github.com/keeps/roda
+ * The contents of this file are subject to the license and copyright
+ * detailed in the LICENSE file at the root of the source
+ * tree and available online at
+ *
+ * https://github.com/keeps/roda
  */
-package com.databasepreservation.visualization.client.common;
+package com.databasepreservation.visualization.client.common.dialogs;
 
+import com.databasepreservation.visualization.client.common.NoAsyncCallback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -25,7 +29,6 @@ import com.google.gwt.user.client.ui.TextBox;
 import config.i18n.client.ClientMessages;
 
 public class Dialogs {
-
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
 
   public static void showConfirmDialog(String title, String message, String cancelButtonText, String confirmButtonText,
@@ -215,28 +218,4 @@ public class Dialogs {
     dialogBox.show();
     inputBox.setFocus(true);
   }
-
-  public static DialogBox showLoadingModel() {
-    final DialogBox dialogBox = new DialogBox(false, true);
-    dialogBox.setText("Loading...");
-
-    FlowPanel layout = new FlowPanel();
-    Label messageLabel = new Label(messages.executingTaskMessage());
-
-    layout.add(messageLabel);
-
-    dialogBox.setWidget(layout);
-
-    dialogBox.setGlassEnabled(true);
-    dialogBox.setAnimationEnabled(false);
-
-    dialogBox.addStyleName("wui-dialog-information");
-    layout.addStyleName("wui-dialog-layout");
-    messageLabel.addStyleName("wui-dialog-message");
-
-    dialogBox.center();
-    dialogBox.show();
-    return dialogBox;
-  }
-
 }

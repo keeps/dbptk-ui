@@ -69,4 +69,8 @@ public interface ClientMessages extends Messages {
   String loginLogout();
 
   String loginLogin();
+
+  String dialogNotFoundGoToHome();
+
+  String dialogResourceNotFound();
 }

@@ -99,7 +99,16 @@ public class UserUtility {
     try {
       return databasePermissions.get(new Pair<>(databaseUUID, user));
     } catch (ExecutionException e) {
-      throw new GenericException(e.getMessage(), e);
+      Throwable cause = e.getCause();
+      if (cause instanceof AuthorizationDeniedException) {
+        throw (AuthorizationDeniedException) cause;
+      } else if (cause instanceof NotFoundException) {
+        throw (NotFoundException) cause;
+      } else if (cause instanceof GenericException) {
+        throw (GenericException) cause;
+      } else {
+        throw new GenericException(e);
+      }
     }
   }
 

@@ -494,7 +494,7 @@ public class SolrUtils {
         throw new NotFoundException("Could not find document " + id);
       }
     } catch (SolrServerException | IOException e) {
-      throw new GenericException("Could not retrieve AIP from index", e);
+      throw new GenericException("Could not retrieve " + classToRetrieve.getName() + " from index", e);
     }
     return ret;
   }
@@ -510,7 +510,7 @@ public class SolrUtils {
         throw new NotFoundException("Could not find document " + rowUUID);
       }
     } catch (SolrServerException | IOException e) {
-      throw new GenericException("Could not retrieve AIP from index", e);
+      throw new GenericException("Could not retrieve " + classToRetrieve.getName() + " from index", e);
     }
     return ret;
   }

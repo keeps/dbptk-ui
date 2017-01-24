@@ -133,6 +133,7 @@ public class DatabasePanel extends Composite {
         @Override
         public void onSuccess(IsIndexed result) {
           database = (ViewerDatabase) result;
+          sidebar.init(database);
           loadPanel(rightPanelLoader);
         }
       });
