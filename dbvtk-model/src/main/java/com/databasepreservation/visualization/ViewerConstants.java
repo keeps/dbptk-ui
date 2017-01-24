@@ -13,7 +13,7 @@ public class ViewerConstants {
    */
   public static final String INSTALL_FOLDER_SYSTEM_PROPERTY = "dbvtk.home";
   public static final String INSTALL_FOLDER_ENVIRONMENT_VARIABLE = "DBVTK_HOME";
-  public static final String INSTALL_FOLDER_DEFAULT_SUBFOLDER_UNDER_HOME = ".db-visualization-toolkit";
+  public static final String INSTALL_FOLDER_DEFAULT_SUBFOLDER_UNDER_HOME = ".dbvtk";
 
   public static final String DEFAULT_ENCODING = "UTF-8";
   public static final String VIEWER_CONFIG_FOLDER = "config";

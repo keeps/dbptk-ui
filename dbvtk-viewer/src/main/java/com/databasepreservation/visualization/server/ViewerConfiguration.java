@@ -2,6 +2,8 @@ package com.databasepreservation.visualization.server;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -31,6 +33,10 @@ import org.slf4j.LoggerFactory;
 import com.databasepreservation.utils.FileUtils;
 import com.databasepreservation.visualization.ViewerConstants;
 import com.databasepreservation.visualization.utils.ViewerAbstractConfiguration;
+
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.joran.JoranConfigurator;
+import ch.qos.logback.core.joran.spi.JoranException;
 
 /**
  * Singleton configuration instance used by the Database Visualization Toolkit
@@ -159,7 +165,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
         }
       }
 
-      // set roda.home in order to correctly configure logging even if no
+      // set dbvtk.home in order to correctly configure logging even if no
       // property has been defined
       System.setProperty(ViewerConstants.INSTALL_FOLDER_SYSTEM_PROPERTY, viewerHomePath.toString());
     }
@@ -170,7 +176,21 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     lobsPath = viewerHomePath.resolve(ViewerConstants.VIEWER_LOBS_FOLDER);
     logPath = viewerHomePath.resolve(ViewerConstants.VIEWER_LOG_FOLDER);
 
+    configureLogback();
+
     return viewerHomePath;
+  }
+
+  private static void configureLogback() {
+    try {
+      LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+      JoranConfigurator configurator = new JoranConfigurator();
+      configurator.setContext(context);
+      context.reset();
+      configurator.doConfigure(getConfigurationFile("logback.xml"));
+    } catch (JoranException e) {
+      LOGGER.error("Error configuring logback", e);
+    }
   }
 
   private static void instantiateEssentialDirectories() {
@@ -237,6 +257,31 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     }
 
     return propertiesConfiguration;
+  }
+
+  public static URL getConfigurationFile(String configurationFile) {
+    Path config = configPath.resolve(configurationFile);
+    URL configUri;
+    if (Files.exists(config) && !Files.isDirectory(config)
+      && config.toAbsolutePath().startsWith(configPath.toAbsolutePath().toString())) {
+      try {
+        configUri = config.toUri().toURL();
+      } catch (MalformedURLException e) {
+        LOGGER.error("Configuration {} doesn't exist", configurationFile);
+        configUri = null;
+      }
+    } else {
+      URL resource = ViewerConfiguration.class.getResource("/" + ViewerConstants.VIEWER_CONFIG_FOLDER + "/"
+        + configurationFile);
+      if (resource != null) {
+        configUri = resource;
+      } else {
+        LOGGER.error("Configuration {} doesn't exist", configurationFile);
+        configUri = null;
+      }
+    }
+
+    return configUri;
   }
 
   private static void copyFilesFromClasspath(String classpathPrefix, Path destinationDirectory) {
