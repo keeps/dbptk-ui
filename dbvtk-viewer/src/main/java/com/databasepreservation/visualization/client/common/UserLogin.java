@@ -60,8 +60,15 @@ public class UserLogin {
    *          call back handler that receives error if failed or AuthOfficeUser
    *          if success.
    */
-  public void getAuthenticatedUser(final AsyncCallback<User> callback) {
+  public void getAuthenticatedUser(final AsyncCallback<User> callback, boolean ensureIsFresh) {
+    if (ensureIsFresh) {
+      getUserRequest.clearCache();
+    }
     getUserRequest.request(callback);
+  }
+
+  public void getAuthenticatedUser(final AsyncCallback<User> callback) {
+    getAuthenticatedUser(callback, false);
   }
 
   /**

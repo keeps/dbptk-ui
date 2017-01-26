@@ -76,5 +76,7 @@ public interface ClientMessages extends Messages {
 
   String dialogPermissionDenied();
 
+  String dialogMustLogin();
+
   String dialogLogin();
 }
