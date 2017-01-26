@@ -16,6 +16,7 @@ import com.databasepreservation.visualization.client.common.utils.RightPanelLoad
 import com.databasepreservation.visualization.client.main.BreadcrumbPanel;
 import com.databasepreservation.visualization.shared.client.Tools.BreadcrumbManager;
 import com.databasepreservation.visualization.shared.client.Tools.FontAwesomeIconManager;
+import com.databasepreservation.visualization.shared.client.Tools.HistoryManager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -97,25 +98,40 @@ public class DatabasePanel extends Composite {
     });
   }
 
-  private void buildMenuForUser(User user) {
+  private void buildMenuForUser(final User user) {
     menu.clearItems();
-    if (user.isGuest()) {
-      menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.USER, messages.loginLogin()), new Command() {
-        @Override
-        public void execute() {
-          UserLogin.getInstance().login();
+    BrowserService.Util.getInstance().isAuthenticationEnabled(new DefaultAsyncCallback<Boolean>() {
+      @Override
+      public void onSuccess(Boolean authenticationIsEnabled) {
+        if (authenticationIsEnabled) {
+          if (user.isGuest()) {
+            menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.USER, messages.loginLogin()),
+              new Command() {
+                @Override
+                public void execute() {
+                  UserLogin.getInstance().login();
+                }
+              });
+          } else {
+            MenuBar subMenu = new MenuBar(true);
+            subMenu.addItem(messages.loginLogout(), new Command() {
+              @Override
+              public void execute() {
+                UserLogin.getInstance().logout();
+              }
+            });
+            menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.USER, user.getFullName()), subMenu);
+          }
+        } else {
+          menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.DATABASES, "Manage Databases"), new Command() {
+            @Override
+            public void execute() {
+              HistoryManager.gotoDatabaseList();
+            }
+          });
         }
-      });
-    } else {
-      MenuBar subMenu = new MenuBar(true);
-      subMenu.addItem(messages.loginLogout(), new Command() {
-        @Override
-        public void execute() {
-          UserLogin.getInstance().logout();
-        }
-      });
-      menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.USER, user.getFullName()), subMenu);
-    }
+      }
+    });
   }
 
   public void load(RightPanelLoader rightPanelLoader) {

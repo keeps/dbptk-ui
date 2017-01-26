@@ -79,6 +79,8 @@ public interface BrowserServiceAsync {
 
   void deleteSearch(String databaseUUID, String savedSearchUUID, AsyncCallback<Void> async);
 
+  void isAuthenticationEnabled(AsyncCallback<Boolean> async);
+
   /**
    * Get the authenticated user
    *

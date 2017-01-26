@@ -46,6 +46,11 @@ import ch.qos.logback.core.joran.spi.JoranException;
 public class ViewerConfiguration extends ViewerAbstractConfiguration {
   private static final Logger LOGGER = LoggerFactory.getLogger(ViewerConfiguration.class);
 
+  public static final String[] PROPERTY_FILTER_AUTHENTICATION_RODA = new String[] {"ui", "filter", "internal",
+    "enabled"};
+
+  public static final String[] PROPERTY_FILTER_AUTHENTICATION_CAS = new String[] {"ui", "filter", "cas", "enabled"};
+
   public static final String[] PROPERTY_AUTHORIZATION_ENABLED = new String[] {"ui", "authorization", "roda", "enabled"};
   public static final String[] PROPERTY_AUTHORIZATION_ADMINS = new String[] {"ui", "authorization", "roda", "users",
     "admin"};
@@ -141,6 +146,15 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   @Override
   public Path getLobPath() {
     return lobsPath;
+  }
+
+  /*
+   * Specific parts to the configuration used in the DBVTK
+   * ____________________________________________________________________________________________________________________
+   */
+  public boolean getIsAuthenticationEnabled() {
+    return getViewerConfigurationAsBoolean(false, PROPERTY_FILTER_AUTHENTICATION_RODA)
+      || getViewerConfigurationAsBoolean(false, PROPERTY_FILTER_AUTHENTICATION_CAS);
   }
 
   /*

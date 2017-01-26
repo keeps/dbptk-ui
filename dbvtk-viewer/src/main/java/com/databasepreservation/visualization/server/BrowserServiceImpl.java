@@ -168,6 +168,11 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
   }
 
   @Override
+  public Boolean isAuthenticationEnabled() throws RODAException {
+    return ViewerConfiguration.getInstance().getIsAuthenticationEnabled();
+  }
+
+  @Override
   public List<SearchField> getSearchFields(ViewerTable viewerTable) throws GenericException {
     // does not retrieve data from index => safe to ignore authorization
     return BrowserServiceUtils.getSearchFieldsFromTable(viewerTable);

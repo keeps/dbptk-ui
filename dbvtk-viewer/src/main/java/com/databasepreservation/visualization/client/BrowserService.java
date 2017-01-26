@@ -86,6 +86,8 @@ public interface BrowserService extends RemoteService {
   void deleteSearch(String databaseUUID, String savedSearchUUID) throws AuthorizationDeniedException, GenericException,
     RequestNotValidException, NotFoundException;
 
+  Boolean isAuthenticationEnabled() throws RODAException;
+
   User getAuthenticatedUser() throws RODAException;
 
   User login(String username, String password) throws AuthenticationDeniedException, GenericException;
