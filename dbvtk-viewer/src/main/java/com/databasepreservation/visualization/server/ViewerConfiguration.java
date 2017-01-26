@@ -167,6 +167,8 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
       viewerHomePath = Paths.get(System.getProperty(ViewerConstants.INSTALL_FOLDER_SYSTEM_PROPERTY));
     } else if (System.getenv(ViewerConstants.INSTALL_FOLDER_ENVIRONMENT_VARIABLE) != null) {
       viewerHomePath = Paths.get(System.getenv(ViewerConstants.INSTALL_FOLDER_ENVIRONMENT_VARIABLE));
+      // set dbvtk.home in order to correctly configure logging
+      System.setProperty(ViewerConstants.INSTALL_FOLDER_SYSTEM_PROPERTY, viewerHomePath.toString());
     } else {
       // last attempt (using user home and hidden directory called .roda)
       String userHome = System.getProperty("user.home");
@@ -178,9 +180,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
           throw new RuntimeException("Unable to create DBVTK HOME '" + viewerHomePath + "'. Aborting...", e);
         }
       }
-
-      // set dbvtk.home in order to correctly configure logging even if no
-      // property has been defined
+      // set dbvtk.home in order to correctly configure logging
       System.setProperty(ViewerConstants.INSTALL_FOLDER_SYSTEM_PROPERTY, viewerHomePath.toString());
     }
 
