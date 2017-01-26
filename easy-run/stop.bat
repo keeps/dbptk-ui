@@ -7,7 +7,7 @@ cd "%SDIR%"
 
 REM setup environment
 SET DBPTK=dbptk-app.jar
-SET DBVTK_WORKSPACE=%SDIR%\dbvtk-data
+SET DBVTK_HOME=%SDIR%\dbvtk-data
 SET JAVA_HOME=%SDIR%\jre\windows
 SET CATALINA_HOME=%SDIR%\apache-tomcat
 

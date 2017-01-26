@@ -12,7 +12,7 @@ cd "$DIR" || (echo "could not change directory to $DIR" && exit)
 
 # setup environment
 DBPTK=dbptk-app.jar
-export DBVTK_WORKSPACE=$DIR/dbvtk-data
+export DBVTK_HOME=$DIR/dbvtk-data
 export JAVA_HOME=$DIR/jre/linux
 [ "$(uname -s)" = "Darwin" ] && export JAVA_HOME=$DIR/jre/mac
 export CATALINA_HOME=$DIR/apache-tomcat
