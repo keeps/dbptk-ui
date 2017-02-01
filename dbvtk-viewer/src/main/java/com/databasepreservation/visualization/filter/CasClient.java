@@ -36,7 +36,7 @@ public class CasClient {
 
   /**
    * Constructor.
-   * 
+   *
    * @param casServerUrlPrefix
    *          CAS server URL.
    */
@@ -47,7 +47,7 @@ public class CasClient {
   /**
    * Get a <strong>Ticket Granting Ticket</strong> from the CAS server for the
    * specified <i>username</i> and <i>password</i>.
-   * 
+   *
    * @param username
    *          the username.
    * @param password
@@ -90,7 +90,7 @@ public class CasClient {
   /**
    * Get a <strong>Service Ticket</strong> from the CAS server for the specified
    * <strong>Ticket Granting Ticket</strong> and <strong>service</strong>.
-   * 
+   *
    * @param ticketGrantingTicket
    *          the <strong>Ticket Granting Ticket</strong>.
    * @param service
@@ -121,7 +121,7 @@ public class CasClient {
 
   /**
    * Logout from the CAS server.
-   * 
+   *
    * @param ticketGrantingTicket
    *          the <strong>Ticket Granting Ticket</strong>.
    * @throws GenericException
@@ -148,7 +148,7 @@ public class CasClient {
 
   /**
    * Returns an error message for invalid response from CAS server.
-   * 
+   *
    * @param method
    *          the HTTP method
    * @return a String with the error message.

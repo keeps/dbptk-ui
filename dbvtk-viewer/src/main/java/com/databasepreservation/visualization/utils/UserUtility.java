@@ -10,14 +10,18 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 
+import org.apache.commons.httpclient.HttpMethod;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
+import org.roda.core.data.exceptions.AuthenticationDeniedException;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
@@ -34,6 +38,7 @@ import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.visualization.client.SavedSearch;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
+import com.databasepreservation.visualization.filter.CasClient;
 import com.databasepreservation.visualization.server.ViewerConfiguration;
 import com.databasepreservation.visualization.shared.ViewerSafeConstants;
 import com.google.common.cache.CacheBuilder;
@@ -261,8 +266,22 @@ public class UserUtility {
      */
     @Override
     public Boolean load(Pair<String, User> pair) throws Exception {
+      final boolean usingCAS = ViewerConfiguration.getInstance().getViewerConfigurationAsBoolean(false,
+        ViewerConfiguration.PROPERTY_FILTER_AUTHENTICATION_CAS);
       String databaseUUID = pair.getFirst();
       User user = pair.getSecond();
+
+      String dbvtkUser = ViewerConfiguration.getInstance().getViewerConfigurationAsString(
+        ViewerConfiguration.PROPERTY_AUTHORIZATION_QUERY_USER_USERNAME);
+      String dbvtkPass = ViewerConfiguration.getInstance().getViewerConfigurationAsString(
+        ViewerConfiguration.PROPERTY_AUTHORIZATION_QUERY_USER_PASSWORD);
+
+      Client client;
+      if (usingCAS) {
+        client = ClientBuilder.newClient();
+      } else {
+        client = getBasicAuthClient(dbvtkUser, dbvtkPass);
+      }
 
       String rodaAddress = ViewerConfiguration.getInstance().getViewerConfigurationAsString(
         ViewerConfiguration.PROPERTY_RODA_ADDRESS);
@@ -277,19 +296,16 @@ public class UserUtility {
       userPermissionParameters = userPermissionParameters.replaceAll("\\{username\\}", user.getName()).replaceAll(
         "\\{databaseUUID\\}", databaseUUID);
 
-      String dbvtkUser = ViewerConfiguration.getInstance().getViewerConfigurationAsString(
-        ViewerConfiguration.PROPERTY_AUTHORIZATION_QUERY_USER_USERNAME);
-      String dbvtkPass = ViewerConfiguration.getInstance().getViewerConfigurationAsString(
-        ViewerConfiguration.PROPERTY_AUTHORIZATION_QUERY_USER_PASSWORD);
-
-      // TODO: cache DIP permissions
-      HttpAuthenticationFeature basicAuth = HttpAuthenticationFeature.basic(dbvtkUser, dbvtkPass);
-      Client client = ClientBuilder.newClient().register(basicAuth);
       UriBuilder uri = client.target(rodaAddress).path(userPermissionPath).getUriBuilder();
       uri.replaceQuery(userPermissionParameters);
       WebTarget target = client.target(uri);
+
       try {
-        String jsonObj = target.request(MediaType.APPLICATION_JSON_TYPE).get(String.class);
+        Invocation.Builder request = target.request(MediaType.APPLICATION_JSON_TYPE);
+        if (usingCAS) {
+          addTokenGrantingToken(dbvtkUser, dbvtkPass, request);
+        }
+        String jsonObj = request.get(String.class);
 
         ObjectPermissionResult permissions = JsonUtils.getObjectFromJson(jsonObj, ObjectPermissionResult.class);
 
@@ -310,7 +326,51 @@ public class UserUtility {
         throw new NotFoundException("Could not find the specified DIP", e);
       } catch (GenericException e) {
         throw new GenericException("Could not understand the server response", e);
+      } catch (BadRequestException e) {
+        String responseText = e.getResponse().readEntity(String.class);
+        LOGGER.error("BadRequestException. Response: {}", responseText);
+        throw e;
       }
+    }
+
+    /**
+     * Creates a Client that includes basic auth credentials
+     */
+    private Client getBasicAuthClient(String username, String password) throws Exception {
+      HttpAuthenticationFeature basicAuth = HttpAuthenticationFeature.basic(username, password);
+      return ClientBuilder.newClient().register(basicAuth);
+    }
+
+    /**
+     * Gets a CAS token using the user/pass, then modifies the request to
+     * include the token
+     */
+    private Invocation.Builder addTokenGrantingToken(String username, String password, Invocation.Builder request)
+      throws Exception {
+      String token;
+
+      final String casServerUrlPrefix = ViewerConfiguration.getInstance().getViewerConfigurationAsString(
+        ViewerConfiguration.PROPERTY_FILTER_AUTHENTICATION_CAS_SERVER_URL_PREFIX);
+      final CasClient casClient = new CasClient(casServerUrlPrefix);
+      try {
+        token = casClient.getTicketGrantingTicket(username, password);
+      } catch (final AuthenticationDeniedException e) {
+        // added explicitly for readibility
+        throw e;
+      }
+
+      return request.header("tgt", token);
+    }
+
+    /**
+     * Returns an error message for invalid response from CAS server.
+     *
+     * @param method
+     *          the HTTP method
+     * @return a String with the error message.
+     */
+    private String invalidResponseMessage(final HttpMethod method) {
+      return String.format("Invalid response from CAS server: %s - %s", method.getStatusCode(), method.getStatusText());
     }
   }
 }

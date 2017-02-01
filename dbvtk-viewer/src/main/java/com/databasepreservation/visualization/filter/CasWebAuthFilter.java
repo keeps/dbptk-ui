@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jasig.cas.client.util.CommonUtils;
+import org.roda.core.data.v2.user.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,8 +87,7 @@ public class CasWebAuthFilter implements Filter {
 
     final Principal principal = httpRequest.getUserPrincipal();
     if (principal != null) {
-      // TODO: CAS is not yet implemented
-      // UserUtility.setUser(httpRequest, getUser(principal.getName()));
+      UserUtility.setUser(httpRequest, new User(principal.getName()));
     }
 
     if (url.endsWith("/login")) {

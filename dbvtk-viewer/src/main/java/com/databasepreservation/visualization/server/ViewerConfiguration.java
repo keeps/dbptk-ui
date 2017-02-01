@@ -50,6 +50,8 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     "enabled"};
 
   public static final String[] PROPERTY_FILTER_AUTHENTICATION_CAS = new String[] {"ui", "filter", "cas", "enabled"};
+  public static final String[] PROPERTY_FILTER_AUTHENTICATION_CAS_SERVER_URL_PREFIX = new String[] {"ui", "filter",
+    "cas", "casServerUrlPrefix"};
 
   public static final String[] PROPERTY_AUTHORIZATION_ENABLED = new String[] {"ui", "authorization", "roda", "enabled"};
   public static final String[] PROPERTY_AUTHORIZATION_ADMINS = new String[] {"ui", "authorization", "roda", "users",
@@ -64,6 +66,8 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     "roda", "query", "user", "username"};
   public static final String[] PROPERTY_AUTHORIZATION_QUERY_USER_PASSWORD = new String[] {"ui", "authorization",
     "roda", "query", "user", "password"};
+  public static final String[] PROPERTY_AUTHORIZATION_QUERY_USER_TICKET_PATH = new String[] {"ui", "authorization",
+    "roda", "query", "user", "ticket"};
   public static final String[] PROPERTY_AUTHORIZATION_QUERY_PATH = new String[] {"ui", "authorization", "roda",
     "query", "path"};
   public static final String[] PROPERTY_AUTHORIZATION_QUERY_PARAMETERS = new String[] {"ui", "authorization", "roda",
