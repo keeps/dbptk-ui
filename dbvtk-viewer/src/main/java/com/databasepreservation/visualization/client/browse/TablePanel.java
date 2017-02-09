@@ -19,10 +19,13 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
+import config.i18n.client.ClientMessages;
+
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class TablePanel extends RightPanel {
+  private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, TablePanel> instances = new HashMap<>();
 
   public static TablePanel getInstance(ViewerDatabase database, String tableUUID) {
@@ -144,7 +147,7 @@ public class TablePanel extends RightPanel {
     mainHeader.setWidget(CommonClientUtils.getSchemaAndTableHeader(database.getUUID(), table, "h1"));
 
     if (ViewerStringUtils.isNotBlank(table.getDescription())) {
-      description.setHTML(CommonClientUtils.getFieldHTML("Description", table.getDescription()));
+      description.setHTML(CommonClientUtils.getFieldHTML(messages.description(), table.getDescription()));
     }
 
     tableSearchPanel.provideSource(database, table);

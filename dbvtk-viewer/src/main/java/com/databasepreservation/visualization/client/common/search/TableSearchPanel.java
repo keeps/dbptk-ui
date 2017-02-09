@@ -31,10 +31,13 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 
+import config.i18n.client.ClientMessages;
+
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class TableSearchPanel extends Composite {
+  private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static final Binder uiBinder = GWT.create(Binder.class);
 
   interface Binder extends UiBinder<Widget, TableSearchPanel> {
@@ -124,8 +127,8 @@ public class TableSearchPanel extends Composite {
 
     GWT.log("initial filter: " + initialFilter.toString());
 
-    searchPanel = new SearchPanel(initialFilter, ViewerSafeConstants.SOLR_ROW_SEARCH, "Search...", false, true,
-      new DefaultAsyncCallback<Void>() {
+    searchPanel = new SearchPanel(initialFilter, ViewerSafeConstants.SOLR_ROW_SEARCH, messages.searchPlaceholder(),
+      false, true, new DefaultAsyncCallback<Void>() {
         @Override
         public void onSuccess(Void result) {
           TableSearchPanel.this.saveQuery();
@@ -332,8 +335,8 @@ public class TableSearchPanel extends Composite {
 
   private void saveQuery() {
     SearchInfo currentSearchInfo = createSearchInfo();
-    BrowserService.Util.getInstance().saveSearch("<no title>", "<no description>", table.getUUID(), table.getName(),
-      database.getUUID(), currentSearchInfo, new DefaultAsyncCallback<String>() {
+    BrowserService.Util.getInstance().saveSearch(messages.searchOnTable(table.getName()), "", table.getUUID(),
+      table.getName(), database.getUUID(), currentSearchInfo, new DefaultAsyncCallback<String>() {
         @Override
         public void onFailure(Throwable caught) {
           searchPanel.querySavedHandler(false, database, null);

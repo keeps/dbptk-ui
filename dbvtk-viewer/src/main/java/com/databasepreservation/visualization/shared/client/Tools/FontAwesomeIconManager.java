@@ -1,12 +1,17 @@
 package com.databasepreservation.visualization.shared.client.Tools;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+
+import config.i18n.client.ClientMessages;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class FontAwesomeIconManager {
+  private static final ClientMessages messages = GWT.create(ClientMessages.class);
+
   public static final String HOME = "home";
   public static final String LOGIN = "sign-in";
   public static final String DATABASES = "server";
@@ -40,8 +45,8 @@ public class FontAwesomeIconManager {
   }
 
   public static SafeHtml loading(String icon) {
-    return SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(icon)
-      + " <span class=\"loadingText\">loading...</span>");
+    return SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(icon) + " <span class=\"loadingText\">"
+      + messages.loading() + "</span>");
   }
 
   public static SafeHtml loaded(String icon, String text) {

@@ -22,10 +22,13 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
+import config.i18n.client.ClientMessages;
+
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class ErDiagram extends Composite {
+  private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, ErDiagram> instances = new HashMap<>();
 
   public static ErDiagram getInstance(ViewerDatabase database, ViewerSchema schema) {
@@ -70,12 +73,8 @@ public class ErDiagram extends Composite {
     databaseUUID = database.getUUID();
     initWidget(uiBinder.createAndBindUi(this));
 
-    contentItems
-      .add(new HTMLPanel(
-        CommonClientUtils
-          .getFieldHTML(
-            "Using the diagram",
-            "The diagram shows the tables and relations in this schema. Each circle in the diagram represents a table, where bigger circles represent tables with more rows and columns and their colour is darker when they have more relations to other tables.")));
+    contentItems.add(new HTMLPanel(CommonClientUtils.getFieldHTML(messages.diagram_usingTheDiagram(),
+      messages.diagram_Explanation())));
 
     SimplePanel config = new SimplePanel();
     config.getElement().setId("erconfig");
@@ -169,21 +168,12 @@ public class ErDiagram extends Composite {
 
           // create tooltip with table information
           StringBuilder tooltip = new StringBuilder();
-          if (ViewerStringUtils.isNotBlank(viewerTable.getDescription())) {
-            if (viewerTable.getDescription().length() > 50) {
-              String trimmed = viewerTable.getDescription().substring(0, 47);
-              int indexOfSpace = trimmed.lastIndexOf(' ');
-              if (indexOfSpace > 25) {
-                trimmed = trimmed.substring(0, indexOfSpace);
-              }
-              tooltip.append(trimmed).append("...");
-            } else {
-              tooltip.append(viewerTable.getDescription());
-            }
-            tooltip.append("<br/>");
+          if (ViewerStringUtils.isNotBlank(viewerTable.getName())) {
+            tooltip.append(viewerTable.getName()).append("<br/>");
           }
-          tooltip.append(visNode.numRows).append(" rows, ").append(visNode.numColumns).append(" columns, ")
-            .append(visNode.numRelationsTotal).append(" relations.");
+          tooltip.append(messages.diagram_rows(visNode.numRows)).append(", ")
+            .append(messages.diagram_columns(visNode.numColumns)).append(", ")
+            .append(messages.diagram_relations(visNode.numRelationsTotal)).append(".");
 
           visNode.setTitle(tooltip.toString());
 

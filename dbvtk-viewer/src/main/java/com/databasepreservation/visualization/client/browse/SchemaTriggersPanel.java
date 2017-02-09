@@ -25,10 +25,13 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
+import config.i18n.client.ClientMessages;
+
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class SchemaTriggersPanel extends RightPanel {
+  private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, SchemaTriggersPanel> instances = new HashMap<>();
 
   public static SchemaTriggersPanel getInstance(ViewerDatabase database, String schemaUUID) {
@@ -87,28 +90,29 @@ public class SchemaTriggersPanel extends RightPanel {
         }
       }
     } else {
-      Label noTriggers = new Label("This schema does not have any triggers.");
+      Label noTriggers = new Label(messages.thisSchemaDoesNotHaveAnyTriggers());
       noTriggers.addStyleName("strong");
       contentItems.add(noTriggers);
     }
   }
 
   private BasicTablePanel<ViewerTrigger> getBasicTablePanelForTableTriggers(final ViewerTable table) {
-    Label header = new Label("Triggers in table " + table.getName());
+    Label header = new Label(messages.triggersInTable(table.getName()));
     header.addStyleName("h4");
 
     HTMLPanel info = new HTMLPanel("");
 
     return new BasicTablePanel<>(header, info, table.getTriggers().iterator(),
 
-    new BasicTablePanel.ColumnInfo<>("Name", 15, new TextColumn<ViewerTrigger>() {
+    new BasicTablePanel.ColumnInfo<>(messages.name(), 15, new TextColumn<ViewerTrigger>() {
       @Override
       public String getValue(ViewerTrigger viewerTrigger) {
         return viewerTrigger.getName();
       }
     }),
 
-    new BasicTablePanel.ColumnInfo<>("Triggered action", 25, new Column<ViewerTrigger, SafeHtml>(new SafeHtmlCell()) {
+    new BasicTablePanel.ColumnInfo<>(messages.triggeredAction(), 25, new Column<ViewerTrigger, SafeHtml>(
+      new SafeHtmlCell()) {
       @Override
       public SafeHtml getValue(ViewerTrigger viewerTrigger) {
         return SafeHtmlUtils.fromSafeConstant(SafeHtmlUtils.htmlEscape(
@@ -116,21 +120,21 @@ public class SchemaTriggersPanel extends RightPanel {
       }
     }),
 
-    new BasicTablePanel.ColumnInfo<>("Action time", 8, new TextColumn<ViewerTrigger>() {
+    new BasicTablePanel.ColumnInfo<>(messages.actionTime(), 8, new TextColumn<ViewerTrigger>() {
       @Override
       public String getValue(ViewerTrigger viewerTrigger) {
         return viewerTrigger.getActionTime();
       }
     }),
 
-    new BasicTablePanel.ColumnInfo<>("Trigger event", 8, new TextColumn<ViewerTrigger>() {
+    new BasicTablePanel.ColumnInfo<>(messages.triggerEvent(), 8, new TextColumn<ViewerTrigger>() {
       @Override
       public String getValue(ViewerTrigger viewerTrigger) {
         return viewerTrigger.getTriggerEvent();
       }
     }),
 
-    new BasicTablePanel.ColumnInfo<>("Alias list", 15, new TextColumn<ViewerTrigger>() {
+    new BasicTablePanel.ColumnInfo<>(messages.aliasList(), 15, new TextColumn<ViewerTrigger>() {
       @Override
       public String getValue(ViewerTrigger viewerTrigger) {
         if (ViewerStringUtils.isNotBlank(viewerTrigger.getAliasList())) {
@@ -141,7 +145,7 @@ public class SchemaTriggersPanel extends RightPanel {
       }
     }),
 
-    new BasicTablePanel.ColumnInfo<>("Description", 35, new TextColumn<ViewerTrigger>() {
+    new BasicTablePanel.ColumnInfo<>(messages.description(), 35, new TextColumn<ViewerTrigger>() {
       @Override
       public String getValue(ViewerTrigger viewerTrigger) {
         if (ViewerStringUtils.isNotBlank(viewerTrigger.getDescription())) {

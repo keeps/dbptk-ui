@@ -38,10 +38,13 @@ import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
+import config.i18n.client.ClientMessages;
+
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class RowPanel extends RightPanel {
+  private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, RowPanel> instances = new HashMap<>();
 
   public static RowPanel createInstance(ViewerDatabase database, String tableUUID, String rowUUID) {
@@ -168,10 +171,10 @@ public class RowPanel extends RightPanel {
     if (!recordRelatedTo.isEmpty() || !recordReferencedBy.isEmpty()) {
       b.appendHtmlConstant("<div class=\"field\">");
       if (!recordRelatedTo.isEmpty()) {
-        b.append(getForeignKeyHTML("This record is related to", recordRelatedTo, row));
+        b.append(getForeignKeyHTML(messages.references_thisRecordIsRelatedTo(), recordRelatedTo, row));
       }
       if (!recordReferencedBy.isEmpty()) {
-        b.append(getForeignKeyHTML("This record is referenced by", recordReferencedBy, row));
+        b.append(getForeignKeyHTML(messages.references_thisRecordIsReferencedBy(), recordReferencedBy, row));
       }
       b.appendHtmlConstant("</div>");
     }
@@ -254,7 +257,9 @@ public class RowPanel extends RightPanel {
         urlBuilder.append(base).append(servlet).append(resource).append("/").append(databaseUUID).append("/")
           .append(tableUUID).append("/").append(row.getUUID()).append("/")
           .append(column.getColumnIndexInEnclosingTable());
-        b.appendHtmlConstant("<a href=\"" + urlBuilder.toString() + "\">Download LOB</a>");
+        b.appendHtmlConstant("<a href=\"" + urlBuilder.toString() + "\">");
+        b.appendEscaped(messages.row_downloadLOB());
+        b.appendHtmlConstant("</a>");
       } else {
         b.appendEscaped(value);
       }
@@ -262,11 +267,11 @@ public class RowPanel extends RightPanel {
     b.appendHtmlConstant("</div>");
 
     if (relatedTo != null && !relatedTo.isEmpty()) {
-      b.append(getForeignKeyHTML("Is related to", relatedTo, row));
+      b.append(getForeignKeyHTML(messages.references_isRelatedTo(), relatedTo, row));
     }
 
     if (referencedBy != null && !referencedBy.isEmpty()) {
-      b.append(getForeignKeyHTML("Is referenced by", referencedBy, row));
+      b.append(getForeignKeyHTML(messages.references_isReferencedBy(), referencedBy, row));
     }
 
     return b.toSafeHtml();

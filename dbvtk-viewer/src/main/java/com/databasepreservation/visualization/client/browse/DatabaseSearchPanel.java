@@ -41,10 +41,13 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 
+import config.i18n.client.ClientMessages;
+
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class DatabaseSearchPanel extends RightPanel {
+  private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, DatabaseSearchPanel> instances = new HashMap<>();
 
   public static DatabaseSearchPanel getInstance(ViewerDatabase database) {
@@ -134,7 +137,7 @@ public class DatabaseSearchPanel extends RightPanel {
 
     this.database = database;
 
-    searchInputBox.getElement().setPropertyString("placeholder", "Search...");
+    searchInputBox.getElement().setPropertyString("placeholder", messages.searchPlaceholder());
 
     searchInputBox.addKeyDownHandler(new KeyDownHandler() {
       @Override

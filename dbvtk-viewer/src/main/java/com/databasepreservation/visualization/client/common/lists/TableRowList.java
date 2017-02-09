@@ -40,10 +40,13 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
 
+import config.i18n.client.ClientMessages;
+
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase, ViewerTable>> {
+  private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private final ClientLogger logger = new ClientLogger(getClass().getName());
 
   private LinkedHashMap<ViewerColumn, Column<ViewerRow, ?>> columns;
@@ -127,7 +130,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
             switch (type) {
               case BINARY:
                 ret = SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.BLOB,
-                  "Large binary object"));
+                  messages.largeBinaryObject()));
                 break;
               // case DATETIME:
               // ret =
@@ -163,7 +166,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
       columns.put(viewerColumn, column);
     }
 
-    Label emptyInfo = new Label("No items to display");
+    Label emptyInfo = new Label(messages.noItemsToDisplay());
     display.setEmptyTableWidget(emptyInfo);
 
     // define default sorting

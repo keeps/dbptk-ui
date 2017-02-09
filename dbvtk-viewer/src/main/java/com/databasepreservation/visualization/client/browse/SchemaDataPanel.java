@@ -27,10 +27,13 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 
+import config.i18n.client.ClientMessages;
+
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class SchemaDataPanel extends RightPanel {
+  private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, SchemaDataPanel> instances = new HashMap<>();
 
   public static SchemaDataPanel getInstance(ViewerDatabase database, String schemaUUID) {
@@ -107,28 +110,28 @@ public class SchemaDataPanel extends RightPanel {
     return new BasicTablePanel<>(new HTMLPanel(SafeHtmlUtils.EMPTY_SAFE_HTML), new HTMLPanel(
       SafeHtmlUtils.EMPTY_SAFE_HTML), tables.iterator(),
 
-    new BasicTablePanel.ColumnInfo<>("Table name", 17, new TextColumn<ViewerTable>() {
+    new BasicTablePanel.ColumnInfo<>(messages.schema_tableName(), 17, new TextColumn<ViewerTable>() {
       @Override
       public String getValue(ViewerTable table) {
         return table.getName();
       }
     }),
 
-    new BasicTablePanel.ColumnInfo<>("Number of rows", 7, new TextColumn<ViewerTable>() {
+    new BasicTablePanel.ColumnInfo<>(messages.schema_numberOfRows(), 7, new TextColumn<ViewerTable>() {
       @Override
       public String getValue(ViewerTable table) {
         return String.valueOf(table.getCountRows());
       }
     }),
 
-    new BasicTablePanel.ColumnInfo<>("Number of columns", 8, new TextColumn<ViewerTable>() {
+    new BasicTablePanel.ColumnInfo<>(messages.schema_numberOfColumns(), 8, new TextColumn<ViewerTable>() {
       @Override
       public String getValue(ViewerTable table) {
         return String.valueOf(table.getColumns().size());
       }
     }),
 
-    new BasicTablePanel.ColumnInfo<>("Description", 35, new TextColumn<ViewerTable>() {
+    new BasicTablePanel.ColumnInfo<>(messages.description(), 35, new TextColumn<ViewerTable>() {
       @Override
       public String getValue(ViewerTable table) {
         if (table.getDescription() != null) {
@@ -139,7 +142,7 @@ public class SchemaDataPanel extends RightPanel {
       }
     }),
 
-    new BasicTablePanel.ColumnInfo<>("Relations (out)", 7, new TextColumn<ViewerTable>() {
+    new BasicTablePanel.ColumnInfo<>(messages.schema_relationsOut(), 7, new TextColumn<ViewerTable>() {
       @Override
       public String getValue(ViewerTable table) {
         int outboundForeignKeys = table.getForeignKeys().size();
@@ -151,7 +154,7 @@ public class SchemaDataPanel extends RightPanel {
       }
     }),
 
-    new BasicTablePanel.ColumnInfo<>("Relations (in)", 7, new TextColumn<ViewerTable>() {
+    new BasicTablePanel.ColumnInfo<>(messages.schema_relationsIn(), 7, new TextColumn<ViewerTable>() {
       @Override
       public String getValue(ViewerTable table) {
         int inboundForeignKeys = 0;

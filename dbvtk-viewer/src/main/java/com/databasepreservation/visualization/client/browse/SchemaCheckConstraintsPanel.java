@@ -21,10 +21,13 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
+import config.i18n.client.ClientMessages;
+
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class SchemaCheckConstraintsPanel extends RightPanel {
+  private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, SchemaCheckConstraintsPanel> instances = new HashMap<>();
 
   public static SchemaCheckConstraintsPanel getInstance(ViewerDatabase database, String schemaUUID) {
@@ -84,28 +87,28 @@ public class SchemaCheckConstraintsPanel extends RightPanel {
         }
       }
     } else {
-      Label noCheckConstraints = new Label("This schema does not have any check constraints.");
+      Label noCheckConstraints = new Label(messages.constraints_thisSchemaDoesNotHaveAnyCheckConstraints());
       noCheckConstraints.addStyleName("strong");
       contentItems.add(noCheckConstraints);
     }
   }
 
   private BasicTablePanel<ViewerCheckConstraint> getBasicTablePanelForTableCheckConstraints(final ViewerTable table) {
-    Label header = new Label("Constraints in table " + table.getName());
+    Label header = new Label(messages.constraints_constraintsInTable(table.getName()));
     header.addStyleName("h4");
 
     HTMLPanel info = new HTMLPanel("");
 
     return new BasicTablePanel<>(header, info, table.getCheckConstraints().iterator(),
 
-    new BasicTablePanel.ColumnInfo<>("Name", 15, new TextColumn<ViewerCheckConstraint>() {
+    new BasicTablePanel.ColumnInfo<>(messages.name(), 15, new TextColumn<ViewerCheckConstraint>() {
       @Override
       public String getValue(ViewerCheckConstraint viewerRoutineParameter) {
         return viewerRoutineParameter.getName();
       }
     }),
 
-    new BasicTablePanel.ColumnInfo<>("Condition", 15, new TextColumn<ViewerCheckConstraint>() {
+    new BasicTablePanel.ColumnInfo<>(messages.constraints_condition(), 15, new TextColumn<ViewerCheckConstraint>() {
       @Override
       public String getValue(ViewerCheckConstraint viewerRoutineParameter) {
         if (ViewerStringUtils.isNotBlank(viewerRoutineParameter.getCondition())) {
@@ -116,7 +119,7 @@ public class SchemaCheckConstraintsPanel extends RightPanel {
       }
     }),
 
-    new BasicTablePanel.ColumnInfo<>("Description", 35, new TextColumn<ViewerCheckConstraint>() {
+    new BasicTablePanel.ColumnInfo<>(messages.description(), 35, new TextColumn<ViewerCheckConstraint>() {
       @Override
       public String getValue(ViewerCheckConstraint viewerRoutineParameter) {
         if (ViewerStringUtils.isNotBlank(viewerRoutineParameter.getDescription())) {

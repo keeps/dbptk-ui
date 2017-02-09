@@ -6,9 +6,10 @@
              xmlns:sb='urn:import:com.databasepreservation.visualization.client.common.sidebar'
              xmlns:lists="urn:import:com.databasepreservation.visualization.client.common.lists">
 
+    <ui:with field='messages' type='config.i18n.client.ClientMessages' />
     <g:FlowPanel>
-        <g:Label addStyleNames="h1"><ui:msg>Routines</ui:msg></g:Label>
-        <g:Label><ui:msg>Including "Stored procedures" and "Functions"</ui:msg></g:Label>
+        <g:Label addStyleNames="h1"><ui:text from='{messages.menusidebar_routines}' /></g:Label>
+        <g:Label><ui:text from='{messages.includingStoredProceduresAndFunctions}' /></g:Label>
         <g:FlowPanel ui:field="contentItems"/>
     </g:FlowPanel>
 </ui:UiBinder>

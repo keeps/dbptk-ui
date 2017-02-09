@@ -185,9 +185,9 @@ public class SearchFieldPanel extends Composite {
 
     inputCheckBox = new CheckBox();
 
-    labelTo = new Label("to");
-    labelAt1 = new Label("at");
-    labelAt2 = new Label("at");
+    labelTo = new Label(messages.searchingRange_to());
+    labelAt1 = new Label(messages.searchingTime_at());
+    labelAt2 = new Label(messages.searchingTime_at());
 
     panel.add(leftPanel);
 

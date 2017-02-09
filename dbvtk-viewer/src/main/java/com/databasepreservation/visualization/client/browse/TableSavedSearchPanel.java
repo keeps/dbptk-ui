@@ -20,10 +20,14 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
+import config.i18n.client.ClientMessages;
+
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class TableSavedSearchPanel extends RightPanel {
+  private static final ClientMessages messages = GWT.create(ClientMessages.class);
+
   public static TableSavedSearchPanel createInstance(ViewerDatabase database, String savedSearchUUID) {
     return new TableSavedSearchPanel(database, savedSearchUUID);
   }
@@ -88,7 +92,7 @@ public class TableSavedSearchPanel extends RightPanel {
     // set UI
     mainHeader.setWidget(CommonClientUtils.getSavedSearchHeader(database.getUUID(), savedSearch.getName()));
     if (ViewerStringUtils.isNotBlank(savedSearch.getDescription())) {
-      description.setHTML(CommonClientUtils.getFieldHTML("Description", savedSearch.getDescription()));
+      description.setHTML(CommonClientUtils.getFieldHTML(messages.description(), savedSearch.getDescription()));
     }
 
     // set searchForm and table

@@ -17,7 +17,8 @@ public class ViewerConstants {
 
   public static final String DEFAULT_ENCODING = "UTF-8";
   public static final String VIEWER_CONFIG_FOLDER = "config";
-  public static final String CORE_LOG_FOLDER = "log";
+  public static final String VIEWER_I18N_CLIENT_FOLDER = "client";
+  public static final String VIEWER_I18_GWT_XML_FILE = "I18N.gwt.xml";
   public static final String VIEWER_EXAMPLE_CONFIG_FOLDER = "example-config";
   public static final String VIEWER_I18N_FOLDER = "i18n";
   public static final String VIEWER_LOG_FOLDER = "log";

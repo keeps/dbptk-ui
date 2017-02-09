@@ -123,12 +123,14 @@ public class DatabasePanel extends Composite {
             menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.USER, user.getFullName()), subMenu);
           }
         } else {
-          menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.DATABASES, "Manage Databases"), new Command() {
-            @Override
-            public void execute() {
-              HistoryManager.gotoDatabaseList();
-            }
-          });
+          menu.addItem(
+            FontAwesomeIconManager.loaded(FontAwesomeIconManager.DATABASES, messages.menusidebar_manageDatabases()),
+            new Command() {
+              @Override
+              public void execute() {
+                HistoryManager.gotoDatabaseList();
+              }
+            });
         }
       }
     });

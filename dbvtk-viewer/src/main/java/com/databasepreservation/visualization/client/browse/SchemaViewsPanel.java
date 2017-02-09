@@ -22,10 +22,13 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 
+import config.i18n.client.ClientMessages;
+
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class SchemaViewsPanel extends RightPanel {
+  private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, SchemaViewsPanel> instances = new HashMap<>();
 
   public static SchemaViewsPanel getInstance(ViewerDatabase database, String schemaUUID) {
@@ -81,45 +84,45 @@ public class SchemaViewsPanel extends RightPanel {
     FlowPanel header = CommonClientUtils.getSchemaAndViewHeader(database.getUUID(), schema, view, "h3");
 
     SafeHtmlBuilder infoBuilder = new SafeHtmlBuilder();
-    infoBuilder.append(CommonClientUtils.getFieldHTML("Description", view.getDescription()));
+    infoBuilder.append(CommonClientUtils.getFieldHTML(messages.description(), view.getDescription()));
 
     if (ViewerStringUtils.isNotBlank(view.getQueryOriginal())) {
       infoBuilder.append(CommonClientUtils.getFieldHTML(
-        "Original query",
+        messages.originalQuery(),
         SafeHtmlUtils.fromSafeConstant("<pre><code>" + SafeHtmlUtils.htmlEscape(view.getQueryOriginal())
           + "</code></pre>")));
     }
 
     if (ViewerStringUtils.isNotBlank(view.getQuery())) {
-      infoBuilder.append(CommonClientUtils.getFieldHTML("Query",
+      infoBuilder.append(CommonClientUtils.getFieldHTML(messages.query(),
         SafeHtmlUtils.fromSafeConstant("<pre><code>" + SafeHtmlUtils.htmlEscape(view.getQuery()) + "</code></pre>")));
     }
 
     // create and return the table panel
     return new BasicTablePanel<>(header, infoBuilder.toSafeHtml(), view.getColumns().iterator(),
 
-    new BasicTablePanel.ColumnInfo<>("column name", 15, new TextColumn<ViewerColumn>() {
+    new BasicTablePanel.ColumnInfo<>(messages.columnName(), 15, new TextColumn<ViewerColumn>() {
       @Override
       public String getValue(ViewerColumn column) {
         return column.getDisplayName();
       }
     }),
 
-    new BasicTablePanel.ColumnInfo<>("Type name", 15, new TextColumn<ViewerColumn>() {
+    new BasicTablePanel.ColumnInfo<>(messages.typeName(), 15, new TextColumn<ViewerColumn>() {
       @Override
       public String getValue(ViewerColumn column) {
         return column.getType().getTypeName();
       }
     }),
 
-    new BasicTablePanel.ColumnInfo<>("Original type name", 15, new TextColumn<ViewerColumn>() {
+    new BasicTablePanel.ColumnInfo<>(messages.originalTypeName(), 15, new TextColumn<ViewerColumn>() {
       @Override
       public String getValue(ViewerColumn column) {
         return column.getType().getOriginalTypeName();
       }
     }),
 
-    new BasicTablePanel.ColumnInfo<>("Nullable", 8, new TextColumn<ViewerColumn>() {
+    new BasicTablePanel.ColumnInfo<>(messages.nullable(), 8, new TextColumn<ViewerColumn>() {
       @Override
       public String getValue(ViewerColumn column) {
         if (column.getNillable()) {
@@ -130,7 +133,7 @@ public class SchemaViewsPanel extends RightPanel {
       }
     }),
 
-    new BasicTablePanel.ColumnInfo<>("Description", 35, new TextColumn<ViewerColumn>() {
+    new BasicTablePanel.ColumnInfo<>(messages.description(), 35, new TextColumn<ViewerColumn>() {
       @Override
       public String getValue(ViewerColumn column) {
         if (ViewerStringUtils.isNotBlank(column.getDescription())) {

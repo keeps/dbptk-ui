@@ -17,10 +17,13 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 
+import config.i18n.client.ClientMessages;
+
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class DatabaseInformationPanel extends RightPanel {
+  private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, DatabaseInformationPanel> instances = new HashMap<>();
 
   public static DatabaseInformationPanel getInstance(ViewerDatabase database) {
@@ -61,21 +64,21 @@ public class DatabaseInformationPanel extends RightPanel {
     // database metadata
     ViewerMetadata metadata = database.getMetadata();
     SafeHtmlBuilder b = new SafeHtmlBuilder();
-    b.append(getFieldHTML("Database Name", metadata.getName()));
-    b.append(getFieldHTML("Archival Date", metadata.getArchivalDate()));
-    b.append(getFieldHTML("Archivist", metadata.getArchiver()));
-    b.append(getFieldHTML("Archivist contact", metadata.getArchiverContact()));
-    b.append(getFieldHTML("Client machine", metadata.getClientMachine()));
-    b.append(getFieldHTML("Database product", metadata.getDatabaseProduct()));
-    b.append(getFieldHTML("Database user", metadata.getDatabaseUser()));
-    b.append(getFieldHTML("Data origin time span", metadata.getDataOriginTimespan()));
-    b.append(getFieldHTML("Data owner", metadata.getDataOwner()));
+    b.append(getFieldHTML(messages.siardMetadata_databaseName(), metadata.getName()));
+    b.append(getFieldHTML(messages.siardMetadata_archivalDate(), metadata.getArchivalDate()));
+    b.append(getFieldHTML(messages.siardMetadata_archivist(), metadata.getArchiver()));
+    b.append(getFieldHTML(messages.siardMetadata_archivistContact(), metadata.getArchiverContact()));
+    b.append(getFieldHTML(messages.siardMetadata_clientMachine(), metadata.getClientMachine()));
+    b.append(getFieldHTML(messages.siardMetadata_databaseProduct(), metadata.getDatabaseProduct()));
+    b.append(getFieldHTML(messages.siardMetadata_databaseUser(), metadata.getDatabaseUser()));
+    b.append(getFieldHTML(messages.siardMetadata_dataOriginTimeSpan(), metadata.getDataOriginTimespan()));
+    b.append(getFieldHTML(messages.siardMetadata_dataOwner(), metadata.getDataOwner()));
     if (ViewerStringUtils.isNotBlank(metadata.getDescription())) {
-      b.append(getFieldHTML("Description", metadata.getDescription()));
+      b.append(getFieldHTML(messages.description(), metadata.getDescription()));
     } else {
-      b.append(getFieldHTML("Description", "A description for this database is not available."));
+      b.append(getFieldHTML(messages.description(), messages.siardMetadata_DescriptionUnavailable()));
     }
-    b.append(getFieldHTML("Producer application", metadata.getProducerApplication()));
+    b.append(getFieldHTML(messages.siardMetadata_producerApplication(), metadata.getProducerApplication()));
     metadatahtml.setHTML(b.toSafeHtml());
   }
 

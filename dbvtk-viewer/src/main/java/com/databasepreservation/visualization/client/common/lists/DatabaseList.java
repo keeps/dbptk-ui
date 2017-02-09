@@ -26,10 +26,13 @@ import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
 
+import config.i18n.client.ClientMessages;
+
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
+  private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private final ClientLogger logger = new ClientLogger(getClass().getName());
 
   private Column<ViewerDatabase, SafeHtml> levelColumn;
@@ -90,13 +93,13 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
     // dataOriginTimespan.setSortable(true);
     // description.setSortable(true);
 
-    addColumn(nameColumn, "Database name", true, false, 30);
-    addColumn(archivalDateColumn, "Archival date", true, false, 20);
-    addColumn(dataOriginTimespan, "Data origin time span", true, false, 20);
-    addColumn(shortID, "Unique ID", true, false, 20);
-    addColumn(description, "Description", true, false, 35);
+    addColumn(nameColumn, messages.databaseName(), true, false, 30);
+    addColumn(archivalDateColumn, messages.siardMetadata_archivalDate(), true, false, 20);
+    addColumn(dataOriginTimespan, messages.siardMetadata_dataOriginTimeSpan(), true, false, 20);
+    addColumn(shortID, messages.uniqueID(), true, false, 20);
+    addColumn(description, messages.description(), true, false, 35);
 
-    Label emptyInfo = new Label("No items to display");
+    Label emptyInfo = new Label(messages.noItemsToDisplay());
     display.setEmptyTableWidget(emptyInfo);
 
     // define default sorting

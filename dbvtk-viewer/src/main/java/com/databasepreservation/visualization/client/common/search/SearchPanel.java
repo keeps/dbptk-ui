@@ -36,10 +36,13 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
+import config.i18n.client.ClientMessages;
+
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class SearchPanel extends Composite implements HasValueChangeHandlers<String> {
+  private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static final String FILTER_ICON = "<i class='fa fa-filter' aria-hidden='true'></i>";
 
   // private static final BrowseMessages messages =
@@ -387,7 +390,7 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
   }
 
   private void saveSearchReset() {
-    saveSearchButton.setText("Save search");
+    saveSearchButton.setText(messages.saveSearch());
     saveSearchButton.addStyleName("searchPanelAdvancedSaveSearchButton");
     saveSearchButton.setEnabled(saveQueryCallback != null);
     saveSearchButton.setVisible(saveQueryCallback != null);
@@ -396,7 +399,7 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
   @UiHandler("saveSearchButton")
   void saveSearchOpenPanel(ClickEvent e) {
     saveSearchButton.setEnabled(false);
-    saveSearchButton.setText("Saving...");
+    saveSearchButton.setText(messages.saving());
     saveQueryCallback.onSuccess(null);
   }
 

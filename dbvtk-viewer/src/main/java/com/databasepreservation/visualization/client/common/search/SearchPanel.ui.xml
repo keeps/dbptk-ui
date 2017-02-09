@@ -3,9 +3,8 @@
              xmlns:b="urn:import:com.databasepreservation.visualization.client.browse"
              xmlns:s="urn:import:com.databasepreservation.visualization.client.common.search"
              xmlns:wcag="urn:import:com.databasepreservation.visualization.shared.client.widgets.wcag">
-    <ui:style>
-    </ui:style>
 
+    <ui:with field='messages' type='config.i18n.client.ClientMessages' />
     <g:FlowPanel>
         <g:FlowPanel styleName="searchPanel" ui:field="searchPanel">
             <g:FlowPanel styleName="searchPanelLeft">
@@ -39,10 +38,9 @@
             <g:FlowPanel styleName="searchAdvancedPanelButtons"
                          ui:field="searchAdvancedPanelButtons">
                 <g:Button styleName="btn btn-plus advancedAddButton"
-                          ui:field="searchAdvancedFieldOptionsAdd">Add search
-                    field</g:Button>
+                          ui:field="searchAdvancedFieldOptionsAdd"><ui:text from='{messages.addSearchField}' /></g:Button>
                 <g:Button styleName="btn btn-search advancedSearchButton"
-                          ui:field="searchAdvancedGo" enabled="false">Search</g:Button>
+                          ui:field="searchAdvancedGo" enabled="false"><ui:text from='{messages.search}' /></g:Button>
                 <g:Button styleName="btn btn-save searchPanelAdvancedSaveSearchButton"
                           ui:field="saveSearchButton" enabled="false" visible="false" />
             </g:FlowPanel>

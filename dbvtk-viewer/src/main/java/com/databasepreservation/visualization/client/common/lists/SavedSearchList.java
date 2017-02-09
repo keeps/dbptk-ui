@@ -34,10 +34,13 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
 
+import config.i18n.client.ClientMessages;
+
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class SavedSearchList extends AsyncTableCell<SavedSearch, String> {
+  private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private final ClientLogger LOGGER = new ClientLogger(getClass().getName());
 
   private TextColumn<SavedSearch> nameColumn;
@@ -87,14 +90,14 @@ public class SavedSearchList extends AsyncTableCell<SavedSearch, String> {
 
     // column with 2 buttons (edit and delete)
     ArrayList<HasCell<SavedSearch, ?>> cells = new ArrayList<>();
-    cells.add(new ActionsCell("Edit", FontAwesomeIconManager.ACTION_EDIT,
+    cells.add(new ActionsCell(messages.edit(), FontAwesomeIconManager.ACTION_EDIT,
       new FontAwesomeActionCell.Delegate<SavedSearch>() {
         @Override
         public void execute(SavedSearch object) {
           HistoryManager.gotoEditSavedSearch(object.getDatabaseUUID(), object.getUUID());
         }
       }));
-    cells.add(new ActionsCell("Delete", FontAwesomeIconManager.ACTION_DELETE, "btn-danger",
+    cells.add(new ActionsCell(messages.delete(), FontAwesomeIconManager.ACTION_DELETE, "btn-danger",
       new FontAwesomeActionCell.Delegate<SavedSearch>() {
         @Override
         public void execute(final SavedSearch object) {
@@ -125,13 +128,13 @@ public class SavedSearchList extends AsyncTableCell<SavedSearch, String> {
     dateAddedColumn.setSortable(true);
     actionsColumn.setSortable(false);
 
-    addColumn(nameColumn, "Search name", true, false, 15);
-    addColumn(tableNameColumn, "Table", true, false, 15);
-    addColumn(dateAddedColumn, "Created", true, false, 15);
-    addColumn(descriptionColumn, "Description", true, false);
-    addColumn(actionsColumn, "Actions", false, false, 6);
+    addColumn(nameColumn, messages.name(), true, false, 15);
+    addColumn(tableNameColumn, messages.table(), true, false, 15);
+    addColumn(dateAddedColumn, messages.created(), true, false, 15);
+    addColumn(descriptionColumn, messages.description(), true, false);
+    addColumn(actionsColumn, messages.actions(), false, false, 6);
 
-    Label emptyInfo = new Label("There are no saved searches.");
+    Label emptyInfo = new Label(messages.thereAreNoSavedSearches());
     display.setEmptyTableWidget(emptyInfo);
 
     // define default sorting

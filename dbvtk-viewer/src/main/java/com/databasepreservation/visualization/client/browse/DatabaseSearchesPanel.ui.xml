@@ -6,9 +6,9 @@
              xmlns:sb='urn:import:com.databasepreservation.visualization.client.common.sidebar'
              xmlns:lists="urn:import:com.databasepreservation.visualization.client.common.lists">
 
-
+    <ui:with field='messages' type='config.i18n.client.ClientMessages' />
     <g:FlowPanel>
-        <g:Label addStyleNames="h1"><ui:msg>Saved searches</ui:msg></g:Label>
+        <g:Label addStyleNames="h1"><ui:text from='{messages.menusidebar_savedSearches}' /></g:Label>
         <g:FlowPanel ui:field="content" />
     </g:FlowPanel>
 </ui:UiBinder>

@@ -1,50 +1,68 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+
+    <ui:with field='messages' type='config.i18n.client.ClientMessages'/>
     <g:HTMLPanel>
         <div class="footer skip_padding static-page max-width">
             <div class="row no_padding full_width">
                 <div class="col_3">
-                    <h3>About Database Viewer</h3>
+                    <h3>
+                        <ui:text from='{messages.aboutDBVTK}'/>
+                    </h3>
                     <ul>
                         <li>
-                            <a href="http://www.database-preservation.com/">What is DBVTK?</a>
+                            <a href="http://www.database-preservation.com/">
+                                <ui:text from='{messages.whatIsDBVTK}'/>
+                            </a>
                         </li>
                         <li>
-                            <a href="http://www.database-preservation.com/#license">License</a>
+                            <a href="http://www.database-preservation.com/#license">
+                                <ui:text from='{messages.license}'/>
+                            </a>
                         </li>
                     </ul>
                 </div>
                 <div class="col_3">
-                    <h3>Download</h3>
+                    <h3>
+                        <ui:text from='{messages.download}'/>
+                    </h3>
                     <ul>
                         <li>
                             <a href="https://github.com/keeps/db-visualization-toolkit/releases"
-                               target="_blank">Binary
+                               target="_blank">
+                                <ui:text from='{messages.binary}'/>
                             </a>
                         </li>
                         <li>
-                            <a href="https://github.com/keeps/db-visualization-toolkit" target="_blank">Source
-                                code
+                            <a href="https://github.com/keeps/db-visualization-toolkit" target="_blank">
+                                <ui:text from='{messages.source}'/>
                             </a>
                         </li>
                     </ul>
 
                 </div>
                 <div class="col_3">
-                    <h3>Development</h3>
+                    <h3>
+                        <ui:text from='{messages.development}'/>
+                    </h3>
                     <ul>
                         <li>
                             <a href="https://github.com/keeps/db-visualization-toolkit/issues/new"
-                               target="_blank">Bug reporting
+                               target="_blank">
+                                <ui:text from='{messages.bugReporting}'/>
                             </a>
                         </li>
                     </ul>
                 </div>
                 <div class="col_3 last">
-                    <h3>Contact us</h3>
+                    <h3>
+                        <ui:text from='{messages.contactUs}'/>
+                    </h3>
                     <ul>
                         <li>
-                            <a href="http://www.database-preservation.com/#information--commercial-support">Information &amp; Commercial support</a>
+                            <a href="http://www.database-preservation.com/#information--commercial-support">
+                                <ui:text from='{messages.infoAndSupport}'/>
+                            </a>
                         </li>
                     </ul>
                 </div>

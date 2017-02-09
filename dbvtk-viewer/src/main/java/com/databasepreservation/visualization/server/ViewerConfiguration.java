@@ -9,12 +9,15 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 
 import org.apache.commons.configuration.CompositeConfiguration;
@@ -33,6 +36,9 @@ import org.slf4j.LoggerFactory;
 import com.databasepreservation.utils.FileUtils;
 import com.databasepreservation.visualization.ViewerConstants;
 import com.databasepreservation.visualization.utils.ViewerAbstractConfiguration;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
@@ -89,6 +95,14 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   private static List<String> configurationFiles = null;
   private static Map<String, Map<String, String>> viewerPropertiesCache = null;
 
+  private static LoadingCache<Locale, Messages> I18N_CACHE = CacheBuilder.newBuilder().build(
+    new CacheLoader<Locale, Messages>() {
+      @Override
+      public Messages load(Locale locale) throws Exception {
+        return new Messages(locale, configPath.resolve(ViewerConstants.VIEWER_I18N_FOLDER));
+      }
+    });
+
   /**
    * Private constructor, use getInstance() instead
    */
@@ -143,7 +157,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   @Override
   public void clearViewerCachableObjectsAfterConfigurationChange() {
     viewerPropertiesCache.clear();
-    // I18N_CACHE.invalidateAll();
+    I18N_CACHE.invalidateAll();
     LOGGER.info("Reloaded dbvtk configurations after file change!");
   }
 
@@ -161,10 +175,30 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
       || getViewerConfigurationAsBoolean(false, PROPERTY_FILTER_AUTHENTICATION_CAS);
   }
 
+  public static Messages getI18NMessages(String localeString) {
+    return getI18NMessages(ServerTools.parseLocale(localeString));
+  }
+
+  public static Messages getI18NMessages(Locale locale) {
+    checkForChangesInI18N();
+    try {
+      return I18N_CACHE.get(locale);
+    } catch (ExecutionException e) {
+      LOGGER.debug("Could not load messages", e);
+      return null;
+    }
+  }
+
   /*
    * "Internal" helper methods
    * ____________________________________________________________________________________________________________________
    */
+  private static void checkForChangesInI18N() {
+    // i18n is cached and that cache is re-done when changes occur to
+    // dbvtk-viewer.properties (for convenience)
+    viewerConfiguration.getString("");
+  }
+
   private static Path determineViewerHomePath() {
     Path viewerHomePath;
     if (System.getProperty(ViewerConstants.INSTALL_FOLDER_SYSTEM_PROPERTY) != null) {
@@ -214,7 +248,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   private static void instantiateEssentialDirectories() {
     List<Path> essentialDirectories = new ArrayList<>();
     essentialDirectories.add(configPath);
-    essentialDirectories.add(viewerHomePath.resolve(ViewerConstants.CORE_LOG_FOLDER));
+    essentialDirectories.add(viewerHomePath.resolve(ViewerConstants.VIEWER_LOG_FOLDER));
     essentialDirectories.add(lobsPath);
     essentialDirectories.add(logPath);
     essentialDirectories.add(exampleConfigPath);
@@ -234,7 +268,13 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     try {
       FileUtils.deleteDirectoryRecursiveQuietly(exampleConfigPath);
       Files.createDirectories(exampleConfigPath);
-      copyFilesFromClasspath(ViewerConstants.VIEWER_CONFIG_FOLDER + "/", exampleConfigPath, true);
+      copyFilesFromClasspath(
+        ViewerConstants.VIEWER_CONFIG_FOLDER + "/",
+        exampleConfigPath,
+        true,
+        Arrays.asList(ViewerConstants.VIEWER_CONFIG_FOLDER + "/" + ViewerConstants.VIEWER_I18N_FOLDER + "/"
+          + ViewerConstants.VIEWER_I18N_CLIENT_FOLDER, ViewerConstants.VIEWER_CONFIG_FOLDER + "/"
+          + ViewerConstants.VIEWER_I18N_FOLDER + "/" + ViewerConstants.VIEWER_I18_GWT_XML_FILE));
     } catch (IOException e) {
       LOGGER.error("Unable to create " + exampleConfigPath, e);
       instantiatedWithoutErrors = false;

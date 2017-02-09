@@ -83,7 +83,7 @@ public class DatabaseUsersPanel extends RightPanel {
     } else {
       return new BasicTablePanel<>(header, info, users.iterator(),
 
-      new BasicTablePanel.ColumnInfo<>(messages.titleName(), 15, new TextColumn<ViewerUserStructure>() {
+      new BasicTablePanel.ColumnInfo<>(messages.name(), 15, new TextColumn<ViewerUserStructure>() {
         @Override
         public String getValue(ViewerUserStructure user) {
           return user.getName();
@@ -114,7 +114,7 @@ public class DatabaseUsersPanel extends RightPanel {
     } else {
       return new BasicTablePanel<>(header, info, roles.iterator(),
 
-      new BasicTablePanel.ColumnInfo<>(messages.titleName(), 15, new TextColumn<ViewerRoleStructure>() {
+      new BasicTablePanel.ColumnInfo<>(messages.name(), 15, new TextColumn<ViewerRoleStructure>() {
         @Override
         public String getValue(ViewerRoleStructure role) {
           return role.getName();

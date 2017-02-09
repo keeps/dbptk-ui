@@ -46,10 +46,14 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
+import config.i18n.client.ClientMessages;
+
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class MainPanel extends Composite {
+  private static final ClientMessages messages = GWT.create(ClientMessages.class);
+
   // databaseUUID, databaseName
   private static Map<String, String> databaseNames = new HashMap<>();
 
@@ -396,7 +400,7 @@ public class MainPanel extends Composite {
       }
     });
 
-    homeLinkArea.setTitle("Go home");
+    homeLinkArea.setTitle(messages.goHome());
   }
 
   private void reSetHeader(final String databaseUUID, String databaseName) {
@@ -411,7 +415,7 @@ public class MainPanel extends Composite {
       }
     });
 
-    homeLinkArea.setTitle("Go to database information");
+    homeLinkArea.setTitle(messages.goToDatabaseInformation());
   }
 
   private void reSetHeader(final String databaseUUID) {

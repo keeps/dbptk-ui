@@ -46,7 +46,6 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.cellview.client.Header;
 import com.google.gwt.user.cellview.client.LoadingStateChangeEvent;
-import com.google.gwt.user.cellview.client.PageSizePager;
 import com.google.gwt.user.cellview.client.SafeHtmlHeader;
 import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.cellview.client.ColumnSortEvent.AsyncHandler;
@@ -84,7 +83,7 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel i
   private final AsyncHandler columnSortHandler;
 
   private final AccessibleSimplePager resultsPager;
-  private final PageSizePager pageSizePager;
+  private final RodaPageSizePager pageSizePager;
   private final CellTable<T> display;
   private FlexTable exportButtons;
   private Anchor exportVisibleButton;
@@ -173,7 +172,7 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel i
       exportButtons.setCellPadding(0);
       exportButtons.setCellSpacing(0);
 
-      exportVisibleButton = new Anchor("Export visible");
+      exportVisibleButton = new Anchor(messages.exportVisible());
       exportVisibleButton.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
@@ -181,7 +180,7 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel i
         }
       });
 
-      exportAllButton = new Anchor("Export all");
+      exportAllButton = new Anchor(messages.exportAll());
       exportAllButton.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
@@ -199,7 +198,7 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel i
       (SimplePager.ImageButtonsConstants) GWT.create(SimplePager.ImageButtonsConstants.class));
     resultsPager.setDisplay(display);
 
-    pageSizePager = new PageSizePager(getPageSizePagerIncrement());
+    pageSizePager = new RodaPageSizePager(getPageSizePagerIncrement());
     pageSizePager.setDisplay(display);
 
     createSelectAllPanel();

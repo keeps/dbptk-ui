@@ -29,10 +29,13 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
+import config.i18n.client.ClientMessages;
+
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class DatabaseSidebar extends Composite {
+  private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, DatabaseSidebar> instances = new HashMap<>();
 
   /**
@@ -133,42 +136,42 @@ public class DatabaseSidebar extends Composite {
     // database metadata
     final ViewerMetadata metadata = database.getMetadata();
 
-    sidebarGroup.add(new SidebarItem("Database").addIcon(FontAwesomeIconManager.DATABASE).setH5().setIndent0());
+    sidebarGroup.add(new SidebarItem(messages.menusidebar_database()).addIcon(FontAwesomeIconManager.DATABASE).setH5()
+      .setIndent0());
 
-    sidebarGroup.add(new SidebarHyperlink("Information", HistoryManager.linkToDatabase(database.getUUID()))
-      .addIcon(FontAwesomeIconManager.DATABASE_INFORMATION).setH6().setIndent1());
+    sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_information(), HistoryManager.linkToDatabase(database
+      .getUUID())).addIcon(FontAwesomeIconManager.DATABASE_INFORMATION).setH6().setIndent1());
 
-    sidebarGroup.add(new SidebarHyperlink("Users & Roles", HistoryManager.linkToDatabaseUsers(database.getUUID()))
-      .addIcon(FontAwesomeIconManager.DATABASE_USERS).setH6().setIndent1());
+    sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_usersRoles(), HistoryManager
+      .linkToDatabaseUsers(database.getUUID())).addIcon(FontAwesomeIconManager.DATABASE_USERS).setH6().setIndent1());
 
-    sidebarGroup.add(new SidebarHyperlink("Saved searches", HistoryManager.linkToSavedSearches(database.getUUID()))
-      .addIcon(FontAwesomeIconManager.SAVED_SEARCH).setH6().setIndent1());
+    sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_savedSearches(), HistoryManager
+      .linkToSavedSearches(database.getUUID())).addIcon(FontAwesomeIconManager.SAVED_SEARCH).setH6().setIndent1());
 
-    sidebarGroup
-      .add(new SidebarHyperlink("Search all records", HistoryManager.linkToDatabaseSearch(database.getUUID()))
-        .addIcon(FontAwesomeIconManager.DATABASE_SEARCH).setH6().setIndent1());
+    sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_searchAllRecords(), HistoryManager
+      .linkToDatabaseSearch(database.getUUID())).addIcon(FontAwesomeIconManager.DATABASE_SEARCH).setH6().setIndent1());
 
     for (final ViewerSchema schema : metadata.getSchemas()) {
       sidebarGroup.add(new SidebarItem(schema.getName()).addIcon(FontAwesomeIconManager.SCHEMA).setH5().setIndent0());
 
-      sidebarGroup.add(new SidebarHyperlink("Structure", HistoryManager.linkToSchemaStructure(database.getUUID(),
-        schema.getUUID())).addIcon(FontAwesomeIconManager.SCHEMA_STRUCTURE).setH6().setIndent1());
+      sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_structure(), HistoryManager.linkToSchemaStructure(
+        database.getUUID(), schema.getUUID())).addIcon(FontAwesomeIconManager.SCHEMA_STRUCTURE).setH6().setIndent1());
 
-      sidebarGroup.add(new SidebarHyperlink("Routines", HistoryManager.linkToSchemaRoutines(database.getUUID(),
-        schema.getUUID())).addIcon(FontAwesomeIconManager.SCHEMA_ROUTINES).setH6().setIndent1());
+      sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_routines(), HistoryManager.linkToSchemaRoutines(
+        database.getUUID(), schema.getUUID())).addIcon(FontAwesomeIconManager.SCHEMA_ROUTINES).setH6().setIndent1());
 
-      sidebarGroup.add(new SidebarHyperlink("Triggers", HistoryManager.linkToSchemaTriggers(database.getUUID(),
-        schema.getUUID())).addIcon(FontAwesomeIconManager.SCHEMA_TRIGGERS).setH6().setIndent1());
+      sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_triggers(), HistoryManager.linkToSchemaTriggers(
+        database.getUUID(), schema.getUUID())).addIcon(FontAwesomeIconManager.SCHEMA_TRIGGERS).setH6().setIndent1());
 
-      sidebarGroup.add(new SidebarHyperlink("Check constraints", HistoryManager.linkToSchemaCheckConstraints(
-        database.getUUID(), schema.getUUID())).addIcon(FontAwesomeIconManager.SCHEMA_CHECK_CONSTRAINTS).setH6()
-        .setIndent1());
+      sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_checkConstraints(), HistoryManager
+        .linkToSchemaCheckConstraints(database.getUUID(), schema.getUUID()))
+        .addIcon(FontAwesomeIconManager.SCHEMA_CHECK_CONSTRAINTS).setH6().setIndent1());
 
-      sidebarGroup.add(new SidebarHyperlink("Views", HistoryManager.linkToSchemaViews(database.getUUID(),
-        schema.getUUID())).addIcon(FontAwesomeIconManager.SCHEMA_VIEWS).setH6().setIndent1());
+      sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_views(), HistoryManager.linkToSchemaViews(
+        database.getUUID(), schema.getUUID())).addIcon(FontAwesomeIconManager.SCHEMA_VIEWS).setH6().setIndent1());
 
-      sidebarGroup.add(new SidebarHyperlink("Data", HistoryManager.linkToSchemaData(database.getUUID(),
-        schema.getUUID())).addIcon(FontAwesomeIconManager.SCHEMA_DATA).setH6().setIndent1());
+      sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_data(), HistoryManager.linkToSchemaData(
+        database.getUUID(), schema.getUUID())).addIcon(FontAwesomeIconManager.SCHEMA_DATA).setH6().setIndent1());
 
       for (ViewerTable table : schema.getTables()) {
         sidebarGroup.add(new SidebarHyperlink(table.getName(), HistoryManager.linkToTable(database.getUUID(),
@@ -182,7 +185,7 @@ public class DatabaseSidebar extends Composite {
   }
 
   private void searchInit() {
-    searchInputBox.getElement().setPropertyString("placeholder", "Filter sidebar");
+    searchInputBox.getElement().setPropertyString("placeholder", messages.menusidebar_filterSidebar());
 
     searchInputBox.addChangeHandler(new ChangeHandler() {
       @Override

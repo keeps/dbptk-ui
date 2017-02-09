@@ -6,9 +6,10 @@
              xmlns:sb='urn:import:com.databasepreservation.visualization.client.common.sidebar'
              xmlns:lists="urn:import:com.databasepreservation.visualization.client.common.lists">
 
+    <ui:with field='messages' type='config.i18n.client.ClientMessages' />
     <g:FlowPanel>
         <g:SimplePanel addStyleNames="h1" ui:field="mainHeader">
-            <g:Label><ui:msg>Loading...</ui:msg></g:Label>
+            <g:Label><ui:text from='{messages.loading}' /></g:Label>
         </g:SimplePanel>
         <g:HTML ui:field="description"/>
         <g:SimplePanel ui:field="tableSearchPanelContainer"/>

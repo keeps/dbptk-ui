@@ -30,10 +30,13 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
+import config.i18n.client.ClientMessages;
+
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class SchemaStructurePanel extends RightPanel {
+  private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, SchemaStructurePanel> instances = new HashMap<>();
 
   public static SchemaStructurePanel getInstance(ViewerDatabase database, String schemaUUID) {
@@ -104,34 +107,34 @@ public class SchemaStructurePanel extends RightPanel {
   }
 
   private BasicTablePanel<ViewerForeignKey> getBasicTablePanelForTableForeignKeys(final ViewerTable table) {
-    Label header = new Label("Foreign Keys");
+    Label header = new Label(messages.foreignKeys());
     header.addStyleName("h5");
 
     return new BasicTablePanel<>(header, SafeHtmlUtils.EMPTY_SAFE_HTML, table.getForeignKeys().iterator(),
 
-    new BasicTablePanel.ColumnInfo<>("Name", 15, new TextColumn<ViewerForeignKey>() {
+    new BasicTablePanel.ColumnInfo<>(messages.name(), 15, new TextColumn<ViewerForeignKey>() {
       @Override
       public String getValue(ViewerForeignKey foreignKey) {
         return foreignKey.getName();
       }
     }),
 
-    new BasicTablePanel.ColumnInfo<>("Referenced Schema", 15, new TextColumn<ViewerForeignKey>() {
+    new BasicTablePanel.ColumnInfo<>(messages.foreignKeys_referencedSchema(), 15, new TextColumn<ViewerForeignKey>() {
       @Override
       public String getValue(ViewerForeignKey foreignKey) {
         return database.getMetadata().getTable(foreignKey.getReferencedTableUUID()).getSchemaName();
       }
     }),
 
-    new BasicTablePanel.ColumnInfo<>("Referenced Table", 15, new TextColumn<ViewerForeignKey>() {
+    new BasicTablePanel.ColumnInfo<>(messages.foreignKeys_referencedTable(), 15, new TextColumn<ViewerForeignKey>() {
       @Override
       public String getValue(ViewerForeignKey foreignKey) {
         return database.getMetadata().getTable(foreignKey.getReferencedTableUUID()).getName();
       }
     }),
 
-    new BasicTablePanel.ColumnInfo<>(
-      SafeHtmlUtils.fromSafeConstant("Mapping (Source <i class=\"fa fa-long-arrow-right\"></i> Referenced)"), 20,
+    new BasicTablePanel.ColumnInfo<>(SafeHtmlUtils.fromSafeConstant(messages
+      .mappingSourceToReferenced("<i class=\"fa fa-long-arrow-right\"></i>")), 20,
       new Column<ViewerForeignKey, SafeHtml>(new SafeHtmlCell()) {
         @Override
         public SafeHtml getValue(ViewerForeignKey foreignKey) {
@@ -153,28 +156,28 @@ public class SchemaStructurePanel extends RightPanel {
         }
       }),
 
-    new BasicTablePanel.ColumnInfo<>("Match type", 10, new TextColumn<ViewerForeignKey>() {
+    new BasicTablePanel.ColumnInfo<>(messages.foreignKeys_matchType(), 10, new TextColumn<ViewerForeignKey>() {
       @Override
       public String getValue(ViewerForeignKey foreignKey) {
         return foreignKey.getMatchType();
       }
     }),
 
-    new BasicTablePanel.ColumnInfo<>("Update action", 9, new TextColumn<ViewerForeignKey>() {
+    new BasicTablePanel.ColumnInfo<>(messages.foreignKeys_updateAction(), 9, new TextColumn<ViewerForeignKey>() {
       @Override
       public String getValue(ViewerForeignKey foreignKey) {
         return foreignKey.getUpdateAction();
       }
     }),
 
-    new BasicTablePanel.ColumnInfo<>("Delete action", 9, new TextColumn<ViewerForeignKey>() {
+    new BasicTablePanel.ColumnInfo<>(messages.foreignKeys_deleteAction(), 9, new TextColumn<ViewerForeignKey>() {
       @Override
       public String getValue(ViewerForeignKey foreignKey) {
         return foreignKey.getDeleteAction();
       }
     }),
 
-    new BasicTablePanel.ColumnInfo<>("Description", 35, new TextColumn<ViewerForeignKey>() {
+    new BasicTablePanel.ColumnInfo<>(messages.description(), 35, new TextColumn<ViewerForeignKey>() {
       @Override
       public String getValue(ViewerForeignKey foreignKey) {
         if (ViewerStringUtils.isNotBlank(foreignKey.getDescription())) {
@@ -194,7 +197,7 @@ public class SchemaStructurePanel extends RightPanel {
     SafeHtmlBuilder infoBuilder = new SafeHtmlBuilder();
     if (ViewerStringUtils.isNotBlank(table.getDescription())) {
       infoBuilder.append(SafeHtmlUtils.fromSafeConstant("<div class=\"field\">"));
-      infoBuilder.append(SafeHtmlUtils.fromSafeConstant("<div class=\"value\">Description: "));
+      infoBuilder.append(SafeHtmlUtils.fromSafeConstant("<div class=\"value\">" + messages.description() + ": "));
       infoBuilder.append(SafeHtmlUtils.fromString(table.getDescription()));
       infoBuilder.append(SafeHtmlUtils.fromSafeConstant("</div>"));
       infoBuilder.append(SafeHtmlUtils.fromSafeConstant("</div>"));
@@ -217,38 +220,38 @@ public class SchemaStructurePanel extends RightPanel {
       @Override
       public SafeHtml getValue(ViewerColumn column) {
         if (pk.getColumnIndexesInViewerTable().contains(column.getColumnIndexInEnclosingTable())) {
-          return SafeHtmlUtils.fromSafeConstant("<i class='fa fa-key' title='Primary Key'></i>");
+          return SafeHtmlUtils.fromSafeConstant("<i class='fa fa-key' title='" + messages.primaryKey() + "'></i>");
         } else if (columnIndexesWithForeignKeys.contains(column.getColumnIndexInEnclosingTable())) {
-          return SafeHtmlUtils
-            .fromSafeConstant("<i class='fa fa-exchange' title='Used by a Foreign Key relation'></i>");
+          return SafeHtmlUtils.fromSafeConstant("<i class='fa fa-exchange' title='"
+            + messages.foreignKeys_usedByAForeignKeyRelation() + "'></i>");
         } else {
           return SafeHtmlUtils.EMPTY_SAFE_HTML;
         }
       }
     }, "primary-key-col"),
 
-    new BasicTablePanel.ColumnInfo<>("column name", 15, new TextColumn<ViewerColumn>() {
+    new BasicTablePanel.ColumnInfo<>(messages.columnName(), 15, new TextColumn<ViewerColumn>() {
       @Override
       public String getValue(ViewerColumn column) {
         return column.getDisplayName();
       }
     }),
 
-    new BasicTablePanel.ColumnInfo<>("Type name", 15, new TextColumn<ViewerColumn>() {
+    new BasicTablePanel.ColumnInfo<>(messages.typeName(), 15, new TextColumn<ViewerColumn>() {
       @Override
       public String getValue(ViewerColumn column) {
         return column.getType().getTypeName();
       }
     }),
 
-    new BasicTablePanel.ColumnInfo<>("Original type name", 15, new TextColumn<ViewerColumn>() {
+    new BasicTablePanel.ColumnInfo<>(messages.originalTypeName(), 15, new TextColumn<ViewerColumn>() {
       @Override
       public String getValue(ViewerColumn column) {
         return column.getType().getOriginalTypeName();
       }
     }),
 
-    new BasicTablePanel.ColumnInfo<>("Nullable", 8, new TextColumn<ViewerColumn>() {
+    new BasicTablePanel.ColumnInfo<>(messages.nullable(), 8, new TextColumn<ViewerColumn>() {
       @Override
       public String getValue(ViewerColumn column) {
         if (column.getNillable()) {
@@ -259,7 +262,7 @@ public class SchemaStructurePanel extends RightPanel {
       }
     }),
 
-    new BasicTablePanel.ColumnInfo<>("Description", 35, new TextColumn<ViewerColumn>() {
+    new BasicTablePanel.ColumnInfo<>(messages.description(), 35, new TextColumn<ViewerColumn>() {
       @Override
       public String getValue(ViewerColumn column) {
         if (ViewerStringUtils.isNotBlank(column.getDescription())) {

@@ -5,17 +5,16 @@
              xmlns:s='urn:import:com.databasepreservation.visualization.client.common.search'
              xmlns:lists="urn:import:com.databasepreservation.visualization.client.common.lists">
 
+    <ui:with field='messages' type='config.i18n.client.ClientMessages' />
     <g:FlowPanel addStyleNames="browseContent wrapper skip_padding">
         <g:FlowPanel addStyleNames="row full_width skip_padding">
             <g:FlowPanel addStyleNames="homePanel">
                 <g:HTML>
-                    <p>
-                    The Database Visualization Toolkit is a lightweight web viewer for relational databases, specially if preserved in SIARD 2, that uses SOLR
-                    as a backend, and allows browsing, search, and export. It uses the Database Preservation Toolkit to
-                    process new relational databases that are in the SIARD2 format or on the original live DBMS.
+                    <p><ui:text from='{messages.homePageDescriptionTop}' />
                     </p>
                     <p>
-                    More information can be found <a href="http://visualization.database-preservation.com/">here</a>.
+                    <ui:text from='{messages.homePageDescriptionBottom}' /> <a href="http://visualization.database-preservation.com/">
+                        <ui:text from='{messages.homePageDescriptionHere}' /></a>.
                     </p>
                 </g:HTML>
             </g:FlowPanel>

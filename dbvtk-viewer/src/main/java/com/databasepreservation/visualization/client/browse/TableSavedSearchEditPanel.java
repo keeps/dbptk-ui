@@ -24,10 +24,14 @@ import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
+import config.i18n.client.ClientMessages;
+
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class TableSavedSearchEditPanel extends RightPanel {
+  private static final ClientMessages messages = GWT.create(ClientMessages.class);
+
   public static TableSavedSearchEditPanel createInstance(ViewerDatabase database, String savedSearchUUID) {
     return new TableSavedSearchEditPanel(database, savedSearchUUID);
   }
@@ -62,7 +66,7 @@ public class TableSavedSearchEditPanel extends RightPanel {
 
     initWidget(uiBinder.createAndBindUi(this));
 
-    mainHeader.setWidget(CommonClientUtils.getSavedSearchHeader(database.getUUID(), "Loading..."));
+    mainHeader.setWidget(CommonClientUtils.getSavedSearchHeader(database.getUUID(), messages.loading()));
 
     BrowserService.Util.getInstance().retrieve(database.getUUID(), SavedSearch.class.getName(), savedSearchUUID,
       new DefaultAsyncCallback<IsIndexed>() {
@@ -94,7 +98,7 @@ public class TableSavedSearchEditPanel extends RightPanel {
     String tableUUID = savedSearch.getTableUUID();
 
     // set UI
-    Label savedSearchLabel = new Label("Editing saved search");
+    Label savedSearchLabel = new Label(messages.editingSavedSearch());
     savedSearchLabel.addStyleName("h1");
     mainHeader.setWidget(savedSearchLabel);
 

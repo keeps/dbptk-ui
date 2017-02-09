@@ -28,10 +28,13 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
+import config.i18n.client.ClientMessages;
+
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class SchemaRoutinesPanel extends RightPanel {
+  private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, SchemaRoutinesPanel> instances = new HashMap<>();
 
   public static SchemaRoutinesPanel getInstance(ViewerDatabase database, String schemaUUID) {
@@ -89,7 +92,7 @@ public class SchemaRoutinesPanel extends RightPanel {
     });
 
     if (routines.isEmpty()) {
-      Label noRoutinesMsg = new Label("This schema does not have any routines.");
+      Label noRoutinesMsg = new Label(messages.routines_thisSchemaDoesNotHaveAnyRoutines());
       noRoutinesMsg.addStyleName("strong");
       contentItems.add(noRoutinesMsg);
     } else {
@@ -109,25 +112,28 @@ public class SchemaRoutinesPanel extends RightPanel {
     SafeHtmlBuilder descriptionBuilder = new SafeHtmlBuilder();
 
     if (ViewerStringUtils.isNotBlank(viewerRoutine.getName())) {
-      descriptionBuilder.append(CommonClientUtils.getFieldHTML("Name", viewerRoutine.getName()));
+      descriptionBuilder.append(CommonClientUtils.getFieldHTML(messages.name(), viewerRoutine.getName()));
     }
     if (ViewerStringUtils.isNotBlank(viewerRoutine.getDescription())) {
-      descriptionBuilder.append(CommonClientUtils.getFieldHTML("Description", viewerRoutine.getDescription()));
+      descriptionBuilder.append(CommonClientUtils.getFieldHTML(messages.description(), viewerRoutine.getDescription()));
     }
     if (ViewerStringUtils.isNotBlank(viewerRoutine.getSource())) {
-      descriptionBuilder.append(CommonClientUtils.getFieldHTML("Source", viewerRoutine.getSource()));
+      descriptionBuilder
+        .append(CommonClientUtils.getFieldHTML(messages.routine_sourceCode(), viewerRoutine.getSource()));
     }
     if (ViewerStringUtils.isNotBlank(viewerRoutine.getBody())) {
       descriptionBuilder.append(CommonClientUtils.getFieldHTML(
-        "Body",
+        messages.routine_body(),
         SafeHtmlUtils.fromSafeConstant("<pre><code>" + SafeHtmlUtils.htmlEscape(viewerRoutine.getBody())
           + "</code></pre>")));
     }
     if (ViewerStringUtils.isNotBlank(viewerRoutine.getCharacteristic())) {
-      descriptionBuilder.append(CommonClientUtils.getFieldHTML("Characteristic", viewerRoutine.getCharacteristic()));
+      descriptionBuilder.append(CommonClientUtils.getFieldHTML(messages.routine_characteristic(),
+        viewerRoutine.getCharacteristic()));
     }
     if (ViewerStringUtils.isNotBlank(viewerRoutine.getReturnType())) {
-      descriptionBuilder.append(CommonClientUtils.getFieldHTML("Return type", viewerRoutine.getReturnType()));
+      descriptionBuilder.append(CommonClientUtils.getFieldHTML(messages.routine_returnType(),
+        viewerRoutine.getReturnType()));
     }
 
     return new HTMLPanel(descriptionBuilder.toSafeHtml());
@@ -151,21 +157,21 @@ public class SchemaRoutinesPanel extends RightPanel {
 
     return new BasicTablePanel<ViewerRoutineParameter>(header, info, routine.getParameters().iterator(),
 
-    new BasicTablePanel.ColumnInfo<>("Name", 15, new TextColumn<ViewerRoutineParameter>() {
+    new BasicTablePanel.ColumnInfo<>(messages.name(), 15, new TextColumn<ViewerRoutineParameter>() {
       @Override
       public String getValue(ViewerRoutineParameter viewerRoutineParameter) {
         return viewerRoutineParameter.getName();
       }
     }),
 
-    new BasicTablePanel.ColumnInfo<>("Mode", 15, new TextColumn<ViewerRoutineParameter>() {
+    new BasicTablePanel.ColumnInfo<>(messages.routineParameter_mode(), 15, new TextColumn<ViewerRoutineParameter>() {
       @Override
       public String getValue(ViewerRoutineParameter viewerRoutineParameter) {
         return viewerRoutineParameter.getMode();
       }
     }),
 
-    new BasicTablePanel.ColumnInfo<>("Type name", 15, new TextColumn<ViewerRoutineParameter>() {
+    new BasicTablePanel.ColumnInfo<>(messages.typeName(), 15, new TextColumn<ViewerRoutineParameter>() {
       @Override
       public String getValue(ViewerRoutineParameter viewerRoutineParameter) {
         if (viewerRoutineParameter.getType() != null) {
@@ -177,7 +183,7 @@ public class SchemaRoutinesPanel extends RightPanel {
       }
     }),
 
-    new BasicTablePanel.ColumnInfo<>("Original type name", 15, new TextColumn<ViewerRoutineParameter>() {
+    new BasicTablePanel.ColumnInfo<>(messages.originalTypeName(), 15, new TextColumn<ViewerRoutineParameter>() {
       @Override
       public String getValue(ViewerRoutineParameter viewerRoutineParameter) {
         if (viewerRoutineParameter.getType() != null) {
@@ -189,7 +195,7 @@ public class SchemaRoutinesPanel extends RightPanel {
       }
     }),
 
-    new BasicTablePanel.ColumnInfo<>("Description", 35, new TextColumn<ViewerRoutineParameter>() {
+    new BasicTablePanel.ColumnInfo<>(messages.description(), 35, new TextColumn<ViewerRoutineParameter>() {
       @Override
       public String getValue(ViewerRoutineParameter viewerRoutineParameter) {
         if (viewerRoutineParameter.getType() != null) {

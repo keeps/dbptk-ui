@@ -6,6 +6,7 @@ import com.databasepreservation.visualization.client.ViewerStructure.ViewerView;
 import com.databasepreservation.visualization.shared.client.Tools.FontAwesomeIconManager;
 import com.databasepreservation.visualization.shared.client.Tools.HistoryManager;
 import com.databasepreservation.visualization.shared.client.Tools.ViewerStringUtils;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -15,14 +16,18 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 
+import config.i18n.client.ClientMessages;
+
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class CommonClientUtils {
+  private static final ClientMessages messages = GWT.create(ClientMessages.class);
+
   public static void addSchemaInfoToFlowPanel(FlowPanel panel, ViewerSchema schema) {
-    panel.add(new HTMLPanel(getFieldHTML("Schema name", schema.getName())));
+    panel.add(new HTMLPanel(getFieldHTML(messages.schemaName(), schema.getName())));
     if (ViewerStringUtils.isNotBlank(schema.getDescription())) {
-      panel.add(new HTMLPanel(getFieldHTML("Schema description", schema.getDescription())));
+      panel.add(new HTMLPanel(getFieldHTML(messages.schemaDescription(), schema.getDescription())));
     }
   }
 

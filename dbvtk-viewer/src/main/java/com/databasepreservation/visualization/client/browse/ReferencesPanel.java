@@ -39,10 +39,13 @@ import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
+import config.i18n.client.ClientMessages;
+
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class ReferencesPanel extends RightPanel {
+  private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, ReferencesPanel> instances = new HashMap<>();
 
   public static ReferencesPanel getInstance(ViewerDatabase database, String tableUUID, String recordUUID,
@@ -117,7 +120,7 @@ public class ReferencesPanel extends RightPanel {
     if (cell != null && ViewerStringUtils.isNotBlank(cell.getValue())) {
       value = cell.getValue();
     }
-    mainHeader.setText("References for value \"" + value + "\"");
+    mainHeader.setText(messages.references_referencesForValue(value));
 
     TreeMap<Reference, TableSearchPanel> references = new TreeMap<>();
 
@@ -198,7 +201,7 @@ public class ReferencesPanel extends RightPanel {
     header.addStyleName("field");
 
     SafeHtmlBuilder relationNameBuilder = new SafeHtmlBuilder();
-    relationNameBuilder.appendHtmlConstant("Relation: ");
+    relationNameBuilder.appendHtmlConstant(messages.references_relation() + ": ");
     // relation source
     if (currentTableIsReferencedTableInForeignKey) {
       relationNameBuilder.appendEscaped(otherTable.getName()).appendHtmlConstant(" (");
@@ -253,19 +256,20 @@ public class ReferencesPanel extends RightPanel {
 
     SafeHtmlBuilder descriptionBuilder = new SafeHtmlBuilder();
 
-    descriptionBuilder.appendHtmlConstant("<div class=\"label\">Related table</div>");
+    descriptionBuilder.appendHtmlConstant("<div class=\"label\">" + messages.references_relatedTable() + "</div>");
     descriptionBuilder
       .appendHtmlConstant("<div class=\"value\">")
       .appendHtmlConstant(
         new Hyperlink(otherTable.getSchemaName() + " . " + otherTable.getName(), HistoryManager.linkToTable(
           database.getUUID(), otherTable.getUUID())).toString()).appendHtmlConstant("</div>");
 
-    descriptionBuilder.appendHtmlConstant("<div class=\"label\">Foreign key name</div>");
+    descriptionBuilder.appendHtmlConstant("<div class=\"label\">" + messages.references_foreignKeyName() + "</div>");
     descriptionBuilder.appendHtmlConstant("<div class=\"value\">").appendEscaped(fk.getName())
       .appendHtmlConstant("</div>");
 
     if (ViewerStringUtils.isNotBlank(fk.getDescription())) {
-      descriptionBuilder.appendHtmlConstant("<div class=\"label\">Foreign key description</div>");
+      descriptionBuilder.appendHtmlConstant("<div class=\"label\">" + messages.references_foreignKeyDescription()
+        + "</div>");
       descriptionBuilder.appendHtmlConstant("<div class=\"value\">").appendEscaped(fk.getDescription())
         .appendHtmlConstant("</div>");
     }
