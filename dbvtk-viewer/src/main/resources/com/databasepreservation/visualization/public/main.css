@@ -617,19 +617,23 @@
 /**********************************************
 				MENU
 ************************************************/
-.gwt-MenuBar {
+.user-menu {
     float: right;
     height: 35px;
     background: none;
 }
 
-.gwt-MenuBar .gwt-MenuItem {
+.user-menu .gwt-MenuItem {
     line-height: 2.5rem;
     color: #404142;
 }
 
-.gwt-MenuBar .gwt-MenuItem-selected {
+.user-menu .gwt-MenuItem-selected {
     line-height: 2.5rem;
     background-color: #5bbeff;
     color: #fff;
+}
+
+.main .wui-breadcrumbPanel .breadcrumb-last {
+    max-width: 200px;
 }

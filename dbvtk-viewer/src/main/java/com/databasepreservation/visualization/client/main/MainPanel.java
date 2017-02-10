@@ -82,17 +82,13 @@ public class MainPanel extends Composite {
    * (switching to another page = using a different RightPanel)
    * ____________________________________________________________________________________________________________________
    */
-  public void setContent(Widget w) {
-    contentPanel.setWidget(w);
-  }
-
   public void setContent(RightPanelLoader rightPanelLoader) {
     setContent(null, rightPanelLoader);
   }
 
   private void setContent(String databaseUUID, RightPanelLoader rightPanelLoader) {
     DatabasePanel databasePanel = DatabasePanel.getInstance(databaseUUID);
-    setContent(databasePanel);
+    contentPanel.setWidget(databasePanel);
     databasePanel.load(rightPanelLoader);
   }
 
@@ -365,6 +361,8 @@ public class MainPanel extends Composite {
       } else {
         handleErrorPath(currentHistoryPath);
       }
+    } else {
+      handleErrorPath(currentHistoryPath);
     }
   }
 

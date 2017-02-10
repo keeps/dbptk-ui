@@ -26,6 +26,10 @@ a {
     color: #089de3;
 }
 
+a:HOVER {
+    text-decoration: underline;
+}
+
 select {
     color: #444;
     padding: 5px;
@@ -85,15 +89,31 @@ h6, .h6 {
     letter-spacing: 0;
 }
 
+ul {
+    list-style: inherit;
+    padding-left: 2rem;
+}
+
+.footer ul {
+    list-style: none;
+    padding-left: 0;
+}
+
 .label {
     font-size: 1.5rem;
     font-weight: 300;
     color: #999;
 }
 
+.col_card {
+    background: #eee;
+    padding: 0 2em;
+}
+
 .associative-label {
     display: inline;
     margin-right: 0.5rem;
+    line-height: 25px;
 }
 
 .value {
@@ -103,6 +123,10 @@ h6, .h6 {
 
 .field {
     margin-bottom: 1rem;
+}
+
+.field ul {
+    color: rgb(88, 89, 91);
 }
 
 .errormessage {
@@ -203,6 +227,14 @@ table .label-success, table .label-danger, table .label-warning, table .label-in
     display: inline;
 }
 
+.text-align-left {
+    text-align: left;
+}
+
+.text-align-right {
+    text-align: right;
+}
+
 div.inline {
     display: inline-block;
 }
@@ -225,14 +257,128 @@ div.inline {
     right: 0;
     width: 2em;
     height: 100%;
-    background: -webkit-linear-gradient(right,#fff 30%,rgba(255,255,255,0) 100%);
-    background: linear-gradient(-90deg,#fff 30%,rgba(255,255,255,0) 100%);
+    background: -webkit-linear-gradient(right, #fff 30%, rgba(255, 255, 255, 0) 100%);
+    background: linear-gradient(-90deg, #fff 30%, rgba(255, 255, 255, 0) 100%);
 }
 
 .sidebar .fade-out:after {
-    background: -webkit-linear-gradient(right,#eee 30%,rgba(255,255,255,0) 100%);
-    background: linear-gradient(-90deg,#eee 30%,rgba(255,255,255,0) 100%);
+    background: -webkit-linear-gradient(right, #eee 30%, rgba(255, 255, 255, 0) 100%);
+    background: linear-gradient(-90deg, #eee 30%, rgba(255, 255, 255, 0) 100%);
 }
+
+
+.card {
+    background-color: white;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+    transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+    border-radius: 2px;
+    padding: 14px 16px;
+}
+
+.card:hover {
+    box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+}
+
+.card + .card {
+    margin-top: 20px;
+}
+
+.card > .h5 {
+    margin-top: 0;
+    color: #089de3;
+    font-weight: 300;
+}
+
+.representationsCard > .h5:before {
+    content: '\f1b3';
+    font-family: 'FontAwesome';
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    padding-right: 10px;
+}
+
+.filesCard > .h5:before {
+    content: '\f0c5';
+    font-family: 'FontAwesome';
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    padding-right: 10px;
+}
+
+.disseminationsCard > .h5:before {
+    content: '\f144';
+    font-family: 'FontAwesome';
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    padding-right: 10px;
+}
+
+.aipChildrenCard > .h5:before {
+    content: '\f0e8';
+    font-family: 'FontAwesome';
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    padding-right: 10px;
+}
+
+.browse_top .aipChildrenCard {
+    box-shadow: none;
+    padding: 0;
+    transition: none;
+}
+
+.browse_top .aipChildrenCard:hover {
+    box-shadow: none;
+}
+
+.descriptiveMetadataCard {
+    background-color: inherit;
+    box-shadow: none;
+    padding: 0;
+    transition: none;
+}
+
+.descriptiveMetadataCard:hover {
+    box-shadow: none;
+}
+
+.slider-container {
+    position: relative;
+}
+
+.slider {
+    height: 100%;
+    width: 300px;
+    background: #089de3;
+    display: none;
+    color: white;
+    position: absolute;
+    right: 0;
+    top: 0;
+    padding: 0;
+    box-shadow: 0 0 0 0 transparent, 0 0 0 0 transparent, 0 0 0 0 transparent, -6px 0 15px -4px rgba(31, 73, 125, 0.8);
+    z-index: 1;
+}
+
+.slider-title, .slider .actions-layout-title {
+    font-size: 2.2rem;
+    margin: 1.2rem 0;
+}
+
+.slider .slider-layout {
+    margin: 25px;
+    opacity: 0;
+    transition: opacity 0.25s ease-in-out;
+}
+
+.slider-active .slider-layout {
+    opacity: 1;
+}
+
 
 /**********************************************
 				SKELETON
@@ -311,7 +457,7 @@ code {
     border-radius: 4px;
 }
 
-pre>code {
+pre > code {
     display: block;
     padding: 1rem 1.5rem;
     white-space: pre-wrap;
@@ -324,6 +470,12 @@ pre>code {
     word-break: break-all;
     word-break: break-word;
 }
+
+pre code {
+    max-height: 15em;
+}
+
+
 
 .code-pre {
     display: block;
@@ -350,12 +502,34 @@ pre>code {
     margin-right: 5px;
 }
 
-.error pre>code {
+.error pre > code {
     color: black;
 }
 
 .form-label {
+    margin-top: 5px;
+}
+.form-label-mandatory::after {
+    content:" *";
+}
+.form-label-error {
+    color:red;
+    font-size: 0.8em;
+}
+.form-separator {
+    color: #089de3;
+    font-size: 1.6rem;
+    font-weight: 300;
+    margin: 1em -15px 0 -15px !important;
+    padding: 5px 15px !important;
+}
 
+.panelDescriptiveMetadata .form-separator:first-child {
+    margin-top:0px !important;
+}
+
+.descriptiveMetadata .form-separator:first-child {
+    margin-top: 0 !important;
 }
 
 .form-integerbox {
@@ -371,10 +545,10 @@ pre>code {
     width: 100%;
     color: #58595b;
     padding: 5px;
+    margin-bottom: 5px;
     border: 1px solid #ccc;
     border-radius: 1px;
     box-sizing: border-box;
-    margin-bottom: 5px;
     background-color: #f5f5f5;
     font-size: 1.5rem;
     font-family: "Ubuntu", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -390,6 +564,9 @@ pre>code {
     border: 0;
     border-left: 2px solid #089de3;
 }
+.panelDescriptiveMetadata .fieldTextBox, .panelDescriptiveMetadata .form-textbox {
+    border-left: 0;
+}
 
 .form-listbox {
     color: #58595b;
@@ -399,6 +576,14 @@ pre>code {
     border-radius: 1px;
     box-sizing: border-box;
     margin-bottom: 5px;
+}
+
+.form-listbox-job {
+    border: none !important;
+}
+
+.form-checkbox-job {
+    margin-right: 1em;
 }
 
 .form-checkbox {
@@ -424,11 +609,11 @@ pre>code {
     top: -5px;
 }
 
-.form-radiobutton+.form-help {
+.form-radiobutton + .form-help {
     margin-left: 20px;
 }
 
-.form-checkbox+.form-help {
+.form-checkbox + .form-help {
     margin-left: 20px;
 }
 
@@ -436,8 +621,8 @@ pre>code {
     width: auto;
 }
 
-.form-textbox-small+.form-textbox-small,
-.form-textbox-small+.form-listbox {
+.form-textbox-small + .form-textbox-small,
+.form-textbox-small + .form-listbox {
     margin-left: 5px;
 }
 
@@ -447,6 +632,10 @@ pre>code {
 
 .form-button {
     margin-bottom: 10px;
+}
+
+.form-controlled{
+    padding: 0px 5px 0px 5px;
 }
 
 .itemPanel {
@@ -474,32 +663,14 @@ pre>code {
     width: 50px;
 }
 
-.row>.content {
-    padding: 40px !important;
+.row > .content {
+    padding: 30px !important;
     min-height: 600px;
-}
-
-.sidebar {
-    background: #eee;
-    padding: 40px !important;
-    min-width: 230px;
-}
-
-.sidebar .btn {
-    width: 160px;
-    margin-right: 10px;
-    margin-bottom: 7px;
-}
-
-.sidebar .h1, .sidebar .h2, .sidebar .h3, .sidebar .h4, .sidebar .h5,
-.sidebar .h6 {
-    margin-bottom: 0.6rem;
-    font-size: 1.8rem;
 }
 
 .btn {
     border-radius: 2px;
-    padding: 8px 10px;
+    padding: 8px 27px 8px 10px;
     border: none;
     background-color: #089de3;
     color: white;
@@ -510,6 +681,19 @@ pre>code {
     text-overflow: ellipsis;
     text-transform: uppercase;
     text-decoration: none;
+
+    position: relative;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.btn-block {
+    width: 100%;
+}
+
+.btn-block + .btn-block {
+    margin-top: 10px;
 }
 
 .btn:hover {
@@ -520,12 +704,29 @@ pre>code {
 }
 
 .btn-default {
-    background-color: #777;
+    background-color: rgba(0,0,0,0.3);
 }
 
 .btn-default:hover {
-    background-color: #666;
+    background-color: rgba(0,0,0,0.4);
 }
+
+.btn-primary {
+    background-color: #089de3;
+}
+
+.btn-primary:hover {
+    background-color: #2988c0;
+}
+
+.actions-popup .btn-primary, .slider .btn-primary {
+    background-color: rgba(0,0,0,0.5);
+}
+
+.actions-popup .btn-primary:hover, .slider .btn-primary:hover {
+    background-color: rgba(0,0,0,0.6);
+}
+
 
 .btn-danger {
     background-color: #d9534f;
@@ -535,6 +736,13 @@ pre>code {
     background-color: #c9302c;
 }
 
+.actions-popup .btn-danger, .slider .btn-danger {
+    background-color: rgb(140, 8, 4);
+}
+
+.actions-popup .btn-danger:hover, .slider .btn-danger:hover {
+    background-color: rgb(185, 6, 1);;
+}
 
 .btn-link {
     background-color: transparent;
@@ -576,7 +784,9 @@ pre>code {
     -moz-osx-font-smoothing: grayscale;
     float: right;
     margin-top: 1px;
-    padding-left: 5px;
+
+    position: absolute;
+    right: 10px;
 }
 
 .btn-link:after {
@@ -595,7 +805,7 @@ pre>code {
     content: "\f14b";;
 }
 
-.btn-edit+.btn-edit {
+.btn-edit + .btn-edit {
     margin-right: 5px;
 }
 
@@ -647,6 +857,18 @@ pre>code {
     content: "\f002";
 }
 
+.btn-chevron-left:after {
+    content: "\f053";
+}
+
+.btn-chevron-right:after {
+    content: "\f054";
+}
+
+.btn-stop:after{
+    content: "\f04d"
+}
+
 .btn-back:after {
     content: "\f0a8";
 }
@@ -666,7 +888,30 @@ pre>code {
 .btn-incremental-list-add {
     margin-top: 2px;
     margin-bottom: 10px;
-    padding: 3px 10px;
+    /*padding: 3px 10px;*/
+}
+
+.lightbtn {
+    cursor: pointer;
+    cursor: hand;
+    display: inline-block;
+    opacity: 0.5;
+    width: 2rem;
+    height: 2rem;
+    line-height: 2rem;
+    font-size: 1.4rem;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.lightbtn:HOVER {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+}
+
+.lightbtn-icon {
+    display: inline-block;
 }
 
 .toolbarLink {
@@ -680,6 +925,7 @@ pre>code {
     color: white;
     background-color: #999;
     text-align: center;
+    /*border-left: 1px SOLID WHITE;*/
 }
 
 .toolbarLink.toolbarLinkSmall {
@@ -694,10 +940,20 @@ pre>code {
 .toolbarLink.active {
     color: white;
     background-color: #089de3;
+
+}
+
+.toolbarLink.disabled, .toolbarLink.disabled:hover {
+    background-color: #ddd;
+    cursor: auto;
 }
 
 .nowrap {
     white-space: nowrap;
+}
+
+.prewrap{
+    white-space: pre-wrap;
 }
 
 .text-align-right {
@@ -733,6 +989,7 @@ pre>code {
     padding-top: 0;
 }
 
+
 .panel-footer {
     padding: 10px 15px;
     background-color: #fafafa;
@@ -749,7 +1006,6 @@ pre>code {
     font-weight: 600;
 }
 
-
 .my-collections-empty-info {
     padding: 10px;
 }
@@ -763,13 +1019,17 @@ pre>code {
     text-align: right;
 }
 
+.my-asyncdatagrid {
+    text-align: left;
+}
+
 .my-asyncdatagrid-pager-results {
     display: inline-block;
     line-height: 1;
     font-size: 1.3rem;
 }
 
-.my-asyncdatagrid-pager-results img{
+.my-asyncdatagrid-pager-results img {
     vertical-align: middle;
 }
 
@@ -798,7 +1058,7 @@ pre>code {
 
 .my-asyncdatagrid-display {
     width: 100%;
-    table-layout:fixed;
+    table-layout: fixed;
 }
 
 .my-asyncdatagrid .panel {
@@ -825,26 +1085,6 @@ pre>code {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     transform: translate(0, 0);
-}
-
-.description-level:before {
-    content: "\f187";
-}
-
-.description-level-organizational:before {
-    content: "\f0f7";
-}
-
-.description-level-categorization:before {
-    content: "\f0c9";
-}
-
-.description-level-intellectual_entity:before {
-    content: "\f114";
-}
-
-.description-level-representational:before {
-    content: "\f016";
 }
 
 /**********************************************
@@ -920,20 +1160,23 @@ pre>code {
 .dropdown {
     white-space: nowrap;
 }
+
 .dropdown-label {
     border: 1px solid #eee;
     -webkit-touch-callout: none; /* iOS Safari */
-    -webkit-user-select: none;   /* Chrome/Safari/Opera */
-    -khtml-user-select: none;    /* Konqueror */
-    -moz-user-select: none;      /* Firefox */
-    -ms-user-select: none;       /* IE/Edge */
+    -webkit-user-select: none; /* Chrome/Safari/Opera */
+    -khtml-user-select: none; /* Konqueror */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* IE/Edge */
     user-select: none;
 }
+
 .dropdown-popup {
     border: 1px solid #eee;
     position: absolute;
     z-index: 1;
 }
+
 .dropdown-label,
 .dropdown-item {
     padding: 5px;
@@ -942,10 +1185,12 @@ pre>code {
     cursor: pointer;
     cursor: hand;
 }
+
 .dropdown-item:hover {
     color: white;
     background-color: black;
 }
+
 .dropdown-label:after {
     display: inline-block;
     font: normal normal normal 14px/1 FontAwesome;
@@ -959,6 +1204,7 @@ pre>code {
     padding-right: 5px;
     content: "\f107";
 }
+
 .open .dropdown-label:after {
     content: "\f106";
 }
@@ -1106,6 +1352,7 @@ td.datePickerMonth, td.datePickerYear {
     font-size: 1.1rem;
     font-weight: 300;
     color: #fff;
+    z-index: 10;
 }
 
 .wui-toast.toast-error {
@@ -1171,7 +1418,6 @@ td.datePickerMonth, td.datePickerYear {
 .static-page .feature-img {
     font-size: 30px;
 }
-
 
 .static-page .feature-img-vertical i {
     float: right;
@@ -1361,8 +1607,6 @@ td.datePickerMonth, td.datePickerYear {
     font-size: 58px;
     line-height: 110px;
     text-align: left;
-    overflow: hidden;
-    white-space: nowrap;
 }
 
 .languageSwitcher {
@@ -1508,6 +1752,10 @@ td.datePickerMonth, td.datePickerYear {
     display: none;
 }
 
+.menu-item-language {
+    text-transform: capitalize;
+}
+
 .menu-item-language-selected .fa {
     right: 10px;
     position: absolute;
@@ -1519,23 +1767,28 @@ td.datePickerMonth, td.datePickerYear {
 ************************************************/
 .main .wui-breadcrumbPanel {
     margin-top: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 
 .main .wui-breadcrumbPanel .breadcrumb {
-    display: inline;
+    display: inline-block;
+    vertical-align: bottom;
     color: #a7a9ac;
     cursor: pointer;
     cursor: hand;
     font-size: 1.2rem;
+
+    max-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .main .wui-breadcrumbPanel .breadcrumb * {
     color: #a7a9ac;
 }
 
-.main .wui-breadcrumbPanel .breadcrumb .fa, .main .wui-breadcrumbPanel .breadcrumb .description-level
-{
+.main .wui-breadcrumbPanel .breadcrumb .fa, .main .wui-breadcrumbPanel .breadcrumb .description-level {
     margin: 0 3px;
     color: #a7a9ac;
 }
@@ -1543,17 +1796,22 @@ td.datePickerMonth, td.datePickerYear {
 .main .wui-breadcrumbPanel .breadcrumb-last {
     color: #404142;
     text-decoration: none;
+
+    max-width: 100px;
 }
 
-.main .wui-breadcrumbPanel .breadcrumb-last .fa, .main .wui-breadcrumbPanel .breadcrumb-last .description-level
-{
+.viewRepresentationBreadcrumb .breadcrumb-last {
+    max-width: none !important;
+}
+
+.main .wui-breadcrumbPanel .breadcrumb-last .fa, .main .wui-breadcrumbPanel .breadcrumb-last .description-level {
     color: #404142;
 }
 
 .main .wui-breadcrumbPanel .breadcrumb-separator {
-    display: inline;
-    font-family: 'Ubuntu', sans-serif;
-    font-size: 12px;
+    display: inline-block;
+    vertical-align: bottom;
+    font-size: 1.2rem;
     color: #a7a9ac;
     cursor: text;
 }
@@ -1561,10 +1819,46 @@ td.datePickerMonth, td.datePickerYear {
 /**********************************************
 				SIDEBAR
 ************************************************/
+
+.sidebar {
+    background: #eee;
+    padding: 0 !important;
+    min-width: 220px;
+}
+
+.sidebar .sticky-flow {
+    min-width: 220px;
+}
+
+.sidebar .sticky-padding {
+    padding: 30px;
+}
+
+
+.sidebar .btn.separator {
+    margin-bottom: 14px;
+}
+
+.sidebar .h1, .sidebar .h2, .sidebar .h3, .sidebar .h4, .sidebar .h5,
+.sidebar .h6, .sidebar .actions-layout-title {
+    margin-bottom: 0.6rem;
+    font-size: 1.8rem;
+}
+
+
 .sidebar-facet-title {
     color: inherit;
+    margin-top: 0;
     margin-bottom: 5px;
     font-size: 1.8rem;
+}
+
+.sidebar-facet-panel + .sidebar-facet-panel {
+    margin-top: 15px;
+}
+
+.sidebar-group + .sidebar-group {
+    margin-top: 15px;
 }
 
 .sidebar-facet-label {
@@ -1613,6 +1907,10 @@ td.datePickerMonth, td.datePickerYear {
 
 .wui-home {
     color: #58595b;
+}
+
+.content > .gwt-HTML > h1 {
+    margin-top: 0;
 }
 
 /**********************************************
@@ -1680,7 +1978,7 @@ td.datePickerMonth, td.datePickerYear {
 }
 
 .descriptionElement .edit-widget-tabs .gwt-TabBar .gwt-TabBarItem {
-    filter: alpha(opacity = 75);
+    filter: alpha(opacity=75);
     -moz-opacity: .75;
     opacity: .75;
     border: 0;
@@ -1691,10 +1989,9 @@ td.datePickerMonth, td.datePickerYear {
     cursor: hand;
 }
 
-.descriptionElement .edit-widget-tabs .gwt-TabBar .gwt-TabBarItem-selected
-{
+.descriptionElement .edit-widget-tabs .gwt-TabBar .gwt-TabBarItem-selected {
     background-color: inherit;
-    filter: alpha(opacity = 100);
+    filter: alpha(opacity=100);
     -moz-opacity: 1;
     opacity: 1;
 }
@@ -1780,9 +2077,19 @@ td.datePickerMonth, td.datePickerYear {
 
 /* Browser v2*/
 
+.browse, .wui-browse-representation {
+    margin-top: 0;
+}
+
+.browse-file .aipState {
+    display: inline-block;
+    margin-left: 1rem;
+    height: 33px;
+}
+
 .browse.under_appraisal, .browse.deleted, .browse.created, .browse.ingest_processing {
     background-color: #efefef;
-    background-image: repeating-linear-gradient(-45deg, transparent, transparent 35px, rgba(255,255,255,.5) 35px, rgba(255,255,255,.5) 70px);
+    background-image: repeating-linear-gradient(-45deg, transparent, transparent 35px, rgba(255, 255, 255, .5) 35px, rgba(255, 255, 255, .5) 70px);
 }
 
 .browseTitle {
@@ -1802,19 +2109,17 @@ td.datePickerMonth, td.datePickerYear {
 }
 
 .browseItemPanel {
-    margin-top: 2em;
     vertical-align: middle;
 }
 
 .browseItemPanelText {
     display: inline;
     vertical-align: middle;
-    padding-left: 1em;
+    padding-left: 1rem;
 }
 
 .browseItemIcon {
     display: inline;
-    width: 50px;
     vertical-align: middle;
 }
 
@@ -1823,30 +2128,51 @@ td.datePickerMonth, td.datePickerYear {
     display: inline-block;
 }
 
+
+
+
+.browseItemHeader {
+    color: #999;
+    font-size: 1.8rem;
+    font-weight: 300;
+}
+
+.browseItemHeader-charot {
+    display: inline;
+    margin: 0 5px;
+    font-size: 1.4rem;
+    font-weight: 300;
+}
+
 .browseItemIcon-all {
     display: inline-block;
-    font-size: 4rem;
-    line-height: 4rem;
+    font-size: 3.2rem;
+    line-height: 3.2rem;
 }
 
 .browseItemIcon-other {
     display: inline-block;
-    font-size: 4rem;
-    line-height: 4rem;
+    font-size: 3.2rem;
+    line-height: 3.2rem;
 }
 
 .browseItemText {
     display: inline;
     margin-bottom: 0 !important;
+
+    font-size: 3.2rem;
+    line-height: 1.2;
+    letter-spacing: -.1rem;
 }
 
 .browseItemId,
-.browseItemDates {
+.browseSipId,
+.browseIngestJobId,
+.browseItemDates,
+.browseRepresentationId {
     color: #a7a9ac;
     font-size: 1rem;
-}
-
-.browseSearchListTitle {
+    line-height: 1.2rem;
 }
 
 .browseItemMetadata {
@@ -1865,7 +2191,6 @@ td.datePickerMonth, td.datePickerYear {
 .browseItemMetadata .gwt-TabPanelBottom {
     background-color: transparent;
     padding: 5px 10px;
-    margin-bottom: 20px;
     min-height: 25px;
 }
 
@@ -1879,7 +2204,7 @@ td.datePickerMonth, td.datePickerYear {
 }
 
 .browseItemMetadata .gwt-TabBarItem {
-    background: white;
+    background: transparent;
     border: none;
     margin: 0;
     cursor: pointer;
@@ -1948,7 +2273,7 @@ td.datePickerMonth, td.datePickerYear {
 
 .browseItemMetadata .gwt-TabBarItem .gwt-Label {
     color: inherit;
-    font-weight: normal;
+    font-weight: 300;
     font-size: 1.5rem;
 }
 
@@ -1969,12 +2294,19 @@ td.datePickerMonth, td.datePickerYear {
 }
 
 .browseItemMetadata .gwt-TabBarItem-selected .gwt-Label {
-    font-weight: normal;
     color: inherit;
+}
+
+.descriptiveMetadataHTML {
+    padding-top: 5px;
 }
 
 .descriptiveMetadata {
     padding-top: 25px;
+}
+
+.descriptiveMetadataHTML .descriptiveMetadata {
+    padding-top: 0px;
 }
 
 .descriptiveMetadata .title, .preservationMetadata .title {
@@ -2024,6 +2356,13 @@ td.datePickerMonth, td.datePickerYear {
 .metadata-edit-area {
     height: 300px;
     max-width: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+.metadata-edit-area-wrapper {
+    padding: 0;
+    line-height:0;
 }
 
 .metadata-edit-errors {
@@ -2034,6 +2373,32 @@ td.datePickerMonth, td.datePickerYear {
 .metadata-edit-errors .error {
     margin-bottom: 5px;
     display: block;
+    max-height: 100px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.panelDescriptiveMetadata {
+    margin-bottom: 0;
+}
+
+.metadata-form-field:first-child {
+    border: none;
+    padding: 0;
+}
+
+.metadata-form-field {
+    padding-top: 10px;
+    padding-bottom: 5px;
+}
+
+.panelDescriptiveMetadata .metadata-form-field {
+    padding-top: 0px;
+    padding-bottom: 0px;
+}
+
+.content .metadata-form-textbox {
+    border-left: none;
 }
 
 .selectableAipList-selectedLabel {
@@ -2085,7 +2450,7 @@ td.datePickerMonth, td.datePickerYear {
     margin: 0 2px;
 }
 
-.header>.field .field-label:after {
+.header > .field .field-label:after {
     content: ':';
     margin-right: 5px;
 }
@@ -2211,28 +2576,24 @@ td.datePickerMonth, td.datePickerYear {
     padding-right: 0;
 }
 
-.content>.field {
+.content > .field {
     display: block;
     line-height: 1.6rem;
     margin-bottom: 10px;
 }
 
-.content>.field .field-label {
+.content > .field .field-label {
     font-weight: bold;
     font-size: 1.2rem;
 }
 
-.content>.field .field-label:after {
+.content > .field .field-label:after {
     content: ':';
     margin-right: 5px;
 }
 
-.content>.field .field-value {
+.content > .field .field-value {
     font-size: 1.2rem;
-}
-
-.browseItemMetadata code {
-    max-height: 300px;
 }
 
 .event .header {
@@ -2429,7 +2790,7 @@ td.datePickerMonth, td.datePickerYear {
     cursor: hand;
 }
 
-.wui-view-window  .viewPanel-tabs .gwt-TabBar {
+.wui-view-window .viewPanel-tabs .gwt-TabBar {
     background-color: #999;
 }
 
@@ -2474,7 +2835,7 @@ td.datePickerMonth, td.datePickerYear {
     width: 100%;
 }
 
-.collection-tree  TABLE {
+.collection-tree TABLE {
     width: 100%;
     border-spacing: 0px;
 }
@@ -2813,6 +3174,11 @@ td.datePickerMonth, td.datePickerYear {
     color: red;
 }
 
+.browseDip-topList {
+    width: 96%;
+    padding: 2%;
+}
+
 /** Preservation Metadata Panel **/
 .wui-metadata-preservation {
     width: 100%;
@@ -2893,12 +3259,18 @@ td.datePickerMonth, td.datePickerYear {
     padding: 0 0 0 0;
     padding-left: 20px;
     padding-right: 10px;
-    min-width: 160px;
+    min-width: 175px;
+    position: relative;
 }
 
 .searchInputListBox .dropdown-label:after {
     line-height: 4rem;
     font-size: 20px;
+    position: absolute;
+    right: 0px;
+    width: 40px;
+    text-align: center;
+    padding: 0;
 }
 
 .searchInputListBoxPopup .dropdown-item:hover {
@@ -2925,8 +3297,8 @@ td.datePickerMonth, td.datePickerYear {
 }
 
 .searchPanelRight .fa-stack {
-    line-height: 4rem;
-    height: 4rem;
+    /*line-height: 4rem;
+    height: 4rem; */
 }
 
 .searchBox {
@@ -2942,7 +3314,7 @@ td.datePickerMonth, td.datePickerYear {
 
 .searchBox::-webkit-input-placeholder,
 .searchBox:placeholder-shown {
-    color: rgba(0,0,0, 0.5);
+    color: rgba(0, 0, 0, 0.5);
 }
 
 .searchButton,
@@ -2961,7 +3333,7 @@ td.datePickerMonth, td.datePickerYear {
 
 .searchAdvancedDisclosureButton {
     background-color: #eee;
-    color: rgba(0,0,0, 0.5);
+    color: rgba(0, 0, 0, 0.5);
 }
 
 .searchButton:hover {
@@ -3031,6 +3403,18 @@ td.datePickerMonth, td.datePickerYear {
     height: 35px;
 }
 
+.search-field-warning {
+    margin-right: 20px;
+    height: 50px;
+}
+
+.search-field-warning-label {
+    font-size: 1.1rem;
+    color: #999;
+    position: absolute;
+    width: 100%;
+}
+
 .search-field.full_width {
     margin-right: 0px;
 }
@@ -3047,6 +3431,8 @@ td.datePickerMonth, td.datePickerYear {
     overflow: hidden !important;
     max-width: 250px;
     height: 28px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .search-field-left-panel .search-field-input-panel {
@@ -3074,7 +3460,7 @@ td.datePickerMonth, td.datePickerYear {
     background: transparent;
     cursor: pointer;
     cursor: hand;
-    color: rgba(0,0,0, 0.5);
+    color: rgba(0, 0, 0, 0.5);
 }
 
 .search-field-dialog {
@@ -3087,7 +3473,7 @@ td.datePickerMonth, td.datePickerYear {
     background: transparent;
     cursor: pointer;
     cursor: hand;
-    color: rgba(0,0,0, 0.5);
+    color: rgba(0, 0, 0, 0.5);
 }
 
 .search-field-left-panel .form-textbox-small {
@@ -3099,11 +3485,11 @@ td.datePickerMonth, td.datePickerYear {
     height: 30px;
 }
 
-.searchAdvancedFieldsPanel+.searchAdvancedPanelButtons {
+.searchAdvancedFieldsPanel + .searchAdvancedPanelButtons {
     margin-top: 10px;
 }
 
-.searchAdvancedFieldsPanel.empty+.searchAdvancedPanelButtons {
+.searchAdvancedFieldsPanel.empty + .searchAdvancedPanelButtons {
     margin-top: 0;
 }
 
@@ -3119,6 +3505,15 @@ td.datePickerMonth, td.datePickerYear {
     width: 8em;
     text-align: center;
     margin: 0 5px;
+}
+
+.searchResults .table-empty {
+    margin: 15px;
+    font-size: 1.3rem;
+}
+
+.searchResults .table-empty-clear-facets {
+    margin-top:10px;
 }
 
 /**********************************************
@@ -3141,6 +3536,7 @@ td.datePickerMonth, td.datePickerYear {
 ************************************************/
 .gwt-DialogBox {
     background-color: white;
+    z-index: 6;
 }
 
 .gwt-DialogBox .Caption {
@@ -3157,6 +3553,7 @@ td.datePickerMonth, td.datePickerYear {
 .wui-dialog-layout {
     padding: 10px;
 }
+
 .wui-dialog-layout-footer {
     text-align: right;
 }
@@ -3169,6 +3566,10 @@ td.datePickerMonth, td.datePickerYear {
     float: right;
 }
 
+.pull-left {
+    float: left;
+}
+
 .list-panel {
     border-left: 5px solid #089de3;
     margin-top: 15px;
@@ -3179,7 +3580,6 @@ td.datePickerMonth, td.datePickerYear {
 .list-panel:first-of-type {
     margin-top: 0;
 }
-
 
 /**********************************************
 				LOGIN CAS
@@ -3357,7 +3757,7 @@ td.datePickerMonth, td.datePickerYear {
 				LOGIN
 ************************************************/
 .loginPanel {
-    margin: 40px auto;
+    margin: 40px auto 0;
     max-width: 400px;
     min-width: 300px;
     background-color: #eee;
@@ -3373,7 +3773,6 @@ td.datePickerMonth, td.datePickerYear {
 }
 
 .login-button {
-    min-width: 12rem;
     float: right;
 }
 
@@ -3406,6 +3805,7 @@ td.datePickerMonth, td.datePickerYear {
     margin-top: 20px;
     width: 120px;
     float: left;
+    margin-right: 10px;
 }
 
 .recover-link {
@@ -3425,7 +3825,8 @@ td.datePickerMonth, td.datePickerYear {
 }
 
 .recoverPanel .isWrong {
-    background-color: #d97570;
+    border-left: 2px solid #d97570 !important;
+    background: rgba(217, 117, 112, 0.25) !important;
 }
 
 /**********************************************
@@ -3435,7 +3836,6 @@ td.datePickerMonth, td.datePickerYear {
     margin-bottom: 10px !important;
 }
 
-.viewRepresentationFocusPanel,
 .viewRepresentationPreviewPanel {
     width: 100%;
 }
@@ -3470,6 +3870,10 @@ td.datePickerMonth, td.datePickerYear {
     display: none;
 }
 
+.viewRepresentation .searchPreFilters {
+    display: none;
+}
+
 .viewRepresentation .my-files-empty-info {
     font-size: 13px;
     margin-left: 10px;
@@ -3489,11 +3893,6 @@ td.datePickerMonth, td.datePickerYear {
     margin-bottom: 2px;
 }
 
-.viewRepresentation .my-files-table .org-roda-wui-common-client-widgets-MyCellTableResources-TableStyle-cellTableOddRow {
-    background: white;
-    border: none;
-}
-
 .viewRepresentation .my-files-table .org-roda-wui-common-client-widgets-MyCellTableResources-TableStyle-cellTableOddRowCell {
     border: 2px solid white;
 }
@@ -3502,60 +3901,111 @@ td.datePickerMonth, td.datePickerYear {
     background: #eee;
 }
 
+.viewRepresentation .my-files-table .org-roda-wui-common-client-widgets-MyCellTableResources-TableStyle-cellTableSelectedRow .org-roda-wui-common-client-widgets-MyCellTableResources-TableStyle-cellTableOddRowCell {
+    border: 2px solid #5bbeff;
+}
+
 .viewRepresentation .my-files-table .org-roda-wui-common-client-widgets-MyCellTableResources-TableStyle-cellTableHoveredRow .org-roda-wui-common-client-widgets-MyCellTableResources-TableStyle-cellTableOddRowCell {
     border: 2px solid #eee;
 }
 
-.viewRepresentationFilePreviewPanel {
+.viewRepresentationFile {
     width: 100%;
-    height: 705px;
 }
 
-.viewRepresentationFilePreviewPanel .filePreviewToolbar {
+.viewRepresentationFile .filePreviewToolbar {
     min-height: 35px;
-    background-color: #eee;
+    line-height: 35px;
+    background-color: #ddd;
     position: relative;
 }
 
-.viewRepresentationFilePreviewPanel .filePreviewToolbar .viewRepresentationBreadcrumb {
-    padding: 5px 70px 5px 20px;
-    margin: 0;
+.viewRepresentationFile .filePreviewToolbar-alt {
+    background-color: #eee;
 }
 
-.viewRepresentationFilePreviewPanel.single .filePreviewToolbar .viewRepresentationBreadcrumb {
+
+.filePreviewToolbar-alt .toolbarLink {
+    background: none;
+    color: #999;
+}
+
+.filePreviewToolbar-alt .toolbarLink:hover {
+    color: white;
+    background-color: #089de3;
+}
+
+.filePreviewToolbar-alt .toolbarLink.disabled {
+    color: #ddd;
+    background: none;
+}
+
+.filePreviewToolbar-alt .toolbarLink.disabled:hover {
+    color: #ddd;
+    background: none;
+}
+
+.viewRepresentationFile .filePreviewToolbar .browseItemHeader {
+    display: inline-block;
+    vertical-align: bottom;
+    margin-left: 40px;
+    margin-right: 2px;
+    font-size: 1.4rem;
+    color: #222;
+}
+
+.viewRepresentationFile .filePreviewToolbar .viewRepresentationBreadcrumb {
+    margin: 0;
+    padding: 0;
+    display: inline-block;
+}
+
+.viewRepresentationFile.single .filePreviewToolbar .viewRepresentationBreadcrumb {
     margin-left: 35px;
 }
 
-.viewRepresentationFilePreviewPanel .filePreviewToolbar .filePreviewToolbarIcons {
+.viewRepresentationFile .filePreviewToolbar .filePreviewToolbarIcons {
     position: absolute;
-    bottom: 0;
+    top: 0;
     right: 0;
 }
 
+.viewRepresentationFile-center {
+    width: 100%;
+    min-height: 670px;
+    position: relative;
+}
+
 .viewRepresentationFilePreview {
-    padding: 40px !important;
-    height: 650px;
+    min-height: 670px;
     display: inline-block;
     vertical-align: top;
     width: 100%;
     text-align: center;
-    padding-top: 0px !important;
-    margin-top: 20px;
+    padding-top: 0px;
+}
+
+.bitstreamPreview-directory {
+    padding: 2%;
+    width: 96%;
 }
 
 .viewRepresentationImageFilePreview {
+    width: 100%;
+    height: 670px;
     max-width: 100%;
-    max-height: 600px;
     margin: 0 auto;
+    display: block;
 }
 
 .viewRepresentationPDFFilePreview {
     width: 100%;
-    height: 600px;
+    height: 670px;
 }
 
 .viewRepresentationTextFilePreview {
-    width: 100%;
+    width: 98%;
+    padding: 1%;
     text-align: left;
 }
 
@@ -3564,25 +4014,31 @@ td.datePickerMonth, td.datePickerYear {
 }
 
 .viewRepresentationAudioFilePreview {
-    width: 100%;
-    max-width: 300px;
+    max-width: 100%;
+    /*max-width: 300px;*/
+    display: block;
+    margin: auto;
 }
 
 .viewRepresentationVideoFilePreview {
     width: 100%;
-    height: 600px;
+    /*height: 600px;*/
 }
 
 .viewRepresentationEmptyPreview, .viewRepresentationErrorPreview,
 .viewRepresentationNotSupportedPreview,
 .viewRepresentationAudioFilePreviewHTML {
-    margin-top: 120px;
+    padding-top: 120px;
     color: #999;
+    text-align: center;
 }
 
 .viewRepresentationEmptyPreview .fa-5 {
     font-size: 9em;
-    margin-bottom: 15px;
+}
+
+.viewRepresentationEmptyPreview .emptymessage {
+    margin-top: 0;
 }
 
 .viewRepresentationErrorPreview .fa-5,
@@ -3593,6 +4049,12 @@ td.datePickerMonth, td.datePickerYear {
 .viewRepresentationNotSupportedDownloadButton {
     font-size: 1.2rem;
     padding: 8px 20px;
+    margin: auto;
+    display: block;
+}
+
+.viewRepresentationNotSupportedDownloadButton::after {
+    content: "";
 }
 
 .viewRepresentationAudioFilePreviewHTML .fa-5 {
@@ -3658,7 +4120,7 @@ td.datePickerMonth, td.datePickerYear {
     color: inherit;
 }
 
-.viewRepresentation .infoFilePanel {
+.viewRepresentationFile .blueSlider {
     height: 630px;
     width: 300px;
     background: #089de3;
@@ -3666,31 +4128,61 @@ td.datePickerMonth, td.datePickerYear {
     color: white;
     position: absolute;
     right: 0;
+    top: 0;
     padding: 20px;
     box-shadow: 0 0 0 0 transparent, 0 0 0 0 transparent, 0 0 0 0 transparent, -6px 0 15px -4px rgba(31, 73, 125, 0.8);
 }
 
-.viewRepresentation .infoFileTitle {
+.viewRepresentationFile .blueSlider .h1 {
     font-size: 3rem;
     margin-top: 1.2rem;
     margin-bottom: 2.5rem;
 }
 
-.viewRepresentation .infoFileEntry {
+.viewRepresentationFile .infoFileEntry, .viewRepresentationFile .dip {
     margin-bottom: 1em;
 }
 
-.viewRepresentation .infoFileEntryKey {
+.viewRepresentationFile .infoFileEntryKey, .viewRepresentationFile .dipTitle {
     font-size: 1.3rem;
     line-height: 1.1em;
     color: rgba(255, 255, 255, 0.8);
     margin-bottom: 0.2em;
 }
 
-.viewRepresentation .infoFileEntryValue {
+.viewRepresentationFile .dip-focus .dipTitle {
+    text-decoration: underline;
+}
+
+.viewRepresentationFile .dip {
+    position: relative;
+}
+
+.viewRepresentationFile .dip-left {
+    margin-right: 20px;
+}
+
+.viewRepresentationFile .dip-options {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.viewRepresentationFile .dip-focus {
+    cursor: pointer;
+    cursor: hand;
+}
+
+.viewRepresentationFile .infoFileEntryValue, .viewRepresentationFile .dipDescription {
     font-size: 1.3rem;
     word-break: break-all;
     line-height: 1.1em;
+}
+
+
+
+.my-files-table .file-path {
+    color: #a7a9ac;
 }
 
 /**********************************************
@@ -3703,7 +4195,6 @@ td.datePickerMonth, td.datePickerYear {
 .wui-ingest-transfer .wui-breadcrumbPanel {
     position: relative;
 }
-
 
 .ingest-transfer-lastscanned {
     font-size: 1.1rem;
@@ -3801,7 +4292,7 @@ td.datePickerMonth, td.datePickerYear {
     position: absolute;
 }
 
-#upload-list li span:after {
+#upload-list li span.icon:after {
     display: inline-block;
     font: normal normal normal 14px/1 FontAwesome;
     font-size: 1.5rem;
@@ -3816,16 +4307,41 @@ td.datePickerMonth, td.datePickerYear {
     cursor: pointer;
     content: "\f00c";
     color: #24c279;
+    -webkit-animation: none;
+    -moz-animation: none;
+    animation:none;
 }
 
-#upload-list li.working span:after {
-    content: "\f00d";
-    color: #d11f49;
+#upload-list li.working span.icon:after {
+    content: "\f1ce";
+    color: #f4d03f;
+    -webkit-animation:spin 3s linear infinite;
+    -moz-animation:spin 3s linear infinite;
+    animation:spin 3s linear infinite;
 }
+@-moz-keyframes spin { 100% { -moz-transform: rotate(360deg); } }
+@-webkit-keyframes spin { 100% { -webkit-transform: rotate(360deg); } }
+@keyframes spin { 100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); } }
 
 #upload-list li.error p {
     color: #D20707;
 }
+
+#upload-list li.error span.icon:after {
+    content: "\f071";
+    color: #D20707;
+    -webkit-animation: none;
+    -moz-animation: none;
+    animation:none;
+}
+#upload-list li.error:before {
+    content: "";
+}
+
+#upload-list li.error .errorMessage {
+    margin-left: 20px;
+}
+
 
 /**********************************************
 				INGEST PROCESS NEW
@@ -3906,7 +4422,7 @@ td.datePickerMonth, td.datePickerYear {
     color: #089de3;
 }
 
-.report .entry, .report .valid{
+.report .entry, .report .valid {
     /* 	border-bottom: 1px solid #ddd; */
 }
 
@@ -4008,18 +4524,21 @@ td.datePickerMonth, td.datePickerYear {
     margin: 0 5px;
     vertical-align: middle;
 }
+
 .wui-UserDisclosurePanel .user-header .user-name {
     width: 150px;
     overflow: hidden;
     font-size: 11px;
     margin-top: 2px;
 }
+
 .wui-UserDisclosurePanel .user-header .user-fullname {
     width: 100%;
     overflow: hidden;
     font-size: 11px;
     margin-top: 2px;
 }
+
 .wui-UserDisclosurePanel .user-header .user-report {
     margin: 0 10px;
     cursor: pointer;
@@ -4090,6 +4609,7 @@ td.datePickerMonth, td.datePickerYear {
 
 .wui-GroupDisclosurePanel .group-header {
 }
+
 .wui-GroupDisclosurePanel .group-header .group-icon {
     margin: 0 5px;
     vertical-align: middle;
@@ -4139,7 +4659,6 @@ td.datePickerMonth, td.datePickerYear {
 
 .wui-GroupDisclosurePanel .wui-user-mini .user-layout {
 }
-
 
 .wui-GroupDisclosurePanel .wui-user-mini .user-icon {
     margin: 0 10px;
@@ -4314,6 +4833,7 @@ td.datePickerMonth, td.datePickerYear {
     width: 300px;
     overflow: auto;
 }
+
 .wui-user-data .id-locality {
     width: 95px;
 }
@@ -4332,7 +4852,8 @@ td.datePickerMonth, td.datePickerYear {
 }
 
 .wui-user-data .isWrong {
-    background-color: #d97570;
+    border-left: 2px solid #d97570 !important;
+    background: rgba(217, 117, 112, 0.25) !important;
 }
 
 .wui-user-data .password {
@@ -4384,6 +4905,7 @@ td.datePickerMonth, td.datePickerYear {
 .wui-data-panel {
     width: 100%;
 }
+
 .wui-data-panel .password {
     margin-bottom: 5px;
 }
@@ -4398,7 +4920,6 @@ td.datePickerMonth, td.datePickerYear {
     margin: 3px 10px;
 }
 
-
 .wui-userlog .log-total {
     margin-right: 5px;
 }
@@ -4408,6 +4929,7 @@ td.datePickerMonth, td.datePickerYear {
     font-weight: bold;
     border-bottom: 2px solid white;
 }
+
 .wui-userlog .log-header-layout * {
     color: #e6e7e8;
 }
@@ -4415,9 +4937,11 @@ td.datePickerMonth, td.datePickerYear {
 .wui-userlog .log-header-dateTime {
     width: 170px;
 }
+
 .wui-userlog .log-header-action {
     width: 271px;
 }
+
 .wui-userlog .log-header-parameters {
     width: 273px;
 }
@@ -4498,17 +5022,22 @@ td.datePickerMonth, td.datePickerYear {
 .wui-userlog .actions-picker {
 
 }
+
 .wui-userlog .date-initial-layout {
     margin-right: 10px;
 }
+
 .wui-userlog .date-initial-label {
     color: #58595b;
     margin-bottom: 5px;
 }
+
 .wui-userlog .date-initial-picker {
 }
+
 .wui-userlog .date-final-layout {
 }
+
 .wui-userlog .date-final-label {
     color: #58595b;
     margin-bottom: 5px;
@@ -4729,6 +5258,7 @@ td.datePickerMonth, td.datePickerYear {
 ************************************************/
 .gwt-PopupPanelGlass {
     background-color: rgba(0, 0, 0, 0.25);
+    z-index: 5;
 }
 
 .office-window-dock {
@@ -4760,8 +5290,7 @@ td.datePickerMonth, td.datePickerYear {
     background: url("images/shadow/shadow-up-left.png") no-repeat;
     _background: none;
     filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(
-            src=
-            'images/shadow/shadow-up-left.png', sizingMethod=       'scale');
+            src='images/shadow/shadow-up-left.png', sizingMethod='scale');
 }
 
 /**********************************************
@@ -4770,7 +5299,6 @@ td.datePickerMonth, td.datePickerYear {
 #recaptcha_div {
     margin-top: 20px;
 }
-
 
 /**********************************************
 	DESCRIPTIVE METADATA VERSIONS
@@ -4795,6 +5323,17 @@ td.datePickerMonth, td.datePickerYear {
 .wui-browse-metadata-descriptive-versions .code-pre {
     margin-top: 5px;
 }
+
+.metadata-form-text-area {
+    min-height: 100px;
+}
+
+.metadata-form-field-wrapper {
+    padding: 5px;
+    margin-bottom: 0;
+}
+
+
 
 /**********************************************
 				SUGGEST BOX
@@ -4842,7 +5381,6 @@ td.datePickerMonth, td.datePickerYear {
     }
 }
 
-
 /**********************************************
 				RISKS & AGENT & FORMAT
 ************************************************/
@@ -4859,21 +5397,39 @@ td.datePickerMonth, td.datePickerYear {
 				COOKIES MESSAGE
 ************************************************/
 @-webkit-keyframes slideDown {
-    0% { margin-top:-66px }
-    100% { margin-top:0 }
+    0% {
+        margin-top: -66px
+    }
+    100% {
+        margin-top: 0
+    }
 }
+
 @keyframes slideDown {
-    0% { margin-top:-66px }
-    100% { margin-top:0px }
+    0% {
+        margin-top: -66px
+    }
+    100% {
+        margin-top: 0px
+    }
 }
 
 @-webkit-keyframes growDown {
-    0% { height:0 }
-    100% { height:66px }
+    0% {
+        height: 0
+    }
+    100% {
+        height: 66px
+    }
 }
-@keyframes growDown{
-    0% { height:0 }
-    100% { height:66px }
+
+@keyframes growDown {
+    0% {
+        height: 0
+    }
+    100% {
+        height: 66px
+    }
 }
 
 .cc_banner-wrapper {
@@ -4969,4 +5525,346 @@ td.datePickerMonth, td.datePickerYear {
     .cc_container {
         display: none;
     }
+}
+
+/**********************************************
+				REPRESENTATIONS
+************************************************/
+
+.representation {
+    background-color: transparent;
+    padding-left: 0px;
+    /* 	border: 1px solid #ddd; */
+    margin-bottom: 10px;
+}
+.representation .panel-body {
+    background: transparent;
+    padding: 0;
+}
+.representationPanel {
+}
+.representationPanelFocus {
+    cursor: pointer;
+    cursor: hand;
+}
+.representationIconPanel,
+.representationDataPanel {
+    vertical-align: top;
+}
+.representationIconPanel {
+    float: left;
+}
+.representationIcon {
+    display: inline-block;
+    text-align: center;
+    /*     font-size: 4rem; */
+    /*     line-height: 6rem; */
+    /*     margin-right: 15px; */
+    /*     height: 6rem; */
+    /*     width: 6rem; */
+    font-size: 2.2rem;
+    line-height: 3.5rem;
+    margin-right: 5px;
+    height: 3.5rem;
+    width: 3.5rem;
+}
+.representationType {
+    /* 	font-size: 2rem; */
+    /*     line-height: 1.2; */
+    /*     letter-spacing: -.1rem; */
+    font-size: 1.6rem;
+    line-height: 1.2;
+    letter-spacing: -.1rem;
+}
+.representationInformation {
+    /*font-size: 90%;*/
+    color: #a7a9ac;
+    font-size: 1rem;
+}
+.representationId {
+    color: #a7a9ac;
+    font-size: 1rem;
+    display: none;
+}
+.representationToolbarIcons {
+    float: right;
+}
+/* .representationToolbarIcons .toolbarLink { */
+/* 	background-color: transparent; */
+/* 	color: blue; */
+/* } */
+.representationToolbarIcons .closed .fa-chevron-up {
+    display: none;
+}
+.representationToolbarIcons .opened .fa-chevron-down {
+    display: none;
+}
+
+/**********************************************
+				NEW CREATE JOB PAGE
+************************************************/
+
+.listbox_col {
+    max-width: 100%;
+    min-width: 100%;
+}
+.plugin-description {
+    font-weight: 300;
+    padding-bottom: 10px;
+}
+.btn-separator {
+    margin-left: 10px;
+}
+
+
+.plugin-list-item {
+    display: block;
+    width: 100%;
+    height: 30px;
+    line-height: 30px;
+    overflow: hidden;
+    border: none;
+}
+
+
+.plugin-list-item-icon {
+    display: inherit;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    padding: 0;
+    margin: 0;
+    float: left;
+    text-align: center;
+    color: #222;
+}
+
+
+.plugin-list-item-icon-risk_management:before {
+    content: "\f071";
+}
+
+.plugin-list-item-icon-management:before {
+    content: "\f0f0";
+}
+
+.plugin-list-item-icon-reindex:before {
+    content: "\f021";
+}
+
+.plugin-list-item-icon-conversion:before {
+    content: "\f085";
+}
+
+.plugin-list-item-icon-characterization:before {
+    content: "\f129";
+}
+
+.plugin-list-item-icon-validation:before {
+    content: "\f00c";
+}
+
+.plugin-list-item-icon-feature_extraction:before {
+    content: "\f129";
+}
+
+.plugin-list-item-icon-identification:before {
+    content: "\f0eb";
+}
+
+.plugin-list-item-icon-ingest:before {
+    content: "\f085";
+}
+
+.plugin-list-item-icon-replication:before {
+    content: "\f0c5";
+}
+
+.plugin-list-item-icon-dissemination:before {
+    content: "\f01a";
+}
+
+.plugin-list-item-icon-misc:before {
+    content: "\f0ae";
+}
+
+.plugin-list-item-icon-default:before {
+    content: "\f0ae";
+}
+
+.plugin-list-item-label {
+    color: #089de3;
+    overflow: hidden;
+    border: none;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    height: 30px;
+    line-height: 30px;
+    padding: 0;
+    margin: 0;
+    display: inherit;
+}
+
+
+.plugin-list-item-selected {
+    background-color: #eee;
+}
+.plugin-list-item:hover {
+    background-color: #f5f5f5;
+    cursor: pointer;
+}
+.plugin-list {
+    width: 40%;
+    padding-bottom: 99999px;
+    margin-bottom: -99999px;
+}
+.plugin-details {
+    width: 56%;
+    background-color: #eee;
+    padding: 2% !important;
+    padding-bottom: 99999px !important;
+    margin-bottom: -99999px;
+}
+.clearfix {
+    overflow: hidden;
+    clear: both;
+    margin-top: 2em;
+}
+.plugin-details .fieldTextBox, .plugin-details .form-textbox {
+    border: none;
+}
+.plugin-list-item-selected:hover {
+    background-color: #eee;
+}
+.item-selector {
+    margin-top: 2em;
+}
+
+.plugin-category-padding {
+    padding-bottom: 20px;
+}
+
+/**********************************************
+				STATISTICS
+************************************************/
+
+#statistics:after {
+    content: "";
+    display: block;
+    clear: both;
+}
+#statistics h1, #statistics h2, #statistics h3 {
+    clear: both;
+}
+#statistics h2 {
+    padding-top: 40px;
+}
+#statistics .half {
+    float: left;
+    width: 50%;
+}
+#statistics pre > code {
+    max-height: none;
+    overflow: auto;
+}
+.chart_col_card {
+    border-width: 2px;
+    border-style: solid;
+    border-color: #eee;
+    padding: 0em 2em 1.5em 2em;
+    position: relative;
+}
+.chart_col_card .toolbarLink {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+.stat_col_card {
+    background: #eee;
+    padding: 0 2em 4em 2em;
+}
+
+
+/**********************************************
+				ERROR 404 PAGE
+************************************************/
+
+#main404 h1 {
+    font-size: 24rem;
+    line-height: 1.2;
+    letter-spacing: -.1rem;
+    text-align: center;
+    text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+    color: white;
+}
+#main404 p {
+    margin-bottom: 0.5em;
+    font-size: 2.3rem;
+    line-height: 1.5em;
+    text-align: center;
+}
+#main404 a {
+    font-size: 1.8rem;
+}
+
+/***************************************
+ DOWNLOAD CSV
+****************************************/
+
+.csvDownloadButton, .actionsButton {
+    padding: 7px;
+    float: right;
+}
+
+.object-dialog .searchPreFilters  {
+    display: none;
+    max-width: 100px;
+}
+
+/***************************************
+ ACTIONS
+****************************************/
+
+.actions-popup {
+    background-color: #089DE3;
+    border-radius: 2px;
+    width: 180px;
+    padding: 10px;
+    box-shadow: 0 0px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+    z-index: 2;
+}
+
+.actions-popup-bottom_right::before {
+    content: "";
+    width: 0px;
+    height: 0px;
+    border: 8px solid transparent;
+    position: absolute;
+    right: 8px;
+    bottom: -16px;
+    border-top: 8px solid #089DE3;
+}
+
+.actions-popup-top_right::before {
+    content: "";
+    width: 0px;
+    height: 0px;
+    border: 8px solid transparent;
+    position: absolute;
+    right: 8px;
+    top: -16px;
+    border-bottom: 8px solid #089DE3;
+}
+
+.actions-popup .actions-layout-title {
+    color: white;
+    margin-bottom: 5px;
+}
+
+.actions-layout-button + .actions-layout-title {
+    margin-top: 10px;
+}
+
+.actions-empty-help {
+    color: white;
 }
