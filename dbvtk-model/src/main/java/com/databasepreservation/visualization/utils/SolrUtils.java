@@ -72,6 +72,7 @@ import org.roda.core.data.v2.user.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.databasepreservation.modules.CloseableUtils;
 import com.databasepreservation.utils.FileUtils;
 import com.databasepreservation.visualization.client.SavedSearch;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
@@ -100,24 +101,25 @@ public class SolrUtils {
   }
 
   public static void setupSolrCloudConfigsets(String zkHost) {
-    // before anything else, try to get a zookeeper client
-    CloudSolrClient zkClient = new CloudSolrClient(zkHost);
+    CloudSolrClient zkClient = null;
+    JarFile jar = null;
 
     // get resources and copy them to a temporary directory
     Path databaseDir = null;
     Path tableDir = null;
-    Path savedSearchesDir = null;
+
     try {
-      final File jarFile = new File(SolrManager.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+      File jarFile = new File(SolrManager.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+      zkClient = new CloudSolrClient.Builder().withZkHost(zkHost).build();
 
       // if it is a directory the application in being run from an IDE
       // in that case do not setup (assuming setup is done)
       if (!jarFile.isDirectory()) {
         databaseDir = Files.createTempDirectory("dbv_db_");
         tableDir = Files.createTempDirectory("dbv_tab_");
-        savedSearchesDir = Files.createTempDirectory("dbv_tab_");
-        final JarFile jar = new JarFile(jarFile);
-        final Enumeration<JarEntry> entries = jar.entries();
+        Path savedSearchesDir = Files.createTempDirectory("dbv_tab_");
+        jar = new JarFile(jarFile);
+        Enumeration<JarEntry> entries = jar.entries();
 
         while (entries.hasMoreElements()) {
           JarEntry entry = entries.nextElement();
@@ -151,7 +153,38 @@ public class SolrUtils {
             outputStream.close();
           }
         }
-        jar.close();
+
+        try {
+          zkClient.uploadConfig(databaseDir, ViewerSafeConstants.SOLR_CONFIGSET_DATABASE);
+        } catch (IOException e) {
+          LOGGER.debug("IO error uploading database config to solr cloud", e);
+        }
+        try {
+          zkClient.uploadConfig(tableDir, ViewerSafeConstants.SOLR_CONFIGSET_TABLE);
+        } catch (IOException e) {
+          LOGGER.debug("IO error uploading table config to solr cloud", e);
+        }
+        try {
+          zkClient.uploadConfig(savedSearchesDir, ViewerSafeConstants.SOLR_CONFIGSET_SEARCHES);
+        } catch (IOException e) {
+          LOGGER.debug("IO error uploading saved searches config to solr cloud", e);
+        }
+
+        try {
+          FileUtils.deleteDirectoryRecursive(databaseDir);
+        } catch (IOException e1) {
+          LOGGER.debug("IO error deleting temporary folder: " + databaseDir, e1);
+        }
+        try {
+          FileUtils.deleteDirectoryRecursive(tableDir);
+        } catch (IOException e1) {
+          LOGGER.debug("IO error deleting temporary folder: " + tableDir, e1);
+        }
+        try {
+          FileUtils.deleteDirectoryRecursive(savedSearchesDir);
+        } catch (IOException e1) {
+          LOGGER.debug("IO error deleting temporary folder: " + savedSearchesDir, e1);
+        }
       }
     } catch (IOException | URISyntaxException e) {
       LOGGER.error("Could not extract Solr configset", e);
@@ -169,49 +202,9 @@ public class SolrUtils {
           LOGGER.debug("IO error deleting temporary folder: " + tableDir, e1);
         }
       }
-      databaseDir = null;
-      tableDir = null;
-    }
-
-    // copy configurations to solr
-    if (databaseDir != null && tableDir != null) {
-      try {
-        zkClient.uploadConfig(databaseDir, ViewerSafeConstants.SOLR_CONFIGSET_DATABASE);
-      } catch (IOException e) {
-        LOGGER.debug("IO error uploading database config to solr cloud", e);
-      }
-      try {
-        zkClient.uploadConfig(tableDir, ViewerSafeConstants.SOLR_CONFIGSET_TABLE);
-      } catch (IOException e) {
-        LOGGER.debug("IO error uploading table config to solr cloud", e);
-      }
-      try {
-        zkClient.uploadConfig(savedSearchesDir, ViewerSafeConstants.SOLR_CONFIGSET_SEARCHES);
-      } catch (IOException e) {
-        LOGGER.debug("IO error uploading saved searches config to solr cloud", e);
-      }
-
-      try {
-        FileUtils.deleteDirectoryRecursive(databaseDir);
-      } catch (IOException e1) {
-        LOGGER.debug("IO error deleting temporary folder: " + databaseDir, e1);
-      }
-      try {
-        FileUtils.deleteDirectoryRecursive(tableDir);
-      } catch (IOException e1) {
-        LOGGER.debug("IO error deleting temporary folder: " + tableDir, e1);
-      }
-      try {
-        FileUtils.deleteDirectoryRecursive(savedSearchesDir);
-      } catch (IOException e1) {
-        LOGGER.debug("IO error deleting temporary folder: " + savedSearchesDir, e1);
-      }
-    }
-
-    try {
-      zkClient.close();
-    } catch (IOException e) {
-      LOGGER.debug("IO error closing connection to solr cloud", e);
+    } finally {
+      CloseableUtils.closeQuietly(zkClient);
+      CloseableUtils.closeQuietly(jar);
     }
   }
 
