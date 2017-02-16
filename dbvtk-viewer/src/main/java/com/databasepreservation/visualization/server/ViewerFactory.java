@@ -23,8 +23,12 @@ public class ViewerFactory {
   private static boolean instantiated = false;
 
   private static void instantiate() {
-    solr = new SolrManager(DEVELOPMENT_SOLR_URL);
     configuration = ViewerConfiguration.getInstance();
+    String solrUrl = configuration.getViewerConfigurationAsString(ViewerConfiguration.PROPERTY_SOLR_URL);
+    if (StringUtils.isBlank(solrUrl)) {
+      solrUrl = DEVELOPMENT_SOLR_URL;
+    }
+    solr = new SolrManager(solrUrl);
     instantiated = true;
   }
 

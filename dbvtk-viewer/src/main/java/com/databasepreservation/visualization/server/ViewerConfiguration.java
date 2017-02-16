@@ -52,6 +52,8 @@ import ch.qos.logback.core.joran.spi.JoranException;
 public class ViewerConfiguration extends ViewerAbstractConfiguration {
   private static final Logger LOGGER = LoggerFactory.getLogger(ViewerConfiguration.class);
 
+  public static final String[] PROPERTY_SOLR_URL = new String[] {"solr", "url"};
+
   public static final String[] PROPERTY_FILTER_AUTHENTICATION_RODA = new String[] {"ui", "filter", "internal",
     "enabled"};
 
