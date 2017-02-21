@@ -4,17 +4,18 @@
  */
 package com.databasepreservation.visualization.api.utils;
 
-import javax.ws.rs.core.StreamingOutput;
+import com.databasepreservation.visualization.api.common.ConsumesOutputStream;
+import com.databasepreservation.visualization.api.common.EntityResponse;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class StreamResponse {
+public class StreamResponse implements EntityResponse {
   private String filename;
   private String mediaType;
-  private StreamingOutput stream;
+  private ConsumesOutputStream stream;
 
-  public StreamResponse(String filename, String mediaType, StreamingOutput stream) {
+  public StreamResponse(String filename, String mediaType, ConsumesOutputStream stream) {
     super();
     this.filename = filename;
     this.mediaType = mediaType;
@@ -37,11 +38,12 @@ public class StreamResponse {
     this.mediaType = mediaType;
   }
 
-  public StreamingOutput getStream() {
+  public ConsumesOutputStream getStream() {
     return stream;
   }
 
-  public void setStream(StreamingOutput stream) {
+  public void setStream(ConsumesOutputStream stream) {
     this.stream = stream;
   }
+
 }

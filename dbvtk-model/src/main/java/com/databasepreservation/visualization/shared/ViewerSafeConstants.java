@@ -172,6 +172,8 @@ public class ViewerSafeConstants {
 
   public static final String API_V1_MANAGE_RESOURCE = "/v1/manage";
 
+  public static final String API_V1_THEME_RESOURCE = "/v1/theme";
+
   /*
    * Search field types from RODA, plus a few new ones
    */

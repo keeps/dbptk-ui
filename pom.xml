@@ -32,7 +32,7 @@
         <!-- Convenience properties to set versions -->
         <gwtVersion>2.7.0</gwtVersion>
         <version.dbptk-model>2.0.0-beta7.2</version.dbptk-model>
-        <version.roda>2.0.0-beta2</version.roda>
+        <version.roda>2.0.0-beta3</version.roda>
 
 
         <version.jersey>2.23</version.jersey>

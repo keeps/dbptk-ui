@@ -21,6 +21,10 @@ public class ViewerConstants {
   public static final String VIEWER_I18_GWT_XML_FILE = "I18N.gwt.xml";
   public static final String VIEWER_EXAMPLE_CONFIG_FOLDER = "example-config";
   public static final String VIEWER_I18N_FOLDER = "i18n";
+  public static final String VIEWER_THEME_FOLDER = "theme";
   public static final String VIEWER_LOG_FOLDER = "log";
   public static final String VIEWER_LOBS_FOLDER = "lobs";
+
+  public final static String MEDIA_TYPE_APPLICATION_OCTET_STREAM = "application/octet-stream";
+  public final static String MEDIA_TYPE_TEXT_HTML = "text/html";
 }

@@ -344,6 +344,26 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     return configUri;
   }
 
+  public static InputStream getConfigurationFileAsStream(String configurationFile) {
+    Path config = configPath.resolve(configurationFile);
+    InputStream inputStream = null;
+    try {
+      if (Files.exists(config) && !Files.isDirectory(config)
+        && config.toAbsolutePath().startsWith(configPath.toAbsolutePath().toString())) {
+        inputStream = Files.newInputStream(config);
+        LOGGER.trace("Loading configuration from file {}", config);
+      }
+    } catch (IOException e) {
+      // do nothing
+    }
+    if (inputStream == null) {
+      inputStream = ViewerConfiguration.class.getResourceAsStream("/" + ViewerConstants.VIEWER_CONFIG_FOLDER + "/"
+        + configurationFile);
+      LOGGER.trace("Loading configuration from classpath {}", configurationFile);
+    }
+    return inputStream;
+  }
+
   private static void copyFilesFromClasspath(String classpathPrefix, Path destinationDirectory) {
     copyFilesFromClasspath(classpathPrefix, destinationDirectory, false);
   }

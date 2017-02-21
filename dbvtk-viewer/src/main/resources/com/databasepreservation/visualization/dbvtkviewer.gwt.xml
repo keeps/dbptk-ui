@@ -39,6 +39,7 @@
     <entry-point class='com.databasepreservation.visualization.client.main.Main'/>
     <stylesheet src="roda_main.css" />
     <stylesheet src="main.css" />
+    <stylesheet src="../api/v1/theme?resource_id=theme.css" />
 
     <!-- Specify the paths for translatable code                    -->
     <source path='client'/>
