@@ -62,7 +62,7 @@ public class InternalApiAuthFilter implements Filter {
     final HttpServletRequest request = (HttpServletRequest) servletRequest;
     final HttpServletResponse response = (HttpServletResponse) servletResponse;
 
-    if (!isRequestUrlExcluded(request) && request.getSession().getAttribute(UserUtility.RODA_USER) == null) {
+    if (!isRequestUrlExcluded(request) && request.getSession().getAttribute(UserUtility.RODA_USER_NAME) == null) {
       // No user yet
       try {
 

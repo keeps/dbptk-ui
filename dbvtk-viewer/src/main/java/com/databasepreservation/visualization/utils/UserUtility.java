@@ -25,9 +25,6 @@ import org.roda.core.data.exceptions.AuthenticationDeniedException;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
-import org.roda.core.data.utils.JsonUtils;
-import org.roda.core.data.v2.common.ObjectPermission;
-import org.roda.core.data.v2.common.ObjectPermissionResult;
 import org.roda.core.data.v2.common.Pair;
 import org.roda.core.data.v2.index.IsIndexed;
 import org.roda.core.data.v2.index.filter.Filter;
@@ -47,9 +44,10 @@ import com.google.common.cache.LoadingCache;
 
 public class UserUtility {
   private static final Logger LOGGER = LoggerFactory.getLogger(UserUtility.class);
-  public static final String RODA_USER = "RODA_USER";
+  public static final String RODA_USER_NAME = "RODA_USER";
+  public static final String RODA_USER_PASS = "RODA_USER_PASS";
 
-  private static LoadingCache<Pair<String, User>, Boolean> databasePermissions = CacheBuilder
+  private static LoadingCache<Pair<String, Pair<User, String>>, Boolean> databasePermissions = CacheBuilder
     .newBuilder()
     .expireAfterWrite(
       ViewerConfiguration.getInstance().getViewerConfigurationAsInt(60,
@@ -61,12 +59,23 @@ public class UserUtility {
 
   }
 
-  public static User getApiUser(final HttpServletRequest request) throws AuthorizationDeniedException {
-    return getUser(request, false);
+  public static String getPasswordOrTicket(final HttpServletRequest request) {
+    final boolean usingCAS = ViewerConfiguration.getInstance().getViewerConfigurationAsBoolean(false,
+      ViewerConfiguration.PROPERTY_FILTER_AUTHENTICATION_CAS);
+
+    if (usingCAS) {
+      return request.getHeader("TGT");
+    } else {
+      String password = (String) request.getSession().getAttribute(RODA_USER_PASS);
+      if (password == null) {
+        password = "";
+      }
+      return password;
+    }
   }
 
   public static User getUser(final HttpServletRequest request, final boolean returnGuestIfNoUserInSession) {
-    User user = (User) request.getSession().getAttribute(RODA_USER);
+    User user = (User) request.getSession().getAttribute(RODA_USER_NAME);
     if (user == null) {
       user = returnGuestIfNoUserInSession ? getGuest() : null;
     } else {
@@ -82,11 +91,15 @@ public class UserUtility {
   }
 
   public static void setUser(final HttpServletRequest request, final User user) {
-    request.getSession(true).setAttribute(RODA_USER, user);
+    request.getSession(true).setAttribute(RODA_USER_NAME, user);
+  }
+
+  public static void setPassword(final HttpServletRequest request, final String password) {
+    request.getSession(true).setAttribute(RODA_USER_PASS, password);
   }
 
   public static void logout(HttpServletRequest servletRequest) {
-    servletRequest.getSession().setAttribute(RODA_USER, getGuest());
+    servletRequest.getSession().setAttribute(RODA_USER_NAME, getGuest());
     // CAS specific clean up
     servletRequest.getSession().removeAttribute("edu.yale.its.tp.cas.client.filter.user");
     servletRequest.getSession().removeAttribute("_const_cas_assertion_");
@@ -99,10 +112,10 @@ public class UserUtility {
     return new User("guest", "guest", true);
   }
 
-  private static boolean userCanAccessDatabase(User user, String databaseUUID) throws AuthorizationDeniedException,
-    NotFoundException, GenericException {
+  private static boolean userCanAccessDatabase(final HttpServletRequest request, User user, String databaseUUID)
+    throws AuthorizationDeniedException, NotFoundException, GenericException {
     try {
-      return databasePermissions.get(new Pair<>(databaseUUID, user));
+      return databasePermissions.get(new Pair<>(databaseUUID, new Pair<>(user, getPasswordOrTicket(request))));
     } catch (ExecutionException e) {
       Throwable cause = e.getCause();
       if (cause instanceof AuthorizationDeniedException) {
@@ -184,7 +197,7 @@ public class UserUtility {
         return;
       }
       User user = getUser(request);
-      if (userCanAccessDatabase(user, databaseUUID) && filterParameterDatabaseUUID.containsKey(returnClass)) {
+      if (userCanAccessDatabase(request, user, databaseUUID) && filterParameterDatabaseUUID.containsKey(returnClass)) {
         filter.add(new SimpleFilterParameter(filterParameterDatabaseUUID.get(returnClass), databaseUUID));
       } else {
         throw error(user, returnClass.getName());
@@ -198,14 +211,14 @@ public class UserUtility {
       }
 
       User user = getUser(request);
-      if (resultClass.equals(ViewerDatabase.class) && userCanAccessDatabase(user, databaseUUID)) {
+      if (resultClass.equals(ViewerDatabase.class) && userCanAccessDatabase(request, user, databaseUUID)) {
         // the user can access the database
         return;
 
       } else if (resultClass.equals(SavedSearch.class)) {
         // the user can access the database to which this saved search belongs
         SavedSearch savedSearch = (SavedSearch) result;
-        if (databaseUUID.equals(savedSearch.getDatabaseUUID()) && userCanAccessDatabase(user, databaseUUID)) {
+        if (databaseUUID.equals(savedSearch.getDatabaseUUID()) && userCanAccessDatabase(request, user, databaseUUID)) {
           return;
         }
 
@@ -223,7 +236,8 @@ public class UserUtility {
       User user = getUser(request);
       // sanity check: table must belong to the database. needed to protect
       // against ViewerTable object forgery
-      if (database.getMetadata().getTable(tableUUID) != null && userCanAccessDatabase(user, database.getUUID())) {
+      if (database.getMetadata().getTable(tableUUID) != null
+        && userCanAccessDatabase(request, user, database.getUUID())) {
         // allow if the user can access the database that the table belongs to
         return;
       }
@@ -239,7 +253,7 @@ public class UserUtility {
       }
 
       User user = getUser(request);
-      if (databaseUUID.equals(savedSearch.getDatabaseUUID()) && userCanAccessDatabase(user, databaseUUID)) {
+      if (databaseUUID.equals(savedSearch.getDatabaseUUID()) && userCanAccessDatabase(request, user, databaseUUID)) {
         return;
       }
 
@@ -247,7 +261,7 @@ public class UserUtility {
     }
   }
 
-  private static class DatabasePermissionsCacheLoader extends CacheLoader<Pair<String, User>, Boolean> {
+  private static class DatabasePermissionsCacheLoader extends CacheLoader<Pair<String, Pair<User, String>>, Boolean> {
 
     /**
      * Computes or retrieves the value corresponding to the databaseUUID/user
@@ -265,64 +279,47 @@ public class UserUtility {
      *           that, when it is caught, the thread's interrupt status is set
      */
     @Override
-    public Boolean load(Pair<String, User> pair) throws Exception {
+    public Boolean load(Pair<String, Pair<User, String>> pair) throws Exception {
       final boolean usingCAS = ViewerConfiguration.getInstance().getViewerConfigurationAsBoolean(false,
         ViewerConfiguration.PROPERTY_FILTER_AUTHENTICATION_CAS);
       String databaseUUID = pair.getFirst();
-      User user = pair.getSecond();
-
-      String dbvtkUser = ViewerConfiguration.getInstance().getViewerConfigurationAsString(
-        ViewerConfiguration.PROPERTY_AUTHORIZATION_QUERY_USER_USERNAME);
-      String dbvtkPass = ViewerConfiguration.getInstance().getViewerConfigurationAsString(
-        ViewerConfiguration.PROPERTY_AUTHORIZATION_QUERY_USER_PASSWORD);
+      User user = pair.getSecond().getFirst();
+      String tokenOrPassword = pair.getSecond().getSecond();
 
       Client client;
       if (usingCAS) {
         client = ClientBuilder.newClient();
       } else {
-        client = getBasicAuthClient(dbvtkUser, dbvtkPass);
+        client = getBasicAuthClient(user.getName(), tokenOrPassword);
       }
 
       String rodaAddress = ViewerConfiguration.getInstance().getViewerConfigurationAsString(
         ViewerConfiguration.PROPERTY_RODA_ADDRESS);
 
-      String userPermissionPath = ViewerConfiguration.getInstance().getViewerConfigurationAsString(
-        ViewerConfiguration.PROPERTY_AUTHORIZATION_QUERY_PATH);
-      userPermissionPath = userPermissionPath.replaceAll("\\{username\\}", user.getName()).replaceAll(
-        "\\{databaseUUID\\}", databaseUUID);
+      String rodaDipPath = ViewerConfiguration.getInstance().getViewerConfigurationAsString(
+        ViewerConfiguration.PROPERTY_AUTHORIZATION_RODA_DIP_PATH);
+      rodaDipPath = rodaDipPath.replaceAll("\\{dip_id\\}", databaseUUID);
 
-      String userPermissionParameters = ViewerConfiguration.getInstance().getViewerConfigurationAsString(
-        ViewerConfiguration.PROPERTY_AUTHORIZATION_QUERY_PARAMETERS);
-      userPermissionParameters = userPermissionParameters.replaceAll("\\{username\\}", user.getName()).replaceAll(
-        "\\{databaseUUID\\}", databaseUUID);
-
-      UriBuilder uri = client.target(rodaAddress).path(userPermissionPath).getUriBuilder();
-      uri.replaceQuery(userPermissionParameters);
+      UriBuilder uri = client.target(rodaAddress).path(rodaDipPath).getUriBuilder();
+      uri.queryParam("acceptFormat", "json");
       WebTarget target = client.target(uri);
 
       try {
         Invocation.Builder request = target.request(MediaType.APPLICATION_JSON_TYPE);
         if (usingCAS) {
-          addTokenGrantingToken(dbvtkUser, dbvtkPass, request);
+          addTokenGrantingToken(tokenOrPassword, request);
         }
         String jsonObj = request.get(String.class);
 
-        ObjectPermissionResult permissions = JsonUtils.getObjectFromJson(jsonObj, ObjectPermissionResult.class);
+        // DIP dip = JsonUtils.getObjectFromJson(jsonObj, DIP.class);
 
-        boolean allowed = false;
-        for (ObjectPermission objectPermission : permissions.getObjects()) {
-          if (databaseUUID.equals(objectPermission.getObjectId()) && objectPermission.isHasPermission()) {
-            allowed = true;
-            break;
-          }
-        }
-
-        return allowed;
+        return true;
       } catch (NotAuthorizedException e) {
-        throw new AuthorizationDeniedException("Could not login with the provided DBVTK username and password", e);
+        // throw new
+        // AuthorizationDeniedException("Could not login with the provided DBVTK username and password",
+        // e);
+        return false;
       } catch (javax.ws.rs.NotFoundException e) {
-        LOGGER.error("link {}/{}", rodaAddress, userPermissionPath);
-        LOGGER.error("Could not find the specified DIP", e);
         throw new NotFoundException("Could not find the specified DIP", e);
       } catch (GenericException e) {
         throw new GenericException("Could not understand the server response", e);
@@ -359,7 +356,14 @@ public class UserUtility {
         throw e;
       }
 
-      return request.header("tgt", token);
+      return addTokenGrantingToken(token, request);
+    }
+
+    /**
+     * Modifies the request to include the CAS token
+     */
+    private Invocation.Builder addTokenGrantingToken(String tgt, Invocation.Builder request) throws Exception {
+      return request.header("tgt", tgt);
     }
 
     /**
