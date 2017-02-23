@@ -44,6 +44,7 @@ public class UserLoginController {
     try {
       user = target.request(MediaType.APPLICATION_JSON_TYPE).get(User.class);
       UserUtility.setUser(request, user);
+      UserUtility.setPassword(request, password);
       return user;
     } catch (NotAuthorizedException e) {
       throw new AuthenticationDeniedException("Could not login with that username and password");
