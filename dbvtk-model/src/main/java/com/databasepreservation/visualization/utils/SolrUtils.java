@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.net.ConnectException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -245,14 +246,23 @@ public class SolrUtils {
     try {
       QueryResponse response = index.query(getIndexName(classToRetrieve), query);
       ret = queryResponseToIndexResult(response, classToRetrieve, facets);
-    } catch (SolrServerException | IOException | org.apache.solr.client.solrj.impl.HttpSolrClient.RemoteSolrException e) {
-      String message = e.getMessage();
-      String bodytag = "<body>";
-      if (message != null && message.contains(bodytag)) {
-        message = message.substring(message.indexOf(bodytag) + bodytag.length(), message.indexOf("</body>"));
-        message = message.replaceAll("\\<[^>]*?>", "");
+    } catch (org.apache.solr.client.solrj.impl.HttpSolrClient.RemoteSolrException e) {
+      boolean shouldReturnEmptyResult = (e.code() == 404);
+      // there may be other cases where an empty result should be returned
+      if (shouldReturnEmptyResult) {
+        // build an empty IndexedResult
+        final SolrDocumentList docList = new SolrDocumentList();
+        final List<FacetFieldResult> facetResults = processFacetFields(facets, null);
+        final long offset = docList.getStart();
+        final long limit = docList.size();
+        final long totalCount = docList.getNumFound();
+        final List<T> docs = new ArrayList<T>();
+        ret = new IndexResult<T>(offset, limit, totalCount, docs, facetResults);
+      } else {
+        throw buildGenericException(e);
       }
-      throw new GenericException("Could not query index, message: " + message, e);
+    } catch (SolrServerException | IOException e) {
+      throw buildGenericException(e);
     }
 
     return ret;
@@ -837,5 +847,21 @@ public class SolrUtils {
       }
       ret.append(")");
     }
+  }
+
+  private static GenericException buildGenericException(Exception e) {
+    String error = "Could not query index";
+    String message = e.getMessage();
+
+    if (e.getCause() instanceof ConnectException) {
+      error = "Could not connect to Solr";
+    } else {
+      String bodytag = "<body>";
+      if (message != null && message.contains(bodytag)) {
+        message = message.substring(message.indexOf(bodytag) + bodytag.length(), message.indexOf("</body>"));
+        message = message.replaceAll("\\<[^>]*?>", "");
+      }
+    }
+    return new GenericException(error + ", message: " + message, e);
   }
 }

@@ -90,6 +90,7 @@ public class MainPanel extends Composite {
     DatabasePanel databasePanel = DatabasePanel.getInstance(databaseUUID);
     contentPanel.setWidget(databasePanel);
     databasePanel.load(rightPanelLoader);
+    contentPanel.getElement().scrollIntoView();
   }
 
   public void onHistoryChanged(String token) {
