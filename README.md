@@ -39,7 +39,9 @@ The DBVTK currently supports adding databases that are in SIARD2 and you can use
 
 ## More information
 
-For more information about these tools can be found at http://database-preservation.com
+Configuration options are detailed in the [Database Visualization toolkit Wiki](https://github.com/keeps/db-visualization-toolkit/wiki).
+
+More information about these tools can be found at http://database-preservation.com
 
 ## To report a problem or make a suggestion
 
