@@ -30,11 +30,6 @@
 		<appender-ref ref="CORE_FILEOUT_NO_THREAD"/>
 	</logger>
 
-	<logger name="org.apache.catalina" additivity="false">
-		<level value="WARN"/>
-		<appender-ref ref="CORE_FILEOUT"/>
-	</logger>
-
 	<logger name="org.eclipse.jetty" additivity="false">
 		<level value="WARN"/>
 		<appender-ref ref="CORE_FILEOUT"/>

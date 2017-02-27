@@ -16,6 +16,7 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.request.CollectionAdminRequest;
 import org.apache.solr.client.solrj.response.UpdateResponse;
+import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.util.NamedList;
 import org.roda.core.data.exceptions.GenericException;
@@ -88,7 +89,7 @@ public class SolrManager {
     } catch (SolrServerException | IOException e) {
       throw new ViewerException("Error creating collection " + ViewerSafeConstants.SOLR_INDEX_DATABASE_COLLECTION_NAME,
         e);
-    } catch (HttpSolrClient.RemoteSolrException e) {
+    } catch (SolrException e) {
       if (e.getMessage().contains(
         "collection already exists: " + ViewerSafeConstants.SOLR_INDEX_DATABASE_COLLECTION_NAME)) {
         LOGGER.info("collection " + ViewerSafeConstants.SOLR_INDEX_DATABASE_COLLECTION_NAME + " already exists.");
@@ -126,7 +127,7 @@ public class SolrManager {
         try {
           client.request(request);
           LOGGER.debug("Deleted collection " + collectionName);
-        } catch (SolrServerException | IOException | HttpSolrClient.RemoteSolrException e) {
+        } catch (SolrServerException | IOException | SolrException e) {
           throw new ViewerException("Error deleting collection " + collectionName, e);
         }
       }
@@ -175,7 +176,7 @@ public class SolrManager {
       if (duration != null) {
         LOGGER.info("Created in " + duration + " ms");
       }
-    } catch (HttpSolrClient.RemoteSolrException e) {
+    } catch (SolrException e) {
       LOGGER.error("Error in Solr server while creating collection " + collectionName, e);
     } catch (Exception e) {
       // mainly: SolrServerException and IOException
@@ -217,43 +218,40 @@ public class SolrManager {
   }
 
   public <T extends IsIndexed> IndexResult<T> find(Class<T> classToReturn, Filter filter, Sorter sorter,
-    Sublist sublist, Facets facets) throws org.roda.core.data.exceptions.GenericException, RequestNotValidException {
+    Sublist sublist, Facets facets) throws GenericException, RequestNotValidException {
     return SolrUtils.find(client, classToReturn, filter, sorter, sublist, facets);
   }
 
-  public <T extends IsIndexed> Long count(Class<T> classToReturn, Filter filter)
-    throws org.roda.core.data.exceptions.GenericException, RequestNotValidException {
+  public <T extends IsIndexed> Long count(Class<T> classToReturn, Filter filter) throws GenericException,
+    RequestNotValidException {
     return SolrUtils.count(client, classToReturn, filter);
   }
 
-  public <T extends IsIndexed> T retrieve(Class<T> classToReturn, String id) throws NotFoundException,
-    org.roda.core.data.exceptions.GenericException {
+  public <T extends IsIndexed> T retrieve(Class<T> classToReturn, String id) throws NotFoundException, GenericException {
     return SolrUtils.retrieve(client, classToReturn, id);
   }
 
   public <T extends IsIndexed> IndexResult<T> findRows(Class<T> classToReturn, String tableUUID, Filter filter,
-    Sorter sorter, Sublist sublist, Facets facets) throws org.roda.core.data.exceptions.GenericException,
-    RequestNotValidException {
+    Sorter sorter, Sublist sublist, Facets facets) throws GenericException, RequestNotValidException {
     return SolrUtils.find(client, classToReturn, tableUUID, filter, sorter, sublist, facets);
   }
 
   public InputStream findRowsCSV(String tableUUID, Filter filter, Sorter sorter, Sublist sublist, List<String> fields)
-    throws org.roda.core.data.exceptions.GenericException, RequestNotValidException {
+    throws GenericException, RequestNotValidException {
     return SolrUtils.findCSV(client, SolrUtils.getTableCollectionName(tableUUID), filter, sorter, sublist, fields);
   }
 
   public <T extends IsIndexed> Long countRows(Class<T> classToReturn, String tableUUID, Filter filter)
-    throws org.roda.core.data.exceptions.GenericException, RequestNotValidException {
+    throws GenericException, RequestNotValidException {
     return SolrUtils.count(client, classToReturn, tableUUID, filter);
   }
 
   public <T extends IsIndexed> T retrieveRows(Class<T> classToReturn, String tableUUID, String rowUUID)
-    throws NotFoundException, org.roda.core.data.exceptions.GenericException {
+    throws NotFoundException, GenericException {
     return SolrUtils.retrieve(client, classToReturn, tableUUID, rowUUID);
   }
 
-  public void addSavedSearch(SavedSearch savedSearch) throws NotFoundException,
-    org.roda.core.data.exceptions.GenericException {
+  public void addSavedSearch(SavedSearch savedSearch) throws NotFoundException, GenericException {
     try {
       createSavedSearchesCollection();
     } catch (ViewerException e) {
@@ -266,14 +264,13 @@ public class SolrManager {
       client.add(ViewerSafeConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME, doc);
       client.commit(ViewerSafeConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME, true, true, true);
     } catch (SolrServerException e) {
-      LOGGER.debug("SolrServerException while attempting to save search", e);
+      LOGGER.debug("Solr error while attempting to save search", e);
     } catch (IOException e) {
       LOGGER.debug("IOException while attempting to save search", e);
     }
   }
 
-  public void editSavedSearch(String uuid, String name, String description) throws NotFoundException,
-    org.roda.core.data.exceptions.GenericException {
+  public void editSavedSearch(String uuid, String name, String description) throws NotFoundException, GenericException {
     try {
       createSavedSearchesCollection();
     } catch (ViewerException e) {
@@ -290,18 +287,18 @@ public class SolrManager {
       client.add(ViewerSafeConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME, doc);
       client.commit(ViewerSafeConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME, true, true);
     } catch (SolrServerException e) {
-      LOGGER.debug("SolrServerException while attempting to save search", e);
+      LOGGER.debug("Solr error while attempting to save search", e);
     } catch (IOException e) {
       LOGGER.debug("IOException while attempting to save search", e);
     }
   }
 
-  public void deleteSavedSearch(String uuid) throws NotFoundException, org.roda.core.data.exceptions.GenericException {
+  public void deleteSavedSearch(String uuid) throws NotFoundException, GenericException {
     try {
       client.deleteById(ViewerSafeConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME, uuid);
       client.commit(ViewerSafeConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME, true, true);
     } catch (SolrServerException e) {
-      LOGGER.debug("SolrServerException while attempting to delete search", e);
+      LOGGER.debug("Solr error while attempting to delete search", e);
     } catch (IOException e) {
       LOGGER.debug("IOException while attempting to delete search", e);
     }
@@ -318,7 +315,7 @@ public class SolrManager {
     } catch (SolrServerException | IOException e) {
       throw new ViewerException("Error creating collection " + ViewerSafeConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME,
         e);
-    } catch (HttpSolrClient.RemoteSolrException e) {
+    } catch (SolrException e) {
       if (e.getMessage().contains(
         "collection already exists: " + ViewerSafeConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME)) {
         LOGGER.info("collection " + ViewerSafeConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME + " already exists.");
@@ -380,7 +377,7 @@ public class SolrManager {
                 LOGGER.warn("Could not insert a document batch in collection " + currentCollection + ". Response: "
                   + response.toString());
               }
-            } catch (HttpSolrClient.RemoteSolrException e) {
+            } catch (SolrException e) {
               if (e.getMessage().contains("<title>Error 404 Not Found</title>")) {
                 // this means that the collection does not exist yet. retry
                 LOGGER.debug("Collection " + currentCollection + " does not exist (yet). Retrying (" + tries + ")");
@@ -391,7 +388,7 @@ public class SolrManager {
             }
           }
         }
-      } catch (SolrServerException | IOException e) {
+      } catch (SolrServerException | SolrException | IOException e) {
         throw new ViewerException("Problem adding or committing information", e);
       }
 
@@ -474,12 +471,12 @@ public class SolrManager {
         } else {
           return;
         }
-      } catch (HttpSolrClient.RemoteSolrException e) {
+      } catch (SolrException e) {
         if (e.getMessage().contains("<title>Error 404 Not Found</title>")) {
           // this means that the collection does not exist yet. retry
           LOGGER.debug("Collection " + collection + " does not exist. Retrying (" + tries + ")");
         } else {
-          throw e;
+          throw new ViewerException("Problem committing collection " + collection, e);
         }
       }
 

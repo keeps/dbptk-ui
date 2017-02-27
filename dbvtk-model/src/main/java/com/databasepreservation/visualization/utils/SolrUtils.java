@@ -37,6 +37,7 @@ import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
+import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.FacetParams;
 import org.roda.core.data.common.RodaConstants;
 import org.roda.core.data.exceptions.GenericException;
@@ -246,7 +247,7 @@ public class SolrUtils {
     try {
       QueryResponse response = index.query(getIndexName(classToRetrieve), query);
       ret = queryResponseToIndexResult(response, classToRetrieve, facets);
-    } catch (org.apache.solr.client.solrj.impl.HttpSolrClient.RemoteSolrException e) {
+    } catch (SolrException e) {
       boolean shouldReturnEmptyResult = (e.code() == 404);
       // there may be other cases where an empty result should be returned
       if (shouldReturnEmptyResult) {
@@ -285,7 +286,7 @@ public class SolrUtils {
     try {
       QueryResponse response = index.query(getIndexName(classToRetrieve), query);
       ret = queryResponseToIndexResult(response, classToRetrieve, facets);
-    } catch (SolrServerException | IOException e) {
+    } catch (SolrServerException | SolrException | IOException e) {
       throw new GenericException("Could not query index", e);
     }
 
@@ -312,7 +313,7 @@ public class SolrUtils {
     try {
       QueryResponse response = index.query(getTableCollectionName(tableUUID), query);
       ret = queryResponseToIndexResult(response, classToRetrieve, facets);
-    } catch (SolrServerException | IOException e) {
+    } catch (SolrServerException | SolrException | IOException e) {
       throw new GenericException("Could not query index", e);
     }
 
@@ -345,7 +346,7 @@ public class SolrUtils {
         throw new GenericException("Result was not an input stream. Its string representation was: "
           + stream.toString());
       }
-    } catch (SolrServerException | IOException e) {
+    } catch (SolrServerException | SolrException | IOException e) {
       throw new GenericException("Could not query index", e);
     }
   }
@@ -471,7 +472,7 @@ public class SolrUtils {
       } else {
         throw new NotFoundException("Could not find document " + id);
       }
-    } catch (SolrServerException | IOException e) {
+    } catch (SolrServerException | SolrException | IOException e) {
       throw new GenericException("Could not retrieve " + classToRetrieve.getName() + " from index", e);
     }
     return ret;
@@ -487,7 +488,7 @@ public class SolrUtils {
       } else {
         throw new NotFoundException("Could not find document " + rowUUID);
       }
-    } catch (SolrServerException | IOException e) {
+    } catch (SolrServerException | SolrException | IOException e) {
       throw new GenericException("Could not retrieve " + classToRetrieve.getName() + " from index", e);
     }
     return ret;
@@ -788,7 +789,7 @@ public class SolrUtils {
     throws GenericException, RequestNotValidException {
     try {
       index.deleteByQuery(getIndexName(classToDelete), parseFilter(filter));
-    } catch (SolrServerException | IOException e) {
+    } catch (SolrServerException | SolrException | IOException e) {
       throw new GenericException("Could not delete items", e);
     }
   }
@@ -797,7 +798,7 @@ public class SolrUtils {
     throws GenericException {
     try {
       index.deleteById(getIndexName(classToDelete), ids);
-    } catch (SolrServerException | IOException e) {
+    } catch (SolrServerException | SolrException | IOException e) {
       throw new GenericException("Could not delete items", e);
     }
   }
