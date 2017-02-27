@@ -118,7 +118,7 @@ public class OnOffFilter implements Filter {
   private void initInnerFilter() throws ServletException {
     final Configuration rodaConfig = ViewerFactory.getViewerConfiguration().getConfiguration();
     if (rodaConfig == null) {
-      LOGGER.info("RODA configuration not available yet. Delaying init of "
+      LOGGER.info("DBVTK configuration not available yet. Delaying init of "
         + this.webXmlFilterConfig.getInitParameter(PARAM_INNER_FILTER_CLASS) + ".");
     } else {
       final String innerFilterClass = this.webXmlFilterConfig.getInitParameter(PARAM_INNER_FILTER_CLASS);

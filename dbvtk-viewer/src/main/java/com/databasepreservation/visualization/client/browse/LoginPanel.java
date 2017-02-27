@@ -1,5 +1,6 @@
 package com.databasepreservation.visualization.client.browse;
 
+import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.v2.user.User;
 
 import com.databasepreservation.visualization.client.common.UserLogin;
@@ -112,7 +113,11 @@ public class LoginPanel extends RightPanel {
       UserLogin.getInstance().login(usernameText, passwordText, new AsyncCallback<User>() {
         @Override
         public void onFailure(Throwable caught) {
-          error.setText(messages.couldNotLoginWithTheProvidedCredentials());
+          if (caught instanceof GenericException) {
+            error.setText(caught.getMessage());
+          } else {
+            error.setText(messages.couldNotLoginWithTheProvidedCredentials());
+          }
         }
 
         @Override

@@ -6,6 +6,8 @@ package com.databasepreservation.visualization.server;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.NotAuthorizedException;
+import javax.ws.rs.ProcessingException;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
@@ -48,6 +50,8 @@ public class UserLoginController {
       return user;
     } catch (NotAuthorizedException e) {
       throw new AuthenticationDeniedException("Could not login with that username and password");
+    } catch (WebApplicationException | ProcessingException e) {
+      throw new GenericException("Could not authenticate with RODA", e);
     }
   }
 }
