@@ -141,15 +141,15 @@ zip -r dbvtk-$5-all.zip apache-tomcat/ dbvtk-data/ jre/ solr/ dbptk-app.jar star
 
 cp dbvtk-$5-all.zip dbvtk-$5-windows.zip
 zip -d dbvtk-$5-windows.zip \
-  jre/linux jre/mac start.command start.sh stop.command stop.sh
+  jre/linux\* jre/mac\* start.command start.sh stop.command stop.sh
 
 cp dbvtk-$5-all.zip dbvtk-$5-mac.zip
 zip -d dbvtk-$5-mac.zip \
-  jre/linux jre/windows start.bat start.sh stop.bat stop.sh
+  jre/linux\* jre/windows\* start.bat start.sh stop.bat stop.sh
 
 cp dbvtk-$5-all.zip dbvtk-$5-linux.zip
 zip -d dbvtk-$5-linux.zip \
-  jre/mac jre/windows start.command start.bat stop.command stop.bat
+  jre/mac\* jre/windows\* start.command start.bat stop.command stop.bat
 
 # create checksums
 shasum -a 1 dbvtk*.zip dbvtk*.war > dbvtk-$5.sha1
