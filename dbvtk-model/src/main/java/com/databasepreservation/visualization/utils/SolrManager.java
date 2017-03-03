@@ -60,7 +60,7 @@ public class SolrManager {
   private boolean setupDone = false;
 
   public SolrManager(String url) {
-    client = new HttpSolrClient(url);
+    client = new HttpSolrClient.Builder().withBaseSolrUrl(url).build();
     client.setConnectionTimeout(5000);
     // allowCompression defaults to false.
     // Server side must support gzip or deflate for this to have any effect.
@@ -162,10 +162,8 @@ public class SolrManager {
    */
   public void addTable(ViewerTable table) throws ViewerException {
     String collectionName = SolrUtils.getTableCollectionName(table.getUUID());
-    CollectionAdminRequest.Create request = new CollectionAdminRequest.Create();
-    request.setCollectionName(collectionName);
-    request.setConfigName(ViewerSafeConstants.SOLR_CONFIGSET_TABLE);
-    request.setNumShards(1);
+    CollectionAdminRequest.Create request = CollectionAdminRequest.createCollection(collectionName,
+      ViewerSafeConstants.SOLR_CONFIGSET_TABLE, 1, 1);
 
     try {
       LOGGER.info("Creating collection for table " + table.getName() + " with id " + table.getUUID());
@@ -306,10 +304,8 @@ public class SolrManager {
 
   private void createSavedSearchesCollection() throws ViewerException {
     // creates saved searches collection, skipping if it is present
-    CollectionAdminRequest.Create request = new CollectionAdminRequest.Create();
-    request.setCollectionName(ViewerSafeConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME);
-    request.setConfigName(ViewerSafeConstants.SOLR_CONFIGSET_SEARCHES);
-    request.setNumShards(1);
+    CollectionAdminRequest.Create request = CollectionAdminRequest.createCollection(
+      ViewerSafeConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME, ViewerSafeConstants.SOLR_CONFIGSET_SEARCHES, 1, 1);
     try {
       NamedList<Object> response = client.request(request);
     } catch (SolrServerException | IOException e) {

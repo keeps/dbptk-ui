@@ -30,8 +30,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.impl.CloudSolrClient;
 import org.apache.solr.client.solrj.impl.InputStreamResponseParser;
+import org.apache.solr.client.solrj.impl.ZkClientClusterStateProvider;
 import org.apache.solr.client.solrj.request.QueryRequest;
 import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.QueryResponse;
@@ -103,7 +103,7 @@ public class SolrUtils {
   }
 
   public static void setupSolrCloudConfigsets(String zkHost) {
-    CloudSolrClient zkClient = null;
+    ZkClientClusterStateProvider zkClient = null;
     JarFile jar = null;
 
     // get resources and copy them to a temporary directory
@@ -113,7 +113,7 @@ public class SolrUtils {
 
     try {
       File jarFile = new File(SolrManager.class.getProtectionDomain().getCodeSource().getLocation().toURI());
-      zkClient = new CloudSolrClient.Builder().withZkHost(zkHost).build();
+      zkClient = new ZkClientClusterStateProvider(zkHost);
 
       // if it is a directory the application in being run from an IDE
       // in that case do not setup (assuming setup is done)
@@ -177,7 +177,7 @@ public class SolrUtils {
     }
   }
 
-  private static void uploadConfig(CloudSolrClient client, Path configPath, String configset) {
+  private static void uploadConfig(ZkClientClusterStateProvider client, Path configPath, String configset) {
     try {
       client.uploadConfig(configPath, configset);
     } catch (IOException e) {
