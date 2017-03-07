@@ -185,9 +185,11 @@
 }
 
 .browseContentFilePreviewPanel .filePreviewToolbar .browseContentBreadcrumb {
-    padding: 5px 20px 5px 20px;
     margin: 0;
     float: left;
+    margin-left: 30px;
+    height: 3.5rem;
+    line-height: 3.5rem;
 }
 
 .browseContentFilePreviewPanel.single .filePreviewToolbar .browseContentBreadcrumb {
@@ -200,6 +202,10 @@
     float: right;
     color: #404142;
     text-decoration: none;
+}
+
+.main .wui-breadcrumbPanel .breadcrumb {
+    font-size: 1.3rem;
 }
 
 .browseContentFilePreviewPanel .filePreviewToolbar .filePreviewToolbarIcons {
@@ -619,21 +625,27 @@
 ************************************************/
 .user-menu {
     float: right;
-    height: 35px;
-    background: none;
+    background-color: #089DE3;
+    box-shadow: 1px -1px 6px black;
 }
 
 .user-menu .gwt-MenuItem {
     line-height: 2.5rem;
-    color: #404142;
+    height: 2.5rem;
+    color: #fff;
 }
 
 .user-menu .gwt-MenuItem-selected {
     line-height: 2.5rem;
+    height: 2.5rem;
     background-color: #5bbeff;
     color: #fff;
 }
 
 .main .wui-breadcrumbPanel .breadcrumb-last {
     max-width: 200px;
+}
+
+.gwt-MenuBar .gwt-MenuItem {
+    font-size: 1.3rem;
 }
