@@ -100,6 +100,10 @@ public class MainPanel extends Composite {
     reSetHeader(currentHistoryPath);
     if (currentHistoryPath.isEmpty()) {
       // #
+      HistoryManager.gotoHome();
+
+    } else if (HistoryManager.ROUTE_HOME.equals(currentHistoryPath.get(0))) {
+      // #home
       setContent(new RightPanelLoader() {
         @Override
         public RightPanel load(ViewerDatabase database) {

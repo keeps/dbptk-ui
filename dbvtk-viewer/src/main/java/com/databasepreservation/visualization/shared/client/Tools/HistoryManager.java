@@ -11,6 +11,7 @@ import com.google.gwt.user.client.Window;
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class HistoryManager {
+  public static final String ROUTE_HOME = "home";
   public static final String ROUTE_LOGIN = "login";
   public static final String ROUTE_DATABASE = "database";
   public static final String ROUTE_DATABASE_USERS = "users";
@@ -34,7 +35,7 @@ public class HistoryManager {
   public static final String HISTORY_SEP_ESCAPE = "%2F";
 
   public static void gotoRoot() {
-    newHistory(new ArrayList<String>());
+    newHistory(Arrays.asList(ROUTE_HOME));
   }
 
   public static void returnFromLogin() {
