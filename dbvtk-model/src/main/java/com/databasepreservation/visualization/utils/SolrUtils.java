@@ -214,7 +214,6 @@ public class SolrUtils {
     return ret;
   }
 
-  // TODO: Handle Viewer datatypes
   private static <T> String getIndexName(Class<T> resultClass) throws GenericException {
     String indexName = null;
     if (resultClass.equals(ViewerDatabase.class)) {
@@ -227,6 +226,18 @@ public class SolrUtils {
       throw new GenericException("Cannot find class index name: " + resultClass.getName());
     }
     return indexName;
+  }
+
+  private static <T> String getHumanFriendlyName(Class<T> resultClass) throws GenericException {
+    String humanFriendlyName = "unknown";
+    if (resultClass.equals(ViewerDatabase.class)) {
+      humanFriendlyName = "database";
+    } else if (resultClass.equals(SavedSearch.class)) {
+      humanFriendlyName = "saved search";
+    } else if (resultClass.equals(ViewerRow.class)) {
+      humanFriendlyName = "row";
+    }
+    return humanFriendlyName;
   }
 
   public static <T extends Serializable> IndexResult<T> find(SolrClient index, Class<T> classToRetrieve, Filter filter,
@@ -470,10 +481,16 @@ public class SolrUtils {
       if (doc != null) {
         ret = solrDocumentTo(classToRetrieve, doc);
       } else {
-        throw new NotFoundException("Could not find document " + id);
+        throw new NotFoundException("Could not find " + getHumanFriendlyName(classToRetrieve) + " " + id);
       }
-    } catch (SolrServerException | SolrException | IOException e) {
+    } catch (SolrServerException | IOException e) {
       throw new GenericException("Could not retrieve " + classToRetrieve.getName() + " from index", e);
+    } catch (SolrException e) {
+      if (e.code() == 404) {
+        throw new NotFoundException(getHumanFriendlyName(classToRetrieve) + " not found.", e);
+      } else {
+        throw new GenericException("Could not retrieve " + classToRetrieve.getName() + " from index", e);
+      }
     }
     return ret;
   }
@@ -486,10 +503,16 @@ public class SolrUtils {
       if (doc != null) {
         ret = solrDocumentTo(classToRetrieve, doc);
       } else {
-        throw new NotFoundException("Could not find document " + rowUUID);
+        throw new NotFoundException("Could not find " + getHumanFriendlyName(classToRetrieve) + " " + rowUUID);
       }
-    } catch (SolrServerException | SolrException | IOException e) {
+    } catch (SolrServerException | IOException e) {
       throw new GenericException("Could not retrieve " + classToRetrieve.getName() + " from index", e);
+    } catch (SolrException e) {
+      if (e.code() == 404) {
+        throw new NotFoundException(getHumanFriendlyName(classToRetrieve) + " not found.", e);
+      } else {
+        throw new GenericException("Could not retrieve " + classToRetrieve.getName() + " from index", e);
+      }
     }
     return ret;
   }
