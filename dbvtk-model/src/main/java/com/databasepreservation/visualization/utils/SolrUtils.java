@@ -487,7 +487,7 @@ public class SolrUtils {
       throw new GenericException("Could not retrieve " + classToRetrieve.getName() + " from index", e);
     } catch (SolrException e) {
       if (e.code() == 404) {
-        throw new NotFoundException(getHumanFriendlyName(classToRetrieve) + " not found.", e);
+        throw new NotFoundException("Could not find " + getHumanFriendlyName(classToRetrieve) + " " + id);
       } else {
         throw new GenericException("Could not retrieve " + classToRetrieve.getName() + " from index", e);
       }
@@ -509,7 +509,7 @@ public class SolrUtils {
       throw new GenericException("Could not retrieve " + classToRetrieve.getName() + " from index", e);
     } catch (SolrException e) {
       if (e.code() == 404) {
-        throw new NotFoundException(getHumanFriendlyName(classToRetrieve) + " not found.", e);
+        throw new NotFoundException("Could not find " + getHumanFriendlyName(classToRetrieve) + " " + rowUUID);
       } else {
         throw new GenericException("Could not retrieve " + classToRetrieve.getName() + " from index", e);
       }
