@@ -342,8 +342,6 @@ public interface ClientMessages extends Messages {
 
   String databaseListing();
 
-  String usersAndPermissions();
-
   String of();
 
   String ofOver();
