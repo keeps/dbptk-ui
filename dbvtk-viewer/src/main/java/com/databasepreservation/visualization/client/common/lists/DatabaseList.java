@@ -37,6 +37,7 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
 
   private Column<ViewerDatabase, SafeHtml> levelColumn;
   private Column<ViewerDatabase, SafeHtml> nameColumn;
+  private Column<ViewerDatabase, SafeHtml> statusColumn;
   private Column<ViewerDatabase, SafeHtml> archivalDateColumn;
   private Column<ViewerDatabase, SafeHtml> dataOriginTimespan;
   private Column<ViewerDatabase, SafeHtml> shortID;
@@ -48,6 +49,7 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
 
   public DatabaseList(Filter filter, Facets facets, String summary, boolean selectable, boolean exportable) {
     super(filter, facets, summary, selectable, exportable);
+    autoUpdate(10000);
   }
 
   @Override
@@ -55,22 +57,24 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
     nameColumn = new TooltipDatabaseColumn() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
-        return database != null ? SafeHtmlUtils.fromString(database.getMetadata().getName()) : null;
+        return database != null && database.getMetadata() != null ? SafeHtmlUtils.fromString(database.getMetadata()
+          .getName()) : SafeHtmlUtils.fromString("unknown");
       }
     };
 
     archivalDateColumn = new TooltipDatabaseColumn() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
-        return database != null ? SafeHtmlUtils.fromString(database.getMetadata().getArchivalDate().substring(0, 10))
-          : null;
+        return database != null && database.getMetadata() != null ? SafeHtmlUtils.fromString(database.getMetadata()
+          .getArchivalDate().substring(0, 10)) : null;
       }
     };
 
     dataOriginTimespan = new TooltipDatabaseColumn() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
-        return database != null ? SafeHtmlUtils.fromString(database.getMetadata().getDataOriginTimespan()) : null;
+        return database != null && database.getMetadata() != null ? SafeHtmlUtils.fromString(database.getMetadata()
+          .getDataOriginTimespan()) : null;
       }
     };
 
@@ -81,10 +85,18 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
       }
     };
 
+    statusColumn = new TooltipDatabaseColumn() {
+      @Override
+      public SafeHtml getValue(ViewerDatabase database) {
+        return database != null ? SafeHtmlUtils.fromString(database.getStatus().toString()) : null;
+      }
+    };
+
     description = new TooltipDatabaseColumn() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
-        return database != null ? SafeHtmlUtils.fromString(database.getMetadata().getDescription()) : null;
+        return database != null && database.getMetadata() != null ? SafeHtmlUtils.fromString(database.getMetadata()
+          .getDescription()) : null;
       }
     };
 
@@ -97,6 +109,7 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
     addColumn(archivalDateColumn, messages.siardMetadata_archivalDate(), true, false, 20);
     addColumn(dataOriginTimespan, messages.siardMetadata_dataOriginTimeSpan(), true, false, 20);
     addColumn(shortID, messages.uniqueID(), true, false, 20);
+    addColumn(statusColumn, messages.databaseStatus(), true, false, 20);
     addColumn(description, messages.description(), true, false, 35);
 
     Label emptyInfo = new Label(messages.noItemsToDisplay());
@@ -153,5 +166,11 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
         sb.appendHtmlConstant("</div");
       }
     }
+  }
+
+  @Override
+  protected void onAttach() {
+    super.onAttach();
+    refresh();
   }
 }

@@ -36,6 +36,8 @@ public class FontAwesomeIconManager {
   public static final String BLOB = "file";
   public static final String USER = "user";
   public static final String GLOBE = "globe";
+  public static final String UPLOADS = "files-o";
+  public static final String NEW_UPLOAD = "upload";
 
   public static String getTag(String icon) {
     return "<i class=\"fa fa-" + icon + "\"></i>";

@@ -52,6 +52,42 @@ public class BreadcrumbManager {
     return items;
   }
 
+  public static List<BreadcrumbItem> forUploads() {
+    List<BreadcrumbItem> items = new ArrayList<>();
+    items.add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager
+      .getTag(FontAwesomeIconManager.UPLOADS) + SafeHtmlUtils.htmlEscape(" " + "Uploads")), new Command() {
+      @Override
+      public void execute() {
+        HistoryManager.gotoDatabaseList();
+      }
+    }));
+    return items;
+  }
+
+  public static List<BreadcrumbItem> forNewUpload() {
+    List<BreadcrumbItem> items = forUploads();
+    items.add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager
+      .getTag(FontAwesomeIconManager.NEW_UPLOAD) + SafeHtmlUtils.htmlEscape(" " + messages.newUpload())), new Command() {
+      @Override
+      public void execute() {
+        HistoryManager.gotoNewUpload();
+      }
+    }));
+    return items;
+  }
+
+  public static List<BreadcrumbItem> forUpload(final String databaseUUID) {
+    List<BreadcrumbItem> items = forUploads();
+    items.add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager
+      .getTag(FontAwesomeIconManager.NEW_UPLOAD) + SafeHtmlUtils.htmlEscape(" " + messages.uploadedSIARD())), new Command() {
+      @Override
+      public void execute() {
+        HistoryManager.gotoUpload(databaseUUID);
+      }
+    }));
+    return items;
+  }
+
   public static List<BreadcrumbItem> forDatabases() {
     List<BreadcrumbItem> items = new ArrayList<>();
     items.add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager

@@ -45,60 +45,61 @@
     that avoids logging every request
 -->
 
-<schema name="databases" version="1.5">
+<schema name="databases" version="1.6">
     <!-- attribute "name" is the name of this schema and is only used for display purposes.
-         version="x.y" is Solr's version number for the schema syntax and
-         semantics.  It should not normally be changed by applications.
+       version="x.y" is Solr's version number for the schema syntax and
+       semantics.  It should not normally be changed by applications.
 
-         1.0: multiValued attribute did not exist, all fields are multiValued
-              by nature
-         1.1: multiValued attribute introduced, false by default
-         1.2: omitTermFreqAndPositions attribute introduced, true by default
-              except for text fields.
-         1.3: removed optional field compress feature
-         1.4: autoGeneratePhraseQueries attribute introduced to drive QueryParser
-              behavior when a single string produces multiple tokens.  Defaults
-              to off for version >= 1.4
-         1.5: omitNorms defaults to true for primitive field types
-              (int, float, boolean, string...)
-       -->
+       1.0: multiValued attribute did not exist, all fields are multiValued
+            by nature
+       1.1: multiValued attribute introduced, false by default
+       1.2: omitTermFreqAndPositions attribute introduced, true by default
+            except for text fields.
+       1.3: removed optional field compress feature
+       1.4: autoGeneratePhraseQueries attribute introduced to drive QueryParser
+            behavior when a single string produces multiple tokens.  Defaults
+            to off for version >= 1.4
+       1.5: omitNorms defaults to true for primitive field types
+            (int, float, boolean, string...)
+       1.6: useDocValuesAsStored defaults to true.
+    -->
+
+
 
 
     <!-- Valid attributes for fields:
-      name: mandatory - the name for the field
-      type: mandatory - the name of a field type from the
-        <types> fieldType section
-      indexed: true if this field should be indexed (searchable or sortable)
-      stored: true if this field should be retrievable
-      docValues: true if this field should have doc values. Doc values are
-        useful for faceting, grouping, sorting and function queries. Although not
-        required, doc values will make the index faster to load, more
-        NRT-friendly and more memory-efficient. They however come with some
-        limitations: they are currently only supported by StrField, UUIDField
-        and all Trie*Fields, and depending on the field type, they might
-        require the field to be single-valued, be required or have a default
-        value (check the documentation of the field type you're interested in
-        for more information)
-      multiValued: true if this field may contain multiple values per document
-      omitNorms: (expert) set to true to omit the norms associated with
-        this field (this disables length normalization and index-time
-        boosting for the field, and saves some memory).  Only full-text
-        fields or fields that need an index-time boost need norms.
-        Norms are omitted for primitive (non-analyzed) types by default.
-      termVectors: [false] set to true to store the term vector for a
-        given field.
-        When using MoreLikeThis, fields used for similarity should be
-        stored for best performance.
-      termPositions: Store position information with the term vector.
-        This will increase storage costs.
-      termOffsets: Store offset information with the term vector. This
-        will increase storage costs.
-      termPayloads: Store payload information with the term vector. This
-        will increase storage costs.
-      required: The field is required.  It will throw an error if the
-        value does not exist
-      default: a value that should be used if no value is specified
-        when adding a document.
+     name: mandatory - the name for the field
+     type: mandatory - the name of a field type from the
+       fieldTypes section
+     indexed: true if this field should be indexed (searchable or sortable)
+     stored: true if this field should be retrievable
+     docValues: true if this field should have doc values. Doc values are
+       useful for faceting, grouping, sorting and function queries. Although not
+       required, doc values will make the index faster to load, more
+       NRT-friendly and more memory-efficient. They however come with some
+       limitations: they are currently only supported by StrField, UUIDField
+       and all Trie*Fields, and depending on the field type, they might
+       require the field to be single-valued, be required or have a default
+       value (check the documentation of the field type you're interested in
+       for more information)
+     multiValued: true if this field may contain multiple values per document
+     omitNorms: (expert) set to true to omit the norms associated with
+       this field (this disables length normalization and index-time
+       boosting for the field, and saves some memory).  Only full-text
+       fields or fields that need an index-time boost need norms.
+       Norms are omitted for primitive (non-analyzed) types by default.
+     termVectors: [false] set to true to store the term vector for a
+       given field.
+       When using MoreLikeThis, fields used for similarity should be
+       stored for best performance.
+     termPositions: Store position information with the term vector.
+       This will increase storage costs.
+     termOffsets: Store offset information with the term vector. This
+       will increase storage costs.
+     required: The field is required.  It will throw an error if the
+       value does not exist
+     default: a value that should be used if no value is specified
+       when adding a document.
     -->
 
     <!-- field names should consist of alphanumeric or underscore characters only and
@@ -108,77 +109,82 @@
        trailing underscores (e.g. _version_) are reserved.
     -->
 
-    <!-- If you remove this field, you must _also_ disable the update log in solrconfig.xml
-       or Solr won't start. _version_ and update log are required for SolrCloud
+    <!-- field names should consist of alphanumeric or underscore characters only and
+      not start with a digit.  This is not currently strictly enforced,
+      but other field names will not have first class support from all components
+      and back compatibility is not guaranteed.  Names with both leading and
+      trailing underscores (e.g. _version_) are reserved.
     -->
-    <field name="_version_" type="long" indexed="true" stored="true"/>
 
-    <!-- points to the root document of a block of nested documents. Required for nested
-       document support, may be removed otherwise
+    <!-- In this data_driven_schema_configs configset, only three fields are pre-declared:
+         id, _version_, and _text_.  All other fields will be type guessed and added via the
+         "add-unknown-fields-to-the-schema" update request processor chain declared
+         in solrconfig.xml.
+
+         Note that many dynamic fields are also defined - you can use them to specify a
+         field's type via field naming conventions - see below.
+
+         WARNING: The _text_ catch-all field will significantly increase your index size.
+         If you don't need it, consider removing it and the corresponding copyField directive.
     -->
-    <field name="_root_" type="string" indexed="true" stored="false"/>
+    <field name="id" type="string" indexed="true" stored="true" required="true" multiValued="false" />
+    <!-- doc values are enabled by default for primitive types such as long so we don't index the version field  -->
+    <field name="_version_" type="long" indexed="true" stored="true" required="true" docValues="true" />
+    <field name="_root_" type="string" indexed="true" stored="false" docValues="false" />
 
-    <!-- Only remove the "id" field if you have a very good reason to. While not strictly
-      required, it is highly recommended. A <uniqueKey> is present in almost all Solr
-      installations. See the <uniqueKey> declaration below where <uniqueKey> is set to "id".
-      Do NOT change the type and apply index-time analysis to the <uniqueKey> as it will likely
-      make routing in SolrCloud and document replacement in general fail. Limited _query_ time
-      analysis is possible as long as the indexing process is guaranteed to index the term
-      in a compatible way. Any analysis applied to the <uniqueKey> should _not_ produce multiple
-      tokens
-    -->
-    <field name="id" type="string" indexed="true" stored="true" required="true" multiValued="false"/>
-    <field name="metadata" type="string" indexed="false" stored="true" required="true" multiValued="false"/>
+    <field name="status" type="string" indexed="true" stored="true" required="true" multiValued="false"/>
+    <field name="metadata" type="string" indexed="false" stored="true" required="false" multiValued="false"/>
 
-
-    <!--
-      Some fields such as popularity and manu_exact could be modified to
-      leverage doc values:
-      <field name="popularity" type="int" indexed="true" stored="true" docValues="true" />
-      <field name="manu_exact" type="string" indexed="false" stored="false" docValues="true" />
-      <field name="cat" type="string" indexed="true" stored="true" docValues="true" multiValued="true"/>
-
-
-      Although it would make indexing slightly slower and the index bigger, it
-      would also make the index faster to load, more memory-efficient and more
-      NRT-friendly.
-      -->
+    <!-- ingesting status reporting helpers -->
+    <field name="total_rows" type="long" indexed="true" stored="true" required="false" multiValued="false"/>
+    <field name="total_tables" type="long" indexed="true" stored="true" required="false" multiValued="false"/>
+    <field name="total_schemas" type="long" indexed="true" stored="true" required="false" multiValued="false"/>
+    <field name="ingested_rows" type="long" indexed="true" stored="true" required="false" multiValued="false"/>
+    <field name="ingested_tables" type="long" indexed="true" stored="true" required="false" multiValued="false"/>
+    <field name="ingested_schemas" type="long" indexed="true" stored="true" required="false" multiValued="false"/>
+    <field name="current_table_name" type="string" indexed="true" stored="true" required="false" multiValued="false"/>
+    <field name="current_schema_name" type="string" indexed="true" stored="true" required="false" multiValued="false"/>
 
     <!-- Dynamic field definitions allow using convention over configuration
-        for fields via the specification of patterns to match field names.
-        EXAMPLE:  name="*_i" will match any field ending in _i (like myid_i, z_i)
-        RESTRICTION: the glob-like pattern in the name attribute must have
-        a "*" only at the start or the end.  -->
+       for fields via the specification of patterns to match field names.
+       EXAMPLE:  name="*_i" will match any field ending in _i (like myid_i, z_i)
+       RESTRICTION: the glob-like pattern in the name attribute must have
+       a "*" only at the start or the end.  -->
 
     <dynamicField name="*_i"  type="int"    indexed="true"  stored="true"/>
-    <dynamicField name="*_is" type="int"    indexed="true"  stored="true"  multiValued="true"/>
+    <dynamicField name="*_is" type="ints"    indexed="true"  stored="true"/>
     <dynamicField name="*_s"  type="string"  indexed="true"  stored="true" />
-    <dynamicField name="*_ss" type="string"  indexed="true"  stored="true" multiValued="true"/>
+    <dynamicField name="*_ss" type="strings"  indexed="true"  stored="true"/>
     <dynamicField name="*_l"  type="long"   indexed="true"  stored="true"/>
-    <dynamicField name="*_ls" type="long"   indexed="true"  stored="true"  multiValued="true"/>
-    <dynamicField name="*_t"  type="text_general"    indexed="true"  stored="true"/>
-    <dynamicField name="*_txt" type="text_general"   indexed="true"  stored="true" multiValued="true"/>
-    <dynamicField name="*_en"  type="text_en"    indexed="true"  stored="true" multiValued="true"/>
+    <dynamicField name="*_ls" type="longs"   indexed="true"  stored="true"/>
+    <dynamicField name="*_t"   type="text_general" indexed="true" stored="true" docValues="false"/>
+    <dynamicField name="*_txt" type="text_general" indexed="true" stored="true" docValues="false"/>
     <dynamicField name="*_b"  type="boolean" indexed="true" stored="true"/>
-    <dynamicField name="*_bs" type="boolean" indexed="true" stored="true"  multiValued="true"/>
+    <dynamicField name="*_bs" type="booleans" indexed="true" stored="true"/>
     <dynamicField name="*_f"  type="float"  indexed="true"  stored="true"/>
-    <dynamicField name="*_fs" type="float"  indexed="true"  stored="true"  multiValued="true"/>
+    <dynamicField name="*_fs" type="floats"  indexed="true"  stored="true"/>
     <dynamicField name="*_d"  type="double" indexed="true"  stored="true"/>
-    <dynamicField name="*_ds" type="double" indexed="true"  stored="true"  multiValued="true"/>
+    <dynamicField name="*_ds" type="doubles" indexed="true"  stored="true"/>
 
     <!-- Type used to index the lat and lon components for the "location" FieldType -->
-    <dynamicField name="*_coordinate"  type="tdouble" indexed="true"  stored="false" />
+    <dynamicField name="*_coordinate"  type="tdouble" indexed="true"  stored="false" useDocValuesAsStored="false" />
 
     <dynamicField name="*_dt"  type="date"    indexed="true"  stored="true"/>
     <dynamicField name="*_dts" type="date"    indexed="true"  stored="true" multiValued="true"/>
     <dynamicField name="*_p"  type="location" indexed="true" stored="true"/>
+    <dynamicField name="*_srpt"  type="location_rpt" indexed="true" stored="true"/>
 
     <!-- some trie-coded dynamic fields for faster range queries -->
     <dynamicField name="*_ti" type="tint"    indexed="true"  stored="true"/>
+    <dynamicField name="*_tis" type="tints"    indexed="true"  stored="true"/>
     <dynamicField name="*_tl" type="tlong"   indexed="true"  stored="true"/>
+    <dynamicField name="*_tls" type="tlongs"   indexed="true"  stored="true"/>
     <dynamicField name="*_tf" type="tfloat"  indexed="true"  stored="true"/>
+    <dynamicField name="*_tfs" type="tfloats"  indexed="true"  stored="true"/>
     <dynamicField name="*_td" type="tdouble" indexed="true"  stored="true"/>
+    <dynamicField name="*_tds" type="tdoubles" indexed="true"  stored="true"/>
     <dynamicField name="*_tdt" type="tdate"  indexed="true"  stored="true"/>
+    <dynamicField name="*_tdts" type="tdates"  indexed="true"  stored="true"/>
 
     <dynamicField name="*_c"   type="currency" indexed="true"  stored="true"/>
 
@@ -188,17 +194,17 @@
     <dynamicField name="random_*" type="random" />
 
     <!-- uncomment the following to ignore any fields that don't already match an existing
-         field name or dynamic field, rather than reporting them as an error.
-         alternately, change the type="ignored" to some other type e.g. "text" if you want
-         unknown fields indexed and/or stored by default -->
+        field name or dynamic field, rather than reporting them as an error.
+        alternately, change the type="ignored" to some other type e.g. "text" if you want
+        unknown fields indexed and/or stored by default
+
+        NB: use of "*" dynamic fields will disable field type guessing and adding
+        unknown fields to the schema. -->
     <!--dynamicField name="*" type="ignored" multiValued="true" /-->
 
-
-
-
     <!-- Field to use to determine and enforce document uniqueness.
-         Unless this field is marked with required="false", it will be a required field
-      -->
+      Unless this field is marked with required="false", it will be a required field
+    -->
     <uniqueKey>id</uniqueKey>
 
 
@@ -214,10 +220,13 @@
        It supports doc values but in that case the field needs to be
        single-valued and either required or have a default value.
       -->
-    <fieldType name="string" class="solr.StrField" sortMissingLast="true" />
+    <fieldType name="string" class="solr.StrField" docValues="false" />
+    <fieldType name="strings" class="solr.StrField" multiValued="true" docValues="false" />
 
     <!-- boolean type: "true" or "false" -->
-    <fieldType name="boolean" class="solr.BoolField" sortMissingLast="true"/>
+    <fieldType name="boolean" class="solr.BoolField"/>
+
+    <fieldType name="booleans" class="solr.BoolField" multiValued="true"/>
 
     <!-- sortMissingLast and sortMissingFirst attributes are optional attributes are
          currently supported on types that are sorted internally as strings
@@ -241,10 +250,15 @@
       These fields support doc values, but they require the field to be
       single-valued and either be required or have a default value.
     -->
-    <fieldType name="int" class="solr.TrieIntField" precisionStep="0" positionIncrementGap="0"/>
-    <fieldType name="float" class="solr.TrieFloatField" precisionStep="0" positionIncrementGap="0"/>
-    <fieldType name="long" class="solr.TrieLongField" precisionStep="0" positionIncrementGap="0"/>
-    <fieldType name="double" class="solr.TrieDoubleField" precisionStep="0" positionIncrementGap="0"/>
+    <fieldType name="int" class="solr.TrieIntField" docValues="true" precisionStep="0" positionIncrementGap="0"/>
+    <fieldType name="float" class="solr.TrieFloatField" docValues="true" precisionStep="0" positionIncrementGap="0"/>
+    <fieldType name="long" class="solr.TrieLongField" docValues="true" precisionStep="0" positionIncrementGap="0"/>
+    <fieldType name="double" class="solr.TrieDoubleField" docValues="true" precisionStep="0" positionIncrementGap="0"/>
+
+    <fieldType name="ints" class="solr.TrieIntField" docValues="true" precisionStep="0" positionIncrementGap="0" multiValued="true"/>
+    <fieldType name="floats" class="solr.TrieFloatField" docValues="true" precisionStep="0" positionIncrementGap="0" multiValued="true"/>
+    <fieldType name="longs" class="solr.TrieLongField" docValues="true" precisionStep="0" positionIncrementGap="0" multiValued="true"/>
+    <fieldType name="doubles" class="solr.TrieDoubleField" docValues="true" precisionStep="0" positionIncrementGap="0" multiValued="true"/>
 
     <!--
      Numeric field types that index each value at various levels of precision
@@ -256,14 +270,19 @@
      indexed per value, slightly larger index size, and faster range queries.
      A precisionStep of 0 disables indexing at different precision levels.
     -->
-    <fieldType name="tint" class="solr.TrieIntField" precisionStep="8" positionIncrementGap="0"/>
-    <fieldType name="tfloat" class="solr.TrieFloatField" precisionStep="8" positionIncrementGap="0"/>
-    <fieldType name="tlong" class="solr.TrieLongField" precisionStep="8" positionIncrementGap="0"/>
-    <fieldType name="tdouble" class="solr.TrieDoubleField" precisionStep="8" positionIncrementGap="0"/>
+    <fieldType name="tint" class="solr.TrieIntField" docValues="true" precisionStep="8" positionIncrementGap="0"/>
+    <fieldType name="tfloat" class="solr.TrieFloatField" docValues="true" precisionStep="8" positionIncrementGap="0"/>
+    <fieldType name="tlong" class="solr.TrieLongField" docValues="true" precisionStep="8" positionIncrementGap="0"/>
+    <fieldType name="tdouble" class="solr.TrieDoubleField" docValues="true" precisionStep="8" positionIncrementGap="0"/>
+
+    <fieldType name="tints" class="solr.TrieIntField" docValues="true" precisionStep="8" positionIncrementGap="0" multiValued="true"/>
+    <fieldType name="tfloats" class="solr.TrieFloatField" docValues="true" precisionStep="8" positionIncrementGap="0" multiValued="true"/>
+    <fieldType name="tlongs" class="solr.TrieLongField" docValues="true" precisionStep="8" positionIncrementGap="0" multiValued="true"/>
+    <fieldType name="tdoubles" class="solr.TrieDoubleField" docValues="true" precisionStep="8" positionIncrementGap="0" multiValued="true"/>
 
     <!-- The format for this date field is of the form 1995-12-31T23:59:59Z, and
          is a more restricted form of the canonical representation of dateTime
-         http://www.w3.org/TR/xmlschema-2/#dateTime    
+         http://www.w3.org/TR/xmlschema-2/#dateTime
          The trailing "Z" designates UTC time and is mandatory.
          Optional fractional seconds are allowed: 1995-12-31T23:59:59.999Z
          All other components are mandatory.
@@ -278,15 +297,18 @@
                NOW/DAY+6MONTHS+3DAYS
                   ... 6 months and 3 days in the future from the start of
                       the current day
-                      
+
          Consult the TrieDateField javadocs for more information.
 
          Note: For faster range queries, consider the tdate type
       -->
-    <fieldType name="date" class="solr.TrieDateField" precisionStep="0" positionIncrementGap="0"/>
+    <fieldType name="date" class="solr.TrieDateField" docValues="true" precisionStep="0" positionIncrementGap="0"/>
+    <fieldType name="dates" class="solr.TrieDateField" docValues="true" precisionStep="0" positionIncrementGap="0" multiValued="true"/>
 
     <!-- A Trie based date field for faster date range queries and date faceting. -->
-    <fieldType name="tdate" class="solr.TrieDateField" precisionStep="6" positionIncrementGap="0"/>
+    <fieldType name="tdate" class="solr.TrieDateField" docValues="true" precisionStep="6" positionIncrementGap="0"/>
+
+    <fieldType name="tdates" class="solr.TrieDateField" docValues="true" precisionStep="6" positionIncrementGap="0" multiValued="true"/>
 
 
     <!--Binary data type. The data should be sent/retrieved in as Base64 encoded Strings -->
@@ -294,11 +316,11 @@
 
     <!-- The "RandomSortField" is not used to store or search any
          data.  You can declare fields of this type it in your schema
-         to generate pseudo-random orderings of your docs for sorting 
+         to generate pseudo-random orderings of your docs for sorting
          or function purposes.  The ordering is generated based on the field
          name and the version of the index. As long as the index version
          remains unchanged, and the same field name is reused,
-         the ordering of the docs will be consistent.  
+         the ordering of the docs will be consistent.
          If you want different psuedo-random orderings of documents,
          for the same version of the index, use a dynamicField and
          change the field name in the request.
@@ -326,6 +348,7 @@
     -->
 
     <!-- A text field that only splits on whitespace for exact matching of words -->
+    <dynamicField name="*_ws" type="text_ws"  indexed="true"  stored="true"/>
     <fieldType name="text_ws" class="solr.TextField" positionIncrementGap="100">
         <analyzer>
             <tokenizer class="solr.WhitespaceTokenizerFactory"/>
@@ -494,7 +517,7 @@
          With various TokenFilterFactories to produce a sortable field
          that does not include some properties of the source text
       -->
-    <fieldType name="alphaOnlySort" class="solr.TextField" sortMissingLast="true" omitNorms="true">
+    <fieldType name="alphaOnlySort" class="solr.TextField" omitNorms="true">
         <analyzer>
             <!-- KeywordTokenizer does no actual tokenizing, so the entire
                  input string is preserved as a single token
@@ -583,7 +606,7 @@
 
     <!-- since fields of this type are by default not stored or indexed,
          any data added to them will be ignored outright.  -->
-    <fieldType name="ignored" stored="false" indexed="false" multiValued="true" class="solr.StrField" />
+    <fieldType name="ignored" stored="false" indexed="false" docValues="false" multiValued="true" class="solr.StrField" />
 
     <!-- This point type indexes the coordinates as separate fields (subFields)
       If subFieldType is defined, it references a type, and a dynamic field

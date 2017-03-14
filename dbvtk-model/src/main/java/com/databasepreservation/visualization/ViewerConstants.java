@@ -24,6 +24,7 @@ public class ViewerConstants {
   public static final String VIEWER_THEME_FOLDER = "theme";
   public static final String VIEWER_LOG_FOLDER = "log";
   public static final String VIEWER_LOBS_FOLDER = "lobs";
+  public static final String VIEWER_UPLOADS_FOLDER = "uploads";
 
   public final static String MEDIA_TYPE_APPLICATION_OCTET_STREAM = "application/octet-stream";
   public final static String MEDIA_TYPE_TEXT_HTML = "text/html";

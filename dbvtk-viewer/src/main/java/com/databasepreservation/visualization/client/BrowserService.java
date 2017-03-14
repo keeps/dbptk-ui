@@ -91,4 +91,9 @@ public interface BrowserService extends RemoteService {
   User getAuthenticatedUser() throws RODAException;
 
   User login(String username, String password) throws AuthenticationDeniedException, GenericException;
+
+  String uploadSIARD(String path) throws GenericException;
+
+  ViewerDatabase uploadSIARDStatus(String databaseUUID)
+    throws GenericException, AuthorizationDeniedException, NotFoundException;
 }

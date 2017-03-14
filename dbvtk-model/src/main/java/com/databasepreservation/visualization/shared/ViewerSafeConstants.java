@@ -35,7 +35,16 @@ public class ViewerSafeConstants {
    * DATABASE FIELDS
    */
   public static final String SOLR_DATABASE_ID = "id";
+  public static final String SOLR_DATABASE_STATUS = "status";
   public static final String SOLR_DATABASE_METADATA = "metadata";
+  public static final String SOLR_DATABASE_TOTAL_ROWS = "total_rows";
+  public static final String SOLR_DATABASE_TOTAL_TABLES = "total_tables";
+  public static final String SOLR_DATABASE_TOTAL_SCHEMAS = "total_schemas";
+  public static final String SOLR_DATABASE_INGESTED_ROWS = "ingested_rows";
+  public static final String SOLR_DATABASE_INGESTED_TABLES = "ingested_tables";
+  public static final String SOLR_DATABASE_INGESTED_SCHEMAS = "ingested_schemas";
+  public static final String SOLR_DATABASE_CURRENT_TABLE_NAME = "current_table_name";
+  public static final String SOLR_DATABASE_CURRENT_SCHEMA_NAME = "current_schema_name";
 
   /*
    * SEARCHES FIELDS

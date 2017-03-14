@@ -23,6 +23,14 @@
             <artifactId>dbvtk-model</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.databasepreservation</groupId>
+            <artifactId>dbptk-module-siard</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.databasepreservation</groupId>
+            <artifactId>dbptk-module-solr</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.databasepreservation.visualization</groupId>
             <artifactId>dbvtk-model</artifactId>
             <classifier>sources</classifier>

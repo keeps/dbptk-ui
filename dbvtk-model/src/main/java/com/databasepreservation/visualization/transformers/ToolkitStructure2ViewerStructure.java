@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -115,6 +116,7 @@ public class ToolkitStructure2ViewerStructure {
     } else {
       result.setUuid(databaseUUID);
     }
+    result.setStatus(ViewerDatabase.Status.INGESTING);
     result.setMetadata(getMetadata(result, structure));
     return result;
   }

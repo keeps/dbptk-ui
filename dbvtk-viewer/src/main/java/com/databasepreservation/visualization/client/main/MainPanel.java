@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.visualization.client.browse.UploadPanel;
 import org.roda.core.data.v2.index.IsIndexed;
 
 import com.databasepreservation.visualization.client.BrowserService;
@@ -18,6 +19,7 @@ import com.databasepreservation.visualization.client.browse.DatabaseUsersPanel;
 import com.databasepreservation.visualization.client.browse.ForeignKeyPanel;
 import com.databasepreservation.visualization.client.browse.HomePanel;
 import com.databasepreservation.visualization.client.browse.LoginPanel;
+import com.databasepreservation.visualization.client.browse.NewUploadPanel;
 import com.databasepreservation.visualization.client.browse.ReferencesPanel;
 import com.databasepreservation.visualization.client.browse.RightPanel;
 import com.databasepreservation.visualization.client.browse.RowPanel;
@@ -87,6 +89,7 @@ public class MainPanel extends Composite {
   }
 
   private void setContent(String databaseUUID, RightPanelLoader rightPanelLoader) {
+    GWT.log("setContent, dbuid " + databaseUUID);
     DatabasePanel databasePanel = DatabasePanel.getInstance(databaseUUID);
     contentPanel.setWidget(databasePanel);
     databasePanel.load(rightPanelLoader);
@@ -102,6 +105,32 @@ public class MainPanel extends Composite {
       // #
       HistoryManager.gotoHome();
 
+    } else if (HistoryManager.ROUTE_UPLOADS.equals(currentHistoryPath.get(0))) {
+      // #uploads
+      // #uploads/...
+
+      if (currentHistoryPath.size() == 2) {
+        if (currentHistoryPath.get(1).equals(HistoryManager.ROUTE_UPLOADS_NEW)) {
+          // #uploads/new
+          setContent(new RightPanelLoader() {
+            @Override
+            public RightPanel load(ViewerDatabase database) {
+              return NewUploadPanel.getInstance();
+            }
+          });
+        } else {
+          // #uploads/<uuid>
+          String databaseUUID = currentHistoryPath.get(1);
+          setContent(databaseUUID, new RightPanelLoader() {
+            @Override
+            public RightPanel load(ViewerDatabase database) {
+              return UploadPanel.createInstance(database);
+            }
+          });
+        }
+      } else {
+        HistoryManager.gotoDatabaseList();
+      }
     } else if (HistoryManager.ROUTE_HOME.equals(currentHistoryPath.get(0))) {
       // #home
       setContent(new RightPanelLoader() {

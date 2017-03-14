@@ -2,7 +2,9 @@ package com.databasepreservation.visualization.client;
 
 import java.util.List;
 
+import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.roda.core.data.exceptions.GenericException;
+import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RODAException;
 import org.roda.core.data.exceptions.RequestNotValidException;
 import org.roda.core.data.v2.index.IsIndexed;
@@ -87,7 +89,7 @@ public interface BrowserServiceAsync {
    * @return
    * @throws RODAException
    */
-  public void getAuthenticatedUser(AsyncCallback<User> callback);
+  void getAuthenticatedUser(AsyncCallback<User> callback);
 
   /**
    * Login into RODA Core
@@ -97,5 +99,9 @@ public interface BrowserServiceAsync {
    * @return
    * @throws RODAException
    */
-  public void login(String username, String password, AsyncCallback<User> callback);
+  void login(String username, String password, AsyncCallback<User> callback);
+
+  void uploadSIARD(String path, AsyncCallback<String> async);
+
+  void uploadSIARDStatus(String databaseUUID, AsyncCallback<ViewerDatabase> async);
 }

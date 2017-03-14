@@ -195,8 +195,10 @@ public class DatabasePanel extends Composite {
   }
 
   public void load(RightPanelLoader rightPanelLoader) {
-    if (databaseUUID != null && database == null) {
-      // need to load database, go get it
+    GWT.log("load. uuid: " + databaseUUID + ", database: " + database);
+    if (databaseUUID != null && (database == null || !ViewerDatabase.Status.AVAILABLE.equals(database.getStatus()))) {
+      // need to load database (not present or not available), go get it
+      GWT.log("getting db");
       loadPanelWithDatabase(rightPanelLoader);
     } else {
       loadPanel(rightPanelLoader);
@@ -209,14 +211,18 @@ public class DatabasePanel extends Composite {
         @Override
         public void onSuccess(IsIndexed result) {
           database = (ViewerDatabase) result;
-          sidebar.init(database);
           loadPanel(rightPanelLoader);
         }
       });
   }
 
   private void loadPanel(RightPanelLoader rightPanelLoader) {
+    GWT.log("have db: " + database + "sb.init: " + sidebar.isInitialized());
     RightPanel rightPanel = rightPanelLoader.load(database);
+
+    if (database != null && !sidebar.isInitialized()) {
+      sidebar.init(database);
+    }
 
     if (rightPanel != null) {
       rightPanel.handleBreadcrumb(breadcrumb);

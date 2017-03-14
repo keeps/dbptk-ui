@@ -300,6 +300,8 @@ public interface ClientMessages extends Messages {
 
   String databaseName();
 
+  String databaseStatus();
+
   String uniqueID();
 
   String edit();
@@ -355,4 +357,8 @@ public interface ClientMessages extends Messages {
   String schemaName();
 
   String schemaDescription();
+
+  String newUpload();
+
+  String uploadedSIARD();
 }

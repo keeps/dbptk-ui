@@ -29,6 +29,8 @@ public class HistoryManager {
   public static final String ROUTE_SCHEMA_CHECK_CONSTRAINTS = "constraints";
   public static final String ROUTE_SAVED_SEARCHES = "searches";
   public static final String ROUTE_SAVED_SEARCHES_EDIT = "edit";
+  public static final String ROUTE_UPLOADS = "uploads";
+  public static final String ROUTE_UPLOADS_NEW = "new";
 
   public static final String HISTORY_SEP = "/";
   public static final String HISTORY_SEP_REGEX = "/";
@@ -66,6 +68,14 @@ public class HistoryManager {
 
   public static void gotoHome() {
     gotoRoot();
+  }
+
+  public static void gotoNewUpload() {
+    newHistory(Arrays.asList(ROUTE_UPLOADS, ROUTE_UPLOADS_NEW));
+  }
+
+  public static void gotoUpload(String databaseUUID) {
+    newHistory(Arrays.asList(ROUTE_UPLOADS, databaseUUID));
   }
 
   public static void gotoDatabase(String databaseUUID) {
@@ -250,5 +260,13 @@ public class HistoryManager {
     List<String> params = new ArrayList<>(Arrays.asList(ROUTE_FOREIGN_KEY, database_uuid, table_uuid));
     params.addAll(solrColumnsAndValues);
     return createHistoryToken(params);
+  }
+
+  public static String linkToNewUpload() {
+    return createHistoryToken(Arrays.asList(ROUTE_UPLOADS, ROUTE_UPLOADS_NEW));
+  }
+
+  public static String linkToUpload(String database_uuid){
+    return createHistoryToken(Arrays.asList(ROUTE_UPLOADS, database_uuid));
   }
 }
