@@ -180,9 +180,10 @@ public class RowPanel extends RightPanel {
     }
 
     for (ViewerColumn column : table.getColumns()) {
+      boolean isPrimaryKeyColumn = table.getPrimaryKey() != null
+        && table.getPrimaryKey().getColumnIndexesInViewerTable().contains(column.getColumnIndexInEnclosingTable());
       b.append(getCellHTML(column, colIndexRelatedTo.get(column.getSolrName()),
-        colIndexReferencedBy.get(column.getSolrName()),
-        table.getPrimaryKey().getColumnIndexesInViewerTable().contains(column.getColumnIndexInEnclosingTable())));
+        colIndexReferencedBy.get(column.getSolrName()), isPrimaryKeyColumn));
     }
 
     content.setHTML(b.toSafeHtml());

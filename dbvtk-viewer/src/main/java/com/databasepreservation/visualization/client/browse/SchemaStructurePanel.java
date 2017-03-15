@@ -219,7 +219,7 @@ public class SchemaStructurePanel extends RightPanel {
       new SafeHtmlCell()) {
       @Override
       public SafeHtml getValue(ViewerColumn column) {
-        if (pk.getColumnIndexesInViewerTable().contains(column.getColumnIndexInEnclosingTable())) {
+        if (pk != null && pk.getColumnIndexesInViewerTable().contains(column.getColumnIndexInEnclosingTable())) {
           return SafeHtmlUtils.fromSafeConstant("<i class='fa fa-key' title='" + messages.primaryKey() + "'></i>");
         } else if (columnIndexesWithForeignKeys.contains(column.getColumnIndexInEnclosingTable())) {
           return SafeHtmlUtils.fromSafeConstant("<i class='fa fa-exchange' title='"
