@@ -563,7 +563,7 @@ public class SolrManager {
 
     // add all the fields that will be updated
     for (Pair<String, Object> field : fields) {
-      LOGGER.info("Updating " + field.getFirst() + " to " + field.getSecond());
+      LOGGER.debug("Updating " + field.getFirst() + " to " + field.getSecond());
       doc.addField(field.getFirst(), SolrUtils.asValueUpdate(field.getSecond()));
     }
 

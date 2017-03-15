@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -57,6 +56,7 @@ import com.databasepreservation.utils.XMLUtils;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerCell;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerCheckConstraint;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerColumn;
+import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabaseFromToolkit;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerForeignKey;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerMetadata;
@@ -638,7 +638,7 @@ public class ToolkitStructure2ViewerStructure {
           result.setValue(JodaUtils.xsTimeParse(simpleData).withDate(1970, 1, 1).withZone(DateTimeZone.UTC).toString());
           break;
         default:
-          result.setValue(simpleCell.getSimpleData());
+          result.setValue(removeUnicode(simpleCell.getSimpleData()));
       }
     } else if (!(cell instanceof NullCell)) {
       // nothing to do for null cells
@@ -646,6 +646,16 @@ public class ToolkitStructure2ViewerStructure {
     }
 
     return result;
+  }
+
+  private static String removeUnicode(String string) {
+    // remove any non-ASCII, non-printable characters.
+    // \p{Print} represents a POSIX character class for printable ASCII
+    // characters, while \P{Print} is the complement of that class. With this
+    // expression, all characters that are not printable ASCII are replaced with
+    // the empty string.
+    // source: http://stackoverflow.com/a/11021262/1483200
+    return string.replaceAll("\\P{Print}", "");
   }
 
   /**
