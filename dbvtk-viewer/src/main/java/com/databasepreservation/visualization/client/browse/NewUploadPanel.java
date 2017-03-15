@@ -63,26 +63,37 @@ public class NewUploadPanel extends RightPanel {
 
     // update info & commit
     BrowserService.Util.getInstance().uploadSIARD(textBoxName.getText(), new DefaultAsyncCallback<String>() {
-        @Override
-        public void onFailure(Throwable caught) {
-          // error, don't go anywhere
-//          buttonApply.setEnabled(true);
-//          buttonCancel.setEnabled(true);
-//          super.onFailure(caught);
-        }
+      @Override
+      public void onFailure(Throwable caught) {
+        // error, don't go anywhere
+        // buttonApply.setEnabled(true);
+        // buttonCancel.setEnabled(true);
+        // super.onFailure(caught);
+      }
 
-        @Override
-        public void onSuccess(String newDatabaseUUID) {
-//          buttonApply.setEnabled(true);
-//          buttonCancel.setEnabled(true);
-//
-//          GWT.log("new ID: " + newDatabaseUUID);
-//
-//          HistoryManager.gotoDatabaseList();
-        }
-      });
+      @Override
+      public void onSuccess(String newDatabaseUUID) {
+        // buttonApply.setEnabled(true);
+        // buttonCancel.setEnabled(true);
+        //
+        // GWT.log("new ID: " + newDatabaseUUID);
+        //
+        // HistoryManager.gotoDatabaseList();
+      }
+    });
+    HistoryManager.gotoDatabaseList();
+  }
+
+  @UiHandler("buttonCancel")
+  void handleButtonCancel(ClickEvent e) {
+    HistoryManager.gotoRoot();
+  }
+
+  @Override
+  protected void onDetach() {
+    super.onDetach();
     buttonApply.setEnabled(true);
     buttonCancel.setEnabled(true);
-    HistoryManager.gotoDatabaseList();
+    textBoxName.setText(null);
   }
 }

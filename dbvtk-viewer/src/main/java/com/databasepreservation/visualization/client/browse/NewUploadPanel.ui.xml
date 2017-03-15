@@ -12,11 +12,11 @@
         <g:FlowPanel styleName="wui-user-data" addStyleNames="wrapper skip_padding">
             <g:FlowPanel addStyleNames="row full_width no_padding">
                 <g:FlowPanel addStyleNames="wui-data-panel">
-                    <g:Label addStyleNames="form-label"><ui:text from='{messages.name}' /></g:Label>
+                    <g:Label addStyleNames="form-label"><ui:text from='{messages.newUploadLabel}' /></g:Label>
                     <g:TextBox ui:field="textBoxName" addStyleNames="form-textbox" />
 
                     <g:Button addStyleNames="btn btn-play btn-margin-right" ui:field="buttonApply">
-                        <ui:text from='{messages.savedSearch_Save}' />
+                        <ui:text from='{messages.newUpload}' />
                     </g:Button>
 
                     <g:Button addStyleNames="btn btn-times-circle" ui:field="buttonCancel">

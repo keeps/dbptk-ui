@@ -49,7 +49,7 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
 
   public DatabaseList(Filter filter, Facets facets, String summary, boolean selectable, boolean exportable) {
     super(filter, facets, summary, selectable, exportable);
-    autoUpdate(10000);
+    autoUpdate(2000);
   }
 
   @Override

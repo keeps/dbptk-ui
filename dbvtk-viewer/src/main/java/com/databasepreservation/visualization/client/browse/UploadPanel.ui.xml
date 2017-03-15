@@ -2,6 +2,7 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:m='urn:import:com.databasepreservation.visualization.client.main'
              xmlns:b='urn:import:com.databasepreservation.visualization.client.browse'
+             xmlns:c='urn:import:com.databasepreservation.visualization.client.common'
              xmlns:s='urn:import:com.databasepreservation.visualization.client.common.search'
              xmlns:sb='urn:import:com.databasepreservation.visualization.client.common.sidebar'
              xmlns:lists="urn:import:com.databasepreservation.visualization.client.common.lists">
@@ -9,6 +10,7 @@
     <ui:with field='messages' type='config.i18n.client.ClientMessages' />
     <g:FlowPanel>
         <g:Label addStyleNames="h1"><ui:text from='{messages.uploadedSIARD}' /></g:Label>
-        <g:HTML ui:field="content"/>
+        <c:Progressbar ui:field="progressBar"/>
+        <g:FlowPanel ui:field="content" addStyleNames="progress-report"/>
     </g:FlowPanel>
 </ui:UiBinder>

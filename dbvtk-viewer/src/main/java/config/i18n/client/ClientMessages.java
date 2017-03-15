@@ -361,4 +361,8 @@ public interface ClientMessages extends Messages {
   String newUpload();
 
   String uploadedSIARD();
+
+  String uploads();
+
+  String newUploadLabel();
 }
