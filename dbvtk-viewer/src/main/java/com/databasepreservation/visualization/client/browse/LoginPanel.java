@@ -56,6 +56,8 @@ public class LoginPanel extends RightPanel {
   @UiField
   Label error;
 
+  private boolean loggingIn = false;
+
   public LoginPanel() {
     initWidget(uiBinder.createAndBindUi(this));
     addAttachHandler(new AttachEvent.Handler() {
@@ -102,12 +104,18 @@ public class LoginPanel extends RightPanel {
   }
 
   private void doLogin() {
+    if (loggingIn) {
+      return;
+    }
+    loggingIn = true;
+
     String usernameText = username.getText();
     String passwordText = password.getText();
     error.setText("");
 
     if (usernameText.trim().length() == 0 || passwordText.trim().length() == 0) {
       error.setText(messages.fillUsernameAndPasswordMessage());
+      loggingIn = false;
     } else {
 
       UserLogin.getInstance().login(usernameText, passwordText, new AsyncCallback<User>() {
@@ -118,11 +126,13 @@ public class LoginPanel extends RightPanel {
           } else {
             error.setText(messages.couldNotLoginWithTheProvidedCredentials());
           }
+          loggingIn = false;
         }
 
         @Override
         public void onSuccess(User user) {
           HistoryManager.returnFromLogin();
+          loggingIn = false;
         }
       });
     }
