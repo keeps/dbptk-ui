@@ -50,6 +50,12 @@
     margin-right: 5px;
 }
 
+.homeText {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 /***********************************************
               Progress bar, from
  https://css-tricks.com/html5-progress-element/
