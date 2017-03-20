@@ -112,22 +112,31 @@ public class UploadPanel extends RightPanel {
       int currentGlobalPercent = new Double(((currentRows * 1.0D) / totalRows) * 100).intValue();
       progressBar.setCurrent(currentGlobalPercent);
 
-      float percent = 0;
-      if (result.getTotalRows() > 0) {
-        percent = (result.getIngestedRows() * 1.0F) / result.getTotalRows();
+      // create textual log
+
+      // extra messages to smoothen the log
+      if (database.getCurrentSchemaName() != null
+        && !database.getCurrentSchemaName().equals(result.getCurrentSchemaName())) {
+        // last message about a completed schema, tables and rows at 100%
+        addMessageToContent(buildMessage(database.getCurrentSchemaName(), database.getIngestedSchemas(),
+          database.getTotalSchemas(), database.getCurrentTableName(), database.getTotalTables(),
+          database.getTotalTables(), database.getTotalRows(), database.getTotalRows()));
+      } else {
+        if (database.getCurrentTableName() != null
+          && !database.getCurrentTableName().equals(result.getCurrentTableName())) {
+          // last message about a completed schema, rows at 100%
+          addMessageToContent(buildMessage(database.getCurrentSchemaName(), database.getIngestedSchemas(),
+            database.getTotalSchemas(), database.getCurrentTableName(), database.getIngestedTables(),
+            database.getTotalTables(), database.getTotalRows(), database.getTotalRows()));
+        }
       }
 
-      StringBuilder sb = new StringBuilder();
-      sb.append("Loading schema \"").append(result.getCurrentSchemaName()).append("\" (")
-        .append(result.getIngestedSchemas()).append(" of ").append(result.getTotalSchemas()).append("), ");
-      sb.append("table \"").append(result.getCurrentTableName()).append("\" (").append(result.getIngestedTables())
-        .append(" of ").append(result.getTotalTables()).append(")");
-      if (percent > 0) {
-        sb.append(", ").append(NumberFormat.getPercentFormat().format(percent)).append(" done");
-      }
+      // current message
+      addMessageToContent(buildMessage(result.getCurrentSchemaName(), result.getIngestedSchemas(),
+        result.getTotalSchemas(), result.getCurrentTableName(), result.getIngestedTables(), result.getTotalTables(),
+        result.getIngestedRows(), result.getTotalRows()));
 
-      GWT.log("DBstatus: " + sb.toString());
-      addMessageToContent(sb.toString());
+      database = result;
     } else if (result.getStatus().equals(ViewerDatabase.Status.AVAILABLE)) {
       Toast.showInfo("Success", "Database \"" + database.getMetadata().getName() + "\" has been loaded.");
       HistoryManager.gotoDatabase(result.getUUID());
@@ -167,5 +176,32 @@ public class UploadPanel extends RightPanel {
       content.add(newMessage);
       content.getElement().setScrollTop(content.getElement().getScrollHeight());
     }
+  }
+
+  private String buildMessage(String currentSchemaName, long ingestedSchemas, long totalSchemas,
+    String currentTableName, long ingestedTables, long totalTables, long ingestedRows, long totalRows) {
+
+    // show number of "completed and processing" instead of only completed ones
+    if (ingestedSchemas < totalSchemas) {
+      ingestedSchemas++;
+    }
+    if (ingestedTables < totalTables) {
+      ingestedTables++;
+    }
+
+    float percent = 0;
+    if (totalRows > 0) {
+      percent = (ingestedRows * 1.0F) / totalRows;
+    }
+
+    StringBuilder sb = new StringBuilder();
+    sb.append("Loading schema \"").append(currentSchemaName).append("\"");
+    sb.append(" (").append(ingestedSchemas).append(" of ").append(totalSchemas).append(")");
+    sb.append(", table \"").append(currentTableName).append("\" (").append(ingestedTables).append(" of ")
+      .append(totalTables).append(")");
+    if (percent > 0) {
+      sb.append(", ").append(NumberFormat.getPercentFormat().format(percent)).append(" done");
+    }
+    return sb.toString();
   }
 }
