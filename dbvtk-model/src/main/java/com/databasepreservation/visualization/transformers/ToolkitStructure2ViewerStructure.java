@@ -649,13 +649,11 @@ public class ToolkitStructure2ViewerStructure {
   }
 
   private static String removeUnicode(String string) {
-    // remove any non-ASCII, non-printable characters.
-    // \p{Print} represents a POSIX character class for printable ASCII
-    // characters, while \P{Print} is the complement of that class. With this
-    // expression, all characters that are not printable ASCII are replaced with
-    // the empty string.
-    // source: http://stackoverflow.com/a/11021262/1483200
-    return string.replaceAll("\\P{Print}", "");
+    // remove any invisible control characters and unused code characters.
+    // based on: http://stackoverflow.com/a/11021262/1483200
+    // more info:
+    // https://en.wikipedia.org/wiki/Unicode_character_property#General_Category
+    return string.replaceAll("\\p{C}", "");
   }
 
   /**
