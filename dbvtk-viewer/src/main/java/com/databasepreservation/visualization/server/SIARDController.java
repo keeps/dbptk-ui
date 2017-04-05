@@ -1,20 +1,21 @@
 package com.databasepreservation.visualization.server;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.databasepreservation.common.ObservableModule;
-import com.databasepreservation.visualization.utils.SolrManager;
-import org.apache.solr.client.solrj.SolrClient;
+import org.apache.commons.io.IOUtils;
 import org.roda.core.data.exceptions.GenericException;
+import org.roda.core.data.exceptions.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.common.ModuleObserver;
+import com.databasepreservation.common.ObservableModule;
 import com.databasepreservation.model.Reporter;
 import com.databasepreservation.model.exception.ModuleException;
 import com.databasepreservation.model.exception.UnknownTypeException;
@@ -27,6 +28,7 @@ import com.databasepreservation.model.structure.SchemaStructure;
 import com.databasepreservation.model.structure.TableStructure;
 import com.databasepreservation.modules.siard.SIARD2ModuleFactory;
 import com.databasepreservation.modules.solr.SolrModuleFactory;
+import com.databasepreservation.visualization.utils.SolrManager;
 import com.databasepreservation.visualization.utils.SolrUtils;
 
 /**
@@ -35,7 +37,20 @@ import com.databasepreservation.visualization.utils.SolrUtils;
 public class SIARDController {
   private static final Logger LOGGER = LoggerFactory.getLogger(SIARDController.class);
 
-  public static String REPORT_FILENAME = "report.md";
+  public static String getReportFileContents(String databaseUUID) throws NotFoundException {
+    Path reportPath = ViewerConfiguration.getInstance().getReportPath(databaseUUID);
+    String result;
+    if(Files.exists(reportPath)){
+      try (InputStream in = Files.newInputStream(reportPath)) {
+        result = IOUtils.toString(in);
+      } catch (IOException e) {
+        throw new NotFoundException("The database does not have a conversion report.", e);
+      }
+    }else{
+      throw new NotFoundException("The database does not have a conversion report.");
+    }
+    return result;
+  }
 
   public static String loadFromLocal(String localPath) throws GenericException {
     String databaseUUID = SolrUtils.randomUUID();
@@ -65,8 +80,8 @@ public class SIARDController {
     // build the SIARD import module, Solr export module, and start the
     // conversion
     try {
-      // TODO: support defining specific reporter filename
-      Reporter reporter = new Reporter(workingDirectory.toAbsolutePath().toString(), REPORT_FILENAME);
+      Path reporterPath = ViewerConfiguration.getInstance().getReportPath(databaseUUID).toAbsolutePath();
+      Reporter reporter = new Reporter(reporterPath.getParent().toString(), reporterPath.getFileName().toString());
 
       DatabaseModuleFactory siardImportFactory = new SIARD2ModuleFactory(reporter);
       Map<Parameter, String> siardParameters = new HashMap<>();
@@ -75,7 +90,7 @@ public class SIARDController {
       siardImportModule.setOnceReporter(reporter);
 
       ProgressObserver progressObserver = new ProgressObserver(databaseUUID);
-      ((ObservableModule)siardImportModule).addModuleObserver(progressObserver);
+      ((ObservableModule) siardImportModule).addModuleObserver(progressObserver);
 
       DatabaseModuleFactory solrExportFactory = new SolrModuleFactory(reporter);
       Map<Parameter, String> solrParameters = new HashMap<>();
@@ -131,7 +146,8 @@ public class SIARDController {
     @Override
     public void notifyOpenSchema(DatabaseStructure structure, SchemaStructure schema, long completedSchemas,
       long completedTablesInSchema) {
-      solrManager.updateDatabaseCurrentSchema(databaseUUID, schema.getName(), completedSchemas, schema.getTables().size());
+      solrManager.updateDatabaseCurrentSchema(databaseUUID, schema.getName(), completedSchemas, schema.getTables()
+        .size());
     }
 
     @Override

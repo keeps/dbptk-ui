@@ -49,10 +49,10 @@ public class SchemaRoutinesPanel extends RightPanel {
     return instance;
   }
 
-  interface DatabasePanelUiBinder extends UiBinder<Widget, SchemaRoutinesPanel> {
+  interface SchemaRoutinesUiBinder extends UiBinder<Widget, SchemaRoutinesPanel> {
   }
 
-  private static DatabasePanelUiBinder uiBinder = GWT.create(DatabasePanelUiBinder.class);
+  private static SchemaRoutinesUiBinder uiBinder = GWT.create(SchemaRoutinesUiBinder.class);
 
   private ViewerDatabase database;
   private ViewerSchema schema;

@@ -42,10 +42,10 @@ public class SchemaCheckConstraintsPanel extends RightPanel {
     return instance;
   }
 
-  interface DatabasePanelUiBinder extends UiBinder<Widget, SchemaCheckConstraintsPanel> {
+  interface SchemaCheckConstraintsPanelUiBinder extends UiBinder<Widget, SchemaCheckConstraintsPanel> {
   }
 
-  private static DatabasePanelUiBinder uiBinder = GWT.create(DatabasePanelUiBinder.class);
+  private static SchemaCheckConstraintsPanelUiBinder uiBinder = GWT.create(SchemaCheckConstraintsPanelUiBinder.class);
 
   private ViewerDatabase database;
   private ViewerSchema schema;

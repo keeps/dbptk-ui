@@ -53,10 +53,10 @@ public class ReferencesPanel extends RightPanel {
     return new ReferencesPanel(database, tableUUID, recordUUID, columnIndexInTable);
   }
 
-  interface DatabasePanelUiBinder extends UiBinder<Widget, ReferencesPanel> {
+  interface ReferencesPanelUiBinder extends UiBinder<Widget, ReferencesPanel> {
   }
 
-  private static DatabasePanelUiBinder uiBinder = GWT.create(DatabasePanelUiBinder.class);
+  private static ReferencesPanelUiBinder uiBinder = GWT.create(ReferencesPanelUiBinder.class);
 
   private ViewerDatabase database;
   private ViewerTable table;

@@ -62,8 +62,10 @@ public class DatabaseSearchPanel extends RightPanel {
     return instance;
   }
 
-  interface TablePanelUiBinder extends UiBinder<Widget, DatabaseSearchPanel> {
+  interface DatabaseSearchPanelUiBinder extends UiBinder<Widget, DatabaseSearchPanel> {
   }
+
+  private static DatabaseSearchPanelUiBinder uiBinder = GWT.create(DatabaseSearchPanelUiBinder.class);
 
   @UiField
   HTML mainHeader;
@@ -92,8 +94,6 @@ public class DatabaseSearchPanel extends RightPanel {
   final List<TableSearchPanelContainer> tableSearchPanelContainers;
 
   private ViewerDatabase database;
-
-  private static TablePanelUiBinder uiBinder = GWT.create(TablePanelUiBinder.class);
 
   private DatabaseSearchPanel(ViewerDatabase database) {
     tableSearchPanelContainers = new ArrayList<>();

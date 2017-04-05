@@ -55,10 +55,10 @@ public class RowPanel extends RightPanel {
     return new RowPanel(database, table, row);
   }
 
-  interface DatabasePanelUiBinder extends UiBinder<Widget, RowPanel> {
+  interface RowPanelUiBinder extends UiBinder<Widget, RowPanel> {
   }
 
-  private static DatabasePanelUiBinder uiBinder = GWT.create(DatabasePanelUiBinder.class);
+  private static RowPanelUiBinder uiBinder = GWT.create(RowPanelUiBinder.class);
 
   private ViewerDatabase database;
   private ViewerTable table;

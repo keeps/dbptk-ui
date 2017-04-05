@@ -211,4 +211,13 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
     GenericException {
     return retrieve(databaseUUID, ViewerDatabase.class.getName(), databaseUUID);
   }
+
+  @Override
+  public String getReport(String databaseUUID) throws GenericException, AuthorizationDeniedException, NotFoundException {
+    ViewerDatabase dummy = new ViewerDatabase();
+    dummy.setUuid(databaseUUID);
+    UserUtility.Authorization.checkRetrievalPermission(getThreadLocalRequest(), databaseUUID, ViewerDatabase.class,
+      dummy);
+    return SIARDController.getReportFileContents(databaseUUID);
+  }
 }

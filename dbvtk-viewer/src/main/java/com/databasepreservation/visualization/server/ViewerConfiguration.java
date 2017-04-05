@@ -91,6 +91,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   private static Path configPath;
   private static Path exampleConfigPath;
   private static Path uploadsPath;
+  private static Path reportsPath;
 
   // Configuration related objects
   private static CompositeConfiguration viewerConfiguration = null;
@@ -195,6 +196,10 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     return uploadsPath;
   }
 
+  public Path getReportPath(String databaseUUID){
+    return reportsPath.resolve(databaseUUID + ".md");
+  }
+
   public String getSolrUrl() {
     String url = getViewerConfigurationAsString(ViewerConfiguration.PROPERTY_SOLR_URL);
     return StringUtils.replaceEach(url, new String[] {"{solr.hostname}", "{solr.port}", "{solr.endpoint}"},
@@ -222,7 +227,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
       // set dbvtk.home in order to correctly configure logging
       System.setProperty(ViewerConstants.INSTALL_FOLDER_SYSTEM_PROPERTY, viewerHomePath.toString());
     } else {
-      // last attempt (using user home and hidden directory called .roda)
+      // last attempt (using user home and hidden directory called .dbvtk)
       String userHome = System.getProperty("user.home");
       viewerHomePath = Paths.get(userHome, ViewerConstants.INSTALL_FOLDER_DEFAULT_SUBFOLDER_UNDER_HOME);
       if (!Files.exists(viewerHomePath)) {
@@ -242,6 +247,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     lobsPath = viewerHomePath.resolve(ViewerConstants.VIEWER_LOBS_FOLDER);
     logPath = viewerHomePath.resolve(ViewerConstants.VIEWER_LOG_FOLDER);
     uploadsPath = viewerHomePath.resolve(ViewerConstants.VIEWER_UPLOADS_FOLDER);
+    reportsPath = viewerHomePath.resolve(ViewerConstants.VIEWER_REPORTS_FOLDER);
 
     configureLogback();
 
@@ -268,6 +274,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     essentialDirectories.add(logPath);
     essentialDirectories.add(exampleConfigPath);
     essentialDirectories.add(uploadsPath);
+    essentialDirectories.add(reportsPath);
 
     for (Path path : essentialDirectories) {
       try {

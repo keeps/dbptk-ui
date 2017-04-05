@@ -22,6 +22,8 @@ public interface ClientMessages extends Messages {
 
   String titleUsers();
 
+  String titleReport();
+
   String titleDescription();
 
   String titleAdmin();

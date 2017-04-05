@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.visualization.client.browse.DatabaseReportPanel;
 import com.databasepreservation.visualization.client.browse.UploadPanel;
 import org.roda.core.data.v2.index.IsIndexed;
 
@@ -166,6 +167,17 @@ public class MainPanel extends Composite {
           @Override
           public RightPanel load(ViewerDatabase database) {
             return DatabaseInformationPanel.getInstance(database);
+          }
+        });
+
+      } else if (currentHistoryPath.size() == 3
+        && currentHistoryPath.get(2).equals(HistoryManager.ROUTE_DATABASE_REPORT)) {
+        // #database/<id>/report
+        String databaseUUID = currentHistoryPath.get(1);
+        setContent(databaseUUID, new RightPanelLoader() {
+          @Override
+          public RightPanel load(ViewerDatabase database) {
+            return DatabaseReportPanel.getInstance(database);
           }
         });
 

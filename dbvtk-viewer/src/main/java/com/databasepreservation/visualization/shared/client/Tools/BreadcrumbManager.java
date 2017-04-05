@@ -115,6 +115,19 @@ public class BreadcrumbManager {
     return items;
   }
 
+  public static List<BreadcrumbItem> forDatabaseReport(final String databaseName, final String databaseUUID) {
+    List<BreadcrumbItem> items = forDatabase(databaseName, databaseUUID);
+    items.add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager
+      .getTag(FontAwesomeIconManager.DATABASE_REPORT) + SafeHtmlUtils.htmlEscape(" " + messages.titleReport())),
+      new Command() {
+        @Override
+        public void execute() {
+          HistoryManager.gotoDatabaseReport(databaseUUID);
+        }
+      }));
+    return items;
+  }
+
   public static List<BreadcrumbItem> forDatabaseUsers(final String databaseName, final String databaseUUID) {
     List<BreadcrumbItem> items = forDatabase(databaseName, databaseUUID);
     items.add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager

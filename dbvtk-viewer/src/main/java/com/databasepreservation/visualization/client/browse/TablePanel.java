@@ -57,6 +57,8 @@ public class TablePanel extends RightPanel {
   interface TablePanelUiBinder extends UiBinder<Widget, TablePanel> {
   }
 
+  private static TablePanelUiBinder uiBinder = GWT.create(TablePanelUiBinder.class);
+
   @UiField
   SimplePanel mainHeader;
 
@@ -69,8 +71,6 @@ public class TablePanel extends RightPanel {
   private ViewerDatabase database;
   private ViewerSchema schema;
   private ViewerTable table;
-
-  private static TablePanelUiBinder uiBinder = GWT.create(TablePanelUiBinder.class);
 
   /**
    * Synchronous Table panel that receives the data and does not need to
