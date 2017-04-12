@@ -187,9 +187,9 @@ public class DatabaseSidebar extends Composite {
     sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_information(), HistoryManager.linkToDatabase(database
       .getUUID())).addIcon(FontAwesomeIconManager.DATABASE_INFORMATION).setH6().setIndent1());
 
-
-    sidebarGroup.add(new SidebarHyperlink(messages.titleReport(), HistoryManager
-      .linkToDatabaseReport(database.getUUID())).addIcon(FontAwesomeIconManager.DATABASE_REPORT).setH6().setIndent1());
+    // sidebarGroup.add(new SidebarHyperlink(messages.titleReport(),
+    // HistoryManager
+    // .linkToDatabaseReport(database.getUUID())).addIcon(FontAwesomeIconManager.DATABASE_REPORT).setH6().setIndent1());
 
     sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_usersRoles(), HistoryManager
       .linkToDatabaseUsers(database.getUUID())).addIcon(FontAwesomeIconManager.DATABASE_USERS).setH6().setIndent1());
