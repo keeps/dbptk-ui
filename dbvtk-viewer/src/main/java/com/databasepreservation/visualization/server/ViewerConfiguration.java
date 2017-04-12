@@ -25,6 +25,7 @@ import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
 import org.reflections.util.ClasspathHelper;
@@ -52,7 +53,14 @@ import ch.qos.logback.core.joran.spi.JoranException;
 public class ViewerConfiguration extends ViewerAbstractConfiguration {
   private static final Logger LOGGER = LoggerFactory.getLogger(ViewerConfiguration.class);
 
-  public static final String[] PROPERTY_SOLR_URL = new String[] {"solr", "url"};
+  // use the getter method instead of the property
+  private static final String[] PROPERTY_SOLR_URL = new String[] {"solr", "url"};
+
+  public static final String[] PROPERTY_SOLR_HOSTNAME = new String[] {"solr", "hostname"};
+  public static final String[] PROPERTY_SOLR_PORT = new String[] {"solr", "port"};
+  public static final String[] PROPERTY_SOLR_ENDPOINT = new String[] {"solr", "endpoint"};
+  public static final String[] PROPERTY_ZOOKEEPER_HOSTNAME = new String[] {"zookeeper", "hostname"};
+  public static final String[] PROPERTY_ZOOKEEPER_PORT = new String[] {"zookeeper", "port"};
 
   public static final String[] PROPERTY_FILTER_AUTHENTICATION_RODA = new String[] {"ui", "filter", "internal",
     "enabled"};
@@ -82,6 +90,8 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   private static Path logPath;
   private static Path configPath;
   private static Path exampleConfigPath;
+  private static Path uploadsPath;
+  private static Path reportsPath;
 
   // Configuration related objects
   private static CompositeConfiguration viewerConfiguration = null;
@@ -103,7 +113,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     super(viewerConfiguration = new CompositeConfiguration());
 
     try {
-      // determine RODA HOME
+      // determine DBVTK HOME
       viewerHomePath = determineViewerHomePath();
       LOGGER.debug("DBVTK HOME is {}", viewerHomePath);
 
@@ -144,7 +154,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   }
 
   /*
-   * Implementation-dependent parts
+   * Implementation
    * ____________________________________________________________________________________________________________________
    */
   @Override
@@ -182,6 +192,22 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     }
   }
 
+  public Path getUploadsPath() {
+    return uploadsPath;
+  }
+
+  public Path getReportPath(String databaseUUID){
+    return reportsPath.resolve(databaseUUID + ".md");
+  }
+
+  public String getSolrUrl() {
+    String url = getViewerConfigurationAsString(ViewerConfiguration.PROPERTY_SOLR_URL);
+    return StringUtils.replaceEach(url, new String[] {"{solr.hostname}", "{solr.port}", "{solr.endpoint}"},
+      new String[] {getViewerConfigurationAsString(ViewerConfiguration.PROPERTY_SOLR_HOSTNAME),
+        getViewerConfigurationAsString(ViewerConfiguration.PROPERTY_SOLR_PORT),
+        getViewerConfigurationAsString(ViewerConfiguration.PROPERTY_SOLR_ENDPOINT)});
+  }
+
   /*
    * "Internal" helper methods
    * ____________________________________________________________________________________________________________________
@@ -201,7 +227,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
       // set dbvtk.home in order to correctly configure logging
       System.setProperty(ViewerConstants.INSTALL_FOLDER_SYSTEM_PROPERTY, viewerHomePath.toString());
     } else {
-      // last attempt (using user home and hidden directory called .roda)
+      // last attempt (using user home and hidden directory called .dbvtk)
       String userHome = System.getProperty("user.home");
       viewerHomePath = Paths.get(userHome, ViewerConstants.INSTALL_FOLDER_DEFAULT_SUBFOLDER_UNDER_HOME);
       if (!Files.exists(viewerHomePath)) {
@@ -220,6 +246,8 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     exampleConfigPath = viewerHomePath.resolve(ViewerConstants.VIEWER_EXAMPLE_CONFIG_FOLDER);
     lobsPath = viewerHomePath.resolve(ViewerConstants.VIEWER_LOBS_FOLDER);
     logPath = viewerHomePath.resolve(ViewerConstants.VIEWER_LOG_FOLDER);
+    uploadsPath = viewerHomePath.resolve(ViewerConstants.VIEWER_UPLOADS_FOLDER);
+    reportsPath = viewerHomePath.resolve(ViewerConstants.VIEWER_REPORTS_FOLDER);
 
     configureLogback();
 
@@ -245,6 +273,8 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     essentialDirectories.add(lobsPath);
     essentialDirectories.add(logPath);
     essentialDirectories.add(exampleConfigPath);
+    essentialDirectories.add(uploadsPath);
+    essentialDirectories.add(reportsPath);
 
     for (Path path : essentialDirectories) {
       try {

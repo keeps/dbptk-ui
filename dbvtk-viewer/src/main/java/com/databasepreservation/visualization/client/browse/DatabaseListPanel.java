@@ -5,6 +5,7 @@ import com.databasepreservation.visualization.client.common.lists.DatabaseList;
 import com.databasepreservation.visualization.client.main.BreadcrumbPanel;
 import com.databasepreservation.visualization.shared.client.Tools.BreadcrumbManager;
 import com.databasepreservation.visualization.shared.client.Tools.HistoryManager;
+import com.databasepreservation.visualization.shared.client.widgets.Toast;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -52,7 +53,14 @@ public class DatabaseListPanel extends RightPanel {
       public void onSelectionChange(SelectionChangeEvent event) {
         ViewerDatabase selected = databaseList.getSelectionModel().getSelectedObject();
         if (selected != null) {
-          HistoryManager.gotoDatabase(selected.getUUID());
+          if (ViewerDatabase.Status.AVAILABLE.equals(selected.getStatus())) {
+            HistoryManager.gotoDatabase(selected.getUUID());
+          } else if (ViewerDatabase.Status.INGESTING.equals(selected.getStatus())) {
+            HistoryManager.gotoUpload(selected.getUUID());
+          } else {
+            Toast.showError("Unavailable", "This database can not be accessed.");
+            databaseList.getSelectionModel().clear();
+          }
         }
       }
     });

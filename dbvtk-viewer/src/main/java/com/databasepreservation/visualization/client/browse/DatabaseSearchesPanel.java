@@ -25,10 +25,10 @@ public class DatabaseSearchesPanel extends RightPanel {
     return new DatabaseSearchesPanel(database);
   }
 
-  interface DatabaseInformationPanelUiBinder extends UiBinder<Widget, DatabaseSearchesPanel> {
+  interface DatabaseSearchesPanelUiBinder extends UiBinder<Widget, DatabaseSearchesPanel> {
   }
 
-  private static DatabaseInformationPanelUiBinder uiBinder = GWT.create(DatabaseInformationPanelUiBinder.class);
+  private static DatabaseSearchesPanelUiBinder uiBinder = GWT.create(DatabaseSearchesPanelUiBinder.class);
 
   private ViewerDatabase database;
   private SavedSearchList savedSearchList;

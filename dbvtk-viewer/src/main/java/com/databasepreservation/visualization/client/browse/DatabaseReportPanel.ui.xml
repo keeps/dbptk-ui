@@ -8,7 +8,7 @@
 
     <ui:with field='messages' type='config.i18n.client.ClientMessages' />
     <g:FlowPanel>
-        <g:Label addStyleNames="h1"><ui:text from='{messages.menusidebar_usersRoles}'/></g:Label>
-        <g:FlowPanel ui:field="contentItems"/>
+        <g:Label addStyleNames="h1"><ui:text from='{messages.titleReport}' /></g:Label>
+        <g:HTML ui:field="contentItems"/>
     </g:FlowPanel>
 </ui:UiBinder>

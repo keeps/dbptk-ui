@@ -25,7 +25,7 @@ public class ViewerFactory {
 
   private static void instantiate() {
     configuration = ViewerConfiguration.getInstance();
-    String solrUrl = configuration.getViewerConfigurationAsString(ViewerConfiguration.PROPERTY_SOLR_URL);
+    String solrUrl = configuration.getSolrUrl();
     if (StringUtils.isBlank(solrUrl)) {
       solrUrl = DEVELOPMENT_SOLR_URL;
     }

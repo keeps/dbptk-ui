@@ -48,16 +48,21 @@ public class InternalWebAuthFilter implements Filter {
     final String service = httpRequest.getParameter("service");
     final String hash = httpRequest.getParameter("hash");
     final String locale = httpRequest.getParameter("locale");
+    final String branding = httpRequest.getParameter("branding");
 
-    LOGGER.debug("URL: {} ; Request URI: {} ; Service: {} ; Hash: {}, Locale: {}", url, requestURI, service, hash,
-      locale);
+    LOGGER.debug("URL: {} ; Request URI: {} ; Service: {} ; Hash: {}, Locale: {}, Branding: {}", url, requestURI, service, hash,
+      locale, branding);
 
     if ("/login".equals(requestURI)) {
       final StringBuilder b = new StringBuilder();
       b.append("/");
 
-      if (StringUtils.isNotBlank(locale)) {
+      if(StringUtils.isNotBlank(locale) && StringUtils.isNotBlank(branding)){
+        b.append("?locale=").append(locale).append("&branding=").append(branding);
+      }else if (StringUtils.isNotBlank(locale)) {
         b.append("?locale=").append(locale);
+      }else if(StringUtils.isNotBlank(branding)){
+        b.append("?branding=").append(branding);
       }
 
       b.append("#login");

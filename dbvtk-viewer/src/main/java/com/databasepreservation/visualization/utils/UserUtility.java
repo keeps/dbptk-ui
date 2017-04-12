@@ -99,7 +99,7 @@ public class UserUtility {
   }
 
   public static void logout(HttpServletRequest servletRequest) {
-    servletRequest.getSession().setAttribute(RODA_USER_NAME, getGuest());
+    servletRequest.getSession().removeAttribute(RODA_USER_NAME);
     // CAS specific clean up
     servletRequest.getSession().removeAttribute("edu.yale.its.tp.cas.client.filter.user");
     servletRequest.getSession().removeAttribute("_const_cas_assertion_");

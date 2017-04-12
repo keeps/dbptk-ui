@@ -200,4 +200,24 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
     LOGGER.debug("Logged user {}", user);
     return user;
   }
+
+  @Override
+  public String uploadSIARD(String path) throws GenericException {
+    return SIARDController.loadFromLocal(path);
+  }
+
+  @Override
+  public ViewerDatabase uploadSIARDStatus(String databaseUUID) throws AuthorizationDeniedException, NotFoundException,
+    GenericException {
+    return retrieve(databaseUUID, ViewerDatabase.class.getName(), databaseUUID);
+  }
+
+  @Override
+  public String getReport(String databaseUUID) throws GenericException, AuthorizationDeniedException, NotFoundException {
+    ViewerDatabase dummy = new ViewerDatabase();
+    dummy.setUuid(databaseUUID);
+    UserUtility.Authorization.checkRetrievalPermission(getThreadLocalRequest(), databaseUUID, ViewerDatabase.class,
+      dummy);
+    return SIARDController.getReportFileContents(databaseUUID);
+  }
 }

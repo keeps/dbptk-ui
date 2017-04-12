@@ -66,6 +66,16 @@ public class SolrTransformer {
   public static SolrInputDocument fromDatabase(ViewerDatabase viewerDatabase) throws ViewerException {
     SolrInputDocument doc = new SolrInputDocument();
     doc.addField(ViewerSafeConstants.SOLR_DATABASE_ID, viewerDatabase.getUUID());
+    doc.addField(ViewerSafeConstants.SOLR_DATABASE_STATUS, viewerDatabase.getStatus().toString());
+    doc.addField(ViewerSafeConstants.SOLR_DATABASE_TOTAL_ROWS, viewerDatabase.getTotalRows());
+    doc.addField(ViewerSafeConstants.SOLR_DATABASE_TOTAL_TABLES, viewerDatabase.getTotalTables());
+    doc.addField(ViewerSafeConstants.SOLR_DATABASE_TOTAL_SCHEMAS, viewerDatabase.getTotalSchemas());
+    doc.addField(ViewerSafeConstants.SOLR_DATABASE_INGESTED_ROWS, viewerDatabase.getIngestedRows());
+    doc.addField(ViewerSafeConstants.SOLR_DATABASE_INGESTED_TABLES, viewerDatabase.getIngestedTables());
+    doc.addField(ViewerSafeConstants.SOLR_DATABASE_INGESTED_SCHEMAS, viewerDatabase.getIngestedSchemas());
+    doc.addField(ViewerSafeConstants.SOLR_DATABASE_CURRENT_TABLE_NAME, viewerDatabase.getCurrentTableName());
+    doc.addField(ViewerSafeConstants.SOLR_DATABASE_CURRENT_SCHEMA_NAME, viewerDatabase.getCurrentSchemaName());
+
     doc.addField(ViewerSafeConstants.SOLR_DATABASE_METADATA, metadataAsJsonString(viewerDatabase.getMetadata()));
     return doc;
   }
@@ -108,6 +118,16 @@ public class SolrTransformer {
   public static ViewerDatabase toDatabase(SolrDocument doc) throws ViewerException {
     ViewerDatabase viewerDatabase = new ViewerDatabase();
     viewerDatabase.setUuid(objectToString(doc.get(ViewerSafeConstants.SOLR_DATABASE_ID)));
+    viewerDatabase.setStatus(objectToString(doc.get(ViewerSafeConstants.SOLR_DATABASE_STATUS)));
+    viewerDatabase.setCurrentSchemaName(objectToString(doc.get(ViewerSafeConstants.SOLR_DATABASE_CURRENT_SCHEMA_NAME)));
+    viewerDatabase.setCurrentTableName(objectToString(doc.get(ViewerSafeConstants.SOLR_DATABASE_CURRENT_TABLE_NAME)));
+    viewerDatabase.setTotalRows(objectToLong(doc.get(ViewerSafeConstants.SOLR_DATABASE_TOTAL_ROWS), 0L));
+    viewerDatabase.setTotalTables(objectToLong(doc.get(ViewerSafeConstants.SOLR_DATABASE_TOTAL_TABLES), 0L));
+    viewerDatabase.setTotalSchemas(objectToLong(doc.get(ViewerSafeConstants.SOLR_DATABASE_TOTAL_SCHEMAS), 0L));
+    viewerDatabase.setIngestedRows(objectToLong(doc.get(ViewerSafeConstants.SOLR_DATABASE_INGESTED_ROWS), 0L));
+    viewerDatabase.setIngestedTables(objectToLong(doc.get(ViewerSafeConstants.SOLR_DATABASE_INGESTED_TABLES), 0L));
+    viewerDatabase.setIngestedSchemas(objectToLong(doc.get(ViewerSafeConstants.SOLR_DATABASE_INGESTED_SCHEMAS), 0L));
+
     viewerDatabase.setMetadata(toMetadata(doc));
     return viewerDatabase;
   }

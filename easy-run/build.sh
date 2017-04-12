@@ -84,8 +84,8 @@ rm -rf solr/example
 rm -rf solr/docs
 
 # download tomcat8 and extract it to a folder named `apache-tomcat`
-echo "Downloading tomcat from http://mirrors.fe.up.pt/pub/apache/tomcat/tomcat-8/v8.5.11/bin/apache-tomcat-8.5.11.tar.gz"
-cd "$3"; curl -O http://mirrors.fe.up.pt/pub/apache/tomcat/tomcat-8/v8.5.11/bin/apache-tomcat-8.5.11.tar.gz
+echo "Downloading tomcat from http://archive.apache.org/dist/tomcat/tomcat-8/v8.5.11/bin/apache-tomcat-8.5.11.tar.gz"
+cd "$3"; curl -O http://archive.apache.org/dist/tomcat/tomcat-8/v8.5.11/bin/apache-tomcat-8.5.11.tar.gz
 tar -xzf apache-tomcat-8.5.11.tar.gz
 rm apache-tomcat-8.5.11.tar.gz
 mv "apache-tomcat-8.5.11" "apache-tomcat"

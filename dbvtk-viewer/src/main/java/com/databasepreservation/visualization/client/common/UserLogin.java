@@ -82,7 +82,8 @@ public class UserLogin {
       hash = UriUtils.encode(hash);
     }
     String locale = LocaleInfo.getCurrentLocale().getLocaleName();
-    Window.open("/login?service=" + currentURL + "&hash=" + hash + "&locale=" + locale, "_self", "");
+    String brandingIfFalse = Window.Location.getHref().contains("branding=false") ? "&branding=false" : "";
+    Window.open("/login?service=" + currentURL + "&hash=" + hash + "&locale=" + locale + brandingIfFalse, "_self", "");
   }
 
   public void login(String username, String password, final AsyncCallback<User> callback) {

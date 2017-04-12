@@ -51,10 +51,10 @@ public class SchemaStructurePanel extends RightPanel {
     return instance;
   }
 
-  interface DatabasePanelUiBinder extends UiBinder<Widget, SchemaStructurePanel> {
+  interface SchemaStructurePanelUiBinder extends UiBinder<Widget, SchemaStructurePanel> {
   }
 
-  private static DatabasePanelUiBinder uiBinder = GWT.create(DatabasePanelUiBinder.class);
+  private static SchemaStructurePanelUiBinder uiBinder = GWT.create(SchemaStructurePanelUiBinder.class);
 
   private ViewerDatabase database;
   private ViewerSchema schema;
@@ -75,7 +75,7 @@ public class SchemaStructurePanel extends RightPanel {
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
     BreadcrumbManager.updateBreadcrumb(
       breadcrumb,
-      BreadcrumbManager.forSchema(database.getMetadata().getName(), database.getUUID(), schema.getName(),
+      BreadcrumbManager.forSchemaStructure(database.getMetadata().getName(), database.getUUID(), schema.getName(),
         schema.getUUID()));
   }
 
@@ -219,7 +219,7 @@ public class SchemaStructurePanel extends RightPanel {
       new SafeHtmlCell()) {
       @Override
       public SafeHtml getValue(ViewerColumn column) {
-        if (pk.getColumnIndexesInViewerTable().contains(column.getColumnIndexInEnclosingTable())) {
+        if (pk != null && pk.getColumnIndexesInViewerTable().contains(column.getColumnIndexInEnclosingTable())) {
           return SafeHtmlUtils.fromSafeConstant("<i class='fa fa-key' title='" + messages.primaryKey() + "'></i>");
         } else if (columnIndexesWithForeignKeys.contains(column.getColumnIndexInEnclosingTable())) {
           return SafeHtmlUtils.fromSafeConstant("<i class='fa fa-exchange' title='"

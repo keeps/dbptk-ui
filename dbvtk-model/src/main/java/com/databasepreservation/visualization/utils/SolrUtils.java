@@ -30,8 +30,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.impl.CloudSolrClient;
 import org.apache.solr.client.solrj.impl.InputStreamResponseParser;
+import org.apache.solr.client.solrj.impl.ZkClientClusterStateProvider;
 import org.apache.solr.client.solrj.request.QueryRequest;
 import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.QueryResponse;
@@ -103,7 +103,7 @@ public class SolrUtils {
   }
 
   public static void setupSolrCloudConfigsets(String zkHost) {
-    CloudSolrClient zkClient = null;
+    ZkClientClusterStateProvider zkClient = null;
     JarFile jar = null;
 
     // get resources and copy them to a temporary directory
@@ -113,7 +113,7 @@ public class SolrUtils {
 
     try {
       File jarFile = new File(SolrManager.class.getProtectionDomain().getCodeSource().getLocation().toURI());
-      zkClient = new CloudSolrClient.Builder().withZkHost(zkHost).build();
+      zkClient = new ZkClientClusterStateProvider(zkHost);
 
       // if it is a directory the application in being run from an IDE
       // in that case do not setup (assuming setup is done)
@@ -177,7 +177,7 @@ public class SolrUtils {
     }
   }
 
-  private static void uploadConfig(CloudSolrClient client, Path configPath, String configset) {
+  private static void uploadConfig(ZkClientClusterStateProvider client, Path configPath, String configset) {
     try {
       client.uploadConfig(configPath, configset);
     } catch (IOException e) {
@@ -214,7 +214,6 @@ public class SolrUtils {
     return ret;
   }
 
-  // TODO: Handle Viewer datatypes
   private static <T> String getIndexName(Class<T> resultClass) throws GenericException {
     String indexName = null;
     if (resultClass.equals(ViewerDatabase.class)) {
@@ -227,6 +226,18 @@ public class SolrUtils {
       throw new GenericException("Cannot find class index name: " + resultClass.getName());
     }
     return indexName;
+  }
+
+  private static <T> String getHumanFriendlyName(Class<T> resultClass) throws GenericException {
+    String humanFriendlyName = "unknown";
+    if (resultClass.equals(ViewerDatabase.class)) {
+      humanFriendlyName = "database";
+    } else if (resultClass.equals(SavedSearch.class)) {
+      humanFriendlyName = "saved search";
+    } else if (resultClass.equals(ViewerRow.class)) {
+      humanFriendlyName = "row";
+    }
+    return humanFriendlyName;
   }
 
   public static <T extends Serializable> IndexResult<T> find(SolrClient index, Class<T> classToRetrieve, Filter filter,
@@ -470,10 +481,16 @@ public class SolrUtils {
       if (doc != null) {
         ret = solrDocumentTo(classToRetrieve, doc);
       } else {
-        throw new NotFoundException("Could not find document " + id);
+        throw new NotFoundException("Could not find " + getHumanFriendlyName(classToRetrieve) + " " + id);
       }
-    } catch (SolrServerException | SolrException | IOException e) {
+    } catch (SolrServerException | IOException e) {
       throw new GenericException("Could not retrieve " + classToRetrieve.getName() + " from index", e);
+    } catch (SolrException e) {
+      if (e.code() == 404) {
+        throw new NotFoundException("Could not find " + getHumanFriendlyName(classToRetrieve) + " " + id);
+      } else {
+        throw new GenericException("Could not retrieve " + classToRetrieve.getName() + " from index", e);
+      }
     }
     return ret;
   }
@@ -486,10 +503,16 @@ public class SolrUtils {
       if (doc != null) {
         ret = solrDocumentTo(classToRetrieve, doc);
       } else {
-        throw new NotFoundException("Could not find document " + rowUUID);
+        throw new NotFoundException("Could not find " + getHumanFriendlyName(classToRetrieve) + " " + rowUUID);
       }
-    } catch (SolrServerException | SolrException | IOException e) {
+    } catch (SolrServerException | IOException e) {
       throw new GenericException("Could not retrieve " + classToRetrieve.getName() + " from index", e);
+    } catch (SolrException e) {
+      if (e.code() == 404) {
+        throw new NotFoundException("Could not find " + getHumanFriendlyName(classToRetrieve) + " " + rowUUID);
+      } else {
+        throw new GenericException("Could not retrieve " + classToRetrieve.getName() + " from index", e);
+      }
     }
     return ret;
   }

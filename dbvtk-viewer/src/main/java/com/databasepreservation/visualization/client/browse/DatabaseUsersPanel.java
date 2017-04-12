@@ -41,10 +41,10 @@ public class DatabaseUsersPanel extends RightPanel {
     return instance;
   }
 
-  interface DatabasePanelUiBinder extends UiBinder<Widget, DatabaseUsersPanel> {
+  interface DatabaseUsersPanelUiBinder extends UiBinder<Widget, DatabaseUsersPanel> {
   }
 
-  private static DatabasePanelUiBinder uiBinder = GWT.create(DatabasePanelUiBinder.class);
+  private static DatabaseUsersPanelUiBinder uiBinder = GWT.create(DatabaseUsersPanelUiBinder.class);
 
   private ViewerDatabase database;
 

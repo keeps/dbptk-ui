@@ -22,6 +22,8 @@ public interface ClientMessages extends Messages {
 
   String titleUsers();
 
+  String titleReport();
+
   String titleDescription();
 
   String titleAdmin();
@@ -300,6 +302,8 @@ public interface ClientMessages extends Messages {
 
   String databaseName();
 
+  String databaseStatus();
+
   String uniqueID();
 
   String edit();
@@ -342,8 +346,6 @@ public interface ClientMessages extends Messages {
 
   String databaseListing();
 
-  String usersAndPermissions();
-
   String of();
 
   String ofOver();
@@ -357,4 +359,12 @@ public interface ClientMessages extends Messages {
   String schemaName();
 
   String schemaDescription();
+
+  String newUpload();
+
+  String uploadedSIARD();
+
+  String uploads();
+
+  String newUploadLabel();
 }

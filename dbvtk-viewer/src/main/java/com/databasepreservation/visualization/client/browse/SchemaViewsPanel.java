@@ -43,10 +43,10 @@ public class SchemaViewsPanel extends RightPanel {
     return instance;
   }
 
-  interface DatabasePanelUiBinder extends UiBinder<Widget, SchemaViewsPanel> {
+  interface SchemaViewsPanelUiBinder extends UiBinder<Widget, SchemaViewsPanel> {
   }
 
-  private static DatabasePanelUiBinder uiBinder = GWT.create(DatabasePanelUiBinder.class);
+  private static SchemaViewsPanelUiBinder uiBinder = GWT.create(SchemaViewsPanelUiBinder.class);
 
   private ViewerDatabase database;
   private ViewerSchema schema;

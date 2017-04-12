@@ -55,10 +55,10 @@ public class RowPanel extends RightPanel {
     return new RowPanel(database, table, row);
   }
 
-  interface DatabasePanelUiBinder extends UiBinder<Widget, RowPanel> {
+  interface RowPanelUiBinder extends UiBinder<Widget, RowPanel> {
   }
 
-  private static DatabasePanelUiBinder uiBinder = GWT.create(DatabasePanelUiBinder.class);
+  private static RowPanelUiBinder uiBinder = GWT.create(RowPanelUiBinder.class);
 
   private ViewerDatabase database;
   private ViewerTable table;
@@ -180,9 +180,10 @@ public class RowPanel extends RightPanel {
     }
 
     for (ViewerColumn column : table.getColumns()) {
+      boolean isPrimaryKeyColumn = table.getPrimaryKey() != null
+        && table.getPrimaryKey().getColumnIndexesInViewerTable().contains(column.getColumnIndexInEnclosingTable());
       b.append(getCellHTML(column, colIndexRelatedTo.get(column.getSolrName()),
-        colIndexReferencedBy.get(column.getSolrName()),
-        table.getPrimaryKey().getColumnIndexesInViewerTable().contains(column.getColumnIndexInEnclosingTable())));
+        colIndexReferencedBy.get(column.getSolrName()), isPrimaryKeyColumn));
     }
 
     content.setHTML(b.toSafeHtml());

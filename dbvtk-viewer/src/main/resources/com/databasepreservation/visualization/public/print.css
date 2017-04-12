@@ -1,0 +1,14 @@
+@media print {
+    .banner,
+    .browseContentFilesPanel,
+    .filePreviewToolbar,
+    .my-asyncdatagrid-display-scroll-wrapper-right:before,
+    .my-asyncdatagrid-display-scroll-wrapper-right:after,
+    .footer {
+        display: none;
+    }
+
+    pre code {
+        max-height: none;
+    }
+}

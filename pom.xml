@@ -8,7 +8,7 @@
     <groupId>com.databasepreservation.visualization</groupId>
     <artifactId>dbvtk</artifactId>
     <packaging>pom</packaging>
-    <version>0.2.7</version>
+    <version>1.0.0-rc1</version>
     <name>Database Visualization Toolkit</name>
 
     <description>A viewer and explorer for preserved databases</description>
@@ -31,8 +31,8 @@
 
         <!-- Convenience properties to set versions -->
         <gwtVersion>2.7.0</gwtVersion>
-        <version.dbptk-model>2.0.0-beta7.2</version.dbptk-model>
-        <version.roda>2.0.0-beta3</version.roda>
+        <version.dbptk>2.0.0-rc1</version.dbptk>
+        <version.roda>2.0.0-beta6</version.roda>
 
 
         <version.jersey>2.23</version.jersey>
@@ -124,6 +124,29 @@
                         </execution>
                     </executions>
                 </plugin>
+                <plugin>
+                    <groupId>pl.project13.maven</groupId>
+                    <artifactId>git-commit-id-plugin</artifactId>
+                    <version>2.2.1</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>revision</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <!-- this is false by default, forces the plugin to generate the file -->
+                        <generateGitPropertiesFile>true</generateGitPropertiesFile>
+
+                        <!-- The path for the properties file to be generated. See Super Pom
+                            for default variable reference https://maven.apache.org/guides/introduction/introduction-to-the-pom.html -->
+                        <generateGitPropertiesFilename>
+                            ${project.build.directory}/${project.build.finalName}/version.json
+                        </generateGitPropertiesFilename>
+                        <format>json</format>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
@@ -134,24 +157,34 @@
             <dependency>
                 <groupId>com.databasepreservation.visualization</groupId>
                 <artifactId>dbvtk-model</artifactId>
-                <version>0.2.7</version>
+                <version>1.0.0-rc1</version>
             </dependency>
             <dependency>
                 <groupId>com.databasepreservation.visualization</groupId>
                 <artifactId>dbvtk-model</artifactId>
-                <version>0.2.7</version>
+                <version>1.0.0-rc1</version>
                 <classifier>sources</classifier>
             </dependency>
             <dependency>
                 <groupId>com.databasepreservation</groupId>
                 <artifactId>dbptk-model</artifactId>
-                <version>${version.dbptk-model}</version>
+                <version>${version.dbptk}</version>
                 <classifier>sources</classifier>
             </dependency>
             <dependency>
                 <groupId>com.databasepreservation</groupId>
                 <artifactId>dbptk-model</artifactId>
-                <version>${version.dbptk-model}</version>
+                <version>${version.dbptk}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.databasepreservation</groupId>
+                <artifactId>dbptk-module-siard</artifactId>
+                <version>${version.dbptk}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.databasepreservation</groupId>
+                <artifactId>dbptk-module-solr</artifactId>
+                <version>${version.dbptk}</version>
             </dependency>
             <dependency>
                 <groupId>org.roda-project</groupId>
@@ -310,7 +343,7 @@
             <dependency>
                 <groupId>org.apache.solr</groupId>
                 <artifactId>solr-solrj</artifactId>
-                <version>6.1.0</version>
+                <version>6.4.1</version>
             </dependency>
             <dependency>
                 <groupId>ch.qos.logback</groupId>

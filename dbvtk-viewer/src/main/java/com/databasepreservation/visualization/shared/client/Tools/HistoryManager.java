@@ -11,10 +11,12 @@ import com.google.gwt.user.client.Window;
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class HistoryManager {
+  public static final String ROUTE_HOME = "home";
   public static final String ROUTE_LOGIN = "login";
   public static final String ROUTE_DATABASE = "database";
   public static final String ROUTE_DATABASE_USERS = "users";
   public static final String ROUTE_DATABASE_SEARCH = "search";
+  public static final String ROUTE_DATABASE_REPORT = "report";
   public static final String ROUTE_SCHEMA = "schema";
   public static final String ROUTE_SCHEMA_STRUCTURE = "structure";
   public static final String ROUTE_SCHEMA_ROUTINES = "routines";
@@ -28,13 +30,15 @@ public class HistoryManager {
   public static final String ROUTE_SCHEMA_CHECK_CONSTRAINTS = "constraints";
   public static final String ROUTE_SAVED_SEARCHES = "searches";
   public static final String ROUTE_SAVED_SEARCHES_EDIT = "edit";
+  public static final String ROUTE_UPLOADS = "uploads";
+  public static final String ROUTE_UPLOADS_NEW = "new";
 
   public static final String HISTORY_SEP = "/";
   public static final String HISTORY_SEP_REGEX = "/";
   public static final String HISTORY_SEP_ESCAPE = "%2F";
 
   public static void gotoRoot() {
-    newHistory(new ArrayList<String>());
+    newHistory(Arrays.asList(ROUTE_HOME));
   }
 
   public static void returnFromLogin() {
@@ -67,6 +71,14 @@ public class HistoryManager {
     gotoRoot();
   }
 
+  public static void gotoNewUpload() {
+    newHistory(Arrays.asList(ROUTE_UPLOADS, ROUTE_UPLOADS_NEW));
+  }
+
+  public static void gotoUpload(String databaseUUID) {
+    newHistory(Arrays.asList(ROUTE_UPLOADS, databaseUUID));
+  }
+
   public static void gotoDatabase(String databaseUUID) {
     newHistory(Arrays.asList(ROUTE_DATABASE, databaseUUID));
   }
@@ -77,6 +89,10 @@ public class HistoryManager {
 
   public static void gotoDatabaseSearch(String databaseUUID) {
     newHistory(Arrays.asList(ROUTE_DATABASE, databaseUUID, ROUTE_DATABASE_SEARCH));
+  }
+
+  public static void gotoDatabaseReport(String databaseUUID) {
+    newHistory(Arrays.asList(ROUTE_DATABASE, databaseUUID, ROUTE_DATABASE_REPORT));
   }
 
   public static void gotoSchema(String databaseUUID, String schemaUUID) {
@@ -205,6 +221,10 @@ public class HistoryManager {
     return createHistoryToken(Arrays.asList(ROUTE_DATABASE, database_uuid, ROUTE_DATABASE_USERS));
   }
 
+  public static String linkToDatabaseReport(String database_uuid) {
+    return createHistoryToken(Arrays.asList(ROUTE_DATABASE, database_uuid, ROUTE_DATABASE_REPORT));
+  }
+
   public static String linkToDatabaseSearch(String database_uuid) {
     return createHistoryToken(Arrays.asList(ROUTE_DATABASE, database_uuid, ROUTE_DATABASE_SEARCH));
   }
@@ -249,5 +269,13 @@ public class HistoryManager {
     List<String> params = new ArrayList<>(Arrays.asList(ROUTE_FOREIGN_KEY, database_uuid, table_uuid));
     params.addAll(solrColumnsAndValues);
     return createHistoryToken(params);
+  }
+
+  public static String linkToNewUpload() {
+    return createHistoryToken(Arrays.asList(ROUTE_UPLOADS, ROUTE_UPLOADS_NEW));
+  }
+
+  public static String linkToUpload(String database_uuid){
+    return createHistoryToken(Arrays.asList(ROUTE_UPLOADS, database_uuid));
   }
 }

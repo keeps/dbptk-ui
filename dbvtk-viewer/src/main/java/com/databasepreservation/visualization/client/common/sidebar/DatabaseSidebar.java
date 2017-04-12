@@ -44,7 +44,7 @@ public class DatabaseSidebar extends Composite {
    *
    * @param databaseUUID
    *          the database UUID
-   * @return a new DatabaseSidebar
+   * @return a DatabaseSidebar instance
    */
   public static DatabaseSidebar getInstance(String databaseUUID) {
     String code = databaseUUID;
@@ -54,9 +54,36 @@ public class DatabaseSidebar extends Composite {
     }
 
     DatabaseSidebar instance = instances.get(code);
-    if (instance == null || instance.database == null) {
+    if (instance == null || instance.database == null
+      || !ViewerDatabase.Status.AVAILABLE.equals(instance.database.getStatus())) {
       instance = new DatabaseSidebar(databaseUUID);
       instances.put(code, instance);
+    } else {
+      // workaround because the same DatabaseSidebar can not belong to multiple
+      // widgets
+      return new DatabaseSidebar(instance);
+    }
+    return instance;
+  }
+
+  /**
+   * Creates a new DatabaseSidebar, rarely hitting the database more than once
+   * for each database.
+   *
+   * @param database
+   *          the database
+   * @return a DatabaseSidebar instance
+   */
+  public static DatabaseSidebar getInstance(ViewerDatabase database) {
+    if (database == null) {
+      return getEmptyInstance();
+    }
+
+    DatabaseSidebar instance = instances.get(database.getUUID());
+    if (instance == null || instance.database == null
+      || !ViewerDatabase.Status.AVAILABLE.equals(instance.database.getStatus())) {
+      instance = new DatabaseSidebar(database);
+      instances.put(database.getUUID(), instance);
     } else {
       // workaround because the same DatabaseSidebar can not belong to multiple
       // widgets
@@ -94,6 +121,7 @@ public class DatabaseSidebar extends Composite {
 
   private ViewerDatabase database;
   private String databaseUUID;
+  private boolean initialized = false;
 
   /**
    * Clone constructor, because the same DatabaseSidebar can not be child in
@@ -103,9 +131,18 @@ public class DatabaseSidebar extends Composite {
    *          the DatabaseSidebar used in another widget
    */
   private DatabaseSidebar(DatabaseSidebar other) {
+    initialized = other.initialized;
     initWidget(uiBinder.createAndBindUi(this));
     searchInputBox.setText(other.searchInputBox.getText());
     init(other.database);
+  }
+
+  /**
+   * Use DatabaseSidebar.getInstance to obtain an instance
+   */
+  private DatabaseSidebar(ViewerDatabase database) {
+    initWidget(uiBinder.createAndBindUi(this));
+    init(database);
   }
 
   /**
@@ -125,11 +162,19 @@ public class DatabaseSidebar extends Composite {
   }
 
   public void init(ViewerDatabase db) {
-    if (database == null && db != null && (databaseUUID == null || databaseUUID.equals(db.getUUID()))) {
-      database = db;
-      databaseUUID = db.getUUID();
-      init();
+    GWT.log("init with db: " + db + "; status: " + db.getStatus().toString());
+    if (ViewerDatabase.Status.AVAILABLE.equals(db.getStatus())) {
+      if (db != null && (databaseUUID == null || databaseUUID.equals(db.getUUID()))) {
+        initialized = true;
+        database = db;
+        databaseUUID = db.getUUID();
+        init();
+      }
     }
+  }
+
+  public boolean isInitialized() {
+    return initialized;
   }
 
   private void init() {
@@ -141,6 +186,10 @@ public class DatabaseSidebar extends Composite {
 
     sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_information(), HistoryManager.linkToDatabase(database
       .getUUID())).addIcon(FontAwesomeIconManager.DATABASE_INFORMATION).setH6().setIndent1());
+
+
+    sidebarGroup.add(new SidebarHyperlink(messages.titleReport(), HistoryManager
+      .linkToDatabaseReport(database.getUUID())).addIcon(FontAwesomeIconManager.DATABASE_REPORT).setH6().setIndent1());
 
     sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_usersRoles(), HistoryManager
       .linkToDatabaseUsers(database.getUUID())).addIcon(FontAwesomeIconManager.DATABASE_USERS).setH6().setIndent1());

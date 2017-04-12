@@ -230,6 +230,9 @@ public class ErDiagram extends Composite {
   }
 
   private Double getNormalizedValue(double value, double min, double max, double minNorm, double maxNorm) {
+    if (max == min) {
+      return minNorm;
+    }
     double range = max - min;
     double zeroToOne = (value - min) / range;
 

@@ -56,6 +56,7 @@ import com.databasepreservation.utils.XMLUtils;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerCell;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerCheckConstraint;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerColumn;
+import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabaseFromToolkit;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerForeignKey;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerMetadata;
@@ -115,6 +116,7 @@ public class ToolkitStructure2ViewerStructure {
     } else {
       result.setUuid(databaseUUID);
     }
+    result.setStatus(ViewerDatabase.Status.INGESTING);
     result.setMetadata(getMetadata(result, structure));
     return result;
   }
@@ -636,7 +638,7 @@ public class ToolkitStructure2ViewerStructure {
           result.setValue(JodaUtils.xsTimeParse(simpleData).withDate(1970, 1, 1).withZone(DateTimeZone.UTC).toString());
           break;
         default:
-          result.setValue(simpleCell.getSimpleData());
+          result.setValue(removeUnicode(simpleCell.getSimpleData()));
       }
     } else if (!(cell instanceof NullCell)) {
       // nothing to do for null cells
@@ -644,6 +646,14 @@ public class ToolkitStructure2ViewerStructure {
     }
 
     return result;
+  }
+
+  private static String removeUnicode(String string) {
+    // remove any invisible control characters and unused code characters.
+    // based on: http://stackoverflow.com/a/11021262/1483200
+    // more info:
+    // https://en.wikipedia.org/wiki/Unicode_character_property#General_Category
+    return string.replaceAll("\\p{C}", "");
   }
 
   /**

@@ -23,6 +23,7 @@ public class FontAwesomeIconManager {
   public static final String DATABASE_INFORMATION = "info-circle";
   public static final String DATABASE_USERS = "users";
   public static final String DATABASE_SEARCH = "search";
+  public static final String DATABASE_REPORT = "clipboard";
   public static final String SCHEMA_STRUCTURE = "sitemap";
   public static final String SCHEMA_ROUTINES = "cog";
   public static final String SCHEMA_TRIGGERS = "clock-o";
@@ -36,6 +37,8 @@ public class FontAwesomeIconManager {
   public static final String BLOB = "file";
   public static final String USER = "user";
   public static final String GLOBE = "globe";
+  public static final String UPLOADS = "files-o";
+  public static final String NEW_UPLOAD = "upload";
 
   public static String getTag(String icon) {
     return "<i class=\"fa fa-" + icon + "\"></i>";
