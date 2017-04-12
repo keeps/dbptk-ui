@@ -65,7 +65,8 @@ public class DatabaseInformationPanel extends RightPanel {
     ViewerMetadata metadata = database.getMetadata();
     SafeHtmlBuilder b = new SafeHtmlBuilder();
     b.append(getFieldHTML(messages.siardMetadata_databaseName(), metadata.getName()));
-    b.append(getFieldHTML(messages.siardMetadata_archivalDate(), metadata.getArchivalDate()));
+    b.append(getFieldHTML(messages.siardMetadata_archivalDate(), metadata.getArchivalDate() != null ? metadata
+      .getArchivalDate().substring(0, 10) : metadata.getArchivalDate()));
     b.append(getFieldHTML(messages.siardMetadata_archivist(), metadata.getArchiver()));
     b.append(getFieldHTML(messages.siardMetadata_archivistContact(), metadata.getArchiverContact()));
     b.append(getFieldHTML(messages.siardMetadata_clientMachine(), metadata.getClientMachine()));
