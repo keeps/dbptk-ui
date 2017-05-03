@@ -19,6 +19,7 @@ import com.databasepreservation.visualization.api.utils.ApiResponseMessage;
 import com.databasepreservation.visualization.api.utils.ApiUtils;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.visualization.exceptions.ViewerException;
+import com.databasepreservation.visualization.server.ViewerConfiguration;
 import com.databasepreservation.visualization.server.ViewerFactory;
 import com.databasepreservation.visualization.shared.ViewerSafeConstants;
 import com.databasepreservation.visualization.utils.SolrManager;
@@ -64,7 +65,7 @@ public class ManageResource {
     ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
     if (database != null) {
       try {
-        solrManager.removeDatabase(database);
+        solrManager.removeDatabase(database, ViewerConfiguration.getInstance().getLobPath());
       } catch (ViewerException e) {
         throw new RODAException("Error deleting the database", e);
       }

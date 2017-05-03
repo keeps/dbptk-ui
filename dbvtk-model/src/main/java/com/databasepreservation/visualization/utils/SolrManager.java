@@ -2,6 +2,8 @@ package com.databasepreservation.visualization.utils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -33,6 +35,7 @@ import org.roda.core.data.v2.index.sublist.Sublist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.databasepreservation.utils.FileUtils;
 import com.databasepreservation.visualization.client.SavedSearch;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabaseFromToolkit;
@@ -118,7 +121,16 @@ public class SolrManager {
     // }
   }
 
-  public void removeDatabase(ViewerDatabase database) throws ViewerException {
+  public void removeDatabase(ViewerDatabase database, Path lobFolder) throws ViewerException {
+    // delete the LOBs
+    if (lobFolder != null) {
+      try {
+        FileUtils.deleteDirectoryRecursiveQuietly(lobFolder.resolve(database.getUUID()));
+      } catch (InvalidPathException e) {
+        throw new ViewerException("Error deleting LOBs for database " + database.getUUID(), e);
+      }
+    }
+
     // delete related table collections
     for (ViewerSchema viewerSchema : database.getMetadata().getSchemas()) {
       for (ViewerTable viewerTable : viewerSchema.getTables()) {
