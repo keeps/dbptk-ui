@@ -67,8 +67,8 @@ public class LobsResource {
       String fileName = rowUUID + "-" + columnID + ".bin";
       try {
         return ApiUtils.okResponse(new StreamResponse(fileName, MediaType.APPLICATION_OCTET_STREAM, DownloadUtils
-          .stream(Files.newInputStream(LobPathManager.getPath(ViewerFactory.getViewerConfiguration(), tableUUID,
-            columnID, rowUUID)))));
+          .stream(Files.newInputStream(LobPathManager.getPath(ViewerFactory.getViewerConfiguration(),
+            database.getUUID(), tableUUID, columnID, rowUUID)))));
       } catch (IOException e) {
         throw new RODAException("There was an IO problem retrieving the LOB.", e);
       }

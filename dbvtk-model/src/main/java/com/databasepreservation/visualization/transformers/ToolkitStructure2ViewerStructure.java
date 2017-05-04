@@ -568,17 +568,18 @@ public class ToolkitStructure2ViewerStructure {
     return result;
   }
 
-  public static ViewerRow getRow(ViewerAbstractConfiguration configuration, ViewerTable table, Row row, long rowIndex)
+  public static ViewerRow getRow(ViewerAbstractConfiguration configuration, String databaseUUID, ViewerTable table,
+    Row row, long rowIndex)
     throws ViewerException {
     ViewerRow result = new ViewerRow();
     String rowUUID = SolrUtils.randomUUID();
     result.setUUID(rowUUID);
-    result.setCells(getCells(configuration, table, row, rowIndex, rowUUID));
+    result.setCells(getCells(configuration, databaseUUID, table, row, rowIndex, rowUUID));
     return result;
   }
 
-  private static Map<String, ViewerCell> getCells(ViewerAbstractConfiguration configuration, ViewerTable table,
-    Row row, long rowIndex, String rowUUID) throws ViewerException {
+  private static Map<String, ViewerCell> getCells(ViewerAbstractConfiguration configuration, String databaseUUID,
+    ViewerTable table, Row row, long rowIndex, String rowUUID) throws ViewerException {
     HashMap<String, ViewerCell> result = new HashMap<>();
 
     int colIndex = 0;
@@ -587,7 +588,7 @@ public class ToolkitStructure2ViewerStructure {
       String solrColumnName = viewerColumn.getSolrName();
       try {
         result.put(solrColumnName,
-          getCell(configuration, table, toolkitCells.get(colIndex), rowIndex, colIndex++, rowUUID));
+          getCell(configuration, databaseUUID, table, toolkitCells.get(colIndex), rowIndex, colIndex++, rowUUID));
       } catch (ViewerException e) {
         LOGGER.error("Problem converting cell, omitted it (as if it were NULL)", e);
       }
@@ -596,8 +597,8 @@ public class ToolkitStructure2ViewerStructure {
     return result;
   }
 
-  private static ViewerCell getCell(ViewerAbstractConfiguration configuration, ViewerTable table, Cell cell,
-    long rowIndex, int colIndex, String rowUUID) throws ViewerException {
+  private static ViewerCell getCell(ViewerAbstractConfiguration configuration, String databaseUUID, ViewerTable table,
+    Cell cell, long rowIndex, int colIndex, String rowUUID) throws ViewerException {
     ViewerCell result = new ViewerCell();
 
     ViewerType columnType = table.getColumns().get(colIndex).getType();
@@ -607,12 +608,12 @@ public class ToolkitStructure2ViewerStructure {
 
       InputStream stream = null;
       try {
-        Path outputPath = LobPathManager.getPath(configuration, table.getUUID(), colIndex, rowUUID);
+        Path outputPath = LobPathManager.getPath(configuration, databaseUUID, table.getUUID(), colIndex, rowUUID);
         Files.createDirectories(outputPath.getParent());
         stream = binaryCell.createInputStream();
         Files.copy(stream, outputPath, StandardCopyOption.REPLACE_EXISTING);
       } catch (IOException | ModuleException e) {
-        throw new ViewerException("Could not copy blob to user directory", e);
+        throw new ViewerException("Could not copy blob", e);
       } finally {
         IOUtils.closeQuietly(stream);
         binaryCell.cleanResources();
