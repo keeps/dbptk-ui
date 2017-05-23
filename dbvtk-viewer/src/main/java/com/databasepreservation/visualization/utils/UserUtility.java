@@ -10,6 +10,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.client.Client;
@@ -20,8 +21,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriBuilder;
 
 import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
-import org.roda.core.data.exceptions.AuthenticationDeniedException;
+import org.jasig.cas.client.util.AbstractCasFilter;
+import org.jasig.cas.client.validation.Assertion;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
@@ -35,7 +38,6 @@ import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.visualization.client.SavedSearch;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
-import com.databasepreservation.visualization.filter.CasClient;
 import com.databasepreservation.visualization.server.ViewerConfiguration;
 import com.databasepreservation.visualization.shared.ViewerSafeConstants;
 import com.google.common.cache.CacheBuilder;
@@ -59,12 +61,38 @@ public class UserUtility {
 
   }
 
-  public static String getPasswordOrTicket(final HttpServletRequest request) {
+  private static String getPasswordOrTicket(final HttpServletRequest request, String databaseUUID)
+    throws AuthorizationDeniedException {
     final boolean usingCAS = ViewerConfiguration.getInstance().getViewerConfigurationAsBoolean(false,
       ViewerConfiguration.PROPERTY_FILTER_AUTHENTICATION_CAS);
 
     if (usingCAS) {
-      return request.getHeader("TGT");
+      String proxyTicketForRODA = null;
+      String errorReason = null;
+
+      HttpSession session = request.getSession();
+      if (session != null) {
+        Object attribute = session.getAttribute(AbstractCasFilter.CONST_CAS_ASSERTION);
+        if (attribute != null && attribute instanceof Assertion) {
+          Assertion assertion = (Assertion) attribute;
+          String rodaAddress = ViewerConfiguration.getInstance().getViewerConfigurationAsString(
+            ViewerConfiguration.PROPERTY_RODA_ADDRESS);
+
+          UriBuilder dipUri = getDIPUri(databaseUUID);
+
+          proxyTicketForRODA = assertion.getPrincipal().getProxyTicketFor(dipUri.toString());
+        } else {
+          errorReason = "Can not create a proxy ticket. Reason: CAS assertion is invalid";
+        }
+      } else {
+        errorReason = "Can not create a proxy ticket. Reason: no session found";
+      }
+
+      if (StringUtils.isNotBlank(proxyTicketForRODA)) {
+        return proxyTicketForRODA;
+      } else {
+        throw new AuthorizationDeniedException(errorReason);
+      }
     } else {
       String password = (String) request.getSession().getAttribute(RODA_USER_PASS);
       if (password == null) {
@@ -115,7 +143,8 @@ public class UserUtility {
   private static boolean userCanAccessDatabase(final HttpServletRequest request, User user, String databaseUUID)
     throws AuthorizationDeniedException, NotFoundException, GenericException {
     try {
-      return databasePermissions.get(new Pair<>(databaseUUID, new Pair<>(user, getPasswordOrTicket(request))));
+      return databasePermissions.get(new Pair<>(databaseUUID, new Pair<>(user, getPasswordOrTicket(request,
+        databaseUUID))));
     } catch (ExecutionException e) {
       Throwable cause = e.getCause();
       if (cause instanceof AuthorizationDeniedException) {
@@ -261,6 +290,32 @@ public class UserUtility {
     }
   }
 
+  private static UriBuilder getDIPUri(String databaseUUID) {
+    return getDIPUri(null, databaseUUID);
+  }
+
+  private static UriBuilder getDIPUri(Client client, String databaseUUID) {
+    boolean usingTemporaryClient = (client == null);
+    if (usingTemporaryClient) {
+      client = ClientBuilder.newClient();
+    }
+
+    String rodaAddress = ViewerConfiguration.getInstance().getViewerConfigurationAsString(
+      ViewerConfiguration.PROPERTY_RODA_ADDRESS);
+    String rodaDipPath = ViewerConfiguration.getInstance().getViewerConfigurationAsString(
+      ViewerConfiguration.PROPERTY_AUTHORIZATION_RODA_DIP_PATH);
+    rodaDipPath = rodaDipPath.replaceAll("\\{dip_id\\}", databaseUUID);
+
+    UriBuilder uri = client.target(rodaAddress).path(rodaDipPath).getUriBuilder();
+    uri.queryParam("acceptFormat", "json");
+
+    if (usingTemporaryClient) {
+      client.close();
+    }
+
+    return uri;
+  }
+
   private static class DatabasePermissionsCacheLoader extends CacheLoader<Pair<String, Pair<User, String>>, Boolean> {
 
     /**
@@ -284,31 +339,23 @@ public class UserUtility {
         ViewerConfiguration.PROPERTY_FILTER_AUTHENTICATION_CAS);
       String databaseUUID = pair.getFirst();
       User user = pair.getSecond().getFirst();
-      String tokenOrPassword = pair.getSecond().getSecond();
+      String ticketOrPassword = pair.getSecond().getSecond();
 
       Client client;
       if (usingCAS) {
         client = ClientBuilder.newClient();
       } else {
-        client = getBasicAuthClient(user.getName(), tokenOrPassword);
+        client = getBasicAuthClient(user.getName(), ticketOrPassword);
       }
 
-      String rodaAddress = ViewerConfiguration.getInstance().getViewerConfigurationAsString(
-        ViewerConfiguration.PROPERTY_RODA_ADDRESS);
-
-      String rodaDipPath = ViewerConfiguration.getInstance().getViewerConfigurationAsString(
-        ViewerConfiguration.PROPERTY_AUTHORIZATION_RODA_DIP_PATH);
-      rodaDipPath = rodaDipPath.replaceAll("\\{dip_id\\}", databaseUUID);
-
-      UriBuilder uri = client.target(rodaAddress).path(rodaDipPath).getUriBuilder();
-      uri.queryParam("acceptFormat", "json");
+      UriBuilder uri = getDIPUri(client, databaseUUID);
+      if (usingCAS) {
+        uri.queryParam("ticket", ticketOrPassword);
+      }
       WebTarget target = client.target(uri);
 
       try {
         Invocation.Builder request = target.request(MediaType.APPLICATION_JSON_TYPE);
-        if (usingCAS) {
-          addTokenGrantingToken(tokenOrPassword, request);
-        }
         String jsonObj = request.get(String.class);
 
         // DIP dip = JsonUtils.getObjectFromJson(jsonObj, DIP.class);
@@ -321,12 +368,12 @@ public class UserUtility {
         return false;
       } catch (javax.ws.rs.NotFoundException e) {
         throw new NotFoundException("Could not find the specified DIP", e);
-      } catch (GenericException e) {
-        throw new GenericException("Could not understand the server response", e);
       } catch (BadRequestException e) {
         String responseText = e.getResponse().readEntity(String.class);
         LOGGER.error("BadRequestException. Response: {}", responseText);
         throw e;
+      } finally {
+        client.close();
       }
     }
 
@@ -336,34 +383,6 @@ public class UserUtility {
     private Client getBasicAuthClient(String username, String password) throws Exception {
       HttpAuthenticationFeature basicAuth = HttpAuthenticationFeature.basic(username, password);
       return ClientBuilder.newClient().register(basicAuth);
-    }
-
-    /**
-     * Gets a CAS token using the user/pass, then modifies the request to
-     * include the token
-     */
-    private Invocation.Builder addTokenGrantingToken(String username, String password, Invocation.Builder request)
-      throws Exception {
-      String token;
-
-      final String casServerUrlPrefix = ViewerConfiguration.getInstance().getViewerConfigurationAsString(
-        ViewerConfiguration.PROPERTY_FILTER_AUTHENTICATION_CAS_SERVER_URL_PREFIX);
-      final CasClient casClient = new CasClient(casServerUrlPrefix);
-      try {
-        token = casClient.getTicketGrantingTicket(username, password);
-      } catch (final AuthenticationDeniedException e) {
-        // added explicitly for readibility
-        throw e;
-      }
-
-      return addTokenGrantingToken(token, request);
-    }
-
-    /**
-     * Modifies the request to include the CAS token
-     */
-    private Invocation.Builder addTokenGrantingToken(String tgt, Invocation.Builder request) throws Exception {
-      return request.header("tgt", tgt);
     }
 
     /**

@@ -166,7 +166,19 @@
             <param-name>redirectAfterValidation</param-name>
             <param-value>false</param-value>
         </init-param>
+        <init-param>
+            <param-name>proxyCallbackUrl</param-name>
+            <param-value>https://localhost:8888/callback</param-value>
+        </init-param>
+        <init-param>
+            <param-name>proxyReceptorUrl</param-name>
+            <param-value>/callback</param-value>
+        </init-param>
     </filter>
+    <filter-mapping>
+        <filter-name>CASValidationFilter</filter-name>
+        <url-pattern>/callback</url-pattern>
+    </filter-mapping>
     <filter-mapping>
         <filter-name>CASValidationFilter</filter-name>
         <url-pattern>/*</url-pattern>
