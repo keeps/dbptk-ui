@@ -26,6 +26,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.MenuItem;
@@ -108,6 +109,9 @@ public class DatabasePanel extends Composite {
 
   private void buildMenuForUser(final User user) {
     menu.clearItems();
+
+    final boolean hideMenu = Window.Location.getHref().contains("branding=false");
+
     BrowserService.Util.getInstance().isAuthenticationEnabled(new DefaultAsyncCallback<Boolean>() {
       @Override
       public void onSuccess(Boolean authenticationIsEnabled) {
@@ -121,14 +125,16 @@ public class DatabasePanel extends Composite {
                 }
               });
           } else {
-            MenuBar subMenu = new MenuBar(true);
-            subMenu.addItem(messages.loginLogout(), new Command() {
-              @Override
-              public void execute() {
-                UserLogin.getInstance().logout();
-              }
-            });
-            menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.USER, user.getFullName()), subMenu);
+            if (!hideMenu) {
+              MenuBar subMenu = new MenuBar(true);
+              subMenu.addItem(messages.loginLogout(), new Command() {
+                @Override
+                public void execute() {
+                  UserLogin.getInstance().logout();
+                }
+              });
+              menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.USER, user.getFullName()), subMenu);
+            }
           }
         } else {
           menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.NEW_UPLOAD, messages.newUpload()),
@@ -148,14 +154,16 @@ public class DatabasePanel extends Composite {
             });
         }
 
-        MenuBar languagesMenu = new MenuBar(true);
+        if (!hideMenu) {
+          MenuBar languagesMenu = new MenuBar(true);
 
-        setLanguageMenu(languagesMenu);
+          setLanguageMenu(languagesMenu);
 
-        MenuItem languagesMenuItem = new MenuItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.GLOBE,
-          selectedLanguage), languagesMenu);
-        languagesMenuItem.addStyleName("menu-item menu-item-label menu-item-language");
-        menu.addItem(languagesMenuItem);
+          MenuItem languagesMenuItem = new MenuItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.GLOBE,
+            selectedLanguage), languagesMenu);
+          languagesMenuItem.addStyleName("menu-item menu-item-label menu-item-language");
+          menu.addItem(languagesMenuItem);
+        }
       }
     });
   }
