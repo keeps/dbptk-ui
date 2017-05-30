@@ -18,13 +18,16 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.databasepreservation.visualization.server.ViewerConfiguration;
 import com.databasepreservation.visualization.server.ViewerFactory;
+import com.databasepreservation.visualization.shared.ViewerSafeConstants;
 
 /**
  * A filter that can be turned on/off using RODA configuration file.
@@ -58,6 +61,15 @@ public class OnOffFilter implements Filter {
    * Combined filter config.
    */
   private OnOffFilterConfig filterConfig = null;
+  /**
+   * IP addresses that are allowed to skip the filters when accessing some
+   * resources
+   */
+  private List<String> whitelistedIPs;
+  /**
+   * Ignore the whitelist and allow all IPs to access protected resources
+   */
+  private boolean whitelistAllIPs;
 
   @Override
   @SuppressWarnings("checkstyle:hiddenfield")
@@ -66,16 +78,47 @@ public class OnOffFilter implements Filter {
     if (isConfigAvailable()) {
       initInnerFilter();
     }
+    whitelistedIPs = ViewerConfiguration.getInstance().getWhitelistedIPs();
+    whitelistAllIPs = ViewerConfiguration.getInstance().getWhitelistAllIPs();
   }
 
   @Override
   public void doFilter(final ServletRequest servletRequest, final ServletResponse servletResponse,
     final FilterChain filterChain) throws IOException, ServletException {
-    if (isOn()) {
+    if (isOn() && !shouldSkipFilters(servletRequest)) {
       this.innerFilter.doFilter(servletRequest, servletResponse, filterChain);
     } else {
       filterChain.doFilter(servletRequest, servletResponse);
     }
+  }
+
+  /**
+   * Checks if the request is for a resource that is not protected by
+   * authentication filters but is instead protected via IP whitelist. And also
+   * if the IP where the request is coming from is in the IP list.
+   *
+   * If both of those are true, this will return true (which will in turn skip
+   * all filters).
+   *
+   * @param servletRequest
+   *          the HTTP request
+   *
+   * @return true if the filters should be skipped
+   */
+  private boolean shouldSkipFilters(final ServletRequest servletRequest) {
+    if (servletRequest instanceof HttpServletRequest) {
+      HttpServletRequest request = (HttpServletRequest) servletRequest;
+      String requestURI = request.getRequestURI();
+      if (StringUtils.isNotBlank(requestURI)
+        && requestURI.startsWith("/" + ViewerSafeConstants.API_SERVLET + ViewerSafeConstants.API_V1_MANAGE_RESOURCE)) {
+        String remoteIP = request.getRemoteAddr();
+        if (whitelistAllIPs || whitelistedIPs.contains(remoteIP)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   @Override

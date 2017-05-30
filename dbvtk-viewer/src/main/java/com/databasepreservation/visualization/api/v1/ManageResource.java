@@ -32,7 +32,8 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
 /**
- * Resource used to manage databases in the viewer
+ * Resource used to manage databases in the viewer. This resource should be
+ * protected (via OnOffFilter) and only accessible from specific IP addresses
  * 
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
@@ -58,9 +59,11 @@ public class ManageResource {
     @ApiParam(value = "Choose format in which to get the response", allowableValues = ViewerSafeConstants.API_DELETE_MEDIA_TYPES) @QueryParam(ViewerSafeConstants.API_QUERY_KEY_ACCEPT_FORMAT) String acceptFormat)
     throws RODAException, NotFoundException {
     String mediaType = ApiUtils.getMediaType(acceptFormat, request);
-    SolrManager solrManager = ViewerFactory.getSolrManager();
 
-    UserUtility.Authorization.allowIfAdmin(request);
+    // check for authorization, to protect against unauthorized access attempts
+    UserUtility.Authorization.checkDatabaseRemovalPermission(request, databaseUUID);
+
+    SolrManager solrManager = ViewerFactory.getSolrManager();
 
     ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
     if (database != null) {
@@ -69,6 +72,8 @@ public class ManageResource {
       } catch (ViewerException e) {
         throw new RODAException("Error deleting the database", e);
       }
+    } else {
+      throw new NotFoundException("Database not found");
     }
 
     return Response.ok(new ApiResponseMessage(ApiResponseMessage.OK, "Database deleted"), mediaType).build();

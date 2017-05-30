@@ -5,6 +5,7 @@
 package com.databasepreservation.visualization.utils;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -287,6 +288,24 @@ public class UserUtility {
       }
 
       throw error(user, "saved search", savedSearch.getUUID());
+    }
+
+    public static void checkDatabaseRemovalPermission(HttpServletRequest request, String databaseUUID)
+      throws AuthorizationDeniedException, NotFoundException, GenericException {
+
+      String originIP = request.getRemoteAddr();
+      if (ViewerConfiguration.getInstance().getWhitelistAllIPs()) {
+        return;
+      } else {
+        List<String> whitelistedIPs = ViewerConfiguration.getInstance().getWhitelistedIPs();
+        if (whitelistedIPs.contains(originIP)) {
+          return;
+        }
+      }
+
+      // database removal request has been denied
+      throw new AuthorizationDeniedException("Removal of database '" + databaseUUID + "' has been denied for address '"
+        + originIP + "'.");
     }
   }
 

@@ -11,11 +11,9 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
@@ -82,6 +80,11 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   public static final String[] PROPERTY_AUTHORIZATION_CACHE_TTL = new String[] {"ui", "authorization", "roda", "cache",
     "ttl"};
 
+  public static final String[] PROPERTY_FILTER_ONOFF_ALLOW_ALL_IPS = new String[] {"ui", "filter", "onOff",
+    "protectedResourcesAllowAllIPs"};
+  public static final String[] PROPERTY_FILTER_ONOFF_WHITELISTED_IPS = new String[] {"ui", "filter", "onOff",
+    "protectedResourcesWhitelistedIP"};
+
   private static boolean instantiatedWithoutErrors = true;
 
   // configurable paths related objects
@@ -96,8 +99,9 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   // Configuration related objects
   private static CompositeConfiguration viewerConfiguration = null;
   private static List<String> configurationFiles = null;
-  private static Map<String, Map<String, String>> viewerPropertiesCache = null;
 
+  private List<String> cachedWhitelistedIPs = null;
+  private Boolean cachedWhitelistAllIPs = null;
   private static LoadingCache<Locale, Messages> I18N_CACHE = CacheBuilder.newBuilder().build(
     new CacheLoader<Locale, Messages>() {
       @Override
@@ -123,7 +127,6 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
 
       // load core configurations
       configurationFiles = new ArrayList<String>();
-      viewerPropertiesCache = new HashMap<>();
       addConfiguration("dbvtk-viewer.properties");
       LOGGER.debug("Finished loading dbvtk-viewer.properties");
 
@@ -159,8 +162,9 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
    */
   @Override
   public void clearViewerCachableObjectsAfterConfigurationChange() {
-    viewerPropertiesCache.clear();
     I18N_CACHE.invalidateAll();
+    cachedWhitelistAllIPs = null;
+    cachedWhitelistedIPs = null;
     LOGGER.info("Reloaded dbvtk configurations after file change!");
   }
 
@@ -196,7 +200,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     return uploadsPath;
   }
 
-  public Path getReportPath(String databaseUUID){
+  public Path getReportPath(String databaseUUID) {
     return reportsPath.resolve(databaseUUID + ".md");
   }
 
@@ -206,6 +210,21 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
       new String[] {getViewerConfigurationAsString(ViewerConfiguration.PROPERTY_SOLR_HOSTNAME),
         getViewerConfigurationAsString(ViewerConfiguration.PROPERTY_SOLR_PORT),
         getViewerConfigurationAsString(ViewerConfiguration.PROPERTY_SOLR_ENDPOINT)});
+  }
+
+  public List<String> getWhitelistedIPs() {
+    if (cachedWhitelistedIPs == null) {
+      cachedWhitelistedIPs = getViewerConfigurationAsList(ViewerConfiguration.PROPERTY_FILTER_ONOFF_WHITELISTED_IPS);
+    }
+    return cachedWhitelistedIPs;
+  }
+
+  public boolean getWhitelistAllIPs() {
+    if (cachedWhitelistAllIPs == null) {
+      cachedWhitelistAllIPs = getViewerConfigurationAsBoolean(false,
+        ViewerConfiguration.PROPERTY_FILTER_ONOFF_ALLOW_ALL_IPS);
+    }
+    return cachedWhitelistAllIPs;
   }
 
   /*
