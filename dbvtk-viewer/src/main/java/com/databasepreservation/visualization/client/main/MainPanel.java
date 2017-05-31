@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.visualization.client.browse.DatabaseReportPanel;
-import com.databasepreservation.visualization.client.browse.UploadPanel;
 import org.roda.core.data.v2.index.IsIndexed;
 
 import com.databasepreservation.visualization.client.BrowserService;
@@ -14,6 +12,7 @@ import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatab
 import com.databasepreservation.visualization.client.browse.DatabaseInformationPanel;
 import com.databasepreservation.visualization.client.browse.DatabaseListPanel;
 import com.databasepreservation.visualization.client.browse.DatabasePanel;
+import com.databasepreservation.visualization.client.browse.DatabaseReportPanel;
 import com.databasepreservation.visualization.client.browse.DatabaseSearchPanel;
 import com.databasepreservation.visualization.client.browse.DatabaseSearchesPanel;
 import com.databasepreservation.visualization.client.browse.DatabaseUsersPanel;
@@ -33,6 +32,7 @@ import com.databasepreservation.visualization.client.browse.SchemaViewsPanel;
 import com.databasepreservation.visualization.client.browse.TablePanel;
 import com.databasepreservation.visualization.client.browse.TableSavedSearchEditPanel;
 import com.databasepreservation.visualization.client.browse.TableSavedSearchPanel;
+import com.databasepreservation.visualization.client.browse.UploadPanel;
 import com.databasepreservation.visualization.client.common.utils.RightPanelLoader;
 import com.databasepreservation.visualization.shared.client.Tools.FontAwesomeIconManager;
 import com.databasepreservation.visualization.shared.client.Tools.HistoryManager;

@@ -6,9 +6,6 @@ package com.databasepreservation.visualization.api.utils;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
@@ -18,13 +15,9 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-import javax.xml.transform.TransformerException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.roda.core.data.common.RodaConstants;
-import org.roda.core.data.exceptions.GenericException;
-import org.roda.core.data.exceptions.RODAException;
-import org.roda.core.data.v2.common.Pair;
 
 /**
  * API Utils
@@ -97,7 +90,8 @@ public class ApiUtils {
 
       }
     };
-    return Response.ok(so, streamResponse.getMediaType())
+    return Response
+      .ok(so, streamResponse.getMediaType())
       .header(HttpHeaders.CONTENT_DISPOSITION,
         contentDisposition(inline) + CONTENT_DISPOSITION_FILENAME_ARGUMENT + "\"" + streamResponse.getFilename() + "\"")
       .cacheControl(cacheControl).tag(tag).build();
@@ -116,7 +110,8 @@ public class ApiUtils {
 
       }
     };
-    return Response.ok(so, streamResponse.getMediaType())
+    return Response
+      .ok(so, streamResponse.getMediaType())
       .header(HttpHeaders.CONTENT_DISPOSITION,
         contentDisposition(inline) + CONTENT_DISPOSITION_FILENAME_ARGUMENT + "\"" + streamResponse.getFilename() + "\"")
       .build();

@@ -569,8 +569,7 @@ public class ToolkitStructure2ViewerStructure {
   }
 
   public static ViewerRow getRow(ViewerAbstractConfiguration configuration, String databaseUUID, ViewerTable table,
-    Row row, long rowIndex)
-    throws ViewerException {
+    Row row, long rowIndex) throws ViewerException {
     ViewerRow result = new ViewerRow();
     String rowUUID = SolrUtils.randomUUID();
     result.setUUID(rowUUID);

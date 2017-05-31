@@ -40,13 +40,13 @@ public class SIARDController {
   public static String getReportFileContents(String databaseUUID) throws NotFoundException {
     Path reportPath = ViewerConfiguration.getInstance().getReportPath(databaseUUID);
     String result;
-    if(Files.exists(reportPath)){
+    if (Files.exists(reportPath)) {
       try (InputStream in = Files.newInputStream(reportPath)) {
         result = IOUtils.toString(in);
       } catch (IOException e) {
         throw new NotFoundException("The database does not have a conversion report.", e);
       }
-    }else{
+    } else {
       throw new NotFoundException("The database does not have a conversion report.");
     }
     return result;

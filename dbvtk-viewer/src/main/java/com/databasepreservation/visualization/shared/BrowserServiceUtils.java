@@ -1,6 +1,5 @@
 package com.databasepreservation.visualization.shared;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -9,7 +8,6 @@ import com.databasepreservation.visualization.client.ViewerStructure.ViewerColum
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerType;
 import com.databasepreservation.visualization.client.common.search.SearchField;
-import com.databasepreservation.visualization.server.ViewerConfiguration;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>

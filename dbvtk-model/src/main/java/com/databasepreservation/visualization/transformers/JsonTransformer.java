@@ -28,7 +28,7 @@ public class JsonTransformer {
   }
 
   public static <T> T getObjectFromJson(String json, Class<T> objectClass) throws ViewerException {
-    if(json == null){
+    if (json == null) {
       return null;
     }
 

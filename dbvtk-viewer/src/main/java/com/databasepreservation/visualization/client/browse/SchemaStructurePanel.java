@@ -73,10 +73,8 @@ public class SchemaStructurePanel extends RightPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    BreadcrumbManager.updateBreadcrumb(
-      breadcrumb,
-      BreadcrumbManager.forSchemaStructure(database.getMetadata().getName(), database.getUUID(), schema.getName(),
-        schema.getUUID()));
+    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forSchemaStructure(database.getMetadata()
+      .getName(), database.getUUID(), schema.getName(), schema.getUUID()));
   }
 
   private void init() {

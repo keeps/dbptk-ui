@@ -275,7 +275,7 @@ public class HistoryManager {
     return createHistoryToken(Arrays.asList(ROUTE_UPLOADS, ROUTE_UPLOADS_NEW));
   }
 
-  public static String linkToUpload(String database_uuid){
+  public static String linkToUpload(String database_uuid) {
     return createHistoryToken(Arrays.asList(ROUTE_UPLOADS, database_uuid));
   }
 }

@@ -240,4 +240,11 @@ public class JavascriptUtils {
                                                                                                             });
                                                                                                             }
                                                                                                             }-*/;
+
+  public static native String convertMarkdownToHTML(String inputText) /*-{
+                                                                      return (new $wnd.showdown.Converter({
+                                                                          "headerLevelStart" : 3,
+                                                                          "literalMidWordUnderscores" : true
+                                                                      })).makeHtml(inputText);
+                                                                      }-*/;
 }

@@ -201,7 +201,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   }
 
   public Path getReportPath(String databaseUUID) {
-    return reportsPath.resolve(databaseUUID + ".md");
+    return reportsPath.resolve("report-" + databaseUUID + ".md");
   }
 
   public String getSolrUrl() {
