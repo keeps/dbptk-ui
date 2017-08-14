@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.visualization.client.common.utils.JavascriptUtils;
 import org.roda.core.data.v2.index.IsIndexed;
 
 import com.databasepreservation.visualization.client.BrowserService;
@@ -94,7 +95,7 @@ public class MainPanel extends Composite {
     DatabasePanel databasePanel = DatabasePanel.getInstance(databaseUUID);
     contentPanel.setWidget(databasePanel);
     databasePanel.load(rightPanelLoader);
-    contentPanel.getElement().scrollIntoView();
+    JavascriptUtils.scrollToElement(contentPanel.getElement());
   }
 
   public void onHistoryChanged(String token) {
