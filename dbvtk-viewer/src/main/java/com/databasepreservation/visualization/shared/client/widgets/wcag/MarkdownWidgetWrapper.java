@@ -51,7 +51,11 @@ public class MarkdownWidgetWrapper extends HTML {
         @Override
         public void onResponseReceived(Request request, Response response) {
           if (response.getStatusCode() == 200) {
-            MarkdownWidgetWrapper.this.setContentFromMarkdown(response.getText());
+            if(response.getText() == null || response.getText().isEmpty()){
+              MarkdownWidgetWrapper.this.setContentFromMarkdown("Nothing to report.");
+            }else{
+              MarkdownWidgetWrapper.this.setContentFromMarkdown(response.getText());
+            }
             callback.onSuccess(null);
           } else {
             MarkdownWidgetWrapper.this.setErrorMessage("Unable to retrieve the report file");
