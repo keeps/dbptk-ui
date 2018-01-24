@@ -324,7 +324,7 @@ public class SolrManager {
     } catch (SolrException e) {
       if (e.getMessage().contains(
         "collection already exists: " + ViewerSafeConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME)) {
-        LOGGER.info("collection " + ViewerSafeConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME + " already exists.");
+        LOGGER.info("collection {} already exists.", ViewerSafeConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME);
       } else {
         throw new ViewerException("Error creating collection "
           + ViewerSafeConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME, e);

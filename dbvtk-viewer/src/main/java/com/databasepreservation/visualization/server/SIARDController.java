@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.slf4j.Logger;
@@ -49,16 +50,16 @@ public class SIARDController {
 
   public static String loadFromLocal(String localPath) throws GenericException {
     String databaseUUID = SolrUtils.randomUUID();
-    LOGGER.info("converting database " + databaseUUID);
+    LOGGER.info("converting database {}", databaseUUID);
     try {
       Path workingDirectory = createUploadWorkingDirectory(databaseUUID);
-      if (convertSIARDtoSolr(Paths.get(localPath), workingDirectory, databaseUUID)) {
-        LOGGER.info("Conversion to SIARD successful, database: " + databaseUUID);
-      } else {
-        LOGGER.error("Conversion to SIARD failed for database " + databaseUUID);
-      }
+      convertSIARDtoSolr(Paths.get(localPath), workingDirectory, databaseUUID);
+      LOGGER.info("Conversion to SIARD successful, database: {}", databaseUUID);
     } catch (IOException e) {
       throw new GenericException("could not create temporary working directory", e);
+    } catch (GenericException e) {
+      LOGGER.error("Conversion to SIARD failed for database {}", databaseUUID);
+      throw e;
     }
     return databaseUUID;
   }
@@ -158,7 +159,7 @@ public class SIARDController {
     @Override
     public void notifyTableProgressDetailed(DatabaseStructure structure, TableStructure table, Row row,
       long completedRows, long totalRows) {
-      // do nothing
+      // do nothing for each row
     }
 
     @Override
