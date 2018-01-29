@@ -53,7 +53,7 @@ public class SIARDController {
     LOGGER.info("converting database {}", databaseUUID);
     try {
       Path workingDirectory = createUploadWorkingDirectory(databaseUUID);
-      convertSIARDtoSolr(Paths.get(localPath), workingDirectory, databaseUUID);
+      convertSIARDtoSolr(Paths.get(localPath), databaseUUID);
       LOGGER.info("Conversion to SIARD successful, database: {}", databaseUUID);
     } catch (IOException e) {
       throw new GenericException("could not create temporary working directory", e);
@@ -68,7 +68,7 @@ public class SIARDController {
     return Files.createDirectories(ViewerConfiguration.getInstance().getUploadsPath().resolve(databaseUUID));
   }
 
-  private static boolean convertSIARDtoSolr(Path siardPath, Path workingDirectory, String databaseUUID)
+  private static boolean convertSIARDtoSolr(Path siardPath, String databaseUUID)
     throws GenericException {
     LOGGER.info("starting to convert database " + siardPath.toAbsolutePath().toString());
 

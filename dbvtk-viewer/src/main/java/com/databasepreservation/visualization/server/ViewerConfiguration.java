@@ -101,7 +101,6 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   private static Path logPath;
   private static Path configPath;
   private static Path exampleConfigPath;
-  private static Path uploadsPath;
   private static Path reportsPath;
 
   // Configuration related objects
@@ -204,10 +203,6 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     }
   }
 
-  public Path getUploadsPath() {
-    return uploadsPath;
-  }
-
   public Path getReportPath(String databaseUUID) {
     return reportsPath.resolve("report-" + databaseUUID + ".md");
   }
@@ -273,7 +268,6 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     exampleConfigPath = viewerHomePath.resolve(ViewerConstants.VIEWER_EXAMPLE_CONFIG_FOLDER);
     lobsPath = viewerHomePath.resolve(ViewerConstants.VIEWER_LOBS_FOLDER);
     logPath = viewerHomePath.resolve(ViewerConstants.VIEWER_LOG_FOLDER);
-    uploadsPath = viewerHomePath.resolve(ViewerConstants.VIEWER_UPLOADS_FOLDER);
     reportsPath = viewerHomePath.resolve(ViewerConstants.VIEWER_REPORTS_FOLDER);
 
     configureLogback();
@@ -300,7 +294,6 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     essentialDirectories.add(lobsPath);
     essentialDirectories.add(logPath);
     essentialDirectories.add(exampleConfigPath);
-    essentialDirectories.add(uploadsPath);
     essentialDirectories.add(reportsPath);
 
     for (Path path : essentialDirectories) {
