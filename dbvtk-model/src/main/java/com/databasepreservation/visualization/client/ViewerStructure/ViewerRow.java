@@ -13,6 +13,7 @@ import org.roda.core.data.v2.index.IsIndexed;
  */
 public class ViewerRow implements Serializable, IsIndexed {
   private String UUID;
+  private String tableId;
   private Map<String, ViewerCell> cells;
 
   public ViewerRow() {
@@ -61,5 +62,13 @@ public class ViewerRow implements Serializable, IsIndexed {
   @Override
   public List<String> liteFields() {
     return Collections.emptyList();
+  }
+
+  public String getTableId() {
+    return tableId;
+  }
+
+  public void setTableId(String tableId) {
+    this.tableId = tableId;
   }
 }

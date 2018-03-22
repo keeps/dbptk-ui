@@ -58,33 +58,33 @@ public interface BrowserService extends RemoteService {
     String localeString) throws GenericException, AuthorizationDeniedException, RequestNotValidException;
 
   IndexResult<SavedSearch> findSavedSearches(String databaseUUID, Filter filter, Sorter sorter, Sublist sublist,
-    Facets facets, String localeString) throws GenericException, AuthorizationDeniedException,
-    RequestNotValidException, NotFoundException;
+    Facets facets, String localeString)
+    throws GenericException, AuthorizationDeniedException, RequestNotValidException, NotFoundException;
 
-  <T extends IsIndexed> T retrieve(String databaseUUID, String classNameToReturn, String id)
+  <T extends IsIndexed> T retrieve(String databaseUUID, String classNameToReturn, String uuid)
     throws AuthorizationDeniedException, GenericException, NotFoundException;
 
-  IndexResult<ViewerRow> findRows(String databaseUUID, String tableUUID, Filter filter, Sorter sorter, Sublist sublist,
+  IndexResult<ViewerRow> findRows(String databaseUUID, Filter filter, Sorter sorter, Sublist sublist,
     Facets facets, String localeString) throws GenericException, AuthorizationDeniedException, RequestNotValidException;
 
-  <T extends IsIndexed> Long countRows(String databaseUUID, String tableUUID, Filter filter)
+  <T extends IsIndexed> Long countRows(String databaseUUID, Filter filter)
     throws AuthorizationDeniedException, GenericException, RequestNotValidException;
 
-  <T extends IsIndexed> ViewerRow retrieveRows(String databaseUUID, String tableUUID, String rowUUID)
+  <T extends IsIndexed> ViewerRow retrieveRows(String databaseUUID, String rowUUID)
     throws AuthorizationDeniedException, GenericException, NotFoundException;
 
   String getSolrQueryString(Filter filter, Sorter sorter, Sublist sublist, Facets facets)
     throws AuthorizationDeniedException, GenericException, RequestNotValidException;
 
   String saveSearch(String name, String description, String tableUUID, String tableName, String databaseUUID,
-    SearchInfo searchInfo) throws AuthorizationDeniedException, GenericException, RequestNotValidException,
-    NotFoundException;
+    SearchInfo searchInfo)
+    throws AuthorizationDeniedException, GenericException, RequestNotValidException, NotFoundException;
 
   void editSearch(String databaseUUID, String savedSearchUUID, String name, String description)
     throws AuthorizationDeniedException, GenericException, RequestNotValidException, NotFoundException;
 
-  void deleteSearch(String databaseUUID, String savedSearchUUID) throws AuthorizationDeniedException, GenericException,
-    RequestNotValidException, NotFoundException;
+  void deleteSearch(String databaseUUID, String savedSearchUUID)
+    throws AuthorizationDeniedException, GenericException, RequestNotValidException, NotFoundException;
 
   Boolean isAuthenticationEnabled() throws RODAException;
 
@@ -94,8 +94,8 @@ public interface BrowserService extends RemoteService {
 
   String uploadSIARD(String path) throws GenericException;
 
-  ViewerDatabase uploadSIARDStatus(String databaseUUID) throws GenericException, AuthorizationDeniedException,
-    NotFoundException;
+  ViewerDatabase uploadSIARDStatus(String databaseUUID)
+    throws GenericException, AuthorizationDeniedException, NotFoundException;
 
   String getReport(String databaseUUID) throws GenericException, AuthorizationDeniedException, NotFoundException;
 }

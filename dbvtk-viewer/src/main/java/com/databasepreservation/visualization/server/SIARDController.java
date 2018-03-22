@@ -129,7 +129,11 @@ public class SIARDController {
 
     @Override
     public void notifyStructureObtained(DatabaseStructure structure) {
-      solrManager.updateDatabaseTotalSchemas(databaseUUID, structure.getSchemas().size());
+      // can not do this yet because the database has not yet been created by dbvtk
+      // export module
+
+      // solrManager.updateDatabaseTotalSchemas(databaseUUID,
+      // structure.getSchemas().size());
     }
 
     @Override

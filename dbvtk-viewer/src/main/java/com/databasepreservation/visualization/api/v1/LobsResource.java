@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import com.databasepreservation.visualization.api.utils.ApiUtils;
 import com.databasepreservation.visualization.api.utils.DownloadUtils;
 import com.databasepreservation.visualization.api.utils.StreamResponse;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerRow;
 import com.databasepreservation.visualization.server.ViewerFactory;
 import com.databasepreservation.visualization.shared.ViewerSafeConstants;
@@ -58,17 +57,16 @@ public class LobsResource {
     @PathParam(ViewerSafeConstants.API_PATH_PARAM_COLUMN_ID) Integer columnID) throws RODAException {
     SolrManager solrManager = ViewerFactory.getSolrManager();
 
-    ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
-    UserUtility.Authorization.checkTableAccessPermission(this.request, database, tableUUID);
+    UserUtility.Authorization.checkDatabaseAccessPermission(this.request, databaseUUID);
 
-    ViewerRow row = solrManager.retrieveRows(ViewerRow.class, tableUUID, rowUUID);
+    ViewerRow row = solrManager.retrieveRows(ViewerRow.class, databaseUUID, rowUUID);
 
     if (row != null) {
       String fileName = rowUUID + "-" + columnID + ".bin";
       try {
-        return ApiUtils.okResponse(new StreamResponse(fileName, MediaType.APPLICATION_OCTET_STREAM, DownloadUtils
-          .stream(Files.newInputStream(LobPathManager.getPath(ViewerFactory.getViewerConfiguration(),
-            database.getUUID(), tableUUID, columnID, rowUUID)))));
+        return ApiUtils.okResponse(new StreamResponse(fileName, MediaType.APPLICATION_OCTET_STREAM,
+          DownloadUtils.stream(Files.newInputStream(LobPathManager.getPath(ViewerFactory.getViewerConfiguration(),
+            databaseUUID, tableUUID, columnID, rowUUID)))));
       } catch (IOException e) {
         throw new RODAException("There was an IO problem retrieving the LOB.", e);
       }

@@ -96,7 +96,7 @@ public class ReferencesPanel extends RightPanel {
     cellSchema.setText(table.getName());
     cellColumn.setText(columnName);
 
-    BrowserService.Util.getInstance().retrieveRows(database.getUUID(), tableUUID, recordUUID,
+    BrowserService.Util.getInstance().retrieveRows(database.getUUID(), recordUUID,
       new DefaultAsyncCallback<ViewerRow>() {
         @Override
         public void onSuccess(ViewerRow result) {

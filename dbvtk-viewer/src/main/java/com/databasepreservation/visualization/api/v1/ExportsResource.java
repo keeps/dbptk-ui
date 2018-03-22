@@ -74,12 +74,10 @@ public class ExportsResource {
   // }
 
   @GET
-  @Path("/csv/{" + ViewerSafeConstants.API_PATH_PARAM_DATABASE_UUID + "}/{"
-    + ViewerSafeConstants.API_PATH_PARAM_TABLE_UUID + "}")
+  @Path("/csv/{" + ViewerSafeConstants.API_PATH_PARAM_DATABASE_UUID + "}")
   @Produces({MediaType.APPLICATION_OCTET_STREAM})
   @ApiOperation(value = "Export as CSV", notes = "Export query results as CSV.", response = String.class, responseContainer = "CSVExport")
   public Response getCSVResultsPost(@PathParam(ViewerSafeConstants.API_PATH_PARAM_DATABASE_UUID) String databaseUUID,
-    @PathParam(ViewerSafeConstants.API_PATH_PARAM_TABLE_UUID) String tableUUID,
     @QueryParam(ViewerSafeConstants.API_QUERY_PARAM_FILTER) String filterParam,
     @QueryParam(ViewerSafeConstants.API_QUERY_PARAM_FIELDS) String fieldsListParam,
     @QueryParam(ViewerSafeConstants.API_QUERY_PARAM_SORTER) String sorterParam,
@@ -97,11 +95,10 @@ public class ExportsResource {
       sublist = JsonUtils.getObjectFromJson(subListParam, Sublist.class);
     }
 
-    ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
-    UserUtility.Authorization.checkTableAccessPermission(this.request, database, tableUUID);
+    UserUtility.Authorization.checkDatabaseAccessPermission(this.request, databaseUUID);
 
     // TODO: use viewerTable to convert solrColumnNames into displayColumnNames
-    InputStream rowsCSV = solrManager.findRowsCSV(tableUUID, filter, sorter, sublist, fields);
+    InputStream rowsCSV = solrManager.findRowsCSV(databaseUUID, filter, sorter, sublist, fields);
 
     return ApiUtils.okResponse(new StreamResponse("file.csv", MediaType.APPLICATION_OCTET_STREAM, DownloadUtils
       .stream(rowsCSV)));

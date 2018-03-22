@@ -11,6 +11,8 @@ public class ViewerTable implements Serializable {
   // used to identify the collection containing data from this table
   private String uuid;
 
+  private String id;
+
   private String name;
 
   private String description;
@@ -125,5 +127,13 @@ public class ViewerTable implements Serializable {
 
   public void setCheckConstraints(List<ViewerCheckConstraint> checkConstraints) {
     this.checkConstraints = checkConstraints;
+  }
+
+  public String getId() {
+    return id;
+  }
+
+  public void setId(String id) {
+    this.id = id;
   }
 }

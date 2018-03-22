@@ -77,38 +77,35 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
   }
 
   @Override
-  public IndexResult<ViewerRow> findRows(String databaseUUID, String tableUUID, Filter filter, Sorter sorter,
+  public IndexResult<ViewerRow> findRows(String databaseUUID, Filter filter, Sorter sorter,
     Sublist sublist, Facets facets, String localeString) throws GenericException, AuthorizationDeniedException,
     RequestNotValidException {
     try {
-      ViewerDatabase database = ViewerFactory.getSolrManager().retrieve(ViewerDatabase.class, databaseUUID);
-      UserUtility.Authorization.checkTableAccessPermission(getThreadLocalRequest(), database, tableUUID);
+      UserUtility.Authorization.checkDatabaseAccessPermission(getThreadLocalRequest(), databaseUUID);
     } catch (NotFoundException e) {
       throw new RequestNotValidException("Invalid database UUID: " + databaseUUID, e);
     }
 
-    return ViewerFactory.getSolrManager().findRows(ViewerRow.class, tableUUID, filter, sorter, sublist, facets);
+    return ViewerFactory.getSolrManager().findRows(ViewerRow.class, databaseUUID, filter, sorter, sublist, facets);
   }
 
   @Override
-  public Long countRows(String databaseUUID, String tableUUID, Filter filter) throws AuthorizationDeniedException,
+  public Long countRows(String databaseUUID, Filter filter) throws AuthorizationDeniedException,
     GenericException, RequestNotValidException {
     try {
-      ViewerDatabase database = ViewerFactory.getSolrManager().retrieve(ViewerDatabase.class, databaseUUID);
-      UserUtility.Authorization.checkTableAccessPermission(getThreadLocalRequest(), database, tableUUID);
+      UserUtility.Authorization.checkDatabaseAccessPermission(getThreadLocalRequest(), databaseUUID);
     } catch (NotFoundException e) {
       throw new RequestNotValidException("Invalid database UUID: " + databaseUUID, e);
     }
 
-    return ViewerFactory.getSolrManager().countRows(ViewerRow.class, tableUUID, filter);
+    return ViewerFactory.getSolrManager().countRows(ViewerRow.class, databaseUUID, filter);
   }
 
   @Override
-  public ViewerRow retrieveRows(String databaseUUID, String tableUUID, String rowUUID)
+  public ViewerRow retrieveRows(String databaseUUID, String rowUUID)
     throws AuthorizationDeniedException, GenericException, NotFoundException {
-    ViewerDatabase database = ViewerFactory.getSolrManager().retrieve(ViewerDatabase.class, databaseUUID);
-    UserUtility.Authorization.checkTableAccessPermission(getThreadLocalRequest(), database, tableUUID);
-    return ViewerFactory.getSolrManager().retrieveRows(ViewerRow.class, tableUUID, rowUUID);
+    UserUtility.Authorization.checkDatabaseAccessPermission(getThreadLocalRequest(), databaseUUID);
+    return ViewerFactory.getSolrManager().retrieveRows(ViewerRow.class, databaseUUID, rowUUID);
   }
 
   @Override
@@ -122,8 +119,7 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
   public String saveSearch(String name, String description, String tableUUID, String tableName, String databaseUUID,
     SearchInfo searchInfo) throws AuthorizationDeniedException, GenericException, RequestNotValidException,
     NotFoundException {
-    ViewerDatabase database = ViewerFactory.getSolrManager().retrieve(ViewerDatabase.class, databaseUUID);
-    UserUtility.Authorization.checkTableAccessPermission(getThreadLocalRequest(), database, tableUUID);
+    UserUtility.Authorization.checkDatabaseAccessPermission(getThreadLocalRequest(), databaseUUID);
 
     String searchInfoJson = JsonUtils.getJsonFromObject(searchInfo);
 

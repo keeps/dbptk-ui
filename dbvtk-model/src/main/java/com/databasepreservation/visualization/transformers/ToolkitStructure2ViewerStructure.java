@@ -327,6 +327,7 @@ public class ToolkitStructure2ViewerStructure {
   private static ViewerTable getTable(ViewerDatabaseFromToolkit vdb, TableStructure table, ReferenceHolder references)
     throws ViewerException {
     ViewerTable result = new ViewerTable();
+    result.setId(table.getId());
     result.setUuid(references.getTableUUID(table.getId()));
     result.setName(table.getName());
     result.setDescription(table.getDescription());
@@ -572,6 +573,7 @@ public class ToolkitStructure2ViewerStructure {
     Row row, long rowIndex) throws ViewerException {
     ViewerRow result = new ViewerRow();
     String rowUUID = SolrUtils.randomUUID();
+    result.setTableId(table.getId());
     result.setUUID(rowUUID);
     result.setCells(getCells(configuration, databaseUUID, table, row, rowIndex, rowUUID));
     return result;

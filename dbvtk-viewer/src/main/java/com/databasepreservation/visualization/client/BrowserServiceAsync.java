@@ -56,14 +56,14 @@ public interface BrowserServiceAsync {
 
   // rows
 
-  <T extends IsIndexed> void findRows(java.lang.String databaseUUID, java.lang.String tableUUID, Filter filter,
+  <T extends IsIndexed> void findRows(java.lang.String databaseUUID, Filter filter,
     Sorter sorter, Sublist sublist, Facets facets, java.lang.String localeString,
     AsyncCallback<org.roda.core.data.v2.index.IndexResult<ViewerRow>> callback);
 
-  void countRows(java.lang.String databaseUUID, java.lang.String tableUUID, Filter filter,
+  void countRows(java.lang.String databaseUUID, Filter filter,
     AsyncCallback<java.lang.Long> callback);
 
-  void retrieveRows(java.lang.String databaseUUID, java.lang.String tableUUID, java.lang.String rowUUID,
+  void retrieveRows(java.lang.String databaseUUID, java.lang.String rowUUID,
     AsyncCallback<ViewerRow> callback);
 
   void getSearchFields(ViewerTable viewerTable, AsyncCallback<List<SearchField>> async);

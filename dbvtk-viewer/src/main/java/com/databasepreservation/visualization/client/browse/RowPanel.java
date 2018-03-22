@@ -100,7 +100,7 @@ public class RowPanel extends RightPanel {
       + SafeHtmlUtils.htmlEscape(rowUUID)));
     recordHeader.setWidget(CommonClientUtils.getSchemaAndTableHeader(database.getUUID(), table, "h1"));
 
-    BrowserService.Util.getInstance().retrieveRows(database.getUUID(), tableUUID, rowUUID,
+    BrowserService.Util.getInstance().retrieveRows(database.getUUID(), rowUUID,
       new DefaultAsyncCallback<ViewerRow>() {
         @Override
         public void onSuccess(ViewerRow result) {

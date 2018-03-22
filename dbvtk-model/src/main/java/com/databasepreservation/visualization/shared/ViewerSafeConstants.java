@@ -15,36 +15,36 @@ public class ViewerSafeConstants {
   /*
    * SOLR CONFIGSETS
    */
+  public static final String SOLR_CONFIGSET_DATABASES_RESOURCE = "solr-configset/dbvtk_databases";
   public static final String SOLR_CONFIGSET_DATABASE_RESOURCE = "solr-configset/dbvtk_database";
-  public static final String SOLR_CONFIGSET_TABLE_RESOURCE = "solr-configset/dbvtk_table";
   public static final String SOLR_CONFIGSET_SEARCHES_RESOURCE = "solr-configset/dbvtk_searches";
+  public static final String SOLR_CONFIGSET_DATABASES = "dbvtk_databases";
   public static final String SOLR_CONFIGSET_DATABASE = "dbvtk_database";
-  public static final String SOLR_CONFIGSET_TABLE = "dbvtk_table";
   public static final String SOLR_CONFIGSET_SEARCHES = "dbvtk_searches";
 
   /*
    * COLLECTION STRUCTURE
    */
-  public static final String SOLR_INDEX_DATABASE_COLLECTION_NAME = "dbv-database";
+  public static final String SOLR_INDEX_DATABASES_COLLECTION_NAME = "dbv-databases";
   public static final String SOLR_INDEX_SEARCHES_COLLECTION_NAME = "dbv-searches";
-  public static final String SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX = "dbv-table-";
+  public static final String SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX = "dbv-database-";
   public static final String SOLR_INDEX_ROW_COLUMN_NAME_PREFIX = "col";
   public static final String SOLR_INDEX_ROW_LOB_COLUMN_NAME_PREFIX = "lob";
 
   /*
    * DATABASE FIELDS
    */
-  public static final String SOLR_DATABASE_ID = "id";
-  public static final String SOLR_DATABASE_STATUS = "status";
-  public static final String SOLR_DATABASE_METADATA = "metadata";
-  public static final String SOLR_DATABASE_TOTAL_ROWS = "total_rows";
-  public static final String SOLR_DATABASE_TOTAL_TABLES = "total_tables";
-  public static final String SOLR_DATABASE_TOTAL_SCHEMAS = "total_schemas";
-  public static final String SOLR_DATABASE_INGESTED_ROWS = "ingested_rows";
-  public static final String SOLR_DATABASE_INGESTED_TABLES = "ingested_tables";
-  public static final String SOLR_DATABASE_INGESTED_SCHEMAS = "ingested_schemas";
-  public static final String SOLR_DATABASE_CURRENT_TABLE_NAME = "current_table_name";
-  public static final String SOLR_DATABASE_CURRENT_SCHEMA_NAME = "current_schema_name";
+  public static final String SOLR_DATABASES_ID = "id";
+  public static final String SOLR_DATABASES_STATUS = "status";
+  public static final String SOLR_DATABASES_METADATA = "metadata";
+  public static final String SOLR_DATABASES_TOTAL_ROWS = "total_rows";
+  public static final String SOLR_DATABASES_TOTAL_TABLES = "total_tables";
+  public static final String SOLR_DATABASES_TOTAL_SCHEMAS = "total_schemas";
+  public static final String SOLR_DATABASES_INGESTED_ROWS = "ingested_rows";
+  public static final String SOLR_DATABASES_INGESTED_TABLES = "ingested_tables";
+  public static final String SOLR_DATABASES_INGESTED_SCHEMAS = "ingested_schemas";
+  public static final String SOLR_DATABASES_CURRENT_TABLE_NAME = "current_table_name";
+  public static final String SOLR_DATABASES_CURRENT_SCHEMA_NAME = "current_schema_name";
 
   /*
    * SEARCHES FIELDS
@@ -62,6 +62,7 @@ public class ViewerSafeConstants {
    * ROW FIELDS
    */
   public static final String SOLR_ROW_ID = "id";
+  public static final String SOLR_TABLE_ID = "tableId";
   public static final String SOLR_ROW_SEARCH = "search";
 
   /*

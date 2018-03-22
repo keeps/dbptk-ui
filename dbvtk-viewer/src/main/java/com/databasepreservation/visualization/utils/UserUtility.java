@@ -251,7 +251,7 @@ public class UserUtility {
       throw error(user, resultClass.getName(), result.getId());
     }
 
-    public static void checkTableAccessPermission(HttpServletRequest request, ViewerDatabase database, String tableUUID)
+    public static void checkDatabaseAccessPermission(HttpServletRequest request, String databaseUUID)
       throws AuthorizationDeniedException, NotFoundException, GenericException {
       if (!isEnabled()) {
         return;
@@ -260,14 +260,13 @@ public class UserUtility {
       User user = getUser(request);
       // sanity check: table must belong to the database. needed to protect
       // against ViewerTable object forgery
-      if (database.getMetadata().getTable(tableUUID) != null
-        && userCanAccessDatabase(request, user, database.getUUID())) {
+      if (userCanAccessDatabase(request, user, databaseUUID)) {
         // allow if the user can access the database that the table belongs to
         return;
       }
 
       // access to everything else is denied
-      throw error(user, "table", tableUUID);
+      throw error(user, "database", databaseUUID);
     }
 
     public static void checkSavedSearchPermission(HttpServletRequest request, String databaseUUID,

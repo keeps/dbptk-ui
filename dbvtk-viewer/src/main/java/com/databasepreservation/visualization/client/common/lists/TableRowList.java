@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.visualization.shared.client.Tools.FilterUtils;
 import org.roda.core.data.v2.common.Pair;
 import org.roda.core.data.v2.index.IndexResult;
 import org.roda.core.data.v2.index.facet.Facets;
@@ -181,7 +182,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
   @Override
   protected void getData(Sublist sublist, ColumnSortList columnSortList, AsyncCallback<IndexResult<ViewerRow>> callback) {
     ViewerTable table = getObject().getSecond();
-    Filter filter = getFilter();
+    Filter filter = FilterUtils.filterByTable(getFilter(), table.getId());
     currentSubList = sublist;
 
     Map<Column<ViewerRow, ?>, List<String>> columnSortingKeyMap = new HashMap<>();
@@ -197,7 +198,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
 
     GWT.log("Filter: " + filter);
 
-    BrowserService.Util.getInstance().findRows(getObject().getFirst().getUUID(), table.getUUID(), filter,
+    BrowserService.Util.getInstance().findRows(getObject().getFirst().getUUID(), filter,
       currentSorter, sublist, getFacets(), LocaleInfo.getCurrentLocale().getLocaleName(), callback);
   }
 
@@ -245,17 +246,15 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
     ViewerTable table = getObject().getSecond();
 
     // builds something like
-    // http://hostname:port/api/v1/exports/csv/databaseUUID/tableUUID?
+    // http://hostname:port/api/v1/exports/csv/databaseUUID?
     StringBuilder urlBuilder = new StringBuilder();
     String base = com.google.gwt.core.client.GWT.getHostPageBaseURL();
     String servlet = ViewerSafeConstants.API_SERVLET;
     String resource = ViewerSafeConstants.API_V1_EXPORT_RESOURCE;
     String method = "/csv/";
     String databaseUUID = database.getUUID();
-    String tableUUID = table.getUUID();
     String queryStart = "?";
-    urlBuilder.append(base).append(servlet).append(resource).append(method).append(databaseUUID).append("/")
-      .append(tableUUID).append(queryStart);
+    urlBuilder.append(base).append(servlet).append(resource).append(method).append(databaseUUID).append(queryStart);
 
     // prepare parameter: field list
     List<String> solrColumns = new ArrayList<>();

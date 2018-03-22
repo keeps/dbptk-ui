@@ -96,8 +96,8 @@ public class SolrUtils {
     return UUID.randomUUID().toString();
   }
 
-  public static String getTableCollectionName(String tableUUID) {
-    return ViewerSafeConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + tableUUID;
+  public static String getDatabaseCollectionName(String databaseUUID) {
+    return ViewerSafeConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + databaseUUID;
   }
 
   public static void setupSolrCloudConfigsets(String zkHost) {
@@ -128,11 +128,11 @@ public class SolrUtils {
 
           String nameWithoutOriginPart = null;
           Path destination = null;
-          if (name.startsWith(ViewerSafeConstants.SOLR_CONFIGSET_DATABASE_RESOURCE + "/")) {
-            nameWithoutOriginPart = name.substring(ViewerSafeConstants.SOLR_CONFIGSET_DATABASE_RESOURCE.length() + 1);
+          if (name.startsWith(ViewerSafeConstants.SOLR_CONFIGSET_DATABASES_RESOURCE + "/")) {
+            nameWithoutOriginPart = name.substring(ViewerSafeConstants.SOLR_CONFIGSET_DATABASES_RESOURCE.length() + 1);
             destination = databaseDir;
-          } else if (name.startsWith(ViewerSafeConstants.SOLR_CONFIGSET_TABLE_RESOURCE + "/")) {
-            nameWithoutOriginPart = name.substring(ViewerSafeConstants.SOLR_CONFIGSET_TABLE_RESOURCE.length() + 1);
+          } else if (name.startsWith(ViewerSafeConstants.SOLR_CONFIGSET_DATABASE_RESOURCE + "/")) {
+            nameWithoutOriginPart = name.substring(ViewerSafeConstants.SOLR_CONFIGSET_DATABASE_RESOURCE.length() + 1);
             destination = tableDir;
           } else if (name.startsWith(ViewerSafeConstants.SOLR_CONFIGSET_SEARCHES_RESOURCE + "/")) {
             nameWithoutOriginPart = name.substring(ViewerSafeConstants.SOLR_CONFIGSET_SEARCHES_RESOURCE.length() + 1);
@@ -146,8 +146,8 @@ public class SolrUtils {
         }
 
         // upload configs to solr
-        uploadConfig(zkClient, databaseDir, ViewerSafeConstants.SOLR_CONFIGSET_DATABASE);
-        uploadConfig(zkClient, tableDir, ViewerSafeConstants.SOLR_CONFIGSET_TABLE);
+        uploadConfig(zkClient, databaseDir, ViewerSafeConstants.SOLR_CONFIGSET_DATABASES);
+        uploadConfig(zkClient, tableDir, ViewerSafeConstants.SOLR_CONFIGSET_DATABASE);
         uploadConfig(zkClient, savedSearchesDir, ViewerSafeConstants.SOLR_CONFIGSET_SEARCHES);
       }
     } catch (IOException e) {
@@ -215,7 +215,7 @@ public class SolrUtils {
   private static <T> String getIndexName(Class<T> resultClass) throws GenericException {
     String indexName = null;
     if (resultClass.equals(ViewerDatabase.class)) {
-      indexName = ViewerSafeConstants.SOLR_INDEX_DATABASE_COLLECTION_NAME;
+      indexName = ViewerSafeConstants.SOLR_INDEX_DATABASES_COLLECTION_NAME;
     } else if (resultClass.equals(SavedSearch.class)) {
       indexName = ViewerSafeConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME;
     } else if (resultClass.equals(ViewerRow.class)) {
@@ -303,12 +303,12 @@ public class SolrUtils {
   }
 
   public static <T extends Serializable> IndexResult<T> find(SolrClient index, Class<T> classToRetrieve,
-    String tableUUID, Filter filter, Sorter sorter, Sublist sublist) throws GenericException, RequestNotValidException {
-    return find(index, classToRetrieve, tableUUID, filter, sorter, sublist, null);
+    String databaseUUID, Filter filter, Sorter sorter, Sublist sublist) throws GenericException, RequestNotValidException {
+    return find(index, classToRetrieve, databaseUUID, filter, sorter, sublist, null);
   }
 
   public static <T extends Serializable> IndexResult<T> find(SolrClient index, Class<T> classToRetrieve,
-    String tableUUID, Filter filter, Sorter sorter, Sublist sublist, Facets facets)
+    String databaseUUID, Filter filter, Sorter sorter, Sublist sublist, Facets facets)
     throws GenericException, RequestNotValidException {
     IndexResult<T> ret;
     SolrQuery query = new SolrQuery();
@@ -320,7 +320,7 @@ public class SolrUtils {
     parseAndConfigureFacets(facets, query);
 
     try {
-      QueryResponse response = index.query(getTableCollectionName(tableUUID), query);
+      QueryResponse response = index.query(getDatabaseCollectionName(databaseUUID), query);
       ret = queryResponseToIndexResult(response, classToRetrieve, facets);
     } catch (SolrServerException | SolrException | IOException e) {
       throw new GenericException("Could not query index", e);
@@ -466,9 +466,9 @@ public class SolrUtils {
     return find(index, classToRetrieve, filter, null, new Sublist(0, 0), null, user, showInactive).getTotalCount();
   }
 
-  public static <T extends Serializable> Long count(SolrClient index, Class<T> classToRetrieve, String tableUUID,
+  public static <T extends Serializable> Long count(SolrClient index, Class<T> classToRetrieve, String databaseUUID,
     Filter filter) throws GenericException, RequestNotValidException {
-    return find(index, classToRetrieve, tableUUID, filter, null, new Sublist(0, 0)).getTotalCount();
+    return find(index, classToRetrieve, databaseUUID, filter, null, new Sublist(0, 0)).getTotalCount();
   }
 
   public static <T> T retrieve(SolrClient index, Class<T> classToRetrieve, String id)
@@ -493,11 +493,11 @@ public class SolrUtils {
     return ret;
   }
 
-  public static <T> T retrieve(SolrClient index, Class<T> classToRetrieve, String tableUUID, String rowUUID)
+  public static <T> T retrieve(SolrClient index, Class<T> classToRetrieve, String databaseUUID, String rowUUID)
     throws NotFoundException, GenericException {
     T ret;
     try {
-      SolrDocument doc = index.getById(getTableCollectionName(tableUUID), rowUUID);
+      SolrDocument doc = index.getById(getDatabaseCollectionName(databaseUUID), rowUUID);
       if (doc != null) {
         ret = solrDocumentTo(classToRetrieve, doc);
       } else {
