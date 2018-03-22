@@ -28,7 +28,7 @@
         </dependency>
         <dependency>
             <groupId>com.databasepreservation</groupId>
-            <artifactId>dbptk-module-solr</artifactId>
+            <artifactId>dbptk-module-dbvtk</artifactId>
         </dependency>
         <dependency>
             <groupId>com.databasepreservation.visualization</groupId>

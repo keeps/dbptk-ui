@@ -182,7 +182,7 @@
             </dependency>
             <dependency>
                 <groupId>com.databasepreservation</groupId>
-                <artifactId>dbptk-module-solr</artifactId>
+                <artifactId>dbptk-module-dbvtk</artifactId>
                 <version>${version.dbptk}</version>
             </dependency>
             <dependency>

@@ -4,13 +4,11 @@
  */
 package com.databasepreservation.visualization.utils;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.ConnectException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -112,16 +110,16 @@ public class SolrUtils {
     Path savedSearchesDir = null;
 
     try {
-      File jarFile = new File(SolrManager.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+      Path jarPath = FileUtils.getJarPath();
       zkClient = new ZkClientClusterStateProvider(zkHost);
 
-      // if it is a directory the application in being run from an IDE
-      // in that case do not setup (assuming setup is done)
-      if (!jarFile.isDirectory()) {
+      // if the jar path cant be found, assume that the application in being run from
+      // an IDE. in that case do not setup (assuming setup is done)
+      if (jarPath != null) {
         databaseDir = Files.createTempDirectory("dbv_db_");
         tableDir = Files.createTempDirectory("dbv_tab_");
         savedSearchesDir = Files.createTempDirectory("dbv_tab_");
-        jar = new JarFile(jarFile);
+        jar = new JarFile(jarPath.toFile());
         Enumeration<JarEntry> entries = jar.entries();
 
         // copy files to temporary directories
@@ -152,7 +150,7 @@ public class SolrUtils {
         uploadConfig(zkClient, tableDir, ViewerSafeConstants.SOLR_CONFIGSET_TABLE);
         uploadConfig(zkClient, savedSearchesDir, ViewerSafeConstants.SOLR_CONFIGSET_SEARCHES);
       }
-    } catch (IOException | URISyntaxException e) {
+    } catch (IOException e) {
       LOGGER.error("Could not extract Solr configset", e);
     } finally {
       // delete temporary files
@@ -281,8 +279,8 @@ public class SolrUtils {
   }
 
   public static <T extends Serializable> IndexResult<T> find(SolrClient index, Class<T> classToRetrieve, Filter filter,
-    Sorter sorter, Sublist sublist, Facets facets, User user, boolean showInactive) throws GenericException,
-    RequestNotValidException {
+    Sorter sorter, Sublist sublist, Facets facets, User user, boolean showInactive)
+    throws GenericException, RequestNotValidException {
     IndexResult<T> ret;
     SolrQuery query = new SolrQuery();
     query.setQuery(parseFilter(filter));
@@ -310,8 +308,8 @@ public class SolrUtils {
   }
 
   public static <T extends Serializable> IndexResult<T> find(SolrClient index, Class<T> classToRetrieve,
-    String tableUUID, Filter filter, Sorter sorter, Sublist sublist, Facets facets) throws GenericException,
-    RequestNotValidException {
+    String tableUUID, Filter filter, Sorter sorter, Sublist sublist, Facets facets)
+    throws GenericException, RequestNotValidException {
     IndexResult<T> ret;
     SolrQuery query = new SolrQuery();
     query.setQuery(parseFilter(filter));
@@ -354,8 +352,8 @@ public class SolrUtils {
       if (stream instanceof InputStream) {
         return (InputStream) stream;
       } else {
-        throw new GenericException("Result was not an input stream. Its string representation was: "
-          + stream.toString());
+        throw new GenericException(
+          "Result was not an input stream. Its string representation was: " + stream.toString());
       }
     } catch (SolrServerException | SolrException | IOException e) {
       throw new GenericException("Could not query index", e);
@@ -366,8 +364,8 @@ public class SolrUtils {
     List<SolrQuery.SortClause> ret = new ArrayList<SolrQuery.SortClause>();
     if (sorter != null) {
       for (SortParameter sortParameter : sorter.getParameters()) {
-        ret.add(new SolrQuery.SortClause(sortParameter.getName(), sortParameter.isDescending() ? SolrQuery.ORDER.desc
-          : SolrQuery.ORDER.asc));
+        ret.add(new SolrQuery.SortClause(sortParameter.getName(),
+          sortParameter.isDescending() ? SolrQuery.ORDER.desc : SolrQuery.ORDER.asc));
       }
     }
     return ret;
@@ -446,8 +444,8 @@ public class SolrUtils {
     if (facetFields != null) {
       for (FacetField facet : facetFields) {
         LOGGER.trace("facet:{} count:{}", facet.getName(), facet.getValueCount());
-        facetResult = new FacetFieldResult(facet.getName(), facet.getValueCount(), facets.getParameters()
-          .get(facet.getName()).getValues());
+        facetResult = new FacetFieldResult(facet.getName(), facet.getValueCount(),
+          facets.getParameters().get(facet.getName()).getValues());
         for (FacetField.Count count : facet.getValues()) {
           LOGGER.trace("   value:{} value:{}", count.getName(), count.getCount());
           facetResult.addFacetValue(count.getName(), count.getName(), count.getCount());
@@ -473,8 +471,8 @@ public class SolrUtils {
     return find(index, classToRetrieve, tableUUID, filter, null, new Sublist(0, 0)).getTotalCount();
   }
 
-  public static <T> T retrieve(SolrClient index, Class<T> classToRetrieve, String id) throws NotFoundException,
-    GenericException {
+  public static <T> T retrieve(SolrClient index, Class<T> classToRetrieve, String id)
+    throws NotFoundException, GenericException {
     T ret;
     try {
       SolrDocument doc = index.getById(getIndexName(classToRetrieve), id);
@@ -580,8 +578,8 @@ public class SolrUtils {
     }
   }
 
-  private static void appendRangeInterval(StringBuilder ret, String fromKey, String toKey, Date fromValue,
-    Date toValue, RodaConstants.DateGranularity granularity) {
+  private static void appendRangeInterval(StringBuilder ret, String fromKey, String toKey, Date fromValue, Date toValue,
+    RodaConstants.DateGranularity granularity) {
     if (fromValue != null || toValue != null) {
       appendANDOperator(ret, true);
       ret.append("(");
@@ -625,7 +623,8 @@ public class SolrUtils {
     return processToDate(toValue, granularity, true);
   }
 
-  private static String processToDate(Date toValue, RodaConstants.DateGranularity granularity, boolean returnStartOnNull) {
+  private static String processToDate(Date toValue, RodaConstants.DateGranularity granularity,
+    boolean returnStartOnNull) {
     final String ret;
     StringBuilder sb = new StringBuilder();
     if (toValue != null) {
