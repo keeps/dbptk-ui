@@ -14,11 +14,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotAuthorizedException;
+import javax.ws.rs.ProcessingException;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
 import org.apache.commons.httpclient.HttpMethod;
@@ -29,10 +32,12 @@ import org.jasig.cas.client.validation.Assertion;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
+import org.roda.core.data.utils.JsonUtils;
 import org.roda.core.data.v2.common.Pair;
 import org.roda.core.data.v2.index.IsIndexed;
 import org.roda.core.data.v2.index.filter.Filter;
 import org.roda.core.data.v2.index.filter.SimpleFilterParameter;
+import org.roda.core.data.v2.ip.DIP;
 import org.roda.core.data.v2.user.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,11 +55,9 @@ public class UserUtility {
   public static final String RODA_USER_NAME = "RODA_USER";
   public static final String RODA_USER_PASS = "RODA_USER_PASS";
 
-  private static LoadingCache<Pair<String, Pair<User, String>>, Boolean> databasePermissions = CacheBuilder
-    .newBuilder()
-    .expireAfterWrite(
-      ViewerConfiguration.getInstance().getViewerConfigurationAsInt(60,
-        ViewerConfiguration.PROPERTY_AUTHORIZATION_CACHE_TTL), TimeUnit.SECONDS)
+  private static LoadingCache<Pair<String, Pair<User, String>>, Boolean> databasePermissions = CacheBuilder.newBuilder()
+    .expireAfterWrite(ViewerConfiguration.getInstance().getViewerConfigurationAsInt(60,
+      ViewerConfiguration.PROPERTY_AUTHORIZATION_CACHE_TTL), TimeUnit.SECONDS)
     .build(new DatabasePermissionsCacheLoader());
 
   /** Private empty constructor */
@@ -76,8 +79,8 @@ public class UserUtility {
         Object attribute = session.getAttribute(AbstractCasFilter.CONST_CAS_ASSERTION);
         if (attribute != null && attribute instanceof Assertion) {
           Assertion assertion = (Assertion) attribute;
-          String rodaAddress = ViewerConfiguration.getInstance().getViewerConfigurationAsString(
-            ViewerConfiguration.PROPERTY_RODA_ADDRESS);
+          String rodaAddress = ViewerConfiguration.getInstance()
+            .getViewerConfigurationAsString(ViewerConfiguration.PROPERTY_RODA_ADDRESS);
 
           UriBuilder dipUri = getDIPUri(databaseUUID);
 
@@ -144,8 +147,8 @@ public class UserUtility {
   private static boolean userCanAccessDatabase(final HttpServletRequest request, User user, String databaseUUID)
     throws AuthorizationDeniedException, NotFoundException, GenericException {
     try {
-      return databasePermissions.get(new Pair<>(databaseUUID, new Pair<>(user, getPasswordOrTicket(request,
-        databaseUUID))));
+      return databasePermissions
+        .get(new Pair<>(databaseUUID, new Pair<>(user, getPasswordOrTicket(request, databaseUUID))));
     } catch (ExecutionException e) {
       Throwable cause = e.getCause();
       if (cause instanceof AuthorizationDeniedException) {
@@ -183,12 +186,13 @@ public class UserUtility {
     }
 
     private static AuthorizationDeniedException error(User user, String objectType, String object) {
-      return new AuthorizationDeniedException("Access to " + objectType + " '" + object + "' has been denied for user "
-        + user.getName());
+      return new AuthorizationDeniedException(
+        "Access to " + objectType + " '" + object + "' has been denied for user " + user.getName());
     }
 
     private static AuthorizationDeniedException error(User user, String objectType) {
-      return new AuthorizationDeniedException("Access to " + objectType + " has been denied for user " + user.getName());
+      return new AuthorizationDeniedException(
+        "Access to " + objectType + " has been denied for user " + user.getName());
     }
 
     private static AuthorizationDeniedException errorAdmin(User user, String action) {
@@ -197,8 +201,8 @@ public class UserUtility {
     }
 
     public static boolean isEnabled() {
-      return ViewerConfiguration.getInstance().getViewerConfigurationAsBoolean(
-        ViewerConfiguration.PROPERTY_AUTHORIZATION_ENABLED);
+      return ViewerConfiguration.getInstance()
+        .getViewerConfigurationAsBoolean(ViewerConfiguration.PROPERTY_AUTHORIZATION_ENABLED);
     }
 
     public static void allowIfAdmin(final HttpServletRequest request) throws AuthorizationDeniedException {
@@ -304,8 +308,8 @@ public class UserUtility {
       }
 
       // database removal request has been denied
-      throw new AuthorizationDeniedException("Removal of database '" + databaseUUID + "' has been denied for address '"
-        + originIP + "'.");
+      throw new AuthorizationDeniedException(
+        "Removal of database '" + databaseUUID + "' has been denied for address '" + originIP + "'.");
     }
   }
 
@@ -319,10 +323,10 @@ public class UserUtility {
       client = ClientBuilder.newClient();
     }
 
-    String rodaAddress = ViewerConfiguration.getInstance().getViewerConfigurationAsString(
-      ViewerConfiguration.PROPERTY_RODA_ADDRESS);
-    String rodaDipPath = ViewerConfiguration.getInstance().getViewerConfigurationAsString(
-      ViewerConfiguration.PROPERTY_AUTHORIZATION_RODA_DIP_PATH);
+    String rodaAddress = ViewerConfiguration.getInstance()
+      .getViewerConfigurationAsString(ViewerConfiguration.PROPERTY_RODA_ADDRESS);
+    String rodaDipPath = ViewerConfiguration.getInstance()
+      .getViewerConfigurationAsString(ViewerConfiguration.PROPERTY_AUTHORIZATION_RODA_DIP_PATH);
     rodaDipPath = rodaDipPath.replaceAll("\\{dip_id\\}", databaseUUID);
 
     UriBuilder uri = client.target(rodaAddress).path(rodaDipPath).getUriBuilder();
@@ -343,8 +347,8 @@ public class UserUtility {
      *
      * @param pair
      *          the non-null databaseUUID/user pair whose value should be loaded
-     * @return the value associated with the databaseUUID/user {@code pair};
-     *         <b>must not be null</b>
+     * @return the value associated with the databaseUUID/user {@code pair}; <b>must
+     *         not be null</b>
      * @throws Exception
      *           if unable to load the result
      * @throws InterruptedException
@@ -373,23 +377,38 @@ public class UserUtility {
       }
       WebTarget target = client.target(uri);
 
+      LOGGER.debug("URI: {}", uri);
+      LOGGER.debug("ticketOrPassword: {}", ticketOrPassword);
+
       try {
         Invocation.Builder request = target.request(MediaType.APPLICATION_JSON_TYPE);
-        String jsonObj = request.get(String.class);
+        Response response = request.get();
+        LOGGER.debug("STATUS: {}, HEADERS: {}", response.getStatus(), response.getStringHeaders());
 
-        // DIP dip = JsonUtils.getObjectFromJson(jsonObj, DIP.class);
+        String jsonObj = response.readEntity(String.class);
+        LOGGER.debug("jsonObj: {}", jsonObj);
 
-        return true;
+        if (response.getStatus() == 200) {
+
+          DIP dip = JsonUtils.getObjectFromJson(jsonObj, DIP.class);
+          return databaseUUID.equals(dip.getId());
+        } else if (response.getStatus() == 404) {
+          LOGGER.debug("Could not find the specified DIP: {}", uri);
+        } else if (response.getStatus() == 401 || response.getStatus() == 403) {
+          LOGGER.debug("The user does not have permission to access the specified DIP: {}", uri);
+        }
+        return false;
       } catch (NotAuthorizedException e) {
-        // throw new
-        // AuthorizationDeniedException("Could not login with the provided DBVTK username and password",
-        // e);
         return false;
       } catch (javax.ws.rs.NotFoundException e) {
-        throw new NotFoundException("Could not find the specified DIP", e);
+        LOGGER.debug("Could not find the specified DIP: {}", uri);
+        return false;
       } catch (BadRequestException e) {
         String responseText = e.getResponse().readEntity(String.class);
         LOGGER.error("BadRequestException. Response: {}", responseText);
+        throw e;
+      } catch (ProcessingException | WebApplicationException e) {
+        LOGGER.error("ProcessingException | WebApplicationException", e);
         throw e;
       } finally {
         client.close();
