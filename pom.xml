@@ -272,18 +272,18 @@
                 <scope>import</scope>
             </dependency>
             <dependency>
-                <groupId>org.glassfish.jersey.bundles</groupId>
-                <artifactId>jaxrs-ri</artifactId>
-                <version>${version.jersey}</version>
-            </dependency>
-            <dependency>
                 <groupId>javax.ws.rs</groupId>
                 <artifactId>javax.ws.rs-api</artifactId>
-                <version>2.0.1</version>
+                <version>2.1-m07</version>
             </dependency>
             <dependency>
                 <groupId>org.glassfish.jersey.core</groupId>
                 <artifactId>jersey-server</artifactId>
+                <version>${version.jersey}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.jersey.inject</groupId>
+                <artifactId>jersey-hk2</artifactId>
                 <version>${version.jersey}</version>
             </dependency>
             <dependency>
