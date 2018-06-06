@@ -365,10 +365,18 @@ public class UserUtility {
       String ticketOrPassword = pair.getSecond().getSecond();
 
       Client client;
-      if (usingCAS) {
-        client = ClientBuilder.newClient();
+      if (!user.isGuest()) {
+        if (usingCAS) {
+          client = ClientBuilder.newClient();
+        } else {
+          client = getBasicAuthClient(user.getName(), ticketOrPassword);
+        }
       } else {
-        client = getBasicAuthClient(user.getName(), ticketOrPassword);
+        String rodaGuestUsername = ViewerConfiguration.getInstance()
+          .getViewerConfigurationAsString(ViewerConfiguration.PROPERTY_AUTHORIZATION_GUEST_USERNAME);
+        String rodaGuestPassword = ViewerConfiguration.getInstance()
+          .getViewerConfigurationAsString(ViewerConfiguration.PROPERTY_AUTHORIZATION_GUEST_PASSWORD);
+        client = getBasicAuthClient(rodaGuestUsername, rodaGuestPassword);
       }
 
       UriBuilder uri = getDIPUri(client, databaseUUID);

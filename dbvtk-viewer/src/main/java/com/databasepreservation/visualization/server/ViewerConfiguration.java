@@ -68,6 +68,10 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     "cas", "casServerUrlPrefix"};
 
   public static final String[] PROPERTY_AUTHORIZATION_ENABLED = new String[] {"ui", "authorization", "roda", "enabled"};
+  public static final String[] PROPERTY_AUTHORIZATION_GUEST_USERNAME = new String[] {"ui", "authorization", "roda",
+    "guest", "username"};
+  public static final String[] PROPERTY_AUTHORIZATION_GUEST_PASSWORD = new String[] {"ui", "authorization", "roda",
+    "guest", "password"};
   public static final String[] PROPERTY_AUTHORIZATION_ADMINS = new String[] {"ui", "authorization", "roda", "users",
     "admin"};
   public static final String[] PROPERTY_AUTHORIZATION_MANAGERS = new String[] {"ui", "authorization", "roda", "users",
@@ -102,8 +106,8 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
 
   private List<String> cachedWhitelistedIPs = null;
   private Boolean cachedWhitelistAllIPs = null;
-  private static LoadingCache<Locale, Messages> I18N_CACHE = CacheBuilder.newBuilder().build(
-    new CacheLoader<Locale, Messages>() {
+  private static LoadingCache<Locale, Messages> I18N_CACHE = CacheBuilder.newBuilder()
+    .build(new CacheLoader<Locale, Messages>() {
       @Override
       public Messages load(Locale locale) throws Exception {
         return new Messages(locale, configPath.resolve(ViewerConstants.VIEWER_I18N_FOLDER));
@@ -310,13 +314,12 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     try {
       FileUtils.deleteDirectoryRecursiveQuietly(exampleConfigPath);
       Files.createDirectories(exampleConfigPath);
-      copyFilesFromClasspath(
-        ViewerConstants.VIEWER_CONFIG_FOLDER + "/",
-        exampleConfigPath,
-        true,
-        Arrays.asList(ViewerConstants.VIEWER_CONFIG_FOLDER + "/" + ViewerConstants.VIEWER_I18N_FOLDER + "/"
-          + ViewerConstants.VIEWER_I18N_CLIENT_FOLDER, ViewerConstants.VIEWER_CONFIG_FOLDER + "/"
-          + ViewerConstants.VIEWER_I18N_FOLDER + "/" + ViewerConstants.VIEWER_I18_GWT_XML_FILE));
+      copyFilesFromClasspath(ViewerConstants.VIEWER_CONFIG_FOLDER + "/", exampleConfigPath, true,
+        Arrays.asList(
+          ViewerConstants.VIEWER_CONFIG_FOLDER + "/" + ViewerConstants.VIEWER_I18N_FOLDER + "/"
+            + ViewerConstants.VIEWER_I18N_CLIENT_FOLDER,
+          ViewerConstants.VIEWER_CONFIG_FOLDER + "/" + ViewerConstants.VIEWER_I18N_FOLDER + "/"
+            + ViewerConstants.VIEWER_I18_GWT_XML_FILE));
     } catch (IOException e) {
       LOGGER.error("Unable to create " + exampleConfigPath, e);
       instantiatedWithoutErrors = false;
@@ -346,8 +349,8 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
       rodaPropertiesReloadStrategy.setRefreshDelay(5000);
       propertiesConfiguration.setReloadingStrategy(rodaPropertiesReloadStrategy);
     } else {
-      InputStream inputStream = ViewerFactory.class.getResourceAsStream("/" + ViewerConstants.VIEWER_CONFIG_FOLDER
-        + "/" + configurationFile);
+      InputStream inputStream = ViewerFactory.class
+        .getResourceAsStream("/" + ViewerConstants.VIEWER_CONFIG_FOLDER + "/" + configurationFile);
       if (inputStream != null) {
         LOGGER.trace("Loading configuration from classpath {}", configurationFile);
         propertiesConfiguration.load(inputStream);
@@ -371,8 +374,8 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
         configUri = null;
       }
     } else {
-      URL resource = ViewerConfiguration.class.getResource("/" + ViewerConstants.VIEWER_CONFIG_FOLDER + "/"
-        + configurationFile);
+      URL resource = ViewerConfiguration.class
+        .getResource("/" + ViewerConstants.VIEWER_CONFIG_FOLDER + "/" + configurationFile);
       if (resource != null) {
         configUri = resource;
       } else {
@@ -397,8 +400,8 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
       // do nothing
     }
     if (inputStream == null) {
-      inputStream = ViewerConfiguration.class.getResourceAsStream("/" + ViewerConstants.VIEWER_CONFIG_FOLDER + "/"
-        + configurationFile);
+      inputStream = ViewerConfiguration.class
+        .getResourceAsStream("/" + ViewerConstants.VIEWER_CONFIG_FOLDER + "/" + configurationFile);
       LOGGER.trace("Loading configuration from classpath {}", configurationFile);
     }
     return inputStream;
@@ -420,10 +423,10 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     List<ClassLoader> classLoadersList = new LinkedList<ClassLoader>();
     classLoadersList.add(ClasspathHelper.contextClassLoader());
 
-    Reflections reflections = new Reflections(new ConfigurationBuilder()
-      .filterInputsBy(new FilterBuilder().include(FilterBuilder.prefix(classpathPrefix)))
-      .setScanners(new ResourcesScanner())
-      .setUrls(ClasspathHelper.forClassLoader(classLoadersList.toArray(new ClassLoader[] {}))));
+    Reflections reflections = new Reflections(
+      new ConfigurationBuilder().filterInputsBy(new FilterBuilder().include(FilterBuilder.prefix(classpathPrefix)))
+        .setScanners(new ResourcesScanner())
+        .setUrls(ClasspathHelper.forClassLoader(classLoadersList.toArray(new ClassLoader[] {}))));
 
     Set<String> resources = reflections.getResources(Pattern.compile(".*"));
 
