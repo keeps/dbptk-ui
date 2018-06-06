@@ -8,7 +8,7 @@
     <groupId>com.databasepreservation.visualization</groupId>
     <artifactId>dbvtk</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.3</version>
+    <version>1.0.4</version>
     <name>Database Visualization Toolkit</name>
 
     <description>A viewer and explorer for preserved databases</description>
@@ -32,7 +32,7 @@
         <!-- Convenience properties to set versions -->
         <gwtVersion>2.8.2</gwtVersion>
         <version.dbptk>2.0.1</version.dbptk>
-        <version.roda>2.2.1</version.roda>
+        <version.roda>2.2.8</version.roda>
 
         <version.jersey>2.26</version.jersey>
         <version.swagger>1.5.19</version.swagger>
@@ -156,12 +156,12 @@
             <dependency>
                 <groupId>com.databasepreservation.visualization</groupId>
                 <artifactId>dbvtk-model</artifactId>
-                <version>1.0.3</version>
+                <version>1.0.4</version>
             </dependency>
             <dependency>
                 <groupId>com.databasepreservation.visualization</groupId>
                 <artifactId>dbvtk-model</artifactId>
-                <version>1.0.3</version>
+                <version>1.0.4</version>
                 <classifier>sources</classifier>
             </dependency>
             <dependency>
