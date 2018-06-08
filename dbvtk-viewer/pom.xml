@@ -7,12 +7,12 @@
     <modelVersion>4.0.0</modelVersion>
     <name>dbvtk-viewer</name>
     <artifactId>dbvtk-viewer</artifactId>
-    <version>1.0.4</version>
+    <version>1.0.5-SNAPSHOT</version>
     <packaging>war</packaging>
     <parent>
         <groupId>com.databasepreservation.visualization</groupId>
         <artifactId>dbvtk</artifactId>
-        <version>1.0.4</version>
+        <version>1.0.5-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
 
