@@ -77,12 +77,16 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   public static final String[] PROPERTY_AUTHORIZATION_MANAGERS = new String[] {"ui", "authorization", "roda", "users",
     "manager"};
 
+  public static final String[] PROPERTY_AUTHORIZATION_RODA_CAS_SERVICE_NAME = new String[] {"ui", "authorization",
+    "roda", "cas", "serviceServerName"};
+
+  public static final String[] PROPERTY_AUTHORIZATION_RODA_DIP_SERVER = new String[] {"ui", "authorization", "roda",
+    "dip", "server"};
+
   public static final String[] PROPERTY_RODA_ADDRESS = new String[] {"ui", "filter", "internal", "server"};
   public static final String[] PROPERTY_RODA_PATH = new String[] {"ui", "filter", "internal", "path"};
   public static final String[] PROPERTY_AUTHORIZATION_RODA_DIP_PATH = new String[] {"ui", "authorization", "roda",
     "dip", "path"};
-  public static final String[] PROPERTY_AUTHORIZATION_CACHE_TTL = new String[] {"ui", "authorization", "roda", "cache",
-    "ttl"};
 
   public static final String[] PROPERTY_FILTER_ONOFF_ALLOW_ALL_IPS = new String[] {"ui", "filter", "onOff",
     "protectedResourcesAllowAllIPs"};
@@ -143,7 +147,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     }
 
     // last log message that state if system was loaded without errors or not
-    LOGGER.info("RODA Core loading completed {}", instantiatedWithoutErrors ? "with success!"
+    LOGGER.info("DBVTK loading completed {}", instantiatedWithoutErrors ? "with success!"
       : "with some errors!!! See logs because these errors might cause instability in the system.");
   }
 

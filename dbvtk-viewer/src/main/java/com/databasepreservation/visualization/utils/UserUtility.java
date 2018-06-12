@@ -4,12 +4,15 @@
  */
 package com.databasepreservation.visualization.utils;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.ws.rs.BadRequestException;
@@ -33,7 +36,6 @@ import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.utils.JsonUtils;
-import org.roda.core.data.v2.common.Pair;
 import org.roda.core.data.v2.index.IsIndexed;
 import org.roda.core.data.v2.index.filter.Filter;
 import org.roda.core.data.v2.index.filter.SimpleFilterParameter;
@@ -46,19 +48,12 @@ import com.databasepreservation.visualization.client.SavedSearch;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.visualization.server.ViewerConfiguration;
 import com.databasepreservation.visualization.shared.ViewerSafeConstants;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 
 public class UserUtility {
   private static final Logger LOGGER = LoggerFactory.getLogger(UserUtility.class);
   public static final String RODA_USER_NAME = "RODA_USER";
+  public static final String RODA_USER_PERMISSIONS = "RODA_USER_PERMISSIONS";
   public static final String RODA_USER_PASS = "RODA_USER_PASS";
-
-  private static LoadingCache<Pair<String, Pair<User, String>>, Boolean> databasePermissions = CacheBuilder.newBuilder()
-    .expireAfterWrite(ViewerConfiguration.getInstance().getViewerConfigurationAsInt(60,
-      ViewerConfiguration.PROPERTY_AUTHORIZATION_CACHE_TTL), TimeUnit.SECONDS)
-    .build(new DatabasePermissionsCacheLoader());
 
   /** Private empty constructor */
   private UserUtility() {
@@ -77,13 +72,9 @@ public class UserUtility {
       HttpSession session = request.getSession();
       if (session != null) {
         Object attribute = session.getAttribute(AbstractCasFilter.CONST_CAS_ASSERTION);
-        if (attribute != null && attribute instanceof Assertion) {
+        if (attribute instanceof Assertion) {
           Assertion assertion = (Assertion) attribute;
-          String rodaAddress = ViewerConfiguration.getInstance()
-            .getViewerConfigurationAsString(ViewerConfiguration.PROPERTY_RODA_ADDRESS);
-
           UriBuilder dipUri = getDIPUri(databaseUUID);
-
           proxyTicketForRODA = assertion.getPrincipal().getProxyTicketFor(dipUri.toString());
         } else {
           errorReason = "Can not create a proxy ticket. Reason: CAS assertion is invalid";
@@ -98,11 +89,7 @@ public class UserUtility {
         throw new AuthorizationDeniedException(errorReason);
       }
     } else {
-      String password = (String) request.getSession().getAttribute(RODA_USER_PASS);
-      if (password == null) {
-        password = "";
-      }
-      return password;
+      return (String) request.getSession().getAttribute(RODA_USER_PASS);
     }
   }
 
@@ -123,7 +110,10 @@ public class UserUtility {
   }
 
   public static void setUser(final HttpServletRequest request, final User user) {
+    LOGGER.debug("Setting user: {}", user);
     request.getSession(true).setAttribute(RODA_USER_NAME, user);
+    // do not keep old password after setting a new user
+    request.getSession().removeAttribute(RODA_USER_PASS);
   }
 
   public static void setPassword(final HttpServletRequest request, final String password) {
@@ -131,7 +121,10 @@ public class UserUtility {
   }
 
   public static void logout(HttpServletRequest servletRequest) {
+    LOGGER.debug("Removing user: {}", getUser(servletRequest, false));
     servletRequest.getSession().removeAttribute(RODA_USER_NAME);
+    servletRequest.getSession().removeAttribute(RODA_USER_PERMISSIONS);
+    servletRequest.getSession().removeAttribute(RODA_USER_PASS);
     // CAS specific clean up
     servletRequest.getSession().removeAttribute("edu.yale.its.tp.cas.client.filter.user");
     servletRequest.getSession().removeAttribute("_const_cas_assertion_");
@@ -145,22 +138,18 @@ public class UserUtility {
   }
 
   private static boolean userCanAccessDatabase(final HttpServletRequest request, User user, String databaseUUID)
-    throws AuthorizationDeniedException, NotFoundException, GenericException {
-    try {
-      return databasePermissions
-        .get(new Pair<>(databaseUUID, new Pair<>(user, getPasswordOrTicket(request, databaseUUID))));
-    } catch (ExecutionException e) {
-      Throwable cause = e.getCause();
-      if (cause instanceof AuthorizationDeniedException) {
-        throw (AuthorizationDeniedException) cause;
-      } else if (cause instanceof NotFoundException) {
-        throw (NotFoundException) cause;
-      } else if (cause instanceof GenericException) {
-        throw (GenericException) cause;
-      } else {
-        throw new GenericException(e);
-      }
+    throws AuthorizationDeniedException {
+
+    // get current permissions object from session or create a new one
+    DatabasePermissions permissions = (DatabasePermissions) request.getSession().getAttribute(RODA_USER_PERMISSIONS);
+    if (permissions == null) {
+      permissions = new DatabasePermissions(user);
     }
+
+    // get permissions from RODA or use permission value from session
+    Boolean canAccess = permissions.canAccessDatabase(user, databaseUUID, getPasswordOrTicket(request, databaseUUID));
+    request.getSession().setAttribute(RODA_USER_PERMISSIONS, permissions);
+    return canAccess;
   }
 
   private static boolean userIsAdmin(User user) {
@@ -314,17 +303,27 @@ public class UserUtility {
   }
 
   private static UriBuilder getDIPUri(String databaseUUID) {
-    return getDIPUri(null, databaseUUID);
+    return getDIPUri(null, databaseUUID, true);
   }
 
   private static UriBuilder getDIPUri(Client client, String databaseUUID) {
+    return getDIPUri(client, databaseUUID, false);
+  }
+
+  private static UriBuilder getDIPUri(Client client, String databaseUUID, boolean useRodaCasServiceServerName) {
     boolean usingTemporaryClient = (client == null);
     if (usingTemporaryClient) {
       client = ClientBuilder.newClient();
     }
 
-    String rodaAddress = ViewerConfiguration.getInstance()
-      .getViewerConfigurationAsString(ViewerConfiguration.PROPERTY_RODA_ADDRESS);
+    String rodaAddress;
+    if (useRodaCasServiceServerName) {
+      rodaAddress = ViewerConfiguration.getInstance()
+        .getViewerConfigurationAsString(ViewerConfiguration.PROPERTY_AUTHORIZATION_RODA_CAS_SERVICE_NAME);
+    } else {
+      rodaAddress = ViewerConfiguration.getInstance()
+        .getViewerConfigurationAsString(ViewerConfiguration.PROPERTY_AUTHORIZATION_RODA_DIP_SERVER);
+    }
     String rodaDipPath = ViewerConfiguration.getInstance()
       .getViewerConfigurationAsString(ViewerConfiguration.PROPERTY_AUTHORIZATION_RODA_DIP_PATH);
     rodaDipPath = rodaDipPath.replaceAll("\\{dip_id\\}", databaseUUID);
@@ -339,30 +338,40 @@ public class UserUtility {
     return uri;
   }
 
-  private static class DatabasePermissionsCacheLoader extends CacheLoader<Pair<String, Pair<User, String>>, Boolean> {
+  private static class DatabasePermissions implements Serializable {
+    private Map<String, Boolean> permissions = new HashMap<>();
+    private User user;
 
-    /**
-     * Computes or retrieves the value corresponding to the databaseUUID/user
-     * {@code pair}.
-     *
-     * @param pair
-     *          the non-null databaseUUID/user pair whose value should be loaded
-     * @return the value associated with the databaseUUID/user {@code pair}; <b>must
-     *         not be null</b>
-     * @throws Exception
-     *           if unable to load the result
-     * @throws InterruptedException
-     *           if this method is interrupted. {@code InterruptedException} is
-     *           treated like any other {@code Exception} in all respects except
-     *           that, when it is caught, the thread's interrupt status is set
-     */
-    @Override
-    public Boolean load(Pair<String, Pair<User, String>> pair) throws Exception {
+    public DatabasePermissions(User user) {
+      this.user = user;
+    }
+
+    private void invalidateCacheIfNeeded(User user) {
+      // invalidate cache if we get a different user
+      if (!StringUtils.equals(user.getName(), this.user.getName())) {
+        LOGGER.debug("Session had user '{}' and now it has '{}', clearing permissions cache.", this.user.getName(),
+          user.getName());
+        permissions.clear();
+        this.user = user;
+      }
+    }
+
+    Boolean canAccessDatabase(User user, String databaseUUID, String ticketOrPassword) {
+      invalidateCacheIfNeeded(user);
+
+      Boolean cachedPermission = permissions.get(databaseUUID);
+      if (cachedPermission != null) {
+        LOGGER.debug("Using cached '{}' permission for user '{}' and database '{}'", cachedPermission, user.getName(),
+          databaseUUID);
+        return cachedPermission;
+      }
+
+      if (ticketOrPassword == null) {
+        ticketOrPassword = StringUtils.EMPTY;
+      }
+
       final boolean usingCAS = ViewerConfiguration.getInstance().getViewerConfigurationAsBoolean(false,
         ViewerConfiguration.PROPERTY_FILTER_AUTHENTICATION_CAS);
-      String databaseUUID = pair.getFirst();
-      User user = pair.getSecond().getFirst();
-      String ticketOrPassword = pair.getSecond().getSecond();
 
       Client client;
       if (!user.isGuest()) {
@@ -399,34 +408,36 @@ public class UserUtility {
         if (response.getStatus() == 200) {
 
           DIP dip = JsonUtils.getObjectFromJson(jsonObj, DIP.class);
-          return databaseUUID.equals(dip.getId());
+          boolean hasPermission = databaseUUID.equals(dip.getId());
+          permissions.put(databaseUUID, hasPermission);
+          return hasPermission;
         } else if (response.getStatus() == 404) {
           LOGGER.debug("Could not find the specified DIP: {}", uri);
         } else if (response.getStatus() == 401 || response.getStatus() == 403) {
           LOGGER.debug("The user does not have permission to access the specified DIP: {}", uri);
         }
-        return false;
       } catch (NotAuthorizedException e) {
-        return false;
+        // do nothing, false will be returned
       } catch (javax.ws.rs.NotFoundException e) {
         LOGGER.debug("Could not find the specified DIP: {}", uri);
-        return false;
       } catch (BadRequestException e) {
         String responseText = e.getResponse().readEntity(String.class);
         LOGGER.error("BadRequestException. Response: {}", responseText);
-        throw e;
       } catch (ProcessingException | WebApplicationException e) {
         LOGGER.error("ProcessingException | WebApplicationException", e);
-        throw e;
-      } finally {
-        client.close();
+      } catch (GenericException e) {
+        LOGGER.error("GenericException (json processing)", e);
       }
+
+      client.close();
+      permissions.put(databaseUUID, false);
+      return false;
     }
 
     /**
      * Creates a Client that includes basic auth credentials
      */
-    private Client getBasicAuthClient(String username, String password) throws Exception {
+    private Client getBasicAuthClient(String username, String password) {
       HttpAuthenticationFeature basicAuth = HttpAuthenticationFeature.basic(username, password);
       return ClientBuilder.newClient().register(basicAuth);
     }
