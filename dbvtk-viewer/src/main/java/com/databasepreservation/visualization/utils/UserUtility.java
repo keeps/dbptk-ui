@@ -5,14 +5,10 @@
 package com.databasepreservation.visualization.utils;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.ws.rs.BadRequestException;
@@ -60,10 +56,14 @@ public class UserUtility {
 
   }
 
-  private static String getPasswordOrTicket(final HttpServletRequest request, String databaseUUID)
+  private static String getPasswordOrTicket(final HttpServletRequest request, User user, String databaseUUID)
     throws AuthorizationDeniedException {
     final boolean usingCAS = ViewerConfiguration.getInstance().getViewerConfigurationAsBoolean(false,
       ViewerConfiguration.PROPERTY_FILTER_AUTHENTICATION_CAS);
+
+    if (user.isGuest()) {
+      return StringUtils.EMPTY;
+    }
 
     if (usingCAS) {
       String proxyTicketForRODA = null;
@@ -147,7 +147,8 @@ public class UserUtility {
     }
 
     // get permissions from RODA or use permission value from session
-    Boolean canAccess = permissions.canAccessDatabase(user, databaseUUID, getPasswordOrTicket(request, databaseUUID));
+    Boolean canAccess = permissions.canAccessDatabase(user, databaseUUID,
+      getPasswordOrTicket(request, user, databaseUUID));
     request.getSession().setAttribute(RODA_USER_PERMISSIONS, permissions);
     return canAccess;
   }
