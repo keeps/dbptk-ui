@@ -8,7 +8,7 @@
     <groupId>com.databasepreservation.visualization</groupId>
     <artifactId>dbvtk</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.5-SNAPSHOT</version>
+    <version>1.0.5</version>
     <name>Database Visualization Toolkit</name>
 
     <description>A viewer and explorer for preserved databases</description>
@@ -156,12 +156,12 @@
             <dependency>
                 <groupId>com.databasepreservation.visualization</groupId>
                 <artifactId>dbvtk-model</artifactId>
-                <version>1.0.5-SNAPSHOT</version>
+                <version>1.0.5</version>
             </dependency>
             <dependency>
                 <groupId>com.databasepreservation.visualization</groupId>
                 <artifactId>dbvtk-model</artifactId>
-                <version>1.0.5-SNAPSHOT</version>
+                <version>1.0.5</version>
                 <classifier>sources</classifier>
             </dependency>
             <dependency>
