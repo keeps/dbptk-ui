@@ -391,24 +391,36 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     return configUri;
   }
 
-  public static InputStream getConfigurationFileAsStream(String configurationFile) {
-    Path config = configPath.resolve(configurationFile);
+  public static InputStream getThemeFileAsStream(String configurationFile) {
     InputStream inputStream = null;
-    try {
-      if (Files.exists(config) && !Files.isDirectory(config)
-        && config.toAbsolutePath().startsWith(configPath.toAbsolutePath().toString())) {
-        inputStream = Files.newInputStream(config);
-        LOGGER.trace("Loading configuration from file {}", config);
+    if (configurationFile != null) {
+      try {
+        Path themePath = configPath.resolve(ViewerConstants.VIEWER_THEME_FOLDER);
+        Path config = themePath.resolve(configurationFile);
+        if (Files.exists(config) && !Files.isDirectory(config) && checkPathIsWithin(config, themePath)) {
+          inputStream = Files.newInputStream(config);
+          LOGGER.trace("Loading configuration from file {}", config);
+        }
+      } catch (IOException | NullPointerException e) {
+        // do nothing
       }
-    } catch (IOException e) {
-      // do nothing
-    }
-    if (inputStream == null) {
-      inputStream = ViewerConfiguration.class
-        .getResourceAsStream("/" + ViewerConstants.VIEWER_CONFIG_FOLDER + "/" + configurationFile);
-      LOGGER.trace("Loading configuration from classpath {}", configurationFile);
+      if (inputStream == null && !configurationFile.contains("..")) {
+        inputStream = ViewerConfiguration.class.getResourceAsStream("/" + ViewerConstants.VIEWER_CONFIG_FOLDER + "/"
+          + ViewerConstants.VIEWER_THEME_FOLDER + "/" + configurationFile);
+        LOGGER.trace("Loading configuration from classpath {}", configurationFile);
+      }
     }
     return inputStream;
+  }
+
+  private static boolean checkPathIsWithin(Path path, Path folder) {
+    boolean ret = true;
+    Path absolutePath = path.toAbsolutePath();
+    // check against normalized path
+    Path normalized = absolutePath.normalize();
+    ret &= normalized.isAbsolute();
+    ret &= normalized.startsWith(folder);
+    return ret;
   }
 
   private static void copyFilesFromClasspath(String classpathPrefix, Path destinationDirectory) {

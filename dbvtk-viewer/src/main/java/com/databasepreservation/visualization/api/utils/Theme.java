@@ -39,11 +39,9 @@ public class Theme {
   }
 
   public static Pair<String, InputStream> getThemeResource(String resourceId, String fallbackResourceId) {
-    InputStream themeResourceInputstream = ViewerFactory.getViewerConfiguration().getConfigurationFileAsStream(
-      ViewerConstants.VIEWER_THEME_FOLDER + "/" + resourceId);
+    InputStream themeResourceInputstream = ViewerFactory.getViewerConfiguration().getThemeFileAsStream(resourceId);
     if (themeResourceInputstream == null) {
-      themeResourceInputstream = ViewerFactory.getViewerConfiguration().getConfigurationFileAsStream(
-        ViewerConstants.VIEWER_THEME_FOLDER + "/" + fallbackResourceId);
+      themeResourceInputstream = ViewerFactory.getViewerConfiguration().getThemeFileAsStream(fallbackResourceId);
       resourceId = fallbackResourceId;
     }
     return new Pair<>(resourceId, themeResourceInputstream);
