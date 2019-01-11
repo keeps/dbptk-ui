@@ -12,9 +12,6 @@
     <name>Database Visualization Toolkit</name>
 
     <description>A viewer and explorer for preserved databases</description>
-    <scm>
-        <!-- FIXME: add url <url>https://...</url> -->
-    </scm>
     <organization>
         <name>KEEP SOLUTIONS</name>
         <url>http://www.keep.pt</url>
