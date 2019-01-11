@@ -161,15 +161,8 @@
             </dependency>
             <dependency>
                 <groupId>com.databasepreservation.visualization</groupId>
-                <artifactId>dbvtk-model</artifactId>
+                <artifactId>dbptk-module-dbvtk</artifactId>
                 <version>1.0.7-SNAPSHOT</version>
-                <classifier>sources</classifier>
-            </dependency>
-            <dependency>
-                <groupId>com.databasepreservation</groupId>
-                <artifactId>dbptk-model</artifactId>
-                <version>${version.dbptk}</version>
-                <classifier>sources</classifier>
             </dependency>
             <dependency>
                 <groupId>com.databasepreservation</groupId>
@@ -179,11 +172,6 @@
             <dependency>
                 <groupId>com.databasepreservation</groupId>
                 <artifactId>dbptk-module-siard</artifactId>
-                <version>${version.dbptk}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.databasepreservation</groupId>
-                <artifactId>dbptk-module-dbvtk</artifactId>
                 <version>${version.dbptk}</version>
             </dependency>
             <dependency>
