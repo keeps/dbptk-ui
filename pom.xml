@@ -79,11 +79,12 @@
             </activation>
             <modules>
                 <module>dbvtk-model</module>
+                <module>dbptk-module-dbvtk</module>
                 <module>dbvtk-viewer</module>
             </modules>
         </profile>
         <profile>
-            <id>common</id>
+            <id>model</id>
             <modules>
                 <module>dbvtk-model</module>
             </modules>
