@@ -68,8 +68,8 @@ public class SchemaTriggersPanel extends RightPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forSchemaTriggers(
-      database.getMetadata().getName(), database.getUUID(), schema.getName(), schema.getUUID()));
+    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forSchemaTriggers(database.getMetadata().getName(),
+      database.getUUID(), schema.getName(), schema.getUUID()));
   }
 
   private void init() {
@@ -104,57 +104,57 @@ public class SchemaTriggersPanel extends RightPanel {
 
     return new BasicTablePanel<>(header, info, table.getTriggers().iterator(),
 
-    new BasicTablePanel.ColumnInfo<>(messages.name(), 15, new TextColumn<ViewerTrigger>() {
-      @Override
-      public String getValue(ViewerTrigger viewerTrigger) {
-        return viewerTrigger.getName();
-      }
-    }),
-
-    new BasicTablePanel.ColumnInfo<>(messages.triggeredAction(), 25, new Column<ViewerTrigger, SafeHtml>(
-      new SafeHtmlCell()) {
-      @Override
-      public SafeHtml getValue(ViewerTrigger viewerTrigger) {
-        return SafeHtmlUtils.fromSafeConstant(SafeHtmlUtils.htmlEscape(
-          viewerTrigger.getTriggeredAction().replace("\\u0020", " ")).replace("\\n", "<br/>"));
-      }
-    }),
-
-    new BasicTablePanel.ColumnInfo<>(messages.actionTime(), 8, new TextColumn<ViewerTrigger>() {
-      @Override
-      public String getValue(ViewerTrigger viewerTrigger) {
-        return viewerTrigger.getActionTime();
-      }
-    }),
-
-    new BasicTablePanel.ColumnInfo<>(messages.triggerEvent(), 8, new TextColumn<ViewerTrigger>() {
-      @Override
-      public String getValue(ViewerTrigger viewerTrigger) {
-        return viewerTrigger.getTriggerEvent();
-      }
-    }),
-
-    new BasicTablePanel.ColumnInfo<>(messages.aliasList(), 15, new TextColumn<ViewerTrigger>() {
-      @Override
-      public String getValue(ViewerTrigger viewerTrigger) {
-        if (ViewerStringUtils.isNotBlank(viewerTrigger.getAliasList())) {
-          return viewerTrigger.getAliasList();
-        } else {
-          return "";
+      new BasicTablePanel.ColumnInfo<>(messages.name(), 15, new TextColumn<ViewerTrigger>() {
+        @Override
+        public String getValue(ViewerTrigger viewerTrigger) {
+          return viewerTrigger.getName();
         }
-      }
-    }),
+      }),
 
-    new BasicTablePanel.ColumnInfo<>(messages.description(), 35, new TextColumn<ViewerTrigger>() {
-      @Override
-      public String getValue(ViewerTrigger viewerTrigger) {
-        if (ViewerStringUtils.isNotBlank(viewerTrigger.getDescription())) {
-          return viewerTrigger.getDescription();
-        } else {
-          return "";
+      new BasicTablePanel.ColumnInfo<>(messages.triggeredAction(), 25,
+        new Column<ViewerTrigger, SafeHtml>(new SafeHtmlCell()) {
+          @Override
+          public SafeHtml getValue(ViewerTrigger viewerTrigger) {
+            return SafeHtmlUtils.fromSafeConstant(SafeHtmlUtils
+              .htmlEscape(viewerTrigger.getTriggeredAction().replace("\\u0020", " ")).replace("\\n", "<br/>"));
+          }
+        }),
+
+      new BasicTablePanel.ColumnInfo<>(messages.actionTime(), 8, new TextColumn<ViewerTrigger>() {
+        @Override
+        public String getValue(ViewerTrigger viewerTrigger) {
+          return viewerTrigger.getActionTime();
         }
-      }
-    })
+      }),
+
+      new BasicTablePanel.ColumnInfo<>(messages.triggerEvent(), 8, new TextColumn<ViewerTrigger>() {
+        @Override
+        public String getValue(ViewerTrigger viewerTrigger) {
+          return viewerTrigger.getTriggerEvent();
+        }
+      }),
+
+      new BasicTablePanel.ColumnInfo<>(messages.aliasList(), 15, new TextColumn<ViewerTrigger>() {
+        @Override
+        public String getValue(ViewerTrigger viewerTrigger) {
+          if (ViewerStringUtils.isNotBlank(viewerTrigger.getAliasList())) {
+            return viewerTrigger.getAliasList();
+          } else {
+            return "";
+          }
+        }
+      }),
+
+      new BasicTablePanel.ColumnInfo<>(messages.description(), 35, new TextColumn<ViewerTrigger>() {
+        @Override
+        public String getValue(ViewerTrigger viewerTrigger) {
+          if (ViewerStringUtils.isNotBlank(viewerTrigger.getDescription())) {
+            return viewerTrigger.getDescription();
+          } else {
+            return "";
+          }
+        }
+      })
 
     );
   }

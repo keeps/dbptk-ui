@@ -68,8 +68,9 @@ public class CasApiAuthFilter implements Filter {
     }
 
     final HttpSession session = request.getSession(false);
-    final Assertion assertion = session != null ? (Assertion) session
-      .getAttribute(AbstractCasFilter.CONST_CAS_ASSERTION) : null;
+    final Assertion assertion = session != null
+      ? (Assertion) session.getAttribute(AbstractCasFilter.CONST_CAS_ASSERTION)
+      : null;
 
     if (assertion != null) {
       filterChain.doFilter(request, response);
@@ -109,8 +110,8 @@ public class CasApiAuthFilter implements Filter {
   }
 
   private void doFilterWithCredentials(final HttpServletRequest request, final HttpServletResponse response,
-    final FilterChain filterChain, final String username, final String password) throws GenericException, IOException,
-    ServletException, AuthenticationDeniedException {
+    final FilterChain filterChain, final String username, final String password)
+    throws GenericException, IOException, ServletException, AuthenticationDeniedException {
     final String tgt = this.casClient.getTicketGrantingTicket(username, password);
     doFilterWithTGT(request, response, filterChain, tgt);
   }
@@ -125,8 +126,7 @@ public class CasApiAuthFilter implements Filter {
    * @param request
    *          the request.
    *
-   * @return <code>true</code> if it is excluded and <code>false</code>
-   *         otherwise.
+   * @return <code>true</code> if it is excluded and <code>false</code> otherwise.
    */
   private boolean isRequestUrlExcluded(final HttpServletRequest request) {
     for (String exclusion : this.exclusions) {

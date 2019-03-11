@@ -28,7 +28,8 @@ import com.google.gwt.user.client.ui.Widget;
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class ForeignKeyPanel extends RightPanel {
-  public static ForeignKeyPanel createInstance(ViewerDatabase database, String tableUUID, List<String> columnsAndValues) {
+  public static ForeignKeyPanel createInstance(ViewerDatabase database, String tableUUID,
+    List<String> columnsAndValues) {
     return new ForeignKeyPanel(database, tableUUID, columnsAndValues);
   }
 
@@ -71,8 +72,8 @@ public class ForeignKeyPanel extends RightPanel {
     Filter filter = new Filter(filterParameters);
 
     // search (count)
-    BrowserService.Util.getInstance().findRows(database.getUUID(), filter, null, new Sublist(0, 1), null,
-      null, new DefaultAsyncCallback<IndexResult<ViewerRow>>() {
+    BrowserService.Util.getInstance().findRows(database.getUUID(), filter, null, new Sublist(0, 1), null, null,
+      new DefaultAsyncCallback<IndexResult<ViewerRow>>() {
         @Override
         public void onSuccess(IndexResult<ViewerRow> result) {
           rowCount = result.getTotalCount();

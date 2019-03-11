@@ -23,6 +23,6 @@ public interface LoginStatusListener {
    * 
    * @param user
    */
-  public void onLoginStatusChanged(User user);
+  void onLoginStatusChanged(User user);
 
 }

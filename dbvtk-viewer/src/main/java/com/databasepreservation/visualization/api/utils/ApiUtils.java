@@ -90,8 +90,7 @@ public class ApiUtils {
 
       }
     };
-    return Response
-      .ok(so, streamResponse.getMediaType())
+    return Response.ok(so, streamResponse.getMediaType())
       .header(HttpHeaders.CONTENT_DISPOSITION,
         contentDisposition(inline) + CONTENT_DISPOSITION_FILENAME_ARGUMENT + "\"" + streamResponse.getFilename() + "\"")
       .cacheControl(cacheControl).tag(tag).build();
@@ -110,8 +109,7 @@ public class ApiUtils {
 
       }
     };
-    return Response
-      .ok(so, streamResponse.getMediaType())
+    return Response.ok(so, streamResponse.getMediaType())
       .header(HttpHeaders.CONTENT_DISPOSITION,
         contentDisposition(inline) + CONTENT_DISPOSITION_FILENAME_ARGUMENT + "\"" + streamResponse.getFilename() + "\"")
       .build();

@@ -9,7 +9,7 @@ package com.databasepreservation.visualization.api.common;
 
 public interface EntityResponse {
 
-  public String getMediaType();
+  String getMediaType();
 
-  public void setMediaType(String mediaType);
+  void setMediaType(String mediaType);
 }

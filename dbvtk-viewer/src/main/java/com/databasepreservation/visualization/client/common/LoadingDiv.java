@@ -9,9 +9,8 @@ import com.google.gwt.user.client.ui.HTMLPanel;
  */
 public class LoadingDiv extends HTMLPanel {
   public LoadingDiv() {
-    super(
-      SafeHtmlUtils
-        .fromSafeConstant("<div class=\"spinner\" id=\"loading\"><div class=\"double-bounce1\"></div><div class=\"double-bounce2\"></div></div>"));
+    super(SafeHtmlUtils.fromSafeConstant(
+      "<div class=\"spinner\" id=\"loading\"><div class=\"double-bounce1\"></div><div class=\"double-bounce2\"></div></div>"));
   }
 
   /**

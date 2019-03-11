@@ -64,10 +64,8 @@ public class SchemaViewsPanel extends RightPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    BreadcrumbManager.updateBreadcrumb(
-      breadcrumb,
-      BreadcrumbManager.forSchemaViews(database.getMetadata().getName(), database.getUUID(), schema.getName(),
-        schema.getUUID()));
+    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forSchemaViews(database.getMetadata().getName(),
+      database.getUUID(), schema.getName(), schema.getUUID()));
   }
 
   private void init() {
@@ -87,10 +85,8 @@ public class SchemaViewsPanel extends RightPanel {
     infoBuilder.append(CommonClientUtils.getFieldHTML(messages.description(), view.getDescription()));
 
     if (ViewerStringUtils.isNotBlank(view.getQueryOriginal())) {
-      infoBuilder.append(CommonClientUtils.getFieldHTML(
-        messages.originalQuery(),
-        SafeHtmlUtils.fromSafeConstant("<pre><code>" + SafeHtmlUtils.htmlEscape(view.getQueryOriginal())
-          + "</code></pre>")));
+      infoBuilder.append(CommonClientUtils.getFieldHTML(messages.originalQuery(), SafeHtmlUtils
+        .fromSafeConstant("<pre><code>" + SafeHtmlUtils.htmlEscape(view.getQueryOriginal()) + "</code></pre>")));
     }
 
     if (ViewerStringUtils.isNotBlank(view.getQuery())) {
@@ -101,48 +97,48 @@ public class SchemaViewsPanel extends RightPanel {
     // create and return the table panel
     return new BasicTablePanel<>(header, infoBuilder.toSafeHtml(), view.getColumns().iterator(),
 
-    new BasicTablePanel.ColumnInfo<>(messages.columnName(), 15, new TextColumn<ViewerColumn>() {
-      @Override
-      public String getValue(ViewerColumn column) {
-        return column.getDisplayName();
-      }
-    }),
-
-    new BasicTablePanel.ColumnInfo<>(messages.typeName(), 15, new TextColumn<ViewerColumn>() {
-      @Override
-      public String getValue(ViewerColumn column) {
-        return column.getType().getTypeName();
-      }
-    }),
-
-    new BasicTablePanel.ColumnInfo<>(messages.originalTypeName(), 15, new TextColumn<ViewerColumn>() {
-      @Override
-      public String getValue(ViewerColumn column) {
-        return column.getType().getOriginalTypeName();
-      }
-    }),
-
-    new BasicTablePanel.ColumnInfo<>(messages.nullable(), 8, new TextColumn<ViewerColumn>() {
-      @Override
-      public String getValue(ViewerColumn column) {
-        if (column.getNillable()) {
-          return "Yes";
-        } else {
-          return "No";
+      new BasicTablePanel.ColumnInfo<>(messages.columnName(), 15, new TextColumn<ViewerColumn>() {
+        @Override
+        public String getValue(ViewerColumn column) {
+          return column.getDisplayName();
         }
-      }
-    }),
+      }),
 
-    new BasicTablePanel.ColumnInfo<>(messages.description(), 35, new TextColumn<ViewerColumn>() {
-      @Override
-      public String getValue(ViewerColumn column) {
-        if (ViewerStringUtils.isNotBlank(column.getDescription())) {
-          return column.getDescription();
-        } else {
-          return "";
+      new BasicTablePanel.ColumnInfo<>(messages.typeName(), 15, new TextColumn<ViewerColumn>() {
+        @Override
+        public String getValue(ViewerColumn column) {
+          return column.getType().getTypeName();
         }
-      }
-    })
+      }),
+
+      new BasicTablePanel.ColumnInfo<>(messages.originalTypeName(), 15, new TextColumn<ViewerColumn>() {
+        @Override
+        public String getValue(ViewerColumn column) {
+          return column.getType().getOriginalTypeName();
+        }
+      }),
+
+      new BasicTablePanel.ColumnInfo<>(messages.nullable(), 8, new TextColumn<ViewerColumn>() {
+        @Override
+        public String getValue(ViewerColumn column) {
+          if (column.getNillable()) {
+            return "Yes";
+          } else {
+            return "No";
+          }
+        }
+      }),
+
+      new BasicTablePanel.ColumnInfo<>(messages.description(), 35, new TextColumn<ViewerColumn>() {
+        @Override
+        public String getValue(ViewerColumn column) {
+          if (ViewerStringUtils.isNotBlank(column.getDescription())) {
+            return column.getDescription();
+          } else {
+            return "";
+          }
+        }
+      })
 
     );
   }

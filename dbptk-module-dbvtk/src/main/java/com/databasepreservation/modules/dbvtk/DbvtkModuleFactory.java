@@ -70,6 +70,11 @@ public class DbvtkModuleFactory implements DatabaseModuleFactory {
   }
 
   @Override
+  public boolean isEnabled() {
+    return true;
+  }
+
+  @Override
   public Map<String, Parameter> getAllParameters() {
     HashMap<String, Parameter> parameterHashMap = new HashMap<>();
     parameterHashMap.put(hostname.longName(), hostname);

@@ -39,8 +39,9 @@ public class RodaExceptionMapper implements ExceptionMapper<RODAException> {
   @Override
   public Response toResponse(RODAException e) {
     ContainerRequest containerRequest = containerRequestProvider.get();
-    String parameter = containerRequest.getProperty("acceptFormat") != null ? (String) containerRequest
-      .getProperty("acceptFormat") : "";
+    String parameter = containerRequest.getProperty("acceptFormat") != null
+      ? (String) containerRequest.getProperty("acceptFormat")
+      : "";
     String header = containerRequest.getHeaderString("Accept");
     String mediaType = ApiUtils.getMediaType(parameter, header);
 
@@ -51,22 +52,22 @@ public class RodaExceptionMapper implements ExceptionMapper<RODAException> {
     }
     LOGGER.debug("Creating error response. MediaType: {}; Message: {}", mediaType, message, e);
     if (e instanceof AuthorizationDeniedException) {
-      responseBuilder = Response.status(Status.UNAUTHORIZED).entity(
-        new ApiResponseMessage(ApiResponseMessage.ERROR, message));
+      responseBuilder = Response.status(Status.UNAUTHORIZED)
+        .entity(new ApiResponseMessage(ApiResponseMessage.ERROR, message));
     } else if (e instanceof NotImplementedException) {
-      responseBuilder = Response.serverError().entity(
-        new ApiResponseMessage(ApiResponseMessage.ERROR, "Not yet implemented"));
+      responseBuilder = Response.serverError()
+        .entity(new ApiResponseMessage(ApiResponseMessage.ERROR, "Not yet implemented"));
     } else if (e instanceof RequestNotValidException) {
-      responseBuilder = Response.status(Status.BAD_REQUEST).entity(
-        new ApiResponseMessage(ApiResponseMessage.ERROR, message));
+      responseBuilder = Response.status(Status.BAD_REQUEST)
+        .entity(new ApiResponseMessage(ApiResponseMessage.ERROR, message));
     } else if (e instanceof GenericException) {
       responseBuilder = Response.serverError().entity(new ApiResponseMessage(ApiResponseMessage.ERROR, message));
     } else if (e instanceof NotFoundException) {
-      responseBuilder = Response.status(Status.NOT_FOUND).entity(
-        new ApiResponseMessage(ApiResponseMessage.ERROR, message));
+      responseBuilder = Response.status(Status.NOT_FOUND)
+        .entity(new ApiResponseMessage(ApiResponseMessage.ERROR, message));
     } else if (e instanceof AlreadyExistsException || e instanceof JobAlreadyStartedException) {
-      responseBuilder = Response.status(Status.CONFLICT).entity(
-        new ApiResponseMessage(ApiResponseMessage.ERROR, message));
+      responseBuilder = Response.status(Status.CONFLICT)
+        .entity(new ApiResponseMessage(ApiResponseMessage.ERROR, message));
     } else {
       responseBuilder = Response.serverError().entity(new ApiResponseMessage(ApiResponseMessage.ERROR, e.getMessage()));
     }

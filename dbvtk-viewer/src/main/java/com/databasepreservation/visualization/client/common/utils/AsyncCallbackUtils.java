@@ -79,8 +79,8 @@ public class AsyncCallbackUtils {
   public static final void defaultFailureTreatment(Throwable caught) {
     if (!treatCommonFailures(caught)) {
       Toast.showError(caught.getClass().getSimpleName(), caught.getMessage());
-      new ClientLogger(AsyncCallbackUtils.class.getName()).error("AsyncCallback error - "
-        + caught.getClass().getSimpleName() + ": " + caught.getMessage(), caught);
+      new ClientLogger(AsyncCallbackUtils.class.getName())
+        .error("AsyncCallback error - " + caught.getClass().getSimpleName() + ": " + caught.getMessage(), caught);
     }
   }
 

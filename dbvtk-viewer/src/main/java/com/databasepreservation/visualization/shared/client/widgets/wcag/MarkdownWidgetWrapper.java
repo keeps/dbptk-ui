@@ -42,8 +42,8 @@ public class MarkdownWidgetWrapper extends HTML {
   }
 
   public MarkdownWidgetWrapper(String databaseUUID, final AsyncCallback<Void> callback) {
-    RequestBuilder request = new RequestBuilder(RequestBuilder.GET, RestUtils.createReportResourceUri(databaseUUID)
-      .asString());
+    RequestBuilder request = new RequestBuilder(RequestBuilder.GET,
+      RestUtils.createReportResourceUri(databaseUUID).asString());
 
     try {
       request.sendRequest(null, new RequestCallback() {
@@ -51,9 +51,9 @@ public class MarkdownWidgetWrapper extends HTML {
         @Override
         public void onResponseReceived(Request request, Response response) {
           if (response.getStatusCode() == 200) {
-            if(response.getText() == null || response.getText().isEmpty()){
+            if (response.getText() == null || response.getText().isEmpty()) {
               MarkdownWidgetWrapper.this.setContentFromMarkdown("Nothing to report.");
-            }else{
+            } else {
               MarkdownWidgetWrapper.this.setContentFromMarkdown(response.getText());
             }
             callback.onSuccess(null);

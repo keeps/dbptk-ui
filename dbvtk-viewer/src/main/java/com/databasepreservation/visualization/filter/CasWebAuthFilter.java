@@ -115,7 +115,7 @@ public class CasWebAuthFilter implements Filter {
       UserUtility.logout(httpRequest);
 
       final StringBuilder b = new StringBuilder();
-      b.append(url.substring(0, url.indexOf("logout"))).append("#");
+      b.append(url, 0, url.indexOf("logout")).append("#");
 
       httpResponse.sendRedirect(CommonUtils.constructRedirectUrl(casLogoutURL, "service", b.toString(), false, false));
 

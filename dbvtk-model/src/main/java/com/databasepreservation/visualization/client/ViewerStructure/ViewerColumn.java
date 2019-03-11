@@ -91,8 +91,8 @@ public class ViewerColumn implements Serializable {
 
   @Override
   public String toString() {
-    return "ViewerColumn{" + "defaultValue='" + defaultValue + '\'' + ", displayName='" + displayName + '\''
-      + ", type=" + type + ", nillable=" + nillable + ", description='" + description + '\'' + ", isAutoIncrement="
+    return "ViewerColumn{" + "defaultValue='" + defaultValue + '\'' + ", displayName='" + displayName + '\'' + ", type="
+      + type + ", nillable=" + nillable + ", description='" + description + '\'' + ", isAutoIncrement="
       + isAutoIncrement + '}';
   }
 

@@ -49,8 +49,8 @@ public class FontAwesomeIconManager {
   }
 
   public static SafeHtml loading(String icon) {
-    return SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(icon) + " <span class=\"loadingText\">"
-      + messages.loading() + "</span>");
+    return SafeHtmlUtils.fromSafeConstant(
+      FontAwesomeIconManager.getTag(icon) + " <span class=\"loadingText\">" + messages.loading() + "</span>");
   }
 
   public static SafeHtml loaded(String icon, String text) {

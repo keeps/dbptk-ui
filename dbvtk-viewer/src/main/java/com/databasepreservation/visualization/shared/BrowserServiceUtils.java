@@ -17,9 +17,10 @@ public class BrowserServiceUtils {
     List<SearchField> searchFields = new ArrayList<>();
 
     for (ViewerColumn viewerColumn : viewerTable.getColumns()) {
-      SearchField searchField = new SearchField(viewerTable.getUUID() + "-"
-        + viewerColumn.getColumnIndexInEnclosingTable(), Arrays.asList(viewerColumn.getSolrName()),
-        viewerColumn.getDisplayName(), viewerTypeToSearchFieldType(viewerColumn.getType()));
+      SearchField searchField = new SearchField(
+        viewerTable.getUUID() + "-" + viewerColumn.getColumnIndexInEnclosingTable(),
+        Arrays.asList(viewerColumn.getSolrName()), viewerColumn.getDisplayName(),
+        viewerTypeToSearchFieldType(viewerColumn.getType()));
       searchField.setFixed(true);
       searchFields.add(searchField);
     }

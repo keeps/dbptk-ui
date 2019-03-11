@@ -10,6 +10,7 @@ import com.databasepreservation.model.exception.UnknownTypeException;
 import com.databasepreservation.model.modules.DatabaseExportModule;
 import com.databasepreservation.model.modules.ModuleSettings;
 import com.databasepreservation.model.structure.DatabaseStructure;
+import com.databasepreservation.modules.DefaultExceptionNormalizer;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabaseFromToolkit;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable;
 import com.databasepreservation.visualization.transformers.ToolkitStructure2ViewerStructure;
@@ -196,5 +197,10 @@ public class DbvtkExportModule implements DatabaseExportModule {
   @Override
   public void setOnceReporter(Reporter reporter) {
     this.reporter = reporter;
+  }
+
+  @Override
+  public ModuleException normalizeException(Exception exception, String contextMessage) {
+    return DefaultExceptionNormalizer.getInstance().normalizeException(exception, contextMessage);
   }
 }

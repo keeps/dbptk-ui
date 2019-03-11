@@ -109,8 +109,8 @@ public class TablePanel extends RightPanel {
 
   /**
    * Asynchronous table panel that receives UUIDs and needs to get the objects
-   * from solr. This method supports a predefined search (SearchInfo instance)
-   * as a JSON String.
+   * from solr. This method supports a predefined search (SearchInfo instance) as
+   * a JSON String.
    *
    * @param viewerDatabase
    *          the database
@@ -137,10 +137,8 @@ public class TablePanel extends RightPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    BreadcrumbManager.updateBreadcrumb(
-      breadcrumb,
-      BreadcrumbManager.forTable(database.getMetadata().getName(), database.getUUID(), schema.getName(),
-        schema.getUUID(), table.getName(), table.getUUID()));
+    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forTable(database.getMetadata().getName(),
+      database.getUUID(), schema.getName(), schema.getUUID(), table.getName(), table.getUUID()));
   }
 
   private void init() {

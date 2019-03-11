@@ -91,8 +91,8 @@ public class InternalApiAuthFilter implements Filter {
    * @throws GenericException
    *           if some other error occurs.
    */
-  private User getBasicAuthUser(final HttpServletRequest request) throws AuthenticationDeniedException,
-    GenericException {
+  private User getBasicAuthUser(final HttpServletRequest request)
+    throws AuthenticationDeniedException, GenericException {
     final Pair<String, String> credentials = new BasicAuthRequestWrapper(request).getCredentials();
     if (credentials == null) {
       throw new AuthenticationDeniedException("No credentials!");
@@ -109,8 +109,7 @@ public class InternalApiAuthFilter implements Filter {
    * @param request
    *          the request.
    * 
-   * @return <code>true</code> if it is excluded and <code>false</code>
-   *         otherwise.
+   * @return <code>true</code> if it is excluded and <code>false</code> otherwise.
    */
   private boolean isRequestUrlExcluded(final HttpServletRequest request) {
     for (String exclusion : this.exclusions) {

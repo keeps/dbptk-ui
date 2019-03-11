@@ -45,14 +45,14 @@ public class Toast extends PopupPanel {
   /**
    * The type of message
    */
-  public static enum MessagePopupType {
+  public enum MessagePopupType {
     /**
      * An error message
      */
     ERROR_MESSAGE, INFO
   }
 
-  private static final ClientMessages messages = (ClientMessages) GWT.create(ClientMessages.class);
+  private static final ClientMessages messages = GWT.create(ClientMessages.class);
 
   private final int slotNumber;
 
@@ -132,8 +132,8 @@ public class Toast extends PopupPanel {
             slotOffset += slots[i].getOffsetHeight() + PADDING;
           }
         }
-        Toast.this.setPopupPosition(Window.getClientWidth() - offsetWidth - PADDING, Window.getScrollTop() + PADDING
-          + slotOffset);
+        Toast.this.setPopupPosition(Window.getClientWidth() - offsetWidth - PADDING,
+          Window.getScrollTop() + PADDING + slotOffset);
       }
 
     });

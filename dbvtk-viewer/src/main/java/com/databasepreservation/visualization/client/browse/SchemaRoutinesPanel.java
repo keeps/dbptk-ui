@@ -71,8 +71,8 @@ public class SchemaRoutinesPanel extends RightPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forSchemaRoutines(
-      database.getMetadata().getName(), database.getUUID(), schema.getName(), schema.getUUID()));
+    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forSchemaRoutines(database.getMetadata().getName(),
+      database.getUUID(), schema.getName(), schema.getUUID()));
   }
 
   private void init() {
@@ -122,18 +122,16 @@ public class SchemaRoutinesPanel extends RightPanel {
         .append(CommonClientUtils.getFieldHTML(messages.routine_sourceCode(), viewerRoutine.getSource()));
     }
     if (ViewerStringUtils.isNotBlank(viewerRoutine.getBody())) {
-      descriptionBuilder.append(CommonClientUtils.getFieldHTML(
-        messages.routine_body(),
-        SafeHtmlUtils.fromSafeConstant("<pre><code>" + SafeHtmlUtils.htmlEscape(viewerRoutine.getBody())
-          + "</code></pre>")));
+      descriptionBuilder.append(CommonClientUtils.getFieldHTML(messages.routine_body(), SafeHtmlUtils
+        .fromSafeConstant("<pre><code>" + SafeHtmlUtils.htmlEscape(viewerRoutine.getBody()) + "</code></pre>")));
     }
     if (ViewerStringUtils.isNotBlank(viewerRoutine.getCharacteristic())) {
-      descriptionBuilder.append(CommonClientUtils.getFieldHTML(messages.routine_characteristic(),
-        viewerRoutine.getCharacteristic()));
+      descriptionBuilder
+        .append(CommonClientUtils.getFieldHTML(messages.routine_characteristic(), viewerRoutine.getCharacteristic()));
     }
     if (ViewerStringUtils.isNotBlank(viewerRoutine.getReturnType())) {
-      descriptionBuilder.append(CommonClientUtils.getFieldHTML(messages.routine_returnType(),
-        viewerRoutine.getReturnType()));
+      descriptionBuilder
+        .append(CommonClientUtils.getFieldHTML(messages.routine_returnType(), viewerRoutine.getReturnType()));
     }
 
     return new HTMLPanel(descriptionBuilder.toSafeHtml());
@@ -157,55 +155,55 @@ public class SchemaRoutinesPanel extends RightPanel {
 
     return new BasicTablePanel<ViewerRoutineParameter>(header, info, routine.getParameters().iterator(),
 
-    new BasicTablePanel.ColumnInfo<>(messages.name(), 15, new TextColumn<ViewerRoutineParameter>() {
-      @Override
-      public String getValue(ViewerRoutineParameter viewerRoutineParameter) {
-        return viewerRoutineParameter.getName();
-      }
-    }),
-
-    new BasicTablePanel.ColumnInfo<>(messages.routineParameter_mode(), 15, new TextColumn<ViewerRoutineParameter>() {
-      @Override
-      public String getValue(ViewerRoutineParameter viewerRoutineParameter) {
-        return viewerRoutineParameter.getMode();
-      }
-    }),
-
-    new BasicTablePanel.ColumnInfo<>(messages.typeName(), 15, new TextColumn<ViewerRoutineParameter>() {
-      @Override
-      public String getValue(ViewerRoutineParameter viewerRoutineParameter) {
-        if (viewerRoutineParameter.getType() != null) {
-          if (ViewerStringUtils.isNotBlank(viewerRoutineParameter.getType().getTypeName())) {
-            return viewerRoutineParameter.getType().getTypeName();
-          }
+      new BasicTablePanel.ColumnInfo<>(messages.name(), 15, new TextColumn<ViewerRoutineParameter>() {
+        @Override
+        public String getValue(ViewerRoutineParameter viewerRoutineParameter) {
+          return viewerRoutineParameter.getName();
         }
-        return "";
-      }
-    }),
+      }),
 
-    new BasicTablePanel.ColumnInfo<>(messages.originalTypeName(), 15, new TextColumn<ViewerRoutineParameter>() {
-      @Override
-      public String getValue(ViewerRoutineParameter viewerRoutineParameter) {
-        if (viewerRoutineParameter.getType() != null) {
-          if (ViewerStringUtils.isNotBlank(viewerRoutineParameter.getType().getOriginalTypeName())) {
-            return viewerRoutineParameter.getType().getOriginalTypeName();
-          }
+      new BasicTablePanel.ColumnInfo<>(messages.routineParameter_mode(), 15, new TextColumn<ViewerRoutineParameter>() {
+        @Override
+        public String getValue(ViewerRoutineParameter viewerRoutineParameter) {
+          return viewerRoutineParameter.getMode();
         }
-        return "";
-      }
-    }),
+      }),
 
-    new BasicTablePanel.ColumnInfo<>(messages.description(), 35, new TextColumn<ViewerRoutineParameter>() {
-      @Override
-      public String getValue(ViewerRoutineParameter viewerRoutineParameter) {
-        if (viewerRoutineParameter.getType() != null) {
-          if (ViewerStringUtils.isNotBlank(viewerRoutineParameter.getDescription())) {
-            return viewerRoutineParameter.getDescription();
+      new BasicTablePanel.ColumnInfo<>(messages.typeName(), 15, new TextColumn<ViewerRoutineParameter>() {
+        @Override
+        public String getValue(ViewerRoutineParameter viewerRoutineParameter) {
+          if (viewerRoutineParameter.getType() != null) {
+            if (ViewerStringUtils.isNotBlank(viewerRoutineParameter.getType().getTypeName())) {
+              return viewerRoutineParameter.getType().getTypeName();
+            }
           }
+          return "";
         }
-        return "";
-      }
-    })
+      }),
+
+      new BasicTablePanel.ColumnInfo<>(messages.originalTypeName(), 15, new TextColumn<ViewerRoutineParameter>() {
+        @Override
+        public String getValue(ViewerRoutineParameter viewerRoutineParameter) {
+          if (viewerRoutineParameter.getType() != null) {
+            if (ViewerStringUtils.isNotBlank(viewerRoutineParameter.getType().getOriginalTypeName())) {
+              return viewerRoutineParameter.getType().getOriginalTypeName();
+            }
+          }
+          return "";
+        }
+      }),
+
+      new BasicTablePanel.ColumnInfo<>(messages.description(), 35, new TextColumn<ViewerRoutineParameter>() {
+        @Override
+        public String getValue(ViewerRoutineParameter viewerRoutineParameter) {
+          if (viewerRoutineParameter.getType() != null) {
+            if (ViewerStringUtils.isNotBlank(viewerRoutineParameter.getDescription())) {
+              return viewerRoutineParameter.getDescription();
+            }
+          }
+          return "";
+        }
+      })
 
     );
   }

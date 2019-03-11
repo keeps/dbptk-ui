@@ -46,7 +46,8 @@ public interface ClientLoggerServiceAsync {
    * 
    * @see com.databasepreservation.visualization.shared.client.ClientLoggerService
    */
-  void info(java.lang.String classname, java.lang.String object, java.lang.Throwable error, AsyncCallback<Void> callback);
+  void info(java.lang.String classname, java.lang.String object, java.lang.Throwable error,
+    AsyncCallback<Void> callback);
 
   /**
    * GWT-RPC service asynchronous (client-side) interface
@@ -60,7 +61,8 @@ public interface ClientLoggerServiceAsync {
    * 
    * @see com.databasepreservation.visualization.shared.client.ClientLoggerService
    */
-  void warn(java.lang.String classname, java.lang.String object, java.lang.Throwable error, AsyncCallback<Void> callback);
+  void warn(java.lang.String classname, java.lang.String object, java.lang.Throwable error,
+    AsyncCallback<Void> callback);
 
   /**
    * GWT-RPC service asynchronous (client-side) interface

@@ -53,12 +53,12 @@ public class UserLogin {
   };
 
   /**
-   * Get current authenticated user. User is cached and only refreshed when
-   * login or logout actions are called.
+   * Get current authenticated user. User is cached and only refreshed when login
+   * or logout actions are called.
    *
    * @param callback
-   *          call back handler that receives error if failed or AuthOfficeUser
-   *          if success.
+   *          call back handler that receives error if failed or AuthOfficeUser if
+   *          success.
    */
   public void getAuthenticatedUser(final AsyncCallback<User> callback, boolean ensureIsFresh) {
     if (ensureIsFresh) {
@@ -88,8 +88,9 @@ public class UserLogin {
 
     String brandingIfFalse = Window.Location.getHref().contains("branding=false") ? "&branding=false" : "";
 
-    Window.open(moduleBaseURL + "login?service=" + currentPath + "&hash=" + hash + "&locale=" + locale
-      + brandingIfFalse, "_self", "");
+    Window.open(
+      moduleBaseURL + "login?service=" + currentPath + "&hash=" + hash + "&locale=" + locale + brandingIfFalse, "_self",
+      "");
   }
 
   public void login(String username, String password, final AsyncCallback<User> callback) {

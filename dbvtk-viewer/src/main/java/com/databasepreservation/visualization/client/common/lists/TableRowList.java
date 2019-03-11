@@ -7,7 +7,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.visualization.shared.client.Tools.FilterUtils;
 import org.roda.core.data.v2.common.Pair;
 import org.roda.core.data.v2.index.IndexResult;
 import org.roda.core.data.v2.index.facet.Facets;
@@ -23,6 +22,7 @@ import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerType;
 import com.databasepreservation.visualization.shared.ViewerSafeConstants;
 import com.databasepreservation.visualization.shared.client.ClientLogger;
+import com.databasepreservation.visualization.shared.client.Tools.FilterUtils;
 import com.databasepreservation.visualization.shared.client.Tools.FontAwesomeIconManager;
 import com.databasepreservation.visualization.shared.client.Tools.ViewerJsonUtils;
 import com.databasepreservation.visualization.shared.client.Tools.ViewerStringUtils;
@@ -96,8 +96,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
 
       Column<ViewerRow, SafeHtml> column = new Column<ViewerRow, SafeHtml>(new SafeHtmlCell()) {
         /**
-         * Render the object into the cell, providing the full content in a
-         * tooltip
+         * Render the object into the cell, providing the full content in a tooltip
          *
          * @param context
          *          the cell context
@@ -130,8 +129,8 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
             // if it exists in Solr, it is not null
             switch (type) {
               case BINARY:
-                ret = SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.BLOB,
-                  messages.largeBinaryObject()));
+                ret = SafeHtmlUtils.fromSafeConstant(
+                  FontAwesomeIconManager.getTag(FontAwesomeIconManager.BLOB, messages.largeBinaryObject()));
                 break;
               // case DATETIME:
               // ret =
@@ -180,7 +179,8 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
   }
 
   @Override
-  protected void getData(Sublist sublist, ColumnSortList columnSortList, AsyncCallback<IndexResult<ViewerRow>> callback) {
+  protected void getData(Sublist sublist, ColumnSortList columnSortList,
+    AsyncCallback<IndexResult<ViewerRow>> callback) {
     ViewerTable table = getObject().getSecond();
     Filter filter = FilterUtils.filterByTable(getFilter(), table.getId());
     currentSubList = sublist;
@@ -198,8 +198,8 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
 
     GWT.log("Filter: " + filter);
 
-    BrowserService.Util.getInstance().findRows(getObject().getFirst().getUUID(), filter,
-      currentSorter, sublist, getFacets(), LocaleInfo.getCurrentLocale().getLocaleName(), callback);
+    BrowserService.Util.getInstance().findRows(getObject().getFirst().getUUID(), filter, currentSorter, sublist,
+      getFacets(), LocaleInfo.getCurrentLocale().getLocaleName(), callback);
   }
 
   @Override

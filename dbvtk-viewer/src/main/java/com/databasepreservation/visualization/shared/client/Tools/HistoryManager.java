@@ -143,7 +143,8 @@ public class HistoryManager {
     newHistory(Arrays.asList(ROUTE_RECORD, databaseUUID, tableUUID, recordUUID));
   }
 
-  public static void gotoReferences(String databaseUUID, String tableUUID, String recordUUID, String columnIndexInTable) {
+  public static void gotoReferences(String databaseUUID, String tableUUID, String recordUUID,
+    String columnIndexInTable) {
     newHistory(Arrays.asList(ROUTE_REFERENCES, databaseUUID, tableUUID, recordUUID, columnIndexInTable));
   }
 
@@ -182,7 +183,7 @@ public class HistoryManager {
     String hash = Window.Location.getHash();
     if (hash.length() > 0) {
       hash = hash.substring(1);
-      List<String> split = Arrays.asList(hash.split(HISTORY_SEP_REGEX));
+      String[] split = hash.split(HISTORY_SEP_REGEX);
       for (String item : split) {
         tokens.add(URL.decode(item));
       }
@@ -193,8 +194,8 @@ public class HistoryManager {
 
   public static String linkToReferences(String database_uuid, String table_uuid, String record_uuid,
     String columnIndexInTable) {
-    return createHistoryToken(Arrays.asList(ROUTE_REFERENCES, database_uuid, table_uuid, record_uuid,
-      columnIndexInTable));
+    return createHistoryToken(
+      Arrays.asList(ROUTE_REFERENCES, database_uuid, table_uuid, record_uuid, columnIndexInTable));
   }
 
   public static String linkToRecord(String database_uuid, String table_uuid, String record_uuid) {

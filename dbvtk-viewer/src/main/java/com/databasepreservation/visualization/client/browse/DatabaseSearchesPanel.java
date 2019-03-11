@@ -50,8 +50,9 @@ public class DatabaseSearchesPanel extends RightPanel {
   }
 
   private void init() {
-    savedSearchList = new SavedSearchList(database.getUUID(), new Filter(new BasicSearchFilterParameter(
-      ViewerSafeConstants.SOLR_SEARCHES_DATABASE_UUID, database.getUUID())), null, null, false, false);
+    savedSearchList = new SavedSearchList(database.getUUID(),
+      new Filter(new BasicSearchFilterParameter(ViewerSafeConstants.SOLR_SEARCHES_DATABASE_UUID, database.getUUID())),
+      null, null, false, false);
 
     savedSearchList.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
       @Override

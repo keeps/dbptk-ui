@@ -94,11 +94,11 @@ public class OnOffFilter implements Filter {
 
   /**
    * Checks if the request is for a resource that is not protected by
-   * authentication filters but is instead protected via IP whitelist. And also
-   * if the IP where the request is coming from is in the IP list.
+   * authentication filters but is instead protected via IP whitelist. And also if
+   * the IP where the request is coming from is in the IP list.
    *
-   * If both of those are true, this will return true (which will in turn skip
-   * all filters).
+   * If both of those are true, this will return true (which will in turn skip all
+   * filters).
    *
    * @param servletRequest
    *          the HTTP request
@@ -112,9 +112,7 @@ public class OnOffFilter implements Filter {
       if (StringUtils.isNotBlank(requestURI)
         && requestURI.startsWith("/" + ViewerSafeConstants.API_SERVLET + ViewerSafeConstants.API_V1_MANAGE_RESOURCE)) {
         String remoteIP = request.getRemoteAddr();
-        if (whitelistAllIPs || whitelistedIPs.contains(remoteIP)) {
-          return true;
-        }
+        return whitelistAllIPs || whitelistedIPs.contains(remoteIP);
       }
     }
 
@@ -186,15 +184,15 @@ public class OnOffFilter implements Filter {
    */
   private FilterConfig getFilterConfig() {
     if (this.filterConfig == null) {
-      this.filterConfig = new OnOffFilterConfig(this.webXmlFilterConfig, ViewerFactory.getViewerConfiguration()
-        .getConfiguration());
+      this.filterConfig = new OnOffFilterConfig(this.webXmlFilterConfig,
+        ViewerFactory.getViewerConfiguration().getConfiguration());
     }
     return this.filterConfig;
   }
 
   /**
-   * {@link FilterConfig} implementation that combines web.xml &lt;init-param>
-   * and RODA configuration values.
+   * {@link FilterConfig} implementation that combines web.xml &lt;init-param> and
+   * RODA configuration values.
    */
   private class OnOffFilterConfig implements FilterConfig {
     /**

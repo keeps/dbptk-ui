@@ -89,8 +89,8 @@ public class Theme {
 
   public static Date getLastModifiedDate(String resourceId) throws IOException {
     Date modifiedDate;
-    URL file = ViewerFactory.getViewerConfiguration().getConfigurationFile(
-      ViewerConstants.VIEWER_THEME_FOLDER + "/" + resourceId);
+    URL file = ViewerFactory.getViewerConfiguration()
+      .getConfigurationFile(ViewerConstants.VIEWER_THEME_FOLDER + "/" + resourceId);
 
     if ("file".equalsIgnoreCase(file.getProtocol())) {
       try {

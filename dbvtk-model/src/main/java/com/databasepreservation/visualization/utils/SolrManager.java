@@ -40,7 +40,6 @@ import com.databasepreservation.visualization.client.SavedSearch;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabaseFromToolkit;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerRow;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerSchema;
 import com.databasepreservation.visualization.client.ViewerStructure.ViewerTable;
 import com.databasepreservation.visualization.exceptions.ViewerException;
 import com.databasepreservation.visualization.shared.ViewerSafeConstants;
@@ -93,12 +92,12 @@ public class SolrManager {
       throw new ViewerException("Error creating collection " + ViewerSafeConstants.SOLR_INDEX_DATABASES_COLLECTION_NAME,
         e);
     } catch (SolrException e) {
-      if (e.getMessage().contains(
-        "collection already exists: " + ViewerSafeConstants.SOLR_INDEX_DATABASES_COLLECTION_NAME)) {
+      if (e.getMessage()
+        .contains("collection already exists: " + ViewerSafeConstants.SOLR_INDEX_DATABASES_COLLECTION_NAME)) {
         LOGGER.debug("collection {} already exists.", ViewerSafeConstants.SOLR_INDEX_DATABASES_COLLECTION_NAME);
       } else {
-        throw new ViewerException("Error creating collection "
-          + ViewerSafeConstants.SOLR_INDEX_DATABASES_COLLECTION_NAME, e);
+        throw new ViewerException(
+          "Error creating collection " + ViewerSafeConstants.SOLR_INDEX_DATABASES_COLLECTION_NAME, e);
       }
     }
 
@@ -111,7 +110,8 @@ public class SolrManager {
     CollectionAdminRequest.Create request = CollectionAdminRequest.createCollection(collectionName,
       ViewerSafeConstants.SOLR_CONFIGSET_DATABASE, 1, 1);
     try {
-      LOGGER.debug("Creating collection for database " + database.getMetadata().getName() + " with uuid " + database.getUUID());
+      LOGGER.debug(
+        "Creating collection for database " + database.getMetadata().getName() + " with uuid " + database.getUUID());
       NamedList<Object> response = client.request(request);
       LOGGER.debug("Response from server (create collection for database with uuid " + database.getUUID() + "): "
         + response.toString());
@@ -120,14 +120,13 @@ public class SolrManager {
         LOGGER.debug("Created in {} ms", duration);
       }
     } catch (SolrException e) {
-      LOGGER.error("Error in Solr server while creating collection for database ({})", collectionName , e);
+      LOGGER.error("Error in Solr server while creating collection for database ({})", collectionName, e);
     } catch (Exception e) {
       // mainly: SolrServerException and IOException
       LOGGER.error("Error creating collection {}", collectionName, e);
     }
 
     collectionsToCommit.add(collectionName);
-
 
     // create collection needed to store saved searches
     try {
@@ -165,8 +164,8 @@ public class SolrManager {
     }
 
     // delete related saved searches
-    Filter savedSearchFilter = new Filter(new SimpleFilterParameter(ViewerSafeConstants.SOLR_SEARCHES_DATABASE_UUID,
-      database.getUUID()));
+    Filter savedSearchFilter = new Filter(
+      new SimpleFilterParameter(ViewerSafeConstants.SOLR_SEARCHES_DATABASE_UUID, database.getUUID()));
     try {
       SolrUtils.delete(client, SavedSearch.class, savedSearchFilter);
       commit(ViewerSafeConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME, false);
@@ -230,12 +229,13 @@ public class SolrManager {
     return SolrUtils.find(client, classToReturn, filter, sorter, sublist, facets);
   }
 
-  public <T extends IsIndexed> Long count(Class<T> classToReturn, Filter filter) throws GenericException,
-    RequestNotValidException {
+  public <T extends IsIndexed> Long count(Class<T> classToReturn, Filter filter)
+    throws GenericException, RequestNotValidException {
     return SolrUtils.count(client, classToReturn, filter);
   }
 
-  public <T extends IsIndexed> T retrieve(Class<T> classToReturn, String id) throws NotFoundException, GenericException {
+  public <T extends IsIndexed> T retrieve(Class<T> classToReturn, String id)
+    throws NotFoundException, GenericException {
     return SolrUtils.retrieve(client, classToReturn, id);
   }
 
@@ -244,9 +244,10 @@ public class SolrManager {
     return SolrUtils.find(client, classToReturn, databaseUUID, filter, sorter, sublist, facets);
   }
 
-  public InputStream findRowsCSV(String databaseUUID, Filter filter, Sorter sorter, Sublist sublist, List<String> fields)
-    throws GenericException, RequestNotValidException {
-    return SolrUtils.findCSV(client, SolrUtils.getDatabaseCollectionName(databaseUUID), filter, sorter, sublist, fields);
+  public InputStream findRowsCSV(String databaseUUID, Filter filter, Sorter sorter, Sublist sublist,
+    List<String> fields) throws GenericException, RequestNotValidException {
+    return SolrUtils.findCSV(client, SolrUtils.getDatabaseCollectionName(databaseUUID), filter, sorter, sublist,
+      fields);
   }
 
   public <T extends IsIndexed> Long countRows(Class<T> classToReturn, String databaseUUID, Filter filter)
@@ -322,12 +323,12 @@ public class SolrManager {
       throw new ViewerException("Error creating collection " + ViewerSafeConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME,
         e);
     } catch (SolrException e) {
-      if (e.getMessage().contains(
-        "collection already exists: " + ViewerSafeConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME)) {
+      if (e.getMessage()
+        .contains("collection already exists: " + ViewerSafeConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME)) {
         LOGGER.info("collection {} already exists.", ViewerSafeConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME);
       } else {
-        throw new ViewerException("Error creating collection "
-          + ViewerSafeConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME, e);
+        throw new ViewerException(
+          "Error creating collection " + ViewerSafeConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME, e);
       }
     }
   }
@@ -357,8 +358,7 @@ public class SolrManager {
 
   /**
    * The collections are not immediately available after creation, this method
-   * makes sequential attempts to insert a document before giving up (by
-   * timeout)
+   * makes sequential attempts to insert a document before giving up (by timeout)
    *
    * @throws ViewerException
    *           in case of a fatal error
@@ -375,16 +375,17 @@ public class SolrManager {
           insertedAllDocuments = true;
           break;
         } else {
-          LOGGER.warn("Could not insert a document batch in collection " + collection + ". Response: "
-            + response.toString());
+          LOGGER.warn(
+            "Could not insert a document batch in collection " + collection + ". Response: " + response.toString());
         }
       } catch (SolrException e) {
         if (e.code() == 404) {
           // this means that the collection does not exist yet. retry
           LOGGER.debug("Collection " + collection + " does not exist (yet). Retrying (" + tries + ")");
         } else {
-          LOGGER.warn("Could not insert a document batch in collection" + collection + ". Last response (if any): "
-            + String.valueOf(response), e);
+          LOGGER.warn(
+            "Could not insert a document batch in collection" + collection + ". Last response (if any): " + response,
+            e);
         }
       } catch (SolrServerException | IOException e) {
         throw new ViewerException("Problem adding information", e);
@@ -409,8 +410,8 @@ public class SolrManager {
 
   /**
    * The collections are not immediately available after creation, this method
-   * makes sequential attempts to insert documents (previously stored in a
-   * buffer) before giving up (by timeout)
+   * makes sequential attempts to insert documents (previously stored in a buffer)
+   * before giving up (by timeout)
    *
    * @throws ViewerException
    *           in case of a fatal error
@@ -445,7 +446,7 @@ public class SolrManager {
                 LOGGER.debug("Collection " + currentCollection + " does not exist (yet). Retrying (" + tries + ")");
               } else {
                 LOGGER.warn("Could not insert a document batch in collection" + currentCollection
-                  + ". Last response (if any): " + String.valueOf(response), e);
+                  + ". Last response (if any): " + response, e);
               }
             }
           }
@@ -562,8 +563,8 @@ public class SolrManager {
   }
 
   public void markDatabaseAsReady(ViewerDatabaseFromToolkit viewerDatabase) throws ViewerException {
-    updateDatabaseFields(viewerDatabase.getUUID(), new Pair<>(ViewerSafeConstants.SOLR_DATABASES_STATUS,
-      ViewerDatabase.Status.AVAILABLE.toString()));
+    updateDatabaseFields(viewerDatabase.getUUID(),
+      new Pair<>(ViewerSafeConstants.SOLR_DATABASES_STATUS, ViewerDatabase.Status.AVAILABLE.toString()));
   }
 
   private void updateDatabaseFields(String databaseUUID, Pair<String, Object>... fields) {
@@ -589,18 +590,19 @@ public class SolrManager {
     updateDatabaseFields(databaseUUID, new Pair<>(ViewerSafeConstants.SOLR_DATABASES_TOTAL_SCHEMAS, totalSchemas));
   }
 
-  public void updateDatabaseCurrentSchema(String databaseUUID, String schemaName, long completedSchemas, int totalTables) {
+  public void updateDatabaseCurrentSchema(String databaseUUID, String schemaName, long completedSchemas,
+    int totalTables) {
     updateDatabaseFields(databaseUUID, new Pair<>(ViewerSafeConstants.SOLR_DATABASES_CURRENT_SCHEMA_NAME, schemaName),
-      new Pair<>(ViewerSafeConstants.SOLR_DATABASES_INGESTED_SCHEMAS, completedSchemas), new Pair<>(
-        ViewerSafeConstants.SOLR_DATABASES_TOTAL_TABLES, totalTables));
+      new Pair<>(ViewerSafeConstants.SOLR_DATABASES_INGESTED_SCHEMAS, completedSchemas),
+      new Pair<>(ViewerSafeConstants.SOLR_DATABASES_TOTAL_TABLES, totalTables));
   }
 
   public void updateDatabaseCurrentTable(String databaseUUID, String tableName, long completedTablesInSchema,
     long totalRows) {
     updateDatabaseFields(databaseUUID, new Pair<>(ViewerSafeConstants.SOLR_DATABASES_CURRENT_TABLE_NAME, tableName),
-      new Pair<>(ViewerSafeConstants.SOLR_DATABASES_INGESTED_TABLES, completedTablesInSchema), new Pair<>(
-        ViewerSafeConstants.SOLR_DATABASES_TOTAL_ROWS, totalRows), new Pair<>(
-        ViewerSafeConstants.SOLR_DATABASES_INGESTED_ROWS, 0));
+      new Pair<>(ViewerSafeConstants.SOLR_DATABASES_INGESTED_TABLES, completedTablesInSchema),
+      new Pair<>(ViewerSafeConstants.SOLR_DATABASES_TOTAL_ROWS, totalRows),
+      new Pair<>(ViewerSafeConstants.SOLR_DATABASES_INGESTED_ROWS, 0));
   }
 
   public void updateDatabaseCurrentRow(String databaseUUID, long completedRows) {
@@ -608,13 +610,13 @@ public class SolrManager {
   }
 
   public void updateDatabaseIngestionFinished(String databaseUUID) {
-    updateDatabaseFields(databaseUUID, new Pair<>(ViewerSafeConstants.SOLR_DATABASES_TOTAL_SCHEMAS, null), new Pair<>(
-      ViewerSafeConstants.SOLR_DATABASES_CURRENT_SCHEMA_NAME, null), new Pair<>(
-      ViewerSafeConstants.SOLR_DATABASES_INGESTED_SCHEMAS, null), new Pair<>(
-      ViewerSafeConstants.SOLR_DATABASES_TOTAL_TABLES, null), new Pair<>(
-      ViewerSafeConstants.SOLR_DATABASES_CURRENT_TABLE_NAME, null), new Pair<>(
-      ViewerSafeConstants.SOLR_DATABASES_INGESTED_TABLES, null), new Pair<>(
-      ViewerSafeConstants.SOLR_DATABASES_TOTAL_ROWS, null), new Pair<>(ViewerSafeConstants.SOLR_DATABASES_INGESTED_ROWS,
-      null));
+    updateDatabaseFields(databaseUUID, new Pair<>(ViewerSafeConstants.SOLR_DATABASES_TOTAL_SCHEMAS, null),
+      new Pair<>(ViewerSafeConstants.SOLR_DATABASES_CURRENT_SCHEMA_NAME, null),
+      new Pair<>(ViewerSafeConstants.SOLR_DATABASES_INGESTED_SCHEMAS, null),
+      new Pair<>(ViewerSafeConstants.SOLR_DATABASES_TOTAL_TABLES, null),
+      new Pair<>(ViewerSafeConstants.SOLR_DATABASES_CURRENT_TABLE_NAME, null),
+      new Pair<>(ViewerSafeConstants.SOLR_DATABASES_INGESTED_TABLES, null),
+      new Pair<>(ViewerSafeConstants.SOLR_DATABASES_TOTAL_ROWS, null),
+      new Pair<>(ViewerSafeConstants.SOLR_DATABASES_INGESTED_ROWS, null));
   }
 }

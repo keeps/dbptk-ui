@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory;
 import com.databasepreservation.visualization.api.utils.ApiUtils;
 import com.databasepreservation.visualization.api.utils.DownloadUtils;
 import com.databasepreservation.visualization.api.utils.StreamResponse;
-import com.databasepreservation.visualization.client.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.visualization.server.ViewerFactory;
 import com.databasepreservation.visualization.shared.ViewerSafeConstants;
 import com.databasepreservation.visualization.utils.SolrManager;
@@ -100,7 +99,7 @@ public class ExportsResource {
     // TODO: use viewerTable to convert solrColumnNames into displayColumnNames
     InputStream rowsCSV = solrManager.findRowsCSV(databaseUUID, filter, sorter, sublist, fields);
 
-    return ApiUtils.okResponse(new StreamResponse("file.csv", MediaType.APPLICATION_OCTET_STREAM, DownloadUtils
-      .stream(rowsCSV)));
+    return ApiUtils
+      .okResponse(new StreamResponse("file.csv", MediaType.APPLICATION_OCTET_STREAM, DownloadUtils.stream(rowsCSV)));
   }
 }

@@ -292,11 +292,11 @@ public class SearchFieldPanel extends Composite {
         inputTimeToForTime.setValue(end);
       } else if (filterParam.getName().endsWith(ViewerSafeConstants.SOLR_DYN_TDATETIME)) {
         inputDateFromForDateTime.setValue(begin);
-        inputTimeFromForDateTime.setValue(extractTimePartWithTimeZone(dateRangeFilterParameter.getFromValue(),
-          inputDateFromForDateTime));
+        inputTimeFromForDateTime
+          .setValue(extractTimePartWithTimeZone(dateRangeFilterParameter.getFromValue(), inputDateFromForDateTime));
         inputDateToForDateTime.setValue(end);
-        inputTimeToForDateTime.setValue(extractTimePartWithTimeZone(dateRangeFilterParameter.getToValue(),
-          inputDateToForDateTime));
+        inputTimeToForDateTime
+          .setValue(extractTimePartWithTimeZone(dateRangeFilterParameter.getToValue(), inputDateToForDateTime));
       }
     } else if (filterParam instanceof LongRangeFilterParameter) {
       LongRangeFilterParameter longRangeFilterParameter = (LongRangeFilterParameter) filterParam;
@@ -441,9 +441,9 @@ public class SearchFieldPanel extends Composite {
         }
       } else if (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_STORAGE)
         && intervalValid(inputStorageSizeFrom, inputStorageSizeTo)) {
-        filterParameter = new LongRangeFilterParameter(field, Humanize.parseFileSize(inputStorageSizeFrom.getValue(),
-          inputStorageSizeList.getSelectedValue()), Humanize.parseFileSize(inputStorageSizeTo.getValue(),
-          inputStorageSizeList.getSelectedValue()));
+        filterParameter = new LongRangeFilterParameter(field,
+          Humanize.parseFileSize(inputStorageSizeFrom.getValue(), inputStorageSizeList.getSelectedValue()),
+          Humanize.parseFileSize(inputStorageSizeTo.getValue(), inputStorageSizeList.getSelectedValue()));
       } else if (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_BOOLEAN) && valid(inputCheckBox)) {
         filterParameter = new SimpleFilterParameter(field, Boolean.toString(inputCheckBox.getValue()));
         // } else if (type.equals(ViewerSafeConstants.SEARCH_FIELD_TYPE_SUGGEST)

@@ -27,7 +27,7 @@ public class FontAwesomeActionCell<C> extends AbstractCell<C> {
    * @param <T>
    *          the type that this delegate acts on
    */
-  public static interface Delegate<T> {
+  public interface Delegate<T> {
     /**
      * Perform the desired action on the given object.
      *
@@ -62,9 +62,9 @@ public class FontAwesomeActionCell<C> extends AbstractCell<C> {
       extraButtonClasses = " " + extraButtonClasses;
     }
 
-    this.html = SafeHtmlUtils.fromSafeConstant("<button type=\"button\" tabindex=\"-1\" class=\"btn btn-cell-action"
-      + extraButtonClasses + "\" title=\"" + SafeHtmlUtils.htmlEscape(tooltip) + "\">"
-      + FontAwesomeIconManager.getTag(icon) + "</button>");
+    this.html = SafeHtmlUtils.fromSafeConstant(
+      "<button type=\"button\" tabindex=\"-1\" class=\"btn btn-cell-action" + extraButtonClasses + "\" title=\""
+        + SafeHtmlUtils.htmlEscape(tooltip) + "\">" + FontAwesomeIconManager.getTag(icon) + "</button>");
   }
 
   /**
@@ -82,7 +82,8 @@ public class FontAwesomeActionCell<C> extends AbstractCell<C> {
   }
 
   @Override
-  public void onBrowserEvent(Context context, Element parent, C value, NativeEvent event, ValueUpdater<C> valueUpdater) {
+  public void onBrowserEvent(Context context, Element parent, C value, NativeEvent event,
+    ValueUpdater<C> valueUpdater) {
     super.onBrowserEvent(context, parent, value, event, valueUpdater);
     if (CLICK.equals(event.getType())) {
       EventTarget eventTarget = event.getEventTarget();

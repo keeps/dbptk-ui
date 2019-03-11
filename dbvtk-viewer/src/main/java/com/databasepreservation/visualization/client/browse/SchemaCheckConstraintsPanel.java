@@ -63,10 +63,8 @@ public class SchemaCheckConstraintsPanel extends RightPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    BreadcrumbManager.updateBreadcrumb(
-      breadcrumb,
-      BreadcrumbManager.forSchemaCheckConstraints(database.getMetadata().getName(), database.getUUID(),
-        schema.getName(), schema.getUUID()));
+    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forSchemaCheckConstraints(
+      database.getMetadata().getName(), database.getUUID(), schema.getName(), schema.getUUID()));
   }
 
   private void init() {
@@ -101,34 +99,34 @@ public class SchemaCheckConstraintsPanel extends RightPanel {
 
     return new BasicTablePanel<>(header, info, table.getCheckConstraints().iterator(),
 
-    new BasicTablePanel.ColumnInfo<>(messages.name(), 15, new TextColumn<ViewerCheckConstraint>() {
-      @Override
-      public String getValue(ViewerCheckConstraint viewerRoutineParameter) {
-        return viewerRoutineParameter.getName();
-      }
-    }),
-
-    new BasicTablePanel.ColumnInfo<>(messages.constraints_condition(), 15, new TextColumn<ViewerCheckConstraint>() {
-      @Override
-      public String getValue(ViewerCheckConstraint viewerRoutineParameter) {
-        if (ViewerStringUtils.isNotBlank(viewerRoutineParameter.getCondition())) {
-          return viewerRoutineParameter.getCondition();
-        } else {
-          return "";
+      new BasicTablePanel.ColumnInfo<>(messages.name(), 15, new TextColumn<ViewerCheckConstraint>() {
+        @Override
+        public String getValue(ViewerCheckConstraint viewerRoutineParameter) {
+          return viewerRoutineParameter.getName();
         }
-      }
-    }),
+      }),
 
-    new BasicTablePanel.ColumnInfo<>(messages.description(), 35, new TextColumn<ViewerCheckConstraint>() {
-      @Override
-      public String getValue(ViewerCheckConstraint viewerRoutineParameter) {
-        if (ViewerStringUtils.isNotBlank(viewerRoutineParameter.getDescription())) {
-          return viewerRoutineParameter.getDescription();
-        } else {
-          return "";
+      new BasicTablePanel.ColumnInfo<>(messages.constraints_condition(), 15, new TextColumn<ViewerCheckConstraint>() {
+        @Override
+        public String getValue(ViewerCheckConstraint viewerRoutineParameter) {
+          if (ViewerStringUtils.isNotBlank(viewerRoutineParameter.getCondition())) {
+            return viewerRoutineParameter.getCondition();
+          } else {
+            return "";
+          }
         }
-      }
-    })
+      }),
+
+      new BasicTablePanel.ColumnInfo<>(messages.description(), 35, new TextColumn<ViewerCheckConstraint>() {
+        @Override
+        public String getValue(ViewerCheckConstraint viewerRoutineParameter) {
+          if (ViewerStringUtils.isNotBlank(viewerRoutineParameter.getDescription())) {
+            return viewerRoutineParameter.getDescription();
+          } else {
+            return "";
+          }
+        }
+      })
 
     );
   }

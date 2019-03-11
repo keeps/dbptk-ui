@@ -303,7 +303,8 @@ public class SolrUtils {
   }
 
   public static <T extends Serializable> IndexResult<T> find(SolrClient index, Class<T> classToRetrieve,
-    String databaseUUID, Filter filter, Sorter sorter, Sublist sublist) throws GenericException, RequestNotValidException {
+    String databaseUUID, Filter filter, Sorter sorter, Sublist sublist)
+    throws GenericException, RequestNotValidException {
     return find(index, classToRetrieve, databaseUUID, filter, sorter, sublist, null);
   }
 
@@ -383,8 +384,7 @@ public class SolrUtils {
 
         if (facetParameter instanceof SimpleFacetParameter) {
           setQueryFacetParameter(query, (SimpleFacetParameter) facetParameter);
-          appendValuesUsingOROperator(filterQuery, facetParameter.getName(),
-            ((SimpleFacetParameter) facetParameter).getValues());
+          appendValuesUsingOROperator(filterQuery, facetParameter.getName(), facetParameter.getValues());
         } else if (facetParameter instanceof RangeFacetParameter) {
           LOGGER.error("Unsupported facet parameter class: {}", facetParameter.getClass().getName());
         } else {
@@ -662,13 +662,13 @@ public class SolrUtils {
   private static <T extends Serializable> void generateRangeValue(StringBuilder ret, Class<T> valueClass, T value) {
     if (value != null) {
       if (valueClass.equals(Date.class)) {
-        String date = Instant.ofEpochMilli((Date.class.cast(value).getTime())).toString();
+        String date = Instant.ofEpochMilli((((Date) value).getTime())).toString();
         LOGGER.trace("Appending date value \"{}\" to range", date);
         ret.append(date);
       } else if (valueClass.equals(Long.class)) {
-        ret.append(Long.class.cast(value));
+        ret.append((Long) value);
       } else if (valueClass.equals(String.class)) {
-        ret.append(String.class.cast(value));
+        ret.append((String) value);
       } else {
         LOGGER.error("Cannot process range of the type {}", valueClass);
       }
@@ -846,7 +846,7 @@ public class SolrUtils {
     }
 
     if (justActive) {
-      appendExactMatch(fq, RodaConstants.STATE, AIPState.ACTIVE.toString(), true, true);
+      appendExactMatch(fq, RodaConstants.INDEX_STATE, AIPState.ACTIVE.toString(), true, true);
     }
 
     return fq.toString();

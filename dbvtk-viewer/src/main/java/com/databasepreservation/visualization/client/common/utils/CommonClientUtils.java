@@ -42,8 +42,8 @@ public class CommonClientUtils {
     panel.add(html);
 
     // add link schema
-    Hyperlink schemaLink = new Hyperlink(table.getSchemaName(), HistoryManager.linkToSchema(databaseUUID,
-      table.getSchemaUUID()));
+    Hyperlink schemaLink = new Hyperlink(table.getSchemaName(),
+      HistoryManager.linkToSchema(databaseUUID, table.getSchemaUUID()));
     schemaLink.addStyleName(hClass);
     panel.add(schemaLink);
 

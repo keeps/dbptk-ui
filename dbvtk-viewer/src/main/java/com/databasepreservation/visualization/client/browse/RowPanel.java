@@ -82,8 +82,8 @@ public class RowPanel extends RightPanel {
 
     initWidget(uiBinder.createAndBindUi(this));
 
-    rowID.setHTML(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.RECORD) + " "
-      + SafeHtmlUtils.htmlEscape(rowUUID)));
+    rowID.setHTML(SafeHtmlUtils.fromSafeConstant(
+      FontAwesomeIconManager.getTag(FontAwesomeIconManager.RECORD) + " " + SafeHtmlUtils.htmlEscape(rowUUID)));
     recordHeader.setWidget(CommonClientUtils.getSchemaAndTableHeader(database.getUUID(), table, "h1"));
 
     init();
@@ -96,26 +96,23 @@ public class RowPanel extends RightPanel {
 
     initWidget(uiBinder.createAndBindUi(this));
 
-    rowID.setHTML(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.RECORD) + " "
-      + SafeHtmlUtils.htmlEscape(rowUUID)));
+    rowID.setHTML(SafeHtmlUtils.fromSafeConstant(
+      FontAwesomeIconManager.getTag(FontAwesomeIconManager.RECORD) + " " + SafeHtmlUtils.htmlEscape(rowUUID)));
     recordHeader.setWidget(CommonClientUtils.getSchemaAndTableHeader(database.getUUID(), table, "h1"));
 
-    BrowserService.Util.getInstance().retrieveRows(database.getUUID(), rowUUID,
-      new DefaultAsyncCallback<ViewerRow>() {
-        @Override
-        public void onSuccess(ViewerRow result) {
-          row = result;
-          init();
-        }
-      });
+    BrowserService.Util.getInstance().retrieveRows(database.getUUID(), rowUUID, new DefaultAsyncCallback<ViewerRow>() {
+      @Override
+      public void onSuccess(ViewerRow result) {
+        row = result;
+        init();
+      }
+    });
   }
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    BreadcrumbManager.updateBreadcrumb(
-      breadcrumb,
-      BreadcrumbManager.forRecord(database.getMetadata().getName(), database.getUUID(), table.getSchemaName(),
-        table.getSchemaUUID(), table.getName(), table.getUUID(), rowUUID));
+    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forRecord(database.getMetadata().getName(),
+      database.getUUID(), table.getSchemaName(), table.getSchemaUUID(), table.getName(), table.getUUID(), rowUUID));
   }
 
   private void init() {
@@ -206,8 +203,8 @@ public class RowPanel extends RightPanel {
           b.appendHtmlConstant(", ");
         }
 
-        Hyperlink hyperlink = new Hyperlink(ref.getSchemaAndTableName(), HistoryManager.linkToForeignKey(
-          database.getUUID(), ref.refTable.getUUID(), columnNamesAndValues));
+        Hyperlink hyperlink = new Hyperlink(ref.getSchemaAndTableName(),
+          HistoryManager.linkToForeignKey(database.getUUID(), ref.refTable.getUUID(), columnNamesAndValues));
         hyperlink.addStyleName("related-records-link");
         b.appendHtmlConstant(hyperlink.toString());
         firstRef = false;

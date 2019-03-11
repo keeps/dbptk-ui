@@ -23,6 +23,11 @@
             <artifactId>dbvtk-model</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.databasepreservation.visualization</groupId>
+            <artifactId>dbvtk-model</artifactId>
+            <classifier>sources</classifier>
+        </dependency>
+        <dependency>
             <groupId>com.databasepreservation</groupId>
             <artifactId>dbptk-module-siard</artifactId>
         </dependency>
@@ -160,7 +165,17 @@
         </dependency>
         <dependency>
             <groupId>org.roda-project</groupId>
+            <artifactId>roda-common-utils</artifactId>
+            <classifier>sources</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.roda-project</groupId>
             <artifactId>roda-common-data</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.roda-project</groupId>
+            <artifactId>roda-common-data</artifactId>
+            <classifier>sources</classifier>
         </dependency>
         <dependency>
             <groupId>org.w3c</groupId>
@@ -206,7 +221,7 @@
                     <runTarget>index.html</runTarget>
                     <sourceLevel>auto</sourceLevel>
                     <modules>
-                        <module>com.databasepreservation.visualization.dbvtkviewer</module>
+                        <module>com.databasepreservation.visualization.Viewer</module>
                     </modules>
                 </configuration>
             </plugin>

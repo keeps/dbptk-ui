@@ -57,7 +57,7 @@ public class ManageResource {
   public Response deleteDatabase(
     @ApiParam(value = "The database uuid", required = true) @PathParam(ViewerSafeConstants.API_PATH_PARAM_DATABASE_UUID) String databaseUUID,
     @ApiParam(value = "Choose format in which to get the response", allowableValues = ViewerSafeConstants.API_DELETE_MEDIA_TYPES) @QueryParam(ViewerSafeConstants.API_QUERY_KEY_ACCEPT_FORMAT) String acceptFormat)
-    throws RODAException, NotFoundException {
+    throws RODAException {
     String mediaType = ApiUtils.getMediaType(acceptFormat, request);
 
     // check for authorization, to protect against unauthorized access attempts

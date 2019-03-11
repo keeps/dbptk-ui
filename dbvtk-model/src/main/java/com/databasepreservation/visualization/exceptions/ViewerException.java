@@ -25,19 +25,8 @@ public class ViewerException extends ModuleException {
    *          the underlying error
    */
   public ViewerException(Throwable cause) {
-    super(cause);
+    withCause(cause);
   }
-
-  /**
-   * Create a generic module exception with a map of error messages and causes
-   *
-   * @param errors
-   *          the errors messages and causes
-   */
-  public ViewerException(Map<String, Throwable> errors) {
-    super(errors);
-  }
-
   /**
    * Create a generic module exception
    *
@@ -45,7 +34,7 @@ public class ViewerException extends ModuleException {
    *          the error message
    */
   public ViewerException(String mesg) {
-    super(mesg);
+    withMessage(mesg);
   }
 
   /**
@@ -56,6 +45,6 @@ public class ViewerException extends ModuleException {
    * @param cause
    */
   public ViewerException(String message, Throwable cause) {
-    super(message, cause);
+    withCause(cause).withMessage(message);
   }
 }

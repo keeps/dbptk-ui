@@ -165,21 +165,19 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
       HTML html = null;
 
       /*
-       * Unused in DBViewer, for now if (parameter instanceof
-       * SimpleFilterParameter) { SimpleFilterParameter p =
-       * (SimpleFilterParameter) parameter; html = new
+       * Unused in DBViewer, for now if (parameter instanceof SimpleFilterParameter) {
+       * SimpleFilterParameter p = (SimpleFilterParameter) parameter; html = new
        * HTML(messages.searchPreFilterSimpleFilterParameter
        * (messages.searchPreFilterName(p.getName()),
        * messages.searchPreFilterValue(p.getValue()))); } else if (parameter
        * instanceof BasicSearchFilterParameter) { BasicSearchFilterParameter p =
-       * (BasicSearchFilterParameter) parameter; // TODO put '*' in some
-       * constant, see Search if (!"*".equals(p.getValue())) { html = new
-       * HTML(messages
+       * (BasicSearchFilterParameter) parameter; // TODO put '*' in some constant, see
+       * Search if (!"*".equals(p.getValue())) { html = new HTML(messages
        * .searchPreFilterBasicSearchFilterParameter(messages.searchPreFilterName
-       * (p.getName()), messages.searchPreFilterValue(p.getValue()))); } } else
-       * if (parameter instanceof NotSimpleFilterParameter) {
-       * NotSimpleFilterParameter p = (NotSimpleFilterParameter) parameter; html
-       * = new HTML(messages.searchPreFilterNotSimpleFilterParameter(messages.
+       * (p.getName()), messages.searchPreFilterValue(p.getValue()))); } } else if
+       * (parameter instanceof NotSimpleFilterParameter) { NotSimpleFilterParameter p
+       * = (NotSimpleFilterParameter) parameter; html = new
+       * HTML(messages.searchPreFilterNotSimpleFilterParameter(messages.
        * searchPreFilterName(p.getName()),
        * messages.searchPreFilterValue(p.getValue()))); } else if (parameter
        * instanceof EmptyKeyFilterParameter) { EmptyKeyFilterParameter p =

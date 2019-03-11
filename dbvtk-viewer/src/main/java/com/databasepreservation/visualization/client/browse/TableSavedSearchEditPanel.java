@@ -86,8 +86,8 @@ public class TableSavedSearchEditPanel extends RightPanel {
    */
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forDatabaseSavedSearchEdit(database.getMetadata()
-      .getName(), database.getUUID(), savedSearchUUID));
+    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager
+      .forDatabaseSavedSearchEdit(database.getMetadata().getName(), database.getUUID(), savedSearchUUID));
   }
 
   /**

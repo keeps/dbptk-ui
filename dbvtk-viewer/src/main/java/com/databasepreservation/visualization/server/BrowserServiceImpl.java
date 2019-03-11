@@ -60,10 +60,10 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
   }
 
   public IndexResult<SavedSearch> findSavedSearches(String databaseUUID, Filter filter, Sorter sorter, Sublist sublist,
-    Facets facets, String localeString) throws GenericException, AuthorizationDeniedException,
-    RequestNotValidException, NotFoundException {
-    UserUtility.Authorization
-      .checkFilteringPermission(getThreadLocalRequest(), databaseUUID, filter, SavedSearch.class);
+    Facets facets, String localeString)
+    throws GenericException, AuthorizationDeniedException, RequestNotValidException, NotFoundException {
+    UserUtility.Authorization.checkFilteringPermission(getThreadLocalRequest(), databaseUUID, filter,
+      SavedSearch.class);
     return ViewerFactory.getSolrManager().find(SavedSearch.class, filter, sorter, sublist, facets);
   }
 
@@ -77,9 +77,9 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
   }
 
   @Override
-  public IndexResult<ViewerRow> findRows(String databaseUUID, Filter filter, Sorter sorter,
-    Sublist sublist, Facets facets, String localeString) throws GenericException, AuthorizationDeniedException,
-    RequestNotValidException {
+  public IndexResult<ViewerRow> findRows(String databaseUUID, Filter filter, Sorter sorter, Sublist sublist,
+    Facets facets, String localeString)
+    throws GenericException, AuthorizationDeniedException, RequestNotValidException {
     try {
       UserUtility.Authorization.checkDatabaseAccessPermission(getThreadLocalRequest(), databaseUUID);
     } catch (NotFoundException e) {
@@ -90,8 +90,8 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
   }
 
   @Override
-  public Long countRows(String databaseUUID, Filter filter) throws AuthorizationDeniedException,
-    GenericException, RequestNotValidException {
+  public Long countRows(String databaseUUID, Filter filter)
+    throws AuthorizationDeniedException, GenericException, RequestNotValidException {
     try {
       UserUtility.Authorization.checkDatabaseAccessPermission(getThreadLocalRequest(), databaseUUID);
     } catch (NotFoundException e) {
@@ -117,8 +117,8 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
 
   @Override
   public String saveSearch(String name, String description, String tableUUID, String tableName, String databaseUUID,
-    SearchInfo searchInfo) throws AuthorizationDeniedException, GenericException, RequestNotValidException,
-    NotFoundException {
+    SearchInfo searchInfo)
+    throws AuthorizationDeniedException, GenericException, RequestNotValidException, NotFoundException {
     UserUtility.Authorization.checkDatabaseAccessPermission(getThreadLocalRequest(), databaseUUID);
 
     String searchInfoJson = JsonUtils.getJsonFromObject(searchInfo);
@@ -151,8 +151,8 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
   }
 
   @Override
-  public void deleteSearch(String databaseUUID, String savedSearchUUID) throws AuthorizationDeniedException,
-    GenericException, RequestNotValidException, NotFoundException {
+  public void deleteSearch(String databaseUUID, String savedSearchUUID)
+    throws AuthorizationDeniedException, GenericException, RequestNotValidException, NotFoundException {
     // get the saved search
     SavedSearch savedSearch = ViewerFactory.getSolrManager().retrieve(SavedSearch.class, savedSearchUUID);
     // authorise viewing the saved search
@@ -203,13 +203,14 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
   }
 
   @Override
-  public ViewerDatabase uploadSIARDStatus(String databaseUUID) throws AuthorizationDeniedException, NotFoundException,
-    GenericException {
+  public ViewerDatabase uploadSIARDStatus(String databaseUUID)
+    throws AuthorizationDeniedException, NotFoundException, GenericException {
     return retrieve(databaseUUID, ViewerDatabase.class.getName(), databaseUUID);
   }
 
   @Override
-  public String getReport(String databaseUUID) throws GenericException, AuthorizationDeniedException, NotFoundException {
+  public String getReport(String databaseUUID)
+    throws GenericException, AuthorizationDeniedException, NotFoundException {
     ViewerDatabase dummy = new ViewerDatabase();
     dummy.setUuid(databaseUUID);
     UserUtility.Authorization.checkRetrievalPermission(getThreadLocalRequest(), databaseUUID, ViewerDatabase.class,

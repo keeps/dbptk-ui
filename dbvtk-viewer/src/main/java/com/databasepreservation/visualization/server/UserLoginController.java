@@ -33,11 +33,11 @@ public class UserLoginController {
     throws AuthenticationDeniedException, GenericException {
     User user;
 
-    String rodaAddress = ViewerConfiguration.getInstance().getViewerConfigurationAsString(
-      ViewerConfiguration.PROPERTY_RODA_ADDRESS);
+    String rodaAddress = ViewerConfiguration.getInstance()
+      .getViewerConfigurationAsString(ViewerConfiguration.PROPERTY_RODA_ADDRESS);
 
-    String rodaPath = ViewerConfiguration.getInstance().getViewerConfigurationAsString(
-      ViewerConfiguration.PROPERTY_RODA_PATH);
+    String rodaPath = ViewerConfiguration.getInstance()
+      .getViewerConfigurationAsString(ViewerConfiguration.PROPERTY_RODA_PATH);
     rodaPath = rodaPath.replaceAll("\\{username\\}", username);
 
     HttpAuthenticationFeature basicAuth = HttpAuthenticationFeature.basic(username, password);

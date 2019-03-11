@@ -50,7 +50,8 @@ public class ViewerUtilsTest {
     return new Object[] {dt, tz, str};
   }
 
-  @Test(description = "Joda DateTime to and from string with offset 0", dataProvider = "testJodaDateTimeConversionsProvider", groups = {"unit"})
+  @Test(description = "Joda DateTime to and from string with offset 0", dataProvider = "testJodaDateTimeConversionsProvider", groups = {
+    "unit"})
   public void testJodaDateTimeConversions(Object... testData) {
     DateTime dt = (DateTime) testData[0];
     DateTimeZone tz = (DateTimeZone) testData[1];

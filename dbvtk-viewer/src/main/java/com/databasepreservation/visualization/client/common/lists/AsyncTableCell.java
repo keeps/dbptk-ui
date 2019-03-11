@@ -73,8 +73,8 @@ import config.i18n.client.ClientMessages;
 
 // import config.i18n.client.BrowseMessages;
 
-public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel implements
-  HasValueChangeHandlers<IndexResult<T>> {
+public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
+  implements HasValueChangeHandlers<IndexResult<T>> {
 
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
 
@@ -140,13 +140,11 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel i
     this.facets = facets;
     this.selectable = selectable;
 
-    display = new AccessibleCellTable<T>(getInitialPageSize(),
-      (MyCellTableResources) GWT.create(MyCellTableResources.class), getKeyProvider(), summary);
+    display = new AccessibleCellTable<T>(getInitialPageSize(), GWT.create(MyCellTableResources.class), getKeyProvider(),
+      summary);
     display.setKeyboardSelectionPolicy(KeyboardSelectionPolicy.DISABLED);
-    display
-      .setLoadingIndicator(new HTML(
-        SafeHtmlUtils
-          .fromSafeConstant("<div class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>")));
+    display.setLoadingIndicator(new HTML(SafeHtmlUtils.fromSafeConstant(
+      "<div class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>")));
 
     configure(display);
 
@@ -194,8 +192,8 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel i
     }
 
     resultsPager = new AccessibleSimplePager(AccessibleSimplePager.TextLocation.LEFT,
-      (SimplePager.Resources) GWT.create(SimplePager.Resources.class), false, initialPageSize, false, false,
-      (SimplePager.ImageButtonsConstants) GWT.create(SimplePager.ImageButtonsConstants.class));
+      GWT.create(SimplePager.Resources.class), false, initialPageSize, false, false,
+      GWT.create(SimplePager.ImageButtonsConstants.class));
     resultsPager.setDisplay(display);
 
     pageSizePager = new RodaPageSizePager(getPageSizePagerIncrement());
@@ -378,7 +376,8 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel i
     };
   }
 
-  protected abstract void getData(Sublist sublist, ColumnSortList columnSortList, AsyncCallback<IndexResult<T>> callback);
+  protected abstract void getData(Sublist sublist, ColumnSortList columnSortList,
+    AsyncCallback<IndexResult<T>> callback);
 
   protected int getPageSizePagerIncrement() {
     return pageSizeIncrement;
@@ -386,7 +385,7 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel i
 
   protected CellPreviewEvent.Handler<T> getSelectionEventManager() {
     if (selectable) {
-      return DefaultSelectionEventManager.<T> createBlacklistManager(0);
+      return DefaultSelectionEventManager.createBlacklistManager(0);
     } else {
       return null;
     }
@@ -633,7 +632,7 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel i
   // LISTENER
 
   public interface CheckboxSelectionListener<T extends IsIndexed> {
-    public void onSelectionChange(SelectedItems<T> selected);
+    void onSelectionChange(SelectedItems<T> selected);
   }
 
   public void addCheckboxSelectionListener(CheckboxSelectionListener<T> checkboxSelectionListener) {
@@ -742,7 +741,8 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel i
     addColumn(column, SafeHtmlUtils.fromString(headerText), nowrap, alignRight);
   }
 
-  protected void addColumn(Column<T, ?> column, String headerText, boolean nowrap, boolean alignRight, double fixedSize) {
+  protected void addColumn(Column<T, ?> column, String headerText, boolean nowrap, boolean alignRight,
+    double fixedSize) {
     addColumn(column, SafeHtmlUtils.fromString(headerText), nowrap, alignRight, fixedSize);
   }
 

@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.visualization.client.common.utils.JavascriptUtils;
 import org.roda.core.data.v2.index.IsIndexed;
 
 import com.databasepreservation.visualization.client.BrowserService;
@@ -34,6 +33,7 @@ import com.databasepreservation.visualization.client.browse.TablePanel;
 import com.databasepreservation.visualization.client.browse.TableSavedSearchEditPanel;
 import com.databasepreservation.visualization.client.browse.TableSavedSearchPanel;
 import com.databasepreservation.visualization.client.browse.UploadPanel;
+import com.databasepreservation.visualization.client.common.utils.JavascriptUtils;
 import com.databasepreservation.visualization.client.common.utils.RightPanelLoader;
 import com.databasepreservation.visualization.shared.client.Tools.FontAwesomeIconManager;
 import com.databasepreservation.visualization.shared.client.Tools.HistoryManager;
@@ -428,13 +428,14 @@ public class MainPanel extends Composite {
    * ____________________________________________________________________________________________________________________
    */
   private void reSetHeader() {
-    HTMLPanel headerText = new HTMLPanel(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager
-      .getTag(FontAwesomeIconManager.DATABASE) + " Database Visualization Toolkit"));
+    HTMLPanel headerText = new HTMLPanel(SafeHtmlUtils.fromSafeConstant(
+      FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE) + " Database Visualization Toolkit"));
     headerText.addStyleName("homeText");
 
     // HTMLPanel headerContent = new HTMLPanel(
     // SafeHtmlUtils
-    // .fromSafeConstant("<img title=\"Database Visualization Toolkit\" class=\"homeLogo\" src=\"/img/dbptk_logo.png\"/>\n"
+    // .fromSafeConstant("<img title=\"Database Visualization Toolkit\"
+    // class=\"homeLogo\" src=\"/img/dbptk_logo.png\"/>\n"
     // + "<div class=\"homeText\">DBVTK</div>"));
 
     bannerLogo.setWidget(headerText);
@@ -449,8 +450,8 @@ public class MainPanel extends Composite {
   }
 
   private void reSetHeader(final String databaseUUID, String databaseName) {
-    HTMLPanel headerText = new HTMLPanel(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager
-      .getTag(FontAwesomeIconManager.DATABASE) + " " + SafeHtmlUtils.htmlEscape(databaseName)));
+    HTMLPanel headerText = new HTMLPanel(SafeHtmlUtils.fromSafeConstant(
+      FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE) + " " + SafeHtmlUtils.htmlEscape(databaseName)));
     headerText.addStyleName("homeText");
     bannerLogo.setWidget(headerText);
 

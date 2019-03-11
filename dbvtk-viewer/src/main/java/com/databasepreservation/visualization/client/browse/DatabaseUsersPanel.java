@@ -83,19 +83,19 @@ public class DatabaseUsersPanel extends RightPanel {
     } else {
       return new BasicTablePanel<>(header, info, users.iterator(),
 
-      new BasicTablePanel.ColumnInfo<>(messages.name(), 15, new TextColumn<ViewerUserStructure>() {
-        @Override
-        public String getValue(ViewerUserStructure user) {
-          return user.getName();
-        }
-      }),
+        new BasicTablePanel.ColumnInfo<>(messages.name(), 15, new TextColumn<ViewerUserStructure>() {
+          @Override
+          public String getValue(ViewerUserStructure user) {
+            return user.getName();
+          }
+        }),
 
-      new BasicTablePanel.ColumnInfo<>(messages.titleDescription(), 35, new TextColumn<ViewerUserStructure>() {
-        @Override
-        public String getValue(ViewerUserStructure user) {
-          return user.getDescription();
-        }
-      })
+        new BasicTablePanel.ColumnInfo<>(messages.titleDescription(), 35, new TextColumn<ViewerUserStructure>() {
+          @Override
+          public String getValue(ViewerUserStructure user) {
+            return user.getDescription();
+          }
+        })
 
       );
     }
@@ -114,26 +114,26 @@ public class DatabaseUsersPanel extends RightPanel {
     } else {
       return new BasicTablePanel<>(header, info, roles.iterator(),
 
-      new BasicTablePanel.ColumnInfo<>(messages.name(), 15, new TextColumn<ViewerRoleStructure>() {
-        @Override
-        public String getValue(ViewerRoleStructure role) {
-          return role.getName();
-        }
-      }),
+        new BasicTablePanel.ColumnInfo<>(messages.name(), 15, new TextColumn<ViewerRoleStructure>() {
+          @Override
+          public String getValue(ViewerRoleStructure role) {
+            return role.getName();
+          }
+        }),
 
-      new BasicTablePanel.ColumnInfo<>(messages.titleAdmin(), 15, new TextColumn<ViewerRoleStructure>() {
-        @Override
-        public String getValue(ViewerRoleStructure role) {
-          return role.getAdmin();
-        }
-      }),
+        new BasicTablePanel.ColumnInfo<>(messages.titleAdmin(), 15, new TextColumn<ViewerRoleStructure>() {
+          @Override
+          public String getValue(ViewerRoleStructure role) {
+            return role.getAdmin();
+          }
+        }),
 
-      new BasicTablePanel.ColumnInfo<>(messages.titleDescription(), 35, new TextColumn<ViewerRoleStructure>() {
-        @Override
-        public String getValue(ViewerRoleStructure role) {
-          return role.getDescription();
-        }
-      })
+        new BasicTablePanel.ColumnInfo<>(messages.titleDescription(), 35, new TextColumn<ViewerRoleStructure>() {
+          @Override
+          public String getValue(ViewerRoleStructure role) {
+            return role.getDescription();
+          }
+        })
 
       );
     }
@@ -152,47 +152,47 @@ public class DatabaseUsersPanel extends RightPanel {
     } else {
       return new BasicTablePanel<>(header, info, privileges.iterator(),
 
-      new BasicTablePanel.ColumnInfo<>(messages.titleType(), 15, new TextColumn<ViewerPrivilegeStructure>() {
-        @Override
-        public String getValue(ViewerPrivilegeStructure privilege) {
-          return privilege.getType();
-        }
-      }),
+        new BasicTablePanel.ColumnInfo<>(messages.titleType(), 15, new TextColumn<ViewerPrivilegeStructure>() {
+          @Override
+          public String getValue(ViewerPrivilegeStructure privilege) {
+            return privilege.getType();
+          }
+        }),
 
-      new BasicTablePanel.ColumnInfo<>(messages.titleGrantor(), 15, new TextColumn<ViewerPrivilegeStructure>() {
-        @Override
-        public String getValue(ViewerPrivilegeStructure privilege) {
-          return privilege.getGrantor();
-        }
-      }),
+        new BasicTablePanel.ColumnInfo<>(messages.titleGrantor(), 15, new TextColumn<ViewerPrivilegeStructure>() {
+          @Override
+          public String getValue(ViewerPrivilegeStructure privilege) {
+            return privilege.getGrantor();
+          }
+        }),
 
-      new BasicTablePanel.ColumnInfo<>(messages.titleGrantee(), 15, new TextColumn<ViewerPrivilegeStructure>() {
-        @Override
-        public String getValue(ViewerPrivilegeStructure privilege) {
-          return privilege.getGrantee();
-        }
-      }),
+        new BasicTablePanel.ColumnInfo<>(messages.titleGrantee(), 15, new TextColumn<ViewerPrivilegeStructure>() {
+          @Override
+          public String getValue(ViewerPrivilegeStructure privilege) {
+            return privilege.getGrantee();
+          }
+        }),
 
-      new BasicTablePanel.ColumnInfo<>(messages.titleObject(), 15, new TextColumn<ViewerPrivilegeStructure>() {
-        @Override
-        public String getValue(ViewerPrivilegeStructure privilege) {
-          return privilege.getObject();
-        }
-      }),
+        new BasicTablePanel.ColumnInfo<>(messages.titleObject(), 15, new TextColumn<ViewerPrivilegeStructure>() {
+          @Override
+          public String getValue(ViewerPrivilegeStructure privilege) {
+            return privilege.getObject();
+          }
+        }),
 
-      new BasicTablePanel.ColumnInfo<>(messages.titleOption(), 15, new TextColumn<ViewerPrivilegeStructure>() {
-        @Override
-        public String getValue(ViewerPrivilegeStructure privilege) {
-          return privilege.getOption();
-        }
-      }),
+        new BasicTablePanel.ColumnInfo<>(messages.titleOption(), 15, new TextColumn<ViewerPrivilegeStructure>() {
+          @Override
+          public String getValue(ViewerPrivilegeStructure privilege) {
+            return privilege.getOption();
+          }
+        }),
 
-      new BasicTablePanel.ColumnInfo<>(messages.titleDescription(), 35, new TextColumn<ViewerPrivilegeStructure>() {
-        @Override
-        public String getValue(ViewerPrivilegeStructure privilege) {
-          return privilege.getDescription();
-        }
-      })
+        new BasicTablePanel.ColumnInfo<>(messages.titleDescription(), 35, new TextColumn<ViewerPrivilegeStructure>() {
+          @Override
+          public String getValue(ViewerPrivilegeStructure privilege) {
+            return privilege.getDescription();
+          }
+        })
 
       );
     }

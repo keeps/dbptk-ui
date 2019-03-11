@@ -159,8 +159,8 @@ public class DatabasePanel extends Composite {
 
           setLanguageMenu(languagesMenu);
 
-          MenuItem languagesMenuItem = new MenuItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.GLOBE,
-            selectedLanguage), languagesMenu);
+          MenuItem languagesMenuItem = new MenuItem(
+            FontAwesomeIconManager.loaded(FontAwesomeIconManager.GLOBE, selectedLanguage), languagesMenu);
           languagesMenuItem.addStyleName("menu-item menu-item-label menu-item-language");
           menu.addItem(languagesMenuItem);
         }

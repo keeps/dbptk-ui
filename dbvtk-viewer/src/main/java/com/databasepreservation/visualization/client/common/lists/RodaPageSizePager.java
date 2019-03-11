@@ -63,8 +63,8 @@ public class RodaPageSizePager extends AbstractPager {
         HasRows display = getDisplay();
         if (display != null) {
           Range range = display.getVisibleRange();
-          int pageSize = Math.min(range.getLength() + increment, display.getRowCount()
-            + (display.isRowCountExact() ? 0 : increment));
+          int pageSize = Math.min(range.getLength() + increment,
+            display.getRowCount() + (display.isRowCountExact() ? 0 : increment));
           display.setVisibleRange(range.getStart(), pageSize);
         }
       }

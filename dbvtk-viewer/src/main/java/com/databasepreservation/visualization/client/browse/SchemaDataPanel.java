@@ -69,10 +69,8 @@ public class SchemaDataPanel extends RightPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    BreadcrumbManager.updateBreadcrumb(
-      breadcrumb,
-      BreadcrumbManager.forSchemaData(database.getMetadata().getName(), database.getUUID(), schema.getName(),
-        schema.getUUID()));
+    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forSchemaData(database.getMetadata().getName(),
+      database.getUUID(), schema.getName(), schema.getUUID()));
   }
 
   private void init() {
@@ -107,74 +105,74 @@ public class SchemaDataPanel extends RightPanel {
       }
     });
 
-    return new BasicTablePanel<>(new HTMLPanel(SafeHtmlUtils.EMPTY_SAFE_HTML), new HTMLPanel(
-      SafeHtmlUtils.EMPTY_SAFE_HTML), tables.iterator(),
+    return new BasicTablePanel<>(new HTMLPanel(SafeHtmlUtils.EMPTY_SAFE_HTML),
+      new HTMLPanel(SafeHtmlUtils.EMPTY_SAFE_HTML), tables.iterator(),
 
-    new BasicTablePanel.ColumnInfo<>(messages.schema_tableName(), 17, new TextColumn<ViewerTable>() {
-      @Override
-      public String getValue(ViewerTable table) {
-        return table.getName();
-      }
-    }),
-
-    new BasicTablePanel.ColumnInfo<>(messages.schema_numberOfRows(), 7, new TextColumn<ViewerTable>() {
-      @Override
-      public String getValue(ViewerTable table) {
-        return String.valueOf(table.getCountRows());
-      }
-    }),
-
-    new BasicTablePanel.ColumnInfo<>(messages.schema_numberOfColumns(), 8, new TextColumn<ViewerTable>() {
-      @Override
-      public String getValue(ViewerTable table) {
-        return String.valueOf(table.getColumns().size());
-      }
-    }),
-
-    new BasicTablePanel.ColumnInfo<>(messages.description(), 35, new TextColumn<ViewerTable>() {
-      @Override
-      public String getValue(ViewerTable table) {
-        if (table.getDescription() != null) {
-          return table.getDescription();
-        } else {
-          return "";
+      new BasicTablePanel.ColumnInfo<>(messages.schema_tableName(), 17, new TextColumn<ViewerTable>() {
+        @Override
+        public String getValue(ViewerTable table) {
+          return table.getName();
         }
-      }
-    }),
+      }),
 
-    new BasicTablePanel.ColumnInfo<>(messages.schema_relationsOut(), 7, new TextColumn<ViewerTable>() {
-      @Override
-      public String getValue(ViewerTable table) {
-        int outboundForeignKeys = table.getForeignKeys().size();
-        if (outboundForeignKeys > 0) {
-          return String.valueOf(outboundForeignKeys);
-        } else {
-          return "none";
+      new BasicTablePanel.ColumnInfo<>(messages.schema_numberOfRows(), 7, new TextColumn<ViewerTable>() {
+        @Override
+        public String getValue(ViewerTable table) {
+          return String.valueOf(table.getCountRows());
         }
-      }
-    }),
+      }),
 
-    new BasicTablePanel.ColumnInfo<>(messages.schema_relationsIn(), 7, new TextColumn<ViewerTable>() {
-      @Override
-      public String getValue(ViewerTable table) {
-        int inboundForeignKeys = 0;
-        for (ViewerSchema viewerSchema : metadata.getSchemas()) {
-          for (ViewerTable viewerTable : viewerSchema.getTables()) {
-            for (ViewerForeignKey viewerForeignKey : viewerTable.getForeignKeys()) {
-              if (viewerForeignKey.getReferencedTableUUID().equals(table.getUUID())) {
-                inboundForeignKeys++;
+      new BasicTablePanel.ColumnInfo<>(messages.schema_numberOfColumns(), 8, new TextColumn<ViewerTable>() {
+        @Override
+        public String getValue(ViewerTable table) {
+          return String.valueOf(table.getColumns().size());
+        }
+      }),
+
+      new BasicTablePanel.ColumnInfo<>(messages.description(), 35, new TextColumn<ViewerTable>() {
+        @Override
+        public String getValue(ViewerTable table) {
+          if (table.getDescription() != null) {
+            return table.getDescription();
+          } else {
+            return "";
+          }
+        }
+      }),
+
+      new BasicTablePanel.ColumnInfo<>(messages.schema_relationsOut(), 7, new TextColumn<ViewerTable>() {
+        @Override
+        public String getValue(ViewerTable table) {
+          int outboundForeignKeys = table.getForeignKeys().size();
+          if (outboundForeignKeys > 0) {
+            return String.valueOf(outboundForeignKeys);
+          } else {
+            return "none";
+          }
+        }
+      }),
+
+      new BasicTablePanel.ColumnInfo<>(messages.schema_relationsIn(), 7, new TextColumn<ViewerTable>() {
+        @Override
+        public String getValue(ViewerTable table) {
+          int inboundForeignKeys = 0;
+          for (ViewerSchema viewerSchema : metadata.getSchemas()) {
+            for (ViewerTable viewerTable : viewerSchema.getTables()) {
+              for (ViewerForeignKey viewerForeignKey : viewerTable.getForeignKeys()) {
+                if (viewerForeignKey.getReferencedTableUUID().equals(table.getUUID())) {
+                  inboundForeignKeys++;
+                }
               }
             }
           }
-        }
 
-        if (inboundForeignKeys > 0) {
-          return String.valueOf(inboundForeignKeys);
-        } else {
-          return "none";
+          if (inboundForeignKeys > 0) {
+            return String.valueOf(inboundForeignKeys);
+          } else {
+            return "none";
+          }
         }
-      }
-    })
+      })
 
     );
   }

@@ -57,24 +57,27 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
     nameColumn = new TooltipDatabaseColumn() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
-        return database != null && database.getMetadata() != null ? SafeHtmlUtils.fromString(database.getMetadata()
-          .getName()) : SafeHtmlUtils.fromString("unknown");
+        return database != null && database.getMetadata() != null
+          ? SafeHtmlUtils.fromString(database.getMetadata().getName())
+          : SafeHtmlUtils.fromString("unknown");
       }
     };
 
     archivalDateColumn = new TooltipDatabaseColumn() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
-        return database != null && database.getMetadata() != null ? SafeHtmlUtils.fromString(database.getMetadata()
-          .getArchivalDate().substring(0, 10)) : null;
+        return database != null && database.getMetadata() != null
+          ? SafeHtmlUtils.fromString(database.getMetadata().getArchivalDate().substring(0, 10))
+          : null;
       }
     };
 
     dataOriginTimespan = new TooltipDatabaseColumn() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
-        return database != null && database.getMetadata() != null ? SafeHtmlUtils.fromString(database.getMetadata()
-          .getDataOriginTimespan()) : null;
+        return database != null && database.getMetadata() != null
+          ? SafeHtmlUtils.fromString(database.getMetadata().getDataOriginTimespan())
+          : null;
       }
     };
 
@@ -95,8 +98,9 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
     description = new TooltipDatabaseColumn() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
-        return database != null && database.getMetadata() != null ? SafeHtmlUtils.fromString(database.getMetadata()
-          .getDescription()) : null;
+        return database != null && database.getMetadata() != null
+          ? SafeHtmlUtils.fromString(database.getMetadata().getDescription())
+          : null;
       }
     };
 

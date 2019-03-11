@@ -19,13 +19,13 @@ public interface ClientLoggerService extends RemoteService {
   /**
    * logger service URI
    */
-  public static final String SERVICE_URI = "wuilogger";
+  String SERVICE_URI = "wuilogger";
 
   /**
    * Utilities
    *
    */
-  public static class Util {
+  class Util {
 
     /**
      * Get service instance
@@ -34,7 +34,7 @@ public interface ClientLoggerService extends RemoteService {
      */
     public static ClientLoggerServiceAsync getInstance() {
 
-      ClientLoggerServiceAsync instance = (ClientLoggerServiceAsync) GWT.create(ClientLoggerService.class);
+      ClientLoggerServiceAsync instance = GWT.create(ClientLoggerService.class);
       ServiceDefTarget target = (ServiceDefTarget) instance;
       target.setServiceEntryPoint(GWT.getModuleBaseURL() + SERVICE_URI);
       return instance;
@@ -47,7 +47,7 @@ public interface ClientLoggerService extends RemoteService {
    * @param classname
    * @param object
    */
-  public void trace(String classname, String object);
+  void trace(String classname, String object);
 
   /**
    * Log at trace level
@@ -56,7 +56,7 @@ public interface ClientLoggerService extends RemoteService {
    * @param object
    * @param error
    */
-  public void trace(String classname, String object, Throwable error);
+  void trace(String classname, String object, Throwable error);
 
   /**
    * Log at debug level
@@ -64,7 +64,7 @@ public interface ClientLoggerService extends RemoteService {
    * @param classname
    * @param object
    */
-  public void debug(String classname, String object);
+  void debug(String classname, String object);
 
   /**
    * Log at debug level
@@ -73,7 +73,7 @@ public interface ClientLoggerService extends RemoteService {
    * @param object
    * @param error
    */
-  public void debug(String classname, String object, Throwable error);
+  void debug(String classname, String object, Throwable error);
 
   /**
    * Log at info level
@@ -81,7 +81,7 @@ public interface ClientLoggerService extends RemoteService {
    * @param classname
    * @param object
    */
-  public void info(String classname, String object);
+  void info(String classname, String object);
 
   /**
    * Log at info level
@@ -90,7 +90,7 @@ public interface ClientLoggerService extends RemoteService {
    * @param object
    * @param error
    */
-  public void info(String classname, String object, Throwable error);
+  void info(String classname, String object, Throwable error);
 
   /**
    * Log at warn level
@@ -98,7 +98,7 @@ public interface ClientLoggerService extends RemoteService {
    * @param classname
    * @param object
    */
-  public void warn(String classname, String object);
+  void warn(String classname, String object);
 
   /**
    * Log at warn level
@@ -107,7 +107,7 @@ public interface ClientLoggerService extends RemoteService {
    * @param object
    * @param error
    */
-  public void warn(String classname, String object, Throwable error);
+  void warn(String classname, String object, Throwable error);
 
   /**
    * Log at error level
@@ -115,7 +115,7 @@ public interface ClientLoggerService extends RemoteService {
    * @param classname
    * @param object
    */
-  public void error(String classname, String object);
+  void error(String classname, String object);
 
   /**
    * Log at error level
@@ -124,7 +124,7 @@ public interface ClientLoggerService extends RemoteService {
    * @param object
    * @param error
    */
-  public void error(String classname, String object, Throwable error);
+  void error(String classname, String object, Throwable error);
 
   /**
    * Log at fatal level
@@ -132,7 +132,7 @@ public interface ClientLoggerService extends RemoteService {
    * @param classname
    * @param object
    */
-  public void fatal(String classname, String object);
+  void fatal(String classname, String object);
 
   /**
    * Log at fatal level
@@ -141,7 +141,7 @@ public interface ClientLoggerService extends RemoteService {
    * @param object
    * @param error
    */
-  public void fatal(String classname, String object, Throwable error);
+  void fatal(String classname, String object, Throwable error);
 
   /**
    * Log a page hit
@@ -150,6 +150,6 @@ public interface ClientLoggerService extends RemoteService {
    * @throws LoginException
    * @throws LoggerException
    */
-  public void pagehit(String pagename) throws LoggerException;
+  void pagehit(String pagename) throws LoggerException;
 
 }

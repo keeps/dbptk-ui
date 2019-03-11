@@ -34,18 +34,18 @@ public interface BrowserService extends RemoteService {
   /**
    * Service location
    */
-  static final String SERVICE_URI = "browse";
+  String SERVICE_URI = "browse";
 
   /**
    * Utilities
    */
-  public static class Util {
+  class Util {
 
     /**
      * @return the singleton instance
      */
     public static BrowserServiceAsync getInstance() {
-      BrowserServiceAsync instance = (BrowserServiceAsync) GWT.create(BrowserService.class);
+      BrowserServiceAsync instance = GWT.create(BrowserService.class);
       ServiceDefTarget target = (ServiceDefTarget) instance;
       target.setServiceEntryPoint(GWT.getModuleBaseURL() + SERVICE_URI);
       return instance;
@@ -64,8 +64,8 @@ public interface BrowserService extends RemoteService {
   <T extends IsIndexed> T retrieve(String databaseUUID, String classNameToReturn, String uuid)
     throws AuthorizationDeniedException, GenericException, NotFoundException;
 
-  IndexResult<ViewerRow> findRows(String databaseUUID, Filter filter, Sorter sorter, Sublist sublist,
-    Facets facets, String localeString) throws GenericException, AuthorizationDeniedException, RequestNotValidException;
+  IndexResult<ViewerRow> findRows(String databaseUUID, Filter filter, Sorter sorter, Sublist sublist, Facets facets,
+    String localeString) throws GenericException, AuthorizationDeniedException, RequestNotValidException;
 
   <T extends IsIndexed> Long countRows(String databaseUUID, Filter filter)
     throws AuthorizationDeniedException, GenericException, RequestNotValidException;

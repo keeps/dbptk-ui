@@ -162,10 +162,8 @@ public class BasicTablePanel<C> extends Composite {
     CellTable<C> cellTable = new CellTable<>(Integer.MAX_VALUE,
       (MyCellTableResources) GWT.create(MyCellTableResources.class));
     cellTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
-    cellTable
-      .setLoadingIndicator(new HTML(
-        SafeHtmlUtils
-          .fromSafeConstant("<div class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>")));
+    cellTable.setLoadingIndicator(new HTML(SafeHtmlUtils.fromSafeConstant(
+      "<div class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>")));
     cellTable.addStyleName("table-info my-asyncdatagrid-display");
 
     // add columns

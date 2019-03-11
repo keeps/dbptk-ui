@@ -81,7 +81,7 @@ public class BreadcrumbPanel extends FlowPanel {
       if (i > 0) {
         add(createSeparator());
       }
-      Breadcrumb breadcrumb = (Breadcrumb) breadcrumbs.get(i);
+      Breadcrumb breadcrumb = breadcrumbs.get(i);
       breadcrumb.setLast(i == breadcrumbs.size() - 1);
       add(breadcrumb);
     }
@@ -154,8 +154,8 @@ public class BreadcrumbPanel extends FlowPanel {
     // }
 
     /**
-     * Set if this breadcrumb is the last one. The last breadcrumb will be
-     * disabled and has a different style.
+     * Set if this breadcrumb is the last one. The last breadcrumb will be disabled
+     * and has a different style.
      *
      * @param last
      */

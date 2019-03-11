@@ -7,24 +7,17 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.DatabaseMigration;
-import com.databasepreservation.common.ModuleObserver;
 import com.databasepreservation.model.Reporter;
-import com.databasepreservation.model.data.Row;
 import com.databasepreservation.model.exception.ModuleException;
 import com.databasepreservation.model.modules.filters.ObservableFilter;
-import com.databasepreservation.model.structure.DatabaseStructure;
-import com.databasepreservation.model.structure.SchemaStructure;
-import com.databasepreservation.model.structure.TableStructure;
 import com.databasepreservation.modules.dbvtk.DbvtkModuleFactory;
 import com.databasepreservation.modules.siard.SIARD2ModuleFactory;
-import com.databasepreservation.visualization.utils.SolrManager;
 import com.databasepreservation.visualization.utils.SolrUtils;
 
 /**
@@ -52,11 +45,8 @@ public class SIARDController {
     String databaseUUID = SolrUtils.randomUUID();
     LOGGER.info("converting database {}", databaseUUID);
     try {
-      Path workingDirectory = createUploadWorkingDirectory(databaseUUID);
       convertSIARDtoSolr(Paths.get(localPath), databaseUUID);
       LOGGER.info("Conversion to SIARD successful, database: {}", databaseUUID);
-    } catch (IOException e) {
-      throw new GenericException("could not create temporary working directory", e);
     } catch (GenericException e) {
       LOGGER.error("Conversion to SIARD failed for database {}", databaseUUID);
       throw e;
@@ -64,12 +54,7 @@ public class SIARDController {
     return databaseUUID;
   }
 
-  private static Path createUploadWorkingDirectory(String databaseUUID) throws IOException {
-    return Files.createDirectories(ViewerConfiguration.getInstance().getUploadsPath().resolve(databaseUUID));
-  }
-
-  private static boolean convertSIARDtoSolr(Path siardPath, String databaseUUID)
-    throws GenericException {
+  private static boolean convertSIARDtoSolr(Path siardPath, String databaseUUID) throws GenericException {
     LOGGER.info("starting to convert database " + siardPath.toAbsolutePath().toString());
 
     // build the SIARD import module, Solr export module, and start the
@@ -111,72 +96,6 @@ public class SIARDController {
       throw new GenericException("Could not initialize conversion modules", e);
     } catch (ModuleException | RuntimeException e) {
       throw new GenericException("Could not convert the database to the Solr instance.", e);
-    }
-  }
-
-  private static class ProgressObserver implements ModuleObserver {
-    private final String databaseUUID;
-    private final SolrManager solrManager;
-
-    public ProgressObserver(String databaseUUID) {
-      this.databaseUUID = databaseUUID;
-      this.solrManager = ViewerFactory.getSolrManager();
-    }
-
-    @Override
-    public void notifyOpenDatabase() {
-      // do nothing
-    }
-
-    @Override
-    public void notifyStructureObtained(DatabaseStructure structure) {
-      // can not do this yet because the database has not yet been created by dbvtk
-      // export module
-
-      // solrManager.updateDatabaseTotalSchemas(databaseUUID,
-      // structure.getSchemas().size());
-    }
-
-    @Override
-    public void notifyOpenSchema(DatabaseStructure structure, SchemaStructure schema, long completedSchemas,
-      long completedTablesInSchema) {
-      solrManager.updateDatabaseCurrentSchema(databaseUUID, schema.getName(), completedSchemas,
-        schema.getTables().size());
-    }
-
-    @Override
-    public void notifyOpenTable(DatabaseStructure structure, TableStructure table, long completedSchemas,
-      long completedTablesInSchema) {
-      solrManager.updateDatabaseCurrentTable(databaseUUID, table.getName(), completedTablesInSchema, table.getRows());
-    }
-
-    @Override
-    public void notifyTableProgressSparse(DatabaseStructure structure, TableStructure table, long completedRows,
-      long totalRows) {
-      solrManager.updateDatabaseCurrentRow(databaseUUID, completedRows);
-    }
-
-    @Override
-    public void notifyTableProgressDetailed(DatabaseStructure structure, TableStructure table, Row row,
-      long completedRows, long totalRows) {
-      // do nothing for each row
-    }
-
-    @Override
-    public void notifyCloseTable(DatabaseStructure structure, TableStructure table, long completedSchemas,
-      long completedTablesInSchema) {
-      // do nothing
-    }
-
-    @Override
-    public void notifyCloseSchema(DatabaseStructure structure, SchemaStructure schema, long completedSchemas,
-      long completedTablesInSchema) {
-      // do nothing
-    }
-
-    @Override
-    public void notifyCloseDatabase(DatabaseStructure structure) {
-      solrManager.updateDatabaseIngestionFinished(databaseUUID);
     }
   }
 }

@@ -28,8 +28,8 @@
 
         <!-- Convenience properties to set versions -->
         <gwtVersion>2.8.2</gwtVersion>
-        <version.dbptk>2.0.1-SNAPSHOT</version.dbptk>
-        <version.roda>2.2.8</version.roda>
+        <version.dbptk>2.1.0-SNAPSHOT</version.dbptk>
+        <version.roda>3.0.2</version.roda>
 
         <version.jersey>2.26</version.jersey>
         <version.swagger>1.5.19</version.swagger>
@@ -42,18 +42,6 @@
             <name>KEEP Artifacts-releases</name>
             <url>http://artifactory.keep.pt/keep</url>
         </repository>
-        <repository>
-            <id>vendorDependencies</id>
-            <name>Vendor dependencies</name>
-            <releases>
-                <enabled>true</enabled>
-                <checksumPolicy>ignore</checksumPolicy>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <url>file://${projectLocalRepository}/</url>
-        </repository>
     </repositories>
 
     <distributionManagement>
@@ -63,10 +51,6 @@
             <url>http://artifactory.keep.pt/keep</url>
         </repository>
     </distributionManagement>
-
-    <prerequisites>
-        <maven>2.2.1</maven>
-    </prerequisites>
 
     <profiles>
         <profile>
@@ -92,36 +76,6 @@
         <pluginManagement>
             <plugins>
                 <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>1.4</version>
-                    <dependencies>
-                        <dependency>
-                            <groupId>com.redhat.victims</groupId>
-                            <artifactId>enforce-victims-rule</artifactId>
-                            <version>1.3.4</version>
-                            <type>jar</type>
-                        </dependency>
-                    </dependencies>
-                    <executions>
-                        <execution>
-                            <id>enforce-victims-rule</id>
-                            <goals>
-                                <goal>enforce</goal>
-                            </goals>
-                            <configuration>
-                                <rules>
-                                    <rule implementation="com.redhat.victims.VictimsRule">
-                                        <metadata>warning</metadata>
-                                        <fingerprint>warning</fingerprint>
-                                        <updates>daily</updates>
-                                    </rule>
-                                </rules>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
                     <groupId>pl.project13.maven</groupId>
                     <artifactId>git-commit-id-plugin</artifactId>
                     <version>2.2.1</version>
@@ -144,6 +98,23 @@
                         <format>json</format>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>3.0.1</version>
+                    <configuration>
+                        <excludeResources>true</excludeResources>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>attach-sources</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>jar-no-fork</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
@@ -155,6 +126,12 @@
                 <groupId>com.databasepreservation.visualization</groupId>
                 <artifactId>dbvtk-model</artifactId>
                 <version>1.0.7-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>com.databasepreservation.visualization</groupId>
+                <artifactId>dbvtk-model</artifactId>
+                <version>1.0.7-SNAPSHOT</version>
+                <classifier>sources</classifier>
             </dependency>
             <dependency>
                 <groupId>com.databasepreservation.visualization</groupId>

@@ -62,8 +62,8 @@ public class CasClient {
     throws AuthenticationDeniedException, GenericException {
     final HttpClient client = new HttpClient();
     final PostMethod post = new PostMethod(String.format("%s/v1/tickets", this.casServerUrlPrefix));
-    post.setRequestBody(new NameValuePair[] {new NameValuePair("username", username),
-      new NameValuePair("password", password)});
+    post.setRequestBody(
+      new NameValuePair[] {new NameValuePair("username", username), new NameValuePair("password", password)});
     try {
       client.executeMethod(post);
       final String response = post.getResponseBodyAsString();
@@ -129,8 +129,8 @@ public class CasClient {
    */
   public void logout(final String ticketGrantingTicket) throws GenericException {
     final HttpClient client = new HttpClient();
-    final DeleteMethod method = new DeleteMethod(String.format("%s/v1/tickets/%s", casServerUrlPrefix,
-      ticketGrantingTicket));
+    final DeleteMethod method = new DeleteMethod(
+      String.format("%s/v1/tickets/%s", casServerUrlPrefix, ticketGrantingTicket));
     try {
       client.executeMethod(method);
       if (method.getStatusCode() == HttpStatus.SC_OK) {

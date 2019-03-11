@@ -108,9 +108,10 @@ public class ReferencesPanel extends RightPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forReferences(database.getMetadata().getName(),
-      database.getUUID(), table.getSchemaName(), table.getSchemaUUID(), table.getName(), table.getUUID(), recordUUID,
-      columnName, columnIndexInTable.toString()));
+    BreadcrumbManager.updateBreadcrumb(breadcrumb,
+      BreadcrumbManager.forReferences(database.getMetadata().getName(), database.getUUID(), table.getSchemaName(),
+        table.getSchemaUUID(), table.getName(), table.getUUID(), recordUUID, columnName,
+        columnIndexInTable.toString()));
   }
 
   private void init() {
@@ -207,8 +208,8 @@ public class ReferencesPanel extends RightPanel {
       relationNameBuilder.appendEscaped(otherTable.getName()).appendHtmlConstant(" (");
       for (Iterator<ViewerReference> i = fk.getReferences().iterator(); i.hasNext();) {
         ViewerReference viewerReference = i.next();
-        relationNameBuilder.appendEscaped(otherTable.getColumns().get(viewerReference.getSourceColumnIndex())
-          .getDisplayName());
+        relationNameBuilder
+          .appendEscaped(otherTable.getColumns().get(viewerReference.getSourceColumnIndex()).getDisplayName());
         if (i.hasNext()) {
           relationNameBuilder.appendHtmlConstant(", ");
         }
@@ -217,8 +218,8 @@ public class ReferencesPanel extends RightPanel {
       relationNameBuilder.appendEscaped(table.getName()).appendHtmlConstant(" (");
       for (Iterator<ViewerReference> i = fk.getReferences().iterator(); i.hasNext();) {
         ViewerReference viewerReference = i.next();
-        relationNameBuilder.appendEscaped(table.getColumns().get(viewerReference.getSourceColumnIndex())
-          .getDisplayName());
+        relationNameBuilder
+          .appendEscaped(table.getColumns().get(viewerReference.getSourceColumnIndex()).getDisplayName());
         if (i.hasNext()) {
           relationNameBuilder.appendHtmlConstant(", ");
         }
@@ -231,8 +232,8 @@ public class ReferencesPanel extends RightPanel {
       relationNameBuilder.appendEscaped(table.getName()).appendHtmlConstant(" (");
       for (Iterator<ViewerReference> i = fk.getReferences().iterator(); i.hasNext();) {
         ViewerReference viewerReference = i.next();
-        relationNameBuilder.appendEscaped(table.getColumns().get(viewerReference.getReferencedColumnIndex())
-          .getDisplayName());
+        relationNameBuilder
+          .appendEscaped(table.getColumns().get(viewerReference.getReferencedColumnIndex()).getDisplayName());
         if (i.hasNext()) {
           relationNameBuilder.appendHtmlConstant(", ");
         }
@@ -241,8 +242,8 @@ public class ReferencesPanel extends RightPanel {
       relationNameBuilder.appendEscaped(otherTable.getName()).appendHtmlConstant(" (");
       for (Iterator<ViewerReference> i = fk.getReferences().iterator(); i.hasNext();) {
         ViewerReference viewerReference = i.next();
-        relationNameBuilder.appendEscaped(otherTable.getColumns().get(viewerReference.getReferencedColumnIndex())
-          .getDisplayName());
+        relationNameBuilder
+          .appendEscaped(otherTable.getColumns().get(viewerReference.getReferencedColumnIndex()).getDisplayName());
         if (i.hasNext()) {
           relationNameBuilder.appendHtmlConstant(", ");
         }
@@ -257,19 +258,18 @@ public class ReferencesPanel extends RightPanel {
     SafeHtmlBuilder descriptionBuilder = new SafeHtmlBuilder();
 
     descriptionBuilder.appendHtmlConstant("<div class=\"label\">" + messages.references_relatedTable() + "</div>");
-    descriptionBuilder
-      .appendHtmlConstant("<div class=\"value\">")
-      .appendHtmlConstant(
-        new Hyperlink(otherTable.getSchemaName() + " . " + otherTable.getName(), HistoryManager.linkToTable(
-          database.getUUID(), otherTable.getUUID())).toString()).appendHtmlConstant("</div>");
+    descriptionBuilder.appendHtmlConstant("<div class=\"value\">")
+      .appendHtmlConstant(new Hyperlink(otherTable.getSchemaName() + " . " + otherTable.getName(),
+        HistoryManager.linkToTable(database.getUUID(), otherTable.getUUID())).toString())
+      .appendHtmlConstant("</div>");
 
     descriptionBuilder.appendHtmlConstant("<div class=\"label\">" + messages.references_foreignKeyName() + "</div>");
     descriptionBuilder.appendHtmlConstant("<div class=\"value\">").appendEscaped(fk.getName())
       .appendHtmlConstant("</div>");
 
     if (ViewerStringUtils.isNotBlank(fk.getDescription())) {
-      descriptionBuilder.appendHtmlConstant("<div class=\"label\">" + messages.references_foreignKeyDescription()
-        + "</div>");
+      descriptionBuilder
+        .appendHtmlConstant("<div class=\"label\">" + messages.references_foreignKeyDescription() + "</div>");
       descriptionBuilder.appendHtmlConstant("<div class=\"value\">").appendEscaped(fk.getDescription())
         .appendHtmlConstant("</div>");
     }
@@ -283,8 +283,8 @@ public class ReferencesPanel extends RightPanel {
 
     // create filter to look for record values in other tables related to this
     // one by a foreign key
-    boolean currentTableIsReferencedTableInForeignKey = reference.foreignKey.getReferencedTableUUID().equals(
-      table.getUUID());
+    boolean currentTableIsReferencedTableInForeignKey = reference.foreignKey.getReferencedTableUUID()
+      .equals(table.getUUID());
     List<FilterParameter> filterParameters = new ArrayList<>();
     for (ViewerReference viewerReference : reference.foreignKey.getReferences()) {
       String columnNameInCurrentTable;

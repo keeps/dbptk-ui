@@ -24,12 +24,12 @@ public interface BrowserServiceAsync {
   /**
    * Utility class to get the RPC Async interface from client-side code
    */
-  public static final class Util {
+  final class Util {
     private static BrowserServiceAsync instance;
 
     public static final BrowserServiceAsync getInstance() {
       if (instance == null) {
-        instance = (BrowserServiceAsync) GWT.create(BrowserService.class);
+        instance = GWT.create(BrowserService.class);
       }
       return instance;
     }
@@ -56,15 +56,13 @@ public interface BrowserServiceAsync {
 
   // rows
 
-  <T extends IsIndexed> void findRows(java.lang.String databaseUUID, Filter filter,
-    Sorter sorter, Sublist sublist, Facets facets, java.lang.String localeString,
+  <T extends IsIndexed> void findRows(java.lang.String databaseUUID, Filter filter, Sorter sorter, Sublist sublist,
+    Facets facets, java.lang.String localeString,
     AsyncCallback<org.roda.core.data.v2.index.IndexResult<ViewerRow>> callback);
 
-  void countRows(java.lang.String databaseUUID, Filter filter,
-    AsyncCallback<java.lang.Long> callback);
+  void countRows(java.lang.String databaseUUID, Filter filter, AsyncCallback<java.lang.Long> callback);
 
-  void retrieveRows(java.lang.String databaseUUID, java.lang.String rowUUID,
-    AsyncCallback<ViewerRow> callback);
+  void retrieveRows(java.lang.String databaseUUID, java.lang.String rowUUID, AsyncCallback<ViewerRow> callback);
 
   void getSearchFields(ViewerTable viewerTable, AsyncCallback<List<SearchField>> async);
 

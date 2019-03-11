@@ -380,8 +380,8 @@ public class ToolkitStructure2ViewerStructure {
     result.setUpdateAction(foreignKey.getUpdateAction());
     result.setMatchType(foreignKey.getMatchType());
 
-    result.setReferencedTableUUID(referenceHolder.getTableUUID(foreignKey.getReferencedSchema(),
-      foreignKey.getReferencedTable()));
+    result.setReferencedTableUUID(
+      referenceHolder.getTableUUID(foreignKey.getReferencedSchema(), foreignKey.getReferencedTable()));
 
     List<ViewerReference> resultReferences = new ArrayList<>();
     for (Reference reference : foreignKey.getReferences()) {

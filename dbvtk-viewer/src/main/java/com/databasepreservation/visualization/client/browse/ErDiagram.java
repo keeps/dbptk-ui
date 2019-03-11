@@ -73,8 +73,8 @@ public class ErDiagram extends Composite {
     databaseUUID = database.getUUID();
     initWidget(uiBinder.createAndBindUi(this));
 
-    contentItems.add(new HTMLPanel(CommonClientUtils.getFieldHTML(messages.diagram_usingTheDiagram(),
-      messages.diagram_Explanation())));
+    contentItems.add(new HTMLPanel(
+      CommonClientUtils.getFieldHTML(messages.diagram_usingTheDiagram(), messages.diagram_Explanation())));
 
     SimplePanel config = new SimplePanel();
     config.getElement().setId("erconfig");
@@ -192,8 +192,8 @@ public class ErDiagram extends Composite {
           // .adjustSize(getNormalizedValue(visNode.numRelationsTotal,
           // minRelationsTotal, maxRelationsTotal, 10, 50));
 
-          visNode.adjustBackgroundColor(getNormalizedValue(visNode.numRelationsTotal, minRelationsTotal,
-            maxRelationsTotal, 0.01, 0.70));
+          visNode.adjustBackgroundColor(
+            getNormalizedValue(visNode.numRelationsTotal, minRelationsTotal, maxRelationsTotal, 0.01, 0.70));
 
           if (visNode.numColumnsAndRows == 0) {
             visNode.adjustSize(20);
