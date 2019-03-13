@@ -7,7 +7,6 @@
     <modelVersion>4.0.0</modelVersion>
     <name>dbvtk-viewer</name>
     <artifactId>dbvtk-viewer</artifactId>
-    <version>1.0.7-SNAPSHOT</version>
     <packaging>war</packaging>
     <parent>
         <groupId>com.databasepreservation.visualization</groupId>
@@ -199,37 +198,138 @@
     <build>
         <!-- Output classes directly into the webapp, so that IDEs and "mvn process-classes" update them in DevMode -->
         <outputDirectory>${project.build.directory}/${project.build.finalName}/WEB-INF/classes</outputDirectory>
-
-        <plugins>
-
-            <!-- GWT Maven Plugin -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>gwt-maven-plugin</artifactId>
-                <version>${gwtVersion}</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>compile</goal>
-                            <goal>test</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <!-- Plugin configuration. There are many available options, see
-                  gwt-maven-plugin documentation at codehaus.org -->
-                <configuration>
-                    <runTarget>index.html</runTarget>
-                    <sourceLevel>auto</sourceLevel>
-                    <modules>
-                        <module>com.databasepreservation.visualization.Viewer</module>
-                    </modules>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>pl.project13.maven</groupId>
-                <artifactId>git-commit-id-plugin</artifactId>
-            </plugin>
-        </plugins>
     </build>
 
+    <profiles>
+        <profile>
+            <id>default</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <!-- GWT Maven Plugin -->
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>gwt-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>compile</goal>
+                                    <goal>test</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <!-- Plugin configuration. There are many available options, see
+                          gwt-maven-plugin documentation at codehaus.org -->
+                        <configuration>
+                            <runTarget>index.html</runTarget>
+                            <sourceLevel>auto</sourceLevel>
+                            <modules>
+                                <module>com.databasepreservation.visualization.Viewer</module>
+                            </modules>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>pl.project13.maven</groupId>
+                        <artifactId>git-commit-id-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>docker</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>gwt-maven-plugin</artifactId>
+                        <!-- Plugin configuration. There are many available options, see
+                          gwt-maven-plugin documentation at codehaus.org -->
+                        <configuration>
+                            <runTarget>index.html</runTarget>
+                            <sourceLevel>auto</sourceLevel>
+                            <modules>
+                                <module>com.databasepreservation.visualization.Viewer</module>
+                            </modules>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>compile-gwt</id>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>compile</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-clean-plugin</artifactId>
+                        <configuration>
+                            <filesets>
+                                <fileset>
+                                    <directory>${basedir}</directory>
+                                    <includes>
+                                        <include>gwt-unitCache/</include>
+                                    </includes>
+                                </fileset>
+                                <fileset>
+                                    <directory>src/main</directory>
+                                    <includes>
+                                        <include>gwt-unitCache/**</include>
+                                        <include>webapp/com.databasepreservation.visualization.Viewer/**</include>
+                                        <include>webapp/WEB-INF/deploy/**</include>
+                                        <include>webapp/WEB-INF/classes/**</include>
+                                    </includes>
+                                    <followSymlinks>false</followSymlinks>
+                                </fileset>
+                            </filesets>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>gwt-clean</id>
+                                <phase>initialize</phase>
+                                <goals>
+                                    <goal>clean</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>com.spotify</groupId>
+                        <artifactId>docker-maven-plugin</artifactId>
+                        <configuration>
+                            <forceTags>true</forceTags>
+                            <imageName>keeps/dbvtk</imageName>
+                            <imageTags>
+                                <imageTag>${project.version}</imageTag>
+                                <imageTag>latest</imageTag>
+                            </imageTags>
+                            <dockerDirectory>${project.basedir}/docker-files</dockerDirectory>
+                            <resources>
+                                <resource>
+                                    <targetPath>/ROOT</targetPath>
+                                    <directory>${project.build.directory}/${project.build.finalName}</directory>
+                                    <filtering>false</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>build</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>pl.project13.maven</groupId>
+                        <artifactId>git-commit-id-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

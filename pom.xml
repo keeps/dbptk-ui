@@ -27,7 +27,7 @@
         <maven.compiler.target>1.8</maven.compiler.target>
 
         <!-- Convenience properties to set versions -->
-        <gwtVersion>2.8.2</gwtVersion>
+        <version.gwt>2.8.2</version.gwt>
         <version.dbptk>2.1.0-SNAPSHOT</version.dbptk>
         <version.roda>3.0.2</version.roda>
 
@@ -46,7 +46,7 @@
 
     <distributionManagement>
         <repository>
-            <id>keeps_artifactory</id>
+            <id>KEEPS-Artifacts-Deploy</id>
             <name>KEEP Artifacts-releases</name>
             <url>http://artifactory.keep.pt/keep</url>
         </repository>
@@ -68,6 +68,7 @@
             <id>model</id>
             <modules>
                 <module>dbvtk-model</module>
+                <module>dbptk-module-dbvtk</module>
             </modules>
         </profile>
     </profiles>
@@ -75,6 +76,15 @@
     <build>
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.8.0</version>
+                    <configuration>
+                        <source>${version.java}</source>
+                        <target>${version.java}</target>
+                    </configuration>
+                </plugin>
                 <plugin>
                     <groupId>pl.project13.maven</groupId>
                     <artifactId>git-commit-id-plugin</artifactId>
@@ -114,6 +124,21 @@
                             </goals>
                         </execution>
                     </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>gwt-maven-plugin</artifactId>
+                    <version>${version.gwt}</version>
+                </plugin>
+                <plugin>
+                    <groupId>com.spotify</groupId>
+                    <artifactId>docker-maven-plugin</artifactId>
+                    <version>1.1.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-clean-plugin</artifactId>
+                    <version>3.1.0</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -180,7 +205,7 @@
             <dependency>
                 <groupId>com.google.gwt</groupId>
                 <artifactId>gwt</artifactId>
-                <version>${gwtVersion}</version>
+                <version>${version.gwt}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
