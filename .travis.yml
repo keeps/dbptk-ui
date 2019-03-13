@@ -10,9 +10,9 @@ env:
     - MAVEN_OPTS="-Xms1024m -Xmx4g -Dmaven.repo.local=$HOME/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true"
     - MAVEN_CLI_OPTS="--batch-mode --errors --fail-at-end --show-version"
     # DOCKER_USERNAME
-    - secure: "K23OtDvjFOuxGedcv7Y3kiu2XtpGDwLO0FWN0eieFzjlMHZU1k/whRMD41FhN89ocjKMI5pEQFIzPlETzq+ZxZa/YtQL7spcif4Q3ppe9RXfG6uUdgfFHpP5IUnpnDN8jqX3yRc+W371H3726s3s+LzoP/ANILd/WQP9rzXd8Ts="
+    - secure: "gwyzZlahwziBgpMjPoUtT6qCTOeF8L1XXz4QBpCOz9v7j3coY7k7tQTS2Onv03lpinP3N2QtmCTKAODwpnkwO/KM/VDZZ9jpA6sYZvCLz7mzHb8kjiFZ0WVHSwsHtUrjpOSDhneQFEOmiDZTMdCxRRTDV4R1JDJaA6hM13OsZjQx2s4m5fM/mY/PkcwNy+UreyfJMn2Je9QVD6ye0/NbdPE+U9IBj0nmPtU93DD/mg5a3rahX/pn5D5yfNR2NsU18+HRR9qx+0mHknb7Hofk8dIaPk4HZj2LTRxTIFYpNAmA4vtWC+L2BHooD6yIisk91g/BoKNN/LEaeV6qctmEuXN06F2zjoFClcg3Oek5SXKswHviPMsjrQlcn7KdAcH/9QXGORVwKM0KsQhaktXff8gI6Ds0f4QAJHa7efm9dq4pD+/CKmNktmSW0PBakzdsfva2veOOaYU8730J++UNQ8AdYuzGvPVUzIvzYRx+KL0ZQP6d2sIpjQ2UAzd1Vu2VP55UtPShHgUa7dj/gbQVWLKXGcWJpCcIoi3tcGg+SLZW/E/NC6gOdGyuH0w1EU46kycxpv63KwFBvySv2XQ+DBfI4j1SA0UHTOXwzInj7P+hFYICBH+Ji3RELB6OyEKxMMZg+757euBbabs6k/sxrj0kdnBg89EZYebQx4pfeD4="
     # DOCKER_PASSWORD
-    - secure: "gDM83kopiEhqJfP9bEMSFmqAnbfLU+HInDpvZ8LQBZ2kA/0CjXCmcm4St/R70FJxd2iFo6YRUl6olPCpmuk4XJ9YSaRBtKcP2QV0tcxjLmtGlS3N6fsuLWn87Q/GUAdE30sp71fo47FAmdcfL68UzK0UgQcqZIKeZZ288ScrbIc="
+    - secure: "cf+kYrLvsMtNNNdkUF5BK2NyZDJ3WwVtI1vKU1VQI/oSY8TyEctv0yzGiOFUCAKmgZhYnE1Ue6tEEKtVAkLV9gre+nbZo5jZQ0G+H1CvB0x187NsUD0wbjPeeWLZVn+bjQlqqFGolQDTOHvIecIU3OjSenyGO1mKzw9KjcQENd3v+qRE2mGDhxSdgtni5kcGDbnRw6DBJpkcfa9X30L7LrWlblhiYamugewiWqnVxKMDAiA0pIVS4Lr5ozgQ7q0MmnbBVMnI6jTTY/CuNRhu5Odi5G9m2IRK+XJh0QZCfLkUnHcVy+iJz3alt5soXk8X+u8OQ+I6LXoTpuQb4iWVUWKHc8QGR9P7ur2E5V1koM/Nw4hTyzwx8GbBDKuehxW5d4367Ty1Eu65Di4Xmd4lLrtKWSkieYF5Y3Z89fbDL0a1rdkDfpft+6yLSHZlhII3H9G4dJqZS6LXc54tPa9YiWTbuGP5duCfKu8EaO7QsGLU3Cvgdfth2mfUFabOBWOKSasn6eFWNxrm9CXGdPlB1aF4UMk+1fm7+zjGftiru7Mljx+3X4MDhOGZLVWKUkFcYDajnFXzScYMpvqI7SH0meYlGPsVj0wUVsd4LzU9THJJ76MHxNZzzUHYE2u9IKuPXcwLAKHoII8Hpi2tUX+3pkrUKO5JVNxFhkYokqe/bN8="
 
 addons:
   sonarqube:
