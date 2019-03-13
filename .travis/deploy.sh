@@ -2,6 +2,10 @@
 
 set -ex
 
+################################################
+# functions
+################################################
+
 function deploy_to_artifactory(){
   echo "Deploy to artifactory"
   mvn $MAVEN_CLI_OPTS clean package deploy -Dmaven.test.skip=true -Denforcer.skip=true -Pmodel
@@ -20,6 +24,16 @@ function deploy_to_dockerhub(){
   # Push to https://hub.docker.com/r/keeps/dbvtk/
   docker push keeps/dbvtk:$DOCKER_TAG
 }
+
+################################################
+# Compile, test, code analysis
+################################################
+
+mvn $MAVEN_CLI_OPTS -Dtestng.groups="travis-ci" -Denforcer.skip=true -Pdocker clean install
+
+################################################
+# Deploy
+################################################
 
 if [[ ! -z "$DOCKER_USERNAME" ]]; then
   # init
