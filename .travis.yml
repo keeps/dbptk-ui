@@ -9,7 +9,7 @@ env:
   global:
     - MAVEN_OPTS="-Xms1024m -Xmx4g -Dmaven.repo.local=$HOME/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true"
     - MAVEN_CLI_OPTS="--batch-mode --errors --fail-at-end --show-version"
-    - # DOCKER_USERNAME
+    # DOCKER_USERNAME
     - secure: "K23OtDvjFOuxGedcv7Y3kiu2XtpGDwLO0FWN0eieFzjlMHZU1k/whRMD41FhN89ocjKMI5pEQFIzPlETzq+ZxZa/YtQL7spcif4Q3ppe9RXfG6uUdgfFHpP5IUnpnDN8jqX3yRc+W371H3726s3s+LzoP/ANILd/WQP9rzXd8Ts="
     # DOCKER_PASSWORD
     - secure: "gDM83kopiEhqJfP9bEMSFmqAnbfLU+HInDpvZ8LQBZ2kA/0CjXCmcm4St/R70FJxd2iFo6YRUl6olPCpmuk4XJ9YSaRBtKcP2QV0tcxjLmtGlS3N6fsuLWn87Q/GUAdE30sp71fo47FAmdcfL68UzK0UgQcqZIKeZZ288ScrbIc="
