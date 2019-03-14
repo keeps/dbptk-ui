@@ -1,0 +1,13 @@
+version: '3'
+services:
+  dbvtk:
+    image: keeps/dbvtk:latest
+    ports:
+      - 8080:8080
+    volumes:
+      # folder in which *.siard files should be dropped so they can be accessed from inside the server
+      - ./siard:/siard
+  solr:
+    image: solr:6
+    links:
+      - dbvtk

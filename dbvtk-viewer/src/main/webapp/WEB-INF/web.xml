@@ -25,11 +25,11 @@
 
     <servlet-mapping>
         <servlet-name>browseServlet</servlet-name>
-        <url-pattern>/dbvtkviewer/browse</url-pattern>
+        <url-pattern>/com.databasepreservation.visualization.Viewer/browse</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>ClientLogger</servlet-name>
-        <url-pattern>/dbvtkviewer/wuilogger</url-pattern>
+        <url-pattern>/com.databasepreservation.visualization.Viewer/wuilogger</url-pattern>
     </servlet-mapping>
 
     <!-- Default page to serve -->
