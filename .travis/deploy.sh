@@ -37,7 +37,7 @@ mvn $MAVEN_CLI_OPTS -Dtestng.groups="travis-ci" -Denforcer.skip=true -Pdocker cl
 
 if [[ ! -z "$DOCKER_USERNAME" ]]; then
   # init
-  docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
+  echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 
   if [ "$TRAVIS_BRANCH" == "master" ]; then
     echo "Logic for master branch"
