@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%d [%thread] %-5level %logger{36} - %msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="STDOUT_NO_THREAD" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%d %-5level %logger{36} - %msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="FILEOUT" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${dbvtk.home}/log/dbvtk.log</file>
+		<append>true</append>
+		<encoder>
+			<pattern>%d [%thread] %-5level %logger{36} - %msg%n</pattern>
+		</encoder>
+		<rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+			<!-- rollover daily -->
+			<fileNamePattern>${dbvtk.home}/log/dbvtk-%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+			<!-- each file should be at most 1GB -->
+			<maxFileSize>1GB</maxFileSize>
+		</rollingPolicy>
+	</appender>
+
+	<appender name="FILEOUT_NO_THREAD" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${dbvtk.home}/log/dbvtk.log</file>
+		<append>true</append>
+		<encoder>
+			<pattern>%d %-5level %logger{36} - %msg%n</pattern>
+		</encoder>
+		<rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+			<!-- rollover daily -->
+			<fileNamePattern>${dbvtk.home}/log/dbvtk-%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+			<!-- each file should be at most 1GB -->
+			<maxFileSize>1GB</maxFileSize>
+		</rollingPolicy>
+	</appender>
+
+	<logger name="org.roda" additivity="false">
+		<level value="INFO"/>
+		<appender-ref ref="${dbvtk.loggerMethod}"/>
+	</logger>
+
+	<logger name="org.apache.solr" additivity="false">
+		<level value="WARN"/>
+		<appender-ref ref="${dbvtk.loggerMethod}_NO_THREAD"/>
+	</logger>
+
+	<logger name="org.eclipse.jetty" additivity="false">
+		<level value="WARN"/>
+		<appender-ref ref="${dbvtk.loggerMethod}"/>
+	</logger>
+
+	<logger name="org.apache.http" additivity="false">
+		<level value="INFO"/>
+		<appender-ref ref="${dbvtk.loggerMethod}"/>
+	</logger>
+
+	<logger name="org.apache.http.headers" additivity="false">
+		<level value="DEBUG"/>
+		<appender-ref ref="${dbvtk.loggerMethod}"/>
+	</logger>
+
+	<logger name="org.roda" additivity="false">
+		<level value="INFO" />
+		<appender-ref ref="${dbvtk.loggerMethod}" />
+	</logger>
+
+	<logger name="com.databasepreservation" additivity="false">
+		<level value="DEBUG" />
+		<appender-ref ref="${dbvtk.loggerMethod}" />
+	</logger>
+
+	<root level="warn">
+		<appender-ref ref="${dbvtk.loggerMethod}" />
+	</root>
+</configuration>

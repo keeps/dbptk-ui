@@ -1,0 +1,30 @@
+version: '3'
+services:
+  dbvtk:
+    image: keeps/dbvtk:latest
+    depends_on:
+      - solr
+    links:
+      - solr
+    ports:
+      - 8080:8080
+      - 5005:9000
+    environment:
+      # development option
+      - COPY_APP_ON_STARTUP=1
+      - JPDA_ADDRESS=9000
+      - JPDA_TRANSPORT=dt_socket
+      - "SOLR_ZOOKEEPER_HOSTS=solr:9983"
+    volumes:
+      # folder in which *.siard files should be dropped so they can be accessed from inside the server
+      #- ./siard:/siard
+      - /home/bferreira/sandbox_fast/dbvtk/chsj:/siard:ro
+      - /home/bferreira/Projects/dbpreservation/github/db-visualization-toolkit/target/dbvtk-1.0.7-SNAPSHOT:/ROOT:ro
+    entrypoint: /docker-entrypoint.sh /usr/local/tomcat/bin/catalina.sh jpda run
+  solr:
+    image: solr:7.5
+    ports:
+      - 8983:8983
+    entrypoint:
+      - 'solr-foreground'
+      - '-c'

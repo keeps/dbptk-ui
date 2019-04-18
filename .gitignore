@@ -8,7 +8,6 @@ dependency-reduced-pom.xml
 buildNumber.properties
 .mvn/timing.properties
 
-
 *~
 .classpath
 .project
@@ -25,3 +24,5 @@ test-output/
 
 *.iml
 .idea
+
+docker-files/siard/

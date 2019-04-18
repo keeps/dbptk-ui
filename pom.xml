@@ -1,13 +1,10 @@
 <?xml version="1.0"?>
-<project
-        xmlns="http://maven.apache.org/POM/4.0.0"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.databasepreservation.visualization</groupId>
     <artifactId>dbvtk</artifactId>
-    <packaging>pom</packaging>
+    <packaging>war</packaging>
     <version>1.0.7-SNAPSHOT</version>
     <name>Database Visualization Toolkit</name>
 
@@ -31,11 +28,13 @@
         <version.dbptk>2.1.0-SNAPSHOT</version.dbptk>
         <version.roda>3.0.2</version.roda>
 
-        <version.jersey>2.26</version.jersey>
+        <version.jersey>2.27</version.jersey>
         <version.swagger>1.5.19</version.swagger>
         <version.jackson>2.9.4</version.jackson>
         <cas.client.version>3.5.0</cas.client.version>
+        <solr.version>7.5.0</solr.version>
     </properties>
+
     <repositories>
         <repository>
             <id>KEEPS-Artifacts</id>
@@ -52,28 +51,10 @@
         </repository>
     </distributionManagement>
 
-    <profiles>
-        <profile>
-            <id>default</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <modules>
-                <module>dbvtk-model</module>
-                <module>dbptk-module-dbvtk</module>
-                <module>dbvtk-viewer</module>
-            </modules>
-        </profile>
-        <profile>
-            <id>model</id>
-            <modules>
-                <module>dbvtk-model</module>
-                <module>dbptk-module-dbvtk</module>
-            </modules>
-        </profile>
-    </profiles>
-
     <build>
+        <!-- Output classes directly into the webapp, so that IDEs and "mvn process-classes" update them in DevMode -->
+        <outputDirectory>${project.build.directory}/${project.build.finalName}/WEB-INF/classes</outputDirectory>
+
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -93,6 +74,7 @@
                 </executions>
             </plugin>
         </plugins>
+
         <pluginManagement>
             <plugins>
                 <plugin>
@@ -119,8 +101,7 @@
                         <!-- this is false by default, forces the plugin to generate the file -->
                         <generateGitPropertiesFile>true</generateGitPropertiesFile>
 
-                        <!-- The path for the properties file to be generated. See Super Pom
-                            for default variable reference https://maven.apache.org/guides/introduction/introduction-to-the-pom.html -->
+                        <!-- The path for the properties file to be generated. See Super Pom for default variable reference https://maven.apache.org/guides/introduction/introduction-to-the-pom.html -->
                         <generateGitPropertiesFilename>
                             ${project.build.directory}/${project.build.finalName}/version.json
                         </generateGitPropertiesFilename>
@@ -146,64 +127,139 @@
         </pluginManagement>
     </build>
 
+    <profiles>
+        <profile>
+            <id>default</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <!-- GWT Maven Plugin -->
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>gwt-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>compile</goal>
+                                    <goal>test</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <!-- Plugin configuration. There are many available options, see gwt-maven-plugin documentation at codehaus.org -->
+                        <configuration>
+                            <runTarget>index.html</runTarget>
+                            <sourceLevel>auto</sourceLevel>
+                            <modules>
+                                <module>com.databasepreservation.visualization.Viewer</module>
+                            </modules>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>pl.project13.maven</groupId>
+                        <artifactId>git-commit-id-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>docker</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>gwt-maven-plugin</artifactId>
+                        <!-- Plugin configuration. There are many available options, see gwt-maven-plugin documentation at codehaus.org -->
+                        <configuration>
+                            <runTarget>index.html</runTarget>
+                            <sourceLevel>auto</sourceLevel>
+                            <modules>
+                                <module>com.databasepreservation.visualization.Viewer</module>
+                            </modules>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>compile-gwt</id>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>compile</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-clean-plugin</artifactId>
+                        <configuration>
+                            <filesets>
+                                <fileset>
+                                    <directory>${basedir}</directory>
+                                    <includes>
+                                        <include>gwt-unitCache/</include>
+                                    </includes>
+                                </fileset>
+                                <fileset>
+                                    <directory>src/main</directory>
+                                    <includes>
+                                        <include>gwt-unitCache/**</include>
+                                        <include>webapp/com.databasepreservation.visualization.Viewer/**</include>
+                                        <include>webapp/WEB-INF/deploy/**</include>
+                                        <include>webapp/WEB-INF/classes/**</include>
+                                    </includes>
+                                    <followSymlinks>false</followSymlinks>
+                                </fileset>
+                            </filesets>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>gwt-clean</id>
+                                <phase>initialize</phase>
+                                <goals>
+                                    <goal>clean</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>com.spotify</groupId>
+                        <artifactId>docker-maven-plugin</artifactId>
+                        <configuration>
+                            <forceTags>true</forceTags>
+                            <imageName>keeps/dbvtk</imageName>
+                            <imageTags>
+                                <imageTag>${project.version}</imageTag>
+                                <imageTag>latest</imageTag>
+                            </imageTags>
+                            <dockerDirectory>${project.basedir}/docker-files</dockerDirectory>
+                            <resources>
+                                <resource>
+                                    <targetPath>/ROOT</targetPath>
+                                    <directory>${project.build.directory}/${project.build.finalName}</directory>
+                                    <filtering>false</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>build</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>pl.project13.maven</groupId>
+                        <artifactId>git-commit-id-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
     <dependencyManagement>
         <dependencies>
-            <!-- internal -->
-            <dependency>
-                <groupId>com.databasepreservation.visualization</groupId>
-                <artifactId>dbvtk-model</artifactId>
-                <version>1.0.7-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>com.databasepreservation.visualization</groupId>
-                <artifactId>dbvtk-model</artifactId>
-                <version>1.0.7-SNAPSHOT</version>
-                <classifier>sources</classifier>
-            </dependency>
-            <dependency>
-                <groupId>com.databasepreservation.visualization</groupId>
-                <artifactId>dbptk-module-dbvtk</artifactId>
-                <version>1.0.7-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>com.databasepreservation</groupId>
-                <artifactId>dbptk-model</artifactId>
-                <version>${version.dbptk}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.databasepreservation</groupId>
-                <artifactId>dbptk-module-siard</artifactId>
-                <version>${version.dbptk}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.roda-project</groupId>
-                <artifactId>roda-common-data</artifactId>
-                <version>${version.roda}</version>
-                <classifier>sources</classifier>
-            </dependency>
-            <dependency>
-                <groupId>org.roda-project</groupId>
-                <artifactId>roda-common-data</artifactId>
-                <version>${version.roda}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.roda-project</groupId>
-                <artifactId>roda-common-utils</artifactId>
-                <version>${version.roda}</version>
-                <classifier>sources</classifier>
-            </dependency>
-            <dependency>
-                <groupId>org.roda-project</groupId>
-                <artifactId>roda-common-utils</artifactId>
-                <version>${version.roda}</version>
-            </dependency>
-
-            <!-- viewer -->
-            <dependency>
-                <groupId>com.github.nmorel.gwtjackson</groupId>
-                <artifactId>gwt-jackson</artifactId>
-                <version>0.15.2</version>
-            </dependency>
             <dependency>
                 <groupId>com.google.gwt</groupId>
                 <artifactId>gwt</artifactId>
@@ -212,48 +268,6 @@
                 <scope>import</scope>
             </dependency>
             <dependency>
-                <groupId>com.bytebybyte.gwt</groupId>
-                <artifactId>fontawesome-lib</artifactId>
-                <version>4.3.0</version>
-            </dependency>
-            <dependency>
-                <groupId>com.tractionsoftware</groupId>
-                <artifactId>gwt-traction</artifactId>
-                <version>1.6.0</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-httpclient</groupId>
-                <artifactId>commons-httpclient</artifactId>
-                <version>3.1</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jasig.cas.client</groupId>
-                <artifactId>cas-client-core</artifactId>
-                <version>${cas.client.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>javax.servlet</groupId>
-                        <artifactId>servlet-api</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.directory.server</groupId>
-                <artifactId>apacheds-all</artifactId>
-                <!-- 20160818 hsilva: versions M22 & M23 don't work properly with RODA
-                    code base -->
-                <version>2.0.0-M21</version>
-            </dependency>
-            <dependency>
-                <groupId>javax.xml.bind</groupId>
-                <artifactId>jaxb-api</artifactId>
-                <version>2.3.0</version>
-                <classifier>sources</classifier>
-                <scope>provided</scope>
-            </dependency>
-
-            <!-- REST API related dependencies - start -->
-            <dependency>
                 <groupId>org.glassfish.jersey</groupId>
                 <artifactId>jersey-bom</artifactId>
                 <version>${version.jersey}</version>
@@ -261,136 +275,288 @@
                 <scope>import</scope>
             </dependency>
             <dependency>
-                <groupId>org.glassfish.jersey.bundles</groupId>
-                <artifactId>jaxrs-ri</artifactId>
-                <version>${version.jersey}</version>
-            </dependency>
-            <dependency>
-                <groupId>javax.ws.rs</groupId>
-                <artifactId>javax.ws.rs-api</artifactId>
-                <version>2.0.1</version>
-            </dependency>
-            <dependency>
-                <groupId>org.glassfish.jersey.core</groupId>
-                <artifactId>jersey-server</artifactId>
-                <version>${version.jersey}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.glassfish.jersey.containers</groupId>
-                <artifactId>jersey-container-servlet-core</artifactId>
-                <version>${version.jersey}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.glassfish.jersey.media</groupId>
-                <artifactId>jersey-media-moxy</artifactId>
-                <version>${version.jersey}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.glassfish.jersey.media</groupId>
-                <artifactId>jersey-media-multipart</artifactId>
-                <version>${version.jersey}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.glassfish.jersey.core</groupId>
-                <artifactId>jersey-client</artifactId>
-                <version>${version.jersey}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.glassfish.jersey.test-framework</groupId>
-                <artifactId>jersey-test-framework-core</artifactId>
-                <version>${version.jersey}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.glassfish.jersey.test-framework.providers</groupId>
-                <artifactId>jersey-test-framework-provider-grizzly2</artifactId>
-                <version>${version.jersey}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.glassfish.jersey.media</groupId>
-                <artifactId>jersey-media-json-jackson</artifactId>
-                <version>${version.jersey}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.swagger</groupId>
-                <artifactId>swagger-jersey2-jaxrs</artifactId>
-                <version>${version.swagger}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-core</artifactId>
-                <version>${version.jackson}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>${version.jackson}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-annotations</artifactId>
-                <version>${version.jackson}</version>
-            </dependency>
-            <!-- REST API related dependencies - end -->
-
-            <!-- other -->
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>1.7.7</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.solr</groupId>
-                <artifactId>solr-solrj</artifactId>
-                <version>6.4.1</version>
-            </dependency>
-            <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-classic</artifactId>
-                <version>1.2.3</version>
-            </dependency>
-            <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-core</artifactId>
-                <version>1.2.3</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-lang3</artifactId>
-                <version>3.7</version>
-            </dependency>
-            <dependency>
-                <groupId>commons-configuration</groupId>
-                <artifactId>commons-configuration</artifactId>
-                <version>1.10</version>
-            </dependency>
-            <dependency>
-                <groupId>org.w3c</groupId>
-                <artifactId>w3c-utils</artifactId>
-                <version>1.0.0</version>
-            </dependency>
-
-
-            <!-- testing -->
-            <dependency>
-                <groupId>org.hamcrest</groupId>
-                <artifactId>hamcrest-integration</artifactId>
-                <version>1.3</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.testng</groupId>
-                <artifactId>testng</artifactId>
-                <version>6.9.4</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-core</artifactId>
-                <version>2.0.28-beta</version>
-                <scope>test</scope>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>26.0-jre</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <dependencies>
+        <!-- internal -->
+        <dependency>
+            <groupId>com.databasepreservation</groupId>
+            <artifactId>dbptk-model</artifactId>
+            <version>${version.dbptk}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.databasepreservation</groupId>
+            <artifactId>dbptk-module-siard</artifactId>
+            <version>${version.dbptk}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.roda-project</groupId>
+            <artifactId>roda-common-data</artifactId>
+            <version>${version.roda}</version>
+            <classifier>sources</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.roda-project</groupId>
+            <artifactId>roda-common-data</artifactId>
+            <version>${version.roda}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.roda-project</groupId>
+            <artifactId>roda-common-utils</artifactId>
+            <version>${version.roda}</version>
+            <classifier>sources</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.roda-project</groupId>
+            <artifactId>roda-common-utils</artifactId>
+            <version>${version.roda}</version>
+        </dependency>
+
+        <!-- gwt -->
+        <dependency>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-servlet</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-user</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-dev</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- viewer -->
+        <dependency>
+            <groupId>com.github.nmorel.gwtjackson</groupId>
+            <artifactId>gwt-jackson</artifactId>
+            <version>0.15.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.bytebybyte.gwt</groupId>
+            <artifactId>fontawesome-lib</artifactId>
+            <version>4.3.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.tractionsoftware</groupId>
+            <artifactId>gwt-traction</artifactId>
+            <version>1.6.0</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-httpclient</groupId>
+            <artifactId>commons-httpclient</artifactId>
+            <version>3.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jasig.cas.client</groupId>
+            <artifactId>cas-client-core</artifactId>
+            <version>${cas.client.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.servlet</groupId>
+                    <artifactId>servlet-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.directory.server</groupId>
+            <artifactId>apacheds-all</artifactId>
+            <!-- 20160818 hsilva: versions M22 & M23 don't work properly with RODA code base -->
+            <version>2.0.0-M21</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>2.3.0</version>
+            <classifier>sources</classifier>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- REST API related dependencies - start -->
+        <dependency>
+            <groupId>org.glassfish.jersey.bundles</groupId>
+            <artifactId>jaxrs-ri</artifactId>
+            <version>${version.jersey}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.glassfish.jersey.media</groupId>
+                    <artifactId>jersey-media-json-binding</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+            <version>2.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-server</artifactId>
+            <version>${version.jersey}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.containers</groupId>
+            <artifactId>jersey-container-servlet-core</artifactId>
+            <version>${version.jersey}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-moxy</artifactId>
+            <version>${version.jersey}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-multipart</artifactId>
+            <version>${version.jersey}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-client</artifactId>
+            <version>${version.jersey}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.test-framework</groupId>
+            <artifactId>jersey-test-framework-core</artifactId>
+            <version>${version.jersey}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.test-framework.providers</groupId>
+            <artifactId>jersey-test-framework-provider-grizzly2</artifactId>
+            <version>${version.jersey}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-json-jackson</artifactId>
+            <version>${version.jersey}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-jersey2-jaxrs</artifactId>
+            <version>${version.swagger}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${version.jackson}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${version.jackson}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${version.jackson}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.bundles.repackaged</groupId>
+            <artifactId>jersey-guava</artifactId>
+            <version>2.26-b03</version>
+        </dependency>
+        <!-- REST API related dependencies - end -->
+
+        <!-- other -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.7</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.solr</groupId>
+            <artifactId>solr-solrj</artifactId>
+            <version>${solr.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.solr</groupId>
+            <artifactId>solr-core</artifactId>
+            <version>${solr.version}</version>
+            <exclusions>
+                <!-- 20160218 hsilva: this is needed for apache tika parsers, so commenting
+                    out -->
+                <!-- <exclusion> <artifactId>asm</artifactId> <groupId>org.ow2.asm</groupId>
+                    </exclusion> <exclusion> <artifactId>asm-commons</artifactId> <groupId>org.ow2.asm</groupId>
+                    </exclusion> -->
+                <exclusion>
+                    <artifactId>*</artifactId>
+                    <groupId>org.eclipse.jetty</groupId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-hdfs</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-common</artifactId>
+                </exclusion>
+                <!-- 20180820 hsilva: when updating solr to 7.4, this dependency is introduced
+                    &, depending on the class loading order of things, might lead slf4j to try
+                    to use the log4j binding (instead of logback binding) -->
+                <exclusion>
+                    <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>log4j-slf4j-impl</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>log4j-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.2.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>3.7</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-configuration</groupId>
+            <artifactId>commons-configuration</artifactId>
+            <version>1.10</version>
+        </dependency>
+        <dependency>
+            <groupId>org.w3c</groupId>
+            <artifactId>w3c-utils</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
+        <!-- testing -->
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-integration</artifactId>
+            <version>1.3</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>6.9.4</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>2.0.28-beta</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.11</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 </project>
