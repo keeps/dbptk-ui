@@ -6,14 +6,13 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
-import com.databasepreservation.visualization.shared.ViewerStructure.IsIndexed;
 import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CloudSolrClient;
@@ -44,6 +43,7 @@ import com.databasepreservation.visualization.server.index.schema.collections.Ro
 import com.databasepreservation.visualization.server.index.utils.SolrUtils;
 import com.databasepreservation.visualization.shared.SavedSearch;
 import com.databasepreservation.visualization.shared.ViewerConstants;
+import com.databasepreservation.visualization.shared.ViewerStructure.IsIndexed;
 import com.databasepreservation.visualization.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.visualization.shared.ViewerStructure.ViewerDatabaseFromToolkit;
 import com.databasepreservation.visualization.shared.ViewerStructure.ViewerRow;
@@ -61,15 +61,13 @@ public class SolrManager {
   private static final int MAX_BUFFERED_COLLECTIONS = 10;
 
   private final CloudSolrClient client;
-  private final Set<String> collectionsToCommit;
+  private final Set<String> collectionsToCommit = ConcurrentHashMap.newKeySet();
   // private final LinkedHashMap<String, String> tablesUUIDandName = new
   // LinkedHashMap<>();
-  private Map<String, List<SolrInputDocument>> docsByCollection = new HashMap<>();
-  private boolean setupDone = false;
+  private Map<String, Queue<SolrInputDocument>> docsByCollection = new ConcurrentHashMap<>();
 
   public SolrManager(CloudSolrClient client) {
     this.client = client;
-    this.collectionsToCommit = new HashSet<>();
   }
 
   /**
@@ -100,7 +98,7 @@ public class SolrManager {
 
     // delete related rows collection
     String rowsCollectionName = SolrRowsCollectionRegistry.get(database.getUUID()).getIndexName();
-    SolrRequest request = CollectionAdminRequest.deleteCollection(rowsCollectionName);
+    SolrRequest<?> request = CollectionAdminRequest.deleteCollection(rowsCollectionName);
     try {
       client.request(request);
       LOGGER.debug("Deleted collection {}", rowsCollectionName);
@@ -177,16 +175,15 @@ public class SolrManager {
     return SolrUtils.retrieve(client, SolrDefaultCollectionRegistry.get(classToReturn), id);
   }
 
-  public IndexResult<ViewerRow> findRows(String databaseUUID, Filter filter,
-    Sorter sorter, Sublist sublist, Facets facets) throws GenericException, RequestNotValidException {
+  public IndexResult<ViewerRow> findRows(String databaseUUID, Filter filter, Sorter sorter, Sublist sublist,
+    Facets facets) throws GenericException, RequestNotValidException {
     return SolrUtils.findRows(client, databaseUUID, filter, sorter, sublist, facets);
   }
 
   public InputStream findRowsCSV(String databaseUUID, Filter filter, Sorter sorter, Sublist sublist,
     List<String> fields) throws GenericException, RequestNotValidException {
     return SolrUtils.findCSV(client, SolrRowsCollectionRegistry.get(databaseUUID).getIndexName(), filter, sorter,
-      sublist,
-      fields);
+      sublist, fields);
   }
 
   public <T extends IsIndexed> Long countRows(String databaseUUID, Filter filter)
@@ -194,8 +191,7 @@ public class SolrManager {
     return SolrUtils.countRows(client, databaseUUID, filter);
   }
 
-  public ViewerRow retrieveRows(String databaseUUID, String rowUUID)
-    throws NotFoundException, GenericException {
+  public ViewerRow retrieveRows(String databaseUUID, String rowUUID) throws NotFoundException, GenericException {
     return SolrUtils.retrieveRows(client, databaseUUID, rowUUID);
   }
 
@@ -263,9 +259,9 @@ public class SolrManager {
     } else {
       // add document to buffer
       if (!docsByCollection.containsKey(collection)) {
-        docsByCollection.put(collection, new ArrayList<>());
+        docsByCollection.put(collection, new ConcurrentLinkedQueue<>());
       }
-      List<SolrInputDocument> docs = docsByCollection.get(collection);
+      Queue<SolrInputDocument> docs = docsByCollection.get(collection);
       docs.add(doc);
 
       // if buffer limit has been reached, "flush" it to solr
@@ -277,7 +273,8 @@ public class SolrManager {
 
   /**
    * The collections are not immediately available after creation, this method
-   * makes sequential attempts to insert a document before giving up (by timeout)
+   * makes sequential attempts to insert a document before giving up (by
+   * timeout)
    *
    * @throws ViewerException
    *           in case of a fatal error
@@ -329,13 +326,13 @@ public class SolrManager {
 
   /**
    * The collections are not immediately available after creation, this method
-   * makes sequential attempts to insert documents (previously stored in a buffer)
-   * before giving up (by timeout)
+   * makes sequential attempts to insert documents (previously stored in a
+   * buffer) before giving up (by timeout)
    *
    * @throws ViewerException
    *           in case of a fatal error
    */
-  private void insertPendingDocuments() throws ViewerException {
+  private synchronized void insertPendingDocuments() throws ViewerException {
     long timeoutStart = System.currentTimeMillis();
     int tries = 0;
     boolean insertedAllDocuments;
@@ -344,15 +341,15 @@ public class SolrManager {
       try {
         // add documents, because the buffer limits were reached
         for (String currentCollection : docsByCollection.keySet()) {
-          List<SolrInputDocument> docs = docsByCollection.get(currentCollection);
-          if (!docs.isEmpty()) {
+          Queue<SolrInputDocument> docs = docsByCollection.get(currentCollection);
+          if (docs != null && !docs.isEmpty()) {
+            List<SolrInputDocument> batch = new ArrayList<>(docs);
             try {
-              response = client.add(currentCollection, docs);
+              response = client.add(currentCollection, batch);
               if (response.getStatus() == 0) {
-                // LOGGER.info("~~ Inserted " + docs.size() +
-                // " into collection " + currentCollection);
                 collectionsToCommit.add(currentCollection);
-                docs.clear();
+                docs.removeAll(batch);
+
                 // reset the timeout when something is inserted
                 timeoutStart = System.currentTimeMillis();
               } else {
@@ -376,7 +373,7 @@ public class SolrManager {
 
       // check if something still needs to be inserted
       insertedAllDocuments = true;
-      for (List<SolrInputDocument> docs : docsByCollection.values()) {
+      for (Queue<SolrInputDocument> docs : docsByCollection.values()) {
         if (!docs.isEmpty()) {
           insertedAllDocuments = false;
           break;
@@ -396,12 +393,8 @@ public class SolrManager {
 
     if (insertedAllDocuments) {
       // remove empty or null lists
-      for (Iterator<String> iter = docsByCollection.keySet().iterator(); iter.hasNext();) {
-        String key = iter.next();
-        if (docsByCollection.get(key) == null || docsByCollection.get(key).isEmpty()) {
-          iter.remove();
-        }
-      }
+      docsByCollection.entrySet()
+        .removeIf(key -> docsByCollection.get(key) == null || docsByCollection.get(key).isEmpty());
 
     } else {
       throw new ViewerException(
