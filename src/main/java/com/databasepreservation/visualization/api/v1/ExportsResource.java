@@ -14,6 +14,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import com.databasepreservation.visualization.shared.ViewerConstants;
+import com.databasepreservation.visualization.shared.ViewerStructure.ViewerDatabase;
 import org.apache.commons.lang3.StringUtils;
 import org.roda.core.data.exceptions.RODAException;
 import org.roda.core.data.utils.JsonUtils;
@@ -81,9 +82,6 @@ public class ExportsResource {
     @QueryParam(ViewerConstants.API_QUERY_PARAM_FIELDS) String fieldsListParam,
     @QueryParam(ViewerConstants.API_QUERY_PARAM_SORTER) String sorterParam,
     @QueryParam(ViewerConstants.API_QUERY_PARAM_SUBLIST) String subListParam) throws RODAException {
-    // delegate action to controller
-    // Jobs jobs = JobsHelper.getJobsFromIndexResult(user, start, limit);
-
     SolrManager solrManager = ViewerFactory.getSolrManager();
 
     Filter filter = JsonUtils.getObjectFromJson(filterParam, Filter.class);
@@ -96,7 +94,6 @@ public class ExportsResource {
 
     UserUtility.Authorization.checkDatabaseAccessPermission(this.request, databaseUUID);
 
-    // TODO: use viewerTable to convert solrColumnNames into displayColumnNames
     InputStream rowsCSV = solrManager.findRowsCSV(databaseUUID, filter, sorter, sublist, fields);
 
     return ApiUtils
