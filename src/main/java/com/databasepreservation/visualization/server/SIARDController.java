@@ -43,9 +43,16 @@ public class SIARDController {
 
   public static String loadFromLocal(String localPath) throws GenericException {
     String databaseUUID = SolrUtils.randomUUID();
+    return loadFromLocal(localPath, databaseUUID);
+  }
+
+  public static String loadFromLocal(String localPath, String databaseUUID) throws GenericException {
     LOGGER.info("converting database {}", databaseUUID);
+    Path basePath = Paths.get(ViewerConfiguration.getInstance().getViewerConfigurationAsString("/",
+      ViewerConfiguration.PROPERTY_BASE_UPLOAD_PATH));
     try {
-      convertSIARDtoSolr(Paths.get(localPath), databaseUUID);
+      Path siardPath = basePath.resolve(localPath);
+      convertSIARDtoSolr(siardPath, databaseUUID);
       LOGGER.info("Conversion to SIARD successful, database: {}", databaseUUID);
     } catch (GenericException e) {
       LOGGER.error("Conversion to SIARD failed for database {}", databaseUUID, e);

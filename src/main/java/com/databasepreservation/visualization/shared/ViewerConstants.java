@@ -138,7 +138,7 @@ public class ViewerConstants {
   public static final String API_SEP = "/";
   // sub-resources strings
   public static final String API_DATA = "data";
-  public static final Object API_FILE = "file";
+  public static final String API_FILE = "file";
   public static final String API_DESCRIPTIVE_METADATA = "descriptive_metadata";
   public static final String API_PRESERVATION_METADATA = "preservation_metadata";
   // "http query string" related strings

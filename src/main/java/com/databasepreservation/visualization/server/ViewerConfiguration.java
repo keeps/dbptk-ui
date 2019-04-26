@@ -58,6 +58,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
 
   public static final String RESOURCES_SOLR_CONFIG_PATH = "solr-config";
 
+  public static final String PROPERTY_BASE_UPLOAD_PATH = "manage.upload.basePath";
 
   public static final String PROPERTY_FILTER_AUTHENTICATION_RODA = "ui.filter.internal.enabled";
 
