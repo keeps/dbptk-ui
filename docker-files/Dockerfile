@@ -10,9 +10,8 @@ EXPOSE 8080
 RUN set -ex \
     ; apt-get -qq update \
     && apt-get -qq -y --no-install-recommends install \
-       curl \
+       curl vim less jq netcat \
        unattended-upgrades \
-       vim \
     && apt-get clean \
     && apt-get autoremove \
     ; rm -rf /var/lib/apt/lists/* \
