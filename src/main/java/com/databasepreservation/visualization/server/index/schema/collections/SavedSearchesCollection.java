@@ -69,7 +69,8 @@ public class SavedSearchesCollection extends AbstractSolrCollection<SavedSearch>
 
     fields.add(newStoredRequiredNotMultivaluedField(SOLR_SEARCHES_NAME, Field.TYPE_TEXT, true));
     fields.add(newStoredRequiredNotMultivaluedField(SOLR_SEARCHES_TABLE_NAME, Field.TYPE_STRING, true));
-    fields.add(newStoredRequiredNotMultivaluedField(SOLR_SEARCHES_DESCRIPTION, Field.TYPE_TEXT, true));
+    fields.add(new Field(SOLR_SEARCHES_DESCRIPTION, Field.TYPE_TEXT).setMultiValued(false));
+
     fields.add(newStoredRequiredNotMultivaluedField(SOLR_SEARCHES_DATE_ADDED, Field.TYPE_DATE, false));
     fields.add(newStoredRequiredNotMultivaluedField(SOLR_SEARCHES_DATABASE_UUID, Field.TYPE_STRING, true));
     fields.add(newStoredRequiredNotMultivaluedField(SOLR_SEARCHES_TABLE_UUID, Field.TYPE_STRING, true));

@@ -176,7 +176,6 @@ public class DbvtkExportModule implements DatabaseExportModule {
   @Override
   public void finishDatabase() throws ModuleException {
     solrManager.markDatabaseAsReady(viewerDatabase);
-    solrManager.commitAll();
   }
 
   /**

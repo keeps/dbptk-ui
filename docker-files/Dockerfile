@@ -11,9 +11,6 @@ RUN set -ex \
     ; apt-get -qq update \
     && apt-get -qq -y --no-install-recommends install \
        curl \
-       lsof \
-       rsync \
-       supervisor \
        unattended-upgrades \
        vim \
     && apt-get clean \
