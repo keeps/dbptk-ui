@@ -5,6 +5,9 @@
 package com.databasepreservation.visualization.utils;
 
 import java.io.Serializable;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,9 +43,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.visualization.server.ViewerConfiguration;
-import com.databasepreservation.visualization.shared.ViewerStructure.IsIndexed;
 import com.databasepreservation.visualization.shared.SavedSearch;
 import com.databasepreservation.visualization.shared.ViewerConstants;
+import com.databasepreservation.visualization.shared.ViewerStructure.IsIndexed;
 import com.databasepreservation.visualization.shared.ViewerStructure.ViewerDatabase;
 
 public class UserUtility {
@@ -290,9 +293,21 @@ public class UserUtility {
       if (ViewerConfiguration.getInstance().getWhitelistAllIPs()) {
         return;
       } else {
-        List<String> whitelistedIPs = ViewerConfiguration.getInstance().getWhitelistedIPs();
-        if (whitelistedIPs.contains(originIP)) {
-          return;
+        try {
+          InetAddress address = InetAddress.getByName(originIP);
+          List<String> whitelistedIPs = ViewerConfiguration.getInstance().getWhitelistedIPs();
+          for (String whitelistedIP : whitelistedIPs) {
+            try {
+              InetAddress whitelistAddress = InetAddress.getByName(whitelistedIP);
+              if (Arrays.equals(address.getAddress(), whitelistAddress.getAddress())) {
+                return;
+              }
+            } catch (UnknownHostException e) {
+              LOGGER.debug("Invalid IP address from config: {}", originIP, e);
+            }
+          }
+        } catch (UnknownHostException e) {
+          LOGGER.debug("Invalid IP address: {}", originIP, e);
         }
       }
 
