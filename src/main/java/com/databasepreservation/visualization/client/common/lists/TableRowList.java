@@ -7,7 +7,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.visualization.shared.ViewerConstants;
 import org.roda.core.data.v2.common.Pair;
 import org.roda.core.data.v2.index.IndexResult;
 import org.roda.core.data.v2.index.facet.Facets;
@@ -16,6 +15,8 @@ import org.roda.core.data.v2.index.sort.Sorter;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
 import com.databasepreservation.visualization.client.BrowserService;
+import com.databasepreservation.visualization.client.common.utils.UriQueryUtils;
+import com.databasepreservation.visualization.shared.ViewerConstants;
 import com.databasepreservation.visualization.shared.ViewerStructure.ViewerColumn;
 import com.databasepreservation.visualization.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.visualization.shared.ViewerStructure.ViewerRow;
@@ -33,7 +34,6 @@ import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
-import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortList;
@@ -272,12 +272,12 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
 
     // add parameter: field list
     String paramFieldList = ViewerJsonUtils.getStringListMapper().write(solrColumns);
-    urlBuilder.append(ViewerConstants.API_QUERY_PARAM_FIELDS).append("=").append(UriUtils.encode(paramFieldList))
+    urlBuilder.append(ViewerConstants.API_QUERY_PARAM_FIELDS).append("=").append(UriQueryUtils.encodeQuery(paramFieldList))
       .append("&");
 
     // add parameter: filter
     String paramFilter = ViewerJsonUtils.getFilterMapper().write(getFilter());
-    urlBuilder.append(ViewerConstants.API_QUERY_PARAM_FILTER).append("=").append(UriUtils.encode(paramFilter))
+    urlBuilder.append(ViewerConstants.API_QUERY_PARAM_FILTER).append("=").append(UriQueryUtils.encodeQuery(paramFilter))
       .append("&");
 
     // add parameter: subList
@@ -287,12 +287,12 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
     } else {
       paramSubList = ViewerJsonUtils.getSubListMapper().write(new Sublist(0, Integer.MAX_VALUE));
     }
-    urlBuilder.append(ViewerConstants.API_QUERY_PARAM_SUBLIST).append("=").append(UriUtils.encode(paramSubList))
+    urlBuilder.append(ViewerConstants.API_QUERY_PARAM_SUBLIST).append("=").append(UriQueryUtils.encodeQuery(paramSubList))
       .append("&");
 
     // add parameter: sorter
     String paramSorter = ViewerJsonUtils.getSorterMapper().write(currentSorter);
-    urlBuilder.append(ViewerConstants.API_QUERY_PARAM_SORTER).append("=").append(UriUtils.encode(paramSorter));
+    urlBuilder.append(ViewerConstants.API_QUERY_PARAM_SORTER).append("=").append(UriQueryUtils.encodeQuery(paramSorter));
 
     GWT.log(urlBuilder.toString());
 

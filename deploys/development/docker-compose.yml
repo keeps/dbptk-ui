@@ -10,7 +10,7 @@ services:
       - COPY_APP_ON_STARTUP=${COPY_APP_ON_STARTUP}
       - JPDA_ADDRESS=5005
       - JPDA_TRANSPORT=dt_socket
-      - "SOLR_ZOOKEEPER_HOSTS=solr:9983"
+      - SOLR_ZOOKEEPER_HOSTS=solr:9983
     volumes:
       # folder in which *.siard files should be dropped so they can be accessed from inside the server
       # You can override variables using environment, defaults are at .env, example:
