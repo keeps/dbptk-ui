@@ -11,6 +11,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RODAException;
@@ -64,7 +65,7 @@ public class ManageResource {
     String mediaType = ApiUtils.getMediaType(acceptFormat, request);
 
     // check for authorization, to protect against unauthorized access attempts
-    UserUtility.Authorization.checkDatabaseRemovalPermission(request, databaseUUID);
+    UserUtility.Authorization.checkDatabaseManagementPermission(request);
 
     SolrManager solrManager = ViewerFactory.getSolrManager();
 
@@ -95,6 +96,10 @@ public class ManageResource {
     throws RODAException {
     String mediaType = ApiUtils.getMediaType(acceptFormat, request);
 
+    // check for authorization, to protect against unauthorized access attempts
+    UserUtility.Authorization.checkDatabaseManagementPermission(request);
+
+    // migrate siard
     new Thread(() -> {
       try {
         SIARDController.loadFromLocal(fileName, databaseUUID);

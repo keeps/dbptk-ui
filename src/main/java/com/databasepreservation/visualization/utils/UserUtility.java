@@ -286,8 +286,8 @@ public class UserUtility {
       throw error(user, "saved search", savedSearch.getUUID());
     }
 
-    public static void checkDatabaseRemovalPermission(HttpServletRequest request, String databaseUUID)
-      throws AuthorizationDeniedException, NotFoundException, GenericException {
+    public static void checkDatabaseManagementPermission(HttpServletRequest request)
+      throws AuthorizationDeniedException {
 
       String originIP = request.getRemoteAddr();
       if (ViewerConfiguration.getInstance().getWhitelistAllIPs()) {
@@ -313,7 +313,7 @@ public class UserUtility {
 
       // database removal request has been denied
       throw new AuthorizationDeniedException(
-        "Removal of database '" + databaseUUID + "' has been denied for address '" + originIP + "'.");
+        "Removal of database has been denied for address '" + originIP + "'.");
     }
   }
 
@@ -334,14 +334,13 @@ public class UserUtility {
     String rodaAddress;
     if (useRodaCasServiceServerName) {
       rodaAddress = ViewerConfiguration.getInstance()
-        .getViewerConfigurationAsString(ViewerConfiguration.PROPERTY_AUTHORIZATION_RODA_CAS_SERVICE_NAME,
-          StringUtils.EMPTY);
+        .getViewerConfigurationAsString(StringUtils.EMPTY, ViewerConfiguration.PROPERTY_AUTHORIZATION_RODA_CAS_SERVICE_NAME);
     } else {
       rodaAddress = ViewerConfiguration.getInstance()
-        .getViewerConfigurationAsString(ViewerConfiguration.PROPERTY_AUTHORIZATION_RODA_DIP_SERVER, StringUtils.EMPTY);
+        .getViewerConfigurationAsString(StringUtils.EMPTY, ViewerConfiguration.PROPERTY_AUTHORIZATION_RODA_DIP_SERVER);
     }
     String rodaDipPath = ViewerConfiguration.getInstance()
-      .getViewerConfigurationAsString(ViewerConfiguration.PROPERTY_AUTHORIZATION_RODA_DIP_PATH, StringUtils.EMPTY);
+      .getViewerConfigurationAsString(StringUtils.EMPTY, ViewerConfiguration.PROPERTY_AUTHORIZATION_RODA_DIP_PATH);
     rodaDipPath = rodaDipPath.replaceAll("\\{dip_id\\}", databaseUUID);
 
     UriBuilder uri = client.target(rodaAddress).path(rodaDipPath).getUriBuilder();

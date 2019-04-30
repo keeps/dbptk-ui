@@ -23,10 +23,13 @@ import org.apache.commons.lang.StringUtils;
 import org.jasig.cas.client.util.AbstractCasFilter;
 import org.jasig.cas.client.validation.Assertion;
 import org.roda.core.data.exceptions.AuthenticationDeniedException;
+import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.v2.common.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.databasepreservation.visualization.utils.UserUtility;
 
 /**
  * CAS authentication filter for API requests.
@@ -82,13 +85,19 @@ public class CasApiAuthFilter implements Filter {
       final Pair<String, String> credentials = new BasicAuthRequestWrapper(request).getCredentials();
 
       if (StringUtils.isNotBlank(tgt)) {
+        // try to use TGT
         doFilterWithTGT(request, response, filterChain, tgt);
       } else if (credentials != null) {
         // TGT is blank. Try to use username and password
         doFilterWithCredentials(request, response, filterChain, credentials.getFirst(), credentials.getSecond());
       } else {
-        LOGGER.debug("No username and password");
-        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "No credentials");
+        // no credentials provided. check list of allowed management IPs
+        try {
+          UserUtility.Authorization.checkDatabaseManagementPermission(request);
+          filterChain.doFilter(request, response);
+        } catch (AuthorizationDeniedException e) {
+          throw new AuthenticationDeniedException("Could not authenticate", e);
+        }
       }
     } catch (final AuthenticationDeniedException e) {
       LOGGER.debug(e.getMessage(), e);
