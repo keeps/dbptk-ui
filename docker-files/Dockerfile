@@ -15,11 +15,11 @@ RUN set -ex \
     && apt-get clean \
     && apt-get autoremove \
     ; rm -rf /var/lib/apt/lists/* \
-    ; rm -rf /usr/local/tomcat/webapps/ROOT
+    ; rm -rf /usr/local/tomcat/webapps/*
 
-COPY supervisor-conf.d/* /etc/supervisor/conf.d/
 
-COPY /ROOT /usr/local/tomcat/webapps/ROOT
+COPY /ROOT /dbvtk.war
+ENV CONTEXT_PATH=""
 
 # environment
 ENV DBVTK_RUNNING_IN_DOCKER=yes
