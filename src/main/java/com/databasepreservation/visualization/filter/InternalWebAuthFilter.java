@@ -55,7 +55,7 @@ public class InternalWebAuthFilter implements Filter {
 
     if ("/login".equals(requestURI)) {
       final StringBuilder b = new StringBuilder();
-      b.append("/");
+      b.append(httpRequest.getContextPath()).append("/");
 
       if (StringUtils.isNotBlank(locale) && StringUtils.isNotBlank(branding)) {
         b.append("?locale=").append(locale).append("&branding=").append(branding);
@@ -76,7 +76,7 @@ public class InternalWebAuthFilter implements Filter {
       UserUtility.logout(httpRequest);
 
       final StringBuilder b = new StringBuilder();
-      b.append("/").append("#");
+      b.append(httpRequest.getContextPath()).append("/").append("#");
       httpResponse.sendRedirect(b.toString());
     } else {
       chain.doFilter(request, response);

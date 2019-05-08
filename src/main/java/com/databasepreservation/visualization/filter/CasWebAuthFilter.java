@@ -94,7 +94,7 @@ public class CasWebAuthFilter implements Filter {
     if (url.endsWith("/login")) {
 
       final StringBuilder b = new StringBuilder();
-      b.append("/");
+      b.append(httpRequest.getContextPath()).append("/");
 
       if (StringUtils.isNotBlank(locale) && StringUtils.isNotBlank(branding)) {
         b.append("?locale=").append(locale).append("&branding=").append(branding);
