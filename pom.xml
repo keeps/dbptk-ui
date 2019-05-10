@@ -32,7 +32,7 @@
         <version.swagger>1.5.19</version.swagger>
         <version.jackson>2.9.8</version.jackson>
         <cas.client.version>3.5.0</cas.client.version>
-        <solr.version>7.5.0</solr.version>
+        <solr.version>7.7.1</solr.version>
     </properties>
 
     <repositories>
