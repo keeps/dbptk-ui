@@ -26,3 +26,6 @@ test-output/
 .idea
 
 docker-files/siard/
+
+.vscode/
+.factorypath
