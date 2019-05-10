@@ -18,8 +18,9 @@ RUN set -ex \
     ; rm -rf /usr/local/tomcat/webapps/*
 
 
+# Install app via server.xml so context path can easily be re-defined
 COPY /ROOT /dbvtk.war
-ENV CONTEXT_PATH=""
+RUN sed -i -r "s%</Host>%<Context docBase=\"/dbvtk.war\" path=\"\${app.context.path}\" reloadable=\"true\"/></Host>%" /usr/local/tomcat/conf/server.xml
 
 # environment
 ENV DBVTK_RUNNING_IN_DOCKER=yes

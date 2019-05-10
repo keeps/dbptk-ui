@@ -25,7 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.visualization.api.common.ConsumesOutputStream;
-import com.databasepreservation.visualization.server.ViewerFactory;
+import com.databasepreservation.visualization.server.ViewerConfiguration;
 
 public class Theme {
 
@@ -39,9 +39,9 @@ public class Theme {
   }
 
   public static Pair<String, InputStream> getThemeResource(String resourceId, String fallbackResourceId) {
-    InputStream themeResourceInputstream = ViewerFactory.getViewerConfiguration().getThemeFileAsStream(resourceId);
+    InputStream themeResourceInputstream = ViewerConfiguration.getThemeFileAsStream(resourceId);
     if (themeResourceInputstream == null) {
-      themeResourceInputstream = ViewerFactory.getViewerConfiguration().getThemeFileAsStream(fallbackResourceId);
+      themeResourceInputstream = ViewerConfiguration.getThemeFileAsStream(fallbackResourceId);
       resourceId = fallbackResourceId;
     }
     return new Pair<>(resourceId, themeResourceInputstream);
@@ -89,7 +89,7 @@ public class Theme {
 
   public static Date getLastModifiedDate(String resourceId) throws IOException {
     Date modifiedDate;
-    URL file = ViewerFactory.getViewerConfiguration()
+    URL file = ViewerConfiguration
       .getConfigurationFile(ViewerConstants.VIEWER_THEME_FOLDER + "/" + resourceId);
 
     if ("file".equalsIgnoreCase(file.getProtocol())) {

@@ -312,8 +312,7 @@ public class UserUtility {
       }
 
       // database removal request has been denied
-      throw new AuthorizationDeniedException(
-        "Removal of database has been denied for address '" + originIP + "'.");
+      throw new AuthorizationDeniedException("Removal of database has been denied for address '" + originIP + "'.");
     }
   }
 
@@ -333,14 +332,14 @@ public class UserUtility {
 
     String rodaAddress;
     if (useRodaCasServiceServerName) {
-      rodaAddress = ViewerConfiguration.getInstance()
-        .getViewerConfigurationAsString(StringUtils.EMPTY, ViewerConfiguration.PROPERTY_AUTHORIZATION_RODA_CAS_SERVICE_NAME);
+      rodaAddress = ViewerConfiguration.getInstance().getViewerConfigurationAsString(StringUtils.EMPTY,
+        ViewerConfiguration.PROPERTY_AUTHORIZATION_RODA_CAS_SERVICE_NAME);
     } else {
-      rodaAddress = ViewerConfiguration.getInstance()
-        .getViewerConfigurationAsString(StringUtils.EMPTY, ViewerConfiguration.PROPERTY_AUTHORIZATION_RODA_DIP_SERVER);
+      rodaAddress = ViewerConfiguration.getInstance().getViewerConfigurationAsString(StringUtils.EMPTY,
+        ViewerConfiguration.PROPERTY_AUTHORIZATION_RODA_DIP_SERVER);
     }
-    String rodaDipPath = ViewerConfiguration.getInstance()
-      .getViewerConfigurationAsString(StringUtils.EMPTY, ViewerConfiguration.PROPERTY_AUTHORIZATION_RODA_DIP_PATH);
+    String rodaDipPath = ViewerConfiguration.getInstance().getViewerConfigurationAsString(StringUtils.EMPTY,
+      ViewerConfiguration.PROPERTY_AUTHORIZATION_RODA_DIP_PATH);
     rodaDipPath = rodaDipPath.replaceAll("\\{dip_id\\}", databaseUUID);
 
     UriBuilder uri = client.target(rodaAddress).path(rodaDipPath).getUriBuilder();
@@ -396,10 +395,10 @@ public class UserUtility {
           client = getBasicAuthClient(user.getName(), ticketOrPassword);
         }
       } else {
-        String rodaGuestUsername = ViewerConfiguration.getInstance()
-          .getViewerConfigurationAsString(null, ViewerConfiguration.PROPERTY_AUTHORIZATION_GUEST_USERNAME);
-        String rodaGuestPassword = ViewerConfiguration.getInstance()
-          .getViewerConfigurationAsString(null, ViewerConfiguration.PROPERTY_AUTHORIZATION_GUEST_PASSWORD);
+        String rodaGuestUsername = ViewerConfiguration.getInstance().getViewerConfigurationAsString(null,
+          ViewerConfiguration.PROPERTY_AUTHORIZATION_GUEST_USERNAME);
+        String rodaGuestPassword = ViewerConfiguration.getInstance().getViewerConfigurationAsString(null,
+          ViewerConfiguration.PROPERTY_AUTHORIZATION_GUEST_PASSWORD);
         client = getBasicAuthClient(rodaGuestUsername, rodaGuestPassword);
       }
 
