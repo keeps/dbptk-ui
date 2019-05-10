@@ -16,7 +16,6 @@ services:
       # You can override variables using environment, defaults are at .env, example:
       # SIARD=/path/to/folder/with/siard/files docker-compose up
       - ${SIARD}:/siard:ro
-      - ${PROJECT}:/ROOT:ro
 
       # configuration overrides
       - ./config/logback.xml:/dbvtk/config/logback.xml:ro

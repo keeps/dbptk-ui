@@ -4,24 +4,19 @@ Lightweight web viewer for relational databases, specially if preserved in SIARD
 
 A compreensive list of features, screenshots and other documentation will be produced soon and available here.
 
-
 ## Setting up the Database Visualization Toolkit
 
-The Database Visualization Toolkit is a web application. To run it you need to download the appropriate ZIP package file for your operating system at https://github.com/keeps/db-visualization-toolkit/releases
+After version 1.0.7 the deploy is made using docker containers and docker compose.
 
-For instance, if you are using Windows, you should download the most recent version of the `dbvtk-{version}-windows.zip` file.
+TBD: It will be released as a [docker app](https://github.com/docker/app) once Docker CLI 19.03 released.
 
-> (optional) MD5, SHA1 and SHA256 checksum files are provided for all release files. You can use them to check if the downloaded file is corrupt. Instructions are available for [Windows](http://superuser.com/a/898377), [Linux (Ubuntu)](https://help.ubuntu.com/community/HowToMD5SUM) and [Mac OS X](https://support.apple.com/HT201259).
-
-You can then extract the contents of the ZIP file. And follow these instructions to start and stop the application:
-
-### To start the server
-
-* **On Windows**: double click `start.bat`
-
-* **On MacOS**: double click `start.command`
-
-* **On Linux**: open a command line and run `./start.sh`
+Pre-installation requirements:
+1. [Install docker](https://docs.docker.com/install/)
+2. [Install docker compose](https://docs.docker.com/compose/install/)
+3. [Download DBVTK latest sources](https://github.com/keeps/db-visualization-toolkit/archive/master.zip)
+4. Unzip and open a terminal at deploys/development folder
+5. Run `SIARD=/path/to/folder/with/siard/files docker-compose up`
+6. Application should be available at [http://localhost:8080](http://localhost:8080)
 
 ### To add more databases to DBVTK
 
@@ -31,11 +26,16 @@ The DBVTK currently supports adding databases that are in SIARD2 and you can use
 
 ### To stop the server
 
-* **On Windows**: double click `stop.bat`
+Use CTRL+C to stop the server.
 
-* **On MacOS**: double click `stop.command`
+### Run as a daemon
 
-* **On Linux**: open a command line and run `./stop.sh`
+Run `SIARD=/path/to/folder/with/siard/files docker-compose up -d` at deploys/development folder.
+
+### Cleanup
+
+Run `docker-compose down` at deploys/development folder.
+
 
 ## More information
 
