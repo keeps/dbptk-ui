@@ -25,10 +25,9 @@ function deploy_to_dockerhub(){
   docker push keeps/dbvtk:$DOCKER_TAG
 
   ## Docker App
-  export OSTYPE="$(uname | tr A-Z a-z)"
-  curl -fsSL --output "/tmp/docker-app-${OSTYPE}.tar.gz" "https://github.com/docker/app/releases/download/v0.6.0/docker-app-${OSTYPE}.tar.gz"
-  tar xf "/tmp/docker-app-${OSTYPE}.tar.gz" -C /tmp/
-  sudo install -b "/tmp/docker-app-standalone-${OSTYPE}" /usr/local/bin/docker-app
+  curl -fsSL --output "/tmp/docker-app-linux.tar.gz" "https://github.com/docker/app/releases/download/v0.8.0-beta2/docker-app-linux.tar.gz"
+  tar xf "/tmp/docker-app-linux.tar.gz" -C /tmp/
+  sudo install -b "/tmp/docker-app-standalone-linux" /usr/local/bin/docker-app
   
   cd deploys/development
   docker-app inspect 
