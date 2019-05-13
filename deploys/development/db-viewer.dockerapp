@@ -1,0 +1,42 @@
+# This section contains your application metadata.
+# Version of the application
+version: 1.0.7
+# Name of the application
+name: db-viewer
+# A short description of the application
+description: 
+# List of application maintainers with name and email for each
+maintainers:
+  - name: lfaria
+    email: lfaria@keep.pt
+
+---
+# This section contains the Compose file that describes your application services.
+version: '3.2'
+services:
+  dbvtk:
+    image: keeps/dbvtk:latest
+    ports:
+      - ${DBVTK_PORT}:8080
+    environment:
+      - SOLR_ZOOKEEPER_HOSTS=solr:9983
+      - JAVA_OPTS=-Dapp.context.path=${DBVTK_CONTEXT_PATH}
+    volumes:
+      # folder in which *.siard files should be dropped so they can be accessed from inside the server
+      # You can override variables using environment, defaults are at .env, example:
+      # SIARD=/path/to/folder/with/siard/files docker-compose up
+      - ${SIARD}:/siard:ro
+    depends_on:
+      - solr
+  solr:
+    image: solr:7.5
+    ports:
+      - ${SOLR_PORT}:8983
+    command: -c # Use cloud mode
+
+---
+# This section contains the default values for your application parameters.
+SIARD: /tmp/siard
+DBVTK_PORT: 8080
+DBVTK_CONTEXT_PATH: /db
+SOLR_PORT: 8983

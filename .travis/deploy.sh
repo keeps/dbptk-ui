@@ -23,6 +23,17 @@ function deploy_to_dockerhub(){
 
   # Push to https://hub.docker.com/r/keeps/dbvtk/
   docker push keeps/dbvtk:$DOCKER_TAG
+
+  ## Docker App
+  export OSTYPE="$(uname | tr A-Z a-z)"
+  curl -fsSL --output "/tmp/docker-app-${OSTYPE}.tar.gz" "https://github.com/docker/app/releases/download/v0.6.0/docker-app-${OSTYPE}.tar.gz"
+  tar xf "/tmp/docker-app-${OSTYPE}.tar.gz" -C /tmp/
+  sudo install -b "/tmp/docker-app-standalone-${OSTYPE}" /usr/local/bin/docker-app
+  
+  cd deploys/development
+  docker-app inspect 
+  docker-app push --tag keeps/dbvtk:$DOCKER_TAG
+  cd $TRAVIS_BUILD_DIR
 }
 
 ################################################
