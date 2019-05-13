@@ -452,7 +452,7 @@ public class ToolkitStructure2ViewerStructure {
     result.setDescription(column.getDescription());
     result.setAutoIncrement(column.getIsAutoIncrement());
     result.setDefaultValue(column.getDefaultValue());
-    result.setNillable(column.getNillable());
+    result.setNillable(column.isNillable());
 
     return result;
   }

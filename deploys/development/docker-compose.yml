@@ -7,7 +7,6 @@ services:
       - 5005:5005
     environment:
       # development option
-      - COPY_APP_ON_STARTUP=${COPY_APP_ON_STARTUP}
       - JPDA_ADDRESS=5005
       - JPDA_TRANSPORT=dt_socket
       - SOLR_ZOOKEEPER_HOSTS=solr:9983

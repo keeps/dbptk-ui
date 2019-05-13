@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 
 import org.apache.commons.io.IOUtils;
 import org.roda.core.data.exceptions.GenericException;
@@ -71,6 +72,9 @@ public class SIARDController {
       ViewerConfiguration configuration = ViewerConfiguration.getInstance();
 
       DatabaseMigration databaseMigration = DatabaseMigration.newInstance();
+      
+      // XXX remove this workaround after fix of NPE
+      databaseMigration.filterFactories(new ArrayList<>());
 
       databaseMigration.importModule(new SIARD2ModuleFactory())
         .importModuleParameter(SIARD2ModuleFactory.PARAMETER_FILE, siardPath.toAbsolutePath().toString());

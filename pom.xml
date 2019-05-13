@@ -25,7 +25,7 @@
 
         <!-- Convenience properties to set versions -->
         <version.gwt>2.8.2</version.gwt>
-        <version.dbptk>2.1.0-SNAPSHOT</version.dbptk>
+        <version.dbptk>2.3.0</version.dbptk>
         <version.roda>3.0.2</version.roda>
 
         <version.jersey>2.27</version.jersey>
