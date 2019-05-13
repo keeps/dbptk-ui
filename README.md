@@ -8,9 +8,37 @@ A compreensive list of features, screenshots and other documentation will be pro
 
 After version 1.0.7 the deploy is made using docker containers and docker compose.
 
-TBD: It will be released as a [docker app](https://github.com/docker/app) once Docker CLI 19.03 released.
+### Deploy using Docker App (beta)
 
-Pre-installation requirements:
+Pre-requisites:
+1. Install [docker](https://docs.docker.com/install/)
+2. Install [docker compose](https://docs.docker.com/compose/install/)
+3. Install [docker app](https://github.com/docker/app)
+
+To execute in a docker-compose do:
+```
+docker-app render keeps/dbvtk-app:latest | docker-compose -f - up
+```
+
+To install in a docker swarm:
+```
+docker-app install keeps/dbvtk-app:latest
+```
+
+See possible parameters with:
+```
+docker-app inspect keeps/dbvtk-app:latest
+```
+
+Check [docker app](https://github.com/docker/app)  for instructions on how to set parameters.
+
+Open:
+* **dbvtk** at http://localhost:8080/db/
+* **solr** at http://localhost:8983/solr/
+
+### Deploy using source code
+
+Pre-requisites:
 1. [Install docker](https://docs.docker.com/install/)
 2. [Install docker compose](https://docs.docker.com/compose/install/)
 3. [Download DBVTK latest sources](https://github.com/keeps/db-visualization-toolkit/archive/master.zip)
@@ -20,9 +48,10 @@ Pre-installation requirements:
 
 ### To add more databases to DBVTK
 
-After starting the server, you can add more databases using the command that is shown in the command line. The command uses the [Database Preservation Toolkit](http://database-preservation.com) to add a SIARD 2 database to the Viewer.
-
-The DBVTK currently supports adding databases that are in SIARD2 and you can use the [Database Preservation Toolkit](http://database-preservation.com) to convert databases to the SIARD 2 format. Other input systems and formats may work but have not been tested.
+1. Put the SIARD files in the SIARD folder defined on install.
+2. Open DBVTK, click on the "Load SIARD file" button on the top menu
+3. Input the SIARD as `/siard/file.siard`
+4. Click "LOAD SIARD FILE" button
 
 ### To stop the server
 
@@ -32,7 +61,7 @@ Use CTRL+C to stop the server.
 
 Run `SIARD=/path/to/folder/with/siard/files docker-compose up -d` at deploys/development folder.
 
-### Cleanup
+### Shutdown daemon and cleanup
 
 Run `docker-compose down` at deploys/development folder.
 

@@ -29,3 +29,4 @@ docker-files/siard/
 
 .vscode/
 .factorypath
+/.apt_generated/
