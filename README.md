@@ -6,7 +6,7 @@ A compreensive list of features, screenshots and other documentation will be pro
 
 ## Setting up the Database Visualization Toolkit
 
-After version 1.0.7 the deploy is made using docker containers and docker compose.
+After version 2.0.0 the deploy is made using docker containers and docker compose.
 
 ### Deploy using Docker App (beta)
 
