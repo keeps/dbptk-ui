@@ -39,18 +39,17 @@ Open:
 ### Deploy using source code
 
 Pre-requisites:
-1. [Install docker](https://docs.docker.com/install/)
-2. [Install docker compose](https://docs.docker.com/compose/install/)
-3. [Download DBVTK latest sources](https://github.com/keeps/db-visualization-toolkit/archive/master.zip)
-4. Unzip and open a terminal at deploys/development folder
-5. Run `SIARD=/path/to/folder/with/siard/files docker-compose up`
-6. Application should be available at [http://localhost:8080](http://localhost:8080)
+1. Install [docker](https://docs.docker.com/install/)
+2. Install [docker compose](https://docs.docker.com/compose/install/)
+3. Download [docker-compose.yml](https://github.com/keeps/db-visualization-toolkit/raw/master/deploys/development/docker-compose.yml)
+4. Run `SIARD=/path/to/folder/with/siard/files docker-compose up`
+5. Application should be available at [http://localhost:8080](http://localhost:8080)
 
 ### To add more databases to DBVTK
 
 1. Put the SIARD files in the SIARD folder defined on install.
 2. Open DBVTK, click on the "Load SIARD file" button on the top menu
-3. Input the SIARD as `/siard/file.siard`
+3. Input the SIARD as `/siard/file.siard` (the SIARD folder will be mounted within the container in /siard/)
 4. Click "LOAD SIARD FILE" button
 
 ### To stop the server

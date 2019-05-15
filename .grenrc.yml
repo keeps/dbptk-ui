@@ -1,0 +1,29 @@
+---
+  dataSource: "issues"
+  ignoreLabels:
+    - "concern: dbptk"
+    - "concern: internal"
+    - "concern: UI"
+    - "type: bug"
+    - "type: discussion"
+    - "type: enhancement"
+    - "type: feature"
+  ignoreIssuesWith:
+    - "meta: duplicate"
+    - "meta: wontfix"
+    - "meta: superseeded"
+    - "meta: hide from changelog"
+  ignoreTagsWith:
+    - "-rc"
+    - "-alpha"
+    - "-beta"
+  onlyMilestones: false
+  groupBy:
+    New features::
+      - "type: feature"
+    Enhancements::
+      - "type: enhancement"
+    Bug Fixes::
+      - "type: bug"
+  changelogFilename: "CHANGELOG.md"
+  prefix: ""
