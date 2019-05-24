@@ -230,8 +230,12 @@ public class ViewerFactory {
     return tempSolrConf;
   }
 
-  private static void createCollection(CloudSolrClient cloudSolrClient, String collection, Path configPath) {
+  public static boolean createCollection(String collection, Path configPath) {
+    return createCollection(getSolrClient(), collection, configPath);
+  }
 
+  private static boolean createCollection(CloudSolrClient cloudSolrClient, String collection, Path configPath) {
+    boolean success = false;
     try {
       LOGGER.info("Creating SOLR collection {}", collection);
 
@@ -248,10 +252,13 @@ public class ViewerFactory {
       CollectionAdminResponse response = createCollection.process(cloudSolrClient);
       if (!response.isSuccess()) {
         LOGGER.error("Could not create collection {}: {}", collection, response.getErrorMessages());
+      } else {
+        success = true;
       }
     } catch (SolrServerException | SolrException | IOException e) {
       LOGGER.error("Error creating collection {}", collection, e);
     }
+    return success;
   }
 
   public static Integer getEnvInt(String name, Integer defaultValue) {
