@@ -39,9 +39,9 @@ public class Theme {
   }
 
   public static Pair<String, InputStream> getThemeResource(String resourceId, String fallbackResourceId) {
-    InputStream themeResourceInputstream = ViewerConfiguration.getThemeFileAsStream(resourceId);
+    InputStream themeResourceInputstream = ViewerConfiguration.getInstance().getThemeFileAsStream(resourceId);
     if (themeResourceInputstream == null) {
-      themeResourceInputstream = ViewerConfiguration.getThemeFileAsStream(fallbackResourceId);
+      themeResourceInputstream = ViewerConfiguration.getInstance().getThemeFileAsStream(fallbackResourceId);
       resourceId = fallbackResourceId;
     }
     return new Pair<>(resourceId, themeResourceInputstream);
@@ -89,7 +89,7 @@ public class Theme {
 
   public static Date getLastModifiedDate(String resourceId) throws IOException {
     Date modifiedDate;
-    URL file = ViewerConfiguration
+    URL file = ViewerConfiguration.getInstance()
       .getConfigurationFile(ViewerConstants.VIEWER_THEME_FOLDER + "/" + resourceId);
 
     if ("file".equalsIgnoreCase(file.getProtocol())) {

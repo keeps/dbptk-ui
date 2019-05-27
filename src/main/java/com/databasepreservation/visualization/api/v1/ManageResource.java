@@ -34,6 +34,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 /**
  * Resource used to manage databases in the viewer. This resource should be
@@ -41,6 +43,7 @@ import io.swagger.annotations.ApiResponses;
  * 
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
+@Service
 @Path(ManageResource.ENDPOINT)
 @Api(value = ManageResource.SWAGGER_ENDPOINT)
 public class ManageResource {

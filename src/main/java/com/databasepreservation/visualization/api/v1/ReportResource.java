@@ -22,7 +22,10 @@ import com.databasepreservation.visualization.server.ViewerConfiguration;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiParam;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
+@Service
 @Path(ReportResource.ENDPOINT)
 @Api(value = ReportResource.SWAGGER_ENDPOINT)
 public class ReportResource {

@@ -1,0 +1,21 @@
+{
+  "name": "dbptk-gui",
+  "version": "1.0.0",
+  "description": "DBPTK GUI",
+  "main": "index.js",
+  "scripts": {
+    "start": "mkdir -p war && ln -sf ../../target/dbvtk-2.0.0.war war/dbvtk.war && ./node_modules/.bin/electron .",
+    "build": "mkdir -p war && ln -sf ../../target/dbvtk-2.0.0.war war/dbvtk.war && rm -rf build/*; electron-packager . --out build/",
+    "build-all": "mkdir -p war && ln -sf ../../target/dbvtk-2.0.0.war war/dbvtk.war && rm -rf build/*; electron-packager . --all --out build/"
+  },
+  "author": "tferreira",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^5.0.2",
+    "electron-packager": "^13.1.1"
+  },
+  "dependencies": {
+    "minimal-request-promise": "^1.5.0",
+    "tree-kill": "^1.2.1"
+  }
+}

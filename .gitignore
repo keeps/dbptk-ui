@@ -30,3 +30,9 @@ docker-files/siard/
 .vscode/
 .factorypath
 /.apt_generated/
+
+.mvn/
+node_modules/
+electron/build/
+electron/war/
+jvm.log

@@ -29,12 +29,15 @@ import com.databasepreservation.visualization.utils.UserUtility;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 /**
  * Resource used to export search results
  * 
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
+@Service
 @Path(LobsResource.ENDPOINT)
 @Api(value = LobsResource.SWAGGER_ENDPOINT)
 public class LobsResource {

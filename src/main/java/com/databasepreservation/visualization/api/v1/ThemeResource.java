@@ -31,7 +31,10 @@ import com.databasepreservation.visualization.api.utils.Theme;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiParam;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
+@Service
 @Path(ThemeResource.ENDPOINT)
 @Api(value = ThemeResource.SWAGGER_ENDPOINT)
 public class ThemeResource {
