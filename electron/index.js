@@ -4,23 +4,23 @@ var windowWidth = 1200;
 var windowHeight = 800;
 var animationWidth = 300;
 var animationHeight = 150;
-var javaVMParameters =  []; //['-Dserver.port=' + port, '-Dtest=test'];
 var windowsJavaPath = 'java.exe';
 var darwinJavaPath = 'java';
+
 
 const {
     app, session, protocol, BrowserWindow, Menu, globalShortcut
 } = require('electron');
 const path = require('path');
+var waitOn = require('wait-on');
+
 let mainWindow = null;
 let serverProcess = null;
 
+
+
 killTree = function() {
     console.log('Kill server process '+ serverProcess.pid);
-    //const kill = require('tree-kill');
-    //kill(serverProcess.pid, 'SIGKILL', function (err) {
-    //    console.log('Server process killed');
-    //});
     require('tree-kill')(serverProcess.pid, "SIGTERM", function (err) {
         console.log('Server process killed');
     });
@@ -85,8 +85,10 @@ global.callElectronUiApi = function (args) {
 app.on('window-all-closed', function () {
     app.quit();
 });
-//app.on('quit', killTree);
-app.on('ready', function () {
+
+app.on('ready', async function () {
+
+    // Loading
     let loading = new BrowserWindow({
         show: false
         , frame: false
@@ -101,6 +103,9 @@ app.on('ready', function () {
         console.log("Loading...")
         loading.show();
     });
+
+
+    // Spawn Java process
     platform = process.platform;
     var javaPath = 'java';
     if (platform === 'win32') {
@@ -110,6 +115,13 @@ app.on('ready', function () {
         javaPath = darwinJavaPath;
     }
     const { spawn } = require('child_process');
+
+    var serverPortFile = app.getAppPath() + '/server.port'
+    console.log("Port file="+serverPortFile);
+    fs.unlink(serverPortFile, (err) => {});
+
+    var javaVMParameters =  ["-Dserver.port.file="+serverPortFile]; 
+
     serverProcess = spawn(javaPath, ['-jar'].concat(javaVMParameters).concat("war/"+filename), {
         cwd: app.getAppPath() + '/'
     });
@@ -123,51 +135,51 @@ app.on('ready', function () {
         throw new Error('The Application could not be started');
     });
     console.log('Server PID: ' + serverProcess.pid);
+
+    // Waiting for app to start
+    console.log('Wait until '+serverPortFile+' exists...');
+    await waitOn({resources: [serverPortFile]});
+    
+    port = parseInt(fs.readFileSync(serverPortFile));
+    fs.unlink(serverPortFile, (err) => {});
     let appUrl = 'http://localhost:' + port;
-    const openWindow = function () {
-        mainWindow = new BrowserWindow({
-            title: title
-            , width: windowWidth
-            , height: windowHeight
-            , frame: true
-        });
-        mainWindow.loadURL(appUrl + "/?branding=false");
-        mainWindow.webContents.once('dom-ready', () => {
-            console.log('main loaded')
-            mainWindow.show()
-            loading.hide()
-            loading.close()
-        })
-        mainWindow.on('closed', function () {
-            mainWindow = null;
-        });
-        mainWindow.on('close', function (e) {
-            if (serverProcess) {
-                var choice = require('electron').dialog.showMessageBox(this, {
-                    type: 'question'
-                    , buttons: ['Yes', 'No']
-                    , title: 'Confirm'
-                    , message: 'Dou you really want to exit?'
-                });
-                if (choice == 1) {
-                    e.preventDefault();
-                }
+    
+    console.log("Server at "+appUrl);
+    await waitOn({resources: [appUrl]});
+    console.log('Server started!');
+
+    // Open window with app
+    mainWindow = new BrowserWindow({
+        title: title
+        , width: windowWidth
+        , height: windowHeight
+        , frame: true
+    });
+    mainWindow.loadURL(appUrl + "/?branding=false");
+    mainWindow.webContents.once('dom-ready', () => {
+        console.log('main loaded')
+        mainWindow.show()
+        loading.hide()
+        loading.close()
+    })
+    mainWindow.on('closed', function () {
+        mainWindow = null;
+    });
+    mainWindow.on('close', function (e) {
+        if (serverProcess) {
+            var choice = require('electron').dialog.showMessageBox(this, {
+                type: 'question'
+                , buttons: ['Yes', 'No']
+                , title: 'Confirm'
+                , message: 'Dou you really want to exit?'
+            });
+            if (choice == 1) {
+                e.preventDefault();
             }
-        });
-    };
-    const startUp = function () {
-        const requestPromise = require('minimal-request-promise');
-        requestPromise.get(appUrl).then(function (response) {
-            console.log('Server started!');
-            openWindow();
-        }, function (response) {
-            console.log('Waiting for the server start...');
-            setTimeout(function () {
-                startUp();
-            }, 200);
-        });
-    };
-    startUp();
+        }
+    });
+
+
     // Register a shortcut listener.
     const ret = globalShortcut.register('CommandOrControl+Shift+`', () => {
         console.log('Bring to front shortcut triggered');

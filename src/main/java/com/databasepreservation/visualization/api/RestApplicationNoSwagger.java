@@ -5,7 +5,7 @@ import com.databasepreservation.visualization.api.v1.LobsResource;
 import com.databasepreservation.visualization.api.v1.ManageResource;
 import com.databasepreservation.visualization.api.v1.ReportResource;
 import com.databasepreservation.visualization.api.v1.ThemeResource;
-import org.glassfish.jersey.server.ManagedAsync;
+
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletProperties;
 import org.springframework.context.annotation.Configuration;
