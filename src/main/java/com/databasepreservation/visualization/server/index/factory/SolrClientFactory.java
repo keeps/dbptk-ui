@@ -3,8 +3,7 @@ package com.databasepreservation.visualization.server.index.factory;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 import com.databasepreservation.visualization.exceptions.ViewerException;
 import com.databasepreservation.visualization.server.ViewerConfiguration;
@@ -15,9 +14,6 @@ import com.databasepreservation.visualization.server.index.schema.SolrDefaultCol
 import com.databasepreservation.visualization.server.index.schema.SolrRowsCollectionRegistry;
 
 import org.apache.solr.client.solrj.SolrClient;
-import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.request.CollectionAdminRequest;
-import org.apache.solr.client.solrj.response.CollectionAdminResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,8 +25,14 @@ public abstract class SolrClientFactory<T extends SolrClient> {
 
     public static synchronized SolrClientFactory<? extends SolrClient> get() {
         if (instance == null) {
-            // TODO get factory type from config
-            instance = new CloudSolrClientFactory();
+            if (ViewerConfiguration.getInstance()
+                    .getViewerConfigurationAsString("", ViewerConfiguration.PROPERTY_SOLR_ZOOKEEPER_HOSTS).isEmpty()) {
+                instance = new EmbeddedSolrClientFactory();
+            } else {
+                // TODO get factory type from config
+                instance = new CloudSolrClientFactory();
+            }
+
             instance.init();
         }
         return instance;
@@ -41,20 +43,20 @@ public abstract class SolrClientFactory<T extends SolrClient> {
     private void init() {
         ViewerConfiguration configuration = ViewerFactory.getViewerConfiguration();
         Field.initialize(configuration);
-        
+
         this.solrClient = configureSolrClient();
-        
+
         waitForSolrToInitialize();
-        
+
         bootstrapDefaultCollections();
-        
+
         try {
             SolrBootstrapUtils.bootstrapSchemas(getSolrClient());
         } catch (ViewerException e) {
             LOGGER.error("Solr bootstrap failed", e);
         }
     }
-    
+
     public T getSolrClient() {
         return solrClient;
     }
@@ -71,28 +73,16 @@ public abstract class SolrClientFactory<T extends SolrClient> {
     }
 
     protected void bootstrapDefaultCollections() {
-        CollectionAdminRequest.List req = new CollectionAdminRequest.List();
-        try {
-            CollectionAdminResponse response = req.process(getSolrClient());
 
-            List<String> existingCollections = (List<String>) response.getResponse().get("collections");
-            if (existingCollections == null) {
-                existingCollections = new ArrayList<>();
+        Collection<String> existingCollections = getCollectionList();
+        for (String collection : SolrDefaultCollectionRegistry.registryIndexNames()) {
+            if (!existingCollections.contains(collection)) {
+                createCollection(collection, tempSolrConf);
             }
-
-            Path tempSolrConf = createTempSolrConfigurationDir();
-
-            for (String collection : SolrDefaultCollectionRegistry.registryIndexNames()) {
-                if (!existingCollections.contains(collection)) {
-                    createCollection(collection, tempSolrConf);
-                }
-            }
-
-            SolrRowsCollectionRegistry.registerExisting(existingCollections);
-
-        } catch (SolrServerException | IOException e) {
-            LOGGER.error("Solr bootstrap failed", e);
         }
+
+        SolrRowsCollectionRegistry.registerExisting(existingCollections);
+
     }
 
     protected abstract T configureSolrClient();
@@ -100,6 +90,8 @@ public abstract class SolrClientFactory<T extends SolrClient> {
     protected abstract void waitForSolrToInitialize();
 
     protected abstract boolean createCollection(String collection, Path config);
+
+    protected abstract Collection<String> getCollectionList();
 
     public boolean createCollection(String collection) {
         try {
@@ -110,5 +102,4 @@ public abstract class SolrClientFactory<T extends SolrClient> {
         }
     }
 
-    
 }

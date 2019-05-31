@@ -46,7 +46,7 @@ public final class SolrRowsCollectionRegistry {
     }
   }
 
-  public static void registerExisting(List<String> existingCollections) {
+  public static void registerExisting(Collection<String> existingCollections) {
     existingCollections.stream().filter(c -> c.startsWith(SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX)).forEach(index -> {
       String databaseUUID = index.substring(SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX.length());
       if (StringUtils.isNotBlank(databaseUUID)) {

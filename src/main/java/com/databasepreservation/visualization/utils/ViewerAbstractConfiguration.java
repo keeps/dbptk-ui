@@ -28,6 +28,7 @@ public abstract class ViewerAbstractConfiguration {
 
   public abstract Path getLobPath();
 
+
   /*
    * Base property retrieval methods
    * ____________________________________________________________________________________________________________________

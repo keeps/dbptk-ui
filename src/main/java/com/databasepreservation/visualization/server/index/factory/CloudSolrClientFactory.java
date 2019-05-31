@@ -2,6 +2,7 @@ package com.databasepreservation.visualization.server.index.factory;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -37,7 +38,7 @@ public class CloudSolrClientFactory extends SolrClientFactory<CloudSolrClient> {
     }
 
     protected CloudSolrClient configureSolrClient() {
-        String solrCloudZooKeeperUrls = ViewerFactory.getViewerConfiguration()
+        String solrCloudZooKeeperUrls = ViewerConfiguration.getInstance()
                 .getViewerConfigurationAsString("localhost:9983", ViewerConfiguration.PROPERTY_SOLR_ZOOKEEPER_HOSTS);
 
         LOGGER.info("Instantiating SOLR Cloud at {}", solrCloudZooKeeperUrls);
@@ -68,7 +69,7 @@ public class CloudSolrClientFactory extends SolrClientFactory<CloudSolrClient> {
     }
 
     protected void waitForSolrToInitialize() {
-        ViewerConfiguration configuration = ViewerFactory.getViewerConfiguration();
+        ViewerConfiguration configuration = ViewerConfiguration.getInstance();
         int retries = configuration.getViewerConfigurationAsInt(100,
                 ViewerConfiguration.PROPERTY_SOLR_HEALTHCHECK_RETRIES);
         long timeout = configuration.getViewerConfigurationAsInt(10000,
@@ -190,6 +191,24 @@ public class CloudSolrClientFactory extends SolrClientFactory<CloudSolrClient> {
             ret = false;
         }
         return ret;
+    }
+
+    @Override
+    protected Collection<String> getCollectionList() {
+        Collection<String> ret = new ArrayList<>();
+        CollectionAdminRequest.List req = new CollectionAdminRequest.List();
+        try {
+            CollectionAdminResponse response = req.process(getSolrClient());
+
+            ret = (List<String>) response.getResponse().get("collections");
+            if (ret == null) {
+                ret = new ArrayList<>();
+            }
+        } catch (SolrServerException | IOException e) {
+            LOGGER.error("Could not retrieve list of collections", e);
+        }
+        return ret;
+
     }
 
 }

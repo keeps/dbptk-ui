@@ -91,6 +91,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   private static Path configPath;
   private static Path exampleConfigPath;
   private static Path reportsPath;
+  private static Path indexPath;
 
   // Configuration related objects
   private static CompositeConfiguration viewerConfiguration = null;
@@ -148,7 +149,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
    */
   private static ViewerConfiguration instance = null;
 
-  public static ViewerConfiguration getInstance() {
+  public synchronized static ViewerConfiguration getInstance() {
     if (instance == null) {
       instance = new ViewerConfiguration();
     }
@@ -170,6 +171,11 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   @Override
   public Path getLobPath() {
     return lobsPath;
+  }
+
+  
+  public Path getIndexPath() {
+    return indexPath;
   }
 
   /*
@@ -253,6 +259,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     lobsPath = viewerHomePath.resolve(ViewerConstants.VIEWER_LOBS_FOLDER);
     logPath = viewerHomePath.resolve(ViewerConstants.VIEWER_LOG_FOLDER);
     reportsPath = viewerHomePath.resolve(ViewerConstants.VIEWER_REPORTS_FOLDER);
+    indexPath = viewerHomePath.resolve(ViewerConstants.VIEWER_INDEX_FOLDER);
 
     configureLogback();
 

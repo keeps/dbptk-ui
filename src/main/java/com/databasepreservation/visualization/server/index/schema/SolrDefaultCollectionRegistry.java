@@ -14,6 +14,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.databasepreservation.visualization.exceptions.ViewerException;
+import com.databasepreservation.visualization.server.index.schema.collections.DatabasesCollection;
+import com.databasepreservation.visualization.server.index.schema.collections.SavedSearchesCollection;
+import com.databasepreservation.visualization.shared.ViewerStructure.IsIndexed;
+
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
@@ -21,11 +26,8 @@ import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.NotSupportedException;
 import org.roda.core.data.exceptions.RequestNotValidException;
-
-import com.databasepreservation.visualization.exceptions.ViewerException;
-import com.databasepreservation.visualization.shared.ViewerStructure.IsIndexed;
-import com.databasepreservation.visualization.server.index.schema.collections.DatabasesCollection;
-import com.databasepreservation.visualization.server.index.schema.collections.SavedSearchesCollection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class SolrDefaultCollectionRegistry {
 
@@ -34,10 +36,15 @@ public final class SolrDefaultCollectionRegistry {
   }
 
   private static final Map<Class<? extends IsIndexed>, SolrCollection<? extends IsIndexed>> REGISTRY = new HashMap<>();
+  private static final Logger LOGGER = LoggerFactory.getLogger(SolrDefaultCollectionRegistry.class);
 
   static {
+    LOGGER.debug("Registering default collections...");
+
     register(new DatabasesCollection());
     register(new SavedSearchesCollection());
+    
+    LOGGER.debug("Default collections done");
   }
 
   public static <T extends IsIndexed> void register(SolrCollection<T> collection) {
