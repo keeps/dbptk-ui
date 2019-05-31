@@ -48,14 +48,21 @@ public class DBVTK {
 
       @Override
       public void onApplicationEvent(ServletWebServerInitializedEvent event) {
-        int port = event.getWebServer().getPort();
 
-        Path portFile = Paths.get(System.getProperty("server.port.file", ".port"));
-        try {
-          Files.write(portFile, Integer.toString(port).getBytes());
-          System.out.println("Written port "+port+" to file "+portFile);
-        } catch (IOException e) {
-          e.printStackTrace();
+        if (System.getProperty("server.port", "").equals("0")) {
+          // Using a Random Unassigned HTTP Port
+          int port = event.getWebServer().getPort();
+
+          String portFilePath = System.getProperty("server.port.file", "");
+          if (!portFilePath.isEmpty()) {
+            Path portFile = Paths.get(portFilePath);
+            try {
+              Files.write(portFile, Integer.toString(port).getBytes());
+              System.out.println("Written port " + port + " to file " + portFile);
+            } catch (IOException e) {
+              e.printStackTrace();
+            }
+          }
         }
       }
     };

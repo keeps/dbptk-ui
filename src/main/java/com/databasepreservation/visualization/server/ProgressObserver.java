@@ -5,14 +5,14 @@ import com.databasepreservation.model.data.Row;
 import com.databasepreservation.model.structure.DatabaseStructure;
 import com.databasepreservation.model.structure.SchemaStructure;
 import com.databasepreservation.model.structure.TableStructure;
-import com.databasepreservation.visualization.server.index.SolrManager;
+import com.databasepreservation.visualization.server.index.DatabaseRowsSolrManager;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class ProgressObserver implements ModuleObserver {
   private final String databaseUUID;
-  private final SolrManager solrManager;
+  private final DatabaseRowsSolrManager solrManager;
 
   public ProgressObserver(String databaseUUID) {
     this.databaseUUID = databaseUUID;

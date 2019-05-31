@@ -24,7 +24,7 @@ import com.databasepreservation.visualization.exceptions.ViewerException;
 import com.databasepreservation.visualization.server.SIARDController;
 import com.databasepreservation.visualization.server.ViewerConfiguration;
 import com.databasepreservation.visualization.server.ViewerFactory;
-import com.databasepreservation.visualization.server.index.SolrManager;
+import com.databasepreservation.visualization.server.index.DatabaseRowsSolrManager;
 import com.databasepreservation.visualization.shared.ViewerConstants;
 import com.databasepreservation.visualization.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.visualization.utils.UserUtility;
@@ -70,7 +70,7 @@ public class ManageResource {
     // check for authorization, to protect against unauthorized access attempts
     UserUtility.Authorization.checkDatabaseManagementPermission(request);
 
-    SolrManager solrManager = ViewerFactory.getSolrManager();
+    DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
 
     ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
     if (database != null) {

@@ -19,15 +19,15 @@ let serverProcess = null;
 
 
 
-killTree = function() {
-    console.log('Kill server process '+ serverProcess.pid);
+killTree = function () {
+    console.log('Kill server process ' + serverProcess.pid);
     require('tree-kill')(serverProcess.pid, "SIGTERM", function (err) {
         console.log('Server process killed');
     });
 }
 
 var otherInstanceOpen = !app.requestSingleInstanceLock();
-app.on('second-instance',function (event, commandLine, workingDirectory) {
+app.on('second-instance', function (event, commandLine, workingDirectory) {
     if (mainWindow) {
         if (mainWindow.isMinimized()) mainWindow.restore();
         mainWindow.show();
@@ -97,7 +97,7 @@ app.on('ready', async function () {
         , height: animationHeight
     });
     console.log(app.getAppPath());
-    loading.loadURL("file://"+app.getAppPath() + '/loading.html');
+    loading.loadURL("file://" + app.getAppPath() + '/loading.html');
     loading.show();
     loading.webContents.once('dom-ready', () => {
         console.log("Loading...")
@@ -117,12 +117,13 @@ app.on('ready', async function () {
     const { spawn } = require('child_process');
 
     var serverPortFile = app.getAppPath() + '/server.port'
-    console.log("Port file="+serverPortFile);
-    fs.unlink(serverPortFile, (err) => {});
+    console.log("Port file=" + serverPortFile);
+    fs.unlink(serverPortFile, (err) => { });
 
-    var javaVMParameters =  ["-Dserver.port.file="+serverPortFile]; 
+    // Ask for a random unassigned port and to write it down in serverPortFile
+    var javaVMParameters = ["-Dserver.port=0", "-Dserver.port.file=" + serverPortFile];
 
-    serverProcess = spawn(javaPath, ['-jar'].concat(javaVMParameters).concat("war/"+filename), {
+    serverProcess = spawn(javaPath, ['-jar'].concat(javaVMParameters).concat("war/" + filename), {
         cwd: app.getAppPath() + '/'
     });
     serverProcess.stdout.pipe(fs.createWriteStream(app.getAppPath() + '/jvm.log', {
@@ -137,15 +138,15 @@ app.on('ready', async function () {
     console.log('Server PID: ' + serverProcess.pid);
 
     // Waiting for app to start
-    console.log('Wait until '+serverPortFile+' exists...');
-    await waitOn({resources: [serverPortFile]});
-    
+    console.log('Wait until ' + serverPortFile + ' exists...');
+    await waitOn({ resources: [serverPortFile] });
+
     port = parseInt(fs.readFileSync(serverPortFile));
-    fs.unlink(serverPortFile, (err) => {});
+    fs.unlink(serverPortFile, (err) => { });
     let appUrl = 'http://localhost:' + port;
-    
-    console.log("Server at "+appUrl);
-    await waitOn({resources: [appUrl]});
+
+    console.log("Server at " + appUrl);
+    await waitOn({ resources: [appUrl] });
     console.log('Server started!');
 
     // Open window with app
@@ -189,17 +190,17 @@ app.on('ready', async function () {
     })
 });
 app.on('will-quit', (event) => {
-    if(serverProcess != null) {
+    if (serverProcess != null) {
         event.preventDefault();
 
         // Unregister all shortcuts.
         globalShortcut.unregisterAll();
-        
-        console.log('Kill server process '+ serverProcess.pid);
-        
+
+        console.log('Kill server process ' + serverProcess.pid);
+
         require('tree-kill')(serverProcess.pid, "SIGTERM", function (err) {
             console.log('Server process killed');
-            serverProcess=null;
+            serverProcess = null;
             app.quit();
         });
     }

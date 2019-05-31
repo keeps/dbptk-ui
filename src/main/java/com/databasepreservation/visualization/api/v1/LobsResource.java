@@ -21,7 +21,7 @@ import com.databasepreservation.visualization.api.utils.ApiUtils;
 import com.databasepreservation.visualization.api.utils.DownloadUtils;
 import com.databasepreservation.visualization.api.utils.StreamResponse;
 import com.databasepreservation.visualization.server.ViewerFactory;
-import com.databasepreservation.visualization.server.index.SolrManager;
+import com.databasepreservation.visualization.server.index.DatabaseRowsSolrManager;
 import com.databasepreservation.visualization.shared.ViewerConstants;
 import com.databasepreservation.visualization.shared.ViewerStructure.ViewerRow;
 import com.databasepreservation.visualization.utils.LobPathManager;
@@ -58,7 +58,7 @@ public class LobsResource {
     @PathParam(ViewerConstants.API_PATH_PARAM_TABLE_UUID) String tableUUID,
     @PathParam(ViewerConstants.API_PATH_PARAM_ROW_UUID) String rowUUID,
     @PathParam(ViewerConstants.API_PATH_PARAM_COLUMN_ID) Integer columnID) throws RODAException {
-    SolrManager solrManager = ViewerFactory.getSolrManager();
+    DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
 
     UserUtility.Authorization.checkDatabaseAccessPermission(this.request, databaseUUID);
 

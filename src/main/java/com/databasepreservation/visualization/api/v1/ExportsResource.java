@@ -13,8 +13,14 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.databasepreservation.visualization.api.utils.ApiUtils;
+import com.databasepreservation.visualization.api.utils.DownloadUtils;
+import com.databasepreservation.visualization.api.utils.StreamResponse;
+import com.databasepreservation.visualization.server.ViewerFactory;
+import com.databasepreservation.visualization.server.index.DatabaseRowsSolrManager;
 import com.databasepreservation.visualization.shared.ViewerConstants;
-import com.databasepreservation.visualization.shared.ViewerStructure.ViewerDatabase;
+import com.databasepreservation.visualization.utils.UserUtility;
+
 import org.apache.commons.lang3.StringUtils;
 import org.roda.core.data.exceptions.RODAException;
 import org.roda.core.data.utils.JsonUtils;
@@ -23,18 +29,10 @@ import org.roda.core.data.v2.index.sort.Sorter;
 import org.roda.core.data.v2.index.sublist.Sublist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.databasepreservation.visualization.api.utils.ApiUtils;
-import com.databasepreservation.visualization.api.utils.DownloadUtils;
-import com.databasepreservation.visualization.api.utils.StreamResponse;
-import com.databasepreservation.visualization.server.ViewerFactory;
-import com.databasepreservation.visualization.server.index.SolrManager;
-import com.databasepreservation.visualization.utils.UserUtility;
+import org.springframework.stereotype.Service;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 /**
  * Resource used to export search results
@@ -62,7 +60,7 @@ public class ExportsResource {
     @QueryParam(ViewerConstants.API_QUERY_PARAM_FIELDS) String fieldsListParam,
     @QueryParam(ViewerConstants.API_QUERY_PARAM_SORTER) String sorterParam,
     @QueryParam(ViewerConstants.API_QUERY_PARAM_SUBLIST) String subListParam) throws RODAException {
-    SolrManager solrManager = ViewerFactory.getSolrManager();
+    DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
 
     Filter filter = JsonUtils.getObjectFromJson(filterParam, Filter.class);
     List<String> fields = JsonUtils.getListFromJson(fieldsListParam, String.class);

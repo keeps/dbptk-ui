@@ -7,9 +7,25 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 
+import com.databasepreservation.utils.FileUtils;
+import com.databasepreservation.visualization.exceptions.ViewerException;
+import com.databasepreservation.visualization.server.index.schema.SolrCollection;
+import com.databasepreservation.visualization.server.index.schema.SolrDefaultCollectionRegistry;
+import com.databasepreservation.visualization.server.index.schema.SolrRowsCollectionRegistry;
+import com.databasepreservation.visualization.server.index.schema.collections.RowsCollection;
+import com.databasepreservation.visualization.server.index.utils.Pair;
+import com.databasepreservation.visualization.server.index.utils.SolrUtils;
+import com.databasepreservation.visualization.shared.SavedSearch;
+import com.databasepreservation.visualization.shared.ViewerConstants;
+import com.databasepreservation.visualization.shared.ViewerStructure.IsIndexed;
+import com.databasepreservation.visualization.shared.ViewerStructure.ViewerDatabase;
+import com.databasepreservation.visualization.shared.ViewerStructure.ViewerDatabaseFromToolkit;
+import com.databasepreservation.visualization.shared.ViewerStructure.ViewerRow;
+import com.databasepreservation.visualization.shared.ViewerStructure.ViewerTable;
+
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.impl.CloudSolrClient;
 import org.apache.solr.client.solrj.request.CollectionAdminRequest;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrException;
@@ -27,34 +43,18 @@ import org.roda.core.data.v2.index.sublist.Sublist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.databasepreservation.utils.FileUtils;
-import com.databasepreservation.visualization.exceptions.ViewerException;
-import com.databasepreservation.visualization.server.index.schema.SolrCollection;
-import com.databasepreservation.visualization.server.index.schema.SolrDefaultCollectionRegistry;
-import com.databasepreservation.visualization.server.index.schema.SolrRowsCollectionRegistry;
-import com.databasepreservation.visualization.server.index.schema.collections.RowsCollection;
-import com.databasepreservation.visualization.server.index.utils.Pair;
-import com.databasepreservation.visualization.server.index.utils.SolrUtils;
-import com.databasepreservation.visualization.shared.SavedSearch;
-import com.databasepreservation.visualization.shared.ViewerConstants;
-import com.databasepreservation.visualization.shared.ViewerStructure.IsIndexed;
-import com.databasepreservation.visualization.shared.ViewerStructure.ViewerDatabase;
-import com.databasepreservation.visualization.shared.ViewerStructure.ViewerDatabaseFromToolkit;
-import com.databasepreservation.visualization.shared.ViewerStructure.ViewerRow;
-import com.databasepreservation.visualization.shared.ViewerStructure.ViewerTable;
-
 /**
  * Exposes some methods to interact with a Solr Server
  * 
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class SolrManager {
-  private static final Logger LOGGER = LoggerFactory.getLogger(SolrManager.class);
+public class DatabaseRowsSolrManager {
+  private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseRowsSolrManager.class);
   private static final long INSERT_DOCUMENT_TIMEOUT = 60000; // 60 seconds
 
-  private final CloudSolrClient client;
+  private final SolrClient client;
 
-  public SolrManager(CloudSolrClient client) {
+  public DatabaseRowsSolrManager(SolrClient client) {
     this.client = client;
   }
 

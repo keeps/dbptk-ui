@@ -12,7 +12,7 @@ import com.databasepreservation.model.modules.ModuleSettings;
 import com.databasepreservation.model.structure.DatabaseStructure;
 import com.databasepreservation.modules.DefaultExceptionNormalizer;
 import com.databasepreservation.visualization.server.ViewerFactory;
-import com.databasepreservation.visualization.server.index.SolrManager;
+import com.databasepreservation.visualization.server.index.DatabaseRowsSolrManager;
 import com.databasepreservation.visualization.shared.ViewerStructure.ViewerDatabaseFromToolkit;
 import com.databasepreservation.visualization.shared.ViewerStructure.ViewerTable;
 import com.databasepreservation.visualization.transformers.ToolkitStructure2ViewerStructure;
@@ -23,7 +23,7 @@ import com.databasepreservation.visualization.transformers.ToolkitStructure2View
 public class DbvtkExportModule implements DatabaseExportModule {
   private final DbvtkModuleConfiguration configuration;
 
-  private final SolrManager solrManager;
+  private final DatabaseRowsSolrManager solrManager;
 
   private DatabaseStructure structure;
 

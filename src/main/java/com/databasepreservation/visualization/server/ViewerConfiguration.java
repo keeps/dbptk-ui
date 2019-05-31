@@ -409,7 +409,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     return ret;
   }
 
-  protected static void copyFilesFromClasspath(String classpathPrefix, Path destinationDirectory,
+  public static void copyFilesFromClasspath(String classpathPrefix, Path destinationDirectory,
     boolean removeClasspathPrefixFromFinalPath) {
     copyFilesFromClasspath(classpathPrefix, destinationDirectory, removeClasspathPrefixFromFinalPath,
       Collections.emptyList());

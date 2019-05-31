@@ -10,8 +10,6 @@ package com.databasepreservation.visualization.server.index.schema.collections;
 import static com.databasepreservation.visualization.shared.ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX;
 import static com.databasepreservation.visualization.shared.ViewerConstants.SOLR_ROWS_TABLE_ID;
 
-import java.io.IOException;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -22,7 +20,7 @@ import java.util.Optional;
 
 import com.databasepreservation.utils.JodaUtils;
 import com.databasepreservation.visualization.exceptions.ViewerException;
-import com.databasepreservation.visualization.server.ViewerFactory;
+import com.databasepreservation.visualization.server.index.factory.SolrClientFactory;
 import com.databasepreservation.visualization.server.index.schema.AbstractSolrCollection;
 import com.databasepreservation.visualization.server.index.schema.CopyField;
 import com.databasepreservation.visualization.server.index.schema.Field;
@@ -34,9 +32,7 @@ import com.databasepreservation.visualization.shared.ViewerConstants;
 import com.databasepreservation.visualization.shared.ViewerStructure.ViewerCell;
 import com.databasepreservation.visualization.shared.ViewerStructure.ViewerRow;
 
-import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.common.SolrDocument;
-import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.joda.time.DateTime;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
@@ -89,7 +85,7 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
 
   @Override
   public SolrInputDocument toSolrDocument(ViewerRow row) throws ViewerException, RequestNotValidException,
-    GenericException, NotFoundException, AuthorizationDeniedException {
+      GenericException, NotFoundException, AuthorizationDeniedException {
 
     SolrInputDocument doc = super.toSolrDocument(row);
 
@@ -147,16 +143,17 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
   }
 
   public void createRowsCollection() {
-    SolrClient solrClient = ViewerFactory.getSolrClient();
-
-    try {
-      Path configPath = ViewerFactory.createTempSolrConfigurationDir();
-      if(ViewerFactory.createCollection(getIndexName(), configPath)) {
-        SolrBootstrapUtils.bootstrapRowsCollection(solrClient, this);
-        SolrRowsCollectionRegistry.register(this);
+    LOGGER.info("Creating SOLR collection {}", getIndexName());
+    if (SolrClientFactory.get().createCollection(getIndexName())) {
+      try {
+        SolrBootstrapUtils.bootstrapRowsCollection(SolrClientFactory.get().getSolrClient(), this);
+      } catch (ViewerException e) {
+        LOGGER.error("Could not create collection " + getIndexName(), e);
       }
-    } catch (SolrException | IOException | ViewerException e) {
-      LOGGER.error("Error creating collection {}", getIndexName(), e);
+      SolrRowsCollectionRegistry.register(this);
+    } else {
+      LOGGER.error("Could not create collection {}", getIndexName());
     }
+
   }
 }
