@@ -43,7 +43,7 @@ import io.swagger.annotations.ApiOperation;
 @Path(ExportsResource.ENDPOINT)
 @Api(value = ExportsResource.SWAGGER_ENDPOINT)
 public class ExportsResource {
-  public static final String ENDPOINT = ViewerConstants.API_V1_EXPORT_RESOURCE;
+  public static final String ENDPOINT = "/" + ViewerConstants.API_SERVLET + ViewerConstants.API_V1_EXPORT_RESOURCE;
   public static final String SWAGGER_ENDPOINT = "v1 exports";
 
   private static Logger LOGGER = LoggerFactory.getLogger(ExportsResource.class);

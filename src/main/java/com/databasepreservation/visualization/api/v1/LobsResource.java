@@ -41,7 +41,7 @@ import org.springframework.stereotype.Service;
 @Path(LobsResource.ENDPOINT)
 @Api(value = LobsResource.SWAGGER_ENDPOINT)
 public class LobsResource {
-  public static final String ENDPOINT = ViewerConstants.API_V1_LOBS_RESOURCE;
+  public static final String ENDPOINT = "/" + ViewerConstants.API_SERVLET + ViewerConstants.API_V1_LOBS_RESOURCE;
   public static final String SWAGGER_ENDPOINT = "v1 lobs";
 
   private static Logger LOGGER = LoggerFactory.getLogger(LobsResource.class);

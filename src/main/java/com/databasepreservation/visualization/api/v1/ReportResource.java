@@ -29,7 +29,7 @@ import org.springframework.stereotype.Service;
 @Path(ReportResource.ENDPOINT)
 @Api(value = ReportResource.SWAGGER_ENDPOINT)
 public class ReportResource {
-  public static final String ENDPOINT = ViewerConstants.API_V1_REPORT_RESOURCE;
+  public static final String ENDPOINT = "/" + ViewerConstants.API_SERVLET + ViewerConstants.API_V1_REPORT_RESOURCE;
   public static final String SWAGGER_ENDPOINT = "v1 report";
 
   @GET

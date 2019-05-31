@@ -38,7 +38,7 @@ import org.springframework.stereotype.Service;
 @Path(ThemeResource.ENDPOINT)
 @Api(value = ThemeResource.SWAGGER_ENDPOINT)
 public class ThemeResource {
-  public static final String ENDPOINT = ViewerConstants.API_V1_THEME_RESOURCE;
+  public static final String ENDPOINT = "/" + ViewerConstants.API_SERVLET + ViewerConstants.API_V1_THEME_RESOURCE;
   public static final String SWAGGER_ENDPOINT = "v1 theme";
   public static final int CACHE_CONTROL_MAX_AGE = 60;
 

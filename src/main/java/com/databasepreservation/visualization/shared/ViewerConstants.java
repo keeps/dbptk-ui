@@ -182,7 +182,7 @@ public class ViewerConstants {
    * API related (for DBVTK)
    */
   public static final String API_SERVLET = "api";
-  public static final String API_V1_EXPORT_RESOURCE = "/api/v1/exports";
+  public static final String API_V1_EXPORT_RESOURCE = "/v1/exports";
   public static final String API_PATH_PARAM_DATABASE_UUID = "databaseUUID";
   public static final String API_PATH_PARAM_TABLE_UUID = "tableUUID";
   public static final String API_QUERY_PARAM_FIELDS = "fl";
@@ -190,18 +190,18 @@ public class ViewerConstants {
   public static final String API_QUERY_PARAM_SORTER = "s";
   public static final String API_QUERY_PARAM_SUBLIST = "sl";
 
-  public static final String API_V1_LOBS_RESOURCE = "/api/v1/lobs";
+  public static final String API_V1_LOBS_RESOURCE = "/v1/lobs";
   public static final String API_PATH_PARAM_ROW_UUID = "rowUUID";
   public static final String API_PATH_PARAM_COLUMN_ID = "columnUUID";
 
   public static final String API_PATH_PARAM_SOLR_COLLECTION = "collection";
   public static final String API_PATH_PARAM_SOLR_QUERY = "query";
 
-  public static final String API_V1_MANAGE_RESOURCE = "/api/v1/manage";
+  public static final String API_V1_MANAGE_RESOURCE = "/v1/manage";
 
-  public static final String API_V1_THEME_RESOURCE = "/api/v1/theme";
+  public static final String API_V1_THEME_RESOURCE = "/v1/theme";
 
-  public static final String API_V1_REPORT_RESOURCE = "/api/v1/report";
+  public static final String API_V1_REPORT_RESOURCE = "/v1/report";
 
   /*
    * Search field types from RODA, plus a few new ones

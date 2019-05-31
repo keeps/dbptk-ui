@@ -47,7 +47,7 @@ import org.springframework.stereotype.Service;
 @Path(ManageResource.ENDPOINT)
 @Api(value = ManageResource.SWAGGER_ENDPOINT)
 public class ManageResource {
-  public static final String ENDPOINT = ViewerConstants.API_V1_MANAGE_RESOURCE;
+  public static final String ENDPOINT = "/" + ViewerConstants.API_SERVLET + ViewerConstants.API_V1_MANAGE_RESOURCE;
   public static final String SWAGGER_ENDPOINT = "v1 manage";
 
   private static Logger LOGGER = LoggerFactory.getLogger(ManageResource.class);
