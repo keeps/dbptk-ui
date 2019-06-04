@@ -14,7 +14,8 @@
   "scripts": {
     "start": "mkdir -p war && ln -sf ../../target/dbvtk-2.0.0.war war/dbvtk.war && ./node_modules/.bin/electron .",
     "pack": "electron-builder --dir",
-    "dist": "electron-builder"
+    "dist": "electron-builder",
+    "dist-lw": "electron-builder -wl"
   },
   "license": "LGPL-3.0-or-later",
   "devDependencies": {
