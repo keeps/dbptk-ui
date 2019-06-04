@@ -13,6 +13,7 @@ const {
 } = require('electron');
 const path = require('path');
 var waitOn = require('wait-on');
+var tmp = require('tmp');
 
 let mainWindow = null;
 let serverProcess = null;
@@ -116,17 +117,19 @@ app.on('ready', async function () {
     }
     const { spawn } = require('child_process');
 
-    var serverPortFile = app.getAppPath() + '/server.port'
-    console.log("Port file=" + serverPortFile);
-    fs.unlink(serverPortFile, (err) => { });
+    var serverPortFile = tmp.tmpNameSync();
+    console.log("Port file at " + serverPortFile);
+
+    var jvmLog = tmp.tmpNameSync();
+    console.log("JVM log at " + jvmLog);
 
     // Ask for a random unassigned port and to write it down in serverPortFile
     var javaVMParameters = ["-Dserver.port=0", "-Dserver.port.file=" + serverPortFile];
 
     serverProcess = spawn(javaPath, ['-jar'].concat(javaVMParameters).concat("war/" + filename), {
-        cwd: app.getAppPath() + '/'
+        cwd: app.getAppPath().replace('app.asar', 'app.asar.unpacked') + '/'
     });
-    serverProcess.stdout.pipe(fs.createWriteStream(app.getAppPath() + '/jvm.log', {
+    serverProcess.stdout.pipe(fs.createWriteStream(jvmLog, {
         flags: 'a'
     })); // logging
     serverProcess.on('error', (code, signal) => {
@@ -143,6 +146,7 @@ app.on('ready', async function () {
 
     port = parseInt(fs.readFileSync(serverPortFile));
     fs.unlink(serverPortFile, (err) => { });
+
     let appUrl = 'http://localhost:' + port;
 
     console.log("Server at " + appUrl);
