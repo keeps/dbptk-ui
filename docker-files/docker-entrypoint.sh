@@ -1,16 +1,16 @@
-#!/bin/bash
+#!/bin/sh
 
 # run extension scripts
 DIR=/docker-entrypoint.d
 
-if [[ -d "$DIR" ]]
+if [ -d "$DIR" ]
 then
-  /bin/run-parts --regex '^.*$' --verbose "$DIR"
+  /bin/run-parts "$DIR"
 fi
 
-if [[ $# -eq 0 ]] ; then
-    echo 'Starting Apache Tomcat'
-    exec catalina.sh run
+if [ $# -eq 0 ] ; then
+    echo 'Starting'
+    exec java -Djava.security.egd=file:/dev/./urandom -jar /app.war
 fi
 
 exec $@

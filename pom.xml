@@ -245,9 +245,9 @@
                             <dockerDirectory>${project.basedir}/docker-files</dockerDirectory>
                             <resources>
                                 <resource>
-                                    <targetPath>/ROOT</targetPath>
-                                    <directory>${project.build.directory}/${project.build.finalName}</directory>
-                                    <filtering>false</filtering>
+                                    <targetPath>/</targetPath>
+                                    <directory>${project.build.directory}</directory>
+                                    <include>${project.build.finalName}.war</include>
                                 </resource>
                             </resources>
                         </configuration>

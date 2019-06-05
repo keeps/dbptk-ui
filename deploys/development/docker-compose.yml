@@ -4,11 +4,7 @@ services:
     image: keeps/dbvtk:latest
     ports:
       - 8080:8080
-      - 5005:5005
     environment:
-      # development option
-      - JPDA_ADDRESS=5005
-      - JPDA_TRANSPORT=dt_socket
       - SOLR_ZOOKEEPER_HOSTS=solr:9983
     volumes:
       # folder in which *.siard files should be dropped so they can be accessed from inside the server
@@ -19,11 +15,10 @@ services:
       # configuration overrides
       # - ./config/logback.xml:/dbvtk/config/logback.xml:ro
       # - ./config/dbvtk-viewer.properties:/dbvtk/config/dbvtk-viewer.properties:ro
-    command: catalina.sh jpda run
     depends_on:
       - solr
   solr:
-    image: solr:7.5
+    image: solr:7.7
     ports:
       - 8983:8983
     command: -c # Use cloud mode
