@@ -7,7 +7,6 @@ import java.util.Collection;
 
 import com.databasepreservation.visualization.exceptions.ViewerException;
 import com.databasepreservation.visualization.server.ViewerConfiguration;
-import com.databasepreservation.visualization.server.ViewerFactory;
 import com.databasepreservation.visualization.server.index.schema.Field;
 import com.databasepreservation.visualization.server.index.schema.SolrBootstrapUtils;
 import com.databasepreservation.visualization.server.index.schema.SolrDefaultCollectionRegistry;
@@ -41,7 +40,7 @@ public abstract class SolrClientFactory<T extends SolrClient> {
     private T solrClient;
 
     private void init() {
-        ViewerConfiguration configuration = ViewerFactory.getViewerConfiguration();
+        ViewerConfiguration configuration = ViewerConfiguration.getInstance();
         Field.initialize(configuration);
 
         this.solrClient = configureSolrClient();
