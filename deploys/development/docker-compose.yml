@@ -4,6 +4,7 @@ services:
     image: keeps/dbvtk:latest
     ports:
       - 8080:8080
+      - 5005:5005
     environment:
       - SOLR_ZOOKEEPER_HOSTS=solr:9983
     volumes:

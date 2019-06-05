@@ -47,11 +47,11 @@ public abstract class SolrClientFactory<T extends SolrClient> {
 
         waitForSolrToInitialize();
 
-        bootstrapDefaultCollections();
 
         try {
+            bootstrapDefaultCollections();
             SolrBootstrapUtils.bootstrapSchemas(getSolrClient());
-        } catch (ViewerException e) {
+        } catch (ViewerException | IOException e) {
             LOGGER.error("Solr bootstrap failed", e);
         }
     }
@@ -63,20 +63,20 @@ public abstract class SolrClientFactory<T extends SolrClient> {
     private Path tempSolrConf = null;
 
     protected synchronized Path createTempSolrConfigurationDir() throws IOException {
-        if (tempSolrConf == null) {
-            Path tempSolrConf = Files.createTempDirectory("solr-config-");
+        if (this.tempSolrConf == null) {
+            this.tempSolrConf = Files.createTempDirectory("solr-config-");
             ViewerConfiguration.copyFilesFromClasspath(ViewerConfiguration.RESOURCES_SOLR_CONFIG_PATH + "/",
-                    tempSolrConf, true);
+                    this.tempSolrConf, true);
         }
-        return tempSolrConf;
+        return this.tempSolrConf;
     }
 
-    protected void bootstrapDefaultCollections() {
+    protected void bootstrapDefaultCollections() throws IOException {
 
         Collection<String> existingCollections = getCollectionList();
         for (String collection : SolrDefaultCollectionRegistry.registryIndexNames()) {
             if (!existingCollections.contains(collection)) {
-                createCollection(collection, tempSolrConf);
+                createCollection(collection, createTempSolrConfigurationDir());
             }
         }
 
