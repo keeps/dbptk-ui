@@ -1,40 +1,40 @@
 <?xml version="1.0" ?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    
+
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.databasepreservation.visualization</groupId>
     <artifactId>dbvtk</artifactId>
     <packaging>war</packaging>
     <version>2.0.0</version>
     <name>Database Visualization Toolkit</name>
-    
+
     <description>A viewer and explorer for preserved databases</description>
     <organization>
         <name>KEEP SOLUTIONS</name>
         <url>http://www.keep.pt</url>
     </organization>
-    
+
     <properties>
         <version.java>1.8</version.java>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <projectLocalRepository>${project.basedir}/vendor-libs/repository</projectLocalRepository>
-        
+
         <!-- GWT needs at least java 1.6 -->
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        
+
         <!-- Convenience properties to set versions -->
         <version.gwt>2.8.2</version.gwt>
         <version.dbptk>2.3.0</version.dbptk>
         <version.roda>3.0.2</version.roda>
-        
+
         <version.jersey>2.27</version.jersey>
         <version.swagger>1.5.19</version.swagger>
         <version.jackson>2.9.9</version.jackson>
         <cas.client.version>3.5.0</cas.client.version>
         <solr.version>7.7.1</solr.version>
     </properties>
-    
+
     <repositories>
         <repository>
             <id>KEEPS-Artifacts</id>
@@ -42,7 +42,7 @@
             <url>http://artifactory.keep.pt/keep</url>
         </repository>
     </repositories>
-    
+
     <distributionManagement>
         <repository>
             <id>KEEPS-Artifacts-Deploy</id>
@@ -50,17 +50,17 @@
             <url>http://artifactory.keep.pt/keep</url>
         </repository>
     </distributionManagement>
-    
+
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>2.1.5.RELEASE</version>
     </parent>
-    
+
     <build>
         <!-- Output classes directly into the webapp, so that IDEs and "mvn process-classes" update them in DevMode -->
         <outputDirectory>${project.build.directory}/${project.build.finalName}/WEB-INF/classes</outputDirectory>
-        
+
         <plugins>
             <!--<plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -85,7 +85,7 @@
                 <version>2.1.5.RELEASE</version>
             </plugin>
         </plugins>
-        
+
         <pluginManagement>
             <plugins>
                 <plugin>
@@ -111,18 +111,13 @@
                     <configuration>
                         <!-- this is false by default, forces the plugin to generate the file -->
                         <generateGitPropertiesFile>true</generateGitPropertiesFile>
-                        
+
                         <!-- The path for the properties file to be generated. See Super Pom for default variable reference https://maven.apache.org/guides/introduction/introduction-to-the-pom.html -->
                         <generateGitPropertiesFilename>
                             ${project.build.directory}/${project.build.finalName}/version.json
                         </generateGitPropertiesFilename>
                         <format>json</format>
                     </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>gwt-maven-plugin</artifactId>
-                    <version>${version.gwt}</version>
                 </plugin>
                 <plugin>
                     <groupId>com.spotify</groupId>
@@ -137,7 +132,7 @@
             </plugins>
         </pluginManagement>
     </build>
-    
+
     <profiles>
         <profile>
             <id>default</id>
@@ -148,9 +143,14 @@
                 <plugins>
                     <!-- GWT Maven Plugin -->
                     <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>gwt-maven-plugin</artifactId>
-                        <executions>
+                      <groupId>net.ltgt.gwt.maven</groupId>
+                      <artifactId>gwt-maven-plugin</artifactId>
+                      <version>1.0-rc-10</version>
+                      <extensions>true</extensions>
+                      <configuration>
+                        <moduleName>com.databasepreservation.visualization.Viewer</moduleName>
+                      </configuration>
+                      <executions>
                             <execution>
                                 <goals>
                                     <goal>compile</goal>
@@ -158,14 +158,6 @@
                                 </goals>
                             </execution>
                         </executions>
-                        <!-- Plugin configuration. There are many available options, see gwt-maven-plugin documentation at codehaus.org -->
-                        <configuration>
-                            <runTarget>index.html</runTarget>
-                            <sourceLevel>auto</sourceLevel>
-                            <modules>
-                                <module>com.databasepreservation.visualization.Viewer</module>
-                            </modules>
-                        </configuration>
                     </plugin>
                     <plugin>
                         <groupId>pl.project13.maven</groupId>
@@ -179,25 +171,22 @@
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>gwt-maven-plugin</artifactId>
-                        <!-- Plugin configuration. There are many available options, see gwt-maven-plugin documentation at codehaus.org -->
-                        <configuration>
-                            <runTarget>index.html</runTarget>
-                            <sourceLevel>auto</sourceLevel>
-                            <modules>
-                                <module>com.databasepreservation.visualization.Viewer</module>
-                            </modules>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>compile-gwt</id>
-                                <phase>prepare-package</phase>
-                                <goals>
-                                    <goal>compile</goal>
-                                </goals>
-                            </execution>
-                        </executions>
+                      <groupId>net.ltgt.gwt.maven</groupId>
+                      <artifactId>gwt-maven-plugin</artifactId>
+                      <version>1.0-rc-10</version>
+                      <extensions>true</extensions>
+                      <configuration>
+                        <moduleName>com.databasepreservation.visualization.Viewer</moduleName>
+                      </configuration>
+                      <executions>
+                          <execution>
+                              <id>compile-gwt</id>
+                              <phase>prepare-package</phase>
+                              <goals>
+                                  <goal>compile</goal>
+                              </goals>
+                          </execution>
+                      </executions>
                     </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
@@ -267,8 +256,37 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>debug</id>
+            <build>
+                <plugins>
+                  <plugin>
+                      <groupId>org.springframework.boot</groupId>
+                      <artifactId>spring-boot-maven-plugin</artifactId>
+                      <version>2.1.5.RELEASE</version>
+                  </plugin>
+                  <plugin>
+                    <groupId>net.ltgt.gwt.maven</groupId>
+                    <artifactId>gwt-maven-plugin</artifactId>
+                    <version>1.0-rc-10</version>
+                    <extensions>true</extensions>
+                    <configuration>
+                      <moduleName>com.databasepreservation.visualization.Viewer</moduleName>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>compile</goal>
+                                <goal>test</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                  </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
-    
+
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -297,7 +315,7 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-    
+
     <dependencies>
         <!-- internal -->
         <dependency>
@@ -321,20 +339,23 @@
             <artifactId>roda-common-data</artifactId>
             <version>${version.roda}</version>
         </dependency>
-        
-        
+
+
         <!-- gwt -->
         <dependency>
             <groupId>com.google.gwt</groupId>
-            <artifactId>gwt-servlet</artifactId>
-            <scope>runtime</scope>
+            <artifactId>gwt-user</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.google.gwt</groupId>
-            <artifactId>gwt-user</artifactId>
-            <scope>provided</scope>
+          <groupId>com.google.gwt</groupId>
+          <artifactId>gwt-dev</artifactId>
+          <exclusions>
+              <exclusion>
+                  <groupId>org.mortbay.jasper</groupId>
+                  <artifactId>apache-jsp</artifactId>
+              </exclusion>
+          </exclusions>
         </dependency>
-        
         <!-- viewer -->
         <dependency>
             <groupId>com.github.nmorel.gwtjackson</groupId>
@@ -374,7 +395,7 @@
             <classifier>sources</classifier>
             <scope>provided</scope>
         </dependency>
-        
+
         <!-- REST API related dependencies - start -->
         <dependency>
             <groupId>org.glassfish.jersey.containers</groupId>
@@ -392,7 +413,7 @@
             <groupId>org.glassfish.jersey.media</groupId>
             <artifactId>jersey-media-multipart</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>org.glassfish.jersey.test-framework</groupId>
             <artifactId>jersey-test-framework-core</artifactId>
@@ -433,7 +454,7 @@
             <version>2.26-b03</version>
         </dependency>
         <!-- REST API related dependencies - end -->
-        
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -443,7 +464,7 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jersey</artifactId>
         </dependency>
-        
+
         <!-- other -->
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -515,7 +536,7 @@
             <artifactId>w3c-utils</artifactId>
             <version>1.0.0</version>
         </dependency>
-        
+
         <!-- testing -->
         <dependency>
             <groupId>org.hamcrest</groupId>

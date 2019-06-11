@@ -80,13 +80,13 @@ public class EmbeddedSolrClientFactory extends SolrClientFactory<EmbeddedSolrSer
             LOGGER.info("Creating SOLR collection {}", collection);
 
             Path collectionPath = solrHome.resolve(collection);
-            FileUtils.copyFile(configPath.toFile(), collectionPath.resolve(SolrUtils.CONF).toFile());
+            FileUtils.copyDirectory(configPath.toFile(), collectionPath.resolve(SolrUtils.CONF).toFile());
 
             // Add core
-            
+
             CoreContainer coreContainer = getSolrClient().getCoreContainer();
             coreContainer.create(collection, Collections.singletonMap("name", collection));
-            
+
             LOGGER.info("SOLR collection {} is loaded=", collection, coreContainer.isLoaded(collection));
 
             ret = true;
