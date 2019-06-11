@@ -26,7 +26,7 @@
     "files":
     [
         {
-            "includePattern": "target/(.*.war)$", "uploadPattern": "$1",
+            "includePattern": "target/(.*.war)$", "uploadPattern": "dbvtk-latest.war",
             "matrixParams": { "override": 1 }
         }
     ],

@@ -8,42 +8,7 @@ A compreensive list of features, screenshots and other documentation will be pro
 
 After version 2.0.0 the deploy is made using docker containers and docker compose.
 
-### Deploy using Docker App (beta)
-
-Pre-requisites:
-1. Install [docker](https://docs.docker.com/install/)
-2. Install [docker compose](https://docs.docker.com/compose/install/)
-3. Install [docker app](https://github.com/docker/app)
-
-To execute in a docker-compose do:
-```
-docker-app render keeps/dbvtk-app:latest | docker-compose -f - up
-```
-
-To install in a docker swarm:
-```
-docker-app install keeps/dbvtk-app:latest
-```
-
-See possible parameters with:
-```
-docker-app inspect keeps/dbvtk-app:latest
-```
-
-Check [docker app](https://github.com/docker/app)  for instructions on how to set parameters.
-
-Open:
-* **dbvtk** at http://localhost:8080/db/
-* **solr** at http://localhost:8983/solr/
-
-### Deploy using source code
-
-Pre-requisites:
-1. Install [docker](https://docs.docker.com/install/)
-2. Install [docker compose](https://docs.docker.com/compose/install/)
-3. Download [docker-compose.yml](https://github.com/keeps/db-visualization-toolkit/raw/master/deploys/development/docker-compose.yml)
-4. Run `SIARD=/path/to/folder/with/siard/files docker-compose up`
-5. Application should be available at [http://localhost:8080](http://localhost:8080)
+Check [Database Preservation Toolkit Docker](https://github.com/keeps/db-preservation-toolkit-docker) for more information.
 
 ### To add more databases to DBVTK
 
@@ -51,19 +16,6 @@ Pre-requisites:
 2. Open DBVTK, click on the "Load SIARD file" button on the top menu
 3. Input the SIARD as `/siard/file.siard` (the SIARD folder will be mounted within the container in /siard/)
 4. Click "LOAD SIARD FILE" button
-
-### To stop the server
-
-Use CTRL+C to stop the server.
-
-### Run as a daemon
-
-Run `SIARD=/path/to/folder/with/siard/files docker-compose up -d` at deploys/development folder.
-
-### Shutdown daemon and cleanup
-
-Run `docker-compose down` at deploys/development folder.
-
 
 ## More information
 
