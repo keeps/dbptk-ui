@@ -367,4 +367,24 @@ public interface ClientMessages extends Messages {
   String uploads();
 
   String newUploadLabel();
+
+  String usersAndPermissions();
+
+  String createCardHeader();
+
+  String createCardText();
+
+  String createCardButton();
+
+  String openCardHeader();
+
+  String openCardText();
+
+  String openCardButton();
+
+  String manageCardHeader();
+
+  String manageCardText();
+
+  String manageCardButton();
 }

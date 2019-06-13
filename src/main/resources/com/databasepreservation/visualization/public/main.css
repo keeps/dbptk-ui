@@ -824,3 +824,28 @@ p[data-value]:after {
 .gwt-MenuBar .gwt-MenuItem {
     font-size: 1.3rem;
 }
+
+.options {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    width: 75%;
+    margin: 0 auto;
+    height: 50%;
+}
+.option {
+    display: flex;
+    flex-flow: column wrap;
+    align-items: center;
+    flex: 1 0 5%;
+    margin: 5px;
+}
+.option .text {
+    padding: 25px;
+    flex: 1;
+}
+
+.card + .card {
+    margin-top: 5px;
+}

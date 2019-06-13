@@ -25,7 +25,7 @@
 
         <!-- Convenience properties to set versions -->
         <version.gwt>2.8.2</version.gwt>
-        <version.dbptk>2.3.0</version.dbptk>
+        <version.dbptk>2.4.0-BETA</version.dbptk>
         <version.roda>3.0.2</version.roda>
 
         <version.jersey>2.27</version.jersey>
@@ -148,7 +148,7 @@
                       <version>1.0-rc-10</version>
                       <extensions>true</extensions>
                       <configuration>
-                        <moduleName>com.databasepreservation.visualization.Viewer</moduleName>
+                        <moduleName>com.databasepreservation.visualization.Desktop</moduleName>
                       </configuration>
                       <executions>
                             <execution>
@@ -176,7 +176,7 @@
                       <version>1.0-rc-10</version>
                       <extensions>true</extensions>
                       <configuration>
-                        <moduleName>com.databasepreservation.visualization.Viewer</moduleName>
+                        <moduleName>com.databasepreservation.visualization.Desktop</moduleName>
                       </configuration>
                       <executions>
                           <execution>
@@ -203,7 +203,7 @@
                                     <directory>src/main</directory>
                                     <includes>
                                         <include>gwt-unitCache/**</include>
-                                        <include>webapp/com.databasepreservation.visualization.Viewer/**</include>
+                                        <include>webapp/com.databasepreservation.visualization.Desktop/**</include>
                                         <include>webapp/WEB-INF/deploy/**</include>
                                         <include>webapp/WEB-INF/classes/**</include>
                                     </includes>
@@ -271,7 +271,7 @@
                     <version>1.0-rc-10</version>
                     <extensions>true</extensions>
                     <configuration>
-                      <moduleName>com.databasepreservation.visualization.Viewer</moduleName>
+                      <moduleName>com.databasepreservation.visualization.Desktop</moduleName>
                     </configuration>
                     <executions>
                         <execution>

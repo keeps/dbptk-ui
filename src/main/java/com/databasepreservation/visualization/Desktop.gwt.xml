@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module>
+    <!-- Inherit the core Web Toolkit stuff.                        -->
+    <inherits name='com.google.gwt.user.User'/>
+    <inherits name='com.google.gwt.logging.Logging'/>
+
+    <!-- date and time pickers -->
+    <inherits name="com.tractionsoftware.gwt.user.UserNoCss" />
+    <inherits name="com.tractionsoftware.gwt.user.UTCDateTime" />
+
+    <!-- Inherit some internal functionality -->
+    <inherits name='org.roda.core.Core'/>
+    <inherits name="com.github.nmorel.gwtjackson.GwtJackson" />
+
+    <!-- Inherit required libraries -->
+    <inherits name="com.bytebybyte.gwt.fontawesome.FontAwesomeLib" />
+
+    <!-- I18N: internals -->
+    <inherits name="com.google.gwt.i18n.I18N" />
+    <inherits name="config.i18n.I18N" />
+    <set-configuration-property name="locale.useragent" value="Y"/>
+    <set-configuration-property name="locale.searchorder" value="queryparam,cookie,meta,useragent"/>
+    <!-- I18N: languages -->
+    <extend-property name="locale" values="en" />
+    <extend-property name="locale" values="pt_PT" />
+    <set-property-fallback name="locale" value="en"/>
+
+    <!-- Other module inherits                                      -->
+
+    <!-- Specify the app entry point class.                         -->
+    <entry-point class='com.databasepreservation.visualization.client.main.MainDesktop'/>
+    <stylesheet src="roda_main.css" />
+    <stylesheet src="main.css" />
+    <stylesheet src="../api/v1/theme?resource_id=theme.css" />
+    <stylesheet src="print.css" />
+
+    <!-- Specify the paths for translatable code                    -->
+    <source path='client'/>
+    <source path='shared'/>
+
+    <!-- better stack trace, http://www.summa.com/blog/2012/06/11/7-tips-for-exception-handling-in-gwt -->
+    <set-property name="compiler.stackMode" value="emulated" />
+    <set-configuration-property name="compiler.emulatedStack.recordFileNames" value="true" />
+    <set-configuration-property name="compiler.emulatedStack.recordLineNumbers" value="true" />
+
+</module>

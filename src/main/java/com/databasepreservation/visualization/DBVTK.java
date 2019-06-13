@@ -30,14 +30,14 @@ public class DBVTK {
   @Bean
   public ServletRegistrationBean<HttpServlet> browseService() {
     ServletRegistrationBean<HttpServlet> bean = new ServletRegistrationBean<>(new BrowserServiceImpl(),
-        "/com.databasepreservation.visualization.Viewer/browse");
+        "/com.databasepreservation.visualization.Desktop/browse");
     return bean;
   }
 
   @Bean
   public ServletRegistrationBean<HttpServlet> clientLogger() {
     ServletRegistrationBean<HttpServlet> bean = new ServletRegistrationBean<>(new ClientLoggerImpl(),
-        "/com.databasepreservation.visualization.Viewer/wuilogger");
+        "/com.databasepreservation.visualization.Desktop/wuilogger");
     bean.setLoadOnStartup(2);
     return bean;
   }

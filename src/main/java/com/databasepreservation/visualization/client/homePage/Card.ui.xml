@@ -1,0 +1,9 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+
+    <g:FlowPanel styleName="option card">
+            <g:FlowPanel ui:field="header"/>
+            <g:FlowPanel addStyleNames="text" ui:field="text"/>
+            <g:FlowPanel ui:field="buttonHolder"/>
+    </g:FlowPanel>
+</ui:UiBinder>
