@@ -1,0 +1,947 @@
+@CHARSET "UTF-8";
+
+/***********************************************
+   Ungrouped
+************************************************/
+
+.clear-both {
+    clear: both;
+}
+
+.db-info-th {
+    font-weight: bolder;
+    padding-right: 1rem;
+}
+
+.hidden {
+    visibility: hidden;
+}
+
+.label {
+    color: #222;
+    font-weight: 400;
+}
+
+.value {
+    font-size: 1.4rem;
+    color: rgb(88, 89, 91);
+}
+
+/* allows tables to scroll correctly and not go beyond the page limits */
+.browseContentPreviewPanel > tbody > tr:nth-child(1) > td:nth-child(2) {
+    max-width: 1px;
+    width: 100%;
+}
+
+.loadingText {
+    font-size: 75%;
+    color: #a7a9ac;
+}
+
+.btn-margin-right {
+    margin-right: 1rem;
+}
+
+.btn-cell-action {
+    padding: 1px 5px;
+    font-size: 12px;
+    line-height: 1.5;
+    border-radius: 3px;
+    margin-right: 5px;
+}
+
+.homeText {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/***********************************************
+              Progress bar, from
+ https://css-tricks.com/html5-progress-element/
+
+ Changed elements:
+ progress
+ .progress-bar
+ .html5progress
+
+************************************************/
+
+.progress-report {
+    overflow: auto;
+    height: 300px;
+    max-height: 300px;
+    padding: .2rem .5rem;
+    font-size: 90%;
+    white-space: nowrap;
+    background: #F1F1F1;
+    border: 1px solid #E1E1E1;
+    border-radius: 4px;
+}
+
+/* Styling the determinate progress element */
+
+progress[value] {
+    /* Get rid of the default appearance */
+    appearance: none;
+
+    /* This unfortunately leaves a trail of border behind in Firefox and Opera. We can remove that by setting the border to none. */
+    border: none;
+
+    /* Add dimensions */
+    width: 100%; height: 20px;
+
+    /* Although firefox doesn't provide any additional pseudo class to style the progress element container, any style applied here works on the container. */
+    background-color: whiteSmoke;
+    border-radius: 3px;
+    box-shadow: 0 2px 3px rgba(0,0,0,.5) inset;
+
+    /* Of all IE, only IE10 supports progress element that too partially. It only allows to change the background-color of the progress value using the 'color' attribute. */
+    color: royalblue;
+
+    position: relative;
+    margin: 0 0 1.5em;
+}
+
+/*
+Webkit browsers provide two pseudo classes that can be use to style HTML5 progress element.
+-webkit-progress-bar -> To style the progress element container
+-webkit-progress-value -> To style the progress element value.
+*/
+
+progress[value]::-webkit-progress-bar {
+    background-color: whiteSmoke;
+    border-radius: 3px;
+    box-shadow: 0 2px 3px rgba(0,0,0,.5) inset;
+}
+
+progress[value]::-webkit-progress-value {
+    position: relative;
+
+    background-size: 35px 20px, 100% 100%, 100% 100%;
+    border-radius:3px;
+
+    /* Let's animate this */
+    animation: animate-stripes 5s linear infinite;
+}
+
+@keyframes animate-stripes { 100% { background-position: -100px 0; } }
+
+/* Let's spice up things little bit by using pseudo elements. */
+
+progress[value]::-webkit-progress-value:after {
+    /* Only webkit/blink browsers understand pseudo elements on pseudo classes. A rare phenomenon! */
+    content: '';
+    position: absolute;
+
+    width:5px; height:5px;
+    top:7px; right:7px;
+
+    background-color: white;
+    border-radius: 100%;
+}
+
+/* Firefox provides a single pseudo class to style the progress element value and not for container. -moz-progress-bar */
+
+progress[value]::-moz-progress-bar {
+    /* Gradient background with Stripes */
+    background-image:
+            -moz-linear-gradient( 135deg,
+            transparent,
+            transparent 33%,
+            rgba(0,0,0,.1) 33%,
+            rgba(0,0,0,.1) 66%,
+            transparent 66%),
+            -moz-linear-gradient( top,
+            rgba(255, 255, 255, .25),
+            rgba(0,0,0,.2)),
+            -moz-linear-gradient( left, #089DE3, #089DE3);
+
+    background-size: 35px 20px, 100% 100%, 100% 100%;
+    border-radius:3px;
+
+    /* Firefox doesn't support CSS3 keyframe animations on progress element. Hence, we did not include animate-stripes in this code block */
+}
+
+/* Fallback technique styles */
+.progress-bar {
+    background-color: whiteSmoke;
+    border-radius: 3px;
+    box-shadow: 0 2px 3px rgba(0,0,0,.5) inset;
+
+    /* Dimensions should be similar to the parent progress element. */
+    width: 100%; height:20px;
+}
+
+.progress-bar span {
+    background-color: royalblue;
+    border-radius: 3px;
+
+    display: block;
+    text-indent: -9999px;
+}
+
+p[data-value] {
+    position: relative;
+}
+
+/* The percentage will automatically fall in place as soon as we make the width fluid. Now making widths fluid. */
+
+p[data-value]:after {
+    content: attr(data-value) '%';
+    position: absolute; right:0;
+}
+
+.html5progress::-webkit-progress-value
+{
+    /* Gradient background with Stripes */
+    background-image:
+            -webkit-linear-gradient( 135deg,
+            transparent,
+            transparent 33%,
+            rgba(0,0,0,.1) 33%,
+            rgba(0,0,0,.1) 66%,
+            transparent 66%),
+            -webkit-linear-gradient( top,
+            rgba(255, 255, 255, .25),
+            rgba(0,0,0,.2)),
+            -webkit-linear-gradient( left, #089DE3, #089DE3);
+}
+
+.html5progress::-moz-progress-bar {
+    /* Gradient background with Stripes */
+    background-image:
+            -moz-linear-gradient( 135deg,
+            transparent,
+            transparent 33%,
+            rgba(0,0,0,.1) 33%,
+            rgba(0,0,0,.1) 66%,
+            transparent 66%),
+            -moz-linear-gradient( top,
+            rgba(255, 255, 255, .25),
+            rgba(0,0,0,.2)),
+            -moz-linear-gradient( left, #09c, #690);
+}
+
+/* Now we are good to duplicate html code for other skills and then add the css code for the new skill based on data-skill */
+
+/***********************************************
+              Table search panel
+************************************************/
+
+.TableSearchPanel-search .searchAdvancedPanel {
+    margin-bottom: 0;
+}
+
+.TableSearchPanel-search {
+    margin-bottom: 20px;
+}
+
+.TableSearchPanel-table {
+    /*nothing yet since most of it is defined for all AsyncTableCells*/
+}
+
+.searchPanelAdvancedSaveSearchButton {
+    margin-right: 1rem;
+    float: right;
+}
+
+.btn-save:after {
+    content: "\f0c7";
+}
+
+.btn-export {
+    padding: 4px 8px 4px 8px;
+    font-size: 11px;
+    font-weight: 400;
+    float: right;
+    margin-top: 3px;
+    border-radius: 0px;
+    margin-left: 5px;
+    display: inline-block;
+    font-family: "Ubuntu", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    text-transform: none;
+    width: 8.4rem;
+}
+
+.btn-export-all {
+    width: 8.4rem;
+}
+
+.btn-export-visible {
+    width: 8.4rem;
+}
+
+.search-field-left-panel .form-textbox-small {
+    max-width: 100px;
+}
+
+.search-field-left-panel .label {
+    display: inline;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+/***********************************************
+   BrowseContent (based on ViewRepresentation)
+************************************************/
+.browseContentTitle {
+    margin-bottom: 10px !important;
+}
+
+.browseContentFocusPanel,
+.browseContentPreviewPanel {
+    width: 100%;
+}
+
+.browseContentFilesPanel {
+    display: inline-block;
+    vertical-align: top;
+    width: 300px;
+    height: 100%;
+    border-right: 1px solid #eee;
+}
+
+.browseContentFilesPanel.full_width {
+    width: 100%;
+    margin-right: 0px;
+    border: none;
+}
+
+.browseContentFilesPanel .fileListScroll {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    height: 650px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.browseContentFilesPanel.full_width .fileListScroll {
+    height: auto;
+}
+
+/*
+.browseContent .my-asyncdatagrid-pager-results {
+    display: none;
+}
+
+.browseContent .my-files-table .org-roda-wui-common-client-widgets-MyCellTableResources-TableStyle-cellTableCell {
+    padding-right: 2px;
+    line-height: 1em;
+    margin-bottom: 2px;
+}
+
+.browseContent .my-files-table .org-roda-wui-common-client-widgets-MyCellTableResources-TableStyle-cellTableOddRow {
+    background: white;
+    border: none;
+}
+
+.browseContent .my-files-table .org-roda-wui-common-client-widgets-MyCellTableResources-TableStyle-cellTableOddRowCell {
+    border: 2px solid white;
+}
+
+.browseContent .my-files-table .org-roda-wui-common-client-widgets-MyCellTableResources-TableStyle-cellTableHoveredRow {
+    background: #eee;
+}
+
+.browseContent .my-files-table .org-roda-wui-common-client-widgets-MyCellTableResources-TableStyle-cellTableHoveredRow .org-roda-wui-common-client-widgets-MyCellTableResources-TableStyle-cellTableOddRowCell {
+    border: 2px solid #eee;
+}
+*/
+
+.browseContentFilePreviewPanel {
+    width: 100%;
+    height: 705px;
+}
+
+.browseContentFilePreviewPanel .filePreviewToolbar {
+    min-height: 35px;
+    background-color: #eee;
+}
+
+.browseContentFilePreviewPanel .filePreviewToolbar .browseContentBreadcrumb {
+    margin: 0;
+    float: left;
+    margin-left: 30px;
+    height: 3.5rem;
+    line-height: 3.5rem;
+}
+
+.browseContentFilePreviewPanel.single .filePreviewToolbar .browseContentBreadcrumb {
+    margin-left: 35px;
+}
+
+.main .wui-breadcrumbPanel .breadcrumb-user {
+    position: relative;
+    top: 0.3rem;
+    float: right;
+    color: #404142;
+    text-decoration: none;
+}
+
+.main .wui-breadcrumbPanel .breadcrumb {
+    font-size: 1.3rem;
+}
+
+.browseContentFilePreviewPanel .filePreviewToolbar .filePreviewToolbarIcons {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+}
+
+.browseContentFilePreview {
+    padding: 40px !important;
+    height: 650px;
+    display: inline-block;
+    vertical-align: top;
+    width: 100%;
+    text-align: center;
+    padding-top: 0px !important;
+    margin-top: 20px;
+}
+
+.browseContentFilesPanel .searchPanel {
+    height: 35px;
+    margin-right: 0px;
+    background-color: #999;
+    color: #eee;
+}
+
+.browseContentFilesPanel .searchBox {
+    box-sizing: border-box;
+    width: 100%;
+    height: 3rem;
+    line-height: 3rem;
+    font-size: 1.3rem;
+    padding: 0 3rem;
+    padding-left: 4.7rem;
+    background-color: inherit;
+    border: none;
+    margin-top: 3px;
+    color: white;
+}
+
+.browseContentFilesPanel .searchBox::-webkit-input-placeholder,
+.browseContentFilesPanel .searchBox:placeholder-shown {
+    color: #ddd;
+}
+
+.browseContentFilesPanel .searchPanelLeft {
+    float: right;
+    width: 100%;
+}
+
+.browseContentFilesPanel .searchButton {
+    cursor: pointer;
+    cursor: hand;
+    position: relative;
+    top: -2px;
+    left: 2px;
+    float: left;
+    width: 40px;
+    margin-right: -55px;
+    background-color: transparent;
+}
+
+.browseContentFilesPanel .searchButton-html {
+    font-size: 14px;
+}
+
+.browseContentFilesPanel .searchButton .fa-stack-2x {
+    color: transparent;
+}
+
+.browseContentFilesPanel .searchButton .fa-stack-1x {
+    color: inherit;
+}
+
+.browseContent .infoFilePanel {
+    height: 630px;
+    width: 300px;
+    background: #089de3;
+    display: none;
+    color: white;
+    position: absolute;
+    right: 0;
+    padding: 20px;
+    box-shadow: 0 0 0 0 transparent, 0 0 0 0 transparent, 0 0 0 0 transparent, -6px 0 15px -4px rgba(31, 73, 125, 0.8);
+}
+
+.browseContent .infoFileTitle {
+    font-size: 3rem;
+    margin-top: 1.2rem;
+    margin-bottom: 2.5rem;
+}
+
+.browseContent .infoFileEntry {
+    margin-bottom: 1em;
+}
+
+.browseContent .infoFileEntryKey {
+    font-size: 1.3rem;
+    line-height: 1.1em;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 0.2em;
+}
+
+.browseContent .infoFileEntryValue {
+    font-size: 1.3rem;
+    word-break: break-all;
+    line-height: 1.1em;
+}
+
+/**********************************************
+				SIDEBAR
+************************************************/
+.leftSidebar-facet-title {
+    color: inherit;
+    margin-bottom: 5px;
+    /*font-size: 1.8rem;*/
+}
+
+.leftSidebar-facet-label {
+    display: block;
+    white-space: nowrap;
+    margin-bottom: 5px;
+    font-size: 1.2rem;
+}
+
+.leftSidebar-facet-input {
+    padding: 2px;
+}
+
+.leftSidebar-facet-input-date {
+    width: 45%;
+}
+
+.leftSidebar-facet-date-separator {
+    display: inline-block;
+    margin-left: 2px;
+    margin-right: 2px;
+    color: #999;
+}
+
+.leftSidebar-facet-panel.facet-empty {
+    display: none;
+}
+
+.leftSidebar .fade-out:after {
+    background: -webkit-linear-gradient(right, #eee 30%, rgba(255, 255, 255, 0) 100%);
+    background: linear-gradient(-90deg, #eee 30%, rgba(255, 255, 255, 0) 100%);
+}
+
+.leftSidebar {
+    padding: 2rem;
+}
+
+.leftSidebar .sidebar-hyperlink a {
+    /*font-size: 1.4rem;*/
+    color: inherit;
+}
+
+.leftSidebar .sidebar-hyperlink {
+    /*font-size: 1.4rem;*/
+    color: #222;
+}
+
+.leftSidebar .sidebar-hyperlink :hover {
+    color: #089de3;
+}
+
+.leftSidebar .btn {
+    width: 160px;
+    margin-right: 10px;
+    margin-bottom: 7px;
+}
+
+.leftSidebar .h1, .leftSidebar .h2, .leftSidebar .h3, .leftSidebar .h4, .leftSidebar .h5,
+.leftSidebar .h6 {
+    margin-bottom: 0.6rem;
+    margin-top: 0.5em;
+    line-height: normal;
+}
+
+.leftSidebar .indent0 {
+    margin-left: 0;
+    margin-top: 1.5rem;
+}
+
+.leftSidebar-facet-title :first-child {
+    margin-top: 0;
+}
+
+.leftSidebar .indent1 {
+    margin-left: 1.5rem;
+}
+
+.leftSidebar .indent2 {
+    margin-left: 3rem;
+}
+
+.leftSidebar .indent3 {
+    margin-left: 4.5rem;
+}
+
+.leftSidebar .indent4 {
+    margin-left: 6rem;
+}
+
+.leftSidebar .h1:before, .leftSidebar .h2:before, .leftSidebar .h3:before, .leftSidebar .h4:before, .leftSidebar .h5:before,
+.leftSidebar .h6:before {
+    display: inline-block;
+    font: normal normal normal 14px/1 FontAwesome;
+    font-size: inherit;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    float: left;
+    padding-right: 0.5em;
+    margin-top: 0.1em;
+    width: 1.5rem;
+    text-align: center;
+}
+
+/* used in schema page to show table column information */
+.table-info {
+    min-width: 100%;
+}
+
+.table-info .primary-key-col {
+    width: 1px;
+    max-width: 1px;
+}
+
+.schema-table-header {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+}
+
+.schema-table-header > div {
+    display: inline;
+}
+
+.schema-table-header > div > a:hover {
+    text-decoration: underline;
+}
+
+.schema-table-header i {
+    font-size: 0.7em !important;
+}
+
+.schema-table-header > :nth-child(1) {
+    padding-right: 1rem;
+}
+
+.schema-table-header > :nth-child(3) {
+    padding-right: .5rem;
+    padding-left: .5rem;
+    color: #ccc;
+}
+
+.search-field-left-panel .visibility-checkbox {
+    display: table-cell;
+    vertical-align: top;
+    padding-top: 0.3rem;
+}
+
+.my-asyncdatagrid-display-scroll-wrapper {
+    position: relative;
+}
+
+/* hide right shadow */
+.my-asyncdatagrid-display-scroll-wrapper:after {
+    box-shadow: inset -10px 0 10px -8px rgba(0,0,0,0.5);
+
+    content: "";
+    display: block;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 20px;
+    height: 100%;
+    pointer-events: none;
+    z-index: 100;
+
+    opacity: 0;
+    transition: opacity .25s ease-in-out;
+    -moz-transition: opacity .25s ease-in-out;
+    -webkit-transition: opacity .25s ease-in-out;
+}
+
+/* show right shadow */
+.my-asyncdatagrid-display-scroll-wrapper-right:after {
+    opacity: 1;
+}
+
+/* hide left shadow */
+.my-asyncdatagrid-display-scroll-wrapper:before {
+    box-shadow: inset 10px 0 10px -8px rgba(0,0,0,0.5);
+
+    content: "";
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 20px;
+    height: 100%;
+    pointer-events: none;
+    z-index: 100;
+
+    opacity: 0;
+    transition: opacity .25s ease-in-out;
+    -moz-transition: opacity .25s ease-in-out;
+    -webkit-transition: opacity .25s ease-in-out;
+}
+
+/* show left shadow */
+.my-asyncdatagrid-display-scroll-wrapper-left:before {
+    opacity: 1;
+}
+
+/**********************************************
+	       SINGLE RECORD PAGE
+************************************************/
+
+.field .value.related-records .related-records-link {
+    display: inline;
+}
+
+.field .value.related-records {
+    font-size: 75%; /*equivalent to .small*/
+}
+
+.recordId {
+    margin-top: -1rem;
+    margin-bottom: 1rem;
+}
+
+.rowData .label {
+    margin-top: 2rem;
+}
+
+.rowData .label:before {
+    display: inline-block;
+    font: normal normal normal 14px/1 FontAwesome;
+    font-size: inherit;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    float: left;
+    padding-right: 0.5rem;
+    margin-top: 0.1em;
+    width: 1.5rem;
+    text-align: center;
+}
+
+.rowData .label.noicon {
+    margin-left: 2rem;
+}
+
+.rowData .value {
+    margin-left: 2rem;
+}
+
+
+
+/**********************************************
+                TABLE DIAGRAM
+************************************************/
+
+.erdiagram {
+    min-width: 600px;
+    width: 100%;
+    height: 600px;
+    border: 1px solid lightgray;
+    margin-bottom: 1rem;
+}
+
+/**********************************************
+	       DATABASE SEARCH PAGE
+************************************************/
+
+.database-search-panel .spinner {
+    position: relative;
+    top: 0;
+    left: 0;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 2rem;
+}
+
+/***********************************************
+   Login page
+************************************************/
+.loginPanel {
+    max-width: 500px;
+    min-width: 400px;
+}
+
+/***********************************************
+   Home page
+************************************************/
+.homePanel {
+    margin: 40px auto;
+    background-color: #eee;
+    padding: 40px;
+    max-width: 600px;
+    min-width: 500px;
+}
+
+.homePanel  img {
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/**********************************************
+				MENU
+************************************************/
+.user-menu {
+    float: right;
+    background-color: #089DE3;
+    box-shadow: 1px -1px 6px black;
+}
+
+.user-menu .gwt-MenuItem {
+    line-height: 2.5rem;
+    height: 2.5rem;
+    color: #fff;
+}
+
+.user-menu .gwt-MenuItem-selected {
+    line-height: 2.5rem;
+    height: 2.5rem;
+    background-color: #5bbeff;
+    color: #fff;
+}
+
+.main .wui-breadcrumbPanel .breadcrumb-last {
+    max-width: 200px;
+}
+
+.gwt-MenuBar .gwt-MenuItem {
+    font-size: 1.3rem;
+}
+
+.options {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    width: 75%;
+    margin: 0 auto;
+    height: 50%;
+}
+.option {
+    display: flex;
+    flex-flow: column wrap;
+    align-items: center;
+    flex: 1 0 5%;
+    margin: 5px;
+}
+.option .text {
+    padding: 25px;
+    flex: 1;
+}
+
+.card + .card {
+    margin-top: 5px;
+}
+
+.metadata-information-panel {
+    display: flex;
+    margin: 0 10rem 0 10rem;
+}
+
+.metadata-information {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.metadata-field {
+    margin-bottom: 1.2rem;
+}
+
+.metadata-field:first-of-type {
+    margin-top: 1.2rem;
+}
+
+.metadata-information-element-label {
+    display: inline-block;
+    width: 16rem;
+    text-align: left;
+    font-weight: bold;
+}
+
+.metadata-information-element-value {
+    display: inline;
+    margin: 0;
+    margin-inline-start: 2.25rem;
+}
+
+.metadata-description {
+    margin: 1% 10rem 1% 10rem;
+}
+
+.navigation-panels {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin: 0 10rem 0 10rem;
+}
+
+.navigation-panel {
+    display: flex;
+    flex-flow: column wrap;
+    flex: 1 0 5%;
+    background: #dadfe8;
+    margin-bottom: 1%;
+    margin-right: 10px;
+}
+
+.navigation-panel-header {
+    font-size: x-large;
+    margin-left: 20px;
+    margin-top: 10px;
+}
+
+.navigation-panel-info {
+    margin-top: 1.25rem;
+    margin-bottom: 1rem;
+    flex: 1;
+    margin-left: 20px;
+}
+
+.navigation-panel-options {
+    margin-bottom: 1.25rem;
+    vertical-align: bottom;
+    margin-left: 20px;
+}
+
+.btn-link-info {
+    background-color: transparent;
+    color: #337ab7;
+    padding-left: 0px;
+}
+
+.btn-link-info:hover {
+    color: #23527c;
+    text-decoration: underline;
+    background-color: transparent;
+}
+
+.label-field {
+    display: inline-block;
+    text-align: left;
+    font-weight: bold;
+    width: 36%;
+    min-width: 100px;
+}
+
+.value-field {
+    display: inline;
+}

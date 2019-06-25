@@ -1,0 +1,12 @@
+package com.databasepreservation.main.common.shared.client.tools;
+
+/**
+ * @author Miguel Guimarães <mguimaraes@keep.pt>
+ */
+public class PathUtils {
+
+  public static String getFileName(final String path) {
+    int i = path.lastIndexOf("/");
+    return path.substring(i+1);
+  }
+}

@@ -387,4 +387,52 @@ public interface ClientMessages extends Messages {
   String manageCardText();
 
   String manageCardButton();
+
+  String viewerMetadataName();
+
+  String viewerMetadataArchivalDate();
+
+  String viewerMetadataArchiver();
+
+  String viewerMetadataArchiverContact();
+
+  String viewerMetadataClientMachine();
+
+  String viewerMetadataDatabaseProduct();
+
+  String viewerMetadataDataOriginTimespan();
+
+  String viewerMetadataDataOwner();
+
+  String viewerMetadataProducerApplication();
+
+  String navigationSIARD();
+
+  String navigationValidation();
+
+  String navigationBrowsing();
+
+  String editMetadata();
+
+  String sendToLiveDBMS();
+
+  String validateNow();
+
+  String seeReport();
+
+  String browseNow();
+
+  String deleteIngested();
+
+  String showFile();
+
+  String validatedAt();
+
+  String validationVersionLabel();
+
+  String SIARDNotValidated();
+
+  String SIARD();
+
+  String manageSIARD();
 }

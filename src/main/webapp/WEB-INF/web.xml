@@ -9,13 +9,14 @@
     <!-- GWT related servlets/servlet-mappings -->
     <!-- ************************************* -->
     <servlet>
-        <servlet-name>browseServlet</servlet-name>
-        <servlet-class>com.databasepreservation.visualization.server.BrowserServiceImpl</servlet-class>
+        <servlet-name>BrowserService</servlet-name>
+        <servlet-class>com.databasepreservation.main.common.server.BrowserServiceImpl</servlet-class>
+        <load-on-startup>2</load-on-startup>
     </servlet>
 
     <servlet>
         <servlet-name>ClientLogger</servlet-name>
-        <servlet-class>com.databasepreservation.visualization.shared.server.ClientLoggerImpl</servlet-class>
+        <servlet-class>com.databasepreservation.main.common.server.ClientLoggerImpl</servlet-class>
         <!-- <init-param> -->
         <!-- <param-name>log4j-init-file</param-name> -->
         <!-- <param-value>WEB-INF/classes/config/log4j.xml</param-value> -->
@@ -24,12 +25,12 @@
     </servlet>
 
     <servlet-mapping>
-        <servlet-name>browseServlet</servlet-name>
-        <url-pattern>/com.databasepreservation.visualization.Viewer/browse</url-pattern>
+        <servlet-name>BrowserService</servlet-name>
+        <url-pattern>/com.databasepreservation.main.desktop.Desktop/browse</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>ClientLogger</servlet-name>
-        <url-pattern>/com.databasepreservation.visualization.Viewer/wuilogger</url-pattern>
+        <url-pattern>/com.databasepreservation.main.desktop.Desktop/wuilogger</url-pattern>
     </servlet-mapping>
 
     <!-- Default page to serve -->
@@ -42,10 +43,10 @@
     <!-- ********************************************** -->
     <filter>
         <filter-name>InternalWebAuthFilter</filter-name>
-        <filter-class>com.databasepreservation.visualization.filter.OnOffFilter</filter-class>
+        <filter-class>com.databasepreservation.main.common.shared.filter.OnOffFilter</filter-class>
         <init-param>
             <param-name>inner-filter-class</param-name>
-            <param-value>com.databasepreservation.visualization.filter.InternalWebAuthFilter</param-value>
+            <param-value>com.databasepreservation.main.common.shared.filter.InternalWebAuthFilter</param-value>
         </init-param>
         <init-param>
             <param-name>config-prefix</param-name>
@@ -63,10 +64,10 @@
 
     <filter>
         <filter-name>InternalApiAuthFilter</filter-name>
-        <filter-class>com.databasepreservation.visualization.filter.OnOffFilter</filter-class>
+        <filter-class>com.databasepreservation.main.common.shared.filter.OnOffFilter</filter-class>
         <init-param>
             <param-name>inner-filter-class</param-name>
-            <param-value>com.databasepreservation.visualization.filter.InternalApiAuthFilter</param-value>
+            <param-value>com.databasepreservation.main.common.shared.filter.InternalApiAuthFilter</param-value>
         </init-param>
         <init-param>
             <param-name>config-prefix</param-name>
@@ -80,7 +81,9 @@
         <init-param>
             <param-name>exclusions</param-name>
             <param-value>^/swagger.json,^/v1/theme/?</param-value>
-            <description>comma separated list of relative paths to exclude in filter logic (using regular expressions for extra power)</description>
+            <description>comma separated list of relative paths to exclude in filter logic (using regular expressions
+                for extra power)
+            </description>
         </init-param>
     </filter>
     <filter-mapping>
@@ -91,7 +94,7 @@
     <!-- Filter to handle logout requests sent directly by the CAS server -->
     <filter>
         <filter-name>CASSingleSignOutFilter</filter-name>
-        <filter-class>com.databasepreservation.visualization.filter.OnOffFilter</filter-class>
+        <filter-class>com.databasepreservation.main.common.shared.filter.OnOffFilter</filter-class>
         <init-param>
             <param-name>inner-filter-class</param-name>
             <param-value>org.jasig.cas.client.session.SingleSignOutFilter</param-value>
@@ -117,7 +120,7 @@
     <!-- validation filter must appear before the authentication filter -->
     <filter>
         <filter-name>CASValidationFilter</filter-name>
-        <filter-class>com.databasepreservation.visualization.filter.OnOffFilter</filter-class>
+        <filter-class>com.databasepreservation.main.common.shared.filter.OnOffFilter</filter-class>
         <init-param>
             <param-name>inner-filter-class</param-name>
             <param-value>org.jasig.cas.client.validation.Cas30ProxyReceivingTicketValidationFilter</param-value>
@@ -158,7 +161,7 @@
 
     <filter>
         <filter-name>CASAuthenticationFilter</filter-name>
-        <filter-class>com.databasepreservation.visualization.filter.OnOffFilter</filter-class>
+        <filter-class>com.databasepreservation.main.common.shared.filter.OnOffFilter</filter-class>
         <init-param>
             <param-name>inner-filter-class</param-name>
             <param-value>org.jasig.cas.client.authentication.AuthenticationFilter</param-value>
@@ -183,7 +186,7 @@
 
     <filter>
         <filter-name>CASRequestWrapperFilter</filter-name>
-        <filter-class>com.databasepreservation.visualization.filter.OnOffFilter</filter-class>
+        <filter-class>com.databasepreservation.main.common.shared.filter.OnOffFilter</filter-class>
         <init-param>
             <param-name>inner-filter-class</param-name>
             <param-value>org.jasig.cas.client.util.HttpServletRequestWrapperFilter</param-value>
@@ -200,10 +203,10 @@
 
     <filter>
         <filter-name>CasApiAuthFilter</filter-name>
-        <filter-class>com.databasepreservation.visualization.filter.OnOffFilter</filter-class>
+        <filter-class>com.databasepreservation.main.common.shared.filter.OnOffFilter</filter-class>
         <init-param>
             <param-name>inner-filter-class</param-name>
-            <param-value>com.databasepreservation.visualization.filter.CasApiAuthFilter</param-value>
+            <param-value>com.databasepreservation.main.common.shared.filter.CasApiAuthFilter</param-value>
         </init-param>
         <init-param>
             <param-name>config-prefix</param-name>
@@ -216,7 +219,9 @@
         <init-param>
             <param-name>exclusions</param-name>
             <param-value>^/swagger.json,^/v1/theme/?,^/v1/auth/ticket?</param-value>
-            <description>comma separated list of relative paths to exclude in filter logic (using regular expressions for extra power)</description>
+            <description>comma separated list of relative paths to exclude in filter logic (using regular expressions
+                for extra power)
+            </description>
         </init-param>
     </filter>
     <filter-mapping>
@@ -226,10 +231,10 @@
 
     <filter>
         <filter-name>CasWebAuthFilter</filter-name>
-        <filter-class>com.databasepreservation.visualization.filter.OnOffFilter</filter-class>
+        <filter-class>com.databasepreservation.main.common.shared.filter.OnOffFilter</filter-class>
         <init-param>
             <param-name>inner-filter-class</param-name>
-            <param-value>com.databasepreservation.visualization.filter.CasWebAuthFilter</param-value>
+            <param-value>com.databasepreservation.main.common.shared.filter.CasWebAuthFilter</param-value>
         </init-param>
         <init-param>
             <param-name>config-prefix</param-name>
@@ -240,8 +245,8 @@
             <param-value>https://localhost:8443/cas</param-value>
         </init-param>
         <init-param>
-          <param-name>casServerLogoutUrl</param-name>
-          <param-value>https://localhost:8443/cas/logout</param-value>
+            <param-name>casServerLogoutUrl</param-name>
+            <param-value>https://localhost:8443/cas/logout</param-value>
         </init-param>
     </filter>
     <filter-mapping>

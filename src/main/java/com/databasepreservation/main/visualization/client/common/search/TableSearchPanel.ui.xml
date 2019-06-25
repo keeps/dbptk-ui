@@ -1,0 +1,11 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <ui:style>
+    </ui:style>
+
+    <g:FlowPanel>
+        <!--<g:Button ui:field="logJsonSearch"><ui:msg>logJson</ui:msg></g:Button>-->
+        <g:SimplePanel ui:field="searchContainer" addStyleNames="TableSearchPanel-search"/>
+        <g:SimplePanel ui:field="tableContainer"  addStyleNames="TableSearchPanel-table"/>
+    </g:FlowPanel>
+</ui:UiBinder>

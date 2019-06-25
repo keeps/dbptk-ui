@@ -25,7 +25,7 @@
 
         <!-- Convenience properties to set versions -->
         <version.gwt>2.8.2</version.gwt>
-        <version.dbptk>2.4.0-BETA</version.dbptk>
+        <version.dbptk>2.4.0-RC-3</version.dbptk>
         <version.roda>3.0.2</version.roda>
 
         <version.jersey>2.27</version.jersey>
@@ -148,7 +148,7 @@
                       <version>1.0-rc-10</version>
                       <extensions>true</extensions>
                       <configuration>
-                        <moduleName>com.databasepreservation.visualization.Desktop</moduleName>
+                        <moduleName>com.databasepreservation.main.desktop.Desktop</moduleName>
                       </configuration>
                       <executions>
                             <execution>
@@ -176,7 +176,7 @@
                       <version>1.0-rc-10</version>
                       <extensions>true</extensions>
                       <configuration>
-                        <moduleName>com.databasepreservation.visualization.Desktop</moduleName>
+                        <moduleName>com.databasepreservation.main.desktop.Desktop</moduleName>
                       </configuration>
                       <executions>
                           <execution>
@@ -203,7 +203,7 @@
                                     <directory>src/main</directory>
                                     <includes>
                                         <include>gwt-unitCache/**</include>
-                                        <include>webapp/com.databasepreservation.visualization.Desktop/**</include>
+                                        <include>webapp/com.databasepreservation.main.desktop.Desktop/**</include>
                                         <include>webapp/WEB-INF/deploy/**</include>
                                         <include>webapp/WEB-INF/classes/**</include>
                                     </includes>
@@ -260,28 +260,39 @@
             <id>debug</id>
             <build>
                 <plugins>
-                  <plugin>
-                      <groupId>org.springframework.boot</groupId>
-                      <artifactId>spring-boot-maven-plugin</artifactId>
-                      <version>2.1.5.RELEASE</version>
-                  </plugin>
-                  <plugin>
-                    <groupId>net.ltgt.gwt.maven</groupId>
-                    <artifactId>gwt-maven-plugin</artifactId>
-                    <version>1.0-rc-10</version>
-                    <extensions>true</extensions>
-                    <configuration>
-                      <moduleName>com.databasepreservation.visualization.Desktop</moduleName>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>compile</goal>
-                                <goal>test</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                  </plugin>
+                    <plugin>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-maven-plugin</artifactId>
+                        <version>2.1.5.RELEASE</version>
+                        <configuration>
+                            <addResources>true</addResources>
+                            <folders>
+                                <folder>${project.build.directory}/${project.build.finalName}</folder>
+                            </folders>
+                            <jvmArguments>
+                                -Dgwt.codeServerPort=9876 -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005
+                            </jvmArguments>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>net.ltgt.gwt.maven</groupId>
+                        <artifactId>gwt-maven-plugin</artifactId>
+                        <version>1.0-rc-10</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <moduleName>com.databasepreservation.main.desktop.Desktop</moduleName>
+                            <launcherDir>${project.build.directory}/${project.build.finalName}/WEB-INF/classes/public</launcherDir>
+                            <webappDirectory>${project.build.directory}/${project.build.finalName}/WEB-INF/classes/public</webappDirectory>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>compile</goal>
+                                    <goal>test</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
                 </plugins>
             </build>
         </profile>
@@ -388,6 +399,13 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/javax.xml/jaxp-api -->
+        <dependency>
+            <groupId>javax.xml</groupId>
+            <artifactId>jaxp-api</artifactId>
+            <version>1.4.2</version>
+        </dependency>
+
         <dependency>
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>

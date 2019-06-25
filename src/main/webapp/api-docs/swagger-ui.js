@@ -7978,7 +7978,7 @@ setDocument = Sizzle.setDocument = function( node ) {
 				return m && m.parentNode ? [ m ] : [];
 			}
 		};
-		Expr.filter["ID"] = function( id ) {
+		com.databasepreservation.main.common.shared.filter["ID"] = function(id ) {
 			var attrId = id.replace( runescape, funescape );
 			return function( elem ) {
 				return elem.getAttribute("id") === attrId;
@@ -7989,7 +7989,7 @@ setDocument = Sizzle.setDocument = function( node ) {
 		// getElementById is not reliable as a find shortcut
 		delete Expr.find["ID"];
 
-		Expr.filter["ID"] =  function( id ) {
+		com.databasepreservation.main.common.shared.filter["ID"] =  function(id ) {
 			var attrId = id.replace( runescape, funescape );
 			return function( elem ) {
 				var node = typeof elem.getAttributeNode !== "undefined" && elem.getAttributeNode("id");
@@ -9189,7 +9189,7 @@ function matcherFromTokens( tokens ) {
 		if ( (matcher = Expr.relative[ tokens[i].type ]) ) {
 			matchers = [ addCombinator(elementMatcher( matchers ), matcher) ];
 		} else {
-			matcher = Expr.filter[ tokens[i].type ].apply( null, tokens[i].matches );
+			matcher = com.databasepreservation.main.common.shared.filter[ tokens[i].type ].apply( null, tokens[i].matches );
 
 			// Return special upon seeing a positional matcher
 			if ( matcher[ expando ] ) {
@@ -9834,7 +9834,7 @@ jQuery.fn.extend({
 
 	addBack: function( selector ) {
 		return this.add( selector == null ?
-			this.prevObject : this.prevObject.filter(selector)
+			this.prevObject : com.databasepreservation.main.common.shared.filter(selector)
 		);
 	}
 });
@@ -11465,7 +11465,7 @@ jQuery.event = {
 			event.target = event.target.parentNode;
 		}
 
-		return fixHook.filter ? fixHook.filter( event, originalEvent ) : event;
+		return com.databasepreservation.main.common.shared.filter ? com.databasepreservation.main.common.shared.filter( event, originalEvent ) : event;
 	},
 
 	special: {
@@ -18772,7 +18772,7 @@ function compileList(schema, name, result) {
     result.push(currentType);
   });
 
-  return result.filter(function (type, index) {
+  return com.databasepreservation.main.common.shared.filter(function (type, index) {
     return -1 === exclude.indexOf(index);
   });
 }
