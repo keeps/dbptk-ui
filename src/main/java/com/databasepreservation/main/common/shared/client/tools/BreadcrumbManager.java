@@ -372,12 +372,7 @@ public class BreadcrumbManager {
     List<BreadcrumbItem> items = forHome();
     items.add(
       new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE)
-        + SafeHtmlUtils.htmlEscape(" " + messages.manageSIARD())), new Command() {
-          @Override
-          public void execute() {
-
-          }
-        }));
+        + SafeHtmlUtils.htmlEscape(" " + messages.manageSIARD()))));
     return items;
   }
 }

@@ -435,4 +435,12 @@ public interface ClientMessages extends Messages {
   String SIARD();
 
   String manageSIARD();
+
+  String dialogReimportSIARDTitle();
+
+  String dialogReimportSIARD();
+
+  String dialogCancel();
+
+  String dialogConfirm();
 }

@@ -2,14 +2,6 @@ package com.databasepreservation.main.common.server;
 
 import java.util.List;
 
-import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;
-import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
-import com.databasepreservation.main.common.shared.ViewerStructure.ViewerRow;
-import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
-import com.databasepreservation.main.common.shared.client.common.search.SavedSearch;
-import com.databasepreservation.main.common.shared.client.common.utils.BrowserServiceUtils;
-import com.databasepreservation.main.common.utils.UserUtility;
-import com.databasepreservation.main.common.utils.UserUtility.Authorization;
 import org.roda.core.data.exceptions.AuthenticationDeniedException;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.roda.core.data.exceptions.GenericException;
@@ -26,12 +18,20 @@ import org.roda.core.data.v2.user.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.databasepreservation.main.common.client.BrowserService;
 import com.databasepreservation.main.common.server.controller.SIARDController;
 import com.databasepreservation.main.common.server.controller.UserLoginController;
-import com.databasepreservation.main.common.client.BrowserService;
+import com.databasepreservation.main.common.server.index.utils.SolrUtils;
+import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerRow;
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
+import com.databasepreservation.main.common.shared.client.common.search.SavedSearch;
 import com.databasepreservation.main.common.shared.client.common.search.SearchField;
 import com.databasepreservation.main.common.shared.client.common.search.SearchInfo;
-import com.databasepreservation.main.common.server.index.utils.SolrUtils;
+import com.databasepreservation.main.common.shared.client.common.utils.BrowserServiceUtils;
+import com.databasepreservation.main.common.utils.UserUtility;
+import com.databasepreservation.main.common.utils.UserUtility.Authorization;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 /**
@@ -227,5 +227,10 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
   @Override
   public String uploadMetadataSIARD(String path) throws GenericException {
     return SIARDController.loadMetadataFromLocal(path);
+  }
+
+  @Override
+  public String findSIARDFile(String path) throws GenericException, RequestNotValidException {
+    return ViewerFactory.getSolrManager().findSIARDFile(path);
   }
 }

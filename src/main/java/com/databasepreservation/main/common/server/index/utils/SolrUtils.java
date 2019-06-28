@@ -28,6 +28,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 
+import com.databasepreservation.main.common.shared.ViewerConstants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -71,10 +72,10 @@ import org.slf4j.LoggerFactory;
 import com.databasepreservation.main.common.server.index.schema.SolrCollection;
 import com.databasepreservation.main.common.server.index.schema.SolrRowsCollectionRegistry;
 import com.databasepreservation.main.common.server.index.schema.collections.RowsCollection;
-import com.databasepreservation.main.common.shared.client.common.search.SavedSearch;
 import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerRow;
+import com.databasepreservation.main.common.shared.client.common.search.SavedSearch;
 import com.databasepreservation.main.common.shared.exceptions.ViewerException;
 
 /**
@@ -117,12 +118,29 @@ public class SolrUtils {
   }
 
   public static <T extends IsIndexed> IndexResult<T> find(SolrClient index, SolrCollection<T> collection, Filter filter,
-                                                          Sorter sorter, Sublist sublist) throws GenericException, RequestNotValidException {
+    Sorter sorter, Sublist sublist) throws GenericException, RequestNotValidException {
     return find(index, collection, filter, sorter, sublist, null);
   }
 
+  public static String findSIARDFile(SolrClient index, String collectionName, Filter filter)
+    throws RequestNotValidException, GenericException {
+    SolrQuery query = new SolrQuery();
+    query.setQuery(parseFilter(filter));
+    try {
+      QueryResponse response = index.query(collectionName, query);
+      SolrDocumentList list = response.getResults();
+      if (list.isEmpty()) {
+        return null;
+      }
+      SolrDocument entry = list.get(0);
+      return objectToString(entry.get(ViewerConstants.INDEX_ID), null);
+    } catch (SolrException | SolrServerException | IOException e) {
+      throw buildGenericException(e);
+    }
+  }
+
   public static <T extends IsIndexed> IndexResult<T> find(SolrClient index, SolrCollection<T> collection, Filter filter,
-                                                          Sorter sorter, Sublist sublist, Facets facets) throws GenericException, RequestNotValidException {
+    Sorter sorter, Sublist sublist, Facets facets) throws GenericException, RequestNotValidException {
     IndexResult<T> ret;
     SolrQuery query = new SolrQuery();
     query.setQuery(parseFilter(filter));
@@ -130,7 +148,6 @@ public class SolrUtils {
     query.setStart(sublist.getFirstElementIndex());
     query.setRows(sublist.getMaximumElementCount());
     parseAndConfigureFacets(facets, query);
-
 
     try {
       QueryResponse response = index.query(collection.getIndexName(), query);
@@ -158,14 +175,12 @@ public class SolrUtils {
   }
 
   public static IndexResult<ViewerRow> findRows(SolrClient index, String databaseUUID, Filter filter, Sorter sorter,
-    Sublist sublist)
-    throws GenericException, RequestNotValidException {
+    Sublist sublist) throws GenericException, RequestNotValidException {
     return findRows(index, databaseUUID, filter, sorter, sublist, null);
   }
 
-  public static IndexResult<ViewerRow> findRows(SolrClient index,
-    String databaseUUID, Filter filter, Sorter sorter, Sublist sublist, Facets facets)
-    throws GenericException, RequestNotValidException {
+  public static IndexResult<ViewerRow> findRows(SolrClient index, String databaseUUID, Filter filter, Sorter sorter,
+    Sublist sublist, Facets facets) throws GenericException, RequestNotValidException {
     return find(index, SolrRowsCollectionRegistry.get(databaseUUID), filter, sorter, sublist, facets);
   }
 
@@ -249,12 +264,12 @@ public class SolrUtils {
   }
 
   public static <T extends IsIndexed> IndexResult<T> queryResponseToIndexResult(QueryResponse response,
-                                                                                SolrCollection<T> collection, Facets facets) throws GenericException {
+    SolrCollection<T> collection, Facets facets) throws GenericException {
     return queryResponseToIndexResult(response, collection, null, facets);
   }
 
   public static <T extends IsIndexed> IndexResult<T> queryResponseToIndexResult(QueryResponse response,
-                                                                                SolrCollection<T> collection, List<String> columnNames, Facets facets) throws GenericException {
+    SolrCollection<T> collection, List<String> columnNames, Facets facets) throws GenericException {
     final SolrDocumentList docList = response.getResults();
     final List<FacetFieldResult> facetResults = processFacetFields(facets, response.getFacetFields());
     final long offset = docList.getStart();
@@ -298,8 +313,8 @@ public class SolrUtils {
     return find(index, collection, filter, null, new Sublist(0, 0)).getTotalCount();
   }
 
-  public static Long countRows(SolrClient index, String databaseUUID,
-    Filter filter) throws GenericException, RequestNotValidException {
+  public static Long countRows(SolrClient index, String databaseUUID, Filter filter)
+    throws GenericException, RequestNotValidException {
     return findRows(index, databaseUUID, filter, null, new Sublist(0, 0)).getTotalCount();
   }
 

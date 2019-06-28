@@ -8,6 +8,11 @@ public class BreadcrumbItem {
   private SafeHtml label;
   private Command command;
 
+  public BreadcrumbItem(SafeHtml label) {
+    super();
+    this.label = label;
+  }
+
   public BreadcrumbItem(SafeHtml label, Command command) {
     super();
     this.label = label;

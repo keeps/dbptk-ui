@@ -106,4 +106,6 @@ public interface BrowserServiceAsync {
   void getApplicationType(AsyncCallback<String> async);
 
   void uploadMetadataSIARD(String path, AsyncCallback<String> async);
+
+  void findSIARDFile(String path, AsyncCallback<String> async);
 }

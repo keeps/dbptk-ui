@@ -2,6 +2,7 @@ package com.databasepreservation.main.common.client;
 
 import java.util.List;
 
+import org.apache.xpath.operations.Bool;
 import org.roda.core.data.exceptions.AuthenticationDeniedException;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.roda.core.data.exceptions.GenericException;
@@ -103,4 +104,6 @@ public interface BrowserService extends RemoteService {
   String getApplicationType();
 
   String uploadMetadataSIARD(String path) throws GenericException;
+
+  String findSIARDFile(String path) throws GenericException, RequestNotValidException;
 }

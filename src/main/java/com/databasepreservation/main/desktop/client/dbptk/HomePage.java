@@ -1,8 +1,9 @@
 package com.databasepreservation.main.desktop.client.dbptk;
 
-import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.common.client.BrowserService;
+import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
+import com.databasepreservation.main.common.shared.client.common.dialogs.Dialogs;
 import com.databasepreservation.main.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
@@ -72,15 +73,45 @@ public class HomePage extends Composite {
         } else {
           path = "/home/mguimaraes/Desktop/mysql.siard";
         }
-        BrowserService.Util.getInstance().uploadMetadataSIARD(path, new DefaultAsyncCallback<String>() {
-          @Override
-          public void onFailure(Throwable caught) {
-            // TODO: error handling
-          }
 
+        BrowserService.Util.getInstance().findSIARDFile(path, new DefaultAsyncCallback<String>() {
           @Override
-          public void onSuccess(String newDatabaseUUID) {
-            HistoryManager.gotoSIARDInfo(newDatabaseUUID);
+          public void onSuccess(String databaseUUID) {
+            if (databaseUUID != null) {
+              Dialogs.showConfirmDialog(messages.dialogReimportSIARDTitle(), messages.dialogReimportSIARD(),
+                messages.dialogCancel(), messages.dialogConfirm(), new DefaultAsyncCallback<Boolean>() {
+                  @Override
+                  public void onSuccess(Boolean confirm) {
+                    if (confirm) {
+                      BrowserService.Util.getInstance().uploadMetadataSIARD(path, new DefaultAsyncCallback<String>() {
+                        @Override
+                        public void onFailure(Throwable caught) {
+                          // TODO: error handling
+                        }
+
+                        @Override
+                        public void onSuccess(String newDatabaseUUID) {
+                          HistoryManager.gotoSIARDInfo(newDatabaseUUID);
+                        }
+                      });
+                    } else {
+                      HistoryManager.gotoSIARDInfo(databaseUUID);
+                    }
+                  }
+                });
+            } else {
+              BrowserService.Util.getInstance().uploadMetadataSIARD(path, new DefaultAsyncCallback<String>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                  // TODO: error handling
+                }
+
+                @Override
+                public void onSuccess(String newDatabaseUUID) {
+                  HistoryManager.gotoSIARDInfo(newDatabaseUUID);
+                }
+              });
+            }
           }
         });
       }

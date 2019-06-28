@@ -27,21 +27,21 @@ import org.roda.core.data.v2.index.sublist.Sublist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.databasepreservation.main.common.shared.client.common.search.SavedSearch;
-import com.databasepreservation.main.common.shared.ViewerConstants;
-import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;
-import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
-import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabaseFromToolkit;
-import com.databasepreservation.main.common.shared.ViewerStructure.ViewerRow;
-import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
-import com.databasepreservation.utils.FileUtils;
-import com.databasepreservation.main.common.shared.exceptions.ViewerException;
 import com.databasepreservation.main.common.server.index.schema.SolrCollection;
 import com.databasepreservation.main.common.server.index.schema.SolrDefaultCollectionRegistry;
 import com.databasepreservation.main.common.server.index.schema.SolrRowsCollectionRegistry;
 import com.databasepreservation.main.common.server.index.schema.collections.RowsCollection;
 import com.databasepreservation.main.common.server.index.utils.Pair;
 import com.databasepreservation.main.common.server.index.utils.SolrUtils;
+import com.databasepreservation.main.common.shared.ViewerConstants;
+import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabaseFromToolkit;
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerRow;
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
+import com.databasepreservation.main.common.shared.client.common.search.SavedSearch;
+import com.databasepreservation.main.common.shared.exceptions.ViewerException;
+import com.databasepreservation.utils.FileUtils;
 
 /**
  * Exposes some methods to interact with a Solr Server
@@ -56,6 +56,11 @@ public class DatabaseRowsSolrManager {
 
   public DatabaseRowsSolrManager(SolrClient client) {
     this.client = client;
+  }
+
+  public String findSIARDFile(String path) throws GenericException, RequestNotValidException {
+    Filter pathFilter = new Filter(new SimpleFilterParameter(ViewerConstants.SOLR_DATABASES_SIARD_PATH, path));
+    return SolrUtils.findSIARDFile(client, ViewerConstants.SOLR_INDEX_DATABASES_COLLECTION_NAME, pathFilter);
   }
 
   /**
