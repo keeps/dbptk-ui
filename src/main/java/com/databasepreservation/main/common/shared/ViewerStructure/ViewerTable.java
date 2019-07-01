@@ -1,14 +1,13 @@
 package com.databasepreservation.main.common.shared.ViewerStructure;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class ViewerTable implements IsSerializable {
+public class ViewerTable implements Serializable {
   // used to identify the collection containing data from this table
   private String uuid;
 

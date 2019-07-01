@@ -1,13 +1,12 @@
 package com.databasepreservation.main.common.shared.ViewerStructure;
 
+import java.io.Serializable;
 import java.util.List;
-
-import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class ViewerCandidateKey implements IsSerializable {
+public class ViewerCandidateKey implements Serializable {
   // mandatory in SIARD2
   private String name;
   private List<Integer> columnIndexesInViewerTable;

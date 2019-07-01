@@ -1,11 +1,11 @@
 package com.databasepreservation.main.common.shared.ViewerStructure;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import java.io.Serializable;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class ViewerReference implements IsSerializable {
+public class ViewerReference implements Serializable {
   private Integer sourceColumnIndex;
   private Integer referencedColumnIndex;
 

@@ -1,11 +1,11 @@
 package com.databasepreservation.main.common.shared.ViewerStructure;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import java.io.Serializable;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class ViewerRoleStructure implements IsSerializable {
+public class ViewerRoleStructure implements Serializable {
   // mandatory in SIARD2
   private String name;
   private String admin;

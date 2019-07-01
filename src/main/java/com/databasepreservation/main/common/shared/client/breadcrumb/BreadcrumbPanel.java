@@ -56,13 +56,16 @@ public class BreadcrumbPanel extends FlowPanel {
     breadcrumbs.clear();
     for (final BreadcrumbItem item : path) {
       Breadcrumb breadcrumb = new Breadcrumb(item);
-      breadcrumb.addClickHandler(new ClickHandler() {
 
-        @Override
-        public void onClick(ClickEvent event) {
-          item.getCommand().execute();
-        }
-      });
+      if (item.getCommand() != null) {
+        breadcrumb.addClickHandler(new ClickHandler() {
+          @Override
+          public void onClick(ClickEvent event) {
+            item.getCommand().execute();
+          }
+        });
+      }
+
       breadcrumbs.add(breadcrumb);
     }
     updateLayout();

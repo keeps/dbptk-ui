@@ -235,6 +235,10 @@ table .label-success, table .label-danger, table .label-warning, table .label-in
     text-align: right;
 }
 
+.text-align-center {
+    text-align: center !important;
+}
+
 div.inline {
     display: inline-block;
 }

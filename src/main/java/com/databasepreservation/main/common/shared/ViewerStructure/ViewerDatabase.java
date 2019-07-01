@@ -1,13 +1,11 @@
 package com.databasepreservation.main.common.shared.ViewerStructure;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
-
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class ViewerDatabase extends IsIndexed {
 
-  public enum Status implements IsSerializable {
+  public enum Status {
     INGESTING, AVAILABLE, REMOVING, ERROR, METADATA_ONLY
   }
 

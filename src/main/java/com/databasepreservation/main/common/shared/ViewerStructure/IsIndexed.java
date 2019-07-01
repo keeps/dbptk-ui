@@ -1,8 +1,7 @@
 package com.databasepreservation.main.common.shared.ViewerStructure;
 
+import java.io.Serializable;
 import java.util.List;
-
-import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
  * IsIndexed that is compatible with RODA objects, but made to fit DBVTK needs.
@@ -10,7 +9,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  *
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public abstract class IsIndexed implements IsSerializable, org.roda.core.data.v2.index.IsIndexed {
+public abstract class IsIndexed implements Serializable, org.roda.core.data.v2.index.IsIndexed {
   public abstract void setUUID(String uuid);
 
   @Override

@@ -10,6 +10,7 @@ public class BreadcrumbItem {
 
   public BreadcrumbItem(SafeHtml label) {
     super();
+    this.command = null;
     this.label = label;
   }
 

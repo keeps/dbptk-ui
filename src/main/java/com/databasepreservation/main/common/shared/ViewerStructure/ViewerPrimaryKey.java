@@ -1,13 +1,12 @@
 package com.databasepreservation.main.common.shared.ViewerStructure;
 
+import java.io.Serializable;
 import java.util.List;
-
-import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class ViewerPrimaryKey implements IsSerializable {
+public class ViewerPrimaryKey implements Serializable {
   private String name;
 
   private List<Integer> columnIndexesInViewerTable;

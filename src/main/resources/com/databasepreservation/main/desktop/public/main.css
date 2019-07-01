@@ -945,3 +945,12 @@ p[data-value]:after {
 .value-field {
     display: inline;
 }
+
+.manage-panel {
+    width: 98%;
+    margin-left: 1%;
+}
+
+.database-list {
+    margin-top: 1%;
+}

@@ -1,11 +1,11 @@
 package com.databasepreservation.main.common.shared.ViewerStructure;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import java.io.Serializable;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class ViewerTrigger implements IsSerializable {
+public class ViewerTrigger implements Serializable {
   private String name;
   private String actionTime;
   private String triggerEvent;

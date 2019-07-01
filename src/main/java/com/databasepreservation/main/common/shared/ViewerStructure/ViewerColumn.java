@@ -1,11 +1,11 @@
 package com.databasepreservation.main.common.shared.ViewerStructure;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+import java.io.Serializable;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class ViewerColumn implements IsSerializable {
+public class ViewerColumn implements Serializable {
   private String solrName;
 
   private String displayName;

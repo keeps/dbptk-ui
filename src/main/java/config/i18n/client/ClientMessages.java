@@ -443,4 +443,20 @@ public interface ClientMessages extends Messages {
   String dialogCancel();
 
   String dialogConfirm();
+
+  String SIARDLocation();
+
+  String SIARDValidated();
+
+  String solrIngesting();
+
+  String solrAvailable();
+
+  String solrMetadataOnly();
+
+  String solrRemoving();
+
+  String solrError();
+
+  String open();
 }

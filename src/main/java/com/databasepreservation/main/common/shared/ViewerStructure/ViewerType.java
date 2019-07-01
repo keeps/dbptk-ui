@@ -1,14 +1,13 @@
 package com.databasepreservation.main.common.shared.ViewerStructure;
 
+import java.io.Serializable;
 import java.util.Objects;
-
-import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class ViewerType implements IsSerializable {
-  public enum dbTypes implements IsSerializable {
+public class ViewerType implements Serializable {
+  public enum dbTypes {
     BINARY, BOOLEAN, DATETIME, DATETIME_JUST_DATE, DATETIME_JUST_TIME, ENUMERATION, TIME_INTERVAL,
     NUMERIC_FLOATING_POINT, NUMERIC_INTEGER, STRING, COMPOSED_STRUCTURE, COMPOSED_ARRAY
   }

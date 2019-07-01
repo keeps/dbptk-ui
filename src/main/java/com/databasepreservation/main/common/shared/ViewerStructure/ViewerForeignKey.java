@@ -1,13 +1,12 @@
 package com.databasepreservation.main.common.shared.ViewerStructure;
 
+import java.io.Serializable;
 import java.util.List;
-
-import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class ViewerForeignKey implements IsSerializable {
+public class ViewerForeignKey implements Serializable {
   private String name;
   private String referencedTableUUID;
   private List<ViewerReference> references;
