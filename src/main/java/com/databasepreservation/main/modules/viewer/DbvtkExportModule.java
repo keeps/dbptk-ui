@@ -5,7 +5,7 @@ import java.util.Set;
 
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabaseFromToolkit;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
-import com.databasepreservation.main.common.shared.client.common.utils.transformers.ToolkitStructure2ViewerStructure;
+import com.databasepreservation.main.common.server.transformers.ToolkitStructure2ViewerStructure;
 import com.databasepreservation.main.common.server.ViewerFactory;
 import com.databasepreservation.main.common.server.index.DatabaseRowsSolrManager;
 import com.databasepreservation.model.Reporter;

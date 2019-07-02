@@ -11,11 +11,13 @@ import com.databasepreservation.main.desktop.client.common.Card;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
@@ -50,13 +52,15 @@ public class HomePage extends Composite {
   }
 
   private void init() {
+
     Button btnCreate = new Button();
     btnCreate.setText(messages.createCardButton());
 
     btnCreate.addClickHandler(new ClickHandler() {
+
       @Override
       public void onClick(ClickEvent event) {
-        // TODO: OPEN MIGRATE PAGE
+        HistoryManager.gotoCreateSIARD();
       }
     });
 
@@ -74,6 +78,11 @@ public class HomePage extends Composite {
           path = "/home/mguimaraes/Desktop/mysql.siard";
         }
 
+        Widget loading = new HTML(SafeHtmlUtils.fromSafeConstant(
+          "<div id='loading' class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
+
+        options.add(loading);
+
         BrowserService.Util.getInstance().findSIARDFile(path, new DefaultAsyncCallback<String>() {
           @Override
           public void onSuccess(String databaseUUID) {
@@ -87,14 +96,17 @@ public class HomePage extends Composite {
                         @Override
                         public void onFailure(Throwable caught) {
                           // TODO: error handling
+                          options.remove(loading);
                         }
 
                         @Override
                         public void onSuccess(String newDatabaseUUID) {
+                          options.remove(loading);
                           HistoryManager.gotoSIARDInfo(newDatabaseUUID);
                         }
                       });
                     } else {
+                      options.remove(loading);
                       HistoryManager.gotoSIARDInfo(databaseUUID);
                     }
                   }
@@ -104,10 +116,12 @@ public class HomePage extends Composite {
                 @Override
                 public void onFailure(Throwable caught) {
                   // TODO: error handling
+                  options.remove(loading);
                 }
 
                 @Override
                 public void onSuccess(String newDatabaseUUID) {
+                  options.remove(loading);
                   HistoryManager.gotoSIARDInfo(newDatabaseUUID);
                 }
               });

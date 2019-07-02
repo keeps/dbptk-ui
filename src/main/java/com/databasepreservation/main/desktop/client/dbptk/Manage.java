@@ -2,6 +2,7 @@ package com.databasepreservation.main.desktop.client.dbptk;
 
 import java.util.List;
 
+import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import org.roda.core.data.v2.index.filter.BasicSearchFilterParameter;
 import org.roda.core.data.v2.index.filter.Filter;
 
@@ -9,10 +10,8 @@ import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
-import com.databasepreservation.main.common.shared.client.common.LoadingDiv;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.main.common.shared.client.tools.ViewerStringUtils;
-import com.databasepreservation.main.common.shared.client.widgets.Toast;
 import com.databasepreservation.main.common.shared.client.widgets.wcag.AccessibleFocusPanel;
 import com.databasepreservation.main.desktop.client.common.lists.DatabaseList;
 import com.google.gwt.core.client.GWT;
@@ -23,6 +22,7 @@ import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -35,7 +35,8 @@ import config.i18n.client.ClientMessages;
  */
 public class Manage extends Composite {
 
-  private static final ClientMessages messages = GWT.create(ClientMessages.class);
+  @UiField
+  public ClientMessages messages = GWT.create(ClientMessages.class);
 
   interface ManageUiBinder extends UiBinder<Widget, Manage> {
   }
@@ -53,6 +54,9 @@ public class Manage extends Composite {
 
   @UiField(provided = true)
   DatabaseList databaseList;
+
+  @UiField
+  Button create, open;
 
   private static Manage instance = null;
 
@@ -102,6 +106,18 @@ public class Manage extends Composite {
           }
         }
       }
+    });
+
+    initButtons();
+  }
+
+  private void initButtons() {
+    create.addClickHandler(event -> {
+      //HistoryManager.gotoHome();
+    });
+
+    open.addClickHandler(event -> {
+      //HistoryManager.gotoHome();
     });
   }
 

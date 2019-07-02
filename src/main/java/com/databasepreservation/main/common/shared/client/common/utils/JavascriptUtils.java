@@ -258,7 +258,9 @@ public class JavascriptUtils {
   public static native String openFileDialog() /*-{
       var dialog = $wnd.nodeRequire('electron').remote.dialog;
 
-      return dialog.showOpenDialog({properties: ['openFile']})[0];
+      return dialog.showOpenDialog({
+          properties: ['openFile'], filters: [{ name: "SIARD", extensions: ["siard"] }]
+      })[0];
   }-*/;
 
   public static native void log(String txt) /*-{

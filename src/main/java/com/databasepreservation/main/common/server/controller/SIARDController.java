@@ -8,32 +8,40 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.solr.client.solrj.SolrServerException;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
-import org.roda.core.data.exceptions.RequestNotValidException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.DatabaseMigration;
 import com.databasepreservation.SIARDEdition;
-import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
-import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabaseFromToolkit;
-import com.databasepreservation.main.common.shared.client.common.utils.transformers.ToolkitStructure2ViewerStructure;
 import com.databasepreservation.main.common.server.ProgressObserver;
 import com.databasepreservation.main.common.server.ViewerConfiguration;
 import com.databasepreservation.main.common.server.ViewerFactory;
 import com.databasepreservation.main.common.server.index.DatabaseRowsSolrManager;
 import com.databasepreservation.main.common.server.index.utils.SolrUtils;
+import com.databasepreservation.main.common.server.transformers.ToolkitStructure2ViewerStructure;
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabaseFromToolkit;
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
+import com.databasepreservation.main.desktop.shared.models.ConnectionModule;
+import com.databasepreservation.main.desktop.shared.models.PreservationParameter;
+import com.databasepreservation.main.modules.viewer.DbvtkModuleFactory;
 import com.databasepreservation.model.Reporter;
 import com.databasepreservation.model.exception.ModuleException;
+import com.databasepreservation.model.modules.DatabaseImportModule;
+import com.databasepreservation.model.modules.DatabaseModuleFactory;
 import com.databasepreservation.model.modules.filters.ObservableFilter;
+import com.databasepreservation.model.parameters.Parameter;
+import com.databasepreservation.model.parameters.Parameters;
 import com.databasepreservation.model.structure.DatabaseStructure;
+import com.databasepreservation.modules.mySql.MySQLModuleFactory;
 import com.databasepreservation.modules.siard.SIARD2ModuleFactory;
 import com.databasepreservation.modules.siard.SIARDEditFactory;
-import com.databasepreservation.main.modules.viewer.DbvtkModuleFactory;
+import com.databasepreservation.utils.ReflectionUtils;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -54,6 +62,68 @@ public class SIARDController {
       throw new NotFoundException("The database does not have a conversion report.");
     }
     return result;
+  }
+
+  public static ViewerMetadata getDatabaseMetadata(String databaseUUID) throws GenericException {
+
+    Path reporterPath = ViewerConfiguration.getInstance().getReportPath(databaseUUID).toAbsolutePath();
+    try (Reporter reporter = new Reporter(reporterPath.getParent().toString(), reporterPath.getFileName().toString())) {
+
+      DatabaseMigration databaseMigration = DatabaseMigration.newInstance();
+
+      databaseMigration.importModule(new MySQLModuleFactory())
+        .importModuleParameter(MySQLModuleFactory.PARAMETER_HOSTNAME, "localhost")
+        .importModuleParameter(MySQLModuleFactory.PARAMETER_USERNAME, "root")
+        .importModuleParameter(MySQLModuleFactory.PARAMETER_PASSWORD, "123456")
+        .importModuleParameter(MySQLModuleFactory.PARAMETER_DATABASE, "sakila")
+        .importModuleParameter(MySQLModuleFactory.PARAMETER_PORT_NUMBER, "3306");
+
+      databaseMigration.reporter(reporter);
+
+      final DatabaseImportModule importModule = databaseMigration.getImportModule();
+      importModule.setOnceReporter(reporter);
+
+      // final DatabaseStructure schemaInformation =
+      // importModule.getSchemaInformation();
+
+      // final ViewerDatabaseFromToolkit database =
+      // ToolkitStructure2ViewerStructure.getDatabase(schemaInformation);
+
+      // return database.getMetadata();
+
+    } catch (IOException e) {
+      throw new GenericException("Could not initialize conversion modules", e);
+    } catch (ModuleException | RuntimeException e) {
+      throw new GenericException("Could not convert the database to the Solr instance.", e);
+    }
+
+    return null;
+  }
+
+  public static ConnectionModule getDatabaseModuleFactories() throws GenericException {
+    ConnectionModule connectionModule = new ConnectionModule();
+    PreservationParameter preservationParameter;
+
+    Set<DatabaseModuleFactory> databaseModuleFactories = ReflectionUtils.collectDatabaseModuleFactories();
+
+    for (DatabaseModuleFactory factory : databaseModuleFactories) {
+      if (factory.isEnabled()) {
+        if (factory.producesImportModules()) {
+
+          final Parameters importModuleParameters;
+
+          importModuleParameters = factory.getConnectionParameters();
+
+          for (Parameter param : importModuleParameters.getParameters()) {
+            preservationParameter = new PreservationParameter(param.longName(), param.longName(), param.description(), param.required(),
+              param.hasArgument());
+            connectionModule.addPreservationParameter(factory.getModuleName(), preservationParameter);
+          }
+        }
+      }
+    }
+
+    return connectionModule;
   }
 
   public static String loadMetadataFromLocal(String localPath) throws GenericException {

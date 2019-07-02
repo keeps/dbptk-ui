@@ -2,6 +2,8 @@ package com.databasepreservation.main.common.server;
 
 import java.util.List;
 
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
+import com.databasepreservation.main.desktop.client.common.GenericField;
 import org.roda.core.data.exceptions.AuthenticationDeniedException;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.roda.core.data.exceptions.GenericException;
@@ -32,6 +34,7 @@ import com.databasepreservation.main.common.shared.client.common.search.SearchIn
 import com.databasepreservation.main.common.shared.client.common.utils.BrowserServiceUtils;
 import com.databasepreservation.main.common.utils.UserUtility;
 import com.databasepreservation.main.common.utils.UserUtility.Authorization;
+import com.databasepreservation.main.desktop.shared.models.ConnectionModule;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 /**
@@ -232,5 +235,14 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
   @Override
   public String findSIARDFile(String path) throws GenericException, RequestNotValidException {
     return ViewerFactory.getSolrManager().findSIARDFile(path);
+  }
+
+  @Override
+  public ConnectionModule getDatabaseModuleFactories() throws GenericException {
+    return SIARDController.getDatabaseModuleFactories();
+  }
+
+  public ViewerMetadata getSchemaInformation(String databaseUUID) throws GenericException {
+    return SIARDController.getDatabaseMetadata(databaseUUID);
   }
 }

@@ -1,0 +1,28 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+
+    <ui:with field="messages" type="config.i18n.client.ClientMessages" />
+    <g:FlowPanel>
+        <g:FlowPanel addStyleNames="form-container">
+            <g:FlowPanel addStyleNames="form-row">
+                <g:CheckBox ui:field="SSHTunnel" />
+            </g:FlowPanel>
+            <g:FlowPanel addStyleNames="form-row">
+                <g:Label ui:field="proxyHostLabel" addStyleNames="form-label form-label-spaced"><ui:text from='{messages.proxyHostLabel}' /></g:Label>
+                <g:FlowPanel addStyleNames="form-inline">
+                    <g:TextBox ui:field="proxyHost" addStyleNames="form-textbox" />
+                    <g:Label ui:field="proxyPortLabel" addStyleNames="form-label form-label-spaced"><ui:text from='{messages.proxyPortLabel}' /></g:Label>
+                    <g:TextBox ui:field="proxyPort" addStyleNames="form-textbox form-100" />
+                </g:FlowPanel>
+            </g:FlowPanel>
+            <g:FlowPanel addStyleNames="form-row">
+                <g:Label ui:field="proxyUserLabel" addStyleNames="form-label form-label-spaced"><ui:text from='{messages.proxyUserLabel}' /></g:Label>
+                <g:TextBox ui:field="proxyUser" addStyleNames="form-textbox" />
+            </g:FlowPanel>
+            <g:FlowPanel addStyleNames="form-row">
+                <g:Label ui:field="proxyPasswordLabel" addStyleNames="form-label form-label-spaced"><ui:text from='{messages.proxyPasswordLabel}' /></g:Label>
+                <g:PasswordTextBox ui:field="proxyPassword" addStyleNames="form-textbox" />
+            </g:FlowPanel>
+        </g:FlowPanel>
+    </g:FlowPanel>
+</ui:UiBinder>

@@ -4,7 +4,7 @@
              xmlns:lists='urn:import:com.databasepreservation.main.desktop.client.common.lists'
              xmlns:wcag="urn:import:com.databasepreservation.main.common.shared.client.widgets.wcag">
 
-
+    <ui:with field='messages' type='config.i18n.client.ClientMessages' />
     <g:FlowPanel>
         <m:BreadcrumbPanel ui:field="breadcrumb" />
         <g:FlowPanel addStyleNames="manage-panel">
@@ -27,6 +27,14 @@
             </g:FlowPanel>
             <g:FlowPanel addStyleNames="database-list">
                 <lists:DatabaseList ui:field="databaseList"/>
+            </g:FlowPanel>
+            <g:FlowPanel addStyleNames="button-group-panel">
+                <g:SimplePanel addStyleNames="button-group-panel-btn">
+                    <g:Button addStyleNames="btn btn-primary" ui:field="create"><ui:text from='{messages.createSIARD}' /></g:Button>
+                </g:SimplePanel>
+                <g:SimplePanel addStyleNames="button-group-panel-btn">
+                    <g:Button addStyleNames="btn btn btn-primary" ui:field="open"><ui:text from='{messages.openSIARD}' /></g:Button>
+                </g:SimplePanel>
             </g:FlowPanel>
         </g:FlowPanel>
     </g:FlowPanel>

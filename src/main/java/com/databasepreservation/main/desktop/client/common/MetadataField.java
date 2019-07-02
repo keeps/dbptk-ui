@@ -13,10 +13,10 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class MetadataField extends Composite {
 
-  interface metadataFieldUiBinder extends UiBinder<Widget, MetadataField> {
+  interface MetadataFieldUiBinder extends UiBinder<Widget, MetadataField> {
   }
 
-  private static metadataFieldUiBinder binder = GWT.create(metadataFieldUiBinder.class);
+  private static MetadataFieldUiBinder binder = GWT.create(MetadataFieldUiBinder.class);
 
   @UiField
   FlowPanel metadataField;

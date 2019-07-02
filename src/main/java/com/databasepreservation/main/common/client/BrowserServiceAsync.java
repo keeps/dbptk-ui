@@ -2,6 +2,7 @@ package com.databasepreservation.main.common.client;
 
 import java.util.List;
 
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.RODAException;
 import org.roda.core.data.exceptions.RequestNotValidException;
@@ -11,13 +12,14 @@ import org.roda.core.data.v2.index.sort.Sorter;
 import org.roda.core.data.v2.index.sublist.Sublist;
 import org.roda.core.data.v2.user.User;
 
-import com.databasepreservation.main.common.shared.client.common.search.SearchField;
-import com.databasepreservation.main.common.shared.client.common.search.SearchInfo;
-import com.databasepreservation.main.common.shared.client.common.search.SavedSearch;
 import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerRow;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
+import com.databasepreservation.main.common.shared.client.common.search.SavedSearch;
+import com.databasepreservation.main.common.shared.client.common.search.SearchField;
+import com.databasepreservation.main.common.shared.client.common.search.SearchInfo;
+import com.databasepreservation.main.desktop.shared.models.ConnectionModule;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
@@ -108,4 +110,8 @@ public interface BrowserServiceAsync {
   void uploadMetadataSIARD(String path, AsyncCallback<String> async);
 
   void findSIARDFile(String path, AsyncCallback<String> async);
+
+  void getDatabaseModuleFactories(AsyncCallback<ConnectionModule> async);
+
+  void getSchemaInformation(String databaseUUID, AsyncCallback<ViewerMetadata> async);
 }

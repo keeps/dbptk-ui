@@ -8,6 +8,7 @@ import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.desktop.client.dbptk.HomePage;
 import com.databasepreservation.main.desktop.client.dbptk.Manage;
 import com.databasepreservation.main.desktop.client.dbptk.SIARDMainPage;
+import com.databasepreservation.main.desktop.client.dbptk.wizard.create.CreateWizardManager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -54,6 +55,13 @@ public class MainPanelDesktop extends Composite {
 
       contentPanel.clear();
       contentPanel.add(manage);
+    } else if (HistoryManager.ROUTE_CREATE_SIARD.equals(currentHistoryPath.get(0))) {
+      CreateWizardManager instance = CreateWizardManager.getInstance();
+      contentPanel.clear();
+      if (currentHistoryPath.size() != 1) {
+        instance.changeConnectionPage(currentHistoryPath.get(1));
+      }
+      contentPanel.add(instance);
     } else {
       handleErrorPath(currentHistoryPath);
     }

@@ -1,4 +1,4 @@
-package com.databasepreservation.main.common.shared.client.common.utils.transformers;
+package com.databasepreservation.main.common.server.transformers;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,11 +10,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+import org.joda.time.DateTimeZone;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.databasepreservation.main.common.server.index.utils.SolrUtils;
 import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerCell;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerCheckConstraint;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerColumn;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabaseFromToolkit;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerForeignKey;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerPrimaryKey;
@@ -33,19 +43,9 @@ import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTypeStr
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerUserStructure;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerView;
 import com.databasepreservation.main.common.shared.exceptions.ViewerException;
-import com.databasepreservation.main.common.server.index.utils.SolrUtils;
 import com.databasepreservation.main.common.utils.LobPathManager;
 import com.databasepreservation.main.common.utils.ViewerAbstractConfiguration;
 import com.databasepreservation.main.common.utils.ViewerUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-import org.joda.time.DateTimeZone;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabaseFromToolkit;
 import com.databasepreservation.model.data.BinaryCell;
 import com.databasepreservation.model.data.Cell;
 import com.databasepreservation.model.data.ComposedCell;

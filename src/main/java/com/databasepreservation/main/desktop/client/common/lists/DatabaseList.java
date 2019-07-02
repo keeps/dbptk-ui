@@ -50,7 +50,7 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
   }
 
   private DatabaseList(Filter filter, Facets facets, String summary, boolean selectable, boolean exportable) {
-    super(filter, facets, summary, selectable, exportable, 15, 50);
+    super(filter, facets, summary, selectable, exportable, 15, 15);
     autoUpdate(2000);
   }
 
@@ -126,7 +126,7 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
     // dataOriginTimespan.setSortable(true);
     // description.setSortable(true);
 
-    addColumn(nameColumn, messages.databaseName(), true, TextAlign.NONE, 20);
+    addColumn(nameColumn, messages.databaseName(), true, TextAlign.NONE, 15);
     addColumn(dbmsColumn, messages.siardMetadata_producerApplication(), true, TextAlign.NONE, 10);
     addColumn(archivalDateColumn, messages.siardMetadata_archivalDate(), true, TextAlign.NONE, 5);
     addColumn(locationColumn, messages.SIARDLocation(), true, TextAlign.NONE, 8);

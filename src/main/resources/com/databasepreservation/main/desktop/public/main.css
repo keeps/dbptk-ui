@@ -818,7 +818,7 @@ p[data-value]:after {
 }
 
 .main .wui-breadcrumbPanel .breadcrumb-last {
-    max-width: 200px;
+    max-width: 300px;
 }
 
 .gwt-MenuBar .gwt-MenuItem {
@@ -953,4 +953,129 @@ p[data-value]:after {
 
 .database-list {
     margin-top: 1%;
+}
+
+.button-group-panel {
+    display: inline;
+    width: 100%;
+}
+
+.button-panel-container {
+    display: inline;
+    float: right;
+    padding-top: 1%;
+}
+
+.button-group-panel-btn {
+    display: table-cell;
+    width: 50%;
+    padding-right: 10px;
+}
+
+.button-group-panel-btn .btn {
+    width: 100%;
+    padding: 8px;
+    text-align: center;
+}
+
+.button-panel-container .btn-item {
+    padding-top: 1%;
+    padding-left: 10px;
+    display: table-cell;
+}
+
+.button-panel-container .btn-item .btn {
+    width: 8rem;
+    padding: 8px;
+    text-align: center;
+}
+
+.wrapper {
+    display: flex;
+}
+
+.wrapper .left {
+    flex: 0 0 15%;
+    margin-right: 15px;
+}
+
+.loading-sidebar {
+    position: relative;
+    height: 50vh;
+}
+
+.wrapper .right {
+    flex: 1;
+}
+
+.connection-container {
+    width: 100%;
+}
+
+.connection-panel {
+    width: 100%;
+    margin: 0 !important;
+}
+
+.form-container {
+    margin: 2.5rem 4rem 0rem 6rem;
+}
+
+.form-row {
+    display: flex;
+    margin-bottom: 2.5rem;
+    width:100%;
+}
+
+.form-inline {
+    display: flex;
+    width: 100%;
+}
+
+.form-inline .form-label-spaced {
+    margin-inline-start: 2rem;
+}
+
+.form-label-spaced {
+    display: inline-block;
+    text-align: left;
+    font-weight: bold;
+    width: 17rem;
+    min-width: 100px;
+}
+
+.form-100 {
+    width: 100px;
+}
+
+.gwt-Label-disabled {
+    color: grey;
+}
+
+.gwt-TextBox:disabled {
+    background-color: inherit;
+}
+
+.gwt-PasswordTextBox:disabled {
+    background-color: inherit;
+}
+
+.gwt-TabPanelBottom {
+    background-color: transparent;
+    border-color: lightgray;
+    border-style: solid;
+    border-width: thin;
+}
+
+.sidebarHyperLink-selected {
+    background: #5bbeff;
+}
+
+
+.sidebarItem {
+    padding: 5px 0;
+}
+
+.sidebarItem-selected {
+    color: white !important;
 }

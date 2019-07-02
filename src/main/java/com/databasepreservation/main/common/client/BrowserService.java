@@ -2,7 +2,7 @@ package com.databasepreservation.main.common.client;
 
 import java.util.List;
 
-import org.apache.xpath.operations.Bool;
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
 import org.roda.core.data.exceptions.AuthenticationDeniedException;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.roda.core.data.exceptions.GenericException;
@@ -16,13 +16,14 @@ import org.roda.core.data.v2.index.sort.Sorter;
 import org.roda.core.data.v2.index.sublist.Sublist;
 import org.roda.core.data.v2.user.User;
 
-import com.databasepreservation.main.common.shared.client.common.search.SavedSearch;
 import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerRow;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
+import com.databasepreservation.main.common.shared.client.common.search.SavedSearch;
 import com.databasepreservation.main.common.shared.client.common.search.SearchField;
 import com.databasepreservation.main.common.shared.client.common.search.SearchInfo;
+import com.databasepreservation.main.desktop.shared.models.ConnectionModule;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
@@ -106,4 +107,8 @@ public interface BrowserService extends RemoteService {
   String uploadMetadataSIARD(String path) throws GenericException;
 
   String findSIARDFile(String path) throws GenericException, RequestNotValidException;
+
+  ConnectionModule getDatabaseModuleFactories() throws GenericException;
+
+  ViewerMetadata getSchemaInformation(String databaseUUID) throws GenericException;
 }

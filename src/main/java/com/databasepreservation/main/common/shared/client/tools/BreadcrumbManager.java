@@ -375,4 +375,53 @@ public class BreadcrumbManager {
         + SafeHtmlUtils.htmlEscape(" " + messages.manageSIARD()))));
     return items;
   }
+
+  public static List<BreadcrumbItem> forCreateConnection() {
+    List<BreadcrumbItem> items = forHome();
+    items.add(
+        new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.GLOBE)
+            + SafeHtmlUtils.htmlEscape(" " + messages.createSIARDConnection())))
+    );
+    return items;
+  }
+
+  public static List<BreadcrumbItem> forTableAndColumns() {
+    List<BreadcrumbItem> items = forHome();
+    items.add(
+        new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.GLOBE)
+            + SafeHtmlUtils.htmlEscape(" " + messages.createSIARDTableAndColumns()))));
+    return items;
+  }
+
+  public static List<BreadcrumbItem> forSIARDExportOptions() {
+    List<BreadcrumbItem> items = forHome();
+    items.add(
+        new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.GLOBE)
+            + SafeHtmlUtils.htmlEscape(" " + messages.createSIARDExportOptions()))));
+    return items;
+  }
+
+  public static List<BreadcrumbItem> forExternalLOBSExportOptions() {
+    List<BreadcrumbItem> items = forHome();
+    items.add(
+        new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.GLOBE)
+            + SafeHtmlUtils.htmlEscape(" " + messages.createSIARDExternalLOBsOptions()))));
+    return items;
+  }
+
+  public static List<BreadcrumbItem> forMetadataExportOptions() {
+    List<BreadcrumbItem> items = forHome();
+    items.add(
+        new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.GLOBE)
+            + SafeHtmlUtils.htmlEscape(" " + messages.createSIARDMetadataOptions()))));
+    return items;
+  }
+
+  public static List<BreadcrumbItem> forCustomViews() {
+    List<BreadcrumbItem> items = forHome();
+    items.add(
+        new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.GLOBE)
+            + SafeHtmlUtils.htmlEscape(" " + messages.createSIARDCustomViews()))));
+    return items;
+  }
 }

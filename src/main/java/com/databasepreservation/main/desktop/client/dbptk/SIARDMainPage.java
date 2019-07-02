@@ -1,6 +1,8 @@
 package com.databasepreservation.main.desktop.client.dbptk;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.databasepreservation.main.common.client.BrowserService;
 import com.databasepreservation.main.common.shared.ViewerConstants;
@@ -17,12 +19,15 @@ import com.databasepreservation.main.common.shared.client.tools.PathUtils;
 import com.databasepreservation.main.common.shared.client.tools.ViewerStringUtils;
 import com.databasepreservation.main.desktop.client.common.MetadataField;
 import com.databasepreservation.main.desktop.client.common.NavigationPanel;
+import com.databasepreservation.main.desktop.client.common.sidebar.ConnectionSidebar;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -39,18 +44,21 @@ public class SIARDMainPage extends Composite {
   }
 
   private static SIARDInfoUiBinder binder = GWT.create(SIARDInfoUiBinder.class);
-  private static SIARDMainPage instance = null;
+  private static Map<String, SIARDMainPage> instances = new HashMap<>();
   private ViewerDatabase database = null;
 
   public static SIARDMainPage getInstance(String databaseUUID) {
-    if (instance == null) {
-      instance = new SIARDMainPage(databaseUUID);
+
+    if (instances.get(databaseUUID) == null) {
+      SIARDMainPage instance = new SIARDMainPage(databaseUUID);
+      instances.put(databaseUUID, instance);
     }
-    return instance;
+
+    return instances.get(databaseUUID);
   }
 
   @UiField
-  FlowPanel metadataInformation, navigationPanels;
+  FlowPanel container, metadataInformation, navigationPanels;
 
   @UiField
   BreadcrumbPanel breadcrumb;
@@ -61,6 +69,11 @@ public class SIARDMainPage extends Composite {
   private SIARDMainPage(final String databaseUUID) {
 
     initWidget(binder.createAndBindUi(this));
+
+    final Widget loading = new HTML(SafeHtmlUtils.fromSafeConstant(
+        "<div id='loading' class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
+
+    container.add(loading);
 
     BrowserService.Util.getInstance().retrieve(databaseUUID, ViewerDatabase.class.getName(), databaseUUID,
       new DefaultAsyncCallback<IsIndexed>() {
@@ -79,6 +92,8 @@ public class SIARDMainPage extends Composite {
 
           List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forSIARDMainPage();
           BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
+
+          container.remove(loading);
         }
       });
   }
@@ -170,7 +185,7 @@ public class SIARDMainPage extends Composite {
 
     MetadataField field;
 
-    field = MetadataField.createInstance("Prepared for browsing");
+    field = MetadataField.createInstance("Work in progress");
 
     browse.addToInfoPanel(field);
     browse.addButton(btnBrowse);

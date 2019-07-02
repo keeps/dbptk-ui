@@ -34,6 +34,7 @@ public class HistoryManager {
   public static final String ROUTE_UPLOADS = "uploads";
   public static final String ROUTE_UPLOADS_NEW = "new";
   public static final String ROUTE_SIARD_INFO = "siard";
+  public static final String ROUTE_CREATE_SIARD = "create";
 
   public static final String HISTORY_SEP = "/";
   public static final String HISTORY_SEP_REGEX = "/";
@@ -161,6 +162,11 @@ public class HistoryManager {
     newHistory(params);
   }
 
+  public static void gotoCreateSIARD() {
+    List<String> params = Collections.singletonList(ROUTE_CREATE_SIARD);
+    newHistory(params);
+  }
+
   private static void newHistory(List<String> path) {
     // History.newItem(createHistoryToken(path)
     String hash = createHistoryToken(path);
@@ -285,5 +291,17 @@ public class HistoryManager {
 
   public static String linkToUpload(String database_uuid) {
     return createHistoryToken(Arrays.asList(ROUTE_UPLOADS, database_uuid));
+  }
+
+  public static String linkToCreateSIARD() {
+    return createHistoryToken(Collections.singletonList(ROUTE_CREATE_SIARD));
+  }
+
+  public static String linkToCreateSIARD(String page) {
+    return createHistoryToken(Arrays.asList(ROUTE_CREATE_SIARD, page));
+  }
+
+  public static String linkToHome() {
+    return createHistoryToken(Collections.singletonList(ROUTE_HOME));
   }
 }

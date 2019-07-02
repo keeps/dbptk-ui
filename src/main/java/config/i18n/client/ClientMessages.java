@@ -1,6 +1,7 @@
 package config.i18n.client;
 
 import com.google.gwt.i18n.client.Messages;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -459,4 +460,62 @@ public interface ClientMessages extends Messages {
   String solrError();
 
   String open();
+
+  String createSIARD();
+
+  String openSIARD();
+
+  String createSIARDConnection();
+
+  String cancel();
+
+  String next();
+
+  String back();
+
+  String menuSidebarSIARD();
+
+  String menuSidebarDatabases();
+
+  String migrate();
+
+  String createSIARDTableAndColumns();
+
+  String createSIARDExportOptions();
+
+  String createSIARDExternalLOBsOptions();
+
+  String createSIARDMetadataOptions();
+
+  String tabGeneral();
+
+  String tabSSHTunnel();
+
+  String useSSHTunnel();
+
+  String proxyHostLabel();
+
+  String proxyPortLabel();
+
+  String proxyUserLabel();
+
+  String proxyPasswordLabel();
+
+  String createSIARDCustomViews();
+
+  String siardversionLabel();
+
+  String siardExportBrowseButton();
+
+  String siardDestinationFolderLabel();
+
+  String siardprettyXMLLabel();
+
+  String siardValidateLabel();
+
+  String siardcompressionLabel();
+
+  String connectionURLLabel();
+
+  String connectionLabels(@Select String fieldName);
 }
