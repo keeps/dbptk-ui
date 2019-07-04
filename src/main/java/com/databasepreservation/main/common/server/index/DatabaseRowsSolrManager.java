@@ -5,15 +5,21 @@ import java.io.InputStream;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import com.databasepreservation.main.common.server.index.utils.JsonTransformer;
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.request.CollectionAdminRequest;
 import org.apache.solr.client.solrj.response.UpdateResponse;
+import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.SolrInputField;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
@@ -228,8 +234,7 @@ public class DatabaseRowsSolrManager {
 
   /**
    * The collections are not immediately available after creation, this method
-   * makes sequential attempts to insert a document before giving up (by
-   * timeout)
+   * makes sequential attempts to insert a document before giving up (by timeout)
    *
    * @throws ViewerException
    *           in case of a fatal error
@@ -335,5 +340,26 @@ public class DatabaseRowsSolrManager {
       Pair.of(ViewerConstants.SOLR_DATABASES_INGESTED_TABLES, null),
       Pair.of(ViewerConstants.SOLR_DATABASES_TOTAL_ROWS, null),
       Pair.of(ViewerConstants.SOLR_DATABASES_INGESTED_ROWS, null));
+  }
+
+  public void updateDatabaseMetadata(String databaseUUID,  ViewerMetadata metadata ) {
+    LOGGER.debug("updateDatabaseMetadata");
+
+    // create document to update this DB
+    SolrInputDocument doc = new SolrInputDocument();
+    doc.addField(ViewerConstants.INDEX_ID, databaseUUID);
+
+//    Map<String, Object> json = new HashMap<>();
+//    json.put("name", SolrUtils.asValueUpdate(metadata.getName()));
+
+    // send it to Solr
+    try {
+      doc.addField(ViewerConstants.SOLR_DATABASES_METADATA,SolrUtils.asValueUpdate(JsonTransformer.getJsonFromObject(metadata)));
+      insertDocument(ViewerConstants.SOLR_INDEX_DATABASES_COLLECTION_NAME, doc);
+      LOGGER.debug("SUCCESS updateDatabaseMetadata");
+    } catch (ViewerException e) {
+      LOGGER.error("Could not update database progress for {}", databaseUUID, e);
+    }
+
   }
 }

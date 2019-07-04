@@ -11,6 +11,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -572,5 +573,45 @@ public class SIARDController {
       }
     }
 
+  }
+
+  public static ViewerMetadata updateMetadataInformation(ViewerMetadata metadata, Map<String, String> bundleSiard,
+    String databaseUUID, String siardPath) throws GenericException {
+    LOGGER.info("Updating  " + siardPath);
+
+    Path reporterPath = ViewerConfiguration.getInstance().getReportPath(databaseUUID).toAbsolutePath();
+    try (Reporter reporter = new Reporter(reporterPath.getParent().toString(), reporterPath.getFileName().toString())) {
+      SIARDEdition siardEdition = SIARDEdition.newInstance();
+
+      siardEdition.editModule(new SIARDEditFactory())
+        .editModuleParameter(SIARDEditFactory.PARAMETER_FILE, Collections.singletonList(siardPath))
+        .editModuleParameter(SIARDEditFactory.PARAMETER_SET, convertMapStructureToSiard(bundleSiard));
+
+      siardEdition.reporter(reporter);
+      siardEdition.edit();
+
+      final DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
+      solrManager.updateDatabaseMetadata(databaseUUID, metadata);
+
+    } catch (IOException e) {
+      throw new GenericException("Could not initialize conversion modules.", e);
+    } catch (ModuleException | RuntimeException e) {
+      throw new GenericException("Could not convert the database to the Solr instance.", e);
+    }
+
+    return metadata;
+  }
+
+  private static List<String> convertMapStructureToSiard(Map<String, String> bundle) {
+
+    List<String> bundleList = new ArrayList<>();
+
+    for (Map.Entry<String, String> entry : bundle.entrySet()) {
+      System.out.println(entry.getKey() + "/" + entry.getValue());
+
+      bundleList.add(entry.getKey().toString()+String.format("---%s---", entry.getValue()));
+    }
+
+    return bundleList;
   }
 }

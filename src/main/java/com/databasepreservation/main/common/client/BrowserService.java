@@ -2,13 +2,8 @@ package com.databasepreservation.main.common.client;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import com.databasepreservation.main.desktop.shared.models.wizardParameters.ConnectionParameters;
-import com.databasepreservation.main.desktop.shared.models.wizardParameters.CustomViewsParameters;
-import com.databasepreservation.main.desktop.shared.models.wizardParameters.ExportOptionsParameters;
-import com.databasepreservation.main.desktop.shared.models.wizardParameters.MetadataExportOptionsParameters;
-import com.databasepreservation.main.desktop.shared.models.wizardParameters.TableAndColumnsParameters;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.roda.core.data.exceptions.AuthenticationDeniedException;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.roda.core.data.exceptions.GenericException;
@@ -31,6 +26,11 @@ import com.databasepreservation.main.common.shared.client.common.search.SavedSea
 import com.databasepreservation.main.common.shared.client.common.search.SearchField;
 import com.databasepreservation.main.common.shared.client.common.search.SearchInfo;
 import com.databasepreservation.main.desktop.shared.models.DBPTKModule;
+import com.databasepreservation.main.desktop.shared.models.wizardParameters.ConnectionParameters;
+import com.databasepreservation.main.desktop.shared.models.wizardParameters.CustomViewsParameters;
+import com.databasepreservation.main.desktop.shared.models.wizardParameters.ExportOptionsParameters;
+import com.databasepreservation.main.desktop.shared.models.wizardParameters.MetadataExportOptionsParameters;
+import com.databasepreservation.main.desktop.shared.models.wizardParameters.TableAndColumnsParameters;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
@@ -126,4 +126,7 @@ public interface BrowserService extends RemoteService {
   boolean testConnection(String databaseUUID, String moduleName, HashMap<String, String> parameters) throws GenericException;
 
   boolean createSIARD(ConnectionParameters connectionParameters, TableAndColumnsParameters tableAndColumnsParameters, CustomViewsParameters customViewsParameters, ExportOptionsParameters exportOptionsParameters, MetadataExportOptionsParameters metadataExportOptionsParameters) throws GenericException;
+
+  ViewerMetadata updateMetadataInformation(ViewerMetadata metadata, Map<String, String> bundleSiard,
+    String databaseUUID, String path) throws GenericException;
 }

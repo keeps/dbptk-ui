@@ -6,8 +6,10 @@ import java.util.List;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
+import com.databasepreservation.main.desktop.client.dbptk.EditMetadataInformation;
 import com.databasepreservation.main.desktop.client.dbptk.HomePage;
 import com.databasepreservation.main.desktop.client.dbptk.Manage;
+import com.databasepreservation.main.desktop.client.dbptk.SIARDEditMetadataPage;
 import com.databasepreservation.main.desktop.client.dbptk.SIARDMainPage;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.create.CreateWizardManager;
 import com.google.gwt.core.client.GWT;
@@ -37,6 +39,14 @@ public class MainPanelDesktop extends Composite {
     initWidget(binder.createAndBindUi(this));
   }
 
+  private void setRightPanelContent(String databaseUUID, Composite content) {
+    GWT.log("setRightPanelContent, dbuid " + databaseUUID);
+    SIARDEditMetadataPage instance = SIARDEditMetadataPage.getInstance(databaseUUID);
+    contentPanel.setWidget(instance);
+    instance.load(content);
+
+  }
+
   void onHistoryChanged(String token) {
     List<String> currentHistoryPath = HistoryManager.getCurrentHistoryPath();
     List<BreadcrumbItem> breadcrumbItemList = new ArrayList<>();
@@ -53,7 +63,6 @@ public class MainPanelDesktop extends Composite {
 
     } else if (HistoryManager.ROUTE_DATABASE.equals(currentHistoryPath.get(0))) {
       Manage manage = Manage.getInstance();
-
       contentPanel.clear();
       contentPanel.add(manage);
     } else if (HistoryManager.ROUTE_CREATE_SIARD.equals(currentHistoryPath.get(0))) {
@@ -73,8 +82,12 @@ public class MainPanelDesktop extends Composite {
         final String tableUUID = currentHistoryPath.get(4);
         instance.change(wizardPage, toSelect, schemaUUID, tableUUID);
       }
-
       contentPanel.add(instance);
+    }  else if (HistoryManager.ROUTE_SIARD_EDIT_METADATA.equals(currentHistoryPath.get(0))) {
+      String databaseUUID =  currentHistoryPath.get(1);
+
+      EditMetadataInformation instance = EditMetadataInformation.getInstance(databaseUUID);
+      setRightPanelContent(databaseUUID, instance );
     } else {
       handleErrorPath(currentHistoryPath);
     }

@@ -255,7 +255,7 @@ public class JavascriptUtils {
                                                                           "headerLevelStart" : 3,
                                                                           "literalMidWordUnderscores" : true
                                                                       })).makeHtml(inputText);
-  }-*/;
+                                                                      }-*/;
 
   public static native String openFileDialog(JavaScriptObject options) /*-{
       var dialog = $wnd.nodeRequire('electron').remote.dialog;
@@ -268,8 +268,8 @@ public class JavascriptUtils {
   }-*/;
 
   public static native void log(String txt) /*-{
-      $wnd.console.log(txt);
-  }-*/;
+                                            $wnd.console.log(txt);
+                                            }-*/;
 
   public static native void showItemInFolder(String path) /*-{
       var shell = $wnd.nodeRequire('electron').remote.shell;

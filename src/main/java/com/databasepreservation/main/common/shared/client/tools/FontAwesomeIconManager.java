@@ -40,6 +40,8 @@ public class FontAwesomeIconManager {
   public static final String UPLOADS = "files-o";
   public static final String NEW_UPLOAD = "upload";
   public static final String LIST = "list";
+  public static final String CALENDAR = "calendar";
+
 
   public static String getTag(String icon) {
     return "<i class=\"fa fa-" + icon + "\"></i>";

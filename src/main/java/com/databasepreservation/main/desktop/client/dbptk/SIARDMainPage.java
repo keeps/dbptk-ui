@@ -14,6 +14,7 @@ import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCal
 import com.databasepreservation.main.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
+import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.common.shared.client.tools.Humanize;
 import com.databasepreservation.main.common.shared.client.tools.PathUtils;
 import com.databasepreservation.main.common.shared.client.tools.ViewerStringUtils;
@@ -103,6 +104,10 @@ public class SIARDMainPage extends Composite {
     Button btnEditMetadata = new Button();
     btnEditMetadata.setText(messages.editMetadata());
     btnEditMetadata.addStyleName("btn btn-link-info");
+    btnEditMetadata.addClickHandler(clickEvent -> {
+        JavascriptUtils.log(database.getUUID());
+        HistoryManager.gotoSIARDEditMetadata(database.getUUID());
+    });
 
     Button btnSendToLiveDBMS = new Button();
     btnSendToLiveDBMS.setText(messages.sendToLiveDBMS());

@@ -2,6 +2,7 @@ package com.databasepreservation.main.common.client;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.RODAException;
@@ -130,4 +131,7 @@ public interface BrowserServiceAsync {
   void createSIARD(ConnectionParameters connectionParameters, TableAndColumnsParameters tableAndColumnsParameters,
     CustomViewsParameters customViewsParameters, ExportOptionsParameters exportOptionsParameters,
     MetadataExportOptionsParameters metadataExportOptionsParameters, AsyncCallback<Boolean> async);
+
+  void updateMetadataInformation(ViewerMetadata metadata, Map<String, String> bundleSiard, String databaseUUID,
+    String path, AsyncCallback<ViewerMetadata> async);
 }

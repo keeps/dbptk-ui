@@ -6,7 +6,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Widget;
-import com.sun.tools.javac.comp.Flow;
+
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -59,6 +59,5 @@ public class SidebarHyperlink extends SidebarItem {
       container.removeStyleName("sidebarHyperLink-selected");
       label.removeStyleName("sidebarItem-selected");
     }
-
   }
 }

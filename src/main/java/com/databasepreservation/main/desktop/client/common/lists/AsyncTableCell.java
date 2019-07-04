@@ -102,7 +102,7 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
 
   private Column<T, Boolean> selectColumn;
   private Set<T> selected = new HashSet<T>();
-  private final List<CheckboxSelectionListener<T>> listeners = new ArrayList<AsyncTableCell.CheckboxSelectionListener<T>>();
+  private final List<CheckboxSelectionListener<T>> listeners = new ArrayList<>();
 
   private Filter filter;
   private boolean justActive;

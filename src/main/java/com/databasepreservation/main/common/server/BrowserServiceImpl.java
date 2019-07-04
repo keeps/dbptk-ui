@@ -2,6 +2,7 @@ package com.databasepreservation.main.common.server;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.roda.core.data.exceptions.AuthenticationDeniedException;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
@@ -274,5 +275,10 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
     throws GenericException {
     return SIARDController.createSIARD(connectionParameters, tableAndColumnsParameters, customViewsParameters,
       exportOptionsParameters, metadataExportOptionsParameters);
+  }
+
+  public ViewerMetadata updateMetadataInformation(ViewerMetadata metadata, Map<String, String> bundleSiard,
+    String databaseUUID, String path) throws GenericException {
+    return SIARDController.updateMetadataInformation(metadata, bundleSiard, databaseUUID, path);
   }
 }

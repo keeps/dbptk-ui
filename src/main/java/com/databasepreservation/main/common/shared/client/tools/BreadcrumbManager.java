@@ -423,4 +423,17 @@ public class BreadcrumbManager {
             + SafeHtmlUtils.htmlEscape(" " + messages.createSIARDCustomViews()))));
     return items;
   }
+
+  public static List<BreadcrumbItem> forSIARDEditMetadataPage() {
+    List<BreadcrumbItem> items = forSIARDMainPage();
+    items.add(
+      new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE)
+        + SafeHtmlUtils.htmlEscape(" " + messages.SIARDEditMetadata())), new Command() {
+          @Override
+          public void execute() {
+
+          }
+        }));
+    return items;
+  }
 }

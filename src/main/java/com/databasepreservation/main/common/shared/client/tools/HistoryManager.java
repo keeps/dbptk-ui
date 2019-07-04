@@ -35,13 +35,13 @@ public class HistoryManager {
   public static final String ROUTE_UPLOADS_NEW = "new";
   public static final String ROUTE_SIARD_INFO = "siard";
   public static final String ROUTE_CREATE_SIARD = "create";
-
   public static final String ROUTE_WIZARD_CONNECTION = "connection";
   public static final String ROUTE_WIZARD_TABLES_COLUMNS = "table-columns";
   public static final String ROUTE_WIZARD_CUSTOM_VIEWS = "custom-views";
-  public static final String ROUTE_WIZARD_EXPORT_SIARD_OPTIONS = "siard";
+  public static final String ROUTE_WIZARD_EXPORT_SIARD_OPTIONS = "siard-export-options";
   public static final String ROUTE_WIZARD_EXPORT_EXT_OPTIONS = "external-lobs";
-  public static final String ROUTE_WIZARD_EXPORT_METADATA_OPTIONS = "metadata";
+  public static final String ROUTE_WIZARD_EXPORT_METADATA_OPTIONS = "metadata-export-options";
+  public static final String ROUTE_SIARD_EDIT_METADATA = "metadata";
 
   public static final String HISTORY_SEP = "/";
   public static final String HISTORY_SEP_REGEX = "/";
@@ -174,6 +174,11 @@ public class HistoryManager {
     newHistory(params);
   }
 
+  public static void gotoSIARDEditMetadata(String databaseUUID) {
+    List<String> params = Arrays.asList(ROUTE_SIARD_EDIT_METADATA, databaseUUID);
+    newHistory(params);
+  }
+
   private static void newHistory(List<String> path) {
     // History.newItem(createHistoryToken(path)
     String hash = createHistoryToken(path);
@@ -290,6 +295,10 @@ public class HistoryManager {
     List<String> params = new ArrayList<>(Arrays.asList(ROUTE_FOREIGN_KEY, database_uuid, table_uuid));
     params.addAll(solrColumnsAndValues);
     return createHistoryToken(params);
+  }
+
+  public static String linkToDatabaseMetadata(String database_uuid) {
+    return createHistoryToken(Arrays.asList(ROUTE_SIARD_EDIT_METADATA, database_uuid));
   }
 
   public static String linkToNewUpload() {

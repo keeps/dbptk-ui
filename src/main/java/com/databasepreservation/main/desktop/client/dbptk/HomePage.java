@@ -1,5 +1,7 @@
 package com.databasepreservation.main.desktop.client.dbptk;
 
+import java.util.Collections;
+
 import com.databasepreservation.main.common.client.BrowserService;
 import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
@@ -24,8 +26,6 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
-
-import java.util.Collections;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -86,7 +86,8 @@ public class HomePage extends Composite {
 
           path = JavascriptUtils.openFileDialog(options);
         } else {
-          path = "/home/mguimaraes/Desktop/mysql-dbptk-gui.siard";
+          // TODO: UPLOAD FILE!!!
+          path = null;
         }
 
         if (path != null) {

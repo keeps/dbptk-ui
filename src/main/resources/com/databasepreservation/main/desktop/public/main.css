@@ -601,6 +601,14 @@ p[data-value]:after {
     text-align: center;
 }
 
+.sidebarHyperLink-selected {
+    background: #5bbeff;
+}
+.sidebarItem-selected {
+    color: white;
+    padding: 5px 0;
+}
+
 /* used in schema page to show table column information */
 .table-info {
     min-width: 100%;
@@ -1272,5 +1280,88 @@ input[type="checkbox"]:checked:after {
 
     .form-text-helper {
         margin: 0;
+    }
+}
+
+/**********************************************
+				EDIT METADATA
+************************************************/
+.metadata-edit {
+    padding: 0em 1em;
+}
+.metadata-edit-title {
+    display: flex;
+    justify-content: space-between;
+    margin: 0 0 0.5em 0;
+}
+.metadata-edit-title .h1 {
+    margin: 0;
+}
+
+.metadata-edit-title .btn{
+    background-color: transparent;
+    font-size: 2em;
+    color:#089de3;
+    padding: 0;
+}
+
+.metadata-edit-title .btn::after{
+    position: relative;
+    right: auto;
+}
+
+.metadata-save {
+    width: 20%;
+    float: right;
+    display: flex;
+    justify-content: space-between;
+}
+
+.metadata-save i {
+    margin: 0 0.5em;
+}
+
+.metadata-edit-panel {
+    display: flex;
+    flex-direction: column;
+}
+
+.metadata-edit-panel textarea {
+    resize: vertical;
+}
+
+.metadata-edit-field {
+    display: flex;
+    margin-bottom: 0.5em;
+}
+
+.metadata-edit-field .form-label {
+    width: 15%;
+    min-width: 200px;
+}
+
+.metadata-edit-field .form-textbox {
+    width: 85%;
+}
+
+.metadata-edit-field-date .metadata-edit-value {
+    max-width: 200px;
+}
+
+.metadata-edit-field-date i {
+    padding: 0.5em;
+}
+
+.metadata-edit-readonly{
+    background-color: #f7f7f7 ;
+    font-weight: bold;
+}
+
+@media (max-width: 768px){
+    .metadata-edit-label {
+        width: 100%;
+    }
+    .metadata-edit-value {
+        width: 100%;
     }
 }

@@ -1,4 +1,4 @@
-package com.databasepreservation.main.visualization.client.common.sidebar;
+package com.databasepreservation.main.desktop.client.common.sidebar;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,6 +15,8 @@ import com.databasepreservation.main.common.shared.client.tools.FontAwesomeIconM
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.common.shared.client.tools.ViewerStringUtils;
 import com.databasepreservation.main.common.shared.client.widgets.wcag.AccessibleFocusPanel;
+import com.databasepreservation.main.common.shared.client.common.sidebar.SidebarHyperlink;
+import com.databasepreservation.main.common.shared.client.common.sidebar.SidebarItem;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
@@ -32,77 +34,51 @@ import com.google.gwt.user.client.ui.Widget;
 import config.i18n.client.ClientMessages;
 
 /**
- * @author Bruno Ferreira <bferreira@keep.pt>
+ * @author Gabriel Barros <bferreira@keep.pt>
  */
-public class DatabaseSidebar extends Composite {
+public class MetadataEditSidebar extends Composite {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
-  private static Map<String, DatabaseSidebar> instances = new HashMap<>();
+  private static Map<String, MetadataEditSidebar> instances = new HashMap<>();
 
-  /**
-   * Creates a new MetadataEditSidebar, rarely hitting the database more than once for
-   * each database.
-   *
-   * @param databaseUUID
-   *          the database UUID
-   * @return a MetadataEditSidebar instance
-   */
-  public static DatabaseSidebar getInstance(String databaseUUID) {
-    String code = databaseUUID;
-
-    if (code == null) {
+  public static MetadataEditSidebar getInstance(String databaseUUID) {
+    if (databaseUUID == null) {
       return getEmptyInstance();
     }
 
-    DatabaseSidebar instance = instances.get(code);
+    MetadataEditSidebar instance = instances.get(databaseUUID);
     if (instance == null || instance.database == null
       || !ViewerDatabase.Status.AVAILABLE.equals(instance.database.getStatus())) {
-      instance = new DatabaseSidebar(databaseUUID);
-      instances.put(code, instance);
+      instance = new MetadataEditSidebar(databaseUUID);
+      instances.put(databaseUUID, instance);
     } else {
-      // workaround because the same MetadataEditSidebar can not belong to multiple
-      // widgets
-      return new DatabaseSidebar(instance);
+      return new MetadataEditSidebar(instance);
     }
     return instance;
   }
 
-  /**
-   * Creates a new MetadataEditSidebar, rarely hitting the database more than once for
-   * each database.
-   *
-   * @param database
-   *          the database
-   * @return a MetadataEditSidebar instance
-   */
-  public static DatabaseSidebar getInstance(ViewerDatabase database) {
+  public static MetadataEditSidebar getInstance(ViewerDatabase database) {
     if (database == null) {
       return getEmptyInstance();
     }
 
-    DatabaseSidebar instance = instances.get(database.getUUID());
+    MetadataEditSidebar instance = instances.get(database.getUUID());
     if (instance == null || instance.database == null
       || !ViewerDatabase.Status.AVAILABLE.equals(instance.database.getStatus())) {
-      instance = new DatabaseSidebar(database);
+      instance = new MetadataEditSidebar(database);
       instances.put(database.getUUID(), instance);
     } else {
       // workaround because the same MetadataEditSidebar can not belong to multiple
       // widgets
-      return new DatabaseSidebar(instance);
+      return new MetadataEditSidebar(instance);
     }
     return instance;
   }
 
-  /**
-   * Creates a new (dummy) MetadataEditSidebar that is not visible. This method exists
-   * so that pages can opt for not using a sidebar at all.
-   *
-   * @return a new invisible MetadataEditSidebar
-   */
-  public static DatabaseSidebar getEmptyInstance() {
-    return new DatabaseSidebar();
+  public static MetadataEditSidebar getEmptyInstance() {
+    return new MetadataEditSidebar();
   }
 
-  interface DatabaseSidebarUiBinder extends UiBinder<Widget, DatabaseSidebar> {
+  interface DatabaseSidebarUiBinder extends UiBinder<Widget, MetadataEditSidebar> {
   }
 
   private static DatabaseSidebarUiBinder uiBinder = GWT.create(DatabaseSidebarUiBinder.class);
@@ -123,48 +99,35 @@ public class DatabaseSidebar extends Composite {
   private String databaseUUID;
   private boolean initialized = false;
 
-  /**
-   * Clone constructor, because the same MetadataEditSidebar can not be child in more
-   * than one widget
-   *
-   * @param other
-   *          the MetadataEditSidebar used in another widget
-   */
-  private DatabaseSidebar(DatabaseSidebar other) {
+  private MetadataEditSidebar(MetadataEditSidebar other) {
     initialized = other.initialized;
     initWidget(uiBinder.createAndBindUi(this));
     searchInputBox.setText(other.searchInputBox.getText());
     init(other.database);
   }
 
-  /**
-   * Use MetadataEditSidebar.getInstance to obtain an instance
-   */
-  private DatabaseSidebar(ViewerDatabase database) {
+  private MetadataEditSidebar(ViewerDatabase database) {
     initWidget(uiBinder.createAndBindUi(this));
     init(database);
   }
 
-  /**
-   * Empty constructor, for pages that do not have a sidebar
-   */
-  private DatabaseSidebar() {
+  private MetadataEditSidebar() {
     initWidget(uiBinder.createAndBindUi(this));
     this.setVisible(false);
   }
 
-  /**
-   * Use MetadataEditSidebar.getInstance to obtain an instance
-   */
-  private DatabaseSidebar(String databaseUUID) {
+  private MetadataEditSidebar(String databaseUUID) {
     this();
     this.databaseUUID = databaseUUID;
   }
 
   public void init(ViewerDatabase db) {
     GWT.log("init with db: " + db + "; status: " + db.getStatus().toString());
-    if (ViewerDatabase.Status.AVAILABLE.equals(db.getStatus())) {
+    GWT.log("started");
+    if (ViewerDatabase.Status.AVAILABLE.equals(db.getStatus())
+      || ViewerDatabase.Status.METADATA_ONLY.equals(db.getStatus())) {
       if (db != null && (databaseUUID == null || databaseUUID.equals(db.getUUID()))) {
+        GWT.log("initialize");
         initialized = true;
         database = db;
         databaseUUID = db.getUUID();
@@ -182,63 +145,48 @@ public class DatabaseSidebar extends Composite {
     final ViewerMetadata metadata = database.getMetadata();
 
     sidebarGroup.add(
-      new SidebarItem(messages.menusidebar_database()).addIcon(FontAwesomeIconManager.DATABASE).setH5().setIndent0());
-
-    sidebarGroup
-      .add(new SidebarHyperlink(messages.menusidebar_information(), HistoryManager.linkToDatabase(database.getUUID()))
-        .addIcon(FontAwesomeIconManager.DATABASE_INFORMATION).setH6().setIndent1());
-
-    sidebarGroup
-      .add(new SidebarHyperlink(messages.titleReport(), HistoryManager.linkToDatabaseReport(database.getUUID()))
-        .addIcon(FontAwesomeIconManager.DATABASE_REPORT).setH6().setIndent1());
+      new SidebarHyperlink(messages.menusidebar_database(), HistoryManager.linkToDatabaseMetadata(database.getUUID()))
+        .addIcon(FontAwesomeIconManager.DATABASE).setH5().setIndent0());
 
     sidebarGroup.add(
       new SidebarHyperlink(messages.menusidebar_usersRoles(), HistoryManager.linkToDatabaseUsers(database.getUUID()))
-        .addIcon(FontAwesomeIconManager.DATABASE_USERS).setH6().setIndent1());
+        .addIcon(FontAwesomeIconManager.DATABASE_USERS).setH5().setIndent0());
 
-    sidebarGroup.add(
-      new SidebarHyperlink(messages.menusidebar_savedSearches(), HistoryManager.linkToSavedSearches(database.getUUID()))
-        .addIcon(FontAwesomeIconManager.SAVED_SEARCH).setH6().setIndent1());
-
-    sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_searchAllRecords(),
-      HistoryManager.linkToDatabaseSearch(database.getUUID())).addIcon(FontAwesomeIconManager.DATABASE_SEARCH).setH6()
-        .setIndent1());
-
-    for (final ViewerSchema schema : metadata.getSchemas()) {
-      sidebarGroup.add(new SidebarItem(schema.getName()).addIcon(FontAwesomeIconManager.SCHEMA).setH5().setIndent0());
-
-      sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_structure(),
-        HistoryManager.linkToSchemaStructure(database.getUUID(), schema.getUUID()))
-          .addIcon(FontAwesomeIconManager.SCHEMA_STRUCTURE).setH6().setIndent1());
-
-      sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_routines(),
-        HistoryManager.linkToSchemaRoutines(database.getUUID(), schema.getUUID()))
-          .addIcon(FontAwesomeIconManager.SCHEMA_ROUTINES).setH6().setIndent1());
-
-      sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_triggers(),
-        HistoryManager.linkToSchemaTriggers(database.getUUID(), schema.getUUID()))
-          .addIcon(FontAwesomeIconManager.SCHEMA_TRIGGERS).setH6().setIndent1());
-
-      sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_checkConstraints(),
-        HistoryManager.linkToSchemaCheckConstraints(database.getUUID(), schema.getUUID()))
-          .addIcon(FontAwesomeIconManager.SCHEMA_CHECK_CONSTRAINTS).setH6().setIndent1());
-
-      sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_views(),
-        HistoryManager.linkToSchemaViews(database.getUUID(), schema.getUUID()))
-          .addIcon(FontAwesomeIconManager.SCHEMA_VIEWS).setH6().setIndent1());
-
-      sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_data(),
-        HistoryManager.linkToSchemaData(database.getUUID(), schema.getUUID()))
-          .addIcon(FontAwesomeIconManager.SCHEMA_DATA).setH6().setIndent1());
-
-      for (ViewerTable table : schema.getTables()) {
-        sidebarGroup
-          .add(new SidebarHyperlink(table.getName(), HistoryManager.linkToTable(database.getUUID(), table.getUUID()))
-            .addIcon(FontAwesomeIconManager.TABLE).setH6().setIndent2());
-      }
-
-      searchInit();
-    }
+//    for (final ViewerSchema schema : metadata.getSchemas()) {
+//      sidebarGroup.add(new SidebarItem(schema.getName()).addIcon(FontAwesomeIconManager.SCHEMA).setH5().setIndent0());
+//
+//      sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_structure(),
+//        HistoryManager.linkToSchemaStructure(database.getUUID(), schema.getUUID()))
+//          .addIcon(FontAwesomeIconManager.SCHEMA_STRUCTURE).setH6().setIndent1());
+//
+//      sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_routines(),
+//        HistoryManager.linkToSchemaRoutines(database.getUUID(), schema.getUUID()))
+//          .addIcon(FontAwesomeIconManager.SCHEMA_ROUTINES).setH6().setIndent1());
+//
+//      sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_triggers(),
+//        HistoryManager.linkToSchemaTriggers(database.getUUID(), schema.getUUID()))
+//          .addIcon(FontAwesomeIconManager.SCHEMA_TRIGGERS).setH6().setIndent1());
+//
+//      sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_checkConstraints(),
+//        HistoryManager.linkToSchemaCheckConstraints(database.getUUID(), schema.getUUID()))
+//          .addIcon(FontAwesomeIconManager.SCHEMA_CHECK_CONSTRAINTS).setH6().setIndent1());
+//
+//      sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_views(),
+//        HistoryManager.linkToSchemaViews(database.getUUID(), schema.getUUID()))
+//          .addIcon(FontAwesomeIconManager.SCHEMA_VIEWS).setH6().setIndent1());
+//
+//      sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_data(),
+//        HistoryManager.linkToSchemaData(database.getUUID(), schema.getUUID()))
+//          .addIcon(FontAwesomeIconManager.SCHEMA_DATA).setH6().setIndent1());
+//
+//      for (ViewerTable table : schema.getTables()) {
+//        sidebarGroup
+//          .add(new SidebarHyperlink(table.getName(), HistoryManager.linkToTable(database.getUUID(), table.getUUID()))
+//            .addIcon(FontAwesomeIconManager.TABLE).setH6().setIndent2());
+//      }
+//
+//      searchInit();
+//    }
 
     setVisible(true);
   }

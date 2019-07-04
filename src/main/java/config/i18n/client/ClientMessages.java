@@ -544,4 +544,13 @@ public interface ClientMessages extends Messages {
   String exportOptionsLabels(@Select String fieldName);
 
   String exportOptionsHelperText(@Select String fieldName);
+
+  String SIARDEditMetadata();
+
+  String databaseInformation();
+
+  String metadataSave();
+
+  String metadataSaveCancel();
+
 }
