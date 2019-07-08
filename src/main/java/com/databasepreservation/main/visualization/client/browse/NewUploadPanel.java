@@ -3,6 +3,7 @@ package com.databasepreservation.main.visualization.client.browse;
 import com.databasepreservation.main.common.client.BrowserService;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
+import com.databasepreservation.main.common.shared.client.common.RightPanel;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.google.gwt.core.client.GWT;

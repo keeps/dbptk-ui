@@ -1,11 +1,13 @@
 package com.databasepreservation.main.desktop.client.dbptk;
 
 import com.databasepreservation.main.common.client.BrowserService;
-import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
+import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
 import com.databasepreservation.main.common.shared.client.common.LoadingDiv;
+import com.databasepreservation.main.common.shared.client.common.RightPanel;
+import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.main.common.shared.client.tools.ViewerStringUtils;
 import com.databasepreservation.main.common.shared.client.widgets.Toast;
 import com.google.gwt.core.client.GWT;
@@ -17,7 +19,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.TextBoxBase;
@@ -30,7 +31,7 @@ import java.util.Map;
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
-public class EditMetadataInformation extends Composite {
+public class EditMetadataInformation extends RightPanel {
   interface EditMetadataInformationUiBinder extends UiBinder<Widget, EditMetadataInformation> {
   }
 
@@ -53,34 +54,29 @@ public class EditMetadataInformation extends Composite {
   @UiField
   Button buttonEnableEdit, buttonCancel, buttonSave;
 
-  public static EditMetadataInformation getInstance(String databaseUUID) {
+  public static EditMetadataInformation getInstance(ViewerDatabase database) {
+    String code = database.getUUID();
 
-    if (instances.get(databaseUUID) == null) {
-      EditMetadataInformation instance = new EditMetadataInformation(databaseUUID);
-      instances.put(databaseUUID, instance);
+    EditMetadataInformation instance = instances.get(code);
+    if (instance == null) {
+      instance = new EditMetadataInformation(database);
+      instances.put(code, instance);
     }
 
-    return instances.get(databaseUUID);
+    return instance;
   }
 
-  private EditMetadataInformation(final String databaseUUID) {
-
+  private EditMetadataInformation(ViewerDatabase database) {
+    this.database = database;
     initWidget(uiBinder.createAndBindUi(this));
 
-    BrowserService.Util.getInstance().retrieve(databaseUUID, ViewerDatabase.class.getName(), databaseUUID,
-      new DefaultAsyncCallback<IsIndexed>() {
-        @Override
-        public void onFailure(Throwable caught) {
-          GWT.log("MetadataInformation onFailure " + caught);
-        }
+    init();
+  }
 
-        @Override
-        public void onSuccess(IsIndexed result) {
-          GWT.log("MetadataInformation onSuccess " + result);
-          database = (ViewerDatabase) result;
-          init();
-        }
-      });
+  @Override
+  public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
+    BreadcrumbManager.updateBreadcrumb(breadcrumb,
+            BreadcrumbManager.forSIARDEditMetadataPage());
   }
 
   private void init() {

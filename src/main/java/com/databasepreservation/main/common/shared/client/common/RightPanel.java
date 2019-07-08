@@ -1,4 +1,4 @@
-package com.databasepreservation.main.visualization.client.browse;
+package com.databasepreservation.main.common.shared.client.common;
 
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.google.gwt.user.client.ui.Composite;

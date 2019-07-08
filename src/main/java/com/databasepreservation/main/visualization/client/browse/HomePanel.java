@@ -1,6 +1,7 @@
 package com.databasepreservation.main.visualization.client.browse;
 
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
+import com.databasepreservation.main.common.shared.client.common.RightPanel;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;

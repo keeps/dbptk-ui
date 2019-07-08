@@ -148,13 +148,13 @@ public class MetadataEditSidebar extends Composite {
       new SidebarHyperlink(messages.menusidebar_database(), HistoryManager.linkToDatabaseMetadata(database.getUUID()))
         .addIcon(FontAwesomeIconManager.DATABASE).setH5().setIndent0());
 
-    sidebarGroup.add(
-      new SidebarHyperlink(messages.menusidebar_usersRoles(), HistoryManager.linkToDatabaseUsers(database.getUUID()))
-        .addIcon(FontAwesomeIconManager.DATABASE_USERS).setH5().setIndent0());
+    sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_usersRoles(),
+      HistoryManager.linkToDatabaseMetadataUsers(database.getUUID())).addIcon(FontAwesomeIconManager.DATABASE_USERS)
+        .setH5().setIndent0());
 
-//    for (final ViewerSchema schema : metadata.getSchemas()) {
-//      sidebarGroup.add(new SidebarItem(schema.getName()).addIcon(FontAwesomeIconManager.SCHEMA).setH5().setIndent0());
-//
+    for (final ViewerSchema schema : metadata.getSchemas()) {
+      sidebarGroup.add(new SidebarItem(schema.getName()).addIcon(FontAwesomeIconManager.SCHEMA).setH5().setIndent0());
+
 //      sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_structure(),
 //        HistoryManager.linkToSchemaStructure(database.getUUID(), schema.getUUID()))
 //          .addIcon(FontAwesomeIconManager.SCHEMA_STRUCTURE).setH6().setIndent1());
@@ -175,18 +175,18 @@ public class MetadataEditSidebar extends Composite {
 //        HistoryManager.linkToSchemaViews(database.getUUID(), schema.getUUID()))
 //          .addIcon(FontAwesomeIconManager.SCHEMA_VIEWS).setH6().setIndent1());
 //
-//      sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_data(),
-//        HistoryManager.linkToSchemaData(database.getUUID(), schema.getUUID()))
-//          .addIcon(FontAwesomeIconManager.SCHEMA_DATA).setH6().setIndent1());
-//
-//      for (ViewerTable table : schema.getTables()) {
-//        sidebarGroup
-//          .add(new SidebarHyperlink(table.getName(), HistoryManager.linkToTable(database.getUUID(), table.getUUID()))
-//            .addIcon(FontAwesomeIconManager.TABLE).setH6().setIndent2());
-//      }
-//
-//      searchInit();
-//    }
+      sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_data(),
+        HistoryManager.linkToSchemaData(database.getUUID(), schema.getUUID()))
+          .addIcon(FontAwesomeIconManager.SCHEMA_DATA).setH6().setIndent1());
+
+      for (ViewerTable table : schema.getTables()) {
+        sidebarGroup
+          .add(new SidebarHyperlink(table.getName(), HistoryManager.linkToTable(database.getUUID(), table.getUUID()))
+            .addIcon(FontAwesomeIconManager.TABLE).setH6().setIndent2());
+      }
+
+      searchInit();
+    }
 
     setVisible(true);
   }

@@ -2,13 +2,14 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:b="urn:import:com.databasepreservation.visualization.client.browse"
              xmlns:s="urn:import:com.databasepreservation.main.visualization.client.common.search"
-             xmlns:wcag="urn:import:com.databasepreservation.main.common.shared.client.widgets.wcag">
+             xmlns:wcag="urn:import:com.databasepreservation.main.common.shared.client.widgets.wcag"
+             xmlns:search="urn:import:com.databasepreservation.main.common.shared.client.common.search">
 
     <ui:with field='messages' type='config.i18n.client.ClientMessages' />
     <g:FlowPanel>
         <g:FlowPanel styleName="searchPanel" ui:field="searchPanel">
             <g:FlowPanel styleName="searchPanelLeft">
-                <s:Dropdown ui:field="searchInputListBox"
+                <search:Dropdown ui:field="searchInputListBox"
                                  addStyleNames="searchInputListBox" />
                 <g:FlowPanel styleName="searchPanelLeftInput">
                     <g:TextBox ui:field="searchInputBox" addStyleNames="searchBox" />

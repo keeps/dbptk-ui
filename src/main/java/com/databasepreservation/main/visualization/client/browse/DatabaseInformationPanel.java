@@ -6,6 +6,7 @@ import java.util.Map;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
+import com.databasepreservation.main.common.shared.client.common.RightPanel;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.main.common.shared.client.tools.ViewerStringUtils;
 import com.google.gwt.core.client.GWT;

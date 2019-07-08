@@ -2,17 +2,15 @@
  * The contents of this file are based on those found at https://github.com/keeps/roda
  * and are subject to the license and copyright detailed in https://github.com/keeps/roda
  */
-package com.databasepreservation.main.visualization.client.common.search;
+package com.databasepreservation.main.common.shared.client.common.search;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
-import com.databasepreservation.main.common.shared.client.common.search.SearchField;
-import com.databasepreservation.main.common.shared.client.common.search.SearchInfo;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.common.shared.client.widgets.wcag.AccessibleFocusPanel;
-import com.databasepreservation.main.visualization.client.common.lists.AsyncTableCell;
+import com.databasepreservation.main.common.shared.client.common.lists.AsyncTableCell;
 import org.roda.core.data.v2.index.filter.BasicSearchFilterParameter;
 import org.roda.core.data.v2.index.filter.Filter;
 import org.roda.core.data.v2.index.filter.FilterParameter;

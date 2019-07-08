@@ -1,4 +1,4 @@
-package com.databasepreservation.main.visualization.client.common.lists;
+package com.databasepreservation.main.common.shared.client.common.lists;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.main.common.shared.client.common.lists.AsyncTableCell;
 import org.roda.core.data.v2.common.Pair;
 import org.roda.core.data.v2.index.IndexResult;
 import org.roda.core.data.v2.index.facet.Facets;

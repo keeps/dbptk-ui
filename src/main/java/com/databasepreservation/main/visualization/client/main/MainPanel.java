@@ -26,7 +26,7 @@ import com.databasepreservation.main.visualization.client.browse.HomePanel;
 import com.databasepreservation.main.visualization.client.browse.LoginPanel;
 import com.databasepreservation.main.visualization.client.browse.NewUploadPanel;
 import com.databasepreservation.main.visualization.client.browse.ReferencesPanel;
-import com.databasepreservation.main.visualization.client.browse.RightPanel;
+import com.databasepreservation.main.common.shared.client.common.RightPanel;
 import com.databasepreservation.main.visualization.client.browse.RowPanel;
 import com.databasepreservation.main.visualization.client.browse.SchemaCheckConstraintsPanel;
 import com.databasepreservation.main.visualization.client.browse.SchemaDataPanel;

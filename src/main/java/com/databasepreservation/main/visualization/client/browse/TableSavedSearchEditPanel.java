@@ -5,6 +5,7 @@ import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabas
 import com.databasepreservation.main.common.client.BrowserService;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
+import com.databasepreservation.main.common.shared.client.common.RightPanel;
 import com.databasepreservation.main.common.shared.client.common.search.SavedSearch;
 import com.databasepreservation.main.common.shared.client.common.search.SearchInfo;
 import com.databasepreservation.main.common.shared.client.common.utils.CommonClientUtils;

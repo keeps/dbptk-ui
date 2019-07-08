@@ -1,7 +1,7 @@
 package com.databasepreservation.main.common.shared.client.common.utils;
 
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
-import com.databasepreservation.main.visualization.client.browse.RightPanel;
+import com.databasepreservation.main.common.shared.client.common.RightPanel;
 
 /**
  * Main passes an instance of this class to DatabasePanel, so it can obtain a

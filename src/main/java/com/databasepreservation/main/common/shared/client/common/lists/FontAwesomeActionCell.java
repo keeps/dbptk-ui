@@ -1,4 +1,4 @@
-package com.databasepreservation.main.visualization.client.common.lists;
+package com.databasepreservation.main.common.shared.client.common.lists;
 
 import static com.google.gwt.dom.client.BrowserEvents.CLICK;
 import static com.google.gwt.dom.client.BrowserEvents.KEYDOWN;

@@ -1,5 +1,6 @@
 package com.databasepreservation.main.visualization.client.browse;
 
+import com.databasepreservation.main.common.shared.client.common.RightPanel;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.v2.user.User;
 

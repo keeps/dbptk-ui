@@ -42,6 +42,7 @@ public class HistoryManager {
   public static final String ROUTE_WIZARD_EXPORT_EXT_OPTIONS = "external-lobs";
   public static final String ROUTE_WIZARD_EXPORT_METADATA_OPTIONS = "metadata-export-options";
   public static final String ROUTE_SIARD_EDIT_METADATA = "metadata";
+  public static final String ROUTE_SIARD_EDIT_METADATA_USERS = "users";
 
   public static final String HISTORY_SEP = "/";
   public static final String HISTORY_SEP_REGEX = "/";
@@ -179,6 +180,11 @@ public class HistoryManager {
     newHistory(params);
   }
 
+  public static void gotoEditMetadataUsers(String databaseUUID) {
+    List<String> params = Arrays.asList(ROUTE_SIARD_EDIT_METADATA, databaseUUID, ROUTE_SIARD_EDIT_METADATA_USERS);
+    newHistory(params);
+  }
+
   private static void newHistory(List<String> path) {
     // History.newItem(createHistoryToken(path)
     String hash = createHistoryToken(path);
@@ -299,6 +305,10 @@ public class HistoryManager {
 
   public static String linkToDatabaseMetadata(String database_uuid) {
     return createHistoryToken(Arrays.asList(ROUTE_SIARD_EDIT_METADATA, database_uuid));
+  }
+
+  public static String linkToDatabaseMetadataUsers(String database_uuid) {
+    return createHistoryToken(Arrays.asList(ROUTE_SIARD_EDIT_METADATA, database_uuid, ROUTE_SIARD_EDIT_METADATA_USERS));
   }
 
   public static String linkToNewUpload() {

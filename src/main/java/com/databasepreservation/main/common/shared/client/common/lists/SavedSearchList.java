@@ -1,4 +1,4 @@
-package com.databasepreservation.main.visualization.client.common.lists;
+package com.databasepreservation.main.common.shared.client.common.lists;
 
 import java.util.ArrayList;
 import java.util.Arrays;

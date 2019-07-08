@@ -3,6 +3,7 @@ package com.databasepreservation.main.visualization.client.browse;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.databasepreservation.main.common.shared.client.common.RightPanel;
 import org.roda.core.data.v2.user.User;
 
 import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;

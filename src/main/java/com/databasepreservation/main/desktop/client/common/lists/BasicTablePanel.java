@@ -1,4 +1,4 @@
-package com.databasepreservation.main.visualization.client.common.lists;
+package com.databasepreservation.main.desktop.client.common.lists;
 
 import java.util.Iterator;
 import java.util.List;
@@ -183,6 +183,8 @@ public class BasicTablePanel<C> extends Composite {
 
     return cellTable;
   }
+
+
 
   public SingleSelectionModel<C> getSelectionModel() {
     return selectionModel;

@@ -6,6 +6,8 @@ import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabas
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
+import com.databasepreservation.main.common.shared.client.common.RightPanel;
+import com.databasepreservation.main.common.shared.client.common.utils.RightPanelLoader;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.main.desktop.client.common.sidebar.MetadataEditSidebar;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -60,42 +62,44 @@ public class SIARDEditMetadataPage extends Composite {
     BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
   }
 
-  public void load(Composite content){
+  public void load(RightPanelLoader rightPanelLoader){
     GWT.log("load. uuid: " + databaseUUID + ", database: " + database);
 
     if (databaseUUID != null && (database == null || !ViewerDatabase.Status.METADATA_ONLY.equals(database.getStatus()))) {
       GWT.log("getting db");
-      loadPanelWithDatabase(content);
+      loadPanelWithDatabase(rightPanelLoader);
     } else {
-      loadPanel(content);
+      loadPanel(rightPanelLoader);
     }
   }
 
-  private void loadPanelWithDatabase(Composite content) {
+  private void loadPanelWithDatabase(RightPanelLoader rightPanelLoader) {
     BrowserService.Util.getInstance().retrieve(databaseUUID, ViewerDatabase.class.getName(), databaseUUID,
       new DefaultAsyncCallback<IsIndexed>() {
         @Override
-        public void onFailure(Throwable caught) {
-          GWT.log("SIARDEditMetadataPage onFailure " + caught);
-        }
+        public void onFailure(Throwable caught){}
 
         @Override
         public void onSuccess(IsIndexed result) {
-          GWT.log("SIARDEditMetadataPage onSuccess ");
           database = (ViewerDatabase) result;
-          loadPanel(content);
+          loadPanel(rightPanelLoader);
         }
       });
   }
 
-  private void loadPanel(Composite content){
+  private void loadPanel(RightPanelLoader rightPanelLoader){
     GWT.log("have db: " + database + "sb.init: " + sidebar.isInitialized());
+    RightPanel rightPanel = rightPanelLoader.load(database);
+
     if (database != null && !sidebar.isInitialized()) {
       sidebar.init(database);
     }
 
-    rightPanelContainer.setWidget(content);
-    content.setVisible(true);
+    if (rightPanel != null) {
+      rightPanel.handleBreadcrumb(breadcrumb);
+      rightPanelContainer.setWidget(rightPanel);
+      rightPanel.setVisible(true);
+    }
 
   }
 }

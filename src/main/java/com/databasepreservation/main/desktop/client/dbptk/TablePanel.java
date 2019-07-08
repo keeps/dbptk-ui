@@ -1,4 +1,4 @@
-package com.databasepreservation.main.visualization.client.browse;
+package com.databasepreservation.main.desktop.client.dbptk;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -124,6 +124,8 @@ public class TablePanel extends RightPanel {
     database = viewerDatabase;
     table = database.getMetadata().getTable(tableUUID);
     schema = database.getMetadata().getSchemaFromTableUUID(tableUUID);
+
+    GWT.log("Table: " +  table);
 
     if (searchInfoJson != null) {
       tableSearchPanel = new TableSearchPanel(searchInfoJson);

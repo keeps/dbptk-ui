@@ -1,5 +1,6 @@
 package com.databasepreservation.main.visualization.client.browse;
 
+import com.databasepreservation.main.common.shared.client.common.RightPanel;
 import org.roda.core.data.v2.index.filter.BasicSearchFilterParameter;
 import org.roda.core.data.v2.index.filter.Filter;
 
@@ -9,7 +10,7 @@ import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbP
 import com.databasepreservation.main.common.shared.client.common.search.SavedSearch;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
-import com.databasepreservation.main.visualization.client.common.lists.SavedSearchList;
+import com.databasepreservation.main.common.shared.client.common.lists.SavedSearchList;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
