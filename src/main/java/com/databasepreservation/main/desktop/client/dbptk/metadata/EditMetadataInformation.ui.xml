@@ -95,14 +95,5 @@
 
         </g:FlowPanel>
 
-        <g:FlowPanel addStyleNames="metadata-save">
-            <g:Button addStyleNames="btn btn-save" ui:field="buttonSave">
-                <ui:text from='{messages.metadataSave}'/>
-            </g:Button>
-            <g:Button addStyleNames="btn btn-default btn-times-circle" ui:field="buttonCancel">
-                <ui:text from='{messages.metadataSaveCancel}'/>
-            </g:Button>
-        </g:FlowPanel>
-
     </g:FlowPanel>
 </ui:UiBinder>

@@ -2,19 +2,20 @@ package com.databasepreservation.main.desktop.client.main;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.main.common.shared.client.common.RightPanel;
 import com.databasepreservation.main.common.shared.client.common.utils.RightPanelLoader;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
-import com.databasepreservation.main.desktop.client.dbptk.EditMetadataInformation;
-import com.databasepreservation.main.desktop.client.dbptk.EditMetadataUsers;
+import com.databasepreservation.main.desktop.client.common.TablePanel;
 import com.databasepreservation.main.desktop.client.dbptk.HomePage;
 import com.databasepreservation.main.desktop.client.dbptk.Manage;
-import com.databasepreservation.main.desktop.client.dbptk.SIARDEditMetadataPage;
 import com.databasepreservation.main.desktop.client.dbptk.SIARDMainPage;
-import com.databasepreservation.main.desktop.client.dbptk.TablePanel;
+import com.databasepreservation.main.desktop.client.dbptk.metadata.EditMetadataInformation;
+import com.databasepreservation.main.desktop.client.dbptk.metadata.EditMetadataUsers;
+import com.databasepreservation.main.desktop.client.dbptk.metadata.SIARDEditMetadataPage;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.create.CreateWizardManager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -89,20 +90,18 @@ public class MainPanelDesktop extends Composite {
       contentPanel.add(instance);
     }  else if (HistoryManager.ROUTE_SIARD_EDIT_METADATA.equals(currentHistoryPath.get(0))) {
       String databaseUUID =  currentHistoryPath.get(1);
-
       if (currentHistoryPath.size() == 2) {
-
         setRightPanelContent(databaseUUID, new RightPanelLoader() {
           @Override
-          public RightPanel load(ViewerDatabase database) {
-            return EditMetadataInformation.getInstance(database);
+          public RightPanel load(ViewerDatabase database, Map<String, String> SIARDbundle) {
+            return EditMetadataInformation.getInstance(database, SIARDbundle);
           }
         });
       } else if (currentHistoryPath.size() == 3) {
         setRightPanelContent(databaseUUID, new RightPanelLoader() {
           @Override
-          public RightPanel load(ViewerDatabase database) {
-            return EditMetadataUsers.getInstance(database);
+          public RightPanel load(ViewerDatabase database, Map<String, String> SIARDbundle) {
+            return EditMetadataUsers.getInstance(database, SIARDbundle);
           }
         });
       }
@@ -113,12 +112,11 @@ public class MainPanelDesktop extends Composite {
 
         setRightPanelContent(databaseUUID, new RightPanelLoader() {
           @Override
-          public RightPanel load(ViewerDatabase database) {
-            return TablePanel.getInstance(database, tableUUID);
+          public RightPanel load(ViewerDatabase database, Map<String, String> SIARDbundle) {
+            return TablePanel.getInstance(database, SIARDbundle, tableUUID);
           }
         });
       }
-
     } else {
       handleErrorPath(currentHistoryPath);
     }

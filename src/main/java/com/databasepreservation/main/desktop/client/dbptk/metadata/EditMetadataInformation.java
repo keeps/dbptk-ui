@@ -1,24 +1,24 @@
-package com.databasepreservation.main.desktop.client.dbptk;
+package com.databasepreservation.main.desktop.client.dbptk.metadata;
 
-import com.databasepreservation.main.common.client.BrowserService;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
-import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
 import com.databasepreservation.main.common.shared.client.common.LoadingDiv;
 import com.databasepreservation.main.common.shared.client.common.RightPanel;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.main.common.shared.client.tools.ViewerStringUtils;
-import com.databasepreservation.main.common.shared.client.widgets.Toast;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NodeList;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.TextBoxBase;
@@ -40,6 +40,7 @@ public class EditMetadataInformation extends RightPanel {
   private static Map<String, EditMetadataInformation> instances = new HashMap<>();
   private ViewerDatabase database = null;
   private ViewerMetadata metadata = null;
+  private Map<String, String> SIARDbundle;
 
   @UiField
   TextBox databaseName, archivalDate, archivist, archivistContact, clientMachine, databaseProduct, databaseUser,
@@ -52,22 +53,23 @@ public class EditMetadataInformation extends RightPanel {
   LoadingDiv loading;
 
   @UiField
-  Button buttonEnableEdit, buttonCancel, buttonSave;
+  Button buttonEnableEdit;
 
-  public static EditMetadataInformation getInstance(ViewerDatabase database) {
+  public static EditMetadataInformation getInstance(ViewerDatabase database, Map<String, String> SIARDbundle) {
     String code = database.getUUID();
 
     EditMetadataInformation instance = instances.get(code);
     if (instance == null) {
-      instance = new EditMetadataInformation(database);
+      instance = new EditMetadataInformation(database, SIARDbundle);
       instances.put(code, instance);
     }
 
     return instance;
   }
 
-  private EditMetadataInformation(ViewerDatabase database) {
+  private EditMetadataInformation(ViewerDatabase database, Map<String, String> SIARDbundle) {
     this.database = database;
+    this.SIARDbundle = SIARDbundle;
     initWidget(uiBinder.createAndBindUi(this));
 
     init();
@@ -83,8 +85,6 @@ public class EditMetadataInformation extends RightPanel {
     GWT.log("Edit Metadata Information init ");
     metadata = database.getMetadata();
     writeOnViewerMetadataInformation(database.getMetadata());
-
-    buttonSave.setEnabled(false);
   }
 
   private void writeOnViewerMetadataInformation(ViewerMetadata metadata) {
@@ -114,28 +114,22 @@ public class EditMetadataInformation extends RightPanel {
     element.setText(text);
     element.getElement().setAttribute("name", name);
     element.getElement().addClassName("metadata-edit-readonly");
+    element.addChangeHandler(new ChangeHandler() {
+      @Override
+      public void onChange(ChangeEvent event) {
+        updateSiardBundle(element);
+        updateSolrMetadata();
+      }
+    });
   }
 
-  private Map<String, String> updateSiardBundle() {
-    GWT.log("updateSiardMetadata");
-
-    Map<String, String> bundle = new HashMap<>();
-
-    bundle.put(databaseName.getElement().getAttribute("name"), databaseName.getText());
-    bundle.put(archivalDate.getElement().getAttribute("name"), archivalDate.getText());
-    bundle.put(archivist.getElement().getAttribute("name"), archivist.getText());
-    bundle.put(archivistContact.getElement().getAttribute("name"), archivistContact.getText());
-    bundle.put(clientMachine.getElement().getAttribute("name"), clientMachine.getText());
-    bundle.put(databaseProduct.getElement().getAttribute("name"), databaseProduct.getText());
-    bundle.put(databaseUser.getElement().getAttribute("name"), databaseUser.getText());
-    bundle.put(dataOriginTimeSpan.getElement().getAttribute("name"), dataOriginTimeSpan.getText());
-    bundle.put(description.getElement().getAttribute("name"), description.getText());
-    bundle.put(producerApplication.getElement().getAttribute("name"), producerApplication.getText());
-
-    return bundle;
+  private void updateSiardBundle(TextBoxBase element) {
+    SIARDbundle.put(element.getElement().getAttribute("name"), element.getText());
   }
 
   private void updateSolrMetadata() {
+
+    GWT.log("onChange metadata: " + databaseName.getText());
     metadata.setName(databaseName.getText());
     metadata.setArchivalDate(archivalDate.getText());
     metadata.setArchiver(archivist.getText());
@@ -146,11 +140,13 @@ public class EditMetadataInformation extends RightPanel {
     metadata.setDataOriginTimespan(dataOriginTimeSpan.getText());
     metadata.setDescription(description.getText());
     metadata.setProducerApplication(producerApplication.getText());
+
+    database.setMetadata(metadata);
   }
+
 
   @UiHandler("buttonEnableEdit")
   void buttonEnableEditHandle(ClickEvent e) {
-    buttonSave.setEnabled(true);
     NodeList<Element> elements = Document.get().getElementsByTagName("input");
 
     for (int i = 0; i < elements.getLength(); i++) {
@@ -160,40 +156,5 @@ public class EditMetadataInformation extends RightPanel {
 
     description.setReadOnly(false);
     description.getElement().removeClassName("metadata-edit-readonly");
-  }
-
-  @UiHandler("buttonCancel")
-  void buttonCancelHandler(ClickEvent e) {
-    buttonSave.setEnabled(false);
-    writeOnViewerMetadataInformation(database.getMetadata());
-  }
-
-  @UiHandler("buttonSave")
-  void buttonSaveHandler(ClickEvent e) {
-    GWT.log("Save Metadata " + databaseName.getText());
-
-    loading.setVisible(true);
-
-    Map<String, String> bundleSiard = updateSiardBundle();
-    updateSolrMetadata();
-
-    BrowserService.Util.getInstance().updateMetadataInformation(metadata, bundleSiard, database.getUUID(),
-      database.getSIARDPath(), new DefaultAsyncCallback<ViewerMetadata>() {
-        @Override
-        public void onFailure(Throwable caught) {
-          // TODO: error handling
-          writeOnViewerMetadataInformation(database.getMetadata());
-          Toast.showError("Metadata Update", database.getMetadata().getName());
-          loading.setVisible(false);
-        }
-
-        @Override
-        public void onSuccess(ViewerMetadata result) {
-          loading.setVisible(false);
-          writeOnViewerMetadataInformation(result);
-          Toast.showInfo("Metadata Update", "Success");
-        }
-      });
-
   }
 }

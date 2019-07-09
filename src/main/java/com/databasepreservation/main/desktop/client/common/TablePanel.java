@@ -1,4 +1,4 @@
-package com.databasepreservation.main.desktop.client.dbptk;
+package com.databasepreservation.main.desktop.client.common;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,11 +29,11 @@ public class TablePanel extends RightPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, TablePanel> instances = new HashMap<>();
 
-  public static TablePanel getInstance(ViewerDatabase database, String tableUUID) {
-    return getInstance(database, tableUUID, null);
+  public static TablePanel getInstance(ViewerDatabase database, Map<String, String> SIARDbundle,  String tableUUID) {
+    return getInstance(database, SIARDbundle, tableUUID, null);
   }
 
-  public static TablePanel getInstance(ViewerDatabase database, String tableUUID, String searchInfoJson) {
+  public static TablePanel getInstance(ViewerDatabase database, Map<String, String> SIARDbundle, String tableUUID, String searchInfoJson) {
     String separator = "/";
     String code = database.getUUID() + separator + tableUUID;
 

@@ -553,4 +553,6 @@ public interface ClientMessages extends Messages {
 
   String metadataSaveCancel();
 
+  String metadataDoesNotContainDescription();
+
 }

@@ -40,7 +40,7 @@ public class BasicTablePanel<C> extends Composite {
 
   private static BasicTablePanelUiBinder uiBinder = GWT.create(BasicTablePanelUiBinder.class);
 
-  private final SingleSelectionModel<C> selectionModel;
+//  private final SingleSelectionModel<C> selectionModel;
 
   private ScrollPanel displayScroll;
   private SimplePanel displayScrollWrapper;
@@ -85,8 +85,8 @@ public class BasicTablePanel<C> extends Composite {
     info.setWidget(infoContent);
 
     CellTable<C> display = createTable(rowItems, columns);
-    selectionModel = new SingleSelectionModel<>();
-    display.setSelectionModel(selectionModel);
+//    selectionModel = new SingleSelectionModel<>();
+//    display.setSelectionModel(selectionModel);
 
     displayScroll = new ScrollPanel(display);
     displayScrollWrapper = new SimplePanel(displayScroll);
@@ -117,7 +117,7 @@ public class BasicTablePanel<C> extends Composite {
     info.setWidget(new HTMLPanel(b.toSafeHtml()));
 
     table.setVisible(false);
-    selectionModel = null;
+//    selectionModel = null;
   }
 
   @Override
@@ -186,13 +186,13 @@ public class BasicTablePanel<C> extends Composite {
 
 
 
-  public SingleSelectionModel<C> getSelectionModel() {
-    return selectionModel;
-  }
+//  public SingleSelectionModel<C> getSelectionModel() {
+//    return selectionModel;
+//  }
 
   @Override
   protected void onLoad() {
     super.onLoad();
-    this.getSelectionModel().clear();
+//    this.getSelectionModel().clear();
   }
 }
