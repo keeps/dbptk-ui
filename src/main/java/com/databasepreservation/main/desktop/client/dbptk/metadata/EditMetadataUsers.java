@@ -35,7 +35,7 @@ import java.util.Map;
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
-public class EditMetadataUsers extends RightPanel {
+public class EditMetadataUsers extends MetadataRightPanel {
 
   interface EditMetadataUsersUiBinder extends UiBinder<Widget, EditMetadataUsers> {
 

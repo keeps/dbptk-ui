@@ -1311,10 +1311,7 @@ input[type="checkbox"]:checked:after {
 }
 
 .metadata-save {
-    width: 20%;
     float: right;
-    display: flex;
-    justify-content: space-between;
 }
 
 .metadata-save i {

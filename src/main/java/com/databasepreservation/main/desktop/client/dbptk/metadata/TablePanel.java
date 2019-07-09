@@ -1,4 +1,4 @@
-package com.databasepreservation.main.desktop.client.common;
+package com.databasepreservation.main.desktop.client.dbptk.metadata;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,7 +25,7 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class TablePanel extends RightPanel {
+public class TablePanel extends MetadataRightPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, TablePanel> instances = new HashMap<>();
 

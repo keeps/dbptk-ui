@@ -77,7 +77,7 @@ public class SIARDEditMetadataPage extends Composite {
     BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
   }
 
-  public void load(RightPanelLoader rightPanelLoader){
+  public void load(MetadataRightPanelLoad rightPanelLoader){
     GWT.log("load. uuid: " + databaseUUID + ", database: " + database);
 
     if (databaseUUID != null && (database == null || !ViewerDatabase.Status.METADATA_ONLY.equals(database.getStatus()))) {
@@ -88,7 +88,7 @@ public class SIARDEditMetadataPage extends Composite {
     }
   }
 
-  private void loadPanelWithDatabase(RightPanelLoader rightPanelLoader) {
+  private void loadPanelWithDatabase(MetadataRightPanelLoad rightPanelLoader) {
     BrowserService.Util.getInstance().retrieve(databaseUUID, ViewerDatabase.class.getName(), databaseUUID,
       new DefaultAsyncCallback<IsIndexed>() {
         @Override
@@ -102,9 +102,9 @@ public class SIARDEditMetadataPage extends Composite {
       });
   }
 
-  private void loadPanel(RightPanelLoader rightPanelLoader){
+  private void loadPanel(MetadataRightPanelLoad rightPanelLoader){
     GWT.log("have db: " + database + "sb.init: " + sidebar.isInitialized());
-    RightPanel rightPanel = rightPanelLoader.load(database, SIARDbundle);
+    MetadataRightPanel rightPanel = rightPanelLoader.load(database, SIARDbundle);
 
     if (database != null && !sidebar.isInitialized()) {
       sidebar.init(database);
@@ -117,7 +117,6 @@ public class SIARDEditMetadataPage extends Composite {
     }
 
   }
-
 
   
   @UiHandler("buttonCommit")

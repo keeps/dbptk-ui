@@ -6,16 +6,16 @@ import java.util.Map;
 
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbItem;
-import com.databasepreservation.main.common.shared.client.common.RightPanel;
-import com.databasepreservation.main.common.shared.client.common.utils.RightPanelLoader;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
-import com.databasepreservation.main.desktop.client.common.TablePanel;
 import com.databasepreservation.main.desktop.client.dbptk.HomePage;
 import com.databasepreservation.main.desktop.client.dbptk.Manage;
 import com.databasepreservation.main.desktop.client.dbptk.SIARDMainPage;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.EditMetadataInformation;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.EditMetadataUsers;
+import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataRightPanel;
+import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataRightPanelLoad;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.SIARDEditMetadataPage;
+import com.databasepreservation.main.desktop.client.dbptk.metadata.TablePanel;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.create.CreateWizardManager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -44,7 +44,7 @@ public class MainPanelDesktop extends Composite {
     initWidget(binder.createAndBindUi(this));
   }
 
-  private void setRightPanelContent(String databaseUUID, RightPanelLoader rightPanelLoader) {
+  private void setRightPanelContent(String databaseUUID, MetadataRightPanelLoad rightPanelLoader) {
     GWT.log("setRightPanelContent, dbuid " + databaseUUID);
     SIARDEditMetadataPage instance = SIARDEditMetadataPage.getInstance(databaseUUID);
     contentPanel.setWidget(instance);
@@ -91,16 +91,16 @@ public class MainPanelDesktop extends Composite {
     }  else if (HistoryManager.ROUTE_SIARD_EDIT_METADATA.equals(currentHistoryPath.get(0))) {
       String databaseUUID =  currentHistoryPath.get(1);
       if (currentHistoryPath.size() == 2) {
-        setRightPanelContent(databaseUUID, new RightPanelLoader() {
+        setRightPanelContent(databaseUUID, new MetadataRightPanelLoad() {
           @Override
-          public RightPanel load(ViewerDatabase database, Map<String, String> SIARDbundle) {
+          public MetadataRightPanel load(ViewerDatabase database, Map<String, String> SIARDbundle) {
             return EditMetadataInformation.getInstance(database, SIARDbundle);
           }
         });
       } else if (currentHistoryPath.size() == 3) {
-        setRightPanelContent(databaseUUID, new RightPanelLoader() {
+        setRightPanelContent(databaseUUID, new MetadataRightPanelLoad() {
           @Override
-          public RightPanel load(ViewerDatabase database, Map<String, String> SIARDbundle) {
+          public MetadataRightPanel load(ViewerDatabase database, Map<String, String> SIARDbundle) {
             return EditMetadataUsers.getInstance(database, SIARDbundle);
           }
         });
@@ -110,9 +110,9 @@ public class MainPanelDesktop extends Composite {
         String databaseUUID = currentHistoryPath.get(1);
         final String tableUUID = currentHistoryPath.get(2);
 
-        setRightPanelContent(databaseUUID, new RightPanelLoader() {
+        setRightPanelContent(databaseUUID, new MetadataRightPanelLoad() {
           @Override
-          public RightPanel load(ViewerDatabase database, Map<String, String> SIARDbundle) {
+          public MetadataRightPanel load(ViewerDatabase database, Map<String, String> SIARDbundle) {
             return TablePanel.getInstance(database, SIARDbundle, tableUUID);
           }
         });

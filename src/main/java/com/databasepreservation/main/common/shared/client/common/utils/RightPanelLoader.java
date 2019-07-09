@@ -12,5 +12,5 @@ import java.util.Map;
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public abstract class RightPanelLoader {
-  public abstract RightPanel load(ViewerDatabase database, Map<String, String> SIARDbundle);
+  public abstract RightPanel load(ViewerDatabase database);
 }
