@@ -28,6 +28,7 @@ import config.i18n.client.ClientMessages;
 public class TablePanel extends MetadataRightPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, TablePanel> instances = new HashMap<>();
+  private Map<String, String> SIARDbundle;
 
   public static TablePanel getInstance(ViewerDatabase database, Map<String, String> SIARDbundle,  String tableUUID) {
     return getInstance(database, SIARDbundle, tableUUID, null);
@@ -39,20 +40,20 @@ public class TablePanel extends MetadataRightPanel {
 
     TablePanel instance = instances.get(code);
     if (instance == null) {
-      instance = new TablePanel(database, tableUUID, searchInfoJson);
+      instance = new TablePanel(database, tableUUID, SIARDbundle, searchInfoJson);
       instances.put(code, instance);
     } else if (searchInfoJson != null) {
       instance.applySearchInfoJson(searchInfoJson);
     } else if (instance.tableSearchPanel.isSearchInfoDefined()) {
-      instance = new TablePanel(database, tableUUID);
+      instance = new TablePanel(database, tableUUID, SIARDbundle);
       instances.put(code, instance);
     }
 
     return instance;
   }
 
-  public static TablePanel createInstance(ViewerDatabase database, ViewerTable table, SearchInfo searchInfo) {
-    return new TablePanel(database, table, searchInfo);
+  public static TablePanel createInstance(ViewerDatabase database, ViewerTable table, Map<String, String> SIARDbundle, SearchInfo searchInfo) {
+    return new TablePanel(database, table, SIARDbundle, searchInfo);
   }
 
   interface TablePanelUiBinder extends UiBinder<Widget, TablePanel> {
@@ -84,13 +85,14 @@ public class TablePanel extends MetadataRightPanel {
    * @param searchInfo
    *          the predefined search
    */
-  private TablePanel(ViewerDatabase database, ViewerTable table, SearchInfo searchInfo) {
+  private TablePanel(ViewerDatabase database, ViewerTable table, Map<String, String> SIARDbundle, SearchInfo searchInfo) {
     tableSearchPanel = new TableSearchPanel(searchInfo);
 
     initWidget(uiBinder.createAndBindUi(this));
 
     this.database = database;
     this.table = table;
+    this.SIARDbundle = SIARDbundle;
     this.schema = database.getMetadata().getSchemaFromTableUUID(table.getUUID());
     init();
   }
@@ -104,8 +106,8 @@ public class TablePanel extends MetadataRightPanel {
    * @param tableUUID
    *          the table UUID
    */
-  private TablePanel(ViewerDatabase viewerDatabase, final String tableUUID) {
-    this(viewerDatabase, tableUUID, null);
+  private TablePanel(ViewerDatabase viewerDatabase, final String tableUUID,  Map<String, String> SIARDbundle) {
+    this(viewerDatabase, tableUUID, SIARDbundle, null);
   }
 
   /**
@@ -120,9 +122,10 @@ public class TablePanel extends MetadataRightPanel {
    * @param searchInfoJson
    *          the SearchInfo instance as a JSON String
    */
-  private TablePanel(ViewerDatabase viewerDatabase, final String tableUUID, String searchInfoJson) {
+  private TablePanel(ViewerDatabase viewerDatabase, final String tableUUID,  Map<String, String> SIARDbundle, String searchInfoJson) {
     database = viewerDatabase;
     table = database.getMetadata().getTable(tableUUID);
+    this.SIARDbundle = SIARDbundle;
     schema = database.getMetadata().getSchemaFromTableUUID(tableUUID);
 
     GWT.log("Table: " +  table);

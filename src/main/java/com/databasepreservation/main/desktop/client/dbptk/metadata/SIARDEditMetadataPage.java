@@ -89,6 +89,7 @@ public class SIARDEditMetadataPage extends Composite {
   }
 
   private void loadPanelWithDatabase(MetadataRightPanelLoad rightPanelLoader) {
+    GWT.log("loadPanelWithDatabase");
     BrowserService.Util.getInstance().retrieve(databaseUUID, ViewerDatabase.class.getName(), databaseUUID,
       new DefaultAsyncCallback<IsIndexed>() {
         @Override
@@ -103,6 +104,7 @@ public class SIARDEditMetadataPage extends Composite {
   }
 
   private void loadPanel(MetadataRightPanelLoad rightPanelLoader){
+    GWT.log("loadPanel");
     GWT.log("have db: " + database + "sb.init: " + sidebar.isInitialized());
     MetadataRightPanel rightPanel = rightPanelLoader.load(database, SIARDbundle);
 

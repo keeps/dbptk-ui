@@ -113,7 +113,7 @@ public class MainPanelDesktop extends Composite {
         setRightPanelContent(databaseUUID, new MetadataRightPanelLoad() {
           @Override
           public MetadataRightPanel load(ViewerDatabase database, Map<String, String> SIARDbundle) {
-            return TablePanel.getInstance(database, SIARDbundle, tableUUID);
+            return EditMetadataTable.getInstance(database, SIARDbundle, tableUUID);
           }
         });
       }

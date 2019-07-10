@@ -17,8 +17,11 @@ import com.google.gwt.view.client.ListDataProvider;
 import java.util.Iterator;
 import java.util.List;
 
-public class MetadataEditTable<C> extends Composite {
-    interface MetadataEditTableUiBinder extends UiBinder<Widget, MetadataEditTable>{
+/**
+ * @author Gabriel Barros <gbarros@keep.pt>
+ */
+public class MetadataTableList<C> extends Composite {
+    interface MetadataEditTableUiBinder extends UiBinder<Widget, MetadataTableList>{
     }
 
     private static MetadataEditTableUiBinder uiBinder = GWT.create(MetadataEditTableUiBinder.class);
@@ -35,7 +38,7 @@ public class MetadataEditTable<C> extends Composite {
     SimplePanel table;
 
     @SafeVarargs
-    public MetadataEditTable(Widget headerContent, Widget infoContent, Iterator<C> rowItems, ColumnInfo<C>... columns){
+    public MetadataTableList(Widget headerContent, Widget infoContent, Iterator<C> rowItems, ColumnInfo<C>... columns){
         initWidget(uiBinder.createAndBindUi(this));
 
         // set widgets
@@ -48,7 +51,20 @@ public class MetadataEditTable<C> extends Composite {
         table.setWidget(displayScrollWrapper);
     }
 
-    public MetadataEditTable(Widget headerContent, String infoContent) {
+    public MetadataTableList(Widget headerContent, Widget infoContent, ColumnInfo<C>... columns){
+        initWidget(uiBinder.createAndBindUi(this));
+
+        // set widgets
+        header.setWidget(headerContent);
+        info.setWidget(infoContent);
+
+        CellTable<C> display = createTable(null, columns);
+        displayScrollWrapper = new SimplePanel(display);
+        displayScrollWrapper.addStyleName("my-asyncdatagrid-display-scroll-wrapper");
+        table.setWidget(displayScrollWrapper);
+    }
+
+    public MetadataTableList(Widget headerContent, String infoContent) {
         initWidget(uiBinder.createAndBindUi(this));
 
         // set widgets
@@ -89,9 +105,11 @@ public class MetadataEditTable<C> extends Composite {
         dataProvider = new ListDataProvider<C>();
         dataProvider.addDataDisplay(cellTable);
         List<C> list = dataProvider.getList();
-        while (rowItems.hasNext()) {
-            C rowItem = rowItems.next();
-            list.add(rowItem);
+        if(rowItems != null) {
+            while (rowItems.hasNext()) {
+                C rowItem = rowItems.next();
+                list.add(rowItem);
+            }
         }
 
         return cellTable;

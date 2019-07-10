@@ -1,27 +1,20 @@
 package com.databasepreservation.main.desktop.client.dbptk.metadata;
 
-import com.databasepreservation.main.common.client.BrowserService;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerPrivilegeStructure;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerRoleStructure;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerUserStructure;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
-import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
-import com.databasepreservation.main.common.shared.client.common.RightPanel;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
-import com.databasepreservation.main.common.shared.client.widgets.Toast;
-import com.databasepreservation.main.desktop.client.common.lists.BasicTablePanel;
+import com.databasepreservation.main.desktop.client.common.lists.MetadataTableList;
 import com.google.gwt.cell.client.EditTextCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -86,12 +79,12 @@ public class EditMetadataUsers extends MetadataRightPanel {
     GWT.log("Edit Metadata Users init ");
     metadata = database.getMetadata();
 
-    contentItems.add(getBasicTablePanelForUsers(metadata));
-    contentItems.add(getBasicTablePanelForRoles(metadata));
-    contentItems.add(getBasicTablePanelForPrivileges(metadata));
+    contentItems.add(getMetadataEditTableForUsers(metadata));
+    contentItems.add(getMetadataEditTableForRoles(metadata));
+    contentItems.add(getMetadataEditTableForPrivileges(metadata));
   }
 
-  private BasicTablePanel<ViewerUserStructure> getBasicTablePanelForUsers(ViewerMetadata metadata) {
+  private MetadataTableList<ViewerUserStructure> getMetadataEditTableForUsers(ViewerMetadata metadata) {
     users = metadata.getUsers();
 
     Label header = new Label(messages.titleUsers());
@@ -99,9 +92,9 @@ public class EditMetadataUsers extends MetadataRightPanel {
 
     HTMLPanel info = new HTMLPanel("");
 
-    BasicTablePanel<ViewerUserStructure> userMetadata;
+    MetadataTableList<ViewerUserStructure> userMetadata;
     if (users.isEmpty()) {
-      userMetadata = new BasicTablePanel<>(header, messages.databaseDoesNotContainUsers());
+      userMetadata = new MetadataTableList<>(header, messages.databaseDoesNotContainUsers());
     } else {
       Column<ViewerUserStructure, String> descriptionUser = new Column<ViewerUserStructure, String>(
         new EditTextCell()) {
@@ -121,21 +114,21 @@ public class EditMetadataUsers extends MetadataRightPanel {
         }
       });
 
-      userMetadata = new BasicTablePanel<>(header, info, users.iterator(),
+      userMetadata = new MetadataTableList<>(header, info, users.iterator(),
 
-        new BasicTablePanel.ColumnInfo<>(messages.name(), 15, new TextColumn<ViewerUserStructure>() {
+        new MetadataTableList.ColumnInfo<>(messages.name(), 15, new TextColumn<ViewerUserStructure>() {
           @Override
           public String getValue(ViewerUserStructure user) {
             return user.getName();
           }
-        }), new BasicTablePanel.ColumnInfo<>(messages.description(), 15, descriptionUser));
+        }), new MetadataTableList.ColumnInfo<>(messages.description(), 15, descriptionUser));
 
     }
 
     return userMetadata;
   }
 
-  private BasicTablePanel<ViewerRoleStructure> getBasicTablePanelForRoles(ViewerMetadata metadata) {
+  private MetadataTableList<ViewerRoleStructure> getMetadataEditTableForRoles(ViewerMetadata metadata) {
     roles = metadata.getRoles();
 
     Label header = new Label(messages.titleRoles());
@@ -143,9 +136,9 @@ public class EditMetadataUsers extends MetadataRightPanel {
 
     HTMLPanel info = new HTMLPanel("");
 
-    BasicTablePanel<ViewerRoleStructure> roleMetadata;
+    MetadataTableList<ViewerRoleStructure> roleMetadata;
     if (roles.isEmpty()) {
-      roleMetadata = new BasicTablePanel<>(header, messages.databaseDoesNotContainRoles());
+      roleMetadata = new MetadataTableList<>(header, messages.databaseDoesNotContainRoles());
     } else {
       Column<ViewerRoleStructure, String> descriptionRole = new Column<ViewerRoleStructure, String>(
         new EditTextCell()) {
@@ -165,29 +158,29 @@ public class EditMetadataUsers extends MetadataRightPanel {
         }
       });
 
-      roleMetadata = new BasicTablePanel<>(header, info, roles.iterator(),
+      roleMetadata = new MetadataTableList<>(header, info, roles.iterator(),
 
-        new BasicTablePanel.ColumnInfo<>(messages.name(), 15, new TextColumn<ViewerRoleStructure>() {
+        new MetadataTableList.ColumnInfo<>(messages.name(), 15, new TextColumn<ViewerRoleStructure>() {
           @Override
           public String getValue(ViewerRoleStructure role) {
             return role.getName();
           }
         }),
 
-        new BasicTablePanel.ColumnInfo<>(messages.titleAdmin(), 15, new TextColumn<ViewerRoleStructure>() {
+        new MetadataTableList.ColumnInfo<>(messages.titleAdmin(), 15, new TextColumn<ViewerRoleStructure>() {
           @Override
           public String getValue(ViewerRoleStructure role) {
             return role.getAdmin();
           }
         }),
 
-        new BasicTablePanel.ColumnInfo<>(messages.titleDescription(), 15, descriptionRole));
+        new MetadataTableList.ColumnInfo<>(messages.titleDescription(), 15, descriptionRole));
     }
 
     return roleMetadata;
   }
 
-  private BasicTablePanel<ViewerPrivilegeStructure> getBasicTablePanelForPrivileges(ViewerMetadata metadata) {
+  private MetadataTableList<ViewerPrivilegeStructure> getMetadataEditTableForPrivileges(ViewerMetadata metadata) {
     privileges = metadata.getPrivileges();
 
     Label header = new Label(messages.titlePrivileges());
@@ -195,9 +188,9 @@ public class EditMetadataUsers extends MetadataRightPanel {
 
     HTMLPanel info = new HTMLPanel("");
 
-    BasicTablePanel<ViewerPrivilegeStructure> privilegeMetadata;
+    MetadataTableList<ViewerPrivilegeStructure> privilegeMetadata;
     if (privileges.isEmpty()) {
-      privilegeMetadata = new BasicTablePanel<>(header, messages.databaseDoesNotContainPrivileges());
+      privilegeMetadata = new MetadataTableList<>(header, messages.databaseDoesNotContainPrivileges());
     } else {
       Column<ViewerPrivilegeStructure, String> descriptionPrivileges = new Column<ViewerPrivilegeStructure, String>(
         new EditTextCell()) {
@@ -221,44 +214,44 @@ public class EditMetadataUsers extends MetadataRightPanel {
         }
       });
 
-      privilegeMetadata = new BasicTablePanel<>(header, info, privileges.iterator(),
+      privilegeMetadata = new MetadataTableList<>(header, info, privileges.iterator(),
 
-        new BasicTablePanel.ColumnInfo<>(messages.titleType(), 15, new TextColumn<ViewerPrivilegeStructure>() {
+        new MetadataTableList.ColumnInfo<>(messages.titleType(), 15, new TextColumn<ViewerPrivilegeStructure>() {
           @Override
           public String getValue(ViewerPrivilegeStructure privilege) {
             return privilege.getType();
           }
         }),
 
-        new BasicTablePanel.ColumnInfo<>(messages.titleGrantor(), 15, new TextColumn<ViewerPrivilegeStructure>() {
+        new MetadataTableList.ColumnInfo<>(messages.titleGrantor(), 15, new TextColumn<ViewerPrivilegeStructure>() {
           @Override
           public String getValue(ViewerPrivilegeStructure privilege) {
             return privilege.getGrantor();
           }
         }),
 
-        new BasicTablePanel.ColumnInfo<>(messages.titleGrantee(), 15, new TextColumn<ViewerPrivilegeStructure>() {
+        new MetadataTableList.ColumnInfo<>(messages.titleGrantee(), 15, new TextColumn<ViewerPrivilegeStructure>() {
           @Override
           public String getValue(ViewerPrivilegeStructure privilege) {
             return privilege.getGrantee();
           }
         }),
 
-        new BasicTablePanel.ColumnInfo<>(messages.titleObject(), 15, new TextColumn<ViewerPrivilegeStructure>() {
+        new MetadataTableList.ColumnInfo<>(messages.titleObject(), 15, new TextColumn<ViewerPrivilegeStructure>() {
           @Override
           public String getValue(ViewerPrivilegeStructure privilege) {
             return privilege.getObject();
           }
         }),
 
-        new BasicTablePanel.ColumnInfo<>(messages.titleOption(), 15, new TextColumn<ViewerPrivilegeStructure>() {
+        new MetadataTableList.ColumnInfo<>(messages.titleOption(), 15, new TextColumn<ViewerPrivilegeStructure>() {
           @Override
           public String getValue(ViewerPrivilegeStructure privilege) {
             return privilege.getOption();
           }
         }),
 
-        new BasicTablePanel.ColumnInfo<>(messages.titleDescription(), 15, descriptionPrivileges));
+        new MetadataTableList.ColumnInfo<>(messages.titleDescription(), 15, descriptionPrivileges));
     }
 
     return privilegeMetadata;
