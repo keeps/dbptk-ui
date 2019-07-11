@@ -36,6 +36,13 @@ public class HistoryManager {
   public static final String ROUTE_SIARD_INFO = "siard";
   public static final String ROUTE_CREATE_SIARD = "create";
 
+  public static final String ROUTE_WIZARD_CONNECTION = "connection";
+  public static final String ROUTE_WIZARD_TABLES_COLUMNS = "table-columns";
+  public static final String ROUTE_WIZARD_CUSTOM_VIEWS = "custom-views";
+  public static final String ROUTE_WIZARD_EXPORT_SIARD_OPTIONS = "siard";
+  public static final String ROUTE_WIZARD_EXPORT_EXT_OPTIONS = "external-lobs";
+  public static final String ROUTE_WIZARD_EXPORT_METADATA_OPTIONS = "metadata";
+
   public static final String HISTORY_SEP = "/";
   public static final String HISTORY_SEP_REGEX = "/";
   public static final String HISTORY_SEP_ESCAPE = "%2F";
@@ -297,9 +304,17 @@ public class HistoryManager {
     return createHistoryToken(Collections.singletonList(ROUTE_CREATE_SIARD));
   }
 
-  public static String linkToCreateSIARD(String page) {
-    return createHistoryToken(Arrays.asList(ROUTE_CREATE_SIARD, page));
+  public static String linkToCreateSIARD(String wizardPage, String toSelect) {
+    return createHistoryToken(Arrays.asList(ROUTE_CREATE_SIARD, wizardPage, toSelect));
   }
+
+  public static String linkToCreateSIARD(String wizardPage, String toSelect, String database_uuid) {
+    return createHistoryToken(Arrays.asList(ROUTE_CREATE_SIARD, wizardPage, toSelect, database_uuid));
+  }
+  public static String linkToCreateSIARD(String wizardPage, String toSelect, String database_uuid, String table_uuid) {
+    return createHistoryToken(Arrays.asList(ROUTE_CREATE_SIARD, wizardPage, toSelect, database_uuid, table_uuid));
+  }
+
 
   public static String linkToHome() {
     return createHistoryToken(Collections.singletonList(ROUTE_HOME));

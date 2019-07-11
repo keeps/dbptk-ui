@@ -1,7 +1,5 @@
 package com.databasepreservation.main.desktop.client.dbptk.wizard.create.exportOptions;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 
 import com.databasepreservation.main.desktop.client.common.ComboBoxField;
 import com.databasepreservation.main.desktop.client.common.GenericField;
@@ -13,10 +11,10 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
-
-import com.sun.tools.javah.Gen;
 import config.i18n.client.ClientMessages;
-import org.checkerframework.checker.units.qual.C;
+
+import java.util.Arrays;
+import java.util.HashMap;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -74,12 +72,17 @@ public class SIARDExportOptions extends WizardPanel {
   }
 
   @Override
-  public void validate() {
-
+  public boolean validate() {
+    return false;
   }
 
   @Override
-  public void getValues() {
+  public HashMap<String, String> getValues() {
+    return null;
+  }
+
+  @Override
+  public void error() {
 
   }
 }

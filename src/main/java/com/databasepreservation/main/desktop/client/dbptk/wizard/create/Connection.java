@@ -2,11 +2,14 @@ package com.databasepreservation.main.desktop.client.dbptk.wizard.create;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.databasepreservation.main.common.client.BrowserService;
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
 import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.main.common.shared.client.tools.FontAwesomeIconManager;
+import com.databasepreservation.main.common.shared.client.widgets.Toast;
 import com.databasepreservation.main.desktop.client.common.sidebar.ConnectionSidebar;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.create.connection.JDBCPanel;
@@ -37,15 +40,14 @@ public class Connection extends WizardPanel {
   private static ConnectionUiBinder binder = GWT.create(ConnectionUiBinder.class);
 
   @UiField
-  FlowPanel JDBCListConnections, SIARDListConnections, leftSideContainer, connectionInputPanel;
+  FlowPanel JDBCListConnections, leftSideContainer, connectionInputPanel;
 
-  private ConnectionModule siardModule;
   private ConnectionModule dbmsModule;
   private ConnectionSidebar connectionSidebar;
   private SSHTunnelPanel sshTunnelPanel;
   private String selectedConnection;
   private JDBCPanel selected;
-  private ArrayList<PreservationParameter> preservationParametersSelected;
+  private Set<JDBCPanel> JDBCPanels = new HashSet<>();
 
   private static Connection instance = null;
 
@@ -64,9 +66,9 @@ public class Connection extends WizardPanel {
     Widget spinner = new HTML(SafeHtmlUtils.fromSafeConstant(
       "<div class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
 
-    SIARDListConnections.add(spinner);
+    JDBCListConnections.add(spinner);
 
-    BrowserService.Util.getInstance().getDatabaseModuleFactories(new DefaultAsyncCallback<ConnectionModule>() {
+    BrowserService.Util.getInstance().getDatabaseImportModules(new DefaultAsyncCallback<ConnectionModule>() {
       @Override
       public void onSuccess(ConnectionModule result) {
         connectionSidebar = ConnectionSidebar.getInstance(messages.menuSidebarDatabases(),
@@ -74,15 +76,14 @@ public class Connection extends WizardPanel {
 
         JDBCListConnections.add(connectionSidebar);
         leftSideContainer.removeStyleName("loading-sidebar");
-        SIARDListConnections.remove(spinner);
+        JDBCListConnections.remove(spinner);
 
-        siardModule = result.getSIARDConnections();
         dbmsModule = result.getDBMSConnections();
       }
     });
   }
 
-  public void change(String connection) {
+  public void sideBarHighlighter(String connection) {
 
     connectionSidebar.select(connection);
     JDBCListConnections.clear();
@@ -92,11 +93,12 @@ public class Connection extends WizardPanel {
 
     selectedConnection = connection;
 
-    preservationParametersSelected = dbmsModule.getParameters(connection);
+    ArrayList<PreservationParameter> preservationParametersSelected = dbmsModule.getParameters(connection);
 
     TabPanel tabPanel = new TabPanel();
     tabPanel.addStyleName("connection-panel");
     selected = JDBCPanel.getInstance(connection, preservationParametersSelected);
+    JDBCPanels.add(selected);
     tabPanel.add(selected, messages.tabGeneral());
     tabPanel.add(sshTunnelPanel, messages.tabSSHTunnel());
 
@@ -106,26 +108,44 @@ public class Connection extends WizardPanel {
   }
 
   @Override
-  public void getValues() {
+  public HashMap<String, String> getValues() {
+
     if (sshTunnelPanel.isSSHTunnelEnabled()) {
       final SSHConfiguration parameters = sshTunnelPanel.getSSHConfiguration();
-      JavascriptUtils.log(parameters.getHostname());
-      JavascriptUtils.log(parameters.getPort());
-      JavascriptUtils.log(parameters.getUsername());
-      JavascriptUtils.log(parameters.getPassword());
+      // TODO: SSH connection
     }
 
-    final HashMap<String, String> values = selected.getValues();
-
+    HashMap<String, String> values = selected.getValues();
+    values.put("module_name", selectedConnection);
+    return values;
   }
 
   @Override
   public void clear() {
+    for (JDBCPanel jdbc : JDBCPanels) {
+      jdbc.clear();
+    }
+    sshTunnelPanel.clear();
     connectionInputPanel.clear();
   }
 
-  @Override
-  public void validate() {
+  public void clearPasswords() {
+    for (JDBCPanel jdbc : JDBCPanels) {
+      jdbc.clearPasswords();
+    }
+    sshTunnelPanel.clearPassword();
+  }
 
+  @Override
+  public boolean validate() {
+    final ArrayList<PreservationParameter> validate = selected.validate();
+
+   return validate.isEmpty();
+  }
+
+  @Override
+  public void error() {
+
+    Toast.showError("Mandatory arguments missing"); //TODO: Improve error message, add electron option to display notification
   }
 }

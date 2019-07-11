@@ -1018,34 +1018,90 @@ p[data-value]:after {
 }
 
 .form-container {
+    width: auto;
+    height: auto;
     margin: 2.5rem 4rem 0rem 6rem;
 }
 
 .form-row {
     display: flex;
-    margin-bottom: 2.5rem;
     width:100%;
+    margin-bottom: 10px;
+}
+
+.form-label-spaced {
+    font-weight: bold;
+    flex: 1 0 160px;
+}
+
+.form-button {
+    width: 100%;
+}
+
+.form-inline > .form-label-spaced:last-of-type {
+    margin-left: 25px;
 }
 
 .form-inline {
     display: flex;
+    margin-bottom: 10px;
+}
+
+.form-textbox-inline:first-of-type {
     width: 100%;
+    color: #58595b;
+    padding: 5px;
+    margin-bottom: 5px;
+    border: 1px solid #ccc;
+    border-radius: 1px;
+    box-sizing: border-box;
+    background-color: #f5f5f5;
+    font-size: 1.5rem;
+    font-family: "Ubuntu", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial,
+    sans-serif;
+    font-weight: 300;
 }
 
-.form-inline .form-label-spaced {
-    margin-inline-start: 2rem;
+.form-textbox-inline {
+    color: #58595b;
+    padding: 5px;
+    margin-bottom: 5px;
+    border: 1px solid #ccc;
+    border-radius: 1px;
+    box-sizing: border-box;
+    background-color: #f5f5f5;
+    font-size: 1.5rem;
+    font-family: "Ubuntu", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial,
+    sans-serif;
+    font-weight: 300;
 }
 
-.form-label-spaced {
-    display: inline-block;
-    text-align: left;
-    font-weight: bold;
-    width: 17rem;
-    min-width: 100px;
-}
+@media (max-width: 698px) {
+    .form-inline input {
+        margin: 10px 0;
+    }
 
-.form-100 {
-    width: 100px;
+    .form-inline {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .form-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .form-textbox-inline {
+        width: 100%;
+    }
+
+    .form-inline .form-label-spaced:last-of-type {
+        margin-left: 0px;
+    }
+
+    .form-label-spaced {
+        flex: 0 0 auto;
+    }
 }
 
 .gwt-Label-disabled {
@@ -1071,6 +1127,10 @@ p[data-value]:after {
     background: #5bbeff;
 }
 
+.information-path {
+    text-overflow: ellipsis;
+    width: 100%;
+}
 
 .sidebarItem {
     padding: 5px 0;
@@ -1078,4 +1138,61 @@ p[data-value]:after {
 
 .sidebarItem-selected {
     color: white !important;
+}
+
+.select-buttons-container .btn:last-child {
+    margin-left: 15px;
+}
+
+/***********************************************
+                    BUTTONS
+***********************************************/
+.btn-back-wizard:before {
+    content: "\f053";
+}
+
+.btn-select-all:after {
+    content: "\f046";
+}
+
+.btn-select-none:after {
+    content: "\f096";
+}
+
+/***********************************************
+				    CHECKBOX
+************************************************/
+
+input[type="checkbox"] {
+    padding-left:5px;
+    padding-right:5px;
+    -webkit-appearance:button;
+    background-color: #eee;
+    color:#FFF;
+    white-space: nowrap;
+    overflow:hidden;
+    width:20px;
+    height:20px;
+    cursor: pointer;
+    border-color: #089de3;
+    border-style: solid;
+    border-width: thin;
+}
+
+input[type="checkbox"]:checked{
+    background-color: #089de3;
+}
+
+input[type="checkbox"]:checked:after {
+    content: '\f00c';
+    font-size: 17px;
+    margin-left: -4px;
+    font-family: FontAwesome;
+}
+
+.form-checkbox Label {
+    font-weight: bold;
+    vertical-align: 8px;
+    cursor: pointer;
+    margin-inline-start: 10px;
 }

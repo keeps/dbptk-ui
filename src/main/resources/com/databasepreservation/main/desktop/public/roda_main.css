@@ -788,9 +788,23 @@ pre code {
     -moz-osx-font-smoothing: grayscale;
     float: right;
     margin-top: 1px;
-
+    text-align: center;
     position: absolute;
     right: 10px;
+}
+
+.btn:before {
+    display: inline-block;
+    font: normal normal normal 14px/1 FontAwesome;
+    font-size: inherit;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    float: left;
+    margin-top: 1px;
+    text-align: center;
+    position: absolute;
+    left: 10px;
 }
 
 .btn-link:after {

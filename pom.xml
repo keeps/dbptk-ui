@@ -346,6 +346,11 @@
         </dependency>
         <dependency>
             <groupId>com.databasepreservation</groupId>
+            <artifactId>dbptk-module-jdbc</artifactId>
+            <version>${version.dbptk}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.databasepreservation</groupId>
             <artifactId>dbptk-module-postgresql</artifactId>
             <version>${version.dbptk}</version>
         </dependency>

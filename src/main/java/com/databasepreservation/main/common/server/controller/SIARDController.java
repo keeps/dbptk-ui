@@ -3,13 +3,20 @@ package com.databasepreservation.main.common.server.controller;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
+import com.databasepreservation.main.common.shared.client.ClientLogger;
+import com.databasepreservation.main.common.shared.client.common.utils.AsyncCallbackUtils;
+import com.databasepreservation.modules.jdbc.in.JDBCImportModule;
 import org.apache.commons.io.IOUtils;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
@@ -32,10 +39,12 @@ import com.databasepreservation.main.desktop.shared.models.PreservationParameter
 import com.databasepreservation.main.modules.viewer.DbvtkModuleFactory;
 import com.databasepreservation.model.Reporter;
 import com.databasepreservation.model.exception.ModuleException;
+import com.databasepreservation.model.exception.UnsupportedModuleException;
 import com.databasepreservation.model.modules.DatabaseImportModule;
 import com.databasepreservation.model.modules.DatabaseModuleFactory;
 import com.databasepreservation.model.modules.filters.ObservableFilter;
 import com.databasepreservation.model.parameters.Parameter;
+import com.databasepreservation.model.parameters.ParameterGroup;
 import com.databasepreservation.model.parameters.Parameters;
 import com.databasepreservation.model.structure.DatabaseStructure;
 import com.databasepreservation.modules.mySql.MySQLModuleFactory;
@@ -64,43 +73,101 @@ public class SIARDController {
     return result;
   }
 
-  public static ViewerMetadata getDatabaseMetadata(String databaseUUID) throws GenericException {
+  public static boolean testConnection(String databaseUUID, String moduleName, HashMap<String, String> parameters)
+    throws GenericException {
+    JDBCImportModule jdbcImportModule = null;
 
     Path reporterPath = ViewerConfiguration.getInstance().getReportPath(databaseUUID).toAbsolutePath();
     try (Reporter reporter = new Reporter(reporterPath.getParent().toString(), reporterPath.getFileName().toString())) {
-
       DatabaseMigration databaseMigration = DatabaseMigration.newInstance();
 
-      databaseMigration.importModule(new MySQLModuleFactory())
-        .importModuleParameter(MySQLModuleFactory.PARAMETER_HOSTNAME, "localhost")
-        .importModuleParameter(MySQLModuleFactory.PARAMETER_USERNAME, "root")
-        .importModuleParameter(MySQLModuleFactory.PARAMETER_PASSWORD, "123456")
-        .importModuleParameter(MySQLModuleFactory.PARAMETER_DATABASE, "sakila")
-        .importModuleParameter(MySQLModuleFactory.PARAMETER_PORT_NUMBER, "3306");
+      DatabaseModuleFactory factory = getDatabaseModuleFactory(moduleName);
 
-      databaseMigration.reporter(reporter);
+      if (factory != null) {
+        databaseMigration.importModule(factory);
 
-      final DatabaseImportModule importModule = databaseMigration.getImportModule();
-      importModule.setOnceReporter(reporter);
+        for (Map.Entry<String, String> entry : parameters.entrySet()) {
+          databaseMigration.importModuleParameter(entry.getKey(), entry.getValue());
+        }
 
-      // final DatabaseStructure schemaInformation =
-      // importModule.getSchemaInformation();
+        databaseMigration.reporter(reporter);
 
-      // final ViewerDatabaseFromToolkit database =
-      // ToolkitStructure2ViewerStructure.getDatabase(schemaInformation);
+        DatabaseImportModule importModule = databaseMigration.getImportModule();
 
-      // return database.getMetadata();
-
+        if (importModule instanceof JDBCImportModule) {
+          jdbcImportModule = (JDBCImportModule) importModule;
+          boolean value = jdbcImportModule.testConnection();
+          jdbcImportModule.closeConnection();
+          return value;
+        }
+      }
     } catch (IOException e) {
       throw new GenericException("Could not initialize conversion modules", e);
-    } catch (ModuleException | RuntimeException e) {
-      throw new GenericException("Could not convert the database to the Solr instance.", e);
-    }
+    } catch (ModuleException e) {
+      throw new GenericException(e.getMessage());
+    } /* finally {
+      if (jdbcImportModule != null) {
+        try {
+          jdbcImportModule.closeConnection();
+        } catch (ModuleException e) {
+          new ClientLogger(SIARDController.class.getName())
+              .error("JDBC SIARD Connection error - " + e.getClass().getSimpleName() + ": " + e.getMessage(), e);
 
+        }
+      }
+    }*/
+
+    return false;
+  }
+
+  public static ViewerMetadata getDatabaseMetadata(String databaseUUID, String moduleName, HashMap<String, String> parameters) throws GenericException {
+    JDBCImportModule jdbcImportModule = null;
+
+    Path reporterPath = ViewerConfiguration.getInstance().getReportPath(databaseUUID).toAbsolutePath();
+    try (Reporter reporter = new Reporter(reporterPath.getParent().toString(), reporterPath.getFileName().toString())) {
+      DatabaseMigration databaseMigration = DatabaseMigration.newInstance();
+
+      DatabaseModuleFactory factory = getDatabaseModuleFactory(moduleName);
+
+      if (factory != null) {
+        databaseMigration.importModule(factory);
+
+        for (Map.Entry<String, String> entry : parameters.entrySet()) {
+          databaseMigration.importModuleParameter(entry.getKey(), entry.getValue());
+        }
+
+        databaseMigration.reporter(reporter);
+
+        DatabaseImportModule importModule = databaseMigration.getImportModule();
+        importModule.setOnceReporter(reporter);
+
+        if (importModule instanceof JDBCImportModule) {
+          jdbcImportModule = (JDBCImportModule) importModule;
+          DatabaseStructure schemaInformation = jdbcImportModule.getSchemaInformation();
+
+          ViewerDatabaseFromToolkit database = ToolkitStructure2ViewerStructure.getDatabase(schemaInformation);
+          return database.getMetadata();
+
+        }
+      }
+    } catch (IOException e) {
+      throw new GenericException("Could not initialize conversion modules", e);
+    } catch (ModuleException e) {
+      throw new GenericException(e.getMessage());
+    } finally {
+      if (jdbcImportModule != null) {
+        try {
+          jdbcImportModule.closeConnection();
+        } catch (ModuleException e) {
+          new ClientLogger(SIARDController.class.getName())
+              .error("JDBC SIARD Connection error - " + e.getClass().getSimpleName() + ": " + e.getMessage(), e);
+        }
+      }
+    }
     return null;
   }
 
-  public static ConnectionModule getDatabaseModuleFactories() throws GenericException {
+  public static ConnectionModule getDatabaseImportModules() throws GenericException {
     ConnectionModule connectionModule = new ConnectionModule();
     PreservationParameter preservationParameter;
 
@@ -111,13 +178,23 @@ public class SIARDController {
         if (factory.producesImportModules()) {
 
           final Parameters importModuleParameters;
+          try {
+            importModuleParameters = factory.getConnectionParameters();
+            for (Parameter param : importModuleParameters.getParameters()) {
+              preservationParameter = new PreservationParameter(param.longName(), param.longName(), param.description(),
+                param.required(), param.hasArgument(), param.getInputType().name());
+              connectionModule.addPreservationParameter(factory.getModuleName(), preservationParameter);
+            }
 
-          importModuleParameters = factory.getConnectionParameters();
-
-          for (Parameter param : importModuleParameters.getParameters()) {
-            preservationParameter = new PreservationParameter(param.longName(), param.longName(), param.description(), param.required(),
-              param.hasArgument());
-            connectionModule.addPreservationParameter(factory.getModuleName(), preservationParameter);
+            for (ParameterGroup pg : importModuleParameters.getGroups()) {
+              for (Parameter param : pg.getParameters()) {
+                preservationParameter = new PreservationParameter(param.longName(), param.longName(),
+                  param.description(), param.required(), param.hasArgument(), param.getInputType().name());
+                connectionModule.addPreservationParameter(factory.getModuleName(), preservationParameter);
+              }
+            }
+          } catch (UnsupportedModuleException e) {
+            throw new GenericException(e);
           }
         }
       }
@@ -248,5 +325,20 @@ public class SIARDController {
     } catch (ModuleException | RuntimeException e) {
       throw new GenericException("Could not convert the database to the Solr instance.", e);
     }
+  }
+
+  private static DatabaseModuleFactory getDatabaseModuleFactory(String moduleName) {
+    Set<DatabaseModuleFactory> databaseModuleFactories = ReflectionUtils.collectDatabaseModuleFactories();
+
+    DatabaseModuleFactory factory = null;
+
+    for (DatabaseModuleFactory dbFactory : databaseModuleFactories) {
+      if (dbFactory.isEnabled() && dbFactory.producesImportModules()) {
+        if (dbFactory.getModuleName().equals(moduleName))
+          factory = dbFactory;
+      }
+    }
+
+    return factory;
   }
 }

@@ -1,8 +1,8 @@
 package com.databasepreservation.main.common.client;
 
+import java.util.HashMap;
 import java.util.List;
 
-import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
 import org.roda.core.data.exceptions.AuthenticationDeniedException;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.roda.core.data.exceptions.GenericException;
@@ -18,6 +18,7 @@ import org.roda.core.data.v2.user.User;
 
 import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerRow;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
 import com.databasepreservation.main.common.shared.client.common.search.SavedSearch;
@@ -108,7 +109,9 @@ public interface BrowserService extends RemoteService {
 
   String findSIARDFile(String path) throws GenericException, RequestNotValidException;
 
-  ConnectionModule getDatabaseModuleFactories() throws GenericException;
+  ConnectionModule getDatabaseImportModules() throws GenericException;
 
-  ViewerMetadata getSchemaInformation(String databaseUUID) throws GenericException;
+  ViewerMetadata getSchemaInformation(String databaseUUID, String moduleName, HashMap<String, String> values) throws GenericException;
+
+  boolean testConnection(String databaseUUID, String moduleName, HashMap<String, String> parameters) throws GenericException;
 }

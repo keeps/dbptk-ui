@@ -5,10 +5,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
-import com.databasepreservation.main.common.shared.client.tools.ToolkitModuleName2ViewerModuleName;
 import com.databasepreservation.main.common.shared.client.common.sidebar.SidebarHyperlink;
 import com.databasepreservation.main.common.shared.client.common.sidebar.SidebarItem;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
+import com.databasepreservation.main.common.shared.client.tools.ToolkitModuleName2ViewerModuleName;
 import com.databasepreservation.main.desktop.shared.models.ConnectionModule;
 import com.databasepreservation.main.desktop.shared.models.PreservationParameter;
 import com.google.gwt.core.client.GWT;
@@ -73,7 +73,8 @@ public class ConnectionSidebar extends Composite {
     final TreeMap<String, ArrayList<PreservationParameter>> parameters = new TreeMap<>(items.getParameters());
 
     for (String moduleName : parameters.keySet()) {
-      SidebarHyperlink sidebarHyperlink = new SidebarHyperlink(ToolkitModuleName2ViewerModuleName.transform(moduleName), HistoryManager.linkToCreateSIARD(moduleName));
+      SidebarHyperlink sidebarHyperlink = new SidebarHyperlink(ToolkitModuleName2ViewerModuleName.transform(moduleName),
+        HistoryManager.linkToCreateSIARD(HistoryManager.ROUTE_WIZARD_CONNECTION, moduleName));
       sidebarHyperlink.addIcon(itemIcon).setH6().setIndent1();
       list.put(moduleName, sidebarHyperlink);
       sidebarGroup.add(sidebarHyperlink);

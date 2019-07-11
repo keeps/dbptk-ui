@@ -1,9 +1,9 @@
 package com.databasepreservation.main.common.server;
 
+import java.util.HashMap;
 import java.util.List;
 
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
-import com.databasepreservation.main.desktop.client.common.GenericField;
 import org.roda.core.data.exceptions.AuthenticationDeniedException;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.roda.core.data.exceptions.GenericException;
@@ -238,11 +238,15 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
   }
 
   @Override
-  public ConnectionModule getDatabaseModuleFactories() throws GenericException {
-    return SIARDController.getDatabaseModuleFactories();
+  public ConnectionModule getDatabaseImportModules() throws GenericException {
+    return SIARDController.getDatabaseImportModules();
   }
 
-  public ViewerMetadata getSchemaInformation(String databaseUUID) throws GenericException {
-    return SIARDController.getDatabaseMetadata(databaseUUID);
+  public ViewerMetadata getSchemaInformation(String databaseUUID, String moduleName, HashMap<String, String> values) throws GenericException {
+    return SIARDController.getDatabaseMetadata(databaseUUID, moduleName, values);
+  }
+
+  public boolean testConnection(String databaseUUID, String moduleName, HashMap<String, String> parameters) throws GenericException {
+    return SIARDController.testConnection(databaseUUID, moduleName, parameters);
   }
 }

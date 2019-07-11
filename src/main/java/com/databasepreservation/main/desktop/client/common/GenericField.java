@@ -43,6 +43,10 @@ public class GenericField extends Composite {
     genericField.add(value);
   }
 
+  public void setRequired(boolean required) {
+    if (required) genericKey.addStyleName("form-label-mandatory");
+  }
+
   public void setCSSMetadata(String cssParent, String cssKey) {
 
     if (cssParent != null) {

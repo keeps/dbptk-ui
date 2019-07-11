@@ -6,6 +6,8 @@
 package com.databasepreservation.main.common.shared.client.common.utils;
 
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONObject;
 
 public class JavascriptUtils {
 
@@ -255,12 +257,14 @@ public class JavascriptUtils {
                                                                       })).makeHtml(inputText);
   }-*/;
 
-  public static native String openFileDialog() /*-{
+  public static native String openFileDialog(JavaScriptObject options) /*-{
       var dialog = $wnd.nodeRequire('electron').remote.dialog;
 
-      return dialog.showOpenDialog({
-          properties: ['openFile'], filters: [{ name: "SIARD", extensions: ["siard"] }]
-      })[0];
+      var result = dialog.showOpenDialog(options);
+
+      if (typeof result != "undefined") { return result[0]; }
+      else return null;
+
   }-*/;
 
   public static native void log(String txt) /*-{

@@ -11,6 +11,8 @@ import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
 
+import java.util.HashMap;
+
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
@@ -46,12 +48,17 @@ public class MetadataExportOptions extends WizardPanel {
   }
 
   @Override
-  public void validate() {
-
+  public boolean validate() {
+    return false;
   }
 
   @Override
-  public void getValues() {
+  public HashMap<String, String> getValues() {
+    return null;
+  }
+
+  @Override
+  public void error() {
 
   }
 }

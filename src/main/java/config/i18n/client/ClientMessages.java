@@ -518,4 +518,12 @@ public interface ClientMessages extends Messages {
   String connectionURLLabel();
 
   String connectionLabels(@Select String fieldName);
+
+  String chooseDriverLocation();
+
+  String sidebarTables();
+
+  String selectAll();
+
+  String selectNone();
 }

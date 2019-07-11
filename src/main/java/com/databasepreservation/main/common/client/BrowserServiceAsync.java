@@ -1,8 +1,8 @@
 package com.databasepreservation.main.common.client;
 
+import java.util.HashMap;
 import java.util.List;
 
-import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.RODAException;
 import org.roda.core.data.exceptions.RequestNotValidException;
@@ -14,6 +14,7 @@ import org.roda.core.data.v2.user.User;
 
 import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerRow;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
 import com.databasepreservation.main.common.shared.client.common.search.SavedSearch;
@@ -111,7 +112,9 @@ public interface BrowserServiceAsync {
 
   void findSIARDFile(String path, AsyncCallback<String> async);
 
-  void getDatabaseModuleFactories(AsyncCallback<ConnectionModule> async);
+  void getDatabaseImportModules(AsyncCallback<ConnectionModule> async);
 
-  void getSchemaInformation(String databaseUUID, AsyncCallback<ViewerMetadata> async);
+  void getSchemaInformation(String databaseUUID, String moduleName, HashMap<String, String> values, AsyncCallback<ViewerMetadata> async);
+
+  void testConnection(String databaseUUID, String moduleName, HashMap<String, String> parameters, AsyncCallback<Boolean> async);
 }

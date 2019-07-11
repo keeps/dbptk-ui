@@ -2,12 +2,13 @@ package com.databasepreservation.main.desktop.client.dbptk.wizard.create;
 
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
+
+import java.util.HashMap;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -42,12 +43,19 @@ public class CustomViews extends WizardPanel {
   }
 
   @Override
-  public void validate() {
-
+  public boolean validate() {
+    return false;
   }
 
   @Override
-  public void getValues() {
+  public HashMap<String, String> getValues() {
+    return null;
+  }
+
+  @Override
+  public void error() {
 
   }
+
+  public void sideBarHighlighter(String value) {}
 }

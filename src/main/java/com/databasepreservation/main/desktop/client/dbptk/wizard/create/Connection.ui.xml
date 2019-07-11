@@ -4,7 +4,6 @@
     <g:FlowPanel>
         <g:FlowPanel addStyleNames="wrapper">
             <g:FlowPanel ui:field="leftSideContainer" addStyleNames="left loading-sidebar">
-                <g:FlowPanel ui:field="SIARDListConnections"/>
                 <g:FlowPanel ui:field="JDBCListConnections"/>
             </g:FlowPanel>
             <g:FlowPanel addStyleNames="right">

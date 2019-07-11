@@ -362,7 +362,6 @@ public class BreadcrumbManager {
         + SafeHtmlUtils.htmlEscape(" " + messages.SIARD())), new Command() {
           @Override
           public void execute() {
-
           }
         }));
     return items;

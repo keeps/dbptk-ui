@@ -7,8 +7,11 @@ import com.databasepreservation.main.common.shared.client.common.dialogs.Dialogs
 import com.databasepreservation.main.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
+import com.databasepreservation.main.common.shared.client.tools.JSOUtils;
 import com.databasepreservation.main.desktop.client.common.Card;
+import com.databasepreservation.main.desktop.shared.models.Filter;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -21,6 +24,8 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
+
+import java.util.Collections;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -72,62 +77,71 @@ public class HomePage extends Composite {
       @Override
       public void onClick(ClickEvent event) {
         String path;
+
         if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
-          path = JavascriptUtils.openFileDialog();
+
+          Filter siard = new Filter("SIARD", Collections.singletonList("siard"));
+
+          JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.singletonList("openFile"), Collections.singletonList(siard));
+
+          path = JavascriptUtils.openFileDialog(options);
         } else {
           path = "/home/mguimaraes/Desktop/mysql.siard";
         }
 
-        Widget loading = new HTML(SafeHtmlUtils.fromSafeConstant(
-          "<div id='loading' class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
+        if (path != null) {
 
-        options.add(loading);
+          Widget loading = new HTML(SafeHtmlUtils.fromSafeConstant(
+            "<div id='loading' class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
 
-        BrowserService.Util.getInstance().findSIARDFile(path, new DefaultAsyncCallback<String>() {
-          @Override
-          public void onSuccess(String databaseUUID) {
-            if (databaseUUID != null) {
-              Dialogs.showConfirmDialog(messages.dialogReimportSIARDTitle(), messages.dialogReimportSIARD(),
-                messages.dialogCancel(), messages.dialogConfirm(), new DefaultAsyncCallback<Boolean>() {
-                  @Override
-                  public void onSuccess(Boolean confirm) {
-                    if (confirm) {
-                      BrowserService.Util.getInstance().uploadMetadataSIARD(path, new DefaultAsyncCallback<String>() {
-                        @Override
-                        public void onFailure(Throwable caught) {
-                          // TODO: error handling
-                          options.remove(loading);
-                        }
+          options.add(loading);
 
-                        @Override
-                        public void onSuccess(String newDatabaseUUID) {
-                          options.remove(loading);
-                          HistoryManager.gotoSIARDInfo(newDatabaseUUID);
-                        }
-                      });
-                    } else {
-                      options.remove(loading);
-                      HistoryManager.gotoSIARDInfo(databaseUUID);
+          BrowserService.Util.getInstance().findSIARDFile(path, new DefaultAsyncCallback<String>() {
+            @Override
+            public void onSuccess(String databaseUUID) {
+              if (databaseUUID != null) {
+                Dialogs.showConfirmDialog(messages.dialogReimportSIARDTitle(), messages.dialogReimportSIARD(),
+                  messages.dialogCancel(), messages.dialogConfirm(), new DefaultAsyncCallback<Boolean>() {
+                    @Override
+                    public void onSuccess(Boolean confirm) {
+                      if (confirm) {
+                        BrowserService.Util.getInstance().uploadMetadataSIARD(path, new DefaultAsyncCallback<String>() {
+                          @Override
+                          public void onFailure(Throwable caught) {
+                            // TODO: error handling
+                            options.remove(loading);
+                          }
+
+                          @Override
+                          public void onSuccess(String newDatabaseUUID) {
+                            options.remove(loading);
+                            HistoryManager.gotoSIARDInfo(newDatabaseUUID);
+                          }
+                        });
+                      } else {
+                        options.remove(loading);
+                        HistoryManager.gotoSIARDInfo(databaseUUID);
+                      }
                     }
+                  });
+              } else {
+                BrowserService.Util.getInstance().uploadMetadataSIARD(path, new DefaultAsyncCallback<String>() {
+                  @Override
+                  public void onFailure(Throwable caught) {
+                    // TODO: error handling
+                    options.remove(loading);
+                  }
+
+                  @Override
+                  public void onSuccess(String newDatabaseUUID) {
+                    options.remove(loading);
+                    HistoryManager.gotoSIARDInfo(newDatabaseUUID);
                   }
                 });
-            } else {
-              BrowserService.Util.getInstance().uploadMetadataSIARD(path, new DefaultAsyncCallback<String>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                  // TODO: error handling
-                  options.remove(loading);
-                }
-
-                @Override
-                public void onSuccess(String newDatabaseUUID) {
-                  options.remove(loading);
-                  HistoryManager.gotoSIARDInfo(newDatabaseUUID);
-                }
-              });
+              }
             }
-          }
-        });
+          });
+        }
       }
     });
 

@@ -1,7 +1,5 @@
 package com.databasepreservation.main.desktop.shared.models;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -15,16 +13,18 @@ public class PreservationParameter implements Serializable {
   private String description = null;
   private boolean required = false;
   private boolean hasArgument = false;
+  private String inputType = null;
 
   public PreservationParameter() {
   }
 
-  public PreservationParameter(String name, String displayName, String description, boolean required, boolean hasArgument) {
+  public PreservationParameter(String name, String displayName, String description, boolean required, boolean hasArgument, String inputType) {
     this.name = name;
     this.displayName = displayName;
     this.description = description;
     this.required = required;
     this.hasArgument = hasArgument;
+    this.inputType = inputType;
   }
 
   public String getName() {
@@ -65,6 +65,14 @@ public class PreservationParameter implements Serializable {
 
   public void setHasArgument(boolean hasArgument) {
     this.hasArgument = hasArgument;
+  }
+
+  public String getInputType() {
+    return inputType;
+  }
+
+  public void setInputType(String inputType) {
+    this.inputType = inputType;
   }
 
   @Override

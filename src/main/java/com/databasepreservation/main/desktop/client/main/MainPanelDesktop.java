@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbItem;
+import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.desktop.client.dbptk.HomePage;
 import com.databasepreservation.main.desktop.client.dbptk.Manage;
@@ -58,9 +59,21 @@ public class MainPanelDesktop extends Composite {
     } else if (HistoryManager.ROUTE_CREATE_SIARD.equals(currentHistoryPath.get(0))) {
       CreateWizardManager instance = CreateWizardManager.getInstance();
       contentPanel.clear();
-      if (currentHistoryPath.size() != 1) {
-        instance.changeConnectionPage(currentHistoryPath.get(1));
+      if (currentHistoryPath.size() == 3) {
+        instance.change(currentHistoryPath.get(1), currentHistoryPath.get(2));
+      } else if (currentHistoryPath.size() == 4) {
+        final String wizardPage = currentHistoryPath.get(1);
+        final String toSelect = currentHistoryPath.get(2);
+        final String schemaUUID = currentHistoryPath.get(3);
+        instance.change(wizardPage, toSelect, schemaUUID);
+      } else if (currentHistoryPath.size() == 5) {
+        final String wizardPage = currentHistoryPath.get(1);
+        final String toSelect = currentHistoryPath.get(2);
+        final String schemaUUID = currentHistoryPath.get(3);
+        final String tableUUID = currentHistoryPath.get(4);
+        instance.change(wizardPage, toSelect, schemaUUID, tableUUID);
       }
+
       contentPanel.add(instance);
     } else {
       handleErrorPath(currentHistoryPath);
