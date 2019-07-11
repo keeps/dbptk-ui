@@ -8,8 +8,6 @@ import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbI
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
 import com.databasepreservation.main.common.shared.client.common.LoadingDiv;
-import com.databasepreservation.main.common.shared.client.common.RightPanel;
-import com.databasepreservation.main.common.shared.client.common.utils.RightPanelLoader;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.main.common.shared.client.widgets.Toast;
 import com.databasepreservation.main.desktop.client.common.sidebar.MetadataEditSidebar;
@@ -38,15 +36,18 @@ public class SIARDEditMetadataPage extends Composite {
   }
 
   private static SIARDEditMetadataPageUiBinder binder = GWT.create(SIARDEditMetadataPageUiBinder.class);
-  private static SIARDEditMetadataPage instance = null;
+  private static Map<String, SIARDEditMetadataPage> instances = new HashMap<>();
   private String databaseUUID;
   private ViewerDatabase database = null;
   private Map<String, String> SIARDbundle = new HashMap<>();
 
   public static SIARDEditMetadataPage getInstance(String databaseUUID) {
+
+    SIARDEditMetadataPage instance = instances.get(databaseUUID);
     if (instance == null) {
-      GWT.log("SIARDEditMetadataPage, getInstance ");
+      GWT.log("SIARDEditMetadataPage, getInstance:::" + databaseUUID);
       instance = new SIARDEditMetadataPage(databaseUUID);
+      instances.put(databaseUUID, instance);
     }
     return instance;
   }
@@ -73,11 +74,11 @@ public class SIARDEditMetadataPage extends Composite {
 
     initWidget(binder.createAndBindUi(this));
 
-    List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forSIARDEditMetadataPage();
+    List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forSIARDEditMetadataPage(databaseUUID);
     BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
   }
 
-  public void load(MetadataRightPanelLoad rightPanelLoader){
+  public void load(MetadataPanelLoad rightPanelLoader){
     GWT.log("load. uuid: " + databaseUUID + ", database: " + database);
 
     if (databaseUUID != null && (database == null || !ViewerDatabase.Status.METADATA_ONLY.equals(database.getStatus()))) {
@@ -88,7 +89,7 @@ public class SIARDEditMetadataPage extends Composite {
     }
   }
 
-  private void loadPanelWithDatabase(MetadataRightPanelLoad rightPanelLoader) {
+  private void loadPanelWithDatabase(MetadataPanelLoad rightPanelLoader) {
     GWT.log("loadPanelWithDatabase");
     BrowserService.Util.getInstance().retrieve(databaseUUID, ViewerDatabase.class.getName(), databaseUUID,
       new DefaultAsyncCallback<IsIndexed>() {
@@ -103,10 +104,10 @@ public class SIARDEditMetadataPage extends Composite {
       });
   }
 
-  private void loadPanel(MetadataRightPanelLoad rightPanelLoader){
+  private void loadPanel(MetadataPanelLoad rightPanelLoader){
     GWT.log("loadPanel");
     GWT.log("have db: " + database + "sb.init: " + sidebar.isInitialized());
-    MetadataRightPanel rightPanel = rightPanelLoader.load(database, SIARDbundle);
+    MetadataPanel rightPanel = rightPanelLoader.load(database, SIARDbundle);
 
     if (database != null && !sidebar.isInitialized()) {
       sidebar.init(database);

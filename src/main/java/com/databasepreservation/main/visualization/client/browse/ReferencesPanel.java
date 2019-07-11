@@ -282,7 +282,7 @@ public class ReferencesPanel extends RightPanel {
   private TableSearchPanel createTableSearchPanelFromReference(Reference reference) {
     final ViewerTable otherTable = reference.table;
 
-    // create filter to look for record values in other tables related to this
+    // create filter to look for record values in other schemas related to this
     // one by a foreign key
     boolean currentTableIsReferencedTableInForeignKey = reference.foreignKey.getReferencedTableUUID()
       .equals(table.getUUID());

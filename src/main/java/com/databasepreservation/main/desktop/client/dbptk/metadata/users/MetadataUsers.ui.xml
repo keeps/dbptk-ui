@@ -1,0 +1,15 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+
+    <ui:with field='messages' type='config.i18n.client.ClientMessages'/>
+
+    <g:FlowPanel addStyleNames="metadata-edit">
+        <g:FlowPanel>
+            <g:Label addStyleNames="h1">
+                <ui:text from='{messages.menusidebar_usersRoles}'/>
+            </g:Label>
+            <g:FlowPanel ui:field="contentItems"/>
+        </g:FlowPanel>
+    </g:FlowPanel>
+
+</ui:UiBinder>

@@ -91,7 +91,7 @@ public class SIARDMainPage extends Composite {
 
           populateNavigationPanels();
 
-          List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forSIARDMainPage();
+          List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forSIARDMainPage(databaseUUID);
           BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
 
           container.remove(loading);

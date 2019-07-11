@@ -31,7 +31,7 @@ public class FilterUtils {
       }
     }
 
-    // remove other tables filters. intersection between tables is always empty
+    // remove other schemas filters. intersection between schemas is always empty
     for (FilterParameter otherTableFilter : otherTableFilters) {
       filter.getParameters().remove(otherTableFilter);
     }

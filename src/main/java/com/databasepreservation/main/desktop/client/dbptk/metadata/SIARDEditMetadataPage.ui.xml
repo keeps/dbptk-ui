@@ -15,7 +15,7 @@
             </g:cell>
             <!-- RIGHT PANEL -->
             <g:cell width="100%">
-                <g:FlowPanel addStyleNames="browseContentFilePreviewPanel">
+                <g:FlowPanel>
                     <c:LoadingDiv visible="false" ui:field="loading"/>
                     <g:SimplePanel addStyleNames="col_12 content" ui:field="rightPanelContainer" />
 

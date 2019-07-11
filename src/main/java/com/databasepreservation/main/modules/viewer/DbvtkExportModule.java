@@ -156,7 +156,7 @@ public class DbvtkExportModule implements DatabaseExportModule {
 
   /**
    * Finish handling the data of a schema. This method will be called after all
-   * tables of the schema were requested to be handled.
+   * schemas of the schema were requested to be handled.
    *
    * @param schemaName
    *          the schema name

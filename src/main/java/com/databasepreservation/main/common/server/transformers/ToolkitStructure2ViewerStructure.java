@@ -212,7 +212,7 @@ public class ToolkitStructure2ViewerStructure {
   }
 
   private static List<ViewerSchema> getSchemas(ViewerDatabaseFromToolkit vdb, List<SchemaStructure> schemas,
-                                               ReferenceHolder references) throws ViewerException {
+    ReferenceHolder references) throws ViewerException {
     List<ViewerSchema> result = new ArrayList<>();
     for (SchemaStructure schema : schemas) {
       result.add(getSchema(vdb, schema, references));
@@ -312,7 +312,7 @@ public class ToolkitStructure2ViewerStructure {
   }
 
   private static List<ViewerTable> getTables(ViewerDatabaseFromToolkit vdb, List<TableStructure> tables,
-                                             ReferenceHolder references) throws ViewerException {
+    ReferenceHolder references) throws ViewerException {
     List<ViewerTable> result = new ArrayList<>();
     for (TableStructure table : tables) {
       result.add(getTable(vdb, table, references));
@@ -566,7 +566,7 @@ public class ToolkitStructure2ViewerStructure {
   }
 
   public static ViewerRow getRow(ViewerAbstractConfiguration configuration, String databaseUUID, ViewerTable table,
-                                 Row row, long rowIndex) throws ViewerException {
+    Row row, long rowIndex) throws ViewerException {
     ViewerRow result = new ViewerRow();
     String rowUUID = SolrUtils.UUIDFromString(table.getId() + "." + rowIndex);
     result.setTableId(table.getId());
@@ -576,7 +576,7 @@ public class ToolkitStructure2ViewerStructure {
   }
 
   private static Map<String, ViewerCell> getCells(ViewerAbstractConfiguration configuration, String databaseUUID,
-                                                  ViewerTable table, Row row, long rowIndex, String rowUUID) throws ViewerException {
+    ViewerTable table, Row row, long rowIndex, String rowUUID) throws ViewerException {
     HashMap<String, ViewerCell> result = new HashMap<>();
 
     int colIndex = 0;
@@ -655,7 +655,7 @@ public class ToolkitStructure2ViewerStructure {
   }
 
   /**
-   * Helper class to hold references to tables and columns, even in different
+   * Helper class to hold references to schemas and columns, even in different
    * schemas
    */
   private static class ReferenceHolder {

@@ -4,6 +4,6 @@ import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabas
 
 import java.util.Map;
 
-public abstract class MetadataRightPanelLoad {
-    public abstract MetadataRightPanel load(ViewerDatabase database, Map<String, String> SIARDbundle);
+public abstract class MetadataPanelLoad {
+    public abstract MetadataPanel load(ViewerDatabase database, Map<String, String> SIARDbundle);
 }

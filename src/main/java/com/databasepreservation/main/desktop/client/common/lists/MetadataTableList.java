@@ -3,6 +3,8 @@ package com.databasepreservation.main.desktop.client.common.lists;
 import com.databasepreservation.main.common.shared.client.widgets.MyCellTableResources;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ScrollEvent;
+import com.google.gwt.event.dom.client.ScrollHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -28,6 +30,8 @@ public class MetadataTableList<C> extends Composite {
 
     CellTable<C> cellTable;
     ListDataProvider<C> dataProvider;
+
+    private ScrollPanel displayScroll;
     private SimplePanel displayScrollWrapper;
 
     @UiField
@@ -46,22 +50,12 @@ public class MetadataTableList<C> extends Composite {
         info.setWidget(infoContent);
 
         CellTable<C> display = createTable(rowItems, columns);
-        displayScrollWrapper = new SimplePanel(display);
-        displayScrollWrapper.addStyleName("my-asyncdatagrid-display-scroll-wrapper");
+        displayScroll = new ScrollPanel(display);
+        displayScroll.setSize("100%", "100%");
+        displayScrollWrapper = new SimplePanel(displayScroll);
+        displayScrollWrapper.addStyleName("metadata-edit-scroll-wrapper");
         table.setWidget(displayScrollWrapper);
-    }
 
-    public MetadataTableList(Widget headerContent, Widget infoContent, ColumnInfo<C>... columns){
-        initWidget(uiBinder.createAndBindUi(this));
-
-        // set widgets
-        header.setWidget(headerContent);
-        info.setWidget(infoContent);
-
-        CellTable<C> display = createTable(null, columns);
-        displayScrollWrapper = new SimplePanel(display);
-        displayScrollWrapper.addStyleName("my-asyncdatagrid-display-scroll-wrapper");
-        table.setWidget(displayScrollWrapper);
     }
 
     public MetadataTableList(Widget headerContent, String infoContent) {
@@ -132,5 +126,10 @@ public class MetadataTableList<C> extends Composite {
         public ColumnInfo(String header, double widthEM, Column<C, ?> column, String... addCellStyleNames) {
             this(SafeHtmlUtils.fromString(header), widthEM, column, addCellStyleNames);
         }
+    }
+
+    @Override
+    protected void onLoad() {
+        super.onLoad();
     }
 }

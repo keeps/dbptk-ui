@@ -27,7 +27,7 @@
     color: rgb(88, 89, 91);
 }
 
-/* allows tables to scroll correctly and not go beyond the page limits */
+/* allows schemas to scroll correctly and not go beyond the page limits */
 .browseContentPreviewPanel > tbody > tr:nth-child(1) > td:nth-child(2) {
     max-width: 1px;
     width: 100%;
@@ -1311,6 +1311,7 @@ input[type="checkbox"]:checked:after {
 }
 
 .metadata-save {
+    align-self: flex-end;
     float: right;
 }
 
@@ -1352,6 +1353,10 @@ input[type="checkbox"]:checked:after {
 .metadata-edit-readonly{
     background-color: #f7f7f7 ;
     font-weight: bold;
+}
+
+.metadata-edit-scroll-wrapper{
+    overflow: scroll;
 }
 
 @media (max-width: 768px){

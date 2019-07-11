@@ -118,7 +118,7 @@ public class UploadPanel extends RightPanel {
       // extra messages to smoothen the log
       if (database.getCurrentSchemaName() != null
         && !database.getCurrentSchemaName().equals(result.getCurrentSchemaName())) {
-        // last message about a completed schema, tables and rows at 100%
+        // last message about a completed schema, schemas and rows at 100%
         addMessageToContent(buildMessage(database.getCurrentSchemaName(), database.getIngestedSchemas(),
           database.getTotalSchemas(), database.getCurrentTableName(), database.getTotalTables(),
           database.getTotalTables(), database.getTotalRows(), database.getTotalRows()));

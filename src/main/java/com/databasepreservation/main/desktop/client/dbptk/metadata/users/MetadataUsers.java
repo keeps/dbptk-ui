@@ -1,4 +1,4 @@
-package com.databasepreservation.main.desktop.client.dbptk.metadata;
+package com.databasepreservation.main.desktop.client.dbptk.metadata.users;
 
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
@@ -8,6 +8,7 @@ import com.databasepreservation.main.common.shared.ViewerStructure.ViewerUserStr
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.main.desktop.client.common.lists.MetadataTableList;
+import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataPanel;
 import com.google.gwt.cell.client.EditTextCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
@@ -28,15 +29,15 @@ import java.util.Map;
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
-public class EditMetadataUsers extends MetadataRightPanel {
+public class MetadataUsers extends MetadataPanel {
 
-  interface EditMetadataUsersUiBinder extends UiBinder<Widget, EditMetadataUsers> {
+  interface EditMetadataUsersUiBinder extends UiBinder<Widget, MetadataUsers> {
 
   }
 
   private static EditMetadataUsersUiBinder uiBinder = GWT.create(EditMetadataUsersUiBinder.class);
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
-  private static Map<String, EditMetadataUsers> instances = new HashMap<>();
+  private static Map<String, MetadataUsers> instances = new HashMap<>();
   private ViewerDatabase database;
   private ViewerMetadata metadata = null;
   private final Map<String, String> SIARDbundle;
@@ -44,12 +45,12 @@ public class EditMetadataUsers extends MetadataRightPanel {
   private List<ViewerRoleStructure> roles;
   private List<ViewerPrivilegeStructure> privileges;
 
-  public static EditMetadataUsers getInstance(ViewerDatabase database, Map<String, String> SIARDbundle) {
+  public static MetadataUsers getInstance(ViewerDatabase database, Map<String, String> SIARDbundle) {
     String code = database.getUUID();
 
-    EditMetadataUsers instance = instances.get(code);
+    MetadataUsers instance = instances.get(code);
     if (instance == null) {
-      instance = new EditMetadataUsers(database, SIARDbundle);
+      instance = new MetadataUsers(database, SIARDbundle);
       instances.put(code, instance);
     }
 
@@ -62,7 +63,7 @@ public class EditMetadataUsers extends MetadataRightPanel {
   // @UiField
   // Button buttonCancel, buttonSave;
 
-  private EditMetadataUsers(ViewerDatabase database, Map<String, String> SIARDbundle) {
+  private MetadataUsers(ViewerDatabase database, Map<String, String> SIARDbundle) {
     this.database = database;
     this.SIARDbundle = SIARDbundle;
     initWidget(uiBinder.createAndBindUi(this));
@@ -72,7 +73,7 @@ public class EditMetadataUsers extends MetadataRightPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forSIARDEditMetadataPage());
+    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forSIARDEditMetadataPage(database.getUUID()));
   }
 
   private void init() {
@@ -255,28 +256,5 @@ public class EditMetadataUsers extends MetadataRightPanel {
     }
 
     return privilegeMetadata;
-  }
-
-  private Map<String, String> updateSiardBundle() {
-    GWT.log("updateSiardMetadata");
-    Map<String, String> bundle = new HashMap<>();
-
-    users.forEach((user) -> {
-      bundle.put("user:" + user.getName(), "description---" + user.getDescription());
-    });
-
-    roles.forEach((role) -> {
-      bundle.put("roles:" + role.getName(), "description---" + role.getDescription());
-    });
-
-    privileges.forEach((privilege) -> {
-      bundle.put("privileges:" + privilege.getType(), "description---" + privilege.getDescription());
-    });
-
-    for (Map.Entry<String, String> entry : bundle.entrySet()) {
-      GWT.log(entry.getKey() + "/" + entry.getValue());
-    }
-
-    return bundle;
   }
 }

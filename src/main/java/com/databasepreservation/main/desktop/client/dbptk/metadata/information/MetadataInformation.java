@@ -1,12 +1,12 @@
-package com.databasepreservation.main.desktop.client.dbptk.metadata;
+package com.databasepreservation.main.desktop.client.dbptk.metadata.information;
 
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.main.common.shared.client.common.LoadingDiv;
-import com.databasepreservation.main.common.shared.client.common.RightPanel;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.main.common.shared.client.tools.ViewerStringUtils;
+import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataPanel;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
@@ -18,7 +18,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.TextBoxBase;
@@ -31,13 +30,13 @@ import java.util.Map;
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
-public class EditMetadataInformation extends MetadataRightPanel {
-  interface EditMetadataInformationUiBinder extends UiBinder<Widget, EditMetadataInformation> {
+public class MetadataInformation extends MetadataPanel {
+  interface EditMetadataInformationUiBinder extends UiBinder<Widget, MetadataInformation> {
   }
 
   private static EditMetadataInformationUiBinder uiBinder = GWT.create(EditMetadataInformationUiBinder.class);
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
-  private static Map<String, EditMetadataInformation> instances = new HashMap<>();
+  private static Map<String, MetadataInformation> instances = new HashMap<>();
   private ViewerDatabase database = null;
   private ViewerMetadata metadata = null;
   private Map<String, String> SIARDbundle;
@@ -55,19 +54,19 @@ public class EditMetadataInformation extends MetadataRightPanel {
   @UiField
   Button buttonEnableEdit;
 
-  public static EditMetadataInformation getInstance(ViewerDatabase database, Map<String, String> SIARDbundle) {
+  public static MetadataInformation getInstance(ViewerDatabase database, Map<String, String> SIARDbundle) {
     String code = database.getUUID();
 
-    EditMetadataInformation instance = instances.get(code);
+    MetadataInformation instance = instances.get(code);
     if (instance == null) {
-      instance = new EditMetadataInformation(database, SIARDbundle);
+      instance = new MetadataInformation(database, SIARDbundle);
       instances.put(code, instance);
     }
 
     return instance;
   }
 
-  private EditMetadataInformation(ViewerDatabase database, Map<String, String> SIARDbundle) {
+  private MetadataInformation(ViewerDatabase database, Map<String, String> SIARDbundle) {
     this.database = database;
     this.SIARDbundle = SIARDbundle;
     initWidget(uiBinder.createAndBindUi(this));
@@ -78,7 +77,7 @@ public class EditMetadataInformation extends MetadataRightPanel {
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
     BreadcrumbManager.updateBreadcrumb(breadcrumb,
-            BreadcrumbManager.forSIARDEditMetadataPage());
+            BreadcrumbManager.forSIARDEditMetadataPage(database.getUUID()));
   }
 
   private void init() {
@@ -89,30 +88,30 @@ public class EditMetadataInformation extends MetadataRightPanel {
 
   private void writeOnViewerMetadataInformation(ViewerMetadata metadata) {
 
-    setupElement(databaseName, metadata.getName(), "dbname");
+    setupElement(databaseName, metadata.getName(), "dbname", "text");
     setupElement(archivalDate,
       metadata.getArchivalDate() != null ? metadata.getArchivalDate().substring(0, 10) : metadata.getArchivalDate(),
-      "archivalDate");
-    archivalDate.getElement().setAttribute("type", "date");
+      "archivalDate", "date");
 
-    setupElement(archivist, metadata.getArchiver(), "archiver");
-    setupElement(archivistContact, metadata.getArchiverContact(), "archiverContact");
-    setupElement(clientMachine, metadata.getClientMachine(), "clientMachine");
-    setupElement(databaseProduct, metadata.getDatabaseProduct(), "databaseProduct");
-    setupElement(databaseUser, metadata.getDatabaseUser(), "databaseUser");
-    setupElement(dataOriginTimeSpan, metadata.getDataOriginTimespan(), "dataOriginTimespan");
-    setupElement(dataOwner, metadata.getDataOwner(), "dataOwner");
+    setupElement(archivist, metadata.getArchiver(), "archiver", "text");
+    setupElement(archivistContact, metadata.getArchiverContact(), "archiverContact", "text");
+    setupElement(clientMachine, metadata.getClientMachine(), "clientMachine", "text");
+    setupElement(databaseProduct, metadata.getDatabaseProduct(), "databaseProduct", "text");
+    setupElement(databaseUser, metadata.getDatabaseUser(), "databaseUser", "text");
+    setupElement(dataOriginTimeSpan, metadata.getDataOriginTimespan(), "dataOriginTimespan", "text");
+    setupElement(dataOwner, metadata.getDataOwner(), "dataOwner", "text");
 
     setupElement(description, ViewerStringUtils.isNotBlank(metadata.getDescription()) ? metadata.getDescription()
-      : messages.siardMetadata_DescriptionUnavailable(), "dataOwner");
+      : messages.siardMetadata_DescriptionUnavailable(), "description", "text");
 
-    setupElement(producerApplication, metadata.getProducerApplication(), "producerApplication");
+    setupElement(producerApplication, metadata.getProducerApplication(), "producerApplication", "text");
   }
 
-  private void setupElement(TextBoxBase element, String text, String name) {
+  private void setupElement(TextBoxBase element, String text, String name, String type) {
     element.setReadOnly(true);
     element.setText(text);
     element.getElement().setAttribute("name", name);
+    element.getElement().setAttribute("type", type);
     element.getElement().addClassName("metadata-edit-readonly");
     element.addChangeHandler(new ChangeHandler() {
       @Override
@@ -128,8 +127,6 @@ public class EditMetadataInformation extends MetadataRightPanel {
   }
 
   private void updateSolrMetadata() {
-
-    GWT.log("onChange metadata: " + databaseName.getText());
     metadata.setName(databaseName.getText());
     metadata.setArchivalDate(archivalDate.getText());
     metadata.setArchiver(archivist.getText());
