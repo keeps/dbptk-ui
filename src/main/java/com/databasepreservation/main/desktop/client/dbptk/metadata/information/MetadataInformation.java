@@ -2,6 +2,7 @@ package com.databasepreservation.main.desktop.client.dbptk.metadata.information;
 
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSIARDBundle;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.main.common.shared.client.common.LoadingDiv;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
@@ -39,7 +40,7 @@ public class MetadataInformation extends MetadataPanel {
   private static Map<String, MetadataInformation> instances = new HashMap<>();
   private ViewerDatabase database = null;
   private ViewerMetadata metadata = null;
-  private Map<String, String> SIARDbundle;
+  private ViewerSIARDBundle SIARDbundle;
 
   @UiField
   TextBox databaseName, archivalDate, archivist, archivistContact, clientMachine, databaseProduct, databaseUser,
@@ -54,7 +55,7 @@ public class MetadataInformation extends MetadataPanel {
   @UiField
   Button buttonEnableEdit;
 
-  public static MetadataInformation getInstance(ViewerDatabase database, Map<String, String> SIARDbundle) {
+  public static MetadataInformation getInstance(ViewerDatabase database, ViewerSIARDBundle SIARDbundle) {
     String code = database.getUUID();
 
     MetadataInformation instance = instances.get(code);
@@ -66,7 +67,7 @@ public class MetadataInformation extends MetadataPanel {
     return instance;
   }
 
-  private MetadataInformation(ViewerDatabase database, Map<String, String> SIARDbundle) {
+  private MetadataInformation(ViewerDatabase database, ViewerSIARDBundle SIARDbundle) {
     this.database = database;
     this.SIARDbundle = SIARDbundle;
     initWidget(uiBinder.createAndBindUi(this));
@@ -116,17 +117,16 @@ public class MetadataInformation extends MetadataPanel {
     element.addChangeHandler(new ChangeHandler() {
       @Override
       public void onChange(ChangeEvent event) {
-        updateSiardBundle(element);
-        updateSolrMetadata();
+//        updateSiardBundle(element);
+        GWT.log("INFORMATION:::" + element.getText());
+        SIARDbundle.setInformation(element.getElement().getAttribute("name"), element.getText());
+        GWT.log("COMMAND:::" + SIARDbundle.getInformation(element.getElement().getAttribute("name")));
+        updateMetadata();
       }
     });
   }
 
-  private void updateSiardBundle(TextBoxBase element) {
-    SIARDbundle.put(element.getElement().getAttribute("name"), element.getText());
-  }
-
-  private void updateSolrMetadata() {
+  private void updateMetadata() {
     metadata.setName(databaseName.getText());
     metadata.setArchivalDate(archivalDate.getText());
     metadata.setArchiver(archivist.getText());

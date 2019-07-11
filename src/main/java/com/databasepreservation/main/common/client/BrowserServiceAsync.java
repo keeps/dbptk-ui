@@ -2,7 +2,6 @@ package com.databasepreservation.main.common.client;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.RODAException;
@@ -17,6 +16,7 @@ import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerRow;
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSIARDBundle;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
 import com.databasepreservation.main.common.shared.client.common.search.SavedSearch;
 import com.databasepreservation.main.common.shared.client.common.search.SearchField;
@@ -132,6 +132,6 @@ public interface BrowserServiceAsync {
     CustomViewsParameters customViewsParameters, ExportOptionsParameters exportOptionsParameters,
     MetadataExportOptionsParameters metadataExportOptionsParameters, AsyncCallback<Boolean> async);
 
-  void updateMetadataInformation(ViewerMetadata metadata, Map<String, String> bundleSiard, String databaseUUID,
+  void updateMetadataInformation(ViewerMetadata metadata, ViewerSIARDBundle bundleSiard, String databaseUUID,
     String path, AsyncCallback<ViewerMetadata> async);
 }

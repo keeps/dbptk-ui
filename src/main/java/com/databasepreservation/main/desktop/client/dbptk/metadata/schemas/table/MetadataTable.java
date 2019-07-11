@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSIARDBundle;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSchema;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
@@ -41,12 +42,12 @@ public class MetadataTable extends MetadataPanel {
 
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, MetadataTable> instances = new HashMap<>();
-  private Map<String, String> SIARDbundle;
+  private ViewerSIARDBundle SIARDbundle;
   private ViewerDatabase database;
   private ViewerSchema schema;
   private ViewerTable table;
 
-  public static MetadataTable getInstance(ViewerDatabase database, Map<String, String> SIARDbundle, String tableUUID) {
+  public static MetadataTable getInstance(ViewerDatabase database, ViewerSIARDBundle SIARDbundle, String tableUUID) {
     String separator = "/";
     String code = database.getUUID() + separator + tableUUID;
 
@@ -59,7 +60,7 @@ public class MetadataTable extends MetadataPanel {
     return instance;
   }
 
-  private MetadataTable(ViewerDatabase database, String tableUUID, Map<String, String> bundle) {
+  private MetadataTable(ViewerDatabase database, String tableUUID, ViewerSIARDBundle bundle) {
     this.database = database;
     this.SIARDbundle = bundle;
     table = database.getMetadata().getTable(tableUUID);
@@ -87,8 +88,7 @@ public class MetadataTable extends MetadataPanel {
       @Override
       public void onChange(ChangeEvent event) {
         table.setDescription(description.getText());
-        SIARDbundle.put("schema:" + schema.getName() + "---" + "table:" + table.getName(),
-          "description---" + description.getText());
+        SIARDbundle.setTable(schema.getName(), table.getName(),description.getText());
       }
     });
 

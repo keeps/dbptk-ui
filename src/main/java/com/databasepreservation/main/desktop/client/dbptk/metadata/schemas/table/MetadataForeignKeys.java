@@ -1,11 +1,6 @@
 package com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.table;
 
-import com.databasepreservation.main.common.shared.ViewerStructure.ViewerColumn;
-import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
-import com.databasepreservation.main.common.shared.ViewerStructure.ViewerForeignKey;
-import com.databasepreservation.main.common.shared.ViewerStructure.ViewerReference;
-import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSchema;
-import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
+import com.databasepreservation.main.common.shared.ViewerStructure.*;
 import com.databasepreservation.main.desktop.client.common.lists.MetadataTableList;
 import com.google.gwt.cell.client.EditTextCell;
 import com.google.gwt.core.client.GWT;
@@ -25,10 +20,10 @@ import java.util.Map;
  */
 public class MetadataForeignKeys implements MetadataTabPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
-  private Map<String, String> SIARDbundle;
+  private ViewerSIARDBundle SIARDbundle;
   private ViewerDatabase database;
 
-  MetadataForeignKeys(Map<String, String> SIARDbundle, ViewerDatabase database){
+  MetadataForeignKeys(ViewerSIARDBundle SIARDbundle, ViewerDatabase database){
         this.SIARDbundle = SIARDbundle;
         this.database = database;
     }
@@ -94,15 +89,14 @@ public class MetadataForeignKeys implements MetadataTabPanel {
 
     description.setFieldUpdater((index, object, value) -> {
       object.setDescription(value);
-      updateSIARDbundle(schema.getName(), table.getName(), object.getName(), "foreignKey", value);
+      updateSIARDbundle(schema.getName(), table.getName(), "foreignKey", object.getName(), value);
     });
 
     return description;
   }
 
   @Override
-  public void updateSIARDbundle(String schemaName, String tableName, String displayName, String type, String value) {
-    SIARDbundle.put("schema:" + schemaName + "---" + "table:" + tableName + "---" + type + ":" + displayName,
-      "description---" + value);
+  public void updateSIARDbundle(String schemaName, String tableName, String type, String displayName, String value) {
+    SIARDbundle.setTableType(schemaName, tableName, type, displayName, value);
   }
 }

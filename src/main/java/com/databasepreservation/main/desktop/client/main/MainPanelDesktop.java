@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSIARDBundle;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.desktop.client.dbptk.HomePage;
@@ -93,14 +94,14 @@ public class MainPanelDesktop extends Composite {
       if (currentHistoryPath.size() == 2) {
         setRightPanelContent(databaseUUID, new MetadataPanelLoad() {
           @Override
-          public MetadataPanel load(ViewerDatabase database, Map<String, String> SIARDbundle) {
+          public MetadataPanel load(ViewerDatabase database, ViewerSIARDBundle SIARDbundle) {
             return MetadataInformation.getInstance(database, SIARDbundle);
           }
         });
       } else if (currentHistoryPath.size() == 3) {
         setRightPanelContent(databaseUUID, new MetadataPanelLoad() {
           @Override
-          public MetadataPanel load(ViewerDatabase database, Map<String, String> SIARDbundle) {
+          public MetadataPanel load(ViewerDatabase database, ViewerSIARDBundle SIARDbundle) {
             return MetadataUsers.getInstance(database, SIARDbundle);
           }
         });
@@ -112,7 +113,7 @@ public class MainPanelDesktop extends Composite {
 
         setRightPanelContent(databaseUUID, new MetadataPanelLoad() {
           @Override
-          public MetadataPanel load(ViewerDatabase database, Map<String, String> SIARDbundle) {
+          public MetadataPanel load(ViewerDatabase database, ViewerSIARDBundle SIARDbundle) {
             return MetadataTable.getInstance(database, SIARDbundle, tableUUID);
           }
         });

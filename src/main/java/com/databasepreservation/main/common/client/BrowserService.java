@@ -2,7 +2,6 @@ package com.databasepreservation.main.common.client;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.roda.core.data.exceptions.AuthenticationDeniedException;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
@@ -21,6 +20,7 @@ import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerRow;
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSIARDBundle;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
 import com.databasepreservation.main.common.shared.client.common.search.SavedSearch;
 import com.databasepreservation.main.common.shared.client.common.search.SearchField;
@@ -127,6 +127,6 @@ public interface BrowserService extends RemoteService {
 
   boolean createSIARD(ConnectionParameters connectionParameters, TableAndColumnsParameters tableAndColumnsParameters, CustomViewsParameters customViewsParameters, ExportOptionsParameters exportOptionsParameters, MetadataExportOptionsParameters metadataExportOptionsParameters) throws GenericException;
 
-  ViewerMetadata updateMetadataInformation(ViewerMetadata metadata, Map<String, String> bundleSiard,
-    String databaseUUID, String path) throws GenericException;
+  ViewerMetadata updateMetadataInformation(ViewerMetadata metadata, ViewerSIARDBundle bundleSiard, String databaseUUID,
+    String path) throws GenericException;
 }

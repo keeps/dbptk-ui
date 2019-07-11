@@ -1,10 +1,6 @@
 package com.databasepreservation.main.desktop.client.dbptk.metadata.users;
 
-import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
-import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
-import com.databasepreservation.main.common.shared.ViewerStructure.ViewerPrivilegeStructure;
-import com.databasepreservation.main.common.shared.ViewerStructure.ViewerRoleStructure;
-import com.databasepreservation.main.common.shared.ViewerStructure.ViewerUserStructure;
+import com.databasepreservation.main.common.shared.ViewerStructure.*;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.main.desktop.client.common.lists.MetadataTableList;
@@ -40,12 +36,12 @@ public class MetadataUsers extends MetadataPanel {
   private static Map<String, MetadataUsers> instances = new HashMap<>();
   private ViewerDatabase database;
   private ViewerMetadata metadata = null;
-  private final Map<String, String> SIARDbundle;
+  private final ViewerSIARDBundle SIARDbundle;
   private List<ViewerUserStructure> users;
   private List<ViewerRoleStructure> roles;
   private List<ViewerPrivilegeStructure> privileges;
 
-  public static MetadataUsers getInstance(ViewerDatabase database, Map<String, String> SIARDbundle) {
+  public static MetadataUsers getInstance(ViewerDatabase database, ViewerSIARDBundle SIARDbundle) {
     String code = database.getUUID();
 
     MetadataUsers instance = instances.get(code);
@@ -63,7 +59,7 @@ public class MetadataUsers extends MetadataPanel {
   // @UiField
   // Button buttonCancel, buttonSave;
 
-  private MetadataUsers(ViewerDatabase database, Map<String, String> SIARDbundle) {
+  private MetadataUsers(ViewerDatabase database, ViewerSIARDBundle SIARDbundle) {
     this.database = database;
     this.SIARDbundle = SIARDbundle;
     initWidget(uiBinder.createAndBindUi(this));
@@ -110,7 +106,7 @@ public class MetadataUsers extends MetadataPanel {
         public void update(int index, ViewerUserStructure object, String value) {
 
           object.setDescription(value);
-          SIARDbundle.put("user:" + object.getName(), "description---" + object.getDescription());
+          SIARDbundle.setUser(object.getName(), object.getDescription());
 
         }
       });
@@ -154,7 +150,7 @@ public class MetadataUsers extends MetadataPanel {
         public void update(int index, ViewerRoleStructure object, String value) {
 
           object.setDescription(value);
-          SIARDbundle.put("role:" + object.getName(), "description---" + object.getDescription());
+          SIARDbundle.setRole(object.getName(), object.getDescription());
 
         }
       });
@@ -203,16 +199,10 @@ public class MetadataUsers extends MetadataPanel {
         }
       };
 
-      descriptionPrivileges.setFieldUpdater(new FieldUpdater<ViewerPrivilegeStructure, String>() {
-        @Override
-        public void update(int index, ViewerPrivilegeStructure object, String value) {
-          object.setDescription(value);
-          SIARDbundle
-            .put(
-              "privileges:[type:" + object.getType() + " object:" + object.getObject() + " grantor:"
-                + object.getGrantor() + " grantee:" + object.getGrantee() + "]",
-              "description---" + object.getDescription());
-        }
+      descriptionPrivileges.setFieldUpdater((index, object, value) -> {
+        object.setDescription(value);
+        SIARDbundle.setPrivileges(object.getType(), object.getObject(), object.getGrantor(), object.getGrantee(),
+          object.getDescription());
       });
 
       privilegeMetadata = new MetadataTableList<>(header, info, privileges.iterator(),

@@ -4,6 +4,7 @@ import com.databasepreservation.main.common.client.BrowserService;
 import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSIARDBundle;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
@@ -39,7 +40,7 @@ public class SIARDEditMetadataPage extends Composite {
   private static Map<String, SIARDEditMetadataPage> instances = new HashMap<>();
   private String databaseUUID;
   private ViewerDatabase database = null;
-  private Map<String, String> SIARDbundle = new HashMap<>();
+  private ViewerSIARDBundle SIARDbundle = new ViewerSIARDBundle();
 
   public static SIARDEditMetadataPage getInstance(String databaseUUID) {
 

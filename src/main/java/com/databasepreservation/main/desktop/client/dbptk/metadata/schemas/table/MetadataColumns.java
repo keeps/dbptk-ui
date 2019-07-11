@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerColumn;
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSIARDBundle;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSchema;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
 import com.databasepreservation.main.desktop.client.common.lists.MetadataTableList;
@@ -22,9 +23,9 @@ import config.i18n.client.ClientMessages;
 public class MetadataColumns implements MetadataTabPanel {
 
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
-  private Map<String, String> SIARDbundle;
+  private ViewerSIARDBundle SIARDbundle;
 
-  MetadataColumns(Map<String, String> SIARDbundle) {
+  MetadataColumns(ViewerSIARDBundle SIARDbundle) {
     this.SIARDbundle = SIARDbundle;
   }
 
@@ -71,15 +72,14 @@ public class MetadataColumns implements MetadataTabPanel {
 
     description.setFieldUpdater((index, object, value) -> {
       object.setDescription(value);
-      updateSIARDbundle(schema.getName(), table.getName(), object.getDisplayName(), "column", value);
+      updateSIARDbundle(schema.getName(), table.getName(), "column" , object.getDisplayName(), value);
     });
     return description;
   }
 
   @Override
-  public void updateSIARDbundle(String schemaName, String tableName, String displayName, String type, String value) {
-    SIARDbundle.put("schema:" + schemaName + "---" + "table:" + tableName + "---" + type + ":" + displayName,
-      "description---" + value);
+  public void updateSIARDbundle(String schemaName, String tableName, String type, String displayName, String value) {
+    SIARDbundle.setTableType(schemaName, tableName, type, displayName, value);
   }
 
 }

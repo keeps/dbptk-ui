@@ -1,9 +1,6 @@
 package com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.table;
 
-import com.databasepreservation.main.common.shared.ViewerStructure.ViewerCheckConstraint;
-import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
-import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSchema;
-import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
+import com.databasepreservation.main.common.shared.ViewerStructure.*;
 import com.databasepreservation.main.desktop.client.common.lists.MetadataTableList;
 import com.google.gwt.cell.client.EditTextCell;
 import com.google.gwt.core.client.GWT;
@@ -21,10 +18,10 @@ import java.util.Map;
  */
 public class MetadataConstraints implements MetadataTabPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
-  private final Map<String, String> SIARDbundle;
+  private final ViewerSIARDBundle SIARDbundle;
   private final ViewerDatabase database;
 
-  MetadataConstraints(Map<String, String> SIARDbundle, ViewerDatabase database) {
+  MetadataConstraints(ViewerSIARDBundle SIARDbundle, ViewerDatabase database) {
     this.SIARDbundle = SIARDbundle;
     this.database = database;
   }
@@ -62,15 +59,14 @@ public class MetadataConstraints implements MetadataTabPanel {
 
     description.setFieldUpdater((index, object, value) -> {
       object.setDescription(value);
-      updateSIARDbundle(schema.getName(), table.getName(), object.getDescription(), "constraint", value);
+      updateSIARDbundle(schema.getName(), table.getName(), "constraint", object.getDescription(), value);
     });
 
     return description;
   }
 
   @Override
-  public void updateSIARDbundle(String schemaName, String tableName, String displayName, String type, String value) {
-    SIARDbundle.put("schema:" + schemaName + "---" + "table:" + tableName + "---" + type + ":" + displayName,
-      "description---" + value);
+  public void updateSIARDbundle(String schemaName, String tableName, String type, String displayName, String value) {
+    SIARDbundle.setTableType(schemaName, tableName, type, displayName, value);
   }
 }

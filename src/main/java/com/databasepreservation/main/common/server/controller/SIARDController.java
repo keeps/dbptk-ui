@@ -11,7 +11,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -34,6 +33,7 @@ import com.databasepreservation.main.common.shared.ViewerStructure.ViewerColumn;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabaseFromToolkit;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSIARDBundle;
 import com.databasepreservation.main.common.shared.client.ClientLogger;
 import com.databasepreservation.main.common.shared.client.tools.PathUtils;
 import com.databasepreservation.main.desktop.shared.models.DBPTKModule;
@@ -575,7 +575,7 @@ public class SIARDController {
 
   }
 
-  public static ViewerMetadata updateMetadataInformation(ViewerMetadata metadata, Map<String, String> bundleSiard,
+  public static ViewerMetadata updateMetadataInformation(ViewerMetadata metadata, ViewerSIARDBundle bundleSiard,
     String databaseUUID, String siardPath) throws GenericException {
     LOGGER.info("Updating  " + siardPath);
 
@@ -585,10 +585,11 @@ public class SIARDController {
 
       siardEdition.editModule(new SIARDEditFactory())
         .editModuleParameter(SIARDEditFactory.PARAMETER_FILE, Collections.singletonList(siardPath))
-        .editModuleParameter(SIARDEditFactory.PARAMETER_SET, convertMapStructureToSiard(bundleSiard));
+        .editModuleParameter(SIARDEditFactory.PARAMETER_SET, bundleSiard.getCommandList());
 
       siardEdition.reporter(reporter);
       siardEdition.edit();
+      bundleSiard.clearCommandList();
 
       final DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
       solrManager.updateDatabaseMetadata(databaseUUID, metadata);
@@ -600,18 +601,5 @@ public class SIARDController {
     }
 
     return metadata;
-  }
-
-  private static List<String> convertMapStructureToSiard(Map<String, String> bundle) {
-
-    List<String> bundleList = new ArrayList<>();
-
-    for (Map.Entry<String, String> entry : bundle.entrySet()) {
-      System.out.println(entry.getKey() + "/" + entry.getValue());
-
-      bundleList.add(entry.getKey().toString()+String.format("---%s---", entry.getValue()));
-    }
-
-    return bundleList;
   }
 }
