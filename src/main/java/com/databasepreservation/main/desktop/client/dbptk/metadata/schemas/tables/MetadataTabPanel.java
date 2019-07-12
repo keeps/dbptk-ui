@@ -1,4 +1,4 @@
-package com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.table;
+package com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.tables;
 
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSchema;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;

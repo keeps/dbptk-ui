@@ -59,7 +59,7 @@ public class DbvtkModuleFactory implements DatabaseModuleFactory {
   }
 
   @Override
-  public Parameters getConnectionParameters() {
+  public Parameters getConnectionParameters() throws UnsupportedModuleException {
     return null;
   }
 

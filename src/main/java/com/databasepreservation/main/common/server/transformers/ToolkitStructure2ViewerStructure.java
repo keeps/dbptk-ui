@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.main.common.server.index.utils.SolrUtils;
 import com.databasepreservation.main.common.shared.ViewerConstants;
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerCandidateKey;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerCell;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerCheckConstraint;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerColumn;
@@ -53,6 +54,7 @@ import com.databasepreservation.model.data.NullCell;
 import com.databasepreservation.model.data.Row;
 import com.databasepreservation.model.data.SimpleCell;
 import com.databasepreservation.model.exception.ModuleException;
+import com.databasepreservation.model.structure.CandidateKey;
 import com.databasepreservation.model.structure.CheckConstraint;
 import com.databasepreservation.model.structure.ColumnStructure;
 import com.databasepreservation.model.structure.DatabaseStructure;
@@ -228,7 +230,7 @@ public class ToolkitStructure2ViewerStructure {
     result.setDescription(schema.getDescription());
 
     result.setRoutines(getRoutines(schema.getRoutines()));
-    result.setViews(getViews(schema.getViews()));
+    // result.setViews(getViews(schema.getViews()));
 
     vdb.putSchema(schema.getName(), result);
     result.setTables(getTables(vdb, schema.getTables(), references));
@@ -249,6 +251,7 @@ public class ToolkitStructure2ViewerStructure {
   private static ViewerView getView(ViewStructure view) {
     ViewerView result = new ViewerView();
     result.setName(view.getName());
+    result.setUUID(SolrUtils.randomUUID());
     try {
       result.setColumns(getColumns(view.getColumns()));
     } catch (ViewerException e) {
@@ -334,6 +337,7 @@ public class ToolkitStructure2ViewerStructure {
     result.setTriggers(getTriggers(table.getTriggers()));
     result.setPrimaryKey(getPrimaryKey(table, references));
     result.setForeignKeys(getForeignKeys(table, references));
+    result.setCandidateKeys(getCandidateKeys(table, references));
     result.setCheckConstraints(getCheckConstraints(table.getCheckConstraints()));
 
     vdb.putTable(table.getId(), result);
@@ -354,7 +358,32 @@ public class ToolkitStructure2ViewerStructure {
     ViewerCheckConstraint result = new ViewerCheckConstraint();
     result.setName(constraint.getName());
     result.setCondition(constraint.getCondition());
-    result.setDescription(constraint.getCondition());
+    result.setDescription(constraint.getDescription());
+    return result;
+  }
+
+  private static List<ViewerCandidateKey> getCandidateKeys(TableStructure table, ReferenceHolder references) {
+    List<ViewerCandidateKey> result = new ArrayList<>();
+    for (CandidateKey candidateKey : table.getCandidateKeys()) {
+      result.add(getCandidateKey(candidateKey, table, references));
+    }
+    return result;
+  }
+
+  private static ViewerCandidateKey getCandidateKey(CandidateKey candidateKey, TableStructure table,
+    ReferenceHolder references) {
+    ViewerCandidateKey result = new ViewerCandidateKey();
+
+    result.setName(candidateKey.getName());
+    result.setDescription(candidateKey.getDescription());
+
+    List<Integer> columnIndexesInTable = new ArrayList<>();
+    for (String columnName : candidateKey.getColumns()) {
+      columnIndexesInTable.add(references.getIndexForColumn(table.getId(), columnName));
+    }
+
+    result.setColumnIndexesInViewerTable(columnIndexesInTable);
+
     return result;
   }
 

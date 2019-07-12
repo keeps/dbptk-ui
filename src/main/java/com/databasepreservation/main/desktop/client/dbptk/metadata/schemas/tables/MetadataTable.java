@@ -1,4 +1,4 @@
-package com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.table;
+package com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.tables;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -83,34 +83,24 @@ public class MetadataTable extends MetadataPanel {
     tableName.setText(table.getName());
     mainHeader.setWidget(tableName);
 
-    description.setText(table.getDescription());
+    description.setText(
+      table.getDescription() == null ? messages.siardMetadata_DescriptionUnavailable() : table.getDescription());
     description.addChangeHandler(new ChangeHandler() {
       @Override
       public void onChange(ChangeEvent event) {
         table.setDescription(description.getText());
-        SIARDbundle.setTable(schema.getName(), table.getName(),description.getText());
+        SIARDbundle.setTable(schema.getName(), table.getName(), description.getText());
       }
     });
 
-    tabPanel.add(new MetadataColumns(SIARDbundle).createTable(table, schema), messages.columnName());
-
-    if (table.getPrimaryKey() != null) {
-      tabPanel.add(new MetadataPrimaryKey(SIARDbundle, database).createTable(table, schema), messages.primaryKey());
-    }
-
-    if (!table.getForeignKeys().isEmpty()) {
-      tabPanel.add(new MetadataForeignKeys(SIARDbundle, database).createTable(table, schema), messages.foreignKeys());
-    }
-
-    if (!table.getCheckConstraints().isEmpty()) {
-      tabPanel.add(new MetadataConstraints(SIARDbundle, database).createTable(table, schema),
-        messages.menusidebar_checkConstraints());
-    }
-
-    if (!table.getTriggers().isEmpty()) {
-      tabPanel.add(new MetadataTriggers(SIARDbundle, database).createTable(table, schema),
-        messages.menusidebar_triggers());
-    }
+    tabPanel.add(new MetadataColumns(SIARDbundle).createTable(table, schema), messages.columns());
+    tabPanel.add(new MetadataPrimaryKey(SIARDbundle, database).createTable(table, schema), messages.primaryKey());
+    tabPanel.add(new MetadataForeignKeys(SIARDbundle, database).createTable(table, schema), messages.foreignKeys());
+    tabPanel.add(new MetadataCandidateKeys(SIARDbundle, database).createTable(table, schema), messages.candidateKeys());
+    tabPanel.add(new MetadataConstraints(SIARDbundle, database).createTable(table, schema),
+      messages.menusidebar_checkConstraints());
+    tabPanel.add(new MetadataTriggers(SIARDbundle, database).createTable(table, schema),
+      messages.menusidebar_triggers());
 
     tabPanel.selectTab(0);
   }

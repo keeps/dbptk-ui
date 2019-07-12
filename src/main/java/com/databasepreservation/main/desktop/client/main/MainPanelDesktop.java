@@ -2,7 +2,6 @@ package com.databasepreservation.main.desktop.client.main;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSIARDBundle;
@@ -15,7 +14,8 @@ import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataPanel
 import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataPanelLoad;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.SIARDEditMetadataPage;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.information.MetadataInformation;
-import com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.table.MetadataTable;
+import com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.tables.MetadataTable;
+import com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.views.MetadataView;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.users.MetadataUsers;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.create.CreateWizardManager;
 import com.google.gwt.core.client.GWT;
@@ -115,6 +115,19 @@ public class MainPanelDesktop extends Composite {
           @Override
           public MetadataPanel load(ViewerDatabase database, ViewerSIARDBundle SIARDbundle) {
             return MetadataTable.getInstance(database, SIARDbundle, tableUUID);
+          }
+        });
+      }
+    } else if (HistoryManager.ROUTE_VIEW.equals(currentHistoryPath.get(0))) {
+      if (currentHistoryPath.size() == 3) {
+        String databaseUUID = currentHistoryPath.get(1);
+        final String schemaUUID = currentHistoryPath.get(2);
+        final String viewUUID = currentHistoryPath.get(3);
+
+        setRightPanelContent(databaseUUID, new MetadataPanelLoad() {
+          @Override
+          public MetadataPanel load(ViewerDatabase database, ViewerSIARDBundle SIARDbundle) {
+            return MetadataView.getInstance(database, SIARDbundle, schemaUUID, viewUUID);
           }
         });
       }

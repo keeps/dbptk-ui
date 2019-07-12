@@ -23,7 +23,7 @@ public class ViewerTable implements Serializable {
 
   private List<ViewerForeignKey> foreignKeys;
 
-  // private List<CandidateKey> candidateKeys;
+  private List<ViewerCandidateKey> candidateKeys;
 
   private List<ViewerCheckConstraint> checkConstraints;
 
@@ -135,5 +135,11 @@ public class ViewerTable implements Serializable {
 
   public void setId(String id) {
     this.id = id;
+  }
+
+  public void setCandidateKeys(List<ViewerCandidateKey> canditateKeys) { this.candidateKeys = canditateKeys;}
+
+  public List<ViewerCandidateKey> getCandidateKeys() {
+    return candidateKeys;
   }
 }

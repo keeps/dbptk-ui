@@ -555,4 +555,20 @@ public interface ClientMessages extends Messages {
 
   String metadataDoesNotContainDescription();
 
+  String tableDoesNotContainColumns();
+
+  String tableDoesNotContainPrimaryKey();
+
+  String tableDoesNotContainForeignKeys();
+
+  String tableDoesNotContainCandidateKeys();
+
+  String tableDoesNotContainConstraints();
+
+  String tableDoesNotContainTriggers();
+
+  String candidateKeys();
+
+  String columns();
+
 }

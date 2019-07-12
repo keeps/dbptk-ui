@@ -11,6 +11,7 @@ import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabas
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSchema;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerView;
 import com.databasepreservation.main.common.shared.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.common.shared.client.tools.ViewerStringUtils;
@@ -155,26 +156,41 @@ public class MetadataEditSidebar extends Composite {
     for (final ViewerSchema schema : metadata.getSchemas()) {
       sidebarGroup.add(new SidebarItem(schema.getName()).addIcon(FontAwesomeIconManager.SCHEMA).setH5().setIndent0());
 
-//      sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_structure(),
-//        HistoryManager.linkToSchemaStructure(database.getUUID(), schema.getUUID()))
-//          .addIcon(FontAwesomeIconManager.SCHEMA_STRUCTURE).setH6().setIndent1());
-//
-//      sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_routines(),
-//        HistoryManager.linkToSchemaRoutines(database.getUUID(), schema.getUUID()))
-//          .addIcon(FontAwesomeIconManager.SCHEMA_ROUTINES).setH6().setIndent1());
-//
-//      sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_triggers(),
-//        HistoryManager.linkToSchemaTriggers(database.getUUID(), schema.getUUID()))
-//          .addIcon(FontAwesomeIconManager.SCHEMA_TRIGGERS).setH6().setIndent1());
-//
-//      sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_checkConstraints(),
-//        HistoryManager.linkToSchemaCheckConstraints(database.getUUID(), schema.getUUID()))
-//          .addIcon(FontAwesomeIconManager.SCHEMA_CHECK_CONSTRAINTS).setH6().setIndent1());
-//
-//      sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_views(),
-//        HistoryManager.linkToSchemaViews(database.getUUID(), schema.getUUID()))
-//          .addIcon(FontAwesomeIconManager.SCHEMA_VIEWS).setH6().setIndent1());
-//
+      // sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_structure(),
+      // HistoryManager.linkToSchemaStructure(database.getUUID(), schema.getUUID()))
+      // .addIcon(FontAwesomeIconManager.SCHEMA_STRUCTURE).setH6().setIndent1());
+      //
+      // sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_routines(),
+      // HistoryManager.linkToSchemaRoutines(database.getUUID(), schema.getUUID()))
+      // .addIcon(FontAwesomeIconManager.SCHEMA_ROUTINES).setH6().setIndent1());
+      //
+      // sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_triggers(),
+      // HistoryManager.linkToSchemaTriggers(database.getUUID(), schema.getUUID()))
+      // .addIcon(FontAwesomeIconManager.SCHEMA_TRIGGERS).setH6().setIndent1());
+      //
+      // sidebarGroup.add(new
+      // SidebarHyperlink(messages.menusidebar_checkConstraints(),
+      // HistoryManager.linkToSchemaCheckConstraints(database.getUUID(),
+      // schema.getUUID()))
+      // .addIcon(FontAwesomeIconManager.SCHEMA_CHECK_CONSTRAINTS).setH6().setIndent1());
+      //
+      sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_views(),
+        HistoryManager.linkToSchemaViews(database.getUUID(), schema.getUUID()))
+          .addIcon(FontAwesomeIconManager.SCHEMA_VIEWS).setH6().setIndent1());
+
+      // for (Map.Entry< String, ViewerView> view : schema.getViews().entrySet()) {
+      // sidebarGroup
+      // .add(new SidebarHyperlink(view.getValue().getName(),
+      // HistoryManager.linkToView(database.getUUID(),schema.getUUID() ,
+      // view.getKey()))
+      // .addIcon(FontAwesomeIconManager.TABLE).setH6().setIndent2());
+      // }
+      for (ViewerView view : schema.getViews()) {
+        sidebarGroup.add(new SidebarHyperlink(view.getName(),
+          HistoryManager.linkToView(database.getUUID(), schema.getUUID(), view.getUUID()))
+            .addIcon(FontAwesomeIconManager.TABLE).setH6().setIndent2());
+      }
+      //
       sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_data(),
         HistoryManager.linkToSchemaData(database.getUUID(), schema.getUUID()))
           .addIcon(FontAwesomeIconManager.SCHEMA_DATA).setH6().setIndent1());

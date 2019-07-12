@@ -1,9 +1,10 @@
-package com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.table;
+package com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.tables;
 
 import com.databasepreservation.main.common.shared.ViewerStructure.*;
 import com.databasepreservation.main.desktop.client.common.lists.MetadataTableList;
 import com.google.gwt.cell.client.EditTextCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.HTMLPanel;
@@ -11,7 +12,6 @@ import com.google.gwt.user.client.ui.Label;
 import config.i18n.client.ClientMessages;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -30,22 +30,28 @@ public class MetadataConstraints implements MetadataTabPanel {
   public MetadataTableList createTable(ViewerTable table, ViewerSchema schema) {
 
     List<ViewerCheckConstraint> columns = table.getCheckConstraints();
-    Label header = new Label(messages.primaryKey());
-    HTMLPanel info = new HTMLPanel("");
+    Label header = new Label("");
+    HTMLPanel info = new HTMLPanel(SafeHtmlUtils.EMPTY_SAFE_HTML);
 
-    return new MetadataTableList<>(header, info, columns.iterator(),
-      new MetadataTableList.ColumnInfo<>(messages.name(), 15, new TextColumn<ViewerCheckConstraint>() {
-        @Override
-        public String getValue(ViewerCheckConstraint object) {
-          return object.getName();
-        }
-      }),
-      new MetadataTableList.ColumnInfo<>(messages.constraints_condition(), 15, new TextColumn<ViewerCheckConstraint>() {
-        @Override
-        public String getValue(ViewerCheckConstraint object) {
-          return database.getMetadata().getTable(object.getCondition()).getName();
-        }
-      }), new MetadataTableList.ColumnInfo<>(messages.description(), 15, getDescriptionColumn(table, schema)));
+    if (columns.isEmpty()) {
+      return new MetadataTableList<>(header, messages.tableDoesNotContainConstraints());
+    } else {
+
+      return new MetadataTableList<>(header, info, columns.iterator(),
+        new MetadataTableList.ColumnInfo<>(messages.name(), 15, new TextColumn<ViewerCheckConstraint>() {
+          @Override
+          public String getValue(ViewerCheckConstraint object) {
+            return object.getName();
+          }
+        }), new MetadataTableList.ColumnInfo<>(messages.constraints_condition(), 15,
+          new TextColumn<ViewerCheckConstraint>() {
+            @Override
+            public String getValue(ViewerCheckConstraint object) {
+              return object.getCondition();
+            }
+          }),
+        new MetadataTableList.ColumnInfo<>(messages.description(), 15, getDescriptionColumn(table, schema)));
+    }
   }
 
   @Override

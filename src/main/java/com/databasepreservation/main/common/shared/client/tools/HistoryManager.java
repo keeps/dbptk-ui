@@ -43,6 +43,7 @@ public class HistoryManager {
   public static final String ROUTE_WIZARD_EXPORT_METADATA_OPTIONS = "metadata-export-options";
   public static final String ROUTE_SIARD_EDIT_METADATA = "metadata";
   public static final String ROUTE_SIARD_EDIT_METADATA_USERS = "users";
+  public static final String ROUTE_VIEW = "view";
 
   public static final String HISTORY_SEP = "/";
   public static final String HISTORY_SEP_REGEX = "/";
@@ -239,6 +240,10 @@ public class HistoryManager {
 
   public static String linkToTable(String database_uuid, String table_uuid) {
     return createHistoryToken(Arrays.asList(ROUTE_TABLE, database_uuid, table_uuid));
+  }
+
+  public static String linkToView(String database_uuid, String schema_uuid, String view_uuid) {
+    return createHistoryToken(Arrays.asList(ROUTE_VIEW, database_uuid, schema_uuid, view_uuid));
   }
 
   public static String linkToDatabaseList() {

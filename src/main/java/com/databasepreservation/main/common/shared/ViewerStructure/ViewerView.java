@@ -17,6 +17,8 @@ public class ViewerView implements Serializable {
   private String queryOriginal;
   private String description;
 
+  private String uuid;
+
   public ViewerView() {
   }
 
@@ -59,4 +61,8 @@ public class ViewerView implements Serializable {
   public void setQueryOriginal(String queryOriginal) {
     this.queryOriginal = queryOriginal;
   }
+
+  public void setUUID(String uuid) { this.uuid = uuid; }
+
+  public String getUUID() { return uuid; }
 }

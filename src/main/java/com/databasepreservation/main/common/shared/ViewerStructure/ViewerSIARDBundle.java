@@ -1,5 +1,7 @@
 package com.databasepreservation.main.common.shared.ViewerStructure;
 
+import com.google.common.html.HtmlEscapers;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 import java.util.ArrayList;
@@ -17,7 +19,7 @@ public class ViewerSIARDBundle implements IsSerializable {
   private static final String DESCRIPTION = "description" + SEPARATOR;
   private static final String USER = "user:";
   private static final String ROLE = "role:";
-  private static final String PRIVILEGES = "privileges:";
+  private static final String PRIVILEGE = "privilege:";
   private static final String SPACE = " ";
   private static final String TYPE = "type:";
   private static final String OBJECT = SPACE + "object:";
@@ -46,16 +48,17 @@ public class ViewerSIARDBundle implements IsSerializable {
   }
 
   public void setPrivileges(String type, String object, String grantor, String grantee, String description) {
-    commandList.put(PRIVILEGES + "[" + TYPE + type + OBJECT + object + GRANTOR + grantor + GRANTEE + grantee + "]",
-      DESCRIPTION + description);
+    commandList.put(PRIVILEGE + "[" + TYPE + type + OBJECT + object + GRANTOR + grantor + GRANTEE
+      + grantee + "]", DESCRIPTION + description);
   }
-  
-  public void setTable(String schema, String table, String description){
-      commandList.put(SCHEMA + schema + SEPARATOR + TABLE + table, DESCRIPTION + description);
+
+  public void setTable(String schema, String table, String description) {
+    commandList.put(SCHEMA + schema + SEPARATOR + TABLE + table, DESCRIPTION + description);
   }
 
   public void setTableType(String schema, String table, String type, String name, String description) {
-    commandList.put(SCHEMA + schema + SEPARATOR + TABLE + table + SEPARATOR + type + ":" + name , DESCRIPTION + description);
+    commandList.put(SCHEMA + schema + SEPARATOR + TABLE + table + SEPARATOR + type + ":" + name,
+      DESCRIPTION + description);
   }
 
   public List<String> getCommandList() {
@@ -67,7 +70,7 @@ public class ViewerSIARDBundle implements IsSerializable {
     return bundleCommandList;
   }
 
-  public void clearCommandList(){
-      commandList.clear();
+  public void clearCommandList() {
+    commandList.clear();
   }
 }

@@ -8,9 +8,6 @@
                 <ui:text from='{messages.loadingTableInfo}'/>
             </g:Label>
         </g:SimplePanel>
-        <g:Label addStyleNames="form-label">
-            <ui:text from='{messages.description}'/>
-        </g:Label>
         <g:TextArea ui:field="description" addStyleNames="form-textbox"/>
         <g:TabPanel ui:field="tabPanel" addStyleNames="browseItemMetadata"/>
 
