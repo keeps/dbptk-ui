@@ -1,6 +1,8 @@
 package com.databasepreservation.main.desktop.client.dbptk.wizard.create;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 import com.databasepreservation.main.common.client.BrowserService;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerColumn;
@@ -9,8 +11,10 @@ import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSchema;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
 import com.databasepreservation.main.common.shared.client.common.lists.MultipleSelectionTablePanel;
+import com.databasepreservation.main.common.shared.client.widgets.Toast;
 import com.databasepreservation.main.desktop.client.common.sidebar.TableAndColumnsSidebar;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
+import com.databasepreservation.main.desktop.shared.models.wizardParameters.TableAndColumnsParameters;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -30,7 +34,7 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-public class TableAndColumns extends WizardPanel {
+public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
   private static final String SELECT_TABLES = "select_tables";
   private static final String SELECT_COLUMNS = "select_columns";
 
@@ -89,16 +93,33 @@ public class TableAndColumns extends WizardPanel {
 
   @Override
   public boolean validate() {
-    return false;
+    boolean empty = false;
+    for (MultipleSelectionTablePanel<ViewerTable> cellTable : tables.values()) {
+      if (cellTable.getSelectionModel().getSelectedSet().isEmpty()) empty = true;
+    }
+    return !empty;
   }
 
   @Override
-  public HashMap<String, String> getValues() {
-    return null;
+  public TableAndColumnsParameters getValues() {
+    HashMap<String, ArrayList<String>> values = new HashMap<>();
+    ArrayList<String> selectedColumns = null;
+    for (Map.Entry<String, MultipleSelectionTablePanel<ViewerColumn>> cellTables : columns.entrySet()) {
+      selectedColumns = new ArrayList<>();
+      String tableUUID = cellTables.getKey();
+      ViewerTable table = metadata.getTable(tableUUID);
+      for (ViewerColumn viewerColumn : cellTables.getValue().getSelectionModel().getSelectedSet()) {
+        selectedColumns.add(viewerColumn.getDisplayName());
+      }
+      values.put(table.getSchemaName(), selectedColumns);
+    }
+
+    return  new TableAndColumnsParameters(values);
   }
 
   @Override
   public void error() {
+    Toast.showError("Select tables"); //TODO: Improve error message, add electron option to display notification
   }
 
   public void sideBarHighlighter(String toSelect, String schemaUUID, String tableUUID) {

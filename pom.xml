@@ -345,6 +345,11 @@
             <version>${version.dbptk}</version>
         </dependency>
         <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.47</version>
+        </dependency>
+        <dependency>
             <groupId>com.databasepreservation</groupId>
             <artifactId>dbptk-module-jdbc</artifactId>
             <version>${version.dbptk}</version>

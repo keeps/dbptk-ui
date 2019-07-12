@@ -1,6 +1,40 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
-    <g:FlowPanel ui:field="content"/>
+    <ui:with field='messages' type='config.i18n.client.ClientMessages' />
+    <g:FlowPanel ui:field="content" >
+        <g:FlowPanel addStyleNames="wrapper">
+            <g:FlowPanel ui:field="leftSideContainer" addStyleNames="left">
+                <g:FlowPanel ui:field="customViewsList"/>
+            </g:FlowPanel>
+            <g:FlowPanel ui:field="rightSideContainer" addStyleNames="right">
+                <g:FlowPanel ui:field="panel">
+                    <g:Label addStyleNames="h4"><ui:text from='{messages.customViewsTitle}'/></g:Label>
+                    <g:Label addStyleNames="h5"><ui:text from='{messages.customViewsDescription}'/></g:Label>
+                    <g:Label addStyleNames="h5"><ui:text from='{messages.customViewsTestMessage}'/></g:Label>
+                    <g:FlowPanel ui:field="customViewsForm" addStyleNames="form-container">
+                        <g:FlowPanel addStyleNames="form-row">
+                            <g:Label ui:field="customViewNameLabel" addStyleNames="form-label-spaced">
+                                <ui:text from='{messages.customViewNameLabel}'/>
+                            </g:Label>
+                            <g:TextBox ui:field="customViewName" addStyleNames="form-textbox"/>
+                        </g:FlowPanel>
+                        <g:FlowPanel addStyleNames="form-row">
+                            <g:Label ui:field="customViewDescriptionLabel" addStyleNames="form-label-spaced">
+                                <ui:text from='{messages.customViewDescriptionLabel}'/>
+                            </g:Label>
+                            <g:TextBox ui:field="customViewDescription" addStyleNames="form-textbox"/>
+                        </g:FlowPanel>
+                        <g:FlowPanel addStyleNames="form-row">
+                            <g:Label ui:field="customViewQueryLabel" addStyleNames="form-label-spaced">
+                                <ui:text from='{messages.customViewQueryLabel}'/>
+                            </g:Label>
+                            <g:TextArea ui:field="customViewQuery" addStyleNames="form-textarea"/>
+                        </g:FlowPanel>
+                    </g:FlowPanel>
+                </g:FlowPanel>
+            </g:FlowPanel>
+        </g:FlowPanel>
+    </g:FlowPanel>
 
 </ui:UiBinder>

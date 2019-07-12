@@ -7,11 +7,11 @@ import java.util.HashMap;
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-public class ConnectionModule implements Serializable {
+public class DBPTKModule implements Serializable {
 
   private HashMap<String, ArrayList<PreservationParameter>> parameters;
 
-  public ConnectionModule() {
+  public DBPTKModule() {
     this.parameters = new HashMap<>();
   }
 
@@ -45,8 +45,8 @@ public class ConnectionModule implements Serializable {
     return this.getParameters().get(moduleName);
   }
 
-  public ConnectionModule getSIARDConnections() {
-    ConnectionModule siard = new ConnectionModule();
+  public DBPTKModule getSIARDConnections() {
+    DBPTKModule siard = new DBPTKModule();
     for (String key : this.parameters.keySet()) {
       if (key.toLowerCase().contains("siard")) {
         siard.addParameters(key, this.getPreservationParameter(key));
@@ -56,8 +56,8 @@ public class ConnectionModule implements Serializable {
     return siard;
   }
 
-  public ConnectionModule getDBMSConnections() {
-    ConnectionModule dbms = new ConnectionModule();
+  public DBPTKModule getDBMSConnections() {
+    DBPTKModule dbms = new DBPTKModule();
     for (String key : this.parameters.keySet()) {
       if (!key.toLowerCase().contains("siard")) {
         dbms.addParameters(key, this.getPreservationParameter(key));

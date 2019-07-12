@@ -1,16 +1,7 @@
 package com.databasepreservation.main.desktop.client.common;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
-import com.databasepreservation.main.common.shared.client.common.sidebar.SidebarHyperlink;
-import com.databasepreservation.main.common.shared.client.common.sidebar.SidebarItem;
-import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
-import com.databasepreservation.main.desktop.shared.models.ConnectionModule;
-import com.databasepreservation.main.desktop.shared.models.PreservationParameter;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -42,6 +33,10 @@ public class ComboBoxField extends Composite {
   @UiField
   ListBox metadataValue;
 
+  public static ComboBoxField createInstance(String key) {
+    return new ComboBoxField(key, null);
+  }
+
   public static ComboBoxField createInstance(String key, List<String> values) {
     return new ComboBoxField(key, values);
   }
@@ -59,10 +54,22 @@ public class ComboBoxField extends Composite {
       metadataKey.setVisible(false);
     }
 
+    if (values != null) {
+      for (String s : values) {
+        metadataValue.addItem(s);
+      }
+    }
+
+  }
+
+  public void setComboBoxValue(String value) {
+    metadataValue.addItem(value);
+  }
+
+  public void setComboBoxValues(List<String> values) {
     for (String s : values) {
       metadataValue.addItem(s);
     }
-
   }
 
   public String getComboBoxValue() {

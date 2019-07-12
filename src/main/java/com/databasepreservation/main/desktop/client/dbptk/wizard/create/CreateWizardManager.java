@@ -1,7 +1,6 @@
 package com.databasepreservation.main.desktop.client.dbptk.wizard.create;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import com.databasepreservation.main.common.client.BrowserService;
@@ -9,10 +8,12 @@ import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbI
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
 import com.databasepreservation.main.common.shared.client.common.utils.AsyncCallbackUtils;
-import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
+import com.databasepreservation.main.desktop.shared.models.wizardParameters.ConnectionParameters;
+import com.databasepreservation.main.desktop.shared.models.wizardParameters.CustomViewsParameters;
+import com.databasepreservation.main.desktop.shared.models.wizardParameters.TableAndColumnsParameters;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -24,7 +25,6 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
-import org.codehaus.janino.Java;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -42,7 +42,7 @@ public class CreateWizardManager extends Composite {
   BreadcrumbPanel breadcrumb;
 
   @UiField
-  FlowPanel wizardContent;
+  FlowPanel wizardContent, customButtons;
 
   @UiField
   Button btnNext, btnCancel, btnBack;
@@ -74,19 +74,6 @@ public class CreateWizardManager extends Composite {
   private CreateWizardManager() {
     initWidget(binder.createAndBindUi(this));
 
-    /*
-     * CustomViews customViews = CustomViews.getInstance(); SIARDExportOptions
-     * SIARDOptions = SIARDExportOptions.getInstance(); ExternalLOBExportOptions
-     * externalLOBOptions = ExternalLOBExportOptions.getInstance();
-     * MetadataExportOptions metadataOptions = MetadataExportOptions.getInstance();
-     */
-
-    /*
-     * wizardInstances.add(2, customViews); wizardInstances.add(3, SIARDOptions);
-     * wizardInstances.add(4, externalLOBOptions); wizardInstances.add(5,
-     * metadataOptions);
-     */
-
     btnNext.addClickHandler(event -> {
       handleWizard();
     });
@@ -99,6 +86,8 @@ public class CreateWizardManager extends Composite {
           Connection conn = (Connection) wizardInstances.get(position);
           conn.clearPasswords();
         }
+
+        customButtons.clear();
         updateButtons();
         updateBreadcrumb();
       }
@@ -108,8 +97,6 @@ public class CreateWizardManager extends Composite {
       clear();
       HistoryManager.gotoHome();
     });
-
-    init();
   }
 
   private void handleWizard() {
@@ -138,21 +125,21 @@ public class CreateWizardManager extends Composite {
   private void handleConnectionPanel() {
     final boolean valid = wizardInstances.get(position).validate();
     if (valid) {
-      HashMap<String, String> values = wizardInstances.get(position).getValues();
-      String moduleName = values.get("module_name");
-      values.remove("module_name");
+      ConnectionParameters parameters = (ConnectionParameters) wizardInstances.get(position).getValues();
+      String moduleName = parameters.getModuleName();
 
       Widget spinner = new HTML(SafeHtmlUtils.fromSafeConstant(
         "<div class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
 
       wizardContent.add(spinner);
 
-      BrowserService.Util.getInstance().testConnection("test", moduleName, values, new DefaultAsyncCallback<Boolean>() {
+      BrowserService.Util.getInstance().testConnection("test", moduleName, parameters.getConnection(),
+        new DefaultAsyncCallback<Boolean>() {
         @Override
         public void onSuccess(Boolean aBoolean) {
           wizardContent.clear();
           position = 1;
-          TableAndColumns tableAndColumns = TableAndColumns.getInstance(moduleName, values);
+            TableAndColumns tableAndColumns = TableAndColumns.getInstance(moduleName, parameters.getConnection());
           wizardInstances.add(position, tableAndColumns);
           wizardContent.add(tableAndColumns);
           updateButtons();
@@ -176,10 +163,31 @@ public class CreateWizardManager extends Composite {
   }
 
   private void handleTableAndColumnsPanel() {
-    wizardInstances.get(position).getValues();
+    final boolean valid = wizardInstances.get(position).validate();
+    if (valid) {
+      TableAndColumnsParameters parameters = (TableAndColumnsParameters) wizardInstances.get(position).getValues();
+      wizardContent.clear();
+      position = 2;
+      CustomViews customViews = CustomViews.getInstance(customButtons);
+      wizardInstances.add(position, customViews);
+      wizardContent.add(customViews);
+      updateButtons();
+      updateBreadcrumb();
+    } else {
+      wizardInstances.get(position).error();
+    }
   }
 
   private void handleCustomViewsPanel() {
+    final boolean valid = wizardInstances.get(position).validate();
+    if (valid) {
+      CustomViewsParameters parameters = (CustomViewsParameters) wizardInstances.get(position).getValues();
+      wizardContent.clear();
+      position = 3;
+
+    } else {
+      wizardInstances.get(position).error();
+    }
   }
 
   private void handleSIARDExportOptions() {

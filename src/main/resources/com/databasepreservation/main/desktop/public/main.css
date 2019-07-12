@@ -960,9 +960,7 @@ p[data-value]:after {
     width: 100%;
 }
 
-.button-panel-container {
-    display: inline;
-    float: right;
+.button-panel-right {
     padding-top: 1%;
 }
 
@@ -978,16 +976,23 @@ p[data-value]:after {
     text-align: center;
 }
 
-.button-panel-container .btn-item {
+.btn-item {
+    position: relative;
     padding-top: 1%;
     padding-left: 10px;
     display: table-cell;
 }
 
-.button-panel-container .btn-item .btn {
-    width: 8rem;
+.btn-item .btn {
+    width: 9rem;
     padding: 8px;
     text-align: center;
+}
+
+.button-panel-container {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
 }
 
 .wrapper {
@@ -1032,6 +1037,18 @@ p[data-value]:after {
 .form-label-spaced {
     font-weight: bold;
     flex: 1 0 160px;
+}
+
+.form-label-spaced-error {
+    color: red;
+}
+
+.textbox-error {
+    border-color: red;
+}
+
+.textarea-error {
+    border-color: red;
 }
 
 .form-button {
@@ -1145,6 +1162,15 @@ p[data-value]:after {
 }
 
 /***********************************************
+                    TEXTAREA
+***********************************************/
+.form-textarea {
+    resize: vertical;
+    min-height: 100px;
+    width: 100%;
+}
+
+/***********************************************
                     BUTTONS
 ***********************************************/
 .btn-back-wizard:before {
@@ -1157,6 +1183,18 @@ p[data-value]:after {
 
 .btn-select-none:after {
     content: "\f096";
+}
+
+.btn-new:after {
+    content: "\f196";
+}
+
+.btn-save:after {
+    content: "\f0c7";
+}
+
+.btn-delete:after {
+    content: "\f014";
 }
 
 /***********************************************

@@ -1,22 +1,20 @@
 package com.databasepreservation.main.desktop.client.dbptk.wizard.create;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
 import com.databasepreservation.main.common.client.BrowserService;
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
-import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.main.common.shared.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.main.common.shared.client.widgets.Toast;
 import com.databasepreservation.main.desktop.client.common.sidebar.ConnectionSidebar;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.create.connection.JDBCPanel;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.create.connection.SSHTunnelPanel;
-import com.databasepreservation.main.desktop.shared.models.ConnectionModule;
+import com.databasepreservation.main.desktop.shared.models.DBPTKModule;
+import com.databasepreservation.main.desktop.shared.models.wizardParameters.ConnectionParameters;
 import com.databasepreservation.main.desktop.shared.models.PreservationParameter;
-import com.databasepreservation.main.desktop.shared.models.SSHConfiguration;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -31,7 +29,7 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-public class Connection extends WizardPanel {
+public class Connection extends WizardPanel<ConnectionParameters> {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
 
   interface ConnectionUiBinder extends UiBinder<Widget, Connection> {
@@ -42,7 +40,7 @@ public class Connection extends WizardPanel {
   @UiField
   FlowPanel JDBCListConnections, leftSideContainer, connectionInputPanel;
 
-  private ConnectionModule dbmsModule;
+  private DBPTKModule dbmsModule;
   private ConnectionSidebar connectionSidebar;
   private SSHTunnelPanel sshTunnelPanel;
   private String selectedConnection;
@@ -68,9 +66,9 @@ public class Connection extends WizardPanel {
 
     JDBCListConnections.add(spinner);
 
-    BrowserService.Util.getInstance().getDatabaseImportModules(new DefaultAsyncCallback<ConnectionModule>() {
+    BrowserService.Util.getInstance().getDatabaseImportModules(new DefaultAsyncCallback<DBPTKModule>() {
       @Override
-      public void onSuccess(ConnectionModule result) {
+      public void onSuccess(DBPTKModule result) {
         connectionSidebar = ConnectionSidebar.getInstance(messages.menuSidebarDatabases(),
           FontAwesomeIconManager.DATABASE, result.getDBMSConnections());
 
@@ -108,16 +106,17 @@ public class Connection extends WizardPanel {
   }
 
   @Override
-  public HashMap<String, String> getValues() {
+  public ConnectionParameters getValues() {
+    ConnectionParameters parameters = new ConnectionParameters();
+
+    parameters.setConnection(selected.getValues());
+    parameters.setModuleName(selectedConnection);
 
     if (sshTunnelPanel.isSSHTunnelEnabled()) {
-      final SSHConfiguration parameters = sshTunnelPanel.getSSHConfiguration();
-      // TODO: SSH connection
+      parameters.setSSHConfiguration(sshTunnelPanel.getSSHConfiguration());
     }
 
-    HashMap<String, String> values = selected.getValues();
-    values.put("module_name", selectedConnection);
-    return values;
+    return parameters;
   }
 
   @Override

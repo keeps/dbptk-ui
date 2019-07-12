@@ -516,10 +516,12 @@ pre code {
 .form-label-mandatory::after {
     content:" *";
 }
+
 .form-label-error {
     color:red;
     font-size: 0.8em;
 }
+
 .form-separator {
     color: #089de3;
     font-size: 1.6rem;
@@ -788,6 +790,7 @@ pre code {
     -moz-osx-font-smoothing: grayscale;
     float: right;
     margin-top: 1px;
+    text-align: center;
     text-align: center;
     position: absolute;
     right: 10px;

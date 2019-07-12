@@ -9,7 +9,7 @@ import com.databasepreservation.main.common.shared.client.common.sidebar.Sidebar
 import com.databasepreservation.main.common.shared.client.common.sidebar.SidebarItem;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.common.shared.client.tools.ToolkitModuleName2ViewerModuleName;
-import com.databasepreservation.main.desktop.shared.models.ConnectionModule;
+import com.databasepreservation.main.desktop.shared.models.DBPTKModule;
 import com.databasepreservation.main.desktop.shared.models.PreservationParameter;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -28,7 +28,7 @@ public class ConnectionSidebar extends Composite {
   private final String headerText;
   private final String headerIcon;
   private final String itemIcon;
-  private final ConnectionModule items;
+  private final DBPTKModule dbptkModule;
   private static Map<String, ConnectionSidebar> instances = new HashMap<>();
   private static Map<String, SidebarHyperlink> list = new HashMap<>();
 
@@ -41,7 +41,7 @@ public class ConnectionSidebar extends Composite {
   FlowPanel sidebarGroup;
 
   public static ConnectionSidebar getInstance(String headerText, String headerIcon, String itemIcon,
-    ConnectionModule items) {
+    DBPTKModule items) {
     if (instances.get(headerText) == null) {
       ConnectionSidebar instance = new ConnectionSidebar(headerText, headerIcon, itemIcon, items);
       instances.put(headerText, instance);
@@ -50,15 +50,15 @@ public class ConnectionSidebar extends Composite {
     return instances.get(headerText);
   }
 
-  public static ConnectionSidebar getInstance(String headerText, String itemIcon, ConnectionModule items) {
-    return ConnectionSidebar.getInstance(headerText, null, itemIcon, items);
+  public static ConnectionSidebar getInstance(String headerText, String itemIcon, DBPTKModule dbptkModule) {
+    return ConnectionSidebar.getInstance(headerText, null, itemIcon, dbptkModule);
   }
 
-  private ConnectionSidebar(String headerText, String headerIcon, String itemIcon, ConnectionModule items) {
+  private ConnectionSidebar(String headerText, String headerIcon, String itemIcon, DBPTKModule dbptkModule) {
     this.headerText = headerText;
     this.headerIcon = headerIcon;
     this.itemIcon = itemIcon;
-    this.items = items;
+    this.dbptkModule = dbptkModule;
     initWidget(uiBinder.createAndBindUi(this));
     init();
   }
@@ -70,7 +70,7 @@ public class ConnectionSidebar extends Composite {
       sidebarGroup.add(new SidebarItem(headerText).setH5().setIndent0());
     }
 
-    final TreeMap<String, ArrayList<PreservationParameter>> parameters = new TreeMap<>(items.getParameters());
+    final TreeMap<String, ArrayList<PreservationParameter>> parameters = new TreeMap<>(dbptkModule.getParameters());
 
     for (String moduleName : parameters.keySet()) {
       SidebarHyperlink sidebarHyperlink = new SidebarHyperlink(ToolkitModuleName2ViewerModuleName.transform(moduleName),

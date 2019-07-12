@@ -24,7 +24,7 @@ import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
 import com.databasepreservation.main.common.shared.client.common.search.SavedSearch;
 import com.databasepreservation.main.common.shared.client.common.search.SearchField;
 import com.databasepreservation.main.common.shared.client.common.search.SearchInfo;
-import com.databasepreservation.main.desktop.shared.models.ConnectionModule;
+import com.databasepreservation.main.desktop.shared.models.DBPTKModule;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
@@ -109,7 +109,9 @@ public interface BrowserService extends RemoteService {
 
   String findSIARDFile(String path) throws GenericException, RequestNotValidException;
 
-  ConnectionModule getDatabaseImportModules() throws GenericException;
+  DBPTKModule getDatabaseImportModules() throws GenericException;
+
+  DBPTKModule getSIARDExportModules() throws GenericException;
 
   ViewerMetadata getSchemaInformation(String databaseUUID, String moduleName, HashMap<String, String> values) throws GenericException;
 

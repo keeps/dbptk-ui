@@ -30,10 +30,10 @@ public class TableAndColumnsSidebar extends Composite {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, SidebarHyperlink> list = new HashMap<>();
 
-  interface ConnectionSidebarUiBinder extends UiBinder<Widget, TableAndColumnsSidebar> {
+  interface TableAndColumnsSidebarUiBinder extends UiBinder<Widget, TableAndColumnsSidebar> {
   }
 
-  private static ConnectionSidebarUiBinder uiBinder = GWT.create(ConnectionSidebarUiBinder.class);
+  private static TableAndColumnsSidebarUiBinder uiBinder = GWT.create(TableAndColumnsSidebarUiBinder.class);
 
   @UiField
   FlowPanel sidebarGroup;

@@ -526,4 +526,18 @@ public interface ClientMessages extends Messages {
   String selectAll();
 
   String selectNone();
+
+  String customViewsTitle();
+
+  String customViewsDescription();
+
+  String customViewsTestMessage();
+
+  String customViewNameLabel();
+
+  String customViewDescriptionLabel();
+
+  String customViewQueryLabel();
+
+  String update();
 }

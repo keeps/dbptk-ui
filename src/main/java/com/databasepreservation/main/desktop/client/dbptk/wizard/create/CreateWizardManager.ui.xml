@@ -5,19 +5,26 @@
     <ui:with field='messages' type='config.i18n.client.ClientMessages' />
     <g:FlowPanel>
         <m:BreadcrumbPanel ui:field="breadcrumb" />
-        <g:FlowPanel ui:field="wizardContent">
-
-        </g:FlowPanel>
+        <g:FlowPanel ui:field="wizardContent"/>
         <g:FlowPanel addStyleNames="button-panel-container">
-            <g:SimplePanel addStyleNames="btn-item">
-                <g:Button ui:field="btnCancel" addStyleNames="btn btn-primary"><ui:text from='{messages.cancel}' /></g:Button>
-            </g:SimplePanel>
-            <g:SimplePanel addStyleNames="btn-item">
-                <g:Button ui:field="btnBack" addStyleNames="btn btn-primary btn-back-wizard"><ui:text from='{messages.back}' /></g:Button>
-            </g:SimplePanel>
-            <g:SimplePanel addStyleNames="btn-item">
-                <g:Button ui:field="btnNext" addStyleNames="btn btn-primary btn-chevron-right"><ui:text from='{messages.next}' /></g:Button>
-            </g:SimplePanel>
+            <g:FlowPanel ui:field="customButtons" addStyleNames="button-panel-right"/>
+            <g:FlowPanel addStyleNames="button-panel-right">
+                <g:SimplePanel addStyleNames="btn-item">
+                    <g:Button ui:field="btnCancel" addStyleNames="btn btn-primary">
+                        <ui:text from='{messages.cancel}'/>
+                    </g:Button>
+                </g:SimplePanel>
+                <g:SimplePanel addStyleNames="btn-item">
+                    <g:Button ui:field="btnBack" addStyleNames="btn btn-primary btn-back-wizard">
+                        <ui:text from='{messages.back}'/>
+                    </g:Button>
+                </g:SimplePanel>
+                <g:SimplePanel addStyleNames="btn-item">
+                    <g:Button ui:field="btnNext" addStyleNames="btn btn-primary btn-chevron-right">
+                        <ui:text from='{messages.next}'/>
+                    </g:Button>
+                </g:SimplePanel>
+            </g:FlowPanel>
         </g:FlowPanel>
     </g:FlowPanel>
 </ui:UiBinder>

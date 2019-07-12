@@ -34,7 +34,7 @@ import com.databasepreservation.main.common.shared.client.common.search.SearchIn
 import com.databasepreservation.main.common.shared.client.common.utils.BrowserServiceUtils;
 import com.databasepreservation.main.common.utils.UserUtility;
 import com.databasepreservation.main.common.utils.UserUtility.Authorization;
-import com.databasepreservation.main.desktop.shared.models.ConnectionModule;
+import com.databasepreservation.main.desktop.shared.models.DBPTKModule;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 /**
@@ -238,8 +238,13 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
   }
 
   @Override
-  public ConnectionModule getDatabaseImportModules() throws GenericException {
+  public DBPTKModule getDatabaseImportModules() throws GenericException {
     return SIARDController.getDatabaseImportModules();
+  }
+
+  @Override
+  public DBPTKModule getSIARDExportModules() throws GenericException {
+    return SIARDController.getSIARDExportModules();
   }
 
   public ViewerMetadata getSchemaInformation(String databaseUUID, String moduleName, HashMap<String, String> values) throws GenericException {

@@ -3,8 +3,6 @@ package com.databasepreservation.main.common.server.controller;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -14,9 +12,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import com.databasepreservation.main.common.shared.client.ClientLogger;
-import com.databasepreservation.main.common.shared.client.common.utils.AsyncCallbackUtils;
-import com.databasepreservation.modules.jdbc.in.JDBCImportModule;
 import org.apache.commons.io.IOUtils;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
@@ -34,7 +29,8 @@ import com.databasepreservation.main.common.server.transformers.ToolkitStructure
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabaseFromToolkit;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
-import com.databasepreservation.main.desktop.shared.models.ConnectionModule;
+import com.databasepreservation.main.common.shared.client.ClientLogger;
+import com.databasepreservation.main.desktop.shared.models.DBPTKModule;
 import com.databasepreservation.main.desktop.shared.models.PreservationParameter;
 import com.databasepreservation.main.modules.viewer.DbvtkModuleFactory;
 import com.databasepreservation.model.Reporter;
@@ -47,7 +43,7 @@ import com.databasepreservation.model.parameters.Parameter;
 import com.databasepreservation.model.parameters.ParameterGroup;
 import com.databasepreservation.model.parameters.Parameters;
 import com.databasepreservation.model.structure.DatabaseStructure;
-import com.databasepreservation.modules.mySql.MySQLModuleFactory;
+import com.databasepreservation.modules.jdbc.in.JDBCImportModule;
 import com.databasepreservation.modules.siard.SIARD2ModuleFactory;
 import com.databasepreservation.modules.siard.SIARDEditFactory;
 import com.databasepreservation.utils.ReflectionUtils;
@@ -167,8 +163,37 @@ public class SIARDController {
     return null;
   }
 
-  public static ConnectionModule getDatabaseImportModules() throws GenericException {
-    ConnectionModule connectionModule = new ConnectionModule();
+  public static DBPTKModule getSIARDExportModules() throws GenericException {
+    DBPTKModule connectionModule = new DBPTKModule();
+    PreservationParameter preservationParameter;
+
+    Set<DatabaseModuleFactory> databaseModuleFactories = ReflectionUtils.collectDatabaseModuleFactories();
+
+    for (DatabaseModuleFactory factory : databaseModuleFactories) {
+      if (factory.isEnabled()) {
+        if (factory.producesExportModules()) {
+          if (factory.getModuleName().startsWith("SIARD")) {
+            final Parameters exportModuleParameters;
+            try {
+              exportModuleParameters = factory.getExportModuleParameters();
+              for (Parameter param : exportModuleParameters.getParameters()) {
+                preservationParameter = new PreservationParameter(param.longName(), param.longName(),
+                  param.description(), param.required(), param.hasArgument(), param.getInputType().name());
+                connectionModule.addPreservationParameter(factory.getModuleName(), preservationParameter);
+              }
+            } catch (UnsupportedModuleException e) {
+              throw new GenericException(e);
+            }
+          }
+        }
+      }
+    }
+
+    return connectionModule;
+  }
+
+  public static DBPTKModule getDatabaseImportModules() throws GenericException {
+    DBPTKModule connectionModule = new DBPTKModule();
     PreservationParameter preservationParameter;
 
     Set<DatabaseModuleFactory> databaseModuleFactories = ReflectionUtils.collectDatabaseModuleFactories();
