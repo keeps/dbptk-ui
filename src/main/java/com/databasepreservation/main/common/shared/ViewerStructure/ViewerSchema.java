@@ -1,10 +1,10 @@
 package com.databasepreservation.main.common.shared.ViewerStructure;
 
+
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
+
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -19,11 +19,8 @@ public class ViewerSchema implements Serializable {
   private List<ViewerTable> tables;
 
   private List<ViewerView> views;
-  //private Map<String, ViewerView> views;
 
   private List<ViewerRoutine> routines;
-
-  // private List<DbvComposedType> userDefinedTypes;
 
   public ViewerSchema() {
     tables = new ArrayList<>();
@@ -77,16 +74,4 @@ public class ViewerSchema implements Serializable {
     this.routines = routines;
   }
 
-//  public Map<String, ViewerView> getViews() { return views; }
-//
-//  public void setViews(List<ViewerView> viewsList) {
-//    views = new LinkedHashMap<>();
-//    for (ViewerView view: viewsList) {
-//      views.put(view.getUUID(), view);
-//    }
-//  }
-//
-//  public ViewerView getView(String viewUUID){
-//    return views.get(viewUUID);
-//  }
 }

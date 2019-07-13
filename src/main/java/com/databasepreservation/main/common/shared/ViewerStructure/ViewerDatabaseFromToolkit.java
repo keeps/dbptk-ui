@@ -9,11 +9,15 @@ import java.util.Map;
 public class ViewerDatabaseFromToolkit extends ViewerDatabase {
   private Map<String, ViewerSchema> toolkitSchemas;
   private Map<String, ViewerTable> toolkitTables;
+  private Map<String, ViewerView> toolkitViews;
+  private Map<String, ViewerRoutine> toolkitRoutines;
 
   public ViewerDatabaseFromToolkit() {
     super();
     toolkitSchemas = new HashMap<>();
     toolkitTables = new HashMap<>();
+    toolkitViews = new HashMap<>();
+    toolkitRoutines = new HashMap<>();
   }
 
   /**
@@ -39,6 +43,28 @@ public class ViewerDatabaseFromToolkit extends ViewerDatabase {
 
   /**
    * @param id
+   *          The schema name followed by a '.' and the view name (used to
+   *          uniquely identify a table in DBPTK)
+   * @param view
+   *          The corresponding view to add
+   */
+  public void putView(String id, ViewerView view) {
+    toolkitViews.put(id, view);
+  }
+
+  /**
+   * @param id
+   *          The schema name followed by a '.' and the routine name (used to
+   *          uniquely identify a routine in DBPTK)
+   * @param view
+   *          The corresponding routine to add
+   */
+  public void putRoutine(String id, ViewerRoutine routine) {
+    toolkitRoutines.put(id, routine);
+  }
+
+  /**
+   * @param id
    *          The schema name (used to uniquely identify a schema in DBPTK)
    */
   public ViewerSchema getSchema(String id) {
@@ -52,5 +78,23 @@ public class ViewerDatabaseFromToolkit extends ViewerDatabase {
    */
   public ViewerTable getTable(String id) {
     return toolkitTables.get(id);
+  }
+
+  /**
+   * @param id
+   *          The schema name followed by a '.' and the view name (used to
+   *          uniquely identify a view in DBPTK)
+   */
+  public ViewerView getView(String id) {
+    return toolkitViews.get(id);
+  }
+
+  /**
+   * @param id
+   *          The schema name followed by a '.' and the view name (used to
+   *          uniquely identify a view in DBPTK)
+   */
+  public ViewerRoutine getRoutine(String id) {
+    return toolkitRoutines.get(id);
   }
 }

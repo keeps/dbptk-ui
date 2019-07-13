@@ -2,6 +2,7 @@ package com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.tabl
 
 import com.databasepreservation.main.common.shared.ViewerStructure.*;
 import com.databasepreservation.main.desktop.client.common.lists.MetadataTableList;
+import com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.MetadataTabPanel;
 import com.google.gwt.cell.client.EditTextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;

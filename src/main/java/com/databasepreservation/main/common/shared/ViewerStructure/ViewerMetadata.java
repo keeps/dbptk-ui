@@ -45,6 +45,10 @@ public class ViewerMetadata implements Serializable {
 
   private Map<String, ViewerTable> tables;
 
+  private Map<String, ViewerView> views;
+
+  private Map<String, ViewerRoutine> routines;
+
   private List<ViewerUserStructure> users;
 
   private List<ViewerRoleStructure> roles;
@@ -58,6 +62,8 @@ public class ViewerMetadata implements Serializable {
   public ViewerMetadata() {
     schemas = new LinkedHashMap<>();
     tables = new LinkedHashMap<>();
+    views = new LinkedHashMap<>();
+    routines = new LinkedHashMap<>();
   }
 
   public String getName() {
@@ -75,10 +81,19 @@ public class ViewerMetadata implements Serializable {
   public void setSchemas(List<ViewerSchema> schemaList) {
     schemas = new LinkedHashMap<>();
     tables = new LinkedHashMap<>();
+    views = new LinkedHashMap<>();
+    routines = new LinkedHashMap<>();
+
     for (ViewerSchema schema : schemaList) {
       schemas.put(schema.getUUID(), schema);
       for (ViewerTable table : schema.getTables()) {
         tables.put(table.getUUID(), table);
+      }
+      for (ViewerView view : schema.getViews()) {
+        views.put(view.getUUID(), view);
+      }
+      for (ViewerRoutine routine : schema.getRoutines()) {
+        routines.put(routine.getUUID(), routine);
       }
     }
   }
@@ -193,6 +208,14 @@ public class ViewerMetadata implements Serializable {
 
   public ViewerTable getTable(String tableUUID) {
     return tables.get(tableUUID);
+  }
+
+  public ViewerView getView(String viewUUID) {
+    return views.get(viewUUID);
+  }
+
+  public ViewerRoutine getRoutine(String routineUUID) {
+    return routines.get(routineUUID);
   }
 
   public ViewerSchema getSchemaFromTableUUID(String tableUUID) {

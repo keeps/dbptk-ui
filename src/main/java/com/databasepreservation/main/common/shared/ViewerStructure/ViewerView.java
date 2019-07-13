@@ -62,7 +62,11 @@ public class ViewerView implements Serializable {
     this.queryOriginal = queryOriginal;
   }
 
-  public void setUUID(String uuid) { this.uuid = uuid; }
+  public void setUUID(String uuid) {
+    this.uuid = uuid;
+  }
 
-  public String getUUID() { return uuid; }
+  public String getUUID() {
+    return uuid;
+  }
 }

@@ -228,9 +228,8 @@ public class ToolkitStructure2ViewerStructure {
     result.setUUID(SolrUtils.randomUUID());
     result.setName(schema.getName());
     result.setDescription(schema.getDescription());
-
-    result.setRoutines(getRoutines(schema.getRoutines()));
-    // result.setViews(getViews(schema.getViews()));
+    result.setRoutines(getRoutines(vdb, schema.getRoutines()));
+    result.setViews(getViews(vdb, schema.getViews()));
 
     vdb.putSchema(schema.getName(), result);
     result.setTables(getTables(vdb, schema.getTables(), references));
@@ -238,17 +237,17 @@ public class ToolkitStructure2ViewerStructure {
     return result;
   }
 
-  private static List<ViewerView> getViews(List<ViewStructure> views) {
+  private static List<ViewerView> getViews(ViewerDatabaseFromToolkit vdb, List<ViewStructure> views) {
     ArrayList<ViewerView> result = new ArrayList<>();
     if (views != null) {
       for (ViewStructure view : views) {
-        result.add(getView(view));
+        result.add(getView(vdb, view));
       }
     }
     return result;
   }
 
-  private static ViewerView getView(ViewStructure view) {
+  private static ViewerView getView(ViewerDatabaseFromToolkit vdb, ViewStructure view) {
     ViewerView result = new ViewerView();
     result.setName(view.getName());
     result.setUUID(SolrUtils.randomUUID());
@@ -262,21 +261,23 @@ public class ToolkitStructure2ViewerStructure {
     result.setQuery(view.getQuery());
     result.setQueryOriginal(view.getQueryOriginal());
     result.setDescription(view.getDescription());
+    vdb.putView(view.getName(), result);
 
     return result;
   }
 
-  private static List<ViewerRoutine> getRoutines(List<RoutineStructure> routines) {
+  private static List<ViewerRoutine> getRoutines(ViewerDatabaseFromToolkit vdb, List<RoutineStructure> routines) {
     ArrayList<ViewerRoutine> result = new ArrayList<>();
     for (RoutineStructure routine : routines) {
-      result.add(getRoutine(routine));
+      result.add(getRoutine(vdb, routine));
     }
     return result;
   }
 
-  private static ViewerRoutine getRoutine(RoutineStructure routine) {
+  private static ViewerRoutine getRoutine(ViewerDatabaseFromToolkit vdb, RoutineStructure routine) {
     ViewerRoutine result = new ViewerRoutine();
     result.setName(routine.getName());
+    result.setUUID(SolrUtils.randomUUID());
 
     result.setDescription(routine.getDescription());
     result.setSource(routine.getSource());
@@ -285,6 +286,7 @@ public class ToolkitStructure2ViewerStructure {
     result.setReturnType(routine.getReturnType());
 
     result.setParameters(getRoutineParameters(routine.getParameters()));
+    vdb.putRoutine(routine.getName(), result);
 
     return result;
   }

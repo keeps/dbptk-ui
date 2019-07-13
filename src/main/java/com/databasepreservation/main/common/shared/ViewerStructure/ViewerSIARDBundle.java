@@ -27,6 +27,10 @@ public class ViewerSIARDBundle implements IsSerializable {
   private static final String GRANTEE = SPACE + "grantee:";
   private static final String SCHEMA = "schema:";
   private static final String TABLE = "table:";
+  private static final String VIEW = "view:";
+  private static final String COLUMN = "column:";
+  private static final String ROUTINE = "routine:";
+
 
   public ViewerSIARDBundle() {
   }
@@ -56,9 +60,22 @@ public class ViewerSIARDBundle implements IsSerializable {
     commandList.put(SCHEMA + schema + SEPARATOR + TABLE + table, DESCRIPTION + description);
   }
 
+  public void setView(String schema, String view, String description) {
+    commandList.put(SCHEMA + schema + SEPARATOR + VIEW + view, DESCRIPTION + description);
+  }
+
+  public void setRoutine(String schema, String routine, String description) {
+    commandList.put(SCHEMA + schema + SEPARATOR + ROUTINE + routine, DESCRIPTION + description);
+  }
+
   public void setTableType(String schema, String table, String type, String name, String description) {
     commandList.put(SCHEMA + schema + SEPARATOR + TABLE + table + SEPARATOR + type + ":" + name,
       DESCRIPTION + description);
+  }
+
+  public void setViewColumn(String schema, String view, String name, String description) {
+    commandList.put(SCHEMA + schema + SEPARATOR + VIEW + view + SEPARATOR +  COLUMN + name,
+            DESCRIPTION + description);
   }
 
   public List<String> getCommandList() {

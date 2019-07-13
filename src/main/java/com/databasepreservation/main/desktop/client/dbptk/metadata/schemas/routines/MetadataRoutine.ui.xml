@@ -1,5 +1,6 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+
     <ui:with field='messages' type='config.i18n.client.ClientMessages'/>
     <g:FlowPanel addStyleNames="metadata-edit">
         <g:SimplePanel addStyleNames="h1" ui:field="mainHeader">
@@ -8,8 +9,12 @@
             </g:Label>
         </g:SimplePanel>
         <g:TextArea ui:field="description" addStyleNames="form-textbox"/>
-        <g:FlowPanel addStyleNames="field" ui:field="query"/>
-        <g:FlowPanel addStyleNames="field" ui:field="queryOriginal"/>
-        <g:TabPanel ui:field="tabPanel" addStyleNames="browseItemMetadata"/>
+
+        <g:FlowPanel addStyleNames="field" ui:field="source"/>
+        <g:FlowPanel addStyleNames="field" ui:field="body"/>
+        <g:FlowPanel addStyleNames="field" ui:field="characteristic"/>
+        <g:FlowPanel addStyleNames="field" ui:field="returnType"/>
+        <g:FlowPanel addStyleNames="field" ui:field="parameters"/>
     </g:FlowPanel>
+
 </ui:UiBinder>

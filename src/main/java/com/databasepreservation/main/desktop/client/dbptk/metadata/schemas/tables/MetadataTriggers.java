@@ -8,6 +8,7 @@ import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSchema;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTrigger;
 import com.databasepreservation.main.desktop.client.common.lists.MetadataTableList;
+import com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.MetadataTabPanel;
 import com.google.gwt.cell.client.EditTextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;

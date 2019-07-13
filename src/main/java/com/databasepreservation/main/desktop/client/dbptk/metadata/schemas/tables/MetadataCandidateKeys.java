@@ -7,6 +7,7 @@ import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSIARDBu
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSchema;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
 import com.databasepreservation.main.desktop.client.common.lists.MetadataTableList;
+import com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.MetadataTabPanel;
 import com.google.gwt.cell.client.EditTextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -38,7 +39,7 @@ public class MetadataCandidateKeys implements MetadataTabPanel {
     Label header = new Label("");
     HTMLPanel info = new HTMLPanel(SafeHtmlUtils.EMPTY_SAFE_HTML);
 
-    if (columns == null) {
+    if (columns.isEmpty()) {
       return new MetadataTableList<>(header, messages.tableDoesNotContainCandidateKeys());
     } else {
       return new MetadataTableList<>(header, info, columns.iterator(),

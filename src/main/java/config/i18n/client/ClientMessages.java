@@ -571,4 +571,16 @@ public interface ClientMessages extends Messages {
 
   String columns();
 
+  String viewDoesNotContainDescription();
+
+  String viewDoesNotContainQuery();
+
+  String viewDoesNotContainQueryOriginal();
+
+  String viewDoesNotContainColumns();
+
+  String routines_thisRoutineFieldDoesNotHaveContent();
+
+  String routines_parametersList();
+
 }

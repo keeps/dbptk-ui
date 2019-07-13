@@ -18,6 +18,8 @@ public class ViewerRoutine implements Serializable {
   private String returnType;
   private List<ViewerRoutineParameter> parameters;
 
+  private String routineUUID;
+
   public ViewerRoutine() {
   }
 
@@ -75,5 +77,13 @@ public class ViewerRoutine implements Serializable {
 
   public void setParameters(List<ViewerRoutineParameter> parameters) {
     this.parameters = parameters;
+  }
+
+  public String getUUID() {
+    return routineUUID;
+  }
+
+  public void setUUID(String routineUUID) {
+    this.routineUUID = routineUUID;
   }
 }

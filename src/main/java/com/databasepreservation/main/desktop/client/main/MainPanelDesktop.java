@@ -14,6 +14,7 @@ import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataPanel
 import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataPanelLoad;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.SIARDEditMetadataPage;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.information.MetadataInformation;
+import com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.routines.MetadataRoutine;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.tables.MetadataTable;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.views.MetadataView;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.users.MetadataUsers;
@@ -39,7 +40,7 @@ public class MainPanelDesktop extends Composite {
   private static MainPanelDesktopUiBinder binder = GWT.create(MainPanelDesktopUiBinder.class);
 
   @UiField
-  SimplePanel contentPanel;
+  SimplePanel  contentPanel;
 
   MainPanelDesktop() {
     initWidget(binder.createAndBindUi(this));
@@ -119,7 +120,7 @@ public class MainPanelDesktop extends Composite {
         });
       }
     } else if (HistoryManager.ROUTE_VIEW.equals(currentHistoryPath.get(0))) {
-      if (currentHistoryPath.size() == 3) {
+      if (currentHistoryPath.size() == 4) {
         String databaseUUID = currentHistoryPath.get(1);
         final String schemaUUID = currentHistoryPath.get(2);
         final String viewUUID = currentHistoryPath.get(3);
@@ -128,6 +129,19 @@ public class MainPanelDesktop extends Composite {
           @Override
           public MetadataPanel load(ViewerDatabase database, ViewerSIARDBundle SIARDbundle) {
             return MetadataView.getInstance(database, SIARDbundle, schemaUUID, viewUUID);
+          }
+        });
+      }
+    } else if (HistoryManager.ROUTE_ROUTINE.equals(currentHistoryPath.get(0))) {
+      if (currentHistoryPath.size() == 4) {
+        String databaseUUID = currentHistoryPath.get(1);
+        final String schemaUUID = currentHistoryPath.get(2);
+        final String routineUUID = currentHistoryPath.get(3);
+
+        setRightPanelContent(databaseUUID, new MetadataPanelLoad() {
+          @Override
+          public MetadataPanel load(ViewerDatabase database, ViewerSIARDBundle SIARDbundle) {
+            return MetadataRoutine.getInstance(database, SIARDbundle, schemaUUID, routineUUID);
           }
         });
       }

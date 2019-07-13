@@ -26,10 +26,10 @@ import config.i18n.client.ClientMessages;
  * @author Gabriel Barros <gbarros@keep.pt>
  */
 public class MetadataTable extends MetadataPanel {
-  interface EditMetadataSchemeUiBinder extends UiBinder<Widget, MetadataTable> {
+  interface MetadataTableUiBinder extends UiBinder<Widget, MetadataTable> {
   }
 
-  private static EditMetadataSchemeUiBinder uiBinder = GWT.create(EditMetadataSchemeUiBinder.class);
+  private static MetadataTableUiBinder uiBinder = GWT.create(MetadataTableUiBinder.class);
 
   @UiField
   SimplePanel mainHeader;
@@ -78,7 +78,6 @@ public class MetadataTable extends MetadataPanel {
   }
 
   private void init() {
-    GWT.log("databaseUUID: " + database.getUUID());
     Label tableName = new Label();
     tableName.setText(table.getName());
     mainHeader.setWidget(tableName);
