@@ -2,14 +2,13 @@ package com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.tabl
 
 import java.util.List;
 
-import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSIARDBundle;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSchema;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTrigger;
+import com.databasepreservation.main.desktop.client.common.EditableCell;
 import com.databasepreservation.main.desktop.client.common.lists.MetadataTableList;
-import com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.MetadataTabPanel;
-import com.google.gwt.cell.client.EditTextCell;
+import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataEditPanel;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.Column;
@@ -22,18 +21,21 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
-public class MetadataTriggers implements MetadataTabPanel {
+public class MetadataTriggers implements MetadataEditPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private final ViewerSIARDBundle SIARDbundle;
-  private final ViewerDatabase database;
+  private ViewerTable table;
+  private ViewerSchema schema;
+  private String type = "trigger";
 
-  public MetadataTriggers(ViewerSIARDBundle SIARDbundle, ViewerDatabase database) {
+  public MetadataTriggers(ViewerSIARDBundle SIARDbundle, ViewerSchema schema, ViewerTable table) {
     this.SIARDbundle = SIARDbundle;
-    this.database = database;
+    this.table = table;
+    this.schema = schema;
   }
 
   @Override
-  public MetadataTableList createTable(ViewerTable table, ViewerSchema schema) {
+  public MetadataTableList createTable() {
     List<ViewerTrigger> columns = table.getTriggers();
     Label header = new Label("");
     HTMLPanel info = new HTMLPanel(SafeHtmlUtils.EMPTY_SAFE_HTML);
@@ -68,13 +70,13 @@ public class MetadataTriggers implements MetadataTabPanel {
           public String getValue(ViewerTrigger object) {
             return object.getActionTime();
           }
-        }), new MetadataTableList.ColumnInfo<>(messages.description(), 15, getDescriptionColumn(table, schema)));
+        }), new MetadataTableList.ColumnInfo<>(messages.description(), 15, getDescriptionColumn()));
     }
   }
 
   @Override
-  public Column<ViewerTrigger, String> getDescriptionColumn(ViewerTable table, ViewerSchema schema) {
-    Column<ViewerTrigger, String> description = new Column<ViewerTrigger, String>(new EditTextCell()) {
+  public Column<ViewerTrigger, String> getDescriptionColumn() {
+    Column<ViewerTrigger, String> description = new Column<ViewerTrigger, String>(new EditableCell()) {
       @Override
       public String getValue(ViewerTrigger object) {
         return object.getDescription();
@@ -83,14 +85,14 @@ public class MetadataTriggers implements MetadataTabPanel {
 
     description.setFieldUpdater((index, object, value) -> {
       object.setDescription(value);
-      updateSIARDbundle(schema.getName(), table.getName(), "trigger", object.getName(), value);
+      updateSIARDbundle(object.getName(), value);
     });
 
     return description;
   }
 
   @Override
-  public void updateSIARDbundle(String schemaName, String tableName, String type, String displayName, String value) {
-    SIARDbundle.setTableType(schemaName, tableName, type, displayName, value);
+  public void updateSIARDbundle(String name, String value) {
+    SIARDbundle.setTableType(schema.getName(), table.getName(), type, name, value);
   }
 }

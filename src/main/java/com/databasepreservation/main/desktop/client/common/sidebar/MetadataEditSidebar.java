@@ -23,10 +23,7 @@ import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 
 import config.i18n.client.ClientMessages;
 
@@ -156,6 +153,18 @@ public class MetadataEditSidebar extends Composite {
       // HistoryManager.linkToSchemaStructure(database.getUUID(), schema.getUUID()))
       // .addIcon(FontAwesomeIconManager.SCHEMA_STRUCTURE).setH6().setIndent1());
       //
+
+//      DisclosurePanel panel = new DisclosurePanel("Teste");
+//      panel.setOpen(true);
+//      panel.setAnimationEnabled(true);
+//      panel.getElement().setAttribute("style", "width:100%;");
+//
+//      panel.add(new SidebarHyperlink(messages.menusidebar_routines(),
+//              HistoryManager.linkToSchemaRoutines(database.getUUID(), schema.getUUID()))
+//              .addIcon(FontAwesomeIconManager.SCHEMA_ROUTINES).setH6().setIndent1());
+//
+//
+//      sidebarGroup.add(panel);
 
       sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_routines(),
               HistoryManager.linkToSchemaRoutines(database.getUUID(), schema.getUUID()))

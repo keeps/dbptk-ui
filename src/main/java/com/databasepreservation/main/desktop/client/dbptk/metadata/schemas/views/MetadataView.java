@@ -99,7 +99,7 @@ public class MetadataView extends MetadataPanel {
     addContent(messages.query(), view.getQuery(), query, messages.viewDoesNotContainQuery());
     addContent(messages.originalQuery(), view.getQueryOriginal(), query, messages.viewDoesNotContainQueryOriginal());
 
-    tabPanel.add(new MetadataViewColumns(SIARDbundle).createTable(view, schema), messages.columns());
+    tabPanel.add(new MetadataViewColumns(SIARDbundle,schema, view).createTable(), messages.columns());
 
     tabPanel.selectTab(0);
 

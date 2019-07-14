@@ -1,9 +1,9 @@
 package com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.views;
 
 import com.databasepreservation.main.common.shared.ViewerStructure.*;
+import com.databasepreservation.main.desktop.client.common.EditableCell;
 import com.databasepreservation.main.desktop.client.common.lists.MetadataTableList;
-import com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.MetadataTabPanel;
-import com.google.gwt.cell.client.EditTextCell;
+import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataEditPanel;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.Column;
@@ -14,15 +14,20 @@ import config.i18n.client.ClientMessages;
 
 import java.util.List;
 
-public class MetadataViewColumns {
+public class MetadataViewColumns implements MetadataEditPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private ViewerSIARDBundle SIARDbundle;
+  private ViewerSchema schema;
+  private ViewerView view;
 
-  public MetadataViewColumns(ViewerSIARDBundle SIARDbundle) {
+  public MetadataViewColumns(ViewerSIARDBundle SIARDbundle, ViewerSchema schema, ViewerView view) {
     this.SIARDbundle = SIARDbundle;
+    this.schema = schema;
+    this.view = view;
   }
 
-  public MetadataTableList createTable(ViewerView view, ViewerSchema schema) {
+  @Override
+  public MetadataTableList createTable() {
     List<ViewerColumn> columns = view.getColumns();
 
     Label header = new Label("");
@@ -52,26 +57,28 @@ public class MetadataViewColumns {
           public String getValue(ViewerColumn object) {
             return object.getNillable() ? "YES" : "NO";
           }
-        }), new MetadataTableList.ColumnInfo<>(messages.description(), 15, getDescriptionColumn(view, schema)));
+        }), new MetadataTableList.ColumnInfo<>(messages.description(), 15, getDescriptionColumn()));
     }
   }
 
-  public Column<ViewerColumn, String> getDescriptionColumn(ViewerView view, ViewerSchema schema) {
-      Column<ViewerColumn, String> description = new Column<ViewerColumn, String>(new EditTextCell()) {
-          @Override
-          public String getValue(ViewerColumn object) {
-              return object.getDescription();
-          }
-      };
+  @Override
+  public Column<ViewerColumn, String> getDescriptionColumn() {
+    Column<ViewerColumn, String> description = new Column<ViewerColumn, String>(new EditableCell()) {
+      @Override
+      public String getValue(ViewerColumn object) {
+        return object.getDescription();
+      }
+    };
 
-      description.setFieldUpdater((index, object, value) -> {
-          object.setDescription(value);
-          updateSIARDbundle(schema.getName(), view.getName(), object.getDisplayName(), value);
-      });
-      return description;
+    description.setFieldUpdater((index, object, value) -> {
+      object.setDescription(value);
+      updateSIARDbundle(object.getDisplayName(), value);
+    });
+    return description;
   }
 
-  public void updateSIARDbundle(String schemaName, String tableName, String displayName, String value) {
-      SIARDbundle.setViewColumn(schemaName, tableName, displayName, value);
+  @Override
+  public void updateSIARDbundle(String name, String value) {
+    SIARDbundle.setViewColumn(schema.getName(), view.getName(), name, value);
   }
 }

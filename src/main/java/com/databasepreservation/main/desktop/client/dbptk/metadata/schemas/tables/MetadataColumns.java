@@ -8,9 +8,9 @@ import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSIARDBu
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSchema;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
 import com.databasepreservation.main.common.shared.client.tools.FontAwesomeIconManager;
+import com.databasepreservation.main.desktop.client.common.EditableCell;
 import com.databasepreservation.main.desktop.client.common.lists.MetadataTableList;
-import com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.MetadataTabPanel;
-import com.google.gwt.cell.client.EditTextCell;
+import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataEditPanel;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -25,17 +25,22 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
-public class MetadataColumns implements MetadataTabPanel {
+public class MetadataColumns implements MetadataEditPanel {
 
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private ViewerSIARDBundle SIARDbundle;
+  private ViewerTable table;
+  private ViewerSchema schema;
+  private String type = "column";
 
-  MetadataColumns(ViewerSIARDBundle SIARDbundle) {
+  MetadataColumns(ViewerSIARDBundle SIARDbundle, ViewerSchema schema, ViewerTable table) {
     this.SIARDbundle = SIARDbundle;
+    this.table = table;
+    this.schema = schema;
   }
 
   @Override
-  public MetadataTableList createTable(ViewerTable table, ViewerSchema schema) {
+  public MetadataTableList createTable() {
 
     List<ViewerColumn> columns = table.getColumns();
 
@@ -67,7 +72,7 @@ public class MetadataColumns implements MetadataTabPanel {
           public String getValue(ViewerColumn object) {
             return object.getNillable() ? "YES" : "NO";
           }
-        }), new MetadataTableList.ColumnInfo<>(messages.description(), 15, getDescriptionColumn(table, schema)));
+        }), new MetadataTableList.ColumnInfo<>(messages.description(), 15, getDescriptionColumn()));
     }
   }
 
@@ -89,8 +94,8 @@ public class MetadataColumns implements MetadataTabPanel {
   }
 
   @Override
-  public Column<ViewerColumn, String> getDescriptionColumn(ViewerTable table, ViewerSchema schema) {
-    Column<ViewerColumn, String> description = new Column<ViewerColumn, String>(new EditTextCell()) {
+  public Column<ViewerColumn, String> getDescriptionColumn() {
+    Column<ViewerColumn, String> description = new Column<ViewerColumn, String>(new EditableCell()) {
       @Override
       public String getValue(ViewerColumn object) {
         return object.getDescription();
@@ -99,14 +104,14 @@ public class MetadataColumns implements MetadataTabPanel {
 
     description.setFieldUpdater((index, object, value) -> {
       object.setDescription(value);
-      updateSIARDbundle(schema.getName(), table.getName(), "column", object.getDisplayName(), value);
+      updateSIARDbundle(object.getDisplayName(), value);
     });
     return description;
   }
 
   @Override
-  public void updateSIARDbundle(String schemaName, String tableName, String type, String displayName, String value) {
-    SIARDbundle.setTableType(schemaName, tableName, type, displayName, value);
+  public void updateSIARDbundle(String name, String value) {
+    SIARDbundle.setTableType(schema.getName(), table.getName(), type, name, value);
   }
 
 }

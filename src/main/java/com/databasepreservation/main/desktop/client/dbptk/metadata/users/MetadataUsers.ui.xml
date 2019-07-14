@@ -9,6 +9,7 @@
                 <ui:text from='{messages.menusidebar_usersRoles}'/>
             </g:Label>
             <g:FlowPanel ui:field="contentItems"/>
+            <g:TabPanel ui:field="tabPanel" addStyleNames="browseItemMetadata"/>
         </g:FlowPanel>
     </g:FlowPanel>
 

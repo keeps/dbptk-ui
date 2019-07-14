@@ -1,9 +1,9 @@
 package com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.tables;
 
 import com.databasepreservation.main.common.shared.ViewerStructure.*;
+import com.databasepreservation.main.desktop.client.common.EditableCell;
 import com.databasepreservation.main.desktop.client.common.lists.MetadataTableList;
-import com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.MetadataTabPanel;
-import com.google.gwt.cell.client.EditTextCell;
+import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataEditPanel;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.Column;
@@ -17,18 +17,21 @@ import java.util.List;
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
-public class MetadataConstraints implements MetadataTabPanel {
+public class MetadataConstraints implements MetadataEditPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private final ViewerSIARDBundle SIARDbundle;
-  private final ViewerDatabase database;
+  private ViewerTable table;
+  private ViewerSchema schema;
+  private String type = "constraint";
 
-  MetadataConstraints(ViewerSIARDBundle SIARDbundle, ViewerDatabase database) {
+  MetadataConstraints(ViewerSIARDBundle SIARDbundle, ViewerSchema schema, ViewerTable table) {
     this.SIARDbundle = SIARDbundle;
-    this.database = database;
+    this.table = table;
+    this.schema = schema;
   }
 
   @Override
-  public MetadataTableList createTable(ViewerTable table, ViewerSchema schema) {
+  public MetadataTableList createTable() {
 
     List<ViewerCheckConstraint> columns = table.getCheckConstraints();
     Label header = new Label("");
@@ -51,13 +54,13 @@ public class MetadataConstraints implements MetadataTabPanel {
               return object.getCondition();
             }
           }),
-        new MetadataTableList.ColumnInfo<>(messages.description(), 15, getDescriptionColumn(table, schema)));
+        new MetadataTableList.ColumnInfo<>(messages.description(), 15, getDescriptionColumn()));
     }
   }
 
   @Override
-  public Column<ViewerCheckConstraint, String> getDescriptionColumn(ViewerTable table, ViewerSchema schema) {
-    Column<ViewerCheckConstraint, String> description = new Column<ViewerCheckConstraint, String>(new EditTextCell()) {
+  public Column<ViewerCheckConstraint, String> getDescriptionColumn() {
+    Column<ViewerCheckConstraint, String> description = new Column<ViewerCheckConstraint, String>(new EditableCell()) {
       @Override
       public String getValue(ViewerCheckConstraint object) {
         return object.getDescription();
@@ -66,14 +69,15 @@ public class MetadataConstraints implements MetadataTabPanel {
 
     description.setFieldUpdater((index, object, value) -> {
       object.setDescription(value);
-      updateSIARDbundle(schema.getName(), table.getName(), "constraint", object.getDescription(), value);
+      updateSIARDbundle(object.getName(), value);
     });
 
     return description;
   }
 
   @Override
-  public void updateSIARDbundle(String schemaName, String tableName, String type, String displayName, String value) {
-    SIARDbundle.setTableType(schemaName, tableName, type, displayName, value);
+  public void updateSIARDbundle(String name, String value) {
+    SIARDbundle.setTableType(schema.getName(), table.getName(), type, name, value);
   }
+
 }

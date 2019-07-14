@@ -2,13 +2,12 @@ package com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.tabl
 
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerCandidateKey;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerColumn;
-import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSIARDBundle;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSchema;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
+import com.databasepreservation.main.desktop.client.common.EditableCell;
 import com.databasepreservation.main.desktop.client.common.lists.MetadataTableList;
-import com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.MetadataTabPanel;
-import com.google.gwt.cell.client.EditTextCell;
+import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataEditPanel;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.Column;
@@ -23,18 +22,21 @@ import java.util.List;
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
-public class MetadataCandidateKeys implements MetadataTabPanel {
+public class MetadataCandidateKeys implements MetadataEditPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private ViewerSIARDBundle SIARDbundle;
-  private ViewerDatabase database;
+  private ViewerTable table;
+  private ViewerSchema schema;
+  private String type = "candidateKey";
 
-  MetadataCandidateKeys(ViewerSIARDBundle SIARDbundle, ViewerDatabase database) {
+  MetadataCandidateKeys(ViewerSIARDBundle SIARDbundle, ViewerSchema schema, ViewerTable table) {
     this.SIARDbundle = SIARDbundle;
-    this.database = database;
+    this.table = table;
+    this.schema = schema;
   }
 
   @Override
-  public MetadataTableList createTable(ViewerTable table, ViewerSchema schema) {
+  public MetadataTableList createTable() {
     List<ViewerCandidateKey> columns = table.getCandidateKeys();
     Label header = new Label("");
     HTMLPanel info = new HTMLPanel(SafeHtmlUtils.EMPTY_SAFE_HTML);
@@ -62,13 +64,13 @@ public class MetadataCandidateKeys implements MetadataTabPanel {
               return columnsName.toString();
             }
           }),
-        new MetadataTableList.ColumnInfo<>(messages.description(), 15, getDescriptionColumn(table, schema)));
+        new MetadataTableList.ColumnInfo<>(messages.description(), 15, getDescriptionColumn()));
     }
   }
 
   @Override
-  public Column<ViewerCandidateKey, String> getDescriptionColumn(ViewerTable table, ViewerSchema schema) {
-    Column<ViewerCandidateKey, String> description = new Column<ViewerCandidateKey, String>(new EditTextCell()) {
+  public Column<ViewerCandidateKey, String> getDescriptionColumn() {
+    Column<ViewerCandidateKey, String> description = new Column<ViewerCandidateKey, String>(new EditableCell()) {
       @Override
       public String getValue(ViewerCandidateKey object) {
         return object.getDescription();
@@ -77,14 +79,14 @@ public class MetadataCandidateKeys implements MetadataTabPanel {
 
     description.setFieldUpdater((index, object, value) -> {
       object.setDescription(value);
-      updateSIARDbundle(schema.getName(), table.getName(), "candidateKey", object.getName(), value);
+      updateSIARDbundle(object.getName(), value);
     });
 
     return description;
   }
 
   @Override
-  public void updateSIARDbundle(String schemaName, String tableName, String type, String displayName, String value) {
-    SIARDbundle.setTableType(schemaName, tableName, type, displayName, value);
+  public void updateSIARDbundle(String name, String value) {
+    SIARDbundle.setTableType(schema.getName(), table.getName(), type, name, value);
   }
 }

@@ -92,13 +92,13 @@ public class MetadataTable extends MetadataPanel {
       }
     });
 
-    tabPanel.add(new MetadataColumns(SIARDbundle).createTable(table, schema), messages.columns());
-    tabPanel.add(new MetadataPrimaryKey(SIARDbundle, database).createTable(table, schema), messages.primaryKey());
-    tabPanel.add(new MetadataForeignKeys(SIARDbundle, database).createTable(table, schema), messages.foreignKeys());
-    tabPanel.add(new MetadataCandidateKeys(SIARDbundle, database).createTable(table, schema), messages.candidateKeys());
-    tabPanel.add(new MetadataConstraints(SIARDbundle, database).createTable(table, schema),
+    tabPanel.add(new MetadataColumns(SIARDbundle, schema, table).createTable(), messages.columns());
+    tabPanel.add(new MetadataPrimaryKey(SIARDbundle, schema, table).createTable(), messages.primaryKey());
+    tabPanel.add(new MetadataForeignKeys(SIARDbundle, database, schema, table).createTable(), messages.foreignKeys());
+    tabPanel.add(new MetadataCandidateKeys(SIARDbundle, schema, table).createTable(), messages.candidateKeys());
+    tabPanel.add(new MetadataConstraints(SIARDbundle, schema, table).createTable(),
       messages.menusidebar_checkConstraints());
-    tabPanel.add(new MetadataTriggers(SIARDbundle, database).createTable(table, schema),
+    tabPanel.add(new MetadataTriggers(SIARDbundle, schema, table).createTable(),
       messages.menusidebar_triggers());
 
     tabPanel.selectTab(0);
