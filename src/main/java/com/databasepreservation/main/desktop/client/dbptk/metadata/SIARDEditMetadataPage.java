@@ -108,7 +108,7 @@ public class SIARDEditMetadataPage extends Composite {
   private void loadPanel(MetadataPanelLoad rightPanelLoader){
     GWT.log("loadPanel");
     GWT.log("have db: " + database + "sb.init: " + sidebar.isInitialized());
-    MetadataPanel rightPanel = rightPanelLoader.load(database, SIARDbundle);
+    MetadataPanel rightPanel = rightPanelLoader.load(database, SIARDbundle, sidebar);
 
     if (database != null && !sidebar.isInitialized()) {
       sidebar.init(database);

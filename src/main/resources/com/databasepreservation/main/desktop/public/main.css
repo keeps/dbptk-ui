@@ -556,14 +556,18 @@ p[data-value]:after {
 
 .leftSidebar .h1, .leftSidebar .h2, .leftSidebar .h3, .leftSidebar .h4, .leftSidebar .h5,
 .leftSidebar .h6 {
-    margin-bottom: 0.6rem;
-    margin-top: 0.5em;
+    /*margin-bottom: 0.6rem;*/
+    /*margin-top: 0.5em;*/
+    margin-bottom: 0px;
+    margin-top: 0px;
     line-height: normal;
 }
 
 .leftSidebar .indent0 {
-    margin-left: 0;
-    margin-top: 1.5rem;
+    /*margin-left: 0;*/
+    /*margin-top: 1.5rem;*/
+    margin-left: 0.5rem;
+    margin-top: 0px;
 }
 
 .leftSidebar-facet-title :first-child {
@@ -601,12 +605,23 @@ p[data-value]:after {
     text-align: center;
 }
 
+.leftSidebar-facet-panel{
+    padding-bottom: 0.3rem;
+    padding-top: 0.3em;
+}
 .sidebarHyperLink-selected {
     background: #5bbeff;
+    /*padding-bottom: 0.6rem;*/
+    /*padding-top: 0.5em;*/
 }
-.sidebarItem-selected {
+.leftSidebar .sidebar-hyperlink.sidebarItem-selected a:hover {
+    text-decoration: none;
+    color: inherit;
+}
+.leftSidebar .sidebarItem-selected.h6, .leftSidebar .sidebarItem-selected.h5 {
     color: white;
-    padding: 5px 0;
+    margin-bottom: 0px;
+    margin-top: 0px;
 }
 
 /* used in schema page to show table column information */
@@ -1286,8 +1301,27 @@ input[type="checkbox"]:checked:after {
 /**********************************************
 				EDIT METADATA
 ************************************************/
-.metadata-edit {
+.metadata-panel{
     padding: 0em 1em;
+    height: 90vh;
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+}
+
+.metadata-content{
+    display: block;
+    height: 70%;
+}
+
+.metadata-save {
+    display: flex;
+    flex-direction: row-reverse;
+    width: 100%;
+}
+
+.metadata-edit {
+    height: 100%;
 }
 .metadata-edit-title {
     display: flex;
@@ -1310,9 +1344,13 @@ input[type="checkbox"]:checked:after {
     right: auto;
 }
 
-.metadata-save {
-    align-self: flex-end;
-    float: right;
+.metadata-table-list{
+    display: block;
+    height: 100%;
+}
+
+.metadata-save button {
+    align-self: center;
 }
 
 .metadata-save i {
@@ -1356,8 +1394,23 @@ input[type="checkbox"]:checked:after {
 }
 
 .metadata-edit-scroll-wrapper{
-    overflow: scroll;
+    display: block;
+    max-height: 100%;
+    width: 100%;
 }
+.metadata-edit-tab, .metadata-edit-tab > tbody{
+    /*overflow: auto;*/
+}
+
+.metadata-edit-tab, .metadata-edit-tab > tbody, .metadata-edit-tab > tbody > tr:nth-of-type(2){
+    /*height: 100%;*/
+}
+.metadata-edit-tab, .metadata-edit-tab > tbody, .metadata-edit-tab > tbody > tr, .metadata-edit-tab > tbody > tr > td{
+    /*display: block;*/
+    /*width: 100%;*/
+}
+
+
 
 @media (max-width: 768px){
     .metadata-edit-label {
@@ -1366,4 +1419,28 @@ input[type="checkbox"]:checked:after {
     .metadata-edit-value {
         width: 100%;
     }
+}
+
+.sidebar-collapse{
+    position: relative;
+    width: 100%;
+}
+.sidebar-collapse .header{
+    color: inherit;
+    text-decoration: none;
+}
+
+.sidebar-collapse .header > .leftSidebar-facet-panel::after{
+    display: inline-block;
+    font-family: FontAwesome;
+    content: "\f107";
+    font-weight: bolder;
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+.sidebar-collapse.gwt-DisclosurePanel-open .header > .leftSidebar-facet-panel::after{
+    content: "\f106";
+    font-weight: bolder;
 }

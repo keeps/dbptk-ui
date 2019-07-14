@@ -1,11 +1,6 @@
 package com.databasepreservation.main.desktop.client.common.sidebar;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import com.databasepreservation.main.common.shared.ViewerStructure.*;
 import com.databasepreservation.main.common.shared.client.tools.FontAwesomeIconManager;
@@ -28,11 +23,12 @@ import com.google.gwt.user.client.ui.*;
 import config.i18n.client.ClientMessages;
 
 /**
- * @author Gabriel Barros <bferreira@keep.pt>
+ * @author Gabriel Barros <gbarros@keep.pt>
  */
 public class MetadataEditSidebar extends Composite {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, MetadataEditSidebar> instances = new HashMap<>();
+  private static Map<String, SidebarHyperlink> list = new HashMap<>();
 
   public static MetadataEditSidebar getInstance(String databaseUUID) {
     if (databaseUUID == null) {
@@ -138,68 +134,90 @@ public class MetadataEditSidebar extends Composite {
     // database metadata
     final ViewerMetadata metadata = database.getMetadata();
 
-    sidebarGroup.add(
-      new SidebarHyperlink(messages.menusidebar_database(), HistoryManager.linkToDatabaseMetadata(database.getUUID()))
-        .addIcon(FontAwesomeIconManager.DATABASE).setH5().setIndent0());
+    SidebarHyperlink databaseLink = new SidebarHyperlink(messages.menusidebar_database(),
+      HistoryManager.linkToDatabaseMetadata(database.getUUID()));
+    databaseLink.addIcon(FontAwesomeIconManager.DATABASE).setH5().setIndent0();
+    list.put(database.getUUID(), databaseLink);
+    sidebarGroup.add(databaseLink);
 
-    sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_usersRoles(),
-      HistoryManager.linkToDatabaseMetadataUsers(database.getUUID())).addIcon(FontAwesomeIconManager.DATABASE_USERS)
-        .setH5().setIndent0());
+    SidebarHyperlink usersLink = new SidebarHyperlink(messages.menusidebar_usersRoles(),
+      HistoryManager.linkToDatabaseMetadataUsers(database.getUUID()));
+    usersLink.addIcon(FontAwesomeIconManager.DATABASE_USERS).setH5().setIndent0();
+    list.put(HistoryManager.ROUTE_DATABASE_USERS, usersLink);
+    sidebarGroup.add(usersLink);
 
     for (final ViewerSchema schema : metadata.getSchemas()) {
       sidebarGroup.add(new SidebarItem(schema.getName()).addIcon(FontAwesomeIconManager.SCHEMA).setH5().setIndent0());
 
-      // sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_structure(),
-      // HistoryManager.linkToSchemaStructure(database.getUUID(), schema.getUUID()))
-      // .addIcon(FontAwesomeIconManager.SCHEMA_STRUCTURE).setH6().setIndent1());
-      //
-
-//      DisclosurePanel panel = new DisclosurePanel("Teste");
-//      panel.setOpen(true);
-//      panel.setAnimationEnabled(true);
-//      panel.getElement().setAttribute("style", "width:100%;");
-//
-//      panel.add(new SidebarHyperlink(messages.menusidebar_routines(),
-//              HistoryManager.linkToSchemaRoutines(database.getUUID(), schema.getUUID()))
-//              .addIcon(FontAwesomeIconManager.SCHEMA_ROUTINES).setH6().setIndent1());
-//
-//
-//      sidebarGroup.add(panel);
-
-      sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_routines(),
-              HistoryManager.linkToSchemaRoutines(database.getUUID(), schema.getUUID()))
-              .addIcon(FontAwesomeIconManager.SCHEMA_ROUTINES).setH6().setIndent1());
-
+      SidebarItem routineHeader = createSidebarSubItemHeader(messages.menusidebar_routines(), FontAwesomeIconManager.SCHEMA_ROUTINES);
+      FlowPanel routineItems = new FlowPanel();
       for (ViewerRoutine routine : schema.getRoutines()) {
-        sidebarGroup.add(new SidebarHyperlink(routine.getName(),
-                HistoryManager.linkToRoutine(database.getUUID(), schema.getUUID(), routine.getUUID()))
-                .addIcon(FontAwesomeIconManager.TABLE).setH6().setIndent2());
+
+        SidebarHyperlink routineLink = new SidebarHyperlink(routine.getName(),
+          HistoryManager.linkToRoutine(database.getUUID(), schema.getUUID(), routine.getUUID()));
+        routineLink.addIcon(FontAwesomeIconManager.TABLE).setH6().setIndent2();
+        list.put(routine.getUUID(), routineLink);
+        routineItems.add(routineLink);
       }
 
-      sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_views(),
-        HistoryManager.linkToSchemaViews(database.getUUID(), schema.getUUID()))
-          .addIcon(FontAwesomeIconManager.SCHEMA_VIEWS).setH6().setIndent1());
+      createSubItem(routineHeader,routineItems);
 
+      SidebarItem viewsHeader = createSidebarSubItemHeader(messages.menusidebar_views(), FontAwesomeIconManager.SCHEMA_VIEWS);
+      FlowPanel viewsItems = new FlowPanel();
       for (ViewerView view : schema.getViews()) {
-        sidebarGroup.add(new SidebarHyperlink(view.getName(),
-          HistoryManager.linkToView(database.getUUID(), schema.getUUID(), view.getUUID()))
-            .addIcon(FontAwesomeIconManager.TABLE).setH6().setIndent2());
+
+        SidebarHyperlink viewLink = new SidebarHyperlink(view.getName(),
+          HistoryManager.linkToView(database.getUUID(), schema.getUUID(), view.getUUID()));
+        viewLink.addIcon(FontAwesomeIconManager.TABLE).setH6().setIndent2();
+        list.put(view.getUUID(), viewLink);
+        sidebarGroup.add(viewLink);
+        viewsItems.add(viewLink);
       }
 
-      sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_data(),
-        HistoryManager.linkToSchemaData(database.getUUID(), schema.getUUID()))
-          .addIcon(FontAwesomeIconManager.SCHEMA_DATA).setH6().setIndent1());
+      createSubItem(viewsHeader,viewsItems);
 
+      SidebarItem tableHeader = createSidebarSubItemHeader(messages.menusidebar_data(), FontAwesomeIconManager.SCHEMA_DATA);
+      FlowPanel tableItems = new FlowPanel();
       for (ViewerTable table : schema.getTables()) {
-        sidebarGroup
-          .add(new SidebarHyperlink(table.getName(), HistoryManager.linkToTable(database.getUUID(), table.getUUID()))
-            .addIcon(FontAwesomeIconManager.TABLE).setH6().setIndent2());
+
+        SidebarHyperlink tableLink = new SidebarHyperlink(table.getName(),
+          HistoryManager.linkToTable(database.getUUID(), table.getUUID()));
+        tableLink.addIcon(FontAwesomeIconManager.TABLE).setH6().setIndent2();
+        list.put(table.getUUID(), tableLink);
+        sidebarGroup.add(tableLink);
+        tableItems.add(tableLink);
+
       }
+      createSubItem(tableHeader,tableItems);
 
       searchInit();
     }
 
     setVisible(true);
+  }
+
+  private SidebarItem createSidebarSubItemHeader(String headerText, String headerIcon) {
+    return new SidebarItem(headerText).addIcon(headerIcon).setH6().setIndent1();
+  }
+
+  private void createSubItem(SidebarItem header, FlowPanel content) {
+    DisclosurePanel panel = new DisclosurePanel();
+    panel.setAnimationEnabled(true);
+    panel.setHeader(header);
+    panel.setContent(content);
+    panel.getElement().addClassName("sidebar-collapse");
+    sidebarGroup.add(panel);
+  }
+
+  public void select(String value) {
+    GWT.log("SELECTED:::" + value);
+    for (Map.Entry<String, SidebarHyperlink> entry : list.entrySet()) {
+      if (entry.getKey().equals(value)) {
+        list.get(value).setSelected(true);
+      } else {
+        list.get(entry.getKey()).setSelected(false);
+      }
+    }
   }
 
   private void searchInit() {
@@ -234,12 +252,25 @@ public class MetadataEditSidebar extends Composite {
       // show all
       for (Widget widget : sidebarGroup) {
         widget.setVisible(true);
+
+        if (widget instanceof DisclosurePanel) {
+          DisclosurePanel disclosurePanel = (DisclosurePanel) widget;
+          disclosurePanel.setOpen(false);
+          FlowPanel fp = (FlowPanel) disclosurePanel.getContent();
+          Iterator<Widget> iterator = fp.iterator();
+          while (iterator.hasNext()) {
+            SidebarItem sb = (SidebarItem) iterator.next();
+            sb.setVisible(true);
+          }
+        }
       }
     } else {
       // show matching and their parents
 
       Set<SidebarItem> parentsThatShouldBeVisible = new HashSet<>();
       List<SidebarItem> parentsList = new ArrayList<>();
+
+      Set<DisclosurePanel> disclosurePanelsThatShouldBeVisible = new HashSet<>();
 
       for (Widget widget : sidebarGroup) {
         if (widget instanceof SidebarItem) {
@@ -258,6 +289,28 @@ public class MetadataEditSidebar extends Composite {
           } else {
             widget.setVisible(false);
           }
+        } else if (widget instanceof DisclosurePanel) {
+          DisclosurePanel disclosurePanel = (DisclosurePanel) widget;
+          disclosurePanel.setOpen(true);
+          FlowPanel fp = (FlowPanel) disclosurePanel.getContent();
+
+          Iterator<Widget> iterator = fp.iterator();
+
+          while (iterator.hasNext()){
+            SidebarItem sb = (SidebarItem) iterator.next();
+
+            GWT.log(sb.getText());
+
+            if(sb.getText().toLowerCase().contains(searchValue.toLowerCase())) {
+              sb.setVisible(true);
+              disclosurePanelsThatShouldBeVisible.add(disclosurePanel);
+            } else {
+              sb.setVisible(false);
+              disclosurePanel.setVisible(false);
+            }
+
+          }
+
         } else {
           widget.setVisible(true);
         }
@@ -265,6 +318,10 @@ public class MetadataEditSidebar extends Composite {
 
       for (SidebarItem sidebarItem : parentsThatShouldBeVisible) {
         sidebarItem.setVisible(true);
+      }
+
+      for (DisclosurePanel disclosurePanel : disclosurePanelsThatShouldBeVisible) {
+        disclosurePanel.setVisible(true);
       }
     }
   }

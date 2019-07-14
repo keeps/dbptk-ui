@@ -25,8 +25,8 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
-public class MetadataTable extends MetadataPanel {
-  interface MetadataTableUiBinder extends UiBinder<Widget, MetadataTable> {
+public class MetadataTablePanel extends MetadataPanel {
+  interface MetadataTableUiBinder extends UiBinder<Widget, MetadataTablePanel> {
   }
 
   private static MetadataTableUiBinder uiBinder = GWT.create(MetadataTableUiBinder.class);
@@ -41,32 +41,30 @@ public class MetadataTable extends MetadataPanel {
   TabPanel tabPanel;
 
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
-  private static Map<String, MetadataTable> instances = new HashMap<>();
+  private static Map<String, MetadataTablePanel> instances = new HashMap<>();
   private ViewerSIARDBundle SIARDbundle;
   private ViewerDatabase database;
   private ViewerSchema schema;
   private ViewerTable table;
 
-  public static MetadataTable getInstance(ViewerDatabase database, ViewerSIARDBundle SIARDbundle, String tableUUID) {
+  public static MetadataTablePanel getInstance(ViewerDatabase database, ViewerSIARDBundle SIARDbundle, String tableUUID) {
     String separator = "/";
     String code = database.getUUID() + separator + tableUUID;
 
-    MetadataTable instance = instances.get(code);
+    MetadataTablePanel instance = instances.get(code);
     if (instance == null) {
-      instance = new MetadataTable(database, tableUUID, SIARDbundle);
+      instance = new MetadataTablePanel(database, tableUUID, SIARDbundle);
       instances.put(code, instance);
     }
 
     return instance;
   }
 
-  private MetadataTable(ViewerDatabase database, String tableUUID, ViewerSIARDBundle bundle) {
+  private MetadataTablePanel(ViewerDatabase database, String tableUUID, ViewerSIARDBundle bundle) {
     this.database = database;
     this.SIARDbundle = bundle;
     table = database.getMetadata().getTable(tableUUID);
     schema = database.getMetadata().getSchemaFromTableUUID(tableUUID);
-
-    GWT.log("MetadataTable::" + table.getName());
 
     initWidget(uiBinder.createAndBindUi(this));
     init();

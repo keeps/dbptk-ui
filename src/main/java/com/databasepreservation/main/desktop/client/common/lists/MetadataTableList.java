@@ -1,9 +1,14 @@
 package com.databasepreservation.main.desktop.client.common.lists;
 
+import com.databasepreservation.main.common.shared.ViewerConstants;
+import com.databasepreservation.main.common.shared.client.tools.ViewerStringUtils;
 import com.databasepreservation.main.common.shared.client.widgets.MyCellTableResources;
+import com.databasepreservation.main.common.shared.client.widgets.wcag.AccessibleFocusPanel;
 import com.google.gwt.cell.client.EditTextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.ScrollEvent;
 import com.google.gwt.event.dom.client.ScrollHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -16,9 +21,14 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.ListDataProvider;
+import com.google.gwt.view.client.Range;
+import org.roda.core.data.v2.index.filter.BasicSearchFilterParameter;
+import org.roda.core.data.v2.index.filter.Filter;
+import org.roda.core.data.v2.index.select.SelectedItems;
+import org.roda.core.data.v2.index.select.SelectedItemsFilter;
+import org.roda.core.data.v2.index.select.SelectedItemsList;
 
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -31,38 +41,32 @@ public class MetadataTableList<C> extends Composite {
 
   CellTable<C> cellTable;
   ListDataProvider<C> dataProvider;
+  CellTable<C> display;
 
   private ScrollPanel displayScroll;
   private SimplePanel displayScrollWrapper;
 
   @UiField
-  SimplePanel header;
-  @UiField
   SimplePanel info;
+
   @UiField
   SimplePanel table;
 
   @SafeVarargs
-  public MetadataTableList(Widget headerContent, Widget infoContent, Iterator<C> rowItems, ColumnInfo<C>... columns) {
+  public MetadataTableList(Iterator<C> rowItems, ColumnInfo<C>... columns) {
     initWidget(uiBinder.createAndBindUi(this));
 
-    // set widgets
-    header.setWidget(headerContent);
-    info.setWidget(infoContent);
-
-    CellTable<C> display = createTable(rowItems, columns);
+    display = createTable(rowItems, columns);
     displayScroll = new ScrollPanel(display);
+    displayScroll.setSize("100%", "100%");
     displayScrollWrapper = new SimplePanel(displayScroll);
     displayScrollWrapper.addStyleName("metadata-edit-scroll-wrapper");
     table.setWidget(displayScrollWrapper);
 
   }
 
-  public MetadataTableList(Widget headerContent, String infoContent) {
+  public MetadataTableList(String infoContent) {
     initWidget(uiBinder.createAndBindUi(this));
-
-    // set widgets
-    header.setWidget(headerContent);
 
     SafeHtmlBuilder b = new SafeHtmlBuilder();
     b.append(SafeHtmlUtils.fromSafeConstant("<div class=\"field\">"));

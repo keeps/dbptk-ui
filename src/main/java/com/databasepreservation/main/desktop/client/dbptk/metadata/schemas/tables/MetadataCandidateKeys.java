@@ -38,13 +38,11 @@ public class MetadataCandidateKeys implements MetadataEditPanel {
   @Override
   public MetadataTableList createTable() {
     List<ViewerCandidateKey> columns = table.getCandidateKeys();
-    Label header = new Label("");
-    HTMLPanel info = new HTMLPanel(SafeHtmlUtils.EMPTY_SAFE_HTML);
 
     if (columns.isEmpty()) {
-      return new MetadataTableList<>(header, messages.tableDoesNotContainCandidateKeys());
+      return new MetadataTableList<>( messages.tableDoesNotContainCandidateKeys());
     } else {
-      return new MetadataTableList<>(header, info, columns.iterator(),
+      return new MetadataTableList<>(columns.iterator(),
         new MetadataTableList.ColumnInfo<>(messages.name(), 15, new TextColumn<ViewerCandidateKey>() {
           @Override
           public String getValue(ViewerCandidateKey object) {

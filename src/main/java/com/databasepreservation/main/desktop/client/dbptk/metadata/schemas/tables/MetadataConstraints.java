@@ -34,14 +34,12 @@ public class MetadataConstraints implements MetadataEditPanel {
   public MetadataTableList createTable() {
 
     List<ViewerCheckConstraint> columns = table.getCheckConstraints();
-    Label header = new Label("");
-    HTMLPanel info = new HTMLPanel(SafeHtmlUtils.EMPTY_SAFE_HTML);
 
     if (columns.isEmpty()) {
-      return new MetadataTableList<>(header, messages.tableDoesNotContainConstraints());
+      return new MetadataTableList<>(messages.tableDoesNotContainConstraints());
     } else {
 
-      return new MetadataTableList<>(header, info, columns.iterator(),
+      return new MetadataTableList<>(columns.iterator(),
         new MetadataTableList.ColumnInfo<>(messages.name(), 15, new TextColumn<ViewerCheckConstraint>() {
           @Override
           public String getValue(ViewerCheckConstraint object) {

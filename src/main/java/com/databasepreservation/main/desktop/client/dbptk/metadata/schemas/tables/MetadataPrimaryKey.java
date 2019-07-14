@@ -34,14 +34,12 @@ public class MetadataPrimaryKey implements MetadataEditPanel {
   public MetadataTableList createTable() {
 
     ViewerPrimaryKey columns = table.getPrimaryKey();
-    Label header = new Label("");
-    HTMLPanel info = new HTMLPanel(SafeHtmlUtils.EMPTY_SAFE_HTML);
 
     if (columns == null) {
-      return new MetadataTableList<>(header, messages.tableDoesNotContainPrimaryKey());
+      return new MetadataTableList<>(messages.tableDoesNotContainPrimaryKey());
     } else {
 
-      return new MetadataTableList<>(header, info, Arrays.asList(columns).iterator(),
+      return new MetadataTableList<>(Arrays.asList(columns).iterator(),
         new MetadataTableList.ColumnInfo<>(messages.primaryKey(), 15, new TextColumn<ViewerPrimaryKey>() {
           @Override
           public String getValue(ViewerPrimaryKey object) {

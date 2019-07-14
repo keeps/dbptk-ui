@@ -1,22 +1,18 @@
 package com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.views;
 
-import com.databasepreservation.main.common.server.index.factory.SolrClientFactory;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSIARDBundle;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSchema;
-import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerView;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataPanel;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.*;
 import config.i18n.client.ClientMessages;
-import org.apache.solr.client.solrj.SolrClient;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,14 +20,14 @@ import java.util.Map;
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
-public class MetadataView extends MetadataPanel {
+public class MetadataViewPanel extends MetadataPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
 
   }
 
-  interface MetadataViewUiBinder extends UiBinder<Widget, MetadataView> {
+  interface MetadataViewUiBinder extends UiBinder<Widget, MetadataViewPanel> {
   }
 
   private static MetadataViewUiBinder uiBinder = GWT.create(MetadataViewUiBinder.class);
@@ -49,33 +45,33 @@ public class MetadataView extends MetadataPanel {
   TabPanel tabPanel;
 
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
-  private static Map<String, MetadataView> instances = new HashMap<>();
+  private static Map<String, MetadataViewPanel> instances = new HashMap<>();
   private ViewerSIARDBundle SIARDbundle;
   private ViewerDatabase database;
   private ViewerSchema schema;
   private ViewerView view;
 
-  public static MetadataView getInstance(ViewerDatabase database, ViewerSIARDBundle SIARDbundle, String schemaUUID,
-    String viewUUID) {
+  public static MetadataViewPanel getInstance(ViewerDatabase database, ViewerSIARDBundle SIARDbundle, String schemaUUID,
+                                              String viewUUID) {
     String separator = "/";
     String code = database.getUUID() + separator + viewUUID;
 
-    MetadataView instance = instances.get(code);
+    MetadataViewPanel instance = instances.get(code);
     if (instance == null) {
-      instance = new MetadataView(database, SIARDbundle, schemaUUID, viewUUID);
+      instance = new MetadataViewPanel(database, SIARDbundle, schemaUUID, viewUUID);
       instances.put(code, instance);
     }
 
     return instance;
   }
 
-  private MetadataView(ViewerDatabase database, ViewerSIARDBundle SIARDbundle, String schemaUUID, String viewUUID) {
+  private MetadataViewPanel(ViewerDatabase database, ViewerSIARDBundle SIARDbundle, String schemaUUID, String viewUUID) {
     this.database = database;
     this.SIARDbundle = SIARDbundle;
     view = database.getMetadata().getView(viewUUID);
     schema = database.getMetadata().getSchema(schemaUUID);
 
-    GWT.log("MetadataView::" + view.getName());
+    GWT.log("MetadataViewPanel::" + view.getName());
 
     initWidget(uiBinder.createAndBindUi(this));
     init();

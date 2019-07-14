@@ -37,14 +37,12 @@ public class MetadataTriggers implements MetadataEditPanel {
   @Override
   public MetadataTableList createTable() {
     List<ViewerTrigger> columns = table.getTriggers();
-    Label header = new Label("");
-    HTMLPanel info = new HTMLPanel(SafeHtmlUtils.EMPTY_SAFE_HTML);
 
     if (columns.isEmpty()) {
-      return new MetadataTableList<>(header, messages.tableDoesNotContainTriggers());
+      return new MetadataTableList<>(messages.tableDoesNotContainTriggers());
     } else {
 
-      return new MetadataTableList<>(header, info, columns.iterator(),
+      return new MetadataTableList<>(columns.iterator(),
         new MetadataTableList.ColumnInfo<>(messages.name(), 15, new TextColumn<ViewerTrigger>() {
           @Override
           public String getValue(ViewerTrigger object) {

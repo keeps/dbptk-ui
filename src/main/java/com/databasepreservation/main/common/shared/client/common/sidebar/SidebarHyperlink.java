@@ -52,6 +52,7 @@ public class SidebarHyperlink extends SidebarItem {
   }
 
   public void setSelected(boolean value) {
+    GWT.log("setSelected:::" + value);
     if (value) {
       container.addStyleName("sidebarHyperLink-selected");
       label.addStyleName("sidebarItem-selected");

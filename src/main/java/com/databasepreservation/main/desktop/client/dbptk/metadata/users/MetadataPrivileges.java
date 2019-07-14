@@ -2,7 +2,9 @@ package com.databasepreservation.main.desktop.client.dbptk.metadata.users;
 
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerPrivilegeStructure;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSIARDBundle;
+import com.databasepreservation.main.desktop.client.common.EditableCell;
 import com.databasepreservation.main.desktop.client.common.lists.MetadataTableList;
+import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataEditPanel;
 import com.google.gwt.cell.client.EditTextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.Column;
@@ -13,41 +15,24 @@ import config.i18n.client.ClientMessages;
 
 import java.util.List;
 
-public class MetadataPrivileges {
+public class MetadataPrivileges implements MetadataEditPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private ViewerSIARDBundle SIARDbundle;
+  private List<ViewerPrivilegeStructure> privileges;
 
-  public MetadataPrivileges(ViewerSIARDBundle SIARDbundle) {
+  public MetadataPrivileges(ViewerSIARDBundle SIARDbundle, List<ViewerPrivilegeStructure> privileges) {
     this.SIARDbundle = SIARDbundle;
+    this.privileges = privileges;
   }
 
-  public MetadataTableList createTable(List<ViewerPrivilegeStructure> privileges) {
-    Label header = new Label(messages.titlePrivileges());
-    header.addStyleName("h4");
-
-    HTMLPanel info = new HTMLPanel("");
-
+  @Override
+  public MetadataTableList createTable() {
     MetadataTableList<ViewerPrivilegeStructure> privilegeMetadata;
     if (privileges.isEmpty()) {
-      privilegeMetadata = new MetadataTableList<>(header, messages.databaseDoesNotContainPrivileges());
+      privilegeMetadata = new MetadataTableList<>(messages.databaseDoesNotContainPrivileges());
     } else {
-      Column<ViewerPrivilegeStructure, String> descriptionPrivileges = new Column<ViewerPrivilegeStructure, String>(
-        new EditTextCell()) {
-        @Override
-        public String getValue(ViewerPrivilegeStructure privilege) {
 
-          return privilege.getDescription() == null ? messages.metadataDoesNotContainDescription()
-            : privilege.getDescription();
-        }
-      };
-
-      descriptionPrivileges.setFieldUpdater((index, object, value) -> {
-        object.setDescription(value);
-        SIARDbundle.setPrivileges(object.getType(), object.getObject(), object.getGrantor(), object.getGrantee(),
-          object.getDescription());
-      });
-
-      privilegeMetadata = new MetadataTableList<>(header, info, privileges.iterator(),
+      privilegeMetadata = new MetadataTableList<>(privileges.iterator(),
 
         new MetadataTableList.ColumnInfo<>(messages.titleType(), 15, new TextColumn<ViewerPrivilegeStructure>() {
           @Override
@@ -84,9 +69,29 @@ public class MetadataPrivileges {
           }
         }),
 
-        new MetadataTableList.ColumnInfo<>(messages.titleDescription(), 15, descriptionPrivileges));
+        new MetadataTableList.ColumnInfo<>(messages.titleDescription(), 15, getDescriptionColumn()));
     }
 
     return privilegeMetadata;
   }
+
+  @Override
+  public Column<ViewerPrivilegeStructure, String> getDescriptionColumn() {
+    Column<ViewerPrivilegeStructure, String> description = new Column<ViewerPrivilegeStructure, String>(
+            new EditableCell()) {
+      @Override
+      public String getValue(ViewerPrivilegeStructure object) { return object.getDescription(); }
+    };
+
+    description.setFieldUpdater((index, object, value) -> {
+      object.setDescription(value);
+      SIARDbundle.setPrivileges(object.getType(), object.getObject(), object.getGrantor(), object.getGrantee(),
+              object.getDescription());
+    });
+
+    return description;
+  }
+
+  @Override
+  public void updateSIARDbundle(String name, String value) {}
 }

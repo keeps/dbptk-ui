@@ -7,6 +7,7 @@ import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabas
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSIARDBundle;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
+import com.databasepreservation.main.desktop.client.common.sidebar.MetadataEditSidebar;
 import com.databasepreservation.main.desktop.client.dbptk.HomePage;
 import com.databasepreservation.main.desktop.client.dbptk.Manage;
 import com.databasepreservation.main.desktop.client.dbptk.SIARDMainPage;
@@ -14,10 +15,10 @@ import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataPanel
 import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataPanelLoad;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.SIARDEditMetadataPage;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.information.MetadataInformation;
-import com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.routines.MetadataRoutine;
-import com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.tables.MetadataTable;
-import com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.views.MetadataView;
-import com.databasepreservation.main.desktop.client.dbptk.metadata.users.MetadataUsers;
+import com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.routines.MetadataRoutinePanel;
+import com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.tables.MetadataTablePanel;
+import com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.views.MetadataViewPanel;
+import com.databasepreservation.main.desktop.client.dbptk.metadata.users.MetadataUsersPanel;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.create.CreateWizardManager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -27,6 +28,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
+
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -95,15 +97,20 @@ public class MainPanelDesktop extends Composite {
       if (currentHistoryPath.size() == 2) {
         setRightPanelContent(databaseUUID, new MetadataPanelLoad() {
           @Override
-          public MetadataPanel load(ViewerDatabase database, ViewerSIARDBundle SIARDbundle) {
+          public MetadataPanel load(ViewerDatabase database, ViewerSIARDBundle SIARDbundle,
+            MetadataEditSidebar sidebar) {
+            sidebar.select(databaseUUID);
             return MetadataInformation.getInstance(database, SIARDbundle);
           }
         });
       } else if (currentHistoryPath.size() == 3) {
+        final String user = currentHistoryPath.get(2);
         setRightPanelContent(databaseUUID, new MetadataPanelLoad() {
           @Override
-          public MetadataPanel load(ViewerDatabase database, ViewerSIARDBundle SIARDbundle) {
-            return MetadataUsers.getInstance(database, SIARDbundle);
+          public MetadataPanel load(ViewerDatabase database, ViewerSIARDBundle SIARDbundle,
+            MetadataEditSidebar sidebar) {
+            sidebar.select(user);
+            return MetadataUsersPanel.getInstance(database, SIARDbundle);
           }
         });
       }
@@ -114,8 +121,10 @@ public class MainPanelDesktop extends Composite {
 
         setRightPanelContent(databaseUUID, new MetadataPanelLoad() {
           @Override
-          public MetadataPanel load(ViewerDatabase database, ViewerSIARDBundle SIARDbundle) {
-            return MetadataTable.getInstance(database, SIARDbundle, tableUUID);
+          public MetadataPanel load(ViewerDatabase database, ViewerSIARDBundle SIARDbundle,
+            MetadataEditSidebar sidebar) {
+            sidebar.select(tableUUID);
+            return MetadataTablePanel.getInstance(database, SIARDbundle, tableUUID);
           }
         });
       }
@@ -127,8 +136,10 @@ public class MainPanelDesktop extends Composite {
 
         setRightPanelContent(databaseUUID, new MetadataPanelLoad() {
           @Override
-          public MetadataPanel load(ViewerDatabase database, ViewerSIARDBundle SIARDbundle) {
-            return MetadataView.getInstance(database, SIARDbundle, schemaUUID, viewUUID);
+          public MetadataPanel load(ViewerDatabase database, ViewerSIARDBundle SIARDbundle,
+            MetadataEditSidebar sidebar) {
+            sidebar.select(viewUUID);
+            return MetadataViewPanel.getInstance(database, SIARDbundle, schemaUUID, viewUUID);
           }
         });
       }
@@ -140,8 +151,10 @@ public class MainPanelDesktop extends Composite {
 
         setRightPanelContent(databaseUUID, new MetadataPanelLoad() {
           @Override
-          public MetadataPanel load(ViewerDatabase database, ViewerSIARDBundle SIARDbundle) {
-            return MetadataRoutine.getInstance(database, SIARDbundle, schemaUUID, routineUUID);
+          public MetadataPanel load(ViewerDatabase database, ViewerSIARDBundle SIARDbundle,
+            MetadataEditSidebar sidebar) {
+            sidebar.select(routineUUID);
+            return MetadataRoutinePanel.getInstance(database, SIARDbundle, schemaUUID, routineUUID);
           }
         });
       }

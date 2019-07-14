@@ -30,13 +30,10 @@ public class MetadataViewColumns implements MetadataEditPanel {
   public MetadataTableList createTable() {
     List<ViewerColumn> columns = view.getColumns();
 
-    Label header = new Label("");
-    HTMLPanel info = new HTMLPanel(SafeHtmlUtils.EMPTY_SAFE_HTML);
-
     if (columns.isEmpty()) {
-      return new MetadataTableList<>(header, messages.tableDoesNotContainColumns());
+      return new MetadataTableList<>(messages.tableDoesNotContainColumns());
     } else {
-      return new MetadataTableList<>(header, info, columns.iterator(),
+      return new MetadataTableList<>(columns.iterator(),
         new MetadataTableList.ColumnInfo<>(messages.columnName(), 15, new TextColumn<ViewerColumn>() {
           @Override
           public String getValue(ViewerColumn object) {

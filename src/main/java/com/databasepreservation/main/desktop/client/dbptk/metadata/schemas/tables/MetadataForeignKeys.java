@@ -37,14 +37,12 @@ public class MetadataForeignKeys implements MetadataEditPanel {
   public MetadataTableList createTable() {
 
     List<ViewerForeignKey> columns = table.getForeignKeys();
-    Label header = new Label("");
-    HTMLPanel info = new HTMLPanel(SafeHtmlUtils.EMPTY_SAFE_HTML);
 
     if (columns.isEmpty()) {
-      return new MetadataTableList<>(header, messages.tableDoesNotContainForeignKeys());
+      return new MetadataTableList<>(messages.tableDoesNotContainForeignKeys());
     } else {
 
-      return new MetadataTableList<>(header, info, columns.iterator(), new MetadataTableList.ColumnInfo<>(
+      return new MetadataTableList<>(columns.iterator(), new MetadataTableList.ColumnInfo<>(
         messages.references_foreignKeyName(), 15, new TextColumn<ViewerForeignKey>() {
           @Override
           public String getValue(ViewerForeignKey object) {

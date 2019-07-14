@@ -15,8 +15,8 @@
             </g:cell>
             <!-- RIGHT PANEL -->
             <g:cell width="100%">
-                <g:FlowPanel>
-                    <g:SimplePanel addStyleNames="col_12 content" ui:field="rightPanelContainer" />
+                <g:FlowPanel addStyleNames="metadata-panel">
+                    <g:SimplePanel addStyleNames="col_12 content metadata-content" ui:field="rightPanelContainer" />
 
                     <g:FlowPanel addStyleNames="metadata-save">
                         <g:Button addStyleNames="btn btn-save" ui:field="buttonCommit">
