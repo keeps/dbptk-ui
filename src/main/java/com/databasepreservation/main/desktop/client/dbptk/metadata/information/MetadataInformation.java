@@ -5,6 +5,7 @@ import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadat
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSIARDBundle;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.main.common.shared.client.common.LoadingDiv;
+import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.main.common.shared.client.tools.ViewerStringUtils;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataPanel;
@@ -25,7 +26,9 @@ import com.google.gwt.user.client.ui.TextBoxBase;
 import com.google.gwt.user.client.ui.Widget;
 import config.i18n.client.ClientMessages;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -41,6 +44,7 @@ public class MetadataInformation extends MetadataPanel {
   private ViewerDatabase database = null;
   private ViewerMetadata metadata = null;
   private ViewerSIARDBundle SIARDbundle;
+  private Map<String, Boolean> mandatoryItem = new HashMap<>();
 
   @UiField
   TextBox databaseName, archivalDate, archivist, archivistContact, clientMachine, databaseProduct, databaseUser,
@@ -52,8 +56,8 @@ public class MetadataInformation extends MetadataPanel {
   @UiField
   LoadingDiv loading;
 
-  @UiField
-  Button buttonEnableEdit;
+  // @UiField
+  // Button buttonEnableEdit;
 
   public static MetadataInformation getInstance(ViewerDatabase database, ViewerSIARDBundle SIARDbundle) {
     String code = database.getUUID();
@@ -77,8 +81,7 @@ public class MetadataInformation extends MetadataPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    BreadcrumbManager.updateBreadcrumb(breadcrumb,
-            BreadcrumbManager.forSIARDEditMetadataPage(database.getUUID()));
+    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forSIARDEditMetadataPage(database.getUUID()));
   }
 
   private void init() {
@@ -89,69 +92,108 @@ public class MetadataInformation extends MetadataPanel {
 
   private void writeOnViewerMetadataInformation(ViewerMetadata metadata) {
 
-    setupElement(databaseName, metadata.getName(), "dbname", "text");
+    setupElement(databaseName, metadata.getName(), "dbname", "text", true);
     setupElement(archivalDate,
       metadata.getArchivalDate() != null ? metadata.getArchivalDate().substring(0, 10) : metadata.getArchivalDate(),
-      "archivalDate", "date");
+      "archivalDate", "date", true);
 
-    setupElement(archivist, metadata.getArchiver(), "archiver", "text");
-    setupElement(archivistContact, metadata.getArchiverContact(), "archiverContact", "text");
-    setupElement(clientMachine, metadata.getClientMachine(), "clientMachine", "text");
-    setupElement(databaseProduct, metadata.getDatabaseProduct(), "databaseProduct", "text");
-    setupElement(databaseUser, metadata.getDatabaseUser(), "databaseUser", "text");
-    setupElement(dataOriginTimeSpan, metadata.getDataOriginTimespan(), "dataOriginTimespan", "text");
-    setupElement(dataOwner, metadata.getDataOwner(), "dataOwner", "text");
+    setupElement(archivist, metadata.getArchiver(), "archiver", "text", false);
+    setupElement(archivistContact, metadata.getArchiverContact(), "archiverContact", "text", false);
+    setupElement(clientMachine, metadata.getClientMachine(), "clientMachine", "text", false);
+    setupElement(databaseProduct, metadata.getDatabaseProduct(), "databaseProduct", "text", false);
+    setupElement(databaseUser, metadata.getDatabaseUser(), "databaseUser", "text", false);
+    setupElement(dataOriginTimeSpan, metadata.getDataOriginTimespan(), "dataOriginTimespan", "text", true);
+    setupElement(dataOwner, metadata.getDataOwner(), "dataOwner", "text", true);
 
     setupElement(description, ViewerStringUtils.isNotBlank(metadata.getDescription()) ? metadata.getDescription()
-      : messages.siardMetadata_DescriptionUnavailable(), "description", "text");
+      : messages.siardMetadata_DescriptionUnavailable(), "description", "text", false);
 
-    setupElement(producerApplication, metadata.getProducerApplication(), "producerApplication", "text");
+    setupElement(producerApplication, metadata.getProducerApplication(), "producerApplication", "text", false);
   }
 
-  private void setupElement(TextBoxBase element, String text, String name, String type) {
-    element.setReadOnly(true);
+  private void setupElement(TextBoxBase element, String text, String name, String type, boolean mandatory) {
     element.setText(text);
     element.getElement().setAttribute("name", name);
     element.getElement().setAttribute("type", type);
-    element.getElement().addClassName("metadata-edit-readonly");
+    if(mandatory){
+      mandatoryItem.put(name, false);
+      element.getElement().setAttribute("required", "required");
+    }
+//    element.setReadOnly(true);
+//    element.getElement().addClassName("metadata-edit-readonly");
     element.addChangeHandler(new ChangeHandler() {
       @Override
       public void onChange(ChangeEvent event) {
-//        updateSiardBundle(element);
-        GWT.log("INFORMATION:::" + element.getText());
-        SIARDbundle.setInformation(element.getElement().getAttribute("name"), element.getText());
-        GWT.log("COMMAND:::" + SIARDbundle.getInformation(element.getElement().getAttribute("name")));
+        String name = element.getElement().getAttribute("name");
+        checkIfElementIsMandatory(name, element);
+
+        SIARDbundle.setInformation(name, element.getText());
         updateMetadata();
+        JavascriptUtils.alertUpdatedMetadata();
       }
     });
   }
 
+
+  private void checkIfElementIsMandatory(String name, TextBoxBase element){
+
+    if(mandatoryItem.get(name) != null) {
+      GWT.log("mandatory::::" + name);
+      if(element.getText().isEmpty()){
+        mandatoryItem.replace(name, true);
+      } else {
+        mandatoryItem.replace(name, false);
+      }
+    }
+
+    for (Map.Entry<String, Boolean> entry : mandatoryItem.entrySet()) {
+      System.out.println(entry.getKey() + "/" + entry.getValue());
+      if(entry.getValue()) {
+        JavascriptUtils.disableSaveMetadataButton(true);
+        break;
+      }
+      JavascriptUtils.disableSaveMetadataButton(false);
+    }
+  }
+
   private void updateMetadata() {
-    metadata.setName(databaseName.getText());
-    metadata.setArchivalDate(archivalDate.getText());
+    /* Mandatory if empty keep original */
+    if (!databaseName.getText().isEmpty()) {
+      metadata.setName(databaseName.getText());
+    }
+
+    if (!archivalDate.getText().isEmpty()) {
+      metadata.setArchivalDate(archivalDate.getText());
+    }
+    if (!dataOwner.getText().isEmpty()) {
+      metadata.setDataOwner(dataOwner.getText());
+    }
+    if (!dataOriginTimeSpan.getText().isEmpty()) {
+      metadata.setDataOriginTimespan(dataOriginTimeSpan.getText());
+    }
+
+    /* Optional */
     metadata.setArchiver(archivist.getText());
     metadata.setArchiverContact(archivistContact.getText());
     metadata.setClientMachine(clientMachine.getText());
     metadata.setDatabaseProduct(databaseProduct.getText());
     metadata.setDatabaseUser(databaseUser.getText());
-    metadata.setDataOriginTimespan(dataOriginTimeSpan.getText());
     metadata.setDescription(description.getText());
     metadata.setProducerApplication(producerApplication.getText());
 
     database.setMetadata(metadata);
   }
 
-
-  @UiHandler("buttonEnableEdit")
-  void buttonEnableEditHandle(ClickEvent e) {
-    NodeList<Element> elements = Document.get().getElementsByTagName("input");
-
-    for (int i = 0; i < elements.getLength(); i++) {
-      elements.getItem(i).removeAttribute("readonly");
-      elements.getItem(i).removeClassName("metadata-edit-readonly");
-    }
-
-    description.setReadOnly(false);
-    description.getElement().removeClassName("metadata-edit-readonly");
-  }
+  // @UiHandler("buttonEnableEdit")
+  // void buttonEnableEditHandle(ClickEvent e) {
+  // NodeList<Element> elements = Document.get().getElementsByTagName("input");
+  //
+  // for (int i = 0; i < elements.getLength(); i++) {
+  // elements.getItem(i).removeAttribute("readonly");
+  // elements.getItem(i).removeClassName("metadata-edit-readonly");
+  // }
+  //
+  // description.setReadOnly(false);
+  // description.getElement().removeClassName("metadata-edit-readonly");
+  // }
 }

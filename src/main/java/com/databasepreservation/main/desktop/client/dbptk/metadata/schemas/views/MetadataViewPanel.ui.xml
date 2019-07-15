@@ -8,8 +8,6 @@
             </g:Label>
         </g:SimplePanel>
         <g:TextArea ui:field="description" addStyleNames="form-textbox"/>
-        <g:FlowPanel addStyleNames="field" ui:field="query"/>
-        <g:FlowPanel addStyleNames="field" ui:field="queryOriginal"/>
-        <g:TabPanel ui:field="tabPanel" addStyleNames="browseItemMetadata"/>
+        <g:TabPanel ui:field="tabPanel" addStyleNames="browseItemMetadata metadata-edit-tab"/>
     </g:FlowPanel>
 </ui:UiBinder>

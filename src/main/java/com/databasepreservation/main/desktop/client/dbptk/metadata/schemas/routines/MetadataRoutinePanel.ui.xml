@@ -9,12 +9,7 @@
             </g:Label>
         </g:SimplePanel>
         <g:TextArea ui:field="description" addStyleNames="form-textbox"/>
-
-        <g:FlowPanel addStyleNames="field" ui:field="source"/>
-        <g:FlowPanel addStyleNames="field" ui:field="body"/>
-        <g:FlowPanel addStyleNames="field" ui:field="characteristic"/>
-        <g:FlowPanel addStyleNames="field" ui:field="returnType"/>
-        <g:FlowPanel addStyleNames="field" ui:field="parameters"/>
+        <g:TabPanel ui:field="tabPanel" addStyleNames="browseItemMetadata metadata-edit-tab"/>
     </g:FlowPanel>
 
 </ui:UiBinder>

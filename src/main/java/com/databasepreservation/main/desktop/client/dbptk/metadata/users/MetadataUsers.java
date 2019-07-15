@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSIARDBundle;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerUserStructure;
+import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.main.desktop.client.common.EditableCell;
 import com.databasepreservation.main.desktop.client.common.lists.MetadataTableList;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataEditPanel;
@@ -70,5 +71,6 @@ public class MetadataUsers implements MetadataEditPanel {
   @Override
   public void updateSIARDbundle(String name, String value) {
     SIARDbundle.setUser(name, value);
+    JavascriptUtils.alertUpdatedMetadata();
   }
 }

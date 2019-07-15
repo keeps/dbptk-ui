@@ -267,6 +267,15 @@ public class JavascriptUtils {
 
   }-*/;
 
+  public static native void alertUpdatedMetadata()/*-{
+                                                    $wnd.jQuery(".metadata-save").show();
+                                                    
+                                                    }-*/;
+
+  public static native void disableSaveMetadataButton(Boolean disable)/*-{
+                                                                      $wnd.jQuery(".metadata-btn-save").prop('disabled', disable);
+                                                                      }-*/;
+
   public static native void log(String txt) /*-{
                                             $wnd.console.log(txt);
                                             }-*/;

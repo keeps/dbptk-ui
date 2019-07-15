@@ -1311,7 +1311,7 @@ input[type="checkbox"]:checked:after {
 
 .metadata-content{
     display: block;
-    height: 70%;
+    height: 80%;
 }
 
 .metadata-save {
@@ -1320,9 +1320,6 @@ input[type="checkbox"]:checked:after {
     width: 100%;
 }
 
-.metadata-edit {
-    height: 100%;
-}
 .metadata-edit-title {
     display: flex;
     justify-content: space-between;
@@ -1337,24 +1334,6 @@ input[type="checkbox"]:checked:after {
     font-size: 2em;
     color:#089de3;
     padding: 0;
-}
-
-.metadata-edit-title .btn::after{
-    position: relative;
-    right: auto;
-}
-
-.metadata-table-list{
-    display: block;
-    height: 100%;
-}
-
-.metadata-save button {
-    align-self: center;
-}
-
-.metadata-save i {
-    margin: 0 0.5em;
 }
 
 .metadata-edit-panel {
@@ -1380,6 +1359,16 @@ input[type="checkbox"]:checked:after {
     width: 85%;
 }
 
+.metadata-edit-field .form-textbox:required {
+    box-shadow: none;
+}
+
+.metadata-edit-field .form-textbox:invalid {
+    background-color: #eebcba;
+    border: none;
+    border-left: 2px solid #d9534f;
+}
+
 .metadata-edit-field-date .metadata-edit-value {
     max-width: 200px;
 }
@@ -1393,33 +1382,65 @@ input[type="checkbox"]:checked:after {
     font-weight: bold;
 }
 
+/**********************************************
+			EDIT METADATA BUTTONS
+************************************************/
+
+.metadata-save button {
+    align-self: center;
+    margin-left: 2em;
+}
+
+.metadata-save i {
+    margin: 0 0.5em;
+}
+
+.metadata-edit-title .btn::after{
+    position: relative;
+    right: auto;
+}
+
+.metadata-update{
+    margin: 0 auto;
+    color: #089de3;
+}
+
+/**********************************************
+		EDIT METADATA TAB & SCROLL
+************************************************/
+.metadata-table-list{
+    display: block;
+    height: 100%;
+}
+
+.metadata-edit, .metadata-edit .gwt-TabPanelBottom {
+    height: 100%;
+    display: block;
+}
+
+.metadata-edit-tab{
+    height: 80%;
+}
+.metadata-edit-tab > tbody > tr:nth-of-type(1){
+    overflow-x: auto;
+}
+
+.metadata-edit-tab > tbody, .metadata-edit-tab > tbody > tr:nth-of-type(2){
+    height: 100%;
+}
+.metadata-edit-tab, .metadata-edit-tab > tbody, .metadata-edit-tab > tbody > tr, .metadata-edit-tab > tbody > tr > td{
+    display: block!important;
+    width: 100%;
+}
+
 .metadata-edit-scroll-wrapper{
     display: block;
     max-height: 100%;
     width: 100%;
 }
-.metadata-edit-tab, .metadata-edit-tab > tbody{
-    /*overflow: auto;*/
-}
-
-.metadata-edit-tab, .metadata-edit-tab > tbody, .metadata-edit-tab > tbody > tr:nth-of-type(2){
-    /*height: 100%;*/
-}
-.metadata-edit-tab, .metadata-edit-tab > tbody, .metadata-edit-tab > tbody > tr, .metadata-edit-tab > tbody > tr > td{
-    /*display: block;*/
-    /*width: 100%;*/
-}
-
-
-
-@media (max-width: 768px){
-    .metadata-edit-label {
-        width: 100%;
-    }
-    .metadata-edit-value {
-        width: 100%;
-    }
-}
+/**********************************************
+		    EDIT METADATA SIDEBAR
+***********************************************/
 
 .sidebar-collapse{
     position: relative;

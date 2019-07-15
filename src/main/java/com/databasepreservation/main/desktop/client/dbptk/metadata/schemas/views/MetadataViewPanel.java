@@ -5,6 +5,7 @@ import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSIARDBu
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSchema;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerView;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
+import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataPanel;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -37,9 +38,6 @@ public class MetadataViewPanel extends MetadataPanel {
 
   @UiField
   TextArea description;
-
-  @UiField
-  FlowPanel query, queryOriginal;
 
   @UiField
   TabPanel tabPanel;
@@ -79,7 +77,7 @@ public class MetadataViewPanel extends MetadataPanel {
 
   private void init() {
     Label viewName = new Label();
-    viewName.setText(view.getName());
+    viewName.setText(schema.getName()+"."+view.getName());
     mainHeader.setWidget(viewName);
 
     description
@@ -89,33 +87,14 @@ public class MetadataViewPanel extends MetadataPanel {
       public void onChange(ChangeEvent event) {
         view.setDescription(description.getText());
         SIARDbundle.setView(schema.getName(), view.getName(), description.getText());
+        JavascriptUtils.alertUpdatedMetadata();
       }
     });
 
-    addContent(messages.query(), view.getQuery(), query, messages.viewDoesNotContainQuery());
-    addContent(messages.originalQuery(), view.getQueryOriginal(), query, messages.viewDoesNotContainQueryOriginal());
-
     tabPanel.add(new MetadataViewColumns(SIARDbundle,schema, view).createTable(), messages.columns());
+    tabPanel.add(new MetadataViewQuery(view).createInfo(), messages.query());
 
     tabPanel.selectTab(0);
 
-  }
-
-  private void addContent(String headerLabel, String bodyValue, FlowPanel panel, String emptyMessage){
-    Label label = new Label();
-    Label value = new Label();
-
-    label.setText(headerLabel);
-    label.addStyleName("label");
-
-    if(bodyValue != null && !bodyValue.isEmpty() ){
-      value.setText(bodyValue);
-    } else {
-      value.setText(emptyMessage);
-    }
-    value.addStyleName("value");
-
-    panel.add(label);
-    panel.add(value);
   }
 }

@@ -2,6 +2,7 @@ package com.databasepreservation.main.desktop.client.dbptk.metadata.users;
 
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerPrivilegeStructure;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSIARDBundle;
+import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.main.desktop.client.common.EditableCell;
 import com.databasepreservation.main.desktop.client.common.lists.MetadataTableList;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataEditPanel;
@@ -87,6 +88,7 @@ public class MetadataPrivileges implements MetadataEditPanel {
       object.setDescription(value);
       SIARDbundle.setPrivileges(object.getType(), object.getObject(), object.getGrantor(), object.getGrantee(),
               object.getDescription());
+      JavascriptUtils.alertUpdatedMetadata();
     });
 
     return description;

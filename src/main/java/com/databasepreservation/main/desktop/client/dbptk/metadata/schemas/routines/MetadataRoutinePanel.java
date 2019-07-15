@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.databasepreservation.main.common.shared.ViewerStructure.*;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
+import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.main.desktop.client.common.sidebar.MetadataEditSidebar;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataPanel;
 import com.google.gwt.core.client.GWT;
@@ -31,7 +32,7 @@ public class MetadataRoutinePanel extends MetadataPanel {
     TextArea description;
 
     @UiField
-    FlowPanel source, body, characteristic, returnType, parameters;
+    TabPanel tabPanel;
 
     private static final ClientMessages messages = GWT.create(ClientMessages.class);
     private static Map<String, MetadataRoutinePanel> instances = new HashMap<>();
@@ -71,7 +72,7 @@ public class MetadataRoutinePanel extends MetadataPanel {
 
     private void init() {
         Label viewName = new Label();
-        viewName.setText(routine.getName());
+        viewName.setText(schema.getName()+"."+routine.getName());
         mainHeader.setWidget(viewName);
 
         description
@@ -81,56 +82,13 @@ public class MetadataRoutinePanel extends MetadataPanel {
             public void onChange(ChangeEvent event) {
                 routine.setDescription(description.getText());
                 SIARDbundle.setRoutine(schema.getName(), routine.getName(), description.getText());
+                JavascriptUtils.alertUpdatedMetadata();
             }
         });
 
-        addContent(messages.routine_sourceCode(),routine.getSource(), source );
-        addContent(messages.routine_body(),routine.getBody(), body );
-        addContent(messages.routine_characteristic(),routine.getCharacteristic(), characteristic );
-        addContent(messages.routine_returnType(),routine.getReturnType(), returnType );
-        addContent(messages.routines_parametersList(),routine.getParameters(), returnType );
-    }
+        tabPanel.add(new MetadataRoutineInfos(routine).createInfo(), messages.menusidebar_information());
+        tabPanel.add(new MetadataRoutineParameters(SIARDbundle, schema, routine.getParameters()).createTable(), messages.routines_parametersList());
 
-    private void addContent(String headerLabel, String bodyValue, FlowPanel panel){
-        Label label = new Label();
-        Label value = new Label();
-
-        label.setText(headerLabel);
-        label.addStyleName("label");
-
-        if(bodyValue != null && !bodyValue.isEmpty() ){
-            value.setText(bodyValue);
-        } else {
-            value.setText(messages.routines_thisRoutineFieldDoesNotHaveContent());
-        }
-        value.addStyleName("value");
-
-        panel.add(label);
-        panel.add(value);
-    }
-
-    private void addContent(String headerLabel, List<ViewerRoutineParameter> bodylist, FlowPanel panel) {
-        Label label = new Label();
-        label.setText(headerLabel);
-        label.addStyleName("label");
-        panel.add(label);
-
-        if(bodylist.isEmpty() ){
-            Label value = new Label();
-            value.setText(messages.routines_thisRoutineFieldDoesNotHaveContent());
-            panel.add(value);
-            value.addStyleName("value");
-        } else {
-            Label value = new Label();
-            for (ViewerRoutineParameter param : bodylist) {
-                value.setText(param.getName());
-                value.addStyleName("h6");
-                panel.add(value);
-
-                value.setText(param.getDescription());
-                value.addStyleName("value");
-                panel.add(value);
-            }
-        }
+        tabPanel.selectTab(0);
     }
 }

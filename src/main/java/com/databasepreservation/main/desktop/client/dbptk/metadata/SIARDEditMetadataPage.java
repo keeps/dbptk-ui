@@ -16,8 +16,10 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import config.i18n.client.ClientMessages;
@@ -63,11 +65,13 @@ public class SIARDEditMetadataPage extends Composite {
   SimplePanel rightPanelContainer;
 
   @UiField
-  Button buttonCommit;
+  Button buttonSave, buttonRevert;
 
   @UiField
   LoadingDiv loading;
 
+  @UiField
+  FlowPanel saveMetadataPanel;
 
   private SIARDEditMetadataPage(final String databaseUUID) {
     this.databaseUUID = databaseUUID;
@@ -79,10 +83,11 @@ public class SIARDEditMetadataPage extends Composite {
     BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
   }
 
-  public void load(MetadataPanelLoad rightPanelLoader){
+  public void load(MetadataPanelLoad rightPanelLoader) {
     GWT.log("load. uuid: " + databaseUUID + ", database: " + database);
 
-    if (databaseUUID != null && (database == null || !ViewerDatabase.Status.METADATA_ONLY.equals(database.getStatus()))) {
+    if (databaseUUID != null
+      && (database == null || !ViewerDatabase.Status.METADATA_ONLY.equals(database.getStatus()))) {
       GWT.log("getting db");
       loadPanelWithDatabase(rightPanelLoader);
     } else {
@@ -95,7 +100,8 @@ public class SIARDEditMetadataPage extends Composite {
     BrowserService.Util.getInstance().retrieve(databaseUUID, ViewerDatabase.class.getName(), databaseUUID,
       new DefaultAsyncCallback<IsIndexed>() {
         @Override
-        public void onFailure(Throwable caught){}
+        public void onFailure(Throwable caught) {
+        }
 
         @Override
         public void onSuccess(IsIndexed result) {
@@ -105,7 +111,7 @@ public class SIARDEditMetadataPage extends Composite {
       });
   }
 
-  private void loadPanel(MetadataPanelLoad rightPanelLoader){
+  private void loadPanel(MetadataPanelLoad rightPanelLoader) {
     GWT.log("loadPanel");
     GWT.log("have db: " + database + "sb.init: " + sidebar.isInitialized());
     MetadataPanel rightPanel = rightPanelLoader.load(database, SIARDbundle, sidebar);
@@ -122,28 +128,32 @@ public class SIARDEditMetadataPage extends Composite {
 
   }
 
-  
-  @UiHandler("buttonCommit")
+  @UiHandler("buttonSave")
   void buttonSaveHandler(ClickEvent e) {
     ViewerMetadata metadata = database.getMetadata();
 
     loading.setVisible(true);
 
-    BrowserService.Util.getInstance().updateMetadataInformation( metadata, SIARDbundle, database.getUUID(),
+    BrowserService.Util.getInstance().updateMetadataInformation(metadata, SIARDbundle, database.getUUID(),
       database.getSIARDPath(), new DefaultAsyncCallback<ViewerMetadata>() {
         @Override
         public void onFailure(Throwable caught) {
-          // TODO: error handling
-          Toast.showError("Metadata Update", database.getMetadata().getName());
+          Toast.showError(messages.metadataFailureUpdated(), caught.getMessage());
           loading.setVisible(false);
         }
 
         @Override
         public void onSuccess(ViewerMetadata result) {
           loading.setVisible(false);
-          Toast.showInfo("Metadata Update", "Success");
+          saveMetadataPanel.setVisible(false);
+          Toast.showInfo(messages.metadataSuccessUpdated(), "");
         }
       });
 
+  }
+
+  @UiHandler("buttonRevert")
+  void cancelButtonHandler(ClickEvent e) {
+    Window.Location.reload();
   }
 }

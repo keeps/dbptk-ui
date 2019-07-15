@@ -7,6 +7,7 @@ import com.databasepreservation.main.common.shared.ViewerStructure.ViewerPrimary
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSIARDBundle;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSchema;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
+import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.main.common.shared.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.main.desktop.client.common.EditableCell;
 import com.databasepreservation.main.desktop.client.common.lists.MetadataTableList;
@@ -109,6 +110,7 @@ public class MetadataColumns implements MetadataEditPanel {
   @Override
   public void updateSIARDbundle(String name, String value) {
     SIARDbundle.setTableType(schema.getName(), table.getName(), type, name, value);
+    JavascriptUtils.alertUpdatedMetadata();
   }
 
 }

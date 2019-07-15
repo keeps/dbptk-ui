@@ -349,10 +349,6 @@ public class DatabaseRowsSolrManager {
     SolrInputDocument doc = new SolrInputDocument();
     doc.addField(ViewerConstants.INDEX_ID, databaseUUID);
 
-//    Map<String, Object> json = new HashMap<>();
-//    json.put("name", SolrUtils.asValueUpdate(metadata.getName()));
-
-    // send it to Solr
     try {
       doc.addField(ViewerConstants.SOLR_DATABASES_METADATA,SolrUtils.asValueUpdate(JsonTransformer.getJsonFromObject(metadata)));
       insertDocument(ViewerConstants.SOLR_INDEX_DATABASES_COLLECTION_NAME, doc);
@@ -361,5 +357,13 @@ public class DatabaseRowsSolrManager {
       LOGGER.error("Could not update database progress for {}", databaseUUID, e);
     }
 
+  }
+
+  public ViewerMetadata retrieveDatabaseMetadata(String databaseUUID) {
+    ViewerMetadata metadata = new ViewerMetadata();
+
+
+
+    return metadata;
   }
 }

@@ -60,7 +60,7 @@ public class MetadataTableList<C> extends Composite {
     displayScroll = new ScrollPanel(display);
     displayScroll.setSize("100%", "100%");
     displayScrollWrapper = new SimplePanel(displayScroll);
-    displayScrollWrapper.addStyleName("metadata-edit-scroll-wrapper");
+    displayScrollWrapper.addStyleName("metadata-edit-scroll-wrapper metadata-table-list");
     table.setWidget(displayScrollWrapper);
 
   }

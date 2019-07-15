@@ -3,6 +3,7 @@ package com.databasepreservation.main.desktop.client.dbptk.metadata.users;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerColumn;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerRoleStructure;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSIARDBundle;
+import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.main.desktop.client.common.EditableCell;
 import com.databasepreservation.main.desktop.client.common.lists.MetadataTableList;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataEditPanel;
@@ -79,5 +80,6 @@ public class MetadataRoles implements MetadataEditPanel {
   @Override
   public void updateSIARDbundle(String name, String value) {
     SIARDbundle.setRole(name, value);
+    JavascriptUtils.alertUpdatedMetadata();
   }
 }

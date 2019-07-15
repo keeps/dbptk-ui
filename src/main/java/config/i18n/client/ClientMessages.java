@@ -549,9 +549,15 @@ public interface ClientMessages extends Messages {
 
   String databaseInformation();
 
-  String metadataSave();
+  String metadataButtonSave();
 
-  String metadataSaveCancel();
+  String metadataHasUpdates();
+
+  String metadataSuccessUpdated();
+
+  String metadataFailureUpdated();
+
+  String metadataButtonRevert();
 
   String metadataDoesNotContainDescription();
 

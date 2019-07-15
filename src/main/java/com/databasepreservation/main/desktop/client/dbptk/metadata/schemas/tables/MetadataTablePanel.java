@@ -8,6 +8,7 @@ import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSIARDBu
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSchema;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
+import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataPanel;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -77,7 +78,7 @@ public class MetadataTablePanel extends MetadataPanel {
 
   private void init() {
     Label tableName = new Label();
-    tableName.setText(table.getName());
+    tableName.setText(schema.getName() + "." + table.getName());
     mainHeader.setWidget(tableName);
 
     description.setText(
@@ -87,6 +88,7 @@ public class MetadataTablePanel extends MetadataPanel {
       public void onChange(ChangeEvent event) {
         table.setDescription(description.getText());
         SIARDbundle.setTable(schema.getName(), table.getName(), description.getText());
+        JavascriptUtils.alertUpdatedMetadata();
       }
     });
 

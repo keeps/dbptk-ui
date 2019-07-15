@@ -12,7 +12,7 @@
             <g:Label addStyleNames="h1">
                 <ui:text from="{messages.databaseInformation}"/>
             </g:Label>
-            <g:Button addStyleNames="btn btn-edit" ui:field="buttonEnableEdit"></g:Button>
+<!--            <g:Button addStyleNames="btn btn-edit" ui:field="buttonEnableEdit"></g:Button>-->
         </g:FlowPanel>
         <g:FlowPanel addStyleNames="metadata-edit-panel">
 
