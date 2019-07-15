@@ -540,4 +540,8 @@ public interface ClientMessages extends Messages {
   String customViewQueryLabel();
 
   String update();
+
+  String exportOptionsLabels(@Select String fieldName);
+
+  String exportOptionsHelperText(@Select String fieldName);
 }

@@ -243,6 +243,11 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
   }
 
   @Override
+  public DBPTKModule getSIARDExportModule(String moduleName) throws GenericException {
+    return SIARDController.getSIARDExportModule(moduleName);
+  }
+
+  @Override
   public DBPTKModule getSIARDExportModules() throws GenericException {
     return SIARDController.getSIARDExportModules();
   }

@@ -77,7 +77,7 @@ public class SIARDController {
     try (Reporter reporter = new Reporter(reporterPath.getParent().toString(), reporterPath.getFileName().toString())) {
       DatabaseMigration databaseMigration = DatabaseMigration.newInstance();
 
-      DatabaseModuleFactory factory = getDatabaseModuleFactory(moduleName);
+      DatabaseModuleFactory factory = getDatabaseImportModuleFactory(moduleName);
 
       if (factory != null) {
         databaseMigration.importModule(factory);
@@ -123,7 +123,7 @@ public class SIARDController {
     try (Reporter reporter = new Reporter(reporterPath.getParent().toString(), reporterPath.getFileName().toString())) {
       DatabaseMigration databaseMigration = DatabaseMigration.newInstance();
 
-      DatabaseModuleFactory factory = getDatabaseModuleFactory(moduleName);
+      DatabaseModuleFactory factory = getDatabaseImportModuleFactory(moduleName);
 
       if (factory != null) {
         databaseMigration.importModule(factory);
@@ -163,24 +163,34 @@ public class SIARDController {
     return null;
   }
 
-  public static DBPTKModule getSIARDExportModules() throws GenericException {
-    DBPTKModule connectionModule = new DBPTKModule();
+  public static DBPTKModule getSIARDExportModule(String moduleName) throws GenericException {
+
+    DBPTKModule dbptkModule = new DBPTKModule();
     PreservationParameter preservationParameter;
+
+    final DatabaseModuleFactory factory = getDatabaseExportModuleFactory(moduleName);
+    try {
+      final Parameters exportModuleParameters = factory.getExportModuleParameters();
+      getParameters(dbptkModule, factory.getModuleName(), exportModuleParameters);
+    } catch (UnsupportedModuleException e) {
+      throw new GenericException(e);
+    }
+    return dbptkModule;
+  }
+
+  public static DBPTKModule getSIARDExportModules() throws GenericException {
+    DBPTKModule dbptkModule = new DBPTKModule();
 
     Set<DatabaseModuleFactory> databaseModuleFactories = ReflectionUtils.collectDatabaseModuleFactories();
 
     for (DatabaseModuleFactory factory : databaseModuleFactories) {
       if (factory.isEnabled()) {
         if (factory.producesExportModules()) {
-          if (factory.getModuleName().startsWith("SIARD")) {
+          if (factory.getModuleName().startsWith("siard")) {
             final Parameters exportModuleParameters;
             try {
               exportModuleParameters = factory.getExportModuleParameters();
-              for (Parameter param : exportModuleParameters.getParameters()) {
-                preservationParameter = new PreservationParameter(param.longName(), param.longName(),
-                  param.description(), param.required(), param.hasArgument(), param.getInputType().name());
-                connectionModule.addPreservationParameter(factory.getModuleName(), preservationParameter);
-              }
+              getParameters(dbptkModule, factory.getModuleName(), exportModuleParameters);
             } catch (UnsupportedModuleException e) {
               throw new GenericException(e);
             }
@@ -188,12 +198,11 @@ public class SIARDController {
         }
       }
     }
-
-    return connectionModule;
+    return dbptkModule;
   }
 
   public static DBPTKModule getDatabaseImportModules() throws GenericException {
-    DBPTKModule connectionModule = new DBPTKModule();
+    DBPTKModule dbptkModule = new DBPTKModule();
     PreservationParameter preservationParameter;
 
     Set<DatabaseModuleFactory> databaseModuleFactories = ReflectionUtils.collectDatabaseModuleFactories();
@@ -206,16 +215,16 @@ public class SIARDController {
           try {
             importModuleParameters = factory.getConnectionParameters();
             for (Parameter param : importModuleParameters.getParameters()) {
-              preservationParameter = new PreservationParameter(param.longName(), param.longName(), param.description(),
+              preservationParameter = new PreservationParameter(param.longName(), param.description(),
                 param.required(), param.hasArgument(), param.getInputType().name());
-              connectionModule.addPreservationParameter(factory.getModuleName(), preservationParameter);
+              dbptkModule.addPreservationParameter(factory.getModuleName(), preservationParameter);
             }
 
             for (ParameterGroup pg : importModuleParameters.getGroups()) {
               for (Parameter param : pg.getParameters()) {
-                preservationParameter = new PreservationParameter(param.longName(), param.longName(),
-                  param.description(), param.required(), param.hasArgument(), param.getInputType().name());
-                connectionModule.addPreservationParameter(factory.getModuleName(), preservationParameter);
+                preservationParameter = new PreservationParameter(param.longName(), param.description(),
+                  param.required(), param.hasArgument(), param.getInputType().name());
+                dbptkModule.addPreservationParameter(factory.getModuleName(), preservationParameter);
               }
             }
           } catch (UnsupportedModuleException e) {
@@ -225,7 +234,7 @@ public class SIARDController {
       }
     }
 
-    return connectionModule;
+    return dbptkModule;
   }
 
   public static String loadMetadataFromLocal(String localPath) throws GenericException {
@@ -352,7 +361,7 @@ public class SIARDController {
     }
   }
 
-  private static DatabaseModuleFactory getDatabaseModuleFactory(String moduleName) {
+  private static DatabaseModuleFactory getDatabaseImportModuleFactory(String moduleName) {
     Set<DatabaseModuleFactory> databaseModuleFactories = ReflectionUtils.collectDatabaseModuleFactories();
 
     DatabaseModuleFactory factory = null;
@@ -365,5 +374,38 @@ public class SIARDController {
     }
 
     return factory;
+  }
+
+  private static DatabaseModuleFactory getDatabaseExportModuleFactory(String moduleName) {
+    Set<DatabaseModuleFactory> databaseModuleFactories = ReflectionUtils.collectDatabaseModuleFactories();
+
+    DatabaseModuleFactory factory = null;
+
+    for (DatabaseModuleFactory dbFactory : databaseModuleFactories) {
+      if (dbFactory.isEnabled() && dbFactory.producesExportModules()) {
+        if (dbFactory.getModuleName().equals(moduleName))
+          factory = dbFactory;
+      }
+    }
+
+    return factory;
+  }
+
+  private static void getParameters(DBPTKModule dbptkModule, String moduleName, Parameters parameters) {
+    if (dbptkModule == null) dbptkModule = new DBPTKModule();
+    PreservationParameter preservationParameter;
+
+    for (Parameter param : parameters.getParameters()) {
+      if (param.getExportOptions() != null) {
+        preservationParameter = new PreservationParameter(param.longName(), param.description(),
+            param.required(), param.hasArgument(), param.getInputType().name(),
+            param.getExportOptions().name());
+      } else {
+        preservationParameter = new PreservationParameter(param.longName(), param.description(),
+            param.required(), param.hasArgument(), param.getInputType().name());
+      }
+
+      dbptkModule.addPreservationParameter(moduleName, preservationParameter);
+    }
   }
 }

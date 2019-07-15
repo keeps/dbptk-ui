@@ -1093,34 +1093,6 @@ p[data-value]:after {
     font-weight: 300;
 }
 
-@media (max-width: 698px) {
-    .form-inline input {
-        margin: 10px 0;
-    }
-
-    .form-inline {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .form-row {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .form-textbox-inline {
-        width: 100%;
-    }
-
-    .form-inline .form-label-spaced:last-of-type {
-        margin-left: 0px;
-    }
-
-    .form-label-spaced {
-        flex: 0 0 auto;
-    }
-}
-
 .gwt-Label-disabled {
     color: grey;
 }
@@ -1131,6 +1103,35 @@ p[data-value]:after {
 
 .gwt-PasswordTextBox:disabled {
     background-color: inherit;
+}
+
+.text-muted {
+    color: #6c757d !important;
+}
+
+.form-helper {
+    margin-bottom: 10px;
+}
+
+.form-helper .form-row {
+    margin-bottom: 0;
+}
+
+.form-text-helper {
+    margin-left: 20px;
+    font-size: 75%;
+    font-weight: lighter;
+}
+
+.form-textbox-external-lobs {
+    width: 5%;
+    border: 1px solid #ccc;
+    border-left-style: none;
+    border-right-style: none;
+    border-top-style: none;
+    background: none;
+    margin: 0px 10px;
+    direction: rtl;
 }
 
 .gwt-TabPanelBottom {
@@ -1228,9 +1229,48 @@ input[type="checkbox"]:checked:after {
     font-family: FontAwesome;
 }
 
+.form-checkbox {
+    width: 100%;
+}
+
 .form-checkbox Label {
     font-weight: bold;
     vertical-align: 8px;
     cursor: pointer;
     margin-inline-start: 10px;
+}
+
+@media (max-width: 698px) {
+    .form-inline input {
+        margin: 10px 0;
+    }
+
+    .form-inline {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .form-row {
+        align-items: stretch;
+    }
+
+    .form-textbox-inline {
+        width: 100%;
+    }
+
+    .form-inline .form-label-spaced:last-of-type {
+        margin-left: 0px;
+    }
+
+    .form-label-spaced {
+        flex: 0 0 auto;
+    }
+
+    .form-helper {
+        margin: 0;
+    }
+
+    .form-text-helper {
+        margin: 0;
+    }
 }

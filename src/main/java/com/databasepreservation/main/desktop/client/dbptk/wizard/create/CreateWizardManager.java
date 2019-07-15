@@ -1,20 +1,28 @@
 package com.databasepreservation.main.desktop.client.dbptk.wizard.create;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.databasepreservation.main.common.client.BrowserService;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
 import com.databasepreservation.main.common.shared.client.common.utils.AsyncCallbackUtils;
+import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
+import com.databasepreservation.main.desktop.client.dbptk.wizard.create.exportOptions.MetadataExportOptions;
+import com.databasepreservation.main.desktop.client.dbptk.wizard.create.exportOptions.SIARDExportOptions;
 import com.databasepreservation.main.desktop.shared.models.wizardParameters.ConnectionParameters;
 import com.databasepreservation.main.desktop.shared.models.wizardParameters.CustomViewsParameters;
+import com.databasepreservation.main.desktop.shared.models.wizardParameters.ExportOptionsParameters;
+import com.databasepreservation.main.desktop.shared.models.wizardParameters.MetadataExportOptionsParameters;
 import com.databasepreservation.main.desktop.shared.models.wizardParameters.TableAndColumnsParameters;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -25,9 +33,10 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
+import org.springframework.web.util.JavaScriptUtils;
 
 /**
- * @author Bruno Ferreira <bferreira@keep.pt>
+ * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 public class CreateWizardManager extends Composite {
   @UiField
@@ -49,7 +58,7 @@ public class CreateWizardManager extends Composite {
 
   private ArrayList<WizardPanel> wizardInstances = new ArrayList<>();
   private int position = 0;
-  private final int positions = 6;
+  private final int positions = 5;
 
   private static CreateWizardManager instance = null;
 
@@ -87,7 +96,13 @@ public class CreateWizardManager extends Composite {
           conn.clearPasswords();
         }
 
-        customButtons.clear();
+        if (wizardInstances.get(position) instanceof CustomViews) {
+          CustomViews customViews = (CustomViews) wizardInstances.get(position);
+          customViews.refreshCustomButtons();
+        } else {
+          customButtons.clear();
+        }
+
         updateButtons();
         updateBreadcrumb();
       }
@@ -114,9 +129,6 @@ public class CreateWizardManager extends Composite {
         handleSIARDExportOptions();
         break;
       case 4:
-        handleExternalLOBSExportOptions();
-        break;
-      case 5:
         handleMetadataExportOptions();
         break;
     }
@@ -169,6 +181,7 @@ public class CreateWizardManager extends Composite {
       wizardContent.clear();
       position = 2;
       CustomViews customViews = CustomViews.getInstance(customButtons);
+      customViews.refreshCustomButtons();
       wizardInstances.add(position, customViews);
       wizardContent.add(customViews);
       updateButtons();
@@ -184,19 +197,48 @@ public class CreateWizardManager extends Composite {
       CustomViewsParameters parameters = (CustomViewsParameters) wizardInstances.get(position).getValues();
       wizardContent.clear();
       position = 3;
-
+      SIARDExportOptions exportOptions = SIARDExportOptions.getInstance();
+      wizardInstances.add(3, exportOptions);
+      wizardContent.add(exportOptions);
+      updateButtons();
+      updateBreadcrumb();
+      customButtons.clear();
     } else {
       wizardInstances.get(position).error();
     }
   }
 
   private void handleSIARDExportOptions() {
-  }
+    final boolean valid = wizardInstances.get(position).validate();
+    if (valid) {
+      ExportOptionsParameters parameters = (ExportOptionsParameters) wizardInstances.get(position).getValues();
 
-  private void handleExternalLOBSExportOptions() {
+      if (!parameters.getSIARDVersion().equals("siard-dk")) {
+        wizardContent.clear();
+        position = 4;
+        MetadataExportOptions metadataExportOptions = MetadataExportOptions.getInstance(parameters.getSIARDVersion());
+        wizardInstances.add(4, metadataExportOptions);
+        wizardContent.add(metadataExportOptions);
+        updateButtons();
+        updateBreadcrumb();
+        customButtons.clear();
+      } else {
+        //TODO: create SIARD
+      }
+    } else {
+      wizardInstances.get(position).error();
+    }
   }
 
   private void handleMetadataExportOptions() {
+    final boolean valid = wizardInstances.get(position).validate();
+    if (valid) {
+      MetadataExportOptionsParameters parameters = (MetadataExportOptionsParameters) wizardInstances.get(position).getValues();
+      final HashMap<String, String> values = parameters.getValues();
+      for (Map.Entry<String, String> entry : values.entrySet()) {
+        JavascriptUtils.log(entry.getKey() + ": " + entry.getValue());
+      }
+    }
   }
 
   private void updateButtons() {
@@ -229,9 +271,6 @@ public class CreateWizardManager extends Composite {
         breadcrumbItems = BreadcrumbManager.forSIARDExportOptions();
         break;
       case 4:
-        breadcrumbItems = BreadcrumbManager.forExternalLOBSExportOptions();
-        break;
-      case 5:
         breadcrumbItems = BreadcrumbManager.forMetadataExportOptions();
         break;
       default: breadcrumbItems = new ArrayList<>();

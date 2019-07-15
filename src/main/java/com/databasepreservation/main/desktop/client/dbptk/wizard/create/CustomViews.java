@@ -172,6 +172,11 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
     customViewsSidebar.select(customViewUUID);
   }
 
+  public void refreshCustomButtons() {
+    customViewsButtons.clear();
+    customViewsButtons.add(createCustomViewButton());
+  }
+
   private boolean customViewFormValidator() {
     String viewNameText = customViewName.getText();
     String viewQueryText = customViewQuery.getText();

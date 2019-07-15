@@ -1,5 +1,7 @@
 package com.databasepreservation.main.common.shared;
 
+import static com.databasepreservation.model.parameters.Parameter.CATEGORY_TYPE;
+
 import org.roda.core.data.common.RodaConstants;
 import org.roda.core.data.v2.index.filter.BasicSearchFilterParameter;
 import org.roda.core.data.v2.index.filter.Filter;
@@ -236,6 +238,13 @@ public class ViewerConstants {
    * Application Environment
    */
   public static final String ELECTRON = "Desktop";
+
+  /*
+   * DBPTK Parameters
+   */
+  public static final String SIARD_EXPORT_OPTIONS = "SIARD_EXPORT_OPTIONS";
+  public static final String METADATA_EXPORT_OPTIONS = "METADATA_EXPORT_OPTIONS";
+  public static final String EXTERNAL_LOBS_EXPORT_OPTIONS = "EXTERNAL_LOBS";
 
   /**
    * private constructor

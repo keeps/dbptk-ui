@@ -54,4 +54,12 @@ public class GenericField extends Composite {
     }
     genericKey.addStyleName(cssKey);
   }
+
+  public void addHelperText(Widget span) {
+    genericField.add(span);
+  }
+
+  public void setLabelVisible(boolean value) {
+    genericKey.setVisible(value);
+  }
 }

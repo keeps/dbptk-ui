@@ -3,8 +3,12 @@ package com.databasepreservation.main.desktop.client.common;
 import java.util.List;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Document;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.DomEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -25,63 +29,59 @@ public class ComboBoxField extends Composite {
   private static ComboBoxFieldUiBinder binder = GWT.create(ComboBoxFieldUiBinder.class);
 
   @UiField
-  FlowPanel metadataField;
+  FlowPanel flowPanelParent;
 
   @UiField
-  Label metadataKey;
+  Label comboboxLabel;
 
   @UiField
-  ListBox metadataValue;
+  ListBox combobox;
 
   public static ComboBoxField createInstance(String key) {
     return new ComboBoxField(key, null);
-  }
-
-  public static ComboBoxField createInstance(String key, List<String> values) {
-    return new ComboBoxField(key, values);
-  }
-
-  public static ComboBoxField createInstance(List<String> values) {
-    return new ComboBoxField(null, values);
   }
 
   private ComboBoxField(String key, List<String> values) {
     initWidget(binder.createAndBindUi(this));
 
     if (key != null) {
-      metadataKey.setText(key);
+      comboboxLabel.setText(key);
     } else {
-      metadataKey.setVisible(false);
+      comboboxLabel.setVisible(false);
     }
 
     if (values != null) {
       for (String s : values) {
-        metadataValue.addItem(s);
+        combobox.addItem(s);
       }
     }
-
   }
 
-  public void setComboBoxValue(String value) {
-    metadataValue.addItem(value);
+  public void addChangeHandler(Command command) {
+    combobox.addChangeHandler(event -> {
+      command.execute();
+    });
   }
 
-  public void setComboBoxValues(List<String> values) {
-    for (String s : values) {
-      metadataValue.addItem(s);
-    }
+  public void setComboBoxValue(String item, String value) {
+    combobox.addItem(item, value);
   }
 
   public String getComboBoxValue() {
-    return metadataValue.getSelectedValue();
+    return combobox.getSelectedValue();
+  }
+
+  public void select(int index) {
+    combobox.setSelectedIndex(index);
+    DomEvent.fireNativeEvent(Document.get().createChangeEvent(), combobox);
   }
 
   public void setCSSMetadata(String cssParent, String cssKey, String cssValue) {
 
     if (cssParent != null) {
-      metadataField.addStyleName(cssParent);
+      flowPanelParent.addStyleName(cssParent);
     }
-    metadataKey.addStyleName(cssKey);
-    metadataValue.addStyleName(cssValue);
+    comboboxLabel.addStyleName(cssKey);
+    combobox.addStyleName(cssValue);
   }
 }

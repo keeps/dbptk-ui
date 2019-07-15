@@ -9,22 +9,32 @@ import java.util.Objects;
 public class PreservationParameter implements Serializable {
 
   private String name = null;
-  private String displayName = null;
   private String description = null;
   private boolean required = false;
   private boolean hasArgument = false;
   private String inputType = null;
+  private String exportOption = null;
 
   public PreservationParameter() {
   }
 
-  public PreservationParameter(String name, String displayName, String description, boolean required, boolean hasArgument, String inputType) {
+  public PreservationParameter(String name, String description, boolean required,
+    boolean hasArgument, String inputType) {
     this.name = name;
-    this.displayName = displayName;
     this.description = description;
     this.required = required;
     this.hasArgument = hasArgument;
     this.inputType = inputType;
+  }
+
+  public PreservationParameter(String name, String description, boolean required,
+    boolean hasArgument, String inputType, String exportOption) {
+    this.name = name;
+    this.description = description;
+    this.required = required;
+    this.hasArgument = hasArgument;
+    this.inputType = inputType;
+    this.exportOption = exportOption;
   }
 
   public String getName() {
@@ -33,14 +43,6 @@ public class PreservationParameter implements Serializable {
 
   public void setName(String name) {
     this.name = name;
-  }
-
-  public String getDisplayName() {
-    return displayName;
-  }
-
-  public void setDisplayName(String displayName) {
-    this.displayName = displayName;
   }
 
   public String getDescription() {
@@ -73,6 +75,14 @@ public class PreservationParameter implements Serializable {
 
   public void setInputType(String inputType) {
     this.inputType = inputType;
+  }
+
+  public String getExportOption() {
+    return exportOption;
+  }
+
+  public void setExportOption(String exportOption) {
+    this.exportOption = exportOption;
   }
 
   @Override

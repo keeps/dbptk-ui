@@ -111,6 +111,8 @@ public interface BrowserService extends RemoteService {
 
   DBPTKModule getDatabaseImportModules() throws GenericException;
 
+  DBPTKModule getSIARDExportModule(String moduleName) throws GenericException;
+
   DBPTKModule getSIARDExportModules() throws GenericException;
 
   ViewerMetadata getSchemaInformation(String databaseUUID, String moduleName, HashMap<String, String> values) throws GenericException;

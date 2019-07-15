@@ -116,6 +116,8 @@ public interface BrowserServiceAsync {
 
   void getSIARDExportModules(AsyncCallback<DBPTKModule> async);
 
+  void getSIARDExportModule(String moduleName, AsyncCallback<DBPTKModule> async);
+
   void getSchemaInformation(String databaseUUID, String moduleName, HashMap<String, String> values, AsyncCallback<ViewerMetadata> async);
 
   void testConnection(String databaseUUID, String moduleName, HashMap<String, String> parameters, AsyncCallback<Boolean> async);
