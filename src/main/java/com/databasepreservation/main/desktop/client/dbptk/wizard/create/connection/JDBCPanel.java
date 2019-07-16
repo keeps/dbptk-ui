@@ -78,7 +78,9 @@ public class JDBCPanel extends Composite {
   public HashMap<String, String> getValues() {
     HashMap<String, String> values = new HashMap<>();
     for (Map.Entry<String, TextBox> entry : textBoxInputs.entrySet()) {
-      values.put(entry.getKey(), entry.getValue().getText());
+      if (ViewerStringUtils.isNotBlank(entry.getValue().getText())) {
+        values.put(entry.getKey(), entry.getValue().getText());
+      }
     }
 
     return values;

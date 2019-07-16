@@ -691,15 +691,23 @@ public class ToolkitStructure2ViewerStructure {
     }
 
     public String getTableUUID(String tableID) {
-      return infoByTableID.get(tableID).getKey();
+      if (infoByTableID.get(tableID) != null) return infoByTableID.get(tableID).getKey();
+
+      return "";
     }
 
     public Integer getIndexForColumn(String tableID, String columnName) {
-      return infoByTableID.get(tableID).getValue().get(columnName);
+      if (infoByTableID.get(tableID) != null) {
+        return infoByTableID.get(tableID).getValue().get(columnName);
+      }
+      return -1;
     }
 
     public Integer getIndexForColumn(String schemaName, String tableName, String columnName) {
-      return infoByTableID.get(getIdFromNames(schemaName, tableName)).getValue().get(columnName);
+      if (infoByTableID.get(getIdFromNames(schemaName, tableName)) != null) {
+        return infoByTableID.get(getIdFromNames(schemaName, tableName)).getValue().get(columnName);
+      }
+      return -1;
     }
 
     private String getIdFromNames(String schemaName, String tableName) {

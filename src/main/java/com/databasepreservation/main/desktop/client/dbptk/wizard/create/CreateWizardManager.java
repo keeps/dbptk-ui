@@ -56,11 +56,16 @@ public class CreateWizardManager extends Composite {
   @UiField
   Button btnNext, btnCancel, btnBack;
 
+  private static CreateWizardManager instance = null;
   private ArrayList<WizardPanel> wizardInstances = new ArrayList<>();
   private int position = 0;
   private final int positions = 5;
 
-  private static CreateWizardManager instance = null;
+  private ConnectionParameters connectionParameters;
+  private TableAndColumnsParameters tableAndColumnsParameters;
+  private CustomViewsParameters customViewsParameters;
+  private ExportOptionsParameters exportOptionsParameters;
+  private MetadataExportOptionsParameters metadataExportOptionsParameters;
 
   public static CreateWizardManager getInstance() {
     if (instance == null) {
@@ -137,21 +142,21 @@ public class CreateWizardManager extends Composite {
   private void handleConnectionPanel() {
     final boolean valid = wizardInstances.get(position).validate();
     if (valid) {
-      ConnectionParameters parameters = (ConnectionParameters) wizardInstances.get(position).getValues();
-      String moduleName = parameters.getModuleName();
+      connectionParameters = (ConnectionParameters) wizardInstances.get(position).getValues();
+      String moduleName = connectionParameters.getModuleName();
 
       Widget spinner = new HTML(SafeHtmlUtils.fromSafeConstant(
         "<div class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
 
       wizardContent.add(spinner);
 
-      BrowserService.Util.getInstance().testConnection("test", moduleName, parameters.getConnection(),
+      BrowserService.Util.getInstance().testConnection("test", moduleName, connectionParameters.getConnection(),
         new DefaultAsyncCallback<Boolean>() {
         @Override
         public void onSuccess(Boolean aBoolean) {
           wizardContent.clear();
           position = 1;
-            TableAndColumns tableAndColumns = TableAndColumns.getInstance(moduleName, parameters.getConnection());
+            TableAndColumns tableAndColumns = TableAndColumns.getInstance(moduleName, connectionParameters.getConnection());
           wizardInstances.add(position, tableAndColumns);
           wizardContent.add(tableAndColumns);
           updateButtons();
@@ -170,14 +175,13 @@ public class CreateWizardManager extends Composite {
       wizardInstances.get(position).error();
       Connection connection = (Connection) wizardInstances.get(position);
       connection.clearPasswords();
-
     }
   }
 
   private void handleTableAndColumnsPanel() {
     final boolean valid = wizardInstances.get(position).validate();
     if (valid) {
-      TableAndColumnsParameters parameters = (TableAndColumnsParameters) wizardInstances.get(position).getValues();
+      tableAndColumnsParameters = (TableAndColumnsParameters) wizardInstances.get(position).getValues();
       wizardContent.clear();
       position = 2;
       CustomViews customViews = CustomViews.getInstance(customButtons);
@@ -194,7 +198,7 @@ public class CreateWizardManager extends Composite {
   private void handleCustomViewsPanel() {
     final boolean valid = wizardInstances.get(position).validate();
     if (valid) {
-      CustomViewsParameters parameters = (CustomViewsParameters) wizardInstances.get(position).getValues();
+      customViewsParameters = (CustomViewsParameters) wizardInstances.get(position).getValues();
       wizardContent.clear();
       position = 3;
       SIARDExportOptions exportOptions = SIARDExportOptions.getInstance();
@@ -211,12 +215,12 @@ public class CreateWizardManager extends Composite {
   private void handleSIARDExportOptions() {
     final boolean valid = wizardInstances.get(position).validate();
     if (valid) {
-      ExportOptionsParameters parameters = (ExportOptionsParameters) wizardInstances.get(position).getValues();
+      exportOptionsParameters = (ExportOptionsParameters) wizardInstances.get(position).getValues();
 
-      if (!parameters.getSIARDVersion().equals("siard-dk")) {
+      if (!exportOptionsParameters.getSIARDVersion().equals("siard-dk")) {
         wizardContent.clear();
         position = 4;
-        MetadataExportOptions metadataExportOptions = MetadataExportOptions.getInstance(parameters.getSIARDVersion());
+        MetadataExportOptions metadataExportOptions = MetadataExportOptions.getInstance(exportOptionsParameters.getSIARDVersion());
         wizardInstances.add(4, metadataExportOptions);
         wizardContent.add(metadataExportOptions);
         updateButtons();
@@ -233,12 +237,19 @@ public class CreateWizardManager extends Composite {
   private void handleMetadataExportOptions() {
     final boolean valid = wizardInstances.get(position).validate();
     if (valid) {
-      MetadataExportOptionsParameters parameters = (MetadataExportOptionsParameters) wizardInstances.get(position).getValues();
-      final HashMap<String, String> values = parameters.getValues();
-      for (Map.Entry<String, String> entry : values.entrySet()) {
-        JavascriptUtils.log(entry.getKey() + ": " + entry.getValue());
-      }
+      metadataExportOptionsParameters = (MetadataExportOptionsParameters) wizardInstances.get(position).getValues();
+
+      createSIARD();
     }
+  }
+
+  private void createSIARD() {
+    BrowserService.Util.getInstance().createSIARD(connectionParameters, tableAndColumnsParameters, customViewsParameters, exportOptionsParameters, metadataExportOptionsParameters, new DefaultAsyncCallback<Boolean>() {
+      @Override
+      public void onSuccess(Boolean result) {
+        JavascriptUtils.log("TEST");
+      }
+    });
   }
 
   private void updateButtons() {
@@ -323,7 +334,6 @@ public class CreateWizardManager extends Composite {
       case HistoryManager.ROUTE_WIZARD_EXPORT_EXT_OPTIONS:
       case HistoryManager.ROUTE_WIZARD_EXPORT_METADATA_OPTIONS:
       default:
-
         break;
     }
   }

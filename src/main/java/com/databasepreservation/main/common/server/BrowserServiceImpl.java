@@ -3,7 +3,6 @@ package com.databasepreservation.main.common.server;
 import java.util.HashMap;
 import java.util.List;
 
-import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
 import org.roda.core.data.exceptions.AuthenticationDeniedException;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.roda.core.data.exceptions.GenericException;
@@ -26,6 +25,7 @@ import com.databasepreservation.main.common.server.controller.UserLoginControlle
 import com.databasepreservation.main.common.server.index.utils.SolrUtils;
 import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerRow;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
 import com.databasepreservation.main.common.shared.client.common.search.SavedSearch;
@@ -35,6 +35,11 @@ import com.databasepreservation.main.common.shared.client.common.utils.BrowserSe
 import com.databasepreservation.main.common.utils.UserUtility;
 import com.databasepreservation.main.common.utils.UserUtility.Authorization;
 import com.databasepreservation.main.desktop.shared.models.DBPTKModule;
+import com.databasepreservation.main.desktop.shared.models.wizardParameters.ConnectionParameters;
+import com.databasepreservation.main.desktop.shared.models.wizardParameters.CustomViewsParameters;
+import com.databasepreservation.main.desktop.shared.models.wizardParameters.ExportOptionsParameters;
+import com.databasepreservation.main.desktop.shared.models.wizardParameters.MetadataExportOptionsParameters;
+import com.databasepreservation.main.desktop.shared.models.wizardParameters.TableAndColumnsParameters;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 /**
@@ -252,11 +257,22 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
     return SIARDController.getSIARDExportModules();
   }
 
+  @Override
   public ViewerMetadata getSchemaInformation(String databaseUUID, String moduleName, HashMap<String, String> values) throws GenericException {
     return SIARDController.getDatabaseMetadata(databaseUUID, moduleName, values);
   }
 
+  @Override
   public boolean testConnection(String databaseUUID, String moduleName, HashMap<String, String> parameters) throws GenericException {
     return SIARDController.testConnection(databaseUUID, moduleName, parameters);
+  }
+
+  @Override
+  public boolean createSIARD(ConnectionParameters connectionParameters,
+    TableAndColumnsParameters tableAndColumnsParameters, CustomViewsParameters customViewsParameters,
+    ExportOptionsParameters exportOptionsParameters, MetadataExportOptionsParameters metadataExportOptionsParameters)
+    throws GenericException {
+    return SIARDController.createSIARD(connectionParameters, tableAndColumnsParameters, customViewsParameters,
+      exportOptionsParameters, metadataExportOptionsParameters);
   }
 }

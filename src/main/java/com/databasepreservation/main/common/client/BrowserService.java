@@ -3,6 +3,12 @@ package com.databasepreservation.main.common.client;
 import java.util.HashMap;
 import java.util.List;
 
+import com.databasepreservation.main.desktop.shared.models.wizardParameters.ConnectionParameters;
+import com.databasepreservation.main.desktop.shared.models.wizardParameters.CustomViewsParameters;
+import com.databasepreservation.main.desktop.shared.models.wizardParameters.ExportOptionsParameters;
+import com.databasepreservation.main.desktop.shared.models.wizardParameters.MetadataExportOptionsParameters;
+import com.databasepreservation.main.desktop.shared.models.wizardParameters.TableAndColumnsParameters;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.roda.core.data.exceptions.AuthenticationDeniedException;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.roda.core.data.exceptions.GenericException;
@@ -118,4 +124,6 @@ public interface BrowserService extends RemoteService {
   ViewerMetadata getSchemaInformation(String databaseUUID, String moduleName, HashMap<String, String> values) throws GenericException;
 
   boolean testConnection(String databaseUUID, String moduleName, HashMap<String, String> parameters) throws GenericException;
+
+  boolean createSIARD(ConnectionParameters connectionParameters, TableAndColumnsParameters tableAndColumnsParameters, CustomViewsParameters customViewsParameters, ExportOptionsParameters exportOptionsParameters, MetadataExportOptionsParameters metadataExportOptionsParameters) throws GenericException;
 }

@@ -1,8 +1,10 @@
 package com.databasepreservation.main.common.server.controller;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -17,6 +19,7 @@ import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yaml.snakeyaml.Yaml;
 
 import com.databasepreservation.DatabaseMigration;
 import com.databasepreservation.SIARDEdition;
@@ -26,12 +29,20 @@ import com.databasepreservation.main.common.server.ViewerFactory;
 import com.databasepreservation.main.common.server.index.DatabaseRowsSolrManager;
 import com.databasepreservation.main.common.server.index.utils.SolrUtils;
 import com.databasepreservation.main.common.server.transformers.ToolkitStructure2ViewerStructure;
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerColumn;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabaseFromToolkit;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
 import com.databasepreservation.main.common.shared.client.ClientLogger;
+import com.databasepreservation.main.common.shared.client.tools.PathUtils;
 import com.databasepreservation.main.desktop.shared.models.DBPTKModule;
 import com.databasepreservation.main.desktop.shared.models.PreservationParameter;
+import com.databasepreservation.main.desktop.shared.models.wizardParameters.ConnectionParameters;
+import com.databasepreservation.main.desktop.shared.models.wizardParameters.CustomViewsParameter;
+import com.databasepreservation.main.desktop.shared.models.wizardParameters.CustomViewsParameters;
+import com.databasepreservation.main.desktop.shared.models.wizardParameters.ExportOptionsParameters;
+import com.databasepreservation.main.desktop.shared.models.wizardParameters.MetadataExportOptionsParameters;
+import com.databasepreservation.main.desktop.shared.models.wizardParameters.TableAndColumnsParameters;
 import com.databasepreservation.main.modules.viewer.DbvtkModuleFactory;
 import com.databasepreservation.model.Reporter;
 import com.databasepreservation.model.exception.ModuleException;
@@ -114,6 +125,76 @@ public class SIARDController {
     }*/
 
     return false;
+  }
+
+  public static boolean createSIARD(ConnectionParameters connectionParameters,
+    TableAndColumnsParameters tableAndColumnsParameters, CustomViewsParameters customViewsParameters,
+    ExportOptionsParameters exportOptionsParameters, MetadataExportOptionsParameters metadataExportOptionsParameters)
+    throws GenericException {
+    final String pathToTableFilter = constructTableFilter(tableAndColumnsParameters);
+    final String siardName = PathUtils.getFileName(exportOptionsParameters.getSiardPath());
+
+    LOGGER.info("starting to convert database " + exportOptionsParameters.getSiardPath());
+
+    Path reporterPath = ViewerConfiguration.getInstance().getReportPath(siardName).toAbsolutePath();
+    try (Reporter reporter = new Reporter(reporterPath.getParent().toString(), reporterPath.getFileName().toString())) {
+      DatabaseMigration databaseMigration = DatabaseMigration.newInstance();
+
+      databaseMigration.filterFactories(new ArrayList<>());
+
+      // BUILD Import Module
+      final DatabaseModuleFactory databaseImportModuleFactory = getDatabaseImportModuleFactory(
+        connectionParameters.getModuleName());
+
+      databaseMigration.importModule(databaseImportModuleFactory);
+
+      for (Map.Entry<String, String> entry : connectionParameters.getConnection().entrySet()) {
+        LOGGER.info("Connection Options - " + entry.getKey() + "->" + entry.getValue());
+        databaseMigration.importModuleParameter(entry.getKey(), entry.getValue());
+      }
+
+      if (!customViewsParameters.getCustomViewsParameter().isEmpty()) {
+        final String pathToCustomViews = constructCustomViews(customViewsParameters);
+        LOGGER.info("Custom view path - " + pathToCustomViews);
+        databaseMigration.importModuleParameter("custom-views", pathToCustomViews);
+      }
+
+      // BUILD Export Module
+      final DatabaseModuleFactory databaseExportModuleFactory = getDatabaseExportModuleFactory(
+        exportOptionsParameters.getSIARDVersion());
+
+      databaseMigration.exportModule(databaseExportModuleFactory);
+
+      for (Map.Entry<String, String> entry : exportOptionsParameters.getParameters().entrySet()) {
+        LOGGER.info("Export Options - " + entry.getKey() + "->" + entry.getValue());
+        databaseMigration.exportModuleParameter(entry.getKey(), entry.getValue());
+      }
+      for (Map.Entry<String, String> entry : metadataExportOptionsParameters.getValues().entrySet()) {
+        LOGGER.info("Metadata Export Options - " + entry.getKey() + "->" + entry.getValue());
+        databaseMigration.exportModuleParameter(entry.getKey(), entry.getValue());
+      }
+
+      LOGGER.info("Path to table-filter: " + pathToTableFilter);
+
+      databaseMigration.exportModuleParameter("table-filter", pathToTableFilter);
+
+      // databaseMigration.filter(new ObservableFilter()); 
+
+      databaseMigration.reporter(reporter);
+
+      long startTime = System.currentTimeMillis();
+
+      databaseMigration.migrate();
+
+      long duration = System.currentTimeMillis() - startTime;
+      LOGGER.info("Conversion time {}m {}s", duration / 60000, duration % 60000 / 1000);
+      return true;
+    } catch (IOException e) {
+      throw new GenericException("Could not initialize conversion modules", e);
+    } catch (ModuleException | RuntimeException e) {
+      LOGGER.info(e.getMessage());
+      throw new GenericException("Could not convert the database", e);
+    }
   }
 
   public static ViewerMetadata getDatabaseMetadata(String databaseUUID, String moduleName, HashMap<String, String> parameters) throws GenericException {
@@ -407,5 +488,89 @@ public class SIARDController {
 
       dbptkModule.addPreservationParameter(moduleName, preservationParameter);
     }
+  }
+
+  private static String constructTableFilter(TableAndColumnsParameters parameters) throws GenericException {
+    final HashMap<String, ArrayList<ViewerColumn>> columns = parameters.getColumns();
+    StringBuilder tf = new StringBuilder();
+
+    for (Map.Entry<String, ArrayList<ViewerColumn>> entry : columns.entrySet()) {
+      if (!entry.getValue().isEmpty()) {
+        tf.append(entry.getKey()).append("{");
+        for (ViewerColumn column : entry.getValue()) {
+          tf.append(column.getDisplayName()).append(";");
+        }
+        tf.append("}").append("\n");
+      }
+    }
+
+    FileOutputStream outputStream = null;
+
+    try {
+      File tmpDir = new File(System.getProperty("java.io.tmpdir"));
+      final File tmpFile = File.createTempFile(SolrUtils.randomUUID(), ".txt", tmpDir);
+      String path = Paths.get(tmpFile.toURI()).normalize().toAbsolutePath().toString();
+      outputStream = new FileOutputStream(tmpFile);
+      OutputStreamWriter writer = new OutputStreamWriter(outputStream);
+      writer.write(tf.toString());
+      writer.flush();
+      writer.close();
+      outputStream.close();
+
+      return path;
+    } catch (IOException e) {
+      throw new GenericException("Could not create table-filter temporary file", e);
+    } finally {
+      try {
+        if (outputStream != null) {
+          outputStream.close();
+        }
+      } catch (IOException e) {
+        throw new GenericException("Could not close the table-filter temporary file", e);
+      }
+    }
+  }
+
+  private static String constructCustomViews(CustomViewsParameters customViewsParameters) throws GenericException {
+    final ArrayList<CustomViewsParameter> customViewParameters = customViewsParameters.getCustomViewsParameter();
+    Map<String, Object> data = new HashMap<>();
+
+    for (CustomViewsParameter parameter : customViewParameters) {
+      Map<String, Object> customViewInformation = new HashMap<>();
+      customViewInformation.put("query", parameter.getCustomViewQuery());
+      customViewInformation.put("description", parameter.getCustomViewDescription());
+
+      Map<String, Object> view = new HashMap<>();
+      view.put(parameter.getCustomViewName(), customViewInformation);
+      data.put("sakila", view);
+    }
+
+    Yaml yaml = new Yaml();
+
+    FileOutputStream outputStream = null;
+
+    try {
+      File tmpDir = new File(System.getProperty("java.io.tmpdir"));
+      final File tmpFile = File.createTempFile(SolrUtils.randomUUID(), ".txt", tmpDir);
+      String path = Paths.get(tmpFile.toURI()).normalize().toAbsolutePath().toString();
+      outputStream = new FileOutputStream(tmpFile);
+      OutputStreamWriter writer = new OutputStreamWriter(outputStream);
+      yaml.dump(data, writer);
+      writer.close();
+      outputStream.close();
+
+      return path;
+    } catch (IOException e) {
+      throw new GenericException("Could not create custom views temporary file", e);
+    } finally {
+      try {
+        if (outputStream != null) {
+          outputStream.close();
+        }
+      } catch (IOException e) {
+        throw new GenericException("Could not close the custom views temporary file", e);
+      }
+    }
+
   }
 }

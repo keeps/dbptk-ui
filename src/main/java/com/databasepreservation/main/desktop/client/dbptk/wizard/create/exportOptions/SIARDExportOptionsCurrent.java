@@ -27,9 +27,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
-import com.sun.tools.javac.comp.Flow;
 import config.i18n.client.ClientMessages;
-import dk.sa.xmlns.diark._1_0.fileindex.FileIndexType;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -52,7 +50,7 @@ public class SIARDExportOptionsCurrent extends Composite {
   private DBPTKModule dbptkModule;
   private ArrayList<PreservationParameter> parameters;
   private ArrayList<Label> externalLobsLabels = new ArrayList<>();
-  private ArrayList<TextBox> externalLobsInputs = new ArrayList<>();
+  private HashMap<String, TextBox> externalLobsInputs = new HashMap<>();
   private CheckBox externalLobCheckbox;
   private String version;
 
@@ -99,10 +97,17 @@ public class SIARDExportOptionsCurrent extends Composite {
             final String text = textBoxInputs.get(parameter.getName()).getText();
             exportParameters.put(parameter.getName(), text);
           }
+          if (externalLobCheckbox.getValue()) {
+            if (externalLobsInputs.get(parameter.getName()) != null) {
+              final String text = externalLobsInputs.get(parameter.getName()).getText();
+              exportParameters.put(parameter.getName(), text);
+            }
+          }
           break;
         case "FILE":
           if (fileInputs.get(parameter.getName()) != null) {
             final String path = fileInputs.get(parameter.getName());
+            exportOptionsParameters.setSiardPath(path);
             exportParameters.put(parameter.getName(), path);
           }
           break;
@@ -115,6 +120,7 @@ public class SIARDExportOptionsCurrent extends Composite {
           break;
       }
     }
+
     exportOptionsParameters.setSIARDVersion(version);
     exportOptionsParameters.setParameters(exportParameters);
 
@@ -162,7 +168,7 @@ public class SIARDExportOptionsCurrent extends Composite {
 
   private boolean validateExternalLobs() {
     if (externalLobCheckbox.getValue()) {
-      for (TextBox textBox : externalLobsInputs) {
+      for (TextBox textBox : externalLobsInputs.values()) {
         final String text = textBox.getText();
         if (ViewerStringUtils.isBlank(text)) {
           return false;
@@ -179,7 +185,7 @@ public class SIARDExportOptionsCurrent extends Composite {
         label.removeStyleName("gwt-Label-disabled");
       }
 
-      for (TextBox textBox : externalLobsInputs) {
+      for (TextBox textBox : externalLobsInputs.values()) {
         textBox.setEnabled(true);
       }
     } else {
@@ -188,7 +194,7 @@ public class SIARDExportOptionsCurrent extends Composite {
         label.addStyleName("gwt-Label-disabled");
       }
 
-      for (TextBox textBox : externalLobsInputs) {
+      for (TextBox textBox : externalLobsInputs.values()) {
         textBox.setEnabled(false);
       }
     }
@@ -216,8 +222,7 @@ public class SIARDExportOptionsCurrent extends Composite {
         externalLobsLabels.add(label);
         TextBox defaultTextBox = new TextBox();
         defaultTextBox.addStyleName("form-textbox-external-lobs");
-        textBoxInputs.put(parameter.getName(), defaultTextBox);
-        externalLobsInputs.add(defaultTextBox);
+        externalLobsInputs.put(parameter.getName(), defaultTextBox);
         Label label_end = new Label();
         label_end.setText(messages.exportOptionsLabels(parameter.getName() + "-end"));
         externalLobsLabels.add(label_end);

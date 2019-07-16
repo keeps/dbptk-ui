@@ -102,16 +102,13 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
 
   @Override
   public TableAndColumnsParameters getValues() {
-    HashMap<String, ArrayList<String>> values = new HashMap<>();
-    ArrayList<String> selectedColumns = null;
+    HashMap<String, ArrayList<ViewerColumn>> values = new HashMap<>();
     for (Map.Entry<String, MultipleSelectionTablePanel<ViewerColumn>> cellTables : columns.entrySet()) {
-      selectedColumns = new ArrayList<>();
       String tableUUID = cellTables.getKey();
       ViewerTable table = metadata.getTable(tableUUID);
-      for (ViewerColumn viewerColumn : cellTables.getValue().getSelectionModel().getSelectedSet()) {
-        selectedColumns.add(viewerColumn.getDisplayName());
-      }
-      values.put(table.getSchemaName(), selectedColumns);
+      ArrayList<ViewerColumn> selectedColumns = new ArrayList<>(cellTables.getValue().getSelectionModel().getSelectedSet());
+      String key = table.getSchemaName() + "." + table.getName();
+      values.put(key, selectedColumns);
     }
 
     return  new TableAndColumnsParameters(values);

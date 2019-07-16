@@ -21,6 +21,11 @@ import com.databasepreservation.main.common.shared.client.common.search.SavedSea
 import com.databasepreservation.main.common.shared.client.common.search.SearchField;
 import com.databasepreservation.main.common.shared.client.common.search.SearchInfo;
 import com.databasepreservation.main.desktop.shared.models.DBPTKModule;
+import com.databasepreservation.main.desktop.shared.models.wizardParameters.ConnectionParameters;
+import com.databasepreservation.main.desktop.shared.models.wizardParameters.CustomViewsParameters;
+import com.databasepreservation.main.desktop.shared.models.wizardParameters.ExportOptionsParameters;
+import com.databasepreservation.main.desktop.shared.models.wizardParameters.MetadataExportOptionsParameters;
+import com.databasepreservation.main.desktop.shared.models.wizardParameters.TableAndColumnsParameters;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
@@ -121,4 +126,8 @@ public interface BrowserServiceAsync {
   void getSchemaInformation(String databaseUUID, String moduleName, HashMap<String, String> values, AsyncCallback<ViewerMetadata> async);
 
   void testConnection(String databaseUUID, String moduleName, HashMap<String, String> parameters, AsyncCallback<Boolean> async);
+
+  void createSIARD(ConnectionParameters connectionParameters, TableAndColumnsParameters tableAndColumnsParameters,
+    CustomViewsParameters customViewsParameters, ExportOptionsParameters exportOptionsParameters,
+    MetadataExportOptionsParameters metadataExportOptionsParameters, AsyncCallback<Boolean> async);
 }

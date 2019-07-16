@@ -86,7 +86,7 @@ public class HomePage extends Composite {
 
           path = JavascriptUtils.openFileDialog(options);
         } else {
-          path = "/home/mguimaraes/Desktop/mysql.siard";
+          path = "/home/mguimaraes/Desktop/mysql-dbptk-gui.siard";
         }
 
         if (path != null) {
