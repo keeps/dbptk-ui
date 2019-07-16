@@ -20,77 +20,77 @@
                 <g:Label addStyleNames="form-label">
                     <ui:text from="{messages.siardMetadata_databaseName}"/>
                 </g:Label>
-                <g:TextBox addStyleNames="form-textbox metadata-edit-readonly" ui:field="databaseName"/>
+                <g:TextBox addStyleNames="form-textbox" ui:field="databaseName"/>
             </g:FlowPanel>
 
             <g:FlowPanel addStyleNames="metadata-edit-field">
                 <g:Label addStyleNames="form-label">
                     <ui:text from="{messages.siardMetadata_archivalDate}"/>
                 </g:Label>
-                <g:TextBox addStyleNames="form-textbox metadata-edit-readonly" ui:field="archivalDate"/>
+                <g:TextBox addStyleNames="form-textbox" ui:field="archivalDate"/>
             </g:FlowPanel>
 
             <g:FlowPanel addStyleNames="metadata-edit-field">
                 <g:Label addStyleNames="form-label">
                     <ui:text from='{messages.siardMetadata_archivist}'/>
                 </g:Label>
-                <g:TextBox addStyleNames="form-textbox metadata-edit-readonly" ui:field="archivist"/>
+                <g:TextBox addStyleNames="form-textbox" ui:field="archivist"/>
             </g:FlowPanel>
 
             <g:FlowPanel addStyleNames="metadata-edit-field">
                 <g:Label addStyleNames="form-label">
                     <ui:text from='{messages.siardMetadata_archivistContact}'/>
                 </g:Label>
-                <g:TextBox addStyleNames="form-textbox metadata-edit-readonly" ui:field="archivistContact"/>
+                <g:TextBox addStyleNames="form-textbox" ui:field="archivistContact"/>
             </g:FlowPanel>
 
             <g:FlowPanel addStyleNames="metadata-edit-field">
                 <g:Label addStyleNames="form-label">
                     <ui:text from='{messages.siardMetadata_clientMachine}'/>
                 </g:Label>
-                <g:TextBox addStyleNames="form-textbox metadata-edit-readonly" ui:field="clientMachine"/>
+                <g:TextBox addStyleNames="form-textbox" ui:field="clientMachine"/>
             </g:FlowPanel>
 
             <g:FlowPanel addStyleNames="metadata-edit-field">
                 <g:Label addStyleNames="form-label">
                     <ui:text from='{messages.siardMetadata_databaseProduct}'/>
                 </g:Label>
-                <g:TextBox addStyleNames="form-textbox metadata-edit-readonly" ui:field="databaseProduct"/>
+                <g:TextBox addStyleNames="form-textbox" ui:field="databaseProduct"/>
             </g:FlowPanel>
 
             <g:FlowPanel addStyleNames="metadata-edit-field">
                 <g:Label addStyleNames="form-label">
                     <ui:text from='{messages.siardMetadata_databaseUser}'/>
                 </g:Label>
-                <g:TextBox addStyleNames="form-textbox metadata-edit-readonly" ui:field="databaseUser"/>
+                <g:TextBox addStyleNames="form-textbox" ui:field="databaseUser"/>
             </g:FlowPanel>
 
             <g:FlowPanel addStyleNames="metadata-edit-field">
                 <g:Label addStyleNames="form-label">
                     <ui:text from='{messages.siardMetadata_dataOriginTimeSpan}'/>
                 </g:Label>
-                <g:TextBox addStyleNames="form-textbox metadata-edit-readonly" ui:field="dataOriginTimeSpan"/>
+                <g:TextBox addStyleNames="form-textbox" ui:field="dataOriginTimeSpan"/>
             </g:FlowPanel>
 
             <g:FlowPanel addStyleNames="metadata-edit-field">
                 <g:Label addStyleNames="form-label">
                     <ui:text from='{messages.siardMetadata_dataOwner}'/>
                 </g:Label>
-                <g:TextBox addStyleNames="form-textbox metadata-edit-readonly" ui:field="dataOwner"/>
+                <g:TextBox addStyleNames="form-textbox" ui:field="dataOwner"/>
             </g:FlowPanel>
 
             <g:FlowPanel addStyleNames="metadata-edit-field">
                 <g:Label addStyleNames="form-label">
                     <ui:text from='{messages.description}'/>
                 </g:Label>
-                <g:TextArea addStyleNames="form-textbox metadata-edit-readonly" ui:field="description"/>
+                <g:TextArea addStyleNames="form-textbox" ui:field="description"/>
             </g:FlowPanel>
 
             <g:FlowPanel addStyleNames="metadata-edit-field">
                 <g:Label addStyleNames="form-label">
                     <ui:text from='{messages.siardMetadata_producerApplication}'/>
                 </g:Label>
-                <g:TextBox addStyleNames="form-textbox metadata-edit-readonly" ui:field="producerApplication"/>
+                <g:TextBox addStyleNames="form-textbox" ui:field="producerApplication"/>
             </g:FlowPanel>
 
         </g:FlowPanel>

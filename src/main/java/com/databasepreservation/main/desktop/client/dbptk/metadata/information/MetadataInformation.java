@@ -119,8 +119,6 @@ public class MetadataInformation extends MetadataPanel {
       mandatoryItem.put(name, false);
       element.getElement().setAttribute("required", "required");
     }
-//    element.setReadOnly(true);
-//    element.getElement().addClassName("metadata-edit-readonly");
     element.addChangeHandler(new ChangeHandler() {
       @Override
       public void onChange(ChangeEvent event) {
@@ -138,7 +136,7 @@ public class MetadataInformation extends MetadataPanel {
   private void checkIfElementIsMandatory(String name, TextBoxBase element){
 
     if(mandatoryItem.get(name) != null) {
-      GWT.log("mandatory::::" + name);
+      //validate
       if(element.getText().isEmpty()){
         mandatoryItem.replace(name, true);
       } else {
@@ -147,7 +145,6 @@ public class MetadataInformation extends MetadataPanel {
     }
 
     for (Map.Entry<String, Boolean> entry : mandatoryItem.entrySet()) {
-      System.out.println(entry.getKey() + "/" + entry.getValue());
       if(entry.getValue()) {
         JavascriptUtils.disableSaveMetadataButton(true);
         break;
@@ -183,17 +180,4 @@ public class MetadataInformation extends MetadataPanel {
 
     database.setMetadata(metadata);
   }
-
-  // @UiHandler("buttonEnableEdit")
-  // void buttonEnableEditHandle(ClickEvent e) {
-  // NodeList<Element> elements = Document.get().getElementsByTagName("input");
-  //
-  // for (int i = 0; i < elements.getLength(); i++) {
-  // elements.getItem(i).removeAttribute("readonly");
-  // elements.getItem(i).removeClassName("metadata-edit-readonly");
-  // }
-  //
-  // description.setReadOnly(false);
-  // description.getElement().removeClassName("metadata-edit-readonly");
-  // }
 }

@@ -4,6 +4,9 @@
  */
 package com.databasepreservation.main.common.shared.client.widgets;
 
+import com.databasepreservation.main.common.shared.ViewerConstants;
+import com.databasepreservation.main.common.shared.client.common.utils.ApplicationType;
+import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.main.common.shared.client.widgets.wcag.AccessibleFocusPanel;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -150,6 +153,9 @@ public class Toast extends PopupPanel {
   public static void showError(String message) {
     Toast errorPopup = new Toast(MessagePopupType.ERROR_MESSAGE, messages.alertErrorTitle(), message);
     errorPopup.start();
+    if(ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
+      JavascriptUtils.showNotification(messages.alertErrorTitle(),message);
+    }
   }
 
   /**
@@ -161,6 +167,9 @@ public class Toast extends PopupPanel {
   public static void showError(String title, String message) {
     Toast errorPopup = new Toast(MessagePopupType.ERROR_MESSAGE, title, message);
     errorPopup.start();
+    if(ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
+      JavascriptUtils.showNotification(title,message);
+    }
   }
 
   /**
@@ -171,6 +180,9 @@ public class Toast extends PopupPanel {
   public static void showInfo(String title, String message) {
     Toast errorPopup = new Toast(MessagePopupType.INFO, title, message);
     errorPopup.start();
+    if(ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
+      JavascriptUtils.showNotification(title,message);
+    }
   }
 
   /**

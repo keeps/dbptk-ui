@@ -80,8 +80,8 @@ public class MetadataViewPanel extends MetadataPanel {
     viewName.setText(schema.getName()+"."+view.getName());
     mainHeader.setWidget(viewName);
 
-    description
-      .setText(view.getDescription() == null ? messages.viewDoesNotContainDescription() : view.getDescription());
+    description.getElement().setAttribute("placeholder", messages.viewDoesNotContainDescription());
+    description.setText(view.getDescription());
     description.addChangeHandler(new ChangeHandler() {
       @Override
       public void onChange(ChangeEvent event) {

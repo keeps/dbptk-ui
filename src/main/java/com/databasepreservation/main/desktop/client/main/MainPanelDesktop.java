@@ -7,7 +7,6 @@ import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabas
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSIARDBundle;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
-import com.databasepreservation.main.desktop.client.common.sidebar.MetadataEditSidebar;
 import com.databasepreservation.main.desktop.client.dbptk.HomePage;
 import com.databasepreservation.main.desktop.client.dbptk.Manage;
 import com.databasepreservation.main.desktop.client.dbptk.SIARDMainPage;
@@ -46,14 +45,6 @@ public class MainPanelDesktop extends Composite {
 
   MainPanelDesktop() {
     initWidget(binder.createAndBindUi(this));
-  }
-
-  private void setRightPanelContent(String databaseUUID, MetadataPanelLoad rightPanelLoader) {
-    GWT.log("setRightPanelContent, dbuid " + databaseUUID);
-    SIARDEditMetadataPage instance = SIARDEditMetadataPage.getInstance(databaseUUID);
-    contentPanel.setWidget(instance);
-    instance.load(rightPanelLoader);
-
   }
 
   void onHistoryChanged(String token) {
@@ -95,21 +86,17 @@ public class MainPanelDesktop extends Composite {
     }  else if (HistoryManager.ROUTE_SIARD_EDIT_METADATA.equals(currentHistoryPath.get(0))) {
       String databaseUUID =  currentHistoryPath.get(1);
       if (currentHistoryPath.size() == 2) {
-        setRightPanelContent(databaseUUID, new MetadataPanelLoad() {
+        setMetadataRightPanelContent(databaseUUID, databaseUUID, new MetadataPanelLoad() {
           @Override
-          public MetadataPanel load(ViewerDatabase database, ViewerSIARDBundle SIARDbundle,
-            MetadataEditSidebar sidebar) {
-            sidebar.select(databaseUUID);
+          public MetadataPanel load(ViewerDatabase database, ViewerSIARDBundle SIARDbundle) {
             return MetadataInformation.getInstance(database, SIARDbundle);
           }
         });
       } else if (currentHistoryPath.size() == 3) {
         final String user = currentHistoryPath.get(2);
-        setRightPanelContent(databaseUUID, new MetadataPanelLoad() {
+        setMetadataRightPanelContent(databaseUUID, user, new MetadataPanelLoad() {
           @Override
-          public MetadataPanel load(ViewerDatabase database, ViewerSIARDBundle SIARDbundle,
-            MetadataEditSidebar sidebar) {
-            sidebar.select(user);
+          public MetadataPanel load(ViewerDatabase database, ViewerSIARDBundle SIARDbundle) {
             return MetadataUsersPanel.getInstance(database, SIARDbundle);
           }
         });
@@ -119,11 +106,10 @@ public class MainPanelDesktop extends Composite {
         String databaseUUID = currentHistoryPath.get(1);
         final String tableUUID = currentHistoryPath.get(2);
 
-        setRightPanelContent(databaseUUID, new MetadataPanelLoad() {
+        setMetadataRightPanelContent(databaseUUID, tableUUID, new MetadataPanelLoad() {
           @Override
-          public MetadataPanel load(ViewerDatabase database, ViewerSIARDBundle SIARDbundle,
-            MetadataEditSidebar sidebar) {
-            sidebar.select(tableUUID);
+
+          public MetadataPanel load(ViewerDatabase database, ViewerSIARDBundle SIARDbundle) {
             return MetadataTablePanel.getInstance(database, SIARDbundle, tableUUID);
           }
         });
@@ -134,11 +120,9 @@ public class MainPanelDesktop extends Composite {
         final String schemaUUID = currentHistoryPath.get(2);
         final String viewUUID = currentHistoryPath.get(3);
 
-        setRightPanelContent(databaseUUID, new MetadataPanelLoad() {
+        setMetadataRightPanelContent(databaseUUID, viewUUID, new MetadataPanelLoad() {
           @Override
-          public MetadataPanel load(ViewerDatabase database, ViewerSIARDBundle SIARDbundle,
-            MetadataEditSidebar sidebar) {
-            sidebar.select(viewUUID);
+          public MetadataPanel load(ViewerDatabase database, ViewerSIARDBundle SIARDbundle) {
             return MetadataViewPanel.getInstance(database, SIARDbundle, schemaUUID, viewUUID);
           }
         });
@@ -149,11 +133,9 @@ public class MainPanelDesktop extends Composite {
         final String schemaUUID = currentHistoryPath.get(2);
         final String routineUUID = currentHistoryPath.get(3);
 
-        setRightPanelContent(databaseUUID, new MetadataPanelLoad() {
+        setMetadataRightPanelContent(databaseUUID, routineUUID, new MetadataPanelLoad() {
           @Override
-          public MetadataPanel load(ViewerDatabase database, ViewerSIARDBundle SIARDbundle,
-            MetadataEditSidebar sidebar) {
-            sidebar.select(routineUUID);
+          public MetadataPanel load(ViewerDatabase database, ViewerSIARDBundle SIARDbundle) {
             return MetadataRoutinePanel.getInstance(database, SIARDbundle, schemaUUID, routineUUID);
           }
         });
@@ -161,6 +143,14 @@ public class MainPanelDesktop extends Composite {
     } else {
       handleErrorPath(currentHistoryPath);
     }
+  }
+
+  private void setMetadataRightPanelContent(String databaseUUID, String sidebarSelected,
+    MetadataPanelLoad rightPanelLoader) {
+    SIARDEditMetadataPage instance = SIARDEditMetadataPage.getInstance(databaseUUID);
+    contentPanel.clear();
+    contentPanel.add(instance);
+    instance.load(rightPanelLoader, sidebarSelected);
   }
 
   private void handleErrorPath(List<String> currentHistoryPath) {

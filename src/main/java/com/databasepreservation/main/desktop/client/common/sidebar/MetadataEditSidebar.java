@@ -30,14 +30,21 @@ public class MetadataEditSidebar extends Composite {
   private static Map<String, MetadataEditSidebar> instances = new HashMap<>();
   private static Map<String, SidebarHyperlink> list = new HashMap<>();
 
+
+  /**
+   * Creates a new MetadataEditSidebar
+   *
+   * @param databaseUUID
+   *          the database
+   * @return a MetadataEditSidebar instance
+   */
   public static MetadataEditSidebar getInstance(String databaseUUID) {
     if (databaseUUID == null) {
       return getEmptyInstance();
     }
 
     MetadataEditSidebar instance = instances.get(databaseUUID);
-    if (instance == null || instance.database == null
-      || !ViewerDatabase.Status.AVAILABLE.equals(instance.database.getStatus())) {
+    if (instance == null || instance.database == null || !ViewerDatabase.Status.AVAILABLE.equals(instance.database.getStatus())) {
       instance = new MetadataEditSidebar(databaseUUID);
       instances.put(databaseUUID, instance);
     } else {
@@ -46,24 +53,12 @@ public class MetadataEditSidebar extends Composite {
     return instance;
   }
 
-  public static MetadataEditSidebar getInstance(ViewerDatabase database) {
-    if (database == null) {
-      return getEmptyInstance();
-    }
-
-    MetadataEditSidebar instance = instances.get(database.getUUID());
-    if (instance == null || instance.database == null
-      || !ViewerDatabase.Status.AVAILABLE.equals(instance.database.getStatus())) {
-      instance = new MetadataEditSidebar(database);
-      instances.put(database.getUUID(), instance);
-    } else {
-      // workaround because the same MetadataEditSidebar can not belong to multiple
-      // widgets
-      return new MetadataEditSidebar(instance);
-    }
-    return instance;
-  }
-
+  /**
+   * Creates a new (dummy) MetadataEditSidebar that is not visible. This method exists
+   * so that pages can opt for not using a sidebar at all.
+   *
+   * @return a new invisible MetadataEditSidebar
+   */
   public static MetadataEditSidebar getEmptyInstance() {
     return new MetadataEditSidebar();
   }
@@ -89,6 +84,13 @@ public class MetadataEditSidebar extends Composite {
   private String databaseUUID;
   private boolean initialized = false;
 
+  /**
+   * Clone constructor, because the same MetadataEditSidebar can not be child in more
+   * than one widget
+   *
+   * @param other
+   *          the MetadataEditSidebar used in another widget
+   */
   private MetadataEditSidebar(MetadataEditSidebar other) {
     initialized = other.initialized;
     initWidget(uiBinder.createAndBindUi(this));
@@ -96,16 +98,17 @@ public class MetadataEditSidebar extends Composite {
     init(other.database);
   }
 
-  private MetadataEditSidebar(ViewerDatabase database) {
-    initWidget(uiBinder.createAndBindUi(this));
-    init(database);
-  }
-
+  /**
+   * Empty constructor, for pages that do not have a sidebar
+   */
   private MetadataEditSidebar() {
     initWidget(uiBinder.createAndBindUi(this));
     this.setVisible(false);
   }
 
+  /**
+   * Use MetadataEditSidebar.getInstance to obtain an instance
+   */
   private MetadataEditSidebar(String databaseUUID) {
     this();
     this.databaseUUID = databaseUUID;
@@ -113,7 +116,6 @@ public class MetadataEditSidebar extends Composite {
 
   public void init(ViewerDatabase db) {
     GWT.log("init with db: " + db + "; status: " + db.getStatus().toString());
-    GWT.log("started");
     if (ViewerDatabase.Status.AVAILABLE.equals(db.getStatus())
       || ViewerDatabase.Status.METADATA_ONLY.equals(db.getStatus())) {
       if (db != null && (databaseUUID == null || databaseUUID.equals(db.getUUID()))) {
@@ -219,7 +221,6 @@ public class MetadataEditSidebar extends Composite {
   }
 
   public void select(String value) {
-    GWT.log("SELECTED:::" + value);
     for (Map.Entry<String, SidebarHyperlink> entry : list.entrySet()) {
       if (entry.getKey().equals(value)) {
         list.get(value).setSelected(true);
@@ -274,7 +275,6 @@ public class MetadataEditSidebar extends Composite {
       }
     } else {
       // show matching and their parents
-
       Set<SidebarItem> parentsThatShouldBeVisible = new HashSet<>();
       List<SidebarItem> parentsList = new ArrayList<>();
 

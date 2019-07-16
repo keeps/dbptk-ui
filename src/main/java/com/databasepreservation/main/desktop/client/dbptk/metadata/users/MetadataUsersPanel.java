@@ -11,6 +11,7 @@ import com.databasepreservation.main.common.shared.ViewerStructure.ViewerUserStr
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.main.common.shared.client.widgets.wcag.AccessibleFocusPanel;
+import com.databasepreservation.main.desktop.client.common.sidebar.MetadataEditSidebar;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataPanel;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -70,7 +71,6 @@ public class MetadataUsersPanel extends MetadataPanel {
   }
 
   private void init() {
-    GWT.log("Edit Metadata Users init ");
     metadata = database.getMetadata();
 
     tabPanel.add(new MetadataUsers(SIARDbundle, metadata.getUsers()).createTable(), messages.titleUsers());

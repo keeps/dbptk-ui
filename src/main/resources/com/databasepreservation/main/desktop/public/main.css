@@ -1353,10 +1353,13 @@ input[type="checkbox"]:checked:after {
 .metadata-edit-field .form-label {
     width: 15%;
     min-width: 200px;
+    padding-right: 0.5em;
+    margin-top: 0;
 }
 
 .metadata-edit-field .form-textbox {
     width: 85%;
+    margin-bottom: 0;
 }
 
 .metadata-edit-field .form-textbox:required {
@@ -1411,6 +1414,10 @@ input[type="checkbox"]:checked:after {
 .metadata-table-list{
     display: block;
     height: 100%;
+}
+
+.metadata-table-list .form-textbox{
+    border-bottom: 0;
 }
 
 .metadata-edit, .metadata-edit .gwt-TabPanelBottom {

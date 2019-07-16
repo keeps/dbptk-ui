@@ -1,6 +1,7 @@
 package com.databasepreservation.main.desktop.client.dbptk.metadata;
 
 import com.databasepreservation.main.common.client.BrowserService;
+import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
@@ -9,6 +10,9 @@ import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbI
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
 import com.databasepreservation.main.common.shared.client.common.LoadingDiv;
+import com.databasepreservation.main.common.shared.client.common.dialogs.Dialogs;
+import com.databasepreservation.main.common.shared.client.common.utils.ApplicationType;
+import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.main.common.shared.client.widgets.Toast;
 import com.databasepreservation.main.desktop.client.common.sidebar.MetadataEditSidebar;
@@ -17,6 +21,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -83,19 +88,19 @@ public class SIARDEditMetadataPage extends Composite {
     BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
   }
 
-  public void load(MetadataPanelLoad rightPanelLoader) {
+  public void load(MetadataPanelLoad rightPanelLoader, String sidebarSelected) {
     GWT.log("load. uuid: " + databaseUUID + ", database: " + database);
 
     if (databaseUUID != null
       && (database == null || !ViewerDatabase.Status.METADATA_ONLY.equals(database.getStatus()))) {
       GWT.log("getting db");
-      loadPanelWithDatabase(rightPanelLoader);
+      loadPanelWithDatabase(rightPanelLoader, sidebarSelected);
     } else {
-      loadPanel(rightPanelLoader);
+      loadPanel(rightPanelLoader, sidebarSelected);
     }
   }
 
-  private void loadPanelWithDatabase(MetadataPanelLoad rightPanelLoader) {
+  private void loadPanelWithDatabase(MetadataPanelLoad rightPanelLoader, String sidebarSelected) {
     GWT.log("loadPanelWithDatabase");
     BrowserService.Util.getInstance().retrieve(databaseUUID, ViewerDatabase.class.getName(), databaseUUID,
       new DefaultAsyncCallback<IsIndexed>() {
@@ -106,20 +111,22 @@ public class SIARDEditMetadataPage extends Composite {
         @Override
         public void onSuccess(IsIndexed result) {
           database = (ViewerDatabase) result;
-          loadPanel(rightPanelLoader);
+          loadPanel(rightPanelLoader, sidebarSelected);
         }
       });
   }
 
-  private void loadPanel(MetadataPanelLoad rightPanelLoader) {
+  private void loadPanel(MetadataPanelLoad rightPanelLoader, String sidebarSelected) {
     GWT.log("loadPanel");
     GWT.log("have db: " + database + "sb.init: " + sidebar.isInitialized());
-    MetadataPanel rightPanel = rightPanelLoader.load(database, SIARDbundle, sidebar);
 
     if (database != null && !sidebar.isInitialized()) {
       sidebar.init(database);
     }
 
+    sidebar.select(sidebarSelected);
+
+    MetadataPanel rightPanel = rightPanelLoader.load(database, SIARDbundle);
     if (rightPanel != null) {
       rightPanel.handleBreadcrumb(breadcrumb);
       rightPanelContainer.setWidget(rightPanel);
@@ -130,6 +137,24 @@ public class SIARDEditMetadataPage extends Composite {
 
   @UiHandler("buttonSave")
   void buttonSaveHandler(ClickEvent e) {
+    Dialogs.showConfirmDialog(messages.dialogConfirm(), messages.dialogConfirmUpdateMetadata(), messages.dialogCancel(),
+      messages.dialogConfirm(), new DefaultAsyncCallback<Boolean>() {
+
+        @Override
+        public void onFailure(Throwable caught) {
+          Toast.showError(messages.metadataFailureUpdated(), caught.getMessage());
+        }
+
+        @Override
+        public void onSuccess(Boolean confirm) {
+          if (confirm) {
+            updateMetadate();
+          }
+        }
+      });
+  }
+
+  private void updateMetadate() {
     ViewerMetadata metadata = database.getMetadata();
 
     loading.setVisible(true);
@@ -149,7 +174,6 @@ public class SIARDEditMetadataPage extends Composite {
           Toast.showInfo(messages.metadataSuccessUpdated(), "");
         }
       });
-
   }
 
   @UiHandler("buttonRevert")

@@ -6,8 +6,7 @@
 package com.databasepreservation.main.common.shared.client.common.utils;
 
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public class JavascriptUtils {
 
@@ -293,5 +292,26 @@ public class JavascriptUtils {
 
       if (typeof result != "undefined") { return result; }
       else return null;
+}-*/;
+
+  public static native void showNotification(String title, String body) /*-{
+                                                                        var myNotification = new Notification(title, {body: body})
+                                                                        
+                                                                        myNotification.onclick = function() {
+                                                                        $wnd.console.log('Notification clicked')
+                                                                        };
+                                                                        }-*/;
+
+  public static native void confirmationDialog(String message, AsyncCallback callback) /*-{
+    var options = {
+      type: 'question',
+      buttons: ['Yes', 'No'],
+      title: 'Question',
+      message: message
+    };
+
+    var dialog = $wnd.nodeRequire('electron').remote.dialog;
+
+    return dialog.showMessageBox(null, options, function(response){callback(response);});
   }-*/;
 }

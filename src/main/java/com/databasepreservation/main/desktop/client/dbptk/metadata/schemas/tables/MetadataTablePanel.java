@@ -81,8 +81,8 @@ public class MetadataTablePanel extends MetadataPanel {
     tableName.setText(schema.getName() + "." + table.getName());
     mainHeader.setWidget(tableName);
 
-    description.setText(
-      table.getDescription() == null ? messages.siardMetadata_DescriptionUnavailable() : table.getDescription());
+    description.getElement().setAttribute("placeholder", messages.siardMetadata_DescriptionUnavailable());
+    description.setText(table.getDescription());
     description.addChangeHandler(new ChangeHandler() {
       @Override
       public void onChange(ChangeEvent event) {

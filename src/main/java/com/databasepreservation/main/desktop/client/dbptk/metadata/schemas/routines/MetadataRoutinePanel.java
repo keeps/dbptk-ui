@@ -75,8 +75,8 @@ public class MetadataRoutinePanel extends MetadataPanel {
         viewName.setText(schema.getName()+"."+routine.getName());
         mainHeader.setWidget(viewName);
 
-        description
-                .setText(routine.getDescription() == null ? messages.viewDoesNotContainDescription() : routine.getDescription());
+        description.getElement().setAttribute("placeholder", messages.routineDoesNotContainDescription());
+        description.setText(routine.getDescription());
         description.addChangeHandler(new ChangeHandler() {
             @Override
             public void onChange(ChangeEvent event) {

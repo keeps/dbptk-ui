@@ -39,12 +39,12 @@ public class DatabaseSidebar extends Composite {
   private static Map<String, DatabaseSidebar> instances = new HashMap<>();
 
   /**
-   * Creates a new MetadataEditSidebar, rarely hitting the database more than once for
+   * Creates a new DatabaseSidebar, rarely hitting the database more than once for
    * each database.
    *
    * @param databaseUUID
    *          the database UUID
-   * @return a MetadataEditSidebar instance
+   * @return a DatabaseSidebar instance
    */
   public static DatabaseSidebar getInstance(String databaseUUID) {
     String code = databaseUUID;
@@ -59,7 +59,7 @@ public class DatabaseSidebar extends Composite {
       instance = new DatabaseSidebar(databaseUUID);
       instances.put(code, instance);
     } else {
-      // workaround because the same MetadataEditSidebar can not belong to multiple
+      // workaround because the same DatabaseSidebar can not belong to multiple
       // widgets
       return new DatabaseSidebar(instance);
     }
@@ -67,12 +67,12 @@ public class DatabaseSidebar extends Composite {
   }
 
   /**
-   * Creates a new MetadataEditSidebar, rarely hitting the database more than once for
+   * Creates a new DatabaseSidebar, rarely hitting the database more than once for
    * each database.
    *
    * @param database
    *          the database
-   * @return a MetadataEditSidebar instance
+   * @return a DatabaseSidebar instance
    */
   public static DatabaseSidebar getInstance(ViewerDatabase database) {
     if (database == null) {
@@ -85,7 +85,7 @@ public class DatabaseSidebar extends Composite {
       instance = new DatabaseSidebar(database);
       instances.put(database.getUUID(), instance);
     } else {
-      // workaround because the same MetadataEditSidebar can not belong to multiple
+      // workaround because the same DatabaseSidebar can not belong to multiple
       // widgets
       return new DatabaseSidebar(instance);
     }
@@ -93,10 +93,10 @@ public class DatabaseSidebar extends Composite {
   }
 
   /**
-   * Creates a new (dummy) MetadataEditSidebar that is not visible. This method exists
+   * Creates a new (dummy) DatabaseSidebar that is not visible. This method exists
    * so that pages can opt for not using a sidebar at all.
    *
-   * @return a new invisible MetadataEditSidebar
+   * @return a new invisible DatabaseSidebar
    */
   public static DatabaseSidebar getEmptyInstance() {
     return new DatabaseSidebar();
@@ -124,11 +124,11 @@ public class DatabaseSidebar extends Composite {
   private boolean initialized = false;
 
   /**
-   * Clone constructor, because the same MetadataEditSidebar can not be child in more
+   * Clone constructor, because the same DatabaseSidebar can not be child in more
    * than one widget
    *
    * @param other
-   *          the MetadataEditSidebar used in another widget
+   *          the DatabaseSidebar used in another widget
    */
   private DatabaseSidebar(DatabaseSidebar other) {
     initialized = other.initialized;
@@ -138,7 +138,7 @@ public class DatabaseSidebar extends Composite {
   }
 
   /**
-   * Use MetadataEditSidebar.getInstance to obtain an instance
+   * Use DatabaseSidebar.getInstance to obtain an instance
    */
   private DatabaseSidebar(ViewerDatabase database) {
     initWidget(uiBinder.createAndBindUi(this));
@@ -154,7 +154,7 @@ public class DatabaseSidebar extends Composite {
   }
 
   /**
-   * Use MetadataEditSidebar.getInstance to obtain an instance
+   * Use DatabaseSidebar.getInstance to obtain an instance
    */
   private DatabaseSidebar(String databaseUUID) {
     this();

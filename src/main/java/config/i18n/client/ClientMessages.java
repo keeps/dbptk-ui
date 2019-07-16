@@ -585,8 +585,11 @@ public interface ClientMessages extends Messages {
 
   String viewDoesNotContainColumns();
 
+  String routineDoesNotContainDescription();
+
   String routines_thisRoutineFieldDoesNotHaveContent();
 
   String routines_parametersList();
 
+  String dialogConfirmUpdateMetadata();
 }

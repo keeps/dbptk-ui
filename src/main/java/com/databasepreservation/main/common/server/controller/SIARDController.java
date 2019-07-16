@@ -577,18 +577,21 @@ public class SIARDController {
 
   public static ViewerMetadata updateMetadataInformation(ViewerMetadata metadata, ViewerSIARDBundle bundleSiard,
     String databaseUUID, String siardPath) throws GenericException {
-    LOGGER.info("Updating  " + siardPath);
 
     Path reporterPath = ViewerConfiguration.getInstance().getReportPath(databaseUUID).toAbsolutePath();
     try (Reporter reporter = new Reporter(reporterPath.getParent().toString(), reporterPath.getFileName().toString())) {
-      SIARDEdition siardEdition = SIARDEdition.newInstance();
 
-      siardEdition.editModule(new SIARDEditFactory())
-        .editModuleParameter(SIARDEditFactory.PARAMETER_FILE, Collections.singletonList(siardPath))
-        .editModuleParameter(SIARDEditFactory.PARAMETER_SET, bundleSiard.getCommandList());
+      if (new File(siardPath).isFile()) {
+        LOGGER.info("Updating  " + siardPath);
+        SIARDEdition siardEdition = SIARDEdition.newInstance();
 
-      siardEdition.reporter(reporter);
-      siardEdition.edit();
+        siardEdition.editModule(new SIARDEditFactory())
+          .editModuleParameter(SIARDEditFactory.PARAMETER_FILE, Collections.singletonList(siardPath))
+          .editModuleParameter(SIARDEditFactory.PARAMETER_SET, bundleSiard.getCommandList());
+
+        siardEdition.reporter(reporter);
+        siardEdition.edit();
+      }
       bundleSiard.clearCommandList();
 
       final DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
