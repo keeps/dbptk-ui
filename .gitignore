@@ -36,3 +36,5 @@ node_modules/
 electron/build/
 electron/war/
 jvm.log
+
+*.siard
