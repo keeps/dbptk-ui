@@ -1019,6 +1019,7 @@ p[data-value]:after {
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
+    padding-left: 315px;
 }
 
 .wrapper {
@@ -1208,6 +1209,10 @@ p[data-value]:after {
 
 .wrapper .h4{
     margin-top: 0;
+}
+
+.wizard-connection-validator:required {
+    box-shadow: none;
 }
 
 .wizard-connection-validator:invalid {
@@ -1479,6 +1484,12 @@ input[type="checkbox"]:checked:after {
     display: block;
     max-height: 100%;
     width: 100%;
+}
+
+.leftSidebar{
+    height: 80vh;
+    display: block;
+    overflow: auto;
 }
 /**********************************************
 		    EDIT METADATA SIDEBAR

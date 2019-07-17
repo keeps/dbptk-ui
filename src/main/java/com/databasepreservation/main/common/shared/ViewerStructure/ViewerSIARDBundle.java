@@ -4,6 +4,7 @@ import com.google.common.html.HtmlEscapers;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +32,6 @@ public class ViewerSIARDBundle implements IsSerializable {
   private static final String COLUMN = "column:";
   private static final String ROUTINE = "routine:";
 
-
   public ViewerSIARDBundle() {
   }
 
@@ -52,8 +52,8 @@ public class ViewerSIARDBundle implements IsSerializable {
   }
 
   public void setPrivileges(String type, String object, String grantor, String grantee, String description) {
-    commandList.put(PRIVILEGE + "[" + TYPE + type + OBJECT + object + GRANTOR + grantor + GRANTEE
-      + grantee + "]", DESCRIPTION + description);
+    commandList.put(PRIVILEGE + "[" + TYPE + type + OBJECT + object + GRANTOR + grantor + GRANTEE + grantee + "]",
+      DESCRIPTION + description);
   }
 
   public void setTable(String schema, String table, String description) {
@@ -74,14 +74,13 @@ public class ViewerSIARDBundle implements IsSerializable {
   }
 
   public void setViewColumn(String schema, String view, String name, String description) {
-    commandList.put(SCHEMA + schema + SEPARATOR + VIEW + view + SEPARATOR +  COLUMN + name,
-            DESCRIPTION + description);
+    commandList.put(SCHEMA + schema + SEPARATOR + VIEW + view + SEPARATOR + COLUMN + name, DESCRIPTION + description);
   }
 
   public List<String> getCommandList() {
     List<String> bundleCommandList = new ArrayList<>();
     for (Map.Entry<String, String> entry : commandList.entrySet()) {
-      bundleCommandList.add(entry.getKey() + SEPARATOR + entry.getValue() + SEPARATOR);
+      bundleCommandList.add(entry.getKey() + SEPARATOR + entry.getValue().replaceAll("\\n", "\\\\u000D") + SEPARATOR);
     }
 
     return bundleCommandList;

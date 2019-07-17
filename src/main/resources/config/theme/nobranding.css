@@ -3,7 +3,7 @@
 }
 
 .browseItemMetadata, .descriptiveMetadataCard, .browseIngestJobId {
-    display: none;
+    /*display: none;*/
 }
 
 .searchResults .actionsButton {

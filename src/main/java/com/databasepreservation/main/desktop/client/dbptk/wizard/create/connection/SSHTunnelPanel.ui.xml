@@ -11,11 +11,11 @@
                 <g:Label ui:field="proxyHostLabel" addStyleNames="form-label-spaced">
                     <ui:text from='{messages.proxyHostLabel}'/>
                 </g:Label>
-                <g:TextBox ui:field="proxyHost" addStyleNames="form-textbox-inline"/>
+                <g:TextBox ui:field="proxyHost" addStyleNames="form-textbox-inline form-textbox"/>
                 <g:Label ui:field="proxyPortLabel" addStyleNames="form-label-spaced">
                     <ui:text from='{messages.proxyPortLabel}'/>
                 </g:Label>
-                <g:TextBox ui:field="proxyPort" addStyleNames="form-textbox-inline"/>
+                <g:TextBox ui:field="proxyPort" addStyleNames="form-textbox-inline form-textbox"/>
             </g:FlowPanel>
             <g:FlowPanel addStyleNames="form-row">
                 <g:Label ui:field="proxyUserLabel" addStyleNames="form-label-spaced">

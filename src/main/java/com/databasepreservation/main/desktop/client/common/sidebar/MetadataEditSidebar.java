@@ -156,8 +156,8 @@ public class MetadataEditSidebar extends Composite {
       sidebarGroup.add(new SidebarItem(schema.getName()).addIcon(FontAwesomeIconManager.SCHEMA).setH5().setIndent0());
 
       /* Tables */
-      SidebarItem tableHeader = createSidebarSubItemHeader(messages.menusidebar_data(),
-        FontAwesomeIconManager.SCHEMA_DATA);
+      SidebarItem tableHeader = createSidebarSubItemHeader(messages.sidebarTables(),
+        FontAwesomeIconManager.LIST);
       FlowPanel tableItems = new FlowPanel();
       for (ViewerTable table : schema.getTables()) {
 

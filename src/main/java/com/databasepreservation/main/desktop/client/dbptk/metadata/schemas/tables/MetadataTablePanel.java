@@ -1,5 +1,7 @@
 package com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.tables;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,6 +17,10 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.safehtml.shared.UriUtils;
+import com.google.gwt.thirdparty.guava.common.html.HtmlEscapers;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Label;
@@ -84,12 +90,13 @@ public class MetadataTablePanel extends MetadataPanel {
     mainHeader.setWidget(tableName);
 
     description.getElement().setAttribute("placeholder", messages.siardMetadata_DescriptionUnavailable());
-    description.setText(table.getDescription());
+    description.setText( (table.getDescription()));
     description.addChangeHandler(new ChangeHandler() {
       @Override
       public void onChange(ChangeEvent event) {
-        table.setDescription(description.getText());
-        SIARDbundle.setTable(schema.getName(), table.getName(), description.getText());
+
+        table.setDescription( description.getText() );
+        SIARDbundle.setTable(schema.getName(), table.getName(),description.getText());
         JavascriptUtils.alertUpdatedMetadata();
       }
     });

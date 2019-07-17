@@ -137,32 +137,22 @@ public class SIARDEditMetadataPage extends Composite {
 
   @UiHandler("buttonSave")
   void buttonSaveHandler(ClickEvent e) {
-    if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
-      JavascriptUtils.confirmationDialog(messages.dialogConfirmUpdateMetadata(), new DefaultAsyncCallback<Boolean>() {
+
+    Dialogs.showConfirmDialog(messages.dialogConfirm(), messages.dialogConfirmUpdateMetadata(), messages.dialogCancel(),
+      messages.dialogConfirm(), new DefaultAsyncCallback<Boolean>() {
+
         @Override
-        public void onSuccess(Boolean result) {
-          if (result) {
+        public void onFailure(Throwable caught) {
+          Toast.showError(messages.metadataFailureUpdated(), caught.getMessage());
+        }
+
+        @Override
+        public void onSuccess(Boolean confirm) {
+          if (confirm) {
             updateMetadate();
           }
         }
       });
-    } else {
-      Dialogs.showConfirmDialog(messages.dialogConfirm(), messages.dialogConfirmUpdateMetadata(),
-        messages.dialogCancel(), messages.dialogConfirm(), new DefaultAsyncCallback<Boolean>() {
-
-          @Override
-          public void onFailure(Throwable caught) {
-            Toast.showError(messages.metadataFailureUpdated(), caught.getMessage());
-          }
-
-          @Override
-          public void onSuccess(Boolean confirm) {
-            if (confirm) {
-              updateMetadate();
-            }
-          }
-        });
-    }
   }
 
   private void updateMetadate() {

@@ -72,26 +72,6 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
     setRequired(customViewDescriptionLabel, false);
     setRequired(customViewQueryLabel, true);
 
-    customViewName.addKeyUpHandler(event -> {
-//      if (ViewerStringUtils.isBlank(customViewName.getText())) {
-//        customViewNameLabel.addStyleName("form-label-spaced-error");
-//        customViewName.addStyleName("textbox-error");
-//      } else {
-//        customViewNameLabel.removeStyleName("form-label-spaced-error");
-//        customViewName.removeStyleName("textbox-error");
-//      }
-//    });
-//
-//    customViewQuery.addKeyUpHandler(event -> {
-//      if (ViewerStringUtils.isBlank(customViewQuery.getText())) {
-//        customViewQueryLabel.addStyleName("form-label-spaced-error");
-//        customViewQuery.addStyleName("textarea-error");
-//      } else {
-//        customViewQueryLabel.removeStyleName("form-label-spaced-error");
-//        customViewQuery.removeStyleName("textarea-error");
-//      }
-    });
-
     this.customViewsButtons.add(createCustomViewButton());
 
   }
