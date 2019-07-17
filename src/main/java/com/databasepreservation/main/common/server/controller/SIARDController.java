@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import com.databasepreservation.main.common.server.SIARDProgressObserver;
 import org.apache.commons.io.IOUtils;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
@@ -128,7 +129,7 @@ public class SIARDController {
     return false;
   }
 
-  public static boolean createSIARD(ConnectionParameters connectionParameters,
+  public static boolean createSIARD(String UUID, ConnectionParameters connectionParameters,
     TableAndColumnsParameters tableAndColumnsParameters, CustomViewsParameters customViewsParameters,
     ExportOptionsParameters exportOptionsParameters, MetadataExportOptionsParameters metadataExportOptionsParameters)
     throws GenericException {
@@ -179,7 +180,7 @@ public class SIARDController {
 
       databaseMigration.exportModuleParameter("table-filter", pathToTableFilter);
 
-      // databaseMigration.filter(new ObservableFilter()); 
+      databaseMigration.filter(new ObservableFilter(new SIARDProgressObserver(UUID)));
 
       databaseMigration.reporter(reporter);
 

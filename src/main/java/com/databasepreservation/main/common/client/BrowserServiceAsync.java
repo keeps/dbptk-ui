@@ -3,6 +3,7 @@ package com.databasepreservation.main.common.client;
 import java.util.HashMap;
 import java.util.List;
 
+import com.databasepreservation.main.common.shared.SIARDProgressData;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.RODAException;
 import org.roda.core.data.exceptions.RequestNotValidException;
@@ -128,10 +129,14 @@ public interface BrowserServiceAsync {
 
   void testConnection(String databaseUUID, String moduleName, HashMap<String, String> parameters, AsyncCallback<Boolean> async);
 
-  void createSIARD(ConnectionParameters connectionParameters, TableAndColumnsParameters tableAndColumnsParameters,
+  void createSIARD(String UUID, ConnectionParameters connectionParameters, TableAndColumnsParameters tableAndColumnsParameters,
     CustomViewsParameters customViewsParameters, ExportOptionsParameters exportOptionsParameters,
     MetadataExportOptionsParameters metadataExportOptionsParameters, AsyncCallback<Boolean> async);
 
+  void generateUUID(AsyncCallback<String> async);
+
   void updateMetadataInformation(ViewerMetadata metadata, ViewerSIARDBundle bundleSiard, String databaseUUID,
     String path, AsyncCallback<ViewerMetadata> async);
+
+  void getProgressData(String uuid, AsyncCallback<SIARDProgressData> async);
 }

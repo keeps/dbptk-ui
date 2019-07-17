@@ -592,4 +592,14 @@ public interface ClientMessages extends Messages {
   String routines_parametersList();
 
   String dialogConfirmUpdateMetadata();
+
+  String retrievingTableStructure();
+
+  String progressBarPanelTables();
+
+  String progressBarPanelRows();
+
+  String progressBarPanelCurrentTables();
+
+  String progressBarPanelCurrentRows();
 }

@@ -3,6 +3,7 @@ package com.databasepreservation.main.common.client;
 import java.util.HashMap;
 import java.util.List;
 
+import com.databasepreservation.main.common.shared.SIARDProgressData;
 import org.roda.core.data.exceptions.AuthenticationDeniedException;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.roda.core.data.exceptions.GenericException;
@@ -125,8 +126,15 @@ public interface BrowserService extends RemoteService {
 
   boolean testConnection(String databaseUUID, String moduleName, HashMap<String, String> parameters) throws GenericException;
 
-  boolean createSIARD(ConnectionParameters connectionParameters, TableAndColumnsParameters tableAndColumnsParameters, CustomViewsParameters customViewsParameters, ExportOptionsParameters exportOptionsParameters, MetadataExportOptionsParameters metadataExportOptionsParameters) throws GenericException;
+  boolean createSIARD(String UUID, ConnectionParameters connectionParameters,
+    TableAndColumnsParameters tableAndColumnsParameters, CustomViewsParameters customViewsParameters,
+    ExportOptionsParameters exportOptionsParameters, MetadataExportOptionsParameters metadataExportOptionsParameters)
+    throws GenericException;
+
+  String generateUUID();
 
   ViewerMetadata updateMetadataInformation(ViewerMetadata metadata, ViewerSIARDBundle bundleSiard, String databaseUUID,
     String path) throws GenericException;
+
+  SIARDProgressData getProgressData(String uuid);
 }

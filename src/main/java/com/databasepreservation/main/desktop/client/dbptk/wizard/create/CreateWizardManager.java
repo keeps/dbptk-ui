@@ -10,9 +10,11 @@ import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbI
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
 import com.databasepreservation.main.common.shared.client.common.utils.AsyncCallbackUtils;
+import com.databasepreservation.main.common.shared.client.common.utils.BrowserServiceUtils;
 import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
+import com.databasepreservation.main.desktop.client.dbptk.wizard.ProgressBarPanel;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.create.exportOptions.MetadataExportOptions;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.create.exportOptions.SIARDExportOptions;
@@ -238,16 +240,28 @@ public class CreateWizardManager extends Composite {
     final boolean valid = wizardInstances.get(position).validate();
     if (valid) {
       metadataExportOptionsParameters = (MetadataExportOptionsParameters) wizardInstances.get(position).getValues();
-
       createSIARD();
     }
   }
 
   private void createSIARD() {
-    BrowserService.Util.getInstance().createSIARD(connectionParameters, tableAndColumnsParameters, customViewsParameters, exportOptionsParameters, metadataExportOptionsParameters, new DefaultAsyncCallback<Boolean>() {
+    wizardContent.clear();
+    enableButtons(false);
+    position = 5;
+    updateBreadcrumb();
+
+    BrowserService.Util.getInstance().generateUUID(new DefaultAsyncCallback<String>() {
       @Override
-      public void onSuccess(Boolean result) {
-        JavascriptUtils.log("TEST");
+      public void onSuccess(String result) {
+        ProgressBarPanel progressBarPanel = ProgressBarPanel.createInstance(result);
+        wizardContent.add(progressBarPanel);
+
+        BrowserService.Util.getInstance().createSIARD(result, connectionParameters, tableAndColumnsParameters, customViewsParameters, exportOptionsParameters, metadataExportOptionsParameters, new DefaultAsyncCallback<Boolean>() {
+          @Override
+          public void onSuccess(Boolean result) {
+            JavascriptUtils.log("TEST");
+          }
+        });
       }
     });
   }
@@ -263,6 +277,12 @@ public class CreateWizardManager extends Composite {
     if (position == positions - 1) {
       btnNext.setText(messages.migrate());
     }
+  }
+
+  private void enableButtons(boolean value) {
+    btnCancel.setEnabled(value);
+    btnNext.setEnabled(value);
+    btnBack.setEnabled(value);
   }
 
   private void updateBreadcrumb() {
@@ -283,6 +303,9 @@ public class CreateWizardManager extends Composite {
         break;
       case 4:
         breadcrumbItems = BreadcrumbManager.forMetadataExportOptions();
+        break;
+      case 5:
+        breadcrumbItems = BreadcrumbManager.forCreateSIARD();
         break;
       default: breadcrumbItems = new ArrayList<>();
         break;

@@ -3,6 +3,7 @@ package com.databasepreservation.main.common.server;
 import java.util.HashMap;
 import java.util.List;
 
+import com.databasepreservation.main.common.shared.SIARDProgressData;
 import org.roda.core.data.exceptions.AuthenticationDeniedException;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.roda.core.data.exceptions.GenericException;
@@ -269,17 +270,27 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
   }
 
   @Override
-  public boolean createSIARD(ConnectionParameters connectionParameters,
+  public boolean createSIARD(String UUID, ConnectionParameters connectionParameters,
     TableAndColumnsParameters tableAndColumnsParameters, CustomViewsParameters customViewsParameters,
     ExportOptionsParameters exportOptionsParameters, MetadataExportOptionsParameters metadataExportOptionsParameters)
     throws GenericException {
-    return SIARDController.createSIARD(connectionParameters, tableAndColumnsParameters, customViewsParameters,
+    return SIARDController.createSIARD(UUID, connectionParameters, tableAndColumnsParameters, customViewsParameters,
       exportOptionsParameters, metadataExportOptionsParameters);
+  }
+
+  @Override
+  public String generateUUID() {
+    return SolrUtils.randomUUID();
   }
 
   @Override
   public ViewerMetadata updateMetadataInformation(ViewerMetadata metadata, ViewerSIARDBundle bundleSiard,
     String databaseUUID, String path) throws GenericException {
     return SIARDController.updateMetadataInformation(metadata, bundleSiard, databaseUUID, path);
+  }
+
+  @Override
+  public SIARDProgressData getProgressData(String uuid) {
+    return SIARDProgressData.getInstance(uuid);
   }
 }

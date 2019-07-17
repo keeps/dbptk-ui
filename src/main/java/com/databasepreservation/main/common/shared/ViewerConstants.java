@@ -1,7 +1,5 @@
 package com.databasepreservation.main.common.shared;
 
-import static com.databasepreservation.model.parameters.Parameter.CATEGORY_TYPE;
-
 import org.roda.core.data.common.RodaConstants;
 import org.roda.core.data.v2.index.filter.BasicSearchFilterParameter;
 import org.roda.core.data.v2.index.filter.Filter;
