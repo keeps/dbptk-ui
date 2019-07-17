@@ -73,23 +73,23 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
     setRequired(customViewQueryLabel, true);
 
     customViewName.addKeyUpHandler(event -> {
-      if (ViewerStringUtils.isBlank(customViewName.getText())) {
-        customViewNameLabel.addStyleName("form-label-spaced-error");
-        customViewName.addStyleName("textbox-error");
-      } else {
-        customViewNameLabel.removeStyleName("form-label-spaced-error");
-        customViewName.removeStyleName("textbox-error");
-      }
-    });
-
-    customViewQuery.addKeyUpHandler(event -> {
-      if (ViewerStringUtils.isBlank(customViewQuery.getText())) {
-        customViewQueryLabel.addStyleName("form-label-spaced-error");
-        customViewQuery.addStyleName("textarea-error");
-      } else {
-        customViewQueryLabel.removeStyleName("form-label-spaced-error");
-        customViewQuery.removeStyleName("textarea-error");
-      }
+//      if (ViewerStringUtils.isBlank(customViewName.getText())) {
+//        customViewNameLabel.addStyleName("form-label-spaced-error");
+//        customViewName.addStyleName("textbox-error");
+//      } else {
+//        customViewNameLabel.removeStyleName("form-label-spaced-error");
+//        customViewName.removeStyleName("textbox-error");
+//      }
+//    });
+//
+//    customViewQuery.addKeyUpHandler(event -> {
+//      if (ViewerStringUtils.isBlank(customViewQuery.getText())) {
+//        customViewQueryLabel.addStyleName("form-label-spaced-error");
+//        customViewQuery.addStyleName("textarea-error");
+//      } else {
+//        customViewQueryLabel.removeStyleName("form-label-spaced-error");
+//        customViewQuery.removeStyleName("textarea-error");
+//      }
     });
 
     this.customViewsButtons.add(createCustomViewButton());
@@ -241,13 +241,13 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
         counter++;
       } else {
         if (ViewerStringUtils.isBlank(customViewName.getText())) {
-          customViewNameLabel.addStyleName("form-label-spaced-error");
-          customViewName.addStyleName("textbox-error");
+          customViewName.getElement().setAttribute("required", "required");
+          customViewName.addStyleName("wizard-connection-validator");
         }
 
         if (ViewerStringUtils.isBlank(customViewQuery.getText())) {
-          customViewQueryLabel.addStyleName("form-label-spaced-error");
-          customViewQuery.addStyleName("textarea-error");
+          customViewQuery.getElement().setAttribute("required", "required");
+          customViewQuery.addStyleName("wizard-connection-validator");
         }
       }
     });

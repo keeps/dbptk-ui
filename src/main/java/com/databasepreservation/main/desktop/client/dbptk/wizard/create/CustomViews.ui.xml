@@ -7,7 +7,7 @@
             <g:FlowPanel ui:field="leftSideContainer" addStyleNames="left">
                 <g:FlowPanel ui:field="customViewsList"/>
             </g:FlowPanel>
-            <g:FlowPanel ui:field="rightSideContainer" addStyleNames="right">
+            <g:FlowPanel ui:field="rightSideContainer" addStyleNames="right content">
                 <g:FlowPanel ui:field="panel">
                     <g:Label addStyleNames="h4"><ui:text from='{messages.customViewsTitle}'/></g:Label>
                     <g:Label addStyleNames="h5"><ui:text from='{messages.customViewsDescription}'/></g:Label>

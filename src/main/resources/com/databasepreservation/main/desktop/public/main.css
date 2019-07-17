@@ -855,7 +855,10 @@ p[data-value]:after {
     justify-content: space-between;
     width: 75%;
     margin: 0 auto;
-    height: 50%;
+    top: 50%;
+    left: 50%;
+    position: absolute;
+    transform: translate(-50%, -50%);
 }
 .option {
     display: flex;
@@ -1059,7 +1062,7 @@ p[data-value]:after {
 
 .form-label-spaced {
     font-weight: bold;
-    flex: 1 0 160px;
+    flex: 0 0 160px;
 }
 
 .form-label-spaced-error {
@@ -1075,7 +1078,8 @@ p[data-value]:after {
 }
 
 .form-button {
-    width: 100%;
+    padding: 0;
+    margin: 0;
 }
 
 .form-inline > .form-label-spaced:last-of-type {
@@ -1159,9 +1163,9 @@ p[data-value]:after {
 
 .gwt-TabPanelBottom {
     background-color: transparent;
-    border-color: lightgray;
-    border-style: solid;
-    border-width: thin;
+    /*border-color: lightgray;*/
+    /*border-style: solid;*/
+    /*border-width: thin;*/
 }
 
 .sidebarHyperLink-selected {
@@ -1173,9 +1177,9 @@ p[data-value]:after {
     width: 100%;
 }
 
-.sidebarItem {
-    padding: 5px 0;
-}
+/*.sidebarItem {*/
+/*    padding: 5px 0;*/
+/*}*/
 
 .sidebarItem-selected {
     color: white !important;
@@ -1183,6 +1187,33 @@ p[data-value]:after {
 
 .select-buttons-container .btn:last-child {
     margin-left: 15px;
+}
+
+/***********************************************
+               WIZARD CONNECTION
+***********************************************/
+.wizard-connection{
+    height: 85vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.wizard-connection .wrapper {
+    /*height: 100%;*/
+}
+
+.connectionSidebar .sidebarItem{
+    padding: 5px 0; ;
+}
+
+.wrapper .h4{
+    margin-top: 0;
+}
+
+.wizard-connection-validator:invalid {
+    background-color: #eebcba;
+    border: none;
+    border-left: 2px solid #d9534f;
 }
 
 /***********************************************
@@ -1385,6 +1416,10 @@ input[type="checkbox"]:checked:after {
     font-weight: bold;
 }
 
+.metadata-edit .h1{
+    margin-top: 0;
+}
+
 /**********************************************
 			EDIT METADATA BUTTONS
 ************************************************/
@@ -1464,8 +1499,12 @@ input[type="checkbox"]:checked:after {
     content: "\f107";
     font-weight: bolder;
     position: absolute;
-    right: 0;
+    right: 1em;
     top: 0;
+}
+
+.sidebar-collapse .header > .leftSidebar-facet-panel.sidebarHyperLink-selected::after{
+    color: #fff;
 }
 
 .sidebar-collapse.gwt-DisclosurePanel-open .header > .leftSidebar-facet-panel::after{

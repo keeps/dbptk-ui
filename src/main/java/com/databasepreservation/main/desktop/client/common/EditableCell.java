@@ -3,7 +3,9 @@ package com.databasepreservation.main.desktop.client.common;
 import com.google.gwt.cell.client.TextInputCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -48,6 +50,18 @@ public class EditableCell extends TextInputCell {
     if (value == null) {
       value = "";
     }
+
+    InputElement input = getInputElement(parent);
+    Element target = event.getEventTarget().cast();
+    if (!input.isOrHasChild(target)) {
+      return;
+    }
+
+    String eventType = event.getType();
+    if (BrowserEvents.FOCUS.equals(eventType)) {
+      input.select();
+    }
+
     super.onBrowserEvent(context, parent, value, event, valueUpdater);
   }
 }

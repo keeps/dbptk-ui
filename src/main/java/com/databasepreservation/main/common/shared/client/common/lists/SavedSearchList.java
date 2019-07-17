@@ -128,11 +128,11 @@ public class SavedSearchList extends AsyncTableCell<SavedSearch, String> {
     dateAddedColumn.setSortable(true);
     actionsColumn.setSortable(false);
 
-    addColumn(nameColumn, messages.name(), true, false, 15);
-    addColumn(tableNameColumn, messages.table(), true, false, 15);
-    addColumn(dateAddedColumn, messages.created(), true, false, 15);
-    addColumn(descriptionColumn, messages.description(), true, false);
-    addColumn(actionsColumn, messages.actions(), false, false, 6);
+    addColumn(nameColumn, messages.name(), true, TextAlign.RIGHT, 15);
+    addColumn(tableNameColumn, messages.table(), true, TextAlign.RIGHT, 15);
+    addColumn(dateAddedColumn, messages.created(), true, TextAlign.RIGHT, 15);
+    addColumn(descriptionColumn, messages.description(), true, TextAlign.RIGHT);
+    addColumn(actionsColumn, messages.actions(), false, TextAlign.RIGHT, 6);
 
     Label emptyInfo = new Label(messages.thereAreNoSavedSearches());
     display.setEmptyTableWidget(emptyInfo);

@@ -96,6 +96,8 @@ public class JDBCPanel extends Composite {
         passwordTextBox.addStyleName("form-textbox");
         textBoxInputs.put(parameter.getName(), passwordTextBox);
         genericField = GenericField.createInstance(messages.connectionLabels(parameter.getName()), passwordTextBox);
+        if(parameter.isRequired())
+          passwordTextBox.getElement().setAttribute("required", "required");
         break;
       case "CHECKBOX":
         CheckBox checkbox = new CheckBox();
@@ -138,6 +140,8 @@ public class JDBCPanel extends Composite {
           defaultTextBox.addStyleName("form-textbox");
           textBoxInputs.put(parameter.getName(), defaultTextBox);
           genericField = GenericField.createInstance(messages.connectionLabels(parameter.getName()), defaultTextBox);
+          if(parameter.isRequired())
+            defaultTextBox.getElement().setAttribute("required", "required");
           break;
     }
 
@@ -157,6 +161,7 @@ public class JDBCPanel extends Composite {
         final TextBox textBox = textBoxInputs.get(parameter.getName());
         if (ViewerStringUtils.isBlank(textBox.getText())) {
           arrayList.add(parameter);
+          textBox.addStyleName("wizard-connection-validator");
         }
       }
     }

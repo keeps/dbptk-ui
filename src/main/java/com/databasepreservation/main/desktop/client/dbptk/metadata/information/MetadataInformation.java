@@ -16,6 +16,9 @@ import com.google.gwt.dom.client.NodeList;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.FocusEvent;
+import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -119,6 +122,12 @@ public class MetadataInformation extends MetadataPanel {
       mandatoryItem.put(name, false);
       element.getElement().setAttribute("required", "required");
     }
+    element.addFocusHandler(new FocusHandler() {
+      @Override
+      public void onFocus(FocusEvent event) {
+        element.selectAll();
+      }
+    });
     element.addChangeHandler(new ChangeHandler() {
       @Override
       public void onChange(ChangeEvent event) {

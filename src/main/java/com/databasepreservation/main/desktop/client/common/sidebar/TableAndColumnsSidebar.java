@@ -1,7 +1,11 @@
 package com.databasepreservation.main.desktop.client.common.sidebar;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSchema;
@@ -10,11 +14,21 @@ import com.databasepreservation.main.common.shared.client.common.sidebar.Sidebar
 import com.databasepreservation.main.common.shared.client.common.sidebar.SidebarItem;
 import com.databasepreservation.main.common.shared.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
+import com.databasepreservation.main.common.shared.client.tools.ViewerStringUtils;
+import com.databasepreservation.main.common.shared.client.widgets.wcag.AccessibleFocusPanel;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
@@ -38,6 +52,15 @@ public class TableAndColumnsSidebar extends Composite {
   @UiField
   FlowPanel sidebarGroup;
 
+  @UiField
+  FlowPanel searchPanel;
+
+  @UiField
+  TextBox searchInputBox;
+
+  @UiField
+  AccessibleFocusPanel searchInputButton;
+
   public static TableAndColumnsSidebar newInstance(ViewerMetadata viewerMetadata) {
     return new TableAndColumnsSidebar(viewerMetadata);
   }
@@ -56,24 +79,39 @@ public class TableAndColumnsSidebar extends Composite {
     sidebarGroup.add(database);
 
     for (ViewerSchema schema : viewerMetadata.getSchemas()) {
-      sidebarGroup.add(new SidebarItem(schema.getName()).addIcon(FontAwesomeIconManager.SCHEMA).setH5().setIndent1());
 
-      SidebarHyperlink tables = new SidebarHyperlink(messages.sidebarTables(),
-        HistoryManager.linkToCreateSIARD(HistoryManager.ROUTE_WIZARD_TABLES_COLUMNS, TABLES_LINK, schema.getUUID()));
+      SidebarHyperlink schemas = new SidebarHyperlink(schema.getName(),
+              HistoryManager.linkToCreateSIARD(HistoryManager.ROUTE_WIZARD_TABLES_COLUMNS, TABLES_LINK, schema.getUUID()));
+      schemas.addIcon(FontAwesomeIconManager.SCHEMA).setH5().setIndent1();
+      list.put(TABLES_LINK, schemas);
+      sidebarGroup.add(schemas);
+
+      SidebarItem tables = new SidebarItem(messages.sidebarTables());
       tables.addIcon(FontAwesomeIconManager.LIST).setH5().setIndent2();
-      list.put(TABLES_LINK, tables);
-      sidebarGroup.add(tables);
 
+      FlowPanel tablesItens = new FlowPanel();
       for (ViewerTable table : schema.getTables()) {
         SidebarHyperlink sidebarHyperlink = new SidebarHyperlink(table.getName(),
-          HistoryManager.linkToCreateSIARD(HistoryManager.ROUTE_WIZARD_TABLES_COLUMNS, TABLE_LINK, schema.getUUID(), table.getUUID()));
+                HistoryManager.linkToCreateSIARD(HistoryManager.ROUTE_WIZARD_TABLES_COLUMNS, TABLE_LINK, schema.getUUID(), table.getUUID()));
         sidebarHyperlink.addIcon(FontAwesomeIconManager.TABLE).setH6().setIndent3();
         list.put(table.getName(), sidebarHyperlink);
-        sidebarGroup.add(sidebarHyperlink);
+        tablesItens.add(sidebarHyperlink);
       }
-    }
+      createSubItem(tables, tablesItens);
 
+      searchInit();
+    }
     setVisible(true);
+  }
+
+  private void createSubItem(SidebarItem header, FlowPanel content) {
+    DisclosurePanel panel = new DisclosurePanel();
+    panel.setAnimationEnabled(true);
+    panel.setHeader(header);
+    panel.setContent(content);
+    panel.getElement().addClassName("sidebar-collapse");
+    panel.setOpen(true);
+    sidebarGroup.add(panel);
   }
 
   public void select(String value) {
@@ -83,6 +121,84 @@ public class TableAndColumnsSidebar extends Composite {
         list.get(value).setSelected(true);
       } else {
         list.get(entry.getKey()).setSelected(false);
+      }
+    }
+  }
+
+  private void searchInit() {
+    searchInputBox.getElement().setPropertyString("placeholder", messages.menusidebar_filterSidebar());
+
+    searchInputBox.addChangeHandler(new ChangeHandler() {
+      @Override
+      public void onChange(ChangeEvent event) {
+        doSearch();
+      }
+    });
+
+    searchInputBox.addKeyUpHandler(new KeyUpHandler() {
+      @Override
+      public void onKeyUp(KeyUpEvent event) {
+        doSearch();
+      }
+    });
+
+    searchInputButton.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        doSearch();
+      }
+    });
+  }
+
+  private void doSearch() {
+    String searchValue = searchInputBox.getValue();
+
+    if (ViewerStringUtils.isBlank(searchValue)) {
+      // show all
+      for (Widget widget : sidebarGroup) {
+        widget.setVisible(true);
+
+        if (widget instanceof DisclosurePanel) {
+          DisclosurePanel disclosurePanel = (DisclosurePanel) widget;
+          FlowPanel fp = (FlowPanel) disclosurePanel.getContent();
+          for (Widget value : fp) {
+            SidebarItem sb = (SidebarItem) value;
+            sb.setVisible(true);
+          }
+        }
+      }
+    } else {
+      // show matching and their parents
+      Set<DisclosurePanel> disclosurePanelsThatShouldBeVisible = new HashSet<>();
+
+      for (Widget widget : sidebarGroup) {
+        if (widget instanceof DisclosurePanel) {
+          DisclosurePanel disclosurePanel = (DisclosurePanel) widget;
+          disclosurePanel.setOpen(true);
+          FlowPanel fp = (FlowPanel) disclosurePanel.getContent();
+
+          for (Widget value : fp) {
+            SidebarItem sb = (SidebarItem) value;
+
+            GWT.log(sb.getText());
+
+            if (sb.getText().toLowerCase().contains(searchValue.toLowerCase())) {
+              sb.setVisible(true);
+              disclosurePanelsThatShouldBeVisible.add(disclosurePanel);
+            } else {
+              sb.setVisible(false);
+              disclosurePanel.setVisible(false);
+            }
+
+          }
+
+        } else {
+          widget.setVisible(true);
+        }
+      }
+
+      for (DisclosurePanel disclosurePanel : disclosurePanelsThatShouldBeVisible) {
+        disclosurePanel.setVisible(true);
       }
     }
   }

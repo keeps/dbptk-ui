@@ -17,14 +17,14 @@
         <g:FlowPanel addStyleNames="metadata-edit-panel">
 
             <g:FlowPanel addStyleNames="metadata-edit-field">
-                <g:Label addStyleNames="form-label">
+                <g:Label addStyleNames="form-label form-label-mandatory">
                     <ui:text from="{messages.siardMetadata_databaseName}"/>
                 </g:Label>
                 <g:TextBox addStyleNames="form-textbox" ui:field="databaseName"/>
             </g:FlowPanel>
 
             <g:FlowPanel addStyleNames="metadata-edit-field">
-                <g:Label addStyleNames="form-label">
+                <g:Label addStyleNames="form-label form-label-mandatory">
                     <ui:text from="{messages.siardMetadata_archivalDate}"/>
                 </g:Label>
                 <g:TextBox addStyleNames="form-textbox" ui:field="archivalDate"/>
@@ -66,14 +66,14 @@
             </g:FlowPanel>
 
             <g:FlowPanel addStyleNames="metadata-edit-field">
-                <g:Label addStyleNames="form-label">
+                <g:Label addStyleNames="form-label form-label-mandatory">
                     <ui:text from='{messages.siardMetadata_dataOriginTimeSpan}'/>
                 </g:Label>
                 <g:TextBox addStyleNames="form-textbox" ui:field="dataOriginTimeSpan"/>
             </g:FlowPanel>
 
             <g:FlowPanel addStyleNames="metadata-edit-field">
-                <g:Label addStyleNames="form-label">
+                <g:Label addStyleNames="form-label form-label-mandatory">
                     <ui:text from='{messages.siardMetadata_dataOwner}'/>
                 </g:Label>
                 <g:TextBox addStyleNames="form-textbox" ui:field="dataOwner"/>

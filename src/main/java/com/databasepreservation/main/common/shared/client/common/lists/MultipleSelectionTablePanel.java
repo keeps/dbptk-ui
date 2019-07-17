@@ -141,6 +141,7 @@ public class MultipleSelectionTablePanel<C> extends Composite {
     displayScroll = new ScrollPanel(display);
     displayScrollWrapper = new SimplePanel(displayScroll);
     displayScrollWrapper.addStyleName("my-asyncdatagrid-display-scroll-wrapper");
+    displayScroll.setSize("100%", "70vh");
     table.setWidget(displayScrollWrapper);
 
     displayScroll.addScrollHandler(new ScrollHandler() {

@@ -5,6 +5,7 @@
 
 package com.databasepreservation.main.common.shared.client.common.utils;
 
+import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
@@ -302,7 +303,7 @@ public class JavascriptUtils {
                                                                         };
                                                                         }-*/;
 
-  public static native void confirmationDialog(String message, AsyncCallback callback) /*-{
+  public static native void confirmationDialog(String message, DefaultAsyncCallback<Boolean> callback) /*-{
     var options = {
       type: 'question',
       buttons: ['Yes', 'No'],

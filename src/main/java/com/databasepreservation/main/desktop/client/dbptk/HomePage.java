@@ -60,6 +60,7 @@ public class HomePage extends Composite {
 
     Button btnCreate = new Button();
     btnCreate.setText(messages.createCardButton());
+    btnCreate.addStyleName("btn btn-edit");
 
     btnCreate.addClickHandler(new ClickHandler() {
 
@@ -71,6 +72,7 @@ public class HomePage extends Composite {
 
     Button btnOpen = new Button();
     btnOpen.setText(messages.openCardButton());
+    btnOpen.addStyleName("btn btn-plus");
 
     btnOpen.addClickHandler(new ClickHandler() {
 
@@ -148,6 +150,7 @@ public class HomePage extends Composite {
 
     Button btnManage = new Button();
     btnManage.setText(messages.manageCardButton());
+    btnManage.addStyleName("btn btn-view");
 
     btnManage.addClickHandler(new ClickHandler() {
 

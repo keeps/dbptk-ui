@@ -110,12 +110,12 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
     // dataOriginTimespan.setSortable(true);
     // description.setSortable(true);
 
-    addColumn(nameColumn, messages.databaseName(), true, false, 30);
-    addColumn(archivalDateColumn, messages.siardMetadata_archivalDate(), true, false, 20);
-    addColumn(dataOriginTimespan, messages.siardMetadata_dataOriginTimeSpan(), true, false, 20);
-    addColumn(shortID, messages.uniqueID(), true, false, 20);
-    addColumn(statusColumn, messages.databaseStatus(), true, false, 20);
-    addColumn(description, messages.description(), true, false, 35);
+    addColumn(nameColumn, messages.databaseName(), true, TextAlign.LEFT, 30);
+    addColumn(archivalDateColumn, messages.siardMetadata_archivalDate(), true, TextAlign.LEFT, 20);
+    addColumn(dataOriginTimespan, messages.siardMetadata_dataOriginTimeSpan(), true, TextAlign.LEFT, 20);
+    addColumn(shortID, messages.uniqueID(), true, TextAlign.LEFT, 20);
+    addColumn(statusColumn, messages.databaseStatus(), true, TextAlign.LEFT, 20);
+    addColumn(description, messages.description(), true, TextAlign.LEFT, 35);
 
     Label emptyInfo = new Label(messages.noItemsToDisplay());
     display.setEmptyTableWidget(emptyInfo);

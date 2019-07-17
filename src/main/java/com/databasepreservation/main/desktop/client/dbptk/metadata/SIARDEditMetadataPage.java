@@ -137,21 +137,32 @@ public class SIARDEditMetadataPage extends Composite {
 
   @UiHandler("buttonSave")
   void buttonSaveHandler(ClickEvent e) {
-    Dialogs.showConfirmDialog(messages.dialogConfirm(), messages.dialogConfirmUpdateMetadata(), messages.dialogCancel(),
-      messages.dialogConfirm(), new DefaultAsyncCallback<Boolean>() {
-
+    if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
+      JavascriptUtils.confirmationDialog(messages.dialogConfirmUpdateMetadata(), new DefaultAsyncCallback<Boolean>() {
         @Override
-        public void onFailure(Throwable caught) {
-          Toast.showError(messages.metadataFailureUpdated(), caught.getMessage());
-        }
-
-        @Override
-        public void onSuccess(Boolean confirm) {
-          if (confirm) {
+        public void onSuccess(Boolean result) {
+          if (result) {
             updateMetadate();
           }
         }
       });
+    } else {
+      Dialogs.showConfirmDialog(messages.dialogConfirm(), messages.dialogConfirmUpdateMetadata(),
+        messages.dialogCancel(), messages.dialogConfirm(), new DefaultAsyncCallback<Boolean>() {
+
+          @Override
+          public void onFailure(Throwable caught) {
+            Toast.showError(messages.metadataFailureUpdated(), caught.getMessage());
+          }
+
+          @Override
+          public void onSuccess(Boolean confirm) {
+            if (confirm) {
+              updateMetadate();
+            }
+          }
+        });
+    }
   }
 
   private void updateMetadate() {
@@ -174,6 +185,18 @@ public class SIARDEditMetadataPage extends Composite {
           Toast.showInfo(messages.metadataSuccessUpdated(), "");
         }
       });
+  }
+
+  private DefaultAsyncCallback<Boolean> callback(boolean result) {
+
+    return new DefaultAsyncCallback<Boolean>() {
+      @Override
+      public void onSuccess(Boolean result) {
+        if (result) {
+          updateMetadate();
+        }
+      }
+    };
   }
 
   @UiHandler("buttonRevert")

@@ -2,7 +2,7 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
     <g:FlowPanel addStyleNames="browseContentFilesPanel">
-        <g:FlowPanel addStyleNames="leftSidebar">
+        <g:FlowPanel addStyleNames="leftSidebar connectionSidebar">
             <g:FlowPanel ui:field="sidebarGroup"/>
         </g:FlowPanel>
     </g:FlowPanel>

@@ -94,7 +94,7 @@ public class Connection extends WizardPanel<ConnectionParameters> {
     ArrayList<PreservationParameter> preservationParametersSelected = dbmsModule.getParameters(connection);
 
     TabPanel tabPanel = new TabPanel();
-    tabPanel.addStyleName("connection-panel");
+    tabPanel.addStyleName("browseItemMetadata connection-panel");
     selected = JDBCPanel.getInstance(connection, preservationParametersSelected);
     JDBCPanels.add(selected);
     tabPanel.add(selected, messages.tabGeneral());

@@ -78,6 +78,10 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
 
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
 
+  protected enum TextAlign {
+    LEFT, RIGHT, CENTER, NONE
+  }
+
   private final MyAsyncDataProvider<T> dataProvider;
   private final SingleSelectionModel<T> selectionModel;
   private final AsyncHandler columnSortHandler;
@@ -717,33 +721,59 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
     this.selectedClass = selectedClass;
   }
 
-  protected void addColumn(Column<T, ?> column, SafeHtml headerHTML, boolean nowrap, boolean alignRight) {
+  protected void addColumn(Column<T, ?> column, SafeHtml headerHTML, boolean nowrap, TextAlign textAlign) {
     SafeHtmlHeader header = new SafeHtmlHeader(headerHTML);
 
     display.addColumn(column, header);
 
-    if (nowrap && alignRight) {
-      header.setHeaderStyleNames("nowrap text-align-right");
-      column.setCellStyleNames("nowrap text-align-right");
-    } else if (nowrap) {
-      header.setHeaderStyleNames("cellTableFadeOut");
-      column.setCellStyleNames("cellTableFadeOut");
+    StringBuilder headerStyleNames = new StringBuilder();
+    StringBuilder cellStyleNames = new StringBuilder();
+
+    switch (textAlign) {
+      case LEFT:
+        headerStyleNames.append("text-align-left");
+        cellStyleNames.append("text-align-left");
+        break;
+      case RIGHT:
+        headerStyleNames.append("text-align-right");
+        cellStyleNames.append("text-align-right");
+        break;
+      case CENTER:
+        headerStyleNames.append("text-align-center");
+        cellStyleNames.append("text-align-center");
+        break;
+      case NONE:
+        headerStyleNames.append("cellTableFadeOut");
+        cellStyleNames.append("cellTableFadeOut");
+        break;
+      default:
+        break;
+    }
+
+    if (nowrap) {
+      headerStyleNames.append(" nowrap");
+      cellStyleNames.append(" nowrap");
+      header.setHeaderStyleNames(headerStyleNames.toString());
+      column.setCellStyleNames(cellStyleNames.toString());
+    } else {
+      header.setHeaderStyleNames(headerStyleNames.toString());
+      column.setCellStyleNames(cellStyleNames.toString());
     }
   }
 
-  protected void addColumn(Column<T, ?> column, SafeHtml headerHTML, boolean nowrap, boolean alignRight,
-    double fixedSize) {
-    addColumn(column, headerHTML, nowrap, alignRight);
+  protected void addColumn(Column<T, ?> column, SafeHtml headerHTML, boolean nowrap, TextAlign textAlign,
+                           double fixedSize) {
+    addColumn(column, headerHTML, nowrap, textAlign);
     display.setColumnWidth(column, fixedSize, Style.Unit.EM);
   }
 
-  protected void addColumn(Column<T, ?> column, String headerText, boolean nowrap, boolean alignRight) {
-    addColumn(column, SafeHtmlUtils.fromString(headerText), nowrap, alignRight);
+  protected void addColumn(Column<T, ?> column, String headerText, boolean nowrap, TextAlign textAlign) {
+    addColumn(column, SafeHtmlUtils.fromString(headerText), nowrap, textAlign);
   }
 
-  protected void addColumn(Column<T, ?> column, String headerText, boolean nowrap, boolean alignRight,
-    double fixedSize) {
-    addColumn(column, SafeHtmlUtils.fromString(headerText), nowrap, alignRight, fixedSize);
+  protected void addColumn(Column<T, ?> column, String headerText, boolean nowrap, TextAlign textAlign,
+                           double fixedSize) {
+    addColumn(column, SafeHtmlUtils.fromString(headerText), nowrap, textAlign, fixedSize);
   }
 
   public abstract void exportVisibleClickHandler();

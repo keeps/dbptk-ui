@@ -232,13 +232,13 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
         .append(SafeHtmlUtils.fromString(viewerColumn.getDescription()).asString()).append("\">")
         .append(SafeHtmlUtils.fromString(viewerColumn.getDisplayName()).asString()).append("</span>");
 
-      addColumn(displayColumn, SafeHtmlUtils.fromSafeConstant(description.toString()), true, false, 10);
+      addColumn(displayColumn, SafeHtmlUtils.fromSafeConstant(description.toString()), true, TextAlign.RIGHT, 10);
     } else {
       StringBuilder description = new StringBuilder("<span title=\"")
         .append(SafeHtmlUtils.fromString(viewerColumn.getDisplayName()).asString()).append("\">")
         .append(SafeHtmlUtils.fromString(viewerColumn.getDisplayName()).asString()).append("</span>");
 
-      addColumn(displayColumn, SafeHtmlUtils.fromSafeConstant(description.toString()), true, false, 10);
+      addColumn(displayColumn, SafeHtmlUtils.fromSafeConstant(description.toString()), true, TextAlign.RIGHT, 10);
     }
   }
 
