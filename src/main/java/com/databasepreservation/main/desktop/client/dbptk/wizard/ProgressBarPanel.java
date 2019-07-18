@@ -73,10 +73,6 @@ public class ProgressBarPanel extends Composite {
   }
 
   private void update(SIARDProgressData progressData) {
-
-    GWT.log("rows:" + progressData.getProcessedRows());
-    GWT.log("Total Rows: " + progressData.getTotalRows());
-
     int currentGlobalPercent = new Double(
       ((progressData.getProcessedRows() * 1.0D) / progressData.getTotalRows()) * 100).intValue();
     progressBar.setCurrent(currentGlobalPercent);
@@ -92,59 +88,18 @@ public class ProgressBarPanel extends Composite {
       final String currentTableRowsPercentage = buildPercentageMessage(messages.progressBarPanelCurrentRows(),
         progressData.getCurrentProcessedTableRows(), progressData.getCurrentTableTotalRows());
 
-      addMessageToContent(totalTablesPercentage);
-      addMessageToContent(totalRowsPercentage);
-      addMessageToContent(currentTable);
-      addMessageToContent(currentTableRowsPercentage);
+      addMessageToContent(1, totalTablesPercentage);
+      addMessageToContent(2, totalRowsPercentage);
+      addMessageToContent(3, currentTable);
+      addMessageToContent(4, currentTableRowsPercentage);
     } else {
-      Label newMessage = new Label(messages.retrievingTableStructure());
-      content.add(newMessage);
+      final String retrieving = buildSimpleMessage("", messages.retrievingTableStructure());
+      addMessageToContent(0, retrieving);
     }
 
     if (progressData.isFinished()) {
       stopUpdating();
     }
-    /*
-     * 
-     * 
-     * // create textual log
-     * 
-     * // extra messages to smoothen the log if (database.getCurrentSchemaName() !=
-     * null &&
-     * !database.getCurrentSchemaName().equals(result.getCurrentSchemaName())) { //
-     * last message about a completed schema, schemas and rows at 100%
-     * addMessageToContent(buildMessage(database.getCurrentSchemaName(),
-     * database.getIngestedSchemas(), database.getTotalSchemas(),
-     * database.getCurrentTableName(), database.getTotalTables(),
-     * database.getTotalTables(), database.getTotalRows(),
-     * database.getTotalRows())); } else { if (database.getCurrentTableName() !=
-     * null && !database.getCurrentTableName().equals(result.getCurrentTableName()))
-     * { // last message about a completed schema, rows at 100%
-     * addMessageToContent(buildMessage(database.getCurrentSchemaName(),
-     * database.getIngestedSchemas(), database.getTotalSchemas(),
-     * database.getCurrentTableName(), database.getIngestedTables(),
-     * database.getTotalTables(), database.getTotalRows(),
-     * database.getTotalRows())); } }
-     * 
-     * // current message
-     * addMessageToContent(buildMessage(result.getCurrentSchemaName(),
-     * result.getIngestedSchemas(), result.getTotalSchemas(),
-     * result.getCurrentTableName(), result.getIngestedTables(),
-     * result.getTotalTables(), result.getIngestedRows(), result.getTotalRows()));
-     * 
-     * database = result; } else if
-     * (result.getStatus().equals(ViewerDatabase.Status.AVAILABLE)) {
-     * Toast.showInfo("Success", "Database \"" + database.getMetadata().getName() +
-     * "\" has been loaded."); HistoryManager.gotoDatabase(result.getUUID()); } else
-     * if (result.getStatus().equals(ViewerDatabase.Status.ERROR)) {
-     * addMessageToContent("The database could not be converted due to an error. Check the logs for details."
-     * ); stopUpdating(); } else if
-     * (result.getStatus().equals(ViewerDatabase.Status.REMOVING)) {
-     * addMessageToContent("The database is being removed and can not be displayed."
-     * ); stopUpdating(); } else {
-     * addMessageToContent("The database is in an unhandled status.");
-     * stopUpdating(); }
-     */
   }
 
   @Override
@@ -159,11 +114,18 @@ public class ProgressBarPanel extends Composite {
     }
   }
 
-  private void addMessageToContent(String message) {
+  private void addMessageToContent(final int index, final String message) {
     Label newMessage = new Label(message);
-    if (content.getWidgetCount() > 0) {
-      Label lastMessage = (Label) content.getWidget(content.getWidgetCount() - 1);
-      if (!newMessage.getText().equals(lastMessage.getText())) {
+    final int widgetCount = content.getWidgetCount();
+    if (widgetCount > 0) {
+      if (index < widgetCount) {
+        Label lastMessage = (Label) content.getWidget(index);
+        if (!newMessage.getText().equals(lastMessage.getText())) {
+          content.remove(index);
+          content.insert(newMessage, index + 1);
+          content.getElement().setScrollTop(content.getElement().getScrollHeight());
+        }
+      } else {
         content.add(newMessage);
         content.getElement().setScrollTop(content.getElement().getScrollHeight());
       }

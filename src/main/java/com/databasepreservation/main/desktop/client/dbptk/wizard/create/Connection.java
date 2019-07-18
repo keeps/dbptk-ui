@@ -114,6 +114,7 @@ public class Connection extends WizardPanel<ConnectionParameters> {
 
     if (sshTunnelPanel.isSSHTunnelEnabled()) {
       parameters.setSSHConfiguration(sshTunnelPanel.getSSHConfiguration());
+      parameters.doSSH(true);
     }
 
     return parameters;

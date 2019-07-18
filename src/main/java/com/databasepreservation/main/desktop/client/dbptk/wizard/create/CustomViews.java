@@ -1,12 +1,10 @@
 package com.databasepreservation.main.desktop.client.dbptk.wizard.create;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.common.shared.client.tools.ViewerStringUtils;
-import com.databasepreservation.main.common.shared.client.widgets.Toast;
 import com.databasepreservation.main.desktop.client.common.sidebar.CustomViewsSidebar;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
 import com.databasepreservation.main.desktop.shared.models.wizardParameters.CustomViewsParameter;
@@ -73,7 +71,6 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
     setRequired(customViewQueryLabel, true);
 
     this.customViewsButtons.add(createCustomViewButton());
-
   }
 
   @Override
@@ -107,7 +104,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
     setTextboxText(parameter.getCustomViewName(), parameter.getCustomViewDescription(), parameter.getCustomViewQuery());
 
     Button btnNew = new Button();
-    btnNew.setText(messages.createCardButton());
+    btnNew.setText(messages.newText());
     btnNew.addStyleName("btn btn-primary btn-new");
     btnNew.addClickHandler(event -> {
       setTextboxText("", "", "");
@@ -170,7 +167,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
       }
     }
 
-    return value && sameName;
+    return value && !sameName;
   }
 
   private void setRequired(Widget label, boolean required) {
@@ -219,6 +216,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
           customViewDescription.getText(), customViewQuery.getText());
         customViewsParameters.put(String.valueOf(counter), parameter);
         counter++;
+        setTextboxText("", "", "");
       } else {
         if (ViewerStringUtils.isBlank(customViewName.getText())) {
           customViewName.getElement().setAttribute("required", "required");

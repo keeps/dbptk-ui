@@ -260,13 +260,13 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
   }
 
   @Override
-  public ViewerMetadata getSchemaInformation(String databaseUUID, String moduleName, HashMap<String, String> values) throws GenericException {
-    return SIARDController.getDatabaseMetadata(databaseUUID, moduleName, values);
+  public ViewerMetadata getSchemaInformation(String databaseUUID, ConnectionParameters values) throws GenericException {
+    return SIARDController.getDatabaseMetadata(databaseUUID, values);
   }
 
   @Override
-  public boolean testConnection(String databaseUUID, String moduleName, HashMap<String, String> parameters) throws GenericException {
-    return SIARDController.testConnection(databaseUUID, moduleName, parameters);
+  public boolean testConnection(String databaseUUID, ConnectionParameters parameters) throws GenericException {
+    return SIARDController.testConnection(databaseUUID, parameters);
   }
 
   @Override

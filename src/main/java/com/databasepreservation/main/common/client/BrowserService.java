@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.databasepreservation.main.common.shared.SIARDProgressData;
+import com.databasepreservation.main.desktop.client.dbptk.wizard.create.Connection;
 import org.roda.core.data.exceptions.AuthenticationDeniedException;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.roda.core.data.exceptions.GenericException;
@@ -122,9 +123,9 @@ public interface BrowserService extends RemoteService {
 
   DBPTKModule getSIARDExportModules() throws GenericException;
 
-  ViewerMetadata getSchemaInformation(String databaseUUID, String moduleName, HashMap<String, String> values) throws GenericException;
+  ViewerMetadata getSchemaInformation(String databaseUUID, ConnectionParameters values) throws GenericException;
 
-  boolean testConnection(String databaseUUID, String moduleName, HashMap<String, String> parameters) throws GenericException;
+  boolean testConnection(String databaseUUID, ConnectionParameters parameters) throws GenericException;
 
   boolean createSIARD(String UUID, ConnectionParameters connectionParameters,
     TableAndColumnsParameters tableAndColumnsParameters, CustomViewsParameters customViewsParameters,

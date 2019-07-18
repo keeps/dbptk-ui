@@ -125,9 +125,9 @@ public interface BrowserServiceAsync {
 
   void getSIARDExportModule(String moduleName, AsyncCallback<DBPTKModule> async);
 
-  void getSchemaInformation(String databaseUUID, String moduleName, HashMap<String, String> values, AsyncCallback<ViewerMetadata> async);
+  void getSchemaInformation(String databaseUUID, ConnectionParameters values, AsyncCallback<ViewerMetadata> async);
 
-  void testConnection(String databaseUUID, String moduleName, HashMap<String, String> parameters, AsyncCallback<Boolean> async);
+  void testConnection(String databaseUUID, ConnectionParameters parameters, AsyncCallback<Boolean> async);
 
   void createSIARD(String UUID, ConnectionParameters connectionParameters, TableAndColumnsParameters tableAndColumnsParameters,
     CustomViewsParameters customViewsParameters, ExportOptionsParameters exportOptionsParameters,

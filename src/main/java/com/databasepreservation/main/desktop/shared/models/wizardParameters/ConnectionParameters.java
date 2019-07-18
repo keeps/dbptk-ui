@@ -12,6 +12,7 @@ public class ConnectionParameters implements Serializable {
 
   private String moduleName;
   private HashMap<String, String> connection;
+  private boolean ssh = false;
   private SSHConfiguration sshConfiguration;
 
   public ConnectionParameters() {
@@ -45,5 +46,13 @@ public class ConnectionParameters implements Serializable {
 
   public void setSSHConfiguration(SSHConfiguration sshConfiguration) {
     this.sshConfiguration = sshConfiguration;
+  }
+
+  public boolean doSSH() {
+    return ssh;
+  }
+
+  public void doSSH(boolean value) {
+    this.ssh = value;
   }
 }

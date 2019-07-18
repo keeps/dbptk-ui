@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import com.databasepreservation.main.desktop.shared.models.SSHConfiguration;
 import org.apache.commons.io.IOUtils;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
@@ -82,7 +83,7 @@ public class SIARDController {
     return result;
   }
 
-  public static boolean testConnection(String databaseUUID, String moduleName, HashMap<String, String> parameters)
+  public static boolean testConnection(String databaseUUID, ConnectionParameters parameters)
     throws GenericException {
     JDBCImportModule jdbcImportModule = null;
 
@@ -90,12 +91,21 @@ public class SIARDController {
     try (Reporter reporter = new Reporter(reporterPath.getParent().toString(), reporterPath.getFileName().toString())) {
       DatabaseMigration databaseMigration = DatabaseMigration.newInstance();
 
-      DatabaseModuleFactory factory = getDatabaseImportModuleFactory(moduleName);
+      DatabaseModuleFactory factory = getDatabaseImportModuleFactory(parameters.getModuleName());
 
       if (factory != null) {
         databaseMigration.importModule(factory);
 
-        for (Map.Entry<String, String> entry : parameters.entrySet()) {
+        if (parameters.doSSH()) {
+          final SSHConfiguration sshConfiguration = parameters.getSSHConfiguration();
+          databaseMigration.importModuleParameter("ssh", "true");
+          databaseMigration.importModuleParameter("ssh-host", sshConfiguration.getHostname());
+          databaseMigration.importModuleParameter("ssh-user", sshConfiguration.getUsername());
+          databaseMigration.importModuleParameter("ssh-password", sshConfiguration.getPassword());
+          databaseMigration.importModuleParameter("ssh-port", sshConfiguration.getPort());
+        }
+
+        for (Map.Entry<String, String> entry : parameters.getConnection().entrySet()) {
           databaseMigration.importModuleParameter(entry.getKey(), entry.getValue());
         }
 
@@ -150,6 +160,15 @@ public class SIARDController {
 
       databaseMigration.importModule(databaseImportModuleFactory);
 
+      if (connectionParameters.doSSH()) {
+        final SSHConfiguration sshConfiguration = connectionParameters.getSSHConfiguration();
+        databaseMigration.importModuleParameter("ssh", "true");
+        databaseMigration.importModuleParameter("ssh-host", sshConfiguration.getHostname());
+        databaseMigration.importModuleParameter("ssh-user", sshConfiguration.getUsername());
+        databaseMigration.importModuleParameter("ssh-password", sshConfiguration.getPassword());
+        databaseMigration.importModuleParameter("ssh-port", sshConfiguration.getPort());
+      }
+
       for (Map.Entry<String, String> entry : connectionParameters.getConnection().entrySet()) {
         LOGGER.info("Connection Options - " + entry.getKey() + "->" + entry.getValue());
         databaseMigration.importModuleParameter(entry.getKey(), entry.getValue());
@@ -199,19 +218,29 @@ public class SIARDController {
     }
   }
 
-  public static ViewerMetadata getDatabaseMetadata(String databaseUUID, String moduleName, HashMap<String, String> parameters) throws GenericException {
+  public static ViewerMetadata getDatabaseMetadata(String databaseUUID, ConnectionParameters parameters)
+    throws GenericException {
     JDBCImportModule jdbcImportModule = null;
 
     Path reporterPath = ViewerConfiguration.getInstance().getReportPath(databaseUUID).toAbsolutePath();
     try (Reporter reporter = new Reporter(reporterPath.getParent().toString(), reporterPath.getFileName().toString())) {
       DatabaseMigration databaseMigration = DatabaseMigration.newInstance();
 
-      DatabaseModuleFactory factory = getDatabaseImportModuleFactory(moduleName);
+      DatabaseModuleFactory factory = getDatabaseImportModuleFactory(parameters.getModuleName());
 
       if (factory != null) {
         databaseMigration.importModule(factory);
 
-        for (Map.Entry<String, String> entry : parameters.entrySet()) {
+        if (parameters.doSSH()) {
+          final SSHConfiguration sshConfiguration = parameters.getSSHConfiguration();
+          databaseMigration.importModuleParameter("ssh", "true");
+          databaseMigration.importModuleParameter("ssh-host", sshConfiguration.getHostname());
+          databaseMigration.importModuleParameter("ssh-user", sshConfiguration.getUsername());
+          databaseMigration.importModuleParameter("ssh-password", sshConfiguration.getPassword());
+          databaseMigration.importModuleParameter("ssh-port", sshConfiguration.getPort());
+        }
+
+        for (Map.Entry<String, String> entry : parameters.getConnection().entrySet()) {
           databaseMigration.importModuleParameter(entry.getKey(), entry.getValue());
         }
 

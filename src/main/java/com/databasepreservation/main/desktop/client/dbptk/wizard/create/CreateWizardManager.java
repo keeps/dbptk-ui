@@ -152,13 +152,13 @@ public class CreateWizardManager extends Composite {
 
       wizardContent.add(spinner);
 
-      BrowserService.Util.getInstance().testConnection("test", moduleName, connectionParameters.getConnection(),
+      BrowserService.Util.getInstance().testConnection("test", connectionParameters,
         new DefaultAsyncCallback<Boolean>() {
         @Override
         public void onSuccess(Boolean aBoolean) {
           wizardContent.clear();
           position = 1;
-            TableAndColumns tableAndColumns = TableAndColumns.getInstance(moduleName, connectionParameters.getConnection());
+            TableAndColumns tableAndColumns = TableAndColumns.getInstance(connectionParameters);
           wizardInstances.add(position, tableAndColumns);
           wizardContent.add(tableAndColumns);
           updateButtons();

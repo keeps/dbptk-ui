@@ -523,6 +523,8 @@ public interface ClientMessages extends Messages {
 
   String sidebarTables();
 
+  String sidebarViews();
+
   String selectAll();
 
   String selectNone();
@@ -604,4 +606,8 @@ public interface ClientMessages extends Messages {
   String progressBarPanelCurrentTables();
 
   String progressBarPanelCurrentRows();
+
+  String newText();
+
+  String viewName();
 }

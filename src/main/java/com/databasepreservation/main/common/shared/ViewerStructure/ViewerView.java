@@ -19,6 +19,9 @@ public class ViewerView implements Serializable {
 
   private String uuid;
 
+  private String schemaUUID;
+  private String schemaName;
+
   public ViewerView() {
   }
 
@@ -68,5 +71,21 @@ public class ViewerView implements Serializable {
 
   public String getUUID() {
     return uuid;
+  }
+
+  public String getSchemaUUID() {
+    return schemaUUID;
+  }
+
+  public void setSchemaUUID(String schemaUUID) {
+    this.schemaUUID = schemaUUID;
+  }
+
+  public String getSchemaName() {
+    return schemaName;
+  }
+
+  public void setSchemaName(String schemaName) {
+    this.schemaName = schemaName;
   }
 }

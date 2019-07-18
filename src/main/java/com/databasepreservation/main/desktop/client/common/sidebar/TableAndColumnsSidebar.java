@@ -10,6 +10,7 @@ import java.util.Set;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSchema;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerView;
 import com.databasepreservation.main.common.shared.client.common.sidebar.SidebarHyperlink;
 import com.databasepreservation.main.common.shared.client.common.sidebar.SidebarItem;
 import com.databasepreservation.main.common.shared.client.tools.FontAwesomeIconManager;
@@ -40,6 +41,7 @@ public class TableAndColumnsSidebar extends Composite {
   public static final String DATABASE_LINK = "database";
   public static final String TABLES_LINK = "tables";
   public static final String TABLE_LINK = "table";
+  public static final String VIEW_LINK = "view";
 
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, SidebarHyperlink> list = new HashMap<>();
@@ -89,15 +91,30 @@ public class TableAndColumnsSidebar extends Composite {
       SidebarItem tables = new SidebarItem(messages.sidebarTables());
       tables.addIcon(FontAwesomeIconManager.LIST).setH5().setIndent2();
 
-      FlowPanel tablesItens = new FlowPanel();
+      FlowPanel tablesItems = new FlowPanel();
       for (ViewerTable table : schema.getTables()) {
-        SidebarHyperlink sidebarHyperlink = new SidebarHyperlink(table.getName(),
-                HistoryManager.linkToCreateSIARD(HistoryManager.ROUTE_WIZARD_TABLES_COLUMNS, TABLE_LINK, schema.getUUID(), table.getUUID()));
-        sidebarHyperlink.addIcon(FontAwesomeIconManager.TABLE).setH6().setIndent3();
-        list.put(table.getName(), sidebarHyperlink);
-        tablesItens.add(sidebarHyperlink);
+        if (!table.getName().startsWith("VIEW_")) {
+          SidebarHyperlink sidebarHyperlink = new SidebarHyperlink(table.getName(),
+              HistoryManager.linkToCreateSIARD(HistoryManager.ROUTE_WIZARD_TABLES_COLUMNS, TABLE_LINK, schema.getUUID(), table.getUUID()));
+          sidebarHyperlink.addIcon(FontAwesomeIconManager.TABLE).setH6().setIndent3();
+          list.put(table.getName(), sidebarHyperlink);
+          tablesItems.add(sidebarHyperlink);
+        }
       }
-      createSubItem(tables, tablesItens);
+      createSubItem(tables, tablesItems);
+
+      SidebarItem views = new SidebarItem(messages.sidebarViews());
+      views.addIcon(FontAwesomeIconManager.LIST).setH5().setIndent2();
+
+      FlowPanel viewsItems = new FlowPanel();
+      for (ViewerView view : schema.getViews()) {
+        SidebarHyperlink sidebarHyperlink = new SidebarHyperlink(view.getName(),
+            HistoryManager.linkToCreateSIARD(HistoryManager.ROUTE_WIZARD_TABLES_COLUMNS, VIEW_LINK, schema.getUUID(), view.getUUID()));
+        sidebarHyperlink.addIcon(FontAwesomeIconManager.SCHEMA_VIEWS).setH6().setIndent3();
+        list.put(view.getName(), sidebarHyperlink);
+        viewsItems.add(sidebarHyperlink);
+      }
+      createSubItem(views, viewsItems);
 
       searchInit();
     }

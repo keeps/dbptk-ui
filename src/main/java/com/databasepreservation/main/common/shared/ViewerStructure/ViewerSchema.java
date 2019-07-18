@@ -74,4 +74,10 @@ public class ViewerSchema implements Serializable {
     this.routines = routines;
   }
 
+  public void setViewsSchemaUUID() {
+    for (ViewerView viewerView : views) {
+      viewerView.setSchemaUUID(uuid);
+      viewerView.setSchemaName(name);
+    }
+  }
 }
