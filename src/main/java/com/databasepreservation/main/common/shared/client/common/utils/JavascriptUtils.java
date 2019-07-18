@@ -258,14 +258,14 @@ public class JavascriptUtils {
                                                                       }-*/;
 
   public static native String openFileDialog(JavaScriptObject options) /*-{
-      var dialog = $wnd.nodeRequire('electron').remote.dialog;
-
-      var result = dialog.showOpenDialog(options);
-
-      if (typeof result != "undefined") { return result[0]; }
-      else return null;
-
-  }-*/;
+                                                                       var dialog = $wnd.nodeRequire('electron').remote.dialog;
+                                                                       
+                                                                       var result = dialog.showOpenDialog(options);
+                                                                       
+                                                                       if (typeof result != "undefined") { return result[0]; }
+                                                                       else return null;
+                                                                       
+                                                                       }-*/;
 
   public static native void alertUpdatedMetadata()/*-{
                                                     $wnd.jQuery(".metadata-save").show();
@@ -281,19 +281,19 @@ public class JavascriptUtils {
                                             }-*/;
 
   public static native void showItemInFolder(String path) /*-{
-      var shell = $wnd.nodeRequire('electron').remote.shell;
-
-      shell.showItemInFolder(path);
-  }-*/;
+                                                          var shell = $wnd.nodeRequire('electron').remote.shell;
+                                                          
+                                                          shell.showItemInFolder(path);
+                                                          }-*/;
 
   public static native String saveFileDialog() /*-{
-      var dialog = $wnd.nodeRequire('electron').remote.dialog
-
-      var result = dialog.showSaveDialog();
-
-      if (typeof result != "undefined") { return result; }
-      else return null;
-}-*/;
+                                               var dialog = $wnd.nodeRequire('electron').remote.dialog
+                                               
+                                               var result = dialog.showSaveDialog();
+                                               
+                                               if (typeof result != "undefined") { return result; }
+                                               else return null;
+                                               }-*/;
 
   public static native void showNotification(String title, String body) /*-{
                                                                         var myNotification = new Notification(title, {body: body})
@@ -303,16 +303,22 @@ public class JavascriptUtils {
                                                                         };
                                                                         }-*/;
 
-  public static native void confirmationDialog(String message, DefaultAsyncCallback<Boolean> callback) /*-{
-    var options = {
-      type: 'question',
-      buttons: ['Yes', 'No'],
-      title: 'Question',
-      message: message
-    };
-
-    var dialog = $wnd.nodeRequire('electron').remote.dialog;
-
-    return dialog.showMessageBox(null, options, function(response){callback(response);});
-  }-*/;
+  public static native void confirmationDialog(String title, String message, String cancel, String confirm, DefaultAsyncCallback<Boolean> callback) /*-{
+                                                                                                       var options = {
+                                                                                                       type: 'question',
+                                                                                                       buttons: [confirm, cancel],
+                                                                                                       title: title,
+                                                                                                       message: message
+                                                                                                       };
+                                                                                                       
+                                                                                                       var dialog = $wnd.nodeRequire('electron').remote.dialog;
+                                                                                                       
+                                                                                                       return dialog.showMessageBox(null, options, function(response){
+                                                                                                       var value = false;
+                                                                                                       if(response === 0) {
+                                                                                                       value = true;
+                                                                                                       }
+                                                                                                       callback.@com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback::onSuccess(*)(value);
+                                                                                                       });
+                                                                                                       }-*/;
 }

@@ -53,7 +53,6 @@ public class SIARDEditMetadataPage extends Composite {
 
     SIARDEditMetadataPage instance = instances.get(databaseUUID);
     if (instance == null) {
-      GWT.log("SIARDEditMetadataPage, getInstance:::" + databaseUUID);
       instance = new SIARDEditMetadataPage(databaseUUID);
       instances.put(databaseUUID, instance);
     }
@@ -93,7 +92,6 @@ public class SIARDEditMetadataPage extends Composite {
 
     if (databaseUUID != null
       && (database == null || !ViewerDatabase.Status.METADATA_ONLY.equals(database.getStatus()))) {
-      GWT.log("getting db");
       loadPanelWithDatabase(rightPanelLoader, sidebarSelected);
     } else {
       loadPanel(rightPanelLoader, sidebarSelected);
@@ -101,7 +99,6 @@ public class SIARDEditMetadataPage extends Composite {
   }
 
   private void loadPanelWithDatabase(MetadataPanelLoad rightPanelLoader, String sidebarSelected) {
-    GWT.log("loadPanelWithDatabase");
     BrowserService.Util.getInstance().retrieve(databaseUUID, ViewerDatabase.class.getName(), databaseUUID,
       new DefaultAsyncCallback<IsIndexed>() {
         @Override
@@ -117,7 +114,6 @@ public class SIARDEditMetadataPage extends Composite {
   }
 
   private void loadPanel(MetadataPanelLoad rightPanelLoader, String sidebarSelected) {
-    GWT.log("loadPanel");
     GWT.log("have db: " + database + "sb.init: " + sidebar.isInitialized());
 
     if (database != null && !sidebar.isInitialized()) {
@@ -138,24 +134,38 @@ public class SIARDEditMetadataPage extends Composite {
   @UiHandler("buttonSave")
   void buttonSaveHandler(ClickEvent e) {
 
-    Dialogs.showConfirmDialog(messages.dialogConfirm(), messages.dialogConfirmUpdateMetadata(), messages.dialogCancel(),
-      messages.dialogConfirm(), new DefaultAsyncCallback<Boolean>() {
+    if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
+      JavascriptUtils.confirmationDialog(messages.dialogUpdateMetadata(), messages.dialogConfirmUpdateMetadata(),
+        messages.dialogCancel(), messages.dialogConfirm(), new DefaultAsyncCallback<Boolean>() {
 
-        @Override
-        public void onFailure(Throwable caught) {
-          Toast.showError(messages.metadataFailureUpdated(), caught.getMessage());
-        }
-
-        @Override
-        public void onSuccess(Boolean confirm) {
-          if (confirm) {
-            updateMetadate();
+          @Override
+          public void onSuccess(Boolean confirm) {
+            if (confirm) {
+              updateMetadata();
+            }
           }
-        }
-      });
+
+        });
+    } else {
+      Dialogs.showConfirmDialog(messages.dialogConfirm(), messages.dialogConfirmUpdateMetadata(),
+        messages.dialogCancel(), messages.dialogConfirm(), new DefaultAsyncCallback<Boolean>() {
+
+          @Override
+          public void onFailure(Throwable caught) {
+            Toast.showError(messages.metadataFailureUpdated(), caught.getMessage());
+          }
+
+          @Override
+          public void onSuccess(Boolean confirm) {
+            if (confirm) {
+              updateMetadata();
+            }
+          }
+        });
+    }
   }
 
-  private void updateMetadate() {
+  private void updateMetadata() {
     ViewerMetadata metadata = database.getMetadata();
 
     loading.setVisible(true);
@@ -175,18 +185,6 @@ public class SIARDEditMetadataPage extends Composite {
           Toast.showInfo(messages.metadataSuccessUpdated(), "");
         }
       });
-  }
-
-  private DefaultAsyncCallback<Boolean> callback(boolean result) {
-
-    return new DefaultAsyncCallback<Boolean>() {
-      @Override
-      public void onSuccess(Boolean result) {
-        if (result) {
-          updateMetadate();
-        }
-      }
-    };
   }
 
   @UiHandler("buttonRevert")

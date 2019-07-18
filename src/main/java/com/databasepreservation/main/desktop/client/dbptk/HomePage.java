@@ -84,7 +84,8 @@ public class HomePage extends Composite {
 
           Filter siard = new Filter("SIARD", Collections.singletonList("siard"));
 
-          JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.singletonList("openFile"), Collections.singletonList(siard));
+          JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.singletonList("openFile"),
+            Collections.singletonList(siard));
 
           path = JavascriptUtils.openFileDialog(options);
         } else {
@@ -103,30 +104,36 @@ public class HomePage extends Composite {
             @Override
             public void onSuccess(String databaseUUID) {
               if (databaseUUID != null) {
-                Dialogs.showConfirmDialog(messages.dialogReimportSIARDTitle(), messages.dialogReimportSIARD(),
-                  messages.dialogCancel(), messages.dialogConfirm(), new DefaultAsyncCallback<Boolean>() {
-                    @Override
-                    public void onSuccess(Boolean confirm) {
-                      if (confirm) {
-                        BrowserService.Util.getInstance().uploadMetadataSIARD(path, new DefaultAsyncCallback<String>() {
-                          @Override
-                          public void onFailure(Throwable caught) {
-                            // TODO: error handling
-                            options.remove(loading);
-                          }
+                if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
+                  JavascriptUtils.confirmationDialog(messages.dialogReimportSIARDTitle(),
+                    messages.dialogReimportSIARD(), messages.dialogCancel(), messages.dialogConfirm(),
+                    new DefaultAsyncCallback<Boolean>() {
 
-                          @Override
-                          public void onSuccess(String newDatabaseUUID) {
-                            options.remove(loading);
-                            HistoryManager.gotoSIARDInfo(newDatabaseUUID);
-                          }
-                        });
-                      } else {
-                        options.remove(loading);
-                        HistoryManager.gotoSIARDInfo(databaseUUID);
+                      @Override
+                      public void onSuccess(Boolean confirm) {
+                        if (confirm) {
+                          uploadMetadataSIARD(path, loading);
+                        } else {
+                          options.remove(loading);
+                          HistoryManager.gotoSIARDInfo(databaseUUID);
+                        }
                       }
-                    }
-                  });
+
+                    });
+                } else {
+                  Dialogs.showConfirmDialog(messages.dialogReimportSIARDTitle(), messages.dialogReimportSIARD(),
+                    messages.dialogCancel(), messages.dialogConfirm(), new DefaultAsyncCallback<Boolean>() {
+                      @Override
+                      public void onSuccess(Boolean confirm) {
+                        if (confirm) {
+                          uploadMetadataSIARD(path, loading);
+                        } else {
+                          options.remove(loading);
+                          HistoryManager.gotoSIARDInfo(databaseUUID);
+                        }
+                      }
+                    });
+                }
               } else {
                 BrowserService.Util.getInstance().uploadMetadataSIARD(path, new DefaultAsyncCallback<String>() {
                   @Override
@@ -167,5 +174,21 @@ public class HomePage extends Composite {
     options.add(createCard);
     options.add(openCard);
     options.add(manageCard);
+  }
+
+  private void uploadMetadataSIARD(String path, Widget loading) {
+    BrowserService.Util.getInstance().uploadMetadataSIARD(path, new DefaultAsyncCallback<String>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        // TODO: error handling
+        options.remove(loading);
+      }
+
+      @Override
+      public void onSuccess(String newDatabaseUUID) {
+        options.remove(loading);
+        HistoryManager.gotoSIARDInfo(newDatabaseUUID);
+      }
+    });
   }
 }

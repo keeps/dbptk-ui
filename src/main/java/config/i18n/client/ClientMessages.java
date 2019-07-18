@@ -591,6 +591,8 @@ public interface ClientMessages extends Messages {
 
   String routines_parametersList();
 
+  String dialogUpdateMetadata();
+
   String dialogConfirmUpdateMetadata();
 
   String retrievingTableStructure();

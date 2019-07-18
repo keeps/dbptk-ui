@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import com.databasepreservation.main.common.server.SIARDProgressObserver;
 import org.apache.commons.io.IOUtils;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
@@ -25,6 +24,7 @@ import org.yaml.snakeyaml.Yaml;
 import com.databasepreservation.DatabaseMigration;
 import com.databasepreservation.SIARDEdition;
 import com.databasepreservation.main.common.server.ProgressObserver;
+import com.databasepreservation.main.common.server.SIARDProgressObserver;
 import com.databasepreservation.main.common.server.ViewerConfiguration;
 import com.databasepreservation.main.common.server.ViewerFactory;
 import com.databasepreservation.main.common.server.index.DatabaseRowsSolrManager;

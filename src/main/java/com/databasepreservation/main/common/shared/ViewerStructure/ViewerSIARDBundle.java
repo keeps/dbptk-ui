@@ -1,14 +1,11 @@
 package com.databasepreservation.main.common.shared.ViewerStructure;
 
-import com.google.common.html.HtmlEscapers;
-import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.user.client.rpc.IsSerializable;
-
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -80,7 +77,7 @@ public class ViewerSIARDBundle implements IsSerializable {
   public List<String> getCommandList() {
     List<String> bundleCommandList = new ArrayList<>();
     for (Map.Entry<String, String> entry : commandList.entrySet()) {
-      bundleCommandList.add(entry.getKey() + SEPARATOR + entry.getValue().replaceAll("\\n", "\\\\u000D") + SEPARATOR);
+      bundleCommandList.add(entry.getKey() + SEPARATOR + entry.getValue().replaceAll("\n", " ") + SEPARATOR);
     }
 
     return bundleCommandList;
