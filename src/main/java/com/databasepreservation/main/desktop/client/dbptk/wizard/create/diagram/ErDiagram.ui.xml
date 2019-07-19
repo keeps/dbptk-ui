@@ -1,0 +1,15 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:c='urn:import:com.databasepreservation.main.common.shared.client.common'
+>
+    <ui:with field='messages' type='config.i18n.client.ClientMessages'/>
+    <g:FlowPanel addStyleNames="metadata-edit">
+        <g:SimplePanel addStyleNames="h4" ui:field="mainHeader">
+            <g:Label>
+                <ui:text from='{messages.diagram}'/>
+            </g:Label>
+        </g:SimplePanel>
+        <g:TabPanel ui:field="tabPanel" addStyleNames="browseItemMetadata metadata-edit-tab diagram-tab"/>
+        <c:LoadingDiv visible="false" ui:field="loading"/>
+    </g:FlowPanel>
+</ui:UiBinder>

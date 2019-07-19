@@ -17,6 +17,7 @@ import com.databasepreservation.main.common.shared.client.common.lists.MultipleS
 import com.databasepreservation.main.common.shared.client.widgets.Toast;
 import com.databasepreservation.main.desktop.client.common.sidebar.TableAndColumnsSidebar;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
+import com.databasepreservation.main.desktop.client.dbptk.wizard.create.diagram.ErDiagram;
 import com.databasepreservation.main.desktop.shared.models.wizardParameters.ConnectionParameters;
 import com.databasepreservation.main.desktop.shared.models.wizardParameters.TableAndColumnsParameters;
 import com.google.gwt.cell.client.CheckboxCell;
@@ -92,6 +93,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
           initTables();
 
           content.remove(spinner);
+          sideBarHighlighter(TableAndColumnsSidebar.DATABASE_LINK,null,null);
         }
       });
   }
@@ -140,7 +142,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
   public void sideBarHighlighter(String toSelect, String schemaUUID, String tableUUID) {
     panel.clear();
 
-    GWT.log(toSelect);
+//    GWT.log(toSelect);
 
     if (tableUUID != null) {
       panel.add(getColumns(tableUUID));
@@ -151,22 +153,21 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
       }
       currentTableUUID = tableUUID;
     } else if (schemaUUID != null) {
+        FlowPanel tables = new FlowPanel();
+        tables.add(getTable(schemaUUID));
+        FlowPanel views = new FlowPanel();
+        views.add(getView(schemaUUID));
 
-      FlowPanel tables = new FlowPanel();
-      tables.add(getTable(schemaUUID));
-      FlowPanel views = new FlowPanel();
-      views.add(getView(schemaUUID));
+        TabPanel tabPanel = new TabPanel();
+        tabPanel.addStyleName("browseItemMetadata connection-panel");
+        tabPanel.add(tables, messages.sidebarTables());
+        tabPanel.add(views, messages.sidebarViews());
+        tabPanel.selectTab(0);
 
-      TabPanel tabPanel = new TabPanel();
-      tabPanel.addStyleName("browseItemMetadata connection-panel");
-      tabPanel.add(tables, messages.sidebarTables());
-      tabPanel.add(views, messages.sidebarViews());
-      tabPanel.selectTab(0);
-
-      panel.add(tabPanel);
-      currentSchemaUUID = schemaUUID;
+        panel.add(tabPanel);
+        currentSchemaUUID = schemaUUID;
     } else {
-      // TODO: IMAGE
+      panel.add(ErDiagram.getInstance(metadata));
     }
     tableAndColumnsSidebar.select(toSelect);
   }
@@ -392,7 +393,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
 
     for (ViewerTable viewerTable : tableList) {
       if (!viewerTable.getName().startsWith("VIEW_")) {
-        GWT.log(viewerTable.getName());
+//        GWT.log(viewerTable.getName());
         finalList.add(viewerTable);
       }
     }

@@ -776,7 +776,7 @@ p[data-value]:after {
     min-width: 600px;
     width: 100%;
     height: 600px;
-    border: 1px solid lightgray;
+    /*border: 1px solid lightgray;*/
     margin-bottom: 1rem;
 }
 
@@ -1460,7 +1460,7 @@ input[type="checkbox"]:checked:after {
     border-bottom: 0;
 }
 
-.metadata-edit, .metadata-edit .gwt-TabPanelBottom {
+.metadata-edit, .metadata-edit .gwt-TabPanelBottom, .metadata-edit-tab .gwt-TabPanelBottom {
     height: 100%;
     display: block;
 }
@@ -1521,4 +1521,9 @@ input[type="checkbox"]:checked:after {
 .sidebar-collapse.gwt-DisclosurePanel-open .header > .leftSidebar-facet-panel::after{
     content: "\f106";
     font-weight: bolder;
+}
+
+.diagram-tab{
+    height: 80vh;
+    padding: 0;
 }

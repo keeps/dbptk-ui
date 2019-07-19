@@ -177,6 +177,11 @@ public class HistoryManager {
     newHistory(params);
   }
 
+  public static void gotoCreateSIARD(String wizardPage, String toSelect, String schemaUUID, String tableUUID) {
+    List<String> params = Arrays.asList(ROUTE_CREATE_SIARD, wizardPage, toSelect, schemaUUID, tableUUID );
+    newHistory(params);
+  }
+
   public static void gotoSIARDEditMetadata(String databaseUUID) {
     List<String> params = Arrays.asList(ROUTE_SIARD_EDIT_METADATA, databaseUUID);
     newHistory(params);

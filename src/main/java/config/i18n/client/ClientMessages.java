@@ -131,6 +131,8 @@ public interface ClientMessages extends Messages {
 
   String searchPlaceholder();
 
+  String diagram();
+
   String diagram_usingTheDiagram();
 
   String diagram_Explanation();
