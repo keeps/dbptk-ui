@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.common.shared.client.tools.ViewerStringUtils;
+import com.databasepreservation.main.common.shared.client.widgets.Toast;
 import com.databasepreservation.main.desktop.client.common.sidebar.CustomViewsSidebar;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
 import com.databasepreservation.main.desktop.shared.models.wizardParameters.CustomViewsParameter;
@@ -38,13 +39,13 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
   FlowPanel customViewsList, rightSideContainer;
 
   @UiField
-  TextBox customViewName, customViewDescription;
+  TextBox customViewSchemaName, customViewName, customViewDescription;
 
   @UiField
   TextArea customViewQuery;
 
   @UiField
-  Label customViewNameLabel, customViewDescriptionLabel, customViewQueryLabel;
+  Label customViewSchemaNameLabel, customViewNameLabel, customViewDescriptionLabel, customViewQueryLabel;
 
   private static CustomViews instance = null;
   private CustomViewsSidebar customViewsSidebar;
@@ -66,6 +67,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
     customViewsSidebar = CustomViewsSidebar.getInstance();
     customViewsList.add(customViewsSidebar);
 
+    setRequired(customViewSchemaNameLabel, true);
     setRequired(customViewNameLabel, true);
     setRequired(customViewDescriptionLabel, false);
     setRequired(customViewQueryLabel, true);
@@ -101,25 +103,32 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
 
     final CustomViewsParameter parameter = customViewsParameters.get(customViewUUID);
 
-    setTextboxText(parameter.getCustomViewName(), parameter.getCustomViewDescription(), parameter.getCustomViewQuery());
+    setTextboxText(parameter.getSchema(), parameter.getCustomViewName(), parameter.getCustomViewDescription(),
+      parameter.getCustomViewQuery());
 
     Button btnNew = new Button();
     btnNew.setText(messages.newText());
     btnNew.addStyleName("btn btn-primary btn-new");
     btnNew.addClickHandler(event -> {
-      setTextboxText("", "", "");
-      customViewsSidebar.select("");
+      setTextboxText("", "", "", "");
+      customViewName.getElement().removeAttribute("required");
+      customViewQuery.getElement().removeAttribute("required");
+      customViewSchemaName.getElement().removeAttribute("required");
+      customViewsSidebar.selectNone();
       customViewsButtons.clear();
       customViewsButtons.add(createCustomViewButton());
+      HistoryManager.gotoCreateSIARD();
     });
     Button btnUpdate = new Button();
     btnUpdate.setText(messages.update());
     btnUpdate.addStyleName("btn btn-primary btn-save");
     btnUpdate.addClickHandler(event -> {
-      final boolean valid = customViewFormValidator();
+      final boolean valid = customViewFormValidatorUpdate(parameter.getCustomViewName());
       if (valid) {
-        updateCustomViewParameters(parameter.getCustomViewUUID(), customViewName.getText(),
+        updateCustomViewParameters(parameter.getCustomViewUUID(), customViewSchemaName.getText(),
+          customViewName.getText(),
           customViewDescription.getText(), customViewQuery.getText());
+        Toast.showInfo(messages.customViewsTitle(), messages.customViewsUpdateMessage());
       }
     });
     Button btnDelete = new Button();
@@ -127,7 +136,14 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
     btnDelete.addStyleName("btn btn-primary btn-delete");
     btnDelete.addClickHandler(event -> {
       deleteCustomView(parameter.getCustomViewUUID());
-      setTextboxText("", "", "");
+      setTextboxText("", "", "", "");
+      customViewName.getElement().removeAttribute("required");
+      customViewQuery.getElement().removeAttribute("required");
+      customViewSchemaName.getElement().removeAttribute("required");
+      customViewsButtons.clear();
+      customViewsButtons.add(createCustomViewButton());
+      customViewsSidebar.selectNone();
+      HistoryManager.gotoCreateSIARD();
     });
 
     SimplePanel simplePanelforbtnNew = new SimplePanel();
@@ -147,6 +163,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
     customViewsButtons.add(simplePanelforbtnDelete);
 
     customViewsSidebar.select(customViewUUID);
+
   }
 
   public void refreshCustomButtons() {
@@ -155,14 +172,35 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
   }
 
   private boolean customViewFormValidator() {
+    String viewSchemaName = customViewSchemaName.getText();
     String viewNameText = customViewName.getText();
     String viewQueryText = customViewQuery.getText();
 
-    boolean value = !(ViewerStringUtils.isBlank(viewNameText) || ViewerStringUtils.isBlank(viewQueryText));
+    boolean value = !(ViewerStringUtils.isBlank(viewNameText) || ViewerStringUtils.isBlank(viewQueryText)
+      || ViewerStringUtils.isBlank(viewSchemaName));
 
     boolean sameName = false;
     for (CustomViewsParameter p : customViewsParameters.values()) {
       if (p.getCustomViewName().toLowerCase().equals(viewNameText.toLowerCase())) {
+        sameName = true;
+      }
+    }
+
+    return value && !sameName;
+  }
+
+  private boolean customViewFormValidatorUpdate(final String customViewName) {
+    String viewSchemaName = customViewSchemaName.getText();
+    String viewNameText = this.customViewName.getText();
+    String viewQueryText = this.customViewQuery.getText();
+
+    boolean value = !(ViewerStringUtils.isBlank(viewNameText) || ViewerStringUtils.isBlank(viewQueryText)
+      || ViewerStringUtils.isBlank(viewSchemaName));
+
+    boolean sameName = false;
+    for (CustomViewsParameter p : customViewsParameters.values()) {
+      if (p.getCustomViewName().toLowerCase().equals(viewNameText.toLowerCase())
+        && !p.getCustomViewName().toLowerCase().equals(customViewName.toLowerCase())) {
         sameName = true;
       }
     }
@@ -177,10 +215,12 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
       label.removeStyleName("form-label-mandatory");
   }
 
-  private void updateCustomViewParameters(final int id, final String customViewNameText,
+  private void updateCustomViewParameters(final int id, final String customViewSchemaName,
+    final String customViewNameText,
     final String customViewDescriptionText, final String customViewQueryText) {
     String customViewUUID = String.valueOf(id);
     final CustomViewsParameter parameter = customViewsParameters.get(customViewUUID);
+    parameter.setSchemaName(customViewSchemaName);
     parameter.setCustomViewName(customViewNameText);
     parameter.setCustomViewDescription(customViewDescriptionText);
     parameter.setCustomViewQuery(customViewQueryText);
@@ -195,8 +235,10 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
     customViewsSidebar.removeSideBarHyperLink(customViewUUID);
   }
 
-  private void setTextboxText(final String customViewNameText, final String customViewDescriptionText,
+  private void setTextboxText(final String schemaName, final String customViewNameText,
+    final String customViewDescriptionText,
     final String customViewQueryText) {
+    customViewSchemaName.setText(schemaName);
     customViewName.setText(customViewNameText);
     customViewDescription.setText(customViewDescriptionText);
     customViewQuery.setText(customViewQueryText);
@@ -212,11 +254,12 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
       if (valid) {
         customViewsSidebar.addSideBarHyperLink(HistoryManager.ROUTE_WIZARD_CUSTOM_VIEWS, customViewName.getText(),
           String.valueOf(counter));
-        CustomViewsParameter parameter = new CustomViewsParameter(counter, customViewName.getText(),
+        CustomViewsParameter parameter = new CustomViewsParameter(customViewSchemaName.getText(), counter,
+          customViewName.getText(),
           customViewDescription.getText(), customViewQuery.getText());
         customViewsParameters.put(String.valueOf(counter), parameter);
         counter++;
-        setTextboxText("", "", "");
+        setTextboxText("", "", "", "");
       } else {
         if (ViewerStringUtils.isBlank(customViewName.getText())) {
           customViewName.getElement().setAttribute("required", "required");
@@ -226,6 +269,11 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
         if (ViewerStringUtils.isBlank(customViewQuery.getText())) {
           customViewQuery.getElement().setAttribute("required", "required");
           customViewQuery.addStyleName("wizard-connection-validator");
+        }
+
+        if (ViewerStringUtils.isBlank(customViewSchemaName.getText())) {
+          customViewSchemaName.getElement().setAttribute("required", "required");
+          customViewSchemaName.addStyleName("wizard-connection-validator");
         }
       }
     });

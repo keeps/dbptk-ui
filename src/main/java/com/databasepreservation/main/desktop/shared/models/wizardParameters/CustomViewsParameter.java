@@ -6,7 +6,7 @@ import java.io.Serializable;
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 public class CustomViewsParameter implements Serializable {
-  private String schema;
+  private String schemaName;
   private Integer customViewUUID;
   private String customViewName;
   private String customViewDescription;
@@ -23,9 +23,9 @@ public class CustomViewsParameter implements Serializable {
     this.customViewQuery = customViewQuery;
   }
 
-  public CustomViewsParameter(String schema, Integer customViewUUID, String customViewName,
+  public CustomViewsParameter(String schemaName, Integer customViewUUID, String customViewName,
     String customViewDescription, String customViewQuery) {
-    this.schema = schema;
+    this.schemaName = schemaName;
     this.customViewUUID = customViewUUID;
     this.customViewName = customViewName;
     this.customViewDescription = customViewDescription;
@@ -33,11 +33,11 @@ public class CustomViewsParameter implements Serializable {
   }
 
   public String getSchema() {
-    return schema;
+    return schemaName;
   }
 
-  public void setSchema(String schema) {
-    this.schema = schema;
+  public void setSchemaName(String schema) {
+    this.schemaName = schema;
   }
 
   public Integer getCustomViewUUID() {

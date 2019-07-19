@@ -349,7 +349,6 @@ public class HistoryManager {
     return createHistoryToken(Arrays.asList(ROUTE_CREATE_SIARD, wizardPage, toSelect, database_uuid, table_uuid));
   }
 
-
   public static String linkToHome() {
     return createHistoryToken(Collections.singletonList(ROUTE_HOME));
   }

@@ -616,4 +616,9 @@ public interface ClientMessages extends Messages {
   String viewName();
 
   String SIARDError();
+
+  String customViewsUpdateMessage();
+
+  String customViewSchemaNameLabel();
+
 }

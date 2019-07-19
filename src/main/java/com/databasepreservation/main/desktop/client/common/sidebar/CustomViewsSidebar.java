@@ -65,6 +65,12 @@ public class CustomViewsSidebar extends Composite {
     sidebarGroup.remove(list.get(customViewUUID));
   }
 
+  public void selectNone() {
+    for (Map.Entry<String, SidebarHyperlink> entry : list.entrySet()) {
+      entry.getValue().setSelected(false);
+    }
+  }
+
   public void select(String value) {
     for (Map.Entry<String, SidebarHyperlink> entry : list.entrySet()) {
       if (entry.getKey().equals(value)) {

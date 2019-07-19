@@ -469,7 +469,7 @@ public class SIARDController {
     } catch (IOException e) {
       throw new GenericException("Could not initialize conversion modules", e);
     } catch (ModuleException | RuntimeException e) {
-      throw new GenericException("Could not convert the database to the Solr instance.", e);
+      throw new GenericException("Could not convert the database.", e);
     }
   }
 
@@ -566,23 +566,24 @@ public class SIARDController {
     final ArrayList<CustomViewsParameter> customViewParameters = customViewsParameters.getCustomViewsParameter();
     Map<String, Object> data = new HashMap<>();
 
+    Map<String, Object> view = new HashMap<>();
+
     for (CustomViewsParameter parameter : customViewParameters) {
       Map<String, Object> customViewInformation = new HashMap<>();
       customViewInformation.put("query", parameter.getCustomViewQuery());
       customViewInformation.put("description", parameter.getCustomViewDescription());
 
-      Map<String, Object> view = new HashMap<>();
       view.put(parameter.getCustomViewName(), customViewInformation);
-      data.put("sakila", view);
+      data.put(parameter.getSchema(), view);
     }
-
+    gst
     Yaml yaml = new Yaml();
 
     FileOutputStream outputStream = null;
 
     try {
       File tmpDir = new File(System.getProperty("java.io.tmpdir"));
-      final File tmpFile = File.createTempFile(SolrUtils.randomUUID(), ".txt", tmpDir);
+      final File tmpFile = File.createTempFile("custom_view_" + SolrUtils.randomUUID(), ".yaml", tmpDir);
       String path = Paths.get(tmpFile.toURI()).normalize().toAbsolutePath().toString();
       outputStream = new FileOutputStream(tmpFile);
       OutputStreamWriter writer = new OutputStreamWriter(outputStream);
