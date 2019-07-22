@@ -74,84 +74,81 @@ public class HomePage extends Composite {
     btnOpen.setText(messages.openCardButton());
     btnOpen.addStyleName("btn btn-plus");
 
-    btnOpen.addClickHandler(new ClickHandler() {
+    btnOpen.addClickHandler(event -> {
+      String path;
 
-      @Override
-      public void onClick(ClickEvent event) {
-        String path;
+      if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
 
-        if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
+        Filter siard = new Filter("SIARD", Collections.singletonList("siard"));
 
-          Filter siard = new Filter("SIARD", Collections.singletonList("siard"));
+        JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.singletonList("openFile"),
+          Collections.singletonList(siard));
 
-          JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.singletonList("openFile"),
-            Collections.singletonList(siard));
+        path = JavascriptUtils.openFileDialog(options);
+      } else {
+        path = "/home/mguimaraes/Desktop/mysql-dbptk-gui.siard";
+        // TODO: UPLOAD FILE!!!
+      }
 
-          path = JavascriptUtils.openFileDialog(options);
-        } else {
-          // TODO: UPLOAD FILE!!!
-          path = null;
-        }
+      if (path != null) {
 
-        if (path != null) {
+        Widget loading = new HTML(SafeHtmlUtils.fromSafeConstant(
+          "<div id='loading' class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
 
-          Widget loading = new HTML(SafeHtmlUtils.fromSafeConstant(
-            "<div id='loading' class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
+        options.add(loading);
 
-          options.add(loading);
+        BrowserService.Util.getInstance().findSIARDFile(path, new DefaultAsyncCallback<String>() {
+          @Override
+          public void onSuccess(String databaseUUID) {
+            if (databaseUUID != null) {
+              if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
+                JavascriptUtils.confirmationDialog(messages.dialogReimportSIARDTitle(),
+                  messages.dialogReimportSIARD(), messages.dialogCancel(), messages.dialogConfirm(),
+                  new DefaultAsyncCallback<Boolean>() {
 
-          BrowserService.Util.getInstance().findSIARDFile(path, new DefaultAsyncCallback<String>() {
-            @Override
-            public void onSuccess(String databaseUUID) {
-              if (databaseUUID != null) {
-                if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
-                  JavascriptUtils.confirmationDialog(messages.dialogReimportSIARDTitle(),
-                    messages.dialogReimportSIARD(), messages.dialogCancel(), messages.dialogConfirm(),
-                    new DefaultAsyncCallback<Boolean>() {
-
-                      @Override
-                      public void onSuccess(Boolean confirm) {
-                        if (confirm) {
-                          uploadMetadataSIARD(path, loading);
-                        } else {
-                          options.remove(loading);
-                          HistoryManager.gotoSIARDInfo(databaseUUID);
-                        }
+                    @Override
+                    public void onSuccess(Boolean confirm) {
+                      if (confirm) {
+                        uploadMetadataSIARD(path, loading);
+                      } else {
+                        options.remove(loading);
+                        HistoryManager.gotoSIARDInfo(databaseUUID);
                       }
+                    }
 
-                    });
-                } else {
-                  Dialogs.showConfirmDialog(messages.dialogReimportSIARDTitle(), messages.dialogReimportSIARD(),
-                    messages.dialogCancel(), messages.dialogConfirm(), new DefaultAsyncCallback<Boolean>() {
-                      @Override
-                      public void onSuccess(Boolean confirm) {
-                        if (confirm) {
-                          uploadMetadataSIARD(path, loading);
-                        } else {
-                          options.remove(loading);
-                          HistoryManager.gotoSIARDInfo(databaseUUID);
-                        }
-                      }
-                    });
-                }
+                  });
               } else {
-                BrowserService.Util.getInstance().uploadMetadataSIARD(path, new DefaultAsyncCallback<String>() {
-                  @Override
-                  public void onFailure(Throwable caught) {
-                    // TODO: error handling
-                    options.remove(loading);
-                  }
-
-                  @Override
-                  public void onSuccess(String newDatabaseUUID) {
-                    options.remove(loading);
-                    HistoryManager.gotoSIARDInfo(newDatabaseUUID);
-                  }
-                });
+                Dialogs.showConfirmDialog(messages.dialogReimportSIARDTitle(), messages.dialogReimportSIARD(),
+                  messages.dialogCancel(), messages.dialogConfirm(), new DefaultAsyncCallback<Boolean>() {
+                    @Override
+                    public void onSuccess(Boolean confirm) {
+                      if (confirm) {
+                        uploadMetadataSIARD(path, loading);
+                      } else {
+                        options.remove(loading);
+                        HistoryManager.gotoSIARDInfo(databaseUUID);
+                      }
+                    }
+                  });
               }
+            } else {
+              BrowserService.Util.getInstance().uploadMetadataSIARD(path, new DefaultAsyncCallback<String>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                  System.out.println(caught.getMessage());
+                  // TODO: error handling
+                  options.remove(loading);
+                }
+
+                @Override
+                public void onSuccess(String newDatabaseUUID) {
+                  options.remove(loading);
+                  HistoryManager.gotoSIARDInfo(newDatabaseUUID);
+                }
+              });
             }
-          });
-        }
+          }
+        });
       }
     });
 

@@ -8,6 +8,9 @@
 package com.databasepreservation.main.common.shared.client.common.dialogs;
 
 import com.databasepreservation.main.common.shared.client.common.NoAsyncCallback;
+import com.databasepreservation.main.desktop.client.common.ComboBoxField;
+import com.databasepreservation.main.desktop.client.common.FileUploadField;
+import com.databasepreservation.main.desktop.client.common.GenericField;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -30,6 +33,57 @@ import config.i18n.client.ClientMessages;
 
 public class Dialogs {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
+
+  public static void showExternalLobsSetupDialog(String title, ComboBoxField referencesType, FileUploadField genericField,
+    String cancelButtonText, String confirmButtonText, final AsyncCallback<Boolean> callback) {
+
+    final DialogBox dialogBox = new DialogBox(false, true);
+    dialogBox.setWidth("75%");
+    dialogBox.setText(title);
+
+    FlowPanel layout = new FlowPanel();
+    Button cancelButton = new Button(cancelButtonText);
+    Button confirmButton = new Button(confirmButtonText);
+    FlowPanel footer = new FlowPanel();
+
+    layout.add(referencesType);
+    layout.add(genericField);
+    layout.add(footer);
+    footer.add(cancelButton);
+    footer.add(confirmButton);
+
+    dialogBox.setWidget(layout);
+
+    dialogBox.setGlassEnabled(true);
+    dialogBox.setAnimationEnabled(false);
+
+    cancelButton.addClickHandler(new ClickHandler() {
+
+      @Override
+      public void onClick(ClickEvent event) {
+        dialogBox.hide();
+        callback.onSuccess(false);
+      }
+    });
+
+    confirmButton.addClickHandler(new ClickHandler() {
+
+      @Override
+      public void onClick(ClickEvent event) {
+        dialogBox.hide();
+        callback.onSuccess(true);
+      }
+    });
+
+    dialogBox.addStyleName("wui-dialog-confirm");
+    layout.addStyleName("wui-dialog-layout");
+    footer.addStyleName("wui-dialog-layout-footer");
+    cancelButton.addStyleName("btn btn-link");
+    confirmButton.addStyleName("btn btn-play");
+
+    dialogBox.center();
+    dialogBox.show();
+  }
 
   public static void showConfirmDialog(String title, String message, String cancelButtonText, String confirmButtonText,
     final AsyncCallback<Boolean> callback) {

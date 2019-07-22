@@ -121,15 +121,13 @@ public class MultipleSelectionTablePanel<C> extends Composite {
 
     CellTable<C> display = internalCreateTable(rowItems, columns);
 
-    display.addCellPreviewHandler(new CellPreviewEvent.Handler<C>() {
+    display.addCellPreviewHandler(event -> {
+      if (event.getColumn() == 4) {
 
-      @Override
-      public void onCellPreview(final CellPreviewEvent<C> event) {
-
+      } else {
         if (BrowserEvents.CLICK.equals(event.getNativeEvent().getType())) {
-
           final C value = event.getValue();
-          final Boolean state = !event.getDisplay().getSelectionModel().isSelected(value);
+          final boolean state = !event.getDisplay().getSelectionModel().isSelected(value);
           event.getDisplay().getSelectionModel().setSelected(value, state);
           event.setCanceled(true);
         }

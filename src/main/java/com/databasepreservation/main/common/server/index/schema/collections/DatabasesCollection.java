@@ -19,7 +19,7 @@ import static com.databasepreservation.main.common.shared.ViewerConstants.SOLR_D
 import static com.databasepreservation.main.common.shared.ViewerConstants.SOLR_DATABASES_TOTAL_ROWS;
 import static com.databasepreservation.main.common.shared.ViewerConstants.SOLR_DATABASES_TOTAL_SCHEMAS;
 import static com.databasepreservation.main.common.shared.ViewerConstants.SOLR_DATABASES_TOTAL_TABLES;
-import static com.databasepreservation.main.common.shared.ViewerConstants.SOLR_DATABASES_VALIDATED;
+import static com.databasepreservation.main.common.shared.ViewerConstants.SOLR_DATABASES_VALIDATION_STATUS;
 import static com.databasepreservation.main.common.shared.ViewerConstants.SOLR_DATABASES_VALIDATED_AT;
 import static com.databasepreservation.main.common.shared.ViewerConstants.SOLR_DATABASES_VALIDATE_VERSION;
 
@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.databasepreservation.main.common.server.index.schema.SolrCollection;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
@@ -39,13 +38,14 @@ import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.main.common.server.index.schema.AbstractSolrCollection;
 import com.databasepreservation.main.common.server.index.schema.CopyField;
+import com.databasepreservation.main.common.server.index.schema.Field;
+import com.databasepreservation.main.common.server.index.schema.SolrCollection;
+import com.databasepreservation.main.common.server.index.utils.JsonTransformer;
+import com.databasepreservation.main.common.server.index.utils.SolrUtils;
 import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
 import com.databasepreservation.main.common.shared.exceptions.ViewerException;
-import com.databasepreservation.main.common.server.index.schema.Field;
-import com.databasepreservation.main.common.server.index.utils.JsonTransformer;
-import com.databasepreservation.main.common.server.index.utils.SolrUtils;
 
 public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> {
   private static final Logger LOGGER = LoggerFactory.getLogger(DatabasesCollection.class);
@@ -86,7 +86,7 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_SIARD_SIZE, Field.TYPE_LONG));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_VALIDATED_AT, Field.TYPE_STRING));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_VALIDATE_VERSION, Field.TYPE_STRING));
-    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_VALIDATED, Field.TYPE_BOOLEAN));
+    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_VALIDATION_STATUS, Field.TYPE_STRING));
 
     return fields;
   }
@@ -118,7 +118,7 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
 
     doc.addField(SOLR_DATABASES_VALIDATED_AT, object.getValidatedAt());
     doc.addField(SOLR_DATABASES_VALIDATE_VERSION, object.getValidatedVersion());
-    doc.addField(SOLR_DATABASES_VALIDATED, object.getValidated());
+    doc.addField(SOLR_DATABASES_VALIDATION_STATUS, object.getValidationStatus().toString());
 
     return doc;
   }
@@ -147,7 +147,8 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
 
     viewerDatabase.setValidatedAt(SolrUtils.objectToString(doc.get(SOLR_DATABASES_VALIDATED_AT), ""));
     viewerDatabase.setValidatedVersion(SolrUtils.objectToString(doc.get(SOLR_DATABASES_VALIDATE_VERSION), ""));
-    viewerDatabase.setValidated(SolrUtils.objectToBoolean(doc.get(SOLR_DATABASES_VALIDATED), false));
+    viewerDatabase.setValidationStatus(SolrUtils.objectToEnum(doc.get(SOLR_DATABASES_VALIDATION_STATUS),
+      ViewerDatabase.ValidationStatus.class, ViewerDatabase.ValidationStatus.NOT_VALIDATED));
 
     return viewerDatabase;
   }

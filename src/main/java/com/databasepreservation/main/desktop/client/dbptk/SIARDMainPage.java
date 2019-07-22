@@ -149,7 +149,7 @@ public class SIARDMainPage extends Composite {
 
     validation.addButton(btnValidate);
 
-    if (database.getValidated()) {
+    if (!database.getValidationStatus().equals(ViewerDatabase.ValidationStatus.NOT_VALIDATED)) {
       btnSeeReport = new Button();
       btnSeeReport.setText(messages.seeReport());
       btnSeeReport.addStyleName("btn btn-link-info");
@@ -159,7 +159,7 @@ public class SIARDMainPage extends Composite {
     MetadataField validatedAt;
     MetadataField version;
 
-    if (database.getValidated()) {
+    if (!database.getValidationStatus().equals(ViewerDatabase.ValidationStatus.NOT_VALIDATED)) {
       validatedAt = MetadataField.createInstance(messages.validatedAt(), database.getValidatedAt());
       version = MetadataField.createInstance(messages.validationVersionLabel(), database.getValidatedVersion());
     } else {

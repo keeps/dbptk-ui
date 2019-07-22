@@ -1,37 +1,53 @@
 package com.databasepreservation.main.desktop.client.dbptk.wizard.create;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import com.databasepreservation.main.common.client.BrowserService;
+import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerColumn;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSchema;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerView;
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
+import com.databasepreservation.main.common.shared.client.common.dialogs.Dialogs;
 import com.databasepreservation.main.common.shared.client.common.lists.MultipleSelectionTablePanel;
+import com.databasepreservation.main.common.shared.client.common.utils.ApplicationType;
+import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
+import com.databasepreservation.main.common.shared.client.tools.JSOUtils;
+import com.databasepreservation.main.common.shared.client.tools.PathUtils;
 import com.databasepreservation.main.common.shared.client.widgets.Toast;
+import com.databasepreservation.main.desktop.client.common.ComboBoxField;
+import com.databasepreservation.main.desktop.client.common.FileUploadField;
+import com.databasepreservation.main.desktop.client.common.GenericField;
 import com.databasepreservation.main.desktop.client.common.sidebar.TableAndColumnsSidebar;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.create.diagram.ErDiagram;
 import com.databasepreservation.main.desktop.shared.models.wizardParameters.ConnectionParameters;
 import com.databasepreservation.main.desktop.shared.models.wizardParameters.TableAndColumnsParameters;
+import com.google.gwt.cell.client.ButtonCell;
+import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TabPanel;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.MultiSelectionModel;
 
@@ -466,6 +482,60 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
     Label header = new Label(viewerTable.getName());
     header.addStyleName("h4");
 
+    final ButtonDatabaseColumn buttonDatabaseColumn = new ButtonDatabaseColumn() {
+      /**
+       * Returns the column value from within the underlying data object.
+       *
+       * @param object
+       */
+      @Override
+      public String getValue(ViewerColumn object) {
+        return "Configure";
+      }
+    };
+    buttonDatabaseColumn.setFieldUpdater((index, object, value) -> {
+      final ComboBoxField referenceType = ComboBoxField.createInstance("Reference Type");
+      referenceType.setComboBoxValue("File System", "file-system");
+      referenceType.setCSSMetadata("form-row", "form-label-spaced", "form-combobox");
+
+      GenericField genericField;
+      if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
+        FileUploadField fileUploadField = FileUploadField.createInstance("BasePath", "Select");
+        fileUploadField.setParentCSS("form-row");
+        fileUploadField.setLabelCSS("form-label-spaced");
+        fileUploadField.setButtonCSS("btn btn-link form-button");
+        fileUploadField.buttonAction(new Command() {
+          @Override
+          public void execute() {
+            if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
+              JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.singletonList("openDirectory"),
+                Collections.emptyList());
+
+              String path = JavascriptUtils.openFileDialog(options);
+              if (path != null) {
+                String displayPath = PathUtils.getFileName(path);
+                fileUploadField.setPathLocation(displayPath, path);
+                fileUploadField.setInformationPathCSS("gwt-Label-disabled information-path");
+              }
+            }
+          }
+        });
+
+        Dialogs.showExternalLobsSetupDialog("Test", referenceType, fileUploadField, "Cancel", "Add",
+            new DefaultAsyncCallback<Boolean>() {
+              @Override
+              public void onSuccess(Boolean result) {
+
+              }
+            });
+      } else {
+        TextBox textBox = new TextBox();
+        textBox.addStyleName("form-textbox");
+        genericField = GenericField.createInstance("Base Path", textBox);
+        genericField.setCSSMetadata("form-row", "form-label-spaced");
+      }
+    });
+
     selectionTablePanel.createTable(header, getSelectPanel(SELECT_COLUMNS_TABLE), viewerTable.getColumns().iterator(),
       new MultipleSelectionTablePanel.ColumnInfo<>("", 15,
         new Column<ViewerColumn, Boolean>(new CheckboxCell(true, true)) {
@@ -498,11 +568,26 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
           return column.getType().getOriginalTypeName();
         }
       }), new MultipleSelectionTablePanel.ColumnInfo<>(messages.description(), 15, new TextColumn<ViewerColumn>() {
-
         @Override
         public String getValue(ViewerColumn column) {
           return column.getDescription();
         }
-      }));
+      }), new MultipleSelectionTablePanel.ColumnInfo<>("Filters", 15, buttonDatabaseColumn));
+  }
+
+  private abstract static class ButtonDatabaseColumn extends Column<ViewerColumn, String> {
+    public ButtonDatabaseColumn() {
+      super(new ButtonCell());
+    }
+
+    @Override
+    public void render(Cell.Context context, ViewerColumn object, SafeHtmlBuilder sb) {
+      String value = getValue(object);
+      sb.appendHtmlConstant("<button class=\"btn btn-link-info\" type=\"button\" tabindex=\"-1\">");
+      if (value != null) {
+        sb.append(SafeHtmlUtils.fromString(value));
+      }
+      sb.appendHtmlConstant("</button>");
+    }
   }
 }

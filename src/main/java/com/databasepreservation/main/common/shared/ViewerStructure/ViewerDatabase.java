@@ -9,6 +9,10 @@ public class ViewerDatabase extends IsIndexed {
     INGESTING, AVAILABLE, REMOVING, ERROR, METADATA_ONLY
   }
 
+  public enum ValidationStatus {
+    NOT_VALIDATED, VALIDATION_SUCCESS, VALIDATION_FAILED
+  }
+
   private String uuid;
   private Status status;
   private ViewerMetadata metadata;
@@ -31,7 +35,7 @@ public class ViewerDatabase extends IsIndexed {
 
   private String validatedAt;
   private String validatedVersion;
-  private boolean validated;
+  private ValidationStatus validationStatus;
 
   public ViewerDatabase() {
   }
@@ -195,11 +199,11 @@ public class ViewerDatabase extends IsIndexed {
     this.validatedVersion = validatedVersion;
   }
 
-  public boolean getValidated() {
-    return validated;
+  public ValidationStatus getValidationStatus() {
+    return validationStatus;
   }
 
-  public void setValidated(boolean validated) {
-    this.validated = validated;
+  public void setValidationStatus(ValidationStatus status) {
+    this.validationStatus = status;
   }
 }

@@ -621,4 +621,7 @@ public interface ClientMessages extends Messages {
 
   String customViewSchemaNameLabel();
 
+  String SIARDValidationSuccess();
+
+  String SIARDValidationFailed();
 }

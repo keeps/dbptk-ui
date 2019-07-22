@@ -5,6 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
@@ -98,28 +99,12 @@ public class SIARDController {
       if (factory != null) {
         databaseMigration.importModule(factory);
 
-        if (parameters.doSSH()) {
-          final SSHConfiguration sshConfiguration = parameters.getSSHConfiguration();
-          databaseMigration.importModuleParameter("ssh", "true");
-          databaseMigration.importModuleParameter("ssh-host", sshConfiguration.getHostname());
-          databaseMigration.importModuleParameter("ssh-user", sshConfiguration.getUsername());
-          databaseMigration.importModuleParameter("ssh-password", sshConfiguration.getPassword());
-          databaseMigration.importModuleParameter("ssh-port", sshConfiguration.getPort());
-        }
+        setupSSHConfiguration(databaseMigration, parameters);
 
-        if (parameters.getJDBCConnectionParameters().isDriver()) {
-          try {
-            //  "jar:file:///opt/progress/DataDirect/Connect_for_JDBC_51/lib/openedgewp.jar!/";
-            String urlPath = "jar:file://" + parameters.getJDBCConnectionParameters().getDriverPath() + "!/";
-            URL[] urls = new URL[5];
-            urls[0] = new URL(urlPath);
-            URLClassLoader classLoader = URLClassLoader.newInstance(urls);
-            Class<?> aClass = classLoader.loadClass("com.ddtek.jdbc.openedge.OpenEdgeDriver");
-
-          } catch (Exception ex) {
-            System.out.println("Failed.");
-            throw new GenericException("Failed to load driver");
-          }
+        try {
+          setupPathToDriver(parameters);
+        } catch (Exception e) {
+          throw new GenericException("Could not load the driver", e);
         }
 
         for (Map.Entry<String, String> entry : parameters.getJDBCConnectionParameters().getConnection().entrySet()) {
@@ -177,13 +162,12 @@ public class SIARDController {
 
       databaseMigration.importModule(databaseImportModuleFactory);
 
-      if (connectionParameters.doSSH()) {
-        final SSHConfiguration sshConfiguration = connectionParameters.getSSHConfiguration();
-        databaseMigration.importModuleParameter("ssh", "true");
-        databaseMigration.importModuleParameter("ssh-host", sshConfiguration.getHostname());
-        databaseMigration.importModuleParameter("ssh-user", sshConfiguration.getUsername());
-        databaseMigration.importModuleParameter("ssh-password", sshConfiguration.getPassword());
-        databaseMigration.importModuleParameter("ssh-port", sshConfiguration.getPort());
+      setupSSHConfiguration(databaseMigration, connectionParameters);
+
+      try {
+        setupPathToDriver(connectionParameters);
+      } catch (Exception e) {
+        throw new GenericException("Could not load the driver", e);
       }
 
       for (Map.Entry<String, String> entry : connectionParameters.getJDBCConnectionParameters().getConnection()
@@ -249,13 +233,12 @@ public class SIARDController {
       if (factory != null) {
         databaseMigration.importModule(factory);
 
-        if (parameters.doSSH()) {
-          final SSHConfiguration sshConfiguration = parameters.getSSHConfiguration();
-          databaseMigration.importModuleParameter("ssh", "true");
-          databaseMigration.importModuleParameter("ssh-host", sshConfiguration.getHostname());
-          databaseMigration.importModuleParameter("ssh-user", sshConfiguration.getUsername());
-          databaseMigration.importModuleParameter("ssh-password", sshConfiguration.getPassword());
-          databaseMigration.importModuleParameter("ssh-port", sshConfiguration.getPort());
+        setupSSHConfiguration(databaseMigration, parameters);
+
+        try {
+          setupPathToDriver(parameters);
+        } catch (Exception e) {
+          throw new GenericException("Could not load the driver", e);
         }
 
         for (Map.Entry<String, String> entry : parameters.getJDBCConnectionParameters().getConnection().entrySet()) {
@@ -436,6 +419,7 @@ public class SIARDController {
 
       viewerDatabase.setSIARDPath(path);
       viewerDatabase.setSIARDSize(new File(path).length());
+      viewerDatabase.setValidationStatus(ViewerDatabase.ValidationStatus.NOT_VALIDATED);
 
       final ViewerDatabaseFromToolkit database = ToolkitStructure2ViewerStructure.getDatabase(metadata);
 
@@ -653,5 +637,41 @@ public class SIARDController {
     }
 
     return metadata;
+  }
+
+  /**
+   * For Java 8 or below: check
+   * http://robertmaldon.blogspot.com/2007/11/dynamically-add-to-eclipse-junit.html
+   * (last access: 22-07-2019)
+   * 
+   * @param url
+   * @throws Exception
+   */
+  private static void addURL(URL url) throws Exception {
+    URLClassLoader classLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
+    Class<URLClassLoader> clazz = URLClassLoader.class;
+
+    // Use reflection
+    Method method = clazz.getDeclaredMethod("addURL", URL.class);
+    method.setAccessible(true);
+    method.invoke(classLoader, url);
+  }
+
+  private static void setupSSHConfiguration(DatabaseMigration databaseMigration, ConnectionParameters parameters) {
+    if (parameters.doSSH()) {
+      final SSHConfiguration sshConfiguration = parameters.getSSHConfiguration();
+
+      databaseMigration.importModuleParameter("ssh", "true");
+      databaseMigration.importModuleParameter("ssh-host", sshConfiguration.getHostname());
+      databaseMigration.importModuleParameter("ssh-user", sshConfiguration.getUsername());
+      databaseMigration.importModuleParameter("ssh-password", sshConfiguration.getPassword());
+      databaseMigration.importModuleParameter("ssh-port", sshConfiguration.getPort());
+    }
+  }
+
+  private static void setupPathToDriver(ConnectionParameters parameters) throws Exception {
+    if (parameters.getJDBCConnectionParameters().isDriver()) {
+      addURL(new File(parameters.getJDBCConnectionParameters().getDriverPath()).toURI().toURL());
+    }
   }
 }

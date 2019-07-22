@@ -86,7 +86,7 @@ public class ViewerConstants {
   public static final String SOLR_DATABASES_SIARD_SIZE = "siard_size";
   public static final String SOLR_DATABASES_VALIDATED_AT = "siard_validated_at";
   public static final String SOLR_DATABASES_VALIDATE_VERSION = "siard_validate_version";
-  public static final String SOLR_DATABASES_VALIDATED = "siard_validated";
+  public static final String SOLR_DATABASES_VALIDATION_STATUS = "siard_validation_status";
 
   /*
    * SEARCHES FIELDS

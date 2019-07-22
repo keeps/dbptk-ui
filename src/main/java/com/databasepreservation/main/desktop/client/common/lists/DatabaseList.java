@@ -97,14 +97,13 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
       }
     });
 
-    Column<ViewerDatabase, SafeHtml> validColumn = new Column<ViewerDatabase, SafeHtml>(new SafeHtmlCell()) {
+    Column<ViewerDatabase, SafeHtml> validColumn = new TooltipDatabaseColumn() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
-        return database != null && database.getMetadata() != null ? getBooleanValue(database.getValidated())
-          : getBooleanValue(false);
+        return database != null ? SafeHtmlUtils.fromString(SolrHumanizer.humanize(database.getValidationStatus())) : null;
       }
     };
-
+    
     Column<ViewerDatabase, SafeHtml> statusColumn = new TooltipDatabaseColumn() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
