@@ -59,6 +59,9 @@ public class Connection extends WizardPanel<ConnectionParameters> {
   private Connection() {
     initWidget(binder.createAndBindUi(this));
 
+    CreateWizardManager createWizardManager = CreateWizardManager.getInstance();
+    createWizardManager.enableNext(false);
+
     sshTunnelPanel = SSHTunnelPanel.getInstance();
 
     Widget spinner = new HTML(SafeHtmlUtils.fromSafeConstant(
@@ -82,6 +85,9 @@ public class Connection extends WizardPanel<ConnectionParameters> {
   }
 
   public void sideBarHighlighter(String connection) {
+
+    CreateWizardManager createWizardManager = CreateWizardManager.getInstance();
+    createWizardManager.enableNext(true);
 
     connectionSidebar.select(connection);
     JDBCListConnections.clear();
@@ -109,7 +115,7 @@ public class Connection extends WizardPanel<ConnectionParameters> {
   public ConnectionParameters getValues() {
     ConnectionParameters parameters = new ConnectionParameters();
 
-    parameters.setConnection(selected.getValues());
+    parameters.setJDBCConnectionParameters(selected.getValues());
     parameters.setModuleName(selectedConnection);
 
     if (sshTunnelPanel.isSSHTunnelEnabled()) {
@@ -127,6 +133,8 @@ public class Connection extends WizardPanel<ConnectionParameters> {
     }
     sshTunnelPanel.clear();
     connectionInputPanel.clear();
+    connectionSidebar.selectNone();
+    instance = null;
   }
 
   public void clearPasswords() {
@@ -138,9 +146,11 @@ public class Connection extends WizardPanel<ConnectionParameters> {
 
   @Override
   public boolean validate() {
-    final ArrayList<PreservationParameter> validate = selected.validate();
-
-   return validate.isEmpty();
+    if (selected != null) {
+      final ArrayList<PreservationParameter> validate = selected.validate();
+      return validate.isEmpty();
+    }
+    return false;
   }
 
   @Override

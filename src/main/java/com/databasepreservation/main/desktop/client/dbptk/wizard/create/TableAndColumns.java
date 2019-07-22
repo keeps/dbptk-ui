@@ -56,7 +56,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
   @UiField
   FlowPanel content, tableAndColumnsList, panel;
 
-  private static TableAndColumns instance = null;
+  private static HashMap<String, TableAndColumns> instances = new HashMap<>();
   private TableAndColumnsSidebar tableAndColumnsSidebar;
   private ViewerMetadata metadata;
   private HashMap<String, MultipleSelectionTablePanel<ViewerColumn>> columns = new HashMap<>();
@@ -68,10 +68,11 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
   private String currentSchemaUUID = null;
 
   public static TableAndColumns getInstance(ConnectionParameters values) {
-    if (instance == null) {
-      instance = new TableAndColumns(values.getModuleName(), values);
+    final String urlConnection = values.getURLConnection();
+    if (instances.get(urlConnection) == null) {
+      instances.put(urlConnection, new TableAndColumns(values.getModuleName(), values));
     }
-    return instance;
+    return instances.get(urlConnection);
   }
 
   private TableAndColumns(String moduleName, ConnectionParameters values) {
@@ -100,15 +101,30 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
 
   @Override
   public void clear() {
+    instances.clear();
+    columns.clear();
+    tables.clear();
+    views.clear();
+    columns = null;
+    tables = null;
+    views = null;
+    instances = new HashMap<>();
+    tableAndColumnsSidebar.selectNone();
   }
 
   @Override
   public boolean validate() {
-    boolean empty = false;
+    boolean tablesEmpty = false;
+    boolean viewsEmpty = false;
     for (MultipleSelectionTablePanel<ViewerTable> cellTable : tables.values()) {
-      if (cellTable.getSelectionModel().getSelectedSet().isEmpty()) empty = true;
+      if (cellTable.getSelectionModel().getSelectedSet().isEmpty()) tablesEmpty = true;
     }
-    return !empty;
+
+    for (MultipleSelectionTablePanel<ViewerView> cellTable : views.values()) {
+      if (cellTable.getSelectionModel().getSelectedSet().isEmpty()) viewsEmpty = true;
+    }
+
+    return !tablesEmpty || !viewsEmpty;
   }
 
   @Override

@@ -73,7 +73,7 @@ public class MetadataExportOptions extends WizardPanel<MetadataExportOptionsPara
 
   @Override
   public void clear() {
-
+    instance = null;
   }
 
   @Override

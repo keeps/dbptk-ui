@@ -93,4 +93,10 @@ public class ConnectionSidebar extends Composite {
       }
     }
   }
+
+  public void selectNone() {
+    for (Map.Entry<String, SidebarHyperlink> entry : list.entrySet()) {
+      entry.getValue().setSelected(false);
+    }
+  }
 }

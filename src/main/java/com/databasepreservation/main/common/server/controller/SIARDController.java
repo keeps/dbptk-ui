@@ -5,6 +5,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -14,7 +16,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import com.databasepreservation.main.desktop.shared.models.SSHConfiguration;
 import org.apache.commons.io.IOUtils;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
@@ -40,6 +41,7 @@ import com.databasepreservation.main.common.shared.client.ClientLogger;
 import com.databasepreservation.main.common.shared.client.tools.PathUtils;
 import com.databasepreservation.main.desktop.shared.models.DBPTKModule;
 import com.databasepreservation.main.desktop.shared.models.PreservationParameter;
+import com.databasepreservation.main.desktop.shared.models.SSHConfiguration;
 import com.databasepreservation.main.desktop.shared.models.wizardParameters.ConnectionParameters;
 import com.databasepreservation.main.desktop.shared.models.wizardParameters.CustomViewsParameter;
 import com.databasepreservation.main.desktop.shared.models.wizardParameters.CustomViewsParameters;
@@ -105,7 +107,22 @@ public class SIARDController {
           databaseMigration.importModuleParameter("ssh-port", sshConfiguration.getPort());
         }
 
-        for (Map.Entry<String, String> entry : parameters.getConnection().entrySet()) {
+        if (parameters.getJDBCConnectionParameters().isDriver()) {
+          try {
+            //  "jar:file:///opt/progress/DataDirect/Connect_for_JDBC_51/lib/openedgewp.jar!/";
+            String urlPath = "jar:file://" + parameters.getJDBCConnectionParameters().getDriverPath() + "!/";
+            URL[] urls = new URL[5];
+            urls[0] = new URL(urlPath);
+            URLClassLoader classLoader = URLClassLoader.newInstance(urls);
+            Class<?> aClass = classLoader.loadClass("com.ddtek.jdbc.openedge.OpenEdgeDriver");
+
+          } catch (Exception ex) {
+            System.out.println("Failed.");
+            throw new GenericException("Failed to load driver");
+          }
+        }
+
+        for (Map.Entry<String, String> entry : parameters.getJDBCConnectionParameters().getConnection().entrySet()) {
           databaseMigration.importModuleParameter(entry.getKey(), entry.getValue());
         }
 
@@ -169,7 +186,8 @@ public class SIARDController {
         databaseMigration.importModuleParameter("ssh-port", sshConfiguration.getPort());
       }
 
-      for (Map.Entry<String, String> entry : connectionParameters.getConnection().entrySet()) {
+      for (Map.Entry<String, String> entry : connectionParameters.getJDBCConnectionParameters().getConnection()
+        .entrySet()) {
         LOGGER.info("Connection Options - " + entry.getKey() + "->" + entry.getValue());
         databaseMigration.importModuleParameter(entry.getKey(), entry.getValue());
       }
@@ -240,7 +258,7 @@ public class SIARDController {
           databaseMigration.importModuleParameter("ssh-port", sshConfiguration.getPort());
         }
 
-        for (Map.Entry<String, String> entry : parameters.getConnection().entrySet()) {
+        for (Map.Entry<String, String> entry : parameters.getJDBCConnectionParameters().getConnection().entrySet()) {
           databaseMigration.importModuleParameter(entry.getKey(), entry.getValue());
         }
 
@@ -576,7 +594,7 @@ public class SIARDController {
       view.put(parameter.getCustomViewName(), customViewInformation);
       data.put(parameter.getSchema(), view);
     }
-    gst
+
     Yaml yaml = new Yaml();
 
     FileOutputStream outputStream = null;

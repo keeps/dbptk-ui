@@ -91,6 +91,7 @@ public class SIARDExportOptions extends WizardPanel<ExportOptionsParameters> {
   @Override
   public void clear() {
 
+    instance = null;
   }
 
   @Override

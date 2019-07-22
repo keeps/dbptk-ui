@@ -77,7 +77,11 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
 
   @Override
   public void clear() {
-
+    if (customViewsParameters != null) {
+      customViewsParameters.clear();
+    }
+    customViewsParameters = null;
+    instance = null;
   }
 
   @Override

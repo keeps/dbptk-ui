@@ -142,6 +142,12 @@ public class TableAndColumnsSidebar extends Composite {
     }
   }
 
+  public void selectNone() {
+    for (Map.Entry<String, SidebarHyperlink> entry : list.entrySet()) {
+      entry.getValue().setSelected(false);
+    }
+  }
+
   private void searchInit() {
     searchInputBox.getElement().setPropertyString("placeholder", messages.menusidebar_filterSidebar());
 

@@ -1,17 +1,13 @@
 package com.databasepreservation.main.desktop.client.dbptk.wizard.create;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.databasepreservation.main.common.client.BrowserService;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
 import com.databasepreservation.main.common.shared.client.common.utils.AsyncCallbackUtils;
-import com.databasepreservation.main.common.shared.client.common.utils.BrowserServiceUtils;
-import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.ProgressBarPanel;
@@ -24,7 +20,6 @@ import com.databasepreservation.main.desktop.shared.models.wizardParameters.Expo
 import com.databasepreservation.main.desktop.shared.models.wizardParameters.MetadataExportOptionsParameters;
 import com.databasepreservation.main.desktop.shared.models.wizardParameters.TableAndColumnsParameters;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -35,7 +30,6 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
-import org.springframework.web.util.JavaScriptUtils;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -43,6 +37,10 @@ import org.springframework.web.util.JavaScriptUtils;
 public class CreateWizardManager extends Composite {
   @UiField
   public ClientMessages messages = GWT.create(ClientMessages.class);
+
+  public void enableNext(boolean value) {
+    btnNext.setEnabled(value);
+  }
 
   interface CreateWizardManagerUiBinder extends UiBinder<Widget, CreateWizardManager> {
   }
@@ -117,6 +115,7 @@ public class CreateWizardManager extends Composite {
 
     btnCancel.addClickHandler(event -> {
       clear();
+      instance = null;
       HistoryManager.gotoHome();
     });
   }
@@ -145,7 +144,6 @@ public class CreateWizardManager extends Composite {
     final boolean valid = wizardInstances.get(position).validate();
     if (valid) {
       connectionParameters = (ConnectionParameters) wizardInstances.get(position).getValues();
-      String moduleName = connectionParameters.getModuleName();
 
       Widget spinner = new HTML(SafeHtmlUtils.fromSafeConstant(
         "<div class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
@@ -154,25 +152,24 @@ public class CreateWizardManager extends Composite {
 
       BrowserService.Util.getInstance().testConnection("test", connectionParameters,
         new DefaultAsyncCallback<Boolean>() {
-        @Override
-        public void onSuccess(Boolean aBoolean) {
-          wizardContent.clear();
-          position = 1;
+          @Override
+          public void onSuccess(Boolean aBoolean) {
+            wizardContent.clear();
+            position = 1;
             TableAndColumns tableAndColumns = TableAndColumns.getInstance(connectionParameters);
-          wizardInstances.add(position, tableAndColumns);
-          wizardContent.add(tableAndColumns);
-          updateButtons();
-          updateBreadcrumb();
+            wizardInstances.add(position, tableAndColumns);
+            wizardContent.add(tableAndColumns);
+            updateButtons();
+            updateBreadcrumb();
+            wizardContent.remove(spinner);
+          }
 
-          wizardContent.remove(spinner);
-        }
-
-        @Override
-        public void onFailure(Throwable caught) {
-          AsyncCallbackUtils.defaultFailureTreatment(caught);
-          wizardContent.remove(spinner);
-        }
-      });
+          @Override
+          public void onFailure(Throwable caught) {
+            AsyncCallbackUtils.defaultFailureTreatment(caught);
+            wizardContent.remove(spinner);
+          }
+        });
     } else {
       wizardInstances.get(position).error();
       Connection connection = (Connection) wizardInstances.get(position);
@@ -222,14 +219,15 @@ public class CreateWizardManager extends Composite {
       if (!exportOptionsParameters.getSIARDVersion().equals("siard-dk")) {
         wizardContent.clear();
         position = 4;
-        MetadataExportOptions metadataExportOptions = MetadataExportOptions.getInstance(exportOptionsParameters.getSIARDVersion());
+        MetadataExportOptions metadataExportOptions = MetadataExportOptions
+          .getInstance(exportOptionsParameters.getSIARDVersion());
         wizardInstances.add(4, metadataExportOptions);
         wizardContent.add(metadataExportOptions);
         updateButtons();
         updateBreadcrumb();
         customButtons.clear();
       } else {
-        //TODO: create SIARD
+        // TODO: create SIARD
       }
     } else {
       wizardInstances.get(position).error();
@@ -256,12 +254,22 @@ public class CreateWizardManager extends Composite {
         ProgressBarPanel progressBarPanel = ProgressBarPanel.createInstance(result);
         wizardContent.add(progressBarPanel);
 
-        BrowserService.Util.getInstance().createSIARD(result, connectionParameters, tableAndColumnsParameters, customViewsParameters, exportOptionsParameters, metadataExportOptionsParameters, new DefaultAsyncCallback<Boolean>() {
-          @Override
-          public void onSuccess(Boolean result) {
-            JavascriptUtils.log("TEST");
-          }
-        });
+        BrowserService.Util.getInstance().createSIARD(result, connectionParameters, tableAndColumnsParameters,
+          customViewsParameters, exportOptionsParameters, metadataExportOptionsParameters,
+          new DefaultAsyncCallback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean result) {
+              final String siardPath = exportOptionsParameters.getSiardPath();
+              BrowserService.Util.getInstance().uploadMetadataSIARD(siardPath, new DefaultAsyncCallback<String>() {
+                @Override
+                public void onSuccess(String result) {
+                  clear();
+                  instance = null;
+                  HistoryManager.gotoSIARDInfo(result);
+                }
+              });
+            }
+          });
       }
     });
   }
@@ -307,7 +315,8 @@ public class CreateWizardManager extends Composite {
       case 5:
         breadcrumbItems = BreadcrumbManager.forCreateSIARD();
         break;
-      default: breadcrumbItems = new ArrayList<>();
+      default:
+        breadcrumbItems = new ArrayList<>();
         break;
     }
 
@@ -318,6 +327,8 @@ public class CreateWizardManager extends Composite {
     for (WizardPanel panel : wizardInstances) {
       panel.clear();
     }
+
+    wizardInstances.clear();
   }
 
   public void change(String wizardPage, String toSelect) {

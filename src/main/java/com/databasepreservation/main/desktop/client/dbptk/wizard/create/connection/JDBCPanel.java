@@ -15,6 +15,7 @@ import com.databasepreservation.main.common.shared.client.tools.ViewerStringUtil
 import com.databasepreservation.main.desktop.client.common.FileUploadField;
 import com.databasepreservation.main.desktop.client.common.GenericField;
 import com.databasepreservation.main.desktop.shared.models.Filter;
+import com.databasepreservation.main.desktop.shared.models.JDBCParameters;
 import com.databasepreservation.main.desktop.shared.models.PreservationParameter;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -50,8 +51,8 @@ public class JDBCPanel extends Composite {
   private HashMap<String, TextBox> textBoxInputs = new HashMap<>();
   private HashMap<String, CheckBox> checkBoxInputs = new HashMap<>();
   private HashMap<String, FileUploadField> fileInputs = new HashMap<>();
+  private String pathToDriver = null;
   private ArrayList<PreservationParameter> parameters;
-  private String pathToDriver;
 
   @UiField
   FlowPanel content;
@@ -75,7 +76,9 @@ public class JDBCPanel extends Composite {
     }
   }
 
-  public HashMap<String, String> getValues() {
+  public JDBCParameters getValues() {
+    JDBCParameters parameters = new JDBCParameters();
+
     HashMap<String, String> values = new HashMap<>();
     for (Map.Entry<String, TextBox> entry : textBoxInputs.entrySet()) {
       if (ViewerStringUtils.isNotBlank(entry.getValue().getText())) {
@@ -83,7 +86,13 @@ public class JDBCPanel extends Composite {
       }
     }
 
-    return values;
+    parameters.setConnection(values);
+    if (ViewerStringUtils.isNotBlank(pathToDriver)) {
+      parameters.setDriver(true);
+      parameters.setDriverPath(pathToDriver);
+    }
+
+    return parameters;
   }
 
   private void buildGenericWidget(PreservationParameter parameter) {
@@ -96,8 +105,9 @@ public class JDBCPanel extends Composite {
         passwordTextBox.addStyleName("form-textbox");
         textBoxInputs.put(parameter.getName(), passwordTextBox);
         genericField = GenericField.createInstance(messages.connectionLabels(parameter.getName()), passwordTextBox);
-        if(parameter.isRequired())
+        if(parameter.isRequired()) {
           passwordTextBox.getElement().setAttribute("required", "required");
+        }
         break;
       case "CHECKBOX":
         CheckBox checkbox = new CheckBox();
@@ -122,7 +132,7 @@ public class JDBCPanel extends Composite {
               String path = JavascriptUtils.openFileDialog(options);
               if (path != null) {
                 pathToDriver = path;
-                String displayPath= PathUtils.getFileName(path);
+                String displayPath = PathUtils.getFileName(path);
                 fileUploadField.setPathLocation(displayPath, path);
                 fileUploadField.setInformationPathCSS("gwt-Label-disabled information-path");
               }
@@ -153,15 +163,22 @@ public class JDBCPanel extends Composite {
   }
 
   public ArrayList<PreservationParameter> validate() {
-
     ArrayList<PreservationParameter> arrayList = new ArrayList<>();
 
     for (PreservationParameter parameter : parameters) {
       if (parameter.isRequired()) {
-        final TextBox textBox = textBoxInputs.get(parameter.getName());
-        if (ViewerStringUtils.isBlank(textBox.getText())) {
-          arrayList.add(parameter);
-          textBox.addStyleName("wizard-connection-validator");
+        if (parameter.getInputType().equals("TEXT")) {
+          final TextBox textBox = textBoxInputs.get(parameter.getName());
+          if (ViewerStringUtils.isBlank(textBox.getText())) {
+            arrayList.add(parameter);
+            textBox.addStyleName("wizard-connection-validator");
+            textBox.getElement().setAttribute("required", "required");
+          }
+        }
+        if (parameter.getInputType().equals("FILE")) {
+          if (ViewerStringUtils.isBlank(pathToDriver)) {
+            arrayList.add(parameter);
+          }
         }
       }
     }
@@ -170,6 +187,7 @@ public class JDBCPanel extends Composite {
 
   public void clear() {
     for (TextBox textBox : textBoxInputs.values()) {
+      textBox.getElement().removeAttribute("required");
       textBox.setText("");
     }
 
