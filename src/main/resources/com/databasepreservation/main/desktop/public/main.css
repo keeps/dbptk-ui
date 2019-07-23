@@ -1448,6 +1448,10 @@ input[type="checkbox"]:checked:after {
     color: #089de3;
 }
 
+.metadata-update .missing{
+    color: #8f3938;
+}
+
 /**********************************************
 		EDIT METADATA TAB & SCROLL
 ************************************************/

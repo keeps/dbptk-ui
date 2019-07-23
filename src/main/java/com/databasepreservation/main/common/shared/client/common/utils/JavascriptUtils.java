@@ -7,7 +7,6 @@ package com.databasepreservation.main.common.shared.client.common.utils;
 
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public class JavascriptUtils {
 
@@ -267,15 +266,6 @@ public class JavascriptUtils {
                                                                        
                                                                        }-*/;
 
-  public static native void alertUpdatedMetadata()/*-{
-                                                    $wnd.jQuery(".metadata-save").show();
-                                                    
-                                                    }-*/;
-
-  public static native void disableSaveMetadataButton(Boolean disable)/*-{
-                                                                      $wnd.jQuery(".metadata-btn-save").prop('disabled', disable);
-                                                                      }-*/;
-
   public static native void log(String txt) /*-{
                                             $wnd.console.log(txt);
                                             }-*/;
@@ -303,22 +293,23 @@ public class JavascriptUtils {
                                                                         };
                                                                         }-*/;
 
-  public static native void confirmationDialog(String title, String message, String cancel, String confirm, DefaultAsyncCallback<Boolean> callback) /*-{
-                                                                                                       var options = {
-                                                                                                       type: 'question',
-                                                                                                       buttons: [confirm, cancel],
-                                                                                                       title: title,
-                                                                                                       message: message
-                                                                                                       };
-                                                                                                       
-                                                                                                       var dialog = $wnd.nodeRequire('electron').remote.dialog;
-                                                                                                       
-                                                                                                       return dialog.showMessageBox(null, options, function(response){
-                                                                                                       var value = false;
-                                                                                                       if(response === 0) {
-                                                                                                       value = true;
-                                                                                                       }
-                                                                                                       callback.@com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback::onSuccess(*)(value);
-                                                                                                       });
-                                                                                                       }-*/;
+  public static native void confirmationDialog(String title, String message, String cancel, String confirm,
+    DefaultAsyncCallback<Boolean> callback) /*-{
+                                            var options = {
+                                            type: 'question',
+                                            buttons: [confirm, cancel],
+                                            title: title,
+                                            message: message
+                                            };
+                                            
+                                            var dialog = $wnd.nodeRequire('electron').remote.dialog;
+                                            
+                                            return dialog.showMessageBox(null, options, function(response){
+                                            var value = false;
+                                            if(response === 0) {
+                                            value = true;
+                                            }
+                                            callback.@com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback::onSuccess(*)(value);
+                                            });
+                                            }-*/;
 }

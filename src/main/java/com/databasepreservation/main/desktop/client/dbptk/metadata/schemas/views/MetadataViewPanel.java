@@ -1,11 +1,14 @@
 package com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.views;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSIARDBundle;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSchema;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerView;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
-import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
+import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataControlPanel;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataPanel;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -14,11 +17,13 @@ import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.*;
-import config.i18n.client.ClientMessages;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.TabPanel;
+import com.google.gwt.user.client.ui.TextArea;
+import com.google.gwt.user.client.ui.Widget;
 
-import java.util.HashMap;
-import java.util.Map;
+import config.i18n.client.ClientMessages;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -47,6 +52,7 @@ public class MetadataViewPanel extends MetadataPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, MetadataViewPanel> instances = new HashMap<>();
   private ViewerSIARDBundle SIARDbundle;
+  private MetadataControlPanel controls;
   private ViewerDatabase database;
   private ViewerSchema schema;
   private ViewerView view;
@@ -70,6 +76,7 @@ public class MetadataViewPanel extends MetadataPanel {
     this.SIARDbundle = SIARDbundle;
     view = database.getMetadata().getView(viewUUID);
     schema = database.getMetadata().getSchema(schemaUUID);
+    controls = MetadataControlPanel.getInstance(database.getUUID());
 
     GWT.log("MetadataViewPanel::" + view.getName());
 
@@ -89,7 +96,7 @@ public class MetadataViewPanel extends MetadataPanel {
       public void onChange(ChangeEvent event) {
         view.setDescription(description.getText());
         SIARDbundle.setView(schema.getName(), view.getName(), description.getText());
-        JavascriptUtils.alertUpdatedMetadata();
+        controls.validate();
       }
     });
     description.addFocusHandler(new FocusHandler() {
@@ -99,7 +106,7 @@ public class MetadataViewPanel extends MetadataPanel {
       }
     });
 
-    tabPanel.add(new MetadataViewColumns(SIARDbundle,schema, view).createTable(), messages.columns());
+    tabPanel.add(new MetadataViewColumns(SIARDbundle,schema, view, controls).createTable(), messages.columns());
     tabPanel.add(new MetadataViewQuery(view).createInfo(), messages.query());
 
     tabPanel.selectTab(0);

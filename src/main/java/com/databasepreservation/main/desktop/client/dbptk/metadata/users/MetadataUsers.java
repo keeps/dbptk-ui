@@ -4,16 +4,14 @@ import java.util.List;
 
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSIARDBundle;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerUserStructure;
-import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.main.desktop.client.common.EditableCell;
 import com.databasepreservation.main.desktop.client.common.lists.MetadataTableList;
+import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataControlPanel;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataEditPanel;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.Label;
 
 import config.i18n.client.ClientMessages;
 
@@ -21,10 +19,12 @@ public class MetadataUsers implements MetadataEditPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private ViewerSIARDBundle SIARDbundle;
   private List<ViewerUserStructure> users;
+  private MetadataControlPanel controls;
 
-  public MetadataUsers(ViewerSIARDBundle SIARDbundle, List<ViewerUserStructure> users) {
+  public MetadataUsers(ViewerSIARDBundle SIARDbundle, List<ViewerUserStructure> users, MetadataControlPanel controls) {
     this.SIARDbundle = SIARDbundle;
     this.users = users;
+    this.controls = controls;
   }
 
   @Override
@@ -71,6 +71,6 @@ public class MetadataUsers implements MetadataEditPanel {
   @Override
   public void updateSIARDbundle(String name, String value) {
     SIARDbundle.setUser(name, value);
-    JavascriptUtils.alertUpdatedMetadata();
+    controls.validate();
   }
 }

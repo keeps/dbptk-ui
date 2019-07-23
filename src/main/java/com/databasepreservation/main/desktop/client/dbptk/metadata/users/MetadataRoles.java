@@ -1,31 +1,30 @@
 package com.databasepreservation.main.desktop.client.dbptk.metadata.users;
 
-import com.databasepreservation.main.common.shared.ViewerStructure.ViewerColumn;
+import java.util.List;
+
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerRoleStructure;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSIARDBundle;
-import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.main.desktop.client.common.EditableCell;
 import com.databasepreservation.main.desktop.client.common.lists.MetadataTableList;
+import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataControlPanel;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataEditPanel;
-import com.google.gwt.cell.client.EditTextCell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.Label;
-import config.i18n.client.ClientMessages;
 
-import java.util.List;
+import config.i18n.client.ClientMessages;
 
 public class MetadataRoles implements MetadataEditPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private ViewerSIARDBundle SIARDbundle;
   private List<ViewerRoleStructure> roles;
+  private MetadataControlPanel controls;
 
-  public MetadataRoles(ViewerSIARDBundle SIARDbundle, List<ViewerRoleStructure> roles) {
+  public MetadataRoles(ViewerSIARDBundle SIARDbundle, List<ViewerRoleStructure> roles, MetadataControlPanel controls) {
     this.SIARDbundle = SIARDbundle;
     this.roles = roles;
+    this.controls = controls;
   }
 
   @Override
@@ -59,10 +58,11 @@ public class MetadataRoles implements MetadataEditPanel {
 
   @Override
   public Column<ViewerRoleStructure, String> getDescriptionColumn() {
-    Column<ViewerRoleStructure, String> description = new Column<ViewerRoleStructure, String>(
-            new EditableCell()) {
+    Column<ViewerRoleStructure, String> description = new Column<ViewerRoleStructure, String>(new EditableCell()) {
       @Override
-      public String getValue(ViewerRoleStructure object) { return object.getDescription(); }
+      public String getValue(ViewerRoleStructure object) {
+        return object.getDescription();
+      }
     };
 
     description.setFieldUpdater(new FieldUpdater<ViewerRoleStructure, String>() {
@@ -80,6 +80,6 @@ public class MetadataRoles implements MetadataEditPanel {
   @Override
   public void updateSIARDbundle(String name, String value) {
     SIARDbundle.setRole(name, value);
-    JavascriptUtils.alertUpdatedMetadata();
+    controls.validate();
   }
 }

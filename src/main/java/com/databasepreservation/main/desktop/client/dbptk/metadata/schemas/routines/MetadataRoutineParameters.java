@@ -7,6 +7,7 @@ import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSIARDBu
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSchema;
 import com.databasepreservation.main.desktop.client.common.EditableCell;
 import com.databasepreservation.main.desktop.client.common.lists.MetadataTableList;
+import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataControlPanel;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataEditPanel;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.Column;
@@ -20,14 +21,16 @@ import config.i18n.client.ClientMessages;
 public class MetadataRoutineParameters implements MetadataEditPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private final List<ViewerRoutineParameter> parameters;
+  private final MetadataControlPanel controls;
   private ViewerSIARDBundle SIARDbundle;
   private ViewerSchema schema;
 
   public MetadataRoutineParameters(ViewerSIARDBundle SIARDbundle, ViewerSchema schema,
-    List<ViewerRoutineParameter> parameters) {
+                                   List<ViewerRoutineParameter> parameters, MetadataControlPanel controls) {
     this.SIARDbundle = SIARDbundle;
     this.schema = schema;
     this.parameters = parameters;
+    this.controls = controls;
   }
 
   @Override
@@ -77,6 +80,6 @@ public class MetadataRoutineParameters implements MetadataEditPanel {
 
   @Override
   public void updateSIARDbundle(String name, String value) {
-
+    //TODO: update routines parameters
   }
 }

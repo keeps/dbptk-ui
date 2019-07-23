@@ -1,29 +1,30 @@
 package com.databasepreservation.main.desktop.client.dbptk.metadata.users;
 
+import java.util.List;
+
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerPrivilegeStructure;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSIARDBundle;
-import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.main.desktop.client.common.EditableCell;
 import com.databasepreservation.main.desktop.client.common.lists.MetadataTableList;
+import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataControlPanel;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataEditPanel;
-import com.google.gwt.cell.client.EditTextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.Label;
-import config.i18n.client.ClientMessages;
 
-import java.util.List;
+import config.i18n.client.ClientMessages;
 
 public class MetadataPrivileges implements MetadataEditPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private ViewerSIARDBundle SIARDbundle;
   private List<ViewerPrivilegeStructure> privileges;
+  private MetadataControlPanel controls;
 
-  public MetadataPrivileges(ViewerSIARDBundle SIARDbundle, List<ViewerPrivilegeStructure> privileges) {
+  public MetadataPrivileges(ViewerSIARDBundle SIARDbundle, List<ViewerPrivilegeStructure> privileges,
+    MetadataControlPanel controls) {
     this.SIARDbundle = SIARDbundle;
     this.privileges = privileges;
+    this.controls = controls;
   }
 
   @Override
@@ -79,21 +80,24 @@ public class MetadataPrivileges implements MetadataEditPanel {
   @Override
   public Column<ViewerPrivilegeStructure, String> getDescriptionColumn() {
     Column<ViewerPrivilegeStructure, String> description = new Column<ViewerPrivilegeStructure, String>(
-            new EditableCell()) {
+      new EditableCell()) {
       @Override
-      public String getValue(ViewerPrivilegeStructure object) { return object.getDescription(); }
+      public String getValue(ViewerPrivilegeStructure object) {
+        return object.getDescription();
+      }
     };
 
     description.setFieldUpdater((index, object, value) -> {
       object.setDescription(value);
       SIARDbundle.setPrivileges(object.getType(), object.getObject(), object.getGrantor(), object.getGrantee(),
-              object.getDescription());
-      JavascriptUtils.alertUpdatedMetadata();
+        object.getDescription());
+      controls.validate();
     });
 
     return description;
   }
 
   @Override
-  public void updateSIARDbundle(String name, String value) {}
+  public void updateSIARDbundle(String name, String value) {
+  }
 }

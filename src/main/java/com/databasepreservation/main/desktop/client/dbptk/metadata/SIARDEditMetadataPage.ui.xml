@@ -1,8 +1,8 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:sb='urn:import:com.databasepreservation.main.desktop.client.common.sidebar'
-             xmlns:m='urn:import:com.databasepreservation.main.common.shared.client.breadcrumb'
-             xmlns:c='urn:import:com.databasepreservation.main.common.shared.client.common'>
+             xmlns:ct='urn:import:com.databasepreservation.main.desktop.client.dbptk.metadata'
+             xmlns:m='urn:import:com.databasepreservation.main.common.shared.client.breadcrumb'>
 
     <ui:with field='messages' type='config.i18n.client.ClientMessages'/>
 
@@ -16,21 +16,11 @@
             <!-- RIGHT PANEL -->
             <g:cell width="100%">
                 <g:FlowPanel addStyleNames="metadata-panel">
+                    <!-- CONTENT PANEL -->
                     <g:SimplePanel addStyleNames="col_12 content metadata-content" ui:field="rightPanelContainer" />
-                    <c:LoadingDiv visible="false" ui:field="loading"/>
-                    <g:FlowPanel visible="false" addStyleNames="metadata-save" ui:field="saveMetadataPanel">
-                        <g:Button addStyleNames="btn btn-times-circle btn-danger" ui:field="buttonRevert">
-                            <ui:text from='{messages.metadataButtonRevert}'/>
-                        </g:Button>
-                        <g:Button addStyleNames="btn btn-save metadata-btn-save" ui:field="buttonSave">
-                            <ui:text from='{messages.metadataButtonSave}'/>
-                        </g:Button>
-                        <g:FlowPanel addStyleNames="metadata-update">
-                            <g:Label>
-                                <ui:text from='{messages.metadataHasUpdates}'/>
-                            </g:Label>
-                        </g:FlowPanel>
-                    </g:FlowPanel>
+                    <!-- CONTROL PANEL -->
+                    <ct:MetadataControlPanel ui:field="controls" />
+
                 </g:FlowPanel>
             </g:cell>
         </g:HorizontalPanel>

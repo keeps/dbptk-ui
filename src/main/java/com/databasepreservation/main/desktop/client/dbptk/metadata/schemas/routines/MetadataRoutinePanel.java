@@ -1,13 +1,14 @@
 package com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.routines;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.main.common.shared.ViewerStructure.*;
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerRoutine;
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSIARDBundle;
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSchema;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
-import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
-import com.databasepreservation.main.desktop.client.common.sidebar.MetadataEditSidebar;
+import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataControlPanel;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataPanel;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
@@ -16,7 +17,11 @@ import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.TabPanel;
+import com.google.gwt.user.client.ui.TextArea;
+import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
 
@@ -42,6 +47,7 @@ public class MetadataRoutinePanel extends MetadataPanel {
     private ViewerDatabase database;
     private ViewerSchema schema;
     private ViewerRoutine routine;
+    private MetadataControlPanel controls;
 
     public static MetadataPanel getInstance(ViewerDatabase database, ViewerSIARDBundle SIARDbundle, String schemaUUID, String routineUUID) {
         String separator = "/";
@@ -60,6 +66,7 @@ public class MetadataRoutinePanel extends MetadataPanel {
         this.SIARDbundle = SIARDbundle;
         routine = database.getMetadata().getRoutine(routineUUID);
         schema = database.getMetadata().getSchema(schemaUUID);
+        this.controls = MetadataControlPanel.getInstance(database.getUUID());
 
         GWT.log("MetadataRoutinePanel::" + routine.getName());
 
@@ -84,7 +91,7 @@ public class MetadataRoutinePanel extends MetadataPanel {
             public void onChange(ChangeEvent event) {
                 routine.setDescription(description.getText());
                 SIARDbundle.setRoutine(schema.getName(), routine.getName(), description.getText());
-                JavascriptUtils.alertUpdatedMetadata();
+                controls.validate();
             }
         });
         description.addFocusHandler(new FocusHandler() {
@@ -95,7 +102,7 @@ public class MetadataRoutinePanel extends MetadataPanel {
         });
 
         tabPanel.add(new MetadataRoutineInfos(routine).createInfo(), messages.menusidebar_information());
-        tabPanel.add(new MetadataRoutineParameters(SIARDbundle, schema, routine.getParameters()).createTable(), messages.routines_parametersList());
+        tabPanel.add(new MetadataRoutineParameters(SIARDbundle, schema, routine.getParameters(), controls).createTable(), messages.routines_parametersList());
 
         tabPanel.selectTab(0);
     }

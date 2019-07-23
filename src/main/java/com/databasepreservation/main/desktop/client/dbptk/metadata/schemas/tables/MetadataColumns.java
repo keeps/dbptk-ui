@@ -7,10 +7,10 @@ import com.databasepreservation.main.common.shared.ViewerStructure.ViewerPrimary
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSIARDBundle;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSchema;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
-import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.main.common.shared.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.main.desktop.client.common.EditableCell;
 import com.databasepreservation.main.desktop.client.common.lists.MetadataTableList;
+import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataControlPanel;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataEditPanel;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
@@ -18,8 +18,6 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.Label;
 
 import config.i18n.client.ClientMessages;
 
@@ -29,15 +27,17 @@ import config.i18n.client.ClientMessages;
 public class MetadataColumns implements MetadataEditPanel {
 
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
+  private final MetadataControlPanel controls;
   private ViewerSIARDBundle SIARDbundle;
   private ViewerTable table;
   private ViewerSchema schema;
   private String type = "column";
 
-  MetadataColumns(ViewerSIARDBundle SIARDbundle, ViewerSchema schema, ViewerTable table) {
+  MetadataColumns(ViewerSIARDBundle SIARDbundle, ViewerSchema schema, ViewerTable table, MetadataControlPanel controls) {
     this.SIARDbundle = SIARDbundle;
     this.table = table;
     this.schema = schema;
+    this.controls = controls;
   }
 
   @Override
@@ -110,7 +110,7 @@ public class MetadataColumns implements MetadataEditPanel {
   @Override
   public void updateSIARDbundle(String name, String value) {
     SIARDbundle.setTableType(schema.getName(), table.getName(), type, name, value);
-    JavascriptUtils.alertUpdatedMetadata();
+    controls.validate();
   }
 
 }

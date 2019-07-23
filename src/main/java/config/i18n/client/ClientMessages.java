@@ -557,6 +557,8 @@ public interface ClientMessages extends Messages {
 
   String metadataHasUpdates();
 
+  String metadataMissingFields(String fieldList);
+
   String metadataSuccessUpdated();
 
   String metadataFailureUpdated();

@@ -2,6 +2,7 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:d="urn:import:com.google.gwt.user.datepicker.client"
              xmlns:c='urn:import:com.databasepreservation.main.common.shared.client.common'>
 
     <ui:with field='messages' type='config.i18n.client.ClientMessages'/>
@@ -27,7 +28,7 @@
                 <g:Label addStyleNames="form-label form-label-mandatory">
                     <ui:text from="{messages.siardMetadata_archivalDate}"/>
                 </g:Label>
-                <g:TextBox addStyleNames="form-textbox" ui:field="archivalDate"/>
+                <d:DateBox addStyleNames="form-textbox" ui:field="archivalDate"/>
             </g:FlowPanel>
 
             <g:FlowPanel addStyleNames="metadata-edit-field">

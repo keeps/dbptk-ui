@@ -1,38 +1,26 @@
 package com.databasepreservation.main.desktop.client.dbptk.metadata;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.databasepreservation.main.common.client.BrowserService;
-import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
-import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSIARDBundle;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
-import com.databasepreservation.main.common.shared.client.common.LoadingDiv;
-import com.databasepreservation.main.common.shared.client.common.dialogs.Dialogs;
-import com.databasepreservation.main.common.shared.client.common.utils.ApplicationType;
-import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
-import com.databasepreservation.main.common.shared.client.widgets.Toast;
 import com.databasepreservation.main.desktop.client.common.sidebar.MetadataEditSidebar;
-import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import config.i18n.client.ClientMessages;
-import com.google.gwt.core.client.GWT;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import config.i18n.client.ClientMessages;
 
 /**
  * @autor Gabriel Barros <gbarros@keep.pt>
@@ -65,21 +53,16 @@ public class SIARDEditMetadataPage extends Composite {
   @UiField(provided = true)
   MetadataEditSidebar sidebar;
 
+  @UiField(provided = true)
+  MetadataControlPanel controls;
+
   @UiField
   SimplePanel rightPanelContainer;
-
-  @UiField
-  Button buttonSave, buttonRevert;
-
-  @UiField
-  LoadingDiv loading;
-
-  @UiField
-  FlowPanel saveMetadataPanel;
 
   private SIARDEditMetadataPage(final String databaseUUID) {
     this.databaseUUID = databaseUUID;
     this.sidebar = MetadataEditSidebar.getInstance(databaseUUID);
+    this.controls = MetadataControlPanel.getInstance(databaseUUID);
 
     initWidget(binder.createAndBindUi(this));
 
@@ -118,6 +101,7 @@ public class SIARDEditMetadataPage extends Composite {
 
     if (database != null && !sidebar.isInitialized()) {
       sidebar.init(database);
+      controls.init(database, SIARDbundle);
     }
 
     sidebar.select(sidebarSelected);
@@ -129,66 +113,5 @@ public class SIARDEditMetadataPage extends Composite {
       rightPanel.setVisible(true);
     }
 
-  }
-
-  @UiHandler("buttonSave")
-  void buttonSaveHandler(ClickEvent e) {
-
-    if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
-      JavascriptUtils.confirmationDialog(messages.dialogUpdateMetadata(), messages.dialogConfirmUpdateMetadata(),
-        messages.dialogCancel(), messages.dialogConfirm(), new DefaultAsyncCallback<Boolean>() {
-
-          @Override
-          public void onSuccess(Boolean confirm) {
-            if (confirm) {
-              updateMetadata();
-            }
-          }
-
-        });
-    } else {
-      Dialogs.showConfirmDialog(messages.dialogConfirm(), messages.dialogConfirmUpdateMetadata(),
-        messages.dialogCancel(), messages.dialogConfirm(), new DefaultAsyncCallback<Boolean>() {
-
-          @Override
-          public void onFailure(Throwable caught) {
-            Toast.showError(messages.metadataFailureUpdated(), caught.getMessage());
-          }
-
-          @Override
-          public void onSuccess(Boolean confirm) {
-            if (confirm) {
-              updateMetadata();
-            }
-          }
-        });
-    }
-  }
-
-  private void updateMetadata() {
-    ViewerMetadata metadata = database.getMetadata();
-
-    loading.setVisible(true);
-
-    BrowserService.Util.getInstance().updateMetadataInformation(metadata, SIARDbundle, database.getUUID(),
-      database.getSIARDPath(), new DefaultAsyncCallback<ViewerMetadata>() {
-        @Override
-        public void onFailure(Throwable caught) {
-          Toast.showError(messages.metadataFailureUpdated(), caught.getMessage());
-          loading.setVisible(false);
-        }
-
-        @Override
-        public void onSuccess(ViewerMetadata result) {
-          loading.setVisible(false);
-          saveMetadataPanel.setVisible(false);
-          Toast.showInfo(messages.metadataSuccessUpdated(), "");
-        }
-      });
-  }
-
-  @UiHandler("buttonRevert")
-  void cancelButtonHandler(ClickEvent e) {
-    Window.Location.reload();
   }
 }

@@ -1,19 +1,20 @@
 package com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.tables;
 
-import com.databasepreservation.main.common.shared.ViewerStructure.*;
-import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
+import java.util.List;
+
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerCheckConstraint;
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSIARDBundle;
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSchema;
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
 import com.databasepreservation.main.desktop.client.common.EditableCell;
 import com.databasepreservation.main.desktop.client.common.lists.MetadataTableList;
+import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataControlPanel;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataEditPanel;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.Label;
-import config.i18n.client.ClientMessages;
 
-import java.util.List;
+import config.i18n.client.ClientMessages;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -21,14 +22,16 @@ import java.util.List;
 public class MetadataConstraints implements MetadataEditPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private final ViewerSIARDBundle SIARDbundle;
+  private final MetadataControlPanel controls;
   private ViewerTable table;
   private ViewerSchema schema;
   private String type = "constraint";
 
-  MetadataConstraints(ViewerSIARDBundle SIARDbundle, ViewerSchema schema, ViewerTable table) {
+  MetadataConstraints(ViewerSIARDBundle SIARDbundle, ViewerSchema schema, ViewerTable table, MetadataControlPanel controls) {
     this.SIARDbundle = SIARDbundle;
     this.table = table;
     this.schema = schema;
+    this.controls = controls;
   }
 
   @Override
@@ -77,7 +80,7 @@ public class MetadataConstraints implements MetadataEditPanel {
   @Override
   public void updateSIARDbundle(String name, String value) {
     SIARDbundle.setTableType(schema.getName(), table.getName(), type, name, value);
-    JavascriptUtils.alertUpdatedMetadata();
+    controls.validate();
   }
 
 }

@@ -1,30 +1,33 @@
 package com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.views;
 
-import com.databasepreservation.main.common.shared.ViewerStructure.*;
-import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
+import java.util.List;
+
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerColumn;
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSIARDBundle;
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSchema;
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerView;
 import com.databasepreservation.main.desktop.client.common.EditableCell;
 import com.databasepreservation.main.desktop.client.common.lists.MetadataTableList;
+import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataControlPanel;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataEditPanel;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.Label;
-import config.i18n.client.ClientMessages;
 
-import java.util.List;
+import config.i18n.client.ClientMessages;
 
 public class MetadataViewColumns implements MetadataEditPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
+  private final MetadataControlPanel controls;
   private ViewerSIARDBundle SIARDbundle;
   private ViewerSchema schema;
   private ViewerView view;
 
-  public MetadataViewColumns(ViewerSIARDBundle SIARDbundle, ViewerSchema schema, ViewerView view) {
+  public MetadataViewColumns(ViewerSIARDBundle SIARDbundle, ViewerSchema schema, ViewerView view, MetadataControlPanel controls) {
     this.SIARDbundle = SIARDbundle;
     this.schema = schema;
     this.view = view;
+    this.controls = controls;
   }
 
   @Override
@@ -78,6 +81,6 @@ public class MetadataViewColumns implements MetadataEditPanel {
   @Override
   public void updateSIARDbundle(String name, String value) {
     SIARDbundle.setViewColumn(schema.getName(), view.getName(), name, value);
-    JavascriptUtils.alertUpdatedMetadata();
+    controls.validate();
   }
 }

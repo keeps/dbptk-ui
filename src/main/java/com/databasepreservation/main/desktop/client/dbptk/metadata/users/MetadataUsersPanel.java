@@ -10,8 +10,7 @@ import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSIARDBu
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerUserStructure;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
-import com.databasepreservation.main.common.shared.client.widgets.wcag.AccessibleFocusPanel;
-import com.databasepreservation.main.desktop.client.common.sidebar.MetadataEditSidebar;
+import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataControlPanel;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataPanel;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -38,6 +37,7 @@ public class MetadataUsersPanel extends MetadataPanel {
   private ViewerMetadata metadata = null;
   private final ViewerSIARDBundle SIARDbundle;
   private List<ViewerUserStructure> users;
+  private final MetadataControlPanel controls;
 
   public static MetadataUsersPanel getInstance(ViewerDatabase database, ViewerSIARDBundle SIARDbundle) {
     String code = database.getUUID();
@@ -60,6 +60,7 @@ public class MetadataUsersPanel extends MetadataPanel {
   private MetadataUsersPanel(ViewerDatabase database, ViewerSIARDBundle SIARDbundle) {
     this.database = database;
     this.SIARDbundle = SIARDbundle;
+    this.controls = MetadataControlPanel.getInstance(database.getUUID());
     initWidget(uiBinder.createAndBindUi(this));
 
     init();
@@ -73,9 +74,10 @@ public class MetadataUsersPanel extends MetadataPanel {
   private void init() {
     metadata = database.getMetadata();
 
-    tabPanel.add(new MetadataUsers(SIARDbundle, metadata.getUsers()).createTable(), messages.titleUsers());
-    tabPanel.add(new MetadataRoles(SIARDbundle, metadata.getRoles()).createTable(), messages.titleRoles());
-    tabPanel.add(new MetadataPrivileges(SIARDbundle, metadata.getPrivileges()).createTable(), messages.titlePrivileges());
+    tabPanel.add(new MetadataUsers(SIARDbundle, metadata.getUsers(), controls).createTable(), messages.titleUsers());
+    tabPanel.add(new MetadataRoles(SIARDbundle, metadata.getRoles(), controls).createTable(), messages.titleRoles());
+    tabPanel.add(new MetadataPrivileges(SIARDbundle, metadata.getPrivileges(), controls).createTable(),
+      messages.titlePrivileges());
     tabPanel.selectTab(0);
   }
 }
