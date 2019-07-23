@@ -39,7 +39,7 @@ public class MetadataPrimaryKey implements MetadataEditPanel {
 
     ViewerPrimaryKey columns = table.getPrimaryKey();
 
-    if (columns == null) {
+    if (columns == null || columns.getColumnIndexesInViewerTable().get(0) == null) {
       return new MetadataTableList<>(messages.tableDoesNotContainPrimaryKey());
     } else {
 

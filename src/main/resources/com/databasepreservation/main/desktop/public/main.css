@@ -1146,7 +1146,7 @@ p[data-value]:after {
 }
 
 .form-text-helper {
-    margin-left: 20px;
+    margin-left: 0px;
     font-size: 75%;
     font-weight: lighter;
 }

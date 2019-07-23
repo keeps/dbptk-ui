@@ -81,9 +81,11 @@ public class MetadataColumns implements MetadataEditPanel {
         ViewerPrimaryKey pk = table.getPrimaryKey();
         if (pk != null) {
           Integer pkIndex = pk.getColumnIndexesInViewerTable().get(0);
-          String pkName = table.getColumns().get(pkIndex).getDisplayName();
-          if (pkName.equals(object.getDisplayName())) {
-            return SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.KEY));
+          if(pkIndex != null) {
+            String pkName = table.getColumns().get(pkIndex).getDisplayName();
+            if (pkName.equals(object.getDisplayName())) {
+              return SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.KEY));
+            }
           }
         }
         return SafeHtmlUtils.EMPTY_SAFE_HTML;

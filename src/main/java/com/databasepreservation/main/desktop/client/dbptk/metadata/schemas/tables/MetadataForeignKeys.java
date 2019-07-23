@@ -59,6 +59,9 @@ public class MetadataForeignKeys implements MetadataEditPanel {
           new TextColumn<ViewerForeignKey>() {
             @Override
             public String getValue(ViewerForeignKey object) {
+              if(database.getMetadata().getTable(object.getReferencedTableUUID()) == null){
+                return messages.SIARDError();
+              }
               return database.getMetadata().getTable(object.getReferencedTableUUID()).getName();
             }
           }),
@@ -84,6 +87,9 @@ public class MetadataForeignKeys implements MetadataEditPanel {
   }
 
   private String getReferenceList(ViewerForeignKey object) {
+    if(database.getMetadata().getTable(object.getReferencedTableUUID()) == null){
+      return messages.SIARDError();
+    }
     List<ViewerColumn> tableColumns = database.getMetadata().getTable(object.getReferencedTableUUID()).getColumns();
     List<String> referanceColumns = new ArrayList<>();
     for (ViewerReference reference : object.getReferences()) {

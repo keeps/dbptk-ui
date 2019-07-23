@@ -614,4 +614,6 @@ public interface ClientMessages extends Messages {
   String newText();
 
   String viewName();
+
+  String SIARDError();
 }
