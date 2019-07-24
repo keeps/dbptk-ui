@@ -205,7 +205,7 @@ public class SIARDController {
       LOGGER.info("Path to table-filter: " + pathToTableFilter);
 
       databaseMigration.exportModuleParameter("table-filter", pathToTableFilter);
-
+/*
       // External Lobs
       final List<DatabaseFilterFactory> databaseFilterFactories = ReflectionUtils.collectDatabaseFilterFactory();
       databaseMigration.filterFactories(databaseFilterFactories);
@@ -221,7 +221,7 @@ public class SIARDController {
         databaseMigration.filterParameter("reference-type", parameter.getReferenceType(), index);
         index++;
       }
-
+*/
       databaseMigration.filter(new ObservableFilter(new SIARDProgressObserver(UUID)));
 
       databaseMigration.reporter(reporter);
