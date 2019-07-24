@@ -6,11 +6,11 @@
 
     <g:FlowPanel addStyleNames="metadata-save" ui:field="saveMetadataPanel">
         <c:LoadingDiv visible="false" ui:field="loading"/>
-        <g:Button addStyleNames="btn btn-save metadata-btn-save" ui:field="buttonSave">
-            <ui:text from='{messages.metadataButtonSave}'/>
-        </g:Button>
         <g:Button visible="false" addStyleNames="btn btn-times-circle btn-danger metadata-btn-revert" ui:field="buttonRevert">
             <ui:text from='{messages.metadataButtonRevert}'/>
+        </g:Button>
+        <g:Button addStyleNames="btn btn-save metadata-btn-save" ui:field="buttonSave">
+            <ui:text from='{messages.metadataButtonSave}'/>
         </g:Button>
         <g:FlowPanel addStyleNames="metadata-update">
             <g:Label ui:field="toolTip" visible="false" />

@@ -9,7 +9,11 @@ import com.databasepreservation.main.desktop.client.common.lists.MetadataTableLi
 import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataControlPanel;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataEditPanel;
 import com.google.gwt.cell.client.FieldUpdater;
+import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.BrowserEvents;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 
@@ -58,7 +62,16 @@ public class MetadataRoles implements MetadataEditPanel {
 
   @Override
   public Column<ViewerRoleStructure, String> getDescriptionColumn() {
-    Column<ViewerRoleStructure, String> description = new Column<ViewerRoleStructure, String>(new EditableCell()) {
+    Column<ViewerRoleStructure, String> description = new Column<ViewerRoleStructure, String>(new EditableCell() {
+      @Override
+      public void onBrowserEvent(Context context, Element parent, String value, NativeEvent event,
+        ValueUpdater<String> valueUpdater) {
+        if (BrowserEvents.KEYUP.equals(event.getType())) {
+          controls.validate();
+        }
+        super.onBrowserEvent(context, parent, value, event, valueUpdater);
+      }
+    }) {
       @Override
       public String getValue(ViewerRoleStructure object) {
         return object.getDescription();

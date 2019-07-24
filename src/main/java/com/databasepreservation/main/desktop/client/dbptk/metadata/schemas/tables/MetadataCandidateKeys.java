@@ -12,7 +12,11 @@ import com.databasepreservation.main.desktop.client.common.EditableCell;
 import com.databasepreservation.main.desktop.client.common.lists.MetadataTableList;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataControlPanel;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataEditPanel;
+import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.BrowserEvents;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 
@@ -29,7 +33,8 @@ public class MetadataCandidateKeys implements MetadataEditPanel {
   private ViewerSchema schema;
   private String type = "candidateKey";
 
-  MetadataCandidateKeys(ViewerSIARDBundle SIARDbundle, ViewerSchema schema, ViewerTable table, MetadataControlPanel controls) {
+  MetadataCandidateKeys(ViewerSIARDBundle SIARDbundle, ViewerSchema schema, ViewerTable table,
+    MetadataControlPanel controls) {
     this.SIARDbundle = SIARDbundle;
     this.table = table;
     this.schema = schema;
@@ -41,7 +46,7 @@ public class MetadataCandidateKeys implements MetadataEditPanel {
     List<ViewerCandidateKey> columns = table.getCandidateKeys();
 
     if (columns.isEmpty()) {
-      return new MetadataTableList<>( messages.tableDoesNotContainCandidateKeys());
+      return new MetadataTableList<>(messages.tableDoesNotContainCandidateKeys());
     } else {
       return new MetadataTableList<>(columns.iterator(),
         new MetadataTableList.ColumnInfo<>(messages.name(), 15, new TextColumn<ViewerCandidateKey>() {
@@ -49,30 +54,37 @@ public class MetadataCandidateKeys implements MetadataEditPanel {
           public String getValue(ViewerCandidateKey object) {
             return object.getName();
           }
-        }), new MetadataTableList.ColumnInfo<>(messages.columnName(), 15,
-          new TextColumn<ViewerCandidateKey>() {
-            @Override
-            public String getValue(ViewerCandidateKey object) {
-              List<Integer> columnsIndex = object.getColumnIndexesInViewerTable();
-              if(columnsIndex != null) {
-                return messages.SIARDError();
-              }
-              List<ViewerColumn> tableColumns = table.getColumns();
-              List<String> columnsName = new ArrayList<>();
-              for (Integer index : columnsIndex) {
-                columnsName.add(tableColumns.get(index).getDisplayName());
-              }
-
-              return columnsName.toString();
+        }), new MetadataTableList.ColumnInfo<>(messages.columnName(), 15, new TextColumn<ViewerCandidateKey>() {
+          @Override
+          public String getValue(ViewerCandidateKey object) {
+            List<Integer> columnsIndex = object.getColumnIndexesInViewerTable();
+            if (columnsIndex != null) {
+              return messages.SIARDError();
             }
-          }),
-        new MetadataTableList.ColumnInfo<>(messages.description(), 15, getDescriptionColumn()));
+            List<ViewerColumn> tableColumns = table.getColumns();
+            List<String> columnsName = new ArrayList<>();
+            for (Integer index : columnsIndex) {
+              columnsName.add(tableColumns.get(index).getDisplayName());
+            }
+
+            return columnsName.toString();
+          }
+        }), new MetadataTableList.ColumnInfo<>(messages.description(), 15, getDescriptionColumn()));
     }
   }
 
   @Override
   public Column<ViewerCandidateKey, String> getDescriptionColumn() {
-    Column<ViewerCandidateKey, String> description = new Column<ViewerCandidateKey, String>(new EditableCell()) {
+    Column<ViewerCandidateKey, String> description = new Column<ViewerCandidateKey, String>(new EditableCell() {
+      @Override
+      public void onBrowserEvent(Context context, Element parent, String value, NativeEvent event,
+        ValueUpdater<String> valueUpdater) {
+        if (BrowserEvents.KEYUP.equals(event.getType())) {
+          controls.validate();
+        }
+        super.onBrowserEvent(context, parent, value, event, valueUpdater);
+      }
+    }) {
       @Override
       public String getValue(ViewerCandidateKey object) {
         return object.getDescription();

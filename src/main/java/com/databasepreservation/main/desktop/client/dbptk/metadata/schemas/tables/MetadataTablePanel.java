@@ -15,6 +15,8 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Label;
@@ -87,10 +89,9 @@ public class MetadataTablePanel extends MetadataPanel {
 
     description.getElement().setAttribute("placeholder", messages.siardMetadata_DescriptionUnavailable());
     description.setText( (table.getDescription()));
-    description.addChangeHandler(new ChangeHandler() {
+    description.addKeyUpHandler(new KeyUpHandler() {
       @Override
-      public void onChange(ChangeEvent event) {
-
+      public void onKeyUp(KeyUpEvent event) {
         table.setDescription( description.getText() );
         SIARDbundle.setTable(schema.getName(), table.getName(),description.getText());
         controls.validate();

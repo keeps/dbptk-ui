@@ -10,7 +10,11 @@ import com.databasepreservation.main.desktop.client.common.EditableCell;
 import com.databasepreservation.main.desktop.client.common.lists.MetadataTableList;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataControlPanel;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataEditPanel;
+import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.BrowserEvents;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 
@@ -27,7 +31,8 @@ public class MetadataPrimaryKey implements MetadataEditPanel {
   private ViewerSchema schema;
   private String type = "primaryKey";
 
-  MetadataPrimaryKey(ViewerSIARDBundle SIARDbundle, ViewerSchema schema, ViewerTable table, MetadataControlPanel controls) {
+  MetadataPrimaryKey(ViewerSIARDBundle SIARDbundle, ViewerSchema schema, ViewerTable table,
+    MetadataControlPanel controls) {
     this.SIARDbundle = SIARDbundle;
     this.table = table;
     this.schema = schema;
@@ -57,7 +62,16 @@ public class MetadataPrimaryKey implements MetadataEditPanel {
 
   @Override
   public Column<ViewerPrimaryKey, String> getDescriptionColumn() {
-    Column<ViewerPrimaryKey, String> description = new Column<ViewerPrimaryKey, String>(new EditableCell()) {
+    Column<ViewerPrimaryKey, String> description = new Column<ViewerPrimaryKey, String>(new EditableCell() {
+      @Override
+      public void onBrowserEvent(Context context, Element parent, String value, NativeEvent event,
+        ValueUpdater<String> valueUpdater) {
+        if (BrowserEvents.KEYUP.equals(event.getType())) {
+          controls.validate();
+        }
+        super.onBrowserEvent(context, parent, value, event, valueUpdater);
+      }
+    }) {
       @Override
       public String getValue(ViewerPrimaryKey object) {
         return object.getDescription();

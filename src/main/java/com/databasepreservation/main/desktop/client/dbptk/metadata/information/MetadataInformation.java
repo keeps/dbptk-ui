@@ -18,6 +18,8 @@ import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ChangeHandler;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -147,6 +149,13 @@ public class MetadataInformation extends MetadataPanel {
 
         SIARDbundle.setInformation(name, element.getText());
         updateMetadata();
+      }
+    });
+    element.addKeyUpHandler(new KeyUpHandler() {
+      @Override
+      public void onKeyUp(KeyUpEvent event) {
+        String name = element.getElement().getAttribute("name");
+        controls.checkIfElementIsMandatory(name, element);
       }
     });
   }

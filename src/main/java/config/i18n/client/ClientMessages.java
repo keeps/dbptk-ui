@@ -601,6 +601,8 @@ public interface ClientMessages extends Messages {
 
   String dialogConfirmUpdateMetadata();
 
+  String dialogLargeFileConfirmUpdateMetadata();
+
   String retrievingTableStructure();
 
   String progressBarPanelTables();

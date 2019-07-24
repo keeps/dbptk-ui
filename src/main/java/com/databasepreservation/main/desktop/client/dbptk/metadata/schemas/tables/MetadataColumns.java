@@ -13,7 +13,11 @@ import com.databasepreservation.main.desktop.client.common.lists.MetadataTableLi
 import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataControlPanel;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataEditPanel;
 import com.google.gwt.cell.client.SafeHtmlCell;
+import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.BrowserEvents;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.Column;
@@ -33,7 +37,8 @@ public class MetadataColumns implements MetadataEditPanel {
   private ViewerSchema schema;
   private String type = "column";
 
-  MetadataColumns(ViewerSIARDBundle SIARDbundle, ViewerSchema schema, ViewerTable table, MetadataControlPanel controls) {
+  MetadataColumns(ViewerSIARDBundle SIARDbundle, ViewerSchema schema, ViewerTable table,
+    MetadataControlPanel controls) {
     this.SIARDbundle = SIARDbundle;
     this.table = table;
     this.schema = schema;
@@ -81,7 +86,7 @@ public class MetadataColumns implements MetadataEditPanel {
         ViewerPrimaryKey pk = table.getPrimaryKey();
         if (pk != null) {
           Integer pkIndex = pk.getColumnIndexesInViewerTable().get(0);
-          if(pkIndex != null) {
+          if (pkIndex != null) {
             String pkName = table.getColumns().get(pkIndex).getDisplayName();
             if (pkName.equals(object.getDisplayName())) {
               return SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.KEY));
@@ -95,7 +100,16 @@ public class MetadataColumns implements MetadataEditPanel {
 
   @Override
   public Column<ViewerColumn, String> getDescriptionColumn() {
-    Column<ViewerColumn, String> description = new Column<ViewerColumn, String>(new EditableCell()) {
+    Column<ViewerColumn, String> description = new Column<ViewerColumn, String>(new EditableCell() {
+      @Override
+      public void onBrowserEvent(Context context, Element parent, String value, NativeEvent event,
+        ValueUpdater<String> valueUpdater) {
+        if (BrowserEvents.KEYUP.equals(event.getType())) {
+          controls.validate();
+        }
+        super.onBrowserEvent(context, parent, value, event, valueUpdater);
+      }
+    }) {
       @Override
       public String getValue(ViewerColumn object) {
         return object.getDescription();

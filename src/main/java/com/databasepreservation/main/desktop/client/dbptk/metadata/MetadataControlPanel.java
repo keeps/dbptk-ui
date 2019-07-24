@@ -46,6 +46,7 @@ public class MetadataControlPanel extends Composite {
   private ViewerDatabase database = null;
   private ViewerSIARDBundle SIARDbundle = null;
   private Map<String, Boolean> mandatoryItems = new HashMap<>();
+  private static final long ALERT_SIARD_FILE_SIZE = 1000000000;
 
   @UiField
   Button buttonSave, buttonRevert;
@@ -87,7 +88,6 @@ public class MetadataControlPanel extends Composite {
       value = ((TextBoxBase) element).getText();
     } else if (element instanceof DateBox) {
       value = ((DateBox) element).getDatePicker().getValue().toString();
-      GWT.log("VALUE:::" + value);
     }
     if (mandatoryItems.get(name) != null) {
       if (value.isEmpty()) {
@@ -113,16 +113,24 @@ public class MetadataControlPanel extends Composite {
     toolTip.setVisible(true);
     if (mandatoryItemsRequired.isEmpty()) {
       toolTip.setText(messages.metadataHasUpdates());
+      toolTip.removeStyleName("missing");
     } else {
       toolTip.setText(messages.metadataMissingFields(mandatoryItemsRequired.toString()));
       toolTip.addStyleName("missing");
     }
   }
 
+  public void reset() {
+    buttonSave.setEnabled(false);
+    buttonRevert.setVisible(false);
+    toolTip.setVisible(false);
+  }
+
   private void updateMetadata() {
     ViewerMetadata metadata = database.getMetadata();
 
     loading.setVisible(true);
+    reset();
 
     BrowserService.Util.getInstance().updateMetadataInformation(metadata, SIARDbundle, database.getUUID(),
       database.getSIARDPath(), new DefaultAsyncCallback<ViewerMetadata>() {
@@ -130,15 +138,15 @@ public class MetadataControlPanel extends Composite {
         public void onFailure(Throwable caught) {
           Toast.showError(messages.metadataFailureUpdated(), caught.getMessage());
           loading.setVisible(false);
+          buttonSave.setEnabled(true);
+          buttonRevert.setVisible(true);
+          toolTip.setVisible(true);
         }
 
         @Override
         public void onSuccess(ViewerMetadata result) {
           loading.setVisible(false);
           Toast.showInfo(messages.metadataSuccessUpdated(), "");
-          buttonRevert.setVisible(false);
-          toolTip.setVisible(false);
-          buttonSave.setEnabled(false);
         }
       });
   }
@@ -146,9 +154,14 @@ public class MetadataControlPanel extends Composite {
   @UiHandler("buttonSave")
   void buttonSaveHandler(ClickEvent e) {
 
+    String message = messages.dialogConfirmUpdateMetadata();
+    if (database.getSIARDSize() > ALERT_SIARD_FILE_SIZE) {
+      message = messages.dialogLargeFileConfirmUpdateMetadata();
+    }
+
     if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
-      JavascriptUtils.confirmationDialog(messages.dialogUpdateMetadata(), messages.dialogConfirmUpdateMetadata(),
-        messages.dialogCancel(), messages.dialogConfirm(), new DefaultAsyncCallback<Boolean>() {
+      JavascriptUtils.confirmationDialog(messages.dialogUpdateMetadata(), message, messages.dialogCancel(),
+        messages.dialogConfirm(), new DefaultAsyncCallback<Boolean>() {
 
           @Override
           public void onSuccess(Boolean confirm) {
@@ -159,8 +172,8 @@ public class MetadataControlPanel extends Composite {
 
         });
     } else {
-      Dialogs.showConfirmDialog(messages.dialogConfirm(), messages.dialogConfirmUpdateMetadata(),
-        messages.dialogCancel(), messages.dialogConfirm(), new DefaultAsyncCallback<Boolean>() {
+      Dialogs.showConfirmDialog(messages.dialogUpdateMetadata(), message, messages.dialogCancel(),
+        messages.dialogConfirm(), new DefaultAsyncCallback<Boolean>() {
 
           @Override
           public void onFailure(Throwable caught) {
