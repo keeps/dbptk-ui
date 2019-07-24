@@ -44,7 +44,7 @@ public class MultipleSelectionTablePanel<C> extends Composite {
   private static MultipleSelectionTablePanelUiBinder uiBinder = GWT.create(MultipleSelectionTablePanelUiBinder.class);
 
   private final MultiSelectionModel<C> selectionModel;
-
+  private CellTable<C> display;
   private ScrollPanel displayScroll;
   private SimplePanel displayScrollWrapper;
 
@@ -108,6 +108,10 @@ public class MultipleSelectionTablePanel<C> extends Composite {
     selectionModel = new MultiSelectionModel<>();
   }
 
+  public CellTable<C> getDisplay() {
+    return display;
+  }
+
   @SafeVarargs
   public final void createTable(Widget headerContent, SafeHtml infoContent, Iterator<C> rowItems, ColumnInfo<C>... columns) {
     createTable(headerContent, new HTMLPanel(infoContent), rowItems, columns);
@@ -119,12 +123,10 @@ public class MultipleSelectionTablePanel<C> extends Composite {
     header.setWidget(headerContent);
     info.setWidget(infoContent);
 
-    CellTable<C> display = internalCreateTable(rowItems, columns);
+    display = internalCreateTable(rowItems, columns);
 
     display.addCellPreviewHandler(event -> {
-      if (event.getColumn() == 4) {
-
-      } else {
+      if (event.getColumn() != display.getColumnCount()-1) {
         if (BrowserEvents.CLICK.equals(event.getNativeEvent().getType())) {
           final C value = event.getValue();
           final boolean state = !event.getDisplay().getSelectionModel().isSelected(value);

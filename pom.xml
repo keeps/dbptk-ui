@@ -375,6 +375,11 @@
             <version>${version.dbptk}</version>
         </dependency>
         <dependency>
+            <groupId>com.databasepreservation</groupId>
+            <artifactId>dbptk-filter-external-lobs</artifactId>
+            <version>${version.dbptk}</version>
+        </dependency>
+        <dependency>
             <groupId>org.roda-project</groupId>
             <artifactId>roda-common-data</artifactId>
             <version>${version.roda}</version>

@@ -1527,7 +1527,27 @@ input[type="checkbox"]:checked:after {
     font-weight: bolder;
 }
 
-.diagram-tab{
+.diagram-tab {
     height: 80vh;
     padding: 0;
+}
+/**********************************************
+		         Dialog ExternalLob
+***********************************************/
+.dialog-external-lobs {
+    width: 500px;
+    height: 170px;
+}
+
+.dialog-external-lobs table{
+    width: 100%;
+}
+
+.dialog-external-lobs-layout {
+    margin: 10px;
+}
+
+.dialog-external-lobs-layout-footer {
+    display: flex;
+    flex-direction: row-reverse;
 }

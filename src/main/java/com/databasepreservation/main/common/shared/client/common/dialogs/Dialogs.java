@@ -11,6 +11,7 @@ import com.databasepreservation.main.common.shared.client.common.NoAsyncCallback
 import com.databasepreservation.main.desktop.client.common.ComboBoxField;
 import com.databasepreservation.main.desktop.client.common.FileUploadField;
 import com.databasepreservation.main.desktop.client.common.GenericField;
+import com.databasepreservation.main.desktop.shared.models.ExternalLobsDialogBoxResult;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -34,16 +35,20 @@ import config.i18n.client.ClientMessages;
 public class Dialogs {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
 
-  public static void showExternalLobsSetupDialog(String title, ComboBoxField referencesType, FileUploadField genericField,
-    String cancelButtonText, String confirmButtonText, final AsyncCallback<Boolean> callback) {
+  public static void showExternalLobsSetupDialog(String title, ComboBoxField referencesType, GenericField genericField,
+    String cancelButtonText, String confirmButtonText, boolean toDelete,
+    final AsyncCallback<ExternalLobsDialogBoxResult> callback) {
 
     final DialogBox dialogBox = new DialogBox(false, true);
-    dialogBox.setWidth("75%");
     dialogBox.setText(title);
 
     FlowPanel layout = new FlowPanel();
     Button cancelButton = new Button(cancelButtonText);
     Button confirmButton = new Button(confirmButtonText);
+    Button deleteButton = null;
+    if (toDelete) {
+      deleteButton = new Button(messages.delete());
+    }
     FlowPanel footer = new FlowPanel();
 
     layout.add(referencesType);
@@ -51,35 +56,110 @@ public class Dialogs {
     layout.add(footer);
     footer.add(cancelButton);
     footer.add(confirmButton);
+    if (deleteButton != null) {
+      deleteButton.addClickHandler(event -> {
+        dialogBox.hide();
+        ExternalLobsDialogBoxResult result = new ExternalLobsDialogBoxResult("delete", true);
+        callback.onSuccess(result);
+      });
+    }
 
     dialogBox.setWidget(layout);
 
     dialogBox.setGlassEnabled(true);
     dialogBox.setAnimationEnabled(false);
 
-    cancelButton.addClickHandler(new ClickHandler() {
-
-      @Override
-      public void onClick(ClickEvent event) {
-        dialogBox.hide();
-        callback.onSuccess(false);
-      }
+    cancelButton.addClickHandler(event -> {
+      dialogBox.hide();
+      ExternalLobsDialogBoxResult result = new ExternalLobsDialogBoxResult("add", false);
+      callback.onSuccess(result);
     });
 
-    confirmButton.addClickHandler(new ClickHandler() {
-
-      @Override
-      public void onClick(ClickEvent event) {
-        dialogBox.hide();
-        callback.onSuccess(true);
-      }
+    confirmButton.addClickHandler(event -> {
+      dialogBox.hide();
+      ExternalLobsDialogBoxResult result = new ExternalLobsDialogBoxResult("add", true);
+      callback.onSuccess(result);
     });
 
-    dialogBox.addStyleName("wui-dialog-confirm");
-    layout.addStyleName("wui-dialog-layout");
-    footer.addStyleName("wui-dialog-layout-footer");
+    dialogBox.addStyleName("dialog-external-lobs");
+    layout.addStyleName("dialog-external-lobs-layout");
+    footer.addStyleName("dialog-external-lobs-layout-footer");
+    FlowPanel btnItemCancelButton = new FlowPanel();
+    btnItemCancelButton.addStyleName("btn-item");
+    btnItemCancelButton.add(cancelButton);
+    cancelButton.addStyleName("btn btn-link");
+    FlowPanel btnItemConfirmButton = new FlowPanel();
+    btnItemConfirmButton.addStyleName("btn-item");
+    btnItemConfirmButton.add(confirmButton);
+    confirmButton.addStyleName("btn btn-play");
+    footer.add(btnItemCancelButton);
+    footer.add(btnItemConfirmButton);
+    if (deleteButton != null) {
+      FlowPanel btnItemDeleteButton = new FlowPanel();
+      btnItemDeleteButton.addStyleName("btn-item");
+      btnItemDeleteButton.add(deleteButton);
+      footer.add(btnItemDeleteButton);
+      deleteButton.addStyleName("btn");
+    }
+
+    dialogBox.center();
+    dialogBox.show();
+  }
+
+  public static void showExternalLobsSetupDialog(String title, ComboBoxField referencesType, FileUploadField genericField,
+    String cancelButtonText, String confirmButtonText, boolean toDelete, final AsyncCallback<ExternalLobsDialogBoxResult> callback) {
+
+    final DialogBox dialogBox = new DialogBox(false, true);
+    dialogBox.setText(title);
+
+    FlowPanel layout = new FlowPanel();
+    Button cancelButton = new Button(cancelButtonText);
+    Button confirmButton = new Button(confirmButtonText);
+    Button deleteButton = null;
+    if (toDelete) {
+      deleteButton = new Button(messages.delete());
+    }
+    FlowPanel footer = new FlowPanel();
+
+    layout.add(referencesType);
+    layout.add(genericField);
+    layout.add(footer);
+    footer.add(cancelButton);
+    footer.add(confirmButton);
+    if (deleteButton != null) {
+      footer.add(deleteButton);
+      deleteButton.addClickHandler(event -> {
+        dialogBox.hide();
+        ExternalLobsDialogBoxResult result = new ExternalLobsDialogBoxResult("delete", true);
+        callback.onSuccess(result);
+      });
+    }
+
+    dialogBox.setWidget(layout);
+
+    dialogBox.setGlassEnabled(true);
+    dialogBox.setAnimationEnabled(false);
+
+    cancelButton.addClickHandler(event -> {
+      dialogBox.hide();
+      ExternalLobsDialogBoxResult result = new ExternalLobsDialogBoxResult("add", false);
+      callback.onSuccess(result);
+    });
+
+    confirmButton.addClickHandler(event -> {
+      dialogBox.hide();
+      ExternalLobsDialogBoxResult result = new ExternalLobsDialogBoxResult("add", true);
+      callback.onSuccess(result);
+    });
+
+    dialogBox.addStyleName("dialog-external-lobs");
+    layout.addStyleName("dialog-external-lobs-layout");
+    footer.addStyleName("dialog-external-lobs-layout-footer");
     cancelButton.addStyleName("btn btn-link");
     confirmButton.addStyleName("btn btn-play");
+    if (deleteButton != null) {
+      deleteButton.addStyleName("btn");
+    }
 
     dialogBox.center();
     dialogBox.show();

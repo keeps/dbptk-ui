@@ -14,9 +14,13 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.databasepreservation.main.desktop.shared.models.ExternalLobDBPTK;
+import com.databasepreservation.model.modules.filters.DatabaseFilterFactory;
+import com.databasepreservation.model.modules.filters.DatabaseFilterModule;
 import org.apache.commons.io.IOUtils;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
@@ -47,6 +51,7 @@ import com.databasepreservation.main.desktop.shared.models.wizardParameters.Conn
 import com.databasepreservation.main.desktop.shared.models.wizardParameters.CustomViewsParameter;
 import com.databasepreservation.main.desktop.shared.models.wizardParameters.CustomViewsParameters;
 import com.databasepreservation.main.desktop.shared.models.wizardParameters.ExportOptionsParameters;
+import com.databasepreservation.main.desktop.shared.models.wizardParameters.ExternalLOBsParameter;
 import com.databasepreservation.main.desktop.shared.models.wizardParameters.MetadataExportOptionsParameters;
 import com.databasepreservation.main.desktop.shared.models.wizardParameters.TableAndColumnsParameters;
 import com.databasepreservation.main.modules.viewer.DbvtkModuleFactory;
@@ -201,6 +206,22 @@ public class SIARDController {
 
       databaseMigration.exportModuleParameter("table-filter", pathToTableFilter);
 
+      // External Lobs
+      final List<DatabaseFilterFactory> databaseFilterFactories = ReflectionUtils.collectDatabaseFilterFactory();
+      databaseMigration.filterFactories(databaseFilterFactories);
+
+      final ArrayList<ExternalLobDBPTK> externalLobDBPTKS = constructExternalLobFilter(tableAndColumnsParameters);
+      int index = 0;
+      for (ExternalLobDBPTK parameter : externalLobDBPTKS) {
+        LOGGER.info("column-list: " + parameter.getPathToColumnList());
+        LOGGER.info("base-path: " + parameter.getBasePath());
+        LOGGER.info("reference-type: " + parameter.getReferenceType());
+        databaseMigration.filterParameter("base-path", parameter.getBasePath(), index);
+        databaseMigration.filterParameter("column-list", parameter.getPathToColumnList(), index);
+        databaseMigration.filterParameter("reference-type", parameter.getReferenceType(), index);
+        index++;
+      }
+
       databaseMigration.filter(new ObservableFilter(new SIARDProgressObserver(UUID)));
 
       databaseMigration.reporter(reporter);
@@ -215,7 +236,7 @@ public class SIARDController {
     } catch (IOException e) {
       throw new GenericException("Could not initialize conversion modules", e);
     } catch (ModuleException | RuntimeException e) {
-      LOGGER.info(e.getMessage());
+      LOGGER.info("" + e.getCause());
       throw new GenericException("Could not convert the database", e);
     }
   }
@@ -279,7 +300,6 @@ public class SIARDController {
   public static DBPTKModule getSIARDExportModule(String moduleName) throws GenericException {
 
     DBPTKModule dbptkModule = new DBPTKModule();
-    PreservationParameter preservationParameter;
 
     final DatabaseModuleFactory factory = getDatabaseExportModuleFactory(moduleName);
     try {
@@ -521,6 +541,47 @@ public class SIARDController {
 
       dbptkModule.addPreservationParameter(moduleName, preservationParameter);
     }
+  }
+
+  private static ArrayList<ExternalLobDBPTK> constructExternalLobFilter(TableAndColumnsParameters parameters) throws GenericException {
+    final ArrayList<ExternalLOBsParameter> externalLOBsParameters = parameters.getExternalLOBsParameters();
+    ArrayList<ExternalLobDBPTK> externalLobDBPTKParameters = new ArrayList<>();
+    ExternalLobDBPTK externalLobDBPTK = new ExternalLobDBPTK();
+    for (ExternalLOBsParameter parameter : externalLOBsParameters) {
+      externalLobDBPTK.setBasePath(parameter.getBasePath());
+      externalLobDBPTK.setReferenceType(parameter.getReferenceType());
+      StringBuilder sb = new StringBuilder();
+      sb.append(parameter.getTable().getSchemaName()).append(".").append(parameter.getTable().getName()).append("{")
+        .append(parameter.getColumnName()).append(";").append("}");
+
+      FileOutputStream outputStream = null;
+
+      try {
+        File tmpDir = new File(System.getProperty("java.io.tmpdir"));
+        final File tmpFile = File.createTempFile(SolrUtils.randomUUID(), ".txt", tmpDir);
+        externalLobDBPTK.setPathToColumnList(Paths.get(tmpFile.toURI()).normalize().toAbsolutePath().toString());
+        outputStream = new FileOutputStream(tmpFile);
+        OutputStreamWriter writer = new OutputStreamWriter(outputStream);
+        writer.write(sb.toString());
+        writer.flush();
+        writer.close();
+        outputStream.close();
+
+        externalLobDBPTKParameters.add(externalLobDBPTK);
+      } catch (IOException e) {
+        throw new GenericException("Could not create table-filter temporary file", e);
+      } finally {
+        try {
+          if (outputStream != null) {
+            outputStream.close();
+          }
+        } catch (IOException e) {
+          throw new GenericException("Could not close the table-filter temporary file", e);
+        }
+      }
+    }
+
+    return externalLobDBPTKParameters;
   }
 
   private static String constructTableFilter(TableAndColumnsParameters parameters) throws GenericException {

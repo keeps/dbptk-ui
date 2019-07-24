@@ -12,12 +12,14 @@ import java.util.HashMap;
 public class TableAndColumnsParameters implements Serializable {
 
   private HashMap<String, ArrayList<ViewerColumn>> columns; // Key: schema, Values: columns
+  private ArrayList<ExternalLOBsParameter> externalLOBsParameters; // key; schema, Value: ExternalLOB
 
   public TableAndColumnsParameters() {
   }
 
-  public TableAndColumnsParameters(HashMap<String, ArrayList<ViewerColumn>> columns) {
+  public TableAndColumnsParameters(HashMap<String, ArrayList<ViewerColumn>> columns, ArrayList<ExternalLOBsParameter> externalLOBsParameters) {
     this.columns = columns;
+    this.externalLOBsParameters = externalLOBsParameters;
   }
 
   public HashMap<String, ArrayList<ViewerColumn>> getColumns() {
@@ -26,5 +28,13 @@ public class TableAndColumnsParameters implements Serializable {
 
   public void setColumns(HashMap<String, ArrayList<ViewerColumn>> columns) {
     this.columns = columns;
+  }
+
+  public ArrayList<ExternalLOBsParameter> getExternalLOBsParameters() {
+    return externalLOBsParameters;
+  }
+
+  public void setExternalLOBsParameters(ArrayList<ExternalLOBsParameter> externalLOBsParameters) {
+    this.externalLOBsParameters = externalLOBsParameters;
   }
 }
