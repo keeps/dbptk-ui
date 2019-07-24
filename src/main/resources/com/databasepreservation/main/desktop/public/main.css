@@ -1611,6 +1611,10 @@ input[type="checkbox"]:checked:after {
     height: 70vh;
     padding: 0;
 }
+
+.wizard-title {
+ margin-left: 6rem;
+}
 /**********************************************
 		         Dialog ExternalLob
 ***********************************************/
@@ -1630,4 +1634,17 @@ input[type="checkbox"]:checked:after {
 .dialog-external-lobs-layout-footer {
     display: flex;
     flex-direction: row-reverse;
+}
+
+/***********************************************
+                CUSTOM VIEWS
+ ***********************************************/
+.custom-views-sidebarItem {
+    width: 75%;
+    float: left;
+}
+
+.custom-views-sidebarItem-delete {
+    cursor: pointer;
+    color: white;
 }

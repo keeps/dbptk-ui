@@ -23,6 +23,8 @@ public class SidebarHyperlink extends SidebarItem {
   @UiField
   FlowPanel container;
 
+  private Hyperlink hyperlink = null;
+
   @Override
   protected Widget getLabelAsWidget() {
     return label;
@@ -33,6 +35,15 @@ public class SidebarHyperlink extends SidebarItem {
     setTargetHistoryToken(targetHistoryToken);
     setText(text);
     label.addStyleName("sidebar-hyperlink sidebarItem");
+  }
+
+  public SidebarHyperlink(String text, String targetHistoryToken, Hyperlink hyperlink) {
+    initWidget(uiBinder.createAndBindUi(this));
+    setTargetHistoryToken(targetHistoryToken);
+    setText(text);
+    label.addStyleName("sidebar-hyperlink sidebarItem custom-views-sidebarItem");
+    this.hyperlink = hyperlink;
+    container.add(this.hyperlink);
   }
 
   public SidebarHyperlink setTargetHistoryToken(String targetHistoryToken) {
@@ -55,9 +66,15 @@ public class SidebarHyperlink extends SidebarItem {
     if (value) {
       container.addStyleName("sidebarHyperLink-selected");
       label.addStyleName("sidebarItem-selected");
+      if (hyperlink != null) {
+        hyperlink.addStyleName("sidebarItem-selected");
+      }
     } else {
       container.removeStyleName("sidebarHyperLink-selected");
       label.removeStyleName("sidebarItem-selected");
+      if (hyperlink != null) {
+        hyperlink.removeStyleName("sidebarItem-selected");
+      }
     }
   }
 }

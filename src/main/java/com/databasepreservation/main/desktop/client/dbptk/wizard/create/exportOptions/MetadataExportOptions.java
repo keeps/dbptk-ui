@@ -28,7 +28,8 @@ import config.i18n.client.ClientMessages;
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 public class MetadataExportOptions extends WizardPanel<MetadataExportOptionsParameters> {
-  private static final ClientMessages messages = GWT.create(ClientMessages.class);
+  @UiField
+  ClientMessages messages = GWT.create(ClientMessages.class);
 
   interface MetadataUiBinder extends UiBinder<Widget, MetadataExportOptions> {
   }
@@ -114,7 +115,7 @@ public class MetadataExportOptions extends WizardPanel<MetadataExportOptionsPara
         TextBox defaultTextBox = new TextBox();
         defaultTextBox.addStyleName("form-textbox");
         textBoxInputs.put(parameter.getName(), defaultTextBox);
-        genericField = GenericField.createInstance(messages.exportOptionsLabels(parameter.getName()), defaultTextBox);
+        genericField = GenericField.createInstance(messages.wizardExportOptionsLabels(parameter.getName()), defaultTextBox);
         break;
       default:
         break;
@@ -125,7 +126,7 @@ public class MetadataExportOptions extends WizardPanel<MetadataExportOptionsPara
       helper.addStyleName("form-helper");
       InlineHTML span = new InlineHTML();
       span.addStyleName("form-text-helper text-muted");
-      span.setText(messages.exportOptionsHelperText(parameter.getName()));
+      span.setText(messages.wizardExportOptionsHelperText(parameter.getName()));
 
       genericField.setRequired(parameter.isRequired());
       genericField.setCSSMetadata("form-row", "form-label-spaced");

@@ -50,6 +50,8 @@ public class HistoryManager {
   public static final String HISTORY_SEP_REGEX = "/";
   public static final String HISTORY_SEP_ESCAPE = "%2F";
 
+  public static final String ACTION_DELETE = "delete";
+
   public static void gotoRoot() {
     newHistory(Collections.singletonList(ROUTE_HOME));
   }
@@ -347,6 +349,14 @@ public class HistoryManager {
   }
   public static String linkToCreateSIARD(String wizardPage, String toSelect, String database_uuid, String table_uuid) {
     return createHistoryToken(Arrays.asList(ROUTE_CREATE_SIARD, wizardPage, toSelect, database_uuid, table_uuid));
+  }
+
+  public static String linkToCreateWizardCustomViewsSelect(String customViewID) {
+    return createHistoryToken(Arrays.asList(ROUTE_CREATE_SIARD, ROUTE_WIZARD_CUSTOM_VIEWS, customViewID));
+  }
+
+  public static String linkToCreateWizardCustomViewsDelete(String customViewID) {
+    return createHistoryToken(Arrays.asList(ROUTE_CREATE_SIARD, ROUTE_WIZARD_CUSTOM_VIEWS, customViewID, ACTION_DELETE));
   }
 
   public static String linkToHome() {

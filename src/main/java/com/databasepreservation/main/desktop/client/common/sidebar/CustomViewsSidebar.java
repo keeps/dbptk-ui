@@ -12,6 +12,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
@@ -47,9 +48,15 @@ public class CustomViewsSidebar extends Composite {
       new SidebarItem(messages.customViewsTitle()).addIcon(FontAwesomeIconManager.SCHEMA_VIEWS).setH5().setIndent1());
   }
 
-  public void addSideBarHyperLink(final String wizardPage, final String nameToDisplay, final String customViewUUID) {
+  public void addSideBarHyperLink(final String nameToDisplay, final String customViewUUID, final String targetHistoryToken) {
+    Hyperlink delete = new Hyperlink();
+    delete.addStyleName("sidebar-hyperlink sidebarItem custom-views-sidebarItem-delete");
+    delete.asWidget().addStyleName("fa fa-trash-o");
+    delete.setTargetHistoryToken(targetHistoryToken);
+
     SidebarHyperlink customView = new SidebarHyperlink(nameToDisplay,
-      HistoryManager.linkToCreateSIARD(wizardPage, customViewUUID));
+      HistoryManager.linkToCreateWizardCustomViewsSelect(customViewUUID), delete);
+
     customView.addIcon(FontAwesomeIconManager.LIST).setH5().setIndent2();
     list.put(customViewUUID, customView);
     sidebarGroup.add(customView);
@@ -79,5 +86,13 @@ public class CustomViewsSidebar extends Composite {
         list.get(entry.getKey()).setSelected(false);
       }
     }
+  }
+
+  public void clear() {
+    if (!list.isEmpty()) {
+      list.clear();
+    }
+
+    instance = null;
   }
 }

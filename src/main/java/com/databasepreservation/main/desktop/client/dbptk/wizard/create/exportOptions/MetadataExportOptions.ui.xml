@@ -1,6 +1,15 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
-    <g:FlowPanel ui:field="content" addStyleNames="form-container content"/>
+    <ui:with field='messages' type='config.i18n.client.ClientMessages'/>
+    <g:FlowPanel addStyleNames="wizard-title">
+        <g:Label addStyleNames="h4">
+            <ui:text from='{messages.wizardMetadataExportOptionsTitle}'/>
+        </g:Label>
+        <g:Label addStyleNames="h5">
+            <ui:text from='{messages.wizardMetadataExportOptionsDescription}'/>
+        </g:Label>
+        <g:FlowPanel ui:field="content" addStyleNames="form-container content"/>
+    </g:FlowPanel>
 
 </ui:UiBinder>

@@ -1,13 +1,14 @@
 package com.databasepreservation.main.desktop.shared.models.wizardParameters;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 public class CustomViewsParameter implements Serializable {
   private String schemaName;
-  private Integer customViewUUID;
+  private Integer customViewID;
   private String customViewName;
   private String customViewDescription;
   private String customViewQuery;
@@ -15,18 +16,10 @@ public class CustomViewsParameter implements Serializable {
   public CustomViewsParameter() {
   }
 
-  public CustomViewsParameter(Integer customViewUUID, String customViewName, String customViewDescription,
-    String customViewQuery) {
-    this.customViewUUID = customViewUUID;
-    this.customViewName = customViewName;
-    this.customViewDescription = customViewDescription;
-    this.customViewQuery = customViewQuery;
-  }
-
-  public CustomViewsParameter(String schemaName, Integer customViewUUID, String customViewName,
+  public CustomViewsParameter(String schemaName, Integer customViewID, String customViewName,
     String customViewDescription, String customViewQuery) {
     this.schemaName = schemaName;
-    this.customViewUUID = customViewUUID;
+    this.customViewID = customViewID;
     this.customViewName = customViewName;
     this.customViewDescription = customViewDescription;
     this.customViewQuery = customViewQuery;
@@ -40,12 +33,12 @@ public class CustomViewsParameter implements Serializable {
     this.schemaName = schema;
   }
 
-  public Integer getCustomViewUUID() {
-    return customViewUUID;
+  public Integer getCustomViewID() {
+    return customViewID;
   }
 
-  public void setCustomViewUUID(Integer customViewUUID) {
-    this.customViewUUID = customViewUUID;
+  public void setCustomViewID(Integer customViewID) {
+    this.customViewID = customViewID;
   }
 
   public String getCustomViewName() {
@@ -70,5 +63,23 @@ public class CustomViewsParameter implements Serializable {
 
   public void setCustomViewQuery(String customViewQuery) {
     this.customViewQuery = customViewQuery;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o)
+      return true;
+    if (o == null || getClass() != o.getClass())
+      return false;
+    CustomViewsParameter parameter = (CustomViewsParameter) o;
+    return Objects.equals(schemaName, parameter.schemaName)
+      && Objects.equals(getCustomViewName(), parameter.getCustomViewName())
+      && Objects.equals(getCustomViewDescription(), parameter.getCustomViewDescription())
+      && Objects.equals(getCustomViewQuery(), parameter.getCustomViewQuery());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(schemaName, getCustomViewName(), getCustomViewDescription(), getCustomViewQuery());
   }
 }

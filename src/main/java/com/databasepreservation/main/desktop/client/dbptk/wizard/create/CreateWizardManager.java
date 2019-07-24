@@ -7,6 +7,7 @@ import com.databasepreservation.main.common.client.BrowserService;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
+import com.databasepreservation.main.common.shared.client.common.dialogs.Dialogs;
 import com.databasepreservation.main.common.shared.client.common.utils.AsyncCallbackUtils;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
@@ -196,18 +197,45 @@ public class CreateWizardManager extends Composite {
 
   private void handleCustomViewsPanel() {
     final boolean valid = wizardInstances.get(position).validate();
-    if (valid) {
+
+    if (!valid) {
+      Dialogs.showConfirmDialog(messages.customViewsDialogTitle(), messages.customViewsDialogMessage(), messages.customViewsDialogCancel(), messages.customViewsDialogConfirm(), new DefaultAsyncCallback<Boolean>() {
+        @Override
+        public void onSuccess(Boolean result) {
+          if (result) {
+            customViewsParameters = (CustomViewsParameters) wizardInstances.get(position).getValues();
+            wizardContent.clear();
+            position = 3;
+            SIARDExportOptions exportOptions = SIARDExportOptions.getInstance();
+            wizardInstances.add(position, exportOptions);
+            wizardContent.add(exportOptions);
+            updateButtons();
+            updateBreadcrumb();
+            customButtons.clear();
+          } else {
+            customViewsParameters = (CustomViewsParameters) wizardInstances.get(position).getValues();
+            customViewsParameters.getCustomViewsParameter().remove(customViewsParameters.getCustomViewsParameter().size()-1); // DISCARD THE LAST
+            wizardContent.clear();
+            position = 3;
+            SIARDExportOptions exportOptions = SIARDExportOptions.getInstance();
+            wizardInstances.add(position, exportOptions);
+            wizardContent.add(exportOptions);
+            updateButtons();
+            updateBreadcrumb();
+            customButtons.clear();
+          }
+        }
+      });
+    } else {
       customViewsParameters = (CustomViewsParameters) wizardInstances.get(position).getValues();
       wizardContent.clear();
       position = 3;
       SIARDExportOptions exportOptions = SIARDExportOptions.getInstance();
-      wizardInstances.add(3, exportOptions);
+      wizardInstances.add(position, exportOptions);
       wizardContent.add(exportOptions);
       updateButtons();
       updateBreadcrumb();
       customButtons.clear();
-    } else {
-      wizardInstances.get(position).error();
     }
   }
 
@@ -221,7 +249,7 @@ public class CreateWizardManager extends Composite {
         position = 4;
         MetadataExportOptions metadataExportOptions = MetadataExportOptions
           .getInstance(exportOptionsParameters.getSIARDVersion());
-        wizardInstances.add(4, metadataExportOptions);
+        wizardInstances.add(position, metadataExportOptions);
         wizardContent.add(metadataExportOptions);
         updateButtons();
         updateBreadcrumb();
@@ -361,7 +389,7 @@ public class CreateWizardManager extends Composite {
       case HistoryManager.ROUTE_WIZARD_CUSTOM_VIEWS:
         if (wizardPanel instanceof CustomViews) {
           CustomViews customViews = (CustomViews) wizardPanel;
-          customViews.sideBarHighlighter(toSelect);
+          customViews.sideBarHighlighter(toSelect, schemaUUID);
         }
         break;
       case HistoryManager.ROUTE_WIZARD_EXPORT_SIARD_OPTIONS:

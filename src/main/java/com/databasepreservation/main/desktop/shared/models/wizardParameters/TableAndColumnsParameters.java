@@ -12,7 +12,7 @@ import java.util.HashMap;
 public class TableAndColumnsParameters implements Serializable {
 
   private HashMap<String, ArrayList<ViewerColumn>> columns; // Key: schema, Values: columns
-  private ArrayList<ExternalLOBsParameter> externalLOBsParameters; // key; schema, Value: ExternalLOB
+  private ArrayList<ExternalLOBsParameter> externalLOBsParameters;
 
   public TableAndColumnsParameters() {
   }

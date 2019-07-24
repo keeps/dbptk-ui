@@ -531,23 +531,7 @@ public interface ClientMessages extends Messages {
 
   String selectNone();
 
-  String customViewsTitle();
-
-  String customViewsDescription();
-
-  String customViewsTestMessage();
-
-  String customViewNameLabel();
-
-  String customViewDescriptionLabel();
-
-  String customViewQueryLabel();
-
   String update();
-
-  String exportOptionsLabels(@Select String fieldName);
-
-  String exportOptionsHelperText(@Select String fieldName);
 
   String SIARDEditMetadata();
 
@@ -619,11 +603,56 @@ public interface ClientMessages extends Messages {
 
   String SIARDError();
 
-  String customViewsUpdateMessage();
 
-  String customViewSchemaNameLabel();
 
   String SIARDValidationSuccess();
 
   String SIARDValidationFailed();
+
+  /* *****************************************
+   *           Wizard Custom Views
+   ********************************************/
+
+  String customViewsUpdateMessage();
+
+  String customViewSchemaNameLabel();
+
+  String customViewsTitle();
+
+  String customViewsDescription();
+
+  String customViewsTestMessage();
+
+  String customViewNameLabel();
+
+  String customViewDescriptionLabel();
+
+  String customViewQueryLabel();
+
+  String customViewsBtnSave();
+
+  String customViewsBtnNew();
+
+  String customViewsDialogTitle();
+
+  String customViewsDialogMessage();
+
+  String customViewsDialogConfirm();
+
+  String customViewsDialogCancel();
+
+  /* *****************************************
+   *          Wizard Export Options
+   ********************************************/
+  String wizardExportOptionsTitle();
+
+  String wizardExportOptionsDescription();
+
+  String wizardMetadataExportOptionsTitle();
+
+  String wizardMetadataExportOptionsDescription();
+
+  String wizardExportOptionsLabels(@Select String fieldName);
+
+  String wizardExportOptionsHelperText(@Select String fieldName);
 }

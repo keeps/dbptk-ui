@@ -162,6 +162,10 @@ public class SIARDExportOptionsCurrent extends Composite {
     return true;
   }
 
+  public void clear() {
+    instances.clear();
+  }
+
   public void error() {
     Toast.showError("MISSING FIELDS");
   }
@@ -206,7 +210,7 @@ public class SIARDExportOptionsCurrent extends Composite {
     switch (parameter.getInputType()) {
       case "CHECKBOX":
         externalLobCheckbox = new CheckBox();
-        externalLobCheckbox.setText(messages.exportOptionsLabels(parameter.getName()));
+        externalLobCheckbox.setText(messages.wizardExportOptionsLabels(parameter.getName()));
         externalLobCheckbox.addStyleName("form-checkbox");
         externalLobCheckbox.addValueChangeHandler(event -> {
           updateCheckboxExternalLobs(event.getValue());
@@ -218,13 +222,13 @@ public class SIARDExportOptionsCurrent extends Composite {
         break;
       case "TEXT":
         Label label = new Label();
-        label.setText(messages.exportOptionsLabels(parameter.getName()));
+        label.setText(messages.wizardExportOptionsLabels(parameter.getName()));
         externalLobsLabels.add(label);
         TextBox defaultTextBox = new TextBox();
         defaultTextBox.addStyleName("form-textbox-external-lobs");
         externalLobsInputs.put(parameter.getName(), defaultTextBox);
         Label label_end = new Label();
-        label_end.setText(messages.exportOptionsLabels(parameter.getName() + "-end"));
+        label_end.setText(messages.wizardExportOptionsLabels(parameter.getName() + "-end"));
         externalLobsLabels.add(label_end);
         if (version.equals("siard-dk")) {
           label.addStyleName("form-label");
@@ -243,7 +247,7 @@ public class SIARDExportOptionsCurrent extends Composite {
         formRow.add(label_end);
         InlineHTML span = new InlineHTML();
         span.addStyleName("form-text-helper text-muted");
-        span.setText(messages.exportOptionsHelperText(parameter.getName()));
+        span.setText(messages.wizardExportOptionsHelperText(parameter.getName()));
         formHelper.add(formRow);
         formHelper.add(span);
         content.add(formHelper);
@@ -260,14 +264,14 @@ public class SIARDExportOptionsCurrent extends Composite {
     switch (parameter.getInputType()) {
       case "CHECKBOX":
         CheckBox checkbox = new CheckBox();
-        checkbox.setText(messages.exportOptionsLabels(parameter.getName()));
+        checkbox.setText(messages.wizardExportOptionsLabels(parameter.getName()));
         checkbox.addStyleName("form-checkbox");
         checkBoxInputs.put(parameter.getName(), checkbox);
         genericField = GenericField.createInstance(checkbox);
         break;
       case "FILE":
         FileUploadField fileUploadField = FileUploadField
-          .createInstance(messages.exportOptionsLabels(parameter.getName()), messages.siardExportBrowseButton());
+          .createInstance(messages.wizardExportOptionsLabels(parameter.getName()), messages.siardExportBrowseButton());
         fileUploadField.setParentCSS("form-row");
         fileUploadField.setLabelCSS("form-label-spaced");
         fileUploadField.setButtonCSS("btn btn-link form-button");
@@ -288,14 +292,14 @@ public class SIARDExportOptionsCurrent extends Composite {
         helper.addStyleName("form-helper");
         InlineHTML span = new InlineHTML();
         span.addStyleName("form-text-helper text-muted");
-        span.setText(messages.exportOptionsHelperText(parameter.getName()));
+        span.setText(messages.wizardExportOptionsHelperText(parameter.getName()));
 
         helper.add(fileUploadField);
         helper.add(span);
         content.add(helper);
         break;
       case "FOLDER":
-        FileUploadField folder = FileUploadField.createInstance(messages.exportOptionsLabels(parameter.getName()),
+        FileUploadField folder = FileUploadField.createInstance(messages.wizardExportOptionsLabels(parameter.getName()),
           messages.siardExportBrowseButton());
         folder.setParentCSS("form-row");
         folder.setLabelCSS("form-label-spaced");
@@ -325,7 +329,7 @@ public class SIARDExportOptionsCurrent extends Composite {
         TextBox defaultTextBox = new TextBox();
         defaultTextBox.addStyleName("form-textbox");
         textBoxInputs.put(parameter.getName(), defaultTextBox);
-        genericField = GenericField.createInstance(messages.exportOptionsLabels(parameter.getName()), defaultTextBox);
+        genericField = GenericField.createInstance(messages.wizardExportOptionsLabels(parameter.getName()), defaultTextBox);
         break;
     }
 
@@ -334,7 +338,7 @@ public class SIARDExportOptionsCurrent extends Composite {
       helper.addStyleName("form-helper");
       InlineHTML span = new InlineHTML();
       span.addStyleName("form-text-helper text-muted");
-      span.setText(messages.exportOptionsHelperText(parameter.getName()));
+      span.setText(messages.wizardExportOptionsHelperText(parameter.getName()));
 
       genericField.setRequired(parameter.isRequired());
       genericField.setCSSMetadata("form-row", "form-label-spaced");

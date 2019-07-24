@@ -18,9 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.databasepreservation.main.desktop.shared.models.ExternalLobDBPTK;
-import com.databasepreservation.model.modules.filters.DatabaseFilterFactory;
-import com.databasepreservation.model.modules.filters.DatabaseFilterModule;
 import org.apache.commons.io.IOUtils;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
@@ -45,6 +42,7 @@ import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSIARDBu
 import com.databasepreservation.main.common.shared.client.ClientLogger;
 import com.databasepreservation.main.common.shared.client.tools.PathUtils;
 import com.databasepreservation.main.desktop.shared.models.DBPTKModule;
+import com.databasepreservation.main.desktop.shared.models.ExternalLobDBPTK;
 import com.databasepreservation.main.desktop.shared.models.PreservationParameter;
 import com.databasepreservation.main.desktop.shared.models.SSHConfiguration;
 import com.databasepreservation.main.desktop.shared.models.wizardParameters.ConnectionParameters;
@@ -60,6 +58,7 @@ import com.databasepreservation.model.exception.ModuleException;
 import com.databasepreservation.model.exception.UnsupportedModuleException;
 import com.databasepreservation.model.modules.DatabaseImportModule;
 import com.databasepreservation.model.modules.DatabaseModuleFactory;
+import com.databasepreservation.model.modules.filters.DatabaseFilterFactory;
 import com.databasepreservation.model.modules.filters.ObservableFilter;
 import com.databasepreservation.model.parameters.Parameter;
 import com.databasepreservation.model.parameters.ParameterGroup;
@@ -159,7 +158,12 @@ public class SIARDController {
     try (Reporter reporter = new Reporter(reporterPath.getParent().toString(), reporterPath.getFileName().toString())) {
       DatabaseMigration databaseMigration = DatabaseMigration.newInstance();
 
-      databaseMigration.filterFactories(new ArrayList<>());
+      if (tableAndColumnsParameters.getExternalLOBsParameters().isEmpty()) {
+        databaseMigration.filterFactories(new ArrayList<>());
+      } else {
+        final List<DatabaseFilterFactory> databaseFilterFactories = ReflectionUtils.collectDatabaseFilterFactory();
+        databaseMigration.filterFactories(databaseFilterFactories);
+      }
 
       // BUILD Import Module
       final DatabaseModuleFactory databaseImportModuleFactory = getDatabaseImportModuleFactory(
@@ -205,23 +209,22 @@ public class SIARDController {
       LOGGER.info("Path to table-filter: " + pathToTableFilter);
 
       databaseMigration.exportModuleParameter("table-filter", pathToTableFilter);
-/*
-      // External Lobs
-      final List<DatabaseFilterFactory> databaseFilterFactories = ReflectionUtils.collectDatabaseFilterFactory();
-      databaseMigration.filterFactories(databaseFilterFactories);
 
-      final ArrayList<ExternalLobDBPTK> externalLobDBPTKS = constructExternalLobFilter(tableAndColumnsParameters);
-      int index = 0;
-      for (ExternalLobDBPTK parameter : externalLobDBPTKS) {
-        LOGGER.info("column-list: " + parameter.getPathToColumnList());
-        LOGGER.info("base-path: " + parameter.getBasePath());
-        LOGGER.info("reference-type: " + parameter.getReferenceType());
-        databaseMigration.filterParameter("base-path", parameter.getBasePath(), index);
-        databaseMigration.filterParameter("column-list", parameter.getPathToColumnList(), index);
-        databaseMigration.filterParameter("reference-type", parameter.getReferenceType(), index);
-        index++;
+      // External Lobs
+      if (!tableAndColumnsParameters.getExternalLOBsParameters().isEmpty()) {
+        final ArrayList<ExternalLobDBPTK> externalLobDBPTKS = constructExternalLobFilter(tableAndColumnsParameters);
+        int index = 0;
+        for (ExternalLobDBPTK parameter : externalLobDBPTKS) {
+          LOGGER.info("column-list: " + parameter.getPathToColumnList());
+          LOGGER.info("base-path: " + parameter.getBasePath());
+          LOGGER.info("reference-type: " + parameter.getReferenceType());
+          databaseMigration.filterParameter("base-path", parameter.getBasePath(), index);
+          databaseMigration.filterParameter("column-list", parameter.getPathToColumnList(), index);
+          databaseMigration.filterParameter("reference-type", parameter.getReferenceType(), index);
+          index++;
+        }
       }
-*/
+
       databaseMigration.filter(new ObservableFilter(new SIARDProgressObserver(UUID)));
 
       databaseMigration.reporter(reporter);
