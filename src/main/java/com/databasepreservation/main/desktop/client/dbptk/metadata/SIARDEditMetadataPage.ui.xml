@@ -6,7 +6,7 @@
 
     <ui:with field='messages' type='config.i18n.client.ClientMessages'/>
 
-    <g:FlowPanel>
+    <g:FlowPanel addStyleNames="application-container">
         <m:BreadcrumbPanel ui:field="breadcrumb" />
         <g:HorizontalPanel addStyleNames="browseContentPreviewPanel">
             <!-- LEFT PANEL -->

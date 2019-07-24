@@ -848,33 +848,113 @@ p[data-value]:after {
     font-size: 1.3rem;
 }
 
-.options {
+/**********************************************
+		          Commons
+***********************************************/
+
+html, body, .main {
+    width: 100%;
+    height: 100%;
+    padding: 0px;
+    margin: 0;
+}
+
+.application-container{
+    padding: 10px;
+}
+/**********************************************
+		          breadcrumb
+***********************************************/
+
+.main .wui-breadcrumbPanel{
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-bottom: 10px;
+}
+
+/**********************************************
+		          Home Page
+***********************************************/
+
+.contentPanel, .contentPanel > div {
+    height: 100%;
+    width: 100%;
+}
+
+.home-page-content{
+    background-color: #DCDCDC;
+    height: 100%;
+    width: 100%;
     display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
+    flex-direction: column;
     justify-content: space-between;
+    align-content: center;
+}
+
+/*Brand*/
+.home-page-brand{
+    text-align: center;
+    padding: 20px;
+    box-sizing: border-box;
     width: 75%;
     margin: 0 auto;
-    top: 50%;
-    left: 50%;
-    position: absolute;
-    transform: translate(-50%, -50%);
 }
+
+.home-page-brand img{
+    max-width: 20%;
+}
+
+/*Content*/
+.home-page-content .options{
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: space-around;
+}
+
+.options{
+    width: 75%;
+    margin: 0 auto;
+}
+
+.options .card + .card{
+    margin-top: 5px;
+}
+
+.options .card {
+    width: 30%;
+}
+
 .option {
     display: flex;
     flex-flow: column wrap;
     align-items: center;
-    flex: 1 0 5%;
     margin: 5px;
 }
+
 .option .text {
     padding: 25px;
     flex: 1;
 }
 
-.card + .card {
-    margin-top: 5px;
+/*Footer*/
+.home-page-footer{
+    padding: 20px;
+    box-sizing: border-box;
+    height: 70px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    background-color: #464646;
 }
+
+.home-page-footer .logo-keep{
+    height: 100%;
+}
+
+/**********************************************
+		          Open SIARD
+***********************************************/
 
 .metadata-information-panel {
     display: flex;
@@ -1528,7 +1608,7 @@ input[type="checkbox"]:checked:after {
 }
 
 .diagram-tab {
-    height: 80vh;
+    height: 70vh;
     padding: 0;
 }
 /**********************************************

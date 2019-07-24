@@ -3,7 +3,7 @@
              xmlns:m='urn:import:com.databasepreservation.main.common.shared.client.breadcrumb'>
 
     <ui:with field='messages' type='config.i18n.client.ClientMessages' />
-    <g:FlowPanel>
+    <g:FlowPanel addStyleNames="application-container">
         <m:BreadcrumbPanel ui:field="breadcrumb" />
         <g:FlowPanel ui:field="wizardContent"/>
         <g:FlowPanel addStyleNames="button-panel-container">

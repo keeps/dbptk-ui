@@ -59,11 +59,12 @@
 }
 
 .cellTableSelectedRow {
-    background: #5bbeff;
+    background: #DCDCDC;
+    color: #222222;
 }
 
 .cellTableSelectedRowCell {
-    border-color: #5bbeff;
+    border-color: #DCDCDC;
 }
 
 @external .cellTableFadeOut;
@@ -95,5 +96,5 @@
 }
 
 .cellTableSelectedRowCell.cellTableFadeOut:after {
-    background: linear-gradient(-90deg,#5bbeff 30%,rgba(255,255,255,0) 100%);
+    background: linear-gradient(-90deg,#DCDCDC 30%,rgba(255,255,255,0) 100%);
 }

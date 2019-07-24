@@ -3,7 +3,7 @@
              xmlns:m='urn:import:com.databasepreservation.main.common.shared.client.breadcrumb'>
 
 
-    <g:FlowPanel ui:field="container">
+    <g:FlowPanel addStyleNames="application-container" ui:field="container">
         <m:BreadcrumbPanel ui:field="breadcrumb" />
         <g:FlowPanel addStyleNames="metadata-information-panel" ui:field="metadataInformation" />
         <g:SimplePanel addStyleNames="metadata-description" ui:field="description" />

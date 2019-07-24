@@ -5,7 +5,7 @@
              xmlns:wcag="urn:import:com.databasepreservation.main.common.shared.client.widgets.wcag">
 
     <ui:with field='messages' type='config.i18n.client.ClientMessages' />
-    <g:FlowPanel>
+    <g:FlowPanel addStyleNames="application-container">
         <m:BreadcrumbPanel ui:field="breadcrumb" />
         <g:FlowPanel addStyleNames="manage-panel">
             <g:FlowPanel styleName="searchPanel" ui:field="searchPanel">
