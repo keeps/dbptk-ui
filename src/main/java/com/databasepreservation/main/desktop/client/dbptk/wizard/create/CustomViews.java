@@ -151,7 +151,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
         HistoryManager.gotoCreateSIARD();
       });
       Button btnUpdate = new Button();
-      btnUpdate.setText(messages.update());
+      btnUpdate.setText(messages.customViewsBtnSave());
       btnUpdate.addStyleName("btn btn-primary btn-save");
       btnUpdate.addClickHandler(event -> {
         final boolean valid = customViewFormValidatorUpdate(parameter.getCustomViewName());
