@@ -44,11 +44,16 @@ public class ProgressBarPanel extends Composite {
   @UiField
   Progressbar progressBar;
 
+  @UiField
+  Label title, subTitle;
+
   private final String uuid;
 
   private ProgressBarPanel(String uuid) {
     initWidget(uiBinder.createAndBindUi(this));
     this.uuid = uuid;
+    title.setText(messages.wizardProgressTitle());
+    subTitle.setText(messages.wizardProgressSubTitle());
     update();
   }
 

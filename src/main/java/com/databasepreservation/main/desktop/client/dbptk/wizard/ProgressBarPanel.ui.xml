@@ -3,6 +3,8 @@
              xmlns:c='urn:import:com.databasepreservation.main.common.shared.client.common'>
 
     <g:FlowPanel>
+        <g:Label ui:field="title" addStyleNames="h1"/>
+        <g:Label ui:field="subTitle" addStyleNames="h4"/>
         <c:Progressbar ui:field="progressBar"/>
         <g:FlowPanel ui:field="content" addStyleNames="progress-report"/>
     </g:FlowPanel>

@@ -684,4 +684,11 @@ public interface ClientMessages extends Messages {
   String wizardExportOptionsLabels(@Select String fieldName);
 
   String wizardExportOptionsHelperText(@Select String fieldName);
+
+  /********************************************
+   * Wizard Progress Panel
+   ********************************************/
+  String wizardProgressTitle();
+
+  String wizardProgressSubTitle();
 }
