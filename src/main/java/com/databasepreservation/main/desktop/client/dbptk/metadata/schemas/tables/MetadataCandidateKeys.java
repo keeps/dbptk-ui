@@ -58,12 +58,12 @@ public class MetadataCandidateKeys implements MetadataEditPanel {
           @Override
           public String getValue(ViewerCandidateKey object) {
             List<Integer> columnsIndex = object.getColumnIndexesInViewerTable();
-            if (columnsIndex != null) {
-              return messages.SIARDError();
-            }
             List<ViewerColumn> tableColumns = table.getColumns();
             List<String> columnsName = new ArrayList<>();
             for (Integer index : columnsIndex) {
+              if (index == null) {
+                return messages.SIARDError();
+              }
               columnsName.add(tableColumns.get(index).getDisplayName());
             }
 
