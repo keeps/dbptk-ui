@@ -3,8 +3,6 @@ package com.databasepreservation.main.desktop.client.dbptk.wizard.create;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
-import com.databasepreservation.main.common.shared.client.common.dialogs.Dialogs;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.common.shared.client.tools.ViewerStringUtils;
 import com.databasepreservation.main.common.shared.client.widgets.Toast;
@@ -54,6 +52,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
   private HashMap<String, CustomViewsParameter> customViewsParameters = new HashMap<>();
   private int counter = 0;
   private FlowPanel customViewsButtons;
+  private boolean toSave;
 
   public static CustomViews getInstance(FlowPanel customViewButtons) {
     if (instance == null) {
@@ -94,24 +93,35 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
     boolean empty = ViewerStringUtils.isBlank(customViewName.getText()) && ViewerStringUtils.isBlank(customViewQuery.getText())
         && ViewerStringUtils.isBlank(customViewSchemaName.getText());
 
-    if (empty) return true;
+    if (empty) {
+      toSave = false;
+      return true;
+    }
 
     CustomViewsParameter parameter = new CustomViewsParameter(customViewSchemaName.getText(), counter,
         customViewName.getText(),
         customViewDescription.getText(), customViewQuery.getText());
+
+    if (customViewsParameters.containsValue(parameter)) {
+      toSave = true;
+    } else {
+      toSave = false;
+    }
 
     return customViewsParameters.containsValue(parameter);
   }
 
   @Override
   public CustomViewsParameters getValues() {
-    CustomViewsParameter parameter = new CustomViewsParameter(customViewSchemaName.getText(), counter,
-        customViewName.getText(),
-        customViewDescription.getText(), customViewQuery.getText());
     CustomViewsParameters customViewsParameters = new CustomViewsParameters();
     ArrayList<CustomViewsParameter> parameters = new ArrayList<>(this.customViewsParameters.values());
-    parameters.add(parameter);
+    if (toSave) {
+      CustomViewsParameter parameter = new CustomViewsParameter(customViewSchemaName.getText(), counter,
+        customViewName.getText(), customViewDescription.getText(), customViewQuery.getText());
+      parameters.add(parameter);
+    }
     customViewsParameters.setCustomViewsParameter(parameters);
+
     return customViewsParameters;
   }
 
