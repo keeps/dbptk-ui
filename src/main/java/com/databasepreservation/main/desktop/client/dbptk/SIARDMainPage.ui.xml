@@ -4,10 +4,12 @@
 
 
     <g:FlowPanel addStyleNames="application-container" ui:field="container">
-        <m:BreadcrumbPanel ui:field="breadcrumb" />
-        <g:FlowPanel addStyleNames="metadata-information-panel" ui:field="metadataInformation" />
-        <g:SimplePanel addStyleNames="metadata-description" ui:field="description" />
-        <g:FlowPanel  addStyleNames="navigation-panels" ui:field="navigationPanels" />
+        <m:BreadcrumbPanel ui:field="breadcrumb"/>
+        <g:FlowPanel addStyleNames="browseContentPreviewPanel">
+            <g:FlowPanel addStyleNames="metadata-information-panel" ui:field="metadataInformation"/>
+            <g:SimplePanel addStyleNames="metadata-description" ui:field="description"/>
+            <g:FlowPanel addStyleNames="navigation-panels" ui:field="navigationPanels"/>
+        </g:FlowPanel>
     </g:FlowPanel>
 
 </ui:UiBinder>

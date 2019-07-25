@@ -173,11 +173,12 @@ progress[value]::-moz-progress-bar {
 .progress-bar {
     background-color: whiteSmoke;
     border-radius: 3px;
-    box-shadow: 0 2px 3px rgba(0, 0, 0, .5) inset;
+    /*box-shadow: 0 2px 3px rgba(0, 0, 0, .5) inset;*/
 
     /* Dimensions should be similar to the parent progress element. */
     width: 100%;
     height: 20px;
+    border : 1px solid #E1E1E1;
 }
 
 .progress-bar span {
@@ -886,7 +887,8 @@ html, body, .main {
     height: 100%;
 }
 
-.application-container .browseContentPreviewPanel{
+.application-container .browseContentPreviewPanel,
+.application-container .manage-panel{
     position: absolute;
     top: 0;
     left: 0;
@@ -1180,7 +1182,7 @@ html, body, .main {
 }
 
 .form-lobs{
-    margin-left: 6rem;
+    margin-left: 4rem;
 }
 
 .export-options-form, .custom-views-form{
@@ -1722,6 +1724,19 @@ input[type="checkbox"]:checked:after {
     color: white;
 }
 
+/***********************************************
+                Progress Panel
+ ***********************************************/
+
+.progress-bar-panel{
+    padding-left: 10px;
+    padding-right: 20px;
+    margin: 0 6rem;
+}
+
+.progress-report-panel {
+    margin-top: 44px;
+}
 /************************************************
 * SendTo Wizard - Export Format
  ************************************************/

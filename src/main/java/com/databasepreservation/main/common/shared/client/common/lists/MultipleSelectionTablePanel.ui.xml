@@ -3,8 +3,8 @@
     <g:FlowPanel>
         <g:SimplePanel ui:field="header"/>
         <g:FlowPanel addStyleNames="full_width skip_padding">
-            <g:SimplePanel ui:field="info"/>
             <g:SimplePanel ui:field="table"/>
         </g:FlowPanel>
+        <g:SimplePanel ui:field="info"/>
     </g:FlowPanel>
 </ui:UiBinder>

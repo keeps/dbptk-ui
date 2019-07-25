@@ -9,7 +9,7 @@
         <g:Label addStyleNames="h5">
             <ui:text from='{messages.wizardMetadataExportOptionsDescription}'/>
         </g:Label>
-        <g:FlowPanel ui:field="content" addStyleNames="form-container content"/>
+        <g:FlowPanel ui:field="content" addStyleNames="form-container content export-options-form"/>
     </g:FlowPanel>
 
 </ui:UiBinder>
