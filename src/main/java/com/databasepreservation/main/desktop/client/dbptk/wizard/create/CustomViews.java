@@ -258,7 +258,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
     customViewQuery.setText(customViewQueryText);
   }
 
-  private Button createCustomViewButton() {
+  private SimplePanel createCustomViewButton() {
     Button btnSave = new Button();
     btnSave.setText(messages.customViewsBtnSave());
     btnSave.addStyleName("btn btn-primary btn-save");
@@ -284,7 +284,11 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
       }
     });
 
-    return btnSave;
+    SimplePanel simplePanelforbtnSave = new SimplePanel();
+    simplePanelforbtnSave.addStyleName("btn-item");
+    simplePanelforbtnSave.add(btnSave);
+
+    return simplePanelforbtnSave;
   }
 
   private void highlightFieldsWhenRequired() {

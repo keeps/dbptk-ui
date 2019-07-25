@@ -2,17 +2,17 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
     <ui:with field='messages' type='config.i18n.client.ClientMessages' />
-    <g:FlowPanel ui:field="content" >
-        <g:FlowPanel addStyleNames="wrapper">
+    <g:FlowPanel addStyleNames="block" ui:field="content" >
+        <g:FlowPanel addStyleNames="wrapper block">
             <g:FlowPanel ui:field="leftSideContainer" addStyleNames="left">
-                <g:FlowPanel ui:field="customViewsList"/>
+                <g:FlowPanel addStyleNames="block" ui:field="customViewsList"/>
             </g:FlowPanel>
-            <g:FlowPanel ui:field="rightSideContainer" addStyleNames="right content">
+            <g:FlowPanel ui:field="rightSideContainer" addStyleNames="right content block">
                 <g:FlowPanel ui:field="panel">
                     <g:Label addStyleNames="h4"><ui:text from='{messages.customViewsTitle}'/></g:Label>
                     <g:Label addStyleNames="h5"><ui:text from='{messages.customViewsDescription}'/></g:Label>
                     <g:Label addStyleNames="h5"><ui:text from='{messages.customViewsTestMessage}'/></g:Label>
-                    <g:FlowPanel ui:field="customViewsForm" addStyleNames="form-container">
+                    <g:FlowPanel ui:field="customViewsForm" addStyleNames="form-container custom-views-form ">
                         <g:FlowPanel addStyleNames="form-row">
                             <g:Label ui:field="customViewSchemaNameLabel" addStyleNames="form-label-spaced">
                                 <ui:text from='{messages.customViewSchemaNameLabel}'/>

@@ -68,12 +68,14 @@ public class SIARDExportOptionsCurrent extends Composite {
     this.parameters = dbptkModule.getParameters(version);
     this.dbptkModule = dbptkModule;
 
+    FlowPanel panel = new FlowPanel();
+
     for (PreservationParameter p : parameters) {
       if (p.getExportOption() != null) {
         if (p.getExportOption().equals(ViewerConstants.SIARD_EXPORT_OPTIONS)) {
           buildGenericWidget(p);
         } else if (p.getExportOption().equals(ViewerConstants.EXTERNAL_LOBS_EXPORT_OPTIONS)) {
-            buildExternalLobs(p);
+            buildExternalLobs(p, panel);
         }
       }
     }
@@ -204,7 +206,7 @@ public class SIARDExportOptionsCurrent extends Composite {
     }
   }
 
-  private void buildExternalLobs(PreservationParameter parameter) {
+  private void buildExternalLobs(PreservationParameter parameter, FlowPanel panel) {
     GenericField genericField;
 
     switch (parameter.getInputType()) {
@@ -250,7 +252,9 @@ public class SIARDExportOptionsCurrent extends Composite {
         span.setText(messages.wizardExportOptionsHelperText(parameter.getName()));
         formHelper.add(formRow);
         formHelper.add(span);
-        content.add(formHelper);
+        panel.add(formHelper);
+        panel.addStyleName("form-lobs");
+        content.add(panel);
         break;
       default:
         break;

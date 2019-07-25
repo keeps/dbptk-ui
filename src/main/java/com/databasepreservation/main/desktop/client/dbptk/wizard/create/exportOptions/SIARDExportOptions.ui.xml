@@ -9,7 +9,7 @@
         <g:Label addStyleNames="h5">
             <ui:text from='{messages.wizardExportOptionsDescription}'/>
         </g:Label>
-        <g:FlowPanel addStyleNames="form-container">
+        <g:FlowPanel addStyleNames="form-container export-options-form">
             <g:SimplePanel ui:field="listBox"/>
             <g:FlowPanel ui:field="content"/>
         </g:FlowPanel>

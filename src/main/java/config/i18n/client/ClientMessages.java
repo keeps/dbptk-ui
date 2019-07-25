@@ -537,6 +537,8 @@ public interface ClientMessages extends Messages {
 
   String databaseInformation();
 
+  String databaseInformationDescription();
+
   String metadataButtonSave();
 
   String metadataHasUpdates();

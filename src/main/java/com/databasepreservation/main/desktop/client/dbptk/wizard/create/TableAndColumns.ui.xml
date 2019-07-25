@@ -1,13 +1,13 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
-    <g:FlowPanel ui:field="content" >
-        <g:FlowPanel addStyleNames="wrapper">
+    <g:FlowPanel addStyleNames="block" ui:field="content" >
+        <g:FlowPanel addStyleNames="wrapper block">
             <g:FlowPanel ui:field="leftSideContainer" addStyleNames="left">
-                <g:FlowPanel ui:field="tableAndColumnsList"/>
+                <g:FlowPanel addStyleNames="block" ui:field="tableAndColumnsList"/>
             </g:FlowPanel>
             <g:FlowPanel addStyleNames="right">
-                <g:FlowPanel ui:field="panel" />
+                <g:FlowPanel addStyleNames="block" ui:field="panel" />
             </g:FlowPanel>
         </g:FlowPanel>
     </g:FlowPanel>

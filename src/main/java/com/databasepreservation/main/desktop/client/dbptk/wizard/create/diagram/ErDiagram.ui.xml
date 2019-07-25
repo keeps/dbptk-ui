@@ -3,7 +3,7 @@
              xmlns:c='urn:import:com.databasepreservation.main.common.shared.client.common'
 >
     <ui:with field='messages' type='config.i18n.client.ClientMessages'/>
-    <g:FlowPanel addStyleNames="metadata-edit">
+    <g:FlowPanel>
         <g:SimplePanel addStyleNames="h4" ui:field="mainHeader">
             <g:Label>
                 <ui:text from='{messages.diagram}'/>

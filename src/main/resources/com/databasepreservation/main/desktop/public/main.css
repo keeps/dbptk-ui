@@ -89,12 +89,13 @@ progress[value] {
     border: none;
 
     /* Add dimensions */
-    width: 100%; height: 20px;
+    width: 100%;
+    height: 20px;
 
     /* Although firefox doesn't provide any additional pseudo class to style the progress element container, any style applied here works on the container. */
     background-color: whiteSmoke;
     border-radius: 3px;
-    box-shadow: 0 2px 3px rgba(0,0,0,.5) inset;
+    box-shadow: 0 2px 3px rgba(0, 0, 0, .5) inset;
 
     /* Of all IE, only IE10 supports progress element that too partially. It only allows to change the background-color of the progress value using the 'color' attribute. */
     color: royalblue;
@@ -112,20 +113,24 @@ Webkit browsers provide two pseudo classes that can be use to style HTML5 progre
 progress[value]::-webkit-progress-bar {
     background-color: whiteSmoke;
     border-radius: 3px;
-    box-shadow: 0 2px 3px rgba(0,0,0,.5) inset;
+    box-shadow: 0 2px 3px rgba(0, 0, 0, .5) inset;
 }
 
 progress[value]::-webkit-progress-value {
     position: relative;
 
     background-size: 35px 20px, 100% 100%, 100% 100%;
-    border-radius:3px;
+    border-radius: 3px;
 
     /* Let's animate this */
     animation: animate-stripes 5s linear infinite;
 }
 
-@keyframes animate-stripes { 100% { background-position: -100px 0; } }
+@keyframes animate-stripes {
+    100% {
+        background-position: -100px 0;
+    }
+}
 
 /* Let's spice up things little bit by using pseudo elements. */
 
@@ -134,8 +139,10 @@ progress[value]::-webkit-progress-value:after {
     content: '';
     position: absolute;
 
-    width:5px; height:5px;
-    top:7px; right:7px;
+    width: 5px;
+    height: 5px;
+    top: 7px;
+    right: 7px;
 
     background-color: white;
     border-radius: 100%;
@@ -145,20 +152,19 @@ progress[value]::-webkit-progress-value:after {
 
 progress[value]::-moz-progress-bar {
     /* Gradient background with Stripes */
-    background-image:
-            -moz-linear-gradient( 135deg,
-            transparent,
-            transparent 33%,
-            rgba(0,0,0,.1) 33%,
-            rgba(0,0,0,.1) 66%,
-            transparent 66%),
-            -moz-linear-gradient( top,
+    background-image: -moz-linear-gradient(135deg,
+    transparent,
+    transparent 33%,
+    rgba(0, 0, 0, .1) 33%,
+    rgba(0, 0, 0, .1) 66%,
+    transparent 66%),
+    -moz-linear-gradient(top,
             rgba(255, 255, 255, .25),
-            rgba(0,0,0,.2)),
-            -moz-linear-gradient( left, #089DE3, #089DE3);
+            rgba(0, 0, 0, .2)),
+    -moz-linear-gradient(left, #089DE3, #089DE3);
 
     background-size: 35px 20px, 100% 100%, 100% 100%;
-    border-radius:3px;
+    border-radius: 3px;
 
     /* Firefox doesn't support CSS3 keyframe animations on progress element. Hence, we did not include animate-stripes in this code block */
 }
@@ -167,10 +173,11 @@ progress[value]::-moz-progress-bar {
 .progress-bar {
     background-color: whiteSmoke;
     border-radius: 3px;
-    box-shadow: 0 2px 3px rgba(0,0,0,.5) inset;
+    box-shadow: 0 2px 3px rgba(0, 0, 0, .5) inset;
 
     /* Dimensions should be similar to the parent progress element. */
-    width: 100%; height:20px;
+    width: 100%;
+    height: 20px;
 }
 
 .progress-bar span {
@@ -189,38 +196,36 @@ p[data-value] {
 
 p[data-value]:after {
     content: attr(data-value) '%';
-    position: absolute; right:0;
+    position: absolute;
+    right: 0;
 }
 
-.html5progress::-webkit-progress-value
-{
+.html5progress::-webkit-progress-value {
     /* Gradient background with Stripes */
-    background-image:
-            -webkit-linear-gradient( 135deg,
-            transparent,
-            transparent 33%,
-            rgba(0,0,0,.1) 33%,
-            rgba(0,0,0,.1) 66%,
-            transparent 66%),
-            -webkit-linear-gradient( top,
+    background-image: -webkit-linear-gradient(135deg,
+    transparent,
+    transparent 33%,
+    rgba(0, 0, 0, .1) 33%,
+    rgba(0, 0, 0, .1) 66%,
+    transparent 66%),
+    -webkit-linear-gradient(top,
             rgba(255, 255, 255, .25),
-            rgba(0,0,0,.2)),
-            -webkit-linear-gradient( left, #089DE3, #089DE3);
+            rgba(0, 0, 0, .2)),
+    -webkit-linear-gradient(left, #089DE3, #089DE3);
 }
 
 .html5progress::-moz-progress-bar {
     /* Gradient background with Stripes */
-    background-image:
-            -moz-linear-gradient( 135deg,
-            transparent,
-            transparent 33%,
-            rgba(0,0,0,.1) 33%,
-            rgba(0,0,0,.1) 66%,
-            transparent 66%),
-            -moz-linear-gradient( top,
+    background-image: -moz-linear-gradient(135deg,
+    transparent,
+    transparent 33%,
+    rgba(0, 0, 0, .1) 33%,
+    rgba(0, 0, 0, .1) 66%,
+    transparent 66%),
+    -moz-linear-gradient(top,
             rgba(255, 255, 255, .25),
-            rgba(0,0,0,.2)),
-            -moz-linear-gradient( left, #09c, #690);
+            rgba(0, 0, 0, .2)),
+    -moz-linear-gradient(left, #09c, #690);
 }
 
 /* Now we are good to duplicate html code for other skills and then add the css code for the new skill based on data-skill */
@@ -605,19 +610,22 @@ p[data-value]:after {
     text-align: center;
 }
 
-.leftSidebar-facet-panel{
+.leftSidebar-facet-panel {
     padding-bottom: 0.3rem;
     padding-top: 0.3em;
 }
+
 .sidebarHyperLink-selected {
     background: #5bbeff;
     /*padding-bottom: 0.6rem;*/
     /*padding-top: 0.5em;*/
 }
+
 .leftSidebar .sidebar-hyperlink.sidebarItem-selected a:hover {
     text-decoration: none;
     color: inherit;
 }
+
 .leftSidebar .sidebarItem-selected.h6, .leftSidebar .sidebarItem-selected.h5 {
     color: white;
     margin-bottom: 0px;
@@ -673,7 +681,7 @@ p[data-value]:after {
 
 /* hide right shadow */
 .my-asyncdatagrid-display-scroll-wrapper:after {
-    box-shadow: inset -10px 0 10px -8px rgba(0,0,0,0.5);
+    box-shadow: inset -10px 0 10px -8px rgba(0, 0, 0, 0.5);
 
     content: "";
     display: block;
@@ -699,7 +707,7 @@ p[data-value]:after {
 
 /* hide left shadow */
 .my-asyncdatagrid-display-scroll-wrapper:before {
-    box-shadow: inset 10px 0 10px -8px rgba(0,0,0,0.5);
+    box-shadow: inset 10px 0 10px -8px rgba(0, 0, 0, 0.5);
 
     content: "";
     display: block;
@@ -767,7 +775,6 @@ p[data-value]:after {
 }
 
 
-
 /**********************************************
                 TABLE DIAGRAM
 ************************************************/
@@ -812,7 +819,7 @@ p[data-value]:after {
     min-width: 500px;
 }
 
-.homePanel  img {
+.homePanel img {
     max-width: 500px;
     margin-left: auto;
     margin-right: auto;
@@ -859,17 +866,49 @@ html, body, .main {
     margin: 0;
 }
 
-.application-container{
-    padding: 10px;
+.main .contentPanel{
+    min-height: auto;
 }
+
+.application-container {
+    padding: 10px;
+    height: 100%;
+    box-sizing: border-box;
+    position: relative;
+}
+
+.application-container .browseContentPreviewPanel,
+.application-container .browseContentPreviewPanel,
+.application-container .browseContentPreviewPanel td,
+.application-container .browseContentFilesPanel,
+.application-container .browseContentFilesPanel td,
+.application-container .block{
+    height: 100%;
+}
+
+.application-container .browseContentPreviewPanel{
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding-top: 44px;
+    padding-left: 10px;
+    box-sizing: border-box;
+}
+
+.application-container .h1{
+    margin: 0;
+}
+
 /**********************************************
 		          breadcrumb
 ***********************************************/
 
-.main .wui-breadcrumbPanel{
+.main .wui-breadcrumbPanel {
     margin-top: 0;
     margin-bottom: 0;
     padding-bottom: 10px;
+    position: absolute;
+    z-index: 1;
 }
 
 /**********************************************
@@ -881,7 +920,7 @@ html, body, .main {
     width: 100%;
 }
 
-.home-page-content{
+.home-page-content {
     background-color: #DCDCDC;
     height: 100%;
     width: 100%;
@@ -892,7 +931,7 @@ html, body, .main {
 }
 
 /*Brand*/
-.home-page-brand{
+.home-page-brand {
     text-align: center;
     padding: 20px;
     box-sizing: border-box;
@@ -900,24 +939,24 @@ html, body, .main {
     margin: 0 auto;
 }
 
-.home-page-brand img{
+.home-page-brand img {
     max-width: 20%;
 }
 
 /*Content*/
-.home-page-content .options{
+.home-page-content .options {
     padding: 20px;
     box-sizing: border-box;
     display: flex;
     justify-content: space-around;
 }
 
-.options{
+.options {
     width: 75%;
     margin: 0 auto;
 }
 
-.options .card + .card{
+.options .card + .card {
     margin-top: 5px;
 }
 
@@ -938,7 +977,7 @@ html, body, .main {
 }
 
 /*Footer*/
-.home-page-footer{
+.home-page-footer {
     padding: 20px;
     box-sizing: border-box;
     height: 70px;
@@ -948,7 +987,7 @@ html, body, .main {
     background-color: #464646;
 }
 
-.home-page-footer .logo-keep{
+.home-page-footer .logo-keep {
     height: 100%;
 }
 
@@ -1100,6 +1139,11 @@ html, body, .main {
     align-items: flex-end;
     justify-content: space-between;
     padding-left: 315px;
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .wrapper {
@@ -1135,9 +1179,17 @@ html, body, .main {
     margin: 2.5rem 4rem 0rem 6rem;
 }
 
+.form-lobs{
+    margin-left: 6rem;
+}
+
+.export-options-form, .custom-views-form{
+    margin: 2.5rem 4rem 0rem 0rem;
+}
+
 .form-row {
     display: flex;
-    width:100%;
+    width: 100%;
     margin-bottom: 10px;
 }
 
@@ -1266,6 +1318,12 @@ html, body, .main {
     color: white !important;
 }
 
+.select-buttons-container {
+    position: absolute;
+    bottom: 10px;
+    z-index: 1;
+}
+
 .select-buttons-container .btn:last-child {
     margin-left: 15px;
 }
@@ -1273,21 +1331,21 @@ html, body, .main {
 /***********************************************
                WIZARD CONNECTION
 ***********************************************/
-.wizard-connection{
-    height: 85vh;
+.wizard-connection {
+    height: 100%;
     display: flex;
     flex-direction: column;
 }
 
 .wizard-connection .wrapper {
-    /*height: 100%;*/
+    height: 100%;
 }
 
-.connectionSidebar .sidebarItem{
-    padding: 5px 0; ;
+.connectionSidebar .sidebarItem {
+    padding: 5px 0;;
 }
 
-.wrapper .h4{
+.wrapper .h4 {
     margin-top: 0;
 }
 
@@ -1342,22 +1400,22 @@ html, body, .main {
 ************************************************/
 
 input[type="checkbox"] {
-    padding-left:5px;
-    padding-right:5px;
-    -webkit-appearance:button;
+    padding-left: 5px;
+    padding-right: 5px;
+    -webkit-appearance: button;
     background-color: #eee;
-    color:#FFF;
+    color: #FFF;
     white-space: nowrap;
-    overflow:hidden;
-    width:20px;
-    height:20px;
+    overflow: hidden;
+    width: 20px;
+    height: 20px;
     cursor: pointer;
     border-color: #089de3;
     border-style: solid;
     border-width: thin;
 }
 
-input[type="checkbox"]:checked{
+input[type="checkbox"]:checked {
     background-color: #089de3;
 }
 
@@ -1417,23 +1475,26 @@ input[type="checkbox"]:checked:after {
 /**********************************************
 				EDIT METADATA
 ************************************************/
-.metadata-panel{
+.metadata-panel {
     padding: 0em 1em;
-    height: 90vh;
+    height: 100%;
     display: flex;
     justify-content: space-between;
     flex-direction: column;
 }
 
-.metadata-content{
+.metadata-content {
     display: block;
-    height: 80%;
+    height: 80vh;
 }
 
 .metadata-save {
     display: flex;
     flex-direction: row-reverse;
     width: 100%;
+    padding: 10px 0;
+    background-color: white;
+    z-index: 1;
 }
 
 .metadata-edit-title {
@@ -1441,14 +1502,15 @@ input[type="checkbox"]:checked:after {
     justify-content: space-between;
     margin: 0 0 0.5em 0;
 }
+
 .metadata-edit-title .h1 {
     margin: 0;
 }
 
-.metadata-edit-title .btn{
+.metadata-edit-title .btn {
     background-color: transparent;
     font-size: 2em;
-    color:#089de3;
+    color: #089de3;
     padding: 0;
 }
 
@@ -1496,12 +1558,12 @@ input[type="checkbox"]:checked:after {
     padding: 0.5em;
 }
 
-.metadata-edit-readonly{
-    background-color: #f7f7f7 ;
+.metadata-edit-readonly {
+    background-color: #f7f7f7;
     font-weight: bold;
 }
 
-.metadata-edit .h1{
+.metadata-edit .h1 {
     margin-top: 0;
 }
 
@@ -1518,29 +1580,34 @@ input[type="checkbox"]:checked:after {
     margin: 0 0.5em;
 }
 
-.metadata-edit-title .btn::after{
+.metadata-edit-title .btn::after {
     position: relative;
     right: auto;
 }
 
-.metadata-update{
+.metadata-update {
     margin: 0 auto;
     color: #089de3;
 }
 
-.metadata-update .missing{
+.metadata-update .missing {
     color: #8f3938;
 }
 
 /**********************************************
 		EDIT METADATA TAB & SCROLL
 ************************************************/
-.metadata-table-list{
+
+.browseItemMetadata{
+    padding: 0;
+}
+
+.metadata-table-list {
     display: block;
     height: 100%;
 }
 
-.metadata-table-list .form-textbox{
+.metadata-table-list .form-textbox {
     border-bottom: 0;
 }
 
@@ -1549,22 +1616,24 @@ input[type="checkbox"]:checked:after {
     display: block;
 }
 
-.metadata-edit-tab{
-    height: 80%;
+.metadata-edit-tab {
+    height: 100%;
 }
-.metadata-edit-tab > tbody > tr:nth-of-type(1){
+
+.metadata-edit-tab > tbody > tr:nth-of-type(1) {
     overflow-x: auto;
 }
 
-.metadata-edit-tab > tbody, .metadata-edit-tab > tbody > tr:nth-of-type(2){
-    height: 100%;
+.metadata-edit-tab > tbody, .metadata-edit-tab > tbody > tr:nth-of-type(2) {
+    height: 90%;
 }
-.metadata-edit-tab, .metadata-edit-tab > tbody, .metadata-edit-tab > tbody > tr, .metadata-edit-tab > tbody > tr > td{
-    display: block!important;
+
+.metadata-edit-tab, .metadata-edit-tab > tbody, .metadata-edit-tab > tbody > tr, .metadata-edit-tab > tbody > tr > td {
+    display: block !important;
     width: 100%;
 }
 
-.metadata-edit-scroll-wrapper{
+.metadata-edit-scroll-wrapper {
     display: block;
     max-height: 100%;
     width: 100%;
@@ -1574,21 +1643,24 @@ input[type="checkbox"]:checked:after {
     height: 80vh;
     display: block;
     overflow: auto;
+    box-sizing: border-box;
 }
+
 /**********************************************
 		    EDIT METADATA SIDEBAR
 ***********************************************/
 
-.sidebar-collapse{
+.sidebar-collapse {
     position: relative;
     width: 100%;
 }
-.sidebar-collapse .header{
+
+.sidebar-collapse .header {
     color: inherit;
     text-decoration: none;
 }
 
-.sidebar-collapse .header > .leftSidebar-facet-panel::after{
+.sidebar-collapse .header > .leftSidebar-facet-panel::after {
     display: inline-block;
     font-family: FontAwesome;
     content: "\f107";
@@ -1598,11 +1670,11 @@ input[type="checkbox"]:checked:after {
     top: 0;
 }
 
-.sidebar-collapse .header > .leftSidebar-facet-panel.sidebarHyperLink-selected::after{
+.sidebar-collapse .header > .leftSidebar-facet-panel.sidebarHyperLink-selected::after {
     color: #fff;
 }
 
-.sidebar-collapse.gwt-DisclosurePanel-open .header > .leftSidebar-facet-panel::after{
+.sidebar-collapse.gwt-DisclosurePanel-open .header > .leftSidebar-facet-panel::after {
     content: "\f106";
     font-weight: bolder;
 }
@@ -1613,8 +1685,9 @@ input[type="checkbox"]:checked:after {
 }
 
 .wizard-title {
- margin-left: 6rem;
+    margin-left: 6rem;
 }
+
 /**********************************************
 		         Dialog ExternalLob
 ***********************************************/
@@ -1623,7 +1696,7 @@ input[type="checkbox"]:checked:after {
     height: 170px;
 }
 
-.dialog-external-lobs table{
+.dialog-external-lobs table {
     width: 100%;
 }
 

@@ -5,7 +5,7 @@
     <ui:with field='messages' type='config.i18n.client.ClientMessages' />
     <g:FlowPanel addStyleNames="application-container">
         <m:BreadcrumbPanel ui:field="breadcrumb" />
-        <g:FlowPanel ui:field="wizardContent"/>
+        <g:FlowPanel addStyleNames="browseContentPreviewPanel" ui:field="wizardContent"/>
         <g:FlowPanel addStyleNames="button-panel-container">
             <g:FlowPanel ui:field="customButtons" addStyleNames="button-panel-right"/>
             <g:FlowPanel addStyleNames="button-panel-right">
