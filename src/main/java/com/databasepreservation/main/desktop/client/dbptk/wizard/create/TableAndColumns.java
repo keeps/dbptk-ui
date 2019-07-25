@@ -3,7 +3,6 @@ package com.databasepreservation.main.desktop.client.dbptk.wizard.create;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -32,13 +31,9 @@ import com.databasepreservation.main.desktop.shared.models.ExternalLobsDialogBox
 import com.databasepreservation.main.desktop.shared.models.wizardParameters.ConnectionParameters;
 import com.databasepreservation.main.desktop.shared.models.wizardParameters.ExternalLOBsParameter;
 import com.databasepreservation.main.desktop.shared.models.wizardParameters.TableAndColumnsParameters;
-import com.google.gwt.cell.client.ActionCell;
 import com.google.gwt.cell.client.ButtonCell;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.CheckboxCell;
-import com.google.gwt.cell.client.CompositeCell;
-import com.google.gwt.cell.client.FieldUpdater;
-import com.google.gwt.cell.client.HasCell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -80,6 +75,9 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
   @UiField
   FlowPanel content, tableAndColumnsList, panel;
 
+  @UiField
+  Label title;
+
   private static HashMap<String, TableAndColumns> instances = new HashMap<>();
   private TableAndColumnsSidebar tableAndColumnsSidebar;
   private ViewerMetadata metadata;
@@ -88,12 +86,14 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
   private HashMap<String, MultipleSelectionTablePanel<ViewerView>> views = new HashMap<>();
   private HashMap<String, Boolean> tableSelectedStatus = new HashMap<>();
   private HashMap<String, Boolean> viewSelectedStatus = new HashMap<>();
-  private HashMap<String, String> filters = new HashMap<>();
-  private HashMap<String, CompositeCell<ViewerColumn>> optionsButtons = new HashMap<>();
   private HashMap<String, ExternalLOBsParameter> externalLOBsParameters = new HashMap<>();
-  private static String currentTableUUID = null;
-  private String currentSchemaUUID = null;
+  private String currentTableUUID = null;
   private String currentBasePath = null;
+  // false: "SELECT ALL"; true: "SELECT // NONE";
+  private HashMap<String, Boolean> toggleSelectionTablesMap = new HashMap<>();
+  private HashMap<String, Boolean> toggleSelectionViewsMap = new HashMap<>();
+  private HashMap<String, Boolean> toggleSelectionColumnsMap = new HashMap<>();
+  private HashMap<String, Button> btnToggleSelectionMap = new HashMap<>();
 
   public static TableAndColumns getInstance(ConnectionParameters values) {
     final String urlConnection = values.getURLConnection();
@@ -191,6 +191,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
     panel.clear();
 
     if (tableUUID != null) {
+      title.setVisible(false);
       panel.add(getColumns(tableUUID));
       if (toSelect.equals(TableAndColumnsSidebar.VIEW_LINK)) {
         toSelect = metadata.getView(tableUUID).getName();
@@ -199,6 +200,8 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
       }
       currentTableUUID = tableUUID;
     } else if (schemaUUID != null) {
+        title.setVisible(true);
+        title.setText(metadata.getSchema(schemaUUID).getName());
         FlowPanel tables = new FlowPanel();
         tables.add(getTable(schemaUUID));
         FlowPanel views = new FlowPanel();
@@ -211,7 +214,6 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
         tabPanel.selectTab(0);
 
         panel.add(tabPanel);
-        currentSchemaUUID = schemaUUID;
     } else {
       panel.add(ErDiagram.getInstance(metadata));
     }
@@ -249,7 +251,6 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
         populateViewColumns(viewColumns, metadata.getView(vView.getUUID()));
         columns.put(vView.getUUID(), viewColumns);
       }
-
     }
   }
 
@@ -265,121 +266,146 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
     return new MultipleSelectionTablePanel<>();
   }
 
-  private FlowPanel getSelectPanel(String id) {
-    Button btnSelectAll = new Button();
-    btnSelectAll.setText(messages.selectAll());
-    btnSelectAll.addStyleName("btn btn-primary btn-select-all");
-    btnSelectAll.getElement().setId(id + "_all");
+  private FlowPanel getSelectPanel(final String id, final String schemaUUID) {
+    return getSelectPanel(id, schemaUUID, null);
+  }
 
-    btnSelectAll.addClickHandler(event -> {
-      switch (btnSelectAll.getElement().getId()) {
-        case SELECT_TABLES + "_all":
-          if (currentSchemaUUID != null) {
-            MultiSelectionModel<ViewerTable> selectionModel = getTable(currentSchemaUUID).getSelectionModel();
-            for (ViewerTable viewerTable : metadata.getSchema(currentSchemaUUID).getTables()) {
-              selectionModel.setSelected(viewerTable, true);
-            }
-          }
-          break;
-        case SELECT_COLUMNS_TABLE + "_all":
-          if (currentTableUUID != null) {
-            MultiSelectionModel<ViewerColumn> selectionModel = getColumns(currentTableUUID).getSelectionModel();
-            for (ViewerColumn viewerColumn : metadata.getTable(currentTableUUID).getColumns()) {
-              selectionModel.setSelected(viewerColumn, true);
-            }
-          }
-          break;
-        case SELECT_COLUMNS_VIEW + "_all":
-          if (currentTableUUID != null) {
-            MultiSelectionModel<ViewerColumn> selectionModel = getColumns(currentTableUUID).getSelectionModel();
-            for (ViewerColumn viewerColumn : metadata.getView(currentTableUUID).getColumns()) {
-              selectionModel.setSelected(viewerColumn, true);
-            }
-          }
-          break;
-        case SELECT_VIEWS + "_all":
-          if (currentSchemaUUID != null) {
-            MultiSelectionModel<ViewerView> selectionModel = getView(currentSchemaUUID).getSelectionModel();
-            for (ViewerView viewerView : metadata.getSchema(currentSchemaUUID).getViews()) {
-              selectionModel.setSelected(viewerView, true);
-            }
-          }
-          break;
-      }
-    });
+  private FlowPanel getSelectPanel(final String id, final String schemaUUID, final String viewOrTableUUID) {
+    Button btnSelectToggle = new Button();
+    btnSelectToggle.setText(messages.selectAll());
+    btnSelectToggle.addStyleName("btn btn-primary btn-select-all");
+    btnSelectToggle.getElement().setId(id);
 
-    Button btnSelectNone = new Button();
-    btnSelectNone.setText(messages.selectNone());
-    btnSelectNone.addStyleName("btn btn-primary btn-select-none");
-    btnSelectNone.getElement().setId(id + "_none");
+    final String toggleBtnKey;
 
-    btnSelectNone.addClickHandler(event -> {
-      switch (btnSelectNone.getElement().getId()) {
-        case SELECT_TABLES + "_none":
-          if (currentSchemaUUID != null) {
-            MultiSelectionModel<ViewerTable> selectionModel = getTable(currentSchemaUUID).getSelectionModel();
-            for (ViewerTable viewerTable : metadata.getSchema(currentSchemaUUID).getTables()) {
-              selectionModel.setSelected(viewerTable, false);
-            }
-          }
+    if (viewOrTableUUID != null) {
+      toggleBtnKey = id + schemaUUID + viewOrTableUUID;
+    } else {
+      toggleBtnKey = id + schemaUUID;
+    }
+
+    btnToggleSelectionMap.put(toggleBtnKey, btnSelectToggle);
+
+    btnSelectToggle.addClickHandler(event -> {
+      switch (btnSelectToggle.getElement().getId()) {
+        case SELECT_COLUMNS_TABLE:
+          toggleSelectionTableColumns(toggleBtnKey, viewOrTableUUID);
           break;
-        case SELECT_COLUMNS_TABLE + "_none":
-          if (currentTableUUID != null) {
-            MultiSelectionModel<ViewerColumn> selectionModel = getColumns(currentTableUUID).getSelectionModel();
-            for (ViewerColumn viewerColumn : metadata.getTable(currentTableUUID).getColumns()) {
-              selectionModel.setSelected(viewerColumn, false);
-            }
-          }
+        case SELECT_COLUMNS_VIEW:
+          toggleSelectionViewColumns(toggleBtnKey, viewOrTableUUID);
           break;
-        case SELECT_VIEWS + "_none":
-          if (currentSchemaUUID != null) {
-            MultiSelectionModel<ViewerView> selectionModel = getView(currentSchemaUUID).getSelectionModel();
-            for (ViewerView viewerView : metadata.getSchema(currentSchemaUUID).getViews()) {
-              selectionModel.setSelected(viewerView, false);
-            }
-          }
+        case SELECT_VIEWS:
+          toggleSelectionViews(toggleBtnKey, schemaUUID);
           break;
-        case SELECT_COLUMNS_VIEW + "_none":
-          if (currentTableUUID != null) {
-            MultiSelectionModel<ViewerColumn> selectionModel = getColumns(currentTableUUID).getSelectionModel();
-            for (ViewerColumn viewerColumn : metadata.getView(currentTableUUID).getColumns()) {
-              selectionModel.setSelected(viewerColumn, false);
-            }
-          }
+        case SELECT_TABLES:
+          toggleSelectionTables(toggleBtnKey, schemaUUID);
           break;
       }
     });
 
     FlowPanel panel = new FlowPanel();
     panel.addStyleName("select-buttons-container");
-    panel.add(btnSelectAll);
-    panel.add(btnSelectNone);
+    panel.add(btnSelectToggle);
 
     return panel;
   }
 
+  private void toggleSelectionTables(final String toggleBtnKey, final String schemaUUID) {
+    final boolean result = toggleSelectionButton(toggleBtnKey, toggleSelectionTablesMap, schemaUUID);
+    MultiSelectionModel<ViewerTable> selectionModel = getTable(schemaUUID).getSelectionModel();
+    for (ViewerTable viewerTable : metadata.getSchema(schemaUUID).getTables()) {
+      selectionModel.setSelected(viewerTable, result);
+    }
+  }
+
+  private void toggleSelectionTableColumns(final String toggleBtnKey, final String tableUUID) {
+    final boolean result = toggleSelectionButton(toggleBtnKey, toggleSelectionColumnsMap, tableUUID);
+    MultiSelectionModel<ViewerColumn> selectionModel = getColumns(tableUUID).getSelectionModel();
+    for (ViewerColumn viewerColumn : metadata.getTable(tableUUID).getColumns()) {
+      selectionModel.setSelected(viewerColumn, result);
+    }
+  }
+
+  private void toggleSelectionViewColumns(final String toggleBtnKey, final String viewUUID) {
+    final boolean result = toggleSelectionButton(toggleBtnKey, toggleSelectionColumnsMap, viewUUID);
+    MultiSelectionModel<ViewerColumn> selectionModel = getColumns(viewUUID).getSelectionModel();
+    for (ViewerColumn viewerColumn : metadata.getView(viewUUID).getColumns()) {
+      selectionModel.setSelected(viewerColumn, result);
+    }
+  }
+
+  private void toggleSelectionViews(final String toggleBtnKey, final String schemaUUID) {
+    final boolean result = toggleSelectionButton(toggleBtnKey, toggleSelectionViewsMap, schemaUUID);
+    MultiSelectionModel<ViewerView> selectionModel = getView(schemaUUID).getSelectionModel();
+    for (ViewerView viewerView : metadata.getSchema(schemaUUID).getViews()) {
+      selectionModel.setSelected(viewerView, result);
+    }
+  }
+
+  private boolean toggleSelectionButton(final String toggleBtnKey, Map<String, Boolean> map, final String key) {
+    final Button button = btnToggleSelectionMap.get(toggleBtnKey);
+    if (map.get(key) == null) {
+      button.setText(messages.selectNone());
+      button.addStyleName("btn-select-none");
+      map.put(key, true);
+
+      return true;
+    } else {
+      boolean value = map.get(key);
+      if (value) {
+        button.setText(messages.selectAll());
+        button.removeStyleName("btn-select-none");
+        button.addStyleName("btn-select-all");
+      } else {
+        button.setText(messages.selectNone());
+        button.removeStyleName("btn-select-all");
+        button.addStyleName("btn-select-none");
+      }
+      map.put(key, !value);
+      btnToggleSelectionMap.put(toggleBtnKey, button);
+
+      return !value;
+    }
+  }
+
+  private boolean CellTableSelectionColumnHelper(ViewerView viewerView,
+    MultipleSelectionTablePanel<ViewerColumn> selectionTablePanel, ViewerColumn column,
+    MultipleSelectionTablePanel<ViewerView> viewerTableMultipleSelectionTablePanel, Map<String, Boolean> map,
+    String key) {
+    if (viewerView.getColumns().size() == selectionTablePanel.getSelectionModel().getSelectedSet().size()) {
+      map.put(key, false);
+      toggleSelectionButton(SELECT_COLUMNS_VIEW + viewerView.getSchemaUUID() + viewerView.getUUID(), map, key);
+    }
+    if (selectionTablePanel.getSelectionModel().isSelected(column)) {
+      viewSelectedStatus.put(viewerView.getUUID(), true);
+      viewerTableMultipleSelectionTablePanel.getSelectionModel().setSelected(viewerView, true);
+    }
+
+    if (selectionTablePanel.getSelectionModel().getSelectedSet().size() == 0) {
+      map.put(key, true);
+      toggleSelectionButton(SELECT_COLUMNS_VIEW + viewerView.getSchemaUUID() + viewerView.getUUID(), map, key);
+      viewerTableMultipleSelectionTablePanel.getSelectionModel().setSelected(viewerView, false);
+      viewSelectedStatus.put(viewerView.getUUID(), false);
+    }
+    return selectionTablePanel.getSelectionModel().isSelected(column);
+  }
+
   private void populateViewColumns(MultipleSelectionTablePanel<ViewerColumn> selectionTablePanel,
     final ViewerView viewerView) {
-    Label header = new Label(viewerView.getName());
-    header.addStyleName("h4");
+    Label header = new Label(viewerView.getSchemaName() + "." + viewerView.getName());
+    header.addStyleName("h1");
 
-    selectionTablePanel.createTable(header, getSelectPanel(SELECT_COLUMNS_VIEW), viewerView.getColumns().iterator(),
+    selectionTablePanel.createTable(header,
+      getSelectPanel(SELECT_COLUMNS_VIEW, viewerView.getSchemaUUID(), viewerView.getUUID()),
+      viewerView.getColumns().iterator(),
       new MultipleSelectionTablePanel.ColumnInfo<>("", 4,
         new Column<ViewerColumn, Boolean>(new CheckboxCell(true, true)) {
           @Override
           public Boolean getValue(ViewerColumn object) {
             MultipleSelectionTablePanel<ViewerView> viewerTableMultipleSelectionTablePanel = getView(
               viewerView.getSchemaUUID());
-            if (selectionTablePanel.getSelectionModel().isSelected(object)) {
-              viewSelectedStatus.put(viewerView.getUUID(), true);
-              viewerTableMultipleSelectionTablePanel.getSelectionModel().setSelected(viewerView, true);
-            }
-
-            if (selectionTablePanel.getSelectionModel().getSelectedSet().size() == 0) {
-              viewerTableMultipleSelectionTablePanel.getSelectionModel().setSelected(viewerView, false);
-              viewSelectedStatus.put(viewerView.getUUID(), false);
-            }
-            return selectionTablePanel.getSelectionModel().isSelected(object);
+            return CellTableSelectionColumnHelper(viewerView, selectionTablePanel, object,
+              viewerTableMultipleSelectionTablePanel, toggleSelectionColumnsMap, viewerView.getUUID());
           }
         }),
       new MultipleSelectionTablePanel.ColumnInfo<>(messages.columnName(), 10, new TextColumn<ViewerColumn>() {
@@ -397,27 +423,30 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
 
   private void populateViews(MultipleSelectionTablePanel<ViewerView> selectionTablePanel,
     final ViewerSchema viewerSchema) {
-    Label header = new Label(viewerSchema.getName());
-    header.addStyleName("h4");
-
-    selectionTablePanel.createTable(header, getSelectPanel(SELECT_VIEWS), viewerSchema.getViews().iterator(),
+    selectionTablePanel.createTable(getSelectPanel(SELECT_VIEWS, viewerSchema.getUUID()),
+      viewerSchema.getViews().iterator(),
       new MultipleSelectionTablePanel.ColumnInfo<>("", 4,
         new Column<ViewerView, Boolean>(new CheckboxCell(true, true)) {
           @Override
-          public Boolean getValue(ViewerView object) {
-            MultipleSelectionTablePanel<ViewerColumn> viewerColumnTablePanel = getColumns(object.getUUID());
-            if (selectionTablePanel.getSelectionModel().isSelected(object)) {
-              if (!viewSelectedStatus.get(object.getUUID())) {
-                for (ViewerColumn column : object.getColumns()) {
+          public Boolean getValue(ViewerView viewerView) {
+            MultipleSelectionTablePanel<ViewerColumn> viewerColumnTablePanel = getColumns(viewerView.getUUID());
+            if (viewerSchema.getViews().size() == selectionTablePanel.getSelectionModel().getSelectedSet().size()) {
+              toggleSelectionViewsMap.put(viewerSchema.getUUID(), false);
+              toggleSelectionButton(SELECT_VIEWS + viewerSchema.getUUID(), toggleSelectionViewsMap,
+                viewerView.getUUID());
+            }
+            if (selectionTablePanel.getSelectionModel().isSelected(viewerView)) {
+              if (!viewSelectedStatus.get(viewerView.getUUID())) {
+                for (ViewerColumn column : viewerView.getColumns()) {
                   viewerColumnTablePanel.getSelectionModel().setSelected(column, true);
                 }
               }
             } else {
-              for (ViewerColumn column : object.getColumns()) {
+              for (ViewerColumn column : viewerView.getColumns()) {
                 viewerColumnTablePanel.getSelectionModel().setSelected(column, false);
               }
             }
-            return selectionTablePanel.getSelectionModel().isSelected(object);
+            return selectionTablePanel.getSelectionModel().isSelected(viewerView);
           }
         }),
       new MultipleSelectionTablePanel.ColumnInfo<>(messages.viewName(), 10, new TextColumn<ViewerView>() {
@@ -433,30 +462,20 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
       }));
   }
 
-  private Iterator<ViewerTable> filtered(List<ViewerTable> tableList) {
-
-    List<ViewerTable> finalList = new ArrayList<>();
-
-    for (ViewerTable viewerTable : tableList) {
-      if (!viewerTable.getName().startsWith("VIEW_")) {
-        finalList.add(viewerTable);
-      }
-    }
-
-    return finalList.iterator();
-  }
-
   private void populateTables(MultipleSelectionTablePanel<ViewerTable> selectionTablePanel,
     final ViewerSchema viewerSchema) {
-    Label header = new Label(viewerSchema.getName());
-    header.addStyleName("h4");
+    final List<ViewerTable> filtered = filtered(viewerSchema.getTables());
 
-    selectionTablePanel.createTable(header, getSelectPanel(SELECT_TABLES),
-      filtered(viewerSchema.getTables()), new MultipleSelectionTablePanel.ColumnInfo<>("", 4,
+    selectionTablePanel.createTable(getSelectPanel(SELECT_TABLES, viewerSchema.getUUID()), filtered.iterator(),
+      new MultipleSelectionTablePanel.ColumnInfo<>("", 4,
         new Column<ViewerTable, Boolean>(new CheckboxCell(true, true)) {
           @Override
           public Boolean getValue(ViewerTable object) {
             MultipleSelectionTablePanel<ViewerColumn> viewerColumnTablePanel = getColumns(object.getUUID());
+            if (filtered.size() == selectionTablePanel.getSelectionModel().getSelectedSet().size()) {
+              toggleSelectionButton(SELECT_TABLES + viewerSchema.getUUID(), toggleSelectionTablesMap,
+                viewerSchema.getUUID());
+            }
             if (selectionTablePanel.getSelectionModel().isSelected(object)) {
               if (!tableSelectedStatus.get(object.getUUID())) {
                 for (ViewerColumn column : object.getColumns()) {
@@ -492,50 +511,47 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
 
   private void populateTableColumns(MultipleSelectionTablePanel<ViewerColumn> selectionTablePanel,
     final ViewerTable viewerTable) {
-    Label header = new Label(viewerTable.getName());
-    header.addStyleName("h4");
+    Label header = new Label(viewerTable.getSchemaName() + "." + viewerTable.getName());
+    header.addStyleName("h1");
 
     final ButtonDatabaseColumn buttonDatabaseColumn = new ButtonDatabaseColumn() {
       @Override
       public String getValue(ViewerColumn viewerColumn) {
-        return "Configure";
+        return messages.tableAndColumnsExternalLOBConfigure();
       }
     };
 
     buttonDatabaseColumn.setFieldUpdater((index, object, value) -> {
-      String btnText = "Add";
+      String btnText = messages.tableAndColumnsAddText();
       boolean delete = false;
       String id = object.getDisplayName() + "_" + viewerTable.getUUID();
 
-      final ComboBoxField referenceType = ComboBoxField.createInstance("Reference Type");
+      final ComboBoxField referenceType = ComboBoxField.createInstance(messages.tableAndColumnsRefTypeLabel());
       referenceType.setComboBoxValue("File System", "file-system");
       referenceType.setCSSMetadata("form-row", "form-label-spaced", "form-combobox");
 
       GenericField genericField;
       if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
-        FileUploadField fileUploadField = FileUploadField.createInstance("BasePath", "Select");
+        FileUploadField fileUploadField = FileUploadField.createInstance(messages.tableAndColumnsBasePathLabel(), messages.tableAndColumnsSelectText());
         fileUploadField.setParentCSS("form-row");
         fileUploadField.setLabelCSS("form-label-spaced");
         fileUploadField.setButtonCSS("btn btn-link form-button");
-        fileUploadField.buttonAction(new Command() {
-          @Override
-          public void execute() {
-            if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
-              JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.singletonList("openDirectory"),
-                Collections.emptyList());
+        fileUploadField.buttonAction(() -> {
+          if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
+            JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.singletonList("openDirectory"),
+              Collections.emptyList());
 
-              String path = JavascriptUtils.openFileDialog(options);
-              if (path != null) {
-                currentBasePath = path;
-                String displayPath = PathUtils.getFileName(path);
-                fileUploadField.setPathLocation(displayPath, path);
-                fileUploadField.setInformationPathCSS("gwt-Label-disabled information-path");
-              }
+            String path = JavascriptUtils.openFileDialog(options);
+            if (path != null) {
+              currentBasePath = path;
+              String displayPath = PathUtils.getFileName(path);
+              fileUploadField.setPathLocation(displayPath, path);
+              fileUploadField.setInformationPathCSS("gwt-Label-disabled information-path");
             }
           }
         });
 
-        Dialogs.showExternalLobsSetupDialog("Test", referenceType, fileUploadField, "Cancel", "Add", delete,
+        Dialogs.showExternalLobsSetupDialog(messages.tableAndColumnsExternalLOBDialogTitle(), referenceType, fileUploadField, messages.dialogCancel(), messages.dialogAdd(), delete,
           new DefaultAsyncCallback<ExternalLobsDialogBoxResult>() {
               @Override
             public void onSuccess(ExternalLobsDialogBoxResult result) {
@@ -557,12 +573,12 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
         if (externalLOBsParameters.get(id) != null) {
           textBox.setText(externalLOBsParameters.get(id).getBasePath());
           delete = true;
-          btnText = "Update";
+          btnText =  messages.tableAndColumnsUpdateText();
         }
-        genericField = GenericField.createInstance("Base Path", textBox);
+        genericField = GenericField.createInstance(messages.tableAndColumnsBasePathLabel(), textBox);
         genericField.setCSSMetadata("form-row", "form-label-spaced");
 
-        Dialogs.showExternalLobsSetupDialog("Test", referenceType, genericField, "Cancel", btnText, delete,
+        Dialogs.showExternalLobsSetupDialog(messages.tableAndColumnsExternalLOBDialogTitle(), referenceType, genericField, "Cancel", btnText, delete,
           new DefaultAsyncCallback<ExternalLobsDialogBoxResult>() {
             @Override
             public void onSuccess(ExternalLobsDialogBoxResult result) {
@@ -591,7 +607,9 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
       }
     });
 
-    selectionTablePanel.createTable(header, getSelectPanel(SELECT_COLUMNS_TABLE), viewerTable.getColumns().iterator(),
+    selectionTablePanel.createTable(header,
+      getSelectPanel(SELECT_COLUMNS_TABLE, viewerTable.getSchemaUUID(), viewerTable.getUUID()),
+      viewerTable.getColumns().iterator(),
       new MultipleSelectionTablePanel.ColumnInfo<>("", 4,
         new Column<ViewerColumn, Boolean>(new CheckboxCell(true, true)) {
           @Override
@@ -599,12 +617,20 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
             MultipleSelectionTablePanel<ViewerTable> viewerTableMultipleSelectionTablePanel = getTable(
               viewerTable.getSchemaUUID());
 
+            if (viewerTable.getColumns().size() == selectionTablePanel.getSelectionModel().getSelectedSet().size()) {
+              toggleSelectionColumnsMap.put(viewerTable.getUUID(), false);
+              toggleSelectionButton(SELECT_COLUMNS_TABLE + viewerTable.getSchemaUUID() + viewerTable.getUUID(),
+                toggleSelectionColumnsMap, viewerTable.getUUID());
+            }
             if (selectionTablePanel.getSelectionModel().isSelected(object)) {
               tableSelectedStatus.put(viewerTable.getUUID(), true);
               viewerTableMultipleSelectionTablePanel.getSelectionModel().setSelected(viewerTable, true);
             }
 
             if (selectionTablePanel.getSelectionModel().getSelectedSet().size() == 0) {
+              toggleSelectionColumnsMap.put(viewerTable.getUUID(), true);
+              toggleSelectionButton(SELECT_COLUMNS_TABLE + viewerTable.getSchemaUUID() + viewerTable.getUUID(),
+                toggleSelectionColumnsMap, viewerTable.getUUID());
               viewerTableMultipleSelectionTablePanel.getSelectionModel().setSelected(viewerTable, false);
               tableSelectedStatus.put(viewerTable.getUUID(), false);
             }
@@ -628,20 +654,31 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
         public String getValue(ViewerColumn column) {
           return column.getDescription();
         }
-      }), new MultipleSelectionTablePanel.ColumnInfo<>("Column Filters", 10, new TooltipDatabaseColumn() {
+      }), new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsColumnFiltersTitle(), 10, new TooltipDatabaseColumn() {
         @Override
         public SafeHtml getValue(ViewerColumn object) {
           String id = object.getDisplayName() + "_" + viewerTable.getUUID();
           if (externalLOBsParameters.get(id) != null) {
             StringBuilder sb = new StringBuilder();
             final ExternalLOBsParameter externalLOBsParameter = externalLOBsParameters.get(id);
-            sb.append("Reference Type:").append(" ").append(externalLOBsParameter.getReferenceType()).append("\n")
-              .append("Base Path:").append(" ").append(externalLOBsParameter.getBasePath());
+            sb.append(messages.tableAndColumnsRefTypeLabel()).append(": ").append(externalLOBsParameter.getReferenceType()).append("\n")
+              .append(messages.tableAndColumnsBasePathLabel()).append(": ").append(externalLOBsParameter.getBasePath());
             return SafeHtmlUtils.fromString(sb.toString());
           }
           return null;
         }
       }), new MultipleSelectionTablePanel.ColumnInfo<>("Options", 10, buttonDatabaseColumn));
+  }
+
+  private List<ViewerTable> filtered(List<ViewerTable> tableList) {
+    List<ViewerTable> finalList = new ArrayList<>();
+    for (ViewerTable viewerTable : tableList) {
+      if (!viewerTable.getName().startsWith("VIEW_")) {
+        finalList.add(viewerTable);
+      }
+    }
+
+    return finalList;
   }
 
   private abstract static class ButtonDatabaseColumn extends Column<ViewerColumn, String> {
@@ -673,36 +710,6 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
         sb.appendHtmlConstant("External Lobs");
         sb.appendHtmlConstant("</div");
       }
-    }
-  }
-
-  private class ActionHasCell implements HasCell<ViewerColumn, ViewerColumn> {
-    private ActionCell<ViewerColumn> cell;
-
-    public ActionHasCell(String text, ActionCell.Delegate<ViewerColumn> delegate) {
-      cell = new ActionCell<ViewerColumn>(text, delegate) {
-        @Override
-        public void render(Context context, ViewerColumn value, SafeHtmlBuilder sb) {
-          sb.appendHtmlConstant("<button class=\"btn btn-link-info\" type=\"button\" tabindex=\"-1\">");
-          sb.append(SafeHtmlUtils.fromString(text));
-          sb.appendHtmlConstant("</button>");
-        }
-      };
-    }
-
-    @Override
-    public Cell<ViewerColumn> getCell() {
-      return cell;
-    }
-
-    @Override
-    public FieldUpdater<ViewerColumn, ViewerColumn> getFieldUpdater() {
-      return null;
-    }
-
-    @Override
-    public ViewerColumn getValue(ViewerColumn object) {
-      return object;
     }
   }
 }

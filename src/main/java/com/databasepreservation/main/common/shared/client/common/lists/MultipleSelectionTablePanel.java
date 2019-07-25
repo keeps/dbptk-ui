@@ -113,6 +113,11 @@ public class MultipleSelectionTablePanel<C> extends Composite {
   }
 
   @SafeVarargs
+  public final void createTable(Widget infoContent, Iterator<C> rowItems, ColumnInfo<C>... columns) {
+    createTable(null, infoContent, rowItems, columns);
+  }
+
+  @SafeVarargs
   public final void createTable(Widget headerContent, SafeHtml infoContent, Iterator<C> rowItems, ColumnInfo<C>... columns) {
     createTable(headerContent, new HTMLPanel(infoContent), rowItems, columns);
   }
@@ -120,7 +125,8 @@ public class MultipleSelectionTablePanel<C> extends Composite {
   @SafeVarargs
   public final void createTable(Widget headerContent, Widget infoContent, Iterator<C> rowItems, ColumnInfo<C>... columns) {
     // set widgets
-    header.setWidget(headerContent);
+    if (headerContent != null)
+      header.setWidget(headerContent);
     info.setWidget(infoContent);
 
     display = internalCreateTable(rowItems, columns);

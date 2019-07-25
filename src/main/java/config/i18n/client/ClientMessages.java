@@ -1,7 +1,6 @@
 package config.i18n.client;
 
 import com.google.gwt.i18n.client.Messages;
-import com.google.gwt.user.client.ui.Widget;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -447,6 +446,8 @@ public interface ClientMessages extends Messages {
 
   String dialogConfirm();
 
+  String dialogAdd();
+
   String SIARDLocation();
 
   String SIARDValidated();
@@ -489,20 +490,6 @@ public interface ClientMessages extends Messages {
 
   String createSIARDMetadataOptions();
 
-  String tabGeneral();
-
-  String tabSSHTunnel();
-
-  String useSSHTunnel();
-
-  String proxyHostLabel();
-
-  String proxyPortLabel();
-
-  String proxyUserLabel();
-
-  String proxyPasswordLabel();
-
   String createSIARDCustomViews();
 
   String siardversionLabel();
@@ -519,17 +506,9 @@ public interface ClientMessages extends Messages {
 
   String connectionURLLabel();
 
-  String connectionLabels(@Select String fieldName);
-
-  String chooseDriverLocation();
-
   String sidebarTables();
 
   String sidebarViews();
-
-  String selectAll();
-
-  String selectNone();
 
   String update();
 
@@ -605,14 +584,62 @@ public interface ClientMessages extends Messages {
 
   String SIARDError();
 
-
-
   String SIARDValidationSuccess();
 
   String SIARDValidationFailed();
 
-  /* *****************************************
-   *           Wizard Custom Views
+  /********************************************
+   * Wizard Connection
+   ********************************************/
+  String tabGeneral();
+
+  String tabSSHTunnel();
+
+  String useSSHTunnel();
+
+  String proxyHostLabel();
+
+  String proxyPortLabel();
+
+  String proxyUserLabel();
+
+  String proxyPasswordLabel();
+
+  String connectionLabels(@Select String fieldName);
+
+  String chooseDriverLocation();
+
+  /********************************************
+   * Wizard Table & Columns
+   ********************************************/
+  String selectAll();
+
+  String selectNone();
+
+  String tableAndColumnsColumnTitle();
+
+  String tableAndColumnsDescriptionTitle();
+
+  String tableAndColumnsTableTitle();
+
+  String tableAndColumnsExternalLOBConfigure();
+
+  String tableAndColumnsRefTypeLabel();
+
+  String tableAndColumnsBasePathLabel();
+
+  String tableAndColumnsColumnFiltersTitle();
+
+  String tableAndColumnsSelectText();
+
+  String tableAndColumnsAddText();
+
+  String tableAndColumnsUpdateText();
+
+  String tableAndColumnsExternalLOBDialogTitle();
+
+  /********************************************
+   * Wizard Custom Views
    ********************************************/
 
   String customViewsUpdateMessage();
@@ -643,8 +670,8 @@ public interface ClientMessages extends Messages {
 
   String customViewsDialogCancel();
 
-  /* *****************************************
-   *          Wizard Export Options
+  /********************************************
+   * Wizard Export Options
    ********************************************/
   String wizardExportOptionsTitle();
 
