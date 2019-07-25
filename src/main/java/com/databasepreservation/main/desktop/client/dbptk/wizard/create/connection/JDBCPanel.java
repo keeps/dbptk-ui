@@ -150,8 +150,12 @@ public class JDBCPanel extends Composite {
           defaultTextBox.addStyleName("form-textbox");
           textBoxInputs.put(parameter.getName(), defaultTextBox);
           genericField = GenericField.createInstance(messages.connectionLabels(parameter.getName()), defaultTextBox);
-          if(parameter.isRequired())
+          if (parameter.getDefaultValue() != null) {
+            defaultTextBox.setText(parameter.getDefaultValue());
+          }
+          if (parameter.isRequired()) {
             defaultTextBox.getElement().setAttribute("required", "required");
+          }
           break;
     }
 

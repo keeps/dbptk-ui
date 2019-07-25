@@ -59,6 +59,7 @@ public class SSHTunnelPanel extends Composite {
     tunnelSSH.addValueChangeHandler(event -> {
       enable(event.getValue());
     });
+    proxyPort.setText("22");
   }
 
   private void enable(boolean value) {

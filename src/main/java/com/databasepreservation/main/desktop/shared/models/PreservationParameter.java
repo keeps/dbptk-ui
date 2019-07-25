@@ -14,6 +14,7 @@ public class PreservationParameter implements Serializable {
   private boolean hasArgument = false;
   private String inputType = null;
   private String exportOption = null;
+  private String defaultValue = null;
 
   public PreservationParameter() {
   }
@@ -83,6 +84,14 @@ public class PreservationParameter implements Serializable {
 
   public void setExportOption(String exportOption) {
     this.exportOption = exportOption;
+  }
+
+  public String getDefaultValue() {
+    return defaultValue;
+  }
+
+  public void setDefaultValue(String defaultValue) {
+    this.defaultValue = defaultValue;
   }
 
   @Override

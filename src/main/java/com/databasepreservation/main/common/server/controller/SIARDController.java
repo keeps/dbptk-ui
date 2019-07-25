@@ -353,6 +353,9 @@ public class SIARDController {
             for (Parameter param : importModuleParameters.getParameters()) {
               preservationParameter = new PreservationParameter(param.longName(), param.description(),
                 param.required(), param.hasArgument(), param.getInputType().name());
+              if (param.valueIfNotSet() != null) {
+                preservationParameter.setDefaultValue(param.valueIfNotSet());
+              }
               dbptkModule.addPreservationParameter(factory.getModuleName(), preservationParameter);
             }
 

@@ -62,13 +62,7 @@ public class HomePage extends Composite {
     btnCreate.setText(messages.createCardButton());
     btnCreate.addStyleName("btn btn-edit");
 
-    btnCreate.addClickHandler(new ClickHandler() {
-
-      @Override
-      public void onClick(ClickEvent event) {
-        HistoryManager.gotoCreateSIARD();
-      }
-    });
+    btnCreate.addClickHandler(event -> HistoryManager.gotoCreateSIARD());
 
     Button btnOpen = new Button();
     btnOpen.setText(messages.openCardButton());
