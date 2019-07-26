@@ -700,4 +700,9 @@ public interface ClientMessages extends Messages {
   String wizardSendToExportFormatBreadcrumb();
 
   String wizardSendToDBMSConnectionBreadcrumb();
+
+  String wizardSendToSIARDExportOptionsBreadcrumb();
+
+  String wizardSendToMetadataExportOptionsBreadcrumb();
+
 }

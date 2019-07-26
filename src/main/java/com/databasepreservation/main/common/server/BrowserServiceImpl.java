@@ -1,9 +1,7 @@
 package com.databasepreservation.main.common.server;
 
-import java.util.HashMap;
 import java.util.List;
 
-import com.databasepreservation.main.common.shared.SIARDProgressData;
 import org.roda.core.data.exceptions.AuthenticationDeniedException;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.roda.core.data.exceptions.GenericException;
@@ -24,6 +22,7 @@ import com.databasepreservation.main.common.client.BrowserService;
 import com.databasepreservation.main.common.server.controller.SIARDController;
 import com.databasepreservation.main.common.server.controller.UserLoginController;
 import com.databasepreservation.main.common.server.index.utils.SolrUtils;
+import com.databasepreservation.main.common.shared.ProgressData;
 import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
@@ -250,6 +249,11 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
   }
 
   @Override
+  public DBPTKModule getDatabaseExportModules() throws GenericException {
+    return SIARDController.getDatabaseExportModules();
+  }
+
+  @Override
   public DBPTKModule getSIARDExportModule(String moduleName) throws GenericException {
     return SIARDController.getSIARDExportModule(moduleName);
   }
@@ -279,6 +283,20 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
   }
 
   @Override
+  public boolean migrateToDBMS(String databaseUUID, String siard, ConnectionParameters connectionParameters)
+    throws GenericException {
+    return SIARDController.migrateToDBMS(databaseUUID, siard, connectionParameters);
+  }
+
+  @Override
+  public boolean migrateToSIARD(String databaseUUID, String siardPath, ConnectionParameters connectionParameters,
+    TableAndColumnsParameters tableAndColumnsParameters, ExportOptionsParameters exportOptionsParameters,
+    MetadataExportOptionsParameters metadataExportOptions) throws GenericException {
+    return SIARDController.migrateToSIARD(databaseUUID, siardPath, connectionParameters, tableAndColumnsParameters,
+      exportOptionsParameters, metadataExportOptions);
+  }
+
+  @Override
   public String generateUUID() {
     return SolrUtils.randomUUID();
   }
@@ -290,7 +308,7 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
   }
 
   @Override
-  public SIARDProgressData getProgressData(String uuid) {
-    return SIARDProgressData.getInstance(uuid);
+  public ProgressData getProgressData(String uuid) {
+    return ProgressData.getInstance(uuid);
   }
 }

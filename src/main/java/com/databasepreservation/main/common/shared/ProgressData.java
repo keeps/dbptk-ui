@@ -1,5 +1,7 @@
 package com.databasepreservation.main.common.shared;
 
+import com.google.gwt.core.client.GWT;
+
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Objects;
@@ -7,9 +9,8 @@ import java.util.Objects;
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-public class SIARDProgressData implements Serializable {
+public class ProgressData implements Serializable {
 
-  private String uuid;
   private long processedRows;
   private long totalRows;
   private long processedTables;
@@ -23,24 +24,16 @@ public class SIARDProgressData implements Serializable {
   private boolean finished = false;
   private boolean databaseStructureRetrieved = false;
 
-  private static HashMap<String, SIARDProgressData> instances = new HashMap<>();
+  private static HashMap<String, ProgressData> instances = new HashMap<>();
 
-  public static SIARDProgressData getInstance(String UUID) {
-    if (instances.get(UUID) == null) {
-      instances.put(UUID, new SIARDProgressData());
+  public static ProgressData getInstance(String uuid) {
+    if (instances.get(uuid) == null) {
+      instances.put(uuid, new ProgressData());
     }
-    return instances.get(UUID);
+    return instances.get(uuid);
   }
 
-  public SIARDProgressData() {
-  }
-
-  public String getUuid() {
-    return uuid;
-  }
-
-  public void setUuid(String uuid) {
-    this.uuid = uuid;
+  public ProgressData() {
   }
 
   public long getProcessedRows() {
@@ -146,17 +139,47 @@ public class SIARDProgressData implements Serializable {
       return true;
     if (o == null || getClass() != o.getClass())
       return false;
-    SIARDProgressData that = (SIARDProgressData) o;
+    ProgressData that = (ProgressData) o;
     return getProcessedRows() == that.getProcessedRows() && getTotalRows() == that.getTotalRows()
       && getProcessedTables() == that.getProcessedTables() && getTotalTables() == that.getTotalTables()
       && getProcessedSchemas() == that.getProcessedSchemas() && getTotalSchemas() == that.getTotalSchemas()
-      && Objects.equals(getUuid(), that.getUuid()) && Objects.equals(getCurrentTableName(), that.getCurrentTableName())
+      && Objects.equals(getCurrentTableName(), that.getCurrentTableName())
       && Objects.equals(getCurrentSchemaName(), that.getCurrentSchemaName());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(getUuid(), getProcessedRows(), getTotalRows(), getProcessedTables(), getTotalTables(),
+    return Objects.hash(getProcessedRows(), getTotalRows(), getProcessedTables(), getTotalTables(),
       getProcessedSchemas(), getTotalSchemas(), getCurrentTableName(), getCurrentSchemaName());
+  }
+
+  public void clear() {
+    processedRows = -1;
+    totalRows = -1;
+    processedTables = -1;
+    totalTables = -1;
+    processedSchemas = -1;
+    totalSchemas = -1;
+    currentProcessedTableRows = -1;
+    currentTableTotalRows = -1;
+    currentTableName = "";
+    currentSchemaName = "";
+    finished = false;
+    databaseStructureRetrieved = false;
+  }
+
+  public void reset() {
+    processedRows = 0;
+    totalRows = 0;
+    processedTables = 0;
+    totalTables = 0;
+    processedSchemas = 0;
+    totalSchemas = 0;
+    currentProcessedTableRows = 0;
+    currentTableTotalRows = 0;
+    currentTableName = "";
+    currentSchemaName = "";
+    finished = false;
+    databaseStructureRetrieved = false;
   }
 }

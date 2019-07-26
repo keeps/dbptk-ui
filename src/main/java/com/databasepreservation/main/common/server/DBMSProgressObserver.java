@@ -2,24 +2,27 @@ package com.databasepreservation.main.common.server;
 
 import com.databasepreservation.common.ModuleObserver;
 import com.databasepreservation.main.common.shared.ProgressData;
+import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.model.data.Row;
 import com.databasepreservation.model.structure.DatabaseStructure;
 import com.databasepreservation.model.structure.SchemaStructure;
 import com.databasepreservation.model.structure.TableStructure;
+import com.google.gwt.core.client.GWT;
+import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-public class SIARDProgressObserver implements ModuleObserver {
+public class DBMSProgressObserver implements ModuleObserver {
   private ProgressData progressData;
 
-  public SIARDProgressObserver(String UUID) {
+  public DBMSProgressObserver(String UUID) {
     progressData = ProgressData.getInstance(UUID);
   }
 
   @Override
   public void notifyOpenDatabase() {
-    progressData.setDatabaseStructureRetrieved(false);
+    progressData.reset();
   }
 
   @Override
@@ -38,7 +41,6 @@ public class SIARDProgressObserver implements ModuleObserver {
   @Override
   public void notifyOpenSchema(DatabaseStructure databaseStructure, SchemaStructure schemaStructure,
     long completedSchemas, long completedTablesInSchema) {
-
     progressData.setCurrentSchemaName(schemaStructure.getName());
     progressData.setProcessedSchemas(completedSchemas);
     progressData.setTotalTables(schemaStructure.getTables().size());
@@ -55,7 +57,7 @@ public class SIARDProgressObserver implements ModuleObserver {
   @Override
   public void notifyTableProgressSparse(DatabaseStructure databaseStructure, TableStructure tableStructure,
     long completedRows, long totalRows) {
-    progressData.setProcessedRows(completedRows);
+    progressData.setCurrentProcessedTableRows(completedRows);
   }
 
   @Override

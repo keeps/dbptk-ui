@@ -27,6 +27,7 @@ import org.yaml.snakeyaml.Yaml;
 
 import com.databasepreservation.DatabaseMigration;
 import com.databasepreservation.SIARDEdition;
+import com.databasepreservation.main.common.server.DBMSProgressObserver;
 import com.databasepreservation.main.common.server.ProgressObserver;
 import com.databasepreservation.main.common.server.SIARDProgressObserver;
 import com.databasepreservation.main.common.server.ViewerConfiguration;
@@ -145,6 +146,122 @@ public class SIARDController {
     return false;
   }
 
+  public static boolean migrateToSIARD(String databaseUUID, String siard, ConnectionParameters connectionParameters,
+    TableAndColumnsParameters tableAndColumnsParameters, ExportOptionsParameters exportOptionsParameters,
+    MetadataExportOptionsParameters metadataExportOptionsParameters) throws GenericException {
+    File f = new File(siard);
+    if (f.exists() && !f.isDirectory()) {
+      LOGGER.info("starting to convert database");
+      Path reporterPath = ViewerConfiguration.getInstance().getReportPath(databaseUUID).toAbsolutePath();
+      try (
+        Reporter reporter = new Reporter(reporterPath.getParent().toString(), reporterPath.getFileName().toString())) {
+        DatabaseMigration databaseMigration = DatabaseMigration.newInstance();
+
+        databaseMigration.filterFactories(new ArrayList<>());
+
+        // BUILD Import Module
+        DatabaseModuleFactory importModuleFactory = getDatabaseImportModuleFactory("siard-2");
+
+        databaseMigration.importModule(importModuleFactory);
+        databaseMigration.importModuleParameter("file", siard);
+
+        // BUILD Export Module
+        final DatabaseModuleFactory databaseExportModuleFactory = getDatabaseExportModuleFactory(
+          exportOptionsParameters.getSIARDVersion());
+
+        databaseMigration.exportModule(databaseExportModuleFactory);
+
+        for (Map.Entry<String, String> entry : exportOptionsParameters.getParameters().entrySet()) {
+          if (!entry.getValue().equals("false")) {
+            LOGGER.info("Export Options - " + entry.getKey() + "->" + entry.getValue());
+            databaseMigration.exportModuleParameter(entry.getKey(), entry.getValue());
+          }
+        }
+        for (Map.Entry<String, String> entry : metadataExportOptionsParameters.getValues().entrySet()) {
+          LOGGER.info("Metadata Export Options - " + entry.getKey() + "->" + entry.getValue());
+          databaseMigration.exportModuleParameter(entry.getKey(), entry.getValue());
+        }
+        try {
+          final String pathToTableFilter = constructTableFilter(tableAndColumnsParameters);
+          LOGGER.info("Path to table-filter: " + pathToTableFilter);
+          databaseMigration.exportModuleParameter("table-filter", pathToTableFilter);
+        } catch (GenericException e) {
+          throw new GenericException(e);
+        }
+
+        databaseMigration.filter(new ObservableFilter(new SIARDProgressObserver(databaseUUID)));
+
+        databaseMigration.reporter(reporter);
+
+        long startTime = System.currentTimeMillis();
+
+        databaseMigration.migrate();
+
+        long duration = System.currentTimeMillis() - startTime;
+        LOGGER.info("Conversion time {}m {}s", duration / 60000, duration % 60000 / 1000);
+        return true;
+      } catch (IOException e) {
+        throw new GenericException("Could not initialize conversion modules", e);
+      } catch (ModuleException | RuntimeException e) {
+        LOGGER.info("" + e.getCause());
+        throw new GenericException("Could not convert the database", e);
+      }
+    }
+    return false;
+  }
+
+  public static boolean migrateToDBMS(String databaseUUID, String siard, ConnectionParameters connectionParameters)
+    throws GenericException {
+    File f = new File(siard);
+    if (f.exists() && !f.isDirectory()) {
+      LOGGER.info("starting to convert database");
+      Path reporterPath = ViewerConfiguration.getInstance().getReportPath(databaseUUID).toAbsolutePath();
+      try (
+        Reporter reporter = new Reporter(reporterPath.getParent().toString(), reporterPath.getFileName().toString())) {
+        DatabaseMigration databaseMigration = DatabaseMigration.newInstance();
+
+        databaseMigration.filterFactories(new ArrayList<>());
+
+        // BUILD Import Module
+        DatabaseModuleFactory importModuleFactory = getDatabaseImportModuleFactory("siard-2");
+
+        databaseMigration.importModule(importModuleFactory);
+        databaseMigration.importModuleParameter("file", siard);
+
+        setupSSHConfiguration(databaseMigration, connectionParameters);
+
+        // BUILD Export Module
+        final DatabaseModuleFactory exportModuleFactory = getDatabaseExportModuleFactory(
+          connectionParameters.getModuleName());
+        for (Map.Entry<String, String> entry : connectionParameters.getJDBCConnectionParameters().getConnection()
+          .entrySet()) {
+          LOGGER.info("Connection Options - " + entry.getKey() + "->" + entry.getValue());
+          databaseMigration.exportModuleParameter(entry.getKey(), entry.getValue());
+        }
+        databaseMigration.exportModule(exportModuleFactory);
+
+        databaseMigration.filter(new ObservableFilter(new DBMSProgressObserver(databaseUUID)));
+
+        databaseMigration.reporter(reporter);
+
+        long startTime = System.currentTimeMillis();
+
+        databaseMigration.migrate();
+
+        long duration = System.currentTimeMillis() - startTime;
+        LOGGER.info("Conversion time {}m {}s", duration / 60000, duration % 60000 / 1000);
+        return true;
+      } catch (IOException e) {
+        throw new GenericException("Could not initialize conversion modules", e);
+      } catch (ModuleException | RuntimeException e) {
+        LOGGER.info("" + e.getCause());
+        throw new GenericException("Could not convert the database", e);
+      }
+    }
+
+    return false;
+  }
+
   public static boolean createSIARD(String UUID, ConnectionParameters connectionParameters,
     TableAndColumnsParameters tableAndColumnsParameters, CustomViewsParameters customViewsParameters,
     ExportOptionsParameters exportOptionsParameters, MetadataExportOptionsParameters metadataExportOptionsParameters)
@@ -198,8 +315,10 @@ public class SIARDController {
       databaseMigration.exportModule(databaseExportModuleFactory);
 
       for (Map.Entry<String, String> entry : exportOptionsParameters.getParameters().entrySet()) {
-        LOGGER.info("Export Options - " + entry.getKey() + "->" + entry.getValue());
-        databaseMigration.exportModuleParameter(entry.getKey(), entry.getValue());
+        if (!entry.getValue().equals("false")) {
+          LOGGER.info("Export Options - " + entry.getKey() + "->" + entry.getValue());
+          databaseMigration.exportModuleParameter(entry.getKey(), entry.getValue());
+        }
       }
       for (Map.Entry<String, String> entry : metadataExportOptionsParameters.getValues().entrySet()) {
         LOGGER.info("Metadata Export Options - " + entry.getKey() + "->" + entry.getValue());
@@ -337,43 +456,57 @@ public class SIARDController {
     return dbptkModule;
   }
 
-  public static DBPTKModule getDatabaseImportModules() throws GenericException {
+  public static DBPTKModule getDatabaseExportModules() throws GenericException {
     DBPTKModule dbptkModule = new DBPTKModule();
-    PreservationParameter preservationParameter;
-
     Set<DatabaseModuleFactory> databaseModuleFactories = ReflectionUtils.collectDatabaseModuleFactories();
-
     for (DatabaseModuleFactory factory : databaseModuleFactories) {
-      if (factory.isEnabled()) {
-        if (factory.producesImportModules()) {
-
-          final Parameters importModuleParameters;
-          try {
-            importModuleParameters = factory.getConnectionParameters();
-            for (Parameter param : importModuleParameters.getParameters()) {
-              preservationParameter = new PreservationParameter(param.longName(), param.description(),
-                param.required(), param.hasArgument(), param.getInputType().name());
-              if (param.valueIfNotSet() != null) {
-                preservationParameter.setDefaultValue(param.valueIfNotSet());
-              }
-              dbptkModule.addPreservationParameter(factory.getModuleName(), preservationParameter);
-            }
-
-            for (ParameterGroup pg : importModuleParameters.getGroups()) {
-              for (Parameter param : pg.getParameters()) {
-                preservationParameter = new PreservationParameter(param.longName(), param.description(),
-                  param.required(), param.hasArgument(), param.getInputType().name());
-                dbptkModule.addPreservationParameter(factory.getModuleName(), preservationParameter);
-              }
-            }
-          } catch (UnsupportedModuleException e) {
-            throw new GenericException(e);
-          }
+      if (!factory.getModuleName().equals("list-tables")) {
+        if (factory.isEnabled() && factory.producesExportModules()) {
+          getDatabaseModulesParameters(factory, dbptkModule);
         }
       }
     }
-
     return dbptkModule;
+  }
+
+  public static DBPTKModule getDatabaseImportModules() throws GenericException {
+    DBPTKModule dbptkModule = new DBPTKModule();
+    Set<DatabaseModuleFactory> databaseModuleFactories = ReflectionUtils.collectDatabaseModuleFactories();
+    for (DatabaseModuleFactory factory : databaseModuleFactories) {
+      if (factory.isEnabled()) {
+        if (factory.producesImportModules()) {
+          getDatabaseModulesParameters(factory, dbptkModule);
+        }
+      }
+    }
+    return dbptkModule;
+  }
+
+  private static void getDatabaseModulesParameters(DatabaseModuleFactory factory, DBPTKModule dbptkModule)
+    throws GenericException {
+    PreservationParameter preservationParameter;
+    final Parameters parameters;
+    try {
+      parameters = factory.getConnectionParameters();
+      for (Parameter param : parameters.getParameters()) {
+        preservationParameter = new PreservationParameter(param.longName(), param.description(), param.required(),
+          param.hasArgument(), param.getInputType().name());
+        if (param.valueIfNotSet() != null) {
+          preservationParameter.setDefaultValue(param.valueIfNotSet());
+        }
+        dbptkModule.addPreservationParameter(factory.getModuleName(), preservationParameter);
+      }
+
+      for (ParameterGroup pg : parameters.getGroups()) {
+        for (Parameter param : pg.getParameters()) {
+          preservationParameter = new PreservationParameter(param.longName(), param.description(), param.required(),
+            param.hasArgument(), param.getInputType().name());
+          dbptkModule.addPreservationParameter(factory.getModuleName(), preservationParameter);
+        }
+      }
+    } catch (UnsupportedModuleException e) {
+      throw new GenericException(e);
+    }
   }
 
   public static String loadMetadataFromLocal(String localPath) throws GenericException {

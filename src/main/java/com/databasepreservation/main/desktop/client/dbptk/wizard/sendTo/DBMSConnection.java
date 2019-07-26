@@ -68,11 +68,11 @@ public class DBMSConnection extends WizardPanel<ConnectionParameters> {
 
     JDBCListConnections.add(spinner);
 
-    BrowserService.Util.getInstance().getDatabaseImportModules(new DefaultAsyncCallback<DBPTKModule>() {
+    BrowserService.Util.getInstance().getDatabaseExportModules(new DefaultAsyncCallback<DBPTKModule>() {
       @Override
       public void onSuccess(DBPTKModule result) {
-        connectionSidebar = ConnectionSidebar.getInstance(messages.menuSidebarDatabases(),
-          FontAwesomeIconManager.DATABASE, result.getDBMSConnections(), HistoryManager.ROUTE_SEND_TO_LIVE_DBMS, databaseUUID);
+        connectionSidebar = ConnectionSidebar.getInstance(databaseUUID, messages.menuSidebarDatabases(),
+          FontAwesomeIconManager.DATABASE, result.getDBMSConnections(), HistoryManager.ROUTE_SEND_TO_LIVE_DBMS);
 
         JDBCListConnections.add(connectionSidebar);
         leftSideContainer.removeStyleName("loading-sidebar");

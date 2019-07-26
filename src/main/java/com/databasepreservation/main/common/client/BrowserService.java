@@ -1,10 +1,7 @@
 package com.databasepreservation.main.common.client;
 
-import java.util.HashMap;
 import java.util.List;
 
-import com.databasepreservation.main.common.shared.SIARDProgressData;
-import com.databasepreservation.main.desktop.client.dbptk.wizard.create.Connection;
 import org.roda.core.data.exceptions.AuthenticationDeniedException;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.roda.core.data.exceptions.GenericException;
@@ -18,6 +15,7 @@ import org.roda.core.data.v2.index.sort.Sorter;
 import org.roda.core.data.v2.index.sublist.Sublist;
 import org.roda.core.data.v2.user.User;
 
+import com.databasepreservation.main.common.shared.ProgressData;
 import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
@@ -119,6 +117,8 @@ public interface BrowserService extends RemoteService {
 
   DBPTKModule getDatabaseImportModules() throws GenericException;
 
+  DBPTKModule getDatabaseExportModules() throws GenericException;
+
   DBPTKModule getSIARDExportModule(String moduleName) throws GenericException;
 
   DBPTKModule getSIARDExportModules() throws GenericException;
@@ -132,10 +132,17 @@ public interface BrowserService extends RemoteService {
     ExportOptionsParameters exportOptionsParameters, MetadataExportOptionsParameters metadataExportOptionsParameters)
     throws GenericException;
 
+  boolean migrateToDBMS(String databaseUUID, String siard, ConnectionParameters connectionParameters)
+    throws GenericException;
+
+  boolean migrateToSIARD(String databaseUUID, String siardPath, ConnectionParameters connectionParameters,
+    TableAndColumnsParameters tableAndColumnsParameters, ExportOptionsParameters exportOptionsParameters,
+    MetadataExportOptionsParameters metadataExportOptions) throws GenericException;
+
   String generateUUID();
 
   ViewerMetadata updateMetadataInformation(ViewerMetadata metadata, ViewerSIARDBundle bundleSiard, String databaseUUID,
     String path) throws GenericException;
 
-  SIARDProgressData getProgressData(String uuid);
+  ProgressData getProgressData(String uuid);
 }

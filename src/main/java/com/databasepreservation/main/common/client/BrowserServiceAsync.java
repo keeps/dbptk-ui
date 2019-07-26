@@ -1,9 +1,7 @@
 package com.databasepreservation.main.common.client;
 
-import java.util.HashMap;
 import java.util.List;
 
-import com.databasepreservation.main.common.shared.SIARDProgressData;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.RODAException;
 import org.roda.core.data.exceptions.RequestNotValidException;
@@ -13,6 +11,7 @@ import org.roda.core.data.v2.index.sort.Sorter;
 import org.roda.core.data.v2.index.sublist.Sublist;
 import org.roda.core.data.v2.user.User;
 
+import com.databasepreservation.main.common.shared.ProgressData;
 import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
@@ -121,6 +120,8 @@ public interface BrowserServiceAsync {
 
   void getDatabaseImportModules(AsyncCallback<DBPTKModule> async);
 
+  void getDatabaseExportModules(AsyncCallback<DBPTKModule> async);
+
   void getSIARDExportModules(AsyncCallback<DBPTKModule> async);
 
   void getSIARDExportModule(String moduleName, AsyncCallback<DBPTKModule> async);
@@ -133,10 +134,17 @@ public interface BrowserServiceAsync {
     CustomViewsParameters customViewsParameters, ExportOptionsParameters exportOptionsParameters,
     MetadataExportOptionsParameters metadataExportOptionsParameters, AsyncCallback<Boolean> async);
 
+  void migrateToDBMS(String databaseUUID, String siard, ConnectionParameters connectionParameters,
+    AsyncCallback<Boolean> async);
+
+  void migrateToSIARD(String databaseUUID, String siardPath, ConnectionParameters connectionParameters,
+    TableAndColumnsParameters tableAndColumnsParameters, ExportOptionsParameters exportOptionsParameters,
+    MetadataExportOptionsParameters metadataExportOptionsParameters, AsyncCallback<Boolean> async);
+
   void generateUUID(AsyncCallback<String> async);
 
   void updateMetadataInformation(ViewerMetadata metadata, ViewerSIARDBundle bundleSiard, String databaseUUID,
     String path, AsyncCallback<ViewerMetadata> async);
 
-  void getProgressData(String uuid, AsyncCallback<SIARDProgressData> async);
+  void getProgressData(String uuid, AsyncCallback<ProgressData> async);
 }

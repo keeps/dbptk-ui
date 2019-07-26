@@ -50,14 +50,14 @@ public class Connection extends WizardPanel<ConnectionParameters> {
 
   private static Connection instance = null;
 
-  public static Connection getInstance() {
+  public static Connection getInstance(String databaseUUID) {
     if (instance == null) {
-      instance = new Connection();
+      instance = new Connection(databaseUUID);
     }
     return instance;
   }
 
-  private Connection() {
+  private Connection(String databaseUUID) {
     initWidget(binder.createAndBindUi(this));
 
     CreateWizardManager createWizardManager = CreateWizardManager.getInstance();
@@ -73,7 +73,7 @@ public class Connection extends WizardPanel<ConnectionParameters> {
     BrowserService.Util.getInstance().getDatabaseImportModules(new DefaultAsyncCallback<DBPTKModule>() {
       @Override
       public void onSuccess(DBPTKModule result) {
-        connectionSidebar = ConnectionSidebar.getInstance(messages.menuSidebarDatabases(),
+        connectionSidebar = ConnectionSidebar.getInstance(databaseUUID, messages.menuSidebarDatabases(),
           FontAwesomeIconManager.DATABASE, result.getDBMSConnections(), HistoryManager.ROUTE_CREATE_SIARD);
 
         JDBCListConnections.add(connectionSidebar);

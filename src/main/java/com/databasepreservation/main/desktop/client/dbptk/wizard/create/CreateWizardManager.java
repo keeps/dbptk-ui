@@ -80,10 +80,16 @@ public class CreateWizardManager extends Composite {
   private void init() {
     updateButtons();
     updateBreadcrumb();
-    Connection connection = Connection.getInstance();
-    wizardContent.clear();
-    wizardInstances.add(0, connection);
-    wizardContent.add(connection);
+
+    BrowserService.Util.getInstance().generateUUID(new DefaultAsyncCallback<String>() {
+      @Override
+      public void onSuccess(String result) {
+        Connection connection = Connection.getInstance(result);
+        wizardContent.clear();
+        wizardInstances.add(0, connection);
+        wizardContent.add(connection);
+      }
+    });
   }
 
   private CreateWizardManager() {
@@ -279,8 +285,10 @@ public class CreateWizardManager extends Composite {
     BrowserService.Util.getInstance().generateUUID(new DefaultAsyncCallback<String>() {
       @Override
       public void onSuccess(String result) {
-        ProgressBarPanel progressBarPanel = ProgressBarPanel.createInstance(result);
+        ProgressBarPanel progressBarPanel = ProgressBarPanel.getInstance(result);
         wizardContent.add(progressBarPanel);
+
+        final String uuid = result;
 
         BrowserService.Util.getInstance().createSIARD(result, connectionParameters, tableAndColumnsParameters,
           customViewsParameters, exportOptionsParameters, metadataExportOptionsParameters,
@@ -293,6 +301,7 @@ public class CreateWizardManager extends Composite {
                 public void onSuccess(String result) {
                   clear();
                   instance = null;
+                  ProgressBarPanel.getInstance(uuid).clear(uuid);
                   HistoryManager.gotoSIARDInfo(result);
                 }
               });

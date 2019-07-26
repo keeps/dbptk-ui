@@ -1,7 +1,7 @@
 package com.databasepreservation.main.desktop.client.dbptk.wizard;
 
 import com.databasepreservation.main.common.client.BrowserService;
-import com.databasepreservation.main.common.shared.SIARDProgressData;
+import com.databasepreservation.main.common.shared.ProgressData;
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
 import com.databasepreservation.main.common.shared.client.common.Progressbar;
 import com.google.gwt.core.client.GWT;
@@ -16,6 +16,8 @@ import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
 
+import java.util.HashMap;
+
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
@@ -23,10 +25,6 @@ public class ProgressBarPanel extends Composite {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
 
   interface ProgressBarPanelUiBinder extends UiBinder<Widget, ProgressBarPanel> {
-  }
-
-  public static ProgressBarPanel createInstance(String uuid) {
-    return new ProgressBarPanel(uuid);
   }
 
   private static ProgressBarPanelUiBinder uiBinder = GWT.create(ProgressBarPanelUiBinder.class);
@@ -47,7 +45,16 @@ public class ProgressBarPanel extends Composite {
   @UiField
   Label title, subTitle;
 
+  private static HashMap<String, ProgressBarPanel> instances = new HashMap<>();
   private final String uuid;
+
+  public static ProgressBarPanel getInstance(String uuid) {
+    if (instances.get(uuid) == null) {
+      instances.put(uuid, new ProgressBarPanel(uuid));
+    }
+
+    return instances.get(uuid);
+  }
 
   private ProgressBarPanel(String uuid) {
     initWidget(uiBinder.createAndBindUi(this));
@@ -58,8 +65,16 @@ public class ProgressBarPanel extends Composite {
   }
 
   private void init() {
-    stopUpdating();
-    autoUpdateTimer.scheduleRepeating(1000);
+    BrowserService.Util.getInstance().getProgressData(uuid, new DefaultAsyncCallback<ProgressData>() {
+      @Override
+      public void onSuccess(ProgressData result) {
+        result.reset();
+        progressBar.setCurrent(0);
+        content.clear();
+        stopUpdating();
+        autoUpdateTimer.scheduleRepeating(1000);
+      }
+    });
   }
 
   @Override
@@ -68,21 +83,26 @@ public class ProgressBarPanel extends Composite {
     super.onAttach();
   }
 
+  public void clear(String uuid) {
+    progressBar.setCurrent(0);
+    content.clear();
+    instances.put(uuid, null);
+  }
+
   private void update() {
-    BrowserService.Util.getInstance().getProgressData(uuid, new DefaultAsyncCallback<SIARDProgressData>() {
+    BrowserService.Util.getInstance().getProgressData(uuid, new DefaultAsyncCallback<ProgressData>() {
       @Override
-      public void onSuccess(SIARDProgressData result) {
+      public void onSuccess(ProgressData result) {
         update(result);
       }
     });
   }
 
-  private void update(SIARDProgressData progressData) {
-    int currentGlobalPercent = new Double(
-      ((progressData.getProcessedRows() * 1.0D) / progressData.getTotalRows()) * 100).intValue();
-    progressBar.setCurrent(currentGlobalPercent);
-
+  private void update(ProgressData progressData) {
     if (progressData.isDatabaseStructureRetrieved()) {
+      int currentGlobalPercent = new Double(
+          ((progressData.getProcessedRows() * 1.0D) / progressData.getTotalRows()) * 100).intValue();
+      progressBar.setCurrent(currentGlobalPercent);
 
       final String totalTablesPercentage = buildPercentageMessage(messages.progressBarPanelTables(),
         progressData.getProcessedTables(), progressData.getTotalTables());

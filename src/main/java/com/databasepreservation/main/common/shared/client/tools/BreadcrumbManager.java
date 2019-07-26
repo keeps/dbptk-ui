@@ -460,4 +460,20 @@ public class BreadcrumbManager {
             + SafeHtmlUtils.htmlEscape(" " + messages.wizardSendToDBMSConnectionBreadcrumb()))));
     return items;
   }
+
+  public static List<BreadcrumbItem> forSIARDExportOptionsSenToWM(String databaseUUID) {
+    List<BreadcrumbItem> items = forSIARDMainPage(databaseUUID);
+    items.add(
+        new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.GLOBE)
+            + SafeHtmlUtils.htmlEscape(" " + messages.wizardSendToSIARDExportOptionsBreadcrumb()))));
+    return items;
+  }
+
+  public static List<BreadcrumbItem> forMetadataExportOptionsSendToWM(String databaseUUID) {
+    List<BreadcrumbItem> items = forSIARDMainPage(databaseUUID);
+    items.add(
+        new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.GLOBE)
+            + SafeHtmlUtils.htmlEscape(" " + messages.wizardSendToMetadataExportOptionsBreadcrumb()))));
+    return items;
+  }
 }

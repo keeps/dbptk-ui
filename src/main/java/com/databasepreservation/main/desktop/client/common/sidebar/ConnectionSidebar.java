@@ -40,25 +40,21 @@ public class ConnectionSidebar extends Composite {
   @UiField
   FlowPanel sidebarGroup;
 
-  public static ConnectionSidebar getInstance(String headerText, String headerIcon, String itemIcon,
-    DBPTKModule items, String targetHistoryToken, String databaseUUID) {
-    if (instances.get(headerText) == null) {
-      ConnectionSidebar instance = new ConnectionSidebar(headerText, headerIcon, itemIcon, items, targetHistoryToken, databaseUUID);
-      instances.put(headerText, instance);
+  public static ConnectionSidebar getInstance(String databaseUUID, String headerText, String headerIcon, String itemIcon,
+    DBPTKModule items, String targetHistoryToken) {
+    if (instances.get(databaseUUID) == null) {
+      ConnectionSidebar instance = new ConnectionSidebar(databaseUUID, headerText, headerIcon, itemIcon, items, targetHistoryToken);
+      instances.put(databaseUUID, instance);
     }
 
-    return instances.get(headerText);
+    return instances.get(databaseUUID);
   }
 
-  public static ConnectionSidebar getInstance(String headerText, String itemIcon, DBPTKModule dbptkModule, String targetHistoryToken) {
-    return ConnectionSidebar.getInstance(headerText, null, itemIcon, dbptkModule, targetHistoryToken, null);
+  public static ConnectionSidebar getInstance(String databaseUUID, String headerText, String itemIcon, DBPTKModule dbptkModule, String targetHistoryToken) {
+    return ConnectionSidebar.getInstance(databaseUUID, headerText, null, itemIcon, dbptkModule, targetHistoryToken);
   }
 
-  public static ConnectionSidebar getInstance(String headerText, String itemIcon, DBPTKModule dbptkModule, String targetHistoryToken, String databaseUUID) {
-    return ConnectionSidebar.getInstance(headerText, null, itemIcon, dbptkModule, targetHistoryToken, databaseUUID);
-  }
-
-  private ConnectionSidebar(String headerText, String headerIcon, String itemIcon, DBPTKModule dbptkModule, String targetHistoryToken, String databaseUUID) {
+  private ConnectionSidebar(String databaseUUID, String headerText, String headerIcon, String itemIcon, DBPTKModule dbptkModule, String targetHistoryToken) {
     this.headerText = headerText;
     this.headerIcon = headerIcon;
     this.itemIcon = itemIcon;
