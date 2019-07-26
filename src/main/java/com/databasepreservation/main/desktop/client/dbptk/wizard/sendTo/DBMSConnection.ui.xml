@@ -1,0 +1,14 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+
+    <g:FlowPanel addStyleNames="wizard-connection">
+        <g:FlowPanel addStyleNames="wrapper">
+            <g:FlowPanel ui:field="leftSideContainer" addStyleNames="left loading-sidebar">
+                <g:FlowPanel addStyleNames="block" ui:field="JDBCListConnections"/>
+            </g:FlowPanel>
+            <g:FlowPanel addStyleNames="right content">
+                <g:FlowPanel ui:field="connectionInputPanel" addStyleNames="connection-container block" />
+            </g:FlowPanel>
+        </g:FlowPanel>
+    </g:FlowPanel>
+</ui:UiBinder>

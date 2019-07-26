@@ -3,6 +3,7 @@ package com.databasepreservation.main.desktop.client.dbptk.wizard.create.diagram
 import static com.databasepreservation.main.desktop.client.common.sidebar.TableAndColumnsSidebar.TABLE_LINK;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerForeignKey;
@@ -29,13 +30,13 @@ import config.i18n.client.ClientMessages;
  */
 public class ErDiagram extends Composite {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
-  private static ErDiagram instance = null;
+  private static HashMap<String,ErDiagram> instances = new HashMap<>();
 
-  public static ErDiagram getInstance(ViewerMetadata metadata) {
-    if (instance == null) {
-      instance = new ErDiagram(metadata);
+  public static ErDiagram getInstance(String databaseUUID, ViewerMetadata metadata) {
+    if (instances.get(databaseUUID) == null) {
+      instances.put(databaseUUID, new ErDiagram(metadata));
     }
-    return instance;
+    return instances.get(databaseUUID);
   }
 
   interface ErDiagramUiBinder extends UiBinder<Widget, ErDiagram> {
@@ -72,7 +73,6 @@ public class ErDiagram extends Composite {
     initWidget(uiBinder.createAndBindUi(this));
 
     for(ViewerSchema schema : metadata.getSchemas()) {
-
       String schemaUUID = schema.getUUID();
 
       final SimplePanel diagram = new SimplePanel();
@@ -106,6 +106,7 @@ public class ErDiagram extends Composite {
           int minColumnsAndRowsBiggerThanZero = Integer.MAX_VALUE;
 
           for (ViewerTable viewerTable : schema.getTables()) {
+            GWT.log(viewerTable.getName());
             if (!viewerTable.getName().startsWith("VIEW_")) {
               VisNode visNode = new VisNode(viewerTable.getUUID(), viewerTable.getName());
 

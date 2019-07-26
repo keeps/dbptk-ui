@@ -401,14 +401,6 @@ public class BreadcrumbManager {
     return items;
   }
 
-  public static List<BreadcrumbItem> forExternalLOBSExportOptions() {
-    List<BreadcrumbItem> items = forHome();
-    items.add(
-        new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.GLOBE)
-            + SafeHtmlUtils.htmlEscape(" " + messages.createSIARDExternalLOBsOptions()))));
-    return items;
-  }
-
   public static List<BreadcrumbItem> forMetadataExportOptions() {
     List<BreadcrumbItem> items = forHome();
     items.add(
@@ -442,6 +434,30 @@ public class BreadcrumbManager {
     List<BreadcrumbItem> items = forHome();
     items.add(
         new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(SafeHtmlUtils.htmlEscape(" " + messages.createSIARD()))));
+    return items;
+  }
+
+  public static List<BreadcrumbItem> forTableAndColumnsSendToWM(final String databaseUUID) {
+    List<BreadcrumbItem> items = forSIARDMainPage(databaseUUID);
+    items.add(
+        new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.GLOBE)
+            + SafeHtmlUtils.htmlEscape(" " + messages.wizardSendToTableAndColumnsBreadcrumb()))));
+    return items;
+  }
+
+  public static List<BreadcrumbItem> forExportFormatSendToWM(String databaseUUID) {
+    List<BreadcrumbItem> items = forSIARDMainPage(databaseUUID);
+    items.add(
+        new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.GLOBE)
+            + SafeHtmlUtils.htmlEscape(" " + messages.wizardSendToExportFormatBreadcrumb()))));
+    return items;
+  }
+
+  public static List<BreadcrumbItem> forDBMSConnectionSendToWM(String databaseUUID) {
+    List<BreadcrumbItem> items = forSIARDMainPage(databaseUUID);
+    items.add(
+        new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.GLOBE)
+            + SafeHtmlUtils.htmlEscape(" " + messages.wizardSendToDBMSConnectionBreadcrumb()))));
     return items;
   }
 }

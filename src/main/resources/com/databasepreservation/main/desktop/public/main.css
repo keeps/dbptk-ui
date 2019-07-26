@@ -1721,3 +1721,34 @@ input[type="checkbox"]:checked:after {
     cursor: pointer;
     color: white;
 }
+
+/************************************************
+* SendTo Wizard - Export Format
+ ************************************************/
+.output-format {
+    box-sizing: border-box;
+    margin: 4rem;
+}
+
+.output-format-buttons {
+    position: absolute;
+    top: 50%;
+    right: 50%;
+    transform: translate(50%,-50%);
+}
+
+.output-format-buttons .btn {
+    margin: 4rem;
+    height: 200px;
+    width: 200px;
+    font-size: 30px;
+    text-align: center;
+}
+
+.output-format-buttons .btn::after{
+    position: relative;
+}
+
+.btn-table:after {
+    content: "\f0ce";
+}

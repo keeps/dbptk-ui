@@ -41,29 +41,33 @@ public class ConnectionSidebar extends Composite {
   FlowPanel sidebarGroup;
 
   public static ConnectionSidebar getInstance(String headerText, String headerIcon, String itemIcon,
-    DBPTKModule items) {
+    DBPTKModule items, String targetHistoryToken, String databaseUUID) {
     if (instances.get(headerText) == null) {
-      ConnectionSidebar instance = new ConnectionSidebar(headerText, headerIcon, itemIcon, items);
+      ConnectionSidebar instance = new ConnectionSidebar(headerText, headerIcon, itemIcon, items, targetHistoryToken, databaseUUID);
       instances.put(headerText, instance);
     }
 
     return instances.get(headerText);
   }
 
-  public static ConnectionSidebar getInstance(String headerText, String itemIcon, DBPTKModule dbptkModule) {
-    return ConnectionSidebar.getInstance(headerText, null, itemIcon, dbptkModule);
+  public static ConnectionSidebar getInstance(String headerText, String itemIcon, DBPTKModule dbptkModule, String targetHistoryToken) {
+    return ConnectionSidebar.getInstance(headerText, null, itemIcon, dbptkModule, targetHistoryToken, null);
   }
 
-  private ConnectionSidebar(String headerText, String headerIcon, String itemIcon, DBPTKModule dbptkModule) {
+  public static ConnectionSidebar getInstance(String headerText, String itemIcon, DBPTKModule dbptkModule, String targetHistoryToken, String databaseUUID) {
+    return ConnectionSidebar.getInstance(headerText, null, itemIcon, dbptkModule, targetHistoryToken, databaseUUID);
+  }
+
+  private ConnectionSidebar(String headerText, String headerIcon, String itemIcon, DBPTKModule dbptkModule, String targetHistoryToken, String databaseUUID) {
     this.headerText = headerText;
     this.headerIcon = headerIcon;
     this.itemIcon = itemIcon;
     this.dbptkModule = dbptkModule;
     initWidget(uiBinder.createAndBindUi(this));
-    init();
+    init(targetHistoryToken, databaseUUID);
   }
 
-  private void init() {
+  private void init(String target, String databaseUUID) {
     if (headerIcon != null) {
       sidebarGroup.add(new SidebarItem(headerText).addIcon(headerIcon).setH5().setIndent0());
     } else {
@@ -73,8 +77,15 @@ public class ConnectionSidebar extends Composite {
     final TreeMap<String, ArrayList<PreservationParameter>> parameters = new TreeMap<>(dbptkModule.getParameters());
 
     for (String moduleName : parameters.keySet()) {
+      String targetHistoryToken = null;
+      if (target.equals(HistoryManager.ROUTE_SEND_TO_LIVE_DBMS)) {
+        targetHistoryToken = HistoryManager.linkToSendToWizardDBMSConnection(databaseUUID, HistoryManager.ROUTE_WIZARD_CONNECTION, moduleName);
+      } else if (target.equals(HistoryManager.ROUTE_CREATE_SIARD)) {
+        targetHistoryToken = HistoryManager.linkToCreateSIARD(HistoryManager.ROUTE_WIZARD_CONNECTION, moduleName);
+      }
+
       SidebarHyperlink sidebarHyperlink = new SidebarHyperlink(ToolkitModuleName2ViewerModuleName.transform(moduleName),
-        HistoryManager.linkToCreateSIARD(HistoryManager.ROUTE_WIZARD_CONNECTION, moduleName));
+        targetHistoryToken);
       sidebarHyperlink.addIcon(itemIcon).setH6().setIndent1();
       list.put(moduleName, sidebarHyperlink);
       sidebarGroup.add(sidebarHyperlink);

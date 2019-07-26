@@ -691,4 +691,13 @@ public interface ClientMessages extends Messages {
   String wizardProgressTitle();
 
   String wizardProgressSubTitle();
+
+  /*********************************************
+   * Send to Table & Columns
+   ********************************************/
+  String wizardSendToTableAndColumnsBreadcrumb();
+
+  String wizardSendToExportFormatBreadcrumb();
+
+  String wizardSendToDBMSConnectionBreadcrumb();
 }

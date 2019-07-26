@@ -19,6 +19,7 @@ import com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.table
 import com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.views.MetadataViewPanel;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.users.MetadataUsersPanel;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.create.CreateWizardManager;
+import com.databasepreservation.main.desktop.client.dbptk.wizard.sendTo.SendToWizardManager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -65,6 +66,26 @@ public class MainPanelDesktop extends Composite {
       Manage manage = Manage.getInstance();
       contentPanel.clear();
       contentPanel.add(manage);
+    } else if (HistoryManager.ROUTE_SEND_TO_LIVE_DBMS.equals(currentHistoryPath.get(0))) {
+      SendToWizardManager instance = SendToWizardManager.getInstance(currentHistoryPath.get(1));
+      contentPanel.clear();
+      if (currentHistoryPath.size() == 4) {
+        final String wizardPage = currentHistoryPath.get(2);
+        final String toSelect = currentHistoryPath.get(3);
+        instance.change(wizardPage, toSelect);
+      } else if (currentHistoryPath.size() == 5) {
+        final String wizardPage = currentHistoryPath.get(2);
+        final String toSelect = currentHistoryPath.get(3);
+        final String schemaUUID = currentHistoryPath.get(4);
+        instance.change(wizardPage, toSelect, schemaUUID);
+      } else if (currentHistoryPath.size() == 6) {
+        final String wizardPage = currentHistoryPath.get(2);
+        final String toSelect = currentHistoryPath.get(3);
+        final String schemaUUID = currentHistoryPath.get(4);
+        final String tableUUID = currentHistoryPath.get(5);
+        instance.change(wizardPage, toSelect, schemaUUID, tableUUID);
+      }
+      contentPanel.add(instance);
     } else if (HistoryManager.ROUTE_CREATE_SIARD.equals(currentHistoryPath.get(0))) {
       CreateWizardManager instance = CreateWizardManager.getInstance();
       contentPanel.clear();

@@ -8,7 +8,9 @@ import java.util.Map;
 
 import com.databasepreservation.main.common.client.BrowserService;
 import com.databasepreservation.main.common.shared.ViewerConstants;
+import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerColumn;
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSchema;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
@@ -24,6 +26,7 @@ import com.databasepreservation.main.common.shared.client.widgets.Toast;
 import com.databasepreservation.main.desktop.client.common.ComboBoxField;
 import com.databasepreservation.main.desktop.client.common.FileUploadField;
 import com.databasepreservation.main.desktop.client.common.GenericField;
+import com.databasepreservation.main.desktop.client.common.sidebar.TableAndColumnsSendToSidebar;
 import com.databasepreservation.main.desktop.client.common.sidebar.TableAndColumnsSidebar;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.create.diagram.ErDiagram;
@@ -80,6 +83,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
 
   private static HashMap<String, TableAndColumns> instances = new HashMap<>();
   private TableAndColumnsSidebar tableAndColumnsSidebar;
+  private TableAndColumnsSendToSidebar tableAndColumnsSendToSidebar;
   private ViewerMetadata metadata;
   private HashMap<String, MultipleSelectionTablePanel<ViewerColumn>> columns = new HashMap<>();
   private HashMap<String, MultipleSelectionTablePanel<ViewerTable>> tables = new HashMap<>();
@@ -89,6 +93,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
   private HashMap<String, ExternalLOBsParameter> externalLOBsParameters = new HashMap<>();
   private String currentTableUUID = null;
   private String currentBasePath = null;
+  private String databaseUUID;
   // false: "SELECT ALL"; true: "SELECT // NONE";
   private HashMap<String, Boolean> toggleSelectionTablesMap = new HashMap<>();
   private HashMap<String, Boolean> toggleSelectionViewsMap = new HashMap<>();
@@ -98,14 +103,47 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
   public static TableAndColumns getInstance(ConnectionParameters values) {
     final String urlConnection = values.getURLConnection();
     if (instances.get(urlConnection) == null) {
-      instances.put(urlConnection, new TableAndColumns(values.getModuleName(), values));
+      instances.put(urlConnection, new TableAndColumns(values));
     }
     return instances.get(urlConnection);
   }
 
-  private TableAndColumns(String moduleName, ConnectionParameters values) {
+  public static TableAndColumns getInstance(String databaseUUID) {
+    if (instances.get(databaseUUID) == null) {
+      instances.put(databaseUUID, new TableAndColumns(databaseUUID));
+    }
+
+    return instances.get(databaseUUID);
+  }
+
+  private TableAndColumns(String databaseUUID) {
     initWidget(binder.createAndBindUi(this));
 
+    this.databaseUUID = databaseUUID;
+    Widget spinner = new HTML(SafeHtmlUtils.fromSafeConstant(
+        "<div class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
+
+    content.add(spinner);
+
+    BrowserService.Util.getInstance().retrieve(databaseUUID, ViewerDatabase.class.getName(), databaseUUID, new DefaultAsyncCallback<IsIndexed>() {
+      @Override
+      public void onSuccess(IsIndexed result) {
+        ViewerDatabase database = (ViewerDatabase) result;
+        metadata = database.getMetadata();
+        tableAndColumnsSendToSidebar = TableAndColumnsSendToSidebar.newInstance(databaseUUID, metadata);
+        tableAndColumnsList.add(tableAndColumnsSendToSidebar);
+        initTables();
+
+        content.remove(spinner);
+        sideBarHighlighter(TableAndColumnsSendToSidebar.DATABASE_LINK,null,null);
+      }
+    });
+  }
+
+  private TableAndColumns(ConnectionParameters values) {
+    initWidget(binder.createAndBindUi(this));
+
+    databaseUUID = values.getURLConnection();
     Widget spinner = new HTML(SafeHtmlUtils.fromSafeConstant(
       "<div class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
 
@@ -130,14 +168,15 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
   @Override
   public void clear() {
     instances.clear();
-    columns.clear();
-    tables.clear();
-    views.clear();
+    if (columns != null) columns.clear();
+    if (tables != null) tables.clear();
+    if (views != null) views.clear();
     columns = null;
     tables = null;
     views = null;
     instances = new HashMap<>();
-    tableAndColumnsSidebar.selectNone();
+    if (tableAndColumnsSidebar != null) tableAndColumnsSidebar.selectNone();
+    if (tableAndColumnsSendToSidebar != null) tableAndColumnsSendToSidebar.selectNone();
   }
 
   @Override
@@ -190,6 +229,8 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
   public void sideBarHighlighter(String toSelect, String schemaUUID, String tableUUID) {
     panel.clear();
 
+    GWT.log("TO SELECT: " + toSelect);
+
     if (tableUUID != null) {
       title.setVisible(false);
       panel.add(getColumns(tableUUID));
@@ -215,9 +256,11 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
 
         panel.add(tabPanel);
     } else {
-      panel.add(ErDiagram.getInstance(metadata));
+      panel.add(ErDiagram.getInstance(databaseUUID, metadata));
     }
-    tableAndColumnsSidebar.select(toSelect);
+
+    if (tableAndColumnsSidebar != null) tableAndColumnsSidebar.select(toSelect);
+    if (tableAndColumnsSendToSidebar != null) tableAndColumnsSendToSidebar.select(toSelect);
   }
 
   private MultipleSelectionTablePanel<ViewerTable> getTable(String schemaUUID) {

@@ -1,5 +1,6 @@
 package com.databasepreservation.main.common.shared.client.tools;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -41,6 +42,8 @@ public class HistoryManager {
   public static final String ROUTE_WIZARD_EXPORT_SIARD_OPTIONS = "siard-export-options";
   public static final String ROUTE_WIZARD_EXPORT_EXT_OPTIONS = "external-lobs";
   public static final String ROUTE_WIZARD_EXPORT_METADATA_OPTIONS = "metadata-export-options";
+  public static final String ROUTE_SEND_TO_LIVE_DBMS = "send-to-live-dbms";
+  public static final String ROUTE_WIZARD_EXPORT_FORMAT = "export-format";
   public static final String ROUTE_SIARD_EDIT_METADATA = "metadata";
   public static final String ROUTE_SIARD_EDIT_METADATA_USERS = "users";
   public static final String ROUTE_VIEW = "view";
@@ -186,6 +189,16 @@ public class HistoryManager {
 
   public static void gotoSIARDEditMetadata(String databaseUUID) {
     List<String> params = Arrays.asList(ROUTE_SIARD_EDIT_METADATA, databaseUUID);
+    newHistory(params);
+  }
+
+  public static void gotoSendToLiveDBMS(String databaseUUID) {
+    List<String> params = Arrays.asList(ROUTE_SEND_TO_LIVE_DBMS, databaseUUID);
+    newHistory(params);
+  }
+
+  public static void gotoSendToLiveDBMSExportFormat(String databaseUUID) {
+    List<String> params = Arrays.asList(ROUTE_SEND_TO_LIVE_DBMS, databaseUUID, ROUTE_WIZARD_EXPORT_FORMAT);
     newHistory(params);
   }
 
@@ -359,7 +372,27 @@ public class HistoryManager {
     return createHistoryToken(Arrays.asList(ROUTE_CREATE_SIARD, ROUTE_WIZARD_CUSTOM_VIEWS, customViewID, ACTION_DELETE));
   }
 
-  public static String linkToHome() {
-    return createHistoryToken(Collections.singletonList(ROUTE_HOME));
+  public static String linkToSendToWizardTableAndColumnsShowTables(String toSelect, String databaseUUID, String tableUUID) {
+    return createHistoryToken(Arrays.asList(ROUTE_SEND_TO_LIVE_DBMS, databaseUUID, ROUTE_WIZARD_TABLES_COLUMNS, toSelect, tableUUID));
+  }
+
+  public static String linkToSendToWizardTableAndColumnsShowColumns(String toSelect, String databaseUUID, String schemaUUID, String tableUUID) {
+    return createHistoryToken(Arrays.asList(ROUTE_SEND_TO_LIVE_DBMS, databaseUUID, ROUTE_WIZARD_TABLES_COLUMNS, toSelect, schemaUUID, tableUUID));
+  }
+
+  public static String linkToSendToWizardTableAndColumnsShowViews(String toSelect, String databaseUUID, String schemaUUID, String viewUUID) {
+    return createHistoryToken(Arrays.asList(ROUTE_SEND_TO_LIVE_DBMS, databaseUUID, ROUTE_WIZARD_TABLES_COLUMNS, toSelect, schemaUUID, viewUUID));
+  }
+
+  public static String linkToSendToWizardTableAndColumnsShowERDiagram(String toSelect, String databaseUUID) {
+    return createHistoryToken(Arrays.asList(ROUTE_SEND_TO_LIVE_DBMS, databaseUUID, ROUTE_WIZARD_TABLES_COLUMNS, toSelect));
+  }
+
+  public static String linkToSendtoWizardExportFormat(String database_uuid) {
+    return createHistoryToken(Arrays.asList(ROUTE_SEND_TO_LIVE_DBMS, database_uuid, ROUTE_WIZARD_EXPORT_FORMAT));
+  }
+
+  public static String linkToSendToWizardDBMSConnection(String databaseUUID, String wizardPage, String moduleName) {
+    return createHistoryToken(Arrays.asList(ROUTE_SEND_TO_LIVE_DBMS, databaseUUID, wizardPage, moduleName));
   }
 }

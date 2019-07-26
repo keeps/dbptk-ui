@@ -79,10 +79,6 @@ public class SIARDMainPage extends Composite {
     BrowserService.Util.getInstance().retrieve(databaseUUID, ViewerDatabase.class.getName(), databaseUUID,
       new DefaultAsyncCallback<IsIndexed>() {
         @Override
-        public void onFailure(Throwable caught) {
-        }
-
-        @Override
         public void onSuccess(IsIndexed result) {
           database = (ViewerDatabase) result;
           populateMetadataInfo();
@@ -105,13 +101,16 @@ public class SIARDMainPage extends Composite {
     btnEditMetadata.setText(messages.editMetadata());
     btnEditMetadata.addStyleName("btn btn-link-info");
     btnEditMetadata.addClickHandler(clickEvent -> {
-        JavascriptUtils.log(database.getUUID());
         HistoryManager.gotoSIARDEditMetadata(database.getUUID());
     });
 
     Button btnSendToLiveDBMS = new Button();
     btnSendToLiveDBMS.setText(messages.sendToLiveDBMS());
     btnSendToLiveDBMS.addStyleName("btn btn-link-info");
+
+    btnSendToLiveDBMS.addClickHandler(event -> {
+      HistoryManager.gotoSendToLiveDBMSExportFormat(database.getUUID());
+    });
 
     MetadataField path = MetadataField.createInstance(PathUtils.getFileName(database.getSIARDPath()));
     MetadataField size = MetadataField.createInstance(Humanize.readableFileSize(database.getSIARDSize()));
