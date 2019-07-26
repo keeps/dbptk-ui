@@ -7,9 +7,7 @@
                 <g:FlowPanel addStyleNames="block" ui:field="tableAndColumnsList"/>
             </g:FlowPanel>
             <g:FlowPanel addStyleNames="right">
-                <g:FlowPanel addStyleNames="block" ui:field="panel">
-                    <g:Label ui:field="title" addStyleNames="h1" />
-                </g:FlowPanel>
+                <g:FlowPanel addStyleNames="block" ui:field="panel" />
             </g:FlowPanel>
         </g:FlowPanel>
     </g:FlowPanel>

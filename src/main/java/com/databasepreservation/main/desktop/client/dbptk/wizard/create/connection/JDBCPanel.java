@@ -53,6 +53,7 @@ public class JDBCPanel extends Composite {
   private HashMap<String, FileUploadField> fileInputs = new HashMap<>();
   private String pathToDriver = null;
   private ArrayList<PreservationParameter> parameters;
+  private TextBox focusElement = null;
 
   @UiField
   FlowPanel content;
@@ -149,6 +150,9 @@ public class JDBCPanel extends Composite {
         default: TextBox defaultTextBox = new TextBox();
           defaultTextBox.addStyleName("form-textbox");
           textBoxInputs.put(parameter.getName(), defaultTextBox);
+          if(focusElement == null){
+            focusElement = defaultTextBox;
+          }
           genericField = GenericField.createInstance(messages.connectionLabels(parameter.getName()), defaultTextBox);
           if (parameter.getDefaultValue() != null) {
             defaultTextBox.setText(parameter.getDefaultValue());
@@ -210,5 +214,11 @@ public class JDBCPanel extends Composite {
         textBox.setText("");
       }
     }
+  }
+
+  @Override
+  protected void onAttach() {
+    super.onAttach();
+    focusElement.setFocus(true);
   }
 }

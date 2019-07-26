@@ -126,8 +126,8 @@ public class ProgressBarPanel extends Composite {
       if (index < widgetCount) {
         Label lastMessage = (Label) content.getWidget(index);
         if (!newMessage.getText().equals(lastMessage.getText())) {
-          content.remove(index);
-          content.insert(newMessage, index + 1);
+          content.insert(newMessage, index);
+          content.remove(index + 1);
           content.getElement().setScrollTop(content.getElement().getScrollHeight());
         }
       } else {

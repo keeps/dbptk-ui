@@ -79,9 +79,6 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
   @UiField
   FlowPanel content, tableAndColumnsList, panel;
 
-  @UiField
-  Label title;
-
   private static HashMap<String, TableAndColumns> instances = new HashMap<>();
   private TableAndColumnsSidebar tableAndColumnsSidebar;
   private TableAndColumnsSendToSidebar tableAndColumnsSendToSidebar;
@@ -233,7 +230,6 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
     GWT.log("TO SELECT: " + toSelect);
 
     if (tableUUID != null) {
-      title.setVisible(false);
       panel.add(getColumns(tableUUID));
       if (toSelect.equals(TableAndColumnsSidebar.VIEW_LINK)) {
         toSelect = metadata.getView(tableUUID).getName();
@@ -242,8 +238,10 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
       }
       currentTableUUID = tableUUID;
     } else if (schemaUUID != null) {
-        title.setVisible(true);
+        Label title = new Label();
         title.setText(metadata.getSchema(schemaUUID).getName());
+        title.addStyleName("h1");
+
         FlowPanel tables = new FlowPanel();
         tables.add(getTable(schemaUUID));
         FlowPanel views = new FlowPanel();
@@ -255,6 +253,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
         tabPanel.add(views, messages.sidebarViews());
         tabPanel.selectTab(0);
 
+        panel.add(title);
         panel.add(tabPanel);
     } else {
       panel.add(ErDiagram.getInstance(databaseUUID, metadata, HistoryManager.getCurrentHistoryPath().get(0)));
