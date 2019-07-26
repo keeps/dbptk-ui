@@ -98,12 +98,11 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
   private HashMap<String, Boolean> toggleSelectionColumnsMap = new HashMap<>();
   private HashMap<String, Button> btnToggleSelectionMap = new HashMap<>();
 
-  public static TableAndColumns getInstance(ConnectionParameters values) {
-    final String urlConnection = values.getURLConnection();
-    if (instances.get(urlConnection) == null) {
-      instances.put(urlConnection, new TableAndColumns(values));
+  public static TableAndColumns getInstance(String databaseUUID, ConnectionParameters values) {
+    if (instances.get(databaseUUID) == null) {
+      instances.put(databaseUUID, new TableAndColumns(values));
     }
-    return instances.get(urlConnection);
+    return instances.get(databaseUUID);
   }
 
   public static TableAndColumns getInstance(String databaseUUID) {

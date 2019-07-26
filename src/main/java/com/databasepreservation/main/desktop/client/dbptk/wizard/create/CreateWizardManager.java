@@ -61,7 +61,7 @@ public class CreateWizardManager extends Composite {
   private ArrayList<WizardPanel> wizardInstances = new ArrayList<>();
   private int position = 0;
   private final int positions = 5;
-
+  private String databaseUUID;
   private ConnectionParameters connectionParameters;
   private TableAndColumnsParameters tableAndColumnsParameters;
   private CustomViewsParameters customViewsParameters;
@@ -84,7 +84,8 @@ public class CreateWizardManager extends Composite {
     BrowserService.Util.getInstance().generateUUID(new DefaultAsyncCallback<String>() {
       @Override
       public void onSuccess(String result) {
-        Connection connection = Connection.getInstance(result);
+        databaseUUID = result;
+        Connection connection = Connection.getInstance(databaseUUID);
         wizardContent.clear();
         wizardInstances.add(0, connection);
         wizardContent.add(connection);
@@ -163,7 +164,7 @@ public class CreateWizardManager extends Composite {
           public void onSuccess(Boolean aBoolean) {
             wizardContent.clear();
             position = 1;
-            TableAndColumns tableAndColumns = TableAndColumns.getInstance(connectionParameters);
+            TableAndColumns tableAndColumns = TableAndColumns.getInstance(databaseUUID, connectionParameters);
             wizardInstances.add(position, tableAndColumns);
             wizardContent.add(tableAndColumns);
             updateButtons();
