@@ -30,11 +30,11 @@ import config.i18n.client.ClientMessages;
  */
 public class ErDiagram extends Composite {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
-  private static HashMap<String,ErDiagram> instances = new HashMap<>();
+  private static HashMap<String, ErDiagram> instances = new HashMap<>();
 
-  public static ErDiagram getInstance(String databaseUUID, ViewerMetadata metadata) {
+  public static ErDiagram getInstance(String databaseUUID, ViewerMetadata metadata, String path) {
     if (instances.get(databaseUUID) == null) {
-      instances.put(databaseUUID, new ErDiagram(metadata));
+      instances.put(databaseUUID, new ErDiagram(metadata, databaseUUID, path));
     }
     return instances.get(databaseUUID);
   }
@@ -68,11 +68,10 @@ public class ErDiagram extends Composite {
 
   // final String databaseUUID;
 
-  private ErDiagram(final ViewerMetadata metadata) {
-    // databaseUUID = database.getUUID();
+  private ErDiagram(final ViewerMetadata metadata, String databaseUUID, String path) {
     initWidget(uiBinder.createAndBindUi(this));
 
-    for(ViewerSchema schema : metadata.getSchemas()) {
+    for (ViewerSchema schema : metadata.getSchemas()) {
       String schemaUUID = schema.getUUID();
 
       final SimplePanel diagram = new SimplePanel();
@@ -173,8 +172,8 @@ public class ErDiagram extends Composite {
                 tooltip.append(viewerTable.getName()).append("<br/>");
               }
               tooltip.append(messages.diagram_rows(visNode.numRows)).append(", ")
-                      .append(messages.diagram_columns(visNode.numColumns)).append(", ")
-                      .append(messages.diagram_relations(visNode.numRelationsTotal)).append(".");
+                .append(messages.diagram_columns(visNode.numColumns)).append(", ")
+                .append(messages.diagram_relations(visNode.numRelationsTotal)).append(".");
 
               visNode.setTitle(tooltip.toString());
 
@@ -192,13 +191,13 @@ public class ErDiagram extends Composite {
           for (VisNode visNode : visNodeList) {
 
             visNode.adjustBackgroundColor(
-                    getNormalizedValue(visNode.numRelationsTotal, minRelationsTotal, maxRelationsTotal, 0.01, 0.70));
+              getNormalizedValue(visNode.numRelationsTotal, minRelationsTotal, maxRelationsTotal, 0.01, 0.70));
 
             if (visNode.numColumnsAndRows == 0) {
               visNode.adjustSize(20);
             } else {
               Double normNumColumnsAndRows = getNormalizedValue(visNode.numColumnsAndRows,
-                      minColumnsAndRowsBiggerThanZero, maxColumnsAndRows, normMinColumnsAndRows, normMaxColumnsAndRows);
+                minColumnsAndRowsBiggerThanZero, maxColumnsAndRows, normMinColumnsAndRows, normMaxColumnsAndRows);
 
               Double normResult = Math.asin(normNumColumnsAndRows - 1) + 1.5;
 
@@ -211,11 +210,12 @@ public class ErDiagram extends Composite {
           String edges = visEdgeMapper.write(jsniEdgeList);
 
           loading.setVisible(false);
-          loadDiagram(HistoryManager.ROUTE_WIZARD_TABLES_COLUMNS, TABLE_LINK, schemaUUID, nodes, edges);
+          loadDiagram(HistoryManager.ROUTE_WIZARD_TABLES_COLUMNS, TABLE_LINK, databaseUUID, schemaUUID, nodes, edges,
+            path);
         }
       });
       tabPanel.add(diagram, schema.getName());
-//      contentItems.add(diagram);
+      // contentItems.add(diagram);
     }
     tabPanel.selectTab(0);
   }
@@ -476,102 +476,106 @@ public class ErDiagram extends Composite {
     }
   }
 
-  public static native void loadDiagram(String wizardPage, String toSelect, String schemaUUID, String nodesJson,
-    String edgesJson)
+  public static native void loadDiagram(String wizardPage, String toSelect, String databaseUUID, String schemaUUID,
+    String nodesJson, String edgesJson, String path)
   /*-{
     (function erdiagramload(){
-        // network container
-        var container = $wnd.document.getElementById(schemaUUID);
-  
-        // avoid setting up the diagram more than once
-        container.className += ' initialized-erdiagram';
-  
-        // create an array with nodes
-        var rawNodes = eval(nodesJson);
-        var rawNodesLen = rawNodes.length;
-        for(var i=0; i<rawNodesLen; i+=1){
-            if(rawNodes[i].title == null || rawNodes[i].title.length === 0){
-                delete rawNodes[i].title;
-            }
-        }
-        var nodes = new $wnd.vis.DataSet(rawNodes);
-  
-        // create an array with edges
-        var edges = new $wnd.vis.DataSet(eval(edgesJson));
-  
-        // provide the data in the vis format
-        var data = {
-          nodes: nodes,
-          edges: edges
-        };
-        var options = {
-            "nodes": {
-                "font": {
-                    "strokeWidth": 0,
-                    "face": "Ubuntu, HelveticaNeue, Helvetica Neue, Helvetica, Arial, sans-serif"
-                },
-                "shape": "dot",
-                "color": {
-                    "hover": {
-                        "border": "#a19b4b",
-                        "background": "#f2f0a1"
-                    },
-                    "highlight": {
-                        "border": "#948e3e",
-                        "background": "#e5e394"
-                    }
-                }
-            },
-            "edges": {
-                "smooth": {
-                    "type": "straightCross",
-                    "forceDirection": "horizontal"
-                }, "arrows": {
-                    "to": {
-                        "enabled": true
-                    }
-                }
-            },
-            "interaction": {
-                "hover": true,
-                "navigationButtons": true,
-                "zoomView": false
-            },
-            "physics": {
-                "enabled": true,
-                "solver": "repulsion",
-                "repulsion": {
-                    "centralGravity": 0.1,
-                    "springLength": 25,
-                    "springConstant": 0,
-                    "nodeDistance": 150,
-                    "damping": 0.09
-                }
-            }//, configure: {enabled: true, showButton: true, container: $wnd.document.getElementById('erconfig')}
-        };
-  
-        // initialize your network!
-        var network = new $wnd.vis.Network(container, data, options);
-  
-        network.on("selectNode", function (params) {
+      // network container
+      var container = $wnd.document.getElementById(schemaUUID);
 
-            if(params.nodes.length == 1) {
-                var tableuuid = params.nodes[0];
-                network.unselectAll();
-                @com.databasepreservation.main.common.shared.client.tools.HistoryManager::gotoCreateSIARD(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)(wizardPage, toSelect, schemaUUID, tableuuid);
+      // avoid setting up the diagram more than once
+      container.className += ' initialized-erdiagram';
+
+      // create an array with nodes
+      var rawNodes = eval(nodesJson);
+      var rawNodesLen = rawNodes.length;
+      for(var i=0; i<rawNodesLen; i+=1){
+        if(rawNodes[i].title == null || rawNodes[i].title.length === 0){
+          delete rawNodes[i].title;
+        }
+      }
+      var nodes = new $wnd.vis.DataSet(rawNodes);
+
+      // create an array with edges
+      var edges = new $wnd.vis.DataSet(eval(edgesJson));
+
+      // provide the data in the vis format
+      var data = {
+        nodes: nodes,
+        edges: edges
+      };
+      var options = {
+        "nodes": {
+          "font": {
+            "strokeWidth": 0,
+            "face": "Ubuntu, HelveticaNeue, Helvetica Neue, Helvetica, Arial, sans-serif"
+          },
+          "shape": "dot",
+          "color": {
+            "hover": {
+              "border": "#a19b4b",
+              "background": "#f2f0a1"
+            },
+            "highlight": {
+              "border": "#948e3e",
+              "background": "#e5e394"
             }
-        });
-  
-        network.on("stabilized", function (params) {
-            if(params.iterations > 1){
-                options.physics.enabled = false;
-                network.setOptions(options);
+          }
+        },
+        "edges": {
+          "smooth": {
+            "type": "straightCross",
+            "forceDirection": "horizontal"
+          }, "arrows": {
+            "to": {
+              "enabled": true
             }
-        });
-  
-        network.on("dragEnd", function (params) {
-            network.unselectAll();
-        });
+          }
+        },
+        "interaction": {
+          "hover": true,
+          "navigationButtons": true,
+          "zoomView": false
+        },
+        "physics": {
+          "enabled": true,
+          "solver": "repulsion",
+          "repulsion": {
+              "centralGravity": 0.1,
+              "springLength": 25,
+              "springConstant": 0,
+              "nodeDistance": 150,
+              "damping": 0.09
+          }
+        }//, configure: {enabled: true, showButton: true, container: $wnd.document.getElementById('erconfig')}
+      };
+
+      // initialize your network!
+      var network = new $wnd.vis.Network(container, data, options);
+
+      network.on("selectNode", function (params) {
+
+        if(params.nodes.length == 1) {
+          var tableuuid = params.nodes[0];
+          network.unselectAll();
+          if(path === "create"){
+            @com.databasepreservation.main.common.shared.client.tools.HistoryManager::gotoCreateSIARDErDiagram(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)(wizardPage, toSelect, schemaUUID, tableuuid);
+          } else if(path === "send-to-live-dbms" ) {
+            @com.databasepreservation.main.common.shared.client.tools.HistoryManager::gotoSendToLiveDBMSExportFormatErDiagram(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)(databaseUUID, wizardPage, toSelect, schemaUUID, tableuuid);
+          }
+        }
+      });
+
+      network.on("stabilized", function (params) {
+        if(params.iterations > 1){
+          options.physics.enabled = false;
+          network.setOptions(options);
+        }
+      });
+
+      network.on("dragEnd", function (params) {
+        network.unselectAll();
+      });
     })();
   }-*/;
 }

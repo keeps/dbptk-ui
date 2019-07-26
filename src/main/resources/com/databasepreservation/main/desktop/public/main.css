@@ -1767,3 +1767,13 @@ input[type="checkbox"]:checked:after {
 .btn-table:after {
     content: "\f0ce";
 }
+
+.btn-selected{
+    background-color: #00468b;
+    outline: none;
+}
+
+.btn-selected:focus, .btn-selected:active, .btn-selected:hover {
+    outline-color: transparent;
+    outline-style: none;
+}

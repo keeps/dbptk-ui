@@ -182,7 +182,7 @@ public class HistoryManager {
     newHistory(params);
   }
 
-  public static void gotoCreateSIARD(String wizardPage, String toSelect, String schemaUUID, String tableUUID) {
+  public static void gotoCreateSIARDErDiagram(String wizardPage, String toSelect, String schemaUUID, String tableUUID) {
     List<String> params = Arrays.asList(ROUTE_CREATE_SIARD, wizardPage, toSelect, schemaUUID, tableUUID );
     newHistory(params);
   }
@@ -199,6 +199,13 @@ public class HistoryManager {
 
   public static void gotoSendToLiveDBMSExportFormat(String databaseUUID) {
     List<String> params = Arrays.asList(ROUTE_SEND_TO_LIVE_DBMS, databaseUUID, ROUTE_WIZARD_EXPORT_FORMAT);
+    newHistory(params);
+  }
+
+  public static void gotoSendToLiveDBMSExportFormatErDiagram(String databaseUUID, String wizardPage, String toSelect,
+    String schemaUUID, String tableUUID) {
+    List<String> params = Arrays.asList(ROUTE_SEND_TO_LIVE_DBMS, databaseUUID, wizardPage, toSelect, schemaUUID,
+      tableUUID);
     newHistory(params);
   }
 

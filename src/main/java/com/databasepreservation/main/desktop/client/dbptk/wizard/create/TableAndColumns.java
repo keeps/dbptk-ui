@@ -20,6 +20,7 @@ import com.databasepreservation.main.common.shared.client.common.dialogs.Dialogs
 import com.databasepreservation.main.common.shared.client.common.lists.MultipleSelectionTablePanel;
 import com.databasepreservation.main.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
+import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.common.shared.client.tools.JSOUtils;
 import com.databasepreservation.main.common.shared.client.tools.PathUtils;
 import com.databasepreservation.main.common.shared.client.widgets.Toast;
@@ -256,7 +257,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
 
         panel.add(tabPanel);
     } else {
-      panel.add(ErDiagram.getInstance(databaseUUID, metadata));
+      panel.add(ErDiagram.getInstance(databaseUUID, metadata, HistoryManager.getCurrentHistoryPath().get(0)));
     }
 
     if (tableAndColumnsSidebar != null) tableAndColumnsSidebar.select(toSelect);
