@@ -87,6 +87,12 @@ public class JDBCPanel extends Composite {
       }
     }
 
+    for (Map.Entry<String, CheckBox> entry : checkBoxInputs.entrySet()) {
+      if (entry.getValue().getValue()) {
+        values.put(entry.getKey(), entry.getValue().getValue().toString());
+      }
+    }
+
     parameters.setConnection(values);
     if (ViewerStringUtils.isNotBlank(pathToDriver)) {
       parameters.setDriver(true);

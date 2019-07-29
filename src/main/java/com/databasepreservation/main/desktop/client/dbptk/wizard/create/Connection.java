@@ -41,6 +41,7 @@ public class Connection extends WizardPanel<ConnectionParameters> {
   @UiField
   FlowPanel JDBCListConnections, leftSideContainer, connectionInputPanel;
 
+  private final String databaseUUID;
   private DBPTKModule dbmsModule;
   private ConnectionSidebar connectionSidebar;
   private SSHTunnelPanel sshTunnelPanel;
@@ -59,6 +60,8 @@ public class Connection extends WizardPanel<ConnectionParameters> {
 
   private Connection(String databaseUUID) {
     initWidget(binder.createAndBindUi(this));
+
+    this.databaseUUID = databaseUUID;
 
     CreateWizardManager createWizardManager = CreateWizardManager.getInstance();
     createWizardManager.enableNext(false);
@@ -156,7 +159,6 @@ public class Connection extends WizardPanel<ConnectionParameters> {
 
   @Override
   public void error() {
-
-    Toast.showError("Mandatory arguments missing"); //TODO: Improve error message, add electron option to display notification
+    Toast.showError("Mandatory arguments missing");
   }
 }

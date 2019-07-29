@@ -1215,6 +1215,7 @@ html, body, .main {
 .form-button {
     padding: 0;
     margin: 0;
+    width: 100px;
 }
 
 .form-inline > .form-label-spaced:last-of-type {
