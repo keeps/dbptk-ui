@@ -4,10 +4,10 @@
 <g:FlowPanel addStyleNames="application-container" ui:field="container">
     <g:FlowPanel addStyleNames="output-format">
         <g:Label addStyleNames="h1">
-            <ui:text from='{messages.SIARD}'/>
+            <ui:text from='{messages.wizardSendToExportFormatTitle}'/>
         </g:Label>
         <g:Label addStyleNames="h5">
-            <ui:text from='{messages.diagram_Explanation}'/>
+            <ui:text from='{messages.wizardSendToExportFormatSubTitle}'/>
         </g:Label>
         <g:FlowPanel addStyleNames="output-format-buttons" >
             <g:Button addStyleNames="btn btn-save" ui:field="buttonSIARD">

@@ -130,7 +130,7 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
     addColumn(dbmsColumn, messages.siardMetadata_producerApplication(), true, TextAlign.NONE, 10);
     addColumn(archivalDateColumn, messages.siardMetadata_archivalDate(), true, TextAlign.NONE, 5);
     addColumn(locationColumn, messages.SIARDLocation(), true, TextAlign.NONE, 8);
-    addColumn(validColumn, messages.SIARDValidated(), true, TextAlign.CENTER, 4);
+    addColumn(validColumn, messages.SIARDValidated(), true, TextAlign.NONE, 4);
     addColumn(statusColumn, messages.databaseStatus(), true, TextAlign.NONE, 8);
     addColumn(openColumn, messages.actions(), true, TextAlign.NONE , 5);
 

@@ -697,7 +697,7 @@ public interface ClientMessages extends Messages {
   String wizardProgressSIARDSubTitle();
 
   /*********************************************
-   * Send to Table & Columns
+   * Send to: Table & Columns
    ********************************************/
   String wizardSendToTableAndColumnsBreadcrumb();
 
@@ -709,4 +709,10 @@ public interface ClientMessages extends Messages {
 
   String wizardSendToMetadataExportOptionsBreadcrumb();
 
+  /*********************************************
+   * Send to: Export Format
+   ********************************************/
+  String wizardSendToExportFormatTitle();
+
+  String wizardSendToExportFormatSubTitle();
 }

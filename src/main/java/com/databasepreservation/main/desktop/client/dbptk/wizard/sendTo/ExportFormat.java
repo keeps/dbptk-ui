@@ -48,17 +48,27 @@ public class ExportFormat extends WizardPanel<String> {
     instance.enableNext(false);
 
     buttonDBMS.addClickHandler(event -> {
-      exportValue = ViewerConstants.EXPORT_FORMAT_DBMS;
-      buttonDBMS.addStyleName("btn-selected");
-      buttonSIARD.removeStyleName("btn-selected");
-      instance.enableNext(true);
+      if (buttonDBMS.getStyleName().contains("btn-selected")) {
+        instance.enableNext(false);
+        buttonDBMS.removeStyleName("btn-selected");
+      } else {
+        exportValue = ViewerConstants.EXPORT_FORMAT_DBMS;
+        buttonDBMS.addStyleName("btn-selected");
+        buttonSIARD.removeStyleName("btn-selected");
+        instance.enableNext(true);
+      }
     });
 
     buttonSIARD.addClickHandler(event -> {
-      exportValue = ViewerConstants.EXPORT_FORMAT_SIARD;
-      buttonSIARD.addStyleName("btn-selected");
-      buttonDBMS.removeStyleName("btn-selected");
-      instance.enableNext(true);
+      if (buttonSIARD.getStyleName().contains("btn-selected")) {
+        instance.enableNext(false);
+        buttonSIARD.removeStyleName("btn-selected");
+      } else {
+        exportValue = ViewerConstants.EXPORT_FORMAT_SIARD;
+        buttonSIARD.addStyleName("btn-selected");
+        buttonDBMS.removeStyleName("btn-selected");
+        instance.enableNext(true);
+      }
     });
   }
 

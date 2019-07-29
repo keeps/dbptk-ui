@@ -1754,10 +1754,13 @@ input[type="checkbox"]:checked:after {
 
 .output-format-buttons .btn {
     margin: 4rem;
-    height: 200px;
+    height: 100px;
     width: 200px;
     font-size: 30px;
     text-align: center;
+    border-radius: 15px;
+    background-color: transparent;
+    color: black;
 }
 
 .output-format-buttons .btn::after{
@@ -1768,9 +1771,11 @@ input[type="checkbox"]:checked:after {
     content: "\f0ce";
 }
 
-.btn-selected{
-    background-color: #00468b;
+.btn-selected {
+    color: white !important;
+    background-color: #089de3 !important;
     outline: none;
+    box-shadow: 2px 2px 14px rgba(0,0,0,.4);
 }
 
 .btn-selected:focus, .btn-selected:active, .btn-selected:hover {
