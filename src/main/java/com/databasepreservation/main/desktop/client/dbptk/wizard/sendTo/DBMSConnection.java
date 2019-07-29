@@ -164,8 +164,6 @@ public class DBMSConnection extends WizardPanel<ConnectionParameters> {
 
   @Override
   public void error() {
-
-    Toast.showError("Mandatory arguments missing"); // TODO: Improve error message, add electron option to display
-                                                    // notification
+    Toast.showError(messages.errorMessagesConnectionTitle(), messages.errorMessagesConnection(1));
   }
 }

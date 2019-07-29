@@ -1,7 +1,6 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
-    <ui:with field='messages' type='config.i18n.client.ClientMessages'/>
     <g:FlowPanel addStyleNames="home-page-content">
         <g:FlowPanel addStyleNames="home-page-brand">
             <g:Image url="/img/dbvtk_horizontal_black_vector.svg" />

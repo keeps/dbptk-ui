@@ -164,13 +164,14 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
       btnUpdate.setText(messages.customViewsBtnSave());
       btnUpdate.addStyleName("btn btn-primary btn-save");
       btnUpdate.addClickHandler(event -> {
-        final boolean valid = customViewFormValidatorUpdate(parameter.getCustomViewName());
-        if (valid) {
+        final int valid = customViewFormValidatorUpdate(parameter.getCustomViewName());
+        if (valid == -1) {
           updateCustomViewParameters(parameter.getCustomViewID(), customViewSchemaName.getText(),
               customViewName.getText(),
               customViewDescription.getText(), customViewQuery.getText());
           Toast.showInfo(messages.customViewsTitle(), messages.customViewsUpdateMessage());
         } else {
+          Toast.showError(messages.errorMessagesCustomViewsTitle(), messages.errorMessagesCustomViews(valid));
           highlightFieldsWhenRequired();
         }
       });
@@ -195,13 +196,16 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
     customViewsButtons.add(createCustomViewButton());
   }
 
-  private boolean customViewFormValidator() {
+  private int customViewFormValidator() {
     String viewSchemaName = customViewSchemaName.getText();
     String viewNameText = customViewName.getText();
     String viewQueryText = customViewQuery.getText();
 
-    boolean value = !(ViewerStringUtils.isBlank(viewNameText) || ViewerStringUtils.isBlank(viewQueryText)
-      || ViewerStringUtils.isBlank(viewSchemaName));
+    boolean value = ViewerStringUtils.isBlank(viewNameText) || ViewerStringUtils.isBlank(viewQueryText)
+      || ViewerStringUtils.isBlank(viewSchemaName);
+
+    if (value)
+      return 1;
 
     boolean sameName = false;
     for (CustomViewsParameter p : customViewsParameters.values()) {
@@ -210,16 +214,22 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
       }
     }
 
-    return value && !sameName;
+    if (sameName)
+      return 2;
+
+    return -1;
   }
 
-  private boolean customViewFormValidatorUpdate(final String customViewName) {
+  private int customViewFormValidatorUpdate(final String customViewName) {
     String viewSchemaName = customViewSchemaName.getText();
     String viewNameText = this.customViewName.getText();
     String viewQueryText = this.customViewQuery.getText();
 
-    boolean value = !(ViewerStringUtils.isBlank(viewNameText) || ViewerStringUtils.isBlank(viewQueryText)
-      || ViewerStringUtils.isBlank(viewSchemaName));
+    boolean value = ViewerStringUtils.isBlank(viewNameText) || ViewerStringUtils.isBlank(viewQueryText)
+      || ViewerStringUtils.isBlank(viewSchemaName);
+
+    if (value)
+      return 1;
 
     boolean sameName = false;
     for (CustomViewsParameter p : customViewsParameters.values()) {
@@ -229,7 +239,10 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
       }
     }
 
-    return value && !sameName;
+    if (sameName)
+      return 2;
+
+    return -1;
   }
 
   private void setRequired(Widget label, boolean required) {
@@ -274,8 +287,8 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
     btnSave.addStyleName("btn btn-primary btn-save");
 
     btnSave.addClickHandler(event -> {
-      final boolean valid = customViewFormValidator();
-      if (valid) {
+      final int valid = customViewFormValidator();
+      if (valid == -1) {
         customViewsSidebar.addSideBarHyperLink(customViewName.getText(),
           String.valueOf(counter), HistoryManager.linkToCreateWizardCustomViewsDelete(String.valueOf(counter)));
 
@@ -290,6 +303,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
         customViewSchemaName.getElement().removeAttribute("required");
         customViewsSidebar.selectNone();
       } else {
+        Toast.showError(messages.errorMessagesCustomViewsTitle(), messages.errorMessagesCustomViews(valid));
         highlightFieldsWhenRequired();
       }
     });

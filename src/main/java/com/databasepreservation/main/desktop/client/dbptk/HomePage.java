@@ -137,13 +137,7 @@ public class HomePage extends Composite {
     btnManage.setText(messages.manageCardButton());
     btnManage.addStyleName("btn btn-view");
 
-    btnManage.addClickHandler(new ClickHandler() {
-
-      @Override
-      public void onClick(ClickEvent event) {
-        HistoryManager.gotoDatabaseList();
-      }
-    });
+    btnManage.addClickHandler(event -> HistoryManager.gotoDatabaseList());
 
     Card createCard = Card.createInstance(messages.createCardHeader(), messages.createCardText(), btnCreate);
     Card openCard = Card.createInstance(messages.openCardHeader(), messages.openCardText(), btnOpen);

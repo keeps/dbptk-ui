@@ -34,8 +34,6 @@ import config.i18n.client.ClientMessages;
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 public class MainPanelDesktop extends Composite {
-  private static final ClientMessages messages = GWT.create(ClientMessages.class);
-
   interface MainPanelDesktopUiBinder extends UiBinder<Widget, MainPanelDesktop> {
   }
 

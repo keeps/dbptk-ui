@@ -589,6 +589,20 @@ public interface ClientMessages extends Messages {
   String SIARDValidationFailed();
 
   /********************************************
+   * Edit Metadata
+   ********************************************/
+  String editMetadataNotificationTitle();
+
+  String editMetadataInformationMessage();
+
+  /********************************************
+   * Create Wizard: Information Messages
+   ********************************************/
+  String createSIARDWizardManagerInformationMessagesTitle();
+
+  String createSIARDWizardManagerInformationMessage();
+
+  /********************************************
    * Wizard Connection
    ********************************************/
   String tabGeneral();
@@ -608,6 +622,10 @@ public interface ClientMessages extends Messages {
   String connectionLabels(@Select String fieldName);
 
   String chooseDriverLocation();
+
+  String errorMessagesConnectionTitle();
+
+  String errorMessagesConnection(@Select int error);
 
   /********************************************
    * Wizard Table & Columns
@@ -637,6 +655,10 @@ public interface ClientMessages extends Messages {
   String tableAndColumnsUpdateText();
 
   String tableAndColumnsExternalLOBDialogTitle();
+
+  String errorMessagesTableAndColumnsTitle();
+
+  String errorMessagesTableAndColumns(@Select int error);
 
   /********************************************
    * Wizard Custom Views
@@ -670,6 +692,10 @@ public interface ClientMessages extends Messages {
 
   String customViewsDialogCancel();
 
+  String errorMessagesCustomViewsTitle();
+
+  String errorMessagesCustomViews(@Select int error);
+
   /********************************************
    * Wizard Export Options
    ********************************************/
@@ -684,6 +710,10 @@ public interface ClientMessages extends Messages {
   String wizardExportOptionsLabels(@Select String fieldName);
 
   String wizardExportOptionsHelperText(@Select String fieldName);
+
+  String errorMessagesExportOptionsTitle();
+
+  String errorMessagesExportOptions(@Select int error);
 
   /********************************************
    * Wizard Progress Panel
@@ -715,4 +745,13 @@ public interface ClientMessages extends Messages {
   String wizardSendToExportFormatTitle();
 
   String wizardSendToExportFormatSubTitle();
+
+  /*********************************************
+   * Send to: Information Messages
+   ********************************************/
+  String sendToWizardManagerInformationTitle();
+
+  String sendToWizardManagerInformationMessageSIARD();
+
+  String sendToWizardManagerInformationMessageDBMS(String name);
 }

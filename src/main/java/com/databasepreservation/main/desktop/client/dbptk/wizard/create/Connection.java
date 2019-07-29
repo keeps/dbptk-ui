@@ -14,8 +14,8 @@ import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.create.connection.JDBCPanel;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.create.connection.SSHTunnelPanel;
 import com.databasepreservation.main.desktop.shared.models.DBPTKModule;
-import com.databasepreservation.main.desktop.shared.models.wizardParameters.ConnectionParameters;
 import com.databasepreservation.main.desktop.shared.models.PreservationParameter;
+import com.databasepreservation.main.desktop.shared.models.wizardParameters.ConnectionParameters;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -156,6 +156,6 @@ public class Connection extends WizardPanel<ConnectionParameters> {
 
   @Override
   public void error() {
-    Toast.showError("Mandatory arguments missing");
+    Toast.showError(messages.errorMessagesConnectionTitle(), messages.errorMessagesConnection(1));
   }
 }

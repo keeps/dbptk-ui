@@ -48,7 +48,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
@@ -220,13 +219,11 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
 
   @Override
   public void error() {
-    Toast.showError("Select tables"); //TODO: Improve error message, add electron option to display notification
+    Toast.showError(messages.errorMessagesTableAndColumnsTitle(), messages.errorMessagesTableAndColumns(1));
   }
 
   public void sideBarHighlighter(String toSelect, String schemaUUID, String tableUUID) {
     panel.clear();
-
-    GWT.log("TO SELECT: " + toSelect);
 
     if (tableUUID != null) {
       panel.add(getColumns(tableUUID));

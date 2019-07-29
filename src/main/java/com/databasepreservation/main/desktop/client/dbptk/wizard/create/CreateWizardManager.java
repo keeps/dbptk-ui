@@ -175,6 +175,7 @@ public class CreateWizardManager extends Composite {
 
           @Override
           public void onFailure(Throwable caught) {
+            Toast.showError(messages.errorMessagesConnectionTitle(), caught.getMessage());
             AsyncCallbackUtils.defaultFailureTreatment(caught);
             wizardContent.remove(spinner);
           }
@@ -263,7 +264,7 @@ public class CreateWizardManager extends Composite {
         updateBreadcrumb();
         customButtons.clear();
       } else {
-        // TODO: create SIARD
+        // TODO: create SIARD-DK
       }
     } else {
       wizardInstances.get(position).error();
@@ -303,6 +304,7 @@ public class CreateWizardManager extends Composite {
                   clear();
                   instance = null;
                   ProgressBarPanel.getInstance(databaseUUID).clear(databaseUUID);
+                  Toast.showInfo(messages.createSIARDWizardManagerInformationMessagesTitle(), messages.createSIARDWizardManagerInformationMessage());
                   HistoryManager.gotoSIARDInfo(databaseUUID);
                 }
 

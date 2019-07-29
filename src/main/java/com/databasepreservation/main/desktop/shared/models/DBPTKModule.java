@@ -58,6 +58,20 @@ public class DBPTKModule implements Serializable {
     return requiredParameters;
   }
 
+  public ArrayList<PreservationParameter> getRequiredParameters(String siardVersion) {
+    ArrayList<PreservationParameter> requiredParameters = new ArrayList<>();
+    for (Map.Entry<String, ArrayList<PreservationParameter>> entry : parameters.entrySet()) {
+      if (entry.getKey().equals(siardVersion)) {
+        for (PreservationParameter p : entry.getValue()) {
+          if (p.isRequired()) {
+            requiredParameters.add(p);
+          }
+        }
+      }
+    }
+    return requiredParameters;
+  }
+
   public DBPTKModule getSIARDConnections() {
     DBPTKModule siard = new DBPTKModule();
     for (String key : this.parameters.keySet()) {

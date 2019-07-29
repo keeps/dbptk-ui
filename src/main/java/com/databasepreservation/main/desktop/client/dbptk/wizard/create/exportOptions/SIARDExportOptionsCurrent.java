@@ -106,6 +106,7 @@ public class SIARDExportOptionsCurrent extends Composite {
             }
           }
           break;
+        case "FOLDER":
         case "FILE":
           if (fileInputs.get(parameter.getName()) != null) {
             final String path = fileInputs.get(parameter.getName());
@@ -130,10 +131,11 @@ public class SIARDExportOptionsCurrent extends Composite {
   }
 
   public boolean validate() {
-    if (!validateExternalLobs())
+    if (!validateExternalLobs()) {
       return false;
+    }
 
-    final ArrayList<PreservationParameter> requiredParameters = dbptkModule.getRequiredParameters();
+    final ArrayList<PreservationParameter> requiredParameters = dbptkModule.getRequiredParameters(version);
 
     for (PreservationParameter parameter : requiredParameters) {
       switch (parameter.getInputType()) {
@@ -147,6 +149,7 @@ public class SIARDExportOptionsCurrent extends Composite {
             }
           }
           break;
+        case "FOLDER":
         case "FILE":
           if (fileInputs.get(parameter.getName()) != null) {
             final String s = fileInputs.get(parameter.getName());
@@ -169,11 +172,11 @@ public class SIARDExportOptionsCurrent extends Composite {
   }
 
   public void error() {
-    Toast.showError("MISSING FIELDS");
+    Toast.showError(messages.errorMessagesExportOptionsTitle(), messages.errorMessagesExportOptions(1));
   }
 
   private boolean validateExternalLobs() {
-    if (externalLobCheckbox.getValue()) {
+    if (externalLobCheckbox != null && externalLobCheckbox.getValue()) {
       for (TextBox textBox : externalLobsInputs.values()) {
         final String text = textBox.getText();
         if (ViewerStringUtils.isBlank(text)) {

@@ -240,7 +240,7 @@ public class SendToWizardManager extends Composite {
               @Override
               public void onSuccess(Boolean result) {
                 if (result) {
-                  Toast.showInfo("SIARD", "created");
+                  Toast.showInfo(messages.sendToWizardManagerInformationTitle(),messages.sendToWizardManagerInformationMessageDBMS(connectionParameters.getJDBCConnectionParameters().getConnection().get("database")));
                   clear();
                   instances.clear();
                   HistoryManager.gotoSIARDInfo(databaseUUID);
@@ -281,7 +281,7 @@ public class SendToWizardManager extends Composite {
               @Override
               public void onSuccess(Boolean result) {
                 if (result) {
-                  Toast.showInfo("SIARD", "created");
+                  Toast.showInfo(messages.sendToWizardManagerInformationTitle(), messages.sendToWizardManagerInformationMessageSIARD());
                   clear();
                   instances.clear();
                   HistoryManager.gotoSIARDInfo(databaseUUID);
