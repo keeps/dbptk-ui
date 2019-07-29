@@ -13,6 +13,7 @@ import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbP
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
+import com.databasepreservation.main.common.shared.client.tools.ToolkitModuleName2ViewerModuleName;
 import com.databasepreservation.main.common.shared.client.widgets.Toast;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.ProgressBarPanel;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
@@ -229,6 +230,9 @@ public class SendToWizardManager extends Composite {
           final String siardPath = database.getSIARDPath();
 
           ProgressBarPanel progressBarPanel = ProgressBarPanel.getInstance(databaseUUID);
+          progressBarPanel.setTitleText(messages.wizardProgressSendToDBMSTitle(
+            ToolkitModuleName2ViewerModuleName.transform(connectionParameters.getModuleName())));
+          progressBarPanel.setSubTitleText(messages.wizardProgressSendToDBMSSubTitle());
           wizardContent.add(progressBarPanel);
 
           BrowserService.Util.getInstance().migrateToDBMS(databaseUUID, siardPath, connectionParameters,
@@ -261,6 +265,8 @@ public class SendToWizardManager extends Composite {
           final String siardPath = database.getSIARDPath();
 
           ProgressBarPanel progressBarPanel = ProgressBarPanel.getInstance(databaseUUID);
+          progressBarPanel.setTitleText(messages.wizardProgressSIARDTitle());
+          progressBarPanel.setSubTitleText(messages.wizardProgressSIARDSubTitle());
           wizardContent.add(progressBarPanel);
 
           BrowserService.Util.getInstance().migrateToSIARD(databaseUUID, siardPath, connectionParameters, tableAndColumnsParameters,

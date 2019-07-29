@@ -509,17 +509,12 @@ public class SIARDController {
     }
   }
 
-  public static String loadMetadataFromLocal(String localPath) throws GenericException {
-    String databaseUUID = SolrUtils.randomUUID();
-    return loadMetadataFromLocal(localPath, databaseUUID);
-  }
-
   public static String loadFromLocal(String localPath) throws GenericException {
     String databaseUUID = SolrUtils.randomUUID();
     return loadFromLocal(localPath, databaseUUID);
   }
 
-  public static String loadMetadataFromLocal(String localPath, String databaseUUID) throws GenericException {
+  public static String loadMetadataFromLocal(String databaseUUID, String localPath) throws GenericException {
     Path basePath = Paths.get(ViewerConfiguration.getInstance().getViewerConfigurationAsString("/",
       ViewerConfiguration.PROPERTY_BASE_UPLOAD_PATH));
     Path siardPath = basePath.resolve(localPath);

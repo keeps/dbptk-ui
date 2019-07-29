@@ -285,25 +285,24 @@ public class CreateWizardManager extends Composite {
 
     BrowserService.Util.getInstance().generateUUID(new DefaultAsyncCallback<String>() {
       @Override
-      public void onSuccess(String result) {
-        ProgressBarPanel progressBarPanel = ProgressBarPanel.getInstance(result);
+      public void onSuccess(String databaseUUID) {
+        ProgressBarPanel progressBarPanel = ProgressBarPanel.getInstance(databaseUUID);
+        progressBarPanel.setTitleText(messages.wizardProgressSIARDTitle());
+        progressBarPanel.setSubTitleText(messages.wizardProgressSIARDSubTitle());
         wizardContent.add(progressBarPanel);
-
-        final String uuid = result;
-
-        BrowserService.Util.getInstance().createSIARD(result, connectionParameters, tableAndColumnsParameters,
+        BrowserService.Util.getInstance().createSIARD(databaseUUID, connectionParameters, tableAndColumnsParameters,
           customViewsParameters, exportOptionsParameters, metadataExportOptionsParameters,
           new DefaultAsyncCallback<Boolean>() {
             @Override
             public void onSuccess(Boolean result) {
               final String siardPath = exportOptionsParameters.getSiardPath();
-              BrowserService.Util.getInstance().uploadMetadataSIARD(siardPath, new DefaultAsyncCallback<String>() {
+              BrowserService.Util.getInstance().uploadMetadataSIARD(databaseUUID, siardPath, new DefaultAsyncCallback<String>() {
                 @Override
                 public void onSuccess(String result) {
                   clear();
                   instance = null;
-                  ProgressBarPanel.getInstance(uuid).clear(uuid);
-                  HistoryManager.gotoSIARDInfo(result);
+                  ProgressBarPanel.getInstance(databaseUUID).clear(databaseUUID);
+                  HistoryManager.gotoSIARDInfo(databaseUUID);
                 }
               });
             }

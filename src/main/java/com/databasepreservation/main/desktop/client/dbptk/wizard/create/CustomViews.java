@@ -78,13 +78,15 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
 
   @Override
   public void clear() {
-    if (!customViewsParameters.isEmpty()) {
+    if (customViewsParameters != null && !customViewsParameters.isEmpty()) {
       customViewsParameters.clear();
     }
-    customViewsParameters = null;
-    customViewsSidebar.selectNone();
-    customViewsSidebar.clear();
-    customViewsSidebar = null;
+    customViewsParameters = new HashMap<>();
+    if (customViewsSidebar != null) {
+      customViewsSidebar.selectNone();
+      customViewsSidebar.clear();
+      customViewsSidebar = null;
+    }
     instance = null;
   }
 
@@ -96,17 +98,15 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
     if (empty) {
       toSave = false;
       return true;
+    } else {
+      toSave = true;
     }
 
     CustomViewsParameter parameter = new CustomViewsParameter(customViewSchemaName.getText(), counter,
         customViewName.getText(),
         customViewDescription.getText(), customViewQuery.getText());
 
-    if (customViewsParameters.containsValue(parameter)) {
-      toSave = true;
-    } else {
-      toSave = false;
-    }
+    toSave = !customViewsParameters.containsValue(parameter);
 
     return customViewsParameters.containsValue(parameter);
   }

@@ -688,9 +688,13 @@ public interface ClientMessages extends Messages {
   /********************************************
    * Wizard Progress Panel
    ********************************************/
-  String wizardProgressTitle();
+  String wizardProgressSendToDBMSTitle(String dbms);
 
-  String wizardProgressSubTitle();
+  String wizardProgressSendToDBMSSubTitle();
+
+  String wizardProgressSIARDTitle();
+
+  String wizardProgressSIARDSubTitle();
 
   /*********************************************
    * Send to Table & Columns

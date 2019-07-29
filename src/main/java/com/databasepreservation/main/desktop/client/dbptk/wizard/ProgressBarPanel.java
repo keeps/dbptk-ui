@@ -59,8 +59,6 @@ public class ProgressBarPanel extends Composite {
   private ProgressBarPanel(String uuid) {
     initWidget(uiBinder.createAndBindUi(this));
     this.uuid = uuid;
-    title.setText(messages.wizardProgressTitle());
-    subTitle.setText(messages.wizardProgressSubTitle());
     update();
   }
 
@@ -75,6 +73,14 @@ public class ProgressBarPanel extends Composite {
         autoUpdateTimer.scheduleRepeating(1000);
       }
     });
+  }
+
+  public void setTitleText(String text) {
+    title.setText(text);
+  }
+
+  public void setSubTitleText(String text) {
+    subTitle.setText(text);
   }
 
   @Override

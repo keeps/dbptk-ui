@@ -126,20 +126,7 @@ public class HomePage extends Composite {
                   });
               }
             } else {
-              BrowserService.Util.getInstance().uploadMetadataSIARD(path, new DefaultAsyncCallback<String>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                  System.out.println(caught.getMessage());
-                  // TODO: error handling
-                  options.remove(loading);
-                }
-
-                @Override
-                public void onSuccess(String newDatabaseUUID) {
-                  options.remove(loading);
-                  HistoryManager.gotoSIARDInfo(newDatabaseUUID);
-                }
-              });
+              uploadMetadataSIARD(path, loading);
             }
           }
         });
@@ -168,17 +155,22 @@ public class HomePage extends Composite {
   }
 
   private void uploadMetadataSIARD(String path, Widget loading) {
-    BrowserService.Util.getInstance().uploadMetadataSIARD(path, new DefaultAsyncCallback<String>() {
+    BrowserService.Util.getInstance().generateUUID(new DefaultAsyncCallback<String>() {
       @Override
-      public void onFailure(Throwable caught) {
-        // TODO: error handling
-        options.remove(loading);
-      }
+      public void onSuccess(String databaseUUID) {
+        BrowserService.Util.getInstance().uploadMetadataSIARD(databaseUUID, path, new DefaultAsyncCallback<String>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            // TODO: error handling
+            options.remove(loading);
+          }
 
-      @Override
-      public void onSuccess(String newDatabaseUUID) {
-        options.remove(loading);
-        HistoryManager.gotoSIARDInfo(newDatabaseUUID);
+          @Override
+          public void onSuccess(String newDatabaseUUID) {
+            options.remove(loading);
+            HistoryManager.gotoSIARDInfo(newDatabaseUUID);
+          }
+        });
       }
     });
   }
