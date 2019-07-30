@@ -1,11 +1,11 @@
 package com.databasepreservation.main.common.server;
 
 import com.databasepreservation.common.ModuleObserver;
+import com.databasepreservation.main.common.server.index.DatabaseRowsSolrManager;
 import com.databasepreservation.model.data.Row;
 import com.databasepreservation.model.structure.DatabaseStructure;
 import com.databasepreservation.model.structure.SchemaStructure;
 import com.databasepreservation.model.structure.TableStructure;
-import com.databasepreservation.main.common.server.index.DatabaseRowsSolrManager;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>

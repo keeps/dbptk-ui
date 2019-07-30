@@ -19,6 +19,7 @@ public class SIARDProgressObserver implements ModuleObserver {
 
   @Override
   public void notifyOpenDatabase() {
+    progressData.reset();
     progressData.setDatabaseStructureRetrieved(false);
   }
 
@@ -47,20 +48,20 @@ public class SIARDProgressObserver implements ModuleObserver {
   public void notifyOpenTable(DatabaseStructure databaseStructure, TableStructure tableStructure, long completedSchemas,
     long completedTablesInSchema) {
     progressData.setCurrentTableName(tableStructure.getName());
-    progressData.setCurrentProcessedTableRows(1);
+    progressData.setCurrentProcessedTableRows(0);
     progressData.setCurrentTableTotalRows(tableStructure.getRows());
   }
 
   @Override
   public void notifyTableProgressSparse(DatabaseStructure databaseStructure, TableStructure tableStructure,
     long completedRows, long totalRows) {
-    progressData.incrementCurrentProcessedTableRows(completedRows);
+    progressData.setCurrentProcessedTableRows(completedRows + 1);
   }
 
   @Override
   public void notifyTableProgressDetailed(DatabaseStructure databaseStructure, TableStructure tableStructure, Row row,
     long completedRows, long totalRows) {
-    progressData.incrementCurrentProcessedTableRows(completedRows);
+    progressData.setCurrentProcessedTableRows(completedRows + 1);
   }
 
   @Override
@@ -73,10 +74,12 @@ public class SIARDProgressObserver implements ModuleObserver {
   @Override
   public void notifyCloseSchema(DatabaseStructure databaseStructure, SchemaStructure schemaStructure,
     long completedSchemas, long completedTablesInSchema) {
+    // DO NOTHING
   }
 
   @Override
   public void notifyCloseDatabase(DatabaseStructure databaseStructure) {
+    progressData.reset();
     progressData.setFinished(true);
   }
 }
