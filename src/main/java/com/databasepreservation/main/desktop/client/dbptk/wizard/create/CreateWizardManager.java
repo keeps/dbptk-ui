@@ -312,7 +312,6 @@ public class CreateWizardManager extends Composite {
                     wizardContent.remove(spinner);
                     ProgressBarPanel.getInstance(databaseUUID).clear(databaseUUID);
                 }
-
                 @Override
                 public void onFailure(Throwable caught) {
                   enableButtons(true);
@@ -320,6 +319,12 @@ public class CreateWizardManager extends Composite {
                   Toast.showError(messages.alertErrorTitle(), caught.getMessage());
                 }
               });
+            }
+            @Override
+            public void onFailure(Throwable caught) {
+              enableButtons(true);
+              enableNext(false);
+              Toast.showError(messages.alertErrorTitle(), caught.getMessage());
             }
           });
       }

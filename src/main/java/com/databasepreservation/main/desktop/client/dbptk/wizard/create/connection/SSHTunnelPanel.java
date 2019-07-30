@@ -1,6 +1,8 @@
 package com.databasepreservation.main.desktop.client.dbptk.wizard.create.connection;
 
 import com.databasepreservation.main.common.shared.client.tools.ViewerStringUtils;
+import com.databasepreservation.main.desktop.client.dbptk.wizard.create.CreateWizardManager;
+import com.databasepreservation.main.desktop.client.dbptk.wizard.sendTo.SendToWizardManager;
 import com.databasepreservation.main.desktop.shared.models.SSHConfiguration;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -13,6 +15,9 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -38,18 +43,21 @@ public class SSHTunnelPanel extends Composite {
   @UiField
   PasswordTextBox proxyPassword;
 
-  private static SSHTunnelPanel instance = null;
+  private static Map<String, SSHTunnelPanel> instances = new HashMap<>();
+  private String databaseUUID;
 
-  public static SSHTunnelPanel getInstance() {
-    if (instance == null) {
-      instance = new SSHTunnelPanel();
+  public static SSHTunnelPanel getInstance( String databaseUUID) {
+    if (instances.get(databaseUUID) == null) {
+      SSHTunnelPanel instance = new SSHTunnelPanel(databaseUUID);
+      instances.put(databaseUUID, instance);
     }
-    return instance;
+    return instances.get(databaseUUID);
   }
 
-  private SSHTunnelPanel() {
+  private SSHTunnelPanel(String databaseUUID) {
     initWidget(binder.createAndBindUi(this));
     enable(false);
+    this.databaseUUID = databaseUUID;
 
     tunnelSSH.setText(messages.useSSHTunnel());
     tunnelSSH.addValueChangeHandler(event -> {
@@ -73,11 +81,6 @@ public class SSHTunnelPanel extends Composite {
     proxyPort.setEnabled(value);
     proxyUser.setEnabled(value);
     proxyPassword.setEnabled(value);
-
-    setRequiredInput(proxyHost);
-    setRequiredInput(proxyPort);
-    setRequiredInput(proxyUser);
-    setRequiredInput(proxyPassword);
   }
 
   private void setEnabled(Widget widget, boolean enabled) {
@@ -99,10 +102,7 @@ public class SSHTunnelPanel extends Composite {
 
   private void setRequiredInput(TextBox input) {
     input.addStyleName("wizard-connection-validator");
-    input.addKeyUpHandler(event -> {
-      if(input.getValue().isEmpty())
-        input.getElement().setAttribute("required", "required");
-    });
+    input.getElement().setAttribute("required", "required");
   }
 
   public boolean isSSHTunnelEnabled() {
@@ -131,14 +131,22 @@ public class SSHTunnelPanel extends Composite {
   }
 
   public boolean validate() {
+
     if (isSSHTunnelEnabled()) {
       String host = proxyHost.getText();
       String port = proxyPort.getText();
       String user = proxyUser.getText();
       String password = proxyPassword.getText();
 
-      return ViewerStringUtils.isBlank(host) && ViewerStringUtils.isBlank(port) && ViewerStringUtils.isBlank(user)
-        && ViewerStringUtils.isBlank(password);
+      if(ViewerStringUtils.isBlank(host) || ViewerStringUtils.isBlank(port) || ViewerStringUtils.isBlank(user)
+              || ViewerStringUtils.isBlank(password)){
+        setRequiredInput(proxyHost);
+        setRequiredInput(proxyPort);
+        setRequiredInput(proxyUser);
+        setRequiredInput(proxyPassword);
+        return false;
+      }
+      return true;
     }
 
     return true;

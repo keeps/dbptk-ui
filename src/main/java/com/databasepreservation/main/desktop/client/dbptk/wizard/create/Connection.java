@@ -66,7 +66,7 @@ public class Connection extends WizardPanel<ConnectionParameters> {
     CreateWizardManager createWizardManager = CreateWizardManager.getInstance();
     createWizardManager.enableNext(false);
 
-    sshTunnelPanel = SSHTunnelPanel.getInstance();
+    sshTunnelPanel = SSHTunnelPanel.getInstance(databaseUUID);
 
     Widget spinner = new HTML(SafeHtmlUtils.fromSafeConstant(
       "<div class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
@@ -109,6 +109,7 @@ public class Connection extends WizardPanel<ConnectionParameters> {
 
     tabPanel.selectTab(0);
 
+    selected.validate();
     connectionInputPanel.add(tabPanel);
   }
 
