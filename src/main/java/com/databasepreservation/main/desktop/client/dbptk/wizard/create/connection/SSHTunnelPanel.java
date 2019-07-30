@@ -1,18 +1,14 @@
 package com.databasepreservation.main.desktop.client.dbptk.wizard.create.connection;
 
-import com.databasepreservation.main.desktop.client.common.GenericField;
+import com.databasepreservation.main.common.shared.client.tools.ViewerStringUtils;
 import com.databasepreservation.main.desktop.shared.models.SSHConfiguration;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.PasswordTextBox;
-import com.google.gwt.user.client.ui.SimpleCheckBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -132,5 +128,19 @@ public class SSHTunnelPanel extends Composite {
 
   public void clearPassword() {
     proxyPassword.setText("");
+  }
+
+  public boolean validate() {
+    if (isSSHTunnelEnabled()) {
+      String host = proxyHost.getText();
+      String port = proxyPort.getText();
+      String user = proxyUser.getText();
+      String password = proxyPassword.getText();
+
+      return ViewerStringUtils.isBlank(host) && ViewerStringUtils.isBlank(port) && ViewerStringUtils.isBlank(user)
+        && ViewerStringUtils.isBlank(password);
+    }
+
+    return true;
   }
 }

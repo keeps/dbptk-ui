@@ -194,7 +194,11 @@ public class JDBCPanel extends Composite {
     validate();
   }
 
-  public ArrayList<PreservationParameter> validate() {
+  /**
+   *
+   * @return true if all fields required fields are filled, otherwise false
+   */
+  public boolean validate() {
     ArrayList<PreservationParameter> arrayList = new ArrayList<>();
     CreateWizardManager createWizardManager = CreateWizardManager.getInstance();
     SendToWizardManager sendToWizardManager = SendToWizardManager.getInstance(databaseUUID);
@@ -218,7 +222,7 @@ public class JDBCPanel extends Composite {
         }
       }
     }
-    return arrayList;
+    return arrayList.isEmpty();
   }
 
   public void clear() {

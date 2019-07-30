@@ -148,9 +148,12 @@ public class Connection extends WizardPanel<ConnectionParameters> {
   @Override
   public boolean validate() {
     if (selected != null) {
-      final ArrayList<PreservationParameter> validate = selected.validate();
-      return validate.isEmpty();
+      if (sshTunnelPanel.isSSHTunnelEnabled()) {
+        return selected.validate() && sshTunnelPanel.validate();
+      }
+      return selected.validate();
     }
+
     return false;
   }
 
