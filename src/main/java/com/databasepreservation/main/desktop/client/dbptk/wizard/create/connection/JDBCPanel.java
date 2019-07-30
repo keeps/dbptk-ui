@@ -51,13 +51,13 @@ public class JDBCPanel extends Composite {
   private String pathToDriver = null;
   private ArrayList<PreservationParameter> parameters;
   private TextBox focusElement = null;
-  private String databaseUUID = null;
+  private String databaseUUID;
 
   @UiField
   FlowPanel content;
 
   public static JDBCPanel getInstance(String connection, ArrayList<PreservationParameter> parameters, String databaseUUID) {
-    String code =  databaseUUID + "/" + connection;
+    String code =  databaseUUID + ViewerConstants.API_SEP + connection;
     if (instances.get(code) == null) {
       JDBCPanel instance = new JDBCPanel(parameters, databaseUUID);
       instances.put(code, instance);

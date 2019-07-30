@@ -1,5 +1,7 @@
 package com.databasepreservation.main.desktop.client.dbptk.wizard.sendTo;
 
+import java.util.HashMap;
+
 import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
 import com.google.gwt.core.client.GWT;
@@ -31,13 +33,13 @@ public class ExportFormat extends WizardPanel<String> {
 
   private String exportValue = null;
 
-  private static ExportFormat instance = null;
+  private static HashMap<String, ExportFormat> instances = new HashMap<>();
 
   public static ExportFormat getInstance(String databaseUUID) {
-    if (instance == null) {
-      instance = new ExportFormat(databaseUUID);
+    if (instances.get(databaseUUID) == null) {
+      instances.put(databaseUUID, new ExportFormat(databaseUUID));
     }
-    return instance;
+    return instances.get(databaseUUID);
   }
 
   private ExportFormat(String databaseUUID) {
@@ -75,7 +77,7 @@ public class ExportFormat extends WizardPanel<String> {
   @Override
   public void clear() {
     exportValue = null;
-    instance = null;
+    instances.clear();
   }
 
   @Override
