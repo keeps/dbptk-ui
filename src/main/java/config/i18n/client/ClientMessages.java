@@ -726,6 +726,8 @@ public interface ClientMessages extends Messages {
 
   String wizardProgressSIARDSubTitle();
 
+  String wizardSendToProgressPanelBreadcrumb();
+
   /*********************************************
    * Send to: Table & Columns
    ********************************************/

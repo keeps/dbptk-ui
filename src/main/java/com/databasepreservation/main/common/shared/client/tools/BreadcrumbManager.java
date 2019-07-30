@@ -476,4 +476,12 @@ public class BreadcrumbManager {
             + SafeHtmlUtils.htmlEscape(" " + messages.wizardSendToMetadataExportOptionsBreadcrumb()))));
     return items;
   }
+
+  public static List<BreadcrumbItem> forProgressBarPanelSendToWM(String databaseUUID) {
+    List<BreadcrumbItem> items = forSIARDMainPage(databaseUUID);
+    items.add(
+        new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.GLOBE)
+            + SafeHtmlUtils.htmlEscape(" " + messages.wizardSendToProgressPanelBreadcrumb()))));
+    return items;
+  }
 }

@@ -27,7 +27,6 @@ import org.yaml.snakeyaml.Yaml;
 
 import com.databasepreservation.DatabaseMigration;
 import com.databasepreservation.SIARDEdition;
-import com.databasepreservation.main.common.server.DBMSProgressObserver;
 import com.databasepreservation.main.common.server.ProgressObserver;
 import com.databasepreservation.main.common.server.SIARDProgressObserver;
 import com.databasepreservation.main.common.server.ViewerConfiguration;
@@ -93,7 +92,7 @@ public class SIARDController {
 
   public static boolean testConnection(String databaseUUID, ConnectionParameters parameters)
     throws GenericException {
-    JDBCImportModule jdbcImportModule = null;
+    JDBCImportModule jdbcImportModule;
 
     Path reporterPath = ViewerConfiguration.getInstance().getReportPath(databaseUUID).toAbsolutePath();
     try (Reporter reporter = new Reporter(reporterPath.getParent().toString(), reporterPath.getFileName().toString())) {
@@ -146,7 +145,7 @@ public class SIARDController {
     return false;
   }
 
-  public static boolean migrateToSIARD(String databaseUUID, String siard, ConnectionParameters connectionParameters,
+  public static boolean migrateToSIARD(String databaseUUID, String siard,
     TableAndColumnsParameters tableAndColumnsParameters, ExportOptionsParameters exportOptionsParameters,
     MetadataExportOptionsParameters metadataExportOptionsParameters) throws GenericException {
     File f = new File(siard);
@@ -240,7 +239,7 @@ public class SIARDController {
         }
         databaseMigration.exportModule(exportModuleFactory);
 
-        databaseMigration.filter(new ObservableFilter(new DBMSProgressObserver(databaseUUID)));
+        databaseMigration.filter(new ObservableFilter(new SIARDProgressObserver(databaseUUID)));
 
         databaseMigration.reporter(reporter);
 
@@ -254,8 +253,7 @@ public class SIARDController {
       } catch (IOException e) {
         throw new GenericException("Could not initialize conversion modules", e);
       } catch (ModuleException | RuntimeException e) {
-        LOGGER.info("" + e.getCause());
-        throw new GenericException("Could not convert the database", e);
+        throw new GenericException(e.getMessage(), e);
       }
     }
 

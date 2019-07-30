@@ -137,8 +137,8 @@ public interface BrowserServiceAsync {
   void migrateToDBMS(String databaseUUID, String siard, ConnectionParameters connectionParameters,
     AsyncCallback<Boolean> async);
 
-  void migrateToSIARD(String databaseUUID, String siardPath, ConnectionParameters connectionParameters,
-    TableAndColumnsParameters tableAndColumnsParameters, ExportOptionsParameters exportOptionsParameters,
+  void migrateToSIARD(String databaseUUID, String siardPath, TableAndColumnsParameters tableAndColumnsParameters,
+    ExportOptionsParameters exportOptionsParameters,
     MetadataExportOptionsParameters metadataExportOptionsParameters, AsyncCallback<Boolean> async);
 
   void generateUUID(AsyncCallback<String> async);

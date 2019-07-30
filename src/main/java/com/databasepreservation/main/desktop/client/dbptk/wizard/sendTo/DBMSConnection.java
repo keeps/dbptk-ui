@@ -156,6 +156,7 @@ public class DBMSConnection extends WizardPanel<ConnectionParameters> {
   @Override
   public boolean validate() {
     if (selected != null) {
+      GWT.log("" + sshTunnelPanel.isSSHTunnelEnabled());
       if (sshTunnelPanel.isSSHTunnelEnabled()) {
         return selected.validate() && sshTunnelPanel.validate();
       }

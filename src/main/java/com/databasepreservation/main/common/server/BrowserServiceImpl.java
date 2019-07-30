@@ -289,10 +289,10 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
   }
 
   @Override
-  public boolean migrateToSIARD(String databaseUUID, String siardPath, ConnectionParameters connectionParameters,
+  public boolean migrateToSIARD(String databaseUUID, String siardPath,
     TableAndColumnsParameters tableAndColumnsParameters, ExportOptionsParameters exportOptionsParameters,
     MetadataExportOptionsParameters metadataExportOptions) throws GenericException {
-    return SIARDController.migrateToSIARD(databaseUUID, siardPath, connectionParameters, tableAndColumnsParameters,
+    return SIARDController.migrateToSIARD(databaseUUID, siardPath, tableAndColumnsParameters,
       exportOptionsParameters, metadataExportOptions);
   }
 

@@ -11,6 +11,7 @@ import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabas
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
+import com.databasepreservation.main.common.shared.client.common.utils.AsyncCallbackUtils;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.common.shared.client.tools.ToolkitModuleName2ViewerModuleName;
@@ -237,6 +238,19 @@ public class SendToWizardManager extends Composite {
 
           BrowserService.Util.getInstance().migrateToDBMS(databaseUUID, siardPath, connectionParameters,
             new DefaultAsyncCallback<Boolean>() {
+
+              @Override
+              public void onFailure(Throwable caught) {
+                wizardContent.clear();
+                position = 1;
+                wizardContent.add(wizardInstances.get(position));
+                enableButtons(true);
+                updateBreadcrumb(1);
+                enableNext(false);
+                Toast.showError(messages.errorMessagesConnectionTitle(), caught.getMessage());
+                AsyncCallbackUtils.defaultFailureTreatment(caught);
+              }
+
               @Override
               public void onSuccess(Boolean result) {
                 if (result) {
@@ -245,12 +259,6 @@ public class SendToWizardManager extends Composite {
                   instances.clear();
                   HistoryManager.gotoSIARDInfo(databaseUUID);
                 }
-              }
-              @Override
-              public void onFailure(Throwable caught) {
-                enableButtons(true);
-                enableNext(false);
-                Toast.showError(messages.alertErrorTitle(), caught.getMessage());
               }
             });
         }
@@ -275,9 +283,9 @@ public class SendToWizardManager extends Composite {
           progressBarPanel.setSubTitleText(messages.wizardProgressSIARDSubTitle());
           wizardContent.add(progressBarPanel);
 
-          BrowserService.Util.getInstance().migrateToSIARD(databaseUUID, siardPath, connectionParameters,
-            tableAndColumnsParameters, exportOptionsParameters, metadataExportOptionsParameters,
-            new DefaultAsyncCallback<Boolean>() {
+          BrowserService.Util.getInstance().migrateToSIARD(databaseUUID, siardPath, tableAndColumnsParameters,
+            exportOptionsParameters, metadataExportOptionsParameters, new DefaultAsyncCallback<Boolean>() {
+
               @Override
               public void onSuccess(Boolean result) {
                 if (result) {
@@ -343,6 +351,9 @@ public class SendToWizardManager extends Composite {
       case 3:
         breadcrumbItems = BreadcrumbManager.forMetadataExportOptionsSendToWM(databaseUUID);
         break;
+      case 4:
+        breadcrumbItems = BreadcrumbManager.forProgressBarPanelSendToWM(databaseUUID);
+        break;
       default:
         breadcrumbItems = new ArrayList<>();
         break;
@@ -378,19 +389,23 @@ public class SendToWizardManager extends Composite {
     WizardPanel wizardPanel = wizardInstances.get(position);
     switch (wizardPage) {
       case HistoryManager.ROUTE_WIZARD_CONNECTION:
-        GWT.log(wizardPanel.getClass().getName());
         if (wizardPanel instanceof DBMSConnection) {
           DBMSConnection connection = (DBMSConnection) wizardPanel;
           connection.sideBarHighlighter(toSelect);
+        } else {
+          HistoryManager.gotoSendToLiveDBMS(databaseUUID);
         }
         break;
       case HistoryManager.ROUTE_WIZARD_TABLES_COLUMNS:
         if (wizardPanel instanceof TableAndColumns) {
           TableAndColumns tableAndColumns = (TableAndColumns) wizardPanel;
           tableAndColumns.sideBarHighlighter(toSelect, schemaUUID, tableUUID);
+        } else {
+          HistoryManager.gotoSendToLiveDBMS(databaseUUID);
         }
         break;
       default:
+        HistoryManager.gotoSendToLiveDBMS(databaseUUID);
         break;
     }
   }

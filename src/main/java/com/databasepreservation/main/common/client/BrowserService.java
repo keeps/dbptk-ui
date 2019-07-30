@@ -135,7 +135,7 @@ public interface BrowserService extends RemoteService {
   boolean migrateToDBMS(String databaseUUID, String siard, ConnectionParameters connectionParameters)
     throws GenericException;
 
-  boolean migrateToSIARD(String databaseUUID, String siardPath, ConnectionParameters connectionParameters,
+  boolean migrateToSIARD(String databaseUUID, String siardPath,
     TableAndColumnsParameters tableAndColumnsParameters, ExportOptionsParameters exportOptionsParameters,
     MetadataExportOptionsParameters metadataExportOptions) throws GenericException;
 

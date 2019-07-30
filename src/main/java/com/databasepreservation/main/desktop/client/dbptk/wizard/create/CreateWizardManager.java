@@ -159,7 +159,7 @@ public class CreateWizardManager extends Composite {
 
       wizardContent.add(spinner);
 
-      BrowserService.Util.getInstance().testConnection("test", connectionParameters,
+      BrowserService.Util.getInstance().testConnection(databaseUUID, connectionParameters,
         new DefaultAsyncCallback<Boolean>() {
           @Override
           public void onSuccess(Boolean aBoolean) {
@@ -303,9 +303,14 @@ public class CreateWizardManager extends Composite {
                 public void onSuccess(String result) {
                   clear();
                   instance = null;
-                  ProgressBarPanel.getInstance(databaseUUID).clear(databaseUUID);
                   Toast.showInfo(messages.createSIARDWizardManagerInformationMessagesTitle(), messages.createSIARDWizardManagerInformationMessage());
+                    Widget spinner = new HTML(SafeHtmlUtils.fromSafeConstant(
+                      "<div class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
+
+                    wizardContent.add(spinner);
                   HistoryManager.gotoSIARDInfo(databaseUUID);
+                    wizardContent.remove(spinner);
+                    ProgressBarPanel.getInstance(databaseUUID).clear(databaseUUID);
                 }
 
                 @Override
@@ -391,31 +396,37 @@ public class CreateWizardManager extends Composite {
   }
 
   private void internalChanger(String wizardPage, String toSelect, String schemaUUID, String tableUUID) {
-    WizardPanel wizardPanel = wizardInstances.get(position);
-    switch (wizardPage) {
-      case HistoryManager.ROUTE_WIZARD_CONNECTION:
-        if (wizardPanel instanceof Connection) {
-          Connection connection = (Connection) wizardPanel;
-          connection.sideBarHighlighter(toSelect);
-        }
-        break;
-      case HistoryManager.ROUTE_WIZARD_TABLES_COLUMNS:
-        if (wizardPanel instanceof TableAndColumns) {
-          TableAndColumns tableAndColumns = (TableAndColumns) wizardPanel;
-          tableAndColumns.sideBarHighlighter(toSelect, schemaUUID, tableUUID);
-        }
-        break;
-      case HistoryManager.ROUTE_WIZARD_CUSTOM_VIEWS:
-        if (wizardPanel instanceof CustomViews) {
-          CustomViews customViews = (CustomViews) wizardPanel;
-          customViews.sideBarHighlighter(toSelect, schemaUUID);
-        }
-        break;
-      case HistoryManager.ROUTE_WIZARD_EXPORT_SIARD_OPTIONS:
-      case HistoryManager.ROUTE_WIZARD_EXPORT_EXT_OPTIONS:
-      case HistoryManager.ROUTE_WIZARD_EXPORT_METADATA_OPTIONS:
-      default:
-        break;
+
+    if (wizardInstances.isEmpty()) {
+      HistoryManager.gotoCreateSIARD();
+    } else {
+
+      WizardPanel wizardPanel = wizardInstances.get(position);
+      switch (wizardPage) {
+        case HistoryManager.ROUTE_WIZARD_CONNECTION:
+          if (wizardPanel instanceof Connection) {
+            Connection connection = (Connection) wizardPanel;
+            connection.sideBarHighlighter(toSelect);
+          }
+          break;
+        case HistoryManager.ROUTE_WIZARD_TABLES_COLUMNS:
+          if (wizardPanel instanceof TableAndColumns) {
+            TableAndColumns tableAndColumns = (TableAndColumns) wizardPanel;
+            tableAndColumns.sideBarHighlighter(toSelect, schemaUUID, tableUUID);
+          }
+          break;
+        case HistoryManager.ROUTE_WIZARD_CUSTOM_VIEWS:
+          if (wizardPanel instanceof CustomViews) {
+            CustomViews customViews = (CustomViews) wizardPanel;
+            customViews.sideBarHighlighter(toSelect, schemaUUID);
+          }
+          break;
+        case HistoryManager.ROUTE_WIZARD_EXPORT_SIARD_OPTIONS:
+        case HistoryManager.ROUTE_WIZARD_EXPORT_EXT_OPTIONS:
+        case HistoryManager.ROUTE_WIZARD_EXPORT_METADATA_OPTIONS:
+        default:
+          break;
+      }
     }
   }
 }
