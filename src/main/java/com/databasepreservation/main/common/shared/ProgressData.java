@@ -33,7 +33,15 @@ public class ProgressData implements Serializable {
     return instances.get(uuid);
   }
 
-  public ProgressData() {
+  private ProgressData() {
+  }
+
+  public void incrementCurrentProcessedTableRows(long value) {
+    this.currentProcessedTableRows += value;
+  }
+
+  public void incrementProcessedRows(long value) {
+    this.processedRows += value;
   }
 
   public long getProcessedRows() {
@@ -151,21 +159,6 @@ public class ProgressData implements Serializable {
   public int hashCode() {
     return Objects.hash(getProcessedRows(), getTotalRows(), getProcessedTables(), getTotalTables(),
       getProcessedSchemas(), getTotalSchemas(), getCurrentTableName(), getCurrentSchemaName());
-  }
-
-  public void clear() {
-    processedRows = -1;
-    totalRows = -1;
-    processedTables = -1;
-    totalTables = -1;
-    processedSchemas = -1;
-    totalSchemas = -1;
-    currentProcessedTableRows = -1;
-    currentTableTotalRows = -1;
-    currentTableName = "";
-    currentSchemaName = "";
-    finished = false;
-    databaseStructureRetrieved = false;
   }
 
   public void reset() {

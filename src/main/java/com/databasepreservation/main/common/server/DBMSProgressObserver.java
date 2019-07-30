@@ -22,7 +22,7 @@ public class DBMSProgressObserver implements ModuleObserver {
 
   @Override
   public void notifyOpenDatabase() {
-    progressData.reset();
+    progressData.setDatabaseStructureRetrieved(false);
   }
 
   @Override
@@ -40,7 +40,7 @@ public class DBMSProgressObserver implements ModuleObserver {
 
   @Override
   public void notifyOpenSchema(DatabaseStructure databaseStructure, SchemaStructure schemaStructure,
-    long completedSchemas, long completedTablesInSchema) {
+                               long completedSchemas, long completedTablesInSchema) {
     progressData.setCurrentSchemaName(schemaStructure.getName());
     progressData.setProcessedSchemas(completedSchemas);
     progressData.setTotalTables(schemaStructure.getTables().size());
@@ -48,36 +48,34 @@ public class DBMSProgressObserver implements ModuleObserver {
 
   @Override
   public void notifyOpenTable(DatabaseStructure databaseStructure, TableStructure tableStructure, long completedSchemas,
-    long completedTablesInSchema) {
+                              long completedTablesInSchema) {
     progressData.setCurrentTableName(tableStructure.getName());
-    progressData.setProcessedTables(completedTablesInSchema);
+    progressData.setCurrentProcessedTableRows(1);
     progressData.setCurrentTableTotalRows(tableStructure.getRows());
   }
 
   @Override
   public void notifyTableProgressSparse(DatabaseStructure databaseStructure, TableStructure tableStructure,
-    long completedRows, long totalRows) {
-    progressData.setCurrentProcessedTableRows(completedRows);
+                                        long completedRows, long totalRows) {
+    progressData.incrementCurrentProcessedTableRows(completedRows);
   }
 
   @Override
   public void notifyTableProgressDetailed(DatabaseStructure databaseStructure, TableStructure tableStructure, Row row,
-    long completedRows, long totalRows) {
-    progressData.setCurrentProcessedTableRows(completedRows);
+                                          long completedRows, long totalRows) {
+    progressData.incrementCurrentProcessedTableRows(completedRows);
   }
 
   @Override
   public void notifyCloseTable(DatabaseStructure databaseStructure, TableStructure tableStructure,
-    long completedSchemas, long completedTablesInSchema) {
+                               long completedSchemas, long completedTablesInSchema) {
+    progressData.incrementProcessedRows(tableStructure.getRows());
     progressData.setProcessedTables(completedTablesInSchema);
-    progressData.setCurrentProcessedTableRows(tableStructure.getRows());
-    progressData.setProcessedRows(progressData.getProcessedRows() + tableStructure.getRows());
   }
 
   @Override
   public void notifyCloseSchema(DatabaseStructure databaseStructure, SchemaStructure schemaStructure,
-    long completedSchemas, long completedTablesInSchema) {
-    progressData.setProcessedSchemas(completedSchemas);
+                                long completedSchemas, long completedTablesInSchema) {
   }
 
   @Override
