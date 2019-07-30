@@ -1,7 +1,9 @@
 package com.databasepreservation.main.desktop.client.dbptk.wizard.sendTo;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import com.databasepreservation.main.common.client.BrowserService;
@@ -11,7 +13,6 @@ import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.common.shared.client.widgets.Toast;
 import com.databasepreservation.main.desktop.client.common.sidebar.ConnectionSidebar;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
-import com.databasepreservation.main.desktop.client.dbptk.wizard.create.CreateWizardManager;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.create.connection.JDBCPanel;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.create.connection.SSHTunnelPanel;
 import com.databasepreservation.main.desktop.shared.models.DBPTKModule;
@@ -48,19 +49,27 @@ public class DBMSConnection extends WizardPanel<ConnectionParameters> {
   private String selectedConnection;
   private JDBCPanel selected;
   private Set<JDBCPanel> JDBCPanels = new HashSet<>();
+  private String databaseUUID;
+  private  static Map<String, DBMSConnection> instances = new HashMap<>();
 
-  private static DBMSConnection instance = null;
+//  private static DBMSConnection instance = null;
 
   public static DBMSConnection getInstance(final String databaseUUID) {
-    if (instance == null) {
-      instance = new DBMSConnection(databaseUUID);
+    if (instances.get(databaseUUID) == null) {
+     DBMSConnection  instance = new DBMSConnection(databaseUUID);
+     instances.put(databaseUUID, instance);
     }
-    return instance;
+
+    SendToWizardManager sendToWizardManager = SendToWizardManager.getInstance(databaseUUID);
+    sendToWizardManager.enableNext(false);
+
+    return instances.get(databaseUUID);
   }
 
   private DBMSConnection(final String databaseUUID) {
     initWidget(binder.createAndBindUi(this));
 
+    this.databaseUUID = databaseUUID;
     sshTunnelPanel = SSHTunnelPanel.getInstance();
 
     Widget spinner = new HTML(SafeHtmlUtils.fromSafeConstant(
@@ -97,12 +106,16 @@ public class DBMSConnection extends WizardPanel<ConnectionParameters> {
 
     TabPanel tabPanel = new TabPanel();
     tabPanel.addStyleName("browseItemMetadata connection-panel");
-    selected = JDBCPanel.getInstance(connection, preservationParametersSelected);
+    selected = JDBCPanel.getInstance(connection, preservationParametersSelected, databaseUUID);
     JDBCPanels.add(selected);
     tabPanel.add(selected, messages.tabGeneral());
     tabPanel.add(sshTunnelPanel, messages.tabSSHTunnel());
 
     tabPanel.selectTab(0);
+
+    SendToWizardManager sendToWizardManager = SendToWizardManager.getInstance(databaseUUID);
+    sendToWizardManager.enableNext(false);
+    selected.validate();
 
     connectionInputPanel.add(tabPanel);
   }
@@ -130,7 +143,7 @@ public class DBMSConnection extends WizardPanel<ConnectionParameters> {
     sshTunnelPanel.clear();
     connectionInputPanel.clear();
     connectionSidebar.selectNone();
-    instance = null;
+    instances.clear();
   }
 
   public void clearPasswords() {

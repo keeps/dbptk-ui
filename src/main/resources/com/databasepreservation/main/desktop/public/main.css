@@ -1081,6 +1081,13 @@ html, body, .main {
     background-color: transparent;
 }
 
+.btn-link-info:disabled{
+    color: #aeaeae;
+    background-color: transparent;
+    cursor: unset;
+    text-decoration: none;
+}
+
 .label-field {
     display: inline-block;
     text-align: left;

@@ -11,6 +11,7 @@ import com.databasepreservation.main.common.shared.client.common.dialogs.Dialogs
 import com.databasepreservation.main.common.shared.client.common.utils.AsyncCallbackUtils;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
+import com.databasepreservation.main.common.shared.client.widgets.Toast;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.ProgressBarPanel;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.create.exportOptions.MetadataExportOptions;
@@ -303,6 +304,13 @@ public class CreateWizardManager extends Composite {
                   instance = null;
                   ProgressBarPanel.getInstance(databaseUUID).clear(databaseUUID);
                   HistoryManager.gotoSIARDInfo(databaseUUID);
+                }
+
+                @Override
+                public void onFailure(Throwable caught) {
+                  enableButtons(true);
+                  enableNext(false);
+                  Toast.showError(messages.alertErrorTitle(), caught.getMessage());
                 }
               });
             }

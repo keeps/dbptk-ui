@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.databasepreservation.main.common.client.BrowserService;
 import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
@@ -14,15 +13,14 @@ import com.databasepreservation.main.common.shared.client.tools.PathUtils;
 import com.databasepreservation.main.common.shared.client.tools.ViewerStringUtils;
 import com.databasepreservation.main.desktop.client.common.FileUploadField;
 import com.databasepreservation.main.desktop.client.common.GenericField;
+import com.databasepreservation.main.desktop.client.dbptk.wizard.create.CreateWizardManager;
+import com.databasepreservation.main.desktop.client.dbptk.wizard.sendTo.SendToWizardManager;
 import com.databasepreservation.main.desktop.shared.models.Filter;
 import com.databasepreservation.main.desktop.shared.models.JDBCParameters;
 import com.databasepreservation.main.desktop.shared.models.PreservationParameter;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.json.client.JSONArray;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONString;
-import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Command;
@@ -34,7 +32,6 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
-import org.springframework.web.util.JavaScriptUtils;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -54,22 +51,24 @@ public class JDBCPanel extends Composite {
   private String pathToDriver = null;
   private ArrayList<PreservationParameter> parameters;
   private TextBox focusElement = null;
+  private String databaseUUID = null;
 
   @UiField
   FlowPanel content;
 
-  public static JDBCPanel getInstance(String connection, ArrayList<PreservationParameter> parameters) {
-    if (instances.get(connection) == null) {
-      JDBCPanel instance = new JDBCPanel(parameters);
-      instances.put(connection, instance);
+  public static JDBCPanel getInstance(String connection, ArrayList<PreservationParameter> parameters, String databaseUUID) {
+    String code =  databaseUUID + "/" + connection;
+    if (instances.get(code) == null) {
+      JDBCPanel instance = new JDBCPanel(parameters, databaseUUID);
+      instances.put(code, instance);
     }
-
-    return instances.get(connection);
+    return instances.get(code);
   }
 
-  private JDBCPanel(ArrayList<PreservationParameter> parameters) {
+  private JDBCPanel(ArrayList<PreservationParameter> parameters, String databaseUUID) {
     initWidget(binder.createAndBindUi(this));
 
+    this.databaseUUID = databaseUUID;
     this.parameters = parameters;
 
     for (PreservationParameter p : parameters) {
@@ -114,6 +113,11 @@ public class JDBCPanel extends Composite {
         genericField = GenericField.createInstance(messages.connectionLabels(parameter.getName()), passwordTextBox);
         if(parameter.isRequired()) {
           passwordTextBox.getElement().setAttribute("required", "required");
+          passwordTextBox.addKeyUpHandler(event -> {
+            if(event.getNativeKeyCode() != KeyCodes.KEY_TAB){
+              selfValidator(passwordTextBox);
+            }
+          });
         }
         break;
       case "CHECKBOX":
@@ -165,6 +169,11 @@ public class JDBCPanel extends Composite {
           }
           if (parameter.isRequired()) {
             defaultTextBox.getElement().setAttribute("required", "required");
+            defaultTextBox.addKeyUpHandler(event -> {
+              if(event.getNativeKeyCode() != KeyCodes.KEY_TAB){
+                selfValidator(defaultTextBox);
+              }
+            });
           }
           break;
     }
@@ -176,17 +185,30 @@ public class JDBCPanel extends Composite {
     }
   }
 
+  private void selfValidator(TextBox input){
+    if(input.getValue().isEmpty()){
+      input.addStyleName("wizard-connection-validator");
+    } else {
+      input.removeStyleName("wizard-connection-validator");
+    }
+    validate();
+  }
+
   public ArrayList<PreservationParameter> validate() {
     ArrayList<PreservationParameter> arrayList = new ArrayList<>();
+    CreateWizardManager createWizardManager = CreateWizardManager.getInstance();
+    SendToWizardManager sendToWizardManager = SendToWizardManager.getInstance(databaseUUID);
+    createWizardManager.enableNext(true);
+    sendToWizardManager.enableNext(true);
 
     for (PreservationParameter parameter : parameters) {
       if (parameter.isRequired()) {
-        if (parameter.getInputType().equals("TEXT")) {
+        if (parameter.getInputType().equals("TEXT") || parameter.getInputType().equals("PASSWORD"))  {
           final TextBox textBox = textBoxInputs.get(parameter.getName());
           if (ViewerStringUtils.isBlank(textBox.getText())) {
             arrayList.add(parameter);
-            textBox.addStyleName("wizard-connection-validator");
-            textBox.getElement().setAttribute("required", "required");
+            createWizardManager.enableNext(false);
+            sendToWizardManager.enableNext(false);
           }
         }
         if (parameter.getInputType().equals("FILE")) {

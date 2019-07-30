@@ -77,6 +77,11 @@ public class SSHTunnelPanel extends Composite {
     proxyPort.setEnabled(value);
     proxyUser.setEnabled(value);
     proxyPassword.setEnabled(value);
+
+    setRequiredInput(proxyHost);
+    setRequiredInput(proxyPort);
+    setRequiredInput(proxyUser);
+    setRequiredInput(proxyPassword);
   }
 
   private void setEnabled(Widget widget, boolean enabled) {
@@ -94,6 +99,14 @@ public class SSHTunnelPanel extends Composite {
   private void setRequired(Widget label, boolean required) {
     if (required) label.addStyleName("form-label-mandatory");
     else label.removeStyleName("form-label-mandatory");
+  }
+
+  private void setRequiredInput(TextBox input) {
+    input.addStyleName("wizard-connection-validator");
+    input.addKeyUpHandler(event -> {
+      if(input.getValue().isEmpty())
+        input.getElement().setAttribute("required", "required");
+    });
   }
 
   public boolean isSSHTunnelEnabled() {

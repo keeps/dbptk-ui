@@ -246,6 +246,12 @@ public class SendToWizardManager extends Composite {
                   HistoryManager.gotoSIARDInfo(databaseUUID);
                 }
               }
+              @Override
+              public void onFailure(Throwable caught) {
+                enableButtons(true);
+                enableNext(false);
+                Toast.showError(messages.alertErrorTitle(), caught.getMessage());
+              }
             });
         }
       });
@@ -269,8 +275,9 @@ public class SendToWizardManager extends Composite {
           progressBarPanel.setSubTitleText(messages.wizardProgressSIARDSubTitle());
           wizardContent.add(progressBarPanel);
 
-          BrowserService.Util.getInstance().migrateToSIARD(databaseUUID, siardPath, connectionParameters, tableAndColumnsParameters,
-            exportOptionsParameters,metadataExportOptionsParameters, new DefaultAsyncCallback<Boolean>() {
+          BrowserService.Util.getInstance().migrateToSIARD(databaseUUID, siardPath, connectionParameters,
+            tableAndColumnsParameters, exportOptionsParameters, metadataExportOptionsParameters,
+            new DefaultAsyncCallback<Boolean>() {
               @Override
               public void onSuccess(Boolean result) {
                 if (result) {
@@ -279,6 +286,12 @@ public class SendToWizardManager extends Composite {
                   instances.clear();
                   HistoryManager.gotoSIARDInfo(databaseUUID);
                 }
+              }
+              @Override
+              public void onFailure(Throwable caught) {
+                enableButtons(true);
+                enableNext(false);
+                Toast.showError(messages.alertErrorTitle(), caught.getMessage());
               }
             });
         }

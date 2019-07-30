@@ -90,9 +90,6 @@ public class Connection extends WizardPanel<ConnectionParameters> {
 
   public void sideBarHighlighter(String connection) {
 
-    CreateWizardManager createWizardManager = CreateWizardManager.getInstance();
-    createWizardManager.enableNext(true);
-
     connectionSidebar.select(connection);
     JDBCListConnections.clear();
     JDBCListConnections.add(connectionSidebar);
@@ -105,7 +102,7 @@ public class Connection extends WizardPanel<ConnectionParameters> {
 
     TabPanel tabPanel = new TabPanel();
     tabPanel.addStyleName("browseItemMetadata connection-panel");
-    selected = JDBCPanel.getInstance(connection, preservationParametersSelected);
+    selected = JDBCPanel.getInstance(connection, preservationParametersSelected, databaseUUID);
     JDBCPanels.add(selected);
     tabPanel.add(selected, messages.tabGeneral());
     tabPanel.add(sshTunnelPanel, messages.tabSSHTunnel());

@@ -141,6 +141,7 @@ public class SIARDMainPage extends Composite {
     Button btnValidate = new Button();
     btnValidate.setText(messages.validateNow());
     btnValidate.addStyleName("btn btn-link-info");
+    btnValidate.setEnabled(false);
 
     Button btnSeeReport;
 
@@ -194,6 +195,9 @@ public class SIARDMainPage extends Composite {
     browse.addToInfoPanel(field);
     browse.addButton(btnBrowse);
     browse.addButton(btnDelete);
+
+    btnBrowse.setVisible(false);
+    btnDelete.setVisible(false);
 
     return browse;
   }
