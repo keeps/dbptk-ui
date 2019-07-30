@@ -105,7 +105,6 @@ public class ErDiagram extends Composite {
           int minColumnsAndRowsBiggerThanZero = Integer.MAX_VALUE;
 
           for (ViewerTable viewerTable : schema.getTables()) {
-            GWT.log(viewerTable.getName());
             if (!viewerTable.getName().startsWith("VIEW_")) {
               VisNode visNode = new VisNode(viewerTable.getUUID(), viewerTable.getName());
 

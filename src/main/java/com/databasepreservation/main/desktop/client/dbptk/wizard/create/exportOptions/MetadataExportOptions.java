@@ -64,7 +64,6 @@ public class MetadataExportOptions extends WizardPanel<MetadataExportOptionsPara
 
         for (PreservationParameter p : result.getParameters(moduleName)) {
           if (p.getExportOption() != null && p.getExportOption().equals(ViewerConstants.METADATA_EXPORT_OPTIONS)) {
-            GWT.log(p.getName());
             buildGenericWidget(p);
           }
         }
