@@ -49,6 +49,7 @@ public class SIARDProgressObserver implements ModuleObserver {
     long completedTablesInSchema) {
     progressData.setCurrentTableName(tableStructure.getName());
     progressData.setCurrentProcessedTableRows(0);
+    progressData.setPreviousProcessedRows(0);
     progressData.setCurrentTableTotalRows(tableStructure.getRows());
   }
 
@@ -56,18 +57,19 @@ public class SIARDProgressObserver implements ModuleObserver {
   public void notifyTableProgressSparse(DatabaseStructure databaseStructure, TableStructure tableStructure,
     long completedRows, long totalRows) {
     progressData.setCurrentProcessedTableRows(completedRows + 1);
+    progressData.incrementProcessedRows(completedRows + 1);
   }
 
   @Override
   public void notifyTableProgressDetailed(DatabaseStructure databaseStructure, TableStructure tableStructure, Row row,
     long completedRows, long totalRows) {
     progressData.setCurrentProcessedTableRows(completedRows + 1);
+    progressData.incrementProcessedRows(completedRows + 1);
   }
 
   @Override
   public void notifyCloseTable(DatabaseStructure databaseStructure, TableStructure tableStructure,
     long completedSchemas, long completedTablesInSchema) {
-    progressData.incrementProcessedRows(tableStructure.getRows());
     progressData.setProcessedTables(completedTablesInSchema);
   }
 

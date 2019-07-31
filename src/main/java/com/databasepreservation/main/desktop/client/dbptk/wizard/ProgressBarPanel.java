@@ -70,7 +70,7 @@ public class ProgressBarPanel extends Composite {
         progressBar.setCurrent(0);
         content.clear();
         stopUpdating();
-        autoUpdateTimer.scheduleRepeating(1000);
+        autoUpdateTimer.scheduleRepeating(100);
       }
     });
   }

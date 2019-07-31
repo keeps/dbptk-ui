@@ -1,7 +1,5 @@
 package com.databasepreservation.main.common.shared;
 
-import com.google.gwt.core.client.GWT;
-
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Objects;
@@ -11,6 +9,7 @@ import java.util.Objects;
  */
 public class ProgressData implements Serializable {
 
+  private long previousProcessedRows;
   private long processedRows;
   private long totalRows;
   private long processedTables;
@@ -41,7 +40,12 @@ public class ProgressData implements Serializable {
   }
 
   public void incrementProcessedRows(long value) {
-    this.processedRows += value;
+    this.processedRows += (value - this.previousProcessedRows);
+    this.previousProcessedRows = value;
+  }
+
+  public void setPreviousProcessedRows(long previousProcessedRows) {
+    this.previousProcessedRows = previousProcessedRows;
   }
 
   public long getProcessedRows() {
