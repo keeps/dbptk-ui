@@ -627,6 +627,20 @@ public interface ClientMessages extends Messages {
 
   String errorMessagesConnection(@Select int error);
 
+  String connectionHomePanelTitle();
+
+  String connectionHomePanelWelcomeText();
+
+  String connectionHomePanelConnectionText();
+
+  String connectionHomePanelTableAndColumnsText();
+
+  String connectionHomePanelCustomViewsText();
+
+  String connectionHomePanelExportOptionsText();
+
+  String connectionHomePanelMetadataExportOptionsText();
+
   /********************************************
    * Create Wizard: Table & Columns
    ********************************************/

@@ -11,6 +11,7 @@ import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.common.shared.client.widgets.Toast;
 import com.databasepreservation.main.desktop.client.common.sidebar.ConnectionSidebar;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
+import com.databasepreservation.main.desktop.client.dbptk.wizard.common.connection.CreateConnectionHomePanel;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.common.connection.JDBCPanel;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.common.connection.SSHTunnelPanel;
 import com.databasepreservation.main.desktop.shared.models.DBPTKModule;
@@ -51,14 +52,14 @@ public class Connection extends WizardPanel<ConnectionParameters> {
 
   private static Connection instance = null;
 
-  public static Connection getInstance(String databaseUUID) {
+  public static Connection getInstance(final String databaseUUID) {
     if (instance == null) {
       instance = new Connection(databaseUUID);
     }
     return instance;
   }
 
-  private Connection(String databaseUUID) {
+  private Connection(final String databaseUUID) {
     initWidget(binder.createAndBindUi(this));
 
     this.databaseUUID = databaseUUID;
@@ -67,6 +68,10 @@ public class Connection extends WizardPanel<ConnectionParameters> {
     createWizardManager.enableNext(false);
 
     sshTunnelPanel = SSHTunnelPanel.getInstance(databaseUUID);
+
+    CreateConnectionHomePanel connectionHomePanel = CreateConnectionHomePanel.getInstance();
+    connectionInputPanel.clear();
+    connectionInputPanel.add(connectionHomePanel);
 
     Widget spinner = new HTML(SafeHtmlUtils.fromSafeConstant(
       "<div class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
