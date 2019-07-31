@@ -3,6 +3,7 @@ package com.databasepreservation.main.desktop.client.dbptk;
 import java.util.List;
 
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
+import com.databasepreservation.main.desktop.client.common.helper.HelperUploadSIARDFile;
 import org.roda.core.data.v2.index.filter.BasicSearchFilterParameter;
 import org.roda.core.data.v2.index.filter.Filter;
 
@@ -112,13 +113,9 @@ public class Manage extends Composite {
   }
 
   private void initButtons() {
-    create.addClickHandler(event -> {
-      //HistoryManager.gotoHome();
-    });
+    create.addClickHandler(event -> HistoryManager.gotoCreateSIARD());
 
-    open.addClickHandler(event -> {
-      //HistoryManager.gotoHome();
-    });
+    open.addClickHandler(event -> new HelperUploadSIARDFile().openFile(databaseList));
   }
 
   private void doSearch() {
