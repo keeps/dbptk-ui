@@ -1,4 +1,5 @@
 language: java
+dist: trusty
 jdk: oraclejdk8
 branches:
   except:
@@ -23,11 +24,11 @@ script:
   -Dsonar.scm.disabled=true clean org.jacoco:jacoco-maven-plugin:prepare-agent install
   sonar:sonar
 before_deploy:
-- sed -ri "s/VERSION/$TRAVIS_BRANCH/g" .travis/descriptor*.json
+- sed -ri "s/VERSION/$TRAVIS_BRANCH/g" .travis/descriptor.json
 - sed -ri "s/RELEASED/`date "+%d\/%m\/%y"`/g" .travis/descriptor*.json
 deploy:
   - provider: bintray
-    file: .travis/descriptor-master.json
+    file: .travis/descriptor-staging.json
     user: "006627"
     key:
       secure: rErT6sjqzP/3iop0MWkjeTbTMQs1V/rG0j9wC/GS3Kly1ylYslLgn7FMZAUM7owZNyFjJBC8fXxcSKkaadoK0J7L1AZ9qfao3/Q5wbrRgjdHYRq2OL1BHzeEprQrnCrocjpmsg6XBA48eNzJC5S780azQmkVecRbJdeU+jCylPZjufje6lVCI9wdKYS4CqLTikYq8Yhnap1BjmLCHduaFa8ohL0wTJ4V6CTxDkQHO3BIlZMd/fICQB1faPxeiGDtEgEUDkSzKqjyGlffI4Qv6OwL7H0Y6dzzp8pY7x+3GvEErNUiKQCvySexkaBlypVjwIZvsI9y+eInB5ATeHeqXX+m4conMTggJas1piZsxBi5gR5K2cADfGq4VaiPtkXDzp8CltUB6XDDbaiEdLzDWbDZ+JKHfSkUCLel5q/Ua8emX8rFlPxYGHyj64rKefnnvJgmZkHzvFj8kdTmq9w697ZG1s5tohWwGECcnQX7VQ3Z3KSomlPaOWa5ykJVA5DupaYnaajzjq0AGbadaTLJSp1tgH48q3nOaDbTeNnn7iwk7fBNAP9MmERF+j1dlsbwSB408pQlyOq3ZlagotnKusjJJ2z/xjddEJL2/Fis2quhZOVOIzHshbwfI4szCOz4rWie2D546asgstiRdr6sDWY88Cc4hgSfiBYLUmJ4DZk=

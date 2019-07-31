@@ -1,0 +1,35 @@
+{
+  "package": {
+    "name": "db-visualization-toolkit",
+    "repo": "db-visualization-toolkit",
+    "subject": "keeps",
+    "desc": "Relational Database Viewer for databases based on SIARD 2",
+    "website_url": "http://visualization.database-preservation.com/",
+    "issue_tracker_url": "",
+    "vcs_url": "https://github.com/keeps/db-visualization-toolkit",
+    "github_use_tag_release_notes": true,
+    "github_release_notes_file": "RELEASE.txt",
+    "public_download_numbers": false,
+    "public_stats": false,
+    "licenses": ["LGPL-3.0"]
+  },
+
+  "version": {
+    "name": "Staging",
+    "description": "",
+    "released": "RELEASED",
+    "vcs_tag": "Staging",
+    "attributes": [],
+    "gpgSign": false
+  },
+
+  "files":
+  [
+    {
+      "includePattern": "target/(.*.war)$", "uploadPattern": "dbvtk-staging.war",
+      "matrixParams": { "override": 1 }
+    }
+  ],
+
+  "publish": true
+}
