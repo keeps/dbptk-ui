@@ -2,10 +2,12 @@ package com.databasepreservation.main.desktop.client.dbptk.wizard.create;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.common.shared.client.tools.ViewerStringUtils;
 import com.databasepreservation.main.common.shared.client.widgets.Toast;
+import com.databasepreservation.main.desktop.client.common.ComboBoxField;
 import com.databasepreservation.main.desktop.client.common.sidebar.CustomViewsSidebar;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
 import com.databasepreservation.main.desktop.shared.models.wizardParameters.CustomViewsParameter;
@@ -36,16 +38,16 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
   private static CustomViewsUiBinder binder = GWT.create(CustomViewsUiBinder.class);
 
   @UiField
-  FlowPanel customViewsList, rightSideContainer;
+  FlowPanel customViewsList, rightSideContainer, schemasCombobox;
 
   @UiField
-  TextBox customViewSchemaName, customViewName, customViewDescription;
+  TextBox customViewName, customViewDescription;
 
   @UiField
   TextArea customViewQuery;
 
   @UiField
-  Label customViewSchemaNameLabel, customViewNameLabel, customViewDescriptionLabel, customViewQueryLabel;
+  Label customViewNameLabel, customViewDescriptionLabel, customViewQueryLabel;
 
   private static CustomViews instance = null;
   private CustomViewsSidebar customViewsSidebar;
@@ -53,22 +55,28 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
   private int counter = 0;
   private FlowPanel customViewsButtons;
   private boolean toSave;
+  private ComboBoxField customViewSchemaName;
 
-  public static CustomViews getInstance(FlowPanel customViewButtons) {
+  public static CustomViews getInstance(List<String> schemas, FlowPanel customViewButtons) {
     if (instance == null) {
-      instance = new CustomViews(customViewButtons);
+      instance = new CustomViews(schemas, customViewButtons);
     }
     return instance;
   }
 
-  private CustomViews(FlowPanel customViewsButtons) {
+  private CustomViews(List<String> schemas, FlowPanel customViewsButtons) {
     initWidget(binder.createAndBindUi(this));
 
     this.customViewsButtons = customViewsButtons;
     customViewsSidebar = CustomViewsSidebar.getInstance();
     customViewsList.add(customViewsSidebar);
 
-    setRequired(customViewSchemaNameLabel, true);
+    customViewSchemaName = ComboBoxField.createInstance(messages.customViewSchemaNameLabel(), schemas);
+    customViewSchemaName.setCSSMetadata("form-row","form-label-spaced", "form-combobox");
+    customViewSchemaName.setRequired();
+
+    schemasCombobox.add(customViewSchemaName);
+
     setRequired(customViewNameLabel, true);
     setRequired(customViewDescriptionLabel, false);
     setRequired(customViewQueryLabel, true);
@@ -93,7 +101,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
   @Override
   public boolean validate() {
     boolean empty = ViewerStringUtils.isBlank(customViewName.getText()) && ViewerStringUtils.isBlank(customViewQuery.getText())
-        && ViewerStringUtils.isBlank(customViewSchemaName.getText());
+        && ViewerStringUtils.isBlank(customViewSchemaName.getSelectedValue());
 
     if (empty) {
       toSave = false;
@@ -102,7 +110,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
       toSave = true;
     }
 
-    CustomViewsParameter parameter = new CustomViewsParameter(customViewSchemaName.getText(), counter,
+    CustomViewsParameter parameter = new CustomViewsParameter(customViewSchemaName.getSelectedValue(), counter,
         customViewName.getText(),
         customViewDescription.getText(), customViewQuery.getText());
 
@@ -116,7 +124,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
     CustomViewsParameters customViewsParameters = new CustomViewsParameters();
     ArrayList<CustomViewsParameter> parameters = new ArrayList<>(this.customViewsParameters.values());
     if (toSave) {
-      CustomViewsParameter parameter = new CustomViewsParameter(customViewSchemaName.getText(), counter,
+      CustomViewsParameter parameter = new CustomViewsParameter(customViewSchemaName.getSelectedValue(), counter,
         customViewName.getText(), customViewDescription.getText(), customViewQuery.getText());
       parameters.add(parameter);
     }
@@ -166,7 +174,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
       btnUpdate.addClickHandler(event -> {
         final int valid = customViewFormValidatorUpdate(parameter.getCustomViewName());
         if (valid == -1) {
-          updateCustomViewParameters(parameter.getCustomViewID(), customViewSchemaName.getText(),
+          updateCustomViewParameters(parameter.getCustomViewID(), customViewSchemaName.getSelectedValue(),
               customViewName.getText(),
               customViewDescription.getText(), customViewQuery.getText());
           Toast.showInfo(messages.customViewsTitle(), messages.customViewsUpdateMessage());
@@ -197,7 +205,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
   }
 
   private int customViewFormValidator() {
-    String viewSchemaName = customViewSchemaName.getText();
+    String viewSchemaName = customViewSchemaName.getSelectedValue();
     String viewNameText = customViewName.getText();
     String viewQueryText = customViewQuery.getText();
 
@@ -221,7 +229,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
   }
 
   private int customViewFormValidatorUpdate(final String customViewName) {
-    String viewSchemaName = customViewSchemaName.getText();
+    String viewSchemaName = customViewSchemaName.getSelectedValue();
     String viewNameText = this.customViewName.getText();
     String viewQueryText = this.customViewQuery.getText();
 
@@ -275,7 +283,6 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
   private void setTextboxText(final String schemaName, final String customViewNameText,
     final String customViewDescriptionText,
     final String customViewQueryText) {
-    customViewSchemaName.setText(schemaName);
     customViewName.setText(customViewNameText);
     customViewDescription.setText(customViewDescriptionText);
     customViewQuery.setText(customViewQueryText);
@@ -292,7 +299,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
         customViewsSidebar.addSideBarHyperLink(customViewName.getText(),
           String.valueOf(counter), HistoryManager.linkToCreateWizardCustomViewsDelete(String.valueOf(counter)));
 
-        CustomViewsParameter parameter = new CustomViewsParameter(customViewSchemaName.getText(), counter,
+        CustomViewsParameter parameter = new CustomViewsParameter(customViewSchemaName.getSelectedValue(), counter,
           customViewName.getText(),
           customViewDescription.getText(), customViewQuery.getText());
         customViewsParameters.put(String.valueOf(counter), parameter);
@@ -326,7 +333,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
       customViewQuery.addStyleName("wizard-connection-validator");
     }
 
-    if (ViewerStringUtils.isBlank(customViewSchemaName.getText())) {
+    if (ViewerStringUtils.isBlank(customViewSchemaName.getSelectedValue())) {
       customViewSchemaName.getElement().setAttribute("required", "required");
       customViewSchemaName.addStyleName("wizard-connection-validator");
     }

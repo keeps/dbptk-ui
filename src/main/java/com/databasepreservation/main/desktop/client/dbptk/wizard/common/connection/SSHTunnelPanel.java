@@ -1,4 +1,4 @@
-package com.databasepreservation.main.desktop.client.dbptk.wizard.create.connection;
+package com.databasepreservation.main.desktop.client.dbptk.wizard.common.connection;
 
 import com.databasepreservation.main.common.shared.client.tools.ViewerStringUtils;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.create.CreateWizardManager;

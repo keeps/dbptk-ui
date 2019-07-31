@@ -1,4 +1,4 @@
-package com.databasepreservation.main.desktop.client.dbptk.wizard.create.exportOptions;
+package com.databasepreservation.main.desktop.client.dbptk.wizard.common.exportOptions;
 
 
 import java.util.ArrayList;
@@ -71,7 +71,7 @@ public class SIARDExportOptions extends WizardPanel<ExportOptionsParameters> {
           comboBoxField.setComboBoxValue(ToolkitModuleName2ViewerModuleName.transform(moduleName), moduleName);
         }
         comboBoxField.addChangeHandler(() -> {
-          version = comboBoxField.getComboBoxValue();
+          version = comboBoxField.getSelectedValue();
           dbptkModule = result;
           final SIARDExportOptionsCurrent instance = SIARDExportOptionsCurrent.getInstance(version, dbptkModule);
           content.clear();

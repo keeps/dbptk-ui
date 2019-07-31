@@ -13,11 +13,7 @@
                     <g:Label addStyleNames="h5"><ui:text from='{messages.customViewsDescription}'/></g:Label>
                     <g:Label addStyleNames="h5"><ui:text from='{messages.customViewsTestMessage}'/></g:Label>
                     <g:FlowPanel ui:field="customViewsForm" addStyleNames="form-container custom-views-form ">
-                        <g:FlowPanel addStyleNames="form-row">
-                            <g:Label ui:field="customViewSchemaNameLabel" addStyleNames="form-label-spaced">
-                                <ui:text from='{messages.customViewSchemaNameLabel}'/>
-                            </g:Label>
-                            <g:TextBox ui:field="customViewSchemaName" addStyleNames="form-textbox"/>
+                        <g:FlowPanel ui:field="schemasCombobox" addStyleNames="form-row">
                         </g:FlowPanel>
                         <g:FlowPanel addStyleNames="form-row">
                             <g:Label ui:field="customViewNameLabel" addStyleNames="form-label-spaced">

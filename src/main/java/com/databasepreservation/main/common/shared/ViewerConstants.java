@@ -246,6 +246,32 @@ public class ViewerConstants {
   public static final String EXPORT_FORMAT_SIARD = "SIARD";
   public static final String EXPORT_FORMAT_DBMS = "DBMS";
 
+  /*
+   * SUFFIX
+   */
+  public static final String TXT_SUFFIX = ".txt";
+  public static final String YAML_SUFFIX = ".yaml";
+
+  /*
+   * DBPTK Input Types
+   */
+  public static final String INPUT_TYPE_PASSWORD = "PASSWORD";
+  public static final String INPUT_TYPE_CHECKBOX = "CHECKBOX";
+  public static final String INPUT_TYPE_FILE = "FILE";
+  public static final String INPUT_TYPE_FOLDER = "FOLDER";
+  public static final String INPUT_TYPE_TEXT = "TEXT";
+  public static final String INPUT_TYPE_NUMBER = "NUMBER";
+  public static final String INPUT_TYPE_DEFAULT = "DEFAULT";
+  public static final String INPUT_TYPE_NONE = "NONE";
+  public static final String INPUT_TYPE_COMBOBOX = "COMBOBOX";
+
+  /*
+   * DBPTK SIARD formats
+   */
+  public static final String SIARD1 = "siard-1";
+  public static final String SIARD2 = "siard-2";
+  public static final String SIARDDK = "siard-dk";
+
   /**
    * private constructor
    */

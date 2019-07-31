@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import com.databasepreservation.main.common.client.BrowserService;
 import com.databasepreservation.main.common.shared.ViewerConstants;
@@ -30,7 +32,7 @@ import com.databasepreservation.main.desktop.client.common.GenericField;
 import com.databasepreservation.main.desktop.client.common.sidebar.TableAndColumnsSendToSidebar;
 import com.databasepreservation.main.desktop.client.common.sidebar.TableAndColumnsSidebar;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
-import com.databasepreservation.main.desktop.client.dbptk.wizard.create.diagram.ErDiagram;
+import com.databasepreservation.main.desktop.client.dbptk.wizard.common.diagram.ErDiagram;
 import com.databasepreservation.main.desktop.shared.models.ExternalLobsDialogBoxResult;
 import com.databasepreservation.main.desktop.shared.models.wizardParameters.ConnectionParameters;
 import com.databasepreservation.main.desktop.shared.models.wizardParameters.ExternalLOBsParameter;
@@ -193,11 +195,13 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
   @Override
   public TableAndColumnsParameters getValues() {
     TableAndColumnsParameters parameters = new TableAndColumnsParameters();
+    List<String> schemas = new ArrayList<>();
     HashMap<String, ArrayList<ViewerColumn>> values = new HashMap<>();
     for (Map.Entry<String, MultipleSelectionTablePanel<ViewerColumn>> cellTables : columns.entrySet()) {
       String tableUUID = cellTables.getKey();
       ViewerTable table = metadata.getTable(tableUUID);
       if (table != null) {
+        schemas.add(table.getSchemaName());
         ArrayList<ViewerColumn> selectedColumns = new ArrayList<>(cellTables.getValue().getSelectionModel().getSelectedSet());
         String key = table.getSchemaName() + "." + table.getName();
         values.put(key, selectedColumns);
@@ -213,6 +217,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
 
     parameters.setColumns(values);
     parameters.setExternalLOBsParameters(new ArrayList<>(externalLOBsParameters.values()));
+    parameters.setSelectedSchemas(schemas);
 
     return parameters;
   }
@@ -598,7 +603,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
                 String id = object.getDisplayName() + "_" + viewerTable.getUUID();
                 ExternalLOBsParameter externalLOBsParameter = new ExternalLOBsParameter();
                 externalLOBsParameter.setBasePath(currentBasePath);
-                externalLOBsParameter.setReferenceType(referenceType.getComboBoxValue());
+                externalLOBsParameter.setReferenceType(referenceType.getSelectedValue());
                 externalLOBsParameter.setTable(viewerTable);
                 externalLOBsParameter.setColumnName(object.getDisplayName());
                 GWT.log("" + externalLOBsParameter);
@@ -624,7 +629,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
               if (result.getOption().equals("add") && result.isResult()) {
                 ExternalLOBsParameter externalLOBsParameter = new ExternalLOBsParameter();
                 externalLOBsParameter.setBasePath(textBox.getText());
-                externalLOBsParameter.setReferenceType(referenceType.getComboBoxValue());
+                externalLOBsParameter.setReferenceType(referenceType.getSelectedValue());
                 externalLOBsParameter.setTable(metadata.getTable(currentTableUUID));
                 externalLOBsParameter.setColumnName(object.getDisplayName());
                 GWT.log("" + externalLOBsParameter);

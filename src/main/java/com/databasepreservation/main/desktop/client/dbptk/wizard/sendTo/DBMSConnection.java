@@ -13,8 +13,8 @@ import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.common.shared.client.widgets.Toast;
 import com.databasepreservation.main.desktop.client.common.sidebar.ConnectionSidebar;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
-import com.databasepreservation.main.desktop.client.dbptk.wizard.create.connection.JDBCPanel;
-import com.databasepreservation.main.desktop.client.dbptk.wizard.create.connection.SSHTunnelPanel;
+import com.databasepreservation.main.desktop.client.dbptk.wizard.common.connection.JDBCPanel;
+import com.databasepreservation.main.desktop.client.dbptk.wizard.common.connection.SSHTunnelPanel;
 import com.databasepreservation.main.desktop.shared.models.DBPTKModule;
 import com.databasepreservation.main.desktop.shared.models.PreservationParameter;
 import com.databasepreservation.main.desktop.shared.models.wizardParameters.ConnectionParameters;
@@ -50,9 +50,7 @@ public class DBMSConnection extends WizardPanel<ConnectionParameters> {
   private JDBCPanel selected;
   private Set<JDBCPanel> JDBCPanels = new HashSet<>();
   private String databaseUUID;
-  private  static Map<String, DBMSConnection> instances = new HashMap<>();
-
-//  private static DBMSConnection instance = null;
+  private static Map<String, DBMSConnection> instances = new HashMap<>();
 
   public static DBMSConnection getInstance(final String databaseUUID) {
     if (instances.get(databaseUUID) == null) {

@@ -1,5 +1,7 @@
 package com.databasepreservation.main.common.shared.client.tools;
 
+import com.databasepreservation.main.common.shared.ViewerConstants;
+
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
@@ -14,9 +16,12 @@ public class ToolkitModuleName2ViewerModuleName {
       case "progress-openedge": return "Progress OpenEdge";
       case "oracle": return "Oracle";
       case "postgresql": return "PostgreSQL";
-      case "siard-1": return "SIARD 1";
-      case "siard-2": return "SIARD 2";
-      case "siard-dk": return "SIARD DK";
+      case ViewerConstants.SIARD1:
+        return "SIARD 1";
+      case ViewerConstants.SIARD2:
+        return "SIARD 2";
+      case ViewerConstants.SIARDDK:
+        return "SIARD DK";
       case "microsoft-sql-server": return "SQL Server";
       case "sybase": return "Sybase";
       default: return moduleName;

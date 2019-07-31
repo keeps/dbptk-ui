@@ -1,4 +1,4 @@
-package com.databasepreservation.main.desktop.client.dbptk.wizard.create.diagram;
+package com.databasepreservation.main.desktop.client.dbptk.wizard.common.diagram;
 
 import static com.databasepreservation.main.desktop.client.common.sidebar.TableAndColumnsSidebar.TABLE_LINK;
 

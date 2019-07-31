@@ -1,4 +1,4 @@
-package com.databasepreservation.main.desktop.client.dbptk.wizard.create.exportOptions;
+package com.databasepreservation.main.desktop.client.dbptk.wizard.common.exportOptions;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -88,37 +88,37 @@ public class SIARDExportOptionsCurrent extends Composite {
 
     for (PreservationParameter parameter : parameters) {
       switch (parameter.getInputType()) {
-        case "CHECKBOX":
+        case ViewerConstants.INPUT_TYPE_CHECKBOX:
           if (checkBoxInputs.get(parameter.getName()) != null) {
             final boolean value = checkBoxInputs.get(parameter.getName()).getValue();
             exportParameters.put(parameter.getName(), String.valueOf(value));
           }
           break;
-        case "TEXT":
+        case ViewerConstants.INPUT_TYPE_TEXT:
           if (textBoxInputs.get(parameter.getName()) != null) {
             final String text = textBoxInputs.get(parameter.getName()).getText();
             exportParameters.put(parameter.getName(), text);
           }
-          if (externalLobCheckbox.getValue()) {
+          if (externalLobCheckbox != null && externalLobCheckbox.getValue()) {
             if (externalLobsInputs.get(parameter.getName()) != null) {
               final String text = externalLobsInputs.get(parameter.getName()).getText();
               exportParameters.put(parameter.getName(), text);
             }
           }
           break;
-        case "FOLDER":
-        case "FILE":
+        case ViewerConstants.INPUT_TYPE_FOLDER:
+        case ViewerConstants.INPUT_TYPE_FILE:
           if (fileInputs.get(parameter.getName()) != null) {
             final String path = fileInputs.get(parameter.getName());
             exportOptionsParameters.setSiardPath(path);
             exportParameters.put(parameter.getName(), path);
           }
           break;
-        case "DEFAULT":
+        case ViewerConstants.INPUT_TYPE_DEFAULT:
           if (parameter.getName().equals("pretty-xml")) {
             exportParameters.put(parameter.getName(), "true");
           }
-        case "NONE":
+        case ViewerConstants.INPUT_TYPE_NONE:
         default:
           break;
       }
@@ -213,7 +213,7 @@ public class SIARDExportOptionsCurrent extends Composite {
     GenericField genericField;
 
     switch (parameter.getInputType()) {
-      case "CHECKBOX":
+      case ViewerConstants.INPUT_TYPE_CHECKBOX:
         externalLobCheckbox = new CheckBox();
         externalLobCheckbox.setText(messages.wizardExportOptionsLabels(parameter.getName()));
         externalLobCheckbox.addStyleName("form-checkbox");
@@ -225,7 +225,7 @@ public class SIARDExportOptionsCurrent extends Composite {
         genericField.setCSSMetadata("form-row", "form-label-spaced");
         content.add(genericField);
         break;
-      case "TEXT":
+      case ViewerConstants.INPUT_TYPE_TEXT:
         Label label = new Label();
         label.setText(messages.wizardExportOptionsLabels(parameter.getName()));
         externalLobsLabels.add(label);
@@ -235,7 +235,7 @@ public class SIARDExportOptionsCurrent extends Composite {
         Label label_end = new Label();
         label_end.setText(messages.wizardExportOptionsLabels(parameter.getName() + "-end"));
         externalLobsLabels.add(label_end);
-        if (version.equals("siard-dk")) {
+        if (version.equals(ViewerConstants.SIARDDK)) {
           label.addStyleName("form-label");
           label_end.addStyleName("form-label");
         } else {
@@ -269,14 +269,14 @@ public class SIARDExportOptionsCurrent extends Composite {
     GenericField genericField = null;
 
     switch (parameter.getInputType()) {
-      case "CHECKBOX":
+      case ViewerConstants.INPUT_TYPE_CHECKBOX:
         CheckBox checkbox = new CheckBox();
         checkbox.setText(messages.wizardExportOptionsLabels(parameter.getName()));
         checkbox.addStyleName("form-checkbox");
         checkBoxInputs.put(parameter.getName(), checkbox);
         genericField = GenericField.createInstance(checkbox);
         break;
-      case "FILE":
+      case ViewerConstants.INPUT_TYPE_FILE:
         FileUploadField fileUploadField = FileUploadField
           .createInstance(messages.wizardExportOptionsLabels(parameter.getName()), messages.siardExportBrowseButton());
         fileUploadField.setParentCSS("form-row");
@@ -305,7 +305,7 @@ public class SIARDExportOptionsCurrent extends Composite {
         helper.add(span);
         content.add(helper);
         break;
-      case "FOLDER":
+      case ViewerConstants.INPUT_TYPE_FOLDER:
         FileUploadField folder = FileUploadField.createInstance(messages.wizardExportOptionsLabels(parameter.getName()),
           messages.siardExportBrowseButton());
         folder.setParentCSS("form-row");
@@ -326,12 +326,12 @@ public class SIARDExportOptionsCurrent extends Composite {
         });
         content.add(folder);
         break;
-      case "COMBOBOX":
-      case "NONE":
+      case ViewerConstants.INPUT_TYPE_COMBOBOX:
+      case ViewerConstants.INPUT_TYPE_NONE:
         genericField = null;
         break;
-      case "NUMBER":
-      case "TEXT":
+      case ViewerConstants.INPUT_TYPE_NUMBER:
+      case ViewerConstants.INPUT_TYPE_TEXT:
       default:
         TextBox defaultTextBox = new TextBox();
         defaultTextBox.addStyleName("form-textbox");

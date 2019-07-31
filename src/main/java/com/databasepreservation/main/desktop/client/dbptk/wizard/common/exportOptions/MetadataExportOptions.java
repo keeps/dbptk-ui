@@ -1,4 +1,4 @@
-package com.databasepreservation.main.desktop.client.dbptk.wizard.create.exportOptions;
+package com.databasepreservation.main.desktop.client.dbptk.wizard.common.exportOptions;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -109,8 +109,8 @@ public class MetadataExportOptions extends WizardPanel<MetadataExportOptionsPara
     GenericField genericField = null;
 
     switch (parameter.getInputType()) {
-      case "NUMBER":
-      case "TEXT":
+      case ViewerConstants.INPUT_TYPE_NUMBER:
+      case ViewerConstants.INPUT_TYPE_TEXT:
         TextBox defaultTextBox = new TextBox();
         defaultTextBox.addStyleName("form-textbox");
         textBoxInputs.put(parameter.getName(), defaultTextBox);

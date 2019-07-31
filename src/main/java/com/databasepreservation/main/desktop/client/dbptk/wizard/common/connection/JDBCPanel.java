@@ -1,4 +1,4 @@
-package com.databasepreservation.main.desktop.client.dbptk.wizard.create.connection;
+package com.databasepreservation.main.desktop.client.dbptk.wizard.common.connection;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -106,7 +106,7 @@ public class JDBCPanel extends Composite {
     GenericField genericField = null;
 
     switch (parameter.getInputType()) {
-      case "PASSWORD":
+      case ViewerConstants.INPUT_TYPE_PASSWORD:
         PasswordTextBox passwordTextBox = new PasswordTextBox();
         passwordTextBox.addStyleName("form-textbox");
         textBoxInputs.put(parameter.getName(), passwordTextBox);
@@ -120,14 +120,14 @@ public class JDBCPanel extends Composite {
           });
         }
         break;
-      case "CHECKBOX":
+      case ViewerConstants.INPUT_TYPE_CHECKBOX:
         CheckBox checkbox = new CheckBox();
         checkbox.setText(messages.connectionLabels(parameter.getName()));
         checkbox.addStyleName("form-checkbox");
         checkBoxInputs.put(parameter.getName(), checkbox);
         genericField = GenericField.createInstance(checkbox);
         break;
-      case "FILE":
+      case ViewerConstants.INPUT_TYPE_FILE:
         FileUploadField fileUploadField = FileUploadField.createInstance(messages.connectionLabels(parameter.getName()), messages.chooseDriverLocation());
         fileUploadField.setParentCSS("form-row");
         fileUploadField.setLabelCSS("form-label-spaced");
@@ -153,10 +153,10 @@ public class JDBCPanel extends Composite {
         fileInputs.put(parameter.getName(), fileUploadField);
         content.add(fileUploadField);
         break;
-      case "FOLDER":
+      case ViewerConstants.INPUT_TYPE_FOLDER:
         break;
-      case "NUMBER":
-      case "TEXT":
+      case ViewerConstants.INPUT_TYPE_NUMBER:
+      case ViewerConstants.INPUT_TYPE_TEXT:
         default: TextBox defaultTextBox = new TextBox();
           defaultTextBox.addStyleName("form-textbox");
           textBoxInputs.put(parameter.getName(), defaultTextBox);
@@ -207,7 +207,8 @@ public class JDBCPanel extends Composite {
 
     for (PreservationParameter parameter : parameters) {
       if (parameter.isRequired()) {
-        if (parameter.getInputType().equals("TEXT") || parameter.getInputType().equals("PASSWORD"))  {
+        if (parameter.getInputType().equals(ViewerConstants.INPUT_TYPE_TEXT)
+          || parameter.getInputType().equals(ViewerConstants.INPUT_TYPE_PASSWORD)) {
           final TextBox textBox = textBoxInputs.get(parameter.getName());
           if (ViewerStringUtils.isBlank(textBox.getText())) {
             arrayList.add(parameter);
@@ -215,7 +216,7 @@ public class JDBCPanel extends Composite {
             sendToWizardManager.enableNext(false);
           }
         }
-        if (parameter.getInputType().equals("FILE")) {
+        if (parameter.getInputType().equals(ViewerConstants.INPUT_TYPE_FILE)) {
           if (ViewerStringUtils.isBlank(pathToDriver)) {
             arrayList.add(parameter);
           }

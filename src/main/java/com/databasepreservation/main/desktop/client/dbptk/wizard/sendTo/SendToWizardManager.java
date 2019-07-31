@@ -16,11 +16,11 @@ import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManage
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.common.shared.client.tools.ToolkitModuleName2ViewerModuleName;
 import com.databasepreservation.main.common.shared.client.widgets.Toast;
-import com.databasepreservation.main.desktop.client.dbptk.wizard.ProgressBarPanel;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
+import com.databasepreservation.main.desktop.client.dbptk.wizard.common.exportOptions.MetadataExportOptions;
+import com.databasepreservation.main.desktop.client.dbptk.wizard.common.exportOptions.SIARDExportOptions;
+import com.databasepreservation.main.desktop.client.dbptk.wizard.common.progressBar.ProgressBarPanel;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.create.TableAndColumns;
-import com.databasepreservation.main.desktop.client.dbptk.wizard.create.exportOptions.MetadataExportOptions;
-import com.databasepreservation.main.desktop.client.dbptk.wizard.create.exportOptions.SIARDExportOptions;
 import com.databasepreservation.main.desktop.shared.models.wizardParameters.ConnectionParameters;
 import com.databasepreservation.main.desktop.shared.models.wizardParameters.ExportOptionsParameters;
 import com.databasepreservation.main.desktop.shared.models.wizardParameters.MetadataExportOptionsParameters;

@@ -41,6 +41,10 @@ public class ComboBoxField extends Composite {
     return new ComboBoxField(key, null);
   }
 
+  public static ComboBoxField createInstance(String key, List<String> values) {
+    return new ComboBoxField(key, values);
+  }
+
   private ComboBoxField(String key, List<String> values) {
     initWidget(binder.createAndBindUi(this));
 
@@ -67,7 +71,7 @@ public class ComboBoxField extends Composite {
     combobox.addItem(item, value);
   }
 
-  public String getComboBoxValue() {
+  public String getSelectedValue() {
     return combobox.getSelectedValue();
   }
 
@@ -76,12 +80,19 @@ public class ComboBoxField extends Composite {
     DomEvent.fireNativeEvent(Document.get().createChangeEvent(), combobox);
   }
 
-  public void setCSSMetadata(String cssParent, String cssKey, String cssValue) {
+  public void setCSSMetadata(String cssKey, String cssValue) {
+    setCSSMetadata(null, cssKey, cssValue);
+  }
 
+  public void setCSSMetadata(String cssParent, String cssKey, String cssValue) {
     if (cssParent != null) {
       flowPanelParent.addStyleName(cssParent);
     }
     comboboxLabel.addStyleName(cssKey);
     combobox.addStyleName(cssValue);
+  }
+
+  public void setRequired() {
+    comboboxLabel.addStyleName("form-label-mandatory");
   }
 }

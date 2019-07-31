@@ -603,7 +603,7 @@ public interface ClientMessages extends Messages {
   String createSIARDWizardManagerInformationMessage();
 
   /********************************************
-   * Wizard Connection
+   * Create Wizard: Connection
    ********************************************/
   String tabGeneral();
 
@@ -628,7 +628,7 @@ public interface ClientMessages extends Messages {
   String errorMessagesConnection(@Select int error);
 
   /********************************************
-   * Wizard Table & Columns
+   * Create Wizard: Table & Columns
    ********************************************/
   String selectAll();
 
@@ -661,7 +661,7 @@ public interface ClientMessages extends Messages {
   String errorMessagesTableAndColumns(@Select int error);
 
   /********************************************
-   * Wizard Custom Views
+   * Create Wizard: Custom Views
    ********************************************/
 
   String customViewsUpdateMessage();
