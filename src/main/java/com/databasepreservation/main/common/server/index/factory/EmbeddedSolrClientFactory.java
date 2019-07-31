@@ -7,7 +7,6 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
 
-import com.databasepreservation.main.common.server.index.utils.SolrUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.common.SolrException;
@@ -16,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.main.common.server.ViewerConfiguration;
+import com.databasepreservation.main.common.server.index.utils.SolrUtils;
 
 public class EmbeddedSolrClientFactory extends SolrClientFactory<EmbeddedSolrServer> {
     private static final Logger LOGGER = LoggerFactory.getLogger(EmbeddedSolrClientFactory.class);

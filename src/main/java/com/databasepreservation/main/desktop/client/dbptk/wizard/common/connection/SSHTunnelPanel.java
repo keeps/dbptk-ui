@@ -1,8 +1,9 @@
 package com.databasepreservation.main.desktop.client.dbptk.wizard.common.connection;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.databasepreservation.main.common.shared.client.tools.ViewerStringUtils;
-import com.databasepreservation.main.desktop.client.dbptk.wizard.create.CreateWizardManager;
-import com.databasepreservation.main.desktop.client.dbptk.wizard.sendTo.SendToWizardManager;
 import com.databasepreservation.main.desktop.shared.models.SSHConfiguration;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -15,9 +16,6 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>

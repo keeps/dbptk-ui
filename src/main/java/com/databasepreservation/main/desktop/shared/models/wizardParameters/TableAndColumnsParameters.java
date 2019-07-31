@@ -1,12 +1,12 @@
 package com.databasepreservation.main.desktop.shared.models.wizardParameters;
 
-import com.databasepreservation.main.common.shared.ViewerStructure.ViewerColumn;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerColumn;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>

@@ -10,11 +10,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.main.common.server.ViewerConfiguration;
-import com.databasepreservation.main.common.shared.exceptions.ViewerException;
 import com.databasepreservation.main.common.server.index.schema.Field;
 import com.databasepreservation.main.common.server.index.schema.SolrBootstrapUtils;
 import com.databasepreservation.main.common.server.index.schema.SolrDefaultCollectionRegistry;
 import com.databasepreservation.main.common.server.index.schema.SolrRowsCollectionRegistry;
+import com.databasepreservation.main.common.shared.exceptions.ViewerException;
 
 public abstract class SolrClientFactory<T extends SolrClient> {
 

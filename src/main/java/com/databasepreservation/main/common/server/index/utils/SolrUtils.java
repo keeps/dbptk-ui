@@ -28,7 +28,6 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 
-import com.databasepreservation.main.common.shared.ViewerConstants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -72,6 +71,7 @@ import org.slf4j.LoggerFactory;
 import com.databasepreservation.main.common.server.index.schema.SolrCollection;
 import com.databasepreservation.main.common.server.index.schema.SolrRowsCollectionRegistry;
 import com.databasepreservation.main.common.server.index.schema.collections.RowsCollection;
+import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerRow;

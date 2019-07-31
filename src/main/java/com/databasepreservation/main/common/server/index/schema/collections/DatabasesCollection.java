@@ -19,9 +19,9 @@ import static com.databasepreservation.main.common.shared.ViewerConstants.SOLR_D
 import static com.databasepreservation.main.common.shared.ViewerConstants.SOLR_DATABASES_TOTAL_ROWS;
 import static com.databasepreservation.main.common.shared.ViewerConstants.SOLR_DATABASES_TOTAL_SCHEMAS;
 import static com.databasepreservation.main.common.shared.ViewerConstants.SOLR_DATABASES_TOTAL_TABLES;
-import static com.databasepreservation.main.common.shared.ViewerConstants.SOLR_DATABASES_VALIDATION_STATUS;
 import static com.databasepreservation.main.common.shared.ViewerConstants.SOLR_DATABASES_VALIDATED_AT;
 import static com.databasepreservation.main.common.shared.ViewerConstants.SOLR_DATABASES_VALIDATE_VERSION;
+import static com.databasepreservation.main.common.shared.ViewerConstants.SOLR_DATABASES_VALIDATION_STATUS;
 
 import java.util.ArrayList;
 import java.util.Collections;

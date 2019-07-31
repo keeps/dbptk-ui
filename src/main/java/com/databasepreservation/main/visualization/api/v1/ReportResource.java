@@ -16,8 +16,8 @@ import javax.ws.rs.core.Response;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.springframework.stereotype.Service;
 
-import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.common.server.ViewerConfiguration;
+import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.visualization.api.utils.ApiUtils;
 import com.databasepreservation.main.visualization.api.utils.DownloadUtils;
 

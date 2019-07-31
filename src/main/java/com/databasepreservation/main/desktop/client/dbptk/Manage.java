@@ -2,8 +2,6 @@ package com.databasepreservation.main.desktop.client.dbptk;
 
 import java.util.List;
 
-import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
-import com.databasepreservation.main.desktop.client.common.helper.HelperUploadSIARDFile;
 import org.roda.core.data.v2.index.filter.BasicSearchFilterParameter;
 import org.roda.core.data.v2.index.filter.Filter;
 
@@ -12,8 +10,10 @@ import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabas
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
+import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.common.shared.client.tools.ViewerStringUtils;
 import com.databasepreservation.main.common.shared.client.widgets.wcag.AccessibleFocusPanel;
+import com.databasepreservation.main.desktop.client.common.helper.HelperUploadSIARDFile;
 import com.databasepreservation.main.desktop.client.common.lists.DatabaseList;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;

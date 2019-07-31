@@ -23,7 +23,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 
-import com.databasepreservation.main.common.server.index.schema.SolrCollection;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
@@ -38,12 +37,13 @@ import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.main.common.server.index.schema.AbstractSolrCollection;
 import com.databasepreservation.main.common.server.index.schema.CopyField;
-import com.databasepreservation.main.common.shared.client.common.search.SavedSearch;
-import com.databasepreservation.main.common.shared.ViewerConstants;
-import com.databasepreservation.utils.JodaUtils;
-import com.databasepreservation.main.common.shared.exceptions.ViewerException;
 import com.databasepreservation.main.common.server.index.schema.Field;
+import com.databasepreservation.main.common.server.index.schema.SolrCollection;
 import com.databasepreservation.main.common.server.index.utils.SolrUtils;
+import com.databasepreservation.main.common.shared.ViewerConstants;
+import com.databasepreservation.main.common.shared.client.common.search.SavedSearch;
+import com.databasepreservation.main.common.shared.exceptions.ViewerException;
+import com.databasepreservation.utils.JodaUtils;
 
 public class SavedSearchesCollection extends AbstractSolrCollection<SavedSearch> {
   private static final Logger LOGGER = LoggerFactory.getLogger(SavedSearchesCollection.class);

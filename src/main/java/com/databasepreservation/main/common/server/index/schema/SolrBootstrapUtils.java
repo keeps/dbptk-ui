@@ -22,9 +22,9 @@ import org.apache.solr.client.solrj.response.schema.SchemaResponse.FieldsRespons
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.databasepreservation.main.common.server.index.schema.collections.RowsCollection;
 import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;
 import com.databasepreservation.main.common.shared.exceptions.ViewerException;
-import com.databasepreservation.main.common.server.index.schema.collections.RowsCollection;
 
 public class SolrBootstrapUtils {
 

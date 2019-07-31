@@ -7,14 +7,14 @@ package com.databasepreservation.main.common.shared.client.common.search;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
-import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
-import com.databasepreservation.main.common.shared.client.widgets.wcag.AccessibleFocusPanel;
-import com.databasepreservation.main.common.shared.client.common.lists.AsyncTableCell;
 import org.roda.core.data.v2.index.filter.BasicSearchFilterParameter;
 import org.roda.core.data.v2.index.filter.Filter;
 import org.roda.core.data.v2.index.filter.FilterParameter;
 
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
+import com.databasepreservation.main.common.shared.client.common.lists.AsyncTableCell;
+import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
+import com.databasepreservation.main.common.shared.client.widgets.wcag.AccessibleFocusPanel;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;

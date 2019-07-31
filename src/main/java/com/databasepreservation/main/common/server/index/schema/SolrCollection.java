@@ -9,15 +9,16 @@ package com.databasepreservation.main.common.server.index.schema;
 
 import java.util.List;
 
-import com.databasepreservation.main.common.shared.ViewerConstants;
-import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;
-import com.databasepreservation.main.common.shared.exceptions.ViewerException;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RequestNotValidException;
+
+import com.databasepreservation.main.common.shared.ViewerConstants;
+import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;
+import com.databasepreservation.main.common.shared.exceptions.ViewerException;
 
 
 public interface SolrCollection<M extends IsIndexed> {

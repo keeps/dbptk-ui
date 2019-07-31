@@ -1,9 +1,9 @@
 package com.databasepreservation.main.desktop.shared.models.wizardParameters;
 
-import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
-
 import java.io.Serializable;
 import java.util.Objects;
+
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>

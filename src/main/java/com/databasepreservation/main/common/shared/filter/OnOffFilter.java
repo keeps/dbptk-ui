@@ -20,7 +20,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
-import com.databasepreservation.main.common.shared.ViewerConstants;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -28,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.main.common.server.ViewerConfiguration;
 import com.databasepreservation.main.common.server.ViewerFactory;
+import com.databasepreservation.main.common.shared.ViewerConstants;
 
 /**
  * A filter that can be turned on/off using RODA configuration file.

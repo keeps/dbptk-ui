@@ -14,8 +14,6 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
-import com.databasepreservation.main.visualization.api.utils.ApiResponseMessage;
-import com.databasepreservation.main.visualization.api.utils.ApiUtils;
 import org.glassfish.jersey.server.ContainerRequest;
 import org.roda.core.data.exceptions.AlreadyExistsException;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
@@ -27,6 +25,9 @@ import org.roda.core.data.exceptions.RODAException;
 import org.roda.core.data.exceptions.RequestNotValidException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.databasepreservation.main.visualization.api.utils.ApiResponseMessage;
+import com.databasepreservation.main.visualization.api.utils.ApiUtils;
 
 
 @Provider

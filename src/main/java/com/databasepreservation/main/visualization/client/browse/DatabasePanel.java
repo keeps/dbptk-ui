@@ -3,15 +3,15 @@ package com.databasepreservation.main.visualization.client.browse;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.databasepreservation.main.common.shared.client.common.RightPanel;
 import org.roda.core.data.v2.user.User;
 
+import com.databasepreservation.main.common.client.BrowserService;
 import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
-import com.databasepreservation.main.common.client.BrowserService;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
 import com.databasepreservation.main.common.shared.client.common.LoginStatusListener;
+import com.databasepreservation.main.common.shared.client.common.RightPanel;
 import com.databasepreservation.main.common.shared.client.common.UserLogin;
 import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.main.common.shared.client.common.utils.RightPanelLoader;

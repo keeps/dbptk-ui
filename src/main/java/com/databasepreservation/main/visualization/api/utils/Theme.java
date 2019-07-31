@@ -23,8 +23,8 @@ import org.roda.core.data.v2.common.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.common.server.ViewerConfiguration;
+import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.visualization.api.common.ConsumesOutputStream;
 
 public class Theme {

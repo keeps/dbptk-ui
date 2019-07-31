@@ -4,7 +4,6 @@ import com.databasepreservation.main.common.client.BrowserService;
 import com.databasepreservation.main.common.shared.client.ClientLogger;
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
 import com.databasepreservation.main.common.shared.client.common.utils.ApplicationType;
-import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;

@@ -2,8 +2,9 @@ package com.databasepreservation.main.modules.viewer;
 
 import java.nio.file.Path;
 
-import com.databasepreservation.main.common.utils.ViewerAbstractConfiguration;
 import org.apache.commons.configuration.SystemConfiguration;
+
+import com.databasepreservation.main.common.utils.ViewerAbstractConfiguration;
 
 
 /**

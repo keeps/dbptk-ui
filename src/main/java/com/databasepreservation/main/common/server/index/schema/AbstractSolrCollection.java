@@ -20,9 +20,9 @@ import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RequestNotValidException;
 
+import com.databasepreservation.main.common.server.index.utils.SolrUtils;
 import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;
 import com.databasepreservation.main.common.shared.exceptions.ViewerException;
-import com.databasepreservation.main.common.server.index.utils.SolrUtils;
 
 public abstract class AbstractSolrCollection<M extends IsIndexed> implements SolrCollection<M> {
 

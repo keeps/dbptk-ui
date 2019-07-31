@@ -11,9 +11,9 @@ import org.roda.core.data.v2.index.filter.Filter;
 import org.roda.core.data.v2.index.filter.FilterParameter;
 import org.roda.core.data.v2.index.filter.LongRangeFilterParameter;
 
-import com.databasepreservation.main.common.shared.client.common.utils.BrowserServiceUtils;
 import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
+import com.databasepreservation.main.common.shared.client.common.utils.BrowserServiceUtils;
 import com.databasepreservation.main.common.shared.client.tools.ViewerJsonUtils;
 import com.databasepreservation.main.common.shared.client.tools.ViewerStringUtils;
 import com.google.gwt.safehtml.shared.UriUtils;

@@ -1,5 +1,7 @@
 package com.databasepreservation.main.desktop.client.dbptk.wizard.common.progressBar;
 
+import java.util.HashMap;
+
 import com.databasepreservation.main.common.client.BrowserService;
 import com.databasepreservation.main.common.shared.ProgressData;
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
@@ -15,8 +17,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
-
-import java.util.HashMap;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>

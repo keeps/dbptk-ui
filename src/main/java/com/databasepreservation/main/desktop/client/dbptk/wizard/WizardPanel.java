@@ -1,7 +1,5 @@
 package com.databasepreservation.main.desktop.client.dbptk.wizard;
 
-import java.util.HashMap;
-
 import com.google.gwt.user.client.ui.Composite;
 
 /**

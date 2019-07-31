@@ -4,11 +4,11 @@
  */
 package com.databasepreservation.main.common.server;
 
-import com.databasepreservation.main.common.client.ClientLoggerService;
 import org.apache.log4j.LogManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.databasepreservation.main.common.client.ClientLoggerService;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 /**

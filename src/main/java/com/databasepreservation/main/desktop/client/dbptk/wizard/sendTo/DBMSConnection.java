@@ -54,8 +54,8 @@ public class DBMSConnection extends WizardPanel<ConnectionParameters> {
 
   public static DBMSConnection getInstance(final String databaseUUID) {
     if (instances.get(databaseUUID) == null) {
-     DBMSConnection  instance = new DBMSConnection(databaseUUID);
-     instances.put(databaseUUID, instance);
+      DBMSConnection instance = new DBMSConnection(databaseUUID);
+      instances.put(databaseUUID, instance);
     }
 
     SendToWizardManager sendToWizardManager = SendToWizardManager.getInstance(databaseUUID);
@@ -163,7 +163,6 @@ public class DBMSConnection extends WizardPanel<ConnectionParameters> {
 
     return false;
   }
-
 
   @Override
   public void error() {

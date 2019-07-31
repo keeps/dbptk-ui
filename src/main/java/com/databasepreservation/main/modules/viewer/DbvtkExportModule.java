@@ -3,11 +3,11 @@ package com.databasepreservation.main.modules.viewer;
 import java.nio.file.Path;
 import java.util.Set;
 
-import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabaseFromToolkit;
-import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
-import com.databasepreservation.main.common.server.transformers.ToolkitStructure2ViewerStructure;
 import com.databasepreservation.main.common.server.ViewerFactory;
 import com.databasepreservation.main.common.server.index.DatabaseRowsSolrManager;
+import com.databasepreservation.main.common.server.transformers.ToolkitStructure2ViewerStructure;
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabaseFromToolkit;
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
 import com.databasepreservation.model.Reporter;
 import com.databasepreservation.model.data.Row;
 import com.databasepreservation.model.exception.ModuleException;

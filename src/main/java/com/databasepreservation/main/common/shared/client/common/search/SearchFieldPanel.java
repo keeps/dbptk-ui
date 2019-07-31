@@ -19,7 +19,6 @@ import org.roda.core.data.v2.index.filter.SimpleFilterParameter;
 
 import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.common.shared.client.ClientLogger;
-import com.databasepreservation.main.common.shared.client.common.search.SearchField;
 import com.databasepreservation.main.common.shared.client.common.utils.ListboxUtils;
 import com.databasepreservation.main.common.shared.client.tools.Humanize;
 import com.google.gwt.core.client.GWT;

@@ -24,10 +24,10 @@ import org.roda.core.data.exceptions.RequestNotValidException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;
-import com.databasepreservation.main.common.shared.exceptions.ViewerException;
 import com.databasepreservation.main.common.server.index.schema.collections.DatabasesCollection;
 import com.databasepreservation.main.common.server.index.schema.collections.SavedSearchesCollection;
+import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;
+import com.databasepreservation.main.common.shared.exceptions.ViewerException;
 
 public final class SolrDefaultCollectionRegistry {
 

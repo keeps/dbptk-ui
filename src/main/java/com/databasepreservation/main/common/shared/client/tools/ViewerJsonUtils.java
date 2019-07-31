@@ -2,11 +2,11 @@ package com.databasepreservation.main.common.shared.client.tools;
 
 import java.util.List;
 
-import com.databasepreservation.main.common.shared.client.common.search.SearchInfo;
 import org.roda.core.data.v2.index.filter.Filter;
 import org.roda.core.data.v2.index.sort.Sorter;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
+import com.databasepreservation.main.common.shared.client.common.search.SearchInfo;
 import com.github.nmorel.gwtjackson.client.ObjectMapper;
 import com.google.gwt.core.client.GWT;
 

@@ -11,8 +11,8 @@ import com.databasepreservation.main.common.shared.ViewerStructure.ViewerRoleStr
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerUserStructure;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.main.common.shared.client.common.RightPanel;
-import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.main.common.shared.client.common.lists.BasicTablePanel;
+import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;

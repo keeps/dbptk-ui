@@ -27,8 +27,6 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
-import config.i18n.client.ClientMessages;
-
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>

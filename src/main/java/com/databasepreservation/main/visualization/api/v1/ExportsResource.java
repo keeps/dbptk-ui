@@ -23,9 +23,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.common.server.ViewerFactory;
 import com.databasepreservation.main.common.server.index.DatabaseRowsSolrManager;
+import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.common.utils.UserUtility;
 import com.databasepreservation.main.visualization.api.utils.ApiUtils;
 import com.databasepreservation.main.visualization.api.utils.DownloadUtils;

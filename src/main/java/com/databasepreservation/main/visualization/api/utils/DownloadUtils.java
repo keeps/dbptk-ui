@@ -5,10 +5,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Path;
 
-import com.databasepreservation.main.common.shared.ViewerConstants;
 import org.apache.commons.io.IOUtils;
 import org.roda.core.data.exceptions.NotFoundException;
 
+import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.visualization.api.common.ConsumesOutputStream;
 
 /**

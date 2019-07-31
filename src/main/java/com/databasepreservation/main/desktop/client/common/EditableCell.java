@@ -1,6 +1,5 @@
 package com.databasepreservation.main.desktop.client.common;
 
-import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataControlPanel;
 import com.google.gwt.cell.client.TextInputCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;

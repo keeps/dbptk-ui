@@ -100,8 +100,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
 
   @Override
   public boolean validate() {
-    boolean empty = ViewerStringUtils.isBlank(customViewName.getText()) && ViewerStringUtils.isBlank(customViewQuery.getText())
-        && ViewerStringUtils.isBlank(customViewSchemaName.getSelectedValue());
+    boolean empty = ViewerStringUtils.isBlank(customViewName.getText()) && ViewerStringUtils.isBlank(customViewQuery.getText());
 
     if (empty) {
       toSave = false;
@@ -205,12 +204,10 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
   }
 
   private int customViewFormValidator() {
-    String viewSchemaName = customViewSchemaName.getSelectedValue();
     String viewNameText = customViewName.getText();
     String viewQueryText = customViewQuery.getText();
 
-    boolean value = ViewerStringUtils.isBlank(viewNameText) || ViewerStringUtils.isBlank(viewQueryText)
-      || ViewerStringUtils.isBlank(viewSchemaName);
+    boolean value = ViewerStringUtils.isBlank(viewNameText) || ViewerStringUtils.isBlank(viewQueryText);
 
     if (value)
       return 1;
@@ -229,12 +226,10 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
   }
 
   private int customViewFormValidatorUpdate(final String customViewName) {
-    String viewSchemaName = customViewSchemaName.getSelectedValue();
     String viewNameText = this.customViewName.getText();
     String viewQueryText = this.customViewQuery.getText();
 
-    boolean value = ViewerStringUtils.isBlank(viewNameText) || ViewerStringUtils.isBlank(viewQueryText)
-      || ViewerStringUtils.isBlank(viewSchemaName);
+    boolean value = ViewerStringUtils.isBlank(viewNameText) || ViewerStringUtils.isBlank(viewQueryText);
 
     if (value)
       return 1;
