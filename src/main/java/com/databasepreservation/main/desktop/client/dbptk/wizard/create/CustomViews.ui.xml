@@ -33,6 +33,7 @@
                             </g:Label>
                             <g:TextArea ui:field="customViewQuery" addStyleNames="form-textarea form-textbox"/>
                         </g:FlowPanel>
+                        <g:FlowPanel ui:field="customViewsButtons" addStyleNames="custom-views-buttons"/>
                     </g:FlowPanel>
                 </g:FlowPanel>
             </g:FlowPanel>

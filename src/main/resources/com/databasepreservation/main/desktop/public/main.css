@@ -1732,6 +1732,11 @@ input[type="checkbox"]:checked:after {
     color: white;
 }
 
+.custom-views-buttons .btn-item{
+    padding-left: 0;
+    padding-right: 10px;
+}
+
 /***********************************************
                 Progress Panel
  ***********************************************/

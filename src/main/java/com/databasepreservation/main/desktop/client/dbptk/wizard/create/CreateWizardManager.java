@@ -195,12 +195,13 @@ public class CreateWizardManager extends Composite {
       tableAndColumnsParameters = (TableAndColumnsParameters) wizardInstances.get(position).getValues();
       wizardContent.clear();
       position = 2;
-      CustomViews customViews = CustomViews.getInstance(tableAndColumnsParameters.getSelectedSchemas(), customButtons);
+      CustomViews customViews = CustomViews.getInstance(tableAndColumnsParameters.getSelectedSchemas(), btnNext);
       customViews.refreshCustomButtons();
       wizardInstances.add(position, customViews);
       wizardContent.add(customViews);
       updateButtons();
       updateBreadcrumb();
+      customViews.checkIfHaveCustomViews();
     } else {
       wizardInstances.get(position).error();
     }
@@ -346,7 +347,9 @@ public class CreateWizardManager extends Composite {
 
   private void updateButtons() {
     btnBack.setEnabled(true);
-    btnNext.setText(messages.next());
+    if (position != 2) {
+      btnNext.setText(messages.next());
+    }
 
     if (position == 0) {
       btnBack.setEnabled(false);

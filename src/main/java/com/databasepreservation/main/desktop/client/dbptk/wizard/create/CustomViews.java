@@ -38,7 +38,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
   private static CustomViewsUiBinder binder = GWT.create(CustomViewsUiBinder.class);
 
   @UiField
-  FlowPanel customViewsList, rightSideContainer, schemasCombobox;
+  FlowPanel customViewsList, rightSideContainer, schemasCombobox, customViewsButtons;
 
   @UiField
   TextBox customViewName, customViewDescription;
@@ -53,21 +53,21 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
   private CustomViewsSidebar customViewsSidebar;
   private HashMap<String, CustomViewsParameter> customViewsParameters = new HashMap<>();
   private int counter = 0;
-  private FlowPanel customViewsButtons;
   private boolean toSave;
   private ComboBoxField customViewSchemaName;
+  private Button btnNext;
 
-  public static CustomViews getInstance(List<String> schemas, FlowPanel customViewButtons) {
+  public static CustomViews getInstance(List<String> schemas, Button btnNext) {
     if (instance == null) {
-      instance = new CustomViews(schemas, customViewButtons);
+      instance = new CustomViews(schemas, btnNext);
     }
     return instance;
   }
 
-  private CustomViews(List<String> schemas, FlowPanel customViewsButtons) {
+  private CustomViews(List<String> schemas, Button btnNext) {
     initWidget(binder.createAndBindUi(this));
 
-    this.customViewsButtons = customViewsButtons;
+    this.btnNext = btnNext;
     customViewsSidebar = CustomViewsSidebar.getInstance();
     customViewsList.add(customViewsSidebar);
 
@@ -81,7 +81,15 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
     setRequired(customViewDescriptionLabel, false);
     setRequired(customViewQueryLabel, true);
 
-    this.customViewsButtons.add(createCustomViewButton());
+    customViewsButtons.add(createCustomViewButton());
+  }
+
+  public void checkIfHaveCustomViews(){
+    if(customViewsParameters.isEmpty()){
+      btnNext.setText(messages.skip());
+    } else {
+      btnNext.setText(messages.next());
+    }
   }
 
   @Override
@@ -201,6 +209,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
   void refreshCustomButtons() {
     customViewsButtons.clear();
     customViewsButtons.add(createCustomViewButton());
+    checkIfHaveCustomViews();
   }
 
   private int customViewFormValidator() {
@@ -273,6 +282,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
     String customViewUUID = String.valueOf(id);
     customViewsParameters.remove(customViewUUID);
     customViewsSidebar.removeSideBarHyperLink(customViewUUID);
+    checkIfHaveCustomViews();
   }
 
   private void setTextboxText(final String schemaName, final String customViewNameText,
@@ -308,6 +318,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
         Toast.showError(messages.errorMessagesCustomViewsTitle(), messages.errorMessagesCustomViews(valid));
         highlightFieldsWhenRequired();
       }
+      checkIfHaveCustomViews();
     });
 
     SimplePanel simplePanelforbtnSave = new SimplePanel();

@@ -580,6 +580,8 @@ public interface ClientMessages extends Messages {
 
   String newText();
 
+  String skip();
+
   String viewName();
 
   String SIARDError();
