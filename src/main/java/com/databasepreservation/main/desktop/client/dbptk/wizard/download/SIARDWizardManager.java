@@ -14,6 +14,7 @@ import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCal
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.common.shared.client.widgets.Toast;
+import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardManager;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.common.exportOptions.MetadataExportOptions;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.common.exportOptions.SIARDExportOptions;
@@ -35,7 +36,7 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
-public class SIARDWizardManager extends Composite {
+public class SIARDWizardManager extends WizardManager {
 
   interface MigrateToSIARDUiBinder extends UiBinder<Widget, SIARDWizardManager> {
   }
@@ -55,7 +56,6 @@ public class SIARDWizardManager extends Composite {
   Button btnNext, btnCancel, btnBack;
 
   private static Map<String, SIARDWizardManager> instances = new HashMap<>();
-  private ArrayList<WizardPanel> wizardInstances = new ArrayList<>();
   private final String databaseUUID;
   private int position = 0;
   private final int positions = 4;
@@ -108,7 +108,8 @@ public class SIARDWizardManager extends Composite {
     updateBreadcrumb();
   }
 
-  private void handleWizard() {
+  @Override
+  protected void handleWizard() {
     GWT.log("Position: " + position);
     switch (position) {
       case 0:
@@ -205,7 +206,8 @@ public class SIARDWizardManager extends Composite {
       });
   }
 
-  private void updateButtons() {
+  @Override
+  protected void updateButtons() {
     btnBack.setEnabled(true);
     btnNext.setText(messages.next());
 
@@ -218,17 +220,20 @@ public class SIARDWizardManager extends Composite {
     }
   }
 
+  @Override
   public void enableNext(boolean value) {
     btnNext.setEnabled(value);
   }
 
-  private void enableButtons(boolean value) {
+  @Override
+  protected void enableButtons(boolean value) {
     btnCancel.setEnabled(value);
     btnNext.setEnabled(value);
     btnBack.setEnabled(value);
   }
 
-  private void updateBreadcrumb() {
+  @Override
+  protected void updateBreadcrumb() {
     List<BreadcrumbItem> breadcrumbItems;
 
     switch (position) {
@@ -252,15 +257,12 @@ public class SIARDWizardManager extends Composite {
     BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
   }
 
-  private void clear() {
-    for (WizardPanel panel : wizardInstances) {
-      panel.clear();
-    }
+  @Override
+  protected void clear() {
+    super.clear();
 
     ProgressBarPanel progressBarPanel = ProgressBarPanel.getInstance(databaseUUID);
     progressBarPanel.clear(databaseUUID);
-
-    wizardInstances.clear();
   }
 
   public void change(String wizardPage, String toSelect) {

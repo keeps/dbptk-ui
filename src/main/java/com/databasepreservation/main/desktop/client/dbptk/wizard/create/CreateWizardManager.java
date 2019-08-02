@@ -65,7 +65,6 @@ public class CreateWizardManager extends WizardManager {
   Button btnNext, btnCancel, btnBack;
 
   private static CreateWizardManager instance = null;
-  private ArrayList<WizardPanel> wizardInstances = new ArrayList<>();
   private int position = 0;
   private final int positions = 5;
   private String databaseUUID;
@@ -135,7 +134,8 @@ public class CreateWizardManager extends WizardManager {
     });
   }
 
-  private void handleWizard() {
+  @Override
+  protected void handleWizard() {
     switch (position) {
       case 0:
         handleConnectionPanel();
@@ -349,7 +349,8 @@ public class CreateWizardManager extends WizardManager {
     });
   }
 
-  private void updateButtons() {
+  @Override
+  protected void updateButtons() {
     btnBack.setEnabled(true);
     if (position != 2) {
       btnNext.setText(messages.next());
@@ -364,13 +365,15 @@ public class CreateWizardManager extends WizardManager {
     }
   }
 
-  private void enableButtons(boolean value) {
+  @Override
+  protected void enableButtons(boolean value) {
     btnCancel.setEnabled(value);
     btnNext.setEnabled(value);
     btnBack.setEnabled(value);
   }
 
-  private void updateBreadcrumb() {
+  @Override
+  protected void updateBreadcrumb() {
     List<BreadcrumbItem> breadcrumbItems;
 
     switch (position) {
@@ -398,14 +401,6 @@ public class CreateWizardManager extends WizardManager {
     }
 
     BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
-  }
-
-  private void clear() {
-    for (WizardPanel panel : wizardInstances) {
-      panel.clear();
-    }
-
-    wizardInstances.clear();
   }
 
   public void change(String wizardPage, String toSelect) {

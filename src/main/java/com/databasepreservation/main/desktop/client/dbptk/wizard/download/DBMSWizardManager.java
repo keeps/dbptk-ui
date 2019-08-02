@@ -32,6 +32,8 @@ import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
 
+import javax.ws.rs.Produces;
+
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
@@ -54,7 +56,6 @@ public class DBMSWizardManager extends WizardManager {
   Button btnNext, btnCancel, btnBack;
 
   private static HashMap<String, DBMSWizardManager> instances = new HashMap<>();
-  private ArrayList<WizardPanel> wizardInstances = new ArrayList<>();
   private String databaseUUID;
   private int format = -1;
   private int position = 0;
@@ -113,7 +114,8 @@ public class DBMSWizardManager extends WizardManager {
     btnNext.setEnabled(value);
   }
 
-  private void handleWizard() {
+  @Override
+  protected void handleWizard() {
     GWT.log("Position: " + position);
     switch (position) {
       case 0:
@@ -203,7 +205,8 @@ public class DBMSWizardManager extends WizardManager {
       });
   }
 
-  private void updateButtons() {
+  @Override
+  protected void updateButtons() {
     btnBack.setEnabled(true);
     btnNext.setText(messages.migrate());
 
@@ -216,13 +219,15 @@ public class DBMSWizardManager extends WizardManager {
     }
   }
 
-  private void enableButtons(boolean value) {
+  @Override
+  protected void enableButtons(boolean value) {
     btnCancel.setEnabled(value);
     btnNext.setEnabled(value);
     btnBack.setEnabled(value);
   }
 
-  private void updateBreadcrumb() {
+  @Override
+  protected void updateBreadcrumb() {
     List<BreadcrumbItem> breadcrumbItems;
 
     switch (position) {
@@ -246,15 +251,12 @@ public class DBMSWizardManager extends WizardManager {
     BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
   }
 
-  private void clear() {
-    for (WizardPanel panel : wizardInstances) {
-      panel.clear();
-    }
+  @Override
+  protected void clear() {
+    super.clear();
 
     ProgressBarPanel progressBarPanel = ProgressBarPanel.getInstance(databaseUUID);
     progressBarPanel.clear(databaseUUID);
-
-    wizardInstances.clear();
   }
 
   public void change(String wizardPage, String toSelect) {
