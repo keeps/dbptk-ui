@@ -86,7 +86,7 @@ public class SIARDMainPage extends Composite {
 
           populateNavigationPanels();
 
-          List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forSIARDMainPage(databaseUUID);
+          List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forSIARDMainPage(databaseUUID, database.getMetadata().getName());
           BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
 
           container.remove(loading);
@@ -108,7 +108,7 @@ public class SIARDMainPage extends Composite {
     btnMigrateToSIARD.addStyleName("btn btn-link-info");
 
     btnMigrateToSIARD.addClickHandler(event -> {
-      HistoryManager.gotoMigrateSIARD(database.getUUID());
+      HistoryManager.gotoMigrateSIARD(database.getUUID(), database.getMetadata().getName());
     });
 
     Button btnSendToLiveDBMS = new Button();
@@ -116,7 +116,7 @@ public class SIARDMainPage extends Composite {
     btnSendToLiveDBMS.addStyleName("btn btn-link-info");
 
     btnSendToLiveDBMS.addClickHandler(event -> {
-      HistoryManager.gotoSendToLiveDBMSExportFormat(database.getUUID());
+      HistoryManager.gotoSendToLiveDBMSExportFormat(database.getUUID(), database.getMetadata().getName());
     });
 
     MetadataField path = MetadataField.createInstance(PathUtils.getFileName(database.getSIARDPath()));

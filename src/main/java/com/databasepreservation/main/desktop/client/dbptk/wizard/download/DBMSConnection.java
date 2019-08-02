@@ -52,23 +52,25 @@ public class DBMSConnection extends WizardPanel<ConnectionParameters> {
   private Set<JDBCPanel> JDBCPanels = new HashSet<>();
   private String databaseUUID;
   private final String type = ViewerConstants.DOWNLOAD_WIZARD_MANAGER;
+  private final String databaseName;
   private static Map<String, DBMSConnection> instances = new HashMap<>();
 
-  public static DBMSConnection getInstance(final String databaseUUID) {
+  public static DBMSConnection getInstance(final String databaseUUID, String databaseName) {
     if (instances.get(databaseUUID) == null) {
-      DBMSConnection instance = new DBMSConnection(databaseUUID);
+      DBMSConnection instance = new DBMSConnection(databaseUUID, databaseName);
       instances.put(databaseUUID, instance);
     }
 
-    DBMSWizardManager wizardManager = DBMSWizardManager.getInstance(databaseUUID);
+    DBMSWizardManager wizardManager = DBMSWizardManager.getInstance(databaseUUID, databaseName);
     wizardManager.enableNext(false);
 
     return instances.get(databaseUUID);
   }
 
-  private DBMSConnection(final String databaseUUID) {
+  private DBMSConnection(final String databaseUUID, String databaseName) {
     initWidget(binder.createAndBindUi(this));
 
+    this.databaseName = databaseName;
     this.databaseUUID = databaseUUID;
     sshTunnelPanel = SSHTunnelPanel.getInstance(databaseUUID);
 
@@ -112,7 +114,7 @@ public class DBMSConnection extends WizardPanel<ConnectionParameters> {
 
     tabPanel.selectTab(0);
 
-    DBMSWizardManager wizardManager = DBMSWizardManager.getInstance(databaseUUID);
+    DBMSWizardManager wizardManager = DBMSWizardManager.getInstance(databaseUUID, databaseName);
     wizardManager.enableNext(false);
 
     selected.validate(type);

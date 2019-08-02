@@ -64,7 +64,7 @@ public class MainPanelDesktop extends Composite {
       contentPanel.clear();
       contentPanel.add(manage);
     } else if (HistoryManager.ROUTE_SEND_TO_LIVE_DBMS.equals(currentHistoryPath.get(0))) {
-      DBMSWizardManager instance = DBMSWizardManager.getInstance(currentHistoryPath.get(1));
+      DBMSWizardManager instance = DBMSWizardManager.getInstance(currentHistoryPath.get(1), currentHistoryPath.get(2));
       contentPanel.clear();
       if (currentHistoryPath.size() == 4) {
         final String wizardPage = currentHistoryPath.get(2);
@@ -73,7 +73,7 @@ public class MainPanelDesktop extends Composite {
       }
       contentPanel.add(instance);
     } else if (HistoryManager.ROUTE_MIGRATE_TO_SIARD.equals(currentHistoryPath.get(0))) {
-      SIARDWizardManager instance = SIARDWizardManager.getInstance(currentHistoryPath.get(1));
+      SIARDWizardManager instance = SIARDWizardManager.getInstance(currentHistoryPath.get(1), currentHistoryPath.get(2));
       contentPanel.clear();
       if (currentHistoryPath.size() == 4) {
         final String wizardPage = currentHistoryPath.get(2);

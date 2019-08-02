@@ -57,6 +57,7 @@ public class SIARDWizardManager extends WizardManager {
 
   private static Map<String, SIARDWizardManager> instances = new HashMap<>();
   private final String databaseUUID;
+  private final String databaseName;
   private int position = 0;
   private final int positions = 4;
 
@@ -64,19 +65,19 @@ public class SIARDWizardManager extends WizardManager {
   private ExportOptionsParameters exportOptionsParameters;
   private MetadataExportOptionsParameters metadataExportOptionsParameters;
 
-  public static SIARDWizardManager getInstance(String databaseUUID) {
+  public static SIARDWizardManager getInstance(String databaseUUID, String databaseName) {
     if (instances.get(databaseUUID) == null) {
-      SIARDWizardManager instance = new SIARDWizardManager(databaseUUID);
+      SIARDWizardManager instance = new SIARDWizardManager(databaseUUID, databaseName);
       instances.put(databaseUUID, instance);
     }
 
     return instances.get(databaseUUID);
   }
 
-  private SIARDWizardManager(String databaseUUID) {
+  private SIARDWizardManager(String databaseUUID, String databaseName) {
     initWidget(binder.createAndBindUi(this));
     this.databaseUUID = databaseUUID;
-
+    this.databaseName = databaseName;
     init();
 
     btnNext.addClickHandler(event -> {
@@ -238,16 +239,16 @@ public class SIARDWizardManager extends WizardManager {
 
     switch (position) {
       case 0:
-        breadcrumbItems = BreadcrumbManager.forTableAndColumnsSendToWM(databaseUUID);
+        breadcrumbItems = BreadcrumbManager.forTableAndColumnsSendToWM(databaseUUID, databaseName);
         break;
       case 1:
-        breadcrumbItems = BreadcrumbManager.forSIARDExportOptionsSenToWM(databaseUUID);
+        breadcrumbItems = BreadcrumbManager.forSIARDExportOptionsSenToWM(databaseUUID, databaseName);
         break;
       case 2:
-        breadcrumbItems = BreadcrumbManager.forMetadataExportOptionsSendToWM(databaseUUID);
+        breadcrumbItems = BreadcrumbManager.forMetadataExportOptionsSendToWM(databaseUUID, databaseName);
         break;
       case 3:
-        breadcrumbItems = BreadcrumbManager.forProgressBarPanelSendToWM(databaseUUID);
+        breadcrumbItems = BreadcrumbManager.forProgressBarPanelSendToWM(databaseUUID, databaseName);
         break;
       default:
         breadcrumbItems = new ArrayList<>();

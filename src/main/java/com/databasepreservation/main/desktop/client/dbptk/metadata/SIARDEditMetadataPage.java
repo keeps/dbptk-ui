@@ -66,7 +66,7 @@ public class SIARDEditMetadataPage extends Composite {
 
     initWidget(binder.createAndBindUi(this));
 
-    List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forSIARDEditMetadataPage(databaseUUID);
+    List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forSIARDEditMetadataPage(databaseUUID, database.getMetadata().getName());
     BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
   }
 

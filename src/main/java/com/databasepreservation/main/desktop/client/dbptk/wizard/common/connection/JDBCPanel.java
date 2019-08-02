@@ -207,7 +207,7 @@ public class JDBCPanel extends Composite {
     if(type.equals(ViewerConstants.UPLOAD_WIZARD_MANAGER)){
       wizardManager = CreateWizardManager.getInstance();
     } else {
-      wizardManager = DBMSWizardManager.getInstance(databaseUUID);
+      wizardManager = DBMSWizardManager.getInstance(databaseUUID, "");
     }
     wizardManager.enableNext(true);
 

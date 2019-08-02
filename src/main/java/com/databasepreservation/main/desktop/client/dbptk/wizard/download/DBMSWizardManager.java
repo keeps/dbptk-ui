@@ -57,26 +57,27 @@ public class DBMSWizardManager extends WizardManager {
 
   private static HashMap<String, DBMSWizardManager> instances = new HashMap<>();
   private String databaseUUID;
-  private int format = -1;
+  private ArrayList<WizardPanel> wizardInstances = new ArrayList<>();
+  private final String databaseName;
+  private ViewerDatabase database;
   private int position = 0;
   private final int positions = 4;
 
   private ConnectionParameters connectionParameters;
   private ExportOptionsParameters exportOptionsParameters;
-  private MetadataExportOptionsParameters metadataExportOptionsParameters;
 
-  public static DBMSWizardManager getInstance(String databaseUUID) {
+  public static DBMSWizardManager getInstance(String databaseUUID, String databaseName) {
     if (instances.get(databaseUUID) == null) {
-      instances.put(databaseUUID, new DBMSWizardManager(databaseUUID));
-      instances.get(databaseUUID).init();
+      instances.put(databaseUUID, new DBMSWizardManager(databaseUUID, databaseName));
+      instances.get(databaseUUID).init(databaseName);
     }
 
     return instances.get(databaseUUID);
   }
 
-  private void init() {
+  private void init(String databaseName) {
     wizardContent.clear();
-    DBMSConnection connection = DBMSConnection.getInstance(databaseUUID);
+    DBMSConnection connection = DBMSConnection.getInstance(databaseUUID, databaseName);
     wizardInstances.add(0, connection);
     wizardContent.add(connection);
     updateButtons();
@@ -84,9 +85,10 @@ public class DBMSWizardManager extends WizardManager {
 
   }
 
-  private DBMSWizardManager(String databaseUUID) {
+  private DBMSWizardManager(String databaseUUID, String databaseName) {
     initWidget(binder.createAndBindUi(this));
 
+    this.databaseName = databaseName;
     this.databaseUUID = databaseUUID;
 
     btnNext.addClickHandler(event -> {
@@ -165,7 +167,7 @@ public class DBMSWizardManager extends WizardManager {
       new DefaultAsyncCallback<IsIndexed>() {
         @Override
         public void onSuccess(IsIndexed result) {
-          ViewerDatabase database = (ViewerDatabase) result;
+          database = (ViewerDatabase) result;
           final String siardPath = database.getSIARDPath();
 
           ProgressBarPanel progressBarPanel = ProgressBarPanel.getInstance(databaseUUID);
@@ -232,16 +234,16 @@ public class DBMSWizardManager extends WizardManager {
 
     switch (position) {
       case 0:
-        breadcrumbItems = BreadcrumbManager.forDBMSConnectionSendToWM(databaseUUID);
+        breadcrumbItems = BreadcrumbManager.forDBMSConnectionSendToWM(databaseUUID, databaseName);
         break;
       case 1:
-        breadcrumbItems = BreadcrumbManager.forSIARDExportOptionsSenToWM(databaseUUID);
+        breadcrumbItems = BreadcrumbManager.forSIARDExportOptionsSenToWM(databaseUUID, databaseName);
         break;
       case 2:
-        breadcrumbItems = BreadcrumbManager.forMetadataExportOptionsSendToWM(databaseUUID);
+        breadcrumbItems = BreadcrumbManager.forMetadataExportOptionsSendToWM(databaseUUID, databaseName);
         break;
       case 3:
-        breadcrumbItems = BreadcrumbManager.forProgressBarPanelSendToWM(databaseUUID);
+        breadcrumbItems = BreadcrumbManager.forProgressBarPanelSendToWM(databaseUUID, databaseName);
         break;
       default:
         breadcrumbItems = new ArrayList<>();

@@ -29,8 +29,8 @@ public class ConnectionSidebar extends Composite {
   private final String headerIcon;
   private final String itemIcon;
   private final DBPTKModule dbptkModule;
+  private Map<String, SidebarHyperlink> list = new HashMap<>();
   private static Map<String, ConnectionSidebar> instances = new HashMap<>();
-  private static Map<String, SidebarHyperlink> list = new HashMap<>();
 
   interface ConnectionSidebarUiBinder extends UiBinder<Widget, ConnectionSidebar> {
   }
@@ -94,9 +94,9 @@ public class ConnectionSidebar extends Composite {
 
     for (Map.Entry<String, SidebarHyperlink> entry : list.entrySet()) {
       if (entry.getKey().equals(connection)) {
-        list.get(connection).setSelected(true);
+        entry.getValue().setSelected(true);
       } else {
-        list.get(entry.getKey()).setSelected(false);
+        entry.getValue().setSelected(false);
       }
     }
   }

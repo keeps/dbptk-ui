@@ -197,13 +197,13 @@ public class HistoryManager {
     newHistory(params);
   }
 
-  public static void gotoSendToLiveDBMSExportFormat(String databaseUUID) {
-    List<String> params = Arrays.asList(ROUTE_SEND_TO_LIVE_DBMS, databaseUUID, ROUTE_WIZARD_EXPORT_FORMAT);
+  public static void gotoSendToLiveDBMSExportFormat(String databaseUUID, String databaseName) {
+    List<String> params = Arrays.asList(ROUTE_SEND_TO_LIVE_DBMS, databaseUUID, databaseName);
     newHistory(params);
   }
 
-  public static void gotoMigrateSIARD(String databaseUUID) {
-    List<String> params = Arrays.asList(ROUTE_MIGRATE_TO_SIARD, databaseUUID, ROUTE_WIZARD_EXPORT_FORMAT);
+  public static void gotoMigrateSIARD(String databaseUUID, String databaseName) {
+    List<String> params = Arrays.asList(ROUTE_MIGRATE_TO_SIARD, databaseUUID, databaseName);
     newHistory(params);
   }
 
