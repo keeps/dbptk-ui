@@ -96,6 +96,8 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
   private HashMap<String, Boolean> toggleSelectionViewsMap = new HashMap<>();
   private HashMap<String, Boolean> toggleSelectionColumnsMap = new HashMap<>();
   private HashMap<String, Button> btnToggleSelectionMap = new HashMap<>();
+  private boolean iLoading = true;
+  private HashMap<String, Boolean> initialLoading = new HashMap<>();
 
   public static TableAndColumns getInstance(String databaseUUID, ConnectionParameters values) {
     if (instances.get(databaseUUID) == null) {
@@ -275,6 +277,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
   }
 
   private void initTables() {
+    set();
     for (ViewerSchema schema : metadata.getSchemas()) {
       MultipleSelectionTablePanel<ViewerTable> schemaTables = createCellTableViewerTable();
       populateTables(schemaTables, metadata.getSchema(schema.getUUID()));
@@ -292,6 +295,21 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
         MultipleSelectionTablePanel<ViewerColumn> viewColumns = createCellTableViewerColumn();
         populateViewColumns(viewColumns, metadata.getView(vView.getUUID()));
         columns.put(vView.getUUID(), viewColumns);
+      }
+    }
+  }
+
+  private void set() {
+    for (ViewerSchema schema : metadata.getSchemas()) {
+      for (ViewerTable vTable : schema.getTables()) {
+        for (ViewerColumn column : vTable.getColumns()) {
+          initialLoading.put(vTable.getUUID() + column.getDisplayName(), true);
+        }
+      }
+      for (ViewerView vView : schema.getViews()) {
+        for (ViewerColumn column : vView.getColumns()) {
+          initialLoading.put(vView.getUUID() + column.getDisplayName(), true);
+        }
       }
     }
   }
@@ -421,6 +439,13 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
     if (selectionTablePanel.getSelectionModel().isSelected(column)) {
       viewSelectedStatus.put(viewerView.getUUID(), true);
       viewerTableMultipleSelectionTablePanel.getSelectionModel().setSelected(viewerView, true);
+    } else {
+      if (initialLoading.get(viewerView.getUUID() + column.getDisplayName())) {
+        viewSelectedStatus.put(viewerView.getUUID(), true);
+        viewerTableMultipleSelectionTablePanel.getSelectionModel().setSelected(viewerView, true);
+        selectionTablePanel.getSelectionModel().setSelected(column, true);
+        initialLoading.put(viewerView.getUUID() + column.getDisplayName(), false);
+      }
     }
 
     if (selectionTablePanel.getSelectionModel().getSelectedSet().size() == 0) {
@@ -429,6 +454,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
       viewerTableMultipleSelectionTablePanel.getSelectionModel().setSelected(viewerView, false);
       viewSelectedStatus.put(viewerView.getUUID(), false);
     }
+
     return selectionTablePanel.getSelectionModel().isSelected(column);
   }
 
@@ -519,7 +545,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
                 viewerSchema.getUUID());
             }
             if (selectionTablePanel.getSelectionModel().isSelected(object)) {
-              if (!tableSelectedStatus.get(object.getUUID())) {
+              if (tableSelectedStatus.get(object.getUUID()) != null && !tableSelectedStatus.get(object.getUUID())) {
                 for (ViewerColumn column : object.getColumns()) {
                   viewerColumnTablePanel.getSelectionModel().setSelected(column, true);
                 }
@@ -604,7 +630,6 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
                 externalLOBsParameter.setReferenceType(referenceType.getSelectedValue());
                 externalLOBsParameter.setTable(viewerTable);
                 externalLOBsParameter.setColumnName(object.getDisplayName());
-                GWT.log("" + externalLOBsParameter);
                 externalLOBsParameters.put(id, externalLOBsParameter);
               }
               }
@@ -630,7 +655,6 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
                 externalLOBsParameter.setReferenceType(referenceType.getSelectedValue());
                 externalLOBsParameter.setTable(metadata.getTable(currentTableUUID));
                 externalLOBsParameter.setColumnName(object.getDisplayName());
-                GWT.log("" + externalLOBsParameter);
 
                 MultipleSelectionTablePanel<ViewerColumn> viewerColumnMultipleSelectionTablePanel = getColumns(
                   viewerTable.getUUID());
@@ -667,6 +691,13 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
             if (selectionTablePanel.getSelectionModel().isSelected(object)) {
               tableSelectedStatus.put(viewerTable.getUUID(), true);
               viewerTableMultipleSelectionTablePanel.getSelectionModel().setSelected(viewerTable, true);
+            } else {
+              if (initialLoading.get(viewerTable.getUUID() + object.getDisplayName())) {
+                viewSelectedStatus.put(viewerTable.getUUID(), true);
+                viewerTableMultipleSelectionTablePanel.getSelectionModel().setSelected(viewerTable, true);
+                selectionTablePanel.getSelectionModel().setSelected(object, true);
+                initialLoading.put(viewerTable.getUUID() + object.getDisplayName(), false);
+              }
             }
 
             if (selectionTablePanel.getSelectionModel().getSelectedSet().size() == 0) {
@@ -709,7 +740,8 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
           }
           return null;
         }
-      }), new MultipleSelectionTablePanel.ColumnInfo<>("Options", 10, buttonDatabaseColumn));
+        }),
+      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsOptionsTitle(), 10, buttonDatabaseColumn));
   }
 
   private List<ViewerTable> filtered(List<ViewerTable> tableList) {

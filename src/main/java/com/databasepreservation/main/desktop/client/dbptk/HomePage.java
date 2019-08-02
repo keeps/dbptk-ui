@@ -58,7 +58,7 @@ public class HomePage extends Composite {
 
     Button btnManage = new Button();
     btnManage.setText(messages.manageCardButton());
-    btnManage.addStyleName("btn btn-view");
+    btnManage.addStyleName("btn btn-manage");
 
     btnManage.addClickHandler(event -> HistoryManager.gotoDatabaseList());
 

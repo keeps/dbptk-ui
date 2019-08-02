@@ -1,5 +1,6 @@
 package com.databasepreservation.main.common.shared;
 
+import com.databasepreservation.modules.siard.SIARD2ModuleFactory;
 import org.roda.core.data.common.RodaConstants;
 import org.roda.core.data.v2.index.filter.BasicSearchFilterParameter;
 import org.roda.core.data.v2.index.filter.Filter;
@@ -271,6 +272,11 @@ public class ViewerConstants {
   public static final String SIARD1 = "siard-1";
   public static final String SIARD2 = "siard-2";
   public static final String SIARDDK = "siard-dk";
+
+  /*
+   * DBPTK Metadata
+   */
+  public static final String SIARD_METADATA_CLIENT_MACHINE = SIARD2ModuleFactory.PARAMETER_META_CLIENT_MACHINE;
 
   /**
    * private constructor

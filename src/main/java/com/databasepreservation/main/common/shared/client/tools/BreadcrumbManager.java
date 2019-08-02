@@ -356,7 +356,7 @@ public class BreadcrumbManager {
   }
 
   public static List<BreadcrumbItem> forSIARDMainPage(final String databaseUUID) {
-    List<BreadcrumbItem> items = forHome();
+    List<BreadcrumbItem> items = forManageSIARD();
     items.add(
       new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE)
         + SafeHtmlUtils.htmlEscape(" " + messages.SIARD())), new Command() {
@@ -371,8 +371,13 @@ public class BreadcrumbManager {
   public static List<BreadcrumbItem> forManageSIARD() {
     List<BreadcrumbItem> items = forHome();
     items.add(
-      new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE)
-        + SafeHtmlUtils.htmlEscape(" " + messages.manageSIARD()))));
+      new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.SERVER)
+        + SafeHtmlUtils.htmlEscape(" " + messages.manageSIARD())), new Command(){
+        @Override
+        public void execute() {
+          HistoryManager.gotoDatabaseList();
+        }
+      }));
     return items;
   }
 

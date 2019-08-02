@@ -42,6 +42,7 @@ public class FontAwesomeIconManager {
   public static final String LIST = "list";
   public static final String CALENDAR = "calendar";
   public static final String KEY = "key";
+  public static final String SERVER = "server";
 
 
   public static String getTag(String icon) {

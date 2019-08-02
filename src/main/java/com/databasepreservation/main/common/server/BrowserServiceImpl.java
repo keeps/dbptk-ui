@@ -1,5 +1,7 @@
 package com.databasepreservation.main.common.server;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.List;
 
 import org.roda.core.data.exceptions.AuthenticationDeniedException;
@@ -231,6 +233,15 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
   @Override
   public String getApplicationType() {
     return System.getProperty("env", "browse");
+  }
+
+  public String getClientMachine() {
+    try {
+      return InetAddress.getLocalHost().getHostName();
+    } catch (UnknownHostException e) {
+      LOGGER.debug("UnkownHostException");
+    }
+    return "";
   }
 
   @Override

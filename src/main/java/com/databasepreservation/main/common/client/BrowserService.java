@@ -111,6 +111,8 @@ public interface BrowserService extends RemoteService {
 
   String getApplicationType();
 
+  String getClientMachine();
+
   String uploadMetadataSIARD(String databaseUUID, String path) throws GenericException;
 
   String findSIARDFile(String path) throws GenericException, RequestNotValidException;

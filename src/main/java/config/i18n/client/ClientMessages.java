@@ -666,6 +666,8 @@ public interface ClientMessages extends Messages {
 
   String tableAndColumnsColumnFiltersTitle();
 
+  String tableAndColumnsOptionsTitle();
+
   String tableAndColumnsSelectText();
 
   String tableAndColumnsAddText();

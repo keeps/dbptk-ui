@@ -115,6 +115,15 @@ public class MetadataExportOptions extends WizardPanel<MetadataExportOptionsPara
         defaultTextBox.addStyleName("form-textbox");
         textBoxInputs.put(parameter.getName(), defaultTextBox);
         genericField = GenericField.createInstance(messages.wizardExportOptionsLabels(parameter.getName()), defaultTextBox);
+
+        if (parameter.getName().equals(ViewerConstants.SIARD_METADATA_CLIENT_MACHINE)) {
+          BrowserService.Util.getInstance().getClientMachine(new DefaultAsyncCallback<String>() {
+            @Override
+            public void onSuccess(String result) {
+              defaultTextBox.setText(result);
+            }
+          });
+        }
         break;
       default:
         break;

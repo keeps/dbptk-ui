@@ -256,6 +256,10 @@ p[data-value]:after {
     content: "\f0c7";
 }
 
+.btn-manage:after {
+    content: "\f233";
+}
+
 .btn-export {
     padding: 4px 8px 4px 8px;
     font-size: 11px;
