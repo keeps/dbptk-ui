@@ -1,7 +1,9 @@
 package com.databasepreservation.main.desktop.client.dbptk.wizard.create;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.databasepreservation.main.common.client.BrowserService;
 import com.databasepreservation.main.common.shared.ViewerConstants;
@@ -13,6 +15,7 @@ import com.databasepreservation.main.common.shared.client.common.utils.AsyncCall
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.common.shared.client.widgets.Toast;
+import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardManager;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.common.exportOptions.MetadataExportOptions;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.common.exportOptions.SIARDExportOptions;
@@ -38,10 +41,11 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-public class CreateWizardManager extends Composite {
+public class CreateWizardManager extends WizardManager {
   @UiField
   public ClientMessages messages = GWT.create(ClientMessages.class);
 
+  @Override
   public void enableNext(boolean value) {
     btnNext.setEnabled(value);
   }
@@ -88,7 +92,7 @@ public class CreateWizardManager extends Composite {
       @Override
       public void onSuccess(String result) {
         databaseUUID = result;
-        Connection connectionImpl = Connection.getInstance(databaseUUID);
+        Connection connectionImpl = Connection.getInstance(databaseUUID, ViewerConstants.UPLOAD_WIZARD_MANAGER);
         wizardContent.clear();
         wizardInstances.add(0, connectionImpl);
         wizardContent.add(connectionImpl);

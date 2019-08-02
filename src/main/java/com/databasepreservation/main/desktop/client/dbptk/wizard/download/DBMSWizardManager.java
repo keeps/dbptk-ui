@@ -15,6 +15,7 @@ import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManage
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.common.shared.client.tools.ToolkitModuleName2ViewerModuleName;
 import com.databasepreservation.main.common.shared.client.widgets.Toast;
+import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardManager;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.common.exportOptions.MetadataExportOptions;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.common.progressBar.ProgressBarPanel;
@@ -34,7 +35,7 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-public class DBMSWizardManager extends Composite {
+public class DBMSWizardManager extends WizardManager {
   @UiField
   public ClientMessages messages = GWT.create(ClientMessages.class);
 
@@ -107,6 +108,7 @@ public class DBMSWizardManager extends Composite {
     });
   }
 
+  @Override
   public void enableNext(boolean value) {
     btnNext.setEnabled(value);
   }

@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.databasepreservation.main.common.client.BrowserService;
+import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
 import com.databasepreservation.main.common.shared.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
@@ -50,6 +51,7 @@ public class DBMSConnection extends WizardPanel<ConnectionParameters> {
   private JDBCPanel selected;
   private Set<JDBCPanel> JDBCPanels = new HashSet<>();
   private String databaseUUID;
+  private final String type = ViewerConstants.DOWNLOAD_WIZARD_MANAGER;
   private static Map<String, DBMSConnection> instances = new HashMap<>();
 
   public static DBMSConnection getInstance(final String databaseUUID) {
@@ -91,7 +93,6 @@ public class DBMSConnection extends WizardPanel<ConnectionParameters> {
   }
 
   public void sideBarHighlighter(String connection) {
-    GWT.log(connection);
     connectionSidebar.select(connection);
     JDBCListConnections.clear();
     JDBCListConnections.add(connectionSidebar);
@@ -104,7 +105,7 @@ public class DBMSConnection extends WizardPanel<ConnectionParameters> {
 
     TabPanel tabPanel = new TabPanel();
     tabPanel.addStyleName("browseItemMetadata connection-panel");
-    selected = JDBCPanel.getInstance(connection, preservationParametersSelected, databaseUUID);
+    selected = JDBCPanel.getInstance(connection, preservationParametersSelected, databaseUUID, type);
     JDBCPanels.add(selected);
     tabPanel.add(selected, messages.tabGeneral());
     tabPanel.add(sshTunnelPanel, messages.tabSSHTunnel());
@@ -114,7 +115,7 @@ public class DBMSConnection extends WizardPanel<ConnectionParameters> {
     DBMSWizardManager wizardManager = DBMSWizardManager.getInstance(databaseUUID);
     wizardManager.enableNext(false);
 
-    selected.validate();
+    selected.validate(type);
     connectionInputPanel.add(tabPanel);
   }
 
@@ -156,9 +157,9 @@ public class DBMSConnection extends WizardPanel<ConnectionParameters> {
     if (selected != null) {
       GWT.log("" + sshTunnelPanel.isSSHTunnelEnabled());
       if (sshTunnelPanel.isSSHTunnelEnabled()) {
-        return selected.validate() && sshTunnelPanel.validate();
+        return selected.validate(type) && sshTunnelPanel.validate();
       }
-      return selected.validate();
+      return selected.validate(type);
     }
 
     return false;

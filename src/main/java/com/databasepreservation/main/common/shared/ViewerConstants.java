@@ -277,7 +277,8 @@ public class ViewerConstants {
    * DBPTK Metadata
    */
   public static final String SIARD_METADATA_CLIENT_MACHINE = SIARD2ModuleFactory.PARAMETER_META_CLIENT_MACHINE;
-
+  public static final String UPLOAD_WIZARD_MANAGER = "upload-wizard-manager";
+  public static final String DOWNLOAD_WIZARD_MANAGER = "download-wizard-manager";
   /**
    * private constructor
    */

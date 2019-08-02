@@ -13,6 +13,7 @@ import com.databasepreservation.main.common.shared.client.tools.PathUtils;
 import com.databasepreservation.main.common.shared.client.tools.ViewerStringUtils;
 import com.databasepreservation.main.desktop.client.common.FileUploadField;
 import com.databasepreservation.main.desktop.client.common.GenericField;
+import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardManager;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.create.CreateWizardManager;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.download.DBMSWizardManager;
 import com.databasepreservation.main.desktop.shared.models.Filter;
@@ -52,24 +53,26 @@ public class JDBCPanel extends Composite {
   private ArrayList<PreservationParameter> parameters;
   private TextBox focusElement = null;
   private String databaseUUID;
+  private final String type;
 
   @UiField
   FlowPanel content;
 
-  public static JDBCPanel getInstance(String connection, ArrayList<PreservationParameter> parameters, String databaseUUID) {
+  public static JDBCPanel getInstance(String connection, ArrayList<PreservationParameter> parameters, String databaseUUID, String type) {
     String code =  databaseUUID + ViewerConstants.API_SEP + connection;
     if (instances.get(code) == null) {
-      JDBCPanel instance = new JDBCPanel(parameters, databaseUUID);
+      JDBCPanel instance = new JDBCPanel(parameters, databaseUUID, type);
       instances.put(code, instance);
     }
     return instances.get(code);
   }
 
-  private JDBCPanel(ArrayList<PreservationParameter> parameters, String databaseUUID) {
+  private JDBCPanel(ArrayList<PreservationParameter> parameters, String databaseUUID, String type) {
     initWidget(binder.createAndBindUi(this));
 
     this.databaseUUID = databaseUUID;
     this.parameters = parameters;
+    this.type = type;
 
     for (PreservationParameter p : parameters) {
       buildGenericWidget(p);
@@ -191,18 +194,21 @@ public class JDBCPanel extends Composite {
     } else {
       input.removeStyleName("wizard-connection-validator");
     }
-    validate();
+    validate(type);
   }
 
   /**
    *
    * @return true if all fields required fields are filled, otherwise false
    */
-  public boolean validate() {
+  public boolean validate(String type) {
     ArrayList<PreservationParameter> arrayList = new ArrayList<>();
-    CreateWizardManager createWizardManager = CreateWizardManager.getInstance();
-    DBMSWizardManager wizardManager = DBMSWizardManager.getInstance(databaseUUID);
-    createWizardManager.enableNext(true);
+    WizardManager wizardManager;
+    if(type.equals(ViewerConstants.UPLOAD_WIZARD_MANAGER)){
+      wizardManager = CreateWizardManager.getInstance();
+    } else {
+      wizardManager = DBMSWizardManager.getInstance(databaseUUID);
+    }
     wizardManager.enableNext(true);
 
     for (PreservationParameter parameter : parameters) {
@@ -212,7 +218,6 @@ public class JDBCPanel extends Composite {
           final TextBox textBox = textBoxInputs.get(parameter.getName());
           if (ViewerStringUtils.isBlank(textBox.getText())) {
             arrayList.add(parameter);
-            createWizardManager.enableNext(false);
             wizardManager.enableNext(false);
           }
         }

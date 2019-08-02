@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.databasepreservation.main.common.client.BrowserService;
+import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
 import com.databasepreservation.main.common.shared.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
@@ -49,20 +50,22 @@ public class Connection extends WizardPanel<ConnectionParameters> {
   private String selectedConnection;
   private JDBCPanel selected;
   private Set<JDBCPanel> JDBCPanels = new HashSet<>();
+  private final String type;
 
   private static Connection instance = null;
 
-  public static Connection getInstance(final String databaseUUID) {
+  public static Connection getInstance(final String databaseUUID, String type) {
     if (instance == null) {
-      instance = new Connection(databaseUUID);
+      instance = new Connection(databaseUUID, type);
     }
     return instance;
   }
 
-  private Connection(final String databaseUUID) {
+  private Connection(final String databaseUUID, String type) {
     initWidget(binder.createAndBindUi(this));
 
     this.databaseUUID = databaseUUID;
+    this.type = type;
 
     CreateWizardManager createWizardManager = CreateWizardManager.getInstance();
     createWizardManager.enableNext(false);
@@ -107,14 +110,14 @@ public class Connection extends WizardPanel<ConnectionParameters> {
 
     TabPanel tabPanel = new TabPanel();
     tabPanel.addStyleName("browseItemMetadata connection-panel");
-    selected = JDBCPanel.getInstance(connection, preservationParametersSelected, databaseUUID);
+    selected = JDBCPanel.getInstance(connection, preservationParametersSelected, databaseUUID, ViewerConstants.UPLOAD_WIZARD_MANAGER);
     JDBCPanels.add(selected);
     tabPanel.add(selected, messages.tabGeneral());
     tabPanel.add(sshTunnelPanel, messages.tabSSHTunnel());
 
     tabPanel.selectTab(0);
 
-    selected.validate();
+    selected.validate(type);
     connectionInputPanel.add(tabPanel);
   }
 
@@ -155,9 +158,9 @@ public class Connection extends WizardPanel<ConnectionParameters> {
   public boolean validate() {
     if (selected != null) {
       if (sshTunnelPanel.isSSHTunnelEnabled()) {
-        return selected.validate() && sshTunnelPanel.validate();
+        return selected.validate(type) && sshTunnelPanel.validate();
       }
-      return selected.validate();
+      return selected.validate(type);
     }
 
     return false;
