@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.databasepreservation.main.common.client.BrowserService;
+import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbItem;
@@ -17,22 +18,19 @@ import com.databasepreservation.main.common.shared.client.tools.ToolkitModuleNam
 import com.databasepreservation.main.common.shared.client.widgets.Toast;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardManager;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
+import com.databasepreservation.main.desktop.client.dbptk.wizard.common.connection.Connection;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.common.exportOptions.MetadataExportOptions;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.common.progressBar.ProgressBarPanel;
 import com.databasepreservation.main.desktop.shared.models.wizardParameters.ConnectionParameters;
 import com.databasepreservation.main.desktop.shared.models.wizardParameters.ExportOptionsParameters;
-import com.databasepreservation.main.desktop.shared.models.wizardParameters.MetadataExportOptionsParameters;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
-
-import javax.ws.rs.Produces;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -56,52 +54,52 @@ public class DBMSWizardManager extends WizardManager {
   Button btnNext, btnCancel, btnBack;
 
   private static HashMap<String, DBMSWizardManager> instances = new HashMap<>();
-  private String databaseUUID;
   private ArrayList<WizardPanel> wizardInstances = new ArrayList<>();
-  private final String databaseName;
+  private final String databaseUUID;
+  private String databaseName;
+
   private ViewerDatabase database;
   private int position = 0;
-  private final int positions = 4;
+  private final int positions = 0;
 
   private ConnectionParameters connectionParameters;
   private ExportOptionsParameters exportOptionsParameters;
 
-  public static DBMSWizardManager getInstance(String databaseUUID, String databaseName) {
+  public static DBMSWizardManager getInstance(String databaseUUID) {
     if (instances.get(databaseUUID) == null) {
-      instances.put(databaseUUID, new DBMSWizardManager(databaseUUID, databaseName));
-      instances.get(databaseUUID).init(databaseName);
+      instances.put(databaseUUID, new DBMSWizardManager(databaseUUID));
+      instances.get(databaseUUID).init();
     }
 
     return instances.get(databaseUUID);
   }
 
-  private void init(String databaseName) {
+  private void init() {
     wizardContent.clear();
-    DBMSConnection connection = DBMSConnection.getInstance(databaseUUID, databaseName);
+    Connection connection = Connection.getInstance(databaseUUID);
+    connection.initExportDBMS(ViewerConstants.DOWNLOAD_WIZARD_MANAGER, HistoryManager.ROUTE_SEND_TO_LIVE_DBMS);
     wizardInstances.add(0, connection);
     wizardContent.add(connection);
+    btnBack.setVisible(false);
+    btnNext.setEnabled(false);
+    btnNext.setText(messages.download());
     updateButtons();
     updateBreadcrumb();
 
   }
 
-  private DBMSWizardManager(String databaseUUID, String databaseName) {
+  public void setBreadcrumbDatabaseName(final String databaseName) {
+    this.databaseName = databaseName;
+    updateBreadcrumb();
+  }
+
+  private DBMSWizardManager(String databaseUUID) {
     initWidget(binder.createAndBindUi(this));
 
-    this.databaseName = databaseName;
     this.databaseUUID = databaseUUID;
 
     btnNext.addClickHandler(event -> {
       handleWizard();
-    });
-
-    btnBack.addClickHandler(event -> {
-      if (position != 0) {
-        wizardContent.clear();
-        wizardContent.add(wizardInstances.get(--position));
-        updateButtons();
-        updateBreadcrumb();
-      }
     });
 
     btnCancel.addClickHandler(event -> {
@@ -152,7 +150,7 @@ public class DBMSWizardManager extends WizardManager {
       migrateToDBMS();
     } else {
       wizardInstances.get(position).error();
-      DBMSConnection connection = (DBMSConnection) wizardInstances.get(position);
+      Connection connection = (Connection) wizardInstances.get(position);
       connection.clearPasswords();
     }
   }
@@ -209,16 +207,6 @@ public class DBMSWizardManager extends WizardManager {
 
   @Override
   protected void updateButtons() {
-    btnBack.setEnabled(true);
-    btnNext.setText(messages.migrate());
-
-    if (position == 0) {
-      btnBack.setEnabled(false);
-    }
-
-    if (position == positions - 1) {
-      btnNext.setText(messages.migrate());
-    }
   }
 
   @Override
@@ -268,8 +256,8 @@ public class DBMSWizardManager extends WizardManager {
   private void internalChanger(String wizardPage, String toSelect) {
     WizardPanel wizardPanel = wizardInstances.get(position);
     if (HistoryManager.ROUTE_WIZARD_CONNECTION.equals(wizardPage)) {
-      if (wizardPanel instanceof DBMSConnection) {
-        DBMSConnection connection = (DBMSConnection) wizardPanel;
+      if (wizardPanel instanceof Connection) {
+        Connection connection = (Connection) wizardPanel;
         connection.sideBarHighlighter(toSelect);
       } else {
         HistoryManager.gotoSendToLiveDBMS(databaseUUID);

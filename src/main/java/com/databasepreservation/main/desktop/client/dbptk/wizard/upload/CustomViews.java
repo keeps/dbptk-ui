@@ -1,4 +1,4 @@
-package com.databasepreservation.main.desktop.client.dbptk.wizard.create;
+package com.databasepreservation.main.desktop.client.dbptk.wizard.upload;
 
 import java.util.ArrayList;
 import java.util.HashMap;

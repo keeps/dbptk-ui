@@ -18,7 +18,7 @@ import com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.routi
 import com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.tables.MetadataTablePanel;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.views.MetadataViewPanel;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.users.MetadataUsersPanel;
-import com.databasepreservation.main.desktop.client.dbptk.wizard.create.CreateWizardManager;
+import com.databasepreservation.main.desktop.client.dbptk.wizard.upload.CreateWizardManager;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.download.SIARDWizardManager;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.download.DBMSWizardManager;
 import com.google.gwt.core.client.GWT;
@@ -64,8 +64,12 @@ public class MainPanelDesktop extends Composite {
       contentPanel.clear();
       contentPanel.add(manage);
     } else if (HistoryManager.ROUTE_SEND_TO_LIVE_DBMS.equals(currentHistoryPath.get(0))) {
-      DBMSWizardManager instance = DBMSWizardManager.getInstance(currentHistoryPath.get(1), currentHistoryPath.get(2));
+      DBMSWizardManager instance = DBMSWizardManager.getInstance(currentHistoryPath.get(1));
       contentPanel.clear();
+      if (currentHistoryPath.size() == 3) {
+        final String databaseName = currentHistoryPath.get(2);
+        instance.setBreadcrumbDatabaseName(databaseName);
+      }
       if (currentHistoryPath.size() == 4) {
         final String wizardPage = currentHistoryPath.get(2);
         final String toSelect = currentHistoryPath.get(3);

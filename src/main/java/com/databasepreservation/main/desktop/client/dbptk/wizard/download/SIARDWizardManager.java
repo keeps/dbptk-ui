@@ -19,7 +19,7 @@ import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.common.exportOptions.MetadataExportOptions;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.common.exportOptions.SIARDExportOptions;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.common.progressBar.ProgressBarPanel;
-import com.databasepreservation.main.desktop.client.dbptk.wizard.create.TableAndColumns;
+import com.databasepreservation.main.desktop.client.dbptk.wizard.upload.TableAndColumns;
 import com.databasepreservation.main.desktop.shared.models.wizardParameters.ExportOptionsParameters;
 import com.databasepreservation.main.desktop.shared.models.wizardParameters.MetadataExportOptionsParameters;
 import com.databasepreservation.main.desktop.shared.models.wizardParameters.TableAndColumnsParameters;

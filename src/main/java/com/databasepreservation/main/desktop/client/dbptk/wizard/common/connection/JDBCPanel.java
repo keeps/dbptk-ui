@@ -14,7 +14,7 @@ import com.databasepreservation.main.common.shared.client.tools.ViewerStringUtil
 import com.databasepreservation.main.desktop.client.common.FileUploadField;
 import com.databasepreservation.main.desktop.client.common.GenericField;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardManager;
-import com.databasepreservation.main.desktop.client.dbptk.wizard.create.CreateWizardManager;
+import com.databasepreservation.main.desktop.client.dbptk.wizard.upload.CreateWizardManager;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.download.DBMSWizardManager;
 import com.databasepreservation.main.desktop.shared.models.Filter;
 import com.databasepreservation.main.desktop.shared.models.JDBCParameters;
@@ -188,12 +188,13 @@ public class JDBCPanel extends Composite {
     }
   }
 
-  private void selfValidator(TextBox input){
-    if(input.getValue().isEmpty()){
+  private void selfValidator(TextBox input) {
+    if (input.getValue().isEmpty()) {
       input.addStyleName("wizard-connection-validator");
     } else {
       input.removeStyleName("wizard-connection-validator");
     }
+    GWT.log(type);
     validate(type);
   }
 
@@ -207,7 +208,7 @@ public class JDBCPanel extends Composite {
     if(type.equals(ViewerConstants.UPLOAD_WIZARD_MANAGER)){
       wizardManager = CreateWizardManager.getInstance();
     } else {
-      wizardManager = DBMSWizardManager.getInstance(databaseUUID, "");
+      wizardManager = DBMSWizardManager.getInstance(databaseUUID);
     }
     wizardManager.enableNext(true);
 

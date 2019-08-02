@@ -1,9 +1,7 @@
-package com.databasepreservation.main.desktop.client.dbptk.wizard.create;
+package com.databasepreservation.main.desktop.client.dbptk.wizard.upload;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.databasepreservation.main.common.client.BrowserService;
 import com.databasepreservation.main.common.shared.ViewerConstants;
@@ -17,6 +15,7 @@ import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.common.shared.client.widgets.Toast;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardManager;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
+import com.databasepreservation.main.desktop.client.dbptk.wizard.common.connection.Connection;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.common.exportOptions.MetadataExportOptions;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.common.exportOptions.SIARDExportOptions;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.common.progressBar.ProgressBarPanel;
@@ -31,7 +30,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
@@ -44,11 +42,6 @@ import config.i18n.client.ClientMessages;
 public class CreateWizardManager extends WizardManager {
   @UiField
   public ClientMessages messages = GWT.create(ClientMessages.class);
-
-  @Override
-  public void enableNext(boolean value) {
-    btnNext.setEnabled(value);
-  }
 
   interface CreateWizardManagerUiBinder extends UiBinder<Widget, CreateWizardManager> {
   }
@@ -91,10 +84,11 @@ public class CreateWizardManager extends WizardManager {
       @Override
       public void onSuccess(String result) {
         databaseUUID = result;
-        Connection connectionImpl = Connection.getInstance(databaseUUID, ViewerConstants.UPLOAD_WIZARD_MANAGER);
+        Connection connection = Connection.getInstance(databaseUUID);
+        connection.initImportDBMS(ViewerConstants.UPLOAD_WIZARD_MANAGER, HistoryManager.ROUTE_CREATE_SIARD);
         wizardContent.clear();
-        wizardInstances.add(0, connectionImpl);
-        wizardContent.add(connectionImpl);
+        wizardInstances.add(0, connection);
+        wizardContent.add(connection);
       }
     });
   }
@@ -363,6 +357,11 @@ public class CreateWizardManager extends WizardManager {
     if (position == positions - 1) {
       btnNext.setText(messages.migrate());
     }
+  }
+
+  @Override
+  public void enableNext(boolean value) {
+    btnNext.setEnabled(value);
   }
 
   @Override
