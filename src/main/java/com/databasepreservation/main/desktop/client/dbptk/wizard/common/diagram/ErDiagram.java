@@ -559,7 +559,7 @@ public class ErDiagram extends Composite {
           network.unselectAll();
           if(path === "create"){
             @com.databasepreservation.main.common.shared.client.tools.HistoryManager::gotoCreateSIARDErDiagram(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)(wizardPage, toSelect, schemaUUID, tableuuid);
-          } else if(path === "send-to-live-dbms" ) {
+          } else if(path === "migrate-to-siard" ) {
             @com.databasepreservation.main.common.shared.client.tools.HistoryManager::gotoSendToLiveDBMSExportFormatErDiagram(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)(databaseUUID, wizardPage, toSelect, schemaUUID, tableuuid);
           }
         }

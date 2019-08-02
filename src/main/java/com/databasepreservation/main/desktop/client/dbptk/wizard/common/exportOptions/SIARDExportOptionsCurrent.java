@@ -292,7 +292,7 @@ public class SIARDExportOptionsCurrent extends Composite {
               fileUploadField.setInformationPathCSS("gwt-Label-disabled information-path");
             }
           } else {
-            fileInputs.put(parameter.getName(), "/home/mguimaraes/Desktop/test.siard");
+            fileInputs.put(parameter.getName(), "/home/gbarros/Desktop/export.siard");
           }
         });
         FlowPanel helper = new FlowPanel();

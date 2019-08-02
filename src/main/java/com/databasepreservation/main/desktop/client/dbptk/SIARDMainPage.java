@@ -103,6 +103,14 @@ public class SIARDMainPage extends Composite {
         HistoryManager.gotoSIARDEditMetadata(database.getUUID());
     });
 
+    Button btnMigrateToSIARD = new Button();
+    btnMigrateToSIARD.setText(messages.migrateToSIARD());
+    btnMigrateToSIARD.addStyleName("btn btn-link-info");
+
+    btnMigrateToSIARD.addClickHandler(event -> {
+      HistoryManager.gotoMigrateSIARD(database.getUUID());
+    });
+
     Button btnSendToLiveDBMS = new Button();
     btnSendToLiveDBMS.setText(messages.sendToLiveDBMS());
     btnSendToLiveDBMS.addStyleName("btn btn-link-info");
@@ -126,6 +134,7 @@ public class SIARDMainPage extends Composite {
     NavigationPanel siard = NavigationPanel.createInstance(messages.navigationSIARD());
 
     siard.addButton(btnEditMetadata);
+    siard.addButton(btnMigrateToSIARD);
     siard.addButton(btnSendToLiveDBMS);
 
     siard.addToInfoPanel(path);

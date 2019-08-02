@@ -416,6 +416,8 @@ public interface ClientMessages extends Messages {
 
   String editMetadata();
 
+  String migrateToSIARD();
+
   String sendToLiveDBMS();
 
   String validateNow();

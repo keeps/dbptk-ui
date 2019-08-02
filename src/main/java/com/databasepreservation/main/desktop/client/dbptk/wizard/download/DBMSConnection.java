@@ -1,4 +1,4 @@
-package com.databasepreservation.main.desktop.client.dbptk.wizard.sendTo;
+package com.databasepreservation.main.desktop.client.dbptk.wizard.download;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -58,8 +58,8 @@ public class DBMSConnection extends WizardPanel<ConnectionParameters> {
       instances.put(databaseUUID, instance);
     }
 
-    SendToWizardManager sendToWizardManager = SendToWizardManager.getInstance(databaseUUID);
-    sendToWizardManager.enableNext(false);
+    DBMSWizardManager wizardManager = DBMSWizardManager.getInstance(databaseUUID);
+    wizardManager.enableNext(false);
 
     return instances.get(databaseUUID);
   }
@@ -111,8 +111,8 @@ public class DBMSConnection extends WizardPanel<ConnectionParameters> {
 
     tabPanel.selectTab(0);
 
-    SendToWizardManager sendToWizardManager = SendToWizardManager.getInstance(databaseUUID);
-    sendToWizardManager.enableNext(false);
+    DBMSWizardManager wizardManager = DBMSWizardManager.getInstance(databaseUUID);
+    wizardManager.enableNext(false);
 
     selected.validate();
     connectionInputPanel.add(tabPanel);

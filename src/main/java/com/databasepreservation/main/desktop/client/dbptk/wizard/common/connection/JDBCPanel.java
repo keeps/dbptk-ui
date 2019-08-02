@@ -14,7 +14,7 @@ import com.databasepreservation.main.common.shared.client.tools.ViewerStringUtil
 import com.databasepreservation.main.desktop.client.common.FileUploadField;
 import com.databasepreservation.main.desktop.client.common.GenericField;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.create.CreateWizardManager;
-import com.databasepreservation.main.desktop.client.dbptk.wizard.sendTo.SendToWizardManager;
+import com.databasepreservation.main.desktop.client.dbptk.wizard.download.DBMSWizardManager;
 import com.databasepreservation.main.desktop.shared.models.Filter;
 import com.databasepreservation.main.desktop.shared.models.JDBCParameters;
 import com.databasepreservation.main.desktop.shared.models.PreservationParameter;
@@ -201,9 +201,9 @@ public class JDBCPanel extends Composite {
   public boolean validate() {
     ArrayList<PreservationParameter> arrayList = new ArrayList<>();
     CreateWizardManager createWizardManager = CreateWizardManager.getInstance();
-    SendToWizardManager sendToWizardManager = SendToWizardManager.getInstance(databaseUUID);
+    DBMSWizardManager wizardManager = DBMSWizardManager.getInstance(databaseUUID);
     createWizardManager.enableNext(true);
-    sendToWizardManager.enableNext(true);
+    wizardManager.enableNext(true);
 
     for (PreservationParameter parameter : parameters) {
       if (parameter.isRequired()) {
@@ -213,7 +213,7 @@ public class JDBCPanel extends Composite {
           if (ViewerStringUtils.isBlank(textBox.getText())) {
             arrayList.add(parameter);
             createWizardManager.enableNext(false);
-            sendToWizardManager.enableNext(false);
+            wizardManager.enableNext(false);
           }
         }
         if (parameter.getInputType().equals(ViewerConstants.INPUT_TYPE_FILE)) {
