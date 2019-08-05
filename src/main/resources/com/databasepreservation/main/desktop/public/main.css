@@ -984,7 +984,8 @@ html, body, .main {
 
 /*Footer*/
 .home-page-footer {
-    padding: 20px;
+    padding: 10px 20px ;
+    padding-bottom: 32px;
     box-sizing: border-box;
     height: 70px;
     width: 100%;
@@ -993,8 +994,28 @@ html, body, .main {
     background-color: #464646;
 }
 
+.home-page-brand img,
+.owner img,
+.financiers img{
+    cursor: pointer;
+}
+
+.financiers{
+    width: 100px;
+}
+
+.owner{
+    text-align: right;
+    width: 100px;
+}
+
 .home-page-footer .logo-keep {
     height: 100%;
+}
+
+.footer-label{
+    color: #fff;
+    font-size: 1.2rem;
 }
 
 /**********************************************

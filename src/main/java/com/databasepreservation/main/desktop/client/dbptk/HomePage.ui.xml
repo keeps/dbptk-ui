@@ -1,16 +1,26 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
+
+    <ui:with field='messages' type='config.i18n.client.ClientMessages'/>
     <g:FlowPanel addStyleNames="home-page-content">
         <g:FlowPanel addStyleNames="home-page-brand">
-            <g:Image url="/img/dbvtk_horizontal_black_vector.svg" />
+            <g:Image ui:field="applicationLink" url="/img/dbvtk_horizontal_black_vector.svg" />
         </g:FlowPanel>
         <g:FlowPanel addStyleNames="options" ui:field="options"/>
         <g:FlowPanel addStyleNames="home-page-footer">
             <g:FlowPanel addStyleNames="financiers">
-                <g:Image addStyleNames="logo-keep" url="/img/NAE-white.png" />
+                <g:Label  addStyleNames="footer-label">
+                    <ui:text from='{messages.financedBy}'/>
+                </g:Label>
+                <g:Image ui:field="financiersLink" addStyleNames="logo-keep" url="/img/NAE-white.png" />
             </g:FlowPanel>
-            <g:Image addStyleNames="logo-keep" url="/img/keeps_logo_white_pt_small.png" />
+            <g:FlowPanel addStyleNames="owner">
+                <g:Label  addStyleNames="footer-label">
+                    <ui:text from='{messages.poweredBy}'/>
+                </g:Label>
+                <g:Image ui:field="ownerLink" addStyleNames="logo-keep" url="/img/keeps_logo_white_pt_small.png" />
+            </g:FlowPanel>
         </g:FlowPanel>
     </g:FlowPanel>
 

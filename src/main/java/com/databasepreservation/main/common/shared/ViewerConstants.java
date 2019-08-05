@@ -279,6 +279,14 @@ public class ViewerConstants {
   public static final String SIARD_METADATA_CLIENT_MACHINE = SIARD2ModuleFactory.PARAMETER_META_CLIENT_MACHINE;
   public static final String UPLOAD_WIZARD_MANAGER = "upload-wizard-manager";
   public static final String DOWNLOAD_WIZARD_MANAGER = "download-wizard-manager";
+
+  /*
+   * LINKS
+   */
+  public static final String APPLICATION_LINK = "https://visualization.database-preservation.com/";
+  public static final String OWNER_LINK = "https://www.keep.pt";
+  public static final String FINANCIER_LINK = "http://www.ra.ee/";
+  public static final String BLANK_LINK = "_blanck";
   /**
    * private constructor
    */

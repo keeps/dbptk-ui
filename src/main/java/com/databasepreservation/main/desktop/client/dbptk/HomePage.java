@@ -1,14 +1,17 @@
 package com.databasepreservation.main.desktop.client.dbptk;
 
+import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.desktop.client.common.Card;
 import com.databasepreservation.main.desktop.client.common.helper.HelperUploadSIARDFile;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
@@ -26,6 +29,9 @@ public class HomePage extends Composite {
 
   @UiField
   FlowPanel options;
+
+  @UiField
+  Image ownerLink, financiersLink, applicationLink;
 
   private static HomePage instance = null;
 
@@ -69,5 +75,17 @@ public class HomePage extends Composite {
     options.add(createCard);
     options.add(openCard);
     options.add(manageCard);
+
+    applicationLink.addClickHandler(event -> {
+      Window.open(ViewerConstants.APPLICATION_LINK, ViewerConstants.BLANK_LINK, null);
+    });
+
+    financiersLink.addClickHandler(event -> {
+      Window.open(ViewerConstants.FINANCIER_LINK, ViewerConstants.BLANK_LINK, null);
+    });
+
+    ownerLink.addClickHandler(event -> {
+      Window.open(ViewerConstants.OWNER_LINK, ViewerConstants.BLANK_LINK, null);
+    });
   }
 }

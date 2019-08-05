@@ -776,4 +776,10 @@ public interface ClientMessages extends Messages {
   String sendToWizardManagerInformationMessageSIARD();
 
   String sendToWizardManagerInformationMessageDBMS(String name);
+
+  /*********************************************
+   * Home Page
+   ********************************************/
+  String poweredBy();
+  String financedBy();
 }
