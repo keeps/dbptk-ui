@@ -102,9 +102,7 @@ public class SIARDController {
       importModule.setOnceReporter(reporter);
       if (importModule instanceof JDBCImportModule) {
         JDBCImportModule jdbcImportModule = (JDBCImportModule) importModule;
-        boolean value = jdbcImportModule.testConnection();
-        jdbcImportModule.closeConnection();
-        return value;
+        return jdbcImportModule.testConnection();
       }
     } catch (ModuleException e) {
       throw new GenericException(e.getMessage());
@@ -277,7 +275,7 @@ public class SIARDController {
       if (importModule instanceof JDBCImportModule) {
         JDBCImportModule jdbcImportModule = (JDBCImportModule) importModule;
         DatabaseStructure schemaInformation = jdbcImportModule.getSchemaInformation();
-
+        jdbcImportModule.closeConnection();
         ViewerDatabaseFromToolkit database = ToolkitStructure2ViewerStructure.getDatabase(schemaInformation);
         return database.getMetadata();
       }
