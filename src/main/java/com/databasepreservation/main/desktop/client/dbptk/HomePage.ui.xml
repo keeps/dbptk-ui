@@ -7,7 +7,9 @@
         </g:FlowPanel>
         <g:FlowPanel addStyleNames="options" ui:field="options"/>
         <g:FlowPanel addStyleNames="home-page-footer">
-            <g:FlowPanel addStyleNames="financiers" />
+            <g:FlowPanel addStyleNames="financiers">
+                <g:Image addStyleNames="logo-keep" url="/img/NAE-white.png" />
+            </g:FlowPanel>
             <g:Image addStyleNames="logo-keep" url="/img/keeps_logo_white_pt_small.png" />
         </g:FlowPanel>
     </g:FlowPanel>
