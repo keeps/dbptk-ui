@@ -17,8 +17,9 @@ addons:
     token:
       secure: C05vsV0wQanl5de2Bg8rlByKmAF1T3b8x47gzQMy7/aABBNquLBBEVtBUjpz/XoyZrq82asizs6l8BD4lKx5m6uSRFRoQwWMb3oZlN2P6hZ+20sspSWwIHnQpBxJfm3wjOwIMb/dXH11QIyQeYypzsMzK6khRwvtlMBDXHqBBIIuTwYLCY/cjTtaRvUn17ni3rSVH5iikYktup51nTriXKDjHamtD/Uz/jEppPWPNJbGy3JO2dngajFY/QKrJ+H1Z2WCUg99MumhEf8QvcHrZGy7hS8GI1yktPInn41tip70YnDejRgzM78HVsdOctSJn7OF37eGeiapJbdoPl9N4WyrXFGp985gcE6mIt7v0YfBggynS14/o0WP0ZGi4zTQrQQsy8myGF4iig0ayE5zA/dahhr4EwcOLkM/eMDuPR+l3wk3p+dbaDY7W1+p45MY8Y3e02iJ394gkbq5RMowi4PmxQLAO1D1gG8WB0GeLif0vf+T9JMHIuXMeM+0oBJJGi5P5Tkxxcm+0QbIt+pEuP4EldYUDpVM++uOT7FPH7/PaYU8BZemPsk+IXaD/OuEK2OrLBtX2K++p7r45xqjD1QVWOZPvJK8vsZpTREBERzThdO2kqj0zDQtTihea7yJSdmqcCY/2c93GQfw0rEvfG6ZE1hQGFmMlC7cowPN+fc="
 before_install:
-- sed -r "s/ARTIFACTORY_USER/$ARTIFACTORY_USER/g;s/ARTIFACTORY_PASS/$ARTIFACTORY_PASS/g"
-  .travis/maven_settings.xml > $HOME/.m2/settings.xml
+#- sed -r "s/ARTIFACTORY_USER/$ARTIFACTORY_USER/g;s/ARTIFACTORY_PASS/$ARTIFACTORY_PASS/g"
+#  .travis/maven_settings.xml > $HOME/.m2/settings.xml
+- sed -r "s/ORACLE_MAVEN_USERNAME/$ORACLE_MAVEN_USERNAME/g;s/ORACLE_MAVEN_PASSWORD/$ORACLE_MAVEN_PASSWORD/g;s/ARTIFACTORY_USER/$ARTIFACTORY_USER/g;s/ARTIFACTORY_PASS/$ARTIFACTORY_PASS/g" .travis/maven_settings.xml > $HOME/.m2/settings.xml
 script:
 - travis_wait 30 mvn $MAVEN_CLI_OPTS -Dtestng.groups="travis-ci" -Dlogback.configurationFile=logback-travis.xml
   -Dsonar.scm.disabled=true clean org.jacoco:jacoco-maven-plugin:prepare-agent install
