@@ -5,5 +5,27 @@
       <username>ARTIFACTORY_USER</username>
       <password>ARTIFACTORY_PASS</password>
     </server>
+    <server>
+      <id>maven.oracle.com</id>
+      <username>ORACLE_MAVEN_USERNAME</username>
+      <password>ORACLE_MAVEN_PASSWORD</password>
+      <configuration>
+        <basicAuthScope>
+          <host>ANY</host>
+          <port>ANY</port>
+          <realm>OAM 11g</realm>
+        </basicAuthScope>
+        <httpConfiguration>
+          <all>
+            <params>
+              <property>
+                <name>http.protocol.allow-circular-redirects</name>
+                <value>%b,true</value>
+              </property>
+            </params>
+          </all>
+        </httpConfiguration>
+      </configuration>
+    </server>
   </servers>
 </settings>
