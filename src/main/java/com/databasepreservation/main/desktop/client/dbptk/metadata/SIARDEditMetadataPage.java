@@ -65,9 +65,6 @@ public class SIARDEditMetadataPage extends Composite {
     this.controls = MetadataControlPanel.getInstance(databaseUUID);
 
     initWidget(binder.createAndBindUi(this));
-
-    List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forSIARDEditMetadataPage(databaseUUID, database.getMetadata().getName());
-    BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
   }
 
   public void load(MetadataPanelLoad rightPanelLoader, String sidebarSelected) {
@@ -91,6 +88,8 @@ public class SIARDEditMetadataPage extends Composite {
         @Override
         public void onSuccess(IsIndexed result) {
           database = (ViewerDatabase) result;
+          List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forSIARDEditMetadataPage(databaseUUID, database.getMetadata().getName());
+          BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
           loadPanel(rightPanelLoader, sidebarSelected);
         }
       });
