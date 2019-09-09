@@ -106,8 +106,9 @@ public class Dialogs {
     dialogBox.show();
   }
 
-  public static void showExternalLobsSetupDialog(String title, ComboBoxField referencesType, FileUploadField genericField,
-    String cancelButtonText, String confirmButtonText, boolean toDelete, final AsyncCallback<ExternalLobsDialogBoxResult> callback) {
+  public static void showExternalLobsSetupDialog(String title, ComboBoxField referencesType,
+    FileUploadField genericField, String cancelButtonText, String confirmButtonText, boolean toDelete,
+    final AsyncCallback<ExternalLobsDialogBoxResult> callback) {
 
     final DialogBox dialogBox = new DialogBox(false, true);
     dialogBox.setText(title);
@@ -163,6 +164,55 @@ public class Dialogs {
 
     dialogBox.center();
     dialogBox.show();
+  }
+
+  public static void showServerFilePathDialog(String title, String message, String cancelButtonText,
+    String confirmButtonText, final AsyncCallback<String> callback) {
+    final DialogBox dialogBox = new DialogBox(false, true);
+    dialogBox.setText(title);
+
+    FlowPanel layout = new FlowPanel();
+    Label messageLabel = new Label(message);
+    TextBox pathInput = new TextBox();
+    FlowPanel footer = new FlowPanel();
+    Button cancelButton = new Button(cancelButtonText);
+    Button confirmButton = new Button(confirmButtonText);
+
+    layout.add(messageLabel);
+    layout.add(pathInput);
+    layout.add(footer);
+    footer.add(cancelButton);
+    footer.add(confirmButton);
+
+    pathInput.getElement().setAttribute("placeholder", "/siard/");
+
+    dialogBox.setWidget(layout);
+    dialogBox.setGlassEnabled(true);
+    dialogBox.setAnimationEnabled(false);
+
+    cancelButton.addClickHandler(event -> {
+      dialogBox.hide();
+    });
+
+    confirmButton.addClickHandler(event -> {
+      if (pathInput.getValue().isEmpty()) {
+        pathInput.getElement().setAttribute("Required", "Required");
+      } else {
+        dialogBox.hide();
+        callback.onSuccess(pathInput.getValue());
+      }
+    });
+
+    dialogBox.addStyleName("wui-dialog-information");
+    layout.addStyleName("wui-dialog-layout");
+    footer.addStyleName("wui-dialog-layout-footer");
+    messageLabel.addStyleName("wui-dialog-message");
+    pathInput.addStyleName("form-textbox wui-dialog-input");
+    cancelButton.addStyleName("btn btn-link");
+    confirmButton.addStyleName("btn btn-play");
+    dialogBox.center();
+    dialogBox.show();
+
   }
 
   public static void showConfirmDialog(String title, String message, String cancelButtonText, String confirmButtonText,

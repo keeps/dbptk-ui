@@ -1022,6 +1022,10 @@ html, body, .main {
 		          Open SIARD
 ***********************************************/
 
+.wui-dialog-input:invalid {
+    background-color: #eebcba;
+}
+
 .metadata-information-panel {
     display: flex;
     margin: 0 10rem 0 10rem;

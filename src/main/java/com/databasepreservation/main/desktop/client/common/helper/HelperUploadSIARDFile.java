@@ -10,6 +10,7 @@ import com.databasepreservation.main.common.shared.client.common.utils.Applicati
 import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.common.shared.client.tools.JSOUtils;
+import com.databasepreservation.main.common.shared.client.widgets.Toast;
 import com.databasepreservation.main.desktop.shared.models.Filter;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -25,16 +26,34 @@ import config.i18n.client.ClientMessages;
  */
 public class HelperUploadSIARDFile {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
-  private String path;
   private Widget loading = new HTML(SafeHtmlUtils.fromSafeConstant(
     "<div id='loading' class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
 
   public void openFile(FlowPanel panel) {
-    path = getSIARDPath();
+    if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
 
+      Filter siard = new Filter("SIARD", Collections.singletonList("siard"));
+
+      JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.singletonList("openFile"),
+        Collections.singletonList(siard));
+
+      openSIARDPath(panel, JavascriptUtils.openFileDialog(options));
+    } else {
+      Dialogs.showServerFilePathDialog(messages.openSIARD(), messages.dialogOpenSIARDMessage(), messages.dialogCancel(),
+        messages.dialogAdd(), new DefaultAsyncCallback<String>() {
+          @Override
+          public void onSuccess(String path) {
+            openSIARDPath(panel, path);
+          }
+        });
+    }
+  }
+
+  private void openSIARDPath(FlowPanel panel, String path) {
     if (path != null) {
       panel.add(loading);
       BrowserService.Util.getInstance().findSIARDFile(path, new DefaultAsyncCallback<String>() {
+
         @Override
         public void onSuccess(String databaseUUID) {
           if (databaseUUID != null) {
@@ -44,7 +63,7 @@ public class HelperUploadSIARDFile {
 
                   @Override
                   public void onSuccess(Boolean confirm) {
-                    successHandler(confirm, panel, databaseUUID);
+                    successHandler(confirm, panel, databaseUUID, path);
                   }
 
                 });
@@ -53,7 +72,7 @@ public class HelperUploadSIARDFile {
                 messages.dialogCancel(), messages.dialogConfirm(), new DefaultAsyncCallback<Boolean>() {
                   @Override
                   public void onSuccess(Boolean confirm) {
-                    successHandler(confirm, panel, databaseUUID);
+                    successHandler(confirm, panel, databaseUUID, path);
                   }
                 });
             }
@@ -65,24 +84,6 @@ public class HelperUploadSIARDFile {
     }
   }
 
-  private String getSIARDPath() {
-    String path;
-    if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
-
-      Filter siard = new Filter("SIARD", Collections.singletonList("siard"));
-
-      JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.singletonList("openFile"),
-        Collections.singletonList(siard));
-
-      path = JavascriptUtils.openFileDialog(options);
-    } else {
-      path = "/home/gbarros/Desktop/test.siard";
-      // TODO: UPLOAD FILE!!!
-    }
-
-    return path;
-  }
-
   private void uploadMetadataSIARD(String path, FlowPanel panel) {
     BrowserService.Util.getInstance().generateUUID(new DefaultAsyncCallback<String>() {
       @Override
@@ -90,7 +91,7 @@ public class HelperUploadSIARDFile {
         BrowserService.Util.getInstance().uploadMetadataSIARD(databaseUUID, path, new DefaultAsyncCallback<String>() {
           @Override
           public void onFailure(Throwable caught) {
-            // TODO: error handling
+            Toast.showError(messages.errorMessagesOpenFile(), caught.getMessage());
             panel.remove(loading);
           }
 
@@ -104,7 +105,7 @@ public class HelperUploadSIARDFile {
     });
   }
 
-  private void successHandler(Boolean confirm, FlowPanel panel, String databaseUUID) {
+  private void successHandler(Boolean confirm, FlowPanel panel, String databaseUUID, String path) {
     if (confirm) {
       uploadMetadataSIARD(path, panel);
     } else {

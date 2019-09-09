@@ -783,5 +783,13 @@ public interface ClientMessages extends Messages {
    * Home Page
    ********************************************/
   String poweredBy();
+
   String financedBy();
+
+  /*********************************************
+   * Open SIARD
+   ********************************************/
+  String dialogOpenSIARDMessage();
+
+  String errorMessagesOpenFile();
 }

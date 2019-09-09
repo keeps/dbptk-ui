@@ -90,8 +90,7 @@ public class SIARDController {
     return result;
   }
 
-  public static boolean testConnection(String databaseUUID, ConnectionParameters parameters)
-    throws GenericException {
+  public static boolean testConnection(String databaseUUID, ConnectionParameters parameters) throws GenericException {
     Reporter reporter = getReporter(databaseUUID);
     final DatabaseMigration databaseMigration = initializeDatabaseMigration(reporter);
 
@@ -361,7 +360,9 @@ public class SIARDController {
 
   private static void convertSIARDMetadataToSolr(Path siardPath, String databaseUUID) throws GenericException {
     LOGGER.info("starting to import metadata database " + siardPath.toAbsolutePath().toString());
-
+    if (Files.notExists(siardPath)) {
+      throw new GenericException("File not found at path: " + siardPath);
+    }
     Path reporterPath = ViewerConfiguration.getInstance().getReportPath(databaseUUID).toAbsolutePath();
     try (Reporter reporter = new Reporter(reporterPath.getParent().toString(), reporterPath.getFileName().toString())) {
       SIARDEdition siardEdition = SIARDEdition.newInstance();
