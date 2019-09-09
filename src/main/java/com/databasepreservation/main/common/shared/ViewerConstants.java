@@ -232,6 +232,7 @@ public class ViewerConstants {
   public static final String SHA256 = "SHA-256";
   public static final String MD5 = "MD5";
   public static final Long MILLISECONDS_IN_A_DAY = 86400000L;
+  public static final String SIARD_FILES = "SIARD files";
 
   /*
    * Application Environment
@@ -252,6 +253,7 @@ public class ViewerConstants {
    */
   public static final String TXT_SUFFIX = ".txt";
   public static final String YAML_SUFFIX = ".yaml";
+  public static final String SIARD_SUFFIX = "siard";
 
   /*
    * DBPTK Input Types

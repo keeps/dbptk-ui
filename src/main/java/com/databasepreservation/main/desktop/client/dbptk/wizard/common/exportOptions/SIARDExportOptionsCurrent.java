@@ -13,6 +13,7 @@ import com.databasepreservation.main.common.shared.client.widgets.Toast;
 import com.databasepreservation.main.desktop.client.common.FileUploadField;
 import com.databasepreservation.main.desktop.client.common.GenericField;
 import com.databasepreservation.main.desktop.shared.models.DBPTKModule;
+import com.databasepreservation.main.desktop.shared.models.Filter;
 import com.databasepreservation.main.desktop.shared.models.PreservationParameter;
 import com.databasepreservation.main.desktop.shared.models.wizardParameters.ExportOptionsParameters;
 import com.google.gwt.core.client.GWT;
@@ -75,7 +76,7 @@ public class SIARDExportOptionsCurrent extends Composite {
         if (p.getExportOption().equals(ViewerConstants.SIARD_EXPORT_OPTIONS)) {
           buildGenericWidget(p);
         } else if (p.getExportOption().equals(ViewerConstants.EXTERNAL_LOBS_EXPORT_OPTIONS)) {
-            buildExternalLobs(p, panel);
+          buildExternalLobs(p, panel);
         }
       }
     }
@@ -285,7 +286,14 @@ public class SIARDExportOptionsCurrent extends Composite {
         fileUploadField.setRequired(parameter.isRequired());
         fileUploadField.buttonAction(() -> {
           if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
-            String path = JavascriptUtils.saveFileDialog();
+            JavaScriptObject.createArray();
+            Filter filter = new Filter();
+            filter.setName(ViewerConstants.SIARD_FILES);
+            filter.setExtensions(Collections.singletonList(ViewerConstants.SIARD_SUFFIX));
+            GWT.log("filter: " + filter);
+            JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.emptyList(),
+              Collections.singletonList(filter));
+            String path = JavascriptUtils.saveFileDialog(options);
             if (path != null) {
               fileInputs.put(parameter.getName(), path);
               fileUploadField.setPathLocation(path, path);
@@ -336,7 +344,8 @@ public class SIARDExportOptionsCurrent extends Composite {
         TextBox defaultTextBox = new TextBox();
         defaultTextBox.addStyleName("form-textbox");
         textBoxInputs.put(parameter.getName(), defaultTextBox);
-        genericField = GenericField.createInstance(messages.wizardExportOptionsLabels(parameter.getName()), defaultTextBox);
+        genericField = GenericField.createInstance(messages.wizardExportOptionsLabels(parameter.getName()),
+          defaultTextBox);
         break;
     }
 

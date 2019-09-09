@@ -276,10 +276,10 @@ public class JavascriptUtils {
                                                           shell.showItemInFolder(path);
                                                           }-*/;
 
-  public static native String saveFileDialog() /*-{
+  public static native String saveFileDialog(JavaScriptObject options) /*-{
                                                var dialog = $wnd.nodeRequire('electron').remote.dialog
                                                
-                                               var result = dialog.showSaveDialog();
+                                               var result = dialog.showSaveDialog(options);
                                                
                                                if (typeof result != "undefined") { return result; }
                                                else return null;
