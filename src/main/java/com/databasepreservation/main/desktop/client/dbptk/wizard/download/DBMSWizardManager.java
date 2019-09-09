@@ -82,7 +82,7 @@ public class DBMSWizardManager extends WizardManager {
     wizardContent.add(connection);
     btnBack.setVisible(false);
     btnNext.setEnabled(false);
-    btnNext.setText(messages.download());
+    btnNext.setText(messages.wizardSendToDBMSExportButton());
     updateButtons();
     updateBreadcrumb();
 

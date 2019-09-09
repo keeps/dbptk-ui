@@ -761,6 +761,8 @@ public interface ClientMessages extends Messages {
 
   String wizardSendToMetadataExportOptionsBreadcrumb();
 
+  String wizardSendToDBMSExportButton();
+
   /*********************************************
    * Send to: Export Format
    ********************************************/
