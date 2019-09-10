@@ -67,9 +67,6 @@ public class Connection extends WizardPanel<ConnectionParameters> {
 
     this.databaseUUID = databaseUUID;
 
-    CreateWizardManager createWizardManager = CreateWizardManager.getInstance();
-    createWizardManager.enableNext(false);
-
     sshTunnelPanel = SSHTunnelPanel.getInstance(databaseUUID);
 
     CreateConnectionHomePanel connectionHomePanel = CreateConnectionHomePanel.getInstance();
