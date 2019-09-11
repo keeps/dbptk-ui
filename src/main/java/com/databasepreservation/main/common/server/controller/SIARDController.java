@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.databasepreservation.main.common.shared.exceptions.ViewerException;
 import org.apache.commons.io.IOUtils;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
@@ -42,6 +41,7 @@ import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabas
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabaseFromToolkit;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSIARDBundle;
+import com.databasepreservation.main.common.shared.exceptions.ViewerException;
 import com.databasepreservation.main.desktop.shared.models.DBPTKModule;
 import com.databasepreservation.main.desktop.shared.models.ExternalLobDBPTK;
 import com.databasepreservation.main.desktop.shared.models.PreservationParameter;
@@ -89,6 +89,32 @@ public class SIARDController {
       throw new NotFoundException("The database does not have a conversion report.");
     }
     return result;
+  }
+
+  public static List<List<String>> validateCustomViewQuery(String databaseUUID, ConnectionParameters parameters,
+    String query) throws GenericException {
+    Reporter reporter = getReporter(databaseUUID);
+    List<List<String>> results = new ArrayList<>();
+    final DatabaseMigration databaseMigration = initializeDatabaseMigration(reporter);
+
+    setupJDBCConnection(databaseMigration, parameters);
+
+    try {
+      DatabaseImportModule importModule = databaseMigration.getImportModule();
+      importModule.setOnceReporter(reporter);
+      if (importModule instanceof JDBCImportModule) {
+        JDBCImportModule jdbcImportModule = (JDBCImportModule) importModule;
+        try {
+          results = jdbcImportModule.testCustomViewQuery(query);
+        } catch (ModuleException e) {
+          throw new GenericException(e.getMessage());
+        }
+      }
+    } catch (ModuleException e) {
+      throw new GenericException(e.getMessage());
+    }
+
+    return results;
   }
 
   public static boolean testConnection(String databaseUUID, ConnectionParameters parameters) throws GenericException {
@@ -268,21 +294,30 @@ public class SIARDController {
     final Reporter reporter = getReporter(databaseUUID);
     final DatabaseMigration databaseMigration = initializeDatabaseMigration(reporter);
     setupJDBCConnection(databaseMigration, parameters);
+
+    DatabaseImportModule importModule;
+    DatabaseStructure schemaInformation = null;
     try {
-      DatabaseImportModule importModule = databaseMigration.getImportModule();
+      importModule = databaseMigration.getImportModule();
       importModule.setOnceReporter(reporter);
 
       if (importModule instanceof JDBCImportModule) {
         JDBCImportModule jdbcImportModule = (JDBCImportModule) importModule;
-        DatabaseStructure schemaInformation = jdbcImportModule.getSchemaInformation();
+        schemaInformation = jdbcImportModule.getSchemaInformation();
         jdbcImportModule.closeConnection();
-        ViewerDatabaseFromToolkit database = ToolkitStructure2ViewerStructure.getDatabase(schemaInformation);
-        return database.getMetadata();
       }
-
     } catch (ModuleException e) {
       throw new GenericException(e.getMessage());
     }
+    ViewerDatabaseFromToolkit database = null;
+    try {
+      database = ToolkitStructure2ViewerStructure.getDatabase(schemaInformation);
+    } catch (ViewerException e) {
+      LOGGER.debug(e.getMessage());
+    }
+
+    if (database != null)
+      return database.getMetadata();
 
     return null;
   }
@@ -364,6 +399,7 @@ public class SIARDController {
     if (Files.notExists(siardPath)) {
       throw new GenericException("File not found at path: " + siardPath);
     }
+
     Path reporterPath = ViewerConfiguration.getInstance().getReportPath(databaseUUID).toAbsolutePath();
     try (Reporter reporter = new Reporter(reporterPath.getParent().toString(), reporterPath.getFileName().toString())) {
       SIARDEdition siardEdition = SIARDEdition.newInstance();
@@ -734,7 +770,7 @@ public class SIARDController {
           outputStream.close();
         }
       } catch (IOException e) {
-        throw new GenericException("Could not close the custom views temporary file", e);
+        // DO NOTHING
       }
     }
   }
@@ -743,7 +779,6 @@ public class SIARDController {
    * For Java 8 or below: check
    * http://robertmaldon.blogspot.com/2007/11/dynamically-add-to-eclipse-junit.html
    * (last access: 22-07-2019)
-   *
    */
   private static void addURL(URL url) throws Exception {
     URLClassLoader classLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();

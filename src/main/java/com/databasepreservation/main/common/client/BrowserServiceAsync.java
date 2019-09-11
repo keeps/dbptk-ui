@@ -132,6 +132,8 @@ public interface BrowserServiceAsync {
 
   void testConnection(String databaseUUID, ConnectionParameters parameters, AsyncCallback<Boolean> async);
 
+  void validateCustomViewQuery(String databaseUUID, ConnectionParameters parameters, String query, AsyncCallback<List<List<String>>> async);
+
   void createSIARD(String UUID, ConnectionParameters connectionParameters, TableAndColumnsParameters tableAndColumnsParameters,
     CustomViewsParameters customViewsParameters, ExportOptionsParameters exportOptionsParameters,
     MetadataExportOptionsParameters metadataExportOptionsParameters, AsyncCallback<Boolean> async);

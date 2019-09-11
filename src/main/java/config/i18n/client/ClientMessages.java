@@ -593,6 +593,17 @@ public interface ClientMessages extends Messages {
   String SIARDValidationFailed();
 
   /********************************************
+   * Basic Actions
+   ********************************************/
+  String basicActionClose();
+
+  String basicActionCancel();
+
+  String basicActionDiscard();
+
+  String basicActionConfirm();
+
+  /********************************************
    * Edit Metadata
    ********************************************/
   String editMetadataNotificationTitle();
@@ -721,6 +732,16 @@ public interface ClientMessages extends Messages {
   String customViewsDialogCancel();
 
   String errorMessagesCustomViewsTitle();
+
+  String customViewsBtnTest();
+
+  String customViewsTestQueryError();
+
+  String customViewsQueryResultsDialogTitle();
+
+  String customViewToastErrorTitle();
+
+  String customViewsDialogConfirmDelete();
 
   String errorMessagesCustomViews(@Select int error);
 

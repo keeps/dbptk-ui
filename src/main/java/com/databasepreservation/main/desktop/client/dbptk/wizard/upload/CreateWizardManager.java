@@ -193,7 +193,7 @@ public class CreateWizardManager extends WizardManager {
       tableAndColumnsParameters = (TableAndColumnsParameters) wizardInstances.get(position).getValues();
       wizardContent.clear();
       position = 2;
-      CustomViews customViews = CustomViews.getInstance(tableAndColumnsParameters.getSelectedSchemas(), btnNext);
+      CustomViews customViews = CustomViews.getInstance(tableAndColumnsParameters.getSelectedSchemas(), btnNext, connectionParameters, databaseUUID);
       customViews.refreshCustomButtons();
       wizardInstances.add(position, customViews);
       wizardContent.add(customViews);
@@ -209,19 +209,34 @@ public class CreateWizardManager extends WizardManager {
     final boolean valid = wizardInstances.get(position).validate();
 
     if (!valid) {
-      Dialogs.showConfirmDialog(messages.customViewsDialogTitle(), messages.customViewsDialogMessage(), messages.customViewsDialogCancel(), messages.customViewsDialogConfirm(), new DefaultAsyncCallback<Boolean>() {
+      Dialogs.showConfirmDialog(messages.customViewsDialogTitle(), messages.customViewsDialogMessage(), messages.basicActionDiscard(), messages.basicActionConfirm(), new DefaultAsyncCallback<Boolean>() {
         @Override
         public void onSuccess(Boolean result) {
           if (result) {
-            customViewsParameters = (CustomViewsParameters) wizardInstances.get(position).getValues();
-            wizardContent.clear();
-            position = 3;
-            SIARDExportOptions exportOptions = SIARDExportOptions.getInstance();
-            wizardInstances.add(position, exportOptions);
-            wizardContent.add(exportOptions);
-            updateButtons();
-            updateBreadcrumb();
-            customButtons.clear();
+            if (wizardInstances.get(position) instanceof CustomViews) {
+              final CustomViews customViewInstance = (CustomViews) wizardInstances.get(position);
+
+              BrowserService.Util.getInstance().validateCustomViewQuery(databaseUUID, connectionParameters, customViewInstance.getCustomViewParameter().getCustomViewQuery(), new DefaultAsyncCallback<List<List<String>>>() {
+                @Override
+                public void onSuccess(List<List<String>> result) {
+
+                  customViewsParameters = customViewInstance.getValues();
+                  wizardContent.clear();
+                  position = 3;
+                  SIARDExportOptions exportOptions = SIARDExportOptions.getInstance();
+                  wizardInstances.add(position, exportOptions);
+                  wizardContent.add(exportOptions);
+                  updateButtons();
+                  updateBreadcrumb();
+                  customButtons.clear();
+                }
+
+                @Override
+                public void onFailure(Throwable caught) {
+                  Toast.showError(messages.customViewToastErrorTitle(), caught.getMessage());
+                }
+              });
+            }
           } else {
             customViewsParameters = (CustomViewsParameters) wizardInstances.get(position).getValues();
             customViewsParameters.getCustomViewsParameter().remove(customViewsParameters.getCustomViewsParameter().size()-1); // DISCARD THE LAST

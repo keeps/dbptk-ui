@@ -4,15 +4,20 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import com.databasepreservation.main.common.client.BrowserService;
+import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
+import com.databasepreservation.main.common.shared.client.common.dialogs.Dialogs;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.common.shared.client.tools.ViewerStringUtils;
 import com.databasepreservation.main.common.shared.client.widgets.Toast;
 import com.databasepreservation.main.desktop.client.common.ComboBoxField;
 import com.databasepreservation.main.desktop.client.common.sidebar.CustomViewsSidebar;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
+import com.databasepreservation.main.desktop.shared.models.wizardParameters.ConnectionParameters;
 import com.databasepreservation.main.desktop.shared.models.wizardParameters.CustomViewsParameter;
 import com.databasepreservation.main.desktop.shared.models.wizardParameters.CustomViewsParameters;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
@@ -56,18 +61,25 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
   private boolean toSave;
   private ComboBoxField customViewSchemaName;
   private Button btnNext;
+  private ConnectionParameters connectionParameters;
+  private String databaseUUID;
+  private boolean queryResult;
 
-  public static CustomViews getInstance(List<String> schemas, Button btnNext) {
+  public static CustomViews getInstance(List<String> schemas, Button btnNext, ConnectionParameters connectionParameters,
+    String databaseUUID) {
     if (instance == null) {
-      instance = new CustomViews(schemas, btnNext);
+      instance = new CustomViews(schemas, btnNext, connectionParameters, databaseUUID);
     }
     return instance;
   }
 
-  private CustomViews(List<String> schemas, Button btnNext) {
+  private CustomViews(List<String> schemas, Button btnNext, ConnectionParameters connectionParameters,
+    String databaseUUID) {
     initWidget(binder.createAndBindUi(this));
 
     this.btnNext = btnNext;
+    this.connectionParameters = connectionParameters;
+    this.databaseUUID = databaseUUID;
     customViewsSidebar = CustomViewsSidebar.getInstance();
     customViewsList.add(customViewsSidebar);
 
@@ -84,7 +96,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
     customViewsButtons.add(createCustomViewButton());
   }
 
-  public void checkIfHaveCustomViews(){
+  void checkIfHaveCustomViews(){
     if(customViewsParameters.isEmpty()){
       btnNext.setText(messages.skip());
     } else {
@@ -144,21 +156,31 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
   public void error() { }
 
   public void sideBarHighlighter(String customViewUUID, String action) {
-    customViewsButtons.clear();
 
     final CustomViewsParameter parameter = customViewsParameters.get(customViewUUID);
 
     if (action != null && action.equals(HistoryManager.ACTION_DELETE)) {
-      deleteCustomView(parameter.getCustomViewID());
-      setTextboxText("", "", "", "");
-      customViewName.getElement().removeAttribute("required");
-      customViewQuery.getElement().removeAttribute("required");
-      customViewSchemaName.getElement().removeAttribute("required");
-      customViewsButtons.clear();
-      customViewsButtons.add(createCustomViewButton());
-      customViewsSidebar.selectNone();
-      HistoryManager.gotoCreateSIARD();
+      Dialogs.showConfirmDialog(messages.customViewsTitle(), messages.customViewsDialogConfirmDelete(), messages.basicActionCancel(), messages.basicActionConfirm(),
+        new DefaultAsyncCallback<Boolean>() {
+          @Override
+          public void onSuccess(Boolean result) {
+            if (result) {
+              deleteCustomView(parameter.getCustomViewID());
+              setTextboxText("", "", "", "");
+              customViewName.getElement().removeAttribute("required");
+              customViewQuery.getElement().removeAttribute("required");
+              customViewSchemaName.getElement().removeAttribute("required");
+              customViewsButtons.clear();
+              customViewsButtons.add(createCustomViewButton());
+              customViewsSidebar.selectNone();
+              HistoryManager.gotoCreateSIARD();
+            } else {
+              HistoryManager.gotoCreateSIARD();
+            }
+          }
+        });
     } else {
+      customViewsButtons.clear();
       setTextboxText(parameter.getSchema(), parameter.getCustomViewName(), parameter.getCustomViewDescription(),
           parameter.getCustomViewQuery());
 
@@ -175,32 +197,75 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
         customViewsButtons.add(createCustomViewButton());
         HistoryManager.gotoCreateSIARD();
       });
+
+      Button btnTest = new Button();
+      btnTest.setText(messages.customViewsBtnTest());
+      btnTest.addStyleName("btn btn-primary btn-run");
+
+      btnTest.addClickHandler(event -> {
+        if (validateCustomViewQueryText()) {
+          BrowserService.Util.getInstance().validateCustomViewQuery(databaseUUID, connectionParameters,
+            customViewQuery.getText(), new DefaultAsyncCallback<List<List<String>>>() {
+              @Override
+              public void onSuccess(List<List<String>> result) {
+                Dialogs.showQueryResult(messages.customViewsQueryResultsDialogTitle(), messages.basicActionClose(),
+                  result);
+              }
+
+              @Override
+              public void onFailure(Throwable caught) {
+                Toast.showError(messages.customViewToastErrorTitle(), caught.getMessage());
+              }
+            });
+        } else {
+          Toast.showError(messages.customViewsTestQueryError());
+        }
+      });
+
       Button btnUpdate = new Button();
       btnUpdate.setText(messages.customViewsBtnSave());
       btnUpdate.addStyleName("btn btn-primary btn-save");
       btnUpdate.addClickHandler(event -> {
         final int valid = customViewFormValidatorUpdate(parameter.getCustomViewName());
         if (valid == -1) {
-          updateCustomViewParameters(parameter.getCustomViewID(), customViewSchemaName.getSelectedValue(),
-              customViewName.getText(),
-              customViewDescription.getText(), customViewQuery.getText());
-          Toast.showInfo(messages.customViewsTitle(), messages.customViewsUpdateMessage());
+          BrowserService.Util.getInstance().validateCustomViewQuery(databaseUUID, connectionParameters,
+            customViewQuery.getText(), new DefaultAsyncCallback<List<List<String>>>() {
+              @Override
+              public void onSuccess(List<List<String>> result) {
+                if (!result.isEmpty()) {
+                  updateCustomViewParameters(parameter.getCustomViewID(), customViewSchemaName.getSelectedValue(),
+                    customViewName.getText(), customViewDescription.getText(), customViewQuery.getText());
+                  Toast.showInfo(messages.customViewsTitle(), messages.customViewsUpdateMessage());
+                } else {
+                  Toast.showError("Empty");
+                }
+              }
+
+              @Override
+              public void onFailure(Throwable caught) {
+                Toast.showError(messages.customViewToastErrorTitle(), caught.getMessage());
+              }
+            });
         } else {
           Toast.showError(messages.errorMessagesCustomViewsTitle(), messages.errorMessagesCustomViews(valid));
           highlightFieldsWhenRequired();
         }
       });
 
-      SimplePanel simplePanelforbtnNew = new SimplePanel();
-      simplePanelforbtnNew.addStyleName("btn-item");
-      simplePanelforbtnNew.add(btnNew);
+      SimplePanel simplePanelForUpdateButton = new SimplePanel();
+      simplePanelForUpdateButton.addStyleName("btn-item");
+      simplePanelForUpdateButton.add(btnUpdate);
+      customViewsButtons.add(simplePanelForUpdateButton);
 
-      SimplePanel simplePanelforbtnUpdate = new SimplePanel();
-      simplePanelforbtnUpdate.addStyleName("btn-item");
-      simplePanelforbtnUpdate.add(btnUpdate);
+      SimplePanel simplePanelForTestButton = new SimplePanel();
+      simplePanelForTestButton.addStyleName("btn-item");
+      simplePanelForTestButton.add(btnTest);
+      customViewsButtons.add(simplePanelForTestButton);
 
-      customViewsButtons.add(simplePanelforbtnUpdate);
-      customViewsButtons.add(simplePanelforbtnNew);
+      SimplePanel simplePanelForNewButton = new SimplePanel();
+      simplePanelForNewButton.addStyleName("btn-item");
+      simplePanelForNewButton.add(btnNew);
+      customViewsButtons.add(simplePanelForNewButton);
 
       customViewsSidebar.select(customViewUUID);
     }
@@ -293,7 +358,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
     customViewQuery.setText(customViewQueryText);
   }
 
-  private SimplePanel createCustomViewButton() {
+  private FlowPanel createCustomViewButton() {
     Button btnSave = new Button();
     btnSave.setText(messages.customViewsBtnSave());
     btnSave.addStyleName("btn btn-primary btn-save");
@@ -301,31 +366,79 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
     btnSave.addClickHandler(event -> {
       final int valid = customViewFormValidator();
       if (valid == -1) {
-        customViewsSidebar.addSideBarHyperLink(customViewName.getText(),
-          String.valueOf(counter), HistoryManager.linkToCreateWizardCustomViewsDelete(String.valueOf(counter)));
+        BrowserService.Util.getInstance().validateCustomViewQuery(databaseUUID, connectionParameters,
+          customViewQuery.getText(), new DefaultAsyncCallback<List<List<String>>>() {
+            @Override
+            public void onSuccess(List<List<String>> result) {
+              if (!result.isEmpty()) {
+                customViewsSidebar.addSideBarHyperLink(customViewName.getText(), String.valueOf(counter),
+                  HistoryManager.linkToCreateWizardCustomViewsDelete(String.valueOf(counter)));
 
-        CustomViewsParameter parameter = new CustomViewsParameter(customViewSchemaName.getSelectedValue(), counter,
-          customViewName.getText(),
-          customViewDescription.getText(), customViewQuery.getText());
-        customViewsParameters.put(String.valueOf(counter), parameter);
-        counter++;
-        setTextboxText("", "", "", "");
-        customViewName.getElement().removeAttribute("required");
-        customViewQuery.getElement().removeAttribute("required");
-        customViewSchemaName.getElement().removeAttribute("required");
-        customViewsSidebar.selectNone();
+                CustomViewsParameter parameter = new CustomViewsParameter(customViewSchemaName.getSelectedValue(),
+                  counter, customViewName.getText(), customViewDescription.getText(), customViewQuery.getText());
+                customViewsParameters.put(String.valueOf(counter), parameter);
+                counter++;
+                setTextboxText("", "", "", "");
+                customViewName.getElement().removeAttribute("required");
+                customViewQuery.getElement().removeAttribute("required");
+                customViewSchemaName.getElement().removeAttribute("required");
+                customViewsSidebar.selectNone();
+              } else {
+                Toast.showError("Empty");
+              }
+              checkIfHaveCustomViews();
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+              Toast.showError(messages.customViewToastErrorTitle(), caught.getMessage());
+              checkIfHaveCustomViews();
+            }
+          });
       } else {
         Toast.showError(messages.errorMessagesCustomViewsTitle(), messages.errorMessagesCustomViews(valid));
         highlightFieldsWhenRequired();
+        checkIfHaveCustomViews();
       }
-      checkIfHaveCustomViews();
     });
 
-    SimplePanel simplePanelforbtnSave = new SimplePanel();
-    simplePanelforbtnSave.addStyleName("btn-item");
-    simplePanelforbtnSave.add(btnSave);
+    Button btnTest = new Button();
+    btnTest.setText(messages.customViewsBtnTest());
+    btnTest.addStyleName("btn btn-primary btn-run");
 
-    return simplePanelforbtnSave;
+    btnTest.addClickHandler(event -> {
+      if (validateCustomViewQueryText()) {
+        BrowserService.Util.getInstance().validateCustomViewQuery(databaseUUID, connectionParameters,
+          customViewQuery.getText(), new DefaultAsyncCallback<List<List<String>>>() {
+            @Override
+            public void onSuccess(List<List<String>> result) {
+              Dialogs.showQueryResult(messages.customViewsQueryResultsDialogTitle(), messages.basicActionClose(),
+                result);
+            }
+
+            @Override
+            public void onFailure(Throwable caught) {
+              Toast.showError(messages.customViewToastErrorTitle(), caught.getMessage());
+            }
+          });
+      } else {
+        Toast.showError(messages.customViewsTestQueryError());
+      }
+    });
+
+    FlowPanel FlowPanelForSaveButton = new FlowPanel();
+    FlowPanelForSaveButton.addStyleName("btn-item");
+    FlowPanelForSaveButton.add(btnSave);
+
+    FlowPanel FlowPanelForTestButton = new FlowPanel();
+    FlowPanelForTestButton.addStyleName("btn-item");
+    FlowPanelForTestButton.add(btnTest);
+
+    FlowPanel FlowPanelForOptionsButtons = new FlowPanel();
+    FlowPanelForOptionsButtons.add(FlowPanelForSaveButton);
+    FlowPanelForOptionsButtons.add(FlowPanelForTestButton);
+
+    return FlowPanelForOptionsButtons;
   }
 
   private void highlightFieldsWhenRequired() {
@@ -343,5 +456,22 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
       customViewSchemaName.getElement().setAttribute("required", "required");
       customViewSchemaName.addStyleName("wizard-connection-validator");
     }
+  }
+
+  private boolean validateCustomViewQueryText() {
+    if (ViewerStringUtils.isBlank(customViewQuery.getText())) {
+      return false;
+    }
+
+    final String query = customViewQuery.getText();
+
+    final RegExp compile = RegExp.compile("^(:>\\s+)?SELECT", "i");
+
+    return compile.test(query);
+  }
+
+  public CustomViewsParameter getCustomViewParameter() {
+    return new CustomViewsParameter(customViewSchemaName.getSelectedValue(), counter, customViewName.getText(),
+      customViewDescription.getText(), customViewQuery.getText());
   }
 }

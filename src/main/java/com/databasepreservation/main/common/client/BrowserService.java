@@ -129,6 +129,8 @@ public interface BrowserService extends RemoteService {
 
   boolean testConnection(String databaseUUID, ConnectionParameters parameters) throws GenericException;
 
+  List<List<String>> validateCustomViewQuery(String databaseUUID, ConnectionParameters parameters, String query) throws GenericException;
+
   boolean createSIARD(String UUID, ConnectionParameters connectionParameters,
     TableAndColumnsParameters tableAndColumnsParameters, CustomViewsParameters customViewsParameters,
     ExportOptionsParameters exportOptionsParameters, MetadataExportOptionsParameters metadataExportOptionsParameters)

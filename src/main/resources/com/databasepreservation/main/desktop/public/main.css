@@ -256,6 +256,10 @@ p[data-value]:after {
     content: "\f0c7";
 }
 
+.btn-run:after {
+    content: "\f085";
+}
+
 .btn-manage:after {
     content: "\f233";
 }
@@ -1764,6 +1768,23 @@ input[type="checkbox"]:checked:after {
 .custom-views-buttons .btn-item{
     padding-left: 0;
     padding-right: 10px;
+}
+
+.dialog-custom-view-test-result {
+    width: 90%;
+}
+
+.dialog-custom-view-test-result table {
+    width: 100%;
+}
+
+.dialog-custom-view-test-result-layout {
+    margin: 10px;
+}
+
+.dialog-custom-view-test-result-layout-footer {
+    display: flex;
+    flex-direction: row-reverse;
 }
 
 /***********************************************

@@ -7,7 +7,12 @@
  */
 package com.databasepreservation.main.common.shared.client.common.dialogs;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.databasepreservation.main.common.shared.client.common.NoAsyncCallback;
+import com.databasepreservation.main.common.shared.client.common.lists.IndexedColumn;
+import com.databasepreservation.main.common.shared.client.widgets.MyCellTableResources;
 import com.databasepreservation.main.desktop.client.common.ComboBoxField;
 import com.databasepreservation.main.desktop.client.common.FileUploadField;
 import com.databasepreservation.main.desktop.client.common.GenericField;
@@ -23,17 +28,88 @@ import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.regexp.shared.RegExp;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
+import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.view.client.ListDataProvider;
 
 import config.i18n.client.ClientMessages;
 
 public class Dialogs {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
+
+  public static void showQueryResult(String title, String closeButtonText, List<List<String>> rows) {
+
+    final DialogBox dialogBox = new DialogBox(false, true);
+    dialogBox.setText(title);
+
+    FlowPanel layout = new FlowPanel();
+    Button closeButton = new Button(closeButtonText);
+    FlowPanel footer = new FlowPanel();
+
+    footer.add(closeButton);
+
+    dialogBox.setWidget(layout);
+
+    CellTable<List<String>> table = new CellTable<>(Integer.MAX_VALUE,
+      (MyCellTableResources) GWT.create(MyCellTableResources.class));
+    table.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
+    table.setLoadingIndicator(new HTML(SafeHtmlUtils.fromSafeConstant(
+      "<div class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>")));
+    table.addStyleName("table-info my-asyncdatagrid-display");
+
+    int nrows = rows.size();
+    int ncols = rows.get(0).size();
+    ArrayList<List<String>> rowsL = new ArrayList<>(nrows);
+
+    for (int irow = 1; irow < nrows; irow++) {
+      List<String> rowL = rows.get(irow);
+      GWT.log("" + rowL.toString());
+      rowsL.add(rowL);
+    }
+
+    // Create table columns
+    for (int icol = 0; icol < ncols; icol++) {
+      table.addColumn(new IndexedColumn(icol), new TextHeader(rows.get(0).get(icol)));
+    }
+
+    // Create a list data provider.
+    final ListDataProvider<List<String>> dataProvider = new ListDataProvider<List<String>>(rowsL);
+
+    // Add the table to the dataProvider.
+    dataProvider.addDataDisplay(table);
+
+    layout.add(table);
+    layout.add(footer);
+
+    dialogBox.setGlassEnabled(true);
+    dialogBox.setAnimationEnabled(false);
+
+    closeButton.addClickHandler(event -> {
+      dialogBox.hide();
+    });
+
+    dialogBox.addStyleName("dialog-custom-view-test-result");
+    layout.addStyleName("dialog-custom-view-test-result-layout");
+    footer.addStyleName("dialog-custom-view-test-result-layout-footer");
+    FlowPanel btnItemCloseButton = new FlowPanel();
+    btnItemCloseButton.addStyleName("btn-item");
+    btnItemCloseButton.add(closeButton);
+    closeButton.addStyleName("btn btn-link");
+    footer.add(btnItemCloseButton);
+
+    dialogBox.setWidget(layout);
+    dialogBox.center();
+    dialogBox.show();
+  }
 
   public static void showExternalLobsSetupDialog(String title, ComboBoxField referencesType, GenericField genericField,
     String cancelButtonText, String confirmButtonText, boolean toDelete,

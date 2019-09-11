@@ -285,6 +285,11 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
   }
 
   @Override
+  public List<List<String>> validateCustomViewQuery(String databaseUUID, ConnectionParameters parameters, String query) throws GenericException {
+    return SIARDController.validateCustomViewQuery(databaseUUID, parameters, query);
+  }
+
+  @Override
   public boolean createSIARD(String UUID, ConnectionParameters connectionParameters,
     TableAndColumnsParameters tableAndColumnsParameters, CustomViewsParameters customViewsParameters,
     ExportOptionsParameters exportOptionsParameters, MetadataExportOptionsParameters metadataExportOptionsParameters)
