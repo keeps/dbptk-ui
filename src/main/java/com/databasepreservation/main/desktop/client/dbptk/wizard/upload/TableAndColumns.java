@@ -135,6 +135,12 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
         content.remove(spinner);
         sideBarHighlighter(TableAndColumnsSendToSidebar.DATABASE_LINK,null,null);
       }
+
+      @Override
+      public void onFailure(Throwable caught) {
+        Toast.showError(messages.errorMessagesTableAndColumnsTitle(), caught.getMessage());
+        content.remove(spinner);
+      }
     });
   }
 
@@ -159,6 +165,12 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
 
           content.remove(spinner);
           sideBarHighlighter(TableAndColumnsSidebar.DATABASE_LINK,null,null);
+        }
+
+        @Override
+        public void onFailure(Throwable caught) {
+          Toast.showError(messages.errorMessagesTableAndColumnsTitle(), caught.getMessage());
+          content.remove(spinner);
         }
       });
   }

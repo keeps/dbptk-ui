@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.databasepreservation.main.common.shared.exceptions.ViewerException;
 import org.apache.commons.io.IOUtils;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
@@ -404,6 +405,8 @@ public class SIARDController {
 
     } catch (IOException e) {
       throw new GenericException("Could not initialize conversion modules", e);
+    } catch (ViewerException e){
+      throw new GenericException(e.getMessage(), e);
     } catch (ModuleException | RuntimeException e) {
       throw new GenericException("Could not convert the database to the Solr instance.", e);
     }
