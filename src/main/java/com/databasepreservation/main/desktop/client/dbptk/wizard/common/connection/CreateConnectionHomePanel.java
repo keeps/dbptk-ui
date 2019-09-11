@@ -1,5 +1,6 @@
 package com.databasepreservation.main.desktop.client.dbptk.wizard.common.connection;
 
+import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -26,21 +27,30 @@ public class CreateConnectionHomePanel extends Composite {
 
   private static CreateConnectionHomePanel instance = null;
 
-  public static CreateConnectionHomePanel getInstance() {
+  public static CreateConnectionHomePanel getInstance(String type) {
     if (instance == null) {
-      instance = new CreateConnectionHomePanel();
+      instance = new CreateConnectionHomePanel(type);
     }
 
     return instance;
   }
 
-  private CreateConnectionHomePanel() {
+  private CreateConnectionHomePanel(String type) {
     initWidget(binder.createAndBindUi(this));
 
     Label header = new Label();
     header.setText(messages.connectionHomePanelTitle());
     header.addStyleName("h2");
 
+    content.add(header);
+    if(type.equals(ViewerConstants.EXPORT_FORMAT_SIARD)){
+      createSiardHomePanel();
+    } else {
+      createSendToDBMSHomePanel();
+    }
+  }
+
+  private void createSiardHomePanel(){
     Label welcome = new Label();
     welcome.setText(messages.connectionHomePanelWelcomeText());
     welcome.addStyleName("h6");
@@ -65,11 +75,29 @@ public class CreateConnectionHomePanel extends Composite {
     MetadataExportOptions.setText(messages.connectionHomePanelMetadataExportOptionsText());
     MetadataExportOptions.addStyleName("h6");
 
-    content.add(header);
     content.add(welcome);
     content.add(connection);
     content.add(tableAndColumns);
     content.add(SIARDExportOptions);
     content.add(MetadataExportOptions);
+
+  }
+
+  private void createSendToDBMSHomePanel(){
+    Label welcome = new Label();
+    welcome.setText(messages.connectionHomePanelWelcomeTextDBMS());
+    welcome.addStyleName("h6");
+
+    Label connection = new Label();
+    connection.setText(messages.connectionHomePanelConnectionTextDBMS());
+    connection.addStyleName("h6");
+
+    Label sshConnection = new Label();
+    sshConnection.setText(messages.connectionHomePanelSSHTextDBMS());
+    sshConnection.addStyleName("h6");
+
+    content.add(welcome);
+    content.add(connection);
+    content.add(sshConnection);
   }
 }

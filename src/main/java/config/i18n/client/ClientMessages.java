@@ -633,6 +633,7 @@ public interface ClientMessages extends Messages {
 
   String connectionHomePanelTitle();
 
+  //create SIARD file
   String connectionHomePanelWelcomeText();
 
   String connectionHomePanelConnectionText();
@@ -644,6 +645,13 @@ public interface ClientMessages extends Messages {
   String connectionHomePanelExportOptionsText();
 
   String connectionHomePanelMetadataExportOptionsText();
+
+  //export to live DBMS
+  String connectionHomePanelWelcomeTextDBMS();
+
+  String connectionHomePanelConnectionTextDBMS();
+
+  String connectionHomePanelSSHTextDBMS();
 
   /********************************************
    * Create Wizard: Table & Columns

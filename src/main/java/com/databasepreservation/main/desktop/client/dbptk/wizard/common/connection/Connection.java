@@ -12,10 +12,6 @@ import com.databasepreservation.main.common.shared.client.tools.FontAwesomeIconM
 import com.databasepreservation.main.common.shared.client.widgets.Toast;
 import com.databasepreservation.main.desktop.client.common.sidebar.ConnectionSidebar;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
-import com.databasepreservation.main.desktop.client.dbptk.wizard.common.connection.CreateConnectionHomePanel;
-import com.databasepreservation.main.desktop.client.dbptk.wizard.common.connection.JDBCPanel;
-import com.databasepreservation.main.desktop.client.dbptk.wizard.common.connection.SSHTunnelPanel;
-import com.databasepreservation.main.desktop.client.dbptk.wizard.upload.CreateWizardManager;
 import com.databasepreservation.main.desktop.shared.models.DBPTKModule;
 import com.databasepreservation.main.desktop.shared.models.PreservationParameter;
 import com.databasepreservation.main.desktop.shared.models.wizardParameters.ConnectionParameters;
@@ -68,10 +64,6 @@ public class Connection extends WizardPanel<ConnectionParameters> {
     this.databaseUUID = databaseUUID;
 
     sshTunnelPanel = SSHTunnelPanel.getInstance(databaseUUID);
-
-    CreateConnectionHomePanel connectionHomePanel = CreateConnectionHomePanel.getInstance();
-    connectionInputPanel.clear();
-    connectionInputPanel.add(connectionHomePanel);
   }
 
   public void initImportDBMS(final String type, final String targetToken) {
@@ -80,6 +72,11 @@ public class Connection extends WizardPanel<ConnectionParameters> {
       "<div class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
 
     JDBCListConnections.add(spinner);
+
+    CreateConnectionHomePanel connectionHomePanel = CreateConnectionHomePanel
+      .getInstance(ViewerConstants.EXPORT_FORMAT_SIARD);
+    connectionInputPanel.clear();
+    connectionInputPanel.add(connectionHomePanel);
 
     BrowserService.Util.getInstance().getDatabaseImportModules(new DefaultAsyncCallback<DBPTKModule>() {
       @Override
@@ -102,6 +99,11 @@ public class Connection extends WizardPanel<ConnectionParameters> {
       "<div class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
 
     JDBCListConnections.add(spinner);
+
+    CreateConnectionHomePanel connectionHomePanel = CreateConnectionHomePanel
+      .getInstance(ViewerConstants.EXPORT_FORMAT_DBMS);
+    connectionInputPanel.clear();
+    connectionInputPanel.add(connectionHomePanel);
 
     BrowserService.Util.getInstance().getDatabaseExportModules(new DefaultAsyncCallback<DBPTKModule>() {
       @Override
