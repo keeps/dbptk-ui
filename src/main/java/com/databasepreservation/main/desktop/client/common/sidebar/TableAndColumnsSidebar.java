@@ -16,12 +16,6 @@ import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.common.shared.client.tools.ViewerStringUtils;
 import com.databasepreservation.main.common.shared.client.widgets.wcag.AccessibleFocusPanel;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -91,13 +85,11 @@ public class TableAndColumnsSidebar extends Composite {
 
       FlowPanel tablesItems = new FlowPanel();
       for (ViewerTable table : schema.getTables()) {
-        if (!table.getName().startsWith("VIEW_")) {
-          SidebarHyperlink sidebarHyperlink = new SidebarHyperlink(table.getName(),
-              HistoryManager.linkToCreateSIARD(HistoryManager.ROUTE_WIZARD_TABLES_COLUMNS, TABLE_LINK, schema.getUUID(), table.getUUID()));
-          sidebarHyperlink.addIcon(FontAwesomeIconManager.TABLE).setH6().setIndent3();
-          list.put(table.getName(), sidebarHyperlink);
-          tablesItems.add(sidebarHyperlink);
-        }
+        SidebarHyperlink sidebarHyperlink = new SidebarHyperlink(table.getName(), HistoryManager.linkToCreateSIARD(
+          HistoryManager.ROUTE_WIZARD_TABLES_COLUMNS, TABLE_LINK, schema.getUUID(), table.getUUID()));
+        sidebarHyperlink.addIcon(FontAwesomeIconManager.TABLE).setH6().setIndent3();
+        list.put(table.getName(), sidebarHyperlink);
+        tablesItems.add(sidebarHyperlink);
       }
       createSubItem(tables, tablesItems);
 
@@ -149,26 +141,11 @@ public class TableAndColumnsSidebar extends Composite {
   private void searchInit() {
     searchInputBox.getElement().setPropertyString("placeholder", messages.menusidebar_filterSidebar());
 
-    searchInputBox.addChangeHandler(new ChangeHandler() {
-      @Override
-      public void onChange(ChangeEvent event) {
-        doSearch();
-      }
-    });
+    searchInputBox.addChangeHandler(event -> doSearch());
 
-    searchInputBox.addKeyUpHandler(new KeyUpHandler() {
-      @Override
-      public void onKeyUp(KeyUpEvent event) {
-        doSearch();
-      }
-    });
+    searchInputBox.addKeyUpHandler(event -> doSearch());
 
-    searchInputButton.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        doSearch();
-      }
-    });
+    searchInputButton.addClickHandler(event -> doSearch());
   }
 
   private void doSearch() {
@@ -210,9 +187,7 @@ public class TableAndColumnsSidebar extends Composite {
               sb.setVisible(false);
               disclosurePanel.setVisible(false);
             }
-
           }
-
         } else {
           widget.setVisible(true);
         }
