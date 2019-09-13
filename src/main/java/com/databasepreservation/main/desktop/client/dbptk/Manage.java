@@ -35,7 +35,6 @@ import config.i18n.client.ClientMessages;
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 public class Manage extends Composite {
-
   @UiField
   public ClientMessages messages = GWT.create(ClientMessages.class);
 

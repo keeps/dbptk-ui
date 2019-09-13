@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
@@ -217,6 +218,12 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
         ViewerConfiguration.PROPERTY_FILTER_ONOFF_ALLOW_ALL_IPS);
     }
     return cachedWhitelistAllIPs;
+  }
+
+  public String getDBPTKVersion() throws IOException {
+    final Properties properties = new Properties();
+    properties.load(ViewerConfiguration.class.getClassLoader().getResourceAsStream("main.properties"));
+    return  properties.getProperty("version.dbptk");
   }
 
   /*

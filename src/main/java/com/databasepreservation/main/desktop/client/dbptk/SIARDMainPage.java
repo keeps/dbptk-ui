@@ -48,9 +48,6 @@ public class SIARDMainPage extends Composite {
   private static SIARDInfoUiBinder binder = GWT.create(SIARDInfoUiBinder.class);
   private static Map<String, SIARDMainPage> instances = new HashMap<>();
   private ViewerDatabase database = null;
-  private HashMap<String, String> fileInputs = new HashMap<>();
-  private String udtPath;
-  private String reporterPath;
 
   public static SIARDMainPage getInstance(String databaseUUID) {
 
@@ -157,8 +154,8 @@ public class SIARDMainPage extends Composite {
     btnValidate.setText(messages.validateNow());
     btnValidate.addStyleName("btn btn-link-info");
     btnValidate.addClickHandler(event -> {
-      Dialogs.showValidatorSettings(messages.SIARDValidatorSettings(), messages.dialogCancel(), messages.dialogConfirm(), validator,
-        new DefaultAsyncCallback<Boolean>() {
+      Dialogs.showValidatorSettings(messages.SIARDValidatorSettings(), messages.dialogCancel(),
+        messages.dialogConfirm(), validator, new DefaultAsyncCallback<Boolean>() {
           @Override
           public void onSuccess(Boolean result) {
             if (result && validator.getReporterPathFile() != null) {

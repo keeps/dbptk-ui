@@ -17,9 +17,16 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
+import com.databasepreservation.SIARDValidation;
+import com.databasepreservation.main.common.server.ValidationProgressObserver;
+import com.databasepreservation.modules.siard.SIARDValidateFactory;
+import com.databasepreservation.modules.siard.common.SIARDValidator;
 import org.apache.commons.io.IOUtils;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeUtils;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.slf4j.Logger;
@@ -535,6 +542,51 @@ public class SIARDController {
     }
 
     return metadata;
+  }
+
+  public static boolean validateSIARD(String databaseUUID, String SIARDPath, String validationReportPath, String allowedTypesPath) throws GenericException {
+    Path reporterPath = ViewerConfiguration.getInstance().getReportPath(databaseUUID).toAbsolutePath();
+    boolean valid;
+    try (Reporter reporter = new Reporter(reporterPath.getParent().toString(), reporterPath.getFileName().toString())) {
+      SIARDValidation siardValidation = SIARDValidation.newInstance();
+      siardValidation.validateModule(new SIARDValidateFactory())
+          .validateModuleParameter(SIARDValidateFactory.PARAMETER_FILE, SIARDPath)
+          .validateModuleParameter(SIARDValidateFactory.PARAMETER_ALLOWED, allowedTypesPath)
+          .validateModuleParameter(SIARDValidateFactory.PARAMETER_REPORT, validationReportPath);
+
+      siardValidation.reporter(reporter);
+      siardValidation.observer(new ValidationProgressObserver(databaseUUID));
+      try {
+        valid = siardValidation.validate();
+
+        ViewerDatabase.ValidationStatus status;
+
+        if (valid) {
+          status = ViewerDatabase.ValidationStatus.VALIDATION_SUCCESS;
+        } else {
+          status = ViewerDatabase.ValidationStatus.VALIDATION_FAILED;
+        }
+
+        String dbptkVersion = "";
+
+        try {
+          dbptkVersion = ViewerConfiguration.getInstance().getDBPTKVersion();
+        } catch (IOException e) {
+          throw new GenericException("Failed to obtain the DBPTK version from properties", e);
+        }
+
+        final DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
+
+        solrManager.updateSIARDValidationInformation(databaseUUID, status, validationReportPath, dbptkVersion, new DateTime().toString());
+
+      } catch (ModuleException e) {
+        throw new GenericException(e);
+      }
+    } catch (IOException e) {
+      throw new GenericException("Could not initialize the validate module.", e);
+    }
+
+    return valid;
   }
 
   /****************************************************************************

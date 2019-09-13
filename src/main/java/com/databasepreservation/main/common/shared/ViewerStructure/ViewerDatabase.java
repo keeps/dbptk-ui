@@ -35,6 +35,7 @@ public class ViewerDatabase extends IsIndexed {
 
   private String validatedAt;
   private String validatedVersion;
+  private String validatorReportPath;
   private ValidationStatus validationStatus;
 
   public ViewerDatabase() {
@@ -205,5 +206,13 @@ public class ViewerDatabase extends IsIndexed {
 
   public void setValidationStatus(ValidationStatus status) {
     this.validationStatus = status;
+  }
+
+  public String getValidatorReportPath() {
+    return validatorReportPath;
+  }
+
+  public void setValidatorReportPath(String validatorReportPath) {
+    this.validatorReportPath = validatorReportPath;
   }
 }

@@ -148,5 +148,7 @@ public interface BrowserService extends RemoteService {
   ViewerMetadata updateMetadataInformation(ViewerMetadata metadata, ViewerSIARDBundle bundleSiard, String databaseUUID,
     String path) throws GenericException;
 
+  boolean validateSIARD(String databaseUUID, String SIARDPath, String validationReportPath, String allowedTypePath) throws GenericException;
+
   ProgressData getProgressData(String uuid);
 }

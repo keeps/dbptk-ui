@@ -815,6 +815,8 @@ public interface ClientMessages extends Messages {
 
   String financedBy();
 
+  String developedBy();
+
   /*********************************************
    * Open SIARD
    ********************************************/

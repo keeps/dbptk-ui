@@ -20,7 +20,8 @@ import config.i18n.client.ClientMessages;
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 public class HomePage extends Composite {
-  private static final ClientMessages messages = GWT.create(ClientMessages.class);
+  @UiField
+  public ClientMessages messages = GWT.create(ClientMessages.class);
 
   interface HomePageUiBinder extends UiBinder<Widget, HomePage> {
   }
@@ -31,7 +32,7 @@ public class HomePage extends Composite {
   FlowPanel options;
 
   @UiField
-  Image ownerLink, financiersLink, applicationLink;
+  Image ownerLink, DGLABFinanciersLink, EARKFinanciersLink, applicationLink, NAEFinanciersLink;
 
   private static HomePage instance = null;
 
@@ -80,8 +81,16 @@ public class HomePage extends Composite {
       Window.open(ViewerConstants.APPLICATION_LINK, ViewerConstants.BLANK_LINK, null);
     });
 
-    financiersLink.addClickHandler(event -> {
-      Window.open(ViewerConstants.FINANCIER_LINK, ViewerConstants.BLANK_LINK, null);
+    NAEFinanciersLink.addClickHandler(event -> {
+      Window.open(ViewerConstants.NAE_FINANCIER_LINK, ViewerConstants.BLANK_LINK, null);
+    });
+
+    EARKFinanciersLink.addClickHandler(event -> {
+      Window.open(ViewerConstants.EARK_FINANCIER_LINK, ViewerConstants.BLANK_LINK, null);
+    });
+
+    DGLABFinanciersLink.addClickHandler(event -> {
+      Window.open(ViewerConstants.DGLAB_FINANCIER_LINK, ViewerConstants.BLANK_LINK, null);
     });
 
     ownerLink.addClickHandler(event -> {

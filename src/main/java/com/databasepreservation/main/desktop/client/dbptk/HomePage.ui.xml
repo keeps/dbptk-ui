@@ -2,7 +2,7 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
 
-    <ui:with field='messages' type='config.i18n.client.ClientMessages'/>
+    <ui:with field='messages' type='config.i18n.client.ClientMessages' />
     <g:FlowPanel addStyleNames="home-page-content">
         <g:FlowPanel addStyleNames="home-page-brand">
             <g:Image ui:field="applicationLink" url="/img/dbvtk_horizontal_black_vector.svg" />
@@ -13,11 +13,13 @@
                 <g:Label  addStyleNames="footer-label">
                     <ui:text from='{messages.financedBy}'/>
                 </g:Label>
-                <g:Image ui:field="financiersLink" addStyleNames="logo-keep" url="/img/NAE-white.png" />
+                <g:Image ui:field="DGLABFinanciersLink" addStyleNames="logo-keep" url="/img/DGLAB-logo.jpg" />
+                <g:Image ui:field="EARKFinanciersLink" addStyleNames="logo-keep" url="/img/e-ark-logo.png" />
+                <g:Image ui:field="NAEFinanciersLink" addStyleNames="logo-keep" url="/img/NAE-white.png" />
             </g:FlowPanel>
             <g:FlowPanel addStyleNames="owner">
                 <g:Label  addStyleNames="footer-label">
-                    <ui:text from='{messages.poweredBy}'/>
+                    <ui:text from='{messages.developedBy}'/>
                 </g:Label>
                 <g:Image ui:field="ownerLink" addStyleNames="logo-keep" url="/img/keeps_logo_white_pt_small.png" />
             </g:FlowPanel>

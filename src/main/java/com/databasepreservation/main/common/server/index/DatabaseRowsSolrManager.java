@@ -338,6 +338,34 @@ public class DatabaseRowsSolrManager {
       Pair.of(ViewerConstants.SOLR_DATABASES_INGESTED_ROWS, null));
   }
 
+  public void updateSIARDValidationInformation(String databaseUUID, ViewerDatabase.ValidationStatus validationStatus, String validatorReportLocation, String DBPTKVersion, String validationDate) {
+
+    updateValidationFields(databaseUUID, Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATED_AT, validationDate),
+        Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATOR_REPORT_PATH, validatorReportLocation),
+        Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATE_VERSION, DBPTKVersion),
+        Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATION_STATUS, validationStatus));
+  }
+
+  @SafeVarargs
+  private final void updateValidationFields(String databaseUUID, Pair<String, ?>... fields) {
+    // create document to update this DB
+    SolrInputDocument doc = new SolrInputDocument();
+    doc.addField(ViewerConstants.INDEX_ID, databaseUUID);
+
+    // add all the fields that will be updated
+    for (Pair<String, ?> field : fields) {
+      LOGGER.debug("Updating " + field.getFirst() + " to " + field.getSecond());
+      doc.addField(field.getFirst(), SolrUtils.asValueUpdate(field.getSecond()));
+    }
+
+    // send it to Solr
+    try {
+      insertDocument(ViewerConstants.SOLR_INDEX_DATABASES_COLLECTION_NAME, doc);
+    } catch (ViewerException e) {
+      LOGGER.error("Could not update SIARD validation information for {}", databaseUUID, e);
+    }
+  }
+
   public void updateDatabaseMetadata(String databaseUUID,  ViewerMetadata metadata ) {
     LOGGER.debug("updateDatabaseMetadata");
 

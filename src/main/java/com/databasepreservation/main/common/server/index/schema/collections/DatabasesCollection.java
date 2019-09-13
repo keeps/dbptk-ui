@@ -22,6 +22,7 @@ import static com.databasepreservation.main.common.shared.ViewerConstants.SOLR_D
 import static com.databasepreservation.main.common.shared.ViewerConstants.SOLR_DATABASES_VALIDATED_AT;
 import static com.databasepreservation.main.common.shared.ViewerConstants.SOLR_DATABASES_VALIDATE_VERSION;
 import static com.databasepreservation.main.common.shared.ViewerConstants.SOLR_DATABASES_VALIDATION_STATUS;
+import static com.databasepreservation.main.common.shared.ViewerConstants.SOLR_DATABASES_VALIDATOR_REPORT_PATH;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -74,6 +75,8 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
     fields.add(new Field(SOLR_DATABASES_METADATA, Field.TYPE_STRING).setIndexed(false).setStored(true)
       .setRequired(false).setDocValues(false));
 
+    fields.add(new Field(SOLR_DATABASES_VALIDATOR_REPORT_PATH, Field.TYPE_STRING).setIndexed(false).setStored(true).setRequired(false).setDocValues(false));
+
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_TOTAL_ROWS, Field.TYPE_LONG));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_TOTAL_TABLES, Field.TYPE_LONG));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_TOTAL_SCHEMAS, Field.TYPE_LONG));
@@ -117,6 +120,7 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
     doc.addField(SOLR_DATABASES_SIARD_SIZE, object.getSIARDSize());
 
     doc.addField(SOLR_DATABASES_VALIDATED_AT, object.getValidatedAt());
+    doc.addField(SOLR_DATABASES_VALIDATOR_REPORT_PATH, object.getValidatorReportPath());
     doc.addField(SOLR_DATABASES_VALIDATE_VERSION, object.getValidatedVersion());
     doc.addField(SOLR_DATABASES_VALIDATION_STATUS, object.getValidationStatus().toString());
 
@@ -146,6 +150,7 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
     viewerDatabase.setSIARDSize(SolrUtils.objectToLong(doc.get(SOLR_DATABASES_SIARD_SIZE), 0L));
 
     viewerDatabase.setValidatedAt(SolrUtils.objectToString(doc.get(SOLR_DATABASES_VALIDATED_AT), ""));
+    viewerDatabase.setValidatorReportPath(SolrUtils.objectToString(doc.get(SOLR_DATABASES_VALIDATOR_REPORT_PATH), ""));
     viewerDatabase.setValidatedVersion(SolrUtils.objectToString(doc.get(SOLR_DATABASES_VALIDATE_VERSION), ""));
     viewerDatabase.setValidationStatus(SolrUtils.objectToEnum(doc.get(SOLR_DATABASES_VALIDATION_STATUS),
       ViewerDatabase.ValidationStatus.class, ViewerDatabase.ValidationStatus.NOT_VALIDATED));

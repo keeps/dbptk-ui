@@ -1004,8 +1004,8 @@ html, body, .main {
     cursor: pointer;
 }
 
-.financiers{
-    width: 100px;
+.financiers .logo-keep {
+    margin-right: 20px;
 }
 
 .owner{

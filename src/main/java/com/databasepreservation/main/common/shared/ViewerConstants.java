@@ -87,6 +87,7 @@ public class ViewerConstants {
   public static final String SOLR_DATABASES_SIARD_SIZE = "siard_size";
   public static final String SOLR_DATABASES_VALIDATED_AT = "siard_validated_at";
   public static final String SOLR_DATABASES_VALIDATE_VERSION = "siard_validate_version";
+  public static final String SOLR_DATABASES_VALIDATOR_REPORT_PATH = "siard_validator_report";
   public static final String SOLR_DATABASES_VALIDATION_STATUS = "siard_validation_status";
 
   /*
@@ -289,8 +290,10 @@ public class ViewerConstants {
    */
   public static final String APPLICATION_LINK = "https://visualization.database-preservation.com/";
   public static final String OWNER_LINK = "https://www.keep.pt";
-  public static final String FINANCIER_LINK = "http://www.ra.ee/";
-  public static final String BLANK_LINK = "_blanck";
+  public static final String NAE_FINANCIER_LINK = "http://www.ra.ee/";
+  public static final String DGLAB_FINANCIER_LINK = "http://dglab.gov.pt/";
+  public static final String EARK_FINANCIER_LINK = "https://www.eark-project.com/";
+  public static final String BLANK_LINK = "_blank";
   /**
    * private constructor
    */

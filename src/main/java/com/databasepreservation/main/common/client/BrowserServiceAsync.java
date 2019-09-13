@@ -150,5 +150,7 @@ public interface BrowserServiceAsync {
   void updateMetadataInformation(ViewerMetadata metadata, ViewerSIARDBundle bundleSiard, String databaseUUID,
     String path, AsyncCallback<ViewerMetadata> async);
 
+  void validateSIARD(String databaseUUID, String SIARDPath, String validationReportPath, String allowedTypePath, AsyncCallback<Boolean> async);
+
   void getProgressData(String uuid, AsyncCallback<ProgressData> async);
 }
