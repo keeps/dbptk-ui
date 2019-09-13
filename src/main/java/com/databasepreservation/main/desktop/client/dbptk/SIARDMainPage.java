@@ -11,6 +11,7 @@ import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabas
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
+import com.databasepreservation.main.common.shared.client.common.dialogs.Dialogs;
 import com.databasepreservation.main.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
@@ -20,6 +21,7 @@ import com.databasepreservation.main.common.shared.client.tools.PathUtils;
 import com.databasepreservation.main.common.shared.client.tools.ViewerStringUtils;
 import com.databasepreservation.main.desktop.client.common.MetadataField;
 import com.databasepreservation.main.desktop.client.common.NavigationPanel;
+import com.databasepreservation.main.desktop.client.common.helper.HelperValidator;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -46,6 +48,9 @@ public class SIARDMainPage extends Composite {
   private static SIARDInfoUiBinder binder = GWT.create(SIARDInfoUiBinder.class);
   private static Map<String, SIARDMainPage> instances = new HashMap<>();
   private ViewerDatabase database = null;
+  private HashMap<String, String> fileInputs = new HashMap<>();
+  private String udtPath;
+  private String reporterPath;
 
   public static SIARDMainPage getInstance(String databaseUUID) {
 
@@ -71,7 +76,7 @@ public class SIARDMainPage extends Composite {
     initWidget(binder.createAndBindUi(this));
 
     final Widget loading = new HTML(SafeHtmlUtils.fromSafeConstant(
-        "<div id='loading' class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
+      "<div id='loading' class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
 
     container.add(loading);
 
@@ -86,7 +91,8 @@ public class SIARDMainPage extends Composite {
 
           populateNavigationPanels();
 
-          List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forSIARDMainPage(databaseUUID, database.getMetadata().getName());
+          List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forSIARDMainPage(databaseUUID,
+            database.getMetadata().getName());
           BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
 
           container.remove(loading);
@@ -100,7 +106,7 @@ public class SIARDMainPage extends Composite {
     btnEditMetadata.setText(messages.editMetadata());
     btnEditMetadata.addStyleName("btn btn-link-info");
     btnEditMetadata.addClickHandler(clickEvent -> {
-        HistoryManager.gotoSIARDEditMetadata(database.getUUID());
+      HistoryManager.gotoSIARDEditMetadata(database.getUUID());
     });
 
     Button btnMigrateToSIARD = new Button();
@@ -146,10 +152,26 @@ public class SIARDMainPage extends Composite {
 
   private NavigationPanel populateNavigationPanelValidation() {
     /* Validation */
+    HelperValidator validator = new HelperValidator(database.getSIARDPath());
     Button btnValidate = new Button();
     btnValidate.setText(messages.validateNow());
     btnValidate.addStyleName("btn btn-link-info");
-    btnValidate.setEnabled(false);
+    btnValidate.addClickHandler(event -> {
+      Dialogs.showValidatorSettings(messages.SIARDValidatorSettings(), messages.dialogCancel(), messages.dialogConfirm(), validator,
+        new DefaultAsyncCallback<Boolean>() {
+          @Override
+          public void onSuccess(Boolean result) {
+            if (result && validator.getReporterPathFile() != null) {
+              if (validator.getUdtPathFile() == null) {
+                HistoryManager.gotoSIARDValidator(database.getUUID(), validator.getReporterPathFile());
+              } else {
+                HistoryManager.gotoSIARDValidator(database.getUUID(), validator.getReporterPathFile(),
+                  validator.getUdtPathFile());
+              }
+            }
+          }
+        });
+    });
 
     Button btnSeeReport;
 

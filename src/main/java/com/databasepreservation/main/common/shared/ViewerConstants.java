@@ -233,6 +233,8 @@ public class ViewerConstants {
   public static final String MD5 = "MD5";
   public static final Long MILLISECONDS_IN_A_DAY = 86400000L;
   public static final String SIARD_FILES = "SIARD files";
+  public static final String REPORT_FILES = "Report files";
+  public static final String UDT_FILES = "UDT files";
 
   /*
    * Application Environment

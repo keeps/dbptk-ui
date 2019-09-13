@@ -1845,3 +1845,36 @@ input[type="checkbox"]:checked:after {
     outline-color: transparent;
     outline-style: none;
 }
+
+/************************************************
+* SIARD validator
+ ************************************************/
+.validator-dialog-information{
+    display: flex;
+    justify-content: space-between;
+}
+
+.validator-dialog-button{
+    display: flex;
+}
+
+.validator-dialog-information .gwt-Label{
+    margin-right: 1em;
+}
+
+.validator-dialog-layout-body{
+    padding: 20px 10px;
+}
+
+.tip-validator{
+    line-height: 48px;
+}
+
+.btn-browser-validator{
+    height: 48px;
+    padding: 10px;
+}
+
+.btn-left{
+    float: left;
+}

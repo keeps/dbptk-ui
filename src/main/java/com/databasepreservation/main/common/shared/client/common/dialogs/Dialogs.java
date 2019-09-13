@@ -16,6 +16,7 @@ import com.databasepreservation.main.common.shared.client.widgets.MyCellTableRes
 import com.databasepreservation.main.desktop.client.common.ComboBoxField;
 import com.databasepreservation.main.desktop.client.common.FileUploadField;
 import com.databasepreservation.main.desktop.client.common.GenericField;
+import com.databasepreservation.main.desktop.client.common.helper.HelperValidator;
 import com.databasepreservation.main.desktop.shared.models.ExternalLobsDialogBoxResult;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -177,6 +178,57 @@ public class Dialogs {
       footer.add(btnItemDeleteButton);
       deleteButton.addStyleName("btn");
     }
+
+    dialogBox.center();
+    dialogBox.show();
+  }
+
+  public static void showValidatorSettings(String title, String cancelButtonText, String confirmButtonText,
+                                           HelperValidator validator, final AsyncCallback<Boolean> callback) {
+
+    final DialogBox dialogBox = new DialogBox(false, true);
+    final Button cancelButton = new Button(cancelButtonText);
+    final Button confirmButton = new Button(confirmButtonText);
+    final Button clearButton = new Button(messages.clear());
+    FlowPanel layout = new FlowPanel();
+    FlowPanel layoutTop = new FlowPanel();
+    FlowPanel layoutBottom = new FlowPanel();
+    FlowPanel footer = new FlowPanel();
+
+    footer.add(clearButton);
+    footer.add(cancelButton);
+    footer.add(confirmButton);
+    footer.addStyleName("wui-dialog-layout-footer");
+
+    layoutTop.add(validator.reporterValidatorPanel());
+    layoutTop.add(validator.udtValidatorPanel());
+    layoutTop.addStyleName("validator-dialog-layout-body");
+    layoutBottom.add(footer);
+    layout.add(layoutTop);
+    layout.add(layoutBottom);
+    layout.addStyleName("wui-dialog-layout");
+
+    cancelButton.addStyleName("btn btn-link");
+    cancelButton.addClickHandler(event -> {
+      dialogBox.hide();
+    });
+
+    confirmButton.addStyleName("btn btn-play");
+    confirmButton.addClickHandler(event -> {
+      dialogBox.hide();
+      callback.onSuccess(true);
+    });
+
+    clearButton.addStyleName("btn btn-refresh btn-left");
+    clearButton.addClickHandler(event -> {
+      validator.clear();
+    });
+
+    dialogBox.setText(title);
+    dialogBox.setWidget(layout);
+    dialogBox.setGlassEnabled(true);
+    dialogBox.setAnimationEnabled(false);
+    dialogBox.addStyleName("wui-dialog-information");
 
     dialogBox.center();
     dialogBox.show();

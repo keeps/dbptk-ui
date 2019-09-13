@@ -18,6 +18,7 @@ import com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.routi
 import com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.tables.MetadataTablePanel;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.views.MetadataViewPanel;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.users.MetadataUsersPanel;
+import com.databasepreservation.main.desktop.client.dbptk.validator.ValidatorPage;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.upload.CreateWizardManager;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.download.SIARDWizardManager;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.download.DBMSWizardManager;
@@ -170,6 +171,23 @@ public class MainPanelDesktop extends Composite {
             return MetadataRoutinePanel.getInstance(database, SIARDbundle, schemaUUID, routineUUID);
           }
         });
+      }
+    } else if(HistoryManager.ROUTE_SIARD_VALIDATOR.equals(currentHistoryPath.get(0))){
+      if (currentHistoryPath.size() == 3) {
+        final String databaseUUID = currentHistoryPath.get(1);
+        final String reporterPath = currentHistoryPath.get(2);
+        ValidatorPage instance = ValidatorPage.getInstance(databaseUUID, reporterPath);
+        contentPanel.clear();
+        contentPanel.add(instance);
+
+      } else if (currentHistoryPath.size() == 4) {
+        final String databaseUUID = currentHistoryPath.get(1);
+        final String reporterPath = currentHistoryPath.get(2);
+        final String udtPath = currentHistoryPath.get(3);
+
+        ValidatorPage instance = ValidatorPage.getInstance(databaseUUID, reporterPath, udtPath);
+        contentPanel.clear();
+        contentPanel.add(instance);
       }
     } else {
       handleErrorPath(currentHistoryPath);

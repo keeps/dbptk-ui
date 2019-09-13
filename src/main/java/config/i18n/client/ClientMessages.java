@@ -821,4 +821,20 @@ public interface ClientMessages extends Messages {
   String dialogOpenSIARDMessage();
 
   String errorMessagesOpenFile();
+
+  /*********************************************
+   * SIARD Validator
+   ********************************************/
+
+  String SIARDValidatorSettings();
+
+  String AllowedTypes();
+
+  String ReporterDestinationFolder();
+
+  String ReporterTip();
+
+  String AllowedTypesTip();
+
+  String clear();
 }

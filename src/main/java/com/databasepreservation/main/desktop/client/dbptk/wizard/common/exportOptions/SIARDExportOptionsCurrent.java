@@ -290,7 +290,6 @@ public class SIARDExportOptionsCurrent extends Composite {
             Filter filter = new Filter();
             filter.setName(ViewerConstants.SIARD_FILES);
             filter.setExtensions(Collections.singletonList(ViewerConstants.SIARD_SUFFIX));
-            GWT.log("filter: " + filter);
             JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.emptyList(),
               Collections.singletonList(filter));
             String path = JavascriptUtils.saveFileDialog(options);

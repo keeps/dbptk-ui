@@ -43,6 +43,7 @@ public class FontAwesomeIconManager {
   public static final String CALENDAR = "calendar";
   public static final String KEY = "key";
   public static final String SERVER = "server";
+  public static final String QUESTION = "question-circle";
 
 
   public static String getTag(String icon) {
@@ -50,7 +51,7 @@ public class FontAwesomeIconManager {
   }
 
   public static String getTag(String icon, String tooltip) {
-    return "<i class=\"fa fa-" + icon + "\"></i>";
+    return "<i class=\"fa fa-" + icon + "\"" + " title = \"" + tooltip + "\"></i>";
   }
 
   public static SafeHtml loading(String icon) {

@@ -48,6 +48,7 @@ public class HistoryManager {
   public static final String ROUTE_SIARD_EDIT_METADATA_USERS = "users";
   public static final String ROUTE_VIEW = "view";
   public static final String ROUTE_ROUTINE = "routine";
+  public static final String ROUTE_SIARD_VALIDATOR = "validator";
 
   public static final String HISTORY_SEP = "/";
   public static final String HISTORY_SEP_REGEX = "/";
@@ -216,6 +217,16 @@ public class HistoryManager {
 
   public static void gotoEditMetadataUsers(String databaseUUID) {
     List<String> params = Arrays.asList(ROUTE_SIARD_EDIT_METADATA, databaseUUID, ROUTE_SIARD_EDIT_METADATA_USERS);
+    newHistory(params);
+  }
+
+  public static void gotoSIARDValidator(String databaseUUID, String reporterPath, String udtPath) {
+    List<String> params = Arrays.asList(ROUTE_SIARD_VALIDATOR, databaseUUID, reporterPath, udtPath);
+    newHistory(params);
+  }
+
+  public static void gotoSIARDValidator(String databaseUUID, String reporterPath) {
+    List<String> params = Arrays.asList(ROUTE_SIARD_VALIDATOR, databaseUUID, reporterPath);
     newHistory(params);
   }
 
