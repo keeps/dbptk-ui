@@ -343,7 +343,7 @@ public class DatabaseRowsSolrManager {
     updateValidationFields(databaseUUID, Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATED_AT, validationDate),
         Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATOR_REPORT_PATH, validatorReportLocation),
         Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATE_VERSION, DBPTKVersion),
-        Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATION_STATUS, validationStatus));
+        Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATION_STATUS, validationStatus.toString()));
   }
 
   @SafeVarargs

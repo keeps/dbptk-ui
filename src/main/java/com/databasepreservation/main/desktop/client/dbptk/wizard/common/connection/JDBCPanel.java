@@ -134,7 +134,7 @@ public class JDBCPanel extends Composite {
         FileUploadField fileUploadField = FileUploadField.createInstance(messages.connectionLabels(parameter.getName()), messages.chooseDriverLocation());
         fileUploadField.setParentCSS("form-row");
         fileUploadField.setLabelCSS("form-label-spaced");
-        fileUploadField.setButtonCSS("btn btn-link form-button");
+        fileUploadField.setButtonCSS("btn btn-link form-button form-button-jar");
         fileUploadField.setRequired(parameter.isRequired());
         fileUploadField.buttonAction(new Command() {
           @Override

@@ -12,7 +12,6 @@ import com.databasepreservation.main.common.shared.ViewerStructure.ViewerValidat
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 public class ValidationProgressData implements Serializable {
-
   private boolean finished = false;
   private int lastPosition = 0;
   private ViewerValidator component;
@@ -44,13 +43,14 @@ public class ValidationProgressData implements Serializable {
     System.out.println("ID: " + ID );
   }
 
+
   public void setStatus(String status) {
     component.setComponentStatus(status);
     System.out.println("STATUS: " + status );
   }
 
   public void setStepBeingValidated(String stepBeingValidated, String status) {
-    System.out.println("step: " + stepBeingValidated );
+    System.out.println("step: " + stepBeingValidated);
     isComponent = false;
     requirement = ViewerValidator.Requirement.getInstance(stepBeingValidated);
     requirement.setRequirementID(stepBeingValidated);
@@ -101,7 +101,7 @@ public class ValidationProgressData implements Serializable {
     return sliceComponentList;
   }
 
-  public void addComponent(ViewerValidator component) {
+  private void addComponent(ViewerValidator component) {
     if (!this.componentList.contains(component)) {
       this.componentList.add(component);
     }

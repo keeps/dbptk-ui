@@ -77,7 +77,7 @@ public class HelperValidator {
       pathLabelReporter.setText(reporterPathFile);
     });
 
-    return buildPanel(messages.ReporterDestinationFolder(), pathLabelReporter, messages.ReporterTip(), reporterButton, clearButton);
+    return buildPanel(messages.reporterDestinationFolder(), pathLabelReporter, messages.reporterTip(), reporterButton, clearButton);
   }
 
   public FlowPanel udtValidatorPanel() {
@@ -105,7 +105,8 @@ public class HelperValidator {
       pathLabelUDT.setText(udtPathFile);
     });
 
-    return buildPanel(messages.AllowedTypes(), pathLabelUDT, messages.AllowedTypesTip(), udtButton, clearButton);
+
+    return buildPanel(messages.allowedTypes(), pathLabelUDT, messages.allowedTypesTip(), udtButton, clearButton);
   }
 
   private FlowPanel buildPanel(String labelTxt, Label pathLabel, String tipTxt, Button btn, Button clear) {
@@ -116,7 +117,7 @@ public class HelperValidator {
     Label tip = new Label(tipTxt);
     tip.addStyleName("form-text-helper text-muted");
 
-    btn.setText(messages.siardExportBrowseButton());
+    btn.setText(messages.basicActionBrowse());
     btn.addStyleName("btn btn-link-info btn-validator");
 
     clear.setHTML(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.ACTION_DELETE)));

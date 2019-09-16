@@ -264,6 +264,10 @@ p[data-value]:after {
     content: "\f233";
 }
 
+.btn-erase:after {
+    content: "\f12d";
+}
+
 .btn-export {
     padding: 4px 8px 4px 8px;
     font-size: 11px;
@@ -1256,6 +1260,13 @@ html, body, .main {
     padding: 0;
     margin: 0;
     width: 100px;
+}
+
+.form-button-jar {
+    padding: 0;
+    margin: 0;
+    width: 260px;
+    text-overflow: unset;
 }
 
 .form-inline > .form-label-spaced:last-of-type {

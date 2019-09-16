@@ -12,7 +12,7 @@ public interface ClientMessages extends Messages {
 
   String alertErrorTitle();
 
-  String noItemsToDisplay();
+
 
   String databaseDoesNotContainUsers();
 
@@ -302,10 +302,6 @@ public interface ClientMessages extends Messages {
 
   String infoAndSupport();
 
-  String databaseName();
-
-  String databaseStatus();
-
   String uniqueID();
 
   String edit();
@@ -315,8 +311,6 @@ public interface ClientMessages extends Messages {
   String table();
 
   String created();
-
-  String actions();
 
   String thereAreNoSavedSearches();
 
@@ -372,149 +366,13 @@ public interface ClientMessages extends Messages {
 
   String usersAndPermissions();
 
-  String createCardHeader();
-
-  String createCardText();
-
-  String createCardButton();
-
-  String openCardHeader();
-
-  String openCardText();
-
-  String openCardButton();
-
-  String manageCardHeader();
-
-  String manageCardText();
-
-  String manageCardButton();
-
-  String viewerMetadataName();
-
-  String viewerMetadataArchivalDate();
-
-  String viewerMetadataArchiver();
-
-  String viewerMetadataArchiverContact();
-
-  String viewerMetadataClientMachine();
-
-  String viewerMetadataDatabaseProduct();
-
-  String viewerMetadataDataOriginTimespan();
-
-  String viewerMetadataDataOwner();
-
-  String viewerMetadataProducerApplication();
-
-  String navigationSIARD();
-
-  String navigationValidation();
-
-  String navigationBrowsing();
-
-  String editMetadata();
-
-  String migrateToSIARD();
-
-  String sendToLiveDBMS();
-
-  String validateNow();
-
-  String seeReport();
-
-  String browseNow();
-
-  String deleteIngested();
-
-  String showFile();
-
-  String validatedAt();
-
-  String validationVersionLabel();
-
-  String SIARDNotValidated();
-
   String SIARD();
-
-  String manageSIARD();
 
   String dialogReimportSIARDTitle();
 
   String dialogReimportSIARD();
 
-  String dialogCancel();
-
-  String dialogConfirm();
-
-  String dialogAdd();
-
-  String SIARDLocation();
-
-  String SIARDValidated();
-
-  String solrIngesting();
-
-  String solrAvailable();
-
-  String solrMetadataOnly();
-
-  String solrRemoving();
-
-  String solrError();
-
-  String open();
-
-  String createSIARD();
-
-  String openSIARD();
-
-  String createSIARDConnection();
-
-  String cancel();
-
-  String next();
-
-  String back();
-
-  String menuSidebarSIARD();
-
-  String menuSidebarDatabases();
-
-  String migrate();
-
-  String createSIARDTableAndColumns();
-
-  String createSIARDExportOptions();
-
-  String createSIARDExternalLOBsOptions();
-
-  String createSIARDMetadataOptions();
-
-  String createSIARDCustomViews();
-
-  String siardversionLabel();
-
-  String siardExportBrowseButton();
-
-  String siardDestinationFolderLabel();
-
-  String siardprettyXMLLabel();
-
-  String siardValidateLabel();
-
-  String siardcompressionLabel();
-
-  String connectionURLLabel();
-
-  String sidebarTables();
-
-  String sidebarViews();
-
   String update();
-
-  String SIARDEditMetadata();
 
   String databaseInformation();
 
@@ -582,15 +440,33 @@ public interface ClientMessages extends Messages {
 
   String newText();
 
-  String skip();
-
   String viewName();
 
   String SIARDError();
 
-  String SIARDValidationSuccess();
+  /********************************************
+   * Information Strings
+   ********************************************/
+  String noItemsToDisplay();
 
-  String SIARDValidationFailed();
+  /********************************************
+   * Humanized Strings
+   ********************************************/
+  String humanizedTextForSIARDValidationSuccess();
+
+  String humanizedTextForSIARDValidationFailed();
+
+  String humanizedTextForSIARDNotValidated();
+
+  String humanizedTextForSolrIngesting();
+
+  String humanizedTextForSolrAvailable();
+
+  String humanizedTextForSolrMetadataOnly();
+
+  String humanizedTextForSolrRemoving();
+
+  String humanizedTextForSolrError();
 
   /********************************************
    * Basic Actions
@@ -603,12 +479,178 @@ public interface ClientMessages extends Messages {
 
   String basicActionConfirm();
 
+  String basicActionClear();
+
+  String basicActionNext();
+
+  String basicActionBack();
+
+  String basicActionSkip();
+
+  String basicActionSelectAll();
+
+  String basicActionSelectNone();
+
+  String basicActionOpen();
+
+  String basicActionAdd();
+
+  String basicActionMigrate();
+
+  String basicActionBrowse();
+
+  /*********************************************
+   * Sidebar Menus
+   ********************************************/
+  String sidebarMenuTextForDatabases();
+
+  String sidebarMenuTextForTables();
+
+  String sidebarMenuTextForViews();
+
+  /*********************************************
+   * Breadcrumbs Text
+   ********************************************/
+  String breadcrumbTextForManageSIARD();
+
+  String breadcrumbTextForWizardCreateSIARDConnection();
+
+  String breadcrumbTextForWizardCreateSIARDTableAndColumns();
+
+  String breadcrumbTextForWizardCreateSIARDExportOptions();
+
+  String breadcrumbTextForWizardCreateSIARDMetadataOptions();
+
+  String breadcrumbTextForWizardCreateSIARDCustomViews();
+
+  String breadcrumbTextForSIARDEditMetadata();
+
+  String breadcrumbTextForCreateSIARD();
+
+  String breadcrumbTextForWizardSendToTableAndColumns();
+
+  String breadcrumbTextForWizardSendToDBMSConnection();
+
+  String breadcrumbTextForWizardSendToSIARDExportOptions();
+
+  String breadcrumbTextForWizardSendToMetadataExportOptions();
+
+  String breadcrumbTextForWizardSendToProgressPanel();
+
+  String breadcrumbTextForSIARDValidator();
+
+  /*********************************************
+   * Home Page
+   ********************************************/
+  String homePageButtonTextForCreateSIARD();
+
+  String homePageButtonTextForOpenSIARD();
+
+  String homePageButtonTextForManageSIARD();
+
+  String homePageHeaderTextForCreateSIARD();
+
+  String homePageDescriptionTextForCreateSIARD();
+
+  String homePageHeaderTextForOpenSIARD();
+
+  String homePageDescriptionTextForOpenSIARD();
+
+  String homePageHeaderTextForManageSIARD();
+
+  String homePageDescriptionTextForManageSIARD();
+
+  String homePageTextForFinancedBy();
+
+  String homePageTextForDevelopedBy();
+
+  /********************************************
+   * Manage SIARD
+   ********************************************/
+  String managePageButtonTextForCreateSIARD();
+
+  String managePageButtonTextForOpenSIARD();
+
+  String managePageTableHeaderTextForDatabaseName();
+
+  String managePageTableHeaderTextForProductName();
+
+  String managePageTableHeaderTextForArchivalDate();
+
+  String managePageTableHeaderTextForSIARDLocation();
+
+  String managePageTableHeaderTextForSIARDValidationStatus();
+
+  String managePageTableHeaderTextForDatabaseStatus();
+
+  String managePageTableHeaderTextForActions();
+
+  /********************************************
+   * SIARD Home Page
+   ********************************************/
+  String SIARDHomePageToastTitle(String method);
+
+  String SIARDHomePageButtonTextEditMetadata();
+
+  String SIARDHomePageButtonTextMigrateToSIARD();
+
+  String SIARDHomePageButtonTextSendToLiveDBMS();
+
+  String SIARDHomePageButtonTextShowFile();
+
+  String SIARDHomePageButtonTextValidateNow();
+
+  String SIARDHomePageButtonTextSeeReport();
+
+  String SIARDHomePageButtonTextForBrowseNow();
+
+  String SIARDHomePageButtonTextForDeleteIngested();
+
+  String SIARDHomePageOptionsHeaderForSIARD();
+
+  String SIARDHomePageOptionsHeaderForValidation();
+
+  String SIARDHomePageOptionsHeaderForBrowsing();
+
+  String SIARDHomePageLabelForViewerMetadataName();
+
+  String SIARDHomePageLabelForViewerMetadataArchivalDate();
+
+  String SIARDHomePageLabelForViewerMetadataArchiver();
+
+  String SIARDHomePageLabelForViewerMetadataArchiverContact();
+
+  String SIARDHomePageLabelForViewerMetadataClientMachine();
+
+  String SIARDHomePageLabelForViewerMetadataDatabaseProduct();
+
+  String SIARDHomePageLabelForViewerMetadataDataOriginTimespan();
+
+  String SIARDHomePageLabelForViewerMetadataDataOwner();
+
+  String SIARDHomePageLabelForViewerMetadataProducerApplication();
+
+  String SIARDHomePageLabelForValidatedAt();
+
+  String SIARDHomePageLabelForValidationVersion();
+
+  String SIARDHomePageTextForMissingDescription();
+
+  String SIARDHomePageLabelForValidationStatus();
+
   /********************************************
    * Edit Metadata
    ********************************************/
   String editMetadataNotificationTitle();
 
   String editMetadataInformationMessage();
+
+  /********************************************
+   * Create Wizard: Home Page
+   ********************************************/
+  String createSIARDWizardManagerErrorTitle();
+
+  String createSIARDWizardManagerSelectDataSourceError();
 
   /********************************************
    * Create Wizard: Information Messages
@@ -667,10 +709,6 @@ public interface ClientMessages extends Messages {
   /********************************************
    * Create Wizard: Table & Columns
    ********************************************/
-  String selectAll();
-
-  String selectNone();
-
   String tableAndColumnsColumnTitle();
 
   String tableAndColumnsDescriptionTitle();
@@ -775,21 +813,9 @@ public interface ClientMessages extends Messages {
 
   String wizardProgressSIARDSubTitle();
 
-  String wizardSendToProgressPanelBreadcrumb();
-
   /*********************************************
    * Send to: Table & Columns
    ********************************************/
-  String wizardSendToTableAndColumnsBreadcrumb();
-
-  String wizardSendToExportFormatBreadcrumb();
-
-  String wizardSendToDBMSConnectionBreadcrumb();
-
-  String wizardSendToSIARDExportOptionsBreadcrumb();
-
-  String wizardSendToMetadataExportOptionsBreadcrumb();
-
   String wizardSendToDBMSExportButton();
 
   /*********************************************
@@ -808,14 +834,6 @@ public interface ClientMessages extends Messages {
 
   String sendToWizardManagerInformationMessageDBMS(String name);
 
-  /*********************************************
-   * Home Page
-   ********************************************/
-  String poweredBy();
-
-  String financedBy();
-
-  String developedBy();
 
   /*********************************************
    * Open SIARD
@@ -830,15 +848,13 @@ public interface ClientMessages extends Messages {
 
   String SIARDValidatorSettings();
 
-  String SIARDValidator();
+  String allowedTypes();
 
-  String AllowedTypes();
+  String reporterDestinationFolder();
 
-  String ReporterDestinationFolder();
+  String reporterTip();
 
-  String ReporterTip();
-
-  String AllowedTypesTip();
+  String allowedTypesTip();
 
   String clear();
 
@@ -853,4 +869,5 @@ public interface ClientMessages extends Messages {
   String runAgain();
 
   String validationRequirements(@Select String codeID);
+
 }

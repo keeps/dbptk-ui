@@ -156,4 +156,6 @@ public interface BrowserService extends RemoteService {
   ProgressData getProgressData(String uuid);
 
   ValidationProgressData getValidationProgressData(String uuid);
+
+  String getDateTimeHumanized(String dateTime);
 }

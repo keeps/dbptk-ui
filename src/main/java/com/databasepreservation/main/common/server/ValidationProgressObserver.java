@@ -2,7 +2,6 @@ package com.databasepreservation.main.common.server;
 
 import com.databasepreservation.common.ValidationObserver;
 import com.databasepreservation.main.common.shared.ValidationProgressData;
-import com.databasepreservation.main.common.shared.ViewerStructure.ViewerValidator;
 import com.databasepreservation.model.reporters.ValidationReporterStatus;
 
 /**
@@ -33,6 +32,7 @@ public class ValidationProgressObserver implements ValidationObserver {
 
   @Override
   public void notifyFinishValidationModule(String componentName, ValidationReporterStatus status) {
+    progressData.setComponentName(componentName);
     progressData.setStatus(status.name());
   }
 
@@ -46,8 +46,8 @@ public class ValidationProgressObserver implements ValidationObserver {
     progressData.setPathBeingValidated(path);
   }
 
-  @Override
+  /*@Override
   public void notifyValidationProcessFinish(boolean result) {
     progressData.setFinished(result);
-  }
+  }*/
 }

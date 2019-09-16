@@ -30,10 +30,10 @@
             </g:FlowPanel>
             <g:FlowPanel addStyleNames="button-group-panel">
                 <g:SimplePanel addStyleNames="button-group-panel-btn">
-                    <g:Button addStyleNames="btn btn-primary" ui:field="create"><ui:text from='{messages.createSIARD}' /></g:Button>
+                    <g:Button addStyleNames="btn btn-primary" ui:field="create"><ui:text from='{messages.managePageButtonTextForCreateSIARD}' /></g:Button>
                 </g:SimplePanel>
                 <g:SimplePanel addStyleNames="button-group-panel-btn">
-                    <g:Button addStyleNames="btn btn btn-primary" ui:field="open"><ui:text from='{messages.openSIARD}' /></g:Button>
+                    <g:Button addStyleNames="btn btn btn-primary" ui:field="open"><ui:text from='{messages.managePageButtonTextForOpenSIARD}' /></g:Button>
                 </g:SimplePanel>
             </g:FlowPanel>
         </g:FlowPanel>

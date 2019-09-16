@@ -39,10 +39,10 @@ public class DBMSWizardManager extends WizardManager {
   @UiField
   public ClientMessages messages = GWT.create(ClientMessages.class);
 
-  interface SendToWizardManagerUiBinder extends UiBinder<Widget, DBMSWizardManager> {
+  interface DBMSWizardManagerUiBinder extends UiBinder<Widget, DBMSWizardManager> {
   }
 
-  private static SendToWizardManagerUiBinder binder = GWT.create(SendToWizardManagerUiBinder.class);
+  private static DBMSWizardManagerUiBinder binder = GWT.create(DBMSWizardManagerUiBinder.class);
 
   @UiField
   BreadcrumbPanel breadcrumb;

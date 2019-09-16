@@ -85,7 +85,7 @@ public class TableAndColumnsSendToSidebar extends Composite {
       list.put(TABLES_LINK, schemas);
       sidebarGroup.add(schemas);
 
-      SidebarItem tables = new SidebarItem(messages.sidebarTables());
+      SidebarItem tables = new SidebarItem(messages.sidebarMenuTextForTables());
       tables.addIcon(FontAwesomeIconManager.LIST).setH5().setIndent2();
 
       FlowPanel tablesItems = new FlowPanel();
@@ -100,7 +100,7 @@ public class TableAndColumnsSendToSidebar extends Composite {
       }
       createSubItem(tables, tablesItems);
 
-      SidebarItem views = new SidebarItem(messages.sidebarViews());
+      SidebarItem views = new SidebarItem(messages.sidebarMenuTextForViews());
       views.addIcon(FontAwesomeIconManager.LIST).setH5().setIndent2();
 
       FlowPanel viewsItems = new FlowPanel();

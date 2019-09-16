@@ -1,5 +1,7 @@
 package com.databasepreservation.main.common.shared.ViewerStructure;
 
+import org.roda.core.data.v2.validation.ValidationReport;
+
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */

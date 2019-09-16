@@ -16,15 +16,15 @@ public class SolrHumanizer {
   public static String humanize(Status status) {
     switch (status) {
       case INGESTING:
-        return messages.solrIngesting();
+        return messages.humanizedTextForSolrIngesting();
       case AVAILABLE:
-        return messages.solrAvailable();
+        return messages.humanizedTextForSolrAvailable();
       case METADATA_ONLY:
-        return messages.solrMetadataOnly();
+        return messages.humanizedTextForSolrMetadataOnly();
       case REMOVING:
-        return messages.solrRemoving();
+        return messages.humanizedTextForSolrRemoving();
       case ERROR:
-        return messages.solrError();
+        return messages.humanizedTextForSolrError();
       default:
         return "";
     }
@@ -33,11 +33,11 @@ public class SolrHumanizer {
   public static String humanize(ViewerDatabase.ValidationStatus status) {
     switch (status) {
       case NOT_VALIDATED:
-        return messages.SIARDNotValidated();
+        return messages.humanizedTextForSIARDNotValidated();
       case VALIDATION_SUCCESS:
-        return messages.SIARDValidationSuccess();
+        return messages.humanizedTextForSIARDValidationSuccess();
       case VALIDATION_FAILED:
-        return messages.SIARDValidationFailed();
+        return messages.humanizedTextForSIARDValidationFailed();
       default:
         return "";
     }

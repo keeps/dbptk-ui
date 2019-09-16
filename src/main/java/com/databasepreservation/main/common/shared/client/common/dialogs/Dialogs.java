@@ -189,6 +189,7 @@ public class Dialogs {
     final DialogBox dialogBox = new DialogBox(false, true);
     final Button cancelButton = new Button(cancelButtonText);
     final Button confirmButton = new Button(confirmButtonText);
+    final Button clearButton = new Button(messages.basicActionClear());
     FlowPanel layout = new FlowPanel();
     FlowPanel layoutTop = new FlowPanel();
     FlowPanel layoutBottom = new FlowPanel();
@@ -216,7 +217,7 @@ public class Dialogs {
       dialogBox.hide();
       callback.onSuccess(true);
     });
-
+    
     dialogBox.setText(title);
     dialogBox.setWidget(layout);
     dialogBox.setGlassEnabled(true);

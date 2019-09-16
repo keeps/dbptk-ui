@@ -132,7 +132,7 @@ public class SavedSearchList extends AsyncTableCell<SavedSearch, String> {
     addColumn(tableNameColumn, messages.table(), true, TextAlign.RIGHT, 15);
     addColumn(dateAddedColumn, messages.created(), true, TextAlign.RIGHT, 15);
     addColumn(descriptionColumn, messages.description(), true, TextAlign.RIGHT);
-    addColumn(actionsColumn, messages.actions(), false, TextAlign.RIGHT, 6);
+    addColumn(actionsColumn, messages.managePageTableHeaderTextForActions(), false, TextAlign.RIGHT, 6);
 
     Label emptyInfo = new Label(messages.thereAreNoSavedSearches());
     display.setEmptyTableWidget(emptyInfo);

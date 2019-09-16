@@ -49,19 +49,19 @@ public class MetadataConstraints implements MetadataEditPanel {
     } else {
 
       return new MetadataTableList<>(columns.iterator(),
-        new MetadataTableList.ColumnInfo<>(messages.name(), 15, new TextColumn<ViewerCheckConstraint>() {
-          @Override
-          public String getValue(ViewerCheckConstraint object) {
-            return object.getName();
-          }
-        }), new MetadataTableList.ColumnInfo<>(messages.constraints_condition(), 15,
+          new MetadataTableList.ColumnInfo<>(messages.name(), 15, new TextColumn<ViewerCheckConstraint>() {
+            @Override
+            public String getValue(ViewerCheckConstraint object) {
+              return object.getName();
+            }
+          }), new MetadataTableList.ColumnInfo<>(messages.constraints_condition(), 15,
           new TextColumn<ViewerCheckConstraint>() {
             @Override
             public String getValue(ViewerCheckConstraint object) {
               return object.getCondition();
             }
           }),
-        new MetadataTableList.ColumnInfo<>(messages.description(), 15, getDescriptionColumn()));
+          new MetadataTableList.ColumnInfo<>(messages.description(), 15, getDescriptionColumn()));
     }
   }
 

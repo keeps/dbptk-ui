@@ -4,7 +4,10 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
 
-import com.databasepreservation.main.common.shared.ValidationProgressData;
+import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.roda.core.data.exceptions.AuthenticationDeniedException;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.roda.core.data.exceptions.GenericException;
@@ -26,6 +29,7 @@ import com.databasepreservation.main.common.server.controller.SIARDController;
 import com.databasepreservation.main.common.server.controller.UserLoginController;
 import com.databasepreservation.main.common.server.index.utils.SolrUtils;
 import com.databasepreservation.main.common.shared.ProgressData;
+import com.databasepreservation.main.common.shared.ValidationProgressData;
 import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
@@ -337,5 +341,16 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
   @Override
   public ValidationProgressData getValidationProgressData(String uuid) {
     return ValidationProgressData.getInstance(uuid);
+  }
+
+  @Override
+  public String getDateTimeHumanized(String dateTimeString) {
+    if (StringUtils.isBlank(dateTimeString))
+      return dateTimeString;
+
+    DateTime dateTime = DateTime.parse(dateTimeString);
+
+    DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm (z)");
+    return dateTimeFormatter.print(dateTime);
   }
 }

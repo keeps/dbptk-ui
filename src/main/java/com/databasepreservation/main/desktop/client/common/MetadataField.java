@@ -53,4 +53,8 @@ public class MetadataField extends Composite {
     metadataKey.addStyleName(cssKey);
     metadataValue.addStyleName(cssValue);
   }
+
+  public void updateText(String text) {
+    metadataValue.setText(text);
+  }
 }

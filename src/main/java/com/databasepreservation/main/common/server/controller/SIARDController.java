@@ -17,16 +17,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
-import com.databasepreservation.SIARDValidation;
-import com.databasepreservation.main.common.server.ValidationProgressObserver;
-import com.databasepreservation.modules.siard.SIARDValidateFactory;
-import com.databasepreservation.modules.siard.common.SIARDValidator;
 import org.apache.commons.io.IOUtils;
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeUtils;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.slf4j.Logger;
@@ -35,8 +29,10 @@ import org.yaml.snakeyaml.Yaml;
 
 import com.databasepreservation.DatabaseMigration;
 import com.databasepreservation.SIARDEdition;
+import com.databasepreservation.SIARDValidation;
 import com.databasepreservation.main.common.server.ProgressObserver;
 import com.databasepreservation.main.common.server.SIARDProgressObserver;
+import com.databasepreservation.main.common.server.ValidationProgressObserver;
 import com.databasepreservation.main.common.server.ViewerConfiguration;
 import com.databasepreservation.main.common.server.ViewerFactory;
 import com.databasepreservation.main.common.server.index.DatabaseRowsSolrManager;
@@ -75,6 +71,7 @@ import com.databasepreservation.model.structure.DatabaseStructure;
 import com.databasepreservation.modules.jdbc.in.JDBCImportModule;
 import com.databasepreservation.modules.siard.SIARD2ModuleFactory;
 import com.databasepreservation.modules.siard.SIARDEditFactory;
+import com.databasepreservation.modules.siard.SIARDValidateFactory;
 import com.databasepreservation.utils.ReflectionUtils;
 
 /**
@@ -571,14 +568,12 @@ public class SIARDController {
 
         try {
           dbptkVersion = ViewerConfiguration.getInstance().getDBPTKVersion();
+          final DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
+          solrManager.updateSIARDValidationInformation(databaseUUID, status, validationReportPath, dbptkVersion,
+            new DateTime().toString());
         } catch (IOException e) {
           throw new GenericException("Failed to obtain the DBPTK version from properties", e);
         }
-
-        final DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
-
-        solrManager.updateSIARDValidationInformation(databaseUUID, status, validationReportPath, dbptkVersion, new DateTime().toString());
-
       } catch (ModuleException e) {
         throw new GenericException(e);
       }

@@ -52,26 +52,26 @@ public class HomePage extends Composite {
   private void init() {
 
     Button btnCreate = new Button();
-    btnCreate.setText(messages.createCardButton());
+    btnCreate.setText(messages.homePageButtonTextForCreateSIARD());
     btnCreate.addStyleName("btn btn-edit");
 
     btnCreate.addClickHandler(event -> HistoryManager.gotoCreateSIARD());
 
     Button btnOpen = new Button();
-    btnOpen.setText(messages.openCardButton());
+    btnOpen.setText(messages.homePageButtonTextForOpenSIARD());
     btnOpen.addStyleName("btn btn-plus");
 
     btnOpen.addClickHandler(event -> new HelperUploadSIARDFile().openFile(options));
 
     Button btnManage = new Button();
-    btnManage.setText(messages.manageCardButton());
+    btnManage.setText(messages.homePageButtonTextForManageSIARD());
     btnManage.addStyleName("btn btn-manage");
 
     btnManage.addClickHandler(event -> HistoryManager.gotoDatabaseList());
 
-    Card createCard = Card.createInstance(messages.createCardHeader(), messages.createCardText(), btnCreate);
-    Card openCard = Card.createInstance(messages.openCardHeader(), messages.openCardText(), btnOpen);
-    Card manageCard = Card.createInstance(messages.manageCardHeader(), messages.manageCardText(), btnManage);
+    Card createCard = Card.createInstance(messages.homePageHeaderTextForCreateSIARD(), messages.homePageDescriptionTextForCreateSIARD(), btnCreate);
+    Card openCard = Card.createInstance(messages.homePageHeaderTextForOpenSIARD(), messages.homePageDescriptionTextForOpenSIARD(), btnOpen);
+    Card manageCard = Card.createInstance(messages.homePageHeaderTextForManageSIARD(), messages.homePageDescriptionTextForManageSIARD(), btnManage);
 
     options.add(createCard);
     options.add(openCard);

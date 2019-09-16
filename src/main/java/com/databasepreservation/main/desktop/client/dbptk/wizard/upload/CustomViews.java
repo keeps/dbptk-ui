@@ -98,9 +98,9 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
 
   void checkIfHaveCustomViews(){
     if(customViewsParameters.isEmpty()){
-      btnNext.setText(messages.skip());
+      btnNext.setText(messages.basicActionSkip());
     } else {
-      btnNext.setText(messages.next());
+      btnNext.setText(messages.basicActionNext());
     }
   }
 

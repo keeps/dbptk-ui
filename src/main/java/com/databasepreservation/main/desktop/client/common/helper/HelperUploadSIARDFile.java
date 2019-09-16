@@ -39,8 +39,8 @@ public class HelperUploadSIARDFile {
 
       openSIARDPath(panel, JavascriptUtils.openFileDialog(options));
     } else {
-      Dialogs.showServerFilePathDialog(messages.openSIARD(), messages.dialogOpenSIARDMessage(), messages.dialogCancel(),
-        messages.dialogAdd(), new DefaultAsyncCallback<String>() {
+      Dialogs.showServerFilePathDialog(messages.managePageButtonTextForOpenSIARD(), messages.dialogOpenSIARDMessage(), messages.basicActionCancel(),
+        messages.basicActionOpen(), new DefaultAsyncCallback<String>() {
           @Override
           public void onSuccess(String path) {
             openSIARDPath(panel, path);
@@ -59,7 +59,7 @@ public class HelperUploadSIARDFile {
           if (databaseUUID != null) {
             if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
               JavascriptUtils.confirmationDialog(messages.dialogReimportSIARDTitle(), messages.dialogReimportSIARD(),
-                messages.dialogCancel(), messages.dialogConfirm(), new DefaultAsyncCallback<Boolean>() {
+                messages.basicActionCancel(), messages.basicActionConfirm(), new DefaultAsyncCallback<Boolean>() {
 
                   @Override
                   public void onSuccess(Boolean confirm) {
@@ -69,7 +69,7 @@ public class HelperUploadSIARDFile {
                 });
             } else {
               Dialogs.showConfirmDialog(messages.dialogReimportSIARDTitle(), messages.dialogReimportSIARD(),
-                messages.dialogCancel(), messages.dialogConfirm(), new DefaultAsyncCallback<Boolean>() {
+                messages.basicActionCancel(), messages.basicActionConfirm(), new DefaultAsyncCallback<Boolean>() {
                   @Override
                   public void onSuccess(Boolean confirm) {
                     successHandler(confirm, panel, databaseUUID, path);

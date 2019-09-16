@@ -262,8 +262,8 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
 
         TabPanel tabPanel = new TabPanel();
         tabPanel.addStyleName("browseItemMetadata connection-panel");
-        tabPanel.add(tables, messages.sidebarTables());
-        tabPanel.add(views, messages.sidebarViews());
+        tabPanel.add(tables, messages.sidebarMenuTextForTables());
+        tabPanel.add(views, messages.sidebarMenuTextForViews());
         tabPanel.selectTab(0);
 
         panel.add(title);
@@ -344,7 +344,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
 
   private FlowPanel getSelectPanel(final String id, final String schemaUUID, final String viewOrTableUUID) {
     Button btnSelectToggle = new Button();
-    btnSelectToggle.setText(messages.selectAll());
+    btnSelectToggle.setText(messages.basicActionSelectAll());
     btnSelectToggle.addStyleName("btn btn-primary btn-select-all");
     btnSelectToggle.getElement().setId(id);
 
@@ -417,7 +417,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
   private boolean toggleSelectionButton(final String toggleBtnKey, Map<String, Boolean> map, final String key) {
     final Button button = btnToggleSelectionMap.get(toggleBtnKey);
     if (map.get(key) == null) {
-      button.setText(messages.selectNone());
+      button.setText(messages.basicActionSelectNone());
       button.addStyleName("btn-select-none");
       map.put(key, true);
 
@@ -425,11 +425,11 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
     } else {
       boolean value = map.get(key);
       if (value) {
-        button.setText(messages.selectAll());
+        button.setText(messages.basicActionSelectAll());
         button.removeStyleName("btn-select-none");
         button.addStyleName("btn-select-all");
       } else {
-        button.setText(messages.selectNone());
+        button.setText(messages.basicActionSelectNone());
         button.removeStyleName("btn-select-all");
         button.addStyleName("btn-select-none");
       }
@@ -631,7 +631,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
           }
         });
 
-        Dialogs.showExternalLobsSetupDialog(messages.tableAndColumnsExternalLOBDialogTitle(), referenceType, fileUploadField, messages.dialogCancel(), messages.dialogAdd(), delete,
+        Dialogs.showExternalLobsSetupDialog(messages.tableAndColumnsExternalLOBDialogTitle(), referenceType, fileUploadField, messages.basicActionCancel(), messages.basicActionAdd(), delete,
           new DefaultAsyncCallback<ExternalLobsDialogBoxResult>() {
               @Override
             public void onSuccess(ExternalLobsDialogBoxResult result) {

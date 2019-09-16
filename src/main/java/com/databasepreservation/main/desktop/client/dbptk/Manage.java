@@ -94,16 +94,13 @@ public class Manage extends Composite {
       }
     });
 
-    databaseList.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-      @Override
-      public void onSelectionChange(SelectionChangeEvent event) {
-        ViewerDatabase selected = databaseList.getSelectionModel().getSelectedObject();
-        if (selected != null) {
-          if (ViewerDatabase.Status.INGESTING.equals(selected.getStatus())) {
+    databaseList.getSelectionModel().addSelectionChangeHandler(event -> {
+      ViewerDatabase selected = databaseList.getSelectionModel().getSelectedObject();
+      if (selected != null) {
+        if (ViewerDatabase.Status.INGESTING.equals(selected.getStatus())) {
 
-          } else {
-            databaseList.getSelectionModel().clear();
-          }
+        } else {
+          databaseList.getSelectionModel().clear();
         }
       }
     });

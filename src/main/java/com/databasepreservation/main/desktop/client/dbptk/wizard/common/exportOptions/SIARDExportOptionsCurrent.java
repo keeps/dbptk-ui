@@ -279,7 +279,7 @@ public class SIARDExportOptionsCurrent extends Composite {
         break;
       case ViewerConstants.INPUT_TYPE_FILE:
         FileUploadField fileUploadField = FileUploadField
-          .createInstance(messages.wizardExportOptionsLabels(parameter.getName()), messages.siardExportBrowseButton());
+          .createInstance(messages.wizardExportOptionsLabels(parameter.getName()), messages.basicActionBrowse());
         fileUploadField.setParentCSS("form-row");
         fileUploadField.setLabelCSS("form-label-spaced");
         fileUploadField.setButtonCSS("btn btn-link form-button");
@@ -299,7 +299,8 @@ public class SIARDExportOptionsCurrent extends Composite {
               fileUploadField.setInformationPathCSS("gwt-Label-disabled information-path");
             }
           } else {
-            fileInputs.put(parameter.getName(), "/home/gbarros/Desktop/export.siard");
+            // TODO
+            // fileInputs.put(parameter.getName(), path);
           }
         });
         FlowPanel helper = new FlowPanel();
@@ -314,7 +315,7 @@ public class SIARDExportOptionsCurrent extends Composite {
         break;
       case ViewerConstants.INPUT_TYPE_FOLDER:
         FileUploadField folder = FileUploadField.createInstance(messages.wizardExportOptionsLabels(parameter.getName()),
-          messages.siardExportBrowseButton());
+          messages.basicActionBrowse());
         folder.setParentCSS("form-row");
         folder.setLabelCSS("form-label-spaced");
         folder.setButtonCSS("btn btn-link form-button");

@@ -11,7 +11,7 @@
         <g:FlowPanel addStyleNames="home-page-footer">
             <g:FlowPanel addStyleNames="financiers">
                 <g:Label  addStyleNames="footer-label">
-                    <ui:text from='{messages.financedBy}'/>
+                    <ui:text from='{messages.homePageTextForFinancedBy}'/>
                 </g:Label>
                 <g:Image ui:field="DGLABFinanciersLink" addStyleNames="logo-keep" url="/img/DGLAB-logo.jpg" />
                 <g:Image ui:field="EARKFinanciersLink" addStyleNames="logo-keep" url="/img/e-ark-logo.png" />
@@ -19,7 +19,7 @@
             </g:FlowPanel>
             <g:FlowPanel addStyleNames="owner">
                 <g:Label  addStyleNames="footer-label">
-                    <ui:text from='{messages.developedBy}'/>
+                    <ui:text from='{messages.homePageTextForDevelopedBy}'/>
                 </g:Label>
                 <g:Image ui:field="ownerLink" addStyleNames="logo-keep" url="/img/keeps_logo_white_pt_small.png" />
             </g:FlowPanel>

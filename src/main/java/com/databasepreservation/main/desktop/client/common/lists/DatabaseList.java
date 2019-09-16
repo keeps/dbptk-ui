@@ -114,7 +114,7 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
     Column<ViewerDatabase, String> openColumn = new ButtonDatabaseColumn() {
       @Override
       public String getValue(ViewerDatabase object) {
-        return messages.open();
+        return messages.basicActionOpen();
       }
     };
     openColumn.setFieldUpdater((index, object, value) -> {
@@ -126,13 +126,13 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
     // dataOriginTimespan.setSortable(true);
     // description.setSortable(true);
 
-    addColumn(nameColumn, messages.databaseName(), true, TextAlign.NONE, 15);
-    addColumn(dbmsColumn, messages.siardMetadata_producerApplication(), true, TextAlign.NONE, 10);
-    addColumn(archivalDateColumn, messages.siardMetadata_archivalDate(), true, TextAlign.NONE, 5);
-    addColumn(locationColumn, messages.SIARDLocation(), true, TextAlign.NONE, 8);
-    addColumn(validColumn, messages.SIARDValidated(), true, TextAlign.NONE, 4);
-    addColumn(statusColumn, messages.databaseStatus(), true, TextAlign.NONE, 8);
-    addColumn(openColumn, messages.actions(), true, TextAlign.NONE , 5);
+    addColumn(nameColumn, messages.managePageTableHeaderTextForDatabaseName(), true, TextAlign.NONE, 15);
+    addColumn(dbmsColumn, messages.managePageTableHeaderTextForProductName(), true, TextAlign.NONE, 10);
+    addColumn(archivalDateColumn, messages.managePageTableHeaderTextForArchivalDate(), true, TextAlign.NONE, 5);
+    addColumn(locationColumn, messages.managePageTableHeaderTextForSIARDLocation(), true, TextAlign.NONE, 8);
+    addColumn(validColumn, messages.managePageTableHeaderTextForSIARDValidationStatus(), true, TextAlign.NONE, 4);
+    addColumn(statusColumn, messages.managePageTableHeaderTextForDatabaseStatus(), true, TextAlign.NONE, 8);
+    addColumn(openColumn, messages.managePageTableHeaderTextForActions(), true, TextAlign.NONE , 5);
 
     Label emptyInfo = new Label(messages.noItemsToDisplay());
     display.setEmptyTableWidget(emptyInfo);

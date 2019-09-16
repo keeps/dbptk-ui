@@ -160,8 +160,8 @@ public class MetadataControlPanel extends Composite {
     }
 
     if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
-      JavascriptUtils.confirmationDialog(messages.dialogUpdateMetadata(), message, messages.dialogCancel(),
-        messages.dialogConfirm(), new DefaultAsyncCallback<Boolean>() {
+      JavascriptUtils.confirmationDialog(messages.dialogUpdateMetadata(), message, messages.basicActionCancel(),
+        messages.basicActionConfirm(), new DefaultAsyncCallback<Boolean>() {
 
           @Override
           public void onSuccess(Boolean confirm) {
@@ -172,8 +172,8 @@ public class MetadataControlPanel extends Composite {
 
         });
     } else {
-      Dialogs.showConfirmDialog(messages.dialogUpdateMetadata(), message, messages.dialogCancel(),
-        messages.dialogConfirm(), new DefaultAsyncCallback<Boolean>() {
+      Dialogs.showConfirmDialog(messages.dialogUpdateMetadata(), message, messages.basicActionCancel(),
+        messages.basicActionConfirm(), new DefaultAsyncCallback<Boolean>() {
 
           @Override
           public void onFailure(Throwable caught) {

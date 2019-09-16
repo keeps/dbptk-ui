@@ -27,7 +27,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -38,10 +37,10 @@ import config.i18n.client.ClientMessages;
  */
 public class SIARDWizardManager extends WizardManager {
 
-  interface MigrateToSIARDUiBinder extends UiBinder<Widget, SIARDWizardManager> {
+  interface SIARDWizardManagerUiBinder extends UiBinder<Widget, SIARDWizardManager> {
   }
 
-  private static MigrateToSIARDUiBinder binder = GWT.create(MigrateToSIARDUiBinder.class);
+  private static SIARDWizardManagerUiBinder binder = GWT.create(SIARDWizardManagerUiBinder.class);
 
   @UiField
   public ClientMessages messages = GWT.create(ClientMessages.class);
@@ -210,14 +209,14 @@ public class SIARDWizardManager extends WizardManager {
   @Override
   protected void updateButtons() {
     btnBack.setEnabled(true);
-    btnNext.setText(messages.next());
+    btnNext.setText(messages.basicActionNext());
 
     if (position == 0) {
       btnBack.setEnabled(false);
     }
 
     if (position == positions - 1) {
-      btnNext.setText(messages.migrate());
+      btnNext.setText(messages.basicActionMigrate());
     }
   }
 

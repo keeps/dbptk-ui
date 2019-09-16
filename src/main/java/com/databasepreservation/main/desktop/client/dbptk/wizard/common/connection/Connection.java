@@ -48,6 +48,7 @@ public class Connection extends WizardPanel<ConnectionParameters> {
   private JDBCPanel selected;
   private Set<JDBCPanel> JDBCPanels = new HashSet<>();
   private String type;
+  private boolean clickedOnSidebar = false;
 
   private static HashMap<String, Connection> instances = new HashMap<>();
 
@@ -81,7 +82,7 @@ public class Connection extends WizardPanel<ConnectionParameters> {
     BrowserService.Util.getInstance().getDatabaseImportModules(new DefaultAsyncCallback<DBPTKModule>() {
       @Override
       public void onSuccess(DBPTKModule result) {
-        connectionSidebar = ConnectionSidebar.getInstance(databaseUUID, messages.menuSidebarDatabases(),
+        connectionSidebar = ConnectionSidebar.getInstance(databaseUUID, messages.sidebarMenuTextForDatabases(),
           FontAwesomeIconManager.DATABASE, result.getDBMSConnections(), targetToken);
 
         JDBCListConnections.add(connectionSidebar);
@@ -108,7 +109,7 @@ public class Connection extends WizardPanel<ConnectionParameters> {
     BrowserService.Util.getInstance().getDatabaseExportModules(new DefaultAsyncCallback<DBPTKModule>() {
       @Override
       public void onSuccess(DBPTKModule result) {
-        connectionSidebar = ConnectionSidebar.getInstance(databaseUUID, messages.menuSidebarDatabases(),
+        connectionSidebar = ConnectionSidebar.getInstance(databaseUUID, messages.sidebarMenuTextForDatabases(),
           FontAwesomeIconManager.DATABASE, result.getDBMSConnections(), targetToken);
 
         JDBCListConnections.add(connectionSidebar);
@@ -121,6 +122,7 @@ public class Connection extends WizardPanel<ConnectionParameters> {
   }
 
   public void sideBarHighlighter(String connection) {
+    this.clickedOnSidebar = true;
     connectionSidebar.select(connection);
     JDBCListConnections.clear();
     JDBCListConnections.add(connectionSidebar);
@@ -175,6 +177,10 @@ public class Connection extends WizardPanel<ConnectionParameters> {
       jdbc.clearPasswords();
     }
     sshTunnelPanel.clearPassword();
+  }
+
+  public boolean isClickedOnSidebar() {
+    return clickedOnSidebar;
   }
 
   @Override

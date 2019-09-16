@@ -181,9 +181,12 @@ public class CreateWizardManager extends WizardManager {
           }
         });
     } else {
-      wizardInstances.get(position).error();
-      Connection connectionImpl = (Connection) wizardInstances.get(position);
-      connectionImpl.clearPasswords();
+      Connection connection = (Connection) wizardInstances.get(position);
+      if (connection.isClickedOnSidebar()) {
+        wizardInstances.get(position).error();
+        connection.clearPasswords();
+      }
+      Toast.showError(messages.createSIARDWizardManagerErrorTitle(), messages.createSIARDWizardManagerSelectDataSourceError());
     }
   }
 
@@ -362,7 +365,7 @@ public class CreateWizardManager extends WizardManager {
   protected void updateButtons() {
     btnBack.setEnabled(true);
     if (position != 2) {
-      btnNext.setText(messages.next());
+      btnNext.setText(messages.basicActionNext());
     }
 
     if (position == 0) {
@@ -370,7 +373,7 @@ public class CreateWizardManager extends WizardManager {
     }
 
     if (position == positions - 1) {
-      btnNext.setText(messages.migrate());
+      btnNext.setText(messages.basicActionMigrate());
     }
   }
 

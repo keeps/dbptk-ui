@@ -17,6 +17,7 @@ import com.databasepreservation.main.common.shared.client.common.LoadingDiv;
 import com.databasepreservation.main.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
+import com.databasepreservation.main.common.shared.client.tools.SolrHumanizer;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -92,7 +93,7 @@ public class ValidatorPage extends Composite {
     }
     initWidget(binder.createAndBindUi(this));
 
-    title.setText(messages.SIARDValidator());
+    title.setText("messages.SIARDValidator()");
     loading.setVisible(true);
 
     BrowserService.Util.getInstance().retrieve(databaseUUID, ViewerDatabase.class.getName(), databaseUUID,
@@ -215,13 +216,13 @@ public class ValidatorPage extends Composite {
   }
 
   private String updateStatus(Label statusLabel) {
-    String statusText = messages.SIARDNotValidated();
+    String statusText = messages.humanizedTextForSIARDNotValidated();
     statusLabel.setStyleName("label-info");
     if (countErrors != 0) {
-      statusText = messages.SIARDValidationFailed();
+      statusText = messages.humanizedTextForSIARDValidationFailed();
       statusLabel.setStyleName("label-danger");
     } else if (countPassed != 0 || countSkipped != 0) {
-      statusText = messages.SIARDValidationSuccess();
+      statusText = messages.humanizedTextForSIARDValidationSuccess();
       statusLabel.setStyleName("label-success");
     }
     return statusText;
@@ -237,19 +238,19 @@ public class ValidatorPage extends Composite {
     validationInformation.clear();
     FlowPanel left = new FlowPanel();
 
-    left.add(validationInfoBuilder(messages.viewerMetadataName(), database.getMetadata().getName(), new Label()));
+    left.add(validationInfoBuilder(messages.managePageTableHeaderTextForDatabaseName(), database.getMetadata().getName(), new Label()));
     left.add(validationInfoBuilder(messages.numberOfValidationError(), countErrors.toString(), new Label()));
     left.add(validationInfoBuilder(messages.numberOfValidationsPassed(), countPassed.toString(), new Label()));
     left.add(validationInfoBuilder(messages.numberOfValidationsSkipped(), countSkipped.toString(), new Label()));
     Label statusLabel = new Label();
-    left.add(validationInfoBuilder(messages.databaseStatus(), updateStatus(statusLabel), statusLabel));
+    left.add(validationInfoBuilder(messages.managePageTableHeaderTextForDatabaseStatus(), updateStatus(statusLabel), statusLabel)); //TODO
 
     FlowPanel reportPanel = new FlowPanel();
     reportPanel.addStyleName("validation-info-panel");
     Label reportLabel = new Label(messages.reporterFile());
     reportLabel.addStyleName("title");
     Button reporterButton = new Button();
-    reporterButton.setText(messages.browseNow());
+    reporterButton.setText(messages.basicActionBrowse());
     reporterButton.addStyleName("btn btn-link-info");
     reporterButton.addClickHandler(event -> {
       if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {

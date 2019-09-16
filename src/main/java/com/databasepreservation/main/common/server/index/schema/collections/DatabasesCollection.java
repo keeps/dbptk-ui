@@ -75,7 +75,7 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
     fields.add(new Field(SOLR_DATABASES_METADATA, Field.TYPE_STRING).setIndexed(false).setStored(true)
       .setRequired(false).setDocValues(false));
 
-    fields.add(new Field(SOLR_DATABASES_VALIDATOR_REPORT_PATH, Field.TYPE_STRING).setIndexed(false).setStored(true).setRequired(false).setDocValues(false));
+    fields.add(new Field(SOLR_DATABASES_VALIDATION_STATUS, Field.TYPE_STRING).setIndexed(true).setRequired(true));
 
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_TOTAL_ROWS, Field.TYPE_LONG));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_TOTAL_TABLES, Field.TYPE_LONG));
@@ -89,7 +89,8 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_SIARD_SIZE, Field.TYPE_LONG));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_VALIDATED_AT, Field.TYPE_STRING));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_VALIDATE_VERSION, Field.TYPE_STRING));
-    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_VALIDATION_STATUS, Field.TYPE_STRING));
+    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_VALIDATOR_REPORT_PATH, Field.TYPE_STRING));
+    //fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_VALIDATION_STATUS, Field.TYPE_STRING));
 
     return fields;
   }
