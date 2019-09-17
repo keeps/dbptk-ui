@@ -2,6 +2,7 @@ package com.databasepreservation.main.common.client;
 
 import java.util.List;
 
+import com.databasepreservation.main.common.shared.ValidationProgressData;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.RODAException;
 import org.roda.core.data.exceptions.RequestNotValidException;
@@ -153,4 +154,6 @@ public interface BrowserServiceAsync {
   void validateSIARD(String databaseUUID, String SIARDPath, String validationReportPath, String allowedTypePath, AsyncCallback<Boolean> async);
 
   void getProgressData(String uuid, AsyncCallback<ProgressData> async);
+
+  void getValidationProgressData(String uuid, AsyncCallback<ValidationProgressData> async);
 }

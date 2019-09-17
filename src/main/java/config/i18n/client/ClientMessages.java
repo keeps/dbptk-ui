@@ -830,6 +830,8 @@ public interface ClientMessages extends Messages {
 
   String SIARDValidatorSettings();
 
+  String SIARDValidator();
+
   String AllowedTypes();
 
   String ReporterDestinationFolder();
@@ -839,4 +841,16 @@ public interface ClientMessages extends Messages {
   String AllowedTypesTip();
 
   String clear();
+
+  String reporterFile();
+
+  String numberOfValidationError();
+
+  String numberOfValidationsPassed();
+
+  String numberOfValidationsSkipped();
+
+  String runAgain();
+
+  String validationRequirements(@Select String codeID);
 }

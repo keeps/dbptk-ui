@@ -270,6 +270,12 @@ public class JavascriptUtils {
                                             $wnd.console.log(txt);
                                             }-*/;
 
+  public static native void showItem(String path) /*-{
+                                                  var shell = $wnd.nodeRequire('electron').remote.shell;
+                                                  
+                                                  shell.openItem(path);
+                                                  }-*/;
+
   public static native void showItemInFolder(String path) /*-{
                                                           var shell = $wnd.nodeRequire('electron').remote.shell;
                                                           
@@ -277,13 +283,13 @@ public class JavascriptUtils {
                                                           }-*/;
 
   public static native String saveFileDialog(JavaScriptObject options) /*-{
-                                               var dialog = $wnd.nodeRequire('electron').remote.dialog
-                                               
-                                               var result = dialog.showSaveDialog(options);
-                                               
-                                               if (typeof result != "undefined") { return result; }
-                                               else return null;
-                                               }-*/;
+                                                                       var dialog = $wnd.nodeRequire('electron').remote.dialog
+                                                                       
+                                                                       var result = dialog.showSaveDialog(options);
+                                                                       
+                                                                       if (typeof result != "undefined") { return result; }
+                                                                       else return null;
+                                                                       }-*/;
 
   public static native void showNotification(String title, String body) /*-{
                                                                         var myNotification = new Notification(title, {body: body})

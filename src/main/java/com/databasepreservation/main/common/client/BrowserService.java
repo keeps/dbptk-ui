@@ -16,6 +16,7 @@ import org.roda.core.data.v2.index.sublist.Sublist;
 import org.roda.core.data.v2.user.User;
 
 import com.databasepreservation.main.common.shared.ProgressData;
+import com.databasepreservation.main.common.shared.ValidationProgressData;
 import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
@@ -65,17 +66,17 @@ public interface BrowserService extends RemoteService {
   List<SearchField> getSearchFields(ViewerTable viewerTable) throws GenericException;
 
   IndexResult<ViewerDatabase> findDatabases(Filter filter, Sorter sorter, Sublist sublist, Facets facets,
-                                            String localeString) throws GenericException, AuthorizationDeniedException, RequestNotValidException;
+    String localeString) throws GenericException, AuthorizationDeniedException, RequestNotValidException;
 
   IndexResult<SavedSearch> findSavedSearches(String databaseUUID, Filter filter, Sorter sorter, Sublist sublist,
-                                             Facets facets, String localeString)
+    Facets facets, String localeString)
     throws GenericException, AuthorizationDeniedException, RequestNotValidException, NotFoundException;
 
   <T extends IsIndexed> T retrieve(String databaseUUID, String classNameToReturn, String uuid)
     throws AuthorizationDeniedException, GenericException, NotFoundException;
 
   IndexResult<ViewerRow> findRows(String databaseUUID, Filter filter, Sorter sorter, Sublist sublist, Facets facets,
-                                  String localeString) throws GenericException, AuthorizationDeniedException, RequestNotValidException;
+    String localeString) throws GenericException, AuthorizationDeniedException, RequestNotValidException;
 
   <T extends IsIndexed> Long countRows(String databaseUUID, Filter filter)
     throws AuthorizationDeniedException, GenericException, RequestNotValidException;
@@ -87,7 +88,7 @@ public interface BrowserService extends RemoteService {
     throws AuthorizationDeniedException, GenericException, RequestNotValidException;
 
   String saveSearch(String name, String description, String tableUUID, String tableName, String databaseUUID,
-                    SearchInfo searchInfo)
+    SearchInfo searchInfo)
     throws AuthorizationDeniedException, GenericException, RequestNotValidException, NotFoundException;
 
   void editSearch(String databaseUUID, String savedSearchUUID, String name, String description)
@@ -129,7 +130,8 @@ public interface BrowserService extends RemoteService {
 
   boolean testConnection(String databaseUUID, ConnectionParameters parameters) throws GenericException;
 
-  List<List<String>> validateCustomViewQuery(String databaseUUID, ConnectionParameters parameters, String query) throws GenericException;
+  List<List<String>> validateCustomViewQuery(String databaseUUID, ConnectionParameters parameters, String query)
+    throws GenericException;
 
   boolean createSIARD(String UUID, ConnectionParameters connectionParameters,
     TableAndColumnsParameters tableAndColumnsParameters, CustomViewsParameters customViewsParameters,
@@ -139,16 +141,19 @@ public interface BrowserService extends RemoteService {
   boolean migrateToDBMS(String databaseUUID, String siard, ConnectionParameters connectionParameters)
     throws GenericException;
 
-  boolean migrateToSIARD(String databaseUUID, String siardPath,
-    TableAndColumnsParameters tableAndColumnsParameters, ExportOptionsParameters exportOptionsParameters,
-    MetadataExportOptionsParameters metadataExportOptions) throws GenericException;
+  boolean migrateToSIARD(String databaseUUID, String siardPath, TableAndColumnsParameters tableAndColumnsParameters,
+    ExportOptionsParameters exportOptionsParameters, MetadataExportOptionsParameters metadataExportOptions)
+    throws GenericException;
 
   String generateUUID();
 
   ViewerMetadata updateMetadataInformation(ViewerMetadata metadata, ViewerSIARDBundle bundleSiard, String databaseUUID,
     String path) throws GenericException;
 
-  boolean validateSIARD(String databaseUUID, String SIARDPath, String validationReportPath, String allowedTypePath) throws GenericException;
+  boolean validateSIARD(String databaseUUID, String SIARDPath, String validationReportPath, String allowedTypePath)
+    throws GenericException;
 
   ProgressData getProgressData(String uuid);
+
+  ValidationProgressData getValidationProgressData(String uuid);
 }

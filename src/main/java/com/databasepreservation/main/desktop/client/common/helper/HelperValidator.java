@@ -53,6 +53,8 @@ public class HelperValidator {
     pathLabelReporter = new Label(reporterPathFile);
 
     Button reporterButton = new Button();
+    Button clearButton = new Button();
+
     reporterButton.addClickHandler((ClickEvent event) -> {
       if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
         JavaScriptObject.createArray();
@@ -70,12 +72,18 @@ public class HelperValidator {
       }
     });
 
-    return buildPanel(messages.ReporterDestinationFolder(), pathLabelReporter, messages.ReporterTip(), reporterButton);
+    clearButton.addClickHandler((ClickEvent event) -> {
+      resetReporterPathFile();
+      pathLabelReporter.setText(reporterPathFile);
+    });
+
+    return buildPanel(messages.ReporterDestinationFolder(), pathLabelReporter, messages.ReporterTip(), reporterButton, clearButton);
   }
 
   public FlowPanel udtValidatorPanel() {
     pathLabelUDT = new Label(udtPathFile);
     Button udtButton = new Button();
+    Button clearButton = new Button();
 
     udtButton.addClickHandler((ClickEvent event) -> {
       if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
@@ -92,30 +100,42 @@ public class HelperValidator {
       }
     });
 
-    return buildPanel(messages.AllowedTypes(), pathLabelUDT, messages.AllowedTypesTip(), udtButton);
+    clearButton.addClickHandler((ClickEvent event) -> {
+      udtPathFile = "";
+      pathLabelUDT.setText(udtPathFile);
+    });
+
+    return buildPanel(messages.AllowedTypes(), pathLabelUDT, messages.AllowedTypesTip(), udtButton, clearButton);
   }
 
-  private FlowPanel buildPanel(String labelTxt, Label pathLabel, String tipTxt, Button btn) {
+  private FlowPanel buildPanel(String labelTxt, Label pathLabel, String tipTxt, Button btn, Button clear) {
     FlowPanel panel = new FlowPanel();
-    FlowPanel labelPanel = new FlowPanel();
-    FlowPanel btnPanel = new FlowPanel();
+    FlowPanel inputPanel = new FlowPanel();
+    FlowPanel browsePanel = new FlowPanel();
     Label label = new Label(labelTxt);
-    HTML tip = new HTML(
-      SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.QUESTION, tipTxt)));
+    Label tip = new Label(tipTxt);
+    tip.addStyleName("form-text-helper text-muted");
 
     btn.setText(messages.siardExportBrowseButton());
-    btn.addStyleName("btn btn-link-info btn-browser-validator");
-    tip.addStyleName("tip-validator");
-    btnPanel.add(btn);
-    btnPanel.add(tip);
-    btnPanel.addStyleName("validator-dialog-button");
+    btn.addStyleName("btn btn-link-info btn-validator");
+
+    clear.setHTML(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.ACTION_DELETE)));
+    clear.addStyleName("btn btn-link-info btn-validator");
+
+    pathLabel.addStyleName("text-muted");
+
+    browsePanel.add(btn);
+    browsePanel.add(pathLabel);
+    browsePanel.addStyleName("validator-dialog-button");
+    inputPanel.add(browsePanel);
+    inputPanel.add(clear);
+
+    inputPanel.addStyleName("validator-dialog-information");
 
     label.addStyleName("form-label-spaced");
-    labelPanel.add(label);
-    labelPanel.add(pathLabel);
-    panel.add(labelPanel);
-    panel.add(btnPanel);
-    panel.addStyleName("form-row validator-dialog-information");
+    panel.add(label);
+    panel.add(inputPanel);
+    panel.add(tip);
 
     return panel;
   }
@@ -129,7 +149,8 @@ public class HelperValidator {
 
   private void resetReporterPathFile() {
     reporterPathFile = SIARDPath.replace(PathUtils.getFileName(SIARDPath), "")
-      + Constants.DBPTK_VALIDATION_REPORTER_PREFIX + "-" + DateTimeFormat.getFormat("yyyyMMddHHmmssSSS").format(new Date())
-      + ViewerConstants.TXT_SUFFIX;
+      + Constants.DBPTK_VALIDATION_REPORTER_PREFIX + "-"
+      + PathUtils.getFileName(SIARDPath).replaceFirst("[.][^.]+$", "") + "-"
+      + DateTimeFormat.getFormat("yyyyMMddHHmmssSSS").format(new Date()) + ViewerConstants.TXT_SUFFIX;
   }
 }

@@ -189,13 +189,11 @@ public class Dialogs {
     final DialogBox dialogBox = new DialogBox(false, true);
     final Button cancelButton = new Button(cancelButtonText);
     final Button confirmButton = new Button(confirmButtonText);
-    final Button clearButton = new Button(messages.clear());
     FlowPanel layout = new FlowPanel();
     FlowPanel layoutTop = new FlowPanel();
     FlowPanel layoutBottom = new FlowPanel();
     FlowPanel footer = new FlowPanel();
 
-    footer.add(clearButton);
     footer.add(cancelButton);
     footer.add(confirmButton);
     footer.addStyleName("wui-dialog-layout-footer");
@@ -217,11 +215,6 @@ public class Dialogs {
     confirmButton.addClickHandler(event -> {
       dialogBox.hide();
       callback.onSuccess(true);
-    });
-
-    clearButton.addStyleName("btn btn-refresh btn-left");
-    clearButton.addClickHandler(event -> {
-      validator.clear();
     });
 
     dialogBox.setText(title);

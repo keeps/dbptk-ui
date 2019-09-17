@@ -1849,9 +1849,11 @@ input[type="checkbox"]:checked:after {
 /************************************************
 * SIARD validator
  ************************************************/
+/*Dialog*/
 .validator-dialog-information{
     display: flex;
     justify-content: space-between;
+    border: 1px solid #eee;
 }
 
 .validator-dialog-button{
@@ -1859,7 +1861,7 @@ input[type="checkbox"]:checked:after {
 }
 
 .validator-dialog-information .gwt-Label{
-    margin-right: 1em;
+    margin: 0 1em;
 }
 
 .validator-dialog-layout-body{
@@ -1870,11 +1872,57 @@ input[type="checkbox"]:checked:after {
     line-height: 48px;
 }
 
-.btn-browser-validator{
-    height: 48px;
-    padding: 10px;
+.btn-validator{
+    background-color: #eeeeee;
+    padding: 0 10px;
+    min-height: 24px;
 }
 
 .btn-left{
     float: left;
+}
+
+/*page*/
+.browseContentPreviewPanel.validation{
+    padding-left:10rem;
+    padding-right:10rem;
+}
+
+.progress-report.validation{
+    height: auto;
+    min-height: 100px;
+    max-height: 500px;
+}
+
+.validation-panel{
+    padding: 2px;
+    display: flex;
+}
+
+.validation-panel:nth-child(even){
+    background-color: #ebebeb
+}
+
+.validation-info-panel{
+    display: flex;
+    padding: 5px 0;
+}
+
+.validation-info-panel .title{
+    font-weight: bolder;
+    width: 260px;
+}
+
+.validation-panel.title .gwt-Label{
+    font-weight: bolder;
+    margin-right: 10px;
+}
+.validation-panel.requirement{
+    justify-content: space-between;
+}
+.validation-panel.requirement .title{
+    display: flex;
+}
+.validation-panel.requirement .gwt-Label{
+    min-width: 90px;
 }

@@ -4,6 +4,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
 
+import com.databasepreservation.main.common.shared.ValidationProgressData;
 import org.roda.core.data.exceptions.AuthenticationDeniedException;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.roda.core.data.exceptions.GenericException;
@@ -331,5 +332,10 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
   @Override
   public ProgressData getProgressData(String uuid) {
     return ProgressData.getInstance(uuid);
+  }
+
+  @Override
+  public ValidationProgressData getValidationProgressData(String uuid) {
+    return ValidationProgressData.getInstance(uuid);
   }
 }

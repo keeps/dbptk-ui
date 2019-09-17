@@ -1,23 +1,24 @@
+
 package com.databasepreservation.main.common.shared;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Objects;
+import java.util.List;
 
-import com.databasepreservation.model.reporters.ValidationReporter.Status;
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerValidator;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 public class ValidationProgressData implements Serializable {
 
-  private String componentName;
-  private String ID;
-  private Status status;
-  private String message;
-  private String stepBeingValidated;
-  private String pathBeingValidated;
   private boolean finished = false;
+  private int lastPosition = 0;
+  private ViewerValidator component;
+  private ViewerValidator.Requirement requirement;
+  private boolean isComponent = false;
+  private List<ViewerValidator> componentList = new ArrayList<>();
 
   private static HashMap<String, ValidationProgressData> instances = new HashMap<>();
 
@@ -31,52 +32,44 @@ public class ValidationProgressData implements Serializable {
   private ValidationProgressData() {
   }
 
-  public String getComponentName() {
-    return componentName;
-  }
-
   public void setComponentName(String componentName) {
-    this.componentName = componentName;
-  }
-
-  public String getID() {
-    return ID;
+    component = ViewerValidator.getInstance(componentName);
+    component.setComponentName(componentName);
+    addComponent(component);
+    System.out.println("componentName: " + componentName );
   }
 
   public void setID(String ID) {
-    this.ID = ID;
+    component.setComponentID(ID);
+    System.out.println("ID: " + ID );
   }
 
-  public Status getStatus() {
-    return status;
+  public void setStatus(String status) {
+    component.setComponentStatus(status);
+    System.out.println("STATUS: " + status );
   }
 
-  public void setStatus(Status status) {
-    this.status = status;
-  }
-
-  public String getMessage() {
-    return message;
+  public void setStepBeingValidated(String stepBeingValidated, String status) {
+    System.out.println("step: " + stepBeingValidated );
+    isComponent = false;
+    requirement = ViewerValidator.Requirement.getInstance(stepBeingValidated);
+    requirement.setRequirementID(stepBeingValidated);
+    requirement.setRequirementStatus(status);
+    component.addRequirement(requirement);
   }
 
   public void setMessage(String message) {
-    this.message = message;
-  }
-
-  public String getStepBeingValidated() {
-    return stepBeingValidated;
-  }
-
-  public void setStepBeingValidated(String stepBeingValidated) {
-    this.stepBeingValidated = stepBeingValidated;
-  }
-
-  public String getPathBeingValidated() {
-    return pathBeingValidated;
+    isComponent = true;
+    component.setComponentMessage(message);
   }
 
   public void setPathBeingValidated(String pathBeingValidated) {
-    this.pathBeingValidated = pathBeingValidated;
+    System.out.println("path: " + pathBeingValidated );
+    if(isComponent){
+      component.addPathBeingValidated(pathBeingValidated);
+    } else {
+      requirement.addPathBeingValidated(pathBeingValidated);
+    }
   }
 
   public boolean isFinished() {
@@ -84,7 +77,8 @@ public class ValidationProgressData implements Serializable {
   }
 
   public void setFinished(boolean finished) {
-    this.finished = finished;
+    this.finished = !finished;
+    System.out.println("finished: " + !finished );
   }
 
   public static HashMap<String, ValidationProgressData> getInstances() {
@@ -95,32 +89,21 @@ public class ValidationProgressData implements Serializable {
     ValidationProgressData.instances = instances;
   }
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    ValidationProgressData that = (ValidationProgressData) o;
-    return isFinished() == that.isFinished() &&
-        Objects.equals(getComponentName(), that.getComponentName()) &&
-        Objects.equals(getID(), that.getID()) &&
-        getStatus() == that.getStatus() &&
-        Objects.equals(getMessage(), that.getMessage()) &&
-        Objects.equals(getStepBeingValidated(), that.getStepBeingValidated()) &&
-        Objects.equals(getPathBeingValidated(), that.getPathBeingValidated());
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(getComponentName(), getID(), getStatus(), getMessage(), getStepBeingValidated(), getPathBeingValidated(), isFinished());
-  }
-
   public void reset() {
-    componentName = "";
-    ID = "";
-    this.status = null;
-    this.message = "";
-    this.stepBeingValidated = "";
-    this.pathBeingValidated = "";
     this.finished = false;
+    this.componentList.clear();
+    ViewerValidator.reset();
+  }
+
+  public List<ViewerValidator> getComponent() {
+    List<ViewerValidator> sliceComponentList = componentList.subList(lastPosition, componentList.size());
+    lastPosition = componentList.size();
+    return sliceComponentList;
+  }
+
+  public void addComponent(ViewerValidator component) {
+    if (!this.componentList.contains(component)) {
+      this.componentList.add(component);
+    }
   }
 }
