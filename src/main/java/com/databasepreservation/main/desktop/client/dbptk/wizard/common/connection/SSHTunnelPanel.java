@@ -57,7 +57,7 @@ public class SSHTunnelPanel extends Composite {
     enable(false);
     this.databaseUUID = databaseUUID;
 
-    tunnelSSH.setText(messages.useSSHTunnel());
+    tunnelSSH.setText(messages.connectionPageLabelForUseSSHTunnel());
     tunnelSSH.addValueChangeHandler(event -> {
       enable(event.getValue());
     });

@@ -137,8 +137,8 @@ public class Connection extends WizardPanel<ConnectionParameters> {
     tabPanel.addStyleName("browseItemMetadata connection-panel");
     selected = JDBCPanel.getInstance(connection, preservationParametersSelected, databaseUUID, type);
     JDBCPanels.add(selected);
-    tabPanel.add(selected, messages.tabGeneral());
-    tabPanel.add(sshTunnelPanel, messages.tabSSHTunnel());
+    tabPanel.add(selected, messages.connectionPageTextForTabGeneral());
+    tabPanel.add(sshTunnelPanel, messages.connectionPageTextForTabSSHTunnel());
 
     tabPanel.selectTab(0);
 
@@ -197,6 +197,6 @@ public class Connection extends WizardPanel<ConnectionParameters> {
 
   @Override
   public void error() {
-    Toast.showError(messages.errorMessagesConnectionTitle(), messages.errorMessagesConnection(1));
+    Toast.showError(messages.errorMessagesConnectionTitle(), messages.connectionPageErrorMessageFor(1));
   }
 }

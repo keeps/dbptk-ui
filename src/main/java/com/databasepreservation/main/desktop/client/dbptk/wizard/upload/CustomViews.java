@@ -83,7 +83,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
     customViewsSidebar = CustomViewsSidebar.getInstance();
     customViewsList.add(customViewsSidebar);
 
-    customViewSchemaName = ComboBoxField.createInstance(messages.customViewSchemaNameLabel(), schemas);
+    customViewSchemaName = ComboBoxField.createInstance(messages.customViewsPageLabelForSchemaName(), schemas);
     customViewSchemaName.setCSSMetadata("form-row","form-label-spaced", "form-combobox");
     customViewSchemaName.setRequired();
 
@@ -160,7 +160,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
     final CustomViewsParameter parameter = customViewsParameters.get(customViewUUID);
 
     if (action != null && action.equals(HistoryManager.ACTION_DELETE)) {
-      Dialogs.showConfirmDialog(messages.customViewsTitle(), messages.customViewsDialogConfirmDelete(), messages.basicActionCancel(), messages.basicActionConfirm(),
+      Dialogs.showConfirmDialog(messages.customViewsPageTitle(), messages.customViewsPageTextForDialogConfirmDelete(), messages.basicActionCancel(), messages.basicActionConfirm(),
         new DefaultAsyncCallback<Boolean>() {
           @Override
           public void onSuccess(Boolean result) {
@@ -185,7 +185,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
           parameter.getCustomViewQuery());
 
       Button btnNew = new Button();
-      btnNew.setText(messages.customViewsBtnNew());
+      btnNew.setText(messages.basicActionNew());
       btnNew.addStyleName("btn btn-primary btn-new");
       btnNew.addClickHandler(event -> {
         setTextboxText("", "", "", "");
@@ -199,7 +199,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
       });
 
       Button btnTest = new Button();
-      btnTest.setText(messages.customViewsBtnTest());
+      btnTest.setText(messages.basicActionTest());
       btnTest.addStyleName("btn btn-primary btn-run");
 
       btnTest.addClickHandler(event -> {
@@ -208,22 +208,22 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
             customViewQuery.getText(), new DefaultAsyncCallback<List<List<String>>>() {
               @Override
               public void onSuccess(List<List<String>> result) {
-                Dialogs.showQueryResult(messages.customViewsQueryResultsDialogTitle(), messages.basicActionClose(),
+                Dialogs.showQueryResult(messages.customViewsPageTextForQueryResultsDialogTitle(), messages.basicActionClose(),
                   result);
               }
 
               @Override
               public void onFailure(Throwable caught) {
-                Toast.showError(messages.customViewToastErrorTitle(), caught.getMessage());
+                Toast.showError(messages.customViewsPageTitle(), caught.getMessage());
               }
             });
         } else {
-          Toast.showError(messages.customViewsTestQueryError());
+          Toast.showError(messages.customViewsPageTitle(), messages.customViewsPageErrorMessageForQueryError());
         }
       });
 
       Button btnUpdate = new Button();
-      btnUpdate.setText(messages.customViewsBtnSave());
+      btnUpdate.setText(messages.basicActionSave());
       btnUpdate.addStyleName("btn btn-primary btn-save");
       btnUpdate.addClickHandler(event -> {
         final int valid = customViewFormValidatorUpdate(parameter.getCustomViewName());
@@ -235,7 +235,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
                 if (!result.isEmpty()) {
                   updateCustomViewParameters(parameter.getCustomViewID(), customViewSchemaName.getSelectedValue(),
                     customViewName.getText(), customViewDescription.getText(), customViewQuery.getText());
-                  Toast.showInfo(messages.customViewsTitle(), messages.customViewsUpdateMessage());
+                  Toast.showInfo(messages.customViewsPageTitle(), messages.customViewsUpdateMessage());
                 } else {
                   Toast.showError("Empty");
                 }
@@ -243,11 +243,11 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
 
               @Override
               public void onFailure(Throwable caught) {
-                Toast.showError(messages.customViewToastErrorTitle(), caught.getMessage());
+                Toast.showError(messages.customViewsPageTitle(), caught.getMessage());
               }
             });
         } else {
-          Toast.showError(messages.errorMessagesCustomViewsTitle(), messages.errorMessagesCustomViews(valid));
+          Toast.showError(messages.customViewsPageTitle(), messages.customViewsPageErrorMessagesFor(valid));
           highlightFieldsWhenRequired();
         }
       });
@@ -360,7 +360,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
 
   private FlowPanel createCustomViewButton() {
     Button btnSave = new Button();
-    btnSave.setText(messages.customViewsBtnSave());
+    btnSave.setText(messages.basicActionSave());
     btnSave.addStyleName("btn btn-primary btn-save");
 
     btnSave.addClickHandler(event -> {
@@ -391,19 +391,19 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
 
             @Override
             public void onFailure(Throwable caught) {
-              Toast.showError(messages.customViewToastErrorTitle(), caught.getMessage());
+              Toast.showError(messages.customViewsPageTitle(), caught.getMessage());
               checkIfHaveCustomViews();
             }
           });
       } else {
-        Toast.showError(messages.errorMessagesCustomViewsTitle(), messages.errorMessagesCustomViews(valid));
+        Toast.showError(messages.customViewsPageTitle(), messages.customViewsPageErrorMessagesFor(valid));
         highlightFieldsWhenRequired();
         checkIfHaveCustomViews();
       }
     });
 
     Button btnTest = new Button();
-    btnTest.setText(messages.customViewsBtnTest());
+    btnTest.setText(messages.basicActionTest());
     btnTest.addStyleName("btn btn-primary btn-run");
 
     btnTest.addClickHandler(event -> {
@@ -412,17 +412,17 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
           customViewQuery.getText(), new DefaultAsyncCallback<List<List<String>>>() {
             @Override
             public void onSuccess(List<List<String>> result) {
-              Dialogs.showQueryResult(messages.customViewsQueryResultsDialogTitle(), messages.basicActionClose(),
+              Dialogs.showQueryResult(messages.customViewsPageTextForQueryResultsDialogTitle(), messages.basicActionClose(),
                 result);
             }
 
             @Override
             public void onFailure(Throwable caught) {
-              Toast.showError(messages.customViewToastErrorTitle(), caught.getMessage());
+              Toast.showError(messages.customViewsPageTitle(), caught.getMessage());
             }
           });
       } else {
-        Toast.showError(messages.customViewsTestQueryError());
+        Toast.showError(messages.customViewsPageTitle(), messages.customViewsPageErrorMessageForQueryError());
       }
     });
 

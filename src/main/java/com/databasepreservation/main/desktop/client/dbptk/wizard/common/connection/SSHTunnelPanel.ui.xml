@@ -9,23 +9,23 @@
 
             <g:FlowPanel addStyleNames="form-inline">
                 <g:Label ui:field="proxyHostLabel" addStyleNames="form-label-spaced">
-                    <ui:text from='{messages.proxyHostLabel}'/>
+                    <ui:text from='{messages.connectionPageLabelForProxyHost}'/>
                 </g:Label>
                 <g:TextBox ui:field="proxyHost" addStyleNames="form-textbox"/>
                 <g:Label ui:field="proxyPortLabel" addStyleNames="form-label-spaced">
-                    <ui:text from='{messages.proxyPortLabel}'/>
+                    <ui:text from='{messages.connectionPageLabelForProxyPort}'/>
                 </g:Label>
                 <g:TextBox ui:field="proxyPort" addStyleNames="form-textbox"/>
             </g:FlowPanel>
             <g:FlowPanel addStyleNames="form-row">
                 <g:Label ui:field="proxyUserLabel" addStyleNames="form-label-spaced">
-                    <ui:text from='{messages.proxyUserLabel}'/>
+                    <ui:text from='{messages.connectionPageLabelForProxyUserLabel}'/>
                 </g:Label>
                 <g:TextBox ui:field="proxyUser" addStyleNames="form-textbox"/>
             </g:FlowPanel>
             <g:FlowPanel addStyleNames="form-row">
                 <g:Label ui:field="proxyPasswordLabel" addStyleNames="form-label-spaced">
-                    <ui:text from='{messages.proxyPasswordLabel}'/>
+                    <ui:text from='{messages.connectionPageLabelForProxyPasswordLabel}'/>
                 </g:Label>
                 <g:PasswordTextBox ui:field="proxyPassword" addStyleNames="form-textbox"/>
             </g:FlowPanel>

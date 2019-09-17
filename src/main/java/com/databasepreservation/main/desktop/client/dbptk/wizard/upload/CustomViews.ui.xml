@@ -9,26 +9,26 @@
             </g:FlowPanel>
             <g:FlowPanel ui:field="rightSideContainer" addStyleNames="right content block">
                 <g:FlowPanel ui:field="panel">
-                    <g:Label addStyleNames="h4"><ui:text from='{messages.customViewsTitle}'/></g:Label>
-                    <g:Label addStyleNames="h5"><ui:text from='{messages.customViewsDescription}'/></g:Label>
+                    <g:Label addStyleNames="h4"><ui:text from='{messages.customViewsPageTitle}'/></g:Label>
+                    <g:Label addStyleNames="h5"><ui:text from='{messages.customViewsPageTextForDescription}'/></g:Label>
                     <g:FlowPanel ui:field="customViewsForm" addStyleNames="form-container custom-views-form ">
                         <g:FlowPanel ui:field="schemasCombobox" addStyleNames="form-row">
                         </g:FlowPanel>
                         <g:FlowPanel addStyleNames="form-row">
                             <g:Label ui:field="customViewNameLabel" addStyleNames="form-label-spaced">
-                                <ui:text from='{messages.customViewNameLabel}'/>
+                                <ui:text from='{messages.customViewsPageLabelForName}'/>
                             </g:Label>
                             <g:TextBox ui:field="customViewName" addStyleNames="form-textbox"/>
                         </g:FlowPanel>
                         <g:FlowPanel addStyleNames="form-row">
                             <g:Label ui:field="customViewDescriptionLabel" addStyleNames="form-label-spaced">
-                                <ui:text from='{messages.customViewDescriptionLabel}'/>
+                                <ui:text from='{messages.customViewsPageLabelForDescription}'/>
                             </g:Label>
                             <g:TextBox ui:field="customViewDescription" addStyleNames="form-textbox"/>
                         </g:FlowPanel>
                         <g:FlowPanel addStyleNames="form-row">
                             <g:Label ui:field="customViewQueryLabel" addStyleNames="form-label-spaced">
-                                <ui:text from='{messages.customViewQueryLabel}'/>
+                                <ui:text from='{messages.customViewsPageLabelForQuery}'/>
                             </g:Label>
                             <g:TextArea ui:field="customViewQuery" addStyleNames="form-textarea form-textbox"/>
                         </g:FlowPanel>

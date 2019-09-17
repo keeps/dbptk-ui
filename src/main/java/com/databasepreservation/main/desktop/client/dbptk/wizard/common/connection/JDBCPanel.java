@@ -113,7 +113,7 @@ public class JDBCPanel extends Composite {
         PasswordTextBox passwordTextBox = new PasswordTextBox();
         passwordTextBox.addStyleName("form-textbox");
         textBoxInputs.put(parameter.getName(), passwordTextBox);
-        genericField = GenericField.createInstance(messages.connectionLabels(parameter.getName()), passwordTextBox);
+        genericField = GenericField.createInstance(messages.connectionPageLabelsFor(parameter.getName()), passwordTextBox);
         if(parameter.isRequired()) {
           passwordTextBox.getElement().setAttribute("required", "required");
           passwordTextBox.addKeyUpHandler(event -> {
@@ -125,13 +125,13 @@ public class JDBCPanel extends Composite {
         break;
       case ViewerConstants.INPUT_TYPE_CHECKBOX:
         CheckBox checkbox = new CheckBox();
-        checkbox.setText(messages.connectionLabels(parameter.getName()));
+        checkbox.setText(messages.connectionPageLabelsFor(parameter.getName()));
         checkbox.addStyleName("form-checkbox");
         checkBoxInputs.put(parameter.getName(), checkbox);
         genericField = GenericField.createInstance(checkbox);
         break;
       case ViewerConstants.INPUT_TYPE_FILE:
-        FileUploadField fileUploadField = FileUploadField.createInstance(messages.connectionLabels(parameter.getName()), messages.chooseDriverLocation());
+        FileUploadField fileUploadField = FileUploadField.createInstance(messages.connectionPageLabelsFor(parameter.getName()), messages.connectionPageLabelForChooseDriverLocation());
         fileUploadField.setParentCSS("form-row");
         fileUploadField.setLabelCSS("form-label-spaced");
         fileUploadField.setButtonCSS("btn btn-link form-button form-button-jar");
@@ -166,7 +166,7 @@ public class JDBCPanel extends Composite {
           if(focusElement == null){
             focusElement = defaultTextBox;
           }
-          genericField = GenericField.createInstance(messages.connectionLabels(parameter.getName()), defaultTextBox);
+          genericField = GenericField.createInstance(messages.connectionPageLabelsFor(parameter.getName()), defaultTextBox);
           if (parameter.getDefaultValue() != null) {
             defaultTextBox.setText(parameter.getDefaultValue());
           }

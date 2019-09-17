@@ -169,9 +169,9 @@ public class DBMSWizardManager extends WizardManager {
           final String siardPath = database.getSIARDPath();
 
           ProgressBarPanel progressBarPanel = ProgressBarPanel.getInstance(databaseUUID);
-          progressBarPanel.setTitleText(messages.wizardProgressSendToDBMSTitle(
+          progressBarPanel.setTitleText(messages.progressBarPanelTextForDBMSWizardTitle(
             ToolkitModuleName2ViewerModuleName.transform(connectionParameters.getModuleName())));
-          progressBarPanel.setSubTitleText(messages.wizardProgressSendToDBMSSubTitle());
+          progressBarPanel.setSubTitleText(messages.progressBarPanelTextForDBMSWizardSubTitle());
           wizardContent.add(progressBarPanel);
 
           BrowserService.Util.getInstance().migrateToDBMS(databaseUUID, siardPath, connectionParameters,

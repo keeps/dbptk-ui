@@ -177,8 +177,8 @@ public class SIARDWizardManager extends WizardManager {
           final String siardPath = database.getSIARDPath();
 
           ProgressBarPanel progressBarPanel = ProgressBarPanel.getInstance(databaseUUID);
-          progressBarPanel.setTitleText(messages.wizardProgressSIARDTitle());
-          progressBarPanel.setSubTitleText(messages.wizardProgressSIARDSubTitle());
+          progressBarPanel.setTitleText(messages.progressBarPanelTextForCreateWizardProgressTitle());
+          progressBarPanel.setSubTitleText(messages.progressBarPanelTextForCreateWizardProgressSubTitle());
           wizardContent.add(progressBarPanel);
 
           BrowserService.Util.getInstance().migrateToSIARD(databaseUUID, siardPath, tableAndColumnsParameters,

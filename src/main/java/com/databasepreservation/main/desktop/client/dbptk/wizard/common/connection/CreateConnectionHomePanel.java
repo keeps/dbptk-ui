@@ -39,7 +39,7 @@ public class CreateConnectionHomePanel extends Composite {
     initWidget(binder.createAndBindUi(this));
 
     Label header = new Label();
-    header.setText(messages.connectionHomePanelTitle());
+    header.setText(messages.connectionPageTitle());
     header.addStyleName("h2");
 
     content.add(header);
@@ -52,27 +52,27 @@ public class CreateConnectionHomePanel extends Composite {
 
   private void createSiardHomePanel(){
     Label welcome = new Label();
-    welcome.setText(messages.connectionHomePanelWelcomeText());
+    welcome.setText(messages.connectionPageTextForWelcome());
     welcome.addStyleName("h6");
 
     Label connection = new Label();
-    connection.setText(messages.connectionHomePanelConnectionText());
+    connection.setText(messages.connectionPageTextForConnectionHelper());
     connection.addStyleName("h6");
 
     Label tableAndColumns = new Label();
-    tableAndColumns.setText(messages.connectionHomePanelTableAndColumnsText());
+    tableAndColumns.setText(messages.connectionPageTextForTableAndColumnsHelper());
     tableAndColumns.addStyleName("h6");
 
     Label customViews = new Label();
-    customViews.setText(messages.connectionHomePanelCustomViewsText());
+    customViews.setText(messages.connectionPageTextForCustomViewsHelper());
     customViews.addStyleName("h6");
 
     Label SIARDExportOptions = new Label();
-    SIARDExportOptions.setText(messages.connectionHomePanelExportOptionsText());
+    SIARDExportOptions.setText(messages.connectionPageTextForExportOptionsHelper());
     SIARDExportOptions.addStyleName("h6");
 
     Label MetadataExportOptions = new Label();
-    MetadataExportOptions.setText(messages.connectionHomePanelMetadataExportOptionsText());
+    MetadataExportOptions.setText(messages.connectionPageTextForMetadataExportOptionsHelper());
     MetadataExportOptions.addStyleName("h6");
 
     content.add(welcome);
@@ -85,15 +85,15 @@ public class CreateConnectionHomePanel extends Composite {
 
   private void createSendToDBMSHomePanel(){
     Label welcome = new Label();
-    welcome.setText(messages.connectionHomePanelWelcomeTextDBMS());
+    welcome.setText(messages.connectionPageTextForWelcomeDBMSHelper());
     welcome.addStyleName("h6");
 
     Label connection = new Label();
-    connection.setText(messages.connectionHomePanelConnectionTextDBMS());
+    connection.setText(messages.connectionPageTextForDBMSHelper());
     connection.addStyleName("h6");
 
     Label sshConnection = new Label();
-    sshConnection.setText(messages.connectionHomePanelSSHTextDBMS());
+    sshConnection.setText(messages.connectionPageTextForSSHelper());
     sshConnection.addStyleName("h6");
 
     content.add(welcome);

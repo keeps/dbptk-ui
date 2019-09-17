@@ -110,13 +110,13 @@ public class ProgressBarPanel extends Composite {
           ((progressData.getProcessedRows() * 1.0D) / progressData.getTotalRows()) * 100).intValue();
       progressBar.setCurrent(currentGlobalPercent);
 
-      final String totalTablesPercentage = buildPercentageMessage(messages.progressBarPanelTables(),
+      final String totalTablesPercentage = buildPercentageMessage(messages.progressBarPanelTextForTables(),
         progressData.getProcessedTables(), progressData.getTotalTables());
-      final String totalRowsPercentage = buildPercentageMessage(messages.progressBarPanelRows(),
+      final String totalRowsPercentage = buildPercentageMessage(messages.progressBarPanelTextForRows(),
         progressData.getProcessedRows(), progressData.getTotalRows());
-      final String currentTable = buildSimpleMessage(messages.progressBarPanelCurrentTables(),
+      final String currentTable = buildSimpleMessage(messages.progressBarPanelTextForCurrentTable(),
         progressData.getCurrentTableName());
-      final String currentTableRowsPercentage = buildPercentageMessage(messages.progressBarPanelCurrentRows(),
+      final String currentTableRowsPercentage = buildPercentageMessage(messages.progressBarPanelTextForCurrentRows(),
         progressData.getCurrentProcessedTableRows(), progressData.getCurrentTableTotalRows());
 
       addMessageToContent(1, totalTablesPercentage);
@@ -124,7 +124,7 @@ public class ProgressBarPanel extends Composite {
       addMessageToContent(3, currentTable);
       addMessageToContent(4, currentTableRowsPercentage);
     } else {
-      final String retrieving = buildSimpleMessage("", messages.retrievingTableStructure());
+      final String retrieving = buildSimpleMessage("", messages.progressBarPanelTextForRetrievingTableStructure());
       addMessageToContent(0, retrieving);
     }
 

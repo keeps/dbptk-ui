@@ -12,8 +12,6 @@ public interface ClientMessages extends Messages {
 
   String alertErrorTitle();
 
-
-
   String databaseDoesNotContainUsers();
 
   String databaseDoesNotContainRoles();
@@ -428,19 +426,7 @@ public interface ClientMessages extends Messages {
 
   String dialogLargeFileConfirmUpdateMetadata();
 
-  String retrievingTableStructure();
-
-  String progressBarPanelTables();
-
-  String progressBarPanelRows();
-
-  String progressBarPanelCurrentTables();
-
-  String progressBarPanelCurrentRows();
-
   String newText();
-
-  String viewName();
 
   String SIARDError();
 
@@ -498,6 +484,14 @@ public interface ClientMessages extends Messages {
   String basicActionMigrate();
 
   String basicActionBrowse();
+
+  String basicActionUpdate();
+
+  String basicActionNew();
+
+  String basicActionSave();
+
+  String basicActionTest();
 
   /*********************************************
    * Sidebar Menus
@@ -660,128 +654,111 @@ public interface ClientMessages extends Messages {
   String createSIARDWizardManagerInformationMessage();
 
   /********************************************
-   * Create Wizard: Connection
+   * Connection Page
    ********************************************/
-  String tabGeneral();
+  String connectionPageTextForTabGeneral();
 
-  String tabSSHTunnel();
+  String connectionPageTextForTabSSHTunnel();
 
-  String useSSHTunnel();
+  String connectionPageLabelForUseSSHTunnel();
 
-  String proxyHostLabel();
+  String connectionPageLabelForProxyHost();
 
-  String proxyPortLabel();
+  String connectionPageLabelForProxyPort();
 
-  String proxyUserLabel();
+  String connectionPageLabelForProxyUserLabel();
 
-  String proxyPasswordLabel();
+  String connectionPageLabelForProxyPasswordLabel();
 
-  String connectionLabels(@Select String fieldName);
+  String connectionPageLabelsFor(@Select String fieldName);
 
-  String chooseDriverLocation();
+  String connectionPageLabelForChooseDriverLocation();
 
   String errorMessagesConnectionTitle();
 
-  String errorMessagesConnection(@Select int error);
+  String connectionPageErrorMessageFor(@Select int error);
 
-  String connectionHomePanelTitle();
+  String connectionPageTitle();
 
-  //create SIARD file
-  String connectionHomePanelWelcomeText();
+  String connectionPageTextForWelcome();
 
-  String connectionHomePanelConnectionText();
+  String connectionPageTextForConnectionHelper();
 
-  String connectionHomePanelTableAndColumnsText();
+  String connectionPageTextForTableAndColumnsHelper();
 
-  String connectionHomePanelCustomViewsText();
+  String connectionPageTextForCustomViewsHelper();
 
-  String connectionHomePanelExportOptionsText();
+  String connectionPageTextForExportOptionsHelper();
 
-  String connectionHomePanelMetadataExportOptionsText();
+  String connectionPageTextForMetadataExportOptionsHelper();
 
-  //export to live DBMS
-  String connectionHomePanelWelcomeTextDBMS();
+  String connectionPageTextForWelcomeDBMSHelper();
 
-  String connectionHomePanelConnectionTextDBMS();
+  String connectionPageTextForDBMSHelper();
 
-  String connectionHomePanelSSHTextDBMS();
+  String connectionPageTextForSSHelper();
 
   /********************************************
    * Create Wizard: Table & Columns
    ********************************************/
-  String tableAndColumnsColumnTitle();
+  String tableAndColumnsPageTitle();
 
-  String tableAndColumnsDescriptionTitle();
+  String tableAndColumnsPageTextForExternalLOBConfigure();
 
-  String tableAndColumnsTableTitle();
+  String tableAndColumnsPageLabelForReferenceType();
 
-  String tableAndColumnsExternalLOBConfigure();
+  String tableAndColumnsPageLabelForBasePath();
 
-  String tableAndColumnsRefTypeLabel();
+  String tableAndColumnsPageTableHeaderTextForColumnFilters();
 
-  String tableAndColumnsBasePathLabel();
+  String tableAndColumnsPageTableHeaderTextForColumnName();
 
-  String tableAndColumnsColumnFiltersTitle();
+  String tableAndColumnsPageTableHeaderTextForOriginalTypeName();
 
-  String tableAndColumnsOptionsTitle();
+  String tableAndColumnsPageTableHeaderTextForDescription();
 
-  String tableAndColumnsSelectText();
+  String tableAndColumnsPageTableHeaderTextForOptions();
 
-  String tableAndColumnsAddText();
+  String tableAndColumnsPageTableHeaderTextForSelect();
 
-  String tableAndColumnsUpdateText();
+  String tableAndColumnsPageTableHeaderTextForViewName();
 
-  String tableAndColumnsExternalLOBDialogTitle();
+  String tableAndColumnsPageTableHeaderTextForTableName();
 
-  String errorMessagesTableAndColumnsTitle();
+  String tableAndColumnsPageTableHeaderTextForNumberOfRows();
 
-  String errorMessagesTableAndColumns(@Select int error);
+  String tableAndColumnsPageDialogTitleForExternalLOBDialog();
+
+  String tableAndColumnsPageErrorMessageFor(@Select int error);
 
   /********************************************
    * Create Wizard: Custom Views
    ********************************************/
+  String customViewsPageTitle();
 
   String customViewsUpdateMessage();
 
-  String customViewSchemaNameLabel();
+  String customViewsPageLabelForSchemaName();
 
-  String customViewsTitle();
+  String customViewsPageLabelForName();
 
-  String customViewsDescription();
+  String customViewsPageLabelForDescription();
 
-  String customViewsTestMessage();
+  String customViewsPageLabelForQuery();
 
-  String customViewNameLabel();
+  String customViewsPageTextForDescription();
 
-  String customViewDescriptionLabel();
+  String customViewsPageTextForDialogTitle();
 
-  String customViewQueryLabel();
+  String customViewsPageTextForDialogMessage();
 
-  String customViewsBtnSave();
+  String customViewsPageTextForQueryResultsDialogTitle();
 
-  String customViewsBtnNew();
+  String customViewsPageTextForDialogConfirmDelete();
 
-  String customViewsDialogTitle();
+  String customViewsPageErrorMessageForQueryError();
 
-  String customViewsDialogMessage();
-
-  String customViewsDialogConfirm();
-
-  String customViewsDialogCancel();
-
-  String errorMessagesCustomViewsTitle();
-
-  String customViewsBtnTest();
-
-  String customViewsTestQueryError();
-
-  String customViewsQueryResultsDialogTitle();
-
-  String customViewToastErrorTitle();
-
-  String customViewsDialogConfirmDelete();
-
-  String errorMessagesCustomViews(@Select int error);
+  String customViewsPageErrorMessagesFor(@Select int error);
 
   /********************************************
    * Wizard Export Options
@@ -801,17 +778,6 @@ public interface ClientMessages extends Messages {
   String errorMessagesExportOptionsTitle();
 
   String errorMessagesExportOptions(@Select int error);
-
-  /********************************************
-   * Wizard Progress Panel
-   ********************************************/
-  String wizardProgressSendToDBMSTitle(String dbms);
-
-  String wizardProgressSendToDBMSSubTitle();
-
-  String wizardProgressSIARDTitle();
-
-  String wizardProgressSIARDSubTitle();
 
   /*********************************************
    * Send to: Table & Columns
@@ -845,7 +811,6 @@ public interface ClientMessages extends Messages {
   /*********************************************
    * SIARD Validator
    ********************************************/
-
   String SIARDValidatorSettings();
 
   String allowedTypes();
@@ -870,4 +835,24 @@ public interface ClientMessages extends Messages {
 
   String validationRequirements(@Select String codeID);
 
+  /*********************************************
+   * Progress Bar
+   ********************************************/
+  String progressBarPanelTextForTables();
+
+  String progressBarPanelTextForRows();
+
+  String progressBarPanelTextForCurrentTable();
+
+  String progressBarPanelTextForCurrentRows();
+
+  String progressBarPanelTextForRetrievingTableStructure();
+
+  String progressBarPanelTextForDBMSWizardTitle(String dbms);
+
+  String progressBarPanelTextForDBMSWizardSubTitle();
+
+  String progressBarPanelTextForCreateWizardProgressTitle();
+
+  String progressBarPanelTextForCreateWizardProgressSubTitle();
 }

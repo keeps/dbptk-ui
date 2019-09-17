@@ -212,7 +212,7 @@ public class CreateWizardManager extends WizardManager {
     final boolean valid = wizardInstances.get(position).validate();
 
     if (!valid) {
-      Dialogs.showConfirmDialog(messages.customViewsDialogTitle(), messages.customViewsDialogMessage(), messages.basicActionDiscard(), messages.basicActionConfirm(), new DefaultAsyncCallback<Boolean>() {
+      Dialogs.showConfirmDialog(messages.customViewsPageTextForDialogTitle(), messages.customViewsPageTextForDialogMessage(), messages.basicActionDiscard(), messages.basicActionConfirm(), new DefaultAsyncCallback<Boolean>() {
         @Override
         public void onSuccess(Boolean result) {
           if (result) {
@@ -236,7 +236,7 @@ public class CreateWizardManager extends WizardManager {
 
                 @Override
                 public void onFailure(Throwable caught) {
-                  Toast.showError(messages.customViewToastErrorTitle(), caught.getMessage());
+                  Toast.showError(messages.customViewsPageTitle(), caught.getMessage());
                 }
               });
             }
@@ -308,8 +308,8 @@ public class CreateWizardManager extends WizardManager {
       @Override
       public void onSuccess(String databaseUUID) {
         ProgressBarPanel progressBarPanel = ProgressBarPanel.getInstance(databaseUUID);
-        progressBarPanel.setTitleText(messages.wizardProgressSIARDTitle());
-        progressBarPanel.setSubTitleText(messages.wizardProgressSIARDSubTitle());
+        progressBarPanel.setTitleText(messages.progressBarPanelTextForCreateWizardProgressTitle());
+        progressBarPanel.setSubTitleText(messages.progressBarPanelTextForCreateWizardProgressSubTitle());
         wizardContent.add(progressBarPanel);
         BrowserService.Util.getInstance().createSIARD(databaseUUID, connectionParameters, tableAndColumnsParameters,
           customViewsParameters, exportOptionsParameters, metadataExportOptionsParameters,
@@ -345,7 +345,7 @@ public class CreateWizardManager extends WizardManager {
                     public void onFailure(Throwable caught) {
                       enableButtons(true);
                       enableNext(false);
-                      Toast.showError(messages.alertErrorTitle(), caught.getMessage());
+                      Toast.showError(messages.createSIARDWizardManagerInformationMessagesTitle(), caught.getMessage());
                     }
                   });
               } else {

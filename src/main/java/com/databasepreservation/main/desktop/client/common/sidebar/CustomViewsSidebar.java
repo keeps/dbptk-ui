@@ -45,7 +45,7 @@ public class CustomViewsSidebar extends Composite {
     initWidget(uiBinder.createAndBindUi(this));
 
     sidebarGroup.add(
-      new SidebarItem(messages.customViewsTitle()).addIcon(FontAwesomeIconManager.SCHEMA_VIEWS).setH5().setIndent1());
+      new SidebarItem(messages.customViewsPageTitle()).addIcon(FontAwesomeIconManager.SCHEMA_VIEWS).setH5().setIndent1());
   }
 
   public void addSideBarHyperLink(final String nameToDisplay, final String customViewUUID, final String targetHistoryToken) {
