@@ -109,6 +109,8 @@ public interface BrowserServiceAsync {
 
   void uploadSIARD(String path, AsyncCallback<String> async);
 
+  void uploadSIARD(String path, String databaseUUID, AsyncCallback<String> async);
+
   void uploadSIARDStatus(String databaseUUID, AsyncCallback<ViewerDatabase> async);
 
   void getReport(String databaseUUID, AsyncCallback<String> async);

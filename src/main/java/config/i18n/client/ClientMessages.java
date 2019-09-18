@@ -598,6 +598,8 @@ public interface ClientMessages extends Messages {
 
   String SIARDHomePageButtonTextForBrowseNow();
 
+  String SIARDHomePageButtonTextForIngest();
+
   String SIARDHomePageButtonTextForDeleteIngested();
 
   String SIARDHomePageOptionsHeaderForSIARD();
@@ -631,6 +633,16 @@ public interface ClientMessages extends Messages {
   String SIARDHomePageTextForMissingDescription();
 
   String SIARDHomePageLabelForValidationStatus();
+
+  String SIARDHomePageLabelForBrowseStatus();
+
+  String SIARDHomePageTextForSIARDValid(String name);
+
+  String SIARDHomePageTextForSIARDInvalid(String name);
+
+  String SIARDHomePageTextForIngestSIARDTitle();
+
+  String SIARDHomePageTextForIngestSIARDSubtitle();
 
   /********************************************
    * Edit Metadata

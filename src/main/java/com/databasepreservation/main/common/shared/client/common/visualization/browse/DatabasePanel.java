@@ -1,4 +1,4 @@
-package com.databasepreservation.main.visualization.client.browse;
+package com.databasepreservation.main.common.shared.client.common.visualization.browse;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,12 +13,12 @@ import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCal
 import com.databasepreservation.main.common.shared.client.common.LoginStatusListener;
 import com.databasepreservation.main.common.shared.client.common.RightPanel;
 import com.databasepreservation.main.common.shared.client.common.UserLogin;
+import com.databasepreservation.main.common.shared.client.common.sidebar.DatabaseSidebar;
 import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.main.common.shared.client.common.utils.RightPanelLoader;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.main.common.shared.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
-import com.databasepreservation.main.visualization.client.common.sidebar.DatabaseSidebar;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.i18n.client.LocaleInfo;

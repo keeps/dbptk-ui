@@ -105,6 +105,8 @@ public interface BrowserService extends RemoteService {
 
   String uploadSIARD(String path) throws GenericException;
 
+  String uploadSIARD(String path, String databaseUUID) throws GenericException;
+
   ViewerDatabase uploadSIARDStatus(String databaseUUID)
     throws GenericException, AuthorizationDeniedException, NotFoundException;
 

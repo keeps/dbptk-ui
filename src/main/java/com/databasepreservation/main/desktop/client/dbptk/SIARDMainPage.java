@@ -14,6 +14,7 @@ import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCal
 import com.databasepreservation.main.common.shared.client.common.dialogs.Dialogs;
 import com.databasepreservation.main.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
+import com.databasepreservation.main.common.shared.client.common.visualization.browse.UploadPanel;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.common.shared.client.tools.Humanize;
@@ -54,7 +55,8 @@ public class SIARDMainPage extends Composite {
   private MetadataField validatedAt = null;
   private MetadataField version = null;
   private MetadataField validationStatus = null;
-  private Button btnSeeReport;
+  private MetadataField browsingStatus = null;
+  private Button btnSeeReport, btnBrowse, btnDelete, btnIngest;
 
   public static SIARDMainPage getInstance(String databaseUUID) {
 
@@ -67,7 +69,7 @@ public class SIARDMainPage extends Composite {
   }
 
   @UiField
-  FlowPanel container, metadataInformation, navigationPanels;
+  FlowPanel container, panel, metadataInformation, navigationPanels;
 
   @UiField
   BreadcrumbPanel breadcrumb;
@@ -175,8 +177,17 @@ public class SIARDMainPage extends Composite {
                 validator.getReporterPathFile(), validator.getUdtPathFile(), new DefaultAsyncCallback<Boolean>() {
                   @Override
                   public void onSuccess(Boolean result) {
-                    GWT.log("" + result);
-                    refreshSIARDValidationInformation(database.getUUID(), messages.SIARDHomePageOptionsHeaderForValidation());
+                    refreshInstance(database.getUUID());
+
+                    if (result) {
+                      Toast.showInfo(
+                        messages.SIARDHomePageToastTitle(messages.SIARDHomePageOptionsHeaderForValidation()),
+                        messages.SIARDHomePageTextForSIARDValid(database.getMetadata().getName()));
+                    } else {
+                      Toast.showInfo(
+                        messages.SIARDHomePageToastTitle(messages.SIARDHomePageOptionsHeaderForValidation()),
+                        messages.SIARDHomePageTextForSIARDInvalid(database.getMetadata().getName()));
+                    }
                   }
                 });
               /*
@@ -233,27 +244,60 @@ public class SIARDMainPage extends Composite {
   }
 
   private NavigationPanel populateNavigationPanelBrowse() {
-    /* Browse */
-    Button btnBrowse = new Button();
-    btnBrowse.setText(messages.SIARDHomePageButtonTextForBrowseNow());
-    btnBrowse.addStyleName("btn btn-link-info");
-
-    Button btnDelete = new Button();
-    btnDelete.setText(messages.SIARDHomePageButtonTextForDeleteIngested());
-    btnDelete.addStyleName("btn btn-link-info");
-
     NavigationPanel browse = NavigationPanel.createInstance(messages.SIARDHomePageOptionsHeaderForBrowsing());
 
-    MetadataField field;
+    btnBrowse = new Button();
+    btnBrowse.setText(messages.SIARDHomePageButtonTextForBrowseNow());
+    btnBrowse.addStyleName("btn btn-link-info");
+    btnBrowse.setVisible(false);
 
-    field = MetadataField.createInstance("Work in progress");
+    btnBrowse.addClickHandler(event -> {
+      HistoryManager.gotoDatabase(database.getUUID());
+    });
 
-    browse.addToInfoPanel(field);
+    btnDelete = new Button();
+    btnDelete.setText(messages.SIARDHomePageButtonTextForDeleteIngested());
+    btnDelete.addStyleName("btn btn-link-info");
+    btnDelete.setVisible(false);
+
+    btnIngest = new Button();
+    btnIngest.setText(messages.SIARDHomePageButtonTextForIngest());
+    btnIngest.addStyleName("btn btn-link-info");
+    btnIngest.setVisible(false);
+
+    btnIngest.addClickHandler(event -> {
+      HistoryManager.gotoIngestSIARDData(database.getUUID());
+      BrowserService.Util.getInstance().uploadSIARD(database.getSIARDPath(), database.getUUID(),
+        new DefaultAsyncCallback<String>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            instances.clear();
+            HistoryManager.gotoSIARDInfo(database.getUUID());
+          }
+
+          @Override
+          public void onSuccess(String databaseUUID) {
+            refreshInstance(databaseUUID);
+          }
+        });
+    });
+
+    browse.addButton(btnIngest);
     browse.addButton(btnBrowse);
     browse.addButton(btnDelete);
 
-    btnBrowse.setVisible(false);
-    btnDelete.setVisible(false);
+    if (database.getStatus() == ViewerDatabase.Status.AVAILABLE) {
+      btnBrowse.setVisible(true);
+      // btnDelete.setVisible(true);
+    } else if (database.getStatus() == ViewerDatabase.Status.METADATA_ONLY) {
+      btnIngest.setVisible(true);
+    }
+
+    browsingStatus = MetadataField.createInstance(messages.SIARDHomePageLabelForBrowseStatus(),
+      SolrHumanizer.humanize(database.getStatus()));
+    browsingStatus.setCSSMetadata(null, "label-field", "value-field");
+
+    browse.addToInfoPanel(browsingStatus);
 
     return browse;
   }
@@ -337,11 +381,7 @@ public class SIARDMainPage extends Composite {
     metadataInformation.add(right);
   }
 
-  public void refreshSIARDValidationInformation(String databaseUUID, String option) {
-    refreshInstance(databaseUUID, option);
-  }
-
-  private void refreshInstance(String databaseUUID, String option) {
+  private void refreshInstance(String databaseUUID) {
     final Widget loading = new HTML(SafeHtmlUtils.fromSafeConstant(
       "<div id='loading' class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
 
@@ -352,20 +392,38 @@ public class SIARDMainPage extends Composite {
         @Override
         public void onSuccess(IsIndexed result) {
           database = (ViewerDatabase) result;
-          BrowserService.Util.getInstance().getDateTimeHumanized(database.getValidatedAt(),
-            new DefaultAsyncCallback<String>() {
-              @Override
-              public void onSuccess(String result) {
-                validatedAt.updateText(result);
-                version.updateText(database.getValidatedVersion());
-                validationStatus.updateText(SolrHumanizer.humanize(database.getValidationStatus()));
-                btnSeeReport.setVisible(true);
-                container.remove(loading);
 
-                Toast.showInfo(messages.SIARDHomePageToastTitle(option), "valited");
-              }
-            });
+          updateValidationStatus();
+          updateBrowsingStatus();
+
+          container.remove(loading);
         }
       });
+  }
+
+  private void updateValidationStatus() {
+    BrowserService.Util.getInstance().getDateTimeHumanized(database.getValidatedAt(),
+      new DefaultAsyncCallback<String>() {
+        @Override
+        public void onSuccess(String result) {
+          validatedAt.updateText(result);
+          version.updateText(database.getValidatedVersion());
+          validationStatus.updateText(SolrHumanizer.humanize(database.getValidationStatus()));
+
+          if (database.getValidationStatus() != ViewerDatabase.ValidationStatus.NOT_VALIDATED) {
+            btnSeeReport.setVisible(true);
+          }
+        }
+      });
+  }
+
+  private void updateBrowsingStatus() {
+    browsingStatus.updateText(SolrHumanizer.humanize(database.getStatus()));
+
+    if (database.getStatus() == ViewerDatabase.Status.AVAILABLE) {
+      btnIngest.setVisible(false);
+      btnBrowse.setVisible(true);
+      // btnDelete.setVisible(true);
+    }
   }
 }

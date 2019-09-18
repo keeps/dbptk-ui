@@ -441,7 +441,7 @@ public class SIARDController {
 
       viewerDatabase.setMetadata(database.getMetadata());
 
-      solrManager.addDatabase(viewerDatabase);
+      solrManager.addDatabaseMetadata(viewerDatabase);
 
     } catch (IOException e) {
       throw new GenericException("Could not initialize conversion modules", e);

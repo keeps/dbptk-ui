@@ -71,10 +71,13 @@ public class DatabaseRowsSolrManager {
    * @param database
    *          the new database
    */
-  public void addDatabase(ViewerDatabase database) throws ViewerException {
+  public void addDatabaseMetadata(ViewerDatabase database) throws ViewerException {
     // add this database to the collection
     insertDocument(ViewerDatabase.class, database);
+  }
 
+  public void addDatabaseRowCollection(ViewerDatabase database) throws ViewerException {
+    updateValidationFields(database.getUUID(), Pair.of(ViewerConstants.SOLR_DATABASES_STATUS, ViewerDatabase.Status.INGESTING.toString()));
     RowsCollection collection = new RowsCollection(database.getUUID());
     collection.createRowsCollection();
   }

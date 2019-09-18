@@ -12,12 +12,13 @@ import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbI
 import com.databasepreservation.main.common.shared.client.common.RightPanel;
 import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.main.common.shared.client.common.utils.RightPanelLoader;
+import com.databasepreservation.main.common.shared.client.common.visualization.browse.DatabaseInformationPanel;
+import com.databasepreservation.main.common.shared.client.common.visualization.browse.DatabaseListPanel;
+import com.databasepreservation.main.common.shared.client.common.visualization.browse.DatabasePanel;
+import com.databasepreservation.main.common.shared.client.common.visualization.browse.UploadPanel;
 import com.databasepreservation.main.common.shared.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.common.shared.client.widgets.wcag.AccessibleFocusPanel;
-import com.databasepreservation.main.visualization.client.browse.DatabaseInformationPanel;
-import com.databasepreservation.main.visualization.client.browse.DatabaseListPanel;
-import com.databasepreservation.main.visualization.client.browse.DatabasePanel;
 import com.databasepreservation.main.visualization.client.browse.DatabaseReportPanel;
 import com.databasepreservation.main.visualization.client.browse.DatabaseSearchPanel;
 import com.databasepreservation.main.visualization.client.browse.DatabaseSearchesPanel;
@@ -37,7 +38,6 @@ import com.databasepreservation.main.visualization.client.browse.SchemaViewsPane
 import com.databasepreservation.main.visualization.client.browse.TablePanel;
 import com.databasepreservation.main.visualization.client.browse.TableSavedSearchEditPanel;
 import com.databasepreservation.main.visualization.client.browse.TableSavedSearchPanel;
-import com.databasepreservation.main.visualization.client.browse.UploadPanel;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -126,7 +126,10 @@ public class MainPanel extends Composite {
           setContent(databaseUUID, new RightPanelLoader() {
             @Override
             public RightPanel load(ViewerDatabase database) {
-              return UploadPanel.createInstance(database);
+              final UploadPanel instance = UploadPanel.createInstance(database);
+              instance.setTitleText(messages.uploadedSIARD());
+
+              return instance;
             }
           });
         }

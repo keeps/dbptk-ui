@@ -221,6 +221,11 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
   }
 
   @Override
+  public String uploadSIARD(String path, String databaseUUID) throws GenericException {
+    return SIARDController.loadFromLocal(path, databaseUUID);
+  }
+
+  @Override
   public ViewerDatabase uploadSIARDStatus(String databaseUUID)
     throws AuthorizationDeniedException, NotFoundException, GenericException {
     return retrieve(databaseUUID, ViewerDatabase.class.getName(), databaseUUID);

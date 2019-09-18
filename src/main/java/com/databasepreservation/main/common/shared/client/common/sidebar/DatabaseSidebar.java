@@ -1,4 +1,4 @@
-package com.databasepreservation.main.visualization.client.common.sidebar;
+package com.databasepreservation.main.common.shared.client.common.sidebar;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,6 +11,8 @@ import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabas
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSchema;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
+import com.databasepreservation.main.common.shared.client.common.sidebar.SidebarHyperlink;
+import com.databasepreservation.main.common.shared.client.common.sidebar.SidebarItem;
 import com.databasepreservation.main.common.shared.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.common.shared.client.tools.ViewerStringUtils;

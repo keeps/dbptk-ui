@@ -55,6 +55,7 @@ public class HistoryManager {
   public static final String HISTORY_SEP_ESCAPE = "%2F";
 
   public static final String ACTION_DELETE = "delete";
+  public static final String ROUTE_DESKTOP_UPLOAD_SIARD_DATA = "ingest-siard";
 
   public static void gotoRoot() {
     newHistory(Collections.singletonList(ROUTE_HOME));
@@ -180,6 +181,11 @@ public class HistoryManager {
 
   public static void gotoCreateSIARD() {
     List<String> params = Collections.singletonList(ROUTE_CREATE_SIARD);
+    newHistory(params);
+  }
+
+  public static void gotoIngestSIARDData(String databaseUUID) {
+    List<String> params = Arrays.asList(ROUTE_DESKTOP_UPLOAD_SIARD_DATA, databaseUUID);
     newHistory(params);
   }
 

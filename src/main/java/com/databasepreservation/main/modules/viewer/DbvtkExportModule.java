@@ -94,7 +94,7 @@ public class DbvtkExportModule implements DatabaseExportModule {
   public void handleStructure(DatabaseStructure structure) throws ModuleException {
     this.structure = structure;
     this.viewerDatabase = ToolkitStructure2ViewerStructure.getDatabase(structure, preSetDatabaseUUID);
-    solrManager.addDatabase(viewerDatabase);
+    solrManager.addDatabaseRowCollection(viewerDatabase);
   }
 
   /**

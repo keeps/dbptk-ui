@@ -6,10 +6,17 @@ import java.util.List;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSIARDBundle;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbItem;
+import com.databasepreservation.main.common.shared.client.common.RightPanel;
+import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
+import com.databasepreservation.main.common.shared.client.common.utils.RightPanelLoader;
+import com.databasepreservation.main.common.shared.client.common.visualization.browse.DatabaseInformationPanel;
+import com.databasepreservation.main.common.shared.client.common.visualization.browse.DatabasePanel;
+import com.databasepreservation.main.common.shared.client.common.visualization.browse.UploadPanel;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.desktop.client.dbptk.HomePage;
 import com.databasepreservation.main.desktop.client.dbptk.Manage;
 import com.databasepreservation.main.desktop.client.dbptk.SIARDMainPage;
+import com.databasepreservation.main.desktop.client.dbptk.ingest.IngestPage;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataPanel;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.MetadataPanelLoad;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.SIARDEditMetadataPage;
@@ -54,6 +61,11 @@ public class MainPanelDesktop extends Composite {
       contentPanel.clear();
       contentPanel.add(HomePage.getInstance());
 
+    } else if (HistoryManager.ROUTE_DESKTOP_UPLOAD_SIARD_DATA.equals(currentHistoryPath.get(0))) {
+      IngestPage ingestPage = IngestPage.getInstance(currentHistoryPath.get(1));
+
+      contentPanel.clear();
+      contentPanel.add(ingestPage);
     } else if (HistoryManager.ROUTE_SIARD_INFO.equals(currentHistoryPath.get(0))) {
       SIARDMainPage instance = SIARDMainPage.getInstance(currentHistoryPath.get(1));
 
@@ -61,9 +73,23 @@ public class MainPanelDesktop extends Composite {
       contentPanel.add(instance);
 
     } else if (HistoryManager.ROUTE_DATABASE.equals(currentHistoryPath.get(0))) {
-      Manage manage = Manage.getInstance();
-      contentPanel.clear();
-      contentPanel.add(manage);
+        if (currentHistoryPath.size() == 1) {
+          // #database
+          Manage manage = Manage.getInstance();
+          contentPanel.clear();
+          contentPanel.add(manage);
+
+        } else if (currentHistoryPath.size() == 2) {
+          // #database/<id>
+          String databaseUUID = currentHistoryPath.get(1);
+          setContent(databaseUUID, new RightPanelLoader() {
+            @Override
+            public RightPanel load(ViewerDatabase database) {
+              return DatabaseInformationPanel.getInstance(database);
+            }
+          });
+
+        }
     } else if (HistoryManager.ROUTE_SEND_TO_LIVE_DBMS.equals(currentHistoryPath.get(0))) {
       DBMSWizardManager instance = DBMSWizardManager.getInstance(currentHistoryPath.get(1));
       contentPanel.clear();
@@ -204,5 +230,23 @@ public class MainPanelDesktop extends Composite {
 
   private void handleErrorPath(List<String> currentHistoryPath) {
     HistoryManager.gotoHome();
+  }
+
+  /*
+   * History change handling
+   *
+   * (switching to another page = using a different RightPanel)
+   * ____________________________________________________________________________________________________________________
+   */
+  public void setContent(RightPanelLoader rightPanelLoader) {
+    setContent(null, rightPanelLoader);
+  }
+
+  private void setContent(String databaseUUID, RightPanelLoader rightPanelLoader) {
+    GWT.log("setContent, dbuid " + databaseUUID);
+    DatabasePanel databasePanel = DatabasePanel.getInstance(databaseUUID);
+    contentPanel.setWidget(databasePanel);
+    databasePanel.load(rightPanelLoader);
+    JavascriptUtils.scrollToElement(contentPanel.getElement());
   }
 }

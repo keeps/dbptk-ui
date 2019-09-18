@@ -96,50 +96,50 @@ public class SchemaViewsPanel extends RightPanel {
     }
 
     // create and return the table panel
-    return new BasicTablePanel<>(header, infoBuilder.toSafeHtml(), view.getColumns().iterator(),
+    return new BasicTablePanel<ViewerColumn>(header, infoBuilder.toSafeHtml(), view.getColumns().iterator(),
 
-      new BasicTablePanel.ColumnInfo<>(messages.columnName(), 15, new TextColumn<ViewerColumn>() {
-        @Override
-        public String getValue(ViewerColumn column) {
-          return column.getDisplayName();
-        }
-      }),
-
-      new BasicTablePanel.ColumnInfo<>(messages.typeName(), 15, new TextColumn<ViewerColumn>() {
-        @Override
-        public String getValue(ViewerColumn column) {
-          return column.getType().getTypeName();
-        }
-      }),
-
-      new BasicTablePanel.ColumnInfo<>(messages.originalTypeName(), 15, new TextColumn<ViewerColumn>() {
-        @Override
-        public String getValue(ViewerColumn column) {
-          return column.getType().getOriginalTypeName();
-        }
-      }),
-
-      new BasicTablePanel.ColumnInfo<>(messages.nullable(), 8, new TextColumn<ViewerColumn>() {
-        @Override
-        public String getValue(ViewerColumn column) {
-          if (column.getNillable()) {
-            return "Yes";
-          } else {
-            return "No";
+        new BasicTablePanel.ColumnInfo<>(messages.columnName(), 15, new TextColumn<ViewerColumn>() {
+          @Override
+          public String getValue(ViewerColumn column) {
+            return column.getDisplayName();
           }
-        }
-      }),
+        }),
 
-      new BasicTablePanel.ColumnInfo<>(messages.description(), 35, new TextColumn<ViewerColumn>() {
-        @Override
-        public String getValue(ViewerColumn column) {
-          if (ViewerStringUtils.isNotBlank(column.getDescription())) {
-            return column.getDescription();
-          } else {
-            return "";
+        new BasicTablePanel.ColumnInfo<>(messages.typeName(), 15, new TextColumn<ViewerColumn>() {
+          @Override
+          public String getValue(ViewerColumn column) {
+            return column.getType().getTypeName();
           }
-        }
-      })
+        }),
+
+        new BasicTablePanel.ColumnInfo<>(messages.originalTypeName(), 15, new TextColumn<ViewerColumn>() {
+          @Override
+          public String getValue(ViewerColumn column) {
+            return column.getType().getOriginalTypeName();
+          }
+        }),
+
+        new BasicTablePanel.ColumnInfo<>(messages.nullable(), 8, new TextColumn<ViewerColumn>() {
+          @Override
+          public String getValue(ViewerColumn column) {
+            if (column.getNillable()) {
+              return "Yes";
+            } else {
+              return "No";
+            }
+          }
+        }),
+
+        new BasicTablePanel.ColumnInfo<>(messages.description(), 35, new TextColumn<ViewerColumn>() {
+          @Override
+          public String getValue(ViewerColumn column) {
+            if (ViewerStringUtils.isNotBlank(column.getDescription())) {
+              return column.getDescription();
+            } else {
+              return "";
+            }
+          }
+        })
 
     );
   }

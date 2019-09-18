@@ -1,6 +1,8 @@
-package com.databasepreservation.main.visualization.client.browse;
+package com.databasepreservation.main.common.shared.client.common.visualization.browse;
 
 import com.databasepreservation.main.common.client.BrowserService;
+import com.databasepreservation.main.common.shared.ViewerConstants;
+import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSchema;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
@@ -8,6 +10,7 @@ import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbP
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
 import com.databasepreservation.main.common.shared.client.common.Progressbar;
 import com.databasepreservation.main.common.shared.client.common.RightPanel;
+import com.databasepreservation.main.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.common.shared.client.widgets.Toast;
@@ -26,6 +29,7 @@ import config.i18n.client.ClientMessages;
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class UploadPanel extends RightPanel {
+
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
 
   interface UploadPanelUiBinder extends UiBinder<Widget, UploadPanel> {
@@ -38,7 +42,6 @@ public class UploadPanel extends RightPanel {
   private static UploadPanelUiBinder uiBinder = GWT.create(UploadPanelUiBinder.class);
 
   private ViewerDatabase database;
-
   private Timer autoUpdateTimer = new Timer() {
     @Override
     public void run() {
@@ -48,6 +51,9 @@ public class UploadPanel extends RightPanel {
 
   @UiField
   FlowPanel content;
+
+  @UiField
+  Label title, subtitle;
 
   @UiField
   Progressbar progressBar;
@@ -69,9 +75,17 @@ public class UploadPanel extends RightPanel {
     BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forNewUpload());
   }
 
+  public void setTitleText(String titleText) {
+    this.title.setText(titleText);
+  }
+
+  public void setSubtitleText(String subtitleText) {
+    this.subtitle.setText(subtitleText);
+  }
+
   private void init() {
     stopUpdating();
-    autoUpdateTimer.scheduleRepeating(1000);
+    autoUpdateTimer.scheduleRepeating(100);
   }
 
   @Override
@@ -90,7 +104,8 @@ public class UploadPanel extends RightPanel {
   }
 
   private void update(ViewerDatabase result) {
-    if (result.getStatus().equals(ViewerDatabase.Status.INGESTING)) {
+    if (result.getStatus().equals(ViewerDatabase.Status.INGESTING)
+      || result.getStatus().equals(ViewerDatabase.Status.METADATA_ONLY)) {
 
       // obtain global progress percentage as an integer
       boolean tablesDone = true;
@@ -140,7 +155,11 @@ public class UploadPanel extends RightPanel {
       database = result;
     } else if (result.getStatus().equals(ViewerDatabase.Status.AVAILABLE)) {
       Toast.showInfo("Success", "Database \"" + database.getMetadata().getName() + "\" has been loaded.");
-      HistoryManager.gotoDatabase(result.getUUID());
+      if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
+        HistoryManager.gotoSIARDInfo(result.getUUID());
+      } else {
+        HistoryManager.gotoDatabase(result.getUUID());
+      }
     } else if (result.getStatus().equals(ViewerDatabase.Status.ERROR)) {
       addMessageToContent("The database could not be converted due to an error. Check the logs for details.");
       stopUpdating();
