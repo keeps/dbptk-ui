@@ -598,6 +598,10 @@ public interface ClientMessages extends Messages {
 
   String SIARDHomePageButtonTextValidateNow();
 
+  String SIARDHomePageButtonTextRunValidationAgain();
+
+  String SIARDHomePageButtonTextOpenValidate();
+
   String SIARDHomePageButtonTextSeeReport();
 
   String SIARDHomePageButtonTextForBrowseNow();
@@ -839,7 +843,9 @@ public interface ClientMessages extends Messages {
 
   String clear();
 
-  String reporterFile();
+  String validatorPageTextForTitle();
+
+  String reportFile();
 
   String numberOfValidationError();
 
@@ -847,7 +853,7 @@ public interface ClientMessages extends Messages {
 
   String numberOfValidationsSkipped();
 
-  String runAgain();
+  String validatorPageTextForStick();
 
   String validationRequirements(@Select String codeID);
 

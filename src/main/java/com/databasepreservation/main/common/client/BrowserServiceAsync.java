@@ -2,6 +2,7 @@ package com.databasepreservation.main.common.client;
 
 import java.util.List;
 
+import com.databasepreservation.main.common.shared.ValidationProgressData;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.RODAException;
 import org.roda.core.data.exceptions.RequestNotValidException;
@@ -12,7 +13,6 @@ import org.roda.core.data.v2.index.sublist.Sublist;
 import org.roda.core.data.v2.user.User;
 
 import com.databasepreservation.main.common.shared.ProgressData;
-import com.databasepreservation.main.common.shared.ValidationProgressData;
 import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
@@ -158,6 +158,8 @@ public interface BrowserServiceAsync {
   void getProgressData(String uuid, AsyncCallback<ProgressData> async);
 
   void getValidationProgressData(String uuid, AsyncCallback<ValidationProgressData> async);
+
+  void clearValidationProgressData(String uuid, AsyncCallback<Void> async);
 
   void getDateTimeHumanized(String dateTime, AsyncCallback<String> async);
 }

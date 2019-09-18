@@ -2,6 +2,7 @@ package com.databasepreservation.main.common.client;
 
 import java.util.List;
 
+import com.databasepreservation.main.common.shared.ValidationProgressData;
 import org.roda.core.data.exceptions.AuthenticationDeniedException;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.roda.core.data.exceptions.GenericException;
@@ -16,7 +17,6 @@ import org.roda.core.data.v2.index.sublist.Sublist;
 import org.roda.core.data.v2.user.User;
 
 import com.databasepreservation.main.common.shared.ProgressData;
-import com.databasepreservation.main.common.shared.ValidationProgressData;
 import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
@@ -158,6 +158,8 @@ public interface BrowserService extends RemoteService {
   ProgressData getProgressData(String uuid);
 
   ValidationProgressData getValidationProgressData(String uuid);
+
+  void clearValidationProgressData(String uuid);
 
   String getDateTimeHumanized(String dateTime);
 }

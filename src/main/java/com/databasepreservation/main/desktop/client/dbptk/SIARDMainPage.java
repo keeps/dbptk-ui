@@ -19,7 +19,6 @@ import com.databasepreservation.main.common.shared.client.tools.Humanize;
 import com.databasepreservation.main.common.shared.client.tools.PathUtils;
 import com.databasepreservation.main.common.shared.client.tools.SolrHumanizer;
 import com.databasepreservation.main.common.shared.client.tools.ViewerStringUtils;
-import com.databasepreservation.main.common.shared.client.widgets.Toast;
 import com.databasepreservation.main.desktop.client.common.MetadataField;
 import com.databasepreservation.main.desktop.client.common.NavigationPanel;
 import com.databasepreservation.main.desktop.client.common.dialogs.Dialogs;
@@ -56,7 +55,7 @@ public class SIARDMainPage extends Composite {
   private MetadataField version = null;
   private MetadataField validationStatus = null;
   private MetadataField browsingStatus = null;
-  private Button btnSeeReport, btnBrowse, btnDelete, btnIngest;
+  private Button btnSeeReport, btnBrowse, btnDelete, btnIngest, btnOpenValidator, btnRunValidator;
 
   public static SIARDMainPage getInstance(String databaseUUID) {
 
@@ -170,73 +169,62 @@ public class SIARDMainPage extends Composite {
 
   private NavigationPanel populateNavigationPanelValidation() {
     /* Validation */
+    NavigationPanel validation = NavigationPanel.createInstance(messages.SIARDHomePageOptionsHeaderForValidation());
+
     HelperValidator validator = new HelperValidator(database.getSIARDPath());
-    Button btnValidate = new Button();
-    btnValidate.setText(messages.SIARDHomePageButtonTextValidateNow());
-    btnValidate.addStyleName("btn btn-link-info");
-    btnValidate.addClickHandler(event -> {
+    btnRunValidator = new Button();
+    btnRunValidator.setText(messages.SIARDHomePageButtonTextValidateNow());
+    btnRunValidator.addStyleName("btn btn-link-info");
+    btnRunValidator.addClickHandler(event -> {
       Dialogs.showValidatorSettings(messages.SIARDValidatorSettings(), messages.basicActionCancel(),
         messages.basicActionConfirm(), validator, new DefaultAsyncCallback<Boolean>() {
           @Override
           public void onSuccess(Boolean result) {
             if (result && validator.getReporterPathFile() != null) {
-              BrowserService.Util.getInstance().validateSIARD(database.getUUID(), database.getSIARDPath(),
-                validator.getReporterPathFile(), validator.getUdtPathFile(), new DefaultAsyncCallback<Boolean>() {
-                  @Override
-                  public void onSuccess(Boolean result) {
-                    refreshInstance(database.getUUID());
-
-                    if (result) {
-                      Toast.showInfo(
-                        messages.SIARDHomePageToastTitle(messages.SIARDHomePageOptionsHeaderForValidation()),
-                        messages.SIARDHomePageTextForSIARDValid(database.getMetadata().getName()));
-                    } else {
-                      Toast.showInfo(
-                        messages.SIARDHomePageToastTitle(messages.SIARDHomePageOptionsHeaderForValidation()),
-                        messages.SIARDHomePageTextForSIARDInvalid(database.getMetadata().getName()));
-                    }
-                  }
-                });
-              /*
-               * if (validator.getUdtPathFile() == null) {
-               * HistoryManager.gotoSIARDValidator(database.getUUID(),
-               * validator.getReporterPathFile()); } else {
-               * HistoryManager.gotoSIARDValidator(database.getUUID(),
-               * validator.getReporterPathFile(), validator.getUdtPathFile()); }
-               */
+              if (validator.getUdtPathFile() == null) {
+                HistoryManager.gotoSIARDValidator(database.getUUID(), validator.getReporterPathFile());
+              } else {
+                HistoryManager.gotoSIARDValidator(database.getUUID(), validator.getReporterPathFile(),
+                  validator.getUdtPathFile());
+              }
             }
           }
         });
     });
 
-    NavigationPanel validation = NavigationPanel.createInstance(messages.SIARDHomePageOptionsHeaderForValidation());
-
-    validation.addButton(btnValidate);
+    validation.addButton(btnRunValidator);
 
     btnSeeReport = new Button();
     btnSeeReport.setText(messages.SIARDHomePageButtonTextSeeReport());
     btnSeeReport.addStyleName("btn btn-link-info");
     if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
       btnSeeReport.addClickHandler(clickEvent -> {
-        JavascriptUtils.showItemInFolder(database.getValidatorReportPath());
+        JavascriptUtils.showItem(database.getValidatorReportPath());
       });
     }
     validation.addButton(btnSeeReport);
 
     if (database.getValidationStatus().equals(ViewerDatabase.ValidationStatus.NOT_VALIDATED)) {
       btnSeeReport.setVisible(false);
+      btnRunValidator.setText(messages.SIARDHomePageButtonTextValidateNow());
     } else {
       btnSeeReport.setVisible(true);
+      btnRunValidator.setText(messages.SIARDHomePageButtonTextRunValidationAgain());
     }
 
     if (!database.getValidationStatus().equals(ViewerDatabase.ValidationStatus.NOT_VALIDATED)) {
       validatedAt = MetadataField.createInstance(messages.SIARDHomePageLabelForValidatedAt(), validateAtHumanized);
-      version = MetadataField.createInstance(messages.SIARDHomePageLabelForValidationVersion(), database.getValidatedVersion());
-      validationStatus = MetadataField.createInstance(messages.SIARDHomePageLabelForValidationStatus(), SolrHumanizer.humanize(database.getValidationStatus()));
+      version = MetadataField.createInstance(messages.SIARDHomePageLabelForValidationVersion(),
+        database.getValidatedVersion());
+      validationStatus = MetadataField.createInstance(messages.SIARDHomePageLabelForValidationStatus(),
+        SolrHumanizer.humanize(database.getValidationStatus()));
     } else {
-      validatedAt = MetadataField.createInstance(messages.SIARDHomePageLabelForValidatedAt(), messages.humanizedTextForSIARDNotValidated());
-      version = MetadataField.createInstance(messages.SIARDHomePageLabelForValidationVersion(), messages.humanizedTextForSIARDNotValidated());
-      validationStatus = MetadataField.createInstance(messages.SIARDHomePageLabelForValidationStatus(), messages.humanizedTextForSIARDNotValidated());
+      validatedAt = MetadataField.createInstance(messages.SIARDHomePageLabelForValidatedAt(),
+        messages.humanizedTextForSIARDNotValidated());
+      version = MetadataField.createInstance(messages.SIARDHomePageLabelForValidationVersion(),
+        messages.humanizedTextForSIARDNotValidated());
+      validationStatus = MetadataField.createInstance(messages.SIARDHomePageLabelForValidationStatus(),
+        messages.humanizedTextForSIARDNotValidated());
     }
 
     validatedAt.setCSSMetadata(null, "label-field", "value-field");
@@ -347,12 +335,12 @@ public class SIARDMainPage extends Composite {
       database.getMetadata().getArchiver());
     archiver.setCSSMetadata("metadata-field", "metadata-information-element-label",
       "metadata-information-element-value");
-    MetadataField archiverContact = MetadataField.createInstance(messages.SIARDHomePageLabelForViewerMetadataArchiverContact(),
-      database.getMetadata().getArchiverContact());
+    MetadataField archiverContact = MetadataField.createInstance(
+      messages.SIARDHomePageLabelForViewerMetadataArchiverContact(), database.getMetadata().getArchiverContact());
     archiverContact.setCSSMetadata("metadata-field", "metadata-information-element-label",
       "metadata-information-element-value");
-    MetadataField clientMachine = MetadataField.createInstance(messages.SIARDHomePageLabelForViewerMetadataClientMachine(),
-      database.getMetadata().getClientMachine());
+    MetadataField clientMachine = MetadataField.createInstance(
+      messages.SIARDHomePageLabelForViewerMetadataClientMachine(), database.getMetadata().getClientMachine());
     clientMachine.setCSSMetadata("metadata-field", "metadata-information-element-label",
       "metadata-information-element-value");
 
@@ -362,19 +350,20 @@ public class SIARDMainPage extends Composite {
     left.add(archiverContact);
     left.add(clientMachine);
 
-    MetadataField databaseProduct = MetadataField.createInstance(messages.SIARDHomePageLabelForViewerMetadataDatabaseProduct(),
-      database.getMetadata().getDatabaseProduct());
+    MetadataField databaseProduct = MetadataField.createInstance(
+      messages.SIARDHomePageLabelForViewerMetadataDatabaseProduct(), database.getMetadata().getDatabaseProduct());
     databaseProduct.setCSSMetadata("metadata-field", "metadata-information-element-label",
       "metadata-information-element-value");
-    MetadataField dataOriginTimespan = MetadataField.createInstance(messages.SIARDHomePageLabelForViewerMetadataDataOriginTimespan(),
-      database.getMetadata().getDataOriginTimespan());
+    MetadataField dataOriginTimespan = MetadataField.createInstance(
+      messages.SIARDHomePageLabelForViewerMetadataDataOriginTimespan(), database.getMetadata().getDataOriginTimespan());
     dataOriginTimespan.setCSSMetadata("metadata-field", "metadata-information-element-label",
       "metadata-information-element-value");
     MetadataField dataOwner = MetadataField.createInstance(messages.SIARDHomePageLabelForViewerMetadataDataOwner(),
       database.getMetadata().getDataOwner());
     dataOwner.setCSSMetadata("metadata-field", "metadata-information-element-label",
       "metadata-information-element-value");
-    MetadataField producerApplication = MetadataField.createInstance(messages.SIARDHomePageLabelForViewerMetadataProducerApplication(),
+    MetadataField producerApplication = MetadataField.createInstance(
+      messages.SIARDHomePageLabelForViewerMetadataProducerApplication(),
       database.getMetadata().getProducerApplication());
     producerApplication.setCSSMetadata("metadata-field", "metadata-information-element-label",
       "metadata-information-element-value");
@@ -388,7 +377,7 @@ public class SIARDMainPage extends Composite {
     metadataInformation.add(right);
   }
 
-  private void refreshInstance(String databaseUUID) {
+  public void refreshInstance(String databaseUUID) {
     final Widget loading = new HTML(SafeHtmlUtils.fromSafeConstant(
       "<div id='loading' class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
 
@@ -419,6 +408,7 @@ public class SIARDMainPage extends Composite {
 
           if (database.getValidationStatus() != ViewerDatabase.ValidationStatus.NOT_VALIDATED) {
             btnSeeReport.setVisible(true);
+            btnRunValidator.setText(messages.SIARDHomePageButtonTextRunValidationAgain());
           }
         }
       });

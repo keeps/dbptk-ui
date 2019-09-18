@@ -1,4 +1,3 @@
-
 package com.databasepreservation.main.common.shared;
 
 import java.io.Serializable;
@@ -6,18 +5,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import com.databasepreservation.main.common.shared.ViewerStructure.ViewerValidator;
-
-/**
- * @author Miguel Guimarães <mguimaraes@keep.pt>
- */
 public class ValidationProgressData implements Serializable {
   private boolean finished = false;
-  private int lastPosition = 0;
-  private ViewerValidator component;
-  private ViewerValidator.Requirement requirement;
-  private boolean isComponent = false;
-  private List<ViewerValidator> componentList = new ArrayList<>();
+  private List<Requirement> requirementsList = new ArrayList<>();
+  private Requirement requirement;
 
   private static HashMap<String, ValidationProgressData> instances = new HashMap<>();
 
@@ -28,82 +19,86 @@ public class ValidationProgressData implements Serializable {
     return instances.get(uuid);
   }
 
-  private ValidationProgressData() {
+  public ValidationProgressData() {
   }
 
-  public void setComponentName(String componentName) {
-    component = ViewerValidator.getInstance(componentName);
-    component.setComponentName(componentName);
-    addComponent(component);
-    System.out.println("componentName: " + componentName );
+  public static void clear(String uuid) {
+    instances.remove(uuid);
   }
 
-  public void setID(String ID) {
-    component.setComponentID(ID);
-    System.out.println("ID: " + ID );
+  public void createRequirement(Requirement.Type type) {
+    requirement = new Requirement(type);
+    requirementsList.add(requirement);
   }
 
-
-  public void setStatus(String status) {
-    component.setComponentStatus(status);
-    System.out.println("STATUS: " + status );
+  public void setRequirementID(String ID) {
+    requirement.setID(ID);
   }
 
-  public void setStepBeingValidated(String stepBeingValidated, String status) {
-    System.out.println("step: " + stepBeingValidated);
-    isComponent = false;
-    requirement = ViewerValidator.Requirement.getInstance(stepBeingValidated);
-    requirement.setRequirementID(stepBeingValidated);
-    requirement.setRequirementStatus(status);
-    component.addRequirement(requirement);
+  public void setRequirementStatus(String status) {
+    requirement.setStatus(status);
   }
 
-  public void setMessage(String message) {
-    isComponent = true;
-    component.setComponentMessage(message);
+  public void setRequirementMessage(String message) {
+    requirement.setMessage(message);
   }
 
-  public void setPathBeingValidated(String pathBeingValidated) {
-    System.out.println("path: " + pathBeingValidated );
-    if(isComponent){
-      component.addPathBeingValidated(pathBeingValidated);
-    } else {
-      requirement.addPathBeingValidated(pathBeingValidated);
-    }
+  public List<Requirement> getRequirementsList(int lastPosition) {
+    return requirementsList.subList(lastPosition, requirementsList.size());
   }
 
   public boolean isFinished() {
     return finished;
   }
 
-  public void setFinished(boolean finished) {
-    this.finished = !finished;
-    System.out.println("finished: " + !finished );
+  public void setFinished(boolean hasErrors) {
+    finished = true;
   }
 
-  public static HashMap<String, ValidationProgressData> getInstances() {
-    return instances;
-  }
 
-  public static void setInstances(HashMap<String, ValidationProgressData> instances) {
-    ValidationProgressData.instances = instances;
-  }
+  public static class Requirement implements Serializable {
+    private String ID;
+    private String message;
+    private String status;
+    private Type type;
 
-  public void reset() {
-    this.finished = false;
-    this.componentList.clear();
-    ViewerValidator.reset();
-  }
+    public Requirement(Type type) {
+      this.type = type;
+    }
 
-  public List<ViewerValidator> getComponent() {
-    List<ViewerValidator> sliceComponentList = componentList.subList(lastPosition, componentList.size());
-    lastPosition = componentList.size();
-    return sliceComponentList;
-  }
+    public Requirement() {
+    }
 
-  private void addComponent(ViewerValidator component) {
-    if (!this.componentList.contains(component)) {
-      this.componentList.add(component);
+    public Type getType() {
+      return type;
+    }
+
+    public enum Type {
+      REQUIREMENT, MESSAGE, SUB_REQUIREMENT, ADDITIONAL, PATH
+    }
+
+    public void setID(String ID) {
+      this.ID = ID;
+    }
+
+    public String getID() {
+      return ID;
+    }
+
+    public void setStatus(String status) {
+      this.status = status;
+    }
+
+    public String getStatus() {
+      return status;
+    }
+
+    public void setMessage(String message) {
+      this.message = message;
+    }
+
+    public String getMessage() {
+      return message;
     }
   }
 }

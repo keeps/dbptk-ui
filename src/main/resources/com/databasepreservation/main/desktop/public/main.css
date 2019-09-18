@@ -1934,6 +1934,23 @@ input[type="checkbox"]:checked:after {
 .validation-panel.requirement .title{
     display: flex;
 }
+
+.validation-panel.requirement .title-message {
+    font-weight: bolder;
+}
+
+.validation-status{
+    max-height: 21px;
+    align-self: center;
+}
+.validation-panel.requirement .title .description{
+    white-space: normal;
+    width: 90%;
+}
 .validation-panel.requirement .gwt-Label{
     min-width: 90px;
+}
+
+.validation-panel.requirement.path{
+    padding-left: 90px;
 }

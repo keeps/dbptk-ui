@@ -9,7 +9,6 @@ import com.databasepreservation.main.common.shared.ValidationProgressData;
 import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
-import com.databasepreservation.main.common.shared.ViewerStructure.ViewerValidator;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
@@ -17,7 +16,7 @@ import com.databasepreservation.main.common.shared.client.common.LoadingDiv;
 import com.databasepreservation.main.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
-import com.databasepreservation.main.common.shared.client.tools.SolrHumanizer;
+import com.databasepreservation.main.desktop.client.dbptk.SIARDMainPage;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -41,17 +40,17 @@ public class ValidatorPage extends Composite {
   private String reporterPath;
   private String udtPath = null;
   private ViewerDatabase database;
-  private boolean isRenderer = false;
+  private int lastPosition = 0;
   private Integer countErrors = 0;
   private Integer countPassed = 0;
   private Integer countSkipped = 0;
+  private Boolean stickToBottom = true;
+  private Boolean isRunning = false;
 
   private Timer autoUpdateTimer = new Timer() {
     @Override
     public void run() {
-      if (!isRenderer) {
-        ValidatorPage.this.update();
-      }
+      ValidatorPage.this.update();
     }
   };
 
@@ -93,7 +92,7 @@ public class ValidatorPage extends Composite {
     }
     initWidget(binder.createAndBindUi(this));
 
-    title.setText("messages.SIARDValidator()");
+    title.setText(messages.validatorPageTextForTitle());
     loading.setVisible(true);
 
     BrowserService.Util.getInstance().retrieve(databaseUUID, ViewerDatabase.class.getName(), databaseUUID,
@@ -107,7 +106,15 @@ public class ValidatorPage extends Composite {
           BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
           content.clear();
 
-          initProgress();
+          if (!isRunning) {
+            BrowserService.Util.getInstance().clearValidationProgressData(databaseUUID,
+              new DefaultAsyncCallback<Void>() {
+                @Override
+                public void onSuccess(Void result) {
+                  initProgress();
+                }
+              });
+          }
         }
       });
   }
@@ -117,11 +124,13 @@ public class ValidatorPage extends Composite {
       new DefaultAsyncCallback<ValidationProgressData>() {
         @Override
         public void onSuccess(ValidationProgressData result) {
-          result.reset();
+          isRunning = true;
+          resetInfos();
           stopUpdating();
           loading.setVisible(true);
           populateValidationInfo(false);
-          autoUpdateTimer.scheduleRepeating(1000);
+          autoUpdateTimer.scheduleRepeating(100);
+          autoUpdateTimer.run();
           runValidator();
         }
       });
@@ -133,7 +142,14 @@ public class ValidatorPage extends Composite {
         @Override
         public void onSuccess(Boolean result) {
           GWT.log("Result: " + result);
-          buildValidationControl(true);
+          SIARDMainPage.getInstance(database.getUUID()).refreshInstance(database.getUUID());
+          stopUpdating();
+        }
+
+        @Override
+        public void onFailure(Throwable caught) {
+          stopUpdating();
+          super.onFailure(caught);
         }
       });
   }
@@ -149,70 +165,84 @@ public class ValidatorPage extends Composite {
   }
 
   private void update(ValidationProgressData validationProgressData) {
-    isRenderer = true;
-//    content.clear();
-//    resetCount();
+    List<ValidationProgressData.Requirement> requirementList = validationProgressData.getRequirementsList(lastPosition);
+    lastPosition += requirementList.size();
+    for (ValidationProgressData.Requirement requirement : requirementList) {
 
-    List<ViewerValidator> componentList = validationProgressData.getComponent();
-    for (ViewerValidator component : componentList) {
-      FlowPanel componentPanel = new FlowPanel();
-      componentPanel.addStyleName("validation-panel title");
-      componentPanel.add(new Label(component.getComponentID()));
-      componentPanel.add(new Label(component.getComponentName()));
-      componentPanel.add(new Label(component.getComponentStatus()));
-      content.add(componentPanel);
-
-      for(Map.Entry<String, List<String>> entry : component.getPathListBeingValidated().entrySet()){
-        Label messageLabel = new Label(entry.getKey());
-        messageLabel.addStyleName("validation-panel title");
-        content.add(messageLabel);
-        for (String path : entry.getValue()) {
-          Label pathLabel = new Label(path);
-          pathLabel.addStyleName("validation-panel requirement");
-          content.add(pathLabel);
-        }
+      if (requirement.getType().equals(ValidationProgressData.Requirement.Type.REQUIREMENT)) {
+        FlowPanel panel = new FlowPanel();
+        panel.addStyleName("validation-panel title");
+        panel.add(new Label(requirement.getID()));
+        panel.add(new Label(requirement.getMessage()));
+        content.add(panel);
       }
 
-      for (ViewerValidator.Requirement requirement : component.getRequirementList()) {
-        FlowPanel requirementPanel = new FlowPanel();
-        FlowPanel requirementTitlePanel = new FlowPanel();
-        requirementPanel.addStyleName("validation-panel requirement");
-        requirementTitlePanel.addStyleName("title");
-        requirementTitlePanel.add(new Label(requirement.getRequirementID()));
-        requirementTitlePanel.add(new Label(messages.validationRequirements(requirement.getRequirementID())));
-        requirementPanel.add(requirementTitlePanel);
-        Label status = new Label(requirement.getRequirementStatus());
-        switch (requirement.getRequirementStatus()) {
-          case "OK":
-            countPassed++;
-            status.addStyleName("label-success");
-            break;
-          case "ERROR":
-            countErrors++;
-            status.addStyleName("label-danger");
-            break;
-          default:
-            countSkipped++;
-            status.addStyleName("label-default");
-        }
-        requirementPanel.add(status);
-        content.add(requirementPanel);
-
-        for(Map.Entry<String, List<String>> entry : requirement.getPathListBeingValidated().entrySet()){
-          for (String path : entry.getValue()) {
-            Label pathLabel = new Label(path);
-            pathLabel.addStyleName("validation-panel requirement");
-            content.add(pathLabel);
-          }
-        }
-//        content.getElement().setScrollTop(content.getElement().getScrollHeight());
+      if (requirement.getType().equals(ValidationProgressData.Requirement.Type.MESSAGE)) {
+        FlowPanel panel = new FlowPanel();
+        panel.addStyleName("validation-panel requirement");
+        Label message = new Label(requirement.getMessage());
+        panel.add(message);
+        Label status = buildStatus(requirement.getStatus());
+        panel.add(status);
+        content.add(panel);
       }
+
+      if (requirement.getType().equals(ValidationProgressData.Requirement.Type.PATH)) {
+        Label pathLabel = new Label("Validation running on path: " + requirement.getMessage()); // TODO
+        pathLabel.addStyleName("validation-panel requirement path text-muted");
+        content.add(pathLabel);
+      }
+
+      if (requirement.getType().equals(ValidationProgressData.Requirement.Type.SUB_REQUIREMENT)) {
+        FlowPanel panel = new FlowPanel();
+        FlowPanel panelTitle = new FlowPanel();
+        panel.addStyleName("validation-panel requirement");
+        panelTitle.addStyleName("title");
+        panelTitle.add(new Label(requirement.getID()));
+        Label description = new Label(messages.validationRequirements(requirement.getID()));
+        description.addStyleName("description text-muted");
+        panelTitle.add(description);
+        panel.add(panelTitle);
+        Label status = buildStatus(requirement.getStatus());
+        panel.add(status);
+        content.add(panel);
+
+      }
+
+      if (stickToBottom) {
+        content.getElement().setScrollTop(content.getElement().getScrollHeight());
+      }
+
     }
 
-    isRenderer = false;
     if (validationProgressData.isFinished()) {
       stopUpdating();
     }
+  }
+
+  private Label buildStatus(String status){
+    Label statusLabel = new Label(status);
+    switch (status) {
+      case "OK":
+        countPassed++;
+        statusLabel.addStyleName("label-success");
+        break;
+      case "ERROR":
+        countErrors++;
+        statusLabel.addStyleName("label-danger");
+        break;
+      case "SKIPPED":
+        countSkipped++;
+        statusLabel.addStyleName("label-default");
+      case "PASSED":
+      case "START":
+      case "FINISH":
+        statusLabel.addStyleName("label-info");
+      default:
+        statusLabel.addStyleName("label-danger");
+    }
+    statusLabel.addStyleName("validation-status");
+    return statusLabel;
   }
 
   private String updateStatus(Label statusLabel) {
@@ -228,42 +258,71 @@ public class ValidatorPage extends Composite {
     return statusText;
   }
 
-  private void resetCount() {
+  private void resetInfos() {
+    lastPosition = 0;
+    content.clear();
     countPassed = 0;
     countErrors = 0;
     countSkipped = 0;
+    populateValidationInfo(false);
+
   }
 
   private void populateValidationInfo(Boolean enable) {
     validationInformation.clear();
     FlowPanel left = new FlowPanel();
 
-    left.add(validationInfoBuilder(messages.managePageTableHeaderTextForDatabaseName(), database.getMetadata().getName(), new Label()));
+    left.add(validationInfoBuilder(messages.managePageTableHeaderTextForDatabaseName(),
+      database.getMetadata().getName(), new Label()));
     left.add(validationInfoBuilder(messages.numberOfValidationError(), countErrors.toString(), new Label()));
     left.add(validationInfoBuilder(messages.numberOfValidationsPassed(), countPassed.toString(), new Label()));
     left.add(validationInfoBuilder(messages.numberOfValidationsSkipped(), countSkipped.toString(), new Label()));
     Label statusLabel = new Label();
-    left.add(validationInfoBuilder(messages.managePageTableHeaderTextForDatabaseStatus(), updateStatus(statusLabel), statusLabel)); //TODO
+    left.add(validationInfoBuilder(messages.managePageTableHeaderTextForDatabaseStatus(), updateStatus(statusLabel),
+      statusLabel));
 
     FlowPanel reportPanel = new FlowPanel();
     reportPanel.addStyleName("validation-info-panel");
-    Label reportLabel = new Label(messages.reporterFile());
+    Label reportLabel = new Label(messages.reportFile());
     reportLabel.addStyleName("title");
-    Button reporterButton = new Button();
-    reporterButton.setText(messages.basicActionBrowse());
-    reporterButton.addStyleName("btn btn-link-info");
-    reporterButton.addClickHandler(event -> {
+    Button reportButton = new Button();
+    reportButton.setText(messages.basicActionBrowse());
+    reportButton.addStyleName("btn btn-link-info");
+    reportButton.addClickHandler(event -> {
       if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
         JavascriptUtils.showItem(reporterPath);
       }
     });
-    reporterButton.setEnabled(enable);
+    reportButton.setEnabled(enable);
     reportPanel.add(reportLabel);
-    reportPanel.add(reporterButton);
+    reportPanel.add(reportButton);
 
     left.add(reportPanel);
 
     validationInformation.add(left);
+
+    validationControl.clear();
+    Button stickToBottomBtn = new Button();
+    stickToBottomBtn.setText(messages.validatorPageTextForStick());
+    stickToBottomBtn.addStyleName("btn btn-link-info");
+    stickToBottomBtn.addClickHandler(event -> {
+      stickToBottom = !stickToBottom;
+    });
+
+    Button runAgainBtn = new Button();
+    runAgainBtn.setText(messages.SIARDHomePageButtonTextRunValidationAgain());
+    runAgainBtn.addStyleName("btn btn-link-info");
+    runAgainBtn.setEnabled(enable);
+    runAgainBtn.addClickHandler(event -> {
+      BrowserService.Util.getInstance().clearValidationProgressData(databaseUUID, new DefaultAsyncCallback<Void>() {
+        @Override
+        public void onSuccess(Void result) {
+          initProgress();
+        }
+      });
+    });
+    validationControl.add(stickToBottomBtn);
+    validationControl.add(runAgainBtn);
   }
 
   private FlowPanel validationInfoBuilder(String key, String value, Label valueLabel) {
@@ -278,35 +337,20 @@ public class ValidatorPage extends Composite {
     return panel;
   }
 
-  private void buildValidationControl(boolean enable){
-    validationControl.clear();
-    Button runAgainBtn = new Button();
-    runAgainBtn.setText(messages.runAgain());
-    runAgainBtn.addStyleName("btn btn-link-info");
-    runAgainBtn.addClickHandler(event ->{
-      clear(databaseUUID);
-      initProgress();
-    });
-    validationControl.add(runAgainBtn);
-  }
-
-  public void clear(String uuid) {
-    content.clear();
-    instances.put(uuid, null);
+  private void stopUpdating() {
+    instances.remove(databaseUUID);
+    isRunning = false;
+    populateValidationInfo(true);
+    loading.setVisible(false);
+    if (autoUpdateTimer != null) {
+      autoUpdateTimer.cancel();
+    }
   }
 
   @Override
   protected void onDetach() {
     stopUpdating();
     super.onDetach();
-  }
-
-  private void stopUpdating() {
-    populateValidationInfo(true);
-    loading.setVisible(false);
-    if (autoUpdateTimer != null) {
-      autoUpdateTimer.cancel();
-    }
   }
 
 }

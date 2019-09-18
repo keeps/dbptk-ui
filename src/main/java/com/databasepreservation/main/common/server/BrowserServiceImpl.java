@@ -6,6 +6,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
+import com.databasepreservation.main.common.shared.ValidationProgressData;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -32,7 +33,6 @@ import com.databasepreservation.main.common.server.controller.SIARDController;
 import com.databasepreservation.main.common.server.controller.UserLoginController;
 import com.databasepreservation.main.common.server.index.utils.SolrUtils;
 import com.databasepreservation.main.common.shared.ProgressData;
-import com.databasepreservation.main.common.shared.ValidationProgressData;
 import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
@@ -349,6 +349,11 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
   @Override
   public ValidationProgressData getValidationProgressData(String uuid) {
     return ValidationProgressData.getInstance(uuid);
+  }
+
+  @Override
+  public void clearValidationProgressData(String uuid) {
+    ValidationProgressData.clear(uuid);
   }
 
   @Override
