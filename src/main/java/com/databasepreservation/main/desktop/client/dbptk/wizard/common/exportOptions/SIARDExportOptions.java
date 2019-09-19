@@ -6,8 +6,8 @@ import java.util.TreeMap;
 
 import com.databasepreservation.main.common.client.BrowserService;
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
+import com.databasepreservation.main.common.shared.client.common.desktop.ComboBoxField;
 import com.databasepreservation.main.common.shared.client.tools.ToolkitModuleName2ViewerModuleName;
-import com.databasepreservation.main.desktop.client.common.ComboBoxField;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
 import com.databasepreservation.main.desktop.shared.models.DBPTKModule;
 import com.databasepreservation.main.desktop.shared.models.PreservationParameter;

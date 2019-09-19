@@ -1,11 +1,13 @@
-package com.databasepreservation.main.visualization.client.browse;
+package com.databasepreservation.main.common.shared.client.common.visualization.browse;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.main.common.shared.client.common.RightPanel;
+import com.databasepreservation.main.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.main.common.shared.client.widgets.wcag.MarkdownWidgetWrapper;
 import com.google.gwt.core.client.GWT;
@@ -52,7 +54,12 @@ public class DatabaseReportPanel extends RightPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    BreadcrumbManager.updateBreadcrumb(breadcrumb,
-      BreadcrumbManager.forDatabaseReport(database.getMetadata().getName(), database.getUUID()));
+    if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
+      BreadcrumbManager.updateBreadcrumb(breadcrumb,
+          BreadcrumbManager.forDesktopDatabaseReport(database.getMetadata().getName(), database.getUUID()));
+    } else {
+      BreadcrumbManager.updateBreadcrumb(breadcrumb,
+          BreadcrumbManager.forDatabaseReport(database.getMetadata().getName(), database.getUUID()));
+    }
   }
 }

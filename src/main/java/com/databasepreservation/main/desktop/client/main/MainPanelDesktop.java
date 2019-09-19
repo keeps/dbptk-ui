@@ -11,7 +11,19 @@ import com.databasepreservation.main.common.shared.client.common.utils.Javascrip
 import com.databasepreservation.main.common.shared.client.common.utils.RightPanelLoader;
 import com.databasepreservation.main.common.shared.client.common.visualization.browse.DatabaseInformationPanel;
 import com.databasepreservation.main.common.shared.client.common.visualization.browse.DatabasePanel;
-import com.databasepreservation.main.common.shared.client.common.visualization.browse.UploadPanel;
+import com.databasepreservation.main.common.shared.client.common.visualization.browse.DatabaseReportPanel;
+import com.databasepreservation.main.common.shared.client.common.visualization.browse.DatabaseSearchPanel;
+import com.databasepreservation.main.common.shared.client.common.visualization.browse.DatabaseSearchesPanel;
+import com.databasepreservation.main.common.shared.client.common.visualization.browse.DatabaseUsersPanel;
+import com.databasepreservation.main.common.shared.client.common.visualization.browse.SchemaCheckConstraintsPanel;
+import com.databasepreservation.main.common.shared.client.common.visualization.browse.SchemaDataPanel;
+import com.databasepreservation.main.common.shared.client.common.visualization.browse.SchemaRoutinesPanel;
+import com.databasepreservation.main.common.shared.client.common.visualization.browse.SchemaStructurePanel;
+import com.databasepreservation.main.common.shared.client.common.visualization.browse.SchemaTriggersPanel;
+import com.databasepreservation.main.common.shared.client.common.visualization.browse.SchemaViewsPanel;
+import com.databasepreservation.main.common.shared.client.common.visualization.browse.TablePanel;
+import com.databasepreservation.main.common.shared.client.common.visualization.browse.TableSavedSearchEditPanel;
+import com.databasepreservation.main.common.shared.client.common.visualization.browse.TableSavedSearchPanel;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.desktop.client.dbptk.HomePage;
 import com.databasepreservation.main.desktop.client.dbptk.Manage;
@@ -26,9 +38,9 @@ import com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.table
 import com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.views.MetadataViewPanel;
 import com.databasepreservation.main.desktop.client.dbptk.metadata.users.MetadataUsersPanel;
 import com.databasepreservation.main.desktop.client.dbptk.validator.ValidatorPage;
-import com.databasepreservation.main.desktop.client.dbptk.wizard.upload.CreateWizardManager;
-import com.databasepreservation.main.desktop.client.dbptk.wizard.download.SIARDWizardManager;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.download.DBMSWizardManager;
+import com.databasepreservation.main.desktop.client.dbptk.wizard.download.SIARDWizardManager;
+import com.databasepreservation.main.desktop.client.dbptk.wizard.upload.CreateWizardManager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -47,7 +59,7 @@ public class MainPanelDesktop extends Composite {
   private static MainPanelDesktopUiBinder binder = GWT.create(MainPanelDesktopUiBinder.class);
 
   @UiField
-  SimplePanel  contentPanel;
+  SimplePanel contentPanel;
 
   MainPanelDesktop() {
     initWidget(binder.createAndBindUi(this));
@@ -72,24 +84,198 @@ public class MainPanelDesktop extends Composite {
       contentPanel.clear();
       contentPanel.add(instance);
 
-    } else if (HistoryManager.ROUTE_DATABASE.equals(currentHistoryPath.get(0))) {
-        if (currentHistoryPath.size() == 1) {
-          // #database
-          Manage manage = Manage.getInstance();
-          contentPanel.clear();
-          contentPanel.add(manage);
+    } else if (HistoryManager.ROUTE_DESKTOP_DATABASE.equals(currentHistoryPath.get(0))) {
+      if (currentHistoryPath.size() == 1) {
+        // #database
+        Manage manage = Manage.getInstance();
+        contentPanel.setWidget(manage);
 
-        } else if (currentHistoryPath.size() == 2) {
-          // #database/<id>
-          String databaseUUID = currentHistoryPath.get(1);
-          setContent(databaseUUID, new RightPanelLoader() {
-            @Override
-            public RightPanel load(ViewerDatabase database) {
-              return DatabaseInformationPanel.getInstance(database);
-            }
-          });
+      } else if (currentHistoryPath.size() == 2) {
+        // #database/<id>
+        String databaseUUID = currentHistoryPath.get(1);
+        setContent(databaseUUID, new RightPanelLoader() {
+          @Override
+          public RightPanel load(ViewerDatabase database) {
+            return DatabaseInformationPanel.getInstance(database);
+          }
+        });
 
+      } else if (currentHistoryPath.size() == 3
+        && currentHistoryPath.get(2).equals(HistoryManager.ROUTE_DATABASE_REPORT)) {
+        // #database/<id>/report
+        String databaseUUID = currentHistoryPath.get(1);
+        setContent(databaseUUID, new RightPanelLoader() {
+          @Override
+          public RightPanel load(ViewerDatabase database) {
+            return DatabaseReportPanel.getInstance(database);
+          }
+        });
+      } else if (currentHistoryPath.size() == 3
+        && currentHistoryPath.get(2).equals(HistoryManager.ROUTE_DATABASE_USERS)) {
+        // #database/<id>/users
+        String databaseUUID = currentHistoryPath.get(1);
+        setContent(databaseUUID, new RightPanelLoader() {
+          @Override
+          public RightPanel load(ViewerDatabase database) {
+            return DatabaseUsersPanel.getInstance(database);
+          }
+        });
+      } else if (currentHistoryPath.size() == 3
+        && currentHistoryPath.get(2).equals(HistoryManager.ROUTE_DATABASE_SEARCH)) {
+        // #database/<id>/search
+        String databaseUUID = currentHistoryPath.get(1);
+        setContent(databaseUUID, new RightPanelLoader() {
+          @Override
+          public RightPanel load(ViewerDatabase database) {
+            return DatabaseSearchPanel.getInstance(database);
+          }
+        });
+
+      }
+    } else if (HistoryManager.ROUTE_DESKTOP_SAVED_SEARCHES.equals(currentHistoryPath.get(0))) {
+      if (currentHistoryPath.size() == 2) {
+        // #searches/<databaseUUID>
+        final String databaseUUID = currentHistoryPath.get(1);
+        setContent(databaseUUID, new RightPanelLoader() {
+          @Override
+          public RightPanel load(ViewerDatabase database) {
+            return DatabaseSearchesPanel.createInstance(database);
+          }
+        });
+
+      } else if (currentHistoryPath.size() == 3) {
+        // #searches / < databaseUUID >/<searchUUID >
+        final String databaseUUID = currentHistoryPath.get(1);
+        final String searchUUID = currentHistoryPath.get(2);
+        setContent(databaseUUID, new RightPanelLoader() {
+          @Override
+          public RightPanel load(ViewerDatabase database) {
+            return TableSavedSearchPanel.createInstance(database, searchUUID);
+          }
+        });
+      } else if (currentHistoryPath.size() == 4
+        && HistoryManager.ROUTE_SAVED_SEARCHES_EDIT.equals(currentHistoryPath.get(3))) {
+        // #searches/<databaseUUID>/<searchUUID>/edit
+        final String databaseUUID = currentHistoryPath.get(1);
+        final String searchUUID = currentHistoryPath.get(2);
+        setContent(databaseUUID, new RightPanelLoader() {
+          @Override
+          public RightPanel load(ViewerDatabase database) {
+            return TableSavedSearchEditPanel.createInstance(database, searchUUID);
+          }
+        });
+      } else {
+        handleErrorPath(currentHistoryPath);
+      }
+    } else if (HistoryManager.ROUTE_DESKTOP_SCHEMA.equals(currentHistoryPath.get(0))) {
+      if (currentHistoryPath.size() == 3) {
+        // #schema/<databaseUUID>/<schemaUUID>
+        String databaseUUID = currentHistoryPath.get(1);
+        final String schemaUUID = currentHistoryPath.get(2);
+        setContent(databaseUUID, new RightPanelLoader() {
+          @Override
+          public RightPanel load(ViewerDatabase database) {
+            return SchemaStructurePanel.getInstance(database, schemaUUID);
+          }
+        });
+
+      } else if (currentHistoryPath.size() == 4) {
+        // #schema/<databaseUUID>/<schemaUUID>/structure
+        // #schema/<databaseUUID>/<schemaUUID>/routines
+        // #schema/<databaseUUID>/<schemaUUID>/triggers
+        // #schema/<databaseUUID>/<schemaUUID>/views
+        String databaseUUID = currentHistoryPath.get(1);
+        final String schemaUUID = currentHistoryPath.get(2);
+        String pageSpec = currentHistoryPath.get(3);
+
+        switch (pageSpec) {
+          case HistoryManager.ROUTE_SCHEMA_STRUCTURE:
+            setContent(databaseUUID, new RightPanelLoader() {
+              @Override
+              public RightPanel load(ViewerDatabase database) {
+                return SchemaStructurePanel.getInstance(database, schemaUUID);
+              }
+            });
+            break;
+          case HistoryManager.ROUTE_SCHEMA_ROUTINES:
+            setContent(databaseUUID, new RightPanelLoader() {
+              @Override
+              public RightPanel load(ViewerDatabase database) {
+                return SchemaRoutinesPanel.getInstance(database, schemaUUID);
+              }
+            });
+            break;
+          case HistoryManager.ROUTE_SCHEMA_TRIGGERS:
+            setContent(databaseUUID, new RightPanelLoader() {
+              @Override
+              public RightPanel load(ViewerDatabase database) {
+                return SchemaTriggersPanel.getInstance(database, schemaUUID);
+              }
+            });
+            break;
+          case HistoryManager.ROUTE_SCHEMA_VIEWS:
+            setContent(databaseUUID, new RightPanelLoader() {
+              @Override
+              public RightPanel load(ViewerDatabase database) {
+                return SchemaViewsPanel.getInstance(database, schemaUUID);
+              }
+            });
+            break;
+          case HistoryManager.ROUTE_SCHEMA_CHECK_CONSTRAINTS:
+            setContent(databaseUUID, new RightPanelLoader() {
+              @Override
+              public RightPanel load(ViewerDatabase database) {
+                return SchemaCheckConstraintsPanel.getInstance(database, schemaUUID);
+              }
+            });
+            break;
+          case HistoryManager.ROUTE_SCHEMA_DATA:
+            setContent(databaseUUID, new RightPanelLoader() {
+              @Override
+              public RightPanel load(ViewerDatabase database) {
+                return SchemaDataPanel.getInstance(database, schemaUUID);
+              }
+            });
+            break;
+          default:
+            // #schema/<databaseUUID>/<schemaUUID>/*invalid-page*
+            handleErrorPath(currentHistoryPath);
         }
+
+      } else {
+        // #schema/...
+        handleErrorPath(currentHistoryPath);
+
+      }
+    } else if (HistoryManager.ROUTE_DESKTOP_TABLE.equals(currentHistoryPath.get(0))) {
+      if (currentHistoryPath.size() == 3) {
+        // #table/<databaseUUID>/<tableUUID>
+        String databaseUUID = currentHistoryPath.get(1);
+        final String tableUUID = currentHistoryPath.get(2);
+        setContent(databaseUUID, new RightPanelLoader() {
+          @Override
+          public RightPanel load(ViewerDatabase database) {
+            return TablePanel.getInstance(database, tableUUID);
+          }
+        });
+
+      } else if (currentHistoryPath.size() == 4) {
+        // #table/<databaseUUID>/<tableUUID>/<searchInfoJSON>
+        String databaseUUID = currentHistoryPath.get(1);
+        final String tableUUID = currentHistoryPath.get(2);
+        final String searchInfo = currentHistoryPath.get(3);
+        setContent(databaseUUID, new RightPanelLoader() {
+          @Override
+          public RightPanel load(ViewerDatabase database) {
+            return TablePanel.getInstance(database, tableUUID, searchInfo);
+          }
+        });
+
+      } else {
+        // #table/...
+        handleErrorPath(currentHistoryPath);
+
+      }
     } else if (HistoryManager.ROUTE_SEND_TO_LIVE_DBMS.equals(currentHistoryPath.get(0))) {
       DBMSWizardManager instance = DBMSWizardManager.getInstance(currentHistoryPath.get(1));
       contentPanel.clear();
@@ -159,7 +345,7 @@ public class MainPanelDesktop extends Composite {
           }
         });
       }
-    } else if (HistoryManager.ROUTE_TABLE.equals(currentHistoryPath.get(0))) {
+    } else if (HistoryManager.ROUTE_DESKTOP_METADATA_TABLE.equals(currentHistoryPath.get(0))) {
       if (currentHistoryPath.size() == 3) {
         String databaseUUID = currentHistoryPath.get(1);
         final String tableUUID = currentHistoryPath.get(2);
@@ -172,7 +358,7 @@ public class MainPanelDesktop extends Composite {
           }
         });
       }
-    } else if (HistoryManager.ROUTE_VIEW.equals(currentHistoryPath.get(0))) {
+    } else if (HistoryManager.ROUTE_DESKTOP_METADATA_VIEW.equals(currentHistoryPath.get(0))) {
       if (currentHistoryPath.size() == 4) {
         String databaseUUID = currentHistoryPath.get(1);
         final String schemaUUID = currentHistoryPath.get(2);
@@ -185,7 +371,7 @@ public class MainPanelDesktop extends Composite {
           }
         });
       }
-    } else if (HistoryManager.ROUTE_ROUTINE.equals(currentHistoryPath.get(0))) {
+    } else if (HistoryManager.ROUTE_DESKTOP_METADATA_ROUTINE.equals(currentHistoryPath.get(0))) {
       if (currentHistoryPath.size() == 4) {
         String databaseUUID = currentHistoryPath.get(1);
         final String schemaUUID = currentHistoryPath.get(2);
@@ -223,8 +409,7 @@ public class MainPanelDesktop extends Composite {
   private void setMetadataRightPanelContent(String databaseUUID, String sidebarSelected,
     MetadataPanelLoad rightPanelLoader) {
     SIARDEditMetadataPage instance = SIARDEditMetadataPage.getInstance(databaseUUID);
-    contentPanel.clear();
-    contentPanel.add(instance);
+    contentPanel.setWidget(instance);
     instance.load(rightPanelLoader, sidebarSelected);
   }
 

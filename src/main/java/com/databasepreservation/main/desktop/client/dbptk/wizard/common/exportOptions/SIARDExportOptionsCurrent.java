@@ -5,13 +5,13 @@ import java.util.Collections;
 import java.util.HashMap;
 
 import com.databasepreservation.main.common.shared.ViewerConstants;
+import com.databasepreservation.main.common.shared.client.common.desktop.FileUploadField;
+import com.databasepreservation.main.common.shared.client.common.desktop.GenericField;
 import com.databasepreservation.main.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.main.common.shared.client.tools.JSOUtils;
 import com.databasepreservation.main.common.shared.client.tools.ViewerStringUtils;
 import com.databasepreservation.main.common.shared.client.widgets.Toast;
-import com.databasepreservation.main.desktop.client.common.FileUploadField;
-import com.databasepreservation.main.desktop.client.common.GenericField;
 import com.databasepreservation.main.desktop.shared.models.DBPTKModule;
 import com.databasepreservation.main.desktop.shared.models.Filter;
 import com.databasepreservation.main.desktop.shared.models.PreservationParameter;

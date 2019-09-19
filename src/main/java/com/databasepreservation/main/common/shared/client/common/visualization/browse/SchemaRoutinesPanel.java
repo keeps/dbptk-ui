@@ -1,4 +1,4 @@
-package com.databasepreservation.main.visualization.client.browse;
+package com.databasepreservation.main.common.shared.client.common.visualization.browse;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerRoutine;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerRoutineParameter;
@@ -14,6 +15,7 @@ import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSchema;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.main.common.shared.client.common.RightPanel;
 import com.databasepreservation.main.common.shared.client.common.lists.BasicTablePanel;
+import com.databasepreservation.main.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.main.common.shared.client.common.utils.CommonClientUtils;
 import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
@@ -72,8 +74,13 @@ public class SchemaRoutinesPanel extends RightPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forSchemaRoutines(database.getMetadata().getName(),
-      database.getUUID(), schema.getName(), schema.getUUID()));
+    if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
+      BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forDesktopSchemaRoutines(database.getMetadata().getName(),
+          database.getUUID(), schema.getName(), schema.getUUID()));
+    } else {
+      BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forSchemaRoutines(database.getMetadata().getName(),
+          database.getUUID(), schema.getName(), schema.getUUID()));
+    }
   }
 
   private void init() {

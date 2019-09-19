@@ -6,6 +6,7 @@ import java.util.Map;
 import org.roda.core.data.v2.user.User;
 
 import com.databasepreservation.main.common.client.BrowserService;
+import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
@@ -13,7 +14,10 @@ import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCal
 import com.databasepreservation.main.common.shared.client.common.LoginStatusListener;
 import com.databasepreservation.main.common.shared.client.common.RightPanel;
 import com.databasepreservation.main.common.shared.client.common.UserLogin;
-import com.databasepreservation.main.common.shared.client.common.sidebar.DatabaseSidebar;
+import com.databasepreservation.main.common.shared.client.common.sidebar.DatabaseSidebarAbstract;
+import com.databasepreservation.main.common.shared.client.common.sidebar.DesktopDatabaseSidebar;
+import com.databasepreservation.main.common.shared.client.common.sidebar.ServerDatabaseSidebar;
+import com.databasepreservation.main.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.main.common.shared.client.common.utils.RightPanelLoader;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
@@ -64,7 +68,7 @@ public class DatabasePanel extends Composite {
   BreadcrumbPanel breadcrumb;
 
   @UiField(provided = true)
-  DatabaseSidebar sidebar;
+  DatabaseSidebarAbstract sidebar;
 
   @UiField
   SimplePanel rightPanelContainer;
@@ -78,7 +82,11 @@ public class DatabasePanel extends Composite {
 
   private DatabasePanel(String databaseUUID) {
     this.databaseUUID = databaseUUID;
-    this.sidebar = DatabaseSidebar.getInstance(databaseUUID);
+    if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
+      this.sidebar = DesktopDatabaseSidebar.getInstance(databaseUUID);
+    } else {
+      this.sidebar = ServerDatabaseSidebar.getInstance(databaseUUID);
+    }
 
     initWidget(uiBinder.createAndBindUi(this));
 

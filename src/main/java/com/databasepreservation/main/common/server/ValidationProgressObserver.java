@@ -46,8 +46,8 @@ public class ValidationProgressObserver implements ValidationObserver {
     progressData.setPathBeingValidated(path);
   }
 
-  /*@Override
+  @Override
   public void notifyValidationProcessFinish(boolean result) {
     progressData.setFinished(result);
-  }*/
+  }
 }

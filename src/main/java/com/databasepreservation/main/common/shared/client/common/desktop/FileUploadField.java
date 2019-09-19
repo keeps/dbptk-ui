@@ -1,4 +1,4 @@
-package com.databasepreservation.main.desktop.client.common;
+package com.databasepreservation.main.common.shared.client.common.desktop;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;

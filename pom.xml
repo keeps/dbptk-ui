@@ -185,7 +185,7 @@
                       <version>1.0-rc-10</version>
                       <extensions>true</extensions>
                       <configuration>
-                        <moduleName>com.databasepreservation.main.desktop.Desktop</moduleName>
+                        <moduleName>com.databasepreservation.main.visualization.Viewer</moduleName>
                       </configuration>
                       <executions>
                             <execution>
@@ -213,7 +213,7 @@
                       <version>1.0-rc-10</version>
                       <extensions>true</extensions>
                       <configuration>
-                        <moduleName>com.databasepreservation.main.desktop.Desktop</moduleName>
+                        <moduleName>com.databasepreservation.main.visualization.Viewer</moduleName>
                       </configuration>
                       <executions>
                           <execution>
@@ -240,7 +240,7 @@
                                     <directory>src/main</directory>
                                     <includes>
                                         <include>gwt-unitCache/**</include>
-                                        <include>webapp/com.databasepreservation.main.desktop.Desktop/**</include>
+                                        <include>webapp/com.databasepreservation.main.visualization.Viewer/**</include>
                                         <include>webapp/WEB-INF/deploy/**</include>
                                         <include>webapp/WEB-INF/classes/**</include>
                                     </includes>
@@ -317,7 +317,7 @@
                         <version>1.0-rc-10</version>
                         <extensions>true</extensions>
                         <configuration>
-                            <moduleName>com.databasepreservation.main.desktop.Desktop</moduleName>
+                            <moduleName>com.databasepreservation.main.visualization.Viewer</moduleName>
                             <launcherDir>${project.build.directory}/${project.build.finalName}/WEB-INF/classes/public</launcherDir>
                             <webappDirectory>${project.build.directory}/${project.build.finalName}/WEB-INF/classes/public</webappDirectory>
                         </configuration>

@@ -19,6 +19,7 @@ import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbP
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
 import com.databasepreservation.main.common.shared.client.common.RightPanel;
 import com.databasepreservation.main.common.shared.client.common.search.SearchInfo;
+import com.databasepreservation.main.common.shared.client.common.visualization.browse.TablePanel;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;

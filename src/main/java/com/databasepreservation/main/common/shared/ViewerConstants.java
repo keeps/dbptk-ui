@@ -241,6 +241,7 @@ public class ViewerConstants {
    * Application Environment
    */
   public static final String ELECTRON = "Desktop";
+  public static final String SERVER = "server";
 
   /*
    * DBPTK Parameters

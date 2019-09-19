@@ -11,11 +11,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.databasepreservation.main.common.shared.client.common.NoAsyncCallback;
+import com.databasepreservation.main.common.shared.client.common.desktop.ComboBoxField;
+import com.databasepreservation.main.common.shared.client.common.desktop.FileUploadField;
+import com.databasepreservation.main.common.shared.client.common.desktop.GenericField;
 import com.databasepreservation.main.common.shared.client.common.lists.IndexedColumn;
 import com.databasepreservation.main.common.shared.client.widgets.MyCellTableResources;
-import com.databasepreservation.main.desktop.client.common.ComboBoxField;
-import com.databasepreservation.main.desktop.client.common.FileUploadField;
-import com.databasepreservation.main.desktop.client.common.GenericField;
 import com.databasepreservation.main.desktop.client.common.helper.HelperValidator;
 import com.databasepreservation.main.desktop.shared.models.ExternalLobsDialogBoxResult;
 import com.google.gwt.core.client.GWT;

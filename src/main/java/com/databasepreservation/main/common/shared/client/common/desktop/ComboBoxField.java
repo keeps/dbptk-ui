@@ -1,4 +1,4 @@
-package com.databasepreservation.main.desktop.client.common;
+package com.databasepreservation.main.common.shared.client.common.desktop;
 
 import java.util.List;
 

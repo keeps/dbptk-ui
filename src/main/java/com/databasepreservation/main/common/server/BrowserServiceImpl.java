@@ -242,7 +242,7 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
 
   @Override
   public String getApplicationType() {
-    return System.getProperty("env", "browse");
+    return System.getProperty("env", "server");
   }
 
   public String getClientMachine() {

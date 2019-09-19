@@ -533,6 +533,8 @@ public interface ClientMessages extends Messages {
 
   String breadcrumbTextForSIARDValidator();
 
+  String breadcrumbTextForDesktopSIARDBrowse();
+
   /*********************************************
    * Home Page
    ********************************************/

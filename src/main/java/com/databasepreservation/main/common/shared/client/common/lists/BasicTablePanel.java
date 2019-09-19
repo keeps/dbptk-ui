@@ -191,6 +191,8 @@ public class BasicTablePanel<C> extends Composite {
   @Override
   protected void onLoad() {
     super.onLoad();
-    this.getSelectionModel().clear();
+    if (this.getSelectionModel() != null) {
+      this.getSelectionModel().clear();
+    }
   }
 }

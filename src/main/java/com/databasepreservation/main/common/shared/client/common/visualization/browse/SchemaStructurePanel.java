@@ -1,10 +1,11 @@
-package com.databasepreservation.main.visualization.client.browse;
+package com.databasepreservation.main.common.shared.client.common.visualization.browse;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
+import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerColumn;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerForeignKey;
@@ -15,6 +16,7 @@ import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.main.common.shared.client.common.RightPanel;
 import com.databasepreservation.main.common.shared.client.common.lists.BasicTablePanel;
+import com.databasepreservation.main.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.main.common.shared.client.common.utils.CommonClientUtils;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.main.common.shared.client.tools.ViewerStringUtils;
@@ -69,8 +71,13 @@ public class SchemaStructurePanel extends RightPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager
-      .forSchemaStructure(database.getMetadata().getName(), database.getUUID(), schema.getName(), schema.getUUID()));
+    if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
+      BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager
+          .forDesktopSchemaStructure(database.getMetadata().getName(), database.getUUID(), schema.getName(), schema.getUUID()));
+    } else {
+      BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager
+          .forSchemaStructure(database.getMetadata().getName(), database.getUUID(), schema.getName(), schema.getUUID()));
+    }
   }
 
   private void init() {

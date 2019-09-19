@@ -252,7 +252,7 @@ public class SIARDMainPage extends Composite {
     btnBrowse.setVisible(false);
 
     btnBrowse.addClickHandler(event -> {
-      HistoryManager.gotoDatabase(database.getUUID());
+      HistoryManager.gotoDesktopDatabase(database.getUUID());
     });
 
     btnDelete = new Button();

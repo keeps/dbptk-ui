@@ -1,10 +1,11 @@
-package com.databasepreservation.main.visualization.client.browse;
+package com.databasepreservation.main.common.shared.client.common.visualization.browse;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.main.common.shared.client.common.utils.ApplicationType;
 import org.roda.core.data.v2.index.IndexResult;
 import org.roda.core.data.v2.index.filter.BasicSearchFilterParameter;
 import org.roda.core.data.v2.index.filter.Filter;
@@ -159,8 +160,13 @@ public class DatabaseSearchPanel extends RightPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    BreadcrumbManager.updateBreadcrumb(breadcrumb,
-      BreadcrumbManager.forDatabase(database.getMetadata().getName(), database.getUUID()));
+    if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
+      BreadcrumbManager.updateBreadcrumb(breadcrumb,
+          BreadcrumbManager.forDesktopDatabaseSearchPanel(database.getUUID(), database.getMetadata().getName()));
+    } else {
+      BreadcrumbManager.updateBreadcrumb(breadcrumb,
+          BreadcrumbManager.forDatabase(database.getMetadata().getName(), database.getUUID()));
+    }
   }
 
   private void doSearch() {

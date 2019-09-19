@@ -1,45 +1,16 @@
 package com.databasepreservation.main.common.shared.client.common.sidebar;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSchema;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
-import com.databasepreservation.main.common.shared.client.common.sidebar.SidebarHyperlink;
-import com.databasepreservation.main.common.shared.client.common.sidebar.SidebarItem;
 import com.databasepreservation.main.common.shared.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
-import com.databasepreservation.main.common.shared.client.tools.ViewerStringUtils;
-import com.databasepreservation.main.common.shared.client.widgets.wcag.AccessibleFocusPanel;
-import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
-import com.google.gwt.uibinder.client.UiBinder;
-import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.Widget;
-
-import config.i18n.client.ClientMessages;
 
 /**
- * @author Bruno Ferreira <bferreira@keep.pt>
+ * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-public class DatabaseSidebar extends Composite {
-  private static final ClientMessages messages = GWT.create(ClientMessages.class);
-  private static Map<String, DatabaseSidebar> instances = new HashMap<>();
-
+public class ServerDatabaseSidebar extends DatabaseSidebarAbstract {
   /**
    * Creates a new DatabaseSidebar, rarely hitting the database more than once for
    * each database.
@@ -48,22 +19,22 @@ public class DatabaseSidebar extends Composite {
    *          the database UUID
    * @return a DatabaseSidebar instance
    */
-  public static DatabaseSidebar getInstance(String databaseUUID) {
+  public static DatabaseSidebarAbstract getInstance(String databaseUUID) {
     String code = databaseUUID;
 
     if (code == null) {
       return getEmptyInstance();
     }
 
-    DatabaseSidebar instance = instances.get(code);
+    DatabaseSidebarAbstract instance = instances.get(code);
     if (instance == null || instance.database == null
       || !ViewerDatabase.Status.AVAILABLE.equals(instance.database.getStatus())) {
-      instance = new DatabaseSidebar(databaseUUID);
+      instance = new ServerDatabaseSidebar(databaseUUID);
       instances.put(code, instance);
     } else {
       // workaround because the same DatabaseSidebar can not belong to multiple
       // widgets
-      return new DatabaseSidebar(instance);
+      return new ServerDatabaseSidebar(instance);
     }
     return instance;
   }
@@ -76,20 +47,20 @@ public class DatabaseSidebar extends Composite {
    *          the database
    * @return a DatabaseSidebar instance
    */
-  public static DatabaseSidebar getInstance(ViewerDatabase database) {
+  public static DatabaseSidebarAbstract getInstance(ViewerDatabase database) {
     if (database == null) {
       return getEmptyInstance();
     }
 
-    DatabaseSidebar instance = instances.get(database.getUUID());
+    DatabaseSidebarAbstract instance = instances.get(database.getUUID());
     if (instance == null || instance.database == null
       || !ViewerDatabase.Status.AVAILABLE.equals(instance.database.getStatus())) {
-      instance = new DatabaseSidebar(database);
+      instance = new ServerDatabaseSidebar(database);
       instances.put(database.getUUID(), instance);
     } else {
       // workaround because the same DatabaseSidebar can not belong to multiple
       // widgets
-      return new DatabaseSidebar(instance);
+      return new ServerDatabaseSidebar(instance);
     }
     return instance;
   }
@@ -100,30 +71,9 @@ public class DatabaseSidebar extends Composite {
    *
    * @return a new invisible DatabaseSidebar
    */
-  public static DatabaseSidebar getEmptyInstance() {
-    return new DatabaseSidebar();
+  public static DatabaseSidebarAbstract getEmptyInstance() {
+    return new ServerDatabaseSidebar();
   }
-
-  interface DatabaseSidebarUiBinder extends UiBinder<Widget, DatabaseSidebar> {
-  }
-
-  private static DatabaseSidebarUiBinder uiBinder = GWT.create(DatabaseSidebarUiBinder.class);
-
-  @UiField
-  FlowPanel sidebarGroup;
-
-  @UiField
-  FlowPanel searchPanel;
-
-  @UiField
-  TextBox searchInputBox;
-
-  @UiField
-  AccessibleFocusPanel searchInputButton;
-
-  private ViewerDatabase database;
-  private String databaseUUID;
-  private boolean initialized = false;
 
   /**
    * Clone constructor, because the same DatabaseSidebar can not be child in more
@@ -132,7 +82,7 @@ public class DatabaseSidebar extends Composite {
    * @param other
    *          the DatabaseSidebar used in another widget
    */
-  private DatabaseSidebar(DatabaseSidebar other) {
+  private ServerDatabaseSidebar(DatabaseSidebarAbstract other) {
     initialized = other.initialized;
     initWidget(uiBinder.createAndBindUi(this));
     searchInputBox.setText(other.searchInputBox.getText());
@@ -142,7 +92,7 @@ public class DatabaseSidebar extends Composite {
   /**
    * Use DatabaseSidebar.getInstance to obtain an instance
    */
-  private DatabaseSidebar(ViewerDatabase database) {
+  private ServerDatabaseSidebar(ViewerDatabase database) {
     initWidget(uiBinder.createAndBindUi(this));
     init(database);
   }
@@ -150,7 +100,7 @@ public class DatabaseSidebar extends Composite {
   /**
    * Empty constructor, for pages that do not have a sidebar
    */
-  private DatabaseSidebar() {
+  private ServerDatabaseSidebar() {
     initWidget(uiBinder.createAndBindUi(this));
     this.setVisible(false);
   }
@@ -158,28 +108,13 @@ public class DatabaseSidebar extends Composite {
   /**
    * Use DatabaseSidebar.getInstance to obtain an instance
    */
-  private DatabaseSidebar(String databaseUUID) {
+  private ServerDatabaseSidebar(String databaseUUID) {
     this();
     this.databaseUUID = databaseUUID;
   }
 
-  public void init(ViewerDatabase db) {
-    GWT.log("init with db: " + db + "; status: " + db.getStatus().toString());
-    if (ViewerDatabase.Status.AVAILABLE.equals(db.getStatus())) {
-      if (db != null && (databaseUUID == null || databaseUUID.equals(db.getUUID()))) {
-        initialized = true;
-        database = db;
-        databaseUUID = db.getUUID();
-        init();
-      }
-    }
-  }
-
-  public boolean isInitialized() {
-    return initialized;
-  }
-
-  private void init() {
+  @Override
+  public void init() {
     // database metadata
     final ViewerMetadata metadata = database.getMetadata();
 
@@ -243,72 +178,5 @@ public class DatabaseSidebar extends Composite {
     }
 
     setVisible(true);
-  }
-
-  private void searchInit() {
-    searchInputBox.getElement().setPropertyString("placeholder", messages.menusidebar_filterSidebar());
-
-    searchInputBox.addChangeHandler(new ChangeHandler() {
-      @Override
-      public void onChange(ChangeEvent event) {
-        doSearch();
-      }
-    });
-
-    searchInputBox.addKeyUpHandler(new KeyUpHandler() {
-      @Override
-      public void onKeyUp(KeyUpEvent event) {
-        doSearch();
-      }
-    });
-
-    searchInputButton.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        doSearch();
-      }
-    });
-  }
-
-  private void doSearch() {
-    String searchValue = searchInputBox.getValue();
-
-    if (ViewerStringUtils.isBlank(searchValue)) {
-      // show all
-      for (Widget widget : sidebarGroup) {
-        widget.setVisible(true);
-      }
-    } else {
-      // show matching and their parents
-
-      Set<SidebarItem> parentsThatShouldBeVisible = new HashSet<>();
-      List<SidebarItem> parentsList = new ArrayList<>();
-
-      for (Widget widget : sidebarGroup) {
-        if (widget instanceof SidebarItem) {
-          SidebarItem sidebarItem = (SidebarItem) widget;
-
-          int indent = sidebarItem.getIndent();
-          if (indent >= 0) {
-            parentsList.add(indent, sidebarItem);
-          }
-
-          if (sidebarItem.getText().toLowerCase().contains(searchValue.toLowerCase())) {
-            widget.setVisible(true);
-            for (int i = 0; i < indent; i++) {
-              parentsThatShouldBeVisible.add(parentsList.get(i));
-            }
-          } else {
-            widget.setVisible(false);
-          }
-        } else {
-          widget.setVisible(true);
-        }
-      }
-
-      for (SidebarItem sidebarItem : parentsThatShouldBeVisible) {
-        sidebarItem.setVisible(true);
-      }
-    }
   }
 }

@@ -1,9 +1,10 @@
-package com.databasepreservation.main.visualization.client.browse;
+package com.databasepreservation.main.common.shared.client.common.visualization.browse;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerPrivilegeStructure;
@@ -12,6 +13,7 @@ import com.databasepreservation.main.common.shared.ViewerStructure.ViewerUserStr
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.main.common.shared.client.common.RightPanel;
 import com.databasepreservation.main.common.shared.client.common.lists.BasicTablePanel;
+import com.databasepreservation.main.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -63,8 +65,13 @@ public class DatabaseUsersPanel extends RightPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    BreadcrumbManager.updateBreadcrumb(breadcrumb,
-      BreadcrumbManager.forDatabaseUsers(database.getMetadata().getName(), database.getUUID()));
+    if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
+      BreadcrumbManager.updateBreadcrumb(breadcrumb,
+          BreadcrumbManager.forDesktopDatabaseUsers(database.getMetadata().getName(), database.getUUID()));
+    } else {
+      BreadcrumbManager.updateBreadcrumb(breadcrumb,
+        BreadcrumbManager.forDatabaseUsers(database.getMetadata().getName(), database.getUUID()));
+    }
   }
 
   private BasicTablePanel<ViewerUserStructure> getBasicTablePanelForUsers(ViewerMetadata metadata) {

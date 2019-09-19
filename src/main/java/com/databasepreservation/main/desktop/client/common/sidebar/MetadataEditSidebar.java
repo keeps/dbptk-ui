@@ -176,7 +176,7 @@ public class MetadataEditSidebar extends Composite {
       for (ViewerTable table : schema.getTables()) {
 
         SidebarHyperlink tableLink = new SidebarHyperlink(table.getName(),
-          HistoryManager.linkToTable(database.getUUID(), table.getUUID()));
+          HistoryManager.linkToDesktopMetadataTable(database.getUUID(), table.getUUID()));
         tableLink.addIcon(FontAwesomeIconManager.TABLE).setH6().setIndent2();
         list.put(table.getUUID(), tableLink);
         sidebarGroup.add(tableLink);
@@ -192,7 +192,7 @@ public class MetadataEditSidebar extends Composite {
       for (ViewerView view : schema.getViews()) {
 
         SidebarHyperlink viewLink = new SidebarHyperlink(view.getName(),
-          HistoryManager.linkToView(database.getUUID(), schema.getUUID(), view.getUUID()));
+          HistoryManager.linTokDesktopMetadataView(database.getUUID(), schema.getUUID(), view.getUUID()));
         viewLink.addIcon(FontAwesomeIconManager.TABLE).setH6().setIndent2();
         list.put(view.getUUID(), viewLink);
         sidebarGroup.add(viewLink);
@@ -207,7 +207,7 @@ public class MetadataEditSidebar extends Composite {
       for (ViewerRoutine routine : schema.getRoutines()) {
 
         SidebarHyperlink routineLink = new SidebarHyperlink(routine.getName(),
-          HistoryManager.linkToRoutine(database.getUUID(), schema.getUUID(), routine.getUUID()));
+          HistoryManager.linkToDesktopMetadataRoutine(database.getUUID(), schema.getUUID(), routine.getUUID()));
         routineLink.addIcon(FontAwesomeIconManager.TABLE).setH6().setIndent2();
         list.put(routine.getUUID(), routineLink);
         routineItems.add(routineLink);

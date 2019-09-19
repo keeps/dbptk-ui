@@ -1,5 +1,6 @@
-package com.databasepreservation.main.visualization.client.browse;
+package com.databasepreservation.main.common.shared.client.common.visualization.browse;
 
+import com.databasepreservation.main.common.shared.client.common.utils.ApplicationType;
 import org.roda.core.data.v2.index.filter.BasicSearchFilterParameter;
 import org.roda.core.data.v2.index.filter.Filter;
 
@@ -46,8 +47,13 @@ public class DatabaseSearchesPanel extends RightPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    BreadcrumbManager.updateBreadcrumb(breadcrumb,
-      BreadcrumbManager.forDatabase(database.getMetadata().getName(), database.getUUID()));
+    if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
+      BreadcrumbManager.updateBreadcrumb(breadcrumb,
+          BreadcrumbManager.forDesktopDatabaseSavedSearch(database.getUUID(), database.getMetadata().getName()));
+    } else {
+      BreadcrumbManager.updateBreadcrumb(breadcrumb,
+          BreadcrumbManager.forDatabase(database.getMetadata().getName(), database.getUUID()));
+    }
   }
 
   private void init() {

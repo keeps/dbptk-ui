@@ -1,5 +1,6 @@
 package com.databasepreservation.main.common.shared.client.common.utils;
 
+import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSchema;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerView;
@@ -42,10 +43,21 @@ public class CommonClientUtils {
     panel.add(html);
 
     // add link schema
-    Hyperlink schemaLink = new Hyperlink(table.getSchemaName(),
-      HistoryManager.linkToSchema(databaseUUID, table.getSchemaUUID()));
-    schemaLink.addStyleName(hClass);
-    panel.add(schemaLink);
+    Hyperlink schemaLink;
+    switch (ApplicationType.getType()) {
+      case ViewerConstants.ELECTRON:
+        schemaLink = new Hyperlink(table.getSchemaName(),
+          HistoryManager.linkToDesktopSchema(databaseUUID, table.getSchemaUUID()));
+        schemaLink.addStyleName(hClass);
+        panel.add(schemaLink);
+        break;
+      case ViewerConstants.SERVER:
+      default:
+        schemaLink = new Hyperlink(table.getSchemaName(),
+          HistoryManager.linkToSchema(databaseUUID, table.getSchemaUUID()));
+        schemaLink.addStyleName(hClass);
+        panel.add(schemaLink);
+    }
 
     // add /
     // Label slashSeparator = new Label("/");
@@ -58,9 +70,19 @@ public class CommonClientUtils {
     panel.add(html);
 
     // add link table
-    Hyperlink tableLink = new Hyperlink(table.getName(), HistoryManager.linkToTable(databaseUUID, table.getUUID()));
-    tableLink.addStyleName(hClass);
-    panel.add(tableLink);
+    Hyperlink tableLink;
+    switch (ApplicationType.getType()) {
+      case ViewerConstants.ELECTRON:
+        tableLink = new Hyperlink(table.getName(), HistoryManager.linkToDesktopTable(databaseUUID, table.getUUID()));
+        tableLink.addStyleName(hClass);
+        panel.add(tableLink);
+        break;
+      case ViewerConstants.SERVER:
+      default:
+        tableLink = new Hyperlink(table.getName(), HistoryManager.linkToTable(databaseUUID, table.getUUID()));
+        tableLink.addStyleName(hClass);
+        panel.add(tableLink);
+    }
 
     return panel;
   }
@@ -96,9 +118,19 @@ public class CommonClientUtils {
     panel.add(html);
 
     // add link schema
-    Hyperlink schemaLink = new Hyperlink(schema.getName(), HistoryManager.linkToSchema(databaseUUID, schema.getUUID()));
-    schemaLink.addStyleName(hClass);
-    panel.add(schemaLink);
+    Hyperlink schemaLink;
+    switch (ApplicationType.getType()) {
+      case ViewerConstants.ELECTRON:
+        schemaLink = new Hyperlink(schema.getName(), HistoryManager.linkToDesktopSchema(databaseUUID, schema.getUUID()));
+        schemaLink.addStyleName(hClass);
+        panel.add(schemaLink);
+        break;
+      case ViewerConstants.SERVER:
+      default:
+        schemaLink = new Hyperlink(schema.getName(), HistoryManager.linkToSchema(databaseUUID, schema.getUUID()));
+        schemaLink.addStyleName(hClass);
+        panel.add(schemaLink);
+    }
 
     iconTag = FontAwesomeIconManager.getTag(FontAwesomeIconManager.SCHEMA_TABLE_SEPARATOR);
     html = new HTML(SafeHtmlUtils.fromSafeConstant(iconTag));
