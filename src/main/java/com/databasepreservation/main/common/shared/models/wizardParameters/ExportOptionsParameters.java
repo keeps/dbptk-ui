@@ -1,4 +1,4 @@
-package com.databasepreservation.main.desktop.shared.models.wizardParameters;
+package com.databasepreservation.main.common.shared.models.wizardParameters;
 
 import java.io.Serializable;
 import java.util.HashMap;

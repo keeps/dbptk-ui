@@ -9,8 +9,8 @@ import com.databasepreservation.main.common.shared.client.common.sidebar.Sidebar
 import com.databasepreservation.main.common.shared.client.common.sidebar.SidebarItem;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.common.shared.client.tools.ToolkitModuleName2ViewerModuleName;
-import com.databasepreservation.main.desktop.shared.models.DBPTKModule;
-import com.databasepreservation.main.desktop.shared.models.PreservationParameter;
+import com.databasepreservation.main.common.shared.models.DBPTKModule;
+import com.databasepreservation.main.common.shared.models.PreservationParameter;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;

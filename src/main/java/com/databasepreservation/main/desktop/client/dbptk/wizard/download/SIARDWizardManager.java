@@ -20,9 +20,9 @@ import com.databasepreservation.main.desktop.client.dbptk.wizard.common.exportOp
 import com.databasepreservation.main.desktop.client.dbptk.wizard.common.exportOptions.SIARDExportOptions;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.common.progressBar.ProgressBarPanel;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.upload.TableAndColumns;
-import com.databasepreservation.main.desktop.shared.models.wizardParameters.ExportOptionsParameters;
-import com.databasepreservation.main.desktop.shared.models.wizardParameters.MetadataExportOptionsParameters;
-import com.databasepreservation.main.desktop.shared.models.wizardParameters.TableAndColumnsParameters;
+import com.databasepreservation.main.common.shared.models.wizardParameters.ExportOptionsParameters;
+import com.databasepreservation.main.common.shared.models.wizardParameters.MetadataExportOptionsParameters;
+import com.databasepreservation.main.common.shared.models.wizardParameters.TableAndColumnsParameters;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;

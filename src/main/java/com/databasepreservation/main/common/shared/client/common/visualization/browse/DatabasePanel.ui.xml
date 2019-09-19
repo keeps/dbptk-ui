@@ -4,7 +4,7 @@
              xmlns:sb='urn:import:com.databasepreservation.main.common.shared.client.common.sidebar'
 >
 
-<g:FlowPanel addStyleNames="browseContent wrapper skip_padding">
+<g:FlowPanel ui:field="toplevel">
     <g:FlowPanel addStyleNames="row full_width skip_padding">
         <g:FocusPanel addStyleNames="browseContentFocusPanel">
             <g:HorizontalPanel addStyleNames="browseContentPreviewPanel">

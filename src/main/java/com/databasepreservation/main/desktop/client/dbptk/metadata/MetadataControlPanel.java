@@ -12,7 +12,7 @@ import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadat
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSIARDBundle;
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
 import com.databasepreservation.main.common.shared.client.common.LoadingDiv;
-import com.databasepreservation.main.common.shared.client.common.dialogs.Dialogs;
+import com.databasepreservation.main.desktop.client.common.dialogs.Dialogs;
 import com.databasepreservation.main.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.main.common.shared.client.widgets.Toast;

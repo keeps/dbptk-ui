@@ -19,7 +19,7 @@ import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCal
 import com.databasepreservation.main.common.shared.client.common.desktop.ComboBoxField;
 import com.databasepreservation.main.common.shared.client.common.desktop.FileUploadField;
 import com.databasepreservation.main.common.shared.client.common.desktop.GenericField;
-import com.databasepreservation.main.common.shared.client.common.dialogs.Dialogs;
+import com.databasepreservation.main.desktop.client.common.dialogs.Dialogs;
 import com.databasepreservation.main.common.shared.client.common.lists.MultipleSelectionTablePanel;
 import com.databasepreservation.main.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
@@ -32,9 +32,9 @@ import com.databasepreservation.main.desktop.client.common.sidebar.TableAndColum
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.common.diagram.ErDiagram;
 import com.databasepreservation.main.desktop.shared.models.ExternalLobsDialogBoxResult;
-import com.databasepreservation.main.desktop.shared.models.wizardParameters.ConnectionParameters;
-import com.databasepreservation.main.desktop.shared.models.wizardParameters.ExternalLOBsParameter;
-import com.databasepreservation.main.desktop.shared.models.wizardParameters.TableAndColumnsParameters;
+import com.databasepreservation.main.common.shared.models.wizardParameters.ConnectionParameters;
+import com.databasepreservation.main.common.shared.models.wizardParameters.ExternalLOBsParameter;
+import com.databasepreservation.main.common.shared.models.wizardParameters.TableAndColumnsParameters;
 import com.google.gwt.cell.client.ButtonCell;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.CheckboxCell;

@@ -3,6 +3,7 @@ package com.databasepreservation.main.common.shared.client.common.visualization.
 import java.util.HashMap;
 import java.util.Map;
 
+import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSchema;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
@@ -10,6 +11,7 @@ import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbP
 import com.databasepreservation.main.common.shared.client.common.RightPanel;
 import com.databasepreservation.main.common.shared.client.common.search.SearchInfo;
 import com.databasepreservation.main.common.shared.client.common.search.TableSearchPanel;
+import com.databasepreservation.main.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.main.common.shared.client.common.utils.CommonClientUtils;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.main.common.shared.client.tools.ViewerStringUtils;
@@ -76,7 +78,7 @@ public class TablePanel extends RightPanel {
   /**
    * Synchronous Table panel that receives the data and does not need to
    * asynchronously query solr
-   * 
+   *
    * @param database
    *          the database
    * @param table
@@ -138,8 +140,13 @@ public class TablePanel extends RightPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forTable(database.getMetadata().getName(),
-      database.getUUID(), schema.getName(), schema.getUUID(), table.getName(), table.getUUID()));
+    if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
+      BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forDesktopTable(database.getMetadata().getName(),
+          database.getUUID(), schema.getName(), schema.getUUID(), table.getName(), table.getUUID()));
+    } else {
+      BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forTable(database.getMetadata().getName(),
+        database.getUUID(), schema.getName(), schema.getUUID(), table.getName(), table.getUUID()));
+    }
   }
 
   private void init() {

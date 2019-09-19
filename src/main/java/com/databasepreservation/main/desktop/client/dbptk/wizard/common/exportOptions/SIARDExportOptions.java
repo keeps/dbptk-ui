@@ -9,9 +9,9 @@ import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCal
 import com.databasepreservation.main.common.shared.client.common.desktop.ComboBoxField;
 import com.databasepreservation.main.common.shared.client.tools.ToolkitModuleName2ViewerModuleName;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
-import com.databasepreservation.main.desktop.shared.models.DBPTKModule;
-import com.databasepreservation.main.desktop.shared.models.PreservationParameter;
-import com.databasepreservation.main.desktop.shared.models.wizardParameters.ExportOptionsParameters;
+import com.databasepreservation.main.common.shared.models.DBPTKModule;
+import com.databasepreservation.main.common.shared.models.PreservationParameter;
+import com.databasepreservation.main.common.shared.models.wizardParameters.ExportOptionsParameters;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;

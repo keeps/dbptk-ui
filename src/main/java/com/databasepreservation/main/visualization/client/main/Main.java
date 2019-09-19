@@ -1,6 +1,9 @@
 package com.databasepreservation.main.visualization.client.main;
 
+import com.databasepreservation.main.common.client.BrowserService;
 import com.databasepreservation.main.common.shared.client.ClientLogger;
+import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
+import com.databasepreservation.main.common.shared.client.common.utils.ApplicationType;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -31,6 +34,13 @@ public class Main implements EntryPoint {
    */
   @Override
   public void onModuleLoad() {
+    BrowserService.Util.getInstance().getApplicationType(new DefaultAsyncCallback<String>() {
+
+      @Override
+      public void onSuccess(String result) {
+        ApplicationType.setType(result);
+      }
+    });
 
     // Set uncaught exception handler
     ClientLogger.setUncaughtExceptionHandler();

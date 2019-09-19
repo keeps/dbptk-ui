@@ -1,6 +1,7 @@
 package com.databasepreservation.main.common.shared.client.common.visualization.browse;
 
 import com.databasepreservation.main.common.client.BrowserService;
+import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
@@ -8,6 +9,7 @@ import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCal
 import com.databasepreservation.main.common.shared.client.common.RightPanel;
 import com.databasepreservation.main.common.shared.client.common.search.SavedSearch;
 import com.databasepreservation.main.common.shared.client.common.search.SearchInfo;
+import com.databasepreservation.main.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.main.common.shared.client.common.utils.CommonClientUtils;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
@@ -86,8 +88,13 @@ public class TableSavedSearchEditPanel extends RightPanel {
    */
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager
-      .forDatabaseSavedSearchEdit(database.getMetadata().getName(), database.getUUID(), savedSearchUUID));
+    if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
+      BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager
+          .forDesktopDatabaseSavedSearchEdit(database.getMetadata().getName(), database.getUUID(), savedSearchUUID));
+    } else {
+      BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager
+          .forDatabaseSavedSearchEdit(database.getMetadata().getName(), database.getUUID(), savedSearchUUID));
+    }
   }
 
   /**

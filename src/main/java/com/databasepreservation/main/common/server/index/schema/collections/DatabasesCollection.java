@@ -158,5 +158,4 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
 
     return viewerDatabase;
   }
-
 }

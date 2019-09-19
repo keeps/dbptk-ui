@@ -11,10 +11,8 @@ import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabas
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
-import com.databasepreservation.main.common.shared.client.common.dialogs.Dialogs;
 import com.databasepreservation.main.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
-import com.databasepreservation.main.common.shared.client.common.visualization.browse.UploadPanel;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.common.shared.client.tools.Humanize;
@@ -24,6 +22,7 @@ import com.databasepreservation.main.common.shared.client.tools.ViewerStringUtil
 import com.databasepreservation.main.common.shared.client.widgets.Toast;
 import com.databasepreservation.main.desktop.client.common.MetadataField;
 import com.databasepreservation.main.desktop.client.common.NavigationPanel;
+import com.databasepreservation.main.desktop.client.common.dialogs.Dialogs;
 import com.databasepreservation.main.desktop.client.common.helper.HelperValidator;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -52,6 +51,7 @@ public class SIARDMainPage extends Composite {
   private static Map<String, SIARDMainPage> instances = new HashMap<>();
   private ViewerDatabase database = null;
   private String validateAtHumanized = null;
+  private String archivalDateHumanized = null;
   private MetadataField validatedAt = null;
   private MetadataField version = null;
   private MetadataField validationStatus = null;
@@ -96,15 +96,22 @@ public class SIARDMainPage extends Composite {
               @Override
               public void onSuccess(String result) {
                 validateAtHumanized = result;
-                populateMetadataInfo();
-                populateDescription();
-                populateNavigationPanels();
+                BrowserService.Util.getInstance().getDateTimeHumanized(database.getMetadata().getArchivalDate(),
+                  new DefaultAsyncCallback<String>() {
+                    @Override
+                    public void onSuccess(String result) {
+                      archivalDateHumanized = result;
+                      populateMetadataInfo();
+                      populateDescription();
+                      populateNavigationPanels();
 
-                List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forSIARDMainPage(databaseUUID,
-                  database.getMetadata().getName());
-                BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
+                      List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forSIARDMainPage(databaseUUID,
+                        database.getMetadata().getName());
+                      BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
 
-                container.remove(loading);
+                      container.remove(loading);
+                    }
+                  });
               }
             });
         }
@@ -333,7 +340,7 @@ public class SIARDMainPage extends Composite {
       database.getMetadata().getName());
     dbname.setCSSMetadata("metadata-field", "metadata-information-element-label", "metadata-information-element-value");
     MetadataField archivalDate = MetadataField.createInstance(messages.SIARDHomePageLabelForViewerMetadataArchivalDate(),
-      database.getMetadata().getArchivalDate());
+        archivalDateHumanized);
     archivalDate.setCSSMetadata("metadata-field", "metadata-information-element-label",
       "metadata-information-element-value");
     MetadataField archiver = MetadataField.createInstance(messages.SIARDHomePageLabelForViewerMetadataArchiver(),

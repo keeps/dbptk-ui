@@ -2,10 +2,13 @@ package com.databasepreservation.main.common.server;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.roda.core.data.exceptions.AuthenticationDeniedException;
@@ -40,14 +43,14 @@ import com.databasepreservation.main.common.shared.client.common.search.SavedSea
 import com.databasepreservation.main.common.shared.client.common.search.SearchField;
 import com.databasepreservation.main.common.shared.client.common.search.SearchInfo;
 import com.databasepreservation.main.common.shared.client.common.utils.BrowserServiceUtils;
+import com.databasepreservation.main.common.shared.models.DBPTKModule;
+import com.databasepreservation.main.common.shared.models.wizardParameters.ConnectionParameters;
+import com.databasepreservation.main.common.shared.models.wizardParameters.CustomViewsParameters;
+import com.databasepreservation.main.common.shared.models.wizardParameters.ExportOptionsParameters;
+import com.databasepreservation.main.common.shared.models.wizardParameters.MetadataExportOptionsParameters;
+import com.databasepreservation.main.common.shared.models.wizardParameters.TableAndColumnsParameters;
 import com.databasepreservation.main.common.utils.UserUtility;
 import com.databasepreservation.main.common.utils.UserUtility.Authorization;
-import com.databasepreservation.main.desktop.shared.models.DBPTKModule;
-import com.databasepreservation.main.desktop.shared.models.wizardParameters.ConnectionParameters;
-import com.databasepreservation.main.desktop.shared.models.wizardParameters.CustomViewsParameters;
-import com.databasepreservation.main.desktop.shared.models.wizardParameters.ExportOptionsParameters;
-import com.databasepreservation.main.desktop.shared.models.wizardParameters.MetadataExportOptionsParameters;
-import com.databasepreservation.main.desktop.shared.models.wizardParameters.TableAndColumnsParameters;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 /**
@@ -352,10 +355,9 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
   public String getDateTimeHumanized(String dateTimeString) {
     if (StringUtils.isBlank(dateTimeString))
       return dateTimeString;
-
     DateTime dateTime = DateTime.parse(dateTimeString);
 
-    DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm (z)");
+    DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm (z)").withZone(DateTimeZone.UTC);
     return dateTimeFormatter.print(dateTime);
   }
 }

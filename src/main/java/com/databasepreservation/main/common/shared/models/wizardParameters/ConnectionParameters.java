@@ -1,10 +1,10 @@
-package com.databasepreservation.main.desktop.shared.models.wizardParameters;
+package com.databasepreservation.main.common.shared.models.wizardParameters;
 
 import java.io.Serializable;
 import java.util.Map;
 
-import com.databasepreservation.main.desktop.shared.models.JDBCParameters;
-import com.databasepreservation.main.desktop.shared.models.SSHConfiguration;
+import com.databasepreservation.main.common.shared.models.JDBCParameters;
+import com.databasepreservation.main.common.shared.models.SSHConfiguration;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>

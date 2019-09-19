@@ -3,6 +3,7 @@ package com.databasepreservation.main.common.shared.client.common.visualization.
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.gwt.user.client.ui.FlowPanel;
 import org.roda.core.data.v2.user.User;
 
 import com.databasepreservation.main.common.client.BrowserService;
@@ -48,12 +49,12 @@ public class DatabasePanel extends Composite {
 
   private static Map<String, DatabasePanel> instances = new HashMap<>();
 
-  public static DatabasePanel getInstance(String databaseUUID) {
+  public static DatabasePanel getInstance(String databaseUUID, boolean initMenu) {
     String code = databaseUUID;
 
     DatabasePanel instance = instances.get(code);
     if (instance == null) {
-      instance = new DatabasePanel(databaseUUID);
+      instance = new DatabasePanel(databaseUUID, initMenu);
       instances.put(code, instance);
     }
     return instance;
@@ -76,11 +77,14 @@ public class DatabasePanel extends Composite {
   @UiField
   MenuBar menu;
 
+  @UiField
+  FlowPanel toplevel;
+
   private String databaseUUID;
   private ViewerDatabase database = null;
   private String selectedLanguage;
 
-  private DatabasePanel(String databaseUUID) {
+  private DatabasePanel(String databaseUUID, boolean initMenu) {
     this.databaseUUID = databaseUUID;
     if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
       this.sidebar = DesktopDatabaseSidebar.getInstance(databaseUUID);
@@ -90,7 +94,9 @@ public class DatabasePanel extends Composite {
 
     initWidget(uiBinder.createAndBindUi(this));
 
-    initMenu();
+    if (initMenu) {
+      initMenu();
+    }
 
     if (databaseUUID == null) {
       BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forDatabases());
@@ -253,5 +259,9 @@ public class DatabasePanel extends Composite {
       rightPanelContainer.setWidget(rightPanel);
       rightPanel.setVisible(true);
     }
+  }
+
+  public void setTopLevelPanelCSS(String css) {
+      toplevel.addStyleName(css);
   }
 }

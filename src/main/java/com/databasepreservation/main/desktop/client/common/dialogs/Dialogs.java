@@ -5,7 +5,7 @@
  *
  * https://github.com/keeps/roda
  */
-package com.databasepreservation.main.common.shared.client.common.dialogs;
+package com.databasepreservation.main.desktop.client.common.dialogs;
 
 import java.util.ArrayList;
 import java.util.List;

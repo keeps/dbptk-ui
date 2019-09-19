@@ -1,4 +1,4 @@
-package com.databasepreservation.main.visualization.client.browse;
+package com.databasepreservation.main.common.shared.client.common.visualization.browse;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,6 +24,7 @@ import com.databasepreservation.main.common.shared.ViewerStructure.ViewerType;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
 import com.databasepreservation.main.common.shared.client.common.RightPanel;
+import com.databasepreservation.main.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.main.common.shared.client.common.utils.CommonClientUtils;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.main.common.shared.client.tools.FontAwesomeIconManager;
@@ -112,8 +113,13 @@ public class RowPanel extends RightPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forRecord(database.getMetadata().getName(),
-      database.getUUID(), table.getSchemaName(), table.getSchemaUUID(), table.getName(), table.getUUID(), rowUUID));
+    if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
+      BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forDesktopRecord(database.getMetadata().getName(),
+          database.getUUID(), table.getSchemaName(), table.getSchemaUUID(), table.getName(), table.getUUID(), rowUUID));
+    } else {
+      BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forRecord(database.getMetadata().getName(),
+        database.getUUID(), table.getSchemaName(), table.getSchemaUUID(), table.getName(), table.getUUID(), rowUUID));
+    }
   }
 
   private void init() {

@@ -12,10 +12,10 @@ import com.databasepreservation.main.common.shared.client.common.utils.Javascrip
 import com.databasepreservation.main.common.shared.client.tools.JSOUtils;
 import com.databasepreservation.main.common.shared.client.tools.ViewerStringUtils;
 import com.databasepreservation.main.common.shared.client.widgets.Toast;
-import com.databasepreservation.main.desktop.shared.models.DBPTKModule;
+import com.databasepreservation.main.common.shared.models.DBPTKModule;
 import com.databasepreservation.main.desktop.shared.models.Filter;
-import com.databasepreservation.main.desktop.shared.models.PreservationParameter;
-import com.databasepreservation.main.desktop.shared.models.wizardParameters.ExportOptionsParameters;
+import com.databasepreservation.main.common.shared.models.PreservationParameter;
+import com.databasepreservation.main.common.shared.models.wizardParameters.ExportOptionsParameters;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.uibinder.client.UiBinder;

@@ -135,7 +135,7 @@ public class DesktopDatabaseSidebar extends DatabaseSidebarAbstract {
         .setH6().setIndent1());
 
     sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_savedSearches(),
-      HistoryManager.linkToDesktopSavedSearches(database.getUUID())).addIcon(FontAwesomeIconManager.SAVED_SEARCH)
+      HistoryManager.linkToSavedSearches(database.getUUID())).addIcon(FontAwesomeIconManager.SAVED_SEARCH)
         .setH6().setIndent1());
 
     sidebarGroup.add(new SidebarHyperlink(messages.menusidebar_searchAllRecords(),

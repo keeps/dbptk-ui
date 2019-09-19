@@ -12,9 +12,9 @@ import com.databasepreservation.main.common.shared.client.tools.FontAwesomeIconM
 import com.databasepreservation.main.common.shared.client.widgets.Toast;
 import com.databasepreservation.main.desktop.client.common.sidebar.ConnectionSidebar;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
-import com.databasepreservation.main.desktop.shared.models.DBPTKModule;
-import com.databasepreservation.main.desktop.shared.models.PreservationParameter;
-import com.databasepreservation.main.desktop.shared.models.wizardParameters.ConnectionParameters;
+import com.databasepreservation.main.common.shared.models.DBPTKModule;
+import com.databasepreservation.main.common.shared.models.PreservationParameter;
+import com.databasepreservation.main.common.shared.models.wizardParameters.ConnectionParameters;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;

@@ -146,6 +146,10 @@ public class HistoryManager {
     newHistory(Arrays.asList(ROUTE_SCHEMA, databaseUUID, schemaUUID));
   }
 
+  public static void gotoDesktopSchema(String databaseUUID, String schemaUUID) {
+    newHistory(Arrays.asList(ROUTE_DESKTOP_SCHEMA, databaseUUID, schemaUUID));
+  }
+
   public static void gotoSchemaStructure(String databaseUUID, String schemaUUID) {
     newHistory(Arrays.asList(ROUTE_SCHEMA, databaseUUID, schemaUUID, ROUTE_SCHEMA_STRUCTURE));
   }
@@ -184,6 +188,10 @@ public class HistoryManager {
 
   public static void gotoTable(String databaseUUID, String tableUUID) {
     newHistory(Arrays.asList(ROUTE_TABLE, databaseUUID, tableUUID));
+  }
+
+  public static void gotoDesktopTable(String databaseUUID, String tableUUID) {
+    newHistory(Arrays.asList(ROUTE_DESKTOP_TABLE, databaseUUID, tableUUID));
   }
 
   public static void gotoRecord(String databaseUUID, String tableUUID, String recordUUID) {

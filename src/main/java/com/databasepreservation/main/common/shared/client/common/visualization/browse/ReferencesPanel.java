@@ -1,4 +1,4 @@
-package com.databasepreservation.main.visualization.client.browse;
+package com.databasepreservation.main.common.shared.client.common.visualization.browse;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
 
+import com.databasepreservation.main.common.shared.ViewerConstants;
+import com.databasepreservation.main.common.shared.client.common.utils.ApplicationType;
 import org.roda.core.data.v2.index.filter.EmptyKeyFilterParameter;
 import org.roda.core.data.v2.index.filter.Filter;
 import org.roda.core.data.v2.index.filter.FilterParameter;
@@ -109,10 +111,17 @@ public class ReferencesPanel extends RightPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    BreadcrumbManager.updateBreadcrumb(breadcrumb,
-      BreadcrumbManager.forReferences(database.getMetadata().getName(), database.getUUID(), table.getSchemaName(),
-        table.getSchemaUUID(), table.getName(), table.getUUID(), recordUUID, columnName,
-        columnIndexInTable.toString()));
+    if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
+      BreadcrumbManager.updateBreadcrumb(breadcrumb,
+          BreadcrumbManager.forDesktopReferences(database.getMetadata().getName(), database.getUUID(), table.getSchemaName(),
+              table.getSchemaUUID(), table.getName(), table.getUUID(), recordUUID, columnName,
+              columnIndexInTable.toString()));
+    } else {
+      BreadcrumbManager.updateBreadcrumb(breadcrumb,
+          BreadcrumbManager.forReferences(database.getMetadata().getName(), database.getUUID(), table.getSchemaName(),
+              table.getSchemaUUID(), table.getName(), table.getUUID(), recordUUID, columnName,
+              columnIndexInTable.toString()));
+    }
   }
 
   private void init() {

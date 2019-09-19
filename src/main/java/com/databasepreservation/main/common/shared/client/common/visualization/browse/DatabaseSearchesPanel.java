@@ -49,7 +49,7 @@ public class DatabaseSearchesPanel extends RightPanel {
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
     if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
       BreadcrumbManager.updateBreadcrumb(breadcrumb,
-          BreadcrumbManager.forDesktopDatabaseSavedSearch(database.getUUID(), database.getMetadata().getName()));
+          BreadcrumbManager.forDesktopDatabaseSavedSearches(database.getUUID(), database.getMetadata().getName()));
     } else {
       BreadcrumbManager.updateBreadcrumb(breadcrumb,
           BreadcrumbManager.forDatabase(database.getMetadata().getName(), database.getUUID()));

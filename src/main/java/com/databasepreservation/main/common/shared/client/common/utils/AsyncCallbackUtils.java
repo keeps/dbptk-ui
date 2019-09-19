@@ -4,6 +4,7 @@
  */
 package com.databasepreservation.main.common.shared.client.common.utils;
 
+import com.databasepreservation.main.common.shared.client.common.dialogs.CommonDialogs;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.v2.user.User;
@@ -11,9 +12,9 @@ import org.roda.core.data.v2.user.User;
 import com.databasepreservation.main.common.shared.client.ClientLogger;
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
 import com.databasepreservation.main.common.shared.client.common.UserLogin;
-import com.databasepreservation.main.common.shared.client.common.dialogs.Dialogs;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.common.shared.client.widgets.Toast;
+import com.databasepreservation.main.desktop.client.common.dialogs.Dialogs;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.StatusCodeException;
@@ -38,7 +39,7 @@ public class AsyncCallbackUtils {
       UserLogin.getInstance().getAuthenticatedUser(new AsyncCallback<User>() {
         @Override
         public void onFailure(Throwable caught2) {
-          Dialogs.showInformationDialog(messages.dialogPermissionDenied(), caught.getMessage(), messages.dialogLogin(),
+          CommonDialogs.showInformationDialog(messages.dialogPermissionDenied(), caught.getMessage(), messages.dialogLogin(),
             new DefaultAsyncCallback<Void>() {
               @Override
               public void onSuccess(Void result) {
@@ -52,7 +53,7 @@ public class AsyncCallbackUtils {
           if (result.isGuest()) {
             UserLogin.getInstance().login();
           } else {
-            Dialogs.showInformationDialog(messages.dialogPermissionDenied(), caught.getMessage(),
+            CommonDialogs.showInformationDialog(messages.dialogPermissionDenied(), caught.getMessage(),
               messages.dialogLogin(), new DefaultAsyncCallback<Void>() {
                 @Override
                 public void onSuccess(Void result) {
@@ -64,7 +65,7 @@ public class AsyncCallbackUtils {
       }, true);
       treatedError = true;
     } else if (caught instanceof NotFoundException) {
-      Dialogs.showInformationDialog(messages.dialogResourceNotFound(), caught.getMessage(),
+      CommonDialogs.showInformationDialog(messages.dialogResourceNotFound(), caught.getMessage(),
         messages.dialogNotFoundGoToHome(), new DefaultAsyncCallback<Void>() {
           @Override
           public void onSuccess(Void result) {

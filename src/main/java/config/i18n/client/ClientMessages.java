@@ -535,6 +535,8 @@ public interface ClientMessages extends Messages {
 
   String breadcrumbTextForDesktopSIARDBrowse();
 
+  String breadcrumbTextForDesktopDatabaseSavedSearches();
+
   /*********************************************
    * Home Page
    ********************************************/

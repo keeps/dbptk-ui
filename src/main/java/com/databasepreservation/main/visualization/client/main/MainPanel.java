@@ -19,6 +19,9 @@ import com.databasepreservation.main.common.shared.client.common.visualization.b
 import com.databasepreservation.main.common.shared.client.common.visualization.browse.DatabaseSearchPanel;
 import com.databasepreservation.main.common.shared.client.common.visualization.browse.DatabaseSearchesPanel;
 import com.databasepreservation.main.common.shared.client.common.visualization.browse.DatabaseUsersPanel;
+import com.databasepreservation.main.common.shared.client.common.visualization.browse.ForeignKeyPanel;
+import com.databasepreservation.main.common.shared.client.common.visualization.browse.ReferencesPanel;
+import com.databasepreservation.main.common.shared.client.common.visualization.browse.RowPanel;
 import com.databasepreservation.main.common.shared.client.common.visualization.browse.SchemaCheckConstraintsPanel;
 import com.databasepreservation.main.common.shared.client.common.visualization.browse.SchemaDataPanel;
 import com.databasepreservation.main.common.shared.client.common.visualization.browse.SchemaRoutinesPanel;
@@ -32,12 +35,9 @@ import com.databasepreservation.main.common.shared.client.common.visualization.b
 import com.databasepreservation.main.common.shared.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.common.shared.client.widgets.wcag.AccessibleFocusPanel;
-import com.databasepreservation.main.visualization.client.browse.ForeignKeyPanel;
 import com.databasepreservation.main.visualization.client.browse.HomePanel;
 import com.databasepreservation.main.visualization.client.browse.LoginPanel;
 import com.databasepreservation.main.visualization.client.browse.NewUploadPanel;
-import com.databasepreservation.main.visualization.client.browse.ReferencesPanel;
-import com.databasepreservation.main.visualization.client.browse.RowPanel;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -92,7 +92,8 @@ public class MainPanel extends Composite {
 
   private void setContent(String databaseUUID, RightPanelLoader rightPanelLoader) {
     GWT.log("setContent, dbuid " + databaseUUID);
-    DatabasePanel databasePanel = DatabasePanel.getInstance(databaseUUID);
+    DatabasePanel databasePanel = DatabasePanel.getInstance(databaseUUID, true);
+    databasePanel.setTopLevelPanelCSS("browseContent wrapper skip_padding");
     contentPanel.setWidget(databasePanel);
     databasePanel.load(rightPanelLoader);
     JavascriptUtils.scrollToElement(contentPanel.getElement());

@@ -1,4 +1,4 @@
-package com.databasepreservation.main.desktop.shared.models;
+package com.databasepreservation.main.common.shared.models;
 
 import java.io.Serializable;
 import java.util.HashMap;

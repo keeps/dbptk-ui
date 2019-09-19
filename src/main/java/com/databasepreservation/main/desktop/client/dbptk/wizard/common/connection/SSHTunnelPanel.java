@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.databasepreservation.main.common.shared.client.tools.ViewerStringUtils;
-import com.databasepreservation.main.desktop.shared.models.SSHConfiguration;
+import com.databasepreservation.main.common.shared.models.SSHConfiguration;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
