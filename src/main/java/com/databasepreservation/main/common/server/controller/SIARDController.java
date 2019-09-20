@@ -474,7 +474,7 @@ public class SIARDController {
 
     } catch (IOException e) {
       throw new GenericException("Could not initialize conversion modules", e);
-    } catch (ViewerException e){
+    } catch (ViewerException e) {
       throw new GenericException(e.getMessage(), e);
     } catch (ModuleException | RuntimeException e) {
       throw new GenericException("Could not convert the database to the Solr instance.", e);
@@ -570,19 +570,29 @@ public class SIARDController {
     return metadata;
   }
 
-  public static boolean validateSIARD(String databaseUUID, String SIARDPath, String validationReportPath, String allowedTypesPath) throws GenericException {
+  public static boolean validateSIARD(String databaseUUID, String SIARDPath, String validationReportPath,
+    String allowedTypesPath) throws GenericException {
     Path reporterPath = ViewerConfiguration.getInstance().getReportPath(databaseUUID).toAbsolutePath();
     boolean valid;
     try (Reporter reporter = new Reporter(reporterPath.getParent().toString(), reporterPath.getFileName().toString())) {
       SIARDValidation siardValidation = SIARDValidation.newInstance();
       siardValidation.validateModule(new SIARDValidateFactory())
-          .validateModuleParameter(SIARDValidateFactory.PARAMETER_FILE, SIARDPath)
-          .validateModuleParameter(SIARDValidateFactory.PARAMETER_ALLOWED, allowedTypesPath)
-          .validateModuleParameter(SIARDValidateFactory.PARAMETER_REPORT, validationReportPath);
+        .validateModuleParameter(SIARDValidateFactory.PARAMETER_FILE, SIARDPath)
+        .validateModuleParameter(SIARDValidateFactory.PARAMETER_ALLOWED, allowedTypesPath)
+        .validateModuleParameter(SIARDValidateFactory.PARAMETER_REPORT, validationReportPath);
 
       siardValidation.reporter(reporter);
       siardValidation.observer(new ValidationProgressObserver(databaseUUID));
       try {
+        String dbptkVersion = "";
+        try {
+          dbptkVersion = ViewerConfiguration.getInstance().getDBPTKVersion();
+          final DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
+          solrManager.updateSIARDValidationInformation(databaseUUID, ViewerDatabase.ValidationStatus.VALIDATION_RUNNING,
+            validationReportPath, dbptkVersion, new DateTime().toString());
+        } catch (IOException e) {
+          throw new GenericException("Failed to obtain the DBPTK version from properties", e);
+        }
         valid = siardValidation.validate();
 
         ViewerDatabase.ValidationStatus status;
@@ -592,8 +602,6 @@ public class SIARDController {
         } else {
           status = ViewerDatabase.ValidationStatus.VALIDATION_FAILED;
         }
-
-        String dbptkVersion = "";
 
         try {
           dbptkVersion = ViewerConfiguration.getInstance().getDBPTKVersion();

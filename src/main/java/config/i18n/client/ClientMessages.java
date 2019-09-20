@@ -442,6 +442,8 @@ public interface ClientMessages extends Messages {
 
   String humanizedTextForSIARDValidationFailed();
 
+  String humanizedTextForSIARDValidationRunning();
+
   String humanizedTextForSIARDNotValidated();
 
   String humanizedTextForSolrIngesting();

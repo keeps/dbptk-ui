@@ -74,7 +74,7 @@ public class ValidationProgressData implements Serializable {
     }
 
     public enum Type {
-      REQUIREMENT, MESSAGE, SUB_REQUIREMENT, ADDITIONAL, PATH
+      REQUIREMENT, REQUIREMENT_INIT, MESSAGE, SUB_REQUIREMENT, ADDITIONAL, PATH
     }
 
     public void setID(String ID) {

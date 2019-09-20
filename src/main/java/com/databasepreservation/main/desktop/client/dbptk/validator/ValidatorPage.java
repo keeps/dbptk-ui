@@ -45,7 +45,6 @@ public class ValidatorPage extends Composite {
   private Integer countPassed = 0;
   private Integer countSkipped = 0;
   private Boolean stickToBottom = true;
-  private Boolean isRunning = false;
 
   private Timer autoUpdateTimer = new Timer() {
     @Override
@@ -65,6 +64,7 @@ public class ValidatorPage extends Composite {
 
   public static ValidatorPage getInstance(String databaseUUID, String reporterPath, String udtPath) {
     if (instances.get(databaseUUID) == null) {
+      GWT.log("NEW");
       ValidatorPage instance = new ValidatorPage(databaseUUID, reporterPath, udtPath);
       instances.put(databaseUUID, instance);
     }
@@ -104,16 +104,19 @@ public class ValidatorPage extends Composite {
           List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forSIARDValidatorPage(database.getUUID(),
             database.getMetadata().getName());
           BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
-          content.clear();
 
-          if (!isRunning) {
+          if (database.getValidationStatus() != ViewerDatabase.ValidationStatus.VALIDATION_RUNNING) {
+            populateValidationInfo(false);
             BrowserService.Util.getInstance().clearValidationProgressData(databaseUUID,
               new DefaultAsyncCallback<Void>() {
                 @Override
                 public void onSuccess(Void result) {
+                  content.clear();
                   initProgress();
                 }
               });
+          } else {
+            populateValidationInfo(false);
           }
         }
       });
@@ -124,11 +127,9 @@ public class ValidatorPage extends Composite {
       new DefaultAsyncCallback<ValidationProgressData>() {
         @Override
         public void onSuccess(ValidationProgressData result) {
-          isRunning = true;
           resetInfos();
-          stopUpdating();
-          loading.setVisible(true);
           populateValidationInfo(false);
+          loading.setVisible(true);
           autoUpdateTimer.scheduleRepeating(100);
           autoUpdateTimer.run();
           runValidator();
@@ -141,7 +142,6 @@ public class ValidatorPage extends Composite {
       new DefaultAsyncCallback<Boolean>() {
         @Override
         public void onSuccess(Boolean result) {
-          GWT.log("Result: " + result);
           SIARDMainPage.getInstance(database.getUUID()).refreshInstance(database.getUUID());
           stopUpdating();
         }
@@ -165,6 +165,7 @@ public class ValidatorPage extends Composite {
   }
 
   private void update(ValidationProgressData validationProgressData) {
+    SIARDMainPage.getInstance(database.getUUID()).refreshInstance(database.getUUID());
     List<ValidationProgressData.Requirement> requirementList = validationProgressData.getRequirementsList(lastPosition);
     lastPosition += requirementList.size();
     for (ValidationProgressData.Requirement requirement : requirementList) {
@@ -206,7 +207,6 @@ public class ValidatorPage extends Composite {
         Label status = buildStatus(requirement.getStatus());
         panel.add(status);
         content.add(panel);
-
       }
 
       if (stickToBottom) {
@@ -220,7 +220,7 @@ public class ValidatorPage extends Composite {
     }
   }
 
-  private Label buildStatus(String status){
+  private Label buildStatus(String status) {
     Label statusLabel = new Label(status);
     switch (status) {
       case "OK":
@@ -246,7 +246,7 @@ public class ValidatorPage extends Composite {
   }
 
   private String updateStatus(Label statusLabel) {
-    String statusText = messages.humanizedTextForSIARDNotValidated();
+    String statusText = messages.humanizedTextForSIARDValidationRunning();
     statusLabel.setStyleName("label-info");
     if (countErrors != 0) {
       statusText = messages.humanizedTextForSIARDValidationFailed();
@@ -339,7 +339,6 @@ public class ValidatorPage extends Composite {
 
   private void stopUpdating() {
     instances.remove(databaseUUID);
-    isRunning = false;
     populateValidationInfo(true);
     loading.setVisible(false);
     if (autoUpdateTimer != null) {
@@ -349,8 +348,13 @@ public class ValidatorPage extends Composite {
 
   @Override
   protected void onDetach() {
-    stopUpdating();
+    loading.setVisible(false);
     super.onDetach();
   }
 
+  @Override
+  protected void onAttach() {
+    loading.setVisible(true);
+    super.onAttach();
+  }
 }

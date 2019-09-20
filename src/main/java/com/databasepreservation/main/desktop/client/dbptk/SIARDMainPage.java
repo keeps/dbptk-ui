@@ -195,6 +195,16 @@ public class SIARDMainPage extends Composite {
 
     validation.addButton(btnRunValidator);
 
+    btnOpenValidator = new Button();
+    btnOpenValidator.setVisible(false);
+    btnOpenValidator.setText(messages.SIARDHomePageButtonTextOpenValidate());
+    btnOpenValidator.addStyleName("btn btn-link-info");
+    btnOpenValidator.addClickHandler(event -> {
+      HistoryManager.gotoSIARDValidator(database.getUUID(), validator.getReporterPathFile());
+    });
+
+    validation.addButton(btnOpenValidator);
+
     btnSeeReport = new Button();
     btnSeeReport.setText(messages.SIARDHomePageButtonTextSeeReport());
     btnSeeReport.addStyleName("btn btn-link-info");
@@ -219,10 +229,12 @@ public class SIARDMainPage extends Composite {
         database.getValidatedVersion());
       validationStatus = MetadataField.createInstance(messages.SIARDHomePageLabelForValidationStatus(),
         SolrHumanizer.humanize(database.getValidationStatus()));
-      if(database.getValidationStatus().equals(ViewerDatabase.ValidationStatus.VALIDATION_SUCCESS)){
+      if (database.getValidationStatus().equals(ViewerDatabase.ValidationStatus.VALIDATION_SUCCESS)) {
         validationStatus.getMetadataValue().addStyleName("label-success");
-      }else{
+      } else if (database.getValidationStatus().equals(ViewerDatabase.ValidationStatus.VALIDATION_FAILED)) {
         validationStatus.getMetadataValue().addStyleName("label-danger");
+      } else {
+        validationStatus.getMetadataValue().addStyleName("label-info");
       }
     } else {
       validatedAt = MetadataField.createInstance(messages.SIARDHomePageLabelForValidatedAt(),
@@ -340,8 +352,8 @@ public class SIARDMainPage extends Composite {
     MetadataField dbname = MetadataField.createInstance(messages.SIARDHomePageLabelForViewerMetadataName(),
       database.getMetadata().getName());
     dbname.setCSSMetadata("metadata-field", "metadata-information-element-label", "metadata-information-element-value");
-    MetadataField archivalDate = MetadataField.createInstance(messages.SIARDHomePageLabelForViewerMetadataArchivalDate(),
-        archivalDateHumanized);
+    MetadataField archivalDate = MetadataField
+      .createInstance(messages.SIARDHomePageLabelForViewerMetadataArchivalDate(), archivalDateHumanized);
     archivalDate.setCSSMetadata("metadata-field", "metadata-information-element-label",
       "metadata-information-element-value");
     MetadataField archiver = MetadataField.createInstance(messages.SIARDHomePageLabelForViewerMetadataArchiver(),
@@ -392,9 +404,11 @@ public class SIARDMainPage extends Composite {
 
   public void refreshInstance(String databaseUUID) {
     final Widget loading = new HTML(SafeHtmlUtils.fromSafeConstant(
-      "<div id='loading' class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
+            "<div id='loading' class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
 
-    container.add(loading);
+    if(database.getValidationStatus() != ViewerDatabase.ValidationStatus.VALIDATION_RUNNING){
+      container.add(loading);
+    }
 
     BrowserService.Util.getInstance().retrieve(databaseUUID, ViewerDatabase.class.getName(), databaseUUID,
       new DefaultAsyncCallback<IsIndexed>() {
@@ -418,10 +432,24 @@ public class SIARDMainPage extends Composite {
           validatedAt.updateText(result);
           version.updateText(database.getValidatedVersion());
           validationStatus.updateText(SolrHumanizer.humanize(database.getValidationStatus()));
-
           if (database.getValidationStatus() != ViewerDatabase.ValidationStatus.NOT_VALIDATED) {
+            btnOpenValidator.setVisible(false);
+            btnRunValidator.setVisible(true);
             btnSeeReport.setVisible(true);
             btnRunValidator.setText(messages.SIARDHomePageButtonTextRunValidationAgain());
+            if (database.getValidationStatus() == ViewerDatabase.ValidationStatus.VALIDATION_SUCCESS) {
+              btnRunValidator.setVisible(true);
+              btnOpenValidator.setVisible(false);
+              validationStatus.getMetadataValue().setStyleName("label-success");
+            } else if (database.getValidationStatus() == ViewerDatabase.ValidationStatus.VALIDATION_FAILED) {
+              btnRunValidator.setVisible(true);
+              btnOpenValidator.setVisible(false);
+              validationStatus.getMetadataValue().setStyleName("label-danger");
+            } else {
+              btnRunValidator.setVisible(false);
+              validationStatus.getMetadataValue().setStyleName("label-info");
+              btnOpenValidator.setVisible(true);
+            }
           }
         }
       });

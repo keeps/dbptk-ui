@@ -38,6 +38,8 @@ public class SolrHumanizer {
         return messages.humanizedTextForSIARDValidationSuccess();
       case VALIDATION_FAILED:
         return messages.humanizedTextForSIARDValidationFailed();
+      case VALIDATION_RUNNING:
+        return messages.humanizedTextForSIARDValidationRunning();
       default:
         return "";
     }
