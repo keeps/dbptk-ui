@@ -219,6 +219,11 @@ public class SIARDMainPage extends Composite {
         database.getValidatedVersion());
       validationStatus = MetadataField.createInstance(messages.SIARDHomePageLabelForValidationStatus(),
         SolrHumanizer.humanize(database.getValidationStatus()));
+      if(database.getValidationStatus().equals(ViewerDatabase.ValidationStatus.VALIDATION_SUCCESS)){
+        validationStatus.getMetadataValue().addStyleName("label-success");
+      }else{
+        validationStatus.getMetadataValue().addStyleName("label-danger");
+      }
     } else {
       validatedAt = MetadataField.createInstance(messages.SIARDHomePageLabelForValidatedAt(),
         messages.humanizedTextForSIARDNotValidated());
@@ -226,6 +231,7 @@ public class SIARDMainPage extends Composite {
         messages.humanizedTextForSIARDNotValidated());
       validationStatus = MetadataField.createInstance(messages.SIARDHomePageLabelForValidationStatus(),
         messages.humanizedTextForSIARDNotValidated());
+      validationStatus.getMetadataValue().addStyleName("label-info");
     }
 
     validatedAt.setCSSMetadata(null, "label-field", "value-field");
