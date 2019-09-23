@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.main.common.shared.client.tools.Humanize;
 import org.roda.core.data.v2.index.IndexResult;
 import org.roda.core.data.v2.index.facet.Facets;
 import org.roda.core.data.v2.index.filter.Filter;
@@ -97,6 +98,14 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
       }
     });
 
+    Column<ViewerDatabase, SafeHtml> sizeColumn = new TooltipDatabaseColumn() {
+      @Override
+      public SafeHtml getValue(ViewerDatabase database) {
+        return database != null ? SafeHtmlUtils.fromString(Humanize.readableFileSize(database.getSIARDSize()))
+            : SafeHtmlUtils.fromString("unknown");
+      }
+    };
+
     Column<ViewerDatabase, SafeHtml> validColumn = new TooltipDatabaseColumn() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
@@ -130,8 +139,9 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
     addColumn(dbmsColumn, messages.managePageTableHeaderTextForProductName(), true, TextAlign.NONE, 10);
     addColumn(archivalDateColumn, messages.managePageTableHeaderTextForArchivalDate(), true, TextAlign.NONE, 5);
     addColumn(locationColumn, messages.managePageTableHeaderTextForSIARDLocation(), true, TextAlign.NONE, 8);
-    addColumn(validColumn, messages.managePageTableHeaderTextForSIARDValidationStatus(), true, TextAlign.NONE, 4);
-    addColumn(statusColumn, messages.managePageTableHeaderTextForDatabaseStatus(), true, TextAlign.NONE, 8);
+    addColumn(sizeColumn, messages.managePageTableHeaderTextForSIARDSize(), true, TextAlign.NONE, 4);
+    addColumn(validColumn, messages.managePageTableHeaderTextForSIARDValidationStatus(), true, TextAlign.NONE, 5);
+    addColumn(statusColumn, messages.managePageTableHeaderTextForDatabaseStatus(), true, TextAlign.NONE, 5);
     addColumn(openColumn, messages.managePageTableHeaderTextForActions(), true, TextAlign.NONE , 5);
 
     Label emptyInfo = new Label(messages.noItemsToDisplay());

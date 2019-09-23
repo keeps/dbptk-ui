@@ -577,6 +577,8 @@ public interface ClientMessages extends Messages {
 
   String managePageTableHeaderTextForSIARDLocation();
 
+  String managePageTableHeaderTextForSIARDSize();
+
   String managePageTableHeaderTextForSIARDValidationStatus();
 
   String managePageTableHeaderTextForDatabaseStatus();

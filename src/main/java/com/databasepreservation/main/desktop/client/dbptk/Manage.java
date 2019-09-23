@@ -16,8 +16,6 @@ import com.databasepreservation.main.common.shared.client.widgets.wcag.Accessibl
 import com.databasepreservation.main.desktop.client.common.helper.HelperUploadSIARDFile;
 import com.databasepreservation.main.desktop.client.common.lists.DatabaseList;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
 import com.google.gwt.event.dom.client.KeyDownHandler;
@@ -27,7 +25,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.SelectionChangeEvent;
 
 import config.i18n.client.ClientMessages;
 
@@ -87,21 +84,12 @@ public class Manage extends Composite {
       }
     });
 
-    searchInputButton.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        doSearch();
-      }
-    });
+    searchInputButton.addClickHandler(event -> doSearch());
 
     databaseList.getSelectionModel().addSelectionChangeHandler(event -> {
       ViewerDatabase selected = databaseList.getSelectionModel().getSelectedObject();
       if (selected != null) {
-        if (ViewerDatabase.Status.INGESTING.equals(selected.getStatus())) {
-
-        } else {
           databaseList.getSelectionModel().clear();
-        }
       }
     });
 
