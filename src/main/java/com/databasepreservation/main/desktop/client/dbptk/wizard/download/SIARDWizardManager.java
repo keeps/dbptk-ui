@@ -156,7 +156,7 @@ public class SIARDWizardManager extends WizardManager {
       wizardContent.clear();
       position = 2;
       MetadataExportOptions metadataExportOptions = MetadataExportOptions
-        .getInstance(exportOptionsParameters.getSIARDVersion());
+        .getInstance(exportOptionsParameters.getSIARDVersion(), true, databaseUUID);
       wizardInstances.add(position, metadataExportOptions);
       wizardContent.add(metadataExportOptions);
       updateButtons();

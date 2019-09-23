@@ -275,7 +275,7 @@ public class CreateWizardManager extends WizardManager {
         wizardContent.clear();
         position = 4;
         MetadataExportOptions metadataExportOptions = MetadataExportOptions
-          .getInstance(exportOptionsParameters.getSIARDVersion());
+          .getInstance(exportOptionsParameters.getSIARDVersion(), false);
         wizardInstances.add(position, metadataExportOptions);
         wizardContent.add(metadataExportOptions);
         updateButtons();

@@ -5,6 +5,9 @@ import java.util.Map;
 
 import com.databasepreservation.main.common.client.BrowserService;
 import com.databasepreservation.main.common.shared.ViewerConstants;
+import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
 import com.databasepreservation.main.common.shared.client.common.desktop.GenericField;
 import com.databasepreservation.main.common.shared.client.tools.ViewerStringUtils;
@@ -12,6 +15,7 @@ import com.databasepreservation.main.common.shared.models.DBPTKModule;
 import com.databasepreservation.main.common.shared.models.PreservationParameter;
 import com.databasepreservation.main.common.shared.models.wizardParameters.MetadataExportOptionsParameters;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
+import com.databasepreservation.modules.siard.SIARD2ModuleFactory;
 import com.github.nmorel.gwtjackson.client.ObjectMapper;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -45,35 +49,55 @@ public class MetadataExportOptions extends WizardPanel<MetadataExportOptionsPara
 
   private static MetadataExportOptions instance = null;
   private HashMap<String, TextBox> textBoxInputs = new HashMap<>();
+  private final boolean populate;
+  private ViewerMetadata metadata = null;
 
-  public static MetadataExportOptions getInstance(String moduleName) {
+  public static MetadataExportOptions getInstance(String moduleName, boolean populate) {
     if (instance == null) {
-      instance = new MetadataExportOptions(moduleName);
+      instance = new MetadataExportOptions(moduleName, populate, null);
     }
     return instance;
   }
 
-  private MetadataExportOptions(String moduleName) {
+  public static MetadataExportOptions getInstance(String moduleName, boolean populate, String databaseUUID) {
+    if (instance == null) {
+      instance = new MetadataExportOptions(moduleName, populate, databaseUUID);
+    }
+    return instance;
+  }
+
+  private MetadataExportOptions(String moduleName, boolean populate, String databaseUUID) {
     initWidget(binder.createAndBindUi(this));
+    this.populate = populate;
 
     Widget spinner = new HTML(SafeHtmlUtils.fromSafeConstant(
       "<div class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
 
     content.add(spinner);
 
-    BrowserService.Util.getInstance().getSIARDExportModule(moduleName, new DefaultAsyncCallback<String>() {
+    BrowserService.Util.getInstance().retrieve(databaseUUID, ViewerDatabase.class.getName(), databaseUUID,
+      new DefaultAsyncCallback<IsIndexed>() {
       @Override
-      public void onSuccess(String result) {
-        content.remove(spinner);
+        public void onSuccess(IsIndexed result) {
+          ViewerDatabase database = (ViewerDatabase) result;
+          metadata = database.getMetadata();
 
-        DBPTKModuleMapper mapper = GWT.create(DBPTKModuleMapper.class);
-        DBPTKModule module = mapper.read(result);
+          BrowserService.Util.getInstance().getSIARDExportModule(moduleName, new DefaultAsyncCallback<String>() {
+            @Override
+            public void onSuccess(String result) {
+              content.remove(spinner);
 
-        for (PreservationParameter p : module.getParameters(moduleName)) {
-          if (p.getExportOption() != null && p.getExportOption().equals(ViewerConstants.METADATA_EXPORT_OPTIONS)) {
-            buildGenericWidget(p);
-          }
-        }
+              DBPTKModuleMapper mapper = GWT.create(DBPTKModuleMapper.class);
+              DBPTKModule module = mapper.read(result);
+
+              for (PreservationParameter p : module.getParameters(moduleName)) {
+                if (p.getExportOption() != null
+                  && p.getExportOption().equals(ViewerConstants.METADATA_EXPORT_OPTIONS)) {
+                  buildGenericWidget(p);
+                }
+              }
+            }
+          });
       }
     });
   }
@@ -121,6 +145,9 @@ public class MetadataExportOptions extends WizardPanel<MetadataExportOptionsPara
         TextBox defaultTextBox = new TextBox();
         defaultTextBox.addStyleName("form-textbox");
         textBoxInputs.put(parameter.getName(), defaultTextBox);
+        if (populate) {
+          populate(parameter.getName(), defaultTextBox);
+        }
         genericField = GenericField.createInstance(messages.wizardExportOptionsLabels(parameter.getName()), defaultTextBox);
 
         if (parameter.getName().equals(ViewerConstants.SIARD_METADATA_CLIENT_MACHINE)) {
@@ -149,6 +176,26 @@ public class MetadataExportOptions extends WizardPanel<MetadataExportOptionsPara
       helper.add(genericField);
       helper.add(span);
       content.add(helper);
+    }
+  }
+
+  public void populate(String parameterName, TextBox textBox) {
+    switch (parameterName) {
+      case SIARD2ModuleFactory.PARAMETER_META_DESCRIPTION:
+        textBox.setText(metadata.getDescription());
+        break;
+      case SIARD2ModuleFactory.PARAMETER_META_ARCHIVER:
+        textBox.setText(metadata.getArchiver());
+        break;
+      case SIARD2ModuleFactory.PARAMETER_META_ARCHIVER_CONTACT:
+        textBox.setText(metadata.getArchiverContact());
+        break;
+      case SIARD2ModuleFactory.PARAMETER_META_DATA_OWNER:
+        textBox.setText(metadata.getDataOwner());
+        break;
+      case SIARD2ModuleFactory.PARAMETER_META_DATA_ORIGIN_TIMESPAN:
+        textBox.setText(metadata.getDataOriginTimespan());
+        break;
     }
   }
 }

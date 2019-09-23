@@ -135,7 +135,7 @@ public class DBMSWizardManager extends WizardManager {
       exportOptionsParameters = (ExportOptionsParameters) wizardInstances.get(position).getValues();
       wizardContent.clear();
       MetadataExportOptions metadataExportOptions = MetadataExportOptions
-        .getInstance(exportOptionsParameters.getSIARDVersion());
+        .getInstance(exportOptionsParameters.getSIARDVersion(), false);
       wizardInstances.add(position, metadataExportOptions);
       wizardContent.add(metadataExportOptions);
       updateButtons();
