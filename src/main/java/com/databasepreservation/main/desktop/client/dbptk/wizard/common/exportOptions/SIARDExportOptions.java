@@ -8,10 +8,11 @@ import com.databasepreservation.main.common.client.BrowserService;
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
 import com.databasepreservation.main.common.shared.client.common.desktop.ComboBoxField;
 import com.databasepreservation.main.common.shared.client.tools.ToolkitModuleName2ViewerModuleName;
-import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
 import com.databasepreservation.main.common.shared.models.DBPTKModule;
 import com.databasepreservation.main.common.shared.models.PreservationParameter;
 import com.databasepreservation.main.common.shared.models.wizardParameters.ExportOptionsParameters;
+import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
+import com.github.nmorel.gwtjackson.client.ObjectMapper;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -31,6 +32,9 @@ public class SIARDExportOptions extends WizardPanel<ExportOptionsParameters> {
   ClientMessages messages = GWT.create(ClientMessages.class);
 
   interface SIARDUiBinder extends UiBinder<Widget, SIARDExportOptions> {
+  }
+
+  interface DBPTKModuleMapper extends ObjectMapper<DBPTKModule> {
   }
 
   private static SIARDUiBinder binder = GWT.create(SIARDUiBinder.class);
@@ -60,19 +64,21 @@ public class SIARDExportOptions extends WizardPanel<ExportOptionsParameters> {
 
     content.add(spinner);
 
-    BrowserService.Util.getInstance().getSIARDExportModules(new DefaultAsyncCallback<DBPTKModule>() {
+    BrowserService.Util.getInstance().getSIARDExportModules(new DefaultAsyncCallback<String>() {
       @Override
-      public void onSuccess(DBPTKModule result) {
+      public void onSuccess(String result) {
         content.remove(spinner);
 
         ComboBoxField comboBoxField = ComboBoxField.createInstance(messages.wizardExportOptionsLabels("version"));
-        final TreeMap<String, ArrayList<PreservationParameter>> modules = new TreeMap<>(result.getParameters());
+        DBPTKModuleMapper mapper = GWT.create(DBPTKModuleMapper.class);
+        DBPTKModule module = mapper.read(result);
+        final TreeMap<String, ArrayList<PreservationParameter>> modules = new TreeMap<>(module.getParameters());
         for (String moduleName : modules.keySet()) {
           comboBoxField.setComboBoxValue(ToolkitModuleName2ViewerModuleName.transform(moduleName), moduleName);
         }
         comboBoxField.addChangeHandler(() -> {
           version = comboBoxField.getSelectedValue();
-          dbptkModule = result;
+          dbptkModule = module;
           final SIARDExportOptionsCurrent instance = SIARDExportOptionsCurrent.getInstance(version, dbptkModule);
           content.clear();
           content.add(instance);

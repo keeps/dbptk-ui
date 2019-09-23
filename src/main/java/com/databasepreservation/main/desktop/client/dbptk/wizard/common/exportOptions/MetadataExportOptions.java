@@ -8,10 +8,11 @@ import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
 import com.databasepreservation.main.common.shared.client.common.desktop.GenericField;
 import com.databasepreservation.main.common.shared.client.tools.ViewerStringUtils;
-import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
 import com.databasepreservation.main.common.shared.models.DBPTKModule;
 import com.databasepreservation.main.common.shared.models.PreservationParameter;
 import com.databasepreservation.main.common.shared.models.wizardParameters.MetadataExportOptionsParameters;
+import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
+import com.github.nmorel.gwtjackson.client.ObjectMapper;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -32,6 +33,9 @@ public class MetadataExportOptions extends WizardPanel<MetadataExportOptionsPara
   ClientMessages messages = GWT.create(ClientMessages.class);
 
   interface MetadataUiBinder extends UiBinder<Widget, MetadataExportOptions> {
+  }
+
+  interface DBPTKModuleMapper extends ObjectMapper<DBPTKModule> {
   }
 
   private static MetadataUiBinder binder = GWT.create(MetadataUiBinder.class);
@@ -57,12 +61,15 @@ public class MetadataExportOptions extends WizardPanel<MetadataExportOptionsPara
 
     content.add(spinner);
 
-    BrowserService.Util.getInstance().getSIARDExportModule(moduleName, new DefaultAsyncCallback<DBPTKModule>() {
+    BrowserService.Util.getInstance().getSIARDExportModule(moduleName, new DefaultAsyncCallback<String>() {
       @Override
-      public void onSuccess(DBPTKModule result) {
+      public void onSuccess(String result) {
         content.remove(spinner);
 
-        for (PreservationParameter p : result.getParameters(moduleName)) {
+        DBPTKModuleMapper mapper = GWT.create(DBPTKModuleMapper.class);
+        DBPTKModule module = mapper.read(result);
+
+        for (PreservationParameter p : module.getParameters(moduleName)) {
           if (p.getExportOption() != null && p.getExportOption().equals(ViewerConstants.METADATA_EXPORT_OPTIONS)) {
             buildGenericWidget(p);
           }

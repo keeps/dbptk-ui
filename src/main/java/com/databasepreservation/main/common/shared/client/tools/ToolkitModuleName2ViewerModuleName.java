@@ -16,12 +16,6 @@ public class ToolkitModuleName2ViewerModuleName {
       case "progress-openedge": return "Progress OpenEdge";
       case "oracle": return "Oracle";
       case "postgresql": return "PostgreSQL";
-      case ViewerConstants.SIARD1:
-        return "SIARD 1";
-      case ViewerConstants.SIARD2:
-        return "SIARD 2";
-      case ViewerConstants.SIARDDK:
-        return "SIARD DK";
       case "microsoft-sql-server": return "SQL Server";
       case "sybase": return "Sybase";
       default: return moduleName;

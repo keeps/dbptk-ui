@@ -1,8 +1,13 @@
 package com.databasepreservation.main.common.client;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.databasepreservation.main.common.shared.ValidationProgressData;
+import com.databasepreservation.main.common.shared.exceptions.ViewerException;
+import com.databasepreservation.main.common.shared.models.PreservationParameter;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.RODAException;
 import org.roda.core.data.exceptions.RequestNotValidException;
@@ -123,13 +128,13 @@ public interface BrowserServiceAsync {
 
   void findSIARDFile(String path, AsyncCallback<String> async);
 
-  void getDatabaseImportModules(AsyncCallback<DBPTKModule> async);
+  void getDatabaseImportModules(AsyncCallback<String> async);
 
-  void getDatabaseExportModules(AsyncCallback<DBPTKModule> async);
+  void getDatabaseExportModules(AsyncCallback<String> async);
 
-  void getSIARDExportModules(AsyncCallback<DBPTKModule> async);
+  void getSIARDExportModules(AsyncCallback<String> async);
 
-  void getSIARDExportModule(String moduleName, AsyncCallback<DBPTKModule> async);
+  void getSIARDExportModule(String moduleName, AsyncCallback<String> async);
 
   void getSchemaInformation(String databaseUUID, ConnectionParameters values, AsyncCallback<ViewerMetadata> async);
 

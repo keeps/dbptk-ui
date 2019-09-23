@@ -38,26 +38,6 @@ public class DBPTKModule implements Serializable {
     }
   }
 
-  private void addParameters(String key, ArrayList<PreservationParameter> value) {
-    this.parameters.put(key, value);
-  }
-
-  private ArrayList<PreservationParameter> getPreservationParameter(String moduleName) {
-    return this.getParameters().get(moduleName);
-  }
-
-  public ArrayList<PreservationParameter> getRequiredParameters() {
-    ArrayList<PreservationParameter> requiredParameters = new ArrayList<>();
-    for (Map.Entry<String, ArrayList<PreservationParameter>> entry : parameters.entrySet()) {
-      for (PreservationParameter p : entry.getValue()) {
-        if (p.isRequired()) {
-          requiredParameters.add(p);
-        }
-      }
-    }
-    return requiredParameters;
-  }
-
   public ArrayList<PreservationParameter> getRequiredParameters(String siardVersion) {
     ArrayList<PreservationParameter> requiredParameters = new ArrayList<>();
     for (Map.Entry<String, ArrayList<PreservationParameter>> entry : parameters.entrySet()) {
@@ -71,27 +51,4 @@ public class DBPTKModule implements Serializable {
     }
     return requiredParameters;
   }
-
-  public DBPTKModule getSIARDConnections() {
-    DBPTKModule siard = new DBPTKModule();
-    for (String key : this.parameters.keySet()) {
-      if (key.toLowerCase().contains("siard")) {
-        siard.addParameters(key, this.getPreservationParameter(key));
-      }
-    }
-
-    return siard;
-  }
-
-  public DBPTKModule getDBMSConnections() {
-    DBPTKModule dbms = new DBPTKModule();
-    for (String key : this.parameters.keySet()) {
-      if (!key.toLowerCase().contains("siard")) {
-        dbms.addParameters(key, this.getPreservationParameter(key));
-      }
-    }
-
-    return dbms;
-  }
-
 }

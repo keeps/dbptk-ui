@@ -1,8 +1,12 @@
 package com.databasepreservation.main.common.client;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.databasepreservation.main.common.shared.ValidationProgressData;
+import com.databasepreservation.main.common.shared.exceptions.ViewerException;
+import com.databasepreservation.main.common.shared.models.PreservationParameter;
 import org.roda.core.data.exceptions.AuthenticationDeniedException;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.roda.core.data.exceptions.GenericException;
@@ -120,13 +124,13 @@ public interface BrowserService extends RemoteService {
 
   String findSIARDFile(String path) throws GenericException, RequestNotValidException;
 
-  DBPTKModule getDatabaseImportModules() throws GenericException;
+  String getDatabaseImportModules() throws GenericException;
 
-  DBPTKModule getDatabaseExportModules() throws GenericException;
+  String getDatabaseExportModules() throws GenericException;
 
-  DBPTKModule getSIARDExportModule(String moduleName) throws GenericException;
+  String getSIARDExportModule(String moduleName) throws GenericException;
 
-  DBPTKModule getSIARDExportModules() throws GenericException;
+  String getSIARDExportModules() throws GenericException;
 
   ViewerMetadata getSchemaInformation(String databaseUUID, ConnectionParameters values) throws GenericException;
 

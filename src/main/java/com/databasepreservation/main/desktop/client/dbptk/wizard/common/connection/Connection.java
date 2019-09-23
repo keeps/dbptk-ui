@@ -3,6 +3,7 @@ package com.databasepreservation.main.desktop.client.dbptk.wizard.common.connect
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import com.databasepreservation.main.common.client.BrowserService;
@@ -10,11 +11,13 @@ import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
 import com.databasepreservation.main.common.shared.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.main.common.shared.client.widgets.Toast;
+import com.databasepreservation.main.common.shared.exceptions.ViewerException;
 import com.databasepreservation.main.desktop.client.common.sidebar.ConnectionSidebar;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
 import com.databasepreservation.main.common.shared.models.DBPTKModule;
 import com.databasepreservation.main.common.shared.models.PreservationParameter;
 import com.databasepreservation.main.common.shared.models.wizardParameters.ConnectionParameters;
+import com.github.nmorel.gwtjackson.client.ObjectMapper;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -25,6 +28,8 @@ import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
+import org.roda.core.data.exceptions.GenericException;
+import org.roda.core.data.utils.JsonUtils;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -34,6 +39,8 @@ public class Connection extends WizardPanel<ConnectionParameters> {
 
   interface ConnectionUiBinder extends UiBinder<Widget, Connection> {
   }
+
+  interface DBPTKModuleMapper extends ObjectMapper<DBPTKModule> {}
 
   private static ConnectionUiBinder binder = GWT.create(ConnectionUiBinder.class);
 
@@ -79,17 +86,20 @@ public class Connection extends WizardPanel<ConnectionParameters> {
     connectionInputPanel.clear();
     connectionInputPanel.add(connectionHomePanel);
 
-    BrowserService.Util.getInstance().getDatabaseImportModules(new DefaultAsyncCallback<DBPTKModule>() {
+    BrowserService.Util.getInstance().getDatabaseImportModules(new DefaultAsyncCallback<String>() {
       @Override
-      public void onSuccess(DBPTKModule result) {
+      public void onSuccess(String result) {
+        DBPTKModuleMapper mapper = GWT.create( DBPTKModuleMapper.class );
+        DBPTKModule module = mapper.read(result);
+        leftSideContainer.removeStyleName("loading-sidebar");
+        JDBCListConnections.remove(spinner);
         connectionSidebar = ConnectionSidebar.getInstance(databaseUUID, messages.sidebarMenuTextForDatabases(),
-          FontAwesomeIconManager.DATABASE, result.getDBMSConnections(), targetToken);
-
+          FontAwesomeIconManager.DATABASE, module, targetToken);
         JDBCListConnections.add(connectionSidebar);
         leftSideContainer.removeStyleName("loading-sidebar");
         JDBCListConnections.remove(spinner);
 
-        dbmsModule = result.getDBMSConnections();
+        dbmsModule = module;
       }
     });
   }
@@ -106,17 +116,19 @@ public class Connection extends WizardPanel<ConnectionParameters> {
     connectionInputPanel.clear();
     connectionInputPanel.add(connectionHomePanel);
 
-    BrowserService.Util.getInstance().getDatabaseExportModules(new DefaultAsyncCallback<DBPTKModule>() {
+    BrowserService.Util.getInstance().getDatabaseExportModules(new DefaultAsyncCallback<String>() {
       @Override
-      public void onSuccess(DBPTKModule result) {
+      public void onSuccess(String result) {
+        DBPTKModuleMapper mapper = GWT.create( DBPTKModuleMapper.class );
+        DBPTKModule module = mapper.read(result);
         connectionSidebar = ConnectionSidebar.getInstance(databaseUUID, messages.sidebarMenuTextForDatabases(),
-          FontAwesomeIconManager.DATABASE, result.getDBMSConnections(), targetToken);
+          FontAwesomeIconManager.DATABASE, module, targetToken);
 
         JDBCListConnections.add(connectionSidebar);
         leftSideContainer.removeStyleName("loading-sidebar");
         JDBCListConnections.remove(spinner);
 
-        dbmsModule = result.getDBMSConnections();
+        dbmsModule = module;
       }
     });
   }
@@ -168,7 +180,9 @@ public class Connection extends WizardPanel<ConnectionParameters> {
     }
     sshTunnelPanel.clear();
     connectionInputPanel.clear();
-    connectionSidebar.selectNone();
+    if (connectionSidebar != null) {
+      connectionSidebar.selectNone();
+    }
     instances.clear();
   }
 

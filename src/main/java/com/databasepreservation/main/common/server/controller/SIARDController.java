@@ -36,6 +36,7 @@ import com.databasepreservation.main.common.server.ValidationProgressObserver;
 import com.databasepreservation.main.common.server.ViewerConfiguration;
 import com.databasepreservation.main.common.server.ViewerFactory;
 import com.databasepreservation.main.common.server.index.DatabaseRowsSolrManager;
+import com.databasepreservation.main.common.server.index.utils.JsonTransformer;
 import com.databasepreservation.main.common.server.index.utils.SolrUtils;
 import com.databasepreservation.main.common.server.transformers.ToolkitStructure2ViewerStructure;
 import com.databasepreservation.main.common.shared.ViewerConstants;
@@ -46,7 +47,6 @@ import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadat
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSIARDBundle;
 import com.databasepreservation.main.common.shared.exceptions.ViewerException;
 import com.databasepreservation.main.common.shared.models.DBPTKModule;
-import com.databasepreservation.main.desktop.shared.models.ExternalLobDBPTK;
 import com.databasepreservation.main.common.shared.models.PreservationParameter;
 import com.databasepreservation.main.common.shared.models.SSHConfiguration;
 import com.databasepreservation.main.common.shared.models.wizardParameters.ConnectionParameters;
@@ -56,6 +56,7 @@ import com.databasepreservation.main.common.shared.models.wizardParameters.Expor
 import com.databasepreservation.main.common.shared.models.wizardParameters.ExternalLOBsParameter;
 import com.databasepreservation.main.common.shared.models.wizardParameters.MetadataExportOptionsParameters;
 import com.databasepreservation.main.common.shared.models.wizardParameters.TableAndColumnsParameters;
+import com.databasepreservation.main.desktop.shared.models.ExternalLobDBPTK;
 import com.databasepreservation.main.modules.viewer.DbvtkModuleFactory;
 import com.databasepreservation.model.Reporter;
 import com.databasepreservation.model.exception.ModuleException;
@@ -326,7 +327,7 @@ public class SIARDController {
     return null;
   }
 
-  public static DBPTKModule getSIARDExportModule(String moduleName) throws GenericException {
+  public static String getSIARDExportModule(String moduleName) throws GenericException {
 
     DBPTKModule dbptkModule = new DBPTKModule();
 
@@ -337,10 +338,15 @@ public class SIARDController {
     } catch (UnsupportedModuleException e) {
       throw new GenericException(e);
     }
-    return dbptkModule;
+
+    try {
+      return JsonTransformer.getJsonFromObject(dbptkModule);
+    } catch (ViewerException e) {
+      throw new GenericException(e);
+    }
   }
 
-  public static DBPTKModule getSIARDExportModules() throws GenericException {
+  public static String getSIARDExportModules() throws GenericException {
     DBPTKModule dbptkModule = new DBPTKModule();
 
     Set<DatabaseModuleFactory> databaseModuleFactories = ReflectionUtils.collectDatabaseModuleFactories();
@@ -360,33 +366,51 @@ public class SIARDController {
         }
       }
     }
-    return dbptkModule;
+
+    try {
+      return JsonTransformer.getJsonFromObject(dbptkModule);
+    } catch (ViewerException e) {
+      throw new GenericException(e);
+    }
   }
 
-  public static DBPTKModule getDatabaseExportModules() throws GenericException {
+  public static String getDatabaseExportModules() throws GenericException {
     DBPTKModule dbptkModule = new DBPTKModule();
     Set<DatabaseModuleFactory> databaseModuleFactories = ReflectionUtils.collectDatabaseModuleFactories();
     for (DatabaseModuleFactory factory : databaseModuleFactories) {
       if (!factory.getModuleName().equals("list-tables")) {
-        if (factory.isEnabled() && factory.producesExportModules()) {
-          getDatabaseModulesParameters(factory, dbptkModule);
+        if (!factory.getModuleName().toLowerCase().contains("siard")) {
+          if (factory.isEnabled() && factory.producesExportModules()) {
+            getDatabaseModulesParameters(factory, dbptkModule);
+          }
         }
       }
     }
-    return dbptkModule;
+    try {
+      return JsonTransformer.getJsonFromObject(dbptkModule);
+    } catch (ViewerException e) {
+      throw new GenericException(e);
+    }
   }
 
-  public static DBPTKModule getDatabaseImportModules() throws GenericException {
+  public static String getDatabaseImportModules() throws GenericException {
     DBPTKModule dbptkModule = new DBPTKModule();
     Set<DatabaseModuleFactory> databaseModuleFactories = ReflectionUtils.collectDatabaseModuleFactories();
     for (DatabaseModuleFactory factory : databaseModuleFactories) {
       if (factory.isEnabled()) {
         if (factory.producesImportModules()) {
-          getDatabaseModulesParameters(factory, dbptkModule);
+          if (!factory.getModuleName().toLowerCase().contains("siard")) {
+            getDatabaseModulesParameters(factory, dbptkModule);
+          }
         }
       }
     }
-    return dbptkModule;
+
+    try {
+      return JsonTransformer.getJsonFromObject(dbptkModule);
+    } catch (ViewerException e) {
+      throw new GenericException(e);
+    }
   }
 
   public static String loadMetadataFromLocal(String databaseUUID, String localPath) throws GenericException {

@@ -4,9 +4,14 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.databasepreservation.main.common.shared.ValidationProgressData;
+import com.databasepreservation.main.common.shared.exceptions.ViewerException;
+import com.databasepreservation.main.common.shared.models.PreservationParameter;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -268,22 +273,22 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
   }
 
   @Override
-  public DBPTKModule getDatabaseImportModules() throws GenericException {
+  public String getDatabaseImportModules() throws GenericException {
     return SIARDController.getDatabaseImportModules();
   }
 
   @Override
-  public DBPTKModule getDatabaseExportModules() throws GenericException {
+  public String getDatabaseExportModules() throws GenericException {
     return SIARDController.getDatabaseExportModules();
   }
 
   @Override
-  public DBPTKModule getSIARDExportModule(String moduleName) throws GenericException {
+  public String getSIARDExportModule(String moduleName) throws GenericException {
     return SIARDController.getSIARDExportModule(moduleName);
   }
 
   @Override
-  public DBPTKModule getSIARDExportModules() throws GenericException {
+  public String getSIARDExportModules() throws GenericException {
     return SIARDController.getSIARDExportModules();
   }
 
