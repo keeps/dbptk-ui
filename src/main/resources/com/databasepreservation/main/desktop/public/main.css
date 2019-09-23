@@ -917,6 +917,7 @@ html, body, .main {
     margin: 0;
 }
 
+
 /**********************************************
 		          breadcrumb
 ***********************************************/
@@ -1965,6 +1966,10 @@ input[type="checkbox"]:checked:after {
 .browseContentPreviewPanel.validation{
     padding-left:10rem;
     padding-right:10rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding-bottom: 1em;
 }
 
 .progress-report.validation{
@@ -2023,6 +2028,55 @@ input[type="checkbox"]:checked:after {
     padding-left: 90px;
 }
 
+.stick-bottom-log{
+    display: flex;
+    height: 20px;
+    line-height: 20px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-left: auto;
+    width: max-content;
+    padding: 0.5em 0;
+}
+.stick-bottom-log .gwt-Label{
+    margin-right: 1rem;
+}
+.tail-off{
+    background-color: #2c2c2c;
+}
+
+.tail-on{
+    background-color: #6b0;
+}
+
+.tail{
+    position: relative;
+    display: inline-block;
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+}
+
+.tail::after{
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    margin: auto;
+    display: block;
+    height: 10px;
+    width: 10px;
+    background: #f1f1f1;
+    border-radius: 50%;
+}
+
+.bottom-panel{
+    align-self: flex-end;
+    padding: 0.5em 0;
+}
 /***************************
     SPINNER
  ***************************/

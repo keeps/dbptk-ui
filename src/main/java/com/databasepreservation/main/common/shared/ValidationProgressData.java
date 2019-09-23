@@ -47,6 +47,10 @@ public class ValidationProgressData implements Serializable {
     return requirementsList.subList(lastPosition, requirementsList.size());
   }
 
+  public List<Requirement> getRequirementsList() {
+    return requirementsList;
+  }
+
   public boolean isFinished() {
     return finished;
   }

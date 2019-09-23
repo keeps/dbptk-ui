@@ -23,9 +23,9 @@ private ValidationProgressData progressData;
 
   @Override
   public void notifyFinishValidationModule(String componentName, ValidationReporterStatus status) {
-    progressData.createRequirement(ValidationProgressData.Requirement.Type.SUB_REQUIREMENT);
-    progressData.setRequirementID(componentName);
-    progressData.setRequirementStatus(status.name());
+//    progressData.createRequirement(ValidationProgressData.Requirement.Type.SUB_REQUIREMENT);
+//    progressData.setRequirementID(componentName);
+//    progressData.setRequirementStatus(status.name());
   }
 
   @Override

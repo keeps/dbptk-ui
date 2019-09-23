@@ -45,6 +45,8 @@ public class FontAwesomeIconManager {
   public static final String SERVER = "server";
   public static final String QUESTION = "question-circle";
   public static final String SIARD_VALIDATIONS = "check";
+  public static final String COG = "cog";
+  public static final String SPIN = "spin";
 
 
   public static String getTag(String icon) {

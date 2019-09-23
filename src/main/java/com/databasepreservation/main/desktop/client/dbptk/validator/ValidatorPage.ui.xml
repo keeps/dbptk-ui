@@ -3,17 +3,27 @@
              xmlns:m='urn:import:com.databasepreservation.main.common.shared.client.breadcrumb'
              xmlns:c='urn:import:com.databasepreservation.main.common.shared.client.common'>
 
-
+    <ui:with field='messages' type='config.i18n.client.ClientMessages' />
     <g:FlowPanel addStyleNames="application-container" ui:field="container">
         <m:BreadcrumbPanel ui:field="breadcrumb"/>
         <g:FlowPanel addStyleNames="browseContentPreviewPanel validation">
-            <c:LoadingDiv visible="false" ui:field="loading"/>
-            <g:Label ui:field="title" addStyleNames="h1"/>
-            <g:FlowPanel ui:field="validationInformation"/>
             <g:FlowPanel>
-                <g:FlowPanel ui:field="content" addStyleNames="progress-report validation"/>
+                <c:LoadingDiv visible="false" ui:field="loading"/>
+                <g:Label ui:field="title" addStyleNames="h1"/>
+                <g:FlowPanel ui:field="validationInformation"/>
+                <g:FocusPanel ui:field="contentScroll" addStyleNames="progress-report validation">
+                    <g:FlowPanel ui:field="content"/>
+                </g:FocusPanel>
+                <g:FlowPanel ui:field="validationControl"/>
             </g:FlowPanel>
-            <g:FlowPanel ui:field="validationControl"/>
+            <g:FlowPanel addStyleNames="bottom-panel">
+                <g:Button ui:field="btnRunAgain" addStyleNames="btn btn-link-info">
+                    <ui:text from='{messages.SIARDHomePageButtonTextRunValidationAgain}'/>
+                </g:Button>
+                <g:Button ui:field="btnCancel" addStyleNames="btn btn-primary btn-back">
+                    <ui:text from='{messages.basicActionCancel}'/>
+                </g:Button>
+            </g:FlowPanel>
         </g:FlowPanel>
     </g:FlowPanel>
 
