@@ -232,7 +232,7 @@ public class JDBCPanel extends Composite {
     return arrayList.isEmpty();
   }
 
-  public void clear() {
+  public void clearInputs() {
     for (TextBox textBox : textBoxInputs.values()) {
       textBox.getElement().removeAttribute("required");
       textBox.setText("");
@@ -245,6 +245,10 @@ public class JDBCPanel extends Composite {
     for (FileUploadField fileUploadField : fileInputs.values()) {
       fileUploadField.setPathLocation("","");
     }
+  }
+
+  public void clear() {
+    instances.clear();
   }
 
   public void clearPasswords() {

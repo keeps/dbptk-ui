@@ -8,23 +8,22 @@ import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
-import com.databasepreservation.main.common.shared.exceptions.ViewerException;
-import com.databasepreservation.main.desktop.client.common.dialogs.Dialogs;
 import com.databasepreservation.main.common.shared.client.common.utils.AsyncCallbackUtils;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.common.shared.client.widgets.Toast;
+import com.databasepreservation.main.common.shared.models.wizardParameters.ConnectionParameters;
+import com.databasepreservation.main.common.shared.models.wizardParameters.CustomViewsParameters;
+import com.databasepreservation.main.common.shared.models.wizardParameters.ExportOptionsParameters;
+import com.databasepreservation.main.common.shared.models.wizardParameters.MetadataExportOptionsParameters;
+import com.databasepreservation.main.common.shared.models.wizardParameters.TableAndColumnsParameters;
+import com.databasepreservation.main.desktop.client.common.dialogs.Dialogs;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardManager;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.common.connection.Connection;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.common.exportOptions.MetadataExportOptions;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.common.exportOptions.SIARDExportOptions;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.common.progressBar.ProgressBarPanel;
-import com.databasepreservation.main.common.shared.models.wizardParameters.ConnectionParameters;
-import com.databasepreservation.main.common.shared.models.wizardParameters.CustomViewsParameters;
-import com.databasepreservation.main.common.shared.models.wizardParameters.ExportOptionsParameters;
-import com.databasepreservation.main.common.shared.models.wizardParameters.MetadataExportOptionsParameters;
-import com.databasepreservation.main.common.shared.models.wizardParameters.TableAndColumnsParameters;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -176,14 +175,14 @@ public class CreateWizardManager extends WizardManager {
 
           @Override
           public void onFailure(Throwable caught) {
-            Toast.showError(messages.errorMessagesConnectionTitle(), caught.getMessage());
-            AsyncCallbackUtils.defaultFailureTreatment(caught);
+            Dialogs.showErrors(messages.errorMessagesConnectionTitle(), caught.getMessage(),
+              messages.basicActionClose());
             wizardContent.remove(spinner);
           }
         });
     } else {
       Connection connection = (Connection) wizardInstances.get(position);
-      if (connection.isClickedOnSidebar()) {
+      if (connection.sidebarWasClicked()) {
         wizardInstances.get(position).error();
         connection.clearPasswords();
       }

@@ -718,6 +718,10 @@ public interface ClientMessages extends Messages {
 
   String connectionPageTextForSSHelper();
 
+  String connectionPageButtonTextForTestConnection();
+
+  String connectionPageTextForConnectionSuccess(String databaseName);
+
   /********************************************
    * Create Wizard: Table & Columns
    ********************************************/

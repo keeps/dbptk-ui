@@ -47,6 +47,38 @@ import config.i18n.client.ClientMessages;
 public class Dialogs {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
 
+  public static void showErrors(String title, String message, String closeButtonText) {
+    final DialogBox dialogBox = new DialogBox(false, true);
+    dialogBox.setText(title);
+
+    FlowPanel layout = new FlowPanel();
+    Label messageLabel = new Label(message);
+    Button btnClose = new Button(closeButtonText);
+    FlowPanel footer = new FlowPanel();
+
+    layout.add(messageLabel);
+    layout.add(footer);
+    footer.add(btnClose);
+
+    dialogBox.setWidget(layout);
+
+    dialogBox.setGlassEnabled(true);
+    dialogBox.setAnimationEnabled(false);
+    dialogBox.setWidth("400px");
+
+    btnClose.addClickHandler(event -> {
+      dialogBox.hide();
+    });
+
+    dialogBox.addStyleName("dialog-persist-errors");
+    layout.addStyleName("dialog-persist-errors-layout");
+    footer.addStyleName("dialog-persist-errors-layout-footer");
+    btnClose.addStyleName("btn btn-link");
+
+    dialogBox.center();
+    dialogBox.show();
+  }
+
   public static void showQueryResult(String title, String closeButtonText, List<List<String>> rows) {
 
     final DialogBox dialogBox = new DialogBox(false, true);
@@ -388,10 +420,39 @@ public class Dialogs {
   }
 
   public static void showInformationDialog(String title, String message, String continueButtonText) {
-    showInformationDialog(title, message, continueButtonText, new NoAsyncCallback<Void>());
+    showInformationDialog(title, message, continueButtonText, null, new NoAsyncCallback<Void>());
   }
 
   public static void showInformationDialog(String title, String message, String continueButtonText,
+    String continueButtonStyle) {
+    final DialogBox dialogBox = createDialogBoxSkeleton(false, true, true, false, title,"wui-dialog-information");
+
+    FlowPanel layout = new FlowPanel();
+    Label messageLabel = new Label(message);
+    Button btnClose = new Button(continueButtonText);
+    FlowPanel footer = new FlowPanel();
+
+    layout.add(messageLabel);
+    layout.add(footer);
+    footer.add(btnClose);
+
+    dialogBox.setWidget(layout);
+
+    btnClose.addClickHandler(event -> {
+      dialogBox.hide();
+    });
+
+    dialogBox.addStyleName("dialog-persist-information");
+    layout.addStyleName("dialog-persist-information-layout");
+    footer.addStyleName("dialog-persist-information-layout-footer");
+    btnClose.addStyleName(continueButtonStyle);
+
+    dialogBox.center();
+    dialogBox.show();
+  }
+
+  public static void showInformationDialog(String title, String message, String continueButtonText,
+    String continueButtonStyle,
     final AsyncCallback<Void> callback) {
     final DialogBox dialogBox = new DialogBox(false, true);
     dialogBox.setText(title);
@@ -420,10 +481,24 @@ public class Dialogs {
     dialogBox.addStyleName("wui-dialog-information");
     layout.addStyleName("wui-dialog-layout");
     messageLabel.addStyleName("wui-dialog-message");
-    continueButton.addStyleName("btn btn-play");
+    if (continueButtonStyle != null) {
+      continueButton.addStyleName(continueButtonStyle);
+    } else {
+      continueButton.addStyleName("btn btn-play");
+    }
 
     dialogBox.center();
     dialogBox.show();
+  }
+
+  private static DialogBox createDialogBoxSkeleton(boolean autoHide, boolean modal, boolean glassEnabled,
+    boolean animationEnabled, String title, String dialogboxStyle) {
+    final DialogBox dialogBox = new DialogBox(autoHide, modal);
+    dialogBox.setText(title);
+    dialogBox.setGlassEnabled(glassEnabled);
+    dialogBox.setAnimationEnabled(animationEnabled);
+    dialogBox.addStyleName(dialogboxStyle);
+    return dialogBox;
   }
 
   public static DialogBox showLoadingModel() {

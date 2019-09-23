@@ -3,7 +3,6 @@ package com.databasepreservation.main.desktop.client.dbptk.wizard.common.connect
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import com.databasepreservation.main.common.client.BrowserService;
@@ -11,25 +10,24 @@ import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
 import com.databasepreservation.main.common.shared.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.main.common.shared.client.widgets.Toast;
-import com.databasepreservation.main.common.shared.exceptions.ViewerException;
-import com.databasepreservation.main.desktop.client.common.sidebar.ConnectionSidebar;
-import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
 import com.databasepreservation.main.common.shared.models.DBPTKModule;
 import com.databasepreservation.main.common.shared.models.PreservationParameter;
 import com.databasepreservation.main.common.shared.models.wizardParameters.ConnectionParameters;
+import com.databasepreservation.main.desktop.client.common.dialogs.Dialogs;
+import com.databasepreservation.main.desktop.client.common.sidebar.ConnectionSidebar;
+import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
 import com.github.nmorel.gwtjackson.client.ObjectMapper;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
-import org.roda.core.data.exceptions.GenericException;
-import org.roda.core.data.utils.JsonUtils;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -45,7 +43,7 @@ public class Connection extends WizardPanel<ConnectionParameters> {
   private static ConnectionUiBinder binder = GWT.create(ConnectionUiBinder.class);
 
   @UiField
-  FlowPanel JDBCListConnections, leftSideContainer, connectionInputPanel;
+  FlowPanel mainPanel, JDBCListConnections, leftSideContainer, connectionInputPanel;
 
   private final String databaseUUID;
   private DBPTKModule dbmsModule;
@@ -56,6 +54,7 @@ public class Connection extends WizardPanel<ConnectionParameters> {
   private Set<JDBCPanel> JDBCPanels = new HashSet<>();
   private String type;
   private boolean clickedOnSidebar = false;
+  private Button btnTestConnection;
 
   private static HashMap<String, Connection> instances = new HashMap<>();
 
@@ -70,8 +69,38 @@ public class Connection extends WizardPanel<ConnectionParameters> {
     initWidget(binder.createAndBindUi(this));
 
     this.databaseUUID = databaseUUID;
-
     sshTunnelPanel = SSHTunnelPanel.getInstance(databaseUUID);
+    btnTestConnection = new Button();
+    btnTestConnection.setVisible(false);
+    btnTestConnection.addStyleName("btn btn-primary btn-test");
+    btnTestConnection.setText(messages.connectionPageButtonTextForTestConnection());
+    btnTestConnection.addClickHandler(event -> {
+      Widget spinner = new HTML(SafeHtmlUtils.fromSafeConstant(
+        "<div class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
+      mainPanel.add(spinner);
+
+      final ConnectionParameters connectionParameters = getValues();
+
+      BrowserService.Util.getInstance().testConnection(databaseUUID, connectionParameters,
+        new DefaultAsyncCallback<Boolean>() {
+          @Override
+          public void onSuccess(Boolean aBoolean) {
+            Dialogs.showInformationDialog(messages.errorMessagesConnectionTitle(),
+              messages.connectionPageTextForConnectionSuccess(
+                connectionParameters.getJDBCConnectionParameters().getConnection().get("database")),
+              messages.basicActionClose(), "btn btn-link");
+            mainPanel.remove(spinner);
+          }
+
+          @Override
+          public void onFailure(Throwable caught) {
+            mainPanel.remove(spinner);
+            Dialogs.showErrors(messages.errorMessagesConnectionTitle(), caught.getMessage(),
+              messages.basicActionClose());
+            Toast.showError(messages.errorMessagesConnectionTitle(), caught.getMessage());
+          }
+        });
+    });
   }
 
   public void initImportDBMS(final String type, final String targetToken) {
@@ -156,6 +185,11 @@ public class Connection extends WizardPanel<ConnectionParameters> {
 
     selected.validate(type);
     connectionInputPanel.add(tabPanel);
+
+    if (connectionInputPanel.getWidgetIndex(btnTestConnection) == -1) {
+      btnTestConnection.setVisible(true);
+      connectionInputPanel.add(btnTestConnection);
+    }
   }
 
   @Override
@@ -178,6 +212,7 @@ public class Connection extends WizardPanel<ConnectionParameters> {
     for (JDBCPanel jdbc : JDBCPanels) {
       jdbc.clear();
     }
+
     sshTunnelPanel.clear();
     connectionInputPanel.clear();
     if (connectionSidebar != null) {
@@ -193,7 +228,7 @@ public class Connection extends WizardPanel<ConnectionParameters> {
     sshTunnelPanel.clearPassword();
   }
 
-  public boolean isClickedOnSidebar() {
+  public boolean sidebarWasClicked() {
     return clickedOnSidebar;
   }
 

@@ -260,6 +260,10 @@ p[data-value]:after {
     content: "\f085";
 }
 
+.btn-test:after {
+    content: "\f0e7";
+}
+
 .btn-manage:after {
     content: "\f233";
 }
@@ -1761,6 +1765,54 @@ input[type="checkbox"]:checked:after {
 .dialog-external-lobs-layout-footer {
     display: flex;
     flex-direction: row-reverse;
+}
+
+/**********************************************
+		         Dialog Errors
+***********************************************/
+.dialog-persist-errors table {
+    width: 100%;
+}
+
+.dialog-persist-errors .Caption {
+    background-color: #d9534f;
+}
+
+.dialog-persist-errors-layout {
+    padding: 10px;
+    height: 100%;
+}
+
+.dialog-persist-errors-layout-footer {
+    display: flex;
+    flex-direction: row-reverse;
+    padding: 5px;
+}
+
+.dialog-persist-errors-layout-footer .btn {
+    padding: 5px 0px;
+}
+
+/**********************************************
+		         Dialog Information
+***********************************************/
+.dialog-persist-information table {
+    width: 100%;
+}
+
+.dialog-persist-information-layout {
+    padding: 10px;
+    height: 100%;
+}
+
+.dialog-persist-information-layout-footer {
+    display: flex;
+    flex-direction: row-reverse;
+    padding: 5px;
+}
+
+.dialog-persist-information-layout-footer .btn {
+    padding: 5px 0px;
 }
 
 /***********************************************

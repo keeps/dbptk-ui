@@ -16,6 +16,7 @@ import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManage
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.common.shared.client.tools.ToolkitModuleName2ViewerModuleName;
 import com.databasepreservation.main.common.shared.client.widgets.Toast;
+import com.databasepreservation.main.desktop.client.common.dialogs.Dialogs;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardManager;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.common.connection.Connection;
@@ -104,6 +105,9 @@ public class DBMSWizardManager extends WizardManager {
 
     btnCancel.addClickHandler(event -> {
       clear();
+      for (WizardPanel wizardPanel : wizardInstances) {
+        wizardPanel.clear();
+      }
       instances.clear();
       HistoryManager.gotoSIARDInfo(databaseUUID);
     });
@@ -147,7 +151,18 @@ public class DBMSWizardManager extends WizardManager {
     final boolean valid = wizardInstances.get(position).validate();
     if (valid) {
       connectionParameters = (ConnectionParameters) wizardInstances.get(position).getValues();
-      migrateToDBMS();
+      BrowserService.Util.getInstance().testConnection(databaseUUID, connectionParameters, new DefaultAsyncCallback<Boolean>() {
+        @Override
+        public void onSuccess(Boolean result) {
+          migrateToDBMS();
+        }
+
+        @Override
+        public void onFailure(Throwable caught) {
+          Dialogs.showErrors(messages.errorMessagesConnectionTitle(), caught.getMessage(),
+              messages.basicActionClose());
+        }
+      });
     } else {
       wizardInstances.get(position).error();
       Connection connection = (Connection) wizardInstances.get(position);
