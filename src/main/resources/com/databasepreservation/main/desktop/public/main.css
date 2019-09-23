@@ -1975,7 +1975,7 @@ input[type="checkbox"]:checked:after {
 .progress-report.validation{
     height: auto;
     min-height: 100px;
-    max-height: 500px;
+    max-height: 400px;
 }
 
 .validation-panel{
@@ -2077,7 +2077,10 @@ input[type="checkbox"]:checked:after {
     align-self: flex-end;
     padding: 0.5em 0;
 }
-/***************************
+
+.bottom-panel .btn-primary{
+    margin-left: 1em;
+}/***************************
     SPINNER
  ***************************/
 .spinnerRetrievingRows {

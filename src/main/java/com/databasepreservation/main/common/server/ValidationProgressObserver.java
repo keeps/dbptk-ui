@@ -57,6 +57,11 @@ private ValidationProgressData progressData;
   }
 
   @Override
+  public void notifyNumberOfWarnings(int warnings) {
+    progressData.setNumberOfWarning(warnings);
+  }
+
+  @Override
   public void notifyValidationProcessFinish(boolean result) {
     progressData.setFinished(result);
   }

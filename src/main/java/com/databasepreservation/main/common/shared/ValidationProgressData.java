@@ -9,6 +9,7 @@ public class ValidationProgressData implements Serializable {
   private boolean finished = false;
   private List<Requirement> requirementsList = new ArrayList<>();
   private Requirement requirement;
+  private int numberOfWarnings;
 
   private static HashMap<String, ValidationProgressData> instances = new HashMap<>();
 
@@ -59,6 +60,13 @@ public class ValidationProgressData implements Serializable {
     finished = true;
   }
 
+  public void setNumberOfWarning(int warnings) {
+    numberOfWarnings = warnings;
+  }
+
+  public int getNumberOfWarnings() {
+    return numberOfWarnings;
+  }
 
   public static class Requirement implements Serializable {
     private String ID;

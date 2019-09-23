@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.Constants;
 import com.databasepreservation.main.common.client.BrowserService;
 import com.databasepreservation.main.common.shared.ValidationProgressData;
 import com.databasepreservation.main.common.shared.ViewerConstants;
@@ -23,11 +22,7 @@ import com.databasepreservation.main.common.shared.client.widgets.Toast;
 import com.databasepreservation.main.desktop.client.dbptk.SIARDMainPage;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.MouseUpEvent;
 import com.google.gwt.event.dom.client.MouseWheelEvent;
-import com.google.gwt.event.dom.client.ScrollEvent;
-import com.google.gwt.event.dom.client.ScrollHandler;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -40,7 +35,6 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
@@ -59,6 +53,7 @@ public class ValidatorPage extends Composite {
   private Integer countErrors = 0;
   private Integer countPassed = 0;
   private Integer countSkipped = 0;
+  private Integer numberOfWarnings = 0;
   private Boolean stickToBottom = true;
   private FlowPanel tailIndicator = new FlowPanel();
 
@@ -163,7 +158,7 @@ public class ValidatorPage extends Composite {
       new DefaultAsyncCallback<Boolean>() {
         @Override
         public void onSuccess(Boolean result) {
-          //TODO
+          // TODO
         }
 
         @Override
@@ -181,6 +176,7 @@ public class ValidatorPage extends Composite {
         public void onSuccess(ValidationProgressData result) {
           update(result);
           if (result.isFinished() && result.getRequirementsList().size() <= lastPosition) {
+            numberOfWarnings = result.getNumberOfWarnings();
             stopUpdating(messages.validatorPageTextForToast());
           }
         }
@@ -283,6 +279,7 @@ public class ValidatorPage extends Composite {
     countPassed = 0;
     countErrors = 0;
     countSkipped = 0;
+    numberOfWarnings = 0;
     populateValidationInfo(false);
 
   }
@@ -292,9 +289,12 @@ public class ValidatorPage extends Composite {
     btnRunAgain.setEnabled(enable);
     FlowPanel left = new FlowPanel();
 
-    left.add(validationInfoBuilder(messages.managePageTableHeaderTextForDatabaseName(),database.getMetadata().getName(), new Label(), true));
+    left.add(validationInfoBuilder(messages.managePageTableHeaderTextForDatabaseName(),
+      database.getMetadata().getName(), new Label(), true));
     left.add(validationInfoBuilder(messages.numberOfValidationError(), countErrors.toString(), new Label(), enable));
     left.add(validationInfoBuilder(messages.numberOfValidationsPassed(), countPassed.toString(), new Label(), enable));
+    left.add(validationInfoBuilder(messages.numberOfValidationsWarnings(), numberOfWarnings.toString(), new Label(),
+      enable));
     left.add(validationInfoBuilder(messages.numberOfValidationsSkipped(), countSkipped.toString(), new Label(), enable));
     Label statusLabel = new Label();
     left.add(validationInfoBuilder(messages.managePageTableHeaderTextForDatabaseStatus(), updateStatus(statusLabel),
@@ -320,7 +320,7 @@ public class ValidatorPage extends Composite {
 
     validationInformation.add(left);
 
-    FlowPanel stickToBottomPannel = new FlowPanel();
+    FlowPanel stickToBottomPanel = new FlowPanel();
     FocusPanel stickFocus = new FocusPanel();
     FlowPanel stickToBottomInner = new FlowPanel();
     Label tailLabel = new Label(messages.validatorPageTextForStick());
@@ -329,7 +329,7 @@ public class ValidatorPage extends Composite {
     stickToBottomInner.addStyleName("stick-bottom-log");
     stickFocus.addClickHandler(event -> {
       stickToBottom = !stickToBottom;
-      if(stickToBottom){
+      if (stickToBottom) {
         contentScroll.getElement().setScrollTop(contentScroll.getElement().getScrollHeight());
         tailIndicator.setStyleName("tail tail-on");
       } else {
@@ -337,8 +337,8 @@ public class ValidatorPage extends Composite {
       }
     });
     stickFocus.add(stickToBottomInner);
-    stickToBottomPannel.add(stickFocus);
-    validationInformation.add(stickToBottomPannel);
+    stickToBottomPanel.add(stickFocus);
+    validationInformation.add(stickToBottomPanel);
   }
 
   private FlowPanel validationInfoBuilder(String key, String value, Label valueLabel, Boolean loading) {
@@ -347,10 +347,10 @@ public class ValidatorPage extends Composite {
     Label keyLabel = new Label(key);
     keyLabel.addStyleName("title");
     panel.add(keyLabel);
-    if(!loading){
+    if (!loading) {
       String iconTag = FontAwesomeIconManager.getTag(FontAwesomeIconManager.COG);
       HTML html = new HTML(SafeHtmlUtils.fromSafeConstant(iconTag));
-      html.getElement().getFirstChildElement().addClassName("fa-"+FontAwesomeIconManager.SPIN);
+      html.getElement().getFirstChildElement().addClassName("fa-" + FontAwesomeIconManager.SPIN);
       html.addStyleName("text-muted");
       panel.add(html);
     } else {
@@ -386,12 +386,12 @@ public class ValidatorPage extends Composite {
   }
 
   @UiHandler("btnCancel")
-  void setBtnCancelHandler(ClickEvent e){
+  void setBtnCancelHandler(ClickEvent e) {
     HistoryManager.gotoSIARDInfo(databaseUUID);
   }
 
   @UiHandler("btnRunAgain")
-  void setBtnRunAgainHandler(ClickEvent e){
+  void setBtnRunAgainHandler(ClickEvent e) {
     BrowserService.Util.getInstance().clearValidationProgressData(databaseUUID, new DefaultAsyncCallback<Void>() {
       @Override
       public void onSuccess(Void result) {
@@ -401,8 +401,8 @@ public class ValidatorPage extends Composite {
   }
 
   @UiHandler("contentScroll")
-  void setContentScrollHandler(MouseWheelEvent e){
-    if(e.isNorth()){
+  void setContentScrollHandler(MouseWheelEvent e) {
+    if (e.isNorth()) {
       stickToBottom = false;
       tailIndicator.setStyleName("tail tail-off");
     }

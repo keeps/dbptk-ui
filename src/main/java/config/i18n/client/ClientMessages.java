@@ -883,6 +883,8 @@ public interface ClientMessages extends Messages {
 
   String numberOfValidationsPassed();
 
+  String numberOfValidationsWarnings();
+
   String numberOfValidationsSkipped();
 
   String validatorPageTextForStick();
