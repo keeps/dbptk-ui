@@ -11,19 +11,17 @@ import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabas
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
-import com.databasepreservation.main.common.shared.client.common.utils.AsyncCallbackUtils;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.common.shared.client.tools.ToolkitModuleName2ViewerModuleName;
-import com.databasepreservation.main.common.shared.client.widgets.Toast;
+import com.databasepreservation.main.common.shared.models.wizardParameters.ConnectionParameters;
+import com.databasepreservation.main.common.shared.models.wizardParameters.ExportOptionsParameters;
 import com.databasepreservation.main.desktop.client.common.dialogs.Dialogs;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardManager;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.common.connection.Connection;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.common.exportOptions.MetadataExportOptions;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.common.progressBar.ProgressBarPanel;
-import com.databasepreservation.main.common.shared.models.wizardParameters.ConnectionParameters;
-import com.databasepreservation.main.common.shared.models.wizardParameters.ExportOptionsParameters;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -151,22 +149,9 @@ public class DBMSWizardManager extends WizardManager {
     final boolean valid = wizardInstances.get(position).validate();
     if (valid) {
       connectionParameters = (ConnectionParameters) wizardInstances.get(position).getValues();
-      BrowserService.Util.getInstance().testConnection(databaseUUID, connectionParameters, new DefaultAsyncCallback<Boolean>() {
-        @Override
-        public void onSuccess(Boolean result) {
-          migrateToDBMS();
-        }
-
-        @Override
-        public void onFailure(Throwable caught) {
-          Dialogs.showErrors(messages.errorMessagesConnectionTitle(), caught.getMessage(),
-              messages.basicActionClose());
-        }
-      });
+      migrateToDBMS();
     } else {
       wizardInstances.get(position).error();
-      Connection connection = (Connection) wizardInstances.get(position);
-      connection.clearPasswords();
     }
   }
 
@@ -200,19 +185,28 @@ public class DBMSWizardManager extends WizardManager {
                 enableButtons(true);
                 updateBreadcrumb();
                 enableNext(false);
-                Toast.showError(messages.errorMessagesConnectionTitle(), caught.getMessage());
-                AsyncCallbackUtils.defaultFailureTreatment(caught);
+
+                Dialogs.showErrors(messages.errorMessagesConnectionTitle(), caught.getMessage(),
+                  messages.basicActionClose());
               }
 
               @Override
               public void onSuccess(Boolean result) {
                 if (result) {
-                  Toast.showInfo(messages.sendToWizardManagerInformationTitle(),
+                  Dialogs.showInformationDialog(messages.sendToWizardManagerInformationTitle(),
                     messages.sendToWizardManagerInformationMessageDBMS(
-                      connectionParameters.getJDBCConnectionParameters().getConnection().get("database")));
-                  clear();
-                  instances.clear();
-                  HistoryManager.gotoSIARDInfo(databaseUUID);
+                      connectionParameters.getJDBCConnectionParameters().getConnection().get("database")),
+                    messages.basicActionClose(), "btn btn-link", new DefaultAsyncCallback<Void>() {
+                      @Override
+                      public void onSuccess(Void result) {
+                        clear();
+                        for (WizardPanel wizardPanel : wizardInstances) {
+                          wizardPanel.clear();
+                        }
+                        instances.clear();
+                        HistoryManager.gotoSIARDInfo(databaseUUID);
+                      }
+                    });
                 }
               }
             });

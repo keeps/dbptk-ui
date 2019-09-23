@@ -8,21 +8,23 @@ import java.util.Map;
 import com.databasepreservation.main.common.client.BrowserService;
 import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
+import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.common.shared.client.widgets.Toast;
+import com.databasepreservation.main.common.shared.models.wizardParameters.ExportOptionsParameters;
+import com.databasepreservation.main.common.shared.models.wizardParameters.MetadataExportOptionsParameters;
+import com.databasepreservation.main.common.shared.models.wizardParameters.TableAndColumnsParameters;
+import com.databasepreservation.main.desktop.client.common.dialogs.Dialogs;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardManager;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.common.exportOptions.MetadataExportOptions;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.common.exportOptions.SIARDExportOptions;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.common.progressBar.ProgressBarPanel;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.upload.TableAndColumns;
-import com.databasepreservation.main.common.shared.models.wizardParameters.ExportOptionsParameters;
-import com.databasepreservation.main.common.shared.models.wizardParameters.MetadataExportOptionsParameters;
-import com.databasepreservation.main.common.shared.models.wizardParameters.TableAndColumnsParameters;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -57,6 +59,7 @@ public class SIARDWizardManager extends WizardManager {
   private static Map<String, SIARDWizardManager> instances = new HashMap<>();
   private final String databaseUUID;
   private final String databaseName;
+  private ViewerDatabase database = null;
   private int position = 0;
   private final int positions = 4;
 
@@ -100,6 +103,12 @@ public class SIARDWizardManager extends WizardManager {
   }
 
   private void init() {
+    BrowserService.Util.getInstance().retrieve(databaseUUID, ViewerDatabase.class.getName(), databaseUUID, new DefaultAsyncCallback<IsIndexed>() {
+      @Override
+      public void onSuccess(IsIndexed result) {
+        database = (ViewerDatabase) result;
+      }
+    });
     wizardContent.clear();
     TableAndColumns tableAndColumns = TableAndColumns.getInstance(databaseUUID);
     wizardInstances.add(0, tableAndColumns);
@@ -133,6 +142,8 @@ public class SIARDWizardManager extends WizardManager {
       SIARDExportOptions exportOptions = SIARDExportOptions.getInstance();
       wizardInstances.add(position, exportOptions);
       wizardContent.add(exportOptions);
+      updateButtons();
+      updateBreadcrumb();
     } else {
       wizardInstances.get(position).error();
     }
@@ -187,11 +198,16 @@ public class SIARDWizardManager extends WizardManager {
               @Override
               public void onSuccess(Boolean result) {
                 if (result) {
-                  Toast.showInfo(messages.sendToWizardManagerInformationTitle(),
-                    messages.sendToWizardManagerInformationMessageSIARD());
-                  clear();
-                  instances.clear();
-                  HistoryManager.gotoSIARDInfo(databaseUUID);
+                  Dialogs.showInformationDialog(messages.sendToWizardManagerInformationTitle(),
+                    messages.sendToWizardManagerInformationMessageSIARD(), messages.basicActionClose(), "btn btn-link",
+                    new DefaultAsyncCallback<Void>() {
+                      @Override
+                      public void onSuccess(Void result) {
+                        clear();
+                        instances.clear();
+                        HistoryManager.gotoSIARDInfo(databaseUUID);
+                      }
+                    });
                 }
               }
 

@@ -8,7 +8,6 @@ import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
-import com.databasepreservation.main.common.shared.client.common.utils.AsyncCallbackUtils;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.common.shared.client.widgets.Toast;
@@ -304,59 +303,49 @@ public class CreateWizardManager extends WizardManager {
     position = 5;
     updateBreadcrumb();
 
-    BrowserService.Util.getInstance().generateUUID(new DefaultAsyncCallback<String>() {
-      @Override
-      public void onSuccess(String databaseUUID) {
-        ProgressBarPanel progressBarPanel = ProgressBarPanel.getInstance(databaseUUID);
-        progressBarPanel.setTitleText(messages.progressBarPanelTextForCreateWizardProgressTitle());
-        progressBarPanel.setSubTitleText(messages.progressBarPanelTextForCreateWizardProgressSubTitle());
-        wizardContent.add(progressBarPanel);
-        BrowserService.Util.getInstance().createSIARD(databaseUUID, connectionParameters, tableAndColumnsParameters,
-          customViewsParameters, exportOptionsParameters, metadataExportOptionsParameters,
-          new AsyncCallback<Boolean>() {
-            @Override
-            public void onFailure(Throwable caught) {
-              wizardContent.clear();
-              position--;
-              wizardContent.add(wizardInstances.get(position));
-              enableButtons(true);
-              updateBreadcrumb();
-              Toast.showError(messages.createSIARDWizardManagerInformationMessagesTitle(), caught.getMessage());
-              AsyncCallbackUtils.defaultFailureTreatment(caught);
-            }
+    ProgressBarPanel progressBarPanel = ProgressBarPanel.getInstance(databaseUUID);
+    progressBarPanel.setTitleText(messages.progressBarPanelTextForCreateWizardProgressTitle());
+    progressBarPanel.setSubTitleText(messages.progressBarPanelTextForCreateWizardProgressSubTitle());
+    wizardContent.add(progressBarPanel);
 
-            @Override
-            public void onSuccess(Boolean result) {
-              if (redirect) {
-                final String siardPath = exportOptionsParameters.getSiardPath();
-                BrowserService.Util.getInstance().uploadMetadataSIARD(databaseUUID, siardPath,
-                  new DefaultAsyncCallback<String>() {
-                    @Override
-                    public void onSuccess(String result) {
-                      clear();
-                      instance = null;
-                      Toast.showInfo(messages.createSIARDWizardManagerInformationMessagesTitle(),
-                        messages.createSIARDWizardManagerInformationMessage());
-                      HistoryManager.gotoSIARDInfo(databaseUUID);
-                      ProgressBarPanel.getInstance(databaseUUID).clear(databaseUUID);
-                    }
+    BrowserService.Util.getInstance().createSIARD(databaseUUID, connectionParameters, tableAndColumnsParameters,
+      customViewsParameters, exportOptionsParameters, metadataExportOptionsParameters, new AsyncCallback<Boolean>() {
+        @Override
+        public void onFailure(Throwable caught) {
+          wizardContent.clear();
+          position--;
+          wizardContent.add(wizardInstances.get(position));
+          enableButtons(true);
+          updateBreadcrumb();
+          Dialogs.showErrors(messages.createSIARDWizardManagerInformationMessagesTitle(), caught.getMessage(),
+            messages.basicActionClose());
+        }
 
-                    @Override
-                    public void onFailure(Throwable caught) {
-                      enableButtons(true);
-                      enableNext(false);
-                      Toast.showError(messages.createSIARDWizardManagerInformationMessagesTitle(), caught.getMessage());
-                    }
-                  });
-              } else {
-                clear();
-                instance = null;
-                Toast.showInfo(messages.createSIARDWizardManagerInformationMessagesTitle(),
-                  messages.createSIARDWizardManagerInformationMessage());
-                HistoryManager.gotoHome();
-              }
-            }
-        });
+        @Override
+        public void onSuccess(Boolean result) {
+          if (redirect) {
+            final String siardPath = exportOptionsParameters.getSiardPath();
+            Dialogs.showConfirmDialog(messages.createSIARDWizardManagerInformationMessagesTitle(),
+              messages.createSIARDWizardManagerSIARDCreated(), messages.basicActionCancel(),
+              messages.basicActionImport(), new DefaultAsyncCallback<Boolean>() {
+                @Override
+                public void onSuccess(Boolean result) {
+                  if (result) {
+                    importSIARDMetadata(siardPath);
+                  } else {
+                    clear();
+                    instance = null;
+                    HistoryManager.gotoHome();
+                  }
+                }
+              });
+          } else {
+            clear();
+            instance = null;
+            Dialogs.showInformationDialog(messages.createSIARDWizardManagerInformationMessagesTitle(),
+              messages.createSIARDWizardManagerInformationMessage(), messages.basicActionClose(), "btn btn-link");
+            HistoryManager.gotoHome();
+          }
       }
     });
   }
@@ -465,5 +454,27 @@ public class CreateWizardManager extends WizardManager {
           break;
       }
     }
+  }
+
+  private void importSIARDMetadata(String path) {
+    final Widget loading = new HTML(SafeHtmlUtils.fromSafeConstant(
+      "<div id='loading' class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
+    wizardContent.add(loading);
+    BrowserService.Util.getInstance().uploadMetadataSIARD(databaseUUID, path, new DefaultAsyncCallback<String>() {
+      @Override
+      public void onSuccess(String result) {
+        clear();
+        instance = null;
+        wizardContent.remove(loading);
+        HistoryManager.gotoSIARDInfo(databaseUUID);
+      }
+
+      @Override
+      public void onFailure(Throwable caught) {
+        HistoryManager.gotoHome();
+        Dialogs.showErrors(messages.createSIARDWizardManagerInformationMessagesTitle(), caught.getMessage(),
+          messages.basicActionClose());
+      }
+    });
   }
 }

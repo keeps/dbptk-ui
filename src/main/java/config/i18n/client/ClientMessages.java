@@ -493,6 +493,8 @@ public interface ClientMessages extends Messages {
 
   String basicActionTest();
 
+  String basicActionImport();
+
   /*********************************************
    * Sidebar Menus
    ********************************************/
@@ -674,6 +676,8 @@ public interface ClientMessages extends Messages {
   String createSIARDWizardManagerInformationMessagesTitle();
 
   String createSIARDWizardManagerInformationMessage();
+
+  String createSIARDWizardManagerSIARDCreated();
 
   /********************************************
    * Connection Page

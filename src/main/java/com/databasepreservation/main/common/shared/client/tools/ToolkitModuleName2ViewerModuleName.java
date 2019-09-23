@@ -18,6 +18,9 @@ public class ToolkitModuleName2ViewerModuleName {
       case "postgresql": return "PostgreSQL";
       case "microsoft-sql-server": return "SQL Server";
       case "sybase": return "Sybase";
+      case ViewerConstants.SIARD1: return "SIARD 1";
+      case ViewerConstants.SIARD2: return "SIARD 2";
+      case ViewerConstants.SIARDDK: return "SIARD DK";
       default: return moduleName;
     }
   }
