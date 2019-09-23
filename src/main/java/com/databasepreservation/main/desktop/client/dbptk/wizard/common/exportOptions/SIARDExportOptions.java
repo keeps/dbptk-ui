@@ -31,6 +31,11 @@ public class SIARDExportOptions extends WizardPanel<ExportOptionsParameters> {
   @UiField
   ClientMessages messages = GWT.create(ClientMessages.class);
 
+  static int EXTERNAL_LOBS_ERROR = 1;
+  static int MISSING_FIELD = 2;
+  static int MISSING_FILE = 3;
+  static int OK = -1;
+
   interface SIARDUiBinder extends UiBinder<Widget, SIARDExportOptions> {
   }
 
@@ -48,6 +53,7 @@ public class SIARDExportOptions extends WizardPanel<ExportOptionsParameters> {
   private static SIARDExportOptions instance = null;
   private String version;
   private DBPTKModule dbptkModule;
+  private int validationError = 0;
 
   public static SIARDExportOptions getInstance() {
     if (instance == null) {
@@ -95,11 +101,13 @@ public class SIARDExportOptions extends WizardPanel<ExportOptionsParameters> {
   public void clear() {
     SIARDExportOptionsCurrent.getInstance(version, dbptkModule).clear();
     instance = null;
+    validationError = 0;
   }
 
   @Override
   public boolean validate() {
-    return SIARDExportOptionsCurrent.getInstance(version, dbptkModule).validate();
+    validationError = SIARDExportOptionsCurrent.getInstance(version, dbptkModule).validate();
+    return validationError == SIARDExportOptions.OK;
   }
 
   @Override

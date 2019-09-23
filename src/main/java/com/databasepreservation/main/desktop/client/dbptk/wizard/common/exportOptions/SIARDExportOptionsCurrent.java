@@ -13,6 +13,7 @@ import com.databasepreservation.main.common.shared.client.tools.JSOUtils;
 import com.databasepreservation.main.common.shared.client.tools.ViewerStringUtils;
 import com.databasepreservation.main.common.shared.client.widgets.Toast;
 import com.databasepreservation.main.common.shared.models.DBPTKModule;
+import com.databasepreservation.main.desktop.client.common.dialogs.Dialogs;
 import com.databasepreservation.main.desktop.shared.models.Filter;
 import com.databasepreservation.main.common.shared.models.PreservationParameter;
 import com.databasepreservation.main.common.shared.models.wizardParameters.ExportOptionsParameters;
@@ -53,6 +54,7 @@ public class SIARDExportOptionsCurrent extends Composite {
   private ArrayList<Label> externalLobsLabels = new ArrayList<>();
   private HashMap<String, TextBox> externalLobsInputs = new HashMap<>();
   private CheckBox externalLobCheckbox;
+  private int validationError = -1;
   private String version;
 
   public static SIARDExportOptionsCurrent getInstance(String key, DBPTKModule dbptkModule) {
@@ -131,9 +133,10 @@ public class SIARDExportOptionsCurrent extends Composite {
     return exportOptionsParameters;
   }
 
-  public boolean validate() {
-    if (!validateExternalLobs()) {
-      return false;
+  public int validate() {
+    if (validateExternalLobs() != SIARDExportOptions.OK) {
+      validationError = SIARDExportOptions.EXTERNAL_LOBS_ERROR;
+      return SIARDExportOptions.EXTERNAL_LOBS_ERROR;
     }
 
     final ArrayList<PreservationParameter> requiredParameters = dbptkModule.getRequiredParameters(version);
@@ -144,9 +147,11 @@ public class SIARDExportOptionsCurrent extends Composite {
           if (textBoxInputs.get(parameter.getName()) != null) {
             final TextBox textBox = textBoxInputs.get(parameter.getName());
             if (ViewerStringUtils.isBlank(textBox.getText())) {
-              return false;
+              validationError = SIARDExportOptions.MISSING_FIELD;
+              return SIARDExportOptions.MISSING_FIELD;
             } else {
-              return false;
+              validationError = SIARDExportOptions.MISSING_FIELD;
+              return SIARDExportOptions.MISSING_FIELD;
             }
           }
           break;
@@ -155,17 +160,19 @@ public class SIARDExportOptionsCurrent extends Composite {
           if (fileInputs.get(parameter.getName()) != null) {
             final String s = fileInputs.get(parameter.getName());
             if (ViewerStringUtils.isBlank(s)) {
-              return false;
+              validationError = SIARDExportOptions.MISSING_FILE;
+              return SIARDExportOptions.MISSING_FILE;
             }
           } else {
-            return false;
+            validationError = SIARDExportOptions.MISSING_FILE;
+            return SIARDExportOptions.MISSING_FILE;
           }
           break;
         default:
           ;
       }
     }
-    return true;
+    return SIARDExportOptions.OK;
   }
 
   public void clear() {
@@ -173,19 +180,21 @@ public class SIARDExportOptionsCurrent extends Composite {
   }
 
   public void error() {
-    Toast.showError(messages.errorMessagesExportOptionsTitle(), messages.errorMessagesExportOptions(1));
+    if (validationError != -1) {
+      Toast.showError(messages.errorMessagesExportOptionsTitle(), messages.errorMessagesExportOptions(validationError));
+    }
   }
 
-  private boolean validateExternalLobs() {
+  private int validateExternalLobs() {
     if (externalLobCheckbox != null && externalLobCheckbox.getValue()) {
       for (TextBox textBox : externalLobsInputs.values()) {
         final String text = textBox.getText();
         if (ViewerStringUtils.isBlank(text)) {
-          return false;
+          return SIARDExportOptions.MISSING_FIELD;
         }
       }
     }
-    return true;
+    return SIARDExportOptions.OK;
   }
 
   private void updateCheckboxExternalLobs(boolean value) {
