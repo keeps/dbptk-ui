@@ -90,13 +90,11 @@ public class TableAndColumnsSendToSidebar extends Composite {
 
       FlowPanel tablesItems = new FlowPanel();
       for (ViewerTable table : schema.getTables()) {
-        if (!table.getName().startsWith("VIEW_")) {
           SidebarHyperlink sidebarHyperlink = new SidebarHyperlink(table.getName(),
               HistoryManager.linkToSendToWizardTableAndColumnsShowColumns(TABLE_LINK, databaseUUID, schema.getUUID(), table.getUUID()));
           sidebarHyperlink.addIcon(FontAwesomeIconManager.TABLE).setH6().setIndent3();
           list.put(table.getName(), sidebarHyperlink);
           tablesItems.add(sidebarHyperlink);
-        }
       }
       createSubItem(tables, tablesItems);
 
