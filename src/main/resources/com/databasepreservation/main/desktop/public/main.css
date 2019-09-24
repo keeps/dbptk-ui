@@ -2025,7 +2025,8 @@ input[type="checkbox"]:checked:after {
 }
 
 .validation-panel.requirement.path{
-    padding-left: 90px;
+    justify-content: normal;
+    font-weight: lighter;
 }
 
 .stick-bottom-log{

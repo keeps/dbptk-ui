@@ -197,22 +197,33 @@ public class ValidatorPage extends Composite {
         content.add(panel);
       }
 
-      if (requirement.getType().equals(ValidationProgressData.Requirement.Type.MESSAGE)) {
+      if (requirement.getType().equals(ValidationProgressData.Requirement.Type.MESSAGE)
+        && !requirement.getStatus().equals("FINISH")) {
         FlowPanel panel = new FlowPanel();
-        panel.addStyleName("validation-panel requirement");
+        FlowPanel panelTitle = new FlowPanel();
+        panel.addStyleName("validation-panel requirement path text-muted");
+        panelTitle.addStyleName("title");
+        panelTitle.add(new Label(requirement.getID()));
         Label message = new Label(requirement.getMessage());
+        message.addStyleName("description text-muted");
+        panel.add(panelTitle);
         panel.add(message);
-        Label status = buildStatus(requirement.getStatus());
-        panel.add(status);
         panel.setTitle(requirement.getType().name());
         content.add(panel);
       }
 
       if (requirement.getType().equals(ValidationProgressData.Requirement.Type.PATH)) {
-        Label pathLabel = new Label("Validation running on path: " + requirement.getMessage()); // TODO
-        pathLabel.addStyleName("validation-panel requirement path text-muted");
-        pathLabel.setTitle(requirement.getType().name());
-        content.add(pathLabel);
+        FlowPanel panel = new FlowPanel();
+        FlowPanel panelTitle = new FlowPanel();
+        panel.addStyleName("validation-panel requirement path text-muted");
+        panelTitle.addStyleName("title");
+        panelTitle.add(new Label(requirement.getID()));
+        Label path = new Label("Validation running on path: " + requirement.getMessage());
+        path.addStyleName("description text-muted");
+        panel.add(panelTitle);
+        panel.add(path);
+        panel.setTitle(requirement.getType().name());
+        content.add(panel);
       }
 
       if (requirement.getType().equals(ValidationProgressData.Requirement.Type.SUB_REQUIREMENT)) {
@@ -293,9 +304,10 @@ public class ValidatorPage extends Composite {
       database.getMetadata().getName(), new Label(), true));
     left.add(validationInfoBuilder(messages.numberOfValidationError(), countErrors.toString(), new Label(), enable));
     left.add(validationInfoBuilder(messages.numberOfValidationsPassed(), countPassed.toString(), new Label(), enable));
-    left.add(validationInfoBuilder(messages.numberOfValidationsWarnings(), numberOfWarnings.toString(), new Label(),
-      enable));
-    left.add(validationInfoBuilder(messages.numberOfValidationsSkipped(), countSkipped.toString(), new Label(), enable));
+    left.add(
+      validationInfoBuilder(messages.numberOfValidationsWarnings(), numberOfWarnings.toString(), new Label(), enable));
+    left
+      .add(validationInfoBuilder(messages.numberOfValidationsSkipped(), countSkipped.toString(), new Label(), enable));
     Label statusLabel = new Label();
     left.add(validationInfoBuilder(messages.managePageTableHeaderTextForDatabaseStatus(), updateStatus(statusLabel),
       statusLabel, true));

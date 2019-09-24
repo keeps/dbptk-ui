@@ -23,14 +23,12 @@ private ValidationProgressData progressData;
 
   @Override
   public void notifyFinishValidationModule(String componentName, ValidationReporterStatus status) {
-//    progressData.createRequirement(ValidationProgressData.Requirement.Type.SUB_REQUIREMENT);
-//    progressData.setRequirementID(componentName);
-//    progressData.setRequirementStatus(status.name());
   }
 
   @Override
-  public void notifyMessage(String componentName, String message, ValidationReporterStatus status) {
+  public void notifyMessage(String componentName, String ID, String message, ValidationReporterStatus status) {
     progressData.createRequirement(ValidationProgressData.Requirement.Type.MESSAGE);
+    progressData.setRequirementID(ID);
     progressData.setRequirementMessage(message);
     progressData.setRequirementStatus(status.name());
   }
@@ -51,8 +49,9 @@ private ValidationProgressData progressData;
   }
 
   @Override
-  public void notifyElementValidating(String path) {
+  public void notifyElementValidating(String ID, String path) {
     progressData.createRequirement(ValidationProgressData.Requirement.Type.PATH);
+    progressData.setRequirementID(ID);
     progressData.setRequirementMessage(path);
   }
 
