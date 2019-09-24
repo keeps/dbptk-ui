@@ -1,13 +1,7 @@
 package com.databasepreservation.main.common.client;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import com.databasepreservation.main.common.shared.ValidationProgressData;
-import com.databasepreservation.main.common.shared.exceptions.ViewerException;
-import com.databasepreservation.main.common.shared.models.PreservationParameter;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.RODAException;
 import org.roda.core.data.exceptions.RequestNotValidException;
@@ -18,6 +12,7 @@ import org.roda.core.data.v2.index.sublist.Sublist;
 import org.roda.core.data.v2.user.User;
 
 import com.databasepreservation.main.common.shared.ProgressData;
+import com.databasepreservation.main.common.shared.ValidationProgressData;
 import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
@@ -27,7 +22,6 @@ import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
 import com.databasepreservation.main.common.shared.client.common.search.SavedSearch;
 import com.databasepreservation.main.common.shared.client.common.search.SearchField;
 import com.databasepreservation.main.common.shared.client.common.search.SearchInfo;
-import com.databasepreservation.main.common.shared.models.DBPTKModule;
 import com.databasepreservation.main.common.shared.models.wizardParameters.ConnectionParameters;
 import com.databasepreservation.main.common.shared.models.wizardParameters.CustomViewsParameters;
 import com.databasepreservation.main.common.shared.models.wizardParameters.ExportOptionsParameters;
@@ -140,25 +134,28 @@ public interface BrowserServiceAsync {
 
   void testConnection(String databaseUUID, String parametersJson, AsyncCallback<Boolean> async);
 
-  void validateCustomViewQuery(String databaseUUID, ConnectionParameters parameters, String query, AsyncCallback<List<List<String>>> async);
+  void validateCustomViewQuery(String databaseUUID, ConnectionParameters parameters, String query,
+    AsyncCallback<List<List<String>>> async);
 
-  void createSIARD(String UUID, ConnectionParameters connectionParameters, TableAndColumnsParameters tableAndColumnsParameters,
-    CustomViewsParameters customViewsParameters, ExportOptionsParameters exportOptionsParameters,
-    MetadataExportOptionsParameters metadataExportOptionsParameters, AsyncCallback<Boolean> async);
+  void createSIARD(String UUID, ConnectionParameters connectionParameters,
+    TableAndColumnsParameters tableAndColumnsParameters, CustomViewsParameters customViewsParameters,
+    ExportOptionsParameters exportOptionsParameters, MetadataExportOptionsParameters metadataExportOptionsParameters,
+    AsyncCallback<Boolean> async);
 
   void migrateToDBMS(String databaseUUID, String siard, ConnectionParameters connectionParameters,
     AsyncCallback<Boolean> async);
 
   void migrateToSIARD(String databaseUUID, String siardPath, TableAndColumnsParameters tableAndColumnsParameters,
-    ExportOptionsParameters exportOptionsParameters,
-    MetadataExportOptionsParameters metadataExportOptionsParameters, AsyncCallback<Boolean> async);
+    ExportOptionsParameters exportOptionsParameters, MetadataExportOptionsParameters metadataExportOptionsParameters,
+    AsyncCallback<Boolean> async);
 
   void generateUUID(AsyncCallback<String> async);
 
   void updateMetadataInformation(ViewerMetadata metadata, ViewerSIARDBundle bundleSiard, String databaseUUID,
     String path, AsyncCallback<ViewerMetadata> async);
 
-  void validateSIARD(String databaseUUID, String SIARDPath, String validationReportPath, String allowedTypePath, AsyncCallback<Boolean> async);
+  void validateSIARD(String databaseUUID, String SIARDPath, String validationReportPath, String allowedTypePath,
+    AsyncCallback<Boolean> async);
 
   void getProgressData(String uuid, AsyncCallback<ProgressData> async);
 

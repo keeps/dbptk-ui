@@ -77,7 +77,8 @@ public class DatabaseRowsSolrManager {
   }
 
   public void addDatabaseRowCollection(ViewerDatabase database) throws ViewerException {
-    updateValidationFields(database.getUUID(), Pair.of(ViewerConstants.SOLR_DATABASES_STATUS, ViewerDatabase.Status.INGESTING.toString()));
+    updateValidationFields(database.getUUID(),
+      Pair.of(ViewerConstants.SOLR_DATABASES_STATUS, ViewerDatabase.Status.INGESTING.toString()));
     RowsCollection collection = new RowsCollection(database.getUUID());
     collection.createRowsCollection();
   }
@@ -341,12 +342,21 @@ public class DatabaseRowsSolrManager {
       Pair.of(ViewerConstants.SOLR_DATABASES_INGESTED_ROWS, null));
   }
 
-  public void updateSIARDValidationInformation(String databaseUUID, ViewerDatabase.ValidationStatus validationStatus, String validatorReportLocation, String DBPTKVersion, String validationDate) {
+  public void updateSIARDValidationInformation(String databaseUUID, ViewerDatabase.ValidationStatus validationStatus,
+    String validatorReportLocation, String DBPTKVersion, String validationDate) {
 
     updateValidationFields(databaseUUID, Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATED_AT, validationDate),
-        Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATOR_REPORT_PATH, validatorReportLocation),
-        Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATE_VERSION, DBPTKVersion),
-        Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATION_STATUS, validationStatus.toString()));
+      Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATOR_REPORT_PATH, validatorReportLocation),
+      Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATE_VERSION, DBPTKVersion),
+      Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATION_STATUS, validationStatus.toString()));
+  }
+
+  public void updateSIARDValidationIndicators(String databaseUUID, String passed, String errors, String warnings,
+    String skipped) {
+    updateValidationFields(databaseUUID, Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATION_PASSED, passed),
+      Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATION_ERRORS, errors),
+      Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATION_WARNINGS, warnings),
+      Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATION_SKIPPED, skipped));
   }
 
   @SafeVarargs
@@ -369,7 +379,7 @@ public class DatabaseRowsSolrManager {
     }
   }
 
-  public void updateDatabaseMetadata(String databaseUUID,  ViewerMetadata metadata ) {
+  public void updateDatabaseMetadata(String databaseUUID, ViewerMetadata metadata) {
     LOGGER.debug("updateDatabaseMetadata");
 
     // create document to update this DB
@@ -377,7 +387,8 @@ public class DatabaseRowsSolrManager {
     doc.addField(ViewerConstants.INDEX_ID, databaseUUID);
 
     try {
-      doc.addField(ViewerConstants.SOLR_DATABASES_METADATA,SolrUtils.asValueUpdate(JsonTransformer.getJsonFromObject(metadata)));
+      doc.addField(ViewerConstants.SOLR_DATABASES_METADATA,
+        SolrUtils.asValueUpdate(JsonTransformer.getJsonFromObject(metadata)));
       insertDocument(ViewerConstants.SOLR_INDEX_DATABASES_COLLECTION_NAME, doc);
       LOGGER.debug("SUCCESS updateDatabaseMetadata");
     } catch (ViewerException e) {
@@ -388,8 +399,6 @@ public class DatabaseRowsSolrManager {
 
   public ViewerMetadata retrieveDatabaseMetadata(String databaseUUID) {
     ViewerMetadata metadata = new ViewerMetadata();
-
-
 
     return metadata;
   }

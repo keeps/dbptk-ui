@@ -73,13 +73,13 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
   }
 
   public IndexResult<ViewerDatabase> findDatabases(Filter filter, Sorter sorter, Sublist sublist, Facets facets,
-                                                   String localeString) throws GenericException, AuthorizationDeniedException, RequestNotValidException {
+    String localeString) throws GenericException, AuthorizationDeniedException, RequestNotValidException {
     Authorization.allowIfAdmin(getThreadLocalRequest());
     return ViewerFactory.getSolrManager().find(ViewerDatabase.class, filter, sorter, sublist, facets);
   }
 
   public IndexResult<SavedSearch> findSavedSearches(String databaseUUID, Filter filter, Sorter sorter, Sublist sublist,
-                                                    Facets facets, String localeString)
+    Facets facets, String localeString)
     throws GenericException, AuthorizationDeniedException, RequestNotValidException, NotFoundException {
     Authorization.checkFilteringPermission(getThreadLocalRequest(), databaseUUID, filter, SavedSearch.class);
     return ViewerFactory.getSolrManager().find(SavedSearch.class, filter, sorter, sublist, facets);
@@ -96,7 +96,7 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
 
   @Override
   public IndexResult<ViewerRow> findRows(String databaseUUID, Filter filter, Sorter sorter, Sublist sublist,
-                                         Facets facets, String localeString)
+    Facets facets, String localeString)
     throws GenericException, AuthorizationDeniedException, RequestNotValidException {
     try {
       Authorization.checkDatabaseAccessPermission(getThreadLocalRequest(), databaseUUID);
@@ -295,7 +295,8 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
   }
 
   @Override
-  public List<List<String>> validateCustomViewQuery(String databaseUUID, ConnectionParameters parameters, String query) throws GenericException {
+  public List<List<String>> validateCustomViewQuery(String databaseUUID, ConnectionParameters parameters, String query)
+    throws GenericException {
     return SIARDController.validateCustomViewQuery(databaseUUID, parameters, query);
   }
 
@@ -318,8 +319,8 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
   public boolean migrateToSIARD(String databaseUUID, String siardPath,
     TableAndColumnsParameters tableAndColumnsParameters, ExportOptionsParameters exportOptionsParameters,
     MetadataExportOptionsParameters metadataExportOptions) throws GenericException {
-    return SIARDController.migrateToSIARD(databaseUUID, siardPath, tableAndColumnsParameters,
-      exportOptionsParameters, metadataExportOptions);
+    return SIARDController.migrateToSIARD(databaseUUID, siardPath, tableAndColumnsParameters, exportOptionsParameters,
+      metadataExportOptions);
   }
 
   @Override
@@ -334,7 +335,8 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
   }
 
   @Override
-  public boolean validateSIARD(String databaseUUID, String SIARDPath, String validationReportPath, String allowedTypePath) throws GenericException {
+  public boolean validateSIARD(String databaseUUID, String SIARDPath, String validationReportPath,
+    String allowedTypePath) throws GenericException {
     return SIARDController.validateSIARD(databaseUUID, SIARDPath, validationReportPath, allowedTypePath);
   }
 

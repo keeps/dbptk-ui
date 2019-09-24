@@ -14,6 +14,7 @@ import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCal
 import com.databasepreservation.main.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
+import com.databasepreservation.main.common.shared.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.common.shared.client.tools.Humanize;
 import com.databasepreservation.main.common.shared.client.tools.PathUtils;
@@ -55,6 +56,7 @@ public class SIARDMainPage extends Composite {
   private MetadataField validatedAt = null;
   private MetadataField version = null;
   private MetadataField validationStatus = null;
+  private FlowPanel validationIndicators = new FlowPanel();
   private MetadataField browsingStatus = null;
   private Button btnSeeReport, btnBrowse, btnDelete, btnIngest, btnOpenValidator, btnRunValidator;
 
@@ -231,8 +233,10 @@ public class SIARDMainPage extends Composite {
         SolrHumanizer.humanize(database.getValidationStatus()));
       if (database.getValidationStatus().equals(ViewerDatabase.ValidationStatus.VALIDATION_SUCCESS)) {
         validationStatus.getMetadataValue().addStyleName("label-success");
+        validationIndicators.setVisible(true);
       } else if (database.getValidationStatus().equals(ViewerDatabase.ValidationStatus.VALIDATION_FAILED)) {
         validationStatus.getMetadataValue().addStyleName("label-danger");
+        validationIndicators.setVisible(true);
       } else {
         validationStatus.getMetadataValue().addStyleName("label-info");
       }
@@ -244,15 +248,20 @@ public class SIARDMainPage extends Composite {
       validationStatus = MetadataField.createInstance(messages.SIARDHomePageLabelForValidationStatus(),
         messages.humanizedTextForSIARDNotValidated());
       validationStatus.getMetadataValue().addStyleName("label-info");
+      validationIndicators.setVisible(false);
     }
 
     validatedAt.setCSSMetadata(null, "label-field", "value-field");
     version.setCSSMetadata(null, "label-field", "value-field");
     validationStatus.setCSSMetadata(null, "label-field", "value-field");
 
+    // indicators
+    updateValidationIndicators();
+
     validation.addToInfoPanel(validatedAt);
     validation.addToInfoPanel(version);
     validation.addToInfoPanel(validationStatus);
+    validation.addToInfoPanel(validationIndicators);
 
     return validation;
   }
@@ -402,26 +411,55 @@ public class SIARDMainPage extends Composite {
     metadataInformation.add(right);
   }
 
-  public void refreshInstance(String databaseUUID) {
+  private void refreshInstance(String databaseUUID) {
     final Widget loading = new HTML(SafeHtmlUtils.fromSafeConstant(
-            "<div id='loading' class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
+      "<div id='loading' class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
 
-    if(database.getValidationStatus() != ViewerDatabase.ValidationStatus.VALIDATION_RUNNING){
-      container.add(loading);
-    }
+    container.add(loading);
 
     BrowserService.Util.getInstance().retrieve(databaseUUID, ViewerDatabase.class.getName(), databaseUUID,
       new DefaultAsyncCallback<IsIndexed>() {
         @Override
         public void onSuccess(IsIndexed result) {
           database = (ViewerDatabase) result;
-
           updateValidationStatus();
           updateBrowsingStatus();
 
           container.remove(loading);
         }
       });
+  }
+
+  private void updateValidationIndicators() {
+    validationIndicators.clear();
+    validationIndicators.addStyleName("validation-indicators");
+    Label label = new Label(messages.SIARDHomePageTextForValidationIndicators());
+    label.addStyleName("label-field");
+    validationIndicators.add(label);
+    FlowPanel panel = new FlowPanel();
+    panel.addStyleName("validation-indicators");
+    panel.add(buildIndicators(database.getValidationPassed(), FontAwesomeIconManager.CHECK, "passed",
+      messages.numberOfValidationsPassed()));
+    panel.add(buildIndicators(database.getValidationErrors(), FontAwesomeIconManager.TIMES, "errors",
+      messages.numberOfValidationError()));
+    panel.add(buildIndicators(database.getValidationWarnings(), FontAwesomeIconManager.WARNING,
+      "warnings", messages.numberOfValidationsWarnings()));
+    panel.add(buildIndicators(database.getValidationSkipped(), FontAwesomeIconManager.SKIPPED, "skipped",
+      messages.numberOfValidationsSkipped()));
+    validationIndicators.add(panel);
+  }
+
+  private FlowPanel buildIndicators(String indicator, String icon, String style, String title) {
+    FlowPanel panel = new FlowPanel();
+    panel.setStyleName("indicator");
+    panel.setTitle(title);
+    Label label = new Label(indicator);
+    HTML iconHTML = new HTML(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(icon)));
+    iconHTML.addStyleName(style);
+    panel.add(iconHTML);
+    panel.add(label);
+
+    return panel;
   }
 
   private void updateValidationStatus() {
@@ -432,27 +470,39 @@ public class SIARDMainPage extends Composite {
           validatedAt.updateText(result);
           version.updateText(database.getValidatedVersion());
           validationStatus.updateText(SolrHumanizer.humanize(database.getValidationStatus()));
-          if (database.getValidationStatus() != ViewerDatabase.ValidationStatus.NOT_VALIDATED) {
-            btnOpenValidator.setVisible(false);
-            btnRunValidator.setVisible(true);
-            btnSeeReport.setVisible(true);
-            btnRunValidator.setText(messages.SIARDHomePageButtonTextRunValidationAgain());
-            if (database.getValidationStatus() == ViewerDatabase.ValidationStatus.VALIDATION_SUCCESS) {
-              btnRunValidator.setVisible(true);
+          updateValidationIndicators();
+          switch (database.getValidationStatus()) {
+            case VALIDATION_SUCCESS:
+              updateValidationButtons(true);
               btnOpenValidator.setVisible(false);
               validationStatus.getMetadataValue().setStyleName("label-success");
-            } else if (database.getValidationStatus() == ViewerDatabase.ValidationStatus.VALIDATION_FAILED) {
-              btnRunValidator.setVisible(true);
+              break;
+            case VALIDATION_FAILED:
+              updateValidationButtons(true);
               btnOpenValidator.setVisible(false);
               validationStatus.getMetadataValue().setStyleName("label-danger");
-            } else {
-              btnRunValidator.setVisible(false);
+              break;
+            case VALIDATION_RUNNING:
+              updateValidationButtons(false);
               validationStatus.getMetadataValue().setStyleName("label-info");
               btnOpenValidator.setVisible(true);
-            }
+              break;
+            default:
+              validationStatus.getMetadataValue().setStyleName("label-info");
+              btnRunValidator.setVisible(true);
+              btnOpenValidator.setVisible(false);
+              validationIndicators.setVisible(false);
+              btnSeeReport.setVisible(false);
+              validationIndicators.setVisible(false);
           }
         }
       });
+  }
+
+  private void updateValidationButtons(Boolean enable) {
+    btnRunValidator.setVisible(enable);
+    btnSeeReport.setVisible(enable);
+    validationIndicators.setVisible(enable);
   }
 
   private void updateBrowsingStatus() {
@@ -466,6 +516,14 @@ public class SIARDMainPage extends Composite {
       btnIngest.setVisible(true);
       btnBrowse.setVisible(false);
       btnIngest.addClickHandler(event -> HistoryManager.gotoIngestSIARDData(database.getUUID(), database.getMetadata().getName()));
+    }
+  }
+
+  @Override
+  protected void onAttach() {
+    super.onAttach();
+    if (database != null) {
+      refreshInstance(database.getUUID());
     }
   }
 

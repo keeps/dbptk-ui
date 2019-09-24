@@ -1103,6 +1103,7 @@ html, body, .main {
     margin-bottom: 1rem;
     flex: 1;
     margin-left: 20px;
+    margin-rigth: 20px;
 }
 
 .navigation-panel-options {
@@ -1929,6 +1930,31 @@ input[type="checkbox"]:checked:after {
 /************************************************
 * SIARD validator
  ************************************************/
+/*indicators*/
+.validation-indicators{
+    display: flex;
+}
+
+.validation-indicators .indicator{
+    display: flex;
+    margin-right: 0.7em;
+}
+
+.indicator .passed{
+    color: #5cb85c;
+}
+
+.indicator .errors{
+    color: #d9534f;
+}
+
+.indicator .warnings{
+    color: #f0ad4e;
+}
+
+.indicator .skipped{
+    color: #337ab7;
+}
 /*Dialog*/
 .validator-dialog-information{
     display: flex;

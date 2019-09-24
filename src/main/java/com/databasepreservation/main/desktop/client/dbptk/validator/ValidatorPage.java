@@ -19,7 +19,6 @@ import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManage
 import com.databasepreservation.main.common.shared.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.common.shared.client.widgets.Toast;
-import com.databasepreservation.main.desktop.client.dbptk.SIARDMainPage;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.MouseWheelEvent;
@@ -59,7 +58,7 @@ public class ValidatorPage extends Composite {
   private FlowPanel tailIndicator = new FlowPanel();
 
   private enum Status {
-    OK,ERROR,SKIPPED,FINISH
+    OK, ERROR, SKIPPED, FINISH
   }
 
   private Timer autoUpdateTimer = new Timer() {
@@ -163,7 +162,7 @@ public class ValidatorPage extends Composite {
       new DefaultAsyncCallback<Boolean>() {
         @Override
         public void onSuccess(Boolean result) {
-          // TODO
+
         }
 
         @Override
@@ -293,7 +292,7 @@ public class ValidatorPage extends Composite {
 
   private void stopUpdating(String message) {
     Toast.showInfo(messages.validatorPageTextForTitle(), message);
-    SIARDMainPage.getInstance(database.getUUID()).refreshInstance(database.getUUID());
+    // SIARDMainPage.getInstance(database.getUUID()).refreshInstance(database.getUUID());
     instances.remove(databaseUUID);
     populateValidationInfo(true);
     loading.setVisible(false);
@@ -318,10 +317,11 @@ public class ValidatorPage extends Composite {
     FlowPanel left = new FlowPanel();
     FlowPanel right = new FlowPanel();
 
-    //Database Name
-    left.add(validationInfoBuilder(messages.managePageTableHeaderTextForDatabaseName(),new Label(database.getMetadata().getName())));
+    // Database Name
+    left.add(validationInfoBuilder(messages.managePageTableHeaderTextForDatabaseName(),
+      new Label(database.getMetadata().getName())));
 
-    //counts
+    // counts
     left.add(validationInfoBuilder(messages.numberOfValidationError(), countErrors.toString(), new Label(), enable));
     left.add(validationInfoBuilder(messages.numberOfValidationsPassed(), countPassed.toString(), new Label(), enable));
     left.add(
@@ -329,10 +329,10 @@ public class ValidatorPage extends Composite {
     left
       .add(validationInfoBuilder(messages.numberOfValidationsSkipped(), countSkipped.toString(), new Label(), enable));
 
-    //Validator Status
+    // Validator Status
     left.add(validationInfoBuilder(messages.managePageTableHeaderTextForDatabaseStatus(), updateStatus()));
 
-    //SIARD specification link
+    // SIARD specification link
     Button SIARDSpecification = new Button(messages.basicActionOpen());
     SIARDSpecification.addClickHandler(event -> {
       Window.open(ViewerConstants.SIARD_SPECIFICATION_LINK, ViewerConstants.BLANK_LINK, null);
@@ -340,15 +340,16 @@ public class ValidatorPage extends Composite {
 
     right.add(validationInfoBuilder(messages.validatorPageTextForSIARDSpecification(), SIARDSpecification));
 
-    //Additional checks link
+    // Additional checks link
     Button AdditionalSpecification = new Button(messages.basicActionOpen());
     AdditionalSpecification.addClickHandler(event -> {
       Window.open(ViewerConstants.ADDITIONAL_CHECKS_SPECIFICATIONLINK, ViewerConstants.BLANK_LINK, null);
     });
 
-    right.add(validationInfoBuilder(messages.validatorPageTextForAdditionalChecksSpecification(), AdditionalSpecification));
+    right.add(
+      validationInfoBuilder(messages.validatorPageTextForAdditionalChecksSpecification(), AdditionalSpecification));
 
-    //Report link
+    // Report link
     Button report = new Button(messages.basicActionOpen());
     report.addClickHandler(event -> {
       if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
@@ -429,7 +430,7 @@ public class ValidatorPage extends Composite {
 
   @Override
   protected void onDetach() {
-    SIARDMainPage.getInstance(database.getUUID()).refreshInstance(database.getUUID());
+    // SIARDMainPage.getInstance(database.getUUID()).refreshInstance(database.getUUID());
     loading.setVisible(false);
     super.onDetach();
   }

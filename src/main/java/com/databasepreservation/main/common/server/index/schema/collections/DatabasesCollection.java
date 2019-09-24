@@ -21,7 +21,11 @@ import static com.databasepreservation.main.common.shared.ViewerConstants.SOLR_D
 import static com.databasepreservation.main.common.shared.ViewerConstants.SOLR_DATABASES_TOTAL_TABLES;
 import static com.databasepreservation.main.common.shared.ViewerConstants.SOLR_DATABASES_VALIDATED_AT;
 import static com.databasepreservation.main.common.shared.ViewerConstants.SOLR_DATABASES_VALIDATE_VERSION;
+import static com.databasepreservation.main.common.shared.ViewerConstants.SOLR_DATABASES_VALIDATION_ERRORS;
+import static com.databasepreservation.main.common.shared.ViewerConstants.SOLR_DATABASES_VALIDATION_PASSED;
+import static com.databasepreservation.main.common.shared.ViewerConstants.SOLR_DATABASES_VALIDATION_SKIPPED;
 import static com.databasepreservation.main.common.shared.ViewerConstants.SOLR_DATABASES_VALIDATION_STATUS;
+import static com.databasepreservation.main.common.shared.ViewerConstants.SOLR_DATABASES_VALIDATION_WARNINGS;
 import static com.databasepreservation.main.common.shared.ViewerConstants.SOLR_DATABASES_VALIDATOR_REPORT_PATH;
 
 import java.util.ArrayList;
@@ -91,6 +95,10 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_VALIDATE_VERSION, Field.TYPE_STRING));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_VALIDATOR_REPORT_PATH, Field.TYPE_STRING));
     //fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_VALIDATION_STATUS, Field.TYPE_STRING));
+    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_VALIDATION_PASSED, Field.TYPE_STRING));
+    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_VALIDATION_ERRORS, Field.TYPE_STRING));
+    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_VALIDATION_WARNINGS, Field.TYPE_STRING));
+    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_VALIDATION_SKIPPED, Field.TYPE_STRING));
 
     return fields;
   }
@@ -124,6 +132,10 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
     doc.addField(SOLR_DATABASES_VALIDATOR_REPORT_PATH, object.getValidatorReportPath());
     doc.addField(SOLR_DATABASES_VALIDATE_VERSION, object.getValidatedVersion());
     doc.addField(SOLR_DATABASES_VALIDATION_STATUS, object.getValidationStatus().toString());
+    doc.addField(SOLR_DATABASES_VALIDATION_PASSED, object.getValidationPassed());
+    doc.addField(SOLR_DATABASES_VALIDATION_ERRORS, object.getValidationWarnings());
+    doc.addField(SOLR_DATABASES_VALIDATION_WARNINGS, object.getValidationWarnings());
+    doc.addField(SOLR_DATABASES_VALIDATION_SKIPPED, object.getValidationSkipped());
 
     return doc;
   }
@@ -155,6 +167,10 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
     viewerDatabase.setValidatedVersion(SolrUtils.objectToString(doc.get(SOLR_DATABASES_VALIDATE_VERSION), ""));
     viewerDatabase.setValidationStatus(SolrUtils.objectToEnum(doc.get(SOLR_DATABASES_VALIDATION_STATUS),
       ViewerDatabase.ValidationStatus.class, ViewerDatabase.ValidationStatus.NOT_VALIDATED));
+    viewerDatabase.setValidationPassed(SolrUtils.objectToString(doc.get(SOLR_DATABASES_VALIDATION_PASSED), ""));
+    viewerDatabase.setValidationErrors(SolrUtils.objectToString(doc.get(SOLR_DATABASES_VALIDATION_ERRORS), ""));
+    viewerDatabase.setValidationWarnings(SolrUtils.objectToString(doc.get(SOLR_DATABASES_VALIDATION_WARNINGS), ""));
+    viewerDatabase.setValidationSkipped(SolrUtils.objectToString(doc.get(SOLR_DATABASES_VALIDATION_SKIPPED), ""));
 
     return viewerDatabase;
   }

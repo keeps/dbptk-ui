@@ -648,6 +648,8 @@ public interface ClientMessages extends Messages {
 
   String SIARDHomePageLabelForValidationStatus();
 
+  String SIARDHomePageTextForValidationIndicators();
+
   String SIARDHomePageLabelForBrowseStatus();
 
   String SIARDHomePageTextForSIARDValid(String name);

@@ -39,6 +39,10 @@ public class ViewerDatabase extends IsIndexed {
   private String validatedVersion;
   private String validatorReportPath;
   private ValidationStatus validationStatus;
+  private String validationPassed;
+  private String validationErrors;
+  private String validationWarnings;
+  private String validationSkipped;
 
   public ViewerDatabase() {
   }
@@ -204,6 +208,38 @@ public class ViewerDatabase extends IsIndexed {
 
   public ValidationStatus getValidationStatus() {
     return validationStatus;
+  }
+
+  public void setValidationPassed(String validationPassed) {
+    this.validationPassed = validationPassed;
+  }
+
+  public String getValidationPassed() {
+    return validationPassed;
+  }
+
+  public void setValidationErrors(String validationErrors) {
+    this.validationErrors = validationErrors;
+  }
+
+  public String getValidationErrors() {
+    return validationErrors;
+  }
+
+  public void setValidationWarnings(String validationWarnings) {
+    this.validationWarnings = validationWarnings;
+  }
+
+  public String getValidationWarnings() {
+    return validationWarnings;
+  }
+
+  public void setValidationSkipped(String validationSkipped) {
+    this.validationSkipped = validationSkipped;
+  }
+
+  public String getValidationSkipped() {
+    return validationSkipped;
   }
 
   public void setValidationStatus(ValidationStatus status) {
