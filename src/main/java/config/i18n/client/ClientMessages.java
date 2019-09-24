@@ -887,6 +887,10 @@ public interface ClientMessages extends Messages {
 
   String numberOfValidationsSkipped();
 
+  String validatorPageTextForSIARDSpecification();
+
+  String validatorPageTextForAdditionalChecksSpecification();
+
   String validatorPageTextForStick();
 
   String validatorPageTextForToast();

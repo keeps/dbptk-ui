@@ -590,22 +590,17 @@ public class SIARDController {
           final DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
           solrManager.updateSIARDValidationInformation(databaseUUID, ViewerDatabase.ValidationStatus.VALIDATION_RUNNING,
             validationReportPath, dbptkVersion, new DateTime().toString());
-        } catch (IOException e) {
-          throw new GenericException("Failed to obtain the DBPTK version from properties", e);
-        }
-        valid = siardValidation.validate();
 
-        ViewerDatabase.ValidationStatus status;
+          valid = siardValidation.validate();
 
-        if (valid) {
-          status = ViewerDatabase.ValidationStatus.VALIDATION_SUCCESS;
-        } else {
-          status = ViewerDatabase.ValidationStatus.VALIDATION_FAILED;
-        }
+          ViewerDatabase.ValidationStatus status;
 
-        try {
-          dbptkVersion = ViewerConfiguration.getInstance().getDBPTKVersion();
-          final DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
+          if (valid) {
+            status = ViewerDatabase.ValidationStatus.VALIDATION_SUCCESS;
+          } else {
+            status = ViewerDatabase.ValidationStatus.VALIDATION_FAILED;
+          }
+
           solrManager.updateSIARDValidationInformation(databaseUUID, status, validationReportPath, dbptkVersion,
             new DateTime().toString());
         } catch (IOException e) {

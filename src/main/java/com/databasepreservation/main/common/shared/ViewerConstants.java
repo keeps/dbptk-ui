@@ -1,9 +1,10 @@
 package com.databasepreservation.main.common.shared;
 
-import com.databasepreservation.modules.siard.SIARD2ModuleFactory;
 import org.roda.core.data.common.RodaConstants;
 import org.roda.core.data.v2.index.filter.BasicSearchFilterParameter;
 import org.roda.core.data.v2.index.filter.Filter;
+
+import com.databasepreservation.modules.siard.SIARD2ModuleFactory;
 
 /**
  * Constants used in Database Viewer
@@ -132,7 +133,7 @@ public class ViewerConstants {
 
   // indexed, stored, trie-based (deprecated) TODO remove
   public static final String SOLR_DYN_TDATETIME = SOLR_DYN_DATE;
-  public static final String SOLR_DYN_TDATE = SOLR_DYN_DATE;//OK
+  public static final String SOLR_DYN_TDATE = SOLR_DYN_DATE;// OK
   public static final String SOLR_DYN_TTIME = SOLR_DYN_DATE;
 
   /*
@@ -295,6 +296,9 @@ public class ViewerConstants {
   public static final String DGLAB_FINANCIER_LINK = "http://dglab.gov.pt/";
   public static final String EARK_FINANCIER_LINK = "https://www.eark-project.com/";
   public static final String BLANK_LINK = "_blank";
+  public static final String SIARD_SPECIFICATION_LINK = "https://dilcis.eu/content-types/siard/";
+  public static final String ADDITIONAL_CHECKS_SPECIFICATIONLINK = "https://github.com/keeps/db-preservation-toolkit/wiki/Validation";
+
   /**
    * private constructor
    */

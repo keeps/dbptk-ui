@@ -1972,6 +1972,11 @@ input[type="checkbox"]:checked:after {
     padding-bottom: 1em;
 }
 
+.validation-information{
+    display: flex;
+    justify-content: space-between;
+}
+
 .progress-report.validation{
     height: auto;
     min-height: 100px;
@@ -1995,6 +2000,10 @@ input[type="checkbox"]:checked:after {
 .validation-info-panel .title{
     font-weight: bolder;
     width: 260px;
+}
+
+.validation-info-panel .btn-link-info{
+    padding-right: 0;
 }
 
 .validation-panel.title .gwt-Label{

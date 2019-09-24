@@ -10,7 +10,8 @@
             <g:FlowPanel>
                 <c:LoadingDiv visible="false" ui:field="loading"/>
                 <g:Label ui:field="title" addStyleNames="h1"/>
-                <g:FlowPanel ui:field="validationInformation"/>
+                <g:FlowPanel ui:field="validationInformation" addStyleNames="validation-information"/>
+                <g:FlowPanel ui:field="stickToBottomPanel"/>
                 <g:FocusPanel ui:field="contentScroll" addStyleNames="progress-report validation">
                     <g:FlowPanel ui:field="content"/>
                 </g:FocusPanel>

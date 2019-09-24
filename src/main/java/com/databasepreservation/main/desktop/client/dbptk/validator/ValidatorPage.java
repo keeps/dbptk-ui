@@ -29,6 +29,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -57,6 +58,10 @@ public class ValidatorPage extends Composite {
   private Boolean stickToBottom = true;
   private FlowPanel tailIndicator = new FlowPanel();
 
+  private enum Status {
+    OK,ERROR,SKIPPED,FINISH
+  }
+
   private Timer autoUpdateTimer = new Timer() {
     @Override
     public void run() {
@@ -83,7 +88,7 @@ public class ValidatorPage extends Composite {
   }
 
   @UiField
-  FlowPanel container, content, validationInformation, validationControl;
+  FlowPanel container, content, validationInformation, stickToBottomPanel, validationControl;
 
   @UiField
   Label title;
@@ -110,7 +115,7 @@ public class ValidatorPage extends Composite {
 
     title.setText(messages.validatorPageTextForTitle());
     loading.setVisible(true);
-    tailIndicator.setStyleName("tail tail-on");
+    buildStickButton();
 
     BrowserService.Util.getInstance().retrieve(databaseUUID, ViewerDatabase.class.getName(), databaseUUID,
       new DefaultAsyncCallback<IsIndexed>() {
@@ -198,7 +203,7 @@ public class ValidatorPage extends Composite {
       }
 
       if (requirement.getType().equals(ValidationProgressData.Requirement.Type.MESSAGE)
-        && !requirement.getStatus().equals("FINISH")) {
+        && !requirement.getStatus().equals(Status.FINISH.name())) {
         FlowPanel panel = new FlowPanel();
         FlowPanel panelTitle = new FlowPanel();
         panel.addStyleName("validation-panel requirement path text-muted");
@@ -250,17 +255,17 @@ public class ValidatorPage extends Composite {
 
   private Label buildStatus(String status) {
     Label statusLabel = new Label(status);
-    switch (status) {
-      case "OK":
+    switch (Status.valueOf(status)) {
+      case OK:
         countPassed++;
         statusLabel.setStyleName("label-success");
         break;
-      case "ERROR":
+      case ERROR:
         countErrors++;
         statusLabel.setStyleName("label-danger");
         statusLabel.setTitle(messages.validatorPageTextForErrorDetails());
         break;
-      case "SKIPPED":
+      case SKIPPED:
         countSkipped++;
         statusLabel.setStyleName("label-default");
         break;
@@ -271,7 +276,8 @@ public class ValidatorPage extends Composite {
     return statusLabel;
   }
 
-  private String updateStatus(Label statusLabel) {
+  private Label updateStatus() {
+    Label statusLabel = new Label();
     String statusText = messages.humanizedTextForSIARDValidationRunning();
     statusLabel.setStyleName("label-info");
     if (countErrors != 0) {
@@ -281,7 +287,19 @@ public class ValidatorPage extends Composite {
       statusText = messages.humanizedTextForSIARDValidationSuccess();
       statusLabel.setStyleName("label-success");
     }
-    return statusText;
+    statusLabel.setText(statusText);
+    return statusLabel;
+  }
+
+  private void stopUpdating(String message) {
+    Toast.showInfo(messages.validatorPageTextForTitle(), message);
+    SIARDMainPage.getInstance(database.getUUID()).refreshInstance(database.getUUID());
+    instances.remove(databaseUUID);
+    populateValidationInfo(true);
+    loading.setVisible(false);
+    if (autoUpdateTimer != null) {
+      autoUpdateTimer.cancel();
+    }
   }
 
   private void resetInfos() {
@@ -292,65 +310,80 @@ public class ValidatorPage extends Composite {
     countSkipped = 0;
     numberOfWarnings = 0;
     populateValidationInfo(false);
-
   }
 
   private void populateValidationInfo(Boolean enable) {
     validationInformation.clear();
     btnRunAgain.setEnabled(enable);
     FlowPanel left = new FlowPanel();
+    FlowPanel right = new FlowPanel();
 
-    left.add(validationInfoBuilder(messages.managePageTableHeaderTextForDatabaseName(),
-      database.getMetadata().getName(), new Label(), true));
+    //Database Name
+    left.add(validationInfoBuilder(messages.managePageTableHeaderTextForDatabaseName(),new Label(database.getMetadata().getName())));
+
+    //counts
     left.add(validationInfoBuilder(messages.numberOfValidationError(), countErrors.toString(), new Label(), enable));
     left.add(validationInfoBuilder(messages.numberOfValidationsPassed(), countPassed.toString(), new Label(), enable));
     left.add(
       validationInfoBuilder(messages.numberOfValidationsWarnings(), numberOfWarnings.toString(), new Label(), enable));
     left
       .add(validationInfoBuilder(messages.numberOfValidationsSkipped(), countSkipped.toString(), new Label(), enable));
-    Label statusLabel = new Label();
-    left.add(validationInfoBuilder(messages.managePageTableHeaderTextForDatabaseStatus(), updateStatus(statusLabel),
-      statusLabel, true));
 
-    FlowPanel reportPanel = new FlowPanel();
-    reportPanel.addStyleName("validation-info-panel");
-    Label reportLabel = new Label(messages.reportFile());
-    reportLabel.addStyleName("title");
-    Button reportButton = new Button();
-    reportButton.setText(messages.basicActionOpen());
-    reportButton.addStyleName("btn btn-link-info");
-    reportButton.addClickHandler(event -> {
+    //Validator Status
+    left.add(validationInfoBuilder(messages.managePageTableHeaderTextForDatabaseStatus(), updateStatus()));
+
+    //SIARD specification link
+    Button SIARDSpecification = new Button(messages.basicActionOpen());
+    SIARDSpecification.addClickHandler(event -> {
+      Window.open(ViewerConstants.SIARD_SPECIFICATION_LINK, ViewerConstants.BLANK_LINK, null);
+    });
+
+    right.add(validationInfoBuilder(messages.validatorPageTextForSIARDSpecification(), SIARDSpecification));
+
+    //Additional checks link
+    Button AdditionalSpecification = new Button(messages.basicActionOpen());
+    AdditionalSpecification.addClickHandler(event -> {
+      Window.open(ViewerConstants.ADDITIONAL_CHECKS_SPECIFICATIONLINK, ViewerConstants.BLANK_LINK, null);
+    });
+
+    right.add(validationInfoBuilder(messages.validatorPageTextForAdditionalChecksSpecification(), AdditionalSpecification));
+
+    //Report link
+    Button report = new Button(messages.basicActionOpen());
+    report.addClickHandler(event -> {
       if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
         JavascriptUtils.showItem(reporterPath);
       }
     });
-    reportButton.setEnabled(enable);
-    reportPanel.add(reportLabel);
-    reportPanel.add(reportButton);
+    report.setEnabled(enable);
 
-    left.add(reportPanel);
+    right.add(validationInfoBuilder(messages.reportFile(), report));
 
     validationInformation.add(left);
+    validationInformation.add(right);
+  }
 
-    FlowPanel stickToBottomPanel = new FlowPanel();
-    FocusPanel stickFocus = new FocusPanel();
-    FlowPanel stickToBottomInner = new FlowPanel();
-    Label tailLabel = new Label(messages.validatorPageTextForStick());
-    stickToBottomInner.add(tailLabel);
-    stickToBottomInner.add(tailIndicator);
-    stickToBottomInner.addStyleName("stick-bottom-log");
-    stickFocus.addClickHandler(event -> {
-      stickToBottom = !stickToBottom;
-      if (stickToBottom) {
-        contentScroll.getElement().setScrollTop(contentScroll.getElement().getScrollHeight());
-        tailIndicator.setStyleName("tail tail-on");
-      } else {
-        tailIndicator.setStyleName("tail tail-off");
-      }
-    });
-    stickFocus.add(stickToBottomInner);
-    stickToBottomPanel.add(stickFocus);
-    validationInformation.add(stickToBottomPanel);
+  private FlowPanel validationInfoBuilder(String key, Label value) {
+    FlowPanel panel = new FlowPanel();
+    panel.addStyleName("validation-info-panel");
+    Label keyLabel = new Label(key);
+    keyLabel.addStyleName("title");
+    panel.add(keyLabel);
+    panel.add(value);
+
+    return panel;
+  }
+
+  private FlowPanel validationInfoBuilder(String key, Button value) {
+    FlowPanel panel = new FlowPanel();
+    panel.addStyleName("validation-info-panel");
+    Label keyLabel = new Label(key);
+    keyLabel.addStyleName("title");
+    value.addStyleName("btn btn-link-info");
+    panel.add(keyLabel);
+    panel.add(value);
+
+    return panel;
   }
 
   private FlowPanel validationInfoBuilder(String key, String value, Label valueLabel, Boolean loading) {
@@ -373,15 +406,25 @@ public class ValidatorPage extends Composite {
     return panel;
   }
 
-  private void stopUpdating(String message) {
-    Toast.showInfo(messages.validatorPageTextForTitle(), message);
-    SIARDMainPage.getInstance(database.getUUID()).refreshInstance(database.getUUID());
-    instances.remove(databaseUUID);
-    populateValidationInfo(true);
-    loading.setVisible(false);
-    if (autoUpdateTimer != null) {
-      autoUpdateTimer.cancel();
-    }
+  private void buildStickButton() {
+    tailIndicator.setStyleName("tail tail-on");
+    FocusPanel stickFocus = new FocusPanel();
+    FlowPanel stickToBottomInner = new FlowPanel();
+    Label tailLabel = new Label(messages.validatorPageTextForStick());
+    stickToBottomInner.add(tailLabel);
+    stickToBottomInner.add(tailIndicator);
+    stickToBottomInner.addStyleName("stick-bottom-log");
+    stickFocus.addClickHandler(event -> {
+      stickToBottom = !stickToBottom;
+      if (stickToBottom) {
+        contentScroll.getElement().setScrollTop(contentScroll.getElement().getScrollHeight());
+        tailIndicator.setStyleName("tail tail-on");
+      } else {
+        tailIndicator.setStyleName("tail tail-off");
+      }
+    });
+    stickFocus.add(stickToBottomInner);
+    stickToBottomPanel.add(stickFocus);
   }
 
   @Override
