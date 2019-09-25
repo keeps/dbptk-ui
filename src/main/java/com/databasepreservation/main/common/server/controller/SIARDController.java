@@ -744,6 +744,10 @@ public class SIARDController {
           param.hasArgument(), param.getInputType().name());
       }
 
+      if (param.valueIfNotSet() != null) {
+        preservationParameter.setDefaultValue(param.valueIfNotSet());
+      }
+
       dbptkModule.addPreservationParameter(moduleName, preservationParameter);
     }
   }

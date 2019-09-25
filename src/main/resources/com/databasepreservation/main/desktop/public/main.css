@@ -2067,3 +2067,9 @@ input[type="checkbox"]:checked:after {
           transform: scale(1.0);
       }
 }
+
+.query-result-scroll-wrapper {
+    display: block;
+    height: 50vh;
+    width: 100%;
+}

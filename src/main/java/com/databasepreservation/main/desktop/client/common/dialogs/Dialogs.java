@@ -39,6 +39,8 @@ import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
@@ -120,6 +122,12 @@ public class Dialogs {
       "<div class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>")));
     table.addStyleName("table-info my-asyncdatagrid-display");
 
+    final ScrollPanel displayScroll = new ScrollPanel(table);
+    displayScroll.setSize("100%", "100%");
+    final SimplePanel displayScrollWrapper = new SimplePanel(displayScroll);
+    displayScrollWrapper.addStyleName("query-result-scroll-wrapper");
+
+
     int nrows = rows.size();
     int ncols = rows.get(0).size();
     ArrayList<List<String>> rowsL = new ArrayList<>(nrows);
@@ -141,7 +149,7 @@ public class Dialogs {
     // Add the table to the dataProvider.
     dataProvider.addDataDisplay(table);
 
-    layout.add(table);
+    layout.add(displayScrollWrapper);
     layout.add(footer);
 
     dialogBox.setGlassEnabled(true);

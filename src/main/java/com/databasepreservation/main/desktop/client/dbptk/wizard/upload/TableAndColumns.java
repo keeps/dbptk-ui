@@ -108,7 +108,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
 
   public static TableAndColumns getInstance(String databaseUUID, ConnectionParameters values) {
     if (instances.get(values.getURLConnection()) == null) {
-      instances.put(values.getURLConnection(), new TableAndColumns(values));
+      instances.put(values.getURLConnection(), new TableAndColumns(databaseUUID, values));
     }
     return instances.get(values.getURLConnection());
   }
@@ -151,10 +151,10 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
     });
   }
 
-  private TableAndColumns(ConnectionParameters values) {
+  private TableAndColumns(String databaseUUID, ConnectionParameters values) {
     initWidget(binder.createAndBindUi(this));
 
-    databaseUUID = values.getURLConnection();
+    this.databaseUUID = values.getURLConnection();
     final DialogBox dialogBox = Dialogs.showWaitResponse(messages.tableAndColumnsPageDialogTitleForRetrievingInformation(), messages.tableAndColumnsPageDialogMessageForRetrievingInformation());
 
     BrowserService.Util.getInstance().getSchemaInformation(databaseUUID, values,

@@ -241,6 +241,8 @@ public class SIARDExportOptionsCurrent extends Composite {
         externalLobsLabels.add(label);
         TextBox defaultTextBox = new TextBox();
         defaultTextBox.addStyleName("form-textbox-external-lobs");
+        GWT.log("" + parameter);
+        defaultTextBox.setText(parameter.getDefaultValue());
         externalLobsInputs.put(parameter.getName(), defaultTextBox);
         Label label_end = new Label();
         label_end.setText(messages.wizardExportOptionsLabels(parameter.getName() + "-end"));
