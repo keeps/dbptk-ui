@@ -84,11 +84,13 @@ public class MetadataInformation extends MetadataPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forSIARDEditMetadataPage(database.getUUID(), database.getMetadata().getName()));
+    BreadcrumbManager.updateBreadcrumb(breadcrumb,
+      BreadcrumbManager.forSIARDEditMetadataPage(database.getUUID(), database.getMetadata().getName()));
   }
 
   private void init() {
     metadata = database.getMetadata();
+    GWT.log("init: " + metadata.getArchivalDate());
     controls = MetadataControlPanel.getInstance(database.getUUID());
     writeOnViewerMetadataInformation(database.getMetadata());
   }
@@ -121,7 +123,7 @@ public class MetadataInformation extends MetadataPanel {
     element.addValueChangeHandler(event -> {
       String nameEl = element.getElement().getAttribute("name");
       controls.checkIfElementIsMandatory(nameEl, element);
-      SIARDbundle.setInformation(name, element.getTextBox().getText());
+      SIARDbundle.setInformation(name, element.getTextBox().getValue());
       updateMetadata();
     });
 
@@ -167,7 +169,7 @@ public class MetadataInformation extends MetadataPanel {
     }
 
     if (!archivalDate.getValue().toString().isEmpty()) {
-      metadata.setArchivalDate(archivalDate.getValue().toString());
+      metadata.setArchivalDate(archivalDate.getTextBox().getValue());
     }
     if (!dataOwner.getText().isEmpty()) {
       metadata.setDataOwner(dataOwner.getText());
