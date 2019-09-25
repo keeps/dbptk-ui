@@ -6,28 +6,50 @@
             <g:FlowPanel addStyleNames="form-row">
                 <g:CheckBox ui:field="tunnelSSH" addStyleNames="form-checkbox" />
             </g:FlowPanel>
+            <g:FlowPanel addStyleNames="form-helper">
+                <g:FlowPanel addStyleNames="form-row">
+                    <g:Label ui:field="proxyHostLabel" addStyleNames="form-label-spaced">
+                        <ui:text from='{messages.connectionPageLabelForProxyHost}'/>
+                    </g:Label>
+                    <g:TextBox ui:field="proxyHost" addStyleNames="form-textbox"/>
+                </g:FlowPanel>
+                <g:InlineHTML addStyleNames="form-text-helper text-muted">
+                    <ui:text from='{messages.connectionPageDescriptionForProxyHost}'/>
+                </g:InlineHTML>
+            </g:FlowPanel>
+            <g:FlowPanel addStyleNames="form-helper">
+                <g:FlowPanel addStyleNames="form-row">
+                    <g:Label ui:field="proxyPortLabel" addStyleNames="form-label-spaced">
+                        <ui:text from='{messages.connectionPageLabelForProxyPort}'/>
+                    </g:Label>
+                    <g:TextBox ui:field="proxyPort" addStyleNames="form-textbox"/>
+                </g:FlowPanel>
+                <g:InlineHTML addStyleNames="form-text-helper text-muted">
+                    <ui:text from='{messages.connectionPageDescriptionForProxyPort}'/>
+                </g:InlineHTML>
+            </g:FlowPanel>
 
-            <g:FlowPanel addStyleNames="form-inline">
-                <g:Label ui:field="proxyHostLabel" addStyleNames="form-label-spaced">
-                    <ui:text from='{messages.connectionPageLabelForProxyHost}'/>
-                </g:Label>
-                <g:TextBox ui:field="proxyHost" addStyleNames="form-textbox"/>
-                <g:Label ui:field="proxyPortLabel" addStyleNames="form-label-spaced">
-                    <ui:text from='{messages.connectionPageLabelForProxyPort}'/>
-                </g:Label>
-                <g:TextBox ui:field="proxyPort" addStyleNames="form-textbox"/>
+            <g:FlowPanel addStyleNames="form-helper">
+                <g:FlowPanel addStyleNames="form-row">
+                    <g:Label ui:field="proxyUserLabel" addStyleNames="form-label-spaced">
+                        <ui:text from='{messages.connectionPageLabelForProxyUserLabel}'/>
+                    </g:Label>
+                    <g:TextBox ui:field="proxyUser" addStyleNames="form-textbox"/>
+                </g:FlowPanel>
+                <g:InlineHTML addStyleNames="form-text-helper text-muted">
+                    <ui:text from='{messages.connectionPageDescriptionForProxyUser}'/>
+                </g:InlineHTML>
             </g:FlowPanel>
-            <g:FlowPanel addStyleNames="form-row">
-                <g:Label ui:field="proxyUserLabel" addStyleNames="form-label-spaced">
-                    <ui:text from='{messages.connectionPageLabelForProxyUserLabel}'/>
-                </g:Label>
-                <g:TextBox ui:field="proxyUser" addStyleNames="form-textbox"/>
-            </g:FlowPanel>
-            <g:FlowPanel addStyleNames="form-row">
-                <g:Label ui:field="proxyPasswordLabel" addStyleNames="form-label-spaced">
-                    <ui:text from='{messages.connectionPageLabelForProxyPasswordLabel}'/>
-                </g:Label>
-                <g:PasswordTextBox ui:field="proxyPassword" addStyleNames="form-textbox"/>
+            <g:FlowPanel addStyleNames="form-helper">
+                <g:FlowPanel addStyleNames="form-row">
+                    <g:Label ui:field="proxyPasswordLabel" addStyleNames="form-label-spaced">
+                        <ui:text from='{messages.connectionPageLabelForProxyPasswordLabel}'/>
+                    </g:Label>
+                    <g:PasswordTextBox ui:field="proxyPassword" addStyleNames="form-textbox"/>
+                </g:FlowPanel>
+                <g:InlineHTML addStyleNames="form-text-helper text-muted">
+                    <ui:text from='{messages.connectionPageDescriptionForProxyPassword}'/>
+                </g:InlineHTML>
             </g:FlowPanel>
         </g:FlowPanel>
     </g:FlowPanel>

@@ -40,6 +40,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 
 import config.i18n.client.ClientMessages;
@@ -164,7 +165,7 @@ public class Dialogs {
     dialogBox.show();
   }
 
-  public static void showExternalLobsSetupDialog(String title, ComboBoxField referencesType, GenericField genericField,
+  public static void showExternalLobsSetupDialog(String title, FlowPanel referencesType, GenericField genericField,
     String cancelButtonText, String confirmButtonText, boolean toDelete,
     final AsyncCallback<ExternalLobsDialogBoxResult> callback) {
 
@@ -280,8 +281,8 @@ public class Dialogs {
     dialogBox.show();
   }
 
-  public static void showExternalLobsSetupDialog(String title, ComboBoxField referencesType,
-    FileUploadField genericField, String cancelButtonText, String confirmButtonText, boolean toDelete,
+  public static void showExternalLobsSetupDialog(String title, FlowPanel referencesType,
+    FlowPanel genericField, String cancelButtonText, String confirmButtonText, boolean toDelete,
     final AsyncCallback<ExternalLobsDialogBoxResult> callback) {
 
     final DialogBox dialogBox = new DialogBox(false, true);

@@ -696,7 +696,17 @@ public interface ClientMessages extends Messages {
 
   String connectionPageLabelForProxyPasswordLabel();
 
+  String connectionPageDescriptionForProxyUser();
+
+  String connectionPageDescriptionForProxyHost();
+
+  String connectionPageDescriptionForProxyPort();
+
+  String connectionPageDescriptionForProxyPassword();
+
   String connectionPageLabelsFor(@Select String fieldName);
+
+  String connectionPageDescriptionsFor(@Select String fieldName);
 
   String connectionPageLabelForChooseDriverLocation();
 
@@ -764,6 +774,10 @@ public interface ClientMessages extends Messages {
   String tableAndColumnsPageDialogTitleForRetrievingInformation();
 
   String tableAndColumnsPageDialogMessageForRetrievingInformation();
+
+  String tableAndColumnsPageDescriptionForExternalLOBReferenceType();
+
+  String tableAndColumnsPageDescriptionForExternalLOBBasePath();
 
   /********************************************
    * Create Wizard: Custom Views

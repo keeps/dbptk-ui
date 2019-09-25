@@ -1,7 +1,7 @@
 package com.databasepreservation.main.common.server;
 
 import com.databasepreservation.common.ModuleObserver;
-import com.databasepreservation.main.common.server.index.DatabaseRowsSolrManager;
+import com.databasepreservation.main.common.shared.ProgressData;
 import com.databasepreservation.model.data.Row;
 import com.databasepreservation.model.structure.DatabaseStructure;
 import com.databasepreservation.model.structure.SchemaStructure;
@@ -11,67 +11,77 @@ import com.databasepreservation.model.structure.TableStructure;
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class ProgressObserver implements ModuleObserver {
-  private final String databaseUUID;
-  private final DatabaseRowsSolrManager solrManager;
+  private ProgressData progressData;
 
-  public ProgressObserver(String databaseUUID) {
-    this.databaseUUID = databaseUUID;
-    this.solrManager = ViewerFactory.getSolrManager();
+  public ProgressObserver(String UUID) {
+    progressData = ProgressData.getInstance(UUID);
   }
 
   @Override
   public void notifyOpenDatabase() {
-    // do nothing
+    progressData.reset();
+    progressData.setDatabaseStructureRetrieved(false);
   }
 
   @Override
-  public void notifyStructureObtained(DatabaseStructure structure) {
-    // can not do this yet because the database has not yet been created by dbvtk
-    // export module
-
-    // solrManager.updateDatabaseTotalSchemas(databaseUUID,
-    // structure.getSchemas().size());
+  public void notifyStructureObtained(DatabaseStructure databaseStructure) {
+    long totalRows = 0;
+    for (SchemaStructure schema : databaseStructure.getSchemas()) {
+      for (TableStructure table : schema.getTables()) {
+        totalRows += table.getRows();
+      }
+    }
+    progressData.setDatabaseStructureRetrieved(true);
+    progressData.setTotalSchemas(databaseStructure.getSchemas().size());
+    progressData.setTotalRows(totalRows);
   }
 
   @Override
-  public void notifyOpenSchema(DatabaseStructure structure, SchemaStructure schema, long completedSchemas,
+  public void notifyOpenSchema(DatabaseStructure structure, SchemaStructure schemaStructure, long completedSchemas,
     long completedTablesInSchema) {
-    solrManager.updateDatabaseCurrentSchema(databaseUUID, schema.getName(), completedSchemas,
-      schema.getTables().size());
+    progressData.setCurrentSchemaName(schemaStructure.getName());
+    progressData.setProcessedSchemas(completedSchemas);
+    progressData.setTotalTables(schemaStructure.getTables().size());
   }
 
   @Override
-  public void notifyOpenTable(DatabaseStructure structure, TableStructure table, long completedSchemas,
+  public void notifyOpenTable(DatabaseStructure structure, TableStructure tableStructure, long completedSchemas,
     long completedTablesInSchema) {
-    solrManager.updateDatabaseCurrentTable(databaseUUID, table.getName(), completedTablesInSchema, table.getRows());
+    progressData.setCurrentTableName(tableStructure.getName());
+    progressData.setCurrentProcessedTableRows(0);
+    progressData.setPreviousProcessedRows(0);
+    progressData.setCurrentTableTotalRows(tableStructure.getRows());
   }
 
   @Override
   public void notifyTableProgressSparse(DatabaseStructure structure, TableStructure table, long completedRows,
     long totalRows) {
-    solrManager.updateDatabaseCurrentRow(databaseUUID, completedRows);
+    progressData.setCurrentProcessedTableRows(completedRows + 1);
+    progressData.incrementProcessedRows(completedRows + 1);
   }
 
   @Override
   public void notifyTableProgressDetailed(DatabaseStructure structure, TableStructure table, Row row,
     long completedRows, long totalRows) {
-    // do nothing for each row
+    progressData.setCurrentProcessedTableRows(completedRows + 1);
+    progressData.incrementProcessedRows(completedRows + 1);
   }
 
   @Override
   public void notifyCloseTable(DatabaseStructure structure, TableStructure table, long completedSchemas,
     long completedTablesInSchema) {
-    // do nothing
+    progressData.setProcessedTables(completedTablesInSchema);
   }
 
   @Override
   public void notifyCloseSchema(DatabaseStructure structure, SchemaStructure schema, long completedSchemas,
     long completedTablesInSchema) {
-    // do nothing
+
   }
 
   @Override
   public void notifyCloseDatabase(DatabaseStructure structure) {
-    solrManager.updateDatabaseIngestionFinished(databaseUUID);
+    progressData.reset();
+    progressData.setFinished(true);
   }
 }

@@ -22,7 +22,6 @@ import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardManager;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.common.exportOptions.MetadataExportOptions;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.common.exportOptions.SIARDExportOptions;
-import com.databasepreservation.main.desktop.client.dbptk.wizard.common.progressBar.ProgressBarMigrationPanel;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.common.progressBar.ProgressBarPanel;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.upload.TableAndColumns;
 import com.google.gwt.core.client.GWT;
@@ -187,7 +186,7 @@ public class SIARDWizardManager extends WizardManager {
           ViewerDatabase database = (ViewerDatabase) result;
           final String siardPath = database.getSIARDPath();
 
-          ProgressBarPanel progressBarPanel = ProgressBarMigrationPanel.getInstance(databaseUUID);
+          ProgressBarPanel progressBarPanel = ProgressBarPanel.getInstance(databaseUUID);
           progressBarPanel.setTitleText(messages.progressBarPanelTextForCreateWizardProgressTitle());
           progressBarPanel.setSubtitleText(messages.progressBarPanelTextForCreateWizardProgressSubTitle());
           wizardContent.add(progressBarPanel);
@@ -277,7 +276,7 @@ public class SIARDWizardManager extends WizardManager {
   protected void clear() {
     super.clear();
 
-    ProgressBarPanel progressBarPanel = ProgressBarMigrationPanel.getInstance(databaseUUID);
+    ProgressBarPanel progressBarPanel = ProgressBarPanel.getInstance(databaseUUID);
     progressBarPanel.clear(databaseUUID);
   }
 

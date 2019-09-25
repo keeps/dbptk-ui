@@ -66,6 +66,10 @@ public class FileUploadField extends Composite {
     path.addStyleName(css);
   }
 
+  public void addHelperText(Widget span) {
+    genericField.add(span);
+  }
+
   public void setPathLocation(String toDisplay, String tooltip) {
     path.setTitle(tooltip);
     path.setText(toDisplay);

@@ -17,6 +17,8 @@ public class GenericField extends Composite {
 
   private static GenericFieldUiBinder binder = GWT.create(GenericFieldUiBinder.class);
 
+  private String type;
+
   @UiField
   FlowPanel genericField;
 
@@ -40,6 +42,8 @@ public class GenericField extends Composite {
       genericKey.setVisible(false);
     }
 
+    type = value.getClass().getSimpleName();
+
     genericField.add(value);
   }
 
@@ -61,5 +65,9 @@ public class GenericField extends Composite {
 
   public void setLabelVisible(boolean value) {
     genericKey.setVisible(value);
+  }
+
+  public String getGenericFieldType() {
+    return this.type;
   }
 }

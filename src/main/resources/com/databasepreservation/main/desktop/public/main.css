@@ -1336,17 +1336,29 @@ html, body, .main {
 }
 
 .form-text-helper {
-    margin-left: 0px;
+    margin-left: 160px;
     font-size: 75%;
     font-weight: lighter;
 }
 
+.form-text-helper-checkbox {
+    margin-left: 20px;
+    font-size: 75%;
+    font-weight: lighter;
+}
+
+.form-helper .form-textbox {
+    margin-bottom: 0;
+}
+
+.form-helper .form-checkbox {
+    margin-bottom: 0;
+}
+
 .form-textbox-external-lobs {
     width: 5%;
-    border: 1px solid #ccc;
-    border-left-style: none;
-    border-right-style: none;
-    border-top-style: none;
+    border: 1px none #ccc;
+    border-bottom-style: solid;
     background: none;
     margin: 0px 10px;
     direction: rtl;
@@ -1751,7 +1763,6 @@ input[type="checkbox"]:checked:after {
 ***********************************************/
 .dialog-external-lobs {
     width: 500px;
-    height: 170px;
 }
 
 .dialog-external-lobs table {
@@ -1766,6 +1777,11 @@ input[type="checkbox"]:checked:after {
     display: flex;
     flex-direction: row-reverse;
 }
+
+.dialog-external-lobs-layout-footer .btn {
+    margin-left: 10px;
+}
+
 
 /**********************************************
 		         Dialog Errors

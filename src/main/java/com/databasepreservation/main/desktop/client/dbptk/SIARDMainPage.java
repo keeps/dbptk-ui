@@ -29,6 +29,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
@@ -272,7 +273,13 @@ public class SIARDMainPage extends Composite {
 
           @Override
           public void onSuccess(String databaseUUID) {
-            refreshInstance(databaseUUID);
+            Dialogs.showInformationDialog("test", "sdfsd", messages.basicActionBrowse(), "btn btn-link", new DefaultAsyncCallback<Void>() {
+              @Override
+              public void onSuccess(Void result) {
+                GWT.log("OK");
+              }
+            });
+            //HistoryManager.gotoDesktopDatabase(databaseUUID);
           }
         });
     });

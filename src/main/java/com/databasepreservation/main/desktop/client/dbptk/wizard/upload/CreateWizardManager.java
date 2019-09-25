@@ -22,7 +22,6 @@ import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.common.connection.Connection;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.common.exportOptions.MetadataExportOptions;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.common.exportOptions.SIARDExportOptions;
-import com.databasepreservation.main.desktop.client.dbptk.wizard.common.progressBar.ProgressBarMigrationPanel;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.common.progressBar.ProgressBarPanel;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -304,7 +303,7 @@ public class CreateWizardManager extends WizardManager {
     position = 5;
     updateBreadcrumb();
 
-    ProgressBarPanel progressBarPanel = ProgressBarMigrationPanel.getInstance(databaseUUID);
+    ProgressBarPanel progressBarPanel = ProgressBarPanel.getInstance(databaseUUID);
     progressBarPanel.setTitleText(messages.progressBarPanelTextForCreateWizardProgressTitle());
     progressBarPanel.setSubtitleText(messages.progressBarPanelTextForCreateWizardProgressSubTitle());
     wizardContent.add(progressBarPanel);

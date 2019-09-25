@@ -53,6 +53,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.TextBox;
@@ -102,12 +103,14 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
   private HashMap<String, Boolean> toggleSelectionColumnsMap = new HashMap<>();
   private HashMap<String, Button> btnToggleSelectionMap = new HashMap<>();
   private HashMap<String, Boolean> initialLoading = new HashMap<>();
+  private boolean externalLOBsDelete = false;
+  private String externalLOBsBtnText = messages.basicActionAdd();
 
   public static TableAndColumns getInstance(String databaseUUID, ConnectionParameters values) {
-    if (instances.get(databaseUUID) == null) {
-      instances.put(databaseUUID, new TableAndColumns(values));
+    if (instances.get(values.getURLConnection()) == null) {
+      instances.put(values.getURLConnection(), new TableAndColumns(values));
     }
-    return instances.get(databaseUUID);
+    return instances.get(values.getURLConnection());
   }
 
   public static TableAndColumns getInstance(String databaseUUID) {
@@ -151,7 +154,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
   private TableAndColumns(ConnectionParameters values) {
     initWidget(binder.createAndBindUi(this));
 
-    // databaseUUID = values.getURLConnection();
+    databaseUUID = values.getURLConnection();
     final DialogBox dialogBox = Dialogs.showWaitResponse(messages.tableAndColumnsPageDialogTitleForRetrievingInformation(), messages.tableAndColumnsPageDialogMessageForRetrievingInformation());
 
     BrowserService.Util.getInstance().getSchemaInformation(databaseUUID, values,
@@ -633,14 +636,21 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
     };
 
     buttonDatabaseColumn.setFieldUpdater((index, object, value) -> {
-      String btnText = messages.basicActionAdd();
-      boolean delete = false;
       String id = object.getDisplayName() + "_" + viewerTable.getUUID();
 
       final ComboBoxField referenceType = ComboBoxField
         .createInstance(messages.tableAndColumnsPageLabelForReferenceType());
       referenceType.setComboBoxValue("File System", "file-system");
       referenceType.setCSSMetadata("form-row", "form-label-spaced", "form-combobox");
+
+      FlowPanel helperReferenceType = new FlowPanel();
+      helperReferenceType.addStyleName("form-helper");
+      InlineHTML spanReferenceType = new InlineHTML();
+      spanReferenceType.addStyleName("form-text-helper text-muted");
+      spanReferenceType.setText(messages.tableAndColumnsPageDescriptionForExternalLOBReferenceType());
+      referenceType.addHelperText(spanReferenceType);
+      helperReferenceType.add(referenceType);
+      helperReferenceType.add(spanReferenceType);
 
       GenericField genericField;
       if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
@@ -649,6 +659,23 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
         fileUploadField.setParentCSS("form-row");
         fileUploadField.setLabelCSS("form-label-spaced");
         fileUploadField.setButtonCSS("btn btn-link form-button");
+
+        FlowPanel helperFileUploadField = new FlowPanel();
+        helperFileUploadField.addStyleName("form-helper");
+        InlineHTML spanFileUploadField = new InlineHTML();
+        spanFileUploadField.addStyleName("form-text-helper text-muted");
+        spanFileUploadField.setText(messages.tableAndColumnsPageDescriptionForExternalLOBBasePath());
+        fileUploadField.addHelperText(spanFileUploadField);
+        helperFileUploadField.add(fileUploadField);
+        helperFileUploadField.add(spanFileUploadField);
+
+        if (externalLOBsParameters.get(id) != null) {
+          String displayPath = PathUtils.getFileName(externalLOBsParameters.get(id).getBasePath());
+          fileUploadField.setPathLocation(displayPath, externalLOBsParameters.get(id).getBasePath());
+          externalLOBsDelete = true;
+          externalLOBsBtnText = messages.basicActionUpdate();
+        }
+
         fileUploadField.buttonAction(() -> {
           if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
             JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.singletonList("openDirectory"),
@@ -665,19 +692,30 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
         });
 
         Dialogs.showExternalLobsSetupDialog(messages.tableAndColumnsPageDialogTitleForExternalLOBDialog(),
-          referenceType, fileUploadField, messages.basicActionCancel(), messages.basicActionAdd(), delete,
-          new DefaultAsyncCallback<ExternalLobsDialogBoxResult>() {
+            helperReferenceType, helperFileUploadField, messages.basicActionCancel(), externalLOBsBtnText, externalLOBsDelete,
+            new DefaultAsyncCallback<ExternalLobsDialogBoxResult>() {
               @Override
-            public void onSuccess(ExternalLobsDialogBoxResult result) {
-              if (result.isResult()) {
-                String id = object.getDisplayName() + "_" + viewerTable.getUUID();
-                ExternalLOBsParameter externalLOBsParameter = new ExternalLOBsParameter();
-                externalLOBsParameter.setBasePath(currentBasePath);
-                externalLOBsParameter.setReferenceType(referenceType.getSelectedValue());
-                externalLOBsParameter.setTable(viewerTable);
-                externalLOBsParameter.setColumnName(object.getDisplayName());
-                externalLOBsParameters.put(id, externalLOBsParameter);
-              }
+              public void onSuccess(ExternalLobsDialogBoxResult result) {
+                if (result.getOption().equals("add") && result.isResult()) {
+                  ExternalLOBsParameter externalLOBsParameter = new ExternalLOBsParameter();
+                  externalLOBsParameter.setBasePath(currentBasePath);
+                  externalLOBsParameter.setReferenceType(referenceType.getSelectedValue());
+                  externalLOBsParameter.setTable(metadata.getTable(currentTableUUID));
+                  externalLOBsParameter.setColumnName(object.getDisplayName());
+
+                  MultipleSelectionTablePanel<ViewerColumn> viewerColumnMultipleSelectionTablePanel = getColumns(
+                      viewerTable.getUUID());
+                  viewerColumnMultipleSelectionTablePanel.getDisplay().redrawRow(index);
+                  externalLOBsParameters.put(id, externalLOBsParameter);
+                }
+                if (result.getOption().equals("delete") && result.isResult()) {
+                  String id = object.getDisplayName() + "_" + viewerTable.getUUID();
+                  externalLOBsDelete = false;
+                  externalLOBsParameters.remove(id);
+                  MultipleSelectionTablePanel<ViewerColumn> viewerColumnMultipleSelectionTablePanel = getColumns(
+                      viewerTable.getUUID());
+                  viewerColumnMultipleSelectionTablePanel.getDisplay().redrawRow(index);
+                }
               }
             });
       } else {
@@ -685,14 +723,14 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
         textBox.addStyleName("form-textbox");
         if (externalLOBsParameters.get(id) != null) {
           textBox.setText(externalLOBsParameters.get(id).getBasePath());
-          delete = true;
-          btnText = messages.basicActionUpdate();
+          externalLOBsDelete = true;
+          externalLOBsBtnText = messages.basicActionUpdate();
         }
         genericField = GenericField.createInstance(messages.tableAndColumnsPageLabelForBasePath(), textBox);
         genericField.setCSSMetadata("form-row", "form-label-spaced");
 
         Dialogs.showExternalLobsSetupDialog(messages.tableAndColumnsPageDialogTitleForExternalLOBDialog(),
-          referenceType, genericField, "Cancel", btnText, delete,
+          helperReferenceType, genericField, messages.basicActionCancel(), externalLOBsBtnText, externalLOBsDelete,
           new DefaultAsyncCallback<ExternalLobsDialogBoxResult>() {
             @Override
             public void onSuccess(ExternalLobsDialogBoxResult result) {
@@ -799,17 +837,6 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
         }),
       new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForOptions(), 10,
         buttonDatabaseColumn));
-  }
-
-  private List<ViewerTable> filtered(List<ViewerTable> tableList) {
-    List<ViewerTable> finalList = new ArrayList<>();
-    for (ViewerTable viewerTable : tableList) {
-      if (!viewerTable.getName().startsWith("VIEW_")) {
-        finalList.add(viewerTable);
-      }
-    }
-
-    return finalList;
   }
 
   private abstract static class ButtonDatabaseColumn extends Column<ViewerColumn, String> {

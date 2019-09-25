@@ -28,6 +28,7 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -154,7 +155,16 @@ public class JDBCPanel extends Composite {
           }
         });
         fileInputs.put(parameter.getName(), fileUploadField);
-        content.add(fileUploadField);
+        FlowPanel helper = new FlowPanel();
+        helper.addStyleName("form-helper");
+        InlineHTML span = new InlineHTML();
+        span.addStyleName("form-text-helper text-muted");
+
+        span.setText(messages.connectionPageDescriptionsFor(parameter.getName()));
+        fileUploadField.addHelperText(span);
+        helper.add(fileUploadField);
+        helper.add(span);
+        content.add(helper);
         break;
       case ViewerConstants.INPUT_TYPE_FOLDER:
         break;
@@ -182,9 +192,22 @@ public class JDBCPanel extends Composite {
     }
 
     if (genericField != null) {
+      FlowPanel helper = new FlowPanel();
+      helper.addStyleName("form-helper");
+      InlineHTML span = new InlineHTML();
       genericField.setRequired(parameter.isRequired());
       genericField.setCSSMetadata("form-row", "form-label-spaced");
-      content.add(genericField);
+      if (genericField.getGenericFieldType().equals(CheckBox.class.getSimpleName())) {
+        span.addStyleName("form-text-helper-checkbox text-muted");
+      } else {
+        span.addStyleName("form-text-helper text-muted");
+      }
+
+      span.setText(messages.connectionPageDescriptionsFor(parameter.getName()));
+      genericField.addHelperText(span);
+      helper.add(genericField);
+      helper.add(span);
+      content.add(helper);
     }
   }
 

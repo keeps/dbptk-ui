@@ -91,6 +91,10 @@ public class ComboBoxField extends Composite {
     combobox.addStyleName(cssValue);
   }
 
+  public void addHelperText(Widget span) {
+    flowPanelParent.add(span);
+  }
+
   public void setRequired() {
     comboboxLabel.addStyleName("form-label-mandatory");
   }

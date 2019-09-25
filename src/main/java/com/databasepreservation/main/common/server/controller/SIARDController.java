@@ -522,7 +522,7 @@ public class SIARDController {
         .exportModuleParameter(DbvtkModuleFactory.PARAMETER_LOB_FOLDER, configuration.getLobPath().toString())
         .exportModuleParameter(DbvtkModuleFactory.PARAMETER_DATABASE_UUID, databaseUUID);
 
-      databaseMigration.filter(new ObservableFilter(new ProgressObserver(databaseUUID)));
+      databaseMigration.filter(new ObservableFilter(new SIARDProgressObserver(databaseUUID)));
 
       databaseMigration.reporter(reporter);
 

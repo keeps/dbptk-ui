@@ -7,7 +7,6 @@ import java.util.Map;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
-import com.databasepreservation.main.desktop.client.dbptk.wizard.common.progressBar.ProgressBarIngestPanel;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.common.progressBar.ProgressBarPanel;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -52,13 +51,10 @@ public class IngestPage extends Composite {
     List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forSIARDIngesting(databaseUUID, databaseName);
     BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
 
-    final ProgressBarPanel instance = ProgressBarIngestPanel.getInstance(databaseUUID);
-    // final UploadPanel instance = UploadPanel.createInstance(databaseUUID);
+    final ProgressBarPanel instance = ProgressBarPanel.getInstance(databaseUUID);
     instance.setTitleText(messages.SIARDHomePageTextForIngestSIARDTitle());
     instance.setSubtitleText(messages.SIARDHomePageTextForIngestSIARDSubtitle());
-
-    GWT.log(databaseUUID);
-
+    
     panel.add(instance);
   }
 
