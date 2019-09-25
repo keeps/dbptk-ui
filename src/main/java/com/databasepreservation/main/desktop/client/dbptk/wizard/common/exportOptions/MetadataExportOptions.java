@@ -74,32 +74,19 @@ public class MetadataExportOptions extends WizardPanel<MetadataExportOptionsPara
       "<div class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
 
     content.add(spinner);
-
-    BrowserService.Util.getInstance().retrieve(databaseUUID, ViewerDatabase.class.getName(), databaseUUID,
-      new DefaultAsyncCallback<IsIndexed>() {
-      @Override
-        public void onSuccess(IsIndexed result) {
-          ViewerDatabase database = (ViewerDatabase) result;
-          metadata = database.getMetadata();
-
-          BrowserService.Util.getInstance().getSIARDExportModule(moduleName, new DefaultAsyncCallback<String>() {
-            @Override
-            public void onSuccess(String result) {
-              content.remove(spinner);
-
-              DBPTKModuleMapper mapper = GWT.create(DBPTKModuleMapper.class);
-              DBPTKModule module = mapper.read(result);
-
-              for (PreservationParameter p : module.getParameters(moduleName)) {
-                if (p.getExportOption() != null
-                  && p.getExportOption().equals(ViewerConstants.METADATA_EXPORT_OPTIONS)) {
-                  buildGenericWidget(p);
-                }
-              }
+    if (populate) {
+      BrowserService.Util.getInstance().retrieve(databaseUUID, ViewerDatabase.class.getName(), databaseUUID,
+        new DefaultAsyncCallback<IsIndexed>() {
+          @Override
+          public void onSuccess(IsIndexed result) {
+            ViewerDatabase database = (ViewerDatabase) result;
+            metadata = database.getMetadata();
+            obtainMetadataExportOptions(moduleName, spinner);
             }
           });
-      }
-    });
+    } else {
+      obtainMetadataExportOptions(moduleName, spinner);
+    }
   }
 
   @Override
@@ -197,5 +184,22 @@ public class MetadataExportOptions extends WizardPanel<MetadataExportOptionsPara
         textBox.setText(metadata.getDataOriginTimespan());
         break;
     }
+  }
+
+  private void obtainMetadataExportOptions(final String moduleName, Widget spinner) {
+    BrowserService.Util.getInstance().getSIARDExportModule(moduleName, new DefaultAsyncCallback<String>() {
+      @Override
+      public void onSuccess(String result) {
+        DBPTKModuleMapper mapper = GWT.create(DBPTKModuleMapper.class);
+        DBPTKModule module = mapper.read(result);
+
+        for (PreservationParameter p : module.getParameters(moduleName)) {
+          if (p.getExportOption() != null && p.getExportOption().equals(ViewerConstants.METADATA_EXPORT_OPTIONS)) {
+            buildGenericWidget(p);
+          }
+        }
+        content.remove(spinner);
+      }
+    });
   }
 }

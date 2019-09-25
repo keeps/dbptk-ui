@@ -586,6 +586,20 @@ public class BreadcrumbManager {
     return items;
   }
 
+  public static List<BreadcrumbItem> forSIARDIngesting(final String databaseUUID, final String databaseName) {
+    List<BreadcrumbItem> items = forSIARDMainPage(databaseUUID, databaseName);
+    items.add(new BreadcrumbItem(
+        SafeHtmlUtils.fromSafeConstant(
+            FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE) + SafeHtmlUtils.htmlEscape("Ingesting")),
+        new Command() {
+          @Override
+          public void execute() {
+            HistoryManager.gotoIngestSIARDData(databaseUUID, databaseName);
+          }
+        }));
+    return items;
+  }
+
   public static List<BreadcrumbItem> forDesktopSIARDBrowse(final String databaseUUID, final String databaseName) {
     List<BreadcrumbItem> items = forSIARDMainPage(databaseUUID, databaseName);
     items.add(new BreadcrumbItem(

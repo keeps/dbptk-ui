@@ -21,20 +21,13 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-public class ProgressBarPanel extends Composite {
-  private static final ClientMessages messages = GWT.create(ClientMessages.class);
+public abstract class ProgressBarPanel extends Composite {
+  interface ProgressBarPanelUiBinder extends UiBinder<Widget, ProgressBarPanel> { }
 
-  interface ProgressBarPanelUiBinder extends UiBinder<Widget, ProgressBarPanel> {
-  }
-
-  private static ProgressBarPanelUiBinder uiBinder = GWT.create(ProgressBarPanelUiBinder.class);
-
-  private Timer autoUpdateTimer = new Timer() {
-    @Override
-    public void run() {
-      ProgressBarPanel.this.update();
-    }
-  };
+  protected static final ClientMessages messages = GWT.create(ClientMessages.class);
+  protected static HashMap<String, ProgressBarPanel> instances = new HashMap<>();
+  protected String databaseUUID;
+  protected static ProgressBarPanelUiBinder uiBinder = GWT.create(ProgressBarPanelUiBinder.class);
 
   @UiField
   FlowPanel content;
@@ -45,48 +38,12 @@ public class ProgressBarPanel extends Composite {
   @UiField
   Label title, subTitle;
 
-  private static HashMap<String, ProgressBarPanel> instances = new HashMap<>();
-  private final String uuid;
-
-  public static ProgressBarPanel getInstance(String uuid) {
-    if (instances.get(uuid) == null) {
-      instances.put(uuid, new ProgressBarPanel(uuid));
-    }
-
-    return instances.get(uuid);
-  }
-
-  private ProgressBarPanel(String uuid) {
-    initWidget(uiBinder.createAndBindUi(this));
-    this.uuid = uuid;
-    update();
-  }
-
-  private void init() {
-    BrowserService.Util.getInstance().getProgressData(uuid, new DefaultAsyncCallback<ProgressData>() {
-      @Override
-      public void onSuccess(ProgressData result) {
-        result.reset();
-        progressBar.setCurrent(0);
-        content.clear();
-        stopUpdating();
-        autoUpdateTimer.scheduleRepeating(100);
-      }
-    });
-  }
-
   public void setTitleText(String text) {
     title.setText(text);
   }
 
-  public void setSubTitleText(String text) {
+  public void setSubtitleText(String text) {
     subTitle.setText(text);
-  }
-
-  @Override
-  protected void onAttach() {
-    init();
-    super.onAttach();
   }
 
   public void clear(String uuid) {
@@ -95,57 +52,8 @@ public class ProgressBarPanel extends Composite {
     instances.put(uuid, null);
   }
 
-  private void update() {
-    BrowserService.Util.getInstance().getProgressData(uuid, new DefaultAsyncCallback<ProgressData>() {
-      @Override
-      public void onSuccess(ProgressData result) {
-        update(result);
-      }
-    });
-  }
 
-  private void update(ProgressData progressData) {
-    if (progressData.isDatabaseStructureRetrieved()) {
-      int currentGlobalPercent = new Double(
-          ((progressData.getProcessedRows() * 1.0D) / progressData.getTotalRows()) * 100).intValue();
-      progressBar.setCurrent(currentGlobalPercent);
-
-      final String totalTablesPercentage = buildPercentageMessage(messages.progressBarPanelTextForTables(),
-        progressData.getProcessedTables(), progressData.getTotalTables());
-      final String totalRowsPercentage = buildPercentageMessage(messages.progressBarPanelTextForRows(),
-        progressData.getProcessedRows(), progressData.getTotalRows());
-      final String currentTable = buildSimpleMessage(messages.progressBarPanelTextForCurrentTable(),
-        progressData.getCurrentTableName());
-      final String currentTableRowsPercentage = buildPercentageMessage(messages.progressBarPanelTextForCurrentRows(),
-        progressData.getCurrentProcessedTableRows(), progressData.getCurrentTableTotalRows());
-
-      addMessageToContent(1, totalTablesPercentage);
-      addMessageToContent(2, totalRowsPercentage);
-      addMessageToContent(3, currentTable);
-      addMessageToContent(4, currentTableRowsPercentage);
-    } else {
-      final String retrieving = buildSimpleMessage("", messages.progressBarPanelTextForRetrievingTableStructure());
-      addMessageToContent(0, retrieving);
-    }
-
-    if (progressData.isFinished()) {
-      stopUpdating();
-    }
-  }
-
-  @Override
-  protected void onDetach() {
-    stopUpdating();
-    super.onDetach();
-  }
-
-  private void stopUpdating() {
-    if (autoUpdateTimer != null) {
-      autoUpdateTimer.cancel();
-    }
-  }
-
-  private void addMessageToContent(final int index, final String message) {
+  protected void addMessageToContent(final int index, final String message) {
     Label newMessage = new Label(message);
     final int widgetCount = content.getWidgetCount();
     if (widgetCount > 0) {
@@ -166,7 +74,7 @@ public class ProgressBarPanel extends Composite {
     }
   }
 
-  private String buildPercentageMessage(final String type, final long processed, final long total) {
+  protected String buildPercentageMessage(final String type, final long processed, final long total) {
     // Examples Table: X of Y (Z%), Rows: X of Y (Z%), Rows on current table: X of Y
     // (Z%)
     StringBuilder sb = new StringBuilder();
@@ -184,7 +92,7 @@ public class ProgressBarPanel extends Composite {
     return sb.toString();
   }
 
-  private String buildSimpleMessage(final String type, final String message) {
+  protected String buildSimpleMessage(final String type, final String message) {
     // Example: Current table: <name>
     return type + " " + message + "\n\n";
   }

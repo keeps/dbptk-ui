@@ -1,12 +1,7 @@
 package com.databasepreservation.main.common.client;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import com.databasepreservation.main.common.shared.ValidationProgressData;
-import com.databasepreservation.main.common.shared.exceptions.ViewerException;
-import com.databasepreservation.main.common.shared.models.PreservationParameter;
 import org.roda.core.data.exceptions.AuthenticationDeniedException;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.roda.core.data.exceptions.GenericException;
@@ -21,6 +16,7 @@ import org.roda.core.data.v2.index.sublist.Sublist;
 import org.roda.core.data.v2.user.User;
 
 import com.databasepreservation.main.common.shared.ProgressData;
+import com.databasepreservation.main.common.shared.ValidationProgressData;
 import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
@@ -30,7 +26,6 @@ import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
 import com.databasepreservation.main.common.shared.client.common.search.SavedSearch;
 import com.databasepreservation.main.common.shared.client.common.search.SearchField;
 import com.databasepreservation.main.common.shared.client.common.search.SearchInfo;
-import com.databasepreservation.main.common.shared.models.DBPTKModule;
 import com.databasepreservation.main.common.shared.models.wizardParameters.ConnectionParameters;
 import com.databasepreservation.main.common.shared.models.wizardParameters.CustomViewsParameters;
 import com.databasepreservation.main.common.shared.models.wizardParameters.ExportOptionsParameters;
@@ -132,7 +127,7 @@ public interface BrowserService extends RemoteService {
 
   String getSIARDExportModules() throws GenericException;
 
-  ViewerMetadata getSchemaInformation(String databaseUUID, ConnectionParameters values) throws GenericException;
+  String getSchemaInformation(String databaseUUID, ConnectionParameters values) throws GenericException;
 
   boolean testConnection(String databaseUUID, ConnectionParameters parameters) throws GenericException;
 

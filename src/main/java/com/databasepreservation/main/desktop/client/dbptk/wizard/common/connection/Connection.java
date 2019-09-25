@@ -8,6 +8,7 @@ import java.util.Set;
 import com.databasepreservation.main.common.client.BrowserService;
 import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
+import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.main.common.shared.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.main.common.shared.client.widgets.Toast;
 import com.databasepreservation.main.common.shared.models.DBPTKModule;
@@ -247,5 +248,9 @@ public class Connection extends WizardPanel<ConnectionParameters> {
   @Override
   public void error() {
     Toast.showError(messages.errorMessagesConnectionTitle(), messages.connectionPageErrorMessageFor(1));
+  }
+
+  public void scrollToElement(String toSelect) {
+    //JavascriptUtils.scrollToElement(connectionSidebar.getElement());
   }
 }

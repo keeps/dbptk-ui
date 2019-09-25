@@ -261,7 +261,7 @@ public class SIARDMainPage extends Composite {
     btnIngest.setVisible(false);
 
     btnIngest.addClickHandler(event -> {
-      HistoryManager.gotoIngestSIARDData(database.getUUID());
+      HistoryManager.gotoIngestSIARDData(database.getUUID(), database.getMetadata().getName());
       BrowserService.Util.getInstance().uploadSIARD(database.getSIARDPath(), database.getUUID(),
         new DefaultAsyncCallback<String>() {
           @Override
@@ -421,6 +421,18 @@ public class SIARDMainPage extends Composite {
       btnIngest.setVisible(false);
       btnBrowse.setVisible(true);
       // btnDelete.setVisible(true);
+    } else if (database.getStatus().equals(ViewerDatabase.Status.INGESTING)) {
+      btnIngest.setVisible(true);
+      btnBrowse.setVisible(false);
+      btnIngest.addClickHandler(event -> HistoryManager.gotoIngestSIARDData(database.getUUID(), database.getMetadata().getName()));
+    }
+  }
+
+  @Override
+  protected void onAttach() {
+    super.onAttach();
+    if (database != null) {
+      refreshInstance(database.getUUID());
     }
   }
 }

@@ -35,6 +35,7 @@ import com.databasepreservation.main.desktop.client.common.sidebar.TableAndColum
 import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.common.diagram.ErDiagram;
 import com.databasepreservation.main.desktop.shared.models.ExternalLobsDialogBoxResult;
+import com.github.nmorel.gwtjackson.client.ObjectMapper;
 import com.google.gwt.cell.client.ButtonCell;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.CheckboxCell;
@@ -49,6 +50,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
@@ -71,6 +73,9 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
 
   interface TableAndColumnsUiBinder extends UiBinder<Widget, TableAndColumns> {
+  }
+
+  interface ViewerMetadataMapper extends ObjectMapper<ViewerMetadata> {
   }
 
   private static TableAndColumnsUiBinder binder = GWT.create(TableAndColumnsUiBinder.class);
@@ -147,29 +152,28 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
     initWidget(binder.createAndBindUi(this));
 
     // databaseUUID = values.getURLConnection();
-    Widget spinner = new HTML(SafeHtmlUtils.fromSafeConstant(
-      "<div class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
-
-    content.add(spinner);
+    final DialogBox dialogBox = Dialogs.showWaitResponse(messages.tableAndColumnsPageDialogTitleForRetrievingInformation(), messages.tableAndColumnsPageDialogMessageForRetrievingInformation());
 
     BrowserService.Util.getInstance().getSchemaInformation(databaseUUID, values,
-      new DefaultAsyncCallback<ViewerMetadata>() {
+      new DefaultAsyncCallback<String>() {
         @Override
-        public void onSuccess(ViewerMetadata result) {
-          metadata = result;
-          tableAndColumnsSidebar = TableAndColumnsSidebar.newInstance(result);
+        public void onSuccess(String result) {
+          ViewerMetadataMapper mapper = GWT.create(ViewerMetadataMapper.class);
+          metadata = mapper.read(result);
+          tableAndColumnsSidebar = TableAndColumnsSidebar.newInstance(metadata);
           tableAndColumnsList.add(tableAndColumnsSidebar);
 
           initTables();
 
-          content.remove(spinner);
           sideBarHighlighter(TableAndColumnsSidebar.DATABASE_LINK,null,null);
+          dialogBox.hide();
         }
 
         @Override
         public void onFailure(Throwable caught) {
           Toast.showError(messages.tableAndColumnsPageTitle(), caught.getMessage());
-          content.remove(spinner);
+          dialogBox.hide();
+          //content.remove(spinner);
         }
       });
   }

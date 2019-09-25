@@ -294,7 +294,7 @@ public class SIARDController {
     return true;
   }
 
-  public static ViewerMetadata getDatabaseMetadata(String databaseUUID, ConnectionParameters parameters)
+  public static String getDatabaseMetadata(String databaseUUID, ConnectionParameters parameters)
     throws GenericException {
     final Reporter reporter = getReporter(databaseUUID);
     final DatabaseMigration databaseMigration = initializeDatabaseMigration(reporter);
@@ -321,9 +321,14 @@ public class SIARDController {
       LOGGER.debug(e.getMessage());
     }
 
-    if (database != null)
-      return database.getMetadata();
-
+    if (database != null) {
+      try {
+        return JsonTransformer.getJsonFromObject(database.getMetadata());
+      } catch (ViewerException e) {
+        throw new GenericException(e.getMessage());
+      }
+    }
+      //return database.getMetadata();
     return null;
   }
 

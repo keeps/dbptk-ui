@@ -136,7 +136,7 @@ public interface BrowserServiceAsync {
 
   void getSIARDExportModule(String moduleName, AsyncCallback<String> async);
 
-  void getSchemaInformation(String databaseUUID, ConnectionParameters values, AsyncCallback<ViewerMetadata> async);
+  void getSchemaInformation(String databaseUUID, ConnectionParameters values, AsyncCallback<String> async);
 
   void testConnection(String databaseUUID, ConnectionParameters parameters, AsyncCallback<Boolean> async);
 

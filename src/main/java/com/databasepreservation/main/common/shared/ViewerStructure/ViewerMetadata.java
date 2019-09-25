@@ -1,6 +1,7 @@
 package com.databasepreservation.main.common.shared.ViewerStructure;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -8,7 +9,9 @@ import java.util.Map;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -74,8 +77,8 @@ public class ViewerMetadata implements Serializable {
     this.name = name;
   }
 
-  public Collection<ViewerSchema> getSchemas() {
-    return schemas.values();
+  public List<ViewerSchema> getSchemas() {
+    return new ArrayList<>(schemas.values());
   }
 
   public void setSchemas(List<ViewerSchema> schemaList) {

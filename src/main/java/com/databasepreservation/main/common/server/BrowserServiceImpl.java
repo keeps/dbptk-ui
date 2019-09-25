@@ -2,16 +2,8 @@ package com.databasepreservation.main.common.server;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import com.databasepreservation.main.common.shared.ValidationProgressData;
-import com.databasepreservation.main.common.shared.exceptions.ViewerException;
-import com.databasepreservation.main.common.shared.models.PreservationParameter;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -38,6 +30,7 @@ import com.databasepreservation.main.common.server.controller.SIARDController;
 import com.databasepreservation.main.common.server.controller.UserLoginController;
 import com.databasepreservation.main.common.server.index.utils.SolrUtils;
 import com.databasepreservation.main.common.shared.ProgressData;
+import com.databasepreservation.main.common.shared.ValidationProgressData;
 import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
@@ -48,7 +41,6 @@ import com.databasepreservation.main.common.shared.client.common.search.SavedSea
 import com.databasepreservation.main.common.shared.client.common.search.SearchField;
 import com.databasepreservation.main.common.shared.client.common.search.SearchInfo;
 import com.databasepreservation.main.common.shared.client.common.utils.BrowserServiceUtils;
-import com.databasepreservation.main.common.shared.models.DBPTKModule;
 import com.databasepreservation.main.common.shared.models.wizardParameters.ConnectionParameters;
 import com.databasepreservation.main.common.shared.models.wizardParameters.CustomViewsParameters;
 import com.databasepreservation.main.common.shared.models.wizardParameters.ExportOptionsParameters;
@@ -293,7 +285,7 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
   }
 
   @Override
-  public ViewerMetadata getSchemaInformation(String databaseUUID, ConnectionParameters values) throws GenericException {
+  public String getSchemaInformation(String databaseUUID, ConnectionParameters values) throws GenericException {
     return SIARDController.getDatabaseMetadata(databaseUUID, values);
   }
 

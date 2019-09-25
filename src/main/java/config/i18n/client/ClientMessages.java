@@ -761,6 +761,10 @@ public interface ClientMessages extends Messages {
 
   String tableAndColumnsPageErrorMessageFor(@Select int error);
 
+  String tableAndColumnsPageDialogTitleForRetrievingInformation();
+
+  String tableAndColumnsPageDialogMessageForRetrievingInformation();
+
   /********************************************
    * Create Wizard: Custom Views
    ********************************************/

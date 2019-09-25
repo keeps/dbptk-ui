@@ -79,6 +79,26 @@ public class Dialogs {
     dialogBox.show();
   }
 
+  public static DialogBox showWaitResponse(String title, String message) {
+    final DialogBox dialogBox = createDialogBoxSkeleton(false, true, true, false, title, "dialog-persist-information");
+    FlowPanel layout = new FlowPanel();
+    Label messageLabel = new Label(message);
+
+    layout.add(messageLabel);
+    layout.add(new HTML(SafeHtmlUtils.fromSafeConstant(
+      "<div class='spinnerRetrievingRows'><div class='bounce1'></div><div class='bounce2'></div><div class='bounce3'></div></div>")));
+
+    layout.addStyleName("dialog-persist-information-layout");
+
+    dialogBox.setWidget(layout);
+    dialogBox.setWidth("400px");
+
+    dialogBox.center();
+    dialogBox.show();
+
+    return dialogBox;
+  }
+
   public static void showQueryResult(String title, String closeButtonText, List<List<String>> rows) {
 
     final DialogBox dialogBox = new DialogBox(false, true);

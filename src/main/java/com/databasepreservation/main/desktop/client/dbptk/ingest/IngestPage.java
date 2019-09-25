@@ -4,14 +4,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.main.common.client.BrowserService;
-import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;
-import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
-import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
-import com.databasepreservation.main.common.shared.client.common.visualization.browse.UploadPanel;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
+import com.databasepreservation.main.desktop.client.dbptk.wizard.common.progressBar.ProgressBarIngestPanel;
+import com.databasepreservation.main.desktop.client.dbptk.wizard.common.progressBar.ProgressBarPanel;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -33,10 +30,10 @@ public class IngestPage extends Composite {
   private static IngestPageUiBinder binder = GWT.create(IngestPageUiBinder.class);
   private static Map<String, IngestPage> instances = new HashMap<>();
 
-  public static IngestPage getInstance(String databaseUUID) {
+  public static IngestPage getInstance(String databaseUUID, String databaseName) {
 
     if (instances.get(databaseUUID) == null) {
-      IngestPage instance = new IngestPage(databaseUUID);
+      IngestPage instance = new IngestPage(databaseUUID, databaseName);
       instances.put(databaseUUID, instance);
     }
 
@@ -49,27 +46,20 @@ public class IngestPage extends Composite {
   @UiField
   BreadcrumbPanel breadcrumb;
 
-  private IngestPage(final String databaseUUID) {
+  private IngestPage(final String databaseUUID, final String databaseName) {
     initWidget(binder.createAndBindUi(this));
 
-    BrowserService.Util.getInstance().retrieve(databaseUUID, ViewerDatabase.class.getName(), databaseUUID,
-      new DefaultAsyncCallback<IsIndexed>() {
-        @Override
-        public void onSuccess(IsIndexed result) {
-          ViewerDatabase database = (ViewerDatabase) result;
+    List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forSIARDIngesting(databaseUUID, databaseName);
+    BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
 
-          List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forSIARDMainPage(databaseUUID,
-            database.getMetadata().getName());
-          BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
+    final ProgressBarPanel instance = ProgressBarIngestPanel.getInstance(databaseUUID);
+    // final UploadPanel instance = UploadPanel.createInstance(databaseUUID);
+    instance.setTitleText(messages.SIARDHomePageTextForIngestSIARDTitle());
+    instance.setSubtitleText(messages.SIARDHomePageTextForIngestSIARDSubtitle());
 
-          final UploadPanel instance = UploadPanel.createInstance(database);
-          instance.setTitleText(messages.SIARDHomePageTextForIngestSIARDTitle());
-          instance.setSubtitleText(messages.SIARDHomePageTextForIngestSIARDSubtitle());
+    GWT.log(databaseUUID);
 
-          GWT.log(database.getUUID());
-
-          panel.add(instance);
-        }
-      });
+    panel.add(instance);
   }
+
 }

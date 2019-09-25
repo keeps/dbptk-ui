@@ -219,8 +219,8 @@ public class HistoryManager {
     newHistory(params);
   }
 
-  public static void gotoIngestSIARDData(String databaseUUID) {
-    List<String> params = Arrays.asList(ROUTE_DESKTOP_UPLOAD_SIARD_DATA, databaseUUID);
+  public static void gotoIngestSIARDData(final String databaseUUID, final String databaseName) {
+    List<String> params = Arrays.asList(ROUTE_DESKTOP_UPLOAD_SIARD_DATA, databaseUUID, databaseName);
     newHistory(params);
   }
 
