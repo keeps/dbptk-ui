@@ -12,6 +12,7 @@ import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadat
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSIARDBundle;
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
 import com.databasepreservation.main.common.shared.client.common.LoadingDiv;
+import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.desktop.client.common.dialogs.Dialogs;
 import com.databasepreservation.main.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
@@ -49,7 +50,7 @@ public class MetadataControlPanel extends Composite {
   private static final long ALERT_SIARD_FILE_SIZE = 1000000000;
 
   @UiField
-  Button buttonSave, buttonRevert;
+  Button buttonSave, buttonClear, buttonCancel;
 
   @UiField
   Label toolTip;
@@ -71,6 +72,7 @@ public class MetadataControlPanel extends Composite {
   private MetadataControlPanel() {
     initWidget(uiBinder.createAndBindUi(this));
     buttonSave.setEnabled(false);
+    buttonClear.setEnabled(false);
   }
 
   public void init(ViewerDatabase database, ViewerSIARDBundle SIARDbundle) {
@@ -90,7 +92,7 @@ public class MetadataControlPanel extends Composite {
       value = ((DateBox) element).getDatePicker().getValue().toString();
     }
     if (mandatoryItems.get(name) != null) {
-      if (value.isEmpty()) {
+      if (value == null || value.isEmpty()) {
         mandatoryItems.replace(name, true);
       } else {
         mandatoryItems.replace(name, false);
@@ -109,7 +111,7 @@ public class MetadataControlPanel extends Composite {
       }
     }
 
-    buttonRevert.setVisible(true);
+    buttonClear.setEnabled(true);
     toolTip.setVisible(true);
     if (mandatoryItemsRequired.isEmpty()) {
       toolTip.setText(messages.metadataHasUpdates());
@@ -122,7 +124,7 @@ public class MetadataControlPanel extends Composite {
 
   public void reset() {
     buttonSave.setEnabled(false);
-    buttonRevert.setVisible(false);
+    buttonClear.setEnabled(false);
     toolTip.setVisible(false);
   }
 
@@ -139,7 +141,7 @@ public class MetadataControlPanel extends Composite {
           Toast.showError(messages.metadataFailureUpdated(), caught.getMessage());
           loading.setVisible(false);
           buttonSave.setEnabled(true);
-          buttonRevert.setVisible(true);
+          buttonClear.setEnabled(true);
           toolTip.setVisible(true);
         }
 
@@ -190,8 +192,12 @@ public class MetadataControlPanel extends Composite {
     }
   }
 
-  @UiHandler("buttonRevert")
+  @UiHandler("buttonCancel")
   void cancelButtonHandler(ClickEvent e) {
+    HistoryManager.gotoSIARDInfo(database.getUUID());
+  }
+  @UiHandler("buttonClear")
+  void clearButtonHandler(ClickEvent e) {
     Window.Location.reload();
   }
 }
