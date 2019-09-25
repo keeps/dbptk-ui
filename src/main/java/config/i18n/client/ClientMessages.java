@@ -650,6 +650,14 @@ public interface ClientMessages extends Messages {
 
   String SIARDHomePageTextForValidationIndicators();
 
+  String SIARDHomePageTextForValidationIndicatorsSuccess(@PluralCount int passed);
+
+  String SIARDHomePageTextForValidationIndicatorsFailed(@PluralCount int errors);
+
+  String SIARDHomePageTextForValidationIndicatorsWarnings(@PluralCount int warnings);
+
+  String SIARDHomePageTextForValidationIndicatorsSkipped(@PluralCount int skipped);
+
   String SIARDHomePageLabelForBrowseStatus();
 
   String SIARDHomePageTextForSIARDValid(String name);
@@ -888,6 +896,8 @@ public interface ClientMessages extends Messages {
   String numberOfValidationsWarnings();
 
   String numberOfValidationsSkipped();
+
+  String validatorPageTextForSIARDVersion();
 
   String validatorPageTextForSIARDSpecification();
 

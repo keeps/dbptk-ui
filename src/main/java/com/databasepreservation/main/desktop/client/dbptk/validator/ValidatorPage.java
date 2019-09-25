@@ -102,7 +102,7 @@ public class ValidatorPage extends Composite {
   LoadingDiv loading;
 
   @UiField
-  Button btnCancel, btnRunAgain;
+  Button btnBack, btnRunAgain;
 
   private ValidatorPage(String databaseUUID, String reporterPath, String udtPath) {
     this.databaseUUID = databaseUUID;
@@ -292,7 +292,6 @@ public class ValidatorPage extends Composite {
 
   private void stopUpdating(String message) {
     Toast.showInfo(messages.validatorPageTextForTitle(), message);
-    // SIARDMainPage.getInstance(database.getUUID()).refreshInstance(database.getUUID());
     instances.remove(databaseUUID);
     populateValidationInfo(true);
     loading.setVisible(false);
@@ -332,8 +331,11 @@ public class ValidatorPage extends Composite {
     // Validator Status
     left.add(validationInfoBuilder(messages.managePageTableHeaderTextForDatabaseStatus(), updateStatus()));
 
+    //SIARD Version
+    right.add(validationInfoBuilder(messages.validatorPageTextForSIARDVersion(),new Label(ViewerConstants.SIARD2_1)));
+
     // SIARD specification link
-    Button SIARDSpecification = new Button(messages.basicActionOpen());
+    Button SIARDSpecification = new Button(ViewerConstants.SIARD2_1);
     SIARDSpecification.addClickHandler(event -> {
       Window.open(ViewerConstants.SIARD_SPECIFICATION_LINK, ViewerConstants.BLANK_LINK, null);
     });
@@ -430,7 +432,6 @@ public class ValidatorPage extends Composite {
 
   @Override
   protected void onDetach() {
-    // SIARDMainPage.getInstance(database.getUUID()).refreshInstance(database.getUUID());
     loading.setVisible(false);
     super.onDetach();
   }
@@ -441,8 +442,8 @@ public class ValidatorPage extends Composite {
     super.onAttach();
   }
 
-  @UiHandler("btnCancel")
-  void setBtnCancelHandler(ClickEvent e) {
+  @UiHandler("btnBack")
+  void setBtnBackHandler(ClickEvent e) {
     HistoryManager.gotoSIARDInfo(databaseUUID);
   }
 

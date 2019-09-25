@@ -283,6 +283,7 @@ public class ViewerConstants {
   public static final String SIARD1 = "siard-1";
   public static final String SIARD2 = "siard-2";
   public static final String SIARDDK = "siard-dk";
+  public static final String SIARD2_1 = "siard-2.1";
 
   /*
    * DBPTK Metadata

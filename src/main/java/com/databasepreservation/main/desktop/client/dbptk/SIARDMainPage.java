@@ -229,6 +229,8 @@ public class SIARDMainPage extends Composite {
       validatedAt = MetadataField.createInstance(messages.SIARDHomePageLabelForValidatedAt(), validateAtHumanized);
       version = MetadataField.createInstance(messages.SIARDHomePageLabelForValidationVersion(),
         database.getValidatedVersion());
+      validatedAt.setVisible(true);
+      version.setVisible(true);
       validationStatus = MetadataField.createInstance(messages.SIARDHomePageLabelForValidationStatus(),
         SolrHumanizer.humanize(database.getValidationStatus()));
       if (database.getValidationStatus().equals(ViewerDatabase.ValidationStatus.VALIDATION_SUCCESS)) {
@@ -249,6 +251,8 @@ public class SIARDMainPage extends Composite {
         messages.humanizedTextForSIARDNotValidated());
       validationStatus.getMetadataValue().addStyleName("label-info");
       validationIndicators.setVisible(false);
+      validatedAt.setVisible(false);
+      version.setVisible(false);
     }
 
     validatedAt.setCSSMetadata(null, "label-field", "value-field");
@@ -258,10 +262,10 @@ public class SIARDMainPage extends Composite {
     // indicators
     updateValidationIndicators();
 
-    validation.addToInfoPanel(validatedAt);
-    validation.addToInfoPanel(version);
     validation.addToInfoPanel(validationStatus);
     validation.addToInfoPanel(validationIndicators);
+    validation.addToInfoPanel(validatedAt);
+    validation.addToInfoPanel(version);
 
     return validation;
   }
@@ -439,13 +443,13 @@ public class SIARDMainPage extends Composite {
     FlowPanel panel = new FlowPanel();
     panel.addStyleName("validation-indicators");
     panel.add(buildIndicators(database.getValidationPassed(), FontAwesomeIconManager.CHECK, "passed",
-      messages.numberOfValidationsPassed()));
+      messages.SIARDHomePageTextForValidationIndicatorsSuccess(Integer.parseInt(database.getValidationPassed()))));
     panel.add(buildIndicators(database.getValidationErrors(), FontAwesomeIconManager.TIMES, "errors",
-      messages.numberOfValidationError()));
-    panel.add(buildIndicators(database.getValidationWarnings(), FontAwesomeIconManager.WARNING,
-      "warnings", messages.numberOfValidationsWarnings()));
+      messages.SIARDHomePageTextForValidationIndicatorsFailed(Integer.parseInt(database.getValidationErrors()))));
+    panel.add(buildIndicators(database.getValidationWarnings(), FontAwesomeIconManager.WARNING, "warnings",
+      messages.SIARDHomePageTextForValidationIndicatorsWarnings(Integer.parseInt(database.getValidationWarnings()))));
     panel.add(buildIndicators(database.getValidationSkipped(), FontAwesomeIconManager.SKIPPED, "skipped",
-      messages.numberOfValidationsSkipped()));
+      messages.SIARDHomePageTextForValidationIndicatorsSkipped(Integer.parseInt(database.getValidationSkipped()))));
     validationIndicators.add(panel);
   }
 
@@ -494,6 +498,8 @@ public class SIARDMainPage extends Composite {
               validationIndicators.setVisible(false);
               btnSeeReport.setVisible(false);
               validationIndicators.setVisible(false);
+              validatedAt.setVisible(false);
+              version.setVisible(false);
           }
         }
       });
@@ -502,6 +508,8 @@ public class SIARDMainPage extends Composite {
   private void updateValidationButtons(Boolean enable) {
     btnRunValidator.setVisible(enable);
     btnSeeReport.setVisible(enable);
+    validatedAt.setVisible(enable);
+    version.setVisible(enable);
     validationIndicators.setVisible(enable);
   }
 

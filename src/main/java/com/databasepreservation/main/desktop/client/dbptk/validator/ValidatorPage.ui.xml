@@ -18,8 +18,8 @@
                 <g:FlowPanel ui:field="validationControl"/>
             </g:FlowPanel>
             <g:FlowPanel addStyleNames="bottom-panel">
-                <g:Button ui:field="btnCancel" addStyleNames="btn btn-primary btn-back">
-                    <ui:text from='{messages.basicActionCancel}'/>
+                <g:Button ui:field="btnBack" addStyleNames="btn btn-primary btn-back">
+                    <ui:text from='{messages.basicActionBack}'/>
                 </g:Button>
                 <g:Button ui:field="btnRunAgain" addStyleNames="btn btn-primary btn-play">
                     <ui:text from='{messages.SIARDHomePageButtonTextRunValidationAgain}'/>

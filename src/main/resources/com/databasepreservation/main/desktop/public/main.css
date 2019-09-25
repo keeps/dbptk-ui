@@ -1942,18 +1942,22 @@ input[type="checkbox"]:checked:after {
 
 .indicator .passed{
     color: #5cb85c;
+    margin-right: 2px;
 }
 
 .indicator .errors{
     color: #d9534f;
+    margin-right: 2px;
 }
 
 .indicator .warnings{
     color: #f0ad4e;
+    margin-right: 2px;
 }
 
 .indicator .skipped{
-    color: #337ab7;
+    color: #727c84;
+    margin-right: 2px;
 }
 /*Dialog*/
 .validator-dialog-information{
