@@ -8,7 +8,6 @@ import java.util.Set;
 import com.databasepreservation.main.common.client.BrowserService;
 import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
-import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.main.common.shared.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.main.common.shared.client.widgets.Toast;
 import com.databasepreservation.main.common.shared.models.DBPTKModule;
@@ -22,6 +21,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
@@ -40,6 +40,7 @@ public class Connection extends WizardPanel<ConnectionParameters> {
   }
 
   interface DBPTKModuleMapper extends ObjectMapper<DBPTKModule> {}
+  interface ConnectionMapper extends ObjectMapper<ConnectionParameters> {}
 
   private static ConnectionUiBinder binder = GWT.create(ConnectionUiBinder.class);
 
@@ -81,26 +82,27 @@ public class Connection extends WizardPanel<ConnectionParameters> {
       mainPanel.add(spinner);
 
       final ConnectionParameters connectionParameters = getValues();
-
-      BrowserService.Util.getInstance().testConnection(databaseUUID, connectionParameters,
-        new DefaultAsyncCallback<Boolean>() {
+      ConnectionMapper mapper = GWT.create( ConnectionMapper.class );
+      String connectionParametersJSON = mapper.write(connectionParameters);
+      GWT.log(connectionParametersJSON);
+      BrowserService.Util.getInstance().testConnection(databaseUUID, connectionParametersJSON,
+        new AsyncCallback<Boolean>() {
           @Override
-          public void onSuccess(Boolean aBoolean) {
+          public void onFailure(Throwable caught) {
+            mainPanel.remove(spinner);
+            Dialogs.showErrors(messages.errorMessagesConnectionTitle(), caught.getMessage(),
+              messages.basicActionClose());
+          }
+
+          @Override
+          public void onSuccess(Boolean result) {
             Dialogs.showInformationDialog(messages.errorMessagesConnectionTitle(),
               messages.connectionPageTextForConnectionSuccess(
                 connectionParameters.getJDBCConnectionParameters().getConnection().get("database")),
               messages.basicActionClose(), "btn btn-link");
             mainPanel.remove(spinner);
           }
-
-          @Override
-          public void onFailure(Throwable caught) {
-            mainPanel.remove(spinner);
-            Dialogs.showErrors(messages.errorMessagesConnectionTitle(), caught.getMessage(),
-              messages.basicActionClose());
-            Toast.showError(messages.errorMessagesConnectionTitle(), caught.getMessage());
-          }
-        });
+      });
     });
   }
 

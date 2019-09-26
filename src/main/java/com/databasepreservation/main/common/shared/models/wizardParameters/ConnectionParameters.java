@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.databasepreservation.main.common.shared.models.JDBCParameters;
 import com.databasepreservation.main.common.shared.models.SSHConfiguration;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -58,6 +59,7 @@ public class ConnectionParameters implements Serializable {
     this.ssh = value;
   }
 
+  @JsonIgnore
   public String getURLConnection() {
     StringBuilder sb = new StringBuilder();
 

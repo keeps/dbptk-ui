@@ -118,20 +118,24 @@ public class SIARDController {
     return results;
   }
 
-  public static boolean testConnection(String databaseUUID, ConnectionParameters parameters) throws GenericException {
+  public static boolean testConnection(String databaseUUID, String parametersJson) throws GenericException {
     Reporter reporter = getReporter(databaseUUID);
     final DatabaseMigration databaseMigration = initializeDatabaseMigration(reporter);
 
-    setupJDBCConnection(databaseMigration, parameters);
-
     try {
-      DatabaseImportModule importModule = databaseMigration.getImportModule();
-      importModule.setOnceReporter(reporter);
-      if (importModule instanceof JDBCImportModule) {
-        JDBCImportModule jdbcImportModule = (JDBCImportModule) importModule;
-        return jdbcImportModule.testConnection();
+      setupJDBCConnection(databaseMigration, JsonTransformer.getObjectFromJson(parametersJson, ConnectionParameters.class));
+
+      try {
+        DatabaseImportModule importModule = databaseMigration.getImportModule();
+        importModule.setOnceReporter(reporter);
+        if (importModule instanceof JDBCImportModule) {
+          JDBCImportModule jdbcImportModule = (JDBCImportModule) importModule;
+          return jdbcImportModule.testConnection();
+        }
+      } catch (ModuleException e) {
+        throw new GenericException(e.getMessage());
       }
-    } catch (ModuleException e) {
+    } catch (ViewerException e) {
       throw new GenericException(e.getMessage());
     }
 

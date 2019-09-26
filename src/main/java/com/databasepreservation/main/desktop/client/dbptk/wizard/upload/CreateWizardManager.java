@@ -12,7 +12,6 @@ import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManage
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.common.shared.client.widgets.Toast;
 import com.databasepreservation.main.common.shared.models.wizardParameters.ConnectionParameters;
-import com.databasepreservation.main.common.shared.models.wizardParameters.CustomViewsParameter;
 import com.databasepreservation.main.common.shared.models.wizardParameters.CustomViewsParameters;
 import com.databasepreservation.main.common.shared.models.wizardParameters.ExportOptionsParameters;
 import com.databasepreservation.main.common.shared.models.wizardParameters.MetadataExportOptionsParameters;
@@ -24,6 +23,7 @@ import com.databasepreservation.main.desktop.client.dbptk.wizard.common.connecti
 import com.databasepreservation.main.desktop.client.dbptk.wizard.common.exportOptions.MetadataExportOptions;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.common.exportOptions.SIARDExportOptions;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.common.progressBar.ProgressBarPanel;
+import com.github.nmorel.gwtjackson.client.ObjectMapper;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -45,6 +45,9 @@ public class CreateWizardManager extends WizardManager {
   public ClientMessages messages = GWT.create(ClientMessages.class);
 
   interface CreateWizardManagerUiBinder extends UiBinder<Widget, CreateWizardManager> {
+  }
+
+  interface ConnectionMapper extends ObjectMapper<ConnectionParameters> {
   }
 
   private static CreateWizardManagerUiBinder binder = GWT.create(CreateWizardManagerUiBinder.class);
@@ -160,7 +163,9 @@ public class CreateWizardManager extends WizardManager {
 
       wizardContent.add(spinner);
 
-      BrowserService.Util.getInstance().testConnection(databaseUUID, connectionParameters,
+      ConnectionMapper mapper = GWT.create(ConnectionMapper.class);
+      String connectionParametersJSON = mapper.write(connectionParameters);
+      BrowserService.Util.getInstance().testConnection(databaseUUID, connectionParametersJSON,
         new DefaultAsyncCallback<Boolean>() {
           @Override
           public void onSuccess(Boolean aBoolean) {

@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerForeignKey;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerMetadata;
@@ -15,6 +16,7 @@ import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.main.common.shared.client.common.RightPanel;
 import com.databasepreservation.main.common.shared.client.common.lists.BasicTablePanel;
+import com.databasepreservation.main.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.main.common.shared.client.common.utils.CommonClientUtils;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
@@ -85,7 +87,11 @@ public class SchemaDataPanel extends RightPanel {
       public void onSelectionChange(SelectionChangeEvent event) {
         ViewerTable item = table.getSelectionModel().getSelectedObject();
         if (item != null) {
-          HistoryManager.gotoTable(database.getUUID(), item.getUUID());
+          if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
+            HistoryManager.gotoDesktopTable(database.getUUID(), item.getUUID());
+          } else {
+            HistoryManager.gotoTable(database.getUUID(), item.getUUID());
+          }
         }
       }
     });

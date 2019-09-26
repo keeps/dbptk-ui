@@ -138,7 +138,7 @@ public interface BrowserServiceAsync {
 
   void getSchemaInformation(String databaseUUID, ConnectionParameters values, AsyncCallback<String> async);
 
-  void testConnection(String databaseUUID, ConnectionParameters parameters, AsyncCallback<Boolean> async);
+  void testConnection(String databaseUUID, String parametersJson, AsyncCallback<Boolean> async);
 
   void validateCustomViewQuery(String databaseUUID, ConnectionParameters parameters, String query, AsyncCallback<List<List<String>>> async);
 

@@ -9,6 +9,7 @@ import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabas
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerForeignKey;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSchema;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
+import com.databasepreservation.main.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.main.common.shared.client.common.utils.CommonClientUtils;
 import com.databasepreservation.main.common.shared.client.tools.ViewerStringUtils;
 import com.github.nmorel.gwtjackson.client.ObjectMapper;
@@ -223,7 +224,7 @@ public class ErDiagram extends Composite {
         String nodes = visNodeMapper.write(visNodeList);
         String edges = visEdgeMapper.write(jsniEdgeList);
 
-        loadDiagram(databaseUUID, nodes, edges);
+        loadDiagram(databaseUUID, nodes, edges, ApplicationType.getType());
       }
     });
     contentItems.add(diagram);
@@ -490,7 +491,7 @@ public class ErDiagram extends Composite {
     }
   }
 
-  public static native void loadDiagram(String dbuuid, String nodesJson, String edgesJson)
+  public static native void loadDiagram(String dbuuid, String nodesJson, String edgesJson, String applicationType)
   /*-{
     (function erdiagramload(){
         // network container
@@ -574,7 +575,11 @@ public class ErDiagram extends Composite {
                 //console.log("go to db" + dbuuid + " and table " + params.nodes[0]);
                 var tableuuid = params.nodes[0];
                 network.unselectAll();
-                @com.databasepreservation.main.common.shared.client.tools.HistoryManager::gotoTable(Ljava/lang/String;Ljava/lang/String;)(dbuuid, tableuuid);
+                if (applicationType === @com.databasepreservation.main.common.shared.ViewerConstants::ELECTRON) {
+                    @com.databasepreservation.main.common.shared.client.tools.HistoryManager::gotoDesktopTable(Ljava/lang/String;Ljava/lang/String;)(dbuuid, tableuuid);
+                } else {
+                    @com.databasepreservation.main.common.shared.client.tools.HistoryManager::gotoTable(Ljava/lang/String;Ljava/lang/String;)(dbuuid, tableuuid);
+                }
             }
         });
   

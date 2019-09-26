@@ -290,8 +290,8 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
   }
 
   @Override
-  public boolean testConnection(String databaseUUID, ConnectionParameters parameters) throws GenericException {
-    return SIARDController.testConnection(databaseUUID, parameters);
+  public boolean testConnection(String databaseUUID, String parametersJson) throws GenericException {
+    return SIARDController.testConnection(databaseUUID, parametersJson);
   }
 
   @Override

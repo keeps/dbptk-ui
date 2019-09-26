@@ -129,7 +129,7 @@ public interface BrowserService extends RemoteService {
 
   String getSchemaInformation(String databaseUUID, ConnectionParameters values) throws GenericException;
 
-  boolean testConnection(String databaseUUID, ConnectionParameters parameters) throws GenericException;
+  boolean testConnection(String databaseUUID, String parametersJson) throws GenericException;
 
   List<List<String>> validateCustomViewQuery(String databaseUUID, ConnectionParameters parameters, String query)
     throws GenericException;
