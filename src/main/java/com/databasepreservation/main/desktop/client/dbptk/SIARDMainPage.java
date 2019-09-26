@@ -233,6 +233,8 @@ public class SIARDMainPage extends Composite {
       version.setVisible(true);
       validationStatus = MetadataField.createInstance(messages.SIARDHomePageLabelForValidationStatus(),
         SolrHumanizer.humanize(database.getValidationStatus()));
+      // indicators
+      updateValidationIndicators();
       if (database.getValidationStatus().equals(ViewerDatabase.ValidationStatus.VALIDATION_SUCCESS)) {
         validationStatus.getMetadataValue().addStyleName("label-success");
         validationIndicators.setVisible(true);
@@ -258,9 +260,6 @@ public class SIARDMainPage extends Composite {
     validatedAt.setCSSMetadata(null, "label-field", "value-field");
     version.setCSSMetadata(null, "label-field", "value-field");
     validationStatus.setCSSMetadata(null, "label-field", "value-field");
-
-    // indicators
-    updateValidationIndicators();
 
     validation.addToInfoPanel(validationStatus);
     validation.addToInfoPanel(validationIndicators);
