@@ -13,10 +13,9 @@ import com.databasepreservation.main.common.shared.client.tools.JSOUtils;
 import com.databasepreservation.main.common.shared.client.tools.ViewerStringUtils;
 import com.databasepreservation.main.common.shared.client.widgets.Toast;
 import com.databasepreservation.main.common.shared.models.DBPTKModule;
-import com.databasepreservation.main.desktop.client.common.dialogs.Dialogs;
-import com.databasepreservation.main.desktop.shared.models.Filter;
 import com.databasepreservation.main.common.shared.models.PreservationParameter;
 import com.databasepreservation.main.common.shared.models.wizardParameters.ExportOptionsParameters;
+import com.databasepreservation.main.desktop.shared.models.Filter;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -56,6 +55,7 @@ public class SIARDExportOptionsCurrent extends Composite {
   private CheckBox externalLobCheckbox;
   private int validationError = -1;
   private String version;
+  private FileUploadField SIARDInputFile;
 
   public static SIARDExportOptionsCurrent getInstance(String key, DBPTKModule dbptkModule) {
     if (instances.get(key) == null) {
@@ -173,6 +173,14 @@ public class SIARDExportOptionsCurrent extends Composite {
       }
     }
     return SIARDExportOptions.OK;
+  }
+
+  public void setDefaultPath(String path) {
+    if (!version.equals(ViewerConstants.SIARDDK)) {
+      fileInputs.put(ViewerConstants.INPUT_TYPE_FILE.toLowerCase(), path);
+      SIARDInputFile.setPathLocation(path, path);
+      SIARDInputFile.setInformationPathCSS("gwt-Label-disabled information-path");
+    }
   }
 
   public void clear() {
@@ -300,7 +308,7 @@ public class SIARDExportOptionsCurrent extends Composite {
             JavaScriptObject.createArray();
             Filter filter = new Filter();
             filter.setName(ViewerConstants.SIARD_FILES);
-            filter.setExtensions(Collections.singletonList(ViewerConstants.SIARD_SUFFIX));
+            filter.setExtensions(Collections.singletonList(ViewerConstants.SIARD));
             JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.emptyList(),
               Collections.singletonList(filter));
             String path = JavascriptUtils.saveFileDialog(options);
@@ -311,15 +319,17 @@ public class SIARDExportOptionsCurrent extends Composite {
             }
           } else {
             // TODO
-            // fileInputs.put(parameter.getName(), path);
           }
         });
+        if (parameter.getName().equals(ViewerConstants.INPUT_TYPE_FILE.toLowerCase())
+          && !version.equals(ViewerConstants.SIARDDK)) {
+          SIARDInputFile = fileUploadField;
+        }
         FlowPanel helper = new FlowPanel();
         helper.addStyleName("form-helper");
         InlineHTML span = new InlineHTML();
         span.addStyleName("form-text-helper text-muted");
         span.setText(messages.wizardExportOptionsHelperText(parameter.getName()));
-
         helper.add(fileUploadField);
         helper.add(span);
         content.add(helper);

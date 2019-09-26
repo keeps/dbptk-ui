@@ -241,6 +241,7 @@ public class ViewerConstants {
   public static final String SIARD_FILES = "SIARD files";
   public static final String REPORT_FILES = "Report files";
   public static final String UDT_FILES = "UDT files";
+  public static final String SIARD = "siard";
 
   /*
    * Application Environment
@@ -262,7 +263,7 @@ public class ViewerConstants {
    */
   public static final String TXT_SUFFIX = ".txt";
   public static final String YAML_SUFFIX = ".yaml";
-  public static final String SIARD_SUFFIX = "siard";
+  public static final String SIARD_SUFFIX = ".siard";
 
   /*
    * DBPTK Input Types

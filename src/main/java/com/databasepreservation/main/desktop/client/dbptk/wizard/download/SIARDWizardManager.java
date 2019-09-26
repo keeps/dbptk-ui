@@ -1,11 +1,13 @@
 package com.databasepreservation.main.desktop.client.dbptk.wizard.download;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.databasepreservation.main.common.client.BrowserService;
+import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbItem;
@@ -13,6 +15,7 @@ import com.databasepreservation.main.common.shared.client.breadcrumb.BreadcrumbP
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
+import com.databasepreservation.main.common.shared.client.tools.PathUtils;
 import com.databasepreservation.main.common.shared.client.widgets.Toast;
 import com.databasepreservation.main.common.shared.models.wizardParameters.ExportOptionsParameters;
 import com.databasepreservation.main.common.shared.models.wizardParameters.MetadataExportOptionsParameters;
@@ -25,6 +28,7 @@ import com.databasepreservation.main.desktop.client.dbptk.wizard.common.exportOp
 import com.databasepreservation.main.desktop.client.dbptk.wizard.common.progressBar.ProgressBarPanel;
 import com.databasepreservation.main.desktop.client.dbptk.wizard.upload.TableAndColumns;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
@@ -77,6 +81,14 @@ public class SIARDWizardManager extends WizardManager {
 
   private SIARDWizardManager(String databaseUUID, String databaseName) {
     initWidget(binder.createAndBindUi(this));
+
+    BrowserService.Util.getInstance().retrieve(databaseUUID, ViewerDatabase.class.getName(), databaseUUID,
+      new DefaultAsyncCallback<IsIndexed>() {
+        @Override
+        public void onSuccess(IsIndexed result) {
+          database = (ViewerDatabase) result;
+        }
+      });
     this.databaseUUID = databaseUUID;
     this.databaseName = databaseName;
     init();
@@ -102,12 +114,13 @@ public class SIARDWizardManager extends WizardManager {
   }
 
   private void init() {
-    BrowserService.Util.getInstance().retrieve(databaseUUID, ViewerDatabase.class.getName(), databaseUUID, new DefaultAsyncCallback<IsIndexed>() {
-      @Override
-      public void onSuccess(IsIndexed result) {
-        database = (ViewerDatabase) result;
-      }
-    });
+    BrowserService.Util.getInstance().retrieve(databaseUUID, ViewerDatabase.class.getName(), databaseUUID,
+      new DefaultAsyncCallback<IsIndexed>() {
+        @Override
+        public void onSuccess(IsIndexed result) {
+          database = (ViewerDatabase) result;
+        }
+      });
     wizardContent.clear();
     TableAndColumns tableAndColumns = TableAndColumns.getInstance(databaseUUID);
     wizardInstances.add(0, tableAndColumns);
@@ -138,7 +151,11 @@ public class SIARDWizardManager extends WizardManager {
       tableAndColumnsParameters = (TableAndColumnsParameters) wizardInstances.get(position).getValues();
       wizardContent.clear();
       position = 1;
-      SIARDExportOptions exportOptions = SIARDExportOptions.getInstance();
+      String SIARDDefaultPath = database.getSIARDPath().replace(PathUtils.getFileName(database.getSIARDPath()), "")
+        + PathUtils.getFileName(database.getSIARDPath()).replaceFirst("[.][^.]+$", "") + "-"
+        + DateTimeFormat.getFormat("yyyyMMddHHmmssSSS").format(new Date()) + ViewerConstants.SIARD_SUFFIX;
+
+      SIARDExportOptions exportOptions = SIARDExportOptions.getInstance(SIARDDefaultPath);
       wizardInstances.add(position, exportOptions);
       wizardContent.add(exportOptions);
       updateButtons();

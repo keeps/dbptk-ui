@@ -55,14 +55,18 @@ public class SIARDExportOptions extends WizardPanel<ExportOptionsParameters> {
   private DBPTKModule dbptkModule;
   private int validationError = 0;
 
-  public static SIARDExportOptions getInstance() {
+  public static SIARDExportOptions getInstance(String path) {
     if (instance == null) {
-      instance = new SIARDExportOptions();
+      instance = new SIARDExportOptions(path);
     }
     return instance;
   }
 
-  private SIARDExportOptions() {
+  public static SIARDExportOptions getInstance() {
+    return SIARDExportOptions.getInstance(null);
+  }
+
+  private SIARDExportOptions(String path) {
     initWidget(binder.createAndBindUi(this));
 
     Widget spinner = new HTML(SafeHtmlUtils.fromSafeConstant(
@@ -86,6 +90,9 @@ public class SIARDExportOptions extends WizardPanel<ExportOptionsParameters> {
           version = comboBoxField.getSelectedValue();
           dbptkModule = module;
           final SIARDExportOptionsCurrent instance = SIARDExportOptionsCurrent.getInstance(version, dbptkModule);
+          if(path != null){
+            instance.setDefaultPath(path);
+          }
           content.clear();
           content.add(instance);
         });
