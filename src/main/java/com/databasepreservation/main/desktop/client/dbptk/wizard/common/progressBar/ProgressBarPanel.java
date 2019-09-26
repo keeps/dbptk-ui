@@ -29,6 +29,7 @@ public class ProgressBarPanel extends Composite {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static HashMap<String, ProgressBarPanel> instances = new HashMap<>();
   private String databaseUUID;
+  private boolean initialized = false;
   private Timer autoUpdateTimer = new Timer() {
     @Override
     public void run() {
@@ -63,11 +64,14 @@ public class ProgressBarPanel extends Composite {
     BrowserService.Util.getInstance().getProgressData(databaseUUID, new DefaultAsyncCallback<ProgressData>() {
       @Override
       public void onSuccess(ProgressData result) {
-        result.reset();
+        if (!initialized) {
+          result.reset();
+          initialized = true;
+        }
         progressBar.setCurrent(0);
         content.clear();
         stopUpdating();
-        autoUpdateTimer.scheduleRepeating(50);
+        autoUpdateTimer.scheduleRepeating(100);
       }
     });
   }
@@ -88,6 +92,7 @@ public class ProgressBarPanel extends Composite {
 
   public void clear(String uuid) {
     progressBar.setCurrent(0);
+    initialized = false;
     content.clear();
     instances.put(uuid, null);
   }
@@ -126,7 +131,7 @@ public class ProgressBarPanel extends Composite {
     }
 
     if (progressData.isFinished()) {
-      //stopUpdating();
+      stopUpdating();
     }
   }
 

@@ -30,7 +30,7 @@
 
         <version.jersey>2.27</version.jersey>
         <version.swagger>1.5.19</version.swagger>
-        <version.jackson>2.9.9</version.jackson>
+        <version.jackson>2.9.10</version.jackson>
         <cas.client.version>3.5.0</cas.client.version>
         <solr.version>7.7.1</solr.version>
     </properties>

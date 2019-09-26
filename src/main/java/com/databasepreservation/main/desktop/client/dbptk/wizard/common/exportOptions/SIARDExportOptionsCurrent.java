@@ -104,10 +104,15 @@ public class SIARDExportOptionsCurrent extends Composite {
             final String text = textBoxInputs.get(parameter.getName()).getText();
             exportParameters.put(parameter.getName(), text);
           }
-          if (externalLobCheckbox != null && externalLobCheckbox.getValue()) {
-            if (externalLobsInputs.get(parameter.getName()) != null) {
-              final String text = externalLobsInputs.get(parameter.getName()).getText();
-              exportParameters.put(parameter.getName(), text);
+          if (ViewerConstants.SIARDDK.equals(version)) {
+            final String text = externalLobsInputs.get(parameter.getName()).getText();
+            exportParameters.put(parameter.getName(), text);
+          } else {
+            if (externalLobCheckbox != null && externalLobCheckbox.getValue()) {
+              if (externalLobsInputs.get(parameter.getName()) != null) {
+                final String text = externalLobsInputs.get(parameter.getName()).getText();
+                exportParameters.put(parameter.getName(), text);
+              }
             }
           }
           break;
@@ -205,6 +210,9 @@ public class SIARDExportOptionsCurrent extends Composite {
   }
 
   private int validateExternalLobs() {
+    if (ViewerConstants.SIARDDK.equals(version)) {
+      return SIARDExportOptions.OK;
+    }
     if (externalLobCheckbox != null && externalLobCheckbox.getValue()) {
       for (TextBox textBox : externalLobsInputs.values()) {
         final String text = textBox.getText();
@@ -298,6 +306,7 @@ public class SIARDExportOptionsCurrent extends Composite {
   private void buildGenericWidget(PreservationParameter parameter) {
 
     GenericField genericField = null;
+    String spanCSSClass = "form-text-helper text-muted";
 
     switch (parameter.getInputType()) {
       case ViewerConstants.INPUT_TYPE_CHECKBOX:
@@ -306,6 +315,7 @@ public class SIARDExportOptionsCurrent extends Composite {
         checkbox.addStyleName("form-checkbox");
         checkBoxInputs.put(parameter.getName(), checkbox);
         genericField = GenericField.createInstance(checkbox);
+        spanCSSClass = "form-text-helper-checkbox text-muted";
         break;
       case ViewerConstants.INPUT_TYPE_FILE:
         FileUploadField fileUploadField = FileUploadField
@@ -364,7 +374,14 @@ public class SIARDExportOptionsCurrent extends Composite {
             }
           }
         });
-        content.add(folder);
+        FlowPanel helperFolder = new FlowPanel();
+        helperFolder.addStyleName("form-helper");
+        InlineHTML spanFolder = new InlineHTML();
+        spanFolder.addStyleName("form-text-helper text-muted");
+        spanFolder.setText(messages.wizardExportOptionsHelperText(parameter.getName()));
+        helperFolder.add(folder);
+        helperFolder.add(spanFolder);
+        content.add(helperFolder);
         break;
       case ViewerConstants.INPUT_TYPE_COMBOBOX:
       case ViewerConstants.INPUT_TYPE_NONE:
@@ -385,7 +402,7 @@ public class SIARDExportOptionsCurrent extends Composite {
       FlowPanel helper = new FlowPanel();
       helper.addStyleName("form-helper");
       InlineHTML span = new InlineHTML();
-      span.addStyleName("form-text-helper text-muted");
+      span.addStyleName(spanCSSClass);
       span.setText(messages.wizardExportOptionsHelperText(parameter.getName()));
 
       genericField.setRequired(parameter.isRequired());

@@ -541,6 +541,8 @@ public interface ClientMessages extends Messages {
 
   String breadcrumbTextForDesktopDatabaseSavedSearches();
 
+  String breadcrumbTextForSIARDIngesting();
+
   /*********************************************
    * Home Page
    ********************************************/
@@ -614,6 +616,8 @@ public interface ClientMessages extends Messages {
 
   String SIARDHomePageButtonTextForIngest();
 
+  String SIARDHomePageButtonTextForStartIngest();
+
   String SIARDHomePageButtonTextForDeleteIngested();
 
   String SIARDHomePageOptionsHeaderForSIARD();
@@ -669,6 +673,10 @@ public interface ClientMessages extends Messages {
   String SIARDHomePageTextForIngestSIARDTitle();
 
   String SIARDHomePageTextForIngestSIARDSubtitle();
+
+  String SIARDHomePageDialogTitleForBrowsing();
+
+  String SIARDHomePageTextForIngestSuccess();
 
   /********************************************
    * Edit Metadata

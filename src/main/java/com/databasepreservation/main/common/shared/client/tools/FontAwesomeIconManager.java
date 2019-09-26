@@ -51,6 +51,8 @@ public class FontAwesomeIconManager {
   public static final String TIMES = "times-circle";
   public static final String WARNING = "exclamation-triangle";
   public static final String SKIPPED = "forward";
+  public static final String WIZARD = "magic";
+  public static final String WRITE = "pencil";
 
 
   public static String getTag(String icon) {

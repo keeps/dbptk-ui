@@ -60,6 +60,7 @@ public class SIARDMainPage extends Composite {
   private FlowPanel validationIndicators = new FlowPanel();
   private MetadataField browsingStatus = null;
   private Button btnSeeReport, btnBrowse, btnDelete, btnIngest, btnOpenValidator, btnRunValidator;
+  private boolean btnIngestClicked = false;
 
   public static SIARDMainPage getInstance(String databaseUUID) {
 
@@ -236,6 +237,8 @@ public class SIARDMainPage extends Composite {
       version.setVisible(true);
       validationStatus = MetadataField.createInstance(messages.SIARDHomePageLabelForValidationStatus(),
         SolrHumanizer.humanize(database.getValidationStatus()));
+      // indicators
+      updateValidationIndicators();
       if (database.getValidationStatus().equals(ViewerDatabase.ValidationStatus.VALIDATION_SUCCESS)) {
         updateValidationIndicators();
         validationStatus.getMetadataValue().addStyleName("label-success");
@@ -295,37 +298,38 @@ public class SIARDMainPage extends Composite {
     btnIngest.setVisible(false);
 
     btnIngest.addClickHandler(event -> {
-      HistoryManager.gotoIngestSIARDData(database.getUUID(), database.getMetadata().getName());
-      BrowserService.Util.getInstance().uploadSIARD(database.getSIARDPath(), database.getUUID(),
-        new DefaultAsyncCallback<String>() {
-          @Override
-          public void onFailure(Throwable caught) {
-            instances.clear();
-            HistoryManager.gotoSIARDInfo(database.getUUID());
-          }
+      if (!btnIngestClicked) {
+        btnIngestClicked = true;
 
-          @Override
-          public void onSuccess(String databaseUUID) {
-            Dialogs.showInformationDialog("test", "sdfsd", messages.basicActionBrowse(), "btn btn-link",
-              new DefaultAsyncCallback<Void>() {
-                @Override
-                public void onSuccess(Void result) {
-                  GWT.log("OK");
-                }
-              });
-            // HistoryManager.gotoDesktopDatabase(databaseUUID);
-          }
-        });
+        HistoryManager.gotoIngestSIARDData(database.getUUID(), database.getMetadata().getName());
+        BrowserService.Util.getInstance().uploadSIARD(database.getSIARDPath(), database.getUUID(),
+          new DefaultAsyncCallback<String>() {
+            @Override
+            public void onFailure(Throwable caught) {
+              instances.clear();
+              HistoryManager.gotoSIARDInfo(database.getUUID());
+              Dialogs.showErrors(messages.SIARDHomePageDialogTitleForBrowsing(), caught.getMessage(),
+                messages.basicActionClose());
+            }
+
+            @Override
+            public void onSuccess(String databaseUUID) {
+              HistoryManager.gotoDesktopDatabase(databaseUUID);
+              Dialogs.showInformationDialog(messages.SIARDHomePageDialogTitleForBrowsing(),
+                messages.SIARDHomePageTextForIngestSuccess(), messages.basicActionClose(), "btn btn-link");
+              }
+          });
+      }
     });
 
     browse.addButton(btnIngest);
     browse.addButton(btnBrowse);
     browse.addButton(btnDelete);
 
-    if (database.getStatus() == ViewerDatabase.Status.AVAILABLE) {
+    if (database.getStatus().equals(ViewerDatabase.Status.AVAILABLE)) {
       btnBrowse.setVisible(true);
       // btnDelete.setVisible(true);
-    } else if (database.getStatus() == ViewerDatabase.Status.METADATA_ONLY) {
+    } else if (database.getStatus().equals(ViewerDatabase.Status.METADATA_ONLY)) {
       btnIngest.setVisible(true);
     }
 
@@ -518,15 +522,18 @@ public class SIARDMainPage extends Composite {
   private void updateBrowsingStatus() {
     browsingStatus.updateText(SolrHumanizer.humanize(database.getStatus()));
 
-    if (database.getStatus() == ViewerDatabase.Status.AVAILABLE) {
+    if (database.getStatus().equals(ViewerDatabase.Status.AVAILABLE)) {
       btnIngest.setVisible(false);
       btnBrowse.setVisible(true);
       // btnDelete.setVisible(true);
     } else if (database.getStatus().equals(ViewerDatabase.Status.INGESTING)) {
-      btnIngest.setVisible(true);
-      btnBrowse.setVisible(false);
-      btnIngest.addClickHandler(
-        event -> HistoryManager.gotoIngestSIARDData(database.getUUID(), database.getMetadata().getName()));
+      if (btnIngestClicked) {
+        btnIngest.setVisible(true);
+        btnIngest.setText(messages.SIARDHomePageButtonTextForStartIngest());
+        btnBrowse.setVisible(false);
+        btnIngest.addClickHandler(
+          event -> HistoryManager.gotoIngestSIARDData(database.getUUID(), database.getMetadata().getName()));
+      }
     }
   }
 
