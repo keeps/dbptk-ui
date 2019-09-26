@@ -12,6 +12,7 @@ import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManage
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.common.shared.client.widgets.Toast;
 import com.databasepreservation.main.common.shared.models.wizardParameters.ConnectionParameters;
+import com.databasepreservation.main.common.shared.models.wizardParameters.CustomViewsParameter;
 import com.databasepreservation.main.common.shared.models.wizardParameters.CustomViewsParameters;
 import com.databasepreservation.main.common.shared.models.wizardParameters.ExportOptionsParameters;
 import com.databasepreservation.main.common.shared.models.wizardParameters.MetadataExportOptionsParameters;
@@ -29,6 +30,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
@@ -217,11 +219,11 @@ public class CreateWizardManager extends WizardManager {
           if (result) {
             if (wizardInstances.get(position) instanceof CustomViews) {
               final CustomViews customViewInstance = (CustomViews) wizardInstances.get(position);
-
+              final DialogBox dialogBox = Dialogs.showWaitResponse(messages.customViewsPageTitle(), messages.customViewsPageTextForDialogValidatingQuery());
               BrowserService.Util.getInstance().validateCustomViewQuery(databaseUUID, connectionParameters, customViewInstance.getCustomViewParameter().getCustomViewQuery(), new DefaultAsyncCallback<List<List<String>>>() {
                 @Override
                 public void onSuccess(List<List<String>> result) {
-
+                  dialogBox.hide();
                   customViewsParameters = customViewInstance.getValues();
                   wizardContent.clear();
                   position = 3;
@@ -235,7 +237,8 @@ public class CreateWizardManager extends WizardManager {
 
                 @Override
                 public void onFailure(Throwable caught) {
-                  Toast.showError(messages.customViewsPageTitle(), caught.getMessage());
+                  dialogBox.hide();
+                  Dialogs.showErrors(messages.customViewsPageTitle(), caught.getMessage(), messages.basicActionClose());
                 }
               });
             }

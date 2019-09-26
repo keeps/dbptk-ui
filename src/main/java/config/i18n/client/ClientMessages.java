@@ -800,6 +800,8 @@ public interface ClientMessages extends Messages {
 
   String customViewsPageTextForDialogMessage();
 
+  String customViewsPageTextForDialogValidatingQuery();
+
   String customViewsPageTextForQueryResultsDialogTitle();
 
   String customViewsPageTextForDialogConfirmDelete();

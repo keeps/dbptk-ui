@@ -156,7 +156,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
 
     this.databaseUUID = values.getURLConnection();
     final DialogBox dialogBox = Dialogs.showWaitResponse(messages.tableAndColumnsPageDialogTitleForRetrievingInformation(), messages.tableAndColumnsPageDialogMessageForRetrievingInformation());
-
+    CreateWizardManager.getInstance().enableNext(false);
     BrowserService.Util.getInstance().getSchemaInformation(databaseUUID, values,
       new DefaultAsyncCallback<String>() {
         @Override
@@ -170,6 +170,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
 
           sideBarHighlighter(TableAndColumnsSidebar.DATABASE_LINK,null,null);
           dialogBox.hide();
+          CreateWizardManager.getInstance().enableNext(true);
         }
 
         @Override

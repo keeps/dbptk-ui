@@ -30,7 +30,6 @@ import org.yaml.snakeyaml.Yaml;
 import com.databasepreservation.DatabaseMigration;
 import com.databasepreservation.SIARDEdition;
 import com.databasepreservation.SIARDValidation;
-import com.databasepreservation.main.common.server.ProgressObserver;
 import com.databasepreservation.main.common.server.SIARDProgressObserver;
 import com.databasepreservation.main.common.server.ValidationProgressObserver;
 import com.databasepreservation.main.common.server.ViewerConfiguration;
@@ -109,13 +108,10 @@ public class SIARDController {
       importModule.setOnceReporter(reporter);
       if (importModule instanceof JDBCImportModule) {
         JDBCImportModule jdbcImportModule = (JDBCImportModule) importModule;
-        try {
-          results = jdbcImportModule.testCustomViewQuery(query);
-        } catch (ModuleException e) {
-          throw new GenericException(e.getMessage());
-        }
+        results = jdbcImportModule.testCustomViewQuery(query);
       }
     } catch (ModuleException e) {
+      LOGGER.debug(e.getMessage(), e);
       throw new GenericException(e.getMessage());
     }
 

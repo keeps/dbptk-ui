@@ -18,10 +18,12 @@ import com.databasepreservation.main.common.shared.models.wizardParameters.Custo
 import com.databasepreservation.main.common.shared.models.wizardParameters.CustomViewsParameters;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.regexp.shared.RegExp;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextArea;
@@ -43,7 +45,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
   private static CustomViewsUiBinder binder = GWT.create(CustomViewsUiBinder.class);
 
   @UiField
-  FlowPanel customViewsList, rightSideContainer, schemasCombobox, customViewsButtons;
+  FlowPanel customViewsList, rightSideContainer, schemasCombobox, customViewsButtons, content;
 
   @UiField
   TextBox customViewName, customViewDescription;
@@ -63,7 +65,6 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
   private Button btnNext;
   private ConnectionParameters connectionParameters;
   private String databaseUUID;
-  private boolean queryResult;
 
   public static CustomViews getInstance(List<String> schemas, Button btnNext, ConnectionParameters connectionParameters,
     String databaseUUID) {
@@ -198,30 +199,6 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
         HistoryManager.gotoCreateSIARD();
       });
 
-      Button btnTest = new Button();
-      btnTest.setText(messages.basicActionTest());
-      btnTest.addStyleName("btn btn-primary btn-run");
-
-      btnTest.addClickHandler(event -> {
-        if (validateCustomViewQueryText()) {
-          BrowserService.Util.getInstance().validateCustomViewQuery(databaseUUID, connectionParameters,
-            customViewQuery.getText(), new DefaultAsyncCallback<List<List<String>>>() {
-              @Override
-              public void onSuccess(List<List<String>> result) {
-                Dialogs.showQueryResult(messages.customViewsPageTextForQueryResultsDialogTitle(), messages.basicActionClose(),
-                  result);
-              }
-
-              @Override
-              public void onFailure(Throwable caught) {
-                Toast.showError(messages.customViewsPageTitle(), caught.getMessage());
-              }
-            });
-        } else {
-          Toast.showError(messages.customViewsPageTitle(), messages.customViewsPageErrorMessageForQueryError());
-        }
-      });
-
       Button btnUpdate = new Button();
       btnUpdate.setText(messages.basicActionSave());
       btnUpdate.addStyleName("btn btn-primary btn-save");
@@ -259,7 +236,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
 
       SimplePanel simplePanelForTestButton = new SimplePanel();
       simplePanelForTestButton.addStyleName("btn-item");
-      simplePanelForTestButton.add(btnTest);
+      simplePanelForTestButton.add(getButtonTestQuery());
       customViewsButtons.add(simplePanelForTestButton);
 
       SimplePanel simplePanelForNewButton = new SimplePanel();
@@ -402,37 +379,13 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
       }
     });
 
-    Button btnTest = new Button();
-    btnTest.setText(messages.basicActionTest());
-    btnTest.addStyleName("btn btn-primary btn-run");
-
-    btnTest.addClickHandler(event -> {
-      if (validateCustomViewQueryText()) {
-        BrowserService.Util.getInstance().validateCustomViewQuery(databaseUUID, connectionParameters,
-          customViewQuery.getText(), new DefaultAsyncCallback<List<List<String>>>() {
-            @Override
-            public void onSuccess(List<List<String>> result) {
-              Dialogs.showQueryResult(messages.customViewsPageTextForQueryResultsDialogTitle(), messages.basicActionClose(),
-                result);
-            }
-
-            @Override
-            public void onFailure(Throwable caught) {
-              Toast.showError(messages.customViewsPageTitle(), caught.getMessage());
-            }
-          });
-      } else {
-        Toast.showError(messages.customViewsPageTitle(), messages.customViewsPageErrorMessageForQueryError());
-      }
-    });
-
     FlowPanel FlowPanelForSaveButton = new FlowPanel();
     FlowPanelForSaveButton.addStyleName("btn-item");
     FlowPanelForSaveButton.add(btnSave);
 
     FlowPanel FlowPanelForTestButton = new FlowPanel();
     FlowPanelForTestButton.addStyleName("btn-item");
-    FlowPanelForTestButton.add(btnTest);
+    FlowPanelForTestButton.add(getButtonTestQuery());
 
     FlowPanel FlowPanelForOptionsButtons = new FlowPanel();
     FlowPanelForOptionsButtons.add(FlowPanelForSaveButton);
@@ -473,5 +426,38 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
   public CustomViewsParameter getCustomViewParameter() {
     return new CustomViewsParameter(customViewSchemaName.getSelectedValue(), counter, customViewName.getText(),
       customViewDescription.getText(), customViewQuery.getText());
+  }
+
+  private Button getButtonTestQuery() {
+    Button btnTest = new Button();
+    btnTest.setText(messages.basicActionTest());
+    btnTest.addStyleName("btn btn-primary btn-run");
+
+    btnTest.addClickHandler(event -> {
+      if (validateCustomViewQueryText()) {
+        Widget spinner = new HTML(SafeHtmlUtils.fromSafeConstant(
+            "<div class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
+        content.add(spinner);
+        BrowserService.Util.getInstance().validateCustomViewQuery(databaseUUID, connectionParameters,
+            customViewQuery.getText(), new DefaultAsyncCallback<List<List<String>>>() {
+              @Override
+              public void onSuccess(List<List<String>> result) {
+                content.remove(spinner);
+                Dialogs.showQueryResult(messages.customViewsPageTextForQueryResultsDialogTitle(), messages.basicActionClose(),
+                    result);
+              }
+
+              @Override
+              public void onFailure(Throwable caught) {
+                content.remove(spinner);
+                Dialogs.showErrors(messages.customViewsPageTitle(), caught.getMessage(), messages.basicActionClose());
+              }
+            });
+      } else {
+        Toast.showError(messages.customViewsPageTitle(), messages.customViewsPageErrorMessageForQueryError());
+      }
+    });
+
+    return btnTest;
   }
 }
