@@ -34,6 +34,7 @@ public class SIARDExportOptions extends WizardPanel<ExportOptionsParameters> {
   static int EXTERNAL_LOBS_ERROR = 1;
   static int MISSING_FIELD = 2;
   static int MISSING_FILE = 3;
+  static int SIARDDK_FOLDER_NAME = 4;
   static int OK = -1;
 
   interface SIARDUiBinder extends UiBinder<Widget, SIARDExportOptions> {

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
+import com.databasepreservation.Constants;
 import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.common.shared.client.common.desktop.FileUploadField;
 import com.databasepreservation.main.common.shared.client.common.desktop.GenericField;
@@ -18,6 +19,7 @@ import com.databasepreservation.main.common.shared.models.wizardParameters.Expor
 import com.databasepreservation.main.desktop.shared.models.Filter;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -162,6 +164,15 @@ public class SIARDExportOptionsCurrent extends Composite {
             if (ViewerStringUtils.isBlank(s)) {
               validationError = SIARDExportOptions.MISSING_FILE;
               return SIARDExportOptions.MISSING_FILE;
+            } else {
+              if (version.equals(ViewerConstants.SIARDDK)) {
+                final RegExp compile = RegExp.compile("AVID.[A-ZÆØÅ]{2,4}.[1-9][0-9]*.[1-9][0-9]*");
+                final boolean test = compile.test(s);
+                if (!test) {
+                  validationError = SIARDExportOptions.SIARDDK_FOLDER_NAME;
+                  return SIARDExportOptions.SIARDDK_FOLDER_NAME;
+                }
+              }
             }
           } else {
             validationError = SIARDExportOptions.MISSING_FILE;
