@@ -48,27 +48,27 @@ public class MetadataTriggers implements MetadataEditPanel {
     } else {
 
       return new MetadataTableList<>(columns.iterator(),
-        new MetadataTableList.ColumnInfo<>(messages.name(), 15, new TextColumn<ViewerTrigger>() {
+        new MetadataTableList.ColumnInfo<>(messages.name(), 10, new TextColumn<ViewerTrigger>() {
           @Override
           public String getValue(ViewerTrigger object) {
             return object.getName();
           }
-        }), new MetadataTableList.ColumnInfo<>(messages.triggeredAction(), 15, new TextColumn<ViewerTrigger>() {
+        }), new MetadataTableList.ColumnInfo<>(messages.triggeredAction(), 10, new TextColumn<ViewerTrigger>() {
           @Override
           public String getValue(ViewerTrigger object) {
             return object.getTriggeredAction();
           }
-        }), new MetadataTableList.ColumnInfo<>(messages.triggerEvent(), 15, new TextColumn<ViewerTrigger>() {
+        }), new MetadataTableList.ColumnInfo<>(messages.triggerEvent(), 7, new TextColumn<ViewerTrigger>() {
           @Override
           public String getValue(ViewerTrigger object) {
             return object.getTriggerEvent();
           }
-        }), new MetadataTableList.ColumnInfo<>(messages.aliasList(), 15, new TextColumn<ViewerTrigger>() {
+        }), new MetadataTableList.ColumnInfo<>(messages.aliasList(), 7, new TextColumn<ViewerTrigger>() {
           @Override
           public String getValue(ViewerTrigger object) {
             return object.getAliasList();
           }
-        }), new MetadataTableList.ColumnInfo<>(messages.actionTime(), 15, new TextColumn<ViewerTrigger>() {
+        }), new MetadataTableList.ColumnInfo<>(messages.actionTime(), 7, new TextColumn<ViewerTrigger>() {
           @Override
           public String getValue(ViewerTrigger object) {
             return object.getActionTime();

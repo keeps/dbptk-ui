@@ -40,42 +40,42 @@ public class MetadataPrivileges implements MetadataEditPanel {
 
       privilegeMetadata = new MetadataTableList<>(privileges.iterator(),
 
-        new MetadataTableList.ColumnInfo<>(messages.titleType(), 15, new TextColumn<ViewerPrivilegeStructure>() {
+        new MetadataTableList.ColumnInfo<>(messages.titleType(), 5, new TextColumn<ViewerPrivilegeStructure>() {
           @Override
           public String getValue(ViewerPrivilegeStructure privilege) {
             return privilege.getType();
           }
         }),
 
-        new MetadataTableList.ColumnInfo<>(messages.titleGrantor(), 15, new TextColumn<ViewerPrivilegeStructure>() {
+        new MetadataTableList.ColumnInfo<>(messages.titleGrantor(), 7, new TextColumn<ViewerPrivilegeStructure>() {
           @Override
           public String getValue(ViewerPrivilegeStructure privilege) {
             return privilege.getGrantor();
           }
         }),
 
-        new MetadataTableList.ColumnInfo<>(messages.titleGrantee(), 15, new TextColumn<ViewerPrivilegeStructure>() {
+        new MetadataTableList.ColumnInfo<>(messages.titleGrantee(), 7, new TextColumn<ViewerPrivilegeStructure>() {
           @Override
           public String getValue(ViewerPrivilegeStructure privilege) {
             return privilege.getGrantee();
           }
         }),
 
-        new MetadataTableList.ColumnInfo<>(messages.titleObject(), 15, new TextColumn<ViewerPrivilegeStructure>() {
+        new MetadataTableList.ColumnInfo<>(messages.titleObject(), 7, new TextColumn<ViewerPrivilegeStructure>() {
           @Override
           public String getValue(ViewerPrivilegeStructure privilege) {
             return privilege.getObject();
           }
         }),
 
-        new MetadataTableList.ColumnInfo<>(messages.titleOption(), 15, new TextColumn<ViewerPrivilegeStructure>() {
+        new MetadataTableList.ColumnInfo<>(messages.titleOption(), 7, new TextColumn<ViewerPrivilegeStructure>() {
           @Override
           public String getValue(ViewerPrivilegeStructure privilege) {
             return privilege.getOption();
           }
         }),
 
-        new MetadataTableList.ColumnInfo<>(messages.titleDescription(), 15, getDescriptionColumn()));
+        new MetadataTableList.ColumnInfo<>(messages.titleDescription(), 25, getDescriptionColumn()));
     }
 
     return privilegeMetadata;

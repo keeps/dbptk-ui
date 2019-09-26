@@ -56,12 +56,12 @@ public class MetadataForeignKeys implements MetadataEditPanel {
     } else {
 
       return new MetadataTableList<>(columns.iterator(), new MetadataTableList.ColumnInfo<>(
-        messages.references_foreignKeyName(), 15, new TextColumn<ViewerForeignKey>() {
+        messages.references_foreignKeyName(), 7, new TextColumn<ViewerForeignKey>() {
           @Override
           public String getValue(ViewerForeignKey object) {
             return object.getName();
           }
-        }), new MetadataTableList.ColumnInfo<>(messages.foreignKeys_referencedTable(), 15,
+        }), new MetadataTableList.ColumnInfo<>(messages.foreignKeys_referencedTable(), 7,
           new TextColumn<ViewerForeignKey>() {
             @Override
             public String getValue(ViewerForeignKey object) {
@@ -71,24 +71,24 @@ public class MetadataForeignKeys implements MetadataEditPanel {
               return database.getMetadata().getTable(object.getReferencedTableUUID()).getName();
             }
           }),
-        new MetadataTableList.ColumnInfo<>(messages.columnName(), 15, new TextColumn<ViewerForeignKey>() {
+        new MetadataTableList.ColumnInfo<>(messages.columnName(), 7, new TextColumn<ViewerForeignKey>() {
           @Override
           public String getValue(ViewerForeignKey object) {
             return getReferenceList(object);
           }
         }),
-        new MetadataTableList.ColumnInfo<>(messages.foreignKeys_deleteAction(), 15, new TextColumn<ViewerForeignKey>() {
+        new MetadataTableList.ColumnInfo<>(messages.foreignKeys_deleteAction(), 7, new TextColumn<ViewerForeignKey>() {
           @Override
           public String getValue(ViewerForeignKey object) {
             return object.getDeleteAction();
           }
         }),
-        new MetadataTableList.ColumnInfo<>(messages.foreignKeys_updateAction(), 15, new TextColumn<ViewerForeignKey>() {
+        new MetadataTableList.ColumnInfo<>(messages.foreignKeys_updateAction(), 7, new TextColumn<ViewerForeignKey>() {
           @Override
           public String getValue(ViewerForeignKey object) {
             return object.getUpdateAction();
           }
-        }), new MetadataTableList.ColumnInfo<>(messages.description(), 15, getDescriptionColumn()));
+        }), new MetadataTableList.ColumnInfo<>(messages.description(), 25, getDescriptionColumn()));
     }
   }
 

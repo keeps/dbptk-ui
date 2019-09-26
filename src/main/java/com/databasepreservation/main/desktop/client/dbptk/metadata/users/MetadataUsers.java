@@ -40,12 +40,12 @@ public class MetadataUsers implements MetadataEditPanel {
 
       userMetadata = new MetadataTableList<>(users.iterator(),
 
-        new MetadataTableList.ColumnInfo<>(messages.name(), 15, new TextColumn<ViewerUserStructure>() {
+        new MetadataTableList.ColumnInfo<>(messages.name(),7, new TextColumn<ViewerUserStructure>() {
           @Override
           public String getValue(ViewerUserStructure user) {
             return user.getName();
           }
-        }), new MetadataTableList.ColumnInfo<>(messages.description(), 15, getDescriptionColumn()));
+        }), new MetadataTableList.ColumnInfo<>(messages.description(), 25, getDescriptionColumn()));
     }
 
     return userMetadata;

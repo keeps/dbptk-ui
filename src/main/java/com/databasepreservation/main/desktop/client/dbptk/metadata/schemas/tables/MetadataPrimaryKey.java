@@ -49,13 +49,13 @@ public class MetadataPrimaryKey implements MetadataEditPanel {
     } else {
 
       return new MetadataTableList<>(Arrays.asList(columns).iterator(),
-        new MetadataTableList.ColumnInfo<>(messages.primaryKey(), 15, new TextColumn<ViewerPrimaryKey>() {
+        new MetadataTableList.ColumnInfo<>(messages.primaryKey(), 7, new TextColumn<ViewerPrimaryKey>() {
           @Override
           public String getValue(ViewerPrimaryKey object) {
             Integer columnIndex = object.getColumnIndexesInViewerTable().get(0);
             return table.getColumns().get(columnIndex).getDisplayName();
           }
-        }), new MetadataTableList.ColumnInfo<>(messages.description(), 15, getDescriptionColumn()));
+        }), new MetadataTableList.ColumnInfo<>(messages.description(), 25, getDescriptionColumn()));
     }
 
   }

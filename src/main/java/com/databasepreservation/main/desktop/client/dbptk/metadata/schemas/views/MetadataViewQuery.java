@@ -2,7 +2,9 @@ package com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.view
 
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerView;
 import com.databasepreservation.main.common.shared.client.common.utils.CommonClientUtils;
+import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
@@ -36,9 +38,11 @@ public class MetadataViewQuery {
       flowPanel.add(new HTMLPanel(
         CommonClientUtils.getFieldHTML(messages.originalQuery(), messages.viewDoesNotContainQueryOriginal())));
     } else {
-      flowPanel.add(new HTMLPanel(CommonClientUtils.getFieldHTML(messages.originalQuery(), view.getQueryOriginal())));
+      flowPanel.add(new HTMLPanel(CommonClientUtils.getFieldHTML(messages.originalQuery(), SafeHtmlUtils
+        .fromSafeConstant("<pre><code>" + SafeHtmlUtils.htmlEscape(view.getQueryOriginal()) + "</code></pre>"))));
     }
 
+    JavascriptUtils.runHighlighter(flowPanel.getElement());
     ScrollPanel panel = new ScrollPanel(flowPanel);
     panel.setSize("100%", "100%");
 

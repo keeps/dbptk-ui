@@ -49,12 +49,12 @@ public class MetadataCandidateKeys implements MetadataEditPanel {
       return new MetadataTableList<>(messages.tableDoesNotContainCandidateKeys());
     } else {
       return new MetadataTableList<>(columns.iterator(),
-        new MetadataTableList.ColumnInfo<>(messages.name(), 15, new TextColumn<ViewerCandidateKey>() {
+        new MetadataTableList.ColumnInfo<>(messages.name(), 7, new TextColumn<ViewerCandidateKey>() {
           @Override
           public String getValue(ViewerCandidateKey object) {
             return object.getName();
           }
-        }), new MetadataTableList.ColumnInfo<>(messages.columnName(), 15, new TextColumn<ViewerCandidateKey>() {
+        }), new MetadataTableList.ColumnInfo<>(messages.columnName(), 7, new TextColumn<ViewerCandidateKey>() {
           @Override
           public String getValue(ViewerCandidateKey object) {
             List<Integer> columnsIndex = object.getColumnIndexesInViewerTable();
@@ -69,7 +69,7 @@ public class MetadataCandidateKeys implements MetadataEditPanel {
 
             return columnsName.toString();
           }
-        }), new MetadataTableList.ColumnInfo<>(messages.description(), 15, getDescriptionColumn()));
+        }), new MetadataTableList.ColumnInfo<>(messages.description(), 25, getDescriptionColumn()));
     }
   }
 

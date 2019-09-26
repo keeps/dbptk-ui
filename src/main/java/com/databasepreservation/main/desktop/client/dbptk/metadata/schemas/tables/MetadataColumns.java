@@ -54,28 +54,28 @@ public class MetadataColumns implements MetadataEditPanel {
       return new MetadataTableList<>(messages.tableDoesNotContainColumns());
     } else {
       return new MetadataTableList<>(columns.iterator(),
-        new MetadataTableList.ColumnInfo<>("", 2, getPrimaryKeyColumn(table)),
-        new MetadataTableList.ColumnInfo<>(messages.columnName(), 15, new TextColumn<ViewerColumn>() {
+        new MetadataTableList.ColumnInfo<>("", 1.2, getPrimaryKeyColumn(table)),
+        new MetadataTableList.ColumnInfo<>(messages.columnName(), 7, new TextColumn<ViewerColumn>() {
           @Override
           public String getValue(ViewerColumn object) {
             return object.getDisplayName();
           }
-        }), new MetadataTableList.ColumnInfo<>(messages.typeName(), 15, new TextColumn<ViewerColumn>() {
+        }), new MetadataTableList.ColumnInfo<>(messages.typeName(), 7, new TextColumn<ViewerColumn>() {
           @Override
           public String getValue(ViewerColumn object) {
             return object.getType().getTypeName();
           }
-        }), new MetadataTableList.ColumnInfo<>(messages.originalTypeName(), 15, new TextColumn<ViewerColumn>() {
+        }), new MetadataTableList.ColumnInfo<>(messages.originalTypeName(), 7, new TextColumn<ViewerColumn>() {
           @Override
           public String getValue(ViewerColumn object) {
             return object.getType().getOriginalTypeName();
           }
-        }), new MetadataTableList.ColumnInfo<>(messages.nullable(), 7, new TextColumn<ViewerColumn>() {
+        }), new MetadataTableList.ColumnInfo<>(messages.nullable(), 4, new TextColumn<ViewerColumn>() {
           @Override
           public String getValue(ViewerColumn object) {
             return object.getNillable() ? "YES" : "NO";
           }
-        }), new MetadataTableList.ColumnInfo<>(messages.description(), 15, getDescriptionColumn()));
+        }), new MetadataTableList.ColumnInfo<>(messages.description(), 25, getDescriptionColumn()));
     }
   }
 

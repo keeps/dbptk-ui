@@ -40,21 +40,21 @@ public class MetadataRoles implements MetadataEditPanel {
 
       roleMetadata = new MetadataTableList<>(roles.iterator(),
 
-        new MetadataTableList.ColumnInfo<>(messages.name(), 15, new TextColumn<ViewerRoleStructure>() {
+        new MetadataTableList.ColumnInfo<>(messages.name(), 7, new TextColumn<ViewerRoleStructure>() {
           @Override
           public String getValue(ViewerRoleStructure role) {
             return role.getName();
           }
         }),
 
-        new MetadataTableList.ColumnInfo<>(messages.titleAdmin(), 15, new TextColumn<ViewerRoleStructure>() {
+        new MetadataTableList.ColumnInfo<>(messages.titleAdmin(), 7, new TextColumn<ViewerRoleStructure>() {
           @Override
           public String getValue(ViewerRoleStructure role) {
             return role.getAdmin();
           }
         }),
 
-        new MetadataTableList.ColumnInfo<>(messages.titleDescription(), 15, getDescriptionColumn()));
+        new MetadataTableList.ColumnInfo<>(messages.titleDescription(), 25, getDescriptionColumn()));
     }
 
     return roleMetadata;

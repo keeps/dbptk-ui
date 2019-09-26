@@ -2,7 +2,9 @@ package com.databasepreservation.main.desktop.client.dbptk.metadata.schemas.rout
 
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerRoutine;
 import com.databasepreservation.main.common.shared.client.common.utils.CommonClientUtils;
+import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
@@ -34,7 +36,8 @@ public class MetadataRoutineInfos {
       flowPanel.add(new HTMLPanel(CommonClientUtils.getFieldHTML(messages.routine_body(),
         messages.routines_thisRoutineFieldDoesNotHaveContent())));
     } else {
-      flowPanel.add(new HTMLPanel(CommonClientUtils.getFieldHTML(messages.routine_body(), routine.getBody())));
+      flowPanel.add(new HTMLPanel(CommonClientUtils.getFieldHTML(messages.routine_body(), SafeHtmlUtils
+        .fromSafeConstant("<pre><code>" + SafeHtmlUtils.htmlEscape(routine.getBody()) + "</code></pre>"))));
     }
 
     if (routine.getCharacteristic() == null || routine.getCharacteristic().isEmpty()) {
@@ -53,6 +56,7 @@ public class MetadataRoutineInfos {
         .add(new HTMLPanel(CommonClientUtils.getFieldHTML(messages.routine_returnType(), routine.getReturnType())));
     }
 
+    JavascriptUtils.runHighlighter(flowPanel.getElement());
     ScrollPanel panel = new ScrollPanel(flowPanel);
     panel.setSize("100%", "100%");
     return panel;
