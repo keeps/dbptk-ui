@@ -640,6 +640,8 @@ public interface ClientMessages extends Messages {
 
   String SIARDHomePageLabelForViewerMetadataProducerApplication();
 
+  String SIARDHomePageLabelForViewerMetadataDescription();
+
   String SIARDHomePageLabelForValidatedAt();
 
   String SIARDHomePageLabelForValidationVersion();

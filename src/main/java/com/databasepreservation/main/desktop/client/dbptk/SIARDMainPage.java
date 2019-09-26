@@ -30,7 +30,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
@@ -303,13 +302,14 @@ public class SIARDMainPage extends Composite {
 
           @Override
           public void onSuccess(String databaseUUID) {
-            Dialogs.showInformationDialog("test", "sdfsd", messages.basicActionBrowse(), "btn btn-link", new DefaultAsyncCallback<Void>() {
-              @Override
-              public void onSuccess(Void result) {
-                GWT.log("OK");
-              }
-            });
-            //HistoryManager.gotoDesktopDatabase(databaseUUID);
+            Dialogs.showInformationDialog("test", "sdfsd", messages.basicActionBrowse(), "btn btn-link",
+              new DefaultAsyncCallback<Void>() {
+                @Override
+                public void onSuccess(Void result) {
+                  GWT.log("OK");
+                }
+              });
+            // HistoryManager.gotoDesktopDatabase(databaseUUID);
           }
         });
     });
@@ -341,17 +341,22 @@ public class SIARDMainPage extends Composite {
   }
 
   private void populateDescription() {
-    Label label = new Label();
+    MetadataField descriptionPanel;
 
     String descriptionTxt = database.getMetadata().getDescription();
 
     if (ViewerStringUtils.isBlank(descriptionTxt) || descriptionTxt.contentEquals("unspecified")) {
-      label.setText(messages.SIARDHomePageTextForMissingDescription());
+      descriptionPanel = MetadataField.createInstance(messages.SIARDHomePageLabelForViewerMetadataDescription(),
+        messages.SIARDHomePageTextForMissingDescription());
     } else {
-      label.setText(descriptionTxt);
+      descriptionPanel = MetadataField.createInstance(messages.SIARDHomePageLabelForViewerMetadataDescription(),
+        descriptionTxt);
     }
 
-    description.add(label);
+    descriptionPanel.setCSSMetadata("metadata-field", "metadata-information-description-label",
+      "metadata-information-element-value");
+
+    description.add(descriptionPanel);
   }
 
   private void populateMetadataInfo() {
@@ -522,7 +527,8 @@ public class SIARDMainPage extends Composite {
     } else if (database.getStatus().equals(ViewerDatabase.Status.INGESTING)) {
       btnIngest.setVisible(true);
       btnBrowse.setVisible(false);
-      btnIngest.addClickHandler(event -> HistoryManager.gotoIngestSIARDData(database.getUUID(), database.getMetadata().getName()));
+      btnIngest.addClickHandler(
+        event -> HistoryManager.gotoIngestSIARDData(database.getUUID(), database.getMetadata().getName()));
     }
   }
 

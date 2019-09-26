@@ -1065,6 +1065,12 @@ html, body, .main {
     font-weight: bold;
 }
 
+.metadata-information-description-label{
+    display: inline-block;
+    text-align: left;
+    font-weight: bold;
+}
+
 .metadata-information-element-value {
     display: inline;
     margin: 0;
