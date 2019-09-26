@@ -534,12 +534,4 @@ public class SIARDMainPage extends Composite {
       refreshInstance(database.getUUID());
     }
   }
-
-  @Override
-  protected void onAttach() {
-    super.onAttach();
-    if (database != null) {
-      refreshInstance(database.getUUID());
-    }
-  }
 }
