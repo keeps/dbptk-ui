@@ -58,6 +58,7 @@ public class ValidatorPage extends Composite {
   private Integer numberOfErros = 0;
   private Boolean stickToBottom = true;
   private FlowPanel tailIndicator = new FlowPanel();
+  private Boolean isRunning = false;
 
   private enum Status {
     OK, ERROR, SKIPPED, FINISH
@@ -156,6 +157,7 @@ public class ValidatorPage extends Composite {
   }
 
   private void runValidator() {
+    isRunning = true;
     BrowserService.Util.getInstance().validateSIARD(database.getUUID(), database.getSIARDPath(), reporterPath, udtPath,
       new DefaultAsyncCallback<Boolean>() {
         @Override
@@ -181,14 +183,14 @@ public class ValidatorPage extends Composite {
             numberOfWarnings = result.getNumberOfWarnings();
             numberOfErros = result.getNumberOfErrors();
             stopUpdating();
-            Toast.showInfo(messages.validatorPageTextForTitle(), messages.validatorPageTextForToast());
-
             if (numberOfErros > 0) {
               Dialogs.showErrors(messages.validatorPageTextForTitle(),
-                messages.validatorPageTextForDialogFailureInformation(), messages.basicActionClose());
+                messages.validatorPageTextForDialogFailureInformation(database.getMetadata().getName(), numberOfErros),
+                messages.basicActionClose());
             } else {
               Dialogs.showInformationDialog(messages.validatorPageTextForTitle(),
-                messages.validatorPageTextForDialogSuccessInformation(), messages.basicActionClose());
+                messages.validatorPageTextForDialogSuccessInformation(database.getMetadata().getName()),
+                messages.basicActionClose());
             }
           }
         }
@@ -295,7 +297,7 @@ public class ValidatorPage extends Composite {
   }
 
   private void stopUpdating() {
-    instances.remove(databaseUUID);
+    isRunning = false;
     populateValidationInfo(true);
     loading.setVisible(false);
     if (autoUpdateTimer != null) {
@@ -303,6 +305,16 @@ public class ValidatorPage extends Composite {
     }
   }
 
+  //For run again button and SIARDMainPAGE
+  public static void clear(String databaseUUID){
+    if(instances.get(databaseUUID)!=null){
+      instances.remove(databaseUUID);
+    }
+  }
+
+  public static boolean checkInstance(String databaseUUID){
+    return instances.get(databaseUUID) != null;
+  }
   private void resetInfos() {
     lastPosition = 0;
     content.clear();
@@ -446,7 +458,9 @@ public class ValidatorPage extends Composite {
 
   @Override
   protected void onAttach() {
-    loading.setVisible(true);
+    if(isRunning){
+      loading.setVisible(true);
+    }
     super.onAttach();
   }
 
@@ -457,6 +471,7 @@ public class ValidatorPage extends Composite {
 
   @UiHandler("btnRunAgain")
   void setBtnRunAgainHandler(ClickEvent e) {
+    clear(databaseUUID);
     BrowserService.Util.getInstance().clearValidationProgressData(databaseUUID, new DefaultAsyncCallback<Void>() {
       @Override
       public void onSuccess(Void result) {

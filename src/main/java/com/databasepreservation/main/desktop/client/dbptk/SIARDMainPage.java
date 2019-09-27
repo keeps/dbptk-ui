@@ -24,6 +24,7 @@ import com.databasepreservation.main.desktop.client.common.MetadataField;
 import com.databasepreservation.main.desktop.client.common.NavigationPanel;
 import com.databasepreservation.main.desktop.client.common.dialogs.Dialogs;
 import com.databasepreservation.main.desktop.client.common.helper.HelperValidator;
+import com.databasepreservation.main.desktop.client.dbptk.validator.ValidatorPage;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -54,6 +55,7 @@ public class SIARDMainPage extends Composite {
   private String archivalDateHumanized = null;
   private MetadataField validatedAt = null;
   private MetadataField version = null;
+  private HelperValidator validator = null;
   private MetadataField validationStatus = null;
   private FlowPanel validationIndicators = new FlowPanel();
   private MetadataField browsingStatus = null;
@@ -173,7 +175,7 @@ public class SIARDMainPage extends Composite {
     /* Validation */
     NavigationPanel validation = NavigationPanel.createInstance(messages.SIARDHomePageOptionsHeaderForValidation());
 
-    HelperValidator validator = new HelperValidator(database.getSIARDPath());
+    validator = new HelperValidator(database.getSIARDPath());
     btnRunValidator = new Button();
     btnRunValidator.setText(messages.SIARDHomePageButtonTextValidateNow());
     btnRunValidator.addStyleName("btn btn-link-info");
@@ -183,6 +185,7 @@ public class SIARDMainPage extends Composite {
           @Override
           public void onSuccess(Boolean result) {
             if (result && validator.getReporterPathFile() != null) {
+              ValidatorPage.clear(database.getUUID());
               if (validator.getUdtPathFile() == null) {
                 HistoryManager.gotoSIARDValidator(database.getUUID(), validator.getReporterPathFile());
               } else {
@@ -197,12 +200,13 @@ public class SIARDMainPage extends Composite {
     validation.addButton(btnRunValidator);
 
     btnOpenValidator = new Button();
-    btnOpenValidator.setVisible(false);
     btnOpenValidator.setText(messages.SIARDHomePageButtonTextOpenValidate());
     btnOpenValidator.addStyleName("btn btn-link-info");
     btnOpenValidator.addClickHandler(event -> {
       HistoryManager.gotoSIARDValidator(database.getUUID(), validator.getReporterPathFile());
     });
+
+    btnOpenValidator.setVisible(ValidatorPage.checkInstance(database.getUUID()));
 
     validation.addButton(btnOpenValidator);
 
@@ -261,9 +265,9 @@ public class SIARDMainPage extends Composite {
     validationStatus.setCSSMetadata(null, "label-field", "value-field");
 
     validation.addToInfoPanel(validationStatus);
-    validation.addToInfoPanel(validationIndicators);
     validation.addToInfoPanel(validatedAt);
     validation.addToInfoPanel(version);
+    validation.addToInfoPanel(validationIndicators);
 
     return validation;
   }
@@ -482,29 +486,21 @@ public class SIARDMainPage extends Composite {
             case VALIDATION_SUCCESS:
               updateValidationIndicators();
               updateValidationButtons(true);
-              btnOpenValidator.setVisible(false);
               validationStatus.getMetadataValue().setStyleName("label-success");
               break;
             case VALIDATION_FAILED:
               updateValidationIndicators();
               updateValidationButtons(true);
-              btnOpenValidator.setVisible(false);
               validationStatus.getMetadataValue().setStyleName("label-danger");
               break;
             case VALIDATION_RUNNING:
               updateValidationButtons(false);
               validationStatus.getMetadataValue().setStyleName("label-info");
-              btnOpenValidator.setVisible(true);
               break;
             default:
               validationStatus.getMetadataValue().setStyleName("label-info");
+              updateValidationButtons(false);
               btnRunValidator.setVisible(true);
-              btnOpenValidator.setVisible(false);
-              validationIndicators.setVisible(false);
-              btnSeeReport.setVisible(false);
-              validationIndicators.setVisible(false);
-              validatedAt.setVisible(false);
-              version.setVisible(false);
           }
         }
       });
@@ -516,6 +512,7 @@ public class SIARDMainPage extends Composite {
     validatedAt.setVisible(enable);
     version.setVisible(enable);
     validationIndicators.setVisible(enable);
+    btnOpenValidator.setVisible(ValidatorPage.checkInstance(database.getUUID()));
   }
 
   private void updateBrowsingStatus() {

@@ -911,9 +911,9 @@ public interface ClientMessages extends Messages {
 
   String validatorPageTextForToast();
 
-  String validatorPageTextForDialogSuccessInformation();
+  String validatorPageTextForDialogSuccessInformation(String databaseUUID);
 
-  String validatorPageTextForDialogFailureInformation();
+  String validatorPageTextForDialogFailureInformation(String databaseUUID, Integer errors);
 
   String validatorPageTextForErrorDetails();
 
