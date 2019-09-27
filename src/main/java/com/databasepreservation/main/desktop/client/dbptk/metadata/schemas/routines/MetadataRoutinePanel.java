@@ -68,8 +68,6 @@ public class MetadataRoutinePanel extends MetadataPanel {
         schema = database.getMetadata().getSchema(schemaUUID);
         this.controls = MetadataControlPanel.getInstance(database.getUUID());
 
-        GWT.log("MetadataRoutinePanel::" + routine.getName());
-
         initWidget(uiBinder.createAndBindUi(this));
         init();
     }

@@ -78,8 +78,6 @@ public class MetadataViewPanel extends MetadataPanel {
     schema = database.getMetadata().getSchema(schemaUUID);
     controls = MetadataControlPanel.getInstance(database.getUUID());
 
-    GWT.log("MetadataViewPanel::" + view.getName());
-
     initWidget(uiBinder.createAndBindUi(this));
     init();
   }

@@ -2046,6 +2046,10 @@ input[type="checkbox"]:checked:after {
     font-weight: bolder;
     margin-right: 10px;
 }
+
+.validation-total{
+    margin-left: 4px;
+}
 .validation-panel.requirement{
     justify-content: space-between;
 }

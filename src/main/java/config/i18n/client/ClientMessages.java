@@ -891,7 +891,9 @@ public interface ClientMessages extends Messages {
 
   String reportFile();
 
-  String numberOfValidationError();
+  String validatorPageRequirementsThatFailed();
+
+  String validatorPageTotalOfValidationError(Integer total);
 
   String numberOfValidationsPassed();
 
@@ -908,6 +910,10 @@ public interface ClientMessages extends Messages {
   String validatorPageTextForStick();
 
   String validatorPageTextForToast();
+
+  String validatorPageTextForDialogSuccessInformation();
+
+  String validatorPageTextForDialogFailureInformation();
 
   String validatorPageTextForErrorDetails();
 

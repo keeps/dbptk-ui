@@ -61,7 +61,7 @@ public class ValidationProgressObserver implements ValidationObserver {
   public void notifyIndicators(int passed, int errors, int warnings, int skipped) {
     SIARDController.updateSIARDValidatorIndicators(databaseUUID, Integer.toString(passed), Integer.toString(errors),
       Integer.toString(warnings), Integer.toString(skipped));
-    progressData.setNumberOfWarning(warnings);
+    progressData.setIndicators(passed, errors, warnings, skipped);
   }
 
   @Override

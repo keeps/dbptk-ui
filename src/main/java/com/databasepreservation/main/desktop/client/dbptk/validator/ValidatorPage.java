@@ -19,6 +19,7 @@ import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManage
 import com.databasepreservation.main.common.shared.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.common.shared.client.widgets.Toast;
+import com.databasepreservation.main.desktop.client.common.dialogs.Dialogs;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.MouseWheelEvent;
@@ -54,6 +55,7 @@ public class ValidatorPage extends Composite {
   private Integer countPassed = 0;
   private Integer countSkipped = 0;
   private Integer numberOfWarnings = 0;
+  private Integer numberOfErros = 0;
   private Boolean stickToBottom = true;
   private FlowPanel tailIndicator = new FlowPanel();
 
@@ -125,19 +127,15 @@ public class ValidatorPage extends Composite {
             database.getMetadata().getName());
           BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
 
-          if (database.getValidationStatus() != ViewerDatabase.ValidationStatus.VALIDATION_RUNNING) {
-            populateValidationInfo(false);
-            BrowserService.Util.getInstance().clearValidationProgressData(databaseUUID,
-              new DefaultAsyncCallback<Void>() {
-                @Override
-                public void onSuccess(Void result) {
-                  content.clear();
-                  initProgress();
-                }
-              });
-          } else {
-            populateValidationInfo(false);
-          }
+          populateValidationInfo(false);
+
+          BrowserService.Util.getInstance().clearValidationProgressData(databaseUUID, new DefaultAsyncCallback<Void>() {
+            @Override
+            public void onSuccess(Void result) {
+              content.clear();
+              initProgress();
+            }
+          });
         }
       });
   }
@@ -162,13 +160,13 @@ public class ValidatorPage extends Composite {
       new DefaultAsyncCallback<Boolean>() {
         @Override
         public void onSuccess(Boolean result) {
-
+          // Do nothing, wait for update finish
         }
 
         @Override
         public void onFailure(Throwable caught) {
-          stopUpdating(caught.getMessage());
-          super.onFailure(caught);
+          stopUpdating();
+          Dialogs.showErrors(messages.validatorPageTextForTitle(), caught.getMessage(), messages.basicActionClose());
         }
       });
   }
@@ -181,7 +179,17 @@ public class ValidatorPage extends Composite {
           update(result);
           if (result.isFinished() && result.getRequirementsList().size() <= lastPosition) {
             numberOfWarnings = result.getNumberOfWarnings();
-            stopUpdating(messages.validatorPageTextForToast());
+            numberOfErros = result.getNumberOfErrors();
+            stopUpdating();
+            Toast.showInfo(messages.validatorPageTextForTitle(), messages.validatorPageTextForToast());
+
+            if (numberOfErros > 0) {
+              Dialogs.showErrors(messages.validatorPageTextForTitle(),
+                messages.validatorPageTextForDialogFailureInformation(), messages.basicActionClose());
+            } else {
+              Dialogs.showInformationDialog(messages.validatorPageTextForTitle(),
+                messages.validatorPageTextForDialogSuccessInformation(), messages.basicActionClose());
+            }
           }
         }
       });
@@ -197,7 +205,6 @@ public class ValidatorPage extends Composite {
         panel.addStyleName("validation-panel title");
         panel.add(new Label(requirement.getID()));
         panel.add(new Label(requirement.getMessage()));
-        panel.setTitle(requirement.getType().name());
         content.add(panel);
       }
 
@@ -212,7 +219,6 @@ public class ValidatorPage extends Composite {
         message.addStyleName("description text-muted");
         panel.add(panelTitle);
         panel.add(message);
-        panel.setTitle(requirement.getType().name());
         content.add(panel);
       }
 
@@ -226,7 +232,6 @@ public class ValidatorPage extends Composite {
         path.addStyleName("description text-muted");
         panel.add(panelTitle);
         panel.add(path);
-        panel.setTitle(requirement.getType().name());
         content.add(panel);
       }
 
@@ -242,7 +247,6 @@ public class ValidatorPage extends Composite {
         panel.add(panelTitle);
         Label status = buildStatus(requirement.getStatus());
         panel.add(status);
-        panel.setTitle(requirement.getType().name());
         content.add(panel);
       }
 
@@ -290,8 +294,7 @@ public class ValidatorPage extends Composite {
     return statusLabel;
   }
 
-  private void stopUpdating(String message) {
-    Toast.showInfo(messages.validatorPageTextForTitle(), message);
+  private void stopUpdating() {
     instances.remove(databaseUUID);
     populateValidationInfo(true);
     loading.setVisible(false);
@@ -307,6 +310,7 @@ public class ValidatorPage extends Composite {
     countErrors = 0;
     countSkipped = 0;
     numberOfWarnings = 0;
+    numberOfErros = 0;
     populateValidationInfo(false);
   }
 
@@ -321,18 +325,16 @@ public class ValidatorPage extends Composite {
       new Label(database.getMetadata().getName())));
 
     // counts
-    left.add(validationInfoBuilder(messages.numberOfValidationError(), countErrors.toString(), new Label(), enable));
-    left.add(validationInfoBuilder(messages.numberOfValidationsPassed(), countPassed.toString(), new Label(), enable));
-    left.add(
-      validationInfoBuilder(messages.numberOfValidationsWarnings(), numberOfWarnings.toString(), new Label(), enable));
-    left
-      .add(validationInfoBuilder(messages.numberOfValidationsSkipped(), countSkipped.toString(), new Label(), enable));
+    left.add(validationInfoBuilder(messages.validatorPageRequirementsThatFailed(), countErrors, numberOfErros, enable));
+    left.add(validationInfoBuilder(messages.numberOfValidationsPassed(), countPassed, null, enable));
+    left.add(validationInfoBuilder(messages.numberOfValidationsWarnings(), numberOfWarnings, null, enable));
+    left.add(validationInfoBuilder(messages.numberOfValidationsSkipped(), countSkipped, null, enable));
 
     // Validator Status
     left.add(validationInfoBuilder(messages.managePageTableHeaderTextForDatabaseStatus(), updateStatus()));
 
-    //SIARD Version
-    right.add(validationInfoBuilder(messages.validatorPageTextForSIARDVersion(),new Label(ViewerConstants.SIARD2_1)));
+    // SIARD Version
+    right.add(validationInfoBuilder(messages.validatorPageTextForSIARDVersion(), new Label(ViewerConstants.SIARD2_1)));
 
     // SIARD specification link
     Button SIARDSpecification = new Button(ViewerConstants.SIARD2_1);
@@ -389,7 +391,8 @@ public class ValidatorPage extends Composite {
     return panel;
   }
 
-  private FlowPanel validationInfoBuilder(String key, String value, Label valueLabel, Boolean loading) {
+  private FlowPanel validationInfoBuilder(String key, Integer value, Integer total, Boolean loading) {
+    Label valueLabel = new Label();
     FlowPanel panel = new FlowPanel();
     panel.addStyleName("validation-info-panel");
     Label keyLabel = new Label(key);
@@ -402,8 +405,13 @@ public class ValidatorPage extends Composite {
       html.addStyleName("text-muted");
       panel.add(html);
     } else {
-      valueLabel.setText(value);
+      valueLabel.setText(value.toString());
       panel.add(valueLabel);
+      if (total != null && total > 0) {
+        Label totalLabel = new Label(messages.validatorPageTotalOfValidationError(total));
+        totalLabel.addStyleName("validation-total");
+        panel.add(totalLabel);
+      }
     }
 
     return panel;

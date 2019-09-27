@@ -106,7 +106,7 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
       }
     };
 
-    Column<ViewerDatabase, SafeHtml> validColumn = new TooltipDatabaseColumn() {
+    Column<ViewerDatabase, SafeHtml> validColumn = new ValidDatabaseColumn() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
         return database != null ? SafeHtmlUtils.fromString(SolrHumanizer.humanize(database.getValidationStatus())) : null;
@@ -218,6 +218,28 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
         sb.append(SafeHtmlUtils.fromString(value));
       }
       sb.appendHtmlConstant("</button>");
+    }
+  }
+
+  private abstract static class ValidDatabaseColumn extends Column<ViewerDatabase, SafeHtml> {
+    public ValidDatabaseColumn() {
+      super(new SafeHtmlCell());
+    }
+
+    @Override
+    public void render(Cell.Context context, ViewerDatabase object, SafeHtmlBuilder sb) {
+      SafeHtml value = getValue(object);
+      if (value != null) {
+        String style = "label-info";
+        if(value.asString().equals(SolrHumanizer.humanize(ViewerDatabase.ValidationStatus.VALIDATION_FAILED))){
+          style = "label-danger";
+        } else if(value.asString().equals(SolrHumanizer.humanize(ViewerDatabase.ValidationStatus.VALIDATION_SUCCESS))){
+          style = "label-success";
+        }
+        sb.appendHtmlConstant("<div class=\""+style+"\" title=\"" + SafeHtmlUtils.htmlEscape(value.asString()) + "\">");
+        sb.append(value);
+        sb.appendHtmlConstant("</div");
+      }
     }
   }
 

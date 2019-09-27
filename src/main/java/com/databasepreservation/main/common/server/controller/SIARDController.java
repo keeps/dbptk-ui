@@ -123,7 +123,8 @@ public class SIARDController {
     final DatabaseMigration databaseMigration = initializeDatabaseMigration(reporter);
 
     try {
-      setupJDBCConnection(databaseMigration, JsonTransformer.getObjectFromJson(parametersJson, ConnectionParameters.class));
+      setupJDBCConnection(databaseMigration,
+        JsonTransformer.getObjectFromJson(parametersJson, ConnectionParameters.class));
 
       try {
         DatabaseImportModule importModule = databaseMigration.getImportModule();
@@ -328,7 +329,7 @@ public class SIARDController {
         throw new GenericException(e.getMessage());
       }
     }
-      //return database.getMetadata();
+    // return database.getMetadata();
     return null;
   }
 
@@ -602,18 +603,22 @@ public class SIARDController {
         solrManager.updateSIARDValidationInformation(databaseUUID, status, validationReportPath, dbptkVersion,
           new DateTime().toString());
       } catch (IOException e) {
+        resetStatusValidate(databaseUUID);
         throw new GenericException("Failed to obtain the DBPTK version from properties", e);
       } catch (ModuleException e) {
+        resetStatusValidate(databaseUUID);
         throw new GenericException(e);
       }
     } catch (IOException e) {
+      resetStatusValidate(databaseUUID);
       throw new GenericException("Could not initialize the validate module.", e);
     }
 
     return valid;
   }
 
-  public static void updateSIARDValidatorIndicators(String databaseUUID, String passed, String errors, String warnings, String skipped) {
+  public static void updateSIARDValidatorIndicators(String databaseUUID, String passed, String errors, String warnings,
+    String skipped) {
     final DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
     solrManager.updateSIARDValidationIndicators(databaseUUID, passed, errors, warnings, skipped);
   }
@@ -905,5 +910,12 @@ public class SIARDController {
     if (parameters.getJDBCConnectionParameters().isDriver()) {
       addURL(new File(parameters.getJDBCConnectionParameters().getDriverPath()).toURI().toURL());
     }
+  }
+
+  private static void resetStatusValidate(String databaseUUID) {
+    final DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
+    solrManager.updateSIARDValidationInformation(databaseUUID, ViewerDatabase.ValidationStatus.NOT_VALIDATED, null,
+      null, new DateTime().toString());
+
   }
 }

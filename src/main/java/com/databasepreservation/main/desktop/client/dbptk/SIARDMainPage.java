@@ -232,12 +232,12 @@ public class SIARDMainPage extends Composite {
       version.setVisible(true);
       validationStatus = MetadataField.createInstance(messages.SIARDHomePageLabelForValidationStatus(),
         SolrHumanizer.humanize(database.getValidationStatus()));
-      // indicators
-      updateValidationIndicators();
       if (database.getValidationStatus().equals(ViewerDatabase.ValidationStatus.VALIDATION_SUCCESS)) {
+        updateValidationIndicators();
         validationStatus.getMetadataValue().addStyleName("label-success");
         validationIndicators.setVisible(true);
       } else if (database.getValidationStatus().equals(ViewerDatabase.ValidationStatus.VALIDATION_FAILED)) {
+        updateValidationIndicators();
         validationStatus.getMetadataValue().addStyleName("label-danger");
         validationIndicators.setVisible(true);
       } else {
@@ -478,14 +478,15 @@ public class SIARDMainPage extends Composite {
           validatedAt.updateText(result);
           version.updateText(database.getValidatedVersion());
           validationStatus.updateText(SolrHumanizer.humanize(database.getValidationStatus()));
-          updateValidationIndicators();
           switch (database.getValidationStatus()) {
             case VALIDATION_SUCCESS:
+              updateValidationIndicators();
               updateValidationButtons(true);
               btnOpenValidator.setVisible(false);
               validationStatus.getMetadataValue().setStyleName("label-success");
               break;
             case VALIDATION_FAILED:
+              updateValidationIndicators();
               updateValidationButtons(true);
               btnOpenValidator.setVisible(false);
               validationStatus.getMetadataValue().setStyleName("label-danger");

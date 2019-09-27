@@ -9,7 +9,10 @@ public class ValidationProgressData implements Serializable {
   private boolean finished = false;
   private List<Requirement> requirementsList = new ArrayList<>();
   private Requirement requirement;
+  private int numberOfPassed;
+  private int numberOfErrors;
   private int numberOfWarnings;
+  private int numberOfSkipped;
 
   private static HashMap<String, ValidationProgressData> instances = new HashMap<>();
 
@@ -60,12 +63,27 @@ public class ValidationProgressData implements Serializable {
     finished = true;
   }
 
-  public void setNumberOfWarning(int warnings) {
+  public void setIndicators(int passed, int errors, int warnings, int skipped) {
+    numberOfPassed = passed;
+    numberOfErrors = errors;
     numberOfWarnings = warnings;
+    numberOfSkipped = skipped;
+  }
+
+  public int getNumberOfPassed() {
+    return numberOfPassed;
+  }
+
+  public int getNumberOfErrors() {
+    return numberOfErrors;
   }
 
   public int getNumberOfWarnings() {
     return numberOfWarnings;
+  }
+
+  public int getNumberOfSkipped() {
+    return numberOfSkipped;
   }
 
   public static class Requirement implements Serializable {
