@@ -6,6 +6,14 @@
         <m:BreadcrumbPanel ui:field="breadcrumb"/>
         <g:FlowPanel addStyleNames="browseContentPreviewPanel" ui:field="panel">
         </g:FlowPanel>
+        <g:FlowPanel addStyleNames="button-panel-container">
+            <g:FlowPanel ui:field="customButtons" addStyleNames="button-panel-right"/>
+            <g:FlowPanel addStyleNames="button-panel-right">
+                <g:SimplePanel addStyleNames="btn-item">
+                    <g:Button ui:field="btnBack" addStyleNames="btn btn-primary btn-back-wizard" />
+                </g:SimplePanel>
+            </g:FlowPanel>
+        </g:FlowPanel>
     </g:FlowPanel>
 
 </ui:UiBinder>
