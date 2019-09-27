@@ -2078,6 +2078,10 @@ input[type="checkbox"]:checked:after {
     font-weight: lighter;
 }
 
+.btn-run-again{
+    box-sizing: content-box;
+}
+
 .stick-bottom-log{
     display: flex;
     height: 20px;
@@ -2124,6 +2128,7 @@ input[type="checkbox"]:checked:after {
 }
 
 .bottom-panel{
+    display: flex;
     align-self: flex-end;
     padding: 0.5em 0;
 }

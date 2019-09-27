@@ -190,7 +190,7 @@ public class ValidatorPage extends Composite {
             } else {
               Dialogs.showInformationDialog(messages.validatorPageTextForTitle(),
                 messages.validatorPageTextForDialogSuccessInformation(database.getMetadata().getName()),
-                messages.basicActionClose());
+                messages.basicActionClose(), "btn btn-link");
             }
           }
         }
