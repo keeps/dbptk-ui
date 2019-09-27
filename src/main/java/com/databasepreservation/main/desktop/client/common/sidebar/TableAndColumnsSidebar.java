@@ -77,7 +77,7 @@ public class TableAndColumnsSidebar extends Composite {
       SidebarHyperlink schemas = new SidebarHyperlink(schema.getName(),
               HistoryManager.linkToCreateSIARD(HistoryManager.ROUTE_WIZARD_TABLES_COLUMNS, TABLES_LINK, schema.getUUID()));
       schemas.addIcon(FontAwesomeIconManager.SCHEMA).setH5().setIndent1();
-      list.put(TABLES_LINK, schemas);
+      list.put(schema.getUUID(), schemas);
       sidebarGroup.add(schemas);
 
       SidebarItem tables = new SidebarItem(messages.sidebarMenuTextForTables());
@@ -85,10 +85,10 @@ public class TableAndColumnsSidebar extends Composite {
 
       FlowPanel tablesItems = new FlowPanel();
       for (ViewerTable table : schema.getTables()) {
-        SidebarHyperlink sidebarHyperlink = new SidebarHyperlink(table.getName(), HistoryManager.linkToCreateSIARD(
-          HistoryManager.ROUTE_WIZARD_TABLES_COLUMNS, TABLE_LINK, schema.getUUID(), table.getUUID()));
-        sidebarHyperlink.addIcon(FontAwesomeIconManager.TABLE).setH6().setIndent3();
-        list.put(table.getName(), sidebarHyperlink);
+        final SidebarHyperlink sidebarHyperlink = buildSidebarHyperLink(table.getName(), HistoryManager
+          .linkToCreateSIARD(HistoryManager.ROUTE_WIZARD_TABLES_COLUMNS, TABLE_LINK, schema.getUUID(), table.getUUID()),
+          FontAwesomeIconManager.TABLE);
+        list.put(ViewerStringUtils.concat(schema.getUUID(), table.getUUID()), sidebarHyperlink);
         tablesItems.add(sidebarHyperlink);
       }
       createSubItem(tables, tablesItems);
@@ -98,10 +98,10 @@ public class TableAndColumnsSidebar extends Composite {
 
       FlowPanel viewsItems = new FlowPanel();
       for (ViewerView view : schema.getViews()) {
-        SidebarHyperlink sidebarHyperlink = new SidebarHyperlink(view.getName(),
-            HistoryManager.linkToCreateSIARD(HistoryManager.ROUTE_WIZARD_TABLES_COLUMNS, VIEW_LINK, schema.getUUID(), view.getUUID()));
-        sidebarHyperlink.addIcon(FontAwesomeIconManager.SCHEMA_VIEWS).setH6().setIndent3();
-        list.put(view.getName(), sidebarHyperlink);
+        SidebarHyperlink sidebarHyperlink = buildSidebarHyperLink(view.getName(), HistoryManager
+          .linkToCreateSIARD(HistoryManager.ROUTE_WIZARD_TABLES_COLUMNS, VIEW_LINK, schema.getUUID(), view.getUUID()),
+          FontAwesomeIconManager.SCHEMA_VIEWS);
+        list.put(ViewerStringUtils.concat(schema.getUUID(), view.getUUID()), sidebarHyperlink);
         viewsItems.add(sidebarHyperlink);
       }
       createSubItem(views, viewsItems);
@@ -122,7 +122,7 @@ public class TableAndColumnsSidebar extends Composite {
   }
 
   public void select(String value) {
-
+    GWT.log("TO SELECT: " + value);
     for (Map.Entry<String, SidebarHyperlink> entry : list.entrySet()) {
       if (entry.getKey().equals(value)) {
         list.get(value).setSelected(true);
@@ -197,5 +197,13 @@ public class TableAndColumnsSidebar extends Composite {
         disclosurePanel.setVisible(true);
       }
     }
+  }
+
+  private SidebarHyperlink buildSidebarHyperLink(final String displayName, final String route,
+    final String fontAwesomeIcon) {
+    SidebarHyperlink sidebarHyperlink = new SidebarHyperlink(displayName, route);
+    sidebarHyperlink.addIcon(fontAwesomeIcon).setH6().setIndent3();
+
+    return sidebarHyperlink;
   }
 }

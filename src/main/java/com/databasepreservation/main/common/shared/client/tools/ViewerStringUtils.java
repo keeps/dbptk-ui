@@ -13,4 +13,13 @@ public class ViewerStringUtils {
   public static boolean isBlank(final CharSequence cs) {
     return cs == null || cs.length() == 0;
   }
+
+  public static String concat(final String ... values) {
+    String concat = "";
+    for (String value : values) {
+      concat = concat.concat(value).concat("_");
+    }
+
+    return concat;
+  }
 }

@@ -25,6 +25,7 @@ import com.databasepreservation.main.common.shared.client.common.utils.Javascrip
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.common.shared.client.tools.JSOUtils;
 import com.databasepreservation.main.common.shared.client.tools.PathUtils;
+import com.databasepreservation.main.common.shared.client.tools.ViewerStringUtils;
 import com.databasepreservation.main.common.shared.client.widgets.Toast;
 import com.databasepreservation.main.common.shared.models.wizardParameters.ConnectionParameters;
 import com.databasepreservation.main.common.shared.models.wizardParameters.ExternalLOBsParameter;
@@ -257,9 +258,9 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
     if (tableUUID != null) {
       panel.add(getColumns(tableUUID));
       if (toSelect.equals(TableAndColumnsSidebar.VIEW_LINK)) {
-        toSelect = metadata.getView(tableUUID).getName();
+        toSelect = ViewerStringUtils.concat(schemaUUID, tableUUID);
       } else if (toSelect.equals(TableAndColumnsSidebar.TABLE_LINK)) {
-        toSelect = metadata.getTable(tableUUID).getName();
+        toSelect = ViewerStringUtils.concat(schemaUUID, tableUUID);
       }
       currentTableUUID = tableUUID;
     } else if (schemaUUID != null) {
@@ -284,6 +285,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
 
         panel.add(title);
         panel.add(tabPanel);
+        toSelect = schemaUUID;
     } else {
       panel.add(ErDiagram.getInstance(databaseUUID, metadata, HistoryManager.getCurrentHistoryPath().get(0)));
     }
