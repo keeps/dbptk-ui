@@ -4,7 +4,7 @@
 
     <g:FlowPanel addStyleNames="progress-bar-panel">
         <g:Label ui:field="title" addStyleNames="h1"/>
-        <g:Label ui:field="subTitle" addStyleNames="h4"/>
+        <g:Label ui:field="subTitle" addStyleNames="h5"/>
         <g:FlowPanel addStyleNames="progress-report-panel">
             <c:Progressbar ui:field="progressBar"/>
             <g:FlowPanel ui:field="content" addStyleNames="progress-report"/>

@@ -146,8 +146,9 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
 
       @Override
       public void onFailure(Throwable caught) {
-          Toast.showError(messages.tableAndColumnsPageTitle(), caught.getMessage());
         content.remove(spinner);
+        HistoryManager.gotoSIARDInfo(databaseUUID);
+        Dialogs.showErrors(messages.tableAndColumnsPageTitle(), caught.getMessage(), messages.basicActionClose());
       }
     });
   }
@@ -176,9 +177,8 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
 
         @Override
         public void onFailure(Throwable caught) {
-          Toast.showError(messages.tableAndColumnsPageTitle(), caught.getMessage());
           dialogBox.hide();
-          //content.remove(spinner);
+          Dialogs.showErrors(messages.tableAndColumnsPageTitle(), caught.getMessage(), messages.basicActionClose());
         }
       });
   }

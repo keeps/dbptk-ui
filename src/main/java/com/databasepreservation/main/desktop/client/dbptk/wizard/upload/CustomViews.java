@@ -7,15 +7,15 @@ import java.util.List;
 import com.databasepreservation.main.common.client.BrowserService;
 import com.databasepreservation.main.common.shared.client.common.DefaultAsyncCallback;
 import com.databasepreservation.main.common.shared.client.common.desktop.ComboBoxField;
-import com.databasepreservation.main.desktop.client.common.dialogs.Dialogs;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.main.common.shared.client.tools.ViewerStringUtils;
 import com.databasepreservation.main.common.shared.client.widgets.Toast;
-import com.databasepreservation.main.desktop.client.common.sidebar.CustomViewsSidebar;
-import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
 import com.databasepreservation.main.common.shared.models.wizardParameters.ConnectionParameters;
 import com.databasepreservation.main.common.shared.models.wizardParameters.CustomViewsParameter;
 import com.databasepreservation.main.common.shared.models.wizardParameters.CustomViewsParameters;
+import com.databasepreservation.main.desktop.client.common.dialogs.Dialogs;
+import com.databasepreservation.main.desktop.client.common.sidebar.CustomViewsSidebar;
+import com.databasepreservation.main.desktop.client.dbptk.wizard.WizardPanel;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.regexp.shared.RegExp;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -85,7 +85,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
     customViewsList.add(customViewsSidebar);
 
     customViewSchemaName = ComboBoxField.createInstance(messages.customViewsPageLabelForSchemaName(), schemas);
-    customViewSchemaName.setCSSMetadata("form-row","form-label-spaced", "form-combobox");
+    customViewSchemaName.setCSSMetadata("form-row", "form-label-spaced", "form-combobox");
     customViewSchemaName.setRequired();
 
     schemasCombobox.add(customViewSchemaName);
@@ -97,8 +97,8 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
     customViewsButtons.add(createCustomViewButton());
   }
 
-  void checkIfHaveCustomViews(){
-    if(customViewsParameters.isEmpty()){
+  void checkIfHaveCustomViews() {
+    if (customViewsParameters.isEmpty()) {
       btnNext.setText(messages.basicActionSkip());
     } else {
       btnNext.setText(messages.basicActionNext());
@@ -121,7 +121,8 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
 
   @Override
   public boolean validate() {
-    boolean empty = ViewerStringUtils.isBlank(customViewName.getText()) && ViewerStringUtils.isBlank(customViewQuery.getText());
+    boolean empty = ViewerStringUtils.isBlank(customViewName.getText())
+      && ViewerStringUtils.isBlank(customViewQuery.getText());
 
     if (empty) {
       toSave = false;
@@ -131,8 +132,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
     }
 
     CustomViewsParameter parameter = new CustomViewsParameter(customViewSchemaName.getSelectedValue(), counter,
-        customViewName.getText(),
-        customViewDescription.getText(), customViewQuery.getText());
+      customViewName.getText(), customViewDescription.getText(), customViewQuery.getText());
 
     toSave = !customViewsParameters.containsValue(parameter);
 
@@ -154,15 +154,16 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
   }
 
   @Override
-  public void error() { }
+  public void error() {
+  }
 
   public void sideBarHighlighter(String customViewUUID, String action) {
 
     final CustomViewsParameter parameter = customViewsParameters.get(customViewUUID);
 
     if (action != null && action.equals(HistoryManager.ACTION_DELETE)) {
-      Dialogs.showConfirmDialog(messages.customViewsPageTitle(), messages.customViewsPageTextForDialogConfirmDelete(), messages.basicActionCancel(), messages.basicActionConfirm(),
-        new DefaultAsyncCallback<Boolean>() {
+      Dialogs.showConfirmDialog(messages.customViewsPageTitle(), messages.customViewsPageTextForDialogConfirmDelete(),
+        messages.basicActionCancel(), messages.basicActionConfirm(), new DefaultAsyncCallback<Boolean>() {
           @Override
           public void onSuccess(Boolean result) {
             if (result) {
@@ -183,7 +184,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
     } else {
       customViewsButtons.clear();
       setTextboxText(parameter.getSchema(), parameter.getCustomViewName(), parameter.getCustomViewDescription(),
-          parameter.getCustomViewQuery());
+        parameter.getCustomViewQuery());
 
       Button btnNew = new Button();
       btnNew.setText(messages.basicActionNew());
@@ -209,18 +210,14 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
             customViewQuery.getText(), new DefaultAsyncCallback<List<List<String>>>() {
               @Override
               public void onSuccess(List<List<String>> result) {
-                if (!result.isEmpty()) {
-                  updateCustomViewParameters(parameter.getCustomViewID(), customViewSchemaName.getSelectedValue(),
-                    customViewName.getText(), customViewDescription.getText(), customViewQuery.getText());
-                  Toast.showInfo(messages.customViewsPageTitle(), messages.customViewsUpdateMessage());
-                } else {
-                  Toast.showError("Empty");
-                }
+                updateCustomViewParameters(parameter.getCustomViewID(), customViewSchemaName.getSelectedValue(),
+                  customViewName.getText(), customViewDescription.getText(), customViewQuery.getText());
+                Toast.showInfo(messages.customViewsPageTitle(), messages.customViewsUpdateMessage());
               }
 
               @Override
               public void onFailure(Throwable caught) {
-                Toast.showError(messages.customViewsPageTitle(), caught.getMessage());
+                Dialogs.showErrors(messages.customViewsPageTitle(), caught.getMessage(), messages.basicActionClose());
               }
             });
         } else {
@@ -307,8 +304,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
   }
 
   private void updateCustomViewParameters(final int id, final String customViewSchemaName,
-    final String customViewNameText,
-    final String customViewDescriptionText, final String customViewQueryText) {
+    final String customViewNameText, final String customViewDescriptionText, final String customViewQueryText) {
     String customViewUUID = String.valueOf(id);
     final CustomViewsParameter parameter = customViewsParameters.get(customViewUUID);
     parameter.setSchemaName(customViewSchemaName);
@@ -328,8 +324,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
   }
 
   private void setTextboxText(final String schemaName, final String customViewNameText,
-    final String customViewDescriptionText,
-    final String customViewQueryText) {
+    final String customViewDescriptionText, final String customViewQueryText) {
     customViewName.setText(customViewNameText);
     customViewDescription.setText(customViewDescriptionText);
     customViewQuery.setText(customViewQueryText);
@@ -347,28 +342,25 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
           customViewQuery.getText(), new DefaultAsyncCallback<List<List<String>>>() {
             @Override
             public void onSuccess(List<List<String>> result) {
-              if (!result.isEmpty()) {
-                customViewsSidebar.addSideBarHyperLink(customViewName.getText(), String.valueOf(counter),
-                  HistoryManager.linkToCreateWizardCustomViewsDelete(String.valueOf(counter)));
+              customViewsSidebar.addSideBarHyperLink(customViewName.getText(), String.valueOf(counter),
+                HistoryManager.linkToCreateWizardCustomViewsDelete(String.valueOf(counter)));
 
-                CustomViewsParameter parameter = new CustomViewsParameter(customViewSchemaName.getSelectedValue(),
-                  counter, customViewName.getText(), customViewDescription.getText(), customViewQuery.getText());
-                customViewsParameters.put(String.valueOf(counter), parameter);
-                counter++;
-                setTextboxText("", "", "", "");
-                customViewName.getElement().removeAttribute("required");
-                customViewQuery.getElement().removeAttribute("required");
-                customViewSchemaName.getElement().removeAttribute("required");
-                customViewsSidebar.selectNone();
-              } else {
-                Toast.showError("Empty");
-              }
+              CustomViewsParameter parameter = new CustomViewsParameter(customViewSchemaName.getSelectedValue(),
+                counter, customViewName.getText(), customViewDescription.getText(), customViewQuery.getText());
+              customViewsParameters.put(String.valueOf(counter), parameter);
+              counter++;
+              setTextboxText("", "", "", "");
+              customViewName.getElement().removeAttribute("required");
+              customViewQuery.getElement().removeAttribute("required");
+              customViewSchemaName.getElement().removeAttribute("required");
+              customViewsSidebar.selectNone();
+
               checkIfHaveCustomViews();
             }
 
             @Override
             public void onFailure(Throwable caught) {
-              Toast.showError(messages.customViewsPageTitle(), caught.getMessage());
+              Dialogs.showErrors(messages.customViewsPageTitle(), caught.getMessage(), messages.basicActionClose());
               checkIfHaveCustomViews();
             }
           });
@@ -436,23 +428,23 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
     btnTest.addClickHandler(event -> {
       if (validateCustomViewQueryText()) {
         Widget spinner = new HTML(SafeHtmlUtils.fromSafeConstant(
-            "<div class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
+          "<div class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
         content.add(spinner);
         BrowserService.Util.getInstance().validateCustomViewQuery(databaseUUID, connectionParameters,
-            customViewQuery.getText(), new DefaultAsyncCallback<List<List<String>>>() {
-              @Override
-              public void onSuccess(List<List<String>> result) {
-                content.remove(spinner);
-                Dialogs.showQueryResult(messages.customViewsPageTextForQueryResultsDialogTitle(), messages.basicActionClose(),
-                    result);
-              }
+          customViewQuery.getText(), new DefaultAsyncCallback<List<List<String>>>() {
+            @Override
+            public void onSuccess(List<List<String>> result) {
+              content.remove(spinner);
+              Dialogs.showQueryResult(messages.customViewsPageTextForQueryResultsDialogTitle(),
+                messages.basicActionClose(), result);
+            }
 
-              @Override
-              public void onFailure(Throwable caught) {
-                content.remove(spinner);
-                Dialogs.showErrors(messages.customViewsPageTitle(), caught.getMessage(), messages.basicActionClose());
-              }
-            });
+            @Override
+            public void onFailure(Throwable caught) {
+              content.remove(spinner);
+              Dialogs.showErrors(messages.customViewsPageTitle(), caught.getMessage(), messages.basicActionClose());
+            }
+          });
       } else {
         Toast.showError(messages.customViewsPageTitle(), messages.customViewsPageErrorMessageForQueryError());
       }

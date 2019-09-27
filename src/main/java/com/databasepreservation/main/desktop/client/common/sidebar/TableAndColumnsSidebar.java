@@ -122,7 +122,6 @@ public class TableAndColumnsSidebar extends Composite {
   }
 
   public void select(String value) {
-    GWT.log("TO SELECT: " + value);
     for (Map.Entry<String, SidebarHyperlink> entry : list.entrySet()) {
       if (entry.getKey().equals(value)) {
         list.get(value).setSelected(true);

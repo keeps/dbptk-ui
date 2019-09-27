@@ -12,25 +12,45 @@
                     <g:Label addStyleNames="h4"><ui:text from='{messages.customViewsPageTitle}'/></g:Label>
                     <g:Label addStyleNames="h5"><ui:text from='{messages.customViewsPageTextForDescription}'/></g:Label>
                     <g:FlowPanel ui:field="customViewsForm" addStyleNames="form-container custom-views-form ">
-                        <g:FlowPanel ui:field="schemasCombobox" addStyleNames="form-row">
+                        <g:FlowPanel addStyleNames="form-helper">
+                            <g:FlowPanel ui:field="schemasCombobox" addStyleNames="form-row">
+                            </g:FlowPanel>
+                            <g:InlineHTML addStyleNames="form-text-helper text-muted">
+                                <ui:text from='{messages.customViewsPageTextForHelpSchemaName}'/>
+                            </g:InlineHTML>
                         </g:FlowPanel>
-                        <g:FlowPanel addStyleNames="form-row">
-                            <g:Label ui:field="customViewNameLabel" addStyleNames="form-label-spaced">
-                                <ui:text from='{messages.customViewsPageLabelForName}'/>
-                            </g:Label>
-                            <g:TextBox ui:field="customViewName" addStyleNames="form-textbox"/>
+                        <g:FlowPanel addStyleNames="form-helper">
+                            <g:FlowPanel addStyleNames="form-row">
+                                <g:Label ui:field="customViewNameLabel" addStyleNames="form-label-spaced">
+                                    <ui:text from='{messages.customViewsPageLabelForName}'/>
+                                </g:Label>
+                                <g:TextBox ui:field="customViewName" addStyleNames="form-textbox"/>
+                            </g:FlowPanel>
+                            <g:InlineHTML addStyleNames="form-text-helper text-muted">
+                                <ui:text from='{messages.customViewsPageTextForHelpViewName}'/>
+                            </g:InlineHTML>
                         </g:FlowPanel>
-                        <g:FlowPanel addStyleNames="form-row">
-                            <g:Label ui:field="customViewDescriptionLabel" addStyleNames="form-label-spaced">
-                                <ui:text from='{messages.customViewsPageLabelForDescription}'/>
-                            </g:Label>
-                            <g:TextBox ui:field="customViewDescription" addStyleNames="form-textbox"/>
+                        <g:FlowPanel addStyleNames="form-helper">
+                            <g:FlowPanel addStyleNames="form-row">
+                                <g:Label ui:field="customViewDescriptionLabel" addStyleNames="form-label-spaced">
+                                    <ui:text from='{messages.customViewsPageLabelForDescription}'/>
+                                </g:Label>
+                                <g:TextBox ui:field="customViewDescription" addStyleNames="form-textbox"/>
+                            </g:FlowPanel>
+                            <g:InlineHTML addStyleNames="form-text-helper text-muted">
+                                <ui:text from='{messages.customViewsPageTextForHelpViewDescription}'/>
+                            </g:InlineHTML>
                         </g:FlowPanel>
-                        <g:FlowPanel addStyleNames="form-row">
-                            <g:Label ui:field="customViewQueryLabel" addStyleNames="form-label-spaced">
-                                <ui:text from='{messages.customViewsPageLabelForQuery}'/>
-                            </g:Label>
-                            <g:TextArea ui:field="customViewQuery" addStyleNames="form-textarea form-textbox"/>
+                        <g:FlowPanel addStyleNames="form-helper">
+                            <g:FlowPanel addStyleNames="form-row">
+                                <g:Label ui:field="customViewQueryLabel" addStyleNames="form-label-spaced">
+                                    <ui:text from='{messages.customViewsPageLabelForQuery}'/>
+                                </g:Label>
+                                <g:TextArea ui:field="customViewQuery" addStyleNames="form-textarea form-textbox"/>
+                            </g:FlowPanel>
+                            <g:InlineHTML addStyleNames="form-text-helper text-muted">
+                                <ui:text from='{messages.customViewsPageTextForHelpViewQuery}'/>
+                            </g:InlineHTML>
                         </g:FlowPanel>
                         <g:FlowPanel ui:field="customViewsButtons" addStyleNames="custom-views-buttons"/>
                     </g:FlowPanel>

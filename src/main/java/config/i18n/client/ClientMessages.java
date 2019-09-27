@@ -832,6 +832,14 @@ public interface ClientMessages extends Messages {
 
   String customViewsPageErrorMessagesFor(@Select int error);
 
+  String customViewsPageTextForHelpSchemaName();
+
+  String customViewsPageTextForHelpViewName();
+
+  String customViewsPageTextForHelpViewDescription();
+
+  String customViewsPageTextForHelpViewQuery();
+
   /********************************************
    * Wizard Export Options
    ********************************************/
