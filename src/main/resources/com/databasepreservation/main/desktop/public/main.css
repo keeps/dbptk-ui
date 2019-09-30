@@ -1651,7 +1651,6 @@ input[type="checkbox"]:checked:after {
 
 .metadata-save button {
     align-self: center;
-    margin-left: 2em;
 }
 
 .metadata-save i {

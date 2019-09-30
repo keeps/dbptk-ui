@@ -909,13 +909,13 @@ public interface ClientMessages extends Messages {
 
   String validatorPageRequirementsThatFailed();
 
-  String validatorPageTotalOfValidationError(Integer total);
-
   String numberOfValidationsPassed();
 
   String numberOfValidationsWarnings();
 
   String numberOfValidationsSkipped();
+
+  String numberOfValidationsErrors();
 
   String validatorPageTextForSIARDVersion();
 
@@ -929,7 +929,7 @@ public interface ClientMessages extends Messages {
 
   String validatorPageTextForDialogSuccessInformation(String databaseUUID);
 
-  String validatorPageTextForDialogFailureInformation(String databaseUUID, Integer errors);
+  String validatorPageTextForDialogFailureInformation(String databaseUUID, @PluralCount int errors);
 
   String validatorPageTextForErrorDetails();
 

@@ -61,6 +61,16 @@ public class SIARDMainPage extends Composite {
   private MetadataField browsingStatus = null;
   private Button btnSeeReport, btnBrowse, btnDelete, btnIngest, btnOpenValidator, btnRunValidator;
   private boolean btnIngestClicked = false;
+  private MetadataField dbname;
+  private MetadataField archivalDate;
+  private MetadataField archiver;
+  private MetadataField archiverContact;
+  private MetadataField clientMachine;
+  private MetadataField databaseProduct;
+  private MetadataField dataOriginTimespan;
+  private MetadataField dataOwner;
+  private MetadataField producerApplication;
+  private MetadataField descriptionPanel;
 
   public static SIARDMainPage getInstance(String databaseUUID) {
 
@@ -349,8 +359,6 @@ public class SIARDMainPage extends Composite {
   }
 
   private void populateDescription() {
-    MetadataField descriptionPanel;
-
     String descriptionTxt = database.getMetadata().getDescription();
 
     if (ViewerStringUtils.isBlank(descriptionTxt) || descriptionTxt.contentEquals("unspecified")) {
@@ -374,22 +382,22 @@ public class SIARDMainPage extends Composite {
     FlowPanel right = new FlowPanel();
     right.addStyleName("metadata-information");
 
-    MetadataField dbname = MetadataField.createInstance(messages.SIARDHomePageLabelForViewerMetadataName(),
+    dbname = MetadataField.createInstance(messages.SIARDHomePageLabelForViewerMetadataName(),
       database.getMetadata().getName());
     dbname.setCSSMetadata("metadata-field", "metadata-information-element-label", "metadata-information-element-value");
-    MetadataField archivalDate = MetadataField
+    archivalDate = MetadataField
       .createInstance(messages.SIARDHomePageLabelForViewerMetadataArchivalDate(), archivalDateHumanized);
     archivalDate.setCSSMetadata("metadata-field", "metadata-information-element-label",
       "metadata-information-element-value");
-    MetadataField archiver = MetadataField.createInstance(messages.SIARDHomePageLabelForViewerMetadataArchiver(),
+    archiver = MetadataField.createInstance(messages.SIARDHomePageLabelForViewerMetadataArchiver(),
       database.getMetadata().getArchiver());
     archiver.setCSSMetadata("metadata-field", "metadata-information-element-label",
       "metadata-information-element-value");
-    MetadataField archiverContact = MetadataField.createInstance(
+    archiverContact = MetadataField.createInstance(
       messages.SIARDHomePageLabelForViewerMetadataArchiverContact(), database.getMetadata().getArchiverContact());
     archiverContact.setCSSMetadata("metadata-field", "metadata-information-element-label",
       "metadata-information-element-value");
-    MetadataField clientMachine = MetadataField.createInstance(
+    clientMachine = MetadataField.createInstance(
       messages.SIARDHomePageLabelForViewerMetadataClientMachine(), database.getMetadata().getClientMachine());
     clientMachine.setCSSMetadata("metadata-field", "metadata-information-element-label",
       "metadata-information-element-value");
@@ -400,19 +408,19 @@ public class SIARDMainPage extends Composite {
     left.add(archiverContact);
     left.add(clientMachine);
 
-    MetadataField databaseProduct = MetadataField.createInstance(
+    databaseProduct = MetadataField.createInstance(
       messages.SIARDHomePageLabelForViewerMetadataDatabaseProduct(), database.getMetadata().getDatabaseProduct());
     databaseProduct.setCSSMetadata("metadata-field", "metadata-information-element-label",
       "metadata-information-element-value");
-    MetadataField dataOriginTimespan = MetadataField.createInstance(
+    dataOriginTimespan = MetadataField.createInstance(
       messages.SIARDHomePageLabelForViewerMetadataDataOriginTimespan(), database.getMetadata().getDataOriginTimespan());
     dataOriginTimespan.setCSSMetadata("metadata-field", "metadata-information-element-label",
       "metadata-information-element-value");
-    MetadataField dataOwner = MetadataField.createInstance(messages.SIARDHomePageLabelForViewerMetadataDataOwner(),
+    dataOwner = MetadataField.createInstance(messages.SIARDHomePageLabelForViewerMetadataDataOwner(),
       database.getMetadata().getDataOwner());
     dataOwner.setCSSMetadata("metadata-field", "metadata-information-element-label",
       "metadata-information-element-value");
-    MetadataField producerApplication = MetadataField.createInstance(
+    producerApplication = MetadataField.createInstance(
       messages.SIARDHomePageLabelForViewerMetadataProducerApplication(),
       database.getMetadata().getProducerApplication());
     producerApplication.setCSSMetadata("metadata-field", "metadata-information-element-label",
@@ -440,10 +448,28 @@ public class SIARDMainPage extends Composite {
           database = (ViewerDatabase) result;
           updateValidationStatus();
           updateBrowsingStatus();
+          updateMetadata();
+
+          List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forSIARDMainPage(databaseUUID,
+              database.getMetadata().getName());
+          BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
 
           container.remove(loading);
         }
       });
+  }
+
+  private void updateMetadata() {
+    dbname.updateText(database.getMetadata().getName());
+    archivalDate.updateText(database.getMetadata().getArchivalDate());
+    archiver.updateText(database.getMetadata().getArchiver());
+    archiverContact.updateText(database.getMetadata().getArchiverContact());
+    clientMachine.updateText(database.getMetadata().getClientMachine());
+    databaseProduct.updateText(database.getMetadata().getDatabaseProduct());
+    dataOriginTimespan.updateText(database.getMetadata().getDataOriginTimespan());
+    dataOwner.updateText(database.getMetadata().getDataOwner());
+    producerApplication.updateText(database.getMetadata().getProducerApplication());
+    descriptionPanel.updateText(database.getMetadata().getDescription());
   }
 
   private void updateValidationIndicators() {

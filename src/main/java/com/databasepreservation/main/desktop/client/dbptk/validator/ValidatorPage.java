@@ -18,7 +18,6 @@ import com.databasepreservation.main.common.shared.client.common.utils.Javascrip
 import com.databasepreservation.main.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.main.common.shared.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
-import com.databasepreservation.main.common.shared.client.widgets.Toast;
 import com.databasepreservation.main.desktop.client.common.dialogs.Dialogs;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -55,7 +54,7 @@ public class ValidatorPage extends Composite {
   private Integer countPassed = 0;
   private Integer countSkipped = 0;
   private Integer numberOfWarnings = 0;
-  private Integer numberOfErros = 0;
+  private Integer numberOfErrors = 0;
   private Boolean stickToBottom = true;
   private FlowPanel tailIndicator = new FlowPanel();
   private Boolean isRunning = false;
@@ -181,11 +180,11 @@ public class ValidatorPage extends Composite {
           update(result);
           if (result.isFinished() && result.getRequirementsList().size() <= lastPosition) {
             numberOfWarnings = result.getNumberOfWarnings();
-            numberOfErros = result.getNumberOfErrors();
+            numberOfErrors = result.getNumberOfErrors();
             stopUpdating();
-            if (numberOfErros > 0) {
+            if (numberOfErrors > 0) {
               Dialogs.showErrors(messages.validatorPageTextForTitle(),
-                messages.validatorPageTextForDialogFailureInformation(database.getMetadata().getName(), numberOfErros),
+                messages.validatorPageTextForDialogFailureInformation(database.getMetadata().getName(), numberOfErrors),
                 messages.basicActionClose());
             } else {
               Dialogs.showInformationDialog(messages.validatorPageTextForTitle(),
@@ -322,7 +321,7 @@ public class ValidatorPage extends Composite {
     countErrors = 0;
     countSkipped = 0;
     numberOfWarnings = 0;
-    numberOfErros = 0;
+    numberOfErrors = 0;
     populateValidationInfo(false);
   }
 
@@ -337,10 +336,11 @@ public class ValidatorPage extends Composite {
       new Label(database.getMetadata().getName())));
 
     // counts
-    left.add(validationInfoBuilder(messages.validatorPageRequirementsThatFailed(), countErrors, numberOfErros, enable));
-    left.add(validationInfoBuilder(messages.numberOfValidationsPassed(), countPassed, null, enable));
-    left.add(validationInfoBuilder(messages.numberOfValidationsWarnings(), numberOfWarnings, null, enable));
-    left.add(validationInfoBuilder(messages.numberOfValidationsSkipped(), countSkipped, null, enable));
+    left.add(validationInfoBuilder(messages.validatorPageRequirementsThatFailed(), countErrors, enable));
+    left.add(validationInfoBuilder(messages.numberOfValidationsErrors(), numberOfErrors, enable));
+    left.add(validationInfoBuilder(messages.numberOfValidationsPassed(), countPassed, enable));
+    left.add(validationInfoBuilder(messages.numberOfValidationsWarnings(), numberOfWarnings, enable));
+    left.add(validationInfoBuilder(messages.numberOfValidationsSkipped(), countSkipped, enable));
 
     // Validator Status
     left.add(validationInfoBuilder(messages.managePageTableHeaderTextForDatabaseStatus(), updateStatus()));
@@ -403,7 +403,7 @@ public class ValidatorPage extends Composite {
     return panel;
   }
 
-  private FlowPanel validationInfoBuilder(String key, Integer value, Integer total, Boolean loading) {
+  private FlowPanel validationInfoBuilder(String key, Integer value, Boolean loading) {
     Label valueLabel = new Label();
     FlowPanel panel = new FlowPanel();
     panel.addStyleName("validation-info-panel");
@@ -419,11 +419,6 @@ public class ValidatorPage extends Composite {
     } else {
       valueLabel.setText(value.toString());
       panel.add(valueLabel);
-      if (total != null && total > 0) {
-        Label totalLabel = new Label(messages.validatorPageTotalOfValidationError(total));
-        totalLabel.addStyleName("validation-total");
-        panel.add(totalLabel);
-      }
     }
 
     return panel;
