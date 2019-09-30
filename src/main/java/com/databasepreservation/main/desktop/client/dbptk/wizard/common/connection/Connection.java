@@ -77,32 +77,37 @@ public class Connection extends WizardPanel<ConnectionParameters> {
     btnTestConnection.addStyleName("btn btn-primary btn-test");
     btnTestConnection.setText(messages.connectionPageButtonTextForTestConnection());
     btnTestConnection.addClickHandler(event -> {
-      Widget spinner = new HTML(SafeHtmlUtils.fromSafeConstant(
-        "<div class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
-      mainPanel.add(spinner);
+      if (validate()) {
 
-      final ConnectionParameters connectionParameters = getValues();
-      ConnectionMapper mapper = GWT.create( ConnectionMapper.class );
-      String connectionParametersJSON = mapper.write(connectionParameters);
-      GWT.log(connectionParametersJSON);
-      BrowserService.Util.getInstance().testConnection(databaseUUID, connectionParametersJSON,
-        new AsyncCallback<Boolean>() {
-          @Override
-          public void onFailure(Throwable caught) {
-            mainPanel.remove(spinner);
-            Dialogs.showErrors(messages.errorMessagesConnectionTitle(), caught.getMessage(),
-              messages.basicActionClose());
-          }
+        Widget spinner = new HTML(SafeHtmlUtils.fromSafeConstant(
+          "<div class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
+        mainPanel.add(spinner);
 
-          @Override
-          public void onSuccess(Boolean result) {
-            Dialogs.showInformationDialog(messages.errorMessagesConnectionTitle(),
-              messages.connectionPageTextForConnectionSuccess(
-                connectionParameters.getJDBCConnectionParameters().getConnection().get("database")),
-              messages.basicActionClose(), "btn btn-link");
-            mainPanel.remove(spinner);
-          }
-      });
+        final ConnectionParameters connectionParameters = getValues();
+        ConnectionMapper mapper = GWT.create(ConnectionMapper.class);
+        String connectionParametersJSON = mapper.write(connectionParameters);
+        GWT.log(connectionParametersJSON);
+        BrowserService.Util.getInstance().testConnection(databaseUUID, connectionParametersJSON,
+          new AsyncCallback<Boolean>() {
+            @Override
+            public void onFailure(Throwable caught) {
+              mainPanel.remove(spinner);
+              Dialogs.showErrors(messages.errorMessagesConnectionTitle(), caught.getMessage(),
+                messages.basicActionClose());
+            }
+
+            @Override
+            public void onSuccess(Boolean result) {
+              Dialogs.showInformationDialog(messages.errorMessagesConnectionTitle(),
+                messages.connectionPageTextForConnectionSuccess(
+                  connectionParameters.getJDBCConnectionParameters().getConnection().get("database")),
+                messages.basicActionClose(), "btn btn-link");
+              mainPanel.remove(spinner);
+            }
+          });
+      } else {
+        Toast.showError(messages.errorMessagesConnectionTitle(), messages.connectionPageErrorMessageFor(1));
+      }
     });
   }
 
@@ -250,9 +255,5 @@ public class Connection extends WizardPanel<ConnectionParameters> {
   @Override
   public void error() {
     Toast.showError(messages.errorMessagesConnectionTitle(), messages.connectionPageErrorMessageFor(1));
-  }
-
-  public void scrollToElement(String toSelect) {
-    //JavascriptUtils.scrollToElement(connectionSidebar.getElement());
   }
 }

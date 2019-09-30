@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
-import com.databasepreservation.Constants;
 import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.common.shared.client.common.desktop.FileUploadField;
 import com.databasepreservation.main.common.shared.client.common.desktop.GenericField;
@@ -17,6 +16,8 @@ import com.databasepreservation.main.common.shared.models.DBPTKModule;
 import com.databasepreservation.main.common.shared.models.PreservationParameter;
 import com.databasepreservation.main.common.shared.models.wizardParameters.ExportOptionsParameters;
 import com.databasepreservation.main.desktop.shared.models.Filter;
+import com.databasepreservation.modules.siard.SIARD2ModuleFactory;
+import com.databasepreservation.modules.siard.constants.SIARDConstants;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.regexp.shared.RegExp;
@@ -132,6 +133,10 @@ public class SIARDExportOptionsCurrent extends Composite {
         default:
           break;
       }
+    }
+
+    if (externalLobCheckbox != null && externalLobCheckbox.getValue() && version.equals(ViewerConstants.SIARD2)) {
+      exportParameters.put(SIARD2ModuleFactory.PARAMETER_EXTERNAL_LOBS, "true");
     }
 
     exportOptionsParameters.setSIARDVersion(version);
