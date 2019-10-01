@@ -163,5 +163,7 @@ public interface BrowserServiceAsync {
 
   void clearValidationProgressData(String uuid, AsyncCallback<Void> async);
 
+  void updateStatusValidate(String uuid, ViewerDatabase.ValidationStatus status, AsyncCallback<Void> async);
+
   void getDateTimeHumanized(String dateTime, AsyncCallback<String> async);
 }

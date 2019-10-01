@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.main.common.shared.client.tools.Humanize;
 import org.roda.core.data.v2.index.IndexResult;
 import org.roda.core.data.v2.index.facet.Facets;
 import org.roda.core.data.v2.index.filter.Filter;
@@ -19,6 +18,7 @@ import com.databasepreservation.main.common.shared.client.common.lists.BasicAsyn
 import com.databasepreservation.main.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.main.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.main.common.shared.client.tools.HistoryManager;
+import com.databasepreservation.main.common.shared.client.tools.Humanize;
 import com.databasepreservation.main.common.shared.client.tools.PathUtils;
 import com.databasepreservation.main.common.shared.client.tools.SolrHumanizer;
 import com.google.gwt.cell.client.ButtonCell;
@@ -102,17 +102,18 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
         return database != null ? SafeHtmlUtils.fromString(Humanize.readableFileSize(database.getSIARDSize()))
-            : SafeHtmlUtils.fromString("unknown");
+          : SafeHtmlUtils.fromString("unknown");
       }
     };
 
     Column<ViewerDatabase, SafeHtml> validColumn = new ValidDatabaseColumn() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
-        return database != null ? SafeHtmlUtils.fromString(SolrHumanizer.humanize(database.getValidationStatus())) : null;
+        return database != null ? SafeHtmlUtils.fromString(SolrHumanizer.humanize(database.getValidationStatus()))
+          : null;
       }
     };
-    
+
     Column<ViewerDatabase, SafeHtml> statusColumn = new TooltipDatabaseColumn() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
@@ -142,7 +143,7 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
     addColumn(sizeColumn, messages.managePageTableHeaderTextForSIARDSize(), true, TextAlign.NONE, 4);
     addColumn(validColumn, messages.managePageTableHeaderTextForSIARDValidationStatus(), true, TextAlign.NONE, 5);
     addColumn(statusColumn, messages.managePageTableHeaderTextForDatabaseStatus(), true, TextAlign.NONE, 5);
-    addColumn(openColumn, messages.managePageTableHeaderTextForActions(), true, TextAlign.NONE , 5);
+    addColumn(openColumn, messages.managePageTableHeaderTextForActions(), true, TextAlign.NONE, 5);
 
     Label emptyInfo = new Label(messages.noItemsToDisplay());
     display.setEmptyTableWidget(emptyInfo);
@@ -231,12 +232,16 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
       SafeHtml value = getValue(object);
       if (value != null) {
         String style = "label-info";
-        if(value.asString().equals(SolrHumanizer.humanize(ViewerDatabase.ValidationStatus.VALIDATION_FAILED))){
+        if (value.asString().equals(SolrHumanizer.humanize(ViewerDatabase.ValidationStatus.VALIDATION_FAILED))) {
           style = "label-danger";
-        } else if(value.asString().equals(SolrHumanizer.humanize(ViewerDatabase.ValidationStatus.VALIDATION_SUCCESS))){
+        } else if(value.asString().equals(SolrHumanizer.humanize(ViewerDatabase.ValidationStatus.ERROR))){
+          style = "label-danger label-error";
+        } else if (value.asString()
+          .equals(SolrHumanizer.humanize(ViewerDatabase.ValidationStatus.VALIDATION_SUCCESS))) {
           style = "label-success";
         }
-        sb.appendHtmlConstant("<div class=\""+style+"\" title=\"" + SafeHtmlUtils.htmlEscape(value.asString()) + "\">");
+        sb.appendHtmlConstant(
+          "<div class=\"" + style + "\" title=\"" + SafeHtmlUtils.htmlEscape(value.asString()) + "\">");
         sb.append(value);
         sb.appendHtmlConstant("</div");
       }

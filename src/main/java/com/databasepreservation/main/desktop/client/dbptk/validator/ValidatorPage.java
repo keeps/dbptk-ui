@@ -127,7 +127,7 @@ public class ValidatorPage extends Composite {
             database.getMetadata().getName());
           BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
 
-          populateValidationInfo(false);
+          populateValidationInfo(false, false);
 
           BrowserService.Util.getInstance().clearValidationProgressData(databaseUUID, new DefaultAsyncCallback<Void>() {
             @Override
@@ -146,7 +146,7 @@ public class ValidatorPage extends Composite {
         @Override
         public void onSuccess(ValidationProgressData result) {
           resetInfos();
-          populateValidationInfo(false);
+          populateValidationInfo(false, false);
           loading.setVisible(true);
           autoUpdateTimer.scheduleRepeating(250);
           autoUpdateTimer.run();
@@ -168,6 +168,12 @@ public class ValidatorPage extends Composite {
         public void onFailure(Throwable caught) {
           stopUpdating();
           Dialogs.showErrors(messages.validatorPageTextForTitle(), caught.getMessage(), messages.basicActionClose());
+          BrowserService.Util.getInstance().updateStatusValidate(databaseUUID, ViewerDatabase.ValidationStatus.ERROR, new DefaultAsyncCallback<Void>() {
+            @Override
+            public void onSuccess(Void result) {
+              populateValidationInfo(false, true);
+            }
+          });
         }
       });
   }
@@ -297,7 +303,7 @@ public class ValidatorPage extends Composite {
 
   private void stopUpdating() {
     isRunning = false;
-    populateValidationInfo(true);
+    populateValidationInfo(true, false);
     loading.setVisible(false);
     if (autoUpdateTimer != null) {
       autoUpdateTimer.cancel();
@@ -322,10 +328,10 @@ public class ValidatorPage extends Composite {
     countSkipped = 0;
     numberOfWarnings = 0;
     numberOfErrors = 0;
-    populateValidationInfo(false);
+    populateValidationInfo(false, false);
   }
 
-  private void populateValidationInfo(Boolean enable) {
+  private void populateValidationInfo(Boolean enable, Boolean error) {
     validationInformation.clear();
     btnRunAgain.setEnabled(enable);
     FlowPanel left = new FlowPanel();
@@ -343,7 +349,13 @@ public class ValidatorPage extends Composite {
     left.add(validationInfoBuilder(messages.numberOfValidationsSkipped(), countSkipped, enable));
 
     // Validator Status
-    left.add(validationInfoBuilder(messages.managePageTableHeaderTextForDatabaseStatus(), updateStatus()));
+    if(error){
+      Label statusLabel = new Label(messages.alertErrorTitle());
+      statusLabel.setStyleName("label-danger label-error");
+      left.add(validationInfoBuilder(messages.managePageTableHeaderTextForDatabaseStatus(), statusLabel));
+    } else {
+      left.add(validationInfoBuilder(messages.managePageTableHeaderTextForDatabaseStatus(), updateStatus()));
+    }
 
     // SIARD Version
     right.add(validationInfoBuilder(messages.validatorPageTextForSIARDVersion(), new Label(ViewerConstants.SIARD2_1)));

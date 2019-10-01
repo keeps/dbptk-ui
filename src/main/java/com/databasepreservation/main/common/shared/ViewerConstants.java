@@ -303,7 +303,7 @@ public class ViewerConstants {
   public static final String EARK_FINANCIER_LINK = "https://www.eark-project.com/";
   public static final String BLANK_LINK = "_blank";
   public static final String SIARD_SPECIFICATION_LINK = "https://dilcis.eu/content-types/siard/";
-  public static final String ADDITIONAL_CHECKS_SPECIFICATIONLINK = "https://github.com/keeps/db-preservation-toolkit/wiki/Validation";
+  public static final String ADDITIONAL_CHECKS_SPECIFICATIONLINK = "https://github.com/keeps/db-preservation-toolkit/wiki/Validation#additional-checks";
 
   /**
    * private constructor

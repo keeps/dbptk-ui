@@ -12,7 +12,7 @@ public class ViewerDatabase extends IsIndexed {
   }
 
   public enum ValidationStatus {
-    NOT_VALIDATED, VALIDATION_SUCCESS, VALIDATION_FAILED, VALIDATION_RUNNING
+    NOT_VALIDATED, VALIDATION_SUCCESS, VALIDATION_FAILED, VALIDATION_RUNNING, ERROR
   }
 
   private String uuid;

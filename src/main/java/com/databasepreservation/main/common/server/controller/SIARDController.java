@@ -603,14 +603,14 @@ public class SIARDController {
         solrManager.updateSIARDValidationInformation(databaseUUID, status, validationReportPath, dbptkVersion,
           new DateTime().toString());
       } catch (IOException e) {
-        resetStatusValidate(databaseUUID);
+        updateStatusValidate(databaseUUID, ViewerDatabase.ValidationStatus.ERROR);
         throw new GenericException("Failed to obtain the DBPTK version from properties", e);
       } catch (ModuleException e) {
-        resetStatusValidate(databaseUUID);
+        updateStatusValidate(databaseUUID, ViewerDatabase.ValidationStatus.ERROR);
         throw new GenericException(e);
       }
     } catch (IOException e) {
-      resetStatusValidate(databaseUUID);
+      updateStatusValidate(databaseUUID, ViewerDatabase.ValidationStatus.ERROR);
       throw new GenericException("Could not initialize the validate module.", e);
     }
 
@@ -623,6 +623,12 @@ public class SIARDController {
     solrManager.updateSIARDValidationIndicators(databaseUUID, passed, errors, warnings, skipped);
   }
 
+  public static void updateStatusValidate(String databaseUUID, ViewerDatabase.ValidationStatus status) {
+    final DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
+    solrManager.updateSIARDValidationInformation(databaseUUID, status, null,
+            null, new DateTime().toString());
+
+  }
   /****************************************************************************
    * Private auxiliary Methods
    ****************************************************************************/

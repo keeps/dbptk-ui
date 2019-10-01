@@ -4,6 +4,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -353,6 +354,11 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
   @Override
   public void clearValidationProgressData(String uuid) {
     ValidationProgressData.clear(uuid);
+  }
+
+  @Override
+  public void updateStatusValidate(String uuid, ViewerDatabase.ValidationStatus status){
+    SIARDController.updateStatusValidate(uuid, status);
   }
 
   @Override

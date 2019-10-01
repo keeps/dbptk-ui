@@ -917,6 +917,12 @@ html, body, .main {
     margin: 0;
 }
 
+.label-error{
+    color: #d9534f;
+    font-weight: 700;
+    border: 2px solid #d9534f;
+    background-color: #f1d5d4;
+}
 
 /**********************************************
 		          breadcrumb
@@ -1981,6 +1987,10 @@ input[type="checkbox"]:checked:after {
 
 .validator-dialog-layout-body{
     padding: 20px 10px;
+}
+
+.validator-dialog-layout-body .form-text-helper{
+    margin-left: 0;
 }
 
 .tip-validator{

@@ -160,5 +160,7 @@ public interface BrowserService extends RemoteService {
 
   void clearValidationProgressData(String uuid);
 
+  void updateStatusValidate(String uuid, ViewerDatabase.ValidationStatus status);
+
   String getDateTimeHumanized(String dateTime);
 }
