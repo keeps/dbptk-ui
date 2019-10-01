@@ -2,7 +2,7 @@
  * The contents of this file are based on those found at https://github.com/keeps/roda
  * and are subject to the license and copyright detailed in https://github.com/keeps/roda
  */
-package com.databasepreservation.main.visualization.api.utils;
+package com.databasepreservation.main.common.server.api.utils;
 
 import javax.xml.bind.annotation.XmlTransient;
 

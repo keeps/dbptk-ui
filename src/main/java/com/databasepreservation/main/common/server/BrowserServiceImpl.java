@@ -1,10 +1,13 @@
 package com.databasepreservation.main.common.server;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -29,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import com.databasepreservation.main.common.client.BrowserService;
 import com.databasepreservation.main.common.server.controller.SIARDController;
 import com.databasepreservation.main.common.server.controller.UserLoginController;
+import com.databasepreservation.main.common.server.index.factory.SolrClientFactory;
 import com.databasepreservation.main.common.server.index.utils.SolrUtils;
 import com.databasepreservation.main.common.shared.ProgressData;
 import com.databasepreservation.main.common.shared.ValidationProgressData;
@@ -57,6 +61,32 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 @SuppressWarnings("serial")
 public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserService {
   private static final Logger LOGGER = LoggerFactory.getLogger(BrowserServiceImpl.class);
+
+  /**
+   * Overridden to load the gwt.codeserver.port system property.
+   *
+   * @param config
+   */
+  @Override
+  public void init(ServletConfig config) throws ServletException {
+    super.init(config);
+    SolrClientFactory.get();
+  }
+
+  /**
+   * Called by the servlet container to indicate to a servlet that the servlet is
+   * being taken out of service.
+   */
+  @Override
+  public void destroy() {
+    super.destroy();
+
+    try {
+      SolrClientFactory.get().getSolrClient().close();
+    } catch (IOException e) {
+      LOGGER.error("Stopping SolrClient", e);
+    }
+  }
 
   /**
    * Escape an html string. Escaping data received from the client helps to

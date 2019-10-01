@@ -5,7 +5,7 @@
  *
  * https://github.com/keeps/roda
  */
-package com.databasepreservation.main.visualization.api.common;
+package com.databasepreservation.main.common.server.api.common;
 
 import java.io.IOException;
 import java.io.OutputStream;

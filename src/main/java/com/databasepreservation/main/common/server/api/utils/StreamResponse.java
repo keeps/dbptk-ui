@@ -2,10 +2,10 @@
  * The contents of this file are based on those found at https://github.com/keeps/roda
  * and are subject to the license and copyright detailed in https://github.com/keeps/roda
  */
-package com.databasepreservation.main.visualization.api.utils;
+package com.databasepreservation.main.common.server.api.utils;
 
-import com.databasepreservation.main.visualization.api.common.ConsumesOutputStream;
-import com.databasepreservation.main.visualization.api.common.EntityResponse;
+import com.databasepreservation.main.common.server.api.common.ConsumesOutputStream;
+import com.databasepreservation.main.common.server.api.common.EntityResponse;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>

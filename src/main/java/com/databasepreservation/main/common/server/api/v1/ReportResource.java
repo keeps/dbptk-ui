@@ -2,7 +2,7 @@
  * The contents of this file are based on those found at https://github.com/keeps/roda
  * and are subject to the license and copyright detailed in https://github.com/keeps/roda
  */
-package com.databasepreservation.main.visualization.api.v1;
+package com.databasepreservation.main.common.server.api.v1;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,8 +18,8 @@ import org.springframework.stereotype.Service;
 
 import com.databasepreservation.main.common.server.ViewerConfiguration;
 import com.databasepreservation.main.common.shared.ViewerConstants;
-import com.databasepreservation.main.visualization.api.utils.ApiUtils;
-import com.databasepreservation.main.visualization.api.utils.DownloadUtils;
+import com.databasepreservation.main.common.server.api.utils.ApiUtils;
+import com.databasepreservation.main.common.server.api.utils.DownloadUtils;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiParam;

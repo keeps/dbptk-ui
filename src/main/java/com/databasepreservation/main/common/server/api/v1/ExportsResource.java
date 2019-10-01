@@ -1,4 +1,4 @@
-package com.databasepreservation.main.visualization.api.v1;
+package com.databasepreservation.main.common.server.api.v1;
 
 import java.io.InputStream;
 import java.util.List;
@@ -27,9 +27,9 @@ import com.databasepreservation.main.common.server.ViewerFactory;
 import com.databasepreservation.main.common.server.index.DatabaseRowsSolrManager;
 import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.common.utils.UserUtility;
-import com.databasepreservation.main.visualization.api.utils.ApiUtils;
-import com.databasepreservation.main.visualization.api.utils.DownloadUtils;
-import com.databasepreservation.main.visualization.api.utils.StreamResponse;
+import com.databasepreservation.main.common.server.api.utils.ApiUtils;
+import com.databasepreservation.main.common.server.api.utils.DownloadUtils;
+import com.databasepreservation.main.common.server.api.utils.StreamResponse;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

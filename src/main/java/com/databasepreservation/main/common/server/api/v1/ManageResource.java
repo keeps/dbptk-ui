@@ -1,4 +1,4 @@
-package com.databasepreservation.main.visualization.api.v1;
+package com.databasepreservation.main.common.server.api.v1;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.DELETE;
@@ -26,8 +26,8 @@ import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.exceptions.ViewerException;
 import com.databasepreservation.main.common.utils.UserUtility;
-import com.databasepreservation.main.visualization.api.utils.ApiResponseMessage;
-import com.databasepreservation.main.visualization.api.utils.ApiUtils;
+import com.databasepreservation.main.common.server.api.utils.ApiResponseMessage;
+import com.databasepreservation.main.common.server.api.utils.ApiUtils;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

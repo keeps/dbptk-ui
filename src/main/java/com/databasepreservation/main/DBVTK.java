@@ -30,6 +30,7 @@ public class DBVTK {
   public ServletRegistrationBean<HttpServlet> browserService() {
     ServletRegistrationBean<HttpServlet> bean = new ServletRegistrationBean<>(new BrowserServiceImpl(),
       "/com.databasepreservation.main.desktop.Desktop/browse");
+    bean.setLoadOnStartup(2);
     return bean;
   }
 

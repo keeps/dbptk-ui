@@ -1,14 +1,14 @@
-package com.databasepreservation.main.visualization.api;
+package com.databasepreservation.main.common.server.api;
 
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletProperties;
 import org.springframework.context.annotation.Configuration;
 
-import com.databasepreservation.main.visualization.api.v1.ExportsResource;
-import com.databasepreservation.main.visualization.api.v1.LobsResource;
-import com.databasepreservation.main.visualization.api.v1.ManageResource;
-import com.databasepreservation.main.visualization.api.v1.ReportResource;
-import com.databasepreservation.main.visualization.api.v1.ThemeResource;
+import com.databasepreservation.main.common.server.api.v1.ExportsResource;
+import com.databasepreservation.main.common.server.api.v1.LobsResource;
+import com.databasepreservation.main.common.server.api.v1.ManageResource;
+import com.databasepreservation.main.common.server.api.v1.ReportResource;
+import com.databasepreservation.main.common.server.api.v1.ThemeResource;
 
 @Configuration
 public class RestApplicationNoSwagger {

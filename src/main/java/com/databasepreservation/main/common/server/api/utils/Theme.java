@@ -5,7 +5,7 @@
  *
  * https://github.com/keeps/roda
  */
-package com.databasepreservation.main.visualization.api.utils;
+package com.databasepreservation.main.common.server.api.utils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.main.common.server.ViewerConfiguration;
 import com.databasepreservation.main.common.shared.ViewerConstants;
-import com.databasepreservation.main.visualization.api.common.ConsumesOutputStream;
+import com.databasepreservation.main.common.server.api.common.ConsumesOutputStream;
 
 public class Theme {
 

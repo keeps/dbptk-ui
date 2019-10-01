@@ -5,7 +5,7 @@
  *
  * https://github.com/keeps/roda
  */
-package com.databasepreservation.main.visualization.api.utils;
+package com.databasepreservation.main.common.server.api.utils;
 
 /**
  * An abstraction for extra media types. Instances are immutable.

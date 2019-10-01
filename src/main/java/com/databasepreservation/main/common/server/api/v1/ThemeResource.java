@@ -5,7 +5,7 @@
  *
  * https://github.com/keeps/roda
  */
-package com.databasepreservation.main.visualization.api.v1;
+package com.databasepreservation.main.common.server.api.v1;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,8 +27,8 @@ import org.roda.core.data.v2.common.Pair;
 import org.springframework.stereotype.Service;
 
 import com.databasepreservation.main.common.shared.ViewerConstants;
-import com.databasepreservation.main.visualization.api.utils.ApiUtils;
-import com.databasepreservation.main.visualization.api.utils.Theme;
+import com.databasepreservation.main.common.server.api.utils.ApiUtils;
+import com.databasepreservation.main.common.server.api.utils.Theme;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiParam;

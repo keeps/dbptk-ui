@@ -1,4 +1,4 @@
-package com.databasepreservation.main.visualization.api.utils;
+package com.databasepreservation.main.common.server.api.utils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,7 +9,7 @@ import org.apache.commons.io.IOUtils;
 import org.roda.core.data.exceptions.NotFoundException;
 
 import com.databasepreservation.main.common.shared.ViewerConstants;
-import com.databasepreservation.main.visualization.api.common.ConsumesOutputStream;
+import com.databasepreservation.main.common.server.api.common.ConsumesOutputStream;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>

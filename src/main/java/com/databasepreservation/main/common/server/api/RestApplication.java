@@ -1,4 +1,4 @@
-package com.databasepreservation.main.visualization.api;
+package com.databasepreservation.main.common.server.api;
 
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
@@ -13,7 +13,7 @@ import io.swagger.jaxrs.listing.SwaggerSerializers;
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class RestApplication extends ResourceConfig {
-  private static final String DBVTK_API_PACKAGE = "com.databasepreservation.main.visualization.api";
+  private static final String DBVTK_API_PACKAGE = "com.databasepreservation.main.common.server.api";
   private static final String SWAGGER_PACKAGE = "io.swagger.jaxrs.listing";
 
   public RestApplication() {

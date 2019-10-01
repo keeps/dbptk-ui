@@ -1,4 +1,4 @@
-package com.databasepreservation.main.visualization.api.v1;
+package com.databasepreservation.main.common.server.api.v1;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -24,9 +24,9 @@ import com.databasepreservation.main.common.shared.ViewerConstants;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerRow;
 import com.databasepreservation.main.common.utils.LobPathManager;
 import com.databasepreservation.main.common.utils.UserUtility;
-import com.databasepreservation.main.visualization.api.utils.ApiUtils;
-import com.databasepreservation.main.visualization.api.utils.DownloadUtils;
-import com.databasepreservation.main.visualization.api.utils.StreamResponse;
+import com.databasepreservation.main.common.server.api.utils.ApiUtils;
+import com.databasepreservation.main.common.server.api.utils.DownloadUtils;
+import com.databasepreservation.main.common.server.api.utils.StreamResponse;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

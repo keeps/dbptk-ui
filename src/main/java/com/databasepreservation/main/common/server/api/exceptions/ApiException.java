@@ -1,4 +1,4 @@
-package com.databasepreservation.main.visualization.api.exceptions;
+package com.databasepreservation.main.common.server.api.exceptions;
 
 
 import com.databasepreservation.main.common.shared.exceptions.ViewerException;

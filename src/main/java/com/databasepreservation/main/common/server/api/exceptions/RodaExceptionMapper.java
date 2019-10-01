@@ -5,7 +5,7 @@
  *
  * https://github.com/keeps/roda
  */
-package com.databasepreservation.main.visualization.api.exceptions;
+package com.databasepreservation.main.common.server.api.exceptions;
 
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
@@ -26,8 +26,8 @@ import org.roda.core.data.exceptions.RequestNotValidException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.databasepreservation.main.visualization.api.utils.ApiResponseMessage;
-import com.databasepreservation.main.visualization.api.utils.ApiUtils;
+import com.databasepreservation.main.common.server.api.utils.ApiResponseMessage;
+import com.databasepreservation.main.common.server.api.utils.ApiUtils;
 
 
 @Provider
