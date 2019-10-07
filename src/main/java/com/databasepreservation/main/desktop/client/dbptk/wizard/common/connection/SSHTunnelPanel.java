@@ -42,20 +42,18 @@ public class SSHTunnelPanel extends Composite {
   PasswordTextBox proxyPassword;
 
   private static Map<String, SSHTunnelPanel> instances = new HashMap<>();
-  private String databaseUUID;
 
   public static SSHTunnelPanel getInstance( String databaseUUID) {
     if (instances.get(databaseUUID) == null) {
-      SSHTunnelPanel instance = new SSHTunnelPanel(databaseUUID);
+      SSHTunnelPanel instance = new SSHTunnelPanel();
       instances.put(databaseUUID, instance);
     }
     return instances.get(databaseUUID);
   }
 
-  private SSHTunnelPanel(String databaseUUID) {
+  private SSHTunnelPanel() {
     initWidget(binder.createAndBindUi(this));
     enable(false);
-    this.databaseUUID = databaseUUID;
 
     tunnelSSH.setText(messages.connectionPageLabelForUseSSHTunnel());
     tunnelSSH.addValueChangeHandler(event -> {

@@ -205,6 +205,14 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     return reportsPath.resolve("report-" + databaseUUID + ".md");
   }
 
+  public Path getReportPathForMigration(String databaseUUID) {
+    return reportsPath.resolve("report-migration-" + databaseUUID + ".md");
+  }
+
+  public Path getReportPathForValidation(String databaseUUID) {
+    return reportsPath.resolve("report-validation-" + databaseUUID + ".md");
+  }
+
   public List<String> getWhitelistedIPs() {
     if (cachedWhitelistedIPs == null) {
       cachedWhitelistedIPs = getViewerConfigurationAsList(ViewerConfiguration.PROPERTY_FILTER_ONOFF_WHITELISTED_IPS);

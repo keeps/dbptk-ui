@@ -14,7 +14,6 @@ public class ConnectionParameters implements Serializable {
 
   private String moduleName;
   private JDBCParameters connection;
-  private boolean ssh = false;
   private SSHConfiguration sshConfiguration;
 
 
@@ -52,11 +51,7 @@ public class ConnectionParameters implements Serializable {
   }
 
   public boolean doSSH() {
-    return ssh;
-  }
-
-  public void doSSH(boolean value) {
-    this.ssh = value;
+    return sshConfiguration != null;
   }
 
   @JsonIgnore

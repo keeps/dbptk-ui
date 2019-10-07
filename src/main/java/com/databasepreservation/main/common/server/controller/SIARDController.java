@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.databasepreservation.model.exception.SIARDVersionNotSupportedException;
 import org.apache.commons.io.IOUtils;
 import org.joda.time.DateTime;
 import org.roda.core.data.exceptions.GenericException;
@@ -225,7 +226,7 @@ public class SIARDController {
     TableAndColumnsParameters tableAndColumnsParameters, CustomViewsParameters customViewsParameters,
     ExportOptionsParameters exportOptionsParameters, MetadataExportOptionsParameters metadataExportOptionsParameters)
     throws GenericException {
-    Reporter reporter = getReporter(databaseUUID);
+    Reporter reporter = getReporterForMigration(databaseUUID);
     LOGGER.info("starting to convert database " + exportOptionsParameters.getSiardPath());
 
     final DatabaseMigration databaseMigration = initializeDatabaseMigration(reporter);
@@ -573,7 +574,7 @@ public class SIARDController {
 
   public static boolean validateSIARD(String databaseUUID, String SIARDPath, String validationReportPath,
     String allowedTypesPath) throws GenericException {
-    Path reporterPath = ViewerConfiguration.getInstance().getReportPath(databaseUUID).toAbsolutePath();
+    Path reporterPath = ViewerConfiguration.getInstance().getReportPathForValidation(databaseUUID).toAbsolutePath();
     boolean valid;
     try (Reporter reporter = new Reporter(reporterPath.getParent().toString(), reporterPath.getFileName().toString())) {
       SIARDValidation siardValidation = SIARDValidation.newInstance();
@@ -607,6 +608,10 @@ public class SIARDController {
         throw new GenericException("Failed to obtain the DBPTK version from properties", e);
       } catch (ModuleException e) {
         updateStatusValidate(databaseUUID, ViewerDatabase.ValidationStatus.ERROR);
+        if (e instanceof SIARDVersionNotSupportedException) {
+          LOGGER.error("{}: {}", e.getMessage(), ((SIARDVersionNotSupportedException) e).getVersionInfo());
+          throw new GenericException(e.getMessage() + ": " + ((SIARDVersionNotSupportedException) e).getVersionInfo());
+        }
         throw new GenericException(e);
       }
     } catch (IOException e) {
@@ -634,6 +639,11 @@ public class SIARDController {
    ****************************************************************************/
   private static Reporter getReporter(final String databaseUUID) {
     Path reporterPath = ViewerConfiguration.getInstance().getReportPath(databaseUUID).toAbsolutePath();
+    return new Reporter(reporterPath.getParent().toString(), reporterPath.getFileName().toString());
+  }
+
+  private static Reporter getReporterForMigration(final String databaseUUID) {
+    Path reporterPath = ViewerConfiguration.getInstance().getReportPathForMigration(databaseUUID).toAbsolutePath();
     return new Reporter(reporterPath.getParent().toString(), reporterPath.getFileName().toString());
   }
 
