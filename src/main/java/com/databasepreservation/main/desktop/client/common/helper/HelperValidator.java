@@ -18,7 +18,6 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 
 import config.i18n.client.ClientMessages;
@@ -56,7 +55,7 @@ public class HelperValidator {
     Button clearButton = new Button();
 
     reporterButton.addClickHandler((ClickEvent event) -> {
-      if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
+      if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
         JavaScriptObject.createArray();
         Filter filter = new Filter();
         filter.setName(ViewerConstants.REPORT_FILES);
@@ -86,7 +85,7 @@ public class HelperValidator {
     Button clearButton = new Button();
 
     udtButton.addClickHandler((ClickEvent event) -> {
-      if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
+      if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
         Filter txt = new Filter(Constants.UDT, Collections.singletonList("txt"));
 
         JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.singletonList("openFile"),

@@ -25,7 +25,7 @@
 
         <!-- Convenience properties to set versions -->
         <version.gwt>2.8.2</version.gwt>
-        <version.dbptk>2.6.0</version.dbptk>
+        <version.dbptk>2.6.0-SNAPSHOT</version.dbptk>
         <version.roda>3.0.2</version.roda>
 
         <version.jersey>2.27</version.jersey>
@@ -73,6 +73,8 @@
                 <filtering>false</filtering>
                 <excludes>
                     <exclude>main.properties</exclude>
+                    <exclude>desktop/**</exclude>
+                    <exclude>server/**</exclude>
                 </excludes>
             </resource>
         </resources>
@@ -172,6 +174,123 @@
 
     <profiles>
         <profile>
+            <id>desktop</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <!-- GWT Maven Plugin -->
+                    <plugin>
+                        <groupId>net.ltgt.gwt.maven</groupId>
+                        <artifactId>gwt-maven-plugin</artifactId>
+                        <version>1.0-rc-10</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <moduleName>com.databasepreservation.main.desktop.Desktop</moduleName>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>compile</goal>
+                                    <goal>test</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <executions>
+                            <execution>
+                                <id>copy-resources</id>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>src/main/resources/static</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>src/main/resources/desktop</directory>
+                                            <includes>
+                                                <include>**/*.html</include>
+                                            </includes>
+                                            <filtering>true</filtering>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>pl.project13.maven</groupId>
+                        <artifactId>git-commit-id-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>server</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <!-- GWT Maven Plugin -->
+                    <plugin>
+                        <groupId>net.ltgt.gwt.maven</groupId>
+                        <artifactId>gwt-maven-plugin</artifactId>
+                        <version>1.0-rc-10</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <moduleName>com.databasepreservation.main.visualization.Viewer</moduleName>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>compile</goal>
+                                    <goal>test</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <executions>
+                            <execution>
+                                <id>copy-resources</id>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>src/main/resources/static</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>src/main/resources/server</directory>
+                                            <includes>
+                                                <include>**/*.html</include>
+                                            </includes>
+                                            <filtering>true</filtering>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>pl.project13.maven</groupId>
+                        <artifactId>git-commit-id-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+
+        <profile>
             <id>default</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
@@ -197,6 +316,31 @@
                         </executions>
                     </plugin>
                     <plugin>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <executions>
+                            <execution>
+                                <id>copy-resources</id>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>src/main/resources/static</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>src/main/resources/desktop</directory>
+                                            <includes>
+                                                <include>**/*.html</include>
+                                            </includes>
+                                            <filtering>true</filtering>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
                         <groupId>pl.project13.maven</groupId>
                         <artifactId>git-commit-id-plugin</artifactId>
                     </plugin>
@@ -213,7 +357,7 @@
                       <version>1.0-rc-10</version>
                       <extensions>true</extensions>
                       <configuration>
-                        <moduleName>com.databasepreservation.main.desktop.Desktop</moduleName>
+                          <moduleName>com.databasepreservation.main.visualization.Viewer</moduleName>
                       </configuration>
                       <executions>
                           <execution>
@@ -224,6 +368,31 @@
                               </goals>
                           </execution>
                       </executions>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <executions>
+                            <execution>
+                                <id>copy-resources</id>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>src/main/resources/static</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>src/main/resources/server</directory>
+                                            <includes>
+                                                <include>**/*.html</include>
+                                            </includes>
+                                            <filtering>true</filtering>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
+                        </executions>
                     </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
@@ -240,7 +409,7 @@
                                     <directory>src/main</directory>
                                     <includes>
                                         <include>gwt-unitCache/**</include>
-                                        <include>webapp/com.databasepreservation.main.desktop.Desktop/**</include>
+                                        <include>webapp/com.databasepreservation.main.visualization.Viewer/**</include>
                                         <include>webapp/WEB-INF/deploy/**</include>
                                         <include>webapp/WEB-INF/classes/**</include>
                                     </includes>

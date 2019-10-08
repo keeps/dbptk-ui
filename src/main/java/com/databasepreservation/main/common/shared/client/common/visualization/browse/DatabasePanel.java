@@ -86,7 +86,7 @@ public class DatabasePanel extends Composite {
 
   private DatabasePanel(String databaseUUID, boolean initMenu) {
     this.databaseUUID = databaseUUID;
-    if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
+    if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
       this.sidebar = DesktopDatabaseSidebar.getInstance(databaseUUID);
     } else {
       this.sidebar = ServerDatabaseSidebar.getInstance(databaseUUID);

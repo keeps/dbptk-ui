@@ -71,7 +71,7 @@ public class SchemaTriggersPanel extends RightPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
+    if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
       BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forDesktopSchemaTriggers(
         database.getMetadata().getName(), database.getUUID(), schema.getName(), schema.getUUID()));
     } else {

@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <module>
+
+    <stylesheet src="roda_main.css" />
+    <stylesheet src="main.css" />
+    <stylesheet src="print.css" />
+
     <source path="client"/>
     <source path="shared"/>
     <source path="utils"/>

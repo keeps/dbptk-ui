@@ -87,7 +87,7 @@ public class SchemaDataPanel extends RightPanel {
       public void onSelectionChange(SelectionChangeEvent event) {
         ViewerTable item = table.getSelectionModel().getSelectedObject();
         if (item != null) {
-          if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
+          if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
             HistoryManager.gotoDesktopTable(database.getUUID(), item.getUUID());
           } else {
             HistoryManager.gotoTable(database.getUUID(), item.getUUID());

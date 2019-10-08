@@ -31,10 +31,7 @@
 
     <!-- Specify the app entry point class.                         -->
     <entry-point class='com.databasepreservation.main.desktop.client.main.Main'/>
-    <stylesheet src="roda_main.css" />
-    <stylesheet src="main.css" />
     <stylesheet src="../api/v1/theme?resource_id=theme.css" />
-    <stylesheet src="print.css" />
 
     <!-- Specify the paths for translatable code                    -->
     <source path='client'/>
@@ -44,4 +41,5 @@
     <set-property name="compiler.stackMode" value="emulated" />
     <set-configuration-property name="compiler.emulatedStack.recordFileNames" value="true" />
     <set-configuration-property name="compiler.emulatedStack.recordLineNumbers" value="true" />
+    <collapse-all-properties />
 </module>

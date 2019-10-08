@@ -380,7 +380,7 @@ public class ValidatorPage extends Composite {
     // Report link
     Button report = new Button(messages.basicActionOpen());
     report.addClickHandler(event -> {
-      if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
+      if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
         JavascriptUtils.showItem(reporterPath);
       }
     });

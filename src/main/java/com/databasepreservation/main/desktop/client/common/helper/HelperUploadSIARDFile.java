@@ -30,7 +30,7 @@ public class HelperUploadSIARDFile {
     "<div id='loading' class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
 
   public void openFile(FlowPanel panel) {
-    if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
+    if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
 
       Filter siard = new Filter("SIARD", Collections.singletonList("siard"));
 
@@ -57,7 +57,7 @@ public class HelperUploadSIARDFile {
         @Override
         public void onSuccess(String databaseUUID) {
           if (databaseUUID != null) {
-            if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
+            if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
               JavascriptUtils.confirmationDialog(messages.dialogReimportSIARDTitle(), messages.dialogReimportSIARD(),
                 messages.basicActionCancel(), messages.basicActionConfirm(), new DefaultAsyncCallback<Boolean>() {
 

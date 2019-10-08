@@ -575,7 +575,7 @@ public class ErDiagram extends Composite {
                 //console.log("go to db" + dbuuid + " and table " + params.nodes[0]);
                 var tableuuid = params.nodes[0];
                 network.unselectAll();
-                if (applicationType === @com.databasepreservation.main.common.shared.ViewerConstants::ELECTRON) {
+                if (applicationType === @com.databasepreservation.main.common.shared.ViewerConstants::DESKTOP) {
                     @com.databasepreservation.main.common.shared.client.tools.HistoryManager::gotoDesktopTable(Ljava/lang/String;Ljava/lang/String;)(dbuuid, tableuuid);
                 } else {
                     @com.databasepreservation.main.common.shared.client.tools.HistoryManager::gotoTable(Ljava/lang/String;Ljava/lang/String;)(dbuuid, tableuuid);

@@ -88,7 +88,7 @@ public class TableSavedSearchEditPanel extends RightPanel {
    */
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
+    if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
       BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager
           .forDesktopDatabaseSavedSearchEdit(database.getMetadata().getName(), database.getUUID(), savedSearchUUID));
     } else {

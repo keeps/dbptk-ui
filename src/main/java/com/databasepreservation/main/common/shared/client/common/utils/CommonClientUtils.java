@@ -45,7 +45,7 @@ public class CommonClientUtils {
     // add link schema
     Hyperlink schemaLink;
     switch (ApplicationType.getType()) {
-      case ViewerConstants.ELECTRON:
+      case ViewerConstants.DESKTOP:
         schemaLink = new Hyperlink(table.getSchemaName(),
           HistoryManager.linkToDesktopSchema(databaseUUID, table.getSchemaUUID()));
         schemaLink.addStyleName(hClass);
@@ -72,7 +72,7 @@ public class CommonClientUtils {
     // add link table
     Hyperlink tableLink;
     switch (ApplicationType.getType()) {
-      case ViewerConstants.ELECTRON:
+      case ViewerConstants.DESKTOP:
         tableLink = new Hyperlink(table.getName(), HistoryManager.linkToDesktopTable(databaseUUID, table.getUUID()));
         tableLink.addStyleName(hClass);
         panel.add(tableLink);
@@ -120,7 +120,7 @@ public class CommonClientUtils {
     // add link schema
     Hyperlink schemaLink;
     switch (ApplicationType.getType()) {
-      case ViewerConstants.ELECTRON:
+      case ViewerConstants.DESKTOP:
         schemaLink = new Hyperlink(schema.getName(), HistoryManager.linkToDesktopSchema(databaseUUID, schema.getUUID()));
         schemaLink.addStyleName(hClass);
         panel.add(schemaLink);

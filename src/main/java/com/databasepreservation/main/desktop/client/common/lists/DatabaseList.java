@@ -93,7 +93,7 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
       }
     };
     locationColumn.setFieldUpdater((index, object, value) -> {
-      if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
+      if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
         JavascriptUtils.showItemInFolder(object.getSIARDPath());
       }
     });

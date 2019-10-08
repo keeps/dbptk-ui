@@ -140,7 +140,7 @@ public class JDBCPanel extends Composite {
         fileUploadField.buttonAction(new Command() {
           @Override
           public void execute() {
-            if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
+            if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
               Filter jar = new Filter("JAR File", Collections.singletonList("jar"));
               JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.singletonList("openFile"), Collections.singletonList(jar));
 

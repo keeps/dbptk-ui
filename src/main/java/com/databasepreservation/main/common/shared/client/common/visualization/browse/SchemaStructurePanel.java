@@ -71,7 +71,7 @@ public class SchemaStructurePanel extends RightPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
+    if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
       BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager
           .forDesktopSchemaStructure(database.getMetadata().getName(), database.getUUID(), schema.getName(), schema.getUUID()));
     } else {

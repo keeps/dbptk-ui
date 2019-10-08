@@ -54,7 +54,7 @@ public class DatabaseReportPanel extends RightPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
+    if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
       BreadcrumbManager.updateBreadcrumb(breadcrumb,
           BreadcrumbManager.forDesktopDatabaseReport(database.getMetadata().getName(), database.getUUID()));
     } else {

@@ -2,7 +2,6 @@ package com.databasepreservation.main.common.shared.client.common.visualization.
 
 import com.databasepreservation.main.common.client.BrowserService;
 import com.databasepreservation.main.common.shared.ViewerConstants;
-import com.databasepreservation.main.common.shared.ViewerStructure.IsIndexed;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerSchema;
 import com.databasepreservation.main.common.shared.ViewerStructure.ViewerTable;
@@ -155,7 +154,7 @@ public class UploadPanel extends RightPanel {
       database = result;
     } else if (result.getStatus().equals(ViewerDatabase.Status.AVAILABLE)) {
       Toast.showInfo("Success", "Database \"" + database.getMetadata().getName() + "\" has been loaded.");
-      if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
+      if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
         HistoryManager.gotoSIARDInfo(result.getUUID());
       } else {
         HistoryManager.gotoDatabase(result.getUUID());

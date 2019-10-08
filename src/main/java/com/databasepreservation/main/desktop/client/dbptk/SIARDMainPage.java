@@ -163,7 +163,7 @@ public class SIARDMainPage extends Composite {
     Button btnShowFiles = new Button(messages.SIARDHomePageButtonTextShowFile());
     btnShowFiles.addStyleName("btn btn-link-info");
 
-    if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
+    if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
       btnShowFiles.addClickHandler(clickEvent -> {
         JavascriptUtils.showItemInFolder(database.getSIARDPath());
       });
@@ -224,7 +224,7 @@ public class SIARDMainPage extends Composite {
     btnSeeReport = new Button();
     btnSeeReport.setText(messages.SIARDHomePageButtonTextSeeReport());
     btnSeeReport.addStyleName("btn btn-link-info");
-    if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
+    if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
       btnSeeReport.addClickHandler(clickEvent -> {
         JavascriptUtils.showItem(database.getValidatorReportPath());
       });

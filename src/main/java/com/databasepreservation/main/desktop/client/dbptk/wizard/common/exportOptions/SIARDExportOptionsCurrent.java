@@ -17,7 +17,6 @@ import com.databasepreservation.main.common.shared.models.PreservationParameter;
 import com.databasepreservation.main.common.shared.models.wizardParameters.ExportOptionsParameters;
 import com.databasepreservation.main.desktop.shared.models.Filter;
 import com.databasepreservation.modules.siard.SIARD2ModuleFactory;
-import com.databasepreservation.modules.siard.constants.SIARDConstants;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.regexp.shared.RegExp;
@@ -330,7 +329,7 @@ public class SIARDExportOptionsCurrent extends Composite {
         fileUploadField.setButtonCSS("btn btn-link form-button");
         fileUploadField.setRequired(parameter.isRequired());
         fileUploadField.buttonAction(() -> {
-          if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
+          if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
             JavaScriptObject.createArray();
             Filter filter = new Filter();
             filter.setName(ViewerConstants.SIARD_FILES);
@@ -368,7 +367,7 @@ public class SIARDExportOptionsCurrent extends Composite {
         folder.setButtonCSS("btn btn-link form-button");
         folder.setRequired(parameter.isRequired());
         folder.buttonAction(() -> {
-          if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
+          if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
             JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.singletonList("openDirectory"),
               Collections.emptyList());
             String path = JavascriptUtils.openFileDialog(options);

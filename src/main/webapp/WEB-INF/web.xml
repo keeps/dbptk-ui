@@ -26,11 +26,11 @@
 
     <servlet-mapping>
         <servlet-name>BrowserService</servlet-name>
-        <url-pattern>/com.databasepreservation.main.desktop.Desktop/browse</url-pattern>
+        <url-pattern>/com.databasepreservation.main.common.Common/browse</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>ClientLogger</servlet-name>
-        <url-pattern>/com.databasepreservation.main.desktop.Desktop/wuilogger</url-pattern>
+        <url-pattern>/com.databasepreservation.main.common.Common/wuilogger</url-pattern>
     </servlet-mapping>
 
     <!-- Default page to serve -->

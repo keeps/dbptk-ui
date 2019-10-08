@@ -39,24 +39,24 @@ public class Main implements EntryPoint {
       @Override
       public void onSuccess(String result) {
         ApplicationType.setType(result);
-      }
-    });
 
-    // Set uncaught exception handler
-    ClientLogger.setUncaughtExceptionHandler();
+        // Set uncaught exception handler
+        ClientLogger.setUncaughtExceptionHandler();
 
-    // Remove loading image
-    RootPanel.getBodyElement().removeChild(DOM.getElementById("loading"));
+        // Remove loading image
+        RootPanel.getBodyElement().removeChild(DOM.getElementById("loading"));
 
-    RootPanel.get().add(mainPanel);
-    RootPanel.get().add(footer);
-    RootPanel.get().addStyleName("roda");
+        RootPanel.get().add(mainPanel);
+        RootPanel.get().add(footer);
+        RootPanel.get().addStyleName("roda");
 
-    mainPanel.onHistoryChanged(History.getToken());
-    History.addValueChangeHandler(new ValueChangeHandler<String>() {
-      @Override
-      public void onValueChange(ValueChangeEvent<String> event) {
-        mainPanel.onHistoryChanged(event.getValue());
+        mainPanel.onHistoryChanged(History.getToken());
+        History.addValueChangeHandler(new ValueChangeHandler<String>() {
+          @Override
+          public void onValueChange(ValueChangeEvent<String> event) {
+            mainPanel.onHistoryChanged(event.getValue());
+          }
+        });
       }
     });
   }

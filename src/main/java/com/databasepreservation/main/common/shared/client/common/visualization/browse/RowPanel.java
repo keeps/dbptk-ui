@@ -113,7 +113,7 @@ public class RowPanel extends RightPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    if (ApplicationType.getType().equals(ViewerConstants.ELECTRON)) {
+    if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
       BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forDesktopRecord(database.getMetadata().getName(),
           database.getUUID(), table.getSchemaName(), table.getSchemaUUID(), table.getName(), table.getUUID(), rowUUID));
     } else {

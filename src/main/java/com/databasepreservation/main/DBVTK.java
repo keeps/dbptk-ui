@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Bean;
 import com.databasepreservation.main.common.server.BrowserServiceImpl;
 import com.databasepreservation.main.common.server.ClientLoggerImpl;
 import com.databasepreservation.main.common.server.ViewerConfiguration;
+import com.databasepreservation.main.common.shared.ViewerConstants;
 
 @SpringBootApplication
 public class DBVTK {
@@ -28,16 +29,29 @@ public class DBVTK {
 
   @Bean
   public ServletRegistrationBean<HttpServlet> browserService() {
-    ServletRegistrationBean<HttpServlet> bean = new ServletRegistrationBean<>(new BrowserServiceImpl(),
-      "/com.databasepreservation.main.desktop.Desktop/browse");
+    ServletRegistrationBean<HttpServlet> bean;
+    if (ViewerConstants.DESKTOP.equals(System.getProperty("env", "server"))) {
+      bean = new ServletRegistrationBean<>(new BrowserServiceImpl(),
+        "/com.databasepreservation.main.desktop.Desktop/browse");
+    } else {
+      bean = new ServletRegistrationBean<>(new BrowserServiceImpl(),
+        "/com.databasepreservation.main.visualization.Viewer/browse");
+    }
+
     bean.setLoadOnStartup(2);
     return bean;
   }
 
   @Bean
   public ServletRegistrationBean<HttpServlet> clientLogger() {
-    ServletRegistrationBean<HttpServlet> bean = new ServletRegistrationBean<>(new ClientLoggerImpl(),
-      "/com.databasepreservation.main.desktop.Desktop/wuilogger");
+    ServletRegistrationBean<HttpServlet> bean;
+    if (ViewerConstants.DESKTOP.equals(System.getProperty("env", "server"))) {
+      bean = new ServletRegistrationBean<>(new ClientLoggerImpl(),
+        "/com.databasepreservation.main.desktop.Desktop/wuilogger");
+    } else {
+      bean = new ServletRegistrationBean<>(new ClientLoggerImpl(),
+        "/com.databasepreservation.main.visualization.Viewer/wuilogger");
+    }
     bean.setLoadOnStartup(2);
     return bean;
   }
