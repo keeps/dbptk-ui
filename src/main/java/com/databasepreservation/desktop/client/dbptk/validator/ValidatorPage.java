@@ -12,7 +12,6 @@ import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.common.shared.client.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.shared.client.common.DefaultAsyncCallback;
-import com.databasepreservation.common.shared.client.common.LoadingDiv;
 import com.databasepreservation.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.shared.client.tools.BreadcrumbManager;
@@ -57,7 +56,6 @@ public class ValidatorPage extends Composite {
   private Integer numberOfErrors = 0;
   private Boolean stickToBottom = true;
   private FlowPanel tailIndicator = new FlowPanel();
-  private Boolean isRunning = false;
 
   private enum Status {
     OK, ERROR, SKIPPED, FINISH
@@ -89,7 +87,7 @@ public class ValidatorPage extends Composite {
   }
 
   @UiField
-  FlowPanel container, content, validationInformation, stickToBottomPanel, validationControl;
+  FlowPanel container, content, validationInformation, stickToBottomPanel;
 
   @UiField
   Label title;
@@ -99,9 +97,6 @@ public class ValidatorPage extends Composite {
 
   @UiField
   BreadcrumbPanel breadcrumb;
-
-  @UiField
-  LoadingDiv loading;
 
   @UiField
   Button btnBack, btnRunAgain;
@@ -115,7 +110,6 @@ public class ValidatorPage extends Composite {
     initWidget(binder.createAndBindUi(this));
 
     title.setText(messages.validatorPageTextForTitle());
-    loading.setVisible(true);
     buildStickButton();
 
     BrowserService.Util.getInstance().retrieve(databaseUUID, ViewerDatabase.class.getName(), databaseUUID,
@@ -147,7 +141,6 @@ public class ValidatorPage extends Composite {
         public void onSuccess(ValidationProgressData result) {
           resetInfos();
           populateValidationInfo(false, false);
-          loading.setVisible(true);
           autoUpdateTimer.scheduleRepeating(250);
           autoUpdateTimer.run();
           runValidator();
@@ -156,7 +149,6 @@ public class ValidatorPage extends Composite {
   }
 
   private void runValidator() {
-    isRunning = true;
     BrowserService.Util.getInstance().validateSIARD(database.getUUID(), database.getSIARDPath(), reporterPath, udtPath,
       new DefaultAsyncCallback<Boolean>() {
         @Override
@@ -168,12 +160,13 @@ public class ValidatorPage extends Composite {
         public void onFailure(Throwable caught) {
           stopUpdating();
           Dialogs.showErrors(messages.validatorPageTextForTitle(), caught.getMessage(), messages.basicActionClose());
-          BrowserService.Util.getInstance().updateStatusValidate(databaseUUID, ViewerDatabase.ValidationStatus.ERROR, new DefaultAsyncCallback<Void>() {
-            @Override
-            public void onSuccess(Void result) {
-              populateValidationInfo(false, true);
-            }
-          });
+          BrowserService.Util.getInstance().updateStatusValidate(databaseUUID, ViewerDatabase.ValidationStatus.ERROR,
+            new DefaultAsyncCallback<Void>() {
+              @Override
+              public void onSuccess(Void result) {
+                populateValidationInfo(false, true);
+              }
+            });
         }
       });
   }
@@ -302,24 +295,23 @@ public class ValidatorPage extends Composite {
   }
 
   private void stopUpdating() {
-    isRunning = false;
     populateValidationInfo(true, false);
-    loading.setVisible(false);
     if (autoUpdateTimer != null) {
       autoUpdateTimer.cancel();
     }
   }
 
-  //For run again button and SIARDMainPAGE
-  public static void clear(String databaseUUID){
-    if(instances.get(databaseUUID)!=null){
+  // For run again button and SIARDMainPAGE
+  public static void clear(String databaseUUID) {
+    if (instances.get(databaseUUID) != null) {
       instances.remove(databaseUUID);
     }
   }
 
-  public static boolean checkInstance(String databaseUUID){
+  public static boolean checkInstance(String databaseUUID) {
     return instances.get(databaseUUID) != null;
   }
+
   private void resetInfos() {
     lastPosition = 0;
     content.clear();
@@ -349,7 +341,7 @@ public class ValidatorPage extends Composite {
     left.add(validationInfoBuilder(messages.numberOfValidationsSkipped(), countSkipped, enable));
 
     // Validator Status
-    if(error){
+    if (error) {
       Label statusLabel = new Label(messages.alertErrorTitle());
       statusLabel.setStyleName("label-danger label-error");
       left.add(validationInfoBuilder(messages.managePageTableHeaderTextForDatabaseStatus(), statusLabel));
@@ -455,20 +447,6 @@ public class ValidatorPage extends Composite {
     });
     stickFocus.add(stickToBottomInner);
     stickToBottomPanel.add(stickFocus);
-  }
-
-  @Override
-  protected void onDetach() {
-    loading.setVisible(false);
-    super.onDetach();
-  }
-
-  @Override
-  protected void onAttach() {
-    if(isRunning){
-      loading.setVisible(true);
-    }
-    super.onAttach();
   }
 
   @UiHandler("btnBack")

@@ -2009,12 +2009,19 @@ input[type="checkbox"]:checked:after {
 
 /*page*/
 .browseContentPreviewPanel.validation{
-    padding-left:10rem;
-    padding-right:10rem;
+    padding-left: 3rem;
+    padding-right: 3rem;
+    padding-bottom: 2rem;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    padding-bottom: 1em;
+}
+
+.browseContentPreviewPanel.validation .validator{
+    height: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
 }
 
 .validation-information{
@@ -2024,8 +2031,8 @@ input[type="checkbox"]:checked:after {
 
 .progress-report.validation{
     height: auto;
-    min-height: 100px;
-    max-height: 400px;
+    max-height: initial;
+    flex: 1;
 }
 
 .validation-panel{
@@ -2140,6 +2147,24 @@ input[type="checkbox"]:checked:after {
     display: flex;
     align-self: flex-end;
     padding: 0.5em 0;
+}
+
+.bottom-panel .btn-item .btn{
+    box-sizing: content-box;
+    width: auto;
+    margin-left: 0;
+}
+
+.bottom-panel .btn-item .btn:before, .bottom-panel .btn-item .btn:after{
+    margin-top: 2px;
+}
+
+.bottom-panel .btn-item .btn-back-wizard{
+    padding-left: 25px;
+}
+
+.bottom-panel .btn-item .btn-run-again{
+    padding-right: 25px;
 }
 
 .bottom-panel .btn-primary{
