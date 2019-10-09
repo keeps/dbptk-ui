@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:d="urn:import:com.google.gwt.user.datepicker.client"
+             xmlns:c='urn:import:com.databasepreservation.common.shared.client.common'>
+
+    <ui:with field='messages' type='config.i18n.client.ClientMessages'/>
+
+    <g:FlowPanel addStyleNames="metadata-edit">
+        <c:LoadingDiv visible="false" ui:field="loading"/>
+        <g:FlowPanel addStyleNames="metadata-edit-title">
+            <g:Label addStyleNames="h1">
+                <ui:text from="{messages.databaseInformation}"/>
+            </g:Label>
+        </g:FlowPanel>
+        <g:FlowPanel>
+            <g:Label addStyleNames="h6">
+                <ui:text from="{messages.databaseInformationDescription}"/>
+            </g:Label>
+        </g:FlowPanel>
+        <g:FlowPanel addStyleNames="metadata-edit-panel">
+
+            <g:FlowPanel addStyleNames="metadata-edit-field">
+                <g:Label addStyleNames="form-label form-label-mandatory">
+                    <ui:text from="{messages.siardMetadata_databaseName}"/>
+                </g:Label>
+                <g:TextBox addStyleNames="form-textbox" ui:field="databaseName"/>
+            </g:FlowPanel>
+
+            <g:FlowPanel addStyleNames="metadata-edit-field">
+                <g:Label addStyleNames="form-label form-label-mandatory">
+                    <ui:text from="{messages.siardMetadata_archivalDate}"/>
+                </g:Label>
+                <d:DateBox addStyleNames="form-textbox" ui:field="archivalDate"/>
+            </g:FlowPanel>
+
+            <g:FlowPanel addStyleNames="metadata-edit-field">
+                <g:Label addStyleNames="form-label">
+                    <ui:text from='{messages.siardMetadata_archivist}'/>
+                </g:Label>
+                <g:TextBox addStyleNames="form-textbox" ui:field="archivist"/>
+            </g:FlowPanel>
+
+            <g:FlowPanel addStyleNames="metadata-edit-field">
+                <g:Label addStyleNames="form-label">
+                    <ui:text from='{messages.siardMetadata_archivistContact}'/>
+                </g:Label>
+                <g:TextBox addStyleNames="form-textbox" ui:field="archivistContact"/>
+            </g:FlowPanel>
+
+            <g:FlowPanel addStyleNames="metadata-edit-field">
+                <g:Label addStyleNames="form-label">
+                    <ui:text from='{messages.siardMetadata_clientMachine}'/>
+                </g:Label>
+                <g:TextBox addStyleNames="form-textbox" ui:field="clientMachine"/>
+            </g:FlowPanel>
+
+            <g:FlowPanel addStyleNames="metadata-edit-field">
+                <g:Label addStyleNames="form-label">
+                    <ui:text from='{messages.siardMetadata_databaseProduct}'/>
+                </g:Label>
+                <g:TextBox addStyleNames="form-textbox" ui:field="databaseProduct"/>
+            </g:FlowPanel>
+
+            <g:FlowPanel addStyleNames="metadata-edit-field">
+                <g:Label addStyleNames="form-label">
+                    <ui:text from='{messages.siardMetadata_databaseUser}'/>
+                </g:Label>
+                <g:TextBox addStyleNames="form-textbox" ui:field="databaseUser"/>
+            </g:FlowPanel>
+
+            <g:FlowPanel addStyleNames="metadata-edit-field">
+                <g:Label addStyleNames="form-label form-label-mandatory">
+                    <ui:text from='{messages.siardMetadata_dataOriginTimeSpan}'/>
+                </g:Label>
+                <g:TextBox addStyleNames="form-textbox" ui:field="dataOriginTimeSpan"/>
+            </g:FlowPanel>
+
+            <g:FlowPanel addStyleNames="metadata-edit-field">
+                <g:Label addStyleNames="form-label form-label-mandatory">
+                    <ui:text from='{messages.siardMetadata_dataOwner}'/>
+                </g:Label>
+                <g:TextBox addStyleNames="form-textbox" ui:field="dataOwner"/>
+            </g:FlowPanel>
+
+            <g:FlowPanel addStyleNames="metadata-edit-field">
+                <g:Label addStyleNames="form-label">
+                    <ui:text from='{messages.description}'/>
+                </g:Label>
+                <g:TextArea addStyleNames="form-textbox" ui:field="description"/>
+            </g:FlowPanel>
+
+            <g:FlowPanel addStyleNames="metadata-edit-field">
+                <g:Label addStyleNames="form-label">
+                    <ui:text from='{messages.siardMetadata_producerApplication}'/>
+                </g:Label>
+                <g:TextBox addStyleNames="form-textbox" ui:field="producerApplication"/>
+            </g:FlowPanel>
+
+        </g:FlowPanel>
+
+    </g:FlowPanel>
+</ui:UiBinder>

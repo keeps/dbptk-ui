@@ -30,9 +30,11 @@
 
         <version.jersey>2.27</version.jersey>
         <version.swagger>1.5.19</version.swagger>
-        <version.jackson>2.9.9</version.jackson>
+        <version.jackson>2.9.10</version.jackson>
         <cas.client.version>3.5.0</cas.client.version>
         <solr.version>7.7.1</solr.version>
+        <desktop>com.databasepreservation.desktop.Desktop</desktop>
+        <server>com.databasepreservation.server.Server</server>
     </properties>
 
     <repositories>
@@ -187,7 +189,7 @@
                         <version>1.0-rc-10</version>
                         <extensions>true</extensions>
                         <configuration>
-                            <moduleName>com.databasepreservation.main.desktop.Desktop</moduleName>
+                            <moduleName>${desktop}</moduleName>
                         </configuration>
                         <executions>
                             <execution>
@@ -245,7 +247,7 @@
                         <version>1.0-rc-10</version>
                         <extensions>true</extensions>
                         <configuration>
-                            <moduleName>com.databasepreservation.main.visualization.Viewer</moduleName>
+                            <moduleName>${server}</moduleName>
                         </configuration>
                         <executions>
                             <execution>
@@ -304,7 +306,7 @@
                       <version>1.0-rc-10</version>
                       <extensions>true</extensions>
                       <configuration>
-                        <moduleName>com.databasepreservation.main.desktop.Desktop</moduleName>
+                        <moduleName>${desktop}</moduleName>
                       </configuration>
                       <executions>
                             <execution>
@@ -357,7 +359,7 @@
                       <version>1.0-rc-10</version>
                       <extensions>true</extensions>
                       <configuration>
-                          <moduleName>com.databasepreservation.main.visualization.Viewer</moduleName>
+                          <moduleName>${server}</moduleName>
                       </configuration>
                       <executions>
                           <execution>
@@ -409,7 +411,7 @@
                                     <directory>src/main</directory>
                                     <includes>
                                         <include>gwt-unitCache/**</include>
-                                        <include>webapp/com.databasepreservation.main.visualization.Viewer/**</include>
+                                        <include>webapp/${server}/**</include>
                                         <include>webapp/WEB-INF/deploy/**</include>
                                         <include>webapp/WEB-INF/classes/**</include>
                                     </includes>
@@ -486,7 +488,7 @@
                         <version>1.0-rc-10</version>
                         <extensions>true</extensions>
                         <configuration>
-                            <moduleName>com.databasepreservation.main.desktop.Desktop</moduleName>
+                            <moduleName>${desktop}</moduleName>
                             <launcherDir>${project.build.directory}/${project.build.finalName}/WEB-INF/classes/public</launcherDir>
                             <webappDirectory>${project.build.directory}/${project.build.finalName}/WEB-INF/classes/public</webappDirectory>
                         </configuration>

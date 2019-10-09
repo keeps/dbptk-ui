@@ -1,0 +1,13 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:search="urn:import:com.databasepreservation.common.shared.client.common.search">
+
+    <ui:with field='messages' type='config.i18n.client.ClientMessages' />
+    <g:FlowPanel>
+        <g:SimplePanel addStyleNames="h1" ui:field="mainHeader">
+            <g:Label><ui:text from='{messages.loadingTableInfo}' /></g:Label>
+        </g:SimplePanel>
+        <g:HTML ui:field="description"/>
+        <search:TableSearchPanel ui:field="tableSearchPanel"/>
+    </g:FlowPanel>
+</ui:UiBinder>

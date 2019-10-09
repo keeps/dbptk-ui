@@ -6,7 +6,7 @@ import static org.hamcrest.Matchers.equalTo;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import com.databasepreservation.main.common.utils.ViewerUtils;
+import com.databasepreservation.common.utils.ViewerUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.testng.annotations.DataProvider;
