@@ -90,6 +90,8 @@ public abstract class SolrClientFactory<T extends SolrClient> {
 
     protected abstract boolean createCollection(String collection, Path config);
 
+    public abstract boolean deleteCollection(String collection);
+
     protected abstract Collection<String> getCollectionList();
 
     public boolean createCollection(String collection) {

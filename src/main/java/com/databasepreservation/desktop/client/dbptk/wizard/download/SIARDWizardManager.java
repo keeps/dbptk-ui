@@ -212,7 +212,7 @@ public class SIARDWizardManager extends WizardManager {
           progressBarPanel.setSubtitleText(messages.progressBarPanelTextForCreateWizardProgressSubTitle());
           wizardContent.add(progressBarPanel);
 
-          BrowserService.Util.getInstance().migrateToSIARD(databaseUUID, siardPath, tableAndColumnsParameters,
+          BrowserService.Util.getInstance().migrateToSIARD(databaseUUID, database.getSIARDVersion(), siardPath, tableAndColumnsParameters,
             exportOptionsParameters, metadataExportOptionsParameters, new DefaultAsyncCallback<Boolean>() {
 
               @Override

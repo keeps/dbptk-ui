@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 
+import com.databasepreservation.common.server.index.schema.collections.DatabasesCollection;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -104,8 +105,8 @@ public class DatabaseRowsSolrManager {
     }
 
     // delete related saved searches
-    Filter savedSearchFilter = new Filter(
-      new SimpleFilterParameter(ViewerConstants.SOLR_SEARCHES_DATABASE_UUID, database.getUUID()));
+      Filter savedSearchFilter = new Filter(
+        new SimpleFilterParameter(ViewerConstants.SOLR_SEARCHES_DATABASE_UUID, database.getUUID()));
     try {
       SolrUtils.delete(client, SolrDefaultCollectionRegistry.get(SavedSearch.class), savedSearchFilter);
       LOGGER.debug("Deleted saved searches for database {}", database.getUUID());
@@ -222,6 +223,17 @@ public class DatabaseRowsSolrManager {
     }
   }
 
+  public void deleteDatabasesCollection(final String UUID) {
+    try {
+      client.deleteById(ViewerConstants.SOLR_INDEX_DATABASES_COLLECTION_NAME, UUID);
+      client.commit(ViewerConstants.SOLR_INDEX_DATABASES_COLLECTION_NAME, true, true);
+    } catch (SolrServerException e) {
+      LOGGER.debug("Solr error while attempting to delete search", e);
+    } catch (IOException e) {
+      LOGGER.debug("IOException while attempting to delete search", e);
+    }
+  }
+
   private <T extends IsIndexed> void insertDocument(Class<T> objClass, T obj) throws ViewerException {
     SolrCollection<T> solrCollection = SolrDefaultCollectionRegistry.get(objClass);
     try {
@@ -284,12 +296,17 @@ public class DatabaseRowsSolrManager {
     }
   }
 
+  public void markDatabaseCollection(final String databaseUUID, ViewerDatabase.Status status) {
+    updateDatabaseFields(databaseUUID, Pair.of(ViewerConstants.SOLR_DATABASES_STATUS, status.toString()));
+  }
+
   public void markDatabaseAsReady(ViewerDatabaseFromToolkit viewerDatabase) throws ViewerException {
     updateDatabaseFields(viewerDatabase.getUUID(),
       Pair.of(ViewerConstants.SOLR_DATABASES_STATUS, ViewerDatabase.Status.AVAILABLE.toString()));
   }
 
-  private void updateDatabaseFields(String databaseUUID, Pair<String, ?>... fields) {
+  @SafeVarargs
+  private final void updateDatabaseFields(String databaseUUID, Pair<String, ?>... fields) {
     // create document to update this DB
     SolrInputDocument doc = new SolrInputDocument();
     doc.addField(ViewerConstants.INDEX_ID, databaseUUID);

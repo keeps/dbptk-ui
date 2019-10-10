@@ -106,6 +106,14 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
       }
     };
 
+    Column<ViewerDatabase, SafeHtml> versionColumn = new TooltipDatabaseColumn() {
+      @Override
+      public SafeHtml getValue(ViewerDatabase database) {
+        return database != null ? SafeHtmlUtils.fromString(database.getSIARDVersion())
+            : SafeHtmlUtils.fromString("unknown");
+      }
+    };
+
     Column<ViewerDatabase, SafeHtml> validColumn = new ValidDatabaseColumn() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
@@ -141,6 +149,7 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
     addColumn(archivalDateColumn, messages.managePageTableHeaderTextForArchivalDate(), true, TextAlign.NONE, 5);
     addColumn(locationColumn, messages.managePageTableHeaderTextForSIARDLocation(), true, TextAlign.NONE, 8);
     addColumn(sizeColumn, messages.managePageTableHeaderTextForSIARDSize(), true, TextAlign.NONE, 4);
+    addColumn(versionColumn, messages.managePageTableHeaderTextForSIARDVersion(), true, TextAlign.NONE, 4);
     addColumn(validColumn, messages.managePageTableHeaderTextForSIARDValidationStatus(), true, TextAlign.NONE, 5);
     addColumn(statusColumn, messages.managePageTableHeaderTextForDatabaseStatus(), true, TextAlign.NONE, 5);
     addColumn(openColumn, messages.managePageTableHeaderTextForActions(), true, TextAlign.NONE, 5);

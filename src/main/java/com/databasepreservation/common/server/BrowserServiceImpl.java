@@ -1,5 +1,8 @@
 package com.databasepreservation.common.server;
 
+import static com.databasepreservation.common.shared.ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX;
+import static com.databasepreservation.common.shared.ViewerConstants.SOLR_SEARCHES_DATABASE_UUID;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -8,6 +11,7 @@ import java.util.List;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 
+import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -23,6 +27,7 @@ import org.roda.core.data.utils.JsonUtils;
 import org.roda.core.data.v2.index.IndexResult;
 import org.roda.core.data.v2.index.facet.Facets;
 import org.roda.core.data.v2.index.filter.Filter;
+import org.roda.core.data.v2.index.filter.SimpleFilterParameter;
 import org.roda.core.data.v2.index.sort.Sorter;
 import org.roda.core.data.v2.index.sublist.Sublist;
 import org.roda.core.data.v2.user.User;
@@ -33,6 +38,7 @@ import com.databasepreservation.common.client.BrowserService;
 import com.databasepreservation.common.server.controller.SIARDController;
 import com.databasepreservation.common.server.controller.UserLoginController;
 import com.databasepreservation.common.server.index.factory.SolrClientFactory;
+import com.databasepreservation.common.server.index.schema.SolrDefaultCollectionRegistry;
 import com.databasepreservation.common.server.index.utils.SolrUtils;
 import com.databasepreservation.common.shared.ProgressData;
 import com.databasepreservation.common.shared.ValidationProgressData;
@@ -213,6 +219,40 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
   }
 
   @Override
+  public Boolean deleteDatabaseCollection(String databaseUUID) {
+    ViewerFactory.getSolrManager().deleteDatabasesCollection(databaseUUID);
+
+    return true;
+  }
+
+  @Override
+  public Boolean deleteRowsCollection(String databaseUUID) {
+    try {
+      final String collectionName = SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + databaseUUID;
+      if (SolrClientFactory.get().deleteCollection(collectionName)) {
+        Filter savedSearchFilter = new Filter(new SimpleFilterParameter(SOLR_SEARCHES_DATABASE_UUID, databaseUUID));
+        SolrUtils.delete(ViewerFactory.getSolrClient(), SolrDefaultCollectionRegistry.get(SavedSearch.class),
+            savedSearchFilter);
+
+        ViewerFactory.getSolrManager().markDatabaseCollection(databaseUUID, ViewerDatabase.Status.METADATA_ONLY);
+        return true;
+      }
+    } catch (GenericException | RequestNotValidException e) {
+      LOGGER.error("Error trying to remove the collection from Solr", e);
+      return false;
+    }
+    return false;
+  }
+
+  @Override
+  public Boolean deleteAllCollections(String databaseUUID) {
+    if (deleteRowsCollection(databaseUUID)) {
+      return deleteDatabaseCollection(databaseUUID);
+    }
+    return false;
+  }
+
+  @Override
   public Boolean isAuthenticationEnabled() throws RODAException {
     return ViewerConfiguration.getInstance().getIsAuthenticationEnabled();
   }
@@ -341,16 +381,18 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
   }
 
   @Override
-  public boolean migrateToDBMS(String databaseUUID, String siard, ConnectionParameters connectionParameters)
+  public boolean migrateToDBMS(String databaseUUID, String siardVersion, String siardPath,
+    ConnectionParameters connectionParameters)
     throws GenericException {
-    return SIARDController.migrateToDBMS(databaseUUID, siard, connectionParameters);
+    return SIARDController.migrateToDBMS(databaseUUID, siardVersion, siardPath, connectionParameters);
   }
 
   @Override
-  public boolean migrateToSIARD(String databaseUUID, String siardPath,
+  public boolean migrateToSIARD(String databaseUUID, String siardVersion, String siardPath,
     TableAndColumnsParameters tableAndColumnsParameters, ExportOptionsParameters exportOptionsParameters,
     MetadataExportOptionsParameters metadataExportOptions) throws GenericException {
-    return SIARDController.migrateToSIARD(databaseUUID, siardPath, tableAndColumnsParameters, exportOptionsParameters,
+    return SIARDController.migrateToSIARD(databaseUUID, siardVersion, siardPath, tableAndColumnsParameters,
+      exportOptionsParameters,
       metadataExportOptions);
   }
 

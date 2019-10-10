@@ -463,7 +463,7 @@ public class Dialogs {
     footer.add(btnClose);
 
     dialogBox.setWidget(layout);
-    dialogBox.setWidth("300px");
+    dialogBox.setWidth("500px");
 
     btnClose.addClickHandler(event -> {
       dialogBox.hide();

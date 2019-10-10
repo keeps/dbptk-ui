@@ -144,11 +144,11 @@ public class SIARDController {
     return false;
   }
 
-  public static boolean migrateToSIARD(String databaseUUID, String siard,
+  public static boolean migrateToSIARD(String databaseUUID, String siardVersion, String siardPath,
     TableAndColumnsParameters tableAndColumnsParameters, ExportOptionsParameters exportOptionsParameters,
     MetadataExportOptionsParameters metadataExportOptionsParameters) throws GenericException {
     Reporter reporter = getReporter(databaseUUID);
-    File f = new File(siard);
+    File f = new File(siardPath);
     if (f.exists() && !f.isDirectory()) {
       LOGGER.info("starting to convert database");
       final DatabaseMigration databaseMigration = initializeDatabaseMigration(reporter);
@@ -156,8 +156,8 @@ public class SIARDController {
       databaseMigration.filterFactories(new ArrayList<>());
 
       // BUILD Import Module
-      databaseMigration.importModule(new SIARD2ModuleFactory());
-      databaseMigration.importModuleParameter(SIARD2ModuleFactory.PARAMETER_FILE, siard);
+      databaseMigration.importModule(getSIARDImportModuleFactory(siardVersion));
+      databaseMigration.importModuleParameter(SIARD2ModuleFactory.PARAMETER_FILE, siardPath);
 
       // BUILD Export Module
       setupSIARDExportModule(databaseMigration, tableAndColumnsParameters, exportOptionsParameters,
@@ -180,10 +180,10 @@ public class SIARDController {
     }
   }
 
-  public static boolean migrateToDBMS(String databaseUUID, String siard, ConnectionParameters connectionParameters)
+  public static boolean migrateToDBMS(String databaseUUID, String siardVersion, String siardPath, ConnectionParameters connectionParameters)
     throws GenericException {
     Reporter reporter = getReporter(databaseUUID);
-    File f = new File(siard);
+    File f = new File(siardPath);
     if (f.exists() && !f.isDirectory()) {
       LOGGER.info("starting to convert database");
       final DatabaseMigration databaseMigration = initializeDatabaseMigration(reporter);
@@ -191,8 +191,8 @@ public class SIARDController {
       databaseMigration.filterFactories(new ArrayList<>());
 
       // BUILD Import Module
-      databaseMigration.importModule(new SIARD2ModuleFactory());
-      databaseMigration.importModuleParameter(SIARD2ModuleFactory.PARAMETER_FILE, siard);
+      databaseMigration.importModule(getSIARDImportModuleFactory(siardVersion));
+      databaseMigration.importModuleParameter(SIARD2ModuleFactory.PARAMETER_FILE, siardPath);
 
       // BUILD Export Module
       final DatabaseModuleFactory exportModuleFactory = getDatabaseExportModuleFactory(
@@ -386,7 +386,7 @@ public class SIARDController {
     Set<DatabaseModuleFactory> databaseModuleFactories = ReflectionUtils.collectDatabaseModuleFactories();
     for (DatabaseModuleFactory factory : databaseModuleFactories) {
       if (!factory.getModuleName().equals("list-tables")) {
-        if (!factory.getModuleName().toLowerCase().contains("siard")) {
+        if (!factory.getModuleName().toLowerCase().contains("siard") && !factory.getModuleName().toLowerCase().equals("internal-dbvtk-export")) {
           if (factory.isEnabled() && factory.producesExportModules()) {
             getDatabaseModulesParameters(factory, dbptkModule);
           }
@@ -702,6 +702,29 @@ public class SIARDController {
 
   private static DatabaseModuleFactory getDatabaseImportModuleFactory(String moduleName) {
     Set<DatabaseModuleFactory> databaseModuleFactories = ReflectionUtils.collectDatabaseModuleFactories();
+
+    DatabaseModuleFactory factory = null;
+
+    for (DatabaseModuleFactory dbFactory : databaseModuleFactories) {
+      if (dbFactory.isEnabled() && dbFactory.producesImportModules()) {
+        if (dbFactory.getModuleName().equals(moduleName))
+          factory = dbFactory;
+      }
+    }
+
+    return factory;
+  }
+
+  private static DatabaseModuleFactory getSIARDImportModuleFactory(String version) {
+    Set<DatabaseModuleFactory> databaseModuleFactories = ReflectionUtils.collectDatabaseModuleFactories();
+    final String moduleName;
+    if (version.equals("2.0") || version.equals("2.1")) {
+      moduleName = "siard-2";
+    } else if (version.equals("1.0")) {
+      moduleName = "siard-1";
+    } else {
+      moduleName = "";
+    }
 
     DatabaseModuleFactory factory = null;
 

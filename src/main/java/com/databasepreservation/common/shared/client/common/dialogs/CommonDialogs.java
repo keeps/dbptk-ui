@@ -19,10 +19,12 @@ import com.google.gwt.event.dom.client.KeyPressHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.regexp.shared.RegExp;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 
@@ -31,13 +33,19 @@ import config.i18n.client.ClientMessages;
 public class CommonDialogs {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
 
-  public static void showConfirmDialog(String title, String message, String cancelButtonText, String confirmButtonText,
-    final AsyncCallback<Boolean> callback) {
+  public enum Level {
+    DANGER, NORMAL, WARNING
+  }
+
+  public static void showConfirmDialog(String title, SafeHtml message, String cancelButtonText, String confirmButtonText,
+                                       Level level, String width,
+                                       final AsyncCallback<Boolean> callback) {
     final DialogBox dialogBox = new DialogBox(false, true);
     dialogBox.setText(title);
 
     FlowPanel layout = new FlowPanel();
-    Label messageLabel = new Label(message);
+
+    HTML messageLabel = new HTML(message);
     Button cancelButton = new Button(cancelButtonText);
     Button confirmButton = new Button(confirmButtonText);
     FlowPanel footer = new FlowPanel();
@@ -48,34 +56,48 @@ public class CommonDialogs {
     footer.add(confirmButton);
 
     dialogBox.setWidget(layout);
+    dialogBox.setWidth(width);
 
     dialogBox.setGlassEnabled(true);
     dialogBox.setAnimationEnabled(false);
 
-    cancelButton.addClickHandler(new ClickHandler() {
-
-      @Override
-      public void onClick(ClickEvent event) {
-        dialogBox.hide();
-        callback.onSuccess(false);
-      }
+    cancelButton.addClickHandler(event -> {
+      dialogBox.hide();
+      callback.onSuccess(false);
     });
 
-    confirmButton.addClickHandler(new ClickHandler() {
-
-      @Override
-      public void onClick(ClickEvent event) {
-        dialogBox.hide();
-        callback.onSuccess(true);
-      }
+    confirmButton.addClickHandler(event -> {
+      dialogBox.hide();
+      callback.onSuccess(true);
     });
 
-    dialogBox.addStyleName("wui-dialog-confirm");
-    layout.addStyleName("wui-dialog-layout");
-    footer.addStyleName("wui-dialog-layout-footer");
-    messageLabel.addStyleName("wui-dialog-message");
-    cancelButton.addStyleName("btn btn-link");
-    confirmButton.addStyleName("btn btn-play");
+    switch (level) {
+      case WARNING:
+        dialogBox.addStyleName("wui-dialog-confirm");
+        layout.addStyleName("wui-dialog-layout");
+        footer.addStyleName("wui-dialog-layout-footer");
+        messageLabel.addStyleName("wui-dialog-message");
+        cancelButton.addStyleName("btn btn-link");
+        confirmButton.addStyleName("btn btn-primary");
+        break;
+      case DANGER:
+        dialogBox.addStyleName("dialog-persist-errors");
+        layout.addStyleName("dialog-persist-errors-layout");
+        footer.addStyleName("dialog-persist-errors-layout-footer");
+        messageLabel.addStyleName("wui-dialog-message");
+        cancelButton.addStyleName("btn btn-link");
+        confirmButton.addStyleName("btn btn-danger btn-delete");
+        break;
+      case NORMAL:
+      default:
+        dialogBox.addStyleName("wui-dialog-confirm");
+        layout.addStyleName("wui-dialog-layout");
+        footer.addStyleName("wui-dialog-layout-footer");
+        messageLabel.addStyleName("wui-dialog-message");
+        cancelButton.addStyleName("btn btn-link");
+        confirmButton.addStyleName("btn btn-play");
+        break;
+    }
 
     dialogBox.center();
     dialogBox.show();

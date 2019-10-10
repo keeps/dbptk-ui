@@ -86,6 +86,12 @@ public interface BrowserServiceAsync {
 
   void deleteSearch(String databaseUUID, String savedSearchUUID, AsyncCallback<Void> async);
 
+  void deleteDatabaseCollection(String databaseUUID, AsyncCallback<Boolean> async);
+
+  void deleteRowsCollection(String databaseUUID, AsyncCallback<Boolean> async);
+
+  void deleteAllCollections(String databaseUUId, AsyncCallback<Boolean> async);
+
   void isAuthenticationEnabled(AsyncCallback<Boolean> async);
 
   /**
@@ -142,10 +148,10 @@ public interface BrowserServiceAsync {
     ExportOptionsParameters exportOptionsParameters, MetadataExportOptionsParameters metadataExportOptionsParameters,
     AsyncCallback<Boolean> async);
 
-  void migrateToDBMS(String databaseUUID, String siard, ConnectionParameters connectionParameters,
+  void migrateToDBMS(String databaseUUID, String siardVersion, String siardPath, ConnectionParameters connectionParameters,
     AsyncCallback<Boolean> async);
 
-  void migrateToSIARD(String databaseUUID, String siardPath, TableAndColumnsParameters tableAndColumnsParameters,
+  void migrateToSIARD(String databaseUUID, String siardVersion, String siardPath, TableAndColumnsParameters tableAndColumnsParameters,
     ExportOptionsParameters exportOptionsParameters, MetadataExportOptionsParameters metadataExportOptionsParameters,
     AsyncCallback<Boolean> async);
 

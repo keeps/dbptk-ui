@@ -1,24 +1,27 @@
 package com.databasepreservation;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
 import javax.servlet.http.HttpServlet;
-import com.databasepreservation.common.shared.client.ClientLogger;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.boot.web.servlet.context.ServletWebServerInitializedEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
-import com.databasepreservation.common.server.BrowserServiceImpl;
-import com.databasepreservation.common.server.ClientLoggerImpl;
-import com.databasepreservation.common.server.ViewerConfiguration;
-import com.databasepreservation.common.shared.ViewerConstants;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import com.databasepreservation.common.server.BrowserServiceImpl;
+import com.databasepreservation.common.server.ClientLoggerImpl;
+import com.databasepreservation.common.server.ViewerConfiguration;
+import com.databasepreservation.common.shared.ViewerConstants;
 
 @SpringBootApplication
 public class DBVTK {
@@ -26,8 +29,10 @@ public class DBVTK {
     ViewerConfiguration.getInstance();
     SpringApplication.run(DBVTK.class, args);
   }
+
   @Configuration
   public static class DefaultView implements WebMvcConfigurer {
+
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
       if (ViewerConstants.DESKTOP.equals(System.getProperty("env", "server"))) {
@@ -36,6 +41,7 @@ public class DBVTK {
       }
     }
   }
+
   @Bean
   public ServletRegistrationBean<HttpServlet> browserService() {
     ServletRegistrationBean<HttpServlet> bean;

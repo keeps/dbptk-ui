@@ -96,6 +96,12 @@ public interface BrowserService extends RemoteService {
   void deleteSearch(String databaseUUID, String savedSearchUUID)
     throws AuthorizationDeniedException, GenericException, RequestNotValidException, NotFoundException;
 
+  Boolean deleteDatabaseCollection(String databaseUUID);
+
+  Boolean deleteRowsCollection(String databaseUUID);
+
+  Boolean deleteAllCollections(String databaseUUID);
+
   Boolean isAuthenticationEnabled() throws RODAException;
 
   User getAuthenticatedUser() throws RODAException;
@@ -139,10 +145,10 @@ public interface BrowserService extends RemoteService {
     ExportOptionsParameters exportOptionsParameters, MetadataExportOptionsParameters metadataExportOptionsParameters)
     throws GenericException;
 
-  boolean migrateToDBMS(String databaseUUID, String siard, ConnectionParameters connectionParameters)
+  boolean migrateToDBMS(String databaseUUID, String siardVersion, String siardPath, ConnectionParameters connectionParameters)
     throws GenericException;
 
-  boolean migrateToSIARD(String databaseUUID, String siardPath, TableAndColumnsParameters tableAndColumnsParameters,
+  boolean migrateToSIARD(String databaseUUID, String siardVersion, String siardPath, TableAndColumnsParameters tableAndColumnsParameters,
     ExportOptionsParameters exportOptionsParameters, MetadataExportOptionsParameters metadataExportOptions)
     throws GenericException;
 

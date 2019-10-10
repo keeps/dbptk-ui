@@ -35,7 +35,6 @@ public class MetadataField extends Composite {
   private MetadataField(String key, String value) {
     initWidget(binder.createAndBindUi(this));
 
-
     if (key != null) {
       metadataKey.setText(key);
     } else {

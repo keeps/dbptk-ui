@@ -25,7 +25,7 @@
 
         <!-- Convenience properties to set versions -->
         <version.gwt>2.8.2</version.gwt>
-        <version.dbptk>2.6.0-SNAPSHOT</version.dbptk>
+        <version.dbptk>2.6.0-SNAPSHOT-2</version.dbptk>
         <version.roda>3.0.2</version.roda>
 
         <version.jersey>2.27</version.jersey>
@@ -103,23 +103,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <!--<plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>3.0.1</version>
-                <configuration>
-                    <excludeResources>true</excludeResources>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>-->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
@@ -159,11 +142,6 @@
                         </generateGitPropertiesFilename>
                         <format>json</format>
                     </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>com.spotify</groupId>
-                    <artifactId>docker-maven-plugin</artifactId>
-                    <version>1.1.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -372,14 +350,14 @@
             <artifactId>gwt-user</artifactId>
         </dependency>
         <dependency>
-          <groupId>com.google.gwt</groupId>
-          <artifactId>gwt-dev</artifactId>
-          <exclusions>
-              <exclusion>
-                  <groupId>org.mortbay.jasper</groupId>
-                  <artifactId>apache-jsp</artifactId>
-              </exclusion>
-          </exclusions>
+            <groupId>com.google.gwt</groupId>
+            <artifactId>gwt-dev</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.mortbay.jasper</groupId>
+                    <artifactId>apache-jsp</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <!-- viewer -->
         <dependency>

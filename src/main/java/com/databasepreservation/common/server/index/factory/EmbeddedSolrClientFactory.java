@@ -97,4 +97,17 @@ public class EmbeddedSolrClientFactory extends SolrClientFactory<EmbeddedSolrSer
         return ret;
     }
 
+  @Override
+  public boolean deleteCollection(String collection) {
+    try {
+      CoreContainer coreContainer = getSolrClient().getCoreContainer();
+      coreContainer.unload(collection, true, true, true);
+
+      return true;
+    } catch (SolrException e) {
+      LOGGER.error("Error deleting collection {}", collection, e);
+      return false;
+    }
+  }
+
 }

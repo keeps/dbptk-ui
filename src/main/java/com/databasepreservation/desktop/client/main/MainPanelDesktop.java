@@ -480,7 +480,7 @@ public class MainPanelDesktop extends Composite {
   private void setContent(String databaseUUID, RightPanelLoader rightPanelLoader) {
     GWT.log("setContent, dbuid " + databaseUUID);
     DatabasePanel databasePanel = DatabasePanel.getInstance(databaseUUID, false);
-    databasePanel.setTopLevelPanelCSS("browseContent skip_padding");
+    databasePanel.setTopLevelPanelCSS("browseContent wrapper skip_padding");
     contentPanel.setWidget(databasePanel);
     databasePanel.load(rightPanelLoader);
     JavascriptUtils.scrollToElement(contentPanel.getElement());

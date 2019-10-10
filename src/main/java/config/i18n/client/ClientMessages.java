@@ -1,6 +1,7 @@
 package config.i18n.client;
 
 import com.google.gwt.i18n.client.Messages;
+import com.google.gwt.safehtml.shared.SafeHtml;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -497,6 +498,10 @@ public interface ClientMessages extends Messages {
 
   String basicActionImport();
 
+  String basicActionUnderstood();
+
+  String basicActionDelete();
+
   /*********************************************
    * Sidebar Menus
    ********************************************/
@@ -585,6 +590,8 @@ public interface ClientMessages extends Messages {
 
   String managePageTableHeaderTextForSIARDSize();
 
+  String managePageTableHeaderTextForSIARDVersion();
+
   String managePageTableHeaderTextForSIARDValidationStatus();
 
   String managePageTableHeaderTextForDatabaseStatus();
@@ -646,6 +653,12 @@ public interface ClientMessages extends Messages {
 
   String SIARDHomePageLabelForViewerMetadataDescription();
 
+  String SIARDHomePageLabelForSIARDVersion();
+
+  String SIARDHomePageLabelForSIARDSize();
+
+  String SIARDHomePageLabelForSIARDPath();
+
   String SIARDHomePageLabelForValidatedAt();
 
   String SIARDHomePageLabelForValidationVersion();
@@ -675,6 +688,14 @@ public interface ClientMessages extends Messages {
   String SIARDHomePageTextForIngestSIARDSubtitle();
 
   String SIARDHomePageDialogTitleForBrowsing();
+
+  String SIARDHomePageDialogTitleForDelete();
+
+  SafeHtml SIARDHomePageTextForDeleteAll();
+
+  SafeHtml SIARDHomePageTextForDeleteFromSolr();
+
+  String SIARDHomePageTextForIngestNotSupported();
 
   String SIARDHomePageTextForIngestSuccess();
 
@@ -892,6 +913,10 @@ public interface ClientMessages extends Messages {
    * SIARD Validator
    ********************************************/
   String SIARDValidatorSettings();
+
+  String SIARDValidatorDialogInformationTitle();
+
+  String SIARDValidatorTextForVersionCannotBeValidated();
 
   String allowedTypes();
 

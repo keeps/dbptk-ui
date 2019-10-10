@@ -174,7 +174,8 @@ public class DBMSWizardManager extends WizardManager {
           progressBarPanel.setSubtitleText(messages.progressBarPanelTextForDBMSWizardSubTitle());
           wizardContent.add(progressBarPanel);
 
-          BrowserService.Util.getInstance().migrateToDBMS(databaseUUID, siardPath, connectionParameters,
+          BrowserService.Util.getInstance().migrateToDBMS(databaseUUID, database.getSIARDVersion(), siardPath,
+            connectionParameters,
             new DefaultAsyncCallback<Boolean>() {
 
               @Override

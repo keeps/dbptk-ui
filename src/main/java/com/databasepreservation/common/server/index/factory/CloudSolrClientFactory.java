@@ -194,6 +194,23 @@ public class CloudSolrClientFactory extends SolrClientFactory<CloudSolrClient> {
     }
 
     @Override
+    public boolean deleteCollection(String collection) {
+        try {
+            CollectionAdminRequest.Delete deleteCollection = CollectionAdminRequest.deleteCollection(collection);
+            final CollectionAdminResponse response = deleteCollection.process(getSolrClient());
+            if (!response.isSuccess()) {
+                LOGGER.error("Could not create collection {}: {}", collection, response.getErrorMessages());
+                return false;
+            } else {
+                return true;
+            }
+        } catch (SolrServerException | SolrException | IOException e) {
+            LOGGER.error("Error creating collection {}", collection, e);
+            return false;
+        }
+    }
+
+    @Override
     protected Collection<String> getCollectionList() {
         Collection<String> ret = new ArrayList<>();
         CollectionAdminRequest.List req = new CollectionAdminRequest.List();
