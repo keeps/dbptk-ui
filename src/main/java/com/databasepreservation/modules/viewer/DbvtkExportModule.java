@@ -5,6 +5,9 @@ import java.util.Set;
 
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
+import com.databasepreservation.common.shared.ViewerConstants;
+import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
+import com.databasepreservation.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.common.transformers.ToolkitStructure2ViewerStructure;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabaseFromToolkit;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerTable;
@@ -94,6 +97,10 @@ public class DbvtkExportModule implements DatabaseExportModule {
   public void handleStructure(DatabaseStructure structure) throws ModuleException {
     this.structure = structure;
     this.viewerDatabase = ToolkitStructure2ViewerStructure.getDatabase(structure, preSetDatabaseUUID);
+    if(System.getProperty("env", "server").equals(ViewerConstants.SERVER)){
+      viewerDatabase.setValidationStatus(ViewerDatabase.ValidationStatus.NOT_VALIDATED);
+      solrManager.addDatabaseMetadata(viewerDatabase);
+    }
     solrManager.addDatabaseRowCollection(viewerDatabase);
   }
 

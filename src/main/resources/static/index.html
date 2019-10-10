@@ -7,49 +7,76 @@
 
 <html>
 <head>
-  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-  <title>Database Preservation</title>
-  <link rel="stylesheet" href="fonts/fonts.css">
-  <link rel="stylesheet" href="css/spinner.css">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Database Visualization Toolkit</title>
+    <link rel="stylesheet" href="fonts/fonts.css">
+    <link rel="stylesheet" href="css/spinner.css">
 
-  <script type="text/javascript" src="js/jquery-1.11.3.min.js"></script>
+    <!-- Favicon from http://realfavicongenerator.net -->
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" href="icons/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="icons/favicon-16x16.png" sizes="16x16">
+    <link rel="manifest" href="icons/manifest.json">
+    <link rel="mask-icon" href="icons/safari-pinned-tab.svg" color="#5bbad5">
+    <link rel="shortcut icon" href="icons/favicon.ico">
+    <meta name="apple-mobile-web-app-title" content="Database Visualization Toolkit">
+    <meta name="application-name" content="Database Visualization Toolkit">
+    <meta name="msapplication-config" content="icons/browserconfig.xml">
+    <meta name="theme-color" content="#ffffff">
 
-  <!-- vis library, source: visjs.org -->
-  <link href='js/vis-4.21.0/vis.min.css' rel='stylesheet' type='text/css'>
-  <script type="text/javascript" src="js/vis-4.21.0/vis.min.js"></script>
+    <!-- FlexGrid and its compatibility to support IE8+ -->
+    <link href='flexgrid/flexgrid.css' rel='stylesheet' type='text/css'>
+    <script type="text/javascript" src="js/jquery-1.11.3.min.js"></script>
+    <script type="text/javascript" src="js/respond-1.4.2.min.js"></script>
+    <script type="text/javascript" src="js/iframeResizer.contentWindow.min.js"></script>
 
-  <!-- Highlighter -->
-  <link rel="stylesheet" href="js/highlight-9.15.8/tomorrow.css">
-  <script src="js/highlight-9.15.8/highlight.pack.js"></script>
+    <!-- vis library, source: visjs.org -->
+    <link href='js/vis-4.16.1/vis.min.css' rel='stylesheet' type='text/css'>
+    <script type="text/javascript" src="js/vis-4.16.1/vis.min.js"></script>
 
-  <!-- Markdown to HTML -->
-  <script src="js/showdown-1.6.4.min.js"></script>
+    <!-- Highlighter -->
+    <link rel="stylesheet" href="js/highlight-9.0.0/tomorrow.css">
+    <script src="js/highlight-9.0.0/highlight.pack.js"></script>
 
-  <script type="text/javascript" language="javascript"
-          src="com.databasepreservation.desktop.Desktop/com.databasepreservation.desktop.Desktop.nocache.js"></script>
+    <!-- Markdown to HTML -->
+    <script src="js/showdown-1.6.4.min.js"></script>
 
-  <!-- Theme -->
-  <script src="api/v1/theme?resource_id=theme.js"></script>
+    <!--                                           -->
+    <!-- This script loads your compiled module.   -->
+    <!-- If you add any GWT meta tags, they must   -->
+    <!-- be added before this line.                -->
+    <!--                                           -->
+    <script type="text/javascript" language="javascript"
+            src="com.databasepreservation.server.Server/com.databasepreservation.server.Server.nocache.js"></script>
+
+    <!-- Theme -->
+    <script src="api/v1/theme?resource_id=theme.js"></script>
 </head>
+
+<!--                                           -->
+<!-- The body can have arbitrary html, or      -->
+<!-- you can leave the body empty if you want  -->
+<!-- to create a completely dynamic UI.        -->
+<!--                                           -->
 <body>
 
 <!-- OPTIONAL: include this if you want history support -->
-<iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1'
-        style="position:absolute;width:0;height:0;border:0"></iframe>
+<iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1' style="position:absolute;width:0;height:0;border:0"></iframe>
 
 <!-- Loading -->
 <div class="spinner" id="loading">
-  <div class="double-bounce1"></div>
-  <div class="double-bounce2"></div>
+    <div class="double-bounce1"></div>
+    <div class="double-bounce2"></div>
 </div>
 
 <!-- RECOMMENDED if your web app will not function without JavaScript enabled -->
 <noscript>
-  <div style="width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif">
-    Your web browser must have JavaScript enabled
-    in order for this application to display correctly.
-  </div>
+    <div style="width: 22em; position: absolute; left: 50%; margin-left: -11em; color: red; background-color: white; border: 1px solid red; padding: 4px; font-family: sans-serif">
+        Your web browser must have JavaScript enabled
+        in order for this application to display correctly.
+    </div>
 </noscript>
+
 
 </body>
 </html>

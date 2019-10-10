@@ -176,123 +176,6 @@
 
     <profiles>
         <profile>
-            <id>desktop</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <build>
-                <plugins>
-                    <!-- GWT Maven Plugin -->
-                    <plugin>
-                        <groupId>net.ltgt.gwt.maven</groupId>
-                        <artifactId>gwt-maven-plugin</artifactId>
-                        <version>1.0-rc-10</version>
-                        <extensions>true</extensions>
-                        <configuration>
-                            <moduleName>${desktop}</moduleName>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>compile</goal>
-                                    <goal>test</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <artifactId>maven-resources-plugin</artifactId>
-                        <version>3.1.0</version>
-                        <executions>
-                            <execution>
-                                <id>copy-resources</id>
-                                <phase>validate</phase>
-                                <goals>
-                                    <goal>copy-resources</goal>
-                                </goals>
-                                <configuration>
-                                    <outputDirectory>src/main/resources/static</outputDirectory>
-                                    <resources>
-                                        <resource>
-                                            <directory>src/main/resources/desktop</directory>
-                                            <includes>
-                                                <include>**/*.html</include>
-                                            </includes>
-                                            <filtering>true</filtering>
-                                        </resource>
-                                    </resources>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>pl.project13.maven</groupId>
-                        <artifactId>git-commit-id-plugin</artifactId>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-        <profile>
-            <id>server</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <build>
-                <plugins>
-                    <!-- GWT Maven Plugin -->
-                    <plugin>
-                        <groupId>net.ltgt.gwt.maven</groupId>
-                        <artifactId>gwt-maven-plugin</artifactId>
-                        <version>1.0-rc-10</version>
-                        <extensions>true</extensions>
-                        <configuration>
-                            <moduleName>${server}</moduleName>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <goals>
-                                    <goal>compile</goal>
-                                    <goal>test</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <artifactId>maven-resources-plugin</artifactId>
-                        <version>3.1.0</version>
-                        <executions>
-                            <execution>
-                                <id>copy-resources</id>
-                                <phase>validate</phase>
-                                <goals>
-                                    <goal>copy-resources</goal>
-                                </goals>
-                                <configuration>
-                                    <outputDirectory>src/main/resources/static</outputDirectory>
-                                    <resources>
-                                        <resource>
-                                            <directory>src/main/resources/server</directory>
-                                            <includes>
-                                                <include>**/*.html</include>
-                                            </includes>
-                                            <filtering>true</filtering>
-                                        </resource>
-                                    </resources>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>pl.project13.maven</groupId>
-                        <artifactId>git-commit-id-plugin</artifactId>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-
-        <profile>
             <id>default</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
@@ -301,158 +184,29 @@
                 <plugins>
                     <!-- GWT Maven Plugin -->
                     <plugin>
-                      <groupId>net.ltgt.gwt.maven</groupId>
-                      <artifactId>gwt-maven-plugin</artifactId>
-                      <version>1.0-rc-10</version>
-                      <extensions>true</extensions>
-                      <configuration>
-                        <moduleName>${desktop}</moduleName>
-                      </configuration>
-                      <executions>
+                        <groupId>net.ltgt.gwt.maven</groupId>
+                        <artifactId>gwt-maven-plugin</artifactId>
+                        <version>1.0-rc-10</version>
+                        <extensions>true</extensions>
+                        <executions>
                             <execution>
+                                <id>${desktop}</id>
+                                <configuration>
+                                    <moduleName>${desktop}</moduleName>
+                                </configuration>
                                 <goals>
                                     <goal>compile</goal>
                                     <goal>test</goal>
                                 </goals>
                             </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <artifactId>maven-resources-plugin</artifactId>
-                        <version>3.1.0</version>
-                        <executions>
                             <execution>
-                                <id>copy-resources</id>
-                                <phase>validate</phase>
-                                <goals>
-                                    <goal>copy-resources</goal>
-                                </goals>
+                                <id>${server}</id>
                                 <configuration>
-                                    <outputDirectory>src/main/resources/static</outputDirectory>
-                                    <resources>
-                                        <resource>
-                                            <directory>src/main/resources/desktop</directory>
-                                            <includes>
-                                                <include>**/*.html</include>
-                                            </includes>
-                                            <filtering>true</filtering>
-                                        </resource>
-                                    </resources>
+                                    <moduleName>${server}</moduleName>
                                 </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>pl.project13.maven</groupId>
-                        <artifactId>git-commit-id-plugin</artifactId>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <id>docker</id>
-            <build>
-                <plugins>
-                    <plugin>
-                      <groupId>net.ltgt.gwt.maven</groupId>
-                      <artifactId>gwt-maven-plugin</artifactId>
-                      <version>1.0-rc-10</version>
-                      <extensions>true</extensions>
-                      <configuration>
-                          <moduleName>${server}</moduleName>
-                      </configuration>
-                      <executions>
-                          <execution>
-                              <id>compile-gwt</id>
-                              <phase>prepare-package</phase>
-                              <goals>
-                                  <goal>compile</goal>
-                              </goals>
-                          </execution>
-                      </executions>
-                    </plugin>
-                    <plugin>
-                        <artifactId>maven-resources-plugin</artifactId>
-                        <version>3.1.0</version>
-                        <executions>
-                            <execution>
-                                <id>copy-resources</id>
-                                <phase>validate</phase>
                                 <goals>
-                                    <goal>copy-resources</goal>
-                                </goals>
-                                <configuration>
-                                    <outputDirectory>src/main/resources/static</outputDirectory>
-                                    <resources>
-                                        <resource>
-                                            <directory>src/main/resources/server</directory>
-                                            <includes>
-                                                <include>**/*.html</include>
-                                            </includes>
-                                            <filtering>true</filtering>
-                                        </resource>
-                                    </resources>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-clean-plugin</artifactId>
-                        <configuration>
-                            <filesets>
-                                <fileset>
-                                    <directory>${basedir}</directory>
-                                    <includes>
-                                        <include>gwt-unitCache/</include>
-                                    </includes>
-                                </fileset>
-                                <fileset>
-                                    <directory>src/main</directory>
-                                    <includes>
-                                        <include>gwt-unitCache/**</include>
-                                        <include>webapp/${server}/**</include>
-                                        <include>webapp/WEB-INF/deploy/**</include>
-                                        <include>webapp/WEB-INF/classes/**</include>
-                                    </includes>
-                                    <followSymlinks>false</followSymlinks>
-                                </fileset>
-                            </filesets>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>gwt-clean</id>
-                                <phase>initialize</phase>
-                                <goals>
-                                    <goal>clean</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>com.spotify</groupId>
-                        <artifactId>docker-maven-plugin</artifactId>
-                        <configuration>
-                            <forceTags>true</forceTags>
-                            <imageName>keeps/dbvtk</imageName>
-                            <imageTags>
-                                <imageTag>${project.version}</imageTag>
-                                <imageTag>latest</imageTag>
-                            </imageTags>
-                            <dockerDirectory>${project.basedir}/docker-files</dockerDirectory>
-                            <resources>
-                                <resource>
-                                    <targetPath>/</targetPath>
-                                    <directory>${project.build.directory}</directory>
-                                    <include>${project.build.finalName}.war</include>
-                                </resource>
-                            </resources>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>build</goal>
+                                    <goal>compile</goal>
+                                    <goal>test</goal>
                                 </goals>
                             </execution>
                         </executions>
@@ -489,6 +243,7 @@
                         <extensions>true</extensions>
                         <configuration>
                             <moduleName>${desktop}</moduleName>
+                            <moduleName>${server}</moduleName>
                             <launcherDir>${project.build.directory}/${project.build.finalName}/WEB-INF/classes/public</launcherDir>
                             <webappDirectory>${project.build.directory}/${project.build.finalName}/WEB-INF/classes/public</webappDirectory>
                         </configuration>
