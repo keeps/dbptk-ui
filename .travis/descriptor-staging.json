@@ -11,25 +11,26 @@
     "github_release_notes_file": "RELEASE.txt",
     "public_download_numbers": false,
     "public_stats": false,
-    "licenses": ["LGPL-3.0"]
+    "licenses": [
+      "LGPL-3.0"
+    ]
   },
-
   "version": {
     "name": "Staging",
     "description": "",
     "released": "RELEASED",
-    "vcs_tag": "Staging",
+    "vcs_tag": "staging",
     "attributes": [],
     "gpgSign": false
   },
-
-  "files":
-  [
+  "files": [
     {
-      "includePattern": "target/(.*.war)$", "uploadPattern": "dbvtk-staging.war",
-      "matrixParams": { "override": 1 }
+      "includePattern": "target/(.*).war$",
+      "uploadPattern": "dbvtk-staging.war",
+      "matrixParams": {
+        "override": 1
+      }
     }
   ],
-
   "publish": true
 }
