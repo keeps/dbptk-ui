@@ -96,6 +96,12 @@ public class JDBCPanel extends Composite {
       }
     }
 
+    for (Map.Entry<String, FileUploadField> entry : fileInputs.entrySet()) {
+      if (ViewerStringUtils.isNotBlank(entry.getValue().getPathLocation())) {
+        values.put(entry.getKey(), entry.getValue().getPathLocation());
+      }
+    }
+
     parameters.setConnection(values);
     if (ViewerStringUtils.isNotBlank(pathToDriver)) {
       parameters.setDriver(true);
@@ -131,7 +137,45 @@ public class JDBCPanel extends Composite {
         checkBoxInputs.put(parameter.getName(), checkbox);
         genericField = GenericField.createInstance(checkbox);
         break;
-      case ViewerConstants.INPUT_TYPE_FILE:
+      case ViewerConstants.INPUT_TYPE_FILE: {
+        FileUploadField fileUploadField = FileUploadField.createInstance(
+          messages.connectionPageLabelsFor(parameter.getName()), messages.connectionPageLabelForChooseFileLocation());
+        fileUploadField.setParentCSS("form-row");
+        fileUploadField.setLabelCSS("form-label-spaced");
+        fileUploadField.setButtonCSS("btn btn-link form-button form-button-jar");
+        fileUploadField.setRequired(parameter.isRequired());
+        fileUploadField.buttonAction(new Command() {
+          @Override
+          public void execute() {
+            if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
+              Filter mdb = new Filter("MS Access", Collections.singletonList("mdb"));
+              JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.singletonList("openFile"),
+                Collections.singletonList(mdb));
+
+              String path = JavascriptUtils.openFileDialog(options);
+              if (path != null) {
+                String displayPath = PathUtils.getFileName(path);
+                fileUploadField.setPathLocation(displayPath, path);
+                fileUploadField.setInformationPathCSS("gwt-Label-disabled information-path");
+              }
+            }
+          }
+        });
+        fileInputs.put(parameter.getName(), fileUploadField);
+        FlowPanel helper = new FlowPanel();
+        helper.addStyleName("form-helper");
+        InlineHTML span = new InlineHTML();
+        span.addStyleName("form-text-helper text-muted");
+
+        span.setText(messages.connectionPageDescriptionsFor(parameter.getName()));
+        fileUploadField.addHelperText(span);
+        helper.add(fileUploadField);
+        helper.add(span);
+        content.add(helper);
+        break;
+
+      }
+      case ViewerConstants.INPUT_TYPE_DRIVER:
         FileUploadField fileUploadField = FileUploadField.createInstance(messages.connectionPageLabelsFor(parameter.getName()), messages.connectionPageLabelForChooseDriverLocation());
         fileUploadField.setParentCSS("form-row");
         fileUploadField.setLabelCSS("form-label-spaced");
@@ -154,7 +198,6 @@ public class JDBCPanel extends Composite {
             }
           }
         });
-        fileInputs.put(parameter.getName(), fileUploadField);
         FlowPanel helper = new FlowPanel();
         helper.addStyleName("form-helper");
         InlineHTML span = new InlineHTML();
@@ -228,7 +271,7 @@ public class JDBCPanel extends Composite {
   public boolean validate(String type) {
     ArrayList<PreservationParameter> arrayList = new ArrayList<>();
     WizardManager wizardManager;
-    if(type.equals(ViewerConstants.UPLOAD_WIZARD_MANAGER)){
+    if (type.equals(ViewerConstants.UPLOAD_WIZARD_MANAGER)) {
       wizardManager = CreateWizardManager.getInstance();
     } else {
       wizardManager = DBMSWizardManager.getInstance(databaseUUID);
@@ -245,7 +288,7 @@ public class JDBCPanel extends Composite {
             wizardManager.enableNext(false);
           }
         }
-        if (parameter.getInputType().equals(ViewerConstants.INPUT_TYPE_FILE)) {
+        if (parameter.getInputType().equals(ViewerConstants.INPUT_TYPE_DRIVER)) {
           if (ViewerStringUtils.isBlank(pathToDriver)) {
             arrayList.add(parameter);
           }

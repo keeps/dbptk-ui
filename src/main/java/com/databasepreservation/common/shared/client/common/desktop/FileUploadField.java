@@ -76,6 +76,10 @@ public class FileUploadField extends Composite {
     path.setVisible(true);
   }
 
+  public String getPathLocation() {
+    return path.getTitle();
+  }
+
   public void buttonAction(Command cmd) {
     upload.addClickHandler(event -> {
       cmd.execute();

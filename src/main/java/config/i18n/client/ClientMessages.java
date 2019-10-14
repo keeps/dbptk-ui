@@ -582,6 +582,8 @@ public interface ClientMessages extends Messages {
 
   String managePageTableHeaderTextForDatabaseName();
 
+  String managePageTableHeaderTextForDataOwner();
+
   String managePageTableHeaderTextForProductName();
 
   String managePageTableHeaderTextForArchivalDate();
@@ -752,6 +754,8 @@ public interface ClientMessages extends Messages {
   String connectionPageDescriptionsFor(@Select String fieldName);
 
   String connectionPageLabelForChooseDriverLocation();
+
+  String connectionPageLabelForChooseFileLocation();
 
   String errorMessagesConnectionTitle();
 

@@ -76,6 +76,15 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
       }
     };
 
+    Column<ViewerDatabase, SafeHtml> dataOwnerColumn = new TooltipDatabaseColumn() {
+      @Override
+      public SafeHtml getValue(ViewerDatabase database) {
+        return database != null && database.getMetadata() != null
+            ? SafeHtmlUtils.fromString(database.getMetadata().getDataOwner())
+            : SafeHtmlUtils.fromString("unknown");
+      }
+    };
+
     Column<ViewerDatabase, SafeHtml> archivalDateColumn = new TooltipDatabaseColumn() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
@@ -145,6 +154,7 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
     // description.setSortable(true);
 
     addColumn(nameColumn, messages.managePageTableHeaderTextForDatabaseName(), true, TextAlign.NONE, 15);
+    addColumn(dataOwnerColumn, messages.managePageTableHeaderTextForDataOwner(), true, TextAlign.NONE, 5);
     addColumn(dbmsColumn, messages.managePageTableHeaderTextForProductName(), true, TextAlign.NONE, 10);
     addColumn(archivalDateColumn, messages.managePageTableHeaderTextForArchivalDate(), true, TextAlign.NONE, 5);
     addColumn(locationColumn, messages.managePageTableHeaderTextForSIARDLocation(), true, TextAlign.NONE, 8);

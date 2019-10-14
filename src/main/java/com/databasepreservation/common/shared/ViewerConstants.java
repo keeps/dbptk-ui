@@ -1,5 +1,6 @@
 package com.databasepreservation.common.shared;
 
+import com.databasepreservation.model.parameters.Parameter;
 import org.roda.core.data.common.RodaConstants;
 import org.roda.core.data.v2.index.filter.BasicSearchFilterParameter;
 import org.roda.core.data.v2.index.filter.Filter;
@@ -278,6 +279,7 @@ public class ViewerConstants {
   public static final String INPUT_TYPE_DEFAULT = "DEFAULT";
   public static final String INPUT_TYPE_NONE = "NONE";
   public static final String INPUT_TYPE_COMBOBOX = "COMBOBOX";
+  public static final String INPUT_TYPE_DRIVER = "DRIVER";
 
   /*
    * DBPTK SIARD formats
