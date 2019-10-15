@@ -7,6 +7,7 @@ import com.databasepreservation.common.shared.ViewerStructure.ViewerView;
 import com.databasepreservation.common.shared.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.common.shared.client.tools.ViewerStringUtils;
+import com.databasepreservation.desktop.client.common.MetadataField;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -26,9 +27,16 @@ public class CommonClientUtils {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
 
   public static void addSchemaInfoToFlowPanel(FlowPanel panel, ViewerSchema schema) {
-    panel.add(new HTMLPanel(getFieldHTML(messages.schemaName(), schema.getName())));
+    MetadataField schemaName = MetadataField.createInstance(messages.schemaName(), schema.getName());
+    schemaName.setCSSMetadata("metadata-field", "metadata-information-element-label",
+        "metadata-information-element-value");
+
+    panel.add(schemaName);
     if (ViewerStringUtils.isNotBlank(schema.getDescription())) {
-      panel.add(new HTMLPanel(getFieldHTML(messages.schemaDescription(), schema.getDescription())));
+      MetadataField description = MetadataField.createInstance(messages.schemaDescription(), schema.getDescription());
+      description.setCSSMetadata("metadata-field", "metadata-information-element-label",
+          "metadata-information-element-value");
+      panel.add(description);
     }
   }
 

@@ -4,7 +4,22 @@
 
     <ui:with field='messages' type='config.i18n.client.ClientMessages' />
     <g:FlowPanel>
-        <g:Label addStyleNames="h1"><ui:text from='{messages.menusidebar_structure}' /></g:Label>
-        <g:FlowPanel ui:field="contentItems"/>
+        <g:FlowPanel addStyleNames="structure-header">
+            <g:SimplePanel>
+                <g:Label addStyleNames="h1">
+                    <ui:text from='{messages.menusidebar_structure}'/>
+                </g:Label>
+            </g:SimplePanel>
+            <g:FlowPanel addStyleNames="advancedOptionsPanel">
+                <g:Label ui:field="switchLabel" addStyleNames="switch-label"/>
+                <g:SimpleCheckBox ui:field="advancedSwitch" addStyleNames="switch"/>
+            </g:FlowPanel>
+        </g:FlowPanel>
+        <g:FlowPanel>
+            <g:FlowPanel ui:field="structureInformation">
+                <g:SimplePanel ui:field="pageExplanation"/>
+            </g:FlowPanel>
+            <g:FlowPanel ui:field="contentItems"/>
+        </g:FlowPanel>
     </g:FlowPanel>
 </ui:UiBinder>

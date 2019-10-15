@@ -609,7 +609,7 @@ html, body, .main {
 				    CHECKBOX
 ************************************************/
 
-input[type="checkbox"] {
+.my-asyncdatagrid-display-scroll-wrapper input[type="checkbox"] {
     padding-left: 5px;
     padding-right: 5px;
     -webkit-appearance: button;
@@ -625,11 +625,65 @@ input[type="checkbox"] {
     border-width: thin;
 }
 
-input[type="checkbox"]:checked {
+.my-asyncdatagrid-display-scroll-wrapper input[type="checkbox"]:checked {
     background-color: #089de3;
 }
 
-input[type="checkbox"]:checked:after {
+.my-asyncdatagrid-display-scroll-wrapper input[type="checkbox"]:checked:after {
+    content: '\f00c';
+    font-size: 17px;
+    margin-left: -4px;
+    font-family: FontAwesome;
+}
+
+.connection-panel input[type="checkbox"] {
+    padding-left: 5px;
+    padding-right: 5px;
+    -webkit-appearance: button;
+    background-color: #eee;
+    color: #FFF;
+    white-space: nowrap;
+    overflow: hidden;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    border-color: #089de3;
+    border-style: solid;
+    border-width: thin;
+}
+
+.connection-panel input[type="checkbox"]:checked {
+    background-color: #089de3;
+}
+
+.connection-panel input[type="checkbox"]:checked:after {
+    content: '\f00c';
+    font-size: 17px;
+    margin-left: -4px;
+    font-family: FontAwesome;
+}
+
+.form-checkbox input[type="checkbox"] {
+    padding-left: 5px;
+    padding-right: 5px;
+    -webkit-appearance: button;
+    background-color: #eee;
+    color: #FFF;
+    white-space: nowrap;
+    overflow: hidden;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    border-color: #089de3;
+    border-style: solid;
+    border-width: thin;
+}
+
+.form-checkbox input[type="checkbox"]:checked {
+    background-color: #089de3;
+}
+
+.form-checkbox input[type="checkbox"]:checked:after {
     content: '\f00c';
     font-size: 17px;
     margin-left: -4px;
@@ -945,7 +999,7 @@ input[type="checkbox"]:checked:after {
 }
 
 .dialog-persist-errors-layout-footer .btn {
-    padding: 5px 0px;
+    /*padding: 5px 0px;*/
 }
 
 /**********************************************
@@ -1344,4 +1398,16 @@ input[type="checkbox"]:checked:after {
     display: block;
     height: 50vh;
     width: 100%;
+}
+
+.browseContent.wrapper {
+    display: unset;
+}
+
+.navigation-buttons {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    margin-right: 10px;
+    margin-bottom: 10px;
 }

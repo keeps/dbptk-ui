@@ -41,7 +41,7 @@ public class BasicTablePanel<C> extends Composite {
   private static BasicTablePanelUiBinder uiBinder = GWT.create(BasicTablePanelUiBinder.class);
 
   private final SingleSelectionModel<C> selectionModel;
-
+  private CellTable<C> display;
   private ScrollPanel displayScroll;
   private SimplePanel displayScrollWrapper;
 
@@ -49,18 +49,24 @@ public class BasicTablePanel<C> extends Composite {
     private Column<C, ?> column;
     private double widthEM;
     private SafeHtml header;
+    private boolean hide;
 
-    public ColumnInfo(SafeHtml header, double widthEM, Column<C, ?> column, String... addCellStyleNames) {
+    public ColumnInfo(SafeHtml header, boolean hide, double widthEM, Column<C, ?> column, String... addCellStyleNames) {
       this.header = header;
       this.widthEM = widthEM;
       this.column = column;
+      this.hide = hide;
       for (String addCellStyleName : addCellStyleNames) {
         this.column.setCellStyleNames(addCellStyleName);
       }
     }
 
+    public ColumnInfo(String header, boolean hide, double widthEM, Column<C, ?> column, String... addCellStyleNames) {
+      this(SafeHtmlUtils.fromString(header), hide, widthEM, column, addCellStyleNames);
+    }
+
     public ColumnInfo(String header, double widthEM, Column<C, ?> column, String... addCellStyleNames) {
-      this(SafeHtmlUtils.fromString(header), widthEM, column, addCellStyleNames);
+      this(SafeHtmlUtils.fromString(header), false, widthEM, column, addCellStyleNames);
     }
   }
 
@@ -84,7 +90,7 @@ public class BasicTablePanel<C> extends Composite {
     header.setWidget(headerContent);
     info.setWidget(infoContent);
 
-    CellTable<C> display = createTable(rowItems, columns);
+    display = createTable(rowItems, columns);
     selectionModel = new SingleSelectionModel<>();
     display.setSelectionModel(selectionModel);
 
@@ -168,8 +174,10 @@ public class BasicTablePanel<C> extends Composite {
 
     // add columns
     for (ColumnInfo<C> column : columns) {
-      cellTable.addColumn(column.column, column.header);
-      cellTable.setColumnWidth(column.column, column.widthEM, Style.Unit.EM);
+      if (!column.hide) {
+        cellTable.addColumn(column.column, column.header);
+        cellTable.setColumnWidth(column.column, column.widthEM, Style.Unit.EM);
+      }
     }
 
     // fetch rows
@@ -187,6 +195,8 @@ public class BasicTablePanel<C> extends Composite {
   public SingleSelectionModel<C> getSelectionModel() {
     return selectionModel;
   }
+
+  public CellTable<C> getDisplay() { return display; }
 
   @Override
   protected void onLoad() {

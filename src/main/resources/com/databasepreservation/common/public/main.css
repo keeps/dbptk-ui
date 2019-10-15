@@ -871,3 +871,56 @@ p[data-value]:after {
 .gwt-MenuBar .gwt-MenuItem {
     font-size: 1.3rem;
 }
+
+.structure-header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.advancedOptionsPanel {
+    align-self: center;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    display: inline-flex;
+}
+
+.advancedOptionsPanel .switch-label {
+    align-self: center;
+    padding-right: 2px;
+}
+
+.advancedOptionsPanel input.switch {
+    position: relative;
+    -webkit-appearance: none;
+    outline: none;
+    width: 50px;
+    height: 30px;
+    background-color: #ccc;
+    border-radius: 50px;
+    box-shadow: inset -20px 0 0 0 #ccc;
+    transition: .4s;
+}
+
+.advancedOptionsPanel input.switch:after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 3px;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    box-shadow: 2px 4px 6px rgba(0,0,0,0.2);
+    transition: .4s;
+    background: white;
+}
+
+.advancedOptionsPanel input.switch:checked {
+    box-shadow: inset 20px 0 0 0 #089de3;
+    border-color: #089de3;
+    background: #089de3;
+}
+
+.advancedOptionsPanel input.switch:checked:after {
+    left: 20px;
+    box-shadow: -2px 4px 3px rgba(0,0,0,0.05);
+}

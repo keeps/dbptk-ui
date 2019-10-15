@@ -20,6 +20,7 @@ import com.databasepreservation.common.shared.client.common.utils.ApplicationTyp
 import com.databasepreservation.common.shared.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.shared.client.tools.ViewerStringUtils;
+import com.databasepreservation.desktop.client.common.MetadataField;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -31,6 +32,8 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.SimpleCheckBox;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
@@ -56,9 +59,19 @@ public class SchemaStructurePanel extends RightPanel {
 
   private ViewerDatabase database;
   private ViewerSchema schema;
+  private boolean advancedMode = false; // True means advanced attributes are on, false means advanced view is off
 
   @UiField
-  FlowPanel contentItems;
+  FlowPanel contentItems, structureInformation;
+
+  @UiField
+  SimplePanel pageExplanation;
+
+  @UiField
+  SimpleCheckBox advancedSwitch;
+
+  @UiField
+  Label switchLabel;
 
   private SchemaStructurePanel(ViewerDatabase database, final String schemaUUID) {
     this.database = database;
@@ -81,8 +94,25 @@ public class SchemaStructurePanel extends RightPanel {
   }
 
   private void init() {
-    CommonClientUtils.addSchemaInfoToFlowPanel(contentItems, schema);
+    advancedSwitch.addClickHandler(event -> {
+      advancedMode = !advancedMode;
+      contentItems.clear();
+      initCellTables();
+    });
 
+    CommonClientUtils.addSchemaInfoToFlowPanel(structureInformation, schema);
+
+    Label subtitle = new Label(messages.schemaStructurePanelTextForPageSubtitle());
+    subtitle.addStyleName("h5");
+
+    pageExplanation.add(subtitle);
+
+    switchLabel.setText(messages.schemaStructurePanelTextForAdvancedOption());
+
+    initCellTables();
+  }
+
+  private void initCellTables() {
     for (ViewerTable viewerTable : schema.getTables()) {
       BasicTablePanel<ViewerColumn> basicTablePanelForTableColumns = getBasicTablePanelForTableColumns(viewerTable);
       contentItems.add(basicTablePanelForTableColumns);
@@ -112,23 +142,38 @@ public class SchemaStructurePanel extends RightPanel {
     Label header = new Label(messages.foreignKeys());
     header.addStyleName("h5");
 
-    return new BasicTablePanel<>(header, SafeHtmlUtils.EMPTY_SAFE_HTML, table.getForeignKeys().iterator(),
+    return new BasicTablePanel<ViewerForeignKey>(header, SafeHtmlUtils.EMPTY_SAFE_HTML,
+      table.getForeignKeys().iterator(),
 
-      new BasicTablePanel.ColumnInfo<>(messages.name(), 15, new TextColumn<ViewerForeignKey>() {
+      new BasicTablePanel.ColumnInfo<>(messages.schemaStructurePanelHeaderTextForForeignKeyName(), false, 15,
+        new TextColumn<ViewerForeignKey>() {
         @Override
         public String getValue(ViewerForeignKey foreignKey) {
           return foreignKey.getName();
         }
       }),
 
-      new BasicTablePanel.ColumnInfo<>(messages.foreignKeys_referencedSchema(), 15, new TextColumn<ViewerForeignKey>() {
+      new BasicTablePanel.ColumnInfo<>(messages.description(), false, 35, new TextColumn<ViewerForeignKey>() {
+        @Override
+        public String getValue(ViewerForeignKey foreignKey) {
+          if (ViewerStringUtils.isNotBlank(foreignKey.getDescription())) {
+            return foreignKey.getDescription();
+          } else {
+            return "";
+          }
+        }
+      }),
+
+      new BasicTablePanel.ColumnInfo<>(messages.foreignKeys_referencedSchema(), !advancedMode, 15,
+        new TextColumn<ViewerForeignKey>() {
         @Override
         public String getValue(ViewerForeignKey foreignKey) {
           return database.getMetadata().getTable(foreignKey.getReferencedTableUUID()).getSchemaName();
         }
       }),
 
-      new BasicTablePanel.ColumnInfo<>(messages.foreignKeys_referencedTable(), 15, new TextColumn<ViewerForeignKey>() {
+      new BasicTablePanel.ColumnInfo<>(messages.foreignKeys_referencedTable(), !advancedMode, 15,
+        new TextColumn<ViewerForeignKey>() {
         @Override
         public String getValue(ViewerForeignKey foreignKey) {
           return database.getMetadata().getTable(foreignKey.getReferencedTableUUID()).getName();
@@ -137,7 +182,7 @@ public class SchemaStructurePanel extends RightPanel {
 
       new BasicTablePanel.ColumnInfo<>(
         SafeHtmlUtils.fromSafeConstant(messages.mappingSourceToReferenced("<i class=\"fa fa-long-arrow-right\"></i>")),
-        20, new Column<ViewerForeignKey, SafeHtml>(new SafeHtmlCell()) {
+        !advancedMode, 20, new Column<ViewerForeignKey, SafeHtml>(new SafeHtmlCell()) {
           @Override
           public SafeHtml getValue(ViewerForeignKey foreignKey) {
             ViewerTable referencedTable = database.getMetadata().getTable(foreignKey.getReferencedTableUUID());
@@ -158,38 +203,29 @@ public class SchemaStructurePanel extends RightPanel {
           }
         }),
 
-      new BasicTablePanel.ColumnInfo<>(messages.foreignKeys_matchType(), 10, new TextColumn<ViewerForeignKey>() {
+      new BasicTablePanel.ColumnInfo<>(messages.foreignKeys_matchType(), !advancedMode, 10,
+        new TextColumn<ViewerForeignKey>() {
         @Override
         public String getValue(ViewerForeignKey foreignKey) {
           return foreignKey.getMatchType();
         }
       }),
 
-      new BasicTablePanel.ColumnInfo<>(messages.foreignKeys_updateAction(), 9, new TextColumn<ViewerForeignKey>() {
+      new BasicTablePanel.ColumnInfo<>(messages.foreignKeys_updateAction(), !advancedMode, 9,
+        new TextColumn<ViewerForeignKey>() {
         @Override
         public String getValue(ViewerForeignKey foreignKey) {
           return foreignKey.getUpdateAction();
         }
       }),
 
-      new BasicTablePanel.ColumnInfo<>(messages.foreignKeys_deleteAction(), 9, new TextColumn<ViewerForeignKey>() {
+      new BasicTablePanel.ColumnInfo<>(messages.foreignKeys_deleteAction(), !advancedMode, 9,
+        new TextColumn<ViewerForeignKey>() {
         @Override
         public String getValue(ViewerForeignKey foreignKey) {
           return foreignKey.getDeleteAction();
         }
-      }),
-
-      new BasicTablePanel.ColumnInfo<>(messages.description(), 35, new TextColumn<ViewerForeignKey>() {
-        @Override
-        public String getValue(ViewerForeignKey foreignKey) {
-          if (ViewerStringUtils.isNotBlank(foreignKey.getDescription())) {
-            return foreignKey.getDescription();
-          } else {
-            return "";
-          }
-        }
       })
-
     );
   }
 
@@ -215,9 +251,9 @@ public class SchemaStructurePanel extends RightPanel {
     }
 
     // create and return the table panel
-    return new BasicTablePanel<>(header, infoBuilder.toSafeHtml(), table.getColumns().iterator(),
+    return new BasicTablePanel<ViewerColumn>(header, infoBuilder.toSafeHtml(), table.getColumns().iterator(),
 
-      new BasicTablePanel.ColumnInfo<>(SafeHtmlUtils.EMPTY_SAFE_HTML, 2.2,
+      new BasicTablePanel.ColumnInfo<>(SafeHtmlUtils.EMPTY_SAFE_HTML, false, 2.2,
         new Column<ViewerColumn, SafeHtml>(new SafeHtmlCell()) {
           @Override
           public SafeHtml getValue(ViewerColumn column) {
@@ -232,39 +268,14 @@ public class SchemaStructurePanel extends RightPanel {
           }
         }, "primary-key-col"),
 
-      new BasicTablePanel.ColumnInfo<>(messages.columnName(), 15, new TextColumn<ViewerColumn>() {
+      new BasicTablePanel.ColumnInfo<>(messages.columnName(), false, 15, new TextColumn<ViewerColumn>() {
         @Override
         public String getValue(ViewerColumn column) {
           return column.getDisplayName();
         }
       }),
 
-      new BasicTablePanel.ColumnInfo<>(messages.typeName(), 15, new TextColumn<ViewerColumn>() {
-        @Override
-        public String getValue(ViewerColumn column) {
-          return column.getType().getTypeName();
-        }
-      }),
-
-      new BasicTablePanel.ColumnInfo<>(messages.originalTypeName(), 15, new TextColumn<ViewerColumn>() {
-        @Override
-        public String getValue(ViewerColumn column) {
-          return column.getType().getOriginalTypeName();
-        }
-      }),
-
-      new BasicTablePanel.ColumnInfo<>(messages.nullable(), 8, new TextColumn<ViewerColumn>() {
-        @Override
-        public String getValue(ViewerColumn column) {
-          if (column.getNillable()) {
-            return "Yes";
-          } else {
-            return "No";
-          }
-        }
-      }),
-
-      new BasicTablePanel.ColumnInfo<>(messages.description(), 35, new TextColumn<ViewerColumn>() {
+      new BasicTablePanel.ColumnInfo<>(messages.description(), false, 35, new TextColumn<ViewerColumn>() {
         @Override
         public String getValue(ViewerColumn column) {
           if (ViewerStringUtils.isNotBlank(column.getDescription())) {
@@ -273,8 +284,32 @@ public class SchemaStructurePanel extends RightPanel {
             return "";
           }
         }
-      })
+      }),
 
+      new BasicTablePanel.ColumnInfo<>(messages.typeName(), !advancedMode, 15, new TextColumn<ViewerColumn>() {
+        @Override
+        public String getValue(ViewerColumn column) {
+          return column.getType().getTypeName();
+        }
+      }),
+
+      new BasicTablePanel.ColumnInfo<>(messages.originalTypeName(), !advancedMode, 15, new TextColumn<ViewerColumn>() {
+        @Override
+        public String getValue(ViewerColumn column) {
+          return column.getType().getOriginalTypeName();
+        }
+      }),
+
+      new BasicTablePanel.ColumnInfo<>(messages.nullable(), !advancedMode, 8, new TextColumn<ViewerColumn>() {
+        @Override
+        public String getValue(ViewerColumn column) {
+          if (column.getNillable()) {
+            return "Yes";
+          } else {
+            return "No";
+          }
+        }
+      })
     );
   }
 }

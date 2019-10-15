@@ -25,7 +25,7 @@
 
         <!-- Convenience properties to set versions -->
         <version.gwt>2.8.2</version.gwt>
-        <version.dbptk>2.6.1-SNAPSHOT</version.dbptk>
+        <version.dbptk>2.6.2-SNAPSHOT</version.dbptk>
         <version.roda>3.0.2</version.roda>
 
         <version.jersey>2.27</version.jersey>
@@ -221,7 +221,6 @@
                         <extensions>true</extensions>
                         <configuration>
                             <moduleName>${desktop}</moduleName>
-                            <moduleName>${server}</moduleName>
                             <launcherDir>${project.build.directory}/${project.build.finalName}/WEB-INF/classes/public</launcherDir>
                             <webappDirectory>${project.build.directory}/${project.build.finalName}/WEB-INF/classes/public</webappDirectory>
                         </configuration>

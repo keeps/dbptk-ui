@@ -984,4 +984,13 @@ public interface ClientMessages extends Messages {
   String progressBarPanelTextForCreateWizardProgressTitle();
 
   String progressBarPanelTextForCreateWizardProgressSubTitle();
+
+  /*********************************************
+   * Structure Panel
+   ********************************************/
+  String schemaStructurePanelTextForAdvancedOption();
+
+  String schemaStructurePanelHeaderTextForForeignKeyName();
+
+  String schemaStructurePanelTextForPageSubtitle();
 }
