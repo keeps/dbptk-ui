@@ -8,7 +8,7 @@
 
     <g:FlowPanel addStyleNames="application-container">
         <m:BreadcrumbPanel ui:field="breadcrumb" />
-        <g:HorizontalPanel addStyleNames="browseContentPreviewPanel">
+        <g:HorizontalPanel addStyleNames="browseContentPreviewPanel metadata">
             <!-- LEFT PANEL -->
             <g:cell>
                 <sb:MetadataEditSidebar ui:field="sidebar" />

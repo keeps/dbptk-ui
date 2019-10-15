@@ -746,6 +746,11 @@ html, body, .main {
 /**********************************************
 				EDIT METADATA
 ************************************************/
+
+.browseContentPreviewPanel.metadata{
+    border-collapse: initial;
+}
+
 .metadata-panel {
     padding: 0em 1em;
     height: 100%;
