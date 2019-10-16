@@ -81,6 +81,9 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
   Button searchAdvancedGo;
 
   @UiField
+  Button clearSearchButton;
+
+  @UiField
   Button saveSearchButton;
   AsyncCallback<Void> saveQueryCallback;
 
@@ -308,12 +311,25 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
     searchInputBox.setText("");
   }
 
+  public void clearAdvancedSearchInputBox() {
+    if (fieldsPanel != null && fieldsPanel.getParent() != null && fieldsPanel.getParent().isVisible()) {
+      for (int i = 0; i < fieldsPanel.getWidgetCount(); i++) {
+        SearchFieldPanel searchAdvancedFieldPanel = (SearchFieldPanel) fieldsPanel.getWidget(i);
+        searchAdvancedFieldPanel.clear();
+      }
+    }
+  }
+
   public void setSearchAdvancedFieldOptionsAddVisible(boolean visible) {
     searchAdvancedFieldOptionsAdd.setVisible(visible);
   }
 
   public void setSearchAdvancedGoEnabled(boolean enabled) {
     searchAdvancedGo.setEnabled(enabled);
+  }
+
+  public void setClearSearchButtonEnabled(boolean enabled) {
+    clearSearchButton.setEnabled(enabled);
   }
 
   public void addSearchAdvancedFieldAddHandler(ClickHandler handler) {
@@ -323,6 +339,11 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
   @UiHandler("searchAdvancedGo")
   void handleSearchAdvancedGo(ClickEvent e) {
     doSearch();
+  }
+
+  @UiHandler("clearSearchButton")
+  void handleClearSearchButton(ClickEvent e) {
+    clearAdvancedSearchInputBox();
   }
 
   @Override

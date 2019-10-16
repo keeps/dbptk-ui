@@ -3,16 +3,15 @@ package com.databasepreservation.common.shared.client.common.visualization.brows
 import java.util.HashMap;
 import java.util.Map;
 
-import com.databasepreservation.common.shared.ViewerConstants;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.shared.client.common.RightPanel;
-import com.databasepreservation.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.shared.client.widgets.wcag.MarkdownWidgetWrapper;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
@@ -42,6 +41,9 @@ public class DatabaseReportPanel extends RightPanel {
 
   private ViewerDatabase database;
 
+  @UiField
+  Label title;
+
   @UiField(provided = true)
   MarkdownWidgetWrapper contentItems;
 
@@ -50,16 +52,13 @@ public class DatabaseReportPanel extends RightPanel {
     this.contentItems = new MarkdownWidgetWrapper(database.getUUID());
 
     initWidget(uiBinder.createAndBindUi(this));
+
+    title.setText(messages.titleReport());
   }
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
       BreadcrumbManager.updateBreadcrumb(breadcrumb,
-          BreadcrumbManager.forDesktopDatabaseReport(database.getMetadata().getName(), database.getUUID()));
-    } else {
-      BreadcrumbManager.updateBreadcrumb(breadcrumb,
-          BreadcrumbManager.forDatabaseReport(database.getMetadata().getName(), database.getUUID()));
-    }
+          BreadcrumbManager.forDatabaseReport(database.getUUID(), database.getMetadata().getName()));
   }
 }

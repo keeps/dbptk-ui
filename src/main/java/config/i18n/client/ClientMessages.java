@@ -502,6 +502,8 @@ public interface ClientMessages extends Messages {
 
   String basicActionDelete();
 
+  String basicActionOptions();
+
   /*********************************************
    * Sidebar Menus
    ********************************************/
@@ -993,4 +995,9 @@ public interface ClientMessages extends Messages {
   String schemaStructurePanelHeaderTextForForeignKeyName();
 
   String schemaStructurePanelTextForPageSubtitle();
+
+  /*********************************************
+   * Database Information Panel
+   ********************************************/
+  String databaseInformationTextForTitle();
 }

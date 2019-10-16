@@ -4,7 +4,11 @@
 
     <ui:with field='messages' type='config.i18n.client.ClientMessages' />
     <g:FlowPanel>
-        <g:Label addStyleNames="h1"><ui:text from='{messages.menusidebar_routines}' /></g:Label>
+        <g:FlowPanel addStyleNames="structure-header">
+            <g:SimplePanel>
+                <g:Label ui:field="title" addStyleNames="h1"/>
+            </g:SimplePanel>
+        </g:FlowPanel>
         <g:Label><ui:text from='{messages.includingStoredProceduresAndFunctions}' /></g:Label>
         <g:FlowPanel ui:field="contentItems"/>
     </g:FlowPanel>

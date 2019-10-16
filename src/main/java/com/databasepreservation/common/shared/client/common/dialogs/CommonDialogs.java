@@ -37,6 +37,16 @@ public class CommonDialogs {
     DANGER, NORMAL, WARNING
   }
 
+  public static void tablePanelOptions() {
+    final DialogBox dialogBox = new DialogBox(false, true);
+    dialogBox.setGlassEnabled(true);
+    dialogBox.setAnimationEnabled(true);
+    dialogBox.setWidth("400px");
+    dialogBox.setPopupPosition(0,0);
+    dialogBox.setHeight("400px");
+    dialogBox.show();
+  }
+
   public static void showConfirmDialog(String title, SafeHtml message, String cancelButtonText, String confirmButtonText,
                                        Level level, String width,
                                        final AsyncCallback<Boolean> callback) {

@@ -47,16 +47,29 @@ public class MultipleSelectionTablePanel<C> extends Composite {
   private CellTable<C> display;
   private ScrollPanel displayScroll;
   private SimplePanel displayScrollWrapper;
+  private String height;
 
   public static class ColumnInfo<C> {
     private Column<C, ?> column;
     private double widthEM;
+    private boolean hide;
     private SafeHtml header;
 
     public ColumnInfo(SafeHtml header, double widthEM, Column<C, ?> column, String... addCellStyleNames) {
       this.header = header;
       this.widthEM = widthEM;
       this.column = column;
+      this.hide = false;
+      for (String addCellStyleName : addCellStyleNames) {
+        this.column.setCellStyleNames(addCellStyleName);
+      }
+    }
+
+    public ColumnInfo(SafeHtml header, boolean hide, double widthEM, Column<C, ?> column, String... addCellStyleNames) {
+      this.header = header;
+      this.widthEM = widthEM;
+      this.column = column;
+      this.hide = hide;
       for (String addCellStyleName : addCellStyleNames) {
         this.column.setCellStyleNames(addCellStyleName);
       }
@@ -64,6 +77,10 @@ public class MultipleSelectionTablePanel<C> extends Composite {
 
     public ColumnInfo(String header, double widthEM, Column<C, ?> column, String... addCellStyleNames) {
       this(SafeHtmlUtils.fromString(header), widthEM, column, addCellStyleNames);
+    }
+
+    public ColumnInfo(String header, boolean hide, double widthEM, Column<C, ?> column, String... addCellStyleNames) {
+      this(SafeHtmlUtils.fromString(header), hide, widthEM, column, addCellStyleNames);
     }
   }
 
@@ -106,6 +123,12 @@ public class MultipleSelectionTablePanel<C> extends Composite {
 
     table.setVisible(false);
     selectionModel = new MultiSelectionModel<>();
+    this.height = "";
+
+  }
+
+  public void setHeight(String height) {
+    this.height = height;
   }
 
   public CellTable<C> getDisplay() {
@@ -147,7 +170,7 @@ public class MultipleSelectionTablePanel<C> extends Composite {
     displayScroll = new ScrollPanel(display);
     displayScrollWrapper = new SimplePanel(displayScroll);
     displayScrollWrapper.addStyleName("my-asyncdatagrid-display-scroll-wrapper");
-    displayScroll.setSize("100%", "70vh");
+    displayScroll.setSize("100%", height);
     table.setWidget(displayScrollWrapper);
 
     displayScroll.addScrollHandler(new ScrollHandler() {
@@ -226,8 +249,10 @@ public class MultipleSelectionTablePanel<C> extends Composite {
 
     // add columns
     for (ColumnInfo<C> column : columns) {
-      cellTable.addColumn(column.column, column.header);
-      cellTable.setColumnWidth(column.column, column.widthEM, Style.Unit.EM);
+      if (!column.hide) {
+        cellTable.addColumn(column.column, column.header);
+        cellTable.setColumnWidth(column.column, column.widthEM, Style.Unit.EM);
+      }
     }
 
     // fetch rows

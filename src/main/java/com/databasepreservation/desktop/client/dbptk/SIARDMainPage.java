@@ -11,6 +11,7 @@ import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.common.shared.client.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.shared.client.common.DefaultAsyncCallback;
+import com.databasepreservation.common.shared.client.common.MetadataField;
 import com.databasepreservation.common.shared.client.common.desktop.GenericField;
 import com.databasepreservation.common.shared.client.common.dialogs.CommonDialogs;
 import com.databasepreservation.common.shared.client.common.utils.ApplicationType;
@@ -22,7 +23,6 @@ import com.databasepreservation.common.shared.client.tools.Humanize;
 import com.databasepreservation.common.shared.client.tools.PathUtils;
 import com.databasepreservation.common.shared.client.tools.SolrHumanizer;
 import com.databasepreservation.common.shared.client.tools.ViewerStringUtils;
-import com.databasepreservation.desktop.client.common.MetadataField;
 import com.databasepreservation.desktop.client.common.NavigationPanel;
 import com.databasepreservation.desktop.client.common.dialogs.Dialogs;
 import com.databasepreservation.desktop.client.common.helper.HelperValidator;
@@ -323,7 +323,7 @@ public class SIARDMainPage extends Composite {
     btnBrowse.setVisible(false);
 
     btnBrowse.addClickHandler(event -> {
-      HistoryManager.gotoDesktopDatabase(database.getUUID());
+      HistoryManager.gotoDatabase(database.getUUID());
     });
 
     btnDelete = new Button();
@@ -642,7 +642,7 @@ public class SIARDMainPage extends Composite {
     btnExclude.setText(messages.basicActionDelete());
 
     btnBack.addClickHandler(event -> {
-      HistoryManager.gotoDesktopDatabase();
+      HistoryManager.gotoDatabase();
     });
 
     btnExclude.addClickHandler(event -> {

@@ -56,6 +56,10 @@
     text-overflow: ellipsis;
 }
 
+.btn-option:after {
+    content: "\f085";
+}
+
 /***********************************************
               Progress bar, from
  https://css-tricks.com/html5-progress-element/
@@ -81,7 +85,7 @@
 
 /* Styling the determinate progress element */
 
-progress[value] {
+progress[noicon] {
     /* Get rid of the default appearance */
     appearance: none;
 
@@ -515,6 +519,10 @@ p[data-value]:after {
 /**********************************************
 				SIDEBAR
 ************************************************/
+.font-size-small {
+    font-size: 0.7em !important;
+}
+
 .leftSidebar-facet-title {
     color: inherit;
     margin-bottom: 5px;
@@ -792,6 +800,14 @@ p[data-value]:after {
 }
 
 
+.row-field {
+    margin-bottom: 1.2rem;
+}
+
+.row-field:first-of-type {
+    margin-top: 1.2rem;
+}
+
 /**********************************************
                 TABLE DIAGRAM
 ************************************************/
@@ -877,11 +893,18 @@ p[data-value]:after {
     justify-content: space-between;
 }
 
+.advancedOptionsButton {
+    align-self: center;
+    margin-top: 2rem;
+    display: inline-flex;
+}
+
 .advancedOptionsPanel {
     align-self: center;
     margin-top: 2rem;
     margin-bottom: 1rem;
     display: inline-flex;
+    margin-left: 20px;
 }
 
 .advancedOptionsPanel .switch-label {
@@ -893,34 +916,75 @@ p[data-value]:after {
     position: relative;
     -webkit-appearance: none;
     outline: none;
-    width: 50px;
-    height: 30px;
+    width: 27px;
+    height: 15px;
     background-color: #ccc;
     border-radius: 50px;
-    box-shadow: inset -20px 0 0 0 #ccc;
     transition: .4s;
+    top: 2px;
 }
 
 .advancedOptionsPanel input.switch:after {
     content: "";
     position: absolute;
-    top: 2px;
-    left: 3px;
-    width: 26px;
-    height: 26px;
+    top: 1px;
+    left: 2px;
+    width: 13px;
+    height: 13px;
     border-radius: 50%;
-    box-shadow: 2px 4px 6px rgba(0,0,0,0.2);
     transition: .4s;
     background: white;
 }
 
 .advancedOptionsPanel input.switch:checked {
-    box-shadow: inset 20px 0 0 0 #089de3;
     border-color: #089de3;
     background: #089de3;
 }
 
 .advancedOptionsPanel input.switch:checked:after {
-    left: 20px;
-    box-shadow: -2px 4px 3px rgba(0,0,0,0.05);
+    left: 12px;
+}
+
+.table-row-description {
+    margin-bottom: 10px;
+}
+
+.btn-pull-right {
+    padding-right: 0 !important;
+}
+
+.footer-buttons-container {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    margin-bottom: 20px;
+    margin-right: 20px;
+}
+
+.column-description-block {
+    display: block;
+}
+
+.column-description {
+    font-size: 75%;
+    font-weight: lighter;
+    color: #6c757d !important;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.structure-header .h1 {
+    margin: 0;
+}
+
+.search-panel-container {
+    width: 100%;
+    margin-top: 20px;
+}
+
+.option-container {
+    height: 100%;
+    border: 1px solid #1D70A2;
+    padding: 20px;
 }

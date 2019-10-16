@@ -1,0 +1,29 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+
+    <g:FlowPanel ui:field="mainContainer">
+        <g:FlowPanel addStyleNames="structure-header">
+            <g:SimplePanel addStyleNames="h1" ui:field="mainHeader">
+            </g:SimplePanel>
+            <g:FlowPanel addStyleNames="advancedOptionsButton">
+                <g:SimplePanel addStyleNames="btn-item">
+                    <g:Button ui:field="options" addStyleNames="btn" />
+                </g:SimplePanel>
+            </g:FlowPanel>
+        </g:FlowPanel>
+
+        <g:FlowPanel ui:field="content" addStyleNames="option-container"/>
+
+        <g:FlowPanel addStyleNames="footer-buttons-container">
+            <g:FlowPanel ui:field="customButtons" addStyleNames="button-panel-right"/>
+            <g:FlowPanel addStyleNames="button-panel-right">
+                <g:SimplePanel addStyleNames="btn-item">
+                    <g:Button ui:field="btnBack" addStyleNames="btn btn-primary btn-back-wizard"/>
+                </g:SimplePanel>
+                <g:SimplePanel addStyleNames="btn-item">
+                    <g:Button ui:field="btnUpdate" addStyleNames="btn btn-primary"/>
+                </g:SimplePanel>
+            </g:FlowPanel>
+        </g:FlowPanel>
+    </g:FlowPanel>
+</ui:UiBinder>

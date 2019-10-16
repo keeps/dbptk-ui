@@ -23,7 +23,10 @@ import com.databasepreservation.common.shared.ViewerStructure.ViewerTable;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerType;
 import com.databasepreservation.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.shared.client.common.DefaultAsyncCallback;
+import com.databasepreservation.common.shared.client.common.MetadataField;
 import com.databasepreservation.common.shared.client.common.RightPanel;
+import com.databasepreservation.common.shared.client.common.desktop.GenericField;
+import com.databasepreservation.common.shared.client.common.fields.RowField;
 import com.databasepreservation.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.common.shared.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.shared.client.tools.BreadcrumbManager;
@@ -35,12 +38,10 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Hyperlink;
-import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 
 import config.i18n.client.ClientMessages;
+import org.apache.calcite.interpreter.Row;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -74,7 +75,7 @@ public class RowPanel extends RightPanel {
   SimplePanel recordHeader;
 
   @UiField
-  HTML rowID;
+  FlowPanel alternativeContent;
 
   private RowPanel(ViewerDatabase database, ViewerTable table, ViewerRow row) {
     this.rowUUID = row.getUUID();
@@ -84,10 +85,7 @@ public class RowPanel extends RightPanel {
 
     initWidget(uiBinder.createAndBindUi(this));
 
-    rowID.setHTML(SafeHtmlUtils.fromSafeConstant(
-      FontAwesomeIconManager.getTag(FontAwesomeIconManager.RECORD) + " " + SafeHtmlUtils.htmlEscape(rowUUID)));
-    recordHeader.setWidget(CommonClientUtils.getSchemaAndTableHeader(database.getUUID(), table, "h1"));
-
+    setTitle();
     init();
   }
 
@@ -98,9 +96,7 @@ public class RowPanel extends RightPanel {
 
     initWidget(uiBinder.createAndBindUi(this));
 
-    rowID.setHTML(SafeHtmlUtils.fromSafeConstant(
-      FontAwesomeIconManager.getTag(FontAwesomeIconManager.RECORD) + " " + SafeHtmlUtils.htmlEscape(rowUUID)));
-    recordHeader.setWidget(CommonClientUtils.getSchemaAndTableHeader(database.getUUID(), table, "h1"));
+    setTitle();
 
     BrowserService.Util.getInstance().retrieveRows(database.getUUID(), rowUUID, new DefaultAsyncCallback<ViewerRow>() {
       @Override
@@ -111,15 +107,22 @@ public class RowPanel extends RightPanel {
     });
   }
 
+  private void setTitle() {
+    String iconTag = FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE);
+    String separatorIconTag = FontAwesomeIconManager.getTag(FontAwesomeIconManager.SCHEMA_TABLE_SEPARATOR);
+    if (database.getMetadata().getSchemas().size() == 1) {
+      recordHeader.setWidget(CommonClientUtils.getHeader(iconTag, table, "h1"));
+    } else {
+      SafeHtml html;
+      html = SafeHtmlUtils.fromSafeConstant(table.getSchemaName() + " " + separatorIconTag + " " + table.getName());
+      recordHeader.setWidget(CommonClientUtils.getHeader(iconTag, html, "h1"));
+    }
+  }
+
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
-      BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forDesktopRecord(database.getMetadata().getName(),
-          database.getUUID(), table.getSchemaName(), table.getSchemaUUID(), table.getName(), table.getUUID(), rowUUID));
-    } else {
-      BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forRecord(database.getMetadata().getName(),
-        database.getUUID(), table.getSchemaName(), table.getSchemaUUID(), table.getName(), table.getUUID(), rowUUID));
-    }
+    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forRecord(database.getMetadata().getName(),
+        database.getUUID(), table.getName(), table.getUUID(), rowUUID));
   }
 
   private void init() {
@@ -186,11 +189,11 @@ public class RowPanel extends RightPanel {
     for (ViewerColumn column : table.getColumns()) {
       boolean isPrimaryKeyColumn = table.getPrimaryKey() != null
         && table.getPrimaryKey().getColumnIndexesInViewerTable().contains(column.getColumnIndexInEnclosingTable());
-      b.append(getCellHTML(column, colIndexRelatedTo.get(column.getSolrName()),
-        colIndexReferencedBy.get(column.getSolrName()), isPrimaryKeyColumn));
+      getCellHTML(column, colIndexRelatedTo.get(column.getSolrName()),
+        colIndexReferencedBy.get(column.getSolrName()), isPrimaryKeyColumn);
     }
 
-    content.setHTML(b.toSafeHtml());
+    //content.setHTML(b.toSafeHtml());
   }
 
   private SafeHtml getForeignKeyHTML(String prefix, Set<Ref> refs, ViewerRow row) {
@@ -227,7 +230,7 @@ public class RowPanel extends RightPanel {
     }
   }
 
-  private SafeHtml getCellHTML(ViewerColumn column, Set<Ref> relatedTo, Set<Ref> referencedBy,
+  private void getCellHTML(ViewerColumn column, Set<Ref> relatedTo, Set<Ref> referencedBy,
     boolean isPrimaryKeyColumn) {
     String label = column.getDisplayName();
 
@@ -239,18 +242,14 @@ public class RowPanel extends RightPanel {
       }
     }
 
-    SafeHtmlBuilder b = new SafeHtmlBuilder();
-    b.appendHtmlConstant("<div class=\"field field-margin\">");
+    RowField rowField;
+
     if (isPrimaryKeyColumn) {
-      b.appendHtmlConstant("<div class=\"label fa-key\">");
-    } else {
-      b.appendHtmlConstant("<div class=\"label noicon\">");
-    }
-    b.appendEscaped(label);
-    b.appendHtmlConstant("</div>");
-    b.appendHtmlConstant("<div class=\"value\">");
-    if (value == null) {
-      b.appendEscaped("NULL");
+      String iconTag = FontAwesomeIconManager.getTag(FontAwesomeIconManager.KEY, "Primary Key");
+      rowField = RowField.createInstance(iconTag, label, new HTML(value));
+
+    } else if (value == null) {
+      rowField = RowField.createInstance(label, new HTML("NULL"));
     } else {
       if (column.getType().getDbType().equals(ViewerType.dbTypes.BINARY)) {
         StringBuilder urlBuilder = new StringBuilder();
@@ -259,27 +258,25 @@ public class RowPanel extends RightPanel {
         String resource = ViewerConstants.API_V1_LOBS_RESOURCE;
         String databaseUUID = database.getUUID();
         String tableUUID = table.getUUID();
-        urlBuilder.append(base).append(servlet).append(resource).append("/").append(databaseUUID).append("/")
-          .append(tableUUID).append("/").append(row.getUUID()).append("/")
-          .append(column.getColumnIndexInEnclosingTable());
-        b.appendHtmlConstant("<a href=\"" + urlBuilder.toString() + "\">");
-        b.appendEscaped(messages.row_downloadLOB());
-        b.appendHtmlConstant("</a>");
+        urlBuilder.append(servlet).append(resource).append("/").append(databaseUUID).append("/")
+                .append(tableUUID).append("/").append(row.getUUID()).append("/")
+                .append(column.getColumnIndexInEnclosingTable());
+        Anchor anchor = new Anchor(messages.row_downloadLOB(), urlBuilder.toString());
+        rowField = RowField.createInstance(label, anchor);
       } else {
-        b.appendEscaped(value);
+        rowField = RowField.createInstance(label, new HTML(value));
       }
     }
-    b.appendHtmlConstant("</div>");
 
     if (relatedTo != null && !relatedTo.isEmpty()) {
-      b.append(getForeignKeyHTML(messages.references_isRelatedTo(), relatedTo, row));
+      rowField.addRelatedTo(getForeignKeyHTML(messages.references_isRelatedTo(), relatedTo, row), "field");
     }
 
     if (referencedBy != null && !referencedBy.isEmpty()) {
-      b.append(getForeignKeyHTML(messages.references_isReferencedBy(), referencedBy, row));
+      rowField.addReferencedBy(getForeignKeyHTML(messages.references_isReferencedBy(), referencedBy, row), "field");
     }
 
-    return b.toSafeHtml();
+    alternativeContent.add(rowField);
   }
 
   /**

@@ -1,6 +1,5 @@
 package com.databasepreservation.common.shared.client.common.visualization.browse;
 
-import com.databasepreservation.common.shared.client.common.utils.ApplicationType;
 import org.roda.core.data.v2.index.filter.BasicSearchFilterParameter;
 import org.roda.core.data.v2.index.filter.Filter;
 
@@ -16,16 +15,17 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
+
+import config.i18n.client.ClientMessages;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class DatabaseSearchesPanel extends RightPanel {
-  public static DatabaseSearchesPanel createInstance(ViewerDatabase database) {
-    return new DatabaseSearchesPanel(database);
-  }
+  private static final ClientMessages messages = GWT.create(ClientMessages.class);
 
   interface DatabaseSearchesPanelUiBinder extends UiBinder<Widget, DatabaseSearchesPanel> {
   }
@@ -35,8 +35,15 @@ public class DatabaseSearchesPanel extends RightPanel {
   private ViewerDatabase database;
   private SavedSearchList savedSearchList;
 
+  public static DatabaseSearchesPanel createInstance(ViewerDatabase database) {
+    return new DatabaseSearchesPanel(database);
+  }
+
   @UiField
   FlowPanel content;
+
+  @UiField
+  Label title;
 
   private DatabaseSearchesPanel(ViewerDatabase database) {
     this.database = database;
@@ -47,16 +54,12 @@ public class DatabaseSearchesPanel extends RightPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
-      BreadcrumbManager.updateBreadcrumb(breadcrumb,
-          BreadcrumbManager.forDesktopDatabaseSavedSearches(database.getUUID(), database.getMetadata().getName()));
-    } else {
-      BreadcrumbManager.updateBreadcrumb(breadcrumb,
-          BreadcrumbManager.forDatabase(database.getMetadata().getName(), database.getUUID()));
-    }
+    BreadcrumbManager.updateBreadcrumb(breadcrumb,
+          BreadcrumbManager.forDatabaseSavedSearches(database.getUUID(), database.getMetadata().getName()));
   }
 
   private void init() {
+    title.setText(messages.menusidebar_savedSearches());
     savedSearchList = new SavedSearchList(database.getUUID(),
       new Filter(new BasicSearchFilterParameter(ViewerConstants.SOLR_SEARCHES_DATABASE_UUID, database.getUUID())),
       null, null, false, false);

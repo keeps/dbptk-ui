@@ -1,4 +1,4 @@
-package com.databasepreservation.desktop.client.common;
+package com.databasepreservation.common.shared.client.common;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -22,34 +22,38 @@ public class MetadataField extends Composite {
   FlowPanel metadataField;
 
   @UiField
-  Label metadataKey, metadataValue;
+  Label metadataLabel, metadataValue;
 
-  public static MetadataField createInstance(String key, String value) {
-    return new MetadataField(key, value);
+  public static MetadataField createInstance(String label, String value) {
+    return new MetadataField(label, value);
   }
 
   public static MetadataField createInstance(String value) {
     return new MetadataField(null, value);
   }
 
-  private MetadataField(String key, String value) {
+  private MetadataField(String label, String value) {
     initWidget(binder.createAndBindUi(this));
 
-    if (key != null) {
-      metadataKey.setText(key);
+    if (label != null) {
+      metadataLabel.setText(label);
     } else {
-      metadataKey.setVisible(false);
+      metadataLabel.setVisible(false);
     }
 
     metadataValue.setText(value);
   }
 
-  public void setCSSMetadata(String cssParent, String cssKey, String cssValue) {
+  public void setCSS(String styleName) {
+    metadataField.addStyleName(styleName);
+  }
+
+  public void setCSSMetadata(String cssParent, String cssLabel, String cssValue) {
 
     if (cssParent != null) {
       metadataField.addStyleName(cssParent);
     }
-    metadataKey.addStyleName(cssKey);
+    metadataLabel.addStyleName(cssLabel);
     metadataValue.addStyleName(cssValue);
   }
 

@@ -42,6 +42,8 @@
                           ui:field="searchAdvancedGo" enabled="false"><ui:text from='{messages.search}' /></g:Button>
                 <g:Button styleName="btn btn-save searchPanelAdvancedSaveSearchButton"
                           ui:field="saveSearchButton" enabled="false" visible="false" />
+                <g:Button styleName="btn btn-refresh searchPanelAdvancedSaveSearchButton"
+                          ui:field="clearSearchButton" enabled="false" ><ui:text from='{messages.basicActionClear}' /></g:Button>
             </g:FlowPanel>
         </g:FlowPanel>
         <g:FlowPanel addStyleNames="searchPreFilters" ui:field="searchPreFilters"/>

@@ -3,11 +3,9 @@ package com.databasepreservation.common.shared.client.common.visualization.brows
 import java.util.HashMap;
 import java.util.Map;
 
-import com.google.gwt.user.client.ui.FlowPanel;
 import org.roda.core.data.v2.user.User;
 
 import com.databasepreservation.common.client.BrowserService;
-import com.databasepreservation.common.shared.ViewerConstants;
 import com.databasepreservation.common.shared.ViewerStructure.IsIndexed;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.common.shared.client.breadcrumb.BreadcrumbPanel;
@@ -15,10 +13,7 @@ import com.databasepreservation.common.shared.client.common.DefaultAsyncCallback
 import com.databasepreservation.common.shared.client.common.LoginStatusListener;
 import com.databasepreservation.common.shared.client.common.RightPanel;
 import com.databasepreservation.common.shared.client.common.UserLogin;
-import com.databasepreservation.common.shared.client.common.sidebar.DatabaseSidebarAbstract;
-import com.databasepreservation.common.shared.client.common.sidebar.DesktopDatabaseSidebar;
-import com.databasepreservation.common.shared.client.common.sidebar.ServerDatabaseSidebar;
-import com.databasepreservation.common.shared.client.common.utils.ApplicationType;
+import com.databasepreservation.common.shared.client.common.sidebar.DatabaseSidebar;
 import com.databasepreservation.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.shared.client.common.utils.RightPanelLoader;
 import com.databasepreservation.common.shared.client.tools.BreadcrumbManager;
@@ -34,6 +29,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.MenuItem;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -69,7 +65,7 @@ public class DatabasePanel extends Composite {
   BreadcrumbPanel breadcrumb;
 
   @UiField(provided = true)
-  DatabaseSidebarAbstract sidebar;
+  DatabaseSidebar sidebar;
 
   @UiField
   SimplePanel rightPanelContainer;
@@ -86,11 +82,7 @@ public class DatabasePanel extends Composite {
 
   private DatabasePanel(String databaseUUID, boolean initMenu) {
     this.databaseUUID = databaseUUID;
-    if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
-      this.sidebar = DesktopDatabaseSidebar.getInstance(databaseUUID);
-    } else {
-      this.sidebar = ServerDatabaseSidebar.getInstance(databaseUUID);
-    }
+    this.sidebar = DatabaseSidebar.getInstance(databaseUUID);
 
     initWidget(uiBinder.createAndBindUi(this));
 
@@ -224,40 +216,43 @@ public class DatabasePanel extends Composite {
     }
   }
 
-  public void load(RightPanelLoader rightPanelLoader) {
+  public void load(RightPanelLoader rightPanelLoader, String toSelect) {
     GWT.log("load. uuid: " + databaseUUID + ", database: " + database);
     if (databaseUUID != null && (database == null || !ViewerDatabase.Status.AVAILABLE.equals(database.getStatus()))) {
       // need to load database (not present or not available), go get it
       GWT.log("getting db");
-      loadPanelWithDatabase(rightPanelLoader);
+      loadPanelWithDatabase(rightPanelLoader, toSelect);
     } else {
-      loadPanel(rightPanelLoader);
+      loadPanel(rightPanelLoader, toSelect);
     }
   }
 
-  private void loadPanelWithDatabase(final RightPanelLoader rightPanelLoader) {
+  private void loadPanelWithDatabase(final RightPanelLoader rightPanelLoader, String toSelect) {
     BrowserService.Util.getInstance().retrieve(databaseUUID, ViewerDatabase.class.getName(), databaseUUID,
       new DefaultAsyncCallback<IsIndexed>() {
         @Override
         public void onSuccess(IsIndexed result) {
           database = (ViewerDatabase) result;
-          loadPanel(rightPanelLoader);
+          loadPanel(rightPanelLoader, toSelect);
         }
       });
   }
 
-  private void loadPanel(RightPanelLoader rightPanelLoader) {
-    GWT.log("have db: " + database + "sb.init: " + sidebar.isInitialized());
+  private void loadPanel(RightPanelLoader rightPanelLoader, String toSelect) {
+    GWT.log("have db: " + database + " sb.init: " + sidebar.isInitialized());
+    GWT.log("to select: " + toSelect);
     RightPanel rightPanel = rightPanelLoader.load(database);
 
     if (database != null && !sidebar.isInitialized()) {
       sidebar.init(database);
+      sidebar.select(toSelect);
     }
 
     if (rightPanel != null) {
       rightPanel.handleBreadcrumb(breadcrumb);
       rightPanelContainer.setWidget(rightPanel);
       rightPanel.setVisible(true);
+      sidebar.select(toSelect);
     }
   }
 

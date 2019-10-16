@@ -10,7 +10,7 @@
             <g:HorizontalPanel addStyleNames="browseContentPreviewPanel">
                 <!-- LEFT PANEL -->
                 <g:cell>
-                    <sb:DatabaseSidebarAbstract ui:field="sidebar" />
+                    <sb:DatabaseSidebar ui:field="sidebar"/>
                 </g:cell>
                 <!-- RIGHT PANEL -->
                 <g:cell width="100%">

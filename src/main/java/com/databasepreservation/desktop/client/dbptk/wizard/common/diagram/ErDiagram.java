@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import com.databasepreservation.common.shared.ViewerConstants;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerForeignKey;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerMetadata;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerSchema;
@@ -105,7 +106,7 @@ public class ErDiagram extends Composite {
           int minColumnsAndRowsBiggerThanZero = Integer.MAX_VALUE;
 
           for (ViewerTable viewerTable : schema.getTables()) {
-            if (!viewerTable.getName().startsWith("VIEW_")) {
+            if (!viewerTable.getName().startsWith(ViewerConstants.MATERIALIZED_VIEW_PREFIX)) {
               VisNode visNode = new VisNode(viewerTable.getUUID(), viewerTable.getName());
 
               visNode.numColumns = viewerTable.getColumns().size();

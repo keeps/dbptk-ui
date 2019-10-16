@@ -4,21 +4,25 @@ import com.databasepreservation.common.shared.ViewerConstants;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerSchema;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerTable;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerView;
+import com.databasepreservation.common.shared.client.common.MetadataField;
 import com.databasepreservation.common.shared.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.common.shared.client.tools.ViewerStringUtils;
-import com.databasepreservation.desktop.client.common.MetadataField;
+import com.databasepreservation.utils.ListUtils;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 
 import config.i18n.client.ClientMessages;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -38,6 +42,88 @@ public class CommonClientUtils {
           "metadata-information-element-value");
       panel.add(description);
     }
+  }
+
+  public static FlowPanel getHeader(String iconTag, ViewerTable table, String hClass) {
+    String displayName;
+    if (table.getName().startsWith(ViewerConstants.MATERIALIZED_VIEW_PREFIX)) {
+      displayName = table.getName().substring(ViewerConstants.MATERIALIZED_VIEW_PREFIX.length());
+    } else {
+      displayName = table.getName();
+    }
+
+    return getHeader(iconTag, displayName, hClass);
+  }
+
+  public static FlowPanel getHeader(String iconTag, String title, String hClass) {
+    FlowPanel panel = new FlowPanel();
+
+    SafeHtmlBuilder safeHtmlBuilder = new SafeHtmlBuilder();
+    safeHtmlBuilder.append(SafeHtmlUtils.fromSafeConstant(iconTag)).appendEscaped(" ")
+        .append(SafeHtmlUtils.fromString(title));
+
+    HTML html = new HTML(safeHtmlBuilder.toSafeHtml());
+    html.addStyleName(hClass);
+    panel.add(html);
+
+    return panel;
+  }
+
+  public static FlowPanel getHeader(String iconTag, SafeHtml title, String hClass) {
+    FlowPanel panel = new FlowPanel();
+
+    SafeHtmlBuilder safeHtmlBuilder = new SafeHtmlBuilder();
+    safeHtmlBuilder.append(SafeHtmlUtils.fromSafeConstant(iconTag)).appendEscaped(" ")
+        .append(title);
+
+    HTML html = new HTML(SafeHtmlUtils.fromSafeConstant(iconTag));
+    html.addStyleName(hClass);
+    panel.add(html);
+
+    return panel;
+  }
+
+  public static SafeHtmlBuilder constructViewQuery(ViewerView view) {
+    SafeHtmlBuilder infoBuilder = new SafeHtmlBuilder();
+
+    if (ViewerStringUtils.isNotBlank(view.getQueryOriginal())) {
+      infoBuilder.append(CommonClientUtils.getFieldHTML(messages.originalQuery(), SafeHtmlUtils.fromSafeConstant(
+        "<pre><code class='sql'>" + SafeHtmlUtils.htmlEscape(view.getQueryOriginal()) + "</code></pre>")));
+    }
+
+    if (ViewerStringUtils.isNotBlank(view.getQuery())) {
+      infoBuilder.append(CommonClientUtils.getFieldHTML(messages.query(), SafeHtmlUtils
+        .fromSafeConstant("<pre><code class='sql'>" + SafeHtmlUtils.htmlEscape(view.getQuery()) + "</code></pre>")));
+    }
+
+    return infoBuilder;
+  }
+
+  public static SafeHtmlBuilder constructSpan(String value, String title, String css) {
+    SafeHtmlBuilder span = new SafeHtmlBuilder();
+
+    if (title == null) title = "";
+
+    span.append(SafeHtmlUtils.fromSafeConstant("<span class='"))
+            .append(SafeHtmlUtils.fromSafeConstant(css))
+            .append(SafeHtmlUtils.fromSafeConstant("' title='"))
+            .append(SafeHtmlUtils.fromSafeConstant(title))
+            .append(SafeHtmlUtils.fromSafeConstant("'>"))
+            .append(SafeHtmlUtils.fromSafeConstant(value))
+            .append(SafeHtmlUtils.fromSafeConstant("</span>"));
+    return span;
+  }
+
+  public static SafeHtml wrapOnDiv(List<SafeHtmlBuilder> builders) {
+    SafeHtmlBuilder div = new SafeHtmlBuilder();
+
+    div.append(SafeHtmlUtils.fromSafeConstant("<div>"));
+    for (SafeHtmlBuilder builder : builders) {
+      div.append(builder.toSafeHtml());
+    }
+    div.append(SafeHtmlUtils.fromSafeConstant("</div>"));
+
+    return div.toSafeHtml();
   }
 
   public static FlowPanel getSchemaAndTableHeader(String databaseUUID, ViewerTable table, String hClass) {

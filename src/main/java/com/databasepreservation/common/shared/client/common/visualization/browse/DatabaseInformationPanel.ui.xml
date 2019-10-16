@@ -4,7 +4,17 @@
 
 
     <g:FlowPanel>
-        <g:Label addStyleNames="h1"><ui:msg>Database information</ui:msg></g:Label>
-        <g:HTML ui:field="metadatahtml"/>
+        <g:FlowPanel addStyleNames="structure-header">
+            <g:SimplePanel>
+                <g:Label ui:field="title" addStyleNames="h1" />
+            </g:SimplePanel>
+            <g:FlowPanel addStyleNames="advancedOptionsPanel">
+                <g:Label ui:field="switchLabel" addStyleNames="switch-label"/>
+                <g:SimpleCheckBox ui:field="advancedSwitch" addStyleNames="switch"/>
+            </g:FlowPanel>
+        </g:FlowPanel>
+
+        <g:FlowPanel ui:field="metadataContent" />
+        <g:FlowPanel ui:field="dataContent" />
     </g:FlowPanel>
 </ui:UiBinder>

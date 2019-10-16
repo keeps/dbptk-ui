@@ -6,18 +6,20 @@ import java.util.Map;
 import com.databasepreservation.common.shared.ViewerConstants;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerMetadata;
+import com.databasepreservation.common.shared.ViewerStructure.ViewerSchema;
 import com.databasepreservation.common.shared.client.breadcrumb.BreadcrumbPanel;
+import com.databasepreservation.common.shared.client.common.MetadataField;
 import com.databasepreservation.common.shared.client.common.RightPanel;
 import com.databasepreservation.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.shared.client.tools.ViewerStringUtils;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.SimpleCheckBox;
+import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
@@ -46,9 +48,20 @@ public class DatabaseInformationPanel extends RightPanel {
   private static DatabaseInformationPanelUiBinder uiBinder = GWT.create(DatabaseInformationPanelUiBinder.class);
 
   private ViewerDatabase database;
+  private boolean advancedMode = false; // True means advanced attributes are on, false means advanced view is off
 
   @UiField
-  HTML metadatahtml;
+  Label title;
+
+  @UiField
+  FlowPanel metadataContent, dataContent;
+
+
+  @UiField
+  SimpleCheckBox advancedSwitch;
+
+  @UiField
+  Label switchLabel;
 
   private DatabaseInformationPanel(ViewerDatabase database) {
     this.database = database;
@@ -59,50 +72,83 @@ public class DatabaseInformationPanel extends RightPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
-      BreadcrumbManager.updateBreadcrumb(breadcrumb,
-        BreadcrumbManager.forDesktopSIARDBrowse(database.getUUID(), database.getMetadata().getName()));
-    } else {
-      BreadcrumbManager.updateBreadcrumb(breadcrumb,
-        BreadcrumbManager.forDatabase(database.getMetadata().getName(), database.getUUID()));
-    }
+    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forDatabaseInformation(database.getUUID(), database.getMetadata().getName()));
   }
 
   private void init() {
-    // database metadata
-    ViewerMetadata metadata = database.getMetadata();
-    SafeHtmlBuilder b = new SafeHtmlBuilder();
-    b.append(getFieldHTML(messages.siardMetadata_databaseName(), metadata.getName()));
-    b.append(getFieldHTML(messages.siardMetadata_archivalDate(),
-      metadata.getArchivalDate() != null ? metadata.getArchivalDate().substring(0, 10) : metadata.getArchivalDate()));
-    b.append(getFieldHTML(messages.siardMetadata_archivist(), metadata.getArchiver()));
-    b.append(getFieldHTML(messages.siardMetadata_archivistContact(), metadata.getArchiverContact()));
-    b.append(getFieldHTML(messages.siardMetadata_clientMachine(), metadata.getClientMachine()));
-    b.append(getFieldHTML(messages.siardMetadata_databaseProduct(), metadata.getDatabaseProduct()));
-    b.append(getFieldHTML(messages.siardMetadata_databaseUser(), metadata.getDatabaseUser()));
-    b.append(getFieldHTML(messages.siardMetadata_dataOriginTimeSpan(), metadata.getDataOriginTimespan()));
-    b.append(getFieldHTML(messages.siardMetadata_dataOwner(), metadata.getDataOwner()));
-    if (ViewerStringUtils.isNotBlank(metadata.getDescription())) {
-      b.append(getFieldHTML(messages.description(), metadata.getDescription()));
-    } else {
-      b.append(getFieldHTML(messages.description(), messages.siardMetadata_DescriptionUnavailable()));
-    }
-    b.append(getFieldHTML(messages.siardMetadata_producerApplication(), metadata.getProducerApplication()));
-    metadatahtml.setHTML(b.toSafeHtml());
+    advancedSwitch.addClickHandler(event -> {
+      advancedMode = !advancedMode;
+      metadataContent.clear();
+      initMetadataContent();
+      dataContent.clear();
+      initDataContent();
+    });
+
+    title.setText(messages.databaseInformationTextForTitle());
+    switchLabel.setText(messages.schemaStructurePanelTextForAdvancedOption());
+    initMetadataContent();
+    initDataContent();
   }
 
-  private SafeHtml getFieldHTML(String label, String value) {
-    SafeHtmlBuilder b = new SafeHtmlBuilder();
-    if (value != null) {
-      b.append(SafeHtmlUtils.fromSafeConstant("<div class=\"field\">"));
-      b.append(SafeHtmlUtils.fromSafeConstant("<div class=\"label\">"));
-      b.append(SafeHtmlUtils.fromString(label));
-      b.append(SafeHtmlUtils.fromSafeConstant("</div>"));
-      b.append(SafeHtmlUtils.fromSafeConstant("<div class=\"value\">"));
-      b.append(SafeHtmlUtils.fromString(value));
-      b.append(SafeHtmlUtils.fromSafeConstant("</div>"));
-      b.append(SafeHtmlUtils.fromSafeConstant("</div>"));
+  private void initDataContent() {
+    if (database.getMetadata().getSchemas().size() == 1) {
+      final SchemaDataPanel instance = SchemaDataPanel.getInstance(database, database.getMetadata().getSchemas().get(0).getUUID());
+      instance.reload(advancedMode);
+      dataContent.add(instance);
+    } else {
+      TabPanel tabPanel = new TabPanel();
+      for (ViewerSchema schema : database.getMetadata().getSchemas()) {
+        tabPanel.addStyleName("browseItemMetadata");
+        final SchemaDataPanel instance = SchemaDataPanel.getInstance(database, schema.getUUID());
+        instance.reload(advancedMode);
+        tabPanel.add(instance, schema.getName());
+
+      }
+      tabPanel.selectTab(0);
+      dataContent.add(tabPanel);
     }
-    return b.toSafeHtml();
+  }
+
+  private void initMetadataContent() {
+    // database metadata
+    ViewerMetadata metadata = database.getMetadata();
+
+    metadataContent.add(getMetadataField(messages.siardMetadata_databaseName(), metadata.getName()));
+    if (ViewerStringUtils.isNotBlank(metadata.getDescription())) {
+      metadataContent.add(getMetadataField(messages.description(), metadata.getDescription()));
+    } else {
+      metadataContent.add(getMetadataField(messages.description(), messages.siardMetadata_DescriptionUnavailable()));
+    }
+    metadataContent
+      .add(getMetadataField(messages.siardMetadata_dataOriginTimeSpan(), metadata.getDataOriginTimespan()));
+    metadataContent.add(getMetadataField(messages.siardMetadata_dataOwner(), metadata.getDataOwner()));
+    metadataContent.add(getMetadataField(messages.siardMetadata_archivalDate(),
+      metadata.getArchivalDate() != null ? metadata.getArchivalDate().substring(0, 10) : metadata.getArchivalDate()));
+
+    if (advancedMode) {
+      metadataContent.add(getMetadataField(messages.siardMetadata_archivist(), metadata.getArchiver()));
+      metadataContent.add(getMetadataField(messages.siardMetadata_archivistContact(), metadata.getArchiverContact()));
+      metadataContent.add(getMetadataField(messages.siardMetadata_clientMachine(), metadata.getClientMachine()));
+      metadataContent.add(getMetadataField(messages.siardMetadata_databaseProduct(), metadata.getDatabaseProduct()));
+      metadataContent
+        .add(getMetadataField(messages.siardMetadata_producerApplication(), metadata.getProducerApplication()));
+    }
+  }
+
+  private MetadataField getMetadataField(String label, String value) {
+    if (value != null) {
+      MetadataField metadataField = MetadataField.createInstance(label, value);
+      metadataField.setCSSMetadata("metadata-field", "metadata-information-element-label",
+        "metadata-information-element-value");
+
+      return metadataField;
+    }
+
+    final MetadataField instance = MetadataField.createInstance(label,
+      messages.managePageTableHeaderTextForDatabaseStatus());
+    instance.setCSSMetadata("metadata-field", "metadata-information-element-label",
+      "metadata-information-element-value");
+
+    return instance;
   }
 }

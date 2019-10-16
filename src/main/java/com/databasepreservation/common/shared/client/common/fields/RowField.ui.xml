@@ -1,0 +1,7 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+
+    <g:FlowPanel addStyleNames="row-field" ui:field="main">
+        <g:FlowPanel ui:field="rowField" />
+    </g:FlowPanel>
+</ui:UiBinder>

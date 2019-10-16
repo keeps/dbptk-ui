@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Window;
 
@@ -49,6 +50,8 @@ public class HistoryManager {
   public static final String ROUTE_VIEW = "view";
   public static final String ROUTE_ROUTINE = "routine";
   public static final String ROUTE_SIARD_VALIDATOR = "validator";
+  public static final String ROUTE_TABLE_OPTIONS = "options";
+  public static final String ROUTE_TABLE_UPDATE = "update";
 
   /****************************************************
    * DESKTOP ROUTES
@@ -110,6 +113,11 @@ public class HistoryManager {
     newHistory(Arrays.asList(ROUTE_UPLOADS, databaseUUID));
   }
 
+  public static void gotoDatabase() {
+    newHistory(Collections.singletonList(ROUTE_DATABASE));
+  }
+
+
   public static void gotoDatabase(String databaseUUID) {
     newHistory(Arrays.asList(ROUTE_DATABASE, databaseUUID));
   }
@@ -158,6 +166,10 @@ public class HistoryManager {
     newHistory(Arrays.asList(ROUTE_SCHEMA, databaseUUID, schemaUUID, ROUTE_SCHEMA_ROUTINES));
   }
 
+  public static void gotoSchemaRoutines(String databaseUUID) {
+    newHistory(Arrays.asList(ROUTE_SCHEMA, databaseUUID, ROUTE_SCHEMA_ROUTINES));
+  }
+
   public static void gotoSchemaTriggers(String databaseUUID, String schemaUUID) {
     newHistory(Arrays.asList(ROUTE_SCHEMA, databaseUUID, schemaUUID, ROUTE_SCHEMA_TRIGGERS));
   }
@@ -190,6 +202,36 @@ public class HistoryManager {
     newHistory(Arrays.asList(ROUTE_TABLE, databaseUUID, tableUUID));
   }
 
+  public static void gotoTableUpdate(String databaseUUID, String tableUUID) {
+    newHistory(Arrays.asList(ROUTE_TABLE, databaseUUID, tableUUID, ROUTE_TABLE_UPDATE));
+  }
+
+  public static void gotoTableOptions(String databaseUUID, String tableUUID) {
+    newHistory(Arrays.asList(ROUTE_TABLE, databaseUUID, tableUUID, ROUTE_TABLE_OPTIONS));
+  }
+
+  public static void gotoRelationOptions(String databaseUUID, String tableUUID, List<String> searchInfo) {
+    List<String> params = new ArrayList<>(Arrays.asList(ROUTE_FOREIGN_KEY, databaseUUID, tableUUID));
+    params.addAll(searchInfo);
+    params.add(ROUTE_TABLE_OPTIONS);
+    newHistory(params);
+  }
+
+  public static void gotoForeignKeyUpdate(String databaseUUID, String tableUUID, List<String> searchInfo) {
+    List<String> params = new ArrayList<>(Arrays.asList(ROUTE_FOREIGN_KEY, databaseUUID, tableUUID));
+    params.addAll(searchInfo);
+    params.add(ROUTE_TABLE_UPDATE);
+    newHistory(params);
+  }
+
+  public static void gotoView(String databaseUUID, String viewUUID) {
+    newHistory(Arrays.asList(ROUTE_VIEW, databaseUUID, viewUUID));
+  }
+
+  public static void gotoViewOptions(String databaseUUID, String tableUUID) {
+    newHistory(Arrays.asList(ROUTE_VIEW, databaseUUID, tableUUID, ROUTE_TABLE_OPTIONS));
+  }
+
   public static void gotoDesktopTable(String databaseUUID, String tableUUID) {
     newHistory(Arrays.asList(ROUTE_DESKTOP_TABLE, databaseUUID, tableUUID));
   }
@@ -203,9 +245,9 @@ public class HistoryManager {
     newHistory(Arrays.asList(ROUTE_REFERENCES, databaseUUID, tableUUID, recordUUID, columnIndexInTable));
   }
 
-  public static void gotoForeignKey(String databaseUUID, String tableUUID, String... solrColumnsAndValues) {
-    List<String> params = Arrays.asList(ROUTE_REFERENCES, databaseUUID, tableUUID);
-    params.addAll(Arrays.asList(solrColumnsAndValues));
+  public static void gotoForeignKey(String databaseUUID, String tableUUID, List<String> solrColumnsAndValues) {
+    List<String> params = new ArrayList<>(Arrays.asList(ROUTE_FOREIGN_KEY, databaseUUID, tableUUID));
+    params.addAll(solrColumnsAndValues);
     newHistory(params);
   }
 
@@ -327,6 +369,14 @@ public class HistoryManager {
     return createHistoryToken(Arrays.asList(ROUTE_TABLE, database_uuid, table_uuid));
   }
 
+  public static String linkToView(String database_uuid, String viewUUID) {
+    return createHistoryToken(Arrays.asList(ROUTE_VIEW, database_uuid, viewUUID));
+  }
+
+  public static String linkToTableOptions(String database_uuid, String table_uuid) {
+    return createHistoryToken(Arrays.asList(ROUTE_TABLE, database_uuid, table_uuid, ROUTE_TABLE_OPTIONS));
+  }
+
   public static String linkToDesktopTable(String database_uuid, String table_uuid) {
     return createHistoryToken(Arrays.asList(ROUTE_DESKTOP_TABLE, database_uuid, table_uuid));
   }
@@ -407,8 +457,12 @@ public class HistoryManager {
     return createHistoryToken(Arrays.asList(ROUTE_SCHEMA, database_uuid, schema_uuid, ROUTE_SCHEMA_ROUTINES));
   }
 
-  public static String linkToDesktopSchemaRoutines(String database_uuid, String schema_uuid) {
-    return createHistoryToken(Arrays.asList(ROUTE_DESKTOP_SCHEMA, database_uuid, schema_uuid, ROUTE_SCHEMA_ROUTINES));
+  public static String linkToSchemaRoutines(String database_uuid) {
+    return createHistoryToken(Arrays.asList(ROUTE_DATABASE, database_uuid, ROUTE_SCHEMA_ROUTINES));
+  }
+
+  public static String linkToDesktopSchemaRoutines(String database_uuid) {
+    return createHistoryToken(Arrays.asList(ROUTE_DESKTOP_SCHEMA, database_uuid, ROUTE_SCHEMA_ROUTINES));
   }
 
   public static String linkToSchemaTriggers(String database_uuid, String schema_uuid) {

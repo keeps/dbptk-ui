@@ -1,6 +1,8 @@
 package com.databasepreservation.common.shared.ViewerStructure;
 
 
+import com.databasepreservation.common.shared.ViewerConstants;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -79,5 +81,16 @@ public class ViewerSchema implements Serializable {
       viewerView.setSchemaUUID(uuid);
       viewerView.setSchemaName(name);
     }
+  }
+
+  public ViewerTable getMaterializedTable(final String viewName) {
+    for (ViewerTable table : tables) {
+      if (table.getName().startsWith(ViewerConstants.MATERIALIZED_VIEW_PREFIX)) {
+        if (table.getName().substring(5).equals(viewName)) {
+          return table;
+        }
+      }
+    }
+    return null;
   }
 }

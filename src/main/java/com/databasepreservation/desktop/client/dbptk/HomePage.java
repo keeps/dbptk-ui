@@ -67,7 +67,7 @@ public class HomePage extends Composite {
     btnManage.setText(messages.homePageButtonTextForManageSIARD());
     btnManage.addStyleName("btn btn-manage");
 
-    btnManage.addClickHandler(event -> HistoryManager.gotoDesktopDatabase());
+    btnManage.addClickHandler(event -> HistoryManager.gotoDatabase());
 
     Card createCard = Card.createInstance(messages.homePageHeaderTextForCreateSIARD(), messages.homePageDescriptionTextForCreateSIARD(), btnCreate);
     Card openCard = Card.createInstance(messages.homePageHeaderTextForOpenSIARD(), messages.homePageDescriptionTextForOpenSIARD(), btnOpen);

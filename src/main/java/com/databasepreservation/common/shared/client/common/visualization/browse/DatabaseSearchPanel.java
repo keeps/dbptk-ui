@@ -70,7 +70,7 @@ public class DatabaseSearchPanel extends RightPanel {
   private static DatabaseSearchPanelUiBinder uiBinder = GWT.create(DatabaseSearchPanelUiBinder.class);
 
   @UiField
-  HTML mainHeader;
+  Label title;
 
   @UiField
   FlowPanel content;
@@ -102,6 +102,8 @@ public class DatabaseSearchPanel extends RightPanel {
 
     initWidget(uiBinder.createAndBindUi(this));
 
+    title.setText(messages.searchAllRecords());
+
     Callback<TableSearchPanelContainer, Void> searchCompletedCallback = new Callback<TableSearchPanelContainer, Void>() {
       @Override
       public void onFailure(Void reason) {
@@ -109,7 +111,7 @@ public class DatabaseSearchPanel extends RightPanel {
       }
 
       @Override
-      public void onSuccess(TableSearchPanelContainer eventTriggerer) {
+      public void onSuccess(TableSearchPanelContainer eventTriggered) {
 
         boolean foundRecords = false;
         for (TableSearchPanelContainer table : tableSearchPanelContainers) {
@@ -160,13 +162,8 @@ public class DatabaseSearchPanel extends RightPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
       BreadcrumbManager.updateBreadcrumb(breadcrumb,
-          BreadcrumbManager.forDesktopDatabaseSearchPanel(database.getUUID(), database.getMetadata().getName()));
-    } else {
-      BreadcrumbManager.updateBreadcrumb(breadcrumb,
-          BreadcrumbManager.forDatabase(database.getMetadata().getName(), database.getUUID()));
-    }
+          BreadcrumbManager.forDatabaseSearchPanel(database.getUUID(), database.getMetadata().getName()));
   }
 
   private void doSearch() {

@@ -2,9 +2,12 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
 >
 
-    <ui:with field='messages' type='config.i18n.client.ClientMessages' />
     <g:FlowPanel>
-        <g:Label addStyleNames="h1"><ui:text from='{messages.menusidebar_savedSearches}' /></g:Label>
+        <g:FlowPanel addStyleNames="structure-header">
+            <g:SimplePanel>
+                <g:Label ui:field="title" addStyleNames="h1"/>
+            </g:SimplePanel>
+        </g:FlowPanel>
         <g:FlowPanel ui:field="content" />
     </g:FlowPanel>
 </ui:UiBinder>

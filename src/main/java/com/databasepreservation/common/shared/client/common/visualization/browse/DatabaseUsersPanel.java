@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.shared.ViewerConstants;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerMetadata;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerPrivilegeStructure;
@@ -13,7 +12,6 @@ import com.databasepreservation.common.shared.ViewerStructure.ViewerUserStructur
 import com.databasepreservation.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.shared.client.common.RightPanel;
 import com.databasepreservation.common.shared.client.common.lists.BasicTablePanel;
-import com.databasepreservation.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.common.shared.client.tools.BreadcrumbManager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -49,6 +47,9 @@ public class DatabaseUsersPanel extends RightPanel {
   @UiField
   FlowPanel contentItems;
 
+  @UiField
+  Label title;
+
   private DatabaseUsersPanel(ViewerDatabase database) {
     initWidget(uiBinder.createAndBindUi(this));
 
@@ -57,21 +58,32 @@ public class DatabaseUsersPanel extends RightPanel {
   }
 
   private void init() {
+    title.setText(messages.menusidebar_usersRoles());
+
     ViewerMetadata metadata = database.getMetadata();
-    contentItems.add(getBasicTablePanelForUsers(metadata));
-    contentItems.add(getBasicTablePanelForRoles(metadata));
-    contentItems.add(getBasicTablePanelForPrivileges(metadata));
+
+    FlowPanel users = new FlowPanel();
+    users.addStyleName("card");
+    users.add(getBasicTablePanelForUsers(metadata));
+
+    FlowPanel roles = new FlowPanel();
+    roles.addStyleName("card");
+    roles.add(getBasicTablePanelForRoles(metadata));
+
+    FlowPanel privileges = new FlowPanel();
+    privileges.addStyleName("card");
+    privileges.add(getBasicTablePanelForPrivileges(metadata));
+
+
+    contentItems.add(users);
+    contentItems.add(roles);
+    contentItems.add(privileges);
   }
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
       BreadcrumbManager.updateBreadcrumb(breadcrumb,
           BreadcrumbManager.forDesktopDatabaseUsers(database.getMetadata().getName(), database.getUUID()));
-    } else {
-      BreadcrumbManager.updateBreadcrumb(breadcrumb,
-        BreadcrumbManager.forDatabaseUsers(database.getMetadata().getName(), database.getUUID()));
-    }
   }
 
   private BasicTablePanel<ViewerUserStructure> getBasicTablePanelForUsers(ViewerMetadata metadata) {

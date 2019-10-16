@@ -4,7 +4,7 @@
 
     <g:FlowPanel>
         <g:SimplePanel ui:field="recordHeader" />
-        <g:HTML addStyleNames="browseItemId recordId" ui:field="rowID" />
         <g:HTML addStyleNames="rowData" ui:field="content"/>
+        <g:FlowPanel addStyleNames="rowData" ui:field="alternativeContent" />
     </g:FlowPanel>
 </ui:UiBinder>

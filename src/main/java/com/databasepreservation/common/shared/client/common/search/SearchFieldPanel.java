@@ -67,8 +67,8 @@ public class SearchFieldPanel extends Composite {
   private Map<String, SearchField> searchFields;
 
   // Column visibility in results
-  private SimplePanel columnVisibilityPanel;
-  private CheckBox columnVisibility;
+  //private SimplePanel columnVisibilityPanel;
+  //private CheckBox columnVisibility;
 
   // any range
   private Label labelTo;
@@ -116,11 +116,11 @@ public class SearchFieldPanel extends Composite {
     inputPanel = new FlowPanel();
     fieldLabel = new Label();
     searchAdvancedFields = new ListBox();
-    columnVisibility = new CheckBox();
+//    columnVisibility = new CheckBox();
 
     setVisibilityCheckboxValue(true, false);
 
-    columnVisibilityPanel = new SimplePanel(columnVisibility);
+  //  columnVisibilityPanel = new SimplePanel(columnVisibility);
 
     DateBox.DefaultFormat dateFormat = new DateBox.DefaultFormat(DateTimeFormat.getFormat("yyyy-MM-dd"));
 
@@ -130,53 +130,53 @@ public class SearchFieldPanel extends Composite {
     inputDateFromForDate.getDateBox().setFormat(dateFormat);
     inputDateFromForDate.getDateBox().getDatePicker().setYearArrowsVisible(true);
     inputDateFromForDate.getDateBox().setFireNullValues(true);
-    inputDateFromForDate.getElement().setPropertyString("placeholder", messages.searchFieldDateFromPlaceHolder());
+    //inputDateFromForDate.getElement().setPropertyString("placeholder", messages.searchFieldDateFromPlaceHolder());
 
     inputDateToForDate = new UTCDateBox();
     inputDateToForDate.getDateBox().setFormat(dateFormat);
     inputDateToForDate.getDateBox().getDatePicker().setYearArrowsVisible(true);
     inputDateToForDate.getDateBox().setFireNullValues(true);
-    inputDateToForDate.getElement().setPropertyString("placeholder", messages.searchFieldDateToPlaceHolder());
+    //inputDateToForDate.getElement().setPropertyString("placeholder", messages.searchFieldDateToPlaceHolder());
 
     inputDateFromForDateTime = new UTCDateBox();
     inputDateFromForDateTime.getDateBox().setFormat(dateFormat);
     inputDateFromForDateTime.getDateBox().getDatePicker().setYearArrowsVisible(true);
     inputDateFromForDateTime.getDateBox().setFireNullValues(true);
-    inputDateFromForDateTime.getElement().setPropertyString("placeholder", messages.searchFieldDateFromPlaceHolder());
+    //inputDateFromForDateTime.getElement().setPropertyString("placeholder", messages.searchFieldDateFromPlaceHolder());
 
     inputTimeFromForDateTime = new UTCTimeBox(timeFormat);
-    inputTimeFromForDateTime.getElement().setPropertyString("placeholder", messages.searchFieldTimeFromPlaceHolder());
+    //inputTimeFromForDateTime.getElement().setPropertyString("placeholder", messages.searchFieldTimeFromPlaceHolder());
 
     inputDateToForDateTime = new UTCDateBox();
     inputDateToForDateTime.getDateBox().setFormat(dateFormat);
     inputDateToForDateTime.getDateBox().getDatePicker().setYearArrowsVisible(true);
     inputDateToForDateTime.getDateBox().setFireNullValues(true);
-    inputDateToForDateTime.getElement().setPropertyString("placeholder", messages.searchFieldDateToPlaceHolder());
+    //inputDateToForDateTime.getElement().setPropertyString("placeholder", messages.searchFieldDateToPlaceHolder());
 
     inputTimeToForDateTime = new UTCTimeBox(timeFormat);
-    inputTimeToForDateTime.getElement().setPropertyString("placeholder", messages.searchFieldTimeToPlaceHolder());
+    //inputTimeToForDateTime.getElement().setPropertyString("placeholder", messages.searchFieldTimeToPlaceHolder());
 
     inputTimeFromForTime = new UTCTimeBox(timeFormat);
-    inputTimeFromForTime.getElement().setPropertyString("placeholder", messages.searchFieldTimeFromPlaceHolder());
+    //inputTimeFromForTime.getElement().setPropertyString("placeholder", messages.searchFieldTimeFromPlaceHolder());
 
     inputTimeToForTime = new UTCTimeBox(timeFormat);
-    inputTimeToForTime.getElement().setPropertyString("placeholder", messages.searchFieldTimeToPlaceHolder());
+    //inputTimeToForTime.getElement().setPropertyString("placeholder", messages.searchFieldTimeToPlaceHolder());
 
     inputNumeric = new TextBox();
-    inputNumeric.getElement().setPropertyString("placeholder", messages.searchFieldNumericPlaceHolder());
+    //inputNumeric.getElement().setPropertyString("placeholder", messages.searchFieldNumericPlaceHolder());
     inputNumeric.getElement().setAttribute("type", "number");
     inputNumericFrom = new TextBox();
-    inputNumericFrom.getElement().setPropertyString("placeholder", messages.searchFieldNumericFromPlaceHolder());
+    //inputNumericFrom.getElement().setPropertyString("placeholder", messages.searchFieldNumericFromPlaceHolder());
     inputNumericFrom.getElement().setAttribute("type", "number");
     inputNumericTo = new TextBox();
-    inputNumericTo.getElement().setPropertyString("placeholder", messages.searchFieldNumericToPlaceHolder());
+    //inputNumericTo.getElement().setPropertyString("placeholder", messages.searchFieldNumericToPlaceHolder());
     inputNumericTo.getElement().setAttribute("type", "number");
 
     inputStorageSizeFrom = new TextBox();
-    inputStorageSizeFrom.getElement().setPropertyString("placeholder", messages.searchFieldNumericFromPlaceHolder());
+    //inputStorageSizeFrom.getElement().setPropertyString("placeholder", messages.searchFieldNumericFromPlaceHolder());
     inputStorageSizeFrom.getElement().setAttribute("type", "number");
     inputStorageSizeTo = new TextBox();
-    inputStorageSizeTo.getElement().setPropertyString("placeholder", messages.searchFieldNumericToPlaceHolder());
+    //inputStorageSizeTo.getElement().setPropertyString("placeholder", messages.searchFieldNumericToPlaceHolder());
     inputStorageSizeTo.getElement().setAttribute("type", "number");
     inputStorageSizeList = new ListBox();
     for (String unit : Humanize.UNITS) {
@@ -201,9 +201,9 @@ public class SearchFieldPanel extends Composite {
         // handle checkbox
         String columnDisplayName = getSearchField().getLabel();
         if (columnDisplayNameToVisibleState.containsKey(columnDisplayName)) {
-          columnVisibility.setValue(columnDisplayNameToVisibleState.get(columnDisplayName), false);
+  //        columnVisibility.setValue(columnDisplayNameToVisibleState.get(columnDisplayName), false);
         } else {
-          columnVisibility.setValue(true, false);
+    //      columnVisibility.setValue(true, false);
         }
       }
     });
@@ -216,7 +216,7 @@ public class SearchFieldPanel extends Composite {
     fieldLabel.addStyleName("search-field-label");
     searchAdvancedFields.addStyleName("form-listbox");
     // columnVisibilityPanel.setStyleName("form-listbox search-field-input-panel");
-    columnVisibility.setStyleName("visibility-checkbox");
+ //   columnVisibility.setStyleName("visibility-checkbox");
 
     labelTo.addStyleName("label");
     labelAt1.addStyleName("label");
@@ -476,7 +476,7 @@ public class SearchFieldPanel extends Composite {
     setSearchField(searchField);
 
     leftPanel.clear();
-    leftPanel.add(columnVisibility);
+//    leftPanel.add(columnVisibility);
     leftPanel.add(searchAdvancedFields);
     leftPanel.add(inputPanel);
     setInputPanel(searchField.getType());
@@ -492,7 +492,7 @@ public class SearchFieldPanel extends Composite {
     fieldLabel.setText(label);
     leftPanel.clear();
     leftPanel.add(fieldLabel);
-    leftPanel.add(columnVisibilityPanel);
+//    leftPanel.add(columnVisibilityPanel);
     leftPanel.add(inputPanel);
     setInputPanel(type);
     panel.addStyleName("full_width");
@@ -602,14 +602,31 @@ public class SearchFieldPanel extends Composite {
   }
 
   public void setVisibilityChangedHandler(ValueChangeHandler<Boolean> handler) {
-    columnVisibility.addValueChangeHandler(handler);
+    //columnVisibility.addValueChangeHandler(handler);
   }
 
   public void setVisibilityCheckboxValue(boolean value, boolean triggerEvents) {
-    columnVisibility.setValue(value, triggerEvents);
+//    columnVisibility.setValue(value, triggerEvents);
   }
 
   public Boolean getVisibilityCheckboxValue() {
-    return columnVisibility.getValue();
+    return true; // columnVisibility.getValue();
+  }
+
+  public void clear() {
+    inputText.setText("");
+    inputDateFromForDate.setText("");
+    inputDateToForDate.setText("");
+    inputDateFromForDateTime.setText("");
+    inputTimeFromForDateTime.setText("");
+    inputDateToForDateTime.setText("");
+    inputTimeToForDateTime.setText("");
+    inputTimeFromForTime.setText("");
+    inputTimeToForTime.setText("");
+    inputNumeric.setText("");
+    inputNumericFrom.setText("");
+    inputNumericTo.setText("");
+    inputStorageSizeFrom.setText("");
+    inputStorageSizeTo.setText("");
   }
 }

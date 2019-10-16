@@ -19,19 +19,14 @@ import com.databasepreservation.common.shared.client.common.visualization.browse
 import com.databasepreservation.common.shared.client.common.visualization.browse.DatabaseSearchPanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.DatabaseSearchesPanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.DatabaseUsersPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.ForeignKeyPanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.ReferencesPanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.RowPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.SchemaCheckConstraintsPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.SchemaDataPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.SchemaRoutinesPanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.SchemaStructurePanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.SchemaTriggersPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.SchemaViewsPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.TablePanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.TableSavedSearchEditPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.TableSavedSearchPanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.UploadPanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.foreignKey.ForeignKeyPanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.table.TablePanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.table.TableSavedSearchEditPanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.table.TableSavedSearchPanel;
 import com.databasepreservation.common.shared.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.common.shared.client.widgets.wcag.AccessibleFocusPanel;
@@ -95,7 +90,7 @@ public class MainPanel extends Composite {
     DatabasePanel databasePanel = DatabasePanel.getInstance(databaseUUID, true);
     databasePanel.setTopLevelPanelCSS("browseContent wrapper skip_padding");
     contentPanel.setWidget(databasePanel);
-    databasePanel.load(rightPanelLoader);
+    databasePanel.load(rightPanelLoader, "");
     JavascriptUtils.scrollToElement(contentPanel.getElement());
   }
 
@@ -242,46 +237,41 @@ public class MainPanel extends Composite {
               }
             });
             break;
-          case HistoryManager.ROUTE_SCHEMA_ROUTINES:
+         /* case HistoryManager.ROUTE_SCHEMA_ROUTINES:
             setContent(databaseUUID, new RightPanelLoader() {
               @Override
               public RightPanel load(ViewerDatabase database) {
                 return SchemaRoutinesPanel.getInstance(database, schema_uuid);
               }
             });
-            break;
-          case HistoryManager.ROUTE_SCHEMA_TRIGGERS:
-            setContent(databaseUUID, new RightPanelLoader() {
-              @Override
-              public RightPanel load(ViewerDatabase database) {
-                return SchemaTriggersPanel.getInstance(database, schema_uuid);
-              }
-            });
-            break;
-          case HistoryManager.ROUTE_SCHEMA_VIEWS:
-            setContent(databaseUUID, new RightPanelLoader() {
-              @Override
-              public RightPanel load(ViewerDatabase database) {
-                return SchemaViewsPanel.getInstance(database, schema_uuid);
-              }
-            });
-            break;
-          case HistoryManager.ROUTE_SCHEMA_CHECK_CONSTRAINTS:
-            setContent(databaseUUID, new RightPanelLoader() {
-              @Override
-              public RightPanel load(ViewerDatabase database) {
-                return SchemaCheckConstraintsPanel.getInstance(database, schema_uuid);
-              }
-            });
-            break;
-          case HistoryManager.ROUTE_SCHEMA_DATA:
+            break;*/
+          /*
+           * case HistoryManager.ROUTE_SCHEMA_TRIGGERS: setContent(databaseUUID, new
+           * RightPanelLoader() {
+           *
+           * @Override public RightPanel load(ViewerDatabase database) { return
+           * SchemaTriggersPanel.getInstance(database, schema_uuid); } }); break; case
+           * HistoryManager.ROUTE_SCHEMA_VIEWS: setContent(databaseUUID, new
+           * RightPanelLoader() {
+           *
+           * @Override public RightPanel load(ViewerDatabase database) { return
+           * SchemaViewsPanel.getInstance(database, schema_uuid); } }); break;
+           */
+          /*
+           * case HistoryManager.ROUTE_SCHEMA_CHECK_CONSTRAINTS: setContent(databaseUUID,
+           * new RightPanelLoader() {
+           *
+           * @Override public RightPanel load(ViewerDatabase database) { return
+           * TableCheckConstraintsPanel.getInstance(database, schema_uuid); } }); break;
+           */
+          /*case HistoryManager.ROUTE_SCHEMA_DATA:
             setContent(databaseUUID, new RightPanelLoader() {
               @Override
               public RightPanel load(ViewerDatabase database) {
                 return SchemaDataPanel.getInstance(database, schema_uuid);
               }
             });
-            break;
+            break;*/
           default:
             // #schema/<databaseUUID>/<schema_uuid>/*invalid-page*
             handleErrorPath(currentHistoryPath);
@@ -300,7 +290,7 @@ public class MainPanel extends Composite {
         setContent(databaseUUID, new RightPanelLoader() {
           @Override
           public RightPanel load(ViewerDatabase database) {
-            return TablePanel.getInstance(database, tableUUID);
+            return TablePanel.getInstance(database, tableUUID, currentHistoryPath.get(0));
           }
         });
 

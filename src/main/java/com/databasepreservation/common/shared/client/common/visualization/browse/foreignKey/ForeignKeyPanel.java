@@ -1,10 +1,13 @@
-package com.databasepreservation.common.shared.client.common.visualization.browse;
+package com.databasepreservation.common.shared.client.common.visualization.browse.foreignKey;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.shared.client.common.visualization.browse.RowPanel;
+import com.databasepreservation.common.shared.client.tools.HistoryManager;
+import com.databasepreservation.common.shared.client.tools.ViewerJsonUtils;
 import org.roda.core.data.v2.index.IndexResult;
 import org.roda.core.data.v2.index.filter.Filter;
 import org.roda.core.data.v2.index.filter.FilterParameter;
@@ -19,6 +22,7 @@ import com.databasepreservation.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.shared.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.shared.client.common.RightPanel;
 import com.databasepreservation.common.shared.client.common.search.SearchInfo;
+import com.databasepreservation.common.shared.client.common.visualization.browse.table.TablePanel;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -30,8 +34,13 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class ForeignKeyPanel extends RightPanel {
   public static ForeignKeyPanel createInstance(ViewerDatabase database, String tableUUID,
-    List<String> columnsAndValues) {
-    return new ForeignKeyPanel(database, tableUUID, columnsAndValues);
+                                               List<String> columnsAndValues) {
+    return new ForeignKeyPanel(database, tableUUID, columnsAndValues, false);
+  }
+
+  public static ForeignKeyPanel createInstance(ViewerDatabase database, String tableUUID,
+    List<String> columnsAndValues, boolean update) {
+    return new ForeignKeyPanel(database, tableUUID, columnsAndValues, update);
   }
 
   interface ForeignKeyPanelUiBinder extends UiBinder<Widget, ForeignKeyPanel> {
@@ -42,8 +51,10 @@ public class ForeignKeyPanel extends RightPanel {
   private ViewerDatabase database;
   private ViewerTable table;
   private Map<String, String> columnAndValueMapping;
+  private List<String> columnsAndValues;
   private Long rowCount;
   private ViewerRow row;
+  private boolean toUpdate;
 
   private RightPanel innerRightPanel = null;
   private BreadcrumbPanel breadcrumb = null;
@@ -51,10 +62,11 @@ public class ForeignKeyPanel extends RightPanel {
   @UiField
   SimplePanel panel;
 
-  private ForeignKeyPanel(ViewerDatabase viewerDatabase, final String tableUUID, List<String> columnsAndValues) {
+  private ForeignKeyPanel(ViewerDatabase viewerDatabase, final String tableUUID, List<String> columnsAndValues, boolean update) {
     database = viewerDatabase;
     table = database.getMetadata().getTable(tableUUID);
-
+    toUpdate = update;
+    this.columnsAndValues = columnsAndValues;
     initWidget(uiBinder.createAndBindUi(this));
 
     // prepare search
@@ -119,7 +131,12 @@ public class ForeignKeyPanel extends RightPanel {
       } else {
         // display a TablePanel
         SearchInfo searchInfo = new SearchInfo(table, columnAndValueMapping);
-        innerRightPanel = TablePanel.createInstance(database, table, searchInfo);
+        TablePanel tablePanel = TablePanel.createInstance(database, table, searchInfo, HistoryManager.ROUTE_FOREIGN_KEY);
+        tablePanel.setColumnsAndValues(columnsAndValues);
+        if (toUpdate) {
+          tablePanel.update();
+        }
+        innerRightPanel = tablePanel;
       }
 
       handleBreadcrumb(breadcrumb);

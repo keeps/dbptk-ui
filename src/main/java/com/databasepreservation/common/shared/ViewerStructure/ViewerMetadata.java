@@ -222,7 +222,13 @@ public class ViewerMetadata implements Serializable {
     return getSchema(tables.get(tableUUID).getSchemaUUID());
   }
 
+  public ViewerSchema getSchemaFromViewUUID(String viewUUID) {
+    return getSchema(views.get(viewUUID).getSchemaUUID());
+  }
+
   public ViewerSchema getSchema(String schemaUUID) {
     return schemas.get(schemaUUID);
   }
+
+
 }

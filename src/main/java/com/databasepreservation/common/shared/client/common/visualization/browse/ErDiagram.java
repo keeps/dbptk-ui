@@ -74,8 +74,8 @@ public class ErDiagram extends Composite {
     databaseUUID = database.getUUID();
     initWidget(uiBinder.createAndBindUi(this));
 
-    contentItems.add(new HTMLPanel(
-      CommonClientUtils.getFieldHTML(messages.diagram_usingTheDiagram(), messages.diagram_Explanation())));
+    //contentItems.add(new HTMLPanel(
+      //CommonClientUtils.getFieldHTML(messages.diagram_usingTheDiagram(), messages.diagram_Explanation())));
 
     SimplePanel config = new SimplePanel();
     config.getElement().setId("erconfig");
@@ -112,6 +112,9 @@ public class ErDiagram extends Composite {
         for (ViewerTable viewerTable : schema.getTables()) {
           VisNode visNode = new VisNode(viewerTable.getUUID(), viewerTable.getName());
 
+          if (ViewerStringUtils.isNotBlank(viewerTable.getDescription())) {
+            visNode.description = viewerTable.getDescription();
+          }
           visNode.numColumns = viewerTable.getColumns().size();
           visNode.numRows = new Long(viewerTable.getCountRows()).intValue();
           visNode.numRelationsOut = viewerTable.getForeignKeys().size();
@@ -172,6 +175,7 @@ public class ErDiagram extends Composite {
           if (ViewerStringUtils.isNotBlank(viewerTable.getName())) {
             tooltip.append(viewerTable.getName()).append("<br/>");
           }
+          tooltip.append(visNode.description).append(" ");
           tooltip.append(messages.diagram_rows(visNode.numRows)).append(", ")
             .append(messages.diagram_columns(visNode.numColumns)).append(", ")
             .append(messages.diagram_relations(visNode.numRelationsTotal)).append(".");
@@ -253,6 +257,7 @@ public class ErDiagram extends Composite {
     String title;
     VisNodeColor color;
 
+    String description;
     int numRows;
     int numRelationsIn;
     int numRelationsOut;
@@ -575,11 +580,7 @@ public class ErDiagram extends Composite {
                 //console.log("go to db" + dbuuid + " and table " + params.nodes[0]);
                 var tableuuid = params.nodes[0];
                 network.unselectAll();
-                if (applicationType === @com.databasepreservation.common.shared.ViewerConstants::DESKTOP) {
-                    @com.databasepreservation.common.shared.client.tools.HistoryManager::gotoDesktopTable(Ljava/lang/String;Ljava/lang/String;)(dbuuid, tableuuid);
-                } else {
-                    @com.databasepreservation.common.shared.client.tools.HistoryManager::gotoTable(Ljava/lang/String;Ljava/lang/String;)(dbuuid, tableuuid);
-                }
+                @com.databasepreservation.common.shared.client.tools.HistoryManager::gotoTable(Ljava/lang/String;Ljava/lang/String;)(dbuuid, tableuuid);
             }
         });
   

@@ -33,6 +33,7 @@
         <version.jackson>2.9.10</version.jackson>
         <cas.client.version>3.5.0</cas.client.version>
         <solr.version>7.7.1</solr.version>
+        <springboot.version>2.1.9.RELEASE</springboot.version>
         <desktop>com.databasepreservation.desktop.Desktop</desktop>
         <server>com.databasepreservation.server.Server</server>
     </properties>
@@ -56,7 +57,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.1.5.RELEASE</version>
+        <version>2.1.9.RELEASE</version>
     </parent>
 
     <build>
@@ -106,7 +107,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>2.1.5.RELEASE</version>
+                <version>${springboot.version}</version>
             </plugin>
         </plugins>
 
@@ -164,7 +165,7 @@
                     <plugin>
                         <groupId>net.ltgt.gwt.maven</groupId>
                         <artifactId>gwt-maven-plugin</artifactId>
-                        <version>1.0-rc-10</version>
+                        <version>1.0.0</version>
                         <extensions>true</extensions>
                         <executions>
                             <execution>
@@ -197,18 +198,14 @@
             </build>
         </profile>
         <profile>
-            <id>debug</id>
+            <id>debug-server</id>
             <build>
                 <plugins>
                     <plugin>
                         <groupId>org.springframework.boot</groupId>
                         <artifactId>spring-boot-maven-plugin</artifactId>
-                        <version>2.1.5.RELEASE</version>
+                        <version>${springboot.version}</version>
                         <configuration>
-                            <addResources>true</addResources>
-                            <folders>
-                                <folder>${project.build.directory}/${project.build.finalName}</folder>
-                            </folders>
                             <jvmArguments>
                                 -Dgwt.codeServerPort=9876 -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005
                             </jvmArguments>
@@ -217,12 +214,46 @@
                     <plugin>
                         <groupId>net.ltgt.gwt.maven</groupId>
                         <artifactId>gwt-maven-plugin</artifactId>
-                        <version>1.0-rc-10</version>
+                        <version>1.0.0</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <moduleName>${server}</moduleName>
+                            <launcherDir>${project.build.directory}/${project.build.finalName}/WEB-INF/classes/public/</launcherDir>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>compile</goal>
+                                    <goal>test</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>debug-desktop</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-maven-plugin</artifactId>
+                        <version>${springboot.version}</version>
+                        <configuration>
+                            <jvmArguments>
+                                -Dgwt.codeServerPort=9876 -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005 -Denv=desktop
+                            </jvmArguments>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>net.ltgt.gwt.maven</groupId>
+                        <artifactId>gwt-maven-plugin</artifactId>
+                        <version>1.0.0</version>
                         <extensions>true</extensions>
                         <configuration>
                             <moduleName>${desktop}</moduleName>
-                            <launcherDir>${project.build.directory}/${project.build.finalName}/WEB-INF/classes/public</launcherDir>
-                            <webappDirectory>${project.build.directory}/${project.build.finalName}/WEB-INF/classes/public</webappDirectory>
+                            <launcherDir>${project.build.directory}/${project.build.finalName}/WEB-INF/classes/public/</launcherDir>
                         </configuration>
                         <executions>
                             <execution>
@@ -462,16 +493,26 @@
             <artifactId>jersey-guava</artifactId>
             <version>2.26-b03</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-csv</artifactId>
+            <version>1.7</version>
+        </dependency>
         <!-- REST API related dependencies - end -->
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <version>2.1.5.RELEASE</version>
+            <version>${springboot.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jersey</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <optional>true</optional>
         </dependency>
 
         <!-- other -->

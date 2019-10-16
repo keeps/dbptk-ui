@@ -7,6 +7,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.shared.client.common.utils.CommonClientUtils;
+import com.google.gwt.user.client.ui.FlowPanel;
 import org.roda.core.data.v2.common.Pair;
 import org.roda.core.data.v2.index.IndexResult;
 import org.roda.core.data.v2.index.facet.Facets;
@@ -226,18 +228,12 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
 
   private void addColumn(ViewerColumn viewerColumn, Column<ViewerRow, ?> displayColumn) {
     if (ViewerStringUtils.isNotBlank(viewerColumn.getDescription())) {
-      StringBuilder description = new StringBuilder("<span title=\"")
-        .append(SafeHtmlUtils.fromString(viewerColumn.getDisplayName()).asString()).append(": ")
-        .append(SafeHtmlUtils.fromString(viewerColumn.getDescription()).asString()).append("\">")
-        .append(SafeHtmlUtils.fromString(viewerColumn.getDisplayName()).asString()).append("</span>");
-
-      addColumn(displayColumn, SafeHtmlUtils.fromSafeConstant(description.toString()), true, TextAlign.RIGHT, 10);
+      SafeHtmlBuilder spanTitle = CommonClientUtils.constructSpan(viewerColumn.getDisplayName(), viewerColumn.getDescription(), "column-description-block");
+      SafeHtmlBuilder spanDescription = CommonClientUtils.constructSpan(viewerColumn.getDescription(), viewerColumn.getDescription(), "column-description-block column-description");
+      addColumn(displayColumn, CommonClientUtils.wrapOnDiv(Arrays.asList(spanTitle, spanDescription)), true, TextAlign.LEFT, 10);
     } else {
-      StringBuilder description = new StringBuilder("<span title=\"")
-        .append(SafeHtmlUtils.fromString(viewerColumn.getDisplayName()).asString()).append("\">")
-        .append(SafeHtmlUtils.fromString(viewerColumn.getDisplayName()).asString()).append("</span>");
-
-      addColumn(displayColumn, SafeHtmlUtils.fromSafeConstant(description.toString()), true, TextAlign.RIGHT, 10);
+      SafeHtmlBuilder spanTitle = CommonClientUtils.constructSpan(viewerColumn.getDisplayName(), viewerColumn.getDescription(), "column-description-block");
+      addColumn(displayColumn, spanTitle.toSafeHtml(), true, TextAlign.LEFT, 10);
     }
   }
 

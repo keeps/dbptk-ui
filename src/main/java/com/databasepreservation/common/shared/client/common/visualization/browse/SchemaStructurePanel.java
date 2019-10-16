@@ -20,7 +20,6 @@ import com.databasepreservation.common.shared.client.common.utils.ApplicationTyp
 import com.databasepreservation.common.shared.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.shared.client.tools.ViewerStringUtils;
-import com.databasepreservation.desktop.client.common.MetadataField;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtml;

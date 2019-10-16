@@ -7,24 +7,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.shared.ViewerConstants;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerForeignKey;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerMetadata;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerSchema;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerTable;
-import com.databasepreservation.common.shared.client.breadcrumb.BreadcrumbPanel;
-import com.databasepreservation.common.shared.client.common.RightPanel;
 import com.databasepreservation.common.shared.client.common.lists.BasicTablePanel;
-import com.databasepreservation.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.common.shared.client.common.utils.CommonClientUtils;
-import com.databasepreservation.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.shared.client.tools.HistoryManager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -35,7 +31,7 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class SchemaDataPanel extends RightPanel {
+public class SchemaDataPanel extends Composite {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, SchemaDataPanel> instances = new HashMap<>();
 
@@ -58,9 +54,10 @@ public class SchemaDataPanel extends RightPanel {
 
   private ViewerDatabase database;
   private ViewerSchema schema;
+  private boolean advancedMode;
 
   @UiField
-  FlowPanel contentItems;
+  FlowPanel contentItems, tableContent;
 
   private SchemaDataPanel(ViewerDatabase viewerDatabase, final String schemaUUID) {
     database = viewerDatabase;
@@ -70,32 +67,33 @@ public class SchemaDataPanel extends RightPanel {
     init();
   }
 
-  @Override
-  public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forSchemaData(database.getMetadata().getName(),
-      database.getUUID(), schema.getName(), schema.getUUID()));
+  public void reload(boolean advancedMode) {
+    if (this.advancedMode != advancedMode) {
+      this.advancedMode = advancedMode;
+      tableContent.clear();
+      initTableContent();
+    }
   }
 
   private void init() {
-    CommonClientUtils.addSchemaInfoToFlowPanel(contentItems, schema);
-
+    advancedMode = false;
+    //CommonClientUtils.addSchemaInfoToFlowPanel(contentItems, schema);
     contentItems.add(ErDiagram.getInstance(database, schema));
+    initTableContent();
+  }
 
+  private void initTableContent() {
     final BasicTablePanel<ViewerTable> table = getBasicTablePanelForTableInfo(database.getMetadata(), schema);
     table.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
       @Override
       public void onSelectionChange(SelectionChangeEvent event) {
         ViewerTable item = table.getSelectionModel().getSelectedObject();
         if (item != null) {
-          if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
-            HistoryManager.gotoDesktopTable(database.getUUID(), item.getUUID());
-          } else {
-            HistoryManager.gotoTable(database.getUUID(), item.getUUID());
-          }
+          HistoryManager.gotoTable(database.getUUID(), item.getUUID());
         }
       }
     });
-    contentItems.add(table);
+    tableContent.add(table);
   }
 
   private BasicTablePanel<ViewerTable> getBasicTablePanelForTableInfo(final ViewerMetadata metadata,
@@ -112,31 +110,17 @@ public class SchemaDataPanel extends RightPanel {
       }
     });
 
-    return new BasicTablePanel<>(new HTMLPanel(SafeHtmlUtils.EMPTY_SAFE_HTML),
+    return new BasicTablePanel<ViewerTable>(new HTMLPanel(SafeHtmlUtils.EMPTY_SAFE_HTML),
       new HTMLPanel(SafeHtmlUtils.EMPTY_SAFE_HTML), tables.iterator(),
 
-      new BasicTablePanel.ColumnInfo<>(messages.schema_tableName(), 17, new TextColumn<ViewerTable>() {
+      new BasicTablePanel.ColumnInfo<>(messages.schema_tableName(), false, 17, new TextColumn<ViewerTable>() {
         @Override
         public String getValue(ViewerTable table) {
           return table.getName();
         }
       }),
 
-      new BasicTablePanel.ColumnInfo<>(messages.schema_numberOfRows(), 7, new TextColumn<ViewerTable>() {
-        @Override
-        public String getValue(ViewerTable table) {
-          return String.valueOf(table.getCountRows());
-        }
-      }),
-
-      new BasicTablePanel.ColumnInfo<>(messages.schema_numberOfColumns(), 8, new TextColumn<ViewerTable>() {
-        @Override
-        public String getValue(ViewerTable table) {
-          return String.valueOf(table.getColumns().size());
-        }
-      }),
-
-      new BasicTablePanel.ColumnInfo<>(messages.description(), 35, new TextColumn<ViewerTable>() {
+      new BasicTablePanel.ColumnInfo<>(messages.description(), false, 35, new TextColumn<ViewerTable>() {
         @Override
         public String getValue(ViewerTable table) {
           if (table.getDescription() != null) {
@@ -147,7 +131,23 @@ public class SchemaDataPanel extends RightPanel {
         }
       }),
 
-      new BasicTablePanel.ColumnInfo<>(messages.schema_relationsOut(), 7, new TextColumn<ViewerTable>() {
+      new BasicTablePanel.ColumnInfo<>(messages.schema_numberOfRows(), !advancedMode, 7, new TextColumn<ViewerTable>() {
+        @Override
+        public String getValue(ViewerTable table) {
+          return String.valueOf(table.getCountRows());
+        }
+      }),
+
+      new BasicTablePanel.ColumnInfo<>(messages.schema_numberOfColumns(), !advancedMode, 8,
+        new TextColumn<ViewerTable>() {
+        @Override
+        public String getValue(ViewerTable table) {
+          return String.valueOf(table.getColumns().size());
+        }
+      }),
+
+
+      new BasicTablePanel.ColumnInfo<>(messages.schema_relationsOut(), !advancedMode, 7, new TextColumn<ViewerTable>() {
         @Override
         public String getValue(ViewerTable table) {
           int outboundForeignKeys = table.getForeignKeys().size();
@@ -159,7 +159,7 @@ public class SchemaDataPanel extends RightPanel {
         }
       }),
 
-      new BasicTablePanel.ColumnInfo<>(messages.schema_relationsIn(), 7, new TextColumn<ViewerTable>() {
+      new BasicTablePanel.ColumnInfo<>(messages.schema_relationsIn(), !advancedMode, 7, new TextColumn<ViewerTable>() {
         @Override
         public String getValue(ViewerTable table) {
           int inboundForeignKeys = 0;

@@ -53,10 +53,15 @@ public class FontAwesomeIconManager {
   public static final String SKIPPED = "forward";
   public static final String WIZARD = "magic";
   public static final String WRITE = "pencil";
+  public static final String TECHNICAL = "briefcase";
 
 
   public static String getTag(String icon) {
     return "<i class=\"fa fa-" + icon + "\"></i>";
+  }
+
+  public static String getTagWithStyleName(String icon, String styleName) {
+    return "<i class=\"fa fa-" + icon + " " + styleName +"\"></i>";
   }
 
   public static String getTag(String icon, String tooltip) {

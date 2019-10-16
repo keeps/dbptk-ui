@@ -311,12 +311,14 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
     for (ViewerSchema schema : metadata.getSchemas()) {
       if (!schema.getTables().isEmpty()) {
         MultipleSelectionTablePanel<ViewerTable> schemaTable = createCellTableForViewerTable();
+        schemaTable.setHeight("70vh");
         populateTable(schemaTable, metadata.getSchema(schema.getUUID()));
         tables.put(schema.getUUID(), schemaTable);
       }
 
       if (!schema.getViews().isEmpty()) {
         MultipleSelectionTablePanel<ViewerView> schemaViews = createCellTableForViewerView();
+        schemaViews.setHeight("70vh");
         populateViews(schemaViews, metadata.getSchema(schema.getUUID()));
         metadata.getSchema(schema.getUUID()).setViewsSchemaUUID();
         views.put(schema.getUUID(), schemaViews);
@@ -324,11 +326,13 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
 
       for (ViewerTable vTable : schema.getTables()) {
         MultipleSelectionTablePanel<ViewerColumn> tableColumns = createCellTableForViewerColumn();
+        tableColumns.setHeight("70vh");
         populateTableColumns(tableColumns, metadata.getTable(vTable.getUUID()));
         columns.put(vTable.getUUID(), tableColumns);
       }
       for (ViewerView vView : schema.getViews()) {
         MultipleSelectionTablePanel<ViewerColumn> viewColumns = createCellTableForViewerColumn();
+        viewColumns.setHeight("70vh");
         populateViewColumns(viewColumns, metadata.getView(vView.getUUID()));
         columns.put(vView.getUUID(), viewColumns);
       }

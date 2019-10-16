@@ -266,10 +266,6 @@ public class JavascriptUtils {
                                                                        
                                                                        }-*/;
 
-  public static native void log(String txt) /*-{
-                                            $wnd.console.log(txt);
-                                            }-*/;
-
   public static native void showItem(String path) /*-{
                                                   var shell = $wnd.nodeRequire('electron').remote.shell;
                                                   

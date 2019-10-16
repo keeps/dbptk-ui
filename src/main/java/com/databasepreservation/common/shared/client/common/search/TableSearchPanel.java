@@ -160,11 +160,17 @@ public class TableSearchPanel extends Composite {
     }
   }
 
+  public void setColumnVisibility(Map<String, Boolean> columnVisibility) {
+    tableRowList.setColumnVisibility(columnVisibility);
+    tableRowList.refreshColumnVisibility();
+  }
+
   private void addSearchFieldPanel(final SearchFieldPanel searchFieldPanel) {
     itemsSearchAdvancedFieldsPanel.add(searchFieldPanel);
     itemsSearchAdvancedFieldsPanel.removeStyleName("empty");
 
     searchPanel.setSearchAdvancedGoEnabled(true);
+    searchPanel.setClearSearchButtonEnabled(true);
 
     ClickHandler clickHandler = new ClickHandler() {
 
@@ -174,6 +180,7 @@ public class TableSearchPanel extends Composite {
         if (itemsSearchAdvancedFieldsPanel.getWidgetCount() == 0) {
           itemsSearchAdvancedFieldsPanel.addStyleName("empty");
           searchPanel.setSearchAdvancedGoEnabled(false);
+          searchPanel.setClearSearchButtonEnabled(false);
         }
       }
     };
@@ -220,7 +227,13 @@ public class TableSearchPanel extends Composite {
   }
 
   public void applySearchInfoJson(String searchInfoJson) {
+    GWT.log("SearchInfo: " + searchInfoJson);
     setCurrentSearchInfoFromJson(searchInfoJson);
+    applyCurrentSearchInfo();
+  }
+
+  public void applySearchInfoJson() {
+    GWT.log("currentSearchInfo: " + currentSearchInfo);
     applyCurrentSearchInfo();
   }
 

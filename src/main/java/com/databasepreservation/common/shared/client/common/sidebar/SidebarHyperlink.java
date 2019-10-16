@@ -1,6 +1,7 @@
 package com.databasepreservation.common.shared.client.common.sidebar;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -37,6 +38,13 @@ public class SidebarHyperlink extends SidebarItem {
     label.addStyleName("sidebar-hyperlink sidebarItem");
   }
 
+  public SidebarHyperlink(SafeHtml text, String targetHistoryToken) {
+    initWidget(uiBinder.createAndBindUi(this));
+    setTargetHistoryToken(targetHistoryToken);
+    setTextBySafeHTML(text);
+    label.addStyleName("sidebar-hyperlink sidebarItem");
+  }
+
   public SidebarHyperlink(String text, String targetHistoryToken, Hyperlink hyperlink) {
     initWidget(uiBinder.createAndBindUi(this));
     setTargetHistoryToken(targetHistoryToken);
@@ -54,6 +62,11 @@ public class SidebarHyperlink extends SidebarItem {
   @Override
   public SidebarItem setText(String text) {
     label.setText(text);
+    return this;
+  }
+
+  public SidebarItem setTextBySafeHTML(SafeHtml safeHtml) {
+    label.setHTML(safeHtml);
     return this;
   }
 

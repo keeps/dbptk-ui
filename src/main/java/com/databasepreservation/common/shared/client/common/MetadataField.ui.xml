@@ -2,7 +2,7 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
     <g:FlowPanel ui:field="metadataField">
-        <g:Label ui:field="metadataKey" />
+        <g:Label ui:field="metadataLabel" />
         <g:Label ui:field="metadataValue" />
     </g:FlowPanel>
 

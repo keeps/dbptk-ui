@@ -1,4 +1,4 @@
-package com.databasepreservation.common.shared.client.common.visualization.browse;
+package com.databasepreservation.common.shared.client.common.visualization.browse.table;
 
 import com.databasepreservation.common.client.BrowserService;
 import com.databasepreservation.common.shared.ViewerConstants;

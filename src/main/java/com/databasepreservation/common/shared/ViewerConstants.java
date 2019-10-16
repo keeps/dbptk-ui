@@ -46,6 +46,8 @@ public class ViewerConstants {
   public final static String MEDIA_TYPE_APPLICATION_OCTET_STREAM = "application/octet-stream";
   public final static String MEDIA_TYPE_TEXT_HTML = "text/html";
 
+  public final static String MATERIALIZED_VIEW_PREFIX = "VIEW_";
+
   /*
    * SOLR CONFIGSETS
    */
