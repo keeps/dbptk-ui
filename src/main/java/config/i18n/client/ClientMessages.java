@@ -1000,4 +1000,22 @@ public interface ClientMessages extends Messages {
    * Database Information Panel
    ********************************************/
   String databaseInformationTextForTitle();
+  /********************************************
+   * Upload SIARD
+   ********************************************/
+  String uploadPanelTextForTabLoadFromServer();
+
+  String uploadPanelTextForTabUploadSIARDFile();
+
+  String uploadPanelTextForLabelGoToSIARDInfo();
+
+  String uploadPanelTextForLabelDropHere();
+
+  String uploadPanelTextForLabelBrowseFiles();
+
+  String newUploadPanelTextForLabelUploadSIARD();
+
+  String newUploadPanelTextForUploadButton();
+
+  String uploadSIARDTextForDoneUpload();
 }

@@ -4,8 +4,6 @@
 
     <ui:with field='messages' type='config.i18n.client.ClientMessages' />
     <g:FlowPanel>
-        <g:Label addStyleNames="h1"><ui:text from='{messages.newUpload}'/></g:Label>
-
         <g:FlowPanel styleName="wui-user-data" addStyleNames="wrapper skip_padding">
             <g:FlowPanel addStyleNames="row full_width no_padding">
                 <g:FlowPanel addStyleNames="wui-data-panel">

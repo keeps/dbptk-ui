@@ -5,16 +5,21 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import javax.servlet.MultipartConfigElement;
 import javax.servlet.http.HttpServlet;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.web.servlet.MultipartConfigFactory;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.boot.web.servlet.context.ServletWebServerInitializedEvent;
+import org.springframework.boot.web.servlet.filter.OrderedRequestContextFilter;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
+import org.springframework.util.unit.DataSize;
+import org.springframework.web.filter.RequestContextFilter;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -90,4 +95,19 @@ public class DBVTK {
       }
     };
   }
+
+  @Bean
+  public RequestContextFilter requestContextFilter() {
+    OrderedRequestContextFilter filter = new OrderedRequestContextFilter();
+    filter.setOrder(-100001);
+    return filter;
+  }
+
+//  @Bean
+//  MultipartConfigElement multipartConfigElement() {
+//    MultipartConfigFactory factory = new MultipartConfigFactory();
+//    factory.setMaxFileSize(DataSize.ofBytes(512000000L));
+//    factory.setMaxRequestSize(DataSize.ofBytes(512000000L));
+//    return factory.createMultipartConfig();
+//  }
 }

@@ -1,4 +1,4 @@
-package com.databasepreservation.server.client.browse;
+package com.databasepreservation.server.client.browse.upload;
 
 import com.databasepreservation.common.client.BrowserService;
 import com.databasepreservation.common.shared.client.breadcrumb.BreadcrumbPanel;
@@ -18,20 +18,20 @@ import com.google.gwt.user.client.ui.Widget;
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class NewUploadPanel extends RightPanel {
-  interface NewUploadPanelUiBinder extends UiBinder<Widget, NewUploadPanel> {
+public class SIARDLoad extends RightPanel {
+  interface SIARDLoadUiBinder extends UiBinder<Widget, SIARDLoad> {
   }
 
-  private static NewUploadPanel instance = null;
+  private static SIARDLoad instance = null;
 
-  public static NewUploadPanel getInstance() {
+  public static SIARDLoad getInstance() {
     if (instance == null) {
-      instance = new NewUploadPanel();
+      instance = new SIARDLoad();
     }
     return instance;
   }
 
-  private static NewUploadPanelUiBinder uiBinder = GWT.create(NewUploadPanelUiBinder.class);
+  private static SIARDLoadUiBinder uiBinder = GWT.create(SIARDLoadUiBinder.class);
 
   @UiField
   TextBox textBoxName;
@@ -42,7 +42,7 @@ public class NewUploadPanel extends RightPanel {
   @UiField
   Button buttonCancel;
 
-  public NewUploadPanel() {
+  public SIARDLoad() {
     initWidget(uiBinder.createAndBindUi(this));
   }
 

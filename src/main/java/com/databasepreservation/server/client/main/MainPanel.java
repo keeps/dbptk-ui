@@ -22,7 +22,7 @@ import com.databasepreservation.common.shared.client.common.visualization.browse
 import com.databasepreservation.common.shared.client.common.visualization.browse.ReferencesPanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.RowPanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.SchemaStructurePanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.UploadPanel;
+
 import com.databasepreservation.common.shared.client.common.visualization.browse.foreignKey.ForeignKeyPanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.table.TablePanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.table.TableSavedSearchEditPanel;
@@ -32,7 +32,7 @@ import com.databasepreservation.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.common.shared.client.widgets.wcag.AccessibleFocusPanel;
 import com.databasepreservation.server.client.browse.HomePanel;
 import com.databasepreservation.server.client.browse.LoginPanel;
-import com.databasepreservation.server.client.browse.NewUploadPanel;
+import com.databasepreservation.server.client.browse.UploadPanel;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -110,10 +110,16 @@ public class MainPanel extends Composite {
       if (currentHistoryPath.size() == 2) {
         if (currentHistoryPath.get(1).equals(HistoryManager.ROUTE_UPLOADS_NEW)) {
           // #uploads/new
+//          setContent(new RightPanelLoader() {
+//            @Override
+//            public RightPanel load(ViewerDatabase database) {
+//              return NewUploadPanel.getInstance();
+//            }
+//          });
           setContent(new RightPanelLoader() {
             @Override
             public RightPanel load(ViewerDatabase database) {
-              return NewUploadPanel.getInstance();
+              return UploadPanel.getInstance();
             }
           });
         } else {
@@ -122,7 +128,7 @@ public class MainPanel extends Composite {
           setContent(databaseUUID, new RightPanelLoader() {
             @Override
             public RightPanel load(ViewerDatabase database) {
-              final UploadPanel instance = UploadPanel.createInstance(database);
+              final com.databasepreservation.common.shared.client.common.visualization.browse.UploadPanel instance = com.databasepreservation.common.shared.client.common.visualization.browse.UploadPanel.createInstance(database);
               instance.setTitleText(messages.uploadedSIARD());
 
               return instance;

@@ -40,6 +40,7 @@ public class ViewerConstants {
   public static final String VIEWER_LOG_FOLDER = "log";
   public static final String VIEWER_LOBS_FOLDER = "lobs";
   public static final String VIEWER_UPLOADS_FOLDER = "uploads";
+  public static final String VIEWER_SIARD_FILES_FOLDER = "SIARD-files";
   public static final String VIEWER_REPORTS_FOLDER = "reports";
   public static final String VIEWER_INDEX_FOLDER = "index";
 
@@ -218,6 +219,8 @@ public class ViewerConstants {
   public static final String API_V1_THEME_RESOURCE = "/v1/theme";
 
   public static final String API_V1_REPORT_RESOURCE = "/v1/report";
+
+  public static final String API_V1_FILE_RESOURCE = "/v1/file";
 
   /*
    * Search field types from RODA, plus a few new ones

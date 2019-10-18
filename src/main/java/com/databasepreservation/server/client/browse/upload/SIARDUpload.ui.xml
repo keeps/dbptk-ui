@@ -1,0 +1,20 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <ui:with field='messages' type='config.i18n.client.ClientMessages' />
+
+    <g:FlowPanel styleName="wui-ingest-transfer-upload"
+                 addStyleNames="wrapper skip_padding">
+        <g:FlowPanel addStyleNames="row full_width skip_padding">
+            <g:FlowPanel addStyleNames="col_12">
+
+                <g:HTML ui:field="uploadMessage"/>
+                <g:HTML ui:field="uploadForm" />
+                <g:HTML ui:field="uploadList">
+                    <ul id="upload-list">
+                        <!-- The file uploads will be shown here -->
+                    </ul>
+                </g:HTML>
+            </g:FlowPanel>
+        </g:FlowPanel>
+    </g:FlowPanel>
+</ui:UiBinder>
