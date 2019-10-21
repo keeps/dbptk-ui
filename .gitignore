@@ -38,3 +38,6 @@ electron/war/
 jvm.log
 
 *.siard
+
+src/main/webapp/com.databasepreservation.server.Server/**
+src/main/webapp/com.databasepreservation.desktop.Desktop/**
