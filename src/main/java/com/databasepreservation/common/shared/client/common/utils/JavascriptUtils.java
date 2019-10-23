@@ -7,7 +7,10 @@ package com.databasepreservation.common.shared.client.common.utils;
 
 import com.databasepreservation.common.shared.client.common.DefaultAsyncCallback;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.safehtml.shared.SafeHtml;
+
+import java.util.List;
 
 public class JavascriptUtils {
 
@@ -108,7 +111,7 @@ public class JavascriptUtils {
                                            $wnd.jQuery('.sticky-flow').stick_in_parent();
                                            $wnd.jQuery('body').trigger("sticky_kit:recalc");
                                            }-*/;
-  public static native void runMiniUploadForm(String layout) /*-{
+  public static native void runMiniUploadForm(String layout, DefaultAsyncCallback<String> callback) /*-{
                                                 $wnd.jQuery(function () {
                                                   var ul = $wnd.jQuery('#upload-list');
                                                   $wnd.jQuery('#drop a').click(function () {
@@ -155,8 +158,8 @@ public class JavascriptUtils {
                                                           path = data.jqXHR.responseJSON.message;
                                                         }
                                                         var id = data.context[0].id;
-                                                        var instance = @com.databasepreservation.server.client.browse.upload.SIARDUpload::getInstance()();
-                                                        instance.@com.databasepreservation.server.client.browse.upload.SIARDUpload::loadSIARDAfterUpload(Ljava/lang/String;Ljava/lang/String;)(path, id);
+                                                        $wnd.jQuery("#" + id).attr('path', path);
+                                                        callback.@com.databasepreservation.common.shared.client.common.DefaultAsyncCallback::onSuccess(*)(id);
                                                     },
                                                     // Callback for uploads start.
                                                     start: function (e) {

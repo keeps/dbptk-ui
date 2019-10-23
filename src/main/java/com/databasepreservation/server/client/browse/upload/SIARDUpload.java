@@ -5,12 +5,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.databasepreservation.common.shared.client.tools.HistoryManager;
+import com.databasepreservation.common.shared.client.tools.JSOUtils;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.*;
+import org.glassfish.jersey.jackson.internal.jackson.jaxrs.json.annotation.JSONP;
 import org.roda.core.data.common.RodaConstants;
 
 import com.databasepreservation.common.client.BrowserService;
@@ -155,30 +159,33 @@ public class SIARDUpload extends RightPanel {
         }
       }, DropEvent.getType());
 
-      JavascriptUtils.runMiniUploadForm(layout);
+      JavascriptUtils.runMiniUploadForm(layout, new DefaultAsyncCallback<String>() {
+        @Override
+        public void onSuccess(String id) {
+          GWT.log("result: " + id);
+          Element item = Document.get().getElementById(id);
+          String path = item.getAttribute("path");
+          GWT.log("path: " + path);
+          startItemLoadHandler(item);
+          BrowserService.Util.getInstance().uploadSIARD(path, new DefaultAsyncCallback<String>() {
+            @Override
+            public void onFailure(Throwable caught) {
+              Toast.showError("Cannot create SIARD", PathUtils.getFileName(path));
+              item.addClassName("error");
+              doneItemLoadHandler(item, caught.getMessage(), null);
+            }
+
+            @Override
+            public void onSuccess(String newDatabaseUUID) {
+              Toast.showInfo("SIARD created with success", PathUtils.getFileName(path));
+              doneItemLoadHandler(item, "", newDatabaseUUID);
+            }
+          });
+        }
+      });
     } else {
       uploadForm.setHTML(SafeHtmlUtils.EMPTY_SAFE_HTML);
     }
-  }
-
-  public void loadSIARDAfterUpload(String path, String ID) {
-    Element item = Document.get().getElementById(ID);
-    startItemLoadHandler(item);
-
-    BrowserService.Util.getInstance().uploadSIARD(path, new DefaultAsyncCallback<String>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        Toast.showError("Cannot create SIARD", PathUtils.getFileName(path));
-        item.addClassName("error");
-        doneItemLoadHandler(item, caught.getMessage(), null);
-      }
-
-      @Override
-      public void onSuccess(String newDatabaseUUID) {
-        Toast.showInfo("SIARD created with success", PathUtils.getFileName(path));
-        doneItemLoadHandler(item, "", newDatabaseUUID);
-      }
-    });
   }
 
   private void startItemLoadHandler(Element item){
