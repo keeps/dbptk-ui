@@ -181,7 +181,6 @@ public class TablePanel extends RightPanel {
     options.setText(messages.basicActionOptions());
 
     options.addClickHandler(event -> {
-      GWT.log("ROUTE: " + route);
       if (HistoryManager.ROUTE_TABLE.equals(route)) {
         HistoryManager.gotoTableOptions(database.getUUID(), table.getUUID());
       } else if (HistoryManager.ROUTE_FOREIGN_KEY.equals(route)) {

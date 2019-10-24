@@ -32,6 +32,7 @@ import com.databasepreservation.common.shared.client.common.utils.CommonClientUt
 import com.databasepreservation.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.shared.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.shared.client.tools.HistoryManager;
+import com.databasepreservation.common.shared.client.tools.ViewerStringUtils;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -76,6 +77,9 @@ public class RowPanel extends RightPanel {
 
   @UiField
   FlowPanel alternativeContent;
+
+  @UiField
+  FlowPanel description;
 
   private RowPanel(ViewerDatabase database, ViewerTable table, ViewerRow row) {
     this.rowUUID = row.getUUID();
@@ -126,6 +130,12 @@ public class RowPanel extends RightPanel {
   }
 
   private void init() {
+    if (ViewerStringUtils.isNotBlank(table.getDescription())) {
+      MetadataField instance = MetadataField.createInstance(table.getDescription());
+      instance.setCSS("table-row-description");
+      description.add(instance);
+    }
+
     Set<Ref> recordRelatedTo = new TreeSet<>();
     Set<Ref> recordReferencedBy = new TreeSet<>();
 
