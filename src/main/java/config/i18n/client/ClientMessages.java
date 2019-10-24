@@ -1037,4 +1037,6 @@ public interface ClientMessages extends Messages {
   String csvExportDialogHelpTextForExportSize();
 
   String csvExportDialogHelpTextForDescription();
+
+  String showAdvancedSearch();
 }
