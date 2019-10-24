@@ -116,6 +116,7 @@ public class ViewerConstants {
    * ROW FIELDS
    */
   public static final String SOLR_ROWS_TABLE_ID = "tableId";
+  public static final String SOLR_ROWS_TABLE_UUID = "tableUUID";
 
   /*
    * DYNAMIC FIELD TYPES (suffixes)
@@ -202,6 +203,8 @@ public class ViewerConstants {
   public static final String API_SERVLET = "api";
   public static final String API_V1_EXPORT_RESOURCE = "/v1/exports";
   public static final String API_PATH_PARAM_DATABASE_UUID = "databaseUUID";
+  public static final String API_PATH_PARAM_EXPORT_DESCRIPTION = "description";
+  public static final String API_PATH_PARAM_FILENAME = "fn";
   public static final String API_PATH_PARAM_TABLE_UUID = "tableUUID";
   public static final String API_QUERY_PARAM_FIELDS = "fl";
   public static final String API_QUERY_PARAM_FILTER = "f";
@@ -316,6 +319,11 @@ public class ViewerConstants {
   public static final String BLANK_LINK = "_blank";
   public static final String SIARD_SPECIFICATION_LINK = "https://dilcis.eu/content-types/siard/";
   public static final String ADDITIONAL_CHECKS_SPECIFICATIONLINK = "https://github.com/keeps/db-preservation-toolkit/wiki/Validation#additional-checks";
+
+  /**
+   * FILE EXTENSIONS
+   */
+  public static final String CSV_EXTENSION = ".csv";
 
   /**
    * private constructor

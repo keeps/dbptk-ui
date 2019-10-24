@@ -12,6 +12,7 @@ import java.util.List;
 
 import com.databasepreservation.common.shared.client.common.NoAsyncCallback;
 import com.databasepreservation.common.shared.client.common.desktop.GenericField;
+import com.databasepreservation.common.shared.client.common.helpers.HelperExportTableData;
 import com.databasepreservation.common.shared.client.common.lists.IndexedColumn;
 import com.databasepreservation.common.shared.client.widgets.MyCellTableResources;
 import com.databasepreservation.common.shared.client.common.helper.HelperValidator;
@@ -166,6 +167,44 @@ public class Dialogs {
     footer.add(btnItemCloseButton);
 
     dialogBox.setWidget(layout);
+    dialogBox.center();
+    dialogBox.show();
+  }
+
+  public static void showCSVSetupDialog(String title, HelperExportTableData helper, String cancelButtonText, String confirmButtonText, final AsyncCallback<Boolean> callback) {
+    final DialogBox dialogBox = new DialogBox(false, true);
+    final Button cancelButton = new Button(cancelButtonText);
+    final Button confirmButton = new Button(confirmButtonText);
+
+    FlowPanel layout = new FlowPanel();
+    FlowPanel footer = new FlowPanel();
+
+    footer.add(cancelButton);
+    footer.add(confirmButton);
+    footer.addStyleName("wui-dialog-layout-footer");
+    layout.add(helper.getWidget());
+    layout.addStyleName("wui-dialog-layout");
+    layout.add(footer);
+
+    cancelButton.addStyleName("btn btn-link");
+    cancelButton.addClickHandler(event -> {
+      dialogBox.hide();
+      callback.onSuccess(false);
+    });
+
+    confirmButton.addStyleName("btn btn-play");
+    confirmButton.addClickHandler(event -> {
+      dialogBox.hide();
+      callback.onSuccess(true);
+    });
+
+    dialogBox.setText(title);
+    dialogBox.setWidget(layout);
+    dialogBox.setWidth("360px");
+    dialogBox.setGlassEnabled(true);
+    dialogBox.setAnimationEnabled(false);
+    dialogBox.addStyleName("wui-dialog-information");
+
     dialogBox.center();
     dialogBox.show();
   }

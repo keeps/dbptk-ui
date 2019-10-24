@@ -13,8 +13,17 @@ import com.databasepreservation.common.shared.client.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.shared.client.common.ContentPanel;
 import com.databasepreservation.common.shared.client.common.RightPanel;
 import com.databasepreservation.common.shared.client.common.utils.RightPanelLoader;
-import com.databasepreservation.common.shared.client.common.visualization.browse.*;
+import com.databasepreservation.common.shared.client.common.visualization.browse.ContainerPanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.DatabaseListPanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.DatabasePanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.DatabaseSearchPanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.DatabaseSearchesPanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.ReferencesPanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.RowPanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.SIARDMainPage;
+import com.databasepreservation.common.shared.client.common.visualization.browse.SchemaStructurePanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.foreignKey.ForeignKeyPanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.information.DatabaseInformationPanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.ingest.IngestPage;
 import com.databasepreservation.common.shared.client.common.visualization.browse.metadata.MetadataPanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.metadata.MetadataPanelLoad;
@@ -27,6 +36,8 @@ import com.databasepreservation.common.shared.client.common.visualization.browse
 import com.databasepreservation.common.shared.client.common.visualization.browse.table.TablePanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.table.TableSavedSearchEditPanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.table.TableSavedSearchPanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.technicalInformation.ReportPanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.technicalInformation.UsersPanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.validate.ValidatorPage;
 import com.databasepreservation.common.shared.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.shared.client.tools.HistoryManager;
@@ -210,7 +221,7 @@ public class MainPanel extends Composite {
         setContent(databaseUUID, new RightPanelLoader() {
           @Override
           public RightPanel load(ViewerDatabase database) {
-            return DatabaseReportPanel.getInstance(database);
+            return ReportPanel.getInstance(database);
           }
         });
 
@@ -221,7 +232,7 @@ public class MainPanel extends Composite {
         setContent(databaseUUID, new RightPanelLoader() {
           @Override
           public RightPanel load(ViewerDatabase database) {
-            return DatabaseUsersPanel.getInstance(database);
+            return UsersPanel.getInstance(database);
           }
         });
 

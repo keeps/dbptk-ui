@@ -1,16 +1,14 @@
-package com.databasepreservation.common.shared.client.common.visualization.browse;
+package com.databasepreservation.common.shared.client.common.visualization.browse.information;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import com.databasepreservation.common.shared.ViewerConstants;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerMetadata;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerSchema;
 import com.databasepreservation.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.shared.client.common.MetadataField;
 import com.databasepreservation.common.shared.client.common.RightPanel;
-import com.databasepreservation.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.shared.client.tools.ViewerStringUtils;
 import com.google.gwt.core.client.GWT;
@@ -92,14 +90,14 @@ public class DatabaseInformationPanel extends RightPanel {
 
   private void initDataContent() {
     if (database.getMetadata().getSchemas().size() == 1) {
-      final SchemaDataPanel instance = SchemaDataPanel.getInstance(database, database.getMetadata().getSchemas().get(0).getUUID());
+      final DataPanel instance = DataPanel.getInstance(database, database.getMetadata().getSchemas().get(0).getUUID());
       instance.reload(advancedMode);
       dataContent.add(instance);
     } else {
       TabPanel tabPanel = new TabPanel();
       for (ViewerSchema schema : database.getMetadata().getSchemas()) {
         tabPanel.addStyleName("browseItemMetadata");
-        final SchemaDataPanel instance = SchemaDataPanel.getInstance(database, schema.getUUID());
+        final DataPanel instance = DataPanel.getInstance(database, schema.getUUID());
         instance.reload(advancedMode);
         tabPanel.add(instance, schema.getName());
 

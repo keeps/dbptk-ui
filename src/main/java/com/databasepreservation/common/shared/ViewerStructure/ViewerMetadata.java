@@ -210,6 +210,13 @@ public class ViewerMetadata implements Serializable {
     return tables.get(tableUUID);
   }
 
+  public ViewerTable getTableById(String tableId) {
+    for (ViewerTable value : tables.values()) {
+      if (value.getId().equals(tableId)) return value;
+    }
+    return null;
+  }
+
   public ViewerView getView(String viewUUID) {
     return views.get(viewUUID);
   }

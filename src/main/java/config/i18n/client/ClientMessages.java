@@ -1018,4 +1018,23 @@ public interface ClientMessages extends Messages {
   String newUploadPanelTextForUploadButton();
 
   String uploadSIARDTextForDoneUpload();
+
+  /*********************************************
+   *  CSV Export Dialog
+   *********************************************/
+  String csvExportDialogTitle();
+
+  String csvExportDialogLabelForFilename();
+
+  String csvExportDialogLabelForExportAllRadioButton();
+
+  String csvExportDialogLabelForExportVisibleRadioButton();
+
+  String csvExportDialogLabelForExportHeaderWithDescriptions();
+
+  String csvExportDialogHelpTextForFilename();
+
+  String csvExportDialogHelpTextForExportSize();
+
+  String csvExportDialogHelpTextForDescription();
 }

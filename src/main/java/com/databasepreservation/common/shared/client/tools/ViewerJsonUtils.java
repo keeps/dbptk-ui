@@ -1,6 +1,7 @@
 package com.databasepreservation.common.shared.client.tools;
 
 import java.util.List;
+import java.util.Map;
 
 import org.roda.core.data.v2.index.filter.Filter;
 import org.roda.core.data.v2.index.sort.Sorter;

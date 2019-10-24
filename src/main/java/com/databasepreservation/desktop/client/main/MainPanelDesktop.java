@@ -10,19 +10,16 @@ import com.databasepreservation.common.shared.client.common.ContentPanel;
 import com.databasepreservation.common.shared.client.common.RightPanel;
 import com.databasepreservation.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.shared.client.common.utils.RightPanelLoader;
-import com.databasepreservation.common.shared.client.common.visualization.browse.*;
+import com.databasepreservation.common.shared.client.common.visualization.browse.ContainerPanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.DatabasePanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.DatabaseSearchPanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.DatabaseSearchesPanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.ReferencesPanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.RowPanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.SIARDMainPage;
 import com.databasepreservation.common.shared.client.common.visualization.browse.foreignKey.ForeignKeyPanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.foreignKey.ForeignKeyPanelOptions;
-import com.databasepreservation.common.shared.client.common.visualization.browse.table.TablePanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.table.TablePanelOptions;
-import com.databasepreservation.common.shared.client.common.visualization.browse.table.TableSavedSearchEditPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.table.TableSavedSearchPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.validate.ValidatorPage;
-import com.databasepreservation.common.shared.client.common.visualization.browse.view.ViewPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.view.ViewPanelStructure;
-import com.databasepreservation.common.shared.client.tools.HistoryManager;
-import com.databasepreservation.desktop.client.dbptk.HomePage;
-import com.databasepreservation.desktop.client.dbptk.Manage;
+import com.databasepreservation.common.shared.client.common.visualization.browse.information.DatabaseInformationPanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.ingest.IngestPage;
 import com.databasepreservation.common.shared.client.common.visualization.browse.metadata.MetadataPanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.metadata.MetadataPanelLoad;
@@ -32,6 +29,19 @@ import com.databasepreservation.common.shared.client.common.visualization.browse
 import com.databasepreservation.common.shared.client.common.visualization.browse.metadata.schemas.tables.MetadataTablePanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.metadata.schemas.views.MetadataViewPanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.metadata.users.MetadataUsersPanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.table.TablePanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.table.TablePanelOptions;
+import com.databasepreservation.common.shared.client.common.visualization.browse.table.TableSavedSearchEditPanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.table.TableSavedSearchPanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.technicalInformation.ReportPanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.technicalInformation.RoutinesPanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.technicalInformation.UsersPanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.validate.ValidatorPage;
+import com.databasepreservation.common.shared.client.common.visualization.browse.view.ViewPanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.view.ViewPanelStructure;
+import com.databasepreservation.common.shared.client.tools.HistoryManager;
+import com.databasepreservation.desktop.client.dbptk.HomePage;
+import com.databasepreservation.desktop.client.dbptk.Manage;
 import com.databasepreservation.desktop.client.dbptk.wizard.download.DBMSWizardManager;
 import com.databasepreservation.desktop.client.dbptk.wizard.download.SIARDWizardManager;
 import com.databasepreservation.desktop.client.dbptk.wizard.upload.CreateWizardManager;
@@ -96,7 +106,7 @@ public class MainPanelDesktop extends Composite {
         setContent(databaseUUID, currentHistoryPath.get(2), new RightPanelLoader() {
           @Override
           public RightPanel load(ViewerDatabase database) {
-            return DatabaseReportPanel.getInstance(database);
+            return ReportPanel.getInstance(database);
           }
         });
       } else if (currentHistoryPath.size() == 3
@@ -106,7 +116,7 @@ public class MainPanelDesktop extends Composite {
         setContent(databaseUUID, currentHistoryPath.get(2), new RightPanelLoader() {
           @Override
           public RightPanel load(ViewerDatabase database) {
-            return DatabaseUsersPanel.getInstance(database);
+            return UsersPanel.getInstance(database);
           }
         });
       } else if (currentHistoryPath.size() == 3
@@ -126,7 +136,7 @@ public class MainPanelDesktop extends Composite {
         setContent(databaseUUID, currentHistoryPath.get(2), new RightPanelLoader() {
           @Override
           public RightPanel load(ViewerDatabase database) {
-            return SchemaRoutinesPanel.getInstance(database);
+            return RoutinesPanel.getInstance(database);
           }
         });
       }

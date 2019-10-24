@@ -1,4 +1,4 @@
-package com.databasepreservation.common.shared.client.common.visualization.browse;
+package com.databasepreservation.common.shared.client.common.visualization.browse.technicalInformation;
 
 import java.util.HashMap;
 import java.util.List;
@@ -27,17 +27,17 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class DatabaseUsersPanel extends RightPanel {
+public class UsersPanel extends RightPanel {
   private static final ClientMessages messages = com.google.gwt.core.shared.GWT.create(ClientMessages.class);
-  private static Map<String, DatabaseUsersPanel> instances = new HashMap<>();
+  private static Map<String, UsersPanel> instances = new HashMap<>();
 
-  public static DatabaseUsersPanel getInstance(ViewerDatabase database) {
+  public static UsersPanel getInstance(ViewerDatabase database) {
     String code = database.getUUID();
-    instances.computeIfAbsent(code, k -> new DatabaseUsersPanel(database));
+    instances.computeIfAbsent(code, k -> new UsersPanel(database));
     return instances.get(code);
   }
 
-  interface DatabaseUsersPanelUiBinder extends UiBinder<Widget, DatabaseUsersPanel> {
+  interface DatabaseUsersPanelUiBinder extends UiBinder<Widget, UsersPanel> {
   }
 
   private static DatabaseUsersPanelUiBinder uiBinder = GWT.create(DatabaseUsersPanelUiBinder.class);
@@ -50,7 +50,7 @@ public class DatabaseUsersPanel extends RightPanel {
   @UiField
   Label title;
 
-  private DatabaseUsersPanel(ViewerDatabase database) {
+  private UsersPanel(ViewerDatabase database) {
     initWidget(uiBinder.createAndBindUi(this));
 
     this.database = database;
@@ -83,7 +83,7 @@ public class DatabaseUsersPanel extends RightPanel {
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
       BreadcrumbManager.updateBreadcrumb(breadcrumb,
-          BreadcrumbManager.forDesktopDatabaseUsers(database.getMetadata().getName(), database.getUUID()));
+          BreadcrumbManager.forDatabaseUsers(database.getMetadata().getName(), database.getUUID()));
   }
 
   private BasicTablePanel<ViewerUserStructure> getBasicTablePanelForUsers(ViewerMetadata metadata) {

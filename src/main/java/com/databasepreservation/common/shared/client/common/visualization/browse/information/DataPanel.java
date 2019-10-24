@@ -1,4 +1,4 @@
-package com.databasepreservation.common.shared.client.common.visualization.browse;
+package com.databasepreservation.common.shared.client.common.visualization.browse.information;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,7 +13,6 @@ import com.databasepreservation.common.shared.ViewerStructure.ViewerMetadata;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerSchema;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerTable;
 import com.databasepreservation.common.shared.client.common.lists.BasicTablePanel;
-import com.databasepreservation.common.shared.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.shared.client.tools.HistoryManager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -31,23 +30,23 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class SchemaDataPanel extends Composite {
+public class DataPanel extends Composite {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
-  private static Map<String, SchemaDataPanel> instances = new HashMap<>();
+  private static Map<String, DataPanel> instances = new HashMap<>();
 
-  public static SchemaDataPanel getInstance(ViewerDatabase database, String schemaUUID) {
+  public static DataPanel getInstance(ViewerDatabase database, String schemaUUID) {
     String separator = "/";
     String code = database.getUUID() + separator + schemaUUID;
 
-    SchemaDataPanel instance = instances.get(code);
+    DataPanel instance = instances.get(code);
     if (instance == null) {
-      instance = new SchemaDataPanel(database, schemaUUID);
+      instance = new DataPanel(database, schemaUUID);
       instances.put(code, instance);
     }
     return instance;
   }
 
-  interface SchemaDataPanelUiBinder extends UiBinder<Widget, SchemaDataPanel> {
+  interface SchemaDataPanelUiBinder extends UiBinder<Widget, DataPanel> {
   }
 
   private static SchemaDataPanelUiBinder uiBinder = GWT.create(SchemaDataPanelUiBinder.class);
@@ -59,7 +58,7 @@ public class SchemaDataPanel extends Composite {
   @UiField
   FlowPanel contentItems, tableContent;
 
-  private SchemaDataPanel(ViewerDatabase viewerDatabase, final String schemaUUID) {
+  private DataPanel(ViewerDatabase viewerDatabase, final String schemaUUID) {
     database = viewerDatabase;
     schema = database.getMetadata().getSchema(schemaUUID);
 

@@ -55,7 +55,7 @@ public class DatabaseSearchesPanel extends RightPanel {
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
     BreadcrumbManager.updateBreadcrumb(breadcrumb,
-          BreadcrumbManager.forDatabaseSavedSearches(database.getUUID(), database.getMetadata().getName()));
+          BreadcrumbManager.forDatabaseSavedSearches(database.getMetadata().getName(), database.getUUID()));
   }
 
   private void init() {

@@ -1,4 +1,4 @@
-package com.databasepreservation.common.shared.client.common.visualization.browse;
+package com.databasepreservation.common.shared.client.common.visualization.browse.technicalInformation;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,22 +19,22 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class DatabaseReportPanel extends RightPanel {
+public class ReportPanel extends RightPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
-  private static Map<String, DatabaseReportPanel> instances = new HashMap<>();
+  private static Map<String, ReportPanel> instances = new HashMap<>();
 
-  public static DatabaseReportPanel getInstance(ViewerDatabase database) {
+  public static ReportPanel getInstance(ViewerDatabase database) {
     String code = database.getUUID();
 
-    DatabaseReportPanel instance = instances.get(code);
+    ReportPanel instance = instances.get(code);
     if (instance == null) {
-      instance = new DatabaseReportPanel(database);
+      instance = new ReportPanel(database);
       instances.put(code, instance);
     }
     return instance;
   }
 
-  interface ReportPanelUiBinder extends UiBinder<Widget, DatabaseReportPanel> {
+  interface ReportPanelUiBinder extends UiBinder<Widget, ReportPanel> {
   }
 
   private static ReportPanelUiBinder uiBinder = GWT.create(ReportPanelUiBinder.class);
@@ -47,7 +47,7 @@ public class DatabaseReportPanel extends RightPanel {
   @UiField(provided = true)
   MarkdownWidgetWrapper contentItems;
 
-  private DatabaseReportPanel(ViewerDatabase database) {
+  private ReportPanel(ViewerDatabase database) {
     this.database = database;
     this.contentItems = new MarkdownWidgetWrapper(database.getUUID());
 

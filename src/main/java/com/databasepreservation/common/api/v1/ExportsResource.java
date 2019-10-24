@@ -1,6 +1,5 @@
 package com.databasepreservation.common.api.v1;
 
-import java.io.InputStream;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -16,6 +15,7 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.roda.core.data.exceptions.RODAException;
 import org.roda.core.data.utils.JsonUtils;
+import org.roda.core.data.v2.index.IndexResult;
 import org.roda.core.data.v2.index.filter.Filter;
 import org.roda.core.data.v2.index.sort.Sorter;
 import org.roda.core.data.v2.index.sublist.Sublist;
@@ -23,12 +23,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.api.utils.ApiUtils;
-import com.databasepreservation.common.api.utils.DownloadUtils;
-import com.databasepreservation.common.api.utils.StreamResponse;
+import com.databasepreservation.common.api.utils.ViewerStreamingOutput;
+import com.databasepreservation.common.api.v1.utils.IterableIndexResultsCSVOutputStream;
+import com.databasepreservation.common.api.v1.utils.ResultsCSVOutputStream;
+import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
+import com.databasepreservation.common.server.index.utils.IterableIndexResult;
 import com.databasepreservation.common.shared.ViewerConstants;
+import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
+import com.databasepreservation.common.shared.ViewerStructure.ViewerRow;
+import com.databasepreservation.common.shared.ViewerStructure.ViewerTable;
 import com.databasepreservation.common.utils.UserUtility;
 
 import io.swagger.annotations.Api;
@@ -59,7 +64,10 @@ public class ExportsResource {
     @QueryParam(ViewerConstants.API_QUERY_PARAM_FILTER) String filterParam,
     @QueryParam(ViewerConstants.API_QUERY_PARAM_FIELDS) String fieldsListParam,
     @QueryParam(ViewerConstants.API_QUERY_PARAM_SORTER) String sorterParam,
-    @QueryParam(ViewerConstants.API_QUERY_PARAM_SUBLIST) String subListParam) throws RODAException {
+    @QueryParam(ViewerConstants.API_QUERY_PARAM_SUBLIST) String subListParam,
+    @QueryParam(ViewerConstants.API_PATH_PARAM_FILENAME) String filename,
+    @QueryParam(ViewerConstants.API_PATH_PARAM_EXPORT_DESCRIPTION) Boolean exportDescriptions,
+    @QueryParam(ViewerConstants.API_PATH_PARAM_TABLE_UUID) String tableUUID) throws RODAException {
     DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
 
     Filter filter = JsonUtils.getObjectFromJson(filterParam, Filter.class);
@@ -72,9 +80,20 @@ public class ExportsResource {
 
     UserUtility.Authorization.checkDatabaseAccessPermission(this.request, databaseUUID);
 
-    InputStream rowsCSV = solrManager.findRowsCSV(databaseUUID, filter, sorter, sublist, fields);
+    final ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
+    final ViewerTable table = database.getMetadata().getTable(tableUUID);
 
-    return ApiUtils
-      .okResponse(new StreamResponse("file.csv", MediaType.APPLICATION_OCTET_STREAM, DownloadUtils.stream(rowsCSV)));
+    if (sublist == null) {
+      final IterableIndexResult allRows = solrManager.findAllRows(databaseUUID, filter, sorter, fields);
+      return ApiUtils.okResponse(new ViewerStreamingOutput(
+        new IterableIndexResultsCSVOutputStream(allRows, table, fields, filename, exportDescriptions, ','))
+          .toStreamResponse());
+    } else {
+      final IndexResult<ViewerRow> rows = solrManager.findRows(databaseUUID, filter, sorter, sublist, null, fields);
+
+      return ApiUtils.okResponse(
+        new ViewerStreamingOutput(new ResultsCSVOutputStream(rows, table, fields, filename, exportDescriptions, ','))
+          .toStreamResponse());
+    }
   }
 }

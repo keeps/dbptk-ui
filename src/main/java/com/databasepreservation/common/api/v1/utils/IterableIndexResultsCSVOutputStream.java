@@ -3,8 +3,10 @@ package com.databasepreservation.common.api.v1.utils;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.util.Iterator;
 import java.util.List;
 
+import com.databasepreservation.common.server.index.utils.IterableIndexResult;
 import org.apache.commons.csv.CSVPrinter;
 import org.roda.core.data.v2.index.IndexResult;
 
@@ -14,9 +16,9 @@ import com.databasepreservation.common.shared.ViewerStructure.ViewerTable;
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-public class ResultsCSVOutputStream extends CSVOutputStream {
+public class IterableIndexResultsCSVOutputStream extends CSVOutputStream {
   /** The results to write to output stream. */
-  private final IndexResult<ViewerRow> results;
+  private final IterableIndexResult results;
   private final ViewerTable table;
   private final List<String> fieldsToReturn;
   private final boolean exportDescription;
@@ -30,8 +32,8 @@ public class ResultsCSVOutputStream extends CSVOutputStream {
    * @param delimiter
    *          the CSV field delimiter.
    */
-  public ResultsCSVOutputStream(final IndexResult<ViewerRow> results, final ViewerTable table, final List<String> fieldsToReturn, final String filename,
-                                final boolean exportDescription, final char delimiter) {
+  public IterableIndexResultsCSVOutputStream(final IterableIndexResult results, final ViewerTable table, final List<String> fieldsToReturn, final String filename,
+                                             final boolean exportDescription, final char delimiter) {
     super(filename, delimiter);
     this.results = results;
     this.table = table;
@@ -44,14 +46,17 @@ public class ResultsCSVOutputStream extends CSVOutputStream {
     final OutputStreamWriter writer = new OutputStreamWriter(out);
     CSVPrinter printer = null;
     boolean isFirst = true;
-    for (final ViewerRow row : this.results.getResults()) {
+
+    for (ViewerRow row : results) {
       if (isFirst) {
         printer = getFormat().withHeader(table.getCSVHeaders(fieldsToReturn, exportDescription).toArray(new String[0])).print(writer);
         isFirst = false;
       }
 
       printer.printRecord(row.getCellValues(fieldsToReturn));
+
     }
+
     writer.flush();
   }
 }

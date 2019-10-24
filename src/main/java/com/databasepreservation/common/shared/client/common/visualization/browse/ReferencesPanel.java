@@ -8,8 +8,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
 
-import com.databasepreservation.common.shared.ViewerConstants;
-import com.databasepreservation.common.shared.client.common.utils.ApplicationType;
 import org.roda.core.data.v2.index.filter.EmptyKeyFilterParameter;
 import org.roda.core.data.v2.index.filter.Filter;
 import org.roda.core.data.v2.index.filter.FilterParameter;
@@ -111,17 +109,10 @@ public class ReferencesPanel extends RightPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
-      BreadcrumbManager.updateBreadcrumb(breadcrumb,
-          BreadcrumbManager.forDesktopReferences(database.getMetadata().getName(), database.getUUID(), table.getSchemaName(),
-              table.getSchemaUUID(), table.getName(), table.getUUID(), recordUUID, columnName,
-              columnIndexInTable.toString()));
-    } else {
       BreadcrumbManager.updateBreadcrumb(breadcrumb,
           BreadcrumbManager.forReferences(database.getMetadata().getName(), database.getUUID(), table.getSchemaName(),
               table.getSchemaUUID(), table.getName(), table.getUUID(), recordUUID, columnName,
               columnIndexInTable.toString()));
-    }
   }
 
   private void init() {

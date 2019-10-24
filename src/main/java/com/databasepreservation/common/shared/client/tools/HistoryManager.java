@@ -121,20 +121,8 @@ public class HistoryManager {
     newHistory(Arrays.asList(ROUTE_DATABASE, databaseUUID));
   }
 
-  public static void gotoDesktopDatabase() {
-    newHistory(Collections.singletonList(ROUTE_DESKTOP_DATABASE));
-  }
-
-  public static void gotoDesktopDatabase(String databaseUUID) {
-    newHistory(Arrays.asList(ROUTE_DESKTOP_DATABASE, databaseUUID));
-  }
-
   public static void gotoDatabaseUsers(String databaseUUID) {
     newHistory(Arrays.asList(ROUTE_DATABASE, databaseUUID, ROUTE_DATABASE_USERS));
-  }
-
-  public static void gotoDesktopDatabaseUsers(String databaseUUID) {
-    newHistory(Arrays.asList(ROUTE_DESKTOP_DATABASE, databaseUUID, ROUTE_DATABASE_USERS));
   }
 
   public static void gotoDatabaseSearch(String databaseUUID) {
@@ -145,16 +133,8 @@ public class HistoryManager {
     newHistory(Arrays.asList(ROUTE_DATABASE, databaseUUID, ROUTE_DATABASE_REPORT));
   }
 
-  public static void gotoDesktopDatabaseReport(String databaseUUID) {
-    newHistory(Arrays.asList(ROUTE_DESKTOP_DATABASE, databaseUUID, ROUTE_DATABASE_REPORT));
-  }
-
   public static void gotoSchema(String databaseUUID, String schemaUUID) {
     newHistory(Arrays.asList(ROUTE_SCHEMA, databaseUUID, schemaUUID));
-  }
-
-  public static void gotoDesktopSchema(String databaseUUID, String schemaUUID) {
-    newHistory(Arrays.asList(ROUTE_DESKTOP_SCHEMA, databaseUUID, schemaUUID));
   }
 
   public static void gotoSchemaStructure(String databaseUUID, String schemaUUID) {
@@ -229,10 +209,6 @@ public class HistoryManager {
 
   public static void gotoViewOptions(String databaseUUID, String tableUUID) {
     newHistory(Arrays.asList(ROUTE_VIEW, databaseUUID, tableUUID, ROUTE_TABLE_OPTIONS));
-  }
-
-  public static void gotoDesktopTable(String databaseUUID, String tableUUID) {
-    newHistory(Arrays.asList(ROUTE_DESKTOP_TABLE, databaseUUID, tableUUID));
   }
 
   public static void gotoRecord(String databaseUUID, String tableUUID, String recordUUID) {

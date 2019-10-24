@@ -3,14 +3,15 @@ package com.databasepreservation.modules.viewer;
 import java.nio.file.Path;
 import java.util.Set;
 
+import org.roda.core.data.exceptions.GenericException;
+import org.roda.core.data.exceptions.NotFoundException;
+
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
-import com.databasepreservation.common.shared.ViewerConstants;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
-import com.databasepreservation.common.shared.client.common.utils.ApplicationType;
-import com.databasepreservation.common.transformers.ToolkitStructure2ViewerStructure;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabaseFromToolkit;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerTable;
+import com.databasepreservation.common.transformers.ToolkitStructure2ViewerStructure;
 import com.databasepreservation.model.Reporter;
 import com.databasepreservation.model.data.Row;
 import com.databasepreservation.model.exception.ModuleException;
@@ -32,9 +33,11 @@ public class DbvtkExportModule implements DatabaseExportModule {
 
   private ViewerDatabaseFromToolkit viewerDatabase;
 
+  private ViewerDatabase retrieved;
+
   private ViewerTable currentTable;
 
-  private String preSetDatabaseUUID;
+  private String databaseUUID;
 
   private long rowIndex = 0;
 
@@ -46,7 +49,12 @@ public class DbvtkExportModule implements DatabaseExportModule {
 
   public DbvtkExportModule(String databaseUUID, Path lobFolder) {
     solrManager = ViewerFactory.getSolrManager();
-    preSetDatabaseUUID = databaseUUID;
+    try {
+      retrieved = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
+    } catch (NotFoundException | GenericException e) {
+      retrieved = null;
+    }
+    this.databaseUUID = databaseUUID;
     configuration = DbvtkModuleConfiguration.getInstance(lobFolder);
   }
 
@@ -96,8 +104,7 @@ public class DbvtkExportModule implements DatabaseExportModule {
   @Override
   public void handleStructure(DatabaseStructure structure) throws ModuleException {
     this.structure = structure;
-    this.viewerDatabase = ToolkitStructure2ViewerStructure.getDatabase(structure, preSetDatabaseUUID);
-    solrManager.addDatabaseRowCollection(viewerDatabase);
+    solrManager.addDatabaseRowCollection(databaseUUID);
   }
 
   /**
@@ -125,7 +132,7 @@ public class DbvtkExportModule implements DatabaseExportModule {
    */
   @Override
   public void handleDataOpenTable(String tableId) throws ModuleException {
-    currentTable = viewerDatabase.getTable(tableId);
+    currentTable = retrieved.getMetadata().getTableById(tableId);
     solrManager.addTable(currentTable);
     rowIndex = 0;
   }
@@ -140,8 +147,8 @@ public class DbvtkExportModule implements DatabaseExportModule {
    */
   @Override
   public void handleDataRow(Row row) throws ModuleException {
-    solrManager.addRow(viewerDatabase,
-      ToolkitStructure2ViewerStructure.getRow(configuration, viewerDatabase.getUUID(), currentTable, row, rowIndex++));
+    solrManager.addRow(retrieved.getUUID(),
+      ToolkitStructure2ViewerStructure.getRow(configuration, databaseUUID, currentTable, row, rowIndex++));
   }
 
   /**
@@ -178,7 +185,7 @@ public class DbvtkExportModule implements DatabaseExportModule {
    */
   @Override
   public void finishDatabase() throws ModuleException {
-    solrManager.markDatabaseAsReady(viewerDatabase);
+    solrManager.markDatabaseAsReady(databaseUUID);
   }
 
   /**

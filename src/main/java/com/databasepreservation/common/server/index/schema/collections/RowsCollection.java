@@ -9,11 +9,12 @@ package com.databasepreservation.common.server.index.schema.collections;
 
 import static com.databasepreservation.common.shared.ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX;
 import static com.databasepreservation.common.shared.ViewerConstants.SOLR_ROWS_TABLE_ID;
+import static com.databasepreservation.common.shared.ViewerConstants.SOLR_ROWS_TABLE_UUID;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -28,6 +29,7 @@ import org.roda.core.data.exceptions.RequestNotValidException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.server.index.factory.SolrClientFactory;
 import com.databasepreservation.common.server.index.schema.AbstractSolrCollection;
 import com.databasepreservation.common.server.index.schema.CopyField;
@@ -39,7 +41,6 @@ import com.databasepreservation.common.server.index.utils.SolrUtils;
 import com.databasepreservation.common.shared.ViewerConstants;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerCell;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerRow;
-import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.utils.JodaUtils;
 
 public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
@@ -75,6 +76,7 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
     List<Field> fields = new ArrayList<>(super.getFields());
 
     fields.add(new Field(SOLR_ROWS_TABLE_ID, Field.TYPE_STRING).setIndexed(true).setStored(true));
+    fields.add(new Field(SOLR_ROWS_TABLE_UUID, Field.TYPE_STRING).setIndexed(true).setStored(true));
 
     return fields;
   }
@@ -90,6 +92,7 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
     SolrInputDocument doc = super.toSolrDocument(row);
 
     doc.setField(ViewerConstants.SOLR_ROWS_TABLE_ID, row.getTableId());
+    doc.setField(SOLR_ROWS_TABLE_UUID, row.getTableUUID());
     for (Map.Entry<String, ViewerCell> cellEntry : row.getCells().entrySet()) {
       String solrColumnName = cellEntry.getKey();
       String cellValue = cellEntry.getValue().getValue();
@@ -105,8 +108,9 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
     ViewerRow viewerRow = super.fromSolrDocument(doc);
 
     viewerRow.setTableId(SolrUtils.objectToString(doc.get(ViewerConstants.SOLR_ROWS_TABLE_ID), null));
+    viewerRow.setTableUUID(SolrUtils.objectToString(doc.get(ViewerConstants.SOLR_ROWS_TABLE_UUID), null));
 
-    Map<String, ViewerCell> cells = new HashMap<>();
+    Map<String, ViewerCell> cells = new LinkedHashMap<>();
     for (Map.Entry<String, Object> entry : doc) {
       String columnName = entry.getKey();
       Object value = entry.getValue();

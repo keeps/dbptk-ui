@@ -174,13 +174,13 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
       exportButtons.setCellPadding(0);
       exportButtons.setCellSpacing(0);
 
-      exportVisibleButton = new Anchor(messages.exportVisible());
-      exportVisibleButton.addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent event) {
-          AsyncTableCell.this.exportVisibleClickHandler();
-        }
-      });
+      //exportVisibleButton = new Anchor(messages.exportVisible());
+      //exportVisibleButton.addClickHandler(new ClickHandler() {
+      //  @Override
+      //  public void onClick(ClickEvent event) {
+      //    AsyncTableCell.this.exportVisibleClickHandler();
+      //  }
+      //});
 
       exportAllButton = new Anchor(messages.exportAll());
       exportAllButton.addClickHandler(new ClickHandler() {
@@ -190,9 +190,9 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
         }
       });
 
-      exportButtons.setWidget(0, 0, exportVisibleButton);
-      exportButtons.setText(0, 1, " | ");
-      exportButtons.setWidget(0, 2, exportAllButton);
+     // exportButtons.setWidget(0, 0, exportVisibleButton);
+     // exportButtons.setText(0, 1, " | ");
+      exportButtons.setWidget(0, 0, exportAllButton);
     }
 
     resultsPager = new AccessibleSimplePager(AccessibleSimplePager.TextLocation.LEFT,

@@ -122,66 +122,53 @@ public class BreadcrumbManager {
   }
 
   public static List<BreadcrumbItem> forDatabaseInformation(final String databaseUUID, final String databaseName) {
-      List<BreadcrumbItem> items;
-      if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
-          items = forSIARDMainPage(databaseUUID, databaseName);
-      } else {
-          items = forDatabase(databaseName, databaseUUID);
-      }
-      items.add(new BreadcrumbItem(
-              SafeHtmlUtils.fromSafeConstant(
-                      FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE_INFORMATION) + SafeHtmlUtils.htmlEscape(" " + messages.databaseInformationTextForTitle())),
-              new Command() {
-                  @Override
-                  public void execute() {
-                      HistoryManager.gotoDatabase(databaseUUID);
-                  }
-              }));
-
-      return items;
-  }
-
-  public static List<BreadcrumbItem> forDesktopDatabaseSavedSearches(final String databaseUUID, final String databaseName) {
-    List<BreadcrumbItem> items = forSIARDMainPage(databaseUUID, databaseName);
+    List<BreadcrumbItem> items;
+    if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
+      items = forSIARDMainPage(databaseUUID, databaseName);
+    } else {
+      items = forDatabase(databaseName, databaseUUID);
+    }
     items.add(new BreadcrumbItem(
-        SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE_SEARCH)
-            + SafeHtmlUtils.htmlEscape(" " + messages.breadcrumbTextForDesktopDatabaseSavedSearches())), new Command(){
-          @Override
-          public void execute() {
-            HistoryManager.gotoSavedSearches(databaseUUID);
-          }
-        })
-    );
+      SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE_INFORMATION)
+        + SafeHtmlUtils.htmlEscape(" " + messages.databaseInformationTextForTitle())),
+      new Command() {
+        @Override
+        public void execute() {
+          HistoryManager.gotoDatabase(databaseUUID);
+        }
+      }));
+
     return items;
   }
 
   public static List<BreadcrumbItem> forDatabaseSearchPanel(final String databaseUUID, final String databaseName) {
     List<BreadcrumbItem> items;
     if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
-        items = forSIARDMainPage(databaseUUID, databaseName);
+      items = forSIARDMainPage(databaseUUID, databaseName);
     } else {
-        items = forDatabase(databaseName, databaseUUID);
+      items = forDatabase(databaseName, databaseUUID);
     }
 
     items.add(new BreadcrumbItem(
-      SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE_SEARCH) + SafeHtmlUtils.htmlEscape(" " + messages.search())),
-              new Command() {
-                  @Override
-                  public void execute() {
-                      HistoryManager.gotoDatabaseSearch(databaseUUID);
-                  }
-              }));
+      SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE_SEARCH)
+        + SafeHtmlUtils.htmlEscape(" " + messages.search())),
+      new Command() {
+        @Override
+        public void execute() {
+          HistoryManager.gotoDatabaseSearch(databaseUUID);
+        }
+      }));
 
     return items;
   }
 
   public static List<BreadcrumbItem> forDatabaseReport(final String databaseUUID, final String databaseName) {
-     List<BreadcrumbItem> items;
-      if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
-          items = forSIARDMainPage(databaseUUID, databaseName);
-     } else {
-        items = forDatabase(databaseName, databaseUUID);
-     }
+    List<BreadcrumbItem> items;
+    if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
+      items = forSIARDMainPage(databaseUUID, databaseName);
+    } else {
+      items = forDatabase(databaseName, databaseUUID);
+    }
 
     items.add(new BreadcrumbItem(
       SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE_REPORT)
@@ -195,22 +182,13 @@ public class BreadcrumbManager {
     return items;
   }
 
-  public static List<BreadcrumbItem> forDesktopDatabaseUsers(final String databaseName, final String databaseUUID) {
-    List<BreadcrumbItem> items = forSIARDMainPage(databaseUUID, databaseName);
-    items.add(new BreadcrumbItem(
-        SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE_USERS)
-            + SafeHtmlUtils.htmlEscape(" " + messages.titleUsers())),
-        new Command() {
-          @Override
-          public void execute() {
-            HistoryManager.gotoDesktopDatabaseUsers(databaseUUID);
-          }
-        }));
-    return items;
-  }
-
   public static List<BreadcrumbItem> forDatabaseUsers(final String databaseName, final String databaseUUID) {
-    List<BreadcrumbItem> items = forDatabase(databaseName, databaseUUID);
+    List<BreadcrumbItem> items;
+    if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
+      items = forSIARDMainPage(databaseUUID, databaseName);
+    } else {
+      items = forDatabase(databaseName, databaseUUID);
+    }
     items.add(new BreadcrumbItem(
       SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE_USERS)
         + SafeHtmlUtils.htmlEscape(" " + messages.titleUsers())),
@@ -224,12 +202,12 @@ public class BreadcrumbManager {
   }
 
   public static List<BreadcrumbItem> forDatabaseSavedSearches(final String databaseName, final String databaseUUID) {
-      List<BreadcrumbItem> items;
-      if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
-        items = forSIARDMainPage(databaseUUID, databaseName);
+    List<BreadcrumbItem> items;
+    if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
+      items = forSIARDMainPage(databaseUUID, databaseName);
     } else {
-          items = forDatabase(databaseName, databaseUUID);
-      }
+      items = forDatabase(databaseName, databaseUUID);
+    }
     items.add(new BreadcrumbItem(
       SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.SAVED_SEARCH)
         + SafeHtmlUtils.htmlEscape(" " + messages.menusidebar_savedSearches())),
@@ -257,51 +235,6 @@ public class BreadcrumbManager {
     return items;
   }
 
-  public static List<BreadcrumbItem> forDesktopDatabaseSavedSearch(final String databaseName, final String databaseUUID,
-                                                            final String savedSearchUUID) {
-    List<BreadcrumbItem> items = forDesktopDatabaseSavedSearches(databaseUUID, databaseName);
-    items.add(new BreadcrumbItem(
-        SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.SAVED_SEARCH)
-            + SafeHtmlUtils.htmlEscape(" " + messages.menusidebar_savedSearch())),
-        new Command() {
-          @Override
-          public void execute() {
-            HistoryManager.gotoSavedSearch(databaseUUID, savedSearchUUID);
-          }
-        }));
-    return items;
-  }
-
-  public static List<BreadcrumbItem> forDatabaseSavedSearchEdit(final String databaseName, final String databaseUUID,
-    final String savedSearchUUID) {
-    List<BreadcrumbItem> items = forDatabaseSavedSearches(databaseName, databaseUUID);
-    items.add(new BreadcrumbItem(
-      SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.SAVED_SEARCH)
-        + SafeHtmlUtils.htmlEscape(" " + messages.editingSavedSearch())),
-      new Command() {
-        @Override
-        public void execute() {
-          HistoryManager.gotoEditSavedSearch(databaseUUID, savedSearchUUID);
-        }
-      }));
-    return items;
-  }
-
-  public static List<BreadcrumbItem> forDesktopDatabaseSavedSearchEdit(final String databaseName, final String databaseUUID,
-                                                                final String savedSearchUUID) {
-    List<BreadcrumbItem> items = forDesktopDatabaseSavedSearches(databaseUUID, databaseName);
-    items.add(new BreadcrumbItem(
-        SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.SAVED_SEARCH)
-            + SafeHtmlUtils.htmlEscape(" " + messages.editingSavedSearch())),
-        new Command() {
-          @Override
-          public void execute() {
-            HistoryManager.gotoEditSavedSearch(databaseUUID, savedSearchUUID);
-          }
-        }));
-    return items;
-  }
-
   public static List<BreadcrumbItem> forSchema(final String databaseName, final String databaseUUID,
     final String schemaName, final String schemaUUID) {
     List<BreadcrumbItem> items = forDatabase(databaseName, databaseUUID);
@@ -314,36 +247,6 @@ public class BreadcrumbManager {
           HistoryManager.gotoSchema(databaseUUID, schemaUUID);
         }
       }));
-    return items;
-  }
-
-  public static List<BreadcrumbItem> forDesktopSchema(final String databaseName, final String databaseUUID,
-                                               final String schemaName, final String schemaUUID) {
-    List<BreadcrumbItem> items = forSIARDMainPage(databaseUUID, databaseName);
-    items.add(new BreadcrumbItem(
-        SafeHtmlUtils.fromSafeConstant(
-            FontAwesomeIconManager.getTag(FontAwesomeIconManager.SCHEMA) + SafeHtmlUtils.htmlEscape(" " + schemaName)),
-        new Command() {
-          @Override
-          public void execute() {
-            HistoryManager.gotoDesktopSchema(databaseUUID, schemaUUID);
-          }
-        }));
-    return items;
-  }
-
-  public static List<BreadcrumbItem> forDesktopSchemaStructure(final String databaseName, final String databaseUUID,
-                                                        final String schemaName, final String schemaUUID) {
-    List<BreadcrumbItem> items = forSIARDMainPage(databaseUUID, databaseName);
-    items.add(new BreadcrumbItem(
-        SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.SCHEMA_STRUCTURE)
-            + SafeHtmlUtils.htmlEscape(" " + messages.menusidebar_structure())),
-        new Command() {
-          @Override
-          public void execute() {
-            //HistoryManager.gotoSchemaStructure(databaseUUID, schemaUUID);
-          }
-        }));
     return items;
   }
 
@@ -365,19 +268,19 @@ public class BreadcrumbManager {
   public static List<BreadcrumbItem> forSchemaRoutines(final String databaseUUID, final String databaseName) {
     List<BreadcrumbItem> items;
     if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
-        items = forDatabase(databaseName, databaseUUID);
+      items = forSIARDMainPage(databaseUUID, databaseName);
     } else {
-        items = forSIARDMainPage(databaseUUID, databaseName);
+      items = forDatabase(databaseName, databaseUUID);
     }
     items.add(new BreadcrumbItem(
-              SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.SCHEMA_ROUTINES)
-                      + SafeHtmlUtils.htmlEscape(" " + messages.menusidebar_routines())),
-              new Command() {
-                  @Override
-                  public void execute() {
-                      HistoryManager.gotoSchemaRoutines(databaseUUID);
-                  }
-              }));
+      SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.SCHEMA_ROUTINES)
+        + SafeHtmlUtils.htmlEscape(" " + messages.menusidebar_routines())),
+      new Command() {
+        @Override
+        public void execute() {
+          HistoryManager.gotoSchemaRoutines(databaseUUID);
+        }
+      }));
     return items;
   }
 
@@ -396,39 +299,9 @@ public class BreadcrumbManager {
     return items;
   }
 
-  public static List<BreadcrumbItem> forDesktopSchemaTriggers(final String databaseName, final String databaseUUID,
-                                                       final String schemaName, final String schemaUUID) {
-    List<BreadcrumbItem> items = forSIARDMainPage(databaseUUID, databaseName);
-    items.add(new BreadcrumbItem(
-        SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.SCHEMA_TRIGGERS)
-            + SafeHtmlUtils.htmlEscape(" " + messages.menusidebar_triggers())),
-        new Command() {
-          @Override
-          public void execute() {
-            HistoryManager.gotoSchemaTriggers(databaseUUID, schemaUUID);
-          }
-        }));
-    return items;
-  }
-
   public static List<BreadcrumbItem> forSchemaCheckConstraints(final String databaseName, final String databaseUUID,
-                                                               final String schemaName, final String schemaUUID) {
-    List<BreadcrumbItem> items = forSchema(databaseName, databaseUUID, schemaName, schemaUUID);
-    items.add(new BreadcrumbItem(
-        SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.SCHEMA_CHECK_CONSTRAINTS)
-            + SafeHtmlUtils.htmlEscape(" " + messages.menusidebar_checkConstraints())),
-        new Command() {
-          @Override
-          public void execute() {
-            HistoryManager.gotoSchemaCheckConstraints(databaseUUID, schemaUUID);
-          }
-        }));
-    return items;
-  }
-
-  public static List<BreadcrumbItem> forDesktopSchemaCheckConstraints(final String databaseName, final String databaseUUID,
     final String schemaName, final String schemaUUID) {
-    List<BreadcrumbItem> items = forSIARDMainPage(databaseUUID, databaseName);
+    List<BreadcrumbItem> items = forSchema(databaseName, databaseUUID, schemaName, schemaUUID);
     items.add(new BreadcrumbItem(
       SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.SCHEMA_CHECK_CONSTRAINTS)
         + SafeHtmlUtils.htmlEscape(" " + messages.menusidebar_checkConstraints())),
@@ -456,21 +329,6 @@ public class BreadcrumbManager {
     return items;
   }
 
-  public static List<BreadcrumbItem> forDesktopSchemaViews(final String databaseName, final String databaseUUID,
-                                                    final String schemaName, final String schemaUUID) {
-    List<BreadcrumbItem> items = forSIARDMainPage(databaseUUID, databaseName);
-    items.add(new BreadcrumbItem(
-        SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.SCHEMA_VIEWS)
-            + SafeHtmlUtils.htmlEscape(" " + messages.menusidebar_views())),
-        new Command() {
-          @Override
-          public void execute() {
-            HistoryManager.gotoSchemaViews(databaseUUID, schemaUUID);
-          }
-        }));
-    return items;
-  }
-
   public static List<BreadcrumbItem> forSchemaData(final String databaseName, final String databaseUUID,
     final String schemaName, final String schemaUUID) {
     List<BreadcrumbItem> items = forDatabase(databaseName, databaseUUID);
@@ -486,29 +344,14 @@ public class BreadcrumbManager {
     return items;
   }
 
-  public static List<BreadcrumbItem> forDesktopTable(final String databaseName, final String databaseUUID,
-                                              final String schemaName, final String schemaUUID, final String tableName, final String tableUUID) {
-    List<BreadcrumbItem> items = forDesktopSchema(databaseName, databaseUUID, schemaName, schemaUUID);
-    items.add(new BreadcrumbItem(
-        SafeHtmlUtils.fromSafeConstant(
-            FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE) + SafeHtmlUtils.htmlEscape(" " + tableName)),
-        new Command() {
-          @Override
-          public void execute() {
-            HistoryManager.gotoDesktopTable(databaseUUID, tableUUID);
-          }
-        }));
-    return items;
-  }
-
   public static List<BreadcrumbItem> forTable(final String databaseName, final String databaseUUID,
-     final String tableName, final String tableUUID) {
-      List<BreadcrumbItem> items;
-      if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
-          items = forSIARDMainPage(databaseUUID, databaseName);
-      } else {
-          items = forDatabase(databaseName, databaseUUID);
-      }
+    final String tableName, final String tableUUID) {
+    List<BreadcrumbItem> items;
+    if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
+      items = forSIARDMainPage(databaseUUID, databaseName);
+    } else {
+      items = forDatabase(databaseName, databaseUUID);
+    }
     items.add(new BreadcrumbItem(
       SafeHtmlUtils.fromSafeConstant(
         FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE) + SafeHtmlUtils.htmlEscape(" " + tableName)),
@@ -521,8 +364,8 @@ public class BreadcrumbManager {
     return items;
   }
 
-  public static List<BreadcrumbItem> forRecord(final String databaseName, final String databaseUUID, final String tableName, final String tableUUID,
-    final String recordUUID) {
+  public static List<BreadcrumbItem> forRecord(final String databaseName, final String databaseUUID,
+    final String tableName, final String tableUUID, final String recordUUID) {
     List<BreadcrumbItem> items = forTable(databaseName, databaseUUID, tableName, tableUUID);
     items.add(
       new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.RECORD)
@@ -535,45 +378,13 @@ public class BreadcrumbManager {
     return items;
   }
 
-  public static List<BreadcrumbItem> forDesktopRecord(final String databaseName, final String databaseUUID,
-                                               final String schemaName, final String schemaUUID, final String tableName, final String tableUUID,
-                                               final String recordUUID) {
-    List<BreadcrumbItem> items = forDesktopTable(databaseName, databaseUUID, schemaName, schemaUUID, tableName, tableUUID);
-    items.add(
-        new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.RECORD)
-            + SafeHtmlUtils.htmlEscape(" " + messages.menusidebar_record())), new Command() {
-          @Override
-          public void execute() {
-            HistoryManager.gotoRecord(databaseUUID, tableUUID, recordUUID);
-          }
-        }));
-    return items;
-  }
-
   public static List<BreadcrumbItem> forReferences(final String databaseName, final String databaseUUID,
     final String schemaName, final String schemaUUID, final String tableName, final String tableUUID,
     final String recordUUID, final String columnNameInTable, final String columnIndexInTable) {
-    List<BreadcrumbItem> items = forRecord(databaseName, databaseUUID, tableName, tableUUID,
-      recordUUID);
+    List<BreadcrumbItem> items = forRecord(databaseName, databaseUUID, tableName, tableUUID, recordUUID);
     items.add(
       new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.REFERENCE)
         + SafeHtmlUtils.htmlEscape(messages.menusidebar_referencesForColumn(columnNameInTable))), new Command() {
-          @Override
-          public void execute() {
-            HistoryManager.gotoReferences(databaseUUID, tableUUID, recordUUID, columnIndexInTable);
-          }
-        }));
-    return items;
-  }
-
-  public static List<BreadcrumbItem> forDesktopReferences(final String databaseName, final String databaseUUID,
-                                                   final String schemaName, final String schemaUUID, final String tableName, final String tableUUID,
-                                                   final String recordUUID, final String columnNameInTable, final String columnIndexInTable) {
-    List<BreadcrumbItem> items = forDesktopRecord(databaseName, databaseUUID, schemaName, schemaUUID, tableName, tableUUID,
-        recordUUID);
-    items.add(
-        new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.REFERENCE)
-            + SafeHtmlUtils.htmlEscape(messages.menusidebar_referencesForColumn(columnNameInTable))), new Command() {
           @Override
           public void execute() {
             HistoryManager.gotoReferences(databaseUUID, tableUUID, recordUUID, columnIndexInTable);
@@ -611,10 +422,9 @@ public class BreadcrumbManager {
 
   public static List<BreadcrumbItem> forSIARDIngesting(final String databaseUUID, final String databaseName) {
     List<BreadcrumbItem> items = forSIARDMainPage(databaseUUID, databaseName);
-    items.add(new BreadcrumbItem(
-        SafeHtmlUtils.fromSafeConstant(
-            FontAwesomeIconManager.getTag(FontAwesomeIconManager.WRITE) + SafeHtmlUtils.htmlEscape(messages.breadcrumbTextForSIARDIngesting())),
-        new Command() {
+    items
+      .add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.WRITE)
+        + SafeHtmlUtils.htmlEscape(messages.breadcrumbTextForSIARDIngesting())), new Command() {
           @Override
           public void execute() {
             HistoryManager.gotoIngestSIARDData(databaseUUID, databaseName);
@@ -625,8 +435,8 @@ public class BreadcrumbManager {
 
   public static List<BreadcrumbItem> forSIARDValidatorPage(final String databaseUUID, final String databaseName) {
     List<BreadcrumbItem> items = forSIARDMainPage(databaseUUID, databaseName);
-    items
-      .add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.SIARD_VALIDATIONS)
+    items.add(new BreadcrumbItem(
+      SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.SIARD_VALIDATIONS)
         + SafeHtmlUtils.htmlEscape(" " + messages.breadcrumbTextForSIARDValidator()))));
     return items;
   }
@@ -646,40 +456,40 @@ public class BreadcrumbManager {
 
   public static List<BreadcrumbItem> forCreateConnection() {
     List<BreadcrumbItem> items = forHome();
-    items
-      .add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.WIZARD)
+    items.add(
+      new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.WIZARD)
         + SafeHtmlUtils.htmlEscape(" " + messages.breadcrumbTextForWizardCreateSIARDConnection()))));
     return items;
   }
 
   public static List<BreadcrumbItem> forTableAndColumns() {
     List<BreadcrumbItem> items = forHome();
-    items
-      .add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.WIZARD)
+    items.add(
+      new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.WIZARD)
         + SafeHtmlUtils.htmlEscape(" " + messages.breadcrumbTextForWizardCreateSIARDTableAndColumns()))));
     return items;
   }
 
   public static List<BreadcrumbItem> forSIARDExportOptions() {
     List<BreadcrumbItem> items = forHome();
-    items
-      .add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.WIZARD)
+    items.add(
+      new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.WIZARD)
         + SafeHtmlUtils.htmlEscape(" " + messages.breadcrumbTextForWizardCreateSIARDExportOptions()))));
     return items;
   }
 
   public static List<BreadcrumbItem> forMetadataExportOptions() {
     List<BreadcrumbItem> items = forHome();
-    items
-      .add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.WIZARD)
+    items.add(
+      new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.WIZARD)
         + SafeHtmlUtils.htmlEscape(" " + messages.breadcrumbTextForWizardCreateSIARDMetadataOptions()))));
     return items;
   }
 
   public static List<BreadcrumbItem> forCustomViews() {
     List<BreadcrumbItem> items = forHome();
-    items
-      .add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.WIZARD)
+    items.add(
+      new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.WIZARD)
         + SafeHtmlUtils.htmlEscape(" " + messages.breadcrumbTextForWizardCreateSIARDCustomViews()))));
     return items;
   }
@@ -699,23 +509,23 @@ public class BreadcrumbManager {
 
   public static List<BreadcrumbItem> forCreateSIARD() {
     List<BreadcrumbItem> items = forHome();
-    items
-      .add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(SafeHtmlUtils.htmlEscape(" " + messages.breadcrumbTextForCreateSIARD()))));
+    items.add(new BreadcrumbItem(
+      SafeHtmlUtils.fromSafeConstant(SafeHtmlUtils.htmlEscape(" " + messages.breadcrumbTextForCreateSIARD()))));
     return items;
   }
 
   public static List<BreadcrumbItem> forTableAndColumnsSendToWM(final String databaseUUID, final String databaseName) {
     List<BreadcrumbItem> items = forSIARDMainPage(databaseUUID, databaseName);
-    items
-      .add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.WIZARD)
+    items.add(
+      new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.WIZARD)
         + SafeHtmlUtils.htmlEscape(" " + messages.breadcrumbTextForWizardSendToTableAndColumns()))));
     return items;
   }
 
   public static List<BreadcrumbItem> forDBMSConnectionSendToWM(final String databaseUUID, final String databaseName) {
     List<BreadcrumbItem> items = forSIARDMainPage(databaseUUID, databaseName);
-    items
-      .add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.WIZARD)
+    items.add(
+      new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.WIZARD)
         + SafeHtmlUtils.htmlEscape(" " + messages.breadcrumbTextForWizardSendToDBMSConnection()))));
     return items;
   }
@@ -723,8 +533,8 @@ public class BreadcrumbManager {
   public static List<BreadcrumbItem> forSIARDExportOptionsSenToWM(final String databaseUUID,
     final String databaseName) {
     List<BreadcrumbItem> items = forSIARDMainPage(databaseUUID, databaseName);
-    items
-      .add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.WIZARD)
+    items.add(
+      new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.WIZARD)
         + SafeHtmlUtils.htmlEscape(" " + messages.breadcrumbTextForWizardSendToSIARDExportOptions()))));
     return items;
   }
@@ -732,16 +542,16 @@ public class BreadcrumbManager {
   public static List<BreadcrumbItem> forMetadataExportOptionsSendToWM(final String databaseUUID,
     final String databaseName) {
     List<BreadcrumbItem> items = forSIARDMainPage(databaseUUID, databaseName);
-    items
-      .add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.WIZARD)
+    items.add(
+      new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.WIZARD)
         + SafeHtmlUtils.htmlEscape(" " + messages.breadcrumbTextForWizardSendToMetadataExportOptions()))));
     return items;
   }
 
   public static List<BreadcrumbItem> forProgressBarPanelSendToWM(final String databaseUUID, final String databaseName) {
     List<BreadcrumbItem> items = forSIARDMainPage(databaseUUID, databaseName);
-    items
-      .add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.WIZARD)
+    items.add(
+      new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.WIZARD)
         + SafeHtmlUtils.htmlEscape(" " + messages.breadcrumbTextForWizardSendToProgressPanel()))));
     return items;
   }

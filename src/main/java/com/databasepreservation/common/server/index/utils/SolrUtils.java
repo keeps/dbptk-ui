@@ -19,6 +19,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -39,10 +40,12 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
+import org.apache.solr.common.params.CursorMarkParams;
 import org.apache.solr.common.params.FacetParams;
 import org.roda.core.data.common.RodaConstants;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
+import org.roda.core.data.exceptions.NotSupportedException;
 import org.roda.core.data.exceptions.RequestNotValidException;
 import org.roda.core.data.v2.index.IndexResult;
 import org.roda.core.data.v2.index.facet.FacetFieldResult;
@@ -68,6 +71,7 @@ import org.roda.core.data.v2.user.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.server.index.schema.SolrCollection;
 import com.databasepreservation.common.server.index.schema.SolrRowsCollectionRegistry;
 import com.databasepreservation.common.server.index.schema.collections.RowsCollection;
@@ -76,7 +80,6 @@ import com.databasepreservation.common.shared.ViewerStructure.IsIndexed;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerRow;
 import com.databasepreservation.common.shared.client.common.search.SavedSearch;
-import com.databasepreservation.common.exceptions.ViewerException;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -119,7 +122,7 @@ public class SolrUtils {
 
   public static <T extends IsIndexed> IndexResult<T> find(SolrClient index, SolrCollection<T> collection, Filter filter,
     Sorter sorter, Sublist sublist) throws GenericException, RequestNotValidException {
-    return find(index, collection, filter, sorter, sublist, null);
+    return find(index, collection, filter, sorter, sublist, Facets.NONE, new ArrayList<>());
   }
 
   public static String findSIARDFile(SolrClient index, String collectionName, Filter filter)
@@ -140,13 +143,17 @@ public class SolrUtils {
   }
 
   public static <T extends IsIndexed> IndexResult<T> find(SolrClient index, SolrCollection<T> collection, Filter filter,
-    Sorter sorter, Sublist sublist, Facets facets) throws GenericException, RequestNotValidException {
+    Sorter sorter, Sublist sublist, Facets facets, List<String> fieldsToReturn)
+    throws GenericException, RequestNotValidException {
     IndexResult<T> ret;
     SolrQuery query = new SolrQuery();
     query.setQuery(parseFilter(filter));
     query.setSorts(parseSorter(sorter));
     query.setStart(sublist.getFirstElementIndex());
     query.setRows(sublist.getMaximumElementCount());
+    if (!fieldsToReturn.isEmpty()) {
+      query.setFields(fieldsToReturn.toArray(new String[0]));
+    }
     parseAndConfigureFacets(facets, query);
 
     try {
@@ -176,44 +183,55 @@ public class SolrUtils {
 
   public static IndexResult<ViewerRow> findRows(SolrClient index, String databaseUUID, Filter filter, Sorter sorter,
     Sublist sublist) throws GenericException, RequestNotValidException {
-    return findRows(index, databaseUUID, filter, sorter, sublist, null);
+    return findRows(index, databaseUUID, filter, sorter, sublist, Facets.NONE);
   }
 
   public static IndexResult<ViewerRow> findRows(SolrClient index, String databaseUUID, Filter filter, Sorter sorter,
     Sublist sublist, Facets facets) throws GenericException, RequestNotValidException {
-    return find(index, SolrRowsCollectionRegistry.get(databaseUUID), filter, sorter, sublist, facets);
+    return find(index, SolrRowsCollectionRegistry.get(databaseUUID), filter, sorter, sublist, facets,
+      new ArrayList<>());
   }
 
-  public static InputStream findCSV(SolrClient index, String collection, Filter filter, Sorter sorter, Sublist sublist,
-    List<String> fields) throws GenericException, RequestNotValidException {
-    SolrQuery query = new SolrQuery();
-    query.setQuery(parseFilter(filter));
-    query.setSorts(parseSorter(sorter));
-    if (sublist != null) {
-      query.setStart(sublist.getFirstElementIndex());
-      query.setRows(sublist.getMaximumElementCount());
-    }
-    query.setFields(fields.toArray(new String[0]));
+  public static IndexResult<ViewerRow> findRows(SolrClient index, String databaseUUID, Filter filter, Sorter sorter,
+    Sublist sublist, Facets facets, List<String> fieldsToReturn) throws GenericException, RequestNotValidException {
+    return find(index, SolrRowsCollectionRegistry.get(databaseUUID), filter, sorter, sublist, facets, fieldsToReturn);
+  }
 
-    LOGGER.debug("CSV export query object: " + query.toString());
-    LOGGER.debug("CSV export query: " + query.toQueryString());
+  public static Pair<IndexResult<ViewerRow>, String> findRows(SolrClient index, String databaseUUID, Filter filter, Sorter sorter, int pageSize, String cursorMark, List<String> fieldsToReturn)
+      throws GenericException, RequestNotValidException {
+
+    Pair<IndexResult<ViewerRow>, String> ret;
+    SolrQuery query = new SolrQuery();
+    query.setParam("q.op", DEFAULT_QUERY_PARSER_OPERATOR);
+    query.setQuery(parseFilter(filter));
+
+    query.set(CursorMarkParams.CURSOR_MARK_PARAM, cursorMark);
+    query.setRows(pageSize);
+    final List<SolrQuery.SortClause> sortClauses = parseSorter(sorter);
+    sortClauses.add(SolrQuery.SortClause.asc(RodaConstants.INDEX_UUID));
+    query.setSorts(sortClauses);
+
+    if (!fieldsToReturn.isEmpty()) {
+      query.setFields(fieldsToReturn.toArray(new String[0]));
+    }
+
+    final RowsCollection collection = SolrRowsCollectionRegistry.get(databaseUUID);
 
     try {
-      QueryRequest queryRequest = new QueryRequest(query);
-      queryRequest.setResponseParser(new InputStreamResponseParser("csv"));
-      QueryResponse response = queryRequest.process(index, collection);
-
-      Object stream = response.getResponse().get("stream");
-      if (stream instanceof InputStream) {
-        return (InputStream) stream;
-      } else {
-        throw new GenericException(
-          "Result was not an input stream. Its string representation was: " + stream.toString());
-      }
-    } catch (SolrServerException | SolrException | IOException e) {
+      QueryResponse response = index.query(collection.getIndexName(), query);
+      final IndexResult<ViewerRow> result = queryResponseToIndexResult(response, collection, Facets.NONE);
+      ret = Pair.of(result, response.getNextCursorMark());
+    } catch (SolrServerException | IOException  e) {
       throw new GenericException("Could not query index", e);
+    } catch (SolrException e) {
+      throw new RequestNotValidException(e);
+    } catch (RuntimeException e) {
+      throw new GenericException("Unexpected exception while querying index", e);
     }
+
+    return ret;
   }
+
 
   public static List<SolrQuery.SortClause> parseSorter(Sorter sorter) {
     List<SolrQuery.SortClause> ret = new ArrayList<SolrQuery.SortClause>();

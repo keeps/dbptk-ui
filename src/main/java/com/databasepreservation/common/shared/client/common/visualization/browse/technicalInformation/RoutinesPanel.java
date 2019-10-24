@@ -1,4 +1,4 @@
-package com.databasepreservation.common.shared.client.common.visualization.browse;
+package com.databasepreservation.common.shared.client.common.visualization.browse.technicalInformation;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -34,20 +34,20 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class SchemaRoutinesPanel extends RightPanel {
+public class RoutinesPanel extends RightPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
-  private static Map<String, SchemaRoutinesPanel> instances = new HashMap<>();
+  private static Map<String, RoutinesPanel> instances = new HashMap<>();
 
-  public static SchemaRoutinesPanel getInstance(ViewerDatabase database) {
-    SchemaRoutinesPanel instance = instances.get(database.getUUID());
+  public static RoutinesPanel getInstance(ViewerDatabase database) {
+    RoutinesPanel instance = instances.get(database.getUUID());
     if (instance == null) {
-      instance = new SchemaRoutinesPanel(database);
+      instance = new RoutinesPanel(database);
       instances.put(database.getUUID(), instance);
     }
     return instance;
   }
 
-  interface SchemaRoutinesUiBinder extends UiBinder<Widget, SchemaRoutinesPanel> {
+  interface SchemaRoutinesUiBinder extends UiBinder<Widget, RoutinesPanel> {
   }
 
   private static SchemaRoutinesUiBinder uiBinder = GWT.create(SchemaRoutinesUiBinder.class);
@@ -60,7 +60,7 @@ public class SchemaRoutinesPanel extends RightPanel {
   @UiField
   Label title;
 
-  private SchemaRoutinesPanel(ViewerDatabase database) {
+  private RoutinesPanel(ViewerDatabase database) {
     this.database = database;
     initWidget(uiBinder.createAndBindUi(this));
     init();

@@ -7,6 +7,8 @@ package com.databasepreservation.common.api.utils;
 import com.databasepreservation.common.api.common.ConsumesOutputStream;
 import com.databasepreservation.common.api.common.EntityResponse;
 
+import javax.ws.rs.core.StreamingOutput;
+
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
@@ -14,6 +16,13 @@ public class StreamResponse implements EntityResponse {
   private String filename;
   private String mediaType;
   private ConsumesOutputStream stream;
+
+  public StreamResponse(ConsumesOutputStream stream) {
+    this.filename = stream.getFileName();
+    this.mediaType = stream.getMediaType();
+    this.mediaType = stream.getMediaType();
+    this.stream = stream;
+  }
 
   public StreamResponse(String filename, String mediaType, ConsumesOutputStream stream) {
     super();

@@ -1,13 +1,12 @@
 package com.databasepreservation.common.server.index;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.databasepreservation.common.server.index.schema.collections.DatabasesCollection;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -28,10 +27,12 @@ import org.roda.core.data.v2.index.sublist.Sublist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.server.index.schema.SolrCollection;
 import com.databasepreservation.common.server.index.schema.SolrDefaultCollectionRegistry;
 import com.databasepreservation.common.server.index.schema.SolrRowsCollectionRegistry;
 import com.databasepreservation.common.server.index.schema.collections.RowsCollection;
+import com.databasepreservation.common.server.index.utils.IterableIndexResult;
 import com.databasepreservation.common.server.index.utils.JsonTransformer;
 import com.databasepreservation.common.server.index.utils.Pair;
 import com.databasepreservation.common.server.index.utils.SolrUtils;
@@ -43,7 +44,6 @@ import com.databasepreservation.common.shared.ViewerStructure.ViewerMetadata;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerRow;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerTable;
 import com.databasepreservation.common.shared.client.common.search.SavedSearch;
-import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.utils.FileUtils;
 
 /**
@@ -77,10 +77,10 @@ public class DatabaseRowsSolrManager {
     insertDocument(ViewerDatabase.class, database);
   }
 
-  public void addDatabaseRowCollection(ViewerDatabase database) throws ViewerException {
-    updateValidationFields(database.getUUID(),
+  public void addDatabaseRowCollection(final String databaseUUID) throws ViewerException {
+    updateValidationFields(databaseUUID,
       Pair.of(ViewerConstants.SOLR_DATABASES_STATUS, ViewerDatabase.Status.INGESTING.toString()));
-    RowsCollection collection = new RowsCollection(database.getUUID());
+    RowsCollection collection = new RowsCollection(databaseUUID);
     collection.createRowsCollection();
   }
 
@@ -133,6 +133,17 @@ public class DatabaseRowsSolrManager {
   public void addTable(ViewerTable table) throws ViewerException {
   }
 
+  public void addRow(String databaseUUID, ViewerRow row) throws ViewerException {
+
+    RowsCollection collection = SolrRowsCollectionRegistry.get(databaseUUID);
+
+    try {
+      insertDocument(collection.getIndexName(), collection.toSolrDocument(row));
+    } catch (RequestNotValidException | GenericException | NotFoundException | AuthorizationDeniedException e) {
+      throw new ViewerException(e);
+    }
+  }
+
   public void addRow(ViewerDatabaseFromToolkit viewerDatabase, ViewerRow row) throws ViewerException {
 
     RowsCollection collection = SolrRowsCollectionRegistry.get(viewerDatabase.getUUID());
@@ -146,7 +157,8 @@ public class DatabaseRowsSolrManager {
 
   public <T extends IsIndexed> IndexResult<T> find(Class<T> classToReturn, Filter filter, Sorter sorter,
     Sublist sublist, Facets facets) throws GenericException, RequestNotValidException {
-    return SolrUtils.find(client, SolrDefaultCollectionRegistry.get(classToReturn), filter, sorter, sublist, facets);
+    return SolrUtils.find(client, SolrDefaultCollectionRegistry.get(classToReturn), filter, sorter, sublist, facets,
+      new ArrayList<>());
   }
 
   public <T extends IsIndexed> Long count(Class<T> classToReturn, Filter filter)
@@ -164,10 +176,14 @@ public class DatabaseRowsSolrManager {
     return SolrUtils.findRows(client, databaseUUID, filter, sorter, sublist, facets);
   }
 
-  public InputStream findRowsCSV(String databaseUUID, Filter filter, Sorter sorter, Sublist sublist,
-    List<String> fields) throws GenericException, RequestNotValidException {
-    return SolrUtils.findCSV(client, SolrRowsCollectionRegistry.get(databaseUUID).getIndexName(), filter, sorter,
-      sublist, fields);
+  public IndexResult<ViewerRow> findRows(String databaseUUID, Filter filter, Sorter sorter, Sublist sublist,
+    Facets facets, List<String> fieldsToReturn) throws GenericException, RequestNotValidException {
+    return SolrUtils.findRows(client, databaseUUID, filter, sorter, sublist, facets, fieldsToReturn);
+  }
+
+  public IterableIndexResult findAllRows(String databaseUUID, final Filter filter, final Sorter sorter,
+    final List<String> fieldsToReturn) {
+    return new IterableIndexResult(client, databaseUUID, filter, sorter, fieldsToReturn);
   }
 
   public <T extends IsIndexed> Long countRows(String databaseUUID, Filter filter)
@@ -300,8 +316,8 @@ public class DatabaseRowsSolrManager {
     updateDatabaseFields(databaseUUID, Pair.of(ViewerConstants.SOLR_DATABASES_STATUS, status.toString()));
   }
 
-  public void markDatabaseAsReady(ViewerDatabaseFromToolkit viewerDatabase) throws ViewerException {
-    updateDatabaseFields(viewerDatabase.getUUID(),
+  public void markDatabaseAsReady(final String databaseUUID) throws ViewerException {
+    updateDatabaseFields(databaseUUID,
       Pair.of(ViewerConstants.SOLR_DATABASES_STATUS, ViewerDatabase.Status.AVAILABLE.toString()));
   }
 

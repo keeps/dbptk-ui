@@ -3,7 +3,6 @@ package com.databasepreservation.common.shared.client.common.visualization.brows
 import java.util.HashMap;
 import java.util.Map;
 
-import com.databasepreservation.common.shared.ViewerConstants;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerColumn;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerSchema;
@@ -11,7 +10,6 @@ import com.databasepreservation.common.shared.ViewerStructure.ViewerView;
 import com.databasepreservation.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.shared.client.common.RightPanel;
 import com.databasepreservation.common.shared.client.common.lists.BasicTablePanel;
-import com.databasepreservation.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.common.shared.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.shared.client.tools.BreadcrumbManager;
@@ -86,13 +84,8 @@ public class ViewPanelStructure extends RightPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
-      BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forDesktopSchemaViews(
-        database.getMetadata().getName(), database.getUUID(), schema.getName(), schema.getUUID()));
-    } else {
       BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forSchemaViews(database.getMetadata().getName(),
         database.getUUID(), schema.getName(), schema.getUUID()));
-    }
   }
 
   private void init() {

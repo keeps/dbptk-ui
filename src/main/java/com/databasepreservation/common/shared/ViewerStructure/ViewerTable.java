@@ -142,4 +142,18 @@ public class ViewerTable implements Serializable {
   public List<ViewerCandidateKey> getCandidateKeys() {
     return candidateKeys;
   }
+
+  public List<String> getCSVHeaders(List<String> fieldsToReturn, boolean exportDescriptions) {
+    List<String> values = new ArrayList<>();
+    for (ViewerColumn column : columns) {
+      if (fieldsToReturn.contains(column.getSolrName())) {
+        if (exportDescriptions) {
+          values.add(column.getDisplayName() + "\r\n" + column.getDescription() );
+        } else {
+          values.add(column.getDisplayName());
+        }
+      }
+    }
+    return values;
+  }
 }

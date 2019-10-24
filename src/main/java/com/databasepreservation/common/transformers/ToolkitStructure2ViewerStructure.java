@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -599,8 +600,9 @@ public class ToolkitStructure2ViewerStructure {
   public static ViewerRow getRow(ViewerAbstractConfiguration configuration, String databaseUUID, ViewerTable table,
     Row row, long rowIndex) throws ViewerException {
     ViewerRow result = new ViewerRow();
-    String rowUUID = SolrUtils.UUIDFromString(table.getId() + "." + rowIndex);
+    String rowUUID = SolrUtils.UUIDFromString(table.getUUID() + "." + rowIndex);
     result.setTableId(table.getId());
+    result.setTableUUID(table.getUUID());
     result.setUUID(rowUUID);
     result.setCells(getCells(configuration, databaseUUID, table, row, rowIndex, rowUUID));
     return result;
@@ -608,7 +610,7 @@ public class ToolkitStructure2ViewerStructure {
 
   private static Map<String, ViewerCell> getCells(ViewerAbstractConfiguration configuration, String databaseUUID,
     ViewerTable table, Row row, long rowIndex, String rowUUID) throws ViewerException {
-    HashMap<String, ViewerCell> result = new HashMap<>();
+    Map<String, ViewerCell> result = new LinkedHashMap<>();
 
     int colIndex = 0;
     List<Cell> toolkitCells = row.getCells();
