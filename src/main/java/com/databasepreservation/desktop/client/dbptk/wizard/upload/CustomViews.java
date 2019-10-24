@@ -13,7 +13,7 @@ import com.databasepreservation.common.shared.client.widgets.Toast;
 import com.databasepreservation.common.shared.models.wizardParameters.ConnectionParameters;
 import com.databasepreservation.common.shared.models.wizardParameters.CustomViewsParameter;
 import com.databasepreservation.common.shared.models.wizardParameters.CustomViewsParameters;
-import com.databasepreservation.desktop.client.common.dialogs.Dialogs;
+import com.databasepreservation.common.shared.client.common.dialogs.Dialogs;
 import com.databasepreservation.desktop.client.common.sidebar.CustomViewsSidebar;
 import com.databasepreservation.desktop.client.dbptk.wizard.WizardPanel;
 import com.google.gwt.core.client.GWT;

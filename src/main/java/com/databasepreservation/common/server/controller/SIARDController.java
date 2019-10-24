@@ -1,25 +1,15 @@
 package com.databasepreservation.common.server.controller;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
-import com.databasepreservation.model.exception.SIARDVersionNotSupportedException;
 import org.apache.commons.io.IOUtils;
 import org.joda.time.DateTime;
 import org.roda.core.data.exceptions.GenericException;
@@ -31,6 +21,7 @@ import org.yaml.snakeyaml.Yaml;
 import com.databasepreservation.DatabaseMigration;
 import com.databasepreservation.SIARDEdition;
 import com.databasepreservation.SIARDValidation;
+import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.server.SIARDProgressObserver;
 import com.databasepreservation.common.server.ValidationProgressObserver;
 import com.databasepreservation.common.server.ViewerConfiguration;
@@ -38,28 +29,17 @@ import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
 import com.databasepreservation.common.server.index.utils.JsonTransformer;
 import com.databasepreservation.common.server.index.utils.SolrUtils;
-import com.databasepreservation.common.transformers.ToolkitStructure2ViewerStructure;
 import com.databasepreservation.common.shared.ViewerConstants;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerColumn;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabaseFromToolkit;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerMetadata;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerSIARDBundle;
-import com.databasepreservation.common.exceptions.ViewerException;
+import com.databasepreservation.common.shared.ViewerStructure.*;
 import com.databasepreservation.common.shared.models.DBPTKModule;
+import com.databasepreservation.common.shared.models.ExternalLobDBPTK;
 import com.databasepreservation.common.shared.models.PreservationParameter;
 import com.databasepreservation.common.shared.models.SSHConfiguration;
-import com.databasepreservation.common.shared.models.wizardParameters.ConnectionParameters;
-import com.databasepreservation.common.shared.models.wizardParameters.CustomViewsParameter;
-import com.databasepreservation.common.shared.models.wizardParameters.CustomViewsParameters;
-import com.databasepreservation.common.shared.models.wizardParameters.ExportOptionsParameters;
-import com.databasepreservation.common.shared.models.wizardParameters.ExternalLOBsParameter;
-import com.databasepreservation.common.shared.models.wizardParameters.MetadataExportOptionsParameters;
-import com.databasepreservation.common.shared.models.wizardParameters.TableAndColumnsParameters;
-import com.databasepreservation.desktop.shared.models.ExternalLobDBPTK;
-import com.databasepreservation.modules.viewer.DbvtkModuleFactory;
+import com.databasepreservation.common.shared.models.wizardParameters.*;
+import com.databasepreservation.common.transformers.ToolkitStructure2ViewerStructure;
 import com.databasepreservation.model.Reporter;
 import com.databasepreservation.model.exception.ModuleException;
+import com.databasepreservation.model.exception.SIARDVersionNotSupportedException;
 import com.databasepreservation.model.exception.UnsupportedModuleException;
 import com.databasepreservation.model.modules.DatabaseImportModule;
 import com.databasepreservation.model.modules.DatabaseModuleFactory;
@@ -73,6 +53,7 @@ import com.databasepreservation.modules.jdbc.in.JDBCImportModule;
 import com.databasepreservation.modules.siard.SIARD2ModuleFactory;
 import com.databasepreservation.modules.siard.SIARDEditFactory;
 import com.databasepreservation.modules.siard.SIARDValidateFactory;
+import com.databasepreservation.modules.viewer.DbvtkModuleFactory;
 import com.databasepreservation.utils.ReflectionUtils;
 
 /**
@@ -420,6 +401,11 @@ public class SIARDController {
     }
   }
 
+  public static String loadMetadataFromLocal(String localPath) throws GenericException {
+    String databaseUUID = SolrUtils.randomUUID();
+    return loadMetadataFromLocal(databaseUUID, localPath);
+  }
+
   public static String loadMetadataFromLocal(String databaseUUID, String localPath) throws GenericException {
     Path basePath = Paths.get(ViewerConfiguration.getInstance().getViewerConfigurationAsString("/",
       ViewerConfiguration.PROPERTY_BASE_UPLOAD_PATH));
@@ -577,6 +563,10 @@ public class SIARDController {
     String allowedTypesPath) throws GenericException {
     Path reporterPath = ViewerConfiguration.getInstance().getReportPathForValidation(databaseUUID).toAbsolutePath();
     boolean valid;
+    if (validationReportPath == null) {
+      validationReportPath = ViewerConfiguration.getInstance().getSIARDReportValidationPath().toString() + "-"
+        + new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()) + ".txt";
+    }
     try (Reporter reporter = new Reporter(reporterPath.getParent().toString(), reporterPath.getFileName().toString())) {
       SIARDValidation siardValidation = SIARDValidation.newInstance();
       siardValidation.validateModule(new SIARDValidateFactory())

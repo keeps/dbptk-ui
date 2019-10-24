@@ -8,25 +8,26 @@ import java.util.Map;
 import com.databasepreservation.common.client.BrowserService;
 import com.databasepreservation.common.shared.ViewerStructure.IsIndexed;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
+import com.databasepreservation.common.shared.ViewerStructure.ViewerSIARDBundle;
 import com.databasepreservation.common.shared.client.breadcrumb.BreadcrumbItem;
+import com.databasepreservation.common.shared.client.common.ContentPanel;
 import com.databasepreservation.common.shared.client.common.RightPanel;
-import com.databasepreservation.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.shared.client.common.utils.RightPanelLoader;
-import com.databasepreservation.common.shared.client.common.visualization.browse.DatabaseInformationPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.DatabaseListPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.DatabasePanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.DatabaseReportPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.DatabaseSearchPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.DatabaseSearchesPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.DatabaseUsersPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.ReferencesPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.RowPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.SchemaStructurePanel;
-
+import com.databasepreservation.common.shared.client.common.visualization.browse.*;
 import com.databasepreservation.common.shared.client.common.visualization.browse.foreignKey.ForeignKeyPanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.ingest.IngestPage;
+import com.databasepreservation.common.shared.client.common.visualization.browse.metadata.MetadataPanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.metadata.MetadataPanelLoad;
+import com.databasepreservation.common.shared.client.common.visualization.browse.metadata.SIARDEditMetadataPage;
+import com.databasepreservation.common.shared.client.common.visualization.browse.metadata.information.MetadataInformation;
+import com.databasepreservation.common.shared.client.common.visualization.browse.metadata.schemas.routines.MetadataRoutinePanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.metadata.schemas.tables.MetadataTablePanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.metadata.schemas.views.MetadataViewPanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.metadata.users.MetadataUsersPanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.table.TablePanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.table.TableSavedSearchEditPanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.table.TableSavedSearchPanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.validate.ValidatorPage;
 import com.databasepreservation.common.shared.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.common.shared.client.widgets.wcag.AccessibleFocusPanel;
@@ -77,7 +78,7 @@ public class MainPanel extends Composite {
 
   /*
    * History change handling
-   * 
+   *
    * (switching to another page = using a different RightPanel)
    * ____________________________________________________________________________________________________________________
    */
@@ -88,10 +89,25 @@ public class MainPanel extends Composite {
   private void setContent(String databaseUUID, RightPanelLoader rightPanelLoader) {
     GWT.log("setContent, dbuid " + databaseUUID);
     DatabasePanel databasePanel = DatabasePanel.getInstance(databaseUUID, true);
-    databasePanel.setTopLevelPanelCSS("browseContent wrapper skip_padding");
+    databasePanel.setTopLevelPanelCSS("browseContent wrapper skip_padding server");
     contentPanel.setWidget(databasePanel);
     databasePanel.load(rightPanelLoader, "");
-    JavascriptUtils.scrollToElement(contentPanel.getElement());
+  }
+
+  private void setContent(String databaseUUID, ContentPanel panel) {
+    GWT.log("setContent, dbuid " + databaseUUID);
+    ContainerPanel containerPanel = ContainerPanel.getInstance(databaseUUID, true);
+    containerPanel.setTopLevelPanelCSS("browseContent wrapper skip_padding server");
+    contentPanel.setWidget(containerPanel);
+    containerPanel.load(panel);
+  }
+
+  private void setMetadataRightPanelContent(String databaseUUID, String sidebarSelected,
+                                            MetadataPanelLoad rightPanelLoader) {
+    SIARDEditMetadataPage instance = SIARDEditMetadataPage.getInstance(databaseUUID);
+    instance.setTopLevelPanelCSS("browseContent wrapper skip_padding server");
+    contentPanel.setWidget(instance);
+    instance.load(rightPanelLoader, sidebarSelected);
   }
 
   public void onHistoryChanged(String token) {
@@ -156,6 +172,17 @@ public class MainPanel extends Composite {
         }
       });
 
+    } else if (HistoryManager.ROUTE_SIARD_INFO.equals(currentHistoryPath.get(0))) {
+      String databaseUUID = currentHistoryPath.get(1);
+      setContent(databaseUUID, SIARDMainPage.getInstance(databaseUUID));
+      // contentPanel.setWidget(SIARDMainPage.getInstance(databaseUUID));
+    } else if (HistoryManager.ROUTE_UPLOAD_SIARD_DATA.equals(currentHistoryPath.get(0))) {
+      String databaseUUID = currentHistoryPath.get(1);
+      String databaseName = currentHistoryPath.get(2);
+      setContent(databaseUUID, IngestPage.getInstance(databaseUUID, databaseName));
+    } else if (HistoryManager.ROUTE_SIARD_VALIDATOR.equals(currentHistoryPath.get(0))) {
+      final String databaseUUID = currentHistoryPath.get(1);
+      setContent(databaseUUID, ValidatorPage.getInstance(databaseUUID));
     } else if (HistoryManager.ROUTE_DATABASE.equals(currentHistoryPath.get(0))) {
       if (currentHistoryPath.size() == 1) {
         // #database
@@ -408,7 +435,64 @@ public class MainPanel extends Composite {
       } else {
         handleErrorPath(currentHistoryPath);
       }
-    } else {
+    }  else if (HistoryManager.ROUTE_SIARD_EDIT_METADATA.equals(currentHistoryPath.get(0))) {
+      String databaseUUID =  currentHistoryPath.get(1);
+      if (currentHistoryPath.size() == 2) {
+        setMetadataRightPanelContent(databaseUUID, databaseUUID, new MetadataPanelLoad() {
+          @Override
+          public MetadataPanel load(ViewerDatabase database, ViewerSIARDBundle SIARDbundle) {
+            return MetadataInformation.getInstance(database, SIARDbundle);
+          }
+        });
+      } else if (currentHistoryPath.size() == 3) {
+        final String user = currentHistoryPath.get(2);
+        setMetadataRightPanelContent(databaseUUID, user, new MetadataPanelLoad() {
+          @Override
+          public MetadataPanel load(ViewerDatabase database, ViewerSIARDBundle SIARDbundle) {
+            return MetadataUsersPanel.getInstance(database, SIARDbundle);
+          }
+        });
+      }
+    } else if (HistoryManager.ROUTE_DESKTOP_METADATA_TABLE.equals(currentHistoryPath.get(0))) {
+      if (currentHistoryPath.size() == 3) {
+        String databaseUUID = currentHistoryPath.get(1);
+        final String tableUUID = currentHistoryPath.get(2);
+
+        setMetadataRightPanelContent(databaseUUID, tableUUID, new MetadataPanelLoad() {
+          @Override
+
+          public MetadataPanel load(ViewerDatabase database, ViewerSIARDBundle SIARDbundle) {
+            return MetadataTablePanel.getInstance(database, SIARDbundle, tableUUID);
+          }
+        });
+      }
+    } else if (HistoryManager.ROUTE_DESKTOP_METADATA_VIEW.equals(currentHistoryPath.get(0))) {
+      if (currentHistoryPath.size() == 4) {
+        String databaseUUID = currentHistoryPath.get(1);
+        final String schemaUUID = currentHistoryPath.get(2);
+        final String viewUUID = currentHistoryPath.get(3);
+
+        setMetadataRightPanelContent(databaseUUID, viewUUID, new MetadataPanelLoad() {
+          @Override
+          public MetadataPanel load(ViewerDatabase database, ViewerSIARDBundle SIARDbundle) {
+            return MetadataViewPanel.getInstance(database, SIARDbundle, schemaUUID, viewUUID);
+          }
+        });
+      }
+    } else if (HistoryManager.ROUTE_DESKTOP_METADATA_ROUTINE.equals(currentHistoryPath.get(0))) {
+      if (currentHistoryPath.size() == 4) {
+        String databaseUUID = currentHistoryPath.get(1);
+        final String schemaUUID = currentHistoryPath.get(2);
+        final String routineUUID = currentHistoryPath.get(3);
+
+        setMetadataRightPanelContent(databaseUUID, routineUUID, new MetadataPanelLoad() {
+          @Override
+          public MetadataPanel load(ViewerDatabase database, ViewerSIARDBundle SIARDbundle) {
+            return MetadataRoutinePanel.getInstance(database, SIARDbundle, schemaUUID, routineUUID);
+          }
+        });
+      }
+    }else {
       handleErrorPath(currentHistoryPath);
     }
   }

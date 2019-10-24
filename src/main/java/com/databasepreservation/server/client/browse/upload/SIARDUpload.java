@@ -167,7 +167,7 @@ public class SIARDUpload extends RightPanel {
           String path = item.getAttribute("path");
           GWT.log("path: " + path);
           startItemLoadHandler(item);
-          BrowserService.Util.getInstance().uploadSIARD(path, new DefaultAsyncCallback<String>() {
+          BrowserService.Util.getInstance().uploadMetadataSIARD(path, new DefaultAsyncCallback<String>() {
             @Override
             public void onFailure(Throwable caught) {
               Toast.showError("Cannot create SIARD", PathUtils.getFileName(path));

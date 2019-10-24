@@ -41,6 +41,7 @@ public class ViewerConstants {
   public static final String VIEWER_LOBS_FOLDER = "lobs";
   public static final String VIEWER_UPLOADS_FOLDER = "uploads";
   public static final String VIEWER_SIARD_FILES_FOLDER = "SIARD-files";
+  public static final String VIEWER_VALIDATIONS_REPORTS_FOLDER = "validations-reports";
   public static final String VIEWER_REPORTS_FOLDER = "reports";
   public static final String VIEWER_INDEX_FOLDER = "index";
 

@@ -2,7 +2,8 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:m='urn:import:com.databasepreservation.common.shared.client.breadcrumb'
              xmlns:lists='urn:import:com.databasepreservation.desktop.client.common.lists'
-             xmlns:wcag="urn:import:com.databasepreservation.common.shared.client.widgets.wcag">
+             xmlns:wcag="urn:import:com.databasepreservation.common.shared.client.widgets.wcag"
+             xmlns:lists2="urn:import:com.databasepreservation.common.shared.client.common.lists">
 
     <ui:with field='messages' type='config.i18n.client.ClientMessages' />
     <g:FlowPanel addStyleNames="application-container">
@@ -26,7 +27,7 @@
                 </g:FlowPanel>
             </g:FlowPanel>
             <g:FlowPanel addStyleNames="database-list">
-                <lists:DatabaseList ui:field="databaseList"/>
+                <lists2:DatabaseList ui:field="databaseList"/>
             </g:FlowPanel>
             <g:FlowPanel addStyleNames="button-group-panel">
                 <g:SimplePanel addStyleNames="button-group-panel-btn">

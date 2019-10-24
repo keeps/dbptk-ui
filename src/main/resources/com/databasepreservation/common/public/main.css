@@ -85,7 +85,7 @@
 
 /* Styling the determinate progress element */
 
-progress[noicon] {
+progress[value] {
     /* Get rid of the default appearance */
     appearance: none;
 
@@ -1019,4 +1019,999 @@ p[data-value]:after {
     position: absolute;
     right: 110px;
     top: 6px;
+}
+
+/**********************************************
+		          Commons
+***********************************************/
+
+html, body, .main, .content-container {
+    width: 100%;
+    height: 100%;
+    padding: 0px;
+    margin: 0;
+}
+
+.main .contentPanel{
+    min-height: auto;
+}
+
+.application-container {
+    padding: 10px;
+    height: 100%;
+    box-sizing: border-box;
+    position: relative;
+}
+
+.desktopToolbar .wui-breadcrumbPanel{
+    padding-top: 10px;
+    padding-left: 10px;
+}
+
+.application-container .browseContentPreviewPanel,
+.application-container .browseContentPreviewPanel,
+.application-container .browseContentPreviewPanel td,
+.application-container .browseContentFilesPanel,
+.application-container .browseContentFilesPanel td,
+.application-container .block{
+    height: 100%;
+}
+
+.application-container .browseContentPreviewPanel,
+.application-container .manage-panel{
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding-top: 44px;
+    padding-left: 10px;
+    box-sizing: border-box;
+}
+
+.application-container .h1{
+    margin: 0;
+}
+
+.label-error{
+    color: #d9534f;
+    font-weight: 700;
+    border: 2px solid #d9534f;
+    background-color: #f1d5d4;
+}
+
+/**********************************************
+		          Open SIARD
+***********************************************/
+
+.wui-dialog-input:invalid {
+    background-color: #eebcba;
+}
+
+.metadata-information-panel {
+    display: flex;
+    margin: 0 10rem 0 10rem;
+}
+
+.metadata-information {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.metadata-field {
+    margin-bottom: 1.2rem;
+}
+
+.metadata-field:first-of-type {
+    margin-top: 1.2rem;
+}
+
+.metadata-information-element-label {
+    display: inline-block;
+    width: 16rem;
+    text-align: left;
+    font-weight: bold;
+}
+
+.metadata-information-table-label {
+    display: inline-block;
+    width: 9rem;
+    text-align: left;
+    font-weight: bold;
+}
+
+.metadata-information-description-label{
+    display: inline-block;
+    text-align: left;
+    font-weight: bold;
+}
+
+.metadata-information-element-value {
+    display: inline;
+    margin: 0;
+    margin-inline-start: 2.25rem;
+}
+
+.metadata-description {
+    margin: 1% 10rem 1% 10rem;
+}
+
+.navigation-panels {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin: 0 10rem 0 10rem;
+}
+
+.navigation-panel {
+    display: flex;
+    flex-flow: column wrap;
+    flex: 1 0 5%;
+    background: #dadfe8;
+    margin-bottom: 1%;
+    margin-right: 10px;
+}
+
+.navigation-panel-header {
+    font-size: x-large;
+    margin-left: 20px;
+    margin-top: 10px;
+}
+
+.navigation-panel-info {
+    margin-top: 1.25rem;
+    margin-bottom: 1rem;
+    flex: 1;
+    margin-left: 20px;
+    margin-rigth: 20px;
+}
+
+.navigation-panel-options {
+    margin-bottom: 1.25rem;
+    vertical-align: bottom;
+    margin-left: 20px;
+}
+
+.btn-link-info {
+    background-color: transparent;
+    color: #337ab7;
+    padding-left: 0px;
+}
+
+.btn-link-info:hover {
+    color: #23527c;
+    text-decoration: underline;
+    background-color: transparent;
+}
+
+.btn-link-info:disabled{
+    color: #aeaeae;
+    background-color: transparent;
+    cursor: unset;
+    text-decoration: none;
+}
+
+.label-field {
+    display: inline-block;
+    text-align: left;
+    font-weight: bold;
+    width: 36%;
+    min-width: 100px;
+}
+
+.value-field {
+    display: inline;
+}
+
+.manage-panel {
+    width: 98%;
+    margin-left: 1%;
+}
+
+.database-list {
+    margin-top: 1%;
+}
+
+.button-group-panel {
+    display: inline;
+    width: 100%;
+}
+
+.button-panel-right {
+    padding-top: 1%;
+}
+
+.button-group-panel-btn {
+    display: table-cell;
+    width: 50%;
+    padding-right: 10px;
+}
+
+.button-group-panel-btn .btn {
+    width: 100%;
+    padding: 8px;
+    text-align: center;
+}
+
+.btn-item {
+    position: relative;
+    padding-top: 1%;
+    padding-left: 10px;
+    display: table-cell;
+}
+
+.btn-item .btn {
+    width: 9rem;
+    padding: 8px;
+    text-align: center;
+}
+
+.button-panel-container {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding-left: 315px;
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/*.wrapper {*/
+/*    display: flex;*/
+/*}*/
+
+/*.wrapper .left {*/
+/*    flex: 0 0 15%;*/
+/*    margin-right: 15px;*/
+/*}*/
+
+/*.wrapper .right {*/
+/*    flex: 1;*/
+/*}*/
+
+.loading-sidebar {
+    position: relative;
+    height: 50vh;
+}
+
+.connection-container {
+    width: 100%;
+}
+
+.connection-panel {
+    width: 100%;
+    margin: 0 !important;
+}
+
+.form-container {
+    width: auto;
+    height: auto;
+    margin: 2.5rem 4rem 0rem 6rem;
+}
+
+.form-lobs{
+    margin-left: 4rem;
+}
+
+.export-options-form, .custom-views-form{
+    margin: 2.5rem 4rem 0rem 0rem;
+}
+
+.form-row {
+    display: flex;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.form-label-spaced {
+    font-weight: bold;
+    flex: 0 0 160px;
+}
+
+.form-label-spaced-error {
+    color: red;
+}
+
+.textbox-error {
+    border-color: red;
+}
+
+.textarea-error {
+    border-color: red;
+}
+
+.form-button {
+    padding: 0;
+    margin: 0;
+    width: 100px;
+}
+
+.form-button-jar {
+    padding: 0;
+    margin: 0;
+    width: 260px;
+    text-overflow: unset;
+}
+
+.form-inline > .form-label-spaced:last-of-type {
+    margin-left: 25px;
+}
+
+.form-inline {
+    display: flex;
+    margin-bottom: 10px;
+}
+
+.form-textbox-inline:first-of-type {
+    width: 100%;
+    color: #58595b;
+    padding: 5px;
+    margin-bottom: 5px;
+    border: 1px solid #ccc;
+    border-radius: 1px;
+    box-sizing: border-box;
+    background-color: #f5f5f5;
+    font-size: 1.5rem;
+    font-family: "Ubuntu", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial,
+    sans-serif;
+    font-weight: 300;
+}
+
+.form-textbox-inline {
+    color: #58595b;
+    padding: 5px;
+    margin-bottom: 5px;
+    border: 1px solid #ccc;
+    border-radius: 1px;
+    box-sizing: border-box;
+    background-color: #f5f5f5;
+    font-size: 1.5rem;
+    font-family: "Ubuntu", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial,
+    sans-serif;
+    font-weight: 300;
+}
+
+.gwt-Label-disabled {
+    color: grey;
+}
+
+.gwt-TextBox:disabled {
+    background-color: inherit;
+}
+
+.gwt-PasswordTextBox:disabled {
+    background-color: inherit;
+}
+
+.text-muted {
+    color: #6c757d !important;
+}
+
+.form-helper {
+    margin-bottom: 10px;
+}
+
+.form-helper .form-row {
+    margin-bottom: 0;
+}
+
+.form-text-helper {
+    margin-left: 160px;
+    font-size: 75%;
+    font-weight: lighter;
+}
+
+.form-text-helper-checkbox {
+    margin-left: 20px;
+    font-size: 75%;
+    font-weight: lighter;
+}
+
+.form-helper .form-textbox {
+    margin-bottom: 0;
+}
+
+.form-helper .form-checkbox {
+    margin-bottom: 0;
+}
+
+.form-textbox-external-lobs {
+    width: 5%;
+    border: 1px none #ccc;
+    border-bottom-style: solid;
+    background: none;
+    margin: 0px 10px;
+    direction: rtl;
+}
+
+.gwt-TabPanelBottom {
+    background-color: transparent;
+    /*border-color: lightgray;*/
+    /*border-style: solid;*/
+    /*border-width: thin;*/
+}
+
+.sidebarHyperLink-selected {
+    background: #5bbeff;
+}
+
+.information-path {
+    text-overflow: ellipsis;
+    width: 100%;
+}
+
+/*.sidebarItem {*/
+/*    padding: 5px 0;*/
+/*}*/
+
+.sidebarItem-selected {
+    color: white !important;
+}
+
+.select-buttons-container {
+    position: absolute;
+    bottom: 10px;
+    z-index: 1;
+}
+
+.select-buttons-container .btn:last-child {
+    margin-left: 15px;
+}
+
+.navigation-buttons {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+
+/**********************************************
+				EDIT METADATA
+************************************************/
+
+.browseContentPreviewPanel.metadata{
+    border-collapse: initial;
+}
+
+.metadata-panel {
+    padding: 40px 10px 0px;
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+}
+
+.server .metadata-panel{
+    padding: 0;
+}
+
+.server .browseContentPreviewPanel.metadata .browseContentFilesPanel{
+    padding: 0;
+}
+
+.metadata-content {
+    display: block;
+    height: 80vh;
+}
+
+.metadata-save {
+    display: flex;
+    flex-direction: row-reverse;
+    width: 100%;
+    padding: 10px 0;
+    background-color: white;
+    z-index: 1;
+}
+
+.metadata-edit-title {
+    display: flex;
+    justify-content: space-between;
+    margin: 0 0 0.5em 0;
+}
+
+.metadata-edit-title .h1 {
+    margin: 0;
+}
+
+.metadata-edit-title .btn {
+    background-color: transparent;
+    font-size: 2em;
+    color: #089de3;
+    padding: 0;
+}
+
+.metadata-edit-panel {
+    display: flex;
+    flex-direction: column;
+}
+
+.metadata-edit-panel textarea {
+    resize: vertical;
+}
+
+.metadata-edit-field {
+    display: flex;
+    margin-bottom: 0.5em;
+}
+
+.metadata-edit-field .form-label {
+    width: 15%;
+    min-width: 200px;
+    padding-right: 0.5em;
+    margin-top: 0;
+}
+
+.metadata-edit-field .form-textbox {
+    width: 85%;
+    margin-bottom: 0;
+}
+
+.metadata-edit-field .form-textbox:required {
+    box-shadow: none;
+}
+
+.metadata-edit-field .form-textbox:invalid {
+    background-color: #eebcba;
+    border: none;
+    border-left: 2px solid #d9534f;
+}
+
+.metadata-edit-field-date .metadata-edit-value {
+    max-width: 200px;
+}
+
+.metadata-edit-field-date i {
+    padding: 0.5em;
+}
+
+.metadata-edit-readonly {
+    background-color: #f7f7f7;
+    font-weight: bold;
+}
+
+.metadata-edit .h1 {
+    margin-top: 0;
+}
+
+/**********************************************
+			EDIT METADATA BUTTONS
+************************************************/
+
+.metadata-save button {
+    align-self: center;
+}
+
+.metadata-save i {
+    margin: 0 0.5em;
+}
+
+.metadata-edit-title .btn::after {
+    position: relative;
+    right: auto;
+}
+
+.metadata-update {
+    margin: 0 auto;
+    color: #089de3;
+}
+
+.metadata-update .missing {
+    color: #8f3938;
+}
+
+/**********************************************
+		EDIT METADATA TAB & SCROLL
+************************************************/
+
+.browseItemMetadata{
+    padding: 0;
+}
+
+.metadata-table-list {
+    display: block;
+    height: 100%;
+}
+
+.metadata-table-list .form-textbox {
+    border-bottom: 0;
+}
+
+.metadata-edit, .metadata-edit .gwt-TabPanelBottom, .metadata-edit-tab .gwt-TabPanelBottom {
+    height: 100%;
+    display: block;
+}
+
+.metadata-edit-tab {
+    height: 100%;
+}
+
+.metadata-edit-tab > tbody > tr:nth-of-type(1) {
+    overflow-x: auto;
+}
+
+.metadata-edit-tab > tbody, .metadata-edit-tab > tbody > tr:nth-of-type(2) {
+    height: 90%;
+}
+
+.metadata-edit-tab, .metadata-edit-tab > tbody, .metadata-edit-tab > tbody > tr, .metadata-edit-tab > tbody > tr > td {
+    display: block !important;
+    width: 100%;
+}
+
+.metadata-edit-scroll-wrapper {
+    display: block;
+    max-height: 100%;
+    width: 100%;
+}
+
+.leftSidebar{
+    height: 80vh;
+    display: block;
+    overflow: auto;
+    box-sizing: border-box;
+}
+
+/**********************************************
+		    EDIT METADATA SIDEBAR
+***********************************************/
+
+.sidebar-collapse {
+    position: relative;
+    width: 100%;
+}
+
+.sidebar-collapse .header {
+    color: inherit;
+    text-decoration: none;
+}
+
+.sidebar-collapse .header > .leftSidebar-facet-panel::after {
+    display: inline-block;
+    font-family: FontAwesome;
+    content: "\f107";
+    font-weight: bolder;
+    position: absolute;
+    right: 1em;
+    top: 0;
+}
+
+.sidebar-collapse .header > .leftSidebar-facet-panel.sidebarHyperLink-selected::after {
+    color: #fff;
+}
+
+.sidebar-collapse.gwt-DisclosurePanel-open .header > .leftSidebar-facet-panel::after {
+    content: "\f106";
+    font-weight: bolder;
+}
+
+.diagram-tab {
+    height: 70vh;
+    padding: 0;
+}
+
+.wizard-title {
+    margin-left: 6rem;
+}
+
+/***********************************************
+                Progress Panel
+ ***********************************************/
+
+.progress-bar-panel{
+    padding-left: 10px;
+    padding-right: 20px;
+    margin: 0 6rem;
+}
+
+.progress-report-panel {
+    margin-top: 44px;
+}
+
+/**********************************************
+		         Dialog ExternalLob
+***********************************************/
+.dialog-external-lobs {
+    width: 500px;
+}
+
+.dialog-external-lobs table {
+    width: 100%;
+}
+
+.dialog-external-lobs-layout {
+    margin: 10px;
+}
+
+.dialog-external-lobs-layout-footer {
+    display: flex;
+    flex-direction: row-reverse;
+}
+
+.dialog-external-lobs-layout-footer .btn {
+    margin-left: 10px;
+}
+
+
+/**********************************************
+		         Dialog Errors
+***********************************************/
+.dialog-persist-errors table {
+    width: 100%;
+}
+
+.dialog-persist-errors .Caption {
+    background-color: #d9534f;
+}
+
+.dialog-persist-errors-layout {
+    padding: 10px;
+    height: 100%;
+}
+
+.dialog-persist-errors-layout-footer {
+    display: flex;
+    flex-direction: row-reverse;
+    padding: 5px;
+}
+
+.dialog-persist-errors-layout-footer .btn {
+    /*padding: 5px 0px;*/
+}
+
+/**********************************************
+		         Dialog Information
+***********************************************/
+.dialog-persist-information table {
+    width: 100%;
+}
+
+.dialog-persist-information-layout {
+    padding: 10px;
+    height: 100%;
+}
+
+.dialog-persist-information-layout-footer {
+    display: flex;
+    flex-direction: row-reverse;
+    padding: 5px;
+}
+
+.dialog-persist-information-layout-footer .btn {
+    padding: 5px 0px;
+}
+
+/************************************************
+* SIARD validator
+ ************************************************/
+/*indicators*/
+.validation-indicators{
+    display: flex;
+}
+
+.validation-indicators .indicator{
+    display: flex;
+    margin-right: 0.7em;
+}
+
+.indicator .passed{
+    color: #5cb85c;
+    margin-right: 2px;
+}
+
+.indicator .errors{
+    color: #d9534f;
+    margin-right: 2px;
+}
+
+.indicator .warnings{
+    color: #f0ad4e;
+    margin-right: 2px;
+}
+
+.indicator .skipped{
+    color: #727c84;
+    margin-right: 2px;
+}
+/*Dialog*/
+.validator-dialog-information{
+    display: flex;
+    justify-content: space-between;
+    border: 1px solid #eee;
+}
+
+.validator-dialog-button{
+    display: flex;
+}
+
+.validator-dialog-information .gwt-Label{
+    margin: 0 1em;
+}
+
+.validator-dialog-layout-body{
+    padding: 20px 10px;
+}
+
+.validator-dialog-layout-body .form-text-helper{
+    margin-left: 0;
+}
+
+.tip-validator{
+    line-height: 48px;
+}
+
+.btn-validator{
+    background-color: #eeeeee;
+    padding: 0 10px;
+    min-height: 24px;
+}
+
+.btn-left{
+    float: left;
+}
+
+/*page*/
+.browseContentPreviewPanel.validation{
+    padding-left: 3rem;
+    padding-right: 3rem;
+    padding-bottom: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.browseContentPreviewPanel.validation .validator{
+    height: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.validation-information{
+    display: flex;
+    justify-content: space-between;
+}
+
+.progress-report.validation{
+    height: auto;
+    max-height: initial;
+    flex: 1;
+}
+
+.validation-panel{
+    padding: 2px;
+    display: flex;
+}
+
+.validation-panel:nth-child(even){
+    background-color: #ebebeb
+}
+
+.validation-info-panel{
+    display: flex;
+    padding: 5px 0;
+}
+
+.validation-info-panel .title{
+    font-weight: bolder;
+    width: 260px;
+}
+
+.validation-info-panel .btn-link-info{
+    padding-right: 0;
+}
+
+.validation-panel.title .gwt-Label{
+    font-weight: bolder;
+    margin-right: 10px;
+}
+
+.validation-total{
+    margin-left: 4px;
+}
+.validation-panel.requirement{
+    justify-content: space-between;
+}
+.validation-panel.requirement .title{
+    display: flex;
+}
+
+.validation-panel.requirement .title-message {
+    font-weight: bolder;
+}
+
+.validation-status{
+    max-height: 21px;
+    align-self: center;
+}
+.validation-panel.requirement .title .description{
+    white-space: normal;
+    width: 90%;
+}
+.validation-panel.requirement .gwt-Label{
+    min-width: 90px;
+}
+
+.validation-panel.requirement.path{
+    justify-content: normal;
+    font-weight: lighter;
+}
+
+.btn-run-again{
+    box-sizing: content-box;
+}
+
+.stick-bottom-log{
+    display: flex;
+    height: 20px;
+    line-height: 20px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-left: auto;
+    width: max-content;
+    padding: 0.5em 0;
+}
+.stick-bottom-log .gwt-Label{
+    margin-right: 1rem;
+}
+.tail-off{
+    background-color: #2c2c2c;
+}
+
+.tail-on{
+    background-color: #6b0;
+}
+
+.tail{
+    position: relative;
+    display: inline-block;
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+}
+
+.tail::after{
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    margin: auto;
+    display: block;
+    height: 10px;
+    width: 10px;
+    background: #f1f1f1;
+    border-radius: 50%;
+}
+
+.bottom-panel{
+    display: flex;
+    align-self: flex-end;
+    padding: 0.5em 0;
+}
+
+.bottom-panel .btn-item .btn{
+    box-sizing: content-box;
+    width: auto;
+    margin-left: 0;
+}
+
+.bottom-panel .btn-item .btn:before, .bottom-panel .btn-item .btn:after{
+    margin-top: 2px;
+}
+
+.bottom-panel .btn-item .btn-back-wizard{
+    padding-left: 25px;
+}
+
+.bottom-panel .btn-item .btn-run-again{
+    padding-right: 25px;
+}
+
+.bottom-panel .btn-primary{
+    margin-left: 1em;
 }

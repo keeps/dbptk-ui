@@ -10,8 +10,8 @@ import com.databasepreservation.common.shared.client.common.utils.JavascriptUtil
 import com.databasepreservation.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.common.shared.client.tools.JSOUtils;
 import com.databasepreservation.common.shared.client.widgets.Toast;
-import com.databasepreservation.desktop.client.common.dialogs.Dialogs;
-import com.databasepreservation.desktop.shared.models.Filter;
+import com.databasepreservation.common.shared.client.common.dialogs.Dialogs;
+import com.databasepreservation.common.shared.models.Filter;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;

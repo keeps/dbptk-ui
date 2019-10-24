@@ -326,6 +326,11 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
   }
 
   @Override
+  public String uploadMetadataSIARD(String path) throws GenericException {
+    return SIARDController.loadMetadataFromLocal(path);
+  }
+
+  @Override
   public String uploadMetadataSIARD(String databaseUUID, String path) throws GenericException {
     return SIARDController.loadMetadataFromLocal(databaseUUID, path);
   }

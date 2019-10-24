@@ -14,7 +14,7 @@ import com.databasepreservation.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.common.shared.client.tools.ViewerStringUtils;
 import com.databasepreservation.common.shared.client.widgets.wcag.AccessibleFocusPanel;
 import com.databasepreservation.desktop.client.common.helper.HelperUploadSIARDFile;
-import com.databasepreservation.desktop.client.common.lists.DatabaseList;
+import com.databasepreservation.common.shared.client.common.lists.DatabaseList;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;

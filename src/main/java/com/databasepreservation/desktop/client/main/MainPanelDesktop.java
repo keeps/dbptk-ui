@@ -6,40 +6,32 @@ import java.util.List;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerSIARDBundle;
 import com.databasepreservation.common.shared.client.breadcrumb.BreadcrumbItem;
+import com.databasepreservation.common.shared.client.common.ContentPanel;
 import com.databasepreservation.common.shared.client.common.RightPanel;
 import com.databasepreservation.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.shared.client.common.utils.RightPanelLoader;
-import com.databasepreservation.common.shared.client.common.visualization.browse.DatabaseInformationPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.DatabasePanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.DatabaseReportPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.DatabaseSearchPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.DatabaseSearchesPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.DatabaseUsersPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.ReferencesPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.RowPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.SchemaRoutinesPanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.*;
 import com.databasepreservation.common.shared.client.common.visualization.browse.foreignKey.ForeignKeyPanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.foreignKey.ForeignKeyPanelOptions;
 import com.databasepreservation.common.shared.client.common.visualization.browse.table.TablePanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.table.TablePanelOptions;
 import com.databasepreservation.common.shared.client.common.visualization.browse.table.TableSavedSearchEditPanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.table.TableSavedSearchPanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.validate.ValidatorPage;
 import com.databasepreservation.common.shared.client.common.visualization.browse.view.ViewPanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.view.ViewPanelStructure;
 import com.databasepreservation.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.desktop.client.dbptk.HomePage;
 import com.databasepreservation.desktop.client.dbptk.Manage;
-import com.databasepreservation.desktop.client.dbptk.SIARDMainPage;
-import com.databasepreservation.desktop.client.dbptk.ingest.IngestPage;
-import com.databasepreservation.desktop.client.dbptk.metadata.MetadataPanel;
-import com.databasepreservation.desktop.client.dbptk.metadata.MetadataPanelLoad;
-import com.databasepreservation.desktop.client.dbptk.metadata.SIARDEditMetadataPage;
-import com.databasepreservation.desktop.client.dbptk.metadata.information.MetadataInformation;
-import com.databasepreservation.desktop.client.dbptk.metadata.schemas.routines.MetadataRoutinePanel;
-import com.databasepreservation.desktop.client.dbptk.metadata.schemas.tables.MetadataTablePanel;
-import com.databasepreservation.desktop.client.dbptk.metadata.schemas.views.MetadataViewPanel;
-import com.databasepreservation.desktop.client.dbptk.metadata.users.MetadataUsersPanel;
-import com.databasepreservation.desktop.client.dbptk.validator.ValidatorPage;
+import com.databasepreservation.common.shared.client.common.visualization.browse.ingest.IngestPage;
+import com.databasepreservation.common.shared.client.common.visualization.browse.metadata.MetadataPanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.metadata.MetadataPanelLoad;
+import com.databasepreservation.common.shared.client.common.visualization.browse.metadata.SIARDEditMetadataPage;
+import com.databasepreservation.common.shared.client.common.visualization.browse.metadata.information.MetadataInformation;
+import com.databasepreservation.common.shared.client.common.visualization.browse.metadata.schemas.routines.MetadataRoutinePanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.metadata.schemas.tables.MetadataTablePanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.metadata.schemas.views.MetadataViewPanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.metadata.users.MetadataUsersPanel;
 import com.databasepreservation.desktop.client.dbptk.wizard.download.DBMSWizardManager;
 import com.databasepreservation.desktop.client.dbptk.wizard.download.SIARDWizardManager;
 import com.databasepreservation.desktop.client.dbptk.wizard.upload.CreateWizardManager;
@@ -74,14 +66,14 @@ public class MainPanelDesktop extends Composite {
     if (currentHistoryPath.isEmpty() || HistoryManager.ROUTE_HOME.equals(currentHistoryPath.get(0))) {
       contentPanel.setWidget(HomePage.getInstance());
 
-    } else if (HistoryManager.ROUTE_DESKTOP_UPLOAD_SIARD_DATA.equals(currentHistoryPath.get(0))) {
-      IngestPage ingestPage = IngestPage.getInstance(currentHistoryPath.get(1), currentHistoryPath.get(2));
-      contentPanel.clear();
-      contentPanel.add(ingestPage);
+    } else if (HistoryManager.ROUTE_UPLOAD_SIARD_DATA.equals(currentHistoryPath.get(0))) {
+      String databaseUUID = currentHistoryPath.get(1);
+      String databaseName = currentHistoryPath.get(2);
+      setContent(databaseUUID, IngestPage.getInstance(databaseUUID, databaseName));
 
     } else if (HistoryManager.ROUTE_SIARD_INFO.equals(currentHistoryPath.get(0))) {
-      SIARDMainPage instance = SIARDMainPage.getInstance(currentHistoryPath.get(1));
-      contentPanel.setWidget(instance);
+      String databaseUUID = currentHistoryPath.get(1);
+      setContent(databaseUUID, SIARDMainPage.getInstance(databaseUUID));
 
     } else if (HistoryManager.ROUTE_DATABASE.equals(currentHistoryPath.get(0))) {
       if (currentHistoryPath.size() == 1) {
@@ -436,8 +428,7 @@ public class MainPanelDesktop extends Composite {
         final String databaseUUID = currentHistoryPath.get(1);
         final String reporterPath = currentHistoryPath.get(2);
         ValidatorPage instance = ValidatorPage.getInstance(databaseUUID, reporterPath);
-        contentPanel.clear();
-        contentPanel.add(instance);
+        setContent(databaseUUID, instance);
 
       } else if (currentHistoryPath.size() == 4) {
         final String databaseUUID = currentHistoryPath.get(1);
@@ -445,8 +436,7 @@ public class MainPanelDesktop extends Composite {
         final String udtPath = currentHistoryPath.get(3);
 
         ValidatorPage instance = ValidatorPage.getInstance(databaseUUID, reporterPath, udtPath);
-        contentPanel.clear();
-        contentPanel.add(instance);
+        setContent(databaseUUID, instance);
       }
     } else {
       handleErrorPath(currentHistoryPath);
@@ -480,6 +470,15 @@ public class MainPanelDesktop extends Composite {
     databasePanel.setTopLevelPanelCSS("browseContent wrapper skip_padding");
     contentPanel.setWidget(databasePanel);
     databasePanel.load(rightPanelLoader, toSelect);
+    JavascriptUtils.scrollToElement(contentPanel.getElement());
+  }
+
+  private void setContent(String databaseUUID, ContentPanel panel) {
+    GWT.log("setContent, dbuid " + databaseUUID);
+    ContainerPanel containerPanel = ContainerPanel.getInstance(databaseUUID, false);
+    containerPanel.setTopLevelPanelCSS("browseContent wrapper skip_padding");
+    contentPanel.setWidget(containerPanel);
+    containerPanel.load(panel);
     JavascriptUtils.scrollToElement(contentPanel.getElement());
   }
 }

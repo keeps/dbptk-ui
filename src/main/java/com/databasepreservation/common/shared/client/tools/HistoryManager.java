@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.Window;
 
@@ -52,6 +51,7 @@ public class HistoryManager {
   public static final String ROUTE_SIARD_VALIDATOR = "validator";
   public static final String ROUTE_TABLE_OPTIONS = "options";
   public static final String ROUTE_TABLE_UPDATE = "update";
+  public static final String ROUTE_UPLOAD_SIARD_DATA = "ingest-siard";
 
   /****************************************************
    * DESKTOP ROUTES
@@ -60,7 +60,6 @@ public class HistoryManager {
   public static final String ROUTE_DESKTOP_METADATA_TABLE = "desktop-metadata-table";
   public static final String ROUTE_DESKTOP_METADATA_VIEW = "desktop-metadata-view";
   public static final String ROUTE_DESKTOP_METADATA_ROUTINE = "desktop-metadata-routine";
-  public static final String ROUTE_DESKTOP_UPLOAD_SIARD_DATA = "ingest-siard";
   public static final String ROUTE_DESKTOP_SAVED_SEARCHES = "desktop-searches";
   public static final String ROUTE_DESKTOP_SCHEMA = "desktop-schema";
   public static final String ROUTE_DESKTOP_TABLE = "desktop-table";
@@ -262,7 +261,7 @@ public class HistoryManager {
   }
 
   public static void gotoIngestSIARDData(final String databaseUUID, final String databaseName) {
-    List<String> params = Arrays.asList(ROUTE_DESKTOP_UPLOAD_SIARD_DATA, databaseUUID, databaseName);
+    List<String> params = Arrays.asList(ROUTE_UPLOAD_SIARD_DATA, databaseUUID, databaseName);
     newHistory(params);
   }
 
@@ -310,6 +309,11 @@ public class HistoryManager {
 
   public static void gotoSIARDValidator(String databaseUUID, String reporterPath) {
     List<String> params = Arrays.asList(ROUTE_SIARD_VALIDATOR, databaseUUID, reporterPath);
+    newHistory(params);
+  }
+
+  public static void gotoSIARDValidator(String databaseUUID) {
+    List<String> params = Arrays.asList(ROUTE_SIARD_VALIDATOR, databaseUUID);
     newHistory(params);
   }
 

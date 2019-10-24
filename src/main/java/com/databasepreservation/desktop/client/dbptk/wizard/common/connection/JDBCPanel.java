@@ -18,7 +18,7 @@ import com.databasepreservation.common.shared.models.PreservationParameter;
 import com.databasepreservation.desktop.client.dbptk.wizard.WizardManager;
 import com.databasepreservation.desktop.client.dbptk.wizard.download.DBMSWizardManager;
 import com.databasepreservation.desktop.client.dbptk.wizard.upload.CreateWizardManager;
-import com.databasepreservation.desktop.shared.models.Filter;
+import com.databasepreservation.common.shared.models.Filter;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.dom.client.KeyCodes;

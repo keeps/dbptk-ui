@@ -13,7 +13,7 @@ import com.databasepreservation.common.shared.client.widgets.Toast;
 import com.databasepreservation.common.shared.models.DBPTKModule;
 import com.databasepreservation.common.shared.models.PreservationParameter;
 import com.databasepreservation.common.shared.models.wizardParameters.ConnectionParameters;
-import com.databasepreservation.desktop.client.common.dialogs.Dialogs;
+import com.databasepreservation.common.shared.client.common.dialogs.Dialogs;
 import com.databasepreservation.desktop.client.common.sidebar.ConnectionSidebar;
 import com.databasepreservation.desktop.client.dbptk.wizard.WizardPanel;
 import com.github.nmorel.gwtjackson.client.ObjectMapper;

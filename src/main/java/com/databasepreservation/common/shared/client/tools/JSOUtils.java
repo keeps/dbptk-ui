@@ -2,9 +2,9 @@ package com.databasepreservation.common.shared.client.tools;
 
 import java.util.List;
 
-import com.databasepreservation.desktop.shared.models.Filter;
-import com.databasepreservation.desktop.shared.models.JSO.FilterJSO;
-import com.databasepreservation.desktop.shared.models.JSO.OpenFileDialogOptions;
+import com.databasepreservation.common.shared.models.Filter;
+import com.databasepreservation.common.shared.models.JSO.FilterJSO;
+import com.databasepreservation.common.shared.models.JSO.OpenFileDialogOptions;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.core.client.JsArrayString;

@@ -15,7 +15,7 @@ import com.databasepreservation.common.shared.client.widgets.Toast;
 import com.databasepreservation.common.shared.models.DBPTKModule;
 import com.databasepreservation.common.shared.models.PreservationParameter;
 import com.databasepreservation.common.shared.models.wizardParameters.ExportOptionsParameters;
-import com.databasepreservation.desktop.shared.models.Filter;
+import com.databasepreservation.common.shared.models.Filter;
 import com.databasepreservation.modules.siard.SIARD2ModuleFactory;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;

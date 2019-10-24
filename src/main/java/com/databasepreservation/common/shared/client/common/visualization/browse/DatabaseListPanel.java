@@ -6,7 +6,7 @@ import com.databasepreservation.common.shared.client.common.RightPanel;
 import com.databasepreservation.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.common.shared.client.widgets.Toast;
-import com.databasepreservation.server.client.common.lists.DatabaseList;
+import com.databasepreservation.common.shared.client.common.lists.DatabaseList;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -54,14 +54,15 @@ public class DatabaseListPanel extends RightPanel {
       public void onSelectionChange(SelectionChangeEvent event) {
         ViewerDatabase selected = databaseList.getSelectionModel().getSelectedObject();
         if (selected != null) {
-          if (ViewerDatabase.Status.AVAILABLE.equals(selected.getStatus())) {
-            HistoryManager.gotoDatabase(selected.getUUID());
-          } else if (ViewerDatabase.Status.INGESTING.equals(selected.getStatus())) {
-            HistoryManager.gotoUpload(selected.getUUID());
-          } else {
-            Toast.showError("Unavailable", "This database can not be accessed.");
-            databaseList.getSelectionModel().clear();
-          }
+//          if (ViewerDatabase.Status.AVAILABLE.equals(selected.getStatus())) {
+//            HistoryManager.gotoDatabase(selected.getUUID());
+//          } else if (ViewerDatabase.Status.INGESTING.equals(selected.getStatus())) {
+//            HistoryManager.gotoUpload(selected.getUUID());
+//          } else {
+//            Toast.showError("Unavailable", "This database can not be accessed.");
+//            databaseList.getSelectionModel().clear();
+//          }
+          databaseList.getSelectionModel().clear();
         }
       }
     });

@@ -124,6 +124,8 @@ public interface BrowserServiceAsync {
 
   void getClientMachine(AsyncCallback<String> async);
 
+  void uploadMetadataSIARD(String path, AsyncCallback<String> async);
+
   void uploadMetadataSIARD(String databaseUUID, String path, AsyncCallback<String> async);
 
   void findSIARDFile(String path, AsyncCallback<String> async);
