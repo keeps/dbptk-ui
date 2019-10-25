@@ -1,14 +1,16 @@
 package com.databasepreservation.common.shared.client.common.utils;
 
+import java.util.List;
+
 import com.databasepreservation.common.shared.ViewerConstants;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerSchema;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerTable;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerView;
 import com.databasepreservation.common.shared.client.common.MetadataField;
+import com.databasepreservation.common.shared.client.common.desktop.GenericField;
 import com.databasepreservation.common.shared.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.common.shared.client.tools.ViewerStringUtils;
-import com.databasepreservation.utils.ListUtils;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -19,10 +21,6 @@ import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 
 import config.i18n.client.ClientMessages;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -42,6 +40,22 @@ public class CommonClientUtils {
           "metadata-information-element-value");
       panel.add(description);
     }
+  }
+
+  public static FlowPanel getPanelInformation(String text, String classes) {
+    FlowPanel panel = new FlowPanel();
+
+    SafeHtmlBuilder safeHtmlBuilder = new SafeHtmlBuilder();
+    safeHtmlBuilder.append(SafeHtmlUtils.fromString(text));
+
+    HTML html = new HTML(safeHtmlBuilder.toSafeHtml());
+    html.addStyleName(classes);
+
+    GenericField genericField = GenericField.createInstance("Information", html);
+    genericField.setCSSMetadata("metadata-field", "metadata-information-element-label");
+    panel.add(genericField);
+
+    return panel;
   }
 
   public static FlowPanel getHeader(String iconTag, ViewerTable table, String hClass) {

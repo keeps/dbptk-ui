@@ -24,7 +24,9 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
+import com.rabbitmq.client.AMQP;
 import config.i18n.client.ClientMessages;
+import dk.sa.xmlns.diark._1_0.fileindex.FileIndexType;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -91,7 +93,7 @@ public class ViewPanel extends RightPanel {
     mainHeader.setWidget(CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.SCHEMA_VIEWS),
       view.getName(), "h1"));
 
-    options.setText(messages.basicActionOptions());
+    options.setText(messages.schemaStructurePanelTextForAdvancedOption());
 
     options.addClickHandler(event -> HistoryManager.gotoViewOptions(database.getUUID(), view.getUUID()));
 
@@ -100,6 +102,8 @@ public class ViewPanel extends RightPanel {
       instance.setCSS("table-row-description");
       description.add(instance);
     }
+
+    content.add(CommonClientUtils.getPanelInformation(messages.viewPanelViewerNotMaterialized(), "metadata-information-element-value"));
 
   }
 }

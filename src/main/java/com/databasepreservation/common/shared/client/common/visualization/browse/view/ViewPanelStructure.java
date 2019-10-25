@@ -105,7 +105,7 @@ public class ViewPanelStructure extends RightPanel {
 
     btnBack.addClickHandler(event -> HistoryManager.gotoView(database.getUUID(), view.getUUID()));
 
-    options.setText(messages.basicActionOptions());
+    options.setText(messages.schemaStructurePanelTextForAdvancedOption());
 
     options.addClickHandler(event -> HistoryManager.gotoView(database.getUUID(), view.getUUID()));
   }

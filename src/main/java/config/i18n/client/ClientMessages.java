@@ -1037,4 +1037,9 @@ public interface ClientMessages extends Messages {
   String csvExportDialogHelpTextForDescription();
 
   String showAdvancedSearch();
+
+  /********************************************
+   * View Panel
+   *******************************************/
+  String viewPanelViewerNotMaterialized();
 }
