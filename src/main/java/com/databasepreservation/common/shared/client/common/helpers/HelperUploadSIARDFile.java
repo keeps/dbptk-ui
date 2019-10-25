@@ -1,4 +1,4 @@
-package com.databasepreservation.desktop.client.common.helper;
+package com.databasepreservation.common.shared.client.common.helpers;
 
 import java.util.Collections;
 

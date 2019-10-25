@@ -82,15 +82,16 @@ public class ValidatorPage extends ContentPanel {
   private static ValidatorUiBinder binder = GWT.create(ValidatorUiBinder.class);
 
   //For server
-  public static ValidatorPage getInstance(String databaseUUID) {
-    return ValidatorPage.getInstance(databaseUUID, null, null);
+  public static ValidatorPage getInstance(ViewerDatabase database) {
+    return ValidatorPage.getInstance(database, null, null);
   }
 
-  public static ValidatorPage getInstance(String databaseUUID, String reporterPath) {
-    return ValidatorPage.getInstance(databaseUUID, reporterPath, null);
+  public static ValidatorPage getInstance(ViewerDatabase database, String reporterPath) {
+    return ValidatorPage.getInstance(database, reporterPath, null);
   }
 
-  public static ValidatorPage getInstance(String databaseUUID, String reporterPath, String udtPath) {
+  public static ValidatorPage getInstance(ViewerDatabase database, String reporterPath, String udtPath) {
+    String databaseUUID = database.getUUID();
     if (instances.get(databaseUUID) == null) {
       ValidatorPage instance = new ValidatorPage(databaseUUID, reporterPath, udtPath);
       instances.put(databaseUUID, instance);

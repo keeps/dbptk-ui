@@ -12,19 +12,13 @@ import com.databasepreservation.common.shared.ViewerStructure.ViewerSIARDBundle;
 import com.databasepreservation.common.shared.client.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.shared.client.common.ContentPanel;
 import com.databasepreservation.common.shared.client.common.RightPanel;
+import com.databasepreservation.common.shared.client.common.utils.ContentPanelLoader;
 import com.databasepreservation.common.shared.client.common.utils.RightPanelLoader;
-import com.databasepreservation.common.shared.client.common.visualization.browse.ContainerPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.DatabaseListPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.DatabasePanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.DatabaseSearchPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.DatabaseSearchesPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.ReferencesPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.RowPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.SIARDMainPage;
-import com.databasepreservation.common.shared.client.common.visualization.browse.SchemaStructurePanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.*;
 import com.databasepreservation.common.shared.client.common.visualization.browse.foreignKey.ForeignKeyPanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.information.DatabaseInformationPanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.ingest.IngestPage;
+import com.databasepreservation.common.shared.client.common.visualization.browse.manager.Manage;
 import com.databasepreservation.common.shared.client.common.visualization.browse.metadata.MetadataPanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.metadata.MetadataPanelLoad;
 import com.databasepreservation.common.shared.client.common.visualization.browse.metadata.SIARDEditMetadataPage;
@@ -97,6 +91,10 @@ public class MainPanel extends Composite {
     setContent(null, rightPanelLoader);
   }
 
+  public void setContent(ContentPanelLoader panel) {
+    setContent(null, panel);
+  }
+
   private void setContent(String databaseUUID, RightPanelLoader rightPanelLoader) {
     GWT.log("setContent, dbuid " + databaseUUID);
     DatabasePanel databasePanel = DatabasePanel.getInstance(databaseUUID, true);
@@ -105,8 +103,8 @@ public class MainPanel extends Composite {
     databasePanel.load(rightPanelLoader, "");
   }
 
-  private void setContent(String databaseUUID, ContentPanel panel) {
-    GWT.log("setContent, dbuid " + databaseUUID);
+  private void setContent(String databaseUUID, ContentPanelLoader panel) {
+    GWT.log("LOADER ::: setContent, dbuid " + databaseUUID);
     ContainerPanel containerPanel = ContainerPanel.getInstance(databaseUUID, true);
     containerPanel.setTopLevelPanelCSS("browseContent wrapper skip_padding server");
     contentPanel.setWidget(containerPanel);
@@ -185,27 +183,40 @@ public class MainPanel extends Composite {
 
     } else if (HistoryManager.ROUTE_SIARD_INFO.equals(currentHistoryPath.get(0))) {
       String databaseUUID = currentHistoryPath.get(1);
-      setContent(databaseUUID, SIARDMainPage.getInstance(databaseUUID));
-      // contentPanel.setWidget(SIARDMainPage.getInstance(databaseUUID));
+      setContent(databaseUUID, new ContentPanelLoader() {
+        @Override
+        public ContentPanel load(ViewerDatabase database) {
+          return SIARDMainPage.getInstance(database);
+        }
+      });
     } else if (HistoryManager.ROUTE_UPLOAD_SIARD_DATA.equals(currentHistoryPath.get(0))) {
       String databaseUUID = currentHistoryPath.get(1);
-      String databaseName = currentHistoryPath.get(2);
-      setContent(databaseUUID, IngestPage.getInstance(databaseUUID, databaseName));
+      setContent(databaseUUID, new ContentPanelLoader() {
+        @Override
+        public ContentPanel load(ViewerDatabase database) {
+          return IngestPage.getInstance(database);
+        }
+      });
     } else if (HistoryManager.ROUTE_SIARD_VALIDATOR.equals(currentHistoryPath.get(0))) {
       final String databaseUUID = currentHistoryPath.get(1);
-      setContent(databaseUUID, ValidatorPage.getInstance(databaseUUID));
+      setContent(databaseUUID, new ContentPanelLoader() {
+        @Override
+        public ContentPanel load(ViewerDatabase database) {
+          return ValidatorPage.getInstance(database);
+        }
+      });
     } else if (HistoryManager.ROUTE_DATABASE.equals(currentHistoryPath.get(0))) {
       if (currentHistoryPath.size() == 1) {
         // #database
-        setContent(new RightPanelLoader() {
+        setContent(new ContentPanelLoader() {
           @Override
-          public RightPanel load(ViewerDatabase database) {
-            return DatabaseListPanel.getInstance();
+          public ContentPanel load(ViewerDatabase database) {
+            return Manage.getInstance();
           }
         });
 
       } else if (currentHistoryPath.size() == 2) {
-        // #database/<id>
+        // #database/<database_uuid>
         String databaseUUID = currentHistoryPath.get(1);
         setContent(databaseUUID, new RightPanelLoader() {
           @Override

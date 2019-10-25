@@ -4,7 +4,6 @@
 
     <ui:with field='messages' type='config.i18n.client.ClientMessages' />
     <g:FlowPanel addStyleNames="application-container" ui:field="container">
-<!--        <m:BreadcrumbPanel ui:field="breadcrumb"/>-->
         <g:FlowPanel addStyleNames="browseContentPreviewPanel validation">
             <g:FlowPanel addStyleNames="validator">
                 <g:Label ui:field="title" addStyleNames="h1"/>

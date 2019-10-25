@@ -1,4 +1,4 @@
-package com.databasepreservation.desktop.client.dbptk;
+package com.databasepreservation.common.shared.client.common.visualization.browse.manager;
 
 import java.util.List;
 
@@ -9,12 +9,14 @@ import com.databasepreservation.common.shared.ViewerConstants;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.common.shared.client.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.shared.client.breadcrumb.BreadcrumbPanel;
+import com.databasepreservation.common.shared.client.common.ContentPanel;
+import com.databasepreservation.common.shared.client.common.helpers.HelperUploadSIARDFile;
+import com.databasepreservation.common.shared.client.common.lists.DatabaseList;
+import com.databasepreservation.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.common.shared.client.tools.ViewerStringUtils;
 import com.databasepreservation.common.shared.client.widgets.wcag.AccessibleFocusPanel;
-import com.databasepreservation.desktop.client.common.helper.HelperUploadSIARDFile;
-import com.databasepreservation.common.shared.client.common.lists.DatabaseList;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyDownEvent;
@@ -22,7 +24,6 @@ import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -31,17 +32,23 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-public class Manage extends Composite {
+public class Manage extends ContentPanel {
   @UiField
   public ClientMessages messages = GWT.create(ClientMessages.class);
+
+  @Override
+  public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
+    List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forManageSIARD();
+    BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
+  }
 
   interface ManageUiBinder extends UiBinder<Widget, Manage> {
   }
 
   private static ManageUiBinder binder = GWT.create(ManageUiBinder.class);
 
-  @UiField
-  BreadcrumbPanel breadcrumb;
+  // @UiField
+  // BreadcrumbPanel breadcrumb;
 
   @UiField
   TextBox searchInputBox;
@@ -70,9 +77,6 @@ public class Manage extends Composite {
 
     initWidget(binder.createAndBindUi(this));
 
-    List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forManageSIARD();
-    BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
-
     searchInputBox.getElement().setPropertyString("placeholder", messages.searchPlaceholder());
 
     searchInputBox.addKeyDownHandler(new KeyDownHandler() {
@@ -89,7 +93,10 @@ public class Manage extends Composite {
     databaseList.getSelectionModel().addSelectionChangeHandler(event -> {
       ViewerDatabase selected = databaseList.getSelectionModel().getSelectedObject();
       if (selected != null) {
-          databaseList.getSelectionModel().clear();
+        if(ApplicationType.getType().equals(ViewerConstants.SERVER)){
+          HistoryManager.gotoSIARDInfo(selected.getUUID());
+        }
+        databaseList.getSelectionModel().clear();
       }
     });
 
@@ -97,9 +104,13 @@ public class Manage extends Composite {
   }
 
   private void initButtons() {
-    create.addClickHandler(event -> HistoryManager.gotoCreateSIARD());
-
-    open.addClickHandler(event -> new HelperUploadSIARDFile().openFile(databaseList));
+    if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
+      create.addClickHandler(event -> HistoryManager.gotoCreateSIARD());
+      open.addClickHandler(event -> new HelperUploadSIARDFile().openFile(databaseList));
+    } else {
+      create.setVisible(false);
+      open.addClickHandler(event -> HistoryManager.gotoNewUpload());
+    }
   }
 
   private void doSearch() {

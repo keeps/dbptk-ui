@@ -1089,6 +1089,18 @@ html, body, .main, .content-container {
 }
 
 /**********************************************
+		          breadcrumb
+***********************************************/
+
+.main .wui-breadcrumbPanel {
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-bottom: 10px;
+    position: absolute;
+    z-index: 1;
+}
+
+/**********************************************
 		          Open SIARD
 ***********************************************/
 
@@ -1267,19 +1279,6 @@ html, body, .main, .content-container {
     width: 100%;
     box-sizing: border-box;
 }
-
-/*.wrapper {*/
-/*    display: flex;*/
-/*}*/
-
-/*.wrapper .left {*/
-/*    flex: 0 0 15%;*/
-/*    margin-right: 15px;*/
-/*}*/
-
-/*.wrapper .right {*/
-/*    flex: 1;*/
-/*}*/
 
 .loading-sidebar {
     position: relative;
@@ -1720,6 +1719,33 @@ html, body, .main, .content-container {
     margin-top: 44px;
 }
 
+/***********************************************
+                    BUTTONS
+***********************************************/
+.btn-back-wizard:before {
+    content: "\f053";
+}
+
+.btn-select-all:after {
+    content: "\f046";
+}
+
+.btn-select-none:after {
+    content: "\f096";
+}
+
+.btn-new:after {
+    content: "\f196";
+}
+
+.btn-save:after {
+    content: "\f0c7";
+}
+
+.btn-delete:after {
+    content: "\f014";
+}
+
 /**********************************************
 		         Dialog ExternalLob
 ***********************************************/
@@ -1791,6 +1817,205 @@ html, body, .main, .content-container {
 
 .dialog-persist-information-layout-footer .btn {
     padding: 5px 0px;
+}
+
+/***********************************************
+				    CHECKBOX
+************************************************/
+
+.my-asyncdatagrid-display-scroll-wrapper input[type="checkbox"] {
+    padding-left: 5px;
+    padding-right: 5px;
+    -webkit-appearance: button;
+    background-color: #eee;
+    color: #FFF;
+    white-space: nowrap;
+    overflow: hidden;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    border-color: #089de3;
+    border-style: solid;
+    border-width: thin;
+}
+
+.my-asyncdatagrid-display-scroll-wrapper input[type="checkbox"]:checked {
+    background-color: #089de3;
+}
+
+.my-asyncdatagrid-display-scroll-wrapper input[type="checkbox"]:checked:after {
+    content: '\f00c';
+    font-size: 17px;
+    margin-left: -4px;
+    font-family: FontAwesome;
+}
+
+.connection-panel input[type="checkbox"] {
+    padding-left: 5px;
+    padding-right: 5px;
+    -webkit-appearance: button;
+    background-color: #eee;
+    color: #FFF;
+    white-space: nowrap;
+    overflow: hidden;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    border-color: #089de3;
+    border-style: solid;
+    border-width: thin;
+}
+
+.connection-panel input[type="checkbox"]:checked {
+    background-color: #089de3;
+}
+
+.connection-panel input[type="checkbox"]:checked:after {
+    content: '\f00c';
+    font-size: 17px;
+    margin-left: -4px;
+    font-family: FontAwesome;
+}
+
+.form-checkbox input[type="checkbox"] {
+    padding-left: 5px;
+    padding-right: 5px;
+    -webkit-appearance: button;
+    background-color: #eee;
+    color: #FFF;
+    white-space: nowrap;
+    overflow: hidden;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    border-color: #089de3;
+    border-style: solid;
+    border-width: thin;
+}
+
+.form-checkbox input[type="checkbox"]:checked {
+    background-color: #089de3;
+}
+
+.form-checkbox input[type="checkbox"]:checked:after {
+    content: '\f00c';
+    font-size: 17px;
+    margin-left: -4px;
+    font-family: FontAwesome;
+}
+
+.form-checkbox {
+    width: 100%;
+}
+
+.form-checkbox Label {
+    font-weight: bold;
+    vertical-align: 8px;
+    cursor: pointer;
+    margin-inline-start: 10px;
+}
+
+@media (max-width: 698px) {
+    .form-inline input {
+        margin: 10px 0;
+    }
+
+    .form-inline {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .form-row {
+        align-items: stretch;
+    }
+
+    .form-textbox-inline {
+        width: 100%;
+    }
+
+    .form-inline .form-label-spaced:last-of-type {
+        margin-left: 0px;
+    }
+
+    .form-label-spaced {
+        flex: 0 0 auto;
+    }
+
+    .form-helper {
+        margin: 0;
+    }
+
+    .form-text-helper {
+        margin: 0;
+    }
+}
+
+/***************************
+    SPINNER
+ ***************************/
+.spinnerRetrievingRows {
+    margin: 100px auto 0;
+    width: 70px;
+    text-align: center;
+}
+
+.spinnerRetrievingRows > div {
+    width: 18px;
+    height: 18px;
+    background-color: #333;
+
+    border-radius: 100%;
+    display: inline-block;
+    -webkit-animation: sk-bouncedelay 1.4s infinite ease-in-out both;
+    animation: sk-bouncedelay 1.4s infinite ease-in-out both;
+}
+
+.spinnerRetrievingRows .bounce1 {
+    -webkit-animation-delay: -0.32s;
+    animation-delay: -0.32s;
+}
+
+.spinnerRetrievingRows .bounce2 {
+    -webkit-animation-delay: -0.16s;
+    animation-delay: -0.16s;
+}
+
+@-webkit-keyframes sk-bouncedelay {
+    0%, 80%, 100% {
+        -webkit-transform: scale(0)
+    }
+    40% {
+        -webkit-transform: scale(1.0)
+    }
+}
+
+@keyframes sk-bouncedelay {
+    0%, 80%, 100% {
+        -webkit-transform: scale(0);
+        transform: scale(0);
+    }
+    40% {
+        -webkit-transform: scale(1.0);
+        transform: scale(1.0);
+    }
+}
+
+.query-result-scroll-wrapper {
+    display: block;
+    height: 50vh;
+    width: 100%;
+}
+
+.browseContent.wrapper {
+    display: unset;
+}
+
+.navigation-buttons {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    margin-right: 10px;
+    margin-bottom: 10px;
 }
 
 /************************************************

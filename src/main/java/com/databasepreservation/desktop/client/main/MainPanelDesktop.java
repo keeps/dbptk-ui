@@ -1,22 +1,19 @@
 package com.databasepreservation.desktop.client.main;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerSIARDBundle;
 import com.databasepreservation.common.shared.client.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.shared.client.common.ContentPanel;
 import com.databasepreservation.common.shared.client.common.RightPanel;
+import com.databasepreservation.common.shared.client.common.utils.ContentPanelLoader;
 import com.databasepreservation.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.shared.client.common.utils.RightPanelLoader;
-import com.databasepreservation.common.shared.client.common.visualization.browse.ContainerPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.DatabasePanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.DatabaseSearchPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.DatabaseSearchesPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.ReferencesPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.RowPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.SIARDMainPage;
+import com.databasepreservation.common.shared.client.common.visualization.browse.*;
 import com.databasepreservation.common.shared.client.common.visualization.browse.foreignKey.ForeignKeyPanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.foreignKey.ForeignKeyPanelOptions;
 import com.databasepreservation.common.shared.client.common.visualization.browse.information.DatabaseInformationPanel;
@@ -41,7 +38,7 @@ import com.databasepreservation.common.shared.client.common.visualization.browse
 import com.databasepreservation.common.shared.client.common.visualization.browse.view.ViewPanelStructure;
 import com.databasepreservation.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.desktop.client.dbptk.HomePage;
-import com.databasepreservation.desktop.client.dbptk.Manage;
+import com.databasepreservation.common.shared.client.common.visualization.browse.manager.Manage;
 import com.databasepreservation.desktop.client.dbptk.wizard.download.DBMSWizardManager;
 import com.databasepreservation.desktop.client.dbptk.wizard.download.SIARDWizardManager;
 import com.databasepreservation.desktop.client.dbptk.wizard.upload.CreateWizardManager;
@@ -59,6 +56,9 @@ import com.google.gwt.user.client.ui.Widget;
 public class MainPanelDesktop extends Composite {
   interface MainPanelDesktopUiBinder extends UiBinder<Widget, MainPanelDesktop> {
   }
+
+  // databaseUUID, databaseName
+  private static Map<String, String> databaseNames = new HashMap<>();
 
   private static MainPanelDesktopUiBinder binder = GWT.create(MainPanelDesktopUiBinder.class);
 
@@ -78,18 +78,31 @@ public class MainPanelDesktop extends Composite {
 
     } else if (HistoryManager.ROUTE_UPLOAD_SIARD_DATA.equals(currentHistoryPath.get(0))) {
       String databaseUUID = currentHistoryPath.get(1);
-      String databaseName = currentHistoryPath.get(2);
-      setContent(databaseUUID, IngestPage.getInstance(databaseUUID, databaseName));
+      setContent(databaseUUID, new ContentPanelLoader() {
+        @Override
+        public ContentPanel load(ViewerDatabase database) {
+          return IngestPage.getInstance(database);
+        }
+      });
 
     } else if (HistoryManager.ROUTE_SIARD_INFO.equals(currentHistoryPath.get(0))) {
       String databaseUUID = currentHistoryPath.get(1);
-      setContent(databaseUUID, SIARDMainPage.getInstance(databaseUUID));
+      setContent(databaseUUID, new ContentPanelLoader() {
+        @Override
+        public ContentPanel load(ViewerDatabase database) {
+          return SIARDMainPage.getInstance(database);
+        }
+      });
 
     } else if (HistoryManager.ROUTE_DATABASE.equals(currentHistoryPath.get(0))) {
       if (currentHistoryPath.size() == 1) {
         // #database
-        Manage manage = Manage.getInstance();
-        contentPanel.setWidget(manage);
+        setContent(new ContentPanelLoader() {
+          @Override
+          public ContentPanel load(ViewerDatabase database) {
+            return Manage.getInstance();
+          }
+        });
       } else if (currentHistoryPath.size() == 2) {
         // #database/<database_uuid>
         String databaseUUID = currentHistoryPath.get(1);
@@ -437,16 +450,25 @@ public class MainPanelDesktop extends Composite {
       if (currentHistoryPath.size() == 3) {
         final String databaseUUID = currentHistoryPath.get(1);
         final String reporterPath = currentHistoryPath.get(2);
-        ValidatorPage instance = ValidatorPage.getInstance(databaseUUID, reporterPath);
-        setContent(databaseUUID, instance);
+
+        setContent(databaseUUID, new ContentPanelLoader() {
+          @Override
+          public ContentPanel load(ViewerDatabase database) {
+            return ValidatorPage.getInstance(database, reporterPath);
+          }
+        });
 
       } else if (currentHistoryPath.size() == 4) {
         final String databaseUUID = currentHistoryPath.get(1);
         final String reporterPath = currentHistoryPath.get(2);
         final String udtPath = currentHistoryPath.get(3);
 
-        ValidatorPage instance = ValidatorPage.getInstance(databaseUUID, reporterPath, udtPath);
-        setContent(databaseUUID, instance);
+        setContent(databaseUUID, new ContentPanelLoader() {
+          @Override
+          public ContentPanel load(ViewerDatabase database) {
+            return ValidatorPage.getInstance(database, reporterPath, udtPath);
+          }
+        });
       }
     } else {
       handleErrorPath(currentHistoryPath);
@@ -474,6 +496,10 @@ public class MainPanelDesktop extends Composite {
     setContent(null, null, rightPanelLoader);
   }
 
+  public void setContent(ContentPanelLoader panel) {
+    setContent(null, panel);
+  }
+
   private void setContent(String databaseUUID, String toSelect, RightPanelLoader rightPanelLoader) {
     GWT.log("setContent, dbuid " + databaseUUID);
     DatabasePanel databasePanel = DatabasePanel.getInstance(databaseUUID, false);
@@ -483,8 +509,8 @@ public class MainPanelDesktop extends Composite {
     JavascriptUtils.scrollToElement(contentPanel.getElement());
   }
 
-  private void setContent(String databaseUUID, ContentPanel panel) {
-    GWT.log("setContent, dbuid " + databaseUUID);
+  private void setContent(String databaseUUID, ContentPanelLoader panel) {
+    GWT.log("LOADER ::: setContent, dbuid " + databaseUUID);
     ContainerPanel containerPanel = ContainerPanel.getInstance(databaseUUID, false);
     containerPanel.setTopLevelPanelCSS("browseContent wrapper skip_padding");
     contentPanel.setWidget(containerPanel);

@@ -3,7 +3,7 @@ package com.databasepreservation.desktop.client.dbptk;
 import com.databasepreservation.common.shared.ViewerConstants;
 import com.databasepreservation.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.desktop.client.common.Card;
-import com.databasepreservation.desktop.client.common.helper.HelperUploadSIARDFile;
+import com.databasepreservation.common.shared.client.common.helpers.HelperUploadSIARDFile;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;

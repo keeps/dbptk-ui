@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.common.shared.client.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.shared.client.common.ContentPanel;
@@ -32,7 +33,6 @@ public class IngestPage extends ContentPanel {
 
   private static IngestPageUiBinder binder = GWT.create(IngestPageUiBinder.class);
   private static Map<String, IngestPage> instances = new HashMap<>();
-  private BreadcrumbPanel breadcrumb;
   private String databaseUUID;
   private String databaseName;
 
@@ -42,8 +42,10 @@ public class IngestPage extends ContentPanel {
     BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
   }
 
-  public static IngestPage getInstance(String databaseUUID, String databaseName) {
+  public static IngestPage getInstance(ViewerDatabase database) {
 
+    String databaseUUID = database.getUUID();
+    String databaseName = database.getMetadata().getName();
     if (instances.get(databaseUUID) == null) {
       IngestPage instance = new IngestPage(databaseUUID, databaseName);
       instances.put(databaseUUID, instance);
@@ -54,9 +56,6 @@ public class IngestPage extends ContentPanel {
 
   @UiField
   FlowPanel container, panel;
-
-//  @UiField
-//  BreadcrumbPanel breadcrumb;
 
   @UiField
   Button btnBack;

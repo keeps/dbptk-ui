@@ -13,32 +13,21 @@ import com.databasepreservation.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.shared.client.common.ContentPanel;
 import com.databasepreservation.common.shared.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.shared.client.common.MetadataField;
+import com.databasepreservation.common.shared.client.common.NavigationPanel;
 import com.databasepreservation.common.shared.client.common.desktop.GenericField;
 import com.databasepreservation.common.shared.client.common.dialogs.CommonDialogs;
+import com.databasepreservation.common.shared.client.common.dialogs.Dialogs;
+import com.databasepreservation.common.shared.client.common.helper.HelperValidator;
 import com.databasepreservation.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.shared.client.common.visualization.browse.validate.ValidatorPage;
-import com.databasepreservation.common.shared.client.tools.BreadcrumbManager;
-import com.databasepreservation.common.shared.client.tools.FontAwesomeIconManager;
-import com.databasepreservation.common.shared.client.tools.HistoryManager;
-import com.databasepreservation.common.shared.client.tools.Humanize;
-import com.databasepreservation.common.shared.client.tools.PathUtils;
-import com.databasepreservation.common.shared.client.tools.SolrHumanizer;
-import com.databasepreservation.common.shared.client.tools.ViewerStringUtils;
-import com.databasepreservation.common.shared.client.common.NavigationPanel;
-import com.databasepreservation.common.shared.client.common.dialogs.Dialogs;
-import com.databasepreservation.common.shared.client.common.helper.HelperValidator;
+import com.databasepreservation.common.shared.client.tools.*;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 
 import config.i18n.client.ClientMessages;
 
@@ -80,12 +69,15 @@ public class SIARDMainPage extends ContentPanel {
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
     this.breadcrumb = breadcrumb;
+    List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forSIARDMainPage(database.getUUID(),
+      database.getMetadata().getName());
+    BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
   }
 
-  public static SIARDMainPage getInstance(String databaseUUID) {
-
+  public static SIARDMainPage getInstance(ViewerDatabase database) {
+    String databaseUUID = database.getUUID();
     if (instances.get(databaseUUID) == null) {
-      SIARDMainPage instance = new SIARDMainPage(databaseUUID);
+      SIARDMainPage instance = new SIARDMainPage(database);
       instances.put(databaseUUID, instance);
     }
 
@@ -104,9 +96,6 @@ public class SIARDMainPage extends ContentPanel {
   @UiField
   FlowPanel navigationPanels;
 
-//  @UiField
-//  BreadcrumbPanel breadcrumb;
-
   @UiField
   SimplePanel description;
 
@@ -116,43 +105,31 @@ public class SIARDMainPage extends ContentPanel {
   @UiField
   Button btnExclude;
 
-  private SIARDMainPage(final String databaseUUID) {
-
+  private SIARDMainPage(final ViewerDatabase database) {
     initWidget(binder.createAndBindUi(this));
+    this.database = database;
 
     final Widget loading = new HTML(SafeHtmlUtils.fromSafeConstant(
       "<div id='loading' class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
     container.add(loading);
 
-    BrowserService.Util.getInstance().retrieve(databaseUUID, ViewerDatabase.class.getName(), databaseUUID,
-      new DefaultAsyncCallback<IsIndexed>() {
+    BrowserService.Util.getInstance().getDateTimeHumanized(database.getValidatedAt(),
+      new DefaultAsyncCallback<String>() {
         @Override
-        public void onSuccess(IsIndexed result) {
-          database = (ViewerDatabase) result;
-          BrowserService.Util.getInstance().getDateTimeHumanized(database.getValidatedAt(),
+        public void onSuccess(String result) {
+          validateAtHumanized = result;
+          BrowserService.Util.getInstance().getDateTimeHumanized(database.getMetadata().getArchivalDate(),
             new DefaultAsyncCallback<String>() {
               @Override
               public void onSuccess(String result) {
-                validateAtHumanized = result;
-                BrowserService.Util.getInstance().getDateTimeHumanized(database.getMetadata().getArchivalDate(),
-                  new DefaultAsyncCallback<String>() {
-                    @Override
-                    public void onSuccess(String result) {
-                      archivalDateHumanized = result;
-                      populateMetadataInfo();
-                      populateDescription();
-                      populateNavigationPanels();
+                archivalDateHumanized = result;
+                populateMetadataInfo();
+                populateDescription();
+                populateNavigationPanels();
+                setupFooterButtons();
 
-                      List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forSIARDMainPage(databaseUUID,
-                        database.getMetadata().getName());
-                      BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
-
-                      setupFooterButtons();
-
-                      container.remove(loading);
-                      populationFieldsCompleted = true;
-                    }
-                  });
+                container.remove(loading);
+                populationFieldsCompleted = true;
               }
             });
         }

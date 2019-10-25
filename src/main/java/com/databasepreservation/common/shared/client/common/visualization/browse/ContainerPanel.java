@@ -3,20 +3,19 @@ package com.databasepreservation.common.shared.client.common.visualization.brows
 import java.util.HashMap;
 import java.util.Map;
 
-import com.databasepreservation.Constants;
-import com.databasepreservation.common.shared.ViewerConstants;
-import com.databasepreservation.common.shared.client.common.ContentPanel;
-import com.databasepreservation.common.shared.client.common.utils.ApplicationType;
 import org.roda.core.data.v2.user.User;
 
 import com.databasepreservation.common.client.BrowserService;
+import com.databasepreservation.common.shared.ViewerConstants;
 import com.databasepreservation.common.shared.ViewerStructure.IsIndexed;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.common.shared.client.breadcrumb.BreadcrumbPanel;
+import com.databasepreservation.common.shared.client.common.ContentPanel;
 import com.databasepreservation.common.shared.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.shared.client.common.LoginStatusListener;
 import com.databasepreservation.common.shared.client.common.UserLogin;
-import com.databasepreservation.common.shared.client.common.sidebar.DatabaseSidebar;
+import com.databasepreservation.common.shared.client.common.utils.ApplicationType;
+import com.databasepreservation.common.shared.client.common.utils.ContentPanelLoader;
 import com.databasepreservation.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.shared.client.tools.FontAwesomeIconManager;
@@ -218,7 +217,35 @@ public class ContainerPanel extends Composite {
     panel.handleBreadcrumb(breadcrumb);
     panelContainer.setWidget(panel);
     panel.setVisible(true);
+  }
 
+  public void load(ContentPanelLoader panelLoader) {
+    if (databaseUUID != null && (database == null || !ViewerDatabase.Status.AVAILABLE.equals(database.getStatus()))) {
+      // need to load database (not present or not available), go get it
+      loadPanelWithDatabase(panelLoader);
+    } else {
+      loadPanel(panelLoader);
+    }
+  }
+
+  private void loadPanelWithDatabase(final ContentPanelLoader panelLoader) {
+    BrowserService.Util.getInstance().retrieve(databaseUUID, ViewerDatabase.class.getName(), databaseUUID,
+      new DefaultAsyncCallback<IsIndexed>() {
+        @Override
+        public void onSuccess(IsIndexed result) {
+          database = (ViewerDatabase) result;
+          loadPanel(panelLoader);
+        }
+      });
+  }
+
+  public void loadPanel(ContentPanelLoader panelLoader) {
+    ContentPanel panel = panelLoader.load(database);
+    if (panel != null) {
+      panel.handleBreadcrumb(breadcrumb);
+      panelContainer.setWidget(panel);
+      panel.setVisible(true);
+    }
   }
 
   public void setTopLevelPanelCSS(String css) {

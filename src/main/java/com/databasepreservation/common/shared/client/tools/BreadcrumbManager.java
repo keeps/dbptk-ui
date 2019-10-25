@@ -69,7 +69,7 @@ public class BreadcrumbManager {
   }
 
   public static List<BreadcrumbItem> forNewUpload() {
-    List<BreadcrumbItem> items = forUploads();
+    List<BreadcrumbItem> items = forHome();
     items.add(
       new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.NEW_UPLOAD)
         + SafeHtmlUtils.htmlEscape(" " + messages.newUpload())), new Command() {
@@ -123,11 +123,11 @@ public class BreadcrumbManager {
 
   public static List<BreadcrumbItem> forDatabaseInformation(final String databaseUUID, final String databaseName) {
     List<BreadcrumbItem> items;
-    if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
+//    if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
       items = forSIARDMainPage(databaseUUID, databaseName);
-    } else {
-      items = forDatabase(databaseName, databaseUUID);
-    }
+//    } else {
+//      items = forDatabase(databaseName, databaseUUID);
+//    }
     items.add(new BreadcrumbItem(
       SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE_INFORMATION)
         + SafeHtmlUtils.htmlEscape(" " + messages.databaseInformationTextForTitle())),
