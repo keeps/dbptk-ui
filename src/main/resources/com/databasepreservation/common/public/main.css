@@ -1174,6 +1174,10 @@ html, body, .main, .content-container {
     margin-right: 10px;
 }
 
+.navigation-panel:last-of-type{
+    margin-right: 0;
+}
+
 .navigation-panel-header {
     font-size: x-large;
     margin-left: 20px;
@@ -1473,7 +1477,7 @@ html, body, .main, .content-container {
     position: absolute;
     bottom: 0;
     right: 0;
-    margin-right: 10px;
+    margin-right: 10rem;
     margin-bottom: 10px;
 }
 
@@ -2008,14 +2012,6 @@ html, body, .main, .content-container {
 
 .browseContent.wrapper {
     display: unset;
-}
-
-.navigation-buttons {
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    margin-right: 10px;
-    margin-bottom: 10px;
 }
 
 /************************************************

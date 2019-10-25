@@ -11,7 +11,6 @@ import java.util.List;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 
-import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -252,6 +251,10 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
     return false;
   }
 
+  public Boolean deleteAll(String databaseUUID) {
+    return SIARDController.deleteAll(databaseUUID);
+  }
+
   @Override
   public Boolean isAuthenticationEnabled() throws RODAException {
     return ViewerConfiguration.getInstance().getIsAuthenticationEnabled();
@@ -446,5 +449,15 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
 
     DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm (z)").withZone(DateTimeZone.UTC);
     return dateTimeFormatter.print(dateTime);
+  }
+
+  @Override
+  public void deleteSIARDFile(String path, String databaseUUID) throws GenericException {
+    SIARDController.deleteSIARDFileFromPath(path, databaseUUID);
+  }
+
+  @Override
+  public void deleteSIARDValidatorReportFile(String path, String databaseUUID) throws GenericException {
+    SIARDController.deleteValidatorReportFileFromPath(path, databaseUUID);
   }
 }

@@ -18,6 +18,7 @@ import com.databasepreservation.common.shared.client.common.visualization.browse
 import com.databasepreservation.common.shared.client.common.visualization.browse.foreignKey.ForeignKeyPanelOptions;
 import com.databasepreservation.common.shared.client.common.visualization.browse.information.DatabaseInformationPanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.ingest.IngestPage;
+import com.databasepreservation.common.shared.client.common.visualization.browse.manager.SIARDPanel.SIARDManagerPage;
 import com.databasepreservation.common.shared.client.common.visualization.browse.metadata.MetadataPanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.metadata.MetadataPanelLoad;
 import com.databasepreservation.common.shared.client.common.visualization.browse.metadata.SIARDEditMetadataPage;
@@ -38,7 +39,7 @@ import com.databasepreservation.common.shared.client.common.visualization.browse
 import com.databasepreservation.common.shared.client.common.visualization.browse.view.ViewPanelStructure;
 import com.databasepreservation.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.desktop.client.dbptk.HomePage;
-import com.databasepreservation.common.shared.client.common.visualization.browse.manager.Manage;
+import com.databasepreservation.common.shared.client.common.visualization.browse.manager.databasePanel.Manage;
 import com.databasepreservation.desktop.client.dbptk.wizard.download.DBMSWizardManager;
 import com.databasepreservation.desktop.client.dbptk.wizard.download.SIARDWizardManager;
 import com.databasepreservation.desktop.client.dbptk.wizard.upload.CreateWizardManager;
@@ -90,7 +91,7 @@ public class MainPanelDesktop extends Composite {
       setContent(databaseUUID, new ContentPanelLoader() {
         @Override
         public ContentPanel load(ViewerDatabase database) {
-          return SIARDMainPage.getInstance(database);
+          return SIARDManagerPage.getInstance(database);
         }
       });
 

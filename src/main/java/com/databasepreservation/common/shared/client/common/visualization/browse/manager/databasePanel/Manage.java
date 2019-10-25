@@ -1,4 +1,4 @@
-package com.databasepreservation.common.shared.client.common.visualization.browse.manager;
+package com.databasepreservation.common.shared.client.common.visualization.browse.manager.databasePanel;
 
 import java.util.List;
 

@@ -392,6 +392,10 @@ public class DatabaseRowsSolrManager {
       Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATION_SKIPPED, skipped));
   }
 
+  public void updateSIARDPath(String databaseUUID, String siardPath) {
+    updateValidationFields(databaseUUID, Pair.of(ViewerConstants.SOLR_DATABASES_SIARD_PATH, siardPath));
+  }
+
   @SafeVarargs
   private final void updateValidationFields(String databaseUUID, Pair<String, ?>... fields) {
     // create document to update this DB

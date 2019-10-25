@@ -16,6 +16,7 @@ import com.databasepreservation.common.shared.client.common.DefaultAsyncCallback
 import com.databasepreservation.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.shared.client.common.visualization.browse.ContainerPanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.manager.SIARDPanel.SIARDManagerPage;
 import com.databasepreservation.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.shared.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.shared.client.tools.HistoryManager;
@@ -194,6 +195,7 @@ public class ValidatorPage extends ContentPanel {
             numberOfWarnings = result.getNumberOfWarnings();
             numberOfErrors = result.getNumberOfErrors();
             stopUpdating();
+            SIARDManagerPage.getInstance(database).refreshInstance(database.getUUID());
             if (numberOfErrors > 0) {
               Dialogs.showErrors(messages.validatorPageTextForTitle(),
                 messages.validatorPageTextForDialogFailureInformation(database.getMetadata().getName(), numberOfErrors),

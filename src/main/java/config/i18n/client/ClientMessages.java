@@ -697,9 +697,15 @@ public interface ClientMessages extends Messages {
 
   SafeHtml SIARDHomePageTextForDeleteFromSolr();
 
+  SafeHtml SIARDHomePageTextForDeleteSIARD();
+
+  SafeHtml SIARDHomePageTextForDeleteSIARDReportValidation();
+
   String SIARDHomePageTextForIngestNotSupported();
 
   String SIARDHomePageTextForIngestSuccess();
+
+  String SIARDHomePageTextForRequiredSIARDFile();
 
   /********************************************
    * Edit Metadata

@@ -10,10 +10,17 @@ import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import com.databasepreservation.common.server.index.factory.SolrClientFactory;
+import com.databasepreservation.common.server.index.schema.SolrDefaultCollectionRegistry;
+import com.databasepreservation.common.shared.client.common.search.SavedSearch;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
+import org.roda.core.data.exceptions.RequestNotValidException;
+import org.roda.core.data.v2.index.filter.Filter;
+import org.roda.core.data.v2.index.filter.SimpleFilterParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
@@ -55,6 +62,9 @@ import com.databasepreservation.modules.siard.SIARDEditFactory;
 import com.databasepreservation.modules.siard.SIARDValidateFactory;
 import com.databasepreservation.modules.viewer.DbvtkModuleFactory;
 import com.databasepreservation.utils.ReflectionUtils;
+
+import static com.databasepreservation.common.shared.ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX;
+import static com.databasepreservation.common.shared.ViewerConstants.SOLR_SEARCHES_DATABASE_UUID;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -564,8 +574,11 @@ public class SIARDController {
     Path reporterPath = ViewerConfiguration.getInstance().getReportPathForValidation(databaseUUID).toAbsolutePath();
     boolean valid;
     if (validationReportPath == null) {
-      validationReportPath = ViewerConfiguration.getInstance().getSIARDReportValidationPath().toString() + "-"
+      String filename = Paths.get(SIARDPath).getFileName().toString().replaceFirst("[.][^.]+$", "") + "-"
         + new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()) + ".txt";
+      validationReportPath = Paths
+        .get(ViewerConfiguration.getInstance().getSIARDReportValidationPath().toString(), filename).toAbsolutePath()
+        .toString();
     }
     try (Reporter reporter = new Reporter(reporterPath.getParent().toString(), reporterPath.getFileName().toString())) {
       SIARDValidation siardValidation = SIARDValidation.newInstance();
@@ -624,6 +637,71 @@ public class SIARDController {
     solrManager.updateSIARDValidationInformation(databaseUUID, status, null,
             null, new DateTime().toString());
 
+  }
+
+  public static boolean deleteAll(String databaseUUID) {
+    final DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
+    try {
+      ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
+
+      String siardPath = database.getSIARDPath();
+      if (StringUtils.isNotBlank(siardPath) && Files.exists(Paths.get(siardPath))) {
+        deleteSIARDFileFromPath(siardPath, databaseUUID);
+      }
+
+      String reportPath = database.getValidatorReportPath();
+      if (StringUtils.isNotBlank(reportPath) && Files.exists(Paths.get(reportPath))) {
+        deleteValidatorReportFileFromPath(reportPath, databaseUUID);
+      }
+
+      if(database.getStatus().equals(ViewerDatabase.Status.AVAILABLE) || database.getStatus().equals(ViewerDatabase.Status.ERROR) ){
+        final String collectionName = SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + databaseUUID;
+        if (SolrClientFactory.get().deleteCollection(collectionName)) {
+          Filter savedSearchFilter = new Filter(new SimpleFilterParameter(SOLR_SEARCHES_DATABASE_UUID, databaseUUID));
+          SolrUtils.delete(ViewerFactory.getSolrClient(), SolrDefaultCollectionRegistry.get(SavedSearch.class),
+                  savedSearchFilter);
+
+          ViewerFactory.getSolrManager().markDatabaseCollection(databaseUUID, ViewerDatabase.Status.METADATA_ONLY);
+        }
+      }
+      ViewerFactory.getSolrManager().deleteDatabasesCollection(databaseUUID);
+      return true;
+    } catch (NotFoundException | GenericException | RequestNotValidException e) {
+      LOGGER.error("Could not delete SIARD from system", e);
+    }
+    return false;
+  }
+
+  public static void deleteSIARDFileFromPath(String siardPath, String databaseUUID) throws GenericException {
+    Path path = Paths.get(siardPath);
+    if (Files.notExists(path)) {
+      throw new GenericException("File not found at path: " + siardPath);
+    }
+    File file = new File(path.toAbsolutePath().toString());
+    if (file.delete()) {
+      LOGGER.info("SIARD file removed from system (" + path.toAbsolutePath().toString() + ")");
+      final DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
+      solrManager.updateSIARDPath(databaseUUID, null);
+    } else {
+      throw new GenericException("Could not delete SIARD file from system");
+    }
+  }
+
+  public static void deleteValidatorReportFileFromPath(String validatorReportPath, String databaseUUID)
+    throws GenericException {
+    Path path = Paths.get(validatorReportPath);
+    if (Files.notExists(path)) {
+      throw new GenericException("File not found at path: " + validatorReportPath);
+    }
+
+    File file = new File(path.toAbsolutePath().toString());
+    if (file.delete()) {
+      LOGGER.info("SIARD validator report file removed from system (" + path.toAbsolutePath().toString() + ")");
+      updateStatusValidate(databaseUUID, ViewerDatabase.ValidationStatus.NOT_VALIDATED);
+      updateSIARDValidatorIndicators(databaseUUID, null, null, null, null);
+    } else {
+      throw new GenericException("Could not delete SIARD validator report file from system");
+    }
   }
   /****************************************************************************
    * Private auxiliary Methods

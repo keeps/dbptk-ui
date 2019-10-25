@@ -18,7 +18,8 @@ import com.databasepreservation.common.shared.client.common.visualization.browse
 import com.databasepreservation.common.shared.client.common.visualization.browse.foreignKey.ForeignKeyPanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.information.DatabaseInformationPanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.ingest.IngestPage;
-import com.databasepreservation.common.shared.client.common.visualization.browse.manager.Manage;
+import com.databasepreservation.common.shared.client.common.visualization.browse.manager.SIARDPanel.SIARDManagerPage;
+import com.databasepreservation.common.shared.client.common.visualization.browse.manager.databasePanel.Manage;
 import com.databasepreservation.common.shared.client.common.visualization.browse.metadata.MetadataPanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.metadata.MetadataPanelLoad;
 import com.databasepreservation.common.shared.client.common.visualization.browse.metadata.SIARDEditMetadataPage;
@@ -186,7 +187,7 @@ public class MainPanel extends Composite {
       setContent(databaseUUID, new ContentPanelLoader() {
         @Override
         public ContentPanel load(ViewerDatabase database) {
-          return SIARDMainPage.getInstance(database);
+          return SIARDManagerPage.getInstance(database);
         }
       });
     } else if (HistoryManager.ROUTE_UPLOAD_SIARD_DATA.equals(currentHistoryPath.get(0))) {

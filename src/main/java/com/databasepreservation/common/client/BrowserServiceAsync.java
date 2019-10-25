@@ -92,6 +92,8 @@ public interface BrowserServiceAsync {
 
   void deleteAllCollections(String databaseUUId, AsyncCallback<Boolean> async);
 
+  void deleteAll(String databaseUUId, AsyncCallback<Boolean> async);
+
   void isAuthenticationEnabled(AsyncCallback<Boolean> async);
 
   /**
@@ -174,4 +176,8 @@ public interface BrowserServiceAsync {
   void updateStatusValidate(String uuid, ViewerDatabase.ValidationStatus status, AsyncCallback<Void> async);
 
   void getDateTimeHumanized(String dateTime, AsyncCallback<String> async);
+
+  void deleteSIARDFile(String path, String databaseUUID, AsyncCallback<Void> async);
+
+  void deleteSIARDValidatorReportFile(String path, String databaseUUID, AsyncCallback<Void> async);
 }

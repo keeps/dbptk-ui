@@ -102,6 +102,8 @@ public interface BrowserService extends RemoteService {
 
   Boolean deleteAllCollections(String databaseUUID);
 
+  Boolean deleteAll(String databaseUUID);
+
   Boolean isAuthenticationEnabled() throws RODAException;
 
   User getAuthenticatedUser() throws RODAException;
@@ -171,4 +173,8 @@ public interface BrowserService extends RemoteService {
   void updateStatusValidate(String uuid, ViewerDatabase.ValidationStatus status);
 
   String getDateTimeHumanized(String dateTime);
+
+  void deleteSIARDFile(String path, String databaseUUID) throws GenericException;
+
+  void deleteSIARDValidatorReportFile(String path, String databaseUUID) throws GenericException;
 }
