@@ -90,8 +90,7 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
   private final RodaPageSizePager pageSizePager;
   private final CellTable<T> display;
   private FlexTable exportButtons;
-  private Anchor exportVisibleButton;
-  private Anchor exportAllButton;
+  private Anchor exportButton;
 
   private ScrollPanel displayScroll;
   private SimplePanel displayScrollWrapper;
@@ -182,17 +181,15 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
       //  }
       //});
 
-      exportAllButton = new Anchor(messages.exportAll());
-      exportAllButton.addClickHandler(new ClickHandler() {
+      exportButton = new Anchor(messages.basicActionExport());
+      exportButton.addClickHandler(new ClickHandler() {
         @Override
         public void onClick(ClickEvent event) {
-          AsyncTableCell.this.exportAllClickHandler();
+          AsyncTableCell.this.exportClickHandler();
         }
       });
 
-     // exportButtons.setWidget(0, 0, exportVisibleButton);
-     // exportButtons.setText(0, 1, " | ");
-      exportButtons.setWidget(0, 0, exportAllButton);
+      exportButtons.setWidget(0, 0, exportButton);
     }
 
     resultsPager = new AccessibleSimplePager(AccessibleSimplePager.TextLocation.LEFT,
@@ -776,7 +773,5 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
     addColumn(column, SafeHtmlUtils.fromString(headerText), nowrap, textAlign, fixedSize);
   }
 
-  public abstract void exportVisibleClickHandler();
-
-  public abstract void exportAllClickHandler();
+  public abstract void exportClickHandler();
 }

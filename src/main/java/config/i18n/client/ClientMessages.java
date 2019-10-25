@@ -273,10 +273,6 @@ public interface ClientMessages extends Messages {
 
   String savedSearch_Cancel();
 
-  String exportVisible();
-
-  String exportAll();
-
   String goHome();
 
   String goToDatabaseInformation();
@@ -503,6 +499,8 @@ public interface ClientMessages extends Messages {
   String basicActionDelete();
 
   String basicActionOptions();
+
+  String basicActionExport();
 
   /*********************************************
    * Sidebar Menus

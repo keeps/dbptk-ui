@@ -216,8 +216,22 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
   }
 
   @Override
-  public void exportVisibleClickHandler() {
-    // do nothing
+  public void exportClickHandler() {
+    HelperExportTableData helperExportTableData = new HelperExportTableData(viewerTable);
+    Dialogs.showCSVSetupDialog(messages.csvExportDialogTitle(), helperExportTableData, messages.basicActionCancel(),
+      messages.basicActionConfirm(), new DefaultAsyncCallback<Boolean>() {
+
+        @Override
+        public void onSuccess(Boolean result) {
+          if (result) {
+            String filename = helperExportTableData.getFilename();
+            boolean exportAll = helperExportTableData.exportAll();
+            boolean exportDescription = helperExportTableData.exportDescription();
+
+            Window.Location.assign(getExportURL(filename, exportAll, exportDescription));
+          }
+        }
+      });
   }
 
   public void refreshColumnVisibility() {
@@ -310,24 +324,4 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
 
     return urlBuilder.toString();
   }
-
-  @Override
-  public void exportAllClickHandler() {
-    HelperExportTableData helperExportTableData = new HelperExportTableData(viewerTable);
-    Dialogs.showCSVSetupDialog(messages.csvExportDialogTitle(), helperExportTableData, messages.basicActionCancel(), messages.basicActionConfirm(),
-      new DefaultAsyncCallback<Boolean>() {
-
-        @Override
-        public void onSuccess(Boolean result) {
-          if (result) {
-            String filename = helperExportTableData.getFilename();
-            boolean exportAll = helperExportTableData.exportAll();
-            boolean exportDescription = helperExportTableData.exportDescription();
-
-            Window.Location.assign(getExportURL(filename, exportAll, exportDescription));
-          }
-        }
-      });
-  }
-
 }

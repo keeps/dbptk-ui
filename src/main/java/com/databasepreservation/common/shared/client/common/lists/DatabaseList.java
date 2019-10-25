@@ -200,13 +200,8 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
   }
 
   @Override
-  public void exportVisibleClickHandler() {
-
-  }
-
-  @Override
-  public void exportAllClickHandler() {
-
+  public void exportClickHandler() {
+    // do nothing
   }
 
   private abstract static class TooltipDatabaseColumn extends Column<ViewerDatabase, SafeHtml> {

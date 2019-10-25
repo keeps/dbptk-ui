@@ -128,11 +128,12 @@ public class SavedSearchList extends AsyncTableCell<SavedSearch, String> {
     dateAddedColumn.setSortable(true);
     actionsColumn.setSortable(false);
 
-    addColumn(nameColumn, messages.name(), true, TextAlign.RIGHT, 15);
-    addColumn(tableNameColumn, messages.table(), true, TextAlign.RIGHT, 15);
-    addColumn(dateAddedColumn, messages.created(), true, TextAlign.RIGHT, 15);
-    addColumn(descriptionColumn, messages.description(), true, TextAlign.RIGHT);
-    addColumn(actionsColumn, messages.managePageTableHeaderTextForActions(), false, TextAlign.RIGHT, 6);
+    addColumn(nameColumn, messages.name(), true, TextAlign.LEFT, 15);
+    addColumn(descriptionColumn, messages.description(), true, TextAlign.LEFT);
+    addColumn(tableNameColumn, messages.table(), true, TextAlign.LEFT, 15);
+    addColumn(dateAddedColumn, messages.created(), true, TextAlign.LEFT, 15);
+
+    addColumn(actionsColumn, messages.managePageTableHeaderTextForActions(), false, TextAlign.LEFT, 6);
 
     Label emptyInfo = new Label(messages.thereAreNoSavedSearches());
     display.setEmptyTableWidget(emptyInfo);
@@ -152,6 +153,11 @@ public class SavedSearchList extends AsyncTableCell<SavedSearch, String> {
   }
 
   @Override
+  public void exportClickHandler() {
+    // do nothing
+  }
+
+  @Override
   protected void getData(Sublist sublist, ColumnSortList columnSortList,
     AsyncCallback<IndexResult<SavedSearch>> callback) {
     Filter filter = getFilter();
@@ -168,16 +174,6 @@ public class SavedSearchList extends AsyncTableCell<SavedSearch, String> {
 
     BrowserService.Util.getInstance().findSavedSearches(getDatabaseUUID(), filter, sorter, sublist, getFacets(),
       LocaleInfo.getCurrentLocale().getLocaleName(), callback);
-
-  }
-
-  @Override
-  public void exportVisibleClickHandler() {
-
-  }
-
-  @Override
-  public void exportAllClickHandler() {
 
   }
 
