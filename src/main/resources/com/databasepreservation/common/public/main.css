@@ -2307,3 +2307,7 @@ html, body, .desktop-main {
 .bottom-panel .btn-primary{
     margin-left: 1em;
 }
+
+.technical-information-container {
+    margin: 0 0 20px 0;
+}

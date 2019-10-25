@@ -11,12 +11,12 @@
                 </g:Label>
             </g:SimplePanel>
             <g:FlowPanel addStyleNames="advancedOptionsButton">
-                <g:Button ui:field="options" addStyleNames="btn btn-link btn-pull-right"/>
+                <g:Button ui:field="options" addStyleNames="btn"/>
             </g:FlowPanel>
         </g:FlowPanel>
-        <g:FlowPanel>
-            <g:FlowPanel ui:field="viewStructure" />
-            <g:FlowPanel ui:field="query" />
+        <g:FlowPanel addStyleNames="option-container">
+            <g:FlowPanel addStyleNames="technical-information-container" ui:field="viewStructure" />
+            <g:FlowPanel addStyleNames="technical-information-container" ui:field="query" />
         </g:FlowPanel>
 
         <g:FlowPanel addStyleNames="footer-buttons-container">

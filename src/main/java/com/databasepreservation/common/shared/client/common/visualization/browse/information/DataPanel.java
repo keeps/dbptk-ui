@@ -13,6 +13,7 @@ import com.databasepreservation.common.shared.ViewerStructure.ViewerMetadata;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerSchema;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerTable;
 import com.databasepreservation.common.shared.client.common.lists.BasicTablePanel;
+import com.databasepreservation.common.shared.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.shared.client.tools.HistoryManager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -22,6 +23,7 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.SelectionChangeEvent;
 
@@ -56,7 +58,13 @@ public class DataPanel extends Composite {
   private boolean advancedMode;
 
   @UiField
-  FlowPanel contentItems, tableContent;
+  FlowPanel contentItems;
+
+  @UiField
+  FlowPanel tableContent;
+
+  @UiField
+  SimplePanel schemaDescription;
 
   private DataPanel(ViewerDatabase viewerDatabase, final String schemaUUID) {
     database = viewerDatabase;
@@ -76,7 +84,9 @@ public class DataPanel extends Composite {
 
   private void init() {
     advancedMode = false;
-    //CommonClientUtils.addSchemaInfoToFlowPanel(contentItems, schema);
+
+    schemaDescription.setWidget(CommonClientUtils.getPanelInformation(messages.schemaDescriptionLabel(), schema.getDescription(), "metadata-information-element-value"));
+
     contentItems.add(ErDiagram.getInstance(database, schema));
     initTableContent();
   }

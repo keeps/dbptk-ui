@@ -42,7 +42,7 @@ public class CommonClientUtils {
     }
   }
 
-  public static FlowPanel getPanelInformation(String text, String classes) {
+  public static FlowPanel getPanelInformation(String label, String text, String classes) {
     FlowPanel panel = new FlowPanel();
 
     SafeHtmlBuilder safeHtmlBuilder = new SafeHtmlBuilder();
@@ -51,7 +51,7 @@ public class CommonClientUtils {
     HTML html = new HTML(safeHtmlBuilder.toSafeHtml());
     html.addStyleName(classes);
 
-    GenericField genericField = GenericField.createInstance("Information", html);
+    GenericField genericField = GenericField.createInstance(label, html);
     genericField.setCSSMetadata("metadata-field", "metadata-information-element-label");
     panel.add(genericField);
 

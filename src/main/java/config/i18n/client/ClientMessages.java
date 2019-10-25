@@ -121,6 +121,8 @@ public interface ClientMessages extends Messages {
 
   String description();
 
+  String schemaDescriptionLabel();
+
   String siardMetadata_producerApplication();
 
   String siardMetadata_DescriptionUnavailable();
@@ -1048,4 +1050,6 @@ public interface ClientMessages extends Messages {
    * View Panel
    *******************************************/
   String viewPanelViewerNotMaterialized();
+
+  String viewPanelInformationLabel();
 }

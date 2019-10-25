@@ -3,6 +3,7 @@
 >
     <g:FlowPanel>
         <g:FlowPanel ui:field="contentItems"/>
+        <g:SimplePanel ui:field="schemaDescription" />
         <g:FlowPanel ui:field="tableContent" />
     </g:FlowPanel>
 </ui:UiBinder>

@@ -103,7 +103,7 @@ public class ViewPanel extends RightPanel {
       description.add(instance);
     }
 
-    content.add(CommonClientUtils.getPanelInformation(messages.viewPanelViewerNotMaterialized(), "metadata-information-element-value"));
+    content.add(CommonClientUtils.getPanelInformation(messages.viewPanelInformationLabel(), messages.viewPanelViewerNotMaterialized(), "metadata-information-element-value"));
 
   }
 }

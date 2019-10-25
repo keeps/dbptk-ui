@@ -34,12 +34,8 @@ public class DatabaseInformationPanel extends RightPanel {
   public static DatabaseInformationPanel getInstance(ViewerDatabase database) {
     String code = database.getUUID();
 
-    DatabaseInformationPanel instance = instances.get(code);
-    if (instance == null) {
-      instance = new DatabaseInformationPanel(database);
-      instances.put(code, instance);
-    }
-    return instance;
+    instances.computeIfAbsent(code, k -> new DatabaseInformationPanel(database));
+    return instances.get(code);
   }
 
   interface DatabaseInformationPanelUiBinder extends UiBinder<Widget, DatabaseInformationPanel> {
