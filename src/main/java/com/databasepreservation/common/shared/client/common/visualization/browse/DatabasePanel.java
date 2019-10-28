@@ -3,6 +3,8 @@ package com.databasepreservation.common.shared.client.common.visualization.brows
 import java.util.HashMap;
 import java.util.Map;
 
+import com.databasepreservation.common.shared.ViewerConstants;
+import com.databasepreservation.common.shared.client.common.utils.ApplicationType;
 import org.roda.core.data.v2.user.User;
 
 import com.databasepreservation.common.client.BrowserService;
@@ -60,9 +62,10 @@ public class DatabasePanel extends Composite {
   }
 
   private static DatabasePanelUiBinder uiBinder = GWT.create(DatabasePanelUiBinder.class);
+  private BreadcrumbPanel breadcrumb = null;
 
   @UiField
-  BreadcrumbPanel breadcrumb;
+  BreadcrumbPanel breadcrumbServer, breadcrumbDesktop;
 
   @UiField(provided = true)
   DatabaseSidebar sidebar;
@@ -74,7 +77,7 @@ public class DatabasePanel extends Composite {
   MenuBar menu;
 
   @UiField
-  FlowPanel toplevel;
+  FlowPanel toplevel, toolbar;
 
   private String databaseUUID;
   private ViewerDatabase database = null;
@@ -89,6 +92,16 @@ public class DatabasePanel extends Composite {
     if (initMenu) {
       initMenu();
     }
+
+    if(ApplicationType.getType().equals(ViewerConstants.SERVER)){
+      toolbar.getElement().addClassName("filePreviewToolbar");
+      breadcrumb = breadcrumbServer;
+      breadcrumbDesktop.removeFromParent();
+    } else {
+      toolbar.removeFromParent();
+      breadcrumb = breadcrumbDesktop;
+    }
+    breadcrumb.setVisible(true);
 
     if (databaseUUID == null) {
       BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forDatabases());

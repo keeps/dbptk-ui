@@ -13,6 +13,7 @@ import com.databasepreservation.common.shared.client.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.shared.client.common.ContentPanel;
 import com.databasepreservation.common.shared.client.common.RightPanel;
 import com.databasepreservation.common.shared.client.common.utils.ContentPanelLoader;
+import com.databasepreservation.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.shared.client.common.utils.RightPanelLoader;
 import com.databasepreservation.common.shared.client.common.visualization.browse.*;
 import com.databasepreservation.common.shared.client.common.visualization.browse.foreignKey.ForeignKeyPanel;
@@ -32,6 +33,7 @@ import com.databasepreservation.common.shared.client.common.visualization.browse
 import com.databasepreservation.common.shared.client.common.visualization.browse.table.TableSavedSearchEditPanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.table.TableSavedSearchPanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.technicalInformation.ReportPanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.technicalInformation.RoutinesPanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.technicalInformation.UsersPanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.validate.ValidatorPage;
 import com.databasepreservation.common.shared.client.tools.FontAwesomeIconManager;
@@ -101,6 +103,7 @@ public class MainPanel extends Composite {
     DatabasePanel databasePanel = DatabasePanel.getInstance(databaseUUID, true);
     databasePanel.setTopLevelPanelCSS("browseContent wrapper skip_padding server");
     contentPanel.setWidget(databasePanel);
+    JavascriptUtils.scrollToElement(contentPanel.getElement());
     databasePanel.load(rightPanelLoader, "");
   }
 
@@ -259,6 +262,16 @@ public class MainPanel extends Composite {
           }
         });
 
+      } else if (currentHistoryPath.size() == 3
+              && currentHistoryPath.get(2).equals(HistoryManager.ROUTE_SCHEMA_ROUTINES)) {
+        // #database/<database_uuid>/routines
+        String databaseUUID = currentHistoryPath.get(1);
+        setContent(databaseUUID, new RightPanelLoader() {
+          @Override
+          public RightPanel load(ViewerDatabase database) {
+            return RoutinesPanel.getInstance(database);
+          }
+        });
       } else {
         // #database/...
         handleErrorPath(currentHistoryPath);

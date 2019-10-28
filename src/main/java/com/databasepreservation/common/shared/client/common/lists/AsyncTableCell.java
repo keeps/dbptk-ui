@@ -203,6 +203,7 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
     createSelectAllPanel();
 
     displayScroll = new ScrollPanel(display);
+    displayScroll.addStyleName("ms-scroll-fix");
     displayScrollWrapper = new SimplePanel(displayScroll);
 
     add(selectAllPanel);

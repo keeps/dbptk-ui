@@ -4,8 +4,10 @@
              xmlns:sb='urn:import:com.databasepreservation.common.shared.client.common.sidebar'
 >
 
-<g:FlowPanel ui:field="toplevel">
+<g:FlowPanel ui:field="toplevel" addStyleNames="database">
     <g:FlowPanel addStyleNames="row full_width skip_padding">
+        <m:BreadcrumbPanel ui:field="breadcrumbDesktop" addStyleNames="browseContentBreadcrumb"
+                           visible="false"/>
         <g:FocusPanel addStyleNames="browseContentFocusPanel">
             <g:HorizontalPanel addStyleNames="browseContentPreviewPanel">
                 <!-- LEFT PANEL -->
@@ -15,8 +17,8 @@
                 <!-- RIGHT PANEL -->
                 <g:cell width="100%">
                     <g:FlowPanel addStyleNames="browseContentFilePreviewPanel">
-                        <g:FlowPanel addStyleNames="filePreviewToolbar">
-                            <m:BreadcrumbPanel ui:field="breadcrumb" addStyleNames="browseContentBreadcrumb"/>
+                        <g:FlowPanel ui:field="toolbar">
+                            <m:BreadcrumbPanel ui:field="breadcrumbServer" addStyleNames="browseContentBreadcrumb" visible="false"/>
                             <g:MenuBar ui:field="menu" />
                             <g:SimplePanel addStyleNames="clear-both" />
                         </g:FlowPanel>

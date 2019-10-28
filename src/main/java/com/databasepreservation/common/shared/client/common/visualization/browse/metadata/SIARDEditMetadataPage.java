@@ -36,6 +36,7 @@ public class SIARDEditMetadataPage extends Composite {
   private String databaseUUID;
   private ViewerDatabase database = null;
   private ViewerSIARDBundle SIARDbundle = new ViewerSIARDBundle();
+  private BreadcrumbPanel breadcrumb = null;
 
   public static SIARDEditMetadataPage getInstance(String databaseUUID) {
 
@@ -48,7 +49,7 @@ public class SIARDEditMetadataPage extends Composite {
   }
 
   @UiField
-  BreadcrumbPanel breadcrumb;
+  BreadcrumbPanel breadcrumbServer, breadcrumbDesktop;
 
   @UiField(provided = true)
   MetadataEditSidebar sidebar;
@@ -74,9 +75,13 @@ public class SIARDEditMetadataPage extends Composite {
 
     if(ApplicationType.getType().equals(ViewerConstants.SERVER)){
       toolbar.getElement().addClassName("filePreviewToolbar");
+      breadcrumb = breadcrumbServer;
+      breadcrumbDesktop.removeFromParent();
     } else {
-      toolbar.getElement().addClassName("desktopToolbar");
+      toolbar.removeFromParent();
+      breadcrumb = breadcrumbDesktop;
     }
+    breadcrumb.setVisible(true);
   }
 
   public void load(MetadataPanelLoad rightPanelLoader, String sidebarSelected) {

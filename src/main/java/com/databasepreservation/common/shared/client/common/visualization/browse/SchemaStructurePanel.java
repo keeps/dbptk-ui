@@ -22,6 +22,8 @@ import com.databasepreservation.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.shared.client.tools.ViewerStringUtils;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -70,7 +72,7 @@ public class SchemaStructurePanel extends RightPanel {
   SimpleCheckBox advancedSwitch;
 
   @UiField
-  Label switchLabel;
+  Label switchLabel, labelForSwitch;
 
   private SchemaStructurePanel(ViewerDatabase database, final String schemaUUID) {
     this.database = database;
@@ -88,11 +90,16 @@ public class SchemaStructurePanel extends RightPanel {
   }
 
   private void init() {
-    advancedSwitch.addClickHandler(event -> {
-      advancedMode = !advancedMode;
-      contentItems.clear();
-      initCellTables();
+    labelForSwitch.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        advancedSwitch.setValue(!advancedSwitch.getValue(), true); // workaround for ie11
+        advancedMode = !advancedMode;
+        contentItems.clear();
+        initCellTables();
+      }
     });
+
 
     CommonClientUtils.addSchemaInfoToFlowPanel(structureInformation, schema);
 

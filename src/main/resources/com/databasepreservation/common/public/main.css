@@ -378,11 +378,14 @@ p[data-value]:after {
 .browseContentFilePreviewPanel {
     width: 100%;
     height: 705px;
+    position: relative;
 }
 
 .browseContentFilePreviewPanel .filePreviewToolbar {
     min-height: 35px;
     background-color: #eee;
+    position: relative;
+    z-index: 1000;
 }
 
 .browseContentFilePreviewPanel .filePreviewToolbar .browseContentBreadcrumb {
@@ -441,7 +444,7 @@ p[data-value]:after {
     font-size: 1.3rem;
     padding: 0 3rem;
     padding-left: 4.7rem;
-    background-color: inherit;
+    background-color: transparent;
     border: none;
     margin-top: 3px;
     color: white;
@@ -700,6 +703,9 @@ p[data-value]:after {
     padding-top: 0.3rem;
 }
 
+.ms-scroll-fix{
+    -ms-overflow-style: -ms-autohiding-scrollbar;
+}
 .my-asyncdatagrid-display-scroll-wrapper {
     position: relative;
 }
@@ -905,44 +911,90 @@ p[data-value]:after {
     margin-bottom: 1rem;
     display: inline-flex;
     margin-left: 20px;
+    position: relative;
 }
 
 .advancedOptionsPanel .switch-label {
     align-self: center;
-    padding-right: 2px;
+    padding-right: 27px;
 }
 
-.advancedOptionsPanel input.switch {
-    position: relative;
-    -webkit-appearance: none;
-    outline: none;
+/*.advancedOptionsPanel input.switch {*/
+/*    position: relative;*/
+/*    -webkit-appearance: none;*/
+/*    outline: none;*/
+/*    width: 27px;*/
+/*    height: 15px;*/
+/*    background-color: #ccc;*/
+/*    border-radius: 50px;*/
+/*    transition: .4s;*/
+/*    top: 2px;*/
+/*}*/
+
+/*.advancedOptionsPanel input.switch:after {*/
+/*    content: "";*/
+/*    position: absolute;*/
+/*    top: 1px;*/
+/*    left: 2px;*/
+/*    width: 13px;*/
+/*    height: 13px;*/
+/*    border-radius: 50%;*/
+/*    transition: .4s;*/
+/*    background: white;*/
+/*}*/
+
+/*.advancedOptionsPanel input.switch:checked {*/
+/*    border-color: #089de3;*/
+/*    background: #089de3;*/
+/*}*/
+
+/*.advancedOptionsPanel input.switch:checked:after {*/
+/*    left: 12px;*/
+/*}*/
+
+.advancedOptionsPanel .switch[type=checkbox]{
+    height: 0;
+    width: 0;
+    visibility: hidden;
+}
+
+.advancedOptionsPanel .label-for-switch {
+    cursor: pointer;
+    text-indent: -9999px;
     width: 27px;
     height: 15px;
-    background-color: #ccc;
+    background: #ccc;
+    display: block;
     border-radius: 50px;
-    transition: .4s;
-    top: 2px;
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
 }
 
-.advancedOptionsPanel input.switch:after {
-    content: "";
+.advancedOptionsPanel .label-for-switch:after {
+    content: '';
     position: absolute;
     top: 1px;
     left: 2px;
     width: 13px;
     height: 13px;
+    background: #fff;
     border-radius: 50%;
     transition: .4s;
-    background: white;
 }
 
-.advancedOptionsPanel input.switch:checked {
-    border-color: #089de3;
+.advancedOptionsPanel .switch:checked + .label-for-switch {
     background: #089de3;
+    border-color: #089de3;
 }
 
-.advancedOptionsPanel input.switch:checked:after {
+.advancedOptionsPanel .switch:checked + .label-for-switch:after {
     left: 12px;
+}
+
+.advancedOptionsPanel .label-for-switch:active:after {
+    width: 15px;
 }
 
 .table-row-description {
@@ -1035,13 +1087,16 @@ p[data-value]:after {
 		          Commons
 ***********************************************/
 
-html, body, .main, .content-container {
+html, body, .desktop-main {
     width: 100%;
     height: 100%;
     padding: 0px;
     margin: 0;
 }
 
+.content-container{
+    height: 100%;
+}
 .main .contentPanel{
     min-height: auto;
 }
@@ -1050,10 +1105,10 @@ html, body, .main, .content-container {
     padding: 10px;
     height: 100%;
     box-sizing: border-box;
-    position: relative;
+    /*position: relative;*/
 }
 
-.desktopToolbar .wui-breadcrumbPanel{
+.desktop-main .wui-breadcrumbPanel{
     padding-top: 10px;
     padding-left: 10px;
 }
@@ -1092,7 +1147,7 @@ html, body, .main, .content-container {
 		          breadcrumb
 ***********************************************/
 
-.main .wui-breadcrumbPanel {
+.main .wui-breadcrumbPanel, .desktop-main .wui-breadcrumbPanel {
     margin-top: 0;
     margin-bottom: 0;
     padding-bottom: 10px;
@@ -1114,7 +1169,7 @@ html, body, .main, .content-container {
 }
 
 .metadata-information {
-    flex: 1;
+    flex: 1 1 auto;
     display: flex;
     flex-direction: column;
 }
@@ -1187,7 +1242,7 @@ html, body, .main, .content-container {
 .navigation-panel-info {
     margin-top: 1.25rem;
     margin-bottom: 1rem;
-    flex: 1;
+    flex: 1 1 auto;
     margin-left: 20px;
     margin-rigth: 20px;
 }
@@ -1267,9 +1322,13 @@ html, body, .main, .content-container {
 }
 
 .btn-item .btn {
-    width: 9rem;
-    padding: 8px;
+    width: auto;
     text-align: center;
+    box-sizing: border-box;
+}
+
+.btn-item .btn-back-wizard{
+    padding-left: 25px;
 }
 
 .button-panel-container {
@@ -1490,11 +1549,12 @@ html, body, .main, .content-container {
 }
 
 .metadata-panel {
-    padding: 40px 10px 0px;
+    padding: 0px 10px;
     height: 100%;
     display: flex;
     justify-content: space-between;
     flex-direction: column;
+    box-sizing: border-box;
 }
 
 .server .metadata-panel{
@@ -2108,7 +2168,7 @@ html, body, .main, .content-container {
 .progress-report.validation{
     height: auto;
     max-height: initial;
-    flex: 1;
+    flex: 1 1 auto;
 }
 
 .validation-panel{

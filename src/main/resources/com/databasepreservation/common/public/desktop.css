@@ -1,3 +1,13 @@
+.desktop-main .content-container .browseContentFilePreviewPanel{
+    height: 100vh;
+}
+
+.desktop-main .metadata .browseContentFocusPanel,
+.desktop-main .database .browseContentFocusPanel{
+    padding-top: 40px;
+}
+
+
 /**********************************************
 		          Home Page
 ***********************************************/

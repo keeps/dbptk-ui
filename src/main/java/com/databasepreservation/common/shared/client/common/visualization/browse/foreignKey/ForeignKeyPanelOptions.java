@@ -87,7 +87,7 @@ public class ForeignKeyPanelOptions extends RightPanel {
   private Map<String, Boolean> initialLoading = new HashMap<>();
   private MultipleSelectionTablePanel<ViewerColumn> columnsTable;
   private Button btnSelectToggle;
-  private Label switchLabel;
+  private Label switchLabel, labelForSwitch;
   private SimpleCheckBox advancedSwitch;
   private List<String> columnsAndValues;
 
@@ -128,10 +128,12 @@ public class ForeignKeyPanelOptions extends RightPanel {
 
   private void configureTechnicalInformationSwitch() {
     switchLabel = new Label();
+    labelForSwitch = new Label(); // workaround for ie11
     switchLabel.setText(messages.schemaStructurePanelTextForAdvancedOption());
-
     advancedSwitch = new SimpleCheckBox();
-    advancedSwitch.addClickHandler(event -> {
+
+    labelForSwitch.addClickHandler(event -> {
+      advancedSwitch.setValue(!advancedSwitch.getValue(), true); // workaround for ie11
       content.clear();
       refreshCellTable(advancedSwitch.getValue());
       showForeignKeyInformation(advancedSwitch.getValue());
@@ -332,6 +334,8 @@ public class ForeignKeyPanelOptions extends RightPanel {
     switchLabel.addStyleName("switch-label");
     technicalInformation.add(advancedSwitch);
     advancedSwitch.setStyleName("switch");
+    technicalInformation.add(labelForSwitch);
+    labelForSwitch.setStyleName("label-for-switch");
 
     panel.add(technicalInformation);
 
