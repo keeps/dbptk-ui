@@ -118,7 +118,10 @@ public class RowPanel extends RightPanel {
       recordHeader.setWidget(CommonClientUtils.getHeader(iconTag, table, "h1"));
     } else {
       SafeHtml html;
+      GWT.log(table.getSchemaName());
+      GWT.log(table.getName());
       html = SafeHtmlUtils.fromSafeConstant(table.getSchemaName() + " " + separatorIconTag + " " + table.getName());
+      GWT.log("" + html);
       recordHeader.setWidget(CommonClientUtils.getHeader(iconTag, html, "h1"));
     }
   }

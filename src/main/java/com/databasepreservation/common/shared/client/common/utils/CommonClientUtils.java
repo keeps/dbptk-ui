@@ -101,7 +101,7 @@ public class CommonClientUtils {
     safeHtmlBuilder.append(SafeHtmlUtils.fromSafeConstant(iconTag)).appendEscaped(" ")
         .append(title);
 
-    HTML html = new HTML(SafeHtmlUtils.fromSafeConstant(iconTag));
+    HTML html = new HTML(safeHtmlBuilder.toSafeHtml());
     html.addStyleName(hClass);
     panel.add(html);
 
