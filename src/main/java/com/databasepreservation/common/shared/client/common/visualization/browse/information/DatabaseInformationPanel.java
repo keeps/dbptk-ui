@@ -9,6 +9,7 @@ import com.databasepreservation.common.shared.ViewerStructure.ViewerSchema;
 import com.databasepreservation.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.shared.client.common.MetadataField;
 import com.databasepreservation.common.shared.client.common.RightPanel;
+import com.databasepreservation.common.shared.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.shared.client.tools.ViewerStringUtils;
 import com.google.gwt.core.client.GWT;
@@ -19,6 +20,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimpleCheckBox;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -50,8 +52,16 @@ public class DatabaseInformationPanel extends RightPanel {
   Label title;
 
   @UiField
-  FlowPanel metadataContent, dataContent;
+  FlowPanel metadataContent;
 
+  @UiField
+  FlowPanel dataContent;
+
+  @UiField
+  FlowPanel dataContentCard;
+
+  @UiField
+  SimplePanel cardTitle;
 
   @UiField
   SimpleCheckBox advancedSwitch;
@@ -84,6 +94,8 @@ public class DatabaseInformationPanel extends RightPanel {
       }
     });
 
+    cardTitle.setWidget(CommonClientUtils.getCardTitle(messages.menusidebar_database()));
+
     title.setText(messages.databaseInformationTextForTitle());
     switchLabel.setText(messages.schemaStructurePanelTextForAdvancedOption());
     initMetadataContent();
@@ -92,13 +104,17 @@ public class DatabaseInformationPanel extends RightPanel {
 
   private void initDataContent() {
     if (database.getMetadata().getSchemas().size() == 1) {
+      FlowPanel cardTitlePanel = CommonClientUtils.getCardTitle(messages.schema());
+      cardTitlePanel.addStyleName("card-header");
+      dataContentCard.insert(cardTitlePanel, 0);
       final DataPanel instance = DataPanel.getInstance(database, database.getMetadata().getSchemas().get(0).getUUID());
       instance.reload(advancedMode);
       dataContent.add(instance);
     } else {
+      dataContentCard.addStyleName("card-diagram");
       TabPanel tabPanel = new TabPanel();
+      tabPanel.addStyleName("information-panel-multi-schemas-tab");
       for (ViewerSchema schema : database.getMetadata().getSchemas()) {
-        tabPanel.addStyleName("browseItemMetadata");
         final DataPanel instance = DataPanel.getInstance(database, schema.getUUID());
         instance.reload(advancedMode);
         tabPanel.add(instance, schema.getName());

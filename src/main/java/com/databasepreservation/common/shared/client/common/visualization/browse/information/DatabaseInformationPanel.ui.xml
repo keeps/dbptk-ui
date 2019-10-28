@@ -15,7 +15,12 @@
             </g:FlowPanel>
         </g:FlowPanel>
 
-        <g:FlowPanel ui:field="metadataContent" />
-        <g:FlowPanel ui:field="dataContent" />
+        <g:FlowPanel addStyleNames="card">
+            <g:SimplePanel ui:field="cardTitle" addStyleNames="card-header" />
+            <g:FlowPanel ui:field="metadataContent" />
+        </g:FlowPanel>
+        <g:FlowPanel ui:field="dataContentCard" addStyleNames="card">
+            <g:FlowPanel ui:field="dataContent" />
+        </g:FlowPanel>
     </g:FlowPanel>
 </ui:UiBinder>

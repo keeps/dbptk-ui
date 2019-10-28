@@ -20,6 +20,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 
+import com.google.gwt.user.client.ui.Widget;
 import config.i18n.client.ClientMessages;
 
 /**
@@ -54,6 +55,16 @@ public class CommonClientUtils {
     GenericField genericField = GenericField.createInstance(label, html);
     genericField.setCSSMetadata("metadata-field", "metadata-information-element-label");
     panel.add(genericField);
+
+    return panel;
+  }
+
+  public static FlowPanel getCardTitle(String text) {
+    FlowPanel panel = new FlowPanel();
+    SafeHtmlBuilder safeHtmlBuilder = new SafeHtmlBuilder();
+    safeHtmlBuilder.append(SafeHtmlUtils.fromString(text));
+    HTML html = new HTML(safeHtmlBuilder.toSafeHtml());
+    panel.add(html);
 
     return panel;
   }

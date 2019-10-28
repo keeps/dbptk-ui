@@ -1179,10 +1179,6 @@ html, body, .desktop-main {
     margin-bottom: 1.2rem;
 }
 
-.metadata-field:first-of-type {
-    margin-top: 1.2rem;
-}
-
 .metadata-information-element-label {
     display: inline-block;
     width: 16rem;
@@ -2310,4 +2306,57 @@ html, body, .desktop-main {
 
 .technical-information-container {
     margin: 0 0 20px 0;
+}
+
+.card-header {
+    color: #5bbeff;
+    font-weight: 500;
+    font-size: 1.1em;
+    margin-bottom: 10px;
+    display: inline-block;
+    line-height: 1em;
+}
+
+.card-diagram {
+    padding: 0;
+}
+
+.information-panel-multi-schemas-tab {
+    margin: 0;
+}
+
+.information-panel-multi-schemas-tab .gwt-TabBar {
+    background-color: #eee;
+}
+
+.information-panel-multi-schemas-tab .gwt-TabBar .gwt-TabBarItem {
+    margin: 0 2px 0 0;
+    background-color: transparent;
+}
+
+.information-panel-multi-schemas-tab .gwt-TabBar .gwt-TabBarItem-selected {
+    background-color: white;
+    border: none;
+    border-top: 1px #5bbeff solid;
+    color: #089de3;
+}
+
+.information-panel-multi-schemas-tab .gwt-TabBarItem .gwt-Label {
+    padding-left: 10px;
+    padding-right: 10px;
+    color: inherit;
+    font-weight: 300;
+    font-size: 1.5rem;
+}
+
+.information-panel-multi-schemas-tab .gwt-TabBarItem-wrapper .gwt-TabBarItem-wrapper-selected {
+    vertical-align: baseline !important;
+}
+
+.information-panel-multi-schemas-tab .gwt-TabBarItem-wrapper {
+    vertical-align: baseline !important;
+}
+
+.information-panel-multi-schemas-tab .multi-schema-description {
+    padding: 14px 14px;
 }

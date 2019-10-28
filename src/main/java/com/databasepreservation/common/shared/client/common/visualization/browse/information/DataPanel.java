@@ -85,7 +85,10 @@ public class DataPanel extends Composite {
   private void init() {
     advancedMode = false;
 
-    schemaDescription.setWidget(CommonClientUtils.getPanelInformation(messages.schemaDescriptionLabel(), schema.getDescription(), "metadata-information-element-value"));
+    if (schema.getDescription() != null) {
+      schemaDescription.addStyleName("multi-schema-description");
+      schemaDescription.setWidget(CommonClientUtils.getPanelInformation(messages.description(), schema.getDescription(), "metadata-information-element-value"));
+    }
 
     contentItems.add(ErDiagram.getInstance(database, schema));
     initTableContent();
@@ -93,13 +96,10 @@ public class DataPanel extends Composite {
 
   private void initTableContent() {
     final BasicTablePanel<ViewerTable> table = getBasicTablePanelForTableInfo(database.getMetadata(), schema);
-    table.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-      @Override
-      public void onSelectionChange(SelectionChangeEvent event) {
-        ViewerTable item = table.getSelectionModel().getSelectedObject();
-        if (item != null) {
-          HistoryManager.gotoTable(database.getUUID(), item.getUUID());
-        }
+    table.getSelectionModel().addSelectionChangeHandler(event -> {
+      ViewerTable item = table.getSelectionModel().getSelectedObject();
+      if (item != null) {
+        HistoryManager.gotoTable(database.getUUID(), item.getUUID());
       }
     });
     tableContent.add(table);
@@ -110,13 +110,10 @@ public class DataPanel extends Composite {
 
     List<ViewerTable> tables = new ArrayList<>(schema.getTables());
 
-    Collections.sort(tables, new Comparator<ViewerTable>() {
-      @Override
-      public int compare(ViewerTable o1, ViewerTable o2) {
-        Long r1 = o1.getCountRows();
-        Long r2 = o2.getCountRows();
-        return r2.compareTo(r1);
-      }
+    tables.sort((o1, o2) -> {
+      Long r1 = o1.getCountRows();
+      Long r2 = o2.getCountRows();
+      return r2.compareTo(r1);
     });
 
     return new BasicTablePanel<ViewerTable>(new HTMLPanel(SafeHtmlUtils.EMPTY_SAFE_HTML),

@@ -31,8 +31,10 @@ public class ErDiagram extends Composite {
   private static Map<String, ErDiagram> instances = new HashMap<>();
 
   public static ErDiagram getInstance(ViewerDatabase database, ViewerSchema schema) {
+
     String separator = "/";
     String code = database.getUUID() + separator + schema.getUUID();
+    GWT.log(code);
 
     ErDiagram instance = instances.get(code);
     if (instance == null) {
@@ -66,7 +68,7 @@ public class ErDiagram extends Composite {
   @UiField
   FlowPanel contentItems;
 
-  final String databaseUUID;
+  private final String databaseUUID;
 
   private ErDiagram(final ViewerDatabase database, final ViewerSchema schema) {
     databaseUUID = database.getUUID();
@@ -81,7 +83,7 @@ public class ErDiagram extends Composite {
 
     final SimplePanel diagram = new SimplePanel();
     diagram.addStyleName("erdiagram");
-    diagram.getElement().setId("erdiagram");
+    diagram.getElement().setId("erdiagram-" + schema.getUUID());
     diagram.addAttachHandler(new AttachEvent.Handler() {
       @Override
       public void onAttachOrDetach(AttachEvent event) {
@@ -226,7 +228,7 @@ public class ErDiagram extends Composite {
         String nodes = visNodeMapper.write(visNodeList);
         String edges = visEdgeMapper.write(jsniEdgeList);
 
-        loadDiagram(databaseUUID, nodes, edges, ApplicationType.getType());
+        loadDiagram(databaseUUID, schema.getUUID(), nodes, edges, ApplicationType.getType());
       }
     });
     contentItems.add(diagram);
@@ -494,11 +496,12 @@ public class ErDiagram extends Composite {
     }
   }
 
-  public static native void loadDiagram(String dbuuid, String nodesJson, String edgesJson, String applicationType)
+  public static native void loadDiagram(String dbuuid, String schemaUUID, String nodesJson, String edgesJson,
+    String applicationType)
   /*-{
     (function erdiagramload(){
         // network container
-        var container = $wnd.document.getElementById('erdiagram');
+        var container = $wnd.document.getElementById('erdiagram-' + schemaUUID);
   
         // avoid setting up the diagram more than once
         container.className += ' initialized-erdiagram';
@@ -563,7 +566,7 @@ public class ErDiagram extends Composite {
                     "springConstant": 0,
                     "nodeDistance": 150,
                     "damping": 0.09
-                },
+                }
             }//, configure: {enabled: true, showButton: true, container: $wnd.document.getElementById('erconfig')}
         };
   
