@@ -2,6 +2,7 @@ package com.databasepreservation.common.api.v1;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
@@ -12,6 +13,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.databasepreservation.common.shared.ViewerStructure.ViewerColumn;
+import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RODAException;
 import org.slf4j.Logger;
@@ -62,9 +65,12 @@ public class LobsResource {
     UserUtility.Authorization.checkDatabaseAccessPermission(this.request, databaseUUID);
 
     ViewerRow row = solrManager.retrieveRows(databaseUUID, rowUUID);
+    final ViewerDatabase viewerDatabase= solrManager.retrieve(ViewerDatabase.class, databaseUUID);
+    final String schemaName = viewerDatabase.getMetadata().getTable(tableUUID).getSchemaName();
+    final String tableName = viewerDatabase.getMetadata().getTable(tableUUID).getName();
 
     if (row != null) {
-      String fileName = rowUUID + "-" + columnID + ".bin";
+      String fileName = schemaName + "-" + tableName + "-" + rowUUID +  columnID + ".bin";
       try {
         return ApiUtils.okResponse(new StreamResponse(fileName, MediaType.APPLICATION_OCTET_STREAM,
           DownloadUtils.stream(Files.newInputStream(LobPathManager.getPath(ViewerFactory.getViewerConfiguration(),

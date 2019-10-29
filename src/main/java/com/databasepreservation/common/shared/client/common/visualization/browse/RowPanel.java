@@ -10,7 +10,6 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import com.databasepreservation.common.client.BrowserService;
-import com.databasepreservation.common.shared.ViewerConstants;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerCell;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerColumn;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
@@ -25,9 +24,7 @@ import com.databasepreservation.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.shared.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.shared.client.common.MetadataField;
 import com.databasepreservation.common.shared.client.common.RightPanel;
-import com.databasepreservation.common.shared.client.common.desktop.GenericField;
 import com.databasepreservation.common.shared.client.common.fields.RowField;
-import com.databasepreservation.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.common.shared.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.shared.client.tools.FontAwesomeIconManager;
@@ -39,10 +36,13 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Hyperlink;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
-import org.apache.calcite.interpreter.Row;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -265,17 +265,8 @@ public class RowPanel extends RightPanel {
       rowField = RowField.createInstance(label, new HTML("NULL"));
     } else {
       if (column.getType().getDbType().equals(ViewerType.dbTypes.BINARY)) {
-        StringBuilder urlBuilder = new StringBuilder();
-        String base = com.google.gwt.core.client.GWT.getHostPageBaseURL();
-        String servlet = ViewerConstants.API_SERVLET;
-        String resource = ViewerConstants.API_V1_LOBS_RESOURCE;
-        String databaseUUID = database.getUUID();
-        String tableUUID = table.getUUID();
-        urlBuilder.append(servlet).append(resource).append("/").append(databaseUUID).append("/")
-                .append(tableUUID).append("/").append(row.getUUID()).append("/")
-                .append(column.getColumnIndexInEnclosingTable());
-        Anchor anchor = new Anchor(messages.row_downloadLOB(), urlBuilder.toString());
-        rowField = RowField.createInstance(label, anchor);
+        rowField = RowField.createInstance(label, CommonClientUtils.getAnchorForLOBDownload(database.getUUID(),
+          table.getUUID(), row.getUUID(), column.getColumnIndexInEnclosingTable()));
       } else {
         rowField = RowField.createInstance(label, new HTML(value));
       }

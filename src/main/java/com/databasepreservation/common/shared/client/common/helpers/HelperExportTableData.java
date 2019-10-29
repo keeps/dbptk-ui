@@ -3,6 +3,7 @@ package com.databasepreservation.common.shared.client.common.helpers;
 import com.databasepreservation.common.shared.ViewerConstants;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerTable;
 import com.databasepreservation.common.shared.client.common.desktop.GenericField;
+import com.databasepreservation.common.shared.client.common.utils.ApplicationType;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -40,9 +41,14 @@ public class HelperExportTableData {
 
   public FlowPanel getWidget() {
     FlowPanel panel = new FlowPanel();
-    GenericField genericFieldFilename = GenericField.createInstance(messages.csvExportDialogLabelForFilename(),
-      filenameTextBox);
-    filenameTextBox.addStyleName("form-textbox");
+
+    if (ViewerConstants.SERVER.equals(ApplicationType.getType())) {
+      GenericField genericFieldFilename = GenericField.createInstance(messages.csvExportDialogLabelForFilename(),
+        filenameTextBox);
+      filenameTextBox.addStyleName("form-textbox");
+      panel.add(wrapHelperText(genericFieldFilename, messages.csvExportDialogHelpTextForFilename()));
+    }
+
     radioButtonExportAll = new RadioButton("export-size");
     radioButtonExportAll.setText(messages.csvExportDialogLabelForExportAllRadioButton());
     RadioButton radioButtonExportVisible = new RadioButton("export-size");
@@ -57,7 +63,6 @@ public class HelperExportTableData {
     checkBoxExportDescription.addStyleName("form-checkbox");
     GenericField genericFieldExportDescription = GenericField.createInstance(checkBoxExportDescription);
 
-    panel.add(wrapHelperText(genericFieldFilename, messages.csvExportDialogHelpTextForFilename()));
     panel.add(wrapHelperText(genericFieldExportAll, messages.csvExportDialogHelpTextForExportSize()));
     panel.add(wrapHelperText(genericFieldExportDescription, messages.csvExportDialogHelpTextForDescription()));
     panel.addStyleName("content");

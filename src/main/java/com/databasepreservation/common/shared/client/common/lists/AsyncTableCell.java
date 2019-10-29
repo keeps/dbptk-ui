@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.gwt.dom.client.BrowserEvents;
 import org.roda.core.data.v2.index.IndexResult;
 import org.roda.core.data.v2.index.facet.Facets;
 import org.roda.core.data.v2.index.filter.Filter;
@@ -173,21 +174,8 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
       exportButtons.setCellPadding(0);
       exportButtons.setCellSpacing(0);
 
-      //exportVisibleButton = new Anchor(messages.exportVisible());
-      //exportVisibleButton.addClickHandler(new ClickHandler() {
-      //  @Override
-      //  public void onClick(ClickEvent event) {
-      //    AsyncTableCell.this.exportVisibleClickHandler();
-      //  }
-      //});
-
       exportButton = new Anchor(messages.basicActionExport());
-      exportButton.addClickHandler(new ClickHandler() {
-        @Override
-        public void onClick(ClickEvent event) {
-          AsyncTableCell.this.exportClickHandler();
-        }
-      });
+      exportButton.addClickHandler(event -> AsyncTableCell.this.exportClickHandler());
 
       exportButtons.setWidget(0, 0, exportButton);
     }

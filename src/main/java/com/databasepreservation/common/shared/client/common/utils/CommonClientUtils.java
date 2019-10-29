@@ -15,12 +15,12 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Label;
 
-import com.google.gwt.user.client.ui.Widget;
 import config.i18n.client.ClientMessages;
 
 /**
@@ -106,6 +106,17 @@ public class CommonClientUtils {
     panel.add(html);
 
     return panel;
+  }
+
+  public static Anchor getAnchorForLOBDownload(final String databaseUUID, final String tableUUID, final String rowUUID,
+    final int columnIndexInEnclosingTable) {
+    StringBuilder urlBuilder = new StringBuilder();
+    String base = com.google.gwt.core.client.GWT.getHostPageBaseURL();
+    String servlet = ViewerConstants.API_SERVLET;
+    String resource = ViewerConstants.API_V1_LOBS_RESOURCE;
+    urlBuilder.append(servlet).append(resource).append("/").append(databaseUUID).append("/").append(tableUUID)
+      .append("/").append(rowUUID).append("/").append(columnIndexInEnclosingTable);
+    return new Anchor(messages.row_downloadLOB(), urlBuilder.toString());
   }
 
   public static SafeHtmlBuilder constructViewQuery(ViewerView view) {

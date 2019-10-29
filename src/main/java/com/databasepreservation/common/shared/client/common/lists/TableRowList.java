@@ -1,6 +1,14 @@
 package com.databasepreservation.common.shared.client.common.lists;
 
-import java.util.*;
+import static com.databasepreservation.common.shared.ViewerStructure.ViewerType.dbTypes.BINARY;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.roda.core.data.v2.common.Pair;
 import org.roda.core.data.v2.index.IndexResult;
@@ -11,7 +19,11 @@ import org.roda.core.data.v2.index.sublist.Sublist;
 
 import com.databasepreservation.common.client.BrowserService;
 import com.databasepreservation.common.shared.ViewerConstants;
-import com.databasepreservation.common.shared.ViewerStructure.*;
+import com.databasepreservation.common.shared.ViewerStructure.ViewerColumn;
+import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
+import com.databasepreservation.common.shared.ViewerStructure.ViewerRow;
+import com.databasepreservation.common.shared.ViewerStructure.ViewerTable;
+import com.databasepreservation.common.shared.ViewerStructure.ViewerType;
 import com.databasepreservation.common.shared.client.ClientLogger;
 import com.databasepreservation.common.shared.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.shared.client.common.dialogs.Dialogs;
@@ -19,7 +31,6 @@ import com.databasepreservation.common.shared.client.common.helpers.HelperExport
 import com.databasepreservation.common.shared.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.shared.client.common.utils.UriQueryUtils;
 import com.databasepreservation.common.shared.client.tools.FilterUtils;
-import com.databasepreservation.common.shared.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.shared.client.tools.ViewerJsonUtils;
 import com.databasepreservation.common.shared.client.tools.ViewerStringUtils;
 import com.google.gwt.cell.client.Cell;
@@ -35,6 +46,8 @@ import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.view.client.CellPreviewEvent;
+import com.google.gwt.view.client.DefaultSelectionEventManager;
 
 import config.i18n.client.ClientMessages;
 
@@ -79,88 +92,127 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
     return visibleState == null || visibleState;
   }
 
+  private int getColumnWithBinary(ViewerTable table) {
+    int columnIndex = 0;
+    for (ViewerColumn viewerColumn : table.getColumns()) {
+      columnIndex++;
+      final ViewerType viewerColumnType = viewerColumn.getType();
+      ViewerType.dbTypes type = viewerColumnType.getDbType();
+      if (type.equals(BINARY)) {
+        return columnIndex - 1;
+      }
+    }
+    return -1;
+  }
+
   @Override
   protected void configureDisplay(CellTable<ViewerRow> display) {
     this.display = display;
     final ViewerTable table = getObject().getSecond();
     columns = new LinkedHashMap<>(table.getColumns().size());
 
+    final int columnWithBinary = getColumnWithBinary(table);
+    if (columnWithBinary != -1) {
+      final CellPreviewEvent.Handler<ViewerRow> selectionEventManager = DefaultSelectionEventManager
+        .createBlacklistManager(columnWithBinary);
+      display.setSelectionModel(getSelectionModel(), selectionEventManager);
+    }
+
     int columnIndex = 0;
     for (ViewerColumn viewerColumn : table.getColumns()) {
       final ViewerType viewerColumnType = viewerColumn.getType();
       final int thisColumnIndex = columnIndex++;
       final String solrColumnName = viewerColumn.getSolrName();
-
-      Column<ViewerRow, SafeHtml> column = new Column<ViewerRow, SafeHtml>(new SafeHtmlCell()) {
-        /**
-         * Render the object into the cell, providing the full content in a tooltip
-         *
-         * @param context
-         *          the cell context
-         * @param object
-         *          the object to render
-         * @param sb
-         *          the buffer to render into
-         */
-        @Override
-        public void render(Cell.Context context, ViewerRow object, SafeHtmlBuilder sb) {
-          SafeHtml value = getValue(object);
-          if (value != null) {
-            sb.appendHtmlConstant("<div title=\"" + SafeHtmlUtils.htmlEscape(value.asString()) + "\">");
-            sb.append(value);
-            sb.appendHtmlConstant("</div");
-          }
-        }
-
-        @Override
-        public SafeHtml getValue(ViewerRow row) {
-          SafeHtml ret = null;
-          if (row == null) {
-            logger.error("Trying to display a NULL ViewerRow");
-          } else if (row.getCells() == null) {
-            logger.error("Trying to display NULL Cells");
-          } else if (row.getCells().get(solrColumnName) != null) {
-            ViewerType.dbTypes type = viewerColumnType.getDbType();
-            String value = row.getCells().get(solrColumnName).getValue();
-
-            // if it exists in Solr, it is not null
-            switch (type) {
-              case BINARY:
-                ret = SafeHtmlUtils.fromSafeConstant(
-                  FontAwesomeIconManager.getTag(FontAwesomeIconManager.BLOB, messages.largeBinaryObject()));
-                break;
-              // case DATETIME:
-              // ret =
-              // SafeHtmlUtils.fromString(JodaUtils.solrDateTimeDisplay(JodaUtils.solrDateParse(value)));
-              // break;
-              // case DATETIME_JUST_DATE:
-              // ret =
-              // SafeHtmlUtils.fromString(JodaUtils.solrDateDisplay(JodaUtils.solrDateParse(value)));
-              // break;
-              // case DATETIME_JUST_TIME:
-              // ret =
-              // SafeHtmlUtils.fromString(JodaUtils.solrTimeDisplay(JodaUtils.solrDateParse(value)));
-              // ret = SafeHtmlUtils.fromString(new Date().)
-              // break;
-              case BOOLEAN:
-              case ENUMERATION:
-              case TIME_INTERVAL:
-              case NUMERIC_FLOATING_POINT:
-              case NUMERIC_INTEGER:
-              case COMPOSED_STRUCTURE:
-              case COMPOSED_ARRAY:
-              case STRING:
-              default:
-                ret = SafeHtmlUtils.fromString(value);
+      final ViewerType.dbTypes type = viewerColumnType.getDbType();
+      if (type.equals(BINARY)) {
+        Column<ViewerRow, SafeHtml> column = new Column<ViewerRow, SafeHtml>(new SafeHtmlCell()) {
+          @Override
+          public void render(Cell.Context context, ViewerRow object, SafeHtmlBuilder sb) {
+            SafeHtml value = getValue(object);
+            if (value != null) {
+              sb.appendHtmlConstant("<div title=\"" + messages.row_downloadLOB() + "\">");
+              sb.append(value);
+              sb.appendHtmlConstant("</div");
             }
           }
-          return ret;
-        }
-      };
-      column.setSortable(viewerColumn.sortable());
 
-      addColumn(viewerColumn, column);
-      columns.put(viewerColumn, column);
+          @Override
+          public SafeHtml getValue(ViewerRow row) {
+            SafeHtml ret = null;
+            if (row == null) {
+              logger.error("Trying to display a NULL ViewerRow");
+            } else if (row.getCells() == null) {
+              logger.error("Trying to display NULL Cells");
+            } else if (row.getCells().get(solrColumnName) != null) {
+              ret = SafeHtmlUtils
+                .fromTrustedString(CommonClientUtils.getAnchorForLOBDownload(getObject().getFirst().getUUID(),
+                  table.getUUID(), row.getUUID(), viewerColumn.getColumnIndexInEnclosingTable()).toString());
+            }
+
+            return ret;
+          }
+        };
+        column.setSortable(viewerColumn.sortable());
+        addColumn(viewerColumn, column);
+        columns.put(viewerColumn, column);
+      } else {
+        Column<ViewerRow, SafeHtml> column = new Column<ViewerRow, SafeHtml>(new SafeHtmlCell()) {
+          @Override
+          public void render(Cell.Context context, ViewerRow object, SafeHtmlBuilder sb) {
+            SafeHtml value = getValue(object);
+            if (value != null) {
+              sb.appendHtmlConstant("<div title=\"" + SafeHtmlUtils.htmlEscape(value.asString()) + "\">");
+              sb.append(value);
+              sb.appendHtmlConstant("</div");
+            }
+          }
+
+          @Override
+          public SafeHtml getValue(ViewerRow row) {
+            SafeHtml ret = null;
+            if (row == null) {
+              logger.error("Trying to display a NULL ViewerRow");
+            } else if (row.getCells() == null) {
+              logger.error("Trying to display NULL Cells");
+            } else if (row.getCells().get(solrColumnName) != null) {
+              ViewerType.dbTypes type = viewerColumnType.getDbType();
+              String value = row.getCells().get(solrColumnName).getValue();
+
+              // if it exists in Solr, it is not null
+              switch (type) {
+                case BINARY:
+                  // case DATETIME:
+                  // ret =
+                  // SafeHtmlUtils.fromString(JodaUtils.solrDateTimeDisplay(JodaUtils.solrDateParse(value)));
+                  // break;
+                  // case DATETIME_JUST_DATE:
+                  // ret =
+                  // SafeHtmlUtils.fromString(JodaUtils.solrDateDisplay(JodaUtils.solrDateParse(value)));
+                  // break;
+                  // case DATETIME_JUST_TIME:
+                  // ret =
+                  // SafeHtmlUtils.fromString(JodaUtils.solrTimeDisplay(JodaUtils.solrDateParse(value)));
+                  // ret = SafeHtmlUtils.fromString(new Date().)
+                  // break;
+                case BOOLEAN:
+                case ENUMERATION:
+                case TIME_INTERVAL:
+                case NUMERIC_FLOATING_POINT:
+                case NUMERIC_INTEGER:
+                case COMPOSED_STRUCTURE:
+                case COMPOSED_ARRAY:
+                case STRING:
+                default:
+                  ret = SafeHtmlUtils.fromString(value);
+              }
+            }
+            return ret;
+          }
+        };
+        column.setSortable(viewerColumn.sortable());
+        addColumn(viewerColumn, column);
+        columns.put(viewerColumn, column);
+      }
     }
 
     Label emptyInfo = new Label(messages.noItemsToDisplay());
