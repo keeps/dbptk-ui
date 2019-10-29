@@ -32,17 +32,17 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-public class Manage extends ContentPanel {
+public class DatabaseManage extends ContentPanel {
   @UiField
   public ClientMessages messages = GWT.create(ClientMessages.class);
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forManageSIARD();
+    List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forManageDatabase();
     BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
   }
 
-  interface ManageUiBinder extends UiBinder<Widget, Manage> {
+  interface ManageUiBinder extends UiBinder<Widget, DatabaseManage> {
   }
 
   private static ManageUiBinder binder = GWT.create(ManageUiBinder.class);
@@ -62,16 +62,16 @@ public class Manage extends ContentPanel {
   @UiField
   Button create, open;
 
-  private static Manage instance = null;
+  private static DatabaseManage instance = null;
 
-  public static Manage getInstance() {
+  public static DatabaseManage getInstance() {
     if (instance == null) {
-      instance = new Manage();
+      instance = new DatabaseManage();
     }
     return instance;
   }
 
-  private Manage() {
+  private DatabaseManage() {
 
     databaseList = new DatabaseList();
 

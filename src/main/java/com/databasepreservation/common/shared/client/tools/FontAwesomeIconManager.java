@@ -54,6 +54,7 @@ public class FontAwesomeIconManager {
   public static final String WIZARD = "magic";
   public static final String WRITE = "pencil";
   public static final String TECHNICAL = "briefcase";
+  public static final String BREADCRUMB_SEPARATOR = "chevron-right";
 
 
   public static String getTag(String icon) {

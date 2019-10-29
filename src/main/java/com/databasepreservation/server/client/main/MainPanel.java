@@ -20,7 +20,7 @@ import com.databasepreservation.common.shared.client.common.visualization.browse
 import com.databasepreservation.common.shared.client.common.visualization.browse.information.DatabaseInformationPanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.ingest.IngestPage;
 import com.databasepreservation.common.shared.client.common.visualization.browse.manager.SIARDPanel.SIARDManagerPage;
-import com.databasepreservation.common.shared.client.common.visualization.browse.manager.databasePanel.Manage;
+import com.databasepreservation.common.shared.client.common.visualization.browse.manager.databasePanel.DatabaseManage;
 import com.databasepreservation.common.shared.client.common.visualization.browse.metadata.MetadataPanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.metadata.MetadataPanelLoad;
 import com.databasepreservation.common.shared.client.common.visualization.browse.metadata.SIARDEditMetadataPage;
@@ -215,7 +215,7 @@ public class MainPanel extends Composite {
         setContent(new ContentPanelLoader() {
           @Override
           public ContentPanel load(ViewerDatabase database) {
-            return Manage.getInstance();
+            return DatabaseManage.getInstance();
           }
         });
 

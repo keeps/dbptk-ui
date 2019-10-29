@@ -514,7 +514,7 @@ public interface ClientMessages extends Messages {
   /*********************************************
    * Breadcrumbs Text
    ********************************************/
-  String breadcrumbTextForManageSIARD();
+  String breadcrumbTextForManageDatabase();
 
   String breadcrumbTextForWizardCreateSIARDConnection();
 

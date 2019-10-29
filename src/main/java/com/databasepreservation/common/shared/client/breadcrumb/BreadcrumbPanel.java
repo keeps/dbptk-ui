@@ -4,8 +4,10 @@ import java.util.List;
 import java.util.Stack;
 
 import com.databasepreservation.common.shared.client.ClientLogger;
+import com.databasepreservation.common.shared.client.tools.FontAwesomeIconManager;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
@@ -39,7 +41,9 @@ public class BreadcrumbPanel extends FlowPanel {
   }
 
   protected Widget createSeparator() {
-    final HTML separator = new HTML("&nbsp;/&nbsp;");
+
+//    final HTML separator = new HTML("&nbsp;/&nbsp;");
+    final HTML separator = new HTML(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.BREADCRUMB_SEPARATOR)));
     separator.setStyleName("breadcrumb-separator");
     return separator;
   }

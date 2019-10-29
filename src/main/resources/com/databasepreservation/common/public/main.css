@@ -381,11 +381,14 @@ p[data-value]:after {
     position: relative;
 }
 
+.banner{
+    z-index: 2;
+}
 .browseContentFilePreviewPanel .filePreviewToolbar {
     min-height: 35px;
     background-color: #eee;
     position: relative;
-    z-index: 1000;
+    z-index: 1;
 }
 
 .browseContentFilePreviewPanel .filePreviewToolbar .browseContentBreadcrumb {
@@ -451,8 +454,10 @@ p[data-value]:after {
 }
 
 .browseContentFilesPanel .searchBox::-webkit-input-placeholder,
+.browseContentFilesPanel .searchBox::placeholder,
 .browseContentFilesPanel .searchBox:placeholder-shown {
-    color: #ddd;
+    color: #fff;
+    opacity: 1; /* Firefox */
 }
 
 .browseContentFilesPanel .searchPanelLeft {
@@ -470,6 +475,7 @@ p[data-value]:after {
     width: 40px;
     margin-right: -55px;
     background-color: transparent;
+    color: #fff;
 }
 
 .browseContentFilesPanel .searchButton-html {
@@ -883,11 +889,39 @@ p[data-value]:after {
     line-height: 2.5rem;
     height: 2.5rem;
     background-color: #5bbeff;
-    color: #fff;
+    color: #fff
+}
+
+.main .wui-breadcrumbPanel .breadcrumb {
+    color: #222222;
+}
+
+.main .wui-breadcrumbPanel .breadcrumb:hover {
+    text-decoration: underline;
 }
 
 .main .wui-breadcrumbPanel .breadcrumb-last {
     max-width: 300px;
+    font-weight: normal;
+    cursor: unset;
+    color: #6a6a6a;
+}
+.main .wui-breadcrumbPanel .breadcrumb-last:hover{
+    text-decoration: none;
+}
+
+.main .wui-breadcrumbPanel .breadcrumb .fa {
+    color: #222222;
+    margin: 0 6px;
+}
+
+.main .wui-breadcrumbPanel .breadcrumb-last .fa{
+    color: #6a6a6a;
+}
+
+.main .wui-breadcrumbPanel .breadcrumb-separator {
+    color: #aaa;
+    margin-left: 6px;
 }
 
 .gwt-MenuBar .gwt-MenuItem {
@@ -918,39 +952,6 @@ p[data-value]:after {
     align-self: center;
     padding-right: 27px;
 }
-
-/*.advancedOptionsPanel input.switch {*/
-/*    position: relative;*/
-/*    -webkit-appearance: none;*/
-/*    outline: none;*/
-/*    width: 27px;*/
-/*    height: 15px;*/
-/*    background-color: #ccc;*/
-/*    border-radius: 50px;*/
-/*    transition: .4s;*/
-/*    top: 2px;*/
-/*}*/
-
-/*.advancedOptionsPanel input.switch:after {*/
-/*    content: "";*/
-/*    position: absolute;*/
-/*    top: 1px;*/
-/*    left: 2px;*/
-/*    width: 13px;*/
-/*    height: 13px;*/
-/*    border-radius: 50%;*/
-/*    transition: .4s;*/
-/*    background: white;*/
-/*}*/
-
-/*.advancedOptionsPanel input.switch:checked {*/
-/*    border-color: #089de3;*/
-/*    background: #089de3;*/
-/*}*/
-
-/*.advancedOptionsPanel input.switch:checked:after {*/
-/*    left: 12px;*/
-/*}*/
 
 .advancedOptionsPanel .switch[type=checkbox]{
     height: 0;
