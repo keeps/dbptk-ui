@@ -242,7 +242,7 @@
                         <version>${springboot.version}</version>
                         <configuration>
                             <jvmArguments>
-                                -Dgwt.codeServerPort=9876 -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005 -Denv=desktop
+                                -Dgwt.codeServerPort=9876 -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5010 -Denv=desktop
                             </jvmArguments>
                         </configuration>
                     </plugin>

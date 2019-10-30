@@ -2360,3 +2360,28 @@ html, body, .desktop-main {
 .information-panel-multi-schemas-tab .multi-schema-description {
     padding: 14px 14px;
 }
+
+.form-radio-buttons input[type="radio"] {
+    padding-left: 5px;
+    padding-right: 5px;
+    -webkit-appearance: button;
+    background-color: #eee;
+    color: #FFF;
+    white-space: nowrap;
+    overflow: hidden;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    border-color: #089de3;
+    border-style: solid;
+    border-width: thin;
+    border-radius: 50%;
+}
+
+.form-radio-buttons input[type="radio"]:checked {
+    background-color: #089de3;
+}
+
+.form-radio-buttons label {
+    vertical-align: text-bottom;
+}

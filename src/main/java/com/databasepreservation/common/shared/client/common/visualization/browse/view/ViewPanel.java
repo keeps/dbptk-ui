@@ -35,18 +35,10 @@ public class ViewPanel extends RightPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, ViewPanel> instances = new HashMap<>();
 
-  /**
-   * Uses BreadcrumbManager to show available information in the breadcrumbPanel
-   *
-   * @param breadcrumb
-   *          the BreadcrumbPanel for this database
-   */
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-
-      BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forTable(database.getMetadata().getName(),
+      BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forView(database.getMetadata().getName(),
         database.getUUID(), view.getName(), view.getUUID()));
-
   }
 
   interface ViewPanelUiBinder extends UiBinder<Widget, ViewPanel> {

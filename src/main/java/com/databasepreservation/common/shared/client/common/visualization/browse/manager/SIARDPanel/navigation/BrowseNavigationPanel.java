@@ -9,15 +9,10 @@ import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.common.shared.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.shared.client.common.MetadataField;
 import com.databasepreservation.common.shared.client.common.NavigationPanel;
-import com.databasepreservation.common.shared.client.common.desktop.GenericField;
 import com.databasepreservation.common.shared.client.common.dialogs.CommonDialogs;
 import com.databasepreservation.common.shared.client.common.dialogs.Dialogs;
-import com.databasepreservation.common.shared.client.common.utils.ApplicationType;
-import com.databasepreservation.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.shared.client.common.visualization.browse.manager.SIARDPanel.SIARDManagerPage;
 import com.databasepreservation.common.shared.client.tools.HistoryManager;
-import com.databasepreservation.common.shared.client.tools.Humanize;
-import com.databasepreservation.common.shared.client.tools.PathUtils;
 import com.databasepreservation.common.shared.client.tools.SolrHumanizer;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -30,15 +25,15 @@ public class BrowseNavigationPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, BrowseNavigationPanel> instances = new HashMap<>();
   private ViewerDatabase database;
-  private Button btnDelete, btnBrowse, btnIngest;
+  private Button btnDelete;
+  private Button btnBrowse;
+  private Button btnIngest;
   private boolean btnIngestClicked = false;
   private MetadataField browsingStatus = null;
 
   public static BrowseNavigationPanel getInstance(ViewerDatabase database) {
     String databaseUUID = database.getUUID();
-    if (instances.get(databaseUUID) == null) {
-      instances.put(databaseUUID, new BrowseNavigationPanel(database));
-    }
+    instances.computeIfAbsent(databaseUUID, k -> new BrowseNavigationPanel(database));
     return instances.get(databaseUUID);
   }
 
@@ -82,7 +77,7 @@ public class BrowseNavigationPanel {
 
     // Ingest Button
     btnIngest = new Button();
-    btnIngest.setText(messages.SIARDHomePageButtonTextForIngest());
+    btnIngest.setText(messages.SIARDHomePageButtonTextForBrowseNow());
     btnIngest.addStyleName("btn btn-link-info");
     btnIngest.setVisible(false);
 

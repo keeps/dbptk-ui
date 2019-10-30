@@ -177,7 +177,7 @@ public class SIARDManagerPage extends ContentPanel {
             }
           });
       } else if (ViewerDatabase.Status.INGESTING.equals(database.getStatus())) {
-        Dialogs.showInformationDialog("c", "c", messages.basicActionClose(), "btn btn-link");
+        Dialogs.showInformationDialog(messages.SIARDManagerPageInformationDialogTitle(), messages.SIARDManagerPageTextForWaitForFinishing(), messages.basicActionClose(), "btn btn-link");
       }
     });
   }

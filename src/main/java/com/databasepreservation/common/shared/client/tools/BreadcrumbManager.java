@@ -322,6 +322,23 @@ public class BreadcrumbManager {
     return items;
   }
 
+  public static List<BreadcrumbItem> forView(final String databaseName, final String databaseUUID,
+                                              final String viewName, final String viewUUID) {
+    List<BreadcrumbItem> items;
+    items = forSIARDMainPage(databaseUUID, databaseName);
+
+    items.add(new BreadcrumbItem(
+        SafeHtmlUtils.fromSafeConstant(
+            FontAwesomeIconManager.getTag(FontAwesomeIconManager.SCHEMA_VIEWS) + SafeHtmlUtils.htmlEscape(viewName)),
+        new Command() {
+          @Override
+          public void execute() {
+            HistoryManager.gotoTable(databaseUUID, viewUUID);
+          }
+        }));
+    return items;
+  }
+
   public static List<BreadcrumbItem> forTable(final String databaseName, final String databaseUUID,
     final String tableName, final String tableUUID) {
     List<BreadcrumbItem> items;

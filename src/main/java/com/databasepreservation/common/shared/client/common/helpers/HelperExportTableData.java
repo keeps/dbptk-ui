@@ -57,6 +57,7 @@ public class HelperExportTableData {
     FlowPanel radioButtonsPanel = new FlowPanel();
     radioButtonsPanel.add(radioButtonExportAll);
     radioButtonsPanel.add(radioButtonExportVisible);
+    radioButtonsPanel.addStyleName("form-radio-buttons");
     GenericField genericFieldExportAll = GenericField.createInstance("Export Rows:", radioButtonsPanel);
     checkBoxExportDescription = new CheckBox();
     checkBoxExportDescription.setText(messages.csvExportDialogLabelForExportHeaderWithDescriptions());

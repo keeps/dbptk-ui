@@ -607,6 +607,10 @@ public interface ClientMessages extends Messages {
   /********************************************
    * SIARD Home Page
    ********************************************/
+  String SIARDManagerPageInformationDialogTitle();
+
+  String SIARDManagerPageTextForWaitForFinishing();
+
   String SIARDHomePageToastTitle(String method);
 
   String SIARDHomePageButtonTextEditMetadata();
