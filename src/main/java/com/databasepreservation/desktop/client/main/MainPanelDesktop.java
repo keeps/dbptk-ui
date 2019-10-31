@@ -58,9 +58,6 @@ public class MainPanelDesktop extends Composite {
   interface MainPanelDesktopUiBinder extends UiBinder<Widget, MainPanelDesktop> {
   }
 
-  // databaseUUID, databaseName
-  private static Map<String, String> databaseNames = new HashMap<>();
-
   private static MainPanelDesktopUiBinder binder = GWT.create(MainPanelDesktopUiBinder.class);
 
   @UiField

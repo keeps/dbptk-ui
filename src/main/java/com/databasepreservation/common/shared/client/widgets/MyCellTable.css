@@ -40,6 +40,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     font-size: 1.3rem;
+    vertical-align: middle;
 }
 
 .cellTableOddRow {

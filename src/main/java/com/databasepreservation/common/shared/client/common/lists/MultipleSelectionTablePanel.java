@@ -29,8 +29,6 @@ import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.MultiSelectionModel;
 
 /**
- * Widget with a title widget, a description or information widget and a
- * synchronous table (a CellTable using a ListDataProvider).
  *
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  * @param <C>
@@ -91,33 +89,6 @@ public class MultipleSelectionTablePanel<C> extends Composite {
   @UiField
   SimplePanel table;
 
-  /*
-   * @SafeVarargs public MultipleSelectionTablePanel(Widget headerContent,
-   * SafeHtml infoContent, Iterator<C> rowItems, ColumnInfo<C>... columns) {
-   * this(headerContent, new HTMLPanel(infoContent), rowItems, columns); }
-   */
-
-  /*
-   * @SafeVarargs public MultipleSelectionTablePanel(Widget headerContent, Widget
-   * infoContent, Iterator<C> rowItems, ColumnInfo<C>... columns) {
-   * initWidget(uiBinder.createAndBindUi(this));
-   * 
-   * // set widgets header.setWidget(headerContent); info.setWidget(infoContent);
-   * 
-   * CellTable<C> display = createTable(rowItems, columns); selectionModel = new
-   * MultiSelectionModel<>(); display.setSelectionModel(selectionModel);
-   * 
-   * displayScroll = new ScrollPanel(display); displayScrollWrapper = new
-   * SimplePanel(displayScroll);
-   * displayScrollWrapper.addStyleName("my-asyncdatagrid-display-scroll-wrapper");
-   * table.setWidget(displayScrollWrapper);
-   * 
-   * displayScroll.addScrollHandler(new ScrollHandler() {
-   * 
-   * @Override public void onScroll(ScrollEvent event) { handleScrollChanges(); }
-   * }); handleScrollChanges(); }
-   */
-
   public MultipleSelectionTablePanel() {
     initWidget(uiBinder.createAndBindUi(this));
 
@@ -127,6 +98,7 @@ public class MultipleSelectionTablePanel<C> extends Composite {
 
   }
 
+  @Override
   public void setHeight(String height) {
     this.height = height;
   }
@@ -164,6 +136,7 @@ public class MultipleSelectionTablePanel<C> extends Composite {
         }
       }
     });
+
     final CellPreviewEvent.Handler<C> selectionEventManager = DefaultSelectionEventManager.createCheckboxManager();
     display.setSelectionModel(getSelectionModel(), selectionEventManager);
 
@@ -173,12 +146,7 @@ public class MultipleSelectionTablePanel<C> extends Composite {
     displayScroll.setSize("100%", height);
     table.setWidget(displayScrollWrapper);
 
-    displayScroll.addScrollHandler(new ScrollHandler() {
-      @Override
-      public void onScroll(ScrollEvent event) {
-        handleScrollChanges();
-      }
-    });
+    displayScroll.addScrollHandler(event -> handleScrollChanges());
     handleScrollChanges();
     table.setVisible(true);
   }
@@ -256,7 +224,7 @@ public class MultipleSelectionTablePanel<C> extends Composite {
     }
 
     // fetch rows
-    ListDataProvider<C> dataProvider = new ListDataProvider<C>();
+    ListDataProvider<C> dataProvider = new ListDataProvider<>();
     dataProvider.addDataDisplay(cellTable);
     List<C> list = dataProvider.getList();
     while (rowItems.hasNext()) {

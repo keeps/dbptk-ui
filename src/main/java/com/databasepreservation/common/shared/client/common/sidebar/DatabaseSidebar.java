@@ -72,17 +72,16 @@ public class DatabaseSidebar extends Composite {
    * @return a DatabaseSidebar instance
    */
   public static DatabaseSidebar getInstance(String databaseUUID) {
-    String code = databaseUUID;
 
-    if (code == null) {
+    if (databaseUUID == null) {
       return getEmptyInstance();
     }
 
-    DatabaseSidebar instance = instances.get(code);
+    DatabaseSidebar instance = instances.get(databaseUUID);
     if (instance == null || instance.database == null
       || !ViewerDatabase.Status.AVAILABLE.equals(instance.database.getStatus())) {
       instance = new DatabaseSidebar(databaseUUID);
-      instances.put(code, instance);
+      instances.put(databaseUUID, instance);
     } else {
       // workaround because the same DatabaseSidebar can not belong to multiple
       // widgets
@@ -319,26 +318,11 @@ public class DatabaseSidebar extends Composite {
   private void searchInit() {
     searchInputBox.getElement().setPropertyString("placeholder", messages.menusidebar_filterSidebar());
 
-    searchInputBox.addChangeHandler(new ChangeHandler() {
-      @Override
-      public void onChange(ChangeEvent event) {
-        doSearch();
-      }
-    });
+    searchInputBox.addChangeHandler(event -> doSearch());
 
-    searchInputBox.addKeyUpHandler(new KeyUpHandler() {
-      @Override
-      public void onKeyUp(KeyUpEvent event) {
-        doSearch();
-      }
-    });
+    searchInputBox.addKeyUpHandler(event -> doSearch());
 
-    searchInputButton.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        doSearch();
-      }
-    });
+    searchInputButton.addClickHandler(event -> doSearch());
   }
 
   private void doSearch() {
