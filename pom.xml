@@ -172,6 +172,7 @@
                                 <id>${desktop}</id>
                                 <configuration>
                                     <moduleName>${desktop}</moduleName>
+                                    <jvmArgs>-Djavax.xml.parsers.SAXParserFactory=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl</jvmArgs>
                                 </configuration>
                                 <goals>
                                     <goal>compile</goal>
@@ -182,6 +183,7 @@
                                 <id>${server}</id>
                                 <configuration>
                                     <moduleName>${server}</moduleName>
+                                    <jvmArgs>-Djavax.xml.parsers.SAXParserFactory=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl</jvmArgs>
                                 </configuration>
                                 <goals>
                                     <goal>compile</goal>
@@ -219,6 +221,7 @@
                         <configuration>
                             <moduleName>${server}</moduleName>
                             <launcherDir>${project.build.directory}/${project.build.finalName}/WEB-INF/classes/public/</launcherDir>
+                            <jvmArgs>-Djavax.xml.parsers.SAXParserFactory=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl</jvmArgs>
                         </configuration>
                         <executions>
                             <execution>
@@ -254,6 +257,7 @@
                         <configuration>
                             <moduleName>${desktop}</moduleName>
                             <launcherDir>${project.build.directory}/${project.build.finalName}/WEB-INF/classes/public/</launcherDir>
+                            <jvmArgs>-Djavax.xml.parsers.SAXParserFactory=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl</jvmArgs>
                         </configuration>
                         <executions>
                             <execution>
@@ -339,12 +343,6 @@
             <groupId>com.databasepreservation</groupId>
             <artifactId>dbptk-module-oracle</artifactId>
             <version>${version.dbptk}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.oracle.jdbc</groupId>
-                    <artifactId>xmlparserv2</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.databasepreservation</groupId>
