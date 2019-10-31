@@ -1,5 +1,8 @@
 package com.databasepreservation.common.shared.ViewerStructure;
 
+import com.databasepreservation.common.shared.client.tools.ViewerStringUtils;
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -148,7 +151,11 @@ public class ViewerTable implements Serializable {
     for (ViewerColumn column : columns) {
       if (fieldsToReturn.contains(column.getSolrName())) {
         if (exportDescriptions) {
-          values.add(column.getDisplayName() + "\r\n" + column.getDescription() );
+          if (ViewerStringUtils.isBlank(column.getDescription())) {
+            values.add(column.getDisplayName());
+          } else {
+            values.add(column.getDisplayName() + "\r\n" + column.getDescription());
+          }
         } else {
           values.add(column.getDisplayName());
         }
