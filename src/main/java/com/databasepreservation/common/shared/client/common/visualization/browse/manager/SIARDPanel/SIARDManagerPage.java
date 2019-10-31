@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.databasepreservation.common.client.BrowserService;
+import com.databasepreservation.common.shared.ViewerConstants;
 import com.databasepreservation.common.shared.ViewerStructure.IsIndexed;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.common.shared.client.breadcrumb.BreadcrumbItem;
@@ -14,6 +15,7 @@ import com.databasepreservation.common.shared.client.common.DefaultAsyncCallback
 import com.databasepreservation.common.shared.client.common.LoadingDiv;
 import com.databasepreservation.common.shared.client.common.dialogs.CommonDialogs;
 import com.databasepreservation.common.shared.client.common.dialogs.Dialogs;
+import com.databasepreservation.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.common.shared.client.common.visualization.browse.manager.SIARDPanel.navigation.BrowseNavigationPanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.manager.SIARDPanel.navigation.MetadataNavigationPanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.manager.SIARDPanel.navigation.SIARDNavigationPanel;
@@ -21,6 +23,7 @@ import com.databasepreservation.common.shared.client.common.visualization.browse
 import com.databasepreservation.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.shared.client.tools.HistoryManager;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -159,8 +162,12 @@ public class SIARDManagerPage extends ContentPanel {
       if (ViewerDatabase.Status.AVAILABLE.equals(database.getStatus())
         || ViewerDatabase.Status.ERROR.equals(database.getStatus())
         || ViewerDatabase.Status.METADATA_ONLY.equals(database.getStatus())) {
+        SafeHtml message = messages.SIARDHomePageTextForDeleteAllFromServer();;
+        if(ApplicationType.getType().equals(ViewerConstants.DESKTOP)){
+          message = messages.SIARDHomePageTextForDeleteAllFromDesktop();
+        }
         CommonDialogs.showConfirmDialog(messages.SIARDHomePageDialogTitleForDelete(),
-          messages.SIARDHomePageTextForDeleteAll(), messages.basicActionCancel(), messages.basicActionConfirm(),
+          message, messages.basicActionCancel(), messages.basicActionConfirm(),
           CommonDialogs.Level.DANGER, "500px", new DefaultAsyncCallback<Boolean>() {
             @Override
             public void onSuccess(Boolean result) {

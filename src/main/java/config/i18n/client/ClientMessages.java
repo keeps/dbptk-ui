@@ -697,7 +697,9 @@ public interface ClientMessages extends Messages {
 
   String SIARDHomePageDialogTitleForDelete();
 
-  SafeHtml SIARDHomePageTextForDeleteAll();
+  SafeHtml SIARDHomePageTextForDeleteAllFromServer();
+
+  SafeHtml SIARDHomePageTextForDeleteAllFromDesktop();
 
   SafeHtml SIARDHomePageTextForDeleteFromSolr();
 

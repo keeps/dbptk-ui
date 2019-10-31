@@ -13,6 +13,7 @@ import java.util.*;
 import com.databasepreservation.common.server.index.factory.SolrClientFactory;
 import com.databasepreservation.common.server.index.schema.SolrDefaultCollectionRegistry;
 import com.databasepreservation.common.shared.client.common.search.SavedSearch;
+import com.databasepreservation.common.shared.client.common.utils.ApplicationType;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
@@ -644,9 +645,11 @@ public class SIARDController {
     try {
       ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
 
-      String siardPath = database.getSIARDPath();
-      if (StringUtils.isNotBlank(siardPath) && Files.exists(Paths.get(siardPath))) {
-        deleteSIARDFileFromPath(siardPath, databaseUUID);
+      if(System.getProperty("env", "server").equals(ViewerConstants.SERVER)){
+        String siardPath = database.getSIARDPath();
+        if (StringUtils.isNotBlank(siardPath) && Files.exists(Paths.get(siardPath))) {
+          deleteSIARDFileFromPath(siardPath, databaseUUID);
+        }
       }
 
       String reportPath = database.getValidatorReportPath();
