@@ -36,7 +36,7 @@ public class UploadPanel extends RightPanel {
 
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
 
-  public UploadPanel() {
+  private UploadPanel() {
     initWidget(uiBinder.createAndBindUi(this));
     init();
   }

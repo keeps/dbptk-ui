@@ -3,14 +3,11 @@ package com.databasepreservation.common.shared.client.common.visualization.brows
 import java.util.HashMap;
 import java.util.Map;
 
-import com.databasepreservation.common.shared.ViewerConstants;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerSchema;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerView;
 import com.databasepreservation.common.shared.client.breadcrumb.BreadcrumbPanel;
-import com.databasepreservation.common.shared.client.common.MetadataField;
 import com.databasepreservation.common.shared.client.common.RightPanel;
-import com.databasepreservation.common.shared.client.common.utils.ApplicationType;
+import com.databasepreservation.common.shared.client.common.fields.MetadataField;
 import com.databasepreservation.common.shared.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.shared.client.tools.FontAwesomeIconManager;
@@ -24,9 +21,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
-import com.rabbitmq.client.AMQP;
 import config.i18n.client.ClientMessages;
-import dk.sa.xmlns.diark._1_0.fileindex.FileIndexType;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>

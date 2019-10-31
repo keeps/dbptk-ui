@@ -1,9 +1,7 @@
 package com.databasepreservation.desktop.client.main;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerSIARDBundle;
@@ -13,20 +11,24 @@ import com.databasepreservation.common.shared.client.common.RightPanel;
 import com.databasepreservation.common.shared.client.common.utils.ContentPanelLoader;
 import com.databasepreservation.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.shared.client.common.utils.RightPanelLoader;
-import com.databasepreservation.common.shared.client.common.visualization.browse.*;
+import com.databasepreservation.common.shared.client.common.visualization.browse.ContainerPanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.DatabasePanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.DatabaseSearchPanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.DatabaseSearchesPanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.ReferencesPanel;
+import com.databasepreservation.common.shared.client.common.visualization.browse.RowPanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.foreignKey.ForeignKeyPanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.foreignKey.ForeignKeyPanelOptions;
 import com.databasepreservation.common.shared.client.common.visualization.browse.information.DatabaseInformationPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.ingest.IngestPage;
-import com.databasepreservation.common.shared.client.common.visualization.browse.manager.SIARDPanel.SIARDManagerPage;
-import com.databasepreservation.common.shared.client.common.visualization.browse.metadata.MetadataPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.metadata.MetadataPanelLoad;
-import com.databasepreservation.common.shared.client.common.visualization.browse.metadata.SIARDEditMetadataPage;
-import com.databasepreservation.common.shared.client.common.visualization.browse.metadata.information.MetadataInformation;
-import com.databasepreservation.common.shared.client.common.visualization.browse.metadata.schemas.routines.MetadataRoutinePanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.metadata.schemas.tables.MetadataTablePanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.metadata.schemas.views.MetadataViewPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.metadata.users.MetadataUsersPanel;
+import com.databasepreservation.common.shared.client.common.visualization.ingest.IngestPage;
+import com.databasepreservation.common.shared.client.common.visualization.metadata.MetadataPanel;
+import com.databasepreservation.common.shared.client.common.visualization.metadata.MetadataPanelLoad;
+import com.databasepreservation.common.shared.client.common.visualization.metadata.SIARDEditMetadataPage;
+import com.databasepreservation.common.shared.client.common.visualization.metadata.information.MetadataInformation;
+import com.databasepreservation.common.shared.client.common.visualization.metadata.schemas.routines.MetadataRoutinePanel;
+import com.databasepreservation.common.shared.client.common.visualization.metadata.schemas.tables.MetadataTablePanel;
+import com.databasepreservation.common.shared.client.common.visualization.metadata.schemas.views.MetadataViewPanel;
+import com.databasepreservation.common.shared.client.common.visualization.metadata.users.MetadataUsersPanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.table.TablePanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.table.TablePanelOptions;
 import com.databasepreservation.common.shared.client.common.visualization.browse.table.TableSavedSearchEditPanel;
@@ -34,12 +36,13 @@ import com.databasepreservation.common.shared.client.common.visualization.browse
 import com.databasepreservation.common.shared.client.common.visualization.browse.technicalInformation.ReportPanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.technicalInformation.RoutinesPanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.technicalInformation.UsersPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.validate.ValidatorPage;
 import com.databasepreservation.common.shared.client.common.visualization.browse.view.ViewPanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.view.ViewPanelStructure;
+import com.databasepreservation.common.shared.client.common.visualization.manager.SIARDPanel.SIARDManagerPage;
+import com.databasepreservation.common.shared.client.common.visualization.manager.databasePanel.DatabaseManage;
+import com.databasepreservation.common.shared.client.common.visualization.validation.ValidatorPage;
 import com.databasepreservation.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.desktop.client.dbptk.HomePage;
-import com.databasepreservation.common.shared.client.common.visualization.browse.manager.databasePanel.DatabaseManage;
 import com.databasepreservation.desktop.client.dbptk.wizard.download.DBMSWizardManager;
 import com.databasepreservation.desktop.client.dbptk.wizard.download.SIARDWizardManager;
 import com.databasepreservation.desktop.client.dbptk.wizard.upload.CreateWizardManager;
@@ -218,7 +221,7 @@ public class MainPanelDesktop extends Composite {
         // #table/...
         handleErrorPath(currentHistoryPath);
       }
-    }else if (HistoryManager.ROUTE_TABLE.equals(currentHistoryPath.get(0))) {
+    } else if (HistoryManager.ROUTE_TABLE.equals(currentHistoryPath.get(0))) {
       if (currentHistoryPath.size() == 3) {
         // #table/<databaseUUID>/<tableUUID>
         String databaseUUID = currentHistoryPath.get(1);

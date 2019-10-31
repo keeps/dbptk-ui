@@ -15,7 +15,7 @@ import com.databasepreservation.common.shared.client.common.desktop.GenericField
 import com.databasepreservation.common.shared.client.common.helpers.HelperExportTableData;
 import com.databasepreservation.common.shared.client.common.lists.IndexedColumn;
 import com.databasepreservation.common.shared.client.widgets.MyCellTableResources;
-import com.databasepreservation.common.shared.client.common.helper.HelperValidator;
+import com.databasepreservation.common.shared.client.common.helpers.HelperValidator;
 import com.databasepreservation.common.shared.models.ExternalLobsDialogBoxResult;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;

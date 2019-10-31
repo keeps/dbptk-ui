@@ -317,29 +317,6 @@ public class ReferencesPanel extends RightPanel {
     return tableSearchPanel;
   }
 
-  private SafeHtml getCellHTML(ViewerColumn column) {
-    String label = column.getDisplayName();
-
-    String value = "NULL";
-    ViewerCell cell = record.getCells().get(column.getSolrName());
-    if (cell != null) {
-      if (cell.getValue() != null) {
-        value = cell.getValue();
-      }
-    }
-
-    SafeHtmlBuilder b = new SafeHtmlBuilder();
-    b.appendHtmlConstant("<div class=\"field\">");
-    b.appendHtmlConstant("<div class=\"label\">");
-    b.appendEscaped(label);
-    b.appendHtmlConstant("</div>");
-    b.appendHtmlConstant("<div class=\"value\">");
-    b.appendEscaped(value);
-    b.appendHtmlConstant("</div>");
-    b.appendHtmlConstant("</div>");
-    return b.toSafeHtml();
-  }
-
   private static class Reference implements Comparable<Reference> {
     private ViewerTable table;
     private ViewerForeignKey foreignKey;

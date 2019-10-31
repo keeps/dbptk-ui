@@ -9,6 +9,7 @@ import com.databasepreservation.common.shared.client.common.RightPanel;
 import com.databasepreservation.common.shared.client.common.search.SavedSearch;
 import com.databasepreservation.common.shared.client.common.search.SearchInfo;
 import com.databasepreservation.common.shared.client.common.utils.CommonClientUtils;
+import com.databasepreservation.common.shared.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.common.shared.client.tools.ViewerJsonUtils;
 import com.google.gwt.core.client.GWT;
@@ -17,7 +18,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
@@ -65,7 +65,8 @@ public class TableSavedSearchEditPanel extends RightPanel {
 
     initWidget(uiBinder.createAndBindUi(this));
 
-    mainHeader.setWidget(CommonClientUtils.getSavedSearchHeader(database.getUUID(), messages.loading()));
+    mainHeader.setWidget(CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.SAVED_SEARCH),
+      messages.loading(), "h1"));
 
     BrowserService.Util.getInstance().retrieve(database.getUUID(), SavedSearch.class.getName(), savedSearchUUID,
       new DefaultAsyncCallback<IsIndexed>() {
@@ -95,12 +96,9 @@ public class TableSavedSearchEditPanel extends RightPanel {
    * result, otherwise show a TablePanel
    */
   private void init() {
-    String tableUUID = savedSearch.getTableUUID();
-
     // set UI
-    Label savedSearchLabel = new Label(messages.editingSavedSearch());
-    savedSearchLabel.addStyleName("h1");
-    mainHeader.setWidget(savedSearchLabel);
+    mainHeader.setWidget(CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.SAVED_SEARCH),
+      savedSearch.getName(), "h1"));
 
     // set searchForm and table
     SearchInfo searchInfo = ViewerJsonUtils.getSearchInfoMapper().read(savedSearch.getSearchInfoJson());

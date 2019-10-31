@@ -22,7 +22,7 @@ import com.databasepreservation.desktop.client.dbptk.wizard.WizardPanel;
 import com.databasepreservation.desktop.client.dbptk.wizard.common.connection.Connection;
 import com.databasepreservation.desktop.client.dbptk.wizard.common.exportOptions.MetadataExportOptions;
 import com.databasepreservation.desktop.client.dbptk.wizard.common.exportOptions.SIARDExportOptions;
-import com.databasepreservation.common.shared.client.common.visualization.browse.wizard.common.progressBar.ProgressBarPanel;
+import com.databasepreservation.common.shared.client.common.visualization.progressBar.ProgressBarPanel;
 import com.github.nmorel.gwtjackson.client.ObjectMapper;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;

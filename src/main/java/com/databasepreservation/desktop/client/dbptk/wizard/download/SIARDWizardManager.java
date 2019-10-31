@@ -25,7 +25,7 @@ import com.databasepreservation.desktop.client.dbptk.wizard.WizardManager;
 import com.databasepreservation.desktop.client.dbptk.wizard.WizardPanel;
 import com.databasepreservation.desktop.client.dbptk.wizard.common.exportOptions.MetadataExportOptions;
 import com.databasepreservation.desktop.client.dbptk.wizard.common.exportOptions.SIARDExportOptions;
-import com.databasepreservation.common.shared.client.common.visualization.browse.wizard.common.progressBar.ProgressBarPanel;
+import com.databasepreservation.common.shared.client.common.visualization.progressBar.ProgressBarPanel;
 import com.databasepreservation.desktop.client.dbptk.wizard.upload.TableAndColumns;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;

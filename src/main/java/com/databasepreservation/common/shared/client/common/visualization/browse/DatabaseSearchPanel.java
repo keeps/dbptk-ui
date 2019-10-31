@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.shared.client.common.utils.ApplicationType;
 import org.roda.core.data.v2.index.IndexResult;
 import org.roda.core.data.v2.index.filter.BasicSearchFilterParameter;
 import org.roda.core.data.v2.index.filter.Filter;
@@ -29,10 +28,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyDownEvent;
-import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -41,7 +37,6 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.SelectionChangeEvent;
 
 import config.i18n.client.ClientMessages;
 
@@ -93,7 +88,7 @@ public class DatabaseSearchPanel extends RightPanel {
   @UiField
   LoadingDiv loading;
 
-  final List<TableSearchPanelContainer> tableSearchPanelContainers;
+  private final List<TableSearchPanelContainer> tableSearchPanelContainers;
 
   private ViewerDatabase database;
 
@@ -143,21 +138,13 @@ public class DatabaseSearchPanel extends RightPanel {
 
     searchInputBox.getElement().setPropertyString("placeholder", messages.searchPlaceholder());
 
-    searchInputBox.addKeyDownHandler(new KeyDownHandler() {
-      @Override
-      public void onKeyDown(KeyDownEvent event) {
-        if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-          doSearch();
-        }
-      }
-    });
-
-    searchInputButton.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
+    searchInputBox.addKeyDownHandler(event -> {
+      if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
         doSearch();
       }
     });
+
+    searchInputButton.addClickHandler(event -> doSearch());
   }
 
   @Override
@@ -225,20 +212,12 @@ public class DatabaseSearchPanel extends RightPanel {
 
       tableContainer.setWidget(tableRowList);
 
-      tableRowList.addValueChangeHandler(new ValueChangeHandler<IndexResult<ViewerRow>>() {
-        @Override
-        public void onValueChange(ValueChangeEvent<IndexResult<ViewerRow>> event) {
-          searchCompletedEventHandler(event);
-        }
-      });
+      tableRowList.addValueChangeHandler(this::searchCompletedEventHandler);
 
-      tableRowList.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-        @Override
-        public void onSelectionChange(SelectionChangeEvent event) {
-          ViewerRow record = tableRowList.getSelectionModel().getSelectedObject();
-          if (record != null) {
-            HistoryManager.gotoRecord(database.getUUID(), table.getUUID(), record.getUUID());
-          }
+      tableRowList.getSelectionModel().addSelectionChangeHandler(event -> {
+        ViewerRow record = tableRowList.getSelectionModel().getSelectedObject();
+        if (record != null) {
+          HistoryManager.gotoRecord(database.getUUID(), table.getUUID(), record.getUUID());
         }
       });
     }
