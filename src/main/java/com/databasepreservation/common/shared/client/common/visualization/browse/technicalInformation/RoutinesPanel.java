@@ -165,7 +165,7 @@ public class RoutinesPanel extends RightPanel {
     panel.addStyleName("card");
 
     Label header = new Label(routine.getName());
-    header.addStyleName("h4");
+    header.addStyleName("card-header");
 
     FlowPanel info = getRoutineDescription(routine);
 

@@ -67,7 +67,10 @@ public class DatabaseInformationPanel extends RightPanel {
   SimpleCheckBox advancedSwitch;
 
   @UiField
-  Label switchLabel, labelForSwitch;
+  Label switchLabel;
+
+  @UiField
+  Label labelForSwitch;
 
   private DatabaseInformationPanel(ViewerDatabase database) {
     this.database = database;
@@ -82,16 +85,13 @@ public class DatabaseInformationPanel extends RightPanel {
   }
 
   private void init() {
-    labelForSwitch.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        advancedSwitch.setValue(!advancedSwitch.getValue(), true); // workaround for ie11
-        advancedMode = !advancedMode;
-        metadataContent.clear();
-        initMetadataContent();
-        dataContent.clear();
-        initDataContent();
-      }
+    labelForSwitch.addClickHandler(event -> {
+      advancedSwitch.setValue(!advancedSwitch.getValue(), true); // workaround for ie11
+      advancedMode = !advancedMode;
+      metadataContent.clear();
+      initMetadataContent();
+      dataContent.clear();
+      initDataContent();
     });
 
     cardTitle.setWidget(CommonClientUtils.getCardTitle(messages.menusidebar_database()));

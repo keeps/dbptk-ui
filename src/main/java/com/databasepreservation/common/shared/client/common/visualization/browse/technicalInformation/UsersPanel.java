@@ -12,6 +12,7 @@ import com.databasepreservation.common.shared.ViewerStructure.ViewerUserStructur
 import com.databasepreservation.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.shared.client.common.RightPanel;
 import com.databasepreservation.common.shared.client.common.lists.BasicTablePanel;
+import com.databasepreservation.common.shared.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.shared.client.tools.BreadcrumbManager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -20,6 +21,7 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
@@ -90,13 +92,13 @@ public class UsersPanel extends RightPanel {
     final List<ViewerUserStructure> users = metadata.getUsers();
 
     Label header = new Label(messages.titleUsers());
-    header.addStyleName("h4");
+    header.addStyleName("card-header");
 
     HTMLPanel info = new HTMLPanel("");
     if (users.isEmpty()) {
       return new BasicTablePanel<>(header, messages.databaseDoesNotContainUsers());
     } else {
-      return new BasicTablePanel<>(header, info, users.iterator(),
+      return new BasicTablePanel<ViewerUserStructure>(header, info, users.iterator(),
 
         new BasicTablePanel.ColumnInfo<>(messages.name(), 15, new TextColumn<ViewerUserStructure>() {
           @Override
@@ -120,14 +122,14 @@ public class UsersPanel extends RightPanel {
     final List<ViewerRoleStructure> roles = metadata.getRoles();
 
     Label header = new Label(messages.titleRoles());
-    header.addStyleName("h4");
+    header.addStyleName("card-header");
 
     HTMLPanel info = new HTMLPanel("");
 
     if (roles.isEmpty()) {
       return new BasicTablePanel<>(header, messages.databaseDoesNotContainRoles());
     } else {
-      return new BasicTablePanel<>(header, info, roles.iterator(),
+      return new BasicTablePanel<ViewerRoleStructure>(header, info, roles.iterator(),
 
         new BasicTablePanel.ColumnInfo<>(messages.name(), 15, new TextColumn<ViewerRoleStructure>() {
           @Override
@@ -158,14 +160,14 @@ public class UsersPanel extends RightPanel {
     final List<ViewerPrivilegeStructure> privileges = metadata.getPrivileges();
 
     Label header = new Label(messages.titlePrivileges());
-    header.addStyleName("h4");
+    header.addStyleName("card-header");
 
     HTMLPanel info = new HTMLPanel("");
 
     if (privileges.isEmpty()) {
       return new BasicTablePanel<>(header, messages.databaseDoesNotContainPrivileges());
     } else {
-      return new BasicTablePanel<>(header, info, privileges.iterator(),
+      return new BasicTablePanel<ViewerPrivilegeStructure>(header, info, privileges.iterator(),
 
         new BasicTablePanel.ColumnInfo<>(messages.titleType(), 15, new TextColumn<ViewerPrivilegeStructure>() {
           @Override

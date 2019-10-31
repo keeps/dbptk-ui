@@ -10,13 +10,11 @@ import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerForeignKey;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerPrimaryKey;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerReference;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerSchema;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerTable;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerView;
 import com.databasepreservation.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.shared.client.common.RightPanel;
 import com.databasepreservation.common.shared.client.common.lists.MultipleSelectionTablePanel;
-import com.databasepreservation.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.common.shared.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.shared.client.tools.BreadcrumbManager;
@@ -25,7 +23,6 @@ import com.databasepreservation.common.shared.client.tools.HistoryManager;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -42,7 +39,6 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.MultiSelectionModel;
 
-import com.rabbitmq.client.AMQP;
 import config.i18n.client.ClientMessages;
 
 /**
@@ -74,10 +70,22 @@ public class TablePanelOptions extends RightPanel {
   SimplePanel mainHeader;
 
   @UiField
-  FlowPanel mainContainer, content, customButtons;
+  FlowPanel mainContainer;
 
   @UiField
-  Button btnBack, btnUpdate, options;
+  FlowPanel content;
+
+  @UiField
+  FlowPanel customButtons;
+
+  @UiField
+  Button btnBack;
+
+  @UiField
+  Button btnUpdate;
+
+  @UiField
+  Button options;
 
   private ViewerDatabase database;
   private ViewerTable table;

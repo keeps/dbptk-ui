@@ -5,18 +5,20 @@ import com.databasepreservation.common.shared.ViewerStructure.IsIndexed;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.shared.client.common.DefaultAsyncCallback;
+import com.databasepreservation.common.shared.client.common.MetadataField;
 import com.databasepreservation.common.shared.client.common.RightPanel;
 import com.databasepreservation.common.shared.client.common.search.SavedSearch;
 import com.databasepreservation.common.shared.client.common.search.SearchInfo;
 import com.databasepreservation.common.shared.client.common.search.TableSearchPanel;
 import com.databasepreservation.common.shared.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.shared.client.tools.BreadcrumbManager;
+import com.databasepreservation.common.shared.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.shared.client.tools.ViewerJsonUtils;
 import com.databasepreservation.common.shared.client.tools.ViewerStringUtils;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -45,12 +47,10 @@ public class TableSavedSearchPanel extends RightPanel {
   SimplePanel mainHeader;
 
   @UiField
-  HTML description;
+  FlowPanel description;
 
   @UiField
   SimplePanel tableSearchPanelContainer;
-
-  private TableSearchPanel tableSearchPanel;
 
   private TableSavedSearchPanel(ViewerDatabase viewerDatabase, final String savedSearchUUID) {
     database = viewerDatabase;
@@ -58,7 +58,8 @@ public class TableSavedSearchPanel extends RightPanel {
 
     initWidget(uiBinder.createAndBindUi(this));
 
-    mainHeader.setWidget(CommonClientUtils.getSavedSearchHeader(database.getUUID(), "Loading..."));
+    mainHeader.setWidget(
+      CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.LOADING), "Loading...", "h1"));
 
     BrowserService.Util.getInstance().retrieve(database.getUUID(), SavedSearch.class.getName(), savedSearchUUID,
       new DefaultAsyncCallback<IsIndexed>() {
@@ -90,15 +91,19 @@ public class TableSavedSearchPanel extends RightPanel {
     String tableUUID = savedSearch.getTableUUID();
 
     // set UI
-    mainHeader.setWidget(CommonClientUtils.getSavedSearchHeader(database.getUUID(), savedSearch.getName()));
+    mainHeader.setWidget(CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.SAVED_SEARCH),
+      savedSearch.getName(), "h1"));
+
     if (ViewerStringUtils.isNotBlank(savedSearch.getDescription())) {
-      description.setHTML(CommonClientUtils.getFieldHTML(messages.description(), savedSearch.getDescription()));
+      MetadataField instance = MetadataField.createInstance(savedSearch.getDescription());
+      instance.setCSS("table-row-description");
+      description.add(instance);
     }
 
     // set searchForm and table
     SearchInfo searchInfo = ViewerJsonUtils.getSearchInfoMapper().read(savedSearch.getSearchInfoJson());
     if (SearchInfo.isPresentAndValid(searchInfo)) {
-      tableSearchPanel = new TableSearchPanel(searchInfo);
+      TableSearchPanel tableSearchPanel = new TableSearchPanel(searchInfo);
       tableSearchPanel.provideSource(database, database.getMetadata().getTable(tableUUID));
       tableSearchPanelContainer.setWidget(tableSearchPanel);
     } else {

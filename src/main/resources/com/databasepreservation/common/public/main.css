@@ -1371,6 +1371,13 @@ html, body, .desktop-main {
     margin: 2.5rem 4rem 0rem 6rem;
 }
 
+.form-container-left {
+    width: auto;
+    height: auto;
+    margin: 2.5rem 4rem 0 0;
+}
+
+
 .form-lobs{
     margin-left: 4rem;
 }

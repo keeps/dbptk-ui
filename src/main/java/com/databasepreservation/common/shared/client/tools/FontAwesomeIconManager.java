@@ -47,6 +47,7 @@ public class FontAwesomeIconManager {
   public static final String SIARD_VALIDATIONS = "check";
   public static final String COG = "cog";
   public static final String SPIN = "spin";
+  public static final String LOADING = "spinner";
   public static final String CHECK = "check-circle";
   public static final String TIMES = "times-circle";
   public static final String WARNING = "exclamation-triangle";

@@ -4,18 +4,25 @@
 
     <ui:with field='messages' type='config.i18n.client.ClientMessages' />
     <g:FlowPanel>
-        <g:SimplePanel addStyleNames="h1" ui:field="mainHeader">
+        <g:SimplePanel addStyleNames="structure-header" ui:field="mainHeader">
             <g:Label><ui:text from='{messages.loading}' /></g:Label>
         </g:SimplePanel>
 
-        <g:FlowPanel styleName="wui-user-data" addStyleNames="wrapper skip_padding">
-            <g:FlowPanel addStyleNames="row full_width no_padding">
-                <g:FlowPanel addStyleNames="wui-data-panel">
-                    <g:Label addStyleNames="form-label"><ui:text from='{messages.name}' /></g:Label>
-                    <g:TextBox ui:field="textBoxName" addStyleNames="form-textbox" />
+        <g:FlowPanel>
+            <g:FlowPanel>
+                <g:FlowPanel addStyleNames="form-container-left">
+                    <g:FlowPanel addStyleNames="form-row">
+                        <g:Label addStyleNames="form-label-spaced"><ui:text from='{messages.name}' /></g:Label>
+                        <g:TextBox ui:field="textBoxName" addStyleNames="form-textbox" />
+                    </g:FlowPanel>
 
-                    <g:Label addStyleNames="form-label"><ui:text from='{messages.description}' /></g:Label>
-                    <g:TextArea ui:field="textAreaDescription" addStyleNames="form-textbox" />
+                    <g:FlowPanel addStyleNames="form-row">
+                        <g:Label addStyleNames="form-label-spaced"><ui:text from='{messages.description}' /></g:Label>
+                        <g:TextArea ui:field="textAreaDescription" addStyleNames="form-textbox" />
+                    </g:FlowPanel>
+
+
+
 
                     <g:Button addStyleNames="btn btn-play btn-margin-right" ui:field="buttonApply">
                         <ui:text from='{messages.savedSearch_Save}' />
