@@ -2170,7 +2170,6 @@ html, body, .desktop-main {
 }
 
 .progress-report.validation{
-    height: auto;
     max-height: initial;
     flex: 1 1 auto;
 }
