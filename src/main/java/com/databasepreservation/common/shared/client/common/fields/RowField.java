@@ -65,6 +65,15 @@ public class RowField extends Composite {
     }
   }
 
+  public void addColumnDescription(String text) {
+    SimplePanel description = new SimplePanel();
+    description.addStyleName("metadata-information-element-value text-muted");
+    final HTML html = new HTML(text);
+    html.addStyleName("column-description");
+    description.setWidget(html);
+    rowField.add(description);
+  }
+
   public void addRelatedTo(SafeHtml safeHtml) {
     addRelatedTo(safeHtml, null);
   }

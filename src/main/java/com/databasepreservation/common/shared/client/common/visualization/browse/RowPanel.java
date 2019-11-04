@@ -43,6 +43,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
+import javassist.tools.web.Viewer;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -121,7 +122,6 @@ public class RowPanel extends RightPanel {
       GWT.log(table.getSchemaName());
       GWT.log(table.getName());
       html = SafeHtmlUtils.fromSafeConstant(table.getSchemaName() + " " + separatorIconTag + " " + table.getName());
-      GWT.log("" + html);
       recordHeader.setWidget(CommonClientUtils.getHeader(iconTag, html, "h1"));
     }
   }
@@ -270,6 +270,10 @@ public class RowPanel extends RightPanel {
       } else {
         rowField = RowField.createInstance(label, new HTML(value));
       }
+    }
+
+    if (ViewerStringUtils.isNotBlank(column.getDescription())) {
+      rowField.addColumnDescription(column.getDescription());
     }
 
     if (relatedTo != null && !relatedTo.isEmpty()) {
