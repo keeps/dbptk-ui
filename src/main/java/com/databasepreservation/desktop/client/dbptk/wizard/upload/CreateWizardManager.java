@@ -14,6 +14,7 @@ import com.databasepreservation.common.shared.client.widgets.Toast;
 import com.databasepreservation.common.shared.models.wizardParameters.ConnectionParameters;
 import com.databasepreservation.common.shared.models.wizardParameters.CustomViewsParameters;
 import com.databasepreservation.common.shared.models.wizardParameters.ExportOptionsParameters;
+import com.databasepreservation.common.shared.models.wizardParameters.ExternalLOBsParameter;
 import com.databasepreservation.common.shared.models.wizardParameters.MetadataExportOptionsParameters;
 import com.databasepreservation.common.shared.models.wizardParameters.TableAndColumnsParameters;
 import com.databasepreservation.common.shared.client.common.dialogs.Dialogs;
@@ -100,9 +101,7 @@ public class CreateWizardManager extends WizardManager {
   private CreateWizardManager() {
     initWidget(binder.createAndBindUi(this));
 
-    btnNext.addClickHandler(event -> {
-      handleWizard();
-    });
+    btnNext.addClickHandler(event -> handleWizard());
 
     btnBack.addClickHandler(event -> {
       if (position != 0) {

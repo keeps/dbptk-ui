@@ -83,7 +83,13 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
   private static TableAndColumnsUiBinder binder = GWT.create(TableAndColumnsUiBinder.class);
 
   @UiField
-  FlowPanel content, tableAndColumnsList, panel;
+  FlowPanel content;
+
+  @UiField
+  FlowPanel tableAndColumnsList;
+
+  @UiField
+  FlowPanel panel;
 
   private static HashMap<String, TableAndColumns> instances = new HashMap<>();
   private TableAndColumnsSidebar tableAndColumnsSidebar;
@@ -106,6 +112,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
   private HashMap<String, Boolean> initialLoading = new HashMap<>();
   private boolean externalLOBsDelete = false;
   private String externalLOBsBtnText = messages.basicActionAdd();
+  private boolean doSSH = false;
 
   public static TableAndColumns getInstance(String databaseUUID, ConnectionParameters values) {
     if (instances.get(values.getURLConnection()) == null) {
@@ -157,6 +164,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
     initWidget(binder.createAndBindUi(this));
 
     this.databaseUUID = values.getURLConnection();
+    this.doSSH = values.doSSH();
     final DialogBox dialogBox = Dialogs.showWaitResponse(messages.tableAndColumnsPageDialogTitleForRetrievingInformation(), messages.tableAndColumnsPageDialogMessageForRetrievingInformation());
     CreateWizardManager.getInstance().enableNext(false);
     BrowserService.Util.getInstance().getSchemaInformation(databaseUUID, values,
@@ -648,6 +656,9 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
       final ComboBoxField referenceType = ComboBoxField
         .createInstance(messages.tableAndColumnsPageLabelForReferenceType());
       referenceType.setComboBoxValue("File System", "file-system");
+      if (doSSH) {
+        referenceType.setComboBoxValue("Remote File System", "remote-file-system");
+      }
       referenceType.setCSSMetadata("form-row", "form-label-spaced", "form-combobox");
 
       FlowPanel helperReferenceType = new FlowPanel();
@@ -677,8 +688,10 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
         helperFileUploadField.add(spanFileUploadField);
 
         if (externalLOBsParameters.get(id) != null) {
-          String displayPath = PathUtils.getFileName(externalLOBsParameters.get(id).getBasePath());
-          fileUploadField.setPathLocation(displayPath, externalLOBsParameters.get(id).getBasePath());
+          if (externalLOBsParameters.get(id).getBasePath() != null) {
+            String displayPath = PathUtils.getFileName(externalLOBsParameters.get(id).getBasePath());
+            fileUploadField.setPathLocation(displayPath, externalLOBsParameters.get(id).getBasePath());
+          }
           externalLOBsDelete = true;
           externalLOBsBtnText = messages.basicActionUpdate();
         }
@@ -719,6 +732,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
                   String id = object.getDisplayName() + "_" + viewerTable.getUUID();
                   externalLOBsDelete = false;
                   externalLOBsParameters.remove(id);
+                  externalLOBsBtnText = messages.basicActionAdd();
                   MultipleSelectionTablePanel<ViewerColumn> viewerColumnMultipleSelectionTablePanel = getColumns(
                       viewerTable.getUUID());
                   viewerColumnMultipleSelectionTablePanel.getDisplay().redrawRow(index);
@@ -832,11 +846,17 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
           String id = object.getDisplayName() + "_" + viewerTable.getUUID();
           if (externalLOBsParameters.get(id) != null) {
             StringBuilder sb = new StringBuilder();
+
+
             final ExternalLOBsParameter externalLOBsParameter = externalLOBsParameters.get(id);
               sb.append(messages.tableAndColumnsPageLabelForReferenceType()).append(": ")
                 .append(externalLOBsParameter.getReferenceType()).append("\n")
-                .append(messages.tableAndColumnsPageLabelForBasePath()).append(": ")
-                .append(externalLOBsParameter.getBasePath());
+                .append(messages.tableAndColumnsPageLabelForBasePath()).append(": ");
+              if (externalLOBsParameter.getBasePath() == null) {
+                sb.append(messages.emptyBasePath());
+              } else {
+                sb.append(externalLOBsParameter.getBasePath());
+              }
             return SafeHtmlUtils.fromString(sb.toString());
           }
           return null;

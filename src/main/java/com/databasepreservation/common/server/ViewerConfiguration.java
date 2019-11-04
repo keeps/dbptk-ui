@@ -95,6 +95,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   private static Path indexPath;
   private static Path SIARDFilesPath;
   private static Path SIARDReportValidationPath;
+  private static Path mapDBPath;
 
   // Configuration related objects
   private static CompositeConfiguration viewerConfiguration = null;
@@ -179,6 +180,8 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   public Path getIndexPath() {
     return indexPath;
   }
+
+  public Path getMapDBPath() { return mapDBPath; }
 
   public Path getSIARDFilesPath() {
     return SIARDFilesPath;
@@ -284,6 +287,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     indexPath = viewerHomePath.resolve(ViewerConstants.VIEWER_INDEX_FOLDER);
     SIARDFilesPath = viewerHomePath.resolve(ViewerConstants.VIEWER_SIARD_FILES_FOLDER);
     SIARDReportValidationPath = viewerHomePath.resolve(ViewerConstants.VIEWER_VALIDATIONS_REPORTS_FOLDER);
+    mapDBPath = viewerHomePath.resolve(ViewerConstants.VIEWER_MAPDB_FOLDER);
 
     configureLogback();
 
@@ -320,6 +324,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     essentialDirectories.add(reportsPath);
     essentialDirectories.add(SIARDFilesPath);
     essentialDirectories.add(SIARDReportValidationPath);
+    essentialDirectories.add(mapDBPath);
 
     for (Path path : essentialDirectories) {
       try {

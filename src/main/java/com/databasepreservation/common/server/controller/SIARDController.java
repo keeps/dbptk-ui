@@ -596,6 +596,8 @@ public class SIARDController {
         solrManager.updateSIARDValidationInformation(databaseUUID, ViewerDatabase.ValidationStatus.VALIDATION_RUNNING,
           validationReportPath, dbptkVersion, new DateTime().toString());
 
+        System.setProperty("dbptk.memory.dir", ViewerConfiguration.getInstance().getMapDBPath().toAbsolutePath().toString());
+
         valid = siardValidation.validate();
 
         ViewerDatabase.ValidationStatus status;

@@ -1060,4 +1060,6 @@ public interface ClientMessages extends Messages {
   String viewPanelViewerNotMaterialized();
 
   String viewPanelInformationLabel();
+
+  String emptyBasePath();
 }
