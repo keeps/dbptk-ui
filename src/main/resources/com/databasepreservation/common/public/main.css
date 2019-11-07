@@ -1487,6 +1487,7 @@ html, body, .desktop-main {
 
 .form-helper .form-textbox {
     margin-bottom: 0;
+    min-width: 0;
 }
 
 .form-helper .form-checkbox {
