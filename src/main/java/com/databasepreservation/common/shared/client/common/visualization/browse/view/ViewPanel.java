@@ -13,6 +13,7 @@ import com.databasepreservation.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.shared.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.common.shared.client.tools.ViewerStringUtils;
+import com.databasepreservation.common.shared.client.widgets.Alert;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -90,7 +91,6 @@ public class ViewPanel extends RightPanel {
       description.add(instance);
     }
 
-    content.add(CommonClientUtils.getPanelInformation(messages.viewPanelInformationLabel(), messages.viewPanelViewerNotMaterialized(), "metadata-information-element-value"));
-
+    content.add(new Alert(Alert.MessageAlertType.PRIMARY, messages.viewPanelViewerNotMaterialized()));
   }
 }
