@@ -16,7 +16,7 @@ import com.databasepreservation.common.shared.client.common.DefaultAsyncCallback
 import com.databasepreservation.common.shared.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.common.shared.client.common.utils.JavascriptUtils;
-import com.databasepreservation.common.shared.client.common.visualization.manager.SIARDPanel.SIARDManagerPage;
+import com.databasepreservation.common.shared.client.common.visualization.manager.SIARDPanel.navigation.ValidationNavigationPanel;
 import com.databasepreservation.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.shared.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.shared.client.tools.HistoryManager;
@@ -32,12 +32,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.FocusPanel;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 
 import config.i18n.client.ClientMessages;
 
@@ -207,7 +202,13 @@ public class ValidatorPage extends ContentPanel {
             numberOfWarnings = result.getNumberOfWarnings();
             numberOfErrors = result.getNumberOfErrors();
             stopUpdating();
-            SIARDManagerPage.getInstance(database).refreshInstance(database.getUUID());
+            BrowserService.Util.getInstance().getDateTimeHumanized(database.getValidatedAt(),
+              new DefaultAsyncCallback<String>() {
+                @Override
+                public void onSuccess(String result) {
+                  ValidationNavigationPanel.getInstance(database, result).update(database);
+                }
+              });
             if (numberOfErrors > 0) {
               Dialogs.showErrors(messages.validatorPageTextForTitle(),
                 messages.validatorPageTextForDialogFailureInformation(database.getMetadata().getName(), numberOfErrors),
