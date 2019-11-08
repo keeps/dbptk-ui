@@ -17,7 +17,10 @@ import com.databasepreservation.common.shared.client.common.visualization.manage
 import com.databasepreservation.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.common.shared.client.tools.Humanize;
 import com.databasepreservation.common.shared.client.tools.PathUtils;
+import com.databasepreservation.common.shared.client.tools.RestUtils;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.safehtml.shared.SafeUri;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 
@@ -78,6 +81,11 @@ public class SIARDNavigationPanel {
       if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
         btnShowFiles.addClickHandler(clickEvent -> {
           JavascriptUtils.showItemInFolder(database.getSIARDPath());
+        });
+      } else {
+        btnShowFiles.addClickHandler(clickEvent -> {
+          SafeUri downloadUri = RestUtils.createFileResourceDownloadSIARDUri(database.getUUID());
+          Window.Location.assign(downloadUri.asString());
         });
       }
     }

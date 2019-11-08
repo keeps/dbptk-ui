@@ -175,6 +175,7 @@ public class DbvtkExportModule implements DatabaseExportModule {
   @Override
   public void handleDataCloseSchema(String schemaName) throws ModuleException {
     // committing + optimizing after whole database
+    //TODO: Foreign Key partials updates
   }
 
   /**

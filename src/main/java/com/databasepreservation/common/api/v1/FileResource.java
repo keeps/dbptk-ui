@@ -1,6 +1,6 @@
 package com.databasepreservation.common.api.v1;
 
-import java.io.IOException;
+import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Paths;
 
@@ -10,22 +10,25 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import com.google.common.io.Files;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.glassfish.jersey.server.JSONP;
 import org.roda.core.data.common.RodaConstants;
 import org.roda.core.data.exceptions.AlreadyExistsException;
 import org.roda.core.data.exceptions.GenericException;
+import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RODAException;
 import org.springframework.stereotype.Service;
 
 import com.databasepreservation.common.api.utils.ApiResponseMessage;
 import com.databasepreservation.common.api.utils.ApiUtils;
-import com.databasepreservation.common.api.utils.ExtraMediaType;
 import com.databasepreservation.common.server.ViewerConfiguration;
+import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.controller.Browser;
+import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
 import com.databasepreservation.common.shared.ViewerConstants;
+import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
+import com.google.common.io.Files;
 
 import io.swagger.annotations.*;
 
@@ -73,5 +76,53 @@ public class FileResource {
     }
 
     return Response.ok(new ApiResponseMessage(ApiResponseMessage.OK, path.toString()), mediaType).build();
+  }
+
+  @GET
+  @Path(ViewerConstants.API_SEP + ViewerConstants.API_PATH_PARAM_SIARD + ViewerConstants.API_SEP + "{"
+    + ViewerConstants.API_PATH_PARAM_DATABASE_UUID + "}")
+  @Produces(MediaType.APPLICATION_OCTET_STREAM)
+  public Response getSIARDFile(@PathParam(ViewerConstants.API_PATH_PARAM_DATABASE_UUID) String databaseUUID)
+    throws NotFoundException, GenericException {
+
+    DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
+
+    ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
+    if (database == null) {
+      throw new NotFoundException("Database not found");
+    }
+
+    File file = new File(database.getSIARDPath());
+    if (!file.exists()) {
+      throw new NotFoundException("SIARD file not found");
+    }
+
+    Response.ResponseBuilder responseBuilder = Response.ok(file);
+    responseBuilder.header("Content-Disposition", "attachment; filename=\"" + file.getName() + "\"");
+    return responseBuilder.build();
+  }
+
+  @GET
+  @Path(ViewerConstants.API_SEP + ViewerConstants.API_PATH_PARAM_VALIDATION_REPORT + ViewerConstants.API_SEP + "{"
+    + ViewerConstants.API_PATH_PARAM_DATABASE_UUID + "}")
+  @Produces(MediaType.APPLICATION_OCTET_STREAM)
+  public Response getValidationReportFile(@PathParam(ViewerConstants.API_PATH_PARAM_DATABASE_UUID) String databaseUUID)
+    throws NotFoundException, GenericException {
+
+    DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
+
+    ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
+    if (database == null) {
+      throw new NotFoundException("Database not found");
+    }
+
+    File file = new File(database.getValidatorReportPath());
+    if (!file.exists()) {
+      throw new NotFoundException("validation report file not found");
+    }
+
+    Response.ResponseBuilder responseBuilder = Response.ok(file);
+    responseBuilder.header("Content-Disposition", "attachment; filename=\"" + file.getName() + "\"");
+    return responseBuilder.build();
   }
 }

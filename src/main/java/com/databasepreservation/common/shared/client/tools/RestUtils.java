@@ -20,4 +20,22 @@ public class RestUtils {
       .append(ViewerConstants.API_V1_REPORT_RESOURCE).append(ViewerConstants.API_SEP).append(databaseUUID);
     return UriUtils.fromSafeConstant(b.toString());
   }
+
+  public static SafeUri createFileResourceDownloadSIARDUri(String databaseUUID) {
+    // api/v1/files/siard/{databaseUUID}
+    StringBuilder b = new StringBuilder().append(ViewerConstants.API_SERVLET);
+    b.append(ViewerConstants.API_V1_FILE_RESOURCE).append(ViewerConstants.API_SEP)
+      .append(ViewerConstants.API_PATH_PARAM_SIARD).append(ViewerConstants.API_SEP).append(databaseUUID);
+
+    return UriUtils.fromSafeConstant(b.toString());
+  }
+
+  public static SafeUri createFileResourceDownloadValidationReportUri(String databaseUUID) {
+    // api/v1/files/validation-report/{databaseUUID}/
+    StringBuilder b = new StringBuilder().append(ViewerConstants.API_SERVLET);
+    b.append(ViewerConstants.API_V1_FILE_RESOURCE).append(ViewerConstants.API_SEP)
+      .append(ViewerConstants.API_PATH_PARAM_VALIDATION_REPORT).append(ViewerConstants.API_SEP).append(databaseUUID);
+
+    return UriUtils.fromSafeConstant(b.toString());
+  }
 }

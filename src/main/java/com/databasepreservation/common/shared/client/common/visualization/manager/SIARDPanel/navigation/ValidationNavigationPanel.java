@@ -18,9 +18,12 @@ import com.databasepreservation.common.shared.client.common.visualization.manage
 import com.databasepreservation.common.shared.client.common.visualization.validation.ValidatorPage;
 import com.databasepreservation.common.shared.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.shared.client.tools.HistoryManager;
+import com.databasepreservation.common.shared.client.tools.RestUtils;
 import com.databasepreservation.common.shared.client.tools.SolrHumanizer;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.safehtml.shared.SafeUri;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -114,6 +117,11 @@ public class ValidationNavigationPanel {
     if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
       btnSeeReport.addClickHandler(clickEvent -> {
         JavascriptUtils.showItem(database.getValidatorReportPath());
+      });
+    } else {
+      btnSeeReport.addClickHandler(clickEvent -> {
+        SafeUri downloadUri = RestUtils.createFileResourceDownloadValidationReportUri(database.getUUID());
+        Window.Location.assign(downloadUri.asString());
       });
     }
 

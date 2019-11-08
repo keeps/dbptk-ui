@@ -20,11 +20,13 @@ import com.databasepreservation.common.shared.client.common.visualization.manage
 import com.databasepreservation.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.shared.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.shared.client.tools.HistoryManager;
+import com.databasepreservation.common.shared.client.tools.RestUtils;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.MouseWheelEvent;
 import com.google.gwt.http.client.URL;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -399,6 +401,9 @@ public class ValidatorPage extends ContentPanel {
     report.addClickHandler(event -> {
       if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
         JavascriptUtils.showItem(reporterPath);
+      } else {
+        SafeUri downloadUri = RestUtils.createFileResourceDownloadValidationReportUri(database.getUUID());
+        Window.Location.assign(downloadUri.asString());
       }
     });
     report.setEnabled(enable);

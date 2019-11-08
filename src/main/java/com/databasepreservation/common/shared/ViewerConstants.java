@@ -226,6 +226,8 @@ public class ViewerConstants {
   public static final String API_V1_REPORT_RESOURCE = "/v1/report";
 
   public static final String API_V1_FILE_RESOURCE = "/v1/file";
+  public static final String API_PATH_PARAM_SIARD = "siard";
+  public static final String API_PATH_PARAM_VALIDATION_REPORT = "validation";
 
   /*
    * Search field types from RODA, plus a few new ones

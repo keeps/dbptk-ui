@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.shared.client.tools.*;
+import com.google.gwt.safehtml.shared.SafeUri;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
 import org.roda.core.data.v2.index.IndexResult;
 import org.roda.core.data.v2.index.facet.Facets;
@@ -18,10 +21,6 @@ import com.databasepreservation.common.shared.client.ClientLogger;
 import com.databasepreservation.common.shared.client.common.lists.BasicAsyncTableCell;
 import com.databasepreservation.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.common.shared.client.common.utils.JavascriptUtils;
-import com.databasepreservation.common.shared.client.tools.HistoryManager;
-import com.databasepreservation.common.shared.client.tools.Humanize;
-import com.databasepreservation.common.shared.client.tools.PathUtils;
-import com.databasepreservation.common.shared.client.tools.SolrHumanizer;
 import com.google.gwt.cell.client.ButtonCell;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.SafeHtmlCell;
@@ -108,6 +107,9 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
     locationColumn.setFieldUpdater((index, object, value) -> {
       if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
         JavascriptUtils.showItemInFolder(object.getSIARDPath());
+      } else {
+        SafeUri downloadUri = RestUtils.createFileResourceDownloadSIARDUri(object.getUUID());
+        Window.Location.assign(downloadUri.asString());
       }
     });
 
