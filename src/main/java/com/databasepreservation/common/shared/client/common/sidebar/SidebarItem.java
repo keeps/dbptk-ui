@@ -1,10 +1,15 @@
 package com.databasepreservation.common.shared.client.common.sidebar;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
 /**
@@ -17,7 +22,7 @@ public class SidebarItem extends Composite {
   private static SidebarItemUiBinder uiBinder = GWT.create(SidebarItemUiBinder.class);
 
   @UiField
-  Label label;
+  HTMLPanel label;
 
   protected Widget getLabelAsWidget() {
     return label;
@@ -31,18 +36,32 @@ public class SidebarItem extends Composite {
     setText(text);
   }
 
+  public SidebarItem(SafeHtml safeHtml) {
+    initWidget(uiBinder.createAndBindUi(this));
+    setTextBySafeHTML(safeHtml);
+  }
+
   public SidebarItem addIcon(String iconName) {
     getLabelAsWidget().addStyleName("fa-" + iconName);
     return this;
   }
 
   public SidebarItem setText(String text) {
-    label.setText(text);
+    final InlineHTML inlineHTML = new InlineHTML();
+    inlineHTML.setText(text);
+    label.add(inlineHTML);
+    return this;
+  }
+
+  public SidebarItem setTextBySafeHTML(SafeHtml safeHtml) {
+    final InlineHTML inlineHTML = new InlineHTML();
+    inlineHTML.setHTML(safeHtml);
+    label.add(inlineHTML);
     return this;
   }
 
   public String getText() {
-    return label.getText();
+    return "label.getText();";
   }
 
   public SidebarItem setH1() {

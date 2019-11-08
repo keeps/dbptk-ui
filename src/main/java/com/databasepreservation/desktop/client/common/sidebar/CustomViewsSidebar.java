@@ -45,24 +45,27 @@ public class CustomViewsSidebar extends Composite {
     initWidget(uiBinder.createAndBindUi(this));
 
     sidebarGroup.add(
-      new SidebarItem(messages.customViewsPageTitle()).addIcon(FontAwesomeIconManager.SCHEMA_VIEWS).setH5().setIndent1());
+      new SidebarItem(
+        FontAwesomeIconManager.getStackedIconSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS, FontAwesomeIconManager.COG, messages.customViewsPageTitle()))
+          .setH5().setIndent1());
   }
 
   public void addSideBarHyperLink(final String nameToDisplay, final String customViewUUID, final String targetHistoryToken) {
     Hyperlink delete = new Hyperlink();
     delete.addStyleName("sidebar-hyperlink sidebarItem custom-views-sidebarItem-delete");
-    delete.asWidget().addStyleName("fa fa-trash-o");
+    delete.asWidget().addStyleName("far fa-trash-alt");
     delete.setTargetHistoryToken(targetHistoryToken);
 
-    SidebarHyperlink customView = new SidebarHyperlink(nameToDisplay,
+    SidebarHyperlink customView = new SidebarHyperlink(
+      FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.LIST, nameToDisplay),
       HistoryManager.linkToCreateWizardCustomViewsSelect(customViewUUID), delete);
 
-    customView.addIcon(FontAwesomeIconManager.LIST).setH5().setIndent2();
+    customView.setH5().setIndent2();
     list.put(customViewUUID, customView);
     sidebarGroup.add(customView);
   }
 
-  public void updateSidarHyperLink(final String id, final String customViewNameText) {
+  public void updateSidebarHyperLink(final String id, final String customViewNameText) {
     final SidebarHyperlink sidebarHyperlink = list.get(id);
     sidebarHyperlink.setText(customViewNameText);
     list.put(id, sidebarHyperlink);
@@ -80,11 +83,7 @@ public class CustomViewsSidebar extends Composite {
 
   public void select(String value) {
     for (Map.Entry<String, SidebarHyperlink> entry : list.entrySet()) {
-      if (entry.getKey().equals(value)) {
-        list.get(value).setSelected(true);
-      } else {
-        list.get(entry.getKey()).setSelected(false);
-      }
+      list.get(value).setSelected(entry.getKey().equals(value));
     }
   }
 
@@ -92,7 +91,5 @@ public class CustomViewsSidebar extends Composite {
     if (!list.isEmpty()) {
       list.clear();
     }
-
-    instance = null;
   }
 }

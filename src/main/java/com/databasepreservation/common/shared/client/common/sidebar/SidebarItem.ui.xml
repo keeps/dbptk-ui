@@ -1,6 +1,6 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
     <g:FlowPanel addStyleNames="leftSidebar-facet-panel">
-        <g:Label addStyleNames="leftSidebar-facet-title" ui:field="label" />
+        <g:HTMLPanel addStyleNames="leftSidebar-facet-title" ui:field="label" />
     </g:FlowPanel>
 </ui:UiBinder>

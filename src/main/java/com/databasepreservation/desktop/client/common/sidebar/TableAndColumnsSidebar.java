@@ -66,22 +66,22 @@ public class TableAndColumnsSidebar extends Composite {
 
   private void init(ViewerMetadata viewerMetadata) {
 
-    SidebarHyperlink database = new SidebarHyperlink(messages.menusidebar_database(),
+    SidebarHyperlink database = new SidebarHyperlink(FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.DATABASE, messages.menusidebar_database()),
       HistoryManager.linkToCreateSIARD(HistoryManager.ROUTE_WIZARD_TABLES_COLUMNS, DATABASE_LINK));
-    database.addIcon(FontAwesomeIconManager.DATABASE).setH5().setIndent0();
+    database.setH5().setIndent0();
     list.put(DATABASE_LINK, database);
     sidebarGroup.add(database);
 
     for (ViewerSchema schema : viewerMetadata.getSchemas()) {
 
-      SidebarHyperlink schemas = new SidebarHyperlink(schema.getName(),
+      SidebarHyperlink schemas = new SidebarHyperlink(FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.SCHEMA, schema.getName()),
               HistoryManager.linkToCreateSIARD(HistoryManager.ROUTE_WIZARD_TABLES_COLUMNS, TABLES_LINK, schema.getUUID()));
-      schemas.addIcon(FontAwesomeIconManager.SCHEMA).setH5().setIndent1();
+      schemas.setH5().setIndent1();
       list.put(schema.getUUID(), schemas);
       sidebarGroup.add(schemas);
 
-      SidebarItem tables = new SidebarItem(messages.sidebarMenuTextForTables());
-      tables.addIcon(FontAwesomeIconManager.LIST).setH5().setIndent2();
+      SidebarItem tables = new SidebarItem(FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.LIST, messages.sidebarMenuTextForTables()));
+      tables.setH5().setIndent2();
 
       FlowPanel tablesItems = new FlowPanel();
       for (ViewerTable table : schema.getTables()) {
@@ -93,8 +93,8 @@ public class TableAndColumnsSidebar extends Composite {
       }
       createSubItem(tables, tablesItems);
 
-      SidebarItem views = new SidebarItem(messages.sidebarMenuTextForViews());
-      views.addIcon(FontAwesomeIconManager.LIST).setH5().setIndent2();
+      SidebarItem views = new SidebarItem(FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.LIST, messages.sidebarMenuTextForViews()));
+      views.setH5().setIndent2();
 
       FlowPanel viewsItems = new FlowPanel();
       for (ViewerView view : schema.getViews()) {
@@ -123,11 +123,7 @@ public class TableAndColumnsSidebar extends Composite {
 
   public void select(String value) {
     for (Map.Entry<String, SidebarHyperlink> entry : list.entrySet()) {
-      if (entry.getKey().equals(value)) {
-        list.get(value).setSelected(true);
-      } else {
-        list.get(entry.getKey()).setSelected(false);
-      }
+      list.get(value).setSelected(entry.getKey().equals(value));
     }
   }
 
@@ -177,8 +173,6 @@ public class TableAndColumnsSidebar extends Composite {
           for (Widget value : fp) {
             SidebarItem sb = (SidebarItem) value;
 
-            GWT.log(sb.getText());
-
             if (sb.getText().toLowerCase().contains(searchValue.toLowerCase())) {
               sb.setVisible(true);
               disclosurePanelsThatShouldBeVisible.add(disclosurePanel);
@@ -200,8 +194,8 @@ public class TableAndColumnsSidebar extends Composite {
 
   private SidebarHyperlink buildSidebarHyperLink(final String displayName, final String route,
     final String fontAwesomeIcon) {
-    SidebarHyperlink sidebarHyperlink = new SidebarHyperlink(displayName, route);
-    sidebarHyperlink.addIcon(fontAwesomeIcon).setH6().setIndent3();
+    SidebarHyperlink sidebarHyperlink = new SidebarHyperlink(FontAwesomeIconManager.getTagSafeHtml(fontAwesomeIcon, displayName), route);
+    sidebarHyperlink.setH6().setIndent3();
 
     return sidebarHyperlink;
   }

@@ -13,9 +13,6 @@
     <inherits name='org.roda.core.Core'/>
     <inherits name="com.github.nmorel.gwtjackson.GwtJackson" />
 
-    <!-- Inherit required libraries -->
-    <inherits name="com.bytebybyte.gwt.fontawesome.FontAwesomeLib" />
-
     <!-- I18N: internals -->
     <inherits name="com.google.gwt.i18n.I18N" />
     <inherits name="config.i18n.I18N" />

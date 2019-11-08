@@ -119,7 +119,7 @@ public class HelperValidator {
     btn.setText(messages.basicActionBrowse());
     btn.addStyleName("btn btn-link-info btn-validator");
 
-    clear.setHTML(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.ACTION_DELETE)));
+    clear.setHTML(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTagRegular(FontAwesomeIconManager.ACTION_DELETE)));
     clear.addStyleName("btn btn-link-info btn-validator");
 
     pathLabel.addStyleName("text-muted");

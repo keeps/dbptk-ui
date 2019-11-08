@@ -46,10 +46,11 @@ public class ViewerConstants {
   public static final String VIEWER_REPORTS_FOLDER = "reports";
   public static final String VIEWER_INDEX_FOLDER = "index";
 
-  public final static String MEDIA_TYPE_APPLICATION_OCTET_STREAM = "application/octet-stream";
-  public final static String MEDIA_TYPE_TEXT_HTML = "text/html";
+  public static final String MEDIA_TYPE_APPLICATION_OCTET_STREAM = "application/octet-stream";
+  public static final String MEDIA_TYPE_TEXT_HTML = "text/html";
 
-  public final static String MATERIALIZED_VIEW_PREFIX = "VIEW_";
+  public static final String MATERIALIZED_VIEW_PREFIX = "VIEW_";
+  public static final String CUSTOM_VIEW_PREFIX = "CUSTOM_VIEW_";
 
   /*
    * SOLR CONFIGSETS

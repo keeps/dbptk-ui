@@ -632,16 +632,15 @@ p[data-value]:after {
 .leftSidebar .h1:before, .leftSidebar .h2:before, .leftSidebar .h3:before, .leftSidebar .h4:before, .leftSidebar .h5:before,
 .leftSidebar .h6:before {
     display: inline-block;
-    font: normal normal normal 14px/1 FontAwesome;
     font-size: inherit;
     text-rendering: auto;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     float: left;
     padding-right: 0.5em;
-    margin-top: 0.1em;
     width: 1.5rem;
     text-align: center;
+    font-family: "Font Awesome 5 Free";
 }
 
 .leftSidebar-facet-panel {
@@ -791,16 +790,15 @@ p[data-value]:after {
 
 .rowData .label:before {
     display: inline-block;
-    font: normal normal normal 14px/1 FontAwesome;
     font-size: inherit;
     text-rendering: auto;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     float: left;
     padding-right: 0.5rem;
-    margin-top: 0.1em;
     width: 1.5rem;
     text-align: center;
+    font-family: "Font Awesome 5 Free";
 }
 
 .rowData .label.noicon {
@@ -1748,7 +1746,7 @@ html, body, .desktop-main {
 
 .sidebar-collapse .header > .leftSidebar-facet-panel::after {
     display: inline-block;
-    font-family: FontAwesome;
+    font-family: 'Font Awesome 5 Free';
     content: "\f107";
     font-weight: bolder;
     position: absolute;
@@ -1796,15 +1794,18 @@ html, body, .desktop-main {
 }
 
 .btn-select-all:after {
-    content: "\f046";
+    content: "\f14a";
+    font-weight: 300;
 }
 
 .btn-select-none:after {
-    content: "\f096";
+    content: "\f0c8";
+    font-weight: 300;
 }
 
 .btn-new:after {
-    content: "\f196";
+    content: "\f0fe";
+    font-weight: 300;
 }
 
 .btn-save:after {
@@ -1812,9 +1813,13 @@ html, body, .desktop-main {
 }
 
 .btn-delete:after {
-    content: "\f014";
+    content: "\f2ed";
 }
 
+.btn-fixed-width {
+    width: 11.75rem;
+    text-align: center;
+}
 /**********************************************
 		         Dialog ExternalLob
 ***********************************************/
@@ -1915,8 +1920,9 @@ html, body, .desktop-main {
 .my-asyncdatagrid-display-scroll-wrapper input[type="checkbox"]:checked:after {
     content: '\f00c';
     font-size: 17px;
+    font-weight: 600;
     margin-left: -4px;
-    font-family: FontAwesome;
+    font-family: 'Font Awesome 5 Free';
 }
 
 .connection-panel input[type="checkbox"] {
@@ -1943,7 +1949,7 @@ html, body, .desktop-main {
     content: '\f00c';
     font-size: 17px;
     margin-left: -4px;
-    font-family: FontAwesome;
+    font-family: 'Font Awesome 5 Free';
 }
 
 .form-checkbox input[type="checkbox"] {
@@ -1968,9 +1974,10 @@ html, body, .desktop-main {
 
 .form-checkbox input[type="checkbox"]:checked:after {
     content: '\f00c';
+    font-weight: 600;
     font-size: 17px;
     margin-left: -4px;
-    font-family: FontAwesome;
+    font-family: 'Font Awesome 5 Free';
 }
 
 .form-checkbox {
@@ -2295,9 +2302,9 @@ html, body, .desktop-main {
     margin-left: 0;
 }
 
-.bottom-panel .btn-item .btn:before, .bottom-panel .btn-item .btn:after{
-    margin-top: 2px;
-}
+/*.bottom-panel .btn-item .btn:before, .bottom-panel .btn-item .btn:after{*/
+/*    margin-top: 2px;*/
+/*}*/
 
 .bottom-panel .btn-item .btn-back-wizard{
     padding-left: 25px;
@@ -2393,6 +2400,34 @@ html, body, .desktop-main {
     vertical-align: text-bottom;
 }
 
+.leftSidebar .sidebarItem i {
+    margin-right: 5px;
+}
+
+.leftSidebar .sidebarItem i:hover {
+    color: inherit;
+}
+
+.leftSidebar .leftSidebar-facet-title i {
+    margin-right: 5px;
+}
+
+.custom-views-sidebarItem-delete .fa-trash-alt:hover {
+    color: #d9534f;
+}
+
+.custom-views-stack {
+    font-size: 0.5em;
+    vertical-align: top;
+    margin-right: 5px;
+}
+
+.fa-stack-right-corner {
+    position: absolute;
+    bottom: 0 !important;
+    text-align: right;
+    line-height: 1em;
+}
 /************************************************
 * alert
  ************************************************/

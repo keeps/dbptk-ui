@@ -2,6 +2,7 @@ package com.databasepreservation.common.shared.ViewerStructure;
 
 
 import com.databasepreservation.common.shared.ViewerConstants;
+import com.google.gwt.core.client.GWT;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -86,7 +87,18 @@ public class ViewerSchema implements Serializable {
   public ViewerTable getMaterializedTable(final String viewName) {
     for (ViewerTable table : tables) {
       if (table.getName().startsWith(ViewerConstants.MATERIALIZED_VIEW_PREFIX)) {
-        if (table.getName().substring(5).equals(viewName)) {
+        if (table.getName().substring(ViewerConstants.MATERIALIZED_VIEW_PREFIX.length()).equals(viewName)) {
+          return table;
+        }
+      }
+    }
+    return null;
+  }
+
+  public ViewerTable getCustomViewTable(final String viewName) {
+    for (ViewerTable table : tables) {
+      if (table.getName().startsWith(ViewerConstants.CUSTOM_VIEW_PREFIX)) {
+        if (table.getName().equals(viewName)) {
           return table;
         }
       }

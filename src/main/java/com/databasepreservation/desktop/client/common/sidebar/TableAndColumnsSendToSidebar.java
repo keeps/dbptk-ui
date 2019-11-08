@@ -37,9 +37,9 @@ import config.i18n.client.ClientMessages;
  */
 public class TableAndColumnsSendToSidebar extends Composite {
   public static final String DATABASE_LINK = "database";
-  public static final String TABLES_LINK = "tables";
-  public static final String TABLE_LINK = "table";
-  public static final String VIEW_LINK = "view";
+  private static final String TABLES_LINK = "tables";
+  private static final String TABLE_LINK = "table";
+  private static final String VIEW_LINK = "view";
 
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, SidebarHyperlink> list = new HashMap<>();
@@ -71,41 +71,41 @@ public class TableAndColumnsSendToSidebar extends Composite {
   }
 
   private void init(ViewerMetadata viewerMetadata, String databaseUUID) {
-    SidebarHyperlink database = new SidebarHyperlink(messages.menusidebar_database(),
+    SidebarHyperlink database = new SidebarHyperlink(FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.DATABASE, messages.menusidebar_database()),
       HistoryManager.linkToSendToWizardTableAndColumnsShowERDiagram(DATABASE_LINK, databaseUUID));
-    database.addIcon(FontAwesomeIconManager.DATABASE).setH5().setIndent0();
+    database.setH5().setIndent0();
     list.put(DATABASE_LINK, database);
     sidebarGroup.add(database);
 
     for (ViewerSchema schema : viewerMetadata.getSchemas()) {
 
-      SidebarHyperlink schemas = new SidebarHyperlink(schema.getName(),
+      SidebarHyperlink schemas = new SidebarHyperlink(FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.SCHEMA, schema.getName()),
           HistoryManager.linkToSendToWizardTableAndColumnsShowTables(TABLES_LINK, databaseUUID, schema.getUUID()));
-      schemas.addIcon(FontAwesomeIconManager.SCHEMA).setH5().setIndent1();
+      schemas.setH5().setIndent1();
       list.put(TABLES_LINK, schemas);
       sidebarGroup.add(schemas);
 
-      SidebarItem tables = new SidebarItem(messages.sidebarMenuTextForTables());
-      tables.addIcon(FontAwesomeIconManager.LIST).setH5().setIndent2();
+      SidebarItem tables = new SidebarItem(FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.LIST, messages.sidebarMenuTextForTables()));
+      tables.setH5().setIndent2();
 
       FlowPanel tablesItems = new FlowPanel();
       for (ViewerTable table : schema.getTables()) {
-          SidebarHyperlink sidebarHyperlink = new SidebarHyperlink(table.getName(),
+          SidebarHyperlink sidebarHyperlink = new SidebarHyperlink(FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE, table.getName()),
               HistoryManager.linkToSendToWizardTableAndColumnsShowColumns(TABLE_LINK, databaseUUID, schema.getUUID(), table.getUUID()));
-          sidebarHyperlink.addIcon(FontAwesomeIconManager.TABLE).setH6().setIndent3();
+          sidebarHyperlink.setH6().setIndent3();
           list.put(table.getName(), sidebarHyperlink);
           tablesItems.add(sidebarHyperlink);
       }
       createSubItem(tables, tablesItems);
 
-      SidebarItem views = new SidebarItem(messages.sidebarMenuTextForViews());
-      views.addIcon(FontAwesomeIconManager.LIST).setH5().setIndent2();
+      SidebarItem views = new SidebarItem(FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.LIST, messages.sidebarMenuTextForViews()));
+      views.setH5().setIndent2();
 
       FlowPanel viewsItems = new FlowPanel();
       for (ViewerView view : schema.getViews()) {
-        SidebarHyperlink sidebarHyperlink = new SidebarHyperlink(view.getName(),
+        SidebarHyperlink sidebarHyperlink = new SidebarHyperlink(FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS, view.getName()),
             HistoryManager.linkToSendToWizardTableAndColumnsShowViews(VIEW_LINK, databaseUUID, schema.getUUID(), view.getUUID()));
-        sidebarHyperlink.addIcon(FontAwesomeIconManager.SCHEMA_VIEWS).setH6().setIndent3();
+        sidebarHyperlink.setH6().setIndent3();
         list.put(view.getName(), sidebarHyperlink);
         viewsItems.add(sidebarHyperlink);
       }

@@ -69,6 +69,15 @@ public class CommonClientUtils {
     return panel;
   }
 
+  public static FlowPanel getHeader(SafeHtml iconStack, String hClass) {
+    FlowPanel panel = new FlowPanel();
+    HTML html = new HTML(iconStack);
+    html.addStyleName(hClass);
+    panel.add(html);
+
+    return panel;
+  }
+
   public static FlowPanel getHeader(String iconTag, ViewerTable table, String hClass) {
     String displayName;
     if (table.getName().startsWith(ViewerConstants.MATERIALIZED_VIEW_PREFIX)) {

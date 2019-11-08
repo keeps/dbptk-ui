@@ -16,14 +16,7 @@ import com.databasepreservation.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.common.shared.client.tools.ViewerStringUtils;
 import com.databasepreservation.common.shared.client.widgets.wcag.AccessibleFocusPanel;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -168,47 +161,51 @@ public class DatabaseSidebar extends Composite {
     // database metadata
     final ViewerMetadata metadata = database.getMetadata();
 
-    SidebarHyperlink informationLink = new SidebarHyperlink(messages.menusidebar_information(),
+    SidebarHyperlink informationLink = new SidebarHyperlink(FontAwesomeIconManager
+      .getTagSafeHtml(FontAwesomeIconManager.DATABASE_INFORMATION, messages.menusidebar_information()),
       HistoryManager.linkToDatabase(database.getUUID()));
-    informationLink.addIcon(FontAwesomeIconManager.DATABASE_INFORMATION).setH5().setIndent0();
+    informationLink.setH5().setIndent0();
     list.put(HistoryManager.ROUTE_DATABASE, informationLink);
     sidebarGroup.add(informationLink);
 
-    SidebarHyperlink searchLink = new SidebarHyperlink(messages.menusidebar_searchAllRecords(),
+    SidebarHyperlink searchLink = new SidebarHyperlink(FontAwesomeIconManager
+      .getTagSafeHtml(FontAwesomeIconManager.DATABASE_SEARCH, messages.menusidebar_searchAllRecords()),
       HistoryManager.linkToDatabaseSearch(database.getUUID()));
-    searchLink.addIcon(FontAwesomeIconManager.DATABASE_SEARCH).setH5().setIndent0();
+    searchLink.setH5().setIndent0();
     list.put(HistoryManager.ROUTE_DATABASE_SEARCH, searchLink);
     sidebarGroup.add(searchLink);
 
-    SidebarHyperlink savedSearchesLink = new SidebarHyperlink(messages.menusidebar_savedSearches(),
+    SidebarHyperlink savedSearchesLink = new SidebarHyperlink(
+      FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.SAVED_SEARCH, messages.menusidebar_savedSearches()),
       HistoryManager.linkToSavedSearches(database.getUUID()));
-    savedSearchesLink.addIcon(FontAwesomeIconManager.SAVED_SEARCH).setH5().setIndent0();
+    savedSearchesLink.setH5().setIndent0();
     list.put(HistoryManager.ROUTE_SAVED_SEARCHES, savedSearchesLink);
     sidebarGroup.add(savedSearchesLink);
 
     /* Schemas */
-    SidebarItem schemasHeader = createSidebarSubItemHeader("Tables", FontAwesomeIconManager.LIST);
+    SidebarItem schemasHeader = createSidebarSubItemHeaderSafeHMTL("Tables", FontAwesomeIconManager.LIST);
     FlowPanel schemaItems = new FlowPanel();
 
     final int totalSchemas = metadata.getSchemas().size();
+
+    String iconTag = FontAwesomeIconManager.getTagWithStyleName(FontAwesomeIconManager.SCHEMA_TABLE_SEPARATOR, "fa-sm");
 
     for (final ViewerSchema schema : metadata.getSchemas()) {
       schema.setViewsSchemaUUID();
 
       for (ViewerTable table : schema.getTables()) {
-        if (!table.getName().startsWith(ViewerConstants.MATERIALIZED_VIEW_PREFIX)) {
-          String iconTag = FontAwesomeIconManager.getTagWithStyleName(FontAwesomeIconManager.SCHEMA_TABLE_SEPARATOR,
-            "font-size-small");
+        if (!table.getName().startsWith(ViewerConstants.MATERIALIZED_VIEW_PREFIX)
+          && !table.getName().startsWith(ViewerConstants.CUSTOM_VIEW_PREFIX)) {
           SafeHtml html;
           if (totalSchemas == 1) {
-            html = SafeHtmlUtils.fromSafeConstant(table.getName());
+            html = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE, table.getName());
           } else {
-            html = SafeHtmlUtils.fromSafeConstant(schema.getName() + " " + iconTag + " " + table.getName());
+            html = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE,
+              schema.getName() + " " + iconTag + " " + table.getName());
           }
-
           SidebarHyperlink tableLink = new SidebarHyperlink(html,
             HistoryManager.linkToTable(database.getUUID(), table.getUUID()));
-          tableLink.addIcon(FontAwesomeIconManager.TABLE).setH6().setIndent2();
+          tableLink.setH6().setIndent2();
           list.put(table.getUUID(), tableLink);
           sidebarGroup.add(tableLink);
           schemaItems.add(tableLink);
@@ -216,13 +213,13 @@ public class DatabaseSidebar extends Composite {
       }
 
       for (ViewerView view : schema.getViews()) {
-        String iconTag = FontAwesomeIconManager.getTagWithStyleName(FontAwesomeIconManager.SCHEMA_TABLE_SEPARATOR,
-          "font-size-small");
+        GWT.log(view.getName());
         SafeHtml html;
         if (totalSchemas == 1) {
-          html = SafeHtmlUtils.fromSafeConstant(view.getName());
+          html = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE, view.getName());
         } else {
-          html = SafeHtmlUtils.fromSafeConstant(schema.getName() + " " + iconTag + " " + view.getName());
+          html = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE,
+            schema.getName() + " " + iconTag + " " + view.getName());
         }
 
         SidebarHyperlink viewLink;
@@ -230,12 +227,32 @@ public class DatabaseSidebar extends Composite {
         if (materializedTable != null) {
           viewLink = new SidebarHyperlink(html,
             HistoryManager.linkToTable(database.getUUID(), materializedTable.getUUID()));
+          list.put(materializedTable.getUUID(), viewLink);
+        } else if (schema.getCustomViewTable(view.getName()) != null) {
+          final ViewerTable customViewTable = schema.getCustomViewTable(view.getName());
+          String customViewTableName = customViewTable.getName().substring(ViewerConstants.CUSTOM_VIEW_PREFIX.length());
+          if (totalSchemas == 1) {
+            html = FontAwesomeIconManager.getStackedIconSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS,
+              FontAwesomeIconManager.COG, customViewTableName);
+          } else {
+            html = FontAwesomeIconManager.getStackedIconSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS,
+              FontAwesomeIconManager.COG, schema.getName() + " " + iconTag + " " + customViewTableName);
+          }
+          viewLink = new SidebarHyperlink(html,
+            HistoryManager.linkToTable(database.getUUID(), customViewTable.getUUID()));
+          list.put(customViewTable.getUUID(), viewLink);
         } else {
+          if (totalSchemas == 1) {
+            html = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS, view.getName());
+          } else {
+            html = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS,
+              schema.getName() + " " + iconTag + " " + view.getName());
+          }
           viewLink = new SidebarHyperlink(html, HistoryManager.linkToView(database.getUUID(), view.getUUID()));
+          list.put(view.getUUID(), viewLink);
         }
 
-        viewLink.addIcon(FontAwesomeIconManager.SCHEMA_VIEWS).setH6().setIndent2();
-        list.put(view.getUUID(), viewLink);
+        viewLink.setH6().setIndent2();
 
         sidebarGroup.add(viewLink);
         schemaItems.add(viewLink);
@@ -245,26 +262,30 @@ public class DatabaseSidebar extends Composite {
       createSubItem(schemasHeader, schemaItems, true);
 
     /* Technical Information */
-    SidebarItem technicalHeader = createSidebarSubItemHeader("Technical Information", FontAwesomeIconManager.TECHNICAL);
+    SidebarItem technicalHeader = createSidebarSubItemHeaderSafeHMTL("Technical Information",
+      FontAwesomeIconManager.TECHNICAL);
     FlowPanel technicalItems = new FlowPanel();
 
-    SidebarHyperlink routinesLink = new SidebarHyperlink(messages.menusidebar_routines(),
+    SidebarHyperlink routinesLink = new SidebarHyperlink(
+      FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.SCHEMA_ROUTINES, messages.menusidebar_routines()),
       HistoryManager.linkToSchemaRoutines(database.getUUID()));
-    routinesLink.addIcon(FontAwesomeIconManager.SCHEMA_ROUTINES).setH6().setIndent1();
+    routinesLink.setH6().setIndent1();
     list.put(HistoryManager.ROUTE_SCHEMA_ROUTINES, routinesLink);
     sidebarGroup.add(routinesLink);
     technicalItems.add(routinesLink);
 
-    SidebarHyperlink usersLink = new SidebarHyperlink(messages.menusidebar_usersRoles(),
+    SidebarHyperlink usersLink = new SidebarHyperlink(
+      FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.DATABASE_USERS, messages.menusidebar_usersRoles()),
       HistoryManager.linkToDatabaseUsers(database.getUUID()));
-    usersLink.addIcon(FontAwesomeIconManager.DATABASE_USERS).setH6().setIndent1();
+    usersLink.setH6().setIndent1();
     list.put(HistoryManager.ROUTE_DATABASE_USERS, usersLink);
     sidebarGroup.add(usersLink);
     technicalItems.add(usersLink);
 
-    SidebarHyperlink reportLink = new SidebarHyperlink(messages.titleReport(),
+    SidebarHyperlink reportLink = new SidebarHyperlink(
+      FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.DATABASE_REPORT, messages.titleReport(), true),
       HistoryManager.linkToDatabaseReport(database.getUUID()));
-    reportLink.addIcon(FontAwesomeIconManager.DATABASE_REPORT).setH6().setIndent1();
+    reportLink.setH6().setIndent1();
     list.put(HistoryManager.ROUTE_DATABASE_REPORT, reportLink);
     sidebarGroup.add(reportLink);
     technicalItems.add(reportLink);
@@ -291,8 +312,8 @@ public class DatabaseSidebar extends Composite {
     }
   }
 
-  private SidebarItem createSidebarSubItemHeader(String headerText, String headerIcon) {
-    return new SidebarItem(headerText).addIcon(headerIcon).setH5().setIndent0();
+  private SidebarItem createSidebarSubItemHeaderSafeHMTL(String headerText, String headerIcon) {
+    return new SidebarItem(FontAwesomeIconManager.getTagSafeHtml(headerIcon, headerText)).setH5().setIndent0();
   }
 
   private void createSubItem(SidebarItem header, FlowPanel content, boolean collapsed) {

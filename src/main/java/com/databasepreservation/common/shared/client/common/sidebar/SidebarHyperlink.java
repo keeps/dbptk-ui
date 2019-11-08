@@ -54,6 +54,15 @@ public class SidebarHyperlink extends SidebarItem {
     container.add(this.hyperlink);
   }
 
+  public SidebarHyperlink(SafeHtml text, String targetHistoryToken, Hyperlink hyperlink) {
+    initWidget(uiBinder.createAndBindUi(this));
+    setTargetHistoryToken(targetHistoryToken);
+    setTextBySafeHTML(text);
+    label.addStyleName("sidebar-hyperlink sidebarItem custom-views-sidebarItem");
+    this.hyperlink = hyperlink;
+    container.add(this.hyperlink);
+  }
+
   public SidebarHyperlink setTargetHistoryToken(String targetHistoryToken) {
     label.setTargetHistoryToken(targetHistoryToken);
     return this;

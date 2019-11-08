@@ -102,9 +102,11 @@ public class DatabaseInformationPanel extends RightPanel {
 
   private void initDataContent() {
     if (database.getMetadata().getSchemas().size() == 1) {
-      FlowPanel cardTitlePanel = CommonClientUtils.getCardTitle(messages.schema());
-      cardTitlePanel.addStyleName("card-header");
-      dataContentCard.insert(cardTitlePanel, 0);
+      if (dataContentCard.getWidgetCount() == 1) {
+        FlowPanel cardTitlePanel = CommonClientUtils.getCardTitle(messages.schema());
+        cardTitlePanel.addStyleName("card-header");
+        dataContentCard.insert(cardTitlePanel, 0);
+      }
       final DataPanel instance = DataPanel.getInstance(database, database.getMetadata().getSchemas().get(0).getUUID());
       instance.reload(advancedMode);
       dataContent.add(instance);

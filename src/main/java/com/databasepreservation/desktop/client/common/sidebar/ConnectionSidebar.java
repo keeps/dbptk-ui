@@ -7,6 +7,7 @@ import java.util.TreeMap;
 
 import com.databasepreservation.common.shared.client.common.sidebar.SidebarHyperlink;
 import com.databasepreservation.common.shared.client.common.sidebar.SidebarItem;
+import com.databasepreservation.common.shared.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.common.shared.client.tools.ToolkitModuleName2ViewerModuleName;
 import com.databasepreservation.common.shared.models.DBPTKModule;
@@ -80,9 +81,10 @@ public class ConnectionSidebar extends Composite {
         targetHistoryToken = HistoryManager.linkToCreateSIARD(HistoryManager.ROUTE_WIZARD_CONNECTION, moduleName);
       }
 
-      SidebarHyperlink sidebarHyperlink = new SidebarHyperlink(ToolkitModuleName2ViewerModuleName.transform(moduleName),
+      SidebarHyperlink sidebarHyperlink = new SidebarHyperlink(FontAwesomeIconManager.getTagSafeHtml(
+        FontAwesomeIconManager.DATABASE, ToolkitModuleName2ViewerModuleName.transform(moduleName)),
         targetHistoryToken);
-      sidebarHyperlink.addIcon(itemIcon).setH6().setIndent1();
+      sidebarHyperlink.setH6().setIndent1();
       list.put(moduleName, sidebarHyperlink);
       sidebarGroup.add(sidebarHyperlink);
     }
@@ -93,11 +95,7 @@ public class ConnectionSidebar extends Composite {
   public void select(String connection) {
 
     for (Map.Entry<String, SidebarHyperlink> entry : list.entrySet()) {
-      if (entry.getKey().equals(connection)) {
-        entry.getValue().setSelected(true);
-      } else {
-        entry.getValue().setSelected(false);
-      }
+      entry.getValue().setSelected(entry.getKey().equals(connection));
     }
   }
 

@@ -2,8 +2,11 @@ package com.databasepreservation.common.shared.client.tools;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 
+import com.google.gwt.user.client.ui.InlineHTML;
+import com.google.gwt.user.client.ui.Widget;
 import config.i18n.client.ClientMessages;
 
 /**
@@ -31,9 +34,9 @@ public class FontAwesomeIconManager {
   public static final String SCHEMA_DATA = "th-large";
   public static final String SCHEMA_CHECK_CONSTRAINTS = "compress";
   public static final String SCHEMA_TABLE_SEPARATOR = "angle-right";
-  public static final String SAVED_SEARCH = "floppy-o";
+  public static final String SAVED_SEARCH = "save";
   public static final String ACTION_EDIT = "pencil";
-  public static final String ACTION_DELETE = "trash-o";
+  public static final String ACTION_DELETE = "trash-alt";
   public static final String BLOB = "file";
   public static final String USER = "user";
   public static final String GLOBE = "globe";
@@ -62,6 +65,18 @@ public class FontAwesomeIconManager {
     return "<i class=\"fa fa-" + icon + "\"></i>";
   }
 
+  public static String getTagFW(String icon) {
+    return "<i class=\"fa fa-fw fa-" + icon + "\"></i>";
+  }
+
+  public static String getTagRFW(String icon) {
+    return "<i class=\"far fa-fw fa-" + icon + "\"></i>";
+  }
+
+  public static String getTagRegular(String icon) {
+    return "<i class=\"far fa-" + icon + "\"></i>";
+  }
+
   public static String getTagWithStyleName(String icon, String styleName) {
     return "<i class=\"fa fa-" + icon + " " + styleName +"\"></i>";
   }
@@ -77,5 +92,32 @@ public class FontAwesomeIconManager {
 
   public static SafeHtml loaded(String icon, String text) {
     return SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(icon) + " " + SafeHtmlUtils.htmlEscape(text));
+  }
+
+  public static SafeHtml getTagSafeHtml(String icon, String text) {
+    return getTagSafeHtml(icon, text, false);
+  }
+
+  public static SafeHtml getStackedIconSafeHtml(String iconButton, String iconTop, String text) {
+    SafeHtmlBuilder safeHtmlBuilder = new SafeHtmlBuilder();
+    final String iButton = "<i class=\"fas fa-" + iconButton + " fa-stack-2x fa-fw\"></i>";
+    final String iTop = "<i class=\"fas fa-" + iconTop + " fa-stack-1x fa-stack-right-corner\"></i>";
+
+    safeHtmlBuilder.append(SafeHtmlUtils.fromSafeConstant("<span class=\"fa-stack custom-views-stack\">"))
+        .append(SafeHtmlUtils.fromSafeConstant(iButton))
+        .append(SafeHtmlUtils.fromSafeConstant(iTop))
+        .append(SafeHtmlUtils.fromSafeConstant("</span>"))
+        .append(SafeHtmlUtils.fromSafeConstant(text));
+
+    return safeHtmlBuilder.toSafeHtml();
+  }
+
+  public static SafeHtml getTagSafeHtml(String icon, String text, boolean regular) {
+    SafeHtmlBuilder safeHtmlBuilder = new SafeHtmlBuilder();
+    if (regular) {
+      return safeHtmlBuilder.append(SafeHtmlUtils.fromSafeConstant(getTagRFW(icon))).append(SafeHtmlUtils.fromSafeConstant(text)).toSafeHtml();
+    } else {
+      return safeHtmlBuilder.append(SafeHtmlUtils.fromSafeConstant(getTagFW(icon))).append(SafeHtmlUtils.fromSafeConstant(text)).toSafeHtml();
+    }
   }
 }

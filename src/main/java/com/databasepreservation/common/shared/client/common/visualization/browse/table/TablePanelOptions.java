@@ -108,9 +108,13 @@ public class TablePanelOptions extends RightPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forTable(database.getMetadata().getName(),
-        database.getUUID(), table.getName(), table.getUUID()));
-
+    if (table.getName().startsWith(ViewerConstants.CUSTOM_VIEW_PREFIX)) {
+      BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forTable(database.getMetadata().getName(),
+          database.getUUID(), table.getName().substring(ViewerConstants.CUSTOM_VIEW_PREFIX.length()), table.getUUID()));
+    } else {
+      BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forTable(database.getMetadata().getName(),
+          database.getUUID(), table.getName(), table.getUUID()));
+    }
   }
 
   public Map<String, Boolean> getSelectedColumns() {
@@ -123,8 +127,14 @@ public class TablePanelOptions extends RightPanel {
   }
 
   private void init() {
-    mainHeader.setWidget(CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE),
-        table, "h1"));
+    if (table.getName().startsWith(ViewerConstants.CUSTOM_VIEW_PREFIX)) {
+      mainHeader.setWidget(
+          CommonClientUtils.getHeader(FontAwesomeIconManager.getStackedIconSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS,
+              FontAwesomeIconManager.COG, table.getName().substring(ViewerConstants.CUSTOM_VIEW_PREFIX.length())), "h1"));
+    } else {
+      mainHeader.setWidget(
+          CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE), table, "h1"));
+    }
     configureButtons();
     configureTechnicalInformationSwitch();
     initTable();
@@ -308,7 +318,7 @@ public class TablePanelOptions extends RightPanel {
   private FlowPanel getToggleSelectPanel() {
     btnSelectToggle = new Button();
     btnSelectToggle.setText(messages.basicActionSelectNone());
-    btnSelectToggle.addStyleName("btn btn-primary btn-select-none");
+    btnSelectToggle.addStyleName("btn btn-primary btn-fixed-width btn-select-none");
 
     btnSelectToggle.addClickHandler(event -> {
       allSelected = !allSelected;

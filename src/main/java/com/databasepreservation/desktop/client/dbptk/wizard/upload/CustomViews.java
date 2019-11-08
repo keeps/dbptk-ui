@@ -188,7 +188,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
 
       Button btnNew = new Button();
       btnNew.setText(messages.basicActionNew());
-      btnNew.addStyleName("btn btn-primary btn-new");
+      btnNew.addStyleName("btn btn-primary btn-plus");
       btnNew.addClickHandler(event -> {
         setTextboxText("", "", "", "");
         customViewName.getElement().removeAttribute("required");
@@ -313,7 +313,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
     parameter.setCustomViewQuery(customViewQueryText);
 
     customViewsParameters.put(customViewUUID, parameter);
-    customViewsSidebar.updateSidarHyperLink(customViewUUID, customViewNameText);
+    customViewsSidebar.updateSidebarHyperLink(customViewUUID, customViewNameText);
   }
 
   private void deleteCustomView(Integer id) {

@@ -24,6 +24,7 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -151,31 +152,34 @@ public class MetadataEditSidebar extends Composite {
     /* Information */
     SidebarHyperlink databaseLink = new SidebarHyperlink(messages.menusidebar_database(),
       HistoryManager.linkToDatabaseMetadata(database.getUUID()));
-    databaseLink.addIcon(FontAwesomeIconManager.DATABASE).setH5().setIndent0();
+    databaseLink.setH5().setIndent0();
+    databaseLink.setTextBySafeHTML(FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.DATABASE, messages.menusidebar_database()));
     list.put(database.getUUID(), databaseLink);
     sidebarGroup.add(databaseLink);
 
     /* Users */
     SidebarHyperlink usersLink = new SidebarHyperlink(messages.menusidebar_usersRoles(),
       HistoryManager.linkToDatabaseMetadataUsers(database.getUUID()));
-    usersLink.addIcon(FontAwesomeIconManager.DATABASE_USERS).setH5().setIndent0();
+    usersLink.setH5().setIndent0();
+    usersLink.setTextBySafeHTML(FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.DATABASE_USERS, messages.menusidebar_usersRoles()));
     list.put(HistoryManager.ROUTE_DATABASE_USERS, usersLink);
     sidebarGroup.add(usersLink);
 
     for (final ViewerSchema schema : metadata.getSchemas()) {
 
       /* Schemas */
-      sidebarGroup.add(new SidebarItem(schema.getName()).addIcon(FontAwesomeIconManager.SCHEMA).setH5().setIndent0());
+      sidebarGroup.add(new SidebarItem(FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.SCHEMA, schema.getName())).setH5().setIndent0());
 
       /* Tables */
-      SidebarItem tableHeader = createSidebarSubItemHeader(messages.sidebarMenuTextForTables(),
+      SidebarItem tableHeader = createSidebarSubItemHeaderSafeHMTL(messages.sidebarMenuTextForTables(),
         FontAwesomeIconManager.LIST);
       FlowPanel tableItems = new FlowPanel();
       for (ViewerTable table : schema.getTables()) {
 
         SidebarHyperlink tableLink = new SidebarHyperlink(table.getName(),
           HistoryManager.linkToDesktopMetadataTable(database.getUUID(), table.getUUID()));
-        tableLink.addIcon(FontAwesomeIconManager.TABLE).setH6().setIndent2();
+        tableLink.setH6().setIndent2();
+        tableLink.setTextBySafeHTML(FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE, table.getName()));
         list.put(table.getUUID(), tableLink);
         sidebarGroup.add(tableLink);
         tableItems.add(tableLink);
@@ -184,14 +188,15 @@ public class MetadataEditSidebar extends Composite {
       createSubItem(tableHeader, tableItems);
 
       /* Views */
-      SidebarItem viewsHeader = createSidebarSubItemHeader(messages.menusidebar_views(),
+      SidebarItem viewsHeader = createSidebarSubItemHeaderSafeHMTL(messages.menusidebar_views(),
         FontAwesomeIconManager.SCHEMA_VIEWS);
       FlowPanel viewsItems = new FlowPanel();
       for (ViewerView view : schema.getViews()) {
 
         SidebarHyperlink viewLink = new SidebarHyperlink(view.getName(),
           HistoryManager.linTokDesktopMetadataView(database.getUUID(), schema.getUUID(), view.getUUID()));
-        viewLink.addIcon(FontAwesomeIconManager.TABLE).setH6().setIndent2();
+        viewLink.setH6().setIndent2();
+        viewLink.setTextBySafeHTML(FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS, view.getName()));
         list.put(view.getUUID(), viewLink);
         sidebarGroup.add(viewLink);
         viewsItems.add(viewLink);
@@ -199,14 +204,15 @@ public class MetadataEditSidebar extends Composite {
       createSubItem(viewsHeader, viewsItems);
 
       /* Routines */
-      SidebarItem routineHeader = createSidebarSubItemHeader(messages.menusidebar_routines(),
+      SidebarItem routineHeader = createSidebarSubItemHeaderSafeHMTL(messages.menusidebar_routines(),
         FontAwesomeIconManager.SCHEMA_ROUTINES);
       FlowPanel routineItems = new FlowPanel();
       for (ViewerRoutine routine : schema.getRoutines()) {
 
         SidebarHyperlink routineLink = new SidebarHyperlink(routine.getName(),
           HistoryManager.linkToDesktopMetadataRoutine(database.getUUID(), schema.getUUID(), routine.getUUID()));
-        routineLink.addIcon(FontAwesomeIconManager.TABLE).setH6().setIndent2();
+        routineLink.setH6().setIndent2();
+        routineLink.setTextBySafeHTML(FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.SCHEMA_ROUTINES, routine.getName()));
         list.put(routine.getUUID(), routineLink);
         routineItems.add(routineLink);
       }
@@ -221,6 +227,10 @@ public class MetadataEditSidebar extends Composite {
 
   private SidebarItem createSidebarSubItemHeader(String headerText, String headerIcon) {
     return new SidebarItem(headerText).addIcon(headerIcon).setH6().setIndent1();
+  }
+
+  private SidebarItem createSidebarSubItemHeaderSafeHMTL(String headerText, String headerIcon) {
+    return new SidebarItem(FontAwesomeIconManager.getTagSafeHtml(headerIcon, headerText)).setH6().setIndent1();
   }
 
   private void createSubItem(SidebarItem header, FlowPanel content) {

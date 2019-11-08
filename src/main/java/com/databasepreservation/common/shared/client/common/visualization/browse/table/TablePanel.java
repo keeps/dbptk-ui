@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.shared.ViewerConstants;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerTable;
 import com.databasepreservation.common.shared.client.breadcrumb.BreadcrumbPanel;
@@ -154,8 +155,13 @@ public class TablePanel extends RightPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
+    if (table.getName().startsWith(ViewerConstants.CUSTOM_VIEW_PREFIX)) {
       BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forTable(database.getMetadata().getName(),
-        database.getUUID(), table.getName(), table.getUUID()));
+          database.getUUID(), table.getName().substring(ViewerConstants.CUSTOM_VIEW_PREFIX.length()), table.getUUID()));
+    } else {
+      BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forTable(database.getMetadata().getName(),
+          database.getUUID(), table.getName(), table.getUUID()));
+    }
   }
 
   public void setColumnsAndValues(List<String> columnsAndValues) {
@@ -175,9 +181,14 @@ public class TablePanel extends RightPanel {
   }
 
   private void init() {
-    mainHeader.setWidget(CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE),
-        table, "h1"));
-
+    if (table.getName().startsWith(ViewerConstants.CUSTOM_VIEW_PREFIX)) {
+      mainHeader.setWidget(
+        CommonClientUtils.getHeader(FontAwesomeIconManager.getStackedIconSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS,
+          FontAwesomeIconManager.COG, table.getName().substring(ViewerConstants.CUSTOM_VIEW_PREFIX.length())), "h1"));
+    } else {
+      mainHeader.setWidget(
+        CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE), table, "h1"));
+    }
     options.setText(messages.basicActionOptions());
 
     options.addClickHandler(event -> {
