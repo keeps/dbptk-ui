@@ -10,6 +10,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import com.databasepreservation.common.client.BrowserService;
+import com.databasepreservation.common.shared.ViewerConstants;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerCell;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerColumn;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
@@ -23,12 +24,17 @@ import com.databasepreservation.common.shared.ViewerStructure.ViewerType;
 import com.databasepreservation.common.shared.client.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.shared.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.shared.client.common.RightPanel;
+import com.databasepreservation.common.shared.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.shared.client.common.fields.MetadataField;
 import com.databasepreservation.common.shared.client.common.fields.RowField;
+import com.databasepreservation.common.shared.client.common.helpers.HelperExportSingleRowData;
+import com.databasepreservation.common.shared.client.common.helpers.HelperExportTableData;
 import com.databasepreservation.common.shared.client.common.utils.CommonClientUtils;
+import com.databasepreservation.common.shared.client.common.utils.UriQueryUtils;
 import com.databasepreservation.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.shared.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.shared.client.tools.HistoryManager;
+import com.databasepreservation.common.shared.client.tools.ViewerJsonUtils;
 import com.databasepreservation.common.shared.client.tools.ViewerStringUtils;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -36,6 +42,8 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Hyperlink;
@@ -43,14 +51,17 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
-import javassist.tools.web.Viewer;
+import org.roda.core.data.v2.index.filter.Filter;
+import org.roda.core.data.v2.index.filter.FilterParameter;
+import org.roda.core.data.v2.index.filter.SimpleFilterParameter;
+import org.roda.core.data.v2.index.sort.Sorter;
+import org.roda.core.data.v2.index.sublist.Sublist;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class RowPanel extends RightPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
-  private static Map<String, RowPanel> instances = new HashMap<>();
 
   public static RowPanel createInstance(ViewerDatabase database, String tableUUID, String rowUUID) {
     return new RowPanel(database, tableUUID, rowUUID);
@@ -71,13 +82,10 @@ public class RowPanel extends RightPanel {
   private ViewerRow row;
 
   @UiField
-  HTML content;
-
-  @UiField
   SimplePanel recordHeader;
 
   @UiField
-  FlowPanel alternativeContent;
+  FlowPanel content;
 
   @UiField
   FlowPanel description;
@@ -129,7 +137,7 @@ public class RowPanel extends RightPanel {
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
     BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forRecord(database.getMetadata().getName(),
-        database.getUUID(), table.getName(), table.getUUID(), rowUUID));
+      database.getUUID(), table.getName(), table.getUUID(), rowUUID));
   }
 
   private void init() {
@@ -151,11 +159,7 @@ public class RowPanel extends RightPanel {
     for (ViewerForeignKey fk : table.getForeignKeys()) {
       Ref ref = new Ref(table, metadata.getTable(fk.getReferencedTableUUID()), fk);
       if (fk.getReferences().size() == 1) {
-        Set<Ref> refs = colIndexRelatedTo.get(ref.getSingleColumnIndex());
-        if (refs == null) {
-          refs = new TreeSet<>();
-          colIndexRelatedTo.put(ref.getSingleColumnIndex(), refs);
-        }
+        Set<Ref> refs = colIndexRelatedTo.computeIfAbsent(ref.getSingleColumnIndex(), k -> new TreeSet<>());
         refs.add(ref);
       } else {
         recordRelatedTo.add(ref);
@@ -170,11 +174,7 @@ public class RowPanel extends RightPanel {
           if (fk.getReferencedTableUUID().equals(table.getUUID())) {
             Ref ref = new Ref(table, viewerTable, fk);
             if (fk.getReferences().size() == 1) {
-              Set<Ref> refs = colIndexReferencedBy.get(ref.getSingleColumnIndex());
-              if (refs == null) {
-                refs = new TreeSet<>();
-                colIndexReferencedBy.put(ref.getSingleColumnIndex(), refs);
-              }
+              Set<Ref> refs = colIndexReferencedBy.computeIfAbsent(ref.getSingleColumnIndex(), k -> new TreeSet<>());
               refs.add(ref);
             } else {
               recordReferencedBy.add(ref);
@@ -202,11 +202,30 @@ public class RowPanel extends RightPanel {
     for (ViewerColumn column : table.getColumns()) {
       boolean isPrimaryKeyColumn = table.getPrimaryKey() != null
         && table.getPrimaryKey().getColumnIndexesInViewerTable().contains(column.getColumnIndexInEnclosingTable());
-      getCellHTML(column, colIndexRelatedTo.get(column.getSolrName()),
-        colIndexReferencedBy.get(column.getSolrName()), isPrimaryKeyColumn);
+      getCellHTML(column, colIndexRelatedTo.get(column.getSolrName()), colIndexReferencedBy.get(column.getSolrName()),
+        isPrimaryKeyColumn);
     }
 
-    //content.setHTML(b.toSafeHtml());
+    Button btn = new Button();
+    btn.setText("TEST");
+    btn.addClickHandler(event -> {
+      HelperExportSingleRowData helperExportSingleRowData = new HelperExportSingleRowData(table);
+      Dialogs.showCSVSetupDialog(messages.csvExportDialogTitle(), helperExportSingleRowData.getWidget(), messages.basicActionCancel(),
+          messages.basicActionConfirm(), new DefaultAsyncCallback<Boolean>() {
+
+            @Override
+            public void onSuccess(Boolean result) {
+              if (result) {
+                String filename = helperExportSingleRowData.getFilename();
+                boolean exportDescription = helperExportSingleRowData.exportDescription();
+
+                Window.Location.assign(getExportURL(filename, true, exportDescription));
+              }
+            }
+          });
+    });
+
+    content.add(btn);
   }
 
   private SafeHtml getForeignKeyHTML(String prefix, Set<Ref> refs, ViewerRow row) {
@@ -243,16 +262,13 @@ public class RowPanel extends RightPanel {
     }
   }
 
-  private void getCellHTML(ViewerColumn column, Set<Ref> relatedTo, Set<Ref> referencedBy,
-    boolean isPrimaryKeyColumn) {
+  private void getCellHTML(ViewerColumn column, Set<Ref> relatedTo, Set<Ref> referencedBy, boolean isPrimaryKeyColumn) {
     String label = column.getDisplayName();
 
     String value = null;
     ViewerCell cell = row.getCells().get(column.getSolrName());
-    if (cell != null) {
-      if (cell.getValue() != null) {
-        value = cell.getValue();
-      }
+    if (cell != null && cell.getValue() != null) {
+      value = cell.getValue();
     }
 
     RowField rowField;
@@ -284,7 +300,62 @@ public class RowPanel extends RightPanel {
       rowField.addReferencedBy(getForeignKeyHTML(messages.references_isReferencedBy(), referencedBy, row), "field");
     }
 
-    alternativeContent.add(rowField);
+    content.add(rowField);
+  }
+
+  private String getExportURL(String filename, boolean exportAll, boolean description) {
+    // builds something like
+    // http://hostname:port/api/v1/exports/csv/databaseUUID?
+    StringBuilder urlBuilder = new StringBuilder();
+    String base = com.google.gwt.core.client.GWT.getHostPageBaseURL();
+    String servlet = ViewerConstants.API_SERVLET;
+    String resource = ViewerConstants.API_V1_EXPORT_RESOURCE;
+    String method = "/csv/";
+    String databaseUUID = database.getUUID();
+    String queryStart = "?";
+    urlBuilder.append(base).append(servlet).append(resource).append(method).append(databaseUUID).append(queryStart);
+
+    // prepare parameter: field list
+    List<String> solrColumns = new ArrayList<>();
+
+    for (Map.Entry<String, ViewerCell> entry : row.getCells().entrySet()) {
+      solrColumns.add(entry.getKey());
+    }
+
+    // add parameter: field list
+    String paramFieldList = ViewerJsonUtils.getStringListMapper().write(solrColumns);
+    urlBuilder.append(ViewerConstants.API_QUERY_PARAM_FIELDS).append("=").append(UriQueryUtils.encodeQuery(paramFieldList))
+        .append("&");
+
+    List<FilterParameter> filterParameters = new ArrayList<>();
+    filterParameters.add(new SimpleFilterParameter("uuid", row.getUUID()));
+
+    // add parameter: filter
+    String paramFilter = ViewerJsonUtils.getFilterMapper().write(new Filter(filterParameters));
+    urlBuilder.append(ViewerConstants.API_QUERY_PARAM_FILTER).append("=").append(UriQueryUtils.encodeQuery(paramFilter))
+        .append("&");
+
+    // add parameter: subList
+    String paramSubList;
+    if (!exportAll) {
+      paramSubList = ViewerJsonUtils.getSubListMapper().write(new Sublist());
+      urlBuilder.append(ViewerConstants.API_QUERY_PARAM_SUBLIST).append("=").append(UriQueryUtils.encodeQuery(paramSubList))
+          .append("&");
+    }
+
+    // add parameter: sorter
+    String paramSorter = ViewerJsonUtils.getSorterMapper().write(Sorter.NONE);
+    urlBuilder.append(ViewerConstants.API_QUERY_PARAM_SORTER).append("=").append(UriQueryUtils.encodeQuery(paramSorter))
+        .append("&");
+
+    urlBuilder.append(ViewerConstants.API_PATH_PARAM_FILENAME).append("=").append(UriQueryUtils.encodeQuery(filename))
+        .append("&");
+
+    urlBuilder.append(ViewerConstants.API_PATH_PARAM_EXPORT_DESCRIPTION).append("=").append(description).append("&");
+
+    urlBuilder.append(ViewerConstants.API_PATH_PARAM_TABLE_UUID).append("=").append(table.getUUID());
+
+    return urlBuilder.toString();
   }
 
   /**

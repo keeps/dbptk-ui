@@ -60,12 +60,7 @@ public class ViewPanel extends RightPanel {
     String separator = "/";
     String code = database.getUUID() + separator + viewUUID;
 
-    ViewPanel instance = instances.get(code);
-    if (instance == null) {
-      instance = new ViewPanel(database, viewUUID);
-      instances.put(code, instance);
-    }
-    return instance;
+    return instances.computeIfAbsent(code, k -> new ViewPanel(database, viewUUID));
   }
 
   private ViewPanel(ViewerDatabase database, String viewUUID) {
@@ -91,6 +86,6 @@ public class ViewPanel extends RightPanel {
       description.add(instance);
     }
 
-    content.add(new Alert(Alert.MessageAlertType.PRIMARY, messages.viewPanelViewerNotMaterialized()));
+    content.add(new Alert(Alert.MessageAlertType.WARNING, messages.viewPanelViewerNotMaterialized()));
   }
 }

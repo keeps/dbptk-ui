@@ -85,6 +85,8 @@ import com.databasepreservation.model.structure.type.Type;
 import com.databasepreservation.utils.JodaUtils;
 import com.databasepreservation.utils.XMLUtils;
 
+import static com.databasepreservation.common.shared.ViewerConstants.INTERNAL_ZIP_LOB_FOLDER;
+
 /**
  * Utility class used to convert a DatabaseStructure (used in Database
  * Preservation Toolkit) to a ViewerStructure (used in Database Viewer)
@@ -649,7 +651,7 @@ public class ToolkitStructure2ViewerStructure {
         binaryCell.cleanResources();
       }
 
-      result.setValue("dummy");
+      result.setValue(INTERNAL_ZIP_LOB_FOLDER + table.getSchemaName() + "_" + table.getName() + "_" + rowIndex + ".bin");
     } else if (cell instanceof ComposedCell) {
       ComposedCell composedCell = (ComposedCell) cell;
       LOGGER.debug("composed cell not supported yet");

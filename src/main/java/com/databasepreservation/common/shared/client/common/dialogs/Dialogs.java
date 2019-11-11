@@ -41,6 +41,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 
 import config.i18n.client.ClientMessages;
@@ -171,7 +172,7 @@ public class Dialogs {
     dialogBox.show();
   }
 
-  public static void showCSVSetupDialog(String title, HelperExportTableData helper, String cancelButtonText, String confirmButtonText, final AsyncCallback<Boolean> callback) {
+  public static void showCSVSetupDialog(String title, Widget helper, String cancelButtonText, String confirmButtonText, final AsyncCallback<Boolean> callback) {
     final DialogBox dialogBox = new DialogBox(false, true);
     final Button cancelButton = new Button(cancelButtonText);
     final Button confirmButton = new Button(confirmButtonText);
@@ -182,7 +183,7 @@ public class Dialogs {
     footer.add(cancelButton);
     footer.add(confirmButton);
     footer.addStyleName("wui-dialog-layout-footer");
-    layout.add(helper.getWidget());
+    layout.add(helper);
     layout.addStyleName("wui-dialog-layout");
     layout.add(footer);
 

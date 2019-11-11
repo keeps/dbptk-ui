@@ -2500,3 +2500,7 @@ html, body, .desktop-main {
     background-color: #d6d8d9;
     border-color: #c6c8ca;
 }
+
+.alert-container {
+    margin-top: 20px;
+}

@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.databasepreservation.common.shared.client.common.search.SearchInfo;
 import com.google.gwt.dom.client.BrowserEvents;
 import org.roda.core.data.v2.index.IndexResult;
 import org.roda.core.data.v2.index.facet.Facets;

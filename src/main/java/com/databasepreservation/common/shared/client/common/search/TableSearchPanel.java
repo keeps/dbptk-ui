@@ -89,6 +89,10 @@ public class TableSearchPanel extends Composite {
     setCurrentSearchInfoFromJson(searchInfoJson);
   }
 
+  public SearchInfo getCurrentSearchInfo() {
+    return currentSearchInfo;
+  }
+
   /**
    * Table search panel without a predefined search
    */
@@ -140,13 +144,10 @@ public class TableSearchPanel extends Composite {
     searchPanel.setDefaultFilterIncremental(true);
     showSearchAdvancedFieldsPanel();
 
-    tableRowList.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-      @Override
-      public void onSelectionChange(SelectionChangeEvent event) {
-        ViewerRow record = tableRowList.getSelectionModel().getSelectedObject();
-        if (record != null) {
-          HistoryManager.gotoRecord(database.getUUID(), table.getUUID(), record.getUUID());
-        }
+    tableRowList.getSelectionModel().addSelectionChangeHandler(event -> {
+      ViewerRow record = tableRowList.getSelectionModel().getSelectedObject();
+      if (record != null) {
+        HistoryManager.gotoRecord(database.getUUID(), table.getUUID(), record.getUUID());
       }
     });
 
@@ -172,16 +173,12 @@ public class TableSearchPanel extends Composite {
     searchPanel.setSearchAdvancedGoEnabled(true);
     searchPanel.setClearSearchButtonEnabled(true);
 
-    ClickHandler clickHandler = new ClickHandler() {
-
-      @Override
-      public void onClick(ClickEvent event) {
-        itemsSearchAdvancedFieldsPanel.remove(searchFieldPanel);
-        if (itemsSearchAdvancedFieldsPanel.getWidgetCount() == 0) {
-          itemsSearchAdvancedFieldsPanel.addStyleName("empty");
-          searchPanel.setSearchAdvancedGoEnabled(false);
-          searchPanel.setClearSearchButtonEnabled(false);
-        }
+    ClickHandler clickHandler = event -> {
+      itemsSearchAdvancedFieldsPanel.remove(searchFieldPanel);
+      if (itemsSearchAdvancedFieldsPanel.getWidgetCount() == 0) {
+        itemsSearchAdvancedFieldsPanel.addStyleName("empty");
+        searchPanel.setSearchAdvancedGoEnabled(false);
+        searchPanel.setClearSearchButtonEnabled(false);
       }
     };
 

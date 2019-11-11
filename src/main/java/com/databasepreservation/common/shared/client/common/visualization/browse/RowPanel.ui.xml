@@ -5,8 +5,7 @@
     <g:FlowPanel>
         <g:SimplePanel ui:field="recordHeader" addStyleNames="structure-header" />
         <g:FlowPanel ui:field="description" />
-        <g:HTML addStyleNames="rowData" ui:field="content"/>
-        <g:FlowPanel addStyleNames="rowData" ui:field="alternativeContent" />
+        <g:FlowPanel addStyleNames="rowData" ui:field="content" />
     </g:FlowPanel>
 </ui:UiBinder>
 

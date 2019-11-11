@@ -24,9 +24,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.databasepreservation.common.api.utils.ApiUtils;
+import com.databasepreservation.common.api.utils.StreamResponse;
 import com.databasepreservation.common.api.utils.ViewerStreamingOutput;
 import com.databasepreservation.common.api.v1.utils.IterableIndexResultsCSVOutputStream;
 import com.databasepreservation.common.api.v1.utils.ResultsCSVOutputStream;
+import com.databasepreservation.common.api.v1.utils.ZipOutputStream;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
 import com.databasepreservation.common.server.index.utils.IterableIndexResult;
@@ -66,7 +68,9 @@ public class ExportsResource {
     @QueryParam(ViewerConstants.API_QUERY_PARAM_SORTER) String sorterParam,
     @QueryParam(ViewerConstants.API_QUERY_PARAM_SUBLIST) String subListParam,
     @QueryParam(ViewerConstants.API_PATH_PARAM_FILENAME) String filename,
+    @QueryParam(ViewerConstants.API_PATH_PARAM_ZIP_FILENAME) String zipFilename,
     @QueryParam(ViewerConstants.API_PATH_PARAM_EXPORT_DESCRIPTION) Boolean exportDescriptions,
+    @QueryParam(ViewerConstants.API_PATH_PARAM_EXPORT_LOBS) Boolean exportLOBs,
     @QueryParam(ViewerConstants.API_PATH_PARAM_TABLE_UUID) String tableUUID) throws RODAException {
     DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
 
@@ -83,17 +87,26 @@ public class ExportsResource {
     final ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
     final ViewerTable table = database.getMetadata().getTable(tableUUID);
 
-    if (sublist == null) {
-      final IterableIndexResult allRows = solrManager.findAllRows(databaseUUID, filter, sorter, fields);
-      return ApiUtils.okResponse(new ViewerStreamingOutput(
-        new IterableIndexResultsCSVOutputStream(allRows, table, fields, filename, exportDescriptions, ','))
-          .toStreamResponse());
-    } else {
-      final IndexResult<ViewerRow> rows = solrManager.findRows(databaseUUID, filter, sorter, sublist, null, fields);
+    if (Boolean.FALSE.equals(exportLOBs) && zipFilename == null) {
+      if (sublist == null) {
+        final IterableIndexResult allRows = solrManager.findAllRows(databaseUUID, filter, sorter, fields);
+        return ApiUtils.okResponse(new ViewerStreamingOutput(
+          new IterableIndexResultsCSVOutputStream(allRows, table, fields, filename, exportDescriptions, ','))
+            .toStreamResponse());
+      } else {
+        final IndexResult<ViewerRow> rows = solrManager.findRows(databaseUUID, filter, sorter, sublist, null, fields);
 
-      return ApiUtils.okResponse(
-        new ViewerStreamingOutput(new ResultsCSVOutputStream(rows, table, fields, filename, exportDescriptions, ','))
-          .toStreamResponse());
+        return ApiUtils.okResponse(
+          new ViewerStreamingOutput(new ResultsCSVOutputStream(rows, table, fields, filename, exportDescriptions, ','))
+            .toStreamResponse());
+      }
+    } else {
+      fields.add("uuid");
+      final IterableIndexResult allRows = solrManager.findAllRows(databaseUUID, filter, sorter, fields);
+      final IterableIndexResult clone = solrManager.findAllRows(databaseUUID, filter, sorter, fields);
+      fields.remove("uuid");
+      return ApiUtils.okResponse(new StreamResponse(
+        new ZipOutputStream(databaseUUID, table, allRows, clone, zipFilename, filename, fields, sublist)));
     }
   }
 }

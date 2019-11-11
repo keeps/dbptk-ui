@@ -163,4 +163,24 @@ public class ViewerTable implements Serializable {
     }
     return values;
   }
+
+  public List<ViewerColumn> getBinaryColumns() {
+    List<ViewerColumn> binaryColumns = new ArrayList<>();
+    for (ViewerColumn column : columns) {
+      if (column.getType().getDbType().equals(ViewerType.dbTypes.BINARY)) {
+        binaryColumns.add(column);
+      }
+    }
+
+    return binaryColumns;
+  }
+
+  public boolean containsBinaryColumns() {
+    for (ViewerColumn column : columns) {
+      if (column.getType().getDbType().equals(ViewerType.dbTypes.BINARY)) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

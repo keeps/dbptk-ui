@@ -13,6 +13,6 @@
             </g:FlowPanel>
         </g:FlowPanel>
         <g:FlowPanel ui:field="description" />
-        <g:FlowPanel ui:field="content" />
+        <g:FlowPanel ui:field="content" addStyleNames="alert-container" />
     </g:FlowPanel>
 </ui:UiBinder>

@@ -6,10 +6,10 @@ import java.util.List;
 
 import org.apache.solr.client.solrj.SolrClient;
 import org.roda.core.data.v2.index.filter.Filter;
+import org.roda.core.data.v2.index.sort.Sorter;
 
 import com.databasepreservation.common.shared.ViewerStructure.ViewerRow;
 import com.databasepreservation.common.utils.CloseableIterable;
-import org.roda.core.data.v2.index.sort.Sorter;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>

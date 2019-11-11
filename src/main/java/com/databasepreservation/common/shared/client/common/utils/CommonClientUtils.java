@@ -29,20 +29,6 @@ import config.i18n.client.ClientMessages;
 public class CommonClientUtils {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
 
-  public static void addSchemaInfoToFlowPanel(FlowPanel panel, ViewerSchema schema) {
-    MetadataField schemaName = MetadataField.createInstance(messages.schemaName(), schema.getName());
-    schemaName.setCSSMetadata("metadata-field", "metadata-information-element-label",
-        "metadata-information-element-value");
-
-    panel.add(schemaName);
-    if (ViewerStringUtils.isNotBlank(schema.getDescription())) {
-      MetadataField description = MetadataField.createInstance(messages.schemaDescription(), schema.getDescription());
-      description.setCSSMetadata("metadata-field", "metadata-information-element-label",
-          "metadata-information-element-value");
-      panel.add(description);
-    }
-  }
-
   public static FlowPanel getPanelInformation(String label, String text, String classes) {
     FlowPanel panel = new FlowPanel();
 
@@ -175,111 +161,11 @@ public class CommonClientUtils {
     FlowPanel panel = new FlowPanel();
     panel.addStyleName("schema-table-header");
 
-    // add icon
-    String iconTag = FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE);
-    HTML html = new HTML(SafeHtmlUtils.fromSafeConstant(iconTag));
-    html.addStyleName(hClass);
-    panel.add(html);
-
-    // add link schema
-    Hyperlink schemaLink;
-    switch (ApplicationType.getType()) {
-      case ViewerConstants.DESKTOP:
-        schemaLink = new Hyperlink(table.getSchemaName(),
-          HistoryManager.linkToDesktopSchema(databaseUUID, table.getSchemaUUID()));
-        schemaLink.addStyleName(hClass);
-        panel.add(schemaLink);
-        break;
-      case ViewerConstants.SERVER:
-      default:
-        schemaLink = new Hyperlink(table.getSchemaName(),
-          HistoryManager.linkToSchema(databaseUUID, table.getSchemaUUID()));
-        schemaLink.addStyleName(hClass);
-        panel.add(schemaLink);
-    }
-
-    // add /
-    // Label slashSeparator = new Label("/");
-    // slashSeparator.addStyleName(hClass);
-    // panel.add(slashSeparator);
-
-    iconTag = FontAwesomeIconManager.getTag(FontAwesomeIconManager.SCHEMA_TABLE_SEPARATOR);
-    html = new HTML(SafeHtmlUtils.fromSafeConstant(iconTag));
-    html.addStyleName(hClass);
-    panel.add(html);
-
-    // add link table
-    Hyperlink tableLink;
-    switch (ApplicationType.getType()) {
-      case ViewerConstants.DESKTOP:
-        tableLink = new Hyperlink(table.getName(), HistoryManager.linkToDesktopTable(databaseUUID, table.getUUID()));
-        tableLink.addStyleName(hClass);
-        panel.add(tableLink);
-        break;
-      case ViewerConstants.SERVER:
-      default:
-        tableLink = new Hyperlink(table.getName(), HistoryManager.linkToTable(databaseUUID, table.getUUID()));
-        tableLink.addStyleName(hClass);
-        panel.add(tableLink);
-    }
-
-    return panel;
-  }
-
-  public static FlowPanel getSavedSearchHeader(String databaseUUID, String savedSearchName) {
-    FlowPanel panel = new FlowPanel();
-    panel.addStyleName("schema-table-header");
-    String hClass = "h1";
-
-    // add icon
-    String iconTag = FontAwesomeIconManager.getTag(FontAwesomeIconManager.SAVED_SEARCH);
-    HTML html = new HTML(SafeHtmlUtils.fromSafeConstant(iconTag));
-    html.addStyleName(hClass);
-    panel.add(html);
-
-    // add view name
-    Label savedSearchLabel = new Label(savedSearchName);
-    savedSearchLabel.addStyleName(hClass);
-    panel.add(savedSearchLabel);
-
-    return panel;
-  }
-
-  public static FlowPanel getSchemaAndViewHeader(String databaseUUID, ViewerSchema schema, ViewerView view,
-    String hClass) {
-    FlowPanel panel = new FlowPanel();
-    panel.addStyleName("schema-table-header");
-
-    // add icon
-    String iconTag = FontAwesomeIconManager.getTag(FontAwesomeIconManager.SCHEMA_VIEWS);
-    HTML html = new HTML(SafeHtmlUtils.fromSafeConstant(iconTag));
-    html.addStyleName(hClass);
-    panel.add(html);
-
-    // add link schema
-    Hyperlink schemaLink;
-    switch (ApplicationType.getType()) {
-      case ViewerConstants.DESKTOP:
-        schemaLink = new Hyperlink(schema.getName(), HistoryManager.linkToDesktopSchema(databaseUUID, schema.getUUID()));
-        schemaLink.addStyleName(hClass);
-        panel.add(schemaLink);
-        break;
-      case ViewerConstants.SERVER:
-      default:
-        schemaLink = new Hyperlink(schema.getName(), HistoryManager.linkToSchema(databaseUUID, schema.getUUID()));
-        schemaLink.addStyleName(hClass);
-        panel.add(schemaLink);
-    }
-
-    iconTag = FontAwesomeIconManager.getTag(FontAwesomeIconManager.SCHEMA_TABLE_SEPARATOR);
-    html = new HTML(SafeHtmlUtils.fromSafeConstant(iconTag));
-    html.addStyleName(hClass);
-    panel.add(html);
-
-    // add view name
-    Label viewLink = new Label(view.getName());
-    viewLink.addStyleName(hClass);
-    panel.add(viewLink);
+    String iconTag = FontAwesomeIconManager.getTag(FontAwesomeIconManager.SCHEMA_TABLE_SEPARATOR);
+    final SafeHtml html = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE, table.getSchemaName() + iconTag + table.getName());
+    Hyperlink tableLink = new Hyperlink(html, HistoryManager.linkToTable(databaseUUID, table.getUUID()));
+    tableLink.addStyleName(hClass);
+    panel.add(tableLink);
 
     return panel;
   }

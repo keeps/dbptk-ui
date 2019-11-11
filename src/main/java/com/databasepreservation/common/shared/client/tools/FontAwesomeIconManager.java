@@ -21,7 +21,7 @@ public class FontAwesomeIconManager {
   public static final String DATABASE = "database";
   public static final String SCHEMA = "cube";
   public static final String TABLE = "table";
-  public static final String RECORD = "file-o";
+  public static final String RECORD = "file";
   public static final String REFERENCE = "exchange";
   public static final String DATABASE_INFORMATION = "info-circle";
   public static final String DATABASE_USERS = "users";

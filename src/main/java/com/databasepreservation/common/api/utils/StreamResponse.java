@@ -7,8 +7,6 @@ package com.databasepreservation.common.api.utils;
 import com.databasepreservation.common.api.common.ConsumesOutputStream;
 import com.databasepreservation.common.api.common.EntityResponse;
 
-import javax.ws.rs.core.StreamingOutput;
-
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */

@@ -293,7 +293,7 @@ public class SolrUtils {
     final long offset = docList.getStart();
     final long limit = docList.size();
     final long totalCount = docList.getNumFound();
-    final List<T> docs = new ArrayList<T>();
+    final List<T> docs = new ArrayList<>();
 
     for (SolrDocument doc : docList) {
       T result;
@@ -305,7 +305,7 @@ public class SolrUtils {
       docs.add(result);
     }
 
-    return new IndexResult<T>(offset, limit, totalCount, docs, facetResults);
+    return new IndexResult<>(offset, limit, totalCount, docs, facetResults);
   }
 
   private static List<FacetFieldResult> processFacetFields(Facets facets, List<FacetField> facetFields) {

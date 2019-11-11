@@ -254,13 +254,24 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
   @Override
   protected void onLoad() {
     super.onLoad();
+    setFilter(FilterUtils.filterByTable(getFilter(), getObject().getSecond().getId()));
     this.getSelectionModel().clear();
   }
 
   @Override
   public void exportClickHandler() {
     HelperExportTableData helperExportTableData = new HelperExportTableData(viewerTable);
-    Dialogs.showCSVSetupDialog(messages.csvExportDialogTitle(), helperExportTableData, messages.basicActionCancel(),
+
+    boolean buildZipHelper = false;
+    final List<ViewerColumn> binaryColumns = viewerTable.getBinaryColumns();
+    for (ViewerColumn column : binaryColumns) {
+      if (this.columnDisplayNameToVisibleState.get(column.getDisplayName())) {
+        buildZipHelper = true;
+      }
+    }
+
+
+    Dialogs.showCSVSetupDialog(messages.csvExportDialogTitle(), helperExportTableData.getWidget(buildZipHelper), messages.basicActionCancel(),
       messages.basicActionConfirm(), new DefaultAsyncCallback<Boolean>() {
 
         @Override
@@ -270,7 +281,13 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
             boolean exportAll = helperExportTableData.exportAll();
             boolean exportDescription = helperExportTableData.exportDescription();
 
-            Window.Location.assign(getExportURL(filename, exportAll, exportDescription));
+            if (helperExportTableData.isZipHelper()) {
+              boolean exportLOBs = helperExportTableData.exportLobs();
+              String zipFilename = helperExportTableData.getZipFileName();
+              Window.Location.assign(getExportURL(zipFilename, filename, exportAll, exportDescription, exportLOBs));
+            } else {
+              Window.Location.assign(getExportURL(filename, exportAll, exportDescription));
+            }
           }
         }
       });
@@ -303,7 +320,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
     }
   }
 
-  private String getExportURL(String filename, boolean exportAll, boolean description) {
+  private String getExportURL(String zipFilename, String filename, boolean exportAll, boolean description, boolean exportLobs) {
     ViewerDatabase database = getObject().getFirst();
     ViewerTable table = getObject().getSecond();
 
@@ -335,12 +352,13 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
     // add parameter: field list
     String paramFieldList = ViewerJsonUtils.getStringListMapper().write(solrColumns);
     urlBuilder.append(ViewerConstants.API_QUERY_PARAM_FIELDS).append("=").append(UriQueryUtils.encodeQuery(paramFieldList))
-      .append("&");
+        .append("&");
 
     // add parameter: filter
     String paramFilter = ViewerJsonUtils.getFilterMapper().write(getFilter());
+    GWT.log("FILTER: " + paramFilter);
     urlBuilder.append(ViewerConstants.API_QUERY_PARAM_FILTER).append("=").append(UriQueryUtils.encodeQuery(paramFilter))
-      .append("&");
+        .append("&");
 
     // add parameter: subList
     String paramSubList;
@@ -348,22 +366,36 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
       paramSubList = ViewerJsonUtils.getSubListMapper().write(currentSubList);
       urlBuilder.append(ViewerConstants.API_QUERY_PARAM_SUBLIST).append("=").append(UriQueryUtils.encodeQuery(paramSubList))
           .append("&");
+      GWT.log("SUBLIST: " + paramSubList);
     }
 
     // add parameter: sorter
     String paramSorter = ViewerJsonUtils.getSorterMapper().write(currentSorter);
     urlBuilder.append(ViewerConstants.API_QUERY_PARAM_SORTER).append("=").append(UriQueryUtils.encodeQuery(paramSorter))
-      .append("&");
+        .append("&");
+
+    GWT.log("SORTER: " + currentSorter);
 
     urlBuilder.append(ViewerConstants.API_PATH_PARAM_FILENAME).append("=").append(UriQueryUtils.encodeQuery(filename))
         .append("&");
 
+    if (exportLobs) {
+      urlBuilder.append(ViewerConstants.API_PATH_PARAM_ZIP_FILENAME).append("=").append(UriQueryUtils.encodeQuery(zipFilename))
+          .append("&");
+    }
+
     urlBuilder.append(ViewerConstants.API_PATH_PARAM_EXPORT_DESCRIPTION).append("=").append(description).append("&");
+
+    urlBuilder.append(ViewerConstants.API_PATH_PARAM_EXPORT_LOBS).append("=").append(exportLobs).append("&");
 
     urlBuilder.append(ViewerConstants.API_PATH_PARAM_TABLE_UUID).append("=").append(table.getUUID());
 
     GWT.log(urlBuilder.toString());
 
     return urlBuilder.toString();
+  }
+
+  private String getExportURL(String filename, boolean exportAll, boolean description) {
+    return getExportURL(null, filename, exportAll, description, false);
   }
 }

@@ -52,6 +52,8 @@ public class ViewerConstants {
   public static final String MATERIALIZED_VIEW_PREFIX = "VIEW_";
   public static final String CUSTOM_VIEW_PREFIX = "CUSTOM_VIEW_";
 
+  public static final String INTERNAL_ZIP_LOB_FOLDER = "lobs/";
+
   /*
    * SOLR CONFIGSETS
    */
@@ -206,7 +208,9 @@ public class ViewerConstants {
   public static final String API_V1_EXPORT_RESOURCE = "/v1/exports";
   public static final String API_PATH_PARAM_DATABASE_UUID = "databaseUUID";
   public static final String API_PATH_PARAM_EXPORT_DESCRIPTION = "description";
+  public static final String API_PATH_PARAM_EXPORT_LOBS = "lobs";
   public static final String API_PATH_PARAM_FILENAME = "fn";
+  public static final String API_PATH_PARAM_ZIP_FILENAME = "zfn";
   public static final String API_PATH_PARAM_TABLE_UUID = "tableUUID";
   public static final String API_QUERY_PARAM_FIELDS = "fl";
   public static final String API_QUERY_PARAM_FILTER = "f";
@@ -328,6 +332,7 @@ public class ViewerConstants {
    * FILE EXTENSIONS
    */
   public static final String CSV_EXTENSION = ".csv";
+  public static final String ZIP_EXTENSION = ".zip";
 
   /**
    * private constructor

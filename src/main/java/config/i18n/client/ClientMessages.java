@@ -1040,17 +1040,27 @@ public interface ClientMessages extends Messages {
 
   String csvExportDialogLabelForFilename();
 
+  String csvExportDialogLabelForZipFilename();
+
+  String csvExportDialogLabelForExportRows();
+
   String csvExportDialogLabelForExportAllRadioButton();
 
   String csvExportDialogLabelForExportVisibleRadioButton();
 
   String csvExportDialogLabelForExportHeaderWithDescriptions();
 
+  String csvExportDialogLabelForExportLOBs();
+
   String csvExportDialogHelpTextForFilename();
+
+  String csvExportDialogHelpTextForZipFilename();
 
   String csvExportDialogHelpTextForExportSize();
 
   String csvExportDialogHelpTextForDescription();
+
+  String csvExportDialogHelpTextForLOBs();
 
   String showAdvancedSearch();
 

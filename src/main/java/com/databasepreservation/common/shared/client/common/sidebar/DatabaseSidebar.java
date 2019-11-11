@@ -213,7 +213,6 @@ public class DatabaseSidebar extends Composite {
       }
 
       for (ViewerView view : schema.getViews()) {
-        GWT.log(view.getName());
         SafeHtml html;
         if (totalSchemas == 1) {
           html = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE, view.getName());

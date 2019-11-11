@@ -1,8 +1,9 @@
 package com.databasepreservation.common.api.v1;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
-import java.util.List;
+import java.nio.file.Paths;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
@@ -13,20 +14,23 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import com.databasepreservation.common.shared.ViewerStructure.ViewerColumn;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
+import org.apache.commons.compress.archivers.zip.Zip64Mode;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
+import org.apache.commons.io.IOUtils;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RODAException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.api.utils.ApiUtils;
 import com.databasepreservation.common.api.utils.DownloadUtils;
 import com.databasepreservation.common.api.utils.StreamResponse;
+import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
 import com.databasepreservation.common.shared.ViewerConstants;
+import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerRow;
 import com.databasepreservation.common.utils.LobPathManager;
 import com.databasepreservation.common.utils.UserUtility;
