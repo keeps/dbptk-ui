@@ -1,11 +1,11 @@
 package com.databasepreservation.common.shared.ViewerStructure;
 
-import com.databasepreservation.common.shared.client.tools.ViewerStringUtils;
-import org.apache.commons.lang3.StringUtils;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.databasepreservation.common.shared.client.tools.ViewerStringUtils;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -140,12 +140,15 @@ public class ViewerTable implements Serializable {
     this.id = id;
   }
 
-  public void setCandidateKeys(List<ViewerCandidateKey> canditateKeys) { this.candidateKeys = canditateKeys;}
+  public void setCandidateKeys(List<ViewerCandidateKey> candidateKeys) {
+    this.candidateKeys = candidateKeys;
+  }
 
   public List<ViewerCandidateKey> getCandidateKeys() {
     return candidateKeys;
   }
 
+  @JsonIgnore
   public List<String> getCSVHeaders(List<String> fieldsToReturn, boolean exportDescriptions) {
     List<String> values = new ArrayList<>();
     for (ViewerColumn column : columns) {
@@ -164,6 +167,7 @@ public class ViewerTable implements Serializable {
     return values;
   }
 
+  @JsonIgnore
   public List<ViewerColumn> getBinaryColumns() {
     List<ViewerColumn> binaryColumns = new ArrayList<>();
     for (ViewerColumn column : columns) {

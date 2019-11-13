@@ -125,9 +125,6 @@ public class SIARDExportOptionsCurrent extends Composite {
           }
           break;
         case ViewerConstants.INPUT_TYPE_DEFAULT:
-          if (parameter.getName().equals("pretty-xml")) {
-            exportParameters.put(parameter.getName(), "true");
-          }
         case ViewerConstants.INPUT_TYPE_NONE:
         default:
           break;

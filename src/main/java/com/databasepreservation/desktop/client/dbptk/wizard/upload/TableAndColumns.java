@@ -171,6 +171,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
       new DefaultAsyncCallback<String>() {
         @Override
         public void onSuccess(String result) {
+          GWT.log("" + result);
           ViewerMetadataMapper mapper = GWT.create(ViewerMetadataMapper.class);
           metadata = mapper.read(result);
           tableAndColumnsSidebar = TableAndColumnsSidebar.newInstance(metadata);
@@ -200,7 +201,6 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
     columns = null;
     tables = null;
     views = null;
-    instances = new HashMap<>();
     if (tableAndColumnsSidebar != null) tableAndColumnsSidebar.selectNone();
     if (tableAndColumnsSendToSidebar != null) tableAndColumnsSendToSidebar.selectNone();
   }
