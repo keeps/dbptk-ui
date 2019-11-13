@@ -217,6 +217,10 @@ public class ViewerMetadata implements Serializable {
     return tables.get(tableUUID);
   }
 
+  public Map<String, ViewerTable> getTables() {
+    return tables;
+  }
+
   public ViewerTable getTableById(String tableId) {
     for (ViewerTable value : tables.values()) {
       if (value.getId().equals(tableId)) return value;

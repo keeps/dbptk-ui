@@ -124,7 +124,8 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
   private Optional<ViewerCell> cellFromEntry(String columnName, Object value) {
     Optional<ViewerCell> viewerCell = Optional.empty();
 
-    if (columnName.startsWith(ViewerConstants.SOLR_INDEX_ROW_COLUMN_NAME_PREFIX)) {
+    if (columnName.startsWith(ViewerConstants.SOLR_INDEX_ROW_COLUMN_NAME_PREFIX) ||
+        columnName.startsWith(ViewerConstants.SOLR_INDEX_ROW_REFERENCED_COLUMN_NAME_PREFIX)) {
       if (value instanceof Date) {
         DateTime date = new DateTime(value, JodaUtils.DEFAULT_CHRONOLOGY);
         if (columnName.endsWith(ViewerConstants.SOLR_DYN_TDATE)) {

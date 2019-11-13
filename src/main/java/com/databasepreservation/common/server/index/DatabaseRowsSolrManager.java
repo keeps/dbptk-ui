@@ -463,6 +463,50 @@ public class DatabaseRowsSolrManager {
   public ViewerMetadata retrieveDatabaseMetadata(String databaseUUID) {
     ViewerMetadata metadata = new ViewerMetadata();
 
+
     return metadata;
+  }
+
+//  @SafeVarargs
+//  public final void addDatabaseField(final String databaseUUID, final String documentUUID, final String nestedUUID, Pair<String, ?>... fields) {
+//    RowsCollection collection = SolrRowsCollectionRegistry.get(databaseUUID);
+//    SolrInputDocument doc = new SolrInputDocument();
+//    SolrInputDocument nestedDoc = new SolrInputDocument();
+//    nestedDoc.addField(ViewerConstants.INDEX_ID, nestedUUID);
+//    nestedDoc.addField("type_t", "child");
+//    for (Pair<String, ?> field : fields) {
+//      LOGGER.debug("Added " + field.getFirst() + " to " + field.getSecond());
+//      nestedDoc.addField(field.getFirst(), field.getSecond());
+//      System.out.println("docID: " + documentUUID + " nestedID " + nestedUUID);
+//    }
+////    doc.addField("_childDocuments_", SolrUtils.asValueUpdate(nestedDoc));
+//    doc.addField(ViewerConstants.INDEX_ID, documentUUID);
+//    doc.addField("type_t", SolrUtils.asValueUpdate("parent"));
+//    doc.addChildDocument(nestedDoc);
+//
+//    try {
+//      insertDocument(collection.getIndexName(), doc);
+//
+//    } catch (ViewerException e) {
+//      LOGGER.error("Could not update database progress for {}", databaseUUID, e);
+//    }
+//  }
+
+  @SafeVarargs
+  public final void addDatabaseField(final String databaseUUID, final String documentUUID, Pair<String, ?>... fields) {
+    RowsCollection collection = SolrRowsCollectionRegistry.get(databaseUUID);
+    SolrInputDocument doc = new SolrInputDocument();
+    doc.addField(ViewerConstants.INDEX_ID, documentUUID);
+    for (Pair<String, ?> field : fields) {
+      LOGGER.debug("Updating " + field.getFirst() + " to " + field.getSecond());
+      doc.addField(field.getFirst(), SolrUtils.asValueUpdate(field.getSecond()));
+    }
+
+    try {
+      insertDocument(collection.getIndexName(), doc);
+    } catch (ViewerException e) {
+      LOGGER.error("Could not update database progress for {}", databaseUUID, e);
+    }
+    updateDatabaseFields(databaseUUID, fields);
   }
 }

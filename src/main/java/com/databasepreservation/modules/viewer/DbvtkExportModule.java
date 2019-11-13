@@ -6,11 +6,12 @@ import java.util.Set;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 
-import com.databasepreservation.common.server.ViewerFactory;
-import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseFromToolkit;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
+import com.databasepreservation.common.server.ViewerFactory;
+import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
+import com.databasepreservation.common.transformers.DbvtkDenormalizationDatabase;
 import com.databasepreservation.common.transformers.ToolkitStructure2ViewerStructure;
 import com.databasepreservation.model.Reporter;
 import com.databasepreservation.model.data.Row;
@@ -20,6 +21,7 @@ import com.databasepreservation.model.modules.DatabaseExportModule;
 import com.databasepreservation.model.modules.ModuleSettings;
 import com.databasepreservation.model.structure.DatabaseStructure;
 import com.databasepreservation.modules.DefaultExceptionNormalizer;
+
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -175,7 +177,8 @@ public class DbvtkExportModule implements DatabaseExportModule {
   @Override
   public void handleDataCloseSchema(String schemaName) throws ModuleException {
     // committing + optimizing after whole database
-    //TODO: Foreign Key partials updates
+    DbvtkDenormalizationDatabase dbvtkDenormalizationDatabase = new DbvtkDenormalizationDatabase(databaseUUID);
+    dbvtkDenormalizationDatabase.denormalize();
   }
 
   /**

@@ -91,6 +91,7 @@ public class ViewerConstants {
   public static final String SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX = "dbv-database-";
   public static final String SOLR_INDEX_ACTIVITY_LOGS_COLLECTION_NAME = "dbv-activity-logs";
   public static final String SOLR_INDEX_ROW_COLUMN_NAME_PREFIX = "col";
+  public static final String SOLR_INDEX_ROW_REFERENCED_COLUMN_NAME_PREFIX = "r_col";
   public static final String SOLR_INDEX_ROW_LOB_COLUMN_NAME_PREFIX = "lob";
 
   /*
