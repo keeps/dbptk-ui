@@ -137,27 +137,24 @@ public class JDBCPanel extends Composite {
         checkBoxInputs.put(parameter.getName(), checkbox);
         genericField = GenericField.createInstance(checkbox);
         break;
-      case ViewerConstants.INPUT_TYPE_FILE: {
+      case ViewerConstants.INPUT_TYPE_FILE_OPEN: {
         FileUploadField fileUploadField = FileUploadField.createInstance(
           messages.connectionPageLabelsFor(parameter.getName()), messages.connectionPageLabelForChooseFileLocation());
         fileUploadField.setParentCSS("form-row");
         fileUploadField.setLabelCSS("form-label-spaced");
         fileUploadField.setButtonCSS("btn btn-link form-button form-button-jar");
         fileUploadField.setRequired(parameter.isRequired());
-        fileUploadField.buttonAction(new Command() {
-          @Override
-          public void execute() {
-            if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
-              Filter mdb = new Filter("MS Access", Collections.singletonList("mdb"));
-              JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.singletonList("openFile"),
-                Collections.singletonList(mdb));
+        fileUploadField.buttonAction(() -> {
+          if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
+            Filter mdb = new Filter("MS Access", Collections.singletonList("mdb"));
+            JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.singletonList("openFile"),
+              Collections.singletonList(mdb));
 
-              String path = JavascriptUtils.openFileDialog(options);
-              if (path != null) {
-                String displayPath = PathUtils.getFileName(path);
-                fileUploadField.setPathLocation(displayPath, path);
-                fileUploadField.setInformationPathCSS("gwt-Label-disabled information-path");
-              }
+            String path = JavascriptUtils.openFileDialog(options);
+            if (path != null) {
+              String displayPath = PathUtils.getFileName(path);
+              fileUploadField.setPathLocation(displayPath, path);
+              fileUploadField.setInformationPathCSS("gwt-Label-disabled information-path");
             }
           }
         });

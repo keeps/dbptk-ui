@@ -13,6 +13,7 @@ public class PreservationParameter implements Serializable {
   private boolean required = false;
   private boolean hasArgument = false;
   private String inputType = null;
+  private String fileFilter = null;
   private String exportOption = null;
   private String defaultValue = null;
 
@@ -92,6 +93,14 @@ public class PreservationParameter implements Serializable {
 
   public void setDefaultValue(String defaultValue) {
     this.defaultValue = defaultValue;
+  }
+
+  public String getFileFilter() {
+    return fileFilter;
+  }
+
+  public void setFileFilter(String fileFilter) {
+    this.fileFilter = fileFilter;
   }
 
   @Override

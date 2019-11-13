@@ -60,9 +60,7 @@ public class SIARDExportOptionsCurrent extends Composite {
   private FileUploadField SIARDInputFile;
 
   public static SIARDExportOptionsCurrent getInstance(String key, DBPTKModule dbptkModule) {
-    if (instances.get(key) == null) {
-      instances.put(key, new SIARDExportOptionsCurrent(key, dbptkModule));
-    }
+    instances.computeIfAbsent(key, k -> new SIARDExportOptionsCurrent(key, dbptkModule));
     return instances.get(key);
   }
 
@@ -117,7 +115,8 @@ public class SIARDExportOptionsCurrent extends Composite {
           }
           break;
         case ViewerConstants.INPUT_TYPE_FOLDER:
-        case ViewerConstants.INPUT_TYPE_FILE:
+        case ViewerConstants.INPUT_TYPE_FILE_OPEN:
+        case ViewerConstants.INPUT_TYPE_FILE_SAVE:
           if (fileInputs.get(parameter.getName()) != null) {
             final String path = fileInputs.get(parameter.getName());
             exportOptionsParameters.setSiardPath(path);
@@ -163,8 +162,9 @@ public class SIARDExportOptionsCurrent extends Composite {
             }
           }
           break;
-        case "FOLDER":
-        case "FILE":
+        case ViewerConstants.INPUT_TYPE_FOLDER:
+        case ViewerConstants.INPUT_TYPE_FILE_OPEN:
+        case ViewerConstants.INPUT_TYPE_FILE_SAVE:
           if (fileInputs.get(parameter.getName()) != null) {
             final String s = fileInputs.get(parameter.getName());
             if (ViewerStringUtils.isBlank(s)) {
@@ -186,7 +186,6 @@ public class SIARDExportOptionsCurrent extends Composite {
           }
           break;
         default:
-          ;
       }
     }
     return SIARDExportOptions.OK;
@@ -194,7 +193,7 @@ public class SIARDExportOptionsCurrent extends Composite {
 
   public void setDefaultPath(String path) {
     if (!version.equals(ViewerConstants.SIARDDK)) {
-      fileInputs.put(ViewerConstants.INPUT_TYPE_FILE.toLowerCase(), path);
+      fileInputs.put(ViewerConstants.INPUT_TYPE_FILE_SAVE.toLowerCase(), path);
       SIARDInputFile.setPathLocation(path, path);
       SIARDInputFile.setInformationPathCSS("gwt-Label-disabled information-path");
     }
@@ -272,15 +271,15 @@ public class SIARDExportOptionsCurrent extends Composite {
         GWT.log("" + parameter);
         defaultTextBox.setText(parameter.getDefaultValue());
         externalLobsInputs.put(parameter.getName(), defaultTextBox);
-        Label label_end = new Label();
-        label_end.setText(messages.wizardExportOptionsLabels(parameter.getName() + "-end"));
-        externalLobsLabels.add(label_end);
+        Label labelEnd = new Label();
+        labelEnd.setText(messages.wizardExportOptionsLabels(parameter.getName() + "-end"));
+        externalLobsLabels.add(labelEnd);
         if (version.equals(ViewerConstants.SIARDDK)) {
           label.addStyleName("form-label");
-          label_end.addStyleName("form-label");
+          labelEnd.addStyleName("form-label");
         } else {
           label.addStyleName("form-label gwt-Label-disabled");
-          label_end.addStyleName("form-label gwt-Label-disabled");
+          labelEnd.addStyleName("form-label gwt-Label-disabled");
           defaultTextBox.setEnabled(false);
         }
         FlowPanel formHelper = new FlowPanel();
@@ -289,7 +288,7 @@ public class SIARDExportOptionsCurrent extends Composite {
         formRow.addStyleName("form-row");
         formRow.add(label);
         formRow.add(defaultTextBox);
-        formRow.add(label_end);
+        formRow.add(labelEnd);
         InlineHTML span = new InlineHTML();
         span.addStyleName("form-text-helper text-muted");
         span.setText(messages.wizardExportOptionsHelperText(parameter.getName()));
@@ -318,7 +317,8 @@ public class SIARDExportOptionsCurrent extends Composite {
         genericField = GenericField.createInstance(checkbox);
         spanCSSClass = "form-text-helper-checkbox text-muted";
         break;
-      case ViewerConstants.INPUT_TYPE_FILE:
+      case ViewerConstants.INPUT_TYPE_FILE_SAVE:
+      case ViewerConstants.INPUT_TYPE_FILE_OPEN:
         FileUploadField fileUploadField = FileUploadField
           .createInstance(messages.wizardExportOptionsLabels(parameter.getName()), messages.basicActionBrowse());
         fileUploadField.setParentCSS("form-row");
@@ -328,12 +328,18 @@ public class SIARDExportOptionsCurrent extends Composite {
         fileUploadField.buttonAction(() -> {
           if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
             JavaScriptObject.createArray();
-            Filter filter = new Filter();
-            filter.setName(ViewerConstants.SIARD_FILES);
-            filter.setExtensions(Collections.singletonList(ViewerConstants.SIARD));
+            Filter filter = new Filter().createFilterTypeFromDBPTK(parameter.getFileFilter());
+            //filter.setName(ViewerConstants.SIARD_FILES);
+            //filter.setExtensions(Collections.singletonList(ViewerConstants.SIARD));
             JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.emptyList(),
               Collections.singletonList(filter));
-            String path = JavascriptUtils.saveFileDialog(options);
+            String path = null;
+            if (parameter.getInputType().equals(ViewerConstants.INPUT_TYPE_FILE_SAVE)) {
+              path = JavascriptUtils.saveFileDialog(options);
+            }
+            if (parameter.getInputType().equals(ViewerConstants.INPUT_TYPE_FILE_OPEN)) {
+              path = JavascriptUtils.openFileDialog(options);
+            }
             if (path != null) {
               fileInputs.put(parameter.getName(), path);
               fileUploadField.setPathLocation(path, path);
@@ -343,7 +349,7 @@ public class SIARDExportOptionsCurrent extends Composite {
             // TODO
           }
         });
-        if (parameter.getName().equals(ViewerConstants.INPUT_TYPE_FILE.toLowerCase())
+        if (parameter.getName().equalsIgnoreCase(ViewerConstants.INPUT_TYPE_FILE_SAVE)
           && !version.equals(ViewerConstants.SIARDDK)) {
           SIARDInputFile = fileUploadField;
         }

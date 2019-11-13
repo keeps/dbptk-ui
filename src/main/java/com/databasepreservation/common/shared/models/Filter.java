@@ -1,6 +1,9 @@
 package com.databasepreservation.common.shared.models;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import com.databasepreservation.common.shared.ViewerConstants;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -8,7 +11,7 @@ import java.util.List;
 public class Filter {
 
   private String name;
-  private List<String> extensions;
+  private List<String> extensions = null;
 
   public Filter() {}
 
@@ -31,5 +34,21 @@ public class Filter {
 
   public void setExtensions(List<String> extensions) {
     this.extensions = extensions;
+  }
+
+  public Filter createFilterTypeFromDBPTK(String type) {
+    if (extensions == null) {
+      extensions = new ArrayList<>();
+    }
+    switch (type) {
+      case "XML_EXTENSION":
+        this.name = "XML";
+        this.extensions.add("xml");
+        return this;
+      default:
+        this.name = ViewerConstants.SIARD_FILES;
+        this.extensions.add(ViewerConstants.SIARD);
+        return this;
+    }
   }
 }

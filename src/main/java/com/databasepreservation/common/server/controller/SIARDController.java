@@ -1,6 +1,14 @@
 package com.databasepreservation.common.server.controller;
 
-import java.io.*;
+import static com.databasepreservation.common.shared.ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX;
+import static com.databasepreservation.common.shared.ViewerConstants.SOLR_SEARCHES_DATABASE_UUID;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -8,12 +16,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import com.databasepreservation.common.server.index.factory.SolrClientFactory;
-import com.databasepreservation.common.server.index.schema.SolrDefaultCollectionRegistry;
-import com.databasepreservation.common.shared.client.common.search.SavedSearch;
-import com.databasepreservation.common.shared.client.common.utils.ApplicationType;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
@@ -35,15 +45,28 @@ import com.databasepreservation.common.server.ValidationProgressObserver;
 import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
+import com.databasepreservation.common.server.index.factory.SolrClientFactory;
+import com.databasepreservation.common.server.index.schema.SolrDefaultCollectionRegistry;
 import com.databasepreservation.common.server.index.utils.JsonTransformer;
 import com.databasepreservation.common.server.index.utils.SolrUtils;
 import com.databasepreservation.common.shared.ViewerConstants;
-import com.databasepreservation.common.shared.ViewerStructure.*;
+import com.databasepreservation.common.shared.ViewerStructure.ViewerColumn;
+import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
+import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabaseFromToolkit;
+import com.databasepreservation.common.shared.ViewerStructure.ViewerMetadata;
+import com.databasepreservation.common.shared.ViewerStructure.ViewerSIARDBundle;
+import com.databasepreservation.common.shared.client.common.search.SavedSearch;
 import com.databasepreservation.common.shared.models.DBPTKModule;
 import com.databasepreservation.common.shared.models.ExternalLobDBPTK;
 import com.databasepreservation.common.shared.models.PreservationParameter;
 import com.databasepreservation.common.shared.models.SSHConfiguration;
-import com.databasepreservation.common.shared.models.wizardParameters.*;
+import com.databasepreservation.common.shared.models.wizardParameters.ConnectionParameters;
+import com.databasepreservation.common.shared.models.wizardParameters.CustomViewsParameter;
+import com.databasepreservation.common.shared.models.wizardParameters.CustomViewsParameters;
+import com.databasepreservation.common.shared.models.wizardParameters.ExportOptionsParameters;
+import com.databasepreservation.common.shared.models.wizardParameters.ExternalLOBsParameter;
+import com.databasepreservation.common.shared.models.wizardParameters.MetadataExportOptionsParameters;
+import com.databasepreservation.common.shared.models.wizardParameters.TableAndColumnsParameters;
 import com.databasepreservation.common.transformers.ToolkitStructure2ViewerStructure;
 import com.databasepreservation.model.Reporter;
 import com.databasepreservation.model.exception.ModuleException;
@@ -63,9 +86,6 @@ import com.databasepreservation.modules.siard.SIARDEditFactory;
 import com.databasepreservation.modules.siard.SIARDValidateFactory;
 import com.databasepreservation.modules.viewer.DbvtkModuleFactory;
 import com.databasepreservation.utils.ReflectionUtils;
-
-import static com.databasepreservation.common.shared.ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX;
-import static com.databasepreservation.common.shared.ViewerConstants.SOLR_SEARCHES_DATABASE_UUID;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -835,6 +855,9 @@ public class SIARDController {
       for (Parameter param : parameters.getParameters()) {
         preservationParameter = new PreservationParameter(param.longName(), param.description(), param.required(),
           param.hasArgument(), param.getInputType().name());
+        if (param.getFileFilter() != null) {
+          preservationParameter.setFileFilter(param.getFileFilter().name());
+        }
         if (param.valueIfNotSet() != null) {
           preservationParameter.setDefaultValue(param.valueIfNotSet());
         }
@@ -845,6 +868,9 @@ public class SIARDController {
         for (Parameter param : pg.getParameters()) {
           preservationParameter = new PreservationParameter(param.longName(), param.description(), param.required(),
             param.hasArgument(), param.getInputType().name());
+          if (param.getFileFilter() != null) {
+            preservationParameter.setFileFilter(param.getFileFilter().name());
+          }
           dbptkModule.addPreservationParameter(factory.getModuleName(), preservationParameter);
         }
       }
@@ -861,10 +887,17 @@ public class SIARDController {
     for (Parameter param : parameters.getParameters()) {
       if (param.getExportOptions() != null) {
         preservationParameter = new PreservationParameter(param.longName(), param.description(), param.required(),
-          param.hasArgument(), param.getInputType().name(), param.getExportOptions().name());
+          param.hasArgument(), param.getInputType().name(),
+          param.getExportOptions().name());
+        if (param.getFileFilter() != null) {
+          preservationParameter.setFileFilter(param.getFileFilter().name());
+        }
       } else {
         preservationParameter = new PreservationParameter(param.longName(), param.description(), param.required(),
           param.hasArgument(), param.getInputType().name());
+        if (param.getFileFilter() != null) {
+          preservationParameter.setFileFilter(param.getFileFilter().name());
+        }
       }
 
       if (param.valueIfNotSet() != null) {
@@ -884,18 +917,12 @@ public class SIARDController {
     } catch (IOException e) {
       throw new GenericException("Could not create the temporary file", e);
     }
-    FileOutputStream outputStream;
-    try {
-      outputStream = new FileOutputStream(tmpFile);
-    } catch (FileNotFoundException e) {
-      throw new GenericException("Could not find the temporary file", e);
-    }
-    OutputStreamWriter writer = new OutputStreamWriter(outputStream);
-    try {
+
+    try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(tmpFile))) {
       writer.write(content);
       writer.flush();
-      writer.close();
-      outputStream.close();
+    } catch (FileNotFoundException e) {
+      throw new GenericException("Could not find the temporary file", e);
     } catch (IOException e) {
       throw new GenericException("Could not close the temporary file", e);
     }

@@ -290,7 +290,8 @@ public class ViewerConstants {
    */
   public static final String INPUT_TYPE_PASSWORD = "PASSWORD";
   public static final String INPUT_TYPE_CHECKBOX = "CHECKBOX";
-  public static final String INPUT_TYPE_FILE = "FILE";
+  public static final String INPUT_TYPE_FILE_OPEN = "FILE_OPEN";
+  public static final String INPUT_TYPE_FILE_SAVE = "FILE_SAVE";
   public static final String INPUT_TYPE_FOLDER = "FOLDER";
   public static final String INPUT_TYPE_TEXT = "TEXT";
   public static final String INPUT_TYPE_NUMBER = "NUMBER";
