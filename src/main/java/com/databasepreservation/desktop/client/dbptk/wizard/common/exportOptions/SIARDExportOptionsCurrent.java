@@ -3,6 +3,8 @@ package com.databasepreservation.desktop.client.dbptk.wizard.common.exportOption
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import com.databasepreservation.common.shared.ViewerConstants;
 import com.databasepreservation.common.shared.client.common.desktop.FileUploadField;
@@ -13,9 +15,9 @@ import com.databasepreservation.common.shared.client.tools.JSOUtils;
 import com.databasepreservation.common.shared.client.tools.ViewerStringUtils;
 import com.databasepreservation.common.shared.client.widgets.Toast;
 import com.databasepreservation.common.shared.models.DBPTKModule;
+import com.databasepreservation.common.shared.models.Filter;
 import com.databasepreservation.common.shared.models.PreservationParameter;
 import com.databasepreservation.common.shared.models.wizardParameters.ExportOptionsParameters;
-import com.databasepreservation.common.shared.models.Filter;
 import com.databasepreservation.modules.siard.SIARD2ModuleFactory;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -46,30 +48,36 @@ public class SIARDExportOptionsCurrent extends Composite {
   @UiField
   FlowPanel content;
 
-  private static HashMap<String, SIARDExportOptionsCurrent> instances = new HashMap<>();
-  private HashMap<String, TextBox> textBoxInputs = new HashMap<>();
-  private HashMap<String, CheckBox> checkBoxInputs = new HashMap<>();
-  private HashMap<String, String> fileInputs = new HashMap<>();
+  private static Map<String, SIARDExportOptionsCurrent> instances = new HashMap<>();
+  private Map<String, TextBox> textBoxInputs = new HashMap<>();
+  private Map<String, CheckBox> checkBoxInputs = new HashMap<>();
+  private Map<String, String> fileInputs = new HashMap<>();
   private DBPTKModule dbptkModule;
-  private ArrayList<PreservationParameter> parameters;
-  private ArrayList<Label> externalLobsLabels = new ArrayList<>();
-  private HashMap<String, TextBox> externalLobsInputs = new HashMap<>();
+  private List<PreservationParameter> parameters;
+  private List<Label> externalLobsLabels = new ArrayList<>();
+  private Map<String, TextBox> externalLobsInputs = new HashMap<>();
   private CheckBox externalLobCheckbox;
   private int validationError = -1;
   private String version;
-  private FileUploadField SIARDInputFile;
+  private String defaultPath;
 
   public static SIARDExportOptionsCurrent getInstance(String key, DBPTKModule dbptkModule) {
-    instances.computeIfAbsent(key, k -> new SIARDExportOptionsCurrent(key, dbptkModule));
+    instances.computeIfAbsent(key, k -> new SIARDExportOptionsCurrent(key, dbptkModule, null));
     return instances.get(key);
   }
 
-  private SIARDExportOptionsCurrent(String version, DBPTKModule dbptkModule) {
+  public static SIARDExportOptionsCurrent getInstance(String key, DBPTKModule dbptkModule, String defaultPath) {
+    instances.computeIfAbsent(key, k -> new SIARDExportOptionsCurrent(key, dbptkModule, defaultPath));
+    return instances.get(key);
+  }
+
+  private SIARDExportOptionsCurrent(String version, DBPTKModule dbptkModule, String defaultPath) {
     initWidget(binder.createAndBindUi(this));
 
     this.version = version;
     this.parameters = dbptkModule.getParameters(version);
     this.dbptkModule = dbptkModule;
+    this.defaultPath = defaultPath;
 
     FlowPanel panel = new FlowPanel();
 
@@ -191,13 +199,14 @@ public class SIARDExportOptionsCurrent extends Composite {
     return SIARDExportOptions.OK;
   }
 
-  public void setDefaultPath(String path) {
-    if (!version.equals(ViewerConstants.SIARDDK)) {
-      fileInputs.put(ViewerConstants.INPUT_TYPE_FILE_SAVE.toLowerCase(), path);
-      SIARDInputFile.setPathLocation(path, path);
-      SIARDInputFile.setInformationPathCSS("gwt-Label-disabled information-path");
-    }
-  }
+//  public void setDefaultPath(String path) {
+//    GWT.log(path);
+//    if (!version.equals(ViewerConstants.SIARDDK)) {
+//      fileInputs.put(ViewerConstants.INPUT_TYPE_FILE_SAVE.toLowerCase(), path);
+//      SIARDInputFile.setPathLocation(path, path);
+//      SIARDInputFile.setInformationPathCSS("gwt-Label-disabled information-path");
+//    }
+//  }
 
   public void clear() {
     instances.clear();
@@ -329,8 +338,6 @@ public class SIARDExportOptionsCurrent extends Composite {
           if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
             JavaScriptObject.createArray();
             Filter filter = new Filter().createFilterTypeFromDBPTK(parameter.getFileFilter());
-            //filter.setName(ViewerConstants.SIARD_FILES);
-            //filter.setExtensions(Collections.singletonList(ViewerConstants.SIARD));
             JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.emptyList(),
               Collections.singletonList(filter));
             String path = null;
@@ -345,13 +352,13 @@ public class SIARDExportOptionsCurrent extends Composite {
               fileUploadField.setPathLocation(path, path);
               fileUploadField.setInformationPathCSS("gwt-Label-disabled information-path");
             }
-          } else {
-            // TODO
           }
         });
-        if (parameter.getName().equalsIgnoreCase(ViewerConstants.INPUT_TYPE_FILE_SAVE)
-          && !version.equals(ViewerConstants.SIARDDK)) {
-          SIARDInputFile = fileUploadField;
+        if (!version.equals(ViewerConstants.SIARDDK)) {
+          if (defaultPath != null) {
+            fileInputs.put(parameter.getName(), defaultPath);
+            fileUploadField.setPathLocation(defaultPath, defaultPath);
+          }
         }
         FlowPanel helper = new FlowPanel();
         helper.addStyleName("form-helper");

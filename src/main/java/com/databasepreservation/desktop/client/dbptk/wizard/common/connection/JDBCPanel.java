@@ -55,16 +55,14 @@ public class JDBCPanel extends Composite {
   private TextBox focusElement = null;
   private String databaseUUID;
   private final String type;
+  private boolean shouldCountRows = false;
 
   @UiField
   FlowPanel content;
 
   public static JDBCPanel getInstance(String connection, ArrayList<PreservationParameter> parameters, String databaseUUID, String type) {
     String code =  databaseUUID + ViewerConstants.API_SEP + connection;
-    if (instances.get(code) == null) {
-      JDBCPanel instance = new JDBCPanel(parameters, databaseUUID, type);
-      instances.put(code, instance);
-    }
+    instances.computeIfAbsent(code, k -> new JDBCPanel(parameters, databaseUUID, type));
     return instances.get(code);
   }
 
@@ -78,6 +76,8 @@ public class JDBCPanel extends Composite {
     for (PreservationParameter p : parameters) {
       buildGenericWidget(p);
     }
+
+    buildCheckboxWidget("Count Rows", "To count or not to count, that is the question.");
   }
 
   public JDBCParameters getValues() {
@@ -108,7 +108,28 @@ public class JDBCPanel extends Composite {
       parameters.setDriverPath(pathToDriver);
     }
 
+    parameters.shouldCountRows(shouldCountRows);
+
     return parameters;
+  }
+
+  private void buildCheckboxWidget(String label, String helperText) {
+    CheckBox checkbox = new CheckBox();
+    checkbox.setText(label);
+    checkbox.addStyleName("form-checkbox");
+    checkbox.addValueChangeHandler(event -> this.shouldCountRows = event.getValue());
+    GenericField genericField = GenericField.createInstance(checkbox);
+
+    FlowPanel helper = new FlowPanel();
+    helper.addStyleName("form-helper");
+    InlineHTML span = new InlineHTML();
+    genericField.setCSSMetadata("form-row", "form-label-spaced");
+    span.addStyleName("form-text-helper-checkbox text-muted");
+    span.setText(helperText);
+    genericField.addHelperText(span);
+    helper.add(genericField);
+    helper.add(span);
+    content.add(helper);
   }
 
   private void buildGenericWidget(PreservationParameter parameter) {

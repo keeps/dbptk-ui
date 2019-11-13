@@ -90,10 +90,7 @@ public class SIARDExportOptions extends WizardPanel<ExportOptionsParameters> {
         comboBoxField.addChangeHandler(() -> {
           version = comboBoxField.getSelectedValue();
           dbptkModule = module;
-          final SIARDExportOptionsCurrent instance = SIARDExportOptionsCurrent.getInstance(version, dbptkModule);
-          if(path != null){
-            instance.setDefaultPath(path);
-          }
+          final SIARDExportOptionsCurrent instance = SIARDExportOptionsCurrent.getInstance(version, dbptkModule, path);
           content.clear();
           content.add(instance);
         });

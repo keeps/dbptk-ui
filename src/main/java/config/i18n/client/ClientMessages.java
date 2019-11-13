@@ -1077,4 +1077,6 @@ public interface ClientMessages extends Messages {
    * Row Panel
    *******************************************/
   String rowPanelTextForButtonExportSingleRow();
+
+  String informationNotAvailable();
 }

@@ -110,7 +110,11 @@ public class ErDiagram extends Composite {
               VisNode visNode = new VisNode(viewerTable.getUUID(), viewerTable.getName());
 
               visNode.numColumns = viewerTable.getColumns().size();
-              visNode.numRows = new Long(viewerTable.getCountRows()).intValue();
+              if (viewerTable.getCountRows() == -1) {
+                visNode.numRows = 0;
+              } else {
+                visNode.numRows = new Long(viewerTable.getCountRows()).intValue();
+              }
               visNode.numRelationsOut = viewerTable.getForeignKeys().size();
               int inboundForeignKeys = 0;
               for (ViewerSchema viewerSchema : metadata.getSchemas()) {
@@ -171,8 +175,11 @@ public class ErDiagram extends Composite {
               if (ViewerStringUtils.isNotBlank(viewerTable.getName())) {
                 tooltip.append(viewerTable.getName()).append("<br/>");
               }
-              tooltip.append(messages.diagram_rows(visNode.numRows)).append(", ")
-                .append(messages.diagram_columns(visNode.numColumns)).append(", ")
+              if (viewerTable.getCountRows() != -1) {
+                tooltip.append(messages.diagram_rows(visNode.numRows)).append(", ");
+              }
+
+              tooltip.append(messages.diagram_columns(visNode.numColumns)).append(", ")
                 .append(messages.diagram_relations(visNode.numRelationsTotal)).append(".");
 
               visNode.setTitle(tooltip.toString());
@@ -215,7 +222,6 @@ public class ErDiagram extends Composite {
         }
       });
       tabPanel.add(diagram, schema.getName());
-      // contentItems.add(diagram);
     }
     tabPanel.selectTab(0);
   }

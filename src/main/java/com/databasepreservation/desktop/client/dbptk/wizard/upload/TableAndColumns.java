@@ -19,6 +19,7 @@ import com.databasepreservation.common.shared.client.common.DefaultAsyncCallback
 import com.databasepreservation.common.shared.client.common.desktop.ComboBoxField;
 import com.databasepreservation.common.shared.client.common.desktop.FileUploadField;
 import com.databasepreservation.common.shared.client.common.desktop.GenericField;
+import com.databasepreservation.common.shared.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.shared.client.common.lists.MultipleSelectionTablePanel;
 import com.databasepreservation.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.common.shared.client.common.utils.JavascriptUtils;
@@ -27,15 +28,14 @@ import com.databasepreservation.common.shared.client.tools.JSOUtils;
 import com.databasepreservation.common.shared.client.tools.PathUtils;
 import com.databasepreservation.common.shared.client.tools.ViewerStringUtils;
 import com.databasepreservation.common.shared.client.widgets.Toast;
+import com.databasepreservation.common.shared.models.ExternalLobsDialogBoxResult;
 import com.databasepreservation.common.shared.models.wizardParameters.ConnectionParameters;
 import com.databasepreservation.common.shared.models.wizardParameters.ExternalLOBsParameter;
 import com.databasepreservation.common.shared.models.wizardParameters.TableAndColumnsParameters;
-import com.databasepreservation.common.shared.client.common.dialogs.Dialogs;
 import com.databasepreservation.desktop.client.common.sidebar.TableAndColumnsSendToSidebar;
 import com.databasepreservation.desktop.client.common.sidebar.TableAndColumnsSidebar;
 import com.databasepreservation.desktop.client.dbptk.wizard.WizardPanel;
 import com.databasepreservation.desktop.client.dbptk.wizard.common.diagram.ErDiagram;
-import com.databasepreservation.common.shared.models.ExternalLobsDialogBoxResult;
 import com.github.nmorel.gwtjackson.client.ObjectMapper;
 import com.google.gwt.cell.client.ButtonCell;
 import com.google.gwt.cell.client.Cell;
@@ -265,9 +265,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
 
     if (tableUUID != null) {
       panel.add(getColumns(tableUUID));
-      if (toSelect.equals(TableAndColumnsSidebar.VIEW_LINK)) {
-        toSelect = ViewerStringUtils.concat(schemaUUID, tableUUID);
-      } else if (toSelect.equals(TableAndColumnsSidebar.TABLE_LINK)) {
+      if (toSelect.equals(TableAndColumnsSidebar.VIEW_LINK) || toSelect.equals(TableAndColumnsSidebar.TABLE_LINK)) {
         toSelect = ViewerStringUtils.concat(schemaUUID, tableUUID);
       }
       currentTableUUID = tableUUID;
@@ -276,19 +274,19 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
         title.setText(metadata.getSchema(schemaUUID).getName());
         title.addStyleName("h1");
 
-        FlowPanel tables = new FlowPanel();
+      FlowPanel flowPanelTables = new FlowPanel();
       if (getTable(schemaUUID) != null) {
-        tables.add(getTable(schemaUUID));
+        flowPanelTables.add(getTable(schemaUUID));
       }
-        FlowPanel views = new FlowPanel();
+      FlowPanel flowPanelViews = new FlowPanel();
       if (getView(schemaUUID) != null) {
-        views.add(getView(schemaUUID));
+        flowPanelViews.add(getView(schemaUUID));
       }
 
         TabPanel tabPanel = new TabPanel();
         tabPanel.addStyleName("browseItemMetadata connection-panel");
-        tabPanel.add(tables, messages.sidebarMenuTextForTables());
-        tabPanel.add(views, messages.sidebarMenuTextForViews());
+      tabPanel.add(flowPanelTables, messages.sidebarMenuTextForTables());
+      tabPanel.add(flowPanelViews, messages.sidebarMenuTextForViews());
         tabPanel.selectTab(0);
 
         panel.add(title);
@@ -409,14 +407,15 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
         case SELECT_TABLES:
           toggleSelectionTables(toggleBtnKey, schemaUUID);
           break;
+        default:
       }
     });
 
-    FlowPanel panel = new FlowPanel();
-    panel.addStyleName("select-buttons-container");
-    panel.add(btnSelectToggle);
+    FlowPanel flowPanel = new FlowPanel();
+    flowPanel.addStyleName("select-buttons-container");
+    flowPanel.add(btnSelectToggle);
 
-    return panel;
+    return flowPanel;
   }
 
   private void toggleSelectionTables(final String toggleBtnKey, final String schemaUUID) {
@@ -478,7 +477,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
     }
   }
 
-  private boolean CellTableSelectionColumnHelper(ViewerView viewerView,
+  private boolean cellTableSelectionColumnHelper(ViewerView viewerView,
     MultipleSelectionTablePanel<ViewerColumn> selectionTablePanel, ViewerColumn column,
     MultipleSelectionTablePanel<ViewerView> viewerTableMultipleSelectionTablePanel, Map<String, Boolean> map,
     String key) {
@@ -522,7 +521,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
           public Boolean getValue(ViewerColumn viewerColumn) {
             MultipleSelectionTablePanel<ViewerView> viewerTableMultipleSelectionTablePanel = getView(
               viewerView.getSchemaUUID());
-            return CellTableSelectionColumnHelper(viewerView, selectionTablePanel, viewerColumn,
+            return cellTableSelectionColumnHelper(viewerView, selectionTablePanel, viewerColumn,
               viewerTableMultipleSelectionTablePanel, toggleSelectionColumnsMap, viewerView.getUUID());
           }
         }),
@@ -626,6 +625,9 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
         new TextColumn<ViewerTable>() {
         @Override
         public String getValue(ViewerTable table) {
+          if (table.getCountRows() == -1) {
+            return messages.informationNotAvailable();
+          }
           return String.valueOf(table.getCountRows());
         }
         }),
