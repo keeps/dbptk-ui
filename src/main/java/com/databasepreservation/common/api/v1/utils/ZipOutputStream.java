@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.shared.ViewerConstants;
 import org.apache.commons.compress.archivers.zip.Zip64Mode;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
@@ -115,7 +116,7 @@ public class ZipOutputStream extends CSVOutputStream {
       final ViewerColumn binaryColumn = findBinaryColumn(binaryColumns, cellEntry.getKey());
 
       if (binaryColumn != null) {
-        out.putArchiveEntry(new ZipArchiveEntry(cellEntry.getValue().getValue()));
+        out.putArchiveEntry(new ZipArchiveEntry(ViewerConstants.INTERNAL_ZIP_LOB_FOLDER + cellEntry.getValue().getValue()));
         final InputStream inputStream = Files
           .newInputStream(LobPathManager.getPath(ViewerFactory.getViewerConfiguration(), databaseUUID, table.getUUID(),
             binaryColumn.getColumnIndexInEnclosingTable(), row.getUUID()));

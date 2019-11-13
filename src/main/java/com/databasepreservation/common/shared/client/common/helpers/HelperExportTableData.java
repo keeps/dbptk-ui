@@ -24,8 +24,10 @@ public class HelperExportTableData {
   private CheckBox checkBoxExportDescription;
   private CheckBox checkBoxExportLOBs;
   private boolean isZipHelper;
+  private final boolean singleRow;
 
-  public HelperExportTableData(ViewerTable table) {
+  public HelperExportTableData(ViewerTable table, boolean singleRow) {
+    this.singleRow = singleRow;
     this.filenameTextBox = new TextBox();
     this.zipFilenameTextBox = new TextBox();
     zipFilenameTextBox.setText(table.getSchemaName() + "_" + table.getName() + ViewerConstants.ZIP_EXTENSION);
@@ -110,22 +112,24 @@ public class HelperExportTableData {
   }
 
   private void addCommonParts(FlowPanel panel) {
-    radioButtonExportAll = new RadioButton("export-size");
-    radioButtonExportAll.setText(messages.csvExportDialogLabelForExportAllRadioButton());
-    RadioButton radioButtonExportVisible = new RadioButton("export-size");
-    radioButtonExportVisible.setText(messages.csvExportDialogLabelForExportVisibleRadioButton());
-    radioButtonExportVisible.setValue(true);
-    FlowPanel radioButtonsPanel = new FlowPanel();
-    radioButtonsPanel.add(radioButtonExportAll);
-    radioButtonsPanel.add(radioButtonExportVisible);
-    radioButtonsPanel.addStyleName("form-radio-buttons");
-    GenericField genericFieldExportAll = GenericField.createInstance(messages.csvExportDialogLabelForExportRows(), radioButtonsPanel);
+    if (!singleRow) {
+      radioButtonExportAll = new RadioButton("export-size");
+      radioButtonExportAll.setText(messages.csvExportDialogLabelForExportAllRadioButton());
+      RadioButton radioButtonExportVisible = new RadioButton("export-size");
+      radioButtonExportVisible.setText(messages.csvExportDialogLabelForExportVisibleRadioButton());
+      radioButtonExportVisible.setValue(true);
+      FlowPanel radioButtonsPanel = new FlowPanel();
+      radioButtonsPanel.add(radioButtonExportAll);
+      radioButtonsPanel.add(radioButtonExportVisible);
+      radioButtonsPanel.addStyleName("form-radio-buttons");
+      GenericField genericFieldExportAll = GenericField.createInstance(messages.csvExportDialogLabelForExportRows(), radioButtonsPanel);
+      panel.add(wrapHelperText(genericFieldExportAll, messages.csvExportDialogHelpTextForExportSize()));
+    }
     checkBoxExportDescription = new CheckBox();
     checkBoxExportDescription.setText(messages.csvExportDialogLabelForExportHeaderWithDescriptions());
     checkBoxExportDescription.addStyleName("form-checkbox");
     GenericField genericFieldExportDescription = GenericField.createInstance(checkBoxExportDescription);
 
-    panel.add(wrapHelperText(genericFieldExportAll, messages.csvExportDialogHelpTextForExportSize()));
     panel.add(wrapHelperText(genericFieldExportDescription, messages.csvExportDialogHelpTextForDescription()));
     panel.addStyleName("content");
   }

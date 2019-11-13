@@ -220,6 +220,7 @@ public class ViewerConstants {
   public static final String API_V1_LOBS_RESOURCE = "/v1/lobs";
   public static final String API_PATH_PARAM_ROW_UUID = "rowUUID";
   public static final String API_PATH_PARAM_COLUMN_ID = "columnUUID";
+  public static final String API_PATH_PARAM_LOB_FILENAME = "lobfilename";
 
   public static final String API_PATH_PARAM_SOLR_COLLECTION = "collection";
   public static final String API_PATH_PARAM_SOLR_QUERY = "query";

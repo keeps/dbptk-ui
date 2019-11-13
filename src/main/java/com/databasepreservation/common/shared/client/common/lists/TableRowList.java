@@ -144,9 +144,10 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
             } else if (row.getCells() == null) {
               logger.error("Trying to display NULL Cells");
             } else if (row.getCells().get(solrColumnName) != null) {
+              final String value = row.getCells().get(solrColumnName).getValue();
               ret = SafeHtmlUtils
                 .fromTrustedString(CommonClientUtils.getAnchorForLOBDownload(getObject().getFirst().getUUID(),
-                  table.getUUID(), row.getUUID(), viewerColumn.getColumnIndexInEnclosingTable()).toString());
+                  table.getUUID(), row.getUUID(), viewerColumn.getColumnIndexInEnclosingTable(), value).toString());
             }
 
             return ret;
@@ -260,16 +261,15 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
 
   @Override
   public void exportClickHandler() {
-    HelperExportTableData helperExportTableData = new HelperExportTableData(viewerTable);
+    HelperExportTableData helperExportTableData = new HelperExportTableData(viewerTable, false);
 
     boolean buildZipHelper = false;
     final List<ViewerColumn> binaryColumns = viewerTable.getBinaryColumns();
     for (ViewerColumn column : binaryColumns) {
-      if (this.columnDisplayNameToVisibleState.get(column.getDisplayName())) {
+      if (isColumnVisible(column)) {
         buildZipHelper = true;
       }
     }
-
 
     Dialogs.showCSVSetupDialog(messages.csvExportDialogTitle(), helperExportTableData.getWidget(buildZipHelper), messages.basicActionCancel(),
       messages.basicActionConfirm(), new DefaultAsyncCallback<Boolean>() {

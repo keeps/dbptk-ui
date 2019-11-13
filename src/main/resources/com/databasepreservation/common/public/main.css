@@ -1808,6 +1808,10 @@ html, body, .desktop-main {
     font-weight: 300;
 }
 
+.btn-download:after {
+    content: "\f56d";
+}
+
 .btn-save:after {
     content: "\f0c7";
 }

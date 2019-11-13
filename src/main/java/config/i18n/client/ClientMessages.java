@@ -1072,4 +1072,9 @@ public interface ClientMessages extends Messages {
   String viewPanelInformationLabel();
 
   String emptyBasePath();
+
+  /********************************************
+   * Row Panel
+   *******************************************/
+  String rowPanelTextForButtonExportSingleRow();
 }

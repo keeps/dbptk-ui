@@ -104,13 +104,13 @@ public class CommonClientUtils {
   }
 
   public static Anchor getAnchorForLOBDownload(final String databaseUUID, final String tableUUID, final String rowUUID,
-    final int columnIndexInEnclosingTable) {
+    final int columnIndexInEnclosingTable, final String lobName) {
     StringBuilder urlBuilder = new StringBuilder();
     String base = com.google.gwt.core.client.GWT.getHostPageBaseURL();
     String servlet = ViewerConstants.API_SERVLET;
     String resource = ViewerConstants.API_V1_LOBS_RESOURCE;
     urlBuilder.append(servlet).append(resource).append("/").append(databaseUUID).append("/").append(tableUUID)
-      .append("/").append(rowUUID).append("/").append(columnIndexInEnclosingTable);
+      .append("/").append(rowUUID).append("/").append(columnIndexInEnclosingTable).append("/").append(lobName);
     return new Anchor(messages.row_downloadLOB(), urlBuilder.toString());
   }
 

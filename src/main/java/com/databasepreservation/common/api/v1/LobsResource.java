@@ -1,9 +1,7 @@
 package com.databasepreservation.common.api.v1;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
@@ -14,10 +12,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.apache.commons.compress.archivers.zip.Zip64Mode;
-import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
-import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
-import org.apache.commons.io.IOUtils;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RODAException;
 import org.slf4j.Logger;
@@ -57,26 +51,24 @@ public class LobsResource {
 
   @GET
   @Path("/{" + ViewerConstants.API_PATH_PARAM_DATABASE_UUID + "}/{" + ViewerConstants.API_PATH_PARAM_TABLE_UUID
-    + "}/{" + ViewerConstants.API_PATH_PARAM_ROW_UUID + "}/{" + ViewerConstants.API_PATH_PARAM_COLUMN_ID + "}")
+    + "}/{" + ViewerConstants.API_PATH_PARAM_ROW_UUID + "}/{" + ViewerConstants.API_PATH_PARAM_COLUMN_ID + "}/{"
+    + ViewerConstants.API_PATH_PARAM_LOB_FILENAME + "}")
   @Produces({MediaType.APPLICATION_OCTET_STREAM})
   @ApiOperation(value = "Download LOB", notes = "download the specified LOB.", response = String.class, responseContainer = "LOB")
   public Response getLOB(@PathParam(ViewerConstants.API_PATH_PARAM_DATABASE_UUID) String databaseUUID,
     @PathParam(ViewerConstants.API_PATH_PARAM_TABLE_UUID) String tableUUID,
     @PathParam(ViewerConstants.API_PATH_PARAM_ROW_UUID) String rowUUID,
-    @PathParam(ViewerConstants.API_PATH_PARAM_COLUMN_ID) Integer columnID) throws RODAException {
+    @PathParam(ViewerConstants.API_PATH_PARAM_COLUMN_ID) Integer columnID,
+    @PathParam(ViewerConstants.API_PATH_PARAM_LOB_FILENAME) String filename) throws RODAException {
     DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
 
     UserUtility.Authorization.checkDatabaseAccessPermission(this.request, databaseUUID);
 
     ViewerRow row = solrManager.retrieveRows(databaseUUID, rowUUID);
-    final ViewerDatabase viewerDatabase= solrManager.retrieve(ViewerDatabase.class, databaseUUID);
-    final String schemaName = viewerDatabase.getMetadata().getTable(tableUUID).getSchemaName();
-    final String tableName = viewerDatabase.getMetadata().getTable(tableUUID).getName();
 
     if (row != null) {
-      String fileName = schemaName + "-" + tableName + "-" + rowUUID +  columnID + ".bin";
       try {
-        return ApiUtils.okResponse(new StreamResponse(fileName, MediaType.APPLICATION_OCTET_STREAM,
+        return ApiUtils.okResponse(new StreamResponse(filename, MediaType.APPLICATION_OCTET_STREAM,
           DownloadUtils.stream(Files.newInputStream(LobPathManager.getPath(ViewerFactory.getViewerConfiguration(),
             databaseUUID, tableUUID, columnID, rowUUID)))));
       } catch (IOException e) {

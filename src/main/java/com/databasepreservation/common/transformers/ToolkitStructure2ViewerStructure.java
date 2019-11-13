@@ -651,7 +651,7 @@ public class ToolkitStructure2ViewerStructure {
         binaryCell.cleanResources();
       }
 
-      result.setValue(INTERNAL_ZIP_LOB_FOLDER + table.getSchemaName() + "_" + table.getName() + "_" + rowIndex + ".bin");
+      result.setValue(table.getSchemaName() + "_" + table.getName() + "_" + rowIndex + ".bin");
     } else if (cell instanceof ComposedCell) {
       ComposedCell composedCell = (ComposedCell) cell;
       LOGGER.debug("composed cell not supported yet");
