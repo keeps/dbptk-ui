@@ -33,6 +33,7 @@ import com.databasepreservation.common.shared.client.common.utils.UriQueryUtils;
 import com.databasepreservation.common.shared.client.tools.FilterUtils;
 import com.databasepreservation.common.shared.client.tools.ViewerJsonUtils;
 import com.databasepreservation.common.shared.client.tools.ViewerStringUtils;
+import com.databasepreservation.common.shared.client.widgets.Alert;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.shared.GWT;
@@ -45,7 +46,6 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
 
@@ -216,8 +216,8 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
       }
     }
 
-    Label emptyInfo = new Label(messages.noItemsToDisplay());
-    display.setEmptyTableWidget(emptyInfo);
+    Alert alert = new Alert(Alert.MessageAlertType.LIGHT, messages.noItemsToDisplay());
+    display.setEmptyTableWidget(alert);
 
     // define default sorting
     // display.getColumnSortList().push(new ColumnSortInfo(datesColumn, false));

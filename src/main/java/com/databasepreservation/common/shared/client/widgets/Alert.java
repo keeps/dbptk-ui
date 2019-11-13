@@ -33,9 +33,6 @@ public class Alert extends FlowPanel {
     add(messageLabel);
 
     switch (type) {
-      case PRIMARY:
-        setStyleName("alert alert-primary");
-        break;
       case SECONDARY:
         setStyleName("alert alert-secondary");
         break;
@@ -56,6 +53,10 @@ public class Alert extends FlowPanel {
         break;
       case DARK:
         setStyleName("alert alert-dark");
+        break;
+      case PRIMARY:
+      default:
+        setStyleName("alert alert-primary");
         break;
     }
   }

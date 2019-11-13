@@ -128,7 +128,7 @@ public class TableSearchPanel extends Composite {
     this.database = database;
     this.table = table;
 
-    tableRowList = new TableRowList(database, table, initialFilter, null, null, false, true);
+    tableRowList = new TableRowList(database, table, initialFilter, null, null, false, table.getCountRows() != 0);
     tableRowList.setColumnVisibility(columnDisplayNameToVisibleState);
 
     GWT.log("initial filter: " + initialFilter.toString());

@@ -4,10 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.shared.client.tools.*;
-import com.google.gwt.safehtml.shared.SafeUri;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.view.client.DefaultSelectionEventManager;
 import org.roda.core.data.v2.index.IndexResult;
 import org.roda.core.data.v2.index.facet.Facets;
 import org.roda.core.data.v2.index.filter.Filter;
@@ -18,9 +14,14 @@ import com.databasepreservation.common.client.BrowserService;
 import com.databasepreservation.common.shared.ViewerConstants;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.common.shared.client.ClientLogger;
-import com.databasepreservation.common.shared.client.common.lists.BasicAsyncTableCell;
 import com.databasepreservation.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.common.shared.client.common.utils.JavascriptUtils;
+import com.databasepreservation.common.shared.client.tools.HistoryManager;
+import com.databasepreservation.common.shared.client.tools.Humanize;
+import com.databasepreservation.common.shared.client.tools.PathUtils;
+import com.databasepreservation.common.shared.client.tools.RestUtils;
+import com.databasepreservation.common.shared.client.tools.SolrHumanizer;
+import com.databasepreservation.common.shared.client.widgets.Alert;
 import com.google.gwt.cell.client.ButtonCell;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.SafeHtmlCell;
@@ -29,11 +30,13 @@ import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortList;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.view.client.DefaultSelectionEventManager;
 
 import config.i18n.client.ClientMessages;
 
@@ -170,8 +173,8 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
     addColumn(statusColumn, messages.managePageTableHeaderTextForDatabaseStatus(), true, TextAlign.NONE, 5);
     addColumn(openColumn, messages.managePageTableHeaderTextForActions(), true, TextAlign.NONE, 5);
 
-    Label emptyInfo = new Label(messages.noItemsToDisplay());
-    display.setEmptyTableWidget(emptyInfo);
+    Alert alert = new Alert(Alert.MessageAlertType.LIGHT, messages.noItemsToDisplay());
+    display.setEmptyTableWidget(alert);
 
     // define default sorting
     // display.getColumnSortList().push(new ColumnSortInfo(datesColumn, false));

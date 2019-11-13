@@ -14,6 +14,7 @@ import com.databasepreservation.common.client.BrowserService;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.common.shared.client.ClientLogger;
 import com.databasepreservation.common.shared.client.common.lists.BasicAsyncTableCell;
+import com.databasepreservation.common.shared.client.widgets.Alert;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.shared.GWT;
@@ -25,7 +26,6 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Label;
 
 import config.i18n.client.ClientMessages;
 
@@ -117,8 +117,8 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
     addColumn(statusColumn, messages.managePageTableHeaderTextForDatabaseStatus(), true, TextAlign.LEFT, 20);
     addColumn(description, messages.description(), true, TextAlign.LEFT, 35);
 
-    Label emptyInfo = new Label(messages.noItemsToDisplay());
-    display.setEmptyTableWidget(emptyInfo);
+    Alert alert = new Alert(Alert.MessageAlertType.LIGHT, messages.noItemsToDisplay());
+    display.setEmptyTableWidget(alert);
 
     // define default sorting
     // display.getColumnSortList().push(new ColumnSortInfo(datesColumn, false));

@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.databasepreservation.common.shared.client.common.search.SearchInfo;
+import com.databasepreservation.common.shared.client.widgets.Alert;
 import com.google.gwt.dom.client.BrowserEvents;
 import org.roda.core.data.v2.index.IndexResult;
 import org.roda.core.data.v2.index.facet.Facets;
@@ -235,23 +236,15 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
       // exportAllButton.addStyleName("btn btn-export btn-export-all");
     }
 
-    displayScroll.addScrollHandler(new ScrollHandler() {
-      @Override
-      public void onScroll(ScrollEvent event) {
-        handleScrollChanges();
-      }
+    displayScroll.addScrollHandler(event -> handleScrollChanges());
+
+    addValueChangeHandler(event -> {
+      selected = new HashSet<>();
+      hideSelectAllPanel();
     });
 
-    addValueChangeHandler(new ValueChangeHandler<IndexResult<T>>() {
-      @Override
-      public void onValueChange(ValueChangeEvent<IndexResult<T>> event) {
-        selected = new HashSet<T>();
-        hideSelectAllPanel();
-      }
-    });
-
-    Label emptyInfo = new Label(messages.noItemsToDisplay());
-    display.setEmptyTableWidget(emptyInfo);
+    Alert alert = new Alert(Alert.MessageAlertType.LIGHT, messages.noItemsToDisplay());
+    display.setEmptyTableWidget(alert);
   }
 
   protected void handleScrollChanges() {
