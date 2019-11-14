@@ -59,7 +59,6 @@ public class DBMSWizardManager extends WizardManager {
 
   private ViewerDatabase database;
   private int position = 0;
-  private final int positions = 0;
 
   private ConnectionParameters connectionParameters;
   private ExportOptionsParameters exportOptionsParameters;
@@ -97,9 +96,7 @@ public class DBMSWizardManager extends WizardManager {
 
     this.databaseUUID = databaseUUID;
 
-    btnNext.addClickHandler(event -> {
-      handleWizard();
-    });
+    btnNext.addClickHandler(event -> handleWizard());
 
     btnCancel.addClickHandler(event -> {
       clear();
@@ -119,13 +116,10 @@ public class DBMSWizardManager extends WizardManager {
   @Override
   protected void handleWizard() {
     GWT.log("Position: " + position);
-    switch (position) {
-      case 0:
-        handleDBMSConnection();
-        break;
-      case 1:
-        handleSIARDExportOptions();
-        break;
+    if (position == 0) {
+      handleDBMSConnection();
+    } else if (position == 1) {
+      handleSIARDExportOptions();
     }
   }
 

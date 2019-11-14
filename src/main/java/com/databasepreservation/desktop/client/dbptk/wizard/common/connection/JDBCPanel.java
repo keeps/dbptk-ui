@@ -3,6 +3,7 @@ package com.databasepreservation.desktop.client.dbptk.wizard.common.connection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.databasepreservation.common.shared.ViewerConstants;
@@ -13,18 +14,17 @@ import com.databasepreservation.common.shared.client.common.utils.JavascriptUtil
 import com.databasepreservation.common.shared.client.tools.JSOUtils;
 import com.databasepreservation.common.shared.client.tools.PathUtils;
 import com.databasepreservation.common.shared.client.tools.ViewerStringUtils;
+import com.databasepreservation.common.shared.models.Filter;
 import com.databasepreservation.common.shared.models.JDBCParameters;
 import com.databasepreservation.common.shared.models.PreservationParameter;
 import com.databasepreservation.desktop.client.dbptk.wizard.WizardManager;
 import com.databasepreservation.desktop.client.dbptk.wizard.download.DBMSWizardManager;
 import com.databasepreservation.desktop.client.dbptk.wizard.upload.CreateWizardManager;
-import com.databasepreservation.common.shared.models.Filter;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -46,12 +46,12 @@ public class JDBCPanel extends Composite {
 
   private static JBDCPanelUiBinder binder = GWT.create(JBDCPanelUiBinder.class);
 
-  private static HashMap<String, JDBCPanel> instances = new HashMap<>();
-  private HashMap<String, TextBox> textBoxInputs = new HashMap<>();
-  private HashMap<String, CheckBox> checkBoxInputs = new HashMap<>();
-  private HashMap<String, FileUploadField> fileInputs = new HashMap<>();
+  private static Map<String, JDBCPanel> instances = new HashMap<>();
+  private Map<String, TextBox> textBoxInputs = new HashMap<>();
+  private Map<String, CheckBox> checkBoxInputs = new HashMap<>();
+  private Map<String, FileUploadField> fileInputs = new HashMap<>();
   private String pathToDriver = null;
-  private ArrayList<PreservationParameter> parameters;
+  private List<PreservationParameter> parameters;
   private TextBox focusElement = null;
   private String databaseUUID;
   private final String type;
@@ -60,13 +60,14 @@ public class JDBCPanel extends Composite {
   @UiField
   FlowPanel content;
 
-  public static JDBCPanel getInstance(String connection, ArrayList<PreservationParameter> parameters, String databaseUUID, String type) {
-    String code =  databaseUUID + ViewerConstants.API_SEP + connection;
-    instances.computeIfAbsent(code, k -> new JDBCPanel(parameters, databaseUUID, type));
+  public static JDBCPanel getInstance(String connection, List<PreservationParameter> parameters, String databaseUUID,
+    String type, boolean countRows) {
+    String code = databaseUUID + ViewerConstants.API_SEP + connection;
+    instances.computeIfAbsent(code, k -> new JDBCPanel(parameters, databaseUUID, type, countRows));
     return instances.get(code);
   }
 
-  private JDBCPanel(ArrayList<PreservationParameter> parameters, String databaseUUID, String type) {
+  private JDBCPanel(List<PreservationParameter> parameters, String databaseUUID, String type, boolean countRows) {
     initWidget(binder.createAndBindUi(this));
 
     this.databaseUUID = databaseUUID;
@@ -77,11 +78,14 @@ public class JDBCPanel extends Composite {
       buildGenericWidget(p);
     }
 
-    buildCheckboxWidget("Count Rows", "To count or not to count, that is the question.");
+    if (countRows) {
+      buildCheckboxWidget(messages.connectionPageLabelsFor("count-rows"),
+        messages.connectionPageDescriptionsFor("count-rows"));
+    }
   }
 
   public JDBCParameters getValues() {
-    JDBCParameters parameters = new JDBCParameters();
+    JDBCParameters jdbcParameters = new JDBCParameters();
 
     HashMap<String, String> values = new HashMap<>();
     for (Map.Entry<String, TextBox> entry : textBoxInputs.entrySet()) {
@@ -102,15 +106,15 @@ public class JDBCPanel extends Composite {
       }
     }
 
-    parameters.setConnection(values);
+    jdbcParameters.setConnection(values);
     if (ViewerStringUtils.isNotBlank(pathToDriver)) {
-      parameters.setDriver(true);
-      parameters.setDriverPath(pathToDriver);
+      jdbcParameters.setDriver(true);
+      jdbcParameters.setDriverPath(pathToDriver);
     }
 
-    parameters.shouldCountRows(shouldCountRows);
+    jdbcParameters.shouldCountRows(shouldCountRows);
 
-    return parameters;
+    return jdbcParameters;
   }
 
   private void buildCheckboxWidget(String label, String helperText) {
@@ -141,11 +145,12 @@ public class JDBCPanel extends Composite {
         PasswordTextBox passwordTextBox = new PasswordTextBox();
         passwordTextBox.addStyleName("form-textbox");
         textBoxInputs.put(parameter.getName(), passwordTextBox);
-        genericField = GenericField.createInstance(messages.connectionPageLabelsFor(parameter.getName()), passwordTextBox);
-        if(parameter.isRequired()) {
+        genericField = GenericField.createInstance(messages.connectionPageLabelsFor(parameter.getName()),
+          passwordTextBox);
+        if (parameter.isRequired()) {
           passwordTextBox.getElement().setAttribute("required", "required");
           passwordTextBox.addKeyUpHandler(event -> {
-            if(event.getNativeKeyCode() != KeyCodes.KEY_TAB){
+            if (event.getNativeKeyCode() != KeyCodes.KEY_TAB) {
               selfValidator(passwordTextBox);
             }
           });
@@ -194,25 +199,24 @@ public class JDBCPanel extends Composite {
 
       }
       case ViewerConstants.INPUT_TYPE_DRIVER:
-        FileUploadField fileUploadField = FileUploadField.createInstance(messages.connectionPageLabelsFor(parameter.getName()), messages.connectionPageLabelForChooseDriverLocation());
+        FileUploadField fileUploadField = FileUploadField.createInstance(
+          messages.connectionPageLabelsFor(parameter.getName()), messages.connectionPageLabelForChooseDriverLocation());
         fileUploadField.setParentCSS("form-row");
         fileUploadField.setLabelCSS("form-label-spaced");
         fileUploadField.setButtonCSS("btn btn-link form-button form-button-jar");
         fileUploadField.setRequired(parameter.isRequired());
-        fileUploadField.buttonAction(new Command() {
-          @Override
-          public void execute() {
-            if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
-              Filter jar = new Filter("JAR File", Collections.singletonList("jar"));
-              JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.singletonList("openFile"), Collections.singletonList(jar));
+        fileUploadField.buttonAction(() -> {
+          if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
+            Filter jar = new Filter("JAR File", Collections.singletonList("jar"));
+            JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.singletonList("openFile"),
+              Collections.singletonList(jar));
 
-              String path = JavascriptUtils.openFileDialog(options);
-              if (path != null) {
-                pathToDriver = path;
-                String displayPath = PathUtils.getFileName(path);
-                fileUploadField.setPathLocation(displayPath, path);
-                fileUploadField.setInformationPathCSS("gwt-Label-disabled information-path");
-              }
+            String path = JavascriptUtils.openFileDialog(options);
+            if (path != null) {
+              pathToDriver = path;
+              String displayPath = PathUtils.getFileName(path);
+              fileUploadField.setPathLocation(displayPath, path);
+              fileUploadField.setInformationPathCSS("gwt-Label-disabled information-path");
             }
           }
         });
@@ -231,25 +235,27 @@ public class JDBCPanel extends Composite {
         break;
       case ViewerConstants.INPUT_TYPE_NUMBER:
       case ViewerConstants.INPUT_TYPE_TEXT:
-        default: TextBox defaultTextBox = new TextBox();
-          defaultTextBox.addStyleName("form-textbox");
-          textBoxInputs.put(parameter.getName(), defaultTextBox);
-          if(focusElement == null){
-            focusElement = defaultTextBox;
-          }
-          genericField = GenericField.createInstance(messages.connectionPageLabelsFor(parameter.getName()), defaultTextBox);
-          if (parameter.getDefaultValue() != null) {
-            defaultTextBox.setText(parameter.getDefaultValue());
-          }
-          if (parameter.isRequired()) {
-            defaultTextBox.getElement().setAttribute("required", "required");
-            defaultTextBox.addKeyUpHandler(event -> {
-              if(event.getNativeKeyCode() != KeyCodes.KEY_TAB){
-                selfValidator(defaultTextBox);
-              }
-            });
-          }
-          break;
+      default:
+        TextBox defaultTextBox = new TextBox();
+        defaultTextBox.addStyleName("form-textbox");
+        textBoxInputs.put(parameter.getName(), defaultTextBox);
+        if (focusElement == null) {
+          focusElement = defaultTextBox;
+        }
+        genericField = GenericField.createInstance(messages.connectionPageLabelsFor(parameter.getName()),
+          defaultTextBox);
+        if (parameter.getDefaultValue() != null) {
+          defaultTextBox.setText(parameter.getDefaultValue());
+        }
+        if (parameter.isRequired()) {
+          defaultTextBox.getElement().setAttribute("required", "required");
+          defaultTextBox.addKeyUpHandler(event -> {
+            if (event.getNativeKeyCode() != KeyCodes.KEY_TAB) {
+              selfValidator(defaultTextBox);
+            }
+          });
+        }
+        break;
     }
 
     if (genericField != null) {
@@ -306,10 +312,9 @@ public class JDBCPanel extends Composite {
             wizardManager.enableNext(false);
           }
         }
-        if (parameter.getInputType().equals(ViewerConstants.INPUT_TYPE_DRIVER)) {
-          if (ViewerStringUtils.isBlank(pathToDriver)) {
+        if (parameter.getInputType().equals(ViewerConstants.INPUT_TYPE_DRIVER)
+          && ViewerStringUtils.isBlank(pathToDriver)) {
             arrayList.add(parameter);
-          }
         }
       }
     }
@@ -327,7 +332,7 @@ public class JDBCPanel extends Composite {
     }
 
     for (FileUploadField fileUploadField : fileInputs.values()) {
-      fileUploadField.setPathLocation("","");
+      fileUploadField.setPathLocation("", "");
     }
   }
 

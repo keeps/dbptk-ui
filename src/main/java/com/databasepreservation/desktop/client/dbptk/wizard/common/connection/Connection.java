@@ -45,7 +45,16 @@ public class Connection extends WizardPanel<ConnectionParameters> {
   private static ConnectionUiBinder binder = GWT.create(ConnectionUiBinder.class);
 
   @UiField
-  FlowPanel mainPanel, JDBCListConnections, leftSideContainer, connectionInputPanel;
+  FlowPanel mainPanel;
+
+  @UiField
+  FlowPanel JDBCListConnections;
+
+  @UiField
+  FlowPanel leftSideContainer;
+
+  @UiField
+  FlowPanel connectionInputPanel;
 
   private final String databaseUUID;
   private DBPTKModule dbmsModule;
@@ -53,17 +62,16 @@ public class Connection extends WizardPanel<ConnectionParameters> {
   private SSHTunnelPanel sshTunnelPanel;
   private String selectedConnection;
   private JDBCPanel selected;
-  private Set<JDBCPanel> JDBCPanels = new HashSet<>();
+  private Set<JDBCPanel> jdbcPanels = new HashSet<>();
   private String type;
   private boolean clickedOnSidebar = false;
+  private boolean countRows = false;
   private Button btnTestConnection;
 
   private static HashMap<String, Connection> instances = new HashMap<>();
 
   public static Connection getInstance(final String databaseUUID) {
-    if (instances.get(databaseUUID) == null) {
-      instances.put(databaseUUID, new Connection(databaseUUID));
-    }
+    instances.computeIfAbsent(databaseUUID, k -> new Connection(databaseUUID));
     return instances.get(databaseUUID);
   }
 
@@ -135,7 +143,7 @@ public class Connection extends WizardPanel<ConnectionParameters> {
         JDBCListConnections.add(connectionSidebar);
         leftSideContainer.removeStyleName("loading-sidebar");
         JDBCListConnections.remove(spinner);
-
+        countRows = true;
         dbmsModule = module;
       }
     });
@@ -164,7 +172,7 @@ public class Connection extends WizardPanel<ConnectionParameters> {
         JDBCListConnections.add(connectionSidebar);
         leftSideContainer.removeStyleName("loading-sidebar");
         JDBCListConnections.remove(spinner);
-
+        countRows = false;
         dbmsModule = module;
       }
     });
@@ -184,8 +192,8 @@ public class Connection extends WizardPanel<ConnectionParameters> {
 
     TabPanel tabPanel = new TabPanel();
     tabPanel.addStyleName("browseItemMetadata connection-panel");
-    selected = JDBCPanel.getInstance(connection, preservationParametersSelected, databaseUUID, type);
-    JDBCPanels.add(selected);
+    selected = JDBCPanel.getInstance(connection, preservationParametersSelected, databaseUUID, type, countRows);
+    jdbcPanels.add(selected);
     tabPanel.add(selected, messages.connectionPageTextForTabGeneral());
     tabPanel.add(sshTunnelPanel, messages.connectionPageTextForTabSSHTunnel());
 
@@ -216,7 +224,7 @@ public class Connection extends WizardPanel<ConnectionParameters> {
 
   @Override
   public void clear() {
-    for (JDBCPanel jdbc : JDBCPanels) {
+    for (JDBCPanel jdbc : jdbcPanels) {
       jdbc.clear();
     }
 
@@ -229,7 +237,7 @@ public class Connection extends WizardPanel<ConnectionParameters> {
   }
 
   public void clearPasswords() {
-    for (JDBCPanel jdbc : JDBCPanels) {
+    for (JDBCPanel jdbc : jdbcPanels) {
       jdbc.clearPasswords();
     }
     sshTunnelPanel.clearPassword();
