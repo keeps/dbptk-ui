@@ -120,21 +120,13 @@ public class RowPanel extends RightPanel {
   }
 
   private void setTitle() {
-    String iconTag = FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE);
-    String separatorIconTag = FontAwesomeIconManager.getTag(FontAwesomeIconManager.SCHEMA_TABLE_SEPARATOR);
-    if (database.getMetadata().getSchemas().size() == 1) {
-      recordHeader.setWidget(CommonClientUtils.getHeader(iconTag, table, "h1"));
-    } else {
-      SafeHtml html;
-      html = SafeHtmlUtils.fromSafeConstant(table.getSchemaName() + " " + separatorIconTag + " " + table.getName());
-      recordHeader.setWidget(CommonClientUtils.getHeader(iconTag, html, "h1"));
-    }
+    recordHeader.setWidget(CommonClientUtils.getHeader(table, "h1", database.getMetadata().getSchemas().size() > 1));
   }
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
     BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forRecord(database.getMetadata().getName(),
-      database.getUUID(), table.getName(), table.getUUID(), rowUUID));
+      database.getUUID(), table.getNameWithoutPrefix(), table.getUUID(), rowUUID));
   }
 
   private void init() {
@@ -195,12 +187,12 @@ public class RowPanel extends RightPanel {
       }
       b.appendHtmlConstant("</div>");
     }
-    int nIndex = 0;
+
     for (ViewerColumn column : table.getColumns()) {
       boolean isPrimaryKeyColumn = table.getPrimaryKey() != null
         && table.getPrimaryKey().getColumnIndexesInViewerTable().contains(column.getColumnIndexInEnclosingTable());
       getCellHTML(column, colIndexRelatedTo.get(column.getSolrName()), colIndexReferencedBy.get(column.getSolrName()),
-        isPrimaryKeyColumn, nIndex++);
+        isPrimaryKeyColumn);
     }
 
     Button btn = new Button();
@@ -214,7 +206,7 @@ public class RowPanel extends RightPanel {
 
             @Override
             public void onSuccess(Boolean result) {
-              if (result) {
+              if (Boolean.TRUE.equals(result)) {
               String filename = helperExportTableData.getFilename();
               boolean exportDescription = helperExportTableData.exportDescription();
 
@@ -267,7 +259,7 @@ public class RowPanel extends RightPanel {
     }
   }
 
-  private void getCellHTML(ViewerColumn column, Set<Ref> relatedTo, Set<Ref> referencedBy, boolean isPrimaryKeyColumn, int nIndex) {
+  private void getCellHTML(ViewerColumn column, Set<Ref> relatedTo, Set<Ref> referencedBy, boolean isPrimaryKeyColumn) {
     String label = column.getDisplayName();
 
     String value = null;
@@ -375,7 +367,7 @@ public class RowPanel extends RightPanel {
 
     public List<String> getColumnNamesAndValues(ViewerRow row) {
       List<String> params = new ArrayList<>();
-      for (String colName : foreignSolrColumnToRowSolrColumn.keySet()) {
+      foreignSolrColumnToRowSolrColumn.keySet().forEach(colName -> {
         String rowColName = foreignSolrColumnToRowSolrColumn.get(colName);
         ViewerCell viewerCell = row.getCells().get(rowColName);
         if (viewerCell != null) {
@@ -383,7 +375,7 @@ public class RowPanel extends RightPanel {
           params.add(colName);
           params.add(value);
         }
-      }
+      });
       return params;
     }
 

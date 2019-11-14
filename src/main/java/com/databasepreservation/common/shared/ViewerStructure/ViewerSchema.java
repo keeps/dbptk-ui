@@ -86,10 +86,8 @@ public class ViewerSchema implements Serializable {
 
   public ViewerTable getMaterializedTable(final String viewName) {
     for (ViewerTable table : tables) {
-      if (table.getName().startsWith(ViewerConstants.MATERIALIZED_VIEW_PREFIX)) {
-        if (table.getName().substring(ViewerConstants.MATERIALIZED_VIEW_PREFIX.length()).equals(viewName)) {
-          return table;
-        }
+      if (table.isMaterializedView() && table.getNameWithoutPrefix().equals(viewName)) {
+        return table;
       }
     }
     return null;
@@ -97,10 +95,8 @@ public class ViewerSchema implements Serializable {
 
   public ViewerTable getCustomViewTable(final String viewName) {
     for (ViewerTable table : tables) {
-      if (table.getName().startsWith(ViewerConstants.CUSTOM_VIEW_PREFIX)) {
-        if (table.getName().equals(viewName)) {
-          return table;
-        }
+      if (table.isCustomView() && table.getName().equals(viewName)) {
+        return table;
       }
     }
     return null;

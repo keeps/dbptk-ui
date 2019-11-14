@@ -52,13 +52,8 @@ public class TablePanelOptions extends RightPanel {
     String separator = "/";
     String code = database.getUUID() + separator + tableUUID;
 
-    TablePanelOptions instance = instances.get(code);
-    if (instance == null) {
-      instance = new TablePanelOptions(database, tableUUID);
-      instances.put(code, instance);
-    }
-
-    return instance;
+    instances.computeIfAbsent(code, k -> new TablePanelOptions(database, tableUUID));
+    return instances.get(code);
   }
 
   interface TablePanelUiBinder extends UiBinder<Widget, TablePanelOptions> {
@@ -108,13 +103,8 @@ public class TablePanelOptions extends RightPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    if (table.getName().startsWith(ViewerConstants.CUSTOM_VIEW_PREFIX)) {
       BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forTable(database.getMetadata().getName(),
-          database.getUUID(), table.getName().substring(ViewerConstants.CUSTOM_VIEW_PREFIX.length()), table.getUUID()));
-    } else {
-      BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forTable(database.getMetadata().getName(),
-          database.getUUID(), table.getName(), table.getUUID()));
-    }
+      database.getUUID(), table.getNameWithoutPrefix(), table.getUUID()));
   }
 
   public Map<String, Boolean> getSelectedColumns() {
@@ -127,14 +117,7 @@ public class TablePanelOptions extends RightPanel {
   }
 
   private void init() {
-    if (table.getName().startsWith(ViewerConstants.CUSTOM_VIEW_PREFIX)) {
-      mainHeader.setWidget(
-          CommonClientUtils.getHeader(FontAwesomeIconManager.getStackedIconSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS,
-              FontAwesomeIconManager.COG, table.getName().substring(ViewerConstants.CUSTOM_VIEW_PREFIX.length())), "h1"));
-    } else {
-      mainHeader.setWidget(
-          CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE), table, "h1"));
-    }
+    mainHeader.setWidget(CommonClientUtils.getHeader(table, "h1", database.getMetadata().getSchemas().size() > 1));
     configureButtons();
     configureTechnicalInformationSwitch();
     initTable();

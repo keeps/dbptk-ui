@@ -253,7 +253,6 @@ public class DatabasePanel extends Composite {
 
   private void loadPanel(RightPanelLoader rightPanelLoader, String toSelect) {
     GWT.log("have db: " + database + " sb.init: " + sidebar.isInitialized());
-    GWT.log("to select: " + toSelect);
     RightPanel rightPanel = rightPanelLoader.load(database);
 
     if (database != null && !sidebar.isInitialized()) {

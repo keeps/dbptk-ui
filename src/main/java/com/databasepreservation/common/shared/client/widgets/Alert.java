@@ -12,21 +12,20 @@ public class Alert extends FlowPanel {
     PRIMARY, SECONDARY, SUCCESS, DANGER, WARNING, INFO, LIGHT, DARK
   }
 
-  private final MessageAlertType type;
-  private final Label messageLabel;
-  private Label titleLabel = null;
+  public Alert() {
+    super();
+  }
 
   public Alert(MessageAlertType type, String message) {
     this(type, null, message);
   }
 
-  public Alert(MessageAlertType type, String title, String message) {
+  private Alert(MessageAlertType type, String title, String message) {
     super();
-    this.type = type;
-    messageLabel = new Label(message);
+    Label messageLabel = new Label(message);
 
     if(title != null){
-      titleLabel = new Label(title);
+      Label titleLabel = new Label(title);
       titleLabel.setStyleName("alert-heading");
       add(titleLabel);
     }

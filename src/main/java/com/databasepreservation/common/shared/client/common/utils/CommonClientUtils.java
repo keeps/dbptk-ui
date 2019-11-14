@@ -3,11 +3,9 @@ package com.databasepreservation.common.shared.client.common.utils;
 import java.util.List;
 
 import com.databasepreservation.common.shared.ViewerConstants;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerSchema;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerTable;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerView;
 import com.databasepreservation.common.shared.client.common.desktop.GenericField;
-import com.databasepreservation.common.shared.client.common.fields.MetadataField;
 import com.databasepreservation.common.shared.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.common.shared.client.tools.ViewerStringUtils;
@@ -19,7 +17,6 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Hyperlink;
-import com.google.gwt.user.client.ui.Label;
 
 import config.i18n.client.ClientMessages;
 
@@ -55,6 +52,50 @@ public class CommonClientUtils {
     return panel;
   }
 
+  public static FlowPanel getHeader(ViewerTable table, String hClass, boolean multiSchema) {
+    if (multiSchema) {
+      return getHeaderMultiSchema(table, hClass);
+    } else {
+      return getHeaderSingleSchema(table, hClass);
+    }
+  }
+
+  private static FlowPanel getHeaderMultiSchema(ViewerTable table, String hClass) {
+    String separatorIconTag = FontAwesomeIconManager.getTagWithStyleName(FontAwesomeIconManager.SCHEMA_TABLE_SEPARATOR,
+      "schema-table-separator");
+
+    if (table.isCustomView()) {
+      final SafeHtml stackedIconSafeHtml = FontAwesomeIconManager.getStackedIconSafeHtml(
+        FontAwesomeIconManager.SCHEMA_VIEWS, FontAwesomeIconManager.COG,
+        table.getSchemaName() + " " + separatorIconTag + " " + table.getNameWithoutPrefix());
+      return getHeader(stackedIconSafeHtml, hClass);
+    } else if (table.isMaterializedView()) {
+      final SafeHtml stackedIconSafeHtml = FontAwesomeIconManager.getStackedIconSafeHtml(
+        FontAwesomeIconManager.SCHEMA_VIEWS, FontAwesomeIconManager.TABLE,
+        table.getSchemaName() + " " + separatorIconTag + " " + table.getNameWithoutPrefix());
+      return getHeader(stackedIconSafeHtml, hClass);
+    } else {
+      final SafeHtml tagSafeHtml = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE,
+        table.getSchemaName() + " " + separatorIconTag + " " + table.getNameWithoutPrefix());
+      return getHeader(tagSafeHtml, hClass);
+    }
+  }
+
+  private static FlowPanel getHeaderSingleSchema(ViewerTable table, String hClass) {
+    if (table.isCustomView()) {
+      final SafeHtml stackedIconSafeHtml = FontAwesomeIconManager.getStackedIconSafeHtml(
+        FontAwesomeIconManager.SCHEMA_VIEWS, FontAwesomeIconManager.COG, table.getNameWithoutPrefix());
+      return getHeader(stackedIconSafeHtml, hClass);
+    } else if (table.isMaterializedView()) {
+      final SafeHtml stackedIconSafeHtml = FontAwesomeIconManager.getStackedIconSafeHtml(
+        FontAwesomeIconManager.SCHEMA_VIEWS, FontAwesomeIconManager.TABLE, table.getNameWithoutPrefix());
+      return getHeader(stackedIconSafeHtml, hClass);
+    } else {
+      final String tag = FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE);
+      return getHeader(tag, table, hClass);
+    }
+  }
+
   public static FlowPanel getHeader(SafeHtml iconStack, String hClass) {
     FlowPanel panel = new FlowPanel();
     HTML html = new HTML(iconStack);
@@ -64,15 +105,8 @@ public class CommonClientUtils {
     return panel;
   }
 
-  public static FlowPanel getHeader(String iconTag, ViewerTable table, String hClass) {
-    String displayName;
-    if (table.getName().startsWith(ViewerConstants.MATERIALIZED_VIEW_PREFIX)) {
-      displayName = table.getName().substring(ViewerConstants.MATERIALIZED_VIEW_PREFIX.length());
-    } else {
-      displayName = table.getName();
-    }
-
-    return getHeader(iconTag, displayName, hClass);
+  private static FlowPanel getHeader(String iconTag, ViewerTable table, String hClass) {
+    return getHeader(iconTag, table.getNameWithoutPrefix(), hClass);
   }
 
   public static FlowPanel getHeader(String iconTag, String title, String hClass) {
@@ -105,13 +139,11 @@ public class CommonClientUtils {
 
   public static Anchor getAnchorForLOBDownload(final String databaseUUID, final String tableUUID, final String rowUUID,
     final int columnIndexInEnclosingTable, final String lobName) {
-    StringBuilder urlBuilder = new StringBuilder();
-    String base = com.google.gwt.core.client.GWT.getHostPageBaseURL();
     String servlet = ViewerConstants.API_SERVLET;
     String resource = ViewerConstants.API_V1_LOBS_RESOURCE;
-    urlBuilder.append(servlet).append(resource).append("/").append(databaseUUID).append("/").append(tableUUID)
-      .append("/").append(rowUUID).append("/").append(columnIndexInEnclosingTable).append("/").append(lobName);
-    return new Anchor(messages.row_downloadLOB(), urlBuilder.toString());
+    String urlBuilder = servlet + resource + "/" + databaseUUID + "/" + tableUUID +
+        "/" + rowUUID + "/" + columnIndexInEnclosingTable + "/" + lobName;
+    return new Anchor(messages.row_downloadLOB(), urlBuilder);
   }
 
   public static SafeHtmlBuilder constructViewQuery(ViewerView view) {

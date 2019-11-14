@@ -15,7 +15,6 @@ import org.roda.core.data.v2.index.filter.SimpleFilterParameter;
 
 import com.databasepreservation.common.client.BrowserService;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerCell;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerColumn;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerForeignKey;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerReference;
@@ -30,7 +29,6 @@ import com.databasepreservation.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.common.shared.client.tools.ViewerStringUtils;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -110,8 +108,8 @@ public class ReferencesPanel extends RightPanel {
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
       BreadcrumbManager.updateBreadcrumb(breadcrumb,
-          BreadcrumbManager.forReferences(database.getMetadata().getName(), database.getUUID(), table.getSchemaName(),
-              table.getSchemaUUID(), table.getName(), table.getUUID(), recordUUID, columnName,
+      BreadcrumbManager.forReferences(database.getMetadata().getName(), database.getUUID(), table.getName(),
+        table.getUUID(), recordUUID, columnName,
               columnIndexInTable.toString()));
   }
 

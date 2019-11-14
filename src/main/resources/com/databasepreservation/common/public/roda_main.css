@@ -3273,9 +3273,7 @@ td.datePickerMonth, td.datePickerYear {
     background-color: #089de3;
     color: white;
     border: none;
-    padding: 0 0 0 0;
-    padding-left: 20px;
-    padding-right: 10px;
+    padding: 0 10px 0 20px;
     min-width: 175px;
     position: relative;
 }
@@ -3314,8 +3312,7 @@ td.datePickerMonth, td.datePickerYear {
 }
 
 .searchPanelRight .fa-stack {
-    /*line-height: 4rem;
-    height: 4rem; */
+    position: initial;
 }
 
 .searchBox {

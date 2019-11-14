@@ -22,11 +22,10 @@ import com.databasepreservation.common.shared.client.common.utils.CommonClientUt
 import com.databasepreservation.common.shared.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.common.shared.client.tools.ViewerStringUtils;
+import com.databasepreservation.common.shared.client.widgets.Alert;
 import com.databasepreservation.common.shared.client.widgets.wcag.AccessibleFocusPanel;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -80,10 +79,13 @@ public class DatabaseSearchPanel extends RightPanel {
   FlowPanel searchPanel;
 
   @UiField
-  AccessibleFocusPanel searchInputButton;
+  FlowPanel noResultsContent;
 
   @UiField
-  Label noResults;
+  AccessibleFocusPanel searchInputButton;
+
+  @UiField(provided = true)
+  Alert noResults;
 
   @UiField
   LoadingDiv loading;
@@ -94,9 +96,9 @@ public class DatabaseSearchPanel extends RightPanel {
 
   private DatabaseSearchPanel(ViewerDatabase database) {
     tableSearchPanelContainers = new ArrayList<>();
+    noResults = new Alert(Alert.MessageAlertType.INFO, messages.noRecordsMatchTheSearchTerms());
 
     initWidget(uiBinder.createAndBindUi(this));
-
     title.setText(messages.searchAllRecords());
 
     Callback<TableSearchPanelContainer, Void> searchCompletedCallback = new Callback<TableSearchPanelContainer, Void>() {
@@ -120,7 +122,7 @@ public class DatabaseSearchPanel extends RightPanel {
         loading.setVisible(false);
         if (!foundRecords) {
           // and no records were found.
-          noResults.setVisible(true);
+          noResultsContent.setVisible(true);
         }
       }
     };
@@ -155,7 +157,7 @@ public class DatabaseSearchPanel extends RightPanel {
 
   private void doSearch() {
     // hide everything
-    noResults.setVisible(false);
+    noResultsContent.setVisible(false);
     loading.setVisible(true);
     for (TableSearchPanelContainer tableSearchPanelContainer : tableSearchPanelContainers) {
       tableSearchPanelContainer.hideEverything();
@@ -196,7 +198,7 @@ public class DatabaseSearchPanel extends RightPanel {
       tableContainer = new SimplePanel();
       tableContainer.setVisible(false);
 
-      header = CommonClientUtils.getSchemaAndTableHeader(database.getUUID(), table, "h3");
+      header = CommonClientUtils.getHeader(table, "h3", database.getMetadata().getSchemas().size() > 1);
       header.setVisible(false);
 
       add(header);

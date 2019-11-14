@@ -123,7 +123,7 @@ public class TableAndColumnsSidebar extends Composite {
 
   public void select(String value) {
     for (Map.Entry<String, SidebarHyperlink> entry : list.entrySet()) {
-      list.get(value).setSelected(entry.getKey().equals(value));
+      entry.getValue().setSelected(entry.getKey().equals(value));
     }
   }
 

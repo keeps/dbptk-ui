@@ -35,7 +35,7 @@ public class FontAwesomeIconManager {
   public static final String SCHEMA_CHECK_CONSTRAINTS = "compress";
   public static final String SCHEMA_TABLE_SEPARATOR = "angle-right";
   public static final String SAVED_SEARCH = "save";
-  public static final String ACTION_EDIT = "pencil";
+  public static final String ACTION_EDIT = "pencil-alt";
   public static final String ACTION_DELETE = "trash-alt";
   public static final String BLOB = "file";
   public static final String USER = "user";

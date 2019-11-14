@@ -325,7 +325,6 @@ public class MainPanelDesktop extends Composite {
           setContent(databaseUUID, tableUUID, new RightPanelLoader() {
             @Override
             public RightPanel load(ViewerDatabase database) {
-              GWT.log("Col: " + columnsAndValues);
               return ForeignKeyPanel.createInstance(database, tableUUID, columnsAndValues.subList(0, columnsAndValues.size() - 1), true);
             }
           });

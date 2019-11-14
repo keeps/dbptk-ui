@@ -1,6 +1,7 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:c='urn:import:com.databasepreservation.common.shared.client.common'
+             xmlns:a="urn:import:com.databasepreservation.common.shared.client.widgets"
              xmlns:wcag="urn:import:com.databasepreservation.common.shared.client.widgets.wcag">
 
     <ui:with field='messages' type='config.i18n.client.ClientMessages' />
@@ -33,7 +34,9 @@
 
         <g:HTML ui:field="description"/>
         <g:FlowPanel ui:field="content">
-            <g:Label visible="false" ui:field="noResults"><ui:text from='{messages.noRecordsMatchTheSearchTerms}'/></g:Label>
+            <g:FlowPanel visible="false" styleName="alert-container" ui:field="noResultsContent">
+                <a:Alert ui:field="noResults"/>
+            </g:FlowPanel>
             <c:LoadingDiv addStyleNames="database-search-panel" visible="false" ui:field="loading"/>
         </g:FlowPanel>
     </g:FlowPanel>

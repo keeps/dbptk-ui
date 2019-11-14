@@ -254,27 +254,9 @@ public class MetadataEditSidebar extends Composite {
 
   private void searchInit() {
     searchInputBox.getElement().setPropertyString("placeholder", messages.menusidebar_filterSidebar());
-
-    searchInputBox.addChangeHandler(new ChangeHandler() {
-      @Override
-      public void onChange(ChangeEvent event) {
-        doSearch();
-      }
-    });
-
-    searchInputBox.addKeyUpHandler(new KeyUpHandler() {
-      @Override
-      public void onKeyUp(KeyUpEvent event) {
-        doSearch();
-      }
-    });
-
-    searchInputButton.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        doSearch();
-      }
-    });
+    searchInputBox.addChangeHandler(event -> doSearch());
+    searchInputBox.addKeyUpHandler(event -> doSearch());
+    searchInputButton.addClickHandler(event -> doSearch());
   }
 
   private void doSearch() {

@@ -38,6 +38,12 @@ public class ViewerTable implements Serializable {
 
   private String schemaName;
 
+  private String nameWithoutPrefix;
+
+  private boolean customView;
+
+  private boolean materializedView;
+
   // private HashMap<String, String> udtAlias;
 
   public ViewerTable() {
@@ -146,6 +152,30 @@ public class ViewerTable implements Serializable {
 
   public List<ViewerCandidateKey> getCandidateKeys() {
     return candidateKeys;
+  }
+
+  public String getNameWithoutPrefix() {
+    return nameWithoutPrefix;
+  }
+
+  public void setNameWithoutPrefix(String nameWithoutPrefix) {
+    this.nameWithoutPrefix = nameWithoutPrefix;
+  }
+
+  public boolean isCustomView() {
+    return customView;
+  }
+
+  public void setCustomView(boolean customView) {
+    this.customView = customView;
+  }
+
+  public boolean isMaterializedView() {
+    return materializedView;
+  }
+
+  public void setMaterializedView(boolean materializedView) {
+    this.materializedView = materializedView;
   }
 
   @JsonIgnore

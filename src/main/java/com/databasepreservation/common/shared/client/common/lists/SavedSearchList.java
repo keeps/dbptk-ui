@@ -2,10 +2,12 @@ package com.databasepreservation.common.shared.client.common.lists;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.shared.client.widgets.Alert;
 import org.roda.core.data.v2.index.IndexResult;
 import org.roda.core.data.v2.index.facet.Facets;
 import org.roda.core.data.v2.index.filter.Filter;
@@ -91,33 +93,21 @@ public class SavedSearchList extends AsyncTableCell<SavedSearch, String> {
     // column with 2 buttons (edit and delete)
     ArrayList<HasCell<SavedSearch, ?>> cells = new ArrayList<>();
     cells.add(new ActionsCell(messages.edit(), FontAwesomeIconManager.ACTION_EDIT,
-      new FontAwesomeActionCell.Delegate<SavedSearch>() {
-        @Override
-        public void execute(SavedSearch object) {
-          HistoryManager.gotoEditSavedSearch(object.getDatabaseUUID(), object.getUUID());
-        }
-      }));
+        object -> HistoryManager.gotoEditSavedSearch(object.getDatabaseUUID(), object.getUUID())));
     cells.add(new ActionsCell(messages.delete(), FontAwesomeIconManager.ACTION_DELETE, "btn-danger",
-      new FontAwesomeActionCell.Delegate<SavedSearch>() {
-        @Override
-        public void execute(final SavedSearch object) {
-          BrowserService.Util.getInstance().deleteSearch(getDatabaseUUID(), object.getUUID(),
-            new DefaultAsyncCallback<Void>() {
-              @Override
-              public void onSuccess(Void result) {
-                GWT.log("deleted " + object.getUUID());
-                SavedSearchList.this.refresh();
-              }
-            });
-        }
-      }));
+        object -> BrowserService.Util.getInstance().deleteSearch(getDatabaseUUID(), object.getUUID(),
+          new DefaultAsyncCallback<Void>() {
+            @Override
+            public void onSuccess(Void result) {
+              GWT.log("deleted " + object.getUUID());
+              SavedSearchList.this.refresh();
+            }
+          })));
     CompositeCell<SavedSearch> compositeCell = new CompositeCell<>(cells);
 
     actionsColumn = new Column<SavedSearch, SavedSearch>(compositeCell) {
       @Override
       public SavedSearch getValue(SavedSearch object) {
-        // return
-        // SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE));
         return object;
       }
     };
@@ -135,7 +125,7 @@ public class SavedSearchList extends AsyncTableCell<SavedSearch, String> {
 
     addColumn(actionsColumn, messages.managePageTableHeaderTextForActions(), false, TextAlign.LEFT, 6);
 
-    Label emptyInfo = new Label(messages.thereAreNoSavedSearches());
+    Alert emptyInfo = new Alert(Alert.MessageAlertType.LIGHT, messages.noItemsToDisplay());
     display.setEmptyTableWidget(emptyInfo);
 
     // define default sorting
@@ -145,9 +135,9 @@ public class SavedSearchList extends AsyncTableCell<SavedSearch, String> {
     //
     // addStyleName("my-collections-table");
     // emptyInfo.addStyleName("my-collections-empty-info");
-
   }
 
+  @Override
   protected CellPreviewEvent.Handler<SavedSearch> getSelectionEventManager() {
     return DefaultSelectionEventManager.createBlacklistManager(4);
   }
@@ -163,10 +153,10 @@ public class SavedSearchList extends AsyncTableCell<SavedSearch, String> {
     Filter filter = getFilter();
 
     Map<Column<SavedSearch, ?>, List<String>> columnSortingKeyMap = new HashMap<>();
-    columnSortingKeyMap.put(nameColumn, Arrays.asList(ViewerConstants.SOLR_SEARCHES_NAME));
-    columnSortingKeyMap.put(tableNameColumn, Arrays.asList(ViewerConstants.SOLR_SEARCHES_TABLE_NAME));
-    columnSortingKeyMap.put(dateAddedColumn, Arrays.asList(ViewerConstants.SOLR_SEARCHES_NAME));
-    columnSortingKeyMap.put(descriptionColumn, Arrays.asList(ViewerConstants.SOLR_SEARCHES_NAME));
+    columnSortingKeyMap.put(nameColumn, Collections.singletonList(ViewerConstants.SOLR_SEARCHES_NAME));
+    columnSortingKeyMap.put(tableNameColumn, Collections.singletonList(ViewerConstants.SOLR_SEARCHES_TABLE_NAME));
+    columnSortingKeyMap.put(dateAddedColumn, Collections.singletonList(ViewerConstants.SOLR_SEARCHES_NAME));
+    columnSortingKeyMap.put(descriptionColumn, Collections.singletonList(ViewerConstants.SOLR_SEARCHES_NAME));
 
     Sorter sorter = createSorter(columnSortList, columnSortingKeyMap);
 
@@ -174,7 +164,6 @@ public class SavedSearchList extends AsyncTableCell<SavedSearch, String> {
 
     BrowserService.Util.getInstance().findSavedSearches(getDatabaseUUID(), filter, sorter, sublist, getFacets(),
       LocaleInfo.getCurrentLocale().getLocaleName(), callback);
-
   }
 
   /**

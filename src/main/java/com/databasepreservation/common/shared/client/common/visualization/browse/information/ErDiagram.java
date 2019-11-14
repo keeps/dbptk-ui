@@ -114,6 +114,8 @@ public class ErDiagram extends Composite {
 
           if (ViewerStringUtils.isNotBlank(viewerTable.getDescription())) {
             visNode.description = viewerTable.getDescription();
+          } else {
+            visNode.description = "";
           }
           visNode.numColumns = viewerTable.getColumns().size();
           visNode.numRows = new Long(viewerTable.getCountRows()).intValue();
@@ -335,11 +337,7 @@ public class ErDiagram extends Composite {
 
     public void adjustBackgroundColor(double value) {
       // this.color.background = "#" + hslToRgb(0.59722222222, 1.0, 0.91);
-
-      GWT.log("using " + (0.91 - value));
-
       this.color.background = "#" + hslToRgb(0.59722222222, 1.0, 0.91 - value);
-      GWT.log("------> " + this.color.background);
     }
 
     /**

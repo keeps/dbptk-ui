@@ -19,8 +19,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyDownEvent;
-import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
@@ -85,7 +83,6 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
 
   @UiField
   Button saveSearchButton;
-  AsyncCallback<Void> saveQueryCallback;
 
   @UiField
   FlowPanel searchPreFilters;
@@ -93,7 +90,7 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
   private Filter defaultFilter;
   private String allFilter;
   private boolean defaultFilterIncremental = false;
-
+  private AsyncCallback<Void> saveQueryCallback;
   private FlowPanel fieldsPanel;
   private AsyncTableCell<?, ?> list;
 
@@ -113,40 +110,14 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
     searchAdvancedDisclosureButton.setVisible(showSearchAdvancedDisclosureButton);
     searchAdvancedPanel.setVisible(false);
 
-    searchInputBox.addKeyDownHandler(new KeyDownHandler() {
-
-      @Override
-      public void onKeyDown(KeyDownEvent event) {
-        if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-          doSearch();
-        }
-      }
-    });
-
-    searchInputButton.addClickHandler(new ClickHandler() {
-
-      @Override
-      public void onClick(ClickEvent event) {
+    searchInputBox.addKeyDownHandler(event -> {
+      if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
         doSearch();
       }
     });
-
-    searchAdvancedDisclosureButton.addClickHandler(new ClickHandler() {
-
-      @Override
-      public void onClick(ClickEvent event) {
-        showSearchAdvancedPanel();
-      }
-    });
-
-    searchInputListBox.addValueChangeHandler(new ValueChangeHandler<String>() {
-
-      @Override
-      public void onValueChange(ValueChangeEvent<String> event) {
-        onChange();
-      }
-    });
-
+    searchInputButton.addClickHandler(event -> doSearch());
+    searchAdvancedDisclosureButton.addClickHandler(event -> showSearchAdvancedPanel());
+    searchInputListBox.addValueChangeHandler(event -> onChange());
     if (showSearchAdvancedDisclosureButton) {
       searchPanel.addStyleName("searchPanelAdvanced");
     }
@@ -205,7 +176,7 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
 
   private Filter buildSearchFilter(String basicQuery, Filter defaultFilter, String allFilter, FlowPanel fieldsPanel,
     boolean defaultFilterIncremental) {
-    List<FilterParameter> parameters = new ArrayList<FilterParameter>();
+    List<FilterParameter> parameters = new ArrayList<>();
 
     if (basicQuery != null && basicQuery.trim().length() > 0) {
       parameters.add(new BasicSearchFilterParameter(allFilter, basicQuery));
@@ -226,11 +197,11 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
     if (defaultFilterIncremental) {
       filter = new Filter(defaultFilter);
       filter.add(parameters);
-      searchPreFilters.setVisible(defaultFilter.getParameters().size() > 0);
+      searchPreFilters.setVisible(!defaultFilter.getParameters().isEmpty());
       GWT.log("Incremental filter: " + filter);
-    } else if (parameters.size() == 0) {
+    } else if (parameters.isEmpty()) {
       filter = defaultFilter;
-      searchPreFilters.setVisible(defaultFilter.getParameters().size() > 0);
+      searchPreFilters.setVisible(!defaultFilter.getParameters().isEmpty());
       GWT.log("Default filter: " + filter);
     } else {
       filter = new Filter(parameters);

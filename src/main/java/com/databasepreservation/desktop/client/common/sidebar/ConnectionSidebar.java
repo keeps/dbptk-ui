@@ -93,7 +93,6 @@ public class ConnectionSidebar extends Composite {
   }
 
   public void select(String connection) {
-
     for (Map.Entry<String, SidebarHyperlink> entry : list.entrySet()) {
       entry.getValue().setSelected(entry.getKey().equals(connection));
     }

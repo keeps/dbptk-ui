@@ -22,7 +22,6 @@ import com.databasepreservation.common.shared.client.common.visualization.browse
 import com.databasepreservation.common.shared.client.common.visualization.browse.table.TableForeignKeysPanel;
 import com.databasepreservation.common.shared.client.common.visualization.browse.table.TableTriggersPanel;
 import com.databasepreservation.common.shared.client.tools.BreadcrumbManager;
-import com.databasepreservation.common.shared.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.shared.client.tools.HistoryManager;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.SafeHtmlCell;
@@ -57,13 +56,8 @@ public class ForeignKeyPanelOptions extends RightPanel {
     String separator = "/";
     String code = database.getUUID() + separator + tableUUID;
 
-    ForeignKeyPanelOptions instance = instances.get(code);
-    if (instance == null) {
-      instance = new ForeignKeyPanelOptions(database, tableUUID, columnsAndValues);
-      instances.put(code, instance);
-    }
-
-    return instance;
+    instances.computeIfAbsent(code, k -> new ForeignKeyPanelOptions(database, tableUUID, columnsAndValues));
+    return instances.get(code);
   }
 
   interface TablePanelUiBinder extends UiBinder<Widget, ForeignKeyPanelOptions> {
@@ -75,10 +69,22 @@ public class ForeignKeyPanelOptions extends RightPanel {
   SimplePanel mainHeader;
 
   @UiField
-  FlowPanel mainContainer, content, customButtons;
+  FlowPanel mainContainer;
 
   @UiField
-  Button btnBack, btnUpdate, options;
+  FlowPanel content;
+
+  @UiField
+  FlowPanel customButtons;
+
+  @UiField
+  Button btnBack;
+
+  @UiField
+  Button btnUpdate;
+
+  @UiField
+  Button options;
 
   private ViewerDatabase database;
   private ViewerTable table;
@@ -87,7 +93,8 @@ public class ForeignKeyPanelOptions extends RightPanel {
   private Map<String, Boolean> initialLoading = new HashMap<>();
   private MultipleSelectionTablePanel<ViewerColumn> columnsTable;
   private Button btnSelectToggle;
-  private Label switchLabel, labelForSwitch;
+  private Label switchLabel;
+  private Label labelForSwitch;
   private SimpleCheckBox advancedSwitch;
   private List<String> columnsAndValues;
 
@@ -96,7 +103,6 @@ public class ForeignKeyPanelOptions extends RightPanel {
     database = viewerDatabase;
     table = database.getMetadata().getTable(tableUUID);
     this.columnsAndValues = columnsAndValues;
-    GWT.log("COL: " + columnsAndValues);
     initWidget(uiBinder.createAndBindUi(this));
 
     init();
@@ -120,7 +126,7 @@ public class ForeignKeyPanelOptions extends RightPanel {
 
   private void init() {
     mainHeader
-      .setWidget(CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE), table, "h1"));
+      .setWidget(CommonClientUtils.getHeader(table, "h1", database.getMetadata().getSchemas().size() > 1));
     configureButtons();
     configureTechnicalInformationSwitch();
     initTable();

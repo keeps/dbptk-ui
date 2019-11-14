@@ -903,9 +903,10 @@ p[data-value]:after {
     font-weight: normal;
     cursor: unset;
     color: #6a6a6a;
+    text-decoration: underline;
 }
 .main .wui-breadcrumbPanel .breadcrumb-last:hover{
-    text-decoration: none;
+    text-decoration: underline;
 }
 
 .main .wui-breadcrumbPanel .breadcrumb .fa {
@@ -1751,7 +1752,7 @@ html, body, .desktop-main {
     font-weight: bolder;
     position: absolute;
     right: 1em;
-    top: 0;
+    top: 5px;
 }
 
 .sidebar-collapse .header > .leftSidebar-facet-panel.sidebarHyperLink-selected::after {
@@ -2431,6 +2432,12 @@ html, body, .desktop-main {
     bottom: 0 !important;
     text-align: right;
     line-height: 1em;
+    padding-left: 2px;
+}
+
+.schema-table-separator {
+    font-size: 1.5rem;
+    vertical-align: middle;
 }
 /************************************************
 * alert

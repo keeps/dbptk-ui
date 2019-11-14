@@ -13,6 +13,7 @@ import com.google.gwt.user.client.ui.Widget;
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class SidebarHyperlink extends SidebarItem {
+  private final static String CSS_ITEM_SELECTED = "sidebarItem-selected";
   interface SidebarHyperlinkUiBinder extends UiBinder<Widget, SidebarHyperlink> {
   }
 
@@ -49,7 +50,7 @@ public class SidebarHyperlink extends SidebarItem {
     initWidget(uiBinder.createAndBindUi(this));
     setTargetHistoryToken(targetHistoryToken);
     setText(text);
-    label.addStyleName("sidebar-hyperlink sidebarItem custom-views-sidebarItem");
+    label.addStyleName("sidebar-hyperlink sidebarItem");
     this.hyperlink = hyperlink;
     container.add(this.hyperlink);
   }
@@ -58,9 +59,14 @@ public class SidebarHyperlink extends SidebarItem {
     initWidget(uiBinder.createAndBindUi(this));
     setTargetHistoryToken(targetHistoryToken);
     setTextBySafeHTML(text);
-    label.addStyleName("sidebar-hyperlink sidebarItem custom-views-sidebarItem");
+    label.addStyleName("sidebar-hyperlink sidebarItem");
     this.hyperlink = hyperlink;
     container.add(this.hyperlink);
+  }
+
+  public SidebarHyperlink setTooltip(final String tooltip) {
+    label.setTitle(tooltip);
+    return this;
   }
 
   public SidebarHyperlink setTargetHistoryToken(String targetHistoryToken) {
@@ -74,6 +80,7 @@ public class SidebarHyperlink extends SidebarItem {
     return this;
   }
 
+  @Override
   public SidebarItem setTextBySafeHTML(SafeHtml safeHtml) {
     label.setHTML(safeHtml);
     return this;
@@ -87,15 +94,15 @@ public class SidebarHyperlink extends SidebarItem {
   public void setSelected(boolean value) {
     if (value) {
       container.addStyleName("sidebarHyperLink-selected");
-      label.addStyleName("sidebarItem-selected");
+      label.addStyleName(CSS_ITEM_SELECTED);
       if (hyperlink != null) {
-        hyperlink.addStyleName("sidebarItem-selected");
+        hyperlink.addStyleName(CSS_ITEM_SELECTED);
       }
     } else {
       container.removeStyleName("sidebarHyperLink-selected");
-      label.removeStyleName("sidebarItem-selected");
+      label.removeStyleName(CSS_ITEM_SELECTED);
       if (hyperlink != null) {
-        hyperlink.removeStyleName("sidebarItem-selected");
+        hyperlink.removeStyleName(CSS_ITEM_SELECTED);
       }
     }
   }

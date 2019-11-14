@@ -344,6 +344,19 @@ public class ToolkitStructure2ViewerStructure {
     result.setForeignKeys(getForeignKeys(table, references));
     result.setCandidateKeys(getCandidateKeys(table, references));
     result.setCheckConstraints(getCheckConstraints(table.getCheckConstraints()));
+    if (table.getName().startsWith(ViewerConstants.CUSTOM_VIEW_PREFIX)) {
+      result.setCustomView(true);
+      result.setMaterializedView(false);
+      result.setNameWithoutPrefix(table.getName().replaceFirst(ViewerConstants.CUSTOM_VIEW_PREFIX,""));
+    } else if (table.getName().startsWith(ViewerConstants.MATERIALIZED_VIEW_PREFIX)) {
+      result.setCustomView(false);
+      result.setMaterializedView(true);
+      result.setNameWithoutPrefix(table.getName().replaceFirst(ViewerConstants.MATERIALIZED_VIEW_PREFIX,""));
+    } else {
+      result.setCustomView(false);
+      result.setMaterializedView(false);
+      result.setNameWithoutPrefix(table.getName());
+    }
 
     vdb.putTable(table.getId(), result);
     return result;

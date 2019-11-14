@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.shared.ViewerConstants;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerTable;
 import com.databasepreservation.common.shared.client.breadcrumb.BreadcrumbPanel;
@@ -15,7 +14,6 @@ import com.databasepreservation.common.shared.client.common.search.TableSearchPa
 import com.databasepreservation.common.shared.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.shared.client.common.visualization.browse.foreignKey.ForeignKeyPanelOptions;
 import com.databasepreservation.common.shared.client.tools.BreadcrumbManager;
-import com.databasepreservation.common.shared.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.common.shared.client.tools.ViewerStringUtils;
 import com.google.gwt.core.client.GWT;
@@ -155,13 +153,8 @@ public class TablePanel extends RightPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    if (table.getName().startsWith(ViewerConstants.CUSTOM_VIEW_PREFIX)) {
       BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forTable(database.getMetadata().getName(),
-          database.getUUID(), table.getName().substring(ViewerConstants.CUSTOM_VIEW_PREFIX.length()), table.getUUID()));
-    } else {
-      BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forTable(database.getMetadata().getName(),
-          database.getUUID(), table.getName(), table.getUUID()));
-    }
+      database.getUUID(), table.getNameWithoutPrefix(), table.getUUID()));
   }
 
   public void setColumnsAndValues(List<String> columnsAndValues) {
@@ -181,14 +174,7 @@ public class TablePanel extends RightPanel {
   }
 
   private void init() {
-    if (table.getName().startsWith(ViewerConstants.CUSTOM_VIEW_PREFIX)) {
-      mainHeader.setWidget(
-        CommonClientUtils.getHeader(FontAwesomeIconManager.getStackedIconSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS,
-          FontAwesomeIconManager.COG, table.getName().substring(ViewerConstants.CUSTOM_VIEW_PREFIX.length())), "h1"));
-    } else {
-      mainHeader.setWidget(
-        CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE), table, "h1"));
-    }
+    mainHeader.setWidget(CommonClientUtils.getHeader(table, "h1", database.getMetadata().getSchemas().size() > 1));
     options.setText(messages.basicActionOptions());
 
     options.addClickHandler(event -> {

@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.databasepreservation.common.shared.ViewerConstants;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerMetadata;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerSchema;
@@ -194,67 +193,13 @@ public class DatabaseSidebar extends Composite {
       schema.setViewsSchemaUUID();
 
       for (ViewerTable table : schema.getTables()) {
-        if (!table.getName().startsWith(ViewerConstants.MATERIALIZED_VIEW_PREFIX)
-          && !table.getName().startsWith(ViewerConstants.CUSTOM_VIEW_PREFIX)) {
-          SafeHtml html;
-          if (totalSchemas == 1) {
-            html = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE, table.getName());
-          } else {
-            html = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE,
-              schema.getName() + " " + iconTag + " " + table.getName());
-          }
-          SidebarHyperlink tableLink = new SidebarHyperlink(html,
-            HistoryManager.linkToTable(database.getUUID(), table.getUUID()));
-          tableLink.setH6().setIndent2();
-          list.put(table.getUUID(), tableLink);
-          sidebarGroup.add(tableLink);
-          schemaItems.add(tableLink);
+        if (!table.isCustomView() && !table.isMaterializedView()) {
+          schemaItems.add(createTableItem(schema, table, totalSchemas, iconTag));
         }
       }
 
       for (ViewerView view : schema.getViews()) {
-        SafeHtml html;
-        if (totalSchemas == 1) {
-          html = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE, view.getName());
-        } else {
-          html = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE,
-            schema.getName() + " " + iconTag + " " + view.getName());
-        }
-
-        SidebarHyperlink viewLink;
-        final ViewerTable materializedTable = schema.getMaterializedTable(view.getName());
-        if (materializedTable != null) {
-          viewLink = new SidebarHyperlink(html,
-            HistoryManager.linkToTable(database.getUUID(), materializedTable.getUUID()));
-          list.put(materializedTable.getUUID(), viewLink);
-        } else if (schema.getCustomViewTable(view.getName()) != null) {
-          final ViewerTable customViewTable = schema.getCustomViewTable(view.getName());
-          String customViewTableName = customViewTable.getName().substring(ViewerConstants.CUSTOM_VIEW_PREFIX.length());
-          if (totalSchemas == 1) {
-            html = FontAwesomeIconManager.getStackedIconSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS,
-              FontAwesomeIconManager.COG, customViewTableName);
-          } else {
-            html = FontAwesomeIconManager.getStackedIconSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS,
-              FontAwesomeIconManager.COG, schema.getName() + " " + iconTag + " " + customViewTableName);
-          }
-          viewLink = new SidebarHyperlink(html,
-            HistoryManager.linkToTable(database.getUUID(), customViewTable.getUUID()));
-          list.put(customViewTable.getUUID(), viewLink);
-        } else {
-          if (totalSchemas == 1) {
-            html = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS, view.getName());
-          } else {
-            html = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS,
-              schema.getName() + " " + iconTag + " " + view.getName());
-          }
-          viewLink = new SidebarHyperlink(html, HistoryManager.linkToView(database.getUUID(), view.getUUID()));
-          list.put(view.getUUID(), viewLink);
-        }
-
-        viewLink.setH6().setIndent2();
-
-        sidebarGroup.add(viewLink);
-        schemaItems.add(viewLink);
+        schemaItems.add(createViewItem(schema, view, totalSchemas, iconTag));
       }
     }
 
@@ -293,6 +238,69 @@ public class DatabaseSidebar extends Composite {
 
     searchInit();
     setVisible(true);
+  }
+
+  private SidebarHyperlink createTableItem(final ViewerSchema schema, final ViewerTable table, final int totalSchemas,
+    final String iconTag) {
+      SafeHtml html;
+      if (totalSchemas == 1) {
+        html = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE, table.getName());
+      } else {
+        html = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE,
+            schema.getName() + " " + iconTag + " " + table.getName());
+      }
+      SidebarHyperlink tableLink = new SidebarHyperlink(html,
+          HistoryManager.linkToTable(database.getUUID(), table.getUUID()));
+      tableLink.setH6().setIndent2();
+      list.put(table.getUUID(), tableLink);
+      sidebarGroup.add(tableLink);
+
+      return tableLink;
+  }
+
+  private SidebarHyperlink createViewItem(final ViewerSchema schema, final ViewerView view, final int totalSchemas,
+    final String iconTag) {
+    SafeHtml html;
+    SidebarHyperlink viewLink;
+    final ViewerTable materializedTable = schema.getMaterializedTable(view.getName());
+    if (materializedTable != null) {
+      if (totalSchemas == 1) {
+        html = FontAwesomeIconManager.getStackedIconSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS,
+            FontAwesomeIconManager.TABLE, materializedTable.getNameWithoutPrefix());
+      } else {
+        html = FontAwesomeIconManager.getStackedIconSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS,
+            FontAwesomeIconManager.TABLE, schema.getName() + " " + iconTag + " " + materializedTable.getNameWithoutPrefix());
+      }
+      viewLink = new SidebarHyperlink(html,
+        HistoryManager.linkToTable(database.getUUID(), materializedTable.getUUID())).setTooltip("Materialized View");
+      list.put(materializedTable.getUUID(), viewLink);
+    } else if (schema.getCustomViewTable(view.getName()) != null) {
+      final ViewerTable customViewTable = schema.getCustomViewTable(view.getName());
+      if (totalSchemas == 1) {
+        html = FontAwesomeIconManager.getStackedIconSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS,
+          FontAwesomeIconManager.COG, customViewTable.getNameWithoutPrefix());
+      } else {
+        html = FontAwesomeIconManager.getStackedIconSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS,
+          FontAwesomeIconManager.COG, schema.getName() + " " + iconTag + " " + customViewTable.getNameWithoutPrefix());
+      }
+      viewLink = new SidebarHyperlink(html, HistoryManager.linkToTable(database.getUUID(), customViewTable.getUUID())).setTooltip("Custom View");
+      list.put(customViewTable.getUUID(), viewLink);
+    } else {
+      if (totalSchemas == 1) {
+        html = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS, view.getName());
+      } else {
+        html = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS,
+          schema.getName() + " " + iconTag + " " + view.getName());
+      }
+      viewLink = new SidebarHyperlink(html, HistoryManager.linkToView(database.getUUID(), view.getUUID()));
+      list.put(view.getUUID(), viewLink);
+    }
+
+    viewLink.setH6().setIndent2();
+
+    sidebarGroup.add(viewLink);
+
+    return viewLink;
   }
 
   public boolean isInitialized() {
@@ -349,50 +357,55 @@ public class DatabaseSidebar extends Composite {
     String searchValue = searchInputBox.getValue();
 
     if (ViewerStringUtils.isBlank(searchValue)) {
-      // show all
-      for (Widget widget : sidebarGroup) {
-        widget.setVisible(true);
-
-        if (widget instanceof DisclosurePanel) {
-          DisclosurePanel disclosurePanel = (DisclosurePanel) widget;
-          FlowPanel fp = (FlowPanel) disclosurePanel.getContent();
-          for (Widget value : fp) {
-            SidebarItem sb = (SidebarItem) value;
-            sb.setVisible(true);
-          }
-        }
-      }
+      showAll();
     } else {
-      // show matching and their parents
-      Set<DisclosurePanel> disclosurePanelsThatShouldBeVisible = new HashSet<>();
+      showMatching(searchValue);
+    }
+  }
 
-      for (Widget widget : sidebarGroup) {
-        if (widget instanceof DisclosurePanel) {
-          DisclosurePanel disclosurePanel = (DisclosurePanel) widget;
-          disclosurePanel.setOpen(true);
-          FlowPanel fp = (FlowPanel) disclosurePanel.getContent();
+  private void showAll() {
+    // show all
+    for (Widget widget : sidebarGroup) {
+      widget.setVisible(true);
 
-          for (Widget value : fp) {
-            SidebarItem sb = (SidebarItem) value;
-
-            GWT.log(sb.getText());
-
-            if (sb.getText().toLowerCase().contains(searchValue.toLowerCase())) {
-              sb.setVisible(true);
-              disclosurePanelsThatShouldBeVisible.add(disclosurePanel);
-            } else {
-              sb.setVisible(false);
-              disclosurePanel.setVisible(false);
-            }
-          }
-        } else {
-          widget.setVisible(true);
+      if (widget instanceof DisclosurePanel) {
+        DisclosurePanel disclosurePanel = (DisclosurePanel) widget;
+        FlowPanel fp = (FlowPanel) disclosurePanel.getContent();
+        for (Widget value : fp) {
+          SidebarItem sb = (SidebarItem) value;
+          sb.setVisible(true);
         }
       }
+    }
+  }
 
-      for (DisclosurePanel disclosurePanel : disclosurePanelsThatShouldBeVisible) {
-        disclosurePanel.setVisible(true);
+  private void showMatching(final String searchValue) {
+    // show matching and their parents
+    Set<DisclosurePanel> disclosurePanelsThatShouldBeVisible = new HashSet<>();
+
+    for (Widget widget : sidebarGroup) {
+      if (widget instanceof DisclosurePanel) {
+        DisclosurePanel disclosurePanel = (DisclosurePanel) widget;
+        disclosurePanel.setOpen(true);
+        FlowPanel fp = (FlowPanel) disclosurePanel.getContent();
+
+        for (Widget value : fp) {
+          SidebarItem sb = (SidebarItem) value;
+          if (sb.getText().toLowerCase().contains(searchValue.toLowerCase())) {
+            sb.setVisible(true);
+            disclosurePanelsThatShouldBeVisible.add(disclosurePanel);
+          } else {
+            sb.setVisible(false);
+            disclosurePanel.setVisible(false);
+          }
+        }
+      } else {
+        widget.setVisible(true);
       }
+    }
+
+    for (DisclosurePanel disclosurePanel : disclosurePanelsThatShouldBeVisible) {
+      disclosurePanel.setVisible(true);
     }
   }
 }
