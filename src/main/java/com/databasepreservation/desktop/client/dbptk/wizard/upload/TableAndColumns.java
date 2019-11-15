@@ -91,25 +91,25 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
   @UiField
   FlowPanel panel;
 
-  private static HashMap<String, TableAndColumns> instances = new HashMap<>();
+  private static Map<String, TableAndColumns> instances = new HashMap<>();
   private TableAndColumnsSidebar tableAndColumnsSidebar;
   private TableAndColumnsSendToSidebar tableAndColumnsSendToSidebar;
   private ViewerMetadata metadata;
-  private HashMap<String, MultipleSelectionTablePanel<ViewerColumn>> columns = new HashMap<>();
-  private HashMap<String, MultipleSelectionTablePanel<ViewerTable>> tables = new HashMap<>();
-  private HashMap<String, MultipleSelectionTablePanel<ViewerView>> views = new HashMap<>();
-  private HashMap<String, Boolean> tableSelectedStatus = new HashMap<>();
-  private HashMap<String, Boolean> viewSelectedStatus = new HashMap<>();
-  private HashMap<String, ExternalLOBsParameter> externalLOBsParameters = new HashMap<>();
+  private Map<String, MultipleSelectionTablePanel<ViewerColumn>> columns = new HashMap<>();
+  private Map<String, MultipleSelectionTablePanel<ViewerTable>> tables = new HashMap<>();
+  private Map<String, MultipleSelectionTablePanel<ViewerView>> views = new HashMap<>();
+  private Map<String, Boolean> tableSelectedStatus = new HashMap<>();
+  private Map<String, Boolean> viewSelectedStatus = new HashMap<>();
+  private Map<String, ExternalLOBsParameter> externalLOBsParameters = new HashMap<>();
   private String currentTableUUID = null;
   private String currentBasePath = null;
   private String databaseUUID;
   // false: "SELECT ALL"; true: "SELECT NONE";
-  private HashMap<String, Boolean> toggleSelectionTablesMap = new HashMap<>();
-  private HashMap<String, Boolean> toggleSelectionViewsMap = new HashMap<>();
-  private HashMap<String, Boolean> toggleSelectionColumnsMap = new HashMap<>();
-  private HashMap<String, Button> btnToggleSelectionMap = new HashMap<>();
-  private HashMap<String, Boolean> initialLoading = new HashMap<>();
+  private Map<String, Boolean> toggleSelectionTablesMap = new HashMap<>();
+  private Map<String, Boolean> toggleSelectionViewsMap = new HashMap<>();
+  private Map<String, Boolean> toggleSelectionColumnsMap = new HashMap<>();
+  private Map<String, Button> btnToggleSelectionMap = new HashMap<>();
+  private Map<String, Boolean> initialLoading = new HashMap<>();
   private boolean externalLOBsDelete = false;
   private String externalLOBsBtnText = messages.basicActionAdd();
   private boolean doSSH = false;
@@ -229,19 +229,21 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
   public TableAndColumnsParameters getValues() {
     TableAndColumnsParameters parameters = new TableAndColumnsParameters();
     List<String> schemas = new ArrayList<>();
-    HashMap<String, ArrayList<ViewerColumn>> values = new HashMap<>();
+    Map<String, List<ViewerColumn>> values = new HashMap<>();
     for (Map.Entry<String, MultipleSelectionTablePanel<ViewerColumn>> cellTables : columns.entrySet()) {
       String tableUUID = cellTables.getKey();
       ViewerTable table = metadata.getTable(tableUUID);
       if (table != null) {
         schemas.add(table.getSchemaName());
-        ArrayList<ViewerColumn> selectedColumns = new ArrayList<>(cellTables.getValue().getSelectionModel().getSelectedSet());
+        List<ViewerColumn> selectedColumns = new ArrayList<>(
+          cellTables.getValue().getSelectionModel().getSelectedSet());
         String key = table.getSchemaName() + "." + table.getName();
         values.put(key, selectedColumns);
       } else {
         ViewerView view = metadata.getView(tableUUID);
         if (view != null) {
-          ArrayList<ViewerColumn> selectedColumns = new ArrayList<>(cellTables.getValue().getSelectionModel().getSelectedSet());
+          List<ViewerColumn> selectedColumns = new ArrayList<>(
+            cellTables.getValue().getSelectionModel().getSelectedSet());
           String key = view.getSchemaName() + "." + view.getName();
           values.put(key, selectedColumns);
         }

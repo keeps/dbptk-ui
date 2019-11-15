@@ -1,7 +1,7 @@
 package com.databasepreservation.common.shared.models.wizardParameters;
 
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -9,20 +9,20 @@ import java.util.Objects;
  */
 public class CustomViewsParameters implements Serializable {
 
-  private ArrayList<CustomViewsParameter> customViewsParameter;
+  private List<CustomViewsParameter> customViewsParameter;
 
   public CustomViewsParameters() {
   }
 
-  public CustomViewsParameters(ArrayList<CustomViewsParameter> customViewsParameter) {
+  public CustomViewsParameters(List<CustomViewsParameter> customViewsParameter) {
     this.customViewsParameter = customViewsParameter;
   }
 
-  public ArrayList<CustomViewsParameter> getCustomViewsParameter() {
+  public List<CustomViewsParameter> getCustomViewsParameter() {
     return customViewsParameter;
   }
 
-  public void setCustomViewsParameter(ArrayList<CustomViewsParameter> customViewsParameter) {
+  public void setCustomViewsParameter(List<CustomViewsParameter> customViewsParameter) {
     this.customViewsParameter = customViewsParameter;
   }
 

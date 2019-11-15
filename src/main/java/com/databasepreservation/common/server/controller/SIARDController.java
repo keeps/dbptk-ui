@@ -276,7 +276,7 @@ public class SIARDController {
 
     // External Lobs
     if (!tableAndColumnsParameters.getExternalLOBsParameters().isEmpty()) {
-      final ArrayList<ExternalLobDBPTK> externalLobDBPTKS = constructExternalLobFilter(tableAndColumnsParameters);
+      final List<ExternalLobDBPTK> externalLobDBPTKS = constructExternalLobFilter(tableAndColumnsParameters);
       int index = 0;
       for (ExternalLobDBPTK parameter : externalLobDBPTKS) {
         LOGGER.info("column-list: {}", parameter.getPathToColumnList());
@@ -768,7 +768,7 @@ public class SIARDController {
     TableAndColumnsParameters tableAndColumnsParameters, ExportOptionsParameters exportOptionsParameters,
     MetadataExportOptionsParameters metadataExportOptionsParameters) throws GenericException {
     final DatabaseModuleFactory databaseExportModuleFactory = getDatabaseExportModuleFactory(
-      exportOptionsParameters.getSIARDVersion());
+      exportOptionsParameters.getSiardVersion());
 
     databaseMigration.exportModule(databaseExportModuleFactory);
 
@@ -924,10 +924,10 @@ public class SIARDController {
     return Paths.get(tmpFile.toURI()).normalize().toAbsolutePath().toString();
   }
 
-  private static ArrayList<ExternalLobDBPTK> constructExternalLobFilter(TableAndColumnsParameters parameters)
+  private static List<ExternalLobDBPTK> constructExternalLobFilter(TableAndColumnsParameters parameters)
     throws GenericException {
-    final ArrayList<ExternalLOBsParameter> externalLOBsParameters = parameters.getExternalLOBsParameters();
-    ArrayList<ExternalLobDBPTK> externalLobDBPTKParameters = new ArrayList<>();
+    final List<ExternalLOBsParameter> externalLOBsParameters = parameters.getExternalLOBsParameters();
+    List<ExternalLobDBPTK> externalLobDBPTKParameters = new ArrayList<>();
     ExternalLobDBPTK externalLobDBPTK = new ExternalLobDBPTK();
     for (ExternalLOBsParameter parameter : externalLOBsParameters) {
       externalLobDBPTK.setBasePath(parameter.getBasePath());
@@ -943,10 +943,10 @@ public class SIARDController {
   }
 
   private static String constructTableFilter(TableAndColumnsParameters parameters) throws GenericException {
-    final HashMap<String, ArrayList<ViewerColumn>> columns = parameters.getColumns();
+    final Map<String, List<ViewerColumn>> columns = parameters.getColumns();
     StringBuilder tf = new StringBuilder();
 
-    for (Map.Entry<String, ArrayList<ViewerColumn>> entry : columns.entrySet()) {
+    for (Map.Entry<String, List<ViewerColumn>> entry : columns.entrySet()) {
       if (!entry.getValue().isEmpty()) {
         tf.append(entry.getKey()).append("{");
         for (ViewerColumn column : entry.getValue()) {
@@ -960,7 +960,7 @@ public class SIARDController {
   }
 
   private static String constructCustomViews(CustomViewsParameters customViewsParameters) throws GenericException {
-    final ArrayList<CustomViewsParameter> customViewParameters = customViewsParameters.getCustomViewsParameter();
+    final List<CustomViewsParameter> customViewParameters = customViewsParameters.getCustomViewsParameter();
     Map<String, Object> data = new HashMap<>();
     Map<String, Object> view = new HashMap<>();
 

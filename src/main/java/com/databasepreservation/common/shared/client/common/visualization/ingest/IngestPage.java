@@ -42,19 +42,17 @@ public class IngestPage extends ContentPanel {
   }
 
   public static IngestPage getInstance(ViewerDatabase database) {
-
     String databaseUUID = database.getUUID();
     String databaseName = database.getMetadata().getName();
-    if (instances.get(databaseUUID) == null) {
-      IngestPage instance = new IngestPage(databaseUUID, databaseName);
-      instances.put(databaseUUID, instance);
-    }
-
+    instances.computeIfAbsent(databaseUUID, k -> new IngestPage(databaseUUID, databaseName));
     return instances.get(databaseUUID);
   }
 
   @UiField
-  FlowPanel container, panel;
+  FlowPanel container;
+
+  @UiField
+  FlowPanel panel;
 
   @UiField
   Button btnBack;

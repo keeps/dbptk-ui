@@ -1,19 +1,20 @@
 package com.databasepreservation.desktop.client.dbptk.wizard.common.connection;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.databasepreservation.common.client.BrowserService;
 import com.databasepreservation.common.shared.ViewerConstants;
 import com.databasepreservation.common.shared.client.common.DefaultAsyncCallback;
+import com.databasepreservation.common.shared.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.shared.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.shared.client.widgets.Toast;
 import com.databasepreservation.common.shared.models.DBPTKModule;
 import com.databasepreservation.common.shared.models.PreservationParameter;
 import com.databasepreservation.common.shared.models.wizardParameters.ConnectionParameters;
-import com.databasepreservation.common.shared.client.common.dialogs.Dialogs;
 import com.databasepreservation.desktop.client.common.sidebar.ConnectionSidebar;
 import com.databasepreservation.desktop.client.dbptk.wizard.WizardPanel;
 import com.github.nmorel.gwtjackson.client.ObjectMapper;
@@ -35,6 +36,7 @@ import config.i18n.client.ClientMessages;
  */
 public class Connection extends WizardPanel<ConnectionParameters> {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
+  private static final String SPINNER_DIV = "<div class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>";
 
   interface ConnectionUiBinder extends UiBinder<Widget, Connection> {
   }
@@ -48,7 +50,7 @@ public class Connection extends WizardPanel<ConnectionParameters> {
   FlowPanel mainPanel;
 
   @UiField
-  FlowPanel JDBCListConnections;
+  FlowPanel jdbcListConnections;
 
   @UiField
   FlowPanel leftSideContainer;
@@ -68,7 +70,7 @@ public class Connection extends WizardPanel<ConnectionParameters> {
   private boolean countRows = false;
   private Button btnTestConnection;
 
-  private static HashMap<String, Connection> instances = new HashMap<>();
+  private static Map<String, Connection> instances = new HashMap<>();
 
   public static Connection getInstance(final String databaseUUID) {
     instances.computeIfAbsent(databaseUUID, k -> new Connection(databaseUUID));
@@ -88,7 +90,7 @@ public class Connection extends WizardPanel<ConnectionParameters> {
       if (validate()) {
 
         Widget spinner = new HTML(SafeHtmlUtils.fromSafeConstant(
-          "<div class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
+            SPINNER_DIV));
         mainPanel.add(spinner);
 
         final ConnectionParameters connectionParameters = getValues();
@@ -122,9 +124,9 @@ public class Connection extends WizardPanel<ConnectionParameters> {
   public void initImportDBMS(final String type, final String targetToken) {
     this.type = type;
     Widget spinner = new HTML(SafeHtmlUtils.fromSafeConstant(
-      "<div class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
+        SPINNER_DIV));
 
-    JDBCListConnections.add(spinner);
+    jdbcListConnections.add(spinner);
 
     CreateConnectionHomePanel connectionHomePanel = CreateConnectionHomePanel
       .getInstance(ViewerConstants.EXPORT_FORMAT_SIARD);
@@ -137,12 +139,12 @@ public class Connection extends WizardPanel<ConnectionParameters> {
         DBPTKModuleMapper mapper = GWT.create( DBPTKModuleMapper.class );
         DBPTKModule module = mapper.read(result);
         leftSideContainer.removeStyleName("loading-sidebar");
-        JDBCListConnections.remove(spinner);
+        jdbcListConnections.remove(spinner);
         connectionSidebar = ConnectionSidebar.getInstance(databaseUUID, messages.sidebarMenuTextForDatabases(),
           FontAwesomeIconManager.DATABASE, module, targetToken);
-        JDBCListConnections.add(connectionSidebar);
+        jdbcListConnections.add(connectionSidebar);
         leftSideContainer.removeStyleName("loading-sidebar");
-        JDBCListConnections.remove(spinner);
+        jdbcListConnections.remove(spinner);
         countRows = true;
         dbmsModule = module;
       }
@@ -152,9 +154,9 @@ public class Connection extends WizardPanel<ConnectionParameters> {
   public void initExportDBMS(final String type, final String targetToken) {
     this.type = type;
     Widget spinner = new HTML(SafeHtmlUtils.fromSafeConstant(
-      "<div class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
+        SPINNER_DIV));
 
-    JDBCListConnections.add(spinner);
+    jdbcListConnections.add(spinner);
 
     CreateConnectionHomePanel connectionHomePanel = CreateConnectionHomePanel
       .getInstance(ViewerConstants.EXPORT_FORMAT_DBMS);
@@ -169,9 +171,9 @@ public class Connection extends WizardPanel<ConnectionParameters> {
         connectionSidebar = ConnectionSidebar.getInstance(databaseUUID, messages.sidebarMenuTextForDatabases(),
           FontAwesomeIconManager.DATABASE, module, targetToken);
 
-        JDBCListConnections.add(connectionSidebar);
+        jdbcListConnections.add(connectionSidebar);
         leftSideContainer.removeStyleName("loading-sidebar");
-        JDBCListConnections.remove(spinner);
+        jdbcListConnections.remove(spinner);
         countRows = false;
         dbmsModule = module;
       }
@@ -181,14 +183,14 @@ public class Connection extends WizardPanel<ConnectionParameters> {
   public void sideBarHighlighter(String connection) {
     this.clickedOnSidebar = true;
     connectionSidebar.select(connection);
-    JDBCListConnections.clear();
-    JDBCListConnections.add(connectionSidebar);
+    jdbcListConnections.clear();
+    jdbcListConnections.add(connectionSidebar);
 
     connectionInputPanel.clear();
 
     selectedConnection = connection;
 
-    ArrayList<PreservationParameter> preservationParametersSelected = dbmsModule.getParameters(connection);
+    List<PreservationParameter> preservationParametersSelected = dbmsModule.getParameters(connection);
 
     TabPanel tabPanel = new TabPanel();
     tabPanel.addStyleName("browseItemMetadata connection-panel");

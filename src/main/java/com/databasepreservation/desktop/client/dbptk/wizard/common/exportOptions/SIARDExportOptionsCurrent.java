@@ -142,7 +142,7 @@ public class SIARDExportOptionsCurrent extends Composite {
       exportParameters.put(SIARD2ModuleFactory.PARAMETER_EXTERNAL_LOBS, "true");
     }
 
-    exportOptionsParameters.setSIARDVersion(version);
+    exportOptionsParameters.setSiardVersion(version);
     exportOptionsParameters.setParameters(exportParameters);
 
     return exportOptionsParameters;
@@ -154,7 +154,7 @@ public class SIARDExportOptionsCurrent extends Composite {
       return SIARDExportOptions.EXTERNAL_LOBS_ERROR;
     }
 
-    final ArrayList<PreservationParameter> requiredParameters = dbptkModule.getRequiredParameters(version);
+    final List<PreservationParameter> requiredParameters = dbptkModule.getRequiredParameters(version);
 
     for (PreservationParameter parameter : requiredParameters) {
       switch (parameter.getInputType()) {

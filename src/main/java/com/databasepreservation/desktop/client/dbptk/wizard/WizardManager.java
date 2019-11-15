@@ -3,13 +3,14 @@ package com.databasepreservation.desktop.client.dbptk.wizard;
 import com.google.gwt.user.client.ui.Composite;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
 public abstract class WizardManager extends Composite {
 
-    protected ArrayList<WizardPanel> wizardInstances = new ArrayList<>();
+    protected List<WizardPanel> wizardInstances = new ArrayList<>();
 
     public abstract void enableNext(boolean value);
 

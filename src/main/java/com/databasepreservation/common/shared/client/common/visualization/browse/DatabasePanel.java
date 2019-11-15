@@ -3,11 +3,10 @@ package com.databasepreservation.common.shared.client.common.visualization.brows
 import java.util.HashMap;
 import java.util.Map;
 
-import com.databasepreservation.common.shared.ViewerConstants;
-import com.databasepreservation.common.shared.client.common.utils.ApplicationType;
 import org.roda.core.data.v2.user.User;
 
 import com.databasepreservation.common.client.BrowserService;
+import com.databasepreservation.common.shared.ViewerConstants;
 import com.databasepreservation.common.shared.ViewerStructure.IsIndexed;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
 import com.databasepreservation.common.shared.client.breadcrumb.BreadcrumbPanel;
@@ -16,6 +15,7 @@ import com.databasepreservation.common.shared.client.common.LoginStatusListener;
 import com.databasepreservation.common.shared.client.common.RightPanel;
 import com.databasepreservation.common.shared.client.common.UserLogin;
 import com.databasepreservation.common.shared.client.common.sidebar.DatabaseSidebar;
+import com.databasepreservation.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.shared.client.common.utils.RightPanelLoader;
 import com.databasepreservation.common.shared.client.tools.BreadcrumbManager;
@@ -48,14 +48,8 @@ public class DatabasePanel extends Composite {
   private static Map<String, DatabasePanel> instances = new HashMap<>();
 
   public static DatabasePanel getInstance(String databaseUUID, boolean initMenu) {
-    String code = databaseUUID;
-
-    DatabasePanel instance = instances.get(code);
-    if (instance == null) {
-      instance = new DatabasePanel(databaseUUID, initMenu);
-      instances.put(code, instance);
-    }
-    return instance;
+    instances.computeIfAbsent(databaseUUID, k -> new DatabasePanel(databaseUUID, initMenu));
+    return instances.get(databaseUUID);
   }
 
   interface DatabasePanelUiBinder extends UiBinder<Widget, DatabasePanel> {
@@ -65,7 +59,9 @@ public class DatabasePanel extends Composite {
   private BreadcrumbPanel breadcrumb = null;
 
   @UiField
-  BreadcrumbPanel breadcrumbServer, breadcrumbDesktop;
+  BreadcrumbPanel breadcrumbServer;
+  @UiField
+  BreadcrumbPanel breadcrumbDesktop;
 
   @UiField(provided = true)
   DatabaseSidebar sidebar;
@@ -77,7 +73,10 @@ public class DatabasePanel extends Composite {
   MenuBar menu;
 
   @UiField
-  FlowPanel toplevel, toolbar;
+  FlowPanel toplevel;
+
+  @UiField
+  FlowPanel toolbar;
 
   private String databaseUUID;
   private ViewerDatabase database = null;
@@ -112,12 +111,7 @@ public class DatabasePanel extends Composite {
 
   private void initMenu() {
     menu.addStyleName("user-menu");
-    UserLogin.getInstance().addLoginStatusListener(new LoginStatusListener() {
-      @Override
-      public void onLoginStatusChanged(User user) {
-        buildMenuForUser(user);
-      }
-    });
+    UserLogin.getInstance().addLoginStatusListener(this::buildMenuForUser);
 
     UserLogin.getInstance().getAuthenticatedUser(new DefaultAsyncCallback<User>() {
       @Override
@@ -138,40 +132,20 @@ public class DatabasePanel extends Composite {
         if (authenticationIsEnabled) {
           if (user.isGuest()) {
             menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.USER, messages.loginLogin()),
-              new Command() {
-                @Override
-                public void execute() {
-                  UserLogin.getInstance().login();
-                }
-              });
+                (Command) () -> UserLogin.getInstance().login());
           } else {
             if (!hideMenu) {
               MenuBar subMenu = new MenuBar(true);
-              subMenu.addItem(messages.loginLogout(), new Command() {
-                @Override
-                public void execute() {
-                  UserLogin.getInstance().logout();
-                }
-              });
+              subMenu.addItem(messages.loginLogout(), (Command) () -> UserLogin.getInstance().logout());
               menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.USER, user.getFullName()), subMenu);
             }
           }
         } else {
           menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.NEW_UPLOAD, messages.newUpload()),
-            new Command() {
-              @Override
-              public void execute() {
-                HistoryManager.gotoNewUpload();
-              }
-            });
+              (Command) HistoryManager::gotoNewUpload);
           menu.addItem(
             FontAwesomeIconManager.loaded(FontAwesomeIconManager.DATABASES, messages.menusidebar_manageDatabases()),
-            new Command() {
-              @Override
-              public void execute() {
-                HistoryManager.gotoDatabaseList();
-              }
-            });
+              (Command) HistoryManager::gotoDatabaseList);
         }
 
         if (!hideMenu) {
@@ -192,7 +166,7 @@ public class DatabasePanel extends Composite {
     String locale = LocaleInfo.getCurrentLocale().getLocaleName();
 
     // Getting supported languages and their display name
-    Map<String, String> supportedLanguages = new HashMap<String, String>();
+    Map<String, String> supportedLanguages = new HashMap<>();
 
     for (String localeName : LocaleInfo.getAvailableLocaleNames()) {
       if (!"default".equals(localeName)) {
@@ -202,7 +176,7 @@ public class DatabasePanel extends Composite {
 
     languagesMenu.clearItems();
 
-    for (final String key : supportedLanguages.keySet()) {
+    supportedLanguages.keySet().forEach(key -> {
       if (key.equals(locale)) {
         SafeHtmlBuilder b = new SafeHtmlBuilder();
         String iconHTML = "<i class='fa fa-check'></i>";
@@ -217,16 +191,11 @@ public class DatabasePanel extends Composite {
         selectedLanguage = supportedLanguages.get(key);
       } else {
         MenuItem languageMenuItem = new MenuItem(SafeHtmlUtils.fromSafeConstant(supportedLanguages.get(key)),
-          new Scheduler.ScheduledCommand() {
-            @Override
-            public void execute() {
-              JavascriptUtils.changeLocale(key);
-            }
-          });
+            () -> JavascriptUtils.changeLocale(key));
         languagesMenu.addItem(languageMenuItem);
         languageMenuItem.addStyleName("menu-item-language");
       }
-    }
+    });
   }
 
   public void load(RightPanelLoader rightPanelLoader, String toSelect) {

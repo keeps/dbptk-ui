@@ -2,26 +2,27 @@ package com.databasepreservation.common.shared.models.wizardParameters;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 public class MetadataExportOptionsParameters implements Serializable {
 
-  private HashMap<String, String> values = new HashMap<>();
+  private Map<String, String> values = new HashMap<>();
 
   public MetadataExportOptionsParameters() {
   }
 
-  public MetadataExportOptionsParameters(HashMap<String, String> values) {
+  public MetadataExportOptionsParameters(Map<String, String> values) {
     this.values = values;
   }
 
-  public HashMap<String, String> getValues() {
+  public Map<String, String> getValues() {
     return values;
   }
 
-  public void setValues(HashMap<String, String> values) {
+  public void setValues(Map<String, String> values) {
     this.values = values;
   }
 }

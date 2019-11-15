@@ -1,9 +1,9 @@
 package com.databasepreservation.desktop.client.dbptk;
 
 import com.databasepreservation.common.shared.ViewerConstants;
+import com.databasepreservation.common.shared.client.common.helpers.HelperUploadSIARDFile;
 import com.databasepreservation.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.desktop.client.common.Card;
-import com.databasepreservation.common.shared.client.common.helpers.HelperUploadSIARDFile;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -32,7 +32,19 @@ public class HomePage extends Composite {
   FlowPanel options;
 
   @UiField
-  Image ownerLink, DGLABFinanciersLink, EARKFinanciersLink, applicationLink, NAEFinanciersLink;
+  Image ownerLink;
+
+  @UiField
+  Image DGLABFinanciersLink;
+
+  @UiField
+  Image EARKFinanciersLink;
+
+  @UiField
+  Image applicationLink;
+
+  @UiField
+  Image NAEFinanciersLink;
 
   private static HomePage instance = null;
 
@@ -77,24 +89,18 @@ public class HomePage extends Composite {
     options.add(openCard);
     options.add(manageCard);
 
-    applicationLink.addClickHandler(event -> {
-      Window.open(ViewerConstants.APPLICATION_LINK, ViewerConstants.BLANK_LINK, null);
-    });
+    applicationLink
+      .addClickHandler(event -> Window.open(ViewerConstants.APPLICATION_LINK, ViewerConstants.BLANK_LINK, null));
 
-    NAEFinanciersLink.addClickHandler(event -> {
-      Window.open(ViewerConstants.NAE_FINANCIER_LINK, ViewerConstants.BLANK_LINK, null);
-    });
+    NAEFinanciersLink
+      .addClickHandler(event -> Window.open(ViewerConstants.NAE_FINANCIER_LINK, ViewerConstants.BLANK_LINK, null));
 
-    EARKFinanciersLink.addClickHandler(event -> {
-      Window.open(ViewerConstants.EARK_FINANCIER_LINK, ViewerConstants.BLANK_LINK, null);
-    });
+    EARKFinanciersLink
+      .addClickHandler(event -> Window.open(ViewerConstants.EARK_FINANCIER_LINK, ViewerConstants.BLANK_LINK, null));
 
-    DGLABFinanciersLink.addClickHandler(event -> {
-      Window.open(ViewerConstants.DGLAB_FINANCIER_LINK, ViewerConstants.BLANK_LINK, null);
-    });
+    DGLABFinanciersLink
+      .addClickHandler(event -> Window.open(ViewerConstants.DGLAB_FINANCIER_LINK, ViewerConstants.BLANK_LINK, null));
 
-    ownerLink.addClickHandler(event -> {
-      Window.open(ViewerConstants.OWNER_LINK, ViewerConstants.BLANK_LINK, null);
-    });
+    ownerLink.addClickHandler(event -> Window.open(ViewerConstants.OWNER_LINK, ViewerConstants.BLANK_LINK, null));
   }
 }

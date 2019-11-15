@@ -1,9 +1,8 @@
 package com.databasepreservation.common.shared.models.wizardParameters;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.databasepreservation.common.shared.ViewerStructure.ViewerColumn;
@@ -13,32 +12,33 @@ import com.databasepreservation.common.shared.ViewerStructure.ViewerColumn;
  */
 public class TableAndColumnsParameters implements Serializable {
 
-  private HashMap<String, ArrayList<ViewerColumn>> columns; // Key: schema, Values: columns
-  private ArrayList<ExternalLOBsParameter> externalLOBsParameters;
+  private Map<String, List<ViewerColumn>> columns; // Key: schema, Values: columns
+  private List<ExternalLOBsParameter> externalLOBsParameters;
   private List<String> selectedSchemas;
 
   public TableAndColumnsParameters() {
   }
 
-  public TableAndColumnsParameters(HashMap<String, ArrayList<ViewerColumn>> columns, ArrayList<ExternalLOBsParameter> externalLOBsParameters, ArrayList<String> selectedSchemas) {
+  public TableAndColumnsParameters(Map<String, List<ViewerColumn>> columns,
+    List<ExternalLOBsParameter> externalLOBsParameters, List<String> selectedSchemas) {
     this.columns = columns;
     this.externalLOBsParameters = externalLOBsParameters;
     this.selectedSchemas = selectedSchemas;
   }
 
-  public HashMap<String, ArrayList<ViewerColumn>> getColumns() {
+  public Map<String, List<ViewerColumn>> getColumns() {
     return columns;
   }
 
-  public void setColumns(HashMap<String, ArrayList<ViewerColumn>> columns) {
+  public void setColumns(Map<String, List<ViewerColumn>> columns) {
     this.columns = columns;
   }
 
-  public ArrayList<ExternalLOBsParameter> getExternalLOBsParameters() {
+  public List<ExternalLOBsParameter> getExternalLOBsParameters() {
     return externalLOBsParameters;
   }
 
-  public void setExternalLOBsParameters(ArrayList<ExternalLOBsParameter> externalLOBsParameters) {
+  public void setExternalLOBsParameters(List<ExternalLOBsParameter> externalLOBsParameters) {
     this.externalLOBsParameters = externalLOBsParameters;
   }
 

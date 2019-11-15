@@ -42,14 +42,8 @@ public class ContainerPanel extends Composite {
   private static Map<String, ContainerPanel> instances = new HashMap<>();
 
   public static ContainerPanel getInstance(String databaseUUID, boolean initMenu) {
-    String code = databaseUUID;
-
-    ContainerPanel instance = instances.get(code);
-    if (instance == null) {
-      instance = new ContainerPanel(databaseUUID, initMenu);
-      instances.put(code, instance);
-    }
-    return instance;
+    instances.computeIfAbsent(databaseUUID, k -> new ContainerPanel(databaseUUID, initMenu));
+    return instances.get(databaseUUID);
   }
 
   interface DatabasePanelUiBinder extends UiBinder<Widget, ContainerPanel> {
@@ -67,7 +61,10 @@ public class ContainerPanel extends Composite {
   MenuBar menu;
 
   @UiField
-  FlowPanel toplevel, toolbar;
+  FlowPanel toplevel;
+
+  @UiField
+  FlowPanel toolbar;
 
   private String databaseUUID;
   private ViewerDatabase database = null;
@@ -96,12 +93,7 @@ public class ContainerPanel extends Composite {
 
   private void initMenu() {
     menu.addStyleName("user-menu");
-    UserLogin.getInstance().addLoginStatusListener(new LoginStatusListener() {
-      @Override
-      public void onLoginStatusChanged(User user) {
-        buildMenuForUser(user);
-      }
-    });
+    UserLogin.getInstance().addLoginStatusListener(this::buildMenuForUser);
 
     UserLogin.getInstance().getAuthenticatedUser(new DefaultAsyncCallback<User>() {
       @Override
@@ -122,40 +114,20 @@ public class ContainerPanel extends Composite {
         if (authenticationIsEnabled) {
           if (user.isGuest()) {
             menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.USER, messages.loginLogin()),
-              new Command() {
-                @Override
-                public void execute() {
-                  UserLogin.getInstance().login();
-                }
-              });
+                (Command) () -> UserLogin.getInstance().login());
           } else {
             if (!hideMenu) {
               MenuBar subMenu = new MenuBar(true);
-              subMenu.addItem(messages.loginLogout(), new Command() {
-                @Override
-                public void execute() {
-                  UserLogin.getInstance().logout();
-                }
-              });
+              subMenu.addItem(messages.loginLogout(), (Command) () -> UserLogin.getInstance().logout());
               menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.USER, user.getFullName()), subMenu);
             }
           }
         } else {
           menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.NEW_UPLOAD, messages.newUpload()),
-            new Command() {
-              @Override
-              public void execute() {
-                HistoryManager.gotoNewUpload();
-              }
-            });
+              (Command) HistoryManager::gotoNewUpload);
           menu.addItem(
             FontAwesomeIconManager.loaded(FontAwesomeIconManager.DATABASES, messages.menusidebar_manageDatabases()),
-            new Command() {
-              @Override
-              public void execute() {
-                HistoryManager.gotoDatabaseList();
-              }
-            });
+              (Command) HistoryManager::gotoDatabaseList);
         }
 
         if (!hideMenu) {
@@ -176,7 +148,7 @@ public class ContainerPanel extends Composite {
     String locale = LocaleInfo.getCurrentLocale().getLocaleName();
 
     // Getting supported languages and their display name
-    Map<String, String> supportedLanguages = new HashMap<String, String>();
+    Map<String, String> supportedLanguages = new HashMap<>();
 
     for (String localeName : LocaleInfo.getAvailableLocaleNames()) {
       if (!"default".equals(localeName)) {
@@ -186,7 +158,7 @@ public class ContainerPanel extends Composite {
 
     languagesMenu.clearItems();
 
-    for (final String key : supportedLanguages.keySet()) {
+    supportedLanguages.keySet().forEach(key -> {
       if (key.equals(locale)) {
         SafeHtmlBuilder b = new SafeHtmlBuilder();
         String iconHTML = "<i class='fa fa-check'></i>";
@@ -201,16 +173,11 @@ public class ContainerPanel extends Composite {
         selectedLanguage = supportedLanguages.get(key);
       } else {
         MenuItem languageMenuItem = new MenuItem(SafeHtmlUtils.fromSafeConstant(supportedLanguages.get(key)),
-          new Scheduler.ScheduledCommand() {
-            @Override
-            public void execute() {
-              JavascriptUtils.changeLocale(key);
-            }
-          });
+            () -> JavascriptUtils.changeLocale(key));
         languagesMenu.addItem(languageMenuItem);
         languageMenuItem.addStyleName("menu-item-language");
       }
-    }
+    });
   }
 
   public void load(ContentPanel panel) {

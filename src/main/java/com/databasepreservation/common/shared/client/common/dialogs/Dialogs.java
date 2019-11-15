@@ -143,7 +143,7 @@ public class Dialogs {
     }
 
     // Create a list data provider.
-    final ListDataProvider<List<String>> dataProvider = new ListDataProvider<List<String>>(rowsL);
+    final ListDataProvider<List<String>> dataProvider = new ListDataProvider<>(rowsL);
 
     // Add the table to the dataProvider.
     dataProvider.addDataDisplay(table);
@@ -154,9 +154,7 @@ public class Dialogs {
     dialogBox.setGlassEnabled(true);
     dialogBox.setAnimationEnabled(false);
 
-    closeButton.addClickHandler(event -> {
-      dialogBox.hide();
-    });
+    closeButton.addClickHandler(event -> dialogBox.hide());
 
     dialogBox.addStyleName("dialog-custom-view-test-result");
     layout.addStyleName("dialog-custom-view-test-result-layout");
@@ -306,9 +304,7 @@ public class Dialogs {
     layout.addStyleName("wui-dialog-layout");
 
     cancelButton.addStyleName("btn btn-link");
-    cancelButton.addClickHandler(event -> {
-      dialogBox.hide();
-    });
+    cancelButton.addClickHandler(event -> dialogBox.hide());
 
     confirmButton.addStyleName("btn btn-play");
     confirmButton.addClickHandler(event -> {
@@ -410,9 +406,7 @@ public class Dialogs {
     dialogBox.setGlassEnabled(true);
     dialogBox.setAnimationEnabled(false);
 
-    cancelButton.addClickHandler(event -> {
-      dialogBox.hide();
-    });
+    cancelButton.addClickHandler(event -> dialogBox.hide());
 
     confirmButton.addClickHandler(event -> {
       if (pathInput.getValue().isEmpty()) {
@@ -456,22 +450,14 @@ public class Dialogs {
     dialogBox.setGlassEnabled(true);
     dialogBox.setAnimationEnabled(false);
 
-    cancelButton.addClickHandler(new ClickHandler() {
-
-      @Override
-      public void onClick(ClickEvent event) {
-        dialogBox.hide();
-        callback.onSuccess(false);
-      }
+    cancelButton.addClickHandler(event -> {
+      dialogBox.hide();
+      callback.onSuccess(false);
     });
 
-    confirmButton.addClickHandler(new ClickHandler() {
-
-      @Override
-      public void onClick(ClickEvent event) {
-        dialogBox.hide();
-        callback.onSuccess(true);
-      }
+    confirmButton.addClickHandler(event -> {
+      dialogBox.hide();
+      callback.onSuccess(true);
     });
 
     dialogBox.addStyleName("wui-dialog-confirm");
@@ -505,9 +491,7 @@ public class Dialogs {
     dialogBox.setWidget(layout);
     dialogBox.setWidth("500px");
 
-    btnClose.addClickHandler(event -> {
-      dialogBox.hide();
-    });
+    btnClose.addClickHandler(event -> dialogBox.hide());
 
     dialogBox.addStyleName("dialog-persist-information");
     layout.addStyleName("dialog-persist-information-layout");
@@ -536,13 +520,9 @@ public class Dialogs {
     dialogBox.setGlassEnabled(true);
     dialogBox.setAnimationEnabled(false);
 
-    continueButton.addClickHandler(new ClickHandler() {
-
-      @Override
-      public void onClick(ClickEvent event) {
-        dialogBox.hide();
-        callback.onSuccess(null);
-      }
+    continueButton.addClickHandler(event -> {
+      dialogBox.hide();
+      callback.onSuccess(null);
     });
 
     dialogBox.addStyleName("wui-dialog-information");
@@ -622,59 +602,38 @@ public class Dialogs {
     dialogBox.setGlassEnabled(true);
     dialogBox.setAnimationEnabled(false);
 
-    cancelButton.addClickHandler(new ClickHandler() {
+    cancelButton.addClickHandler(event -> {
+      dialogBox.hide();
+      callback.onFailure(null);
+    });
 
-      @Override
-      public void onClick(ClickEvent event) {
-        dialogBox.hide();
-        callback.onFailure(null);
+    confirmButton.addClickHandler(event -> {
+      dialogBox.hide();
+      callback.onSuccess(inputBox.getText());
+    });
+
+    inputBox.addValueChangeHandler(event -> {
+      boolean isValid = validator.test(inputBox.getText());
+      if (isValid) {
+        inputBox.addStyleName("error");
+      } else {
+        inputBox.removeStyleName("error");
       }
     });
 
-    confirmButton.addClickHandler(new ClickHandler() {
-
-      @Override
-      public void onClick(ClickEvent event) {
-        dialogBox.hide();
-        callback.onSuccess(inputBox.getText());
-      }
+    inputBox.addKeyPressHandler(event -> {
+      boolean isValid = validator.test(inputBox.getText());
+      confirmButton.setEnabled(isValid);
     });
 
-    inputBox.addValueChangeHandler(new ValueChangeHandler<String>() {
-
-      @Override
-      public void onValueChange(ValueChangeEvent<String> event) {
+    inputBox.addKeyDownHandler(event -> {
+      if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
         boolean isValid = validator.test(inputBox.getText());
         if (isValid) {
-          inputBox.addStyleName("error");
-        } else {
-          inputBox.removeStyleName("error");
+          dialogBox.hide();
+          callback.onSuccess(inputBox.getText());
         }
       }
-    });
-
-    inputBox.addKeyPressHandler(new KeyPressHandler() {
-
-      @Override
-      public void onKeyPress(KeyPressEvent event) {
-        boolean isValid = validator.test(inputBox.getText());
-        confirmButton.setEnabled(isValid);
-      }
-    });
-
-    inputBox.addKeyDownHandler(new KeyDownHandler() {
-
-      @Override
-      public void onKeyDown(KeyDownEvent event) {
-        if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-          boolean isValid = validator.test(inputBox.getText());
-          if (isValid) {
-            dialogBox.hide();
-            callback.onSuccess(inputBox.getText());
-          }
-        }
-      }
-
     });
 
     confirmButton.setEnabled(validator.test(inputBox.getText()));

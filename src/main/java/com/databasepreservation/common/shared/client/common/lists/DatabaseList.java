@@ -153,9 +153,7 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
         return messages.basicActionOpen();
       }
     };
-    openColumn.setFieldUpdater((index, object, value) -> {
-      HistoryManager.gotoSIARDInfo(object.getUUID());
-    });
+    openColumn.setFieldUpdater((index, object, value) -> HistoryManager.gotoSIARDInfo(object.getUUID()));
 
     // nameColumn.setSortable(true);
     // archivalDateColumn.setSortable(true);

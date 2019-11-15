@@ -1,7 +1,7 @@
 package com.databasepreservation.desktop.client.common.sidebar;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -43,11 +43,7 @@ public class ConnectionSidebar extends Composite {
 
   public static ConnectionSidebar getInstance(String databaseUUID, String headerText, String headerIcon, String itemIcon,
     DBPTKModule items, String targetHistoryToken) {
-    if (instances.get(databaseUUID) == null) {
-      ConnectionSidebar instance = new ConnectionSidebar(databaseUUID, headerText, headerIcon, itemIcon, items, targetHistoryToken);
-      instances.put(databaseUUID, instance);
-    }
-
+    instances.computeIfAbsent(databaseUUID, k -> new ConnectionSidebar(databaseUUID, headerText, headerIcon, itemIcon, items, targetHistoryToken));
     return instances.get(databaseUUID);
   }
 
@@ -71,7 +67,7 @@ public class ConnectionSidebar extends Composite {
       sidebarGroup.add(new SidebarItem(headerText).setH5().setIndent0());
     }
 
-    final TreeMap<String, ArrayList<PreservationParameter>> parameters = new TreeMap<>(dbptkModule.getParameters());
+    final Map<String, List<PreservationParameter>> parameters = new TreeMap<>(dbptkModule.getParameters());
 
     for (String moduleName : parameters.keySet()) {
       String targetHistoryToken = null;

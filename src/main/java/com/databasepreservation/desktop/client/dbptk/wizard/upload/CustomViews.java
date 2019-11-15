@@ -3,17 +3,18 @@ package com.databasepreservation.desktop.client.dbptk.wizard.upload;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.databasepreservation.common.client.BrowserService;
 import com.databasepreservation.common.shared.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.shared.client.common.desktop.ComboBoxField;
+import com.databasepreservation.common.shared.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.shared.client.tools.HistoryManager;
 import com.databasepreservation.common.shared.client.tools.ViewerStringUtils;
 import com.databasepreservation.common.shared.client.widgets.Toast;
 import com.databasepreservation.common.shared.models.wizardParameters.ConnectionParameters;
 import com.databasepreservation.common.shared.models.wizardParameters.CustomViewsParameter;
 import com.databasepreservation.common.shared.models.wizardParameters.CustomViewsParameters;
-import com.databasepreservation.common.shared.client.common.dialogs.Dialogs;
 import com.databasepreservation.desktop.client.common.sidebar.CustomViewsSidebar;
 import com.databasepreservation.desktop.client.dbptk.wizard.WizardPanel;
 import com.google.gwt.core.client.GWT;
@@ -45,20 +46,41 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
   private static CustomViewsUiBinder binder = GWT.create(CustomViewsUiBinder.class);
 
   @UiField
-  FlowPanel customViewsList, rightSideContainer, schemasCombobox, customViewsButtons, content;
+  FlowPanel customViewsList;
 
   @UiField
-  TextBox customViewName, customViewDescription;
+  FlowPanel rightSideContainer;
+
+  @UiField
+  FlowPanel schemasCombobox;
+
+  @UiField
+  FlowPanel customViewsButtons;
+
+  @UiField
+  FlowPanel content;
+
+  @UiField
+  TextBox customViewName;
+
+  @UiField
+  TextBox customViewDescription;
 
   @UiField
   TextArea customViewQuery;
 
   @UiField
-  Label customViewNameLabel, customViewDescriptionLabel, customViewQueryLabel;
+  Label customViewNameLabel;
+
+  @UiField
+  Label customViewDescriptionLabel;
+
+  @UiField
+  Label customViewQueryLabel;
 
   private static CustomViews instance = null;
   private CustomViewsSidebar customViewsSidebar;
-  private HashMap<String, CustomViewsParameter> customViewsParameters = new HashMap<>();
+  private Map<String, CustomViewsParameter> customViewsParameters = new HashMap<>();
   private int counter = 0;
   private boolean toSave;
   private ComboBoxField customViewSchemaName;
@@ -284,8 +306,8 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
 
     boolean sameName = false;
     for (CustomViewsParameter p : customViewsParameters.values()) {
-      if (p.getCustomViewName().toLowerCase().equals(viewNameText.toLowerCase())
-        && !p.getCustomViewName().toLowerCase().equals(customViewName.toLowerCase())) {
+      if (p.getCustomViewName().equalsIgnoreCase(viewNameText.toLowerCase())
+        && !p.getCustomViewName().equalsIgnoreCase(customViewName.toLowerCase())) {
         sameName = true;
       }
     }

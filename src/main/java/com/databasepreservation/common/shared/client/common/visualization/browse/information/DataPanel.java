@@ -1,8 +1,6 @@
 package com.databasepreservation.common.shared.client.common.visualization.browse.information;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +23,6 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.SelectionChangeEvent;
 
 import config.i18n.client.ClientMessages;
 
@@ -39,13 +36,8 @@ public class DataPanel extends Composite {
   public static DataPanel getInstance(ViewerDatabase database, String schemaUUID) {
     String separator = "/";
     String code = database.getUUID() + separator + schemaUUID;
-
-    DataPanel instance = instances.get(code);
-    if (instance == null) {
-      instance = new DataPanel(database, schemaUUID);
-      instances.put(code, instance);
-    }
-    return instance;
+    instances.computeIfAbsent(code, k -> new DataPanel(database, schemaUUID));
+    return instances.get(code);
   }
 
   interface SchemaDataPanelUiBinder extends UiBinder<Widget, DataPanel> {

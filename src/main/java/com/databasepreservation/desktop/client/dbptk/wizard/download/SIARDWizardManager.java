@@ -171,11 +171,11 @@ public class SIARDWizardManager extends WizardManager {
       exportOptionsParameters = (ExportOptionsParameters) wizardInstances.get(position).getValues();
       wizardContent.clear();
       position = 2;
-      if (exportOptionsParameters.getSIARDVersion().equals(ViewerConstants.SIARDDK)) {
+      if (exportOptionsParameters.getSiardVersion().equals(ViewerConstants.SIARDDK)) {
         migrateToSIARD();
       } else {
         MetadataExportOptions metadataExportOptions = MetadataExportOptions
-            .getInstance(exportOptionsParameters.getSIARDVersion(), true, databaseUUID);
+            .getInstance(exportOptionsParameters.getSiardVersion(), true, databaseUUID);
         wizardInstances.add(position, metadataExportOptions);
         wizardContent.add(metadataExportOptions);
         updateButtons();

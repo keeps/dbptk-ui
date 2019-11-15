@@ -7,10 +7,6 @@ package com.databasepreservation.common.shared.client.common.utils;
 
 import com.databasepreservation.common.shared.client.common.DefaultAsyncCallback;
 import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.safehtml.shared.SafeHtml;
-
-import java.util.List;
 
 public class JavascriptUtils {
 

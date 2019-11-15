@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Enumeration;
@@ -112,34 +113,30 @@ public class Messages {
 
     @Override
     public ResourceBundle newBundle(String baseName, Locale locale, String format, ClassLoader loader, boolean reload)
-      throws IllegalAccessException, InstantiationException, IOException {
+      throws IOException {
 
       if (!"java.properties".equals(format)) {
         return null;
       }
 
       String bundleName = toBundleName(baseName, locale) + ".properties";
-      ResourceBundle bundle = null;
+      ResourceBundle bundle;
+      InputStreamReader reader;
 
-      InputStreamReader reader = null;
-      InputStream is = null;
-      try {
-        File file = folder.resolve(bundleName).toFile();
-
-        // Also checks for file existence
-        if (Files.exists(folder.resolve(bundleName))) {
-          is = new FileInputStream(file);
-        } else {
-          is = this.getClass().getResourceAsStream(CONFIG_I18N_PATH + bundleName);
+      File file = folder.resolve(bundleName).toFile();
+      if (file.exists()) {
+        try (InputStream is = new FileInputStream(file)) {
+          reader = new InputStreamReader(is, StandardCharsets.UTF_8);
+          bundle = new PropertyResourceBundle(reader);
+          return bundle;
         }
-        reader = new InputStreamReader(is, Charset.forName(ViewerConstants.DEFAULT_ENCODING));
-        bundle = new PropertyResourceBundle(reader);
-      } finally {
-        IOUtils.closeQuietly(reader);
-        IOUtils.closeQuietly(is);
+      } else {
+        try (InputStream is = this.getClass().getResourceAsStream(CONFIG_I18N_PATH + bundleName)) {
+          reader = new InputStreamReader(is, StandardCharsets.UTF_8);
+          bundle = new PropertyResourceBundle(reader);
+          return bundle;
+        }
       }
-      return bundle;
     }
   }
-
 }

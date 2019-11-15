@@ -48,14 +48,8 @@ public class DatabaseSearchPanel extends RightPanel {
 
   public static DatabaseSearchPanel getInstance(ViewerDatabase database) {
     String code = database.getUUID();
-
-    DatabaseSearchPanel instance = instances.get(code);
-    if (instance == null) {
-      instance = new DatabaseSearchPanel(database);
-      instances.put(code, instance);
-    }
-
-    return instance;
+    instances.computeIfAbsent(code, k -> new DatabaseSearchPanel(database));
+    return instances.get(code);
   }
 
   interface DatabaseSearchPanelUiBinder extends UiBinder<Widget, DatabaseSearchPanel> {

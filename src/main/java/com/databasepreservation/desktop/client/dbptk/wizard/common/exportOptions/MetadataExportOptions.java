@@ -48,7 +48,7 @@ public class MetadataExportOptions extends WizardPanel<MetadataExportOptionsPara
   FlowPanel content;
 
   private static MetadataExportOptions instance = null;
-  private HashMap<String, TextBox> textBoxInputs = new HashMap<>();
+  private Map<String, TextBox> textBoxInputs = new HashMap<>();
   private final boolean populate;
   private ViewerMetadata metadata = null;
 
@@ -119,7 +119,7 @@ public class MetadataExportOptions extends WizardPanel<MetadataExportOptionsPara
 
   @Override
   public void error() {
-
+    // DO NOTHING
   }
 
   private void buildGenericWidget(PreservationParameter parameter) {

@@ -3,13 +3,11 @@ package com.databasepreservation.common.api.v1.utils;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.util.Iterator;
 import java.util.List;
 
-import com.databasepreservation.common.server.index.utils.IterableIndexResult;
 import org.apache.commons.csv.CSVPrinter;
-import org.roda.core.data.v2.index.IndexResult;
 
+import com.databasepreservation.common.server.index.utils.IterableIndexResult;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerRow;
 import com.databasepreservation.common.shared.ViewerStructure.ViewerTable;
 

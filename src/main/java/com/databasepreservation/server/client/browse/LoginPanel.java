@@ -61,13 +61,9 @@ public class LoginPanel extends RightPanel {
 
   public LoginPanel() {
     initWidget(uiBinder.createAndBindUi(this));
-    addAttachHandler(new AttachEvent.Handler() {
-
-      @Override
-      public void onAttachOrDetach(AttachEvent event) {
-        if (event.isAttached()) {
-          username.setFocus(true);
-        }
+    addAttachHandler(event -> {
+      if (event.isAttached()) {
+        username.setFocus(true);
       }
     });
   }

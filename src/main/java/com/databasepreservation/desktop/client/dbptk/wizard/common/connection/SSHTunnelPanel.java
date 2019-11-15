@@ -33,10 +33,25 @@ public class SSHTunnelPanel extends Composite {
   CheckBox tunnelSSH;
 
   @UiField
-  Label proxyHostLabel, proxyPortLabel, proxyUserLabel, proxyPasswordLabel;
+  Label proxyHostLabel;
 
   @UiField
-  TextBox proxyHost, proxyPort, proxyUser;
+  Label proxyPortLabel;
+
+  @UiField
+  Label proxyUserLabel;
+
+  @UiField
+  Label proxyPasswordLabel;
+
+  @UiField
+  TextBox proxyHost;
+
+  @UiField
+  TextBox proxyPort;
+
+  @UiField
+  TextBox proxyUser;
 
   @UiField
   PasswordTextBox proxyPassword;
@@ -44,10 +59,7 @@ public class SSHTunnelPanel extends Composite {
   private static Map<String, SSHTunnelPanel> instances = new HashMap<>();
 
   public static SSHTunnelPanel getInstance( String databaseUUID) {
-    if (instances.get(databaseUUID) == null) {
-      SSHTunnelPanel instance = new SSHTunnelPanel();
-      instances.put(databaseUUID, instance);
-    }
+    instances.computeIfAbsent(databaseUUID, k -> new SSHTunnelPanel());
     return instances.get(databaseUUID);
   }
 
@@ -56,9 +68,7 @@ public class SSHTunnelPanel extends Composite {
     enable(false);
 
     tunnelSSH.setText(messages.connectionPageLabelForUseSSHTunnel());
-    tunnelSSH.addValueChangeHandler(event -> {
-      enable(event.getValue());
-    });
+    tunnelSSH.addValueChangeHandler(event -> enable(event.getValue()));
     proxyPort.setText("22");
   }
 

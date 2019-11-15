@@ -2,6 +2,8 @@ package com.databasepreservation.desktop.client.dbptk.wizard.common.exportOption
 
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 
 import com.databasepreservation.common.client.BrowserService;
@@ -83,7 +85,7 @@ public class SIARDExportOptions extends WizardPanel<ExportOptionsParameters> {
         ComboBoxField comboBoxField = ComboBoxField.createInstance(messages.wizardExportOptionsLabels("version"));
         DBPTKModuleMapper mapper = GWT.create(DBPTKModuleMapper.class);
         DBPTKModule module = mapper.read(result);
-        final TreeMap<String, ArrayList<PreservationParameter>> modules = new TreeMap<>(module.getParameters());
+        final Map<String, List<PreservationParameter>> modules = new TreeMap<>(module.getParameters());
         for (String moduleName : modules.keySet()) {
           comboBoxField.setComboBoxValue(ToolkitModuleName2ViewerModuleName.transform(moduleName), moduleName);
         }

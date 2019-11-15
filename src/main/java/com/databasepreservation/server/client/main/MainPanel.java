@@ -546,11 +546,7 @@ public class MainPanel extends Composite {
 
     bannerLogo.setWidget(headerText);
 
-    homeLinkArea.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        HistoryManager.gotoHome();
-      }
-    });
+    homeLinkArea.addClickHandler(event -> HistoryManager.gotoHome());
 
     homeLinkArea.setTitle(messages.goHome());
   }
@@ -561,11 +557,7 @@ public class MainPanel extends Composite {
     headerText.addStyleName("homeText");
     bannerLogo.setWidget(headerText);
 
-    homeLinkArea.addClickHandler(new ClickHandler() {
-      public void onClick(ClickEvent event) {
-        HistoryManager.gotoDatabase(databaseUUID);
-      }
-    });
+    homeLinkArea.addClickHandler(event -> HistoryManager.gotoDatabase(databaseUUID));
 
     homeLinkArea.setTitle(messages.goToDatabaseInformation());
   }

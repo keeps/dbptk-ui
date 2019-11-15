@@ -4,7 +4,7 @@
     <g:FlowPanel addStyleNames="wizard-connection" ui:field="mainPanel">
         <g:FlowPanel addStyleNames="wrapper">
             <g:FlowPanel ui:field="leftSideContainer" addStyleNames="left loading-sidebar">
-                <g:FlowPanel addStyleNames="block" ui:field="JDBCListConnections"/>
+                <g:FlowPanel addStyleNames="block" ui:field="jdbcListConnections"/>
             </g:FlowPanel>
             <g:FlowPanel addStyleNames="right content">
                 <g:FlowPanel ui:field="connectionInputPanel" addStyleNames="connection-container block" />

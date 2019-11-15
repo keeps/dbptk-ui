@@ -14,7 +14,6 @@ import com.databasepreservation.common.shared.client.widgets.Toast;
 import com.databasepreservation.common.shared.models.wizardParameters.ConnectionParameters;
 import com.databasepreservation.common.shared.models.wizardParameters.CustomViewsParameters;
 import com.databasepreservation.common.shared.models.wizardParameters.ExportOptionsParameters;
-import com.databasepreservation.common.shared.models.wizardParameters.ExternalLOBsParameter;
 import com.databasepreservation.common.shared.models.wizardParameters.MetadataExportOptionsParameters;
 import com.databasepreservation.common.shared.models.wizardParameters.TableAndColumnsParameters;
 import com.databasepreservation.common.shared.client.common.dialogs.Dialogs;
@@ -57,10 +56,19 @@ public class CreateWizardManager extends WizardManager {
   BreadcrumbPanel breadcrumb;
 
   @UiField
-  FlowPanel wizardContent, customButtons;
+  FlowPanel wizardContent;
 
   @UiField
-  Button btnNext, btnCancel, btnBack;
+  FlowPanel customButtons;
+
+  @UiField
+  Button btnNext;
+
+  @UiField
+  Button btnCancel;
+
+  @UiField
+  Button btnBack;
 
   private static CreateWizardManager instance = null;
   private int position = 0;
@@ -287,11 +295,11 @@ public class CreateWizardManager extends WizardManager {
     if (valid) {
       exportOptionsParameters = (ExportOptionsParameters) wizardInstances.get(position).getValues();
 
-      if (!exportOptionsParameters.getSIARDVersion().equals(ViewerConstants.SIARDDK)) {
+      if (!exportOptionsParameters.getSiardVersion().equals(ViewerConstants.SIARDDK)) {
         wizardContent.clear();
         position = 4;
         MetadataExportOptions metadataExportOptions = MetadataExportOptions
-          .getInstance(exportOptionsParameters.getSIARDVersion(), false);
+          .getInstance(exportOptionsParameters.getSiardVersion(), false);
         wizardInstances.add(position, metadataExportOptions);
         wizardContent.add(metadataExportOptions);
         updateButtons();
