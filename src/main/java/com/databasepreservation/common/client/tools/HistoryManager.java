@@ -53,6 +53,7 @@ public class HistoryManager {
   public static final String ROUTE_TABLE_UPDATE = "update";
   public static final String ROUTE_UPLOAD_SIARD_DATA = "ingest-siard";
   public static final String ROUTE_ACTIVITY_LOG = "activity-log";
+  public static final String ROUTE_ADVANCED_CONFIGURATION = "advanced-configuration";
 
   /****************************************************
    * DESKTOP ROUTES
@@ -297,6 +298,11 @@ public class HistoryManager {
 
   public static void gotoActivityLog(final String logUUID) {
     List<String> params = Arrays.asList(ROUTE_ACTIVITY_LOG, logUUID);
+    newHistory(params);
+  }
+
+  public static void gotoAdvancedConfiguration(String databaseUUID) {
+    List<String> params = Arrays.asList(ROUTE_ADVANCED_CONFIGURATION, databaseUUID);
     newHistory(params);
   }
 

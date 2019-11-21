@@ -3,6 +3,7 @@ package com.databasepreservation.common.api.v1;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_SEARCHES_DATABASE_UUID;
 
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +30,7 @@ import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.models.ProgressData;
 import com.databasepreservation.common.client.models.activity.logs.LogEntryState;
+import com.databasepreservation.common.client.models.denormalize.DenormalizeListConfiguration;
 import com.databasepreservation.common.client.models.parameters.ConnectionParameters;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
@@ -41,8 +43,10 @@ import com.databasepreservation.common.server.controller.SIARDController;
 import com.databasepreservation.common.server.index.factory.SolrClientFactory;
 import com.databasepreservation.common.server.index.schema.SolrDefaultCollectionRegistry;
 import com.databasepreservation.common.server.index.utils.SolrUtils;
+import com.databasepreservation.common.transformers.DenormalizeSolrStructure;
 import com.databasepreservation.common.utils.ControllerAssistant;
 import com.databasepreservation.common.utils.UserUtility;
+import com.databasepreservation.model.exception.ModuleException;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -282,5 +286,21 @@ public class DatabaseResource implements DatabaseService {
       controllerAssistant.registerAction(user, databaseUUID, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM,
         databaseUUID, ViewerConstants.CONTROLLER_ROW_ID_PARAM, rowUUID);
     }
+  }
+
+  @Override
+  public Boolean denormalize(String databaseuuid) {
+    DenormalizeListConfiguration denormalizeListConfiguration = null;
+    try {
+      denormalizeListConfiguration = JsonUtils.readObjectFromFile(
+        Paths.get("/home/gbarros/work/sandbox/Denormalization/actor_category.json"),
+        DenormalizeListConfiguration.class);
+      DenormalizeSolrStructure denormalizeSolrStructure = new DenormalizeSolrStructure(databaseuuid,
+        denormalizeListConfiguration);
+      denormalizeSolrStructure.denormalize();
+    } catch (GenericException | ModuleException e) {
+      throw new RESTException(e.getMessage());
+    }
+    return true;
   }
 }

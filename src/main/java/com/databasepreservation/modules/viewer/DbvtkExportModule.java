@@ -1,8 +1,11 @@
 package com.databasepreservation.modules.viewer;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Set;
 
+import com.databasepreservation.common.server.index.schema.SolrRowsCollectionRegistry;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 
@@ -11,7 +14,6 @@ import com.databasepreservation.common.client.models.structure.ViewerDatabaseFro
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
-import com.databasepreservation.common.transformers.DbvtkDenormalizationDatabase;
 import com.databasepreservation.common.transformers.ToolkitStructure2ViewerStructure;
 import com.databasepreservation.model.Reporter;
 import com.databasepreservation.model.data.Row;
@@ -177,8 +179,14 @@ public class DbvtkExportModule implements DatabaseExportModule {
   @Override
   public void handleDataCloseSchema(String schemaName) throws ModuleException {
     // committing + optimizing after whole database
-    DbvtkDenormalizationDatabase dbvtkDenormalizationDatabase = new DbvtkDenormalizationDatabase(databaseUUID);
-    dbvtkDenormalizationDatabase.denormalize();
+
+    try {
+      ViewerFactory.getSolrClient().commit(SolrRowsCollectionRegistry.get(databaseUUID).getIndexName());
+    } catch (SolrServerException e) {
+      e.printStackTrace();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
   /**

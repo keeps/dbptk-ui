@@ -29,6 +29,8 @@ public class BrowseNavigationPanel {
   private Button btnDelete;
   private Button btnBrowse;
   private Button btnIngest;
+  private Button btnDenormalize;
+  private Button btnAdvancedConfiguration;
   private boolean btnIngestClicked = false;
   private MetadataField browsingStatus = null;
 
@@ -91,18 +93,43 @@ public class BrowseNavigationPanel {
           SIARDService.Util.call((String databaseUUID) -> {
             HistoryManager.gotoDatabase(databaseUUID);
             Dialogs.showInformationDialog(messages.SIARDHomePageDialogTitleForBrowsing(),
-                messages.SIARDHomePageTextForIngestSuccess(), messages.basicActionClose(), "btn btn-link");
-          },(String errorMessage) -> {
+              messages.SIARDHomePageTextForIngestSuccess(), messages.basicActionClose(), "btn btn-link");
+          }, (String errorMessage) -> {
             instances.clear();
             HistoryManager.gotoSIARDInfo(database.getUuid());
             Dialogs.showErrors(messages.SIARDHomePageDialogTitleForBrowsing(), errorMessage,
-                messages.basicActionClose());
+              messages.basicActionClose());
           }).uploadSIARD(database.getUuid(), database.getPath());
         }
       } else {
         Dialogs.showInformationDialog(messages.SIARDHomePageDialogTitleForBrowsing(),
           messages.SIARDHomePageTextForIngestNotSupported(), messages.basicActionUnderstood(), "btn btn-link");
       }
+    });
+  }
+
+  private void denormalizeButton() {
+
+    btnDenormalize = new Button();
+    btnDenormalize.setText("Denormalize");
+    btnDenormalize.addStyleName("btn btn-link-info");
+    btnDenormalize.setVisible(false);
+
+    btnDenormalize.addClickHandler(event -> {
+      DatabaseService.Util.call((Boolean result) -> {
+        GWT.log("Denormalize:" + result);
+      }).denormalize(database.getUuid());
+    });
+  }
+
+  private void advancedConfigurationButton(){
+    btnAdvancedConfiguration = new Button();
+    btnAdvancedConfiguration.setText("Configuration");
+    btnAdvancedConfiguration.addStyleName("btn btn-link-info");
+    btnAdvancedConfiguration.setVisible(true);
+
+    btnAdvancedConfiguration.addClickHandler(event -> {
+      HistoryManager.gotoAdvancedConfiguration(database.getUuid());
     });
   }
 
@@ -116,19 +143,27 @@ public class BrowseNavigationPanel {
     // Ingest Button
     ingestButton();
 
+    // Denormalize Button
+    denormalizeButton();
+    advancedConfigurationButton();
+
     NavigationPanel browse = NavigationPanel.createInstance(messages.SIARDHomePageOptionsHeaderForBrowsing());
 
     browse.addButton(btnIngest);
     browse.addButton(btnBrowse);
     browse.addButton(btnDelete);
+    browse.addButton(btnDenormalize);
+    browse.addButton(btnAdvancedConfiguration);
 
     if (database.getStatus().equals(ViewerDatabaseStatus.AVAILABLE)
       || database.getStatus().equals(ViewerDatabaseStatus.ERROR)) {
       btnBrowse.setVisible(true);
       btnDelete.setVisible(true);
+      btnDenormalize.setVisible(true);
     } else if (database.getStatus().equals(ViewerDatabaseStatus.METADATA_ONLY)) {
       btnIngest.setVisible(true);
       btnDelete.setVisible(false);
+      btnDenormalize.setVisible(false);
     }
 
     if (database.getPath() == null || database.getPath().isEmpty()) {
@@ -154,6 +189,7 @@ public class BrowseNavigationPanel {
       btnIngest.setVisible(false);
       btnBrowse.setVisible(true);
       btnDelete.setVisible(true);
+      btnDenormalize.setVisible(true);
     } else if (database.getStatus().equals(ViewerDatabaseStatus.INGESTING)) {
       if (btnIngestClicked) {
         btnIngest.setVisible(true);
@@ -166,6 +202,7 @@ public class BrowseNavigationPanel {
       btnIngest.setVisible(true);
       btnBrowse.setVisible(false);
       btnDelete.setVisible(false);
+      btnDenormalize.setVisible(true);
       btnIngestClicked = false;
     }
 

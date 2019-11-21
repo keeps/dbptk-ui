@@ -2614,6 +2614,46 @@ button.close:hover {
     margin: 25px;
 }
 
+
 .display-inline-grid {
     display: inline-grid;
+}
+/************************************************
+* Advanced Configuration
+ ************************************************/
+.advanced-configuration-options{
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    height: 100%;
+    margin-top: -48px;
+}
+
+.advanced-configuration-option{
+    width: 80%;
+    display: flex;
+    background-color: #eeeeee;
+    margin: 15px auto;
+    height: 100px;
+    padding: 10px;
+    cursor: pointer;
+}
+
+.advanced-configuration-option .icon{
+    font-size: 70px;
+    line-height: 100px;
+}
+
+.advanced-configuration-option .right {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    margin-left: 20px;
+}
+.advanced-configuration-option .title{
+    font-size: 30px;
+}
+
+.advanced-configuration-option .description{
+    font-size: 15px;
 }

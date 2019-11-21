@@ -337,4 +337,12 @@ public class BreadcrumbManager {
             + SafeHtmlUtils.htmlEscape(messages.breadcrumbTextForActivityLogDetail()))));
     return items;
   }
+
+  public static List<BreadcrumbItem> forAdvancedConfiguration(final String databaseUUID, final String databaseName) {
+    List<BreadcrumbItem> items = forSIARDMainPage(databaseUUID, databaseName);
+    items.add(new BreadcrumbItem(
+        SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.COG)
+            + SafeHtmlUtils.htmlEscape(messages.breadcrumbTextForAdvancedConfiguration()))));
+    return items;
+  }
 }

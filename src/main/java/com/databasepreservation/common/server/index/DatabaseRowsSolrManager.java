@@ -6,14 +6,17 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.solr.client.solrj.SolrClient;
+import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.request.CollectionAdminRequest;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.SolrInputField;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
@@ -32,13 +35,7 @@ import com.databasepreservation.common.client.index.IsIndexed;
 import com.databasepreservation.common.client.index.facets.Facets;
 import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.activity.logs.ActivityLogEntry;
-import com.databasepreservation.common.client.models.structure.ViewerDatabase;
-import com.databasepreservation.common.client.models.structure.ViewerDatabaseFromToolkit;
-import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
-import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
-import com.databasepreservation.common.client.models.structure.ViewerMetadata;
-import com.databasepreservation.common.client.models.structure.ViewerRow;
-import com.databasepreservation.common.client.models.structure.ViewerTable;
+import com.databasepreservation.common.client.models.structure.*;
 import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.server.index.schema.SolrCollection;
 import com.databasepreservation.common.server.index.schema.SolrDefaultCollectionRegistry;
@@ -193,6 +190,11 @@ public class DatabaseRowsSolrManager {
   public IterableIndexResult findAllRows(String databaseUUID, final Filter filter, final Sorter sorter,
     final List<String> fieldsToReturn) {
     return new IterableIndexResult(client, databaseUUID, filter, sorter, fieldsToReturn);
+  }
+
+  public IndexResult<ViewerRow> findRows(String databaseUUID, List<SolrQuery> queryList)
+    throws GenericException, RequestNotValidException {
+    return SolrUtils.findRowsWithSubQuery(client, databaseUUID, queryList);
   }
 
   public <T extends IsIndexed> Long countRows(String databaseUUID, Filter filter)
@@ -463,50 +465,47 @@ public class DatabaseRowsSolrManager {
   public ViewerMetadata retrieveDatabaseMetadata(String databaseUUID) {
     ViewerMetadata metadata = new ViewerMetadata();
 
-
     return metadata;
   }
 
-//  @SafeVarargs
-//  public final void addDatabaseField(final String databaseUUID, final String documentUUID, final String nestedUUID, Pair<String, ?>... fields) {
-//    RowsCollection collection = SolrRowsCollectionRegistry.get(databaseUUID);
-//    SolrInputDocument doc = new SolrInputDocument();
-//    SolrInputDocument nestedDoc = new SolrInputDocument();
-//    nestedDoc.addField(ViewerConstants.INDEX_ID, nestedUUID);
-//    nestedDoc.addField("type_t", "child");
-//    for (Pair<String, ?> field : fields) {
-//      LOGGER.debug("Added " + field.getFirst() + " to " + field.getSecond());
-//      nestedDoc.addField(field.getFirst(), field.getSecond());
-//      System.out.println("docID: " + documentUUID + " nestedID " + nestedUUID);
-//    }
-////    doc.addField("_childDocuments_", SolrUtils.asValueUpdate(nestedDoc));
-//    doc.addField(ViewerConstants.INDEX_ID, documentUUID);
-//    doc.addField("type_t", SolrUtils.asValueUpdate("parent"));
-//    doc.addChildDocument(nestedDoc);
-//
-//    try {
-//      insertDocument(collection.getIndexName(), doc);
-//
-//    } catch (ViewerException e) {
-//      LOGGER.error("Could not update database progress for {}", databaseUUID, e);
-//    }
-//  }
-
-  @SafeVarargs
-  public final void addDatabaseField(final String databaseUUID, final String documentUUID, Pair<String, ?>... fields) {
+  public final void addDatabaseField(final String databaseUUID, final String documentUUID,
+    List<SolrInputDocument> nestedDocuments) {
     RowsCollection collection = SolrRowsCollectionRegistry.get(databaseUUID);
     SolrInputDocument doc = new SolrInputDocument();
     doc.addField(ViewerConstants.INDEX_ID, documentUUID);
-    for (Pair<String, ?> field : fields) {
-      LOGGER.debug("Updating " + field.getFirst() + " to " + field.getSecond());
-      doc.addField(field.getFirst(), SolrUtils.asValueUpdate(field.getSecond()));
+    doc.addField("type_t", SolrUtils.asValueUpdate("parent"));
+    for (int i = 0; i < nestedDocuments.size(); i++) {
+      SolrInputDocument nest = nestedDocuments.get(i);
+      List<String> fields = new ArrayList<>();
+      for (SolrInputField field : nest) {
+        if (field.getName().equals(ViewerConstants.INDEX_ID)
+          || field.getName().startsWith(ViewerConstants.SOLR_INDEX_ROW_COLUMN_NAME_PREFIX)) {
+          fields.add((String) field.getValue());
+        }
+      }
+      doc.addField("nest" + i + "_txt", fields);
     }
+    doc.addField("columns", SolrUtils.asValueUpdate(nestedDocuments));
 
     try {
       insertDocument(collection.getIndexName(), doc);
+
     } catch (ViewerException e) {
       LOGGER.error("Could not update database progress for {}", databaseUUID, e);
     }
-    updateDatabaseFields(databaseUUID, fields);
+  }
+
+  public SolrInputDocument createNestedDocument(String nestedDocumentUUID, Map<String, ?> fields,
+    String referencedTableId, String parentTableId) {
+    SolrInputDocument nestedDoc = new SolrInputDocument();
+    nestedDoc.addField(ViewerConstants.INDEX_ID, nestedDocumentUUID);
+    nestedDoc.addField("referencedTableId_t", referencedTableId);
+    nestedDoc.addField("parentTableId_t", parentTableId);
+    nestedDoc.addField("type_t", "child");
+    for (Map.Entry<String, ?> entry : fields.entrySet()) {
+      nestedDoc.addField(entry.getKey(), entry.getValue());
+    }
+
+    return nestedDoc;
   }
 }

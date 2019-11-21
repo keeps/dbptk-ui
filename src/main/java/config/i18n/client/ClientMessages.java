@@ -582,6 +582,8 @@ public interface ClientMessages extends Messages {
 
   String breadcrumbTextForActivityLogDetail();
 
+  String breadcrumbTextForAdvancedConfiguration();
+
   /*********************************************
    * Home Page
    ********************************************/
@@ -1252,4 +1254,21 @@ public interface ClientMessages extends Messages {
   String administrationMenuText();
 
   String objectNotFound();
+
+  /********************************************
+   * Advanced Configuration
+   *******************************************/
+  String advancedConfigurationLabelForMainTitle();
+
+  String advancedConfigurationLabelForTableManagement();
+
+  String advancedConfigurationLabelForColumnsManagement();
+
+  String advancedConfigurationLabelForDataTransformation();
+
+  String advancedConfigurationTextForTableManagement();
+
+  String advancedConfigurationTextForColumnsManagement();
+
+  String advancedConfigurationTextForDataTransformation();
 }

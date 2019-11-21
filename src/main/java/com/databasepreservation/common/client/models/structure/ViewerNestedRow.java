@@ -1,24 +1,24 @@
 package com.databasepreservation.common.client.models.structure;
 
-import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.index.IsIndexed;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.index.IsIndexed;
+
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class ViewerRow extends IsIndexed {
+public class ViewerNestedRow extends IsIndexed {
   private String UUID;
   private String tableUUID;
   private String tableId;
   private Map<String, ViewerCell> cells;
-  private List<ViewerRow> nestedRowList;
+  private ViewerNestedRow nestedRow;
 
-  public ViewerRow() {
+  public ViewerNestedRow() {
     cells = new LinkedHashMap<>();
   }
 
@@ -77,18 +77,11 @@ public class ViewerRow extends IsIndexed {
     return values;
   }
 
-  public List<ViewerRow> getNestedRowList() {
-    return nestedRowList;
+  public ViewerNestedRow getNestedRow() {
+    return nestedRow;
   }
 
-  public void setNestedRowList(List<ViewerRow> nestedRowList) {
-    this.nestedRowList = nestedRowList;
-  }
-
-  public void addNestedRow(ViewerRow nestedRowList) {
-    if(this.nestedRowList == null) {
-      this.nestedRowList = new ArrayList<>();
-    }
-    this.nestedRowList.add(nestedRowList);
+  public void setNestedRow(ViewerNestedRow nestedRow) {
+    this.nestedRow = nestedRow;
   }
 }

@@ -117,4 +117,9 @@ public interface DatabaseService extends DirectRestService {
   @Path("find/rows/{databaseUUID}/{rowUUID}")
   @ApiOperation(value = "Retrieves a specific row within a specific database", notes = "", response = ViewerRow.class)
   ViewerRow retrieveRow(@PathParam("databaseUUID") String databaseUUID, @PathParam("rowUUID") String rowUUID);
+
+  @GET
+  @Path("/denormalize/{databaseuuid}")
+  @ApiOperation(value = "retrieves the first 5 rows of the query execution", notes = "", response = ProgressData.class, responseContainer = "database metadata")
+  Boolean denormalize(@PathParam("databaseuuid") String databaseuuid);
 }
