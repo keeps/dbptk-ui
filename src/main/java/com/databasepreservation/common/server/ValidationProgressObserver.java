@@ -26,6 +26,7 @@ public class ValidationProgressObserver implements ValidationObserver {
 
   @Override
   public void notifyFinishValidationModule(String componentName, ValidationReporterStatus status) {
+    // Nothing to do
   }
 
   @Override
@@ -58,14 +59,28 @@ public class ValidationProgressObserver implements ValidationObserver {
   }
 
   @Override
-  public void notifyIndicators(int passed, int errors, int warnings, int skipped) {
-    SIARDController.updateSIARDValidatorIndicators(databaseUUID, Integer.toString(passed), Integer.toString(errors),
+  public void notifyIndicators(int passed, int ok, int failed, int errors, int warnings, int skipped) {
+    SIARDController.updateSIARDValidatorIndicators(databaseUUID, Integer.toString(passed), Integer.toString(ok), Integer.toString(failed), Integer.toString(errors),
       Integer.toString(warnings), Integer.toString(skipped));
-    progressData.setIndicators(passed, errors, warnings, skipped);
+    progressData.setIndicators(passed, ok, failed, errors, warnings, skipped);
   }
 
   @Override
   public void notifyValidationProcessFinish(boolean result) {
     progressData.setFinished(result);
+  }
+
+  @Override
+  public void notifyValidationProgressSparse(int numberOfRows) {
+    progressData.createRequirement(ValidationProgressData.Requirement.Type.SPARSE_PROGRESS);
+    progressData.setRequirementMessage(Integer.toString(numberOfRows));
+  }
+
+  @Override
+  public void notifyElementValidationFinish(String ID, String path, ValidationReporterStatus status) {
+    progressData.createRequirement(ValidationProgressData.Requirement.Type.PATH_COMPLETE);
+    progressData.setRequirementID(ID);
+    progressData.setRequirementMessage(path);
+    progressData.setRequirementStatus(status.name());
   }
 }

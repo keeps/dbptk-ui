@@ -36,8 +36,7 @@ public class DataPanel extends Composite {
   public static DataPanel getInstance(ViewerDatabase database, String schemaUUID) {
     String separator = "/";
     String code = database.getUUID() + separator + schemaUUID;
-    instances.computeIfAbsent(code, k -> new DataPanel(database, schemaUUID));
-    return instances.get(code);
+    return instances.computeIfAbsent(code, k -> new DataPanel(database, schemaUUID));
   }
 
   interface SchemaDataPanelUiBinder extends UiBinder<Widget, DataPanel> {

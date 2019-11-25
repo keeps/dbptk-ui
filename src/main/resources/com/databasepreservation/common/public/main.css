@@ -2123,6 +2123,11 @@ html, body, .desktop-main {
     color: #727c84;
     margin-right: 2px;
 }
+
+.label-status {
+    line-height: unset !important;
+}
+
 /*Dialog*/
 .validator-dialog-information{
     display: flex;
@@ -2229,10 +2234,15 @@ html, body, .desktop-main {
     font-weight: bolder;
 }
 
+.sparse-progress {
+    margin-left: 90px;
+}
+
 .validation-status{
     max-height: 21px;
     align-self: center;
 }
+
 .validation-panel.requirement .title .description{
     white-space: normal;
     width: 90%;

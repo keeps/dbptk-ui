@@ -10,6 +10,8 @@ public class ValidationProgressData implements Serializable {
   private List<Requirement> requirementsList = new ArrayList<>();
   private Requirement requirement;
   private int numberOfPassed;
+  private int numberOfOks;
+  private int numberOfFailed;
   private int numberOfErrors;
   private int numberOfWarnings;
   private int numberOfSkipped;
@@ -17,10 +19,7 @@ public class ValidationProgressData implements Serializable {
   private static HashMap<String, ValidationProgressData> instances = new HashMap<>();
 
   public static ValidationProgressData getInstance(String uuid) {
-    if (instances.get(uuid) == null) {
-      instances.put(uuid, new ValidationProgressData());
-    }
-    return instances.get(uuid);
+    return instances.computeIfAbsent(uuid, k -> new ValidationProgressData());
   }
 
   public ValidationProgressData() {
@@ -63,8 +62,10 @@ public class ValidationProgressData implements Serializable {
     finished = true;
   }
 
-  public void setIndicators(int passed, int errors, int warnings, int skipped) {
+  public void setIndicators(int passed, int ok, int failed, int errors, int warnings, int skipped) {
     numberOfPassed = passed;
+    numberOfOks = ok;
+    numberOfFailed = failed;
     numberOfErrors = errors;
     numberOfWarnings = warnings;
     numberOfSkipped = skipped;
@@ -86,6 +87,14 @@ public class ValidationProgressData implements Serializable {
     return numberOfSkipped;
   }
 
+  public int getNumberOfOks() {
+    return numberOfOks;
+  }
+
+  public int getNumberOfFailed() {
+    return numberOfFailed;
+  }
+
   public static class Requirement implements Serializable {
     private String ID;
     private String message;
@@ -104,7 +113,7 @@ public class ValidationProgressData implements Serializable {
     }
 
     public enum Type {
-      REQUIREMENT, REQUIREMENT_INIT, MESSAGE, SUB_REQUIREMENT, ADDITIONAL, PATH
+      REQUIREMENT, REQUIREMENT_INIT, MESSAGE, SUB_REQUIREMENT, ADDITIONAL, PATH, SPARSE_PROGRESS, PATH_COMPLETE
     }
 
     public void setID(String ID) {

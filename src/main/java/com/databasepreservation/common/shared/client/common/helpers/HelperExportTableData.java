@@ -97,7 +97,7 @@ public class HelperExportTableData {
     checkBoxExportLOBs.setText(messages.csvExportDialogLabelForExportLOBs());
     checkBoxExportLOBs.addStyleName("form-checkbox");
     GenericField genericFieldExportLOBs = GenericField.createInstance(checkBoxExportLOBs);
-    panel.add(wrapHelperText(genericFieldExportLOBs, messages.csvExportDialogHelpTextForDescription()));
+    panel.add(wrapHelperText(genericFieldExportLOBs, messages.csvExportDialogHelpTextForLOBs()));
     checkBoxExportLOBs.addValueChangeHandler(event -> {
       if (!event.getValue()) {
         panel.remove(panel.getWidgetCount()-1);

@@ -101,6 +101,8 @@ public class ViewerConstants {
   public static final String SOLR_DATABASES_VALIDATOR_REPORT_PATH = "siard_validator_report";
   public static final String SOLR_DATABASES_VALIDATION_STATUS = "siard_validation_status";
   public static final String SOLR_DATABASES_VALIDATION_PASSED = "siard_validation_passed";
+  public static final String SOLR_DATABASES_VALIDATION_OK = "siard_validation_ok";
+  public static final String SOLR_DATABASES_VALIDATION_FAILED = "siard_validation_failed";
   public static final String SOLR_DATABASES_VALIDATION_ERRORS = "siard_validation_errors";
   public static final String SOLR_DATABASES_VALIDATION_WARNINGS = "siard_validation_warnings";
   public static final String SOLR_DATABASES_VALIDATION_SKIPPED = "siard_validation_skipped";
@@ -234,6 +236,8 @@ public class ViewerConstants {
   public static final String API_V1_FILE_RESOURCE = "/v1/file";
   public static final String API_PATH_PARAM_SIARD = "siard";
   public static final String API_PATH_PARAM_VALIDATION_REPORT = "validation";
+
+  public static final String API_V1_LOGIN_RESOURCE = "/v1/login";
 
   /*
    * Search field types from RODA, plus a few new ones

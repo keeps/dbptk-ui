@@ -194,10 +194,11 @@ public class MainPanel extends Composite {
       });
     } else if (HistoryManager.ROUTE_SIARD_VALIDATOR.equals(currentHistoryPath.get(0))) {
       final String databaseUUID = currentHistoryPath.get(1);
+      final String skipAdditionalChecks = currentHistoryPath.get(2);
       setContent(databaseUUID, new ContentPanelLoader() {
         @Override
         public ContentPanel load(ViewerDatabase database) {
-          return ValidatorPage.getInstance(database);
+          return ValidatorPage.getInstance(database, skipAdditionalChecks);
         }
       });
     } else if (HistoryManager.ROUTE_DATABASE.equals(currentHistoryPath.get(0))) {

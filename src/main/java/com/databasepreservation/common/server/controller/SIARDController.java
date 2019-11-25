@@ -585,7 +585,7 @@ public class SIARDController {
   }
 
   public static boolean validateSIARD(String databaseUUID, String siardPath, String validationReportPath,
-    String allowedTypesPath) throws GenericException {
+    String allowedTypesPath, boolean skipAdditionalChecks) throws GenericException {
     Path reporterPath = ViewerConfiguration.getInstance().getReportPathForValidation(databaseUUID).toAbsolutePath();
     boolean valid;
     if (validationReportPath == null) {
@@ -601,6 +601,10 @@ public class SIARDController {
         .validateModuleParameter(SIARDValidateFactory.PARAMETER_FILE, siardPath)
         .validateModuleParameter(SIARDValidateFactory.PARAMETER_ALLOWED, allowedTypesPath)
         .validateModuleParameter(SIARDValidateFactory.PARAMETER_REPORT, validationReportPath);
+
+      if (skipAdditionalChecks) {
+        siardValidation.validateModuleParameter(SIARDValidateFactory.PARAMETER_SKIP_ADDITIONAL_CHECKS, "true");
+      }
 
       siardValidation.reporter(reporter);
       siardValidation.observer(new ValidationProgressObserver(databaseUUID));
@@ -644,10 +648,10 @@ public class SIARDController {
     return valid;
   }
 
-  public static void updateSIARDValidatorIndicators(String databaseUUID, String passed, String errors, String warnings,
+  public static void updateSIARDValidatorIndicators(String databaseUUID, String passed, String ok, String failed, String errors, String warnings,
     String skipped) {
     final DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
-    solrManager.updateSIARDValidationIndicators(databaseUUID, passed, errors, warnings, skipped);
+    solrManager.updateSIARDValidationIndicators(databaseUUID, passed, ok, errors, failed, warnings, skipped);
   }
 
   public static void updateStatusValidate(String databaseUUID, ViewerDatabase.ValidationStatus status) {
@@ -720,7 +724,7 @@ public class SIARDController {
       Files.delete(path);
       LOGGER.info("SIARD validator report file removed from system ({})", path.toAbsolutePath());
       updateStatusValidate(databaseUUID, ViewerDatabase.ValidationStatus.NOT_VALIDATED);
-      updateSIARDValidatorIndicators(databaseUUID, null, null, null, null);
+      updateSIARDValidatorIndicators(databaseUUID, null, null, null, null, null, null);
     } catch (IOException e) {
       throw new GenericException("Could not delete SIARD validator report file from system", e);
     }

@@ -5,6 +5,7 @@ import java.util.Date;
 
 import com.databasepreservation.Constants;
 import com.databasepreservation.common.shared.ViewerConstants;
+import com.databasepreservation.common.shared.client.common.desktop.GenericField;
 import com.databasepreservation.common.shared.client.common.utils.ApplicationType;
 import com.databasepreservation.common.shared.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.shared.client.tools.FontAwesomeIconManager;
@@ -17,7 +18,9 @@ import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Label;
 
 import config.i18n.client.ClientMessages;
@@ -32,6 +35,7 @@ public class HelperValidator {
   private String SIARDPath;
   private Label pathLabelReporter;
   private Label pathLabelUDT;
+  private boolean skipAdditionalChecks;
 
   public HelperValidator(String SIARDPath) {
     this.SIARDPath = SIARDPath;
@@ -43,6 +47,28 @@ public class HelperValidator {
 
   public String getUdtPathFile() {
     return udtPathFile;
+  }
+
+  public String skipAdditionalChecks() { return String.valueOf(skipAdditionalChecks); }
+
+  public FlowPanel additionalChecksPanel() {
+    CheckBox checkbox = new CheckBox();
+    checkbox.setText(messages.skipAdditionalChecks());
+    checkbox.addStyleName("form-checkbox");
+    checkbox.addValueChangeHandler(event -> this.skipAdditionalChecks = event.getValue());
+    GenericField genericField = GenericField.createInstance(checkbox);
+
+    FlowPanel helper = new FlowPanel();
+    helper.addStyleName("form-helper");
+    InlineHTML span = new InlineHTML();
+    genericField.setCSSMetadata("form-row", "form-label-spaced");
+    span.addStyleName("form-text-helper-checkbox text-muted");
+    span.setText(messages.skipAdditionalChecksHelpText());
+    genericField.addHelperText(span);
+    helper.add(genericField);
+    helper.add(span);
+
+    return helper;
   }
 
   public FlowPanel reporterValidatorPanel() {

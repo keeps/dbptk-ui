@@ -32,7 +32,12 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.FocusPanel;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
 
@@ -45,13 +50,14 @@ public class ValidatorPage extends ContentPanel {
   private String databaseUUID;
   private String reporterPath;
   private String udtPath = null;
+  private boolean skipAdditionalChecks;
   private ViewerDatabase database;
   private int lastPosition = 0;
   private Integer countErrors = 0;
   private Integer countPassed = 0;
   private Integer countSkipped = 0;
   private Integer numberOfWarnings = 0;
-  private Integer numberOfErrors = 0;
+  private Integer numberOfFailedRequirements = 0;
   private Boolean stickToBottom = true;
   private FlowPanel tailIndicator = new FlowPanel();
   private BreadcrumbPanel breadcrumb;
@@ -78,22 +84,18 @@ public class ValidatorPage extends ContentPanel {
   private static ValidatorUiBinder binder = GWT.create(ValidatorUiBinder.class);
 
   //For server
-  public static ValidatorPage getInstance(ViewerDatabase database) {
-    return ValidatorPage.getInstance(database, null, null);
+  public static ValidatorPage getInstance(ViewerDatabase database, String skipAdditionalChecks) {
+    return ValidatorPage.getInstance(database, null, null, skipAdditionalChecks);
   }
 
-  public static ValidatorPage getInstance(ViewerDatabase database, String reporterPath) {
-    return ValidatorPage.getInstance(database, reporterPath, null);
+  public static ValidatorPage getInstance(ViewerDatabase database, String reporterPath, String skipAdditionalChecks) {
+    return ValidatorPage.getInstance(database, reporterPath, null, skipAdditionalChecks);
   }
 
-  public static ValidatorPage getInstance(ViewerDatabase database, String reporterPath, String udtPath) {
-    String databaseUUID = database.getUUID();
-    if (instances.get(databaseUUID) == null) {
-      ValidatorPage instance = new ValidatorPage(databaseUUID, reporterPath, udtPath);
-      instances.put(databaseUUID, instance);
-    }
-
-    return instances.get(databaseUUID);
+  public static ValidatorPage getInstance(ViewerDatabase database, String reporterPath, String udtPath,
+                                          String skipAdditionalChecks) {
+    return instances.computeIfAbsent(database.getUUID(),
+      k -> new ValidatorPage(database.getUUID(), reporterPath, udtPath, skipAdditionalChecks));
   }
 
   @UiField
@@ -120,7 +122,7 @@ public class ValidatorPage extends ContentPanel {
   @UiField
   Button btnRunAgain;
 
-  private ValidatorPage(String databaseUUID, String reporterPath, String udtPath) {
+  private ValidatorPage(String databaseUUID, String reporterPath, String udtPath, String skipAdditionalChecks) {
     this.databaseUUID = databaseUUID;
     if(reporterPath != null){
       this.reporterPath = URL.decodePathSegment(reporterPath);
@@ -128,6 +130,8 @@ public class ValidatorPage extends ContentPanel {
     if (udtPath != null) {
       this.udtPath = URL.decodePathSegment(udtPath);
     }
+    this.skipAdditionalChecks = Boolean.parseBoolean(skipAdditionalChecks);
+
     initWidget(binder.createAndBindUi(this));
 
     title.setText(messages.validatorPageTextForTitle());
@@ -171,6 +175,7 @@ public class ValidatorPage extends ContentPanel {
 
   private void runValidator() {
     BrowserService.Util.getInstance().validateSIARD(database.getUUID(), database.getSIARDPath(), reporterPath, udtPath,
+      skipAdditionalChecks,
       new DefaultAsyncCallback<Boolean>() {
         @Override
         public void onSuccess(Boolean result) {
@@ -199,8 +204,16 @@ public class ValidatorPage extends ContentPanel {
         public void onSuccess(ValidationProgressData result) {
           update(result);
           if (result.isFinished() && result.getRequirementsList().size() <= lastPosition) {
+            GWT.log("Warnings: " + result.getNumberOfWarnings());
+            GWT.log("Failed: " + result.getNumberOfFailed());
+            GWT.log("Passed: " + result.getNumberOfPassed());
+            GWT.log("Skipped: " + result.getNumberOfSkipped());
+            GWT.log("Errors: " + result.getNumberOfErrors());
             numberOfWarnings = result.getNumberOfWarnings();
-            numberOfErrors = result.getNumberOfErrors();
+            numberOfFailedRequirements = result.getNumberOfFailed();
+            countPassed = result.getNumberOfPassed();
+            countSkipped = result.getNumberOfSkipped();
+            countErrors = result.getNumberOfErrors();
             stopUpdating();
             BrowserService.Util.getInstance().getDateTimeHumanized(database.getValidatedAt(),
               new DefaultAsyncCallback<String>() {
@@ -209,9 +222,9 @@ public class ValidatorPage extends ContentPanel {
                   ValidationNavigationPanel.getInstance(database, result).update(database);
                 }
               });
-            if (numberOfErrors > 0) {
+            if (numberOfFailedRequirements > 0) {
               Dialogs.showErrors(messages.validatorPageTextForTitle(),
-                messages.validatorPageTextForDialogFailureInformation(database.getMetadata().getName(), numberOfErrors),
+                messages.validatorPageTextForDialogFailureInformation(database.getMetadata().getName(), countErrors),
                 messages.basicActionClose());
             } else {
               Dialogs.showInformationDialog(messages.validatorPageTextForTitle(),
@@ -250,6 +263,15 @@ public class ValidatorPage extends ContentPanel {
         content.add(panel);
       }
 
+      if (ValidationProgressData.Requirement.Type.SPARSE_PROGRESS.equals(requirement.getType())) {
+        FlowPanel panel = new FlowPanel();
+        panel.addStyleName("validation-panel requirement path text-muted");
+        Label path = new Label("Completed " + requirement.getMessage() + " rows");
+        path.addStyleName("description text-muted sparse-progress");
+        panel.add(path);
+        content.add(panel);
+      }
+
       if (requirement.getType().equals(ValidationProgressData.Requirement.Type.PATH)) {
         FlowPanel panel = new FlowPanel();
         FlowPanel panelTitle = new FlowPanel();
@@ -260,6 +282,21 @@ public class ValidatorPage extends ContentPanel {
         path.addStyleName("description text-muted");
         panel.add(panelTitle);
         panel.add(path);
+        content.add(panel);
+      }
+
+      if (ValidationProgressData.Requirement.Type.PATH_COMPLETE.equals(requirement.getType())) {
+        FlowPanel panel = new FlowPanel();
+        FlowPanel panelTitle = new FlowPanel();
+        panel.addStyleName("validation-panel requirement text-muted");
+        panelTitle.addStyleName("title");
+        panelTitle.add(new Label(requirement.getID()));
+        Label path = new Label("Validation finish on path: " + requirement.getMessage());
+        path.addStyleName("description text-muted");
+        panelTitle.add(path);
+        panel.add(panelTitle);
+        Label status = buildStatus(requirement.getStatus());
+        panel.add(status);
         content.add(panel);
       }
 
@@ -288,16 +325,13 @@ public class ValidatorPage extends ContentPanel {
     Label statusLabel = new Label(status);
     switch (Status.valueOf(status)) {
       case OK:
-        countPassed++;
         statusLabel.setStyleName("label-success");
         break;
       case ERROR:
-        countErrors++;
         statusLabel.setStyleName("label-danger");
         statusLabel.setTitle(messages.validatorPageTextForErrorDetails());
         break;
       case SKIPPED:
-        countSkipped++;
         statusLabel.setStyleName("label-default");
         break;
       default:
@@ -310,13 +344,13 @@ public class ValidatorPage extends ContentPanel {
   private Label updateStatus() {
     Label statusLabel = new Label();
     String statusText = messages.humanizedTextForSIARDValidationRunning();
-    statusLabel.setStyleName("label-info");
+    statusLabel.setStyleName("label-status label-info");
     if (countErrors != 0) {
       statusText = messages.humanizedTextForSIARDValidationFailed();
-      statusLabel.setStyleName("label-danger");
+      statusLabel.setStyleName("label-status label-danger");
     } else if (countPassed != 0 || countSkipped != 0) {
       statusText = messages.humanizedTextForSIARDValidationSuccess();
-      statusLabel.setStyleName("label-success");
+      statusLabel.setStyleName("label-status label-success");
     }
     statusLabel.setText(statusText);
     return statusLabel;
@@ -347,7 +381,7 @@ public class ValidatorPage extends ContentPanel {
     countErrors = 0;
     countSkipped = 0;
     numberOfWarnings = 0;
-    numberOfErrors = 0;
+    numberOfFailedRequirements = 0;
     populateValidationInfo(false, false);
   }
 
@@ -362,9 +396,9 @@ public class ValidatorPage extends ContentPanel {
       new Label(database.getMetadata().getName())));
 
     // counts
-    left.add(validationInfoBuilder(messages.validatorPageRequirementsThatFailed(), countErrors, enable));
-    left.add(validationInfoBuilder(messages.numberOfValidationsErrors(), numberOfErrors, enable));
-    left.add(validationInfoBuilder(messages.numberOfValidationsPassed(), countPassed, enable));
+    left.add(validationInfoBuilder(messages.validatorPageRequirementsThatPassed(), countPassed, enable));
+    left.add(validationInfoBuilder(messages.validatorPageRequirementsThatFailed(), numberOfFailedRequirements, enable));
+    left.add(validationInfoBuilder(messages.numberOfValidationsErrors(), countErrors, enable));
     left.add(validationInfoBuilder(messages.numberOfValidationsWarnings(), numberOfWarnings, enable));
     left.add(validationInfoBuilder(messages.numberOfValidationsSkipped(), countSkipped, enable));
 
@@ -382,17 +416,15 @@ public class ValidatorPage extends ContentPanel {
 
     // SIARD specification link
     Button SIARDSpecification = new Button(ViewerConstants.SIARD2_1);
-    SIARDSpecification.addClickHandler(event -> {
-      Window.open(ViewerConstants.SIARD_SPECIFICATION_LINK, ViewerConstants.BLANK_LINK, null);
-    });
+    SIARDSpecification.addClickHandler(
+      event -> Window.open(ViewerConstants.SIARD_SPECIFICATION_LINK, ViewerConstants.BLANK_LINK, null));
 
     right.add(validationInfoBuilder(messages.validatorPageTextForSIARDSpecification(), SIARDSpecification));
 
     // Additional checks link
     Button AdditionalSpecification = new Button(messages.basicActionOpen());
-    AdditionalSpecification.addClickHandler(event -> {
-      Window.open(ViewerConstants.ADDITIONAL_CHECKS_SPECIFICATIONLINK, ViewerConstants.BLANK_LINK, null);
-    });
+    AdditionalSpecification.addClickHandler(
+      event -> Window.open(ViewerConstants.ADDITIONAL_CHECKS_SPECIFICATIONLINK, ViewerConstants.BLANK_LINK, null));
 
     right.add(
       validationInfoBuilder(messages.validatorPageTextForAdditionalChecksSpecification(), AdditionalSpecification));
@@ -501,6 +533,16 @@ public class ValidatorPage extends ContentPanel {
     if (e.isNorth()) {
       stickToBottom = false;
       tailIndicator.setStyleName("tail tail-off");
+    }
+  }
+
+  @Override
+  protected void onAttach() {
+    super.onAttach();
+    if (database != null) {
+      List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forSIARDValidatorPage(database.getUUID(),
+        database.getMetadata().getName());
+      BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
     }
   }
 }

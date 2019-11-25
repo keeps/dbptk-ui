@@ -51,12 +51,7 @@ public class Main implements EntryPoint {
         RootPanel.get().addStyleName("roda");
 
         mainPanel.onHistoryChanged(History.getToken());
-        History.addValueChangeHandler(new ValueChangeHandler<String>() {
-          @Override
-          public void onValueChange(ValueChangeEvent<String> event) {
-            mainPanel.onHistoryChanged(event.getValue());
-          }
-        });
+        History.addValueChangeHandler(event -> mainPanel.onHistoryChanged(event.getValue()));
       }
     });
   }

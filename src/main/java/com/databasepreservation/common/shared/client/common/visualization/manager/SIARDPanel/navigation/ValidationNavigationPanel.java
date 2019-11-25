@@ -78,17 +78,17 @@ public class ValidationNavigationPanel {
                 if (result && validator.getReporterPathFile() != null) {
                   ValidatorPage.clear(database.getUUID());
                   if (validator.getUdtPathFile() == null) {
-                    HistoryManager.gotoSIARDValidator(database.getUUID(), validator.getReporterPathFile());
+                    HistoryManager.gotoSIARDValidator(database.getUUID(), validator.getReporterPathFile(), validator.skipAdditionalChecks());
                   } else {
                     HistoryManager.gotoSIARDValidator(database.getUUID(), validator.getReporterPathFile(),
-                      validator.getUdtPathFile());
+                      validator.getUdtPathFile(), validator.skipAdditionalChecks());
                   }
                 }
               }
             });
         } else {
           ValidatorPage.clear(database.getUUID());
-          HistoryManager.gotoSIARDValidator(database.getUUID());
+          HistoryManager.gotoSIARDValidator(database.getUUID(), validator.skipAdditionalChecks());
         }
       } else {
         Dialogs.showInformationDialog(messages.SIARDValidatorDialogInformationTitle(),
@@ -104,7 +104,7 @@ public class ValidationNavigationPanel {
       if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
         HistoryManager.gotoSIARDValidator(database.getUUID(), validator.getReporterPathFile());
       } else {
-        HistoryManager.gotoSIARDValidator(database.getUUID());
+        HistoryManager.gotoSIARDValidator(database.getUUID(), validator.skipAdditionalChecks());
       }
     });
 

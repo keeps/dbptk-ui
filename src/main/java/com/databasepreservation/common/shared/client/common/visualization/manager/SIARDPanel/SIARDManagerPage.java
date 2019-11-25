@@ -54,17 +54,19 @@ public class SIARDManagerPage extends ContentPanel {
   LoadingDiv loading;
 
   @UiField
-  FlowPanel metadataInformation, navigationPanels;
+  FlowPanel metadataInformation;
 
   @UiField
-  Button btnBack, btnExclude;
+  FlowPanel navigationPanels;
+
+  @UiField
+  Button btnBack;
+
+  @UiField
+  Button btnExclude;
 
   public static SIARDManagerPage getInstance(ViewerDatabase database) {
-    String databaseUUID = database.getUUID();
-    if (instances.get(databaseUUID) == null) {
-      instances.put(databaseUUID, new SIARDManagerPage(database));
-    }
-    return instances.get(databaseUUID);
+    return instances.computeIfAbsent(database.getUUID(), k -> new SIARDManagerPage(database));
   }
 
   private SIARDManagerPage(ViewerDatabase database) {
@@ -154,15 +156,13 @@ public class SIARDManagerPage extends ContentPanel {
     btnBack.setText(messages.basicActionBack());
     btnExclude.setText(messages.basicActionDelete());
 
-    btnBack.addClickHandler(event -> {
-      HistoryManager.gotoDatabase();
-    });
+    btnBack.addClickHandler(event -> HistoryManager.gotoDatabase());
 
     btnExclude.addClickHandler(event -> {
       if (ViewerDatabase.Status.AVAILABLE.equals(database.getStatus())
         || ViewerDatabase.Status.ERROR.equals(database.getStatus())
         || ViewerDatabase.Status.METADATA_ONLY.equals(database.getStatus())) {
-        SafeHtml message = messages.SIARDHomePageTextForDeleteAllFromServer();;
+        SafeHtml message = messages.SIARDHomePageTextForDeleteAllFromServer();
         if(ApplicationType.getType().equals(ViewerConstants.DESKTOP)){
           message = messages.SIARDHomePageTextForDeleteAllFromDesktop();
         }
@@ -171,7 +171,7 @@ public class SIARDManagerPage extends ContentPanel {
           CommonDialogs.Level.DANGER, "500px", new DefaultAsyncCallback<Boolean>() {
             @Override
             public void onSuccess(Boolean result) {
-              if (result) {
+              if (Boolean.TRUE.equals(result)) {
                 deleteAll();
               }
             }

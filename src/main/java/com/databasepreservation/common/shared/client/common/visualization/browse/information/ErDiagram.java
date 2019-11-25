@@ -13,7 +13,6 @@ import com.databasepreservation.common.shared.client.common.utils.ApplicationTyp
 import com.databasepreservation.common.shared.client.tools.ViewerStringUtils;
 import com.github.nmorel.gwtjackson.client.ObjectMapper;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -31,17 +30,9 @@ public class ErDiagram extends Composite {
   private static Map<String, ErDiagram> instances = new HashMap<>();
 
   public static ErDiagram getInstance(ViewerDatabase database, ViewerSchema schema) {
-
     String separator = "/";
     String code = database.getUUID() + separator + schema.getUUID();
-    GWT.log(code);
-
-    ErDiagram instance = instances.get(code);
-    if (instance == null) {
-      instance = new ErDiagram(database, schema);
-      instances.put(code, instance);
-    }
-    return instance;
+    return instances.computeIfAbsent(code, k -> new ErDiagram(database, schema));
   }
 
   interface ErDiagramUiBinder extends UiBinder<Widget, ErDiagram> {
@@ -84,154 +75,151 @@ public class ErDiagram extends Composite {
     final SimplePanel diagram = new SimplePanel();
     diagram.addStyleName("erdiagram");
     diagram.getElement().setId("erdiagram-" + schema.getUUID());
-    diagram.addAttachHandler(new AttachEvent.Handler() {
-      @Override
-      public void onAttachOrDetach(AttachEvent event) {
-        // avoid setting up the diagram more than once
-        if (diagram.getStyleName().contains("initialized-erdiagram")) {
-          return;
+    diagram.addAttachHandler(event -> {
+      // avoid setting up the diagram more than once
+      if (diagram.getStyleName().contains("initialized-erdiagram")) {
+        return;
+      }
+
+      List<VisNode> visNodeList = new ArrayList<>();
+      List<JsniEdge> jsniEdgeList = new ArrayList<>();
+
+      int maxRows = 0;
+      int maxRelationsIn = 0;
+      int maxRelationsOut = 0;
+      int maxRelationsTotal = 0;
+      int maxColumns = 0;
+      int maxColumnsAndRows = 0;
+
+      int minRows = Integer.MAX_VALUE;
+      int minRelationsIn = Integer.MAX_VALUE;
+      int minRelationsOut = Integer.MAX_VALUE;
+      int minRelationsTotal = Integer.MAX_VALUE;
+      int minColumns = Integer.MAX_VALUE;
+      int minColumnsAndRowsBiggerThanZero = Integer.MAX_VALUE;
+
+      for (ViewerTable viewerTable : schema.getTables()) {
+        VisNode visNode = new VisNode(viewerTable.getUUID(), viewerTable.getName());
+
+        if (ViewerStringUtils.isNotBlank(viewerTable.getDescription())) {
+          visNode.description = viewerTable.getDescription();
+        } else {
+          visNode.description = "";
         }
-
-        List<VisNode> visNodeList = new ArrayList<>();
-        List<JsniEdge> jsniEdgeList = new ArrayList<>();
-
-        int maxRows = 0;
-        int maxRelationsIn = 0;
-        int maxRelationsOut = 0;
-        int maxRelationsTotal = 0;
-        int maxColumns = 0;
-        int maxColumnsAndRows = 0;
-
-        int minRows = Integer.MAX_VALUE;
-        int minRelationsIn = Integer.MAX_VALUE;
-        int minRelationsOut = Integer.MAX_VALUE;
-        int minRelationsTotal = Integer.MAX_VALUE;
-        int minColumns = Integer.MAX_VALUE;
-        int minColumnsAndRowsBiggerThanZero = Integer.MAX_VALUE;
-
-        for (ViewerTable viewerTable : schema.getTables()) {
-          VisNode visNode = new VisNode(viewerTable.getUUID(), viewerTable.getName());
-
-          if (ViewerStringUtils.isNotBlank(viewerTable.getDescription())) {
-            visNode.description = viewerTable.getDescription();
-          } else {
-            visNode.description = "";
-          }
-          visNode.numColumns = viewerTable.getColumns().size();
-          visNode.numRows = new Long(viewerTable.getCountRows()).intValue();
-          visNode.numRelationsOut = viewerTable.getForeignKeys().size();
-          int inboundForeignKeys = 0;
-          for (ViewerSchema viewerSchema : database.getMetadata().getSchemas()) {
-            for (ViewerTable table : viewerSchema.getTables()) {
-              for (ViewerForeignKey viewerForeignKey : table.getForeignKeys()) {
-                if (viewerForeignKey.getReferencedTableUUID().equals(viewerTable.getUUID())) {
-                  inboundForeignKeys++;
-                }
+        visNode.numColumns = viewerTable.getColumns().size();
+        visNode.numRows = new Long(viewerTable.getCountRows()).intValue();
+        visNode.numRelationsOut = viewerTable.getForeignKeys().size();
+        int inboundForeignKeys = 0;
+        for (ViewerSchema viewerSchema : database.getMetadata().getSchemas()) {
+          for (ViewerTable table : viewerSchema.getTables()) {
+            for (ViewerForeignKey viewerForeignKey : table.getForeignKeys()) {
+              if (viewerForeignKey.getReferencedTableUUID().equals(viewerTable.getUUID())) {
+                inboundForeignKeys++;
               }
             }
           }
-          visNode.numRelationsIn = inboundForeignKeys;
-          visNode.numRelationsTotal = visNode.numRelationsIn + visNode.numRelationsOut;
-          visNode.numColumnsAndRows = visNode.numColumns * visNode.numRows;
+        }
+        visNode.numRelationsIn = inboundForeignKeys;
+        visNode.numRelationsTotal = visNode.numRelationsIn + visNode.numRelationsOut;
+        visNode.numColumnsAndRows = visNode.numColumns * visNode.numRows;
 
-          if (maxColumns < visNode.numColumns) {
-            maxColumns = visNode.numColumns;
-          }
-          if (maxRows < visNode.numRows) {
-            maxRows = visNode.numRows;
-          }
-          if (maxRelationsOut < visNode.numRelationsOut) {
-            maxRelationsOut = visNode.numRelationsOut;
-          }
-          if (maxRelationsIn < visNode.numRelationsIn) {
-            maxRelationsIn = visNode.numRelationsIn;
-          }
-          if (maxRelationsTotal < visNode.numRelationsTotal) {
-            maxRelationsTotal = visNode.numRelationsTotal;
-          }
-          if (maxColumnsAndRows < visNode.numColumnsAndRows) {
-            maxColumnsAndRows = visNode.numColumnsAndRows;
-          }
-
-          if (minColumns > visNode.numColumns) {
-            minColumns = visNode.numColumns;
-          }
-          if (minRows > visNode.numRows) {
-            minRows = visNode.numRows;
-          }
-          if (minRelationsOut > visNode.numRelationsOut) {
-            minRelationsOut = visNode.numRelationsOut;
-          }
-          if (minRelationsIn > visNode.numRelationsIn) {
-            minRelationsIn = visNode.numRelationsIn;
-          }
-          if (minRelationsTotal > visNode.numRelationsTotal) {
-            minRelationsTotal = visNode.numRelationsTotal;
-          }
-          if (minColumnsAndRowsBiggerThanZero > visNode.numColumnsAndRows && visNode.numColumnsAndRows > 0) {
-            minColumnsAndRowsBiggerThanZero = visNode.numColumnsAndRows;
-          }
-
-          // create tooltip with table information
-          StringBuilder tooltip = new StringBuilder();
-          if (ViewerStringUtils.isNotBlank(viewerTable.getName())) {
-            tooltip.append(viewerTable.getName()).append("<br/>");
-          }
-          tooltip.append(visNode.description).append(" ");
-          tooltip.append(messages.diagram_rows(visNode.numRows)).append(", ")
-            .append(messages.diagram_columns(visNode.numColumns)).append(", ")
-            .append(messages.diagram_relations(visNode.numRelationsTotal)).append(".");
-
-          visNode.setTitle(tooltip.toString());
-
-          visNodeList.add(visNode);
-
-          for (ViewerForeignKey viewerForeignKey : viewerTable.getForeignKeys()) {
-            jsniEdgeList.add(new JsniEdge(viewerTable.getUUID(), viewerForeignKey.getReferencedTableUUID()));
-          }
+        if (maxColumns < visNode.numColumns) {
+          maxColumns = visNode.numColumns;
+        }
+        if (maxRows < visNode.numRows) {
+          maxRows = visNode.numRows;
+        }
+        if (maxRelationsOut < visNode.numRelationsOut) {
+          maxRelationsOut = visNode.numRelationsOut;
+        }
+        if (maxRelationsIn < visNode.numRelationsIn) {
+          maxRelationsIn = visNode.numRelationsIn;
+        }
+        if (maxRelationsTotal < visNode.numRelationsTotal) {
+          maxRelationsTotal = visNode.numRelationsTotal;
+        }
+        if (maxColumnsAndRows < visNode.numColumnsAndRows) {
+          maxColumnsAndRows = visNode.numColumnsAndRows;
         }
 
-        Double normMinColumnsAndRows = 0.0;
-        Double normMaxColumnsAndRows = 2.0; // N
-
-        for (VisNode visNode : visNodeList) {
-          // visNode
-          // .adjustSize(getNormalizedValue(visNode.numRelationsTotal,
-          // minRelationsTotal, maxRelationsTotal, 10, 50));
-
-          visNode.adjustBackgroundColor(
-            getNormalizedValue(visNode.numRelationsTotal, minRelationsTotal, maxRelationsTotal, 0.01, 0.70));
-
-          if (visNode.numColumnsAndRows == 0) {
-            visNode.adjustSize(20);
-          } else {
-            Double normNumColumnsAndRows = getNormalizedValue(visNode.numColumnsAndRows,
-              minColumnsAndRowsBiggerThanZero, maxColumnsAndRows, normMinColumnsAndRows, normMaxColumnsAndRows);
-
-            Double normResult = Math.asin(normNumColumnsAndRows - 1) + 1.5;
-
-            visNode.adjustSize(getNormalizedValue(normResult, 0, 3, 40, 150).intValue());
-          }
-
-          // Double logColumnsAndRows = Math.log(visNode.numColumnsAndRows);
-          // if (logColumnsAndRows.isInfinite() || logColumnsAndRows.isNaN()) {
-          // logColumnsAndRows = 0.0;
-          // }
-          // visNode
-          // .adjustSize(getNormalizedValue(visNode.numColumnsAndRows,
-          // minColumnsAndRows,
-          // maxColumnsAndRows, 20, 150));
-
-          // visNode.adjustBackgroundColor(((double)
-          // getNormalizedValue(logColumnsAndRows, logMinColumnsAndRows,
-          // logMaxColumnsAndRows, 1, 70)) / 100);
+        if (minColumns > visNode.numColumns) {
+          minColumns = visNode.numColumns;
+        }
+        if (minRows > visNode.numRows) {
+          minRows = visNode.numRows;
+        }
+        if (minRelationsOut > visNode.numRelationsOut) {
+          minRelationsOut = visNode.numRelationsOut;
+        }
+        if (minRelationsIn > visNode.numRelationsIn) {
+          minRelationsIn = visNode.numRelationsIn;
+        }
+        if (minRelationsTotal > visNode.numRelationsTotal) {
+          minRelationsTotal = visNode.numRelationsTotal;
+        }
+        if (minColumnsAndRowsBiggerThanZero > visNode.numColumnsAndRows && visNode.numColumnsAndRows > 0) {
+          minColumnsAndRowsBiggerThanZero = visNode.numColumnsAndRows;
         }
 
-        String nodes = visNodeMapper.write(visNodeList);
-        String edges = visEdgeMapper.write(jsniEdgeList);
+        // create tooltip with table information
+        StringBuilder tooltip = new StringBuilder();
+        if (ViewerStringUtils.isNotBlank(viewerTable.getName())) {
+          tooltip.append(viewerTable.getName()).append("<br/>");
+        }
+        tooltip.append(visNode.description).append(" ");
+        tooltip.append(messages.diagram_rows(visNode.numRows)).append(", ")
+          .append(messages.diagram_columns(visNode.numColumns)).append(", ")
+          .append(messages.diagram_relations(visNode.numRelationsTotal)).append(".");
 
-        loadDiagram(databaseUUID, schema.getUUID(), nodes, edges, ApplicationType.getType());
+        visNode.setTitle(tooltip.toString());
+
+        visNodeList.add(visNode);
+
+        for (ViewerForeignKey viewerForeignKey : viewerTable.getForeignKeys()) {
+          jsniEdgeList.add(new JsniEdge(viewerTable.getUUID(), viewerForeignKey.getReferencedTableUUID()));
+        }
       }
+
+      Double normMinColumnsAndRows = 0.0;
+      Double normMaxColumnsAndRows = 2.0; // N
+
+      for (VisNode visNode : visNodeList) {
+        // visNode
+        // .adjustSize(getNormalizedValue(visNode.numRelationsTotal,
+        // minRelationsTotal, maxRelationsTotal, 10, 50));
+
+        visNode.adjustBackgroundColor(
+          getNormalizedValue(visNode.numRelationsTotal, minRelationsTotal, maxRelationsTotal, 0.01, 0.70));
+
+        if (visNode.numColumnsAndRows == 0) {
+          visNode.adjustSize(20);
+        } else {
+          Double normNumColumnsAndRows = getNormalizedValue(visNode.numColumnsAndRows, minColumnsAndRowsBiggerThanZero,
+            maxColumnsAndRows, normMinColumnsAndRows, normMaxColumnsAndRows);
+
+          double normResult = Math.asin(normNumColumnsAndRows - 1) + 1.5;
+
+          visNode.adjustSize(getNormalizedValue(normResult, 0, 3, 40, 150).intValue());
+        }
+
+        // Double logColumnsAndRows = Math.log(visNode.numColumnsAndRows);
+        // if (logColumnsAndRows.isInfinite() || logColumnsAndRows.isNaN()) {
+        // logColumnsAndRows = 0.0;
+        // }
+        // visNode
+        // .adjustSize(getNormalizedValue(visNode.numColumnsAndRows,
+        // minColumnsAndRows,
+        // maxColumnsAndRows, 20, 150));
+
+        // visNode.adjustBackgroundColor(((double)
+        // getNormalizedValue(logColumnsAndRows, logMinColumnsAndRows,
+        // logMaxColumnsAndRows, 1, 70)) / 100);
+      }
+
+      String nodes = visNodeMapper.write(visNodeList);
+      String edges = visEdgeMapper.write(jsniEdgeList);
+
+      loadDiagram(databaseUUID, schema.getUUID(), nodes, edges, ApplicationType.getType());
     });
     contentItems.add(diagram);
   }
@@ -575,11 +563,11 @@ public class ErDiagram extends Composite {
             //params.event = "[original event]";
             //console.log(params);
   
-            if(params.nodes.length == 1) {
+            if(params.nodes.length === 1) {
                 //console.log("go to db" + dbuuid + " and table " + params.nodes[0]);
-                var tableuuid = params.nodes[0];
+                var tableUUID = params.nodes[0];
                 network.unselectAll();
-                @com.databasepreservation.common.shared.client.tools.HistoryManager::gotoTable(Ljava/lang/String;Ljava/lang/String;)(dbuuid, tableuuid);
+                @com.databasepreservation.common.shared.client.tools.HistoryManager::gotoTable(Ljava/lang/String;Ljava/lang/String;)(dbuuid, tableUUID);
             }
         });
   

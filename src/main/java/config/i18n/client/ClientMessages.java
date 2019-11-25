@@ -954,6 +954,8 @@ public interface ClientMessages extends Messages {
 
   String validatorPageRequirementsThatFailed();
 
+  String validatorPageRequirementsThatPassed();
+
   String numberOfValidationsPassed();
 
   String numberOfValidationsWarnings();
@@ -979,6 +981,10 @@ public interface ClientMessages extends Messages {
   String validatorPageTextForErrorDetails();
 
   String validationRequirements(@Select String codeID);
+
+  String skipAdditionalChecks();
+
+  String skipAdditionalChecksHelpText();
 
   /*********************************************
    * Progress Bar

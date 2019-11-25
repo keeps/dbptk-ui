@@ -417,8 +417,8 @@ public class BrowserServiceImpl extends RemoteServiceServlet implements BrowserS
 
   @Override
   public boolean validateSIARD(String databaseUUID, String SIARDPath, String validationReportPath,
-    String allowedTypePath) throws GenericException {
-    return SIARDController.validateSIARD(databaseUUID, SIARDPath, validationReportPath, allowedTypePath);
+    String allowedTypePath, boolean skipAdditionalChecks) throws GenericException {
+    return SIARDController.validateSIARD(databaseUUID, SIARDPath, validationReportPath, allowedTypePath, skipAdditionalChecks);
   }
 
   @Override

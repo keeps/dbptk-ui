@@ -41,8 +41,7 @@ public class BrowseNavigationPanel {
     this.database = database;
   }
 
-  public NavigationPanel build() {
-
+  private void browseButton() {
     // Browser now Button
     btnBrowse = new Button();
     btnBrowse.setText(messages.SIARDHomePageButtonTextForBrowseNow());
@@ -52,8 +51,9 @@ public class BrowseNavigationPanel {
     btnBrowse.addClickHandler(event -> {
       HistoryManager.gotoDatabase(database.getUUID());
     });
+  }
 
-    // Delete Button
+  private void deleteButton() {
     btnDelete = new Button();
     btnDelete.setText(messages.SIARDHomePageButtonTextForDeleteIngested());
     btnDelete.addStyleName("btn btn-link-info");
@@ -74,8 +74,9 @@ public class BrowseNavigationPanel {
           });
       }
     });
+  }
 
-    // Ingest Button
+  private void ingestButton() {
     btnIngest = new Button();
     btnIngest.setText(messages.SIARDHomePageButtonTextForBrowseNow());
     btnIngest.addStyleName("btn btn-link-info");
@@ -111,6 +112,17 @@ public class BrowseNavigationPanel {
           messages.SIARDHomePageTextForIngestNotSupported(), messages.basicActionUnderstood(), "btn btn-link");
       }
     });
+  }
+
+  public NavigationPanel build() {
+    // Browser now Button
+    browseButton();
+
+    // Delete Button
+    deleteButton();
+
+    // Ingest Button
+    ingestButton();
 
     NavigationPanel browse = NavigationPanel.createInstance(messages.SIARDHomePageOptionsHeaderForBrowsing());
 

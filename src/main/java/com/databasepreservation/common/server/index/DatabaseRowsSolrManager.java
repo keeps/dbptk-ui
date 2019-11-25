@@ -384,9 +384,11 @@ public class DatabaseRowsSolrManager {
       Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATION_STATUS, validationStatus.toString()));
   }
 
-  public void updateSIARDValidationIndicators(String databaseUUID, String passed, String errors, String warnings,
+  public void updateSIARDValidationIndicators(String databaseUUID, String passed, String ok, String failed, String errors, String warnings,
     String skipped) {
     updateValidationFields(databaseUUID, Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATION_PASSED, passed),
+      Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATION_OK, ok),
+        Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATION_FAILED, failed),
       Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATION_ERRORS, errors),
       Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATION_WARNINGS, warnings),
       Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATION_SKIPPED, skipped));

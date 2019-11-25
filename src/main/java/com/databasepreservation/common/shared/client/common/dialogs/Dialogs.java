@@ -297,6 +297,7 @@ public class Dialogs {
 
     layoutTop.add(validator.reporterValidatorPanel());
     layoutTop.add(validator.udtValidatorPanel());
+    layoutTop.add(validator.additionalChecksPanel());
     layoutTop.addStyleName("validator-dialog-layout-body");
     layoutBottom.add(footer);
     layout.add(layoutTop);
