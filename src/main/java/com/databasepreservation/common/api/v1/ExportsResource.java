@@ -12,10 +12,10 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.databasepreservation.common.client.index.IndexResult;
 import org.apache.commons.lang3.StringUtils;
 import org.roda.core.data.exceptions.RODAException;
 import org.roda.core.data.utils.JsonUtils;
-import org.roda.core.data.v2.index.IndexResult;
 import org.roda.core.data.v2.index.filter.Filter;
 import org.roda.core.data.v2.index.sort.Sorter;
 import org.roda.core.data.v2.index.sublist.Sublist;
@@ -32,10 +32,10 @@ import com.databasepreservation.common.api.v1.utils.ZipOutputStream;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
 import com.databasepreservation.common.server.index.utils.IterableIndexResult;
-import com.databasepreservation.common.shared.ViewerConstants;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerRow;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerTable;
+import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.structure.ViewerRow;
+import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.utils.UserUtility;
 
 import io.swagger.annotations.Api;

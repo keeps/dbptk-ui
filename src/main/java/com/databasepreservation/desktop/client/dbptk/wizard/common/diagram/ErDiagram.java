@@ -6,14 +6,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import com.databasepreservation.common.shared.ViewerConstants;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerForeignKey;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerMetadata;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerSchema;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerTable;
-import com.databasepreservation.common.shared.client.common.LoadingDiv;
-import com.databasepreservation.common.shared.client.tools.HistoryManager;
-import com.databasepreservation.common.shared.client.tools.ViewerStringUtils;
+import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
+import com.databasepreservation.common.client.models.structure.ViewerMetadata;
+import com.databasepreservation.common.client.models.structure.ViewerSchema;
+import com.databasepreservation.common.client.models.structure.ViewerTable;
+import com.databasepreservation.common.client.common.LoadingDiv;
+import com.databasepreservation.common.client.tools.HistoryManager;
+import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.github.nmorel.gwtjackson.client.ObjectMapper;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.logical.shared.AttachEvent;
@@ -73,7 +73,7 @@ public class ErDiagram extends Composite {
     initWidget(uiBinder.createAndBindUi(this));
 
     for (ViewerSchema schema : metadata.getSchemas()) {
-      String schemaUUID = schema.getUUID();
+      String schemaUUID = schema.getUuid();
 
       final SimplePanel diagram = new SimplePanel();
       diagram.addStyleName("erdiagram");
@@ -565,9 +565,9 @@ public class ErDiagram extends Composite {
           var tableuuid = params.nodes[0];
           network.unselectAll();
           if(path === "create"){
-            @com.databasepreservation.common.shared.client.tools.HistoryManager::gotoCreateSIARDErDiagram(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)(wizardPage, toSelect, schemaUUID, tableuuid);
+            @com.databasepreservation.common.client.tools.HistoryManager::gotoCreateSIARDErDiagram(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)(wizardPage, toSelect, schemaUUID, tableuuid);
           } else if(path === "migrate-to-siard" ) {
-            @com.databasepreservation.common.shared.client.tools.HistoryManager::gotoSendToLiveDBMSExportFormatErDiagram(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)(databaseUUID, wizardPage, toSelect, schemaUUID, tableuuid);
+            @com.databasepreservation.common.client.tools.HistoryManager::gotoSendToLiveDBMSExportFormatErDiagram(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)(databaseUUID, wizardPage, toSelect, schemaUUID, tableuuid);
           }
         }
       });

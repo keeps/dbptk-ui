@@ -9,7 +9,7 @@ import org.apache.commons.io.IOUtils;
 import org.roda.core.data.exceptions.NotFoundException;
 
 import com.databasepreservation.common.api.common.ConsumesOutputStream;
-import com.databasepreservation.common.shared.ViewerConstants;
+import com.databasepreservation.common.client.ViewerConstants;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>

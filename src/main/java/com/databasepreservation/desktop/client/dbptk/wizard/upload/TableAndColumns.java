@@ -1,37 +1,31 @@
 package com.databasepreservation.desktop.client.dbptk.wizard.upload;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import com.databasepreservation.common.client.BrowserService;
-import com.databasepreservation.common.shared.ViewerConstants;
-import com.databasepreservation.common.shared.ViewerStructure.IsIndexed;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerColumn;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerMetadata;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerSchema;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerTable;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerView;
-import com.databasepreservation.common.shared.client.common.DefaultAsyncCallback;
-import com.databasepreservation.common.shared.client.common.desktop.ComboBoxField;
-import com.databasepreservation.common.shared.client.common.desktop.FileUploadField;
-import com.databasepreservation.common.shared.client.common.desktop.GenericField;
-import com.databasepreservation.common.shared.client.common.dialogs.Dialogs;
-import com.databasepreservation.common.shared.client.common.lists.MultipleSelectionTablePanel;
-import com.databasepreservation.common.shared.client.common.utils.ApplicationType;
-import com.databasepreservation.common.shared.client.common.utils.JavascriptUtils;
-import com.databasepreservation.common.shared.client.tools.HistoryManager;
-import com.databasepreservation.common.shared.client.tools.JSOUtils;
-import com.databasepreservation.common.shared.client.tools.PathUtils;
-import com.databasepreservation.common.shared.client.tools.ViewerStringUtils;
-import com.databasepreservation.common.shared.client.widgets.Toast;
-import com.databasepreservation.common.shared.models.ExternalLobsDialogBoxResult;
-import com.databasepreservation.common.shared.models.wizardParameters.ConnectionParameters;
-import com.databasepreservation.common.shared.models.wizardParameters.ExternalLOBsParameter;
-import com.databasepreservation.common.shared.models.wizardParameters.TableAndColumnsParameters;
+import com.databasepreservation.common.client.models.ExternalLobsDialogBoxResult;
+import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.index.IsIndexed;
+import com.databasepreservation.common.client.models.structure.ViewerColumn;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.structure.ViewerMetadata;
+import com.databasepreservation.common.client.models.structure.ViewerSchema;
+import com.databasepreservation.common.client.models.structure.ViewerTable;
+import com.databasepreservation.common.client.models.structure.ViewerView;
+import com.databasepreservation.common.client.common.DefaultAsyncCallback;
+import com.databasepreservation.common.client.common.desktop.ComboBoxField;
+import com.databasepreservation.common.client.common.desktop.FileUploadField;
+import com.databasepreservation.common.client.common.desktop.GenericField;
+import com.databasepreservation.common.client.common.dialogs.Dialogs;
+import com.databasepreservation.common.client.common.lists.MultipleSelectionTablePanel;
+import com.databasepreservation.common.client.common.utils.ApplicationType;
+import com.databasepreservation.common.client.common.utils.JavascriptUtils;
+import com.databasepreservation.common.client.tools.HistoryManager;
+import com.databasepreservation.common.client.tools.JSOUtils;
+import com.databasepreservation.common.client.tools.PathUtils;
+import com.databasepreservation.common.client.tools.ViewerStringUtils;
+import com.databasepreservation.common.client.widgets.Toast;
+import com.databasepreservation.common.client.models.parameters.ConnectionParameters;
+import com.databasepreservation.common.client.models.parameters.ExternalLOBsParameter;
+import com.databasepreservation.common.client.models.parameters.TableAndColumnsParameters;
+import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.desktop.client.common.sidebar.TableAndColumnsSendToSidebar;
 import com.databasepreservation.desktop.client.common.sidebar.TableAndColumnsSidebar;
 import com.databasepreservation.desktop.client.dbptk.wizard.WizardPanel;
@@ -60,8 +54,13 @@ import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.MultiSelectionModel;
-
 import config.i18n.client.ClientMessages;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -138,26 +137,20 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
 
     content.add(spinner);
 
-    BrowserService.Util.getInstance().retrieve(databaseUUID, ViewerDatabase.class.getName(), databaseUUID, new DefaultAsyncCallback<IsIndexed>() {
-      @Override
-      public void onSuccess(IsIndexed result) {
-        ViewerDatabase database = (ViewerDatabase) result;
-        metadata = database.getMetadata();
-        tableAndColumnsSendToSidebar = TableAndColumnsSendToSidebar.newInstance(databaseUUID, metadata);
-        tableAndColumnsList.add(tableAndColumnsSendToSidebar);
-        initTables();
+    DatabaseService.Util.call((IsIndexed result) -> {
+      ViewerDatabase database = (ViewerDatabase) result;
+      metadata = database.getMetadata();
+      tableAndColumnsSendToSidebar = TableAndColumnsSendToSidebar.newInstance(databaseUUID, metadata);
+      tableAndColumnsList.add(tableAndColumnsSendToSidebar);
+      initTables();
 
-        content.remove(spinner);
-        sideBarHighlighter(TableAndColumnsSendToSidebar.DATABASE_LINK,null,null);
-      }
-
-      @Override
-      public void onFailure(Throwable caught) {
-        content.remove(spinner);
-        HistoryManager.gotoSIARDInfo(databaseUUID);
-        Dialogs.showErrors(messages.tableAndColumnsPageTitle(), caught.getMessage(), messages.basicActionClose());
-      }
-    });
+      content.remove(spinner);
+      sideBarHighlighter(TableAndColumnsSendToSidebar.DATABASE_LINK, null, null);
+    }, (String errorMessage) -> {
+      content.remove(spinner);
+      HistoryManager.gotoSIARDInfo(databaseUUID);
+      Dialogs.showErrors(messages.tableAndColumnsPageTitle(), errorMessage, messages.basicActionClose());
+    }).retrieve(databaseUUID, databaseUUID);
   }
 
   private TableAndColumns(String databaseUUID, ConnectionParameters values) {
@@ -167,29 +160,21 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
     this.doSSH = values.doSSH();
     final DialogBox dialogBox = Dialogs.showWaitResponse(messages.tableAndColumnsPageDialogTitleForRetrievingInformation(), messages.tableAndColumnsPageDialogMessageForRetrievingInformation());
     CreateWizardManager.getInstance().enableNext(false);
-    BrowserService.Util.getInstance().getSchemaInformation(databaseUUID, values,
-      new DefaultAsyncCallback<String>() {
-        @Override
-        public void onSuccess(String result) {
-          GWT.log("" + result);
-          ViewerMetadataMapper mapper = GWT.create(ViewerMetadataMapper.class);
-          metadata = mapper.read(result);
-          tableAndColumnsSidebar = TableAndColumnsSidebar.newInstance(metadata);
-          tableAndColumnsList.add(tableAndColumnsSidebar);
 
-          initTables();
-
-          sideBarHighlighter(TableAndColumnsSidebar.DATABASE_LINK,null,null);
-          dialogBox.hide();
-          CreateWizardManager.getInstance().enableNext(true);
-        }
-
-        @Override
-        public void onFailure(Throwable caught) {
-          dialogBox.hide();
-          Dialogs.showErrors(messages.tableAndColumnsPageTitle(), caught.getMessage(), messages.basicActionClose());
-        }
-      });
+    DatabaseService.Util.call((ViewerMetadata metadata) -> {
+      this.metadata = metadata;
+      GWT.log("schema size:" + metadata.getSchemas().size());
+      GWT.log("tables size:" + metadata.getSchemas().get(0).getTables().size());
+      tableAndColumnsSidebar = TableAndColumnsSidebar.newInstance(metadata);
+      tableAndColumnsList.add(tableAndColumnsSidebar);
+      initTables();
+      sideBarHighlighter(TableAndColumnsSidebar.DATABASE_LINK,null,null);
+      dialogBox.hide();
+      CreateWizardManager.getInstance().enableNext(true);
+    }, (String errorMessage) -> {
+      dialogBox.hide();
+      Dialogs.showErrors(messages.tableAndColumnsPageTitle(), errorMessage, messages.basicActionClose());
+    }).getSchemaInformation(values);
   }
 
   @Override
@@ -320,16 +305,16 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
       if (!schema.getTables().isEmpty()) {
         MultipleSelectionTablePanel<ViewerTable> schemaTable = createCellTableForViewerTable();
         schemaTable.setHeight("70vh");
-        populateTable(schemaTable, metadata.getSchema(schema.getUUID()));
-        tables.put(schema.getUUID(), schemaTable);
+        populateTable(schemaTable, metadata.getSchema(schema.getUuid()));
+        tables.put(schema.getUuid(), schemaTable);
       }
 
       if (!schema.getViews().isEmpty()) {
         MultipleSelectionTablePanel<ViewerView> schemaViews = createCellTableForViewerView();
         schemaViews.setHeight("70vh");
-        populateViews(schemaViews, metadata.getSchema(schema.getUUID()));
-        metadata.getSchema(schema.getUUID()).setViewsSchemaUUID();
-        views.put(schema.getUUID(), schemaViews);
+        populateViews(schemaViews, metadata.getSchema(schema.getUuid()));
+        metadata.getSchema(schema.getUuid()).setViewsSchemaUUID();
+        views.put(schema.getUuid(), schemaViews);
       }
 
       for (ViewerTable vTable : schema.getTables()) {
@@ -341,8 +326,8 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
       for (ViewerView vView : schema.getViews()) {
         MultipleSelectionTablePanel<ViewerColumn> viewColumns = createCellTableForViewerColumn();
         viewColumns.setHeight("70vh");
-        populateViewColumns(viewColumns, metadata.getView(vView.getUUID()));
-        columns.put(vView.getUUID(), viewColumns);
+        populateViewColumns(viewColumns, metadata.getView(vView.getUuid()));
+        columns.put(vView.getUuid(), viewColumns);
       }
     }
   }
@@ -356,7 +341,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
       }
       for (ViewerView vView : schema.getViews()) {
         for (ViewerColumn column : vView.getColumns()) {
-          initialLoading.put(vView.getUUID() + column.getDisplayName(), true);
+          initialLoading.put(vView.getUuid() + column.getDisplayName(), true);
         }
       }
     }
@@ -485,25 +470,25 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
     String key) {
     if (viewerView.getColumns().size() == selectionTablePanel.getSelectionModel().getSelectedSet().size()) {
       map.put(key, false);
-      toggleSelectionButton(SELECT_COLUMNS_VIEW + viewerView.getSchemaUUID() + viewerView.getUUID(), map, key);
+      toggleSelectionButton(SELECT_COLUMNS_VIEW + viewerView.getSchemaUUID() + viewerView.getUuid(), map, key);
     }
     if (selectionTablePanel.getSelectionModel().isSelected(column)) {
-      viewSelectedStatus.put(viewerView.getUUID(), true);
+      viewSelectedStatus.put(viewerView.getUuid(), true);
       viewerTableMultipleSelectionTablePanel.getSelectionModel().setSelected(viewerView, true);
     } else {
-      if (initialLoading.get(viewerView.getUUID() + column.getDisplayName())) {
-        viewSelectedStatus.put(viewerView.getUUID(), true);
+      if (initialLoading.get(viewerView.getUuid() + column.getDisplayName())) {
+        viewSelectedStatus.put(viewerView.getUuid(), true);
         viewerTableMultipleSelectionTablePanel.getSelectionModel().setSelected(viewerView, true);
         selectionTablePanel.getSelectionModel().setSelected(column, true);
-        initialLoading.put(viewerView.getUUID() + column.getDisplayName(), false);
+        initialLoading.put(viewerView.getUuid() + column.getDisplayName(), false);
       }
     }
 
     if (selectionTablePanel.getSelectionModel().getSelectedSet().size() == 0) {
       map.put(key, true);
-      toggleSelectionButton(SELECT_COLUMNS_VIEW + viewerView.getSchemaUUID() + viewerView.getUUID(), map, key);
+      toggleSelectionButton(SELECT_COLUMNS_VIEW + viewerView.getSchemaUUID() + viewerView.getUuid(), map, key);
       viewerTableMultipleSelectionTablePanel.getSelectionModel().setSelected(viewerView, false);
-      viewSelectedStatus.put(viewerView.getUUID(), false);
+      viewSelectedStatus.put(viewerView.getUuid(), false);
     }
 
     return selectionTablePanel.getSelectionModel().isSelected(column);
@@ -515,7 +500,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
     header.addStyleName("h1");
 
     selectionTablePanel.createTable(header,
-      getSelectPanel(SELECT_COLUMNS_VIEW, viewerView.getSchemaUUID(), viewerView.getUUID()),
+      getSelectPanel(SELECT_COLUMNS_VIEW, viewerView.getSchemaUUID(), viewerView.getUuid()),
       viewerView.getColumns().iterator(),
       new MultipleSelectionTablePanel.ColumnInfo<>("", 4,
         new Column<ViewerColumn, Boolean>(new CheckboxCell(true, true)) {
@@ -524,7 +509,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
             MultipleSelectionTablePanel<ViewerView> viewerTableMultipleSelectionTablePanel = getView(
               viewerView.getSchemaUUID());
             return cellTableSelectionColumnHelper(viewerView, selectionTablePanel, viewerColumn,
-              viewerTableMultipleSelectionTablePanel, toggleSelectionColumnsMap, viewerView.getUUID());
+              viewerTableMultipleSelectionTablePanel, toggleSelectionColumnsMap, viewerView.getUuid());
           }
         }),
       new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForColumnName(), 10,
@@ -545,19 +530,19 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
 
   private void populateViews(MultipleSelectionTablePanel<ViewerView> selectionTablePanel,
     final ViewerSchema viewerSchema) {
-    selectionTablePanel.createTable(getSelectPanel(SELECT_VIEWS, viewerSchema.getUUID()),
+    selectionTablePanel.createTable(getSelectPanel(SELECT_VIEWS, viewerSchema.getUuid()),
       viewerSchema.getViews().iterator(),
       new MultipleSelectionTablePanel.ColumnInfo<>("", 4,
         new Column<ViewerView, Boolean>(new CheckboxCell(true, true)) {
           @Override
           public Boolean getValue(ViewerView viewerView) {
-            MultipleSelectionTablePanel<ViewerColumn> viewerColumnTablePanel = getColumns(viewerView.getUUID());
+            MultipleSelectionTablePanel<ViewerColumn> viewerColumnTablePanel = getColumns(viewerView.getUuid());
             if (viewerSchema.getViews().size() == selectionTablePanel.getSelectionModel().getSelectedSet().size()) {
               //toggleSelectionButton(SELECT_VIEWS + viewerSchema.getUUID(), toggleSelectionViewsMap, viewerView.getUUID());
             }
             if (selectionTablePanel.getSelectionModel().isSelected(viewerView)) {
-              if (viewSelectedStatus.get(viewerView.getUUID()) != null
-                && !viewSelectedStatus.get(viewerView.getUUID())) {
+              if (viewSelectedStatus.get(viewerView.getUuid()) != null
+                && !viewSelectedStatus.get(viewerView.getUuid())) {
                 for (ViewerColumn column : viewerView.getColumns()) {
                   viewerColumnTablePanel.getSelectionModel().setSelected(column, true);
                 }
@@ -588,7 +573,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
 
   private void populateTable(MultipleSelectionTablePanel<ViewerTable> selectionTablePanel,
     final ViewerSchema viewerSchema) {
-    selectionTablePanel.createTable(getSelectPanel(SELECT_TABLES, viewerSchema.getUUID()), viewerSchema.getTables().iterator(),
+    selectionTablePanel.createTable(getSelectPanel(SELECT_TABLES, viewerSchema.getUuid()), viewerSchema.getTables().iterator(),
       new MultipleSelectionTablePanel.ColumnInfo<>("", 4,
         new Column<ViewerTable, Boolean>(new CheckboxCell(true, true)) {
           @Override

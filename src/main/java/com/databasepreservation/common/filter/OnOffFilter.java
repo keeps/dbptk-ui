@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.server.ViewerFactory;
-import com.databasepreservation.common.shared.ViewerConstants;
+import com.databasepreservation.common.client.ViewerConstants;
 
 /**
  * A filter that can be turned on/off using RODA configuration file.

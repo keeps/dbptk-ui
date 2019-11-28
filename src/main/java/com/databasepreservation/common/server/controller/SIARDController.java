@@ -1,7 +1,7 @@
 package com.databasepreservation.common.server.controller;
 
-import static com.databasepreservation.common.shared.ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX;
-import static com.databasepreservation.common.shared.ViewerConstants.SOLR_SEARCHES_DATABASE_UUID;
+import static com.databasepreservation.common.client.ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX;
+import static com.databasepreservation.common.client.ViewerConstants.SOLR_SEARCHES_DATABASE_UUID;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -26,6 +26,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
+import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
+import com.databasepreservation.common.client.models.parameters.SIARDUpdateParameters;
+import com.databasepreservation.model.NoOpReporter;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
@@ -49,26 +53,25 @@ import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
 import com.databasepreservation.common.server.index.factory.SolrClientFactory;
 import com.databasepreservation.common.server.index.schema.SolrDefaultCollectionRegistry;
-import com.databasepreservation.common.server.index.utils.JsonTransformer;
 import com.databasepreservation.common.server.index.utils.SolrUtils;
-import com.databasepreservation.common.shared.ViewerConstants;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerColumn;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabaseFromToolkit;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerMetadata;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerSIARDBundle;
-import com.databasepreservation.common.shared.client.common.search.SavedSearch;
-import com.databasepreservation.common.shared.models.DBPTKModule;
-import com.databasepreservation.common.shared.models.ExternalLobDBPTK;
-import com.databasepreservation.common.shared.models.PreservationParameter;
-import com.databasepreservation.common.shared.models.SSHConfiguration;
-import com.databasepreservation.common.shared.models.wizardParameters.ConnectionParameters;
-import com.databasepreservation.common.shared.models.wizardParameters.CustomViewsParameter;
-import com.databasepreservation.common.shared.models.wizardParameters.CustomViewsParameters;
-import com.databasepreservation.common.shared.models.wizardParameters.ExportOptionsParameters;
-import com.databasepreservation.common.shared.models.wizardParameters.ExternalLOBsParameter;
-import com.databasepreservation.common.shared.models.wizardParameters.MetadataExportOptionsParameters;
-import com.databasepreservation.common.shared.models.wizardParameters.TableAndColumnsParameters;
+import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.models.structure.ViewerColumn;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.structure.ViewerDatabaseFromToolkit;
+import com.databasepreservation.common.client.models.structure.ViewerMetadata;
+import com.databasepreservation.common.client.models.structure.ViewerSIARDBundle;
+import com.databasepreservation.common.client.common.search.SavedSearch;
+import com.databasepreservation.common.client.models.DBPTKModule;
+import com.databasepreservation.common.client.models.ExternalLobDBPTK;
+import com.databasepreservation.common.client.models.parameters.PreservationParameter;
+import com.databasepreservation.common.client.models.parameters.SSHConfiguration;
+import com.databasepreservation.common.client.models.parameters.ConnectionParameters;
+import com.databasepreservation.common.client.models.parameters.CustomViewsParameter;
+import com.databasepreservation.common.client.models.parameters.CustomViewsParameters;
+import com.databasepreservation.common.client.models.parameters.ExportOptionsParameters;
+import com.databasepreservation.common.client.models.parameters.ExternalLOBsParameter;
+import com.databasepreservation.common.client.models.parameters.MetadataExportOptionsParameters;
+import com.databasepreservation.common.client.models.parameters.TableAndColumnsParameters;
 import com.databasepreservation.common.transformers.ToolkitStructure2ViewerStructure;
 import com.databasepreservation.model.Reporter;
 import com.databasepreservation.model.exception.ModuleException;
@@ -110,9 +113,9 @@ public class SIARDController {
     return result;
   }
 
-  public static List<List<String>> validateCustomViewQuery(String databaseUUID, ConnectionParameters parameters,
+  public static List<List<String>> validateCustomViewQuery(ConnectionParameters parameters,
     String query) throws GenericException {
-    Reporter reporter = getReporter(databaseUUID);
+    Reporter reporter = new NoOpReporter();
     List<List<String>> results = new ArrayList<>();
     final DatabaseMigration databaseMigration = initializeDatabaseMigration(reporter);
 
@@ -132,13 +135,12 @@ public class SIARDController {
     return results;
   }
 
-  public static boolean testConnection(String databaseUUID, String parametersJson) throws GenericException {
-    Reporter reporter = getReporter(databaseUUID);
+  public static boolean testConnection(ConnectionParameters parameters) throws GenericException {
+    NoOpReporter reporter = new NoOpReporter();
     final DatabaseMigration databaseMigration = initializeDatabaseMigration(reporter);
 
     try {
-      setupJDBCConnection(databaseMigration,
-        JsonTransformer.getObjectFromJson(parametersJson, ConnectionParameters.class));
+      setupJDBCConnection(databaseMigration, parameters);
 
       DatabaseImportModule importModule = databaseMigration.getImportModule();
       importModule.setOnceReporter(reporter);
@@ -206,7 +208,7 @@ public class SIARDController {
       final DatabaseModuleFactory exportModuleFactory = getDatabaseExportModuleFactory(
         connectionParameters.getModuleName());
       setupExportModuleSSHConfiguration(databaseMigration, connectionParameters);
-      for (Map.Entry<String, String> entry : connectionParameters.getJDBCConnectionParameters().getConnection()
+      for (Map.Entry<String, String> entry : connectionParameters.getJdbcParameters().getConnection()
         .entrySet()) {
         LOGGER.info("Connection Options - {} -> {}", entry.getKey(), entry.getValue());
         databaseMigration.exportModuleParameter(entry.getKey(), entry.getValue());
@@ -258,7 +260,7 @@ public class SIARDController {
       throw new GenericException("Could not load the driver", e);
     }
 
-    for (Map.Entry<String, String> entry : connectionParameters.getJDBCConnectionParameters().getConnection()
+    for (Map.Entry<String, String> entry : connectionParameters.getJdbcParameters().getConnection()
       .entrySet()) {
       LOGGER.info("Connection Options: {} -> {}", entry.getKey(), entry.getValue());
       databaseMigration.importModuleParameter(entry.getKey(), entry.getValue());
@@ -304,9 +306,9 @@ public class SIARDController {
     return true;
   }
 
-  public static String getDatabaseMetadata(String databaseUUID, ConnectionParameters parameters)
+  public static ViewerMetadata getDatabaseMetadata(ConnectionParameters parameters)
     throws GenericException {
-    final Reporter reporter = getReporter(databaseUUID);
+    final Reporter reporter = new NoOpReporter();
     final DatabaseMigration databaseMigration = initializeDatabaseMigration(reporter);
     setupJDBCConnection(databaseMigration, parameters);
 
@@ -319,31 +321,22 @@ public class SIARDController {
       if (importModule instanceof JDBCImportModule) {
         JDBCImportModule jdbcImportModule = (JDBCImportModule) importModule;
         schemaInformation = jdbcImportModule
-          .getSchemaInformation(parameters.getJDBCConnectionParameters().shouldCountRows());
+          .getSchemaInformation(parameters.getJdbcParameters().shouldCountRows());
         jdbcImportModule.closeConnection();
       }
     } catch (ModuleException e) {
       throw new GenericException(e.getMessage());
     }
-    ViewerDatabaseFromToolkit database = null;
+
     try {
-      database = ToolkitStructure2ViewerStructure.getDatabase(schemaInformation);
+      ViewerDatabaseFromToolkit database = ToolkitStructure2ViewerStructure.getDatabase(schemaInformation);
+      return database.getMetadata();
     } catch (ViewerException e) {
-      LOGGER.debug(e.getMessage());
+      throw new GenericException(e.getMessage());
     }
-
-    if (database != null) {
-      try {
-        return JsonTransformer.getJsonFromObject(database.getMetadata());
-      } catch (ViewerException e) {
-        throw new GenericException(e.getMessage());
-      }
-    }
-
-    return null;
   }
 
-  public static String getSIARDExportModule(String moduleName) throws GenericException {
+  public static DBPTKModule getSIARDExportModule(String moduleName) throws GenericException {
 
     DBPTKModule dbptkModule = new DBPTKModule();
 
@@ -355,18 +348,14 @@ public class SIARDController {
     try {
       final Parameters exportModuleParameters = factory.getExportModuleParameters();
       getParameters(dbptkModule, factory.getModuleName(), exportModuleParameters);
-    } catch (UnsupportedModuleException e) {
-      throw new GenericException(e);
-    }
 
-    try {
-      return JsonTransformer.getJsonFromObject(dbptkModule);
-    } catch (ViewerException e) {
+      return dbptkModule;
+    } catch (UnsupportedModuleException e) {
       throw new GenericException(e);
     }
   }
 
-  public static String getSIARDExportModules() throws GenericException {
+  public static DBPTKModule getSIARDExportModules() throws GenericException {
     DBPTKModule dbptkModule = new DBPTKModule();
 
     Set<DatabaseModuleFactory> databaseModuleFactories = ReflectionUtils.collectDatabaseModuleFactories();
@@ -384,14 +373,10 @@ public class SIARDController {
       }
     }
 
-    try {
-      return JsonTransformer.getJsonFromObject(dbptkModule);
-    } catch (ViewerException e) {
-      throw new GenericException(e);
-    }
+    return dbptkModule;
   }
 
-  public static String getDatabaseExportModules() throws GenericException {
+  public static DBPTKModule getDatabaseExportModules() throws GenericException {
     DBPTKModule dbptkModule = new DBPTKModule();
     Set<DatabaseModuleFactory> databaseModuleFactories = ReflectionUtils.collectDatabaseModuleFactories();
     for (DatabaseModuleFactory factory : databaseModuleFactories) {
@@ -402,14 +387,11 @@ public class SIARDController {
         getDatabaseModulesParameters(factory, dbptkModule);
       }
     }
-    try {
-      return JsonTransformer.getJsonFromObject(dbptkModule);
-    } catch (ViewerException e) {
-      throw new GenericException(e);
-    }
+
+    return dbptkModule;
   }
 
-  public static String getDatabaseImportModules() throws GenericException {
+  public static DBPTKModule getDatabaseImportModules() throws GenericException {
     DBPTKModule dbptkModule = new DBPTKModule();
     Set<DatabaseModuleFactory> databaseModuleFactories = ReflectionUtils.collectDatabaseModuleFactories();
     for (DatabaseModuleFactory factory : databaseModuleFactories) {
@@ -419,11 +401,7 @@ public class SIARDController {
       }
     }
 
-    try {
-      return JsonTransformer.getJsonFromObject(dbptkModule);
-    } catch (ViewerException e) {
-      throw new GenericException(e);
-    }
+    return dbptkModule;
   }
 
   public static String loadMetadataFromLocal(String localPath) throws GenericException {
@@ -461,7 +439,7 @@ public class SIARDController {
 
       ViewerDatabase viewerDatabase = new ViewerDatabase();
 
-      viewerDatabase.setStatus(ViewerDatabase.Status.METADATA_ONLY);
+      viewerDatabase.setStatus(ViewerDatabaseStatus.METADATA_ONLY);
       viewerDatabase.setCurrentSchemaName("");
       viewerDatabase.setCurrentTableName("");
 
@@ -473,12 +451,12 @@ public class SIARDController {
       viewerDatabase.setTotalTables(0);
       viewerDatabase.setTotalRows(0);
 
-      viewerDatabase.setUUID(databaseUUID);
+      viewerDatabase.setUuid(databaseUUID);
 
-      viewerDatabase.setSIARDPath(siardPath.toAbsolutePath().toString());
-      viewerDatabase.setSIARDSize(siardPath.toFile().length());
-      viewerDatabase.setSIARDVersion(siardEdition.getSIARDVersion());
-      viewerDatabase.setValidationStatus(ViewerDatabase.ValidationStatus.NOT_VALIDATED);
+      viewerDatabase.setPath(siardPath.toAbsolutePath().toString());
+      viewerDatabase.setSize(siardPath.toFile().length());
+      viewerDatabase.setVersion(siardEdition.getSIARDVersion());
+      viewerDatabase.setValidationStatus(ViewerDatabaseValidationStatus.NOT_VALIDATED);
 
       final ViewerDatabaseFromToolkit database = ToolkitStructure2ViewerStructure.getDatabase(metadata);
 
@@ -553,19 +531,20 @@ public class SIARDController {
     }
   }
 
-  public static ViewerMetadata updateMetadataInformation(ViewerMetadata metadata, ViewerSIARDBundle bundleSiard,
-    String databaseUUID, String siardPath) throws GenericException {
+  public static ViewerMetadata updateMetadataInformation(String databaseUUID, String siardPath, SIARDUpdateParameters parameters) throws GenericException {
 
     Path reporterPath = ViewerConfiguration.getInstance().getReportPath(databaseUUID).toAbsolutePath();
+    ViewerMetadata metadata = parameters.getMetadata();
     try (Reporter reporter = new Reporter(reporterPath.getParent().toString(), reporterPath.getFileName().toString())) {
 
+      ViewerSIARDBundle bundleSiard = parameters.getSiardBundle();
       if (new File(siardPath).isFile()) {
         LOGGER.info("Updating {}", siardPath);
         SIARDEdition siardEdition = SIARDEdition.newInstance();
 
         siardEdition.editModule(new SIARDEditFactory())
           .editModuleParameter(SIARDEditFactory.PARAMETER_FILE, Collections.singletonList(siardPath))
-          .editModuleParameter(SIARDEditFactory.PARAMETER_SET, bundleSiard.getCommandList());
+          .editModuleParameter(SIARDEditFactory.PARAMETER_SET, bundleSiard.getCommandMapAsList());
 
         siardEdition.reporter(reporter);
         siardEdition.edit();
@@ -611,7 +590,7 @@ public class SIARDController {
       try {
         String dbptkVersion = ViewerConfiguration.getInstance().getDBPTKVersion();
         final DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
-        solrManager.updateSIARDValidationInformation(databaseUUID, ViewerDatabase.ValidationStatus.VALIDATION_RUNNING,
+        solrManager.updateSIARDValidationInformation(databaseUUID, ViewerDatabaseValidationStatus.VALIDATION_RUNNING,
           validationReportPath, dbptkVersion, new DateTime().toString());
 
         System.setProperty("dbptk.memory.dir",
@@ -619,21 +598,21 @@ public class SIARDController {
 
         valid = siardValidation.validate();
 
-        ViewerDatabase.ValidationStatus status;
+        ViewerDatabaseValidationStatus status;
 
         if (valid) {
-          status = ViewerDatabase.ValidationStatus.VALIDATION_SUCCESS;
+          status = ViewerDatabaseValidationStatus.VALIDATION_SUCCESS;
         } else {
-          status = ViewerDatabase.ValidationStatus.VALIDATION_FAILED;
+          status = ViewerDatabaseValidationStatus.VALIDATION_FAILED;
         }
 
         solrManager.updateSIARDValidationInformation(databaseUUID, status, validationReportPath, dbptkVersion,
           new DateTime().toString());
       } catch (IOException e) {
-        updateStatusValidate(databaseUUID, ViewerDatabase.ValidationStatus.ERROR);
+        updateStatusValidate(databaseUUID, ViewerDatabaseValidationStatus.ERROR);
         throw new GenericException("Failed to obtain the DBPTK version from properties", e);
       } catch (ModuleException e) {
-        updateStatusValidate(databaseUUID, ViewerDatabase.ValidationStatus.ERROR);
+        updateStatusValidate(databaseUUID, ViewerDatabaseValidationStatus.ERROR);
         if (e instanceof SIARDVersionNotSupportedException) {
           LOGGER.error("{}: {}", e.getMessage(), ((SIARDVersionNotSupportedException) e).getVersionInfo());
           throw new GenericException(e.getMessage() + ": " + ((SIARDVersionNotSupportedException) e).getVersionInfo());
@@ -641,7 +620,7 @@ public class SIARDController {
         throw new GenericException(e);
       }
     } catch (IOException e) {
-      updateStatusValidate(databaseUUID, ViewerDatabase.ValidationStatus.ERROR);
+      updateStatusValidate(databaseUUID, ViewerDatabaseValidationStatus.ERROR);
       throw new GenericException("Could not initialize the validate module.", e);
     }
 
@@ -654,7 +633,7 @@ public class SIARDController {
     solrManager.updateSIARDValidationIndicators(databaseUUID, passed, ok, errors, failed, warnings, skipped);
   }
 
-  public static void updateStatusValidate(String databaseUUID, ViewerDatabase.ValidationStatus status) {
+  public static void updateStatusValidate(String databaseUUID, ViewerDatabaseValidationStatus status) {
     final DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
     solrManager.updateSIARDValidationInformation(databaseUUID, status, null, null, new DateTime().toString());
 
@@ -666,7 +645,7 @@ public class SIARDController {
       ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
 
       if (System.getProperty("env", "server").equals(ViewerConstants.SERVER)) {
-        String siardPath = database.getSIARDPath();
+        String siardPath = database.getPath();
         if (StringUtils.isNotBlank(siardPath) && Paths.get(siardPath).toFile().exists()) {
           deleteSIARDFileFromPath(siardPath, databaseUUID);
         }
@@ -677,15 +656,15 @@ public class SIARDController {
         deleteValidatorReportFileFromPath(reportPath, databaseUUID);
       }
 
-      if (database.getStatus().equals(ViewerDatabase.Status.AVAILABLE)
-        || database.getStatus().equals(ViewerDatabase.Status.ERROR)) {
+      if (database.getStatus().equals(ViewerDatabaseStatus.AVAILABLE)
+        || database.getStatus().equals(ViewerDatabaseStatus.ERROR)) {
         final String collectionName = SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + databaseUUID;
         if (SolrClientFactory.get().deleteCollection(collectionName)) {
           Filter savedSearchFilter = new Filter(new SimpleFilterParameter(SOLR_SEARCHES_DATABASE_UUID, databaseUUID));
           SolrUtils.delete(ViewerFactory.getSolrClient(), SolrDefaultCollectionRegistry.get(SavedSearch.class),
             savedSearchFilter);
 
-          ViewerFactory.getSolrManager().markDatabaseCollection(databaseUUID, ViewerDatabase.Status.METADATA_ONLY);
+          ViewerFactory.getSolrManager().markDatabaseCollection(databaseUUID, ViewerDatabaseStatus.METADATA_ONLY);
         }
       }
       ViewerFactory.getSolrManager().deleteDatabasesCollection(databaseUUID);
@@ -723,7 +702,7 @@ public class SIARDController {
     try {
       Files.delete(path);
       LOGGER.info("SIARD validator report file removed from system ({})", path.toAbsolutePath());
-      updateStatusValidate(databaseUUID, ViewerDatabase.ValidationStatus.NOT_VALIDATED);
+      updateStatusValidate(databaseUUID, ViewerDatabaseValidationStatus.NOT_VALIDATED);
       updateSIARDValidatorIndicators(databaseUUID, null, null, null, null, null, null);
     } catch (IOException e) {
       throw new GenericException("Could not delete SIARD validator report file from system", e);
@@ -762,7 +741,7 @@ public class SIARDController {
         throw new GenericException("Could not load the driver", e);
       }
 
-      for (Map.Entry<String, String> entry : parameters.getJDBCConnectionParameters().getConnection().entrySet()) {
+      for (Map.Entry<String, String> entry : parameters.getJdbcParameters().getConnection().entrySet()) {
         databaseMigration.importModuleParameter(entry.getKey(), entry.getValue());
       }
     }
@@ -1014,7 +993,7 @@ public class SIARDController {
   private static void setupImportModuleSSHConfiguration(DatabaseMigration databaseMigration,
     ConnectionParameters parameters) {
     if (parameters.doSSH()) {
-      final SSHConfiguration sshConfiguration = parameters.getSSHConfiguration();
+      final SSHConfiguration sshConfiguration = parameters.getSshConfiguration();
 
       databaseMigration.importModuleParameter("ssh", "true");
       databaseMigration.importModuleParameter("ssh-host", sshConfiguration.getHostname());
@@ -1027,7 +1006,7 @@ public class SIARDController {
   private static void setupExportModuleSSHConfiguration(DatabaseMigration databaseMigration,
     ConnectionParameters parameters) {
     if (parameters.doSSH()) {
-      final SSHConfiguration sshConfiguration = parameters.getSSHConfiguration();
+      final SSHConfiguration sshConfiguration = parameters.getSshConfiguration();
 
       databaseMigration.exportModuleParameter("ssh", "true");
       databaseMigration.exportModuleParameter("ssh-host", sshConfiguration.getHostname());
@@ -1038,8 +1017,8 @@ public class SIARDController {
   }
 
   private static void setupPathToDriver(ConnectionParameters parameters) throws Exception {
-    if (parameters.getJDBCConnectionParameters().isDriver()) {
-      addURL(new File(parameters.getJDBCConnectionParameters().getDriverPath()).toURI().toURL());
+    if (parameters.getJdbcParameters().isDriver()) {
+      addURL(new File(parameters.getJdbcParameters().getDriverPath()).toURI().toURL());
     }
   }
 }

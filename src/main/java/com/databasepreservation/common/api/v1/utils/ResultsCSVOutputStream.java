@@ -5,11 +5,11 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.List;
 
+import com.databasepreservation.common.client.index.IndexResult;
 import org.apache.commons.csv.CSVPrinter;
-import org.roda.core.data.v2.index.IndexResult;
 
-import com.databasepreservation.common.shared.ViewerStructure.ViewerRow;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerTable;
+import com.databasepreservation.common.client.models.structure.ViewerRow;
+import com.databasepreservation.common.client.models.structure.ViewerTable;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>

@@ -12,9 +12,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -24,10 +22,6 @@ import java.util.MissingResourceException;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
 import java.util.ResourceBundle.Control;
-
-import org.apache.commons.io.IOUtils;
-
-import com.databasepreservation.common.shared.ViewerConstants;
 
 public class Messages {
   private static final String MESSAGES_BUNDLE = "ServerMessages";

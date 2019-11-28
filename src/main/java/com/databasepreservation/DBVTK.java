@@ -5,12 +5,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import javax.servlet.MultipartConfigElement;
 import javax.servlet.http.HttpServlet;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.web.servlet.MultipartConfigFactory;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.boot.web.servlet.context.ServletWebServerInitializedEvent;
 import org.springframework.boot.web.servlet.filter.OrderedRequestContextFilter;
@@ -18,7 +16,6 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
-import org.springframework.util.unit.DataSize;
 import org.springframework.web.filter.RequestContextFilter;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -26,7 +23,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import com.databasepreservation.common.server.BrowserServiceImpl;
 import com.databasepreservation.common.server.ClientLoggerImpl;
 import com.databasepreservation.common.server.ViewerConfiguration;
-import com.databasepreservation.common.shared.ViewerConstants;
+import com.databasepreservation.common.client.ViewerConstants;
 
 @SpringBootApplication
 public class DBVTK {

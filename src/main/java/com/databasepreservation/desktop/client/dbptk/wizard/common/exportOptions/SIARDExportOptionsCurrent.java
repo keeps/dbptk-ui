@@ -6,18 +6,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.shared.ViewerConstants;
-import com.databasepreservation.common.shared.client.common.desktop.FileUploadField;
-import com.databasepreservation.common.shared.client.common.desktop.GenericField;
-import com.databasepreservation.common.shared.client.common.utils.ApplicationType;
-import com.databasepreservation.common.shared.client.common.utils.JavascriptUtils;
-import com.databasepreservation.common.shared.client.tools.JSOUtils;
-import com.databasepreservation.common.shared.client.tools.ViewerStringUtils;
-import com.databasepreservation.common.shared.client.widgets.Toast;
-import com.databasepreservation.common.shared.models.DBPTKModule;
-import com.databasepreservation.common.shared.models.Filter;
-import com.databasepreservation.common.shared.models.PreservationParameter;
-import com.databasepreservation.common.shared.models.wizardParameters.ExportOptionsParameters;
+import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.common.desktop.FileUploadField;
+import com.databasepreservation.common.client.common.desktop.GenericField;
+import com.databasepreservation.common.client.common.utils.ApplicationType;
+import com.databasepreservation.common.client.common.utils.JavascriptUtils;
+import com.databasepreservation.common.client.tools.JSOUtils;
+import com.databasepreservation.common.client.tools.ViewerStringUtils;
+import com.databasepreservation.common.client.widgets.Toast;
+import com.databasepreservation.common.client.models.DBPTKModule;
+import com.databasepreservation.common.client.models.ExtensionFilter;
+import com.databasepreservation.common.client.models.parameters.PreservationParameter;
+import com.databasepreservation.common.client.models.parameters.ExportOptionsParameters;
 import com.databasepreservation.modules.siard.SIARD2ModuleFactory;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -337,9 +337,9 @@ public class SIARDExportOptionsCurrent extends Composite {
         fileUploadField.buttonAction(() -> {
           if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
             JavaScriptObject.createArray();
-            Filter filter = new Filter().createFilterTypeFromDBPTK(parameter.getFileFilter());
+            ExtensionFilter extensionFilter = new ExtensionFilter().createFilterTypeFromDBPTK(parameter.getFileFilter());
             JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.emptyList(),
-              Collections.singletonList(filter));
+              Collections.singletonList(extensionFilter));
             String path = null;
             if (parameter.getInputType().equals(ViewerConstants.INPUT_TYPE_FILE_SAVE)) {
               path = JavascriptUtils.saveFileDialog(options);

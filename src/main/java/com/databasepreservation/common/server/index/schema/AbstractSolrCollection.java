@@ -7,7 +7,7 @@
  */
 package com.databasepreservation.common.server.index.schema;
 
-import static com.databasepreservation.common.shared.ViewerConstants.INDEX_ID;
+import static com.databasepreservation.common.client.ViewerConstants.INDEX_ID;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,7 +21,7 @@ import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RequestNotValidException;
 
 import com.databasepreservation.common.server.index.utils.SolrUtils;
-import com.databasepreservation.common.shared.ViewerStructure.IsIndexed;
+import com.databasepreservation.common.client.index.IsIndexed;
 import com.databasepreservation.common.exceptions.ViewerException;
 
 public abstract class AbstractSolrCollection<M extends IsIndexed> implements SolrCollection<M> {
@@ -63,7 +63,7 @@ public abstract class AbstractSolrCollection<M extends IsIndexed> implements Sol
     M ret;
     try {
       ret = getObjectClass().newInstance();
-      ret.setUUID(SolrUtils.objectToString(doc.get(INDEX_ID), null));
+      ret.setUuid(SolrUtils.objectToString(doc.get(INDEX_ID), null));
     } catch (InstantiationException | IllegalAccessException e) {
       throw new ViewerException(e);
     }
@@ -78,6 +78,6 @@ public abstract class AbstractSolrCollection<M extends IsIndexed> implements Sol
 
   @Override
   public String getUniqueId(M modelObject) {
-    return modelObject.getUUID();
+    return modelObject.getUuid();
   }
 }

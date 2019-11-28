@@ -5,16 +5,16 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.databasepreservation.common.shared.ViewerStructure.ViewerMetadata;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerSchema;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerTable;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerView;
-import com.databasepreservation.common.shared.client.common.sidebar.SidebarHyperlink;
-import com.databasepreservation.common.shared.client.common.sidebar.SidebarItem;
-import com.databasepreservation.common.shared.client.tools.FontAwesomeIconManager;
-import com.databasepreservation.common.shared.client.tools.HistoryManager;
-import com.databasepreservation.common.shared.client.tools.ViewerStringUtils;
-import com.databasepreservation.common.shared.client.widgets.wcag.AccessibleFocusPanel;
+import com.databasepreservation.common.client.models.structure.ViewerMetadata;
+import com.databasepreservation.common.client.models.structure.ViewerSchema;
+import com.databasepreservation.common.client.models.structure.ViewerTable;
+import com.databasepreservation.common.client.models.structure.ViewerView;
+import com.databasepreservation.common.client.common.sidebar.SidebarHyperlink;
+import com.databasepreservation.common.client.common.sidebar.SidebarItem;
+import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
+import com.databasepreservation.common.client.tools.HistoryManager;
+import com.databasepreservation.common.client.tools.ViewerStringUtils;
+import com.databasepreservation.common.client.widgets.wcag.AccessibleFocusPanel;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -75,9 +75,9 @@ public class TableAndColumnsSidebar extends Composite {
     for (ViewerSchema schema : viewerMetadata.getSchemas()) {
 
       SidebarHyperlink schemas = new SidebarHyperlink(FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.SCHEMA, schema.getName()),
-              HistoryManager.linkToCreateSIARD(HistoryManager.ROUTE_WIZARD_TABLES_COLUMNS, TABLES_LINK, schema.getUUID()));
+              HistoryManager.linkToCreateSIARD(HistoryManager.ROUTE_WIZARD_TABLES_COLUMNS, TABLES_LINK, schema.getUuid()));
       schemas.setH5().setIndent1();
-      list.put(schema.getUUID(), schemas);
+      list.put(schema.getUuid(), schemas);
       sidebarGroup.add(schemas);
 
       SidebarItem tables = new SidebarItem(FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.LIST, messages.sidebarMenuTextForTables()));
@@ -86,9 +86,9 @@ public class TableAndColumnsSidebar extends Composite {
       FlowPanel tablesItems = new FlowPanel();
       for (ViewerTable table : schema.getTables()) {
         final SidebarHyperlink sidebarHyperlink = buildSidebarHyperLink(table.getName(), HistoryManager
-          .linkToCreateSIARD(HistoryManager.ROUTE_WIZARD_TABLES_COLUMNS, TABLE_LINK, schema.getUUID(), table.getUUID()),
+          .linkToCreateSIARD(HistoryManager.ROUTE_WIZARD_TABLES_COLUMNS, TABLE_LINK, schema.getUuid(), table.getUUID()),
           FontAwesomeIconManager.TABLE);
-        list.put(ViewerStringUtils.concat(schema.getUUID(), table.getUUID()), sidebarHyperlink);
+        list.put(ViewerStringUtils.concat(schema.getUuid(), table.getUUID()), sidebarHyperlink);
         tablesItems.add(sidebarHyperlink);
       }
       createSubItem(tables, tablesItems);
@@ -99,9 +99,9 @@ public class TableAndColumnsSidebar extends Composite {
       FlowPanel viewsItems = new FlowPanel();
       for (ViewerView view : schema.getViews()) {
         SidebarHyperlink sidebarHyperlink = buildSidebarHyperLink(view.getName(), HistoryManager
-          .linkToCreateSIARD(HistoryManager.ROUTE_WIZARD_TABLES_COLUMNS, VIEW_LINK, schema.getUUID(), view.getUUID()),
+          .linkToCreateSIARD(HistoryManager.ROUTE_WIZARD_TABLES_COLUMNS, VIEW_LINK, schema.getUuid(), view.getUuid()),
           FontAwesomeIconManager.SCHEMA_VIEWS);
-        list.put(ViewerStringUtils.concat(schema.getUUID(), view.getUUID()), sidebarHyperlink);
+        list.put(ViewerStringUtils.concat(schema.getUuid(), view.getUuid()), sidebarHyperlink);
         viewsItems.add(sidebarHyperlink);
       }
       createSubItem(views, viewsItems);

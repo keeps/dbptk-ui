@@ -43,10 +43,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.common.server.ViewerConfiguration;
-import com.databasepreservation.common.shared.ViewerConstants;
-import com.databasepreservation.common.shared.ViewerStructure.IsIndexed;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
-import com.databasepreservation.common.shared.client.common.search.SavedSearch;
+import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.index.IsIndexed;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.common.search.SavedSearch;
 
 public class UserUtility {
   private static final Logger LOGGER = LoggerFactory.getLogger(UserUtility.class);
@@ -251,7 +251,7 @@ public class UserUtility {
 
       }
       // access to anything else is denied
-      throw error(user, resultClass.getName(), result.getUUID());
+      throw error(user, resultClass.getName(), result.getUuid());
     }
 
     public static void checkDatabaseAccessPermission(HttpServletRequest request, String databaseUUID)
@@ -283,7 +283,7 @@ public class UserUtility {
         return;
       }
 
-      throw error(user, "saved search", savedSearch.getUUID());
+      throw error(user, "saved search", savedSearch.getUuid());
     }
 
     public static void checkDatabaseManagementPermission(HttpServletRequest request)

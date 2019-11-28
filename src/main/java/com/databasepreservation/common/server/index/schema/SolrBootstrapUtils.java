@@ -23,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.common.server.index.schema.collections.RowsCollection;
-import com.databasepreservation.common.shared.ViewerStructure.IsIndexed;
+import com.databasepreservation.common.client.index.IsIndexed;
 import com.databasepreservation.common.exceptions.ViewerException;
 
 public class SolrBootstrapUtils {

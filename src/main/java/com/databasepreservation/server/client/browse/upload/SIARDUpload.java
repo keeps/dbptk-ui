@@ -1,31 +1,23 @@
 package com.databasepreservation.server.client.browse.upload;
 
-import java.beans.EventHandler;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.databasepreservation.common.shared.client.tools.HistoryManager;
-import com.databasepreservation.common.shared.client.tools.JSOUtils;
-import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
-import com.google.gwt.json.client.JSONObject;
+import com.databasepreservation.common.client.tools.HistoryManager;
+import com.databasepreservation.common.client.services.SIARDService;
 import com.google.gwt.user.client.Event;
 import com.google.gwt.user.client.EventListener;
-import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.*;
-import org.glassfish.jersey.jackson.internal.jackson.jaxrs.json.annotation.JSONP;
 import org.roda.core.data.common.RodaConstants;
 
-import com.databasepreservation.common.client.BrowserService;
-import com.databasepreservation.common.shared.ViewerConstants;
-import com.databasepreservation.common.shared.client.breadcrumb.BreadcrumbPanel;
-import com.databasepreservation.common.shared.client.common.DefaultAsyncCallback;
-import com.databasepreservation.common.shared.client.common.RightPanel;
-import com.databasepreservation.common.shared.client.common.utils.JavascriptUtils;
-import com.databasepreservation.common.shared.client.tools.BreadcrumbManager;
-import com.databasepreservation.common.shared.client.tools.PathUtils;
-import com.databasepreservation.common.shared.client.widgets.Toast;
+import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
+import com.databasepreservation.common.client.common.DefaultAsyncCallback;
+import com.databasepreservation.common.client.common.RightPanel;
+import com.databasepreservation.common.client.common.utils.JavascriptUtils;
+import com.databasepreservation.common.client.tools.BreadcrumbManager;
+import com.databasepreservation.common.client.tools.PathUtils;
+import com.databasepreservation.common.client.widgets.Toast;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
@@ -35,8 +27,6 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.Window;
 
 import config.i18n.client.ClientMessages;
 
@@ -162,25 +152,17 @@ public class SIARDUpload extends RightPanel {
       JavascriptUtils.runMiniUploadForm(layout, new DefaultAsyncCallback<String>() {
         @Override
         public void onSuccess(String id) {
-          GWT.log("result: " + id);
           Element item = Document.get().getElementById(id);
           String path = item.getAttribute("path");
-          GWT.log("path: " + path);
           startItemLoadHandler(item);
-          BrowserService.Util.getInstance().uploadMetadataSIARD(path, new DefaultAsyncCallback<String>() {
-            @Override
-            public void onFailure(Throwable caught) {
-              Toast.showError("Cannot create SIARD", PathUtils.getFileName(path));
-              item.addClassName("error");
-              doneItemLoadHandler(item, caught.getMessage(), null);
-            }
-
-            @Override
-            public void onSuccess(String newDatabaseUUID) {
-              Toast.showInfo("SIARD created with success", PathUtils.getFileName(path));
-              doneItemLoadHandler(item, "", newDatabaseUUID);
-            }
-          });
+          SIARDService.Util.call((String newDatabaseUUID) -> {
+            Toast.showInfo("SIARD created with success", PathUtils.getFileName(path));
+            doneItemLoadHandler(item, "", newDatabaseUUID);
+          }, (String errorMessage) -> {
+            Toast.showError("Cannot create SIARD", PathUtils.getFileName(path));
+            item.addClassName("error");
+            doneItemLoadHandler(item, errorMessage, null);
+          }).uploadMetadataSIARD(path);
         }
       });
     } else {

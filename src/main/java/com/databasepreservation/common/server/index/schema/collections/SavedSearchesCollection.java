@@ -7,13 +7,13 @@
  */
 package com.databasepreservation.common.server.index.schema.collections;
 
-import static com.databasepreservation.common.shared.ViewerConstants.SOLR_SEARCHES_DATABASE_UUID;
-import static com.databasepreservation.common.shared.ViewerConstants.SOLR_SEARCHES_DATE_ADDED;
-import static com.databasepreservation.common.shared.ViewerConstants.SOLR_SEARCHES_DESCRIPTION;
-import static com.databasepreservation.common.shared.ViewerConstants.SOLR_SEARCHES_NAME;
-import static com.databasepreservation.common.shared.ViewerConstants.SOLR_SEARCHES_SEARCH_INFO_JSON;
-import static com.databasepreservation.common.shared.ViewerConstants.SOLR_SEARCHES_TABLE_NAME;
-import static com.databasepreservation.common.shared.ViewerConstants.SOLR_SEARCHES_TABLE_UUID;
+import static com.databasepreservation.common.client.ViewerConstants.SOLR_SEARCHES_DATABASE_UUID;
+import static com.databasepreservation.common.client.ViewerConstants.SOLR_SEARCHES_DATE_ADDED;
+import static com.databasepreservation.common.client.ViewerConstants.SOLR_SEARCHES_DESCRIPTION;
+import static com.databasepreservation.common.client.ViewerConstants.SOLR_SEARCHES_NAME;
+import static com.databasepreservation.common.client.ViewerConstants.SOLR_SEARCHES_SEARCH_INFO_JSON;
+import static com.databasepreservation.common.client.ViewerConstants.SOLR_SEARCHES_TABLE_NAME;
+import static com.databasepreservation.common.client.ViewerConstants.SOLR_SEARCHES_TABLE_UUID;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -40,8 +40,8 @@ import com.databasepreservation.common.server.index.schema.CopyField;
 import com.databasepreservation.common.server.index.schema.Field;
 import com.databasepreservation.common.server.index.schema.SolrCollection;
 import com.databasepreservation.common.server.index.utils.SolrUtils;
-import com.databasepreservation.common.shared.ViewerConstants;
-import com.databasepreservation.common.shared.client.common.search.SavedSearch;
+import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.common.search.SavedSearch;
 import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.utils.JodaUtils;
 

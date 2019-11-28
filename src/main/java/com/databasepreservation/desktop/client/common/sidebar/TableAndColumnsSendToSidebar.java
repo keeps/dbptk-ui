@@ -5,23 +5,17 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.databasepreservation.common.shared.ViewerStructure.ViewerMetadata;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerSchema;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerTable;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerView;
-import com.databasepreservation.common.shared.client.common.sidebar.SidebarHyperlink;
-import com.databasepreservation.common.shared.client.common.sidebar.SidebarItem;
-import com.databasepreservation.common.shared.client.tools.FontAwesomeIconManager;
-import com.databasepreservation.common.shared.client.tools.HistoryManager;
-import com.databasepreservation.common.shared.client.tools.ViewerStringUtils;
-import com.databasepreservation.common.shared.client.widgets.wcag.AccessibleFocusPanel;
+import com.databasepreservation.common.client.models.structure.ViewerMetadata;
+import com.databasepreservation.common.client.models.structure.ViewerSchema;
+import com.databasepreservation.common.client.models.structure.ViewerTable;
+import com.databasepreservation.common.client.models.structure.ViewerView;
+import com.databasepreservation.common.client.common.sidebar.SidebarHyperlink;
+import com.databasepreservation.common.client.common.sidebar.SidebarItem;
+import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
+import com.databasepreservation.common.client.tools.HistoryManager;
+import com.databasepreservation.common.client.tools.ViewerStringUtils;
+import com.databasepreservation.common.client.widgets.wcag.AccessibleFocusPanel;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ChangeHandler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -80,7 +74,7 @@ public class TableAndColumnsSendToSidebar extends Composite {
     for (ViewerSchema schema : viewerMetadata.getSchemas()) {
 
       SidebarHyperlink schemas = new SidebarHyperlink(FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.SCHEMA, schema.getName()),
-          HistoryManager.linkToSendToWizardTableAndColumnsShowTables(TABLES_LINK, databaseUUID, schema.getUUID()));
+          HistoryManager.linkToSendToWizardTableAndColumnsShowTables(TABLES_LINK, databaseUUID, schema.getUuid()));
       schemas.setH5().setIndent1();
       list.put(TABLES_LINK, schemas);
       sidebarGroup.add(schemas);
@@ -91,7 +85,7 @@ public class TableAndColumnsSendToSidebar extends Composite {
       FlowPanel tablesItems = new FlowPanel();
       for (ViewerTable table : schema.getTables()) {
           SidebarHyperlink sidebarHyperlink = new SidebarHyperlink(FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE, table.getName()),
-              HistoryManager.linkToSendToWizardTableAndColumnsShowColumns(TABLE_LINK, databaseUUID, schema.getUUID(), table.getUUID()));
+              HistoryManager.linkToSendToWizardTableAndColumnsShowColumns(TABLE_LINK, databaseUUID, schema.getUuid(), table.getUUID()));
           sidebarHyperlink.setH6().setIndent3();
           list.put(table.getName(), sidebarHyperlink);
           tablesItems.add(sidebarHyperlink);
@@ -104,7 +98,7 @@ public class TableAndColumnsSendToSidebar extends Composite {
       FlowPanel viewsItems = new FlowPanel();
       for (ViewerView view : schema.getViews()) {
         SidebarHyperlink sidebarHyperlink = new SidebarHyperlink(FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS, view.getName()),
-            HistoryManager.linkToSendToWizardTableAndColumnsShowViews(VIEW_LINK, databaseUUID, schema.getUUID(), view.getUUID()));
+            HistoryManager.linkToSendToWizardTableAndColumnsShowViews(VIEW_LINK, databaseUUID, schema.getUuid(), view.getUuid()));
         sidebarHyperlink.setH6().setIndent3();
         list.put(view.getName(), sidebarHyperlink);
         viewsItems.add(sidebarHyperlink);

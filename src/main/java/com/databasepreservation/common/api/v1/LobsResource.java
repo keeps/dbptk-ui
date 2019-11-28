@@ -23,8 +23,8 @@ import com.databasepreservation.common.api.utils.DownloadUtils;
 import com.databasepreservation.common.api.utils.StreamResponse;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
-import com.databasepreservation.common.shared.ViewerConstants;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerRow;
+import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.utils.LobPathManager;
 import com.databasepreservation.common.utils.UserUtility;
 

@@ -1,5 +1,6 @@
 package com.databasepreservation.common.api;
 
+import com.databasepreservation.common.client.services.ModulesService;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.moxy.xml.MoxyXmlFeature;
@@ -22,12 +23,18 @@ public class RestApplicationNoSwagger {
       property(ServletProperties.FILTER_CONTEXT_PATH,"/api/*");
       //packages("com.databasepreservation.visualization.api");
 
+      register(AuthenticationResource.class);
+      register(ContextResource.class);
+      register(DatabaseResource.class);
       register(ExportsResource.class);
+      register(FileResource.class);
       register(LobsResource.class);
       register(ManageResource.class);
+      register(ModulesResource.class);
       register(ReportResource.class);
+      register(SearchResource.class);
+      register(SIARDResource.class);
       register(ThemeResource.class);
-      register(FileResource.class);
       register(JacksonFeature.class);
       register(MoxyXmlFeature.class);
       register(MultiPartFeature.class);

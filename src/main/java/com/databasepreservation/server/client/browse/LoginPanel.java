@@ -1,18 +1,19 @@
 package com.databasepreservation.server.client.browse;
 
+import org.fusesource.restygwt.client.Method;
+import org.fusesource.restygwt.client.MethodCallback;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.v2.user.User;
 
-import com.databasepreservation.common.shared.client.breadcrumb.BreadcrumbPanel;
-import com.databasepreservation.common.shared.client.common.RightPanel;
-import com.databasepreservation.common.shared.client.common.UserLogin;
-import com.databasepreservation.common.shared.client.tools.BreadcrumbManager;
-import com.databasepreservation.common.shared.client.tools.HistoryManager;
+import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
+import com.databasepreservation.common.client.common.RightPanel;
+import com.databasepreservation.common.client.common.UserLogin;
+import com.databasepreservation.common.client.tools.BreadcrumbManager;
+import com.databasepreservation.common.client.tools.HistoryManager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyPressEvent;
-import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -115,11 +116,11 @@ public class LoginPanel extends RightPanel {
       loggingIn = false;
     } else {
 
-      UserLogin.getInstance().login(usernameText, passwordText, new AsyncCallback<User>() {
+      UserLogin.getInstance().login(usernameText, passwordText, new MethodCallback<User>() {
         @Override
-        public void onFailure(Throwable caught) {
-          if (caught instanceof GenericException) {
-            error.setText(caught.getMessage());
+        public void onFailure(Method method, Throwable exception) {
+          if (exception instanceof GenericException) {
+            error.setText(exception.getMessage());
           } else {
             error.setText(messages.couldNotLoginWithTheProvidedCredentials());
           }
@@ -127,7 +128,7 @@ public class LoginPanel extends RightPanel {
         }
 
         @Override
-        public void onSuccess(User user) {
+        public void onSuccess(Method method, User response) {
           HistoryManager.returnFromLogin();
           loggingIn = false;
         }

@@ -11,6 +11,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -20,30 +21,29 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.common.server.index.utils.SolrUtils;
-import com.databasepreservation.common.shared.ViewerConstants;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerCandidateKey;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerCell;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerCheckConstraint;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerColumn;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabaseFromToolkit;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerForeignKey;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerMetadata;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerPrimaryKey;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerPrivilegeStructure;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerReference;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerRoleStructure;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerRoutine;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerRoutineParameter;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerRow;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerSchema;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerTable;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerTrigger;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerType;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerTypeArray;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerTypeStructure;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerUserStructure;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerView;
+import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.models.structure.ViewerCandidateKey;
+import com.databasepreservation.common.client.models.structure.ViewerCell;
+import com.databasepreservation.common.client.models.structure.ViewerCheckConstraint;
+import com.databasepreservation.common.client.models.structure.ViewerColumn;
+import com.databasepreservation.common.client.models.structure.ViewerDatabaseFromToolkit;
+import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
+import com.databasepreservation.common.client.models.structure.ViewerMetadata;
+import com.databasepreservation.common.client.models.structure.ViewerPrimaryKey;
+import com.databasepreservation.common.client.models.structure.ViewerPrivilegeStructure;
+import com.databasepreservation.common.client.models.structure.ViewerReference;
+import com.databasepreservation.common.client.models.structure.ViewerRoleStructure;
+import com.databasepreservation.common.client.models.structure.ViewerRoutine;
+import com.databasepreservation.common.client.models.structure.ViewerRoutineParameter;
+import com.databasepreservation.common.client.models.structure.ViewerRow;
+import com.databasepreservation.common.client.models.structure.ViewerSchema;
+import com.databasepreservation.common.client.models.structure.ViewerTable;
+import com.databasepreservation.common.client.models.structure.ViewerTrigger;
+import com.databasepreservation.common.client.models.structure.ViewerType;
+import com.databasepreservation.common.client.models.structure.ViewerTypeArray;
+import com.databasepreservation.common.client.models.structure.ViewerTypeStructure;
+import com.databasepreservation.common.client.models.structure.ViewerUserStructure;
+import com.databasepreservation.common.client.models.structure.ViewerView;
 import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.utils.LobPathManager;
 import com.databasepreservation.common.utils.ViewerAbstractConfiguration;
@@ -85,8 +85,6 @@ import com.databasepreservation.model.structure.type.Type;
 import com.databasepreservation.utils.JodaUtils;
 import com.databasepreservation.utils.XMLUtils;
 
-import static com.databasepreservation.common.shared.ViewerConstants.INTERNAL_ZIP_LOB_FOLDER;
-
 /**
  * Utility class used to convert a DatabaseStructure (used in Database
  * Preservation Toolkit) to a ViewerStructure (used in Database Viewer)
@@ -116,8 +114,8 @@ public class ToolkitStructure2ViewerStructure {
   public static ViewerDatabaseFromToolkit getDatabase(DatabaseStructure structure, String databaseUUID)
     throws ViewerException {
     ViewerDatabaseFromToolkit result = new ViewerDatabaseFromToolkit();
-    result.setUUID(databaseUUID);
-    result.setStatus(ViewerDatabase.Status.INGESTING);
+    result.setUuid(databaseUUID);
+    result.setStatus(ViewerDatabaseStatus.INGESTING);
     result.setMetadata(getMetadata(result, structure));
     return result;
   }
@@ -228,7 +226,7 @@ public class ToolkitStructure2ViewerStructure {
   private static ViewerSchema getSchema(ViewerDatabaseFromToolkit vdb, SchemaStructure schema,
     ReferenceHolder references) throws ViewerException {
     ViewerSchema result = new ViewerSchema();
-    result.setUUID(SolrUtils.randomUUID());
+    result.setUuid(SolrUtils.randomUUID());
     result.setName(schema.getName());
     result.setDescription(schema.getDescription());
     result.setRoutines(getRoutines(vdb, schema.getRoutines()));
@@ -253,7 +251,7 @@ public class ToolkitStructure2ViewerStructure {
   private static ViewerView getView(ViewerDatabaseFromToolkit vdb, ViewStructure view) {
     ViewerView result = new ViewerView();
     result.setName(view.getName());
-    result.setUUID(SolrUtils.randomUUID());
+    result.setUuid(SolrUtils.randomUUID());
     try {
       result.setColumns(getColumns(view.getColumns()));
     } catch (ViewerException e) {
@@ -280,7 +278,7 @@ public class ToolkitStructure2ViewerStructure {
   private static ViewerRoutine getRoutine(ViewerDatabaseFromToolkit vdb, RoutineStructure routine) {
     ViewerRoutine result = new ViewerRoutine();
     result.setName(routine.getName());
-    result.setUUID(SolrUtils.randomUUID());
+    result.setUuid(SolrUtils.randomUUID());
 
     result.setDescription(routine.getDescription());
     result.setSource(routine.getSource());
@@ -337,7 +335,7 @@ public class ToolkitStructure2ViewerStructure {
     result.setDescription(table.getDescription());
     result.setCountRows(table.getRows());
     result.setSchemaName(table.getSchema());
-    result.setSchemaUUID(vdb.getSchema(result.getSchemaName()).getUUID());
+    result.setSchemaUUID(vdb.getSchema(result.getSchemaName()).getUuid());
     result.setColumns(getColumns(table.getColumns()));
     result.setTriggers(getTriggers(table.getTriggers()));
     result.setPrimaryKey(getPrimaryKey(table, references));
@@ -618,7 +616,7 @@ public class ToolkitStructure2ViewerStructure {
     String rowUUID = SolrUtils.UUIDFromString(table.getUUID() + "." + rowIndex);
     result.setTableId(table.getId());
     result.setTableUUID(table.getUUID());
-    result.setUUID(rowUUID);
+    result.setUuid(rowUUID);
     result.setCells(getCells(configuration, databaseUUID, table, row, rowIndex, rowUUID));
     return result;
   }

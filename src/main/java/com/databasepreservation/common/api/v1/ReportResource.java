@@ -17,7 +17,7 @@ import org.roda.core.data.exceptions.NotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.databasepreservation.common.server.ViewerConfiguration;
-import com.databasepreservation.common.shared.ViewerConstants;
+import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.api.utils.ApiUtils;
 import com.databasepreservation.common.api.utils.DownloadUtils;
 

@@ -8,7 +8,7 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 
-import com.databasepreservation.common.shared.ViewerConstants;
+import com.databasepreservation.common.client.ViewerConstants;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>

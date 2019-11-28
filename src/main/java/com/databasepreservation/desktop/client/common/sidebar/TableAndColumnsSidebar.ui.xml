@@ -1,6 +1,6 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
-             xmlns:wcag="urn:import:com.databasepreservation.common.shared.client.widgets.wcag">
+             xmlns:wcag="urn:import:com.databasepreservation.common.client.widgets.wcag">
 
     <g:FlowPanel addStyleNames="browseContentFilesPanel">
         <g:FlowPanel>

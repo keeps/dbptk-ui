@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.api.common.ConsumesOutputStream;
-import com.databasepreservation.common.shared.ViewerConstants;
+import com.databasepreservation.common.client.ViewerConstants;
 
 public class Theme {
 

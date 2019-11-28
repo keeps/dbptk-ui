@@ -8,9 +8,9 @@ import org.roda.core.data.exceptions.NotFoundException;
 
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabaseFromToolkit;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerTable;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.structure.ViewerDatabaseFromToolkit;
+import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.transformers.ToolkitStructure2ViewerStructure;
 import com.databasepreservation.model.Reporter;
 import com.databasepreservation.model.data.Row;
@@ -147,7 +147,7 @@ public class DbvtkExportModule implements DatabaseExportModule {
    */
   @Override
   public void handleDataRow(Row row) throws ModuleException {
-    solrManager.addRow(retrieved.getUUID(),
+    solrManager.addRow(retrieved.getUuid(),
       ToolkitStructure2ViewerStructure.getRow(configuration, databaseUUID, currentTable, row, rowIndex++));
   }
 

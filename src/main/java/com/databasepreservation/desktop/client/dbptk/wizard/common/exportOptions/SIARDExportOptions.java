@@ -1,18 +1,16 @@
 package com.databasepreservation.desktop.client.dbptk.wizard.common.exportOptions;
 
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import com.databasepreservation.common.client.BrowserService;
-import com.databasepreservation.common.shared.client.common.DefaultAsyncCallback;
-import com.databasepreservation.common.shared.client.common.desktop.ComboBoxField;
-import com.databasepreservation.common.shared.client.tools.ToolkitModuleName2ViewerModuleName;
-import com.databasepreservation.common.shared.models.DBPTKModule;
-import com.databasepreservation.common.shared.models.PreservationParameter;
-import com.databasepreservation.common.shared.models.wizardParameters.ExportOptionsParameters;
+import com.databasepreservation.common.client.common.desktop.ComboBoxField;
+import com.databasepreservation.common.client.tools.ToolkitModuleName2ViewerModuleName;
+import com.databasepreservation.common.client.models.DBPTKModule;
+import com.databasepreservation.common.client.models.parameters.PreservationParameter;
+import com.databasepreservation.common.client.models.parameters.ExportOptionsParameters;
+import com.databasepreservation.common.client.services.ModulesService;
 import com.databasepreservation.desktop.client.dbptk.wizard.WizardPanel;
 import com.github.nmorel.gwtjackson.client.ObjectMapper;
 import com.google.gwt.core.client.GWT;
@@ -77,31 +75,25 @@ public class SIARDExportOptions extends WizardPanel<ExportOptionsParameters> {
 
     content.add(spinner);
 
-    BrowserService.Util.getInstance().getSIARDExportModules(new DefaultAsyncCallback<String>() {
-      @Override
-      public void onSuccess(String result) {
-        content.remove(spinner);
-
-        ComboBoxField comboBoxField = ComboBoxField.createInstance(messages.wizardExportOptionsLabels("version"));
-        DBPTKModuleMapper mapper = GWT.create(DBPTKModuleMapper.class);
-        DBPTKModule module = mapper.read(result);
-        final Map<String, List<PreservationParameter>> modules = new TreeMap<>(module.getParameters());
-        for (String moduleName : modules.keySet()) {
-          comboBoxField.setComboBoxValue(ToolkitModuleName2ViewerModuleName.transform(moduleName), moduleName);
-        }
-        comboBoxField.addChangeHandler(() -> {
-          version = comboBoxField.getSelectedValue();
-          dbptkModule = module;
-          final SIARDExportOptionsCurrent instance = SIARDExportOptionsCurrent.getInstance(version, dbptkModule, path);
-          content.clear();
-          content.add(instance);
-        });
-        comboBoxField.setCSSMetadata("form-row", "form-label-spaced", "form-combobox");
-        comboBoxField.select(1);
-
-        listBox.add(comboBoxField);
+    ModulesService.Util.call((DBPTKModule result) -> {
+      content.remove(spinner);
+      ComboBoxField comboBoxField = ComboBoxField.createInstance(messages.wizardExportOptionsLabels("version"));
+      final Map<String, List<PreservationParameter>> modules = new TreeMap<>(result.getParameters());
+      for (String moduleName : modules.keySet()) {
+        comboBoxField.setComboBoxValue(ToolkitModuleName2ViewerModuleName.transform(moduleName), moduleName);
       }
-    });
+      comboBoxField.addChangeHandler(() -> {
+        version = comboBoxField.getSelectedValue();
+        dbptkModule = result;
+        final SIARDExportOptionsCurrent instance = SIARDExportOptionsCurrent.getInstance(version, dbptkModule, path);
+        content.clear();
+        content.add(instance);
+      });
+      comboBoxField.setCSSMetadata("form-row", "form-label-spaced", "form-combobox");
+      comboBoxField.select(1);
+
+      listBox.add(comboBoxField);
+    }).getSIARDExportModules();
   }
 
   @Override

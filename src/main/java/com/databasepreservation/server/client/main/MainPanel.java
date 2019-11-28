@@ -1,69 +1,64 @@
 package com.databasepreservation.server.client.main;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import com.databasepreservation.common.client.BrowserService;
-import com.databasepreservation.common.shared.ViewerStructure.IsIndexed;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerSIARDBundle;
-import com.databasepreservation.common.shared.client.breadcrumb.BreadcrumbItem;
-import com.databasepreservation.common.shared.client.common.ContentPanel;
-import com.databasepreservation.common.shared.client.common.RightPanel;
-import com.databasepreservation.common.shared.client.common.utils.ContentPanelLoader;
-import com.databasepreservation.common.shared.client.common.utils.JavascriptUtils;
-import com.databasepreservation.common.shared.client.common.utils.RightPanelLoader;
-import com.databasepreservation.common.shared.client.common.visualization.browse.ContainerPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.DatabasePanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.DatabaseSearchPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.DatabaseSearchesPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.ReferencesPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.RowPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.foreignKey.ForeignKeyPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.foreignKey.ForeignKeyPanelOptions;
-import com.databasepreservation.common.shared.client.common.visualization.browse.information.DatabaseInformationPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.table.TablePanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.table.TablePanelOptions;
-import com.databasepreservation.common.shared.client.common.visualization.browse.table.TableSavedSearchEditPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.table.TableSavedSearchPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.technicalInformation.ReportPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.technicalInformation.RoutinesPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.technicalInformation.UsersPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.view.ViewPanel;
-import com.databasepreservation.common.shared.client.common.visualization.browse.view.ViewPanelStructure;
-import com.databasepreservation.common.shared.client.common.visualization.ingest.IngestPage;
-import com.databasepreservation.common.shared.client.common.visualization.manager.SIARDPanel.SIARDManagerPage;
-import com.databasepreservation.common.shared.client.common.visualization.manager.databasePanel.DatabaseManage;
-import com.databasepreservation.common.shared.client.common.visualization.metadata.MetadataPanel;
-import com.databasepreservation.common.shared.client.common.visualization.metadata.MetadataPanelLoad;
-import com.databasepreservation.common.shared.client.common.visualization.metadata.SIARDEditMetadataPage;
-import com.databasepreservation.common.shared.client.common.visualization.metadata.information.MetadataInformation;
-import com.databasepreservation.common.shared.client.common.visualization.metadata.schemas.routines.MetadataRoutinePanel;
-import com.databasepreservation.common.shared.client.common.visualization.metadata.schemas.tables.MetadataTablePanel;
-import com.databasepreservation.common.shared.client.common.visualization.metadata.schemas.views.MetadataViewPanel;
-import com.databasepreservation.common.shared.client.common.visualization.metadata.users.MetadataUsersPanel;
-import com.databasepreservation.common.shared.client.common.visualization.validation.ValidatorPage;
-import com.databasepreservation.common.shared.client.tools.FontAwesomeIconManager;
-import com.databasepreservation.common.shared.client.tools.HistoryManager;
-import com.databasepreservation.common.shared.client.widgets.wcag.AccessibleFocusPanel;
+import com.databasepreservation.common.client.common.ContentPanel;
+import com.databasepreservation.common.client.common.RightPanel;
+import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
+import com.databasepreservation.common.client.common.utils.ContentPanelLoader;
+import com.databasepreservation.common.client.common.utils.JavascriptUtils;
+import com.databasepreservation.common.client.common.utils.RightPanelLoader;
+import com.databasepreservation.common.client.common.visualization.browse.ContainerPanel;
+import com.databasepreservation.common.client.common.visualization.browse.DatabasePanel;
+import com.databasepreservation.common.client.common.visualization.browse.DatabaseSearchPanel;
+import com.databasepreservation.common.client.common.visualization.browse.DatabaseSearchesPanel;
+import com.databasepreservation.common.client.common.visualization.browse.ReferencesPanel;
+import com.databasepreservation.common.client.common.visualization.browse.RowPanel;
+import com.databasepreservation.common.client.common.visualization.browse.foreignKey.ForeignKeyPanel;
+import com.databasepreservation.common.client.common.visualization.browse.foreignKey.ForeignKeyPanelOptions;
+import com.databasepreservation.common.client.common.visualization.browse.information.DatabaseInformationPanel;
+import com.databasepreservation.common.client.common.visualization.browse.table.TablePanel;
+import com.databasepreservation.common.client.common.visualization.browse.table.TablePanelOptions;
+import com.databasepreservation.common.client.common.visualization.browse.table.TableSavedSearchEditPanel;
+import com.databasepreservation.common.client.common.visualization.browse.table.TableSavedSearchPanel;
+import com.databasepreservation.common.client.common.visualization.browse.technicalInformation.ReportPanel;
+import com.databasepreservation.common.client.common.visualization.browse.technicalInformation.RoutinesPanel;
+import com.databasepreservation.common.client.common.visualization.browse.technicalInformation.UsersPanel;
+import com.databasepreservation.common.client.common.visualization.browse.view.ViewPanel;
+import com.databasepreservation.common.client.common.visualization.browse.view.ViewPanelStructure;
+import com.databasepreservation.common.client.common.visualization.ingest.IngestPage;
+import com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.SIARDManagerPage;
+import com.databasepreservation.common.client.common.visualization.manager.databasePanel.DatabaseManage;
+import com.databasepreservation.common.client.common.visualization.metadata.MetadataPanel;
+import com.databasepreservation.common.client.common.visualization.metadata.MetadataPanelLoad;
+import com.databasepreservation.common.client.common.visualization.metadata.SIARDEditMetadataPage;
+import com.databasepreservation.common.client.common.visualization.metadata.information.MetadataInformation;
+import com.databasepreservation.common.client.common.visualization.metadata.schemas.routines.MetadataRoutinePanel;
+import com.databasepreservation.common.client.common.visualization.metadata.schemas.tables.MetadataTablePanel;
+import com.databasepreservation.common.client.common.visualization.metadata.schemas.views.MetadataViewPanel;
+import com.databasepreservation.common.client.common.visualization.metadata.users.MetadataUsersPanel;
+import com.databasepreservation.common.client.common.visualization.validation.ValidatorPage;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.structure.ViewerSIARDBundle;
+import com.databasepreservation.common.client.services.DatabaseService;
+import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
+import com.databasepreservation.common.client.tools.HistoryManager;
+import com.databasepreservation.common.client.widgets.wcag.AccessibleFocusPanel;
 import com.databasepreservation.server.client.browse.HomePanel;
 import com.databasepreservation.server.client.browse.LoginPanel;
 import com.databasepreservation.server.client.browse.UploadPanel;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-
 import config.i18n.client.ClientMessages;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -117,7 +112,7 @@ public class MainPanel extends Composite {
   }
 
   private void setContent(String databaseUUID, ContentPanelLoader panel) {
-    GWT.log("LOADER ::: setContent, dbuid " + databaseUUID);
+    GWT.log("setContent, dbuid " + databaseUUID);
     ContainerPanel containerPanel = ContainerPanel.getInstance(databaseUUID, true);
     containerPanel.setTopLevelPanelCSS("browseContent wrapper skip_padding server");
     contentPanel.setWidget(containerPanel);
@@ -144,20 +139,12 @@ public class MainPanel extends Composite {
     } else if (HistoryManager.ROUTE_UPLOADS.equals(currentHistoryPath.get(0))) {
       // #uploads
       // #uploads/...
-
-      if (currentHistoryPath.size() == 2) {
-        if (currentHistoryPath.get(1).equals(HistoryManager.ROUTE_UPLOADS_NEW)) {
-          // #uploads/new
-          setContent(new RightPanelLoader() {
-            @Override
-            public RightPanel load(ViewerDatabase database) {
-              return UploadPanel.getInstance();
-            }
-          });
+      setContent(new RightPanelLoader() {
+        @Override
+        public RightPanel load(ViewerDatabase database) {
+          return UploadPanel.getInstance();
         }
-      } else {
-        HistoryManager.gotoDatabaseList();
-      }
+      });
     } else if (HistoryManager.ROUTE_HOME.equals(currentHistoryPath.get(0))) {
       // #home
       setContent(new RightPanelLoader() {
@@ -539,12 +526,6 @@ public class MainPanel extends Composite {
       FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE) + " Database Visualization Toolkit"));
     headerText.addStyleName("homeText");
 
-    // HTMLPanel headerContent = new HTMLPanel(
-    // SafeHtmlUtils
-    // .fromSafeConstant("<img title=\"Database Visualization Toolkit\"
-    // class=\"homeLogo\" src=\"/img/dbptk_logo.png\"/>\n"
-    // + "<div class=\"homeText\">DBVTK</div>"));
-
     bannerLogo.setWidget(headerText);
 
     homeLinkArea.addClickHandler(event -> HistoryManager.gotoHome());
@@ -571,22 +552,12 @@ public class MainPanel extends Composite {
     } else {
       reSetHeader();
 
-      BrowserService.Util.getInstance().retrieve(databaseUUID, ViewerDatabase.class.getName(), databaseUUID,
-        new AsyncCallback<IsIndexed>() {
-          @Override
-          public void onSuccess(IsIndexed result) {
-            ViewerDatabase database = (ViewerDatabase) result;
-            String databaseName = database.getMetadata().getName();
+      DatabaseService.Util.call((ViewerDatabase result) -> {
+        String databaseName = result.getMetadata().getName();
 
-            databaseNames.put(databaseUUID, databaseName);
-            reSetHeader(databaseUUID, databaseName);
-          }
-
-          @Override
-          public void onFailure(Throwable caught) {
-            // do nothing. header has been set correctly
-          }
-        });
+        databaseNames.put(databaseUUID, databaseName);
+        reSetHeader(databaseUUID, databaseName);
+      }).retrieve(databaseUUID, databaseUUID);
     }
   }
 

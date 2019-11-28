@@ -33,7 +33,7 @@ import org.reflections.util.ConfigurationBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.databasepreservation.common.shared.ViewerConstants;
+import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.utils.ViewerAbstractConfiguration;
 import com.databasepreservation.utils.FileUtils;
 import com.google.common.cache.CacheBuilder;

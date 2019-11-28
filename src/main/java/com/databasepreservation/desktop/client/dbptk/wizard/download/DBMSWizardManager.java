@@ -1,24 +1,19 @@
 package com.databasepreservation.desktop.client.dbptk.wizard.download;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import com.databasepreservation.common.client.BrowserService;
-import com.databasepreservation.common.shared.ViewerConstants;
-import com.databasepreservation.common.shared.ViewerStructure.IsIndexed;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
-import com.databasepreservation.common.shared.client.breadcrumb.BreadcrumbItem;
-import com.databasepreservation.common.shared.client.breadcrumb.BreadcrumbPanel;
-import com.databasepreservation.common.shared.client.common.DefaultAsyncCallback;
-import com.databasepreservation.common.shared.client.common.dialogs.Dialogs;
-import com.databasepreservation.common.shared.client.common.visualization.progressBar.ProgressBarPanel;
-import com.databasepreservation.common.shared.client.tools.BreadcrumbManager;
-import com.databasepreservation.common.shared.client.tools.HistoryManager;
-import com.databasepreservation.common.shared.client.tools.ToolkitModuleName2ViewerModuleName;
-import com.databasepreservation.common.shared.models.wizardParameters.ConnectionParameters;
-import com.databasepreservation.common.shared.models.wizardParameters.ExportOptionsParameters;
+import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
+import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
+import com.databasepreservation.common.client.common.DefaultAsyncCallback;
+import com.databasepreservation.common.client.common.dialogs.Dialogs;
+import com.databasepreservation.common.client.common.visualization.progressBar.ProgressBarPanel;
+import com.databasepreservation.common.client.tools.BreadcrumbManager;
+import com.databasepreservation.common.client.tools.HistoryManager;
+import com.databasepreservation.common.client.tools.ToolkitModuleName2ViewerModuleName;
+import com.databasepreservation.common.client.models.parameters.ConnectionParameters;
+import com.databasepreservation.common.client.models.parameters.ExportOptionsParameters;
+import com.databasepreservation.common.client.services.DatabaseService;
+import com.databasepreservation.common.client.services.SIARDService;
 import com.databasepreservation.desktop.client.dbptk.wizard.WizardManager;
 import com.databasepreservation.desktop.client.dbptk.wizard.WizardPanel;
 import com.databasepreservation.desktop.client.dbptk.wizard.common.connection.Connection;
@@ -29,8 +24,12 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
-
 import config.i18n.client.ClientMessages;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -136,10 +135,10 @@ public class DBMSWizardManager extends WizardManager {
     final boolean valid = wizardPanels.get(position).validate();
     if (valid) {
       ExportOptionsParameters exportOptionsParameters = (ExportOptionsParameters) wizardPanels.get(position)
-        .getValues();
+          .getValues();
       wizardContent.clear();
       MetadataExportOptions metadataExportOptions = MetadataExportOptions
-        .getInstance(exportOptionsParameters.getSiardVersion(), false);
+          .getInstance(exportOptionsParameters.getSiardVersion(), false);
       wizardPanels.add(position, metadataExportOptions);
       wizardContent.add(metadataExportOptions);
       updateButtons();
@@ -165,58 +164,47 @@ public class DBMSWizardManager extends WizardManager {
     position = 3;
     updateBreadcrumb();
 
-    BrowserService.Util.getInstance().retrieve(databaseUUID, ViewerDatabase.class.getName(), databaseUUID,
-      new DefaultAsyncCallback<IsIndexed>() {
-        @Override
-        public void onSuccess(IsIndexed result) {
-          database = (ViewerDatabase) result;
-          final String siardPath = database.getSIARDPath();
+    DatabaseService.Util.call((ViewerDatabase result) -> {
+      database = result;
+      final String siardPath = database.getPath();
 
-          ProgressBarPanel progressBarPanel = ProgressBarPanel.getInstance(databaseUUID);
-          progressBarPanel.setTitleText(messages.progressBarPanelTextForDBMSWizardTitle(
-            ToolkitModuleName2ViewerModuleName.transform(connectionParameters.getModuleName())));
-          progressBarPanel.setSubtitleText(messages.progressBarPanelTextForDBMSWizardSubTitle());
-          wizardContent.add(progressBarPanel);
+      ProgressBarPanel progressBarPanel = ProgressBarPanel.getInstance(databaseUUID);
+      progressBarPanel.setTitleText(messages.progressBarPanelTextForDBMSWizardTitle(
+          ToolkitModuleName2ViewerModuleName.transform(connectionParameters.getModuleName())));
+      progressBarPanel.setSubtitleText(messages.progressBarPanelTextForDBMSWizardSubTitle());
+      wizardContent.add(progressBarPanel);
 
-          BrowserService.Util.getInstance().migrateToDBMS(databaseUUID, database.getSIARDVersion(), siardPath,
-            connectionParameters,
-            new DefaultAsyncCallback<Boolean>() {
-
-              @Override
-              public void onFailure(Throwable caught) {
-                wizardContent.clear();
-                position = 0;
-                wizardContent.add(wizardPanels.get(position));
-                enableButtons(true);
-                updateBreadcrumb();
-                enableNext(false);
-
-                Dialogs.showErrors(messages.errorMessagesConnectionTitle(), caught.getMessage(),
-                  messages.basicActionClose());
-              }
-
-              @Override
-              public void onSuccess(Boolean result) {
-                if (result) {
-                  Dialogs.showInformationDialog(messages.sendToWizardManagerInformationTitle(),
-                    messages.sendToWizardManagerInformationMessageDBMS(
-                      connectionParameters.getJDBCConnectionParameters().getConnection().get("database")),
-                    messages.basicActionClose(), "btn btn-link", new DefaultAsyncCallback<Void>() {
-                      @Override
-                      public void onSuccess(Void result) {
-                        clear();
-                        for (WizardPanel wizardPanel : wizardPanels) {
-                          wizardPanel.clear();
-                        }
-                        instances.clear();
-                        HistoryManager.gotoSIARDInfo(databaseUUID);
-                      }
-                    });
+      SIARDService.Util.call((Boolean response) -> {
+        if (response) {
+          Dialogs.showInformationDialog(messages.sendToWizardManagerInformationTitle(),
+              messages.sendToWizardManagerInformationMessageDBMS(
+                  connectionParameters.getJdbcParameters().getConnection().get("database")),
+              messages.basicActionClose(), "btn btn-link", new DefaultAsyncCallback<Void>() {
+                @Override
+                public void onSuccess(Void result) {
+                  clear();
+                  for (WizardPanel wizardPanel : wizardPanels) {
+                    wizardPanel.clear();
+                  }
+                  instances.clear();
+                  HistoryManager.gotoSIARDInfo(databaseUUID);
                 }
-              }
-            });
+              });
         }
-      });
+
+      }, (String errorMessage) -> {
+        wizardContent.clear();
+        position = 0;
+        wizardContent.add(wizardPanels.get(position));
+        enableButtons(true);
+        updateBreadcrumb();
+        enableNext(false);
+
+        Dialogs.showErrors(messages.errorMessagesConnectionTitle(), errorMessage, messages.basicActionClose());
+
+      }).migrateToDBMS(databaseUUID, database.getVersion(), siardPath, connectionParameters);
+
+    }).retrieve(databaseUUID, databaseUUID);
   }
 
   @Override

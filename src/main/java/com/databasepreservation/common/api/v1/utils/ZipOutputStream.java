@@ -10,7 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.shared.ViewerConstants;
+import com.databasepreservation.common.client.ViewerConstants;
 import org.apache.commons.compress.archivers.zip.Zip64Mode;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
@@ -21,10 +21,10 @@ import org.roda.core.data.v2.index.sublist.Sublist;
 import com.databasepreservation.common.api.utils.ExtraMediaType;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.index.utils.IterableIndexResult;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerCell;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerColumn;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerRow;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerTable;
+import com.databasepreservation.common.client.models.structure.ViewerCell;
+import com.databasepreservation.common.client.models.structure.ViewerColumn;
+import com.databasepreservation.common.client.models.structure.ViewerRow;
+import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.utils.LobPathManager;
 
 /**
@@ -119,7 +119,7 @@ public class ZipOutputStream extends CSVOutputStream {
         out.putArchiveEntry(new ZipArchiveEntry(ViewerConstants.INTERNAL_ZIP_LOB_FOLDER + cellEntry.getValue().getValue()));
         final InputStream inputStream = Files
           .newInputStream(LobPathManager.getPath(ViewerFactory.getViewerConfiguration(), databaseUUID, table.getUUID(),
-            binaryColumn.getColumnIndexInEnclosingTable(), row.getUUID()));
+            binaryColumn.getColumnIndexInEnclosingTable(), row.getUuid()));
         IOUtils.copy(inputStream, out);
         inputStream.close();
         out.closeArchiveEntry();

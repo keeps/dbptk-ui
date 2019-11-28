@@ -1,31 +1,29 @@
 package com.databasepreservation.desktop.client.dbptk.wizard.download;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import com.databasepreservation.common.client.BrowserService;
-import com.databasepreservation.common.shared.ViewerConstants;
-import com.databasepreservation.common.shared.ViewerStructure.IsIndexed;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
-import com.databasepreservation.common.shared.client.breadcrumb.BreadcrumbItem;
-import com.databasepreservation.common.shared.client.breadcrumb.BreadcrumbPanel;
-import com.databasepreservation.common.shared.client.common.DefaultAsyncCallback;
-import com.databasepreservation.common.shared.client.tools.BreadcrumbManager;
-import com.databasepreservation.common.shared.client.tools.HistoryManager;
-import com.databasepreservation.common.shared.client.tools.PathUtils;
-import com.databasepreservation.common.shared.client.widgets.Toast;
-import com.databasepreservation.common.shared.models.wizardParameters.ExportOptionsParameters;
-import com.databasepreservation.common.shared.models.wizardParameters.MetadataExportOptionsParameters;
-import com.databasepreservation.common.shared.models.wizardParameters.TableAndColumnsParameters;
-import com.databasepreservation.common.shared.client.common.dialogs.Dialogs;
+import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.index.IsIndexed;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
+import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
+import com.databasepreservation.common.client.common.DefaultAsyncCallback;
+import com.databasepreservation.common.client.common.dialogs.Dialogs;
+import com.databasepreservation.common.client.common.visualization.progressBar.ProgressBarPanel;
+import com.databasepreservation.common.client.tools.BreadcrumbManager;
+import com.databasepreservation.common.client.tools.HistoryManager;
+import com.databasepreservation.common.client.tools.PathUtils;
+import com.databasepreservation.common.client.widgets.Toast;
+import com.databasepreservation.common.client.models.parameters.CreateSIARDParameters;
+import com.databasepreservation.common.client.models.parameters.ExportOptionsParameters;
+import com.databasepreservation.common.client.models.parameters.MetadataExportOptionsParameters;
+import com.databasepreservation.common.client.models.parameters.TableAndColumnsParameters;
+import com.databasepreservation.common.client.services.DatabaseService;
+import com.databasepreservation.common.client.services.SIARDService;
 import com.databasepreservation.desktop.client.dbptk.wizard.WizardManager;
 import com.databasepreservation.desktop.client.dbptk.wizard.WizardPanel;
 import com.databasepreservation.desktop.client.dbptk.wizard.common.exportOptions.MetadataExportOptions;
 import com.databasepreservation.desktop.client.dbptk.wizard.common.exportOptions.SIARDExportOptions;
-import com.databasepreservation.common.shared.client.common.visualization.progressBar.ProgressBarPanel;
 import com.databasepreservation.desktop.client.dbptk.wizard.upload.TableAndColumns;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -82,13 +80,9 @@ public class SIARDWizardManager extends WizardManager {
   private SIARDWizardManager(String databaseUUID, String databaseName) {
     initWidget(binder.createAndBindUi(this));
 
-    BrowserService.Util.getInstance().retrieve(databaseUUID, ViewerDatabase.class.getName(), databaseUUID,
-      new DefaultAsyncCallback<IsIndexed>() {
-        @Override
-        public void onSuccess(IsIndexed result) {
-          database = (ViewerDatabase) result;
-        }
-      });
+    DatabaseService.Util.call((IsIndexed result) -> {
+      database = (ViewerDatabase) result;
+    }).retrieve(databaseUUID, databaseUUID);
     this.databaseUUID = databaseUUID;
     this.databaseName = databaseName;
     init();
@@ -114,13 +108,9 @@ public class SIARDWizardManager extends WizardManager {
   }
 
   private void init() {
-    BrowserService.Util.getInstance().retrieve(databaseUUID, ViewerDatabase.class.getName(), databaseUUID,
-      new DefaultAsyncCallback<IsIndexed>() {
-        @Override
-        public void onSuccess(IsIndexed result) {
-          database = (ViewerDatabase) result;
-        }
-      });
+    DatabaseService.Util.call((IsIndexed result) -> {
+      database = (ViewerDatabase) result;
+    }).retrieve(databaseUUID, databaseUUID);
     wizardContent.clear();
     TableAndColumns tableAndColumns = TableAndColumns.getInstance(databaseUUID);
     wizardInstances.add(0, tableAndColumns);
@@ -151,8 +141,8 @@ public class SIARDWizardManager extends WizardManager {
       tableAndColumnsParameters = (TableAndColumnsParameters) wizardInstances.get(position).getValues();
       wizardContent.clear();
       position = 1;
-      String SIARDDefaultPath = database.getSIARDPath().replace(PathUtils.getFileName(database.getSIARDPath()), "")
-        + PathUtils.getFileName(database.getSIARDPath()).replaceFirst("[.][^.]+$", "") + "-"
+      String SIARDDefaultPath = database.getPath().replace(PathUtils.getFileName(database.getPath()), "")
+        + PathUtils.getFileName(database.getPath()).replaceFirst("[.][^.]+$", "") + "-"
         + DateTimeFormat.getFormat("yyyyMMddHHmmssSSS").format(new Date()) + ViewerConstants.SIARD_SUFFIX;
 
       SIARDExportOptions exportOptions = SIARDExportOptions.getInstance(SIARDDefaultPath);
@@ -200,46 +190,34 @@ public class SIARDWizardManager extends WizardManager {
     position = 3;
     updateBreadcrumb();
 
-    BrowserService.Util.getInstance().retrieve(databaseUUID, ViewerDatabase.class.getName(), databaseUUID,
-      new DefaultAsyncCallback<IsIndexed>() {
-        @Override
-        public void onSuccess(IsIndexed result) {
-          ViewerDatabase database = (ViewerDatabase) result;
-          final String siardPath = database.getSIARDPath();
+    DatabaseService.Util.call((ViewerDatabase result) -> {
+      final String siardPath = result.getPath();
+      ProgressBarPanel progressBarPanel = ProgressBarPanel.getInstance(databaseUUID);
+      progressBarPanel.setTitleText(messages.progressBarPanelTextForCreateWizardProgressTitle());
+      progressBarPanel.setSubtitleText(messages.progressBarPanelTextForCreateWizardProgressSubTitle());
+      wizardContent.add(progressBarPanel);
 
-          ProgressBarPanel progressBarPanel = ProgressBarPanel.getInstance(databaseUUID);
-          progressBarPanel.setTitleText(messages.progressBarPanelTextForCreateWizardProgressTitle());
-          progressBarPanel.setSubtitleText(messages.progressBarPanelTextForCreateWizardProgressSubTitle());
-          wizardContent.add(progressBarPanel);
-
-          BrowserService.Util.getInstance().migrateToSIARD(databaseUUID, database.getSIARDVersion(), siardPath, tableAndColumnsParameters,
-            exportOptionsParameters, metadataExportOptionsParameters, new DefaultAsyncCallback<Boolean>() {
-
-              @Override
-              public void onSuccess(Boolean result) {
-                if (result) {
-                  Dialogs.showInformationDialog(messages.sendToWizardManagerInformationTitle(),
-                    messages.sendToWizardManagerInformationMessageSIARD(), messages.basicActionClose(), "btn btn-link",
-                    new DefaultAsyncCallback<Void>() {
-                      @Override
-                      public void onSuccess(Void result) {
-                        clear();
-                        instances.clear();
-                        HistoryManager.gotoSIARDInfo(databaseUUID);
-                      }
-                    });
+      SIARDService.Util.call((Boolean response) -> {
+        if (response) {
+          Dialogs.showInformationDialog(messages.sendToWizardManagerInformationTitle(),
+              messages.sendToWizardManagerInformationMessageSIARD(), messages.basicActionClose(), "btn btn-link",
+              new DefaultAsyncCallback<Void>() {
+                @Override
+                public void onSuccess(Void result) {
+                  clear();
+                  instances.clear();
+                  HistoryManager.gotoSIARDInfo(databaseUUID);
                 }
-              }
-
-              @Override
-              public void onFailure(Throwable caught) {
-                enableButtons(true);
-                enableNext(false);
-                Toast.showError(messages.alertErrorTitle(), caught.getMessage());
-              }
-            });
+              });
         }
-      });
+      }, (String errorMessage) -> {
+        enableButtons(true);
+        enableNext(false);
+        Toast.showError(messages.alertErrorTitle(), errorMessage);
+      }).migrateToSIARD(databaseUUID, result.getVersion(), siardPath, new CreateSIARDParameters(null,
+          tableAndColumnsParameters, null, exportOptionsParameters, metadataExportOptionsParameters));
+
+    }).retrieve(databaseUUID, databaseUUID);
   }
 
   @Override

@@ -7,7 +7,7 @@
  */
 package com.databasepreservation.common.server.index.schema;
 
-import static com.databasepreservation.common.shared.ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX;
+import static com.databasepreservation.common.client.ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -28,7 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.common.server.index.schema.collections.RowsCollection;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerRow;
+import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.exceptions.ViewerException;
 
 public final class SolrRowsCollectionRegistry {

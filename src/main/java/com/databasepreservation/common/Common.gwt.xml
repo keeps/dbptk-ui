@@ -1,12 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <module>
-
+    <!-- Inherit the core Web Toolkit stuff. -->
+    <inherits name="com.google.gwt.i18n.I18N" />
+    <inherits name="config.i18n.I18N" />
+    <inherits name="org.fusesource.restygwt.RestyGWT"/>
+    <inherits name="org.roda.core.Core"/>
     <stylesheet src="roda_main.css" />
     <stylesheet src="main.css" />
     <stylesheet src="print.css" />
 
     <source path="client"/>
-    <source path="shared"/>
+
+    <set-property name="restygwt.autodetect.plainText" value="true" />
 </module>
 

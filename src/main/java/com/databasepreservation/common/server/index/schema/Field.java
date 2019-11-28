@@ -16,7 +16,7 @@ import org.apache.solr.client.solrj.request.schema.SchemaRequest.AddField;
 import org.apache.solr.client.solrj.request.schema.SchemaRequest.Update;
 
 import com.databasepreservation.common.server.ViewerConfiguration;
-import com.databasepreservation.common.shared.ViewerConstants;
+import com.databasepreservation.common.client.ViewerConstants;
 
 public class Field {
 

@@ -1,8 +1,8 @@
 package com.databasepreservation.desktop.client.dbptk;
 
-import com.databasepreservation.common.shared.ViewerConstants;
-import com.databasepreservation.common.shared.client.common.helpers.HelperUploadSIARDFile;
-import com.databasepreservation.common.shared.client.tools.HistoryManager;
+import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.common.helpers.HelperUploadSIARDFile;
+import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.desktop.client.common.Card;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -62,7 +62,6 @@ public class HomePage extends Composite {
   }
 
   private void init() {
-
     Button btnCreate = new Button();
     btnCreate.setText(messages.homePageButtonTextForCreateSIARD());
     btnCreate.addStyleName("btn btn-edit");

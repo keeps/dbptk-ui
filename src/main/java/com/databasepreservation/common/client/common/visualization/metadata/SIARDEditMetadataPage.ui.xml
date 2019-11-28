@@ -1,0 +1,39 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:ct='urn:import:com.databasepreservation.common.client.common.visualization.metadata'
+             xmlns:m='urn:import:com.databasepreservation.common.client.common.breadcrumb'
+             xmlns:sidebar="urn:import:com.databasepreservation.common.client.common.sidebar">
+
+    <ui:with field='messages' type='config.i18n.client.ClientMessages'/>
+    <g:FlowPanel ui:field="toplevel" addStyleNames="metadata">
+        <g:FlowPanel addStyleNames="row full_width skip_padding">
+            <m:BreadcrumbPanel ui:field="breadcrumbDesktop" addStyleNames="browseContentBreadcrumb"
+                               visible="false"/>
+            <g:FocusPanel addStyleNames="browseContentFocusPanel">
+                <g:HorizontalPanel addStyleNames="browseContentPreviewPanel">
+                    <!-- LEFT PANEL -->
+                    <g:cell>
+                        <sidebar:MetadataEditSidebar ui:field="sidebar" />
+                    </g:cell>
+                    <!-- RIGHT PANEL -->
+                    <g:cell width="100%">
+                        <g:FlowPanel addStyleNames="browseContentFilePreviewPanel metadata-panel">
+                            <g:FlowPanel ui:field="toolbar">
+                                <m:BreadcrumbPanel ui:field="breadcrumbServer" addStyleNames="browseContentBreadcrumb"
+                                                   visible="false"/>
+                                <g:MenuBar ui:field="menu" />
+                                <g:SimplePanel addStyleNames="clear-both" />
+                            </g:FlowPanel>
+                            <!-- CONTENT PANEL -->
+                            <g:SimplePanel addStyleNames="col_12 content metadata-content" ui:field="rightPanelContainer" />
+                            <!-- CONTROL PANEL -->
+                            <ct:MetadataControlPanel ui:field="controls" />
+
+                        </g:FlowPanel>
+                    </g:cell>
+                </g:HorizontalPanel>
+            </g:FocusPanel>
+        </g:FlowPanel>
+    </g:FlowPanel>
+
+</ui:UiBinder>

@@ -3,8 +3,8 @@ package com.databasepreservation.desktop.client.dbptk.wizard.common.connection;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.databasepreservation.common.shared.client.tools.ViewerStringUtils;
-import com.databasepreservation.common.shared.models.SSHConfiguration;
+import com.databasepreservation.common.client.tools.ViewerStringUtils;
+import com.databasepreservation.common.client.models.parameters.SSHConfiguration;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;

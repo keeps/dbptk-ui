@@ -26,8 +26,8 @@ import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.controller.Browser;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
-import com.databasepreservation.common.shared.ViewerConstants;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
+import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.google.common.io.Files;
 
 import io.swagger.annotations.*;
@@ -92,7 +92,7 @@ public class FileResource {
       throw new NotFoundException("Database not found");
     }
 
-    File file = new File(database.getSIARDPath());
+    File file = new File(database.getPath());
     if (!file.exists()) {
       throw new NotFoundException("SIARD file not found");
     }

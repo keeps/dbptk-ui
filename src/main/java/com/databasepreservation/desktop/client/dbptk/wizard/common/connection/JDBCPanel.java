@@ -6,17 +6,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.shared.ViewerConstants;
-import com.databasepreservation.common.shared.client.common.desktop.FileUploadField;
-import com.databasepreservation.common.shared.client.common.desktop.GenericField;
-import com.databasepreservation.common.shared.client.common.utils.ApplicationType;
-import com.databasepreservation.common.shared.client.common.utils.JavascriptUtils;
-import com.databasepreservation.common.shared.client.tools.JSOUtils;
-import com.databasepreservation.common.shared.client.tools.PathUtils;
-import com.databasepreservation.common.shared.client.tools.ViewerStringUtils;
-import com.databasepreservation.common.shared.models.Filter;
-import com.databasepreservation.common.shared.models.JDBCParameters;
-import com.databasepreservation.common.shared.models.PreservationParameter;
+import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.common.desktop.FileUploadField;
+import com.databasepreservation.common.client.common.desktop.GenericField;
+import com.databasepreservation.common.client.common.utils.ApplicationType;
+import com.databasepreservation.common.client.common.utils.JavascriptUtils;
+import com.databasepreservation.common.client.tools.JSOUtils;
+import com.databasepreservation.common.client.tools.PathUtils;
+import com.databasepreservation.common.client.tools.ViewerStringUtils;
+import com.databasepreservation.common.client.models.ExtensionFilter;
+import com.databasepreservation.common.client.models.parameters.JDBCParameters;
+import com.databasepreservation.common.client.models.parameters.PreservationParameter;
 import com.databasepreservation.desktop.client.dbptk.wizard.WizardManager;
 import com.databasepreservation.desktop.client.dbptk.wizard.download.DBMSWizardManager;
 import com.databasepreservation.desktop.client.dbptk.wizard.upload.CreateWizardManager;
@@ -172,7 +172,7 @@ public class JDBCPanel extends Composite {
         fileUploadField.setRequired(parameter.isRequired());
         fileUploadField.buttonAction(() -> {
           if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
-            Filter mdb = new Filter("MS Access", Collections.singletonList("mdb"));
+            ExtensionFilter mdb = new ExtensionFilter("MS Access", Collections.singletonList("mdb"));
             JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.singletonList("openFile"),
               Collections.singletonList(mdb));
 
@@ -207,7 +207,7 @@ public class JDBCPanel extends Composite {
         fileUploadField.setRequired(parameter.isRequired());
         fileUploadField.buttonAction(() -> {
           if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
-            Filter jar = new Filter("JAR File", Collections.singletonList("jar"));
+            ExtensionFilter jar = new ExtensionFilter("JAR File", Collections.singletonList("jar"));
             JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.singletonList("openFile"),
               Collections.singletonList(jar));
 

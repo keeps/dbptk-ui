@@ -1,19 +1,16 @@
 package com.databasepreservation.desktop.client.dbptk.wizard.common.exportOptions;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import com.databasepreservation.common.client.BrowserService;
-import com.databasepreservation.common.shared.ViewerConstants;
-import com.databasepreservation.common.shared.ViewerStructure.IsIndexed;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerMetadata;
-import com.databasepreservation.common.shared.client.common.DefaultAsyncCallback;
-import com.databasepreservation.common.shared.client.common.desktop.GenericField;
-import com.databasepreservation.common.shared.client.tools.ViewerStringUtils;
-import com.databasepreservation.common.shared.models.DBPTKModule;
-import com.databasepreservation.common.shared.models.PreservationParameter;
-import com.databasepreservation.common.shared.models.wizardParameters.MetadataExportOptionsParameters;
+import com.databasepreservation.common.client.models.DBPTKModule;
+import com.databasepreservation.common.client.models.parameters.PreservationParameter;
+import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.structure.ViewerMetadata;
+import com.databasepreservation.common.client.common.desktop.GenericField;
+import com.databasepreservation.common.client.tools.ViewerStringUtils;
+import com.databasepreservation.common.client.models.parameters.MetadataExportOptionsParameters;
+import com.databasepreservation.common.client.services.ContextService;
+import com.databasepreservation.common.client.services.DatabaseService;
+import com.databasepreservation.common.client.services.ModulesService;
 import com.databasepreservation.desktop.client.dbptk.wizard.WizardPanel;
 import com.databasepreservation.modules.siard.SIARD2ModuleFactory;
 import com.github.nmorel.gwtjackson.client.ObjectMapper;
@@ -26,8 +23,10 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-
 import config.i18n.client.ClientMessages;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -75,15 +74,10 @@ public class MetadataExportOptions extends WizardPanel<MetadataExportOptionsPara
 
     content.add(spinner);
     if (populate) {
-      BrowserService.Util.getInstance().retrieve(databaseUUID, ViewerDatabase.class.getName(), databaseUUID,
-        new DefaultAsyncCallback<IsIndexed>() {
-          @Override
-          public void onSuccess(IsIndexed result) {
-            ViewerDatabase database = (ViewerDatabase) result;
-            metadata = database.getMetadata();
-            obtainMetadataExportOptions(moduleName, spinner);
-            }
-          });
+      DatabaseService.Util.call((ViewerDatabase result) -> {
+        metadata = result.getMetadata();
+        obtainMetadataExportOptions(moduleName, spinner);
+      }).retrieve(databaseUUID,databaseUUID);
     } else {
       obtainMetadataExportOptions(moduleName, spinner);
     }
@@ -138,12 +132,7 @@ public class MetadataExportOptions extends WizardPanel<MetadataExportOptionsPara
         genericField = GenericField.createInstance(messages.wizardExportOptionsLabels(parameter.getName()), defaultTextBox);
 
         if (parameter.getName().equals(ViewerConstants.SIARD_METADATA_CLIENT_MACHINE)) {
-          BrowserService.Util.getInstance().getClientMachine(new DefaultAsyncCallback<String>() {
-            @Override
-            public void onSuccess(String result) {
-              defaultTextBox.setText(result);
-            }
-          });
+          ContextService.Util.call(defaultTextBox::setText);
         }
         break;
       default:
@@ -187,19 +176,14 @@ public class MetadataExportOptions extends WizardPanel<MetadataExportOptionsPara
   }
 
   private void obtainMetadataExportOptions(final String moduleName, Widget spinner) {
-    BrowserService.Util.getInstance().getSIARDExportModule(moduleName, new DefaultAsyncCallback<String>() {
-      @Override
-      public void onSuccess(String result) {
-        DBPTKModuleMapper mapper = GWT.create(DBPTKModuleMapper.class);
-        DBPTKModule module = mapper.read(result);
 
-        for (PreservationParameter p : module.getParameters(moduleName)) {
-          if (p.getExportOption() != null && p.getExportOption().equals(ViewerConstants.METADATA_EXPORT_OPTIONS)) {
-            buildGenericWidget(p);
-          }
+    ModulesService.Util.call((DBPTKModule result) -> {
+      for (PreservationParameter p : result.getParameters(moduleName)) {
+        if (p.getExportOption() != null && p.getExportOption().equals(ViewerConstants.METADATA_EXPORT_OPTIONS)) {
+          buildGenericWidget(p);
         }
-        content.remove(spinner);
       }
-    });
+      content.remove(spinner);
+    }).getSIARDExportModule(moduleName);
   }
 }

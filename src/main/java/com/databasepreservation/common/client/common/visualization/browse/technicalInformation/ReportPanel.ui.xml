@@ -1,0 +1,13 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:wcag='urn:import:com.databasepreservation.common.client.widgets.wcag'
+>
+    <g:FlowPanel>
+        <g:FlowPanel addStyleNames="structure-header">
+            <g:SimplePanel>
+                <g:Label ui:field="title" addStyleNames="h1"/>
+            </g:SimplePanel>
+        </g:FlowPanel>
+        <wcag:MarkdownWidgetWrapper ui:field="contentItems"/>
+    </g:FlowPanel>
+</ui:UiBinder>

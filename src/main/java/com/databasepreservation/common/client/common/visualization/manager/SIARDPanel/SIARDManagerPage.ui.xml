@@ -1,0 +1,20 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:c='urn:import:com.databasepreservation.common.client.common'>
+
+    <g:FlowPanel addStyleNames="application-container" ui:field="container">
+        <g:FlowPanel addStyleNames="browseContentPreviewPanel" ui:field="panel">
+            <c:LoadingDiv visible="false" ui:field="loading"/>
+            <g:FlowPanel ui:field="metadataInformation"/>
+            <g:FlowPanel addStyleNames="navigation-panels" ui:field="navigationPanels"/>
+            <g:FlowPanel addStyleNames="navigation-buttons">
+                <g:SimplePanel addStyleNames="btn-item">
+                  <g:Button ui:field="btnBack" addStyleNames="btn btn-primary btn-back-wizard"/>
+                </g:SimplePanel>
+                <g:SimplePanel addStyleNames="btn-item">
+                  <g:Button ui:field="btnExclude" addStyleNames="btn btn-danger btn-delete"/>
+                </g:SimplePanel>
+            </g:FlowPanel>
+        </g:FlowPanel>
+    </g:FlowPanel>
+</ui:UiBinder>

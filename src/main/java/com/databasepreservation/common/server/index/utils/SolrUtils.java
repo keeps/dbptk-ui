@@ -8,7 +8,6 @@
 package com.databasepreservation.common.server.index.utils;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
 import java.net.ConnectException;
 import java.text.ParseException;
@@ -19,7 +18,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -29,12 +27,16 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 
+import com.databasepreservation.common.client.index.IndexResult;
+import com.databasepreservation.common.client.index.facets.FacetFieldResult;
+import com.databasepreservation.common.client.index.facets.FacetParameter;
+import com.databasepreservation.common.client.index.facets.Facets;
+import com.databasepreservation.common.client.index.facets.RangeFacetParameter;
+import com.databasepreservation.common.client.index.facets.SimpleFacetParameter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.impl.InputStreamResponseParser;
-import org.apache.solr.client.solrj.request.QueryRequest;
 import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
@@ -45,14 +47,7 @@ import org.apache.solr.common.params.FacetParams;
 import org.roda.core.data.common.RodaConstants;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
-import org.roda.core.data.exceptions.NotSupportedException;
 import org.roda.core.data.exceptions.RequestNotValidException;
-import org.roda.core.data.v2.index.IndexResult;
-import org.roda.core.data.v2.index.facet.FacetFieldResult;
-import org.roda.core.data.v2.index.facet.FacetParameter;
-import org.roda.core.data.v2.index.facet.Facets;
-import org.roda.core.data.v2.index.facet.RangeFacetParameter;
-import org.roda.core.data.v2.index.facet.SimpleFacetParameter;
 import org.roda.core.data.v2.index.filter.BasicSearchFilterParameter;
 import org.roda.core.data.v2.index.filter.DateIntervalFilterParameter;
 import org.roda.core.data.v2.index.filter.DateRangeFilterParameter;
@@ -75,11 +70,11 @@ import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.server.index.schema.SolrCollection;
 import com.databasepreservation.common.server.index.schema.SolrRowsCollectionRegistry;
 import com.databasepreservation.common.server.index.schema.collections.RowsCollection;
-import com.databasepreservation.common.shared.ViewerConstants;
-import com.databasepreservation.common.shared.ViewerStructure.IsIndexed;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerRow;
-import com.databasepreservation.common.shared.client.common.search.SavedSearch;
+import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.index.IsIndexed;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.structure.ViewerRow;
+import com.databasepreservation.common.client.common.search.SavedSearch;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -182,7 +177,7 @@ public class SolrUtils {
   }
 
   public static IndexResult<ViewerRow> findRows(SolrClient index, String databaseUUID, Filter filter, Sorter sorter,
-    Sublist sublist) throws GenericException, RequestNotValidException {
+                                                Sublist sublist) throws GenericException, RequestNotValidException {
     return findRows(index, databaseUUID, filter, sorter, sublist, Facets.NONE);
   }
 

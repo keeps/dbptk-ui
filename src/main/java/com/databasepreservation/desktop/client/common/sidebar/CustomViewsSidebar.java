@@ -3,10 +3,10 @@ package com.databasepreservation.desktop.client.common.sidebar;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.databasepreservation.common.shared.client.common.sidebar.SidebarHyperlink;
-import com.databasepreservation.common.shared.client.common.sidebar.SidebarItem;
-import com.databasepreservation.common.shared.client.tools.FontAwesomeIconManager;
-import com.databasepreservation.common.shared.client.tools.HistoryManager;
+import com.databasepreservation.common.client.common.sidebar.SidebarHyperlink;
+import com.databasepreservation.common.client.common.sidebar.SidebarItem;
+import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
+import com.databasepreservation.common.client.tools.HistoryManager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;

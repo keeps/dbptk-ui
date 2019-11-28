@@ -8,8 +8,8 @@ import java.util.List;
 import org.apache.commons.csv.CSVPrinter;
 
 import com.databasepreservation.common.server.index.utils.IterableIndexResult;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerRow;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerTable;
+import com.databasepreservation.common.client.models.structure.ViewerRow;
+import com.databasepreservation.common.client.models.structure.ViewerTable;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>

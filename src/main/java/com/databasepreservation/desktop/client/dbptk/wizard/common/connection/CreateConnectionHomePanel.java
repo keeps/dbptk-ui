@@ -1,6 +1,6 @@
 package com.databasepreservation.desktop.client.dbptk.wizard.common.connection;
 
-import com.databasepreservation.common.shared.ViewerConstants;
+import com.databasepreservation.common.client.ViewerConstants;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;

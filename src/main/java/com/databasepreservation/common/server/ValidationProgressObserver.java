@@ -1,8 +1,9 @@
 package com.databasepreservation.common.server;
 
 import com.databasepreservation.common.ValidationObserver;
+import com.databasepreservation.common.client.models.ValidationRequirement;
 import com.databasepreservation.common.server.controller.SIARDController;
-import com.databasepreservation.common.shared.ValidationProgressData;
+import com.databasepreservation.common.client.models.ValidationProgressData;
 import com.databasepreservation.model.reporters.ValidationReporterStatus;
 
 /**
@@ -19,7 +20,7 @@ public class ValidationProgressObserver implements ValidationObserver {
 
   @Override
   public void notifyStartValidationModule(String componentName, String ID) {
-    progressData.createRequirement(ValidationProgressData.Requirement.Type.REQUIREMENT);
+    progressData.createRequirement(ValidationRequirement.Type.REQUIREMENT);
     progressData.setRequirementID(ID);
     progressData.setRequirementMessage(componentName);
   }
@@ -31,7 +32,7 @@ public class ValidationProgressObserver implements ValidationObserver {
 
   @Override
   public void notifyMessage(String componentName, String ID, String message, ValidationReporterStatus status) {
-    progressData.createRequirement(ValidationProgressData.Requirement.Type.MESSAGE);
+    progressData.createRequirement(ValidationRequirement.Type.MESSAGE);
     progressData.setRequirementID(ID);
     progressData.setRequirementMessage(message);
     progressData.setRequirementStatus(status.name());
@@ -39,21 +40,21 @@ public class ValidationProgressObserver implements ValidationObserver {
 
   @Override
   public void notifyValidationStep(String componentName, String step, ValidationReporterStatus status) {
-    progressData.createRequirement(ValidationProgressData.Requirement.Type.SUB_REQUIREMENT);
+    progressData.createRequirement(ValidationRequirement.Type.SUB_REQUIREMENT);
     progressData.setRequirementID(step);
     progressData.setRequirementStatus(status.name());
   }
 
   @Override
   public void notifyComponent(String ID, ValidationReporterStatus status) {
-    progressData.createRequirement(ValidationProgressData.Requirement.Type.ADDITIONAL);
+    progressData.createRequirement(ValidationRequirement.Type.ADDITIONAL);
     progressData.setRequirementID(ID);
     progressData.setRequirementStatus(status.name());
   }
 
   @Override
   public void notifyElementValidating(String ID, String path) {
-    progressData.createRequirement(ValidationProgressData.Requirement.Type.PATH);
+    progressData.createRequirement(ValidationRequirement.Type.PATH);
     progressData.setRequirementID(ID);
     progressData.setRequirementMessage(path);
   }
@@ -67,18 +68,18 @@ public class ValidationProgressObserver implements ValidationObserver {
 
   @Override
   public void notifyValidationProcessFinish(boolean result) {
-    progressData.setFinished(result);
+    progressData.setFinished(true);
   }
 
   @Override
   public void notifyValidationProgressSparse(int numberOfRows) {
-    progressData.createRequirement(ValidationProgressData.Requirement.Type.SPARSE_PROGRESS);
+    progressData.createRequirement(ValidationRequirement.Type.SPARSE_PROGRESS);
     progressData.setRequirementMessage(Integer.toString(numberOfRows));
   }
 
   @Override
   public void notifyElementValidationFinish(String ID, String path, ValidationReporterStatus status) {
-    progressData.createRequirement(ValidationProgressData.Requirement.Type.PATH_COMPLETE);
+    progressData.createRequirement(ValidationRequirement.Type.PATH_COMPLETE);
     progressData.setRequirementID(ID);
     progressData.setRequirementMessage(path);
     progressData.setRequirementStatus(status.name());

@@ -4,17 +4,17 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import com.databasepreservation.common.client.index.IndexResult;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.common.params.CursorMarkParams;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.RequestNotValidException;
-import org.roda.core.data.v2.index.IndexResult;
 import org.roda.core.data.v2.index.filter.Filter;
 import org.roda.core.data.v2.index.sort.Sorter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.databasepreservation.common.shared.ViewerStructure.ViewerRow;
+import com.databasepreservation.common.client.models.structure.ViewerRow;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>

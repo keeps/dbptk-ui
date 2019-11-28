@@ -1,20 +1,15 @@
 package com.databasepreservation.desktop.client.dbptk.wizard.upload;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import com.databasepreservation.common.client.BrowserService;
-import com.databasepreservation.common.shared.client.common.DefaultAsyncCallback;
-import com.databasepreservation.common.shared.client.common.desktop.ComboBoxField;
-import com.databasepreservation.common.shared.client.common.dialogs.Dialogs;
-import com.databasepreservation.common.shared.client.tools.HistoryManager;
-import com.databasepreservation.common.shared.client.tools.ViewerStringUtils;
-import com.databasepreservation.common.shared.client.widgets.Toast;
-import com.databasepreservation.common.shared.models.wizardParameters.ConnectionParameters;
-import com.databasepreservation.common.shared.models.wizardParameters.CustomViewsParameter;
-import com.databasepreservation.common.shared.models.wizardParameters.CustomViewsParameters;
+import com.databasepreservation.common.client.common.DefaultAsyncCallback;
+import com.databasepreservation.common.client.common.desktop.ComboBoxField;
+import com.databasepreservation.common.client.common.dialogs.Dialogs;
+import com.databasepreservation.common.client.tools.HistoryManager;
+import com.databasepreservation.common.client.tools.ViewerStringUtils;
+import com.databasepreservation.common.client.widgets.Toast;
+import com.databasepreservation.common.client.models.parameters.ConnectionParameters;
+import com.databasepreservation.common.client.models.parameters.CustomViewsParameter;
+import com.databasepreservation.common.client.models.parameters.CustomViewsParameters;
+import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.desktop.client.common.sidebar.CustomViewsSidebar;
 import com.databasepreservation.desktop.client.dbptk.wizard.WizardPanel;
 import com.google.gwt.core.client.GWT;
@@ -30,8 +25,12 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-
 import config.i18n.client.ClientMessages;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -228,20 +227,13 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
       btnUpdate.addClickHandler(event -> {
         final int valid = customViewFormValidatorUpdate(parameter.getCustomViewName());
         if (valid == -1) {
-          BrowserService.Util.getInstance().validateCustomViewQuery(databaseUUID, connectionParameters,
-            customViewQuery.getText(), new DefaultAsyncCallback<List<List<String>>>() {
-              @Override
-              public void onSuccess(List<List<String>> result) {
-                updateCustomViewParameters(parameter.getCustomViewID(), customViewSchemaName.getSelectedValue(),
-                  customViewName.getText(), customViewDescription.getText(), customViewQuery.getText());
-                Toast.showInfo(messages.customViewsPageTitle(), messages.customViewsUpdateMessage());
-              }
-
-              @Override
-              public void onFailure(Throwable caught) {
-                Dialogs.showErrors(messages.customViewsPageTitle(), caught.getMessage(), messages.basicActionClose());
-              }
-            });
+          DatabaseService.Util.call((List<List<String>> result) -> {
+            updateCustomViewParameters(parameter.getCustomViewID(), customViewSchemaName.getSelectedValue(),
+                customViewName.getText(), customViewDescription.getText(), customViewQuery.getText());
+            Toast.showInfo(messages.customViewsPageTitle(), messages.customViewsUpdateMessage());
+          }, (String errorMessage) -> {
+            Dialogs.showErrors(messages.customViewsPageTitle(), errorMessage, messages.basicActionClose());
+          }).validateCustomViewQuery(connectionParameters, customViewQuery.getText());
         } else {
           Toast.showError(messages.customViewsPageTitle(), messages.customViewsPageErrorMessagesFor(valid));
           highlightFieldsWhenRequired();
@@ -360,32 +352,25 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
     btnSave.addClickHandler(event -> {
       final int valid = customViewFormValidator();
       if (valid == -1) {
-        BrowserService.Util.getInstance().validateCustomViewQuery(databaseUUID, connectionParameters,
-          customViewQuery.getText(), new DefaultAsyncCallback<List<List<String>>>() {
-            @Override
-            public void onSuccess(List<List<String>> result) {
-              customViewsSidebar.addSideBarHyperLink(customViewName.getText(), String.valueOf(counter),
-                HistoryManager.linkToCreateWizardCustomViewsDelete(String.valueOf(counter)));
+        DatabaseService.Util.call((List<List<String>> result) -> {
+          customViewsSidebar.addSideBarHyperLink(customViewName.getText(), String.valueOf(counter),
+              HistoryManager.linkToCreateWizardCustomViewsDelete(String.valueOf(counter)));
 
-              CustomViewsParameter parameter = new CustomViewsParameter(customViewSchemaName.getSelectedValue(),
-                counter, customViewName.getText(), customViewDescription.getText(), customViewQuery.getText());
-              customViewsParameters.put(String.valueOf(counter), parameter);
-              counter++;
-              setTextboxText("", "", "", "");
-              customViewName.getElement().removeAttribute("required");
-              customViewQuery.getElement().removeAttribute("required");
-              customViewSchemaName.getElement().removeAttribute("required");
-              customViewsSidebar.selectNone();
+          CustomViewsParameter parameter = new CustomViewsParameter(customViewSchemaName.getSelectedValue(),
+              counter, customViewName.getText(), customViewDescription.getText(), customViewQuery.getText());
+          customViewsParameters.put(String.valueOf(counter), parameter);
+          counter++;
+          setTextboxText("", "", "", "");
+          customViewName.getElement().removeAttribute("required");
+          customViewQuery.getElement().removeAttribute("required");
+          customViewSchemaName.getElement().removeAttribute("required");
+          customViewsSidebar.selectNone();
 
-              checkIfHaveCustomViews();
-            }
-
-            @Override
-            public void onFailure(Throwable caught) {
-              Dialogs.showErrors(messages.customViewsPageTitle(), caught.getMessage(), messages.basicActionClose());
-              checkIfHaveCustomViews();
-            }
-          });
+          checkIfHaveCustomViews();
+        }, (String errorMessage) -> {
+          Dialogs.showErrors(messages.customViewsPageTitle(), errorMessage, messages.basicActionClose());
+          checkIfHaveCustomViews();
+        }).validateCustomViewQuery(connectionParameters, customViewQuery.getText());
       } else {
         Toast.showError(messages.customViewsPageTitle(), messages.customViewsPageErrorMessagesFor(valid));
         highlightFieldsWhenRequired();
@@ -452,21 +437,15 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
         Widget spinner = new HTML(SafeHtmlUtils.fromSafeConstant(
           "<div class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
         content.add(spinner);
-        BrowserService.Util.getInstance().validateCustomViewQuery(databaseUUID, connectionParameters,
-          customViewQuery.getText(), new DefaultAsyncCallback<List<List<String>>>() {
-            @Override
-            public void onSuccess(List<List<String>> result) {
-              content.remove(spinner);
-              Dialogs.showQueryResult(messages.customViewsPageTextForQueryResultsDialogTitle(),
-                messages.basicActionClose(), result);
-            }
 
-            @Override
-            public void onFailure(Throwable caught) {
-              content.remove(spinner);
-              Dialogs.showErrors(messages.customViewsPageTitle(), caught.getMessage(), messages.basicActionClose());
-            }
-          });
+        DatabaseService.Util.call((List<List<String>> result) -> {
+          content.remove(spinner);
+          Dialogs.showQueryResult(messages.customViewsPageTextForQueryResultsDialogTitle(),
+              messages.basicActionClose(), result);
+        }, (String errorMessage) -> {
+          content.remove(spinner);
+          Dialogs.showErrors(messages.customViewsPageTitle(), errorMessage, messages.basicActionClose());
+        }).validateCustomViewQuery(connectionParameters, customViewQuery.getText());
       } else {
         Toast.showError(messages.customViewsPageTitle(), messages.customViewsPageErrorMessageForQueryError());
       }

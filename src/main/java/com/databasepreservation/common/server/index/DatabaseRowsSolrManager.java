@@ -1,12 +1,27 @@
 package com.databasepreservation.common.server.index;
 
-import java.io.IOException;
-import java.nio.file.InvalidPathException;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
+import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.index.IsIndexed;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.structure.ViewerDatabaseFromToolkit;
+import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
+import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
+import com.databasepreservation.common.client.models.structure.ViewerMetadata;
+import com.databasepreservation.common.client.models.structure.ViewerRow;
+import com.databasepreservation.common.client.models.structure.ViewerTable;
+import com.databasepreservation.common.client.common.search.SavedSearch;
+import com.databasepreservation.common.client.index.IndexResult;
+import com.databasepreservation.common.client.index.facets.Facets;
+import com.databasepreservation.common.exceptions.ViewerException;
+import com.databasepreservation.common.server.index.schema.SolrCollection;
+import com.databasepreservation.common.server.index.schema.SolrDefaultCollectionRegistry;
+import com.databasepreservation.common.server.index.schema.SolrRowsCollectionRegistry;
+import com.databasepreservation.common.server.index.schema.collections.RowsCollection;
+import com.databasepreservation.common.server.index.utils.IterableIndexResult;
+import com.databasepreservation.common.server.index.utils.JsonTransformer;
+import com.databasepreservation.common.server.index.utils.Pair;
+import com.databasepreservation.common.server.index.utils.SolrUtils;
+import com.databasepreservation.utils.FileUtils;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -18,8 +33,6 @@ import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RequestNotValidException;
-import org.roda.core.data.v2.index.IndexResult;
-import org.roda.core.data.v2.index.facet.Facets;
 import org.roda.core.data.v2.index.filter.Filter;
 import org.roda.core.data.v2.index.filter.SimpleFilterParameter;
 import org.roda.core.data.v2.index.sort.Sorter;
@@ -27,24 +40,12 @@ import org.roda.core.data.v2.index.sublist.Sublist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.databasepreservation.common.exceptions.ViewerException;
-import com.databasepreservation.common.server.index.schema.SolrCollection;
-import com.databasepreservation.common.server.index.schema.SolrDefaultCollectionRegistry;
-import com.databasepreservation.common.server.index.schema.SolrRowsCollectionRegistry;
-import com.databasepreservation.common.server.index.schema.collections.RowsCollection;
-import com.databasepreservation.common.server.index.utils.IterableIndexResult;
-import com.databasepreservation.common.server.index.utils.JsonTransformer;
-import com.databasepreservation.common.server.index.utils.Pair;
-import com.databasepreservation.common.server.index.utils.SolrUtils;
-import com.databasepreservation.common.shared.ViewerConstants;
-import com.databasepreservation.common.shared.ViewerStructure.IsIndexed;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabaseFromToolkit;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerMetadata;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerRow;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerTable;
-import com.databasepreservation.common.shared.client.common.search.SavedSearch;
-import com.databasepreservation.utils.FileUtils;
+import java.io.IOException;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Exposes some methods to interact with a Solr Server
@@ -79,7 +80,7 @@ public class DatabaseRowsSolrManager {
 
   public void addDatabaseRowCollection(final String databaseUUID) throws ViewerException {
     updateValidationFields(databaseUUID,
-      Pair.of(ViewerConstants.SOLR_DATABASES_STATUS, ViewerDatabase.Status.INGESTING.toString()));
+        Pair.of(ViewerConstants.SOLR_DATABASES_STATUS, ViewerDatabaseStatus.INGESTING.toString()));
     RowsCollection collection = new RowsCollection(databaseUUID);
     collection.createRowsCollection();
   }
@@ -88,14 +89,14 @@ public class DatabaseRowsSolrManager {
     // delete the LOBs
     if (lobFolder != null) {
       try {
-        FileUtils.deleteDirectoryRecursiveQuietly(lobFolder.resolve(database.getUUID()));
+        FileUtils.deleteDirectoryRecursiveQuietly(lobFolder.resolve(database.getUuid()));
       } catch (InvalidPathException e) {
-        throw new ViewerException("Error deleting LOBs for database " + database.getUUID(), e);
+        throw new ViewerException("Error deleting LOBs for database " + database.getUuid(), e);
       }
     }
 
     // delete related rows collection
-    String rowsCollectionName = SolrRowsCollectionRegistry.get(database.getUUID()).getIndexName();
+    String rowsCollectionName = SolrRowsCollectionRegistry.get(database.getUuid()).getIndexName();
     SolrRequest<?> request = CollectionAdminRequest.deleteCollection(rowsCollectionName);
     try {
       client.request(request);
@@ -106,21 +107,21 @@ public class DatabaseRowsSolrManager {
 
     // delete related saved searches
       Filter savedSearchFilter = new Filter(
-        new SimpleFilterParameter(ViewerConstants.SOLR_SEARCHES_DATABASE_UUID, database.getUUID()));
+          new SimpleFilterParameter(ViewerConstants.SOLR_SEARCHES_DATABASE_UUID, database.getUuid()));
     try {
       SolrUtils.delete(client, SolrDefaultCollectionRegistry.get(SavedSearch.class), savedSearchFilter);
-      LOGGER.debug("Deleted saved searches for database {}", database.getUUID());
+      LOGGER.debug("Deleted saved searches for database {}", database.getUuid());
     } catch (GenericException | RequestNotValidException e) {
-      throw new ViewerException("Error deleting saved searches for database " + database.getUUID(), e);
+      throw new ViewerException("Error deleting saved searches for database " + database.getUuid(), e);
     }
 
     // delete the database item
     try {
       SolrUtils.delete(client, SolrDefaultCollectionRegistry.get(ViewerDatabase.class),
-        Arrays.asList(database.getUUID()));
-      LOGGER.debug("Deleted database {}", database.getUUID());
+          Arrays.asList(database.getUuid()));
+      LOGGER.debug("Deleted database {}", database.getUuid());
     } catch (GenericException e) {
-      throw new ViewerException("Error deleting the database " + database.getUUID(), e);
+      throw new ViewerException("Error deleting the database " + database.getUuid(), e);
     }
   }
 
@@ -146,7 +147,7 @@ public class DatabaseRowsSolrManager {
 
   public void addRow(ViewerDatabaseFromToolkit viewerDatabase, ViewerRow row) throws ViewerException {
 
-    RowsCollection collection = SolrRowsCollectionRegistry.get(viewerDatabase.getUUID());
+    RowsCollection collection = SolrRowsCollectionRegistry.get(viewerDatabase.getUuid());
 
     try {
       insertDocument(collection.getIndexName(), collection.toSolrDocument(row));
@@ -156,7 +157,7 @@ public class DatabaseRowsSolrManager {
   }
 
   public <T extends IsIndexed> IndexResult<T> find(Class<T> classToReturn, Filter filter, Sorter sorter,
-    Sublist sublist, Facets facets) throws GenericException, RequestNotValidException {
+                                                   Sublist sublist, Facets facets) throws GenericException, RequestNotValidException {
     return SolrUtils.find(client, SolrDefaultCollectionRegistry.get(classToReturn), filter, sorter, sublist, facets,
       new ArrayList<>());
   }
@@ -312,13 +313,13 @@ public class DatabaseRowsSolrManager {
     }
   }
 
-  public void markDatabaseCollection(final String databaseUUID, ViewerDatabase.Status status) {
+  public void markDatabaseCollection(final String databaseUUID, ViewerDatabaseStatus status) {
     updateDatabaseFields(databaseUUID, Pair.of(ViewerConstants.SOLR_DATABASES_STATUS, status.toString()));
   }
 
   public void markDatabaseAsReady(final String databaseUUID) throws ViewerException {
     updateDatabaseFields(databaseUUID,
-      Pair.of(ViewerConstants.SOLR_DATABASES_STATUS, ViewerDatabase.Status.AVAILABLE.toString()));
+        Pair.of(ViewerConstants.SOLR_DATABASES_STATUS, ViewerDatabaseStatus.AVAILABLE.toString()));
   }
 
   @SafeVarargs
@@ -375,8 +376,8 @@ public class DatabaseRowsSolrManager {
       Pair.of(ViewerConstants.SOLR_DATABASES_INGESTED_ROWS, null));
   }
 
-  public void updateSIARDValidationInformation(String databaseUUID, ViewerDatabase.ValidationStatus validationStatus,
-    String validatorReportLocation, String DBPTKVersion, String validationDate) {
+  public void updateSIARDValidationInformation(String databaseUUID, ViewerDatabaseValidationStatus validationStatus,
+                                               String validatorReportLocation, String DBPTKVersion, String validationDate) {
 
     updateValidationFields(databaseUUID, Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATED_AT, validationDate),
       Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATOR_REPORT_PATH, validatorReportLocation),

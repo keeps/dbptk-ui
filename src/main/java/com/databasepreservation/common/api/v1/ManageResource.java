@@ -24,8 +24,8 @@ import com.databasepreservation.common.api.utils.ApiResponseMessage;
 import com.databasepreservation.common.api.utils.ApiUtils;
 import com.databasepreservation.common.server.controller.SIARDController;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
-import com.databasepreservation.common.shared.ViewerConstants;
-import com.databasepreservation.common.shared.ViewerStructure.ViewerDatabase;
+import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.utils.UserUtility;
 
