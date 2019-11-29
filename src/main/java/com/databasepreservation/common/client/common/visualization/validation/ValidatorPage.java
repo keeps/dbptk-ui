@@ -1,5 +1,6 @@
 package com.databasepreservation.common.client.common.visualization.validation;
 
+import com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.SIARDManagerPage;
 import com.databasepreservation.common.client.models.ValidationProgressData;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
@@ -192,7 +193,8 @@ public class ValidatorPage extends ContentPanel {
         countSkipped = result.getNumberOfSkipped();
         countErrors = result.getNumberOfErrors();
         stopUpdating();
-        ValidationNavigationPanel.getInstance(database).update(database);
+        SIARDManagerPage.getInstance(database).refreshInstance(databaseUUID);
+        //ValidationNavigationPanel.getInstance(database).update(database);
         if (numberOfFailedRequirements > 0) {
           Dialogs.showErrors(messages.validatorPageTextForTitle(),
               messages.validatorPageTextForDialogFailureInformation(database.getMetadata().getName(), countErrors),

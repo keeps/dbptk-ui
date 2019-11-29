@@ -4324,7 +4324,7 @@ td.datePickerMonth, td.datePickerYear {
     -moz-animation: none;
     animation:none;
     font-family: "Font Awesome 5 Free";
-    font-weight: 600;
+    font-weight: 900;
 }
 
 #upload-list li.working span.icon:after {

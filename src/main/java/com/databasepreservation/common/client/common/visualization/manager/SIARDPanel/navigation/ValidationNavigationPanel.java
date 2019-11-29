@@ -303,6 +303,8 @@ public class ValidationNavigationPanel {
   }
 
   public void update(ViewerDatabase database) {
+    GWT.log("HERE!!" + database.getValidationStatus());
+
     this.database = database;
     updateValidationStatus();
     updateValidationButtons();
