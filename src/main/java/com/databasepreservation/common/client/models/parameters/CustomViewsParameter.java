@@ -25,7 +25,7 @@ public class CustomViewsParameter implements Serializable {
     this.customViewQuery = customViewQuery;
   }
 
-  public String getSchema() {
+  public String getSchemaName() {
     return schemaName;
   }
 

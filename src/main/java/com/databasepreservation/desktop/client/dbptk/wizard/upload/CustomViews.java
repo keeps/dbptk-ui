@@ -204,7 +204,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
         });
     } else {
       customViewsButtons.clear();
-      setTextboxText(parameter.getSchema(), parameter.getCustomViewName(), parameter.getCustomViewDescription(),
+      setTextboxText(parameter.getSchemaName(), parameter.getCustomViewName(), parameter.getCustomViewDescription(),
         parameter.getCustomViewQuery());
 
       Button btnNew = new Button();

@@ -952,7 +952,7 @@ public class SIARDController {
       customViewInformation.put("query", parameter.getCustomViewQuery());
       customViewInformation.put("description", parameter.getCustomViewDescription());
       view.put(parameter.getCustomViewName(), customViewInformation);
-      data.put(parameter.getSchema(), view);
+      data.put(parameter.getSchemaName(), view);
     }
 
     Yaml yaml = new Yaml();
