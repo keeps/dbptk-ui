@@ -1,30 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module>
-    <!-- Inherit the core Web Toolkit stuff. -->
-    <inherits name='com.google.gwt.user.User'/>
-    <inherits name='com.google.gwt.logging.Logging'/>
     <inherits name='com.databasepreservation.common.Common'/>
-
-    <!-- date and time pickers -->
-    <inherits name="com.tractionsoftware.gwt.user.UserNoCss" />
-    <inherits name="com.tractionsoftware.gwt.user.UTCDateTime" />
-
-    <!-- Inherit some internal functionality -->
-    <inherits name='org.roda.core.Core'/>
-    <inherits name="com.github.nmorel.gwtjackson.GwtJackson" />
-
-    <!-- I18N: internals -->
-    <inherits name="com.google.gwt.i18n.I18N" />
-    <inherits name="config.i18n.I18N" />
-    <set-configuration-property name="locale.useragent" value="Y"/>
-    <set-configuration-property name="locale.searchorder" value="queryparam,cookie,meta,useragent"/>
-
-    <!-- I18N: languages -->
-    <extend-property name="locale" values="en" />
-    <extend-property name="locale" values="pt_PT" />
-    <set-property-fallback name="locale" value="en"/>
-
-    <!-- Other module inherits                                      -->
 
     <!-- Specify the app entry point class.                         -->
     <entry-point class='com.databasepreservation.desktop.client.main.Main'/>
@@ -39,5 +15,4 @@
     <set-property name="compiler.stackMode" value="emulated" />
     <set-configuration-property name="compiler.emulatedStack.recordFileNames" value="true" />
     <set-configuration-property name="compiler.emulatedStack.recordLineNumbers" value="true" />
-    <collapse-all-properties />
 </module>

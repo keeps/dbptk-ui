@@ -5,7 +5,7 @@
     <ui:with field='messages' type='config.i18n.client.ClientMessages' />
     <g:FlowPanel addStyleNames="home-page-content">
         <g:FlowPanel addStyleNames="home-page-brand">
-            <g:Image ui:field="applicationLink" url="/img/dbvtk_horizontal_black_vector.svg" />
+            <g:Image ui:field="applicationLink" url="/img/dbptk_horizontal_black_vector.svg" />
         </g:FlowPanel>
         <g:FlowPanel addStyleNames="options" ui:field="options"/>
         <g:FlowPanel addStyleNames="home-page-footer">

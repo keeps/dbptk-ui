@@ -1,17 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <module>
+    <inherits name="org.fusesource.restygwt.RestyGWT"/>
     <!-- Inherit the core Web Toolkit stuff. -->
+    <inherits name='com.google.gwt.user.User'/>
+    <inherits name='com.google.gwt.logging.Logging'/>
+
+
+    <!-- date and time pickers -->
+    <inherits name="com.tractionsoftware.gwt.user.UserNoCss" />
+    <inherits name="com.tractionsoftware.gwt.user.UTCDateTime" />
+
+    <!-- Inherit some internal functionality -->
+    <inherits name='org.roda.core.Core'/>
+    <inherits name="com.github.nmorel.gwtjackson.GwtJackson" />
+
+    <!-- I18N: internals -->
     <inherits name="com.google.gwt.i18n.I18N" />
     <inherits name="config.i18n.I18N" />
-    <inherits name="org.fusesource.restygwt.RestyGWT"/>
-    <inherits name="org.roda.core.Core"/>
+    <set-configuration-property name="locale.useragent" value="Y"/>
+    <set-configuration-property name="locale.searchorder" value="queryparam,cookie,meta,useragent"/>
+
+    <!-- I18N: languages -->
+    <extend-property name="locale" values="en" />
+    <extend-property name="locale" values="pt_PT" />
+    <set-property-fallback name="locale" value="en"/>
+
     <stylesheet src="roda_main.css" />
     <stylesheet src="main.css" />
     <stylesheet src="print.css" />
 
     <source path="client"/>
 
+    <!-- https://github.com/resty-gwt/resty-gwt/issues/296 -->
+    <!-- in order to use auto-detection on strings you need to set in your XZY-gwt.xml -->
     <set-property name="restygwt.autodetect.plainText" value="true" />
 </module>
 
