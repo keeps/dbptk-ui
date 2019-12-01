@@ -9,6 +9,8 @@ import com.databasepreservation.common.client.ClientLogger;
 import com.databasepreservation.common.client.common.roda.select.SelectedItems;
 import com.databasepreservation.common.client.common.roda.select.SelectedItemsFilter;
 import com.databasepreservation.common.client.common.roda.select.SelectedItemsList;
+import com.databasepreservation.common.client.index.sort.SortParameter;
+import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.widgets.Alert;
 import com.databasepreservation.common.client.widgets.MyCellTableResources;
 import com.databasepreservation.common.client.widgets.wcag.AccessibleCellTable;
@@ -56,8 +58,6 @@ import config.i18n.client.ClientMessages;
 import org.fusesource.restygwt.client.Method;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.roda.core.data.v2.index.filter.Filter;
-import org.roda.core.data.v2.index.sort.SortParameter;
-import org.roda.core.data.v2.index.sort.Sorter;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
 import java.util.ArrayList;

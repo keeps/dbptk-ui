@@ -5,12 +5,12 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import com.databasepreservation.common.client.index.IndexResult;
+import com.databasepreservation.common.client.index.sort.Sorter;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.common.params.CursorMarkParams;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.RequestNotValidException;
 import org.roda.core.data.v2.index.filter.Filter;
-import org.roda.core.data.v2.index.sort.Sorter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

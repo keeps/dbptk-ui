@@ -1,6 +1,7 @@
 package com.databasepreservation.common.client.common.lists;
 
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
 import com.databasepreservation.common.client.ClientLogger;
@@ -33,7 +34,6 @@ import com.google.gwt.view.client.DefaultSelectionEventManager;
 import config.i18n.client.ClientMessages;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.roda.core.data.v2.index.filter.Filter;
-import org.roda.core.data.v2.index.sort.Sorter;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
 import java.util.HashMap;

@@ -2,9 +2,9 @@ package com.databasepreservation.common.client.common.lists;
 
 import java.util.*;
 
+import com.databasepreservation.common.client.index.sort.Sorter;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.roda.core.data.v2.index.filter.Filter;
-import org.roda.core.data.v2.index.sort.Sorter;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
 import com.databasepreservation.common.client.ViewerConstants;
