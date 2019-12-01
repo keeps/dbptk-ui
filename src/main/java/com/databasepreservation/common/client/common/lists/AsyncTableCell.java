@@ -486,7 +486,6 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
       ColumnSortInfo columnSortInfo = columnSortList.get(i);
 
       List<String> sortParameterKeys = columnSortingKeyMap.get(columnSortInfo.getColumn());
-
       if (sortParameterKeys != null) {
         for (String sortParameterKey : sortParameterKeys) {
           sorter.add(new SortParameter(sortParameterKey, !columnSortInfo.isAscending()));

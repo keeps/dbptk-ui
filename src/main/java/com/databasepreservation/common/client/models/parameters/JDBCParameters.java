@@ -45,11 +45,11 @@ public class JDBCParameters implements Serializable {
     this.driverPath = driverPath;
   }
 
-  public void shouldCountRows(boolean shouldCountRows) {
+  public void setShouldCountRows(boolean shouldCountRows) {
     this.shouldCountRows = shouldCountRows;
   }
 
-  public boolean shouldCountRows() {
+  public boolean isShouldCountRows() {
     return shouldCountRows;
   }
 }

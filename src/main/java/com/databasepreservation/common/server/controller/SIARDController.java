@@ -321,7 +321,7 @@ public class SIARDController {
       if (importModule instanceof JDBCImportModule) {
         JDBCImportModule jdbcImportModule = (JDBCImportModule) importModule;
         schemaInformation = jdbcImportModule
-          .getSchemaInformation(parameters.getJdbcParameters().shouldCountRows());
+          .getSchemaInformation(parameters.getJdbcParameters().isShouldCountRows());
         jdbcImportModule.closeConnection();
       }
     } catch (ModuleException e) {

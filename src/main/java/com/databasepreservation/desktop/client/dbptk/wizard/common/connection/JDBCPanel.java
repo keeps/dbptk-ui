@@ -112,7 +112,7 @@ public class JDBCPanel extends Composite {
       jdbcParameters.setDriverPath(pathToDriver);
     }
 
-    jdbcParameters.shouldCountRows(shouldCountRows);
+    jdbcParameters.setShouldCountRows(shouldCountRows);
 
     return jdbcParameters;
   }
