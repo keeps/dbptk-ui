@@ -34,6 +34,7 @@ public class RestApplicationNoSwagger {
       register(ReportResource.class);
       register(SearchResource.class);
       register(SIARDResource.class);
+      register(ClientLoggerResource.class);
       register(ThemeResource.class);
       register(JacksonFeature.class);
       register(MoxyXmlFeature.class);

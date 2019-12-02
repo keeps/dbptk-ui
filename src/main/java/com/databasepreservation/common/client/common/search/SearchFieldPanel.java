@@ -129,19 +129,19 @@ public class SearchFieldPanel extends Composite {
     inputDateFromForDate = new UTCDateBox();
     inputDateFromForDate.getDateBox().setFormat(dateFormat);
     inputDateFromForDate.getDateBox().getDatePicker().setYearArrowsVisible(true);
-    inputDateFromForDate.getDateBox().setFireNullValues(true);
+    //inputDateFromForDate.getDateBox().setFireNullValues(true);
     //inputDateFromForDate.getElement().setPropertyString("placeholder", messages.searchFieldDateFromPlaceHolder());
 
     inputDateToForDate = new UTCDateBox();
     inputDateToForDate.getDateBox().setFormat(dateFormat);
     inputDateToForDate.getDateBox().getDatePicker().setYearArrowsVisible(true);
-    inputDateToForDate.getDateBox().setFireNullValues(true);
+    //inputDateToForDate.getDateBox().setFireNullValues(true);
     //inputDateToForDate.getElement().setPropertyString("placeholder", messages.searchFieldDateToPlaceHolder());
 
     inputDateFromForDateTime = new UTCDateBox();
     inputDateFromForDateTime.getDateBox().setFormat(dateFormat);
     inputDateFromForDateTime.getDateBox().getDatePicker().setYearArrowsVisible(true);
-    inputDateFromForDateTime.getDateBox().setFireNullValues(true);
+    //inputDateFromForDateTime.getDateBox().setFireNullValues(true);
     //inputDateFromForDateTime.getElement().setPropertyString("placeholder", messages.searchFieldDateFromPlaceHolder());
 
     inputTimeFromForDateTime = new UTCTimeBox(timeFormat);
@@ -150,7 +150,7 @@ public class SearchFieldPanel extends Composite {
     inputDateToForDateTime = new UTCDateBox();
     inputDateToForDateTime.getDateBox().setFormat(dateFormat);
     inputDateToForDateTime.getDateBox().getDatePicker().setYearArrowsVisible(true);
-    inputDateToForDateTime.getDateBox().setFireNullValues(true);
+    //inputDateToForDateTime.getDateBox().setFireNullValues(true);
     //inputDateToForDateTime.getElement().setPropertyString("placeholder", messages.searchFieldDateToPlaceHolder());
 
     inputTimeToForDateTime = new UTCTimeBox(timeFormat);

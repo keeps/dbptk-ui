@@ -1234,7 +1234,7 @@ pre code {
 }
 
 .dateBoxFormatError {
-    background: #eed6d6;
+    background: #eed6d6 !important;
 }
 
 .dateBoxPopup {

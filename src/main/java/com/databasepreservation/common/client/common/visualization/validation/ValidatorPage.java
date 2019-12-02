@@ -156,7 +156,7 @@ public class ValidatorPage extends ContentPanel {
     SIARDService.Util.call((ValidationProgressData result) -> {
       resetInfos();
       populateValidationInfo(false, false);
-      autoUpdateTimer.scheduleRepeating(250);
+      autoUpdateTimer.scheduleRepeating(1000);
       autoUpdateTimer.run();
       result.setFinished(false);
       runValidator();

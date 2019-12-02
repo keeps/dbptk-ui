@@ -7,11 +7,14 @@ package com.databasepreservation.common.client;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.fusesource.restygwt.client.Method;
+import org.fusesource.restygwt.client.MethodCallback;
+
+import com.databasepreservation.common.client.services.ClientLoggerService;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
 import com.google.gwt.core.shared.SerializableThrowable;
 import com.google.gwt.logging.client.DevelopmentModeLogHandler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 /**
@@ -97,17 +100,19 @@ public class ClientLogger implements IsSerializable {
    */
   public void trace(final String message) {
     if (CURRENT_LOG_LEVEL <= TRACE) {
-      AsyncCallback<Void> errorcallback = new AsyncCallback<Void>() {
-        public void onFailure(Throwable caught) {
+      MethodCallback<Void> errorcallback = new MethodCallback<Void>() {
+        @Override
+        public void onFailure(Method method, Throwable caught) {
           GWT.log(message, null);
           GWT.log("Error while logging another error", caught);
         }
 
-        public void onSuccess(Void result) {
+        @Override
+        public void onSuccess(Method method, Void result) {
           // do nothing
         }
       };
-      ClientLoggerService.Util.getInstance().trace(classname, message, errorcallback);
+      ClientLoggerService.Util.call(errorcallback).trace(classname, message);
     }
   }
 
@@ -120,18 +125,20 @@ public class ClientLogger implements IsSerializable {
   public void trace(final String message, final Throwable error) {
     if (CURRENT_LOG_LEVEL <= TRACE) {
 
-      AsyncCallback<Void> errorcallback = new AsyncCallback<Void>() {
-        public void onFailure(Throwable caught) {
+      MethodCallback<Void> errorcallback = new MethodCallback<Void>() {
+        @Override
+        public void onFailure(Method method, Throwable caught) {
           GWT.log(message, error);
           GWT.log("Error while logging another error", caught);
         }
 
-        public void onSuccess(Void result) {
+        @Override
+        public void onSuccess(Method method, Void result) {
           GWT.log(message, error);
         }
       };
-      ClientLoggerService.Util.getInstance().trace(classname, message, SerializableThrowable.fromThrowable(error),
-        errorcallback);
+      ClientLoggerService.Util.call(errorcallback).trace(classname, message,
+        SerializableThrowable.fromThrowable(error));
     }
   }
 
@@ -143,17 +150,19 @@ public class ClientLogger implements IsSerializable {
   public void debug(final String message) {
     GWT.log(message);
     if (CURRENT_LOG_LEVEL <= DEBUG) {
-      AsyncCallback<Void> errorcallback = new AsyncCallback<Void>() {
-        public void onFailure(Throwable caught) {
+      MethodCallback<Void> errorcallback = new MethodCallback<Void>() {
+        @Override
+        public void onFailure(Method method, Throwable caught) {
           GWT.log(message, null);
           GWT.log("Error while logging another error", caught);
         }
 
-        public void onSuccess(Void result) {
+        @Override
+        public void onSuccess(Method method, Void result) {
           // do nothing
         }
       };
-      ClientLoggerService.Util.getInstance().debug(classname, message, errorcallback);
+      ClientLoggerService.Util.call(errorcallback).debug(classname, message);
     }
   }
 
@@ -165,19 +174,20 @@ public class ClientLogger implements IsSerializable {
    */
   public void debug(final String object, final Throwable error) {
     if (CURRENT_LOG_LEVEL <= DEBUG) {
-      AsyncCallback<Void> errorcallback = new AsyncCallback<Void>() {
-        public void onFailure(Throwable caught) {
+      MethodCallback<Void> errorcallback = new MethodCallback<Void>() {
+        @Override
+        public void onFailure(Method method, Throwable caught) {
           GWT.log(object, error);
           GWT.log("Error while logging another error", caught);
         }
 
-        public void onSuccess(Void result) {
+        @Override
+        public void onSuccess(Method method, Void result) {
           // do nothing
           GWT.log(object, error);
         }
       };
-      ClientLoggerService.Util.getInstance().debug(classname, object, SerializableThrowable.fromThrowable(error),
-        errorcallback);
+      ClientLoggerService.Util.call(errorcallback).debug(classname, object, SerializableThrowable.fromThrowable(error));
     }
   }
 
@@ -188,17 +198,19 @@ public class ClientLogger implements IsSerializable {
    */
   public void info(final String message) {
     if (CURRENT_LOG_LEVEL <= INFO) {
-      AsyncCallback<Void> errorcallback = new AsyncCallback<Void>() {
-        public void onFailure(Throwable caught) {
+      MethodCallback<Void> errorcallback = new MethodCallback<Void>() {
+        @Override
+        public void onFailure(Method method, Throwable caught) {
           GWT.log(message, null);
           GWT.log("Error while logging another error", caught);
         }
 
-        public void onSuccess(Void result) {
+        @Override
+        public void onSuccess(Method method, Void result) {
           // do nothing
         }
       };
-      ClientLoggerService.Util.getInstance().info(classname, message, errorcallback);
+      ClientLoggerService.Util.call(errorcallback).info(classname, message);
     }
   }
 
@@ -210,19 +222,20 @@ public class ClientLogger implements IsSerializable {
    */
   public void info(final String message, final Throwable error) {
     if (CURRENT_LOG_LEVEL <= INFO) {
-      AsyncCallback<Void> errorcallback = new AsyncCallback<Void>() {
-        public void onFailure(Throwable caught) {
+      MethodCallback<Void> errorcallback = new MethodCallback<Void>() {
+        @Override
+        public void onFailure(Method method, Throwable caught) {
           GWT.log(message, error);
           GWT.log("Error while logging another error", caught);
         }
 
-        public void onSuccess(Void result) {
+        @Override
+        public void onSuccess(Method method, Void result) {
           // do nothing
           GWT.log(message, error);
         }
       };
-      ClientLoggerService.Util.getInstance().info(classname, message, SerializableThrowable.fromThrowable(error),
-        errorcallback);
+      ClientLoggerService.Util.call(errorcallback).info(classname, message, SerializableThrowable.fromThrowable(error));
     }
   }
 
@@ -233,17 +246,19 @@ public class ClientLogger implements IsSerializable {
    */
   public void warn(final String message) {
     if (CURRENT_LOG_LEVEL <= WARN) {
-      AsyncCallback<Void> errorcallback = new AsyncCallback<Void>() {
-        public void onFailure(Throwable caught) {
+      MethodCallback<Void> errorcallback = new MethodCallback<Void>() {
+        @Override
+        public void onFailure(Method method, Throwable caught) {
           GWT.log(message, null);
           GWT.log("Error while logging another error", caught);
         }
 
-        public void onSuccess(Void result) {
+        @Override
+        public void onSuccess(Method method, Void result) {
           // do nothing
         }
       };
-      ClientLoggerService.Util.getInstance().warn(classname, message, errorcallback);
+      ClientLoggerService.Util.call(errorcallback).warn(classname, message);
     }
   }
 
@@ -255,18 +270,19 @@ public class ClientLogger implements IsSerializable {
    */
   public void warn(final String message, final Throwable error) {
     if (CURRENT_LOG_LEVEL <= WARN) {
-      AsyncCallback<Void> errorcallback = new AsyncCallback<Void>() {
-        public void onFailure(Throwable caught) {
+      MethodCallback<Void> errorcallback = new MethodCallback<Void>() {
+        @Override
+        public void onFailure(Method method, Throwable caught) {
           GWT.log(message, error);
           GWT.log("Error while logging another error", caught);
         }
 
-        public void onSuccess(Void result) {
+        @Override
+        public void onSuccess(Method method, Void result) {
           GWT.log(message, error);
         }
       };
-      ClientLoggerService.Util.getInstance().warn(classname, message, SerializableThrowable.fromThrowable(error),
-        errorcallback);
+      ClientLoggerService.Util.call(errorcallback).warn(classname, message, SerializableThrowable.fromThrowable(error));
     }
   }
 
@@ -277,18 +293,20 @@ public class ClientLogger implements IsSerializable {
    */
   public void error(final String message) {
     if (CURRENT_LOG_LEVEL <= ERROR) {
-      AsyncCallback<Void> errorcallback = new AsyncCallback<Void>() {
-        public void onFailure(Throwable caught) {
+      MethodCallback<Void> errorcallback = new MethodCallback<Void>() {
+        @Override
+        public void onFailure(Method method, Throwable caught) {
           GWT.log(message, null);
           GWT.log("Error while logging another error", caught);
         }
 
-        public void onSuccess(Void result) {
+        @Override
+        public void onSuccess(Method method, Void result) {
           // do nothing
         }
       };
       GWT.log(message, null);
-      ClientLoggerService.Util.getInstance().error(classname, message, errorcallback);
+      ClientLoggerService.Util.call(errorcallback).error(classname, message);
 
       // if (SHOW_ERROR_MESSAGES) {
       // Toast.showError(message);
@@ -306,19 +324,21 @@ public class ClientLogger implements IsSerializable {
     // FIXME should this be done if internal authentication is being used? I
     // don't think so
     if (CURRENT_LOG_LEVEL <= ERROR) {
-      AsyncCallback<Void> errorcallback = new AsyncCallback<Void>() {
-        public void onFailure(Throwable caught) {
+      MethodCallback<Void> errorcallback = new MethodCallback<Void>() {
+        @Override
+        public void onFailure(Method method, Throwable caught) {
           logger.log(Level.SEVERE, message, error);
           logger.log(Level.SEVERE, "Error while logging another error", caught);
         }
 
-        public void onSuccess(Void result) {
+        @Override
+        public void onSuccess(Method method, Void result) {
           logger.log(Level.SEVERE, message, error);
         }
       };
 
-      ClientLoggerService.Util.getInstance().error(classname, message, SerializableThrowable.fromThrowable(error),
-        errorcallback);
+      ClientLoggerService.Util.call(errorcallback).error(classname, message,
+        SerializableThrowable.fromThrowable(error));
       // if (SHOW_ERROR_MESSAGES) {
       // Toast.showError(message, error.getMessage()
       // + (error.getCause() != null ? "\nCause: " +
@@ -334,19 +354,21 @@ public class ClientLogger implements IsSerializable {
    */
   public void fatal(final String message) {
     if (CURRENT_LOG_LEVEL <= FATAL) {
-      AsyncCallback<Void> errorcallback = new AsyncCallback<Void>() {
-        public void onFailure(Throwable caught) {
+      MethodCallback<Void> errorcallback = new MethodCallback<Void>() {
+        @Override
+        public void onFailure(Method method, Throwable caught) {
           GWT.log(message, null);
           GWT.log("Error while logging another error", caught);
         }
 
-        public void onSuccess(Void result) {
+        @Override
+        public void onSuccess(Method method, Void result) {
           // do nothing
         }
       };
       GWT.log(message);
       logger.log(Level.SEVERE, message);
-      ClientLoggerService.Util.getInstance().fatal(classname, message, errorcallback);
+      ClientLoggerService.Util.call(errorcallback).fatal(classname, message);
       // if (SHOW_ERROR_MESSAGES) {
       // Toast.showError(message);
       // }
@@ -361,21 +383,23 @@ public class ClientLogger implements IsSerializable {
    */
   public void fatal(final String message, final Throwable error) {
     if (CURRENT_LOG_LEVEL <= FATAL) {
-      AsyncCallback<Void> errorcallback = new AsyncCallback<Void>() {
-        public void onFailure(Throwable caught) {
+      MethodCallback<Void> errorcallback = new MethodCallback<Void>() {
+        @Override
+        public void onFailure(Method method, Throwable caught) {
           GWT.log(message, error);
           GWT.log("Error while logging another error", caught);
           logger.log(Level.SEVERE, message, error);
         }
 
-        public void onSuccess(Void result) {
+        @Override
+        public void onSuccess(Method method, Void result) {
           GWT.log(message, error);
           logger.log(Level.SEVERE, message, error);
         }
       };
 
-      ClientLoggerService.Util.getInstance().fatal(classname, message, SerializableThrowable.fromThrowable(error),
-        errorcallback);
+      ClientLoggerService.Util.call(errorcallback).fatal(classname, message,
+        SerializableThrowable.fromThrowable(error));
 
       // if (SHOW_ERROR_MESSAGES) {
       // Toast.showError(message, error.getMessage()

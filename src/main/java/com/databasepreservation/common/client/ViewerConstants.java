@@ -19,7 +19,8 @@ public class ViewerConstants {
   public static final String ENDPOINT_CONTEXT = "/" + ViewerConstants.API_SERVLET + ViewerConstants.API_V1_CONTEXT_RESOURCE;
   public static final String ENDPOINT_DATABASE = "/" + ViewerConstants.API_SERVLET + ViewerConstants.API_V1_DATABASE_RESOURCE;
   public static final String ENDPOINT_SEARCH = "/" + ViewerConstants.API_SERVLET + ViewerConstants.API_V1_SEARCH_RESOURCE;
-  public static final String ENDPOINT_AUTHENTICATION = "/" + ViewerConstants.API_SERVLET + ViewerConstants.API_V1_SEARCH_AUTHENTICATION;
+  public static final String ENDPOINT_AUTHENTICATION = "/" + ViewerConstants.API_SERVLET + ViewerConstants.API_V1_AUTHENTICATION_RESOURCE;
+  public static final String ENDPOINT_CLIENT_LOGGER = "/" + ViewerConstants.API_SERVLET + ViewerConstants.API_V1_CLIENT_LOGGER_RESOURCE;
 
   /*
    * DBVTK CONFIG
@@ -251,7 +252,8 @@ public class ViewerConstants {
   public static final String API_V1_CONTEXT_RESOURCE = "/v1/context";
   public static final String API_V1_DATABASE_RESOURCE = "/v1/database";
   public static final String API_V1_SEARCH_RESOURCE = "/v1/search";
-  public static final String API_V1_SEARCH_AUTHENTICATION = "/v1/authentication";
+  public static final String API_V1_AUTHENTICATION_RESOURCE = "/v1/authentication";
+  public static final String API_V1_CLIENT_LOGGER_RESOURCE = "/v1/logger";
   /*
    * Search field types from RODA, plus a few new ones
    */

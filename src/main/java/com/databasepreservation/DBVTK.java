@@ -21,7 +21,6 @@ import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.databasepreservation.common.server.BrowserServiceImpl;
-import com.databasepreservation.common.server.ClientLoggerImpl;
 import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.client.ViewerConstants;
 
@@ -57,19 +56,7 @@ public class DBVTK {
     bean.setLoadOnStartup(2);
     return bean;
   }
-  @Bean
-  public ServletRegistrationBean<HttpServlet> clientLogger() {
-    ServletRegistrationBean<HttpServlet> bean;
-    if (ViewerConstants.DESKTOP.equals(System.getProperty("env", "server"))) {
-      bean = new ServletRegistrationBean<>(new ClientLoggerImpl(),
-              "/com.databasepreservation.desktop.Desktop/wuilogger");
-    } else {
-      bean = new ServletRegistrationBean<>(new ClientLoggerImpl(),
-              "/com.databasepreservation.server.Server/wuilogger");
-    }
-    bean.setLoadOnStartup(2);
-    return bean;
-  }
+
   @Bean
   public ApplicationListener<ServletWebServerInitializedEvent> getPort() {
     return new ApplicationListener<ServletWebServerInitializedEvent>() {
