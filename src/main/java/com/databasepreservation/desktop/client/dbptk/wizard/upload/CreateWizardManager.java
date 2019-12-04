@@ -1,17 +1,13 @@
 package com.databasepreservation.desktop.client.dbptk.wizard.upload;
 
-import com.databasepreservation.common.client.BrowserService;
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
-import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.visualization.progressBar.ProgressBarPanel;
-import com.databasepreservation.common.client.tools.BreadcrumbManager;
-import com.databasepreservation.common.client.tools.HistoryManager;
-import com.databasepreservation.common.client.widgets.Toast;
-import com.databasepreservation.common.client.models.parameters.CreateSIARDParameters;
 import com.databasepreservation.common.client.models.parameters.ConnectionParameters;
+import com.databasepreservation.common.client.models.parameters.CreateSIARDParameters;
 import com.databasepreservation.common.client.models.parameters.CustomViewsParameters;
 import com.databasepreservation.common.client.models.parameters.ExportOptionsParameters;
 import com.databasepreservation.common.client.models.parameters.MetadataExportOptionsParameters;
@@ -19,12 +15,14 @@ import com.databasepreservation.common.client.models.parameters.TableAndColumnsP
 import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.services.ModulesService;
 import com.databasepreservation.common.client.services.SIARDService;
+import com.databasepreservation.common.client.tools.BreadcrumbManager;
+import com.databasepreservation.common.client.tools.HistoryManager;
+import com.databasepreservation.common.client.widgets.Toast;
 import com.databasepreservation.desktop.client.dbptk.wizard.WizardManager;
 import com.databasepreservation.desktop.client.dbptk.wizard.WizardPanel;
 import com.databasepreservation.desktop.client.dbptk.wizard.common.connection.Connection;
 import com.databasepreservation.desktop.client.dbptk.wizard.common.exportOptions.MetadataExportOptions;
 import com.databasepreservation.desktop.client.dbptk.wizard.common.exportOptions.SIARDExportOptions;
-import com.github.nmorel.gwtjackson.client.ObjectMapper;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -166,9 +164,6 @@ public class CreateWizardManager extends WizardManager {
 
       wizardContent.add(spinner);
 
-      //ConnectionMapper mapper = GWT.create(ConnectionMapper.class);
-      //String connectionParametersJSON = mapper.write(connectionParameters);
-
       ModulesService.Util.call((Boolean result) -> {
         wizardContent.clear();
         position = 1;
@@ -188,9 +183,10 @@ public class CreateWizardManager extends WizardManager {
       if (connection.sidebarWasClicked()) {
         wizardInstances.get(position).error();
         connection.clearPasswords();
+      } else {
+        Toast.showError(messages.createSIARDWizardManagerErrorTitle(),
+            messages.createSIARDWizardManagerSelectDataSourceError());
       }
-      Toast.showError(messages.createSIARDWizardManagerErrorTitle(),
-        messages.createSIARDWizardManagerSelectDataSourceError());
     }
   }
 

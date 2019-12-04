@@ -8,6 +8,7 @@ import com.databasepreservation.common.client.common.sidebar.SidebarItem;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -22,7 +23,7 @@ import config.i18n.client.ClientMessages;
  */
 public class CustomViewsSidebar extends Composite {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
-  private static Map<String, SidebarHyperlink> list = new HashMap<>();
+  private Map<String, SidebarHyperlink> list = new HashMap<>();
 
   interface ConnectionSidebarUiBinder extends UiBinder<Widget, CustomViewsSidebar> {
   }
@@ -52,22 +53,28 @@ public class CustomViewsSidebar extends Composite {
 
   public void addSideBarHyperLink(final String nameToDisplay, final String customViewUUID, final String targetHistoryToken) {
     Hyperlink delete = new Hyperlink();
+
     delete.addStyleName("sidebar-hyperlink sidebarItem custom-views-sidebarItem-delete");
-    delete.asWidget().addStyleName("far fa-trash-alt");
+    delete.getElement().getStyle().setProperty("position", "absolute");
+    delete.getElement().getStyle().setProperty("right", 5, Style.Unit.PX);
+    delete.getElement().getStyle().setProperty("top", 8, Style.Unit.PX);
+    delete.asWidget().addStyleName("fas fa-trash-alt");
     delete.setTargetHistoryToken(targetHistoryToken);
 
     SidebarHyperlink customView = new SidebarHyperlink(
       FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.LIST, nameToDisplay),
       HistoryManager.linkToCreateWizardCustomViewsSelect(customViewUUID), delete);
 
+
     customView.setH5().setIndent2();
+    customView.getElement().getStyle().setProperty("position", "relative");
     list.put(customViewUUID, customView);
     sidebarGroup.add(customView);
   }
 
   public void updateSidebarHyperLink(final String id, final String customViewNameText) {
     final SidebarHyperlink sidebarHyperlink = list.get(id);
-    sidebarHyperlink.setText(customViewNameText);
+    sidebarHyperlink.setTextBySafeHTML(FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.LIST, customViewNameText));
     list.put(id, sidebarHyperlink);
   }
 
@@ -83,11 +90,15 @@ public class CustomViewsSidebar extends Composite {
 
   public void select(String value) {
     for (Map.Entry<String, SidebarHyperlink> entry : list.entrySet()) {
-      list.get(value).setSelected(entry.getKey().equals(value));
+      entry.getValue().setSelected(entry.getKey().equals(value));
     }
   }
 
   public void clear() {
+    for (Map.Entry<String, SidebarHyperlink> entry : list.entrySet()) {
+      sidebarGroup.remove(entry.getValue());
+    }
+
     if (!list.isEmpty()) {
       list.clear();
     }

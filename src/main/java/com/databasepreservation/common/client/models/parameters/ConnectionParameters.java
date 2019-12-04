@@ -61,6 +61,8 @@ public class ConnectionParameters implements Serializable {
       sb.append(entry.getKey()).append("=").append(entry.getValue());
     }
 
+    sb.append(jdbcParameters.isShouldCountRows());
+
     return sb.toString();
   }
 }

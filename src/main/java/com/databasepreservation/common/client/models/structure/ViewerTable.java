@@ -187,7 +187,7 @@ public class ViewerTable implements Serializable {
           if (ViewerStringUtils.isBlank(column.getDescription())) {
             values.add(column.getDisplayName());
           } else {
-            values.add(column.getDisplayName() + "\r\n" + column.getDescription());
+            values.add(column.getDisplayName() + ": " + column.getDescription());
           }
         } else {
           values.add(column.getDisplayName());
