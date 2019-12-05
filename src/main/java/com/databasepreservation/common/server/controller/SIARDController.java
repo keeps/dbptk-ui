@@ -139,7 +139,6 @@ public class SIARDController {
     NoOpReporter reporter = new NoOpReporter();
     final DatabaseMigration databaseMigration = initializeDatabaseMigration(reporter);
     ConnectionResponse response = new ConnectionResponse();
-    response.setConnected(false);
     try {
       setupJDBCConnection(databaseMigration, parameters);
 
@@ -150,14 +149,16 @@ public class SIARDController {
         response.setConnected(jdbcImportModule.testConnection());
         response.setMessage("OK");
         return response;
+      } else {
+        response.setConnected(false);
+        response.setMessage("");
+        return response;
       }
     } catch (ModuleException | GenericException e) {
       response.setConnected(false);
       response.setMessage(e.getMessage());
       return response;
     }
-
-    return response;
   }
 
   public static boolean migrateToSIARD(String databaseUUID, String siardVersion, String siardPath,

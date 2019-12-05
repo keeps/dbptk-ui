@@ -1085,4 +1085,15 @@ public interface ClientMessages extends Messages {
   String rowPanelTextForButtonExportSingleRow();
 
   String informationNotAvailable();
+
+  /********************************************
+   * Advanced Search
+   *******************************************/
+  String advancedSearchDialogTitle();
+
+  String advancedSearchErrorMessageForDateInvalid();
+
+  String advancedSearchErrorMessageForTimeInvalid();
+
+  String advancedSearchErrorMessageForNumericInvalid();
 }
