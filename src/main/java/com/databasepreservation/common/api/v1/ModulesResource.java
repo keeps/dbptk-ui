@@ -1,10 +1,11 @@
 package com.databasepreservation.common.api.v1;
 
-import com.databasepreservation.common.client.models.DBPTKModule;
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.exceptions.RESTException;
+import com.databasepreservation.common.client.models.ConnectionResponse;
+import com.databasepreservation.common.client.models.DBPTKModule;
 import com.databasepreservation.common.client.models.parameters.ConnectionParameters;
 import com.databasepreservation.common.client.services.ModulesService;
-import com.databasepreservation.common.client.exceptions.RESTException;
 import com.databasepreservation.common.server.controller.SIARDController;
 import org.roda.core.data.exceptions.GenericException;
 import org.springframework.stereotype.Service;
@@ -55,11 +56,7 @@ public class ModulesResource implements ModulesService {
   }
 
   @Override
-  public Boolean testDBConnection(final ConnectionParameters connectionParameters) {
-    try {
+  public ConnectionResponse testDBConnection(final ConnectionParameters connectionParameters) {
       return SIARDController.testConnection(connectionParameters);
-    } catch (GenericException e) {
-      throw new RESTException(e.getMessage());
-    }
   }
 }

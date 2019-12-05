@@ -1,6 +1,7 @@
 package com.databasepreservation.common.client.services;
 
 import com.databasepreservation.common.api.v1.ExportsResource;
+import com.databasepreservation.common.client.models.ConnectionResponse;
 import com.databasepreservation.common.client.models.DBPTKModule;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultMethodCallback;
@@ -78,6 +79,6 @@ public interface ModulesService extends DirectRestService {
   @Path("/test/connection")
   @Consumes({MediaType.APPLICATION_JSON})
   @Produces({MediaType.APPLICATION_JSON})
-  @ApiOperation(value = "tests the connection to the database", notes = "Export query results as CSV.", response = DBPTKModule.class, responseContainer = "CSVExport")
-  Boolean testDBConnection(@ApiParam(value = "Find parameters") final ConnectionParameters connectionParameters) throws RESTException;
+  @ApiOperation(value = "tests the connection to the database", notes = "Export query results as CSV.", response = ConnectionResponse.class, responseContainer = "CSVExport")
+  ConnectionResponse testDBConnection(@ApiParam(value = "Find parameters") final ConnectionParameters connectionParameters);
 }

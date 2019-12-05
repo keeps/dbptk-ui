@@ -95,8 +95,8 @@ public class CustomViewsSidebar extends Composite {
   }
 
   public void clear() {
-    for (Map.Entry<String, SidebarHyperlink> entry : list.entrySet()) {
-      sidebarGroup.remove(entry.getValue());
+    for (SidebarHyperlink entry : list.values()) {
+      sidebarGroup.remove(entry);
     }
 
     if (!list.isEmpty()) {

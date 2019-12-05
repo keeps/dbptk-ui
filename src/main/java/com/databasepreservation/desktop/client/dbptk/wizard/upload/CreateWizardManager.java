@@ -6,6 +6,7 @@ import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.visualization.progressBar.ProgressBarPanel;
+import com.databasepreservation.common.client.models.ConnectionResponse;
 import com.databasepreservation.common.client.models.parameters.ConnectionParameters;
 import com.databasepreservation.common.client.models.parameters.CreateSIARDParameters;
 import com.databasepreservation.common.client.models.parameters.CustomViewsParameters;
@@ -164,19 +165,21 @@ public class CreateWizardManager extends WizardManager {
 
       wizardContent.add(spinner);
 
-      ModulesService.Util.call((Boolean result) -> {
-        wizardContent.clear();
-        position = 1;
-        TableAndColumns tableAndColumns = TableAndColumns.getInstance(databaseUUID, connectionParameters);
-        wizardInstances.add(position, tableAndColumns);
-        wizardContent.add(tableAndColumns);
-        updateButtons();
-        updateBreadcrumb();
-        wizardContent.remove(spinner);
-      }, (String errorMessage) -> {
-        Dialogs.showErrors(messages.errorMessagesConnectionTitle(), errorMessage,
-            messages.basicActionClose());
-        wizardContent.remove(spinner);
+      ModulesService.Util.call((ConnectionResponse result) -> {
+        if (result.isConnected()) {
+          wizardContent.clear();
+          position = 1;
+          TableAndColumns tableAndColumns = TableAndColumns.getInstance(databaseUUID, connectionParameters);
+          wizardInstances.add(position, tableAndColumns);
+          wizardContent.add(tableAndColumns);
+          updateButtons();
+          updateBreadcrumb();
+          wizardContent.remove(spinner);
+        } else {
+          Dialogs.showErrors(messages.errorMessagesConnectionTitle(), result.getMessage(),
+              messages.basicActionClose());
+          wizardContent.remove(spinner);
+        }
       }).testDBConnection(connectionParameters);
     } else {
       Connection connection = (Connection) wizardInstances.get(position);

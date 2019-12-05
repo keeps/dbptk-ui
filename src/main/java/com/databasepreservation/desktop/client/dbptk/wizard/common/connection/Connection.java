@@ -1,5 +1,6 @@
 package com.databasepreservation.desktop.client.dbptk.wizard.common.connection;
 
+import com.databasepreservation.common.client.models.ConnectionResponse;
 import com.databasepreservation.common.client.models.DBPTKModule;
 import com.databasepreservation.common.client.models.parameters.PreservationParameter;
 import com.databasepreservation.common.client.ViewerConstants;
@@ -88,15 +89,17 @@ public class Connection extends WizardPanel<ConnectionParameters> {
 
         final ConnectionParameters connectionParameters = getValues();
 
-        ModulesService.Util.call((Boolean result) -> {
-          Dialogs.showInformationDialog(messages.errorMessagesConnectionTitle(),
-              messages.connectionPageTextForConnectionSuccess(
-                  connectionParameters.getJdbcParameters().getConnection().get("database")),
-              messages.basicActionClose(), "btn btn-link");
-          mainPanel.remove(spinner);
-        }, (String errorMessage) -> {
-          mainPanel.remove(spinner);
-          Dialogs.showErrors(messages.errorMessagesConnectionTitle(), errorMessage, messages.basicActionClose());
+        ModulesService.Util.call((ConnectionResponse result) -> {
+          if (result.isConnected()) {
+            Dialogs.showInformationDialog(messages.errorMessagesConnectionTitle(),
+                messages.connectionPageTextForConnectionSuccess(
+                    connectionParameters.getJdbcParameters().getConnection().get("database")),
+                messages.basicActionClose(), "btn btn-link");
+            mainPanel.remove(spinner);
+          } else {
+            mainPanel.remove(spinner);
+            Dialogs.showErrors(messages.errorMessagesConnectionTitle(), result.getMessage(), messages.basicActionClose());
+          }
         }).testDBConnection(connectionParameters);
       } else {
         Toast.showError(messages.errorMessagesConnectionTitle(), messages.connectionPageErrorMessageFor(1));

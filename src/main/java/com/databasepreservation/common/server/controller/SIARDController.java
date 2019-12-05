@@ -1,7 +1,70 @@
 package com.databasepreservation.common.server.controller;
 
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_SEARCHES_DATABASE_UUID;
+import com.databasepreservation.DatabaseMigration;
+import com.databasepreservation.SIARDEdition;
+import com.databasepreservation.SIARDValidation;
+import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.common.search.SavedSearch;
+import com.databasepreservation.common.client.models.ConnectionResponse;
+import com.databasepreservation.common.client.models.DBPTKModule;
+import com.databasepreservation.common.client.models.ExternalLobDBPTK;
+import com.databasepreservation.common.client.models.parameters.ConnectionParameters;
+import com.databasepreservation.common.client.models.parameters.CustomViewsParameter;
+import com.databasepreservation.common.client.models.parameters.CustomViewsParameters;
+import com.databasepreservation.common.client.models.parameters.ExportOptionsParameters;
+import com.databasepreservation.common.client.models.parameters.ExternalLOBsParameter;
+import com.databasepreservation.common.client.models.parameters.MetadataExportOptionsParameters;
+import com.databasepreservation.common.client.models.parameters.PreservationParameter;
+import com.databasepreservation.common.client.models.parameters.SIARDUpdateParameters;
+import com.databasepreservation.common.client.models.parameters.SSHConfiguration;
+import com.databasepreservation.common.client.models.parameters.TableAndColumnsParameters;
+import com.databasepreservation.common.client.models.structure.ViewerColumn;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.structure.ViewerDatabaseFromToolkit;
+import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
+import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
+import com.databasepreservation.common.client.models.structure.ViewerMetadata;
+import com.databasepreservation.common.client.models.structure.ViewerSIARDBundle;
+import com.databasepreservation.common.exceptions.ViewerException;
+import com.databasepreservation.common.server.SIARDProgressObserver;
+import com.databasepreservation.common.server.ValidationProgressObserver;
+import com.databasepreservation.common.server.ViewerConfiguration;
+import com.databasepreservation.common.server.ViewerFactory;
+import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
+import com.databasepreservation.common.server.index.factory.SolrClientFactory;
+import com.databasepreservation.common.server.index.schema.SolrDefaultCollectionRegistry;
+import com.databasepreservation.common.server.index.utils.SolrUtils;
+import com.databasepreservation.common.transformers.ToolkitStructure2ViewerStructure;
+import com.databasepreservation.model.NoOpReporter;
+import com.databasepreservation.model.Reporter;
+import com.databasepreservation.model.exception.ModuleException;
+import com.databasepreservation.model.exception.SIARDVersionNotSupportedException;
+import com.databasepreservation.model.exception.UnsupportedModuleException;
+import com.databasepreservation.model.modules.DatabaseImportModule;
+import com.databasepreservation.model.modules.DatabaseModuleFactory;
+import com.databasepreservation.model.modules.filters.DatabaseFilterFactory;
+import com.databasepreservation.model.modules.filters.ObservableFilter;
+import com.databasepreservation.model.parameters.Parameter;
+import com.databasepreservation.model.parameters.ParameterGroup;
+import com.databasepreservation.model.parameters.Parameters;
+import com.databasepreservation.model.structure.DatabaseStructure;
+import com.databasepreservation.modules.jdbc.in.JDBCImportModule;
+import com.databasepreservation.modules.siard.SIARD2ModuleFactory;
+import com.databasepreservation.modules.siard.SIARDEditFactory;
+import com.databasepreservation.modules.siard.SIARDValidateFactory;
+import com.databasepreservation.modules.viewer.DbvtkModuleFactory;
+import com.databasepreservation.utils.ReflectionUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
+import org.roda.core.data.exceptions.GenericException;
+import org.roda.core.data.exceptions.NotFoundException;
+import org.roda.core.data.exceptions.RequestNotValidException;
+import org.roda.core.data.v2.index.filter.Filter;
+import org.roda.core.data.v2.index.filter.SimpleFilterParameter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -26,71 +89,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
-import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
-import com.databasepreservation.common.client.models.parameters.SIARDUpdateParameters;
-import com.databasepreservation.model.NoOpReporter;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
-import org.roda.core.data.exceptions.GenericException;
-import org.roda.core.data.exceptions.NotFoundException;
-import org.roda.core.data.exceptions.RequestNotValidException;
-import org.roda.core.data.v2.index.filter.Filter;
-import org.roda.core.data.v2.index.filter.SimpleFilterParameter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.yaml.snakeyaml.Yaml;
-
-import com.databasepreservation.DatabaseMigration;
-import com.databasepreservation.SIARDEdition;
-import com.databasepreservation.SIARDValidation;
-import com.databasepreservation.common.exceptions.ViewerException;
-import com.databasepreservation.common.server.SIARDProgressObserver;
-import com.databasepreservation.common.server.ValidationProgressObserver;
-import com.databasepreservation.common.server.ViewerConfiguration;
-import com.databasepreservation.common.server.ViewerFactory;
-import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
-import com.databasepreservation.common.server.index.factory.SolrClientFactory;
-import com.databasepreservation.common.server.index.schema.SolrDefaultCollectionRegistry;
-import com.databasepreservation.common.server.index.utils.SolrUtils;
-import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.models.structure.ViewerColumn;
-import com.databasepreservation.common.client.models.structure.ViewerDatabase;
-import com.databasepreservation.common.client.models.structure.ViewerDatabaseFromToolkit;
-import com.databasepreservation.common.client.models.structure.ViewerMetadata;
-import com.databasepreservation.common.client.models.structure.ViewerSIARDBundle;
-import com.databasepreservation.common.client.common.search.SavedSearch;
-import com.databasepreservation.common.client.models.DBPTKModule;
-import com.databasepreservation.common.client.models.ExternalLobDBPTK;
-import com.databasepreservation.common.client.models.parameters.PreservationParameter;
-import com.databasepreservation.common.client.models.parameters.SSHConfiguration;
-import com.databasepreservation.common.client.models.parameters.ConnectionParameters;
-import com.databasepreservation.common.client.models.parameters.CustomViewsParameter;
-import com.databasepreservation.common.client.models.parameters.CustomViewsParameters;
-import com.databasepreservation.common.client.models.parameters.ExportOptionsParameters;
-import com.databasepreservation.common.client.models.parameters.ExternalLOBsParameter;
-import com.databasepreservation.common.client.models.parameters.MetadataExportOptionsParameters;
-import com.databasepreservation.common.client.models.parameters.TableAndColumnsParameters;
-import com.databasepreservation.common.transformers.ToolkitStructure2ViewerStructure;
-import com.databasepreservation.model.Reporter;
-import com.databasepreservation.model.exception.ModuleException;
-import com.databasepreservation.model.exception.SIARDVersionNotSupportedException;
-import com.databasepreservation.model.exception.UnsupportedModuleException;
-import com.databasepreservation.model.modules.DatabaseImportModule;
-import com.databasepreservation.model.modules.DatabaseModuleFactory;
-import com.databasepreservation.model.modules.filters.DatabaseFilterFactory;
-import com.databasepreservation.model.modules.filters.ObservableFilter;
-import com.databasepreservation.model.parameters.Parameter;
-import com.databasepreservation.model.parameters.ParameterGroup;
-import com.databasepreservation.model.parameters.Parameters;
-import com.databasepreservation.model.structure.DatabaseStructure;
-import com.databasepreservation.modules.jdbc.in.JDBCImportModule;
-import com.databasepreservation.modules.siard.SIARD2ModuleFactory;
-import com.databasepreservation.modules.siard.SIARDEditFactory;
-import com.databasepreservation.modules.siard.SIARDValidateFactory;
-import com.databasepreservation.modules.viewer.DbvtkModuleFactory;
-import com.databasepreservation.utils.ReflectionUtils;
+import static com.databasepreservation.common.client.ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX;
+import static com.databasepreservation.common.client.ViewerConstants.SOLR_SEARCHES_DATABASE_UUID;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -135,10 +135,11 @@ public class SIARDController {
     return results;
   }
 
-  public static boolean testConnection(ConnectionParameters parameters) throws GenericException {
+  public static ConnectionResponse testConnection(ConnectionParameters parameters) {
     NoOpReporter reporter = new NoOpReporter();
     final DatabaseMigration databaseMigration = initializeDatabaseMigration(reporter);
-
+    ConnectionResponse response = new ConnectionResponse();
+    response.setConnected(false);
     try {
       setupJDBCConnection(databaseMigration, parameters);
 
@@ -146,13 +147,17 @@ public class SIARDController {
       importModule.setOnceReporter(reporter);
       if (importModule instanceof JDBCImportModule) {
         JDBCImportModule jdbcImportModule = (JDBCImportModule) importModule;
-        return jdbcImportModule.testConnection();
+        response.setConnected(jdbcImportModule.testConnection());
+        response.setMessage("OK");
+        return response;
       }
-    } catch (ModuleException e) {
-      throw new GenericException(e.getMessage());
+    } catch (ModuleException | GenericException e) {
+      response.setConnected(false);
+      response.setMessage(e.getMessage());
+      return response;
     }
 
-    return false;
+    return response;
   }
 
   public static boolean migrateToSIARD(String databaseUUID, String siardVersion, String siardPath,
