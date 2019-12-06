@@ -1,16 +1,16 @@
 package com.databasepreservation.desktop.client.dbptk.wizard.common.exportOptions;
 
-import com.databasepreservation.common.client.models.DBPTKModule;
-import com.databasepreservation.common.client.models.parameters.PreservationParameter;
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.common.fields.GenericField;
+import com.databasepreservation.common.client.models.DBPTKModule;
+import com.databasepreservation.common.client.models.parameters.MetadataExportOptionsParameters;
+import com.databasepreservation.common.client.models.parameters.PreservationParameter;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
-import com.databasepreservation.common.client.common.desktop.GenericField;
-import com.databasepreservation.common.client.tools.ViewerStringUtils;
-import com.databasepreservation.common.client.models.parameters.MetadataExportOptionsParameters;
 import com.databasepreservation.common.client.services.ContextService;
 import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.services.ModulesService;
+import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.databasepreservation.desktop.client.dbptk.wizard.WizardPanel;
 import com.databasepreservation.modules.siard.SIARD2ModuleFactory;
 import com.github.nmorel.gwtjackson.client.ObjectMapper;

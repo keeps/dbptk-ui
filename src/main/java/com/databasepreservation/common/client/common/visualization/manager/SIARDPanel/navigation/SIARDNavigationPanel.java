@@ -1,31 +1,30 @@
 package com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.navigation;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.models.structure.ViewerDatabase;
-import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
-import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.NavigationPanel;
-import com.databasepreservation.common.client.common.desktop.GenericField;
 import com.databasepreservation.common.client.common.dialogs.CommonDialogs;
+import com.databasepreservation.common.client.common.fields.GenericField;
 import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.SIARDManagerPage;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
+import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
+import com.databasepreservation.common.client.services.SIARDService;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.Humanize;
 import com.databasepreservation.common.client.tools.PathUtils;
 import com.databasepreservation.common.client.tools.RestUtils;
-import com.databasepreservation.common.client.services.SIARDService;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
-
 import config.i18n.client.ClientMessages;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class SIARDNavigationPanel {
 

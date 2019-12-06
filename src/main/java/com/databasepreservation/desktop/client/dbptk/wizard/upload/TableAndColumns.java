@@ -2,10 +2,10 @@ package com.databasepreservation.desktop.client.dbptk.wizard.upload;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
-import com.databasepreservation.common.client.common.desktop.ComboBoxField;
-import com.databasepreservation.common.client.common.desktop.FileUploadField;
-import com.databasepreservation.common.client.common.desktop.GenericField;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
+import com.databasepreservation.common.client.common.fields.ComboBoxField;
+import com.databasepreservation.common.client.common.fields.FileUploadField;
+import com.databasepreservation.common.client.common.fields.GenericField;
 import com.databasepreservation.common.client.common.lists.MultipleSelectionTablePanel;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;

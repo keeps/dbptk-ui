@@ -1,4 +1,4 @@
-package com.databasepreservation.common.client.common.desktop;
+package com.databasepreservation.common.client.common.fields;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;

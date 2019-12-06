@@ -7,15 +7,12 @@
  */
 package com.databasepreservation.common.client.common.dialogs;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.databasepreservation.common.client.common.NoAsyncCallback;
-import com.databasepreservation.common.client.common.desktop.GenericField;
-import com.databasepreservation.common.client.common.lists.IndexedColumn;
-import com.databasepreservation.common.client.widgets.MyCellTableResources;
+import com.databasepreservation.common.client.common.fields.GenericField;
 import com.databasepreservation.common.client.common.helpers.HelperValidator;
+import com.databasepreservation.common.client.common.lists.IndexedColumn;
 import com.databasepreservation.common.client.models.ExternalLobsDialogBoxResult;
+import com.databasepreservation.common.client.widgets.MyCellTableResources;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.regexp.shared.RegExp;
@@ -34,8 +31,10 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
-
 import config.i18n.client.ClientMessages;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Dialogs {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);

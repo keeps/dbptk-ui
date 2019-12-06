@@ -1,23 +1,18 @@
 package com.databasepreservation.common.client.common.visualization.browse.technicalInformation;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.databasepreservation.common.client.common.RightPanel;
+import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
+import com.databasepreservation.common.client.common.fields.GenericField;
+import com.databasepreservation.common.client.common.fields.MetadataField;
+import com.databasepreservation.common.client.common.lists.BasicTablePanel;
+import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerRoutine;
 import com.databasepreservation.common.client.models.structure.ViewerRoutineParameter;
 import com.databasepreservation.common.client.models.structure.ViewerSchema;
-import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
-import com.databasepreservation.common.client.common.RightPanel;
-import com.databasepreservation.common.client.common.desktop.GenericField;
-import com.databasepreservation.common.client.common.fields.MetadataField;
-import com.databasepreservation.common.client.common.lists.BasicTablePanel;
-import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
+import com.databasepreservation.common.client.widgets.Alert;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -28,8 +23,13 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.Widget;
-
 import config.i18n.client.ClientMessages;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -39,12 +39,7 @@ public class RoutinesPanel extends RightPanel {
   private static Map<String, RoutinesPanel> instances = new HashMap<>();
 
   public static RoutinesPanel getInstance(ViewerDatabase database) {
-    RoutinesPanel instance = instances.get(database.getUuid());
-    if (instance == null) {
-      instance = new RoutinesPanel(database);
-      instances.put(database.getUuid(), instance);
-    }
-    return instance;
+    return instances.computeIfAbsent(database.getUuid(), k -> new RoutinesPanel(database));
   }
 
   interface SchemaRoutinesUiBinder extends UiBinder<Widget, RoutinesPanel> {
@@ -68,7 +63,7 @@ public class RoutinesPanel extends RightPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-      BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forSchemaRoutines(database.getUuid(), database.getMetadata().getName()          ));
+    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forSchemaRoutines(database.getUuid(), database.getMetadata().getName()));
   }
 
   private void init() {
@@ -90,9 +85,7 @@ public class RoutinesPanel extends RightPanel {
     routines.sort(Comparator.comparing(ViewerRoutine::getName));
 
     if (routines.isEmpty()) {
-      Label noRoutinesMsg = new Label(messages.routines_thisSchemaDoesNotHaveAnyRoutines());
-      noRoutinesMsg.addStyleName("strong");
-      panel.add(noRoutinesMsg);
+      panel.add(new Alert(Alert.MessageAlertType.WARNING, messages.routines_thisSchemaDoesNotHaveAnyRoutines()));
     } else {
       for (ViewerRoutine viewerRoutine : routines) {
         if (viewerRoutine.getParameters().isEmpty()) {

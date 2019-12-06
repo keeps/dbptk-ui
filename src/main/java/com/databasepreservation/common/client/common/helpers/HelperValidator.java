@@ -1,17 +1,14 @@
 package com.databasepreservation.common.client.common.helpers;
 
-import java.util.Collections;
-import java.util.Date;
-
 import com.databasepreservation.Constants;
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.common.desktop.GenericField;
+import com.databasepreservation.common.client.common.fields.GenericField;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
+import com.databasepreservation.common.client.models.ExtensionFilter;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.JSOUtils;
 import com.databasepreservation.common.client.tools.PathUtils;
-import com.databasepreservation.common.client.models.ExtensionFilter;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -22,8 +19,10 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Label;
-
 import config.i18n.client.ClientMessages;
+
+import java.util.Collections;
+import java.util.Date;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>

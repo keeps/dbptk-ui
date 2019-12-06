@@ -1,16 +1,15 @@
 package com.databasepreservation.common.client.common.helpers;
 
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.models.structure.ViewerTable;
-import com.databasepreservation.common.client.common.desktop.GenericField;
+import com.databasepreservation.common.client.common.fields.GenericField;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
+import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.TextBox;
-
 import config.i18n.client.ClientMessages;
 
 /**

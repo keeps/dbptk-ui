@@ -1,23 +1,17 @@
 package com.databasepreservation.desktop.client.dbptk.wizard.common.exportOptions;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.common.desktop.FileUploadField;
-import com.databasepreservation.common.client.common.desktop.GenericField;
+import com.databasepreservation.common.client.common.fields.FileUploadField;
+import com.databasepreservation.common.client.common.fields.GenericField;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
+import com.databasepreservation.common.client.models.DBPTKModule;
+import com.databasepreservation.common.client.models.ExtensionFilter;
+import com.databasepreservation.common.client.models.parameters.ExportOptionsParameters;
+import com.databasepreservation.common.client.models.parameters.PreservationParameter;
 import com.databasepreservation.common.client.tools.JSOUtils;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.databasepreservation.common.client.widgets.Toast;
-import com.databasepreservation.common.client.models.DBPTKModule;
-import com.databasepreservation.common.client.models.ExtensionFilter;
-import com.databasepreservation.common.client.models.parameters.PreservationParameter;
-import com.databasepreservation.common.client.models.parameters.ExportOptionsParameters;
 import com.databasepreservation.modules.siard.SIARD2ModuleFactory;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -31,8 +25,13 @@ import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-
 import config.i18n.client.ClientMessages;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>

@@ -1,15 +1,15 @@
 package com.databasepreservation.desktop.client.dbptk.wizard.upload;
 
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
-import com.databasepreservation.common.client.common.desktop.ComboBoxField;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
-import com.databasepreservation.common.client.tools.HistoryManager;
-import com.databasepreservation.common.client.tools.ViewerStringUtils;
-import com.databasepreservation.common.client.widgets.Toast;
+import com.databasepreservation.common.client.common.fields.ComboBoxField;
 import com.databasepreservation.common.client.models.parameters.ConnectionParameters;
 import com.databasepreservation.common.client.models.parameters.CustomViewsParameter;
 import com.databasepreservation.common.client.models.parameters.CustomViewsParameters;
 import com.databasepreservation.common.client.services.DatabaseService;
+import com.databasepreservation.common.client.tools.HistoryManager;
+import com.databasepreservation.common.client.tools.ViewerStringUtils;
+import com.databasepreservation.common.client.widgets.Toast;
 import com.databasepreservation.desktop.client.common.sidebar.CustomViewsSidebar;
 import com.databasepreservation.desktop.client.dbptk.wizard.WizardPanel;
 import com.google.gwt.core.client.GWT;

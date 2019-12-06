@@ -1,16 +1,12 @@
 package com.databasepreservation.desktop.client.dbptk.wizard.common.exportOptions;
 
 
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-
-import com.databasepreservation.common.client.common.desktop.ComboBoxField;
-import com.databasepreservation.common.client.tools.ToolkitModuleName2ViewerModuleName;
+import com.databasepreservation.common.client.common.fields.ComboBoxField;
 import com.databasepreservation.common.client.models.DBPTKModule;
-import com.databasepreservation.common.client.models.parameters.PreservationParameter;
 import com.databasepreservation.common.client.models.parameters.ExportOptionsParameters;
+import com.databasepreservation.common.client.models.parameters.PreservationParameter;
 import com.databasepreservation.common.client.services.ModulesService;
+import com.databasepreservation.common.client.tools.ToolkitModuleName2ViewerModuleName;
 import com.databasepreservation.desktop.client.dbptk.wizard.WizardPanel;
 import com.github.nmorel.gwtjackson.client.ObjectMapper;
 import com.google.gwt.core.client.GWT;
@@ -21,8 +17,11 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-
 import config.i18n.client.ClientMessages;
+
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>

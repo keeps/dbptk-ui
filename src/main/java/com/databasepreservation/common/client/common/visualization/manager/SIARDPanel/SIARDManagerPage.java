@@ -1,14 +1,11 @@
 package com.databasepreservation.common.client.common.visualization.manager.SIARDPanel;
 
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.index.IsIndexed;
-import com.databasepreservation.common.client.models.structure.ViewerDatabase;
-import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
-import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
-import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.ContentPanel;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.LoadingDiv;
+import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
+import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.dialogs.CommonDialogs;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
@@ -16,9 +13,12 @@ import com.databasepreservation.common.client.common.visualization.manager.SIARD
 import com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.navigation.MetadataNavigationPanel;
 import com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.navigation.SIARDNavigationPanel;
 import com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.navigation.ValidationNavigationPanel;
+import com.databasepreservation.common.client.index.IsIndexed;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
+import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
-import com.databasepreservation.common.client.services.DatabaseService;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.uibinder.client.UiBinder;

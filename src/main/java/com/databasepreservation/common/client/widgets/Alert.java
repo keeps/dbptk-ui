@@ -1,5 +1,8 @@
 package com.databasepreservation.common.client.widgets;
 
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 
@@ -17,10 +20,14 @@ public class Alert extends FlowPanel {
   }
 
   public Alert(MessageAlertType type, String message) {
-    this(type, null, message);
+    this(type, null, message, false);
   }
 
-  private Alert(MessageAlertType type, String title, String message) {
+  public Alert(MessageAlertType type, String message, boolean dismissible) {
+    this(type, null, message, dismissible);
+  }
+
+  private Alert(MessageAlertType type, String title, String message, boolean dismissible) {
     super();
     Label messageLabel = new Label(message);
 
@@ -57,6 +64,18 @@ public class Alert extends FlowPanel {
       default:
         setStyleName("alert alert-primary");
         break;
+    }
+
+    if (dismissible) {
+      Button button = new Button();
+      button.addStyleName("close");
+      SafeHtmlBuilder safeHtmlBuilder = new SafeHtmlBuilder();
+      safeHtmlBuilder.append(SafeHtmlUtils.fromSafeConstant("<span>")).appendHtmlConstant("&times").appendHtmlConstant("</span>");
+      button.setHTML(safeHtmlBuilder.toSafeHtml());
+      button.addClickHandler(event -> {
+        this.setVisible(false);
+      });
+      add(button);
     }
   }
 }

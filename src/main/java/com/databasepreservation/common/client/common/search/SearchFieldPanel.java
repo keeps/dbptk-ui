@@ -452,13 +452,10 @@ public class SearchFieldPanel extends Composite {
 
         if (intervalValid(inputNumericFrom, inputNumericTo)) {
           if (inputNumericTo.getValue().isEmpty()) {
-            GWT.log("TO is not filled");
             filterParameter = new LongRangeFilterParameter(field, Long.valueOf(inputNumericFrom.getValue()), null);
           } else if (inputNumericFrom.getValue().isEmpty()) {
-            GWT.log("FROM is not filled");
             filterParameter = new LongRangeFilterParameter(field, null, Long.valueOf(inputNumericTo.getValue()));
           } else {
-            GWT.log("BOTH FILLED");
             filterParameter = new LongRangeFilterParameter(field, Long.valueOf(inputNumericFrom.getValue()), Long.valueOf(inputNumericTo.getValue()));
           }
         } else {

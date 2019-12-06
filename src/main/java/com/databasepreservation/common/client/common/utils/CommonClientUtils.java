@@ -1,11 +1,9 @@
 package com.databasepreservation.common.client.common.utils;
 
-import java.util.List;
-
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.common.fields.GenericField;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.models.structure.ViewerView;
-import com.databasepreservation.common.client.common.desktop.GenericField;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
@@ -17,8 +15,9 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Hyperlink;
-
 import config.i18n.client.ClientMessages;
+
+import java.util.List;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
