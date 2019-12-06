@@ -701,6 +701,10 @@ public interface ClientMessages extends Messages {
 
   String SIARDHomePageDialogTitleForDelete();
 
+  String SIARDHomePageDialogTitleForDeleteBrowseContent();
+
+  String SIARDHomePageDialogTitleForDeleteValidationReport();
+
   SafeHtml SIARDHomePageTextForDeleteAllFromServer();
 
   SafeHtml SIARDHomePageTextForDeleteAllFromDesktop();

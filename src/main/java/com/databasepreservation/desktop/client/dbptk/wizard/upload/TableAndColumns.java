@@ -163,8 +163,6 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
 
     DatabaseService.Util.call((ViewerMetadata metadata) -> {
       this.metadata = metadata;
-      GWT.log("schema size:" + metadata.getSchemas().size());
-      GWT.log("tables size:" + metadata.getSchemas().get(0).getTables().size());
       tableAndColumnsSidebar = TableAndColumnsSidebar.newInstance(metadata);
       tableAndColumnsList.add(tableAndColumnsSidebar);
       initTables();

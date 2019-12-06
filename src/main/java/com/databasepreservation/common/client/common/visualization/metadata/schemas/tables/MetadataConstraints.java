@@ -2,14 +2,14 @@ package com.databasepreservation.common.client.common.visualization.metadata.sch
 
 import java.util.List;
 
-import com.databasepreservation.common.client.models.structure.ViewerCheckConstraint;
-import com.databasepreservation.common.client.models.structure.ViewerSIARDBundle;
-import com.databasepreservation.common.client.models.structure.ViewerSchema;
-import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.common.EditableCell;
 import com.databasepreservation.common.client.common.lists.MetadataTableList;
 import com.databasepreservation.common.client.common.visualization.metadata.MetadataControlPanel;
 import com.databasepreservation.common.client.common.visualization.metadata.MetadataEditPanel;
+import com.databasepreservation.common.client.models.structure.ViewerCheckConstraint;
+import com.databasepreservation.common.client.models.structure.ViewerSIARDBundle;
+import com.databasepreservation.common.client.models.structure.ViewerSchema;
+import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.BrowserEvents;
@@ -49,19 +49,19 @@ public class MetadataConstraints implements MetadataEditPanel {
     } else {
 
       return new MetadataTableList<ViewerCheckConstraint>(columns.iterator(),
-          new MetadataTableList.ColumnInfo<>(messages.name(), 7, new TextColumn<ViewerCheckConstraint>() {
-            @Override
-            public String getValue(ViewerCheckConstraint object) {
-              return object.getName();
-            }
-          }), new MetadataTableList.ColumnInfo<>(messages.constraints_condition(), 7,
+        new MetadataTableList.ColumnInfo<>(messages.name(), 7, new TextColumn<ViewerCheckConstraint>() {
+          @Override
+          public String getValue(ViewerCheckConstraint object) {
+            return object.getName();
+          }
+        }), new MetadataTableList.ColumnInfo<>(messages.constraints_condition(), 7,
           new TextColumn<ViewerCheckConstraint>() {
             @Override
             public String getValue(ViewerCheckConstraint object) {
               return object.getCondition();
             }
           }),
-          new MetadataTableList.ColumnInfo<>(messages.description(), 25, getDescriptionColumn()));
+        new MetadataTableList.ColumnInfo<>(messages.description(), 25, getDescriptionColumn()));
     }
   }
 

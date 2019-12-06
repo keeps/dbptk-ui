@@ -3,8 +3,8 @@ package com.databasepreservation.common.client.common.visualization.manager.SIAR
 import java.util.HashMap;
 import java.util.Map;
 
-import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.common.fields.MetadataField;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.tools.Humanize;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.google.gwt.core.client.GWT;

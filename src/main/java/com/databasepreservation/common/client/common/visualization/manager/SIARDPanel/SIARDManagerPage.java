@@ -1,5 +1,9 @@
 package com.databasepreservation.common.client.common.visualization.manager.SIARDPanel;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.ContentPanel;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
@@ -26,11 +30,8 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
-import config.i18n.client.ClientMessages;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import config.i18n.client.ClientMessages;
 
 public class SIARDManagerPage extends ContentPanel {
   interface SIARDManagerPageUiBinder extends UiBinder<Widget, SIARDManagerPage> {

@@ -335,7 +335,7 @@ public class SIARDController {
     }
 
     try {
-      ViewerDatabaseFromToolkit database = ToolkitStructure2ViewerStructure.getDatabase(schemaInformation);
+      ViewerDatabaseFromToolkit database = ToolkitStructure2ViewerStructure.getDatabase(schemaInformation, true);
       return database.getMetadata();
     } catch (ViewerException e) {
       throw new GenericException(e.getMessage());

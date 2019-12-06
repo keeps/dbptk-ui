@@ -6,25 +6,29 @@ import java.util.List;
 import java.util.Map;
 
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.models.structure.ViewerDatabase;
-import com.databasepreservation.common.client.models.structure.ViewerMetadata;
-import com.databasepreservation.common.client.models.structure.ViewerSIARDBundle;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.LoadingDiv;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
+import com.databasepreservation.common.client.models.parameters.SIARDUpdateParameters;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.structure.ViewerMetadata;
+import com.databasepreservation.common.client.models.structure.ViewerSIARDBundle;
+import com.databasepreservation.common.client.services.SIARDService;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.widgets.Toast;
-import com.databasepreservation.common.client.models.parameters.SIARDUpdateParameters;
-import com.databasepreservation.common.client.services.SIARDService;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.TextBoxBase;
+import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.datepicker.client.DateBox;
 
 import config.i18n.client.ClientMessages;
@@ -193,6 +197,7 @@ public class MetadataControlPanel extends Composite {
   void cancelButtonHandler(ClickEvent e) {
     HistoryManager.gotoSIARDInfo(database.getUuid());
   }
+
   @UiHandler("buttonClear")
   void clearButtonHandler(ClickEvent e) {
     Window.Location.reload();

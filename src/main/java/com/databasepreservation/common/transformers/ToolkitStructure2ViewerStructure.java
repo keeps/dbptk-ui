@@ -11,7 +11,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -20,13 +19,13 @@ import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.databasepreservation.common.server.index.utils.SolrUtils;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.models.structure.ViewerCandidateKey;
 import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerCheckConstraint;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseFromToolkit;
+import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerPrimaryKey;
@@ -45,6 +44,7 @@ import com.databasepreservation.common.client.models.structure.ViewerTypeStructu
 import com.databasepreservation.common.client.models.structure.ViewerUserStructure;
 import com.databasepreservation.common.client.models.structure.ViewerView;
 import com.databasepreservation.common.exceptions.ViewerException;
+import com.databasepreservation.common.server.index.utils.SolrUtils;
 import com.databasepreservation.common.utils.LobPathManager;
 import com.databasepreservation.common.utils.ViewerAbstractConfiguration;
 import com.databasepreservation.common.utils.ViewerUtils;
@@ -93,6 +93,7 @@ import com.databasepreservation.utils.XMLUtils;
  */
 public class ToolkitStructure2ViewerStructure {
   private static final Logger LOGGER = LoggerFactory.getLogger(ToolkitStructure2ViewerStructure.class);
+  private static boolean simpleMetadata = false;
 
   /**
    * Private empty constructor
@@ -108,11 +109,24 @@ public class ToolkitStructure2ViewerStructure {
    * @return an equivalent database that can be used by Database Viewer
    */
   public static ViewerDatabaseFromToolkit getDatabase(DatabaseStructure structure) throws ViewerException {
-    return getDatabase(structure, SolrUtils.randomUUID());
+    return getDatabase(structure, SolrUtils.randomUUID(), false);
   }
 
-  public static ViewerDatabaseFromToolkit getDatabase(DatabaseStructure structure, String databaseUUID)
+  /**
+   * Deep-convert a DatabaseStructure to a ViewerDatabase
+   *
+   * @param structure
+   *          the database structure used by Database Preservation Toolkit
+   * @return an equivalent database that can be used by Database Viewer
+   */
+  public static ViewerDatabaseFromToolkit getDatabase(DatabaseStructure structure, boolean simpleMetadata)
     throws ViewerException {
+    return getDatabase(structure, SolrUtils.randomUUID(), simpleMetadata);
+  }
+
+  public static ViewerDatabaseFromToolkit getDatabase(DatabaseStructure structure, String databaseUUID, boolean value)
+    throws ViewerException {
+    simpleMetadata = value;
     ViewerDatabaseFromToolkit result = new ViewerDatabaseFromToolkit();
     result.setUuid(databaseUUID);
     result.setStatus(ViewerDatabaseStatus.INGESTING);
@@ -124,22 +138,23 @@ public class ToolkitStructure2ViewerStructure {
     throws ViewerException {
     ViewerMetadata result = new ViewerMetadata();
     result.setName(structure.getName());
-    result.setArchiver(structure.getArchiver());
-    result.setArchiverContact(structure.getArchiverContact());
-    result.setClientMachine(structure.getClientMachine());
-    result.setDatabaseProduct(getDatabaseProduct(structure));
-    result.setDatabaseUser(structure.getDatabaseUser());
-    result.setDataOriginTimespan(structure.getDataOriginTimespan());
-    result.setDataOwner(structure.getDataOwner());
+    if (!simpleMetadata) {
+      result.setArchiver(structure.getArchiver());
+      result.setArchiverContact(structure.getArchiverContact());
+      result.setArchivalDate(getArchivalDate(structure));
+      result.setClientMachine(structure.getClientMachine());
+      result.setDatabaseProduct(getDatabaseProduct(structure));
+      result.setDatabaseUser(structure.getDatabaseUser());
+      result.setDataOriginTimespan(structure.getDataOriginTimespan());
+      result.setDataOwner(structure.getDataOwner());
+      result.setProducerApplication(structure.getProducerApplication());
+
+      result.setUsers(getUsers(structure.getUsers()));
+      result.setRoles(getRoles(structure.getRoles()));
+      result.setPrivileges(getPrivileges(structure.getPrivileges()));
+    }
+
     result.setDescription(structure.getDescription());
-    result.setProducerApplication(structure.getProducerApplication());
-
-    result.setUsers(getUsers(structure.getUsers()));
-    result.setRoles(getRoles(structure.getRoles()));
-    result.setPrivileges(getPrivileges(structure.getPrivileges()));
-
-    result.setArchivalDate(getArchivalDate(structure));
-
     ReferenceHolder references = new ReferenceHolder(structure);
 
     result.setSchemas(getSchemas(vdb, structure.getSchemas(), references));
@@ -229,7 +244,11 @@ public class ToolkitStructure2ViewerStructure {
     result.setUuid(SolrUtils.randomUUID());
     result.setName(schema.getName());
     result.setDescription(schema.getDescription());
-    result.setRoutines(getRoutines(vdb, schema.getRoutines()));
+    if (!simpleMetadata) {
+      result.setRoutines(getRoutines(vdb, schema.getRoutines()));
+    } else {
+      result.setRoutines(new ArrayList<>());
+    }
     result.setViews(getViews(vdb, schema.getViews()));
 
     vdb.putSchema(schema.getName(), result);
@@ -337,11 +356,13 @@ public class ToolkitStructure2ViewerStructure {
     result.setSchemaName(table.getSchema());
     result.setSchemaUUID(vdb.getSchema(result.getSchemaName()).getUuid());
     result.setColumns(getColumns(table.getColumns()));
-    result.setTriggers(getTriggers(table.getTriggers()));
-    result.setPrimaryKey(getPrimaryKey(table, references));
+    if (!simpleMetadata) {
+      result.setTriggers(getTriggers(table.getTriggers()));
+      result.setPrimaryKey(getPrimaryKey(table, references));
+      result.setCandidateKeys(getCandidateKeys(table, references));
+      result.setCheckConstraints(getCheckConstraints(table.getCheckConstraints()));
+    }
     result.setForeignKeys(getForeignKeys(table, references));
-    result.setCandidateKeys(getCandidateKeys(table, references));
-    result.setCheckConstraints(getCheckConstraints(table.getCheckConstraints()));
     if (table.getName().startsWith(ViewerConstants.CUSTOM_VIEW_PREFIX)) {
       result.setCustomView(true);
       result.setMaterializedView(false);
@@ -488,12 +509,14 @@ public class ToolkitStructure2ViewerStructure {
   private static ViewerColumn getColumn(ColumnStructure column, int index) throws ViewerException {
     ViewerColumn result = new ViewerColumn();
     Type columnType = column.getType();
-    ViewerType columnViewerType = getType(columnType);
 
-    result.setDisplayName(column.getName());
+    ViewerType columnViewerType = getType(columnType);
     result.setType(columnViewerType);
-    result.setSolrName(getColumnSolrName(index, columnType, columnViewerType));
-    result.setColumnIndexInEnclosingTable(index);
+    if (!simpleMetadata) {
+      result.setSolrName(getColumnSolrName(index, columnType, columnViewerType));
+      result.setColumnIndexInEnclosingTable(index);
+    }
+    result.setDisplayName(column.getName());
     result.setDescription(column.getDescription());
     result.setAutoIncrement(column.getIsAutoIncrement());
     result.setDefaultValue(column.getDefaultValue());
@@ -563,44 +586,47 @@ public class ToolkitStructure2ViewerStructure {
   private static ViewerType getType(Type type) throws ViewerException {
     ViewerType result = new ViewerType();
 
-    if (type instanceof SimpleTypeBinary) {
-      result.setDbType(ViewerType.dbTypes.BINARY);
-    } else if (type instanceof SimpleTypeBoolean) {
-      result.setDbType(ViewerType.dbTypes.BOOLEAN);
-    } else if (type instanceof SimpleTypeDateTime) {
-      if ("TIME WITH TIME ZONE".equalsIgnoreCase(type.getSql2008TypeName())
-        || "TIME".equalsIgnoreCase(type.getSql2008TypeName())) {
-        // solr does not have a time type, use string
-        result.setDbType(ViewerType.dbTypes.DATETIME_JUST_TIME);
-      } else if ("DATE".equalsIgnoreCase(type.getSql2008TypeName())) {
-        result.setDbType(ViewerType.dbTypes.DATETIME_JUST_DATE);
-      } else {
-        result.setDbType(ViewerType.dbTypes.DATETIME);
-      }
-    } else if (type instanceof SimpleTypeEnumeration) {
-      result.setDbType(ViewerType.dbTypes.ENUMERATION);
-    } else if (type instanceof SimpleTypeInterval) {
-      result.setDbType(ViewerType.dbTypes.TIME_INTERVAL);
-    } else if (type instanceof SimpleTypeNumericApproximate) {
-      result.setDbType(ViewerType.dbTypes.NUMERIC_FLOATING_POINT);
-    } else if (type instanceof SimpleTypeNumericExact) {
-      if (((SimpleTypeNumericExact) type).getScale() == 0) {
-        result.setDbType(ViewerType.dbTypes.NUMERIC_INTEGER);
-      } else {
+    if (!simpleMetadata) {
+
+      if (type instanceof SimpleTypeBinary) {
+        result.setDbType(ViewerType.dbTypes.BINARY);
+      } else if (type instanceof SimpleTypeBoolean) {
+        result.setDbType(ViewerType.dbTypes.BOOLEAN);
+      } else if (type instanceof SimpleTypeDateTime) {
+        if ("TIME WITH TIME ZONE".equalsIgnoreCase(type.getSql2008TypeName())
+          || "TIME".equalsIgnoreCase(type.getSql2008TypeName())) {
+          // solr does not have a time type, use string
+          result.setDbType(ViewerType.dbTypes.DATETIME_JUST_TIME);
+        } else if ("DATE".equalsIgnoreCase(type.getSql2008TypeName())) {
+          result.setDbType(ViewerType.dbTypes.DATETIME_JUST_DATE);
+        } else {
+          result.setDbType(ViewerType.dbTypes.DATETIME);
+        }
+      } else if (type instanceof SimpleTypeEnumeration) {
+        result.setDbType(ViewerType.dbTypes.ENUMERATION);
+      } else if (type instanceof SimpleTypeInterval) {
+        result.setDbType(ViewerType.dbTypes.TIME_INTERVAL);
+      } else if (type instanceof SimpleTypeNumericApproximate) {
         result.setDbType(ViewerType.dbTypes.NUMERIC_FLOATING_POINT);
+      } else if (type instanceof SimpleTypeNumericExact) {
+        if (((SimpleTypeNumericExact) type).getScale() == 0) {
+          result.setDbType(ViewerType.dbTypes.NUMERIC_INTEGER);
+        } else {
+          result.setDbType(ViewerType.dbTypes.NUMERIC_FLOATING_POINT);
+        }
+      } else if (type instanceof SimpleTypeString) {
+        result.setDbType(ViewerType.dbTypes.STRING);
+      } else if (type instanceof ComposedTypeArray) {
+        result = new ViewerTypeArray();
+        result.setDbType(ViewerType.dbTypes.COMPOSED_ARRAY);
+        // set type of elements in the array
+        ((ViewerTypeArray) result).setElementType(getType(((ComposedTypeArray) type).getElementType()));
+      } else if (type instanceof ComposedTypeStructure) {
+        result = new ViewerTypeStructure();
+        result.setDbType(ViewerType.dbTypes.COMPOSED_STRUCTURE);
+      } else {
+        throw new ViewerException("Unknown type: " + type.toString());
       }
-    } else if (type instanceof SimpleTypeString) {
-      result.setDbType(ViewerType.dbTypes.STRING);
-    } else if (type instanceof ComposedTypeArray) {
-      result = new ViewerTypeArray();
-      result.setDbType(ViewerType.dbTypes.COMPOSED_ARRAY);
-      // set type of elements in the array
-      ((ViewerTypeArray) result).setElementType(getType(((ComposedTypeArray) type).getElementType()));
-    } else if (type instanceof ComposedTypeStructure) {
-      result = new ViewerTypeStructure();
-      result.setDbType(ViewerType.dbTypes.COMPOSED_STRUCTURE);
-    } else {
-      throw new ViewerException("Unknown type: " + type.toString());
     }
 
     result.setDescription(type.getDescription());

@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.models.structure.ViewerDatabase;
-import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.NavigationPanel;
 import com.databasepreservation.common.client.common.dialogs.CommonDialogs;
@@ -16,12 +14,14 @@ import com.databasepreservation.common.client.common.utils.ApplicationType;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.SIARDManagerPage;
 import com.databasepreservation.common.client.common.visualization.validation.ValidatorPage;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
+import com.databasepreservation.common.client.services.SIARDService;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.Humanize;
 import com.databasepreservation.common.client.tools.RestUtils;
 import com.databasepreservation.common.client.tools.SolrHumanizer;
-import com.databasepreservation.common.client.services.SIARDService;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.safehtml.shared.SafeUri;
@@ -130,7 +130,7 @@ public class ValidationNavigationPanel {
     btnDeleteReport.addStyleName("btn btn-link-info");
     btnDeleteReport.addClickHandler(event -> {
       if (!database.getValidationStatus().equals(ViewerDatabaseValidationStatus.VALIDATION_RUNNING)) {
-        CommonDialogs.showConfirmDialog(messages.SIARDHomePageDialogTitleForDelete(),
+        CommonDialogs.showConfirmDialog(messages.SIARDHomePageDialogTitleForDeleteValidationReport(),
           messages.SIARDHomePageTextForDeleteSIARDReportValidation(), messages.basicActionCancel(), messages.basicActionConfirm(),
           CommonDialogs.Level.DANGER, "500px", new DefaultAsyncCallback<Boolean>() {
             @Override

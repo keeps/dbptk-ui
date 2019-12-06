@@ -3,13 +3,13 @@ package com.databasepreservation.common.client.common.visualization.metadata.sch
 import java.util.HashMap;
 import java.util.Map;
 
+import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
+import com.databasepreservation.common.client.common.visualization.metadata.MetadataControlPanel;
+import com.databasepreservation.common.client.common.visualization.metadata.MetadataPanel;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerRoutine;
 import com.databasepreservation.common.client.models.structure.ViewerSIARDBundle;
 import com.databasepreservation.common.client.models.structure.ViewerSchema;
-import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
-import com.databasepreservation.common.client.common.visualization.metadata.MetadataControlPanel;
-import com.databasepreservation.common.client.common.visualization.metadata.MetadataPanel;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.FocusEvent;
 import com.google.gwt.event.dom.client.FocusHandler;

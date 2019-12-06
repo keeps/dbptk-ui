@@ -1,8 +1,8 @@
 package com.databasepreservation.common.client.common.visualization.metadata.schemas.routines;
 
-import com.databasepreservation.common.client.models.structure.ViewerRoutine;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
+import com.databasepreservation.common.client.models.structure.ViewerRoutine;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.FlowPanel;

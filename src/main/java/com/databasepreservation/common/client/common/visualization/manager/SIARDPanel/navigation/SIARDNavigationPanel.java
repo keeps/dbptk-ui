@@ -1,5 +1,8 @@
 package com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.navigation;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.NavigationPanel;
@@ -21,10 +24,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
-import config.i18n.client.ClientMessages;
 
-import java.util.HashMap;
-import java.util.Map;
+import config.i18n.client.ClientMessages;
 
 public class SIARDNavigationPanel {
 

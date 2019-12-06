@@ -1,24 +1,25 @@
 package com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.navigation;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.models.structure.ViewerDatabase;
-import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.NavigationPanel;
 import com.databasepreservation.common.client.common.dialogs.CommonDialogs;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.SIARDManagerPage;
-import com.databasepreservation.common.client.tools.HistoryManager;
-import com.databasepreservation.common.client.tools.SolrHumanizer;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.services.SIARDService;
+import com.databasepreservation.common.client.tools.HistoryManager;
+import com.databasepreservation.common.client.tools.SolrHumanizer;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Button;
-import config.i18n.client.ClientMessages;
 
-import java.util.HashMap;
-import java.util.Map;
+import config.i18n.client.ClientMessages;
 
 public class BrowseNavigationPanel {
 
@@ -32,9 +33,7 @@ public class BrowseNavigationPanel {
   private MetadataField browsingStatus = null;
 
   public static BrowseNavigationPanel getInstance(ViewerDatabase database) {
-    String databaseUUID = database.getUuid();
-    instances.computeIfAbsent(databaseUUID, k -> new BrowseNavigationPanel(database));
-    return instances.get(databaseUUID);
+    return instances.computeIfAbsent(database.getUuid(), k -> new BrowseNavigationPanel(database));
   }
 
   private BrowseNavigationPanel(ViewerDatabase database) {
@@ -62,7 +61,7 @@ public class BrowseNavigationPanel {
     btnDelete.addClickHandler(event -> {
       if (database.getStatus().equals(ViewerDatabaseStatus.AVAILABLE)
         || database.getStatus().equals(ViewerDatabaseStatus.ERROR)) {
-        CommonDialogs.showConfirmDialog(messages.SIARDHomePageDialogTitleForDelete(),
+        CommonDialogs.showConfirmDialog(messages.SIARDHomePageDialogTitleForDeleteBrowseContent(),
           messages.SIARDHomePageTextForDeleteFromSolr(), messages.basicActionCancel(), messages.basicActionConfirm(),
           CommonDialogs.Level.DANGER, "500px", new DefaultAsyncCallback<Boolean>() {
             @Override
