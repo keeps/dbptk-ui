@@ -41,3 +41,4 @@ jvm.log
 
 src/main/webapp/com.databasepreservation.server.Server/**
 src/main/webapp/com.databasepreservation.desktop.Desktop/**
+/home/mguimaraes/Documents/Projects/db-visualization-toolkit/src/main/resources/config/dbvtk-viewer.properties
