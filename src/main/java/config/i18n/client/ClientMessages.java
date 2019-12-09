@@ -1100,4 +1100,10 @@ public interface ClientMessages extends Messages {
   String advancedSearchErrorMessageForTimeInvalid();
 
   String advancedSearchErrorMessageForNumericInvalid();
+
+  String advancedSearchBooleanValueTrue();
+
+  String advancedSearchBooleanValueFalse();
+
+  String advancedSearchBooleanValueDefault();
 }

@@ -4,6 +4,19 @@
  */
 package com.databasepreservation.common.client.common.search;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.roda.core.data.common.RodaConstants;
+import org.roda.core.data.v2.index.filter.BasicSearchFilterParameter;
+import org.roda.core.data.v2.index.filter.DateRangeFilterParameter;
+import org.roda.core.data.v2.index.filter.FilterParameter;
+import org.roda.core.data.v2.index.filter.LongRangeFilterParameter;
+import org.roda.core.data.v2.index.filter.SimpleFilterParameter;
+
 import com.databasepreservation.common.client.ClientLogger;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
@@ -17,7 +30,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -26,19 +38,8 @@ import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.datepicker.client.DateBox;
 import com.tractionsoftware.gwt.user.client.ui.UTCDateBox;
 import com.tractionsoftware.gwt.user.client.ui.UTCTimeBox;
-import config.i18n.client.ClientMessages;
-import org.roda.core.data.common.RodaConstants;
-import org.roda.core.data.v2.index.filter.BasicSearchFilterParameter;
-import org.roda.core.data.v2.index.filter.DateRangeFilterParameter;
-import org.roda.core.data.v2.index.filter.FilterParameter;
-import org.roda.core.data.v2.index.filter.LongRangeFilterParameter;
-import org.roda.core.data.v2.index.filter.SimpleFilterParameter;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import config.i18n.client.ClientMessages;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -97,7 +98,7 @@ public class SearchFieldPanel extends Composite {
   private TextBox inputStorageSizeTo;
   private ListBox inputStorageSizeList;
   // Boolean
-  private CheckBox inputCheckBox;
+  private ListBox inputCheckBox;
 
   // Suggestion
   // private SearchSuggestBox<?> inputSearchSuggestBox = null;
@@ -182,7 +183,10 @@ public class SearchFieldPanel extends Composite {
       inputStorageSizeList.addItem(unit, unit);
     }
 
-    inputCheckBox = new CheckBox();
+    inputCheckBox = new ListBox();
+    inputCheckBox.addItem(messages.advancedSearchBooleanValueDefault());
+    inputCheckBox.addItem(messages.advancedSearchBooleanValueTrue(), "true");
+    inputCheckBox.addItem(messages.advancedSearchBooleanValueFalse(), "false");
 
     labelTo = new Label(messages.searchingRange_to());
     labelAt1 = new Label(messages.searchingTime_at());
@@ -235,7 +239,7 @@ public class SearchFieldPanel extends Composite {
     inputStorageSizeFrom.addStyleName("form-textbox form-textbox-small");
     inputStorageSizeTo.addStyleName("form-textbox form-textbox-small");
     inputStorageSizeList.addStyleName("form-listbox");
-    inputCheckBox.addStyleName("form-checkbox");
+    inputCheckBox.addStyleName("form-listbox form-listbox-search");
   }
 
   public SearchField getSearchField() {
@@ -311,6 +315,16 @@ public class SearchFieldPanel extends Composite {
       BasicSearchFilterParameter basicSearchFilterParameter = (BasicSearchFilterParameter) filterParam;
       inputText.setValue(basicSearchFilterParameter.getValue());
       GWT.log("set " + getField() + " to " + basicSearchFilterParameter.getValue());
+    } else if (filterParam instanceof SimpleFilterParameter) {
+      SimpleFilterParameter simpleFilterParameter = (SimpleFilterParameter) filterParam;
+      final String value = simpleFilterParameter.getValue();
+      if (value.equals("true")) {
+        inputCheckBox.setSelectedIndex(1);
+      } else if (value.equals("false")) {
+        inputCheckBox.setSelectedIndex(2);
+      } else {
+        inputCheckBox.setSelectedIndex(0);
+      }
     }
   }
 
@@ -467,7 +481,7 @@ public class SearchFieldPanel extends Composite {
             Humanize.parseFileSize(inputStorageSizeFrom.getValue(), inputStorageSizeList.getSelectedValue()),
             Humanize.parseFileSize(inputStorageSizeTo.getValue(), inputStorageSizeList.getSelectedValue()));
       } else if (type.equals(ViewerConstants.SEARCH_FIELD_TYPE_BOOLEAN) && valid(inputCheckBox)) {
-        filterParameter = new SimpleFilterParameter(field, Boolean.toString(inputCheckBox.getValue()));
+        filterParameter = new SimpleFilterParameter(field, inputCheckBox.getSelectedValue());
         // } else if (type.equals(ViewerConstants.SEARCH_FIELD_TYPE_SUGGEST)
         // &&
         // valid(inputSearchSuggestBox)) {
@@ -607,8 +621,8 @@ public class SearchFieldPanel extends Composite {
   // return (!input.getValue().isEmpty());
   // }
 
-  private boolean valid(CheckBox input) {
-    return input.getValue();
+  private boolean valid(ListBox input) {
+    return (input.getSelectedValue().equals("true") || input.getSelectedValue().equals("false"));
   }
 
   private boolean intervalValid(TextBox inputFrom, TextBox inputTo) {
@@ -660,5 +674,6 @@ public class SearchFieldPanel extends Composite {
     inputNumericTo.setText("");
     inputStorageSizeFrom.setText("");
     inputStorageSizeTo.setText("");
+    inputCheckBox.setSelectedIndex(0);
   }
 }

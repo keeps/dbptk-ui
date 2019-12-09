@@ -308,6 +308,12 @@ p[data-value]:after {
     padding-right: 1rem;
 }
 
+.form-listbox-search {
+    border-left: 2px solid #089de3;
+    max-width: 100px;
+    width: 100px;
+}
+
 /***********************************************
    BrowseContent (based on ViewRepresentation)
 ************************************************/
