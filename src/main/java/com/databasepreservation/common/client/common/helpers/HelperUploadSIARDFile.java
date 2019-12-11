@@ -2,7 +2,6 @@ package com.databasepreservation.common.client.common.helpers;
 
 import java.util.Collections;
 
-import com.databasepreservation.common.client.BrowserService;
 import com.databasepreservation.common.client.models.ExtensionFilter;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;

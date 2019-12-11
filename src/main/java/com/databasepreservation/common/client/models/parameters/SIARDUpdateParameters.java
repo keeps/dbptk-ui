@@ -12,7 +12,7 @@ public class SIARDUpdateParameters implements Serializable {
   private ViewerMetadata metadata;
   private ViewerSIARDBundle siardBundle;
 
-  public SIARDUpdateParameters(){}
+  public SIARDUpdateParameters() {}
 
   public SIARDUpdateParameters(ViewerMetadata metadata, ViewerSIARDBundle siardBundle) {
     this.metadata = metadata;

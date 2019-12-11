@@ -89,6 +89,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   public static final String PROPERTY_AUTHORIZATION_ADMINISTRATORS = "user.attribute.roles.administrators";
 
   private static boolean instantiatedWithoutErrors = true;
+  private static String applicationEnvironment = ViewerConstants.SERVER;
 
   // configurable paths related objects
   private static Path viewerHomePath;
@@ -136,6 +137,12 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
       configurationFiles = new ArrayList<String>();
       addConfiguration("dbvtk-viewer.properties");
       LOGGER.debug("Finished loading dbvtk-viewer.properties");
+
+      addConfiguration("dbvtk-roles.properties");
+      LOGGER.debug("Finished loading dbvtk-roles.properties");
+
+      applicationEnvironment = System.getProperty("env", "server");
+
     } catch (ConfigurationException e) {
       LOGGER.error("Error loading dbvtk properties", e);
       instantiatedWithoutErrors = false;
@@ -526,5 +533,9 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
       exclude = true;
     }
     return exclude;
+  }
+
+  public String getApplicationEnvironment() {
+    return applicationEnvironment;
   }
 }

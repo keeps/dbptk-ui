@@ -5,10 +5,13 @@
 package com.databasepreservation.common.utils;
 
 import java.io.Serializable;
+import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +29,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
+import com.databasepreservation.common.server.ViewerFactory;
+import com.google.common.collect.Sets;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
@@ -57,6 +62,41 @@ public class UserUtility {
   /** Private empty constructor */
   private UserUtility() {
 
+  }
+
+  public static void checkRoles(final User user, final Class<?> invokingMethodInnerClass)
+      throws AuthorizationDeniedException {
+    checkRoles(user, invokingMethodInnerClass, null);
+  }
+
+  public static void checkRoles(final User user, final Class<?> invokingMethodInnerClass, final Class<?> classToReturn)
+      throws AuthorizationDeniedException {
+    final Method method = invokingMethodInnerClass.getEnclosingMethod();
+    final String classParam = (classToReturn == null) ? "" : "(" + classToReturn.getSimpleName() + ")";
+    final String configKey = String.format("roles.%s.%s%s", method.getDeclaringClass().getName(), method.getName(),
+        classParam);
+    if (ViewerFactory.getViewerConfiguration().getConfiguration().containsKey(configKey)) {
+      LOGGER.trace("Testing if user '{}' has permissions to '{}'", user.getName(), configKey);
+      final List<String> roles = ViewerFactory.getViewerConfiguration().getViewerConfigurationAsList(configKey);
+      checkRoles(user, roles);
+    } else {
+      LOGGER.error("Unable to determine which roles the user '{}' needs because the config. key '{}' is not defined",
+          user.getName(), configKey);
+      throw new AuthorizationDeniedException(
+          "Unable to determine which roles the user needs because the config. key '" + configKey + "' is not defined");
+    }
+  }
+
+  public static void checkRoles(final User rsu, final List<String> rolesToCheck) throws AuthorizationDeniedException {
+    // INFO 20170220 nvieira containsAll changed to set intersection (contain at
+    // least one role)
+    if (!rolesToCheck.isEmpty() && Sets.intersection(rsu.getAllRoles(), new HashSet<>(rolesToCheck)).isEmpty()) {
+      final List<String> missingRoles = new ArrayList<>(rolesToCheck);
+      missingRoles.removeAll(rsu.getAllRoles());
+
+      throw new AuthorizationDeniedException("The user '" + rsu.getId() + "' does not have all needed permissions",
+          missingRoles);
+    }
   }
 
   private static String getPasswordOrTicket(final HttpServletRequest request, User user, String databaseUUID)

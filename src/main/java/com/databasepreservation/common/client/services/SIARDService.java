@@ -66,7 +66,7 @@ public interface SIARDService extends DirectRestService {
   @Path("uploadMetadata")
   @Produces(MediaType.TEXT_PLAIN)
   @ApiOperation(value = "retrieve DBPTK import modules", notes = "Export query results as CSV.", response = DBPTKModule.class, responseContainer = "CSVExport")
-  String uploadMetadataSIARD(@QueryParam("siardPath") String path) throws RESTException;
+  String uploadMetadataSIARDServer(@QueryParam("siardPath") String path) throws RESTException;
 
   @POST
   @Path("uploadMetadata/{databaseUUID}")

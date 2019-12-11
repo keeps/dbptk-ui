@@ -383,6 +383,14 @@ public class ViewerConstants {
   public static final String DEFAULT_ATTRIBUTE_EMAIL = "email";
   public static final String DEFAULT_ATTRIBUTE_ROLES = "memberOf";
 
+  /*
+   * ASSISTANT CONTROLLER
+   */
+  public static final String CONTROLLER_SIARD_PATH_PARAM = "siard-path";
+  public static final String CONTROLLER_REPORT_PATH_PARAM = "path";
+  public static final String CONTROLLER_DATABASE_ID_PARAM = "databaseUUID";
+  public static final String CONTROLLER_SKIP_ADDITIONAL_CHECKS_PARAM = "additional-checks";
+
   /**
    * private constructor
    */

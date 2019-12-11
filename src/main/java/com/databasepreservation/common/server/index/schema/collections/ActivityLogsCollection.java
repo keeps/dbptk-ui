@@ -69,7 +69,7 @@ public class ActivityLogsCollection extends AbstractSolrCollection<ActivityLogEn
     fields.add(new Field(SOLR_ACTIVITY_LOG_STATE, Field.TYPE_STRING).setIndexed(true).setRequired(true));
     fields.add(new Field(SOLR_ACTIVITY_LOG_DURATION, Field.TYPE_LONG).setIndexed(true).setRequired(true));
     fields.add(new Field(SOLR_ACTIVITY_LOG_LINE_NUMBER, Field.TYPE_LONG).setIndexed(true).setRequired(true));
-    fields.add(new Field(SOLR_ACTIVITY_LOG_PARAMETERS, Field.TYPE_STRING).setIndexed(true).setDocValues(false));
+    fields.add(new Field(SOLR_ACTIVITY_LOG_PARAMETERS, Field.TYPE_STRING).setIndexed(false).setDocValues(false));
 
     fields.add(newIndexedStoredNotRequiredField(SOLR_ACTIVITY_LOG_RELATED_OBJECT_ID, Field.TYPE_STRING));
 

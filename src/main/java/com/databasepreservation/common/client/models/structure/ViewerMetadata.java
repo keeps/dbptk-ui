@@ -243,6 +243,4 @@ public class ViewerMetadata implements Serializable {
   public ViewerSchema getSchema(String schemaUUID) {
     return schemasMap.get(schemaUUID);
   }
-
-
 }

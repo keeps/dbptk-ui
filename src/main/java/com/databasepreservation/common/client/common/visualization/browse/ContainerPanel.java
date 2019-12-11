@@ -3,8 +3,6 @@ package com.databasepreservation.common.client.common.visualization.browse;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.databasepreservation.common.client.services.AuthenticationService;
-import com.databasepreservation.common.utils.UserUtility;
 import org.roda.core.data.v2.user.User;
 
 import com.databasepreservation.common.client.ViewerConstants;
@@ -18,6 +16,7 @@ import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.index.IsIndexed;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
+import com.databasepreservation.common.client.services.AuthenticationService;
 import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
@@ -30,7 +29,12 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.MenuBar;
+import com.google.gwt.user.client.ui.MenuItem;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
 
@@ -74,7 +78,7 @@ public class ContainerPanel extends Composite {
     this.databaseUUID = databaseUUID;
 
     initWidget(uiBinder.createAndBindUi(this));
-    if(ApplicationType.getType().equals(ViewerConstants.SERVER)){
+    if (ApplicationType.getType().equals(ViewerConstants.SERVER)) {
       toolbar.getElement().addClassName("filePreviewToolbar");
     } else {
       toolbar.getElement().addClassName("desktopToolbar");
@@ -118,20 +122,18 @@ public class ContainerPanel extends Composite {
             MenuBar subMenu = new MenuBar(true);
             subMenu.addItem(messages.loginLogout(), (Command) () -> UserLogin.getInstance().logout());
             menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.USER, user.getFullName()), subMenu);
-            if (user.getAllRoles().contains("administrators")) {
-              menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.NEW_UPLOAD, messages.newUpload()),
-                  (Command) HistoryManager::gotoNewUpload);
-            }
+            menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.NEW_UPLOAD, messages.newUpload()),
+              (Command) HistoryManager::gotoNewUpload);
             menu.addItem(
-                FontAwesomeIconManager.loaded(FontAwesomeIconManager.DATABASES, messages.menusidebar_manageDatabases()),
-                (Command) HistoryManager::gotoDatabaseList);
+              FontAwesomeIconManager.loaded(FontAwesomeIconManager.DATABASES, messages.menusidebar_manageDatabases()),
+              (Command) HistoryManager::gotoDatabaseList);
           }
         }
       } else {
         menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.NEW_UPLOAD, messages.newUpload()),
           (Command) HistoryManager::gotoNewUpload);
         menu.addItem(
-            FontAwesomeIconManager.loaded(FontAwesomeIconManager.DATABASES, messages.menusidebar_manageDatabases()),
+          FontAwesomeIconManager.loaded(FontAwesomeIconManager.DATABASES, messages.menusidebar_manageDatabases()),
           (Command) HistoryManager::gotoDatabaseList);
       }
 
@@ -141,7 +143,7 @@ public class ContainerPanel extends Composite {
         setLanguageMenu(languagesMenu);
 
         MenuItem languagesMenuItem = new MenuItem(
-            FontAwesomeIconManager.loaded(FontAwesomeIconManager.GLOBE, selectedLanguage), languagesMenu);
+          FontAwesomeIconManager.loaded(FontAwesomeIconManager.GLOBE, selectedLanguage), languagesMenu);
         languagesMenuItem.addStyleName("menu-item menu-item-label menu-item-language");
         menu.addItem(languagesMenuItem);
       }
@@ -177,7 +179,7 @@ public class ContainerPanel extends Composite {
         selectedLanguage = supportedLanguages.get(key);
       } else {
         MenuItem languageMenuItem = new MenuItem(SafeHtmlUtils.fromSafeConstant(supportedLanguages.get(key)),
-            () -> JavascriptUtils.changeLocale(key));
+          () -> JavascriptUtils.changeLocale(key));
         languagesMenu.addItem(languageMenuItem);
         languageMenuItem.addStyleName("menu-item-language");
       }
@@ -216,6 +218,6 @@ public class ContainerPanel extends Composite {
   }
 
   public void setTopLevelPanelCSS(String css) {
-      toplevel.addStyleName(css);
+    toplevel.addStyleName(css);
   }
 }

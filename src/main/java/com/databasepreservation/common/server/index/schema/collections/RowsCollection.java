@@ -29,6 +29,9 @@ import org.roda.core.data.exceptions.RequestNotValidException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.models.structure.ViewerCell;
+import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.server.index.factory.SolrClientFactory;
 import com.databasepreservation.common.server.index.schema.AbstractSolrCollection;
@@ -38,9 +41,6 @@ import com.databasepreservation.common.server.index.schema.SolrBootstrapUtils;
 import com.databasepreservation.common.server.index.schema.SolrCollection;
 import com.databasepreservation.common.server.index.schema.SolrRowsCollectionRegistry;
 import com.databasepreservation.common.server.index.utils.SolrUtils;
-import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.models.structure.ViewerCell;
-import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.utils.JodaUtils;
 
 public class RowsCollection extends AbstractSolrCollection<ViewerRow> {

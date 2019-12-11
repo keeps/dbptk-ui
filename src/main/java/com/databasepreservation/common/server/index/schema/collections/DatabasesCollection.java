@@ -7,31 +7,6 @@
  */
 package com.databasepreservation.common.server.index.schema.collections;
 
-import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.models.structure.ViewerDatabase;
-import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
-import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
-import com.databasepreservation.common.client.models.structure.ViewerMetadata;
-import com.databasepreservation.common.exceptions.ViewerException;
-import com.databasepreservation.common.server.index.schema.AbstractSolrCollection;
-import com.databasepreservation.common.server.index.schema.CopyField;
-import com.databasepreservation.common.server.index.schema.Field;
-import com.databasepreservation.common.server.index.schema.SolrCollection;
-import com.databasepreservation.common.server.index.utils.JsonTransformer;
-import com.databasepreservation.common.server.index.utils.SolrUtils;
-import org.apache.solr.common.SolrDocument;
-import org.apache.solr.common.SolrInputDocument;
-import org.roda.core.data.exceptions.AuthorizationDeniedException;
-import org.roda.core.data.exceptions.GenericException;
-import org.roda.core.data.exceptions.NotFoundException;
-import org.roda.core.data.exceptions.RequestNotValidException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_CURRENT_SCHEMA_NAME;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_CURRENT_TABLE_NAME;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_INGESTED_ROWS;
@@ -53,6 +28,32 @@ import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABA
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_VALIDATION_STATUS;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_VALIDATION_WARNINGS;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_VALIDATOR_REPORT_PATH;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrInputDocument;
+import org.roda.core.data.exceptions.AuthorizationDeniedException;
+import org.roda.core.data.exceptions.GenericException;
+import org.roda.core.data.exceptions.NotFoundException;
+import org.roda.core.data.exceptions.RequestNotValidException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
+import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
+import com.databasepreservation.common.client.models.structure.ViewerMetadata;
+import com.databasepreservation.common.exceptions.ViewerException;
+import com.databasepreservation.common.server.index.schema.AbstractSolrCollection;
+import com.databasepreservation.common.server.index.schema.CopyField;
+import com.databasepreservation.common.server.index.schema.Field;
+import com.databasepreservation.common.server.index.schema.SolrCollection;
+import com.databasepreservation.common.server.index.utils.JsonTransformer;
+import com.databasepreservation.common.server.index.utils.SolrUtils;
 
 public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> {
   private static final Logger LOGGER = LoggerFactory.getLogger(DatabasesCollection.class);
