@@ -114,6 +114,7 @@ public class UserUtility {
 
   public static void setUser(final HttpServletRequest request, final User user) {
     LOGGER.debug("Setting user: {}", user);
+    user.setIpAddress(request.getRemoteAddr());
     request.getSession(true).setAttribute(RODA_USER_NAME, user);
     // do not keep old password after setting a new user
     request.getSession().removeAttribute(RODA_USER_PASS);

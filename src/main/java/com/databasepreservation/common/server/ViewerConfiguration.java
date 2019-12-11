@@ -83,6 +83,11 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   public static final String PROPERTY_FILTER_ONOFF_ALLOW_ALL_IPS = "ui.filter.onOff.protectedResourcesAllowAllIPs";
   public static final String PROPERTY_FILTER_ONOFF_WHITELISTED_IPS = "ui.filter.onOff.protectedResourcesWhitelistedIP";
 
+  public static final String PROPERTY_AUTHORIZATION_FULLNAME_ATTRIBUTE = "user.attribute.fullname";
+  public static final String PROPERTY_AUTHORIZATION_EMAIL_ATTRIBUTE = "user.attribute.email";
+  public static final String PROPERTY_AUTHORIZATION_ROLES_ATTRIBUTE = "user.attribute.roles";
+  public static final String PROPERTY_AUTHORIZATION_ADMINISTRATORS = "user.attribute.roles.administrators";
+
   private static boolean instantiatedWithoutErrors = true;
 
   // configurable paths related objects
@@ -96,6 +101,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   private static Path SIARDFilesPath;
   private static Path SIARDReportValidationPath;
   private static Path mapDBPath;
+  private static Path activityLogsPath;
 
   // Configuration related objects
   private static CompositeConfiguration viewerConfiguration = null;
@@ -188,6 +194,8 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   }
 
   public Path getSIARDReportValidationPath() { return SIARDReportValidationPath; }
+
+  public Path getActivityLogsPath() { return activityLogsPath; }
 
   /*
    * Specific parts to the configuration used in the DBVTK
@@ -288,6 +296,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     SIARDFilesPath = viewerHomePath.resolve(ViewerConstants.VIEWER_SIARD_FILES_FOLDER);
     SIARDReportValidationPath = viewerHomePath.resolve(ViewerConstants.VIEWER_VALIDATIONS_REPORTS_FOLDER);
     mapDBPath = viewerHomePath.resolve(ViewerConstants.VIEWER_MAPDB_FOLDER);
+    activityLogsPath = viewerHomePath.resolve(ViewerConstants.VIEWER_ACTIVITY_LOG_FOLDER);
 
     configureLogback();
 
@@ -325,6 +334,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     essentialDirectories.add(SIARDFilesPath);
     essentialDirectories.add(SIARDReportValidationPath);
     essentialDirectories.add(mapDBPath);
+    essentialDirectories.add(activityLogsPath);
 
     for (Path path : essentialDirectories) {
       try {

@@ -14,13 +14,16 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
+import org.roda.core.data.common.RodaConstants;
 import org.roda.core.data.exceptions.AuthenticationDeniedException;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.v2.user.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.databasepreservation.common.client.models.activity.logs.LogEntryState;
 import com.databasepreservation.common.server.ViewerConfiguration;
+import com.databasepreservation.common.utils.ControllerAssistant;
 import com.databasepreservation.common.utils.UserUtility;
 
 public class UserLoginController {
@@ -54,5 +57,19 @@ public class UserLoginController {
     } catch (WebApplicationException | ProcessingException e) {
       throw new GenericException("Could not authenticate with RODA", e);
     }
+  }
+
+  public static void casLogin(final String username, HttpServletRequest request) {
+    ControllerAssistant controllerAssistant = new ControllerAssistant() {};
+    User user = UserLoginHelper.casLogin(username, request);
+    controllerAssistant.registerAction(user, LogEntryState.SUCCESS, RodaConstants.CONTROLLER_USERNAME_PARAM, username);
+  }
+
+  public static void logout(HttpServletRequest request) {
+    ControllerAssistant controllerAssistant = new ControllerAssistant() {};
+    User user = UserUtility.getUser(request);
+    UserUtility.logout(request);
+    controllerAssistant.registerAction(user, LogEntryState.SUCCESS, RodaConstants.CONTROLLER_USERNAME_PARAM,
+      user.getName());
   }
 }

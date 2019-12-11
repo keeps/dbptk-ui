@@ -6,6 +6,10 @@ package com.databasepreservation.common.filter;
 
 import java.io.IOException;
 import java.security.Principal;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -16,7 +20,11 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.databasepreservation.common.client.common.UserLogin;
+import com.databasepreservation.common.server.controller.UserLoginController;
 import org.apache.commons.lang3.StringUtils;
+import org.jasig.cas.client.authentication.AttributePrincipal;
+import org.jasig.cas.client.authentication.AttributePrincipalImpl;
 import org.jasig.cas.client.util.CommonUtils;
 import org.roda.core.data.v2.user.User;
 import org.slf4j.Logger;
@@ -86,13 +94,7 @@ public class CasWebAuthFilter implements Filter {
     LOGGER.debug("URL: {} ; Request URI: {} ; Service: {} ; Hash: {}, Locale: {}, Branding: {}", url, requestURI,
       service, hash, locale, branding);
 
-    final Principal principal = httpRequest.getUserPrincipal();
-    if (principal != null) {
-      UserUtility.setUser(httpRequest, new User(principal.getName()));
-    }
-
     if (url.endsWith("/login")) {
-
       final StringBuilder b = new StringBuilder();
       b.append(httpRequest.getContextPath()).append("/");
 
@@ -108,9 +110,14 @@ public class CasWebAuthFilter implements Filter {
         b.append("#").append(hash);
       }
 
+      if (httpRequest.getUserPrincipal() != null) {
+        UserLoginController.casLogin(httpRequest.getUserPrincipal().getName(), httpRequest);
+      }
+
       httpResponse.sendRedirect(b.toString());
 
     } else if (url.endsWith("/logout")) {
+      UserLoginController.logout(httpRequest);
 
       UserUtility.logout(httpRequest);
 

@@ -1,9 +1,14 @@
 package com.databasepreservation.common.client;
 
+import com.databasepreservation.common.client.models.activity.logs.LogEntryParameter;
+import com.databasepreservation.common.client.models.activity.logs.LogEntryState;
 import com.databasepreservation.modules.siard.SIARD2ModuleFactory;
 import org.roda.core.data.common.RodaConstants;
 import org.roda.core.data.v2.index.filter.BasicSearchFilterParameter;
 import org.roda.core.data.v2.index.filter.Filter;
+
+import java.util.Date;
+import java.util.List;
 
 /**
  * Constants used in Database Viewer
@@ -51,6 +56,7 @@ public class ViewerConstants {
   public static final String VIEWER_VALIDATIONS_REPORTS_FOLDER = "validations-reports";
   public static final String VIEWER_REPORTS_FOLDER = "reports";
   public static final String VIEWER_INDEX_FOLDER = "index";
+  public static final String VIEWER_ACTIVITY_LOG_FOLDER = "activity-logs";
 
   public static final String MEDIA_TYPE_APPLICATION_OCTET_STREAM = "application/octet-stream";
   public static final String MEDIA_TYPE_TEXT_HTML = "text/html";
@@ -76,6 +82,7 @@ public class ViewerConstants {
   public static final String SOLR_INDEX_DATABASES_COLLECTION_NAME = "dbv-databases";
   public static final String SOLR_INDEX_SEARCHES_COLLECTION_NAME = "dbv-searches";
   public static final String SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX = "dbv-database-";
+  public static final String SOLR_INDEX_ACTIVITY_LOGS_COLLECTION_NAME = "dbv-activity-logs";
   public static final String SOLR_INDEX_ROW_COLUMN_NAME_PREFIX = "col";
   public static final String SOLR_INDEX_ROW_LOB_COLUMN_NAME_PREFIX = "lob";
 
@@ -112,6 +119,20 @@ public class ViewerConstants {
   public static final String SOLR_DATABASES_VALIDATION_ERRORS = "siard_validation_errors";
   public static final String SOLR_DATABASES_VALIDATION_WARNINGS = "siard_validation_warnings";
   public static final String SOLR_DATABASES_VALIDATION_SKIPPED = "siard_validation_skipped";
+
+  /*
+   * ACTIVITY LOG FIELDS
+   */
+  public static final String SOLR_ACTIVITY_LOG_IP_ADDRESS = "ip_address";
+  public static final String SOLR_ACTIVITY_LOG_DATETIME = "datetime";
+  public static final String SOLR_ACTIVITY_LOG_USERNAME = "username";
+  public static final String SOLR_ACTIVITY_LOG_ACTION_COMPONENT = "action_component";
+  public static final String SOLR_ACTIVITY_LOG_ACTION_METHOD = "action_method";
+  public static final String SOLR_ACTIVITY_LOG_RELATED_OBJECT_ID = "related_object_id";
+  public static final String SOLR_ACTIVITY_LOG_STATE = "log_state";
+  public static final String SOLR_ACTIVITY_LOG_DURATION = "duration";
+  public static final String SOLR_ACTIVITY_LOG_LINE_NUMBER = "line_number";
+  public static final String SOLR_ACTIVITY_LOG_PARAMETERS = "parameters";
 
   /*
    * SEARCHES FIELDS
@@ -354,6 +375,13 @@ public class ViewerConstants {
    */
   public static final String CSV_EXTENSION = ".csv";
   public static final String ZIP_EXTENSION = ".zip";
+
+  /*
+   * AUTHORIZATION DEFAULT VALUES
+   */
+  public static final String DEFAULT_ATTRIBUTE_FULLNAME = "fullname";
+  public static final String DEFAULT_ATTRIBUTE_EMAIL = "email";
+  public static final String DEFAULT_ATTRIBUTE_ROLES = "memberOf";
 
   /**
    * private constructor

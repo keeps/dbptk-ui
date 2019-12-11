@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.databasepreservation.common.client.services.AuthenticationService;
+import com.databasepreservation.common.utils.UserUtility;
 import org.roda.core.data.v2.user.User;
 
 import com.databasepreservation.common.client.ViewerConstants;
@@ -42,8 +43,7 @@ public class ContainerPanel extends Composite {
   private static Map<String, ContainerPanel> instances = new HashMap<>();
 
   public static ContainerPanel getInstance(String databaseUUID, boolean initMenu) {
-    instances.computeIfAbsent(databaseUUID, k -> new ContainerPanel(databaseUUID, initMenu));
-    return instances.get(databaseUUID);
+    return instances.computeIfAbsent(databaseUUID, k -> new ContainerPanel(databaseUUID, initMenu));
   }
 
   interface DatabasePanelUiBinder extends UiBinder<Widget, ContainerPanel> {
@@ -118,6 +118,13 @@ public class ContainerPanel extends Composite {
             MenuBar subMenu = new MenuBar(true);
             subMenu.addItem(messages.loginLogout(), (Command) () -> UserLogin.getInstance().logout());
             menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.USER, user.getFullName()), subMenu);
+            if (user.getAllRoles().contains("administrators")) {
+              menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.NEW_UPLOAD, messages.newUpload()),
+                  (Command) HistoryManager::gotoNewUpload);
+            }
+            menu.addItem(
+                FontAwesomeIconManager.loaded(FontAwesomeIconManager.DATABASES, messages.menusidebar_manageDatabases()),
+                (Command) HistoryManager::gotoDatabaseList);
           }
         }
       } else {

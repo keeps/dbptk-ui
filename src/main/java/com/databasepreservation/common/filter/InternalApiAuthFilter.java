@@ -123,6 +123,7 @@ public class InternalApiAuthFilter implements Filter {
   @Override
   public void destroy() {
     // do nothing
+    System.out.println("STOP");
   }
 
 }

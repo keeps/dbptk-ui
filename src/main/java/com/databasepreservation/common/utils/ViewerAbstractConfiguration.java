@@ -63,7 +63,7 @@ public abstract class ViewerAbstractConfiguration {
 
   public List<String> getViewerConfigurationAsList(String... keyParts) {
     String[] array = configuration.getStringArray(getConfigurationKey(keyParts));
-    return Arrays.asList(array).stream().filter(v -> StringUtils.isNotBlank(v)).collect(Collectors.toList());
+    return Arrays.stream(array).filter(StringUtils::isNotBlank).collect(Collectors.toList());
   }
 
   /*

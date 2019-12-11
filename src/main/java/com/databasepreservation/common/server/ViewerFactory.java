@@ -20,6 +20,7 @@ public class ViewerFactory {
   private static SolrClient solrClient;
   private static DatabaseRowsSolrManager solrManager;
   private static ViewerConfiguration configuration;
+  private static ActivityLogsManager activityLogsManager;
   private static boolean instantiated = false;
 
   private static synchronized void instantiate() {
@@ -27,6 +28,7 @@ public class ViewerFactory {
       configuration = ViewerConfiguration.getInstance();
       solrClient = SolrClientFactory.get().getSolrClient();
       solrManager = new DatabaseRowsSolrManager(solrClient);
+      activityLogsManager = new ActivityLogsManager();
       instantiated = true;
     }
   }
@@ -63,5 +65,10 @@ public class ViewerFactory {
   public static ViewerConfiguration getViewerConfiguration() {
     instantiate();
     return configuration;
+  }
+
+  public static ActivityLogsManager getActivityLogsManager() {
+    instantiate();
+    return activityLogsManager;
   }
 }

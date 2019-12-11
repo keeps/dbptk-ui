@@ -3,6 +3,7 @@ package com.databasepreservation.common.server.index;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.index.IsIndexed;
 import com.databasepreservation.common.client.index.sort.Sorter;
+import com.databasepreservation.common.client.models.activity.logs.ActivityLogEntry;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseFromToolkit;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
@@ -194,6 +195,21 @@ public class DatabaseRowsSolrManager {
 
   public ViewerRow retrieveRows(String databaseUUID, String rowUUID) throws NotFoundException, GenericException {
     return SolrUtils.retrieveRows(client, databaseUUID, rowUUID);
+  }
+
+  public void addLogEntry(ActivityLogEntry logEntry) throws NotFoundException, GenericException {
+    SolrCollection<ActivityLogEntry> activityLogEntrySolrCollection = SolrDefaultCollectionRegistry.get(ActivityLogEntry.class);
+    try {
+      SolrInputDocument doc = activityLogEntrySolrCollection.toSolrDocument(logEntry);
+      client.add(activityLogEntrySolrCollection.getIndexName(), doc);
+      client.commit(activityLogEntrySolrCollection.getIndexName(), true, true, true);
+    } catch (ViewerException | AuthorizationDeniedException | RequestNotValidException e) {
+      LOGGER.debug("Solr error while converting to document", e);
+    } catch (IOException e) {
+      LOGGER.debug("IOException while attempting to save activity log entry", e);
+    } catch (SolrServerException e) {
+      LOGGER.debug("Solr error while attempting to save activity log entry", e);
+    }
   }
 
   public void addSavedSearch(SavedSearch savedSearch) throws NotFoundException, GenericException {

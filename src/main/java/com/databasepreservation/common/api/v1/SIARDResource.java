@@ -1,22 +1,26 @@
 package com.databasepreservation.common.api.v1;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Path;
+import javax.ws.rs.core.Context;
 
-import com.databasepreservation.common.client.models.ValidationProgressData;
-import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
+import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.RequestNotValidException;
 import org.springframework.stereotype.Service;
 
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.models.structure.ViewerMetadata;
+import com.databasepreservation.common.client.exceptions.RESTException;
+import com.databasepreservation.common.client.models.ValidationProgressData;
+import com.databasepreservation.common.client.models.parameters.ConnectionParameters;
 import com.databasepreservation.common.client.models.parameters.CreateSIARDParameters;
 import com.databasepreservation.common.client.models.parameters.SIARDUpdateParameters;
-import com.databasepreservation.common.client.models.parameters.ConnectionParameters;
-import com.databasepreservation.common.client.exceptions.RESTException;
+import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
+import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.services.SIARDService;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.controller.SIARDController;
+import com.databasepreservation.common.utils.UserUtility;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -24,12 +28,18 @@ import com.databasepreservation.common.server.controller.SIARDController;
 @Service
 @Path(ViewerConstants.ENDPOINT_SIARD)
 public class SIARDResource implements SIARDService {
+  @Context
+  private HttpServletRequest request;
 
   @Override
   public String uploadSIARD(String databaseUUID, String path) throws RESTException {
     try {
+
+      UserUtility.Authorization.allowIfAdmin(request);
       return SIARDController.loadFromLocal(path, databaseUUID);
     } catch (GenericException e) {
+      throw new RESTException(e.getMessage());
+    } catch (AuthorizationDeniedException e) {
       throw new RESTException(e.getMessage());
     }
   }

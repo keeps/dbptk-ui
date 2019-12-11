@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Vector;
 
 import com.databasepreservation.common.client.services.AuthenticationService;
+import org.apache.http.HttpRequest;
 import org.fusesource.restygwt.client.Method;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.roda.core.data.v2.user.User;
@@ -20,6 +21,8 @@ import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>

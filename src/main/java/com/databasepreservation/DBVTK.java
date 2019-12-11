@@ -7,8 +7,11 @@ import java.nio.file.Paths;
 
 import javax.servlet.http.HttpServlet;
 
+import com.databasepreservation.common.filter.OnOffFilter;
+import org.jasig.cas.client.session.SingleSignOutHttpSessionListener;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.boot.web.servlet.context.ServletWebServerInitializedEvent;
 import org.springframework.boot.web.servlet.filter.OrderedRequestContextFilter;
@@ -85,6 +88,133 @@ public class DBVTK {
     OrderedRequestContextFilter filter = new OrderedRequestContextFilter();
     filter.setOrder(-100001);
     return filter;
+  }
+
+  /*********************
+   * Authentication
+   *********************/
+  @Bean
+  public FilterRegistrationBean<OnOffFilter> internalWebAuthFilter() {
+    FilterRegistrationBean<OnOffFilter> registrationBean = new FilterRegistrationBean<>();
+    registrationBean.setFilter(new OnOffFilter());
+    registrationBean.setName("InternalWebAuthFilter");
+    registrationBean.addInitParameter("inner-filter-class", "com.databasepreservation.common.filter.InternalWebAuthFilter");
+    registrationBean.addInitParameter("config-prefix", "ui.filter.internal");
+    registrationBean.addUrlPatterns("/login", "/logout");
+
+    return registrationBean;
+  }
+
+  @Bean
+  public FilterRegistrationBean<OnOffFilter> internalApiAuthFilter() {
+    FilterRegistrationBean<OnOffFilter> registrationBean = new FilterRegistrationBean<>();
+    registrationBean.setFilter(new OnOffFilter());
+    registrationBean.setName("InternalApiAuthFilter");
+    registrationBean.addInitParameter("inner-filter-class", "com.databasepreservation.common.filter.InternalApiAuthFilter");
+    registrationBean.addInitParameter("config-prefix", "ui.filter.internal");
+
+    // Realm to be used
+    registrationBean.addInitParameter("realm", "RODA REST API");
+
+    // Comma separated list of relative paths to exclude in filter logic (using
+    // regular expressions for extra power)
+    registrationBean.addInitParameter("exclusions", "^/swagger.json,^/v1/theme/?");
+
+    registrationBean.addUrlPatterns("/api/*");
+
+    return registrationBean;
+  }
+
+  @Bean
+  public FilterRegistrationBean<OnOffFilter> casSingleSignOutFilter() {
+    FilterRegistrationBean<OnOffFilter> registrationBean = new FilterRegistrationBean<>();
+    registrationBean.setFilter(new OnOffFilter());
+    registrationBean.setName("CasSingleSignOutFilter");
+    registrationBean.addInitParameter("inner-filter-class", "org.jasig.cas.client.session.SingleSignOutFilter");
+    registrationBean.addInitParameter("config-prefix", "ui.filter.cas");
+    registrationBean.addInitParameter("casServerUrlPrefix", "http://localhost:8888/cas");
+    registrationBean.addUrlPatterns("/*");
+
+    return registrationBean;
+  }
+
+  @Bean
+  public SingleSignOutHttpSessionListener singleSignOutHttpSessionListener() {
+    return new SingleSignOutHttpSessionListener();
+  }
+
+  @Bean
+  public FilterRegistrationBean<OnOffFilter> casValidationFilter() {
+    FilterRegistrationBean<OnOffFilter> registrationBean = new FilterRegistrationBean<>();
+    registrationBean.setFilter(new OnOffFilter());
+    registrationBean.setName("CasValidationFilter");
+    registrationBean.addInitParameter("inner-filter-class",
+        "org.jasig.cas.client.validation.Cas30ProxyReceivingTicketValidationFilter");
+    registrationBean.addInitParameter("config-prefix", "ui.filter.cas");
+    registrationBean.addInitParameter("casServerUrlPrefix", "https://localhost:8443/cas");
+    registrationBean.addInitParameter("serverName", "https://localhost:8888");
+    registrationBean.addInitParameter("exceptionOnValidationFailure", "false");
+    registrationBean.addInitParameter("redirectAfterValidation", "false");
+    registrationBean.addInitParameter("proxyCallbackUrl", "https://localhost:8888/callback");
+    registrationBean.addInitParameter("proxyReceptorUrl", "/callback");
+    registrationBean.addInitParameter("acceptAnyProxy", "true");
+    registrationBean.addUrlPatterns("/*");
+
+    return registrationBean;
+  }
+
+  @Bean
+  public FilterRegistrationBean<OnOffFilter> casAuthenticationFilter() {
+    FilterRegistrationBean<OnOffFilter> registrationBean = new FilterRegistrationBean<>();
+    registrationBean.setFilter(new OnOffFilter());
+    registrationBean.setName("CasAuthenticationFilter");
+    registrationBean.addInitParameter("inner-filter-class", "org.jasig.cas.client.authentication.AuthenticationFilter");
+    registrationBean.addInitParameter("config-prefix", "ui.filter.cas");
+    registrationBean.addInitParameter("casServerLoginUrl", "https://localhost:8443/cas/login");
+    registrationBean.addUrlPatterns("/login");
+
+    return registrationBean;
+  }
+
+  @Bean
+  public FilterRegistrationBean<OnOffFilter> casRequestWrapperFilter() {
+    FilterRegistrationBean<OnOffFilter> registrationBean = new FilterRegistrationBean<>();
+    registrationBean.setFilter(new OnOffFilter());
+    registrationBean.setName("CasRequestWrapperFilter");
+    registrationBean.addInitParameter("inner-filter-class",
+        "org.jasig.cas.client.util.HttpServletRequestWrapperFilter");
+    registrationBean.addInitParameter("config-prefix", "ui.filter.cas");
+    registrationBean.addUrlPatterns("/*");
+
+    return registrationBean;
+  }
+
+  @Bean
+  public FilterRegistrationBean<OnOffFilter> casApiAuthFilter() {
+    FilterRegistrationBean<OnOffFilter> registrationBean = new FilterRegistrationBean<>();
+    registrationBean.setFilter(new OnOffFilter());
+    registrationBean.setName("CasApiAuthFilter");
+    registrationBean.addInitParameter("inner-filter-class", "com.databasepreservation.common.filter.CasApiAuthFilter");
+    registrationBean.addInitParameter("config-prefix", "ui.filter.cas");
+    registrationBean.addInitParameter("casServerUrlPrefix", "https://localhost:8443/cas");
+    registrationBean.addInitParameter("exclusions", "^/swagger.json,^/v1/theme/?,^/v1/auth/ticket?");
+    registrationBean.addUrlPatterns("/api/v1/*");
+
+    return registrationBean;
+  }
+
+  @Bean
+  public FilterRegistrationBean<OnOffFilter> casWebAuthFilter() {
+    FilterRegistrationBean<OnOffFilter> registrationBean = new FilterRegistrationBean<>();
+    registrationBean.setFilter(new OnOffFilter());
+    registrationBean.setName("CasWebAuthFilter");
+    registrationBean.addInitParameter("inner-filter-class", "com.databasepreservation.common.filter.CasWebAuthFilter");
+    registrationBean.addInitParameter("config-prefix", "ui.filter.cas");
+    registrationBean.addInitParameter("casServerLogoutUrl", "https://localhost:8443/cas/logout");
+
+    registrationBean.addUrlPatterns("/login", "/logout");
+
+    return registrationBean;
   }
 
 //  @Bean

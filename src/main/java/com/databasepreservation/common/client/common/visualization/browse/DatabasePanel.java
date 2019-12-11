@@ -43,8 +43,7 @@ public class DatabasePanel extends Composite {
   private static Map<String, DatabasePanel> instances = new HashMap<>();
 
   public static DatabasePanel getInstance(String databaseUUID, boolean initMenu) {
-    instances.computeIfAbsent(databaseUUID, k -> new DatabasePanel(databaseUUID, initMenu));
-    return instances.get(databaseUUID);
+    return instances.computeIfAbsent(databaseUUID, k -> new DatabasePanel(databaseUUID, initMenu));
   }
 
   interface DatabasePanelUiBinder extends UiBinder<Widget, DatabasePanel> {
@@ -131,6 +130,13 @@ public class DatabasePanel extends Composite {
             MenuBar subMenu = new MenuBar(true);
             subMenu.addItem(messages.loginLogout(), (Command) () -> UserLogin.getInstance().logout());
             menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.USER, user.getFullName()), subMenu);
+            if (user.getAllRoles().contains("administrators")) {
+              menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.NEW_UPLOAD, messages.newUpload()),
+                  (Command) HistoryManager::gotoNewUpload);
+            }
+            menu.addItem(
+                FontAwesomeIconManager.loaded(FontAwesomeIconManager.DATABASES, messages.menusidebar_manageDatabases()),
+                (Command) HistoryManager::gotoDatabaseList);
           }
         }
       } else {
