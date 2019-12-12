@@ -14,6 +14,8 @@ import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.RightPanel;
 import com.databasepreservation.common.client.common.UserLogin;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
+import com.databasepreservation.common.client.common.sidebar.DataTransformationSidebar;
+import com.databasepreservation.common.client.common.sidebar.Sidebar;
 import com.databasepreservation.common.client.common.utils.ContentPanelLoader;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.common.utils.RightPanelLoader;
@@ -25,6 +27,8 @@ import com.databasepreservation.common.client.common.visualization.browse.Databa
 import com.databasepreservation.common.client.common.visualization.browse.DatabaseSearchesPanel;
 import com.databasepreservation.common.client.common.visualization.browse.ReferencesPanel;
 import com.databasepreservation.common.client.common.visualization.browse.RowPanel;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.AdvancedConfiguration;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.DataTransformation;
 import com.databasepreservation.common.client.common.visualization.browse.foreignKey.ForeignKeyPanel;
 import com.databasepreservation.common.client.common.visualization.browse.foreignKey.ForeignKeyPanelOptions;
 import com.databasepreservation.common.client.common.visualization.browse.information.DatabaseInformationPanel;
@@ -37,7 +41,6 @@ import com.databasepreservation.common.client.common.visualization.browse.techni
 import com.databasepreservation.common.client.common.visualization.browse.technicalInformation.UsersPanel;
 import com.databasepreservation.common.client.common.visualization.browse.view.ViewPanel;
 import com.databasepreservation.common.client.common.visualization.browse.view.ViewPanelStructure;
-import com.databasepreservation.common.client.common.visualization.browse.configuration.AdvancedConfiguration;
 import com.databasepreservation.common.client.common.visualization.ingest.IngestPage;
 import com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.SIARDManagerPage;
 import com.databasepreservation.common.client.common.visualization.manager.databasePanel.admin.DatabaseManage;
@@ -122,6 +125,16 @@ public class MainPanel extends Composite {
     JavascriptUtils.scrollToElement(contentPanel.getElement());
   }
 
+  private void setContent(String databaseUUID, String route, String toSelect, Sidebar sidebar,
+    RightPanelLoader rightPanelLoader) {
+    GWT.log("setContent, dbuid " + databaseUUID);
+    DatabasePanel databasePanel = DatabasePanel.getInstance(databaseUUID, route, true, sidebar);
+    databasePanel.setTopLevelPanelCSS("browseContent wrapper skip_padding");
+    contentPanel.setWidget(databasePanel);
+    databasePanel.load(rightPanelLoader, toSelect);
+    JavascriptUtils.scrollToElement(contentPanel.getElement());
+  }
+
   private void setContent(String databaseUUID, ContentPanelLoader panel) {
     GWT.log("setContent, dbuid " + databaseUUID);
     ContainerPanel containerPanel = ContainerPanel.getInstance(databaseUUID, true);
@@ -130,8 +143,7 @@ public class MainPanel extends Composite {
     containerPanel.load(panel);
   }
 
-  private void setMetadataRightPanelContent(String databaseUUID, String sidebarSelected,
-                                            MetadataPanelLoad rightPanelLoader) {
+  private void setContent(String databaseUUID, String sidebarSelected, MetadataPanelLoad rightPanelLoader) {
     SIARDEditMetadataPage instance = SIARDEditMetadataPage.getInstance(databaseUUID);
     instance.setTopLevelPanelCSS("browseContent wrapper skip_padding server");
     contentPanel.setWidget(instance);
@@ -249,6 +261,27 @@ public class MainPanel extends Composite {
           return AdvancedConfiguration.getInstance(database);
         }
       });
+    } else if (HistoryManager.ROUTE_DATA_TRANSFORMATION.equals(currentHistoryPath.get(0))) {
+      final String databaseUUID = currentHistoryPath.get(1);
+      DataTransformationSidebar sidebar = DataTransformationSidebar.getInstance(databaseUUID);
+      if (currentHistoryPath.size() == 2) {
+        setContent(databaseUUID, HistoryManager.ROUTE_DATA_TRANSFORMATION, databaseUUID,
+            sidebar, new RightPanelLoader() {
+            @Override
+            public RightPanel load(ViewerDatabase database) {
+              return DataTransformation.getInstance(database);
+            }
+          });
+      } else if (currentHistoryPath.size() == 3) {
+        final String tableUUID = currentHistoryPath.get(2);
+        setContent(databaseUUID, HistoryManager.ROUTE_DATA_TRANSFORMATION, tableUUID,
+            sidebar, new RightPanelLoader() {
+            @Override
+            public RightPanel load(ViewerDatabase database) {
+              return DataTransformation.getInstance(database, tableUUID);
+            }
+          });
+      }
     } else if (HistoryManager.ROUTE_DATABASE.equals(currentHistoryPath.get(0))) {
 //      if (currentHistoryPath.size() == 1) {
 //        // #database
@@ -353,6 +386,7 @@ public class MainPanel extends Composite {
         // #table/<databaseUUID>/<tableUUID>
         String databaseUUID = currentHistoryPath.get(1);
         final String tableUUID = currentHistoryPath.get(2);
+        GWT.log("HERE::" + databaseUUID);
         setContent(databaseUUID, tableUUID, new RightPanelLoader() {
           @Override
           public RightPanel load(ViewerDatabase database) {
@@ -510,7 +544,7 @@ public class MainPanel extends Composite {
     }  else if (HistoryManager.ROUTE_SIARD_EDIT_METADATA.equals(currentHistoryPath.get(0))) {
       String databaseUUID =  currentHistoryPath.get(1);
       if (currentHistoryPath.size() == 2) {
-        setMetadataRightPanelContent(databaseUUID, databaseUUID, new MetadataPanelLoad() {
+        setContent(databaseUUID, databaseUUID, new MetadataPanelLoad() {
           @Override
           public MetadataPanel load(ViewerDatabase database, ViewerSIARDBundle SIARDbundle) {
             return MetadataInformation.getInstance(database, SIARDbundle);
@@ -518,7 +552,7 @@ public class MainPanel extends Composite {
         });
       } else if (currentHistoryPath.size() == 3) {
         final String user = currentHistoryPath.get(2);
-        setMetadataRightPanelContent(databaseUUID, user, new MetadataPanelLoad() {
+        setContent(databaseUUID, user, new MetadataPanelLoad() {
           @Override
           public MetadataPanel load(ViewerDatabase database, ViewerSIARDBundle SIARDbundle) {
             return MetadataUsersPanel.getInstance(database, SIARDbundle);
@@ -530,7 +564,7 @@ public class MainPanel extends Composite {
         String databaseUUID = currentHistoryPath.get(1);
         final String tableUUID = currentHistoryPath.get(2);
 
-        setMetadataRightPanelContent(databaseUUID, tableUUID, new MetadataPanelLoad() {
+        setContent(databaseUUID, tableUUID, new MetadataPanelLoad() {
           @Override
 
           public MetadataPanel load(ViewerDatabase database, ViewerSIARDBundle SIARDbundle) {
@@ -544,7 +578,7 @@ public class MainPanel extends Composite {
         final String schemaUUID = currentHistoryPath.get(2);
         final String viewUUID = currentHistoryPath.get(3);
 
-        setMetadataRightPanelContent(databaseUUID, viewUUID, new MetadataPanelLoad() {
+        setContent(databaseUUID, viewUUID, new MetadataPanelLoad() {
           @Override
           public MetadataPanel load(ViewerDatabase database, ViewerSIARDBundle SIARDbundle) {
             return MetadataViewPanel.getInstance(database, SIARDbundle, schemaUUID, viewUUID);
@@ -557,7 +591,7 @@ public class MainPanel extends Composite {
         final String schemaUUID = currentHistoryPath.get(2);
         final String routineUUID = currentHistoryPath.get(3);
 
-        setMetadataRightPanelContent(databaseUUID, routineUUID, new MetadataPanelLoad() {
+        setContent(databaseUUID, routineUUID, new MetadataPanelLoad() {
           @Override
           public MetadataPanel load(ViewerDatabase database, ViewerSIARDBundle SIARDbundle) {
             return MetadataRoutinePanel.getInstance(database, SIARDbundle, schemaUUID, routineUUID);

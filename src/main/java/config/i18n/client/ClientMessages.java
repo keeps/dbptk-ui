@@ -584,6 +584,8 @@ public interface ClientMessages extends Messages {
 
   String breadcrumbTextForAdvancedConfiguration();
 
+  String breadcrumbTextForDataTransformation();
+
   /*********************************************
    * Home Page
    ********************************************/
@@ -1271,4 +1273,13 @@ public interface ClientMessages extends Messages {
   String advancedConfigurationTextForColumnsManagement();
 
   String advancedConfigurationTextForDataTransformation();
+
+  /********************************************
+   * Data Transformation
+   *******************************************/
+
+  String dataTransformationTextForAlertColumnsOrder();
+  String dataTransformationTextForIsReferencedBy(String table, String column);
+  String dataTransformationTextForIsRelatedTo(String table, String column);
+
 }

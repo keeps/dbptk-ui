@@ -10,14 +10,14 @@ import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
+import com.databasepreservation.common.client.tools.HistoryManager;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 
 import config.i18n.client.ClientMessages;
 
@@ -61,23 +61,30 @@ public class AdvancedConfiguration extends ContentPanel {
   private void init() {
     title.setText(messages.advancedConfigurationLabelForMainTitle());
 
-    FlowPanel ManagementTablesPanel = createOptions(messages.advancedConfigurationLabelForTableManagement(),
+    FocusPanel ManagementTablesPanel = createOptions(messages.advancedConfigurationLabelForTableManagement(),
       messages.advancedConfigurationTextForTableManagement());
 
-    FlowPanel ManagementColumnsPanel = createOptions(messages.advancedConfigurationLabelForColumnsManagement(),
+    FocusPanel ManagementColumnsPanel = createOptions(messages.advancedConfigurationLabelForColumnsManagement(),
       messages.advancedConfigurationTextForColumnsManagement());
 
-    FlowPanel DataTransformationPanel = createOptions(messages.advancedConfigurationLabelForDataTransformation(),
+    FocusPanel DataTransformationPanel = createOptions(messages.advancedConfigurationLabelForDataTransformation(),
       messages.advancedConfigurationTextForDataTransformation());
+    DataTransformationPanel.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+       HistoryManager.gotoDataTransformation(database.getUuid());
+      }
+    });
 
     options.add(ManagementTablesPanel);
     options.add(ManagementColumnsPanel);
     options.add(DataTransformationPanel);
   }
 
-  private FlowPanel createOptions(String title, String description) {
-    FlowPanel panel = new FlowPanel();
-    panel.setStyleName("advanced-configuration-option");
+  private FocusPanel createOptions(String title, String description) {
+    FocusPanel panel = new FocusPanel();
+    FlowPanel content = new FlowPanel();
+    content.setStyleName("advanced-configuration-option");
     FlowPanel left = new FlowPanel();
     left.setStyleName("left");
     FlowPanel right = new FlowPanel();
@@ -96,9 +103,10 @@ public class AdvancedConfiguration extends ContentPanel {
     right.add(panelTitle);
     right.add(panelDescription);
 
-    panel.add(left);
-    panel.add(right);
+    content.add(left);
+    content.add(right);
 
+    panel.add(content);
     return panel;
   }
 }

@@ -54,6 +54,7 @@ public class HistoryManager {
   public static final String ROUTE_UPLOAD_SIARD_DATA = "ingest-siard";
   public static final String ROUTE_ACTIVITY_LOG = "activity-log";
   public static final String ROUTE_ADVANCED_CONFIGURATION = "advanced-configuration";
+  public static final String ROUTE_DATA_TRANSFORMATION = "data-transformation";
 
   /****************************************************
    * DESKTOP ROUTES
@@ -306,6 +307,16 @@ public class HistoryManager {
     newHistory(params);
   }
 
+  public static void gotoDataTransformation(String databaseUUID) {
+    List<String> params = Arrays.asList(ROUTE_DATA_TRANSFORMATION, databaseUUID);
+    newHistory(params);
+  }
+
+  public static void gotoDataTransformation(String databaseUUID, String tableUUID) {
+    List<String> params = Arrays.asList(ROUTE_DATA_TRANSFORMATION, databaseUUID, tableUUID);
+    newHistory(params);
+  }
+
   private static void newHistory(List<String> path) {
     // History.newItem(createHistoryToken(path)
     String hash = createHistoryToken(path);
@@ -466,5 +477,13 @@ public class HistoryManager {
 
   public static String linkToSIARDInfo(String databaseUUID) {
     return createHistoryToken(Arrays.asList(ROUTE_SIARD_INFO, databaseUUID));
+  }
+
+  public static String linkToDataTransformation(String database_uuid) {
+    return createHistoryToken(Arrays.asList(ROUTE_DATA_TRANSFORMATION, database_uuid));
+  }
+
+  public static String linkToDataTransformationTable(String database_uuid, String tableUUID) {
+    return createHistoryToken(Arrays.asList(ROUTE_DATA_TRANSFORMATION, database_uuid, tableUUID));
   }
 }

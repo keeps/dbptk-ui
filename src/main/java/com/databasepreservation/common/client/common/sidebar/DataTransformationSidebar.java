@@ -5,12 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import com.databasepreservation.common.client.models.structure.ViewerDatabase;
-import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
-import com.databasepreservation.common.client.models.structure.ViewerMetadata;
-import com.databasepreservation.common.client.models.structure.ViewerSchema;
-import com.databasepreservation.common.client.models.structure.ViewerTable;
-import com.databasepreservation.common.client.models.structure.ViewerView;
+import com.databasepreservation.common.client.models.structure.*;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
@@ -19,25 +14,21 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.DisclosurePanel;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 
 import config.i18n.client.ClientMessages;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class DatabaseSidebar extends Composite implements Sidebar{
-  protected static final ClientMessages messages = GWT.create(ClientMessages.class);
-  protected static Map<String, DatabaseSidebar> instances = new HashMap<>();
+public class DataTransformationSidebar extends Composite implements Sidebar {
+  private static final ClientMessages messages = GWT.create(ClientMessages.class);
+  private static Map<String, DataTransformationSidebar> instances = new HashMap<>();
 
-  interface DatabaseSidebarUiBinder extends UiBinder<Widget, DatabaseSidebar> {
+  interface DatabaseSidebarUiBinder extends UiBinder<Widget, DataTransformationSidebar> {
   }
 
-  protected static DatabaseSidebarUiBinder uiBinder = GWT.create(DatabaseSidebarUiBinder.class);
+  private static DatabaseSidebarUiBinder uiBinder = GWT.create(DatabaseSidebarUiBinder.class);
 
   @UiField
   FlowPanel sidebarGroup;
@@ -51,10 +42,10 @@ public class DatabaseSidebar extends Composite implements Sidebar{
   @UiField
   AccessibleFocusPanel searchInputButton;
 
-  protected ViewerDatabase database;
-  protected String databaseUUID;
-  protected boolean initialized = false;
-  protected Map<String, SidebarHyperlink> list = new HashMap<>();
+  private ViewerDatabase database;
+  private String databaseUUID;
+  private boolean initialized = false;
+  private Map<String, SidebarHyperlink> list = new HashMap<>();
 
   /**
    * Creates a new DatabaseSidebar, rarely hitting the database more than once for
@@ -64,21 +55,18 @@ public class DatabaseSidebar extends Composite implements Sidebar{
    *          the database UUID
    * @return a DatabaseSidebar instance
    */
-  public static DatabaseSidebar getInstance(String databaseUUID) {
-
+  public static DataTransformationSidebar getInstance(String databaseUUID) {
     if (databaseUUID == null) {
       return getEmptyInstance();
     }
 
-    DatabaseSidebar instance = instances.get(databaseUUID);
+    DataTransformationSidebar instance = instances.get(databaseUUID);
     if (instance == null || instance.database == null
       || !ViewerDatabaseStatus.AVAILABLE.equals(instance.database.getStatus())) {
-      instance = new DatabaseSidebar(databaseUUID);
+      instance = new DataTransformationSidebar(databaseUUID);
       instances.put(databaseUUID, instance);
     } else {
-      // workaround because the same DatabaseSidebar can not belong to multiple
-      // widgets
-      return new DatabaseSidebar(instance);
+      return new DataTransformationSidebar(instance);
     }
     return instance;
   }
@@ -91,20 +79,20 @@ public class DatabaseSidebar extends Composite implements Sidebar{
    *          the database
    * @return a DatabaseSidebar instance
    */
-  public static DatabaseSidebar getInstance(ViewerDatabase database) {
+  public static DataTransformationSidebar getInstance(ViewerDatabase database) {
     if (database == null) {
       return getEmptyInstance();
     }
 
-    DatabaseSidebar instance = instances.get(database.getUuid());
+    DataTransformationSidebar instance = instances.get(database.getUuid());
     if (instance == null || instance.database == null
       || !ViewerDatabaseStatus.AVAILABLE.equals(instance.database.getStatus())) {
-      instance = new DatabaseSidebar(database);
+      instance = new DataTransformationSidebar(database);
       instances.put(database.getUuid(), instance);
     } else {
       // workaround because the same DatabaseSidebar can not belong to multiple
       // widgets
-      return new DatabaseSidebar(instance);
+      return new DataTransformationSidebar(instance);
     }
     return instance;
   }
@@ -115,8 +103,8 @@ public class DatabaseSidebar extends Composite implements Sidebar{
    *
    * @return a new invisible DatabaseSidebar
    */
-  public static DatabaseSidebar getEmptyInstance() {
-    return new DatabaseSidebar();
+  public static DataTransformationSidebar getEmptyInstance() {
+    return new DataTransformationSidebar();
   }
 
   /**
@@ -126,7 +114,7 @@ public class DatabaseSidebar extends Composite implements Sidebar{
    * @param other
    *          the DatabaseSidebar used in another widget
    */
-  private DatabaseSidebar(DatabaseSidebar other) {
+  private DataTransformationSidebar(DataTransformationSidebar other) {
     initialized = other.initialized;
     initWidget(uiBinder.createAndBindUi(this));
     searchInputBox.setText(other.searchInputBox.getText());
@@ -136,7 +124,7 @@ public class DatabaseSidebar extends Composite implements Sidebar{
   /**
    * Use DatabaseSidebar.getInstance to obtain an instance
    */
-  private DatabaseSidebar(ViewerDatabase database) {
+  private DataTransformationSidebar(ViewerDatabase database) {
     initWidget(uiBinder.createAndBindUi(this));
     init(database);
   }
@@ -144,7 +132,7 @@ public class DatabaseSidebar extends Composite implements Sidebar{
   /**
    * Empty constructor, for pages that do not have a sidebar
    */
-  private DatabaseSidebar() {
+  private DataTransformationSidebar() {
     initWidget(uiBinder.createAndBindUi(this));
     this.setVisible(false);
   }
@@ -152,7 +140,7 @@ public class DatabaseSidebar extends Composite implements Sidebar{
   /**
    * Use DatabaseSidebar.getInstance to obtain an instance
    */
-  private DatabaseSidebar(String databaseUUID) {
+  private DataTransformationSidebar(String databaseUUID) {
     this();
     this.databaseUUID = databaseUUID;
   }
@@ -163,24 +151,10 @@ public class DatabaseSidebar extends Composite implements Sidebar{
 
     SidebarHyperlink informationLink = new SidebarHyperlink(FontAwesomeIconManager
       .getTagSafeHtml(FontAwesomeIconManager.DATABASE_INFORMATION, messages.menusidebar_information()),
-      HistoryManager.linkToDatabase(database.getUuid()));
+      HistoryManager.linkToDataTransformation(database.getUuid()));
     informationLink.setH5().setIndent0();
-    list.put(HistoryManager.ROUTE_DATABASE, informationLink);
+    list.put(database.getUuid(), informationLink);
     sidebarGroup.add(informationLink);
-
-    SidebarHyperlink searchLink = new SidebarHyperlink(FontAwesomeIconManager
-      .getTagSafeHtml(FontAwesomeIconManager.DATABASE_SEARCH, messages.menusidebar_searchAllRecords()),
-      HistoryManager.linkToDatabaseSearch(database.getUuid()));
-    searchLink.setH5().setIndent0();
-    list.put(HistoryManager.ROUTE_DATABASE_SEARCH, searchLink);
-    sidebarGroup.add(searchLink);
-
-    SidebarHyperlink savedSearchesLink = new SidebarHyperlink(
-      FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.SAVED_SEARCH, messages.menusidebar_savedSearches()),
-      HistoryManager.linkToSavedSearches(database.getUuid()));
-    savedSearchesLink.setH5().setIndent0();
-    list.put(HistoryManager.ROUTE_SAVED_SEARCHES, savedSearchesLink);
-    sidebarGroup.add(savedSearchesLink);
 
     /* Schemas */
     SidebarItem schemasHeader = createSidebarSubItemHeaderSafeHMTL("Tables", FontAwesomeIconManager.LIST);
@@ -198,44 +172,9 @@ public class DatabaseSidebar extends Composite implements Sidebar{
           schemaItems.add(createTableItem(schema, table, totalSchemas, iconTag));
         }
       }
-
-      for (ViewerView view : schema.getViews()) {
-        schemaItems.add(createViewItem(schema, view, totalSchemas, iconTag));
-      }
     }
 
-      createSubItem(schemasHeader, schemaItems, true);
-
-    /* Technical Information */
-    SidebarItem technicalHeader = createSidebarSubItemHeaderSafeHMTL("Technical Information",
-      FontAwesomeIconManager.TECHNICAL);
-    FlowPanel technicalItems = new FlowPanel();
-
-    SidebarHyperlink routinesLink = new SidebarHyperlink(
-      FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.SCHEMA_ROUTINES, messages.menusidebar_routines()),
-      HistoryManager.linkToSchemaRoutines(database.getUuid()));
-    routinesLink.setH6().setIndent1();
-    list.put(HistoryManager.ROUTE_SCHEMA_ROUTINES, routinesLink);
-    sidebarGroup.add(routinesLink);
-    technicalItems.add(routinesLink);
-
-    SidebarHyperlink usersLink = new SidebarHyperlink(
-      FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.DATABASE_USERS, messages.menusidebar_usersRoles()),
-      HistoryManager.linkToDatabaseUsers(database.getUuid()));
-    usersLink.setH6().setIndent1();
-    list.put(HistoryManager.ROUTE_DATABASE_USERS, usersLink);
-    sidebarGroup.add(usersLink);
-    technicalItems.add(usersLink);
-
-    SidebarHyperlink reportLink = new SidebarHyperlink(
-      FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.DATABASE_REPORT, messages.titleReport(), true),
-      HistoryManager.linkToDatabaseReport(database.getUuid()));
-    reportLink.setH6().setIndent1();
-    list.put(HistoryManager.ROUTE_DATABASE_REPORT, reportLink);
-    sidebarGroup.add(reportLink);
-    technicalItems.add(reportLink);
-
-    createSubItem(technicalHeader, technicalItems, true);
+    createSubItem(schemasHeader, schemaItems, false);
 
     searchInit();
     setVisible(true);
@@ -251,60 +190,14 @@ public class DatabaseSidebar extends Composite implements Sidebar{
             schema.getName() + " " + iconTag + " " + table.getName());
       }
       SidebarHyperlink tableLink = new SidebarHyperlink(html,
-          HistoryManager.linkToTable(database.getUuid(), table.getUuid()));
+          HistoryManager.linkToDataTransformationTable(database.getUuid(), table.getUUID()));
       tableLink.setH6().setIndent2();
-      list.put(table.getUuid(), tableLink);
+      list.put(table.getUUID(), tableLink);
       sidebarGroup.add(tableLink);
 
       return tableLink;
   }
 
-  private SidebarHyperlink createViewItem(final ViewerSchema schema, final ViewerView view, final int totalSchemas,
-    final String iconTag) {
-    SafeHtml html;
-    SidebarHyperlink viewLink;
-    final ViewerTable materializedTable = schema.getMaterializedTable(view.getName());
-    if (materializedTable != null) {
-      if (totalSchemas == 1) {
-        html = FontAwesomeIconManager.getStackedIconSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS,
-            FontAwesomeIconManager.TABLE, materializedTable.getNameWithoutPrefix());
-      } else {
-        html = FontAwesomeIconManager.getStackedIconSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS,
-            FontAwesomeIconManager.TABLE, schema.getName() + " " + iconTag + " " + materializedTable.getNameWithoutPrefix());
-      }
-      viewLink = new SidebarHyperlink(html,
-        HistoryManager.linkToTable(database.getUuid(), materializedTable.getUuid())).setTooltip("Materialized View");
-      list.put(materializedTable.getUuid(), viewLink);
-    } else if (schema.getCustomViewTable(view.getName()) != null) {
-      final ViewerTable customViewTable = schema.getCustomViewTable(view.getName());
-      if (totalSchemas == 1) {
-        html = FontAwesomeIconManager.getStackedIconSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS,
-          FontAwesomeIconManager.COG, customViewTable.getNameWithoutPrefix());
-      } else {
-        html = FontAwesomeIconManager.getStackedIconSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS,
-          FontAwesomeIconManager.COG, schema.getName() + " " + iconTag + " " + customViewTable.getNameWithoutPrefix());
-      }
-      viewLink = new SidebarHyperlink(html, HistoryManager.linkToTable(database.getUuid(), customViewTable.getUuid())).setTooltip("Custom View");
-      list.put(customViewTable.getUuid(), viewLink);
-    } else {
-      if (totalSchemas == 1) {
-        html = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS, view.getName());
-      } else {
-        html = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS,
-          schema.getName() + " " + iconTag + " " + view.getName());
-      }
-      viewLink = new SidebarHyperlink(html, HistoryManager.linkToView(database.getUuid(), view.getUuid()));
-      list.put(view.getUuid(), viewLink);
-    }
-
-    viewLink.setH6().setIndent2();
-
-    sidebarGroup.add(viewLink);
-
-    return viewLink;
-  }
-
-  @Override
   public boolean isInitialized() {
     return initialized;
   }
@@ -348,11 +241,8 @@ public class DatabaseSidebar extends Composite implements Sidebar{
 
   private void searchInit() {
     searchInputBox.getElement().setPropertyString("placeholder", messages.menusidebar_filterSidebar());
-
     searchInputBox.addChangeHandler(event -> doSearch());
-
     searchInputBox.addKeyUpHandler(event -> doSearch());
-
     searchInputButton.addClickHandler(event -> doSearch());
   }
 

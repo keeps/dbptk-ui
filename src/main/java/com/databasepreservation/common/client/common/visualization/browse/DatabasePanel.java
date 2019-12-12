@@ -11,6 +11,7 @@ import com.databasepreservation.common.client.common.RightPanel;
 import com.databasepreservation.common.client.common.UserLogin;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.sidebar.DatabaseSidebar;
+import com.databasepreservation.common.client.common.sidebar.Sidebar;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.common.utils.RightPanelLoader;
@@ -30,12 +31,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.MenuBar;
-import com.google.gwt.user.client.ui.MenuItem;
-import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 
 import config.i18n.client.ClientMessages;
 
@@ -51,6 +47,12 @@ public class DatabasePanel extends Composite {
     return instances.computeIfAbsent(databaseUUID, k -> new DatabasePanel(databaseUUID, initMenu));
   }
 
+  public static DatabasePanel getInstance(String databaseUUID, String route, boolean initMenu, Sidebar sidebar) {
+    String key = databaseUUID + route;
+    instances.computeIfAbsent(key, k -> new DatabasePanel(databaseUUID, initMenu, sidebar));
+    return instances.get(databaseUUID + route);
+  }
+
   interface DatabasePanelUiBinder extends UiBinder<Widget, DatabasePanel> {
   }
 
@@ -63,7 +65,7 @@ public class DatabasePanel extends Composite {
   BreadcrumbPanel breadcrumbDesktop;
 
   @UiField(provided = true)
-  DatabaseSidebar sidebar;
+  Sidebar sidebar;
 
   @UiField
   SimplePanel rightPanelContainer;
@@ -82,8 +84,17 @@ public class DatabasePanel extends Composite {
   private String selectedLanguage;
 
   private DatabasePanel(String databaseUUID, boolean initMenu) {
+    this(databaseUUID, initMenu, null);
+  }
+
+  private DatabasePanel(String databaseUUID, boolean initMenu, Sidebar sidebar) {
     this.databaseUUID = databaseUUID;
-    this.sidebar = DatabaseSidebar.getInstance(databaseUUID);
+
+    if (sidebar == null) {
+      this.sidebar = DatabaseSidebar.getInstance(databaseUUID);
+    } else {
+      this.sidebar = sidebar;
+    }
 
     initWidget(uiBinder.createAndBindUi(this));
 
@@ -91,7 +102,7 @@ public class DatabasePanel extends Composite {
       initMenu();
     }
 
-    if(ApplicationType.getType().equals(ViewerConstants.SERVER)){
+    if (ApplicationType.getType().equals(ViewerConstants.SERVER)) {
       toolbar.getElement().addClassName("filePreviewToolbar");
       breadcrumb = breadcrumbServer;
       breadcrumbDesktop.removeFromParent();
@@ -143,6 +154,7 @@ public class DatabasePanel extends Composite {
             MenuBar subMenu = new MenuBar(true);
             subMenu.addItem(messages.loginLogout(), (Command) () -> UserLogin.getInstance().logout());
             menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.USER, user.getFullName()), subMenu);
+
             AuthenticationService.Util.call((Boolean userIsAdmin) -> {
               if (userIsAdmin) {
                 MenuBar administrationMenu = new MenuBar(true);
@@ -170,8 +182,19 @@ public class DatabasePanel extends Composite {
         menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.NEW_UPLOAD, messages.newUpload()),
           (Command) HistoryManager::gotoNewUpload);
         menu.addItem(
-            FontAwesomeIconManager.loaded(FontAwesomeIconManager.DATABASES, messages.menusidebar_manageDatabases()),
+          FontAwesomeIconManager.loaded(FontAwesomeIconManager.DATABASES, messages.menusidebar_manageDatabases()),
           (Command) HistoryManager::gotoDatabaseList);
+      }
+
+      if (!hideMenu) {
+        MenuBar languagesMenu = new MenuBar(true);
+
+        setLanguageMenu(languagesMenu);
+
+        MenuItem languagesMenuItem = new MenuItem(
+          FontAwesomeIconManager.loaded(FontAwesomeIconManager.GLOBE, selectedLanguage), languagesMenu);
+        languagesMenuItem.addStyleName("menu-item menu-item-label menu-item-language");
+        menu.addItem(languagesMenuItem);
       }
     }).isAuthenticationEnabled();
   }
@@ -205,7 +228,7 @@ public class DatabasePanel extends Composite {
         selectedLanguage = supportedLanguages.get(key);
       } else {
         MenuItem languageMenuItem = new MenuItem(SafeHtmlUtils.fromSafeConstant(supportedLanguages.get(key)),
-            () -> JavascriptUtils.changeLocale(key));
+          () -> JavascriptUtils.changeLocale(key));
         languagesMenu.addItem(languageMenuItem);
         languageMenuItem.addStyleName("menu-item-language");
       }
@@ -248,6 +271,6 @@ public class DatabasePanel extends Composite {
   }
 
   public void setTopLevelPanelCSS(String css) {
-      toplevel.addStyleName(css);
+    toplevel.addStyleName(css);
   }
 }

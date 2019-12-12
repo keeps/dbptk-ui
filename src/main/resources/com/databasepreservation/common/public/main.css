@@ -2465,6 +2465,7 @@ html, body, .desktop-main {
     border: 1px solid transparent;
     border-radius: .25rem;
     box-sizing: border-box;
+    margin-bottom: 10px;
 }
 
 .alert-heading {
@@ -2476,6 +2477,12 @@ html, body, .desktop-main {
 .alert-heading:after{
     content: ":";
     color: inherit;
+}
+
+.alert-icon {
+    color: inherit;
+    float: left;
+    margin-right: 10px;
 }
 
 .alert-primary {
@@ -2619,6 +2626,119 @@ button.close:hover {
     display: inline-grid;
 }
 /************************************************
+* Bootstrap CARD
+ ************************************************/
+.bootstrap-card{
+    background-color: #fff;
+    background-clip: border-box;
+    rgba(0,0,0,.125);
+    border-radius: .25rem;
+    position: relative;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+}
+
+.bootstrap-card-title-panel{
+    display: flex;
+    height: 50px;
+}
+
+.bootstrap-card-title-icon{
+    font-size: 30px;
+    line-height: 50px;
+    margin-right: 20px;
+}
+
+.bootstrap-card-title{
+    font-size: 30px;
+    line-height: 50px;
+}
+
+.bootstrap-card-description {
+    font-size: 1em;
+}
+
+.bootstrap-card-extra-content-btn{
+    position: absolute;
+    display: flex;
+    align-items: center;
+    height: 50px;
+    top: 0px;
+    right: 10px;
+}
+
+.bootstrap-card-body{
+    flex: 1 1 auto;
+    padding: 1.25rem;
+}
+
+.bootstrap-card-extra-content{
+
+}
+
+.bootstrap-card-footer{
+
+}
+
+/************************************************
+* Switch Button
+ ************************************************/
+.switch-widget {
+    align-self: center;
+    display: inline-flex;
+    position: relative;
+}
+
+.switch-widget .switch-label {
+    align-self: center;
+    padding-right: 27px;
+}
+
+.switch-widget .switch[type=checkbox]{
+    height: 0;
+    width: 0;
+    visibility: hidden;
+}
+
+.switch-widget .label-for-switch {
+    cursor: pointer;
+    text-indent: -9999px;
+    width: 27px;
+    height: 15px;
+    background: #ccc;
+    display: block;
+    border-radius: 50px;
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+}
+
+.switch-widget .label-for-switch:after {
+    content: '';
+    position: absolute;
+    top: 1px;
+    left: 2px;
+    width: 13px;
+    height: 13px;
+    background: #fff;
+    border-radius: 50%;
+    transition: .4s;
+}
+
+.switch-widget .switch:checked + .label-for-switch {
+    background: #089de3;
+    border-color: #089de3;
+}
+
+.switch-widget .switch:checked + .label-for-switch:after {
+    left: 12px;
+}
+
+.switch-widget .label-for-switch:active:after {
+    width: 15px;
+}
+
+/************************************************
 * Advanced Configuration
  ************************************************/
 .advanced-configuration-options{
@@ -2656,4 +2776,77 @@ button.close:hover {
 
 .advanced-configuration-option .description{
     font-size: 15px;
+}
+
+/************************************************
+* Data Transformation
+ ************************************************/
+.data-transformation-header {
+    position: relative;
+}
+
+.data-transformation-header .title-panel{
+    height: 100px;
+    line-height: 100px;
+    display: flex;
+}
+
+.data-transformation-header .icon{
+    margin-right: 20px;
+    font-size: 50px;
+}
+
+.data-transformation-header .title{
+    font-size: 50px;
+}
+
+.data-transformation-header .description-panel{
+    font-size: 15px;
+}
+
+.data-transformation-wrapper{
+    position: relative;
+    padding-top: 15px;
+}
+.data-transformation-panel{
+    margin-left: 10px;
+}
+.data-transformation-child{
+    margin-left: 10px;
+}
+
+.data-transformation-wrapper::after {
+    content: '';
+    top: 0;
+    height: 100%;
+    width: 0;
+    border-left: 2px solid #ccc;
+    position: absolute;
+    left: -10px;
+}
+
+.data-transformation-wrapper::before{
+    border-top: 2px solid #ccc;
+    top: 52px;
+    width: 8px;
+    height: 0;
+    content: '';
+    position: absolute;
+    left: -10px;
+}
+
+.data-transformation-wrapper:last-child::after{
+    height: 52px;
+}
+
+.reference-panel{
+    font-size: 15px;
+    display: flex;
+    line-height: 50px;
+    color: #818182;
+}
+
+.reference-panel .icon{
+    font-size: 15px;
+    margin-right: 10px;
 }
