@@ -15,6 +15,7 @@ import io.swagger.annotations.ApiParam;
 import org.fusesource.restygwt.client.DirectRestService;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.fusesource.restygwt.client.REST;
+import org.roda.core.data.exceptions.AuthorizationDeniedException;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -97,7 +98,7 @@ public interface DatabaseService extends DirectRestService {
   @DELETE
   @Path("/delete/rows/{databaseUUID}")
   @ApiOperation(value = "retrieves DBPTK export modules", notes = "", response = Boolean.class, responseContainer = "IndexResult")
-  Boolean deleteRows(@PathParam("databaseUUID") String databaseUUID);
+  Boolean deleteSolrData(@PathParam("databaseUUID") String databaseUUID);
 
 
   @POST

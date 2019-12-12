@@ -7,19 +7,11 @@
  */
 package com.databasepreservation.common.server.index.schema.collections;
 
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_CURRENT_SCHEMA_NAME;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_CURRENT_TABLE_NAME;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_INGESTED_ROWS;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_INGESTED_SCHEMAS;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_INGESTED_TABLES;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_METADATA;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_SIARD_PATH;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_SIARD_SIZE;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_SIARD_VERSION;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_STATUS;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_TOTAL_ROWS;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_TOTAL_SCHEMAS;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_TOTAL_TABLES;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_VALIDATED_AT;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_VALIDATE_VERSION;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_VALIDATION_ERRORS;
@@ -78,27 +70,15 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
     List<Field> fields = new ArrayList<>(super.getFields());
 
     fields.add(new Field(SOLR_DATABASES_STATUS, Field.TYPE_STRING).setIndexed(true).setRequired(true));
-
     fields.add(new Field(SOLR_DATABASES_METADATA, Field.TYPE_STRING).setIndexed(false).setStored(true)
       .setRequired(false).setDocValues(false));
-
     fields.add(new Field(SOLR_DATABASES_VALIDATION_STATUS, Field.TYPE_STRING).setIndexed(true).setRequired(true));
-
-    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_TOTAL_ROWS, Field.TYPE_LONG));
-    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_TOTAL_TABLES, Field.TYPE_LONG));
-    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_TOTAL_SCHEMAS, Field.TYPE_LONG));
-    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_INGESTED_ROWS, Field.TYPE_LONG));
-    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_INGESTED_TABLES, Field.TYPE_LONG));
-    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_INGESTED_SCHEMAS, Field.TYPE_LONG));
-    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_CURRENT_TABLE_NAME, Field.TYPE_STRING));
-    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_CURRENT_SCHEMA_NAME, Field.TYPE_STRING));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_SIARD_PATH, Field.TYPE_STRING));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_SIARD_SIZE, Field.TYPE_LONG));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_SIARD_VERSION, Field.TYPE_STRING));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_VALIDATED_AT, Field.TYPE_STRING));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_VALIDATE_VERSION, Field.TYPE_STRING));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_VALIDATOR_REPORT_PATH, Field.TYPE_STRING));
-    //fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_VALIDATION_STATUS, Field.TYPE_STRING));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_VALIDATION_PASSED, Field.TYPE_STRING));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_VALIDATION_ERRORS, Field.TYPE_STRING));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_VALIDATION_WARNINGS, Field.TYPE_STRING));
@@ -118,15 +98,6 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
     SolrInputDocument doc = super.toSolrDocument(object);
 
     doc.addField(SOLR_DATABASES_STATUS, object.getStatus().toString());
-    doc.addField(SOLR_DATABASES_TOTAL_ROWS, object.getTotalRows());
-    doc.addField(SOLR_DATABASES_TOTAL_TABLES, object.getTotalTables());
-    doc.addField(SOLR_DATABASES_TOTAL_SCHEMAS, object.getTotalSchemas());
-    doc.addField(SOLR_DATABASES_INGESTED_ROWS, object.getIngestedRows());
-    doc.addField(SOLR_DATABASES_INGESTED_TABLES, object.getIngestedTables());
-    doc.addField(SOLR_DATABASES_INGESTED_SCHEMAS, object.getIngestedSchemas());
-    doc.addField(SOLR_DATABASES_CURRENT_TABLE_NAME, object.getCurrentTableName());
-    doc.addField(SOLR_DATABASES_CURRENT_SCHEMA_NAME, object.getCurrentSchemaName());
-
     doc.addField(SOLR_DATABASES_METADATA, JsonTransformer.getJsonFromObject(object.getMetadata()));
 
     doc.addField(SOLR_DATABASES_SIARD_PATH, object.getPath());
@@ -151,14 +122,6 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
 
     viewerDatabase.setStatus(SolrUtils.objectToEnum(doc.get(SOLR_DATABASES_STATUS), ViewerDatabaseStatus.class,
         ViewerDatabaseStatus.INGESTING));
-    viewerDatabase.setCurrentSchemaName(SolrUtils.objectToString(doc.get(SOLR_DATABASES_CURRENT_SCHEMA_NAME), ""));
-    viewerDatabase.setCurrentTableName(SolrUtils.objectToString(doc.get(SOLR_DATABASES_CURRENT_TABLE_NAME), ""));
-    viewerDatabase.setTotalRows(SolrUtils.objectToLong(doc.get(SOLR_DATABASES_TOTAL_ROWS), 0L));
-    viewerDatabase.setTotalTables(SolrUtils.objectToLong(doc.get(SOLR_DATABASES_TOTAL_TABLES), 0L));
-    viewerDatabase.setTotalSchemas(SolrUtils.objectToLong(doc.get(SOLR_DATABASES_TOTAL_SCHEMAS), 0L));
-    viewerDatabase.setIngestedRows(SolrUtils.objectToLong(doc.get(SOLR_DATABASES_INGESTED_ROWS), 0L));
-    viewerDatabase.setIngestedTables(SolrUtils.objectToLong(doc.get(SOLR_DATABASES_INGESTED_TABLES), 0L));
-    viewerDatabase.setIngestedSchemas(SolrUtils.objectToLong(doc.get(SOLR_DATABASES_INGESTED_SCHEMAS), 0L));
 
     String jsonMetadata = SolrUtils.objectToString(doc.get(SOLR_DATABASES_METADATA), "");
     ViewerMetadata metadata = JsonTransformer.getObjectFromJson(jsonMetadata, ViewerMetadata.class);

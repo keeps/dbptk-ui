@@ -47,6 +47,7 @@ public class SIARDManagerPage extends ContentPanel {
   private ValidationNavigationPanel validationNavigationPanel = null;
   private BrowseNavigationPanel browseNavigationPanel = null;
   private Boolean populationFieldsCompleted = false;
+  private boolean firstAttachment = true;
 
   @UiField
   LoadingDiv loading;
@@ -112,7 +113,6 @@ public class SIARDManagerPage extends ContentPanel {
   }
 
   public void refreshInstance(String databaseUUID) {
-    GWT.log("refreshInstance");
     loading.setVisible(true);
 
     DatabaseService.Util.call((IsIndexed result) -> {

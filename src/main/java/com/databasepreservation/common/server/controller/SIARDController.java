@@ -1,5 +1,43 @@
 package com.databasepreservation.common.server.controller;
 
+import static com.databasepreservation.common.client.ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX;
+import static com.databasepreservation.common.client.ViewerConstants.SOLR_SEARCHES_DATABASE_UUID;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
+import org.roda.core.data.exceptions.GenericException;
+import org.roda.core.data.exceptions.NotFoundException;
+import org.roda.core.data.exceptions.RequestNotValidException;
+import org.roda.core.data.v2.index.filter.Filter;
+import org.roda.core.data.v2.index.filter.SimpleFilterParameter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.yaml.snakeyaml.Yaml;
+
 import com.databasepreservation.DatabaseMigration;
 import com.databasepreservation.SIARDEdition;
 import com.databasepreservation.SIARDValidation;
@@ -54,43 +92,6 @@ import com.databasepreservation.modules.siard.SIARDEditFactory;
 import com.databasepreservation.modules.siard.SIARDValidateFactory;
 import com.databasepreservation.modules.viewer.DbvtkModuleFactory;
 import com.databasepreservation.utils.ReflectionUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
-import org.roda.core.data.exceptions.GenericException;
-import org.roda.core.data.exceptions.NotFoundException;
-import org.roda.core.data.exceptions.RequestNotValidException;
-import org.roda.core.data.v2.index.filter.Filter;
-import org.roda.core.data.v2.index.filter.SimpleFilterParameter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.yaml.snakeyaml.Yaml;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_SEARCHES_DATABASE_UUID;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -446,17 +447,6 @@ public class SIARDController {
       ViewerDatabase viewerDatabase = new ViewerDatabase();
 
       viewerDatabase.setStatus(ViewerDatabaseStatus.METADATA_ONLY);
-      viewerDatabase.setCurrentSchemaName("");
-      viewerDatabase.setCurrentTableName("");
-
-      viewerDatabase.setIngestedSchemas(0);
-      viewerDatabase.setIngestedTables(0);
-      viewerDatabase.setIngestedRows(0);
-
-      viewerDatabase.setTotalSchemas(0);
-      viewerDatabase.setTotalTables(0);
-      viewerDatabase.setTotalRows(0);
-
       viewerDatabase.setUuid(databaseUUID);
 
       viewerDatabase.setPath(siardPath.toAbsolutePath().toString());

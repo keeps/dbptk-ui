@@ -6,6 +6,7 @@ package com.databasepreservation.common.client.common.lists;
 
 import com.databasepreservation.common.client.common.DefaultMethodCallback;
 import com.databasepreservation.common.client.index.IndexResult;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.view.client.AsyncDataProvider;

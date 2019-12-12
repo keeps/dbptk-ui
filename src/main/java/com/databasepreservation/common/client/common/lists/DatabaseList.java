@@ -1,6 +1,8 @@
 package com.databasepreservation.common.client.common.lists;
 
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.common.DefaultAsyncCallback;
+import com.databasepreservation.common.client.common.UserLogin;
 import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
@@ -17,6 +19,7 @@ import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.index.facets.Facets;
 import com.databasepreservation.common.client.services.DatabaseService;
+import com.databasepreservation.common.utils.UserUtility;
 import com.google.gwt.cell.client.ButtonCell;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.SafeHtmlCell;
@@ -30,11 +33,13 @@ import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
 import config.i18n.client.ClientMessages;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.roda.core.data.v2.index.filter.Filter;
 import org.roda.core.data.v2.index.sublist.Sublist;
+import org.roda.core.data.v2.user.User;
 
 import java.util.HashMap;
 import java.util.List;

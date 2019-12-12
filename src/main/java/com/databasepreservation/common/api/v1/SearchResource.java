@@ -5,14 +5,17 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 
+import com.databasepreservation.common.client.models.activity.logs.LogEntryState;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.common.search.SearchField;
 import com.databasepreservation.common.client.common.utils.BrowserServiceUtils;
+import com.databasepreservation.common.utils.ControllerAssistant;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RequestNotValidException;
 import org.roda.core.data.utils.JsonUtils;
+import org.roda.core.data.v2.user.User;
 import org.springframework.stereotype.Service;
 
 import com.databasepreservation.common.client.ViewerConstants;
@@ -132,6 +135,13 @@ public class SearchResource implements SearchService {
 
   @Override
   public List<SearchField> getSearchFields(ViewerTable viewerTable) {
+    ControllerAssistant controllerAssistant = new ControllerAssistant() {};
+    User user = UserUtility.getUser(request);
+
+    LogEntryState state = LogEntryState.SUCCESS;
+
+    // register action
+    controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, viewerTable.getName());
     return BrowserServiceUtils.getSearchFieldsFromTable(viewerTable);
   }
 }

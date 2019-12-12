@@ -184,7 +184,7 @@ public class BrowseNavigationPanel {
       || database.getStatus().equals(ViewerDatabaseStatus.ERROR)) {
       DatabaseService.Util.call((Boolean result) -> {
         SIARDManagerPage.getInstance(database).refreshInstance(database.getUuid());
-      }).deleteRows(database.getUuid());
+      }).deleteSolrData(database.getUuid());
     }
   }
 }

@@ -29,8 +29,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
-import com.databasepreservation.common.server.ViewerFactory;
-import com.google.common.collect.Sets;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
@@ -47,11 +45,13 @@ import org.roda.core.data.v2.user.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.common.search.SavedSearch;
 import com.databasepreservation.common.client.index.IsIndexed;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
-import com.databasepreservation.common.client.common.search.SavedSearch;
+import com.databasepreservation.common.server.ViewerConfiguration;
+import com.databasepreservation.common.server.ViewerFactory;
+import com.google.common.collect.Sets;
 
 public class UserUtility {
   private static final Logger LOGGER = LoggerFactory.getLogger(UserUtility.class);
@@ -197,10 +197,20 @@ public class UserUtility {
     return canAccess;
   }
 
-  private static boolean userIsAdmin(User user) {
-    return ViewerConfiguration.getInstance()
-      .getViewerConfigurationAsList(ViewerConfiguration.PROPERTY_AUTHORIZATION_ADMINS).contains(user.getName());
+  public static boolean userIsAdmin(HttpServletRequest request) {
+    return userIsAdmin(getUser(request));
   }
+
+  private static boolean userIsAdmin(User user) {
+    final List<String> rolesToCheck = ViewerConfiguration.getInstance()
+      .getViewerConfigurationAsList(ViewerConfiguration.PROPERTY_AUTHORIZATION_ADMINISTRATORS);
+    return (rolesToCheck.isEmpty() && !Sets.intersection(user.getAllRoles(), new HashSet<>(rolesToCheck)).isEmpty());
+  }
+
+  // private static boolean userIsAdmin(User user) {
+  // return ViewerConfiguration.getInstance()
+  // .getViewerConfigurationAsList(ViewerConfiguration.PROPERTY_AUTHORIZATION_ADMINS).contains(user.getName());
+  // }
 
   private static boolean userIsManager(User user) {
     return ViewerConfiguration.getInstance()

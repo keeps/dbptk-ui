@@ -67,19 +67,15 @@ public class Humanize {
     return NumberFormat.getFormat("#,##0.#").format(size / Math.pow(1024, digitGroups)) + " " + UNITS[digitGroups];
   }
 
-  // 2019-11-28T00:00:00.000+0000
-
   public static String formatDateTime(String dateTimeString) {
     if (ViewerStringUtils.isBlank(dateTimeString)) return dateTimeString;
     DateTimeFormat archivalDateFormat = DateTimeFormat.getFormat("yyyy-MM-ddTHH:mm:ss.SSSZZZZ");
     DateTimeFormat normalizedDateFormat = DateTimeFormat.getFormat("yyyy-MM-dd HH:mm (zzzz)");
     try {
       final Date parsed = archivalDateFormat.parse(dateTimeString);
-      GWT.log("OK: " + dateTimeString);
       return normalizedDateFormat.format(parsed);
     } catch (IllegalArgumentException e) {
-      GWT.log("exception: " + e.getMessage());
+      return dateTimeString;
     }
-    return dateTimeString;
   }
 }
