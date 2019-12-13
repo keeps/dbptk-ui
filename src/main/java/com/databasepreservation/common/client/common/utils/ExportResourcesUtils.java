@@ -1,11 +1,36 @@
 package com.databasepreservation.common.client.common.utils;
 
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.index.ExportRequest;
+import com.databasepreservation.common.client.index.FindRequest;
+import com.databasepreservation.common.client.tools.ViewerJsonUtils;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 public class ExportResourcesUtils {
+
+  public static String getExportURL(final String databaseUUID, final String tableUUID, FindRequest findRequest, ExportRequest exportRequest) {
+    final String paramFindRequest = ViewerJsonUtils.getFindRequestMapper().write(findRequest);
+    final String paramExportRequest = ViewerJsonUtils.getExportRequestMapper().write(exportRequest);
+    // builds something like
+    // http://hostname:port/api/v1/exports/csv/databaseUUID?
+    StringBuilder urlBuilder = new StringBuilder();
+    String base = com.google.gwt.core.client.GWT.getHostPageBaseURL();
+    String servlet = ViewerConstants.API_SERVLET;
+    String resource = ViewerConstants.API_V1_EXPORT_RESOURCE;
+    String method = "/csv/";
+    String queryStart = "?";
+    urlBuilder.append(base).append(servlet).append(resource).append(method).append(databaseUUID).append("/").append(tableUUID).append(queryStart);
+
+    urlBuilder.append(ViewerConstants.API_QUERY_PARAM_FILTER).append("=")
+        .append(UriQueryUtils.encodeQuery(paramFindRequest)).append("&");
+
+    urlBuilder.append(ViewerConstants.API_QUERY_PARAM_EXPORT).append("=")
+        .append(UriQueryUtils.encodeQuery(paramExportRequest));
+
+    return urlBuilder.toString();
+  }
 
   public static String getExportURL(final String databaseUUID, final String tableUUID, final String paramFilter,
     final String paramFieldList, final String paramSubList, final String paramSorter, String zipFilename,

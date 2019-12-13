@@ -1,5 +1,32 @@
 package com.databasepreservation.common.client.common.visualization.browse;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
+
+import org.roda.core.data.v2.index.filter.Filter;
+import org.roda.core.data.v2.index.filter.FilterParameter;
+import org.roda.core.data.v2.index.filter.SimpleFilterParameter;
+import org.roda.core.data.v2.index.sublist.Sublist;
+
+import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.common.DefaultAsyncCallback;
+import com.databasepreservation.common.client.common.RightPanel;
+import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
+import com.databasepreservation.common.client.common.dialogs.Dialogs;
+import com.databasepreservation.common.client.common.fields.MetadataField;
+import com.databasepreservation.common.client.common.fields.RowField;
+import com.databasepreservation.common.client.common.helpers.HelperExportTableData;
+import com.databasepreservation.common.client.common.utils.CommonClientUtils;
+import com.databasepreservation.common.client.common.utils.ExportResourcesUtils;
+import com.databasepreservation.common.client.index.ExportRequest;
+import com.databasepreservation.common.client.index.FindRequest;
+import com.databasepreservation.common.client.index.facets.Facets;
 import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
@@ -11,21 +38,12 @@ import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.models.structure.ViewerSchema;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.models.structure.ViewerType;
-import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
-import com.databasepreservation.common.client.common.DefaultAsyncCallback;
-import com.databasepreservation.common.client.common.RightPanel;
-import com.databasepreservation.common.client.common.dialogs.Dialogs;
-import com.databasepreservation.common.client.common.fields.MetadataField;
-import com.databasepreservation.common.client.common.fields.RowField;
-import com.databasepreservation.common.client.common.helpers.HelperExportTableData;
-import com.databasepreservation.common.client.common.utils.CommonClientUtils;
-import com.databasepreservation.common.client.common.utils.ExportResourcesUtils;
+import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.ViewerJsonUtils;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
-import com.databasepreservation.common.client.services.DatabaseService;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -39,20 +57,8 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import config.i18n.client.ClientMessages;
-import org.roda.core.data.v2.index.filter.Filter;
-import org.roda.core.data.v2.index.filter.FilterParameter;
-import org.roda.core.data.v2.index.filter.SimpleFilterParameter;
-import org.roda.core.data.v2.index.sublist.Sublist;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import config.i18n.client.ClientMessages;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -297,10 +303,7 @@ public class RowPanel extends RightPanel {
 
   private String getExportURL(String zipFilename, String filename, boolean description, boolean exportLOBs) {
     List<FilterParameter> filterParameters = new ArrayList<>();
-    filterParameters.add(new SimpleFilterParameter("uuid", row.getUuid()));
-
-    // add parameter: filter
-    String paramFilter = ViewerJsonUtils.getFilterMapper().write(new Filter(filterParameters));
+    filterParameters.add(new SimpleFilterParameter(ViewerConstants.INDEX_ID, row.getUuid()));
 
     // prepare parameter: field list
     List<String> solrColumns = new ArrayList<>();
@@ -308,13 +311,11 @@ public class RowPanel extends RightPanel {
       solrColumns.add(entry.getKey());
     }
 
-    // add parameter: field list
-    String paramFieldList = ViewerJsonUtils.getStringListMapper().write(solrColumns);
+    FindRequest findRequest = new FindRequest(ViewerRow.class.getName(), new Filter(filterParameters), Sorter.NONE,
+      new Sublist(), Facets.NONE, false, "", solrColumns);
+    ExportRequest exportRequest = new ExportRequest(filename, zipFilename, description, exportLOBs);
 
-    String paramSubList = ViewerJsonUtils.getSubListMapper().write(new Sublist());
-    String paramSorter = ViewerJsonUtils.getSorterMapper().write(Sorter.NONE);
-    return ExportResourcesUtils.getExportURL(database.getUuid(), table.getUUID(), paramFilter, paramFieldList,
-      paramSubList, paramSorter, zipFilename, filename, description, exportLOBs);
+    return ExportResourcesUtils.getExportURL(database.getUuid(), table.getUUID(), findRequest, exportRequest);
   }
 
   /**

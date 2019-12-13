@@ -114,8 +114,8 @@ public class SIARDController {
     return result;
   }
 
-  public static List<List<String>> validateCustomViewQuery(ConnectionParameters parameters,
-    String query) throws GenericException {
+  public static List<List<String>> validateCustomViewQuery(ConnectionParameters parameters, String query)
+    throws GenericException {
     Reporter reporter = new NoOpReporter();
     List<List<String>> results = new ArrayList<>();
     final DatabaseMigration databaseMigration = initializeDatabaseMigration(reporter);
@@ -215,8 +215,7 @@ public class SIARDController {
       final DatabaseModuleFactory exportModuleFactory = getDatabaseExportModuleFactory(
         connectionParameters.getModuleName());
       setupExportModuleSSHConfiguration(databaseMigration, connectionParameters);
-      for (Map.Entry<String, String> entry : connectionParameters.getJdbcParameters().getConnection()
-        .entrySet()) {
+      for (Map.Entry<String, String> entry : connectionParameters.getJdbcParameters().getConnection().entrySet()) {
         LOGGER.info("Connection Options - {} -> {}", entry.getKey(), entry.getValue());
         databaseMigration.exportModuleParameter(entry.getKey(), entry.getValue());
       }
@@ -267,8 +266,7 @@ public class SIARDController {
       throw new GenericException("Could not load the driver", e);
     }
 
-    for (Map.Entry<String, String> entry : connectionParameters.getJdbcParameters().getConnection()
-      .entrySet()) {
+    for (Map.Entry<String, String> entry : connectionParameters.getJdbcParameters().getConnection().entrySet()) {
       LOGGER.info("Connection Options: {} -> {}", entry.getKey(), entry.getValue());
       databaseMigration.importModuleParameter(entry.getKey(), entry.getValue());
     }
@@ -313,8 +311,7 @@ public class SIARDController {
     return true;
   }
 
-  public static ViewerMetadata getDatabaseMetadata(ConnectionParameters parameters)
-    throws GenericException {
+  public static ViewerMetadata getDatabaseMetadata(ConnectionParameters parameters) throws GenericException {
     final Reporter reporter = new NoOpReporter();
     final DatabaseMigration databaseMigration = initializeDatabaseMigration(reporter);
     setupJDBCConnection(databaseMigration, parameters);
@@ -327,8 +324,7 @@ public class SIARDController {
 
       if (importModule instanceof JDBCImportModule) {
         JDBCImportModule jdbcImportModule = (JDBCImportModule) importModule;
-        schemaInformation = jdbcImportModule
-          .getSchemaInformation(parameters.getJdbcParameters().isShouldCountRows());
+        schemaInformation = jdbcImportModule.getSchemaInformation(parameters.getJdbcParameters().isShouldCountRows());
         jdbcImportModule.closeConnection();
       }
     } catch (ModuleException e) {
@@ -527,7 +523,8 @@ public class SIARDController {
     }
   }
 
-  public static ViewerMetadata updateMetadataInformation(String databaseUUID, String siardPath, SIARDUpdateParameters parameters) throws GenericException {
+  public static ViewerMetadata updateMetadataInformation(String databaseUUID, String siardPath,
+    SIARDUpdateParameters parameters) throws GenericException {
 
     Path reporterPath = ViewerConfiguration.getInstance().getReportPath(databaseUUID).toAbsolutePath();
     ViewerMetadata metadata = parameters.getMetadata();
@@ -623,8 +620,8 @@ public class SIARDController {
     return valid;
   }
 
-  public static void updateSIARDValidatorIndicators(String databaseUUID, String passed, String ok, String failed, String errors, String warnings,
-    String skipped) {
+  public static void updateSIARDValidatorIndicators(String databaseUUID, String passed, String ok, String failed,
+    String errors, String warnings, String skipped) {
     final DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
     solrManager.updateSIARDValidationIndicators(databaseUUID, passed, ok, errors, failed, warnings, skipped);
   }
@@ -635,40 +632,37 @@ public class SIARDController {
 
   }
 
-  public static boolean deleteAll(String databaseUUID) {
+  public static boolean deleteAll(String databaseUUID)
+    throws NotFoundException, GenericException, RequestNotValidException {
     final DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
-    try {
-      ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
 
-      if (System.getProperty("env", "server").equals(ViewerConstants.SERVER)) {
-        String siardPath = database.getPath();
-        if (StringUtils.isNotBlank(siardPath) && Paths.get(siardPath).toFile().exists()) {
-          deleteSIARDFileFromPath(siardPath, databaseUUID);
-        }
+    ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
+
+    if (System.getProperty("env", "server").equals(ViewerConstants.SERVER)) {
+      String siardPath = database.getPath();
+      if (StringUtils.isNotBlank(siardPath) && Paths.get(siardPath).toFile().exists()) {
+        deleteSIARDFileFromPath(siardPath, databaseUUID);
       }
-
-      String reportPath = database.getValidatorReportPath();
-      if (StringUtils.isNotBlank(reportPath) && Paths.get(reportPath).toFile().exists()) {
-        deleteValidatorReportFileFromPath(reportPath, databaseUUID);
-      }
-
-      if (database.getStatus().equals(ViewerDatabaseStatus.AVAILABLE)
-        || database.getStatus().equals(ViewerDatabaseStatus.ERROR)) {
-        final String collectionName = SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + databaseUUID;
-        if (SolrClientFactory.get().deleteCollection(collectionName)) {
-          Filter savedSearchFilter = new Filter(new SimpleFilterParameter(SOLR_SEARCHES_DATABASE_UUID, databaseUUID));
-          SolrUtils.delete(ViewerFactory.getSolrClient(), SolrDefaultCollectionRegistry.get(SavedSearch.class),
-            savedSearchFilter);
-
-          ViewerFactory.getSolrManager().markDatabaseCollection(databaseUUID, ViewerDatabaseStatus.METADATA_ONLY);
-        }
-      }
-      ViewerFactory.getSolrManager().deleteDatabasesCollection(databaseUUID);
-      return true;
-    } catch (NotFoundException | GenericException | RequestNotValidException e) {
-      LOGGER.error("Could not delete SIARD from system", e);
     }
-    return false;
+
+    String reportPath = database.getValidatorReportPath();
+    if (StringUtils.isNotBlank(reportPath) && Paths.get(reportPath).toFile().exists()) {
+      deleteValidatorReportFileFromPath(reportPath, databaseUUID);
+    }
+
+    if (database.getStatus().equals(ViewerDatabaseStatus.AVAILABLE)
+      || database.getStatus().equals(ViewerDatabaseStatus.ERROR)) {
+      final String collectionName = SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + databaseUUID;
+      if (SolrClientFactory.get().deleteCollection(collectionName)) {
+        Filter savedSearchFilter = new Filter(new SimpleFilterParameter(SOLR_SEARCHES_DATABASE_UUID, databaseUUID));
+        SolrUtils.delete(ViewerFactory.getSolrClient(), SolrDefaultCollectionRegistry.get(SavedSearch.class),
+          savedSearchFilter);
+
+        ViewerFactory.getSolrManager().markDatabaseCollection(databaseUUID, ViewerDatabaseStatus.METADATA_ONLY);
+      }
+    }
+    ViewerFactory.getSolrManager().deleteDatabasesCollection(databaseUUID);
+    return true;
   }
 
   public static void deleteSIARDFileFromPath(String siardPath, String databaseUUID) throws GenericException {

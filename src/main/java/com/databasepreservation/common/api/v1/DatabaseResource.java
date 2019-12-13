@@ -10,7 +10,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 
-import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RequestNotValidException;
@@ -34,6 +33,7 @@ import com.databasepreservation.common.client.models.structure.ViewerDatabaseSta
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.services.DatabaseService;
+import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.controller.SIARDController;
 import com.databasepreservation.common.server.index.factory.SolrClientFactory;
@@ -58,7 +58,7 @@ public class DatabaseResource implements DatabaseService {
   }
 
   @Override
-  public ViewerMetadata getSchemaInformation(ConnectionParameters connectionParameters) {
+  public ViewerMetadata getSchemaInformation(ConnectionParameters connectionParameters) throws RESTException {
     try {
       return SIARDController.getDatabaseMetadata(connectionParameters);
     } catch (GenericException e) {
@@ -67,7 +67,8 @@ public class DatabaseResource implements DatabaseService {
   }
 
   @Override
-  public List<List<String>> validateCustomViewQuery(ConnectionParameters parameters, String query) {
+  public List<List<String>> validateCustomViewQuery(ConnectionParameters parameters, String query)
+    throws RESTException {
     try {
       return SIARDController.validateCustomViewQuery(parameters, query);
     } catch (GenericException e) {
@@ -81,35 +82,51 @@ public class DatabaseResource implements DatabaseService {
   }
 
   @Override
-  public IndexResult<ViewerDatabase> findDatabases(FindRequest findRequest, String localeString) {
+  public IndexResult<ViewerDatabase> findDatabases(FindRequest findRequest, String localeString) throws RESTException {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
     User user = UserUtility.getUser(request);
 
     LogEntryState state = LogEntryState.SUCCESS;
 
-    if (UserUtility.userIsAdmin(request)) {
-      try {
-        return ViewerFactory.getSolrManager().find(ViewerDatabase.class, findRequest.filter, findRequest.sorter,
-          findRequest.sublist, findRequest.facets);
-      } catch (GenericException | RequestNotValidException e) {
-        throw new RESTException(e.getMessage());
-      } finally {
-        // register action
-        controllerAssistant.registerAction(user, state);
+    if (ViewerConfiguration.getInstance().getApplicationEnvironment().equals(ViewerConstants.SERVER)) {
+      if (UserUtility.userIsAdmin(request)) {
+        return getViewerDatabaseIndexResult(findRequest, controllerAssistant, user, state);
+      } else {
+        List<String> fieldsToReturn = new ArrayList<>();
+        fieldsToReturn.add(ViewerConstants.INDEX_ID);
+        fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA);
+        return getViewerDatabaseIndexResult(findRequest, fieldsToReturn, controllerAssistant, user, state);
       }
     } else {
-      List<String> fieldsToReturn = new ArrayList<>();
-      fieldsToReturn.add(ViewerConstants.INDEX_ID);
-      fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA);
-      try {
-        return ViewerFactory.getSolrManager().find(ViewerDatabase.class, findRequest.filter, findRequest.sorter,
-          findRequest.sublist, findRequest.facets, fieldsToReturn);
-      } catch (GenericException | RequestNotValidException e) {
-        throw new RESTException(e.getMessage());
-      } finally {
-        // register action
-        controllerAssistant.registerAction(user, state);
-      }
+      return getViewerDatabaseIndexResult(findRequest, controllerAssistant, user, state);
+    }
+  }
+
+  private IndexResult<ViewerDatabase> getViewerDatabaseIndexResult(FindRequest findRequest,
+    ControllerAssistant controllerAssistant, User user, LogEntryState state) {
+    try {
+      return ViewerFactory.getSolrManager().find(ViewerDatabase.class, findRequest.filter, findRequest.sorter,
+        findRequest.sublist, findRequest.facets);
+    } catch (GenericException | RequestNotValidException e) {
+      state = LogEntryState.FAILURE;
+      throw new RESTException(e);
+    } finally {
+      // register action
+      controllerAssistant.registerAction(user, state);
+    }
+  }
+
+  private IndexResult<ViewerDatabase> getViewerDatabaseIndexResult(FindRequest findRequest, List<String> fieldsToReturn,
+    ControllerAssistant controllerAssistant, User user, LogEntryState state) {
+    try {
+      return ViewerFactory.getSolrManager().find(ViewerDatabase.class, findRequest.filter, findRequest.sorter,
+        findRequest.sublist, findRequest.facets, fieldsToReturn);
+    } catch (GenericException | RequestNotValidException e) {
+      state = LogEntryState.FAILURE;
+      throw new RESTException(e);
+    } finally {
+      // register action
+      controllerAssistant.registerAction(user, state);
     }
   }
 
@@ -119,6 +136,8 @@ public class DatabaseResource implements DatabaseService {
     User user = UserUtility.getUser(request);
 
     LogEntryState state = LogEntryState.SUCCESS;
+
+    controllerAssistant.checkRoles(user);
 
     try {
       return ViewerFactory.getSolrManager().retrieve(ViewerDatabase.class, id);
@@ -137,13 +156,13 @@ public class DatabaseResource implements DatabaseService {
     User user = UserUtility.getUser(request);
 
     LogEntryState state = LogEntryState.SUCCESS;
+    controllerAssistant.checkRoles(user);
+
     try {
-      controllerAssistant.checkRoles(user);
       return SIARDController.deleteAll(databaseUUID);
-    } catch (AuthorizationDeniedException e) {
-      // TODO change to other exception and add exception mapper to return a different
-      // response error code
-      throw new RESTException(e.getMessage());
+    } catch (RequestNotValidException | GenericException | NotFoundException e) {
+      state = LogEntryState.FAILURE;
+      throw new RESTException(e);
     } finally {
       // register action
       controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID);
@@ -157,22 +176,21 @@ public class DatabaseResource implements DatabaseService {
 
     LogEntryState state = LogEntryState.SUCCESS;
 
+    controllerAssistant.checkRoles(user);
+
     try {
-      controllerAssistant.checkRoles(user);
       final String collectionName = SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + databaseUUID;
       if (SolrClientFactory.get().deleteCollection(collectionName)) {
         Filter savedSearchFilter = new Filter(new SimpleFilterParameter(SOLR_SEARCHES_DATABASE_UUID, databaseUUID));
         SolrUtils.delete(ViewerFactory.getSolrClient(), SolrDefaultCollectionRegistry.get(SavedSearch.class),
-            savedSearchFilter);
+          savedSearchFilter);
 
         ViewerFactory.getSolrManager().markDatabaseCollection(databaseUUID, ViewerDatabaseStatus.METADATA_ONLY);
         return true;
       }
     } catch (GenericException | RequestNotValidException e) {
-      LOGGER.error("Error trying to remove the collection from Solr", e);
-      return false;
-    } catch (AuthorizationDeniedException e) {
-      e.printStackTrace();
+      state = LogEntryState.FAILURE;
+      throw new RESTException(e);
     } finally {
       // register action
       controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID);
@@ -182,43 +200,47 @@ public class DatabaseResource implements DatabaseService {
 
   //
   @Override
-  public IndexResult<ViewerRow> findRows(String databaseUUID, FindRequest findRequest, String localeString) {
+  public IndexResult<ViewerRow> findRows(String databaseUUID, FindRequest findRequest, String localeString)
+    throws RESTException {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
     User user = UserUtility.getUser(request);
 
     LogEntryState state = LogEntryState.SUCCESS;
 
+    controllerAssistant.checkRoles(user);
+
     try {
-      return ViewerFactory.getSolrManager().findRows(databaseUUID, findRequest.filter, findRequest.sorter, findRequest.sublist, findRequest.facets);
-    } catch (GenericException e) {
+      return ViewerFactory.getSolrManager().findRows(databaseUUID, findRequest.filter, findRequest.sorter,
+        findRequest.sublist, findRequest.facets);
+    } catch (GenericException | RequestNotValidException e) {
       state = LogEntryState.FAILURE;
-      throw new RESTException(e.getMessage());
-    } catch (RequestNotValidException e) {
-      state = LogEntryState.FAILURE;
-      throw new RESTException("Invalid database UUID: " + databaseUUID);
+      throw new RESTException(e);
     } finally {
       // register action
       controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,
-        ViewerConstants.CONTROLLER_FILTER_PARAM, findRequest.filter.toString());
+        ViewerConstants.CONTROLLER_FILTER_PARAM, findRequest.filter.toString(),
+        ViewerConstants.CONTROLLER_SUBLIST_PARAM, findRequest.sublist.toString());
     }
   }
 
   @Override
-  public ViewerRow retrieveRows(String databaseUUID, String rowUUID) {
+  public ViewerRow retrieveRows(String databaseUUID, String rowUUID) throws RESTException {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
     User user = UserUtility.getUser(request);
 
     LogEntryState state = LogEntryState.SUCCESS;
+
+    controllerAssistant.checkRoles(user);
 
     try {
       return ViewerFactory.getSolrManager().retrieveRows(databaseUUID, rowUUID);
     } catch (NotFoundException | GenericException e) {
       state = LogEntryState.FAILURE;
-      throw new RESTException(e.getMessage());
+      throw new RESTException(e);
     } finally {
       // register action
       controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,
-          ViewerConstants.CONTROLLER_ROW_ID_PARAM, rowUUID);
+        ViewerConstants.CONTROLLER_ROW_ID_PARAM, rowUUID);
     }
   }
 }

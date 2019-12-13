@@ -7,13 +7,14 @@
  */
 package com.databasepreservation.common.client.index;
 
-import com.databasepreservation.common.client.index.facets.Facets;
-import com.databasepreservation.common.client.index.sort.Sorter;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.roda.core.data.v2.index.filter.Filter;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.databasepreservation.common.client.index.facets.Facets;
+import com.databasepreservation.common.client.index.sort.Sorter;
 
 /**
  * A request to a find operation.

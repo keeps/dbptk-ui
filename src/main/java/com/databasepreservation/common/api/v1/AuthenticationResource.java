@@ -42,7 +42,7 @@ public class AuthenticationResource  implements AuthenticationService {
   }
 
   @Override
-  public User login(String username, String password) {
+  public User login(String username, String password) throws RESTException {
     try {
       User user = UserLoginController.login(username, password, request);
       LOGGER.debug("Logged user {}", user);

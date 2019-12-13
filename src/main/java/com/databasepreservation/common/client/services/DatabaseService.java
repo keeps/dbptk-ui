@@ -1,21 +1,7 @@
 package com.databasepreservation.common.client.services;
 
-import com.databasepreservation.common.client.models.ProgressData;
-import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.common.DefaultMethodCallback;
-import com.databasepreservation.common.client.index.FindRequest;
-import com.databasepreservation.common.client.index.IndexResult;
-import com.databasepreservation.common.client.models.structure.ViewerDatabase;
-import com.databasepreservation.common.client.models.structure.ViewerMetadata;
-import com.databasepreservation.common.client.models.structure.ViewerRow;
-import com.databasepreservation.common.client.models.parameters.ConnectionParameters;
-import com.google.gwt.core.client.GWT;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import org.fusesource.restygwt.client.DirectRestService;
-import org.fusesource.restygwt.client.MethodCallback;
-import org.fusesource.restygwt.client.REST;
-import org.roda.core.data.exceptions.AuthorizationDeniedException;
+import java.util.List;
+import java.util.function.Consumer;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -25,8 +11,24 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import java.util.List;
-import java.util.function.Consumer;
+
+import org.fusesource.restygwt.client.DirectRestService;
+import org.fusesource.restygwt.client.MethodCallback;
+import org.fusesource.restygwt.client.REST;
+
+import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.common.DefaultMethodCallback;
+import com.databasepreservation.common.client.index.FindRequest;
+import com.databasepreservation.common.client.index.IndexResult;
+import com.databasepreservation.common.client.models.ProgressData;
+import com.databasepreservation.common.client.models.parameters.ConnectionParameters;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.structure.ViewerMetadata;
+import com.databasepreservation.common.client.models.structure.ViewerRow;
+import com.google.gwt.core.client.GWT;
+
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>

@@ -6,9 +6,9 @@ package com.databasepreservation.common.client.common.lists;
 
 import com.databasepreservation.common.client.index.IsIndexed;
 import com.databasepreservation.common.client.ClientLogger;
-import com.databasepreservation.common.client.common.roda.select.SelectedItems;
-import com.databasepreservation.common.client.common.roda.select.SelectedItemsFilter;
-import com.databasepreservation.common.client.common.roda.select.SelectedItemsList;
+import com.databasepreservation.common.client.index.select.SelectedItems;
+import com.databasepreservation.common.client.index.select.SelectedItemsFilter;
+import com.databasepreservation.common.client.index.select.SelectedItemsList;
 import com.databasepreservation.common.client.index.sort.SortParameter;
 import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.widgets.Alert;

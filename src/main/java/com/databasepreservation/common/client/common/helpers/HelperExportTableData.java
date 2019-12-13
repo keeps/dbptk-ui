@@ -10,6 +10,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.RadioButton;
 import com.google.gwt.user.client.ui.TextBox;
+
 import config.i18n.client.ClientMessages;
 
 /**
@@ -24,12 +25,14 @@ public class HelperExportTableData {
   private CheckBox checkBoxExportLOBs;
   private boolean isZipHelper;
   private final boolean singleRow;
+  private String defaultZipFilename;
 
   public HelperExportTableData(ViewerTable table, boolean singleRow) {
     this.singleRow = singleRow;
     this.filenameTextBox = new TextBox();
     this.zipFilenameTextBox = new TextBox();
-    zipFilenameTextBox.setText(table.getSchemaName() + "_" + table.getName() + ViewerConstants.ZIP_EXTENSION);
+    this.defaultZipFilename = table.getSchemaName() + "_" + table.getName() + ViewerConstants.ZIP_EXTENSION;
+    zipFilenameTextBox.setText(defaultZipFilename);
     filenameTextBox.setText(table.getSchemaName() + "_" + table.getName() + ViewerConstants.CSV_EXTENSION);
   }
 
@@ -99,8 +102,10 @@ public class HelperExportTableData {
     panel.add(wrapHelperText(genericFieldExportLOBs, messages.csvExportDialogHelpTextForLOBs()));
     checkBoxExportLOBs.addValueChangeHandler(event -> {
       if (!event.getValue()) {
+        zipFilenameTextBox.setText(null);
         panel.remove(panel.getWidgetCount()-1);
       } else {
+        zipFilenameTextBox.setText(defaultZipFilename);
         panel.add(wrapHelperText(genericFieldZipFilename, messages.csvExportDialogHelpTextForZipFilename()));
       }
     });

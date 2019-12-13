@@ -3,6 +3,7 @@ package com.databasepreservation.common.api.v1;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
 
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.roda.core.data.exceptions.GenericException;
@@ -41,8 +42,6 @@ public class SIARDResource implements SIARDService {
     try {
       controllerAssistant.checkRoles(UserUtility.getUser(request));
       return SIARDController.loadFromLocal(path, databaseUUID);
-    } catch (AuthorizationDeniedException e) {
-      throw new RESTException(e.getMessage());
     } catch (GenericException e) {
       throw new RESTException(e.getMessage());
     }
@@ -58,9 +57,7 @@ public class SIARDResource implements SIARDService {
       controllerAssistant.checkRoles(UserUtility.getUser(request));
       return SIARDController.loadMetadataFromLocal(path);
     } catch (GenericException e) {
-      throw new RESTException(e.getMessage());
-    } catch (AuthorizationDeniedException e) {
-      throw new RESTException(e.getMessage());
+      throw new RESTException(e);
     } finally {
       // register action
       controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_SIARD_PATH_PARAM, path);
@@ -77,8 +74,6 @@ public class SIARDResource implements SIARDService {
       controllerAssistant.checkRoles(UserUtility.getUser(request));
       return SIARDController.loadMetadataFromLocal(databaseUUID, path);
     } catch (GenericException e) {
-      throw new RESTException(e.getMessage());
-    } catch (AuthorizationDeniedException e) {
       throw new RESTException(e.getMessage());
     } finally {
       // register action
@@ -142,8 +137,6 @@ public class SIARDResource implements SIARDService {
       return SIARDController.updateMetadataInformation(databaseUUID, path, parameters);
     } catch (GenericException e) {
       throw new RESTException(e.getMessage());
-    } catch (AuthorizationDeniedException e) {
-      throw new RESTException(e.getMessage());
     } finally {
       // register action
       controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,
@@ -163,9 +156,7 @@ public class SIARDResource implements SIARDService {
       return SIARDController.validateSIARD(databaseUUID, SIARDPath, validationReportPath, allowedTypePath,
         skipAdditionalChecks);
     } catch (GenericException e) {
-      throw new RESTException(e.getMessage());
-    } catch (AuthorizationDeniedException e) {
-      throw new RESTException(e.getMessage());
+      throw new RESTException(e);
     } finally {
       // register action
       controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,
@@ -190,7 +181,7 @@ public class SIARDResource implements SIARDService {
   }
 
   @Override
-  public void deleteSIARDFile(String databaseUUID, String path) {
+  public void deleteSIARDFile(String databaseUUID, String path) throws RESTException {
     final ControllerAssistant controllerAssistant = new ControllerAssistant() {};
     final User user = UserUtility.getUser(request);
 
@@ -199,9 +190,7 @@ public class SIARDResource implements SIARDService {
       controllerAssistant.checkRoles(UserUtility.getUser(request));
       SIARDController.deleteSIARDFileFromPath(path, databaseUUID);
     } catch (GenericException e) {
-      throw new RESTException(e.getMessage());
-    } catch (AuthorizationDeniedException e) {
-      e.printStackTrace();
+      throw new RESTException(e);
     } finally {
       // register action
       controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,
@@ -210,7 +199,7 @@ public class SIARDResource implements SIARDService {
   }
 
   @Override
-  public void deleteSIARDValidatorReportFile(String databaseUUID, String path) {
+  public void deleteSIARDValidatorReportFile(String databaseUUID, String path) throws RESTException {
     final ControllerAssistant controllerAssistant = new ControllerAssistant() {};
     final User user = UserUtility.getUser(request);
 
@@ -221,8 +210,6 @@ public class SIARDResource implements SIARDService {
       SIARDController.deleteValidatorReportFileFromPath(path, databaseUUID);
     } catch (GenericException e) {
       throw new RESTException(e.getMessage());
-    } catch (AuthorizationDeniedException e) {
-      e.printStackTrace();
     } finally {
       // register action
       controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,

@@ -20,7 +20,7 @@ import javax.ws.rs.Path;
 public class ModulesResource implements ModulesService {
 
   @Override
-  public DBPTKModule getImportDBPTKModules() {
+  public DBPTKModule getImportDBPTKModules() throws RESTException {
     try {
       return SIARDController.getDatabaseImportModules();
     } catch (GenericException e) {
@@ -29,7 +29,7 @@ public class ModulesResource implements ModulesService {
   }
 
   @Override
-  public DBPTKModule getExportDBPTKModules() {
+  public DBPTKModule getExportDBPTKModules() throws RESTException {
     try {
       return SIARDController.getDatabaseExportModules();
     } catch (GenericException e) {
@@ -38,7 +38,7 @@ public class ModulesResource implements ModulesService {
   }
 
   @Override
-  public DBPTKModule getSIARDExportModule(String moduleName) {
+  public DBPTKModule getSIARDExportModule(String moduleName) throws RESTException {
     try {
       return SIARDController.getSIARDExportModule(moduleName);
     } catch (GenericException e) {
@@ -47,7 +47,7 @@ public class ModulesResource implements ModulesService {
   }
 
   @Override
-  public DBPTKModule getSIARDExportModules() {
+  public DBPTKModule getSIARDExportModules() throws RESTException {
     try {
       return SIARDController.getSIARDExportModules();
     } catch (GenericException e) {

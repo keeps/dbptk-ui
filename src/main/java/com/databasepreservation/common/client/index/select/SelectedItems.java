@@ -5,15 +5,15 @@
  *
  * https://github.com/keeps/roda
  */
-package com.databasepreservation.common.client.common.roda.select;
+package com.databasepreservation.common.client.index.select;
+
+import java.io.Serializable;
 
 import com.databasepreservation.common.client.index.IsIndexed;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-
-import java.io.Serializable;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")

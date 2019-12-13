@@ -47,7 +47,7 @@ public class SIARDManagerPage extends ContentPanel {
   private ValidationNavigationPanel validationNavigationPanel = null;
   private BrowseNavigationPanel browseNavigationPanel = null;
   private Boolean populationFieldsCompleted = false;
-  private boolean firstAttachment = true;
+  private boolean initialized = false;
 
   @UiField
   LoadingDiv loading;
@@ -107,8 +107,12 @@ public class SIARDManagerPage extends ContentPanel {
   @Override
   protected void onAttach() {
     super.onAttach();
-    if (database != null && populationFieldsCompleted) {
-      refreshInstance(database.getUuid());
+    if (!initialized) {
+      initialized = true;
+    } else {
+      if (database != null && populationFieldsCompleted) {
+        refreshInstance(database.getUuid());
+      }
     }
   }
 
@@ -123,7 +127,7 @@ public class SIARDManagerPage extends ContentPanel {
       validationNavigationPanel.update(database);
 
       List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forSIARDMainPage(databaseUUID,
-          database.getMetadata().getName());
+        database.getMetadata().getName());
       BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
 
       loading.setVisible(false);
@@ -141,12 +145,12 @@ public class SIARDManagerPage extends ContentPanel {
         || ViewerDatabaseStatus.ERROR.equals(database.getStatus())
         || ViewerDatabaseStatus.METADATA_ONLY.equals(database.getStatus())) {
         SafeHtml message = messages.SIARDHomePageTextForDeleteAllFromServer();
-        if(ApplicationType.getType().equals(ViewerConstants.DESKTOP)){
+        if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
           message = messages.SIARDHomePageTextForDeleteAllFromDesktop();
         }
-        CommonDialogs.showConfirmDialog(messages.SIARDHomePageDialogTitleForDelete(),
-          message, messages.basicActionCancel(), messages.basicActionConfirm(),
-          CommonDialogs.Level.DANGER, "500px", new DefaultAsyncCallback<Boolean>() {
+        CommonDialogs.showConfirmDialog(messages.SIARDHomePageDialogTitleForDelete(), message,
+          messages.basicActionCancel(), messages.basicActionConfirm(), CommonDialogs.Level.DANGER, "500px",
+          new DefaultAsyncCallback<Boolean>() {
             @Override
             public void onSuccess(Boolean result) {
               if (Boolean.TRUE.equals(result)) {
@@ -155,7 +159,8 @@ public class SIARDManagerPage extends ContentPanel {
             }
           });
       } else if (ViewerDatabaseStatus.INGESTING.equals(database.getStatus())) {
-        Dialogs.showInformationDialog(messages.SIARDManagerPageInformationDialogTitle(), messages.SIARDManagerPageTextForWaitForFinishing(), messages.basicActionClose(), "btn btn-link");
+        Dialogs.showInformationDialog(messages.SIARDManagerPageInformationDialogTitle(),
+          messages.SIARDManagerPageTextForWaitForFinishing(), messages.basicActionClose(), "btn btn-link");
       }
     });
   }

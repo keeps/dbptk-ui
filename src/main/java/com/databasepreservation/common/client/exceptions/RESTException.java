@@ -1,78 +1,54 @@
 package com.databasepreservation.common.client.exceptions;
 
+import org.roda.core.data.exceptions.AlreadyExistsException;
+import org.roda.core.data.exceptions.AuthorizationDeniedException;
+import org.roda.core.data.exceptions.NotFoundException;
+
+import com.google.gwt.http.client.Response;
+
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 public class RESTException extends RuntimeException {
-  /**
-   * Constructs a new runtime exception with {@code null} as its
-   * detail message.  The cause is not initialized, and may subsequently be
-   * initialized by a call to {@link #initCause}.
-   */
+
+  private int status = Response.SC_INTERNAL_SERVER_ERROR;
+
   public RESTException() {
   }
 
-  /**
-   * Constructs a new runtime exception with the specified detail message.
-   * The cause is not initialized, and may subsequently be initialized by a
-   * call to {@link #initCause}.
-   *
-   * @param message the detail message. The detail message is saved for
-   *                later retrieval by the {@link #getMessage()} method.
-   */
   public RESTException(String message) {
     super(message);
   }
 
-  /**
-   * Constructs a new runtime exception with the specified detail message and
-   * cause.  <p>Note that the detail message associated with
-   * {@code cause} is <i>not</i> automatically incorporated in
-   * this runtime exception's detail message.
-   *
-   * @param message the detail message (which is saved for later retrieval
-   *                by the {@link #getMessage()} method).
-   * @param cause   the cause (which is saved for later retrieval by the
-   *                {@link #getCause()} method).  (A <tt>null</tt> value is
-   *                permitted, and indicates that the cause is nonexistent or
-   *                unknown.)
-   * @since 1.4
-   */
-  public RESTException(String message, Throwable cause) {
-    super(message, cause);
+  public RESTException(String message, int status) {
+    super(message);
+    this.status = status;
   }
 
-  /**
-   * Constructs a new runtime exception with the specified cause and a
-   * detail message of <tt>(cause==null ? null : cause.toString())</tt>
-   * (which typically contains the class and detail message of
-   * <tt>cause</tt>).  This constructor is useful for runtime exceptions
-   * that are little more than wrappers for other throwables.
-   *
-   * @param cause the cause (which is saved for later retrieval by the
-   *              {@link #getCause()} method).  (A <tt>null</tt> value is
-   *              permitted, and indicates that the cause is nonexistent or
-   *              unknown.)
-   * @since 1.4
-   */
   public RESTException(Throwable cause) {
-    super(cause);
+    super(cause.getMessage());
+    if (cause instanceof AuthorizationDeniedException) {
+      this.status = Response.SC_UNAUTHORIZED;
+    } else if (cause instanceof NotFoundException) {
+      this.status = Response.SC_NOT_FOUND;
+    } else if (cause instanceof AlreadyExistsException) {
+      this.status = Response.SC_CONFLICT;
+    }
   }
 
-  /**
-   * Constructs a new runtime exception with the specified detail
-   * message, cause, suppression enabled or disabled, and writable
-   * stack trace enabled or disabled.
-   *
-   * @param message            the detail message.
-   * @param cause              the cause.  (A {@code null} value is permitted,
-   *                           and indicates that the cause is nonexistent or unknown.)
-   * @param enableSuppression  whether or not suppression is enabled
-   *                           or disabled
-   * @param writableStackTrace whether or not the stack trace should
-   *                           be writable
-   * @since 1.7
-   */
+  public RESTException(Throwable cause, int status) {
+    super(cause.getMessage());
+    this.status = status;
+  }
+
+  public int getStatus() {
+    return status;
+  }
+
+  public void setStatus(int status) {
+    this.status = status;
+  }
+
   public RESTException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
     super(message, cause, enableSuppression, writableStackTrace);
   }

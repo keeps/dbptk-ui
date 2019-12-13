@@ -1,16 +1,22 @@
 package com.databasepreservation.common.client.services;
 
-import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.common.DefaultMethodCallback;
-import com.google.gwt.core.client.GWT;
+import java.util.function.Consumer;
+
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+
 import org.fusesource.restygwt.client.DirectRestService;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.fusesource.restygwt.client.REST;
 import org.roda.core.data.v2.user.User;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import java.util.function.Consumer;
+import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.common.DefaultMethodCallback;
+import com.google.gwt.core.client.GWT;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>

@@ -5,13 +5,13 @@
  *
  * https://github.com/keeps/roda
  */
-package com.databasepreservation.common.client.common.roda.select;
-
-import com.databasepreservation.common.client.index.IsIndexed;
+package com.databasepreservation.common.client.index.select;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import com.databasepreservation.common.client.index.IsIndexed;
 
 public class SelectedItemsList<T extends IsIndexed> implements SelectedItems<T> {
 
@@ -82,11 +82,8 @@ public class SelectedItemsList<T extends IsIndexed> implements SelectedItems<T> 
       return false;
     SelectedItemsList other = (SelectedItemsList) obj;
     if (ids == null) {
-      if (other.ids != null)
-        return false;
-    } else if (!ids.equals(other.ids))
-      return false;
-    return true;
+      return other.ids == null;
+    } else return ids.equals(other.ids);
   }
 
   @Override

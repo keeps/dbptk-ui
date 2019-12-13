@@ -5,10 +5,11 @@
  * <p>
  * https://github.com/keeps/roda
  */
-package com.databasepreservation.common.client.common.roda.select;
+package com.databasepreservation.common.client.index.select;
+
+import org.roda.core.data.v2.index.filter.Filter;
 
 import com.databasepreservation.common.client.index.IsIndexed;
-import org.roda.core.data.v2.index.filter.Filter;
 
 public class SelectedItemsFilter<T extends IsIndexed> implements SelectedItems<T> {
 

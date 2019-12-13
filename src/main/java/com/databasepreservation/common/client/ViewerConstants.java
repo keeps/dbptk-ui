@@ -23,6 +23,7 @@ public class ViewerConstants {
   public static final String ENDPOINT_SIARD = "/" + ViewerConstants.API_SERVLET + ViewerConstants.API_V1_SIARD_RESOURCE;
   public static final String ENDPOINT_CONTEXT = "/" + ViewerConstants.API_SERVLET + ViewerConstants.API_V1_CONTEXT_RESOURCE;
   public static final String ENDPOINT_DATABASE = "/" + ViewerConstants.API_SERVLET + ViewerConstants.API_V1_DATABASE_RESOURCE;
+  public static final String ENDPOINT_EXPORT = "/" + ViewerConstants.API_SERVLET + ViewerConstants.API_V1_EXPORT_RESOURCE;
   public static final String ENDPOINT_SEARCH = "/" + ViewerConstants.API_SERVLET + ViewerConstants.API_V1_SEARCH_RESOURCE;
   public static final String ENDPOINT_AUTHENTICATION = "/" + ViewerConstants.API_SERVLET + ViewerConstants.API_V1_AUTHENTICATION_RESOURCE;
   public static final String ENDPOINT_CLIENT_LOGGER = "/" + ViewerConstants.API_SERVLET + ViewerConstants.API_V1_CLIENT_LOGGER_RESOURCE;
@@ -243,6 +244,7 @@ public class ViewerConstants {
   public static final String API_PATH_PARAM_TABLE_UUID = "tableUUID";
   public static final String API_QUERY_PARAM_FIELDS = "fl";
   public static final String API_QUERY_PARAM_FILTER = "f";
+  public static final String API_QUERY_PARAM_EXPORT = "e";
   public static final String API_QUERY_PARAM_SORTER = "s";
   public static final String API_QUERY_PARAM_SUBLIST = "sl";
   public static final String API_QUERY_PARAM_FACETS = "facets";
@@ -389,8 +391,11 @@ public class ViewerConstants {
   public static final String CONTROLLER_SIARD_PATH_PARAM = "siard-path";
   public static final String CONTROLLER_REPORT_PATH_PARAM = "path";
   public static final String CONTROLLER_DATABASE_ID_PARAM = "databaseUUID";
+  public static final String CONTROLLER_TABLE_ID_PARAM = "tableUUID";
   public static final String CONTROLLER_ROW_ID_PARAM = "rowUUID";
   public static final String CONTROLLER_FILTER_PARAM = "filter";
+  public static final String CONTROLLER_EXPORT_PARAM = "export";
+  public static final String CONTROLLER_SUBLIST_PARAM = "sublist";
   public static final String CONTROLLER_SKIP_ADDITIONAL_CHECKS_PARAM = "additional-checks";
 
   /**

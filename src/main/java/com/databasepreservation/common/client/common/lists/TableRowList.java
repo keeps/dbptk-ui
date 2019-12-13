@@ -1,26 +1,41 @@
 package com.databasepreservation.common.client.common.lists;
 
+import static com.databasepreservation.common.client.models.structure.ViewerType.dbTypes.BINARY;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.fusesource.restygwt.client.MethodCallback;
+import org.roda.core.data.v2.common.Pair;
+import org.roda.core.data.v2.index.filter.Filter;
+import org.roda.core.data.v2.index.sublist.Sublist;
+
+import com.databasepreservation.common.client.ClientLogger;
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.common.DefaultAsyncCallback;
+import com.databasepreservation.common.client.common.dialogs.Dialogs;
+import com.databasepreservation.common.client.common.helpers.HelperExportTableData;
+import com.databasepreservation.common.client.common.utils.CommonClientUtils;
+import com.databasepreservation.common.client.common.utils.ExportResourcesUtils;
+import com.databasepreservation.common.client.index.ExportRequest;
+import com.databasepreservation.common.client.index.FindRequest;
+import com.databasepreservation.common.client.index.IndexResult;
+import com.databasepreservation.common.client.index.facets.Facets;
 import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.models.structure.ViewerType;
-import com.databasepreservation.common.client.ClientLogger;
-import com.databasepreservation.common.client.common.DefaultAsyncCallback;
-import com.databasepreservation.common.client.common.dialogs.Dialogs;
-import com.databasepreservation.common.client.common.helpers.HelperExportTableData;
-import com.databasepreservation.common.client.common.utils.CommonClientUtils;
-import com.databasepreservation.common.client.common.utils.UriQueryUtils;
+import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.tools.FilterUtils;
-import com.databasepreservation.common.client.tools.ViewerJsonUtils;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.databasepreservation.common.client.widgets.Alert;
-import com.databasepreservation.common.client.index.FindRequest;
-import com.databasepreservation.common.client.index.IndexResult;
-import com.databasepreservation.common.client.index.facets.Facets;
-import com.databasepreservation.common.client.services.DatabaseService;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.shared.GWT;
@@ -34,21 +49,8 @@ import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.view.client.CellPreviewEvent;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
+
 import config.i18n.client.ClientMessages;
-import org.fusesource.restygwt.client.MethodCallback;
-import org.roda.core.data.v2.common.Pair;
-import org.roda.core.data.v2.index.filter.Filter;
-import org.roda.core.data.v2.index.sublist.Sublist;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-import static com.databasepreservation.common.client.models.structure.ViewerType.dbTypes.BINARY;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -67,7 +69,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
   private ViewerTable viewerTable;
 
   public TableRowList(ViewerDatabase database, ViewerTable table, Filter filter, Facets facets, String summary,
-                      boolean selectable, boolean exportable) {
+    boolean selectable, boolean exportable) {
     super(filter, false, facets, summary, selectable, exportable, new Pair<>(database, table));
     this.viewerTable = table;
   }
@@ -247,15 +249,16 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
 
     GWT.log("Filter: " + filter);
 
-    FindRequest findRequest = new FindRequest(ViewerDatabase.class.getName(), filter, currentSorter, sublist, getFacets());
+    FindRequest findRequest = new FindRequest(ViewerDatabase.class.getName(), filter, currentSorter, sublist,
+      getFacets());
 
-    DatabaseService.Util.call(callback).findRows(getObject().getFirst().getUuid(), findRequest, LocaleInfo.getCurrentLocale().getLocaleName());
+    DatabaseService.Util.call(callback).findRows(getObject().getFirst().getUuid(), findRequest,
+      LocaleInfo.getCurrentLocale().getLocaleName());
   }
 
   @Override
   protected void onLoad() {
     super.onLoad();
-    setFilter(FilterUtils.filterByTable(getFilter(), getObject().getSecond().getId()));
     this.getSelectionModel().clear();
   }
 
@@ -271,8 +274,8 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
       }
     }
 
-    Dialogs.showCSVSetupDialog(messages.csvExportDialogTitle(), helperExportTableData.getWidget(buildZipHelper), messages.basicActionCancel(),
-      messages.basicActionConfirm(), new DefaultAsyncCallback<Boolean>() {
+    Dialogs.showCSVSetupDialog(messages.csvExportDialogTitle(), helperExportTableData.getWidget(buildZipHelper),
+      messages.basicActionCancel(), messages.basicActionConfirm(), new DefaultAsyncCallback<Boolean>() {
 
         @Override
         public void onSuccess(Boolean result) {
@@ -284,6 +287,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
             if (helperExportTableData.isZipHelper()) {
               boolean exportLOBs = helperExportTableData.exportLobs();
               String zipFilename = helperExportTableData.getZipFileName();
+              GWT.log("Export all: " + exportLOBs);
               Window.Location.assign(getExportURL(zipFilename, filename, exportAll, exportDescription, exportLOBs));
             } else {
               Window.Location.assign(getExportURL(filename, exportAll, exportDescription));
@@ -311,29 +315,23 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
 
   private void addColumn(ViewerColumn viewerColumn, Column<ViewerRow, ?> displayColumn) {
     if (ViewerStringUtils.isNotBlank(viewerColumn.getDescription())) {
-      SafeHtmlBuilder spanTitle = CommonClientUtils.constructSpan(viewerColumn.getDisplayName(), viewerColumn.getDescription(), "column-description-block");
-      SafeHtmlBuilder spanDescription = CommonClientUtils.constructSpan(viewerColumn.getDescription(), viewerColumn.getDescription(), "column-description-block column-description");
-      addColumn(displayColumn, CommonClientUtils.wrapOnDiv(Arrays.asList(spanTitle, spanDescription)), true, TextAlign.LEFT, 10);
+      SafeHtmlBuilder spanTitle = CommonClientUtils.constructSpan(viewerColumn.getDisplayName(),
+        viewerColumn.getDescription(), "column-description-block");
+      SafeHtmlBuilder spanDescription = CommonClientUtils.constructSpan(viewerColumn.getDescription(),
+        viewerColumn.getDescription(), "column-description-block column-description");
+      addColumn(displayColumn, CommonClientUtils.wrapOnDiv(Arrays.asList(spanTitle, spanDescription)), true,
+        TextAlign.LEFT, 10);
     } else {
-      SafeHtmlBuilder spanTitle = CommonClientUtils.constructSpan(viewerColumn.getDisplayName(), viewerColumn.getDescription(), "column-description-block");
+      SafeHtmlBuilder spanTitle = CommonClientUtils.constructSpan(viewerColumn.getDisplayName(),
+        viewerColumn.getDescription(), "column-description-block");
       addColumn(displayColumn, spanTitle.toSafeHtml(), true, TextAlign.LEFT, 10);
     }
   }
 
-  private String getExportURL(String zipFilename, String filename, boolean exportAll, boolean description, boolean exportLobs) {
+  private String getExportURL(String zipFilename, String filename, boolean exportAll, boolean description,
+    boolean exportLobs) {
     ViewerDatabase database = getObject().getFirst();
     ViewerTable table = getObject().getSecond();
-
-    // builds something like
-    // http://hostname:port/api/v1/exports/csv/databaseUUID?
-    StringBuilder urlBuilder = new StringBuilder();
-    String base = com.google.gwt.core.client.GWT.getHostPageBaseURL();
-    String servlet = ViewerConstants.API_SERVLET;
-    String resource = ViewerConstants.API_V1_EXPORT_RESOURCE;
-    String method = "/csv/";
-    String databaseUUID = database.getUuid();
-    String queryStart = "?";
-    urlBuilder.append(base).append(servlet).append(resource).append(method).append(databaseUUID).append(queryStart);
 
     // prepare parameter: field list
     List<String> solrColumns = new ArrayList<>();
@@ -349,50 +347,19 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
       }
     }
 
-    // add parameter: field list
-    String paramFieldList = ViewerJsonUtils.getStringListMapper().write(solrColumns);
-    urlBuilder.append(ViewerConstants.API_QUERY_PARAM_FIELDS).append("=").append(UriQueryUtils.encodeQuery(paramFieldList))
-        .append("&");
+    Sublist sublist;
 
-    // add parameter: filter
-    String paramFilter = ViewerJsonUtils.getFilterMapper().write(getFilter());
-    GWT.log("FILTER: " + paramFilter);
-    urlBuilder.append(ViewerConstants.API_QUERY_PARAM_FILTER).append("=").append(UriQueryUtils.encodeQuery(paramFilter))
-        .append("&");
-
-    // add parameter: subList
-    String paramSubList;
     if (!exportAll) {
-      paramSubList = ViewerJsonUtils.getSubListMapper().write(currentSubList);
-      urlBuilder.append(ViewerConstants.API_QUERY_PARAM_SUBLIST).append("=").append(UriQueryUtils.encodeQuery(paramSubList))
-          .append("&");
-      GWT.log("SUBLIST: " + paramSubList);
+      sublist = currentSubList;
+    } else {
+      sublist = null;
     }
 
-    // add parameter: sorter
-    String paramSorter = ViewerJsonUtils.getSorterMapper().write(currentSorter);
-    urlBuilder.append(ViewerConstants.API_QUERY_PARAM_SORTER).append("=").append(UriQueryUtils.encodeQuery(paramSorter))
-        .append("&");
+    FindRequest findRequest = new FindRequest(ViewerRow.class.getName(), getFilter(), currentSorter, sublist,
+      Facets.NONE, false, null, solrColumns);
+    ExportRequest exportRequest = new ExportRequest(filename, zipFilename, description, exportLobs);
 
-    GWT.log("SORTER: " + currentSorter);
-
-    urlBuilder.append(ViewerConstants.API_PATH_PARAM_FILENAME).append("=").append(UriQueryUtils.encodeQuery(filename))
-        .append("&");
-
-    if (exportLobs) {
-      urlBuilder.append(ViewerConstants.API_PATH_PARAM_ZIP_FILENAME).append("=").append(UriQueryUtils.encodeQuery(zipFilename))
-          .append("&");
-    }
-
-    urlBuilder.append(ViewerConstants.API_PATH_PARAM_EXPORT_DESCRIPTION).append("=").append(description).append("&");
-
-    urlBuilder.append(ViewerConstants.API_PATH_PARAM_EXPORT_LOBS).append("=").append(exportLobs).append("&");
-
-    urlBuilder.append(ViewerConstants.API_PATH_PARAM_TABLE_UUID).append("=").append(table.getUUID());
-
-    GWT.log(urlBuilder.toString());
-
-    return urlBuilder.toString();
+    return ExportResourcesUtils.getExportURL(database.getUuid(), table.getUUID(), findRequest, exportRequest);
   }
 
   private String getExportURL(String filename, boolean exportAll, boolean description) {

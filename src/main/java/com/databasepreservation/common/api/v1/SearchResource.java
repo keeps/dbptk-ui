@@ -71,7 +71,7 @@ public class SearchResource implements SearchService {
   }
 
   @Override
-  public IndexResult<SavedSearch> findSavedSearches(String databaseUUID, FindRequest findRequest, String localeString) {
+  public IndexResult<SavedSearch> findSavedSearches(String databaseUUID, FindRequest findRequest, String localeString) throws RESTException {
     try {
       UserUtility.Authorization.checkFilteringPermission(request, databaseUUID, findRequest.filter,
         SavedSearch.class);
@@ -88,7 +88,7 @@ public class SearchResource implements SearchService {
   }
 
   @Override
-  public SavedSearch retrieveSavedSearch(String databaseUUID, String savedSearchUUID) {
+  public SavedSearch retrieveSavedSearch(String databaseUUID, String savedSearchUUID) throws RESTException {
     try {
       SavedSearch result = ViewerFactory.getSolrManager().retrieve(SavedSearch.class, savedSearchUUID);
       UserUtility.Authorization.checkRetrievalPermission(request, databaseUUID, SavedSearch.class, result);
@@ -118,7 +118,7 @@ public class SearchResource implements SearchService {
   }
 
   @Override
-  public void deleteSearch(String databaseUUID, String savedSearchUUID) {
+  public void deleteSearch(String databaseUUID, String savedSearchUUID) throws RESTException {
     // get the saved search
     try {
       SavedSearch savedSearch = ViewerFactory.getSolrManager().retrieve(SavedSearch.class, savedSearchUUID);

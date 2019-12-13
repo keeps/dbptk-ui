@@ -1,19 +1,6 @@
 package com.databasepreservation.common.client.services;
 
-import com.databasepreservation.common.api.v1.ExportsResource;
-import com.databasepreservation.common.client.models.ConnectionResponse;
-import com.databasepreservation.common.client.models.DBPTKModule;
-import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.common.DefaultMethodCallback;
-import com.databasepreservation.common.client.exceptions.RESTException;
-import com.databasepreservation.common.client.models.parameters.ConnectionParameters;
-import com.google.gwt.core.client.GWT;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import org.fusesource.restygwt.client.DirectRestService;
-import org.fusesource.restygwt.client.MethodCallback;
-import org.fusesource.restygwt.client.REST;
+import java.util.function.Consumer;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -22,14 +9,27 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import java.util.function.Consumer;
+
+import org.fusesource.restygwt.client.DirectRestService;
+import org.fusesource.restygwt.client.MethodCallback;
+import org.fusesource.restygwt.client.REST;
+
+import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.common.DefaultMethodCallback;
+import com.databasepreservation.common.client.exceptions.RESTException;
+import com.databasepreservation.common.client.models.ConnectionResponse;
+import com.databasepreservation.common.client.models.DBPTKModule;
+import com.databasepreservation.common.client.models.parameters.ConnectionParameters;
+import com.google.gwt.core.client.GWT;
+
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 
 @Path(".." + ViewerConstants.ENDPOINT_MODULES)
-@Api(value = ExportsResource.SWAGGER_ENDPOINT)
 public interface ModulesService extends DirectRestService {
 
   class Util {

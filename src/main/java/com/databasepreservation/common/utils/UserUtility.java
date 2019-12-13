@@ -139,10 +139,13 @@ public class UserUtility {
   public static User getUser(final HttpServletRequest request, final boolean returnGuestIfNoUserInSession) {
     User user = (User) request.getSession().getAttribute(RODA_USER_NAME);
     if (user == null) {
-      user = returnGuestIfNoUserInSession ? getGuest() : null;
+      if (returnGuestIfNoUserInSession) {
+        user = getGuest(request);
+        request.getSession().setAttribute(RODA_USER_NAME, user);
+      }
     } else {
       if (user.isGuest()) {
-        user = getGuest();
+        user = getGuest(request);
       }
     }
     return user;
@@ -177,8 +180,10 @@ public class UserUtility {
   /**
    * Retrieves guest used
    */
-  public static User getGuest() {
-    return new User("guest", "guest", true);
+  public static User getGuest(final HttpServletRequest request) {
+    User user = new User("guest", "guest", true);
+    user.setIpAddress(request.getRemoteAddr());
+    return user;
   }
 
   private static boolean userCanAccessDatabase(final HttpServletRequest request, User user, String databaseUUID)
@@ -204,7 +209,7 @@ public class UserUtility {
   private static boolean userIsAdmin(User user) {
     final List<String> rolesToCheck = ViewerConfiguration.getInstance()
       .getViewerConfigurationAsList(ViewerConfiguration.PROPERTY_AUTHORIZATION_ADMINISTRATORS);
-    return (rolesToCheck.isEmpty() && !Sets.intersection(user.getAllRoles(), new HashSet<>(rolesToCheck)).isEmpty());
+    return (!rolesToCheck.isEmpty() && !Sets.intersection(user.getAllRoles(), new HashSet<>(rolesToCheck)).isEmpty());
   }
 
   // private static boolean userIsAdmin(User user) {

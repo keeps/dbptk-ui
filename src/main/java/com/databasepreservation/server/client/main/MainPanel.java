@@ -1,5 +1,10 @@
 package com.databasepreservation.server.client.main;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.databasepreservation.common.client.common.ContentPanel;
 import com.databasepreservation.common.client.common.RightPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
@@ -53,12 +58,8 @@ import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import config.i18n.client.ClientMessages;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import config.i18n.client.ClientMessages;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -131,7 +132,7 @@ public class MainPanel extends Composite {
     List<String> currentHistoryPath = HistoryManager.getCurrentHistoryPath();
     List<BreadcrumbItem> breadcrumbItemList = new ArrayList<>();
 
-    reSetHeader(currentHistoryPath);
+    // reSetHeader(currentHistoryPath);
     if (currentHistoryPath.isEmpty()) {
       // #
       HistoryManager.gotoHome();

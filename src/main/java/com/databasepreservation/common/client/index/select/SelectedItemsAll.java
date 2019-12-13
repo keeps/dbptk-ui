@@ -5,7 +5,7 @@
  *
  * https://github.com/keeps/roda
  */
-package com.databasepreservation.common.client.common.roda.select;
+package com.databasepreservation.common.client.index.select;
 
 import com.databasepreservation.common.client.index.IsIndexed;
 

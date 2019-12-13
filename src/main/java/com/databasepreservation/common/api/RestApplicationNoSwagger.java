@@ -1,6 +1,6 @@
 package com.databasepreservation.common.api;
 
-import com.databasepreservation.common.client.services.ModulesService;
+import com.databasepreservation.common.api.exceptions.RestExceptionMapper;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.moxy.xml.MoxyXmlFeature;
@@ -38,6 +38,7 @@ public class RestApplicationNoSwagger {
       register(ThemeResource.class);
       register(JacksonFeature.class);
       register(MoxyXmlFeature.class);
+      register(RestExceptionMapper.class);
       register(MultiPartFeature.class);
     }
   }
