@@ -386,7 +386,6 @@ public class MainPanel extends Composite {
         // #table/<databaseUUID>/<tableUUID>
         String databaseUUID = currentHistoryPath.get(1);
         final String tableUUID = currentHistoryPath.get(2);
-        GWT.log("HERE::" + databaseUUID);
         setContent(databaseUUID, tableUUID, new RightPanelLoader() {
           @Override
           public RightPanel load(ViewerDatabase database) {

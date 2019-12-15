@@ -3,10 +3,7 @@ package com.databasepreservation.common.server.index;
 import java.io.IOException;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -35,6 +32,8 @@ import com.databasepreservation.common.client.index.IsIndexed;
 import com.databasepreservation.common.client.index.facets.Facets;
 import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.activity.logs.ActivityLogEntry;
+import com.databasepreservation.common.client.models.configuration.denormalize.DenormalizeConfiguration;
+import com.databasepreservation.common.client.models.configuration.denormalize.RelatedTablesConfiguration;
 import com.databasepreservation.common.client.models.structure.*;
 import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.server.index.schema.SolrCollection;
@@ -474,18 +473,30 @@ public class DatabaseRowsSolrManager {
     SolrInputDocument doc = new SolrInputDocument();
     doc.addField(ViewerConstants.INDEX_ID, documentUUID);
     doc.addField("type_t", SolrUtils.asValueUpdate("parent"));
+    Map<String, Map<String, List<String>>> fields = new HashMap<>();
+    Map<String, String> nestedMap = new HashMap<>();
     for (int i = 0; i < nestedDocuments.size(); i++) {
       SolrInputDocument nest = nestedDocuments.get(i);
-      List<String> fields = new ArrayList<>();
+      String parentField = (String) nest.get("parentTableId_t").getValue();
+      String nestKey = (String) nest.get("nestedIndex_t").getValue();
+      nestedMap.put(parentField, nestKey);
+
       for (SolrInputField field : nest) {
-        if (field.getName().equals(ViewerConstants.INDEX_ID)
-          || field.getName().startsWith(ViewerConstants.SOLR_INDEX_ROW_COLUMN_NAME_PREFIX)) {
-          fields.add((String) field.getValue());
+        if (field.getName().startsWith(ViewerConstants.SOLR_INDEX_ROW_COLUMN_NAME_PREFIX)) {
+          fields.computeIfAbsent(parentField, k -> new HashMap<>());
+          fields.get(parentField).computeIfAbsent(field.getName(), k -> new ArrayList<>());
+          fields.get(parentField).get(field.getName()).add((String) field.getValue());
         }
       }
-      doc.addField("nest" + i + "_txt", fields);
     }
-    doc.addField("columns", SolrUtils.asValueUpdate(nestedDocuments));
+
+    for (Map.Entry<String, Map<String, List<String>>> parent : fields.entrySet()) {
+      for (Map.Entry<String, List<String>> col : parent.getValue().entrySet()) {
+        doc.addField(nestedMap.get(parent.getKey()), col.getValue());
+      }
+    }
+
+    doc.addField("nested", SolrUtils.asValueUpdate(nestedDocuments));
 
     try {
       insertDocument(collection.getIndexName(), doc);
@@ -496,7 +507,7 @@ public class DatabaseRowsSolrManager {
   }
 
   public SolrInputDocument createNestedDocument(String nestedDocumentUUID, Map<String, ?> fields,
-    String referencedTableId, String parentTableId) {
+    String referencedTableId, String parentTableId, DenormalizeConfiguration item) {
     SolrInputDocument nestedDoc = new SolrInputDocument();
     nestedDoc.addField(ViewerConstants.INDEX_ID, nestedDocumentUUID);
     nestedDoc.addField("referencedTableId_t", referencedTableId);
@@ -504,6 +515,13 @@ public class DatabaseRowsSolrManager {
     nestedDoc.addField("type_t", "child");
     for (Map.Entry<String, ?> entry : fields.entrySet()) {
       nestedDoc.addField(entry.getKey(), entry.getValue());
+    }
+
+    for (RelatedTablesConfiguration relatedTable : item.getRelatedTables()) {
+      if (relatedTable.getTableID().equals(parentTableId)) {
+        nestedDoc.addField("nestedIndex_t", relatedTable.getDisplaySettings().getNestedSolrName());
+        break;
+      }
     }
 
     return nestedDoc;

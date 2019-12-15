@@ -33,6 +33,8 @@ public class ViewerConstants {
     + ViewerConstants.API_V1_CLIENT_LOGGER_RESOURCE;
   public static final String ENDPOINT_ACTIVITY_LOG = ViewerConstants.API_SEP + ViewerConstants.API_SERVLET
     + ViewerConstants.API_V1_ACTIVITY_LOG_RESOURCE;
+  public static final String ENDPOINT_CONFIGURATION = ViewerConstants.API_SEP + ViewerConstants.API_SERVLET
+    + ViewerConstants.API_V1_CONFIGURATION_RESOURCE;
 
   /*
    * DBVTK CONFIG
@@ -59,6 +61,7 @@ public class ViewerConstants {
   public static final String VIEWER_LOBS_FOLDER = "lobs";
   public static final String VIEWER_UPLOADS_FOLDER = "uploads";
   public static final String VIEWER_SIARD_FILES_FOLDER = "SIARD-files";
+  public static final String VIEWER_DATABASE_CONFIG_FOLDER = "databases";
   public static final String VIEWER_MAPDB_FOLDER = "mapdb";
   public static final String VIEWER_VALIDATIONS_REPORTS_FOLDER = "validations-reports";
   public static final String VIEWER_REPORTS_FOLDER = "reports";
@@ -91,6 +94,7 @@ public class ViewerConstants {
   public static final String SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX = "dbv-database-";
   public static final String SOLR_INDEX_ACTIVITY_LOGS_COLLECTION_NAME = "dbv-activity-logs";
   public static final String SOLR_INDEX_ROW_COLUMN_NAME_PREFIX = "col";
+  public static final String SOLR_INDEX_ROW_NESTED_COLUMN_NAME_PREFIX = "nest";
   public static final String SOLR_INDEX_ROW_LOB_COLUMN_NAME_PREFIX = "lob";
 
   /*
@@ -190,6 +194,7 @@ public class ViewerConstants {
   public static final String SOLR_DYN_LONG = "_l";
   public static final String SOLR_DYN_STRING = "_s";
   public static final String SOLR_DYN_TEXT_GENERAL = "_t";
+  public static final String SOLR_DYN_TEXT_MULTI = "_txt";
 
   // indexed, stored, multiValued
   public static final String SOLR_DYN_BOOLEANS = "_bs";
@@ -303,6 +308,7 @@ public class ViewerConstants {
   public static final String API_V1_AUTHENTICATION_RESOURCE = "/v1/authentication";
   public static final String API_V1_CLIENT_LOGGER_RESOURCE = "/v1/logger";
   public static final String API_V1_ACTIVITY_LOG_RESOURCE = "/v1/activity";
+  public static final String API_V1_CONFIGURATION_RESOURCE = "/v1/configuration";
   /*
    * Search field types from RODA, plus a few new ones
    */
@@ -403,6 +409,7 @@ public class ViewerConstants {
    */
   public static final String CSV_EXTENSION = ".csv";
   public static final String ZIP_EXTENSION = ".zip";
+  public static final String JSON_EXTENSION = ".json";
 
   /*
    * AUTHORIZATION DEFAULT VALUES

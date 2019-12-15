@@ -26,7 +26,6 @@ import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.filter.OnOffFilter;
 import com.databasepreservation.common.server.BrowserServiceImpl;
 import com.databasepreservation.common.server.ViewerConfiguration;
-
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @SpringBootApplication

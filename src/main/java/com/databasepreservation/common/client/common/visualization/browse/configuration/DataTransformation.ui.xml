@@ -1,6 +1,9 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:c='urn:import:com.databasepreservation.common.client.common'>
     <ui:with field='messages' type='config.i18n.client.ClientMessages' />
     <g:FlowPanel addStyleNames="block" ui:field="content" >
+        <c:LoadingDiv visible="false" ui:field="loading"/>
+        <g:FlowPanel ui:field="rootTablePanel" />
     </g:FlowPanel>
 </ui:UiBinder>

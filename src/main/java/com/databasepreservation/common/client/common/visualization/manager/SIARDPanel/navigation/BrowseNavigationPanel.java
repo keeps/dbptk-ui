@@ -13,6 +13,7 @@ import com.databasepreservation.common.client.common.utils.html.LabelUtils;
 import com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.SIARDManagerPage;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
+import com.databasepreservation.common.client.services.ConfigurationService;
 import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.services.SIARDService;
 import com.databasepreservation.common.client.tools.HistoryManager;
@@ -116,13 +117,14 @@ public class BrowseNavigationPanel {
     btnDenormalize.setVisible(false);
 
     btnDenormalize.addClickHandler(event -> {
-      DatabaseService.Util.call((Boolean result) -> {
+      ConfigurationService.Util.call((Boolean result) -> {
         GWT.log("Denormalize:" + result);
+        Dialogs.showInformationDialog("Data transformation", "Successfully transformed data", "OK");
       }).denormalize(database.getUuid());
     });
   }
 
-  private void advancedConfigurationButton(){
+  private void advancedConfigurationButton() {
     btnAdvancedConfiguration = new Button();
     btnAdvancedConfiguration.setText("Configuration");
     btnAdvancedConfiguration.addStyleName("btn btn-link-info");

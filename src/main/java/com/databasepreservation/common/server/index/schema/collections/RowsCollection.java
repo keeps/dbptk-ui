@@ -7,17 +7,9 @@
  */
 package com.databasepreservation.common.server.index.schema.collections;
 
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_ROWS_TABLE_ID;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_ROWS_TABLE_UUID;
+import static com.databasepreservation.common.client.ViewerConstants.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
@@ -35,12 +27,7 @@ import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.server.index.factory.SolrClientFactory;
-import com.databasepreservation.common.server.index.schema.AbstractSolrCollection;
-import com.databasepreservation.common.server.index.schema.CopyField;
-import com.databasepreservation.common.server.index.schema.Field;
-import com.databasepreservation.common.server.index.schema.SolrBootstrapUtils;
-import com.databasepreservation.common.server.index.schema.SolrCollection;
-import com.databasepreservation.common.server.index.schema.SolrRowsCollectionRegistry;
+import com.databasepreservation.common.server.index.schema.*;
 import com.databasepreservation.common.server.index.utils.SolrUtils;
 import com.databasepreservation.utils.JodaUtils;
 
@@ -88,7 +75,7 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
 
   @Override
   public SolrInputDocument toSolrDocument(ViewerRow row) throws ViewerException, RequestNotValidException,
-      GenericException, NotFoundException, AuthorizationDeniedException {
+    GenericException, NotFoundException, AuthorizationDeniedException {
 
     SolrInputDocument doc = super.toSolrDocument(row);
 
@@ -118,9 +105,9 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
       cellFromEntry(columnName, value).ifPresent(viewerCell -> cells.put(columnName, viewerCell));
     }
     viewerRow.setCells(cells);
-    if(doc.get("nested") != null){
+    if (doc.get("nested") != null) {
       SolrDocumentList documentList = (SolrDocumentList) doc.get("nested");
-      for (SolrDocument document: documentList) {
+      for (SolrDocument document : documentList) {
         viewerRow.addNestedRow(fromSolrDocument(document));
       }
     }
@@ -131,7 +118,8 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
   private Optional<ViewerCell> cellFromEntry(String columnName, Object value) {
     Optional<ViewerCell> viewerCell = Optional.empty();
 
-    if (columnName.startsWith(ViewerConstants.SOLR_INDEX_ROW_COLUMN_NAME_PREFIX)) {
+    if (columnName.startsWith(ViewerConstants.SOLR_INDEX_ROW_COLUMN_NAME_PREFIX)
+      || columnName.startsWith(SOLR_INDEX_ROW_NESTED_COLUMN_NAME_PREFIX)) {
       if (value instanceof Date) {
         DateTime date = new DateTime(value, JodaUtils.DEFAULT_CHRONOLOGY);
         if (columnName.endsWith(ViewerConstants.SOLR_DYN_TDATE)) {

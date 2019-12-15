@@ -75,6 +75,8 @@ public class MetadataTableList<C> extends Composite {
     return this.dataProvider.getList();
   }
 
+
+
   private final CellTable<C> createTable(Iterator<C> rowItems, ColumnInfo<C>... columns) {
 
     cellTable = new CellTable<>(Integer.MAX_VALUE, (MyCellTableResources) GWT.create(MyCellTableResources.class));

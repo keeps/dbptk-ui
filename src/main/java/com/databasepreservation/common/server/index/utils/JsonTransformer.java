@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 
 import org.apache.commons.io.IOUtils;
 import org.roda.core.data.common.RodaConstants;
@@ -28,6 +29,18 @@ public class JsonTransformer {
       throw new ViewerException(e);
     }
   }
+
+  public static void writeObjectToFile(Object object, Path file) throws ViewerException {
+      try {
+        String json = getJsonFromObject(object);
+        if (json != null) {
+          Files.write(file, json.getBytes());
+        }
+      } catch (IOException e) {
+        throw new ViewerException("Error writing object, as json, to file", e);
+      }
+  }
+
 
   public static String getJsonFromObject(Object object) throws ViewerException {
     String ret = null;

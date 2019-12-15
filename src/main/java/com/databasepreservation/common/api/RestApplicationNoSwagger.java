@@ -45,6 +45,7 @@ public class RestApplicationNoSwagger {
 
       register(ActivityLogResource.class);
       register(AuthenticationResource.class);
+      register(ConfigurationResource.class);
       register(ContextResource.class);
       register(DatabaseResource.class);
       register(ExportsResource.class);

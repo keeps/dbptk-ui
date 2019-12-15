@@ -3,13 +3,7 @@ package com.databasepreservation.common.client.services;
 import java.util.List;
 import java.util.function.Consumer;
 
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
 import org.fusesource.restygwt.client.DirectRestService;
@@ -76,7 +70,6 @@ public interface DatabaseService extends DirectRestService {
   @ApiOperation(value = "Retrieves the first 5 rows of the query execution", notes = "", response = List.class, responseContainer = "List")
   List<List<String>> validateCustomViewQuery(@ApiParam(value = "connection parameters") ConnectionParameters parameters, @QueryParam("q") String query);
 
-
   @GET
   @Path("/progress/{databaseUUID}")
   @ApiOperation(value = "Retrieves the first 5 rows of the query execution", notes = "", response = ProgressData.class)
@@ -86,8 +79,7 @@ public interface DatabaseService extends DirectRestService {
   @Path("/find")
   @ApiOperation(value = "Finds all the databases", notes = "", response = ViewerDatabase.class, responseContainer = "IndexResult")
   IndexResult<ViewerDatabase> findDatabases(@ApiParam(ViewerConstants.API_QUERY_PARAM_FILTER) FindRequest filter,
-                                            @QueryParam(ViewerConstants.API_QUERY_PARAM_LOCALE) String localeString);
-
+    @QueryParam(ViewerConstants.API_QUERY_PARAM_LOCALE) String localeString);
 
   @GET
   @Path("/find/{databaseUUID}/{id}")
@@ -104,14 +96,12 @@ public interface DatabaseService extends DirectRestService {
   @ApiOperation(value = "Deletes the row data for a specific database", notes = "", response = Boolean.class)
   Boolean deleteSolrData(@PathParam("databaseUUID") String databaseUUID);
 
-
   @POST
   @Path("find/rows/{databaseUUID}")
   @ApiOperation(value = "Find all rows for a specific database", notes = "", response = ViewerRow.class, responseContainer = "IndexResult")
   IndexResult<ViewerRow> findRows(@PathParam("databaseUUID") String databaseUUID,
-                                  @ApiParam(ViewerConstants.API_QUERY_PARAM_FILTER) FindRequest findRequest,
-                                  @QueryParam(ViewerConstants.API_QUERY_PARAM_LOCALE) String localeString);
-
+    @ApiParam(ViewerConstants.API_QUERY_PARAM_FILTER) FindRequest findRequest,
+    @QueryParam(ViewerConstants.API_QUERY_PARAM_LOCALE) String localeString);
 
   @GET
   @Path("find/rows/{databaseUUID}/{rowUUID}")

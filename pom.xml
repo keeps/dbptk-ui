@@ -23,8 +23,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
 
-        <!-- Convenience properties to set versions -->
-        <version.gwt>2.8.2-11262019jetty94</version.gwt>
+        <version.gwt>2.8.2-jetty94</version.gwt>
         <version.dbptk>2.6.4</version.dbptk>
         <version.roda>3.0.2</version.roda>
 

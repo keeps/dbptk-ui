@@ -19,6 +19,7 @@ public class BootstrapCard extends FocusPanel {
   private Label title;
   private HTML titleIcon;
   private Label description;
+  private String uuid;
 
   public BootstrapCard() {
     super();
@@ -43,6 +44,14 @@ public class BootstrapCard extends FocusPanel {
     body.setStyleName("bootstrap-card-body");
     card.add(body);
     add(card);
+  }
+
+  public String getUuid() {
+    return uuid;
+  }
+
+  public void setUuid(String uuid) {
+    this.uuid = uuid;
   }
 
   public void setTitle(String title){

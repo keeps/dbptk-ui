@@ -1,8 +1,8 @@
 package com.databasepreservation.common.transformers;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.common.SolrInputDocument;
@@ -15,15 +15,23 @@ import org.roda.core.data.v2.index.filter.FilterParameter;
 import org.roda.core.data.v2.index.filter.SimpleFilterParameter;
 
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.models.denormalize.*;
+import com.databasepreservation.common.client.models.configuration.collection.CollectionConfiguration;
+import com.databasepreservation.common.client.models.configuration.collection.TableConfiguration;
+import com.databasepreservation.common.client.models.configuration.denormalize.DenormalizeConfiguration;
+import com.databasepreservation.common.client.models.configuration.denormalize.ReferencesConfiguration;
+import com.databasepreservation.common.client.models.configuration.denormalize.RelatedColumnConfiguration;
+import com.databasepreservation.common.client.models.configuration.denormalize.RelatedTablesConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
+import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.tools.FilterUtils;
 import com.databasepreservation.common.filter.solr.TermsFilterParameter;
+import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
 import com.databasepreservation.common.server.index.utils.IterableIndexResult;
+import com.databasepreservation.common.server.index.utils.JsonTransformer;
 import com.databasepreservation.common.server.index.utils.SolrUtils;
 import com.databasepreservation.model.exception.ModuleException;
 import com.databasepreservation.utils.JodaUtils;
@@ -35,43 +43,62 @@ public class DenormalizeSolrStructure {
   private final DatabaseRowsSolrManager solrManager;
   private ViewerDatabase database;
   private String databaseUUID;
-  private DenormalizeListConfiguration configuration;
+  private CollectionConfiguration configuration;
+  private DenormalizeConfiguration denormalizeConfiguration;
 
-  public DenormalizeSolrStructure(String databaseUUID, DenormalizeListConfiguration configuration)
-    throws ModuleException {
+  public DenormalizeSolrStructure(String databaseUUID) throws ModuleException {
     solrManager = ViewerFactory.getSolrManager();
     this.databaseUUID = databaseUUID;
-    this.configuration = configuration;
     try {
       database = solrManager.retrieve(ViewerDatabase.class, this.databaseUUID);
+      denormalize();
     } catch (NotFoundException | GenericException e) {
       throw new ModuleException().withMessage("Cannot retrieved database from solr");
     }
   }
 
   public void denormalize() throws ModuleException {
-    List<DenormalizeConfiguration> denormalizeList = configuration.getDenormalizeList();
-    for (DenormalizeConfiguration item : denormalizeList) {
-      List<ReferencedConfiguration> allRootReferencedColumn = item.getAllRootReferencedColumn(item.getTableUUID());
-      getRowsToDenormalize(item, allRootReferencedColumn);
+    Path configurationPath = ViewerConfiguration.getInstance().getDatabaseConfigPath()
+      .resolve(database.getUuid() + ViewerConstants.JSON_EXTENSION);
+    if (Files.exists(configurationPath)) {
+      configuration = JsonTransformer.readObjectFromFile(configurationPath, CollectionConfiguration.class);
+    } else {
+      throw new ModuleException().withMessage("Configuration file not exist");
     }
+
+    for (TableConfiguration tables : configuration.getTables()) {
+      ViewerTable table = database.getMetadata().getTable(tables.getUuid());
+      java.nio.file.Path denormalizeConfigurationPath = ViewerConfiguration.getInstance().getDatabaseConfigPath()
+          .resolve(database.getUuid() + "." + table.getUUID() + "-CURRENT" + ViewerConstants.JSON_EXTENSION);
+
+      if (Files.exists(denormalizeConfigurationPath)) {
+        denormalizeConfiguration = JsonTransformer.readObjectFromFile(denormalizeConfigurationPath, DenormalizeConfiguration.class);
+      } else {
+        throw new ModuleException().withMessage("Configuration file not exist");
+      }
+      getRowsToDenormalize(denormalizeConfiguration);
+    }
+
     System.out.println("denormalize() ended");
   }
 
-  private void getRowsToDenormalize(DenormalizeConfiguration item,
-    List<ReferencedConfiguration> allRootReferencedColumn) throws ModuleException {
-    Filter filter = FilterUtils.filterByTable(new Filter(), item.getTableUUID());
+  private void getRowsToDenormalize(DenormalizeConfiguration item) throws ModuleException {
+    Filter filter = FilterUtils.filterByTable(new Filter(), item.getTableID());
     List<String> fieldsToReturn = new ArrayList<>();
     fieldsToReturn.add(ViewerConstants.INDEX_ID);
     fieldsToReturn.add(ViewerConstants.SOLR_ROWS_TABLE_ID);
 
-    for(ReferencedConfiguration referenced : allRootReferencedColumn){
-      fieldsToReturn.add(referenced.getSolrName());
-    }
+    for (RelatedTablesConfiguration relatedTableList : item.getRelatedTables()) {
+      if (relatedTableList.getReferencedTableUUID().equals(item.getTableUUID())) {
+        for (ReferencesConfiguration references : relatedTableList.getReferences()) {
+          fieldsToReturn.add(references.getReferencedTable().getSolrName());
+        }
+      }
 
-    IterableIndexResult sourceRows = solrManager.findAllRows(databaseUUID, filter, null, fieldsToReturn);
-    for (ViewerRow row : sourceRows) {
-      buildMainQuery(item, row);
+      IterableIndexResult sourceRows = solrManager.findAllRows(databaseUUID, filter, null, fieldsToReturn);
+      for (ViewerRow row : sourceRows) {
+        buildMainQuery(item, row);
+      }
     }
   }
 
@@ -80,25 +107,33 @@ public class DenormalizeSolrStructure {
     Filter resultingFilter = new Filter();
     List<FilterParameter> filterParameterList = new ArrayList<>();
     List<SolrQuery> queryList = new ArrayList<>();
-    for(Map.Entry<String, ViewerCell> entry : cells.entrySet()){
+    for (Map.Entry<String, ViewerCell> entry : cells.entrySet()) {
       filterParameterList.add(new AndFiltersParameters(
-          Arrays.asList(new SimpleFilterParameter(ViewerConstants.SOLR_ROWS_TABLE_ID, item.getTableUUID()),
-              new SimpleFilterParameter(entry.getKey(), entry.getValue().getValue()))));
+        Arrays.asList(new SimpleFilterParameter(ViewerConstants.SOLR_ROWS_TABLE_ID, item.getTableID()),
+          new SimpleFilterParameter(entry.getKey(), entry.getValue().getValue()))));
     }
     resultingFilter.add(filterParameterList);
 
     List<String> fieldsToReturn = new ArrayList<>();
     fieldsToReturn.add("*");
-    if(item.checkIfTableIsReferenced(item.getTableUUID())){
-      fieldsToReturn.add("nested:[subquery]");
+
+    List<RelatedTablesConfiguration> relatedTableList = item.getRelatedTables();
+    for (RelatedTablesConfiguration relatedTable : relatedTableList) {
+      // if table is referenced by some of related tables, add a sub query
+      if (relatedTable.getReferencedTableUUID().equals(item.getTableUUID())) {
+        fieldsToReturn.add("nested:[subquery]");
+        break;
+      }
     }
+
     try {
       SolrQuery entries = SolrUtils.buildQuery(0, resultingFilter, fieldsToReturn);
       queryList.add(entries);
       Map<String, List<String>> fieldsToDisplay = new HashMap<>();
-      for(ColumnsToIncludeConfiguration table : item.getAllTables()) {
+      for (RelatedTablesConfiguration table : item.getRelatedTables()) {
         queryList.add(buildSubQuery(item, table));
-        if(fieldsToDisplay.get(table.getTableUUID()) == null ){
+
+        if (fieldsToDisplay.get(table.getTableUUID()) == null) {
           fieldsToDisplay.put(table.getTableUUID(), new ArrayList<>());
         }
         fieldsToDisplay.get(table.getTableUUID()).addAll(buildColumnsToDisplay(table));
@@ -109,8 +144,8 @@ public class DenormalizeSolrStructure {
       List<SolrInputDocument> nestedDocument = new ArrayList<>();
 
       if (document.getNestedRowList() != null) {
-        buildNestedDocumentList(document.getNestedRowList(), nestedDocument, document.getUuid(),
-          document.getTableId(), fieldsToDisplay);
+        buildNestedDocumentList(document.getNestedRowList(), nestedDocument, document.getUuid(), document.getTableId(),
+          fieldsToDisplay, item);
       }
 
       if (!nestedDocument.isEmpty()) {
@@ -122,8 +157,38 @@ public class DenormalizeSolrStructure {
     }
   }
 
+  private SolrQuery buildSubQuery(DenormalizeConfiguration item, RelatedTablesConfiguration table)
+    throws RequestNotValidException {
+    Filter resultingFilter = new Filter();
+    List<FilterParameter> filterParameterList = new ArrayList<>();
+
+    for (ReferencesConfiguration reference : table.getReferences()) {
+      String sourceSolrName = reference.getReferencedTable().getSolrName();
+      String referencedSolrName = reference.getSourceTable().getSolrName();
+
+      filterParameterList.add(new AndFiltersParameters(
+        Arrays.asList(new SimpleFilterParameter(ViewerConstants.SOLR_ROWS_TABLE_ID, table.getTableID()),
+          new TermsFilterParameter(referencedSolrName, "$row." + sourceSolrName))));
+    }
+
+    resultingFilter.add(filterParameterList);
+    List<String> fieldsToReturn = new ArrayList<>();
+    fieldsToReturn.add("*");
+
+    List<RelatedTablesConfiguration> relatedTableList = item.getRelatedTables();
+    for (RelatedTablesConfiguration relatedTable : relatedTableList) {
+      // if table is referenced by some of related tables, add a sub query
+      if (relatedTable.getReferencedTableUUID().equals(table.getTableUUID())) {
+        fieldsToReturn.add("nested:[subquery]");
+        break;
+      }
+    }
+
+    return SolrUtils.buildQuery(0, resultingFilter, fieldsToReturn);
+  }
+
   private void buildNestedDocumentList(List<ViewerRow> documentList, List<SolrInputDocument> nestedDocument,
-    String uuid, String referenceTableId, Map<String, List<String>> fieldsToDisplay) {
+                                       String uuid, String referenceTableId, Map<String, List<String>> fieldsToDisplay, DenormalizeConfiguration item) {
     for (ViewerRow document : documentList) {
       Map<String, ViewerCell> cells = document.getCells();
       String nestedUUID = uuid + "." + document.getUuid();
@@ -131,7 +196,7 @@ public class DenormalizeSolrStructure {
       Map<String, Object> fields = new HashMap<>();
       for (Map.Entry<String, ViewerCell> cell : cells.entrySet()) {
         String key = cell.getKey();
-        if(fieldsToDisplay.get(document.getTableId()) != null && !fieldsToDisplay.get(document.getTableId()).contains(key)){
+        if(fieldsToDisplay.get(document.getTableUUID()) != null && !fieldsToDisplay.get(document.getTableUUID()).contains(key)){
           continue;
         }
         ViewerCell cellValue = cell.getValue();
@@ -143,48 +208,23 @@ public class DenormalizeSolrStructure {
       }
       if (!fields.isEmpty()) {
         nestedDocument
-          .add(solrManager.createNestedDocument(nestedUUID, fields, referenceTableId, document.getTableId()));
+          .add(solrManager.createNestedDocument(nestedUUID, fields, referenceTableId, document.getTableId(), item));
       }
 
       if (document.getNestedRowList() == null) {
         return;
       } else {
-        buildNestedDocumentList(document.getNestedRowList(), nestedDocument, nestedUUID, document.getTableId(), fieldsToDisplay);
+        buildNestedDocumentList(document.getNestedRowList(), nestedDocument, nestedUUID, document.getTableId(), fieldsToDisplay, item);
       }
     }
   }
 
-  private SolrQuery buildSubQuery(DenormalizeConfiguration item, ColumnsToIncludeConfiguration table)
-    throws RequestNotValidException {
-    Filter resultingFilter = new Filter();
-    List<FilterParameter> filterParameterList = new ArrayList<>();
 
-    ReferencedConfiguration referenced = table.getForeignKey().getReferenced();
-    ReferenceConfiguration reference = table.getForeignKey().getReference();
-
-    filterParameterList.add(new AndFiltersParameters(
-        Arrays.asList(new SimpleFilterParameter(ViewerConstants.SOLR_ROWS_TABLE_ID, table.getTableUUID()),
-        new TermsFilterParameter(reference.getSolrName(), "$row." + referenced.getSolrName()))));
-
-    resultingFilter.add(filterParameterList);
-
-    List<String> fieldsToReturn = new ArrayList<>();
-    fieldsToReturn.add("*");
-    if(item.checkIfTableIsReferenced(table.getTableUUID())){
-      fieldsToReturn.add("nested:[subquery]");
-    }
-
-    return SolrUtils.buildQuery(item.checkNestedLevel(table.getTableUUID(), 0), resultingFilter, fieldsToReturn);
-  }
-
-  private static List<String> buildColumnsToDisplay(ColumnsToIncludeConfiguration item) {
+  private static List<String> buildColumnsToDisplay(RelatedTablesConfiguration table) {
     List<String> displayColumns = new ArrayList<>();
-    String displayFormat = item.getDisplayFormat();
 
-    Pattern pattern = Pattern.compile("col[0-9]*_\\w");
-    Matcher matcher = pattern.matcher(displayFormat);
-    while (matcher.find()) {
-      displayColumns.add(matcher.group());
+    for(RelatedColumnConfiguration columnsIncluded : table.getColumnsIncluded()){
+      displayColumns.add(columnsIncluded.getSolrName());
     }
 
     return displayColumns;

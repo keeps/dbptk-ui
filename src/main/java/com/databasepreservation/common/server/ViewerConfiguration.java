@@ -111,6 +111,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   private static Path SIARDReportValidationPath;
   private static Path mapDBPath;
   private static Path activityLogsPath;
+  private static Path databaseConfigPath;
 
   // Configuration related objects
   private static CompositeConfiguration viewerConfiguration = null;
@@ -311,6 +312,8 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
 
   public Path getActivityLogsPath() { return activityLogsPath; }
 
+  public Path getDatabaseConfigPath() { return databaseConfigPath;}
+
   /*
    * Specific parts to the configuration used in the DBVTK
    * ____________________________________________________________________________________________________________________
@@ -411,6 +414,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     SIARDReportValidationPath = viewerHomePath.resolve(ViewerConstants.VIEWER_VALIDATIONS_REPORTS_FOLDER);
     mapDBPath = viewerHomePath.resolve(ViewerConstants.VIEWER_MAPDB_FOLDER);
     activityLogsPath = viewerHomePath.resolve(ViewerConstants.VIEWER_ACTIVITY_LOG_FOLDER);
+    databaseConfigPath = configPath.resolve(ViewerConstants.VIEWER_DATABASE_CONFIG_FOLDER);
 
     configureLogback();
 
@@ -449,6 +453,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     essentialDirectories.add(SIARDReportValidationPath);
     essentialDirectories.add(mapDBPath);
     essentialDirectories.add(activityLogsPath);
+    essentialDirectories.add(databaseConfigPath);
 
     for (Path path : essentialDirectories) {
       try {
