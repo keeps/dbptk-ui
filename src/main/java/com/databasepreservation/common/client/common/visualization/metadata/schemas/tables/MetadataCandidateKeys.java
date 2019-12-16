@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.databasepreservation.common.client.common.EditableCell;
-import com.databasepreservation.common.client.common.lists.MetadataTableList;
+import com.databasepreservation.common.client.common.lists.widgets.MetadataTableList;
 import com.databasepreservation.common.client.common.visualization.metadata.MetadataControlPanel;
 import com.databasepreservation.common.client.common.visualization.metadata.MetadataEditPanel;
 import com.databasepreservation.common.client.models.structure.ViewerCandidateKey;

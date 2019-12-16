@@ -8,6 +8,7 @@ import org.glassfish.jersey.servlet.ServletProperties;
 import org.springframework.context.annotation.Configuration;
 
 import com.databasepreservation.common.api.exceptions.RestExceptionMapper;
+import com.databasepreservation.common.api.v1.ActivityLogResource;
 import com.databasepreservation.common.api.v1.AuthenticationResource;
 import com.databasepreservation.common.api.v1.ClientLoggerResource;
 import com.databasepreservation.common.api.v1.ContextResource;
@@ -31,9 +32,10 @@ public class RestApplicationNoSwagger {
      */
     public JerseyConfig() {
       property(ServletProperties.FILTER_FORWARD_ON_404, true);
-      property(ServletProperties.FILTER_CONTEXT_PATH,"/api/*");
-      //packages("com.databasepreservation.visualization.api");
+      property(ServletProperties.FILTER_CONTEXT_PATH, "/api/*");
+      // packages("com.databasepreservation.visualization.api");
 
+      register(ActivityLogResource.class);
       register(AuthenticationResource.class);
       register(ContextResource.class);
       register(DatabaseResource.class);

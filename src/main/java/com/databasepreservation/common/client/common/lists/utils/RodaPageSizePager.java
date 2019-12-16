@@ -5,7 +5,7 @@
  *
  * https://github.com/keeps/roda
  */
-package com.databasepreservation.common.client.common.lists;
+package com.databasepreservation.common.client.common.lists.utils;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;

@@ -1,4 +1,4 @@
-package com.databasepreservation.common.client.common.lists;
+package com.databasepreservation.common.client.common.lists.cells;
 
 import static com.google.gwt.dom.client.BrowserEvents.CLICK;
 import static com.google.gwt.dom.client.BrowserEvents.KEYDOWN;

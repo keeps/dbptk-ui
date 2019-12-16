@@ -10,7 +10,7 @@ package com.databasepreservation.common.client.common.dialogs;
 import com.databasepreservation.common.client.common.NoAsyncCallback;
 import com.databasepreservation.common.client.common.fields.GenericField;
 import com.databasepreservation.common.client.common.helpers.HelperValidator;
-import com.databasepreservation.common.client.common.lists.IndexedColumn;
+import com.databasepreservation.common.client.common.lists.columns.IndexedColumn;
 import com.databasepreservation.common.client.models.ExternalLobsDialogBoxResult;
 import com.databasepreservation.common.client.widgets.MyCellTableResources;
 import com.google.gwt.core.client.GWT;

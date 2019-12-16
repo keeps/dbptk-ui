@@ -1,5 +1,6 @@
-package com.databasepreservation.common.client.common.lists;
+package com.databasepreservation.common.client.common.lists.utils;
 
+import com.databasepreservation.common.client.common.lists.utils.AsyncTableCell;
 import com.databasepreservation.common.client.index.facets.Facets;
 import org.roda.core.data.v2.index.filter.Filter;
 

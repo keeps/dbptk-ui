@@ -15,7 +15,7 @@ import com.databasepreservation.common.client.models.structure.ViewerDatabaseSta
 import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.services.SIARDService;
 import com.databasepreservation.common.client.tools.HistoryManager;
-import com.databasepreservation.common.client.tools.SolrHumanizer;
+import com.databasepreservation.common.client.tools.Humanize;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Button;
 
@@ -137,7 +137,7 @@ public class BrowseNavigationPanel {
     }
 
     browsingStatus = MetadataField.createInstance(messages.SIARDHomePageLabelForBrowseStatus(),
-      SolrHumanizer.humanize(database.getStatus()));
+      Humanize.databaseStatus(database.getStatus()));
     browsingStatus.setCSSMetadata(null, "label-field", "value-field");
 
     browse.addToInfoPanel(browsingStatus);
@@ -147,7 +147,7 @@ public class BrowseNavigationPanel {
 
   public void update(ViewerDatabase database) {
     this.database = database;
-    browsingStatus.updateText(SolrHumanizer.humanize(database.getStatus()));
+    browsingStatus.updateText(Humanize.databaseStatus(database.getStatus()));
 
     if (database.getStatus().equals(ViewerDatabaseStatus.AVAILABLE)
       || database.getStatus().equals(ViewerDatabaseStatus.ERROR)) {

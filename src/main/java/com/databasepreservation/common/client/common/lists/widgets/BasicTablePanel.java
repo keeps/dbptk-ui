@@ -1,12 +1,13 @@
-package com.databasepreservation.common.client.common.lists;
+package com.databasepreservation.common.client.common.lists.widgets;
 
 import java.util.Iterator;
 import java.util.List;
 
 import com.databasepreservation.common.client.widgets.MyCellTableResources;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ScrollEvent;
+import com.google.gwt.event.dom.client.ScrollHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -21,45 +22,34 @@ import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.CellPreviewEvent;
-import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.ListDataProvider;
-import com.google.gwt.view.client.MultiSelectionModel;
+import com.google.gwt.view.client.SingleSelectionModel;
 
 /**
+ * Widget with a title widget, a description or information widget and a
+ * synchronous table (a CellTable using a ListDataProvider).
  *
- * @author Miguel Guimarães <mguimaraes@keep.pt>
+ * @author Bruno Ferreira <bferreira@keep.pt>
  * @param <C>
  *          Type for the column, used by inner class ColumnInfo as Column<C,
  *          SafeHtml>
  */
-public class MultipleSelectionTablePanel<C> extends Composite {
-  interface MultipleSelectionTablePanelUiBinder extends UiBinder<Widget, MultipleSelectionTablePanel> {
+public class BasicTablePanel<C> extends Composite {
+  interface BasicTablePanelUiBinder extends UiBinder<Widget, BasicTablePanel> {
   }
 
-  private static MultipleSelectionTablePanelUiBinder uiBinder = GWT.create(MultipleSelectionTablePanelUiBinder.class);
+  private static BasicTablePanelUiBinder uiBinder = GWT.create(BasicTablePanelUiBinder.class);
 
-  private final MultiSelectionModel<C> selectionModel;
+  private final SingleSelectionModel<C> selectionModel;
   private CellTable<C> display;
   private ScrollPanel displayScroll;
   private SimplePanel displayScrollWrapper;
-  private String height;
 
   public static class ColumnInfo<C> {
     private Column<C, ?> column;
     private double widthEM;
-    private boolean hide;
     private SafeHtml header;
-
-    public ColumnInfo(SafeHtml header, double widthEM, Column<C, ?> column, String... addCellStyleNames) {
-      this.header = header;
-      this.widthEM = widthEM;
-      this.column = column;
-      this.hide = false;
-      for (String addCellStyleName : addCellStyleNames) {
-        this.column.setCellStyleNames(addCellStyleName);
-      }
-    }
+    private boolean hide;
 
     public ColumnInfo(SafeHtml header, boolean hide, double widthEM, Column<C, ?> column, String... addCellStyleNames) {
       this.header = header;
@@ -71,12 +61,12 @@ public class MultipleSelectionTablePanel<C> extends Composite {
       }
     }
 
-    public ColumnInfo(String header, double widthEM, Column<C, ?> column, String... addCellStyleNames) {
-      this(SafeHtmlUtils.fromString(header), widthEM, column, addCellStyleNames);
-    }
-
     public ColumnInfo(String header, boolean hide, double widthEM, Column<C, ?> column, String... addCellStyleNames) {
       this(SafeHtmlUtils.fromString(header), hide, widthEM, column, addCellStyleNames);
+    }
+
+    public ColumnInfo(String header, double widthEM, Column<C, ?> column, String... addCellStyleNames) {
+      this(SafeHtmlUtils.fromString(header), false, widthEM, column, addCellStyleNames);
     }
   }
 
@@ -87,69 +77,38 @@ public class MultipleSelectionTablePanel<C> extends Composite {
   @UiField
   SimplePanel table;
 
-  public MultipleSelectionTablePanel() {
+  @SafeVarargs
+  public BasicTablePanel(Widget headerContent, SafeHtml infoContent, Iterator<C> rowItems, ColumnInfo<C>... columns) {
+    this(headerContent, new HTMLPanel(infoContent), rowItems, columns);
+  }
+
+  @SafeVarargs
+  public BasicTablePanel(Widget headerContent, Widget infoContent, Iterator<C> rowItems, ColumnInfo<C>... columns) {
     initWidget(uiBinder.createAndBindUi(this));
 
-    table.setVisible(false);
-    selectionModel = new MultiSelectionModel<>();
-    this.height = "";
-
-  }
-
-  @Override
-  public void setHeight(String height) {
-    this.height = height;
-  }
-
-  public CellTable<C> getDisplay() {
-    return display;
-  }
-
-  @SafeVarargs
-  public final void createTable(Widget infoContent, Iterator<C> rowItems, ColumnInfo<C>... columns) {
-    createTable(null, infoContent, rowItems, columns);
-  }
-
-  @SafeVarargs
-  public final void createTable(Widget headerContent, SafeHtml infoContent, Iterator<C> rowItems, ColumnInfo<C>... columns) {
-    createTable(headerContent, new HTMLPanel(infoContent), rowItems, columns);
-  }
-
-  @SafeVarargs
-  public final void createTable(Widget headerContent, Widget infoContent, Iterator<C> rowItems, ColumnInfo<C>... columns) {
     // set widgets
-    if (headerContent != null)
-      header.setWidget(headerContent);
+    header.setWidget(headerContent);
     info.setWidget(infoContent);
 
-    display = internalCreateTable(rowItems, columns);
-
-    display.addCellPreviewHandler(event -> {
-      if (event.getColumn() != display.getColumnCount()-1) {
-        if (BrowserEvents.CLICK.equals(event.getNativeEvent().getType())) {
-          final C value = event.getValue();
-          final boolean state = !event.getDisplay().getSelectionModel().isSelected(value);
-          event.getDisplay().getSelectionModel().setSelected(value, state);
-          event.setCanceled(true);
-        }
-      }
-    });
-
-    final CellPreviewEvent.Handler<C> selectionEventManager = DefaultSelectionEventManager.createCheckboxManager();
-    display.setSelectionModel(getSelectionModel(), selectionEventManager);
+    display = createTable(rowItems, columns);
+    selectionModel = new SingleSelectionModel<>();
+    display.setSelectionModel(selectionModel);
 
     displayScroll = new ScrollPanel(display);
     displayScrollWrapper = new SimplePanel(displayScroll);
     displayScrollWrapper.addStyleName("my-asyncdatagrid-display-scroll-wrapper");
-    displayScroll.setSize("100%", height);
     table.setWidget(displayScrollWrapper);
 
-    displayScroll.addScrollHandler(event -> handleScrollChanges());
+    displayScroll.addScrollHandler(new ScrollHandler() {
+      @Override
+      public void onScroll(ScrollEvent event) {
+        handleScrollChanges();
+      }
+    });
     handleScrollChanges();
-    table.setVisible(true);
   }
 
-  public MultipleSelectionTablePanel(Widget headerContent, String infoContent) {
+  public BasicTablePanel(Widget headerContent, String infoContent) {
     initWidget(uiBinder.createAndBindUi(this));
 
     // set widgets
@@ -204,7 +163,7 @@ public class MultipleSelectionTablePanel<C> extends Composite {
   }
 
   @SafeVarargs
-  private final CellTable<C> internalCreateTable(Iterator<C> rowItems, ColumnInfo<C>... columns) {
+  private final CellTable<C> createTable(Iterator<C> rowItems, ColumnInfo<C>... columns) {
     // create table
     CellTable<C> cellTable = new CellTable<>(Integer.MAX_VALUE,
       (MyCellTableResources) GWT.create(MyCellTableResources.class));
@@ -222,7 +181,7 @@ public class MultipleSelectionTablePanel<C> extends Composite {
     }
 
     // fetch rows
-    ListDataProvider<C> dataProvider = new ListDataProvider<>();
+    ListDataProvider<C> dataProvider = new ListDataProvider<C>();
     dataProvider.addDataDisplay(cellTable);
     List<C> list = dataProvider.getList();
     while (rowItems.hasNext()) {
@@ -233,7 +192,17 @@ public class MultipleSelectionTablePanel<C> extends Composite {
     return cellTable;
   }
 
-  public MultiSelectionModel<C> getSelectionModel() {
+  public SingleSelectionModel<C> getSelectionModel() {
     return selectionModel;
+  }
+
+  public CellTable<C> getDisplay() { return display; }
+
+  @Override
+  protected void onLoad() {
+    super.onLoad();
+    if (this.getSelectionModel() != null) {
+      this.getSelectionModel().clear();
+    }
   }
 }

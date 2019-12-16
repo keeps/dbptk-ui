@@ -21,7 +21,6 @@ import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.Humanize;
 import com.databasepreservation.common.client.tools.RestUtils;
-import com.databasepreservation.common.client.tools.SolrHumanizer;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.safehtml.shared.SafeUri;
@@ -77,7 +76,8 @@ public class ValidationNavigationPanel {
                 if (result && validator.getReporterPathFile() != null) {
                   ValidatorPage.clear(database.getUuid());
                   if (validator.getUdtPathFile() == null) {
-                    HistoryManager.gotoSIARDValidator(database.getUuid(), validator.getReporterPathFile(), validator.skipAdditionalChecks());
+                    HistoryManager.gotoSIARDValidator(database.getUuid(), validator.getReporterPathFile(),
+                      validator.skipAdditionalChecks());
                   } else {
                     HistoryManager.gotoSIARDValidator(database.getUuid(), validator.getReporterPathFile(),
                       validator.getUdtPathFile(), validator.skipAdditionalChecks());
@@ -131,8 +131,8 @@ public class ValidationNavigationPanel {
     btnDeleteReport.addClickHandler(event -> {
       if (!database.getValidationStatus().equals(ViewerDatabaseValidationStatus.VALIDATION_RUNNING)) {
         CommonDialogs.showConfirmDialog(messages.SIARDHomePageDialogTitleForDeleteValidationReport(),
-          messages.SIARDHomePageTextForDeleteSIARDReportValidation(), messages.basicActionCancel(), messages.basicActionConfirm(),
-          CommonDialogs.Level.DANGER, "500px", new DefaultAsyncCallback<Boolean>() {
+          messages.SIARDHomePageTextForDeleteSIARDReportValidation(), messages.basicActionCancel(),
+          messages.basicActionConfirm(), CommonDialogs.Level.DANGER, "500px", new DefaultAsyncCallback<Boolean>() {
             @Override
             public void onSuccess(Boolean result) {
               if (result) {
@@ -155,7 +155,7 @@ public class ValidationNavigationPanel {
 
     // Validation Status info
     validationStatus = MetadataField.createInstance(messages.SIARDHomePageLabelForValidationStatus(),
-      SolrHumanizer.humanize(database.getValidationStatus()));
+      Humanize.validationStatus(database.getValidationStatus()));
     validationStatus.setCSSMetadata(null, "label-field", "value-field");
     updateValidationStatus();
 
@@ -194,7 +194,7 @@ public class ValidationNavigationPanel {
   }
 
   private void updateValidationStatus() {
-    validationStatus.updateText(SolrHumanizer.humanize(database.getValidationStatus()));
+    validationStatus.updateText(Humanize.validationStatus(database.getValidationStatus()));
     switch (database.getValidationStatus()) {
       case VALIDATION_SUCCESS:
         validationStatus.getMetadataValue().setStyleName("label-success");
@@ -246,7 +246,7 @@ public class ValidationNavigationPanel {
   }
 
   private void updateRunValidatorButton(String msg) {
-    if(database.getPath() != null && !database.getPath().isEmpty()){
+    if (database.getPath() != null && !database.getPath().isEmpty()) {
       btnRunValidator.setEnabled(true);
       btnRunValidator.setTitle(null);
     } else {
@@ -312,7 +312,7 @@ public class ValidationNavigationPanel {
 
   private void delete() {
     if (!database.getValidationStatus().equals(ViewerDatabaseValidationStatus.VALIDATION_RUNNING)) {
-      SIARDService.Util.call((Void result)->{
+      SIARDService.Util.call((Void result) -> {
         SIARDManagerPage.getInstance(database).refreshInstance(database.getUuid());
       }).deleteSIARDValidatorReportFile(database.getUuid(), database.getValidatorReportPath());
     }

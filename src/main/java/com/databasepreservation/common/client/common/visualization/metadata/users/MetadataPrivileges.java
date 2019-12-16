@@ -2,12 +2,12 @@ package com.databasepreservation.common.client.common.visualization.metadata.use
 
 import java.util.List;
 
-import com.databasepreservation.common.client.models.structure.ViewerPrivilegeStructure;
-import com.databasepreservation.common.client.models.structure.ViewerSIARDBundle;
 import com.databasepreservation.common.client.common.EditableCell;
-import com.databasepreservation.common.client.common.lists.MetadataTableList;
+import com.databasepreservation.common.client.common.lists.widgets.MetadataTableList;
 import com.databasepreservation.common.client.common.visualization.metadata.MetadataControlPanel;
 import com.databasepreservation.common.client.common.visualization.metadata.MetadataEditPanel;
+import com.databasepreservation.common.client.models.structure.ViewerPrivilegeStructure;
+import com.databasepreservation.common.client.models.structure.ViewerSIARDBundle;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.BrowserEvents;

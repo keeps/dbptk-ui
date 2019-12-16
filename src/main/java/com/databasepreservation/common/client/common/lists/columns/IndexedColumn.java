@@ -1,4 +1,4 @@
-package com.databasepreservation.common.client.common.lists;
+package com.databasepreservation.common.client.common.lists.columns;
 
 import java.util.List;
 

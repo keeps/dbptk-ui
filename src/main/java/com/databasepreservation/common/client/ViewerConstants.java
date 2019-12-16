@@ -1,14 +1,10 @@
 package com.databasepreservation.common.client;
 
-import com.databasepreservation.common.client.models.activity.logs.LogEntryParameter;
-import com.databasepreservation.common.client.models.activity.logs.LogEntryState;
-import com.databasepreservation.modules.siard.SIARD2ModuleFactory;
 import org.roda.core.data.common.RodaConstants;
 import org.roda.core.data.v2.index.filter.BasicSearchFilterParameter;
 import org.roda.core.data.v2.index.filter.Filter;
 
-import java.util.Date;
-import java.util.List;
+import com.databasepreservation.modules.siard.SIARD2ModuleFactory;
 
 /**
  * Constants used in Database Viewer
@@ -19,14 +15,24 @@ public class ViewerConstants {
 
   // TODO: remove unused, use better names
 
-  public static final String ENDPOINT_MODULES = "/" + ViewerConstants.API_SERVLET + ViewerConstants.API_V1_MODULES_RESOURCE;
-  public static final String ENDPOINT_SIARD = "/" + ViewerConstants.API_SERVLET + ViewerConstants.API_V1_SIARD_RESOURCE;
-  public static final String ENDPOINT_CONTEXT = "/" + ViewerConstants.API_SERVLET + ViewerConstants.API_V1_CONTEXT_RESOURCE;
-  public static final String ENDPOINT_DATABASE = "/" + ViewerConstants.API_SERVLET + ViewerConstants.API_V1_DATABASE_RESOURCE;
-  public static final String ENDPOINT_EXPORT = "/" + ViewerConstants.API_SERVLET + ViewerConstants.API_V1_EXPORT_RESOURCE;
-  public static final String ENDPOINT_SEARCH = "/" + ViewerConstants.API_SERVLET + ViewerConstants.API_V1_SEARCH_RESOURCE;
-  public static final String ENDPOINT_AUTHENTICATION = "/" + ViewerConstants.API_SERVLET + ViewerConstants.API_V1_AUTHENTICATION_RESOURCE;
-  public static final String ENDPOINT_CLIENT_LOGGER = "/" + ViewerConstants.API_SERVLET + ViewerConstants.API_V1_CLIENT_LOGGER_RESOURCE;
+  public static final String ENDPOINT_MODULES = ViewerConstants.API_SEP + ViewerConstants.API_SERVLET
+    + ViewerConstants.API_V1_MODULES_RESOURCE;
+  public static final String ENDPOINT_SIARD = ViewerConstants.API_SEP + ViewerConstants.API_SERVLET
+    + ViewerConstants.API_V1_SIARD_RESOURCE;
+  public static final String ENDPOINT_CONTEXT = ViewerConstants.API_SEP + ViewerConstants.API_SERVLET
+    + ViewerConstants.API_V1_CONTEXT_RESOURCE;
+  public static final String ENDPOINT_DATABASE = ViewerConstants.API_SEP + ViewerConstants.API_SERVLET
+    + ViewerConstants.API_V1_DATABASE_RESOURCE;
+  public static final String ENDPOINT_EXPORT = ViewerConstants.API_SEP + ViewerConstants.API_SERVLET
+    + ViewerConstants.API_V1_EXPORT_RESOURCE;
+  public static final String ENDPOINT_SEARCH = ViewerConstants.API_SEP + ViewerConstants.API_SERVLET
+    + ViewerConstants.API_V1_SEARCH_RESOURCE;
+  public static final String ENDPOINT_AUTHENTICATION = ViewerConstants.API_SEP + ViewerConstants.API_SERVLET
+    + ViewerConstants.API_V1_AUTHENTICATION_RESOURCE;
+  public static final String ENDPOINT_CLIENT_LOGGER = ViewerConstants.API_SEP + ViewerConstants.API_SERVLET
+    + ViewerConstants.API_V1_CLIENT_LOGGER_RESOURCE;
+  public static final String ENDPOINT_ACTIVITY_LOG = ViewerConstants.API_SEP + ViewerConstants.API_SERVLET
+    + ViewerConstants.API_V1_ACTIVITY_LOG_RESOURCE;
 
   /*
    * DBVTK CONFIG
@@ -278,6 +284,7 @@ public class ViewerConstants {
   public static final String API_V1_SEARCH_RESOURCE = "/v1/search";
   public static final String API_V1_AUTHENTICATION_RESOURCE = "/v1/authentication";
   public static final String API_V1_CLIENT_LOGGER_RESOURCE = "/v1/logger";
+  public static final String API_V1_ACTIVITY_LOG_RESOURCE = "/v1/activity";
   /*
    * Search field types from RODA, plus a few new ones
    */

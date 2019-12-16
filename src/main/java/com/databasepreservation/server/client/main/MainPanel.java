@@ -5,12 +5,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.ContentPanel;
 import com.databasepreservation.common.client.common.RightPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.utils.ContentPanelLoader;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.common.utils.RightPanelLoader;
+import com.databasepreservation.common.client.common.visualization.activity.log.ActivityLogPanel;
 import com.databasepreservation.common.client.common.visualization.browse.ContainerPanel;
 import com.databasepreservation.common.client.common.visualization.browse.DatabasePanel;
 import com.databasepreservation.common.client.common.visualization.browse.DatabaseSearchPanel;
@@ -164,6 +166,13 @@ public class MainPanel extends Composite {
         }
       });
 
+    } else if (HistoryManager.ROUTE_ACTIVITY_LOG.equals(currentHistoryPath.get(0))) {
+      setContent(new ContentPanelLoader() {
+        @Override
+        public ContentPanel load(ViewerDatabase database) {
+          return ActivityLogPanel.createInstance();
+        }
+      });
     } else if (HistoryManager.ROUTE_SIARD_INFO.equals(currentHistoryPath.get(0))) {
       String databaseUUID = currentHistoryPath.get(1);
       setContent(databaseUUID, new ContentPanelLoader() {

@@ -321,4 +321,12 @@ public class BreadcrumbManager {
         + SafeHtmlUtils.htmlEscape(messages.breadcrumbTextForWizardSendToProgressPanel()))));
     return items;
   }
+
+  public static List<BreadcrumbItem> forActivityLog() {
+    List<BreadcrumbItem> items = forManageDatabase();
+    items
+      .add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.ACTIVITY_LOG)
+        + SafeHtmlUtils.htmlEscape(messages.breadcrumbTextForActivityLog()))));
+    return items;
+  }
 }

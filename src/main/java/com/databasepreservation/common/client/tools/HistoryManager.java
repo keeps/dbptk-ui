@@ -52,6 +52,7 @@ public class HistoryManager {
   public static final String ROUTE_TABLE_OPTIONS = "options";
   public static final String ROUTE_TABLE_UPDATE = "update";
   public static final String ROUTE_UPLOAD_SIARD_DATA = "ingest-siard";
+  public static final String ROUTE_ACTIVITY_LOG = "activity-log";
 
   /****************************************************
    * DESKTOP ROUTES
@@ -289,6 +290,11 @@ public class HistoryManager {
     newHistory(params);
   }
 
+  public static void gotoActivityLog() {
+    List<String> params = Collections.singletonList(ROUTE_ACTIVITY_LOG);
+    newHistory(params);
+  }
+
   private static void newHistory(List<String> path) {
     // History.newItem(createHistoryToken(path)
     String hash = createHistoryToken(path);
@@ -349,140 +355,40 @@ public class HistoryManager {
     return createHistoryToken(Arrays.asList(ROUTE_VIEW, database_uuid, viewUUID));
   }
 
-  public static String linkToTableOptions(String database_uuid, String table_uuid) {
-    return createHistoryToken(Arrays.asList(ROUTE_TABLE, database_uuid, table_uuid, ROUTE_TABLE_OPTIONS));
-  }
-
-  public static String linkToDesktopTable(String database_uuid, String table_uuid) {
-    return createHistoryToken(Arrays.asList(ROUTE_DESKTOP_TABLE, database_uuid, table_uuid));
-  }
-
   public static String linkToDesktopMetadataTable(String database_uuid, String table_uuid) {
     return createHistoryToken(Arrays.asList(ROUTE_DESKTOP_METADATA_TABLE, database_uuid, table_uuid));
-  }
-
-  public static String linkToView(String database_uuid, String schema_uuid, String view_uuid) {
-    return createHistoryToken(Arrays.asList(ROUTE_VIEW, database_uuid, schema_uuid, view_uuid));
   }
 
   public static String linTokDesktopMetadataView(String database_uuid, String schema_uuid, String view_uuid) {
     return createHistoryToken(Arrays.asList(ROUTE_DESKTOP_METADATA_VIEW, database_uuid, schema_uuid, view_uuid));
   }
 
-  public static String linkToRoutine(String database_uuid, String schema_uuid, String routine_uuid) {
-    return createHistoryToken(Arrays.asList(ROUTE_ROUTINE, database_uuid, schema_uuid, routine_uuid));
-  }
-
   public static String linkToDesktopMetadataRoutine(String database_uuid, String schema_uuid, String routine_uuid) {
     return createHistoryToken(Arrays.asList(ROUTE_DESKTOP_METADATA_ROUTINE, database_uuid, schema_uuid, routine_uuid));
-  }
-
-  public static String linkToDatabaseList() {
-    return createHistoryToken(Arrays.asList(ROUTE_DATABASE));
   }
 
   public static String linkToDatabase(String database_uuid) {
     return createHistoryToken(Arrays.asList(ROUTE_DATABASE, database_uuid));
   }
 
-  public static String linkToDatabaseDesktop(String database_uuid) {
-    return createHistoryToken(Arrays.asList(ROUTE_DESKTOP_DATABASE, database_uuid));
-  }
-
   public static String linkToDatabaseUsers(String database_uuid) {
     return createHistoryToken(Arrays.asList(ROUTE_DATABASE, database_uuid, ROUTE_DATABASE_USERS));
-  }
-
-  public static String linkToDesktopDatabaseUsers(String database_uuid) {
-    return createHistoryToken(Arrays.asList(ROUTE_DESKTOP_DATABASE, database_uuid, ROUTE_DATABASE_USERS));
   }
 
   public static String linkToDatabaseReport(String database_uuid) {
     return createHistoryToken(Arrays.asList(ROUTE_DATABASE, database_uuid, ROUTE_DATABASE_REPORT));
   }
 
-  public static String linkToDesktopDatabaseReport(String database_uuid) {
-    return createHistoryToken(Arrays.asList(ROUTE_DESKTOP_DATABASE, database_uuid, ROUTE_DATABASE_REPORT));
-  }
-
   public static String linkToDatabaseSearch(String database_uuid) {
     return createHistoryToken(Arrays.asList(ROUTE_DATABASE, database_uuid, ROUTE_DATABASE_SEARCH));
-  }
-
-  public static String linkToDesktopDatabaseSearch(String database_uuid) {
-    return createHistoryToken(Arrays.asList(ROUTE_DESKTOP_DATABASE, database_uuid, ROUTE_DATABASE_SEARCH));
-  }
-
-  public static String linkToSchema(String database_uuid, String schema_uuid) {
-    return createHistoryToken(Arrays.asList(ROUTE_SCHEMA, database_uuid, schema_uuid));
-  }
-
-  public static String linkToDesktopSchema(String database_uuid, String schema_uuid) {
-    return createHistoryToken(Arrays.asList(ROUTE_DESKTOP_SCHEMA, database_uuid, schema_uuid));
-  }
-
-  public static String linkToSchemaStructure(String database_uuid, String schema_uuid) {
-    return createHistoryToken(Arrays.asList(ROUTE_SCHEMA, database_uuid, schema_uuid, ROUTE_SCHEMA_STRUCTURE));
-  }
-
-  public static String linkToDesktopSchemaStructure(String database_uuid, String schema_uuid) {
-    return createHistoryToken(Arrays.asList(ROUTE_DESKTOP_SCHEMA, database_uuid, schema_uuid, ROUTE_SCHEMA_STRUCTURE));
-  }
-
-  public static String linkToSchemaRoutines(String database_uuid, String schema_uuid) {
-    return createHistoryToken(Arrays.asList(ROUTE_SCHEMA, database_uuid, schema_uuid, ROUTE_SCHEMA_ROUTINES));
   }
 
   public static String linkToSchemaRoutines(String database_uuid) {
     return createHistoryToken(Arrays.asList(ROUTE_DATABASE, database_uuid, ROUTE_SCHEMA_ROUTINES));
   }
 
-  public static String linkToDesktopSchemaRoutines(String database_uuid) {
-    return createHistoryToken(Arrays.asList(ROUTE_DESKTOP_SCHEMA, database_uuid, ROUTE_SCHEMA_ROUTINES));
-  }
-
-  public static String linkToSchemaTriggers(String database_uuid, String schema_uuid) {
-    return createHistoryToken(Arrays.asList(ROUTE_SCHEMA, database_uuid, schema_uuid, ROUTE_SCHEMA_TRIGGERS));
-  }
-
-  public static String linkToDesktopSchemaTriggers(String database_uuid, String schema_uuid) {
-    return createHistoryToken(Arrays.asList(ROUTE_DESKTOP_SCHEMA, database_uuid, schema_uuid, ROUTE_SCHEMA_TRIGGERS));
-  }
-
-  public static String linkToSchemaCheckConstraints(String database_uuid, String schema_uuid) {
-    return createHistoryToken(Arrays.asList(ROUTE_SCHEMA, database_uuid, schema_uuid, ROUTE_SCHEMA_CHECK_CONSTRAINTS));
-  }
-
-  public static String linkToDesktopSchemaCheckConstraints(String database_uuid, String schema_uuid) {
-    return createHistoryToken(Arrays.asList(ROUTE_DESKTOP_SCHEMA, database_uuid, schema_uuid, ROUTE_SCHEMA_CHECK_CONSTRAINTS));
-  }
-
-  public static String linkToSchemaViews(String database_uuid, String schema_uuid) {
-    return createHistoryToken(Arrays.asList(ROUTE_SCHEMA, database_uuid, schema_uuid, ROUTE_SCHEMA_VIEWS));
-  }
-
-  public static String linkToDesktopSchemaViews(String database_uuid, String schema_uuid) {
-    return createHistoryToken(Arrays.asList(ROUTE_DESKTOP_SCHEMA, database_uuid, schema_uuid, ROUTE_SCHEMA_VIEWS));
-  }
-
   public static String linkToSavedSearches(String database_uuid) {
     return createHistoryToken(Arrays.asList(ROUTE_SAVED_SEARCHES, database_uuid));
-  }
-
-  public static String linkToDesktopSavedSearches(String database_uuid) {
-    return createHistoryToken(Arrays.asList(ROUTE_DESKTOP_SAVED_SEARCHES, database_uuid));
-  }
-
-  public static String linkToSavedSearch(String database_uuid, String saved_search_uuid) {
-    return createHistoryToken(Arrays.asList(ROUTE_SAVED_SEARCHES, database_uuid, saved_search_uuid));
-  }
-
-  public static String linkToSchemaData(String database_uuid, String schema_uuid) {
-    return createHistoryToken(Arrays.asList(ROUTE_SCHEMA, database_uuid, schema_uuid, ROUTE_SCHEMA_DATA));
-  }
-
-  public static String linkToDesktopSchemaData(String database_uuid, String schema_uuid) {
-    return createHistoryToken(Arrays.asList(ROUTE_DESKTOP_SCHEMA, database_uuid, schema_uuid, ROUTE_SCHEMA_DATA));
   }
 
   public static String linkToForeignKey(String database_uuid, String table_uuid, List<String> solrColumnsAndValues) {
@@ -497,18 +403,6 @@ public class HistoryManager {
 
   public static String linkToDatabaseMetadataUsers(String database_uuid) {
     return createHistoryToken(Arrays.asList(ROUTE_SIARD_EDIT_METADATA, database_uuid, ROUTE_SIARD_EDIT_METADATA_USERS));
-  }
-
-  public static String linkToNewUpload() {
-    return createHistoryToken(Arrays.asList(ROUTE_UPLOADS, ROUTE_UPLOADS_NEW));
-  }
-
-  public static String linkToUpload(String database_uuid) {
-    return createHistoryToken(Arrays.asList(ROUTE_UPLOADS, database_uuid));
-  }
-
-  public static String linkToCreateSIARD() {
-    return createHistoryToken(Collections.singletonList(ROUTE_CREATE_SIARD));
   }
 
   public static String linkToCreateSIARD(String wizardPage, String toSelect) {
@@ -545,10 +439,6 @@ public class HistoryManager {
 
   public static String linkToSendToWizardTableAndColumnsShowERDiagram(String toSelect, String databaseUUID) {
     return createHistoryToken(Arrays.asList(ROUTE_MIGRATE_TO_SIARD, databaseUUID, ROUTE_WIZARD_TABLES_COLUMNS, toSelect));
-  }
-
-  public static String linkToSendtoWizardExportFormat(String database_uuid) {
-    return createHistoryToken(Arrays.asList(ROUTE_SEND_TO_LIVE_DBMS, database_uuid, ROUTE_WIZARD_EXPORT_FORMAT));
   }
 
   public static String linkToSendToWizardDBMSConnection(String databaseUUID, String wizardPage, String moduleName) {

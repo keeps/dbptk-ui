@@ -4,16 +4,31 @@
  */
 package com.databasepreservation.common.client.tools;
 
+import java.util.Date;
+
+import com.databasepreservation.common.client.models.activity.logs.LogEntryState;
+import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
+import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 
-import java.util.Date;
+import config.i18n.client.ClientMessages;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class Humanize {
+  private static final ClientMessages messages = GWT.create(ClientMessages.class);
+
+  public static final long ONE_SECOND = 1000;
+  public static final long SECONDS = 60;
+  public static final long ONE_MINUTE = ONE_SECOND * 60;
+  public static final long MINUTES = 60;
+  public static final long ONE_HOUR = ONE_MINUTE * 60;
+  public static final long HOURS = 24;
+  public static final long ONE_DAY = ONE_HOUR * 24;
 
   public static final String BYTES = "B";
   public static final String KILOBYTES = "KB";
@@ -76,6 +91,86 @@ public class Humanize {
       return normalizedDateFormat.format(parsed);
     } catch (IllegalArgumentException e) {
       return dateTimeString;
+    }
+  }
+
+  public static String formatDateTime(Date date) {
+    DateTimeFormat format = DateTimeFormat.getFormat("yyy-MM-dd HH:mm:ss");
+    return format.format(date);
+  }
+
+  public static String logEntryState(@NotNull LogEntryState state) {
+    switch (state) {
+      case SUCCESS:
+        return messages.activityLogHumanizedTextForSuccess();
+      case FAILURE:
+        return messages.activityLogHumanizedTextForFailure();
+      case UNAUTHORIZED:
+        return messages.activityLogHumanizedTextForUnauthorized();
+      case UNKNOWN:
+      default:
+        return messages.activityLogHumanizedTextForUnknown();
+    }
+  }
+
+  public static String validationStatus(ViewerDatabaseValidationStatus status) {
+    switch (status) {
+      case NOT_VALIDATED:
+        return messages.humanizedTextForSIARDNotValidated();
+      case VALIDATION_SUCCESS:
+        return messages.humanizedTextForSIARDValidationSuccess();
+      case VALIDATION_FAILED:
+        return messages.humanizedTextForSIARDValidationFailed();
+      case VALIDATION_RUNNING:
+        return messages.humanizedTextForSIARDValidationRunning();
+      case ERROR:
+        return messages.alertErrorTitle();
+      default:
+        return "";
+    }
+  }
+
+  public static String databaseStatus(ViewerDatabaseStatus status) {
+    switch (status) {
+      case INGESTING:
+        return messages.humanizedTextForSolrIngesting();
+      case AVAILABLE:
+        return messages.humanizedTextForSolrAvailable();
+      case METADATA_ONLY:
+        return messages.humanizedTextForSolrMetadataOnly();
+      case REMOVING:
+        return messages.humanizedTextForSolrRemoving();
+      case ERROR:
+        return messages.humanizedTextForSolrError();
+      default:
+        return "";
+    }
+  }
+
+  /**
+   * converts time (in milliseconds) to human-readable format "<dd:>hh:mm:ss"
+   */
+  public static String durationMillisToShortDHMS(long duration) {
+    long d = duration;
+    int millis = (int) (d % ONE_SECOND);
+    d /= ONE_SECOND;
+    int seconds = (int) (d % SECONDS);
+    d /= SECONDS;
+    int minutes = (int) (d % MINUTES);
+    d /= MINUTES;
+    int hours = (int) (d % HOURS);
+    int days = (int) (d / HOURS);
+
+    if (days > 0) {
+      return messages.durationDHMSShortDays(days, hours, minutes, seconds);
+    } else if (hours > 0) {
+      return messages.durationDHMSShortHours(hours, minutes, seconds);
+    } else if (minutes > 0) {
+      return messages.durationDHMSShortMinutes(minutes, seconds);
+    } else if (seconds > 0) {
+      return messages.durationDHMSShortSeconds(seconds);
+    } else {
+      return messages.durationDHMSShortMillis(millis);
     }
   }
 }

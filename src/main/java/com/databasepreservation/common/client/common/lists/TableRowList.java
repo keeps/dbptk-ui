@@ -19,6 +19,7 @@ import com.databasepreservation.common.client.ClientLogger;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.helpers.HelperExportTableData;
+import com.databasepreservation.common.client.common.lists.utils.AsyncTableCell;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.utils.ExportResourcesUtils;
 import com.databasepreservation.common.client.index.ExportRequest;

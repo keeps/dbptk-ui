@@ -457,6 +457,24 @@ public interface ClientMessages extends Messages {
 
   String humanizedTextForSolrError();
 
+  String durationDHMSShortDays(int days, int hours, int minutes, int seconds);
+
+  String durationDHMSShortHours(int hours, int minutes, int seconds);
+
+  String durationDHMSShortMinutes(int minutes, int seconds);
+
+  String durationDHMSShortSeconds(int seconds);
+
+  String durationDHMSLongDays(int days, int hours, int minutes, int seconds);
+
+  String durationDHMSLongHours(int hours, int minutes, int seconds);
+
+  String durationDHMSLongMinutes(int minutes, int seconds);
+
+  String durationDHMSLongSeconds(int seconds);
+
+  String durationDHMSShortMillis(int millis);
+
   /********************************************
    * Basic Actions
    ********************************************/
@@ -551,6 +569,8 @@ public interface ClientMessages extends Messages {
   String breadcrumbTextForDesktopDatabaseSavedSearches();
 
   String breadcrumbTextForSIARDIngesting();
+
+  String breadcrumbTextForActivityLog();
 
   /*********************************************
    * Home Page
@@ -1106,4 +1126,31 @@ public interface ClientMessages extends Messages {
   String advancedSearchBooleanValueFalse();
 
   String advancedSearchBooleanValueDefault();
+
+  /********************************************
+   * Activity Log
+   *******************************************/
+  String activityLogMenuText();
+
+  String activityLogTableHeaderForDate();
+
+  String activityLogTableHeaderForComponent();
+
+  String activityLogTableHeaderForMethod();
+
+  String activityLogTableHeaderForUser();
+
+  String activityLogTableHeaderForDuration();
+
+  String activityLogTableHeaderForAddress();
+
+  String activityLogTableHeaderForOutcome();
+
+  String activityLogHumanizedTextForSuccess();
+
+  String activityLogHumanizedTextForFailure();
+
+  String activityLogHumanizedTextForUnauthorized();
+
+  String activityLogHumanizedTextForUnknown();
 }

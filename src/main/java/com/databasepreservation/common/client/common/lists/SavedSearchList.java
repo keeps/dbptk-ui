@@ -1,23 +1,29 @@
 package com.databasepreservation.common.client.common.lists;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import com.databasepreservation.common.client.index.sort.Sorter;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.roda.core.data.v2.index.filter.Filter;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
-import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.ClientLogger;
+import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.common.lists.cells.FontAwesomeActionCell;
+import com.databasepreservation.common.client.common.lists.utils.AsyncTableCell;
 import com.databasepreservation.common.client.common.search.SavedSearch;
-import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
-import com.databasepreservation.common.client.tools.HistoryManager;
-import com.databasepreservation.common.client.widgets.Alert;
 import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.index.facets.Facets;
+import com.databasepreservation.common.client.index.sort.Sorter;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.services.SearchService;
+import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
+import com.databasepreservation.common.client.tools.HistoryManager;
+import com.databasepreservation.common.client.widgets.Alert;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.CompositeCell;
 import com.google.gwt.cell.client.FieldUpdater;

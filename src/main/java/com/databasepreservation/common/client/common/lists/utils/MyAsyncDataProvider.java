@@ -2,11 +2,11 @@
  * The contents of this file are based on those found at https://github.com/keeps/roda
  * and are subject to the license and copyright detailed in https://github.com/keeps/roda
  */
-package com.databasepreservation.common.client.common.lists;
+package com.databasepreservation.common.client.common.lists.utils;
 
 import com.databasepreservation.common.client.common.DefaultMethodCallback;
+import com.databasepreservation.common.client.common.lists.utils.IndexResultDataProvider;
 import com.databasepreservation.common.client.index.IndexResult;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.view.client.AsyncDataProvider;

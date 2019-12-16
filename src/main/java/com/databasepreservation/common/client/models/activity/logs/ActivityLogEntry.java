@@ -1,10 +1,10 @@
 package com.databasepreservation.common.client.models.activity.logs;
 
-import com.databasepreservation.common.client.index.IsIndexed;
-
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+
+import com.databasepreservation.common.client.index.IsIndexed;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>

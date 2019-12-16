@@ -127,6 +127,8 @@ public class ContainerPanel extends Composite {
             menu.addItem(
               FontAwesomeIconManager.loaded(FontAwesomeIconManager.DATABASES, messages.menusidebar_manageDatabases()),
               (Command) HistoryManager::gotoDatabaseList);
+            menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.ACTIVITY_LOG, messages.activityLogMenuText()),
+              (Command) HistoryManager::gotoActivityLog);
           }
         }
       } else {
@@ -135,6 +137,8 @@ public class ContainerPanel extends Composite {
         menu.addItem(
           FontAwesomeIconManager.loaded(FontAwesomeIconManager.DATABASES, messages.menusidebar_manageDatabases()),
           (Command) HistoryManager::gotoDatabaseList);
+        menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.BLOB, messages.activityLogMenuText()),
+          (Command) HistoryManager::gotoActivityLog);
       }
 
       if (!hideMenu) {

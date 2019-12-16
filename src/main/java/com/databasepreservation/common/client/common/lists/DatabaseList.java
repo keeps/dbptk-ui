@@ -1,49 +1,45 @@
 package com.databasepreservation.common.client.common.lists;
 
-import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.common.DefaultAsyncCallback;
-import com.databasepreservation.common.client.common.UserLogin;
-import com.databasepreservation.common.client.index.sort.Sorter;
-import com.databasepreservation.common.client.models.structure.ViewerDatabase;
-import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.fusesource.restygwt.client.MethodCallback;
+import org.roda.core.data.v2.index.filter.Filter;
+import org.roda.core.data.v2.index.sublist.Sublist;
+
 import com.databasepreservation.common.client.ClientLogger;
+import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.common.lists.columns.ButtonColumn;
+import com.databasepreservation.common.client.common.lists.columns.TooltipColumn;
+import com.databasepreservation.common.client.common.lists.utils.BasicAsyncTableCell;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
+import com.databasepreservation.common.client.common.utils.LabelUtils;
+import com.databasepreservation.common.client.index.FindRequest;
+import com.databasepreservation.common.client.index.IndexResult;
+import com.databasepreservation.common.client.index.facets.Facets;
+import com.databasepreservation.common.client.index.sort.Sorter;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.Humanize;
 import com.databasepreservation.common.client.tools.PathUtils;
 import com.databasepreservation.common.client.tools.RestUtils;
-import com.databasepreservation.common.client.tools.SolrHumanizer;
 import com.databasepreservation.common.client.widgets.Alert;
-import com.databasepreservation.common.client.index.FindRequest;
-import com.databasepreservation.common.client.index.IndexResult;
-import com.databasepreservation.common.client.index.facets.Facets;
-import com.databasepreservation.common.client.services.DatabaseService;
-import com.databasepreservation.common.utils.UserUtility;
-import com.google.gwt.cell.client.ButtonCell;
-import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.view.client.DefaultSelectionEventManager;
-import config.i18n.client.ClientMessages;
-import org.fusesource.restygwt.client.MethodCallback;
-import org.roda.core.data.v2.index.filter.Filter;
-import org.roda.core.data.v2.index.sublist.Sublist;
-import org.roda.core.data.v2.user.User;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import config.i18n.client.ClientMessages;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -69,7 +65,7 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
 
     display.setSelectionModel(display.getSelectionModel(), DefaultSelectionEventManager.createBlacklistManager(4,9));
 
-    Column<ViewerDatabase, SafeHtml> nameColumn = new TooltipDatabaseColumn() {
+    Column<ViewerDatabase, SafeHtml> nameColumn = new TooltipColumn<ViewerDatabase>() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
         return database != null && database.getMetadata() != null
@@ -78,7 +74,7 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
       }
     };
 
-    Column<ViewerDatabase, SafeHtml> dbmsColumn = new TooltipDatabaseColumn() {
+    Column<ViewerDatabase, SafeHtml> dbmsColumn = new TooltipColumn<ViewerDatabase>() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
         return database != null && database.getMetadata() != null
@@ -87,7 +83,7 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
       }
     };
 
-    Column<ViewerDatabase, SafeHtml> dataOwnerColumn = new TooltipDatabaseColumn() {
+    Column<ViewerDatabase, SafeHtml> dataOwnerColumn = new TooltipColumn<ViewerDatabase>() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
         return database != null && database.getMetadata() != null
@@ -96,7 +92,7 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
       }
     };
 
-    Column<ViewerDatabase, SafeHtml> archivalDateColumn = new TooltipDatabaseColumn() {
+    Column<ViewerDatabase, SafeHtml> archivalDateColumn = new TooltipColumn<ViewerDatabase>() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
         return database != null && database.getMetadata() != null
@@ -105,7 +101,7 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
       }
     };
 
-    Column<ViewerDatabase, String> locationColumn = new ButtonDatabaseColumn() {
+    Column<ViewerDatabase, String> locationColumn = new ButtonColumn<ViewerDatabase>() {
       @Override
       public String getValue(ViewerDatabase database) {
         return database != null && database.getMetadata() != null ? PathUtils.getFileName(database.getPath())
@@ -121,7 +117,7 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
       }
     });
 
-    Column<ViewerDatabase, SafeHtml> sizeColumn = new TooltipDatabaseColumn() {
+    Column<ViewerDatabase, SafeHtml> sizeColumn = new TooltipColumn<ViewerDatabase>() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
         return database != null ? SafeHtmlUtils.fromString(Humanize.readableFileSize(database.getSize()))
@@ -129,7 +125,7 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
       }
     };
 
-    Column<ViewerDatabase, SafeHtml> versionColumn = new TooltipDatabaseColumn() {
+    Column<ViewerDatabase, SafeHtml> versionColumn = new TooltipColumn<ViewerDatabase>() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
         return database != null ? SafeHtmlUtils.fromString(database.getVersion())
@@ -137,22 +133,22 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
       }
     };
 
-    Column<ViewerDatabase, SafeHtml> validColumn = new ValidDatabaseColumn() {
+    Column<ViewerDatabase, SafeHtml> validColumn = new Column<ViewerDatabase, SafeHtml>(new SafeHtmlCell()) {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
-        return database != null ? SafeHtmlUtils.fromString(SolrHumanizer.humanize(database.getValidationStatus()))
+        return database != null ? LabelUtils.getSIARDValidationStatus(database.getValidationStatus())
           : null;
       }
     };
 
-    Column<ViewerDatabase, SafeHtml> statusColumn = new TooltipDatabaseColumn() {
+    Column<ViewerDatabase, SafeHtml> statusColumn = new TooltipColumn<ViewerDatabase>() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
-        return database != null ? SafeHtmlUtils.fromString(SolrHumanizer.humanize(database.getStatus())) : null;
+        return database != null ? SafeHtmlUtils.fromString(Humanize.databaseStatus(database.getStatus())) : null;
       }
     };
 
-    Column<ViewerDatabase, String> openColumn = new ButtonDatabaseColumn() {
+    Column<ViewerDatabase, String> openColumn = new ButtonColumn<ViewerDatabase>() {
       @Override
       public String getValue(ViewerDatabase object) {
         return messages.basicActionOpen();
@@ -178,14 +174,6 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
 
     Alert alert = new Alert(Alert.MessageAlertType.LIGHT, messages.noItemsToDisplay());
     display.setEmptyTableWidget(alert);
-
-    // define default sorting
-    // display.getColumnSortList().push(new ColumnSortInfo(datesColumn, false));
-    //
-    // datesColumn.setCellStyleNames("nowrap");
-    //
-    // addStyleName("my-collections-table");
-    // emptyInfo.addStyleName("my-collections-empty-info");
   }
 
   private static SafeHtml getBooleanValue(boolean value) {
@@ -199,13 +187,7 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
     Filter filter = getFilter();
 
     Map<Column<ViewerDatabase, ?>, List<String>> columnSortingKeyMap = new HashMap<>();
-    // columnSortingKeyMap.put(nameColumn, Arrays.asList("id"));
-    // columnSortingKeyMap.put(archivalDateColumn,
-    // Arrays.asList("archivalList"));
-
     Sorter sorter = createSorter(columnSortList, columnSortingKeyMap);
-
-    GWT.log("Filter: " + filter);
 
     FindRequest findRequest = new FindRequest(ViewerDatabase.class.getName(), filter, sorter, sublist, getFacets());
 
@@ -215,64 +197,6 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
   @Override
   public void exportClickHandler() {
     // do nothing
-  }
-
-  private abstract static class TooltipDatabaseColumn extends Column<ViewerDatabase, SafeHtml> {
-    public TooltipDatabaseColumn() {
-      super(new SafeHtmlCell());
-    }
-
-    @Override
-    public void render(Cell.Context context, ViewerDatabase object, SafeHtmlBuilder sb) {
-      SafeHtml value = getValue(object);
-      if (value != null) {
-        sb.appendHtmlConstant("<div title=\"" + SafeHtmlUtils.htmlEscape(value.asString()) + "\">");
-        sb.append(value);
-        sb.appendHtmlConstant("</div");
-      }
-    }
-  }
-
-  private abstract static class ButtonDatabaseColumn extends Column<ViewerDatabase, String> {
-    public ButtonDatabaseColumn() {
-      super(new ButtonCell());
-    }
-
-    @Override
-    public void render(Cell.Context context, ViewerDatabase object, SafeHtmlBuilder sb) {
-      String value = getValue(object);
-      sb.appendHtmlConstant("<button class=\"btn btn-link-info\" type=\"button\" tabindex=\"-1\">");
-      if (value != null) {
-        sb.append(SafeHtmlUtils.fromString(value));
-      }
-      sb.appendHtmlConstant("</button>");
-    }
-  }
-
-  private abstract static class ValidDatabaseColumn extends Column<ViewerDatabase, SafeHtml> {
-    public ValidDatabaseColumn() {
-      super(new SafeHtmlCell());
-    }
-
-    @Override
-    public void render(Cell.Context context, ViewerDatabase object, SafeHtmlBuilder sb) {
-      SafeHtml value = getValue(object);
-      if (value != null) {
-        String style = "label-info";
-        if (value.asString().equals(SolrHumanizer.humanize(ViewerDatabaseValidationStatus.VALIDATION_FAILED))) {
-          style = "label-danger";
-        } else if (value.asString().equals(SolrHumanizer.humanize(ViewerDatabaseValidationStatus.ERROR))) {
-          style = "label-danger label-error";
-        } else if (value.asString()
-            .equals(SolrHumanizer.humanize(ViewerDatabaseValidationStatus.VALIDATION_SUCCESS))) {
-          style = "label-success";
-        }
-        sb.appendHtmlConstant(
-          "<div class=\"" + style + "\" title=\"" + SafeHtmlUtils.htmlEscape(value.asString()) + "\">");
-        sb.append(value);
-        sb.appendHtmlConstant("</div");
-      }
-    }
   }
 
   @Override

@@ -1,4 +1,4 @@
-package com.databasepreservation.common.client.common.lists;
+package com.databasepreservation.common.client.common.lists.widgets;
 
 import java.util.Iterator;
 import java.util.List;

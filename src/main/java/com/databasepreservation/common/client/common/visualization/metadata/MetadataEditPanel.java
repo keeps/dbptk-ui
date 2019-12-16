@@ -1,6 +1,6 @@
 package com.databasepreservation.common.client.common.visualization.metadata;
 
-import com.databasepreservation.common.client.common.lists.MetadataTableList;
+import com.databasepreservation.common.client.common.lists.widgets.MetadataTableList;
 import com.google.gwt.user.cellview.client.Column;
 
 /**
