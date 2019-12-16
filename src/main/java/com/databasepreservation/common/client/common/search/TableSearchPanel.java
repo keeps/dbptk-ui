@@ -4,24 +4,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.client.services.SearchService;
 import org.roda.core.data.v2.index.filter.Filter;
 
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.models.structure.ViewerDatabase;
-import com.databasepreservation.common.client.models.structure.ViewerRow;
-import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.lists.TableRowList;
 import com.databasepreservation.common.client.common.utils.ListboxUtils;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.structure.ViewerRow;
+import com.databasepreservation.common.client.models.structure.ViewerTable;
+import com.databasepreservation.common.client.services.SearchService;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.ViewerJsonUtils;
 import com.github.nmorel.gwtjackson.client.exception.JsonDeserializationException;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
-import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -132,8 +130,8 @@ public class TableSearchPanel extends Composite {
 
     GWT.log("initial filter: " + initialFilter.toString());
 
-    searchPanel = new SearchPanel(initialFilter, ViewerConstants.INDEX_SEARCH, messages.searchPlaceholder(),
-      false, true, new DefaultAsyncCallback<Void>() {
+    searchPanel = new SearchPanel(initialFilter, ViewerConstants.INDEX_SEARCH, messages.searchPlaceholder(), false,
+      true, new DefaultAsyncCallback<Void>() {
         @Override
         public void onSuccess(Void result) {
           TableSearchPanel.this.saveQuery();
@@ -189,7 +187,7 @@ public class TableSearchPanel extends Composite {
       TableSearchPanel.this.searchFields.clear();
       for (SearchField searchField : searchFields) {
         ListboxUtils.insertItemByAlphabeticOrder(searchAdvancedFieldOptions, searchField.getLabel(),
-            searchField.getId());
+          searchField.getId());
         TableSearchPanel.this.searchFields.put(searchField.getId(), searchField);
       }
 
@@ -198,8 +196,7 @@ public class TableSearchPanel extends Composite {
   }
 
   public void showSearchAdvancedFieldsPanel() {
-    searchPanel.setVariables(initialFilter, ViewerConstants.INDEX_SEARCH, tableRowList,
-      itemsSearchAdvancedFieldsPanel);
+    searchPanel.setVariables(initialFilter, ViewerConstants.INDEX_SEARCH, tableRowList, itemsSearchAdvancedFieldsPanel);
     searchPanel.setSearchAdvancedFieldOptionsAddVisible(true);
   }
 
@@ -250,22 +247,8 @@ public class TableSearchPanel extends Composite {
       // update search panel and trigger a search
       searchPanel.updateSearchPanel(currentSearchInfo);
 
-      // update checkboxes
-      for (int i = 0; i < itemsSearchAdvancedFieldsPanel.getWidgetCount(); i++) {
-        SearchFieldPanel searchFieldPanel = (SearchFieldPanel) itemsSearchAdvancedFieldsPanel.getWidget(i);
-
-        String columnDisplayName = searchFieldPanel.getSearchField().getLabel();
-        Boolean visibility = currentSearchInfo.getFieldVisibility().get(columnDisplayName);
-        if (visibility == null) {
-          visibility = true;
-        }
-
-        searchFieldPanel.setVisibilityCheckboxValue(visibility, false);
-      }
-
       // show only visible columns
       columnDisplayNameToVisibleState.clear();
-      columnDisplayNameToVisibleState.putAll(currentSearchInfo.getFieldVisibility());
       tableRowList.refreshColumnVisibility();
     }
   }
@@ -276,32 +259,19 @@ public class TableSearchPanel extends Composite {
         final SearchFieldPanel searchFieldPanel = new SearchFieldPanel(columnDisplayNameToVisibleState);
         searchFieldPanel.setSearchAdvancedFields(searchAdvancedFieldOptions);
         searchFieldPanel.setSearchFields(TableSearchPanel.this.searchFields);
-        searchFieldPanel.setVisibilityChangedHandler(new ValueChangeHandler<Boolean>() {
-          @Override
-          public void onValueChange(ValueChangeEvent<Boolean> event) {
-            handleColumnVisibilityChanges(searchFieldPanel, event);
-          }
-        });
+        searchFieldPanel.setVisibilityChangedHandler(event -> handleColumnVisibilityChanges(searchFieldPanel, event));
         addSearchFieldPanel(searchFieldPanel);
         searchFieldPanel.selectSearchField(searchField.getId());
       }
     }
 
-    searchPanel.addSearchAdvancedFieldAddHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        final SearchFieldPanel searchFieldPanel = new SearchFieldPanel(columnDisplayNameToVisibleState);
-        searchFieldPanel.setSearchAdvancedFields(searchAdvancedFieldOptions);
-        searchFieldPanel.setSearchFields(TableSearchPanel.this.searchFields);
-        searchFieldPanel.setVisibilityChangedHandler(new ValueChangeHandler<Boolean>() {
-          @Override
-          public void onValueChange(ValueChangeEvent<Boolean> event) {
-            handleColumnVisibilityChanges(searchFieldPanel, event);
-          }
-        });
-        searchFieldPanel.selectFirstSearchField();
-        addSearchFieldPanel(searchFieldPanel);
-      }
+    searchPanel.addSearchAdvancedFieldAddHandler(event -> {
+      final SearchFieldPanel searchFieldPanel = new SearchFieldPanel(columnDisplayNameToVisibleState);
+      searchFieldPanel.setSearchAdvancedFields(searchAdvancedFieldOptions);
+      searchFieldPanel.setSearchFields(TableSearchPanel.this.searchFields);
+      searchFieldPanel.setVisibilityChangedHandler(event1 -> handleColumnVisibilityChanges(searchFieldPanel, event1));
+      searchFieldPanel.selectFirstSearchField();
+      addSearchFieldPanel(searchFieldPanel);
     });
   }
 
@@ -333,7 +303,6 @@ public class TableSearchPanel extends Composite {
     searchInfo.setCurrentFilter(searchPanel.getCurrentFilter());
     searchInfo.setFields(searchPanel.getAdvancedSearchSearchFields());
     searchInfo.setFieldParameters(searchPanel.getAdvancedSearchFilterParameters());
-    searchInfo.setFieldVisibility(columnDisplayNameToVisibleState);
     return searchInfo;
   }
 
@@ -343,10 +312,11 @@ public class TableSearchPanel extends Composite {
 
   private void saveQuery() {
     SearchInfo currentSearchInfo = createSearchInfo();
-    SearchService.Util.call((String savedSearchUUID)->{
+    SearchService.Util.call((String savedSearchUUID) -> {
       searchPanel.querySavedHandler(true, database, savedSearchUUID);
-    },(String errorMessage)->{
+    }, (String errorMessage) -> {
       searchPanel.querySavedHandler(false, database, null);
-    }).saveSearch( database.getUuid(),  table.getUUID(), table.getName(), messages.searchOnTable(table.getName()), "", currentSearchInfo);
+    }).save(database.getUuid(), table.getUUID(), table.getName(), messages.searchOnTable(table.getName()), "",
+      currentSearchInfo);
   }
 }

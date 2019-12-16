@@ -3,9 +3,7 @@ package com.databasepreservation.common.api.v1;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
 
-import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.RequestNotValidException;
 import org.roda.core.data.v2.user.User;
@@ -38,23 +36,29 @@ public class SIARDResource implements SIARDService {
   @Override
   public String uploadSIARD(String databaseUUID, String path) throws RESTException {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
+    final User user = UserUtility.getUser(request);
 
+    LogEntryState state = LogEntryState.SUCCESS;
+    controllerAssistant.checkRoles(UserUtility.getUser(request));
     try {
-      controllerAssistant.checkRoles(UserUtility.getUser(request));
       return SIARDController.loadFromLocal(path, databaseUUID);
     } catch (GenericException e) {
-      throw new RESTException(e.getMessage());
+      state = LogEntryState.FAILURE;
+      throw new RESTException(e);
+    } finally {
+      // register action
+      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_SIARD_PATH_PARAM, path);
     }
   }
 
   @Override
-  public String uploadMetadataSIARDServer(String path) throws RESTException {
+  public String uploadMetadataSIARDServer(String path) {
     final ControllerAssistant controllerAssistant = new ControllerAssistant() {};
     final User user = UserUtility.getUser(request);
 
     LogEntryState state = LogEntryState.SUCCESS;
+    controllerAssistant.checkRoles(UserUtility.getUser(request));
     try {
-      controllerAssistant.checkRoles(UserUtility.getUser(request));
       return SIARDController.loadMetadataFromLocal(path);
     } catch (GenericException e) {
       throw new RESTException(e);
@@ -65,16 +69,16 @@ public class SIARDResource implements SIARDService {
   }
 
   @Override
-  public String uploadMetadataSIARD(String databaseUUID, String path) throws RESTException {
+  public String uploadMetadataSIARD(String databaseUUID, String path) {
     final ControllerAssistant controllerAssistant = new ControllerAssistant() {};
     final User user = UserUtility.getUser(request);
 
     LogEntryState state = LogEntryState.SUCCESS;
+    controllerAssistant.checkRoles(UserUtility.getUser(request));
     try {
-      controllerAssistant.checkRoles(UserUtility.getUser(request));
       return SIARDController.loadMetadataFromLocal(databaseUUID, path);
     } catch (GenericException e) {
-      throw new RESTException(e.getMessage());
+      throw new RESTException(e);
     } finally {
       // register action
       controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,
@@ -83,60 +87,91 @@ public class SIARDResource implements SIARDService {
   }
 
   @Override
-  public String findSIARDFile(String path) throws RESTException {
+  public String findSIARDFile(String path) {
+    final ControllerAssistant controllerAssistant = new ControllerAssistant() {};
+    final User user = UserUtility.getUser(request);
+
+    LogEntryState state = LogEntryState.SUCCESS;
     try {
       return ViewerFactory.getSolrManager().findSIARDFile(path);
     } catch (GenericException | RequestNotValidException e) {
-      throw new RESTException(e.getMessage());
+      state = LogEntryState.FAILURE;
+      throw new RESTException(e);
+    } finally {
+      // register action
+      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_SIARD_PATH_PARAM, path);
     }
   }
 
   @Override
-  public Boolean createSIARD(String databaseUUID, CreateSIARDParameters parameters) throws RESTException {
+  public Boolean createSIARD(String databaseUUID, CreateSIARDParameters parameters) {
+    final ControllerAssistant controllerAssistant = new ControllerAssistant() {};
+    final User user = UserUtility.getUser(request);
+
+    LogEntryState state = LogEntryState.SUCCESS;
     try {
       return SIARDController.createSIARD(databaseUUID, parameters.getConnectionParameters(),
         parameters.getTableAndColumnsParameters(), parameters.getCustomViewsParameters(),
         parameters.getExportOptionsParameters(), parameters.getMetadataExportOptionsParameters());
     } catch (GenericException e) {
-      throw new RESTException(e.getMessage());
+      state = LogEntryState.FAILURE;
+      throw new RESTException(e);
+    } finally {
+      // register action
+      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID);
     }
   }
 
   @Override
   public Boolean migrateToDBMS(String databaseUUID, String siardVersion, String siardPath,
-    ConnectionParameters connectionParameters) throws RESTException {
+    ConnectionParameters connectionParameters) {
+    final ControllerAssistant controllerAssistant = new ControllerAssistant() {};
+    final User user = UserUtility.getUser(request);
+
+    LogEntryState state = LogEntryState.SUCCESS;
     try {
       return SIARDController.migrateToDBMS(databaseUUID, siardVersion, siardPath, connectionParameters);
     } catch (GenericException e) {
-      throw new RESTException(e.getMessage());
+      state = LogEntryState.FAILURE;
+      throw new RESTException(e);
+    } finally {
+      // register action
+      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID);
     }
   }
 
   @Override
   public Boolean migrateToSIARD(String databaseUUID, String siardVersion, String siardPath,
-    CreateSIARDParameters parameters) throws RESTException {
+    CreateSIARDParameters parameters) {
+    final ControllerAssistant controllerAssistant = new ControllerAssistant() {};
+    final User user = UserUtility.getUser(request);
+
+    LogEntryState state = LogEntryState.SUCCESS;
     try {
       return SIARDController.migrateToSIARD(databaseUUID, siardVersion, siardPath,
         parameters.getTableAndColumnsParameters(), parameters.getExportOptionsParameters(),
         parameters.getMetadataExportOptionsParameters());
     } catch (GenericException e) {
-      throw new RESTException(e.getMessage());
+      state = LogEntryState.FAILURE;
+      throw new RESTException(e);
+    } finally {
+      // register action
+      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID);
     }
   }
 
   @Override
-  public ViewerMetadata updateMetadataInformation(String databaseUUID, String path, SIARDUpdateParameters parameters)
-    throws RESTException {
+  public ViewerMetadata updateMetadataInformation(String databaseUUID, String path, SIARDUpdateParameters parameters) {
     final ControllerAssistant controllerAssistant = new ControllerAssistant() {};
     final User user = UserUtility.getUser(request);
 
     LogEntryState state = LogEntryState.SUCCESS;
-
+    controllerAssistant.checkRoles(UserUtility.getUser(request));
     try {
-      controllerAssistant.checkRoles(UserUtility.getUser(request));
       return SIARDController.updateMetadataInformation(databaseUUID, path, parameters);
     } catch (GenericException e) {
-      throw new RESTException(e.getMessage());
+      state = LogEntryState.FAILURE;
+      throw new RESTException(e);
     } finally {
       // register action
       controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,
@@ -146,16 +181,17 @@ public class SIARDResource implements SIARDService {
 
   @Override
   public Boolean validateSIARD(String databaseUUID, String SIARDPath, String validationReportPath,
-    String allowedTypePath, boolean skipAdditionalChecks) throws RESTException {
+    String allowedTypePath, boolean skipAdditionalChecks) {
     final ControllerAssistant controllerAssistant = new ControllerAssistant() {};
     final User user = UserUtility.getUser(request);
 
     LogEntryState state = LogEntryState.SUCCESS;
+    controllerAssistant.checkRoles(UserUtility.getUser(request));
     try {
-      controllerAssistant.checkRoles(UserUtility.getUser(request));
       return SIARDController.validateSIARD(databaseUUID, SIARDPath, validationReportPath, allowedTypePath,
         skipAdditionalChecks);
     } catch (GenericException e) {
+      state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
       // register action
@@ -177,19 +213,31 @@ public class SIARDResource implements SIARDService {
 
   @Override
   public void updateStatusValidate(String databaseUUID, ViewerDatabaseValidationStatus status) {
-    SIARDController.updateStatusValidate(databaseUUID, status);
-  }
-
-  @Override
-  public void deleteSIARDFile(String databaseUUID, String path) throws RESTException {
     final ControllerAssistant controllerAssistant = new ControllerAssistant() {};
     final User user = UserUtility.getUser(request);
 
     LogEntryState state = LogEntryState.SUCCESS;
+    controllerAssistant.checkRoles(UserUtility.getUser(request));
     try {
-      controllerAssistant.checkRoles(UserUtility.getUser(request));
+      SIARDController.updateStatusValidate(databaseUUID, status);
+    } finally {
+      // register action
+      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,
+        ViewerConstants.CONTROLLER_SIARD_VALIDATION_STATUS_PARAM, status);
+    }
+  }
+
+  @Override
+  public void deleteSIARDFile(String databaseUUID, String path) {
+    final ControllerAssistant controllerAssistant = new ControllerAssistant() {};
+    final User user = UserUtility.getUser(request);
+
+    LogEntryState state = LogEntryState.SUCCESS;
+    controllerAssistant.checkRoles(UserUtility.getUser(request));
+    try {
       SIARDController.deleteSIARDFileFromPath(path, databaseUUID);
     } catch (GenericException e) {
+      state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
       // register action
@@ -199,17 +247,17 @@ public class SIARDResource implements SIARDService {
   }
 
   @Override
-  public void deleteSIARDValidatorReportFile(String databaseUUID, String path) throws RESTException {
+  public void deleteSIARDValidatorReportFile(String databaseUUID, String path) {
     final ControllerAssistant controllerAssistant = new ControllerAssistant() {};
     final User user = UserUtility.getUser(request);
 
     LogEntryState state = LogEntryState.SUCCESS;
-
+    controllerAssistant.checkRoles(UserUtility.getUser(request));
     try {
-      controllerAssistant.checkRoles(UserUtility.getUser(request));
       SIARDController.deleteValidatorReportFileFromPath(path, databaseUUID);
     } catch (GenericException e) {
-      throw new RESTException(e.getMessage());
+      state = LogEntryState.FAILURE;
+      throw new RESTException(e);
     } finally {
       // register action
       controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,

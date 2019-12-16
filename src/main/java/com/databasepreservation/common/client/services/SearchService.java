@@ -55,33 +55,34 @@ public interface SearchService extends DirectRestService {
   }
 
   @POST
-  @Path("save/{databaseUUID}")
+  @Path("save/{databaseUUID}/{tableUUID}/{tableName}")
   @Produces(MediaType.TEXT_PLAIN)
-  String saveSearch(@PathParam("databaseUUID") String databaseUUID, @QueryParam("tableUUID") String tableUUID,
-    @QueryParam("tableName") String tableName, @QueryParam("name") String name,
-    @QueryParam("description") String description, SearchInfo searchInfo);
+  String save(@PathParam("databaseUUID") String databaseUUID, @PathParam("tableUUID") String tableUUID,
+              @PathParam("tableName") String tableName, @QueryParam("name") String name,
+              @QueryParam("description") String description,
+              @ApiParam(ViewerConstants.API_QUERY_PARAM_SEARCH) SearchInfo searchInfo);
 
   @POST
   @Path("find/{databaseUUID}")
-  IndexResult<SavedSearch> findSavedSearches(@PathParam("databaseUUID") String databaseUUID,
-    @ApiParam(ViewerConstants.API_QUERY_PARAM_FILTER) FindRequest findRequest,
-    @QueryParam(ViewerConstants.API_QUERY_PARAM_LOCALE) String localeString);
+  IndexResult<SavedSearch> find(@PathParam("databaseUUID") String databaseUUID,
+                                @ApiParam(ViewerConstants.API_QUERY_PARAM_FILTER) FindRequest findRequest,
+                                @QueryParam(ViewerConstants.API_QUERY_PARAM_LOCALE) String localeString);
 
   @POST
   @Path("find/{databaseUUID}/{savedSearchUUID}")
-  SavedSearch retrieveSavedSearch(@PathParam("databaseUUID") String databaseUUID,
-    @PathParam("savedSearchUUID") String savedSearchUUID);
+  SavedSearch retrieve(@PathParam("databaseUUID") String databaseUUID,
+                       @PathParam("savedSearchUUID") String savedSearchUUID);
 
   @POST
   @Path("edit/{databaseUUID}/{savedSearchUUID}")
-  void editSearch(@PathParam("databaseUUID") String databaseUUID,
-    @PathParam("savedSearchUUID") String savedSearchUUID, @QueryParam("name") String name,
-    @QueryParam("description") String description);
+  void edit(@PathParam("databaseUUID") String databaseUUID,
+            @PathParam("savedSearchUUID") String savedSearchUUID, @QueryParam("name") String name,
+            @QueryParam("description") String description);
 
   @DELETE
   @Path("delete/{databaseUUID}/{savedSearchUUID}")
-  void deleteSearch(@PathParam("databaseUUID") String databaseUUID,
-                  @PathParam("savedSearchUUID") String savedSearchUUID);
+  void delete(@PathParam("databaseUUID") String databaseUUID,
+              @PathParam("savedSearchUUID") String savedSearchUUID);
 
   @POST
   @Path("find/searchFields")

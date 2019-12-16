@@ -2,7 +2,6 @@ package com.databasepreservation.common.client.common.search;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -12,8 +11,8 @@ import org.roda.core.data.v2.index.filter.FilterParameter;
 import org.roda.core.data.v2.index.filter.LongRangeFilterParameter;
 
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.common.utils.BrowserServiceUtils;
+import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.tools.ViewerJsonUtils;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.google.gwt.safehtml.shared.UriUtils;
@@ -26,7 +25,6 @@ import com.google.gwt.safehtml.shared.UriUtils;
 public class SearchInfo implements Serializable {
   private Filter defaultFilter;
   private String currentFilter;
-  private Map<String, Boolean> fieldVisibility;
   private List<SearchField> fields;
   private List<FilterParameter> fieldParameters;
 
@@ -48,7 +46,6 @@ public class SearchInfo implements Serializable {
   public SearchInfo(ViewerTable viewerTable, Map<String, String> solrColumnAndValue) {
     defaultFilter = ViewerConstants.DEFAULT_FILTER;
     currentFilter = "";
-    fieldVisibility = new HashMap<>();
 
     fields = BrowserServiceUtils.getSearchFieldsFromTable(viewerTable);
 
@@ -123,14 +120,6 @@ public class SearchInfo implements Serializable {
     this.fields = fields;
   }
 
-  public Map<String, Boolean> getFieldVisibility() {
-    return fieldVisibility;
-  }
-
-  public void setFieldVisibility(Map<String, Boolean> fieldVisibility) {
-    this.fieldVisibility = fieldVisibility;
-  }
-
   /**
    * Checks if the search info is not null and is valid
    * 
@@ -140,7 +129,7 @@ public class SearchInfo implements Serializable {
    */
   public static boolean isPresentAndValid(SearchInfo searchInfo) {
     return searchInfo != null && searchInfo.currentFilter != null && searchInfo.defaultFilter != null
-      && searchInfo.fields != null && searchInfo.fieldParameters != null && searchInfo.fieldVisibility != null
+      && searchInfo.fields != null && searchInfo.fieldParameters != null
       && searchInfo.fields.size() == searchInfo.fieldParameters.size();
   }
 }

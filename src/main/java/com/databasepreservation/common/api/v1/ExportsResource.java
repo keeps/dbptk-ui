@@ -91,30 +91,9 @@ public class ExportsResource {
       final ViewerTable table = database.getMetadata().getTable(tableUUID);
 
       if (Boolean.FALSE.equals(exportRequest.exportLOBs) && StringUtils.isBlank(exportRequest.zipFilename)) {
-        if (findRequest.sublist == null) {
-          final IterableIndexResult allRows = solrManager.findAllRows(databaseUUID, findRequest.filter,
-            findRequest.sorter, findRequest.fieldsToReturn);
-          return ApiUtils.okResponse(new ViewerStreamingOutput(new IterableIndexResultsCSVOutputStream(allRows, table,
-            findRequest.fieldsToReturn, exportRequest.filename, exportRequest.exportDescription, ','))
-              .toStreamResponse());
-        } else {
-          final IndexResult<ViewerRow> rows = solrManager.findRows(databaseUUID, findRequest.filter, findRequest.sorter,
-            findRequest.sublist, null, findRequest.fieldsToReturn);
-
-          return ApiUtils
-            .okResponse(new ViewerStreamingOutput(new ResultsCSVOutputStream(rows, table, findRequest.fieldsToReturn,
-              exportRequest.filename, exportRequest.exportDescription, ',')).toStreamResponse());
-        }
+        return handleCSVExport(solrManager, databaseUUID, table, findRequest, exportRequest);
       } else {
-        List<String> fields = findRequest.fieldsToReturn;
-        fields.add(ViewerConstants.INDEX_ID);
-        final IterableIndexResult allRows = solrManager.findAllRows(databaseUUID, findRequest.filter,
-          findRequest.sorter, fields);
-        final IterableIndexResult clone = solrManager.findAllRows(databaseUUID, findRequest.filter, findRequest.sorter,
-          fields);
-        fields.remove(ViewerConstants.INDEX_ID);
-        return ApiUtils.okResponse(new StreamResponse(new ZipOutputStream(databaseUUID, table, allRows, clone,
-          exportRequest.zipFilename, exportRequest.filename, findRequest.fieldsToReturn, findRequest.sublist)));
+        return handleCSVExportWithLobs(solrManager, databaseUUID, table, findRequest, exportRequest);
       }
     } catch (GenericException | NotFoundException | RequestNotValidException e) {
       state = LogEntryState.FAILURE;
@@ -130,5 +109,35 @@ public class ExportsResource {
           ViewerConstants.CONTROLLER_EXPORT_PARAM, exportRequest.toString());
       }
     }
+  }
+
+  private Response handleCSVExport(DatabaseRowsSolrManager solrManager, final String databaseUUID,
+    final ViewerTable table, final FindRequest findRequest, final ExportRequest exportRequest)
+    throws GenericException, RequestNotValidException {
+    if (findRequest.sublist == null) {
+      final IterableIndexResult allRows = solrManager.findAllRows(databaseUUID, findRequest.filter, findRequest.sorter,
+        findRequest.fieldsToReturn);
+      return ApiUtils.okResponse(new ViewerStreamingOutput(new IterableIndexResultsCSVOutputStream(allRows, table,
+        findRequest.fieldsToReturn, exportRequest.filename, exportRequest.exportDescription, ',')).toStreamResponse());
+    } else {
+      final IndexResult<ViewerRow> rows = solrManager.findRows(databaseUUID, findRequest.filter, findRequest.sorter,
+        findRequest.sublist, null, findRequest.fieldsToReturn);
+
+      return ApiUtils.okResponse(new ViewerStreamingOutput(new ResultsCSVOutputStream(rows, table,
+        findRequest.fieldsToReturn, exportRequest.filename, exportRequest.exportDescription, ',')).toStreamResponse());
+    }
+  }
+
+  private Response handleCSVExportWithLobs(DatabaseRowsSolrManager solrManager, final String databaseUUID,
+    final ViewerTable table, final FindRequest findRequest, final ExportRequest exportRequest) {
+    List<String> fields = findRequest.fieldsToReturn;
+    fields.add(ViewerConstants.INDEX_ID);
+    final IterableIndexResult allRows = solrManager.findAllRows(databaseUUID, findRequest.filter, findRequest.sorter,
+      fields);
+    final IterableIndexResult clone = solrManager.findAllRows(databaseUUID, findRequest.filter, findRequest.sorter,
+      fields);
+    fields.remove(ViewerConstants.INDEX_ID);
+    return ApiUtils.okResponse(new StreamResponse(new ZipOutputStream(databaseUUID, table, allRows, clone,
+      exportRequest.zipFilename, exportRequest.filename, findRequest.fieldsToReturn, findRequest.sublist)));
   }
 }

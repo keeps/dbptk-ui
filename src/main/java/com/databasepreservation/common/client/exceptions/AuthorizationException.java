@@ -11,10 +11,6 @@ public class AuthorizationException extends RESTException {
     super(message);
   }
 
-  public AuthorizationException(String message, int status) {
-    super(message, status);
-  }
-
   public AuthorizationException(Throwable cause) {
     super(cause);
   }

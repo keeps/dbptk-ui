@@ -1,21 +1,25 @@
 package com.databasepreservation.common.client.common.visualization.browse.table;
 
-import com.databasepreservation.common.client.models.structure.ViewerDatabase;
-import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.RightPanel;
+import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.search.SavedSearch;
 import com.databasepreservation.common.client.common.search.SearchInfo;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.services.SearchService;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.ViewerJsonUtils;
-import com.databasepreservation.common.client.services.SearchService;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.TextArea;
+import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
 
@@ -66,7 +70,7 @@ public class TableSavedSearchEditPanel extends RightPanel {
     SearchService.Util.call((SavedSearch result) ->{
       savedSearch = result;
       init();
-    } ).retrieveSavedSearch(database.getUuid(), savedSearchUUID);
+    } ).retrieve(database.getUuid(), savedSearchUUID);
   }
 
   /**
@@ -116,7 +120,7 @@ public class TableSavedSearchEditPanel extends RightPanel {
     }, (String errorMessage) -> {
       buttonApply.setEnabled(true);
       buttonCancel.setEnabled(true);
-    }).editSearch(database.getUuid(), savedSearchUUID, textBoxName.getText(), textAreaDescription.getText());
+    }).edit(database.getUuid(), savedSearchUUID, textBoxName.getText(), textAreaDescription.getText());
   }
 
   @UiHandler("buttonCancel")

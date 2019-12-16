@@ -1,16 +1,11 @@
 package com.databasepreservation.common.api.v1;
 
-import javax.servlet.http.HttpServlet;
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 
-import com.databasepreservation.common.client.models.activity.logs.LogEntryState;
-import com.databasepreservation.common.client.models.structure.ViewerTable;
-import com.databasepreservation.common.client.common.search.SearchField;
-import com.databasepreservation.common.client.common.utils.BrowserServiceUtils;
-import com.databasepreservation.common.utils.ControllerAssistant;
-import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RequestNotValidException;
@@ -20,17 +15,20 @@ import org.springframework.stereotype.Service;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.search.SavedSearch;
+import com.databasepreservation.common.client.common.search.SearchField;
 import com.databasepreservation.common.client.common.search.SearchInfo;
+import com.databasepreservation.common.client.common.utils.BrowserServiceUtils;
+import com.databasepreservation.common.client.exceptions.RESTException;
+import com.databasepreservation.common.client.exceptions.SavedSearchException;
 import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
-import com.databasepreservation.common.client.exceptions.RESTException;
+import com.databasepreservation.common.client.models.activity.logs.LogEntryState;
+import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.services.SearchService;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.index.utils.SolrUtils;
+import com.databasepreservation.common.utils.ControllerAssistant;
 import com.databasepreservation.common.utils.UserUtility;
-import com.google.gwt.user.server.rpc.RemoteServiceServlet;
-
-import java.util.List;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -43,12 +41,13 @@ public class SearchResource implements SearchService {
   private HttpServletRequest request;
 
   @Override
-  public String saveSearch(String databaseUUID, String tableUUID, String tableName, String name, String description, SearchInfo searchInfo) throws RESTException {
-    try {
-      UserUtility.Authorization.checkDatabaseAccessPermission(request, databaseUUID);
-    } catch (AuthorizationDeniedException | GenericException | NotFoundException e) {
-      throw new RESTException(e.getMessage());
-    }
+  public String save(String databaseUUID, String tableUUID, String tableName, String name, String description,
+                     SearchInfo searchInfo) {
+    ControllerAssistant controllerAssistant = new ControllerAssistant() {};
+    User user = UserUtility.getUser(request);
+    LogEntryState state = LogEntryState.SUCCESS;
+
+    controllerAssistant.checkRoles(user);
 
     String searchInfoJson = JsonUtils.getJsonFromObject(searchInfo);
 
@@ -63,73 +62,99 @@ public class SearchResource implements SearchService {
 
     try {
       ViewerFactory.getSolrManager().addSavedSearch(savedSearch);
+      return savedSearch.getUuid();
     } catch (NotFoundException | GenericException e) {
-      throw new RESTException(e.getMessage());
+      state = LogEntryState.FAILURE;
+      throw new RESTException(e);
+    } finally {
+      // register action
+      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,
+        ViewerConstants.CONTROLLER_TABLE_ID_PARAM, tableUUID, ViewerConstants.CONTROLLER_SAVED_SEARCH_NAME_PARAM, name,
+        ViewerConstants.CONTROLLER_SAVED_SEARCH_DESCRIPTION_PARAM, description,
+        ViewerConstants.CONTROLLER_SAVED_SEARCH_PARAM, savedSearch.getSearchInfoJson());
     }
-
-    return savedSearch.getUuid();
   }
 
   @Override
-  public IndexResult<SavedSearch> findSavedSearches(String databaseUUID, FindRequest findRequest, String localeString) throws RESTException {
-    try {
-      UserUtility.Authorization.checkFilteringPermission(request, databaseUUID, findRequest.filter,
-        SavedSearch.class);
-    } catch (AuthorizationDeniedException | NotFoundException | GenericException e) {
-      throw new RESTException(e.getMessage());
-    }
+  public IndexResult<SavedSearch> find(String databaseUUID, FindRequest findRequest, String localeString) {
+    ControllerAssistant controllerAssistant = new ControllerAssistant() {};
+    User user = UserUtility.getUser(request);
+    LogEntryState state = LogEntryState.SUCCESS;
+
+    controllerAssistant.checkRoles(user);
 
     try {
       return ViewerFactory.getSolrManager().find(SavedSearch.class, findRequest.filter, findRequest.sorter,
         findRequest.sublist, findRequest.facets);
     } catch (GenericException | RequestNotValidException e) {
-      throw new RESTException(e.getMessage());
+      state = LogEntryState.FAILURE;
+      throw new RESTException(e);
+    } finally {
+      // register action
+      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,
+        ViewerConstants.CONTROLLER_FILTER_PARAM, JsonUtils.getJsonFromObject(findRequest));
     }
   }
 
   @Override
-  public SavedSearch retrieveSavedSearch(String databaseUUID, String savedSearchUUID) throws RESTException {
-    try {
-      SavedSearch result = ViewerFactory.getSolrManager().retrieve(SavedSearch.class, savedSearchUUID);
-      UserUtility.Authorization.checkRetrievalPermission(request, databaseUUID, SavedSearch.class, result);
-      return result;
-    } catch (NotFoundException | GenericException | AuthorizationDeniedException e) {
-      throw new RESTException(e.getMessage());
-    }
+  public SavedSearch retrieve(String databaseUUID, String savedSearchUUID) {
+    ControllerAssistant controllerAssistant = new ControllerAssistant() {};
+    User user = UserUtility.getUser(request);
+    LogEntryState state = LogEntryState.SUCCESS;
 
+    controllerAssistant.checkRoles(user);
+
+    try {
+      return ViewerFactory.getSolrManager().retrieve(SavedSearch.class, savedSearchUUID);
+    } catch (NotFoundException | GenericException e) {
+      state = LogEntryState.FAILURE;
+      throw new RESTException(e);
+    } finally {
+      // register action
+      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,
+        ViewerConstants.CONTROLLER_SAVED_SEARCH_UUID_PARAM, savedSearchUUID);
+    }
   }
 
   @Override
-  public void editSearch(String databaseUUID, String savedSearchUUID, String name, String description)
-    throws RESTException {
-    // get the saved search
-    SavedSearch savedSearch = null;
-    try {
-      savedSearch = ViewerFactory.getSolrManager().retrieve(SavedSearch.class, savedSearchUUID);
-      // authorise viewing the saved search
-      UserUtility.Authorization.checkSavedSearchPermission(request, databaseUUID, savedSearch);
-      // authorise editing the saved search
-      UserUtility.Authorization.allowIfAdminOrManager(request);
+  public void edit(String databaseUUID, String savedSearchUUID, String name, String description) {
+    ControllerAssistant controllerAssistant = new ControllerAssistant() {};
+    User user = UserUtility.getUser(request);
+    LogEntryState state = LogEntryState.SUCCESS;
 
+    controllerAssistant.checkRoles(user);
+
+    try {
       ViewerFactory.getSolrManager().editSavedSearch(savedSearchUUID, name, description);
-    } catch (NotFoundException | GenericException | AuthorizationDeniedException e) {
-      throw new RESTException(e.getMessage());
+    } catch (SavedSearchException e) {
+      state = LogEntryState.FAILURE;
+      throw new RESTException(e);
+    } finally {
+      // register action
+      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,
+        ViewerConstants.CONTROLLER_SAVED_SEARCH_UUID_PARAM, savedSearchUUID,
+        ViewerConstants.CONTROLLER_SAVED_SEARCH_NAME_PARAM, name,
+        ViewerConstants.CONTROLLER_SAVED_SEARCH_DESCRIPTION_PARAM, description);
     }
   }
 
   @Override
-  public void deleteSearch(String databaseUUID, String savedSearchUUID) throws RESTException {
-    // get the saved search
-    try {
-      SavedSearch savedSearch = ViewerFactory.getSolrManager().retrieve(SavedSearch.class, savedSearchUUID);
-      // authorise viewing the saved search
-      UserUtility.Authorization.checkSavedSearchPermission(request, databaseUUID, savedSearch);
-      // authorise editing the saved search
-      UserUtility.Authorization.allowIfAdminOrManager(request);
+  public void delete(String databaseUUID, String savedSearchUUID) {
+    ControllerAssistant controllerAssistant = new ControllerAssistant() {};
+    User user = UserUtility.getUser(request);
+    LogEntryState state = LogEntryState.SUCCESS;
 
+    controllerAssistant.checkRoles(user);
+
+    try {
       ViewerFactory.getSolrManager().deleteSavedSearch(savedSearchUUID);
-    } catch (NotFoundException | GenericException | AuthorizationDeniedException e) {
-      throw new RESTException(e.getMessage());
+    } catch (SavedSearchException e) {
+      state = LogEntryState.FAILURE;
+      throw new RESTException(e);
+    } finally {
+      // register action
+      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,
+        ViewerConstants.CONTROLLER_SAVED_SEARCH_UUID_PARAM, savedSearchUUID);
     }
   }
 
@@ -137,11 +162,15 @@ public class SearchResource implements SearchService {
   public List<SearchField> getSearchFields(ViewerTable viewerTable) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
     User user = UserUtility.getUser(request);
-
     LogEntryState state = LogEntryState.SUCCESS;
 
-    // register action
-    controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, viewerTable.getName());
-    return BrowserServiceUtils.getSearchFieldsFromTable(viewerTable);
+    controllerAssistant.checkRoles(user);
+    try {
+      return BrowserServiceUtils.getSearchFieldsFromTable(viewerTable);
+    } finally {
+      // register action
+      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM,
+        viewerTable.getName());
+    }
   }
 }

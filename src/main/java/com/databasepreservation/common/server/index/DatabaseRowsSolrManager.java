@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -27,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.search.SavedSearch;
+import com.databasepreservation.common.client.exceptions.SavedSearchException;
 import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.index.IsIndexed;
 import com.databasepreservation.common.client.index.facets.Facets;
@@ -83,7 +83,7 @@ public class DatabaseRowsSolrManager {
 
   public void addDatabaseRowCollection(final String databaseUUID) throws ViewerException {
     updateValidationFields(databaseUUID,
-        Pair.of(ViewerConstants.SOLR_DATABASES_STATUS, ViewerDatabaseStatus.INGESTING.toString()));
+      Pair.of(ViewerConstants.SOLR_DATABASES_STATUS, ViewerDatabaseStatus.INGESTING.toString()));
     RowsCollection collection = new RowsCollection(databaseUUID);
     collection.createRowsCollection();
   }
@@ -109,8 +109,8 @@ public class DatabaseRowsSolrManager {
     }
 
     // delete related saved searches
-      Filter savedSearchFilter = new Filter(
-          new SimpleFilterParameter(ViewerConstants.SOLR_SEARCHES_DATABASE_UUID, database.getUuid()));
+    Filter savedSearchFilter = new Filter(
+      new SimpleFilterParameter(ViewerConstants.SOLR_SEARCHES_DATABASE_UUID, database.getUuid()));
     try {
       SolrUtils.delete(client, SolrDefaultCollectionRegistry.get(SavedSearch.class), savedSearchFilter);
       LOGGER.debug("Deleted saved searches for database {}", database.getUuid());
@@ -121,7 +121,7 @@ public class DatabaseRowsSolrManager {
     // delete the database item
     try {
       SolrUtils.delete(client, SolrDefaultCollectionRegistry.get(ViewerDatabase.class),
-          Collections.singletonList(database.getUuid()));
+        Collections.singletonList(database.getUuid()));
       LOGGER.debug("Deleted database {}", database.getUuid());
     } catch (GenericException e) {
       throw new ViewerException("Error deleting the database " + database.getUuid(), e);
@@ -166,7 +166,7 @@ public class DatabaseRowsSolrManager {
   }
 
   public <T extends IsIndexed> IndexResult<T> find(Class<T> classToReturn, Filter filter, Sorter sorter,
-                                                   Sublist sublist, Facets facets) throws GenericException, RequestNotValidException {
+    Sublist sublist, Facets facets) throws GenericException, RequestNotValidException {
     return find(classToReturn, filter, sorter, sublist, facets, new ArrayList<>());
   }
 
@@ -205,7 +205,8 @@ public class DatabaseRowsSolrManager {
   }
 
   public void addLogEntry(ActivityLogEntry logEntry) throws NotFoundException, GenericException {
-    SolrCollection<ActivityLogEntry> activityLogEntrySolrCollection = SolrDefaultCollectionRegistry.get(ActivityLogEntry.class);
+    SolrCollection<ActivityLogEntry> activityLogEntrySolrCollection = SolrDefaultCollectionRegistry
+      .get(ActivityLogEntry.class);
     try {
       SolrInputDocument doc = activityLogEntrySolrCollection.toSolrDocument(logEntry);
       client.add(activityLogEntrySolrCollection.getIndexName(), doc);
@@ -235,31 +236,30 @@ public class DatabaseRowsSolrManager {
     }
   }
 
-  public void editSavedSearch(String uuid, String name, String description) throws NotFoundException, GenericException {
+  public void editSavedSearch(String uuid, String name, String description) throws SavedSearchException {
     SolrInputDocument doc = new SolrInputDocument();
 
     doc.addField(ViewerConstants.INDEX_ID, uuid);
     doc.addField(ViewerConstants.SOLR_SEARCHES_NAME, SolrUtils.asValueUpdate(name));
     doc.addField(ViewerConstants.SOLR_SEARCHES_DESCRIPTION, SolrUtils.asValueUpdate(description));
-
     try {
       client.add(ViewerConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME, doc);
       client.commit(ViewerConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME, true, true);
-    } catch (SolrServerException e) {
-      LOGGER.debug("Solr error while attempting to save search", e);
+    } catch (SolrException | SolrServerException e) {
+      throw new SavedSearchException("Solr error while attempting to save search", e);
     } catch (IOException e) {
-      LOGGER.debug("IOException while attempting to save search", e);
+      throw new SavedSearchException("IOException while attempting to save search", e);
     }
   }
 
-  public void deleteSavedSearch(String uuid) {
+  public void deleteSavedSearch(String uuid) throws SavedSearchException {
     try {
       client.deleteById(ViewerConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME, uuid);
       client.commit(ViewerConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME, true, true);
     } catch (SolrServerException e) {
-      LOGGER.debug("Solr error while attempting to delete search", e);
+      throw new SavedSearchException("Solr error while attempting to save search", e);
     } catch (IOException e) {
-      LOGGER.debug("IOException while attempting to delete search", e);
+      throw new SavedSearchException("IOException while attempting to save search", e);
     }
   }
 
@@ -342,7 +342,7 @@ public class DatabaseRowsSolrManager {
 
   public void markDatabaseAsReady(final String databaseUUID) throws ViewerException {
     updateDatabaseFields(databaseUUID,
-        Pair.of(ViewerConstants.SOLR_DATABASES_STATUS, ViewerDatabaseStatus.AVAILABLE.toString()));
+      Pair.of(ViewerConstants.SOLR_DATABASES_STATUS, ViewerDatabaseStatus.AVAILABLE.toString()));
   }
 
   @SafeVarargs
@@ -400,7 +400,7 @@ public class DatabaseRowsSolrManager {
   }
 
   public void updateSIARDValidationInformation(String databaseUUID, ViewerDatabaseValidationStatus validationStatus,
-                                               String validatorReportLocation, String DBPTKVersion, String validationDate) {
+    String validatorReportLocation, String DBPTKVersion, String validationDate) {
 
     updateValidationFields(databaseUUID, Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATED_AT, validationDate),
       Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATOR_REPORT_PATH, validatorReportLocation),
@@ -408,11 +408,11 @@ public class DatabaseRowsSolrManager {
       Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATION_STATUS, validationStatus.toString()));
   }
 
-  public void updateSIARDValidationIndicators(String databaseUUID, String passed, String ok, String failed, String errors, String warnings,
-    String skipped) {
+  public void updateSIARDValidationIndicators(String databaseUUID, String passed, String ok, String failed,
+    String errors, String warnings, String skipped) {
     updateValidationFields(databaseUUID, Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATION_PASSED, passed),
       Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATION_OK, ok),
-        Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATION_FAILED, failed),
+      Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATION_FAILED, failed),
       Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATION_ERRORS, errors),
       Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATION_WARNINGS, warnings),
       Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATION_SKIPPED, skipped));

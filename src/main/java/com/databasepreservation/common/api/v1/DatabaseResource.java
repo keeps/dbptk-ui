@@ -58,21 +58,36 @@ public class DatabaseResource implements DatabaseService {
   }
 
   @Override
-  public ViewerMetadata getSchemaInformation(ConnectionParameters connectionParameters) throws RESTException {
+  public ViewerMetadata getSchemaInformation(ConnectionParameters connectionParameters) {
+    final ControllerAssistant controllerAssistant = new ControllerAssistant() {};
+    final User user = UserUtility.getUser(request);
+
+    LogEntryState state = LogEntryState.SUCCESS;
     try {
       return SIARDController.getDatabaseMetadata(connectionParameters);
     } catch (GenericException e) {
+      state = LogEntryState.FAILURE;
       throw new RESTException(e);
+    } finally {
+      // register action
+      controllerAssistant.registerAction(user, state);
     }
   }
 
   @Override
-  public List<List<String>> validateCustomViewQuery(ConnectionParameters parameters, String query)
-    throws RESTException {
+  public List<List<String>> validateCustomViewQuery(ConnectionParameters parameters, String query) {
+    final ControllerAssistant controllerAssistant = new ControllerAssistant() {};
+    final User user = UserUtility.getUser(request);
+
+    LogEntryState state = LogEntryState.SUCCESS;
     try {
       return SIARDController.validateCustomViewQuery(parameters, query);
     } catch (GenericException e) {
-      throw new RESTException(e.getMessage());
+      state = LogEntryState.FAILURE;
+      throw new RESTException(e);
+    } finally {
+      // register action
+      controllerAssistant.registerAction(user, state);
     }
   }
 
@@ -87,6 +102,8 @@ public class DatabaseResource implements DatabaseService {
     User user = UserUtility.getUser(request);
 
     LogEntryState state = LogEntryState.SUCCESS;
+
+    controllerAssistant.checkRoles(user);
 
     if (ViewerConfiguration.getInstance().getApplicationEnvironment().equals(ViewerConstants.SERVER)) {
       if (UserUtility.userIsAdmin(request)) {
@@ -143,7 +160,7 @@ public class DatabaseResource implements DatabaseService {
       return ViewerFactory.getSolrManager().retrieve(ViewerDatabase.class, id);
     } catch (NotFoundException | GenericException e) {
       state = LogEntryState.FAILURE;
-      throw new RESTException(e.getMessage());
+      throw new RESTException(e);
     } finally {
       // register action
       controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID);

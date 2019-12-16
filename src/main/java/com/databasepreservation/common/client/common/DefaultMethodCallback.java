@@ -40,6 +40,7 @@ public abstract class DefaultMethodCallback<T> implements MethodCallback<T> {
       public void onFailure(Method method, Throwable throwable) {
         final JSONValue parse = JSONParser.parseStrict(method.getResponse().getText());
         String message = parse.isObject().get("message").isString().stringValue();
+        new ClientLogger(AsyncCallbackUtils.class.getName()).error("AsyncCallback error - " + message);
         errorHandler.accept(message);
       }
 

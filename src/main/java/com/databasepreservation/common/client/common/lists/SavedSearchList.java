@@ -93,7 +93,7 @@ public class SavedSearchList extends AsyncTableCell<SavedSearch, String> {
         object -> SearchService.Util.call((Void result) ->{
         GWT.log("deleted " + object.getUuid());
         SavedSearchList.this.refresh();
-        }).deleteSearch(getDatabaseUUID(), object.getUuid())));
+        }).delete(getDatabaseUUID(), object.getUuid())));
     CompositeCell<SavedSearch> compositeCell = new CompositeCell<>(cells);
 
     actionsColumn = new Column<SavedSearch, SavedSearch>(compositeCell) {
@@ -154,7 +154,7 @@ public class SavedSearchList extends AsyncTableCell<SavedSearch, String> {
     GWT.log("Filter: " + filter);
 
     FindRequest findRequest = new FindRequest(ViewerDatabase.class.getName(), filter, sorter, sublist, getFacets());
-    SearchService.Util.call(callback).findSavedSearches(getDatabaseUUID(), findRequest, LocaleInfo.getCurrentLocale().getLocaleName());
+    SearchService.Util.call(callback).find(getDatabaseUUID(), findRequest, LocaleInfo.getCurrentLocale().getLocaleName());
   }
 
   /**

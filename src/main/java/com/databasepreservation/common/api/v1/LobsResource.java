@@ -12,8 +12,9 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
-import org.roda.core.data.exceptions.RODAException;
+import org.roda.core.data.v2.user.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -21,10 +22,13 @@ import org.springframework.stereotype.Service;
 import com.databasepreservation.common.api.utils.ApiUtils;
 import com.databasepreservation.common.api.utils.DownloadUtils;
 import com.databasepreservation.common.api.utils.StreamResponse;
+import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.exceptions.RESTException;
+import com.databasepreservation.common.client.models.activity.logs.LogEntryState;
+import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
-import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.models.structure.ViewerRow;
+import com.databasepreservation.common.utils.ControllerAssistant;
 import com.databasepreservation.common.utils.LobPathManager;
 import com.databasepreservation.common.utils.UserUtility;
 
@@ -58,23 +62,37 @@ public class LobsResource {
     @PathParam(ViewerConstants.API_PATH_PARAM_TABLE_UUID) String tableUUID,
     @PathParam(ViewerConstants.API_PATH_PARAM_ROW_UUID) String rowUUID,
     @PathParam(ViewerConstants.API_PATH_PARAM_COLUMN_ID) Integer columnID,
-    @PathParam(ViewerConstants.API_PATH_PARAM_LOB_FILENAME) String filename) throws RODAException {
+    @PathParam(ViewerConstants.API_PATH_PARAM_LOB_FILENAME) String filename) {
+
+    ControllerAssistant controllerAssistant = new ControllerAssistant() {};
+    User user = UserUtility.getUser(request);
+    LogEntryState state = LogEntryState.SUCCESS;
+
+    controllerAssistant.checkRoles(user);
+
     DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
 
-    UserUtility.Authorization.checkDatabaseAccessPermission(this.request, databaseUUID);
-
-    ViewerRow row = solrManager.retrieveRows(databaseUUID, rowUUID);
-
-    if (row != null) {
-      try {
-        return ApiUtils.okResponse(new StreamResponse(filename, MediaType.APPLICATION_OCTET_STREAM,
-          DownloadUtils.stream(Files.newInputStream(LobPathManager.getPath(ViewerFactory.getViewerConfiguration(),
-            databaseUUID, tableUUID, columnID, rowUUID)))));
-      } catch (IOException e) {
-        throw new RODAException("There was an IO problem retrieving the LOB.", e);
+    try {
+      ViewerRow row = solrManager.retrieveRows(databaseUUID, rowUUID);
+      if (row != null) {
+        try {
+          return ApiUtils.okResponse(new StreamResponse(filename, MediaType.APPLICATION_OCTET_STREAM,
+            DownloadUtils.stream(Files.newInputStream(LobPathManager.getPath(ViewerFactory.getViewerConfiguration(),
+              databaseUUID, tableUUID, columnID, rowUUID)))));
+        } catch (IOException e) {
+          throw new GenericException("There was an IO problem retrieving the LOB.", e);
+        }
+      } else {
+        throw new NotFoundException("LOB not found.");
       }
-    } else {
-      throw new NotFoundException("LOB not found.");
+    } catch (NotFoundException | GenericException e) {
+      state = LogEntryState.FAILURE;
+      throw new RESTException(e);
+    } finally {
+      // register action
+      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,
+        ViewerConstants.CONTROLLER_TABLE_ID_PARAM, tableUUID, ViewerConstants.CONTROLLER_ROW_ID_PARAM, rowUUID,
+        ViewerConstants.CONTROLLER_COLUMN_ID_PARAM, columnID, ViewerConstants.CONTROLLER_FILENAME_PARAM, filename);
     }
   }
 }

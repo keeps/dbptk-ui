@@ -293,7 +293,7 @@ public class ClientLogger implements IsSerializable {
    */
   public void error(final String message) {
     if (CURRENT_LOG_LEVEL <= ERROR) {
-      MethodCallback<Void> errorcallback = new MethodCallback<Void>() {
+      MethodCallback<Void> errorCallback = new MethodCallback<Void>() {
         @Override
         public void onFailure(Method method, Throwable caught) {
           GWT.log(message, null);
@@ -306,7 +306,7 @@ public class ClientLogger implements IsSerializable {
         }
       };
       GWT.log(message, null);
-      ClientLoggerService.Util.call(errorcallback).error(classname, message);
+      ClientLoggerService.Util.call(errorCallback).error(classname, message);
 
       // if (SHOW_ERROR_MESSAGES) {
       // Toast.showError(message);

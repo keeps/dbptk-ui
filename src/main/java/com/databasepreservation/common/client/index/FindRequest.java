@@ -33,8 +33,6 @@ public class FindRequest extends CountRequest {
   public Facets facets;
   /** For CSV results, export only facets? */
   public boolean exportFacets;
-  /** The filename for exported CSV. */
-  public String filename;
   /** The index fields to return and use to construct the indexed object. */
   public List<String> fieldsToReturn;
 
@@ -61,7 +59,7 @@ public class FindRequest extends CountRequest {
    */
   public FindRequest(final String classToReturn, final Filter filter, final Sorter sorter, final Sublist sublist,
                      final Facets facets) {
-    this(classToReturn, filter, sorter, sublist, facets, false, "export.csv", new ArrayList<>());
+    this(classToReturn, filter, sorter, sublist, facets, false, new ArrayList<>());
   }
 
   /**
@@ -79,20 +77,16 @@ public class FindRequest extends CountRequest {
    *          Facets to return.
    * @param exportFacets
    *          for CSV results, export only facets?
-   * @param filename
-   *          the filename for exported CSV.
    * @param fieldsToReturn
    *          the index fields to return.
    */
   public FindRequest(final String classToReturn, final Filter filter, final Sorter sorter, final Sublist sublist,
-                     final Facets facets, final boolean exportFacets, final String filename,
-                     final List<String> fieldsToReturn) {
+    final Facets facets, final boolean exportFacets, final List<String> fieldsToReturn) {
     super(classToReturn, filter);
     this.sorter = sorter;
     this.sublist = sublist;
     this.facets = facets;
     this.exportFacets = exportFacets;
-    this.filename = filename;
     this.fieldsToReturn = fieldsToReturn;
   }
 

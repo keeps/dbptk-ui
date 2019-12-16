@@ -1,14 +1,16 @@
 package com.databasepreservation.common.api.v1;
 
-import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.services.ContextService;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
+import javax.ws.rs.Path;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import javax.ws.rs.Path;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.services.ContextService;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>

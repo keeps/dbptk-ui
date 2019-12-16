@@ -117,9 +117,8 @@ public class FileResource {
     controllerAssistant.checkRoles(user);
     DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
 
-    ViewerDatabase database = null;
     try {
-      database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
+      ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
       File file = new File(database.getPath());
       if (!file.exists()) {
         throw new NotFoundException("SIARD file not found");

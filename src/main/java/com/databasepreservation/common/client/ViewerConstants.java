@@ -249,6 +249,7 @@ public class ViewerConstants {
   public static final String API_QUERY_PARAM_SUBLIST = "sl";
   public static final String API_QUERY_PARAM_FACETS = "facets";
   public static final String API_QUERY_PARAM_LOCALE = "locale";
+  public static final String API_QUERY_PARAM_SEARCH = "search";
 
   public static final String API_V1_LOBS_RESOURCE = "/v1/lobs";
   public static final String API_PATH_PARAM_ROW_UUID = "rowUUID";
@@ -389,14 +390,21 @@ public class ViewerConstants {
    * ASSISTANT CONTROLLER
    */
   public static final String CONTROLLER_SIARD_PATH_PARAM = "siard-path";
+  public static final String CONTROLLER_SIARD_VALIDATION_STATUS_PARAM = "siard-validation-status";
   public static final String CONTROLLER_REPORT_PATH_PARAM = "path";
   public static final String CONTROLLER_DATABASE_ID_PARAM = "databaseUUID";
   public static final String CONTROLLER_TABLE_ID_PARAM = "tableUUID";
   public static final String CONTROLLER_ROW_ID_PARAM = "rowUUID";
+  public static final String CONTROLLER_COLUMN_ID_PARAM = "columnID";
+  public static final String CONTROLLER_FILENAME_PARAM = "rowUUID";
   public static final String CONTROLLER_FILTER_PARAM = "filter";
   public static final String CONTROLLER_EXPORT_PARAM = "export";
   public static final String CONTROLLER_SUBLIST_PARAM = "sublist";
   public static final String CONTROLLER_SKIP_ADDITIONAL_CHECKS_PARAM = "additional-checks";
+  public static final String CONTROLLER_SAVED_SEARCH_NAME_PARAM = "name";
+  public static final String CONTROLLER_SAVED_SEARCH_DESCRIPTION_PARAM = "description";
+  public static final String CONTROLLER_SAVED_SEARCH_PARAM = "saved-search";
+  public static final String CONTROLLER_SAVED_SEARCH_UUID_PARAM = "saved-search-uuid";
 
   /**
    * private constructor

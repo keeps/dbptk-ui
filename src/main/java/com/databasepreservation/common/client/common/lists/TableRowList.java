@@ -16,7 +16,6 @@ import org.roda.core.data.v2.index.filter.Filter;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
 import com.databasepreservation.common.client.ClientLogger;
-import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.helpers.HelperExportTableData;
@@ -276,7 +275,6 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
 
     Dialogs.showCSVSetupDialog(messages.csvExportDialogTitle(), helperExportTableData.getWidget(buildZipHelper),
       messages.basicActionCancel(), messages.basicActionConfirm(), new DefaultAsyncCallback<Boolean>() {
-
         @Override
         public void onSuccess(Boolean result) {
           if (result) {
@@ -287,7 +285,6 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
             if (helperExportTableData.isZipHelper()) {
               boolean exportLOBs = helperExportTableData.exportLobs();
               String zipFilename = helperExportTableData.getZipFileName();
-              GWT.log("Export all: " + exportLOBs);
               Window.Location.assign(getExportURL(zipFilename, filename, exportAll, exportDescription, exportLOBs));
             } else {
               Window.Location.assign(getExportURL(filename, exportAll, exportDescription));
@@ -356,7 +353,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
     }
 
     FindRequest findRequest = new FindRequest(ViewerRow.class.getName(), getFilter(), currentSorter, sublist,
-      Facets.NONE, false, null, solrColumns);
+      Facets.NONE, false, solrColumns);
     ExportRequest exportRequest = new ExportRequest(filename, zipFilename, description, exportLobs);
 
     return ExportResourcesUtils.getExportURL(database.getUuid(), table.getUUID(), findRequest, exportRequest);

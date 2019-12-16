@@ -62,7 +62,7 @@ public class TableSavedSearchPanel extends RightPanel {
     SearchService.Util.call((SavedSearch result) ->{
       savedSearch = result;
       init();
-    } ).retrieveSavedSearch(database.getUuid(), savedSearchUUID);
+    } ).retrieve(database.getUuid(), savedSearchUUID);
   }
 
   /**

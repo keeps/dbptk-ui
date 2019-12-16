@@ -23,8 +23,8 @@ import com.databasepreservation.common.utils.UserUtility;
  */
 @Service
 @Path(ViewerConstants.ENDPOINT_AUTHENTICATION)
-public class AuthenticationResource  implements AuthenticationService {
-  private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationResource.class);;
+public class AuthenticationResource implements AuthenticationService {
+  private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationResource.class);
 
   @Context
   private HttpServletRequest request;
