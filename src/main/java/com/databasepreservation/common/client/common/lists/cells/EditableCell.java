@@ -1,4 +1,4 @@
-package com.databasepreservation.common.client.common;
+package com.databasepreservation.common.client.common.lists.cells;
 
 import com.google.gwt.cell.client.TextInputCell;
 import com.google.gwt.cell.client.ValueUpdater;

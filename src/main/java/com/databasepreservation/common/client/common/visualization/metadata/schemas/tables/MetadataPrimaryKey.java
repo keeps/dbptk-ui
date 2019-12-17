@@ -2,7 +2,7 @@ package com.databasepreservation.common.client.common.visualization.metadata.sch
 
 import java.util.Arrays;
 
-import com.databasepreservation.common.client.common.EditableCell;
+import com.databasepreservation.common.client.common.lists.cells.EditableCell;
 import com.databasepreservation.common.client.common.lists.widgets.MetadataTableList;
 import com.databasepreservation.common.client.common.visualization.metadata.MetadataControlPanel;
 import com.databasepreservation.common.client.common.visualization.metadata.MetadataEditPanel;
