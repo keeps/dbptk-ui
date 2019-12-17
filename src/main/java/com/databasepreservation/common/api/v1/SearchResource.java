@@ -17,7 +17,7 @@ import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.search.SavedSearch;
 import com.databasepreservation.common.client.common.search.SearchField;
 import com.databasepreservation.common.client.common.search.SearchInfo;
-import com.databasepreservation.common.client.common.utils.BrowserServiceUtils;
+import com.databasepreservation.common.client.common.utils.AdvancedSearchUtils;
 import com.databasepreservation.common.client.exceptions.RESTException;
 import com.databasepreservation.common.client.exceptions.SavedSearchException;
 import com.databasepreservation.common.client.index.FindRequest;
@@ -166,7 +166,7 @@ public class SearchResource implements SearchService {
 
     controllerAssistant.checkRoles(user);
     try {
-      return BrowserServiceUtils.getSearchFieldsFromTable(viewerTable);
+      return AdvancedSearchUtils.getSearchFieldsFromTable(viewerTable);
     } finally {
       // register action
       controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM,

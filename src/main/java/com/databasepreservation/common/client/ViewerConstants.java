@@ -130,17 +130,35 @@ public class ViewerConstants {
   /*
    * ACTIVITY LOG FIELDS
    */
-  public static final String SOLR_ACTIVITY_LOG_IP_ADDRESS = "ip_address";
+  public static final String SOLR_ACTIVITY_LOG_IP_ADDRESS = "ipAddress";
   public static final String SOLR_ACTIVITY_LOG_DATETIME = "datetime";
   public static final String SOLR_ACTIVITY_LOG_USERNAME = "username";
-  public static final String SOLR_ACTIVITY_LOG_ACTION_COMPONENT = "action_component";
-  public static final String SOLR_ACTIVITY_LOG_ACTION_METHOD = "action_method";
-  public static final String SOLR_ACTIVITY_LOG_RELATED_OBJECT_ID = "related_object_id";
-  public static final String SOLR_ACTIVITY_LOG_STATE = "log_state";
+  public static final String SOLR_ACTIVITY_LOG_ACTION_COMPONENT = "actionComponent";
+  public static final String SOLR_ACTIVITY_LOG_ACTION_METHOD = "actionMethod";
+  public static final String SOLR_ACTIVITY_LOG_RELATED_OBJECT_ID = "relatedObjectId";
+  public static final String SOLR_ACTIVITY_LOG_STATE = "state";
   public static final String SOLR_ACTIVITY_LOG_DURATION = "duration";
-  public static final String SOLR_ACTIVITY_LOG_LINE_NUMBER = "line_number";
+  public static final String SOLR_ACTIVITY_LOG_LINE_NUMBER = "lineNumber";
   public static final String SOLR_ACTIVITY_LOG_PARAMETERS = "parameters";
 
+  public static final String ACTIVITY_LOG_PROPERTY = "activityLogEntry";
+
+  public static final String LISTS_PROPERTY = "lists";
+
+  public static final String LISTS_FACETS_QUERY_PROPERTY = "facets.query";
+  public static final String LISTS_FACETS_PARAMETERS_PROPERTY = "facets.parameters";
+  public static final String LISTS_FACETS_PARAMETERS_TYPE_PROPERTY = "type";
+  public static final String LISTS_FACETS_PARAMETERS_ARGS_PROPERTY = "args";
+  public static final String LISTS_FACETS_PARAMETERS_ARGS_NAME_PROPERTY = "name";
+  public static final String LISTS_FACETS_PARAMETERS_ARGS_START_PROPERTY = "start";
+  public static final String LISTS_FACETS_PARAMETERS_ARGS_END_PROPERTY = "end";
+  public static final String LISTS_FACETS_PARAMETERS_ARGS_GAP_PROPERTY = "gap";
+  public static final String LISTS_FACETS_PARAMETERS_ARGS_LIMIT_PROPERTY = "limit";
+  public static final String LISTS_FACETS_PARAMETERS_ARGS_SORT_PROPERTY = "sort";
+  public static final String LISTS_FACETS_PARAMETERS_ARGS_VALUES_PROPERTY = "values";
+  public static final String LISTS_FACETS_PARAMETERS_ARGS_MINCOUNT_PROPERTY = "minCount";
+
+  public static final String I18N_UI_FACETS_PREFIX = "ui.facets";
   /*
    * SEARCHES FIELDS
    */

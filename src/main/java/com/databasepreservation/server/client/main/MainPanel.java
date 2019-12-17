@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.ContentPanel;
 import com.databasepreservation.common.client.common.RightPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
@@ -170,7 +169,7 @@ public class MainPanel extends Composite {
       setContent(new ContentPanelLoader() {
         @Override
         public ContentPanel load(ViewerDatabase database) {
-          return ActivityLogPanel.createInstance();
+          return ActivityLogPanel.getInstance();
         }
       });
     } else if (HistoryManager.ROUTE_SIARD_INFO.equals(currentHistoryPath.get(0))) {

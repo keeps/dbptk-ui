@@ -94,7 +94,7 @@ public class ActivityLogsCollection extends AbstractSolrCollection<ActivityLogEn
     doc.addField(SOLR_ACTIVITY_LOG_USERNAME, activityLogEntry.getUsername());
     doc.addField(SOLR_ACTIVITY_LOG_ACTION_COMPONENT, activityLogEntry.getActionComponent());
     doc.addField(SOLR_ACTIVITY_LOG_ACTION_METHOD, activityLogEntry.getActionMethod());
-    doc.addField(SOLR_ACTIVITY_LOG_STATE, activityLogEntry.getLogEntryState().toString());
+    doc.addField(SOLR_ACTIVITY_LOG_STATE, activityLogEntry.getState().toString());
     doc.addField(SOLR_ACTIVITY_LOG_DURATION, activityLogEntry.getDuration());
     doc.addField(SOLR_ACTIVITY_LOG_LINE_NUMBER, activityLogEntry.getLineNumber());
     doc.addField(SOLR_ACTIVITY_LOG_PARAMETERS, JsonUtils.getJsonFromObject(activityLogEntry.getParameters()));
@@ -111,7 +111,7 @@ public class ActivityLogsCollection extends AbstractSolrCollection<ActivityLogEn
     activityLogEntry.setUsername(SolrUtils.objectToString(doc.get(SOLR_ACTIVITY_LOG_USERNAME), null));
     activityLogEntry.setActionComponent(SolrUtils.objectToString(doc.get(SOLR_ACTIVITY_LOG_ACTION_COMPONENT), null));
     activityLogEntry.setActionMethod(SolrUtils.objectToString(doc.get(SOLR_ACTIVITY_LOG_ACTION_METHOD), null));
-    activityLogEntry.setLogEntryState(
+    activityLogEntry.setState(
       SolrUtils.objectToEnum(doc.get(SOLR_ACTIVITY_LOG_STATE), LogEntryState.class, LogEntryState.UNKNOWN));
     activityLogEntry.setDuration(SolrUtils.objectToLong(doc.get(SOLR_ACTIVITY_LOG_DURATION), 0L));
     activityLogEntry.setLineNumber(SolrUtils.objectToLong(doc.get(SOLR_ACTIVITY_LOG_LINE_NUMBER), 0L));

@@ -2559,3 +2559,32 @@ button.close:hover {
     color: black;
     cursor: pointer;
 }
+
+.my-asyncdatagrid-main-panel {
+    vertical-align: top;
+    overflow: hidden;
+}
+
+.my-asyncdatagrid-main-panel-full {
+    width: 100%;
+}
+
+.my-asyncdatagrid-side-panel {
+    vertical-align: top;
+    float: right;
+    margin-left: 20px;
+    background-color: #eee;
+    padding: 1rem 1.5rem 0 1.5rem;
+}
+
+.my-asyncdatagrid-side-panel-hidden {
+    display: none;
+}
+
+.my-asyncdatagrid-side-panel .fade-out:after {
+    background: linear-gradient(-90deg, #eee 30%, rgba(255, 255, 255, 0) 100%);
+}
+
+.facet-empty {
+    display: none;
+}

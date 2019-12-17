@@ -4,20 +4,20 @@
  */
 package com.databasepreservation.common.client.common.lists.utils;
 
+import java.io.Serializable;
+import java.util.Date;
+
+import org.fusesource.restygwt.client.Method;
+import org.fusesource.restygwt.client.MethodCallback;
+import org.roda.core.data.v2.index.sublist.Sublist;
+
 import com.databasepreservation.common.client.common.DefaultMethodCallback;
-import com.databasepreservation.common.client.common.lists.utils.IndexResultDataProvider;
 import com.databasepreservation.common.client.index.IndexResult;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.view.client.AsyncDataProvider;
 import com.google.gwt.view.client.HasData;
 import com.google.gwt.view.client.Range;
-import org.fusesource.restygwt.client.Method;
-import org.fusesource.restygwt.client.MethodCallback;
-import org.roda.core.data.v2.index.sublist.Sublist;
-
-import java.io.Serializable;
-import java.util.Date;
 
 //import org.roda.wui.common.client.widgets.Toast;
 

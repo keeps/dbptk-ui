@@ -1,0 +1,15 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:lists="urn:import:com.databasepreservation.common.client.common.lists"
+>
+
+    <g:FlowPanel addStyleNames="application-container">
+        <g:FlowPanel addStyleNames="manage-panel">
+            <g:SimplePanel ui:field="advancedSearch"/>
+            <g:FlowPanel addStyleNames="database-list">
+                <lists:ActivityLogList ui:field="activityLogList"/>
+            </g:FlowPanel>
+            <g:SimplePanel ui:field="facets"/>
+        </g:FlowPanel>
+    </g:FlowPanel>
+</ui:UiBinder>

@@ -263,8 +263,9 @@ public class SearchFieldPanel extends Composite {
   public void setSearchField(SearchField searchField) {
     this.searchField = searchField;
 
-    Boolean visibleState = columnDisplayNameToVisibleState.get(searchField.getLabel());
-    setVisibilityCheckboxValue(visibleState == null || visibleState, false);
+    // Boolean visibleState =
+    // columnDisplayNameToVisibleState.get(searchField.getLabel());
+    // setVisibilityCheckboxValue(visibleState == null || visibleState, false);
   }
 
   public void setSearchAdvancedFields(ListBox searchAdvancedFieldOptions) {

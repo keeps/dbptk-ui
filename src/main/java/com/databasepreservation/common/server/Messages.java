@@ -26,11 +26,11 @@ import java.util.ResourceBundle.Control;
 public class Messages {
   private static final String MESSAGES_BUNDLE = "ServerMessages";
   private ResourceBundle resourceBundle;
-  private Map<String, Map<String, Object>> translationsCache;
+  private Map<String, Map<String, ?>> translationsCache;
 
   public Messages(Locale locale, Path folder) {
     this.resourceBundle = ResourceBundle.getBundle(MESSAGES_BUNDLE, locale, new FolderBasedUTF8Control(folder));
-    this.translationsCache = new HashMap<String, Map<String, Object>>();
+    this.translationsCache = new HashMap<>();
   }
 
   /**
@@ -53,6 +53,10 @@ public class Messages {
     return ret;
   }
 
+  public boolean containsTranslation(String key) {
+    return resourceBundle.containsKey(key);
+  }
+
   /**
    * 
    * prefix will be replaced by "i18n." for simplicity purposes
@@ -64,7 +68,7 @@ public class Messages {
       return (Map<String, T>) translationsCache.get(prefix);
     }
 
-    Map<String, T> map = new HashMap<String, T>();
+    Map<String, T> map = new HashMap<>();
     Enumeration<String> keys = resourceBundle.getKeys();
     String fullPrefix = prefix + ".";
     while (keys.hasMoreElements()) {
@@ -76,7 +80,7 @@ public class Messages {
     }
 
     // cache it
-    translationsCache.put(prefix, (Map<String, Object>) map);
+    translationsCache.put(prefix, map);
     return map;
   }
 

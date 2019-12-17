@@ -11,9 +11,12 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -88,6 +91,11 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   public static final String PROPERTY_AUTHORIZATION_ROLES_ATTRIBUTE = "user.attribute.roles";
   public static final String PROPERTY_AUTHORIZATION_ADMINISTRATORS = "user.attribute.roles.administrators";
 
+  public static final String SHARED_PROPERTY_WHITELIST_MESSAGES_PREFIX = "ui.sharedProperties.whitelist.messages.prefix";
+  public static final String SHARED_PROPERTY_WHITELIST_MESSAGES_PROPERTY = "ui.sharedProperties.whitelist.messages.property";
+  public static final String SHARED_PROPERTY_WHITELIST_CONFIGURATION_PREFIX = "ui.sharedProperties.whitelist.configuration.prefix";
+  public static final String SHARED_PROPERTY_WHITELIST_CONFIGURATION_PROPERTY = "ui.sharedProperties.whitelist.configuration.property";
+
   private static boolean instantiatedWithoutErrors = true;
   private static String applicationEnvironment = ViewerConstants.SERVER;
 
@@ -119,6 +127,103 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     });
 
   /**
+   * Cache of shared configuration properties
+   */
+  private static Map<String, List<String>> sharedConfigurationPropertiesCache = null;
+
+  /**
+   * Shared configuration and message properties (cache). Includes properties from
+   * {@code rodaConfiguration} and translations from ServerMessages, filtered by
+   * the {@code ui.sharedProperties.*} properties in {@code roda-wui.properties}.
+   *
+   * This cache provides the complete set of properties to be shared with the
+   * client browser.
+   */
+  private static LoadingCache<Locale, Map<String, List<String>>> SHARED_PROPERTIES_CACHE = CacheBuilder.newBuilder()
+    .build(new CacheLoader<Locale, Map<String, List<String>>>() {
+      @Override
+      public Map<String, List<String>> load(Locale locale) {
+        Map<String, List<String>> sharedProperties = new HashMap<>(getSharedConfigurationProperties());
+        Messages messages = getI18NMessages(locale);
+
+        if (messages != null) {
+          List<String> prefixes = ViewerConfiguration.getInstance()
+            .getViewerConfigurationAsList(SHARED_PROPERTY_WHITELIST_MESSAGES_PREFIX);
+          for (String prefix : prefixes) {
+            Map<String, String> translations = messages.getTranslations(prefix, String.class, false);
+            for (Map.Entry<String, String> translationEntry : translations.entrySet()) {
+              sharedProperties.put("i18n." + translationEntry.getKey(),
+                Collections.singletonList(translationEntry.getValue()));
+            }
+          }
+
+          List<String> properties = ViewerConfiguration.getInstance()
+            .getViewerConfigurationAsList(SHARED_PROPERTY_WHITELIST_MESSAGES_PROPERTY);
+          for (String propertyKey : properties) {
+            if (messages.containsTranslation(propertyKey)) {
+              sharedProperties.put("i18n." + propertyKey,
+                Collections.singletonList(messages.getTranslation(propertyKey)));
+            }
+          }
+        }
+
+        return sharedProperties;
+      }
+    });
+
+  /**
+   * Gets (with caching) the shared configuration properties from
+   * {@code rodaConfiguration}.
+   *
+   * The properties that should be shared with the client browser are defined by
+   * the {@code ui.sharedProperties.*} properties in {@code roda-wui.properties}.
+   *
+   * @return The configuration properties that should be shared with the client
+   *         browser.
+   */
+  private static Map<String, List<String>> getSharedConfigurationProperties() {
+    if (sharedConfigurationPropertiesCache == null) {
+      sharedConfigurationPropertiesCache = new HashMap<>();
+      Configuration configuration = ViewerConfiguration.getInstance().getConfiguration();
+
+      List<String> prefixes = ViewerConfiguration.getInstance()
+        .getViewerConfigurationAsList(SHARED_PROPERTY_WHITELIST_CONFIGURATION_PREFIX);
+
+      Iterator<String> keys = configuration.getKeys();
+      while (keys.hasNext()) {
+        String key = keys.next();
+        for (String prefix : prefixes) {
+          if (key.startsWith(prefix + ".")) {
+            sharedConfigurationPropertiesCache.put(key,
+              ViewerConfiguration.getInstance().getViewerConfigurationAsList(key));
+            break;
+          }
+        }
+      }
+
+      List<String> properties = ViewerConfiguration.getInstance()
+        .getViewerConfigurationAsList(SHARED_PROPERTY_WHITELIST_CONFIGURATION_PROPERTY);
+      for (String propertyKey : properties) {
+        if (configuration.containsKey(propertyKey)) {
+          sharedConfigurationPropertiesCache.put(propertyKey,
+            ViewerConfiguration.getInstance().getViewerConfigurationAsList(propertyKey));
+        }
+      }
+    }
+    return sharedConfigurationPropertiesCache;
+  }
+
+  public static Map<String, List<String>> getSharedProperties(Locale locale) {
+    checkForChangesInI18N();
+    try {
+      return SHARED_PROPERTIES_CACHE.get(locale);
+    } catch (ExecutionException e) {
+      LOGGER.debug("Could not load shared properties", e);
+      return Collections.emptyMap();
+    }
+  }
+
+  /**
    * Private constructor, use getInstance() instead
    */
   private ViewerConfiguration() {
@@ -134,7 +239,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
       LOGGER.debug("Finished instantiating essential directories");
 
       // load core configurations
-      configurationFiles = new ArrayList<String>();
+      configurationFiles = new ArrayList<>();
       addConfiguration("dbvtk-viewer.properties");
       LOGGER.debug("Finished loading dbvtk-viewer.properties");
 
@@ -180,8 +285,10 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   @Override
   public void clearViewerCachableObjectsAfterConfigurationChange() {
     I18N_CACHE.invalidateAll();
+    SHARED_PROPERTIES_CACHE.invalidateAll();
     cachedWhitelistAllIPs = null;
     cachedWhitelistedIPs = null;
+    sharedConfigurationPropertiesCache = null;
     LOGGER.info("Reloaded dbvtk configurations after file change!");
   }
 

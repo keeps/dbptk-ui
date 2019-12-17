@@ -1,18 +1,24 @@
 package com.databasepreservation.common.client.services;
 
-import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.common.DefaultMethodCallback;
-import com.google.gwt.core.client.GWT;
-import io.swagger.annotations.ApiOperation;
-import org.fusesource.restygwt.client.DirectRestService;
-import org.fusesource.restygwt.client.MethodCallback;
-import org.fusesource.restygwt.client.REST;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-import java.util.function.Consumer;
+
+import org.fusesource.restygwt.client.DirectRestService;
+import org.fusesource.restygwt.client.MethodCallback;
+import org.fusesource.restygwt.client.REST;
+
+import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.common.DefaultMethodCallback;
+import com.google.gwt.core.client.GWT;
+
+import io.swagger.annotations.ApiOperation;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -47,4 +53,9 @@ public interface ContextService extends DirectRestService {
   @Produces({MediaType.TEXT_PLAIN})
   @ApiOperation(value = "retrieves the client machine host", notes = "", response = String.class, responseContainer = "Client machine")
   String getClientMachine();
+
+  @GET
+  @Path("/shared/properties")
+  Map<String, List<String>> getSharedProperties(
+    @QueryParam(ViewerConstants.API_QUERY_PARAM_LOCALE) String localeString);
 }

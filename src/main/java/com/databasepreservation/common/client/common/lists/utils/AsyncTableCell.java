@@ -4,8 +4,28 @@
  */
 package com.databasepreservation.common.client.common.lists.utils;
 
-import com.databasepreservation.common.client.index.IsIndexed;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.fusesource.restygwt.client.Method;
+import org.fusesource.restygwt.client.MethodCallback;
+import org.roda.core.data.v2.index.filter.Filter;
+import org.roda.core.data.v2.index.sublist.Sublist;
+
+import com.databasepreservation.common.client.ClientConfigurationManager;
 import com.databasepreservation.common.client.ClientLogger;
+import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.index.IndexResult;
+import com.databasepreservation.common.client.index.IsIndexed;
+import com.databasepreservation.common.client.index.facets.FacetFieldResult;
+import com.databasepreservation.common.client.index.facets.FacetParameter;
+import com.databasepreservation.common.client.index.facets.FacetValue;
+import com.databasepreservation.common.client.index.facets.Facets;
 import com.databasepreservation.common.client.index.select.SelectedItems;
 import com.databasepreservation.common.client.index.select.SelectedItemsFilter;
 import com.databasepreservation.common.client.index.select.SelectedItemsList;
@@ -15,11 +35,7 @@ import com.databasepreservation.common.client.widgets.Alert;
 import com.databasepreservation.common.client.widgets.MyCellTableResources;
 import com.databasepreservation.common.client.widgets.wcag.AccessibleCellTable;
 import com.databasepreservation.common.client.widgets.wcag.AccessibleSimplePager;
-import com.databasepreservation.common.client.index.IndexResult;
-import com.databasepreservation.common.client.index.facets.Facets;
 import com.google.gwt.cell.client.CheckboxCell;
-import com.google.gwt.cell.client.FieldUpdater;
-import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
@@ -54,24 +70,12 @@ import com.google.gwt.view.client.DefaultSelectionEventManager;
 import com.google.gwt.view.client.ProvidesKey;
 import com.google.gwt.view.client.Range;
 import com.google.gwt.view.client.SingleSelectionModel;
+
 import config.i18n.client.ClientMessages;
-import org.fusesource.restygwt.client.Method;
-import org.fusesource.restygwt.client.MethodCallback;
-import org.roda.core.data.v2.index.filter.Filter;
-import org.roda.core.data.v2.index.sublist.Sublist;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-// import config.i18n.client.BrowseMessages;
 
 public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
   implements HasValueChangeHandlers<IndexResult<T>> {
-
+  private static final ClientLogger LOGGER = new ClientLogger(AsyncTableCell.class.getName());
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
 
   protected enum TextAlign {
@@ -81,7 +85,6 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
   private final MyAsyncDataProvider<T> dataProvider;
   private final SingleSelectionModel<T> selectionModel;
   private final AsyncHandler columnSortHandler;
-
   private final AccessibleSimplePager resultsPager;
   private final RodaPageSizePager pageSizePager;
   private final CellTable<T> display;
@@ -91,6 +94,10 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
   private ScrollPanel displayScroll;
   private SimplePanel displayScrollWrapper;
 
+  private HandlerRegistration facetsValueChangedHandlerRegistration;
+
+  private FlowPanel mainPanel;
+  private FlowPanel sidePanel;
   private FlowPanel selectAllPanel;
   private FlowPanel selectAllPanelBody;
   private Label selectAllLabel;
@@ -105,6 +112,7 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
   private Facets facets;
   private boolean selectable;
   private boolean autoUpdating = false;
+  private IndexResult<T> result;
 
   private final ClientLogger logger = new ClientLogger(getClass().getName());
 
@@ -148,14 +156,19 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
 
     configure(display);
 
-    this.dataProvider = new MyAsyncDataProvider<T>(display, new IndexResultDataProvider<T>() {
+    this.dataProvider = new MyAsyncDataProvider<T>(display, (sublist, columnSortList, callback) -> AsyncTableCell.this
+      .getData(sublist, columnSortList, new MethodCallback<IndexResult<T>>() {
+        @Override
+        public void onFailure(Method method, Throwable throwable) {
+          callback.onFailure(method, throwable);
+        }
 
-      @Override
-      public void getData(Sublist sublist, ColumnSortList columnSortList, MethodCallback<IndexResult<T>> callback) {
-        AsyncTableCell.this.getData(sublist, columnSortList, callback);
-      }
-    }) {
-
+        @Override
+        public void onSuccess(Method method, IndexResult<T> tIndexResult) {
+          setResult(tIndexResult);
+          callback.onSuccess(method, tIndexResult);
+        }
+      })) {
       @Override
       protected void fireChangeEvent(IndexResult<T> result) {
         ValueChangeEvent.fire(AsyncTableCell.this, result);
@@ -190,14 +203,6 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
     displayScroll.addStyleName("ms-scroll-fix");
     displayScrollWrapper = new SimplePanel(displayScroll);
 
-    add(selectAllPanel);
-    add(displayScrollWrapper);
-    add(resultsPager);
-    if (exportButtons != null) {
-      add(exportButtons);
-    }
-    add(pageSizePager);
-
     selectionModel = new SingleSelectionModel<>(getKeyProvider());
 
     Handler<T> selectionEventManager = getSelectionEventManager();
@@ -210,12 +215,9 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
     columnSortHandler = new AsyncHandler(display);
     display.addColumnSortHandler(columnSortHandler);
 
-    display.addLoadingStateChangeHandler(new LoadingStateChangeEvent.Handler() {
-      @Override
-      public void onLoadingStateChanged(LoadingStateChangeEvent event) {
-        if (LoadingStateChangeEvent.LoadingState.LOADED.equals(event.getLoadingState())) {
-          handleScrollChanges();
-        }
+    display.addLoadingStateChangeHandler(event -> {
+      if (LoadingStateChangeEvent.LoadingState.LOADED.equals(event.getLoadingState())) {
+        handleScrollChanges();
       }
     });
 
@@ -237,8 +239,36 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
       hideSelectAllPanel();
     });
 
+    sidePanel = new FlowPanel();
+    sidePanel.addStyleName("my-asyncdatagrid-side-panel");
+    add(sidePanel);
+
+    mainPanel = new FlowPanel();
+    mainPanel.addStyleName("my-asyncdatagrid-main-panel");
+    add(mainPanel);
+
+    mainPanel.add(selectAllPanel);
+    mainPanel.add(displayScrollWrapper);
+    mainPanel.add(resultsPager);
+    if (exportButtons != null) {
+      mainPanel.add(exportButtons);
+    }
+    mainPanel.add(pageSizePager);
+
+    toggleSidePanel(createAndBindFacets(sidePanel));
+
     Alert alert = new Alert(Alert.MessageAlertType.LIGHT, messages.noItemsToDisplay());
     display.setEmptyTableWidget(alert);
+  }
+
+  private void toggleSidePanel(boolean toggle) {
+    if (toggle) {
+      mainPanel.removeStyleName("my-asyncdatagrid-main-panel-full");
+      sidePanel.removeStyleName("my-asyncdatagrid-side-panel-hidden");
+    } else {
+      mainPanel.addStyleName("my-asyncdatagrid-main-panel-full");
+      sidePanel.addStyleName("my-asyncdatagrid-side-panel-hidden");
+    }
   }
 
   protected void handleScrollChanges() {
@@ -280,19 +310,16 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
         }
       };
 
-      selectColumn.setFieldUpdater(new FieldUpdater<T, Boolean>() {
-        @Override
-        public void update(int index, T object, Boolean isSelected) {
-          if (isSelected) {
-            selected.add(object);
-          } else {
-            selected.remove(object);
-          }
-
-          // update header
-          display.redrawHeaders();
-          fireOnCheckboxSelectionChanged();
+      selectColumn.setFieldUpdater((index, object, isSelected) -> {
+        if (isSelected) {
+          selected.add(object);
+        } else {
+          selected.remove(object);
         }
+
+        // update header
+        display.redrawHeaders();
+        fireOnCheckboxSelectionChanged();
       });
 
       Header<Boolean> selectHeader = new Header<Boolean>(new CheckboxCell(true, true)) {
@@ -316,20 +343,16 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
         }
       };
 
-      selectHeader.setUpdater(new ValueUpdater<Boolean>() {
-
-        @Override
-        public void update(Boolean value) {
-          if (value) {
-            selected.addAll(getVisibleItems());
-            showSelectAllPanel();
-          } else {
-            selected.clear();
-            hideSelectAllPanel();
-          }
-          redraw();
-          fireOnCheckboxSelectionChanged();
+      selectHeader.setUpdater(value -> {
+        if (value) {
+          selected.addAll(getVisibleItems());
+          showSelectAllPanel();
+        } else {
+          selected.clear();
+          hideSelectAllPanel();
         }
+        redraw();
+        fireOnCheckboxSelectionChanged();
       });
 
       display.addColumn(selectColumn, selectHeader);
@@ -345,17 +368,11 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
   }
 
   protected ProvidesKey<T> getKeyProvider() {
-    return new ProvidesKey<T>() {
-
-      @Override
-      public Object getKey(T item) {
-        return item.getUuid();
-      }
-    };
+    return IsIndexed::getUuid;
   }
 
   protected abstract void getData(Sublist sublist, ColumnSortList columnSortList,
-                                  MethodCallback<IndexResult<T>> callback);
+    MethodCallback<IndexResult<T>> callback);
 
   protected int getPageSizePagerIncrement() {
     return pageSizeIncrement;
@@ -473,6 +490,19 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
 
   public void setFacets(Facets facets) {
     this.facets = facets;
+    refresh();
+    toggleSidePanel(createAndBindFacets(sidePanel));
+  }
+
+  public void set(Filter filter, boolean justActive, Facets facets) {
+    this.facets = facets;
+    set(filter, justActive);
+    toggleSidePanel(createAndBindFacets(sidePanel));
+  }
+
+  public void set(Filter filter, boolean justActive) {
+    this.filter = filter;
+    this.justActive = justActive;
     refresh();
   }
 
@@ -744,7 +774,7 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
   }
 
   protected void addColumn(Column<T, ?> column, SafeHtml headerHTML, boolean nowrap, TextAlign textAlign,
-                           double fixedSize) {
+    double fixedSize) {
     addColumn(column, headerHTML, nowrap, textAlign);
     display.setColumnWidth(column, fixedSize, Style.Unit.EM);
   }
@@ -754,9 +784,163 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
   }
 
   protected void addColumn(Column<T, ?> column, String headerText, boolean nowrap, TextAlign textAlign,
-                           double fixedSize) {
+    double fixedSize) {
     addColumn(column, SafeHtmlUtils.fromString(headerText), nowrap, textAlign, fixedSize);
   }
 
   public abstract void exportClickHandler();
+
+  private boolean createAndBindFacets(FlowPanel facetsPanel) {
+    facetsPanel.clear();
+
+    if (facetsValueChangedHandlerRegistration != null) {
+      facetsValueChangedHandlerRegistration.removeHandler();
+    }
+
+    if (getFacets() != null) {
+
+      Map<String, FlowPanel> facetPanels = createInnerFacetPanels(facetsPanel);
+      facetsValueChangedHandlerRegistration = addValueChangeHandler(listValueChangedEvent -> {
+        List<FacetFieldResult> facetResults = listValueChangedEvent.getValue().getFacetResults();
+
+        boolean allFacetsAreEmpty = true;
+        for (FacetFieldResult facetResult : facetResults) {
+          final String facetField = facetResult.getField();
+          FlowPanel facetPanel = facetPanels.get(facetField);
+          if (facetPanel != null) {
+            facetPanel.clear();
+            if (facetResult.getTotalCount() == 0) {
+              facetPanel.getParent().addStyleName("facet-empty");
+            } else {
+              allFacetsAreEmpty = false;
+              facetPanel.getParent().removeStyleName("facet-empty");
+            }
+
+            for (FacetValue facetValue : facetResult.getValues()) {
+              final String value = facetValue.getValue();
+              final String label = facetValue.getLabel();
+              long count = facetValue.getCount();
+              boolean facetIsSelected = facetResult.getSelectedValues().contains(value);
+              StringBuilder checkboxLabel = new StringBuilder();
+              checkboxLabel.append(label);
+              if (count > 0 || facetResult.getSelectedValues().isEmpty() || facetIsSelected) {
+                checkboxLabel.append(" (").append(count).append(")");
+              }
+
+              CheckBox facetValuePanel = new CheckBox(checkboxLabel.toString());
+              facetValuePanel.setTitle(checkboxLabel.toString());
+              facetValuePanel.addStyleName("sidebar-facet-label");
+              facetValuePanel.addStyleName("fade-out");
+              boolean enabled = count > 0 || !facetResult.getSelectedValues().isEmpty();
+              facetValuePanel.setEnabled(enabled);
+              facetValuePanel.setVisible(enabled);
+
+              facetPanel.add(facetValuePanel);
+              facetValuePanel.setValue(facetIsSelected);
+
+              facetValuePanel.addValueChangeHandler(facetValueChangedEvent -> {
+                FacetParameter selectedFacetParameter = getFacets().getParameters().get(facetField);
+
+                if (selectedFacetParameter != null) {
+                  if (facetValueChangedEvent.getValue()) {
+                    selectedFacetParameter.getValues().add(value);
+                  } else {
+                    selectedFacetParameter.getValues().remove(value);
+                  }
+                } else {
+                  LOGGER.warn("Haven't found the facet parameter: " + facetField);
+                }
+                refresh();
+              });
+            }
+          } else {
+            LOGGER.warn("Got a facet but haven't got a panel for it: " + facetField);
+          }
+        }
+
+        facetsPanel.setVisible(!allFacetsAreEmpty);
+      });
+
+      return !facetPanels.isEmpty();
+    }
+
+    return false;
+  }
+
+  private Map<String, FlowPanel> createInnerFacetPanels(final FlowPanel facetsPanel) {
+    Map<String, FlowPanel> innerFacetPanels = new HashMap<>();
+    for (FacetParameter facetParameter : getFacets().getParameters().values()) {
+      FlowPanel facetAndTitle = new FlowPanel();
+      facetAndTitle.addStyleName("sidebar-facet-panel");
+
+      String title = ClientConfigurationManager.getTranslationWithDefault(facetParameter.getName(),
+        ViewerConstants.I18N_UI_FACETS_PREFIX, getSelectedClass().getSimpleName(), facetParameter.getName());
+
+      Label titleLabel = new Label(title);
+      titleLabel.addStyleName("h5");
+
+      FlowPanel facetPanel = new FlowPanel();
+      facetPanel.addStyleName("facet-input-panel");
+
+      facetAndTitle.add(titleLabel);
+      facetAndTitle.add(facetPanel);
+      facetsPanel.add(facetAndTitle);
+
+      innerFacetPanels.put(facetParameter.getName(), facetPanel);
+    }
+
+    return innerFacetPanels;
+  }
+
+  private boolean hasSelectedFacets() {
+    boolean hasSelectedFacets = false;
+    if (getFacets() != null) {
+      for (FacetParameter facetParameter : getFacets().getParameters().values()) {
+        if (!facetParameter.getValues().isEmpty()) {
+          hasSelectedFacets = true;
+          break;
+        }
+      }
+    }
+    return hasSelectedFacets;
+  }
+
+  private void clearSelectedFacets() {
+    for (Map.Entry<String, FacetParameter> entry : getFacets().getParameters().entrySet()) {
+      entry.getValue().getValues().clear();
+    }
+  }
+
+  public String translate(String fieldName, String fieldValue) {
+    String translation = null;
+    if (this.result != null && this.result.getFacetResults() != null) {
+      for (FacetFieldResult ffr : this.result.getFacetResults()) {
+        if (ffr.getField().equalsIgnoreCase(fieldName)) {
+          if (ffr.getValues() != null) {
+            for (FacetValue fv : ffr.getValues()) {
+              if (fv.getValue().equalsIgnoreCase(fieldValue)) {
+                translation = fv.getLabel();
+                break;
+              }
+            }
+          }
+        }
+        if (translation != null) {
+          break;
+        }
+      }
+    }
+    if (translation == null) {
+      translation = fieldValue;
+    }
+    return translation;
+  }
+
+  public IndexResult<T> getResult() {
+    return result;
+  }
+
+  public void setResult(IndexResult<T> result) {
+    this.result = result;
+  }
 }

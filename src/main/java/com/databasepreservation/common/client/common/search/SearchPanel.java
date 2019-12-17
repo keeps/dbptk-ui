@@ -11,8 +11,8 @@ import org.roda.core.data.v2.index.filter.BasicSearchFilterParameter;
 import org.roda.core.data.v2.index.filter.Filter;
 import org.roda.core.data.v2.index.filter.FilterParameter;
 
-import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.common.lists.utils.AsyncTableCell;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.widgets.wcag.AccessibleFocusPanel;
 import com.google.gwt.core.client.GWT;
@@ -93,6 +93,35 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
   private AsyncCallback<Void> saveQueryCallback;
   private FlowPanel fieldsPanel;
   private AsyncTableCell<?, ?> list;
+
+  public SearchPanel(Filter defaultFilter, String allFilter, String placeholder, boolean showSearchInputListBox,
+    boolean showSearchAdvancedDisclosureButton) {
+    this.defaultFilter = defaultFilter;
+    this.allFilter = allFilter;
+
+    initWidget(binder.createAndBindUi(this));
+
+    if (placeholder != null) {
+      searchInputBox.getElement().setPropertyString("placeholder", placeholder);
+    }
+
+    searchInputListBox.setVisible(showSearchInputListBox);
+    searchAdvancedDisclosureButton.setVisible(showSearchAdvancedDisclosureButton);
+    searchAdvancedPanel.setVisible(false);
+
+    searchInputBox.addKeyDownHandler(event -> {
+      if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
+        doSearch();
+      }
+    });
+
+    searchInputButton.addClickHandler(event -> doSearch());
+    searchAdvancedDisclosureButton.addClickHandler(event -> showSearchAdvancedPanel());
+    searchInputListBox.addValueChangeHandler(event -> onChange());
+    if (showSearchAdvancedDisclosureButton) {
+      searchPanel.addStyleName("searchPanelAdvanced");
+    }
+  }
 
   public SearchPanel(Filter defaultFilter, String allFilter, String placeholder, boolean showSearchInputListBox,
     boolean showSearchAdvancedDisclosureButton, final AsyncCallback<Void> saveQueryCallback) {

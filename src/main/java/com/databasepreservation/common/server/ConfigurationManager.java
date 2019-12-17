@@ -7,29 +7,35 @@ import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import com.databasepreservation.common.client.exceptions.RESTException;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.utils.JsonUtils;
+import org.roda.core.data.v2.index.facet.FacetParameter;
+import org.roda.core.data.v2.index.facet.Facets;
+import org.roda.core.data.v2.index.facet.SimpleFacetParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.databasepreservation.common.client.ClientLogger;
+import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.models.activity.logs.ActivityLogEntry;
 import com.databasepreservation.common.server.storage.fs.FSUtils;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-public class ActivityLogsManager {
-  private static final Logger LOGGER = LoggerFactory.getLogger(ActivityLogsManager.class);
+public class ConfigurationManager {
+  private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationManager.class);
 
   private static final DateTimeFormatter LOG_NAME_DATE_FORMAT = DateTimeFormatter.ISO_LOCAL_DATE;
   private final Object logFileLock = new Object();
   private long entryLogLineNumber = -1;
 
-  public ActivityLogsManager() {
-
+  public ConfigurationManager() {
   }
 
   public void addLogEntry(ActivityLogEntry logEntry, Path logDirectory) throws GenericException {

@@ -11,7 +11,7 @@ import org.roda.core.data.v2.index.filter.FilterParameter;
 import org.roda.core.data.v2.index.filter.LongRangeFilterParameter;
 
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.common.utils.BrowserServiceUtils;
+import com.databasepreservation.common.client.common.utils.AdvancedSearchUtils;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.tools.ViewerJsonUtils;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
@@ -47,7 +47,7 @@ public class SearchInfo implements Serializable {
     defaultFilter = ViewerConstants.DEFAULT_FILTER;
     currentFilter = "";
 
-    fields = BrowserServiceUtils.getSearchFieldsFromTable(viewerTable);
+    fields = AdvancedSearchUtils.getSearchFieldsFromTable(viewerTable);
 
     fieldParameters = new ArrayList<>();
     for (SearchField field : fields) {

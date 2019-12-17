@@ -18,7 +18,7 @@ public class ActivityLogEntry extends IsIndexed {
   private String actionComponent;
   private String actionMethod;
   private String relatedObjectID;
-  private LogEntryState logEntryState;
+  private LogEntryState state;
   private long duration;
   private long lineNumber = -1;
   private List<LogEntryParameter> parameters;
@@ -27,7 +27,7 @@ public class ActivityLogEntry extends IsIndexed {
    * Constructs an empty {@link ActivityLogEntry}.
    */
   public ActivityLogEntry() {
-    this.logEntryState = LogEntryState.UNKNOWN;
+    this.state = LogEntryState.UNKNOWN;
   }
 
   @Override
@@ -88,12 +88,12 @@ public class ActivityLogEntry extends IsIndexed {
     this.relatedObjectID = relatedObjectID;
   }
 
-  public LogEntryState getLogEntryState() {
-    return logEntryState;
+  public LogEntryState getState() {
+    return state;
   }
 
-  public void setLogEntryState(LogEntryState logEntryState) {
-    this.logEntryState = logEntryState;
+  public void setState(LogEntryState state) {
+    this.state = state;
   }
 
 
@@ -135,12 +135,13 @@ public class ActivityLogEntry extends IsIndexed {
         Objects.equals(getActionComponent(), that.getActionComponent()) &&
         Objects.equals(getActionMethod(), that.getActionMethod()) &&
         Objects.equals(getRelatedObjectID(), that.getRelatedObjectID()) &&
-        getLogEntryState() == that.getLogEntryState();
+      getState() == that.getState();
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(getUuid(), getAddress(), getDatetime(), getUsername(), getActionComponent(), getActionMethod(), getRelatedObjectID(), getLogEntryState(), getDuration(), getLineNumber());
+    return Objects.hash(getUuid(), getAddress(), getDatetime(), getUsername(), getActionComponent(), getActionMethod(),
+      getRelatedObjectID(), getState(), getDuration(), getLineNumber());
   }
 
   @Override
@@ -148,6 +149,6 @@ public class ActivityLogEntry extends IsIndexed {
     return "LogEntry [uuid=" + uuid + ", address=" + address + ", datetime=" + datetime + ", username="
         + username + ", actionComponent=" + actionComponent + ", actionMethod=" + actionMethod + ", relatedObjectID="
         + relatedObjectID + ", duration=" + duration + ", lineNumber=" + lineNumber
-        + ", parameters=" + parameters + ", state=" + logEntryState.name() + "]";
+      + ", parameters=" + parameters + ", state=" + state.name() + "]";
   }
 }

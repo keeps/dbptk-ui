@@ -5,13 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.client.common.lists.utils.BasicAsyncTableCell;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.roda.core.data.v2.index.filter.Filter;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.lists.columns.TooltipColumn;
+import com.databasepreservation.common.client.common.lists.utils.BasicAsyncTableCell;
 import com.databasepreservation.common.client.common.utils.LabelUtils;
 import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
@@ -20,6 +20,7 @@ import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.activity.logs.ActivityLogEntry;
 import com.databasepreservation.common.client.services.ActivityLogService;
 import com.databasepreservation.common.client.tools.Humanize;
+import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.databasepreservation.common.client.widgets.Alert;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.shared.GWT;
@@ -52,6 +53,10 @@ public class ActivityLogList extends BasicAsyncTableCell<ActivityLogEntry> {
     this(null, null, null, false, false);
   }
 
+  public ActivityLogList(Filter filter, Facets facets, boolean selectable, boolean exportable) {
+    this(filter, facets, null, selectable, exportable);
+  }
+
   private ActivityLogList(Filter filter, Facets facets, String summary, boolean selectable, boolean exportable) {
     super(filter, facets, summary, selectable, exportable, INITIAL_PAGE_SIZE, INITIAL_PAGE_SIZE_INCREMENT);
   }
@@ -59,6 +64,7 @@ public class ActivityLogList extends BasicAsyncTableCell<ActivityLogEntry> {
   @Override
   protected void configureDisplay(CellTable<ActivityLogEntry> display) {
     display.setSelectionModel(display.getSelectionModel());
+    setSelectedClass(ActivityLogEntry.class);
 
     dateColumn = new TooltipColumn<ActivityLogEntry>() {
       @Override
@@ -71,14 +77,19 @@ public class ActivityLogList extends BasicAsyncTableCell<ActivityLogEntry> {
     componentColumn = new TooltipColumn<ActivityLogEntry>() {
       @Override
       public SafeHtml getValue(ActivityLogEntry log) {
-        return log != null ? SafeHtmlUtils.fromString(log.getActionComponent()) : SafeHtmlUtils.fromString("unknown");
+        return log != null
+          ? SafeHtmlUtils
+            .fromString(translate(ViewerConstants.SOLR_ACTIVITY_LOG_ACTION_COMPONENT, log.getActionComponent()))
+          : SafeHtmlUtils.fromString("unknown");
       }
     };
 
     methodColumn = new TooltipColumn<ActivityLogEntry>() {
       @Override
       public SafeHtml getValue(ActivityLogEntry log) {
-        return log != null ? SafeHtmlUtils.fromString(log.getActionMethod()) : SafeHtmlUtils.fromString("unknown");
+        return log != null
+          ? SafeHtmlUtils.fromString(ViewerStringUtils.getPrettifiedActionMethod(log.getActionMethod()))
+          : SafeHtmlUtils.fromString("unknown");
       }
     };
 
@@ -107,7 +118,7 @@ public class ActivityLogList extends BasicAsyncTableCell<ActivityLogEntry> {
     outcomeColumn = new Column<ActivityLogEntry, SafeHtml>(new SafeHtmlCell()) {
       @Override
       public SafeHtml getValue(ActivityLogEntry log) {
-        return log != null ? LabelUtils.getLogEntryState(log.getLogEntryState()) : SafeHtmlUtils.fromString("unknown");
+        return log != null ? LabelUtils.getLogEntryState(log.getState()) : SafeHtmlUtils.fromString("unknown");
       }
     };
 
@@ -119,13 +130,13 @@ public class ActivityLogList extends BasicAsyncTableCell<ActivityLogEntry> {
     addressColumn.setSortable(true);
     outcomeColumn.setSortable(true);
 
-    addColumn(dateColumn, messages.activityLogTableHeaderForDate(), true, TextAlign.NONE, 10);
-    addColumn(componentColumn, messages.activityLogTableHeaderForComponent(), true, TextAlign.NONE, 15);
-    addColumn(methodColumn, messages.activityLogTableHeaderForMethod(), true, TextAlign.NONE, 10);
-    addColumn(userColumn, messages.activityLogTableHeaderForUser(), true, TextAlign.NONE, 10);
+    addColumn(dateColumn, messages.activityLogTableHeaderForDate(), true, TextAlign.NONE, 14);
+    addColumn(componentColumn, messages.activityLogTableHeaderForComponent(), true, TextAlign.NONE);
+    addColumn(methodColumn, messages.activityLogTableHeaderForMethod(), true, TextAlign.NONE);
+    addColumn(userColumn, messages.activityLogTableHeaderForUser(), true, TextAlign.NONE);
     addColumn(durationColumn, messages.activityLogTableHeaderForDuration(), true, TextAlign.NONE, 5);
-    addColumn(addressColumn, messages.activityLogTableHeaderForAddress(), true, TextAlign.NONE, 10);
-    addColumn(outcomeColumn, messages.activityLogTableHeaderForOutcome(), true, TextAlign.NONE, 10);
+    addColumn(addressColumn, messages.activityLogTableHeaderForAddress(), true, TextAlign.NONE);
+    addColumn(outcomeColumn, messages.activityLogTableHeaderForOutcome(), true, TextAlign.NONE);
 
     Alert alert = new Alert(Alert.MessageAlertType.LIGHT, messages.noItemsToDisplay());
     display.setEmptyTableWidget(alert);

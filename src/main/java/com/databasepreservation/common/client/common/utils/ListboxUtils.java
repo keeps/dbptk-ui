@@ -14,7 +14,7 @@ import com.google.gwt.user.client.ui.ListBox;
  */
 public class ListboxUtils {
 
-  public static final void removeItemByValue(ListBox listbox, String value) {
+  public static void removeItemByValue(ListBox listbox, String value) {
     List<Integer> indexesToRemove = new ArrayList<>();
     // going from the end to the start so remove is easier
     for (int i = listbox.getItemCount() - 1; i >= 0; i--) {
@@ -28,7 +28,7 @@ public class ListboxUtils {
     }
   }
 
-  public static final int insertItemByAlphabeticOrder(ListBox listbox, String item, String value) {
+  public static int insertItemByAlphabeticOrder(ListBox listbox, String item, String value) {
     int indexToInsert = -1;
     for (int i = 0; i < listbox.getItemCount(); i++) {
       String itemText = listbox.getItemText(i);
@@ -46,7 +46,7 @@ public class ListboxUtils {
     return indexToInsert;
   }
 
-  public static final void copyValues(ListBox listBoxOrigin, ListBox listBoxDestination) {
+  public static void copyValues(ListBox listBoxOrigin, ListBox listBoxDestination) {
     for (int i = 0; i < listBoxOrigin.getItemCount(); i++) {
       listBoxDestination.addItem(listBoxOrigin.getItemText(i), listBoxOrigin.getValue(i));
     }

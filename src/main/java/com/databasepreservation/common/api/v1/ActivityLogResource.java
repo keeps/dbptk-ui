@@ -4,6 +4,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 
+import com.databasepreservation.common.utils.I18nUtility;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.RequestNotValidException;
 import org.roda.core.data.utils.JsonUtils;
@@ -43,8 +44,10 @@ public class ActivityLogResource implements ActivityLogService {
     controllerAssistant.checkRoles(user);
 
     try {
-      return ViewerFactory.getSolrManager().find(ActivityLogEntry.class, findRequest.filter, findRequest.sorter,
-        findRequest.sublist, findRequest.facets);
+
+      final IndexResult<ActivityLogEntry> result = ViewerFactory.getSolrManager().find(ActivityLogEntry.class, findRequest.filter, findRequest.sorter,
+          findRequest.sublist, findRequest.facets);
+      return I18nUtility.translate(result, ActivityLogEntry.class, locale);
     } catch (GenericException | RequestNotValidException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);

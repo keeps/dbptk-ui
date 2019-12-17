@@ -22,4 +22,11 @@ public class ViewerStringUtils {
 
     return concat;
   }
+
+  // method to prettify method names
+  public static String getPrettifiedActionMethod(String actionMethod) {
+    String method = actionMethod.substring(0, 1).toUpperCase() + actionMethod.substring(1);
+    method = method.replaceAll("([A-Z])", " $1").trim();
+    return method.replaceAll("S I A R D", "SIARD");
+  }
 }

@@ -1,10 +1,12 @@
 package com.databasepreservation.common.client.common.fields;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -24,8 +26,7 @@ public class MetadataField extends Composite {
   @UiField
   Label metadataLabel;
 
-  @UiField
-  Label metadataValue;
+  private HTML metadataValue = new HTML();
 
   public static MetadataField createInstance(String label, String value) {
     return new MetadataField(label, value);
@@ -35,7 +36,25 @@ public class MetadataField extends Composite {
     return new MetadataField(null, value);
   }
 
+  public static MetadataField createInstance(String label, SafeHtml safeHtml) {
+    return new MetadataField(label, safeHtml);
+  }
+
+  private MetadataField(String label, SafeHtml safeHtml) {
+    init(label);
+
+    metadataValue.setHTML(safeHtml);
+    metadataField.add(metadataValue);
+  }
+
   private MetadataField(String label, String value) {
+    init(label);
+
+    metadataValue.setText(value);
+    metadataField.add(metadataValue);
+  }
+
+  private void init(String label) {
     initWidget(binder.createAndBindUi(this));
 
     if (label != null) {
@@ -43,8 +62,6 @@ public class MetadataField extends Composite {
     } else {
       metadataLabel.setVisible(false);
     }
-
-    metadataValue.setText(value);
   }
 
   public void setCSS(String styleName) {

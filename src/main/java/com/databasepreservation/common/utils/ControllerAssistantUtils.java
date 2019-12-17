@@ -44,7 +44,7 @@ public class ControllerAssistantUtils {
     logEntry.setDuration(duration);
     logEntry.setDatetime(new Date());
     logEntry.setRelatedObjectID(relatedObjectId);
-    logEntry.setLogEntryState(status);
+    logEntry.setState(status);
     return logEntry;
   }
 
@@ -70,7 +70,7 @@ public class ControllerAssistantUtils {
 
   private static void registerAction(ActivityLogEntry logEntry) {
     try {
-      ViewerFactory.getActivityLogsManager().addLogEntry(logEntry,
+      ViewerFactory.getConfigurationManager().addLogEntry(logEntry,
         ViewerFactory.getViewerConfiguration().getActivityLogsPath());
     } catch (GenericException e) {
       LOGGER.error("Error registering action (actionComponent={}, actionMethod={})", logEntry.getActionComponent(),
