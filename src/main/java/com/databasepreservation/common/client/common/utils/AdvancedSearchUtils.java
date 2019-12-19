@@ -23,11 +23,11 @@ public class AdvancedSearchUtils {
 
     SearchField address = new SearchField(ViewerConstants.SOLR_ACTIVITY_LOG_IP_ADDRESS,
       Collections.singletonList(ViewerConstants.SOLR_ACTIVITY_LOG_IP_ADDRESS),
-      messages.activityLogTableHeaderForAddress(), ViewerConstants.SEARCH_FIELD_TYPE_TEXT);
+      messages.activityLogTextForAddress(), ViewerConstants.SEARCH_FIELD_TYPE_TEXT);
     address.setFixed(true);
 
     SearchField date = new SearchField(ViewerConstants.SOLR_ACTIVITY_LOG_DATETIME,
-      Collections.singletonList(ViewerConstants.SOLR_ACTIVITY_LOG_DATETIME), messages.activityLogTableHeaderForDate(),
+      Collections.singletonList(ViewerConstants.SOLR_ACTIVITY_LOG_DATETIME), messages.activityLogTextForDate(),
       ViewerConstants.SEARCH_FIELD_TYPE_DATETIME);
     date.setFixed(true);
 

@@ -19,6 +19,7 @@ import com.databasepreservation.common.client.common.utils.ListboxUtils;
 import com.databasepreservation.common.client.models.activity.logs.ActivityLogEntry;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
+import com.databasepreservation.common.client.tools.HistoryManager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -29,6 +30,7 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
+import org.roda.core.data.v2.index.filter.Filter;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -68,7 +70,7 @@ public class ActivityLogPanel extends ContentPanel {
   private final Map<String, SearchField> searchFields = new HashMap<>();
 
   private ActivityLogPanel() {
-    activityLogList = new ActivityLogList(null,
+    activityLogList = new ActivityLogList(new Filter(),
       ClientConfigurationManager.FacetFactory.getFacets(ViewerConstants.ACTIVITY_LOG_PROPERTY), false, false);
     itemsSearchAdvancedFieldsPanel = new FlowPanel();
     searchAdvancedFieldOptions = new ListBox();
@@ -87,8 +89,8 @@ public class ActivityLogPanel extends ContentPanel {
     activityLogList.getSelectionModel().addSelectionChangeHandler(event -> {
       ActivityLogEntry selected = activityLogList.getSelectionModel().getSelectedObject();
       if (selected != null) {
-        GWT.log("CLICK");
         activityLogList.getSelectionModel().clear();
+        HistoryManager.gotoActivityLog(selected.getUuid());
       }
 
     });
@@ -96,7 +98,7 @@ public class ActivityLogPanel extends ContentPanel {
     searchPanel = new SearchPanel(ViewerConstants.DEFAULT_FILTER, ViewerConstants.INDEX_SEARCH,
       messages.searchPlaceholder(), false, true);
     searchPanel.setList(activityLogList);
-    searchPanel.setDefaultFilterIncremental(true);
+    searchPanel.setDefaultFilterIncremental(false);
     showSearchAdvancedFieldsPanel();
 
     advancedSearch.add(searchPanel);

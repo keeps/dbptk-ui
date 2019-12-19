@@ -2,8 +2,10 @@ package com.databasepreservation.common.client.services;
 
 import java.util.function.Consumer;
 
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
 import org.fusesource.restygwt.client.DirectRestService;
@@ -50,4 +52,8 @@ public interface ActivityLogService extends DirectRestService {
   @Path("/find")
   IndexResult<ActivityLogEntry> find(@ApiParam(ViewerConstants.API_QUERY_PARAM_FILTER) FindRequest findRequest,
     @QueryParam(ViewerConstants.API_QUERY_PARAM_LOCALE) String locale);
+
+  @GET
+  @Path("/find/{logUUID}")
+  ActivityLogEntry retrieve(@PathParam("logUUID") String logUUID);
 }

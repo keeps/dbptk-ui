@@ -101,12 +101,13 @@ public class ExportsResource {
     } finally {
       if (findRequest != null && exportRequest != null) {
         // register action
-        controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,
+        controllerAssistant.registerAction(user, databaseUUID, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,
           ViewerConstants.CONTROLLER_TABLE_ID_PARAM, tableUUID,
-          ViewerConstants.CONTROLLER_FILTER_PARAM, findRequest.filter.toString(),
+          ViewerConstants.CONTROLLER_FILTER_PARAM, JsonUtils.getJsonFromObject(findRequest.filter),
           ViewerConstants.CONTROLLER_SUBLIST_PARAM,
-          findRequest.sublist == null ? Sublist.NONE.toString() : findRequest.sublist.toString(),
-          ViewerConstants.CONTROLLER_EXPORT_PARAM, exportRequest.toString());
+          findRequest.sublist == null ? JsonUtils.getJsonFromObject(Sublist.NONE)
+            : JsonUtils.getJsonFromObject(findRequest.sublist),
+          ViewerConstants.CONTROLLER_EXPORT_PARAM, JsonUtils.getJsonFromObject(exportRequest));
       }
     }
   }

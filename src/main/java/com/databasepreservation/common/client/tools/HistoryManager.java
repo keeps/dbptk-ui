@@ -295,6 +295,11 @@ public class HistoryManager {
     newHistory(params);
   }
 
+  public static void gotoActivityLog(final String logUUID) {
+    List<String> params = Arrays.asList(ROUTE_ACTIVITY_LOG, logUUID);
+    newHistory(params);
+  }
+
   private static void newHistory(List<String> path) {
     // History.newItem(createHistoryToken(path)
     String hash = createHistoryToken(path);

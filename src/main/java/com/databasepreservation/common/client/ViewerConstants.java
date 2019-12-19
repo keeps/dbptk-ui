@@ -421,6 +421,7 @@ public class ViewerConstants {
   public static final String CONTROLLER_TABLE_ID_PARAM = "tableUUID";
   public static final String CONTROLLER_ROW_ID_PARAM = "rowUUID";
   public static final String CONTROLLER_COLUMN_ID_PARAM = "columnID";
+  public static final String CONTROLLER_LOG_ID_PARAM = "logID";
   public static final String CONTROLLER_FILENAME_PARAM = "rowUUID";
   public static final String CONTROLLER_FILTER_PARAM = "filter";
   public static final String CONTROLLER_EXPORT_PARAM = "export";

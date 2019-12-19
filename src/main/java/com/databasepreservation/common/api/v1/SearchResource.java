@@ -68,10 +68,11 @@ public class SearchResource implements SearchService {
       throw new RESTException(e);
     } finally {
       // register action
-      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,
+      controllerAssistant.registerAction(user, databaseUUID, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM,
+        databaseUUID,
         ViewerConstants.CONTROLLER_TABLE_ID_PARAM, tableUUID, ViewerConstants.CONTROLLER_SAVED_SEARCH_NAME_PARAM, name,
         ViewerConstants.CONTROLLER_SAVED_SEARCH_DESCRIPTION_PARAM, description,
-        ViewerConstants.CONTROLLER_SAVED_SEARCH_PARAM, savedSearch.getSearchInfoJson());
+        ViewerConstants.CONTROLLER_SAVED_SEARCH_PARAM, JsonUtils.getJsonFromObject(savedSearch));
     }
   }
 
@@ -91,7 +92,8 @@ public class SearchResource implements SearchService {
       throw new RESTException(e);
     } finally {
       // register action
-      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,
+      controllerAssistant.registerAction(user, databaseUUID, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM,
+        databaseUUID,
         ViewerConstants.CONTROLLER_FILTER_PARAM, JsonUtils.getJsonFromObject(findRequest));
     }
   }
@@ -111,7 +113,8 @@ public class SearchResource implements SearchService {
       throw new RESTException(e);
     } finally {
       // register action
-      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,
+      controllerAssistant.registerAction(user, databaseUUID, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM,
+        databaseUUID,
         ViewerConstants.CONTROLLER_SAVED_SEARCH_UUID_PARAM, savedSearchUUID);
     }
   }
@@ -131,7 +134,8 @@ public class SearchResource implements SearchService {
       throw new RESTException(e);
     } finally {
       // register action
-      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,
+      controllerAssistant.registerAction(user, databaseUUID, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM,
+        databaseUUID,
         ViewerConstants.CONTROLLER_SAVED_SEARCH_UUID_PARAM, savedSearchUUID,
         ViewerConstants.CONTROLLER_SAVED_SEARCH_NAME_PARAM, name,
         ViewerConstants.CONTROLLER_SAVED_SEARCH_DESCRIPTION_PARAM, description);
@@ -153,7 +157,8 @@ public class SearchResource implements SearchService {
       throw new RESTException(e);
     } finally {
       // register action
-      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,
+      controllerAssistant.registerAction(user, databaseUUID, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM,
+        databaseUUID,
         ViewerConstants.CONTROLLER_SAVED_SEARCH_UUID_PARAM, savedSearchUUID);
     }
   }
@@ -169,7 +174,8 @@ public class SearchResource implements SearchService {
       return AdvancedSearchUtils.getSearchFieldsFromTable(viewerTable);
     } finally {
       // register action
-      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM,
+      controllerAssistant.registerAction(user, viewerTable.getUUID(), state,
+        ViewerConstants.CONTROLLER_DATABASE_ID_PARAM,
         viewerTable.getName());
     }
   }

@@ -130,13 +130,13 @@ public class ActivityLogList extends BasicAsyncTableCell<ActivityLogEntry> {
     addressColumn.setSortable(true);
     outcomeColumn.setSortable(true);
 
-    addColumn(dateColumn, messages.activityLogTableHeaderForDate(), true, TextAlign.NONE, 14);
-    addColumn(componentColumn, messages.activityLogTableHeaderForComponent(), true, TextAlign.NONE);
-    addColumn(methodColumn, messages.activityLogTableHeaderForMethod(), true, TextAlign.NONE);
-    addColumn(userColumn, messages.activityLogTableHeaderForUser(), true, TextAlign.NONE);
-    addColumn(durationColumn, messages.activityLogTableHeaderForDuration(), true, TextAlign.NONE, 5);
-    addColumn(addressColumn, messages.activityLogTableHeaderForAddress(), true, TextAlign.NONE);
-    addColumn(outcomeColumn, messages.activityLogTableHeaderForOutcome(), true, TextAlign.NONE);
+    addColumn(dateColumn, messages.activityLogTextForDate(), true, TextAlign.NONE, 14);
+    addColumn(componentColumn, messages.activityLogTextForComponent(), true, TextAlign.NONE);
+    addColumn(methodColumn, messages.activityLogTextForMethod(), true, TextAlign.NONE);
+    addColumn(userColumn, messages.activityLogTextForUser(), true, TextAlign.NONE);
+    addColumn(durationColumn, messages.activityLogTextForDuration(), true, TextAlign.NONE, 7);
+    addColumn(addressColumn, messages.activityLogTextForAddress(), true, TextAlign.NONE);
+    addColumn(outcomeColumn, messages.activityLogTextForOutcome(), true, TextAlign.NONE);
 
     Alert alert = new Alert(Alert.MessageAlertType.LIGHT, messages.noItemsToDisplay());
     display.setEmptyTableWidget(alert);

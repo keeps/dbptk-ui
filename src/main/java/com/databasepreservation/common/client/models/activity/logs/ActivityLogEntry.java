@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Objects;
 
 import com.databasepreservation.common.client.index.IsIndexed;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>

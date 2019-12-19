@@ -11,6 +11,7 @@ import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.utils.ContentPanelLoader;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.common.utils.RightPanelLoader;
+import com.databasepreservation.common.client.common.visualization.activity.log.ActivityLogDetailedPanel;
 import com.databasepreservation.common.client.common.visualization.activity.log.ActivityLogPanel;
 import com.databasepreservation.common.client.common.visualization.browse.ContainerPanel;
 import com.databasepreservation.common.client.common.visualization.browse.DatabasePanel;
@@ -166,12 +167,24 @@ public class MainPanel extends Composite {
       });
 
     } else if (HistoryManager.ROUTE_ACTIVITY_LOG.equals(currentHistoryPath.get(0))) {
-      setContent(new ContentPanelLoader() {
-        @Override
-        public ContentPanel load(ViewerDatabase database) {
-          return ActivityLogPanel.getInstance();
-        }
-      });
+      if (currentHistoryPath.size() == 1) {
+        // #activityLog
+        setContent(new ContentPanelLoader() {
+          @Override
+          public ContentPanel load(ViewerDatabase database) {
+            return ActivityLogPanel.getInstance();
+          }
+        });
+      } else if (currentHistoryPath.size() == 2) {
+        // #activityLog/<logUUID>
+        String logUUID = currentHistoryPath.get(1);
+        setContent(new ContentPanelLoader() {
+          @Override
+          public ContentPanel load(ViewerDatabase database) {
+            return ActivityLogDetailedPanel.getInstance(logUUID);
+          }
+        });
+      }
     } else if (HistoryManager.ROUTE_SIARD_INFO.equals(currentHistoryPath.get(0))) {
       String databaseUUID = currentHistoryPath.get(1);
       setContent(databaseUUID, new ContentPanelLoader() {

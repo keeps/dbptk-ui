@@ -52,7 +52,7 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
   private static final String OPEN_NOT_VALIDATED_SPAN = "<span>&#10006;</span>";
 
   public DatabaseList() {
-    this(null, null, null, false, false);
+    this(new Filter(), null, null, false, false);
   }
 
   private DatabaseList(Filter filter, Facets facets, String summary, boolean selectable, boolean exportable) {
@@ -185,6 +185,8 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
   protected void getData(Sublist sublist, ColumnSortList columnSortList,
     MethodCallback<IndexResult<ViewerDatabase>> callback) {
     Filter filter = getFilter();
+
+    GWT.log("filter: " + filter);
 
     Map<Column<ViewerDatabase, ?>, List<String>> columnSortingKeyMap = new HashMap<>();
     Sorter sorter = createSorter(columnSortList, columnSortingKeyMap);

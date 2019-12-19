@@ -94,9 +94,18 @@ public class Humanize {
     }
   }
 
-  public static String formatDateTime(Date date) {
-    DateTimeFormat format = DateTimeFormat.getFormat("yyy-MM-dd HH:mm:ss");
+  public static String formatDateTime(Date date, boolean showTimeZone) {
+    DateTimeFormat format;
+    if (!showTimeZone) {
+      format = DateTimeFormat.getFormat("yyyy-MM-dd HH:mm:ss");
+    } else {
+      format = DateTimeFormat.getFormat("yyyy-MM-dd HH:mm:ss zzz");
+    }
     return format.format(date);
+  }
+
+  public static String formatDateTime(Date date) {
+    return formatDateTime(date, false);
   }
 
   public static String logEntryState(@NotNull LogEntryState state) {

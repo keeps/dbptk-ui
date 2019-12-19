@@ -2,9 +2,8 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
 >
 
-    <g:FlowPanel>
-        <g:SimplePanel ui:field="recordHeader" addStyleNames="structure-header" />
-        <g:FlowPanel ui:field="description" />
+    <g:FlowPanel addStyleNames="activity-log-panel">
+        <g:SimplePanel ui:field="logHeader" addStyleNames="structure-header" />
         <g:FlowPanel addStyleNames="rowData" ui:field="content" />
     </g:FlowPanel>
 </ui:UiBinder>

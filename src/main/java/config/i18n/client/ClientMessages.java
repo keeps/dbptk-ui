@@ -572,6 +572,8 @@ public interface ClientMessages extends Messages {
 
   String breadcrumbTextForActivityLog();
 
+  String breadcrumbTextForActivityLogDetail();
+
   /*********************************************
    * Home Page
    ********************************************/
@@ -1132,21 +1134,25 @@ public interface ClientMessages extends Messages {
    *******************************************/
   String activityLogMenuText();
 
+  String activityLogDetailedHeaderText();
+
   String activityLogDescription();
 
-  String activityLogTableHeaderForDate();
+  String activityLogTextForDate();
 
-  String activityLogTableHeaderForComponent();
+  String activityLogTextForComponent();
 
-  String activityLogTableHeaderForMethod();
+  String activityLogTextForMethod();
 
-  String activityLogTableHeaderForUser();
+  String activityLogTextForUser();
 
-  String activityLogTableHeaderForDuration();
+  String activityLogTextForDuration();
 
-  String activityLogTableHeaderForAddress();
+  String activityLogTextForAddress();
 
-  String activityLogTableHeaderForOutcome();
+  String activityLogTextForParameters();
+
+  String activityLogTextForOutcome();
 
   String activityLogHumanizedTextForSuccess();
 

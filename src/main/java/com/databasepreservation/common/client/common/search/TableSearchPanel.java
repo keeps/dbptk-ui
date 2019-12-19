@@ -119,7 +119,7 @@ public class TableSearchPanel extends Composite {
 
   public void provideSource(final ViewerDatabase database, final ViewerTable table, Filter initialFilter) {
     if (initialFilter == null) {
-      initialFilter = ViewerConstants.DEFAULT_FILTER;
+      initialFilter = new Filter();
     }
     this.initialFilter = initialFilter;
     this.database = database;
@@ -128,9 +128,10 @@ public class TableSearchPanel extends Composite {
     tableRowList = new TableRowList(database, table, initialFilter, null, null, false, table.getCountRows() != 0);
     tableRowList.setColumnVisibility(columnDisplayNameToVisibleState);
 
-    GWT.log("initial filter: " + initialFilter.toString());
+    GWT.log("initial filter: " + initialFilter);
 
-    searchPanel = new SearchPanel(initialFilter, ViewerConstants.INDEX_SEARCH, messages.searchPlaceholder(), false,
+    searchPanel = new SearchPanel(ViewerConstants.DEFAULT_FILTER, ViewerConstants.INDEX_SEARCH,
+      messages.searchPlaceholder(), false,
       true, new DefaultAsyncCallback<Void>() {
         @Override
         public void onSuccess(Void result) {
@@ -138,7 +139,7 @@ public class TableSearchPanel extends Composite {
         }
       });
     searchPanel.setList(tableRowList);
-    searchPanel.setDefaultFilterIncremental(true);
+    searchPanel.setDefaultFilterIncremental(false);
     showSearchAdvancedFieldsPanel();
 
     tableRowList.getSelectionModel().addSelectionChangeHandler(event -> {

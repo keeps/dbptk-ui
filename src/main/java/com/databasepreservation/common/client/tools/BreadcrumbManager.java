@@ -326,7 +326,15 @@ public class BreadcrumbManager {
     List<BreadcrumbItem> items = forManageDatabase();
     items
       .add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.ACTIVITY_LOG)
-        + SafeHtmlUtils.htmlEscape(messages.breadcrumbTextForActivityLog()))));
+        + SafeHtmlUtils.htmlEscape(messages.breadcrumbTextForActivityLog())), HistoryManager::gotoActivityLog));
+    return items;
+  }
+
+  public static List<BreadcrumbItem> forActivityLogDetailed() {
+    List<BreadcrumbItem> items = forActivityLog();
+    items
+        .add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.ACTIVITY_LOG)
+            + SafeHtmlUtils.htmlEscape(messages.breadcrumbTextForActivityLogDetail()))));
     return items;
   }
 }

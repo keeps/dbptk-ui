@@ -13,6 +13,7 @@ import javax.ws.rs.core.Context;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RequestNotValidException;
+import org.roda.core.data.utils.JsonUtils;
 import org.roda.core.data.v2.index.filter.Filter;
 import org.roda.core.data.v2.index.filter.SimpleFilterParameter;
 import org.roda.core.data.v2.user.User;
@@ -97,7 +98,7 @@ public class DatabaseResource implements DatabaseService {
   }
 
   @Override
-  public IndexResult<ViewerDatabase> findDatabases(FindRequest findRequest, String localeString) throws RESTException {
+  public IndexResult<ViewerDatabase> findDatabases(FindRequest findRequest, String localeString) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
     User user = UserUtility.getUser(request);
 
@@ -163,7 +164,7 @@ public class DatabaseResource implements DatabaseService {
       throw new RESTException(e);
     } finally {
       // register action
-      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID);
+      controllerAssistant.registerAction(user, databaseUUID, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID);
     }
   }
 
@@ -182,7 +183,7 @@ public class DatabaseResource implements DatabaseService {
       throw new RESTException(e);
     } finally {
       // register action
-      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID);
+      controllerAssistant.registerAction(user, databaseUUID, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID);
     }
   }
 
@@ -210,7 +211,7 @@ public class DatabaseResource implements DatabaseService {
       throw new RESTException(e);
     } finally {
       // register action
-      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID);
+      controllerAssistant.registerAction(user, databaseUUID, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID);
     }
     return false;
   }
@@ -221,7 +222,6 @@ public class DatabaseResource implements DatabaseService {
     throws RESTException {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
     User user = UserUtility.getUser(request);
-
     LogEntryState state = LogEntryState.SUCCESS;
 
     controllerAssistant.checkRoles(user);
@@ -234,9 +234,9 @@ public class DatabaseResource implements DatabaseService {
       throw new RESTException(e);
     } finally {
       // register action
-      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,
-        ViewerConstants.CONTROLLER_FILTER_PARAM, findRequest.filter.toString(),
-        ViewerConstants.CONTROLLER_SUBLIST_PARAM, findRequest.sublist.toString());
+      controllerAssistant.registerAction(user, databaseUUID, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM,
+        databaseUUID, ViewerConstants.CONTROLLER_FILTER_PARAM, JsonUtils.getJsonFromObject(findRequest.filter),
+        ViewerConstants.CONTROLLER_SUBLIST_PARAM, JsonUtils.getJsonFromObject(findRequest.sublist));
     }
   }
 
@@ -256,7 +256,7 @@ public class DatabaseResource implements DatabaseService {
       throw new RESTException(e);
     } finally {
       // register action
-      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,
+      controllerAssistant.registerAction(user, databaseUUID, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,
         ViewerConstants.CONTROLLER_ROW_ID_PARAM, rowUUID);
     }
   }
