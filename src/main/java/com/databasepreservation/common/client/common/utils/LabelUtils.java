@@ -1,6 +1,7 @@
 package com.databasepreservation.common.client.common.utils;
 
 import com.databasepreservation.common.client.models.activity.logs.LogEntryState;
+import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
 import com.databasepreservation.common.client.tools.Humanize;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -55,5 +56,28 @@ public class LabelUtils {
 
     return SafeHtmlUtils
         .fromSafeConstant("<span class='" + style + "'>" + Humanize.validationStatus(status) + CLOSE_SPAN);
+  }
+
+  public static SafeHtml getDatabaseStatus(ViewerDatabaseStatus status) {
+    String style;
+    switch (status) {
+      case ERROR:
+        style = "label-danger label-error";
+        break;
+      case AVAILABLE:
+        style = "label-success";
+        break;
+      case INGESTING:
+        style = "label-info";
+        break;
+      case REMOVING:
+      case METADATA_ONLY:
+      default:
+        style = "label-default";
+        break;
+    }
+
+    return SafeHtmlUtils
+      .fromSafeConstant("<span class='" + style + "'>" + Humanize.databaseStatus(status) + CLOSE_SPAN);
   }
 }

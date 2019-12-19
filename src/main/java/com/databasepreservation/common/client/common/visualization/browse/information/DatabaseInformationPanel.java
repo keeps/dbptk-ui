@@ -154,7 +154,7 @@ public class DatabaseInformationPanel extends RightPanel {
   private MetadataField getMetadataField(String label, String value) {
     if (value != null) {
       MetadataField metadataField = MetadataField.createInstance(label, value);
-      metadataField.setCSSMetadata("metadata-field", "metadata-information-element-label",
+      metadataField.setCSS("metadata-field", "metadata-information-element-label",
         "metadata-information-element-value");
 
       return metadataField;
@@ -162,7 +162,7 @@ public class DatabaseInformationPanel extends RightPanel {
 
     final MetadataField instance = MetadataField.createInstance(label,
       messages.managePageTableHeaderTextForDatabaseStatus());
-    instance.setCSSMetadata("metadata-field", "metadata-information-element-label",
+    instance.setCSS("metadata-field", "metadata-information-element-label",
       "metadata-information-element-value");
 
     return instance;

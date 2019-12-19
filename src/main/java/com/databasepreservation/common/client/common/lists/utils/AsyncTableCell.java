@@ -255,6 +255,10 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
     }
     mainPanel.add(pageSizePager);
 
+    SimplePanel clearfix = new SimplePanel();
+    clearfix.addStyleName("clearfix");
+    add(clearfix);
+
     toggleSidePanel(createAndBindFacets(sidePanel));
 
     Alert alert = new Alert(Alert.MessageAlertType.LIGHT, messages.noItemsToDisplay());
@@ -603,7 +607,7 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
     resultsPager.nextPage();
   }
 
-  public void prevousPage() {
+  public void previousPage() {
     resultsPager.previousPage();
   }
 

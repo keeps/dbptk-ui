@@ -50,22 +50,22 @@ public class MetadataNavigationPanel {
 
     dbname = MetadataField.createInstance(messages.SIARDHomePageLabelForViewerMetadataName(),
       database.getMetadata().getName());
-    dbname.setCSSMetadata("metadata-field", "metadata-information-element-label", "metadata-information-element-value");
+    dbname.setCSS("metadata-field", "metadata-information-element-label", "metadata-information-element-value");
     archivalDate = MetadataField.createInstance(messages.SIARDHomePageLabelForViewerMetadataArchivalDate(),
         Humanize.formatDateTime(database.getMetadata().getArchivalDate()));
-    archivalDate.setCSSMetadata("metadata-field", "metadata-information-element-label",
+    archivalDate.setCSS("metadata-field", "metadata-information-element-label",
       "metadata-information-element-value");
     archiver = MetadataField.createInstance(messages.SIARDHomePageLabelForViewerMetadataArchiver(),
       database.getMetadata().getArchiver());
-    archiver.setCSSMetadata("metadata-field", "metadata-information-element-label",
+    archiver.setCSS("metadata-field", "metadata-information-element-label",
       "metadata-information-element-value");
     archiverContact = MetadataField.createInstance(messages.SIARDHomePageLabelForViewerMetadataArchiverContact(),
       database.getMetadata().getArchiverContact());
-    archiverContact.setCSSMetadata("metadata-field", "metadata-information-element-label",
+    archiverContact.setCSS("metadata-field", "metadata-information-element-label",
       "metadata-information-element-value");
     clientMachine = MetadataField.createInstance(messages.SIARDHomePageLabelForViewerMetadataClientMachine(),
       database.getMetadata().getClientMachine());
-    clientMachine.setCSSMetadata("metadata-field", "metadata-information-element-label",
+    clientMachine.setCSS("metadata-field", "metadata-information-element-label",
       "metadata-information-element-value");
 
     left.add(dbname);
@@ -76,20 +76,20 @@ public class MetadataNavigationPanel {
 
     databaseProduct = MetadataField.createInstance(messages.SIARDHomePageLabelForViewerMetadataDatabaseProduct(),
       database.getMetadata().getDatabaseProduct());
-    databaseProduct.setCSSMetadata("metadata-field", "metadata-information-element-label",
+    databaseProduct.setCSS("metadata-field", "metadata-information-element-label",
       "metadata-information-element-value");
     dataOriginTimespan = MetadataField.createInstance(messages.SIARDHomePageLabelForViewerMetadataDataOriginTimespan(),
       database.getMetadata().getDataOriginTimespan());
-    dataOriginTimespan.setCSSMetadata("metadata-field", "metadata-information-element-label",
+    dataOriginTimespan.setCSS("metadata-field", "metadata-information-element-label",
       "metadata-information-element-value");
     dataOwner = MetadataField.createInstance(messages.SIARDHomePageLabelForViewerMetadataDataOwner(),
       database.getMetadata().getDataOwner());
-    dataOwner.setCSSMetadata("metadata-field", "metadata-information-element-label",
+    dataOwner.setCSS("metadata-field", "metadata-information-element-label",
       "metadata-information-element-value");
     producerApplication = MetadataField.createInstance(
       messages.SIARDHomePageLabelForViewerMetadataProducerApplication(),
       database.getMetadata().getProducerApplication());
-    producerApplication.setCSSMetadata("metadata-field", "metadata-information-element-label",
+    producerApplication.setCSS("metadata-field", "metadata-information-element-label",
       "metadata-information-element-value");
 
     right.add(databaseProduct);
@@ -115,7 +115,7 @@ public class MetadataNavigationPanel {
         descriptionTxt);
     }
 
-    descriptionPanel.setCSSMetadata("metadata-field", "metadata-information-description-label",
+    descriptionPanel.setCSS("metadata-field", "metadata-information-description-label",
       "metadata-information-element-value");
 
     panel.add(descriptionPanel);

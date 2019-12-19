@@ -116,19 +116,19 @@ public class RoutinesPanel extends RightPanel {
 
     if (ViewerStringUtils.isNotBlank(viewerRoutine.getName())) {
       MetadataField schemaName = MetadataField.createInstance(messages.name(), viewerRoutine.getName());
-      schemaName.setCSSMetadata("metadata-field", "metadata-information-element-label",
+      schemaName.setCSS("metadata-field", "metadata-information-element-label",
               "metadata-information-element-value");
       panel.add(schemaName);
     }
     if (ViewerStringUtils.isNotBlank(viewerRoutine.getDescription())) {
       MetadataField description = MetadataField.createInstance(messages.description(), viewerRoutine.getDescription());
-      description.setCSSMetadata("metadata-field", "metadata-information-element-label",
+      description.setCSS("metadata-field", "metadata-information-element-label",
               "metadata-information-element-value");
       panel.add(description);
     }
     if (ViewerStringUtils.isNotBlank(viewerRoutine.getSource())) {
       MetadataField sourceCode = MetadataField.createInstance(messages.routine_sourceCode(), viewerRoutine.getSource());
-      sourceCode.setCSSMetadata("metadata-field", "metadata-information-element-label",
+      sourceCode.setCSS("metadata-field", "metadata-information-element-label",
               "metadata-information-element-value");
       panel.add(sourceCode);
     }
@@ -140,13 +140,13 @@ public class RoutinesPanel extends RightPanel {
     }
     if (ViewerStringUtils.isNotBlank(viewerRoutine.getCharacteristic())) {
       MetadataField field = MetadataField.createInstance(messages.routine_characteristic(), viewerRoutine.getCharacteristic());
-      field.setCSSMetadata("metadata-field", "metadata-information-element-label",
+      field.setCSS("metadata-field", "metadata-information-element-label",
               "metadata-information-element-value");
       panel.add(field);
     }
     if (ViewerStringUtils.isNotBlank(viewerRoutine.getReturnType())) {
       MetadataField field = MetadataField.createInstance(messages.routine_returnType(), viewerRoutine.getReturnType());
-      field.setCSSMetadata("metadata-field", "metadata-information-element-label",
+      field.setCSS("metadata-field", "metadata-information-element-label",
               "metadata-information-element-value");
       panel.add(field);
     }

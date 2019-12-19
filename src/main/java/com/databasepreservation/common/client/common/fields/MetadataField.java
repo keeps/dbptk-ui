@@ -68,7 +68,14 @@ public class MetadataField extends Composite {
     metadataField.addStyleName(styleName);
   }
 
-  public void setCSSMetadata(String cssParent, String cssLabel, String cssValue) {
+  public void setCSS(String cssParent, String cssValue) {
+    if (cssParent != null) {
+      metadataField.addStyleName(cssParent);
+    }
+    metadataValue.addStyleName(cssValue);
+  }
+
+  public void setCSS(String cssParent, String cssLabel, String cssValue) {
 
     if (cssParent != null) {
       metadataField.addStyleName(cssParent);
@@ -83,5 +90,9 @@ public class MetadataField extends Composite {
 
   public void updateText(String text) {
     metadataValue.setText(text);
+  }
+
+  public void updateText(SafeHtml html) {
+    metadataValue.setHTML(html);
   }
 }

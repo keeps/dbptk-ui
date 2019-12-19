@@ -383,7 +383,7 @@ p[data-value]:after {
 
 .browseContentFilePreviewPanel {
     width: 100%;
-    height: 705px;
+    min-height: 705px;
     position: relative;
 }
 
@@ -2585,6 +2585,30 @@ button.close:hover {
     background: linear-gradient(-90deg, #eee 30%, rgba(255, 255, 255, 0) 100%);
 }
 
+.my-asyncdatagrid-side-panel .sidebar-facet-panel {
+    width: 225px;
+}
+
+.my-asyncdatagrid-side-panel .h5 {
+    margin-top: 0;
+    font-size: 1.4rem;
+    font-weight: 500;
+    margin-bottom: 0.2rem;
+    color: #4b4a4a;
+}
+
 .facet-empty {
     display: none;
+}
+
+.facet-input-panel {
+    margin-bottom: 1rem;
+}
+
+.font-size-description {
+    font-size: 1.3rem;
+}
+
+.activity-log-panel {
+    margin: 25px;
 }

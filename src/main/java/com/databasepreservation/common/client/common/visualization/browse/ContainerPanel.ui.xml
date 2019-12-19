@@ -4,7 +4,7 @@
 >
 
     <g:FlowPanel ui:field="toplevel" addStyleNames="content-container">
-        <g:FlowPanel addStyleNames="row full_width skip_padding">
+        <g:FlowPanel addStyleNames="full_width skip_padding">
             <g:FocusPanel addStyleNames="browseContentFocusPanel">
                 <g:HorizontalPanel addStyleNames="browseContentPreviewPanel">
                     <g:cell width="100%" height="100%">

@@ -157,11 +157,11 @@ public class ValidationNavigationPanel {
     // Validation Status info
     validationStatus = MetadataField.createInstance(messages.SIARDHomePageLabelForValidationStatus(),
       LabelUtils.getSIARDValidationStatus(database.getValidationStatus()));
-    validationStatus.setCSSMetadata(null, "label-field", "value-field");
+    validationStatus.setCSS(null, "label-field", "value-field");
     // updateValidationStatus();
 
-    validatedAt.setCSSMetadata(null, "label-field", "value-field");
-    version.setCSSMetadata(null, "label-field", "value-field");
+    validatedAt.setCSS(null, "label-field", "value-field");
+    version.setCSS(null, "label-field", "value-field");
 
     NavigationPanel validation = NavigationPanel.createInstance(messages.SIARDHomePageOptionsHeaderForValidation());
     validation.addButton(btnRunValidator);

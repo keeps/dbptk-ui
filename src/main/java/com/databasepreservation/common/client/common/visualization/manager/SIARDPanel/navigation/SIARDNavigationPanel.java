@@ -116,12 +116,12 @@ public class SIARDNavigationPanel {
     // version information
     MetadataField version = MetadataField.createInstance(messages.SIARDHomePageLabelForSIARDVersion(),
         database.getVersion());
-    version.setCSSMetadata(null, "label-field", "value-field");
+    version.setCSS(null, "label-field", "value-field");
 
     // size information
     MetadataField size = MetadataField.createInstance(messages.SIARDHomePageLabelForSIARDSize(),
         Humanize.readableFileSize(database.getSize()));
-    size.setCSSMetadata(null, "label-field", "value-field");
+    size.setCSS(null, "label-field", "value-field");
 
     // path information
     GenericField path = GenericField.createInstance(messages.SIARDHomePageLabelForSIARDPath(), btnShowFiles);

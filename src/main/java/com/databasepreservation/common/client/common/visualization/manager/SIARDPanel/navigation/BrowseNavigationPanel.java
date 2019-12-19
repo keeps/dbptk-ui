@@ -9,13 +9,13 @@ import com.databasepreservation.common.client.common.NavigationPanel;
 import com.databasepreservation.common.client.common.dialogs.CommonDialogs;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.fields.MetadataField;
+import com.databasepreservation.common.client.common.utils.LabelUtils;
 import com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.SIARDManagerPage;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.services.SIARDService;
 import com.databasepreservation.common.client.tools.HistoryManager;
-import com.databasepreservation.common.client.tools.Humanize;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Button;
 
@@ -137,8 +137,8 @@ public class BrowseNavigationPanel {
     }
 
     browsingStatus = MetadataField.createInstance(messages.SIARDHomePageLabelForBrowseStatus(),
-      Humanize.databaseStatus(database.getStatus()));
-    browsingStatus.setCSSMetadata(null, "label-field", "value-field");
+      LabelUtils.getDatabaseStatus(database.getStatus()));
+    browsingStatus.setCSS(null, "label-field", "value-field");
 
     browse.addToInfoPanel(browsingStatus);
 
@@ -147,7 +147,7 @@ public class BrowseNavigationPanel {
 
   public void update(ViewerDatabase database) {
     this.database = database;
-    browsingStatus.updateText(Humanize.databaseStatus(database.getStatus()));
+    browsingStatus.updateText(LabelUtils.getDatabaseStatus(database.getStatus()));
 
     if (database.getStatus().equals(ViewerDatabaseStatus.AVAILABLE)
       || database.getStatus().equals(ViewerDatabaseStatus.ERROR)) {

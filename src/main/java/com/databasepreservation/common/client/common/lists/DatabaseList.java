@@ -144,7 +144,7 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
     Column<ViewerDatabase, SafeHtml> statusColumn = new TooltipColumn<ViewerDatabase>() {
       @Override
       public SafeHtml getValue(ViewerDatabase database) {
-        return database != null ? SafeHtmlUtils.fromString(Humanize.databaseStatus(database.getStatus())) : null;
+        return database != null ? LabelUtils.getDatabaseStatus(database.getStatus()) : null;
       }
     };
 

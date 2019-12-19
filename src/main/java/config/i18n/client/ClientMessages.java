@@ -1132,6 +1132,8 @@ public interface ClientMessages extends Messages {
    *******************************************/
   String activityLogMenuText();
 
+  String activityLogDescription();
+
   String activityLogTableHeaderForDate();
 
   String activityLogTableHeaderForComponent();

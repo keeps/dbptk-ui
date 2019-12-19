@@ -8,14 +8,17 @@ import com.databasepreservation.common.client.ClientConfigurationManager;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.ContentPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
+import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.lists.ActivityLogList;
 import com.databasepreservation.common.client.common.search.SearchField;
 import com.databasepreservation.common.client.common.search.SearchFieldPanel;
 import com.databasepreservation.common.client.common.search.SearchPanel;
 import com.databasepreservation.common.client.common.utils.AdvancedSearchUtils;
+import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.utils.ListboxUtils;
 import com.databasepreservation.common.client.models.activity.logs.ActivityLogEntry;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
+import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -49,7 +52,10 @@ public class ActivityLogPanel extends ContentPanel {
   SimplePanel advancedSearch;
 
   @UiField
-  SimplePanel facets;
+  SimplePanel mainHeader;
+
+  @UiField
+  SimplePanel description;
 
   @UiField(provided = true)
   ActivityLogList activityLogList;
@@ -69,6 +75,14 @@ public class ActivityLogPanel extends ContentPanel {
     itemsSearchAdvancedFieldsPanel.addStyleName("searchAdvancedFieldsPanel empty");
 
     initWidget(uiBinder.createAndBindUi(this));
+
+    mainHeader.setWidget(CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.ACTIVITY_LOG),
+      messages.activityLogMenuText(), "h1"));
+
+    MetadataField instance = MetadataField.createInstance(messages.activityLogDescription());
+    instance.setCSS("table-row-description", "font-size-description");
+
+    description.setWidget(instance);
 
     activityLogList.getSelectionModel().addSelectionChangeHandler(event -> {
       ActivityLogEntry selected = activityLogList.getSelectionModel().getSelectedObject();
