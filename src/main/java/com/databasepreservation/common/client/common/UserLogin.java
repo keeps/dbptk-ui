@@ -7,27 +7,27 @@ package com.databasepreservation.common.client.common;
 import java.util.List;
 import java.util.Vector;
 
-import com.databasepreservation.common.client.services.AuthenticationService;
-import org.apache.http.HttpRequest;
 import org.fusesource.restygwt.client.Method;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.roda.core.data.v2.user.User;
 
-import com.databasepreservation.common.client.BrowserService;
-import com.databasepreservation.common.client.BrowserServiceAsync;
 import com.databasepreservation.common.client.ClientLogger;
+import com.databasepreservation.common.client.common.dialogs.Dialogs;
+import com.databasepreservation.common.client.services.AuthenticationService;
+import com.databasepreservation.common.client.tools.HistoryManager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
-import javax.servlet.http.HttpServletRequest;
+import config.i18n.client.ClientMessages;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class UserLogin {
+  private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static final ClientLogger logger = new ClientLogger(UserLogin.class.getName());
 
   private static UserLogin instance = null;
@@ -147,5 +147,25 @@ public class UserLogin {
     for (LoginStatusListener listener : listeners) {
       listener.onLoginStatusChanged(newUser);
     }
+  }
+
+  public void showSuggestLoginDialog() {
+    Dialogs.showConfirmDialog(messages.loginDialogTitle(), messages.casForwardWarning(),
+      messages.basicActionCancel(), messages.loginDialogLogin(), new AsyncCallback<Boolean>() {
+
+        @Override
+        public void onSuccess(Boolean result) {
+          if (result) {
+            UserLogin.getInstance().login();
+          } else {
+            HistoryManager.gotoHome();
+          }
+        }
+
+        @Override
+        public void onFailure(Throwable caught) {
+          HistoryManager.gotoHome();
+        }
+      });
   }
 }

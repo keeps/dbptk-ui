@@ -5,11 +5,6 @@
 package com.databasepreservation.common.filter;
 
 import java.io.IOException;
-import java.security.Principal;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -20,16 +15,12 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.databasepreservation.common.client.common.UserLogin;
-import com.databasepreservation.common.server.controller.UserLoginController;
 import org.apache.commons.lang3.StringUtils;
-import org.jasig.cas.client.authentication.AttributePrincipal;
-import org.jasig.cas.client.authentication.AttributePrincipalImpl;
 import org.jasig.cas.client.util.CommonUtils;
-import org.roda.core.data.v2.user.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.databasepreservation.common.server.controller.UserLoginController;
 import com.databasepreservation.common.utils.UserUtility;
 
 /**
@@ -51,8 +42,7 @@ public class CasWebAuthFilter implements Filter {
 
   @Override
   public void init(final FilterConfig config) throws ServletException {
-    casLogoutURL = String.format("%s/logout", config.getInitParameter("casServerUrlPrefix"));
-
+    casLogoutURL = config.getInitParameter("casServerLogoutUrl");
     LOGGER.info(getClass().getSimpleName() + " initialized ok");
   }
 

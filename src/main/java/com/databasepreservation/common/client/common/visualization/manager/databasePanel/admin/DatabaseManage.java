@@ -1,18 +1,22 @@
-package com.databasepreservation.common.client.common.visualization.manager.databasePanel;
+package com.databasepreservation.common.client.common.visualization.manager.databasePanel.admin;
 
 import java.util.List;
 
+import com.databasepreservation.common.client.common.fields.MetadataField;
+import com.databasepreservation.common.client.common.utils.CommonClientUtils;
+import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
+import com.google.gwt.user.client.ui.SimplePanel;
 import org.roda.core.data.v2.index.filter.BasicSearchFilterParameter;
 import org.roda.core.data.v2.index.filter.Filter;
 
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.common.ContentPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
-import com.databasepreservation.common.client.common.ContentPanel;
 import com.databasepreservation.common.client.common.helpers.HelperUploadSIARDFile;
 import com.databasepreservation.common.client.common.lists.DatabaseList;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
@@ -51,6 +55,12 @@ public class DatabaseManage extends ContentPanel {
   @UiField
   AccessibleFocusPanel searchInputButton;
 
+  @UiField
+  SimplePanel mainHeader;
+
+  @UiField
+  SimplePanel description;
+
   @UiField(provided = true)
   DatabaseList databaseList;
 
@@ -70,10 +80,16 @@ public class DatabaseManage extends ContentPanel {
   }
 
   private DatabaseManage() {
-
     databaseList = new DatabaseList();
-
     initWidget(binder.createAndBindUi(this));
+
+    mainHeader.setWidget(CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.SERVER),
+        messages.menusidebar_databases(), "h1"));
+
+    MetadataField instance = MetadataField.createInstance(messages.manageDatabasePageDescription());
+    instance.setCSS("table-row-description", "font-size-description");
+
+    description.setWidget(instance);
 
     searchInputBox.getElement().setPropertyString("placeholder", messages.searchPlaceholder());
 
@@ -103,7 +119,7 @@ public class DatabaseManage extends ContentPanel {
       create.addClickHandler(event -> HistoryManager.gotoCreateSIARD());
       open.addClickHandler(event -> new HelperUploadSIARDFile().openFile(databaseList));
     } else {
-      create.setVisible(false);
+      create.setText(messages.managePageButtonTextForDownloadDBPTK());
       open.addClickHandler(event -> HistoryManager.gotoNewUpload());
     }
   }

@@ -54,6 +54,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    height: 110px;
 }
 
 .btn-option:after {
@@ -2606,6 +2607,7 @@ button.close:hover {
 
 .font-size-description {
     font-size: 1.3rem;
+    text-align: justify;
 }
 
 .activity-log-panel {

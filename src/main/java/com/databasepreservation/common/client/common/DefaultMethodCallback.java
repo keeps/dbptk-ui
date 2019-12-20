@@ -10,10 +10,12 @@ import com.databasepreservation.common.api.v1.AuthenticationResource;
 import com.databasepreservation.common.client.ClientLogger;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.utils.AsyncCallbackUtils;
+import com.databasepreservation.common.client.tools.HistoryManager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 
 import config.i18n.client.ClientMessages;
 
@@ -65,14 +67,36 @@ public abstract class DefaultMethodCallback<T> implements MethodCallback<T> {
       // user.
       AuthenticationResource.Util.call((User user) -> {
         if (user.isGuest()) {
-          Dialogs.showErrors("Authentication error", "not login mister", messages.basicActionClose());
+          UserLogin.getInstance().showSuggestLoginDialog();
         } else {
-          Dialogs.showErrors("Authentication error", "not login mister", messages.basicActionClose());
+          Dialogs.showInformationDialog(messages.loginDialogTitle(), messages.loginMissingPermissions(), messages.basicActionClose(),
+            "btn btn-close", new AsyncCallback<Void>() {
+              @Override
+              public void onFailure(Throwable caught) {
+                HistoryManager.gotoHome();
+              }
+
+              @Override
+              public void onSuccess(Void result) {
+                HistoryManager.gotoHome();
+              }
+            });
         }
       }).getAuthenticatedUser();
 
     } else if (method.getResponse().getStatusCode() == Response.SC_NOT_FOUND) {
-      Dialogs.showErrors("NOT FOUND", "NOT FOUND", messages.basicActionClose());
+      Dialogs.showInformationDialog(messages.loginDialogTitle(), messages.objectNotFound(), messages.basicActionClose(),
+          "btn btn-close", new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+              HistoryManager.gotoHome();
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+              HistoryManager.gotoHome();
+            }
+          });
     }
 
     new ClientLogger(AsyncCallbackUtils.class.getName())

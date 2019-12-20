@@ -1,0 +1,13 @@
+.header-logo {
+    height: 90px;
+    margin-top: 10px;
+    margin-right: 10px;
+    display: inline-block;
+}
+
+.header-text {
+    height: 110px;
+    display: inline-block;
+    vertical-align: bottom;
+    line-height: 110px;
+}

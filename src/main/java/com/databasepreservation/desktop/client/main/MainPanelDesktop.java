@@ -29,7 +29,7 @@ import com.databasepreservation.common.client.common.visualization.browse.view.V
 import com.databasepreservation.common.client.common.visualization.browse.view.ViewPanelStructure;
 import com.databasepreservation.common.client.common.visualization.ingest.IngestPage;
 import com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.SIARDManagerPage;
-import com.databasepreservation.common.client.common.visualization.manager.databasePanel.DatabaseManage;
+import com.databasepreservation.common.client.common.visualization.manager.databasePanel.admin.DatabaseManage;
 import com.databasepreservation.common.client.common.visualization.metadata.MetadataPanel;
 import com.databasepreservation.common.client.common.visualization.metadata.MetadataPanelLoad;
 import com.databasepreservation.common.client.common.visualization.metadata.SIARDEditMetadataPage;

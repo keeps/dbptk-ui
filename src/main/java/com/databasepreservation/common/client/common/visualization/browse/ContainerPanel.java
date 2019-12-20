@@ -116,29 +116,31 @@ public class ContainerPanel extends Composite {
       if (authenticationIsEnabled) {
         if (user.isGuest()) {
           menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.USER, messages.loginLogin()),
-            (Command) () -> UserLogin.getInstance().login());
+              (Command) () -> UserLogin.getInstance().login());
         } else {
           if (!hideMenu) {
             MenuBar subMenu = new MenuBar(true);
             subMenu.addItem(messages.loginLogout(), (Command) () -> UserLogin.getInstance().logout());
             menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.USER, user.getFullName()), subMenu);
-            menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.NEW_UPLOAD, messages.newUpload()),
-              (Command) HistoryManager::gotoNewUpload);
             menu.addItem(
-              FontAwesomeIconManager.loaded(FontAwesomeIconManager.DATABASES, messages.menusidebar_manageDatabases()),
-              (Command) HistoryManager::gotoDatabaseList);
-            menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.ACTIVITY_LOG, messages.activityLogMenuText()),
-              (Command) HistoryManager::gotoActivityLog);
+                FontAwesomeIconManager.loaded(FontAwesomeIconManager.DATABASES, messages.menusidebar_manageDatabases()),
+                (Command) HistoryManager::gotoDatabaseList);
+            MenuBar administrationMenu = new MenuBar(true);
+            administrationMenu.addItem(
+                FontAwesomeIconManager.loaded(FontAwesomeIconManager.ACTIVITY_LOG, messages.activityLogMenuText()),
+                (Command) HistoryManager::gotoActivityLog);
+            administrationMenu.addItem(
+                FontAwesomeIconManager.loaded(FontAwesomeIconManager.COG, messages.preferencesMenuText()),
+                (Command) HistoryManager::gotoHome);
+            menu.addItem(messages.administrationMenuText(), administrationMenu);
           }
         }
       } else {
         menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.NEW_UPLOAD, messages.newUpload()),
-          (Command) HistoryManager::gotoNewUpload);
+            (Command) HistoryManager::gotoNewUpload);
         menu.addItem(
-          FontAwesomeIconManager.loaded(FontAwesomeIconManager.DATABASES, messages.menusidebar_manageDatabases()),
-          (Command) HistoryManager::gotoDatabaseList);
-        menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.BLOB, messages.activityLogMenuText()),
-          (Command) HistoryManager::gotoActivityLog);
+            FontAwesomeIconManager.loaded(FontAwesomeIconManager.DATABASES, messages.menusidebar_manageDatabases()),
+            (Command) HistoryManager::gotoDatabaseList);
       }
 
       if (!hideMenu) {
@@ -147,7 +149,7 @@ public class ContainerPanel extends Composite {
         setLanguageMenu(languagesMenu);
 
         MenuItem languagesMenuItem = new MenuItem(
-          FontAwesomeIconManager.loaded(FontAwesomeIconManager.GLOBE, selectedLanguage), languagesMenu);
+            FontAwesomeIconManager.loaded(FontAwesomeIconManager.GLOBE, selectedLanguage), languagesMenu);
         languagesMenuItem.addStyleName("menu-item menu-item-label menu-item-language");
         menu.addItem(languagesMenuItem);
       }

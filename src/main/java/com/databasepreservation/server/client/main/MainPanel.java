@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.ClientConfigurationManager;
 import com.databasepreservation.common.client.common.ContentPanel;
 import com.databasepreservation.common.client.common.RightPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
@@ -33,7 +34,7 @@ import com.databasepreservation.common.client.common.visualization.browse.view.V
 import com.databasepreservation.common.client.common.visualization.browse.view.ViewPanelStructure;
 import com.databasepreservation.common.client.common.visualization.ingest.IngestPage;
 import com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.SIARDManagerPage;
-import com.databasepreservation.common.client.common.visualization.manager.databasePanel.DatabaseManage;
+import com.databasepreservation.common.client.common.visualization.manager.databasePanel.admin.DatabaseManage;
 import com.databasepreservation.common.client.common.visualization.metadata.MetadataPanel;
 import com.databasepreservation.common.client.common.visualization.metadata.MetadataPanelLoad;
 import com.databasepreservation.common.client.common.visualization.metadata.SIARDEditMetadataPage;
@@ -544,8 +545,9 @@ public class MainPanel extends Composite {
    * ____________________________________________________________________________________________________________________
    */
   private void reSetHeader() {
-    HTMLPanel headerText = new HTMLPanel(SafeHtmlUtils.fromSafeConstant(
-      FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE) + " Database Visualization Toolkit"));
+
+    HTMLPanel headerText = new HTMLPanel(
+      SafeHtmlUtils.fromTrustedString(ClientConfigurationManager.getString("ui.header.title")));
     headerText.addStyleName("homeText");
 
     bannerLogo.setWidget(headerText);

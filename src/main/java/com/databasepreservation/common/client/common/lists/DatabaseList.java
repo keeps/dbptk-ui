@@ -156,16 +156,13 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
     };
     openColumn.setFieldUpdater((index, object, value) -> HistoryManager.gotoSIARDInfo(object.getUuid()));
 
-    // nameColumn.setSortable(true);
-    // archivalDateColumn.setSortable(true);
-    // dataOriginTimespan.setSortable(true);
-    // description.setSortable(true);
-
     addColumn(nameColumn, messages.managePageTableHeaderTextForDatabaseName(), true, TextAlign.NONE, 15);
     addColumn(dataOwnerColumn, messages.managePageTableHeaderTextForDataOwner(), true, TextAlign.NONE, 5);
     addColumn(dbmsColumn, messages.managePageTableHeaderTextForProductName(), true, TextAlign.NONE, 10);
     addColumn(archivalDateColumn, messages.managePageTableHeaderTextForArchivalDate(), true, TextAlign.NONE, 5);
-    addColumn(locationColumn, messages.managePageTableHeaderTextForSIARDLocation(), true, TextAlign.NONE, 8);
+    if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
+      addColumn(locationColumn, messages.managePageTableHeaderTextForSIARDLocation(), true, TextAlign.NONE, 8);
+    }
     addColumn(sizeColumn, messages.managePageTableHeaderTextForSIARDSize(), true, TextAlign.NONE, 4);
     addColumn(versionColumn, messages.managePageTableHeaderTextForSIARDVersion(), true, TextAlign.NONE, 4);
     addColumn(validColumn, messages.managePageTableHeaderTextForSIARDValidationStatus(), true, TextAlign.NONE, 5);
@@ -176,17 +173,10 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
     display.setEmptyTableWidget(alert);
   }
 
-  private static SafeHtml getBooleanValue(boolean value) {
-    return value ? SafeHtmlUtils.fromSafeConstant(OPEN_VALIDATED_SPAN)
-      : SafeHtmlUtils.fromSafeConstant(OPEN_NOT_VALIDATED_SPAN);
-  }
-
   @Override
   protected void getData(Sublist sublist, ColumnSortList columnSortList,
     MethodCallback<IndexResult<ViewerDatabase>> callback) {
     Filter filter = getFilter();
-
-    GWT.log("filter: " + filter);
 
     Map<Column<ViewerDatabase, ?>, List<String>> columnSortingKeyMap = new HashMap<>();
     Sorter sorter = createSorter(columnSortList, columnSortingKeyMap);

@@ -241,6 +241,10 @@ public interface ClientMessages extends Messages {
 
   String loginDialogTitle();
 
+  String casForwardWarning();
+
+  String loginMissingPermissions();
+
   String loginDialogUsername();
 
   String loginDialogPassword();
@@ -604,6 +608,8 @@ public interface ClientMessages extends Messages {
    ********************************************/
   String managePageButtonTextForCreateSIARD();
 
+  String managePageButtonTextForDownloadDBPTK();
+
   String managePageButtonTextForOpenSIARD();
 
   String managePageTableHeaderTextForDatabaseName();
@@ -625,6 +631,8 @@ public interface ClientMessages extends Messages {
   String managePageTableHeaderTextForDatabaseStatus();
 
   String managePageTableHeaderTextForActions();
+
+  String manageDatabasePageDescription();
 
   /********************************************
    * SIARD Home Page
@@ -1182,4 +1190,13 @@ public interface ClientMessages extends Messages {
   SafeHtml longRangeFilterParameterOnlyTo(String name, long toValue);
 
   SafeHtml longRangeFilterParameterEquals(String name, long value);
+
+  /********************************************
+   * Preferences
+   *******************************************/
+  String preferencesMenuText();
+
+  String administrationMenuText();
+
+  String objectNotFound();
 }

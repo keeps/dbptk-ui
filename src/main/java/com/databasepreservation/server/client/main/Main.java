@@ -26,7 +26,6 @@ public class Main implements EntryPoint {
    * Create a new main
    */
   public Main() {
-    mainPanel = new MainPanel();
     footer = new Footer();
   }
 
@@ -46,7 +45,8 @@ public class Main implements EntryPoint {
 
         // Remove loading image
         RootPanel.getBodyElement().removeChild(DOM.getElementById("loading"));
-
+        
+        mainPanel = new MainPanel();
         RootPanel.get().add(mainPanel);
         RootPanel.get().add(footer);
         RootPanel.get().addStyleName("roda");

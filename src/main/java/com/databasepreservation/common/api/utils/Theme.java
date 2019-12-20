@@ -23,9 +23,9 @@ import org.roda.core.data.v2.common.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.api.common.ConsumesOutputStream;
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.server.ViewerConfiguration;
 
 public class Theme {
 
@@ -61,6 +61,8 @@ public class Theme {
       mimeType = "image/png";
     } else if (resourceId.endsWith(".js")) {
       mimeType = "text/javascript";
+    } else if (resourceId.endsWith(".svg")) {
+      mimeType = "image/svg+xml";
     } else {
       mimeType = ViewerConstants.MEDIA_TYPE_APPLICATION_OCTET_STREAM;
     }

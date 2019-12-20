@@ -135,14 +135,17 @@ public class DatabasePanel extends Composite {
             MenuBar subMenu = new MenuBar(true);
             subMenu.addItem(messages.loginLogout(), (Command) () -> UserLogin.getInstance().logout());
             menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.USER, user.getFullName()), subMenu);
-            menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.NEW_UPLOAD, messages.newUpload()),
-                  (Command) HistoryManager::gotoNewUpload);
             menu.addItem(
                 FontAwesomeIconManager.loaded(FontAwesomeIconManager.DATABASES, messages.menusidebar_manageDatabases()),
                 (Command) HistoryManager::gotoDatabaseList);
-            menu.addItem(
+            MenuBar administrationMenu = new MenuBar(true);
+            administrationMenu.addItem(
               FontAwesomeIconManager.loaded(FontAwesomeIconManager.ACTIVITY_LOG, messages.activityLogMenuText()),
               (Command) HistoryManager::gotoActivityLog);
+            administrationMenu.addItem(
+              FontAwesomeIconManager.loaded(FontAwesomeIconManager.COG, messages.preferencesMenuText()),
+              (Command) HistoryManager::gotoHome);
+            menu.addItem(messages.administrationMenuText(), administrationMenu);
           }
         }
       } else {

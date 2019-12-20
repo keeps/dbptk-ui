@@ -15,6 +15,7 @@ import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RequestNotValidException;
 import org.roda.core.data.utils.JsonUtils;
 import org.roda.core.data.v2.index.filter.Filter;
+import org.roda.core.data.v2.index.filter.FilterParameter;
 import org.roda.core.data.v2.index.filter.SimpleFilterParameter;
 import org.roda.core.data.v2.user.User;
 import org.slf4j.Logger;
@@ -113,7 +114,12 @@ public class DatabaseResource implements DatabaseService {
         List<String> fieldsToReturn = new ArrayList<>();
         fieldsToReturn.add(ViewerConstants.INDEX_ID);
         fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA);
-        return getViewerDatabaseIndexResult(findRequest, fieldsToReturn, controllerAssistant, user, state);
+        FilterParameter parameter = new SimpleFilterParameter(ViewerConstants.SOLR_DATABASES_STATUS,
+          ViewerDatabaseStatus.AVAILABLE.name());
+        Filter databasesReadyFilter = new Filter(parameter);
+        FindRequest request = new FindRequest(findRequest.classToReturn, databasesReadyFilter, findRequest.sorter,
+          findRequest.sublist, findRequest.facets, findRequest.exportFacets, fieldsToReturn);
+        return getViewerDatabaseIndexResult(request, fieldsToReturn, controllerAssistant, user, state);
       }
     } else {
       return getViewerDatabaseIndexResult(findRequest, controllerAssistant, user, state);
