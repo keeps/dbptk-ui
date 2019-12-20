@@ -4,19 +4,18 @@ import java.nio.file.Files;
 
 import javax.ws.rs.Path;
 
-import com.databasepreservation.common.client.models.configuration.collection.CollectionConfiguration;
-import com.databasepreservation.common.transformers.DenormalizeSolrStructure;
-import com.databasepreservation.model.exception.ModuleException;
 import org.springframework.stereotype.Service;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.exceptions.RESTException;
-import com.databasepreservation.common.client.models.configuration.Configuration;
+import com.databasepreservation.common.client.models.configuration.collection.CollectionConfiguration;
 import com.databasepreservation.common.client.models.configuration.denormalize.DenormalizeConfiguration;
 import com.databasepreservation.common.client.services.ConfigurationService;
 import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.server.index.utils.JsonTransformer;
+import com.databasepreservation.common.transformers.DenormalizeSolrStructure;
+import com.databasepreservation.model.exception.ModuleException;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -28,7 +27,7 @@ public class ConfigurationResource implements ConfigurationService {
   public Boolean createConfigurationFile(String databaseuuid, CollectionConfiguration configuration) {
     try {
       JsonTransformer.writeObjectToFile(configuration, ViewerConfiguration.getInstance().getDatabaseConfigPath()
-        .resolve(databaseuuid + ViewerConstants.JSON_EXTENSION));
+        .resolve(databaseuuid).resolve(databaseuuid + ViewerConstants.JSON_EXTENSION));
     } catch (ViewerException e) {
       throw new RESTException(e.getMessage());
     }
@@ -38,7 +37,7 @@ public class ConfigurationResource implements ConfigurationService {
   @Override
   public CollectionConfiguration getConfigurationFile(String databaseuuid) {
     try {
-      java.nio.file.Path path = ViewerConfiguration.getInstance().getDatabaseConfigPath()
+      java.nio.file.Path path = ViewerConfiguration.getInstance().getDatabaseConfigPath().resolve(databaseuuid)
         .resolve(databaseuuid + ViewerConstants.JSON_EXTENSION);
       if (Files.exists(path)) {
         return JsonTransformer.readObjectFromFile(path, CollectionConfiguration.class);
@@ -53,8 +52,8 @@ public class ConfigurationResource implements ConfigurationService {
   @Override
   public DenormalizeConfiguration getDenormalizeConfigurationFile(String databaseuuid, String tableuuid) {
     try {
-      java.nio.file.Path path = ViewerConfiguration.getInstance().getDatabaseConfigPath()
-        .resolve(databaseuuid + "." + tableuuid + "-CURRENT" + ViewerConstants.JSON_EXTENSION);
+      java.nio.file.Path path = ViewerConfiguration.getInstance().getDatabaseConfigPath().resolve(databaseuuid)
+        .resolve(tableuuid + "-CURRENT" + ViewerConstants.JSON_EXTENSION);
       if (Files.exists(path)) {
         return JsonTransformer.readObjectFromFile(path, DenormalizeConfiguration.class);
       } else {
@@ -69,8 +68,8 @@ public class ConfigurationResource implements ConfigurationService {
   public Boolean createDenormalizeConfigurationFile(String databaseuuid, String tableuuid,
     DenormalizeConfiguration configuration) {
     try {
-      JsonTransformer.writeObjectToFile(configuration, ViewerConfiguration.getInstance().getDatabaseConfigPath()
-        .resolve(databaseuuid + "." + tableuuid + "-" + configuration.getState() + ViewerConstants.JSON_EXTENSION));
+      JsonTransformer.writeObjectToFile(configuration, ViewerConfiguration.getInstance().getDatabaseConfigPath().resolve(databaseuuid)
+        .resolve(tableuuid + "-" + configuration.getState() + ViewerConstants.JSON_EXTENSION));
     } catch (ViewerException e) {
       throw new RESTException(e.getMessage());
     }

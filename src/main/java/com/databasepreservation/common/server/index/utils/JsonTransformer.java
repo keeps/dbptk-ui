@@ -34,6 +34,7 @@ public class JsonTransformer {
       try {
         String json = getJsonFromObject(object);
         if (json != null) {
+          Files.createDirectories(file.getParent());
           Files.write(file, json.getBytes());
         }
       } catch (IOException e) {

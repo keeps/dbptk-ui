@@ -68,7 +68,7 @@ public class DenormalizeSolrStructure {
 
     for (TableConfiguration tables : configuration.getTables()) {
       ViewerTable table = database.getMetadata().getTable(tables.getUuid());
-      java.nio.file.Path denormalizeConfigurationPath = ViewerConfiguration.getInstance().getDatabaseConfigPath()
+      Path denormalizeConfigurationPath = ViewerConfiguration.getInstance().getDatabaseConfigPath()
           .resolve(database.getUuid() + "." + table.getUUID() + "-CURRENT" + ViewerConstants.JSON_EXTENSION);
 
       if (Files.exists(denormalizeConfigurationPath)) {

@@ -1,12 +1,9 @@
 package com.databasepreservation.common.client.common.visualization.browse.configuration;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.client.common.lists.MultipleSelectionTablePanel;
-import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.DenormalizeConfigurationHandler;
 import org.fusesource.restygwt.client.Method;
 
 import com.databasepreservation.common.client.common.DefaultMethodCallback;
@@ -14,9 +11,11 @@ import com.databasepreservation.common.client.common.LoadingDiv;
 import com.databasepreservation.common.client.common.RightPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
+import com.databasepreservation.common.client.common.lists.MultipleSelectionTablePanel;
+import com.databasepreservation.common.client.common.utils.TableUtils;
 import com.databasepreservation.common.client.common.utils.Tree;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.DenormalizeConfigurationHandler;
 import com.databasepreservation.common.client.common.visualization.browse.information.ErDiagram;
-import com.databasepreservation.common.client.models.configuration.denormalize.RelatedTablesConfiguration;
 import com.databasepreservation.common.client.models.structure.*;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
@@ -50,6 +49,9 @@ public class DataTransformation extends RightPanel {
   FlowPanel content;
 
   @UiField
+  ScrollPanel scrollPanel;
+
+  @UiField
   FlowPanel rootTablePanel;
 
   @UiField
@@ -58,10 +60,7 @@ public class DataTransformation extends RightPanel {
   private ViewerDatabase database;
   private ViewerMetadata metadata;
   private ViewerTable rootTable;
-  private TransformationTable transformationTable;
-  private String rootTableUUID;
   private DenormalizeConfigurationHandler configuration;
-  private List<ViewerColumn> columnsList = new ArrayList<>();
 
   /**
    * Used for show resume and ERDiagram
@@ -99,7 +98,6 @@ public class DataTransformation extends RightPanel {
     this.database = database;
     this.metadata = database.getMetadata();
     this.rootTable = metadata.getTable(tableUUID);
-    this.rootTableUUID = tableUUID;
     if (tableUUID == null) {
       content.add(ErDiagram.getInstance(database, database.getMetadata().getSchemas().get(0)));
     } else {
@@ -129,6 +127,7 @@ public class DataTransformation extends RightPanel {
     Alert alert = new Alert(Alert.MessageAlertType.INFO, messages.dataTransformationTextForAlertColumnsOrder(), true,
       FontAwesomeIconManager.DATABASE_INFORMATION);
 
+    scrollPanel.setSize("100%", "100%");
     content.add(alert);
     content.add(createTargetTableCard(rootTable));
     content.add(relationshipPanel);
@@ -186,7 +185,7 @@ public class DataTransformation extends RightPanel {
       }
 
       childNode.setParent(parentNode);
-      panel.add(createRelationshipWrapper(table, relatedTable, childNode, foreignKey));
+      panel.add(createRelationshipWrapper(table, relatedTable, childNode));
     }
 
     return panel;
@@ -228,12 +227,10 @@ public class DataTransformation extends RightPanel {
    * @param table
    * @param relatedTable
    * @param childNode
-   * @param foreignKey
    * @return a Wrapper with a BootstrapCard and a data-transformation-child
    */
-  private FlowPanel createRelationshipWrapper(ViewerTable table, ViewerTable relatedTable, Tree<String> childNode,
-    ViewerForeignKey foreignKey) {
-    BootstrapCard card = createChildTableCard(table, relatedTable, foreignKey);
+  private FlowPanel createRelationshipWrapper(ViewerTable table, ViewerTable relatedTable, Tree<String> childNode) {
+    BootstrapCard card = createChildTableCard(table, relatedTable);
     card.setHideContentVisible(false);
     FlowPanel panel = new FlowPanel();
     panel.addStyleName("data-transformation-wrapper");
@@ -257,7 +254,7 @@ public class DataTransformation extends RightPanel {
         if (switchBtn.getButton().getValue()) {
           child.add(createRelationshipList(relatedTable, childNode));
 
-          String uuid = configuration.includeRelatedTable(relatedTable, table, foreignKey);
+          String uuid = configuration.includeRelatedTable(relatedTable, table);
           card.setUuid(uuid);
           TransformationChildTables tableInstance = TransformationChildTables.getInstance(relatedTable, configuration,
             uuid);
@@ -269,16 +266,17 @@ public class DataTransformation extends RightPanel {
       }
     });
 
-    RelatedTablesConfiguration relatedTablesConfiguration = configuration
-      .getRelatedTableByRelationship(relatedTable.getUUID(), table.getUUID(), foreignKey);
-    if (relatedTablesConfiguration != null) {
-      String uuid = relatedTablesConfiguration.getUuid();
-      switchBtn.getButton().setValue(true, true);
-      card.setHideContentVisible(true);
-      card.setUuid(uuid);
-      child.add(createRelationshipList(relatedTable, childNode));
-      container.add(TransformationChildTables.getInstance(relatedTable, configuration, uuid).createTable());
-    }
+    // RelatedTablesConfiguration relatedTablesConfiguration = configuration
+    // .getRelatedTableByRelationship(relatedTable.getUUID(), table.getUUID());
+    // if (relatedTablesConfiguration != null) {
+    // String uuid = relatedTablesConfiguration.getUuid();
+    // switchBtn.getButton().setValue(true, true);
+    // card.setHideContentVisible(true);
+    // card.setUuid(uuid);
+    // child.add(createRelationshipList(relatedTable, childNode));
+    // container.add(TransformationChildTables.getInstance(relatedTable,
+    // configuration, uuid).createTable());
+    // }
 
     card.addHideContent(container, switchPanel);
     panel.add(card);
@@ -290,15 +288,14 @@ public class DataTransformation extends RightPanel {
    * Creates the child card of relationship tree
    * 
    * @param table
-   * @param foreignKey
    * @return BootstrapCard
    */
-  private BootstrapCard createChildTableCard(ViewerTable table, ViewerTable relatedTable, ViewerForeignKey foreignKey) {
+  private BootstrapCard createChildTableCard(ViewerTable table, ViewerTable relatedTable) {
     BootstrapCard card = new BootstrapCard();
     card.setTitleIcon(FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE));
     card.setTitle(relatedTable.getId());
     card.setDescription(relatedTable.getDescription());
-    card.addExtraContent(getInformationAboutRelationship(table, foreignKey));
+    card.addExtraContent(getInformationAboutRelationship(table, relatedTable));
 
     return card;
   }
@@ -306,27 +303,74 @@ public class DataTransformation extends RightPanel {
   /**
    * Add information in card about your relationship
    *
-   * @param table
-   * @param foreignKey
+   *
+   * @param tableA
+   * @param tableB
    * @return
    */
-  private FlowPanel getInformationAboutRelationship(ViewerTable table, ViewerForeignKey foreignKey) {
+  private FlowPanel getInformationAboutRelationship(ViewerTable tableA, ViewerTable tableB) {
     FlowPanel information = new FlowPanel();
 
-    if (foreignKey.getReferencedTableUUID().equals(table.getUUID())) {
+    Map<String, List<ViewerForeignKey>> relationship = TableUtils.getRelationship(tableA, tableB);
+
+    // for (Map.Entry<String, List<ViewerForeignKey>> entry :
+    // relationship.entrySet()) {
+    // for (ViewerForeignKey foreignKey : entry.getValue()) {
+    // for (ViewerReference reference : foreignKey.getReferences()) {
+    // if (foreignKey.getReferencedTableUUID().equals(tableA.getUUID())) {
+    // ViewerColumn column =
+    // metadata.getTable(foreignKey.getReferencedTableUUID()).getColumns()
+    // .get(reference.getReferencedColumnIndex());
+    // information.add(buildReferenceInformation(
+    // messages.dataTransformationTextForIsRelatedTo(tableA.getId(),
+    // column.getDisplayName())));
+    // } else {
+    // ViewerColumn column = metadata.getTable(tableA.getUUID()).getColumns()
+    // .get(reference.getSourceColumnIndex());
+    // information.add(buildReferenceInformation(
+    // messages.dataTransformationTextForIsReferencedBy(tableA.getId(),
+    // column.getDisplayName())));
+    // }
+    // }
+    //
+    // }
+    // }
+
+    for (ViewerForeignKey foreignKey : TableUtils.checkForeignKey(tableA, tableB)) {
       for (ViewerReference reference : foreignKey.getReferences()) {
         ViewerColumn column = metadata.getTable(foreignKey.getReferencedTableUUID()).getColumns()
           .get(reference.getReferencedColumnIndex());
         information.add(buildReferenceInformation(
-          messages.dataTransformationTextForIsRelatedTo(table.getId(), column.getDisplayName())));
-      }
-    } else {
-      for (ViewerReference reference : foreignKey.getReferences()) {
-        ViewerColumn column = metadata.getTable(table.getUUID()).getColumns().get(reference.getSourceColumnIndex());
-        information.add(buildReferenceInformation(
-          messages.dataTransformationTextForIsReferencedBy(table.getId(), column.getDisplayName())));
+          messages.dataTransformationTextForIsRelatedTo(tableA.getId(), column.getDisplayName())));
       }
     }
+
+    for (ViewerForeignKey foreignKey : TableUtils.checkForeignKey(tableB, tableA)) {
+      for (ViewerReference reference : foreignKey.getReferences()) {
+        ViewerColumn column = metadata.getTable(tableA.getUUID()).getColumns().get(reference.getSourceColumnIndex());
+        information.add(buildReferenceInformation(
+          messages.dataTransformationTextForIsReferencedBy(tableA.getId(), column.getDisplayName())));
+      }
+    }
+
+    // if (foreignKey.getReferencedTableUUID().equals(tableA.getUUID())) {
+    // for (ViewerReference reference : foreignKey.getReferences()) {
+    // ViewerColumn column =
+    // metadata.getTable(foreignKey.getReferencedTableUUID()).getColumns()
+    // .get(reference.getReferencedColumnIndex());
+    // information.add(buildReferenceInformation(
+    // messages.dataTransformationTextForIsRelatedTo(tableA.getId(),
+    // column.getDisplayName())));
+    // }
+    // } else {
+    // for (ViewerReference reference : foreignKey.getReferences()) {
+    // ViewerColumn column =
+    // metadata.getTable(tableA.getUUID()).getColumns().get(reference.getSourceColumnIndex());
+    // information.add(buildReferenceInformation(
+    // messages.dataTransformationTextForIsReferencedBy(tableA.getId(),
+    // column.getDisplayName())));
+    // }
+    // }
 
     return information;
   }

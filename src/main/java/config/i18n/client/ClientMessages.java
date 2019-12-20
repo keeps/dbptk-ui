@@ -3,6 +3,8 @@ package config.i18n.client;
 import com.google.gwt.i18n.client.Messages;
 import com.google.gwt.safehtml.shared.SafeHtml;
 
+import java.util.List;
+
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
@@ -1279,7 +1281,11 @@ public interface ClientMessages extends Messages {
    *******************************************/
 
   String dataTransformationTextForAlertColumnsOrder();
+
   String dataTransformationTextForIsReferencedBy(String table, String column);
+
   String dataTransformationTextForIsRelatedTo(String table, String column);
+
+  String dataTransformationTableRowList(List<String> columns);
 
 }

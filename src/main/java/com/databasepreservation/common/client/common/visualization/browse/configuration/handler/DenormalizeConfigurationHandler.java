@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
+import com.databasepreservation.common.client.common.utils.TableUtils;
 import com.databasepreservation.common.client.widgets.Toast;
 import org.fusesource.restygwt.client.Method;
 
@@ -88,37 +89,47 @@ public class DenormalizeConfigurationHandler {
     }).createDenormalizeConfigurationFile(database.getUuid(), table.getUUID(), configuration);
   }
 
-  public ViewerTable getTable(){
+  public ViewerTable getTable() {
     return table;
   }
 
-  public List<RelatedTablesConfiguration> getRelatedTableList(){
+  public List<RelatedTablesConfiguration> getRelatedTableList() {
     return configuration.getRelatedTables();
   }
 
-  public String includeRelatedTable(ViewerTable sourceTable, ViewerTable referencedTable, ViewerForeignKey foreignKey) {
+  public String includeRelatedTable(ViewerTable sourceTable, ViewerTable referencedTable) {
     RelatedTablesConfiguration relatedTable = new RelatedTablesConfiguration();
     relatedTable.setTableUUID(sourceTable.getUUID());
     relatedTable.setTableID(sourceTable.getId());
     relatedTable.setReferencedTableUUID(referencedTable.getUUID());
     relatedTable.setReferencedTableID(referencedTable.getId());
 
-    for (ViewerReference reference : foreignKey.getReferences()) {
-      if (foreignKey.getReferencedTableUUID().equals(sourceTable.getUUID())) {
-        ViewerColumn sourceColumn = sourceTable.getColumns().get(reference.getReferencedColumnIndex());
-        ViewerColumn referencedColumn = referencedTable.getColumns().get(reference.getSourceColumnIndex());
-        relatedTable.getReferences().add(createReference(sourceColumn, referencedColumn));
-      } else {
-        ViewerColumn sourceColumn = sourceTable.getColumns().get(reference.getSourceColumnIndex());
-        ViewerColumn referencedColumn = referencedTable.getColumns().get(reference.getReferencedColumnIndex());
-        relatedTable.getReferences().add(createReference(sourceColumn, referencedColumn));
+    Map<String, List<ViewerForeignKey>> relationship = TableUtils.getRelationship(sourceTable, referencedTable);
+    for (Map.Entry<String, List<ViewerForeignKey>> entry : relationship.entrySet()) {
+      for (ViewerForeignKey foreignKey : entry.getValue()) {
+        for (ViewerReference reference : foreignKey.getReferences()) {
+          if (entry.getKey().equals(sourceTable.getUUID())) {
+            ViewerColumn sourceColumn = sourceTable.getColumns().get(reference.getSourceColumnIndex());
+            ViewerColumn referencedColumn = referencedTable.getColumns().get(reference.getReferencedColumnIndex());
+            relatedTable.getReferences().add(createReference(sourceColumn, referencedColumn));
+          } else {
+            ViewerColumn sourceColumn = sourceTable.getColumns().get(reference.getReferencedColumnIndex());
+            ViewerColumn referencedColumn = referencedTable.getColumns().get(reference.getSourceColumnIndex());
+            relatedTable.getReferences().add(createReference(sourceColumn, referencedColumn));
+          }
+        }
       }
     }
 
     StringBuilder uuid = new StringBuilder(sourceTable.getUUID());
     uuid.append(".").append(referencedTable.getUUID());
-    for (ViewerReference reference : foreignKey.getReferences()) {
-      uuid.append(".").append(reference.getSourceColumnIndex());
+
+    for (List<ViewerForeignKey> value : relationship.values()) {
+      for (ViewerForeignKey foreignKey : value) {
+        for (ViewerReference reference : foreignKey.getReferences()) {
+          uuid.append(".").append(reference.getSourceColumnIndex());
+        }
+      }
     }
 
     relatedTable.setUuid(uuid.toString());
@@ -170,7 +181,7 @@ public class DenormalizeConfigurationHandler {
     return null;
   }
 
-  //TODO: Cascate delete, implement tree and delete all child
+  // TODO: Cascate delete, implement tree and delete all child
   public void removeRelatedTableByUUID(String uuid) {
     for (RelatedTablesConfiguration relatedTables : configuration.getRelatedTables()) {
       if (relatedTables.getUuid().equals(uuid)) {
@@ -187,7 +198,7 @@ public class DenormalizeConfigurationHandler {
     column.setColumnName(object.getDisplayName());
     column.setSolrName(object.getSolrName());
 
-    //avoid to include the same column twice
+    // avoid to include the same column twice
     for (RelatedColumnConfiguration columnToInclude : relatedTable.getColumnsIncluded()) {
       if (columnToInclude.getIndex() == column.getIndex()) {
         return;
