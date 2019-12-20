@@ -1161,4 +1161,25 @@ public interface ClientMessages extends Messages {
   String activityLogHumanizedTextForUnauthorized();
 
   String activityLogHumanizedTextForUnknown();
+
+  String activityLogComponent(@Select String component);
+
+  String activityLogFilterName(@Select String name);
+
+  /********************************************
+   * HTML Utils
+   *******************************************/
+  String sublist(int firstElementIndex, long maximumElementCount);
+
+  SafeHtml simpleFilterParameter(String name, String value);
+
+  SafeHtml basicFilterParameter(String name, String value);
+
+  SafeHtml longRangeFilterParameter(String name, long fromValue, long toValue);
+
+  SafeHtml longRangeFilterParameterOnlyFrom(String name, long fromValue);
+
+  SafeHtml longRangeFilterParameterOnlyTo(String name, long toValue);
+
+  SafeHtml longRangeFilterParameterEquals(String name, long value);
 }

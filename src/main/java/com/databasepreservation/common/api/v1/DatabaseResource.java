@@ -164,7 +164,8 @@ public class DatabaseResource implements DatabaseService {
       throw new RESTException(e);
     } finally {
       // register action
-      controllerAssistant.registerAction(user, databaseUUID, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID);
+      controllerAssistant.registerAction(user, databaseUUID, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM,
+        databaseUUID);
     }
   }
 
@@ -183,7 +184,8 @@ public class DatabaseResource implements DatabaseService {
       throw new RESTException(e);
     } finally {
       // register action
-      controllerAssistant.registerAction(user, databaseUUID, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID);
+      controllerAssistant.registerAction(user, databaseUUID, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM,
+        databaseUUID);
     }
   }
 
@@ -211,12 +213,12 @@ public class DatabaseResource implements DatabaseService {
       throw new RESTException(e);
     } finally {
       // register action
-      controllerAssistant.registerAction(user, databaseUUID, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID);
+      controllerAssistant.registerAction(user, databaseUUID, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM,
+        databaseUUID);
     }
     return false;
   }
 
-  //
   @Override
   public IndexResult<ViewerRow> findRows(String databaseUUID, FindRequest findRequest, String localeString)
     throws RESTException {
@@ -226,9 +228,13 @@ public class DatabaseResource implements DatabaseService {
 
     controllerAssistant.checkRoles(user);
 
+    long count = 0;
+
     try {
-      return ViewerFactory.getSolrManager().findRows(databaseUUID, findRequest.filter, findRequest.sorter,
-        findRequest.sublist, findRequest.facets);
+      final IndexResult<ViewerRow> viewerRowIndexResult = ViewerFactory.getSolrManager().findRows(databaseUUID,
+        findRequest.filter, findRequest.sorter, findRequest.sublist, findRequest.facets);
+      count = viewerRowIndexResult.getTotalCount();
+      return viewerRowIndexResult;
     } catch (GenericException | RequestNotValidException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
@@ -236,12 +242,13 @@ public class DatabaseResource implements DatabaseService {
       // register action
       controllerAssistant.registerAction(user, databaseUUID, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM,
         databaseUUID, ViewerConstants.CONTROLLER_FILTER_PARAM, JsonUtils.getJsonFromObject(findRequest.filter),
-        ViewerConstants.CONTROLLER_SUBLIST_PARAM, JsonUtils.getJsonFromObject(findRequest.sublist));
+        ViewerConstants.CONTROLLER_SUBLIST_PARAM, JsonUtils.getJsonFromObject(findRequest.sublist),
+        ViewerConstants.CONTROLLER_RETRIEVE_COUNT, count);
     }
   }
 
   @Override
-  public ViewerRow retrieveRows(String databaseUUID, String rowUUID) throws RESTException {
+  public ViewerRow retrieveRow(String databaseUUID, String rowUUID) throws RESTException {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
     User user = UserUtility.getUser(request);
 
@@ -256,8 +263,8 @@ public class DatabaseResource implements DatabaseService {
       throw new RESTException(e);
     } finally {
       // register action
-      controllerAssistant.registerAction(user, databaseUUID, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,
-        ViewerConstants.CONTROLLER_ROW_ID_PARAM, rowUUID);
+      controllerAssistant.registerAction(user, databaseUUID, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM,
+        databaseUUID, ViewerConstants.CONTROLLER_ROW_ID_PARAM, rowUUID);
     }
   }
 }

@@ -50,7 +50,7 @@ public class ViewerTable implements Serializable {
     columns = new ArrayList<>();
   }
 
-  public String getUUID() {
+  public String getUuid() {
     return uuid;
   }
 

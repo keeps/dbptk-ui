@@ -194,7 +194,7 @@ public class CommonClientUtils {
 
     String iconTag = FontAwesomeIconManager.getTag(FontAwesomeIconManager.SCHEMA_TABLE_SEPARATOR);
     final SafeHtml html = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE, table.getSchemaName() + iconTag + table.getName());
-    Hyperlink tableLink = new Hyperlink(html, HistoryManager.linkToTable(databaseUUID, table.getUUID()));
+    Hyperlink tableLink = new Hyperlink(html, HistoryManager.linkToTable(databaseUUID, table.getUuid()));
     tableLink.addStyleName(hClass);
     panel.add(tableLink);
 

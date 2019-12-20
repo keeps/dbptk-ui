@@ -145,7 +145,7 @@ public class TableSearchPanel extends Composite {
     tableRowList.getSelectionModel().addSelectionChangeHandler(event -> {
       ViewerRow record = tableRowList.getSelectionModel().getSelectedObject();
       if (record != null) {
-        HistoryManager.gotoRecord(database.getUuid(), table.getUUID(), record.getUuid());
+        HistoryManager.gotoRecord(database.getUuid(), table.getUuid(), record.getUuid());
       }
     });
 
@@ -317,7 +317,7 @@ public class TableSearchPanel extends Composite {
       searchPanel.querySavedHandler(true, database, savedSearchUUID);
     }, (String errorMessage) -> {
       searchPanel.querySavedHandler(false, database, null);
-    }).save(database.getUuid(), table.getUUID(), table.getName(), messages.searchOnTable(table.getName()), "",
+    }).save(database.getUuid(), table.getUuid(), table.getName(), messages.searchOnTable(table.getName()), "",
       currentSearchInfo);
   }
 }

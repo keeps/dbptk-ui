@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.models.activity.logs.ActivityLogEntry;
-import com.databasepreservation.common.client.models.activity.logs.LogEntryParameter;
 import com.databasepreservation.common.client.models.activity.logs.LogEntryState;
 import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.server.index.schema.AbstractSolrCollection;
@@ -117,12 +116,7 @@ public class ActivityLogsCollection extends AbstractSolrCollection<ActivityLogEn
     activityLogEntry.setLineNumber(SolrUtils.objectToLong(doc.get(SOLR_ACTIVITY_LOG_LINE_NUMBER), 0L));
 
     final String parameters = SolrUtils.objectToString(doc.get(SOLR_ACTIVITY_LOG_PARAMETERS), null);
-    try {
-      activityLogEntry
-        .setParameters(JsonUtils.getListFromJson(parameters == null ? "" : parameters, LogEntryParameter.class));
-    } catch (GenericException e) {
-      LOGGER.error("Error parsing activity log entry parameters", e);
-    }
+    activityLogEntry.setParameters(JsonUtils.getMapFromJson(parameters == null ? "" : parameters));
 
     return activityLogEntry;
   }

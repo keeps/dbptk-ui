@@ -27,10 +27,10 @@ public class TableCheckConstraintsPanel extends Composite {
   private static Map<String, TableCheckConstraintsPanel> instances = new HashMap<>();
 
   public static TableCheckConstraintsPanel getInstance(ViewerTable table) {
-    TableCheckConstraintsPanel instance = instances.get(table.getUUID());
+    TableCheckConstraintsPanel instance = instances.get(table.getUuid());
     if (instance == null) {
       instance = new TableCheckConstraintsPanel(table);
-      instances.put(table.getUUID(), instance);
+      instances.put(table.getUuid(), instance);
     }
     return instance;
   }

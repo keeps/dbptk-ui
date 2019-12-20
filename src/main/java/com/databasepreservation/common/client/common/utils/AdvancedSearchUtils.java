@@ -42,7 +42,7 @@ public class AdvancedSearchUtils {
 
     for (ViewerColumn viewerColumn : viewerTable.getColumns()) {
       SearchField searchField = new SearchField(
-        viewerTable.getUUID() + "-" + viewerColumn.getColumnIndexInEnclosingTable(),
+        viewerTable.getUuid() + "-" + viewerColumn.getColumnIndexInEnclosingTable(),
         Collections.singletonList(viewerColumn.getSolrName()), viewerColumn.getDisplayName(),
         viewerTypeToSearchFieldType(viewerColumn.getType()));
       searchField.setFixed(true);

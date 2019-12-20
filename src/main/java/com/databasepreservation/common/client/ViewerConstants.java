@@ -431,6 +431,18 @@ public class ViewerConstants {
   public static final String CONTROLLER_SAVED_SEARCH_DESCRIPTION_PARAM = "description";
   public static final String CONTROLLER_SAVED_SEARCH_PARAM = "saved-search";
   public static final String CONTROLLER_SAVED_SEARCH_UUID_PARAM = "saved-search-uuid";
+  public static final String CONTROLLER_RETRIEVE_COUNT = "total-count";
+  public static final String CONTROLLER_USERNAME_PARAM = "username";
+
+  /*
+   * REST CONTROLLERS
+   */
+  public static final String CONTROLLER_ACTIVITY_LOG_RESOURCE = "com.databasepreservation.common.api.v1.ActivityLogResource";
+  public static final String CONTROLLER_DATABASE_RESOURCE = "com.databasepreservation.common.api.v1.DatabaseResource";
+  public static final String CONTROLLER_FILE_RESOURCE = "com.databasepreservation.common.api.v1.FileResource";
+  public static final String CONTROLLER_SIARD_RESOURCE = "com.databasepreservation.common.api.v1.SIARDResource";
+  public static final String CONTROLLER_SEARCH_RESOURCE = "com.databasepreservation.common.api.v1.SearchResource";
+  public static final String CONTROLLER_USER_LOGIN_CONTROLLER = "com.databasepreservation.common.server.controller.UserLoginController";
 
   /**
    * private constructor

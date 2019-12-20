@@ -251,9 +251,9 @@ public class DatabaseSidebar extends Composite {
             schema.getName() + " " + iconTag + " " + table.getName());
       }
       SidebarHyperlink tableLink = new SidebarHyperlink(html,
-          HistoryManager.linkToTable(database.getUuid(), table.getUUID()));
+          HistoryManager.linkToTable(database.getUuid(), table.getUuid()));
       tableLink.setH6().setIndent2();
-      list.put(table.getUUID(), tableLink);
+      list.put(table.getUuid(), tableLink);
       sidebarGroup.add(tableLink);
 
       return tableLink;
@@ -273,8 +273,8 @@ public class DatabaseSidebar extends Composite {
             FontAwesomeIconManager.TABLE, schema.getName() + " " + iconTag + " " + materializedTable.getNameWithoutPrefix());
       }
       viewLink = new SidebarHyperlink(html,
-        HistoryManager.linkToTable(database.getUuid(), materializedTable.getUUID())).setTooltip("Materialized View");
-      list.put(materializedTable.getUUID(), viewLink);
+        HistoryManager.linkToTable(database.getUuid(), materializedTable.getUuid())).setTooltip("Materialized View");
+      list.put(materializedTable.getUuid(), viewLink);
     } else if (schema.getCustomViewTable(view.getName()) != null) {
       final ViewerTable customViewTable = schema.getCustomViewTable(view.getName());
       if (totalSchemas == 1) {
@@ -284,8 +284,8 @@ public class DatabaseSidebar extends Composite {
         html = FontAwesomeIconManager.getStackedIconSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS,
           FontAwesomeIconManager.COG, schema.getName() + " " + iconTag + " " + customViewTable.getNameWithoutPrefix());
       }
-      viewLink = new SidebarHyperlink(html, HistoryManager.linkToTable(database.getUuid(), customViewTable.getUUID())).setTooltip("Custom View");
-      list.put(customViewTable.getUUID(), viewLink);
+      viewLink = new SidebarHyperlink(html, HistoryManager.linkToTable(database.getUuid(), customViewTable.getUuid())).setTooltip("Custom View");
+      list.put(customViewTable.getUuid(), viewLink);
     } else {
       if (totalSchemas == 1) {
         html = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS, view.getName());

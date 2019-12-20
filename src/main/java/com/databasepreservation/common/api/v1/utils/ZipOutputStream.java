@@ -118,7 +118,7 @@ public class ZipOutputStream extends CSVOutputStream {
       if (binaryColumn != null) {
         out.putArchiveEntry(new ZipArchiveEntry(ViewerConstants.INTERNAL_ZIP_LOB_FOLDER + cellEntry.getValue().getValue()));
         final InputStream inputStream = Files
-          .newInputStream(LobPathManager.getPath(ViewerFactory.getViewerConfiguration(), databaseUUID, table.getUUID(),
+          .newInputStream(LobPathManager.getPath(ViewerFactory.getViewerConfiguration(), databaseUUID, table.getUuid(),
             binaryColumn.getColumnIndexInEnclosingTable(), row.getUuid()));
         IOUtils.copy(inputStream, out);
         inputStream.close();

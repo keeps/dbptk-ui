@@ -107,7 +107,7 @@ public class ErDiagram extends Composite {
 
           for (ViewerTable viewerTable : schema.getTables()) {
             if (!viewerTable.getName().startsWith(ViewerConstants.MATERIALIZED_VIEW_PREFIX)) {
-              VisNode visNode = new VisNode(viewerTable.getUUID(), viewerTable.getName());
+              VisNode visNode = new VisNode(viewerTable.getUuid(), viewerTable.getName());
 
               visNode.numColumns = viewerTable.getColumns().size();
               if (viewerTable.getCountRows() == -1) {
@@ -121,7 +121,7 @@ public class ErDiagram extends Composite {
                 for (ViewerTable table : viewerSchema.getTables()) {
 
                   for (ViewerForeignKey viewerForeignKey : table.getForeignKeys()) {
-                    if (viewerForeignKey.getReferencedTableUUID().equals(viewerTable.getUUID())) {
+                    if (viewerForeignKey.getReferencedTableUUID().equals(viewerTable.getUuid())) {
                       inboundForeignKeys++;
                     }
                   }
@@ -187,7 +187,7 @@ public class ErDiagram extends Composite {
               visNodeList.add(visNode);
 
               for (ViewerForeignKey viewerForeignKey : viewerTable.getForeignKeys()) {
-                jsniEdgeList.add(new JsniEdge(viewerTable.getUUID(), viewerForeignKey.getReferencedTableUUID()));
+                jsniEdgeList.add(new JsniEdge(viewerTable.getUuid(), viewerForeignKey.getReferencedTableUUID()));
               }
             }
           }

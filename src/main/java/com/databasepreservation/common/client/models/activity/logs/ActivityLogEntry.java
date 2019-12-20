@@ -1,11 +1,10 @@
 package com.databasepreservation.common.client.models.activity.logs;
 
 import java.util.Date;
-import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import com.databasepreservation.common.client.index.IsIndexed;
-import org.codehaus.jackson.annotate.JsonIgnore;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -22,7 +21,7 @@ public class ActivityLogEntry extends IsIndexed {
   private LogEntryState state;
   private long duration;
   private long lineNumber = -1;
-  private List<LogEntryParameter> parameters;
+  private Map<String, String> parameters;
 
   /**
    * Constructs an empty {@link ActivityLogEntry}.
@@ -114,11 +113,11 @@ public class ActivityLogEntry extends IsIndexed {
     this.lineNumber = lineNumber;
   }
 
-  public List<LogEntryParameter> getParameters() {
+  public Map<String, String> getParameters() {
     return parameters;
   }
 
-  public void setParameters(List<LogEntryParameter> parameters) {
+  public void setParameters(Map<String, String> parameters) {
     this.parameters = parameters;
   }
 

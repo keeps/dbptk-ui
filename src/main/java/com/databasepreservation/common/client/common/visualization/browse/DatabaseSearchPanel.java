@@ -211,7 +211,7 @@ public class DatabaseSearchPanel extends RightPanel {
       tableRowList.getSelectionModel().addSelectionChangeHandler(event -> {
         ViewerRow record = tableRowList.getSelectionModel().getSelectedObject();
         if (record != null) {
-          HistoryManager.gotoRecord(database.getUuid(), table.getUUID(), record.getUuid());
+          HistoryManager.gotoRecord(database.getUuid(), table.getUuid(), record.getUuid());
         }
       });
     }

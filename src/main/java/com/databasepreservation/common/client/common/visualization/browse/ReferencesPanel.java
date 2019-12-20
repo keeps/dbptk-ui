@@ -97,14 +97,14 @@ public class ReferencesPanel extends RightPanel {
     DatabaseService.Util.call((ViewerRow result) -> {
       record = result;
       init();
-    }).retrieveRows(database.getUuid(), recordUUID);
+    }).retrieveRow(database.getUuid(), recordUUID);
   }
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
       BreadcrumbManager.updateBreadcrumb(breadcrumb,
       BreadcrumbManager.forReferences(database.getMetadata().getName(), database.getUuid(), table.getName(),
-        table.getUUID(), recordUUID, columnName,
+        table.getUuid(), recordUUID, columnName,
               columnIndexInTable.toString()));
   }
 
@@ -138,7 +138,7 @@ public class ReferencesPanel extends RightPanel {
         for (ViewerForeignKey viewerForeignKey : viewerTable.getForeignKeys()) {
 
           boolean fkSourceIsCurrentTable = viewerTable.equals(table);
-          boolean fkTargetIsCurrentTable = viewerForeignKey.getReferencedTableUUID().equals(table.getUUID());
+          boolean fkTargetIsCurrentTable = viewerForeignKey.getReferencedTableUUID().equals(table.getUuid());
 
           // the table that is different than the current table, to use in the
           // reference
@@ -190,7 +190,7 @@ public class ReferencesPanel extends RightPanel {
   private Widget getReferenceHeaderPanel(Reference reference) {
     ViewerTable otherTable = reference.table;
     ViewerForeignKey fk = reference.foreignKey;
-    boolean currentTableIsReferencedTableInForeignKey = fk.getReferencedTableUUID().equals(table.getUUID());
+    boolean currentTableIsReferencedTableInForeignKey = fk.getReferencedTableUUID().equals(table.getUuid());
 
     FlowPanel header = new FlowPanel();
     header.addStyleName("field");
@@ -254,7 +254,7 @@ public class ReferencesPanel extends RightPanel {
     descriptionBuilder.appendHtmlConstant("<div class=\"label\">" + messages.references_relatedTable() + "</div>");
     descriptionBuilder.appendHtmlConstant("<div class=\"value\">")
       .appendHtmlConstant(new Hyperlink(otherTable.getSchemaName() + " . " + otherTable.getName(),
-        HistoryManager.linkToTable(database.getUuid(), otherTable.getUUID())).toString())
+        HistoryManager.linkToTable(database.getUuid(), otherTable.getUuid())).toString())
       .appendHtmlConstant("</div>");
 
     descriptionBuilder.appendHtmlConstant("<div class=\"label\">" + messages.references_foreignKeyName() + "</div>");
@@ -278,7 +278,7 @@ public class ReferencesPanel extends RightPanel {
     // create filter to look for record values in other schemas related to this
     // one by a foreign key
     boolean currentTableIsReferencedTableInForeignKey = reference.foreignKey.getReferencedTableUUID()
-      .equals(table.getUUID());
+      .equals(table.getUuid());
     List<FilterParameter> filterParameters = new ArrayList<>();
     for (ViewerReference viewerReference : reference.foreignKey.getReferences()) {
       String columnNameInCurrentTable;

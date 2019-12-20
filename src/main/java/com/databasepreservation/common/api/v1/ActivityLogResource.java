@@ -29,7 +29,7 @@ import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.index.facets.Facets;
 import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.activity.logs.ActivityLogEntry;
-import com.databasepreservation.common.client.models.activity.logs.LogEntryParameter;
+import com.databasepreservation.common.client.models.activity.logs.ActivityLogWrapper;
 import com.databasepreservation.common.client.models.activity.logs.LogEntryState;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
@@ -60,8 +60,8 @@ public class ActivityLogResource implements ActivityLogService {
     controllerAssistant.checkRoles(user);
 
     try {
-      final IndexResult<ActivityLogEntry> result = ViewerFactory.getSolrManager().find(ActivityLogEntry.class, findRequest.filter, findRequest.sorter,
-          findRequest.sublist, findRequest.facets);
+      final IndexResult<ActivityLogEntry> result = ViewerFactory.getSolrManager().find(ActivityLogEntry.class,
+        findRequest.filter, findRequest.sorter, findRequest.sublist, findRequest.facets);
       return I18nUtility.translate(result, ActivityLogEntry.class, locale);
     } catch (GenericException | RequestNotValidException e) {
       state = LogEntryState.FAILURE;
@@ -74,7 +74,7 @@ public class ActivityLogResource implements ActivityLogService {
   }
 
   @Override
-  public ActivityLogEntry retrieve(String logUUID) {
+  public ActivityLogWrapper retrieve(String logUUID) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
     User user = UserUtility.getUser(request);
     LogEntryState state = LogEntryState.SUCCESS;
@@ -82,19 +82,13 @@ public class ActivityLogResource implements ActivityLogService {
     controllerAssistant.checkRoles(user);
 
     try {
-      final ActivityLogEntry retrieve = ViewerFactory.getSolrManager().retrieve(ActivityLogEntry.class, logUUID);
 
+      final ActivityLogEntry retrieve = ViewerFactory.getSolrManager().retrieve(ActivityLogEntry.class, logUUID);
       final ViewerDatabase viewerDatabase = getViewerDatabase(retrieve.getParameters());
       if (viewerDatabase != null) {
-        final Map<String, String> displayNameColumn = getDisplayNameColumn(viewerDatabase.getMetadata(),
-          retrieve.getParameters());
-        final List<LogEntryParameter> parameters = replaceColumnSolrName(displayNameColumn, retrieve.getParameters());
-
-        retrieve.setParameters(parameters);
-        return retrieve;
+        retrieve.setParameters(replaceColumnSolrName(viewerDatabase.getMetadata(), retrieve.getParameters()));
       }
-
-      return null;
+      return new ActivityLogWrapper(retrieve);
     } catch (GenericException | NotFoundException | RequestNotValidException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
@@ -104,76 +98,67 @@ public class ActivityLogResource implements ActivityLogService {
     }
   }
 
-  private ViewerDatabase getViewerDatabase(List<LogEntryParameter> parameters)
+  private ViewerDatabase getViewerDatabase(Map<String, String> parameters)
     throws GenericException, RequestNotValidException {
-    for (LogEntryParameter parameter : parameters) {
-      if (parameter.getName().equals(ViewerConstants.CONTROLLER_DATABASE_ID_PARAM)) {
-        final String databaseUuid = parameter.getValue();
-        List<String> fieldsToReturn = Collections.singletonList(ViewerConstants.SOLR_DATABASES_METADATA);
-        Filter filterParam = new Filter(new SimpleFilterParameter(ViewerConstants.INDEX_ID, databaseUuid));
-        final IndexResult<ViewerDatabase> viewerDatabase = ViewerFactory.getSolrManager().find(ViewerDatabase.class,
-          filterParam, Sorter.NONE, new Sublist(), Facets.NONE, fieldsToReturn);
 
-        return viewerDatabase.getResults().get(0);
-      }
-    }
+    final String databaseUuid = parameters.get(ViewerConstants.CONTROLLER_DATABASE_ID_PARAM);
 
-    return null;
+    if (databaseUuid == null)
+      return null;
+
+    List<String> fieldsToReturn = Collections.singletonList(ViewerConstants.SOLR_DATABASES_METADATA);
+    Filter filterParam = new Filter(new SimpleFilterParameter(ViewerConstants.INDEX_ID, databaseUuid));
+    final IndexResult<ViewerDatabase> viewerDatabase = ViewerFactory.getSolrManager().find(ViewerDatabase.class,
+      filterParam, Sorter.NONE, new Sublist(), Facets.NONE, fieldsToReturn);
+
+    if (viewerDatabase.getTotalCount() == 0)
+      return null;
+
+    return viewerDatabase.getResults().get(0);
   }
 
-  private List<LogEntryParameter> replaceColumnSolrName(Map<String, String> mapperSolrToDisplayName,
-    List<LogEntryParameter> parameters) throws GenericException {
+  private Map<String, String> replaceColumnSolrName(ViewerMetadata metadata, Map<String, String> parameters)
+    throws GenericException {
 
-    for (LogEntryParameter parameter : parameters) {
-      if (parameter.getName().equals(ViewerConstants.CONTROLLER_FILTER_PARAM)) {
-        final Filter filter = JsonUtils.getObjectFromJson(parameter.getValue(), Filter.class);
-        for (FilterParameter filterParameter : filter.getParameters()) {
-          if (filterParameter.getName().startsWith(ViewerConstants.SOLR_INDEX_ROW_COLUMN_NAME_PREFIX)) {
-            filterParameter.setName(mapperSolrToDisplayName.get(filterParameter.getName()));
-            final String jsonFromObject = JsonUtils.getJsonFromObject(filter);
-            parameter.setValue(jsonFromObject);
-          }
-        }
+    final String jsonFilter = parameters.get(ViewerConstants.CONTROLLER_FILTER_PARAM);
+    final Filter filter = JsonUtils.getObjectFromJson(jsonFilter, Filter.class);
+
+    final Map<String, String> mapperSolrToDisplayName = getDisplayNameColumn(metadata, filter);
+
+    for (FilterParameter filterParameter : filter.getParameters()) {
+      if (filterParameter.getName().startsWith(ViewerConstants.SOLR_INDEX_ROW_COLUMN_NAME_PREFIX)) {
+        filterParameter.setName(mapperSolrToDisplayName.get(filterParameter.getName()));
       }
     }
+
+    final String jsonFromObject = JsonUtils.getJsonFromObject(filter);
+    parameters.put(ViewerConstants.CONTROLLER_FILTER_PARAM, jsonFromObject);
 
     return parameters;
   }
 
-  private String getTableIdFromFilter(List<LogEntryParameter> parameters) throws GenericException {
-    for (LogEntryParameter parameter : parameters) {
-      if (parameter.getName().equals(ViewerConstants.CONTROLLER_FILTER_PARAM)) {
-        final Filter filter = JsonUtils.getObjectFromJson(parameter.getValue(), Filter.class);
-        for (FilterParameter filterParameter : filter.getParameters()) {
-          if (filterParameter.getName().equals(ViewerConstants.SOLR_ROWS_TABLE_ID)
-            && filterParameter instanceof SimpleFilterParameter) {
-            return ((SimpleFilterParameter) filterParameter).getValue();
-          }
-        }
+  private String getTableIdFromFilter(Filter filter) {
+    for (FilterParameter filterParameter : filter.getParameters()) {
+      if (filterParameter.getName().equals(ViewerConstants.SOLR_ROWS_TABLE_ID)
+        && filterParameter instanceof SimpleFilterParameter) {
+        return ((SimpleFilterParameter) filterParameter).getValue();
       }
     }
-
     return null;
   }
 
-  private Map<String, String> getDisplayNameColumn(ViewerMetadata metadata, List<LogEntryParameter> parameters)
-    throws GenericException {
+  private Map<String, String> getDisplayNameColumn(ViewerMetadata metadata, Filter filter) {
     Map<String, String> solrNameToDisplayName = new HashMap<>();
 
-    String tableId = getTableIdFromFilter(parameters);
+    String tableId = getTableIdFromFilter(filter);
 
-    for (LogEntryParameter parameter : parameters) {
-      if (parameter.getName().equals(ViewerConstants.CONTROLLER_FILTER_PARAM)) {
-        final Filter filter = JsonUtils.getObjectFromJson(parameter.getValue(), Filter.class);
-        for (FilterParameter filterParameter : filter.getParameters()) {
-          if (filterParameter.getName().startsWith(ViewerConstants.SOLR_INDEX_ROW_COLUMN_NAME_PREFIX)) {
-            final List<ViewerColumn> columns = metadata.getTableById(tableId).getColumns();
+    for (FilterParameter filterParameter : filter.getParameters()) {
+      if (filterParameter.getName().startsWith(ViewerConstants.SOLR_INDEX_ROW_COLUMN_NAME_PREFIX)) {
+        final List<ViewerColumn> columns = metadata.getTableById(tableId).getColumns();
 
-            for (ViewerColumn column : columns) {
-              if (column.getSolrName().equals(filterParameter.getName())) {
-                solrNameToDisplayName.put(column.getSolrName(), column.getDisplayName());
-              }
-            }
+        for (ViewerColumn column : columns) {
+          if (column.getSolrName().equals(filterParameter.getName())) {
+            solrNameToDisplayName.put(column.getSolrName(), column.getDisplayName());
           }
         }
       }

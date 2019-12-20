@@ -114,5 +114,5 @@ public interface DatabaseService extends DirectRestService {
   @GET
   @Path("find/rows/{databaseUUID}/{rowUUID}")
   @ApiOperation(value = "retrieves DBPTK export modules", notes = "", response = ViewerRow.class, responseContainer = "IndexResult")
-  ViewerRow retrieveRows(@PathParam("databaseUUID") String databaseUUID, @PathParam("rowUUID") String rowUUID);
+  ViewerRow retrieveRow(@PathParam("databaseUUID") String databaseUUID, @PathParam("rowUUID") String rowUUID);
 }

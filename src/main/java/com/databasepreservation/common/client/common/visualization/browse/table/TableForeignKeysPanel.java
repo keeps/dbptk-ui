@@ -34,10 +34,10 @@ public class TableForeignKeysPanel extends Composite {
   private static Map<String, TableForeignKeysPanel> instances = new HashMap<>();
 
   public static TableForeignKeysPanel getInstance(ViewerDatabase database, ViewerTable table) {
-    TableForeignKeysPanel instance = instances.get(table.getUUID());
+    TableForeignKeysPanel instance = instances.get(table.getUuid());
     if (instance == null) {
       instance = new TableForeignKeysPanel(database, table);
-      instances.put(table.getUUID(), instance);
+      instances.put(table.getUuid(), instance);
     }
     return instance;
   }

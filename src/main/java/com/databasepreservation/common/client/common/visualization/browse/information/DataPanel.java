@@ -90,7 +90,7 @@ public class DataPanel extends Composite {
     table.getSelectionModel().addSelectionChangeHandler(event -> {
       ViewerTable item = table.getSelectionModel().getSelectedObject();
       if (item != null) {
-        HistoryManager.gotoTable(database.getUuid(), item.getUUID());
+        HistoryManager.gotoTable(database.getUuid(), item.getUuid());
       }
     });
     tableContent.add(table);
@@ -163,7 +163,7 @@ public class DataPanel extends Composite {
           for (ViewerSchema viewerSchema : metadata.getSchemas()) {
             for (ViewerTable viewerTable : viewerSchema.getTables()) {
               for (ViewerForeignKey viewerForeignKey : viewerTable.getForeignKeys()) {
-                if (viewerForeignKey.getReferencedTableUUID().equals(table.getUUID())) {
+                if (viewerForeignKey.getReferencedTableUUID().equals(table.getUuid())) {
                   inboundForeignKeys++;
                 }
               }

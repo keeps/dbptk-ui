@@ -103,7 +103,7 @@ public class TablePanelOptions extends RightPanel {
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
       BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forTable(database.getMetadata().getName(),
-      database.getUuid(), table.getNameWithoutPrefix(), table.getUUID()));
+      database.getUuid(), table.getNameWithoutPrefix(), table.getUuid()));
   }
 
   public Map<String, Boolean> getSelectedColumns() {
@@ -172,15 +172,15 @@ public class TablePanelOptions extends RightPanel {
   private void configureButtons() {
     btnBack.setText(messages.basicActionBack());
 
-    btnBack.addClickHandler(event -> HistoryManager.gotoTable(database.getUuid(), table.getUUID()));
+    btnBack.addClickHandler(event -> HistoryManager.gotoTable(database.getUuid(), table.getUuid()));
 
     btnUpdate.setText(messages.basicActionUpdate());
 
-    btnUpdate.addClickHandler(event -> HistoryManager.gotoTableUpdate(database.getUuid(), table.getUUID()));
+    btnUpdate.addClickHandler(event -> HistoryManager.gotoTableUpdate(database.getUuid(), table.getUuid()));
 
     options.setText(messages.basicActionOptions());
 
-    options.addClickHandler(event -> HistoryManager.gotoTable(database.getUuid(), table.getUUID()));
+    options.addClickHandler(event -> HistoryManager.gotoTable(database.getUuid(), table.getUuid()));
   }
 
   private void initTable() {

@@ -153,7 +153,7 @@ public class TablePanel extends RightPanel {
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
       BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forTable(database.getMetadata().getName(),
-      database.getUuid(), table.getNameWithoutPrefix(), table.getUUID()));
+      database.getUuid(), table.getNameWithoutPrefix(), table.getUuid()));
   }
 
   public void setColumnsAndValues(List<String> columnsAndValues) {
@@ -163,10 +163,10 @@ public class TablePanel extends RightPanel {
   public void update() {
     final Map<String, Boolean> selectedColumns;
     if (HistoryManager.ROUTE_FOREIGN_KEY.equals(route)) {
-      selectedColumns = ForeignKeyPanelOptions.getInstance(database, table.getUUID(), columnsAndValues)
+      selectedColumns = ForeignKeyPanelOptions.getInstance(database, table.getUuid(), columnsAndValues)
         .getSelectedColumns();
     } else {
-      selectedColumns = TablePanelOptions.getInstance(database, table.getUUID()).getSelectedColumns();
+      selectedColumns = TablePanelOptions.getInstance(database, table.getUuid()).getSelectedColumns();
     }
     tableSearchPanel.setColumnVisibility(selectedColumns);
     applyCurrentSearchInfoJsonIfExists();
@@ -178,9 +178,9 @@ public class TablePanel extends RightPanel {
 
     options.addClickHandler(event -> {
       if (HistoryManager.ROUTE_TABLE.equals(route)) {
-        HistoryManager.gotoTableOptions(database.getUuid(), table.getUUID());
+        HistoryManager.gotoTableOptions(database.getUuid(), table.getUuid());
       } else if (HistoryManager.ROUTE_FOREIGN_KEY.equals(route)) {
-        HistoryManager.gotoRelationOptions(database.getUuid(), table.getUUID(), columnsAndValues);
+        HistoryManager.gotoRelationOptions(database.getUuid(), table.getUuid(), columnsAndValues);
       }
     });
 

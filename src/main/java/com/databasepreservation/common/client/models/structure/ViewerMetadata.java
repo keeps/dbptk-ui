@@ -94,7 +94,7 @@ public class ViewerMetadata implements Serializable {
     for (ViewerSchema schema : schemaList) {
       schemasMap.put(schema.getUuid(), schema);
       for (ViewerTable table : schema.getTables()) {
-        tables.put(table.getUUID(), table);
+        tables.put(table.getUuid(), table);
       }
       for (ViewerView view : schema.getViews()) {
         views.put(view.getUuid(), view);

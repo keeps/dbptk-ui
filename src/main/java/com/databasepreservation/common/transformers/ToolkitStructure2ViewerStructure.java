@@ -639,9 +639,9 @@ public class ToolkitStructure2ViewerStructure {
   public static ViewerRow getRow(ViewerAbstractConfiguration configuration, String databaseUUID, ViewerTable table,
     Row row, long rowIndex) throws ViewerException {
     ViewerRow result = new ViewerRow();
-    String rowUUID = SolrUtils.UUIDFromString(table.getUUID() + "." + rowIndex);
+    String rowUUID = SolrUtils.UUIDFromString(table.getUuid() + "." + rowIndex);
     result.setTableId(table.getId());
-    result.setTableUUID(table.getUUID());
+    result.setTableUUID(table.getUuid());
     result.setUuid(rowUUID);
     result.setCells(getCells(configuration, databaseUUID, table, row, rowIndex, rowUUID));
     return result;
@@ -677,7 +677,7 @@ public class ToolkitStructure2ViewerStructure {
 
       InputStream stream = null;
       try {
-        Path outputPath = LobPathManager.getPath(configuration, databaseUUID, table.getUUID(), colIndex, rowUUID);
+        Path outputPath = LobPathManager.getPath(configuration, databaseUUID, table.getUuid(), colIndex, rowUUID);
         Files.createDirectories(outputPath.getParent());
         stream = binaryCell.createInputStream();
         Files.copy(stream, outputPath, StandardCopyOption.REPLACE_EXISTING);

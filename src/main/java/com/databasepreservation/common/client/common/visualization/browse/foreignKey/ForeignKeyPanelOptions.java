@@ -111,7 +111,7 @@ public class ForeignKeyPanelOptions extends RightPanel {
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
     BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forTable(database.getMetadata().getName(),
-      database.getUuid(), table.getName(), table.getUUID()));
+      database.getUuid(), table.getName(), table.getUuid()));
 
   }
 
@@ -182,15 +182,15 @@ public class ForeignKeyPanelOptions extends RightPanel {
   private void configureButtons() {
     btnBack.setText(messages.basicActionBack());
 
-    btnBack.addClickHandler(event -> HistoryManager.gotoForeignKey(database.getUuid(), table.getUUID(), columnsAndValues));
+    btnBack.addClickHandler(event -> HistoryManager.gotoForeignKey(database.getUuid(), table.getUuid(), columnsAndValues));
 
     btnUpdate.setText(messages.basicActionUpdate());
 
-    btnUpdate.addClickHandler(event -> HistoryManager.gotoForeignKeyUpdate(database.getUuid(), table.getUUID(), columnsAndValues));
+    btnUpdate.addClickHandler(event -> HistoryManager.gotoForeignKeyUpdate(database.getUuid(), table.getUuid(), columnsAndValues));
 
     options.setText(messages.basicActionOptions());
 
-    options.addClickHandler(event -> HistoryManager.gotoForeignKey(database.getUuid(), table.getUUID(), columnsAndValues));
+    options.addClickHandler(event -> HistoryManager.gotoForeignKey(database.getUuid(), table.getUuid(), columnsAndValues));
   }
 
   private void initTable() {

@@ -99,7 +99,7 @@ public class ErDiagram extends Composite {
       int minColumnsAndRowsBiggerThanZero = Integer.MAX_VALUE;
 
       for (ViewerTable viewerTable : schema.getTables()) {
-        VisNode visNode = new VisNode(viewerTable.getUUID(), viewerTable.getName());
+        VisNode visNode = new VisNode(viewerTable.getUuid(), viewerTable.getName());
 
         if (ViewerStringUtils.isNotBlank(viewerTable.getDescription())) {
           visNode.description = viewerTable.getDescription();
@@ -113,7 +113,7 @@ public class ErDiagram extends Composite {
         for (ViewerSchema viewerSchema : database.getMetadata().getSchemas()) {
           for (ViewerTable table : viewerSchema.getTables()) {
             for (ViewerForeignKey viewerForeignKey : table.getForeignKeys()) {
-              if (viewerForeignKey.getReferencedTableUUID().equals(viewerTable.getUUID())) {
+              if (viewerForeignKey.getReferencedTableUUID().equals(viewerTable.getUuid())) {
                 inboundForeignKeys++;
               }
             }
@@ -176,7 +176,7 @@ public class ErDiagram extends Composite {
         visNodeList.add(visNode);
 
         for (ViewerForeignKey viewerForeignKey : viewerTable.getForeignKeys()) {
-          jsniEdgeList.add(new JsniEdge(viewerTable.getUUID(), viewerForeignKey.getReferencedTableUUID()));
+          jsniEdgeList.add(new JsniEdge(viewerTable.getUuid(), viewerForeignKey.getReferencedTableUUID()));
         }
       }
 

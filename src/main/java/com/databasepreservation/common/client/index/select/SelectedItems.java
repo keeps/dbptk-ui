@@ -19,7 +19,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({@Type(value = SelectedItemsAll.class, name = "all"),
   @Type(value = SelectedItemsNone.class, name = "none"), @Type(value = SelectedItemsList.class, name = "list"),
-  @Type(value = SelectedItemsFilter.class, name = "filter")})
+  @Type(value = SelectedItemsFilter.class, name = "simpleFilterParameter")})
 @FunctionalInterface
 public interface SelectedItems<T extends IsIndexed> extends Serializable {
   String getSelectedClass();

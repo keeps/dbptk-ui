@@ -1,10 +1,9 @@
 package com.databasepreservation.common.utils;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
-import com.databasepreservation.common.client.models.activity.logs.LogEntryParameter;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.v2.user.User;
 import org.slf4j.Logger;
@@ -33,7 +32,7 @@ public class ControllerAssistantUtils {
   }
 
   private static ActivityLogEntry createLogEntry(User user, String actionComponent, String actionMethod,
-                                                 String relatedObjectId, long duration, LogEntryState status, List<LogEntryParameter> parameters) {
+    String relatedObjectId, long duration, LogEntryState status, Map<String, String> parameters) {
     ActivityLogEntry logEntry = new ActivityLogEntry();
     logEntry.setUuid(SolrUtils.randomUUID());
     logEntry.setAddress(user.getIpAddress());
@@ -50,7 +49,7 @@ public class ControllerAssistantUtils {
 
   private static ActivityLogEntry createLogEntry(User user, String actionComponent, String actionMethod, String relatedObjectId,
                                                  long duration, LogEntryState status, Object... parameters) {
-    List<LogEntryParameter> logParameters = new ArrayList<>();
+    Map<String, String> logParameters = new HashMap<>();
     if (parameters != null && parameters.length > 0) {
       if ((parameters.length % 2) != 0) {
         LOGGER.warn(
@@ -60,8 +59,7 @@ public class ControllerAssistantUtils {
         for (int i = 0; i < parameters.length; i += 2) {
           Object key = parameters[i];
           Object value = parameters[i + 1];
-          logParameters.add(
-            new LogEntryParameter(key != null ? key.toString() : "null", value != null ? value.toString() : "null"));
+          logParameters.put(key != null ? key.toString() : "null", value != null ? value.toString() : "null");
         }
       }
     }

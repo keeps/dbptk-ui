@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.roda.core.data.v2.index.filter.Filter;
+import org.roda.core.data.v2.index.sublist.Sublist;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.ContentPanel;
@@ -12,8 +13,10 @@ import com.databasepreservation.common.client.common.fields.RowField;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.utils.FilterHtmlUtils;
 import com.databasepreservation.common.client.common.utils.LabelUtils;
+import com.databasepreservation.common.client.common.utils.SublistHtmlUtils;
 import com.databasepreservation.common.client.models.activity.logs.ActivityLogEntry;
-import com.databasepreservation.common.client.models.activity.logs.LogEntryParameter;
+import com.databasepreservation.common.client.models.activity.logs.ActivityLogWrapper;
+import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.services.ActivityLogService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
@@ -57,8 +60,8 @@ public class ActivityLogDetailedPanel extends ContentPanel {
   private ActivityLogDetailedPanel(String logUUID) {
     initWidget(uiBinder.createAndBindUi(this));
 
-    ActivityLogService.Util.call((ActivityLogEntry log) -> {
-      activityLogEntry = log;
+    ActivityLogService.Util.call((ActivityLogWrapper wrapper) -> {
+      activityLogEntry = wrapper.getActivityLogEntry();
       init();
     }).retrieve(logUUID);
   }
@@ -70,7 +73,7 @@ public class ActivityLogDetailedPanel extends ContentPanel {
     RowField dataField = RowField.createInstance(messages.activityLogTextForDate(),
       new HTML(Humanize.formatDateTime(activityLogEntry.getDatetime(), true)));
     RowField componentField = RowField.createInstance(messages.activityLogTextForComponent(),
-      new HTML(activityLogEntry.getActionComponent()));
+      new HTML(messages.activityLogComponent(activityLogEntry.getActionComponent())));
     RowField methodField = RowField.createInstance(messages.activityLogTextForMethod(),
       new HTML(activityLogEntry.getActionMethod()));
     RowField addressField = RowField.createInstance(messages.activityLogTextForAddress(),
@@ -95,15 +98,39 @@ public class ActivityLogDetailedPanel extends ContentPanel {
     content.add(parametersField);
     content.add(outcomeField);
 
-    for (LogEntryParameter entryParameter : activityLogEntry.getParameters()) {
-      if (entryParameter.getName().equals(ViewerConstants.CONTROLLER_FILTER_PARAM)) {
-        final Filter read = ViewerJsonUtils.getFilterMapper().read(entryParameter.getValue());
-        final SafeHtml filterHTML = FilterHtmlUtils.getFilterHTML(read, ActivityLogEntry.class.getSimpleName());
+//    final Map<String, String> parameters = activityLogEntry.getParameters();
+//    final String sublistJson = parameters.get(ViewerConstants.CONTROLLER_SUBLIST_PARAM);
 
-        content.add(new HTML(filterHTML));
-      }
+//    final Sublist sublist = ViewerJsonUtils.getSubListMapper().read(sublistJson);
+//    final SafeHtml sublistHTML = SublistHtmlUtils.getSublistHTML(sublist,
+//      Long.parseLong(parameters.get(ViewerConstants.CONTROLLER_RETRIEVE_COUNT)));
+//    content.add(new HTML(sublistHTML));
+//
+//    final String filterJson = parameters.get(ViewerConstants.CONTROLLER_FILTER_PARAM);
+//    final Filter filter = ViewerJsonUtils.getFilterMapper().read(filterJson);
+//    final SafeHtml filterHTML = FilterHtmlUtils.getFilterHTML(filter, ViewerTable.class.getSimpleName());
+//    content.add(new HTML(filterHTML));
 
-    }
+    // for (LogEntryParameter entryParameter : activityLogEntry.getParameters()) {
+    // if (entryParameter.getName().equals(ViewerConstants.CONTROLLER_FILTER_PARAM))
+    // {
+    // final Filter read =
+    // ViewerJsonUtils.getFilterMapper().read(entryParameter.getValue());
+    // final SafeHtml filterHTML = FilterHtmlUtils.getFilterHTML(read,
+    // ActivityLogEntry.class.getSimpleName());
+    //
+    // content.add(new HTML(filterHTML));
+    // }
+    //
+    // if
+    // (entryParameter.getName().equals(ViewerConstants.CONTROLLER_SUBLIST_PARAM)) {
+    // final Sublist sublist =
+    // ViewerJsonUtils.getSubListMapper().read(entryParameter.getValue());
+    // // final SafeHtml sublistHTML = SublistHtmlUtils.getSublistHTML(sublist);
+    //
+    // // content.add(new HTML(sublistHTML));
+    // }
+    // }
   }
 
   @Override

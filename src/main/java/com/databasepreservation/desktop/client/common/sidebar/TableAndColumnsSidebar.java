@@ -86,9 +86,9 @@ public class TableAndColumnsSidebar extends Composite {
       FlowPanel tablesItems = new FlowPanel();
       for (ViewerTable table : schema.getTables()) {
         final SidebarHyperlink sidebarHyperlink = buildSidebarHyperLink(table.getName(), HistoryManager
-          .linkToCreateSIARD(HistoryManager.ROUTE_WIZARD_TABLES_COLUMNS, TABLE_LINK, schema.getUuid(), table.getUUID()),
+          .linkToCreateSIARD(HistoryManager.ROUTE_WIZARD_TABLES_COLUMNS, TABLE_LINK, schema.getUuid(), table.getUuid()),
           FontAwesomeIconManager.TABLE);
-        list.put(ViewerStringUtils.concat(schema.getUuid(), table.getUUID()), sidebarHyperlink);
+        list.put(ViewerStringUtils.concat(schema.getUuid(), table.getUuid()), sidebarHyperlink);
         tablesItems.add(sidebarHyperlink);
       }
       createSubItem(tables, tablesItems);

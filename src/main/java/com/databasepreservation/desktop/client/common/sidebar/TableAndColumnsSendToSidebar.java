@@ -85,7 +85,7 @@ public class TableAndColumnsSendToSidebar extends Composite {
       FlowPanel tablesItems = new FlowPanel();
       for (ViewerTable table : schema.getTables()) {
           SidebarHyperlink sidebarHyperlink = new SidebarHyperlink(FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE, table.getName()),
-              HistoryManager.linkToSendToWizardTableAndColumnsShowColumns(TABLE_LINK, databaseUUID, schema.getUuid(), table.getUUID()));
+              HistoryManager.linkToSendToWizardTableAndColumnsShowColumns(TABLE_LINK, databaseUUID, schema.getUuid(), table.getUuid()));
           sidebarHyperlink.setH6().setIndent3();
           list.put(table.getName(), sidebarHyperlink);
           tablesItems.add(sidebarHyperlink);

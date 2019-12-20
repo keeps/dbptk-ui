@@ -8,6 +8,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
+import com.databasepreservation.common.client.models.activity.logs.ActivityLogWrapper;
 import org.fusesource.restygwt.client.DirectRestService;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.fusesource.restygwt.client.REST;
@@ -55,5 +56,5 @@ public interface ActivityLogService extends DirectRestService {
 
   @GET
   @Path("/find/{logUUID}")
-  ActivityLogEntry retrieve(@PathParam("logUUID") String logUUID);
+  ActivityLogWrapper retrieve(@PathParam("logUUID") String logUUID);
 }

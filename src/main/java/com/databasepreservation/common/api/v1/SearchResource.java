@@ -174,9 +174,9 @@ public class SearchResource implements SearchService {
       return AdvancedSearchUtils.getSearchFieldsFromTable(viewerTable);
     } finally {
       // register action
-      controllerAssistant.registerAction(user, viewerTable.getUUID(), state,
-        ViewerConstants.CONTROLLER_DATABASE_ID_PARAM,
-        viewerTable.getName());
+      controllerAssistant.registerAction(user, viewerTable.getUuid(), state,
+        ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, viewerTable.getSchemaUUID(),
+        ViewerConstants.CONTROLLER_TABLE_ID_PARAM, viewerTable.getUuid());
     }
   }
 }

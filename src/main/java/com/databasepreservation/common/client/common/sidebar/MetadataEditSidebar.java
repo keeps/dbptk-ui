@@ -171,10 +171,10 @@ public class MetadataEditSidebar extends Composite {
       for (ViewerTable table : schema.getTables()) {
 
         SidebarHyperlink tableLink = new SidebarHyperlink(table.getName(),
-          HistoryManager.linkToDesktopMetadataTable(database.getUuid(), table.getUUID()));
+          HistoryManager.linkToDesktopMetadataTable(database.getUuid(), table.getUuid()));
         tableLink.setH6().setIndent2();
         tableLink.setTextBySafeHTML(FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE, table.getName()));
-        list.put(table.getUUID(), tableLink);
+        list.put(table.getUuid(), tableLink);
         sidebarGroup.add(tableLink);
         tableItems.add(tableLink);
 

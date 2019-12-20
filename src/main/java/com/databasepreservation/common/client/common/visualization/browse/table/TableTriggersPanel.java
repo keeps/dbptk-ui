@@ -31,10 +31,10 @@ public class TableTriggersPanel extends Composite {
   private static Map<String, TableTriggersPanel> instances = new HashMap<>();
 
   public static TableTriggersPanel getInstance(ViewerTable table) {
-    TableTriggersPanel instance = instances.get(table.getUUID());
+    TableTriggersPanel instance = instances.get(table.getUuid());
     if (instance == null) {
       instance = new TableTriggersPanel(table);
-      instances.put(table.getUUID(), instance);
+      instances.put(table.getUuid(), instance);
     }
     return instance;
   }

@@ -46,35 +46,25 @@ public class FilterHtmlUtils {
   public static SafeHtml getFilterParameterHTML(FilterParameter parameter) {
     if (parameter instanceof SimpleFilterParameter) {
       SimpleFilterParameter p = (SimpleFilterParameter) parameter;
-      return SafeHtmlUtils.fromSafeConstant("<span class=\"search-prefilter-field\">" + p.getName()
-        + "</span> is <span class=\"search-prefilter-value\">" + p.getValue() + "</span>");
-      // return
-      // messages.searchPreFilterSimpleFilterParameter(messages.searchPreFilterName(p.getName()),
-      // p.getValue());
+      return messages.simpleFilterParameter(messages.activityLogFilterName(p.getName()), p.getValue());
     } else if (parameter instanceof BasicSearchFilterParameter) {
       BasicSearchFilterParameter p = (BasicSearchFilterParameter) parameter;
       // TODO put '*' in some constant, see Search
       if (!"*".equals(p.getValue())) {
-        return SafeHtmlUtils.fromSafeConstant("<span class=\"search-prefilter-field\">" + p.getName()
-          + "</span> is <span class=\"search-prefilter-value\">" + p.getValue() + "</span>");
+        return messages.basicFilterParameter(messages.activityLogFilterName(p.getName()), p.getValue());
       }
     } else if (parameter instanceof LongRangeFilterParameter) {
       LongRangeFilterParameter p = (LongRangeFilterParameter) parameter;
       if (p.getFromValue() == null) {
-        return SafeHtmlUtils.fromSafeConstant("<span class=\"search-prefilter-field\">" + p.getName()
-          + "</span> until <span class=\"search-prefilter-value\">" + p.getToValue());
+        return messages.longRangeFilterParameterOnlyTo(messages.activityLogFilterName(p.getName()), p.getToValue());
       } else if (p.getToValue() == null) {
-        return SafeHtmlUtils.fromSafeConstant("<span class=\"search-prefilter-field\">" + p.getName()
-          + "</span> from <span class=\"search-prefilter-value\">" + p.getFromValue());
+        return messages.longRangeFilterParameterOnlyFrom(messages.activityLogFilterName(p.getName()), p.getFromValue());
       } else {
         if (p.getToValue().equals(p.getFromValue())) {
-          return SafeHtmlUtils.fromSafeConstant("<span class=\"search-prefilter-field\">" + p.getName()
-            + "</span> is <span class=\"search-prefilter-value\">" + p.getFromValue());
+          return messages.longRangeFilterParameterEquals(messages.activityLogFilterName(p.getName()), p.getFromValue());
         }
-
-        return SafeHtmlUtils.fromSafeConstant("<span class=\"search-prefilter-field\">" + p.getName()
-          + "</span> is between <span class=\"search-prefilter-value\">" + p.getFromValue()
-          + "</span> and <span class=\"search-prefilter-value\">" + p.getToValue() + "</span>");
+        return messages.longRangeFilterParameter(messages.activityLogFilterName(p.getName()), p.getFromValue(),
+          p.getToValue());
       }
     } else {
       return SafeHtmlUtils.fromString(parameter.getClass().getSimpleName());

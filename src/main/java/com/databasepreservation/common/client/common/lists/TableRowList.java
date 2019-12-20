@@ -148,7 +148,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
               final String value = row.getCells().get(solrColumnName).getValue();
               ret = SafeHtmlUtils
                 .fromTrustedString(CommonClientUtils.getAnchorForLOBDownload(getObject().getFirst().getUuid(),
-                  table.getUUID(), row.getUuid(), viewerColumn.getColumnIndexInEnclosingTable(), value).toString());
+                  table.getUuid(), row.getUuid(), viewerColumn.getColumnIndexInEnclosingTable(), value).toString());
             }
 
             return ret;
@@ -357,7 +357,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
       Facets.NONE, false, solrColumns);
     ExportRequest exportRequest = new ExportRequest(filename, zipFilename, description, exportLobs);
 
-    return ExportResourcesUtils.getExportURL(database.getUuid(), table.getUUID(), findRequest, exportRequest);
+    return ExportResourcesUtils.getExportURL(database.getUuid(), table.getUuid(), findRequest, exportRequest);
   }
 
   private String getExportURL(String filename, boolean exportAll, boolean description) {

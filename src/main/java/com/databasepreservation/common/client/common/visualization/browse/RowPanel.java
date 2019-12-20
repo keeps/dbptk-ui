@@ -116,7 +116,7 @@ public class RowPanel extends RightPanel {
     DatabaseService.Util.call((ViewerRow result) -> {
       row = result;
       init();
-    }).retrieveRows(database.getUuid(), rowUUID);
+    }).retrieveRow(database.getUuid(), rowUUID);
   }
 
   private void setTitle() {
@@ -126,7 +126,7 @@ public class RowPanel extends RightPanel {
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
     BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forRecord(database.getMetadata().getName(),
-      database.getUuid(), table.getNameWithoutPrefix(), table.getUUID(), rowUUID));
+      database.getUuid(), table.getNameWithoutPrefix(), table.getUuid(), rowUUID));
   }
 
   private void init() {
@@ -160,7 +160,7 @@ public class RowPanel extends RightPanel {
     for (ViewerSchema viewerSchema : database.getMetadata().getSchemas()) {
       for (ViewerTable viewerTable : viewerSchema.getTables()) {
         for (ViewerForeignKey fk : viewerTable.getForeignKeys()) {
-          if (fk.getReferencedTableUUID().equals(table.getUUID())) {
+          if (fk.getReferencedTableUUID().equals(table.getUuid())) {
             Ref ref = new Ref(table, viewerTable, fk);
             if (fk.getReferences().size() == 1) {
               Set<Ref> refs = colIndexReferencedBy.computeIfAbsent(ref.getSingleColumnIndex(), k -> new TreeSet<>());
@@ -243,7 +243,7 @@ public class RowPanel extends RightPanel {
         }
 
         Hyperlink hyperlink = new Hyperlink(ref.getSchemaAndTableName(),
-          HistoryManager.linkToForeignKey(database.getUuid(), ref.refTable.getUUID(), columnNamesAndValues));
+          HistoryManager.linkToForeignKey(database.getUuid(), ref.refTable.getUuid(), columnNamesAndValues));
         hyperlink.addStyleName("related-records-link");
         b.appendHtmlConstant(hyperlink.toString());
         firstRef = false;
@@ -279,7 +279,7 @@ public class RowPanel extends RightPanel {
     } else {
       if (column.getType().getDbType().equals(ViewerType.dbTypes.BINARY)) {
         rowField = RowField.createInstance(label, CommonClientUtils.getAnchorForLOBDownload(database.getUuid(),
-          table.getUUID(), row.getUuid(), column.getColumnIndexInEnclosingTable(), cell.getValue()));
+          table.getUuid(), row.getUuid(), column.getColumnIndexInEnclosingTable(), cell.getValue()));
       } else {
         rowField = RowField.createInstance(label, new HTML(value));
       }
@@ -314,7 +314,7 @@ public class RowPanel extends RightPanel {
       new Sublist(), Facets.NONE, false, solrColumns);
     ExportRequest exportRequest = new ExportRequest(filename, zipFilename, description, exportLOBs);
 
-    return ExportResourcesUtils.getExportURL(database.getUuid(), table.getUUID(), findRequest, exportRequest);
+    return ExportResourcesUtils.getExportURL(database.getUuid(), table.getUuid(), findRequest, exportRequest);
   }
 
   /**
@@ -332,7 +332,7 @@ public class RowPanel extends RightPanel {
       foreignSolrColumnToRowSolrColumn = new TreeMap<>();
 
       // tableUUID to use in URL is always otherTable.getUUID()
-      if (foreignKey.getReferencedTableUUID().equals(otherTable.getUUID())) {
+      if (foreignKey.getReferencedTableUUID().equals(otherTable.getUuid())) {
         // related to
         // currentTable -> otherTable
         // fk belongs to current table, fk target is otherTable
@@ -410,13 +410,13 @@ public class RowPanel extends RightPanel {
       if (o == null || getClass() != o.getClass())
         return false;
       Ref ref = (Ref) o;
-      return Objects.equals(refTable.getUUID(), ref.refTable.getUUID())
+      return Objects.equals(refTable.getUuid(), ref.refTable.getUuid())
         && Objects.equals(foreignSolrColumnToRowSolrColumn, ref.foreignSolrColumnToRowSolrColumn);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(refTable.getUUID(), foreignSolrColumnToRowSolrColumn);
+      return Objects.hash(refTable.getUuid(), foreignSolrColumnToRowSolrColumn);
     }
   }
 }
