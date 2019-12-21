@@ -98,7 +98,7 @@ public class CollectionConfigurationHandler {
    * @param table
    */
   public void addTable(ViewerTable table){
-    if(getTableByID(table.getUUID()) == null){
+    if(getTableByID(table.getUuid()) == null){
       configuration.getTables().add(new TableConfiguration(table));
     } else {
       GWT.log("Table already exist: " + table.getName());

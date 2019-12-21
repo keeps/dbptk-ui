@@ -58,7 +58,7 @@ public class DenormalizeSolrStructure {
   }
 
   public void denormalize() throws ModuleException {
-    Path configurationPath = ViewerConfiguration.getInstance().getDatabaseConfigPath()
+    Path configurationPath = ViewerConfiguration.getInstance().getDatabaseConfigPath().resolve(database.getUuid())
       .resolve(database.getUuid() + ViewerConstants.JSON_EXTENSION);
     if (Files.exists(configurationPath)) {
       configuration = JsonTransformer.readObjectFromFile(configurationPath, CollectionConfiguration.class);
@@ -68,8 +68,8 @@ public class DenormalizeSolrStructure {
 
     for (TableConfiguration tables : configuration.getTables()) {
       ViewerTable table = database.getMetadata().getTable(tables.getUuid());
-      Path denormalizeConfigurationPath = ViewerConfiguration.getInstance().getDatabaseConfigPath()
-          .resolve(database.getUuid() + "." + table.getUUID() + "-CURRENT" + ViewerConstants.JSON_EXTENSION);
+      Path denormalizeConfigurationPath = ViewerConfiguration.getInstance().getDatabaseConfigPath().resolve(database.getUuid())
+          .resolve(table.getUuid() + "-CURRENT" + ViewerConstants.JSON_EXTENSION);
 
       if (Files.exists(denormalizeConfigurationPath)) {
         denormalizeConfiguration = JsonTransformer.readObjectFromFile(denormalizeConfigurationPath, DenormalizeConfiguration.class);

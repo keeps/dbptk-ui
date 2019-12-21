@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.common.lists.widgets.MultipleSelectionTablePanel;
 import org.fusesource.restygwt.client.Method;
 
 import com.databasepreservation.common.client.common.DefaultMethodCallback;
@@ -11,7 +12,6 @@ import com.databasepreservation.common.client.common.LoadingDiv;
 import com.databasepreservation.common.client.common.RightPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
-import com.databasepreservation.common.client.common.lists.MultipleSelectionTablePanel;
 import com.databasepreservation.common.client.common.utils.TableUtils;
 import com.databasepreservation.common.client.common.utils.Tree;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.DenormalizeConfigurationHandler;
@@ -211,7 +211,7 @@ public class DataTransformation extends RightPanel {
     for (ViewerSchema viewerSchema : metadata.getSchemas()) {
       for (ViewerTable viewerTable : viewerSchema.getTables()) {
         for (ViewerForeignKey fk : viewerTable.getForeignKeys()) {
-          if (fk.getReferencedTableUUID().equals(table.getUUID())) {
+          if (fk.getReferencedTableUUID().equals(table.getUuid())) {
             tableMap.put(fk, viewerTable);
           }
         }
@@ -347,7 +347,7 @@ public class DataTransformation extends RightPanel {
 
     for (ViewerForeignKey foreignKey : TableUtils.checkForeignKey(tableB, tableA)) {
       for (ViewerReference reference : foreignKey.getReferences()) {
-        ViewerColumn column = metadata.getTable(tableA.getUUID()).getColumns().get(reference.getSourceColumnIndex());
+        ViewerColumn column = metadata.getTable(tableA.getUuid()).getColumns().get(reference.getSourceColumnIndex());
         information.add(buildReferenceInformation(
           messages.dataTransformationTextForIsReferencedBy(tableA.getId(), column.getDisplayName())));
       }

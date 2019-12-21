@@ -1,5 +1,6 @@
 package com.databasepreservation.common.api;
 
+import com.databasepreservation.common.api.v1.*;
 import io.swagger.models.Contact;
 import io.swagger.models.License;
 import org.glassfish.jersey.jackson.JacksonFeature;
@@ -10,19 +11,6 @@ import org.glassfish.jersey.servlet.ServletProperties;
 import org.springframework.context.annotation.Configuration;
 
 import com.databasepreservation.common.api.exceptions.RestExceptionMapper;
-import com.databasepreservation.common.api.v1.ActivityLogResource;
-import com.databasepreservation.common.api.v1.AuthenticationResource;
-import com.databasepreservation.common.api.v1.ClientLoggerResource;
-import com.databasepreservation.common.api.v1.ContextResource;
-import com.databasepreservation.common.api.v1.DatabaseResource;
-import com.databasepreservation.common.api.v1.ExportsResource;
-import com.databasepreservation.common.api.v1.FileResource;
-import com.databasepreservation.common.api.v1.LobsResource;
-import com.databasepreservation.common.api.v1.ModulesResource;
-import com.databasepreservation.common.api.v1.ReportResource;
-import com.databasepreservation.common.api.v1.SIARDResource;
-import com.databasepreservation.common.api.v1.SearchResource;
-import com.databasepreservation.common.api.v1.ThemeResource;
 
 import io.swagger.jaxrs.config.BeanConfig;
 import io.swagger.jaxrs.config.SwaggerConfigLocator;

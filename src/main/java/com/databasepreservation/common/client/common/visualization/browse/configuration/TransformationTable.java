@@ -1,6 +1,6 @@
 package com.databasepreservation.common.client.common.visualization.browse.configuration;
 
-import com.databasepreservation.common.client.common.lists.MetadataTableList;
+import com.databasepreservation.common.client.common.lists.widgets.MetadataTableList;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.DenormalizeConfigurationHandler;
 import com.databasepreservation.common.client.models.configuration.denormalize.RelatedColumnConfiguration;
 import com.databasepreservation.common.client.models.configuration.denormalize.RelatedTablesConfiguration;
@@ -44,7 +44,7 @@ public class TransformationTable extends Composite {
    * @return
    */
   public static TransformationTable getInstance(ViewerDatabase database, ViewerTable table, DenormalizeConfigurationHandler configuration) {
-    return instances.computeIfAbsent(database.getUuid() + table.getUUID(), k -> new TransformationTable(database, table, configuration));
+    return instances.computeIfAbsent(database.getUuid() + table.getUuid(), k -> new TransformationTable(database, table, configuration));
   }
 
   /**

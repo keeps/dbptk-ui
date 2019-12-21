@@ -25,10 +25,10 @@ public class TableUtils {
     Map<String, List<ViewerForeignKey>> relationShip = new HashMap<>();
 
     // check if table A has reference to table B
-    relationShip.put(tableA.getUUID(), checkForeignKey(tableA, tableB));
+    relationShip.put(tableA.getUuid(), checkForeignKey(tableA, tableB));
 
     // check if table B has reference to table A
-    relationShip.put(tableB.getUUID(), checkForeignKey(tableB, tableA));
+    relationShip.put(tableB.getUuid(), checkForeignKey(tableB, tableA));
 
     return relationShip;
   }
@@ -42,7 +42,7 @@ public class TableUtils {
   public static List<ViewerForeignKey> checkForeignKey(ViewerTable tableA, ViewerTable tableB) {
     List<ViewerForeignKey> foreignKeyList = new ArrayList<>();
     for (ViewerForeignKey foreignKey : tableA.getForeignKeys()) {
-      if (!foreignKey.getReferencedTableUUID().equals(tableB.getUUID())) {
+      if (!foreignKey.getReferencedTableUUID().equals(tableB.getUuid())) {
         // this foreign is not related with tableB. check next
         continue;
       }
@@ -68,7 +68,7 @@ public class TableUtils {
     for (ViewerSchema schema : metadata.getSchemas()) {
       for (ViewerTable schemaTable : schema.getTables()) {
         for (ViewerForeignKey foreignKey : schemaTable.getForeignKeys()) {
-          if(foreignKey.getReferencedTableUUID().equals(table.getUUID())){
+          if(foreignKey.getReferencedTableUUID().equals(table.getUuid())){
             relatedTables.add(schemaTable);
           }
         }

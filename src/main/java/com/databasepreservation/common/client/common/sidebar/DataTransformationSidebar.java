@@ -190,9 +190,9 @@ public class DataTransformationSidebar extends Composite implements Sidebar {
             schema.getName() + " " + iconTag + " " + table.getName());
       }
       SidebarHyperlink tableLink = new SidebarHyperlink(html,
-          HistoryManager.linkToDataTransformationTable(database.getUuid(), table.getUUID()));
+          HistoryManager.linkToDataTransformationTable(database.getUuid(), table.getUuid()));
       tableLink.setH6().setIndent2();
-      list.put(table.getUUID(), tableLink);
+      list.put(table.getUuid(), tableLink);
       sidebarGroup.add(tableLink);
 
       return tableLink;

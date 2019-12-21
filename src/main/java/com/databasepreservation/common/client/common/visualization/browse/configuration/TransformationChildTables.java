@@ -3,7 +3,7 @@ package com.databasepreservation.common.client.common.visualization.browse.confi
 import java.util.HashMap;
 import java.util.Map;
 
-import com.databasepreservation.common.client.common.lists.MultipleSelectionTablePanel;
+import com.databasepreservation.common.client.common.lists.widgets.MultipleSelectionTablePanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.DenormalizeConfigurationHandler;
 import com.databasepreservation.common.client.models.configuration.denormalize.RelatedColumnConfiguration;
 import com.databasepreservation.common.client.models.configuration.denormalize.RelatedTablesConfiguration;
@@ -36,7 +36,7 @@ public class TransformationChildTables {
    */
   public static TransformationChildTables getInstance(ViewerTable childTable,
                                                       DenormalizeConfigurationHandler configuration, String uuid) {
-    return instances.computeIfAbsent(childTable.getUUID(),
+    return instances.computeIfAbsent(childTable.getUuid(),
       k -> new TransformationChildTables(childTable, configuration, uuid));
   }
 

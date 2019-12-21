@@ -20,7 +20,7 @@ public class TableConfiguration implements Serializable {
   private String relatedTables;
 
   public TableConfiguration(ViewerTable table){
-    setUuid(table.getUUID());
+    setUuid(table.getUuid());
     setId(table.getId());
     setName(table.getName());
     setDescription(table.getDescription());

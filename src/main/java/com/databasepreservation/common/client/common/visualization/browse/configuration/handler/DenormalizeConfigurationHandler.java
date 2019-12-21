@@ -41,7 +41,7 @@ public class DenormalizeConfigurationHandler {
    * @return
    */
   public static DenormalizeConfigurationHandler getInstance(ViewerDatabase database, ViewerTable table) {
-    return instances.computeIfAbsent(database.getUuid() + table.getUUID(),
+    return instances.computeIfAbsent(database.getUuid() + table.getUuid(),
       k -> new DenormalizeConfigurationHandler(database, table));
   }
 
@@ -71,7 +71,7 @@ public class DenormalizeConfigurationHandler {
         }
         callback.onSuccess(method, true);
       }
-    }).getDenormalizeConfigurationFile(database.getUuid(), table.getUUID());
+    }).getDenormalizeConfigurationFile(database.getUuid(), table.getUuid());
   }
 
   private void createConfiguration(State state) {
@@ -79,14 +79,14 @@ public class DenormalizeConfigurationHandler {
     configuration.setVersion(VERSION);
     configuration.setState(state.name());
     collectionConfiguration.addTable(table);
-    collectionConfiguration.getTableByID(table.getUUID()).setRelatedTables(configuration.getUuid());
+    collectionConfiguration.getTableByID(table.getUuid()).setRelatedTables(configuration.getUuid());
   }
 
   public void build() {
     ConfigurationService.Util.call((Boolean result) -> {
       GWT.log("Created denormalization configuration file with success");
       collectionConfiguration.build();
-    }).createDenormalizeConfigurationFile(database.getUuid(), table.getUUID(), configuration);
+    }).createDenormalizeConfigurationFile(database.getUuid(), table.getUuid(), configuration);
   }
 
   public ViewerTable getTable() {
@@ -99,16 +99,16 @@ public class DenormalizeConfigurationHandler {
 
   public String includeRelatedTable(ViewerTable sourceTable, ViewerTable referencedTable) {
     RelatedTablesConfiguration relatedTable = new RelatedTablesConfiguration();
-    relatedTable.setTableUUID(sourceTable.getUUID());
+    relatedTable.setTableUUID(sourceTable.getUuid());
     relatedTable.setTableID(sourceTable.getId());
-    relatedTable.setReferencedTableUUID(referencedTable.getUUID());
+    relatedTable.setReferencedTableUUID(referencedTable.getUuid());
     relatedTable.setReferencedTableID(referencedTable.getId());
 
     Map<String, List<ViewerForeignKey>> relationship = TableUtils.getRelationship(sourceTable, referencedTable);
     for (Map.Entry<String, List<ViewerForeignKey>> entry : relationship.entrySet()) {
       for (ViewerForeignKey foreignKey : entry.getValue()) {
         for (ViewerReference reference : foreignKey.getReferences()) {
-          if (entry.getKey().equals(sourceTable.getUUID())) {
+          if (entry.getKey().equals(sourceTable.getUuid())) {
             ViewerColumn sourceColumn = sourceTable.getColumns().get(reference.getSourceColumnIndex());
             ViewerColumn referencedColumn = referencedTable.getColumns().get(reference.getReferencedColumnIndex());
             relatedTable.getReferences().add(createReference(sourceColumn, referencedColumn));
@@ -121,8 +121,8 @@ public class DenormalizeConfigurationHandler {
       }
     }
 
-    StringBuilder uuid = new StringBuilder(sourceTable.getUUID());
-    uuid.append(".").append(referencedTable.getUUID());
+    StringBuilder uuid = new StringBuilder(sourceTable.getUuid());
+    uuid.append(".").append(referencedTable.getUuid());
 
     for (List<ViewerForeignKey> value : relationship.values()) {
       for (ViewerForeignKey foreignKey : value) {
