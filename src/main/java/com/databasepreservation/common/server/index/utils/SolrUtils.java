@@ -207,7 +207,7 @@ public class SolrUtils {
     return ret;
   }
 
-  public static SolrQuery buildQuery(long level, Filter filter, List<String> fieldsToReturn) throws RequestNotValidException {
+  public static SolrQuery buildQuery(Filter filter, List<String> fieldsToReturn) throws RequestNotValidException {
     SolrQuery query = new SolrQuery();
 
     query.setQuery(parseFilter(filter));

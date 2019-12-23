@@ -81,7 +81,7 @@ public class DataPanel extends Composite {
       schemaDescription.setWidget(CommonClientUtils.getPanelInformation(messages.description(), schema.getDescription(), "metadata-information-element-value"));
     }
 
-    contentItems.add(ErDiagram.getInstance(database, schema));
+    contentItems.add(ErDiagram.getInstance(database, schema, HistoryManager.getCurrentHistoryPath().get(0)));
     initTableContent();
   }
 

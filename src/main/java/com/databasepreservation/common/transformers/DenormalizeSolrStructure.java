@@ -127,7 +127,7 @@ public class DenormalizeSolrStructure {
     }
 
     try {
-      SolrQuery entries = SolrUtils.buildQuery(0, resultingFilter, fieldsToReturn);
+      SolrQuery entries = SolrUtils.buildQuery(resultingFilter, fieldsToReturn);
       queryList.add(entries);
       Map<String, List<String>> fieldsToDisplay = new HashMap<>();
       for (RelatedTablesConfiguration table : item.getRelatedTables()) {
@@ -184,7 +184,7 @@ public class DenormalizeSolrStructure {
       }
     }
 
-    return SolrUtils.buildQuery(0, resultingFilter, fieldsToReturn);
+    return SolrUtils.buildQuery( resultingFilter, fieldsToReturn);
   }
 
   private void buildNestedDocumentList(List<ViewerRow> documentList, List<SolrInputDocument> nestedDocument,

@@ -1,6 +1,9 @@
 package com.databasepreservation.common.client.models.configuration.collection;
 
+import com.databasepreservation.common.client.models.configuration.denormalize.DenormalizeConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.Table;
 
 import java.io.Serializable;
@@ -18,6 +21,7 @@ public class TableConfiguration implements Serializable {
   private Boolean hide;
   private List<ColumnConfiguration> column;
   private String relatedTables;
+  private DenormalizeConfiguration denormalizeConfiguration;
 
   public TableConfiguration(ViewerTable table){
     setUuid(table.getUuid());
@@ -25,7 +29,8 @@ public class TableConfiguration implements Serializable {
     setName(table.getName());
     setDescription(table.getDescription());
     setHide(false);
-    setColumn(new ArrayList<>());
+    column = new ArrayList<>();
+    denormalizeConfiguration = new DenormalizeConfiguration();
   }
 
   public TableConfiguration() {
@@ -85,5 +90,13 @@ public class TableConfiguration implements Serializable {
 
   public void setRelatedTables(String relatedTables) {
     this.relatedTables = relatedTables;
+  }
+
+  public DenormalizeConfiguration getDenormalizeConfiguration() {
+    return denormalizeConfiguration;
+  }
+
+  public void setDenormalizeConfiguration(DenormalizeConfiguration denormalizeConfiguration) {
+    this.denormalizeConfiguration = denormalizeConfiguration;
   }
 }

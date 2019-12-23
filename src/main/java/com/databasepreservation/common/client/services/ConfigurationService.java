@@ -48,13 +48,13 @@ public interface ConfigurationService extends DirectRestService {
   }
 
   @POST
-  @Path("/{databaseuuid}")
+  @Path("/file/{databaseuuid}")
   @ApiOperation(value = "retrieves the first 5 rows of the query execution", notes = "", response = ProgressData.class, responseContainer = "database metadata")
   Boolean createConfigurationFile(@PathParam("databaseuuid") String databaseuuid,
     CollectionConfiguration configuration);
 
   @GET
-  @Path("/{databaseuuid}")
+  @Path("/file/{databaseuuid}")
   CollectionConfiguration getConfigurationFile(@PathParam("databaseuuid") String databaseuuid);
 
   @GET
@@ -70,4 +70,13 @@ public interface ConfigurationService extends DirectRestService {
   @POST
   @Path("/process/denormalize/{databaseuuid}")
   Boolean denormalize(@PathParam("databaseuuid") String databaseuuid);
+
+  @GET
+  @Path("/{databaseuuid}")
+  CollectionConfiguration getConfiguration(@PathParam("databaseuuid") String databaseuuid);
+
+  @POST
+  @Path("/{databaseuuid}")
+  Boolean createConfigurationBundle(@PathParam("databaseuuid") String databaseuuid,
+    CollectionConfiguration configuration);
 }

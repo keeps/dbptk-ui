@@ -23,5 +23,6 @@
         <g:FlowPanel addStyleNames="leftSidebar">
             <g:FlowPanel styleName="leftSidebar-group" ui:field="sidebarGroup" />
         </g:FlowPanel>
+        <g:FlowPanel addStyleNames="leftSidebar-controller" ui:field="controller"></g:FlowPanel>
     </g:FlowPanel>
 </ui:UiBinder>

@@ -4,7 +4,9 @@ import static com.databasepreservation.common.client.models.structure.ViewerType
 
 import java.util.*;
 
-import org.fusesource.restygwt.client.Method;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.ConfigurationHandler;
+import com.databasepreservation.common.client.models.configuration.collection.CollectionConfiguration;
+import com.databasepreservation.common.client.services.ConfigurationService;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.roda.core.data.v2.common.Pair;
 import org.roda.core.data.v2.index.filter.Filter;
@@ -12,13 +14,11 @@ import org.roda.core.data.v2.index.sublist.Sublist;
 
 import com.databasepreservation.common.client.ClientLogger;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
-import com.databasepreservation.common.client.common.DefaultMethodCallback;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.helpers.HelperExportTableData;
 import com.databasepreservation.common.client.common.lists.utils.AsyncTableCell;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.utils.ExportResourcesUtils;
-import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.DenormalizeConfigurationHandler;
 import com.databasepreservation.common.client.index.ExportRequest;
 import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
@@ -212,34 +212,33 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
       }
     }
 
-    DenormalizeConfigurationHandler configuration = DenormalizeConfigurationHandler.getInstance(database, table);
-    configuration.getCollectionConfiguration(new DefaultMethodCallback<Boolean>() {
-      @Override
-      public void onSuccess(Method method, Boolean response) {
-        List<ViewerColumn> columnsToInclude = configuration.getAllColumnsToInclude();
+    ConfigurationService.Util.call((CollectionConfiguration response) -> {
+      ConfigurationHandler configuration = ConfigurationHandler.getInstance(database, response);
+      List<ViewerColumn> allColumnsToInclude = configuration.getAllColumnsToInclude(table);
 
-        for (ViewerColumn columnToInclude : columnsToInclude) {
+      for (ViewerColumn columnToInclude : allColumnsToInclude) {
 
-          Column<ViewerRow, SafeHtml> column = new Column<ViewerRow, SafeHtml>(new SafeHtmlCell()) {
-            @Override
-            public SafeHtml getValue(ViewerRow row) {
-              SafeHtml ret = null;
-              if (row == null) {
-                logger.error("Trying to display a NULL ViewerRow");
-              } else if (row.getCells() == null) {
-                logger.error("Trying to display NULL Cells");
-              } else if (row.getCells().get(columnToInclude.getSolrName()) != null) {
-                String value = row.getCells().get(columnToInclude.getSolrName()).getValue();
-                ret = SafeHtmlUtils.fromString(value);
-              }
-              return ret;
+        Column<ViewerRow, SafeHtml> column = new Column<ViewerRow, SafeHtml>(new SafeHtmlCell()) {
+          @Override
+          public SafeHtml getValue(ViewerRow row) {
+            SafeHtml ret = null;
+            if (row == null) {
+              logger.error("Trying to display a NULL ViewerRow");
+            } else if (row.getCells() == null) {
+              logger.error("Trying to display NULL Cells");
+            } else if (row.getCells().get(columnToInclude.getSolrName()) != null) {
+              String value = row.getCells().get(columnToInclude.getSolrName()).getValue();
+              ret = SafeHtmlUtils.fromString(value);
             }
-          };
-          addColumn(columnToInclude, column);
-          columns.put(columnToInclude, column);
-        }
+            return ret;
+          }
+        };
+        addColumn(columnToInclude, column);
+        columns.put(columnToInclude, column);
       }
-    });
+
+    }).getConfiguration(database.getUuid());
+
 
     Alert alert = new Alert(Alert.MessageAlertType.LIGHT, messages.noItemsToDisplay());
     display.setEmptyTableWidget(alert);

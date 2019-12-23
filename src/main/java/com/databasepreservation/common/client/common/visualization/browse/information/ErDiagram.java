@@ -10,6 +10,7 @@ import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
 import com.databasepreservation.common.client.models.structure.ViewerSchema;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
+import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.github.nmorel.gwtjackson.client.ObjectMapper;
 import com.google.gwt.core.client.GWT;
@@ -29,10 +30,10 @@ public class ErDiagram extends Composite {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, ErDiagram> instances = new HashMap<>();
 
-  public static ErDiagram getInstance(ViewerDatabase database, ViewerSchema schema) {
+  public static ErDiagram getInstance(ViewerDatabase database, ViewerSchema schema, String path) {
     String separator = "/";
     String code = database.getUuid() + separator + schema.getUuid();
-    return instances.computeIfAbsent(code, k -> new ErDiagram(database, schema));
+    return instances.computeIfAbsent(code, k -> new ErDiagram(database, schema, path));
   }
 
   interface ErDiagramUiBinder extends UiBinder<Widget, ErDiagram> {
@@ -61,12 +62,13 @@ public class ErDiagram extends Composite {
 
   private final String databaseUUID;
 
-  private ErDiagram(final ViewerDatabase database, final ViewerSchema schema) {
+  private ErDiagram(final ViewerDatabase database, final ViewerSchema schema, String path) {
     databaseUUID = database.getUuid();
     initWidget(uiBinder.createAndBindUi(this));
 
-    //contentItems.add(new HTMLPanel(
-      //CommonClientUtils.getFieldHTML(messages.diagram_usingTheDiagram(), messages.diagram_Explanation())));
+    // contentItems.add(new HTMLPanel(
+    // CommonClientUtils.getFieldHTML(messages.diagram_usingTheDiagram(),
+    // messages.diagram_Explanation())));
 
     SimplePanel config = new SimplePanel();
     config.getElement().setId("erconfig");
@@ -99,6 +101,10 @@ public class ErDiagram extends Composite {
       int minColumnsAndRowsBiggerThanZero = Integer.MAX_VALUE;
 
       for (ViewerTable viewerTable : schema.getTables()) {
+        if (path.equals(HistoryManager.ROUTE_DATA_TRANSFORMATION)
+          && (viewerTable.isMaterializedView() || viewerTable.isCustomView())) {
+          continue;
+        }
         VisNode visNode = new VisNode(viewerTable.getUuid(), viewerTable.getName());
 
         if (ViewerStringUtils.isNotBlank(viewerTable.getDescription())) {
@@ -219,7 +225,7 @@ public class ErDiagram extends Composite {
       String nodes = visNodeMapper.write(visNodeList);
       String edges = visEdgeMapper.write(jsniEdgeList);
 
-      loadDiagram(databaseUUID, schema.getUuid(), nodes, edges, ApplicationType.getType());
+      loadDiagram(databaseUUID, schema.getUuid(), nodes, edges, ApplicationType.getType(), path);
     });
     contentItems.add(diagram);
   }
@@ -483,7 +489,7 @@ public class ErDiagram extends Composite {
   }
 
   public static native void loadDiagram(String dbuuid, String schemaUUID, String nodesJson, String edgesJson,
-    String applicationType)
+    String applicationType, String path)
   /*-{
     (function erdiagramload(){
         // network container
@@ -567,7 +573,11 @@ public class ErDiagram extends Composite {
                 //console.log("go to db" + dbuuid + " and table " + params.nodes[0]);
                 var tableUUID = params.nodes[0];
                 network.unselectAll();
-                @com.databasepreservation.common.client.tools.HistoryManager::gotoTable(Ljava/lang/String;Ljava/lang/String;)(dbuuid, tableUUID);
+                if(path === "data-transformation"){
+                    @com.databasepreservation.common.client.tools.HistoryManager::gotoDataTransformation(Ljava/lang/String;Ljava/lang/String;)(dbuuid, tableUUID);
+                } else if (path === "table"){
+                    @com.databasepreservation.common.client.tools.HistoryManager::gotoTable(Ljava/lang/String;Ljava/lang/String;)(dbuuid, tableUUID);
+                }
             }
         });
   

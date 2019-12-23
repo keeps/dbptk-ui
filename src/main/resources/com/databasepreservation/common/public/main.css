@@ -183,7 +183,7 @@ progress[value]::-moz-progress-bar {
     /* Dimensions should be similar to the parent progress element. */
     width: 100%;
     height: 20px;
-    border : 1px solid #E1E1E1;
+    border: 1px solid #E1E1E1;
 }
 
 .progress-bar span {
@@ -388,9 +388,10 @@ p[data-value]:after {
     position: relative;
 }
 
-.banner{
+.banner {
     z-index: 2;
 }
+
 .browseContentFilePreviewPanel .filePreviewToolbar {
     min-height: 35px;
     background-color: #eee;
@@ -715,9 +716,10 @@ p[data-value]:after {
     padding-top: 0.3rem;
 }
 
-.ms-scroll-fix{
+.ms-scroll-fix {
     -ms-overflow-style: -ms-autohiding-scrollbar;
 }
+
 .my-asyncdatagrid-display-scroll-wrapper {
     position: relative;
 }
@@ -911,7 +913,8 @@ p[data-value]:after {
     color: #6a6a6a;
     text-decoration: underline;
 }
-.main .wui-breadcrumbPanel .breadcrumb-last:hover{
+
+.main .wui-breadcrumbPanel .breadcrumb-last:hover {
     text-decoration: underline;
 }
 
@@ -920,7 +923,7 @@ p[data-value]:after {
     margin: 0 6px;
 }
 
-.main .wui-breadcrumbPanel .breadcrumb-last .fa{
+.main .wui-breadcrumbPanel .breadcrumb-last .fa {
     color: #6a6a6a;
 }
 
@@ -958,7 +961,7 @@ p[data-value]:after {
     padding-right: 27px;
 }
 
-.advancedOptionsPanel .switch[type=checkbox]{
+.advancedOptionsPanel .switch[type=checkbox] {
     height: 0;
     width: 0;
     visibility: hidden;
@@ -1046,6 +1049,7 @@ p[data-value]:after {
     border: 1px solid #1D70A2;
     padding: 20px;
 }
+
 /**********************************************
 				SIARD Upload
 ************************************************/
@@ -1055,24 +1059,37 @@ p[data-value]:after {
 }
 
 @-webkit-keyframes flash {
-    0% { opacity: 1; }
-    50% { opacity: .1; }
-    100% { opacity: 1; }
-}
-@keyframes flash {
-    0% { opacity: 1; }
-    50% { opacity: .1; }
-    100% { opacity: 1; }
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: .1;
+    }
+    100% {
+        opacity: 1;
+    }
 }
 
-.btn-goto-siard-info{
+@keyframes flash {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: .1;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.btn-goto-siard-info {
     position: absolute;
     padding-right: 10px;
     top: 15px;
     right: 50px;
 }
 
-.loadStatus, .errorMessage{
+.loadStatus, .errorMessage {
     margin-right: 0px;
     position: absolute;
     right: 110px;
@@ -1087,8 +1104,9 @@ p[data-value]:after {
     position: absolute;
     right: 32px;
     padding-left: 20px;
-    background: linear-gradient(-90deg,#eee 80%,rgba(255,255,255,0) 100%);
+    background: linear-gradient(-90deg, #eee 80%, rgba(255, 255, 255, 0) 100%);
 }
+
 /**********************************************
 		          Commons
 ***********************************************/
@@ -1099,11 +1117,14 @@ html, body, .desktop-main {
     padding: 0px;
     margin: 0;
 }
-
-.content-container{
+.container{
     height: 100%;
 }
-.main .contentPanel{
+.content-container {
+    height: 100%;
+}
+
+.main .contentPanel {
     min-height: auto;
 }
 
@@ -1114,7 +1135,7 @@ html, body, .desktop-main {
     /*position: relative;*/
 }
 
-.desktop-main .wui-breadcrumbPanel{
+.desktop-main .wui-breadcrumbPanel {
     padding-top: 10px;
     padding-left: 10px;
 }
@@ -1124,12 +1145,12 @@ html, body, .desktop-main {
 .application-container .browseContentPreviewPanel td,
 .application-container .browseContentFilesPanel,
 .application-container .browseContentFilesPanel td,
-.application-container .block{
+.application-container .block {
     height: 100%;
 }
 
 .application-container .browseContentPreviewPanel,
-.application-container .manage-panel{
+.application-container .manage-panel {
     position: absolute;
     top: 0;
     left: 0;
@@ -1138,11 +1159,11 @@ html, body, .desktop-main {
     box-sizing: border-box;
 }
 
-.application-container .h1{
+.application-container .h1 {
     margin: 0;
 }
 
-.label-error{
+.label-error {
     color: #d9534f;
     font-weight: 700;
     border: 2px solid #d9534f;
@@ -1198,7 +1219,7 @@ html, body, .desktop-main {
     font-weight: bold;
 }
 
-.metadata-information-description-label{
+.metadata-information-description-label {
     display: inline-block;
     text-align: left;
     font-weight: bold;
@@ -1231,7 +1252,7 @@ html, body, .desktop-main {
     margin-right: 10px;
 }
 
-.navigation-panel:last-of-type{
+.navigation-panel:last-of-type {
     margin-right: 0;
 }
 
@@ -1267,7 +1288,7 @@ html, body, .desktop-main {
     background-color: transparent;
 }
 
-.btn-link-info:disabled{
+.btn-link-info:disabled {
     color: #aeaeae;
     background-color: transparent;
     cursor: unset;
@@ -1329,7 +1350,7 @@ html, body, .desktop-main {
     box-sizing: border-box;
 }
 
-.btn-item .btn-back-wizard{
+.btn-item .btn-back-wizard {
     padding-left: 25px;
 }
 
@@ -1372,11 +1393,11 @@ html, body, .desktop-main {
 }
 
 
-.form-lobs{
+.form-lobs {
     margin-left: 4rem;
 }
 
-.export-options-form, .custom-views-form{
+.export-options-form, .custom-views-form {
     margin: 2.5rem 4rem 0rem 0rem;
 }
 
@@ -1554,7 +1575,7 @@ html, body, .desktop-main {
 				EDIT METADATA
 ************************************************/
 
-.browseContentPreviewPanel.metadata{
+.browseContentPreviewPanel.metadata {
     border-collapse: initial;
 }
 
@@ -1567,11 +1588,11 @@ html, body, .desktop-main {
     box-sizing: border-box;
 }
 
-.server .metadata-panel{
+.server .metadata-panel {
     padding: 0;
 }
 
-.server .browseContentPreviewPanel.metadata .browseContentFilesPanel{
+.server .browseContentPreviewPanel.metadata .browseContentFilesPanel {
     padding: 0;
 }
 
@@ -1689,7 +1710,7 @@ html, body, .desktop-main {
 		EDIT METADATA TAB & SCROLL
 ************************************************/
 
-.browseItemMetadata{
+.browseItemMetadata {
     padding: 0;
 }
 
@@ -1730,7 +1751,7 @@ html, body, .desktop-main {
     width: 100%;
 }
 
-.leftSidebar{
+.leftSidebar {
     height: 80vh;
     display: block;
     overflow: auto;
@@ -1783,7 +1804,7 @@ html, body, .desktop-main {
                 Progress Panel
  ***********************************************/
 
-.progress-bar-panel{
+.progress-bar-panel {
     padding-left: 10px;
     padding-right: 20px;
     margin: 0 6rem;
@@ -1831,6 +1852,7 @@ html, body, .desktop-main {
     width: 11.75rem;
     text-align: center;
 }
+
 /**********************************************
 		         Dialog ExternalLob
 ***********************************************/
@@ -2101,31 +2123,31 @@ html, body, .desktop-main {
 * SIARD validator
  ************************************************/
 /*indicators*/
-.validation-indicators{
+.validation-indicators {
     display: flex;
 }
 
-.validation-indicators .indicator{
+.validation-indicators .indicator {
     display: flex;
     margin-right: 0.7em;
 }
 
-.indicator .passed{
+.indicator .passed {
     color: #5cb85c;
     margin-right: 2px;
 }
 
-.indicator .errors{
+.indicator .errors {
     color: #d9534f;
     margin-right: 2px;
 }
 
-.indicator .warnings{
+.indicator .warnings {
     color: #f0ad4e;
     margin-right: 2px;
 }
 
-.indicator .skipped{
+.indicator .skipped {
     color: #727c84;
     margin-right: 2px;
 }
@@ -2135,44 +2157,44 @@ html, body, .desktop-main {
 }
 
 /*Dialog*/
-.validator-dialog-information{
+.validator-dialog-information {
     display: flex;
     justify-content: space-between;
     border: 1px solid #eee;
 }
 
-.validator-dialog-button{
+.validator-dialog-button {
     display: flex;
 }
 
-.validator-dialog-information .gwt-Label{
+.validator-dialog-information .gwt-Label {
     margin: 0 1em;
 }
 
-.validator-dialog-layout-body{
+.validator-dialog-layout-body {
     padding: 20px 10px;
 }
 
-.validator-dialog-layout-body .form-text-helper{
+.validator-dialog-layout-body .form-text-helper {
     margin-left: 0;
 }
 
-.tip-validator{
+.tip-validator {
     line-height: 48px;
 }
 
-.btn-validator{
+.btn-validator {
     background-color: #eeeeee;
     padding: 0 10px;
     min-height: 24px;
 }
 
-.btn-left{
+.btn-left {
     float: left;
 }
 
 /*page*/
-.browseContentPreviewPanel.validation{
+.browseContentPreviewPanel.validation {
     padding-left: 3rem;
     padding-right: 3rem;
     padding-bottom: 2rem;
@@ -2181,58 +2203,60 @@ html, body, .desktop-main {
     justify-content: space-between;
 }
 
-.browseContentPreviewPanel.validation .validator{
+.browseContentPreviewPanel.validation .validator {
     height: 100%;
     position: relative;
     display: flex;
     flex-direction: column;
 }
 
-.validation-information{
+.validation-information {
     display: flex;
     justify-content: space-between;
 }
 
-.progress-report.validation{
+.progress-report.validation {
     max-height: initial;
     flex: 1 1 auto;
 }
 
-.validation-panel{
+.validation-panel {
     padding: 2px;
     display: flex;
 }
 
-.validation-panel:nth-child(even){
+.validation-panel:nth-child(even) {
     background-color: #ebebeb
 }
 
-.validation-info-panel{
+.validation-info-panel {
     display: flex;
     padding: 5px 0;
 }
 
-.validation-info-panel .title{
+.validation-info-panel .title {
     font-weight: bolder;
     width: 260px;
 }
 
-.validation-info-panel .btn-link-info{
+.validation-info-panel .btn-link-info {
     padding-right: 0;
 }
 
-.validation-panel.title .gwt-Label{
+.validation-panel.title .gwt-Label {
     font-weight: bolder;
     margin-right: 10px;
 }
 
-.validation-total{
+.validation-total {
     margin-left: 4px;
 }
-.validation-panel.requirement{
+
+.validation-panel.requirement {
     justify-content: space-between;
 }
-.validation-panel.requirement .title{
+
+.validation-panel.requirement .title {
     display: flex;
 }
 
@@ -2244,29 +2268,30 @@ html, body, .desktop-main {
     margin-left: 90px;
 }
 
-.validation-status{
+.validation-status {
     max-height: 21px;
     align-self: center;
 }
 
-.validation-panel.requirement .title .description{
+.validation-panel.requirement .title .description {
     white-space: normal;
     width: 90%;
 }
-.validation-panel.requirement .gwt-Label{
+
+.validation-panel.requirement .gwt-Label {
     min-width: 90px;
 }
 
-.validation-panel.requirement.path{
+.validation-panel.requirement.path {
     justify-content: normal;
     font-weight: lighter;
 }
 
-.btn-run-again{
+.btn-run-again {
     box-sizing: content-box;
 }
 
-.stick-bottom-log{
+.stick-bottom-log {
     display: flex;
     height: 20px;
     line-height: 20px;
@@ -2277,18 +2302,20 @@ html, body, .desktop-main {
     width: max-content;
     padding: 0.5em 0;
 }
-.stick-bottom-log .gwt-Label{
+
+.stick-bottom-log .gwt-Label {
     margin-right: 1rem;
 }
-.tail-off{
+
+.tail-off {
     background-color: #2c2c2c;
 }
 
-.tail-on{
+.tail-on {
     background-color: #6b0;
 }
 
-.tail{
+.tail {
     position: relative;
     display: inline-block;
     height: 20px;
@@ -2296,7 +2323,7 @@ html, body, .desktop-main {
     border-radius: 50%;
 }
 
-.tail::after{
+.tail::after {
     content: "";
     position: absolute;
     top: 0;
@@ -2311,13 +2338,13 @@ html, body, .desktop-main {
     border-radius: 50%;
 }
 
-.bottom-panel{
+.bottom-panel {
     display: flex;
     align-self: flex-end;
     padding: 0.5em 0;
 }
 
-.bottom-panel .btn-item .btn{
+.bottom-panel .btn-item .btn {
     box-sizing: content-box;
     width: auto;
     margin-left: 0;
@@ -2327,15 +2354,15 @@ html, body, .desktop-main {
 /*    margin-top: 2px;*/
 /*}*/
 
-.bottom-panel .btn-item .btn-back-wizard{
+.bottom-panel .btn-item .btn-back-wizard {
     padding-left: 25px;
 }
 
-.bottom-panel .btn-item .btn-run-again{
+.bottom-panel .btn-item .btn-run-again {
     padding-right: 25px;
 }
 
-.bottom-panel .btn-primary{
+.bottom-panel .btn-primary {
     margin-left: 1em;
 }
 
@@ -2455,6 +2482,7 @@ html, body, .desktop-main {
     font-size: 1.5rem;
     vertical-align: middle;
 }
+
 /************************************************
 * alert
  ************************************************/
@@ -2474,7 +2502,8 @@ html, body, .desktop-main {
     font-weight: bold;
     margin-right: 0.5rem;
 }
-.alert-heading:after{
+
+.alert-heading:after {
     content: ":";
     color: inherit;
 }
@@ -2628,27 +2657,27 @@ button.close:hover {
 /************************************************
 * Bootstrap CARD
  ************************************************/
-.bootstrap-card{
+.bootstrap-card {
     background-color: #fff;
     background-clip: border-box;
-    rgba(0,0,0,.125);
+rgba(0, 0, 0, .125);
     border-radius: .25rem;
     position: relative;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
 }
 
-.bootstrap-card-title-panel{
+.bootstrap-card-title-panel {
     display: flex;
     height: 50px;
 }
 
-.bootstrap-card-title-icon{
+.bootstrap-card-title-icon {
     font-size: 30px;
     line-height: 50px;
     margin-right: 20px;
 }
 
-.bootstrap-card-title{
+.bootstrap-card-title {
     font-size: 30px;
     line-height: 50px;
 }
@@ -2657,7 +2686,7 @@ button.close:hover {
     font-size: 1em;
 }
 
-.bootstrap-card-extra-content-btn{
+.bootstrap-card-extra-content-btn {
     position: absolute;
     display: flex;
     align-items: center;
@@ -2666,16 +2695,16 @@ button.close:hover {
     right: 10px;
 }
 
-.bootstrap-card-body{
+.bootstrap-card-body {
     flex: 1 1 auto;
     padding: 1.25rem;
 }
 
-.bootstrap-card-extra-content{
+.bootstrap-card-extra-content {
 
 }
 
-.bootstrap-card-footer{
+.bootstrap-card-footer {
 
 }
 
@@ -2693,7 +2722,7 @@ button.close:hover {
     padding-right: 27px;
 }
 
-.switch-widget .switch[type=checkbox]{
+.switch-widget .switch[type=checkbox] {
     height: 0;
     width: 0;
     visibility: hidden;
@@ -2741,15 +2770,21 @@ button.close:hover {
 /************************************************
 * Advanced Configuration
  ************************************************/
-.advanced-configuration-options{
+.advanced-configuration {
+    padding: 10px;
+    height: 100%;
+    box-sizing: border-box;
+    position: relative;
+}
+
+.advanced-configuration-options {
     display: flex;
     justify-content: center;
     flex-direction: column;
     height: 100%;
-    margin-top: -48px;
 }
 
-.advanced-configuration-option{
+.advanced-configuration-option {
     width: 80%;
     display: flex;
     background-color: #eeeeee;
@@ -2759,7 +2794,7 @@ button.close:hover {
     cursor: pointer;
 }
 
-.advanced-configuration-option .icon{
+.advanced-configuration-option .icon {
     font-size: 70px;
     line-height: 100px;
 }
@@ -2770,48 +2805,64 @@ button.close:hover {
     flex-direction: column;
     margin-left: 20px;
 }
-.advanced-configuration-option .title{
+
+.advanced-configuration-option .title {
     font-size: 30px;
 }
 
-.advanced-configuration-option .description{
+.advanced-configuration-option .description {
     font-size: 15px;
 }
 
 /************************************************
 * Data Transformation
  ************************************************/
+.leftSidebar-controller{
+    display: flex;
+    padding: 2rem;
+    justify-content: space-between;
+}
+.data-transformation{
+    padding: 10px;
+    height: 100%;
+    box-sizing: border-box;
+    position: relative;
+}
+
 .data-transformation-header {
     position: relative;
 }
 
-.data-transformation-header .title-panel{
+.data-transformation-header .title-panel {
     height: 100px;
     line-height: 100px;
     display: flex;
 }
 
-.data-transformation-header .icon{
+.data-transformation-header .icon {
     margin-right: 20px;
     font-size: 50px;
 }
 
-.data-transformation-header .title{
+.data-transformation-header .title {
     font-size: 50px;
 }
 
-.data-transformation-header .description-panel{
+.data-transformation-header .description-panel {
     font-size: 15px;
 }
 
-.data-transformation-wrapper{
+.data-transformation-wrapper {
     position: relative;
     padding-top: 15px;
 }
-.data-transformation-panel{
+
+.data-transformation-panel {
     margin-left: 10px;
+    margin-bottom: 10px;
 }
-.data-transformation-child{
+
+.data-transformation-child {
     margin-left: 10px;
 }
 
@@ -2825,7 +2876,7 @@ button.close:hover {
     left: -10px;
 }
 
-.data-transformation-wrapper::before{
+.data-transformation-wrapper::before {
     border-top: 2px solid #ccc;
     top: 52px;
     width: 8px;
@@ -2835,18 +2886,24 @@ button.close:hover {
     left: -10px;
 }
 
-.data-transformation-wrapper:last-child::after{
+.data-transformation-wrapper:last-child::after {
     height: 52px;
 }
 
-.reference-panel{
+.aggregation-panel{
+    display: flex;
+    flex-direction: column;
+    margin: 10px 0;
+}
+
+.reference-panel {
     font-size: 15px;
     display: flex;
     line-height: 50px;
     color: #818182;
 }
 
-.reference-panel .icon{
+.reference-panel .icon {
     font-size: 15px;
     margin-right: 10px;
 }

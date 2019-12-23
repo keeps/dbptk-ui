@@ -1286,6 +1286,10 @@ public interface ClientMessages extends Messages {
 
   String dataTransformationTextForIsRelatedTo(String table, String column);
 
+  String dataTransformationTextForSeparetedRadioButton();
+
+  String dataTransformationTextForAggregationRadioButton();
+
   String dataTransformationTableRowList(List<String> columns);
 
 }

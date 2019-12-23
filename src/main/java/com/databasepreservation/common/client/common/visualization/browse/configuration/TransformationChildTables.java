@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.databasepreservation.common.client.common.lists.widgets.MultipleSelectionTablePanel;
-import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.DenormalizeConfigurationHandler;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.ConfigurationHandler;
 import com.databasepreservation.common.client.models.configuration.denormalize.RelatedColumnConfiguration;
 import com.databasepreservation.common.client.models.configuration.denormalize.RelatedTablesConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
@@ -23,7 +23,8 @@ import config.i18n.client.ClientMessages;
 public class TransformationChildTables {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, TransformationChildTables> instances = new HashMap<>();
-  private DenormalizeConfigurationHandler configuration;
+  private ConfigurationHandler configuration;
+  private TransformationTable rootTable;
   private ViewerTable childTable;
   private Map<Integer, Boolean> isLoading = new HashMap<>();
   private String uuid;
@@ -32,24 +33,24 @@ public class TransformationChildTables {
    *
    * @param childTable
    * @param configuration
+   * @param rootTable
    * @return
    */
-  public static TransformationChildTables getInstance(ViewerTable childTable,
-                                                      DenormalizeConfigurationHandler configuration, String uuid) {
+  public static TransformationChildTables getInstance(TableNode childTable, ConfigurationHandler configuration, TransformationTable rootTable) {
     return instances.computeIfAbsent(childTable.getUuid(),
-      k -> new TransformationChildTables(childTable, configuration, uuid));
+      k -> new TransformationChildTables(childTable, configuration, rootTable));
   }
 
   /**
    * @param childTable
    * @param configuration
-   * @param uuid
+   * @param rootTable
    */
-  private TransformationChildTables(ViewerTable childTable, DenormalizeConfigurationHandler configuration,
-                                    String uuid) {
+  private TransformationChildTables(TableNode childTable, ConfigurationHandler configuration, TransformationTable rootTable) {
     this.configuration = configuration;
-    this.childTable = childTable;
-    this.uuid = uuid;
+    this.rootTable = rootTable;
+    this.childTable = childTable.getTable();
+    this.uuid = childTable.getUuid();
     preset();
   }
 
@@ -106,8 +107,10 @@ public class TransformationChildTables {
           } else {
             if (selectionTablePanel.getSelectionModel().isSelected(object)) {
               configuration.addColumnToInclude(uuid, object);
+              rootTable.redrawTable();
             } else {
               configuration.removeColumnToInclude(uuid, object);
+              rootTable.redrawTable();
             }
           }
 
@@ -117,10 +120,12 @@ public class TransformationChildTables {
   }
 
   private boolean isSet(String uuid, int index) {
-    RelatedTablesConfiguration relatedTable = configuration.getRelatedTableByUUID(uuid);
-    for (RelatedColumnConfiguration column : relatedTable.getColumnsIncluded()) {
-      if (column.getIndex() == index) {
-        return true;
+    RelatedTablesConfiguration relatedTable = configuration.getRelatedTable(uuid);
+    if(relatedTable != null){
+      for (RelatedColumnConfiguration column : relatedTable.getColumnsIncluded()) {
+        if (column.getIndex() == index) {
+          return true;
+        }
       }
     }
     return false;

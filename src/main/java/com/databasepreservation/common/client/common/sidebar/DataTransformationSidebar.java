@@ -5,12 +5,18 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.databasepreservation.common.client.common.dialogs.Dialogs;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.ConfigurationHandler;
+import com.databasepreservation.common.client.models.configuration.collection.CollectionConfiguration;
 import com.databasepreservation.common.client.models.structure.*;
+import com.databasepreservation.common.client.services.ConfigurationService;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.databasepreservation.common.client.widgets.wcag.AccessibleFocusPanel;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -35,6 +41,9 @@ public class DataTransformationSidebar extends Composite implements Sidebar {
 
   @UiField
   FlowPanel searchPanel;
+
+  @UiField
+  FlowPanel controller;
 
   @UiField
   TextBox searchInputBox;
@@ -182,20 +191,20 @@ public class DataTransformationSidebar extends Composite implements Sidebar {
 
   private SidebarHyperlink createTableItem(final ViewerSchema schema, final ViewerTable table, final int totalSchemas,
     final String iconTag) {
-      SafeHtml html;
-      if (totalSchemas == 1) {
-        html = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE, table.getName());
-      } else {
-        html = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE,
-            schema.getName() + " " + iconTag + " " + table.getName());
-      }
-      SidebarHyperlink tableLink = new SidebarHyperlink(html,
-          HistoryManager.linkToDataTransformationTable(database.getUuid(), table.getUuid()));
-      tableLink.setH6().setIndent2();
-      list.put(table.getUuid(), tableLink);
-      sidebarGroup.add(tableLink);
+    SafeHtml html;
+    if (totalSchemas == 1) {
+      html = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE, table.getName());
+    } else {
+      html = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE,
+        schema.getName() + " " + iconTag + " " + table.getName());
+    }
+    SidebarHyperlink tableLink = new SidebarHyperlink(html,
+      HistoryManager.linkToDataTransformationTable(database.getUuid(), table.getUuid()));
+    tableLink.setH6().setIndent2();
+    list.put(table.getUuid(), tableLink);
+    sidebarGroup.add(tableLink);
 
-      return tableLink;
+    return tableLink;
   }
 
   public boolean isInitialized() {
@@ -208,6 +217,7 @@ public class DataTransformationSidebar extends Composite implements Sidebar {
       if (db != null && (databaseUUID == null || databaseUUID.equals(db.getUuid()))) {
         initialized = true;
         database = db;
+        createControllerPanel();
         databaseUUID = db.getUuid();
         init();
       }
@@ -301,4 +311,35 @@ public class DataTransformationSidebar extends Composite implements Sidebar {
       disclosurePanel.setVisible(true);
     }
   }
+
+  private void createControllerPanel() {
+    Button btnSaveConfiguration = new Button();
+    btnSaveConfiguration.setText("save");
+    btnSaveConfiguration.setStyleName("btn btn-save");
+    btnSaveConfiguration.setEnabled(false);
+
+    Button btnDenormalize = new Button();
+    btnDenormalize.setText("Denormalize");
+    btnDenormalize.addStyleName("btn btn-run");
+    btnDenormalize.setEnabled(false);
+
+    ConfigurationService.Util.call((CollectionConfiguration result) -> {
+      ConfigurationHandler configuration = ConfigurationHandler.getInstance(database, result);
+      btnDenormalize.setEnabled(true);
+      btnSaveConfiguration.setEnabled(true);
+      btnSaveConfiguration.addClickHandler(event -> {
+        configuration.buildAll();
+      });
+    }).getConfiguration(databaseUUID);
+
+    btnDenormalize.addClickHandler(event -> {
+      ConfigurationService.Util.call((Boolean result) -> {
+        Dialogs.showInformationDialog("Data transformation", "Successfully transformed data", "OK");
+      }).denormalize(database.getUuid());
+    });
+
+    controller.add(btnSaveConfiguration);
+    controller.add(btnDenormalize);
+  }
+
 }

@@ -4,6 +4,8 @@ import java.nio.file.Files;
 
 import javax.ws.rs.Path;
 
+import com.databasepreservation.common.client.models.configuration.collection.TableConfiguration;
+import com.databasepreservation.common.transformers.DenormalizeStructure;
 import org.springframework.stereotype.Service;
 
 import com.databasepreservation.common.client.ViewerConstants;
@@ -68,8 +70,8 @@ public class ConfigurationResource implements ConfigurationService {
   public Boolean createDenormalizeConfigurationFile(String databaseuuid, String tableuuid,
     DenormalizeConfiguration configuration) {
     try {
-      JsonTransformer.writeObjectToFile(configuration, ViewerConfiguration.getInstance().getDatabaseConfigPath().resolve(databaseuuid)
-        .resolve(tableuuid + "-" + configuration.getState() + ViewerConstants.JSON_EXTENSION));
+      JsonTransformer.writeObjectToFile(configuration, ViewerConfiguration.getInstance().getDatabaseConfigPath()
+        .resolve(databaseuuid).resolve(tableuuid + "-" + configuration.getState() + ViewerConstants.JSON_EXTENSION));
     } catch (ViewerException e) {
       throw new RESTException(e.getMessage());
     }
@@ -79,8 +81,47 @@ public class ConfigurationResource implements ConfigurationService {
   @Override
   public Boolean denormalize(String databaseuuid) {
     try {
-      DenormalizeSolrStructure denormalizeSolrStructure = new DenormalizeSolrStructure(databaseuuid);
+      DenormalizeStructure denormalizeSolrStructure = new DenormalizeStructure(databaseuuid);
     } catch (ModuleException e) {
+      throw new RESTException(e.getMessage());
+    }
+    return true;
+  }
+
+  @Override
+  public CollectionConfiguration getConfiguration(String databaseuuid) {
+    try {
+      java.nio.file.Path path = ViewerConfiguration.getInstance().getDatabaseConfigPath().resolve(databaseuuid)
+        .resolve(databaseuuid + ViewerConstants.JSON_EXTENSION);
+
+      if (Files.exists(path)) {
+        CollectionConfiguration collectionConfiguration = JsonTransformer.readObjectFromFile(path,
+          CollectionConfiguration.class);
+
+        for (TableConfiguration table : collectionConfiguration.getTables()) {
+          table.setDenormalizeConfiguration(getDenormalizeConfigurationFile(databaseuuid, table.getUuid()));
+        }
+        return JsonTransformer.readObjectFromFile(path, CollectionConfiguration.class);
+      } else {
+        return null;
+      }
+    } catch (ViewerException e) {
+      throw new RESTException(e.getMessage());
+    }
+  }
+
+  @Override
+  public Boolean createConfigurationBundle(String databaseuuid, CollectionConfiguration configuration) {
+    try {
+      JsonTransformer.writeObjectToFile(configuration, ViewerConfiguration.getInstance().getDatabaseConfigPath()
+        .resolve(databaseuuid).resolve(databaseuuid + ViewerConstants.JSON_EXTENSION));
+      for (TableConfiguration table : configuration.getTables()) {
+        JsonTransformer.writeObjectToFile(table.getDenormalizeConfiguration(),
+          ViewerConfiguration.getInstance().getDatabaseConfigPath().resolve(databaseuuid).resolve(
+            table.getUuid() + "-" + table.getDenormalizeConfiguration().getState() + ViewerConstants.JSON_EXTENSION));
+      }
+
+    } catch (ViewerException e) {
       throw new RESTException(e.getMessage());
     }
     return true;
