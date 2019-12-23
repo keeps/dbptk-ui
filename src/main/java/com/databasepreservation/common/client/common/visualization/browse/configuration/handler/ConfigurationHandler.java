@@ -26,6 +26,7 @@ public class ConfigurationHandler {
   private final String VERSION = "1.0.0";
   private ViewerDatabase database;
   private CollectionConfiguration collectionConfiguration;
+  private Map<String, Integer> nestedIndexMap = new HashMap<>();
 
   private enum State {
     CURRENT, DESIRED
@@ -186,6 +187,14 @@ public class ConfigurationHandler {
     }
 
     denormalizeConfiguration.getRelatedTables().add(relatedTable);
+    if (nestedIndexMap.get(targetTable.getUuid()) == null) {
+      nestedIndexMap.put(targetTable.getUuid(), 0);
+    } else {
+      nestedIndexMap.put(targetTable.getUuid(), nestedIndexMap.get(targetTable.getUuid()) + 1);
+    }
+
+    relatedTable.getDisplaySettings().setNestedSolrName(ViewerConstants.SOLR_INDEX_ROW_NESTED_COLUMN_NAME_PREFIX
+      + nestedIndexMap.get(targetTable.getUuid()) + "_txt");
   }
 
   /**
@@ -258,11 +267,6 @@ public class ConfigurationHandler {
       }
     }
     relatedTable.getColumnsIncluded().add(column);
-
-    int nestedIndex = relatedTable.getNestedIndex();
-    relatedTable.getDisplaySettings()
-      .setNestedSolrName(ViewerConstants.SOLR_INDEX_ROW_NESTED_COLUMN_NAME_PREFIX + nestedIndex + "_txt");
-    relatedTable.setNestedIndex(nestedIndex + 1);
   }
 
   /**

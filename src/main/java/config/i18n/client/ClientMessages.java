@@ -1280,6 +1280,12 @@ public interface ClientMessages extends Messages {
    * Data Transformation
    *******************************************/
 
+  String dataTransformationSidebarDialogTitle();
+
+  String dataTransformationSidebarWaitDialogMessage();
+
+  String dataTransformationSidebarSuccessDialogMessage();
+
   String dataTransformationTextForAlertColumnsOrder();
 
   String dataTransformationTextForIsReferencedBy(String table, String column);

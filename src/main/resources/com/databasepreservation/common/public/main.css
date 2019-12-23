@@ -2820,13 +2820,20 @@ rgba(0, 0, 0, .125);
 .leftSidebar-controller{
     display: flex;
     padding: 2rem;
-    justify-content: space-between;
+    position: absolute;
+    bottom: 0;
+}
+.leftSidebar-controller .btn {
+    margin-right: 10px;
+}
+.data-transformation-sidebar{
+    height: 70vh;
 }
 .data-transformation{
-    padding: 10px;
-    height: 100%;
+    height: 80vh;
     box-sizing: border-box;
     position: relative;
+    padding: 2px;
 }
 
 .data-transformation-header {

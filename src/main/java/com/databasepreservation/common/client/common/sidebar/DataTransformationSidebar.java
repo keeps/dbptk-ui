@@ -20,6 +20,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.*;
 
 import config.i18n.client.ClientMessages;
@@ -55,6 +56,8 @@ public class DataTransformationSidebar extends Composite implements Sidebar {
   private String databaseUUID;
   private boolean initialized = false;
   private Map<String, SidebarHyperlink> list = new HashMap<>();
+  private Button btnSaveConfiguration;
+  private Button btnClearConfiguration;
 
   /**
    * Creates a new DatabaseSidebar, rarely hitting the database more than once for
@@ -74,8 +77,6 @@ public class DataTransformationSidebar extends Composite implements Sidebar {
       || !ViewerDatabaseStatus.AVAILABLE.equals(instance.database.getStatus())) {
       instance = new DataTransformationSidebar(databaseUUID);
       instances.put(databaseUUID, instance);
-    } else {
-      return new DataTransformationSidebar(instance);
     }
     return instance;
   }
@@ -98,11 +99,8 @@ public class DataTransformationSidebar extends Composite implements Sidebar {
       || !ViewerDatabaseStatus.AVAILABLE.equals(instance.database.getStatus())) {
       instance = new DataTransformationSidebar(database);
       instances.put(database.getUuid(), instance);
-    } else {
-      // workaround because the same DatabaseSidebar can not belong to multiple
-      // widgets
-      return new DataTransformationSidebar(instance);
     }
+
     return instance;
   }
 
@@ -313,33 +311,57 @@ public class DataTransformationSidebar extends Composite implements Sidebar {
   }
 
   private void createControllerPanel() {
-    Button btnSaveConfiguration = new Button();
-    btnSaveConfiguration.setText("save");
+    btnSaveConfiguration = new Button();
+    btnSaveConfiguration.setText(messages.basicActionSave());
     btnSaveConfiguration.setStyleName("btn btn-save");
     btnSaveConfiguration.setEnabled(false);
 
     Button btnDenormalize = new Button();
-    btnDenormalize.setText("Denormalize");
+    btnDenormalize.setText("Run");
     btnDenormalize.addStyleName("btn btn-run");
     btnDenormalize.setEnabled(false);
 
+    btnClearConfiguration = new Button();
+    btnClearConfiguration.setText(messages.basicActionClear());
+    btnClearConfiguration.addStyleName("btn btn-times-circle btn-danger");
+    btnClearConfiguration.setEnabled(false);
+
     ConfigurationService.Util.call((CollectionConfiguration result) -> {
       ConfigurationHandler configuration = ConfigurationHandler.getInstance(database, result);
-      btnDenormalize.setEnabled(true);
-      btnSaveConfiguration.setEnabled(true);
       btnSaveConfiguration.addClickHandler(event -> {
         configuration.buildAll();
+        btnDenormalize.setEnabled(true);
+        btnClearConfiguration.setEnabled(false);
+        btnSaveConfiguration.setEnabled(false);
       });
     }).getConfiguration(databaseUUID);
 
     btnDenormalize.addClickHandler(event -> {
+      final DialogBox dialogBox = Dialogs.showWaitResponse(messages.dataTransformationSidebarDialogTitle(),
+          messages.dataTransformationSidebarWaitDialogMessage());
       ConfigurationService.Util.call((Boolean result) -> {
-        Dialogs.showInformationDialog("Data transformation", "Successfully transformed data", "OK");
+        Dialogs.showInformationDialog(messages.dataTransformationSidebarDialogTitle(), messages.dataTransformationSidebarSuccessDialogMessage(), messages.basicActionClose());
+        dialogBox.hide();
+        btnDenormalize.setEnabled(false);
+      },(String errorMessage) ->{
+        dialogBox.hide();
+        Dialogs.showErrors(messages.dataTransformationSidebarDialogTitle(), errorMessage,
+            messages.basicActionClose());
+        btnDenormalize.setEnabled(false);
       }).denormalize(database.getUuid());
     });
 
+    btnClearConfiguration.addClickHandler(event ->{
+      Window.Location.reload();
+    });
+
     controller.add(btnSaveConfiguration);
+    controller.add(btnClearConfiguration);
     controller.add(btnDenormalize);
   }
 
+  public void enableSaveConfiguration(Boolean enable) {
+    btnSaveConfiguration.setEnabled(enable);
+    btnClearConfiguration.setEnabled(enable);
+  }
 }

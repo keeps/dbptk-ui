@@ -269,7 +269,7 @@ public class MainPanel extends Composite {
             sidebar, new RightPanelLoader() {
             @Override
             public RightPanel load(ViewerDatabase database) {
-              return DataTransformation.getInstance(database);
+              return DataTransformation.getInstance(database, sidebar);
             }
           });
       } else if (currentHistoryPath.size() == 3) {
@@ -278,7 +278,7 @@ public class MainPanel extends Composite {
             sidebar, new RightPanelLoader() {
             @Override
             public RightPanel load(ViewerDatabase database) {
-              return DataTransformation.getInstance(database, tableUUID);
+              return DataTransformation.getInstance(database, tableUUID, sidebar);
             }
           });
       }

@@ -6,6 +6,8 @@ import java.util.List;
 import com.databasepreservation.common.client.common.ContentPanel;
 import com.databasepreservation.common.client.common.RightPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
+import com.databasepreservation.common.client.common.sidebar.DataTransformationSidebar;
+import com.databasepreservation.common.client.common.sidebar.Sidebar;
 import com.databasepreservation.common.client.common.utils.ContentPanelLoader;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.common.utils.RightPanelLoader;
@@ -15,6 +17,8 @@ import com.databasepreservation.common.client.common.visualization.browse.Databa
 import com.databasepreservation.common.client.common.visualization.browse.DatabaseSearchesPanel;
 import com.databasepreservation.common.client.common.visualization.browse.ReferencesPanel;
 import com.databasepreservation.common.client.common.visualization.browse.RowPanel;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.AdvancedConfiguration;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.DataTransformation;
 import com.databasepreservation.common.client.common.visualization.browse.foreignKey.ForeignKeyPanel;
 import com.databasepreservation.common.client.common.visualization.browse.foreignKey.ForeignKeyPanelOptions;
 import com.databasepreservation.common.client.common.visualization.browse.information.DatabaseInformationPanel;
@@ -473,6 +477,35 @@ public class MainPanelDesktop extends Composite {
           }
         });
       }
+    }else if (HistoryManager.ROUTE_ADVANCED_CONFIGURATION.equals(currentHistoryPath.get(0))) {
+      final String databaseUUID = currentHistoryPath.get(1);
+      setContent(databaseUUID, new ContentPanelLoader() {
+        @Override
+        public ContentPanel load(ViewerDatabase database) {
+          return AdvancedConfiguration.getInstance(database);
+        }
+      });
+    } else if (HistoryManager.ROUTE_DATA_TRANSFORMATION.equals(currentHistoryPath.get(0))) {
+      final String databaseUUID = currentHistoryPath.get(1);
+      DataTransformationSidebar sidebar = DataTransformationSidebar.getInstance(databaseUUID);
+      if (currentHistoryPath.size() == 2) {
+        setContent(databaseUUID, HistoryManager.ROUTE_DATA_TRANSFORMATION, databaseUUID,
+            sidebar, new RightPanelLoader() {
+              @Override
+              public RightPanel load(ViewerDatabase database) {
+                return DataTransformation.getInstance(database, sidebar);
+              }
+            });
+      } else if (currentHistoryPath.size() == 3) {
+        final String tableUUID = currentHistoryPath.get(2);
+        setContent(databaseUUID, HistoryManager.ROUTE_DATA_TRANSFORMATION, tableUUID,
+            sidebar, new RightPanelLoader() {
+              @Override
+              public RightPanel load(ViewerDatabase database) {
+                return DataTransformation.getInstance(database, tableUUID, sidebar);
+              }
+            });
+      }
     } else {
       handleErrorPath(currentHistoryPath);
     }
@@ -506,6 +539,16 @@ public class MainPanelDesktop extends Composite {
   private void setContent(String databaseUUID, String toSelect, RightPanelLoader rightPanelLoader) {
     GWT.log("setContent, dbuid " + databaseUUID);
     DatabasePanel databasePanel = DatabasePanel.getInstance(databaseUUID, false);
+    databasePanel.setTopLevelPanelCSS("browseContent wrapper skip_padding");
+    contentPanel.setWidget(databasePanel);
+    databasePanel.load(rightPanelLoader, toSelect);
+    JavascriptUtils.scrollToElement(contentPanel.getElement());
+  }
+
+  private void setContent(String databaseUUID, String route, String toSelect, Sidebar sidebar,
+                          RightPanelLoader rightPanelLoader) {
+    GWT.log("setContent, dbuid " + databaseUUID);
+    DatabasePanel databasePanel = DatabasePanel.getInstance(databaseUUID, route, true, sidebar);
     databasePanel.setTopLevelPanelCSS("browseContent wrapper skip_padding");
     contentPanel.setWidget(databasePanel);
     databasePanel.load(rightPanelLoader, toSelect);

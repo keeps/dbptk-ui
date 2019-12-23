@@ -5,7 +5,7 @@ import java.nio.file.Files;
 import javax.ws.rs.Path;
 
 import com.databasepreservation.common.client.models.configuration.collection.TableConfiguration;
-import com.databasepreservation.common.transformers.DenormalizeStructure;
+import com.databasepreservation.common.transformers.Denormalize;
 import org.springframework.stereotype.Service;
 
 import com.databasepreservation.common.client.ViewerConstants;
@@ -16,7 +16,6 @@ import com.databasepreservation.common.client.services.ConfigurationService;
 import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.server.index.utils.JsonTransformer;
-import com.databasepreservation.common.transformers.DenormalizeSolrStructure;
 import com.databasepreservation.model.exception.ModuleException;
 
 /**
@@ -81,7 +80,7 @@ public class ConfigurationResource implements ConfigurationService {
   @Override
   public Boolean denormalize(String databaseuuid) {
     try {
-      DenormalizeStructure denormalizeSolrStructure = new DenormalizeStructure(databaseuuid);
+      Denormalize denormalizeSolrStructure = new Denormalize(databaseuuid);
     } catch (ModuleException e) {
       throw new RESTException(e.getMessage());
     }
@@ -116,9 +115,12 @@ public class ConfigurationResource implements ConfigurationService {
       JsonTransformer.writeObjectToFile(configuration, ViewerConfiguration.getInstance().getDatabaseConfigPath()
         .resolve(databaseuuid).resolve(databaseuuid + ViewerConstants.JSON_EXTENSION));
       for (TableConfiguration table : configuration.getTables()) {
-        JsonTransformer.writeObjectToFile(table.getDenormalizeConfiguration(),
-          ViewerConfiguration.getInstance().getDatabaseConfigPath().resolve(databaseuuid).resolve(
-            table.getUuid() + "-" + table.getDenormalizeConfiguration().getState() + ViewerConstants.JSON_EXTENSION));
+        if (table.getDenormalizeConfiguration().getRelatedTables() != null
+          && !table.getDenormalizeConfiguration().getRelatedTables().isEmpty()) {
+          JsonTransformer.writeObjectToFile(table.getDenormalizeConfiguration(),
+            ViewerConfiguration.getInstance().getDatabaseConfigPath().resolve(databaseuuid).resolve(
+              table.getUuid() + "-" + table.getDenormalizeConfiguration().getState() + ViewerConstants.JSON_EXTENSION));
+        }
       }
 
     } catch (ViewerException e) {

@@ -19,8 +19,6 @@ public class RelatedTablesConfiguration implements Serializable {
     private List<ReferencesConfiguration> references;
     private List<RelatedColumnConfiguration> columnsIncluded;
     private DisplaySettingsConfiguration displaySettings;
-    @JsonIgnore
-    private int nestedIndex = 0;
 
     public RelatedTablesConfiguration(){
         references = new ArrayList<>();
@@ -98,15 +96,5 @@ public class RelatedTablesConfiguration implements Serializable {
 
     public void setDisplaySettings(DisplaySettingsConfiguration displaySettings) {
         this.displaySettings = displaySettings;
-    }
-
-    @JsonIgnore
-    public int getNestedIndex() {
-        return nestedIndex;
-    }
-
-    @JsonIgnore
-    public void setNestedIndex(int nestedIndex) {
-        this.nestedIndex = nestedIndex;
     }
 }

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.databasepreservation.common.client.common.lists.widgets.MultipleSelectionTablePanel;
+import com.databasepreservation.common.client.common.sidebar.DataTransformationSidebar;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.ConfigurationHandler;
 import com.databasepreservation.common.client.models.configuration.denormalize.RelatedColumnConfiguration;
 import com.databasepreservation.common.client.models.configuration.denormalize.RelatedTablesConfiguration;
@@ -23,6 +24,7 @@ import config.i18n.client.ClientMessages;
 public class TransformationChildTables {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, TransformationChildTables> instances = new HashMap<>();
+  private final DataTransformationSidebar sidebar;
   private ConfigurationHandler configuration;
   private TransformationTable rootTable;
   private ViewerTable childTable;
@@ -34,23 +36,26 @@ public class TransformationChildTables {
    * @param childTable
    * @param configuration
    * @param rootTable
+   * @param sidebar
    * @return
    */
-  public static TransformationChildTables getInstance(TableNode childTable, ConfigurationHandler configuration, TransformationTable rootTable) {
+  public static TransformationChildTables getInstance(TableNode childTable, ConfigurationHandler configuration, TransformationTable rootTable, DataTransformationSidebar sidebar) {
     return instances.computeIfAbsent(childTable.getUuid(),
-      k -> new TransformationChildTables(childTable, configuration, rootTable));
+      k -> new TransformationChildTables(childTable, configuration, rootTable, sidebar));
   }
 
   /**
    * @param childTable
    * @param configuration
    * @param rootTable
+   * @param sidebar
    */
-  private TransformationChildTables(TableNode childTable, ConfigurationHandler configuration, TransformationTable rootTable) {
+  private TransformationChildTables(TableNode childTable, ConfigurationHandler configuration, TransformationTable rootTable, DataTransformationSidebar sidebar) {
     this.configuration = configuration;
     this.rootTable = rootTable;
     this.childTable = childTable.getTable();
     this.uuid = childTable.getUuid();
+    this.sidebar = sidebar;
     preset();
   }
 
@@ -95,7 +100,7 @@ public class TransformationChildTables {
     MultipleSelectionTablePanel<ViewerColumn> selectionTablePanel) {
     return new MultipleSelectionTablePanel.ColumnInfo<>("", 4,
       new Column<ViewerColumn, Boolean>(new CheckboxCell(true, true)) {
-
+        int selectionSize;
         @Override
         public Boolean getValue(ViewerColumn object) {
           int index = object.getColumnIndexInEnclosingTable();
@@ -104,6 +109,8 @@ public class TransformationChildTables {
             if (isSet(uuid, index)) {
               selectionTablePanel.getSelectionModel().setSelected(object, true);
             }
+            //save preset size to check if this table has changes
+            selectionSize = selectionTablePanel.getSelectionModel().getSelectedSet().size();
           } else {
             if (selectionTablePanel.getSelectionModel().isSelected(object)) {
               configuration.addColumnToInclude(uuid, object);
@@ -111,6 +118,10 @@ public class TransformationChildTables {
             } else {
               configuration.removeColumnToInclude(uuid, object);
               rootTable.redrawTable();
+            }
+            int currentSize = selectionTablePanel.getSelectionModel().getSelectedSet().size();
+            if(selectionSize != currentSize){
+              sidebar.enableSaveConfiguration(true);
             }
           }
 

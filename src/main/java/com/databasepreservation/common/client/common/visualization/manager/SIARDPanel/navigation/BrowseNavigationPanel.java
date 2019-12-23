@@ -30,7 +30,6 @@ public class BrowseNavigationPanel {
   private Button btnDelete;
   private Button btnBrowse;
   private Button btnIngest;
-  private Button btnDenormalize;
   private Button btnAdvancedConfiguration;
   private boolean btnIngestClicked = false;
   private MetadataField browsingStatus = null;
@@ -109,21 +108,6 @@ public class BrowseNavigationPanel {
     });
   }
 
-  private void denormalizeButton() {
-
-    btnDenormalize = new Button();
-    btnDenormalize.setText("Denormalize");
-    btnDenormalize.addStyleName("btn btn-link-info");
-    btnDenormalize.setVisible(false);
-
-    btnDenormalize.addClickHandler(event -> {
-      ConfigurationService.Util.call((Boolean result) -> {
-        GWT.log("Denormalize:" + result);
-        Dialogs.showInformationDialog("Data transformation", "Successfully transformed data", "OK");
-      }).denormalize(database.getUuid());
-    });
-  }
-
   private void advancedConfigurationButton() {
     btnAdvancedConfiguration = new Button();
     btnAdvancedConfiguration.setText("Configuration");
@@ -145,8 +129,6 @@ public class BrowseNavigationPanel {
     // Ingest Button
     ingestButton();
 
-    // Denormalize Button
-    denormalizeButton();
     advancedConfigurationButton();
 
     NavigationPanel browse = NavigationPanel.createInstance(messages.SIARDHomePageOptionsHeaderForBrowsing());
@@ -154,18 +136,15 @@ public class BrowseNavigationPanel {
     browse.addButton(btnIngest);
     browse.addButton(btnBrowse);
     browse.addButton(btnDelete);
-    browse.addButton(btnDenormalize);
     browse.addButton(btnAdvancedConfiguration);
 
     if (database.getStatus().equals(ViewerDatabaseStatus.AVAILABLE)
       || database.getStatus().equals(ViewerDatabaseStatus.ERROR)) {
       btnBrowse.setVisible(true);
       btnDelete.setVisible(true);
-      btnDenormalize.setVisible(true);
     } else if (database.getStatus().equals(ViewerDatabaseStatus.METADATA_ONLY)) {
       btnIngest.setVisible(true);
       btnDelete.setVisible(false);
-      btnDenormalize.setVisible(false);
     }
 
     if (database.getPath() == null || database.getPath().isEmpty()) {
@@ -191,7 +170,6 @@ public class BrowseNavigationPanel {
       btnIngest.setVisible(false);
       btnBrowse.setVisible(true);
       btnDelete.setVisible(true);
-      btnDenormalize.setVisible(true);
     } else if (database.getStatus().equals(ViewerDatabaseStatus.INGESTING)) {
       if (btnIngestClicked) {
         btnIngest.setVisible(true);
@@ -204,7 +182,6 @@ public class BrowseNavigationPanel {
       btnIngest.setVisible(true);
       btnBrowse.setVisible(false);
       btnDelete.setVisible(false);
-      btnDenormalize.setVisible(true);
       btnIngestClicked = false;
     }
 

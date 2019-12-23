@@ -9,6 +9,7 @@ import com.databasepreservation.common.client.common.RightPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.lists.widgets.MultipleSelectionTablePanel;
+import com.databasepreservation.common.client.common.sidebar.DataTransformationSidebar;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.ConfigurationHandler;
 import com.databasepreservation.common.client.common.visualization.browse.information.ErDiagram;
 import com.databasepreservation.common.client.models.configuration.collection.CollectionConfiguration;
@@ -55,6 +56,7 @@ public class DataTransformation extends RightPanel {
   private ViewerTable table;
   private ConfigurationHandler configuration;
   private TransformationTable rootTable;
+  private DataTransformationSidebar sidebar;
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
@@ -63,17 +65,20 @@ public class DataTransformation extends RightPanel {
     BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
   }
 
-  public static DataTransformation getInstance(ViewerDatabase database) {
-    return instances.computeIfAbsent(database.getUuid(), k -> new DataTransformation(database, null));
+  public static DataTransformation getInstance(ViewerDatabase database, DataTransformationSidebar sidebar) {
+    return instances.computeIfAbsent(database.getUuid(), k -> new DataTransformation(database, null, sidebar));
   }
 
-  public static DataTransformation getInstance(ViewerDatabase database, String tableUUID) {
-    return instances.computeIfAbsent(database.getUuid() + tableUUID, k -> new DataTransformation(database, tableUUID));
+  public static DataTransformation getInstance(ViewerDatabase database, String tableUUID,
+    DataTransformationSidebar sidebar) {
+    return instances.computeIfAbsent(database.getUuid() + tableUUID,
+      k -> new DataTransformation(database, tableUUID, sidebar));
   }
 
-  public DataTransformation(ViewerDatabase database, String tableUUID) {
+  public DataTransformation(ViewerDatabase database, String tableUUID, DataTransformationSidebar sidebar) {
     initWidget(binder.createAndBindUi(this));
     this.database = database;
+    this.sidebar = sidebar;
     if (tableUUID == null) {
       content.add(ErDiagram.getInstance(database, database.getMetadata().getSchemas().get(0), HistoryManager.getCurrentHistoryPath().get(0)));
     } else {
@@ -154,7 +159,7 @@ public class DataTransformation extends RightPanel {
 
     FlowPanel container = new FlowPanel();
     TransformationChildTables tableInstance = TransformationChildTables.getInstance(childNode, configuration,
-      rootTable);
+      rootTable, sidebar);
     MultipleSelectionTablePanel selectTable = tableInstance.createTable();
 
     SwitchBtn switchBtn = new SwitchBtn("Enable", false);
@@ -164,12 +169,13 @@ public class DataTransformation extends RightPanel {
         grandChild.add(expandLevel(childNode));
         configuration.includeRelatedTable(childNode, table);
         container.add(selectTable);
-
+        sidebar.enableSaveConfiguration(true);
       } else {
         configuration.removeRelatedTable(childNode, table);
         grandChild.clear();
         container.clear();
         rootTable.redrawTable();
+        sidebar.enableSaveConfiguration(true);
       }
     });
 
@@ -218,14 +224,15 @@ public class DataTransformation extends RightPanel {
     FlowPanel information = new FlowPanel();
     ViewerForeignKey foreignKey = node.getForeignKey();
     ViewerTable referencedTable = node.getParentNode().getTable();
+    ViewerTable sourceTable = node.getTable();
 
     for (ViewerReference reference : foreignKey.getReferences()) {
-      ViewerColumn column = referencedTable.getColumns()
-        .get(reference.getSourceColumnIndex());
       if (foreignKey.getReferencedTableUUID().equals(referencedTable.getUuid())) {
+        ViewerColumn column = sourceTable.getColumns().get(reference.getSourceColumnIndex());
         information.add(buildReferenceInformation(
           messages.dataTransformationTextForIsRelatedTo(referencedTable.getId(), column.getDisplayName())));
       } else {
+        ViewerColumn column = referencedTable.getColumns().get(reference.getSourceColumnIndex());
         information.add(buildReferenceInformation(
           messages.dataTransformationTextForIsReferencedBy(referencedTable.getId(), column.getDisplayName())));
       }

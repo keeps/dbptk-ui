@@ -44,7 +44,6 @@ public class TermsFilterParameter extends FilterParameter {
 
   @Override
   public String toString() {
-    return "TermsFilterParameter [getName()=" + getName() + ", getClass()=" + getClass() + ", hashCode()="
-        + hashCode() + ", toString()=" + super.toString() + "]";
+    return "{!Terms f=" + getField() + " v=" + getParameterValue() + " }";
   }
 }

@@ -116,10 +116,6 @@ public class DenormalizeStructure {
     for (ViewerRow row : sourceRows) {
       for (RelatedTablesConfiguration relatedTable : denormalizeConfig.getRelatedTables()) {
         if (relatedTable.getReferencedTableUUID().equals(denormalizeConfig.getTableUUID())) {
-          System.out.println();
-          System.out.println("===============================================================");
-          System.out.println("> Related Table : " + relatedTable.getTableID());
-          System.out.println("***************************************************************");
           buildMainQuery(denormalizeConfig, row, relatedTable);
         }
       }
@@ -142,8 +138,6 @@ public class DenormalizeStructure {
 
     for (ReferencesConfiguration reference : relatedTable.getReferences()) {
       if (cells.get(reference.getReferencedTable().getSolrName()) == null) {
-        System.out.println("----------------------------SKIP------------------------------");
-        System.out.println("===============================================================");
         return;
       }
 
@@ -169,12 +163,6 @@ public class DenormalizeStructure {
         break;
       }
     }
-    System.out.println("===============================================================");
-    for (SolrQuery entries : queryList) {
-      System.out.println(entries);
-    }
-
-    System.out.println("===============================================================");
   }
 
   private SolrQuery buildSubQuery(DenormalizeConfiguration denormalizeConfig, RelatedTablesConfiguration relatedTable) throws ModuleException {

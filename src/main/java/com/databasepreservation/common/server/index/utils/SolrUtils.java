@@ -207,6 +207,34 @@ public class SolrUtils {
     return ret;
   }
 
+  public static Pair<IndexResult<ViewerRow>, String> findRows(SolrClient index, String databaseUUID, SolrQuery query, Sorter sorter, int pageSize, String cursorMark)
+      throws GenericException, RequestNotValidException {
+
+    Pair<IndexResult<ViewerRow>, String> ret;
+
+    query.set(CursorMarkParams.CURSOR_MARK_PARAM, cursorMark);
+    query.setRows(pageSize);
+    final List<SolrQuery.SortClause> sortClauses = parseSorter(sorter);
+    sortClauses.add(SolrQuery.SortClause.asc(RodaConstants.INDEX_UUID));
+    query.setSorts(sortClauses);
+
+    final RowsCollection collection = SolrRowsCollectionRegistry.get(databaseUUID);
+
+    try {
+      QueryResponse response = index.query(collection.getIndexName(), query);
+      final IndexResult<ViewerRow> result = queryResponseToIndexResult(response, collection, Facets.NONE);
+      ret = Pair.of(result, response.getNextCursorMark());
+    } catch (SolrServerException | IOException  e) {
+      throw new GenericException("Could not query index", e);
+    } catch (SolrException e) {
+      throw new RequestNotValidException(e);
+    } catch (RuntimeException e) {
+      throw new GenericException("Unexpected exception while querying index", e);
+    }
+
+    return ret;
+  }
+
   public static SolrQuery buildQuery(Filter filter, List<String> fieldsToReturn) throws RequestNotValidException {
     SolrQuery query = new SolrQuery();
 

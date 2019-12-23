@@ -97,6 +97,7 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
 
     viewerRow.setTableId(SolrUtils.objectToString(doc.get(ViewerConstants.SOLR_ROWS_TABLE_ID), null));
     viewerRow.setTableUUID(SolrUtils.objectToString(doc.get(ViewerConstants.SOLR_ROWS_TABLE_UUID), null));
+    viewerRow.setNestedUUID(SolrUtils.objectToString(doc.get(ViewerConstants.SOLR_ROWS_NESTED_UUID), null));
 
     Map<String, ViewerCell> cells = new LinkedHashMap<>();
     for (Map.Entry<String, Object> entry : doc) {
@@ -105,8 +106,8 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
       cellFromEntry(columnName, value).ifPresent(viewerCell -> cells.put(columnName, viewerCell));
     }
     viewerRow.setCells(cells);
-    if (doc.get("nested") != null) {
-      SolrDocumentList documentList = (SolrDocumentList) doc.get("nested");
+    if (doc.get(ViewerConstants.SOLR_ROWS_NESTED) != null) {
+      SolrDocumentList documentList = (SolrDocumentList) doc.get(ViewerConstants.SOLR_ROWS_NESTED);
       for (SolrDocument document : documentList) {
         viewerRow.addNestedRow(fromSolrDocument(document));
       }

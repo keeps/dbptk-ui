@@ -179,6 +179,8 @@ public class ViewerConstants {
    */
   public static final String SOLR_ROWS_TABLE_ID = "tableId";
   public static final String SOLR_ROWS_TABLE_UUID = "tableUUID";
+  public static final String SOLR_ROWS_NESTED_UUID = "nestedUUID_t";
+  public static final String SOLR_ROWS_NESTED = "nested";
 
   /*
    * DYNAMIC FIELD TYPES (suffixes)
