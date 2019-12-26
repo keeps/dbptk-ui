@@ -76,8 +76,8 @@ public class AdvancedConfiguration extends ContentPanel {
       }
     });
 
-    options.add(ManagementTablesPanel);
-    options.add(ManagementColumnsPanel);
+//    options.add(ManagementTablesPanel);
+//    options.add(ManagementColumnsPanel);
     options.add(DataTransformationPanel);
   }
 

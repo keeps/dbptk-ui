@@ -27,5 +27,35 @@
         </httpConfiguration>
       </configuration>
     </server>
+    <server>
+      <id>github</id>
+      <username>GITHUB_MAVEN_USERNAME</username>
+      <password>GITHUB_MAVEN_PASSWORD</password>
+    </server>
   </servers>
+  <profiles>
+    <profile>
+      <id>github</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <repositories>
+        <repository>
+          <id>central</id>
+          <url>https://repo1.maven.org/maven2</url>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+        </repository>
+        <repository>
+          <id>github</id>
+          <name>GitHub Apache Maven Packages</name>
+          <url>https://maven.pkg.github.com/006627/gwt</url>
+        </repository>
+      </repositories>
+    </profile>
+  </profiles>
 </settings>

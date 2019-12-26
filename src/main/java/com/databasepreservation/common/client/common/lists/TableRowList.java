@@ -228,7 +228,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
               logger.error("Trying to display NULL Cells");
             } else if (row.getCells().get(columnToInclude.getSolrName()) != null) {
               String value = row.getCells().get(columnToInclude.getSolrName()).getValue();
-              ret = SafeHtmlUtils.fromString(value);
+              ret = SafeHtmlUtils.fromString(value.substring(1, value.length()-1));
             }
             return ret;
           }

@@ -138,13 +138,18 @@ public class BrowseNavigationPanel {
     browse.addButton(btnDelete);
     browse.addButton(btnAdvancedConfiguration);
 
-    if (database.getStatus().equals(ViewerDatabaseStatus.AVAILABLE)
-      || database.getStatus().equals(ViewerDatabaseStatus.ERROR)) {
+    if (database.getStatus().equals(ViewerDatabaseStatus.AVAILABLE)){
       btnBrowse.setVisible(true);
       btnDelete.setVisible(true);
+      btnAdvancedConfiguration.setVisible(true);
+    } else if( database.getStatus().equals(ViewerDatabaseStatus.ERROR)) {
+      btnBrowse.setVisible(true);
+      btnDelete.setVisible(true);
+      btnAdvancedConfiguration.setVisible(false);
     } else if (database.getStatus().equals(ViewerDatabaseStatus.METADATA_ONLY)) {
       btnIngest.setVisible(true);
       btnDelete.setVisible(false);
+      btnAdvancedConfiguration.setVisible(false);
     }
 
     if (database.getPath() == null || database.getPath().isEmpty()) {
@@ -165,16 +170,22 @@ public class BrowseNavigationPanel {
     this.database = database;
     browsingStatus.updateText(LabelUtils.getDatabaseStatus(database.getStatus()));
 
-    if (database.getStatus().equals(ViewerDatabaseStatus.AVAILABLE)
-      || database.getStatus().equals(ViewerDatabaseStatus.ERROR)) {
+    if (database.getStatus().equals(ViewerDatabaseStatus.AVAILABLE)){
       btnIngest.setVisible(false);
       btnBrowse.setVisible(true);
       btnDelete.setVisible(true);
+      btnAdvancedConfiguration.setVisible(true);
+    } else if(database.getStatus().equals(ViewerDatabaseStatus.ERROR)) {
+      btnIngest.setVisible(false);
+      btnBrowse.setVisible(true);
+      btnDelete.setVisible(true);
+      btnAdvancedConfiguration.setVisible(false);
     } else if (database.getStatus().equals(ViewerDatabaseStatus.INGESTING)) {
       if (btnIngestClicked) {
         btnIngest.setVisible(true);
         btnIngest.setText(messages.SIARDHomePageButtonTextForStartIngest());
         btnBrowse.setVisible(false);
+        btnAdvancedConfiguration.setVisible(false);
         btnIngest.addClickHandler(
           event -> HistoryManager.gotoIngestSIARDData(database.getUuid(), database.getMetadata().getName()));
       }
@@ -182,6 +193,7 @@ public class BrowseNavigationPanel {
       btnIngest.setVisible(true);
       btnBrowse.setVisible(false);
       btnDelete.setVisible(false);
+      btnAdvancedConfiguration.setVisible(false);
       btnIngestClicked = false;
     }
 
