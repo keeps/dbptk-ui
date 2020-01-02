@@ -194,7 +194,7 @@ public class ConfigurationHandler {
     }
 
     relatedTable.getDisplaySettings().setNestedSolrName(ViewerConstants.SOLR_INDEX_ROW_NESTED_COLUMN_NAME_PREFIX
-      + nestedIndexMap.get(targetTable.getUuid()) + "_txt");
+      + nestedIndexMap.get(targetTable.getUuid()) + ViewerConstants.SOLR_DYN_NEST_MULTI);
   }
 
   /**
@@ -288,19 +288,18 @@ public class ConfigurationHandler {
     }
   }
 
-  public List<ViewerColumn> getAllColumnsToInclude(ViewerTable table) {
-    List<ViewerColumn> columnList = new ArrayList<>();
+  public Map<String, List<ViewerColumn>> getAllColumnsToInclude(ViewerTable table) {
+    Map<String, List<ViewerColumn>> columnsToIncludeMap = new HashMap<>();
     TableConfiguration tableConfiguration = getTableConfiguration(table);
     List<RelatedTablesConfiguration> relatedList = tableConfiguration.getDenormalizeConfiguration().getRelatedTables();
     for (RelatedTablesConfiguration relatedTable : relatedList) {
       ViewerTable referencedTable = database.getMetadata().getTable(relatedTable.getTableUUID());
+      columnsToIncludeMap.computeIfAbsent(referencedTable.getId(), k -> new ArrayList<>());
       for (RelatedColumnConfiguration columnsIncluded : relatedTable.getColumnsIncluded()) {
         ViewerColumn column = referencedTable.getColumns().get(columnsIncluded.getIndex());
-        column.setSolrName(relatedTable.getDisplaySettings().getNestedSolrName());
-        columnList.add(column);
+        columnsToIncludeMap.get(referencedTable.getId()).add(column);
       }
     }
-
-    return columnList;
+    return columnsToIncludeMap;
   }
 }

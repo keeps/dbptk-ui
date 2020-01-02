@@ -41,6 +41,7 @@ public abstract class AbstractSolrCollection<M extends IsIndexed> implements Sol
     List<DynamicField> ret = new ArrayList<>();
 
     ret.add(new DynamicField("*_txt", Field.TYPE_TEXT).setIndexed(true).setStored(true).setMultiValued(true));
+    ret.add(new DynamicField("*_nst", Field.TYPE_TEXT).setIndexed(false).setStored(false).setMultiValued(true));
 
     return ret;
   }

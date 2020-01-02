@@ -1,5 +1,23 @@
 package com.databasepreservation.common.transformers;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.common.SolrInputDocument;
+import org.roda.core.data.exceptions.GenericException;
+import org.roda.core.data.exceptions.NotFoundException;
+import org.roda.core.data.exceptions.RequestNotValidException;
+import org.roda.core.data.v2.index.filter.AndFiltersParameters;
+import org.roda.core.data.v2.index.filter.Filter;
+import org.roda.core.data.v2.index.filter.FilterParameter;
+import org.roda.core.data.v2.index.filter.SimpleFilterParameter;
+
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.utils.Tree;
 import com.databasepreservation.common.client.models.configuration.collection.CollectionConfiguration;
@@ -21,20 +39,6 @@ import com.databasepreservation.common.server.index.utils.JsonTransformer;
 import com.databasepreservation.common.server.index.utils.SolrUtils;
 import com.databasepreservation.model.exception.ModuleException;
 import com.databasepreservation.utils.JodaUtils;
-import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.common.SolrInputDocument;
-import org.roda.core.data.exceptions.GenericException;
-import org.roda.core.data.exceptions.NotFoundException;
-import org.roda.core.data.exceptions.RequestNotValidException;
-import org.roda.core.data.v2.index.filter.AndFiltersParameters;
-import org.roda.core.data.v2.index.filter.Filter;
-import org.roda.core.data.v2.index.filter.FilterParameter;
-import org.roda.core.data.v2.index.filter.SimpleFilterParameter;
-
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -73,7 +77,7 @@ public class Denormalize {
     if (Files.exists(configurationPath)) {
       return JsonTransformer.readObjectFromFile(configurationPath, objectClass);
     } else {
-      throw new ModuleException().withMessage("Configuration file not exist");
+      throw new ModuleException().withMessage("Configuration file not exist: " + configurationPath.toString());
     }
   }
 
@@ -289,7 +293,8 @@ public class Denormalize {
         }
         if (!fields.isEmpty()) {
           nestedDocument
-            .add(solrManager.createNestedDocument(uuid, row.getUuid(), document.getUuid(), fields, document.getTableId()));
+            .add(solrManager.createNestedDocument(uuid, row.getUuid(), document.getUuid(), fields,
+              document.getTableId(), document.getNestedUUID()));
         }
 
         if (document.getNestedRowList() == null) {

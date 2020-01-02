@@ -29,6 +29,8 @@ import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CursorMarkParams;
 import org.apache.solr.common.params.FacetParams;
+import org.apache.solr.common.params.MapSolrParams;
+import org.apache.solr.common.params.SolrParams;
 import org.roda.core.data.common.RodaConstants;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
@@ -425,10 +427,12 @@ public class SolrUtils {
     ViewerRow ret;
     Class<ViewerRow> classToRetrieve = ViewerRow.class;
     try {
-
       RowsCollection collection = SolrRowsCollectionRegistry.get(databaseUUID);
 
-      SolrDocument doc = index.getById(collection.getIndexName(), rowUUID);
+      Map<String, String> param = new HashMap<>();
+      param.put("fl", "*, [child]");
+      SolrParams params = new MapSolrParams(param);
+      SolrDocument doc = index.getById(collection.getIndexName(), rowUUID, params);
       if (doc != null) {
         try {
           ret = collection.fromSolrDocument(doc);

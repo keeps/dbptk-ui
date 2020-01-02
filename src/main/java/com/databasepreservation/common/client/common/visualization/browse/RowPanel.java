@@ -1,13 +1,6 @@
 package com.databasepreservation.common.client.common.visualization.browse;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
 
 import org.roda.core.data.v2.index.filter.Filter;
 import org.roda.core.data.v2.index.filter.FilterParameter;
@@ -28,16 +21,7 @@ import com.databasepreservation.common.client.index.ExportRequest;
 import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.facets.Facets;
 import com.databasepreservation.common.client.index.sort.Sorter;
-import com.databasepreservation.common.client.models.structure.ViewerCell;
-import com.databasepreservation.common.client.models.structure.ViewerColumn;
-import com.databasepreservation.common.client.models.structure.ViewerDatabase;
-import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
-import com.databasepreservation.common.client.models.structure.ViewerMetadata;
-import com.databasepreservation.common.client.models.structure.ViewerReference;
-import com.databasepreservation.common.client.models.structure.ViewerRow;
-import com.databasepreservation.common.client.models.structure.ViewerSchema;
-import com.databasepreservation.common.client.models.structure.ViewerTable;
-import com.databasepreservation.common.client.models.structure.ViewerType;
+import com.databasepreservation.common.client.models.structure.*;
 import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
@@ -50,12 +34,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Hyperlink;
-import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 
 import config.i18n.client.ClientMessages;
 
@@ -195,6 +174,8 @@ public class RowPanel extends RightPanel {
         isPrimaryKeyColumn);
     }
 
+    getNestedHTML(row.getNestedRowList());
+
     Button btn = new Button();
     btn.addStyleName("btn btn-primary btn-download");
     btn.setText(messages.rowPanelTextForButtonExportSingleRow());
@@ -298,6 +279,23 @@ public class RowPanel extends RightPanel {
     }
 
     content.add(rowField);
+  }
+
+  private void getNestedHTML(List<ViewerRow> nestedRow) {
+    //TODO create a table
+    Map<String, List<String>> columnsMap = new HashMap<>();
+    for (ViewerRow viewerRow : nestedRow) {
+      columnsMap.computeIfAbsent(viewerRow.getTableId(), k -> new ArrayList<>());
+      Map<String, ViewerCell> cells = viewerRow.getCells();
+      for (Map.Entry<String, ViewerCell> entry : cells.entrySet()) {
+        columnsMap.get(viewerRow.getTableId()).add(entry.getValue().getValue());
+      }
+    }
+
+    for (Map.Entry<String, List<String>> entry : columnsMap.entrySet()) {
+      RowField rowField = RowField.createInstance(entry.getKey(), new HTML(entry.getValue().toString()));
+      content.add(rowField);
+    }
   }
 
   private String getExportURL(String zipFilename, String filename, boolean description, boolean exportLOBs) {

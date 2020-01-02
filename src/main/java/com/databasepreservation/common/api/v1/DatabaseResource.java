@@ -248,7 +248,7 @@ public class DatabaseResource implements DatabaseService {
 
     try {
       final IndexResult<ViewerRow> viewerRowIndexResult = ViewerFactory.getSolrManager().findRows(databaseUUID,
-        findRequest.filter, findRequest.sorter, findRequest.sublist, findRequest.facets);
+        findRequest.filter, findRequest.sorter, findRequest.sublist, findRequest.facets, findRequest.fieldsToReturn);
       count = viewerRowIndexResult.getTotalCount();
       return viewerRowIndexResult;
     } catch (GenericException | RequestNotValidException e) {

@@ -4,9 +4,6 @@ import static com.databasepreservation.common.client.models.structure.ViewerType
 
 import java.util.*;
 
-import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.ConfigurationHandler;
-import com.databasepreservation.common.client.models.configuration.collection.CollectionConfiguration;
-import com.databasepreservation.common.client.services.ConfigurationService;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.roda.core.data.v2.common.Pair;
 import org.roda.core.data.v2.index.filter.Filter;
@@ -19,12 +16,15 @@ import com.databasepreservation.common.client.common.helpers.HelperExportTableDa
 import com.databasepreservation.common.client.common.lists.utils.AsyncTableCell;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.utils.ExportResourcesUtils;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.ConfigurationHandler;
 import com.databasepreservation.common.client.index.ExportRequest;
 import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.index.facets.Facets;
 import com.databasepreservation.common.client.index.sort.Sorter;
+import com.databasepreservation.common.client.models.configuration.collection.CollectionConfiguration;
 import com.databasepreservation.common.client.models.structure.*;
+import com.databasepreservation.common.client.services.ConfigurationService;
 import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.tools.FilterUtils;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
@@ -214,27 +214,41 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
 
     ConfigurationService.Util.call((CollectionConfiguration response) -> {
       ConfigurationHandler configuration = ConfigurationHandler.getInstance(database, response);
-      List<ViewerColumn> allColumnsToInclude = configuration.getAllColumnsToInclude(table);
+      Map<String, List<ViewerColumn>> allColumnsToInclude = configuration.getAllColumnsToInclude(table);
 
-      for (ViewerColumn columnToInclude : allColumnsToInclude) {
+      for (Map.Entry<String, List<ViewerColumn>> entry : allColumnsToInclude.entrySet()) {
+        String tableName = entry.getKey();
+        List<ViewerColumn> columnsToInclude = entry.getValue();
 
-        Column<ViewerRow, SafeHtml> column = new Column<ViewerRow, SafeHtml>(new SafeHtmlCell()) {
-          @Override
-          public SafeHtml getValue(ViewerRow row) {
-            SafeHtml ret = null;
-            if (row == null) {
-              logger.error("Trying to display a NULL ViewerRow");
-            } else if (row.getCells() == null) {
-              logger.error("Trying to display NULL Cells");
-            } else if (row.getCells().get(columnToInclude.getSolrName()) != null) {
-              String value = row.getCells().get(columnToInclude.getSolrName()).getValue();
-              ret = SafeHtmlUtils.fromString(value.substring(1, value.length()-1));
+        for (ViewerColumn columnToInclude : columnsToInclude) {
+
+          Column<ViewerRow, SafeHtml> column = new Column<ViewerRow, SafeHtml>(new SafeHtmlCell()) {
+            @Override
+            public SafeHtml getValue(ViewerRow row) {
+              SafeHtml ret = null;
+              String aggregationColumn = null;
+
+              if (row.getNestedRowList() != null) {
+                for (ViewerRow viewerRow : row.getNestedRowList()) {
+                  if (viewerRow.getCells() == null || viewerRow.getCells().isEmpty()) {
+                    continue;
+                  } else if (viewerRow.getTableId().equals(tableName)) {
+                    if (aggregationColumn == null) {
+                      aggregationColumn = viewerRow.getCells().get(columnToInclude.getSolrName()).getValue();
+                    } else {
+                      aggregationColumn = aggregationColumn + ","
+                        + viewerRow.getCells().get(columnToInclude.getSolrName()).getValue();
+                    }
+                    ret = SafeHtmlUtils.fromString(aggregationColumn);
+                  }
+                }
+              }
+              return ret;
             }
-            return ret;
-          }
-        };
-        addColumn(columnToInclude, column);
-        columns.put(columnToInclude, column);
+          };
+          addColumn(columnToInclude, column);
+          columns.put(columnToInclude, column);
+        }
       }
 
     }).getConfiguration(database.getUuid());
@@ -272,8 +286,11 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
 
     GWT.log("Filter: " + filter);
 
+    List<String> fieldsToReturn = new ArrayList<>();
+    fieldsToReturn.add("*,[child]");
+
     FindRequest findRequest = new FindRequest(ViewerDatabase.class.getName(), filter, currentSorter, sublist,
-      getFacets());
+      getFacets(), false, fieldsToReturn);
 
     DatabaseService.Util.call(callback).findRows(getObject().getFirst().getUuid(), findRequest,
       LocaleInfo.getCurrentLocale().getLocaleName());

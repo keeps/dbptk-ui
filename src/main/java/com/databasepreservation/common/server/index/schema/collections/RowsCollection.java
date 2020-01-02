@@ -12,7 +12,6 @@ import static com.databasepreservation.common.client.ViewerConstants.*;
 import java.util.*;
 
 import org.apache.solr.common.SolrDocument;
-import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 import org.joda.time.DateTime;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
@@ -106,8 +105,9 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
       cellFromEntry(columnName, value).ifPresent(viewerCell -> cells.put(columnName, viewerCell));
     }
     viewerRow.setCells(cells);
+
     if (doc.get(ViewerConstants.SOLR_ROWS_NESTED) != null) {
-      SolrDocumentList documentList = (SolrDocumentList) doc.get(ViewerConstants.SOLR_ROWS_NESTED);
+      List<SolrDocument> documentList = (List<SolrDocument>) doc.get(ViewerConstants.SOLR_ROWS_NESTED);
       for (SolrDocument document : documentList) {
         viewerRow.addNestedRow(fromSolrDocument(document));
       }
@@ -119,8 +119,7 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
   private Optional<ViewerCell> cellFromEntry(String columnName, Object value) {
     Optional<ViewerCell> viewerCell = Optional.empty();
 
-    if (columnName.startsWith(ViewerConstants.SOLR_INDEX_ROW_COLUMN_NAME_PREFIX)
-      || columnName.startsWith(SOLR_INDEX_ROW_NESTED_COLUMN_NAME_PREFIX)) {
+    if (columnName.startsWith(ViewerConstants.SOLR_INDEX_ROW_COLUMN_NAME_PREFIX)) {
       if (value instanceof Date) {
         DateTime date = new DateTime(value, JodaUtils.DEFAULT_CHRONOLOGY);
         if (columnName.endsWith(ViewerConstants.SOLR_DYN_TDATE)) {
