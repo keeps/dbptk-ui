@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.roda.core.data.v2.index.filter.Filter;
+
 import com.databasepreservation.common.client.ClientConfigurationManager;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.ContentPanel;
@@ -30,7 +32,6 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
-import org.roda.core.data.v2.index.filter.Filter;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -92,7 +93,6 @@ public class ActivityLogPanel extends ContentPanel {
         activityLogList.getSelectionModel().clear();
         HistoryManager.gotoActivityLog(selected.getUuid());
       }
-
     });
 
     searchPanel = new SearchPanel(ViewerConstants.DEFAULT_FILTER, ViewerConstants.INDEX_SEARCH,
@@ -166,15 +166,5 @@ public class ActivityLogPanel extends ContentPanel {
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
     BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forActivityLog());
-  }
-
-  /**
-   * This method is called immediately after a widget becomes attached to the
-   * browser's document.
-   */
-  @Override
-  protected void onAttach() {
-    super.onAttach();
-    activityLogList.refresh();
   }
 }

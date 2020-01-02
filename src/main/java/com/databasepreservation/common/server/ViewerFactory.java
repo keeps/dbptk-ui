@@ -8,6 +8,7 @@ import org.apache.solr.client.solrj.SolrClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.databasepreservation.common.server.activity.log.strategies.ActivityLogStrategyFactory;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
 import com.databasepreservation.common.server.index.factory.SolrClientFactory;
 
@@ -21,6 +22,7 @@ public class ViewerFactory {
   private static DatabaseRowsSolrManager solrManager;
   private static ViewerConfiguration configuration;
   private static ConfigurationManager configurationManager;
+  private static ActivityLogStrategyFactory activityLogStrategyFactory;
   private static boolean instantiated = false;
 
   private static synchronized void instantiate() {
@@ -29,6 +31,7 @@ public class ViewerFactory {
       solrClient = SolrClientFactory.get().getSolrClient();
       solrManager = new DatabaseRowsSolrManager(solrClient);
       configurationManager = new ConfigurationManager();
+      activityLogStrategyFactory = new ActivityLogStrategyFactory();
       instantiated = true;
     }
   }
@@ -70,5 +73,10 @@ public class ViewerFactory {
   public static ConfigurationManager getConfigurationManager() {
     instantiate();
     return configurationManager;
+  }
+
+  public static ActivityLogStrategyFactory getActivityLogStrategyFactory() {
+    instantiate();
+    return activityLogStrategyFactory;
   }
 }

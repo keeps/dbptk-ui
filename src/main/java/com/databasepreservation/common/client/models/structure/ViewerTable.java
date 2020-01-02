@@ -209,6 +209,15 @@ public class ViewerTable implements Serializable {
     return binaryColumns;
   }
 
+  @JsonIgnore
+  public ViewerColumn getColumnByIndexInEnclosingTable(int index) {
+    for (ViewerColumn column : columns) {
+      if (column.getColumnIndexInEnclosingTable() == index)
+        return column;
+    }
+    return null;
+  }
+
   public boolean containsBinaryColumns() {
     for (ViewerColumn column : columns) {
       if (column.getType().getDbType().equals(ViewerType.dbTypes.BINARY)) {

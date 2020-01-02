@@ -1,5 +1,9 @@
 package com.databasepreservation.common.api.v1;
 
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
@@ -19,6 +23,7 @@ import com.databasepreservation.common.client.models.parameters.SIARDUpdateParam
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.services.SIARDService;
+import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.controller.SIARDController;
 import com.databasepreservation.common.utils.ControllerAssistant;
@@ -39,7 +44,7 @@ public class SIARDResource implements SIARDService {
     final User user = UserUtility.getUser(request);
 
     LogEntryState state = LogEntryState.SUCCESS;
-    controllerAssistant.checkRoles(UserUtility.getUser(request));
+    controllerAssistant.checkRoles(user);
     try {
       return SIARDController.loadFromLocal(path, databaseUUID);
     } catch (GenericException e) {
@@ -57,7 +62,7 @@ public class SIARDResource implements SIARDService {
     final User user = UserUtility.getUser(request);
 
     LogEntryState state = LogEntryState.SUCCESS;
-    controllerAssistant.checkRoles(UserUtility.getUser(request));
+    controllerAssistant.checkRoles(user);
     try {
       return SIARDController.loadMetadataFromLocal(path);
     } catch (GenericException e) {
@@ -74,7 +79,7 @@ public class SIARDResource implements SIARDService {
     final User user = UserUtility.getUser(request);
 
     LogEntryState state = LogEntryState.SUCCESS;
-    controllerAssistant.checkRoles(UserUtility.getUser(request));
+    controllerAssistant.checkRoles(user);
     try {
       return SIARDController.loadMetadataFromLocal(databaseUUID, path);
     } catch (GenericException e) {
@@ -166,7 +171,7 @@ public class SIARDResource implements SIARDService {
     final User user = UserUtility.getUser(request);
 
     LogEntryState state = LogEntryState.SUCCESS;
-    controllerAssistant.checkRoles(UserUtility.getUser(request));
+    controllerAssistant.checkRoles(user);
     try {
       return SIARDController.updateMetadataInformation(databaseUUID, path, parameters);
     } catch (GenericException e) {
@@ -186,9 +191,11 @@ public class SIARDResource implements SIARDService {
     final User user = UserUtility.getUser(request);
 
     LogEntryState state = LogEntryState.SUCCESS;
-    controllerAssistant.checkRoles(UserUtility.getUser(request));
+    controllerAssistant.checkRoles(user);
+    String result = null;
     try {
-      return SIARDController.validateSIARD(databaseUUID, SIARDPath, validationReportPath, allowedTypePath,
+      result = getValidationReportPath(validationReportPath, SIARDPath);
+      return SIARDController.validateSIARD(databaseUUID, SIARDPath, result, allowedTypePath,
         skipAdditionalChecks);
     } catch (GenericException e) {
       state = LogEntryState.FAILURE;
@@ -197,7 +204,7 @@ public class SIARDResource implements SIARDService {
       // register action
       controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,
         ViewerConstants.CONTROLLER_SIARD_PATH_PARAM, SIARDPath, ViewerConstants.CONTROLLER_REPORT_PATH_PARAM,
-        validationReportPath, ViewerConstants.CONTROLLER_SKIP_ADDITIONAL_CHECKS_PARAM, skipAdditionalChecks);
+        result, ViewerConstants.CONTROLLER_SKIP_ADDITIONAL_CHECKS_PARAM, skipAdditionalChecks);
     }
   }
 
@@ -217,7 +224,7 @@ public class SIARDResource implements SIARDService {
     final User user = UserUtility.getUser(request);
 
     LogEntryState state = LogEntryState.SUCCESS;
-    controllerAssistant.checkRoles(UserUtility.getUser(request));
+    controllerAssistant.checkRoles(user);
     try {
       SIARDController.updateStatusValidate(databaseUUID, status);
     } finally {
@@ -233,7 +240,7 @@ public class SIARDResource implements SIARDService {
     final User user = UserUtility.getUser(request);
 
     LogEntryState state = LogEntryState.SUCCESS;
-    controllerAssistant.checkRoles(UserUtility.getUser(request));
+    controllerAssistant.checkRoles(user);
     try {
       SIARDController.deleteSIARDFileFromPath(path, databaseUUID);
     } catch (GenericException e) {
@@ -252,7 +259,7 @@ public class SIARDResource implements SIARDService {
     final User user = UserUtility.getUser(request);
 
     LogEntryState state = LogEntryState.SUCCESS;
-    controllerAssistant.checkRoles(UserUtility.getUser(request));
+    controllerAssistant.checkRoles(user);
     try {
       SIARDController.deleteValidatorReportFileFromPath(path, databaseUUID);
     } catch (GenericException e) {
@@ -265,4 +272,15 @@ public class SIARDResource implements SIARDService {
     }
   }
 
+  private String getValidationReportPath(String validationReportPath, String siardPath) {
+    if (validationReportPath == null) {
+      String filename = Paths.get(siardPath).getFileName().toString().replaceFirst("[.][^.]+$", "") + "-"
+        + new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()) + ".txt";
+      validationReportPath = Paths
+        .get(ViewerConfiguration.getInstance().getSIARDReportValidationPath().toString(), filename).toAbsolutePath()
+        .toString();
+    }
+
+    return validationReportPath;
+  }
 }

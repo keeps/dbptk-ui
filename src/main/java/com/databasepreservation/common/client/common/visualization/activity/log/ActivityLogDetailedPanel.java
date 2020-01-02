@@ -51,7 +51,7 @@ public class ActivityLogDetailedPanel extends ContentPanel {
   FlowPanel content;
 
   private static Map<String, ActivityLogDetailedPanel> instances = new HashMap<>();
-  private ActivityLogEntry activityLogEntry;
+  private ActivityLogWrapper activityLogWrapper;
 
   public static ActivityLogDetailedPanel getInstance(String logUUID) {
     return instances.computeIfAbsent(logUUID, k -> new ActivityLogDetailedPanel(logUUID));
@@ -61,7 +61,7 @@ public class ActivityLogDetailedPanel extends ContentPanel {
     initWidget(uiBinder.createAndBindUi(this));
 
     ActivityLogService.Util.call((ActivityLogWrapper wrapper) -> {
-      activityLogEntry = wrapper.getActivityLogEntry();
+      activityLogWrapper = wrapper;
       init();
     }).retrieve(logUUID);
   }
@@ -69,6 +69,8 @@ public class ActivityLogDetailedPanel extends ContentPanel {
   private void init() {
     logHeader.setWidget(CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.ACTIVITY_LOG),
       messages.activityLogDetailedHeaderText(), "h1"));
+
+    ActivityLogEntry activityLogEntry = activityLogWrapper.getActivityLogEntry();
 
     RowField dataField = RowField.createInstance(messages.activityLogTextForDate(),
       new HTML(Humanize.formatDateTime(activityLogEntry.getDatetime(), true)));

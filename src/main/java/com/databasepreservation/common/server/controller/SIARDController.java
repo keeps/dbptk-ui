@@ -560,13 +560,7 @@ public class SIARDController {
     String allowedTypesPath, boolean skipAdditionalChecks) throws GenericException {
     Path reporterPath = ViewerConfiguration.getInstance().getReportPathForValidation(databaseUUID).toAbsolutePath();
     boolean valid;
-    if (validationReportPath == null) {
-      String filename = Paths.get(siardPath).getFileName().toString().replaceFirst("[.][^.]+$", "") + "-"
-        + new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()) + ".txt";
-      validationReportPath = Paths
-        .get(ViewerConfiguration.getInstance().getSIARDReportValidationPath().toString(), filename).toAbsolutePath()
-        .toString();
-    }
+
     try (Reporter reporter = new Reporter(reporterPath.getParent().toString(), reporterPath.getFileName().toString())) {
       SIARDValidation siardValidation = SIARDValidation.newInstance();
       siardValidation.validateModule(new SIARDValidateFactory())

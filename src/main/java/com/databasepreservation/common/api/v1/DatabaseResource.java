@@ -128,29 +128,39 @@ public class DatabaseResource implements DatabaseService {
 
   private IndexResult<ViewerDatabase> getViewerDatabaseIndexResult(FindRequest findRequest,
     ControllerAssistant controllerAssistant, User user, LogEntryState state) {
+    long count = 0;
     try {
-      return ViewerFactory.getSolrManager().find(ViewerDatabase.class, findRequest.filter, findRequest.sorter,
-        findRequest.sublist, findRequest.facets);
+      final IndexResult<ViewerDatabase> result = ViewerFactory.getSolrManager().find(ViewerDatabase.class,
+        findRequest.filter, findRequest.sorter, findRequest.sublist, findRequest.facets);
+      count = result.getTotalCount();
+      return result;
     } catch (GenericException | RequestNotValidException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
       // register action
-      controllerAssistant.registerAction(user, state);
+      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_FILTER_PARAM,
+        JsonUtils.getJsonFromObject(findRequest.filter), ViewerConstants.CONTROLLER_SUBLIST_PARAM,
+        JsonUtils.getJsonFromObject(findRequest.sublist), ViewerConstants.CONTROLLER_RETRIEVE_COUNT, count);
     }
   }
 
   private IndexResult<ViewerDatabase> getViewerDatabaseIndexResult(FindRequest findRequest, List<String> fieldsToReturn,
     ControllerAssistant controllerAssistant, User user, LogEntryState state) {
+    long count = 0;
     try {
-      return ViewerFactory.getSolrManager().find(ViewerDatabase.class, findRequest.filter, findRequest.sorter,
-        findRequest.sublist, findRequest.facets, fieldsToReturn);
+      final IndexResult<ViewerDatabase> result = ViewerFactory.getSolrManager().find(ViewerDatabase.class, findRequest.filter, findRequest.sorter,
+          findRequest.sublist, findRequest.facets, fieldsToReturn);
+      count = result.getTotalCount();
+      return result;
     } catch (GenericException | RequestNotValidException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
       // register action
-      controllerAssistant.registerAction(user, state);
+      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_FILTER_PARAM,
+        JsonUtils.getJsonFromObject(findRequest.filter), ViewerConstants.CONTROLLER_SUBLIST_PARAM,
+        JsonUtils.getJsonFromObject(findRequest.sublist), ViewerConstants.CONTROLLER_RETRIEVE_COUNT, count);
     }
   }
 

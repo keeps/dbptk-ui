@@ -422,8 +422,9 @@ public class ViewerConstants {
   public static final String CONTROLLER_ROW_ID_PARAM = "rowUUID";
   public static final String CONTROLLER_COLUMN_ID_PARAM = "columnID";
   public static final String CONTROLLER_LOG_ID_PARAM = "logID";
-  public static final String CONTROLLER_FILENAME_PARAM = "rowUUID";
+  public static final String CONTROLLER_FILENAME_PARAM = "filename";
   public static final String CONTROLLER_FILTER_PARAM = "filter";
+  public static final String CONTROLLER_FACET_PARAM = "facets";
   public static final String CONTROLLER_EXPORT_PARAM = "export";
   public static final String CONTROLLER_SUBLIST_PARAM = "sublist";
   public static final String CONTROLLER_SKIP_ADDITIONAL_CHECKS_PARAM = "additional-checks";
@@ -439,7 +440,9 @@ public class ViewerConstants {
    */
   public static final String CONTROLLER_ACTIVITY_LOG_RESOURCE = "com.databasepreservation.common.api.v1.ActivityLogResource";
   public static final String CONTROLLER_DATABASE_RESOURCE = "com.databasepreservation.common.api.v1.DatabaseResource";
+  public static final String CONTROLLER_EXPORT_RESOURCE = "com.databasepreservation.common.api.v1.ExportsResource";
   public static final String CONTROLLER_FILE_RESOURCE = "com.databasepreservation.common.api.v1.FileResource";
+  public static final String CONTROLLER_LOB_RESOURCE = "com.databasepreservation.common.api.v1.LobsResource";
   public static final String CONTROLLER_SIARD_RESOURCE = "com.databasepreservation.common.api.v1.SIARDResource";
   public static final String CONTROLLER_SEARCH_RESOURCE = "com.databasepreservation.common.api.v1.SearchResource";
   public static final String CONTROLLER_USER_LOGIN_CONTROLLER = "com.databasepreservation.common.server.controller.UserLoginController";
