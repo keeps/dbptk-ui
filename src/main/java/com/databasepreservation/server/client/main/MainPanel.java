@@ -5,9 +5,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.roda.core.data.v2.user.User;
+
+import com.databasepreservation.common.api.v1.AuthenticationResource;
 import com.databasepreservation.common.client.ClientConfigurationManager;
 import com.databasepreservation.common.client.common.ContentPanel;
+import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.RightPanel;
+import com.databasepreservation.common.client.common.UserLogin;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.utils.ContentPanelLoader;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
@@ -35,6 +40,7 @@ import com.databasepreservation.common.client.common.visualization.browse.view.V
 import com.databasepreservation.common.client.common.visualization.ingest.IngestPage;
 import com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.SIARDManagerPage;
 import com.databasepreservation.common.client.common.visualization.manager.databasePanel.admin.DatabaseManage;
+import com.databasepreservation.common.client.common.visualization.manager.databasePanel.user.UserDatabaseListPanel;
 import com.databasepreservation.common.client.common.visualization.metadata.MetadataPanel;
 import com.databasepreservation.common.client.common.visualization.metadata.MetadataPanelLoad;
 import com.databasepreservation.common.client.common.visualization.metadata.SIARDEditMetadataPage;
@@ -150,14 +156,37 @@ public class MainPanel extends Composite {
         }
       });
     } else if (HistoryManager.ROUTE_HOME.equals(currentHistoryPath.get(0))) {
-      // #home
-      setContent(new RightPanelLoader() {
+      UserLogin.getInstance().getAuthenticatedUser(new DefaultAsyncCallback<User>() {
         @Override
-        public RightPanel load(ViewerDatabase database) {
-          return HomePanel.getInstance();
+        public void onSuccess(User result) {
+          if (result.isGuest()) {
+            setContent(new RightPanelLoader() {
+              @Override
+              public RightPanel load(ViewerDatabase database) {
+                return HomePanel.getInstance();
+              }
+            });
+          } else {
+            AuthenticationResource.Util.call((Boolean isAdmin) -> {
+              if (isAdmin) {
+                setContent(new ContentPanelLoader() {
+                  @Override
+                  public ContentPanel load(ViewerDatabase database) {
+                    return DatabaseManage.getInstance();
+                  }
+                });
+              } else {
+                setContent(new ContentPanelLoader() {
+                  @Override
+                  public ContentPanel load(ViewerDatabase database) {
+                    return UserDatabaseListPanel.getInstance();
+                  }
+                });
+              }
+            }).userIsAdmin();
+          }
         }
       });
-
     } else if (HistoryManager.ROUTE_LOGIN.equals(currentHistoryPath.get(0))) {
       // #login
       setContent(new RightPanelLoader() {
@@ -212,16 +241,17 @@ public class MainPanel extends Composite {
         }
       });
     } else if (HistoryManager.ROUTE_DATABASE.equals(currentHistoryPath.get(0))) {
-      if (currentHistoryPath.size() == 1) {
-        // #database
-        setContent(new ContentPanelLoader() {
-          @Override
-          public ContentPanel load(ViewerDatabase database) {
-            return DatabaseManage.getInstance();
-          }
-        });
-
-      } else if (currentHistoryPath.size() == 2) {
+//      if (currentHistoryPath.size() == 1) {
+//        // #database
+//        setContent(new ContentPanelLoader() {
+//          @Override
+//          public ContentPanel load(ViewerDatabase database) {
+//            return DatabaseManage.getInstance();
+//          }
+//        });
+//
+//      } else
+        if (currentHistoryPath.size() == 2) {
         // #database/<database_uuid>
         String databaseUUID = currentHistoryPath.get(1);
         setContent(databaseUUID, currentHistoryPath.get(0), new RightPanelLoader() {

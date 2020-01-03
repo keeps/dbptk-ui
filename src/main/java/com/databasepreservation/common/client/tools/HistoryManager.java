@@ -345,7 +345,7 @@ public class HistoryManager {
   }
 
   public static String linkToRecord(String database_uuid, String table_uuid, String record_uuid) {
-    return createHistoryToken(Arrays.asList(ROUTE_TABLE, database_uuid, table_uuid, record_uuid));
+    return createHistoryToken(Arrays.asList(ROUTE_RECORD, database_uuid, table_uuid, record_uuid));
   }
 
   public static String linkToLogin() {
@@ -394,6 +394,10 @@ public class HistoryManager {
 
   public static String linkToSavedSearches(String database_uuid) {
     return createHistoryToken(Arrays.asList(ROUTE_SAVED_SEARCHES, database_uuid));
+  }
+
+  public static String linkToSavedSearch(String databaseUUID, String savedSearchUUID) {
+      return createHistoryToken(Arrays.asList(ROUTE_SAVED_SEARCHES, databaseUUID, savedSearchUUID));
   }
 
   public static String linkToForeignKey(String database_uuid, String table_uuid, List<String> solrColumnsAndValues) {
@@ -448,5 +452,13 @@ public class HistoryManager {
 
   public static String linkToSendToWizardDBMSConnection(String databaseUUID, String wizardPage, String moduleName) {
     return createHistoryToken(Arrays.asList(ROUTE_SEND_TO_LIVE_DBMS, databaseUUID, wizardPage, moduleName));
+  }
+
+  public static String linkToLog(String logUUID) {
+    return createHistoryToken(Arrays.asList(ROUTE_ACTIVITY_LOG, logUUID));
+  }
+
+  public static String linkToSIARDInfo(String databaseUUID) {
+    return createHistoryToken(Arrays.asList(ROUTE_SIARD_INFO, databaseUUID));
   }
 }

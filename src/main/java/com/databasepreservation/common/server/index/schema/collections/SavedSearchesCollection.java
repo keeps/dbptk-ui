@@ -120,10 +120,13 @@ public class SavedSearchesCollection extends AbstractSolrCollection<SavedSearch>
   }
 
   private static String dateToIsoDateString(Date date) {
-    TimeZone tz = TimeZone.getTimeZone("UTC");
-    DateFormat df = new SimpleDateFormat("yyyy-MM-dd' 'HH:mm:ss' UTC'");
-    df.setTimeZone(tz);
-    return df.format(date);
+    if (date != null) {
+      TimeZone tz = TimeZone.getTimeZone("UTC");
+      DateFormat df = new SimpleDateFormat("yyyy-MM-dd' 'HH:mm:ss' UTC'");
+      df.setTimeZone(tz);
+      return df.format(date);
+    }
+    return null;
   }
 
 }

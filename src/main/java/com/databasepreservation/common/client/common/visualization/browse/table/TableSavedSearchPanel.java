@@ -60,6 +60,7 @@ public class TableSavedSearchPanel extends RightPanel {
       CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.LOADING), "Loading...", "h1"));
 
     SearchService.Util.call((SavedSearch result) ->{
+      GWT.log("-----" + result);
       savedSearch = result;
       init();
     } ).retrieve(database.getUuid(), savedSearchUUID);

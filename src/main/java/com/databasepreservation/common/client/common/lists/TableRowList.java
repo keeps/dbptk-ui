@@ -355,7 +355,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
 
     FindRequest findRequest = new FindRequest(ViewerRow.class.getName(), getFilter(), currentSorter, sublist,
       Facets.NONE, false, solrColumns);
-    ExportRequest exportRequest = new ExportRequest(filename, zipFilename, description, exportLobs);
+    ExportRequest exportRequest = new ExportRequest(filename, zipFilename, description, exportLobs, false);
 
     return ExportResourcesUtils.getExportURL(database.getUuid(), table.getUuid(), findRequest, exportRequest);
   }

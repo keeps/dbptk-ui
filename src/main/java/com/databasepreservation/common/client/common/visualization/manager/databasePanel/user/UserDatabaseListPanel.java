@@ -1,12 +1,7 @@
-package com.databasepreservation.common.client.common.visualization.manager.databasePanel.admin;
+package com.databasepreservation.common.client.common.visualization.manager.databasePanel.user;
 
 import java.util.List;
 
-import com.databasepreservation.common.client.common.fields.MetadataField;
-import com.databasepreservation.common.client.common.utils.CommonClientUtils;
-import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.SimplePanel;
 import org.roda.core.data.v2.index.filter.BasicSearchFilterParameter;
 import org.roda.core.data.v2.index.filter.Filter;
 
@@ -14,11 +9,13 @@ import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.ContentPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
-import com.databasepreservation.common.client.common.helpers.HelperUploadSIARDFile;
+import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.lists.DatabaseList;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
+import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
+import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.databasepreservation.common.client.widgets.wcag.AccessibleFocusPanel;
@@ -26,7 +23,9 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -35,7 +34,7 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-public class DatabaseManage extends ContentPanel {
+public class UserDatabaseListPanel extends ContentPanel {
   @UiField
   public ClientMessages messages = GWT.create(ClientMessages.class);
 
@@ -45,7 +44,7 @@ public class DatabaseManage extends ContentPanel {
     BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
   }
 
-  interface ManageUiBinder extends UiBinder<Widget, DatabaseManage> {
+  interface ManageUiBinder extends UiBinder<Widget, UserDatabaseListPanel> {
   }
 
   private static ManageUiBinder binder = GWT.create(ManageUiBinder.class);
@@ -62,30 +61,27 @@ public class DatabaseManage extends ContentPanel {
   @UiField
   SimplePanel description;
 
+  @UiField
+  Button download;
+
   @UiField(provided = true)
   DatabaseList databaseList;
 
-  @UiField
-  Button create;
+  private static UserDatabaseListPanel instance = null;
 
-  @UiField
-  Button open;
-
-  private static DatabaseManage instance = null;
-
-  public static DatabaseManage getInstance() {
+  public static UserDatabaseListPanel getInstance() {
     if (instance == null) {
-      instance = new DatabaseManage();
+      instance = new UserDatabaseListPanel();
     }
     return instance;
   }
 
-  private DatabaseManage() {
+  private UserDatabaseListPanel() {
     databaseList = new DatabaseList();
     initWidget(binder.createAndBindUi(this));
 
     mainHeader.setWidget(CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.SERVER),
-        messages.menusidebar_databases(), "h1"));
+      messages.menusidebar_databases(), "h1"));
 
     MetadataField instance = MetadataField.createInstance(messages.manageDatabasePageDescription());
     instance.setCSS("table-row-description", "font-size-description");
@@ -105,8 +101,8 @@ public class DatabaseManage extends ContentPanel {
     databaseList.getSelectionModel().addSelectionChangeHandler(event -> {
       ViewerDatabase selected = databaseList.getSelectionModel().getSelectedObject();
       if (selected != null) {
-        if(ApplicationType.getType().equals(ViewerConstants.SERVER)){
-          HistoryManager.gotoSIARDInfo(selected.getUuid());
+        if (ApplicationType.getType().equals(ViewerConstants.SERVER)) {
+          HistoryManager.gotoDatabase(selected.getUuid());
         }
         databaseList.getSelectionModel().clear();
       }
@@ -116,16 +112,9 @@ public class DatabaseManage extends ContentPanel {
   }
 
   private void initButtons() {
-    if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
-      create.addClickHandler(event -> HistoryManager.gotoCreateSIARD());
-      open.addClickHandler(event -> new HelperUploadSIARDFile().openFile(databaseList));
-    } else {
-      create.setText(messages.managePageButtonTextForDownloadDBPTK());
-      create.addClickHandler(event -> {
-        Window.open("https://database-preservation.com/#desktop", "_blank", "");
-      });
-      open.addClickHandler(event -> HistoryManager.gotoNewUpload());
-    }
+    download.addClickHandler(event -> {
+      Window.open("https://database-preservation.com/#desktop", "_blank", "");
+    });
   }
 
   private void doSearch() {

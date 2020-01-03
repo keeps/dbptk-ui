@@ -1,6 +1,6 @@
 package com.databasepreservation.common.server.activity.log.operations;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 
 import org.roda.core.data.exceptions.GenericException;
@@ -31,9 +31,8 @@ public class RowOperation implements Operation {
     final String rowUUID = wrapper.getActivityLogEntry().getParameters().get(ViewerConstants.CONTROLLER_ROW_ID_PARAM);
 
     if (wrapper.getDatabase() != null) {
-
       try {
-        List<String> fieldsToReturn = Collections.singletonList(ViewerConstants.INDEX_ID);
+        List<String> fieldsToReturn = Arrays.asList(ViewerConstants.INDEX_ID, ViewerConstants.SOLR_ROWS_TABLE_UUID);
         Filter filterParam = new Filter(new SimpleFilterParameter(ViewerConstants.INDEX_ID, rowUUID));
         final IndexResult<ViewerRow> viewerRow = ViewerFactory.getSolrManager().findRows(wrapper.getDatabase().getUuid(),
             filterParam, Sorter.NONE, new Sublist(), Facets.NONE, fieldsToReturn);
@@ -41,7 +40,7 @@ public class RowOperation implements Operation {
         if (viewerRow.getTotalCount() == 0) {
           wrapper.setRowPresence(PresenceState.NO);
         } else {
-          wrapper.setRow(rowUUID);
+          wrapper.setRow(viewerRow.getResults().get(0));
           wrapper.setRowPresence(PresenceState.YES);
         }
 

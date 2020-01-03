@@ -1,4 +1,4 @@
-package com.databasepreservation.common.client.common.utils;
+package com.databasepreservation.common.client.common.utils.html;
 
 import com.databasepreservation.common.client.models.activity.logs.LogEntryState;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;

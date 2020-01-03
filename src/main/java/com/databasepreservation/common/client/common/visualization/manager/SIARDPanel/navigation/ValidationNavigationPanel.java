@@ -12,7 +12,7 @@ import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.helpers.HelperValidator;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
-import com.databasepreservation.common.client.common.utils.LabelUtils;
+import com.databasepreservation.common.client.common.utils.html.LabelUtils;
 import com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.SIARDManagerPage;
 import com.databasepreservation.common.client.common.visualization.validation.ValidatorPage;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;

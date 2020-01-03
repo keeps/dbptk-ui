@@ -2613,3 +2613,7 @@ button.close:hover {
 .activity-log-panel {
     margin: 25px;
 }
+
+.display-inline-grid {
+    display: inline-grid;
+}

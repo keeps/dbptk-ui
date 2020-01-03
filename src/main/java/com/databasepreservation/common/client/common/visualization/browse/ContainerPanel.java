@@ -117,22 +117,41 @@ public class ContainerPanel extends Composite {
         if (user.isGuest()) {
           menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.USER, messages.loginLogin()),
               (Command) () -> UserLogin.getInstance().login());
+          MenuBar languagesMenu = new MenuBar(true);
+
+          setLanguageMenu(languagesMenu);
+
+          MenuItem languagesMenuItem = new MenuItem(
+              FontAwesomeIconManager.loaded(FontAwesomeIconManager.GLOBE, selectedLanguage), languagesMenu);
+          languagesMenuItem.addStyleName("menu-item menu-item-label menu-item-language");
+          menu.addItem(languagesMenuItem);
         } else {
           if (!hideMenu) {
             MenuBar subMenu = new MenuBar(true);
             subMenu.addItem(messages.loginLogout(), (Command) () -> UserLogin.getInstance().logout());
             menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.USER, user.getFullName()), subMenu);
-            menu.addItem(
-                FontAwesomeIconManager.loaded(FontAwesomeIconManager.DATABASES, messages.menusidebar_manageDatabases()),
-                (Command) HistoryManager::gotoDatabaseList);
-            MenuBar administrationMenu = new MenuBar(true);
-            administrationMenu.addItem(
-                FontAwesomeIconManager.loaded(FontAwesomeIconManager.ACTIVITY_LOG, messages.activityLogMenuText()),
-                (Command) HistoryManager::gotoActivityLog);
-            administrationMenu.addItem(
-                FontAwesomeIconManager.loaded(FontAwesomeIconManager.COG, messages.preferencesMenuText()),
-                (Command) HistoryManager::gotoHome);
-            menu.addItem(messages.administrationMenuText(), administrationMenu);
+            AuthenticationService.Util.call((Boolean userIsAdmin) -> {
+              if (userIsAdmin) {
+                MenuBar administrationMenu = new MenuBar(true);
+                administrationMenu.addItem(
+                  FontAwesomeIconManager.loaded(FontAwesomeIconManager.ACTIVITY_LOG, messages.activityLogMenuText()),
+                  (Command) HistoryManager::gotoActivityLog);
+                administrationMenu.addItem(
+                  FontAwesomeIconManager.loaded(FontAwesomeIconManager.COG, messages.preferencesMenuText()),
+                  (Command) HistoryManager::gotoHome);
+                menu.addItem(messages.administrationMenuText(), administrationMenu);
+              }
+
+              MenuBar languagesMenu = new MenuBar(true);
+
+              setLanguageMenu(languagesMenu);
+
+              MenuItem languagesMenuItem = new MenuItem(
+                FontAwesomeIconManager.loaded(FontAwesomeIconManager.GLOBE, selectedLanguage), languagesMenu);
+              languagesMenuItem.addStyleName("menu-item menu-item-label menu-item-language");
+              menu.addItem(languagesMenuItem);
+
+            }).userIsAdmin();
           }
         }
       } else {
@@ -141,17 +160,6 @@ public class ContainerPanel extends Composite {
         menu.addItem(
             FontAwesomeIconManager.loaded(FontAwesomeIconManager.DATABASES, messages.menusidebar_manageDatabases()),
             (Command) HistoryManager::gotoDatabaseList);
-      }
-
-      if (!hideMenu) {
-        MenuBar languagesMenu = new MenuBar(true);
-
-        setLanguageMenu(languagesMenu);
-
-        MenuItem languagesMenuItem = new MenuItem(
-            FontAwesomeIconManager.loaded(FontAwesomeIconManager.GLOBE, selectedLanguage), languagesMenu);
-        languagesMenuItem.addStyleName("menu-item menu-item-label menu-item-language");
-        menu.addItem(languagesMenuItem);
       }
     }).isAuthenticationEnabled();
   }

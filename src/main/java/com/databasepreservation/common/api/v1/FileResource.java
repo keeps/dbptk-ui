@@ -101,7 +101,8 @@ public class FileResource {
       throw new RESTException(e);
     } finally {
       // register action
-      controllerAssistant.registerAction(user, state);
+      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_FILENAME_PARAM,
+        fileDetail.getFileName());
     }
   }
 

@@ -15,17 +15,20 @@ public class ExportRequest implements Serializable {
 
   public boolean exportLOBs;
 
+  public boolean record;
+
   public ExportRequest() {
   }
 
   /*
    * Constructor
    */
-  public ExportRequest(String filename, String zipFilename, boolean exportDescription, boolean exportLOBs) {
+  public ExportRequest(String filename, String zipFilename, boolean exportDescription, boolean exportLOBs, boolean record) {
     this.filename = filename;
     this.zipFilename = zipFilename;
     this.exportDescription = exportDescription;
     this.exportLOBs = exportLOBs;
+    this.record = record;
   }
 
   @Override

@@ -1,13 +1,15 @@
-package com.databasepreservation.common.client.common.utils;
+package com.databasepreservation.common.client.common.utils.html;
 
 import java.util.List;
 
 import org.roda.core.data.v2.index.filter.BasicSearchFilterParameter;
+import org.roda.core.data.v2.index.filter.DateRangeFilterParameter;
 import org.roda.core.data.v2.index.filter.Filter;
 import org.roda.core.data.v2.index.filter.FilterParameter;
 import org.roda.core.data.v2.index.filter.LongRangeFilterParameter;
 import org.roda.core.data.v2.index.filter.SimpleFilterParameter;
 
+import com.databasepreservation.common.client.tools.Humanize;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -21,11 +23,15 @@ import config.i18n.client.ClientMessages;
 public class FilterHtmlUtils {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
 
-  public static SafeHtml getFilterHTML(Filter filter, String classToFilter) {
+  public static SafeHtml getFilterHTML(Filter filter) {
     List<FilterParameter> parameterValues = filter.getParameters();
+
+    if (parameterValues.isEmpty()) {
+      return SafeHtmlUtils.fromTrustedString(messages.filterParameterEmpty());
+    }
+
     SafeHtmlBuilder preFilterTranslations = new SafeHtmlBuilder();
-    preFilterTranslations.append(SafeHtmlUtils.fromSafeConstant(classToFilter))
-      .append(SafeHtmlUtils.fromSafeConstant("&nbsp;where")).append(SafeHtmlUtils.fromSafeConstant(":<ul><li>"));
+    preFilterTranslations.append(SafeHtmlUtils.fromSafeConstant("<ul><li>"));
 
     for (int i = 0; i < parameterValues.size(); i++) {
       final SafeHtml filterParameterHTML = getFilterParameterHTML(parameterValues.get(i));
@@ -65,6 +71,17 @@ public class FilterHtmlUtils {
         }
         return messages.longRangeFilterParameter(messages.activityLogFilterName(p.getName()), p.getFromValue(),
           p.getToValue());
+      }
+    } else if (parameter instanceof DateRangeFilterParameter) {
+      DateRangeFilterParameter p = (DateRangeFilterParameter) parameter;
+      SafeHtmlBuilder builder = new SafeHtmlBuilder();
+      if (p.getFromValue() != null && p.getToValue() != null) {
+        return messages.dateRangeFilterParameter(Humanize.formatDateTime(p.getFromValue(), true),
+          Humanize.formatDateTime(p.getToValue(), true));
+      } else if (p.getToValue() != null) {
+        return messages.dateRangeFilterParameterOnlyTo(Humanize.formatDateTime(p.getToValue(), true));
+      } else {
+        return messages.dateRangeFilterParameterOnlyFrom(Humanize.formatDateTime(p.getFromValue(), true));
       }
     } else {
       return SafeHtmlUtils.fromString(parameter.getClass().getSimpleName());

@@ -42,6 +42,11 @@ public class AuthenticationResource implements AuthenticationService {
   }
 
   @Override
+  public Boolean userIsAdmin() {
+    return UserUtility.userIsAdmin(request);
+  }
+
+  @Override
   public User login(String username, String password) throws RESTException {
     try {
       User user = UserLoginController.login(username, password, request);

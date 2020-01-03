@@ -3,6 +3,7 @@ package com.databasepreservation.common.client.models.activity.logs;
 import java.io.Serializable;
 
 import com.databasepreservation.common.client.common.search.SavedSearch;
+import com.databasepreservation.common.client.models.structure.ViewerRow;
 import org.roda.core.data.v2.index.filter.Filter;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
@@ -29,7 +30,7 @@ public class ActivityLogWrapper implements Serializable {
   private String columnName;
 
   private PresenceState rowPresence = PresenceState.NONE;
-  private String row;
+  private ViewerRow row;
 
   private PresenceState savedSearchPresence = PresenceState.NONE;
   private SavedSearch savedSearch;
@@ -189,11 +190,11 @@ public class ActivityLogWrapper implements Serializable {
     this.rowPresence = rowPresence;
   }
 
-  public String getRow() {
+  public ViewerRow getRow() {
     return row;
   }
 
-  public void setRow(String row) {
+  public void setRow(ViewerRow row) {
     this.row = row;
   }
 

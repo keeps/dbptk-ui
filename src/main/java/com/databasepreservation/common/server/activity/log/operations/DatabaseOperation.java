@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.client.models.activity.logs.PresenceState;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.RequestNotValidException;
 import org.roda.core.data.v2.index.filter.Filter;
@@ -19,6 +18,7 @@ import com.databasepreservation.common.client.index.facets.Facets;
 import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.activity.logs.ActivityLogEntry;
 import com.databasepreservation.common.client.models.activity.logs.ActivityLogWrapper;
+import com.databasepreservation.common.client.models.activity.logs.PresenceState;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.server.ViewerFactory;
 
@@ -54,7 +54,8 @@ public class DatabaseOperation implements Operation {
     if (databaseUuid == null)
       return null;
 
-    List<String> fieldsToReturn = Arrays.asList(ViewerConstants.INDEX_ID, ViewerConstants.SOLR_DATABASES_METADATA);
+    List<String> fieldsToReturn = Arrays.asList(ViewerConstants.INDEX_ID, ViewerConstants.SOLR_DATABASES_METADATA,
+      ViewerConstants.SOLR_DATABASES_STATUS);
     Filter filterParam = new Filter(new SimpleFilterParameter(ViewerConstants.INDEX_ID, databaseUuid));
     final IndexResult<ViewerDatabase> viewerDatabase = ViewerFactory.getSolrManager().find(ViewerDatabase.class,
       filterParam, Sorter.NONE, new Sublist(), Facets.NONE, fieldsToReturn);

@@ -1,6 +1,6 @@
 package com.databasepreservation.common.server.activity.log.operations;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 
 import org.roda.core.data.exceptions.GenericException;
@@ -47,10 +47,10 @@ public class SearchOperation implements Operation {
         LOGGER.debug("Error executing the retrieve saved search information", e);
       }
     } else {
-
       if (wrapper.getDatabase() != null) {
         try {
-          List<String> fieldsToReturn = Collections.singletonList(ViewerConstants.INDEX_ID);
+          List<String> fieldsToReturn = Arrays.asList(ViewerConstants.INDEX_ID,
+            ViewerConstants.SOLR_SEARCHES_DATABASE_UUID, ViewerConstants.SOLR_SEARCHES_NAME);
           Filter filterParam = new Filter(new SimpleFilterParameter(ViewerConstants.INDEX_ID, searchUUID));
           final IndexResult<SavedSearch> result = ViewerFactory.getSolrManager().find(SavedSearch.class, filterParam,
             Sorter.NONE, new Sublist(), Facets.NONE, fieldsToReturn);

@@ -45,10 +45,12 @@ public class ActivityLogResource implements ActivityLogService {
     LogEntryState state = LogEntryState.SUCCESS;
 
     controllerAssistant.checkRoles(user);
+    long count = 0;
 
     try {
       final IndexResult<ActivityLogEntry> result = ViewerFactory.getSolrManager().find(ActivityLogEntry.class,
         findRequest.filter, findRequest.sorter, findRequest.sublist, findRequest.facets);
+      count = result.getTotalCount();
       return I18nUtility.translate(result, ActivityLogEntry.class, locale);
     } catch (GenericException | RequestNotValidException e) {
       state = LogEntryState.FAILURE;
@@ -57,7 +59,8 @@ public class ActivityLogResource implements ActivityLogService {
       // register action
       controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_FILTER_PARAM,
         JsonUtils.getJsonFromObject(findRequest.filter), ViewerConstants.CONTROLLER_FACET_PARAM,
-        JsonUtils.getJsonFromObject(findRequest.facets));
+        JsonUtils.getJsonFromObject(findRequest.facets), ViewerConstants.CONTROLLER_SUBLIST_PARAM,
+        JsonUtils.getJsonFromObject(findRequest.sublist), ViewerConstants.CONTROLLER_RETRIEVE_COUNT, count);
     }
   }
 

@@ -53,6 +53,10 @@ public interface AuthenticationService extends DirectRestService {
   @Produces(MediaType.APPLICATION_JSON)
   User getAuthenticatedUser();
 
+  @GET
+  @Path("/isAdmin")
+  Boolean userIsAdmin();
+
   @POST
   @Path("/login")
   @Produces(MediaType.APPLICATION_JSON)

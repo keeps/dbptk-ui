@@ -1172,12 +1172,35 @@ public interface ClientMessages extends Messages {
 
   String activityLogComponent(@Select String component);
 
+  String activityLogMethod(@Select String method);
+
   String activityLogFilterName(@Select String name);
 
+  String filterParameterEmpty();
+
+  String activityLogViewedLog();
+
+  String activityLogDatabaseDeleted();
+
+  String activityLogSavedSearchDeleted();
+
+  String activityLogDatabaseRelated();
+
+  String activityLogTableRelated();
+
+  String activityLogRecordRelated();
+
+  String activityLogSavedSearchRelated();
+
+  SafeHtml activityLogFilenameParameter(String value);
   /********************************************
    * HTML Utils
    *******************************************/
   String sublist(int firstElementIndex, long maximumElementCount);
+
+  String sublistSingleElement();
+
+  String sublistNoElements();
 
   SafeHtml simpleFilterParameter(String name, String value);
 
@@ -1190,6 +1213,12 @@ public interface ClientMessages extends Messages {
   SafeHtml longRangeFilterParameterOnlyTo(String name, long toValue);
 
   SafeHtml longRangeFilterParameterEquals(String name, long value);
+
+  SafeHtml dateRangeFilterParameterOnlyFrom(String date);
+
+  SafeHtml dateRangeFilterParameterOnlyTo(String date);
+
+  SafeHtml dateRangeFilterParameter(String fromDate, String fromTo);
 
   /********************************************
    * Preferences

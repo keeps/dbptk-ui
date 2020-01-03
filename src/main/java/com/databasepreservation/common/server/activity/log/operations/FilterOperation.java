@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.models.activity.logs.LogEntryState;
 import com.databasepreservation.common.client.models.activity.logs.PresenceState;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.utils.JsonUtils;
@@ -34,6 +35,9 @@ public class FilterOperation implements Operation {
         wrapper.setFilterPresence(PresenceState.YES);
       } else {
         final String jsonFilter = log.getParameters().get(ViewerConstants.CONTROLLER_FILTER_PARAM);
+        if (jsonFilter == null) {
+          return wrapper;
+        }
         final Filter filter = JsonUtils.getObjectFromJson(jsonFilter, Filter.class);
         wrapper.setFilterPresence(PresenceState.YES);
         wrapper.setFilter(filter);

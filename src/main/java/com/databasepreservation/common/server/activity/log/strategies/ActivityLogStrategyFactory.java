@@ -46,12 +46,16 @@ public class ActivityLogStrategyFactory {
           composeLogStrategy.getOperationList().add(new FacetsOperation());
           composeLogStrategy.getOperationList().add(new SublistOperation());
           return composeLogStrategy;
-        case "retrieveRow":
         case "retrieve":
         case "deleteSolrData":
         case "deleteDatabase":
           composeLogStrategy.clearOperationList();
           composeLogStrategy.getOperationList().add(new DatabaseOperation());
+          return composeLogStrategy;
+        case "retrieveRow":
+          composeLogStrategy.clearOperationList();
+          composeLogStrategy.getOperationList().add(new DatabaseOperation());
+          composeLogStrategy.getOperationList().add(new RowOperation());
           return composeLogStrategy;
       }
     } else if (ViewerConstants.CONTROLLER_EXPORT_RESOURCE.equals(actionComponent)) {
@@ -98,11 +102,6 @@ public class ActivityLogStrategyFactory {
           composeLogStrategy.getOperationList().add(new FilterOperation());
           composeLogStrategy.getOperationList().add(new SublistOperation());
           return composeLogStrategy;
-        case "getSearchFields":
-          composeLogStrategy.clearOperationList();
-          composeLogStrategy.getOperationList().add(new DatabaseOperation());
-          composeLogStrategy.getOperationList().add(new TableOperation());
-          return composeLogStrategy;
         case "save":
           composeLogStrategy.clearOperationList();
           composeLogStrategy.getOperationList().add(new DatabaseOperation());
@@ -122,6 +121,12 @@ public class ActivityLogStrategyFactory {
           return composeLogStrategy;
         case "uploadMetadataSIARDServer":
         case "uploadSIARD":
+          return identityLogStrategy;
+      }
+    } else if (ViewerConstants.CONTROLLER_USER_LOGIN_CONTROLLER.equals(actionComponent)) {
+      switch (actionMethod) {
+        case "casLogin":
+        case "logout":
           return identityLogStrategy;
       }
     } else if (ViewerConstants.CONTROLLER_ACTIVITY_LOG_RESOURCE.equals(actionComponent)) {

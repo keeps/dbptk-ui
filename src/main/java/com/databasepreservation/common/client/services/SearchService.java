@@ -11,6 +11,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import com.databasepreservation.common.client.common.search.SearchField;
+import com.databasepreservation.common.client.models.structure.ViewerTable;
 import org.fusesource.restygwt.client.DirectRestService;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.fusesource.restygwt.client.REST;
@@ -18,11 +20,9 @@ import org.fusesource.restygwt.client.REST;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultMethodCallback;
 import com.databasepreservation.common.client.common.search.SavedSearch;
-import com.databasepreservation.common.client.common.search.SearchField;
 import com.databasepreservation.common.client.common.search.SearchInfo;
 import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
-import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.google.gwt.core.client.GWT;
 
 import io.swagger.annotations.ApiParam;
@@ -83,8 +83,4 @@ public interface SearchService extends DirectRestService {
   @Path("delete/{databaseUUID}/{savedSearchUUID}")
   void delete(@PathParam("databaseUUID") String databaseUUID,
               @PathParam("savedSearchUUID") String savedSearchUUID);
-
-  @POST
-  @Path("find/searchFields")
-  List<SearchField> getSearchFields(ViewerTable viewerTable);
 }

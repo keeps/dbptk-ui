@@ -12,7 +12,7 @@ import org.roda.core.data.v2.index.sublist.Sublist;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.lists.columns.TooltipColumn;
 import com.databasepreservation.common.client.common.lists.utils.BasicAsyncTableCell;
-import com.databasepreservation.common.client.common.utils.LabelUtils;
+import com.databasepreservation.common.client.common.utils.html.LabelUtils;
 import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.index.facets.Facets;

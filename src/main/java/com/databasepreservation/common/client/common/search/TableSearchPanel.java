@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.common.utils.AdvancedSearchUtils;
 import org.roda.core.data.v2.index.filter.Filter;
 
 import com.databasepreservation.common.client.ViewerConstants;
@@ -184,16 +185,14 @@ public class TableSearchPanel extends Composite {
   }
 
   private void initAdvancedSearch() {
-    SearchService.Util.call((List<SearchField> searchFields) -> {
-      TableSearchPanel.this.searchFields.clear();
-      for (SearchField searchField : searchFields) {
-        ListboxUtils.insertItemByAlphabeticOrder(searchAdvancedFieldOptions, searchField.getLabel(),
+    final List<SearchField> searchFieldsFromTable = AdvancedSearchUtils.getSearchFieldsFromTable(table);
+    TableSearchPanel.this.searchFields.clear();
+    for (SearchField searchField : searchFieldsFromTable) {
+      ListboxUtils.insertItemByAlphabeticOrder(searchAdvancedFieldOptions, searchField.getLabel(),
           searchField.getId());
-        TableSearchPanel.this.searchFields.put(searchField.getId(), searchField);
-      }
-
-      updateSearchFields(searchFields);
-    }).getSearchFields(table);
+      TableSearchPanel.this.searchFields.put(searchField.getId(), searchField);
+    }
+    updateSearchFields(searchFieldsFromTable);
   }
 
   public void showSearchAdvancedFieldsPanel() {
