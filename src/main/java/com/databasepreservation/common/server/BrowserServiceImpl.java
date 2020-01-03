@@ -1,10 +1,14 @@
 package com.databasepreservation.common.server;
 
 import java.io.IOException;
+import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 
+import org.quartz.*;
+import org.quartz.impl.StdSchedulerFactory;
+import org.quartz.impl.matchers.GroupMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,6 +23,29 @@ public class BrowserServiceImpl extends HttpServlet {
   public void init() throws ServletException {
     super.init();
     new Thread(SolrClientFactory::get).start();
+
+//    SchedulerFactory sf = new StdSchedulerFactory();
+//    try {
+//      Scheduler s = sf.getScheduler();
+//      // get current state
+//      Set<JobKey> jobKeys = s.getJobKeys(GroupMatcher.anyGroup());
+//      for(JobKey jk :  s.getJobKeys(GroupMatcher.anyGroup())) {
+//        JobDetail jd = s.getJobDetail(jk);
+//        for (Trigger trigger : s.getTriggersOfJob(jk)) {
+//          Trigger.TriggerState triggerState = s.getTriggerState(trigger.getKey());
+//          // triggerState == Trigger.TriggerState.BLOCKED;
+//        }
+//        JobExecutionContext c;
+//        // TODO index
+//      }
+//      // TODO add listener to be updated
+//    } catch (
+//
+//    SchedulerException e) {
+//      e.printStackTrace();
+//    }
+//    // TODO init Quartz Scheduler
+//    // TODO bind Quartz listener to update Solr status
   }
 
   /**
@@ -34,5 +61,8 @@ public class BrowserServiceImpl extends HttpServlet {
     } catch (IOException e) {
       LOGGER.error("Stopping SolrClient", e);
     }
+
+    // TODO stop Quartz Scheduler
+
   }
 }

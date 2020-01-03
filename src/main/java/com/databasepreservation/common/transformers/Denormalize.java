@@ -64,6 +64,20 @@ public class Denormalize {
     }
   }
 
+  public Denormalize(ViewerDatabase database, CollectionConfiguration configuration,
+    DenormalizeConfiguration denormalizeConfiguration) throws ModuleException  {
+    this.solrManager = ViewerFactory.getSolrManager();
+    this.database = database;
+    this.databaseUUID = database.getUuid();
+    this.configuration = configuration;
+    buildDenormalizeTree(denormalizeConfiguration);
+
+    if (structure.isEmpty()) {
+      return;
+    }
+    denormalize();
+  }
+
   /**
    * @param path
    * @param objectClass
@@ -151,7 +165,7 @@ public class Denormalize {
             solrManager.addDatabaseField(databaseUUID, row.getUuid(), nestedDocument, configuration);
           }
           // TODO: remove
-          //break;
+          // break;
         }
       }
     }
@@ -198,8 +212,7 @@ public class Denormalize {
     }
   }
 
-  private List<SolrQuery> buildChildQuery(List<RelatedTablesConfiguration> paths)
-    throws ModuleException {
+  private List<SolrQuery> buildChildQuery(List<RelatedTablesConfiguration> paths) throws ModuleException {
     List<SolrQuery> queryList = new ArrayList<>();
     for (int i = 0; i < paths.size(); i++) {
       RelatedTablesConfiguration relatedTable = paths.get(i);
@@ -215,8 +228,8 @@ public class Denormalize {
         RelatedColumnConfiguration referencedTable = reference.getReferencedTable();
 
         // eg: {!terms f=col0_l v=$row.col4_l}
-        filterParameterList.add(new TermsFilterParameter(sourceTable.getSolrName(),
-          String.format("$row.%s", referencedTable.getSolrName())));
+        filterParameterList.add(
+          new TermsFilterParameter(sourceTable.getSolrName(), String.format("$row.%s", referencedTable.getSolrName())));
       }
 
       // (tableId:{sakila.film_actor} AND {!terms f=col0_l v=$row.col4_l})
@@ -224,7 +237,7 @@ public class Denormalize {
 
       fieldsToReturn.add(ViewerConstants.INDEX_ID);
       fieldsToReturn.add(ViewerConstants.SOLR_ROWS_TABLE_ID);
-      fieldsToReturn.add(String.format("%s:\"%s\"",ViewerConstants.SOLR_ROWS_NESTED_UUID, relatedTable.getUuid()));
+      fieldsToReturn.add(String.format("%s:\"%s\"", ViewerConstants.SOLR_ROWS_NESTED_UUID, relatedTable.getUuid()));
       for (RelatedColumnConfiguration columnConfiguration : relatedTable.getColumnsIncluded()) {
         fieldsToReturn.add(columnConfiguration.getSolrName());
       }
@@ -292,9 +305,8 @@ public class Denormalize {
           }
         }
         if (!fields.isEmpty()) {
-          nestedDocument
-            .add(solrManager.createNestedDocument(uuid, row.getUuid(), document.getUuid(), fields,
-              document.getTableId(), document.getNestedUUID()));
+          nestedDocument.add(solrManager.createNestedDocument(uuid, row.getUuid(), document.getUuid(), fields,
+            document.getTableId(), document.getNestedUUID()));
         }
 
         if (document.getNestedRowList() == null) {
