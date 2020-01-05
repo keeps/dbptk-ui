@@ -18,6 +18,7 @@ public class ViewerRow extends IsIndexed {
   private Map<String, ViewerCell> cells;
   private List<ViewerRow> nestedRowList;
   private String nestedUUID;
+  private String nestedOriginalUUID;
 
   public ViewerRow() {
     cells = new LinkedHashMap<>();
@@ -99,5 +100,13 @@ public class ViewerRow extends IsIndexed {
 
   public void setNestedUUID(String nestedUUID) {
     this.nestedUUID = nestedUUID;
+  }
+
+  public String getNestedOriginalUUID() {
+    return nestedOriginalUUID;
+  }
+
+  public void setNestedOriginalUUID(String nestedOriginalUUID) {
+    this.nestedOriginalUUID = nestedOriginalUUID;
   }
 }

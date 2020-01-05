@@ -567,9 +567,12 @@
             <artifactId>spring-boot-starter-batch</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.hsqldb</groupId>
-            <artifactId>hsqldb</artifactId>
-            <scope>runtime</scope>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jdbc</artifactId>
+         </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
         </dependency>
 
         <!-- other -->
@@ -638,12 +641,6 @@
             <groupId>org.w3c</groupId>
             <artifactId>w3c-utils</artifactId>
             <version>1.0.0</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.quartz-scheduler/quartz-jobs -->
-        <dependency>
-            <groupId>org.quartz-scheduler</groupId>
-            <artifactId>quartz</artifactId>
-            <version>2.3.2</version>
         </dependency>
 
 

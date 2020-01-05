@@ -75,12 +75,13 @@ public class DataTransformation extends RightPanel {
       k -> new DataTransformation(database, tableUUID, sidebar));
   }
 
-  public DataTransformation(ViewerDatabase database, String tableUUID, DataTransformationSidebar sidebar) {
+  private DataTransformation(ViewerDatabase database, String tableUUID, DataTransformationSidebar sidebar) {
     initWidget(binder.createAndBindUi(this));
     this.database = database;
     this.sidebar = sidebar;
     if (tableUUID == null) {
-      content.add(ErDiagram.getInstance(database, database.getMetadata().getSchemas().get(0), HistoryManager.getCurrentHistoryPath().get(0)));
+      //content.add(ErDiagram.getInstance(database, database.getMetadata().getSchemas().get(0), HistoryManager.getCurrentHistoryPath().get(0)));
+      content.add(DataTransformationProgressPanel.getInstance(database));
     } else {
       this.table = database.getMetadata().getTable(tableUUID);
       getDenormalizeConfigurationFile();

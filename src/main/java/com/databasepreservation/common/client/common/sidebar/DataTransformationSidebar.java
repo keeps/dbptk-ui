@@ -6,10 +6,12 @@ import java.util.Map;
 import java.util.Set;
 
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.DataTransformationProgressPanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.ConfigurationHandler;
 import com.databasepreservation.common.client.models.configuration.collection.CollectionConfiguration;
 import com.databasepreservation.common.client.models.structure.*;
 import com.databasepreservation.common.client.services.ConfigurationService;
+import com.databasepreservation.common.client.services.JobService;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
@@ -338,20 +340,22 @@ public class DataTransformationSidebar extends Composite implements Sidebar {
 
     btnDenormalize.addClickHandler(event -> {
       final DialogBox dialogBox = Dialogs.showWaitResponse(messages.dataTransformationSidebarDialogTitle(),
-          messages.dataTransformationSidebarWaitDialogMessage());
-      ConfigurationService.Util.call((Boolean result) -> {
-        Dialogs.showInformationDialog(messages.dataTransformationSidebarDialogTitle(), messages.dataTransformationSidebarSuccessDialogMessage(), messages.basicActionClose());
+        messages.dataTransformationSidebarWaitDialogMessage());
+      JobService.Util.call((Boolean result) -> {
+        Dialogs.showInformationDialog(messages.dataTransformationSidebarDialogTitle(),
+          messages.dataTransformationSidebarSuccessDialogMessage(), messages.basicActionClose());
         dialogBox.hide();
         btnDenormalize.setEnabled(false);
-      },(String errorMessage) ->{
-        dialogBox.hide();
-        Dialogs.showErrors(messages.dataTransformationSidebarDialogTitle(), errorMessage,
-            messages.basicActionClose());
+        DataTransformationProgressPanel progressPanel = DataTransformationProgressPanel.getInstance(database);
+        progressPanel.initProgress();
+        HistoryManager.gotoDataTransformation(databaseUUID);
+      }, (String errorMessage) -> {
+        Dialogs.showErrors(messages.dataTransformationSidebarDialogTitle(), errorMessage, messages.basicActionClose());
         btnDenormalize.setEnabled(false);
-      }).denormalize(database.getUuid());
+      }).denormalizeJob(databaseUUID);
     });
 
-    btnClearConfiguration.addClickHandler(event ->{
+    btnClearConfiguration.addClickHandler(event -> {
       Window.Location.reload();
     });
 

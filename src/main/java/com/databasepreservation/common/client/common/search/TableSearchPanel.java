@@ -131,16 +131,28 @@ public class TableSearchPanel extends Composite {
 
     GWT.log("initial filter: " + initialFilter);
 
-    searchPanel = new SearchPanel(ViewerConstants.DEFAULT_FILTER, ViewerConstants.INDEX_SEARCH,
-      messages.searchPlaceholder(), false,
-      true, new DefaultAsyncCallback<Void>() {
-        @Override
-        public void onSuccess(Void result) {
-          TableSearchPanel.this.saveQuery();
-        }
-      });
-    searchPanel.setList(tableRowList);
-    searchPanel.setDefaultFilterIncremental(false);
+    if (initialFilter == null) {
+      searchPanel = new SearchPanel(ViewerConstants.DEFAULT_FILTER, ViewerConstants.INDEX_SEARCH,
+        messages.searchPlaceholder(), false, true, new DefaultAsyncCallback<Void>() {
+          @Override
+          public void onSuccess(Void result) {
+            TableSearchPanel.this.saveQuery();
+          }
+        });
+      searchPanel.setList(tableRowList);
+      searchPanel.setDefaultFilterIncremental(false);
+    } else {
+      searchPanel = new SearchPanel(initialFilter, ViewerConstants.INDEX_SEARCH, messages.searchPlaceholder(), false,
+        true, new DefaultAsyncCallback<Void>() {
+          @Override
+          public void onSuccess(Void result) {
+            TableSearchPanel.this.saveQuery();
+          }
+        });
+      searchPanel.setList(tableRowList);
+      searchPanel.setDefaultFilterIncremental(true);
+    }
+
     showSearchAdvancedFieldsPanel();
 
     tableRowList.getSelectionModel().addSelectionChangeHandler(event -> {

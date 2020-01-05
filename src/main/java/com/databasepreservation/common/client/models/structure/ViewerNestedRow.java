@@ -11,77 +11,36 @@ import com.databasepreservation.common.client.index.IsIndexed;
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class ViewerNestedRow extends IsIndexed {
-  private String UUID;
-  private String tableUUID;
-  private String tableId;
-  private Map<String, ViewerCell> cells;
-  private ViewerNestedRow nestedRow;
+public class ViewerNestedRow extends ViewerRow {
+  private String nestedUUID;
+  private String nestedTableId;
+  private String nestedOriginalUUID;
 
   public ViewerNestedRow() {
-    cells = new LinkedHashMap<>();
+    super();
   }
 
-  @Override
-  public String getUuid() {
-    return UUID;
+  public String getNestedUUID() {
+    return nestedUUID;
   }
 
-  public void setUuid(String UUID) {
-    this.UUID = UUID;
+  public void setNestedUUID(String nestedUUID) {
+    this.nestedUUID = nestedUUID;
   }
 
-  /**
-   * @return Map of solrColumnName to cell value as string
-   */
-  public Map<String, ViewerCell> getCells() {
-    return cells;
+  public String getNestedOriginalUUID() {
+    return nestedOriginalUUID;
   }
 
-  /**
-   * @param cells
-   *          Map of solrColumnName to value as String
-   */
-  public void setCells(Map<String, ViewerCell> cells) {
-    this.cells = cells;
+  public void setNestedOriginalUUID(String nestedOriginalUUID) {
+    this.nestedOriginalUUID = nestedOriginalUUID;
   }
 
-  public String getTableId() {
-    return tableId;
+  public String getNestedTableId() {
+    return nestedTableId;
   }
 
-  public void setTableId(String tableId) {
-    this.tableId = tableId;
-  }
-
-  public String getTableUUID() {
-    return tableUUID;
-  }
-
-  public void setTableUUID(String tableUUID) {
-    this.tableUUID = tableUUID;
-  }
-
-  public List<String> getCellValues(List<String> fieldsToReturn) {
-    List<String> values = new ArrayList<>();
-    fieldsToReturn.remove(ViewerConstants.SOLR_ROWS_TABLE_ID);
-    fieldsToReturn.remove(ViewerConstants.SOLR_ROWS_TABLE_UUID);
-    for (String solrColumnName : fieldsToReturn) {
-      if (cells.get(solrColumnName) == null) {
-        values.add("");
-      } else {
-        values.add(cells.get(solrColumnName).getValue());
-      }
-    }
-
-    return values;
-  }
-
-  public ViewerNestedRow getNestedRow() {
-    return nestedRow;
-  }
-
-  public void setNestedRow(ViewerNestedRow nestedRow) {
-    this.nestedRow = nestedRow;
+  public void setNestedTableId(String nestedTableId) {
+    this.nestedTableId = nestedTableId;
   }
 }

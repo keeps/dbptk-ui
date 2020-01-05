@@ -474,7 +474,6 @@ public class DatabaseRowsSolrManager {
     RowsCollection collection = SolrRowsCollectionRegistry.get(databaseUUID);
     SolrInputDocument doc = new SolrInputDocument();
     doc.addField(ViewerConstants.INDEX_ID, documentUUID);
-    doc.addField("type_t", SolrUtils.asValueUpdate("parent"));
     for (SolrInputDocument nest : nestedDocuments) {
 
       Map<String, Map<String, List<String>>> fields = new HashMap<>();
@@ -491,7 +490,7 @@ public class DatabaseRowsSolrManager {
       for (TableConfiguration tableConfiguration : configuration.getTables()) {
         for (RelatedTablesConfiguration relatedTable : tableConfiguration.getDenormalizeConfiguration()
           .getRelatedTables()) {
-          if (relatedTable.getUuid().equals(nest.get(ViewerConstants.SOLR_ROWS_NESTED_UUID).getValue())) {
+          if (relatedTable.getUuid().equals(nest.get(ViewerConstants.INDEX_ID).getValue())) {
             String nestIndex = relatedTable.getDisplaySettings().getNestedSolrName();
             for (Map.Entry<String, Map<String, List<String>>> parent : fields.entrySet()) {
               for (Map.Entry<String, List<String>> col : parent.getValue().entrySet()) {
@@ -515,15 +514,13 @@ public class DatabaseRowsSolrManager {
     }
   }
 
-  public SolrInputDocument createNestedDocument(String rowUUID, String parentUUID, String tableRowUUID,
-    Map<String, ?> fields, String tableId, String nestedUUID) {
+  public SolrInputDocument createNestedDocument(String parentUUID, String tableRowUUID,
+                                                Map<String, ?> fields, String tableId, String nestedUUID) {
     SolrInputDocument nestedDoc = new SolrInputDocument();
-    nestedDoc.addField(ViewerConstants.INDEX_ID, rowUUID);
-    nestedDoc.addField(ViewerConstants.SOLR_ROWS_TABLE_ID, tableId);
-    nestedDoc.addField("type_t", "child");
+    nestedDoc.addField(ViewerConstants.INDEX_ID, nestedUUID);
+    nestedDoc.addField(ViewerConstants.SOLR_ROWS_NESTED_TABLE_ID, tableId);
     nestedDoc.addField("parentUUID_t", parentUUID);
-    nestedDoc.addField("tableRowUUID_t", tableRowUUID);
-    nestedDoc.addField(ViewerConstants.SOLR_ROWS_NESTED_UUID, nestedUUID);
+    nestedDoc.addField(ViewerConstants.SOLR_ROWS_NESTED_ORIGINAL_UUID, tableRowUUID);
     for (Map.Entry<String, ?> entry : fields.entrySet()) {
       if(entry.getKey().equals(ViewerConstants.SOLR_ROWS_NESTED)){
         continue;

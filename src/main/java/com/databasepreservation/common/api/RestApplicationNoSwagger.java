@@ -38,6 +38,7 @@ public class RestApplicationNoSwagger {
       register(DatabaseResource.class);
       register(ExportsResource.class);
       register(FileResource.class);
+      register(JobResource.class);
       register(LobsResource.class);
       register(ModulesResource.class);
       register(ReportResource.class);

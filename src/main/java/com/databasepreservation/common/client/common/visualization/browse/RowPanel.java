@@ -2,9 +2,9 @@ package com.databasepreservation.common.client.common.visualization.browse;
 
 import java.util.*;
 
-import org.roda.core.data.v2.index.filter.Filter;
-import org.roda.core.data.v2.index.filter.FilterParameter;
-import org.roda.core.data.v2.index.filter.SimpleFilterParameter;
+import com.databasepreservation.common.client.common.lists.TableRowList;
+import com.databasepreservation.common.client.common.search.TableSearchPanel;
+import org.roda.core.data.v2.index.filter.*;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
 import com.databasepreservation.common.client.ViewerConstants;
@@ -183,11 +183,11 @@ public class RowPanel extends RightPanel {
       HelperExportTableData helperExportTableData = new HelperExportTableData(table, true);
       Dialogs.showCSVSetupDialog(messages.csvExportDialogTitle(),
         helperExportTableData.getWidget(table.containsBinaryColumns()), messages.basicActionCancel(),
-          messages.basicActionConfirm(), new DefaultAsyncCallback<Boolean>() {
+        messages.basicActionConfirm(), new DefaultAsyncCallback<Boolean>() {
 
-            @Override
-            public void onSuccess(Boolean result) {
-              if (Boolean.TRUE.equals(result)) {
+          @Override
+          public void onSuccess(Boolean result) {
+            if (Boolean.TRUE.equals(result)) {
               String filename = helperExportTableData.getFilename();
               boolean exportDescription = helperExportTableData.exportDescription();
 
@@ -198,9 +198,9 @@ public class RowPanel extends RightPanel {
               } else {
                 Window.Location.assign(getExportURL(null, filename, exportDescription, false));
               }
-              }
             }
-          });
+          }
+        });
     });
 
     content.add(btn);
@@ -281,20 +281,36 @@ public class RowPanel extends RightPanel {
     content.add(rowField);
   }
 
-  private void getNestedHTML(List<ViewerRow> nestedRow) {
-    //TODO create a table
+  private void getNestedHTML(List<ViewerRow> nestedRowList) {
+    // TODO create a table
+    Filter filter = new Filter();
+    List<FilterParameter> filterParameterList = new ArrayList<>();
+
     Map<String, List<String>> columnsMap = new HashMap<>();
-    for (ViewerRow viewerRow : nestedRow) {
-      columnsMap.computeIfAbsent(viewerRow.getTableId(), k -> new ArrayList<>());
-      Map<String, ViewerCell> cells = viewerRow.getCells();
+    for (ViewerRow nestedRow : nestedRowList) {
+      filterParameterList.add(new SimpleFilterParameter(ViewerConstants.INDEX_ID, nestedRow.getNestedOriginalUUID()));
+
+      columnsMap.computeIfAbsent(nestedRow.getTableId(), k -> new ArrayList<>());
+      Map<String, ViewerCell> cells = nestedRow.getCells();
       for (Map.Entry<String, ViewerCell> entry : cells.entrySet()) {
-        columnsMap.get(viewerRow.getTableId()).add(entry.getValue().getValue());
+        columnsMap.get(nestedRow.getTableId()).add(entry.getValue().getValue());
       }
     }
 
+    filter.add(new OrFiltersParameters(filterParameterList));
+
     for (Map.Entry<String, List<String>> entry : columnsMap.entrySet()) {
-      RowField rowField = RowField.createInstance(entry.getKey(), new HTML(entry.getValue().toString()));
+      RowField rowField = RowField.createInstance(entry.getKey(), null);
       content.add(rowField);
+
+      ViewerTable table = database.getMetadata().getTableById(entry.getKey());
+
+      final TableSearchPanel tableSearchPanel = new TableSearchPanel();
+          tableSearchPanel.provideSource(database, table, filter);
+
+      //TableRowList tableRowList = new TableRowList(database, table, filter, null, null, false, false);
+
+      content.add(tableSearchPanel);
     }
   }
 

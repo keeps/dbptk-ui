@@ -113,6 +113,8 @@
     <field name="_nest_path_" type="_nest_path_" />
     <fieldType name="_nest_path_" class="solr.NestPathField"/>
     <field name="_nest_parent_" type="string" indexed="true" stored="true"/>
+    <field name="nestedTableUUID" type="string" indexed="true" stored="true" required="false" multiValued="false" />
+    <field name="nestedTableId" type="string" indexed="true" stored="true" required="false" multiValued="false" />
 
 
     <!-- Only remove the "id" field if you have a very good reason to. While not strictly

@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.models.DenormalizeProgressData;
+import com.databasepreservation.common.client.models.structure.ViewerNestedRow;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.common.SolrInputDocument;
 import org.roda.core.data.exceptions.GenericException;
@@ -49,6 +51,7 @@ public class Denormalize {
   private String databaseUUID;
   private CollectionConfiguration configuration;
   private Map<DenormalizeConfiguration, List<Tree<RelatedTablesConfiguration>>> structure = new HashMap<>();
+  private DenormalizeProgressData progressData = null;
 
   public Denormalize(String databaseUUID) throws ModuleException {
     this.solrManager = ViewerFactory.getSolrManager();
@@ -65,7 +68,7 @@ public class Denormalize {
   }
 
   public Denormalize(ViewerDatabase database, CollectionConfiguration configuration,
-    DenormalizeConfiguration denormalizeConfiguration) throws ModuleException  {
+    DenormalizeConfiguration denormalizeConfiguration) throws ModuleException {
     this.solrManager = ViewerFactory.getSolrManager();
     this.database = database;
     this.databaseUUID = database.getUuid();
@@ -76,6 +79,31 @@ public class Denormalize {
       return;
     }
     denormalize();
+  }
+
+  public Denormalize(String databaseUUID, String tableUUID) throws ModuleException {
+    this.solrManager = ViewerFactory.getSolrManager();
+    this.databaseUUID = databaseUUID;
+    progressData = DenormalizeProgressData.getInstance(databaseUUID, tableUUID);
+    progressData.setTableUUID(tableUUID);
+    try {
+      database = solrManager.retrieve(ViewerDatabase.class, this.databaseUUID);
+
+      this.configuration = getConfiguration(Paths.get(databaseUUID + ViewerConstants.JSON_EXTENSION),
+        CollectionConfiguration.class);
+      DenormalizeConfiguration denormalizeConfiguration = getConfiguration(
+        Paths.get(tableUUID + "-CURRENT" + ViewerConstants.JSON_EXTENSION), DenormalizeConfiguration.class);
+
+      buildDenormalizeTree(denormalizeConfiguration);
+
+      if (structure.isEmpty()) {
+        return;
+      }
+      denormalize();
+
+    } catch (NotFoundException | GenericException e) {
+      throw new ModuleException().withMessage("Cannot retrieved database from solr");
+    }
   }
 
   /**
@@ -158,15 +186,17 @@ public class Denormalize {
 
       for (SolrQuery query : queryList) {
         IterableNestedIndexResult sourceRows = solrManager.findAllRows(databaseUUID, query, null);
+        progressData.setRowsToProcess(sourceRows.getTotalCount());
+        progressData.setProcessedRows(0);
         for (ViewerRow row : sourceRows) {
+          progressData.incrementProcessedRows();
           List<SolrInputDocument> nestedDocument = new ArrayList<>();
           createdNestedDocument(row, nestedDocument);
           if (!nestedDocument.isEmpty()) {
             solrManager.addDatabaseField(databaseUUID, row.getUuid(), nestedDocument, configuration);
           }
-          // TODO: remove
-          // break;
         }
+        progressData.setFinished(true);
       }
     }
   }
@@ -221,6 +251,9 @@ public class Denormalize {
       List<FilterParameter> filterParameterList = new ArrayList<>();
 
       // tableId:{sakila.film_actor}
+      if(relatedTable.getTableID().equals("sakila.address")){
+        //throw new ModuleException().withMessage("ERROR TEST");
+      }
       filterParameterList.add(new SimpleFilterParameter(ViewerConstants.SOLR_ROWS_TABLE_ID, relatedTable.getTableID()));
 
       for (ReferencesConfiguration reference : relatedTable.getReferences()) {
@@ -235,8 +268,9 @@ public class Denormalize {
       // (tableId:{sakila.film_actor} AND {!terms f=col0_l v=$row.col4_l})
       resultingFilter.add(new AndFiltersParameters(filterParameterList));
 
-      fieldsToReturn.add(ViewerConstants.INDEX_ID);
       fieldsToReturn.add(ViewerConstants.SOLR_ROWS_TABLE_ID);
+      fieldsToReturn.add(String.format("%s:%s", ViewerConstants.SOLR_ROWS_NESTED_ORIGINAL_UUID, ViewerConstants.INDEX_ID));
+      fieldsToReturn.add(String.format("%s:%s", ViewerConstants.SOLR_ROWS_NESTED_TABLE_ID, ViewerConstants.SOLR_ROWS_TABLE_ID));
       fieldsToReturn.add(String.format("%s:\"%s\"", ViewerConstants.SOLR_ROWS_NESTED_UUID, relatedTable.getUuid()));
       for (RelatedColumnConfiguration columnConfiguration : relatedTable.getColumnsIncluded()) {
         fieldsToReturn.add(columnConfiguration.getSolrName());
@@ -291,7 +325,6 @@ public class Denormalize {
     if (row.getNestedRowList() != null) {
       for (ViewerRow document : row.getNestedRowList()) {
         Map<String, ViewerCell> cells = document.getCells();
-        String uuid = row.getUuid() + "." + document.getUuid();
 
         Map<String, Object> fields = new HashMap<>();
         for (Map.Entry<String, ViewerCell> cell : cells.entrySet()) {
@@ -305,7 +338,7 @@ public class Denormalize {
           }
         }
         if (!fields.isEmpty()) {
-          nestedDocument.add(solrManager.createNestedDocument(uuid, row.getUuid(), document.getUuid(), fields,
+          nestedDocument.add(solrManager.createNestedDocument(row.getUuid(), document.getNestedOriginalUUID(), fields,
             document.getTableId(), document.getNestedUUID()));
         }
 

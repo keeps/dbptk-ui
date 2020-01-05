@@ -35,6 +35,8 @@ public class ViewerConstants {
     + ViewerConstants.API_V1_ACTIVITY_LOG_RESOURCE;
   public static final String ENDPOINT_CONFIGURATION = ViewerConstants.API_SEP + ViewerConstants.API_SERVLET
     + ViewerConstants.API_V1_CONFIGURATION_RESOURCE;
+  public static final String ENDPOINT_JOB = ViewerConstants.API_SEP + ViewerConstants.API_SERVLET
+      + ViewerConstants.API_V1_JOB_RESOURCE;
 
   /*
    * DBVTK CONFIG
@@ -179,7 +181,9 @@ public class ViewerConstants {
    */
   public static final String SOLR_ROWS_TABLE_ID = "tableId";
   public static final String SOLR_ROWS_TABLE_UUID = "tableUUID";
+  public static final String SOLR_ROWS_NESTED_TABLE_ID = "nestedTableId";
   public static final String SOLR_ROWS_NESTED_UUID = "nestedUUID_t";
+  public static final String SOLR_ROWS_NESTED_ORIGINAL_UUID = "nestedOriginalUUID_t";
   public static final String SOLR_ROWS_NESTED = "nested";
 
   /*
@@ -312,6 +316,7 @@ public class ViewerConstants {
   public static final String API_V1_CLIENT_LOGGER_RESOURCE = "/v1/logger";
   public static final String API_V1_ACTIVITY_LOG_RESOURCE = "/v1/activity";
   public static final String API_V1_CONFIGURATION_RESOURCE = "/v1/configuration";
+  public static final String API_V1_JOB_RESOURCE = "/v1/job";
   /*
    * Search field types from RODA, plus a few new ones
    */

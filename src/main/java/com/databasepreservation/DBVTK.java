@@ -7,7 +7,6 @@ import java.nio.file.Paths;
 
 import javax.servlet.http.HttpServlet;
 
-import com.databasepreservation.common.server.jobs.spring.JobController;
 import org.jasig.cas.client.session.SingleSignOutHttpSessionListener;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -35,8 +34,6 @@ public class DBVTK {
   public static void main(String[] args) {
     ViewerConfiguration.getInstance();
     SpringApplication.run(DBVTK.class, args);
-    JobController jobController = new JobController();
-    jobController.run();
   }
 
   @Configuration

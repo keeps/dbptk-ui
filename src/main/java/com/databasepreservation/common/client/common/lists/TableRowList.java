@@ -229,15 +229,15 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
               String aggregationColumn = null;
 
               if (row.getNestedRowList() != null) {
-                for (ViewerRow viewerRow : row.getNestedRowList()) {
-                  if (viewerRow.getCells() == null || viewerRow.getCells().isEmpty()) {
+                for (ViewerRow nestedRow : row.getNestedRowList()) {
+                  if (nestedRow.getCells() == null || nestedRow.getCells().isEmpty()) {
                     continue;
-                  } else if (viewerRow.getTableId().equals(tableName)) {
+                  } else if (nestedRow.getTableId().equals(tableName)) {
                     if (aggregationColumn == null) {
-                      aggregationColumn = viewerRow.getCells().get(columnToInclude.getSolrName()).getValue();
+                      aggregationColumn = nestedRow.getCells().get(columnToInclude.getSolrName()).getValue();
                     } else {
                       aggregationColumn = aggregationColumn + ","
-                        + viewerRow.getCells().get(columnToInclude.getSolrName()).getValue();
+                        + nestedRow.getCells().get(columnToInclude.getSolrName()).getValue();
                     }
                     ret = SafeHtmlUtils.fromString(aggregationColumn);
                   }

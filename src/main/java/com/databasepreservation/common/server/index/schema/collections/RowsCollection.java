@@ -11,6 +11,7 @@ import static com.databasepreservation.common.client.ViewerConstants.*;
 
 import java.util.*;
 
+import com.databasepreservation.common.client.models.structure.ViewerNestedRow;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.joda.time.DateTime;
@@ -96,7 +97,6 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
 
     viewerRow.setTableId(SolrUtils.objectToString(doc.get(ViewerConstants.SOLR_ROWS_TABLE_ID), null));
     viewerRow.setTableUUID(SolrUtils.objectToString(doc.get(ViewerConstants.SOLR_ROWS_TABLE_UUID), null));
-    viewerRow.setNestedUUID(SolrUtils.objectToString(doc.get(ViewerConstants.SOLR_ROWS_NESTED_UUID), null));
 
     Map<String, ViewerCell> cells = new LinkedHashMap<>();
     for (Map.Entry<String, Object> entry : doc) {
@@ -109,11 +109,38 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
     if (doc.get(ViewerConstants.SOLR_ROWS_NESTED) != null) {
       List<SolrDocument> documentList = (List<SolrDocument>) doc.get(ViewerConstants.SOLR_ROWS_NESTED);
       for (SolrDocument document : documentList) {
-        viewerRow.addNestedRow(fromSolrDocument(document));
+        viewerRow.addNestedRow(populateNestedRow(document));
       }
     }
 
     return viewerRow;
+  }
+
+  private ViewerRow populateNestedRow(SolrDocument doc) throws ViewerException {
+    ViewerRow nestedRow = super.fromSolrDocument(doc);
+
+    nestedRow.setTableId(SolrUtils.objectToString(doc.get(ViewerConstants.SOLR_ROWS_TABLE_ID), null));
+    nestedRow.setTableUUID(SolrUtils.objectToString(doc.get(ViewerConstants.SOLR_ROWS_TABLE_UUID), null));
+    nestedRow.setTableId(SolrUtils.objectToString(doc.get(ViewerConstants.SOLR_ROWS_NESTED_TABLE_ID), null));
+    nestedRow.setNestedUUID(SolrUtils.objectToString(doc.get(ViewerConstants.SOLR_ROWS_NESTED_UUID), null));
+    nestedRow.setNestedOriginalUUID(SolrUtils.objectToString(doc.get(ViewerConstants.SOLR_ROWS_NESTED_ORIGINAL_UUID), null));
+
+    Map<String, ViewerCell> cells = new LinkedHashMap<>();
+    for (Map.Entry<String, Object> entry : doc) {
+      String columnName = entry.getKey();
+      Object value = entry.getValue();
+      cellFromEntry(columnName, value).ifPresent(viewerCell -> cells.put(columnName, viewerCell));
+    }
+    nestedRow.setCells(cells);
+
+    if (doc.get(ViewerConstants.SOLR_ROWS_NESTED) != null) {
+      List<SolrDocument> documentList = (List<SolrDocument>) doc.get(ViewerConstants.SOLR_ROWS_NESTED);
+      for (SolrDocument document : documentList) {
+        nestedRow.addNestedRow(populateNestedRow(document));
+      }
+    }
+
+    return nestedRow;
   }
 
   private Optional<ViewerCell> cellFromEntry(String columnName, Object value) {

@@ -5,7 +5,7 @@ import java.nio.file.Files;
 import javax.ws.rs.Path;
 
 import com.databasepreservation.common.client.models.configuration.collection.TableConfiguration;
-import com.databasepreservation.common.server.jobs.quartz.DenormalizeService;
+import com.databasepreservation.common.transformers.Denormalize;
 import org.springframework.stereotype.Service;
 
 import com.databasepreservation.common.client.ViewerConstants;
@@ -80,8 +80,7 @@ public class ConfigurationResource implements ConfigurationService {
   @Override
   public Boolean denormalize(String databaseuuid) {
     try {
-//      Denormalize denormalizeSolrStructure = new Denormalize(databaseuuid);
-      DenormalizeService denormalizeService = new DenormalizeService(databaseuuid);
+      Denormalize denormalizeSolrStructure = new Denormalize(databaseuuid);
     } catch (ModuleException e) {
       throw new RESTException(e.getMessage());
     }
