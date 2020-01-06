@@ -208,4 +208,8 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
     super.onAttach();
     refresh();
   }
+
+  private void manageDesktopTable() {
+
+  }
 }

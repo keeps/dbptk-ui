@@ -61,85 +61,85 @@ public interface SIARDService extends DirectRestService {
   @POST
   @Path("upload/{databaseUUID}")
   @Produces(MediaType.TEXT_PLAIN)
-  @ApiOperation(value = "retrieve DBPTK import modules", notes = "Export query results as CSV.", response = DBPTKModule.class, responseContainer = "CSVExport")
+  @ApiOperation(value = "Uploads a database", notes = "", response = String.class)
   String uploadSIARD(@PathParam("databaseUUID") String databaseUUID, @QueryParam("siardPath") String path)
     throws RESTException;
 
   @POST
   @Path("uploadMetadata")
   @Produces(MediaType.TEXT_PLAIN)
-  @ApiOperation(value = "retrieve DBPTK import modules", notes = "Export query results as CSV.", response = DBPTKModule.class, responseContainer = "CSVExport")
+  @ApiOperation(value = "Uploads the metadata information about the SIARD file", notes = "", response = String.class)
   String uploadMetadataSIARDServer(@QueryParam("siardPath") String path) throws RESTException;
 
   @POST
   @Path("uploadMetadata/{databaseUUID}")
   @Produces(MediaType.TEXT_PLAIN)
-  @ApiOperation(value = "retrieve DBPTK import modules", notes = "Export query results as CSV.", response = DBPTKModule.class, responseContainer = "CSVExport")
+  @ApiOperation(value = "Uploads the metadata information about the SIARD file", notes = "", response = String.class)
   String uploadMetadataSIARD(@PathParam("databaseUUID") String databaseUUID, @QueryParam("siardPath") String path)
     throws RESTException;
 
   @GET
-  @Path("find")
+  @Path("/find")
   @Produces(MediaType.TEXT_PLAIN)
-  @ApiOperation(value = "retrieve DBPTK import modules", notes = "Export query results as CSV.", response = DBPTKModule.class, responseContainer = "CSVExport")
+  @ApiOperation(value = "Checks if SIARD file path exists in the storage location", notes = "Returns the the database identification", response = String.class)
   String findSIARDFile(@QueryParam("siardPath") String path) throws RESTException;
 
   @POST
   @Path("create/{databaseUUID}")
-  @ApiOperation(value = "retrieve DBPTK import modules", notes = "Export query results as CSV.", response = DBPTKModule.class, responseContainer = "CSVExport")
-  Boolean createSIARD(@PathParam("databaseUUID") String databaseUUID, CreateSIARDParameters parameters)
-    throws RESTException;
+  @ApiOperation(value = "Creates a SIARD file from the wizard", notes = "", response = String.class)
+  Boolean createSIARD(@PathParam("databaseUUID") String databaseUUID, CreateSIARDParameters parameters);
 
   @POST
-  @Path("migrateToDbms/{databaseUUID}")
-  @ApiOperation(value = "retrieve DBPTK import modules", notes = "Export query results as CSV.", response = DBPTKModule.class, responseContainer = "CSVExport")
+  @Path("/migrateToDbms/{databaseUUID}")
+  @ApiOperation(value = "Migrates a SIARD file to a live DBMS", notes = "", response = Boolean.class)
   Boolean migrateToDBMS(@PathParam("databaseUUID") String databaseUUID, @QueryParam("siardVersion") String siardVersion,
     @QueryParam("siardPath") String siardPath, ConnectionParameters parameters) throws RESTException;
 
   @POST
-  @Path("migrateToSiard/{databaseUUID}")
-  @ApiOperation(value = "retrieve DBPTK import modules", notes = "Export query results as CSV.", response = DBPTKModule.class, responseContainer = "CSVExport")
+  @Path("/migrateToSiard/{databaseUUID}")
+  @ApiOperation(value = "Migrates a SIARD file to another SIARD version", notes = "", response = DBPTKModule.class)
   Boolean migrateToSIARD(@PathParam("databaseUUID") String databaseUUID,
     @QueryParam("siardVersion") String siardVersion, @QueryParam("siardPath") String siardPath,
-    CreateSIARDParameters parameters) throws RESTException;
+    CreateSIARDParameters parameters);
 
   @POST
-  @Path("updateMetadataInformation/{databaseUUID}")
-  @ApiOperation(value = "retrieve DBPTK import modules", notes = "Export query results as CSV.", response = DBPTKModule.class, responseContainer = "CSVExport")
+  @Path("/updateMetadataInformation/{databaseUUID}")
+  @ApiOperation(value = "Updates the SIARD metadata information", notes = "", response = ViewerMetadata.class)
   ViewerMetadata updateMetadataInformation(@PathParam("databaseUUID") String databaseUUID,
     @QueryParam("path") String path, SIARDUpdateParameters parameters) throws RESTException;
 
   @POST
-  @Path("validate/{databaseUUID}")
-  @ApiOperation(value = "retrieve DBPTK import modules", notes = "Export query results as CSV.", response = DBPTKModule.class, responseContainer = "CSVExport")
+  @Path("/validate/{databaseUUID}")
+  @ApiOperation(value = "Validates the SIARD file against the specification", notes = "", response = Boolean.class)
   Boolean validateSIARD(@PathParam("databaseUUID") String databaseUUID, @QueryParam("SIARDPath") String SIARDPath,
     @QueryParam("validationReportPath") String validationReportPath,
     @QueryParam("allowedTypePath") String allowedTypePath,
     @QueryParam("skipAdditionalChecks") boolean skipAdditionalChecks) throws RESTException;
 
   @GET
-  @Path("validateProgress/{databaseUUID}")
-  @ApiOperation(value = "retrieve DBPTK import modules", notes = "Export query results as CSV.", response = DBPTKModule.class, responseContainer = "CSVExport")
+  @Path("/validateProgress/{databaseUUID}")
+  @ApiOperation(value = "Retrieves the validation progress", notes = "", response = ValidationProgressData.class)
   ValidationProgressData getValidationProgressData(@PathParam("databaseUUID") String databaseUUID);
 
   @POST
-  @Path("validateProgressClear/{databaseUUID}")
-  @ApiOperation(value = "retrieve DBPTK import modules", notes = "Export query results as CSV.", response = DBPTKModule.class, responseContainer = "CSVExport")
+  @Path("/validateProgressClear/{databaseUUID}")
+  @ApiOperation(value = "Clears the validation progress", notes = "")
   void clearValidationProgressData(@PathParam("databaseUUID") String databaseUUID);
 
   @POST
-  @Path("validateUpdate/{databaseUUID}")
-  @ApiOperation(value = "retrieve DBPTK import modules", notes = "Export query results as CSV.", response = DBPTKModule.class, responseContainer = "CSVExport")
-  void updateStatusValidate(@PathParam("databaseUUID") String databaseUUID, @QueryParam("status") ViewerDatabaseValidationStatus status);
+  @Path("/validateUpdate/{databaseUUID}")
+  @ApiOperation(value = "Updates the internal SIARD validation status", notes = "")
+  void updateStatusValidate(@PathParam("databaseUUID") String databaseUUID,
+    @QueryParam("status") ViewerDatabaseValidationStatus status);
 
   @POST
-  @Path("deleteSIARDFile/{databaseUUID}")
-  @ApiOperation(value = "retrieve DBPTK import modules", notes = "Export query results as CSV.", response = DBPTKModule.class, responseContainer = "CSVExport")
+  @Path("/deleteSIARDFile/{databaseUUID}")
+  @ApiOperation(value = "Deletes a specific SIARD file in the storage location", notes = "")
   void deleteSIARDFile(@PathParam("databaseUUID") String databaseUUID, @QueryParam("path") String path);
 
   @POST
-  @Path("deleteSIARDValidatorReportFile/{databaseUUID}")
-  @ApiOperation(value = "retrieve DBPTK import modules", notes = "Export query results as CSV.", response = DBPTKModule.class, responseContainer = "CSVExport")
+  @Path("/deleteSIARDValidatorReportFile/{databaseUUID}")
+  @ApiOperation(value = "Deletes the report generated for the validation of a SIARD file in the storage location", notes = "")
   void deleteSIARDValidatorReportFile(@PathParam("databaseUUID") String databaseUUID, @QueryParam("path") String path);
 
 }

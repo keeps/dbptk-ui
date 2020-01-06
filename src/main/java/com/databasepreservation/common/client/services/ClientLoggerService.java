@@ -6,6 +6,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 
+import com.databasepreservation.common.client.ClientConfigurationManager;
 import org.fusesource.restygwt.client.DirectRestService;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.fusesource.restygwt.client.REST;
@@ -20,8 +21,9 @@ import io.swagger.annotations.Api;
  * @author Gabriel Barros <gbarros@keep.pt>
  */
 @Path(".." + ViewerConstants.ENDPOINT_CLIENT_LOGGER)
-@Api(value = SIARDService.SWAGGER_ENDPOINT)
+@Api(value = ClientLoggerService.SWAGGER_ENDPOINT)
 public interface ClientLoggerService extends DirectRestService {
+  public static final String SWAGGER_ENDPOINT = "v1 client logger";
   class Util {
     /**
      * @return the singleton instance

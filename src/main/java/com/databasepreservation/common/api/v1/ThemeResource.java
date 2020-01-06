@@ -21,6 +21,7 @@ import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
+import io.swagger.annotations.ApiOperation;
 import org.roda.core.data.common.RodaConstants;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.v2.common.Pair;
@@ -42,6 +43,7 @@ public class ThemeResource {
   public static final int CACHE_CONTROL_MAX_AGE = 60;
 
   @GET
+  @ApiOperation(value = "Gets the custom theme")
   public Response getResource(
     @ApiParam(value = "The resource id", required = true) @QueryParam(RodaConstants.API_QUERY_PARAM_RESOURCE_ID) String resourceId,
     @ApiParam(value = "The default resource id", required = false) @QueryParam(RodaConstants.API_QUERY_PARAM_DEFAULT_RESOURCE_ID) String fallbackResourceId,

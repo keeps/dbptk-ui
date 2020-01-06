@@ -63,8 +63,8 @@ public class FileResource {
   @Produces({MediaType.APPLICATION_JSON})
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @JSONP(callback = RodaConstants.API_QUERY_DEFAULT_JSONP_CALLBACK, queryParam = RodaConstants.API_QUERY_KEY_JSONP_CALLBACK)
-  @ApiOperation(value = "Create file", notes = "Create a new SIARD file", response = Void.class)
-  @ApiResponses(value = {@ApiResponse(code = 204, message = "OK", response = Void.class),
+  @ApiOperation(value = "Creates a new SIARD file", notes = "")
+  @ApiResponses(value = {@ApiResponse(code = 204, message = "OK"),
     @ApiResponse(code = 409, message = "Already exists", response = ApiResponseMessage.class)})
 
   public Response createSIARDFile(@FormDataParam("upl") InputStream inputStream,
@@ -110,6 +110,7 @@ public class FileResource {
   @Path(ViewerConstants.API_SEP + ViewerConstants.API_PATH_PARAM_SIARD + ViewerConstants.API_SEP + "{"
     + ViewerConstants.API_PATH_PARAM_DATABASE_UUID + "}")
   @Produces(MediaType.APPLICATION_OCTET_STREAM)
+  @ApiOperation(value = "Downloads a specific SIARD file from the storage location", notes = "")
   public Response getSIARDFile(@PathParam(ViewerConstants.API_PATH_PARAM_DATABASE_UUID) String databaseUUID) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
     User user = UserUtility.getUser(request);
@@ -140,6 +141,7 @@ public class FileResource {
   @Path(ViewerConstants.API_SEP + ViewerConstants.API_PATH_PARAM_VALIDATION_REPORT + ViewerConstants.API_SEP + "{"
     + ViewerConstants.API_PATH_PARAM_DATABASE_UUID + "}")
   @Produces(MediaType.APPLICATION_OCTET_STREAM)
+  @ApiOperation(value = "Downloads a specific SIARD validation report file from the storage location", notes = "")
   public Response getValidationReportFile(
     @PathParam(ViewerConstants.API_PATH_PARAM_DATABASE_UUID) String databaseUUID) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};

@@ -8,7 +8,10 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
+import com.databasepreservation.common.client.models.DBPTKModule;
 import com.databasepreservation.common.client.models.activity.logs.ActivityLogWrapper;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.fusesource.restygwt.client.DirectRestService;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.fusesource.restygwt.client.REST;
@@ -21,13 +24,16 @@ import com.databasepreservation.common.client.models.activity.logs.ActivityLogEn
 import com.google.gwt.core.client.GWT;
 
 import io.swagger.annotations.ApiParam;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 
 @Path(".." + ViewerConstants.ENDPOINT_ACTIVITY_LOG)
+@Api(value = ActivityLogService.SWAGGER_ENDPOINT)
 public interface ActivityLogService extends DirectRestService {
+  public static final String SWAGGER_ENDPOINT = "v1 activity log";
   class Util {
     /**
      * @return the singleton instance
@@ -51,10 +57,12 @@ public interface ActivityLogService extends DirectRestService {
 
   @POST
   @Path("/find")
+  @ApiOperation(value = "Find all logs", response =  IndexResult.class)
   IndexResult<ActivityLogEntry> find(@ApiParam(ViewerConstants.API_QUERY_PARAM_FILTER) FindRequest findRequest,
     @QueryParam(ViewerConstants.API_QUERY_PARAM_LOCALE) String locale);
 
   @GET
   @Path("/find/{logUUID}")
+  @ApiOperation(value = "Retrieve a specific log detail", response = ActivityLogWrapper.class)
   ActivityLogWrapper retrieve(@PathParam("logUUID") String logUUID);
 }

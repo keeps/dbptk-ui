@@ -21,7 +21,6 @@ import org.roda.core.data.v2.index.sublist.Sublist;
 import org.roda.core.data.v2.user.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
 import com.databasepreservation.common.api.utils.ApiUtils;
 import com.databasepreservation.common.api.utils.StreamResponse;
@@ -52,9 +51,8 @@ import io.swagger.annotations.ApiOperation;
  * 
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-@Service
 @Path(ExportsResource.ENDPOINT)
-@Api(value = ExportsResource.SWAGGER_ENDPOINT)
+@Api(value = ExportsResource.SWAGGER_ENDPOINT, tags = "v1 export")
 public class ExportsResource {
   public static final String ENDPOINT = "/" + ViewerConstants.API_SERVLET + ViewerConstants.API_V1_EXPORT_RESOURCE;
   public static final String SWAGGER_ENDPOINT = "v1 exports";
@@ -68,7 +66,7 @@ public class ExportsResource {
   @Path("/csv/{" + ViewerConstants.API_PATH_PARAM_DATABASE_UUID + "}/{" + ViewerConstants.API_PATH_PARAM_TABLE_UUID
     + "}")
   @Produces({MediaType.APPLICATION_OCTET_STREAM})
-  @ApiOperation(value = "Export as CSV", notes = "Export query results as CSV.", response = String.class, responseContainer = "CSVExport")
+  @ApiOperation(value = "Export the row or rows as CSV", notes = "", response = Response.class)
   public Response getCSVResultsPost(@PathParam(ViewerConstants.API_PATH_PARAM_DATABASE_UUID) String databaseUUID,
     @QueryParam(ViewerConstants.API_QUERY_PARAM_EXPORT) String paramExportRequest,
     @QueryParam(ViewerConstants.API_QUERY_PARAM_FILTER) String paramFindRequest,
@@ -101,10 +99,9 @@ public class ExportsResource {
     } finally {
       if (findRequest != null && exportRequest != null) {
         // register action
-        controllerAssistant.registerAction(user, databaseUUID, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,
-          ViewerConstants.CONTROLLER_TABLE_ID_PARAM, tableUUID,
-          ViewerConstants.CONTROLLER_FILTER_PARAM, JsonUtils.getJsonFromObject(findRequest.filter),
-          ViewerConstants.CONTROLLER_SUBLIST_PARAM,
+        controllerAssistant.registerAction(user, databaseUUID, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM,
+          databaseUUID, ViewerConstants.CONTROLLER_TABLE_ID_PARAM, tableUUID, ViewerConstants.CONTROLLER_FILTER_PARAM,
+          JsonUtils.getJsonFromObject(findRequest.filter), ViewerConstants.CONTROLLER_SUBLIST_PARAM,
           findRequest.sublist == null ? JsonUtils.getJsonFromObject(Sublist.NONE)
             : JsonUtils.getJsonFromObject(findRequest.sublist),
           ViewerConstants.CONTROLLER_EXPORT_PARAM, JsonUtils.getJsonFromObject(exportRequest));

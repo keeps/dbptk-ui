@@ -27,6 +27,7 @@ import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.google.gwt.core.client.GWT;
 
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 
@@ -34,7 +35,9 @@ import io.swagger.annotations.ApiParam;
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 @Path(".." + ViewerConstants.ENDPOINT_DATABASE)
+@Api(value = DatabaseService.SWAGGER_ENDPOINT)
 public interface DatabaseService extends DirectRestService {
+  public static final String SWAGGER_ENDPOINT = "v1 database";
 
   class Util {
     /**
@@ -60,52 +63,51 @@ public interface DatabaseService extends DirectRestService {
   @GET
   @Path("/generateUUID")
   @Produces({MediaType.TEXT_PLAIN})
-  @ApiOperation(value = "retrieves the schema information", notes = "", response = String.class, responseContainer = "database metadata")
   String generateUUID();
 
   @POST
   @Path("/schemaInformation")
   @Produces({MediaType.APPLICATION_JSON})
-  @ApiOperation(value = "retrieves the schema information", notes = "", response = ViewerMetadata.class, responseContainer = "database metadata")
+  @ApiOperation(value = "Retrieves the schema information", notes = "", response = ViewerMetadata.class)
   ViewerMetadata getSchemaInformation(@ApiParam(value = "connection parameters") final ConnectionParameters connectionParameters);
 
   @POST
   @Path("/executeQuery")
-  @ApiOperation(value = "retrieves the first 5 rows of the query execution", notes = "", response = List.class, responseContainer = "database metadata")
+  @ApiOperation(value = "Retrieves the first 5 rows of the query execution", notes = "", response = List.class, responseContainer = "List")
   List<List<String>> validateCustomViewQuery(@ApiParam(value = "connection parameters") ConnectionParameters parameters, @QueryParam("q") String query);
 
 
   @GET
-  @Path("/progress/{databaseuuid}")
-  @ApiOperation(value = "retrieves the first 5 rows of the query execution", notes = "", response = ProgressData.class, responseContainer = "database metadata")
-  ProgressData getProgressData(@PathParam("databaseuuid") String databaseuuid);
+  @Path("/progress/{databaseUUID}")
+  @ApiOperation(value = "Retrieves the first 5 rows of the query execution", notes = "", response = ProgressData.class)
+  ProgressData getProgressData(@PathParam("databaseUUID") String databaseUUID);
 
   @POST
   @Path("/find")
-  @ApiOperation(value = "retrieves DBPTK export modules", notes = "", response = IndexResult.class, responseContainer = "IndexResult")
+  @ApiOperation(value = "Finds all the databases", notes = "", response = ViewerDatabase.class, responseContainer = "IndexResult")
   IndexResult<ViewerDatabase> findDatabases(@ApiParam(ViewerConstants.API_QUERY_PARAM_FILTER) FindRequest filter,
                                             @QueryParam(ViewerConstants.API_QUERY_PARAM_LOCALE) String localeString);
 
 
   @GET
   @Path("/find/{databaseUUID}/{id}")
-  @ApiOperation(value = "retrieves DBPTK export modules", notes = "", response = ViewerDatabase.class, responseContainer = "IndexResult")
+  @ApiOperation(value = "Retrieves a specific database", notes = "", response = ViewerDatabase.class)
   ViewerDatabase retrieve(@PathParam("databaseUUID") String databaseUUID, @PathParam("id") String id);
 
   @DELETE
   @Path("/delete/{databaseUUID}")
-  @ApiOperation(value = "retrieves DBPTK export modules", notes = "", response = Boolean.class, responseContainer = "IndexResult")
+  @ApiOperation(value = "Deletes a specific database", notes = "", response = Boolean.class)
   Boolean deleteDatabase(@PathParam("databaseUUID") String databaseUUID);
 
   @DELETE
   @Path("/delete/rows/{databaseUUID}")
-  @ApiOperation(value = "retrieves DBPTK export modules", notes = "", response = Boolean.class, responseContainer = "IndexResult")
+  @ApiOperation(value = "Deletes the row data for a specific database", notes = "", response = Boolean.class)
   Boolean deleteSolrData(@PathParam("databaseUUID") String databaseUUID);
 
 
   @POST
   @Path("find/rows/{databaseUUID}")
-  @ApiOperation(value = "retrieves DBPTK export modules", notes = "", response = IndexResult.class, responseContainer = "IndexResult")
+  @ApiOperation(value = "Find all rows for a specific database", notes = "", response = ViewerRow.class, responseContainer = "IndexResult")
   IndexResult<ViewerRow> findRows(@PathParam("databaseUUID") String databaseUUID,
                                   @ApiParam(ViewerConstants.API_QUERY_PARAM_FILTER) FindRequest findRequest,
                                   @QueryParam(ViewerConstants.API_QUERY_PARAM_LOCALE) String localeString);
@@ -113,6 +115,6 @@ public interface DatabaseService extends DirectRestService {
 
   @GET
   @Path("find/rows/{databaseUUID}/{rowUUID}")
-  @ApiOperation(value = "retrieves DBPTK export modules", notes = "", response = ViewerRow.class, responseContainer = "IndexResult")
+  @ApiOperation(value = "Retrieves a specific row within a specific database", notes = "", response = ViewerRow.class)
   ViewerRow retrieveRow(@PathParam("databaseUUID") String databaseUUID, @PathParam("rowUUID") String rowUUID);
 }

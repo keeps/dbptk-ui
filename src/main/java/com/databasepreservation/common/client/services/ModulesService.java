@@ -22,6 +22,7 @@ import com.databasepreservation.common.client.models.DBPTKModule;
 import com.databasepreservation.common.client.models.parameters.ConnectionParameters;
 import com.google.gwt.core.client.GWT;
 
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 
@@ -30,7 +31,9 @@ import io.swagger.annotations.ApiParam;
  */
 
 @Path(".." + ViewerConstants.ENDPOINT_MODULES)
+@Api(value = ModulesService.SWAGGER_ENDPOINT)
 public interface ModulesService extends DirectRestService {
+  public static final String SWAGGER_ENDPOINT = "v1 modules";
 
   class Util {
     /**
@@ -56,29 +59,31 @@ public interface ModulesService extends DirectRestService {
   @GET
   @Path("/live/import")
   @Produces({MediaType.APPLICATION_JSON})
-  @ApiOperation(value = "retrieves DBPTK import modules", notes = "", response = DBPTKModule.class, responseContainer = "DBPTK Modules")
+  @ApiOperation(value = "Retrieves the import DBPTK developer modules", notes = "", response = DBPTKModule.class)
   DBPTKModule getImportDBPTKModules() throws RESTException;
 
   @GET
   @Path("/live/export")
   @Produces({MediaType.APPLICATION_JSON})
-  @ApiOperation(value = "retrieves DBPTK export modules", notes = "", response = DBPTKModule.class, responseContainer = "DBPTK Modules")
+  @ApiOperation(value = "Retrieves the export DBPTK developer modules", notes = "", response = DBPTKModule.class)
   DBPTKModule getExportDBPTKModules() throws RESTException;
 
   @GET
-  @Path("/siard/export/{modulename}")
+  @Path("/siard/export/{moduleName}")
   @Produces({MediaType.APPLICATION_JSON})
-  DBPTKModule getSIARDExportModule(@PathParam("modulename") String moduleName);
+  @ApiOperation(value = "Gets the specific export DBPTK developer module", notes = "", response = DBPTKModule.class)
+  DBPTKModule getSIARDExportModule(@PathParam("moduleName") String moduleName);
 
   @GET
   @Path("/siard/export/all")
   @Produces({MediaType.APPLICATION_JSON})
+  @ApiOperation(value = "Find all the export DBPTK developer module", notes = "", response = DBPTKModule.class)
   DBPTKModule getSIARDExportModules();
 
   @POST
   @Path("/test/connection")
   @Consumes({MediaType.APPLICATION_JSON})
   @Produces({MediaType.APPLICATION_JSON})
-  @ApiOperation(value = "tests the connection to the database", notes = "Export query results as CSV.", response = ConnectionResponse.class, responseContainer = "CSVExport")
-  ConnectionResponse testDBConnection(@ApiParam(value = "Find parameters") final ConnectionParameters connectionParameters);
+  @ApiOperation(value = "Tests the connection to the database", notes = "", response = ConnectionResponse.class)
+  ConnectionResponse testDBConnection(@ApiParam(value = "DBMS connection parameters") final ConnectionParameters connectionParameters);
 }

@@ -57,7 +57,7 @@ public class LobsResource {
     + "}/{" + ViewerConstants.API_PATH_PARAM_ROW_UUID + "}/{" + ViewerConstants.API_PATH_PARAM_COLUMN_ID + "}/{"
     + ViewerConstants.API_PATH_PARAM_LOB_FILENAME + "}")
   @Produces({MediaType.APPLICATION_OCTET_STREAM})
-  @ApiOperation(value = "Download LOB", notes = "download the specified LOB.", response = String.class, responseContainer = "LOB")
+  @ApiOperation(value = "Downloads a LOB for a specific row within a database", notes = "download the specified LOB.", response = String.class, responseContainer = "LOB")
   public Response getLOB(@PathParam(ViewerConstants.API_PATH_PARAM_DATABASE_UUID) String databaseUUID,
     @PathParam(ViewerConstants.API_PATH_PARAM_TABLE_UUID) String tableUUID,
     @PathParam(ViewerConstants.API_PATH_PARAM_ROW_UUID) String rowUUID,

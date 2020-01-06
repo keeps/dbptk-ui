@@ -13,6 +13,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 
+import io.swagger.annotations.ApiOperation;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +34,7 @@ public class ReportResource {
 
   @GET
   @Path("/{" + ViewerConstants.API_PATH_PARAM_DATABASE_UUID + "}")
+  @ApiOperation(value = "Downloads the migration report for a specific database")
   public Response getResource(
     @ApiParam(value = "The database uuid", required = true) @PathParam(ViewerConstants.API_PATH_PARAM_DATABASE_UUID) String databaseUUID)
     throws IOException, NotFoundException {

@@ -139,7 +139,7 @@ public class CasApiAuthFilter implements Filter {
    */
   private boolean isRequestUrlExcluded(final HttpServletRequest request) {
     for (String exclusion : this.exclusions) {
-      if (request.getPathInfo().matches(exclusion)) {
+      if (request.getPathInfo() != null && request.getPathInfo().matches(exclusion)) {
         return true;
       }
     }

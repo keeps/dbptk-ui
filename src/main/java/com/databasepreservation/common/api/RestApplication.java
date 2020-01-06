@@ -6,6 +6,8 @@ import org.glassfish.jersey.moxy.xml.MoxyXmlFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 
 import io.swagger.jaxrs.config.BeanConfig;
+import io.swagger.jaxrs.config.SwaggerConfigLocator;
+import io.swagger.jaxrs.config.SwaggerContextService;
 import io.swagger.jaxrs.listing.ApiListingResource;
 import io.swagger.jaxrs.listing.SwaggerSerializers;
 
@@ -18,7 +20,9 @@ public class RestApplication extends ResourceConfig {
 
   public RestApplication() {
     super();
-    packages(SWAGGER_PACKAGE, DBVTK_API_PACKAGE);
+    packages("com.databasepreservation.common.api", "com.databasepreservation.common.client.services",
+      ApiListingResource.class.getPackage().getName());
+
     register(JacksonFeature.class);
     register(MoxyXmlFeature.class);
     register(MultiPartFeature.class);
@@ -29,7 +33,9 @@ public class RestApplication extends ResourceConfig {
     BeanConfig beanConfig = new BeanConfig();
     beanConfig.setVersion("1");
     beanConfig.setBasePath("/api");
-    beanConfig.setResourcePackage(DBVTK_API_PACKAGE);
+    beanConfig
+      .setResourcePackage("com.databasepreservation.common.api,com.databasepreservation.common.client.services");
     beanConfig.setScan(true);
+    SwaggerConfigLocator.getInstance().putConfig(SwaggerContextService.CONFIG_ID_DEFAULT, beanConfig);
   }
 }

@@ -27,6 +27,8 @@ import com.databasepreservation.common.utils.ControllerAssistant;
 import com.databasepreservation.common.utils.I18nUtility;
 import com.databasepreservation.common.utils.UserUtility;
 
+import io.swagger.annotations.Api;
+
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */

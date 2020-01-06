@@ -7,7 +7,6 @@ import java.nio.file.Paths;
 
 import javax.servlet.http.HttpServlet;
 
-import com.databasepreservation.common.filter.OnOffFilter;
 import org.jasig.cas.client.session.SingleSignOutHttpSessionListener;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -23,11 +22,15 @@ import org.springframework.web.filter.RequestContextFilter;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.filter.OnOffFilter;
 import com.databasepreservation.common.server.BrowserServiceImpl;
 import com.databasepreservation.common.server.ViewerConfiguration;
-import com.databasepreservation.common.client.ViewerConstants;
+
+import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @SpringBootApplication
+@EnableSwagger2
 public class DBVTK {
   public static void main(String[] args) {
     ViewerConfiguration.getInstance();
@@ -43,6 +46,8 @@ public class DBVTK {
         registry.addViewController("/").setViewName("forward:/desktop.html");
         registry.setOrder(Ordered.HIGHEST_PRECEDENCE);
       }
+      registry.addRedirectViewController("/api-docs", "/swagger-ui.html");
+      registry.setOrder(Ordered.HIGHEST_PRECEDENCE);
     }
   }
 
@@ -51,10 +56,9 @@ public class DBVTK {
     ServletRegistrationBean<HttpServlet> bean;
     if (ViewerConstants.DESKTOP.equals(System.getProperty("env", "server"))) {
       bean = new ServletRegistrationBean<>(new BrowserServiceImpl(),
-              "/com.databasepreservation.desktop.Desktop/browse");
+        "/com.databasepreservation.desktop.Desktop/browse");
     } else {
-      bean = new ServletRegistrationBean<>(new BrowserServiceImpl(),
-              "/com.databasepreservation.server.Server/browse");
+      bean = new ServletRegistrationBean<>(new BrowserServiceImpl(), "/com.databasepreservation.server.Server/browse");
     }
     bean.setLoadOnStartup(2);
     return bean;
@@ -98,7 +102,8 @@ public class DBVTK {
     FilterRegistrationBean<OnOffFilter> registrationBean = new FilterRegistrationBean<>();
     registrationBean.setFilter(new OnOffFilter());
     registrationBean.setName("InternalWebAuthFilter");
-    registrationBean.addInitParameter("inner-filter-class", "com.databasepreservation.common.filter.InternalWebAuthFilter");
+    registrationBean.addInitParameter("inner-filter-class",
+      "com.databasepreservation.common.filter.InternalWebAuthFilter");
     registrationBean.addInitParameter("config-prefix", "ui.filter.internal");
     registrationBean.addUrlPatterns("/login", "/logout");
 
@@ -110,7 +115,8 @@ public class DBVTK {
     FilterRegistrationBean<OnOffFilter> registrationBean = new FilterRegistrationBean<>();
     registrationBean.setFilter(new OnOffFilter());
     registrationBean.setName("InternalApiAuthFilter");
-    registrationBean.addInitParameter("inner-filter-class", "com.databasepreservation.common.filter.InternalApiAuthFilter");
+    registrationBean.addInitParameter("inner-filter-class",
+      "com.databasepreservation.common.filter.InternalApiAuthFilter");
     registrationBean.addInitParameter("config-prefix", "ui.filter.internal");
 
     // Realm to be used
@@ -149,7 +155,7 @@ public class DBVTK {
     registrationBean.setFilter(new OnOffFilter());
     registrationBean.setName("CasValidationFilter");
     registrationBean.addInitParameter("inner-filter-class",
-        "org.jasig.cas.client.validation.Cas30ProxyReceivingTicketValidationFilter");
+      "org.jasig.cas.client.validation.Cas30ProxyReceivingTicketValidationFilter");
     registrationBean.addInitParameter("config-prefix", "ui.filter.cas");
     registrationBean.addInitParameter("casServerUrlPrefix", "https://localhost:8443/cas");
     registrationBean.addInitParameter("serverName", "https://localhost:8888");
@@ -182,7 +188,7 @@ public class DBVTK {
     registrationBean.setFilter(new OnOffFilter());
     registrationBean.setName("CasRequestWrapperFilter");
     registrationBean.addInitParameter("inner-filter-class",
-        "org.jasig.cas.client.util.HttpServletRequestWrapperFilter");
+      "org.jasig.cas.client.util.HttpServletRequestWrapperFilter");
     registrationBean.addInitParameter("config-prefix", "ui.filter.cas");
     registrationBean.addUrlPatterns("/*");
 
@@ -217,11 +223,11 @@ public class DBVTK {
     return registrationBean;
   }
 
-//  @Bean
-//  MultipartConfigElement multipartConfigElement() {
-//    MultipartConfigFactory factory = new MultipartConfigFactory();
-//    factory.setMaxFileSize(DataSize.ofBytes(512000000L));
-//    factory.setMaxRequestSize(DataSize.ofBytes(512000000L));
-//    return factory.createMultipartConfig();
-//  }
+  // @Bean
+  // MultipartConfigElement multipartConfigElement() {
+  // MultipartConfigFactory factory = new MultipartConfigFactory();
+  // factory.setMaxFileSize(DataSize.ofBytes(512000000L));
+  // factory.setMaxRequestSize(DataSize.ofBytes(512000000L));
+  // return factory.createMultipartConfig();
+  // }
 }

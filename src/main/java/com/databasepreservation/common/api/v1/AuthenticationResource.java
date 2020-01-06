@@ -43,6 +43,9 @@ public class AuthenticationResource implements AuthenticationService {
 
   @Override
   public Boolean userIsAdmin() {
+    if (ViewerConstants.DESKTOP.equals(System.getProperty("env", "server"))) {
+      return true;
+    }
     return UserUtility.userIsAdmin(request);
   }
 
