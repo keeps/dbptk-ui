@@ -139,6 +139,9 @@ public class ContainerPanel extends Composite {
                 administrationMenu.addItem(
                   FontAwesomeIconManager.loaded(FontAwesomeIconManager.COG, messages.preferencesMenuText()),
                   (Command) HistoryManager::gotoHome);
+                administrationMenu.addItem(
+                    FontAwesomeIconManager.loaded(FontAwesomeIconManager.COG, "Jobs"),
+                    (Command) HistoryManager::gotoJobs);
                 menu.addItem(messages.administrationMenuText(), administrationMenu);
               }
 

@@ -154,7 +154,6 @@ public class DatabasePanel extends Composite {
             MenuBar subMenu = new MenuBar(true);
             subMenu.addItem(messages.loginLogout(), (Command) () -> UserLogin.getInstance().logout());
             menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.USER, user.getFullName()), subMenu);
-
             AuthenticationService.Util.call((Boolean userIsAdmin) -> {
               if (userIsAdmin) {
                 MenuBar administrationMenu = new MenuBar(true);
@@ -164,6 +163,9 @@ public class DatabasePanel extends Composite {
                 administrationMenu.addItem(
                   FontAwesomeIconManager.loaded(FontAwesomeIconManager.COG, messages.preferencesMenuText()),
                   (Command) HistoryManager::gotoHome);
+                administrationMenu.addItem(
+                    FontAwesomeIconManager.loaded(FontAwesomeIconManager.COG, "Jobs"),
+                    (Command) HistoryManager::gotoJobs);
                 menu.addItem(messages.administrationMenuText(), administrationMenu);
               }
 

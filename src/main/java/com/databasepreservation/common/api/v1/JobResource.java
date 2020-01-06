@@ -1,19 +1,11 @@
 package com.databasepreservation.common.api.v1;
 
-import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.exceptions.RESTException;
-import com.databasepreservation.common.client.models.DenormalizeProgressData;
-import com.databasepreservation.common.client.models.configuration.collection.CollectionConfiguration;
-import com.databasepreservation.common.client.models.configuration.collection.TableConfiguration;
-import com.databasepreservation.common.server.ViewerConfiguration;
-import com.databasepreservation.common.server.ViewerFactory;
-import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
-import com.databasepreservation.common.server.index.utils.JsonTransformer;
-import com.databasepreservation.model.exception.ModuleException;
-import org.roda.core.data.exceptions.GenericException;
-import org.roda.core.data.exceptions.RequestNotValidException;
-import org.roda.core.data.v2.index.filter.Filter;
-import org.roda.core.data.v2.index.filter.SimpleFilterParameter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
+
+import javax.ws.rs.Path;
+
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.explore.JobExplorer;
@@ -24,14 +16,22 @@ import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
-
-import com.databasepreservation.common.client.services.JobService;
 import org.springframework.stereotype.Service;
 
-import javax.ws.rs.Path;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.*;
+import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.exceptions.RESTException;
+import com.databasepreservation.common.client.index.FindRequest;
+import com.databasepreservation.common.client.index.IndexResult;
+import com.databasepreservation.common.client.models.DenormalizeProgressData;
+import com.databasepreservation.common.client.models.configuration.collection.CollectionConfiguration;
+import com.databasepreservation.common.client.models.configuration.collection.TableConfiguration;
+import com.databasepreservation.common.client.models.structure.ViewerJob;
+import com.databasepreservation.common.client.services.JobService;
+import com.databasepreservation.common.server.ViewerConfiguration;
+import com.databasepreservation.common.server.ViewerFactory;
+import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
+import com.databasepreservation.common.server.index.utils.JsonTransformer;
+import com.databasepreservation.model.exception.ModuleException;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -151,5 +151,32 @@ public class JobResource implements JobService {
     }
 
     return progressDataList;
+  }
+
+  @Override
+  public IndexResult<ViewerJob> findJobs(FindRequest filter) {
+    List<ViewerJob> viewerJobList = new ArrayList<>();
+    long offset = 0;
+    long limit = 1000;
+    long totalCount = 0;
+    try {
+      totalCount = JobExplorer.getJobInstanceCount(job.getName());
+
+      List<JobInstance> jobInstances = JobExplorer.getJobInstances(job.getName(), (int) offset, (int) limit);
+      for (JobInstance jobInstance : jobInstances) {
+        for (JobExecution jobExecution : JobExplorer.getJobExecutions(jobInstance)) {
+          ViewerJob job = new ViewerJob();
+          job.setName(jobInstance.getJobName());
+          job.setUuid(String.valueOf(jobExecution.getJobId()));
+          job.setStatus(jobExecution.getStatus().name());
+          job.setStartTime(jobExecution.getStartTime().toString());
+          job.setEndTime(jobExecution.getEndTime().toString());
+          viewerJobList.add(job);
+        }
+      }
+    } catch (NoSuchJobException e) {
+      throw new RESTException(e);
+    }
+    return new IndexResult<>(offset, limit, totalCount, viewerJobList, null);
   }
 }

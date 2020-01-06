@@ -42,6 +42,7 @@ import com.databasepreservation.common.client.common.visualization.browse.techni
 import com.databasepreservation.common.client.common.visualization.browse.view.ViewPanel;
 import com.databasepreservation.common.client.common.visualization.browse.view.ViewPanelStructure;
 import com.databasepreservation.common.client.common.visualization.ingest.IngestPage;
+import com.databasepreservation.common.client.common.visualization.manager.JobPanel.JobManager;
 import com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.SIARDManagerPage;
 import com.databasepreservation.common.client.common.visualization.manager.databasePanel.admin.DatabaseManage;
 import com.databasepreservation.common.client.common.visualization.manager.databasePanel.user.UserDatabaseListPanel;
@@ -282,6 +283,13 @@ public class MainPanel extends Composite {
             }
           });
       }
+    } else if (HistoryManager.ROUTE_JOBS.equals(currentHistoryPath.get(0))) {
+      setContent(new ContentPanelLoader() {
+        @Override
+        public ContentPanel load(ViewerDatabase database) {
+          return JobManager.getInstance();
+        }
+      });
     } else if (HistoryManager.ROUTE_DATABASE.equals(currentHistoryPath.get(0))) {
 //      if (currentHistoryPath.size() == 1) {
 //        // #database

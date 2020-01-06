@@ -55,6 +55,7 @@ public class HistoryManager {
   public static final String ROUTE_ACTIVITY_LOG = "activity-log";
   public static final String ROUTE_ADVANCED_CONFIGURATION = "advanced-configuration";
   public static final String ROUTE_DATA_TRANSFORMATION = "data-transformation";
+  public static final String ROUTE_JOBS = "jobs";
 
   /****************************************************
    * DESKTOP ROUTES
@@ -314,6 +315,11 @@ public class HistoryManager {
 
   public static void gotoDataTransformation(String databaseUUID, String tableUUID) {
     List<String> params = Arrays.asList(ROUTE_DATA_TRANSFORMATION, databaseUUID, tableUUID);
+    newHistory(params);
+  }
+
+  public static void gotoJobs() {
+    List<String> params = Arrays.asList(ROUTE_JOBS);
     newHistory(params);
   }
 

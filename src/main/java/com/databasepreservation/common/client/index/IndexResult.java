@@ -4,6 +4,7 @@ package com.databasepreservation.common.client.index;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.common.search.SavedSearch;
 import com.databasepreservation.common.client.index.facets.FacetFieldResult;
+import com.databasepreservation.common.client.models.structure.ViewerJob;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 
 import java.io.Serializable;
@@ -13,7 +14,7 @@ import java.util.List;
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-@JsonSubTypes({@JsonSubTypes.Type(value= ViewerDatabase.class, name="ViewerDatabase"), @JsonSubTypes.Type(SavedSearch.class)})
+@JsonSubTypes({@JsonSubTypes.Type(value= ViewerDatabase.class, name="ViewerDatabase"), @JsonSubTypes.Type(SavedSearch.class), @JsonSubTypes.Type(ViewerJob.class)})
 public class IndexResult<T extends Serializable> implements Serializable {
 
   private long offset;
