@@ -479,6 +479,10 @@ public interface ClientMessages extends Messages {
 
   String durationDHMSShortMillis(int millis);
 
+  String yes();
+
+  String no();
+
   /********************************************
    * Basic Actions
    ********************************************/
@@ -1192,7 +1196,27 @@ public interface ClientMessages extends Messages {
 
   String activityLogSavedSearchRelated();
 
+  String activityLogPathRelated();
+
+  String activityLogFilenameRelated();
+
+  String activityLogRelatedLog();
+
   SafeHtml activityLogFilenameParameter(String value);
+
+  String activityLogSavedSearchName();
+
+  String activityLogSavedSearchDescription();
+
+  String activityLogSearchInfoRelated();
+
+  String activityLogLabelForExportType();
+
+  String activityLogTextForExportTypeTable();
+
+  String activityLogTextForExportTypeRow();
+
+  String activityLogUsernameRelated();
   /********************************************
    * HTML Utils
    *******************************************/

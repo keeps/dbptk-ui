@@ -71,9 +71,13 @@ public class ActivityLogUtils {
   private static FlowPanel getLogParameters(ActivityLogWrapper wrapper) {
     FlowPanel panel = new FlowPanel();
     if (wrapper.getActivityLogEntry().getActionMethod().equals("retrieve")) {
-      Hyperlink link = new Hyperlink(messages.activityLogViewedLog(), HistoryManager
+      final SafeHtml tagSafeHtml = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.ACTIVITY_LOG,
+        messages.activityLogViewedLog());
+      Hyperlink hyperlink = new Hyperlink(tagSafeHtml, HistoryManager
         .linkToLog(wrapper.getActivityLogEntry().getParameters().get(ViewerConstants.CONTROLLER_LOG_ID_PARAM)));
-      panel.add(link);
+      hyperlink.addStyleName("btn btn-link");
+
+      panel.add(RowField.createInstance(messages.activityLogDatabaseRelated(), hyperlink));
     } else if (wrapper.getActivityLogEntry().getActionMethod().equals("find")) {
       handleFilterInfo(panel, wrapper);
       handleSublistInfo(panel, wrapper);
@@ -111,8 +115,8 @@ public class ActivityLogUtils {
 
     switch (wrapper.getActivityLogEntry().getActionMethod()) {
       case "createSIARDFile":
-        panel.add(new HTML(messages.activityLogFilenameParameter(
-          wrapper.getActivityLogEntry().getParameters().get(ViewerConstants.CONTROLLER_FILENAME_PARAM))));
+        panel.add(RowField.createInstance(messages.activityLogPathRelated(), new HTML(messages.activityLogFilenameParameter(
+          wrapper.getActivityLogEntry().getParameters().get(ViewerConstants.CONTROLLER_FILENAME_PARAM)))));
         break;
       case "getSIARDFile":
       case "getValidationReportFile":
@@ -127,11 +131,11 @@ public class ActivityLogUtils {
     switch (wrapper.getActivityLogEntry().getActionMethod()) {
       case "deleteSIARDFile":
         handleDatabaseInfo(panel, wrapper);
-        handleFilenameInfo(panel, wrapper, "Path ", ViewerConstants.CONTROLLER_SIARD_PATH_PARAM);
+        handleFilenameInfo(panel, wrapper, messages.activityLogPathRelated(), ViewerConstants.CONTROLLER_SIARD_PATH_PARAM);
         break;
       case "deleteSIARDValidatorReportFile":
         handleDatabaseInfo(panel, wrapper);
-        handleFilenameInfo(panel, wrapper, "Path ", ViewerConstants.CONTROLLER_REPORT_PATH_PARAM);
+        handleFilenameInfo(panel, wrapper, messages.activityLogPathRelated(), ViewerConstants.CONTROLLER_REPORT_PATH_PARAM);
         break;
       case "updateMetadataInformation":
         handleDatabaseInfo(panel, wrapper);
@@ -140,12 +144,12 @@ public class ActivityLogUtils {
         break;
       case "uploadSIARD":
       case "uploadMetadataSIARDServer":
-        handleFilenameInfo(panel, wrapper, "Path ", ViewerConstants.CONTROLLER_SIARD_PATH_PARAM);
+        handleFilenameInfo(panel, wrapper, messages.activityLogPathRelated(), ViewerConstants.CONTROLLER_SIARD_PATH_PARAM);
         break;
       case "validateSIARD":
         handleDatabaseInfo(panel, wrapper);
-        handleFilenameInfo(panel, wrapper, "Path ", ViewerConstants.CONTROLLER_SIARD_PATH_PARAM);
-        handleFilenameInfo(panel, wrapper, "Path ", ViewerConstants.CONTROLLER_REPORT_PATH_PARAM);
+        handleFilenameInfo(panel, wrapper, messages.activityLogPathRelated(), ViewerConstants.CONTROLLER_SIARD_PATH_PARAM);
+        handleFilenameInfo(panel, wrapper, messages.activityLogPathRelated(), ViewerConstants.CONTROLLER_REPORT_PATH_PARAM);
         break;
     }
 
@@ -191,8 +195,7 @@ public class ActivityLogUtils {
     if (ViewerStringUtils.isNotBlank(username)) {
       SafeHtmlBuilder safeHtmlBuilder = new SafeHtmlBuilder();
       safeHtmlBuilder.append(SafeHtmlUtils.fromSafeConstant(username));
-      panel.add(new HTML(safeHtmlBuilder.toSafeHtml()));
-
+      panel.add(RowField.createInstance(messages.activityLogUsernameRelated(),new HTML(safeHtmlBuilder.toSafeHtml())));
     }
     return panel;
   }
@@ -222,7 +225,8 @@ public class ActivityLogUtils {
       handleTableInfo(panel, wrapper);
       handleRowInfo(panel, wrapper);
       handleColumnInfo(panel, wrapper);
-      handleFilenameInfo(panel, wrapper, "Filename: ", ViewerConstants.CONTROLLER_FILENAME_PARAM);
+      handleFilenameInfo(panel, wrapper, messages.activityLogFilenameRelated(),
+        ViewerConstants.CONTROLLER_FILENAME_PARAM);
     }
     return panel;
   }
@@ -296,9 +300,11 @@ public class ActivityLogUtils {
 
       final boolean record = exportRequest.record;
       if (record) {
-        panel.add(RowField.createInstance("Type", new HTML(SafeHtmlUtils.fromSafeConstant("Table exported"))));
+        panel.add(RowField.createInstance(messages.activityLogLabelForExportType(),
+          new HTML(SafeHtmlUtils.fromSafeConstant(messages.activityLogTextForExportTypeTable()))));
       } else {
-        panel.add(RowField.createInstance("Type", new HTML(SafeHtmlUtils.fromSafeConstant("Row exported"))));
+        panel.add(RowField.createInstance(messages.activityLogLabelForExportType(),
+          new HTML(SafeHtmlUtils.fromSafeConstant(messages.activityLogTextForExportTypeRow()))));
       }
 
       if (ViewerStringUtils.isNotBlank(exportRequest.filename)) {
@@ -313,26 +319,27 @@ public class ActivityLogUtils {
       final boolean exportDescription = exportRequest.exportDescription;
       if (exportDescription) {
         panel.add(RowField.createInstance(messages.csvExportDialogLabelForExportHeaderWithDescriptions(),
-          new HTML(SafeHtmlUtils.fromSafeConstant("Yes"))));
+          new HTML(SafeHtmlUtils.fromSafeConstant(messages.yes()))));
       } else {
         panel.add(RowField.createInstance(messages.csvExportDialogLabelForExportHeaderWithDescriptions(),
-          new HTML(SafeHtmlUtils.fromSafeConstant("No"))));
+          new HTML(SafeHtmlUtils.fromSafeConstant(messages.no()))));
       }
 
       final boolean exportLobs = exportRequest.exportLOBs;
       if (exportLobs) {
         panel.add(RowField.createInstance(messages.csvExportDialogLabelForExportLOBs(),
-          new HTML(SafeHtmlUtils.fromSafeConstant("Yes"))));
+          new HTML(SafeHtmlUtils.fromSafeConstant(messages.yes()))));
       } else {
         panel.add(RowField.createInstance(messages.csvExportDialogLabelForExportLOBs(),
-          new HTML(SafeHtmlUtils.fromSafeConstant("No"))));
+          new HTML(SafeHtmlUtils.fromSafeConstant(messages.no()))));
       }
     }
   }
 
   private static void handleColumnInfo(FlowPanel panel, ActivityLogWrapper wrapper) {
     if (wrapper.getColumnPresence().equals(PresenceState.YES)) {
-      panel.add(RowField.createInstance("Column ", new HTML(SafeHtmlUtils.fromSafeConstant(wrapper.getColumnName()))));
+      panel.add(RowField.createInstance(messages.columnName(),
+        new HTML(SafeHtmlUtils.fromSafeConstant(wrapper.getColumnName()))));
     }
   }
 
@@ -364,12 +371,14 @@ public class ActivityLogUtils {
       .get(ViewerConstants.CONTROLLER_SAVED_SEARCH_DESCRIPTION_PARAM);
 
     if (ViewerStringUtils.isNotBlank(name)) {
-      panel.add(RowField.createInstance("Saved search name ", new HTML(SafeHtmlUtils.fromSafeConstant(name))));
+      panel.add(
+        RowField.createInstance(messages.activityLogSavedSearchName(), new HTML(SafeHtmlUtils.fromSafeConstant(name))));
     }
 
     if (ViewerStringUtils.isNotBlank(description)) {
       panel.add(
-        RowField.createInstance("Saved search description ", new HTML(SafeHtmlUtils.fromSafeConstant(description))));
+        RowField.createInstance(messages.activityLogSavedSearchDescription(),
+          new HTML(SafeHtmlUtils.fromSafeConstant(description))));
     }
   }
 
@@ -377,7 +386,8 @@ public class ActivityLogUtils {
     if (wrapper.getSavedSearchPresence().equals(PresenceState.YES)) {
       final String searchInfoJson = wrapper.getSavedSearch().getSearchInfoJson();
       final SearchInfo searchInfo = ViewerJsonUtils.getSearchInfoMapper().read(searchInfoJson);
-      panel.add(new HTML(SearchInfoHtmlUtils.getSearchInfoHtml(searchInfo)));
+      panel.add(RowField.createInstance(messages.activityLogSearchInfoRelated(),
+        new HTML(SearchInfoHtmlUtils.getSearchInfoHtml(searchInfo))));
     }
   }
 }
