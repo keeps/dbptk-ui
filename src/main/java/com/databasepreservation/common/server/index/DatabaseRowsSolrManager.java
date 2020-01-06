@@ -7,7 +7,6 @@ import java.util.*;
 
 import com.databasepreservation.common.client.models.configuration.collection.CollectionConfiguration;
 import com.databasepreservation.common.server.index.utils.*;
-import com.sun.javafx.binding.StringFormatter;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest;

@@ -3,6 +3,7 @@ package com.databasepreservation.common.client.common.utils.html;
 import com.databasepreservation.common.client.models.activity.logs.LogEntryState;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
+import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
 import com.databasepreservation.common.client.tools.Humanize;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -31,8 +32,7 @@ public class LabelUtils {
         break;
     }
 
-    return SafeHtmlUtils
-        .fromSafeConstant("<span class='" + style + "'>" + Humanize.logEntryState(state) + CLOSE_SPAN);
+    return SafeHtmlUtils.fromSafeConstant("<span class='" + style + "'>" + Humanize.logEntryState(state) + CLOSE_SPAN);
   }
 
   public static SafeHtml getSIARDValidationStatus(ViewerDatabaseValidationStatus status) {
@@ -55,7 +55,7 @@ public class LabelUtils {
     }
 
     return SafeHtmlUtils
-        .fromSafeConstant("<span class='" + style + "'>" + Humanize.validationStatus(status) + CLOSE_SPAN);
+      .fromSafeConstant("<span class='" + style + "'>" + Humanize.validationStatus(status) + CLOSE_SPAN);
   }
 
   public static SafeHtml getDatabaseStatus(ViewerDatabaseStatus status) {
@@ -79,5 +79,31 @@ public class LabelUtils {
 
     return SafeHtmlUtils
       .fromSafeConstant("<span class='" + style + "'>" + Humanize.databaseStatus(status) + CLOSE_SPAN);
+  }
+
+  public static SafeHtml getJobStatus(ViewerJobStatus status) {
+    String style;
+    switch (status) {
+      case FAILED:
+        style = "label-danger label-error";
+        break;
+      case COMPLETED:
+        style = "label-success";
+        break;
+      case STARTING:
+      case STARTED:
+      case STOPPING:
+      case STOPPED:
+        style = "label-info";
+        break;
+      case ABANDONED:
+      case UNKNOWN:
+      default:
+        style = "label-default";
+        break;
+    }
+
+    return SafeHtmlUtils
+      .fromSafeConstant("<span class='" + style + "'>" + status.name() + CLOSE_SPAN);
   }
 }

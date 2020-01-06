@@ -10,8 +10,10 @@ import java.io.Serializable;
 public class ViewerJob extends IsIndexed implements Serializable {
 
   private String uuid;
+  private String databaseUuid;
+  private String tableUuid;
   private String name;
-  private String status;
+  private ViewerJobStatus status;
   private String startTime;
   private String endTime;
 
@@ -33,11 +35,11 @@ public class ViewerJob extends IsIndexed implements Serializable {
     this.name = name;
   }
 
-  public String getStatus() {
+  public ViewerJobStatus getStatus() {
     return status;
   }
 
-  public void setStatus(String status) {
+  public void setStatus(ViewerJobStatus status) {
     this.status = status;
   }
 
@@ -55,5 +57,21 @@ public class ViewerJob extends IsIndexed implements Serializable {
 
   public void setEndTime(String endTime) {
     this.endTime = endTime;
+  }
+
+  public void setDatabaseUuid(String databaseUuid) {
+    this.databaseUuid = databaseUuid;
+  }
+
+  public String getDatabaseUuid() {
+    return databaseUuid;
+  }
+
+  public void setTableUuid(String tableUuid) {
+    this.tableUuid = tableUuid;
+  }
+
+  public String getTableUuid() {
+    return tableUuid;
   }
 }

@@ -4,7 +4,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.view.client.DefaultSelectionEventManager;
+import com.databasepreservation.common.client.common.utils.LabelUtils;
+import com.databasepreservation.common.client.index.facets.Facets;
+import com.google.gwt.core.shared.GWT;
+import config.i18n.client.ClientMessages;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.roda.core.data.v2.index.filter.Filter;
 import org.roda.core.data.v2.index.sublist.Sublist;
@@ -26,15 +29,38 @@ import com.google.gwt.user.cellview.client.ColumnSortList;
  * @author Gabriel Barros <gbarros@keep.pt>
  */
 public class JobList extends BasicAsyncTableCell<ViewerJob> {
+  private static final ClientMessages messages = GWT.create(ClientMessages.class);
+
+  public JobList() {
+    this(new Filter(), null, null, false, false);
+  }
+
+  private JobList(Filter filter, Facets facets, String summary, boolean selectable, boolean exportable) {
+    super(filter, facets, summary, selectable, exportable, 15, 15);
+    autoUpdate(10000);
+  }
+
   @Override
   protected void configureDisplay(CellTable<ViewerJob> display) {
-
-    display.setSelectionModel(display.getSelectionModel(), DefaultSelectionEventManager.createBlacklistManager(4,9));
 
     Column<ViewerJob, SafeHtml> idColumn = new TooltipColumn<ViewerJob>() {
       @Override
       public SafeHtml getValue(ViewerJob viewerJob) {
         return SafeHtmlUtils.fromString(viewerJob.getUuid());
+      }
+    };
+
+    Column<ViewerJob, SafeHtml> databaseColumn = new TooltipColumn<ViewerJob>() {
+      @Override
+      public SafeHtml getValue(ViewerJob viewerJob) {
+        return SafeHtmlUtils.fromString(viewerJob.getDatabaseUuid());
+      }
+    };
+
+    Column<ViewerJob, SafeHtml> tableColumn = new TooltipColumn<ViewerJob>() {
+      @Override
+      public SafeHtml getValue(ViewerJob viewerJob) {
+        return SafeHtmlUtils.fromString(viewerJob.getTableUuid());
       }
     };
 
@@ -62,15 +88,17 @@ public class JobList extends BasicAsyncTableCell<ViewerJob> {
     Column<ViewerJob, SafeHtml> statusColumn = new TooltipColumn<ViewerJob>() {
       @Override
       public SafeHtml getValue(ViewerJob viewerJob) {
-        return SafeHtmlUtils.fromString(viewerJob.getStatus());
+        return LabelUtils.getJobStatus(viewerJob.getStatus());
       }
     };
 
-    addColumn(idColumn, "jobId", true, TextAlign.NONE, 15);
-    addColumn(nameColumn, "jobName", true, TextAlign.NONE, 15);
+    addColumn(idColumn, messages.uniqueID(), true, TextAlign.NONE, 5);
+    addColumn(databaseColumn, messages.menusidebar_database(), true, TextAlign.NONE, 15);
+    addColumn(tableColumn, messages.table(), true, TextAlign.NONE, 15);
+    addColumn(nameColumn, messages.name(), true, TextAlign.NONE, 15);
     addColumn(startTimeColumn, "startTime", true, TextAlign.NONE, 15);
     addColumn(endTimeColumn, "endTime", true, TextAlign.NONE, 15);
-    addColumn(statusColumn, "status", true, TextAlign.NONE, 15);
+    addColumn(statusColumn, messages.managePageTableHeaderTextForDatabaseStatus(), true, TextAlign.NONE, 15);
   }
 
   @Override
@@ -89,5 +117,11 @@ public class JobList extends BasicAsyncTableCell<ViewerJob> {
   @Override
   public void exportClickHandler() {
     // do nothing
+  }
+
+  @Override
+  protected void onAttach() {
+    super.onAttach();
+    refresh();
   }
 }

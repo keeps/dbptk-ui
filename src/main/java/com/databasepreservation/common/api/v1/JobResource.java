@@ -6,6 +6,7 @@ import java.util.*;
 
 import javax.ws.rs.Path;
 
+import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.configuration.JobRegistry;
 import org.springframework.batch.core.explore.JobExplorer;
@@ -154,29 +155,41 @@ public class JobResource implements JobService {
   }
 
   @Override
-  public IndexResult<ViewerJob> findJobs(FindRequest filter) {
-    List<ViewerJob> viewerJobList = new ArrayList<>();
-    long offset = 0;
-    long limit = 1000;
-    long totalCount = 0;
+  public IndexResult<ViewerJob> findJobs(FindRequest request) {
     try {
-      totalCount = JobExplorer.getJobInstanceCount(job.getName());
+      List<ViewerJob> viewerJobList = new ArrayList<>();
+      long totalCount = JobExplorer.getJobInstanceCount(job.getName());
+      long offset = 0;
+      long limit = 10;
+
+      if(request.sublist != null){
+        offset = request.sublist.getFirstElementIndex();
+        limit = request.sublist.getMaximumElementCount();
+      }
 
       List<JobInstance> jobInstances = JobExplorer.getJobInstances(job.getName(), (int) offset, (int) limit);
       for (JobInstance jobInstance : jobInstances) {
         for (JobExecution jobExecution : JobExplorer.getJobExecutions(jobInstance)) {
+          JobParameters jobParameters = jobExecution.getJobParameters();
           ViewerJob job = new ViewerJob();
           job.setName(jobInstance.getJobName());
           job.setUuid(String.valueOf(jobExecution.getJobId()));
-          job.setStatus(jobExecution.getStatus().name());
+          job.setStatus(ViewerJobStatus.valueOf(jobExecution.getStatus().name()));
           job.setStartTime(jobExecution.getStartTime().toString());
-          job.setEndTime(jobExecution.getEndTime().toString());
+          job.setDatabaseUuid(jobParameters.getString(ViewerConstants.CONTROLLER_DATABASE_ID_PARAM));
+          job.setTableUuid(jobParameters.getString(ViewerConstants.CONTROLLER_TABLE_ID_PARAM));
+          if(jobExecution.getEndTime() != null){
+            job.setEndTime(jobExecution.getEndTime().toString());
+          } else {
+            job.setEndTime("Running");
+          }
           viewerJobList.add(job);
         }
       }
+
+      return new IndexResult<>(offset, limit, totalCount, viewerJobList, null);
     } catch (NoSuchJobException e) {
       throw new RESTException(e);
     }
-    return new IndexResult<>(offset, limit, totalCount, viewerJobList, null);
   }
 }
