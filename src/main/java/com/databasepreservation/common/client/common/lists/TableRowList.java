@@ -224,6 +224,16 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
 
           Column<ViewerRow, SafeHtml> column = new Column<ViewerRow, SafeHtml>(new SafeHtmlCell()) {
             @Override
+            public void render(Cell.Context context, ViewerRow object, SafeHtmlBuilder sb) {
+              SafeHtml value = getValue(object);
+              if (value != null) {
+                sb.appendHtmlConstant("<div title=\"" + SafeHtmlUtils.htmlEscape(value.asString()) + "\">");
+                sb.append(value);
+                sb.appendHtmlConstant("</div");
+              }
+            }
+
+            @Override
             public SafeHtml getValue(ViewerRow row) {
               SafeHtml ret = null;
               String aggregationColumn = null;

@@ -764,6 +764,17 @@ public class SolrUtils {
     return fieldModifier;
   }
 
+  public static Map<String, Object> addValueUpdate(Object value) {
+    Map<String, Object> fieldModifier = new HashMap<>(1);
+    // 20160511 this workaround fixes solr wrong behaviour with partial update
+    // of empty lists
+    if (value instanceof List && ((List<?>) value).isEmpty()) {
+      value = null;
+    }
+    fieldModifier.put("add", value);
+    return fieldModifier;
+  }
+
   public static <T extends IsIndexed> void delete(SolrClient index, SolrCollection<T> collection, Filter filter)
     throws GenericException, RequestNotValidException {
     try {

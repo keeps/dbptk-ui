@@ -10,6 +10,7 @@ import java.util.Map;
 
 import com.databasepreservation.common.client.models.DenormalizeProgressData;
 import com.databasepreservation.common.client.models.structure.ViewerNestedRow;
+import com.databasepreservation.common.server.index.utils.IterableIndexResult;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.common.SolrInputDocument;
 import org.roda.core.data.exceptions.GenericException;
@@ -167,6 +168,7 @@ public class Denormalize {
     for (Map.Entry<DenormalizeConfiguration, List<Tree<RelatedTablesConfiguration>>> entry : structure.entrySet()) {
       DenormalizeConfiguration root = entry.getKey();
       List<Tree<RelatedTablesConfiguration>> treeList = entry.getValue();
+      cleanNestedDocuments(root);
       SolrQuery rootQuery = buildRootQuery(root, treeList);
       List<SolrQuery> queryList = new ArrayList<>();
       for (Tree<RelatedTablesConfiguration> child : treeList) {
@@ -220,6 +222,19 @@ public class Denormalize {
     list.add(node.getValue());
   }
 
+  private void cleanNestedDocuments(DenormalizeConfiguration root){
+    Filter filter = FilterUtils.filterByTable(new Filter(), root.getTableID());
+
+    IterableIndexResult allRows = solrManager.findAllRows(databaseUUID, filter, null, new ArrayList<>());
+    for (ViewerRow row : allRows) {
+      solrManager.deleteNestedDocuments(databaseUUID, row.getUuid());
+    }
+
+    for (RelatedTablesConfiguration relatedTable : root.getRelatedTables()) {
+      solrManager.deleteNestedDocuments(databaseUUID, relatedTable.getUuid());
+    }
+  }
+
   private SolrQuery buildRootQuery(DenormalizeConfiguration root, List<Tree<RelatedTablesConfiguration>> treeList)
     throws ModuleException {
     Filter filter = FilterUtils.filterByTable(new Filter(), root.getTableID());
@@ -269,6 +284,7 @@ public class Denormalize {
       resultingFilter.add(new AndFiltersParameters(filterParameterList));
 
       fieldsToReturn.add(ViewerConstants.SOLR_ROWS_TABLE_ID);
+      fieldsToReturn.add(ViewerConstants.INDEX_ID);
       fieldsToReturn.add(String.format("%s:%s", ViewerConstants.SOLR_ROWS_NESTED_ORIGINAL_UUID, ViewerConstants.INDEX_ID));
       fieldsToReturn.add(String.format("%s:%s", ViewerConstants.SOLR_ROWS_NESTED_TABLE_ID, ViewerConstants.SOLR_ROWS_TABLE_ID));
       fieldsToReturn.add(String.format("%s:\"%s\"", ViewerConstants.SOLR_ROWS_NESTED_UUID, relatedTable.getUuid()));
@@ -325,6 +341,7 @@ public class Denormalize {
     if (row.getNestedRowList() != null) {
       for (ViewerRow document : row.getNestedRowList()) {
         Map<String, ViewerCell> cells = document.getCells();
+        String uuid = row.getUuid() + ViewerConstants.API_SEP + document.getUuid();
 
         Map<String, Object> fields = new HashMap<>();
         for (Map.Entry<String, ViewerCell> cell : cells.entrySet()) {
@@ -338,12 +355,12 @@ public class Denormalize {
           }
         }
         if (!fields.isEmpty()) {
-          nestedDocument.add(solrManager.createNestedDocument(row.getUuid(), document.getNestedOriginalUUID(), fields,
+          nestedDocument.add(solrManager.createNestedDocument(uuid, row.getUuid(), document.getNestedOriginalUUID(), fields,
             document.getTableId(), document.getNestedUUID()));
         }
 
         if (document.getNestedRowList() == null) {
-          break;
+          continue;
         } else {
           createdNestedDocument(document, nestedDocument);
         }

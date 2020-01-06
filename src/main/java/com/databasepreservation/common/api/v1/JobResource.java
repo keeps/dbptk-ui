@@ -16,6 +16,7 @@ import org.roda.core.data.v2.index.filter.Filter;
 import org.roda.core.data.v2.index.filter.SimpleFilterParameter;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.configuration.JobRegistry;
+import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.*;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
@@ -55,6 +56,9 @@ public class JobResource implements JobService {
 
   @Autowired
   JobRegistry JobRegistry;
+
+  @Autowired
+  JobExplorer JobExplorer;
 
   Map<String, JobExecution> jobExecutionMap = new HashMap<>();
 
@@ -118,7 +122,6 @@ public class JobResource implements JobService {
     for (String jobName : jobOperator.getJobNames()) {
       System.out.println("JobNames " + jobName);
     }
-
   }
 
   private <T> T getConfiguration(java.nio.file.Path path, String databaseUUID, Class<T> objectClass)

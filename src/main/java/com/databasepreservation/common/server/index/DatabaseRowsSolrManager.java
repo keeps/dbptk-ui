@@ -6,9 +6,8 @@ import java.nio.file.Path;
 import java.util.*;
 
 import com.databasepreservation.common.client.models.configuration.collection.CollectionConfiguration;
-import com.databasepreservation.common.client.models.configuration.collection.TableConfiguration;
-import com.databasepreservation.common.client.models.configuration.denormalize.RelatedTablesConfiguration;
 import com.databasepreservation.common.server.index.utils.*;
+import com.sun.javafx.binding.StringFormatter;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest;
@@ -463,61 +462,37 @@ public class DatabaseRowsSolrManager {
 
   }
 
-  public ViewerMetadata retrieveDatabaseMetadata(String databaseUUID) {
-    ViewerMetadata metadata = new ViewerMetadata();
-
-    return metadata;
-  }
-
   public final void addDatabaseField(final String databaseUUID, final String documentUUID,
     List<SolrInputDocument> nestedDocuments, CollectionConfiguration configuration) {
     RowsCollection collection = SolrRowsCollectionRegistry.get(databaseUUID);
     SolrInputDocument doc = new SolrInputDocument();
     doc.addField(ViewerConstants.INDEX_ID, documentUUID);
+
+    List<String> fields = new ArrayList<>();
     for (SolrInputDocument nest : nestedDocuments) {
-
-      Map<String, Map<String, List<String>>> fields = new HashMap<>();
-      String parentUUID = (String) nest.get("parentUUID_t").getValue();
-
       for (SolrInputField field : nest) {
-        if (field.getName().startsWith(ViewerConstants.SOLR_INDEX_ROW_COLUMN_NAME_PREFIX)) {
-          fields.computeIfAbsent(parentUUID, k -> new HashMap<>());
-          fields.get(parentUUID).computeIfAbsent(field.getName(), k -> new ArrayList<>());
-          fields.get(parentUUID).get(field.getName()).add((String) field.getValue());
-        }
-      }
-
-      for (TableConfiguration tableConfiguration : configuration.getTables()) {
-        for (RelatedTablesConfiguration relatedTable : tableConfiguration.getDenormalizeConfiguration()
-          .getRelatedTables()) {
-          if (relatedTable.getUuid().equals(nest.get(ViewerConstants.INDEX_ID).getValue())) {
-            String nestIndex = relatedTable.getDisplaySettings().getNestedSolrName();
-            for (Map.Entry<String, Map<String, List<String>>> parent : fields.entrySet()) {
-              for (Map.Entry<String, List<String>> col : parent.getValue().entrySet()) {
-                doc.addField(nestIndex, col.getValue());
-              }
-            }
-            break;
-          }
-        }
+        fields.add((String) field.getValue());
       }
     }
 
+    //add a non-stored field for search only
+    doc.addField("token" + ViewerConstants.SOLR_DYN_NEST_MULTI, fields);
 
-    doc.addField(ViewerConstants.SOLR_ROWS_NESTED, SolrUtils.asValueUpdate(nestedDocuments));
+    //add nested documents to root document
+    doc.addField(ViewerConstants.SOLR_ROWS_NESTED, SolrUtils.addValueUpdate(nestedDocuments));
 
     try {
       insertDocument(collection.getIndexName(), doc);
-
     } catch (ViewerException e) {
       LOGGER.error("Could not update database progress for {}", databaseUUID, e);
     }
   }
 
-  public SolrInputDocument createNestedDocument(String parentUUID, String tableRowUUID,
+  public SolrInputDocument createNestedDocument(String uuid, String parentUUID, String tableRowUUID,
                                                 Map<String, ?> fields, String tableId, String nestedUUID) {
     SolrInputDocument nestedDoc = new SolrInputDocument();
-    nestedDoc.addField(ViewerConstants.INDEX_ID, nestedUUID);
+    nestedDoc.addField(ViewerConstants.INDEX_ID, uuid);
+    nestedDoc.addField(ViewerConstants.SOLR_ROWS_NESTED_UUID, nestedUUID);
     nestedDoc.addField(ViewerConstants.SOLR_ROWS_NESTED_TABLE_ID, tableId);
     nestedDoc.addField("parentUUID_t", parentUUID);
     nestedDoc.addField(ViewerConstants.SOLR_ROWS_NESTED_ORIGINAL_UUID, tableRowUUID);
@@ -529,5 +504,17 @@ public class DatabaseRowsSolrManager {
     }
 
     return nestedDoc;
+  }
+
+  public void deleteNestedDocuments(String databaseUUID, String documentUUID) {
+    RowsCollection collection = SolrRowsCollectionRegistry.get(databaseUUID);
+    SolrInputDocument doc = new SolrInputDocument();
+    doc.addField(ViewerConstants.INDEX_ID, documentUUID);
+    doc.addField(ViewerConstants.SOLR_ROWS_NESTED, SolrUtils.asValueUpdate(null));
+    try {
+      insertDocument(collection.getIndexName(), doc);
+    } catch (ViewerException e) {
+      LOGGER.error("Could not delete nested document", databaseUUID, e);
+    }
   }
 }

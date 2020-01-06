@@ -140,6 +140,8 @@ public class DataTransformationProgressPanel extends Composite {
   private void createProgressBar(DenormalizeProgressData progressData) {
     int currentGlobalPercent = new Double(
       ((progressData.getProcessedRows() * 1.0D) / progressData.getRowsToProcess()) * 100).intValue();
-    progressbarMap.get(progressData.getTableUUID()).setCurrent(currentGlobalPercent);
+    if(progressbarMap.get(progressData.getTableUUID()) != null ){
+      progressbarMap.get(progressData.getTableUUID()).setCurrent(currentGlobalPercent);
+    }
   }
 }

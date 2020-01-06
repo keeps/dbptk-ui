@@ -181,9 +181,10 @@ public class ViewerConstants {
    */
   public static final String SOLR_ROWS_TABLE_ID = "tableId";
   public static final String SOLR_ROWS_TABLE_UUID = "tableUUID";
+  public static final String SOLR_ROWS_NESTED_UUID = "nestedUUID";
+  public static final String SOLR_ROWS_NESTED_ORIGINAL_UUID = "nestedOriginalUUID";
   public static final String SOLR_ROWS_NESTED_TABLE_ID = "nestedTableId";
-  public static final String SOLR_ROWS_NESTED_UUID = "nestedUUID_t";
-  public static final String SOLR_ROWS_NESTED_ORIGINAL_UUID = "nestedOriginalUUID_t";
+  public static final String SOLR_ROWS_NESTED_TABLE_UUID = "nestedTableUUID";
   public static final String SOLR_ROWS_NESTED = "nested";
 
   /*

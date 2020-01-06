@@ -282,7 +282,6 @@ public class RowPanel extends RightPanel {
   }
 
   private void getNestedHTML(List<ViewerRow> nestedRowList) {
-    // TODO create a table
     Filter filter = new Filter();
     List<FilterParameter> filterParameterList = new ArrayList<>();
 
