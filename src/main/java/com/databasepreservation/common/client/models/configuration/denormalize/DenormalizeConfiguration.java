@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 
 /**
@@ -12,7 +13,7 @@ import com.databasepreservation.common.client.models.structure.ViewerTable;
 public class DenormalizeConfiguration implements Serializable {
     private String uuid;
     private String version;
-    private String state;
+    private ViewerJobStatus state;
     private String job;
     private String tableUUID;
     private String tableID;
@@ -44,11 +45,11 @@ public class DenormalizeConfiguration implements Serializable {
         this.version = version;
     }
 
-    public String getState() {
+    public ViewerJobStatus getState() {
         return state;
     }
 
-    public void setState(String state) {
+    public void setState(ViewerJobStatus state) {
         this.state = state;
     }
 

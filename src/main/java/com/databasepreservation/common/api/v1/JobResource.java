@@ -10,9 +10,10 @@ import java.util.Map;
 
 import javax.ws.rs.Path;
 
+import org.roda.core.data.exceptions.GenericException;
+import org.roda.core.data.exceptions.RequestNotValidException;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
@@ -43,8 +44,9 @@ import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
 import com.databasepreservation.common.client.services.JobService;
 import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.server.ViewerFactory;
-import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
 import com.databasepreservation.common.server.index.utils.JsonTransformer;
+import com.databasepreservation.common.server.index.utils.SolrUtils;
+import com.databasepreservation.common.utils.I18nUtility;
 import com.databasepreservation.model.exception.ModuleException;
 
 /**
@@ -72,7 +74,7 @@ public class JobResource implements JobService {
   JobRegistry JobRegistry;
 
   @Autowired
-  JobExplorer JobExplorer;
+  JobExplorer jobExplorer;
 
   Map<String, JobExecution> jobExecutionMap = new HashMap<>();
 
@@ -113,23 +115,24 @@ public class JobResource implements JobService {
   }
 
   private void setupJob(CollectionConfiguration configuration, String databaseUUID) throws ModuleException {
-    DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
-
     for (TableConfiguration table : configuration.getTables()) {
-      try {
-        JobParametersBuilder jobBuilder = new JobParametersBuilder();
-        jobBuilder.addDate("startDate", new Date());
-        jobBuilder.addString(ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID);
-        jobBuilder.addString(ViewerConstants.CONTROLLER_TABLE_ID_PARAM, table.getUuid());
-        JobParameters jobParameters = jobBuilder.toJobParameters();
+      if (table.getDenormalizeConfiguration().getState().equals(ViewerJobStatus.NEW)) {
+        try {
+          JobParametersBuilder jobBuilder = new JobParametersBuilder();
+          jobBuilder.addDate(ViewerConstants.SOLR_SEARCHES_DATE_ADDED, new Date());
+          jobBuilder.addString(ViewerConstants.INDEX_ID, SolrUtils.randomUUID());
+          jobBuilder.addString(ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID);
+          jobBuilder.addString(ViewerConstants.CONTROLLER_TABLE_ID_PARAM, table.getUuid());
+          JobParameters jobParameters = jobBuilder.toJobParameters();
 
-        JobExecution jobExecution = jobLauncher.run(job, jobParameters);
-        String uuid = databaseUUID + table.getUuid();
-        jobExecutionMap.put(uuid, jobExecution);
+          JobExecution jobExecution = jobLauncher.run(job, jobParameters);
+          String uuid = databaseUUID + table.getUuid();
+          jobExecutionMap.put(uuid, jobExecution);
 
-      } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
-        | JobParametersInvalidException e) {
-        throw new ModuleException().withMessage("Cannot run a Job: " + e.getMessage());
+        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
+          | JobParametersInvalidException e) {
+          throw new ModuleException().withMessage("Cannot run a Job: " + e.getMessage());
+        }
       }
     }
 
@@ -153,10 +156,9 @@ public class JobResource implements JobService {
   public List<DenormalizeProgressData> progress(String databaseUUID) {
     List<DenormalizeProgressData> progressDataList = new ArrayList<>();
 
-    CollectionConfiguration configuration = null;
     try {
-      configuration = getConfiguration(Paths.get(databaseUUID + ViewerConstants.JSON_EXTENSION), databaseUUID,
-        CollectionConfiguration.class);
+      CollectionConfiguration configuration = getConfiguration(Paths.get(databaseUUID + ViewerConstants.JSON_EXTENSION),
+        databaseUUID, CollectionConfiguration.class);
       for (TableConfiguration table : configuration.getTables()) {
         progressDataList.add(DenormalizeProgressData.getInstance(databaseUUID, table.getUuid()));
       }
@@ -168,40 +170,12 @@ public class JobResource implements JobService {
   }
 
   @Override
-  public IndexResult<ViewerJob> findJobs(FindRequest request) {
+  public IndexResult<ViewerJob> find(FindRequest findRequest, String locale) {
     try {
-      List<ViewerJob> viewerJobList = new ArrayList<>();
-      long totalCount = JobExplorer.getJobInstanceCount(job.getName());
-      long offset = 0;
-      long limit = 10;
-
-      if(request.sublist != null){
-        offset = request.sublist.getFirstElementIndex();
-        limit = request.sublist.getMaximumElementCount();
-      }
-
-      List<JobInstance> jobInstances = JobExplorer.getJobInstances(job.getName(), (int) offset, (int) limit);
-      for (JobInstance jobInstance : jobInstances) {
-        for (JobExecution jobExecution : JobExplorer.getJobExecutions(jobInstance)) {
-          JobParameters jobParameters = jobExecution.getJobParameters();
-          ViewerJob job = new ViewerJob();
-          job.setName(jobInstance.getJobName());
-          job.setUuid(String.valueOf(jobExecution.getJobId()));
-          job.setStatus(ViewerJobStatus.valueOf(jobExecution.getStatus().name()));
-          job.setStartTime(jobExecution.getStartTime().toString());
-          job.setDatabaseUuid(jobParameters.getString(ViewerConstants.CONTROLLER_DATABASE_ID_PARAM));
-          job.setTableUuid(jobParameters.getString(ViewerConstants.CONTROLLER_TABLE_ID_PARAM));
-          if(jobExecution.getEndTime() != null){
-            job.setEndTime(jobExecution.getEndTime().toString());
-          } else {
-            job.setEndTime("Running");
-          }
-          viewerJobList.add(job);
-        }
-      }
-
-      return new IndexResult<>(offset, limit, totalCount, viewerJobList, null);
-    } catch (NoSuchJobException e) {
+      final IndexResult<ViewerJob> result = ViewerFactory.getSolrManager().find(ViewerJob.class, findRequest.filter,
+        findRequest.sorter, findRequest.sublist, findRequest.facets);
+      return I18nUtility.translate(result, ViewerJob.class, locale);
+    } catch (GenericException | RequestNotValidException e) {
       throw new RESTException(e);
     }
   }

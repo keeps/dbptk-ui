@@ -114,9 +114,11 @@ public class TransformationChildTables {
           } else {
             if (selectionTablePanel.getSelectionModel().isSelected(object)) {
               configuration.addColumnToInclude(uuid, object);
+              configuration.update(configuration.getDenormalizeConfiguration(rootTable.getTable()));
               rootTable.redrawTable();
             } else {
               configuration.removeColumnToInclude(uuid, object);
+              //configuration.update(configuration.getDenormalizeConfiguration(rootTable.getTable()));
               rootTable.redrawTable();
             }
             int currentSize = selectionTablePanel.getSelectionModel().getSelectedSet().size();
@@ -141,4 +143,5 @@ public class TransformationChildTables {
     }
     return false;
   }
+
 }

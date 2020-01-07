@@ -97,6 +97,7 @@ public class ViewerConstants {
   public static final String SOLR_INDEX_SEARCHES_COLLECTION_NAME = "dbv-searches";
   public static final String SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX = "dbv-database-";
   public static final String SOLR_INDEX_ACTIVITY_LOGS_COLLECTION_NAME = "dbv-activity-logs";
+  public static final String SOLR_INDEX_BATCH_JOBS_COLLECTION_NAME = "dbv-batch-jobs";
   public static final String SOLR_INDEX_ROW_COLUMN_NAME_PREFIX = "col";
   public static final String SOLR_INDEX_ROW_NESTED_COLUMN_NAME_PREFIX = "nest";
   public static final String SOLR_INDEX_ROW_LOB_COLUMN_NAME_PREFIX = "lob";
@@ -148,6 +149,22 @@ public class ViewerConstants {
   public static final String SOLR_ACTIVITY_LOG_DURATION = "duration";
   public static final String SOLR_ACTIVITY_LOG_LINE_NUMBER = "lineNumber";
   public static final String SOLR_ACTIVITY_LOG_PARAMETERS = "parameters";
+
+  /*
+   * BATCH JOB FIELDS
+   */
+  public static final String SOLR_BATCH_JOB_ID = "jobId";
+  public static final String SOLR_BATCH_JOB_DATABASE_UUID = "databaseUUID";
+  public static final String SOLR_BATCH_JOB_DATABASE_NAME = "databaseName";
+  public static final String SOLR_BATCH_JOB_TABLE_UUID = "tableUUID";
+  public static final String SOLR_BATCH_JOB_TABLE_NAME = "tableName";
+  public static final String SOLR_BATCH_JOB_NAME = "name";
+  public static final String SOLR_BATCH_JOB_STATUS = "status";
+  public static final String SOLR_BATCH_JOB_CREATE_TIME = "createTime";
+  public static final String SOLR_BATCH_JOB_START_TIME = "startTime";
+  public static final String SOLR_BATCH_JOB_END_TIME = "endTime";
+  public static final String SOLR_BATCH_JOB_EXIT_CODE = "exitCode";
+  public static final String SOLR_BATCH_JOB_EXIT_DESCRIPTION = "exitCodeDescription";
 
   public static final String ACTIVITY_LOG_PROPERTY = "activityLogEntry";
 

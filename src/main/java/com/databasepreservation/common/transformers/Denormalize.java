@@ -8,9 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.client.models.DenormalizeProgressData;
-import com.databasepreservation.common.client.models.structure.ViewerNestedRow;
-import com.databasepreservation.common.server.index.utils.IterableIndexResult;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.common.SolrInputDocument;
 import org.roda.core.data.exceptions.GenericException;
@@ -23,6 +20,7 @@ import org.roda.core.data.v2.index.filter.SimpleFilterParameter;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.utils.Tree;
+import com.databasepreservation.common.client.models.DenormalizeProgressData;
 import com.databasepreservation.common.client.models.configuration.collection.CollectionConfiguration;
 import com.databasepreservation.common.client.models.configuration.collection.TableConfiguration;
 import com.databasepreservation.common.client.models.configuration.denormalize.DenormalizeConfiguration;
@@ -37,6 +35,7 @@ import com.databasepreservation.common.filter.solr.TermsFilterParameter;
 import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
+import com.databasepreservation.common.server.index.utils.IterableIndexResult;
 import com.databasepreservation.common.server.index.utils.IterableNestedIndexResult;
 import com.databasepreservation.common.server.index.utils.JsonTransformer;
 import com.databasepreservation.common.server.index.utils.SolrUtils;
@@ -68,20 +67,6 @@ public class Denormalize {
     }
   }
 
-  public Denormalize(ViewerDatabase database, CollectionConfiguration configuration,
-    DenormalizeConfiguration denormalizeConfiguration) throws ModuleException {
-    this.solrManager = ViewerFactory.getSolrManager();
-    this.database = database;
-    this.databaseUUID = database.getUuid();
-    this.configuration = configuration;
-    buildDenormalizeTree(denormalizeConfiguration);
-
-    if (structure.isEmpty()) {
-      return;
-    }
-    denormalize();
-  }
-
   public Denormalize(String databaseUUID, String tableUUID) throws ModuleException {
     this.solrManager = ViewerFactory.getSolrManager();
     this.databaseUUID = databaseUUID;
@@ -93,7 +78,7 @@ public class Denormalize {
       this.configuration = getConfiguration(Paths.get(databaseUUID + ViewerConstants.JSON_EXTENSION),
         CollectionConfiguration.class);
       DenormalizeConfiguration denormalizeConfiguration = getConfiguration(
-        Paths.get(tableUUID + "-CURRENT" + ViewerConstants.JSON_EXTENSION), DenormalizeConfiguration.class);
+        Paths.get(tableUUID + ViewerConstants.JSON_EXTENSION), DenormalizeConfiguration.class);
 
       buildDenormalizeTree(denormalizeConfiguration);
 
@@ -130,7 +115,7 @@ public class Denormalize {
       System.out.println(" TC " + tableConfig.getId());
       System.out.println("================================================================");
       DenormalizeConfiguration denormalizeConfig = getConfiguration(
-        Paths.get(tableConfig.getUuid() + "-CURRENT" + ViewerConstants.JSON_EXTENSION), DenormalizeConfiguration.class);
+        Paths.get(tableConfig.getUuid() + ViewerConstants.JSON_EXTENSION), DenormalizeConfiguration.class);
       if (denormalizeConfig != null) {
         buildDenormalizeTree(denormalizeConfig);
       }
@@ -266,9 +251,6 @@ public class Denormalize {
       List<FilterParameter> filterParameterList = new ArrayList<>();
 
       // tableId:{sakila.film_actor}
-      if(relatedTable.getTableID().equals("sakila.address")){
-        //throw new ModuleException().withMessage("ERROR TEST");
-      }
       filterParameterList.add(new SimpleFilterParameter(ViewerConstants.SOLR_ROWS_TABLE_ID, relatedTable.getTableID()));
 
       for (ReferencesConfiguration reference : relatedTable.getReferences()) {

@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.models.structure.ViewerJob;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest;
@@ -239,6 +240,21 @@ public class DatabaseRowsSolrManager {
       LOGGER.debug("IOException while attempting to save activity log entry", e);
     } catch (SolrServerException e) {
       LOGGER.debug("Solr error while attempting to save activity log entry", e);
+    }
+  }
+
+  public void addBatchJob(ViewerJob batchJob) throws NotFoundException, GenericException {
+    SolrCollection<ViewerJob> viewerJobSolrCollection = SolrDefaultCollectionRegistry.get(ViewerJob.class);
+    try {
+      SolrInputDocument doc = viewerJobSolrCollection.toSolrDocument(batchJob);
+      client.add(viewerJobSolrCollection.getIndexName(), doc);
+      client.commit(viewerJobSolrCollection.getIndexName(), true, true, true);
+    } catch (ViewerException | AuthorizationDeniedException | RequestNotValidException e) {
+      LOGGER.debug("Solr error while converting to document", e);
+    } catch (SolrServerException e) {
+      LOGGER.debug("Solr error while attempting to save batch job", e);
+    } catch (IOException e) {
+      LOGGER.debug("IOException while attempting to save batch job", e);
     }
   }
 

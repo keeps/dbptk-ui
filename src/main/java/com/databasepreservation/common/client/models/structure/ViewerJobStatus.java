@@ -5,5 +5,5 @@ package com.databasepreservation.common.client.models.structure;
  */
 //copy of BatchStatus for use in GWT
 public enum ViewerJobStatus {
-  COMPLETED, STARTING, STARTED, STOPPING, STOPPED, FAILED, ABANDONED, UNKNOWN;
+  COMPLETED, STARTING, STARTED, STOPPING, STOPPED, FAILED, ABANDONED, UNKNOWN, NEW;
 }

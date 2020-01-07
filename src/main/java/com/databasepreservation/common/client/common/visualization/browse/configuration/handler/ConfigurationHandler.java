@@ -14,7 +14,12 @@ import com.databasepreservation.common.client.models.configuration.denormalize.D
 import com.databasepreservation.common.client.models.configuration.denormalize.ReferencesConfiguration;
 import com.databasepreservation.common.client.models.configuration.denormalize.RelatedColumnConfiguration;
 import com.databasepreservation.common.client.models.configuration.denormalize.RelatedTablesConfiguration;
-import com.databasepreservation.common.client.models.structure.*;
+import com.databasepreservation.common.client.models.structure.ViewerColumn;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
+import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
+import com.databasepreservation.common.client.models.structure.ViewerReference;
+import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.services.ConfigurationService;
 import com.google.gwt.core.client.GWT;
 
@@ -27,10 +32,6 @@ public class ConfigurationHandler {
   private ViewerDatabase database;
   private CollectionConfiguration collectionConfiguration;
   private Map<String, Integer> nestedIndexMap = new HashMap<>();
-
-  private enum State {
-    CURRENT, DESIRED
-  }
 
   /**
    *
@@ -106,7 +107,7 @@ public class ConfigurationHandler {
    */
   private DenormalizeConfiguration createDenormalizeConfiguration(ViewerTable table) {
     DenormalizeConfiguration denormalizeConfiguration = new DenormalizeConfiguration(database.getUuid(), table);
-    denormalizeConfiguration.setState(State.CURRENT.name());
+    update(denormalizeConfiguration);
     denormalizeConfiguration.setVersion(VERSION);
     return denormalizeConfiguration;
   }
@@ -144,6 +145,7 @@ public class ConfigurationHandler {
     for (Map.Entry<ViewerForeignKey, TableNode> entry : children.entrySet()) {
       removeRelatedTable(entry.getValue(), table);
     }
+    update(tableConfiguration.getDenormalizeConfiguration());
   }
 
   /**
@@ -187,6 +189,7 @@ public class ConfigurationHandler {
     }
 
     denormalizeConfiguration.getRelatedTables().add(relatedTable);
+    update(denormalizeConfiguration);
     if (nestedIndexMap.get(targetTable.getUuid()) == null) {
       nestedIndexMap.put(targetTable.getUuid(), 0);
     } else {
@@ -301,5 +304,9 @@ public class ConfigurationHandler {
       }
     }
     return columnsToIncludeMap;
+  }
+
+  public void update(DenormalizeConfiguration denormalizeConfiguration) {
+    denormalizeConfiguration.setState(ViewerJobStatus.NEW);
   }
 }

@@ -11,18 +11,17 @@ import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.lists.widgets.MultipleSelectionTablePanel;
 import com.databasepreservation.common.client.common.sidebar.DataTransformationSidebar;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.ConfigurationHandler;
-import com.databasepreservation.common.client.common.visualization.browse.information.ErDiagram;
 import com.databasepreservation.common.client.models.configuration.collection.CollectionConfiguration;
 import com.databasepreservation.common.client.models.configuration.denormalize.RelatedTablesConfiguration;
 import com.databasepreservation.common.client.models.structure.*;
 import com.databasepreservation.common.client.services.ConfigurationService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
-import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.widgets.Alert;
 import com.databasepreservation.common.client.widgets.BootstrapCard;
 import com.databasepreservation.common.client.widgets.SwitchBtn;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -248,7 +247,7 @@ public class DataTransformation extends RightPanel {
    * @param message
    * @return FlowPanel
    */
-  private FlowPanel buildReferenceInformation(String message) {
+  private FlowPanel buildReferenceInformation(SafeHtml message) {
     FlowPanel referenceInformation = new FlowPanel();
     referenceInformation.setStyleName("reference-panel");
 
@@ -257,7 +256,7 @@ public class DataTransformation extends RightPanel {
       SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.REFERENCE)));
     referenceIcon.setStyleName("icon");
     referenceInformation.add(referenceIcon);
-    referenceInformation.add(new Label(message));
+    referenceInformation.add(new HTML(message));
 
     return referenceInformation;
   }

@@ -111,4 +111,7 @@ public class TransformationTable extends Composite {
     content.add(tablePanel);
   }
 
+  public ViewerTable getTable() {
+    return table;
+  }
 }

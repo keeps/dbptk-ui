@@ -89,7 +89,7 @@ public class DenormalizeStructure {
   private void denormalize() throws ModuleException {
     for (TableConfiguration tableConfig : configuration.getTables()) {
       DenormalizeConfiguration denormalizeConfig = getConfiguration(
-        Paths.get(tableConfig.getUuid() + "-CURRENT" + ViewerConstants.JSON_EXTENSION), DenormalizeConfiguration.class);
+        Paths.get(tableConfig.getUuid() + ViewerConstants.JSON_EXTENSION), DenormalizeConfiguration.class);
       getRowsToDenormalize(denormalizeConfig);
     }
   }

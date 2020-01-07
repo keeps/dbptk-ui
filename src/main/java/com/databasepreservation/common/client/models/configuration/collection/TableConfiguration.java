@@ -20,7 +20,7 @@ public class TableConfiguration implements Serializable {
   private String description;
   private Boolean hide;
   private List<ColumnConfiguration> column;
-  private String relatedTables;
+  private List<String> relatedTables;
   private DenormalizeConfiguration denormalizeConfiguration;
 
   public TableConfiguration(ViewerTable table){
@@ -30,6 +30,7 @@ public class TableConfiguration implements Serializable {
     setDescription(table.getDescription());
     setHide(false);
     column = new ArrayList<>();
+    relatedTables = new ArrayList<>();
     denormalizeConfiguration = new DenormalizeConfiguration();
   }
 
@@ -84,19 +85,19 @@ public class TableConfiguration implements Serializable {
     this.column = column;
   }
 
-  public String getRelatedTables() {
-    return relatedTables;
-  }
-
-  public void setRelatedTables(String relatedTables) {
-    this.relatedTables = relatedTables;
-  }
-
   public DenormalizeConfiguration getDenormalizeConfiguration() {
     return denormalizeConfiguration;
   }
 
   public void setDenormalizeConfiguration(DenormalizeConfiguration denormalizeConfiguration) {
     this.denormalizeConfiguration = denormalizeConfiguration;
+  }
+
+  public List<String> getRelatedTables() {
+    return relatedTables;
+  }
+
+  public void setRelatedTables(List<String> relatedTables) {
+    this.relatedTables = relatedTables;
   }
 }

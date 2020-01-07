@@ -60,6 +60,7 @@ public class FontAwesomeIconManager {
   public static final String TECHNICAL = "briefcase";
   public static final String BREADCRUMB_SEPARATOR = "chevron-right";
   public static final String ACTIVITY_LOG = "receipt";
+  public static final String NETWORK_WIRED = "network-wired";
 
 
   public static String getTag(String icon) {

@@ -166,7 +166,7 @@ public class DatabasePanel extends Composite {
                   FontAwesomeIconManager.loaded(FontAwesomeIconManager.ACTIVITY_LOG, messages.activityLogMenuText()),
                   (Command) HistoryManager::gotoActivityLog);
                 administrationMenu.addItem(
-                  FontAwesomeIconManager.loaded(FontAwesomeIconManager.COG, messages.menuTextForJobs()),
+                    FontAwesomeIconManager.loaded(FontAwesomeIconManager.NETWORK_WIRED, messages.menuTextForJobs()),
                     (Command) HistoryManager::gotoJobs);
                 administrationMenu.addItem(
                   FontAwesomeIconManager.loaded(FontAwesomeIconManager.PREFERENCES, messages.menuTextForPreferences()),

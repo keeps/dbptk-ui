@@ -463,6 +463,22 @@ public interface ClientMessages extends Messages {
 
   String humanizedTextForSolrError();
 
+  String humanizedTextForJobStatusFailed();
+
+  String humanizedTextForJobStatusCompleted();
+
+  String humanizedTextForJobStatusStarting();
+
+  String humanizedTextForJobStatusStarted();
+
+  String humanizedTextForJobStatusStopping();
+
+  String humanizedTextForJobStatusStopped();
+
+  String humanizedTextForJobStatusAbandoned();
+
+  String humanizedTextForJobStatusUnknown();
+
   String durationDHMSShortDays(int days, int hours, int minutes, int seconds);
 
   String durationDHMSShortHours(int hours, int minutes, int seconds);
@@ -1293,9 +1309,9 @@ public interface ClientMessages extends Messages {
 
   String dataTransformationTextForAlertColumnsOrder();
 
-  String dataTransformationTextForIsReferencedBy(String table, String column);
+  SafeHtml dataTransformationTextForIsReferencedBy(String table, String column);
 
-  String dataTransformationTextForIsRelatedTo(String table, String column);
+  SafeHtml dataTransformationTextForIsRelatedTo(String table, String column);
 
   String dataTransformationTextForSeparetedRadioButton();
 
@@ -1308,4 +1324,24 @@ public interface ClientMessages extends Messages {
    *******************************************/
   String preferencesPanelTextForDescription();
 
+  /********************************************
+   * Batch Jobs
+   *******************************************/
+  String batchJobsTextForJobId();
+
+  String batchJobsTextForDatabase();
+
+  String batchJobsTextForTable();
+
+  String batchJobsTextForName();
+
+  String batchJobsTextForCreateTime();
+
+  String batchJobsTextForStartTime();
+
+  String batchJobsTextForEndTime();
+
+  String batchJobsTextForStatus();
+
+  String batchJobsTextForDetail();
 }

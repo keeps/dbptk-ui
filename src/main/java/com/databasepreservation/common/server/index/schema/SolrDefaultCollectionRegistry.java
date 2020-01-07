@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.databasepreservation.common.server.index.schema.collections.ActivityLogsCollection;
+import com.databasepreservation.common.server.index.schema.collections.BatchJobsCollection;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
@@ -45,6 +46,7 @@ public final class SolrDefaultCollectionRegistry {
     register(new DatabasesCollection());
     register(new SavedSearchesCollection());
     register(new ActivityLogsCollection());
+    register(new BatchJobsCollection());
 
     LOGGER.debug("Default collections done");
   }

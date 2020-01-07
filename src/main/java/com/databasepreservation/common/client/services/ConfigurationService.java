@@ -7,6 +7,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 
+import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
 import org.fusesource.restygwt.client.DirectRestService;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.fusesource.restygwt.client.REST;
@@ -67,10 +68,6 @@ public interface ConfigurationService extends DirectRestService {
   Boolean createDenormalizeConfigurationFile(@PathParam("databaseuuid") String databaseuuid,
     @PathParam("tableuuid") String tableeuuid, DenormalizeConfiguration configuration);
 
-  @POST
-  @Path("/process/denormalize/{databaseuuid}")
-  Boolean denormalize(@PathParam("databaseuuid") String databaseuuid);
-
   @GET
   @Path("/{databaseuuid}")
   CollectionConfiguration getConfiguration(@PathParam("databaseuuid") String databaseuuid);
@@ -79,4 +76,9 @@ public interface ConfigurationService extends DirectRestService {
   @Path("/{databaseuuid}")
   Boolean createConfigurationBundle(@PathParam("databaseuuid") String databaseuuid,
     CollectionConfiguration configuration);
+
+  @POST
+  @Path("/{databaseuuid}/{tableuuid}")
+  Boolean updateDenormalizeConfiguration(@PathParam("databaseuuid") String databaseuuid,
+                                         @PathParam("tableuuid") String tableuuid, ViewerJobStatus status);
 }

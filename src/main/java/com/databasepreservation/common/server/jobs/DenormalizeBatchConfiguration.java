@@ -51,7 +51,7 @@ public class DenormalizeBatchConfiguration {
   }
 
   @Bean(name = "denormalizeJob")
-  public Job denormalizeJob(JobCompletionNotificationListener listener, Step step1) {
+  public Job denormalizeJob(JobListener listener, Step step1) {
     return jobBuilderFactory.get("denormalizeJob").incrementer(new RunIdIncrementer()).listener(listener).flow(step1)
       .end().build();
   }
