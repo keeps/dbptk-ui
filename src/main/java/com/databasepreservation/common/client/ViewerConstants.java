@@ -69,6 +69,10 @@ public class ViewerConstants {
   public static final String VIEWER_REPORTS_FOLDER = "reports";
   public static final String VIEWER_INDEX_FOLDER = "index";
   public static final String VIEWER_ACTIVITY_LOG_FOLDER = "activity-logs";
+  public static final String VIEWER_STATUS_FOLDER = "status";
+  public static final String VIEWER_STATUS_DATABASE_FOLDER = "databases";
+  public static final String VIEWER_STATUS_COLLECTION_FOLDER = "collections";
+  public static final String VIEWER_STATUS_DENORMALIZATION_FOLDER = "denormalizations";
 
   public static final String MEDIA_TYPE_APPLICATION_OCTET_STREAM = "application/octet-stream";
   public static final String MEDIA_TYPE_TEXT_HTML = "text/html";
@@ -462,6 +466,13 @@ public class ViewerConstants {
   public static final String CONTROLLER_SIARD_RESOURCE = "com.databasepreservation.common.api.v1.SIARDResource";
   public static final String CONTROLLER_SEARCH_RESOURCE = "com.databasepreservation.common.api.v1.SearchResource";
   public static final String CONTROLLER_USER_LOGIN_CONTROLLER = "com.databasepreservation.common.server.controller.UserLoginController";
+
+  /*
+   * Status
+   */
+  public static final String DATABASE_STATUS_VERSION = "1.0.0";
+  public static final String COLLECTION_STATUS_VERSION = "1.0.0";
+  public static final String DENORMALIZATION_STATUS_VERSION = "1.0.0";
 
   /**
    * private constructor

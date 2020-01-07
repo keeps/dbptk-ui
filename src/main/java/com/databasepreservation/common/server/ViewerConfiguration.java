@@ -112,6 +112,10 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   private static Path mapDBPath;
   private static Path activityLogsPath;
   private static Path databaseConfigPath;
+  private static Path statusPath;
+  private static Path databaseStatusPath;
+  private static Path collectionStatusPath;
+  private static Path denormalizationStatusPath;
 
   // Configuration related objects
   private static CompositeConfiguration viewerConfiguration = null;
@@ -314,6 +318,22 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
 
   public Path getDatabaseConfigPath() { return databaseConfigPath;}
 
+  public Path getStatusPath() {
+    return statusPath;
+  }
+
+  public Path getDatabaseStatusPath() {
+    return databaseStatusPath;
+  }
+
+  public Path getCollectionStatusPath() {
+    return collectionStatusPath;
+  }
+
+  public Path getDenormalizationStatusPath() {
+    return denormalizationStatusPath;
+  }
+
   /*
    * Specific parts to the configuration used in the DBVTK
    * ____________________________________________________________________________________________________________________
@@ -415,6 +435,10 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     mapDBPath = viewerHomePath.resolve(ViewerConstants.VIEWER_MAPDB_FOLDER);
     activityLogsPath = viewerHomePath.resolve(ViewerConstants.VIEWER_ACTIVITY_LOG_FOLDER);
     databaseConfigPath = configPath.resolve(ViewerConstants.VIEWER_DATABASE_CONFIG_FOLDER);
+    statusPath = viewerHomePath.resolve(ViewerConstants.VIEWER_STATUS_FOLDER);
+    databaseStatusPath = statusPath.resolve(ViewerConstants.VIEWER_STATUS_DATABASE_FOLDER);
+    collectionStatusPath = statusPath.resolve(ViewerConstants.VIEWER_STATUS_COLLECTION_FOLDER);
+    denormalizationStatusPath = statusPath.resolve(ViewerConstants.VIEWER_STATUS_DENORMALIZATION_FOLDER);
 
     configureLogback();
 
@@ -454,6 +478,10 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     essentialDirectories.add(mapDBPath);
     essentialDirectories.add(activityLogsPath);
     essentialDirectories.add(databaseConfigPath);
+    essentialDirectories.add(statusPath);
+    essentialDirectories.add(databaseStatusPath);
+    essentialDirectories.add(collectionStatusPath);
+    essentialDirectories.add(denormalizationStatusPath);
 
     for (Path path : essentialDirectories) {
       try {

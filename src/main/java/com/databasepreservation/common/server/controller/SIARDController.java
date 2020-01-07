@@ -3,7 +3,12 @@ package com.databasepreservation.common.server.controller;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_SEARCHES_DATABASE_UUID;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -12,10 +17,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +54,10 @@ import com.databasepreservation.common.client.models.parameters.PreservationPara
 import com.databasepreservation.common.client.models.parameters.SIARDUpdateParameters;
 import com.databasepreservation.common.client.models.parameters.SSHConfiguration;
 import com.databasepreservation.common.client.models.parameters.TableAndColumnsParameters;
+import com.databasepreservation.common.client.models.status.database.DatabaseStatus;
+import com.databasepreservation.common.client.models.status.database.Indicators;
+import com.databasepreservation.common.client.models.status.database.SiardStatus;
+import com.databasepreservation.common.client.models.status.database.ValidationStatus;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseFromToolkit;
@@ -413,6 +420,19 @@ public class SIARDController {
     Path siardPath = basePath.resolve(localPath);
     convertSIARDMetadataToSolr(siardPath, databaseUUID);
 
+    DatabaseStatus status = new DatabaseStatus();
+    SiardStatus siardStatus = new SiardStatus();
+    siardStatus.setLocation(siardPath.toString());
+    status.setId(databaseUUID);
+    status.setSiardStatus(siardStatus);
+
+    ValidationStatus validationStatus = new ValidationStatus();
+    validationStatus.setValidationStatus(ViewerDatabaseValidationStatus.NOT_VALIDATED);
+    status.setValidationStatus(validationStatus);
+
+    ViewerFactory.getConfigurationManager().addDatabaseStatus(status,
+      ViewerFactory.getViewerConfiguration().getDatabaseStatusPath());
+
     return databaseUUID;
   }
 
@@ -590,6 +610,8 @@ public class SIARDController {
 
         solrManager.updateSIARDValidationInformation(databaseUUID, status, validationReportPath, dbptkVersion,
           new DateTime().toString());
+        ViewerFactory.getConfigurationManager().updateValidationStatus(databaseUUID, status, new DateTime().toString(), validationReportPath, dbptkVersion,
+          ViewerFactory.getViewerConfiguration().getDatabaseStatusPath());
       } catch (IOException e) {
         updateStatusValidate(databaseUUID, ViewerDatabaseValidationStatus.ERROR);
         throw new GenericException("Failed to obtain the DBPTK version from properties", e);
@@ -613,12 +635,16 @@ public class SIARDController {
     String errors, String warnings, String skipped) {
     final DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
     solrManager.updateSIARDValidationIndicators(databaseUUID, passed, ok, errors, failed, warnings, skipped);
+    Indicators indicators = new Indicators(passed, failed, warnings, skipped);
+    ViewerFactory.getConfigurationManager().updateIndicators(databaseUUID, indicators,
+      ViewerFactory.getViewerConfiguration().getDatabaseStatusPath());
   }
 
   public static void updateStatusValidate(String databaseUUID, ViewerDatabaseValidationStatus status) {
     final DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
     solrManager.updateSIARDValidationInformation(databaseUUID, status, null, null, new DateTime().toString());
-
+    ViewerFactory.getConfigurationManager().updateValidationStatus(databaseUUID, status, new DateTime().toString(), null, null,
+        ViewerFactory.getViewerConfiguration().getDatabaseStatusPath());
   }
 
   public static boolean deleteAll(String databaseUUID)
