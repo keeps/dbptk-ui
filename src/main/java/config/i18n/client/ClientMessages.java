@@ -588,6 +588,8 @@ public interface ClientMessages extends Messages {
 
   String breadcrumbTextForDataTransformation();
 
+  String breadcrumbTextForPreferences();
+
   /*********************************************
    * Home Page
    ********************************************/
@@ -1251,11 +1253,13 @@ public interface ClientMessages extends Messages {
   SafeHtml dateRangeFilterParameter(String fromDate, String fromTo);
 
   /********************************************
-   * Preferences
+   * Menu
    *******************************************/
-  String preferencesMenuText();
+  String menuTextForPreferences();
 
-  String administrationMenuText();
+  String menuTextForAdministration();
+
+  String menuTextForJobs();
 
   String objectNotFound();
 
@@ -1279,7 +1283,6 @@ public interface ClientMessages extends Messages {
   /********************************************
    * Data Transformation
    *******************************************/
-
   String dataTransformationSidebarDialogTitle();
 
   String dataTransformationSidebarWaitDialogMessage();
@@ -1297,5 +1300,10 @@ public interface ClientMessages extends Messages {
   String dataTransformationTextForAggregationRadioButton();
 
   String dataTransformationTableRowList(List<String> columns);
+
+  /********************************************
+   * Preferences Panel
+   *******************************************/
+  String preferencesPanelTextForDescription();
 
 }

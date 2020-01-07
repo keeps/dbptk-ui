@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.common.visualization.preferences.PreferencesPanel;
 import org.roda.core.data.v2.user.User;
 
 import com.databasepreservation.common.client.ClientConfigurationManager;
@@ -20,7 +21,12 @@ import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.common.utils.RightPanelLoader;
 import com.databasepreservation.common.client.common.visualization.activity.log.ActivityLogDetailedPanel;
 import com.databasepreservation.common.client.common.visualization.activity.log.ActivityLogPanel;
-import com.databasepreservation.common.client.common.visualization.browse.*;
+import com.databasepreservation.common.client.common.visualization.browse.ContainerPanel;
+import com.databasepreservation.common.client.common.visualization.browse.DatabasePanel;
+import com.databasepreservation.common.client.common.visualization.browse.DatabaseSearchPanel;
+import com.databasepreservation.common.client.common.visualization.browse.DatabaseSearchesPanel;
+import com.databasepreservation.common.client.common.visualization.browse.ReferencesPanel;
+import com.databasepreservation.common.client.common.visualization.browse.RowPanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.AdvancedConfiguration;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.DataTransformation;
 import com.databasepreservation.common.client.common.visualization.browse.foreignKey.ForeignKeyPanel;
@@ -285,17 +291,14 @@ public class MainPanel extends Composite {
           return JobManager.getInstance();
         }
       });
+    } else if (HistoryManager.ROUTE_PREFERENCES.equals(currentHistoryPath.get(0))) {
+      setContent(new ContentPanelLoader() {
+        @Override
+        public ContentPanel load(ViewerDatabase database) {
+          return PreferencesPanel.createInstance();
+        }
+      });
     } else if (HistoryManager.ROUTE_DATABASE.equals(currentHistoryPath.get(0))) {
-//      if (currentHistoryPath.size() == 1) {
-//        // #database
-//        setContent(new ContentPanelLoader() {
-//          @Override
-//          public ContentPanel load(ViewerDatabase database) {
-//            return DatabaseManage.getInstance();
-//          }
-//        });
-//
-//      } else
         if (currentHistoryPath.size() == 2) {
         // #database/<database_uuid>
         String databaseUUID = currentHistoryPath.get(1);

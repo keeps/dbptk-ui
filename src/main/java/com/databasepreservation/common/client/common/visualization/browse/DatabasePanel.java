@@ -31,7 +31,12 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.MenuBar;
+import com.google.gwt.user.client.ui.MenuItem;
+import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
 
@@ -161,12 +166,12 @@ public class DatabasePanel extends Composite {
                   FontAwesomeIconManager.loaded(FontAwesomeIconManager.ACTIVITY_LOG, messages.activityLogMenuText()),
                   (Command) HistoryManager::gotoActivityLog);
                 administrationMenu.addItem(
-                  FontAwesomeIconManager.loaded(FontAwesomeIconManager.COG, messages.preferencesMenuText()),
-                  (Command) HistoryManager::gotoHome);
-                administrationMenu.addItem(
-                    FontAwesomeIconManager.loaded(FontAwesomeIconManager.COG, "Jobs"),
+                  FontAwesomeIconManager.loaded(FontAwesomeIconManager.COG, messages.menuTextForJobs()),
                     (Command) HistoryManager::gotoJobs);
-                menu.addItem(messages.administrationMenuText(), administrationMenu);
+                administrationMenu.addItem(
+                  FontAwesomeIconManager.loaded(FontAwesomeIconManager.PREFERENCES, messages.menuTextForPreferences()),
+                  (Command) HistoryManager::gotoPreferences);
+                menu.addItem(messages.menuTextForAdministration(), administrationMenu);
               }
 
               MenuBar languagesMenu = new MenuBar(true);
@@ -186,17 +191,6 @@ public class DatabasePanel extends Composite {
         menu.addItem(
           FontAwesomeIconManager.loaded(FontAwesomeIconManager.DATABASES, messages.menusidebar_manageDatabases()),
           (Command) HistoryManager::gotoDatabaseList);
-      }
-
-      if (!hideMenu) {
-        MenuBar languagesMenu = new MenuBar(true);
-
-        setLanguageMenu(languagesMenu);
-
-        MenuItem languagesMenuItem = new MenuItem(
-          FontAwesomeIconManager.loaded(FontAwesomeIconManager.GLOBE, selectedLanguage), languagesMenu);
-        languagesMenuItem.addStyleName("menu-item menu-item-label menu-item-language");
-        menu.addItem(languagesMenuItem);
       }
     }).isAuthenticationEnabled();
   }

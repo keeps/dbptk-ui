@@ -3,8 +3,10 @@ package com.databasepreservation.common.client.tools;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
+import com.databasepreservation.common.client.common.utils.ApplicationType;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 
@@ -219,6 +221,9 @@ public class BreadcrumbManager {
 
   public static List<BreadcrumbItem> forManageDatabase() {
     List<BreadcrumbItem> items = new ArrayList<>();
+    if (ViewerConstants.DESKTOP.equals(ApplicationType.getType())) {
+      items = forHome();
+    }
     items.add(
       new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.SERVER)
         + SafeHtmlUtils.htmlEscape(messages.breadcrumbTextForManageDatabase())), HistoryManager::gotoDatabase));
@@ -352,6 +357,15 @@ public class BreadcrumbManager {
     items.add(new BreadcrumbItem(
         SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.COG)
         + SafeHtmlUtils.htmlEscape(messages.breadcrumbTextForDataTransformation()))));
+    return items;
+  }
+
+  public static List<BreadcrumbItem> forPreferencesPanel() {
+    List<BreadcrumbItem> items = forManageDatabase();
+    items.add(new BreadcrumbItem(
+      SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.PREFERENCES)
+        + SafeHtmlUtils.htmlEscape(messages.breadcrumbTextForPreferences())),
+      HistoryManager::gotoPreferences));
     return items;
   }
 }

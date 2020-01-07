@@ -56,6 +56,7 @@ public class HistoryManager {
   public static final String ROUTE_ADVANCED_CONFIGURATION = "advanced-configuration";
   public static final String ROUTE_DATA_TRANSFORMATION = "data-transformation";
   public static final String ROUTE_JOBS = "jobs";
+  public static final String ROUTE_PREFERENCES = "preferences";
 
   /****************************************************
    * DESKTOP ROUTES
@@ -319,7 +320,12 @@ public class HistoryManager {
   }
 
   public static void gotoJobs() {
-    List<String> params = Arrays.asList(ROUTE_JOBS);
+    List<String> params = Collections.singletonList(ROUTE_JOBS);
+    newHistory(params);
+  }
+
+  public static void gotoPreferences() {
+    List<String> params = Collections.singletonList(ROUTE_PREFERENCES);
     newHistory(params);
   }
 

@@ -136,13 +136,12 @@ public class ContainerPanel extends Composite {
                 administrationMenu.addItem(
                   FontAwesomeIconManager.loaded(FontAwesomeIconManager.ACTIVITY_LOG, messages.activityLogMenuText()),
                   (Command) HistoryManager::gotoActivityLog);
+                administrationMenu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.COG, messages.menuTextForJobs()),
+                  (Command) HistoryManager::gotoJobs);
                 administrationMenu.addItem(
-                  FontAwesomeIconManager.loaded(FontAwesomeIconManager.COG, messages.preferencesMenuText()),
-                  (Command) HistoryManager::gotoHome);
-                administrationMenu.addItem(
-                    FontAwesomeIconManager.loaded(FontAwesomeIconManager.COG, "Jobs"),
-                    (Command) HistoryManager::gotoJobs);
-                menu.addItem(messages.administrationMenuText(), administrationMenu);
+                  FontAwesomeIconManager.loaded(FontAwesomeIconManager.PREFERENCES, messages.menuTextForPreferences()),
+                  (Command) HistoryManager::gotoPreferences);
+                menu.addItem(messages.menuTextForAdministration(), administrationMenu);
               }
 
               MenuBar languagesMenu = new MenuBar(true);
