@@ -7,7 +7,6 @@ import java.util.Map;
 
 import org.roda.core.data.v2.user.User;
 
-import com.databasepreservation.common.api.v1.AuthenticationResource;
 import com.databasepreservation.common.client.ClientConfigurationManager;
 import com.databasepreservation.common.client.common.ContentPanel;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
@@ -21,12 +20,7 @@ import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.common.utils.RightPanelLoader;
 import com.databasepreservation.common.client.common.visualization.activity.log.ActivityLogDetailedPanel;
 import com.databasepreservation.common.client.common.visualization.activity.log.ActivityLogPanel;
-import com.databasepreservation.common.client.common.visualization.browse.ContainerPanel;
-import com.databasepreservation.common.client.common.visualization.browse.DatabasePanel;
-import com.databasepreservation.common.client.common.visualization.browse.DatabaseSearchPanel;
-import com.databasepreservation.common.client.common.visualization.browse.DatabaseSearchesPanel;
-import com.databasepreservation.common.client.common.visualization.browse.ReferencesPanel;
-import com.databasepreservation.common.client.common.visualization.browse.RowPanel;
+import com.databasepreservation.common.client.common.visualization.browse.*;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.AdvancedConfiguration;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.DataTransformation;
 import com.databasepreservation.common.client.common.visualization.browse.foreignKey.ForeignKeyPanel;
@@ -57,6 +51,7 @@ import com.databasepreservation.common.client.common.visualization.metadata.user
 import com.databasepreservation.common.client.common.visualization.validation.ValidatorPage;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerSIARDBundle;
+import com.databasepreservation.common.client.services.AuthenticationService;
 import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
@@ -181,7 +176,7 @@ public class MainPanel extends Composite {
               }
             });
           } else {
-            AuthenticationResource.Util.call((Boolean isAdmin) -> {
+            AuthenticationService.Util.call((Boolean isAdmin) -> {
               if (isAdmin) {
                 setContent(new ContentPanelLoader() {
                   @Override

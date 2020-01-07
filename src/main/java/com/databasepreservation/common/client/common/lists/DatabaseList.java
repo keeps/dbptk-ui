@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.api.v1.AuthenticationResource;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.roda.core.data.v2.index.filter.Filter;
 import org.roda.core.data.v2.index.sublist.Sublist;
@@ -22,6 +21,7 @@ import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.index.facets.Facets;
 import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.services.AuthenticationService;
 import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.Humanize;
@@ -63,7 +63,7 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
 
   @Override
   protected void configureDisplay(CellTable<ViewerDatabase> display) {
-    AuthenticationResource.Util.call((Boolean result)->{
+    AuthenticationService.Util.call((Boolean result) -> {
       display.setSelectionModel(display.getSelectionModel(), DefaultSelectionEventManager.createBlacklistManager(4, 9));
 
       Column<ViewerDatabase, SafeHtml> nameColumn = new TooltipColumn<ViewerDatabase>() {

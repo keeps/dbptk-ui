@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.client.common.utils.LabelUtils;
+import com.databasepreservation.common.client.common.utils.html.LabelUtils;
 import com.databasepreservation.common.client.index.facets.Facets;
 import com.google.gwt.core.shared.GWT;
 import config.i18n.client.ClientMessages;

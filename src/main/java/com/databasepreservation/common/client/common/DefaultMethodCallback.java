@@ -6,10 +6,10 @@ import org.fusesource.restygwt.client.Method;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.roda.core.data.v2.user.User;
 
-import com.databasepreservation.common.api.v1.AuthenticationResource;
 import com.databasepreservation.common.client.ClientLogger;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.utils.AsyncCallbackUtils;
+import com.databasepreservation.common.client.services.AuthenticationService;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.Response;
@@ -65,7 +65,7 @@ public abstract class DefaultMethodCallback<T> implements MethodCallback<T> {
       // TODO open dialog to states that is unauthorized and ask to login if currently
       // not logged in (guest) or to ask the administrator to add permissions to your
       // user.
-      AuthenticationResource.Util.call((User user) -> {
+      AuthenticationService.Util.call((User user) -> {
         if (user.isGuest()) {
           UserLogin.getInstance().showSuggestLoginDialog();
         } else {
