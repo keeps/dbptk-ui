@@ -137,7 +137,7 @@ public class DbvtkExportModule implements DatabaseExportModule {
   @Override
   public void handleDataOpenTable(String tableId) throws ModuleException {
     currentTable = retrieved.getMetadata().getTableById(tableId);
-    solrManager.addTable(currentTable);
+    solrManager.addTable(retrieved.getUuid(), currentTable);
     rowIndex = 0;
   }
 

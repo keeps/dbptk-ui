@@ -3,10 +3,12 @@ package com.databasepreservation.common.client.models.status.database;
 import java.io.Serializable;
 
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
+@JsonPropertyOrder({"validationStatus", "createdOn", "reportLocation", "validatorVersion", "indicators"})
 public class ValidationStatus implements Serializable {
 
   private ViewerDatabaseValidationStatus validationStatus;

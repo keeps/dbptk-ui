@@ -128,7 +128,7 @@ public class SearchResource implements SearchService {
     controllerAssistant.checkRoles(user);
 
     try {
-      ViewerFactory.getSolrManager().editSavedSearch(savedSearchUUID, name, description);
+      ViewerFactory.getSolrManager().editSavedSearch(databaseUUID, savedSearchUUID, name, description);
     } catch (SavedSearchException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);

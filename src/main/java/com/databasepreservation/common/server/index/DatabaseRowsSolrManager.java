@@ -3,10 +3,11 @@ package com.databasepreservation.common.server.index;
 import java.io.IOException;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
-import com.databasepreservation.common.client.models.configuration.collection.CollectionConfiguration;
-import com.databasepreservation.common.server.index.utils.*;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest;
@@ -34,12 +35,25 @@ import com.databasepreservation.common.client.index.IsIndexed;
 import com.databasepreservation.common.client.index.facets.Facets;
 import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.activity.logs.ActivityLogEntry;
-import com.databasepreservation.common.client.models.structure.*;
+import com.databasepreservation.common.client.models.configuration.collection.CollectionConfiguration;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.structure.ViewerDatabaseFromToolkit;
+import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
+import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
+import com.databasepreservation.common.client.models.structure.ViewerMetadata;
+import com.databasepreservation.common.client.models.structure.ViewerRow;
+import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.exceptions.ViewerException;
+import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.index.schema.SolrCollection;
 import com.databasepreservation.common.server.index.schema.SolrDefaultCollectionRegistry;
 import com.databasepreservation.common.server.index.schema.SolrRowsCollectionRegistry;
 import com.databasepreservation.common.server.index.schema.collections.RowsCollection;
+import com.databasepreservation.common.server.index.utils.IterableIndexResult;
+import com.databasepreservation.common.server.index.utils.IterableNestedIndexResult;
+import com.databasepreservation.common.server.index.utils.JsonTransformer;
+import com.databasepreservation.common.server.index.utils.Pair;
+import com.databasepreservation.common.server.index.utils.SolrUtils;
 import com.databasepreservation.utils.FileUtils;
 
 /**
@@ -71,6 +85,12 @@ public class DatabaseRowsSolrManager {
   public void addDatabaseMetadata(ViewerDatabase database) throws ViewerException {
     // add this database to the collection
     insertDocument(ViewerDatabase.class, database);
+    // Delegate
+    try {
+      ViewerFactory.getConfigurationManager().addDatabase(database);
+    } catch (GenericException e) {
+      throw new ViewerException(e);
+    }
   }
 
   public void addDatabaseRowCollection(final String databaseUUID) throws ViewerException {
@@ -78,6 +98,8 @@ public class DatabaseRowsSolrManager {
       Pair.of(ViewerConstants.SOLR_DATABASES_STATUS, ViewerDatabaseStatus.INGESTING.toString()));
     RowsCollection collection = new RowsCollection(databaseUUID);
     collection.createRowsCollection();
+    // Delegate
+    ViewerFactory.getConfigurationManager().addCollection(databaseUUID, collection.getIndexName());
   }
 
   public void removeDatabase(ViewerDatabase database, Path lobFolder) throws ViewerException {
@@ -126,11 +148,11 @@ public class DatabaseRowsSolrManager {
    * @param table
    *          the table
    */
-  public void addTable(ViewerTable table) throws ViewerException {
+  public void addTable(String databaseUUID, ViewerTable table) throws ViewerException {
+    ViewerFactory.getConfigurationManager().addTable(databaseUUID, table);
   }
 
   public void addRow(String databaseUUID, ViewerRow row) throws ViewerException {
-
     RowsCollection collection = SolrRowsCollectionRegistry.get(databaseUUID);
 
     try {
@@ -141,7 +163,6 @@ public class DatabaseRowsSolrManager {
   }
 
   public void addRow(ViewerDatabaseFromToolkit viewerDatabase, ViewerRow row) throws ViewerException {
-
     RowsCollection collection = SolrRowsCollectionRegistry.get(viewerDatabase.getUuid());
 
     try {
@@ -228,6 +249,8 @@ public class DatabaseRowsSolrManager {
       SolrInputDocument doc = savedSearchesCollection.toSolrDocument(savedSearch);
       client.add(savedSearchesCollection.getIndexName(), doc);
       client.commit(savedSearchesCollection.getIndexName(), true, true, true);
+      // Delegate
+      ViewerFactory.getConfigurationManager().addSearch(savedSearch);
     } catch (ViewerException | RequestNotValidException | AuthorizationDeniedException e) {
       LOGGER.debug("Solr error while converting to document", e);
     } catch (SolrServerException e) {
@@ -237,7 +260,7 @@ public class DatabaseRowsSolrManager {
     }
   }
 
-  public void editSavedSearch(String uuid, String name, String description) throws SavedSearchException {
+  public void editSavedSearch(String databaseUUID, String uuid, String name, String description) throws SavedSearchException {
     SolrInputDocument doc = new SolrInputDocument();
 
     doc.addField(ViewerConstants.INDEX_ID, uuid);
@@ -246,6 +269,8 @@ public class DatabaseRowsSolrManager {
     try {
       client.add(ViewerConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME, doc);
       client.commit(ViewerConstants.SOLR_INDEX_SEARCHES_COLLECTION_NAME, true, true);
+      // Delegate
+      ViewerFactory.getConfigurationManager().editSearch(databaseUUID, uuid, name, description);
     } catch (SolrException | SolrServerException e) {
       throw new SavedSearchException("Solr error while attempting to save search", e);
     } catch (IOException e) {
@@ -366,40 +391,6 @@ public class DatabaseRowsSolrManager {
     }
   }
 
-  public void updateDatabaseTotalSchemas(String databaseUUID, int totalSchemas) {
-    updateDatabaseFields(databaseUUID, Pair.of(ViewerConstants.SOLR_DATABASES_TOTAL_SCHEMAS, totalSchemas));
-  }
-
-  public void updateDatabaseCurrentSchema(String databaseUUID, String schemaName, long completedSchemas,
-    int totalTables) {
-    updateDatabaseFields(databaseUUID, Pair.of(ViewerConstants.SOLR_DATABASES_CURRENT_SCHEMA_NAME, schemaName),
-      Pair.of(ViewerConstants.SOLR_DATABASES_INGESTED_SCHEMAS, completedSchemas),
-      Pair.of(ViewerConstants.SOLR_DATABASES_TOTAL_TABLES, totalTables));
-  }
-
-  public void updateDatabaseCurrentTable(String databaseUUID, String tableName, long completedTablesInSchema,
-    long totalRows) {
-    updateDatabaseFields(databaseUUID, Pair.of(ViewerConstants.SOLR_DATABASES_CURRENT_TABLE_NAME, tableName),
-      Pair.of(ViewerConstants.SOLR_DATABASES_INGESTED_TABLES, completedTablesInSchema),
-      Pair.of(ViewerConstants.SOLR_DATABASES_TOTAL_ROWS, totalRows),
-      Pair.of(ViewerConstants.SOLR_DATABASES_INGESTED_ROWS, 0));
-  }
-
-  public void updateDatabaseCurrentRow(String databaseUUID, long completedRows) {
-    updateDatabaseFields(databaseUUID, Pair.of(ViewerConstants.SOLR_DATABASES_INGESTED_ROWS, completedRows));
-  }
-
-  public void updateDatabaseIngestionFinished(String databaseUUID) {
-    updateDatabaseFields(databaseUUID, Pair.of(ViewerConstants.SOLR_DATABASES_TOTAL_SCHEMAS, null),
-      Pair.of(ViewerConstants.SOLR_DATABASES_CURRENT_SCHEMA_NAME, null),
-      Pair.of(ViewerConstants.SOLR_DATABASES_INGESTED_SCHEMAS, null),
-      Pair.of(ViewerConstants.SOLR_DATABASES_TOTAL_TABLES, null),
-      Pair.of(ViewerConstants.SOLR_DATABASES_CURRENT_TABLE_NAME, null),
-      Pair.of(ViewerConstants.SOLR_DATABASES_INGESTED_TABLES, null),
-      Pair.of(ViewerConstants.SOLR_DATABASES_TOTAL_ROWS, null),
-      Pair.of(ViewerConstants.SOLR_DATABASES_INGESTED_ROWS, null));
-  }
-
   public void updateSIARDValidationInformation(String databaseUUID, ViewerDatabaseValidationStatus validationStatus,
     String validatorReportLocation, String DBPTKVersion, String validationDate) {
 
@@ -407,6 +398,9 @@ public class DatabaseRowsSolrManager {
       Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATOR_REPORT_PATH, validatorReportLocation),
       Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATE_VERSION, DBPTKVersion),
       Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATION_STATUS, validationStatus.toString()));
+    // delegate
+    ViewerFactory.getConfigurationManager().updateValidationStatus(databaseUUID, validationStatus, validationDate,
+      validatorReportLocation, DBPTKVersion);
   }
 
   public void updateSIARDValidationIndicators(String databaseUUID, String passed, String ok, String failed,
@@ -417,6 +411,8 @@ public class DatabaseRowsSolrManager {
       Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATION_ERRORS, errors),
       Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATION_WARNINGS, warnings),
       Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATION_SKIPPED, skipped));
+    // delegate
+    ViewerFactory.getConfigurationManager().updateIndicators(databaseUUID, passed, failed, warnings, skipped);
   }
 
   public void updateSIARDPath(String databaseUUID, String siardPath) {
@@ -474,10 +470,10 @@ public class DatabaseRowsSolrManager {
       }
     }
 
-    //add a non-stored field for search only
+    // add a non-stored field for search only
     doc.addField("token" + ViewerConstants.SOLR_DYN_NEST_MULTI, fields);
 
-    //add nested documents to root document
+    // add nested documents to root document
     doc.addField(ViewerConstants.SOLR_ROWS_NESTED, SolrUtils.addValueUpdate(nestedDocuments));
 
     try {
@@ -488,7 +484,7 @@ public class DatabaseRowsSolrManager {
   }
 
   public SolrInputDocument createNestedDocument(String uuid, String parentUUID, String tableRowUUID,
-                                                Map<String, ?> fields, String tableId, String nestedUUID) {
+    Map<String, ?> fields, String tableId, String nestedUUID) {
     SolrInputDocument nestedDoc = new SolrInputDocument();
     nestedDoc.addField(ViewerConstants.INDEX_ID, uuid);
     nestedDoc.addField(ViewerConstants.SOLR_ROWS_NESTED_UUID, nestedUUID);
@@ -496,7 +492,7 @@ public class DatabaseRowsSolrManager {
     nestedDoc.addField("parentUUID_t", parentUUID);
     nestedDoc.addField(ViewerConstants.SOLR_ROWS_NESTED_ORIGINAL_UUID, tableRowUUID);
     for (Map.Entry<String, ?> entry : fields.entrySet()) {
-      if(entry.getKey().equals(ViewerConstants.SOLR_ROWS_NESTED)){
+      if (entry.getKey().equals(ViewerConstants.SOLR_ROWS_NESTED)) {
         continue;
       }
       nestedDoc.addField(entry.getKey(), entry.getValue());
@@ -513,7 +509,7 @@ public class DatabaseRowsSolrManager {
     try {
       insertDocument(collection.getIndexName(), doc);
     } catch (ViewerException e) {
-      LOGGER.error("Could not delete nested document", databaseUUID, e);
+      LOGGER.error("Could not delete nested document for {}", databaseUUID, e);
     }
   }
 }

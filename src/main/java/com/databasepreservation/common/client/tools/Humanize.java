@@ -9,6 +9,7 @@ import java.util.Date;
 import com.databasepreservation.common.client.models.activity.logs.LogEntryState;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
+import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
@@ -154,6 +155,10 @@ public class Humanize {
       default:
         return "";
     }
+  }
+
+  public static String jobStatus(ViewerJobStatus status) {
+    return messages.humanizedTextForViewerJobStatus(status.name());
   }
 
   /**

@@ -1,11 +1,15 @@
 package com.databasepreservation.common.client.models.status.collection;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
+@JsonPropertyOrder({"uuid", "id", "name", "description", "hide", "columns"})
 public class TableStatus implements Serializable {
 
   private String uuid;
@@ -16,6 +20,7 @@ public class TableStatus implements Serializable {
   private List<ColumnStatus> columns;
 
   public TableStatus() {
+    columns = new ArrayList<>();
   }
 
   public String getUuid() {
@@ -64,5 +69,9 @@ public class TableStatus implements Serializable {
 
   public void setColumns(List<ColumnStatus> columns) {
     this.columns = columns;
+  }
+
+  public void addColumnStatus(ColumnStatus status) {
+    this.columns.add(status);
   }
 }

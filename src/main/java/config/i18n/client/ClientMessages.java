@@ -485,6 +485,8 @@ public interface ClientMessages extends Messages {
 
   String no();
 
+  String humanizedTextForViewerJobStatus(@Select String status);
+
   /********************************************
    * Basic Actions
    ********************************************/

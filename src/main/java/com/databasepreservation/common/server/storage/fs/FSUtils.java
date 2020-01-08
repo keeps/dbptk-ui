@@ -26,4 +26,17 @@ public class FSUtils {
       return false;
     }
   }
+
+  public static boolean createDirectory(Path path) {
+    if (!Files.exists(path)) {
+      try {
+        Files.createDirectories(path);
+        return true;
+      } catch (IOException e) {
+        return false;
+      }
+    }
+
+    return false;
+  }
 }

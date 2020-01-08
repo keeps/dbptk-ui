@@ -92,7 +92,7 @@ public interface DatabaseService extends DirectRestService {
   Boolean deleteDatabase(@PathParam("databaseUUID") String databaseUUID);
 
   @DELETE
-  @Path("/delete/rows/{databaseUUID}")
+  @Path("/delete/collection/{databaseUUID}")
   @ApiOperation(value = "Deletes the row data for a specific database", notes = "", response = Boolean.class)
   Boolean deleteSolrData(@PathParam("databaseUUID") String databaseUUID);
 

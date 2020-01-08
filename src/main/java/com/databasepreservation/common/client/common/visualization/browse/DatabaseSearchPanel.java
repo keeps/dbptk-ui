@@ -45,9 +45,7 @@ public class DatabaseSearchPanel extends RightPanel {
   private static Map<String, DatabaseSearchPanel> instances = new HashMap<>();
 
   public static DatabaseSearchPanel getInstance(ViewerDatabase database) {
-    String code = database.getUuid();
-    instances.computeIfAbsent(code, k -> new DatabaseSearchPanel(database));
-    return instances.get(code);
+    return instances.computeIfAbsent(database.getUuid(), k -> new DatabaseSearchPanel(database));
   }
 
   interface DatabaseSearchPanelUiBinder extends UiBinder<Widget, DatabaseSearchPanel> {

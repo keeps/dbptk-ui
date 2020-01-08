@@ -104,6 +104,6 @@ public class LabelUtils {
     }
 
     return SafeHtmlUtils
-      .fromSafeConstant("<span class='" + style + "'>" + status.name() + CLOSE_SPAN);
+      .fromSafeConstant("<span class='" + style + "'>" + Humanize.jobStatus(status) + CLOSE_SPAN);
   }
 }

@@ -2,9 +2,12 @@ package com.databasepreservation.common.client.models.status.database;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
+@JsonPropertyOrder({"success", "failed", "warnings", "skipped"})
 public class Indicators implements Serializable {
 
   private String success;

@@ -112,10 +112,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   private static Path mapDBPath;
   private static Path activityLogsPath;
   private static Path databaseConfigPath;
-  private static Path statusPath;
-  private static Path databaseStatusPath;
-  private static Path collectionStatusPath;
-  private static Path denormalizationStatusPath;
+  private static Path databasesPath;
 
   // Configuration related objects
   private static CompositeConfiguration viewerConfiguration = null;
@@ -306,32 +303,28 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     return indexPath;
   }
 
-  public Path getMapDBPath() { return mapDBPath; }
+  public Path getMapDBPath() {
+    return mapDBPath;
+  }
 
   public Path getSIARDFilesPath() {
     return SIARDFilesPath;
   }
 
-  public Path getSIARDReportValidationPath() { return SIARDReportValidationPath; }
-
-  public Path getActivityLogsPath() { return activityLogsPath; }
-
-  public Path getDatabaseConfigPath() { return databaseConfigPath;}
-
-  public Path getStatusPath() {
-    return statusPath;
+  public Path getSIARDReportValidationPath() {
+    return SIARDReportValidationPath;
   }
 
-  public Path getDatabaseStatusPath() {
-    return databaseStatusPath;
+  public Path getActivityLogsPath() {
+    return activityLogsPath;
   }
 
-  public Path getCollectionStatusPath() {
-    return collectionStatusPath;
+  public Path getDatabaseConfigPath() {
+    return databaseConfigPath;
   }
 
-  public Path getDenormalizationStatusPath() {
-    return denormalizationStatusPath;
+  public Path getDatabasesPath() {
+    return databasesPath;
   }
 
   /*
@@ -387,7 +380,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   public String getDBPTKVersion() throws IOException {
     final Properties properties = new Properties();
     properties.load(ViewerConfiguration.class.getClassLoader().getResourceAsStream("main.properties"));
-    return  properties.getProperty("version.dbptk");
+    return properties.getProperty("version.dbptk");
   }
 
   /*
@@ -435,10 +428,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     mapDBPath = viewerHomePath.resolve(ViewerConstants.VIEWER_MAPDB_FOLDER);
     activityLogsPath = viewerHomePath.resolve(ViewerConstants.VIEWER_ACTIVITY_LOG_FOLDER);
     databaseConfigPath = configPath.resolve(ViewerConstants.VIEWER_DATABASE_CONFIG_FOLDER);
-    statusPath = viewerHomePath.resolve(ViewerConstants.VIEWER_STATUS_FOLDER);
-    databaseStatusPath = statusPath.resolve(ViewerConstants.VIEWER_STATUS_DATABASE_FOLDER);
-    collectionStatusPath = statusPath.resolve(ViewerConstants.VIEWER_STATUS_COLLECTION_FOLDER);
-    denormalizationStatusPath = statusPath.resolve(ViewerConstants.VIEWER_STATUS_DENORMALIZATION_FOLDER);
+    databasesPath = viewerHomePath.resolve(ViewerConstants.VIEWER_DATABASES_FOLDER);
 
     configureLogback();
 
@@ -478,10 +468,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     essentialDirectories.add(mapDBPath);
     essentialDirectories.add(activityLogsPath);
     essentialDirectories.add(databaseConfigPath);
-    essentialDirectories.add(statusPath);
-    essentialDirectories.add(databaseStatusPath);
-    essentialDirectories.add(collectionStatusPath);
-    essentialDirectories.add(denormalizationStatusPath);
+    essentialDirectories.add(databasesPath);
 
     for (Path path : essentialDirectories) {
       try {

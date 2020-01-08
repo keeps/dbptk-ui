@@ -13,14 +13,18 @@ import org.roda.core.data.utils.JsonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.common.search.SavedSearch;
 import com.databasepreservation.common.client.models.activity.logs.ActivityLogEntry;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.database.DatabaseStatus;
-import com.databasepreservation.common.client.models.status.database.Indicators;
-import com.databasepreservation.common.client.models.status.database.ValidationStatus;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
+import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.server.index.utils.JsonTransformer;
 import com.databasepreservation.common.server.storage.fs.FSUtils;
+import com.databasepreservation.common.utils.StatusUtils;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -30,46 +34,164 @@ public class ConfigurationManager {
 
   private final Object logFileLock = new Object();
   private final Object databaseStatusFileLock = new Object();
+  private final Object collectionStatusFileLock = new Object();
   private long entryLogLineNumber = -1;
 
   public ConfigurationManager() {
   }
 
-  public void updateIndicators(String id, Indicators indicators, Path databaseStatusDirectory) {
+  public void editSearch(String databaseUUID, String uuid, String name, String description) {
+    try {
+      final CollectionStatus collectionStatus = getCollectionStatus(databaseUUID,
+        ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + databaseUUID);
+
+      final SavedSearch savedSearch = collectionStatus.getSavedSearch(uuid);
+      savedSearch.setName(name);
+      savedSearch.setDescription(description);
+      collectionStatus.updateSavedSearch(savedSearch);
+
+      updateCollectionStatus(databaseUUID, collectionStatus);
+    } catch (GenericException | ViewerException e) {
+      LOGGER.debug("Failed to manipulate the JSON file", e);
+    }
+  }
+
+  public void addSearch(SavedSearch savedSearch) {
+    try {
+      final CollectionStatus collectionStatus = getCollectionStatus(savedSearch.getDatabaseUUID(),
+        ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + savedSearch.getDatabaseUUID());
+      collectionStatus.addSavedSearch(savedSearch);
+      updateCollectionStatus(savedSearch.getDatabaseUUID(), collectionStatus);
+    } catch (GenericException | ViewerException e) {
+      LOGGER.debug("Failed to manipulate the JSON file", e);
+    }
+  }
+
+  public void addTable(String databaseUUID, ViewerTable table) {
+    try {
+      final DatabaseStatus databaseStatus = getDatabaseStatus(databaseUUID);
+      // At the moment there is only one collection per database
+      if (databaseStatus.getCollections().size() >= 1) {
+        final String collectionId = databaseStatus.getCollections().get(0);
+        final CollectionStatus collectionStatus = getCollectionStatus(databaseUUID, collectionId);
+        collectionStatus.addTableStatus(StatusUtils.getTableStatus(table));
+        // Update collection
+        updateCollectionStatus(databaseUUID, collectionStatus);
+      }
+    } catch (GenericException | ViewerException e) {
+      LOGGER.debug("Failed to manipulate the JSON file", e);
+    }
+  }
+
+  public void addCollection(String databaseUUID, String solrCollectionName) {
+    final CollectionStatus collectionStatus = StatusUtils.getCollectionStatus(solrCollectionName);
+
+    try {
+      final DatabaseStatus databaseStatus = getDatabaseStatus(databaseUUID);
+
+      Path collectionFile = getCollectionStatusPath(databaseUUID, solrCollectionName);
+      // verify if file exists
+      if (!FSUtils.exists(collectionFile)) {
+        try {
+          Files.createFile(collectionFile);
+        } catch (FileAlreadyExistsException e) {
+          // do nothing (just caused due to concurrency)
+        } catch (IOException e) {
+          throw new GenericException("Error creating file to write the collection information", e);
+        }
+
+        // Save collection file and update database file
+        JsonUtils.writeObjectToFile(collectionStatus, collectionFile);
+        synchronized (databaseStatusFileLock) {
+          databaseStatus.addBrowseCollection(solrCollectionName);
+          updateDatabaseStatus(databaseStatus);
+        }
+      }
+    } catch (GenericException | ViewerException e) {
+      LOGGER.debug("Failed to manipulate the JSON file", e);
+    }
+  }
+
+  private DatabaseStatus getDatabaseStatus(String databaseUUID) throws GenericException {
+    synchronized (databaseStatusFileLock) {
+      final Path databaseStatusFile = getDatabaseStatusPath(databaseUUID);
+      return JsonUtils.readObjectFromFile(databaseStatusFile, DatabaseStatus.class);
+    }
+  }
+
+  private CollectionStatus getCollectionStatus(String databaseUUID, String id) throws GenericException {
+    synchronized (collectionStatusFileLock) {
+      Path collectionStatusFile = getCollectionStatusPath(databaseUUID, id);
+      return JsonUtils.readObjectFromFile(collectionStatusFile, CollectionStatus.class);
+    }
+  }
+
+  private Path getDatabaseStatusPath(String id) {
+    final Path databasesDirectoryPath = ViewerFactory.getViewerConfiguration().getDatabasesPath();
+    final Path databaseDirectoryPath = databasesDirectoryPath.resolve(id);
+
+    return databaseDirectoryPath.resolve(ViewerConstants.DATABASE_STATUS_PREFIX + id + ".json");
+  }
+
+  private Path getCollectionStatusPath(String databaseUUID, String id) {
+    final Path databasesDirectoryPath = ViewerFactory.getViewerConfiguration().getDatabasesPath();
+    final Path databaseDirectoryPath = databasesDirectoryPath.resolve(databaseUUID);
+
+    return databaseDirectoryPath.resolve(id + ".json");
+  }
+
+  public void updateIndicators(String id, String passed, String failed, String warnings, String skipped) {
     synchronized (databaseStatusFileLock) {
       try {
-        Path statusFile = databaseStatusDirectory.resolve(id + ".json");
-        // verify if file exists
-        if (FSUtils.exists(statusFile)) {
-          final DatabaseStatus databaseStatus = JsonUtils.readObjectFromFile(statusFile, DatabaseStatus.class);
-          databaseStatus.getValidationStatus().setIndicators(indicators);
+        final Path databasesDirectoryPath = ViewerFactory.getViewerConfiguration().getDatabasesPath();
+        final Path databaseDirectoryPath = databasesDirectoryPath.resolve(id);
 
-          // Save backup
-          JsonTransformer.writeObjectToFile(databaseStatus, statusFile);
+        Path databaseFile = databaseDirectoryPath.resolve(ViewerConstants.DATABASE_STATUS_PREFIX + id + ".json");
+        // verify if file exists
+        if (FSUtils.exists(databaseFile)) {
+          final DatabaseStatus databaseStatus = JsonUtils.readObjectFromFile(databaseFile, DatabaseStatus.class);
+          databaseStatus.getValidationStatus()
+            .setIndicators(StatusUtils.getIndicators(passed, failed, warnings, skipped));
+
+          // update database file
+          JsonTransformer.writeObjectToFile(databaseStatus, databaseFile);
         }
       } catch (GenericException | ViewerException e) {
         LOGGER.debug(e.getMessage(), e);
       }
+    }
+  }
+
+  public void updateDatabaseStatus(DatabaseStatus status) throws ViewerException {
+    synchronized (databaseStatusFileLock) {
+      Path statusFile = getDatabaseStatusPath(status.getId());
+      JsonTransformer.writeObjectToFile(status, statusFile);
+    }
+  }
+
+  public void updateCollectionStatus(String databaseUUID, CollectionStatus status) throws ViewerException {
+    synchronized (databaseStatusFileLock) {
+      Path statusFile = getCollectionStatusPath(databaseUUID, status.getId());
+      JsonTransformer.writeObjectToFile(status, statusFile);
     }
   }
 
   public void updateValidationStatus(String id, ViewerDatabaseValidationStatus status, String date,
-    String validationReportPath, String dbptkVersion, Path databaseStatusDirectory) {
+    String validationReportPath, String dbptkVersion) {
     synchronized (databaseStatusFileLock) {
       try {
-        Path statusFile = databaseStatusDirectory.resolve(id + ".json");
+        final Path databasesDirectoryPath = ViewerFactory.getViewerConfiguration().getDatabasesPath();
+        final Path databaseDirectoryPath = databasesDirectoryPath.resolve(id);
+
+        Path databaseFile = databaseDirectoryPath.resolve(ViewerConstants.DATABASE_STATUS_PREFIX + id + ".json");
 
         // verify if file exists
-        if (FSUtils.exists(statusFile)) {
-          final DatabaseStatus databaseStatus = JsonUtils.readObjectFromFile(statusFile, DatabaseStatus.class);
-          final ValidationStatus validationStatus = databaseStatus.getValidationStatus();
-          validationStatus.setValidationStatus(status);
-          validationStatus.setCreatedOn(date);
-          validationStatus.setReportLocation(validationReportPath);
-          validationStatus.setValidatorVersion(dbptkVersion);
-          databaseStatus.setValidationStatus(validationStatus);
+        if (FSUtils.exists(databaseFile)) {
+          final DatabaseStatus databaseStatus = JsonUtils.readObjectFromFile(databaseFile, DatabaseStatus.class);
+          databaseStatus.setValidationStatus(StatusUtils.getValidationStatus(status, date, validationReportPath,
+            dbptkVersion, databaseStatus.getValidationStatus().getIndicators()));
 
-          JsonTransformer.writeObjectToFile(databaseStatus, statusFile);
+          JsonTransformer.writeObjectToFile(databaseStatus, databaseFile);
         }
       } catch (GenericException | ViewerException e) {
         LOGGER.debug(e.getMessage(), e);
@@ -77,27 +199,45 @@ public class ConfigurationManager {
     }
   }
 
-  public void addDatabaseStatus(DatabaseStatus status, Path databaseStatusDirectory) throws GenericException {
-    synchronized (databaseStatusFileLock) {
-      String filename = status.getId();
-      Path statusFile = databaseStatusDirectory.resolve(filename + ".json");
-
-      // verify if file exists
-      if (!FSUtils.exists(statusFile)) {
+  public void addDatabase(ViewerDatabase database) throws GenericException {
+    final Path databasesFolder = ViewerFactory.getViewerConfiguration().getDatabasesPath();
+    Path databasePath = databasesFolder.resolve(database.getUuid());
+    if (FSUtils.createDirectory(databasePath)) {
+      String filename = ViewerConstants.DATABASE_STATUS_PREFIX + database.getUuid();
+      Path databaseStatusPath = databasePath.resolve(filename + ".json");
+      if (!FSUtils.exists(databaseStatusPath)) {
         try {
-          Files.createFile(statusFile);
+          Files.createFile(databaseStatusPath);
+          // Write file
+          JsonUtils.writeObjectToFile(StatusUtils.getDatabaseStatus(database), databaseStatusPath);
         } catch (FileAlreadyExistsException e) {
           // do nothing (just caused due to concurrency)
         } catch (IOException e) {
-          throw new GenericException("Error creating file to write the backup information", e);
+          throw new GenericException("Error creating file to write the database information", e);
         }
-      } else {
-        status = new DatabaseStatus(JsonUtils.readObjectFromFile(statusFile, DatabaseStatus.class));
       }
-
-      // Save backup
-      JsonUtils.writeObjectToFile(status, statusFile);
     }
+
+    // String filename = status.getId();
+    // Path statusFile = databaseStatusDirectory.resolve(filename + ".json");
+    //
+    // // verify if file exists
+    // if (!FSUtils.exists(statusFile)) {
+    // try {
+    // Files.createFile(statusFile);
+    // } catch (FileAlreadyExistsException e) {
+    // // do nothing (just caused due to concurrency)
+    // } catch (IOException e) {
+    // throw new GenericException("Error creating file to write the database
+    // information", e);
+    // }
+    // } else {
+    // status = new DatabaseStatus(JsonUtils.readObjectFromFile(statusFile,
+    // DatabaseStatus.class));
+    // }
+    //
+    // // Save backup
+    // JsonUtils.writeObjectToFile(status, statusFile);
   }
 
   public void addLogEntry(ActivityLogEntry logEntry, Path logDirectory) throws GenericException {

@@ -419,20 +419,6 @@ public class SIARDController {
       ViewerConfiguration.PROPERTY_BASE_UPLOAD_PATH));
     Path siardPath = basePath.resolve(localPath);
     convertSIARDMetadataToSolr(siardPath, databaseUUID);
-
-    DatabaseStatus status = new DatabaseStatus();
-    SiardStatus siardStatus = new SiardStatus();
-    siardStatus.setLocation(siardPath.toString());
-    status.setId(databaseUUID);
-    status.setSiardStatus(siardStatus);
-
-    ValidationStatus validationStatus = new ValidationStatus();
-    validationStatus.setValidationStatus(ViewerDatabaseValidationStatus.NOT_VALIDATED);
-    status.setValidationStatus(validationStatus);
-
-    ViewerFactory.getConfigurationManager().addDatabaseStatus(status,
-      ViewerFactory.getViewerConfiguration().getDatabaseStatusPath());
-
     return databaseUUID;
   }
 
@@ -610,8 +596,6 @@ public class SIARDController {
 
         solrManager.updateSIARDValidationInformation(databaseUUID, status, validationReportPath, dbptkVersion,
           new DateTime().toString());
-        ViewerFactory.getConfigurationManager().updateValidationStatus(databaseUUID, status, new DateTime().toString(), validationReportPath, dbptkVersion,
-          ViewerFactory.getViewerConfiguration().getDatabaseStatusPath());
       } catch (IOException e) {
         updateStatusValidate(databaseUUID, ViewerDatabaseValidationStatus.ERROR);
         throw new GenericException("Failed to obtain the DBPTK version from properties", e);
@@ -635,16 +619,11 @@ public class SIARDController {
     String errors, String warnings, String skipped) {
     final DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
     solrManager.updateSIARDValidationIndicators(databaseUUID, passed, ok, errors, failed, warnings, skipped);
-    Indicators indicators = new Indicators(passed, failed, warnings, skipped);
-    ViewerFactory.getConfigurationManager().updateIndicators(databaseUUID, indicators,
-      ViewerFactory.getViewerConfiguration().getDatabaseStatusPath());
   }
 
   public static void updateStatusValidate(String databaseUUID, ViewerDatabaseValidationStatus status) {
     final DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
     solrManager.updateSIARDValidationInformation(databaseUUID, status, null, null, new DateTime().toString());
-    ViewerFactory.getConfigurationManager().updateValidationStatus(databaseUUID, status, new DateTime().toString(), null, null,
-        ViewerFactory.getViewerConfiguration().getDatabaseStatusPath());
   }
 
   public static boolean deleteAll(String databaseUUID)

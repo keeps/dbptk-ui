@@ -1,6 +1,7 @@
 package com.databasepreservation.common.client.models.status.database;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.databasepreservation.common.client.ViewerConstants;
@@ -10,25 +11,26 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-@JsonPropertyOrder({"version", "id", "siard", "validation", "browse"})
+@JsonPropertyOrder({"version", "id", "siard", "validation", "collections"})
 public class DatabaseStatus implements Serializable {
 
   private String version = ViewerConstants.DATABASE_STATUS_VERSION;
   private String id;
   private SiardStatus siardStatus;
   private ValidationStatus validationStatus;
-  private List<String> browse;
+  private List<String> collections;
 
   public DatabaseStatus() {
+    collections = new ArrayList<>();
   }
 
   public DatabaseStatus(String version, String id, SiardStatus siardStatus, ValidationStatus validationStatus,
-    List<String> browse) {
+    List<String> collections) {
     this.version = version;
     this.id = id;
     this.siardStatus = siardStatus;
     this.validationStatus = validationStatus;
-    this.browse = browse;
+    this.collections = collections;
   }
 
   public DatabaseStatus(DatabaseStatus status) {
@@ -36,7 +38,7 @@ public class DatabaseStatus implements Serializable {
     this.id = status.getId();
     this.siardStatus = status.getSiardStatus();
     this.validationStatus = status.getValidationStatus();
-    this.browse = status.getBrowse();
+    this.collections = status.getCollections();
   }
 
   public String getVersion() {
@@ -73,11 +75,15 @@ public class DatabaseStatus implements Serializable {
     this.validationStatus = validationStatus;
   }
 
-  public List<String> getBrowse() {
-    return browse;
+  public List<String> getCollections() {
+    return collections;
   }
 
-  public void setBrowse(List<String> browse) {
-    this.browse = browse;
+  public void setCollections(List<String> collections) {
+    this.collections = collections;
+  }
+
+  public void addBrowseCollection(String collection) {
+    this.collections.add(collection);
   }
 }
