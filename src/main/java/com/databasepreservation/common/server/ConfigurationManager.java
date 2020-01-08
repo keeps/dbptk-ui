@@ -83,6 +83,22 @@ public class ConfigurationManager {
     }
   }
 
+  public void addDenormalization(String databaseUUID, String denormalizationUUID) throws GenericException {
+    try {
+      final DatabaseStatus databaseStatus = getDatabaseStatus(databaseUUID);
+      // At the moment there is only one collection per database
+      if(databaseStatus.getCollections().size() >= 1){
+        final String collectionId = databaseStatus.getCollections().get(0);
+        final CollectionStatus collectionStatus = getCollectionStatus(databaseUUID, collectionId);
+        collectionStatus.addDenormalization(denormalizationUUID);
+        // Update collection
+        updateCollectionStatus(databaseUUID, collectionStatus);
+      }
+    } catch (GenericException | ViewerException e) {
+      throw new GenericException("Failed to manipulate the JSON file", e);
+    }
+  }
+
   public void addCollection(String databaseUUID, String solrCollectionName) {
     final CollectionStatus collectionStatus = StatusUtils.getCollectionStatus(solrCollectionName);
 

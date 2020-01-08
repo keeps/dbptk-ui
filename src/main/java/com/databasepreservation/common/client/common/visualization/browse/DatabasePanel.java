@@ -3,16 +3,18 @@ package com.databasepreservation.common.client.common.visualization.browse;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import org.roda.core.data.v2.user.User;
 
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.common.ContentPanel;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.RightPanel;
 import com.databasepreservation.common.client.common.UserLogin;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
-import com.databasepreservation.common.client.common.sidebar.DatabaseSidebar;
 import com.databasepreservation.common.client.common.sidebar.Sidebar;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
+import com.databasepreservation.common.client.common.utils.ContentPanelLoader;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.common.utils.RightPanelLoader;
 import com.databasepreservation.common.client.index.IsIndexed;
@@ -20,7 +22,6 @@ import com.databasepreservation.common.client.models.status.collection.Collectio
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.services.AuthenticationService;
-import com.databasepreservation.common.client.services.ConfigurationService;
 import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
@@ -43,15 +44,22 @@ import com.google.gwt.user.client.ui.Widget;
 import config.i18n.client.ClientMessages;
 
 /**
- * @author Bruno Ferreira <bferreira@keep.pt>
+ * @author Gabriel Barros <gbarros@keep.pt>
  */
 public class DatabasePanel extends Composite {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
 
   private static Map<String, DatabasePanel> instances = new HashMap<>();
 
+  interface ViewerPanelUiBinder extends UiBinder<Widget, DatabasePanel> {
+  }
+
+  public static DatabasePanel getInstance(boolean initMenu) {
+    return new DatabasePanel(null, initMenu, null);
+  }
+
   public static DatabasePanel getInstance(String databaseUUID, boolean initMenu) {
-    return instances.computeIfAbsent(databaseUUID, k -> new DatabasePanel(databaseUUID, initMenu));
+    return instances.computeIfAbsent(databaseUUID, k -> new DatabasePanel(databaseUUID, initMenu, null));
   }
 
   public static DatabasePanel getInstance(String databaseUUID, String route, boolean initMenu, Sidebar sidebar) {
@@ -60,19 +68,14 @@ public class DatabasePanel extends Composite {
     return instances.get(databaseUUID + route);
   }
 
-  interface DatabasePanelUiBinder extends UiBinder<Widget, DatabasePanel> {
-  }
-
-  private static DatabasePanelUiBinder uiBinder = GWT.create(DatabasePanelUiBinder.class);
-  private BreadcrumbPanel breadcrumb = null;
-
   @UiField
   BreadcrumbPanel breadcrumbServer;
+
   @UiField
   BreadcrumbPanel breadcrumbDesktop;
 
-  @UiField(provided = true)
-  Sidebar sidebar;
+  @UiField
+  FlowPanel sidebarPanel;
 
   @UiField
   SimplePanel rightPanelContainer;
@@ -86,25 +89,23 @@ public class DatabasePanel extends Composite {
   @UiField
   FlowPanel toolbar;
 
+  private static ViewerPanelUiBinder uiBinder = GWT.create(ViewerPanelUiBinder.class);
   private String databaseUUID;
   private ViewerDatabase database = null;
   private CollectionStatus collectionStatus = null;
   private String selectedLanguage;
+  private BreadcrumbPanel breadcrumb = null;
+  private Sidebar sidebar;
 
-  private DatabasePanel(String databaseUUID, boolean initMenu) {
-    this(databaseUUID, initMenu, null);
-  }
+  public DatabasePanel(String databaseUUID, boolean initMenu, Sidebar sidebar) {
+    initWidget(uiBinder.createAndBindUi(this));
 
-  private DatabasePanel(String databaseUUID, boolean initMenu, Sidebar sidebar) {
     this.databaseUUID = databaseUUID;
 
-    if (sidebar == null) {
-      this.sidebar = DatabaseSidebar.getInstance(databaseUUID);
-    } else {
+    if (sidebar != null) {
       this.sidebar = sidebar;
+      sidebarPanel.add(sidebar);
     }
-
-    initWidget(uiBinder.createAndBindUi(this));
 
     if (initMenu) {
       initMenu();
@@ -234,6 +235,47 @@ public class DatabasePanel extends Composite {
     });
   }
 
+  public void load(ContentPanelLoader panelLoader) {
+    rightPanelContainer.removeStyleName("col_12");
+    rightPanelContainer.addStyleName("content-container");
+    if (databaseUUID == null) {
+      ContentPanel panel = panelLoader.load(null, null);
+      panel.handleBreadcrumb(breadcrumb);
+      rightPanelContainer.setWidget(panel);
+      panel.setVisible(true);
+    } else {
+      if (databaseUUID != null && (database == null || !ViewerDatabaseStatus.AVAILABLE.equals(database.getStatus()))) {
+        // need to load database (not present or not available), go get it
+        GWT.log("getting db");
+        loadPanelWithDatabase(panelLoader);
+      } else {
+        loadPanel(panelLoader);
+      }
+    }
+  }
+
+  private void loadPanelWithDatabase(final ContentPanelLoader panelLoader) {
+    DatabaseService.Util.call((IsIndexed result) -> {
+      database = (ViewerDatabase) result;
+      loadPanel(panelLoader);
+    }).retrieve(databaseUUID, databaseUUID);
+  }
+
+  private void loadPanel(ContentPanelLoader panelLoader) {
+    GWT.log("have db: " + database);
+    // ConfigurationService.Util.call((CollectionStatus status) -> {
+    // collectionStatus = status;
+
+    ContentPanel contentPanel = panelLoader.load(database, collectionStatus);
+
+    if (contentPanel != null) {
+      contentPanel.handleBreadcrumb(breadcrumb);
+      rightPanelContainer.setWidget(contentPanel);
+      contentPanel.setVisible(true);
+    }
+    // }).getCollectionStatus(database.getUuid(), database.getUuid());
+  }
+
   public void load(RightPanelLoader rightPanelLoader, String toSelect) {
     GWT.log("load. uuid: " + databaseUUID + ", database: " + database);
     if (databaseUUID != null && (database == null || !ViewerDatabaseStatus.AVAILABLE.equals(database.getStatus()))) {
@@ -254,23 +296,24 @@ public class DatabasePanel extends Composite {
 
   private void loadPanel(RightPanelLoader rightPanelLoader, String toSelect) {
     GWT.log("have db: " + database + " sb.init: " + sidebar.isInitialized());
-    ConfigurationService.Util.call((CollectionStatus status) -> {
-      collectionStatus = status;
+    // ConfigurationService.Util.call((CollectionStatus status) -> {
+    // collectionStatus = status;
 
-      RightPanel rightPanel = rightPanelLoader.load(database, collectionStatus);
+    RightPanel rightPanel = rightPanelLoader.load(database, collectionStatus);
 
-      if (database != null && !sidebar.isInitialized()) {
-        sidebar.init(database);
-        sidebar.select(toSelect);
-      }
+    if (database != null && !sidebar.isInitialized()) {
+      sidebar.init(database);
+      sidebar.select(toSelect);
+    }
 
-      if (rightPanel != null) {
-        rightPanel.handleBreadcrumb(breadcrumb);
-        rightPanelContainer.setWidget(rightPanel);
-        rightPanel.setVisible(true);
-        sidebar.select(toSelect);
-      }
-    }).getCollectionStatus(database.getUuid(), database.getUuid());
+    if (rightPanel != null) {
+      sidebar.select(toSelect);
+      rightPanel.handleBreadcrumb(breadcrumb);
+      rightPanel.setVisible(true);
+      rightPanelContainer.setWidget(rightPanel);
+    }
+    GWT.log("END");
+    // }).getCollectionStatus(database.getUuid(), database.getUuid());
   }
 
   public void setTopLevelPanelCSS(String css) {

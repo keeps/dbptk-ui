@@ -1,7 +1,7 @@
 package com.databasepreservation.server.client.browse;
 
+import com.databasepreservation.common.client.common.ContentPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
-import com.databasepreservation.common.client.common.RightPanel;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -12,7 +12,7 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class HomePanel extends RightPanel {
+public class HomePanel extends ContentPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
 
   private static HomePanelUiBinder uiBinder = GWT.create(HomePanelUiBinder.class);

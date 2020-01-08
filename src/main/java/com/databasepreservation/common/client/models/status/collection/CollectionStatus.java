@@ -2,7 +2,9 @@ package com.databasepreservation.common.client.models.status.collection;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.databasepreservation.common.client.common.search.SavedSearch;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -22,12 +24,12 @@ public class CollectionStatus implements Serializable {
   private String description;
   private List<TableStatus> tables;
   private List<SavedSearch> savedSearches;
-  private List<String> denormalizations;
+  private Set<String> denormalizations;
 
   public CollectionStatus() {
     tables = new ArrayList<>();
     savedSearches = new ArrayList<>();
-    denormalizations = new ArrayList<>();
+    denormalizations = new HashSet<>();
   }
 
   public String getVersion() {
@@ -91,13 +93,15 @@ public class CollectionStatus implements Serializable {
     this.tables.add(status);
   }
 
-  public List<String> getDenormalizations() {
+  public Set<String> getDenormalizations() {
     return denormalizations;
   }
 
-  public void setDenormalizations(List<String> denormalizations) {
+  public void setDenormalizations(Set<String> denormalizations) {
     this.denormalizations = denormalizations;
   }
+
+  public void addDenormalization(String denormalization) { this.denormalizations.add(denormalization);}
 
   public void addSavedSearch(SavedSearch savedSearch) {
     this.savedSearches.add(savedSearch);

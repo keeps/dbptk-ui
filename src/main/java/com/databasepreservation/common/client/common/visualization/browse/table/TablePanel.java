@@ -44,7 +44,6 @@ public class TablePanel extends RightPanel {
   public static TablePanel getInstance(CollectionStatus status, ViewerDatabase database, String tableUUID, String searchInfoJson, String route) {
     String separator = "/";
     String code = database.getUuid() + separator + tableUUID;
-    GWT.log(status.getVersion());
     TablePanel instance = instances.get(code);
     if (instance == null) {
       instance = new TablePanel(database, tableUUID, searchInfoJson, route);

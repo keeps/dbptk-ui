@@ -1,10 +1,7 @@
 package com.databasepreservation.common.client.models.configuration.collection;
 
-import com.databasepreservation.common.client.models.configuration.denormalize.DenormalizeConfiguration;
+import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.collect.Table;
 
 import java.io.Serializable;
 import java.util.ArrayList;

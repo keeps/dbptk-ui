@@ -14,18 +14,18 @@ import com.databasepreservation.common.client.common.RightPanel;
 import com.databasepreservation.common.client.common.UserLogin;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.sidebar.DataTransformationSidebar;
+import com.databasepreservation.common.client.common.sidebar.DatabaseSidebar;
 import com.databasepreservation.common.client.common.sidebar.Sidebar;
 import com.databasepreservation.common.client.common.utils.ContentPanelLoader;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.common.utils.RightPanelLoader;
 import com.databasepreservation.common.client.common.visualization.activity.log.ActivityLogDetailedPanel;
 import com.databasepreservation.common.client.common.visualization.activity.log.ActivityLogPanel;
-import com.databasepreservation.common.client.common.visualization.browse.ContainerPanel;
-import com.databasepreservation.common.client.common.visualization.browse.DatabasePanel;
 import com.databasepreservation.common.client.common.visualization.browse.DatabaseSearchPanel;
 import com.databasepreservation.common.client.common.visualization.browse.DatabaseSearchesPanel;
 import com.databasepreservation.common.client.common.visualization.browse.ReferencesPanel;
 import com.databasepreservation.common.client.common.visualization.browse.RowPanel;
+import com.databasepreservation.common.client.common.visualization.browse.DatabasePanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.AdvancedConfiguration;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.DataTransformation;
 import com.databasepreservation.common.client.common.visualization.browse.foreignKey.ForeignKeyPanel;
@@ -105,54 +105,6 @@ public class MainPanel extends Composite {
     reSetHeader();
   }
 
-  /*
-   * History change handling
-   *
-   * (switching to another page = using a different RightPanel)
-   * ____________________________________________________________________________________________________________________
-   */
-  public void setContent(RightPanelLoader rightPanelLoader) {
-    setContent(null, null, rightPanelLoader);
-  }
-
-  public void setContent(ContentPanelLoader panel) {
-    setContent(null, panel);
-  }
-
-  private void setContent(String databaseUUID, String toSelect, RightPanelLoader rightPanelLoader) {
-    GWT.log("setContent, dbuid " + databaseUUID);
-    DatabasePanel databasePanel = DatabasePanel.getInstance(databaseUUID, true);
-    databasePanel.setTopLevelPanelCSS("browseContent wrapper skip_padding");
-    contentPanel.setWidget(databasePanel);
-    databasePanel.load(rightPanelLoader, toSelect);
-    JavascriptUtils.scrollToElement(contentPanel.getElement());
-  }
-
-  private void setContent(String databaseUUID, String route, String toSelect, Sidebar sidebar,
-    RightPanelLoader rightPanelLoader) {
-    GWT.log("setContent, dbuid " + databaseUUID);
-    DatabasePanel databasePanel = DatabasePanel.getInstance(databaseUUID, route, true, sidebar);
-    databasePanel.setTopLevelPanelCSS("browseContent wrapper skip_padding");
-    contentPanel.setWidget(databasePanel);
-    databasePanel.load(rightPanelLoader, toSelect);
-    JavascriptUtils.scrollToElement(contentPanel.getElement());
-  }
-
-  private void setContent(String databaseUUID, ContentPanelLoader panel) {
-    GWT.log("setContent, dbuid " + databaseUUID);
-    ContainerPanel containerPanel = ContainerPanel.getInstance(databaseUUID, true);
-    containerPanel.setTopLevelPanelCSS("browseContent wrapper skip_padding server");
-    contentPanel.setWidget(containerPanel);
-    containerPanel.load(panel);
-  }
-
-  private void setContent(String databaseUUID, String sidebarSelected, MetadataPanelLoad rightPanelLoader) {
-    SIARDEditMetadataPage instance = SIARDEditMetadataPage.getInstance(databaseUUID);
-    instance.setTopLevelPanelCSS("browseContent wrapper skip_padding server");
-    contentPanel.setWidget(instance);
-    instance.load(rightPanelLoader, sidebarSelected);
-  }
-
   public void onHistoryChanged(String token) {
     List<String> currentHistoryPath = HistoryManager.getCurrentHistoryPath();
     List<BreadcrumbItem> breadcrumbItemList = new ArrayList<>();
@@ -165,9 +117,9 @@ public class MainPanel extends Composite {
     } else if (HistoryManager.ROUTE_UPLOADS.equals(currentHistoryPath.get(0))) {
       // #uploads
       // #uploads/...
-      setContent(new RightPanelLoader() {
+      setContent(new ContentPanelLoader() {
         @Override
-        public RightPanel load(ViewerDatabase database, CollectionStatus status) {
+        public ContentPanel load(ViewerDatabase database, CollectionStatus status) {
           return UploadPanel.getInstance();
         }
       });
@@ -176,9 +128,9 @@ public class MainPanel extends Composite {
         @Override
         public void onSuccess(User result) {
           if (result.isGuest()) {
-            setContent(new RightPanelLoader() {
+            setContent(new ContentPanelLoader() {
               @Override
-              public RightPanel load(ViewerDatabase database, CollectionStatus status) {
+              public ContentPanel load(ViewerDatabase database, CollectionStatus status) {
                 return HomePanel.getInstance();
               }
             });
@@ -205,9 +157,9 @@ public class MainPanel extends Composite {
       });
     } else if (HistoryManager.ROUTE_LOGIN.equals(currentHistoryPath.get(0))) {
       // #login
-      setContent(new RightPanelLoader() {
+      setContent(new ContentPanelLoader() {
         @Override
-        public RightPanel load(ViewerDatabase database, CollectionStatus status) {
+        public ContentPanel load(ViewerDatabase database, CollectionStatus status) {
           return LoginPanel.getInstance();
         }
       });
@@ -268,22 +220,21 @@ public class MainPanel extends Composite {
       final String databaseUUID = currentHistoryPath.get(1);
       DataTransformationSidebar sidebar = DataTransformationSidebar.getInstance(databaseUUID);
       if (currentHistoryPath.size() == 2) {
-        setContent(databaseUUID, HistoryManager.ROUTE_DATA_TRANSFORMATION, databaseUUID,
-            sidebar, new RightPanelLoader() {
+        setContent(databaseUUID, HistoryManager.ROUTE_DATA_TRANSFORMATION, databaseUUID, sidebar,
+          new RightPanelLoader() {
             @Override
             public RightPanel load(ViewerDatabase database, CollectionStatus status) {
-              return DataTransformation.getInstance(database, sidebar);
+              return DataTransformation.getInstance(status, database, sidebar);
             }
           });
       } else if (currentHistoryPath.size() == 3) {
         final String tableUUID = currentHistoryPath.get(2);
-        setContent(databaseUUID, HistoryManager.ROUTE_DATA_TRANSFORMATION, tableUUID,
-            sidebar, new RightPanelLoader() {
-            @Override
-            public RightPanel load(ViewerDatabase database, CollectionStatus status) {
-              return DataTransformation.getInstance(database, tableUUID, sidebar);
-            }
-          });
+        setContent(databaseUUID, HistoryManager.ROUTE_DATA_TRANSFORMATION, tableUUID, sidebar, new RightPanelLoader() {
+          @Override
+          public RightPanel load(ViewerDatabase database, CollectionStatus status) {
+            return DataTransformation.getInstance(status, database, tableUUID, sidebar);
+          }
+        });
       }
     } else if (HistoryManager.ROUTE_JOBS.equals(currentHistoryPath.get(0))) {
       setContent(new ContentPanelLoader() {
@@ -300,10 +251,10 @@ public class MainPanel extends Composite {
         }
       });
     } else if (HistoryManager.ROUTE_DATABASE.equals(currentHistoryPath.get(0))) {
-        if (currentHistoryPath.size() == 2) {
+      if (currentHistoryPath.size() == 2) {
         // #database/<database_uuid>
         String databaseUUID = currentHistoryPath.get(1);
-        setContent(databaseUUID, currentHistoryPath.get(0), new RightPanelLoader() {
+        setContent(databaseUUID, HistoryManager.ROUTE_DATABASE, currentHistoryPath.get(0), new RightPanelLoader() {
           @Override
           public RightPanel load(ViewerDatabase database, CollectionStatus status) {
             return DatabaseInformationPanel.getInstance(database);
@@ -314,7 +265,7 @@ public class MainPanel extends Composite {
         && currentHistoryPath.get(2).equals(HistoryManager.ROUTE_DATABASE_REPORT)) {
         // #database/<id>/report
         String databaseUUID = currentHistoryPath.get(1);
-        setContent(databaseUUID, currentHistoryPath.get(2), new RightPanelLoader() {
+        setContent(databaseUUID, HistoryManager.ROUTE_DATABASE, currentHistoryPath.get(2), new RightPanelLoader() {
           @Override
           public RightPanel load(ViewerDatabase database, CollectionStatus status) {
             return ReportPanel.getInstance(database);
@@ -325,7 +276,7 @@ public class MainPanel extends Composite {
         && currentHistoryPath.get(2).equals(HistoryManager.ROUTE_DATABASE_USERS)) {
         // #database/<id>/users
         String databaseUUID = currentHistoryPath.get(1);
-        setContent(databaseUUID, currentHistoryPath.get(2), new RightPanelLoader() {
+        setContent(databaseUUID, HistoryManager.ROUTE_DATABASE, currentHistoryPath.get(2), new RightPanelLoader() {
           @Override
           public RightPanel load(ViewerDatabase database, CollectionStatus status) {
             return UsersPanel.getInstance(database);
@@ -336,7 +287,7 @@ public class MainPanel extends Composite {
         && currentHistoryPath.get(2).equals(HistoryManager.ROUTE_DATABASE_SEARCH)) {
         // #database/<id>/search
         String databaseUUID = currentHistoryPath.get(1);
-        setContent(databaseUUID, currentHistoryPath.get(2), new RightPanelLoader() {
+        setContent(databaseUUID, HistoryManager.ROUTE_DATABASE, currentHistoryPath.get(2), new RightPanelLoader() {
           @Override
           public RightPanel load(ViewerDatabase database, CollectionStatus status) {
             return DatabaseSearchPanel.getInstance(database);
@@ -344,10 +295,10 @@ public class MainPanel extends Composite {
         });
 
       } else if (currentHistoryPath.size() == 3
-              && currentHistoryPath.get(2).equals(HistoryManager.ROUTE_SCHEMA_ROUTINES)) {
+        && currentHistoryPath.get(2).equals(HistoryManager.ROUTE_SCHEMA_ROUTINES)) {
         // #database/<database_uuid>/routines
         String databaseUUID = currentHistoryPath.get(1);
-        setContent(databaseUUID, currentHistoryPath.get(2), new RightPanelLoader() {
+        setContent(databaseUUID, HistoryManager.ROUTE_DATABASE, currentHistoryPath.get(2), new RightPanelLoader() {
           @Override
           public RightPanel load(ViewerDatabase database, CollectionStatus status) {
             return RoutinesPanel.getInstance(database);
@@ -362,7 +313,7 @@ public class MainPanel extends Composite {
         // #view/<databaseUUID>/<viewUUID>
         String databaseUUID = currentHistoryPath.get(1);
         String viewUUID = currentHistoryPath.get(2);
-        setContent(databaseUUID, viewUUID, new RightPanelLoader() {
+        setContent(databaseUUID, currentHistoryPath.get(0), viewUUID, new RightPanelLoader() {
           @Override
           public RightPanel load(ViewerDatabase database, CollectionStatus status) {
             return ViewPanel.getInstance(database, viewUUID);
@@ -374,7 +325,7 @@ public class MainPanel extends Composite {
         String viewUUID = currentHistoryPath.get(2);
         final String page = currentHistoryPath.get(3);
         if (page.equals(HistoryManager.ROUTE_TABLE_OPTIONS)) {
-          setContent(databaseUUID, viewUUID, new RightPanelLoader() {
+          setContent(databaseUUID, currentHistoryPath.get(0), viewUUID, new RightPanelLoader() {
             @Override
             public RightPanel load(ViewerDatabase database, CollectionStatus status) {
               return ViewPanelStructure.getInstance(database, viewUUID);
@@ -393,7 +344,7 @@ public class MainPanel extends Composite {
         // #table/<databaseUUID>/<tableUUID>
         String databaseUUID = currentHistoryPath.get(1);
         final String tableUUID = currentHistoryPath.get(2);
-        setContent(databaseUUID, tableUUID, new RightPanelLoader() {
+        setContent(databaseUUID, HistoryManager.ROUTE_DATABASE, tableUUID, new RightPanelLoader() {
           @Override
           public RightPanel load(ViewerDatabase database, CollectionStatus status) {
             return TablePanel.getInstance(status, database, tableUUID, currentHistoryPath.get(0));
@@ -407,7 +358,7 @@ public class MainPanel extends Composite {
         final String page = currentHistoryPath.get(3);
         if (page.equals(HistoryManager.ROUTE_TABLE_OPTIONS)) {
           // #table/<databaseUUID>/<tableUUID>/options
-          setContent(databaseUUID, tableUUID, new RightPanelLoader() {
+          setContent(databaseUUID, HistoryManager.ROUTE_DATABASE, tableUUID, new RightPanelLoader() {
             @Override
             public RightPanel load(ViewerDatabase database, CollectionStatus status) {
               return TablePanelOptions.getInstance(database, tableUUID);
@@ -416,7 +367,7 @@ public class MainPanel extends Composite {
 
         } else if (page.equals(HistoryManager.ROUTE_TABLE_UPDATE)) {
           // #table/<databaseUUID>/<tableUUID>/update
-          setContent(databaseUUID, tableUUID, new RightPanelLoader() {
+          setContent(databaseUUID, HistoryManager.ROUTE_DATABASE, tableUUID, new RightPanelLoader() {
             @Override
             public RightPanel load(ViewerDatabase database, CollectionStatus status) {
               final TablePanel instance = TablePanel.getInstance(database, tableUUID, currentHistoryPath.get(0));
@@ -426,7 +377,7 @@ public class MainPanel extends Composite {
           });
         } else {
           // #table/<databaseUUID>/<tableUUID>/<searchInfoJSON>
-          setContent(databaseUUID, tableUUID, new RightPanelLoader() {
+          setContent(databaseUUID, HistoryManager.ROUTE_DATABASE, tableUUID, new RightPanelLoader() {
             @Override
             public RightPanel load(ViewerDatabase database, CollectionStatus status) {
               return TablePanel.getInstance(database, tableUUID, page);
@@ -443,7 +394,7 @@ public class MainPanel extends Composite {
         String databaseUUID = currentHistoryPath.get(1);
         final String tableUUID = currentHistoryPath.get(2);
         final String recordUUID = currentHistoryPath.get(3);
-        setContent(databaseUUID, tableUUID, new RightPanelLoader() {
+        setContent(databaseUUID, currentHistoryPath.get(0), tableUUID, new RightPanelLoader() {
           @Override
           public RightPanel load(ViewerDatabase database, CollectionStatus status) {
             return RowPanel.createInstance(database, tableUUID, recordUUID);
@@ -462,7 +413,7 @@ public class MainPanel extends Composite {
         final String tableUUID = currentHistoryPath.get(2);
         final String recordUUID = currentHistoryPath.get(3);
         final String columnIndex = currentHistoryPath.get(4);
-        setContent(databaseUUID, tableUUID, new RightPanelLoader() {
+        setContent(databaseUUID, currentHistoryPath.get(0), tableUUID, new RightPanelLoader() {
           @Override
           public RightPanel load(ViewerDatabase database, CollectionStatus status) {
             return ReferencesPanel.getInstance(database, tableUUID, recordUUID, columnIndex);
@@ -474,7 +425,7 @@ public class MainPanel extends Composite {
         handleErrorPath(currentHistoryPath);
 
       }
-    }else if (HistoryManager.ROUTE_FOREIGN_KEY.equals(currentHistoryPath.get(0))) {
+    } else if (HistoryManager.ROUTE_FOREIGN_KEY.equals(currentHistoryPath.get(0))) {
       if (currentHistoryPath.size() >= 5) {
         // #foreignkey/<databaseUUID>/<tableUUID>/<col1>/<val1>/<col2>/<val2>/<colN>/<valN>/...
         // minimum: #foreignkey/<databaseUUID>/<tableUUID>/<col1>/<val1>
@@ -483,22 +434,24 @@ public class MainPanel extends Composite {
         final List<String> columnsAndValues = currentHistoryPath.subList(3, currentHistoryPath.size());
         String page = columnsAndValues.get(columnsAndValues.size() - 1);
         if (page.equals(HistoryManager.ROUTE_TABLE_OPTIONS)) {
-          setContent(databaseUUID, tableUUID, new RightPanelLoader() {
+          setContent(databaseUUID, currentHistoryPath.get(0), tableUUID, new RightPanelLoader() {
             @Override
             public RightPanel load(ViewerDatabase database, CollectionStatus status) {
-              return ForeignKeyPanelOptions.getInstance(database, tableUUID, columnsAndValues.subList(0, columnsAndValues.size() - 1));
+              return ForeignKeyPanelOptions.getInstance(database, tableUUID,
+                columnsAndValues.subList(0, columnsAndValues.size() - 1));
             }
           });
         } else if (page.equals(HistoryManager.ROUTE_TABLE_UPDATE)) {
-          setContent(databaseUUID, tableUUID, new RightPanelLoader() {
+          setContent(databaseUUID, currentHistoryPath.get(0), tableUUID, new RightPanelLoader() {
             @Override
             public RightPanel load(ViewerDatabase database, CollectionStatus status) {
               GWT.log("Col: " + columnsAndValues);
-              return ForeignKeyPanel.createInstance(database, tableUUID, columnsAndValues.subList(0, columnsAndValues.size() - 1), true);
+              return ForeignKeyPanel.createInstance(database, tableUUID,
+                columnsAndValues.subList(0, columnsAndValues.size() - 1), true);
             }
           });
         } else if (columnsAndValues.size() % 2 == 0) {
-          setContent(databaseUUID, tableUUID, new RightPanelLoader() {
+          setContent(databaseUUID, currentHistoryPath.get(0), tableUUID, new RightPanelLoader() {
             @Override
             public RightPanel load(ViewerDatabase database, CollectionStatus status) {
               return ForeignKeyPanel.createInstance(database, tableUUID, columnsAndValues);
@@ -514,7 +467,7 @@ public class MainPanel extends Composite {
       if (currentHistoryPath.size() == 2) {
         // #searches/<databaseUUID>
         final String databaseUUID = currentHistoryPath.get(1);
-        setContent(databaseUUID, currentHistoryPath.get(0), new RightPanelLoader() {
+        setContent(databaseUUID, currentHistoryPath.get(0), currentHistoryPath.get(0), new RightPanelLoader() {
           @Override
           public RightPanel load(ViewerDatabase database, CollectionStatus status) {
             return DatabaseSearchesPanel.createInstance(database);
@@ -525,7 +478,7 @@ public class MainPanel extends Composite {
         // #searches/<databaseUUID>/<searchUUID>
         final String databaseUUID = currentHistoryPath.get(1);
         final String searchUUID = currentHistoryPath.get(2);
-        setContent(databaseUUID, currentHistoryPath.get(0), new RightPanelLoader() {
+        setContent(databaseUUID, currentHistoryPath.get(0), currentHistoryPath.get(0), new RightPanelLoader() {
           @Override
           public RightPanel load(ViewerDatabase database, CollectionStatus status) {
             return TableSavedSearchPanel.createInstance(database, searchUUID);
@@ -537,7 +490,7 @@ public class MainPanel extends Composite {
         // #searches/<databaseUUID>/<searchUUID>/edit
         final String databaseUUID = currentHistoryPath.get(1);
         final String searchUUID = currentHistoryPath.get(2);
-        setContent(databaseUUID, currentHistoryPath.get(0), new RightPanelLoader() {
+        setContent(databaseUUID, currentHistoryPath.get(0), currentHistoryPath.get(0), new RightPanelLoader() {
           @Override
           public RightPanel load(ViewerDatabase database, CollectionStatus status) {
             return TableSavedSearchEditPanel.createInstance(database, searchUUID);
@@ -547,8 +500,8 @@ public class MainPanel extends Composite {
       } else {
         handleErrorPath(currentHistoryPath);
       }
-    }  else if (HistoryManager.ROUTE_SIARD_EDIT_METADATA.equals(currentHistoryPath.get(0))) {
-      String databaseUUID =  currentHistoryPath.get(1);
+    } else if (HistoryManager.ROUTE_SIARD_EDIT_METADATA.equals(currentHistoryPath.get(0))) {
+      String databaseUUID = currentHistoryPath.get(1);
       if (currentHistoryPath.size() == 2) {
         setContent(databaseUUID, databaseUUID, new MetadataPanelLoad() {
           @Override
@@ -604,7 +557,7 @@ public class MainPanel extends Composite {
           }
         });
       }
-    }else {
+    } else {
       handleErrorPath(currentHistoryPath);
     }
   }
@@ -670,5 +623,56 @@ public class MainPanel extends Composite {
     } else {
       reSetHeader((String) null);
     }
+  }
+
+  /*
+   * History change handling
+   *
+   * (switching to another page = using a different RightPanel)
+   * ____________________________________________________________________________________________________________________
+   */
+  public void setContent(ContentPanelLoader panel) {
+    setContent(null, panel);
+  }
+
+  private void setContent(String databaseUUID, String route, String toSelect, Sidebar sidebar,
+    RightPanelLoader rightPanelLoader) {
+    GWT.log("setContent, dbuid " + databaseUUID);
+    DatabasePanel databasePanel = DatabasePanel.getInstance(databaseUUID, route, true, sidebar);
+    databasePanel.setTopLevelPanelCSS("browseContent wrapper skip_padding");
+    contentPanel.setWidget(databasePanel);
+    databasePanel.load(rightPanelLoader, toSelect);
+    JavascriptUtils.scrollToElement(contentPanel.getElement());
+  }
+
+  private void setContent(String databaseUUID, String route, String toSelect, RightPanelLoader rightPanelLoader) {
+    GWT.log("setContent, dbuid " + databaseUUID);
+
+    Sidebar sidebar = DatabaseSidebar.getInstance(databaseUUID);
+    DatabasePanel containerPanel = DatabasePanel.getInstance(databaseUUID, route, true, sidebar);
+    containerPanel.setTopLevelPanelCSS("browseContent wrapper skip_padding");
+    contentPanel.setWidget(containerPanel);
+    containerPanel.load(rightPanelLoader, toSelect);
+    JavascriptUtils.scrollToElement(contentPanel.getElement());
+  }
+
+  private void setContent(String databaseUUID, ContentPanelLoader panelLoader) {
+    DatabasePanel containerPanel;
+    if (databaseUUID == null) {
+      containerPanel = DatabasePanel.getInstance(true);
+    } else {
+      containerPanel = DatabasePanel.getInstance(databaseUUID, true);
+    }
+    contentPanel.setWidget(containerPanel);
+    containerPanel.load(panelLoader);
+    containerPanel.setTopLevelPanelCSS("browseContent wrapper skip_padding server");
+
+  }
+
+  private void setContent(String databaseUUID, String sidebarSelected, MetadataPanelLoad rightPanelLoader) {
+    SIARDEditMetadataPage instance = SIARDEditMetadataPage.getInstance(databaseUUID);
+    instance.setTopLevelPanelCSS("browseContent wrapper skip_padding server");
+    contentPanel.setWidget(instance);
+    instance.load(rightPanelLoader, sidebarSelected);
   }
 }

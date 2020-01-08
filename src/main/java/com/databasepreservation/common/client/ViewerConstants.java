@@ -77,6 +77,7 @@ public class ViewerConstants {
   public static final String MATERIALIZED_VIEW_PREFIX = "VIEW_";
   public static final String CUSTOM_VIEW_PREFIX = "CUSTOM_VIEW_";
   public static final String DATABASE_STATUS_PREFIX = "database-";
+  public static final String DENORMALIZATION_STATUS_PREFIX = "denormalization-";
 
   public static final String INTERNAL_ZIP_LOB_FOLDER = "lobs/";
 

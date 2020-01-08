@@ -5,9 +5,9 @@ import org.fusesource.restygwt.client.MethodCallback;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.v2.user.User;
 
-import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
-import com.databasepreservation.common.client.common.RightPanel;
+import com.databasepreservation.common.client.common.ContentPanel;
 import com.databasepreservation.common.client.common.UserLogin;
+import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.google.gwt.core.client.GWT;
@@ -17,19 +17,14 @@ import com.google.gwt.event.dom.client.KeyPressEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.PasswordTextBox;
-import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 
 import config.i18n.client.ClientMessages;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class LoginPanel extends RightPanel {
+public class LoginPanel extends ContentPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
 
   private static LoginPanelUiBinder uiBinder = GWT.create(LoginPanelUiBinder.class);

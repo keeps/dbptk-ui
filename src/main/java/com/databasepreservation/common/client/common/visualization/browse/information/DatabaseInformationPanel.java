@@ -3,6 +3,7 @@ package com.databasepreservation.common.client.common.visualization.browse.infor
 import java.util.HashMap;
 import java.util.Map;
 
+import com.databasepreservation.common.client.common.ContentPanel;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerSchema;

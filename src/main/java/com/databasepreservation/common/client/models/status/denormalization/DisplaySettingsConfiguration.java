@@ -1,4 +1,4 @@
-package com.databasepreservation.common.client.models.configuration.denormalize;
+package com.databasepreservation.common.client.models.status.denormalization;
 
 import java.io.Serializable;
 

@@ -1,9 +1,10 @@
-package com.databasepreservation.common.client.models.configuration.denormalize;
+package com.databasepreservation.common.client.models.status.denormalization;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 
@@ -23,7 +24,7 @@ public class DenormalizeConfiguration implements Serializable {
     }
 
     public DenormalizeConfiguration(String databaseUUID, ViewerTable table){
-        setUuid(databaseUUID + "." + table.getUuid());
+        setUuid(ViewerConstants.DENORMALIZATION_STATUS_PREFIX + table.getUuid());
         setTableUUID(table.getUuid());
         setTableID(table.getId());
         relatedTables = new ArrayList<>();

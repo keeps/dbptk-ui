@@ -10,10 +10,11 @@ import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.TableNode;
 import com.databasepreservation.common.client.models.configuration.collection.CollectionConfiguration;
 import com.databasepreservation.common.client.models.configuration.collection.TableConfiguration;
-import com.databasepreservation.common.client.models.configuration.denormalize.DenormalizeConfiguration;
-import com.databasepreservation.common.client.models.configuration.denormalize.ReferencesConfiguration;
-import com.databasepreservation.common.client.models.configuration.denormalize.RelatedColumnConfiguration;
-import com.databasepreservation.common.client.models.configuration.denormalize.RelatedTablesConfiguration;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
+import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
+import com.databasepreservation.common.client.models.status.denormalization.ReferencesConfiguration;
+import com.databasepreservation.common.client.models.status.denormalization.RelatedColumnConfiguration;
+import com.databasepreservation.common.client.models.status.denormalization.RelatedTablesConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
@@ -31,6 +32,7 @@ public class ConfigurationHandler {
   private final String VERSION = "1.0.0";
   private ViewerDatabase database;
   private CollectionConfiguration collectionConfiguration;
+  private DenormalizeConfiguration denormalizeConfiguration;
   private Map<String, Integer> nestedIndexMap = new HashMap<>();
 
   /**
@@ -42,6 +44,11 @@ public class ConfigurationHandler {
     CollectionConfiguration collectionConfiguration) {
     return instances.computeIfAbsent(database.getUuid(),
       k -> new ConfigurationHandler(database, collectionConfiguration));
+  }
+
+  public static ConfigurationHandler getInstance(ViewerDatabase database, DenormalizeConfiguration denormalizeConfiguration){
+    return instances.computeIfAbsent(database.getUuid(),
+        k -> new ConfigurationHandler(database, denormalizeConfiguration));
   }
 
   /**
@@ -57,6 +64,11 @@ public class ConfigurationHandler {
     }
   }
 
+  private ConfigurationHandler(ViewerDatabase database, DenormalizeConfiguration denormalizeConfiguration) {
+    this.database = database;
+    this.denormalizeConfiguration = denormalizeConfiguration;
+  }
+
   /**
    * 
    */
@@ -69,10 +81,21 @@ public class ConfigurationHandler {
    * 
    */
   public void buildAll() {
+//    ConfigurationService.Util.call((Boolean result) -> {
+//      Dialogs.showInformationDialog("Configuration file", "Created denormalization configuration file with success",
+//        "OK");
+//    }).createConfigurationBundle(database.getUuid(), collectionConfiguration);
+
+    for (TableConfiguration table : collectionConfiguration.getTables()) {
+      addDenormalizationConfiguration(table.getDenormalizeConfiguration());
+    }
+  }
+
+  public void addDenormalizationConfiguration(DenormalizeConfiguration denormalizeConfiguration){
     ConfigurationService.Util.call((Boolean result) -> {
       Dialogs.showInformationDialog("Configuration file", "Created denormalization configuration file with success",
-        "OK");
-    }).createConfigurationBundle(database.getUuid(), collectionConfiguration);
+          "OK");
+    }).createDenormalizeConfigurationFile(database.getUuid(), denormalizeConfiguration.getTableUUID(), denormalizeConfiguration);
   }
 
   /**

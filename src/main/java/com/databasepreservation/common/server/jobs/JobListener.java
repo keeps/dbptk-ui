@@ -1,11 +1,8 @@
 package com.databasepreservation.common.server.jobs;
 
-import com.databasepreservation.common.api.v1.ConfigurationResource;
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.models.configuration.denormalize.DenormalizeConfiguration;
-import com.databasepreservation.common.client.models.structure.ViewerJob;
+import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
-import com.databasepreservation.common.client.services.ConfigurationService;
 import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.server.controller.JobController;

@@ -2,8 +2,8 @@ package com.databasepreservation.common.client.common.visualization.browse.confi
 
 import com.databasepreservation.common.client.common.lists.widgets.MetadataTableList;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.ConfigurationHandler;
-import com.databasepreservation.common.client.models.configuration.denormalize.RelatedColumnConfiguration;
-import com.databasepreservation.common.client.models.configuration.denormalize.RelatedTablesConfiguration;
+import com.databasepreservation.common.client.models.status.denormalization.RelatedColumnConfiguration;
+import com.databasepreservation.common.client.models.status.denormalization.RelatedTablesConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerTable;

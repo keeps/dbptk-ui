@@ -1,7 +1,6 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:m='urn:import:com.databasepreservation.common.client.common.breadcrumb'
-             xmlns:sb='urn:import:com.databasepreservation.common.client.common.sidebar'
 >
 
 <g:FlowPanel ui:field="toplevel" addStyleNames="database">
@@ -12,7 +11,7 @@
             <g:HorizontalPanel addStyleNames="browseContentPreviewPanel">
                 <!-- LEFT PANEL -->
                 <g:cell>
-                    <sb:Sidebar ui:field="sidebar"/>
+                    <g:FlowPanel ui:field="sidebarPanel"/>
                 </g:cell>
                 <!-- RIGHT PANEL -->
                 <g:cell width="100%">
@@ -22,7 +21,7 @@
                             <g:MenuBar ui:field="menu" />
                             <g:SimplePanel addStyleNames="clear-both" />
                         </g:FlowPanel>
-                        <g:SimplePanel addStyleNames="col_12 content" ui:field="rightPanelContainer" />
+                        <g:SimplePanel addStyleNames="col_12 content content-container" ui:field="rightPanelContainer" />
                     </g:FlowPanel>
                 </g:cell>
             </g:HorizontalPanel>

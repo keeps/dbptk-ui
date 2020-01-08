@@ -1,7 +1,7 @@
 package com.databasepreservation.server.client.browse;
 
+import com.databasepreservation.common.client.common.ContentPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
-import com.databasepreservation.common.client.common.RightPanel;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.server.client.browse.upload.SIARDUpload;
 import com.google.gwt.core.client.GWT;
@@ -15,7 +15,7 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class UploadPanel extends RightPanel {
+public class UploadPanel extends ContentPanel {
   interface NewUploadPanelUiBinder extends UiBinder<Widget, UploadPanel> {
   }
 
@@ -55,6 +55,5 @@ public class UploadPanel extends RightPanel {
     tabPanel.add(SIARDUpload.getInstance(), messages.uploadPanelTextForTabUploadSIARDFile());
     tabPanel.selectTab(0);
   }
-
 
 }

@@ -1,6 +1,4 @@
-package com.databasepreservation.common.client.models.configuration.denormalize;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
+package com.databasepreservation.common.client.models.status.denormalization;
 
 import java.io.Serializable;
 import java.util.ArrayList;

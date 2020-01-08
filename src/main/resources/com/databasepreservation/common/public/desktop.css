@@ -7,12 +7,12 @@
     padding-top: 40px;
 }
 
-.browseContentPreviewPanel > tbody > tr > td:first-child {
-    width: 300px;
-    min-width: 300px;
-    max-width: 1px;
-    word-break: break-all;
-}
+/*.browseContentPreviewPanel > tbody > tr > td:first-child {*/
+/*    width: 300px;*/
+/*    min-width: 300px;*/
+/*    max-width: 1px;*/
+/*    word-break: break-all;*/
+/*}*/
 
 .browseContentFilePreviewPanel > .col_12.content {
     padding: 0 20px 20px 20px;

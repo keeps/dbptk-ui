@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.LoadingDiv;
 import com.databasepreservation.common.client.common.RightPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
@@ -12,7 +13,9 @@ import com.databasepreservation.common.client.common.lists.widgets.MultipleSelec
 import com.databasepreservation.common.client.common.sidebar.DataTransformationSidebar;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.ConfigurationHandler;
 import com.databasepreservation.common.client.models.configuration.collection.CollectionConfiguration;
-import com.databasepreservation.common.client.models.configuration.denormalize.RelatedTablesConfiguration;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
+import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
+import com.databasepreservation.common.client.models.status.denormalization.RelatedTablesConfiguration;
 import com.databasepreservation.common.client.models.structure.*;
 import com.databasepreservation.common.client.services.ConfigurationService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
@@ -56,6 +59,7 @@ public class DataTransformation extends RightPanel {
   private ConfigurationHandler configuration;
   private TransformationTable rootTable;
   private DataTransformationSidebar sidebar;
+  private CollectionStatus collectionStatus;
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
@@ -64,22 +68,28 @@ public class DataTransformation extends RightPanel {
     BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
   }
 
-  public static DataTransformation getInstance(ViewerDatabase database, DataTransformationSidebar sidebar) {
-    return instances.computeIfAbsent(database.getUuid(), k -> new DataTransformation(database, null, sidebar));
-  }
-
-  public static DataTransformation getInstance(ViewerDatabase database, String tableUUID,
+  public static DataTransformation getInstance(CollectionStatus collectionStatus, ViewerDatabase database,
     DataTransformationSidebar sidebar) {
-    return instances.computeIfAbsent(database.getUuid() + tableUUID,
-      k -> new DataTransformation(database, tableUUID, sidebar));
+    return instances.computeIfAbsent(database.getUuid(),
+      k -> new DataTransformation(collectionStatus, database, null, sidebar));
   }
 
-  private DataTransformation(ViewerDatabase database, String tableUUID, DataTransformationSidebar sidebar) {
+  public static DataTransformation getInstance(CollectionStatus collectionStatus, ViewerDatabase database,
+    String tableUUID, DataTransformationSidebar sidebar) {
+    return instances.computeIfAbsent(database.getUuid() + tableUUID,
+      k -> new DataTransformation(collectionStatus, database, tableUUID, sidebar));
+  }
+
+  private DataTransformation(CollectionStatus collectionStatus, ViewerDatabase database, String tableUUID,
+    DataTransformationSidebar sidebar) {
     initWidget(binder.createAndBindUi(this));
     this.database = database;
     this.sidebar = sidebar;
+    this.collectionStatus = collectionStatus;
     if (tableUUID == null) {
-      //content.add(ErDiagram.getInstance(database, database.getMetadata().getSchemas().get(0), HistoryManager.getCurrentHistoryPath().get(0)));
+      // content.add(ErDiagram.getInstance(database,
+      // database.getMetadata().getSchemas().get(0),
+      // HistoryManager.getCurrentHistoryPath().get(0)));
       content.add(DataTransformationProgressPanel.getInstance(database));
     } else {
       this.table = database.getMetadata().getTable(tableUUID);
@@ -97,6 +107,16 @@ public class DataTransformation extends RightPanel {
       loading.setVisible(false);
       init();
     }).getConfiguration(database.getUuid());
+
+//    if (collectionStatus.getDenormalizations()
+//      .contains(ViewerConstants.DENORMALIZATION_STATUS_PREFIX + table.getUuid())) {
+//      ConfigurationService.Util.call((DenormalizeConfiguration response) -> {
+//        configuration = ConfigurationHandler.getInstance(database, response);
+//        loading.setVisible(false);
+//        init();
+//      }).getDenormalizeConfigurationFile(database.getUuid(),
+//        ViewerConstants.DENORMALIZATION_STATUS_PREFIX + table.getUuid());
+//    }
   }
 
   private void init() {
@@ -158,8 +178,8 @@ public class DataTransformation extends RightPanel {
     card.addExtraContent(getInformationAboutRelashionship(childNode));
 
     FlowPanel container = new FlowPanel();
-    TransformationChildTables tableInstance = TransformationChildTables.getInstance(childNode, configuration,
-      rootTable, sidebar);
+    TransformationChildTables tableInstance = TransformationChildTables.getInstance(childNode, configuration, rootTable,
+      sidebar);
     MultipleSelectionTablePanel selectTable = tableInstance.createTable();
 
     SwitchBtn switchBtn = new SwitchBtn("Enable", false);
