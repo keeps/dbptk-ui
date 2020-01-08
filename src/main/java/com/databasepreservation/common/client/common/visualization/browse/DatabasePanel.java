@@ -16,9 +16,11 @@ import com.databasepreservation.common.client.common.utils.ApplicationType;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.common.utils.RightPanelLoader;
 import com.databasepreservation.common.client.index.IsIndexed;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.services.AuthenticationService;
+import com.databasepreservation.common.client.services.ConfigurationService;
 import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
@@ -86,6 +88,7 @@ public class DatabasePanel extends Composite {
 
   private String databaseUUID;
   private ViewerDatabase database = null;
+  private CollectionStatus collectionStatus = null;
   private String selectedLanguage;
 
   private DatabasePanel(String databaseUUID, boolean initMenu) {
@@ -151,7 +154,7 @@ public class DatabasePanel extends Composite {
           setLanguageMenu(languagesMenu);
 
           MenuItem languagesMenuItem = new MenuItem(
-              FontAwesomeIconManager.loaded(FontAwesomeIconManager.GLOBE, selectedLanguage), languagesMenu);
+            FontAwesomeIconManager.loaded(FontAwesomeIconManager.GLOBE, selectedLanguage), languagesMenu);
           languagesMenuItem.addStyleName("menu-item menu-item-label menu-item-language");
           menu.addItem(languagesMenuItem);
         } else {
@@ -166,8 +169,8 @@ public class DatabasePanel extends Composite {
                   FontAwesomeIconManager.loaded(FontAwesomeIconManager.ACTIVITY_LOG, messages.activityLogMenuText()),
                   (Command) HistoryManager::gotoActivityLog);
                 administrationMenu.addItem(
-                    FontAwesomeIconManager.loaded(FontAwesomeIconManager.NETWORK_WIRED, messages.menuTextForJobs()),
-                    (Command) HistoryManager::gotoJobs);
+                  FontAwesomeIconManager.loaded(FontAwesomeIconManager.NETWORK_WIRED, messages.menuTextForJobs()),
+                  (Command) HistoryManager::gotoJobs);
                 administrationMenu.addItem(
                   FontAwesomeIconManager.loaded(FontAwesomeIconManager.PREFERENCES, messages.menuTextForPreferences()),
                   (Command) HistoryManager::gotoPreferences);
@@ -251,19 +254,23 @@ public class DatabasePanel extends Composite {
 
   private void loadPanel(RightPanelLoader rightPanelLoader, String toSelect) {
     GWT.log("have db: " + database + " sb.init: " + sidebar.isInitialized());
-    RightPanel rightPanel = rightPanelLoader.load(database);
+    ConfigurationService.Util.call((CollectionStatus status) -> {
+      collectionStatus = status;
 
-    if (database != null && !sidebar.isInitialized()) {
-      sidebar.init(database);
-      sidebar.select(toSelect);
-    }
+      RightPanel rightPanel = rightPanelLoader.load(database, collectionStatus);
 
-    if (rightPanel != null) {
-      rightPanel.handleBreadcrumb(breadcrumb);
-      rightPanelContainer.setWidget(rightPanel);
-      rightPanel.setVisible(true);
-      sidebar.select(toSelect);
-    }
+      if (database != null && !sidebar.isInitialized()) {
+        sidebar.init(database);
+        sidebar.select(toSelect);
+      }
+
+      if (rightPanel != null) {
+        rightPanel.handleBreadcrumb(breadcrumb);
+        rightPanelContainer.setWidget(rightPanel);
+        rightPanel.setVisible(true);
+        sidebar.select(toSelect);
+      }
+    }).getCollectionStatus(database.getUuid(), database.getUuid());
   }
 
   public void setTopLevelPanelCSS(String css) {

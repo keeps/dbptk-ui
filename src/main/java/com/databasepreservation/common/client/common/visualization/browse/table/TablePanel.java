@@ -7,6 +7,7 @@ import com.databasepreservation.common.client.common.search.SearchInfo;
 import com.databasepreservation.common.client.common.search.TableSearchPanel;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.visualization.browse.foreignKey.ForeignKeyPanelOptions;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
@@ -32,14 +33,18 @@ public class TablePanel extends RightPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, TablePanel> instances = new HashMap<>();
 
-  public static TablePanel getInstance(ViewerDatabase database, String tableUUID, String route) {
-    return getInstance(database, tableUUID, null, route);
+  public static TablePanel getInstance(CollectionStatus status, ViewerDatabase database, String tableUUID, String route) {
+    return getInstance(status, database, tableUUID, null, route);
   }
 
-  public static TablePanel getInstance(ViewerDatabase database, String tableUUID, String searchInfoJson, String route) {
+  public static TablePanel getInstance(ViewerDatabase database, String tableUUID, String route) {
+    return getInstance(null, database, tableUUID, null, route);
+  }
+
+  public static TablePanel getInstance(CollectionStatus status, ViewerDatabase database, String tableUUID, String searchInfoJson, String route) {
     String separator = "/";
     String code = database.getUuid() + separator + tableUUID;
-
+    GWT.log(status.getVersion());
     TablePanel instance = instances.get(code);
     if (instance == null) {
       instance = new TablePanel(database, tableUUID, searchInfoJson, route);

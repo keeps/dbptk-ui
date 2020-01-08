@@ -1,5 +1,6 @@
 package com.databasepreservation.common.client.common.utils;
 
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.common.RightPanel;
 
@@ -10,5 +11,5 @@ import com.databasepreservation.common.client.common.RightPanel;
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public abstract class RightPanelLoader {
-  public abstract RightPanel load(ViewerDatabase database);
+  public abstract RightPanel load(ViewerDatabase database, CollectionStatus status);
 }

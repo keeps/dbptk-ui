@@ -7,6 +7,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
 import org.fusesource.restygwt.client.DirectRestService;
 import org.fusesource.restygwt.client.MethodCallback;
@@ -48,9 +49,14 @@ public interface ConfigurationService extends DirectRestService {
     }
   }
 
+  @GET
+  @Path("databases/{databaseUUID}/collection/{collectionUUID}")
+  @ApiOperation(value ="")
+  CollectionStatus getCollectionStatus(@PathParam("databaseUUID") String databaseUUID, @PathParam("collectionUUID") String collectionUUID);
+
   @POST
   @Path("/file/{databaseuuid}")
-  @ApiOperation(value = "retrieves the first 5 rows of the query execution", notes = "", response = ProgressData.class, responseContainer = "database metadata")
+  @ApiOperation(value = "", notes = "", response = Boolean.class)
   Boolean createConfigurationFile(@PathParam("databaseuuid") String databaseuuid,
     CollectionConfiguration configuration);
 

@@ -217,27 +217,6 @@ public class ConfigurationManager {
         }
       }
     }
-
-    // String filename = status.getId();
-    // Path statusFile = databaseStatusDirectory.resolve(filename + ".json");
-    //
-    // // verify if file exists
-    // if (!FSUtils.exists(statusFile)) {
-    // try {
-    // Files.createFile(statusFile);
-    // } catch (FileAlreadyExistsException e) {
-    // // do nothing (just caused due to concurrency)
-    // } catch (IOException e) {
-    // throw new GenericException("Error creating file to write the database
-    // information", e);
-    // }
-    // } else {
-    // status = new DatabaseStatus(JsonUtils.readObjectFromFile(statusFile,
-    // DatabaseStatus.class));
-    // }
-    //
-    // // Save backup
-    // JsonUtils.writeObjectToFile(status, statusFile);
   }
 
   public void addLogEntry(ActivityLogEntry logEntry, Path logDirectory) throws GenericException {

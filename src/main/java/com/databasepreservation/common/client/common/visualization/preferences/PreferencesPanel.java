@@ -7,6 +7,8 @@ import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.widgets.Alert;
@@ -51,7 +53,6 @@ public class PreferencesPanel extends ContentPanel {
   }
 
   private PreferencesPanel() {
-    ;
     initWidget(binder.createAndBindUi(this));
 
     mainHeader.setWidget(CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.PREFERENCES),

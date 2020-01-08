@@ -3,6 +3,8 @@ package com.databasepreservation.common.client.common.visualization.browse;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
+import com.databasepreservation.common.client.services.ConfigurationService;
 import org.roda.core.data.v2.user.User;
 
 import com.databasepreservation.common.client.ViewerConstants;
@@ -72,6 +74,7 @@ public class ContainerPanel extends Composite {
 
   private String databaseUUID;
   private ViewerDatabase database = null;
+  private CollectionStatus collectionStatus = null;
   private String selectedLanguage;
 
   private ContainerPanel(String databaseUUID, boolean initMenu) {
@@ -221,12 +224,12 @@ public class ContainerPanel extends Composite {
   private void loadPanelWithDatabase(final ContentPanelLoader panelLoader) {
     DatabaseService.Util.call((IsIndexed result) -> {
       database = (ViewerDatabase) result;
-      loadPanel(panelLoader);
+        loadPanel(panelLoader);
     }).retrieve(databaseUUID, databaseUUID);
   }
 
   public void loadPanel(ContentPanelLoader panelLoader) {
-    ContentPanel panel = panelLoader.load(database);
+    ContentPanel panel = panelLoader.load(database, collectionStatus);
     if (panel != null) {
       panel.handleBreadcrumb(breadcrumb);
       panelContainer.setWidget(panel);
