@@ -17,7 +17,7 @@ import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultMethodCallback;
 import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
-import com.databasepreservation.common.client.models.DenormalizeProgressData;
+import com.databasepreservation.common.client.models.DataTransformationProgressData;
 import com.databasepreservation.common.client.models.structure.ViewerJob;
 import com.google.gwt.core.client.GWT;
 
@@ -52,7 +52,7 @@ public interface JobService extends DirectRestService {
 
   @POST
   @Path("/{databaseuuid}")
-  Boolean denormalizeJob(@PathParam("databaseuuid") String databaseuuid);
+  List<String> denormalizeCollectionJob(@PathParam("databaseuuid") String databaseuuid);
 
   @POST
   @Path("/{databaseuuid}/{tableuuid}")
@@ -68,7 +68,7 @@ public interface JobService extends DirectRestService {
 
   @GET
   @Path("/progress/{databaseuuid}")
-  List<DenormalizeProgressData> progress(@PathParam("databaseuuid") String databaseuuid);
+  List<DataTransformationProgressData> progress(@PathParam("databaseuuid") String databaseuuid);
 
   @POST
   @Path("/find")

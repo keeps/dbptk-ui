@@ -19,6 +19,7 @@ import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Label;
 
 import config.i18n.client.ClientMessages;
@@ -29,38 +30,38 @@ import config.i18n.client.ClientMessages;
 public class TransformationChildTables {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, TransformationChildTables> instances = new HashMap<>();
-  private final DataTransformationSidebar sidebar;
   private DenormalizeConfiguration denormalizeConfiguration;
   private TransformationTable rootTable;
   private ViewerTable childTable;
   private Map<Integer, Boolean> isLoading = new HashMap<>();
   private String uuid;
+  private Button btnSave;
 
   /**
    *
    * @param childTable
    * @param denormalizeConfiguration
    * @param rootTable
-   * @param sidebar
+   * @param btnSave
    * @return
    */
-  public static TransformationChildTables getInstance(TableNode childTable, DenormalizeConfiguration denormalizeConfiguration, TransformationTable rootTable, DataTransformationSidebar sidebar) {
+  public static TransformationChildTables getInstance(TableNode childTable, DenormalizeConfiguration denormalizeConfiguration, TransformationTable rootTable, Button btnSave) {
     return instances.computeIfAbsent(childTable.getUuid(),
-        k -> new TransformationChildTables(childTable, denormalizeConfiguration, rootTable, sidebar));
+        k -> new TransformationChildTables(childTable, denormalizeConfiguration, rootTable, btnSave));
   }
 
   /**
    * @param childTable
    * @param denormalizeConfiguration
    * @param rootTable
-   * @param sidebar
+   * @param btnSave
    */
-  private TransformationChildTables(TableNode childTable, DenormalizeConfiguration denormalizeConfiguration, TransformationTable rootTable, DataTransformationSidebar sidebar) {
+  private TransformationChildTables(TableNode childTable, DenormalizeConfiguration denormalizeConfiguration, TransformationTable rootTable, Button btnSave) {
     this.denormalizeConfiguration = denormalizeConfiguration;
     this.rootTable = rootTable;
     this.childTable = childTable.getTable();
     this.uuid = childTable.getUuid();
-    this.sidebar = sidebar;
+    this.btnSave = btnSave;
     preset();
   }
 
@@ -126,7 +127,7 @@ public class TransformationChildTables {
             }
             int currentSize = selectionTablePanel.getSelectionModel().getSelectedSet().size();
             if(selectionSize != currentSize){
-              sidebar.enableSaveConfiguration(true);
+              btnSave.setEnabled(true);
             }
           }
 

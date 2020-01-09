@@ -20,7 +20,6 @@ import org.roda.core.data.v2.index.filter.SimpleFilterParameter;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.utils.Tree;
-import com.databasepreservation.common.client.models.DenormalizeProgressData;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
 import com.databasepreservation.common.client.models.status.denormalization.ReferencesConfiguration;
@@ -31,6 +30,7 @@ import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.tools.FilterUtils;
 import com.databasepreservation.common.filter.solr.TermsFilterParameter;
+import com.databasepreservation.common.server.DataTransformationObserver;
 import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
@@ -49,19 +49,19 @@ public class Denormalize {
   private ViewerDatabase database;
   private String databaseUUID;
   private Map<DenormalizeConfiguration, List<Tree<RelatedTablesConfiguration>>> structure = new HashMap<>();
-  private DenormalizeProgressData progressData = null;
+  private DataTransformationObserver observer;
 
   public Denormalize(String databaseUUID, String tableUUID) throws ModuleException {
     this.solrManager = ViewerFactory.getSolrManager();
     this.databaseUUID = databaseUUID;
-    progressData = DenormalizeProgressData.getInstance(databaseUUID, tableUUID);
-    progressData.setTableUUID(tableUUID);
+    observer = new DataTransformationObserver(databaseUUID, tableUUID);
     try {
       database = solrManager.retrieve(ViewerDatabase.class, this.databaseUUID);
       DenormalizeConfiguration denormalizeConfiguration = getConfiguration(
         Paths.get(ViewerConstants.DENORMALIZATION_STATUS_PREFIX + tableUUID + ViewerConstants.JSON_EXTENSION),
         DenormalizeConfiguration.class);
 
+      cleanNestedDocuments(denormalizeConfiguration);
       buildDenormalizeTree(denormalizeConfiguration);
 
       if (structure.isEmpty()) {
@@ -133,7 +133,6 @@ public class Denormalize {
     for (Map.Entry<DenormalizeConfiguration, List<Tree<RelatedTablesConfiguration>>> entry : structure.entrySet()) {
       DenormalizeConfiguration root = entry.getKey();
       List<Tree<RelatedTablesConfiguration>> treeList = entry.getValue();
-      cleanNestedDocuments(root);
       SolrQuery rootQuery = buildRootQuery(root, treeList);
       List<SolrQuery> queryList = new ArrayList<>();
       for (Tree<RelatedTablesConfiguration> child : treeList) {
@@ -153,17 +152,16 @@ public class Denormalize {
 
       for (SolrQuery query : queryList) {
         IterableNestedIndexResult sourceRows = solrManager.findAllRows(databaseUUID, query, null);
-        progressData.setRowsToProcess(sourceRows.getTotalCount());
-        progressData.setProcessedRows(0);
+        observer.notifyStartDataTransformation(sourceRows.getTotalCount());
         for (ViewerRow row : sourceRows) {
-          progressData.incrementProcessedRows();
+          observer.notifyProcessedRow();
           List<SolrInputDocument> nestedDocument = new ArrayList<>();
           createdNestedDocument(row, nestedDocument);
           if (!nestedDocument.isEmpty()) {
             solrManager.addDatabaseField(databaseUUID, row.getUuid(), nestedDocument);
           }
         }
-        progressData.setFinished(true);
+        observer.notifyFinishDataTransformation();
       }
     }
   }
@@ -187,7 +185,7 @@ public class Denormalize {
     list.add(node.getValue());
   }
 
-  private void cleanNestedDocuments(DenormalizeConfiguration root){
+  private void cleanNestedDocuments(DenormalizeConfiguration root) {
     Filter filter = FilterUtils.filterByTable(new Filter(), root.getTableID());
 
     IterableIndexResult allRows = solrManager.findAllRows(databaseUUID, filter, null, new ArrayList<>());
@@ -247,8 +245,10 @@ public class Denormalize {
 
       fieldsToReturn.add(ViewerConstants.SOLR_ROWS_TABLE_ID);
       fieldsToReturn.add(ViewerConstants.INDEX_ID);
-      fieldsToReturn.add(String.format("%s:%s", ViewerConstants.SOLR_ROWS_NESTED_ORIGINAL_UUID, ViewerConstants.INDEX_ID));
-      fieldsToReturn.add(String.format("%s:%s", ViewerConstants.SOLR_ROWS_NESTED_TABLE_ID, ViewerConstants.SOLR_ROWS_TABLE_ID));
+      fieldsToReturn
+        .add(String.format("%s:%s", ViewerConstants.SOLR_ROWS_NESTED_ORIGINAL_UUID, ViewerConstants.INDEX_ID));
+      fieldsToReturn
+        .add(String.format("%s:%s", ViewerConstants.SOLR_ROWS_NESTED_TABLE_ID, ViewerConstants.SOLR_ROWS_TABLE_ID));
       fieldsToReturn.add(String.format("%s:\"%s\"", ViewerConstants.SOLR_ROWS_NESTED_UUID, relatedTable.getUuid()));
       for (RelatedColumnConfiguration columnConfiguration : relatedTable.getColumnsIncluded()) {
         fieldsToReturn.add(columnConfiguration.getSolrName());
@@ -317,8 +317,8 @@ public class Denormalize {
           }
         }
         if (!fields.isEmpty()) {
-          nestedDocument.add(solrManager.createNestedDocument(uuid, row.getUuid(), document.getNestedOriginalUUID(), fields,
-            document.getTableId(), document.getNestedUUID()));
+          nestedDocument.add(solrManager.createNestedDocument(uuid, row.getUuid(), document.getNestedOriginalUUID(),
+            fields, document.getTableId(), document.getNestedUUID()));
         }
 
         if (document.getNestedRowList() == null) {

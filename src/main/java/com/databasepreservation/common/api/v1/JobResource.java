@@ -36,9 +36,8 @@ import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.exceptions.RESTException;
 import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
-import com.databasepreservation.common.client.models.DenormalizeProgressData;
-import com.databasepreservation.common.client.models.configuration.collection.CollectionConfiguration;
-import com.databasepreservation.common.client.models.configuration.collection.TableConfiguration;
+import com.databasepreservation.common.client.models.DataTransformationProgressData;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerJob;
 import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
@@ -80,16 +79,26 @@ public class JobResource implements JobService {
   Map<String, JobExecution> jobExecutionMap = new HashMap<>();
 
   @Override
-  public Boolean denormalizeJob(String databaseUUID) {
+  public List<String> denormalizeCollectionJob(String databaseUUID) {
+    List<String> jobList = new ArrayList<>();
     try {
-      CollectionConfiguration configuration = getConfiguration(Paths.get(databaseUUID + ViewerConstants.JSON_EXTENSION),
-        databaseUUID, CollectionConfiguration.class);
+      CollectionStatus collectionStatus = getConfiguration(
+        Paths
+          .get(ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + databaseUUID + ViewerConstants.JSON_EXTENSION),
+        databaseUUID, CollectionStatus.class);
 
-      setupJob(configuration, databaseUUID);
-      return true;
+      for (String denormalization : collectionStatus.getDenormalizations()) {
+        DenormalizeConfiguration denormalizeConfiguration = getConfiguration(
+          Paths.get(denormalization + ViewerConstants.JSON_EXTENSION), databaseUUID, DenormalizeConfiguration.class);
+        if (denormalizeConfiguration.getState().equals(ViewerJobStatus.NEW)) {
+          jobList.add(setupJob(databaseUUID, denormalizeConfiguration.getTableUUID()));
+        }
+      }
+
     } catch (ModuleException e) {
-      throw new RESTException(e);
+      e.printStackTrace();
     }
+    return jobList;
   }
 
   @Override
@@ -146,37 +155,10 @@ public class JobResource implements JobService {
     return uuid;
   }
 
-  private void setupJob(CollectionConfiguration configuration, String databaseUUID) throws ModuleException {
-    for (TableConfiguration table : configuration.getTables()) {
-      if (table.getDenormalizeConfiguration().getState().equals(ViewerJobStatus.NEW)) {
-        try {
-          JobParametersBuilder jobBuilder = new JobParametersBuilder();
-          jobBuilder.addDate(ViewerConstants.SOLR_SEARCHES_DATE_ADDED, new Date());
-          jobBuilder.addString(ViewerConstants.INDEX_ID, SolrUtils.randomUUID());
-          jobBuilder.addString(ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID);
-          jobBuilder.addString(ViewerConstants.CONTROLLER_TABLE_ID_PARAM, table.getUuid());
-          JobParameters jobParameters = jobBuilder.toJobParameters();
-
-          JobExecution jobExecution = jobLauncher.run(job, jobParameters);
-          String uuid = databaseUUID + table.getUuid();
-          jobExecutionMap.put(uuid, jobExecution);
-
-        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
-          | JobParametersInvalidException e) {
-          throw new ModuleException().withMessage("Cannot run a Job: " + e.getMessage());
-        }
-      }
-    }
-
-    for (String jobName : jobOperator.getJobNames()) {
-      System.out.println("JobNames " + jobName);
-    }
-  }
-
   private <T> T getConfiguration(java.nio.file.Path path, String databaseUUID, Class<T> objectClass)
     throws ModuleException {
-    java.nio.file.Path configurationPath = ViewerConfiguration.getInstance().getDatabasesPath()
-      .resolve(databaseUUID).resolve(path);
+    java.nio.file.Path configurationPath = ViewerConfiguration.getInstance().getDatabasesPath().resolve(databaseUUID)
+      .resolve(path);
     if (Files.exists(configurationPath)) {
       return JsonTransformer.readObjectFromFile(configurationPath, objectClass);
     } else {
@@ -185,14 +167,23 @@ public class JobResource implements JobService {
   }
 
   @Override
-  public List<DenormalizeProgressData> progress(String databaseUUID) {
-    List<DenormalizeProgressData> progressDataList = new ArrayList<>();
+  public List<DataTransformationProgressData> progress(String databaseUUID) {
+    List<DataTransformationProgressData> progressDataList = new ArrayList<>();
 
     try {
-      CollectionConfiguration configuration = getConfiguration(Paths.get(databaseUUID + ViewerConstants.JSON_EXTENSION),
-        databaseUUID, CollectionConfiguration.class);
-      for (TableConfiguration table : configuration.getTables()) {
-        progressDataList.add(DenormalizeProgressData.getInstance(databaseUUID, table.getUuid()));
+      CollectionStatus collectionStatus = getConfiguration(
+        Paths
+          .get(ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + databaseUUID + ViewerConstants.JSON_EXTENSION),
+        databaseUUID, CollectionStatus.class);
+
+      for (String denormalization : collectionStatus.getDenormalizations()) {
+        DenormalizeConfiguration denormalizeConfiguration = getConfiguration(
+          Paths.get(denormalization + ViewerConstants.JSON_EXTENSION), databaseUUID, DenormalizeConfiguration.class);
+        if (denormalizeConfiguration.getState().equals(ViewerJobStatus.NEW)) {
+          progressDataList
+            .add(DataTransformationProgressData.getInstance(databaseUUID, denormalizeConfiguration.getTableUUID()));
+        }
+
       }
     } catch (ModuleException e) {
       throw new RESTException(e);

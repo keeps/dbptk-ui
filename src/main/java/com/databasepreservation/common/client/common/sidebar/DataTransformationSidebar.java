@@ -2,6 +2,7 @@ package com.databasepreservation.common.client.common.sidebar;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -65,8 +66,6 @@ public class DataTransformationSidebar extends Composite implements Sidebar {
   private CollectionStatus collectionStatus;
   private boolean initialized = false;
   private Map<String, SidebarHyperlink> list = new HashMap<>();
-  private Button btnSaveConfiguration;
-  private Button btnClearConfiguration;
 
   /**
    * Creates a new DatabaseSidebar, rarely hitting the database more than once for
@@ -228,7 +227,6 @@ public class DataTransformationSidebar extends Composite implements Sidebar {
         initialized = true;
         database = db;
         collectionStatus = status;
-        createControllerPanel();
         databaseUUID = db.getUuid();
         init();
       }
@@ -323,57 +321,12 @@ public class DataTransformationSidebar extends Composite implements Sidebar {
     }
   }
 
-  private void createControllerPanel() {
-    btnSaveConfiguration = new Button();
-    btnSaveConfiguration.setText(messages.basicActionSave());
-    btnSaveConfiguration.setStyleName("btn btn-save");
-    btnSaveConfiguration.setEnabled(false);
-
-    Button btnDenormalize = new Button();
-    btnDenormalize.setText("Run");
-    btnDenormalize.addStyleName("btn btn-run");
-    btnDenormalize.setEnabled(false);
-
-    btnClearConfiguration = new Button();
-    btnClearConfiguration.setText(messages.basicActionClear());
-    btnClearConfiguration.addStyleName("btn btn-times-circle btn-danger");
-    btnClearConfiguration.setEnabled(false);
-
-    btnSaveConfiguration.addClickHandler(event -> {
-      collectionStatus.getDenormalizations();
-      btnDenormalize.setEnabled(true);
-      btnClearConfiguration.setEnabled(false);
-      btnSaveConfiguration.setEnabled(false);
-    });
-
-    btnDenormalize.addClickHandler(event -> {
-      final DialogBox dialogBox = Dialogs.showWaitResponse(messages.dataTransformationSidebarDialogTitle(),
-        messages.dataTransformationSidebarWaitDialogMessage());
-      JobService.Util.call((Boolean result) -> {
-        Dialogs.showInformationDialog(messages.dataTransformationSidebarDialogTitle(),
-          messages.dataTransformationSidebarSuccessDialogMessage(), messages.basicActionClose());
-        dialogBox.hide();
-        btnDenormalize.setEnabled(false);
-        DataTransformationProgressPanel progressPanel = DataTransformationProgressPanel.getInstance(database);
-        progressPanel.initProgress();
-        HistoryManager.gotoDataTransformation(databaseUUID);
-      }, (String errorMessage) -> {
-        Dialogs.showErrors(messages.dataTransformationSidebarDialogTitle(), errorMessage, messages.basicActionClose());
-        btnDenormalize.setEnabled(false);
-      }).denormalizeJob(databaseUUID);
-    });
-
-    btnClearConfiguration.addClickHandler(event -> {
-      Window.Location.reload();
-    });
-
-    controller.add(btnSaveConfiguration);
-    controller.add(btnClearConfiguration);
-    controller.add(btnDenormalize);
-  }
-
-  public void enableSaveConfiguration(Boolean enable) {
-    btnSaveConfiguration.setEnabled(enable);
-    btnClearConfiguration.setEnabled(enable);
+  public void updateControllerPanel(List<Button> buttonList) {
+    controller.clear();
+    if(buttonList != null){
+      for (Button button : buttonList) {
+        controller.add(button);
+      }
+    }
   }
 }

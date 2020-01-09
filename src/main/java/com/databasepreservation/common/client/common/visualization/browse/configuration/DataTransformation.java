@@ -1,5 +1,6 @@
 package com.databasepreservation.common.client.common.visualization.browse.configuration;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,21 +12,22 @@ import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.lists.widgets.MultipleSelectionTablePanel;
 import com.databasepreservation.common.client.common.sidebar.DataTransformationSidebar;
-import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.ConfigurationHandler;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.DataTransformationUtils;
-import com.databasepreservation.common.client.models.configuration.collection.CollectionConfiguration;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
 import com.databasepreservation.common.client.models.status.denormalization.RelatedTablesConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
+import com.databasepreservation.common.client.models.structure.ViewerJob;
+import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
 import com.databasepreservation.common.client.models.structure.ViewerReference;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.services.ConfigurationService;
 import com.databasepreservation.common.client.services.JobService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
+import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.widgets.Alert;
 import com.databasepreservation.common.client.widgets.BootstrapCard;
 import com.databasepreservation.common.client.widgets.SwitchBtn;
@@ -34,6 +36,7 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
@@ -70,6 +73,13 @@ public class DataTransformation extends RightPanel {
   private DataTransformationSidebar sidebar;
   private CollectionStatus collectionStatus;
   private DenormalizeConfiguration denormalizeConfiguration;
+  private Button btnSaveConfiguration = new Button();
+  private Button btnSaveAllConfiguration = new Button();
+  private Button btnRunConfiguration = new Button();
+  private Button btnRunAllConfiguration = new Button();
+  private Button btnClearConfiguration = new Button();
+  private Boolean isInformation;
+  private DataTransformationProgressPanel progressPanel;
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
@@ -96,12 +106,12 @@ public class DataTransformation extends RightPanel {
     this.database = database;
     this.sidebar = sidebar;
     this.collectionStatus = collectionStatus;
+    this.progressPanel = DataTransformationProgressPanel.getInstance(database);
     if (tableUUID == null) {
-      // content.add(ErDiagram.getInstance(database,
-      // database.getMetadata().getSchemas().get(0),
-      // HistoryManager.getCurrentHistoryPath().get(0)));
-      content.add(DataTransformationProgressPanel.getInstance(database));
+      isInformation = true;
+      content.add(progressPanel);
     } else {
+      isInformation = false;
       this.table = database.getMetadata().getTable(tableUUID);
       getDenormalizeConfigurationFile();
     }
@@ -131,22 +141,6 @@ public class DataTransformation extends RightPanel {
       FontAwesomeIconManager.DATABASE_INFORMATION);
     content.add(alert);
 
-    Button btnSaveConfiguration = new Button(messages.basicActionSave());
-    btnSaveConfiguration.setStyleName("btn btn-save");
-    btnSaveConfiguration.addClickHandler(clickEvent -> {
-      DataTransformationUtils.saveConfiguration(database.getUuid(), denormalizeConfiguration);
-    });
-    content.add(btnSaveConfiguration);
-
-    Button btnRunConfiguration = new Button("Run");
-    btnRunConfiguration.setStyleName("btn btn-run");
-    btnRunConfiguration.addClickHandler(clickEvent -> {
-      JobService.Util.call((Boolean result) -> {
-        //TODO save stuffs
-      }).denormalizeTableJob(database.getUuid(), table.getUuid());
-    });
-    content.add(btnRunConfiguration);
-
     // root table
     TableNode parentNode = new TableNode(database, table);
     parentNode.setupChildren();
@@ -159,6 +153,62 @@ public class DataTransformation extends RightPanel {
     relationShipPanel.add(expandLevel(parentNode));
     content.add(relationShipPanel);
 
+    createButtons();
+  }
+
+  private void createButtons() {
+    btnClearConfiguration = new Button();
+    btnClearConfiguration.setText(messages.basicActionClear());
+    btnClearConfiguration.addStyleName("btn btn-times-circle btn-danger");
+    btnClearConfiguration.setEnabled(true);
+    btnClearConfiguration.addClickHandler(event -> {
+      Window.Location.reload();
+    });
+
+    btnSaveConfiguration.setEnabled(true);
+    btnSaveConfiguration.setText(messages.basicActionSave());
+    btnSaveConfiguration.setStyleName("btn btn-save");
+    btnSaveConfiguration.addClickHandler(clickEvent -> {
+      DataTransformationUtils.saveConfiguration(database.getUuid(), denormalizeConfiguration);
+      btnRunConfiguration.setEnabled(true);
+    });
+
+    btnSaveAllConfiguration.setEnabled(true);
+    btnSaveAllConfiguration.setText("Save All");
+    btnSaveAllConfiguration.setStyleName("btn btn-save");
+    btnSaveAllConfiguration.addClickHandler(clickEvent -> {
+      for (DataTransformation dataTransformation : instances.values()) {
+        DataTransformationUtils.saveConfiguration(database.getUuid(), dataTransformation.denormalizeConfiguration);
+      }
+      btnRunConfiguration.setEnabled(true);
+    });
+
+    btnRunConfiguration.setEnabled(true);
+    btnRunConfiguration.setStyleName("btn btn-run");
+    btnRunConfiguration.addClickHandler(clickEvent -> {
+      JobService.Util.call((Boolean result) -> {
+      }).denormalizeTableJob(database.getUuid(), table.getUuid());
+      progressPanel.initProgress();
+      HistoryManager.gotoDataTransformation(database.getUuid());
+    });
+
+    btnRunAllConfiguration.setEnabled(true);
+    btnRunAllConfiguration.setText("Run All");
+    btnRunAllConfiguration.setStyleName("btn btn-run");
+    btnRunAllConfiguration.addClickHandler(clickEvent -> {
+      JobService.Util.call((Boolean result) -> {
+      }).denormalizeCollectionJob(database.getUuid());
+      progressPanel.initProgress();
+      HistoryManager.gotoDataTransformation(database.getUuid());
+    });
+
+    String btnSaveText = "run";
+    if (table != null) {
+      btnSaveText = table.getName();
+    }
+    btnRunConfiguration.setText(btnSaveText);
+
+    updateControllerPanel();
   }
 
   /**
@@ -202,8 +252,7 @@ public class DataTransformation extends RightPanel {
 
     FlowPanel container = new FlowPanel();
     TransformationChildTables tableInstance = TransformationChildTables.getInstance(childNode, denormalizeConfiguration,
-      rootTable,
-      sidebar);
+      rootTable, btnSaveConfiguration);
     MultipleSelectionTablePanel selectTable = tableInstance.createTable();
 
     SwitchBtn switchBtn = new SwitchBtn("Enable", false);
@@ -213,13 +262,12 @@ public class DataTransformation extends RightPanel {
         grandChild.add(expandLevel(childNode));
         DataTransformationUtils.includeRelatedTable(childNode, denormalizeConfiguration);
         container.add(selectTable);
-        sidebar.enableSaveConfiguration(true);
       } else {
         DataTransformationUtils.removeRelatedTable(childNode, denormalizeConfiguration);
         grandChild.clear();
         container.clear();
         rootTable.redrawTable();
-        sidebar.enableSaveConfiguration(true);
+        btnSaveConfiguration.setEnabled(true);
       }
     });
 
@@ -303,5 +351,27 @@ public class DataTransformation extends RightPanel {
     referenceInformation.add(new HTML(message));
 
     return referenceInformation;
+  }
+
+  private void updateControllerPanel() {
+    if (!isInformation) {
+      List<Button> buttons = new ArrayList<>();
+      buttons.add(btnSaveAllConfiguration);
+      buttons.add(btnSaveConfiguration);
+      buttons.add(btnRunConfiguration);
+      buttons.add(btnRunAllConfiguration);
+      buttons.add(btnClearConfiguration);
+      sidebar.updateControllerPanel(buttons);
+    } else {
+      sidebar.updateControllerPanel(null);
+    }
+  }
+
+  @Override
+  protected void onAttach() {
+    super.onAttach();
+    if (database != null) {
+      updateControllerPanel();
+    }
   }
 }

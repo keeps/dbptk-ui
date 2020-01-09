@@ -2821,12 +2821,15 @@ rgba(0, 0, 0, .125);
  ************************************************/
 .leftSidebar-controller{
     display: flex;
+    flex-wrap: wrap;
     padding: 2rem;
     position: absolute;
     bottom: 0;
+    width: 300px;
 }
 .leftSidebar-controller .btn {
     margin-right: 10px;
+    margin-bottom: 10px;
 }
 .data-transformation-sidebar{
     height: 70vh;

@@ -6,20 +6,24 @@ import java.util.HashMap;
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
-public class DenormalizeProgressData implements Serializable {
+public class DataTransformationProgressData implements Serializable {
   private long rowsToProcess;
   private long processedRows;
   private String tableUUID;
   private boolean finished = false;
 
-  private static HashMap<String, DenormalizeProgressData> instances = new HashMap<>();
+  private static HashMap<String, DataTransformationProgressData> instances = new HashMap<>();
 
-  public static DenormalizeProgressData getInstance(String databaseUUID, String tableUUID) {
-    String uuid = databaseUUID + tableUUID;
-    return instances.computeIfAbsent(uuid, k -> new DenormalizeProgressData());
+  public DataTransformationProgressData() {
   }
 
-  public DenormalizeProgressData() {
+  public static DataTransformationProgressData getInstance(String databaseUUID, String tableUUID) {
+    String uuid = databaseUUID + tableUUID;
+    return instances.computeIfAbsent(uuid, k -> new DataTransformationProgressData(tableUUID));
+  }
+
+  private DataTransformationProgressData(String tableUUID) {
+    this.tableUUID = tableUUID;
   }
 
   public long getRowsToProcess() {

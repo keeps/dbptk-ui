@@ -15,6 +15,7 @@ import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
 import com.databasepreservation.common.client.models.structure.ViewerReference;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.services.ConfigurationService;
+import com.databasepreservation.common.client.services.JobService;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -47,7 +48,6 @@ public class DataTransformationUtils {
     }
 
     denormalizeConfiguration.addRelatedTable(relatedTable);
-    denormalizeConfiguration.setState(ViewerJobStatus.NEW);
   }
 
   private static ReferencesConfiguration createReference(ViewerColumn sourceColumn, ViewerColumn referencedColumn) {
@@ -70,17 +70,12 @@ public class DataTransformationUtils {
   }
 
   public static void saveConfiguration(String databaseUUID, DenormalizeConfiguration denormalizeConfiguration) {
-    if (denormalizeConfiguration.getRelatedTables() != null && !denormalizeConfiguration.getRelatedTables().isEmpty()) {
+    if (denormalizeConfiguration.getState().equals(ViewerJobStatus.NEW)) {
       ConfigurationService.Util.call((Boolean result) -> {
         Dialogs.showInformationDialog("Configuration file", "Created denormalization configuration file with success",
           "OK");
       }).createDenormalizeConfigurationFile(databaseUUID, denormalizeConfiguration.getTableUUID(),
         denormalizeConfiguration);
-    } else {
-      ConfigurationService.Util.call((Boolean result) -> {
-        Dialogs.showInformationDialog("Configuration file", "Removed denormalization configuration file with success",
-          "OK");
-      }).deleteDenormalizeConfigurationFile(databaseUUID, denormalizeConfiguration.getTableUUID());
     }
   }
 
@@ -101,9 +96,11 @@ public class DataTransformationUtils {
     DenormalizeConfiguration denormalizeConfiguration) {
     RelatedTablesConfiguration relatedTable = denormalizeConfiguration.getRelatedTable(uuid);
 
-    for (RelatedColumnConfiguration checkColumn : relatedTable.getColumnsIncluded()) {
-      if (checkColumn.getIndex() == columnToInclude.getColumnIndexInEnclosingTable()) {
-        return;
+    if (relatedTable != null) {
+      for (RelatedColumnConfiguration checkColumn : relatedTable.getColumnsIncluded()) {
+        if (checkColumn.getIndex() == columnToInclude.getColumnIndexInEnclosingTable()) {
+          return;
+        }
       }
     }
     relatedTable.addColumnToInclude(columnToInclude);
