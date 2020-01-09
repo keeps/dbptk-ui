@@ -99,8 +99,6 @@ public class DatabaseRowsSolrManager {
       Pair.of(ViewerConstants.SOLR_DATABASES_STATUS, ViewerDatabaseStatus.INGESTING.toString()));
     RowsCollection collection = new RowsCollection(databaseUUID);
     collection.createRowsCollection();
-    // Delegate
-    ViewerFactory.getConfigurationManager().addCollection(databaseUUID, collection.getIndexName());
   }
 
   public void removeDatabase(ViewerDatabase database, Path lobFolder) throws ViewerException {
@@ -150,7 +148,6 @@ public class DatabaseRowsSolrManager {
    *          the table
    */
   public void addTable(String databaseUUID, ViewerTable table) throws ViewerException {
-    ViewerFactory.getConfigurationManager().addTable(databaseUUID, table);
   }
 
   public void addRow(String databaseUUID, ViewerRow row) throws ViewerException {

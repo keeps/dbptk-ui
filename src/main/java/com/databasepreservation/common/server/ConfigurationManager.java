@@ -5,7 +5,9 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
@@ -67,14 +69,14 @@ public class ConfigurationManager {
     }
   }
 
-  public void addTable(String databaseUUID, ViewerTable table) {
+  public void addTable(String databaseUUID, Collection<ViewerTable> tables) {
     try {
       final DatabaseStatus databaseStatus = getDatabaseStatus(databaseUUID);
       // At the moment there is only one collection per database
       if (databaseStatus.getCollections().size() >= 1) {
         final String collectionId = databaseStatus.getCollections().get(0);
         final CollectionStatus collectionStatus = getCollectionStatus(databaseUUID, collectionId);
-        collectionStatus.addTableStatus(StatusUtils.getTableStatus(table));
+        collectionStatus.setTables(StatusUtils.getTableStatusFromList(tables));
         // Update collection
         updateCollectionStatus(databaseUUID, collectionStatus);
       }
@@ -226,6 +228,9 @@ public class ConfigurationManager {
           Files.createFile(databaseStatusPath);
           // Write file
           JsonUtils.writeObjectToFile(StatusUtils.getDatabaseStatus(database), databaseStatusPath);
+
+          addCollection(database.getUuid(), ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + database.getUuid());
+          addTable(database.getUuid(), database.getMetadata().getTables().values());
         } catch (FileAlreadyExistsException e) {
           // do nothing (just caused due to concurrency)
         } catch (IOException e) {

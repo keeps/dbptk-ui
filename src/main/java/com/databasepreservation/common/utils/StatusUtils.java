@@ -1,6 +1,7 @@
 package com.databasepreservation.common.utils;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import com.databasepreservation.common.client.ViewerConstants;
@@ -20,6 +21,14 @@ import com.databasepreservation.common.client.models.structure.ViewerTable;
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 public class StatusUtils {
+
+  public static List<TableStatus> getTableStatusFromList(Collection<ViewerTable> tables) {
+    List<TableStatus> tableStatus = new ArrayList<>();
+    for (ViewerTable table : tables) {
+      tableStatus.add(getTableStatus(table));
+    }
+    return tableStatus;
+  }
 
   public static TableStatus getTableStatus(ViewerTable table) {
     return getTableStatus(table, false);

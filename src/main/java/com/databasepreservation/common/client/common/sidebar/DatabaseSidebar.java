@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
@@ -53,6 +54,7 @@ public class DatabaseSidebar extends Composite implements Sidebar{
 
   protected ViewerDatabase database;
   protected String databaseUUID;
+  protected CollectionStatus collectionStatus;
   protected boolean initialized = false;
   protected Map<String, SidebarHyperlink> list = new HashMap<>();
 
@@ -91,7 +93,7 @@ public class DatabaseSidebar extends Composite implements Sidebar{
    *          the database
    * @return a DatabaseSidebar instance
    */
-  public static DatabaseSidebar getInstance(ViewerDatabase database) {
+  public static DatabaseSidebar getInstance(ViewerDatabase database, CollectionStatus status) {
     if (database == null) {
       return getEmptyInstance();
     }
@@ -99,7 +101,7 @@ public class DatabaseSidebar extends Composite implements Sidebar{
     DatabaseSidebar instance = instances.get(database.getUuid());
     if (instance == null || instance.database == null
       || !ViewerDatabaseStatus.AVAILABLE.equals(instance.database.getStatus())) {
-      instance = new DatabaseSidebar(database);
+      instance = new DatabaseSidebar(database, status);
       instances.put(database.getUuid(), instance);
     } else {
       // workaround because the same DatabaseSidebar can not belong to multiple
@@ -130,15 +132,15 @@ public class DatabaseSidebar extends Composite implements Sidebar{
     initialized = other.initialized;
     initWidget(uiBinder.createAndBindUi(this));
     searchInputBox.setText(other.searchInputBox.getText());
-    init(other.database);
+    init(other.database, other.collectionStatus);
   }
 
   /**
    * Use DatabaseSidebar.getInstance to obtain an instance
    */
-  private DatabaseSidebar(ViewerDatabase database) {
+  private DatabaseSidebar(ViewerDatabase database, CollectionStatus status) {
     initWidget(uiBinder.createAndBindUi(this));
-    init(database);
+    init(database, collectionStatus);
   }
 
   /**
@@ -195,7 +197,9 @@ public class DatabaseSidebar extends Composite implements Sidebar{
 
       for (ViewerTable table : schema.getTables()) {
         if (!table.isCustomView() && !table.isMaterializedView()) {
-          schemaItems.add(createTableItem(schema, table, totalSchemas, iconTag));
+          if (collectionStatus.showTable(table.getUuid())) {
+            schemaItems.add(createTableItem(schema, table, totalSchemas, iconTag));
+          }
         }
       }
 
@@ -309,12 +313,14 @@ public class DatabaseSidebar extends Composite implements Sidebar{
     return initialized;
   }
 
-  public void init(ViewerDatabase db) {
+  @Override
+  public void init(ViewerDatabase db, CollectionStatus status) {
     GWT.log("init with db: " + db + "; status: " + db.getStatus().toString());
     if (ViewerDatabaseStatus.AVAILABLE.equals(db.getStatus())) {
       if (db != null && (databaseUUID == null || databaseUUID.equals(db.getUuid()))) {
         initialized = true;
         database = db;
+        collectionStatus = status;
         databaseUUID = db.getUuid();
         init();
       }

@@ -9,6 +9,7 @@ import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.DataTransformationProgressPanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.ConfigurationHandler;
 import com.databasepreservation.common.client.models.configuration.collection.CollectionConfiguration;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
@@ -64,6 +65,7 @@ public class DataTransformationSidebar extends Composite implements Sidebar {
 
   private ViewerDatabase database;
   private String databaseUUID;
+  private CollectionStatus collectionStatus;
   private boolean initialized = false;
   private Map<String, SidebarHyperlink> list = new HashMap<>();
   private Button btnSaveConfiguration;
@@ -135,7 +137,7 @@ public class DataTransformationSidebar extends Composite implements Sidebar {
     initialized = other.initialized;
     initWidget(uiBinder.createAndBindUi(this));
     searchInputBox.setText(other.searchInputBox.getText());
-    init(other.database);
+    init(other.database, other.collectionStatus);
   }
 
   /**
@@ -143,7 +145,7 @@ public class DataTransformationSidebar extends Composite implements Sidebar {
    */
   private DataTransformationSidebar(ViewerDatabase database) {
     initWidget(uiBinder.createAndBindUi(this));
-    init(database);
+    init(database, null);
   }
 
   /**
@@ -219,7 +221,8 @@ public class DataTransformationSidebar extends Composite implements Sidebar {
     return initialized;
   }
 
-  public void init(ViewerDatabase db) {
+  @Override
+  public void init(ViewerDatabase db, CollectionStatus status) {
     GWT.log("init with db: " + db + "; status: " + db.getStatus().toString());
     if (ViewerDatabaseStatus.AVAILABLE.equals(db.getStatus())) {
       if (db != null && (databaseUUID == null || databaseUUID.equals(db.getUuid()))) {

@@ -3,7 +3,6 @@ package com.databasepreservation.common.client.common.visualization.browse;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.google.gwt.user.client.ui.HorizontalPanel;
 import org.roda.core.data.v2.user.User;
 
 import com.databasepreservation.common.client.ViewerConstants;
@@ -22,6 +21,7 @@ import com.databasepreservation.common.client.models.status.collection.Collectio
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.services.AuthenticationService;
+import com.databasepreservation.common.client.services.ConfigurationService;
 import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
@@ -290,19 +290,20 @@ public class DatabasePanel extends Composite {
   private void loadPanelWithDatabase(final RightPanelLoader rightPanelLoader, String toSelect) {
     DatabaseService.Util.call((IsIndexed result) -> {
       database = (ViewerDatabase) result;
-      loadPanel(rightPanelLoader, toSelect);
+      ConfigurationService.Util.call((CollectionStatus status) -> {
+        collectionStatus = status;
+        loadPanel(rightPanelLoader, toSelect);
+      }).getCollectionStatus(database.getUuid(), database.getUuid());
     }).retrieve(databaseUUID, databaseUUID);
   }
 
   private void loadPanel(RightPanelLoader rightPanelLoader, String toSelect) {
     GWT.log("have db: " + database + " sb.init: " + sidebar.isInitialized());
-    // ConfigurationService.Util.call((CollectionStatus status) -> {
-    // collectionStatus = status;
 
     RightPanel rightPanel = rightPanelLoader.load(database, collectionStatus);
 
     if (database != null && !sidebar.isInitialized()) {
-      sidebar.init(database);
+      sidebar.init(database, collectionStatus);
       sidebar.select(toSelect);
     }
 
@@ -313,7 +314,6 @@ public class DatabasePanel extends Composite {
       rightPanelContainer.setWidget(rightPanel);
     }
     GWT.log("END");
-    // }).getCollectionStatus(database.getUuid(), database.getUuid());
   }
 
   public void setTopLevelPanelCSS(String css) {

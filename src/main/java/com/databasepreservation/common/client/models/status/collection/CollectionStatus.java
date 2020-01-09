@@ -123,4 +123,13 @@ public class CollectionStatus implements Serializable {
       }
     }
   }
+
+  public boolean showTable(String id) {
+    for (TableStatus table : tables) {
+      if (table.getUuid().equals(id))
+        return !table.isHide();
+    }
+
+    return true;
+  }
 }
