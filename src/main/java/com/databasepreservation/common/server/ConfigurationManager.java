@@ -126,8 +126,9 @@ public class ConfigurationManager {
         final CollectionStatus collectionStatus = getCollectionStatus(databaseUUID, collectionId);
         TableStatus table = collectionStatus.getTable(tableUUID);
         table.getColumns().removeIf(ColumnStatus::isNestedColumn);
+        int order = table.getLastColumnOrder();
         for (ColumnStatus columnStatus : columnStatusList) {
-          columnStatus.setOrder(table.getLastColumnOrder());
+          columnStatus.setOrder(++order);
           table.addColumnStatus(columnStatus);
         }
 
