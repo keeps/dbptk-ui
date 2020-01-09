@@ -10,6 +10,7 @@ import com.databasepreservation.common.client.common.search.SavedSearch;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import org.fusesource.restygwt.client.Json;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -124,6 +125,16 @@ public class CollectionStatus implements Serializable {
     }
   }
 
+  @JsonIgnore
+  public TableStatus getTableStatus(String id) {
+    for (TableStatus table : tables) {
+      if (table.getUuid().equals(id))
+        return table;
+    }
+
+    return null;
+  }
+
   public boolean showTable(String id) {
     for (TableStatus table : tables) {
       if (table.getUuid().equals(id))
@@ -131,5 +142,26 @@ public class CollectionStatus implements Serializable {
     }
 
     return true;
+  }
+
+  public void updateTableHidingCondition(String id, boolean value) {
+    for (TableStatus table : tables) {
+      if (table.getUuid().equals(id))
+        table.setHide(value);
+    }
+  }
+
+  public void updateTableCustomName(String id, String value) {
+    for (TableStatus table : tables) {
+      if (table.getUuid().equals(id))
+        table.setCustomName(value);
+    }
+  }
+
+  public void updateTableCustomDescription(String id, String value) {
+    for (TableStatus table : tables) {
+      if (table.getUuid().equals(id))
+        table.setCustomDescription(value);
+    }
   }
 }

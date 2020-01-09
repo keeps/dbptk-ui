@@ -368,4 +368,12 @@ public class BreadcrumbManager {
       HistoryManager::gotoPreferences));
     return items;
   }
+
+  public static List<BreadcrumbItem> forTableManagement(final String databaseUUID, final String databaseName) {
+    List<BreadcrumbItem> items = forAdvancedConfiguration(databaseUUID, databaseName);
+    items.add(new BreadcrumbItem(
+        SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE)
+            + SafeHtmlUtils.htmlEscape(messages.breadcrumbTextForTableManagement()))));
+    return items;
+  }
 }

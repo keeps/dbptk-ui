@@ -20,6 +20,7 @@ import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
 import com.google.gwt.core.client.GWT;
 
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -50,8 +51,15 @@ public interface ConfigurationService extends DirectRestService {
 
   @GET
   @Path("databases/{databaseUUID}/collection/{collectionUUID}")
-  @ApiOperation(value ="")
-  CollectionStatus getCollectionStatus(@PathParam("databaseUUID") String databaseUUID, @PathParam("collectionUUID") String collectionUUID);
+  @ApiOperation(value = "", response = CollectionStatus.class)
+  CollectionStatus getCollectionStatus(@PathParam("databaseUUID") String databaseUUID,
+    @PathParam("collectionUUID") String collectionUUID);
+
+  @POST
+  @Path("databases/{databaseUUID}/collection/{collectionUUID}")
+  @ApiOperation(value = "", response = Boolean.class)
+  Boolean updateCollectionStatus(@PathParam("databaseUUID") String databaseUUID,
+    @PathParam("collectionUUID") String collectionUUID, @ApiParam("collectionStatus") CollectionStatus status);
 
   @POST
   @Path("/file/{databaseuuid}")
@@ -85,5 +93,5 @@ public interface ConfigurationService extends DirectRestService {
   @POST
   @Path("/{databaseuuid}/{tableuuid}")
   Boolean updateDenormalizeConfiguration(@PathParam("databaseuuid") String databaseuuid,
-                                         @PathParam("tableuuid") String tableuuid, ViewerJobStatus status);
+    @PathParam("tableuuid") String tableuuid, ViewerJobStatus status);
 }

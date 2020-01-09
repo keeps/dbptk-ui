@@ -9,13 +9,15 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-@JsonPropertyOrder({"uuid", "id", "name", "description", "hide", "columns"})
+@JsonPropertyOrder({"uuid", "id", "name", "customName", "description", "customDescription", "hide", "columns"})
 public class TableStatus implements Serializable {
 
   private String uuid;
   private String id;
   private String name;
+  private String customName;
   private String description;
+  private String customDescription;
   private boolean hide;
   private List<ColumnStatus> columns;
 
@@ -69,6 +71,22 @@ public class TableStatus implements Serializable {
 
   public void setColumns(List<ColumnStatus> columns) {
     this.columns = columns;
+  }
+
+  public String getCustomName() {
+    return customName;
+  }
+
+  public void setCustomName(String customName) {
+    this.customName = customName;
+  }
+
+  public String getCustomDescription() {
+    return customDescription;
+  }
+
+  public void setCustomDescription(String customDescription) {
+    this.customDescription = customDescription;
   }
 
   public void addColumnStatus(ColumnStatus status) {

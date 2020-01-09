@@ -80,4 +80,20 @@ public class ColumnStatus implements Serializable {
   public void setTemplateStatus(TemplateStatus templateStatus) {
     this.templateStatus = templateStatus;
   }
+
+  public String getCustomName() {
+    return customName;
+  }
+
+  public void setCustomName(String customName) {
+    this.customName = customName;
+  }
+
+  public String getCustomDescription() {
+    return customDescription;
+  }
+
+  public void setCustomDescription(String customDescription) {
+    this.customDescription = customDescription;
+  }
 }

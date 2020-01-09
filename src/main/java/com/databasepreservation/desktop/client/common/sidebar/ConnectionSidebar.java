@@ -7,11 +7,11 @@ import java.util.TreeMap;
 
 import com.databasepreservation.common.client.common.sidebar.SidebarHyperlink;
 import com.databasepreservation.common.client.common.sidebar.SidebarItem;
+import com.databasepreservation.common.client.models.DBPTKModule;
+import com.databasepreservation.common.client.models.parameters.PreservationParameter;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.ToolkitModuleName2ViewerModuleName;
-import com.databasepreservation.common.client.models.DBPTKModule;
-import com.databasepreservation.common.client.models.parameters.PreservationParameter;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -28,7 +28,6 @@ public class ConnectionSidebar extends Composite {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private final String headerText;
   private final String headerIcon;
-  private final String itemIcon;
   private final DBPTKModule dbptkModule;
   private Map<String, SidebarHyperlink> list = new HashMap<>();
   private static Map<String, ConnectionSidebar> instances = new HashMap<>();
@@ -41,20 +40,21 @@ public class ConnectionSidebar extends Composite {
   @UiField
   FlowPanel sidebarGroup;
 
-  public static ConnectionSidebar getInstance(String databaseUUID, String headerText, String headerIcon, String itemIcon,
+  public static ConnectionSidebar getInstance(String databaseUUID, String headerText, String headerIcon,
     DBPTKModule items, String targetHistoryToken) {
-    instances.computeIfAbsent(databaseUUID, k -> new ConnectionSidebar(databaseUUID, headerText, headerIcon, itemIcon, items, targetHistoryToken));
-    return instances.get(databaseUUID);
+    return instances.computeIfAbsent(databaseUUID,
+      k -> new ConnectionSidebar(databaseUUID, headerText, headerIcon, items, targetHistoryToken));
   }
 
-  public static ConnectionSidebar getInstance(String databaseUUID, String headerText, String itemIcon, DBPTKModule dbptkModule, String targetHistoryToken) {
-    return ConnectionSidebar.getInstance(databaseUUID, headerText, null, itemIcon, dbptkModule, targetHistoryToken);
+  public static ConnectionSidebar getInstance(String databaseUUID, String headerText, DBPTKModule dbptkModule,
+    String targetHistoryToken) {
+    return ConnectionSidebar.getInstance(databaseUUID, headerText, null, dbptkModule, targetHistoryToken);
   }
 
-  private ConnectionSidebar(String databaseUUID, String headerText, String headerIcon, String itemIcon, DBPTKModule dbptkModule, String targetHistoryToken) {
+  private ConnectionSidebar(String databaseUUID, String headerText, String headerIcon, DBPTKModule dbptkModule,
+    String targetHistoryToken) {
     this.headerText = headerText;
     this.headerIcon = headerIcon;
-    this.itemIcon = itemIcon;
     this.dbptkModule = dbptkModule;
     initWidget(uiBinder.createAndBindUi(this));
     init(targetHistoryToken, databaseUUID);
@@ -72,14 +72,14 @@ public class ConnectionSidebar extends Composite {
     for (String moduleName : parameters.keySet()) {
       String targetHistoryToken = null;
       if (target.equals(HistoryManager.ROUTE_SEND_TO_LIVE_DBMS)) {
-        targetHistoryToken = HistoryManager.linkToSendToWizardDBMSConnection(databaseUUID, HistoryManager.ROUTE_WIZARD_CONNECTION, moduleName);
+        targetHistoryToken = HistoryManager.linkToSendToWizardDBMSConnection(databaseUUID,
+          HistoryManager.ROUTE_WIZARD_CONNECTION, moduleName);
       } else if (target.equals(HistoryManager.ROUTE_CREATE_SIARD)) {
         targetHistoryToken = HistoryManager.linkToCreateSIARD(HistoryManager.ROUTE_WIZARD_CONNECTION, moduleName);
       }
 
       SidebarHyperlink sidebarHyperlink = new SidebarHyperlink(FontAwesomeIconManager.getTagSafeHtml(
-        FontAwesomeIconManager.DATABASE, ToolkitModuleName2ViewerModuleName.transform(moduleName)),
-        targetHistoryToken);
+        FontAwesomeIconManager.DATABASE, ToolkitModuleName2ViewerModuleName.transform(moduleName)), targetHistoryToken);
       sidebarHyperlink.setH6().setIndent1();
       list.put(moduleName, sidebarHyperlink);
       sidebarGroup.add(sidebarHyperlink);

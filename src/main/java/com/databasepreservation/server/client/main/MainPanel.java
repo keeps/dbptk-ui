@@ -21,13 +21,14 @@ import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.common.utils.RightPanelLoader;
 import com.databasepreservation.common.client.common.visualization.activity.log.ActivityLogDetailedPanel;
 import com.databasepreservation.common.client.common.visualization.activity.log.ActivityLogPanel;
+import com.databasepreservation.common.client.common.visualization.browse.DatabasePanel;
 import com.databasepreservation.common.client.common.visualization.browse.DatabaseSearchPanel;
 import com.databasepreservation.common.client.common.visualization.browse.DatabaseSearchesPanel;
 import com.databasepreservation.common.client.common.visualization.browse.ReferencesPanel;
 import com.databasepreservation.common.client.common.visualization.browse.RowPanel;
-import com.databasepreservation.common.client.common.visualization.browse.DatabasePanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.AdvancedConfiguration;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.DataTransformation;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.table.TableManagementPanel;
 import com.databasepreservation.common.client.common.visualization.browse.foreignKey.ForeignKeyPanel;
 import com.databasepreservation.common.client.common.visualization.browse.foreignKey.ForeignKeyPanelOptions;
 import com.databasepreservation.common.client.common.visualization.browse.information.DatabaseInformationPanel;
@@ -236,6 +237,14 @@ public class MainPanel extends Composite {
           }
         });
       }
+    } else if (HistoryManager.ROUTE_TABLE_MANAGEMENT.equals(currentHistoryPath.get(0))) {
+      final String databaseUUID = currentHistoryPath.get(1);
+      setContent(databaseUUID, new ContentPanelLoader() {
+        @Override
+        public ContentPanel load(ViewerDatabase database, CollectionStatus status) {
+          return TableManagementPanel.getInstance(database, status);
+        }
+      });
     } else if (HistoryManager.ROUTE_JOBS.equals(currentHistoryPath.get(0))) {
       setContent(new ContentPanelLoader() {
         @Override

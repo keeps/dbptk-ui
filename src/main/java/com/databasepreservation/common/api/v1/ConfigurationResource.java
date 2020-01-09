@@ -42,6 +42,17 @@ public class ConfigurationResource implements ConfigurationService {
   }
 
   @Override
+  public Boolean updateCollectionStatus(String databaseUUID, String collectionUUID, CollectionStatus status) {
+    try {
+      ViewerFactory.getConfigurationManager().updateCollectionStatus(databaseUUID, status);
+    } catch ( ViewerException e) {
+      throw new RESTException(e);
+    }
+
+    return true;
+  }
+
+  @Override
   public Boolean createConfigurationFile(String databaseuuid, CollectionConfiguration configuration) {
     try {
       JsonTransformer.writeObjectToFile(configuration, ViewerConfiguration.getInstance().getDatabaseConfigPath()

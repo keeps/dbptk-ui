@@ -9,8 +9,6 @@ import com.databasepreservation.common.client.common.utils.ApplicationType;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.widgets.wcag.AccessibleFocusPanel;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -24,7 +22,8 @@ import config.i18n.client.ClientMessages;
  * 
  */
 public class Toast extends PopupPanel {
-  private static final int PADDING = 10;
+  private static final int PADDING_WIDTH = 50;
+  private static final int PADDING_HEIGHT = 25;
 
   private static final int SLOTS_NUMBER = 7;
 
@@ -58,17 +57,7 @@ public class Toast extends PopupPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
 
   private final int slotNumber;
-
   private final MessagePopupType type;
-
-  private final AccessibleFocusPanel focus;
-
-  private final FlowPanel layout;
-
-  private final Label titleLabel;
-
-  private final Label messageLabel;
-
   private final Timer hideTimer;
 
   /**
@@ -82,10 +71,10 @@ public class Toast extends PopupPanel {
     super(false);
     this.type = type;
     slotNumber = getNextSlot(this);
-    layout = new FlowPanel();
-    focus = new AccessibleFocusPanel(layout);
-    titleLabel = new Label(title);
-    messageLabel = new Label(message);
+    FlowPanel layout = new FlowPanel();
+    AccessibleFocusPanel focus = new AccessibleFocusPanel(layout);
+    Label titleLabel = new Label(title);
+    Label messageLabel = new Label(message);
 
     if (type.equals(MessagePopupType.ERROR_MESSAGE)) {
       layout.addStyleName("toast-error");
@@ -98,13 +87,7 @@ public class Toast extends PopupPanel {
 
     setWidget(focus);
 
-    focus.addClickHandler(new ClickHandler() {
-
-      @Override
-      public void onClick(ClickEvent event) {
-        hide();
-      }
-    });
+    focus.addClickHandler(event -> hide());
 
     hideTimer = new Timer() {
       public void run() {
@@ -126,23 +109,20 @@ public class Toast extends PopupPanel {
    * Start showing popup
    */
   public void start() {
-    setPopupPositionAndShow(new PositionCallback() {
-
-      public void setPosition(int offsetWidth, int offsetHeight) {
-        int slotOffset = 0;
-        for (int i = 0; i < slotNumber; i++) {
-          if (slots[i] != null) {
-            slotOffset += slots[i].getOffsetHeight() + PADDING;
-          }
+    setPopupPositionAndShow((offsetWidth, offsetHeight) -> {
+      int slotOffset = 0;
+      for (int i = 0; i < slotNumber; i++) {
+        if (slots[i] != null) {
+          slotOffset += slots[i].getOffsetHeight() + PADDING_HEIGHT;
         }
-        Toast.this.setPopupPosition(Window.getClientWidth() - offsetWidth - PADDING,
-          Window.getScrollTop() + PADDING + slotOffset);
       }
-
+      GWT.log("win: " + Window.getClientWidth());
+      GWT.log("offset: " + offsetWidth);
+      Toast.this.setPopupPosition(Window.getClientWidth() - offsetWidth - PADDING_WIDTH,
+        Window.getScrollTop() + PADDING_HEIGHT + slotOffset);
     });
 
     hideTimer.schedule(HIDE_DELAY_MS);
-
   }
 
   /**

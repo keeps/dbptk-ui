@@ -3,6 +3,7 @@ package com.databasepreservation.common.utils;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
@@ -39,7 +40,9 @@ public class StatusUtils {
     status.setUuid(table.getUuid());
     status.setId(table.getId());
     status.setName(table.getName());
+    status.setCustomName(table.getName());
     status.setDescription(table.getDescription());
+    status.setCustomDescription(table.getDescription());
     status.setColumns(getColumnsStatus(table.getColumns()));
     status.setHide(hide);
 
@@ -63,7 +66,9 @@ public class StatusUtils {
     ColumnStatus status = new ColumnStatus();
     status.setId(column.getSolrName());
     status.setName(column.getDisplayName());
+    status.setCustomName(column.getDisplayName());
     status.setDescription(column.getDescription());
+    status.setCustomDescription(column.getDescription());
     status.setHide(hide);
     status.setNestedColumn(false);
     status.setOrder(order);

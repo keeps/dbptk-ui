@@ -608,6 +608,8 @@ public interface ClientMessages extends Messages {
 
   String breadcrumbTextForPreferences();
 
+  String breadcrumbTextForTableManagement();
+
   /*********************************************
    * Home Page
    ********************************************/
@@ -1344,4 +1346,21 @@ public interface ClientMessages extends Messages {
   String batchJobsTextForStatus();
 
   String batchJobsTextForDetail();
+
+  /********************************************
+   * Table Management Panel
+   *******************************************/
+  String tableManagementPageTitle();
+
+  String tableManagementPageToastDescription();
+
+  String tableManagementPageTableTextForDescription();
+
+  String tableManagementPageTableHeaderTextForShow();
+
+  String tableManagementPageTableHeaderTextForOriginalTableName();
+
+  String tableManagementPageTableHeaderTextForLabel();
+
+  String tableManagementPageTableHeaderTextForDescription();
 }

@@ -388,10 +388,6 @@ p[data-value]:after {
     position: relative;
 }
 
-.banner {
-    z-index: 2;
-}
-
 .browseContentFilePreviewPanel .filePreviewToolbar {
     min-height: 35px;
     background-color: #eee;
@@ -882,7 +878,7 @@ p[data-value]:after {
 .user-menu {
     float: right;
     background-color: #089DE3;
-    box-shadow: 1px -1px 6px black;
+    box-shadow: 2px 4px 2px -2px rgba(0,0,0,0.49);
 }
 
 .user-menu .gwt-MenuItem {
@@ -1569,6 +1565,12 @@ html, body, .desktop-main {
     right: 0;
     margin-right: 10rem;
     margin-bottom: 10px;
+}
+
+.activity-log-panel .navigation-panel-buttons {
+    display: flex;
+    flex-direction: row-reverse;
+    width: 100%;
 }
 
 /**********************************************

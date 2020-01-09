@@ -15,7 +15,9 @@ import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Hyperlink;
+import com.google.gwt.user.client.ui.Widget;
 import config.i18n.client.ClientMessages;
+import dk.sa.xmlns.diark._1_0.fileindex.FileIndexType;
 
 import java.util.List;
 
@@ -186,6 +188,16 @@ public class CommonClientUtils {
     div.append(SafeHtmlUtils.fromSafeConstant("</div>"));
 
     return div.toSafeHtml();
+  }
+
+  public static FlowPanel wrapOnDiv(String divClassName, Widget... widgets) {
+    FlowPanel panel = new FlowPanel();
+    panel.addStyleName(divClassName);
+    for (Widget widget : widgets) {
+      panel.add(widget);
+    }
+
+    return panel;
   }
 
   public static FlowPanel getSchemaAndTableHeader(String databaseUUID, ViewerTable table, String hClass) {

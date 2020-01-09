@@ -1,5 +1,7 @@
 package com.databasepreservation.common.client.common.visualization.browse.configuration;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -75,7 +77,7 @@ public class TransformationChildTables {
   public MultipleSelectionTablePanel createTable() {
     MultipleSelectionTablePanel<ViewerColumn> selectionTablePanel = new MultipleSelectionTablePanel<>();
     Label header = new Label("");
-    selectionTablePanel.createTable(header, childTable.getColumns().iterator(), createCheckbox(selectionTablePanel),
+    selectionTablePanel.createTable(header, new ArrayList<>(), childTable.getColumns().iterator(), createCheckbox(selectionTablePanel),
       new MultipleSelectionTablePanel.ColumnInfo<>(messages.columnName(), 7, new TextColumn<ViewerColumn>() {
         @Override
         public String getValue(ViewerColumn object) {

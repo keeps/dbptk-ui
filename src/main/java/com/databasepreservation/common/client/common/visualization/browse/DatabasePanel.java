@@ -257,7 +257,10 @@ public class DatabasePanel extends Composite {
   private void loadPanelWithDatabase(final ContentPanelLoader panelLoader) {
     DatabaseService.Util.call((IsIndexed result) -> {
       database = (ViewerDatabase) result;
-      loadPanel(panelLoader);
+      ConfigurationService.Util.call((CollectionStatus status) -> {
+        collectionStatus = status;
+        loadPanel(panelLoader);
+      }).getCollectionStatus(database.getUuid(), database.getUuid());
     }).retrieve(databaseUUID, databaseUUID);
   }
 

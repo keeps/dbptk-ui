@@ -55,6 +55,7 @@ public class HistoryManager {
   public static final String ROUTE_ACTIVITY_LOG = "activity-log";
   public static final String ROUTE_ADVANCED_CONFIGURATION = "advanced-configuration";
   public static final String ROUTE_DATA_TRANSFORMATION = "data-transformation";
+  public static final String ROUTE_TABLE_MANAGEMENT = "table-management";
   public static final String ROUTE_JOBS = "jobs";
   public static final String ROUTE_PREFERENCES = "preferences";
 
@@ -85,7 +86,7 @@ public class HistoryManager {
 
     // check if the current path starts with the login path
     if (currentPath.size() > 1 && currentPath.size() > loginPath.size()
-        && currentPath.subList(0, loginPath.size()).equals(loginPath)) {
+      && currentPath.subList(0, loginPath.size()).equals(loginPath)) {
       newHistory(currentPath.subList(1, currentPath.size()));
     } else {
       // in case something is wrong or has been tampered with, go to root
@@ -110,13 +111,12 @@ public class HistoryManager {
   }
 
   public static void gotoNewUpload() {
-    newHistory(Arrays.asList(ROUTE_UPLOADS));
+    newHistory(Collections.singletonList(ROUTE_UPLOADS));
   }
 
   public static void gotoDatabase() {
     newHistory(Collections.singletonList(ROUTE_DATABASE));
   }
-
 
   public static void gotoDatabase(String databaseUUID) {
     newHistory(Arrays.asList(ROUTE_DATABASE, databaseUUID));
@@ -134,36 +134,8 @@ public class HistoryManager {
     newHistory(Arrays.asList(ROUTE_DATABASE, databaseUUID, ROUTE_DATABASE_REPORT));
   }
 
-  public static void gotoSchema(String databaseUUID, String schemaUUID) {
-    newHistory(Arrays.asList(ROUTE_SCHEMA, databaseUUID, schemaUUID));
-  }
-
-  public static void gotoSchemaStructure(String databaseUUID, String schemaUUID) {
-    newHistory(Arrays.asList(ROUTE_SCHEMA, databaseUUID, schemaUUID, ROUTE_SCHEMA_STRUCTURE));
-  }
-
-  public static void gotoSchemaRoutines(String databaseUUID, String schemaUUID) {
-    newHistory(Arrays.asList(ROUTE_SCHEMA, databaseUUID, schemaUUID, ROUTE_SCHEMA_ROUTINES));
-  }
-
   public static void gotoSchemaRoutines(String databaseUUID) {
     newHistory(Arrays.asList(ROUTE_SCHEMA, databaseUUID, ROUTE_SCHEMA_ROUTINES));
-  }
-
-  public static void gotoSchemaTriggers(String databaseUUID, String schemaUUID) {
-    newHistory(Arrays.asList(ROUTE_SCHEMA, databaseUUID, schemaUUID, ROUTE_SCHEMA_TRIGGERS));
-  }
-
-  public static void gotoSchemaViews(String databaseUUID, String schemaUUID) {
-    newHistory(Arrays.asList(ROUTE_SCHEMA, databaseUUID, schemaUUID, ROUTE_SCHEMA_VIEWS));
-  }
-
-  public static void gotoSchemaData(String databaseUUID, String schemaUUID) {
-    newHistory(Arrays.asList(ROUTE_SCHEMA, databaseUUID, schemaUUID, ROUTE_SCHEMA_DATA));
-  }
-
-  public static void gotoSchemaCheckConstraints(String databaseUUID, String schemaUUID) {
-    newHistory(Arrays.asList(ROUTE_SCHEMA, databaseUUID, schemaUUID, ROUTE_SCHEMA_CHECK_CONSTRAINTS));
   }
 
   public static void gotoSavedSearches(String databaseUUID) {
@@ -217,7 +189,7 @@ public class HistoryManager {
   }
 
   public static void gotoReferences(String databaseUUID, String tableUUID, String recordUUID,
-                                    String columnIndexInTable) {
+    String columnIndexInTable) {
     newHistory(Arrays.asList(ROUTE_REFERENCES, databaseUUID, tableUUID, recordUUID, columnIndexInTable));
   }
 
@@ -268,19 +240,16 @@ public class HistoryManager {
   }
 
   public static void gotoSendToLiveDBMSExportFormatErDiagram(String databaseUUID, String wizardPage, String toSelect,
-                                                             String schemaUUID, String tableUUID) {
+    String schemaUUID, String tableUUID) {
     List<String> params = Arrays.asList(ROUTE_MIGRATE_TO_SIARD, databaseUUID, wizardPage, toSelect, schemaUUID,
-        tableUUID);
+      tableUUID);
     newHistory(params);
   }
 
-  public static void gotoEditMetadataUsers(String databaseUUID) {
-    List<String> params = Arrays.asList(ROUTE_SIARD_EDIT_METADATA, databaseUUID, ROUTE_SIARD_EDIT_METADATA_USERS);
-    newHistory(params);
-  }
-
-  public static void gotoSIARDValidator(String databaseUUID, String reporterPath, String udtPath, String skipAdditionalChecks) {
-    List<String> params = Arrays.asList(ROUTE_SIARD_VALIDATOR, databaseUUID, reporterPath, udtPath, skipAdditionalChecks);
+  public static void gotoSIARDValidator(String databaseUUID, String reporterPath, String udtPath,
+    String skipAdditionalChecks) {
+    List<String> params = Arrays.asList(ROUTE_SIARD_VALIDATOR, databaseUUID, reporterPath, udtPath,
+      skipAdditionalChecks);
     newHistory(params);
   }
 
@@ -316,6 +285,11 @@ public class HistoryManager {
 
   public static void gotoDataTransformation(String databaseUUID, String tableUUID) {
     List<String> params = Arrays.asList(ROUTE_DATA_TRANSFORMATION, databaseUUID, tableUUID);
+    newHistory(params);
+  }
+
+  public static void gotoTableManagement(String databaseUUID) {
+    List<String> params = Arrays.asList(ROUTE_TABLE_MANAGEMENT, databaseUUID);
     newHistory(params);
   }
 
@@ -368,9 +342,9 @@ public class HistoryManager {
   }
 
   public static String linkToReferences(String database_uuid, String table_uuid, String record_uuid,
-                                        String columnIndexInTable) {
+    String columnIndexInTable) {
     return createHistoryToken(
-        Arrays.asList(ROUTE_REFERENCES, database_uuid, table_uuid, record_uuid, columnIndexInTable));
+      Arrays.asList(ROUTE_REFERENCES, database_uuid, table_uuid, record_uuid, columnIndexInTable));
   }
 
   public static String linkToRecord(String database_uuid, String table_uuid, String record_uuid) {
@@ -426,7 +400,7 @@ public class HistoryManager {
   }
 
   public static String linkToSavedSearch(String databaseUUID, String savedSearchUUID) {
-      return createHistoryToken(Arrays.asList(ROUTE_SAVED_SEARCHES, databaseUUID, savedSearchUUID));
+    return createHistoryToken(Arrays.asList(ROUTE_SAVED_SEARCHES, databaseUUID, savedSearchUUID));
   }
 
   public static String linkToForeignKey(String database_uuid, String table_uuid, List<String> solrColumnsAndValues) {
@@ -460,23 +434,31 @@ public class HistoryManager {
   }
 
   public static String linkToCreateWizardCustomViewsDelete(String customViewID) {
-    return createHistoryToken(Arrays.asList(ROUTE_CREATE_SIARD, ROUTE_WIZARD_CUSTOM_VIEWS, customViewID, ACTION_DELETE));
+    return createHistoryToken(
+      Arrays.asList(ROUTE_CREATE_SIARD, ROUTE_WIZARD_CUSTOM_VIEWS, customViewID, ACTION_DELETE));
   }
 
-  public static String linkToSendToWizardTableAndColumnsShowTables(String toSelect, String databaseUUID, String tableUUID) {
-    return createHistoryToken(Arrays.asList(ROUTE_MIGRATE_TO_SIARD, databaseUUID, ROUTE_WIZARD_TABLES_COLUMNS, toSelect, tableUUID));
+  public static String linkToSendToWizardTableAndColumnsShowTables(String toSelect, String databaseUUID,
+    String tableUUID) {
+    return createHistoryToken(
+      Arrays.asList(ROUTE_MIGRATE_TO_SIARD, databaseUUID, ROUTE_WIZARD_TABLES_COLUMNS, toSelect, tableUUID));
   }
 
-  public static String linkToSendToWizardTableAndColumnsShowColumns(String toSelect, String databaseUUID, String schemaUUID, String tableUUID) {
-    return createHistoryToken(Arrays.asList(ROUTE_MIGRATE_TO_SIARD, databaseUUID, ROUTE_WIZARD_TABLES_COLUMNS, toSelect, schemaUUID, tableUUID));
+  public static String linkToSendToWizardTableAndColumnsShowColumns(String toSelect, String databaseUUID,
+    String schemaUUID, String tableUUID) {
+    return createHistoryToken(Arrays.asList(ROUTE_MIGRATE_TO_SIARD, databaseUUID, ROUTE_WIZARD_TABLES_COLUMNS, toSelect,
+      schemaUUID, tableUUID));
   }
 
-  public static String linkToSendToWizardTableAndColumnsShowViews(String toSelect, String databaseUUID, String schemaUUID, String viewUUID) {
-    return createHistoryToken(Arrays.asList(ROUTE_MIGRATE_TO_SIARD, databaseUUID, ROUTE_WIZARD_TABLES_COLUMNS, toSelect, schemaUUID, viewUUID));
+  public static String linkToSendToWizardTableAndColumnsShowViews(String toSelect, String databaseUUID,
+    String schemaUUID, String viewUUID) {
+    return createHistoryToken(
+      Arrays.asList(ROUTE_MIGRATE_TO_SIARD, databaseUUID, ROUTE_WIZARD_TABLES_COLUMNS, toSelect, schemaUUID, viewUUID));
   }
 
   public static String linkToSendToWizardTableAndColumnsShowERDiagram(String toSelect, String databaseUUID) {
-    return createHistoryToken(Arrays.asList(ROUTE_MIGRATE_TO_SIARD, databaseUUID, ROUTE_WIZARD_TABLES_COLUMNS, toSelect));
+    return createHistoryToken(
+      Arrays.asList(ROUTE_MIGRATE_TO_SIARD, databaseUUID, ROUTE_WIZARD_TABLES_COLUMNS, toSelect));
   }
 
   public static String linkToSendToWizardDBMSConnection(String databaseUUID, String wizardPage, String moduleName) {

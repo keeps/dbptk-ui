@@ -1,5 +1,6 @@
 package com.databasepreservation.common.client.common.visualization.browse.table;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -102,7 +103,7 @@ public class TablePanelOptions extends RightPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-      BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forTable(database.getMetadata().getName(),
+    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forTable(database.getMetadata().getName(),
       database.getUuid(), table.getNameWithoutPrefix(), table.getUuid()));
   }
 
@@ -212,7 +213,7 @@ public class TablePanelOptions extends RightPanel {
       }
     }
 
-    selectionTablePanel.createTable(getToggleSelectPanel(), viewerTable.getColumns().iterator(),
+    selectionTablePanel.createTable(getToggleSelectPanel(), new ArrayList<>(), viewerTable.getColumns().iterator(),
       new MultipleSelectionTablePanel.ColumnInfo<>("Show", 4,
         new Column<ViewerColumn, Boolean>(new CheckboxCell(true, true)) {
           @Override
@@ -289,9 +290,9 @@ public class TablePanelOptions extends RightPanel {
           @Override
           public String getValue(ViewerColumn column) {
             if (column.getNillable()) {
-              return "Yes";
+              return messages.yes();
             } else {
-              return "No";
+              return messages.no();
             }
           }
         }));

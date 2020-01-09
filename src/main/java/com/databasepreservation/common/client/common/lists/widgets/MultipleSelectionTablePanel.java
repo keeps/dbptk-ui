@@ -8,7 +8,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -81,8 +80,6 @@ public class MultipleSelectionTablePanel<C> extends Composite {
   }
 
   @UiField
-  SimplePanel header;
-  @UiField
   SimplePanel info;
   @UiField
   SimplePanel table;
@@ -106,31 +103,32 @@ public class MultipleSelectionTablePanel<C> extends Composite {
   }
 
   @SafeVarargs
-  public final void createTable(Widget infoContent, Iterator<C> rowItems, ColumnInfo<C>... columns) {
-    createTable(null, infoContent, rowItems, columns);
+  public final void createTable(Widget infoContent, List<Integer> whitelistedColumns, Iterator<C> rowItems,
+    ColumnInfo<C>... columns) {
+    createTable(null, infoContent, whitelistedColumns, rowItems, columns);
   }
 
   @SafeVarargs
-  public final void createTable(Widget headerContent, SafeHtml infoContent, Iterator<C> rowItems, ColumnInfo<C>... columns) {
-    createTable(headerContent, new HTMLPanel(infoContent), rowItems, columns);
+  public final void createTable(Widget headerContent, SafeHtml infoContent, List<Integer> whitelistedColumns,
+    Iterator<C> rowItems, ColumnInfo<C>... columns) {
+    createTable(headerContent, new HTMLPanel(infoContent), whitelistedColumns, rowItems, columns);
   }
 
   @SafeVarargs
-  public final void createTable(Widget headerContent, Widget infoContent, Iterator<C> rowItems, ColumnInfo<C>... columns) {
+  public final void createTable(Widget headerContent, Widget infoContent, List<Integer> whitelistedColumns,
+    Iterator<C> rowItems, ColumnInfo<C>... columns) {
     // set widgets
-    if (headerContent != null)
-      header.setWidget(headerContent);
+    // if (headerContent != null)
+    // header.setWidget(headerContent);
     info.setWidget(infoContent);
 
     display = internalCreateTable(rowItems, columns);
 
     display.addCellPreviewHandler(event -> {
-      if (event.getColumn() != display.getColumnCount()-1) {
-        if (BrowserEvents.CLICK.equals(event.getNativeEvent().getType())) {
-          final C value = event.getValue();
-          final boolean state = !event.getDisplay().getSelectionModel().isSelected(value);
-          event.getDisplay().getSelectionModel().setSelected(value, state);
-          event.setCanceled(true);
+      if (BrowserEvents.CLICK.equals(event.getNativeEvent().getType())) {
+        GWT.log("i: " + event.getColumn());
+        if (whitelistedColumns.isEmpty() || whitelistedColumns.contains(event.getColumn()+1)) {
+          handleRowSelection(event);
         }
       }
     });
@@ -149,22 +147,11 @@ public class MultipleSelectionTablePanel<C> extends Composite {
     table.setVisible(true);
   }
 
-  public MultipleSelectionTablePanel(Widget headerContent, String infoContent) {
-    initWidget(uiBinder.createAndBindUi(this));
-
-    // set widgets
-    header.setWidget(headerContent);
-
-    SafeHtmlBuilder b = new SafeHtmlBuilder();
-    b.append(SafeHtmlUtils.fromSafeConstant("<div class=\"field\">"));
-    b.append(SafeHtmlUtils.fromSafeConstant("<div class=\"label\">"));
-    b.append(SafeHtmlUtils.fromString(infoContent));
-    b.append(SafeHtmlUtils.fromSafeConstant("</div>"));
-    b.append(SafeHtmlUtils.fromSafeConstant("</div>"));
-    info.setWidget(new HTMLPanel(b.toSafeHtml()));
-
-    table.setVisible(false);
-    selectionModel = null;
+  private void handleRowSelection(CellPreviewEvent<C> event) {
+    final C value = event.getValue();
+    final boolean state = !event.getDisplay().getSelectionModel().isSelected(value);
+    event.getDisplay().getSelectionModel().setSelected(value, state);
+    event.setCanceled(true);
   }
 
   @Override
