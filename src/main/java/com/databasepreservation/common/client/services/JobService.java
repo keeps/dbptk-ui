@@ -55,6 +55,10 @@ public interface JobService extends DirectRestService {
   Boolean denormalizeJob(@PathParam("databaseuuid") String databaseuuid);
 
   @POST
+  @Path("/{databaseuuid}/{tableuuid}")
+  String denormalizeTableJob(@PathParam("databaseuuid") String databaseuuid, @PathParam("tableuuid") String tableuuid);
+
+  @POST
   @Path("/stop/{databaseuuid}/{tableuuid}")
   Boolean stopDenormalizeJob(@PathParam("databaseuuid") String databaseuuid, @PathParam("tableuuid") String tableuuid);
 

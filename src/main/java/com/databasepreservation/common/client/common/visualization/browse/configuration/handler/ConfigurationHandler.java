@@ -81,11 +81,6 @@ public class ConfigurationHandler {
    * 
    */
   public void buildAll() {
-//    ConfigurationService.Util.call((Boolean result) -> {
-//      Dialogs.showInformationDialog("Configuration file", "Created denormalization configuration file with success",
-//        "OK");
-//    }).createConfigurationBundle(database.getUuid(), collectionConfiguration);
-
     for (TableConfiguration table : collectionConfiguration.getTables()) {
       addDenormalizationConfiguration(table.getDenormalizeConfiguration());
     }

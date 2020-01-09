@@ -18,6 +18,8 @@ import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.search.SavedSearch;
 import com.databasepreservation.common.client.models.activity.logs.ActivityLogEntry;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
+import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
+import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.status.database.DatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
@@ -92,6 +94,43 @@ public class ConfigurationManager {
         final String collectionId = databaseStatus.getCollections().get(0);
         final CollectionStatus collectionStatus = getCollectionStatus(databaseUUID, collectionId);
         collectionStatus.addDenormalization(denormalizationUUID);
+        // Update collection
+        updateCollectionStatus(databaseUUID, collectionStatus);
+      }
+    } catch (GenericException | ViewerException e) {
+      throw new GenericException("Failed to manipulate the JSON file", e);
+    }
+  }
+
+  public void removeDenormalization(String databaseUUID, String denormalizationUUID) throws GenericException {
+    try {
+      final DatabaseStatus databaseStatus = getDatabaseStatus(databaseUUID);
+      if (databaseStatus.getCollections().size() >= 1) {
+        final String collectionId = databaseStatus.getCollections().get(0);
+        final CollectionStatus collectionStatus = getCollectionStatus(databaseUUID, collectionId);
+        collectionStatus.getDenormalizations().remove(denormalizationUUID);
+        // Update collection
+        updateCollectionStatus(databaseUUID, collectionStatus);
+      }
+    } catch (GenericException | ViewerException e) {
+      throw new GenericException("Failed to manipulate the JSON file", e);
+    }
+  }
+
+  public void addDenormalizationColumns(String databaseUUID, String tableUUID, List<ColumnStatus> columnStatusList)
+    throws GenericException {
+    try {
+      final DatabaseStatus databaseStatus = getDatabaseStatus(databaseUUID);
+      if (databaseStatus.getCollections().size() >= 1) {
+        final String collectionId = databaseStatus.getCollections().get(0);
+        final CollectionStatus collectionStatus = getCollectionStatus(databaseUUID, collectionId);
+        TableStatus table = collectionStatus.getTable(tableUUID);
+        table.getColumns().removeIf(ColumnStatus::isNestedColumn);
+        for (ColumnStatus columnStatus : columnStatusList) {
+          columnStatus.setOrder(table.getLastColumnOrder());
+          table.addColumnStatus(columnStatus);
+        }
+
         // Update collection
         updateCollectionStatus(databaseUUID, collectionStatus);
       }

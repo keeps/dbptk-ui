@@ -3,11 +3,14 @@ package com.databasepreservation.common.client.common.visualization.browse.confi
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.databasepreservation.common.client.common.lists.widgets.MultipleSelectionTablePanel;
 import com.databasepreservation.common.client.common.sidebar.DataTransformationSidebar;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.ConfigurationHandler;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.DataTransformationUtils;
+import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
 import com.databasepreservation.common.client.models.status.denormalization.RelatedColumnConfiguration;
 import com.databasepreservation.common.client.models.status.denormalization.RelatedTablesConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
@@ -27,7 +30,7 @@ public class TransformationChildTables {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, TransformationChildTables> instances = new HashMap<>();
   private final DataTransformationSidebar sidebar;
-  private ConfigurationHandler configuration;
+  private DenormalizeConfiguration denormalizeConfiguration;
   private TransformationTable rootTable;
   private ViewerTable childTable;
   private Map<Integer, Boolean> isLoading = new HashMap<>();
@@ -36,24 +39,24 @@ public class TransformationChildTables {
   /**
    *
    * @param childTable
-   * @param configuration
+   * @param denormalizeConfiguration
    * @param rootTable
    * @param sidebar
    * @return
    */
-  public static TransformationChildTables getInstance(TableNode childTable, ConfigurationHandler configuration, TransformationTable rootTable, DataTransformationSidebar sidebar) {
+  public static TransformationChildTables getInstance(TableNode childTable, DenormalizeConfiguration denormalizeConfiguration, TransformationTable rootTable, DataTransformationSidebar sidebar) {
     return instances.computeIfAbsent(childTable.getUuid(),
-      k -> new TransformationChildTables(childTable, configuration, rootTable, sidebar));
+        k -> new TransformationChildTables(childTable, denormalizeConfiguration, rootTable, sidebar));
   }
 
   /**
    * @param childTable
-   * @param configuration
+   * @param denormalizeConfiguration
    * @param rootTable
    * @param sidebar
    */
-  private TransformationChildTables(TableNode childTable, ConfigurationHandler configuration, TransformationTable rootTable, DataTransformationSidebar sidebar) {
-    this.configuration = configuration;
+  private TransformationChildTables(TableNode childTable, DenormalizeConfiguration denormalizeConfiguration, TransformationTable rootTable, DataTransformationSidebar sidebar) {
+    this.denormalizeConfiguration = denormalizeConfiguration;
     this.rootTable = rootTable;
     this.childTable = childTable.getTable();
     this.uuid = childTable.getUuid();
@@ -115,12 +118,10 @@ public class TransformationChildTables {
             selectionSize = selectionTablePanel.getSelectionModel().getSelectedSet().size();
           } else {
             if (selectionTablePanel.getSelectionModel().isSelected(object)) {
-              configuration.addColumnToInclude(uuid, object);
-              configuration.update(configuration.getDenormalizeConfiguration(rootTable.getTable()));
+              DataTransformationUtils.addColumnToInclude(uuid, object, denormalizeConfiguration);
               rootTable.redrawTable();
             } else {
-              configuration.removeColumnToInclude(uuid, object);
-              //configuration.update(configuration.getDenormalizeConfiguration(rootTable.getTable()));
+              DataTransformationUtils.removeColumnToInclude(uuid, object, denormalizeConfiguration);
               rootTable.redrawTable();
             }
             int currentSize = selectionTablePanel.getSelectionModel().getSelectedSet().size();
@@ -135,11 +136,14 @@ public class TransformationChildTables {
   }
 
   private boolean isSet(String uuid, int index) {
-    RelatedTablesConfiguration relatedTable = configuration.getRelatedTable(uuid);
-    if(relatedTable != null){
-      for (RelatedColumnConfiguration column : relatedTable.getColumnsIncluded()) {
-        if (column.getIndex() == index) {
-          return true;
+    //RelatedTablesConfiguration relatedTable = configuration.getRelatedTable(uuid);
+    if(denormalizeConfiguration != null){
+      RelatedTablesConfiguration relatedTable = denormalizeConfiguration.getRelatedTable(uuid);
+      if(relatedTable != null){
+        for (RelatedColumnConfiguration column : relatedTable.getColumnsIncluded()) {
+          if (column.getIndex() == index) {
+            return true;
+          }
         }
       }
     }

@@ -72,7 +72,7 @@ public class DenormalizeStructure {
    * @throws ModuleException
    */
   private <T> T getConfiguration(Path path, Class<T> objectClass) throws ModuleException {
-    Path configurationPath = ViewerConfiguration.getInstance().getDatabaseConfigPath().resolve(database.getUuid())
+    Path configurationPath = ViewerConfiguration.getInstance().getDatabasesPath().resolve(database.getUuid())
       .resolve(path);
     if (Files.exists(configurationPath)) {
       return JsonTransformer.readObjectFromFile(configurationPath, objectClass);

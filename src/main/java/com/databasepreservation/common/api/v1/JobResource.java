@@ -39,6 +39,7 @@ import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.models.DenormalizeProgressData;
 import com.databasepreservation.common.client.models.configuration.collection.CollectionConfiguration;
 import com.databasepreservation.common.client.models.configuration.collection.TableConfiguration;
+import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerJob;
 import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
 import com.databasepreservation.common.client.services.JobService;
@@ -92,6 +93,15 @@ public class JobResource implements JobService {
   }
 
   @Override
+  public String denormalizeTableJob(String databaseUUID, String tableuuid) {
+    try {
+      return setupJob(databaseUUID, tableuuid);
+    } catch (ModuleException e) {
+      throw new RESTException(e);
+    }
+  }
+
+  @Override
   public Boolean stopDenormalizeJob(String databaseuuid, String tableuuid) {
     String uuid = databaseuuid + tableuuid;
     try {
@@ -112,6 +122,28 @@ public class JobResource implements JobService {
       | JobRestartException | JobParametersInvalidException e) {
       throw new RESTException(e);
     }
+  }
+
+  private String setupJob(String databaseUUID, String tableUUID) throws ModuleException {
+
+    JobParametersBuilder jobBuilder = new JobParametersBuilder();
+    jobBuilder.addDate(ViewerConstants.SOLR_SEARCHES_DATE_ADDED, new Date());
+    jobBuilder.addString(ViewerConstants.INDEX_ID, SolrUtils.randomUUID());
+    jobBuilder.addString(ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID);
+    jobBuilder.addString(ViewerConstants.CONTROLLER_TABLE_ID_PARAM, tableUUID);
+    JobParameters jobParameters = jobBuilder.toJobParameters();
+
+    JobExecution jobExecution = null;
+    try {
+      jobExecution = jobLauncher.run(job, jobParameters);
+    } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
+      | JobParametersInvalidException e) {
+      throw new ModuleException().withMessage("Cannot run a Job: " + e.getMessage());
+    }
+
+    String uuid = databaseUUID + tableUUID;
+    jobExecutionMap.put(uuid, jobExecution);
+    return uuid;
   }
 
   private void setupJob(CollectionConfiguration configuration, String databaseUUID) throws ModuleException {
@@ -143,7 +175,7 @@ public class JobResource implements JobService {
 
   private <T> T getConfiguration(java.nio.file.Path path, String databaseUUID, Class<T> objectClass)
     throws ModuleException {
-    java.nio.file.Path configurationPath = ViewerConfiguration.getInstance().getDatabaseConfigPath()
+    java.nio.file.Path configurationPath = ViewerConfiguration.getInstance().getDatabasesPath()
       .resolve(databaseUUID).resolve(path);
     if (Files.exists(configurationPath)) {
       return JsonTransformer.readObjectFromFile(configurationPath, objectClass);

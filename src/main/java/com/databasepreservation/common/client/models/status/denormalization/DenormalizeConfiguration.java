@@ -12,77 +12,100 @@ import com.databasepreservation.common.client.models.structure.ViewerTable;
  * @author Gabriel Barros <gbarros@keep.pt>
  */
 public class DenormalizeConfiguration implements Serializable {
-    private String uuid;
-    private String version;
-    private ViewerJobStatus state;
-    private String job;
-    private String tableUUID;
-    private String tableID;
-    private List<RelatedTablesConfiguration> relatedTables;
+  private String id;
+  private String uuid;
+  private String version;
+  private ViewerJobStatus state;
+  private String job;
+  private String tableUUID;
+  private String tableID;
+  private List<RelatedTablesConfiguration> relatedTables;
 
-    public DenormalizeConfiguration(){
-    }
+  public DenormalizeConfiguration() {
+  }
 
-    public DenormalizeConfiguration(String databaseUUID, ViewerTable table){
-        setUuid(ViewerConstants.DENORMALIZATION_STATUS_PREFIX + table.getUuid());
-        setTableUUID(table.getUuid());
-        setTableID(table.getId());
-        relatedTables = new ArrayList<>();
-    }
+  public DenormalizeConfiguration(String databaseUUID, ViewerTable table) {
+    setId(ViewerConstants.DENORMALIZATION_STATUS_PREFIX + table.getUuid());
+    setUuid(table.getUuid());
+    setTableUUID(table.getUuid());
+    setTableID(table.getId());
+    relatedTables = new ArrayList<>();
+  }
 
-    public String getUuid() {
-        return uuid;
-    }
+  public String getId() {
+    return id;
+  }
 
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
-    }
+  public void setId(String id) {
+    this.id = id;
+  }
 
-    public String getVersion() {
-        return version;
-    }
+  public String getUuid() {
+    return uuid;
+  }
 
-    public void setVersion(String version) {
-        this.version = version;
-    }
+  public void setUuid(String uuid) {
+    this.uuid = uuid;
+  }
 
-    public ViewerJobStatus getState() {
-        return state;
-    }
+  public String getVersion() {
+    return version;
+  }
 
-    public void setState(ViewerJobStatus state) {
-        this.state = state;
-    }
+  public void setVersion(String version) {
+    this.version = version;
+  }
 
-    public String getJob() {
-        return job;
-    }
+  public ViewerJobStatus getState() {
+    return state;
+  }
 
-    public void setJob(String job) {
-        this.job = job;
-    }
+  public void setState(ViewerJobStatus state) {
+    this.state = state;
+  }
 
-    public String getTableUUID() {
-        return tableUUID;
-    }
+  public String getJob() {
+    return job;
+  }
 
-    public void setTableUUID(String tableUUID) {
-        this.tableUUID = tableUUID;
-    }
+  public void setJob(String job) {
+    this.job = job;
+  }
 
-    public String getTableID() {
-        return tableID;
-    }
+  public String getTableUUID() {
+    return tableUUID;
+  }
 
-    public void setTableID(String tableID) {
-        this.tableID = tableID;
-    }
+  public void setTableUUID(String tableUUID) {
+    this.tableUUID = tableUUID;
+  }
 
-    public List<RelatedTablesConfiguration> getRelatedTables() {
-        return relatedTables;
-    }
+  public String getTableID() {
+    return tableID;
+  }
 
-    public void setRelatedTables(List<RelatedTablesConfiguration> relatedTables) {
-        this.relatedTables = relatedTables;
+  public void setTableID(String tableID) {
+    this.tableID = tableID;
+  }
+
+  public List<RelatedTablesConfiguration> getRelatedTables() {
+    return relatedTables;
+  }
+
+  public RelatedTablesConfiguration getRelatedTable(String uuid) {
+    for (RelatedTablesConfiguration relatedTable : relatedTables) {
+      if (relatedTable.getUuid().equals(uuid)) {
+        return relatedTable;
+      }
     }
+    return null;
+  }
+
+  public void addRelatedTable(RelatedTablesConfiguration relatedTable){
+      relatedTables.add(relatedTable);
+  }
+
+  public void setRelatedTables(List<RelatedTablesConfiguration> relatedTables) {
+    this.relatedTables = relatedTables;
+  }
 }

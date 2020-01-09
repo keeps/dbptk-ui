@@ -21,8 +21,7 @@ import org.roda.core.data.v2.index.filter.SimpleFilterParameter;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.utils.Tree;
 import com.databasepreservation.common.client.models.DenormalizeProgressData;
-import com.databasepreservation.common.client.models.configuration.collection.CollectionConfiguration;
-import com.databasepreservation.common.client.models.configuration.collection.TableConfiguration;
+import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
 import com.databasepreservation.common.client.models.status.denormalization.ReferencesConfiguration;
 import com.databasepreservation.common.client.models.status.denormalization.RelatedColumnConfiguration;
@@ -49,23 +48,8 @@ public class Denormalize {
   private final DatabaseRowsSolrManager solrManager;
   private ViewerDatabase database;
   private String databaseUUID;
-  private CollectionConfiguration configuration;
   private Map<DenormalizeConfiguration, List<Tree<RelatedTablesConfiguration>>> structure = new HashMap<>();
   private DenormalizeProgressData progressData = null;
-
-  public Denormalize(String databaseUUID) throws ModuleException {
-    this.solrManager = ViewerFactory.getSolrManager();
-    this.databaseUUID = databaseUUID;
-    try {
-      database = solrManager.retrieve(ViewerDatabase.class, this.databaseUUID);
-      this.configuration = getConfiguration(Paths.get(databaseUUID + ViewerConstants.JSON_EXTENSION),
-        CollectionConfiguration.class);
-
-      setup();
-    } catch (NotFoundException | GenericException e) {
-      throw new ModuleException().withMessage("Cannot retrieved database from solr");
-    }
-  }
 
   public Denormalize(String databaseUUID, String tableUUID) throws ModuleException {
     this.solrManager = ViewerFactory.getSolrManager();
@@ -74,11 +58,9 @@ public class Denormalize {
     progressData.setTableUUID(tableUUID);
     try {
       database = solrManager.retrieve(ViewerDatabase.class, this.databaseUUID);
-
-      this.configuration = getConfiguration(Paths.get(databaseUUID + ViewerConstants.JSON_EXTENSION),
-        CollectionConfiguration.class);
       DenormalizeConfiguration denormalizeConfiguration = getConfiguration(
-        Paths.get(tableUUID + ViewerConstants.JSON_EXTENSION), DenormalizeConfiguration.class);
+        Paths.get(ViewerConstants.DENORMALIZATION_STATUS_PREFIX + tableUUID + ViewerConstants.JSON_EXTENSION),
+        DenormalizeConfiguration.class);
 
       buildDenormalizeTree(denormalizeConfiguration);
 
@@ -86,10 +68,26 @@ public class Denormalize {
         return;
       }
       denormalize();
+      updateCollectionStatus(denormalizeConfiguration);
 
     } catch (NotFoundException | GenericException e) {
       throw new ModuleException().withMessage("Cannot retrieved database from solr");
     }
+  }
+
+  private void updateCollectionStatus(DenormalizeConfiguration denormalizeConfiguration) throws GenericException {
+    List<ColumnStatus> columnStatusList = new ArrayList<>();
+    for (RelatedTablesConfiguration relatedTable : denormalizeConfiguration.getRelatedTables()) {
+      for (RelatedColumnConfiguration column : relatedTable.getColumnsIncluded()) {
+        ColumnStatus columnStatus = new ColumnStatus();
+        columnStatus.setId(denormalizeConfiguration.getTableID() + "." + column.getSolrName());
+        columnStatus.setName(column.getColumnName());
+        columnStatus.setNestedColumn(true);
+        columnStatusList.add(columnStatus);
+      }
+    }
+    ViewerFactory.getConfigurationManager().addDenormalizationColumns(databaseUUID,
+      denormalizeConfiguration.getTableUUID(), columnStatusList);
   }
 
   /**
@@ -100,31 +98,13 @@ public class Denormalize {
    * @throws ModuleException
    */
   private <T> T getConfiguration(Path path, Class<T> objectClass) throws ModuleException {
-    Path configurationPath = ViewerConfiguration.getInstance().getDatabaseConfigPath().resolve(database.getUuid())
+    Path configurationPath = ViewerConfiguration.getInstance().getDatabasesPath().resolve(database.getUuid())
       .resolve(path);
     if (Files.exists(configurationPath)) {
       return JsonTransformer.readObjectFromFile(configurationPath, objectClass);
     } else {
       throw new ModuleException().withMessage("Configuration file not exist: " + configurationPath.toString());
     }
-  }
-
-  private void setup() throws ModuleException {
-    for (TableConfiguration tableConfig : configuration.getTables()) {
-      System.out.println("================================================================");
-      System.out.println(" TC " + tableConfig.getId());
-      System.out.println("================================================================");
-      DenormalizeConfiguration denormalizeConfig = getConfiguration(
-        Paths.get(tableConfig.getUuid() + ViewerConstants.JSON_EXTENSION), DenormalizeConfiguration.class);
-      if (denormalizeConfig != null) {
-        buildDenormalizeTree(denormalizeConfig);
-      }
-    }
-
-    if (structure.isEmpty()) {
-      return;
-    }
-    denormalize();
   }
 
   private void buildDenormalizeTree(DenormalizeConfiguration denormalizeConfig) {
@@ -180,7 +160,7 @@ public class Denormalize {
           List<SolrInputDocument> nestedDocument = new ArrayList<>();
           createdNestedDocument(row, nestedDocument);
           if (!nestedDocument.isEmpty()) {
-            solrManager.addDatabaseField(databaseUUID, row.getUuid(), nestedDocument, configuration);
+            solrManager.addDatabaseField(databaseUUID, row.getUuid(), nestedDocument);
           }
         }
         progressData.setFinished(true);

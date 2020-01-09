@@ -1,10 +1,14 @@
 package com.databasepreservation.common.api.v1;
 
+import java.io.IOException;
 import java.nio.file.Files;
 
 import javax.ws.rs.Path;
 
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.structure.ViewerTable;
 import org.roda.core.data.exceptions.GenericException;
+import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.utils.JsonUtils;
 import org.springframework.stereotype.Service;
 
@@ -53,42 +57,18 @@ public class ConfigurationResource implements ConfigurationService {
   }
 
   @Override
-  public Boolean createConfigurationFile(String databaseuuid, CollectionConfiguration configuration) {
-    try {
-      JsonTransformer.writeObjectToFile(configuration, ViewerConfiguration.getInstance().getDatabaseConfigPath()
-        .resolve(databaseuuid).resolve(databaseuuid + ViewerConstants.JSON_EXTENSION));
-    } catch (ViewerException e) {
-      throw new RESTException(e.getMessage());
-    }
-    return true;
-  }
-
-  @Override
-  public CollectionConfiguration getConfigurationFile(String databaseuuid) {
-    try {
-      java.nio.file.Path path = ViewerConfiguration.getInstance().getDatabaseConfigPath().resolve(databaseuuid)
-        .resolve(databaseuuid + ViewerConstants.JSON_EXTENSION);
-      if (Files.exists(path)) {
-        return JsonTransformer.readObjectFromFile(path, CollectionConfiguration.class);
-      } else {
-        return null;
-      }
-    } catch (ViewerException e) {
-      throw new RESTException(e.getMessage());
-    }
-  }
-
-  @Override
   public DenormalizeConfiguration getDenormalizeConfigurationFile(String databaseuuid, String tableuuid) {
     try {
-      java.nio.file.Path path = ViewerConfiguration.getInstance().getDatabaseConfigPath().resolve(databaseuuid)
-        .resolve(tableuuid + ViewerConstants.JSON_EXTENSION);
+      java.nio.file.Path path = ViewerConfiguration.getInstance().getDatabasesPath().resolve(databaseuuid)
+        .resolve(ViewerConstants.DENORMALIZATION_STATUS_PREFIX + tableuuid + ViewerConstants.JSON_EXTENSION);
       if (Files.exists(path)) {
         return JsonTransformer.readObjectFromFile(path, DenormalizeConfiguration.class);
       } else {
-        return null;
+        ViewerDatabase database = ViewerFactory.getSolrManager().retrieve(ViewerDatabase.class, databaseuuid);
+        ViewerTable table = database.getMetadata().getTable(tableuuid);
+        return new DenormalizeConfiguration(databaseuuid, table);
       }
-    } catch (ViewerException e) {
+    } catch (ViewerException | NotFoundException | GenericException e) {
       throw new RESTException(e.getMessage());
     }
   }
@@ -97,12 +77,28 @@ public class ConfigurationResource implements ConfigurationService {
   public Boolean createDenormalizeConfigurationFile(String databaseuuid, String tableuuid,
     DenormalizeConfiguration configuration) {
     try {
+      JsonTransformer.writeObjectToFile(configuration,
+        ViewerConfiguration.getInstance().getDatabasesPath().resolve(databaseuuid)
+          .resolve(ViewerConstants.DENORMALIZATION_STATUS_PREFIX + tableuuid + ViewerConstants.JSON_EXTENSION));
       ViewerFactory.getConfigurationManager().addDenormalization(databaseuuid,
         ViewerConstants.DENORMALIZATION_STATUS_PREFIX + tableuuid);
-      // JsonTransformer.writeObjectToFile(configuration,
-      // ViewerConfiguration.getInstance().getDatabaseConfigPath()
-      // .resolve(databaseuuid).resolve(tableuuid + ViewerConstants.JSON_EXTENSION));
-    } catch (GenericException e) {
+    } catch (GenericException | ViewerException e) {
+      throw new RESTException(e.getMessage());
+    }
+    return true;
+  }
+
+  @Override
+  public Boolean deleteDenormalizeConfigurationFile(String databaseuuid, String tableuuid) {
+    try {
+      ViewerFactory.getConfigurationManager().removeDenormalization(databaseuuid,
+        ViewerConstants.DENORMALIZATION_STATUS_PREFIX + tableuuid);
+      java.nio.file.Path path = ViewerConfiguration.getInstance().getDatabasesPath().resolve(databaseuuid)
+        .resolve(ViewerConstants.DENORMALIZATION_STATUS_PREFIX + tableuuid + ViewerConstants.JSON_EXTENSION);
+      if (Files.exists(path)) {
+        Files.delete(path);
+      }
+    } catch (GenericException | IOException e) {
       throw new RESTException(e.getMessage());
     }
     return true;
@@ -111,7 +107,7 @@ public class ConfigurationResource implements ConfigurationService {
   @Override
   public CollectionConfiguration getConfiguration(String databaseuuid) {
     try {
-      java.nio.file.Path path = ViewerConfiguration.getInstance().getDatabaseConfigPath().resolve(databaseuuid)
+      java.nio.file.Path path = ViewerConfiguration.getInstance().getDatabasesPath().resolve(databaseuuid)
         .resolve(databaseuuid + ViewerConstants.JSON_EXTENSION);
 
       if (Files.exists(path)) {
@@ -137,10 +133,10 @@ public class ConfigurationResource implements ConfigurationService {
         if (table.getDenormalizeConfiguration().getRelatedTables() != null
           && !table.getDenormalizeConfiguration().getRelatedTables().isEmpty()) {
           JsonTransformer.writeObjectToFile(table.getDenormalizeConfiguration(), ViewerConfiguration.getInstance()
-            .getDatabaseConfigPath().resolve(databaseuuid).resolve(table.getUuid() + ViewerConstants.JSON_EXTENSION));
+            .getDatabasesPath().resolve(databaseuuid).resolve(table.getUuid() + ViewerConstants.JSON_EXTENSION));
         }
       }
-      JsonTransformer.writeObjectToFile(configuration, ViewerConfiguration.getInstance().getDatabaseConfigPath()
+      JsonTransformer.writeObjectToFile(configuration, ViewerConfiguration.getInstance().getDatabasesPath()
         .resolve(databaseuuid).resolve(databaseuuid + ViewerConstants.JSON_EXTENSION));
 
     } catch (ViewerException e) {
@@ -154,7 +150,7 @@ public class ConfigurationResource implements ConfigurationService {
     DenormalizeConfiguration configuration = getDenormalizeConfigurationFile(databaseuuid, tableuuid);
     configuration.setState(status);
     try {
-      JsonTransformer.writeObjectToFile(configuration, ViewerConfiguration.getInstance().getDatabaseConfigPath()
+      JsonTransformer.writeObjectToFile(configuration, ViewerConfiguration.getInstance().getDatabasesPath()
         .resolve(databaseuuid).resolve(tableuuid + ViewerConstants.JSON_EXTENSION));
     } catch (ViewerException e) {
       throw new RESTException(e.getMessage());

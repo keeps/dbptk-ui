@@ -1,7 +1,13 @@
 package com.databasepreservation.common.client.common.visualization.browse.configuration;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.databasepreservation.common.client.common.lists.widgets.MetadataTableList;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.ConfigurationHandler;
+import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
 import com.databasepreservation.common.client.models.status.denormalization.RelatedColumnConfiguration;
 import com.databasepreservation.common.client.models.status.denormalization.RelatedTablesConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
@@ -14,12 +20,8 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
-import config.i18n.client.ClientMessages;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import config.i18n.client.ClientMessages;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -31,7 +33,7 @@ public class TransformationTable extends Composite {
   private static TransformationTableUiBinder binder = GWT.create(TransformationTableUiBinder.class);
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, TransformationTable> instances = new HashMap<>();
-  private ConfigurationHandler configuration;
+  private DenormalizeConfiguration denormalizeConfiguration;
   private ViewerDatabase database;
   private ViewerTable table;
 
@@ -39,22 +41,27 @@ public class TransformationTable extends Composite {
   FlowPanel content;
 
   /**
-   * 
+   *
+   * @param database
+   * @param table
    * @param configuration
    * @return
    */
-  public static TransformationTable getInstance(ViewerDatabase database, ViewerTable table, ConfigurationHandler configuration) {
-    return instances.computeIfAbsent(database.getUuid() + table.getUuid(), k -> new TransformationTable(database, table, configuration));
+  public static TransformationTable getInstance(ViewerDatabase database, ViewerTable table,
+    DenormalizeConfiguration configuration) {
+    return instances.computeIfAbsent(database.getUuid() + table.getUuid(),
+      k -> new TransformationTable(database, table, configuration));
   }
 
   /**
-   * 
+   *
+   * @param database
    * @param table
    * @param configuration
    */
-  public TransformationTable(ViewerDatabase database, ViewerTable table, ConfigurationHandler configuration) {
+  public TransformationTable(ViewerDatabase database, ViewerTable table, DenormalizeConfiguration configuration) {
     initWidget(binder.createAndBindUi(this));
-    this.configuration = configuration;
+    this.denormalizeConfiguration = configuration;
     this.database = database;
     this.table = table;
     createTable();
@@ -72,9 +79,8 @@ public class TransformationTable extends Composite {
    */
   public void redrawTable(){
     List<ViewerColumn> columns = new ArrayList<>(table.getColumns());
-    List<RelatedTablesConfiguration> relatadTableList = configuration.getRelatedTableList(table);
 
-    for(RelatedTablesConfiguration relatadTable : relatadTableList){
+    for (RelatedTablesConfiguration relatadTable : denormalizeConfiguration.getRelatedTables()) {
       for(RelatedColumnConfiguration columnToInclude : relatadTable.getColumnsIncluded()){
         ViewerTable referencedTable = database.getMetadata().getTable(relatadTable.getTableUUID());
         ViewerColumn col = referencedTable.getColumns().get(columnToInclude.getIndex());

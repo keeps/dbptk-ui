@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
@@ -91,5 +92,14 @@ public class TableStatus implements Serializable {
 
   public void addColumnStatus(ColumnStatus status) {
     this.columns.add(status);
+  }
+
+  @JsonIgnore
+  public int getLastColumnOrder(){
+    int lastIndex = 0;
+    for (ColumnStatus column : columns) {
+     if(column.getOrder() > lastIndex) lastIndex = column.getOrder();
+    }
+    return lastIndex;
   }
 }

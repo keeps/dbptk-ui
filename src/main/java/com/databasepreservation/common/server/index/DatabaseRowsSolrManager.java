@@ -471,7 +471,7 @@ public class DatabaseRowsSolrManager {
   }
 
   public final void addDatabaseField(final String databaseUUID, final String documentUUID,
-    List<SolrInputDocument> nestedDocuments, CollectionConfiguration configuration) {
+    List<SolrInputDocument> nestedDocuments) {
     RowsCollection collection = SolrRowsCollectionRegistry.get(databaseUUID);
     SolrInputDocument doc = new SolrInputDocument();
     doc.addField(ViewerConstants.INDEX_ID, documentUUID);

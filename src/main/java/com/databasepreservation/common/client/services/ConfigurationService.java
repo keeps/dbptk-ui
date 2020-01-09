@@ -2,6 +2,7 @@ package com.databasepreservation.common.client.services;
 
 import java.util.function.Consumer;
 
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -61,16 +62,6 @@ public interface ConfigurationService extends DirectRestService {
   Boolean updateCollectionStatus(@PathParam("databaseUUID") String databaseUUID,
     @PathParam("collectionUUID") String collectionUUID, @ApiParam("collectionStatus") CollectionStatus status);
 
-  @POST
-  @Path("/file/{databaseuuid}")
-  @ApiOperation(value = "", notes = "", response = Boolean.class)
-  Boolean createConfigurationFile(@PathParam("databaseuuid") String databaseuuid,
-    CollectionConfiguration configuration);
-
-  @GET
-  @Path("/file/{databaseuuid}")
-  CollectionConfiguration getConfigurationFile(@PathParam("databaseuuid") String databaseuuid);
-
   @GET
   @Path("/denormalize/{databaseuuid}/{tableuuid}")
   DenormalizeConfiguration getDenormalizeConfigurationFile(@PathParam("databaseuuid") String databaseuuid,
@@ -79,7 +70,12 @@ public interface ConfigurationService extends DirectRestService {
   @POST
   @Path("/denormalize/{databaseuuid}/{tableuuid}")
   Boolean createDenormalizeConfigurationFile(@PathParam("databaseuuid") String databaseuuid,
-    @PathParam("tableuuid") String tableeuuid, DenormalizeConfiguration configuration);
+    @PathParam("tableuuid") String tableuuid, DenormalizeConfiguration configuration);
+
+  @DELETE
+  @Path("/denormalize/{databaseuuid}/{tableuuid}")
+  Boolean deleteDenormalizeConfigurationFile(@PathParam("databaseuuid") String databaseuuid,
+                                             @PathParam("tableuuid") String tableuuid);
 
   @GET
   @Path("/{databaseuuid}")

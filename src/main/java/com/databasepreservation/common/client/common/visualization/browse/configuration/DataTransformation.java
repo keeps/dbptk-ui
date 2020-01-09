@@ -12,12 +12,18 @@ import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.lists.widgets.MultipleSelectionTablePanel;
 import com.databasepreservation.common.client.common.sidebar.DataTransformationSidebar;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.ConfigurationHandler;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.DataTransformationUtils;
 import com.databasepreservation.common.client.models.configuration.collection.CollectionConfiguration;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
 import com.databasepreservation.common.client.models.status.denormalization.RelatedTablesConfiguration;
-import com.databasepreservation.common.client.models.structure.*;
+import com.databasepreservation.common.client.models.structure.ViewerColumn;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
+import com.databasepreservation.common.client.models.structure.ViewerReference;
+import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.services.ConfigurationService;
+import com.databasepreservation.common.client.services.JobService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.widgets.Alert;
@@ -28,7 +34,11 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.ScrollPanel;
+import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
 
@@ -56,10 +66,10 @@ public class DataTransformation extends RightPanel {
 
   private ViewerDatabase database;
   private ViewerTable table;
-  private ConfigurationHandler configuration;
   private TransformationTable rootTable;
   private DataTransformationSidebar sidebar;
   private CollectionStatus collectionStatus;
+  private DenormalizeConfiguration denormalizeConfiguration;
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
@@ -102,27 +112,40 @@ public class DataTransformation extends RightPanel {
    */
   private void getDenormalizeConfigurationFile() {
     loading.setVisible(true);
-    ConfigurationService.Util.call((CollectionConfiguration response) -> {
-      configuration = ConfigurationHandler.getInstance(database, response);
+    if (collectionStatus.getDenormalizations()
+      .contains(ViewerConstants.DENORMALIZATION_STATUS_PREFIX + table.getUuid())) {
+      ConfigurationService.Util.call((DenormalizeConfiguration response) -> {
+        denormalizeConfiguration = response;
+        loading.setVisible(false);
+        init();
+      }).getDenormalizeConfigurationFile(database.getUuid(), table.getUuid());
+    } else {
+      denormalizeConfiguration = new DenormalizeConfiguration(database.getUuid(), table);
       loading.setVisible(false);
       init();
-    }).getConfiguration(database.getUuid());
-
-//    if (collectionStatus.getDenormalizations()
-//      .contains(ViewerConstants.DENORMALIZATION_STATUS_PREFIX + table.getUuid())) {
-//      ConfigurationService.Util.call((DenormalizeConfiguration response) -> {
-//        configuration = ConfigurationHandler.getInstance(database, response);
-//        loading.setVisible(false);
-//        init();
-//      }).getDenormalizeConfigurationFile(database.getUuid(),
-//        ViewerConstants.DENORMALIZATION_STATUS_PREFIX + table.getUuid());
-//    }
+    }
   }
 
   private void init() {
     Alert alert = new Alert(Alert.MessageAlertType.INFO, messages.dataTransformationTextForAlertColumnsOrder(), true,
       FontAwesomeIconManager.DATABASE_INFORMATION);
     content.add(alert);
+
+    Button btnSaveConfiguration = new Button(messages.basicActionSave());
+    btnSaveConfiguration.setStyleName("btn btn-save");
+    btnSaveConfiguration.addClickHandler(clickEvent -> {
+      DataTransformationUtils.saveConfiguration(database.getUuid(), denormalizeConfiguration);
+    });
+    content.add(btnSaveConfiguration);
+
+    Button btnRunConfiguration = new Button("Run");
+    btnRunConfiguration.setStyleName("btn btn-run");
+    btnRunConfiguration.addClickHandler(clickEvent -> {
+      JobService.Util.call((Boolean result) -> {
+        //TODO save stuffs
+      }).denormalizeTableJob(database.getUuid(), table.getUuid());
+    });
+    content.add(btnRunConfiguration);
 
     // root table
     TableNode parentNode = new TableNode(database, table);
@@ -149,7 +172,7 @@ public class DataTransformation extends RightPanel {
     card.setTitleIcon(FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE));
     card.setTitle(table.getId());
     card.setDescription(table.getDescription());
-    rootTable = TransformationTable.getInstance(database, table, configuration);
+    rootTable = TransformationTable.getInstance(database, table, denormalizeConfiguration);
     FlowPanel rootTablePanel = new FlowPanel();
     rootTablePanel.add(rootTable);
     card.addExtraContent(rootTablePanel);
@@ -178,7 +201,8 @@ public class DataTransformation extends RightPanel {
     card.addExtraContent(getInformationAboutRelashionship(childNode));
 
     FlowPanel container = new FlowPanel();
-    TransformationChildTables tableInstance = TransformationChildTables.getInstance(childNode, configuration, rootTable,
+    TransformationChildTables tableInstance = TransformationChildTables.getInstance(childNode, denormalizeConfiguration,
+      rootTable,
       sidebar);
     MultipleSelectionTablePanel selectTable = tableInstance.createTable();
 
@@ -187,11 +211,11 @@ public class DataTransformation extends RightPanel {
       switchBtn.getButton().setValue(!switchBtn.getButton().getValue(), true); // workaround for ie11
       if (switchBtn.getButton().getValue()) {
         grandChild.add(expandLevel(childNode));
-        configuration.includeRelatedTable(childNode, table);
+        DataTransformationUtils.includeRelatedTable(childNode, denormalizeConfiguration);
         container.add(selectTable);
         sidebar.enableSaveConfiguration(true);
       } else {
-        configuration.removeRelatedTable(childNode, table);
+        DataTransformationUtils.removeRelatedTable(childNode, denormalizeConfiguration);
         grandChild.clear();
         container.clear();
         rootTable.redrawTable();
@@ -207,15 +231,15 @@ public class DataTransformation extends RightPanel {
     panel.add(card);
     panel.add(grandChild);
 
-    List<RelatedTablesConfiguration> relatedTables = configuration.getTableConfiguration(table)
-      .getDenormalizeConfiguration().getRelatedTables();
-    for (RelatedTablesConfiguration relatedTable : relatedTables) {
-      if (relatedTable.getUuid().equals(childNode.getUuid())) {
-        switchBtn.getButton().setValue(true, true);
-        card.setHideContentVisible(true);
-        grandChild.add(expandLevel(childNode));
-        container.add(selectTable);
-        break;
+    if (denormalizeConfiguration != null) {
+      for (RelatedTablesConfiguration relatedTable : denormalizeConfiguration.getRelatedTables()) {
+        if (relatedTable.getUuid().equals(childNode.getUuid())) {
+          switchBtn.getButton().setValue(true, true);
+          card.setHideContentVisible(true);
+          grandChild.add(expandLevel(childNode));
+          container.add(selectTable);
+          break;
+        }
       }
     }
 

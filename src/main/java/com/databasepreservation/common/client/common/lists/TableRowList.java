@@ -212,56 +212,56 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
       }
     }
 
-    ConfigurationService.Util.call((CollectionConfiguration response) -> {
-      ConfigurationHandler configuration = ConfigurationHandler.getInstance(database, response);
-      Map<String, List<ViewerColumn>> allColumnsToInclude = configuration.getAllColumnsToInclude(table);
-
-      for (Map.Entry<String, List<ViewerColumn>> entry : allColumnsToInclude.entrySet()) {
-        String tableName = entry.getKey();
-        List<ViewerColumn> columnsToInclude = entry.getValue();
-
-        for (ViewerColumn columnToInclude : columnsToInclude) {
-
-          Column<ViewerRow, SafeHtml> column = new Column<ViewerRow, SafeHtml>(new SafeHtmlCell()) {
-            @Override
-            public void render(Cell.Context context, ViewerRow object, SafeHtmlBuilder sb) {
-              SafeHtml value = getValue(object);
-              if (value != null) {
-                sb.appendHtmlConstant("<div title=\"" + SafeHtmlUtils.htmlEscape(value.asString()) + "\">");
-                sb.append(value);
-                sb.appendHtmlConstant("</div");
-              }
-            }
-
-            @Override
-            public SafeHtml getValue(ViewerRow row) {
-              SafeHtml ret = null;
-              String aggregationColumn = null;
-
-              if (row.getNestedRowList() != null) {
-                for (ViewerRow nestedRow : row.getNestedRowList()) {
-                  if (nestedRow.getCells() == null || nestedRow.getCells().isEmpty()) {
-                    continue;
-                  } else if (nestedRow.getTableId().equals(tableName)) {
-                    if (aggregationColumn == null) {
-                      aggregationColumn = nestedRow.getCells().get(columnToInclude.getSolrName()).getValue();
-                    } else {
-                      aggregationColumn = aggregationColumn + ","
-                        + nestedRow.getCells().get(columnToInclude.getSolrName()).getValue();
-                    }
-                    ret = SafeHtmlUtils.fromString(aggregationColumn);
-                  }
-                }
-              }
-              return ret;
-            }
-          };
-          addColumn(columnToInclude, column);
-          columns.put(columnToInclude, column);
-        }
-      }
-
-    }).getConfiguration(database.getUuid());
+//    ConfigurationService.Util.call((CollectionConfiguration response) -> {
+//      ConfigurationHandler configuration = ConfigurationHandler.getInstance(database, response);
+//      Map<String, List<ViewerColumn>> allColumnsToInclude = configuration.getAllColumnsToInclude(table);
+//
+//      for (Map.Entry<String, List<ViewerColumn>> entry : allColumnsToInclude.entrySet()) {
+//        String tableName = entry.getKey();
+//        List<ViewerColumn> columnsToInclude = entry.getValue();
+//
+//        for (ViewerColumn columnToInclude : columnsToInclude) {
+//
+//          Column<ViewerRow, SafeHtml> column = new Column<ViewerRow, SafeHtml>(new SafeHtmlCell()) {
+//            @Override
+//            public void render(Cell.Context context, ViewerRow object, SafeHtmlBuilder sb) {
+//              SafeHtml value = getValue(object);
+//              if (value != null) {
+//                sb.appendHtmlConstant("<div title=\"" + SafeHtmlUtils.htmlEscape(value.asString()) + "\">");
+//                sb.append(value);
+//                sb.appendHtmlConstant("</div");
+//              }
+//            }
+//
+//            @Override
+//            public SafeHtml getValue(ViewerRow row) {
+//              SafeHtml ret = null;
+//              String aggregationColumn = null;
+//
+//              if (row.getNestedRowList() != null) {
+//                for (ViewerRow nestedRow : row.getNestedRowList()) {
+//                  if (nestedRow.getCells() == null || nestedRow.getCells().isEmpty()) {
+//                    continue;
+//                  } else if (nestedRow.getTableId().equals(tableName)) {
+//                    if (aggregationColumn == null) {
+//                      aggregationColumn = nestedRow.getCells().get(columnToInclude.getSolrName()).getValue();
+//                    } else {
+//                      aggregationColumn = aggregationColumn + ","
+//                        + nestedRow.getCells().get(columnToInclude.getSolrName()).getValue();
+//                    }
+//                    ret = SafeHtmlUtils.fromString(aggregationColumn);
+//                  }
+//                }
+//              }
+//              return ret;
+//            }
+//          };
+//          addColumn(columnToInclude, column);
+//          columns.put(columnToInclude, column);
+//        }
+//      }
+//
+//    }).getConfiguration(database.getUuid());
 
 
     Alert alert = new Alert(Alert.MessageAlertType.LIGHT, messages.noItemsToDisplay());

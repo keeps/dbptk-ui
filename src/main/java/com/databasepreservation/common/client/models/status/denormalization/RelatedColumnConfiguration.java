@@ -1,5 +1,7 @@
 package com.databasepreservation.common.client.models.status.denormalization;
 
+import com.databasepreservation.common.client.models.structure.ViewerColumn;
+
 import java.io.Serializable;
 
 /**
@@ -9,6 +11,15 @@ public class RelatedColumnConfiguration implements Serializable {
     private String columnName;
     private String solrName;
     private int index;
+
+    public RelatedColumnConfiguration(ViewerColumn column){
+        index = column.getColumnIndexInEnclosingTable();
+        solrName = column.getSolrName();
+        columnName = column.getDisplayName();
+    }
+
+    public RelatedColumnConfiguration() {
+    }
 
     public String getColumnName() {
         return columnName;

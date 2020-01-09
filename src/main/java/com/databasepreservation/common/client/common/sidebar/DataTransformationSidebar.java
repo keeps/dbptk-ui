@@ -7,15 +7,12 @@ import java.util.Set;
 
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.DataTransformationProgressPanel;
-import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.ConfigurationHandler;
-import com.databasepreservation.common.client.models.configuration.collection.CollectionConfiguration;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerSchema;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
-import com.databasepreservation.common.client.services.ConfigurationService;
 import com.databasepreservation.common.client.services.JobService;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
@@ -101,7 +98,7 @@ public class DataTransformationSidebar extends Composite implements Sidebar {
    *          the database
    * @return a DatabaseSidebar instance
    */
-  public static DataTransformationSidebar getInstance(ViewerDatabase database) {
+  public static DataTransformationSidebar getInstance(ViewerDatabase database, CollectionStatus status) {
     if (database == null) {
       return getEmptyInstance();
     }
@@ -109,7 +106,7 @@ public class DataTransformationSidebar extends Composite implements Sidebar {
     DataTransformationSidebar instance = instances.get(database.getUuid());
     if (instance == null || instance.database == null
       || !ViewerDatabaseStatus.AVAILABLE.equals(instance.database.getStatus())) {
-      instance = new DataTransformationSidebar(database);
+      instance = new DataTransformationSidebar(database, status);
       instances.put(database.getUuid(), instance);
     }
 
@@ -143,9 +140,9 @@ public class DataTransformationSidebar extends Composite implements Sidebar {
   /**
    * Use DatabaseSidebar.getInstance to obtain an instance
    */
-  private DataTransformationSidebar(ViewerDatabase database) {
+  private DataTransformationSidebar(ViewerDatabase database, CollectionStatus status) {
     initWidget(uiBinder.createAndBindUi(this));
-    init(database, null);
+    init(database, status);
   }
 
   /**
@@ -188,7 +185,9 @@ public class DataTransformationSidebar extends Composite implements Sidebar {
 
       for (ViewerTable table : schema.getTables()) {
         if (!table.isCustomView() && !table.isMaterializedView()) {
-          schemaItems.add(createTableItem(schema, table, totalSchemas, iconTag));
+          if (collectionStatus.showTable(table.getUuid())) {
+            schemaItems.add(createTableItem(schema, table, totalSchemas, iconTag));
+          }
         }
       }
     }
@@ -228,6 +227,7 @@ public class DataTransformationSidebar extends Composite implements Sidebar {
       if (db != null && (databaseUUID == null || databaseUUID.equals(db.getUuid()))) {
         initialized = true;
         database = db;
+        collectionStatus = status;
         createControllerPanel();
         databaseUUID = db.getUuid();
         init();
@@ -339,15 +339,12 @@ public class DataTransformationSidebar extends Composite implements Sidebar {
     btnClearConfiguration.addStyleName("btn btn-times-circle btn-danger");
     btnClearConfiguration.setEnabled(false);
 
-    ConfigurationService.Util.call((CollectionConfiguration result) -> {
-      ConfigurationHandler configuration = ConfigurationHandler.getInstance(database, result);
-      btnSaveConfiguration.addClickHandler(event -> {
-        configuration.buildAll();
-        btnDenormalize.setEnabled(true);
-        btnClearConfiguration.setEnabled(false);
-        btnSaveConfiguration.setEnabled(false);
-      });
-    }).getConfiguration(databaseUUID);
+    btnSaveConfiguration.addClickHandler(event -> {
+      collectionStatus.getDenormalizations();
+      btnDenormalize.setEnabled(true);
+      btnClearConfiguration.setEnabled(false);
+      btnSaveConfiguration.setEnabled(false);
+    });
 
     btnDenormalize.addClickHandler(event -> {
       final DialogBox dialogBox = Dialogs.showWaitResponse(messages.dataTransformationSidebarDialogTitle(),

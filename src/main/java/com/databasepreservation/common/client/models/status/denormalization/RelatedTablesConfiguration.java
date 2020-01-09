@@ -1,5 +1,7 @@
 package com.databasepreservation.common.client.models.status.denormalization;
 
+import com.databasepreservation.common.client.models.structure.ViewerColumn;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -86,6 +88,10 @@ public class RelatedTablesConfiguration implements Serializable {
 
     public void setColumnsIncluded(List<RelatedColumnConfiguration> columnsIncluded) {
         this.columnsIncluded = columnsIncluded;
+    }
+
+    public void addColumnToInclude(ViewerColumn column) {
+        columnsIncluded.add(new RelatedColumnConfiguration(column));
     }
 
     public DisplaySettingsConfiguration getDisplaySettings() {

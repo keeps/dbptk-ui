@@ -1,12 +1,8 @@
 package com.databasepreservation.common.server.jobs;
 
-import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
-import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
-import com.databasepreservation.common.exceptions.ViewerException;
-import com.databasepreservation.common.server.ViewerConfiguration;
-import com.databasepreservation.common.server.controller.JobController;
-import com.databasepreservation.common.server.index.utils.JsonTransformer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.slf4j.Logger;
@@ -16,8 +12,13 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.listener.JobExecutionListenerSupport;
 import org.springframework.stereotype.Component;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
+import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
+import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
+import com.databasepreservation.common.exceptions.ViewerException;
+import com.databasepreservation.common.server.ViewerConfiguration;
+import com.databasepreservation.common.server.controller.JobController;
+import com.databasepreservation.common.server.index.utils.JsonTransformer;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -57,15 +58,13 @@ public class JobListener extends JobExecutionListenerSupport {
   }
 
   private Boolean updateConfigurationFile(String databaseUUID, String tableUUID, ViewerJobStatus status){
-    Path path = ViewerConfiguration.getInstance().getDatabaseConfigPath().resolve(databaseUUID)
-        .resolve(tableUUID + ViewerConstants.JSON_EXTENSION);
+    Path path = ViewerConfiguration.getInstance().getDatabasesPath().resolve(databaseUUID)
+      .resolve(ViewerConstants.DENORMALIZATION_STATUS_PREFIX + tableUUID + ViewerConstants.JSON_EXTENSION);
     if (Files.exists(path)) {
       try {
         DenormalizeConfiguration configuration = JsonTransformer.readObjectFromFile(path, DenormalizeConfiguration.class);
         configuration.setState(status);
-        JsonTransformer.writeObjectToFile(configuration,
-            ViewerConfiguration.getInstance().getDatabaseConfigPath().resolve(databaseUUID).resolve(
-                tableUUID + ViewerConstants.JSON_EXTENSION));
+        JsonTransformer.writeObjectToFile(configuration, path);
         return true;
       } catch (ViewerException e) {
         return false;
