@@ -25,14 +25,7 @@ import config.i18n.client.ClientMessages;
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 public class PreferencesPanel extends ContentPanel {
-  @UiField
-  public ClientMessages messages = GWT.create(ClientMessages.class);
-
-  @Override
-  public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forPreferencesPanel();
-    BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
-  }
+  private ClientMessages messages = GWT.create(ClientMessages.class);
 
   interface ManageUiBinder extends UiBinder<Widget, PreferencesPanel> {
   }
@@ -40,10 +33,7 @@ public class PreferencesPanel extends ContentPanel {
   private static ManageUiBinder binder = GWT.create(ManageUiBinder.class);
 
   @UiField
-  SimplePanel mainHeader;
-
-  @UiField
-  SimplePanel description;
+  FlowPanel header;
 
   @UiField
   FlowPanel content;
@@ -55,14 +45,20 @@ public class PreferencesPanel extends ContentPanel {
   private PreferencesPanel() {
     initWidget(binder.createAndBindUi(this));
 
-    mainHeader.setWidget(CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.PREFERENCES),
+    header.add(CommonClientUtils.getHeaderHTML(FontAwesomeIconManager.getTag(FontAwesomeIconManager.PREFERENCES),
       messages.menuTextForPreferences(), "h1"));
 
     MetadataField instance = MetadataField.createInstance(messages.preferencesPanelTextForDescription());
     instance.setCSS("table-row-description", "font-size-description");
 
-    description.setWidget(instance);
+    content.add(instance);
 
     content.add(new Alert(Alert.MessageAlertType.INFO, "Under construction"));
+  }
+
+  @Override
+  public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
+    List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forPreferencesPanel();
+    BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
   }
 }

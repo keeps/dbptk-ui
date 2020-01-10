@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-@JsonPropertyOrder({"uuid", "id", "name", "customName", "description", "customDescription", "hide", "columns"})
+@JsonPropertyOrder({"uuid", "id", "name", "customName", "description", "customDescription", "show", "columns"})
 public class TableStatus implements Serializable {
 
   private String uuid;
@@ -19,7 +19,7 @@ public class TableStatus implements Serializable {
   private String customName;
   private String description;
   private String customDescription;
-  private boolean hide;
+  private boolean show;
   private List<ColumnStatus> columns;
 
   public TableStatus() {
@@ -58,12 +58,12 @@ public class TableStatus implements Serializable {
     this.description = description;
   }
 
-  public boolean isHide() {
-    return hide;
+  public boolean isShow() {
+    return show;
   }
 
-  public void setHide(boolean hide) {
-    this.hide = hide;
+  public void setShow(boolean show) {
+    this.show = show;
   }
 
   public List<ColumnStatus> getColumns() {

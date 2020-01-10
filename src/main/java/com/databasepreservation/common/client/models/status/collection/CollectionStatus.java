@@ -135,7 +135,7 @@ public class CollectionStatus implements Serializable {
   public boolean showTable(String id) {
     for (TableStatus table : tables) {
       if (table.getUuid().equals(id))
-        return !table.isHide();
+        return table.isShow();
     }
 
     return true;
@@ -146,19 +146,18 @@ public class CollectionStatus implements Serializable {
     if (tableStatus != null) {
       for (ColumnStatus column : tableStatus.getColumns()) {
         if (column.getId().equals(columnId)) {
-          return !column.getSearchStatus().getList().isHide();
+          return column.getSearchStatus().getList().isShow();
         }
       }
-
     }
 
     return true;
   }
 
-  public void updateTableHidingCondition(String id, boolean value) {
+  public void updateTableShowCondition(String id, boolean value) {
     for (TableStatus table : tables) {
       if (table.getUuid().equals(id))
-        table.setHide(value);
+        table.setShow(value);
     }
   }
 

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.common.lists.cells.ActionsCell;
 import org.fusesource.restygwt.client.MethodCallback;
 import com.databasepreservation.common.client.index.filter.Filter;
 import org.roda.core.data.v2.index.sublist.Sublist;
@@ -93,9 +94,9 @@ public class SavedSearchList extends AsyncTableCell<SavedSearch, String> {
 
     // column with 2 buttons (edit and delete)
     ArrayList<HasCell<SavedSearch, ?>> cells = new ArrayList<>();
-    cells.add(new ActionsCell(messages.edit(), FontAwesomeIconManager.ACTION_EDIT,
+    cells.add(new ActionsCell<>(messages.edit(), FontAwesomeIconManager.ACTION_EDIT,
         object -> HistoryManager.gotoEditSavedSearch(object.getDatabaseUUID(), object.getUuid())));
-    cells.add(new ActionsCell(messages.delete(), FontAwesomeIconManager.ACTION_DELETE, "btn-danger",
+    cells.add(new ActionsCell<>(messages.delete(), FontAwesomeIconManager.ACTION_DELETE, "btn-danger",
         object -> SearchService.Util.call((Void result) ->{
         GWT.log("deleted " + object.getUuid());
         SavedSearchList.this.refresh();
@@ -161,37 +162,5 @@ public class SavedSearchList extends AsyncTableCell<SavedSearch, String> {
 
     FindRequest findRequest = new FindRequest(ViewerDatabase.class.getName(), filter, sorter, sublist, getFacets());
     SearchService.Util.call(callback).find(getDatabaseUUID(), findRequest, LocaleInfo.getCurrentLocale().getLocaleName());
-  }
-
-  /**
-   * Edit and delete cells, in a way that they can be added to a CompositeCell.
-   * based on this code http://stackoverflow.com/a/9119496/1483200
-   */
-  private static class ActionsCell implements HasCell<SavedSearch, SavedSearch> {
-    private FontAwesomeActionCell<SavedSearch> cell;
-
-    public ActionsCell(String tooltip, String icon, String extraButtonClasses,
-      FontAwesomeActionCell.Delegate<SavedSearch> delegate) {
-      cell = new FontAwesomeActionCell<>(tooltip, icon, extraButtonClasses, delegate);
-    }
-
-    public ActionsCell(String tooltip, String icon, FontAwesomeActionCell.Delegate<SavedSearch> delegate) {
-      cell = new FontAwesomeActionCell<>(tooltip, icon, delegate);
-    }
-
-    @Override
-    public Cell<SavedSearch> getCell() {
-      return cell;
-    }
-
-    @Override
-    public FieldUpdater<SavedSearch, SavedSearch> getFieldUpdater() {
-      return null;
-    }
-
-    @Override
-    public SavedSearch getValue(SavedSearch object) {
-      return object;
-    }
   }
 }

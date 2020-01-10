@@ -1,13 +1,16 @@
 package com.databasepreservation.common.client.common.visualization.manager.JobPanel;
 
+import java.util.List;
+
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.ContentPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.fields.MetadataField;
-import com.databasepreservation.common.client.common.lists.DatabaseList;
 import com.databasepreservation.common.client.common.lists.JobList;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
+import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
+import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
@@ -16,27 +19,18 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import config.i18n.client.ClientMessages;
-import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
-import com.databasepreservation.common.client.index.filter.Filter;
 
-import java.util.List;
+import config.i18n.client.ClientMessages;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
 public class JobManager extends ContentPanel {
-  @UiField
-  public ClientMessages messages = GWT.create(ClientMessages.class);
-
-  @Override
-  public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forJobManager();
-    BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
-  }
+  private ClientMessages messages = GWT.create(ClientMessages.class);
 
   interface JobManagerBinder extends UiBinder<Widget, JobManager> {
   }
@@ -50,7 +44,7 @@ public class JobManager extends ContentPanel {
   AccessibleFocusPanel searchInputButton;
 
   @UiField
-  SimplePanel mainHeader;
+  FlowPanel header;
 
   @UiField
   SimplePanel description;
@@ -71,13 +65,13 @@ public class JobManager extends ContentPanel {
     jobList = new JobList();
     initWidget(binder.createAndBindUi(this));
 
-    mainHeader
-      .setWidget(CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.NETWORK_WIRED), "Jobs", "h1"));
+    header.add(CommonClientUtils.getHeaderHTML(
+      FontAwesomeIconManager.getTag(FontAwesomeIconManager.NETWORK_WIRED), messages.batchJobsTextForPageTitle(), "h1"));
 
-//    MetadataField instance = MetadataField.createInstance(messages.manageDatabasePageDescription());
-//    instance.setCSS("table-row-description", "font-size-description");
-//
-//    description.setWidget(instance);
+    MetadataField instance = MetadataField.createInstance(messages.batchJobsTextForPageDescription());
+    instance.setCSS("table-row-description", "font-size-description");
+
+    description.setWidget(instance);
 
     searchInputBox.getElement().setPropertyString("placeholder", messages.searchPlaceholder());
 
@@ -109,4 +103,9 @@ public class JobManager extends ContentPanel {
     jobList.getSelectionModel().clear();
   }
 
+  @Override
+  public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
+    List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forJobManager();
+    BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
+  }
 }

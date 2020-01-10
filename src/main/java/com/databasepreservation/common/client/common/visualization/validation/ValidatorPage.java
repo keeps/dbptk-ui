@@ -1,24 +1,29 @@
 package com.databasepreservation.common.client.common.visualization.validation;
 
-import com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.SIARDManagerPage;
-import com.databasepreservation.common.client.models.ValidationProgressData;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.models.structure.ViewerDatabase;
-import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
+import com.databasepreservation.common.client.common.ContentPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
-import com.databasepreservation.common.client.common.ContentPanel;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
+import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
+import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
-import com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.navigation.ValidationNavigationPanel;
+import com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.SIARDManagerPage;
+import com.databasepreservation.common.client.models.ValidationProgressData;
+import com.databasepreservation.common.client.models.ValidationRequirement;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
+import com.databasepreservation.common.client.services.DatabaseService;
+import com.databasepreservation.common.client.services.SIARDService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.RestUtils;
-import com.databasepreservation.common.client.models.ValidationRequirement;
-import com.databasepreservation.common.client.services.DatabaseService;
-import com.databasepreservation.common.client.services.SIARDService;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.MouseWheelEvent;
@@ -35,12 +40,10 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import config.i18n.client.ClientMessages;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import config.i18n.client.ClientMessages;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -84,7 +87,7 @@ public class ValidatorPage extends ContentPanel {
 
   private static ValidatorUiBinder binder = GWT.create(ValidatorUiBinder.class);
 
-  //For server
+  // For server
   public static ValidatorPage getInstance(ViewerDatabase database, String skipAdditionalChecks) {
     return ValidatorPage.getInstance(database, null, null, skipAdditionalChecks);
   }
@@ -94,7 +97,7 @@ public class ValidatorPage extends ContentPanel {
   }
 
   public static ValidatorPage getInstance(ViewerDatabase database, String reporterPath, String udtPath,
-                                          String skipAdditionalChecks) {
+    String skipAdditionalChecks) {
     return instances.computeIfAbsent(database.getUuid(),
       k -> new ValidatorPage(database.getUuid(), reporterPath, udtPath, skipAdditionalChecks));
   }
@@ -112,7 +115,10 @@ public class ValidatorPage extends ContentPanel {
   FlowPanel stickToBottomPanel;
 
   @UiField
-  Label title;
+  FlowPanel header;
+
+  @UiField
+  SimplePanel description;
 
   @UiField
   FocusPanel contentScroll;
@@ -125,7 +131,7 @@ public class ValidatorPage extends ContentPanel {
 
   private ValidatorPage(String databaseUUID, String reporterPath, String udtPath, String skipAdditionalChecks) {
     this.databaseUUID = databaseUUID;
-    if(reporterPath != null){
+    if (reporterPath != null) {
       this.reporterPath = URL.decodePathSegment(reporterPath);
     }
     if (udtPath != null) {
@@ -135,21 +141,32 @@ public class ValidatorPage extends ContentPanel {
 
     initWidget(binder.createAndBindUi(this));
 
-    title.setText(messages.validatorPageTextForTitle());
+    configureHeader();
+
     buildStickButton();
 
     DatabaseService.Util.call((ViewerDatabase databaseResult) -> {
       database = databaseResult;
       List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forSIARDValidatorPage(database.getUuid(),
-          database.getMetadata().getName());
+        database.getMetadata().getName());
       BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
 
       populateValidationInfo(false, false);
-          SIARDService.Util.call((Void response) ->{
-            content.clear();
-            initProgress();
-          }).clearValidationProgressData(databaseUUID);
+      SIARDService.Util.call((Void response) -> {
+        content.clear();
+        initProgress();
+      }).clearValidationProgressData(databaseUUID);
     }).retrieve(databaseUUID, databaseUUID);
+  }
+
+  private void configureHeader() {
+    header.add(CommonClientUtils.getHeaderHTML(FontAwesomeIconManager.getTag(FontAwesomeIconManager.SIARD_VALIDATIONS),
+        messages.validatorPageTextForTitle(), "h1"));
+
+    MetadataField instance = MetadataField.createInstance(messages.preferencesPanelTextForDescription());
+    instance.setCSS("table-row-description", "font-size-description");
+
+    content.add(instance);
   }
 
   private void initProgress() {
@@ -170,14 +187,14 @@ public class ValidatorPage extends ContentPanel {
     }, (String errorMessage) -> {
       stopUpdating();
       Dialogs.showErrors(messages.validatorPageTextForTitle(), errorMessage, messages.basicActionClose());
-      SIARDService.Util.call((Void result)->{
+      SIARDService.Util.call((Void result) -> {
         populateValidationInfo(false, true);
       }).updateStatusValidate(databaseUUID, ViewerDatabaseValidationStatus.ERROR);
     }).validateSIARD(database.getUuid(), database.getPath(), reporterPath, udtPath, skipAdditionalChecks);
   }
 
   private void update() {
-    SIARDService.Util.call((ValidationProgressData result)->{
+    SIARDService.Util.call((ValidationProgressData result) -> {
       update(result);
       GWT.log("result.isFinished(): " + result.getFinished());
       GWT.log("result.getRequirementsList().size(): " + result.getRequirementsList().size());
@@ -194,15 +211,15 @@ public class ValidatorPage extends ContentPanel {
         countErrors = result.getNumberOfErrors();
         stopUpdating();
         SIARDManagerPage.getInstance(database).refreshInstance(databaseUUID);
-        //ValidationNavigationPanel.getInstance(database).update(database);
+        // ValidationNavigationPanel.getInstance(database).update(database);
         if (numberOfFailedRequirements > 0) {
           Dialogs.showErrors(messages.validatorPageTextForTitle(),
-              messages.validatorPageTextForDialogFailureInformation(database.getMetadata().getName(), countErrors),
-              messages.basicActionClose());
+            messages.validatorPageTextForDialogFailureInformation(database.getMetadata().getName(), countErrors),
+            messages.basicActionClose());
         } else {
           Dialogs.showInformationDialog(messages.validatorPageTextForTitle(),
-              messages.validatorPageTextForDialogSuccessInformation(database.getMetadata().getName()),
-              messages.basicActionClose(), "btn btn-link");
+            messages.validatorPageTextForDialogSuccessInformation(database.getMetadata().getName()),
+            messages.basicActionClose(), "btn btn-link");
         }
       }
     }).getValidationProgressData(databaseUUID);
@@ -492,7 +509,7 @@ public class ValidatorPage extends ContentPanel {
   @UiHandler("btnRunAgain")
   void setBtnRunAgainHandler(ClickEvent e) {
     clear(databaseUUID);
-    SIARDService.Util.call((Void response) ->{
+    SIARDService.Util.call((Void response) -> {
       initProgress();
     }).clearValidationProgressData(databaseUUID);
   }

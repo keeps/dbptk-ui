@@ -23,7 +23,6 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -230,6 +229,11 @@ public class DataTransformationSidebar extends Composite implements Sidebar {
   }
 
   @Override
+  public void reset(ViewerDatabase database, CollectionStatus status) {
+
+  }
+
+  @Override
   public void select(String value) {
     for (Map.Entry<String, SidebarHyperlink> entry : list.entrySet()) {
       if (entry.getKey().equals(value)) {
@@ -238,6 +242,16 @@ public class DataTransformationSidebar extends Composite implements Sidebar {
         list.get(entry.getKey()).setSelected(false);
       }
     }
+  }
+
+  @Override
+  public void selectFirst() {
+    // do nothing
+  }
+
+  @Override
+  public void updateSidebarItem(String key, boolean value) {
+    // do nothing
   }
 
   private void searchInit() {

@@ -1,14 +1,7 @@
  <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
 >
-
-    <ui:with field='messages' type='config.i18n.client.ClientMessages' />
-    <g:FlowPanel>
-        <g:FlowPanel styleName="wui-user-data" addStyleNames="wrapper skip_padding">
-            <g:Label addStyleNames="h1"><ui:text from='{messages.newUpload}'/></g:Label>
-            <g:FlowPanel addStyleNames="row full_width no_padding">
-                <g:TabPanel ui:field="tabPanel" addStyleNames="browseItemMetadata"/>
-            </g:FlowPanel>
-        </g:FlowPanel>
-    </g:FlowPanel>
+     <g:FlowPanel ui:field="content" addStyleNames="col_12">
+         <g:FlowPanel addStyleNames="structure-header" ui:field="header"/>
+     </g:FlowPanel>
 </ui:UiBinder>

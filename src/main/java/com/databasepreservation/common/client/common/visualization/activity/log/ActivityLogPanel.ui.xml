@@ -3,7 +3,7 @@
              xmlns:lists="urn:import:com.databasepreservation.common.client.common.lists"
 >
 
-    <g:FlowPanel addStyleNames="activity-log-panel">
+    <g:FlowPanel addStyleNames="col_12">
         <g:FlowPanel addStyleNames="structure-header">
             <g:SimplePanel addStyleNames="h1" ui:field="mainHeader"/>
         </g:FlowPanel>

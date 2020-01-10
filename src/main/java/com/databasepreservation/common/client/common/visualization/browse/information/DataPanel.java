@@ -108,7 +108,7 @@ public class DataPanel extends Composite {
     });
 
     return new BasicTablePanel<ViewerTable>(new HTMLPanel(SafeHtmlUtils.EMPTY_SAFE_HTML),
-      new HTMLPanel(SafeHtmlUtils.EMPTY_SAFE_HTML), tables.iterator(),
+      SafeHtmlUtils.EMPTY_SAFE_HTML, tables.iterator(),
 
       new BasicTablePanel.ColumnInfo<>(messages.schema_tableName(), false, 17, new TextColumn<ViewerTable>() {
         @Override

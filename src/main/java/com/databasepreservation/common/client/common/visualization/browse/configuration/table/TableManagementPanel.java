@@ -9,13 +9,15 @@ import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.common.ContentPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
+import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.fields.MetadataField;
-import com.databasepreservation.common.client.common.lists.cells.EditableCell;
+import com.databasepreservation.common.client.common.lists.cells.RequiredEditableCell;
+import com.databasepreservation.common.client.common.lists.cells.TextAreaInputCell;
 import com.databasepreservation.common.client.common.lists.widgets.MultipleSelectionTablePanel;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.configuration.observer.CollectionObserver;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
-import com.databasepreservation.common.client.models.status.helpers.TableStatusHelper;
+import com.databasepreservation.common.client.models.status.helpers.StatusHelper;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerSchema;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
@@ -23,6 +25,8 @@ import com.databasepreservation.common.client.services.ConfigurationService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
+import com.databasepreservation.common.client.tools.ViewerStringUtils;
+import com.databasepreservation.common.client.widgets.ConfigurationCellTableResources;
 import com.databasepreservation.common.client.widgets.Toast;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.core.client.GWT;
@@ -32,7 +36,6 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
@@ -41,10 +44,11 @@ import config.i18n.client.ClientMessages;
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 public class TableManagementPanel extends ContentPanel {
+  private static final String INVALID_CSS_CLASSNAME = "text-box-invalid";
   private ClientMessages messages = GWT.create(ClientMessages.class);
 
   @UiField
-  SimplePanel mainHeader;
+  FlowPanel header;
 
   @UiField
   FlowPanel content;
@@ -57,9 +61,10 @@ public class TableManagementPanel extends ContentPanel {
   private static Map<String, TableManagementPanel> instances = new HashMap<>();
   private ViewerDatabase database;
   private CollectionStatus collectionStatus;
+  private Button btnSave = new Button();
   private Map<String, MultipleSelectionTablePanel<ViewerTable>> tables = new HashMap<>();
   private Map<String, Boolean> initialLoading = new HashMap<>();
-  private Map<String, TableStatusHelper> editableValues = new HashMap<>();
+  private Map<String, StatusHelper> editableValues = new HashMap<>();
 
   public static TableManagementPanel getInstance(ViewerDatabase database, CollectionStatus status) {
     return instances.computeIfAbsent(database.getUuid(), k -> new TableManagementPanel(database, status));
@@ -90,47 +95,55 @@ public class TableManagementPanel extends ContentPanel {
     Button btnCancel = new Button();
     btnCancel.setText(messages.basicActionCancel());
     btnCancel.addStyleName("btn btn-danger btn-times-circle");
-    Button btnUpdate = new Button();
-    btnUpdate.setText(messages.basicActionSave());
-    btnUpdate.addStyleName("btn btn-primary btn-save");
+    btnSave.setText(messages.basicActionSave());
+    btnSave.addStyleName("btn btn-primary btn-save");
 
     btnCancel.addClickHandler(clickEvent -> HistoryManager.gotoAdvancedConfiguration(database.getUuid()));
 
-    btnUpdate.addClickHandler(clickEvent -> {
-      for (MultipleSelectionTablePanel<ViewerTable> value : tables.values()) {
-        for (ViewerTable table : database.getMetadata().getTables().values()) {
-          collectionStatus.updateTableHidingCondition(table.getUuid(), !value.getSelectionModel().isSelected(table));
-          if (editableValues.get(table.getUuid()) != null) {
-            collectionStatus.updateTableCustomDescription(table.getUuid(),
-              editableValues.get(table.getUuid()).getDescription());
-            collectionStatus.updateTableCustomName(table.getUuid(), editableValues.get(table.getUuid()).getLabel());
+    btnSave.addClickHandler(clickEvent -> {
+      if (selectionValidation()) {
+        if (inputValidation()) {
+          for (MultipleSelectionTablePanel<ViewerTable> value : tables.values()) {
+            for (ViewerTable table : database.getMetadata().getTables().values()) {
+              collectionStatus.updateTableShowCondition(table.getUuid(), value.getSelectionModel().isSelected(table));
+              if (editableValues.get(table.getUuid()) != null) {
+                collectionStatus.updateTableCustomDescription(table.getUuid(),
+                  editableValues.get(table.getUuid()).getDescription());
+                collectionStatus.updateTableCustomName(table.getUuid(), editableValues.get(table.getUuid()).getLabel());
+              }
+            }
           }
-        }
-      }
 
-      ConfigurationService.Util.call((Boolean result) -> {
-        final CollectionObserver collectionObserver = ObserverManager.getCollectionObserver();
-        collectionObserver.setCollectionStatus(collectionStatus);
-        Toast.showInfo(messages.tableManagementPageTitle(), messages.tableManagementPageToastDescription());
-      }).updateCollectionStatus(database.getUuid(), database.getUuid(), collectionStatus);
+          ConfigurationService.Util.call((Boolean result) -> {
+            final CollectionObserver collectionObserver = ObserverManager.getCollectionObserver();
+            collectionObserver.setCollectionStatus(collectionStatus);
+            Toast.showInfo(messages.tableManagementPageTitle(), messages.tableManagementPageToastDescription());
+          }).updateCollectionStatus(database.getUuid(), database.getUuid(), collectionStatus);
+        } else {
+          Dialogs.showErrors(messages.tableManagementPageTitle(), messages.tableManagementPageDialogInputError(),
+            messages.basicActionClose());
+        }
+      } else {
+        Dialogs.showErrors(messages.tableManagementPageTitle(), messages.tableManagementPageDialogSelectionError(),
+          messages.basicActionClose());
+      }
     });
 
     content.add(CommonClientUtils.wrapOnDiv("navigation-panel-buttons",
-      CommonClientUtils.wrapOnDiv("btn-item", btnCancel), CommonClientUtils.wrapOnDiv("btn-item", btnUpdate)));
+      CommonClientUtils.wrapOnDiv("btn-item", btnSave), CommonClientUtils.wrapOnDiv("btn-item", btnCancel)));
   }
 
   private void configureHeader() {
-    mainHeader.setWidget(CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE),
+    header.add(CommonClientUtils.getHeaderHTML(FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE),
       messages.tableManagementPageTitle(), "h1"));
 
     MetadataField instance = MetadataField.createInstance(messages.tableManagementPageTableTextForDescription());
     instance.setCSS("table-row-description", "font-size-description");
-
     content.add(instance);
   }
 
   private MultipleSelectionTablePanel<ViewerTable> createCellTableForViewerTable() {
-    return new MultipleSelectionTablePanel<>();
+    return new MultipleSelectionTablePanel<>(GWT.create(ConfigurationCellTableResources.class));
   }
 
   private void populateTable(MultipleSelectionTablePanel<ViewerTable> selectionTablePanel,
@@ -149,34 +162,38 @@ public class TableManagementPanel extends ContentPanel {
             return selectionTablePanel.getSelectionModel().isSelected(viewerTable);
           }
         }),
-      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableManagementPageTableHeaderTextForOriginalTableName(),
-        10, new TextColumn<ViewerTable>() {
+      new MultipleSelectionTablePanel.ColumnInfo<>(messages.basicTableHeaderTableOrColumn("name"), 15,
+        new TextColumn<ViewerTable>() {
           @Override
           public String getValue(ViewerTable table) {
             return table.getName();
           }
         }),
-      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableManagementPageTableHeaderTextForLabel(), 15,
+      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableManagementPageTableHeaderTextForLabel(), 20,
         getLabelColumn()),
       new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableManagementPageTableHeaderTextForDescription(), 0,
         getDescriptionColumn()));
   }
 
   private Column<ViewerTable, String> getLabelColumn() {
-    Column<ViewerTable, String> label = new Column<ViewerTable, String>(new EditableCell() {}) {
+    Column<ViewerTable, String> label = new Column<ViewerTable, String>(new RequiredEditableCell() {}) {
       @Override
       public String getValue(ViewerTable table) {
-        return collectionStatus.getTableStatus(table.getUuid()).getCustomName();
+        if (editableValues.get(table.getUuid()) == null) {
+          return collectionStatus.getTableStatus(table.getUuid()).getCustomName();
+        } else {
+          return editableValues.get(table.getUuid()).getLabel();
+        }
       }
     };
 
     label.setFieldUpdater((index, table, value) -> {
       if (editableValues.get(table.getUuid()) != null) {
-        final TableStatusHelper tableStatusHelper = editableValues.get(table.getUuid());
-        tableStatusHelper.setLabel(value);
-        editableValues.put(table.getUuid(), tableStatusHelper);
+        final StatusHelper statusHelper = editableValues.get(table.getUuid());
+        statusHelper.setLabel(value);
+        editableValues.put(table.getUuid(), statusHelper);
       } else {
-        TableStatusHelper helper = new TableStatusHelper(value,
+        StatusHelper helper = new StatusHelper(value,
           collectionStatus.getTableStatus(table.getUuid()).getCustomDescription());
         editableValues.put(table.getUuid(), helper);
       }
@@ -185,25 +202,46 @@ public class TableManagementPanel extends ContentPanel {
   }
 
   private Column<ViewerTable, String> getDescriptionColumn() {
-    Column<ViewerTable, String> description = new Column<ViewerTable, String>(new EditableCell() {}) {
+    Column<ViewerTable, String> description = new Column<ViewerTable, String>(new TextAreaInputCell() {}) {
       @Override
       public String getValue(ViewerTable table) {
-        return collectionStatus.getTableStatus(table.getUuid()).getCustomDescription();
+        if (editableValues.get(table.getUuid()) == null) {
+          return collectionStatus.getTableStatus(table.getUuid()).getCustomDescription();
+        } else {
+          return editableValues.get(table.getUuid()).getDescription();
+        }
       }
     };
 
     description.setFieldUpdater((index, table, value) -> {
       if (editableValues.get(table.getUuid()) != null) {
-        final TableStatusHelper tableStatusHelper = editableValues.get(table.getUuid());
-        tableStatusHelper.setDescription(value);
-        editableValues.put(table.getUuid(), tableStatusHelper);
+        final StatusHelper statusHelper = editableValues.get(table.getUuid());
+        statusHelper.setDescription(value);
+        editableValues.put(table.getUuid(), statusHelper);
       } else {
-        TableStatusHelper helper = new TableStatusHelper(
-          collectionStatus.getTableStatus(table.getUuid()).getCustomName(), value);
+        StatusHelper helper = new StatusHelper(collectionStatus.getTableStatus(table.getUuid()).getCustomName(), value);
         editableValues.put(table.getUuid(), helper);
       }
     });
     return description;
+  }
+
+  private boolean selectionValidation() {
+    for (MultipleSelectionTablePanel<ViewerTable> value : tables.values()) {
+      if (value.getSelectionModel().getSelectedSet().isEmpty())
+        return false;
+    }
+
+    return true;
+  }
+
+  private boolean inputValidation() {
+    for (StatusHelper value : editableValues.values()) {
+      if (ViewerStringUtils.isBlank(value.getLabel()))
+        return false;
+    }
+
+    return true;
   }
 
   @Override

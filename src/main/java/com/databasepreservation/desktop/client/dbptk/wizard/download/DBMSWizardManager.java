@@ -8,6 +8,7 @@ import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.visualization.progressBar.ProgressBarPanel;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
+import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.ToolkitModuleName2ViewerModuleName;
 import com.databasepreservation.common.client.models.parameters.ConnectionParameters;

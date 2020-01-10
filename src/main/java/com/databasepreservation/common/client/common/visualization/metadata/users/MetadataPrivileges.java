@@ -84,7 +84,7 @@ public class MetadataPrivileges implements MetadataEditPanel {
   @Override
   public Column<ViewerPrivilegeStructure, String> getDescriptionColumn() {
     Column<ViewerPrivilegeStructure, String> description = new Column<ViewerPrivilegeStructure, String>(
-      new EditableCell() {
+      new EditableCell(messages.metadataDoesNotContainDescription()) {
         @Override
         public void onBrowserEvent(Context context, Element parent, String value, NativeEvent event,
           ValueUpdater<String> valueUpdater) {

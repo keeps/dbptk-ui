@@ -4,13 +4,11 @@
              xmlns:a="urn:import:com.databasepreservation.common.client.widgets"
              xmlns:wcag="urn:import:com.databasepreservation.common.client.widgets.wcag">
 
-    <ui:with field='messages' type='config.i18n.client.ClientMessages' />
     <g:FlowPanel>
         <g:FlowPanel addStyleNames="structure-header">
-            <g:SimplePanel>
-                <g:Label ui:field="title" addStyleNames="h1"/>
-            </g:SimplePanel>
+            <g:SimplePanel addStyleNames="h1" ui:field="mainHeader"/>
         </g:FlowPanel>
+        <g:SimplePanel ui:field="description"/>
 
         <g:FlowPanel addStyleNames="search-panel-container">
             <g:FlowPanel styleName="searchPanel" ui:field="searchPanel">
@@ -32,7 +30,6 @@
             </g:FlowPanel>
         </g:FlowPanel>
 
-        <g:HTML ui:field="description"/>
         <g:FlowPanel ui:field="content">
             <g:FlowPanel visible="false" styleName="alert-container" ui:field="noResultsContent">
                 <a:Alert ui:field="noResults"/>

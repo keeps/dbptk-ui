@@ -7,20 +7,20 @@ import java.io.Serializable;
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-@JsonPropertyOrder({"hide", "template"})
+@JsonPropertyOrder({"show", "template"})
 public class ListStatus implements Serializable {
 
-  private boolean hide;
+  private boolean show;
   private TemplateStatus template;
 
   public ListStatus() { }
 
-  public boolean isHide() {
-    return hide;
+  public boolean isShow() {
+    return show;
   }
 
-  public void setHide(boolean hide) {
-    this.hide = hide;
+  public void setShow(boolean show) {
+    this.show = show;
   }
 
   public TemplateStatus getTemplate() {
@@ -34,7 +34,7 @@ public class ListStatus implements Serializable {
   @Override
   public String toString() {
     return "ListStatus{" +
-        "hide=" + hide +
+        "show=" + show +
         ", template=" + template +
         '}';
   }

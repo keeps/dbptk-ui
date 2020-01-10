@@ -24,6 +24,7 @@ public class FontAwesomeIconManager {
   public static final String DATABASE_INFORMATION = "info-circle";
   public static final String DATABASE_USERS = "users";
   public static final String DATABASE_SEARCH = "search";
+  public static final String SEARCH_PLUS = "search-plus";
   public static final String DATABASE_REPORT = "clipboard";
   public static final String SCHEMA_STRUCTURE = "sitemap";
   public static final String SCHEMA_ROUTINES = "cog";
@@ -48,6 +49,7 @@ public class FontAwesomeIconManager {
   public static final String SIARD_VALIDATIONS = "check";
   public static final String COG = "cog";
   public static final String PREFERENCES = "tools";
+  public static final String CLONE = "clone";
   public static final String SPIN = "spin";
   public static final String LOADING = "spinner";
   public static final String CHECK = "check-circle";
@@ -61,7 +63,11 @@ public class FontAwesomeIconManager {
   public static final String BREADCRUMB_SEPARATOR = "chevron-right";
   public static final String ACTIVITY_LOG = "receipt";
   public static final String NETWORK_WIRED = "network-wired";
-
+  public static final String ARROW_UP = "arrow-up";
+  public static final String ARROW_DOWN = "arrow-down";
+  public static final String BOX_OPEN = "box-open";
+  public static final String TASKS = "tasks";
+  public static final String ASTERISK = "asterisk";
 
   public static String getTag(String icon) {
     return "<i class=\"fa fa-" + icon + "\"></i>";
@@ -80,7 +86,11 @@ public class FontAwesomeIconManager {
   }
 
   public static String getTagWithStyleName(String icon, String styleName) {
-    return "<i class=\"fa fa-" + icon + " " + styleName +"\"></i>";
+    return "<i class=\"fa fa-" + icon + " " + styleName + "\"></i>";
+  }
+
+  public static String getTagWithStyleName(String icon, String tooltip, String styleName) {
+    return "<i class=\"fa fa-" + icon + " " + styleName + "\" title=\"" + tooltip + "\"></i>";
   }
 
   public static String getTag(String icon, String tooltip) {
@@ -100,16 +110,14 @@ public class FontAwesomeIconManager {
     return getTagSafeHtml(icon, text, false);
   }
 
-  public static SafeHtml getStackedIconSafeHtml(String iconButton, String iconTop, String text) {
+  public static SafeHtml getStackedIconSafeHtml(String iconBottom, String iconTop, String text) {
     SafeHtmlBuilder safeHtmlBuilder = new SafeHtmlBuilder();
-    final String iButton = "<i class=\"fas fa-" + iconButton + " fa-stack-2x fa-fw\"></i>";
+    final String iButton = "<i class=\"fas fa-" + iconBottom + " fa-stack-2x fa-fw\"></i>";
     final String iTop = "<i class=\"fas fa-" + iconTop + " fa-stack-1x fa-stack-right-corner\"></i>";
 
     safeHtmlBuilder.append(SafeHtmlUtils.fromSafeConstant("<span class=\"fa-stack custom-views-stack\">"))
-        .append(SafeHtmlUtils.fromSafeConstant(iButton))
-        .append(SafeHtmlUtils.fromSafeConstant(iTop))
-        .append(SafeHtmlUtils.fromSafeConstant("</span>"))
-        .append(SafeHtmlUtils.fromSafeConstant(text));
+      .append(SafeHtmlUtils.fromSafeConstant(iButton)).append(SafeHtmlUtils.fromSafeConstant(iTop))
+      .append(SafeHtmlUtils.fromSafeConstant("</span>")).append(SafeHtmlUtils.fromSafeConstant(text));
 
     return safeHtmlBuilder.toSafeHtml();
   }
@@ -117,9 +125,11 @@ public class FontAwesomeIconManager {
   public static SafeHtml getTagSafeHtml(String icon, String text, boolean regular) {
     SafeHtmlBuilder safeHtmlBuilder = new SafeHtmlBuilder();
     if (regular) {
-      return safeHtmlBuilder.append(SafeHtmlUtils.fromSafeConstant(getTagRFW(icon))).append(SafeHtmlUtils.fromSafeConstant(text)).toSafeHtml();
+      return safeHtmlBuilder.append(SafeHtmlUtils.fromSafeConstant(getTagRFW(icon)))
+        .append(SafeHtmlUtils.fromSafeConstant(text)).toSafeHtml();
     } else {
-      return safeHtmlBuilder.append(SafeHtmlUtils.fromSafeConstant(getTagFW(icon))).append(SafeHtmlUtils.fromSafeConstant(text)).toSafeHtml();
+      return safeHtmlBuilder.append(SafeHtmlUtils.fromSafeConstant(getTagFW(icon)))
+        .append(SafeHtmlUtils.fromSafeConstant(text)).toSafeHtml();
     }
   }
 }

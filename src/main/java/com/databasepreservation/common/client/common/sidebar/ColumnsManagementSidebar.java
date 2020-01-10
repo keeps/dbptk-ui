@@ -2,6 +2,7 @@ package com.databasepreservation.common.client.common.sidebar;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -9,7 +10,6 @@ import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.configuration.observer.CollectionStatusObserver;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
-import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerSchema;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
@@ -54,11 +54,11 @@ public class ColumnsManagementSidebar extends Composite implements Sidebar, Coll
   @UiField
   AccessibleFocusPanel searchInputButton;
 
-  protected ViewerDatabase database;
-  protected String databaseUUID;
-  protected CollectionStatus collectionStatus;
-  protected boolean initialized = false;
-  protected Map<String, SidebarHyperlink> list = new HashMap<>();
+  private ViewerDatabase database;
+  private String databaseUUID;
+  private CollectionStatus collectionStatus;
+  private boolean initialized = false;
+  private Map<String, SidebarHyperlink> list = new LinkedHashMap<>();
 
   /**
    * Creates a new DatabaseSidebar, rarely hitting the database more than once for
@@ -69,85 +69,9 @@ public class ColumnsManagementSidebar extends Composite implements Sidebar, Coll
    * @return a DatabaseSidebar instance
    */
   public static ColumnsManagementSidebar getInstance(String databaseUUID) {
-
-    if (databaseUUID == null) {
-      return getEmptyInstance();
-    }
-
-    ColumnsManagementSidebar instance = instances.get(databaseUUID);
-    if (instance == null || instance.database == null
-      || !ViewerDatabaseStatus.AVAILABLE.equals(instance.database.getStatus())) {
-      instance = new ColumnsManagementSidebar(databaseUUID);
-      instances.put(databaseUUID, instance);
-    } else {
-      // workaround because the same DatabaseSidebar can not belong to multiple
-      // widgets
-      return new ColumnsManagementSidebar(instance);
-    }
-    return instance;
+    return instances.computeIfAbsent(databaseUUID, k -> new ColumnsManagementSidebar(databaseUUID));
   }
 
-  /**
-   * Creates a new DatabaseSidebar, rarely hitting the database more than once for
-   * each database.
-   *
-   * @param database
-   *          the database
-   * @return a DatabaseSidebar instance
-   */
-  public static ColumnsManagementSidebar getInstance(ViewerDatabase database, CollectionStatus status) {
-    if (database == null) {
-      return getEmptyInstance();
-    }
-
-    ColumnsManagementSidebar instance = instances.get(database.getUuid());
-    if (instance == null || instance.database == null
-      || !ViewerDatabaseStatus.AVAILABLE.equals(instance.database.getStatus())) {
-      instance = new ColumnsManagementSidebar(database, status);
-      instances.put(database.getUuid(), instance);
-    } else {
-      // workaround because the same DatabaseSidebar can not belong to multiple
-      // widgets
-      return new ColumnsManagementSidebar(instance);
-    }
-    return instance;
-  }
-
-  /**
-   * Creates a new (dummy) DatabaseSidebar that is not visible. This method exists
-   * so that pages can opt for not using a sidebar at all.
-   *
-   * @return a new invisible DatabaseSidebar
-   */
-  public static ColumnsManagementSidebar getEmptyInstance() {
-    return new ColumnsManagementSidebar();
-  }
-
-  /**
-   * Clone constructor, because the same DatabaseSidebar can not be child in more
-   * than one widget
-   *
-   * @param other
-   *          the DatabaseSidebar used in another widget
-   */
-  private ColumnsManagementSidebar(ColumnsManagementSidebar other) {
-    initialized = other.initialized;
-    initWidget(uiBinder.createAndBindUi(this));
-    searchInputBox.setText(other.searchInputBox.getText());
-    init(other.database, other.collectionStatus);
-  }
-
-  /**
-   * Use DatabaseSidebar.getInstance to obtain an instance
-   */
-  private ColumnsManagementSidebar(ViewerDatabase database, CollectionStatus status) {
-    initWidget(uiBinder.createAndBindUi(this));
-    init(database, collectionStatus);
-  }
-
-  /**
-   * Empty constructor, for pages that do not have a sidebar
-   */
   private ColumnsManagementSidebar() {
     initWidget(uiBinder.createAndBindUi(this));
     this.setVisible(false);
@@ -162,13 +86,8 @@ public class ColumnsManagementSidebar extends Composite implements Sidebar, Coll
   }
 
   public void init() {
-
     // database metadata
     final ViewerMetadata metadata = database.getMetadata();
-
-    /* Schemas */
-    SidebarItem tableHeader = createSidebarSubItemHeaderSafeHMTL(messages.tableHeader(), FontAwesomeIconManager.LIST);
-    FlowPanel schemaItems = new FlowPanel();
 
     final int totalSchemas = metadata.getSchemas().size();
 
@@ -208,7 +127,7 @@ public class ColumnsManagementSidebar extends Composite implements Sidebar, Coll
     }
     SidebarHyperlink tableLink = new SidebarHyperlink(html,
       HistoryManager.linkToColumnManagement(database.getUuid(), table.getUuid()));
-    tableLink.setH6().setIndent2();
+    tableLink.setH6().setIndent0();
     list.put(table.getUuid(), tableLink);
 
     return tableLink;
@@ -247,7 +166,7 @@ public class ColumnsManagementSidebar extends Composite implements Sidebar, Coll
       list.put(customViewTable.getUuid(), viewLink);
     }
     if (viewLink != null) {
-      viewLink.setH6().setIndent2();
+      viewLink.setH6().setIndent0();
     }
 
     return viewLink;
@@ -256,7 +175,6 @@ public class ColumnsManagementSidebar extends Composite implements Sidebar, Coll
   @Override
   public void updateCollection(CollectionStatus collectionStatus) {
     this.collectionStatus = collectionStatus;
-    instances.clear();
   }
 
   @Override
@@ -266,37 +184,53 @@ public class ColumnsManagementSidebar extends Composite implements Sidebar, Coll
 
   @Override
   public void init(ViewerDatabase db, CollectionStatus status) {
-    GWT.log("init with db: " + db + "; status: " + db.getStatus().toString());
-    if (ViewerDatabaseStatus.AVAILABLE.equals(db.getStatus())) {
-      if (db != null && (databaseUUID == null || databaseUUID.equals(db.getUuid()))) {
-        initialized = true;
-        ObserverManager.getCollectionObserver().addObserver(this);
-        database = db;
-        collectionStatus = status;
-        databaseUUID = db.getUuid();
-        init();
-      }
+    if (!isInitialized()) {
+      initialized = true;
+      ObserverManager.getCollectionObserver().addObserver(this);
+      database = db;
+      collectionStatus = status;
+      databaseUUID = db.getUuid();
+      init();
     }
   }
 
-  private SidebarItem createSidebarSubItemHeaderSafeHMTL(String headerText, String headerIcon) {
-    return new SidebarItem(FontAwesomeIconManager.getTagSafeHtml(headerIcon, headerText)).setH5().setIndent0();
-  }
-
-  private void createSubItem(SidebarItem header, FlowPanel content, boolean collapsed) {
-    DisclosurePanel panel = new DisclosurePanel();
-    panel.setOpen(!collapsed);
-    panel.setAnimationEnabled(true);
-    panel.setHeader(header);
-    panel.setContent(content);
-    panel.getElement().addClassName("sidebar-collapse");
-    sidebarGroup.add(panel);
+  @Override
+  public void reset(ViewerDatabase database, CollectionStatus collectionStatus) {
+    sidebarGroup.clear();
+    initialized = false;
+    init(database, collectionStatus);
   }
 
   @Override
   public void select(String value) {
-    for (Map.Entry<String, SidebarHyperlink> entry : list.entrySet()) {
-      entry.getValue().setSelected(entry.getKey().equals(value));
+    if (value.equals(databaseUUID)) {
+      selectFirst();
+    } else {
+      for (Map.Entry<String, SidebarHyperlink> entry : list.entrySet()) {
+        entry.getValue().setSelected(entry.getKey().equals(value));
+      }
+    }
+  }
+
+  @Override
+  public void selectFirst() {
+    final String uuid = collectionStatus.getTables().get(0).getUuid();
+    list.forEach((key, hyperlink) -> {
+      if (key.equals(uuid)) {
+        hyperlink.setSelected(true);
+      } else {
+        hyperlink.setSelected(false);
+      }
+    });
+  }
+
+  @Override
+  public void updateSidebarItem(String key, boolean value) {
+    final SidebarHyperlink sidebarHyperlink = list.get(key);
+    if (value) {
+      sidebarHyperlink.setChanged(FontAwesomeIconManager.ACTION_EDIT);
+    } else {
+      sidebarHyperlink.setChanged(FontAwesomeIconManager.TABLE);
     }
   }
 

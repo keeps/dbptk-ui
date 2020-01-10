@@ -67,7 +67,7 @@ public class MetadataRoutineParameters implements MetadataEditPanel {
 
   @Override
   public Column<ViewerRoutineParameter, String> getDescriptionColumn() {
-    Column<ViewerRoutineParameter, String> description = new Column<ViewerRoutineParameter, String>(new EditableCell() {
+    Column<ViewerRoutineParameter, String> description = new Column<ViewerRoutineParameter, String>(new EditableCell(messages.metadataDoesNotContainDescription()) {
       @Override
       public void onBrowserEvent(Context context, Element parent, String value, NativeEvent event,
         ValueUpdater<String> valueUpdater) {

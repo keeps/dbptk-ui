@@ -41,6 +41,7 @@ public class BasicTablePanel<C> extends Composite {
   private static BasicTablePanelUiBinder uiBinder = GWT.create(BasicTablePanelUiBinder.class);
 
   private final SingleSelectionModel<C> selectionModel;
+  private ListDataProvider<C> dataProvider;
   private CellTable<C> display;
   private ScrollPanel displayScroll;
   private SimplePanel displayScrollWrapper;
@@ -79,18 +80,30 @@ public class BasicTablePanel<C> extends Composite {
 
   @SafeVarargs
   public BasicTablePanel(Widget headerContent, SafeHtml infoContent, Iterator<C> rowItems, ColumnInfo<C>... columns) {
-    this(headerContent, new HTMLPanel(infoContent), rowItems, columns);
+    this(headerContent, new HTMLPanel(infoContent), GWT.create(MyCellTableResources.class), rowItems, columns);
+  }
+
+  @SafeVarargs
+  public BasicTablePanel(Widget headerContent, SafeHtml infoContent, CellTable.Resources resources,
+    Iterator<C> rowItems, ColumnInfo<C>... columns) {
+    this(headerContent, new HTMLPanel(infoContent), resources, rowItems, columns);
   }
 
   @SafeVarargs
   public BasicTablePanel(Widget headerContent, Widget infoContent, Iterator<C> rowItems, ColumnInfo<C>... columns) {
+    this(headerContent, infoContent, GWT.create(MyCellTableResources.class), rowItems, columns);
+  }
+
+  @SafeVarargs
+  public BasicTablePanel(Widget headerContent, Widget infoContent, CellTable.Resources resources, Iterator<C> rowItems,
+    ColumnInfo<C>... columns) {
     initWidget(uiBinder.createAndBindUi(this));
 
     // set widgets
     header.setWidget(headerContent);
     info.setWidget(infoContent);
 
-    display = createTable(rowItems, columns);
+    display = createTable(resources, rowItems, columns);
     selectionModel = new SingleSelectionModel<>();
     display.setSelectionModel(selectionModel);
 
@@ -163,10 +176,9 @@ public class BasicTablePanel<C> extends Composite {
   }
 
   @SafeVarargs
-  private final CellTable<C> createTable(Iterator<C> rowItems, ColumnInfo<C>... columns) {
-    // create table
-    CellTable<C> cellTable = new CellTable<>(Integer.MAX_VALUE,
-      (MyCellTableResources) GWT.create(MyCellTableResources.class));
+  private final CellTable<C> createTable(CellTable.Resources resources, Iterator<C> rowItems,
+    ColumnInfo<C>... columns) {
+    CellTable<C> cellTable = new CellTable<>(Integer.MAX_VALUE, resources);
     cellTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
     cellTable.setLoadingIndicator(new HTML(SafeHtmlUtils.fromSafeConstant(
       "<div class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>")));
@@ -176,12 +188,14 @@ public class BasicTablePanel<C> extends Composite {
     for (ColumnInfo<C> column : columns) {
       if (!column.hide) {
         cellTable.addColumn(column.column, column.header);
-        cellTable.setColumnWidth(column.column, column.widthEM, Style.Unit.EM);
+        if (column.widthEM > 0) {
+          cellTable.setColumnWidth(column.column, column.widthEM, Style.Unit.EM);
+        }
       }
     }
 
     // fetch rows
-    ListDataProvider<C> dataProvider = new ListDataProvider<C>();
+    dataProvider = new ListDataProvider<C>();
     dataProvider.addDataDisplay(cellTable);
     List<C> list = dataProvider.getList();
     while (rowItems.hasNext()) {
@@ -196,7 +210,9 @@ public class BasicTablePanel<C> extends Composite {
     return selectionModel;
   }
 
-  public CellTable<C> getDisplay() { return display; }
+  public CellTable<C> getDisplay() {
+    return display;
+  }
 
   @Override
   protected void onLoad() {
@@ -204,5 +220,9 @@ public class BasicTablePanel<C> extends Composite {
     if (this.getSelectionModel() != null) {
       this.getSelectionModel().clear();
     }
+  }
+
+  public ListDataProvider<C> getDataProvider() {
+    return dataProvider;
   }
 }

@@ -268,11 +268,11 @@ public class DataTransformation extends RightPanel {
     panel.add(card);
     panel.add(grandChild);
 
-    if (denormalizeConfiguration != null) {
-      for (RelatedTablesConfiguration relatedTable : denormalizeConfiguration.getRelatedTables()) {
-        setup(relatedTable, childNode, switchBtn, card, grandChild, container, selectTable);
-      }
-    }
+//    if (denormalizeConfiguration != null) {
+//      for (RelatedTablesConfiguration relatedTable : denormalizeConfiguration.getRelatedTables()) {
+//        setup(relatedTable, childNode, switchBtn, card, grandChild, container, selectTable);
+//      }
+//    }
 
     return panel;
   }

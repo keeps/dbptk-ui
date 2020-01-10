@@ -639,6 +639,8 @@ public class SIARDController {
       }
     }
 
+    ViewerFactory.getConfigurationManager().deleteDatabaseFolder(databaseUUID);
+
     String reportPath = database.getValidatorReportPath();
     if (StringUtils.isNotBlank(reportPath) && Paths.get(reportPath).toFile().exists()) {
       deleteValidatorReportFileFromPath(reportPath, databaseUUID);

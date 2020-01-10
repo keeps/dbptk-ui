@@ -57,7 +57,7 @@ public class ActivityLogDetailedPanel extends ContentPanel {
   }
 
   private void init() {
-    logHeader.setWidget(CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.ACTIVITY_LOG),
+    logHeader.setWidget(CommonClientUtils.getHeaderHTML(FontAwesomeIconManager.getTag(FontAwesomeIconManager.ACTIVITY_LOG),
       messages.activityLogDetailedHeaderText(), "h1"));
 
     ActivityLogEntry activityLogEntry = activityLogWrapper.getActivityLogEntry();

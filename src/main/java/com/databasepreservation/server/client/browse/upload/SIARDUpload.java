@@ -36,7 +36,7 @@ import config.i18n.client.ClientMessages;
 public class SIARDUpload extends RightPanel {
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forNewUpload());
+    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forUpload());
   }
 
   interface SIARDUploadUiBinder extends UiBinder<Widget, SIARDUpload> {
@@ -174,7 +174,7 @@ public class SIARDUpload extends RightPanel {
     itemList.add(item);
     Element loadStatus = item.getElementsByTagName("span").getItem(0);
     loadStatus.addClassName("flash");
-    loadStatus.setInnerText(messages.uploadedSIARD());
+    loadStatus.setInnerText(messages.uploadPanelTextForLoading());
   }
   private void doneItemLoadHandler(Element item, String message, String databaseUUID){
     Element loadStatus = item.getElementsByTagName("span").getItem(0);

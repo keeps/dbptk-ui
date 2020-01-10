@@ -1,15 +1,16 @@
 package com.databasepreservation.common.server;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
-import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.utils.JsonUtils;
@@ -23,6 +24,7 @@ import com.databasepreservation.common.client.models.status.collection.Collectio
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.status.database.DatabaseStatus;
+import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
@@ -92,7 +94,7 @@ public class ConfigurationManager {
     try {
       final DatabaseStatus databaseStatus = getDatabaseStatus(databaseUUID);
       // At the moment there is only one collection per database
-      if(databaseStatus.getCollections().size() >= 1){
+      if (databaseStatus.getCollections().size() >= 1) {
         final String collectionId = databaseStatus.getCollections().get(0);
         final CollectionStatus collectionStatus = getCollectionStatus(databaseUUID, collectionId);
         collectionStatus.addDenormalization(denormalizationUUID);
@@ -119,15 +121,15 @@ public class ConfigurationManager {
     }
   }
 
-  public void addDenormalizationColumns(String databaseUUID, String tableUUID, ViewerColumn column, List<String> nestedId)
-    throws GenericException {
+  public void addDenormalizationColumns(String databaseUUID, String tableUUID, ViewerColumn column,
+    List<String> nestedId) throws GenericException {
     try {
       final DatabaseStatus databaseStatus = getDatabaseStatus(databaseUUID);
       if (databaseStatus.getCollections().size() >= 1) {
         final String collectionId = databaseStatus.getCollections().get(0);
         final CollectionStatus collectionStatus = getCollectionStatus(databaseUUID, collectionId);
         TableStatus table = collectionStatus.getTableStatus(tableUUID);
-//        table.getColumns().removeIf(c -> !c.getNestedColumns().isEmpty());
+        // table.getColumns().removeIf(c -> !c.getNestedColumns().isEmpty());
 
         int order = table.getLastColumnOrder();
         ColumnStatus columnStatus = StatusUtils.getColumnStatus(column, false, ++order);
@@ -278,6 +280,21 @@ public class ConfigurationManager {
           throw new GenericException("Error creating file to write the database information", e);
         }
       }
+    }
+  }
+
+  public void deleteDatabaseFolder(String databaseUUID) throws GenericException {
+    final Path databasesDirectoryPath = ViewerFactory.getViewerConfiguration().getDatabasesPath();
+    final Path databaseDirectoryPath = databasesDirectoryPath.resolve(databaseUUID);
+    try {
+      Files.walk(databaseDirectoryPath)
+          .sorted(Comparator.reverseOrder())
+          .map(Path::toFile)
+          .forEach(File::delete);
+      LOGGER.info("Database folder removed from system ({})", databaseDirectoryPath.toAbsolutePath());
+    } catch (IOException e) {
+      throw new GenericException("Could not delete the database folder for uuid: " + databaseUUID + " from the system",
+        e);
     }
   }
 

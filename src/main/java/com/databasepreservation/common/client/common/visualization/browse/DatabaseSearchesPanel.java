@@ -1,22 +1,25 @@
 package com.databasepreservation.common.client.common.visualization.browse;
 
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.models.structure.ViewerDatabase;
-import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.RightPanel;
+import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.lists.SavedSearchList;
 import com.databasepreservation.common.client.common.search.SavedSearch;
+import com.databasepreservation.common.client.common.utils.CommonClientUtils;
+import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
+import com.databasepreservation.common.client.index.filter.Filter;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
+import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
+
 import config.i18n.client.ClientMessages;
-import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
-import com.databasepreservation.common.client.index.filter.Filter;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -40,7 +43,10 @@ public class DatabaseSearchesPanel extends RightPanel {
   FlowPanel content;
 
   @UiField
-  Label title;
+  SimplePanel mainHeader;
+
+  @UiField
+  SimplePanel description;
 
   private DatabaseSearchesPanel(ViewerDatabase database) {
     this.database = database;
@@ -52,14 +58,15 @@ public class DatabaseSearchesPanel extends RightPanel {
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
     BreadcrumbManager.updateBreadcrumb(breadcrumb,
-          BreadcrumbManager.forDatabaseSavedSearches(database.getMetadata().getName(), database.getUuid()));
+      BreadcrumbManager.forDatabaseSavedSearches(database.getMetadata().getName(), database.getUuid()));
   }
 
   private void init() {
-    title.setText(messages.menusidebar_savedSearches());
+    mainHeader.setWidget(CommonClientUtils.getHeaderHTML(
+      FontAwesomeIconManager.getTag(FontAwesomeIconManager.SAVED_SEARCH), messages.menusidebar_savedSearches(), "h1"));
     savedSearchList = new SavedSearchList(database.getUuid(),
-      new Filter(new BasicSearchFilterParameter(ViewerConstants.SOLR_SEARCHES_DATABASE_UUID, database.getUuid())),
-      null, null, false, false);
+      new Filter(new BasicSearchFilterParameter(ViewerConstants.SOLR_SEARCHES_DATABASE_UUID, database.getUuid())), null,
+      null, false, false);
 
     savedSearchList.getSelectionModel().addSelectionChangeHandler(event -> {
       SavedSearch selected = savedSearchList.getSelectionModel().getSelectedObject();

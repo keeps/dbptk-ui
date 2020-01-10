@@ -3,10 +3,9 @@ package com.databasepreservation.common.client.common.visualization.browse;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.databasepreservation.common.client.ObserverManager;
-import com.databasepreservation.common.client.configuration.observer.CollectionStatusObserver;
 import org.roda.core.data.v2.user.User;
 
+import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.ContentPanel;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
@@ -18,6 +17,7 @@ import com.databasepreservation.common.client.common.utils.ApplicationType;
 import com.databasepreservation.common.client.common.utils.ContentPanelLoader;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.common.utils.RightPanelLoader;
+import com.databasepreservation.common.client.configuration.observer.CollectionStatusObserver;
 import com.databasepreservation.common.client.index.IsIndexed;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
@@ -195,7 +195,7 @@ public class DatabasePanel extends Composite implements CollectionStatusObserver
           }
         }
       } else {
-        menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.NEW_UPLOAD, messages.newUpload()),
+        menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.NEW_UPLOAD, messages.uploadPanelTextForTitle()),
           (Command) HistoryManager::gotoNewUpload);
         menu.addItem(
           FontAwesomeIconManager.loaded(FontAwesomeIconManager.DATABASES, messages.menusidebar_manageDatabases()),

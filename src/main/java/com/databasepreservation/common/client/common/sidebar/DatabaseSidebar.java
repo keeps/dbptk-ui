@@ -339,6 +339,11 @@ public class DatabaseSidebar extends Composite implements Sidebar, CollectionSta
     }
   }
 
+  @Override
+  public void reset(ViewerDatabase database, CollectionStatus status) {
+
+  }
+
   private SidebarItem createSidebarSubItemHeaderSafeHMTL(String headerText, String headerIcon) {
     return new SidebarItem(FontAwesomeIconManager.getTagSafeHtml(headerIcon, headerText)).setH5().setIndent0();
   }
@@ -362,6 +367,16 @@ public class DatabaseSidebar extends Composite implements Sidebar, CollectionSta
         list.get(entry.getKey()).setSelected(false);
       }
     }
+  }
+
+  @Override
+  public void selectFirst() {
+    // do nothing
+  }
+
+  @Override
+  public void updateSidebarItem(String key, boolean value) {
+    // do nothing
   }
 
   private void searchInit() {

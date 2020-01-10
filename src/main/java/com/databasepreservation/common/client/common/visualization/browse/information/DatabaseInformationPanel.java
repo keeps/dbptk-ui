@@ -3,22 +3,21 @@ package com.databasepreservation.common.client.common.visualization.browse.infor
 import java.util.HashMap;
 import java.util.Map;
 
-import com.databasepreservation.common.client.common.ContentPanel;
+import com.databasepreservation.common.client.common.RightPanel;
+import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
+import com.databasepreservation.common.client.common.fields.MetadataField;
+import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerSchema;
-import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
-import com.databasepreservation.common.client.common.RightPanel;
-import com.databasepreservation.common.client.common.fields.MetadataField;
-import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
+import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
+import com.databasepreservation.common.client.widgets.SwitchBtn;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.SimpleCheckBox;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -48,7 +47,7 @@ public class DatabaseInformationPanel extends RightPanel {
   private boolean advancedMode = false; // True means advanced attributes are on, false means advanced view is off
 
   @UiField
-  Label title;
+  FlowPanel header;
 
   @UiField
   FlowPanel metadataContent;
@@ -62,15 +61,6 @@ public class DatabaseInformationPanel extends RightPanel {
   @UiField
   SimplePanel cardTitle;
 
-  @UiField
-  SimpleCheckBox advancedSwitch;
-
-  @UiField
-  Label switchLabel;
-
-  @UiField
-  Label labelForSwitch;
-
   private DatabaseInformationPanel(ViewerDatabase database) {
     this.database = database;
     initWidget(uiBinder.createAndBindUi(this));
@@ -80,23 +70,28 @@ public class DatabaseInformationPanel extends RightPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forDatabaseInformation(database.getUuid(), database.getMetadata().getName()));
+    BreadcrumbManager.updateBreadcrumb(breadcrumb,
+      BreadcrumbManager.forDatabaseInformation(database.getUuid(), database.getMetadata().getName()));
   }
 
   private void init() {
-    labelForSwitch.addClickHandler(event -> {
-      advancedSwitch.setValue(!advancedSwitch.getValue(), true); // workaround for ie11
+    cardTitle.setWidget(CommonClientUtils.getCardTitle(messages.menusidebar_database()));
+
+    header
+      .add(CommonClientUtils.getHeaderHTML(FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE_INFORMATION),
+        messages.databaseInformationTextForTitle(), "h1"));
+
+    SwitchBtn switchTechInformation = new SwitchBtn(messages.schemaStructurePanelTextForAdvancedOption(), false);
+    switchTechInformation.setClickHandler(clickEvent -> {
+      switchTechInformation.getButton().setValue(!switchTechInformation.getButton().getValue(), true); // workaround for ie11
       advancedMode = !advancedMode;
       metadataContent.clear();
       initMetadataContent();
       dataContent.clear();
       initDataContent();
     });
+    header.add(switchTechInformation);
 
-    cardTitle.setWidget(CommonClientUtils.getCardTitle(messages.menusidebar_database()));
-
-    title.setText(messages.databaseInformationTextForTitle());
-    switchLabel.setText(messages.schemaStructurePanelTextForAdvancedOption());
     initMetadataContent();
     initDataContent();
   }
@@ -163,8 +158,7 @@ public class DatabaseInformationPanel extends RightPanel {
 
     final MetadataField instance = MetadataField.createInstance(label,
       messages.managePageTableHeaderTextForDatabaseStatus());
-    instance.setCSS("metadata-field", "metadata-information-element-label",
-      "metadata-information-element-value");
+    instance.setCSS("metadata-field", "metadata-information-element-label", "metadata-information-element-value");
 
     return instance;
   }

@@ -79,7 +79,7 @@ public class MetadataTriggers implements MetadataEditPanel {
 
   @Override
   public Column<ViewerTrigger, String> getDescriptionColumn() {
-    Column<ViewerTrigger, String> description = new Column<ViewerTrigger, String>(new EditableCell() {
+    Column<ViewerTrigger, String> description = new Column<ViewerTrigger, String>(new EditableCell(messages.metadataDoesNotContainDescription()) {
       @Override
       public void onBrowserEvent(Context context, Element parent, String value, NativeEvent event,
         ValueUpdater<String> valueUpdater) {

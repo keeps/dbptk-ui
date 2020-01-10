@@ -4,10 +4,9 @@
 
     <g:FlowPanel>
         <g:FlowPanel addStyleNames="structure-header">
-            <g:SimplePanel>
-                <g:Label ui:field="title" addStyleNames="h1"/>
-            </g:SimplePanel>
+            <g:SimplePanel addStyleNames="h1" ui:field="mainHeader"/>
         </g:FlowPanel>
-        <g:FlowPanel ui:field="content" />
+        <g:SimplePanel ui:field="description"/>
+        <g:FlowPanel ui:field="content" addStyleNames="database-list"/>
     </g:FlowPanel>
 </ui:UiBinder>

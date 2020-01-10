@@ -37,10 +37,10 @@ public class StatusUtils {
   }
 
   public static TableStatus getTableStatus(ViewerTable table) {
-    return getTableStatus(table, false);
+    return getTableStatus(table, true);
   }
 
-  public static TableStatus getTableStatus(ViewerTable table, boolean hide) {
+  public static TableStatus getTableStatus(ViewerTable table, boolean show) {
     TableStatus status = new TableStatus();
     status.setUuid(table.getUuid());
     status.setId(table.getId());
@@ -49,25 +49,25 @@ public class StatusUtils {
     status.setDescription(table.getDescription());
     status.setCustomDescription(table.getDescription());
     status.setColumns(getColumnsStatus(table.getColumns()));
-    status.setHide(hide);
+    status.setShow(show);
 
     return status;
   }
 
   public static List<ColumnStatus> getColumnsStatus(List<ViewerColumn> viewerColumns) {
-    return getColumnsStatus(viewerColumns, false);
+    return getColumnsStatus(viewerColumns, true);
   }
 
-  public static List<ColumnStatus> getColumnsStatus(List<ViewerColumn> viewerColumns, boolean hide) {
+  public static List<ColumnStatus> getColumnsStatus(List<ViewerColumn> viewerColumns, boolean show) {
     List<ColumnStatus> columnStatusList = new ArrayList<>();
     int order = 1;
     for (ViewerColumn viewerColumn : viewerColumns) {
-      columnStatusList.add(getColumnStatus(viewerColumn, hide, order++));
+      columnStatusList.add(getColumnStatus(viewerColumn, show, order++));
     }
     return columnStatusList;
   }
 
-  public static ColumnStatus getColumnStatus(ViewerColumn column, boolean hide, int order) {
+  public static ColumnStatus getColumnStatus(ViewerColumn column, boolean show, int order) {
     ColumnStatus status = new ColumnStatus();
     status.setId(column.getSolrName());
     status.setName(column.getDisplayName());
@@ -76,24 +76,24 @@ public class StatusUtils {
     status.setCustomDescription(column.getDescription());
     status.setNestedColumns(new ArrayList<>());
     status.setOrder(order);
-    status.setSearchStatus(getSearchStatus(hide));
-    status.setDetailsStatus(getDetailsStatus(hide));
+    status.setSearchStatus(getSearchStatus(show));
+    status.setDetailsStatus(getDetailsStatus(show));
 
     return status;
   }
 
-  public static DetailsStatus getDetailsStatus(boolean hide) {
+  public static DetailsStatus getDetailsStatus(boolean show) {
     DetailsStatus status = new DetailsStatus();
-    status.setHide(hide);
+    status.setShow(show);
     status.setTemplateStatus(getTemplateStatus());
 
     return status;
   }
 
-  public static SearchStatus getSearchStatus(boolean hide) {
+  public static SearchStatus getSearchStatus(boolean show) {
     SearchStatus status = new SearchStatus();
     status.setAdvanced(getAdvancedStatus());
-    status.setList(getListStatus(hide));
+    status.setList(getListStatus(show));
     status.setFacets(getFacetsStatus());
 
     return status;
@@ -103,9 +103,9 @@ public class StatusUtils {
     return new AdvancedStatus();
   }
 
-  public static ListStatus getListStatus(boolean hide) {
+  public static ListStatus getListStatus(boolean show) {
     ListStatus status = new ListStatus();
-    status.setHide(hide);
+    status.setShow(show);
     status.setTemplate(getTemplateStatus());
 
     return status;

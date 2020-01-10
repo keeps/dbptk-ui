@@ -361,14 +361,6 @@ public interface ClientMessages extends Messages {
 
   String schemaDescription();
 
-  String newUpload();
-
-  String uploadedSIARD();
-
-  String uploads();
-
-  String newUploadLabel();
-
   String usersAndPermissions();
 
   String SIARD();
@@ -514,6 +506,8 @@ public interface ClientMessages extends Messages {
 
   String basicTableHeaderTableOrColumn(@Select String value);
 
+  String basicTableHeaderOrder();
+
   /********************************************
    * Basic Actions
    ********************************************/
@@ -602,10 +596,6 @@ public interface ClientMessages extends Messages {
   String breadcrumbTextForWizardSendToProgressPanel();
 
   String breadcrumbTextForSIARDValidator();
-
-  String breadcrumbTextForDesktopSIARDBrowse();
-
-  String breadcrumbTextForDesktopDatabaseSavedSearches();
 
   String breadcrumbTextForSIARDIngesting();
 
@@ -1104,19 +1094,17 @@ public interface ClientMessages extends Messages {
   /********************************************
    * Upload SIARD
    ********************************************/
-  String uploadPanelTextForTabLoadFromServer();
+  String uploadPanelTextForTitle();
 
-  String uploadPanelTextForTabUploadSIARDFile();
+  String uploadPanelTextForDescription();
+
+  String uploadPanelTextForLoading();
 
   String uploadPanelTextForLabelGoToSIARDInfo();
 
   String uploadPanelTextForLabelDropHere();
 
-  String uploadPanelTextForLabelBrowseFiles();
-
-  String newUploadPanelTextForLabelUploadSIARD();
-
-  String newUploadPanelTextForUploadButton();
+  String uploadPanelTextForLabelBrowseFiles();;
 
   String uploadSIARDTextForDoneUpload();
 
@@ -1344,6 +1332,10 @@ public interface ClientMessages extends Messages {
   /********************************************
    * Batch Jobs
    *******************************************/
+  String batchJobsTextForPageTitle();
+
+  String batchJobsTextForPageDescription();
+
   String batchJobsTextForJobId();
 
   String batchJobsTextForDatabase();
@@ -1373,11 +1365,13 @@ public interface ClientMessages extends Messages {
 
   String tableManagementPageTableHeaderTextForShow();
 
-  String tableManagementPageTableHeaderTextForOriginalTableName();
-
   String tableManagementPageTableHeaderTextForLabel();
 
   String tableManagementPageTableHeaderTextForDescription();
+
+  String tableManagementPageDialogSelectionError();
+
+  String tableManagementPageDialogInputError();
 
   /********************************************
    * Column Management Panel
@@ -1388,6 +1382,17 @@ public interface ClientMessages extends Messages {
 
   String columnManagementPageTableTextForDescription();
 
+  String columnManagementPageDialogErrorDescription();
+
+  String columnManagementPageTextForArrowUp();
+
+  String columnManagementPageTextForArrowDown();
+
+  String columnManagementPageTooltipForTable();
+
+  String columnManagementPageTooltipForDetails();
+
+  String columnManagementPageTooltipForAdvancedSearch();
 
   /********************************************
    * Sidebar

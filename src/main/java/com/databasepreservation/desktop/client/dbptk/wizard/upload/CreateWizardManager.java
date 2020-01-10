@@ -17,6 +17,7 @@ import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.services.ModulesService;
 import com.databasepreservation.common.client.services.SIARDService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
+import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.widgets.Toast;
 import com.databasepreservation.desktop.client.dbptk.wizard.WizardManager;

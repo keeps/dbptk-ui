@@ -67,7 +67,7 @@ public class MetadataConstraints implements MetadataEditPanel {
 
   @Override
   public Column<ViewerCheckConstraint, String> getDescriptionColumn() {
-    Column<ViewerCheckConstraint, String> description = new Column<ViewerCheckConstraint, String>(new EditableCell() {
+    Column<ViewerCheckConstraint, String> description = new Column<ViewerCheckConstraint, String>(new EditableCell(messages.metadataDoesNotContainDescription()) {
       @Override
       public void onBrowserEvent(Context context, Element parent, String value, NativeEvent event,
         ValueUpdater<String> valueUpdater) {

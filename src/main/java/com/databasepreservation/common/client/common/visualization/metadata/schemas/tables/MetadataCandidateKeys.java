@@ -75,7 +75,7 @@ public class MetadataCandidateKeys implements MetadataEditPanel {
 
   @Override
   public Column<ViewerCandidateKey, String> getDescriptionColumn() {
-    Column<ViewerCandidateKey, String> description = new Column<ViewerCandidateKey, String>(new EditableCell() {
+    Column<ViewerCandidateKey, String> description = new Column<ViewerCandidateKey, String>(new EditableCell(messages.metadataDoesNotContainDescription()) {
       @Override
       public void onBrowserEvent(Context context, Element parent, String value, NativeEvent event,
         ValueUpdater<String> valueUpdater) {

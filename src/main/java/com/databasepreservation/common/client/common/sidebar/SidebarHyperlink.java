@@ -1,5 +1,6 @@
 package com.databasepreservation.common.client.common.sidebar;
 
+import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -14,6 +15,7 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class SidebarHyperlink extends SidebarItem {
   private final static String CSS_ITEM_SELECTED = "sidebarItem-selected";
+  private final static String CSS_CHANGED = "sidebarItem-changed";
   interface SidebarHyperlinkUiBinder extends UiBinder<Widget, SidebarHyperlink> {
   }
 
@@ -89,6 +91,11 @@ public class SidebarHyperlink extends SidebarItem {
   @Override
   public String getText() {
     return label.getText();
+  }
+
+  public void setChanged(String icon) {
+    final SafeHtml safeHtml = FontAwesomeIconManager.getTagSafeHtml(icon, getText());
+    setTextBySafeHTML(safeHtml);
   }
 
   public void setSelected(boolean value) {

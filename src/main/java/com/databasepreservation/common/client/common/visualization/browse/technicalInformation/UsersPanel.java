@@ -6,14 +6,18 @@ import java.util.Map;
 
 import com.databasepreservation.common.client.common.RightPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
+import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.lists.widgets.BasicTablePanel;
+import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerPrivilegeStructure;
 import com.databasepreservation.common.client.models.structure.ViewerRoleStructure;
 import com.databasepreservation.common.client.models.structure.ViewerUserStructure;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
+import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -32,9 +36,7 @@ public class UsersPanel extends RightPanel {
   private static Map<String, UsersPanel> instances = new HashMap<>();
 
   public static UsersPanel getInstance(ViewerDatabase database) {
-    String code = database.getUuid();
-    instances.computeIfAbsent(code, k -> new UsersPanel(database));
-    return instances.get(code);
+    return instances.computeIfAbsent(database.getUuid(), k -> new UsersPanel(database));
   }
 
   interface DatabaseUsersPanelUiBinder extends UiBinder<Widget, UsersPanel> {
@@ -45,10 +47,10 @@ public class UsersPanel extends RightPanel {
   private ViewerDatabase database;
 
   @UiField
-  FlowPanel contentItems;
+  FlowPanel content;
 
   @UiField
-  Label title;
+  FlowPanel header;
 
   private UsersPanel(ViewerDatabase database) {
     initWidget(uiBinder.createAndBindUi(this));
@@ -58,7 +60,12 @@ public class UsersPanel extends RightPanel {
   }
 
   private void init() {
-    title.setText(messages.menusidebar_usersRoles());
+    header.add(CommonClientUtils.getHeaderHTML(FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE_USERS),
+      messages.menusidebar_usersRoles(), "h1"));
+
+    MetadataField instance = MetadataField.createInstance(messages.includingStoredProceduresAndFunctions());
+    instance.setCSS("table-row-description", "font-size-description");
+    content.add(instance);
 
     ViewerMetadata metadata = database.getMetadata();
 
@@ -75,9 +82,9 @@ public class UsersPanel extends RightPanel {
     privileges.add(getBasicTablePanelForPrivileges(metadata));
 
 
-    contentItems.add(users);
-    contentItems.add(roles);
-    contentItems.add(privileges);
+    content.add(users);
+    content.add(roles);
+    content.add(privileges);
   }
 
   @Override
@@ -92,11 +99,10 @@ public class UsersPanel extends RightPanel {
     Label header = new Label(messages.titleUsers());
     header.addStyleName("card-header");
 
-    HTMLPanel info = new HTMLPanel("");
     if (users.isEmpty()) {
       return new BasicTablePanel<>(header, messages.databaseDoesNotContainUsers());
     } else {
-      return new BasicTablePanel<ViewerUserStructure>(header, info, users.iterator(),
+      return new BasicTablePanel<ViewerUserStructure>(header, SafeHtmlUtils.EMPTY_SAFE_HTML, users.iterator(),
 
         new BasicTablePanel.ColumnInfo<>(messages.name(), 15, new TextColumn<ViewerUserStructure>() {
           @Override

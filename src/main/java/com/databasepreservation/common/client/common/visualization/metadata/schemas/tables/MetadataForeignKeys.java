@@ -106,7 +106,7 @@ public class MetadataForeignKeys implements MetadataEditPanel {
 
   @Override
   public Column<ViewerForeignKey, String> getDescriptionColumn() {
-    Column<ViewerForeignKey, String> description = new Column<ViewerForeignKey, String>(new EditableCell() {
+    Column<ViewerForeignKey, String> description = new Column<ViewerForeignKey, String>(new EditableCell(messages.metadataDoesNotContainDescription()) {
       @Override
       public void onBrowserEvent(Context context, Element parent, String value, NativeEvent event,
         ValueUpdater<String> valueUpdater) {

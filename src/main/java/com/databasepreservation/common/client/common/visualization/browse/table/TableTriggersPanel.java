@@ -64,9 +64,7 @@ public class TableTriggersPanel extends Composite {
     Label header = new Label(messages.menusidebar_triggers());
     header.addStyleName("h5");
 
-    HTMLPanel info = new HTMLPanel("");
-
-    return new BasicTablePanel<ViewerTrigger>(header, info, table.getTriggers().iterator(),
+    return new BasicTablePanel<ViewerTrigger>(header, SafeHtmlUtils.EMPTY_SAFE_HTML, table.getTriggers().iterator(),
 
       new BasicTablePanel.ColumnInfo<>(messages.name(), 15, new TextColumn<ViewerTrigger>() {
         @Override

@@ -1567,7 +1567,7 @@ html, body, .desktop-main {
     margin-bottom: 10px;
 }
 
-.activity-log-panel .navigation-panel-buttons {
+.navigation-panel-buttons {
     display: flex;
     flex-direction: row-reverse;
     width: 100%;
@@ -1813,7 +1813,7 @@ html, body, .desktop-main {
 }
 
 .progress-report-panel {
-    margin-top: 44px;
+    margin-top: 25px;
 }
 
 /***********************************************
@@ -1946,6 +1946,7 @@ html, body, .desktop-main {
     border-color: #089de3;
     border-style: solid;
     border-width: thin;
+    margin-left: unset;
 }
 
 .my-asyncdatagrid-display-scroll-wrapper input[type="checkbox"]:checked {
@@ -2196,16 +2197,13 @@ html, body, .desktop-main {
 }
 
 /*page*/
-.browseContentPreviewPanel.validation {
-    padding-left: 3rem;
-    padding-right: 3rem;
-    padding-bottom: 2rem;
+.validation {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
 }
 
-.browseContentPreviewPanel.validation .validator {
+.validation .validator {
     height: 100%;
     position: relative;
     display: flex;
@@ -2918,4 +2916,22 @@ rgba(0, 0, 0, .125);
 .reference-panel .icon {
     font-size: 15px;
     margin-right: 10px;
+}
+
+.form-textarea {
+	resize: vertical;
+	min-height: 27px;
+	word-break: break-word;
+}
+
+.text-box-invalid {
+    background-color: #eebcba;
+    border: none !important;
+    border-left: 2px solid #d9534f !important;
+}
+
+.form-textbox:invalid {
+    background-color: #eebcba;
+    border: none;
+    border-left: 2px solid #d9534f;
 }

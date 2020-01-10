@@ -1,9 +1,7 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
-    <g:FlowPanel addStyleNames="activity-log-panel" ui:field="content">
-        <g:FlowPanel addStyleNames="structure-header">
-            <g:SimplePanel addStyleNames="h1" ui:field="mainHeader"/>
-        </g:FlowPanel>
+    <g:FlowPanel addStyleNames="col_12" ui:field="content">
+        <g:FlowPanel addStyleNames="structure-header" ui:field="header" />
     </g:FlowPanel>
 </ui:UiBinder>

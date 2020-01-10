@@ -1,22 +1,30 @@
 package com.databasepreservation.common.client.common.visualization.browse;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.common.LoadingDiv;
+import com.databasepreservation.common.client.common.RightPanel;
+import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
+import com.databasepreservation.common.client.common.lists.TableRowList;
+import com.databasepreservation.common.client.common.utils.CommonClientUtils;
+import com.databasepreservation.common.client.index.IndexResult;
+import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
+import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.models.structure.ViewerSchema;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
-import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
-import com.databasepreservation.common.client.common.LoadingDiv;
-import com.databasepreservation.common.client.common.RightPanel;
-import com.databasepreservation.common.client.common.lists.TableRowList;
-import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
+import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.databasepreservation.common.client.widgets.Alert;
 import com.databasepreservation.common.client.widgets.wcag.AccessibleFocusPanel;
-import com.databasepreservation.common.client.index.IndexResult;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -25,18 +33,11 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import config.i18n.client.ClientMessages;
-import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
-import com.databasepreservation.common.client.index.filter.Filter;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import config.i18n.client.ClientMessages;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -56,13 +57,13 @@ public class DatabaseSearchPanel extends RightPanel {
   private static DatabaseSearchPanelUiBinder uiBinder = GWT.create(DatabaseSearchPanelUiBinder.class);
 
   @UiField
-  Label title;
+  SimplePanel mainHeader;
 
   @UiField
   FlowPanel content;
 
   @UiField
-  HTML description;
+  SimplePanel description;
 
   @UiField
   TextBox searchInputBox;
@@ -92,7 +93,8 @@ public class DatabaseSearchPanel extends RightPanel {
     this.status = status;
 
     initWidget(uiBinder.createAndBindUi(this));
-    title.setText(messages.searchAllRecords());
+    mainHeader.setWidget(CommonClientUtils.getHeaderHTML(
+      FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE_SEARCH), messages.searchAllRecords(), "h1"));
 
     Callback<TableSearchPanelContainer, Void> searchCompletedCallback = new Callback<TableSearchPanelContainer, Void>() {
       @Override

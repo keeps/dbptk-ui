@@ -2,16 +2,7 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
 >
     <g:FlowPanel>
-        <g:FlowPanel addStyleNames="structure-header">
-            <g:SimplePanel>
-                <g:Label ui:field="title" addStyleNames="h1" />
-            </g:SimplePanel>
-            <g:FlowPanel addStyleNames="advancedOptionsPanel">
-                <g:Label ui:field="switchLabel" addStyleNames="switch-label"/>
-                <g:SimpleCheckBox ui:field="advancedSwitch" addStyleNames="switch"/>
-                <g:Label ui:field="labelForSwitch" addStyleNames="label-for-switch"/>
-            </g:FlowPanel>
-        </g:FlowPanel>
+        <g:FlowPanel addStyleNames="structure-header" ui:field="header" />
 
         <g:FlowPanel addStyleNames="card">
             <g:SimplePanel ui:field="cardTitle" addStyleNames="card-header" />

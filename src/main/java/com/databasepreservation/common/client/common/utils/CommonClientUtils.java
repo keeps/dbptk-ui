@@ -155,6 +155,17 @@ public class CommonClientUtils {
     return getHeader(iconTag, table.getNameWithoutPrefix(), hClass);
   }
 
+  public static HTML getHeaderHTML(String iconTag, String title, String styleName) {
+    SafeHtmlBuilder safeHtmlBuilder = new SafeHtmlBuilder();
+    safeHtmlBuilder.append(SafeHtmlUtils.fromSafeConstant(iconTag)).appendEscaped(" ")
+        .append(SafeHtmlUtils.fromString(title));
+
+    HTML html = new HTML(safeHtmlBuilder.toSafeHtml());
+    html.addStyleName(styleName);
+
+    return html;
+  }
+
   public static FlowPanel getHeader(String iconTag, String title, String hClass) {
     FlowPanel panel = new FlowPanel();
 

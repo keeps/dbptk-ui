@@ -39,10 +39,12 @@ public class MultipleSelectionTablePanel<C> extends Composite {
   private static MultipleSelectionTablePanelUiBinder uiBinder = GWT.create(MultipleSelectionTablePanelUiBinder.class);
 
   private final MultiSelectionModel<C> selectionModel;
+	private ListDataProvider<C> dataProvider = new ListDataProvider<>();
   private CellTable<C> display;
   private ScrollPanel displayScroll;
   private SimplePanel displayScrollWrapper;
   private String height;
+  private CellTable.Resources resources = null;
 
   public static class ColumnInfo<C> {
     private Column<C, ?> column;
@@ -93,6 +95,16 @@ public class MultipleSelectionTablePanel<C> extends Composite {
 
   }
 
+  public MultipleSelectionTablePanel(CellTable.Resources resources) {
+    initWidget(uiBinder.createAndBindUi(this));
+
+    table.setVisible(false);
+    selectionModel = new MultiSelectionModel<>();
+    this.height = "";
+    this.resources = resources;
+
+  }
+
   @Override
   public void setHeight(String height) {
     this.height = height;
@@ -126,7 +138,6 @@ public class MultipleSelectionTablePanel<C> extends Composite {
 
     display.addCellPreviewHandler(event -> {
       if (BrowserEvents.CLICK.equals(event.getNativeEvent().getType())) {
-        GWT.log("i: " + event.getColumn());
         if (whitelistedColumns.isEmpty() || whitelistedColumns.contains(event.getColumn()+1)) {
           handleRowSelection(event);
         }
@@ -193,8 +204,12 @@ public class MultipleSelectionTablePanel<C> extends Composite {
   @SafeVarargs
   private final CellTable<C> internalCreateTable(Iterator<C> rowItems, ColumnInfo<C>... columns) {
     // create table
-    CellTable<C> cellTable = new CellTable<>(Integer.MAX_VALUE,
-      (MyCellTableResources) GWT.create(MyCellTableResources.class));
+    CellTable<C> cellTable;
+    if (resources != null) {
+      cellTable = new CellTable<>(Integer.MAX_VALUE, resources);
+    } else {
+      cellTable = new CellTable<>(Integer.MAX_VALUE, (MyCellTableResources) GWT.create(MyCellTableResources.class));
+    }
     cellTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
     cellTable.setLoadingIndicator(new HTML(SafeHtmlUtils.fromSafeConstant(
       "<div class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>")));
@@ -211,7 +226,6 @@ public class MultipleSelectionTablePanel<C> extends Composite {
     }
 
     // fetch rows
-    ListDataProvider<C> dataProvider = new ListDataProvider<>();
     dataProvider.addDataDisplay(cellTable);
     List<C> list = dataProvider.getList();
     while (rowItems.hasNext()) {
@@ -222,7 +236,11 @@ public class MultipleSelectionTablePanel<C> extends Composite {
     return cellTable;
   }
 
-  public MultiSelectionModel<C> getSelectionModel() {
+	public ListDataProvider<C> getDataProvider() {
+		return dataProvider;
+	}
+
+	public MultiSelectionModel<C> getSelectionModel() {
     return selectionModel;
   }
 }

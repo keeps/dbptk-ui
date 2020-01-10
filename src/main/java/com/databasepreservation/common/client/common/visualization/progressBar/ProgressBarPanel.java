@@ -3,9 +3,12 @@ package com.databasepreservation.common.client.common.visualization.progressBar;
 import java.util.HashMap;
 import java.util.function.Consumer;
 
-import com.databasepreservation.common.client.models.ProgressData;
 import com.databasepreservation.common.client.common.Progressbar;
+import com.databasepreservation.common.client.common.fields.MetadataField;
+import com.databasepreservation.common.client.common.utils.CommonClientUtils;
+import com.databasepreservation.common.client.models.ProgressData;
 import com.databasepreservation.common.client.services.DatabaseService;
+import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -14,6 +17,7 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
@@ -44,7 +48,10 @@ public class ProgressBarPanel extends Composite {
   Progressbar progressBar;
 
   @UiField
-  Label title, subTitle;
+  SimplePanel header;
+
+  @UiField
+  SimplePanel description;
 
   public static ProgressBarPanel getInstance(String uuid) {
     if (instances.get(uuid) == null) {
@@ -74,11 +81,19 @@ public class ProgressBarPanel extends Composite {
   }
 
   public void setTitleText(String text) {
-    title.setText(text);
+    header.setWidget(
+      CommonClientUtils.getHeaderHTML(FontAwesomeIconManager.getTag(FontAwesomeIconManager.BOX_OPEN), text, "h1"));
+  }
+
+  public void setTitleText(String iconTag, String text) {
+    header.setWidget(CommonClientUtils.getHeaderHTML(iconTag, text, "h1"));
   }
 
   public void setSubtitleText(String text) {
-    subTitle.setText(text);
+    MetadataField instance = MetadataField.createInstance(text);
+    instance.setCSS("table-row-description", "font-size-description");
+
+    description.setWidget(instance);
   }
 
   @Override

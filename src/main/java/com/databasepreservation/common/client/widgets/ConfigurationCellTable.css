@@ -1,0 +1,101 @@
+/* Incremental changes from CellTable.css */
+
+.cellTableWidget {
+    border-collapse: initial;
+}
+
+.cellTableHeader {
+    border-bottom: 1px solid rgba(167, 169, 172, 0.5);
+}
+
+.cellTableHeader,.cellTableFooter {
+    white-space: nowrap;
+    font-family: 'Ubuntu', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 500;
+    text-shadow: none !important;
+}
+
+.cellTableFooter {
+    border-top: 4px solid #eee;
+}
+
+.cellTableWidget {
+    border-bottom: 1px solid #eee;
+}
+
+.cellTableKeyboardSelectedRow {
+    background: none;
+}
+
+.cellTableKeyboardSelectedCell {
+    border: none;
+}
+
+.cellTableHoveredRow {
+    cursor: pointer;
+}
+
+.cellTableCell {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 1.3rem;
+    vertical-align: top;
+}
+
+.cellTableOddRow {
+    background: #fff;
+}
+
+.cellTableOddRowCell {
+    border-color: #fff;
+}
+
+.cellTableHoveredRow {
+    background: #fff;
+}
+
+.cellTableHoveredRowCell {
+    border-color: #fff;
+}
+
+.cellTableSelectedRow {
+    background: #fff;
+    color: #222222;
+}
+
+.cellTableSelectedRowCell {
+    border-color: #fff;
+}
+
+@external .cellTableFadeOut;
+
+.cellTableFadeOut {
+    white-space: nowrap;
+    position: relative;
+    overflow: hidden;
+}
+
+.cellTableFadeOut:after {
+    content: "";
+    display: block;
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 2em;
+    height: 100%;
+    background: -webkit-linear-gradient(right,#fff 30%,rgba(255,255,255,0) 100%);
+    background: linear-gradient(-90deg,#fff 30%,rgba(255,255,255,0) 100%);
+}
+
+.cellTableOddRowCell.cellTableFadeOut:after {
+    background: linear-gradient(-90deg,#f8f8f8 30%,rgba(255,255,255,0) 100%);
+}
+
+.cellTableHoveredRowCell.cellTableFadeOut:after {
+    background: linear-gradient(-90deg,#eee 30%,rgba(255,255,255,0) 100%);
+}
+
+.cellTableSelectedRowCell.cellTableFadeOut:after {
+    background: linear-gradient(-90deg,#DCDCDC 30%,rgba(255,255,255,0) 100%);
+}

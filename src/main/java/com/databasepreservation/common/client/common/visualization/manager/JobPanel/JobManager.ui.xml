@@ -2,11 +2,8 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:wcag="urn:import:com.databasepreservation.common.client.widgets.wcag"
              xmlns:lists="urn:import:com.databasepreservation.common.client.common.lists">
-
-    <ui:with field='messages' type='config.i18n.client.ClientMessages'/>
-    <g:FlowPanel addStyleNames="activity-log-panel">
-        <g:FlowPanel addStyleNames="structure-header">
-            <g:SimplePanel addStyleNames="h1" ui:field="mainHeader"/>
+    <g:FlowPanel addStyleNames="col_12">
+        <g:FlowPanel addStyleNames="structure-header" ui:field="header">
         </g:FlowPanel>
         <g:SimplePanel ui:field="description"/>
         <g:FlowPanel>

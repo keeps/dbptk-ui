@@ -14,23 +14,23 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
-public class EditableCell extends TextInputCell {
+public class RequiredEditableCell extends EditableCell {
   private static Template template;
   private String placeholder;
 
   interface Template extends SafeHtmlTemplates {
     // {0}, {1} relate to value, placeholder
-    @Template("<input type=\"text\" value=\"{0}\" tabindex=\"-1\" placeholder=\"{1}\" class=\"gwt-TextBox form-textbox\"></input>")
+    @Template("<input type=\"text\" value=\"{0}\" tabindex=\"-1\" placeholder=\"{1}\" class=\"gwt-TextBox form-textbox\" required></input>")
     SafeHtml input(String value, String placeholder);
   }
 
-  public EditableCell() {
-    EditableCell.template = GWT.create(Template.class);
+  public RequiredEditableCell() {
+    RequiredEditableCell.template = GWT.create(Template.class);
     this.placeholder = "";
   }
 
-  public EditableCell(String placeholder) {
-    EditableCell.template = GWT.create(Template.class);
+  public RequiredEditableCell(String placeholder) {
+    RequiredEditableCell.template = GWT.create(Template.class);
     this.placeholder = placeholder;
   }
 
@@ -41,26 +41,5 @@ public class EditableCell extends TextInputCell {
     } else {
       sb.append(template.input(value, placeholder));
     }
-  }
-
-  @Override
-  public void onBrowserEvent(Context context, Element parent, String value, NativeEvent event,
-    ValueUpdater<String> valueUpdater) {
-    if (value == null) {
-      value = "";
-    }
-
-    InputElement input = getInputElement(parent);
-    Element target = event.getEventTarget().cast();
-    if (!input.isOrHasChild(target)) {
-      return;
-    }
-
-    String eventType = event.getType();
-    if (BrowserEvents.FOCUS.equals(eventType)) {
-      input.select();
-    }
-
-    super.onBrowserEvent(context, parent, value, event, valueUpdater);
   }
 }

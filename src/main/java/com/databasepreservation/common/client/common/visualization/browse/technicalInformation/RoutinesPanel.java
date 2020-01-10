@@ -11,12 +11,14 @@ import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.fields.GenericField;
 import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.lists.widgets.BasicTablePanel;
+import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerRoutine;
 import com.databasepreservation.common.client.models.structure.ViewerRoutineParameter;
 import com.databasepreservation.common.client.models.structure.ViewerSchema;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
+import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.databasepreservation.common.client.widgets.Alert;
 import com.google.gwt.core.client.GWT;
@@ -37,24 +39,24 @@ import config.i18n.client.ClientMessages;
  */
 public class RoutinesPanel extends RightPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
-  private static Map<String, RoutinesPanel> instances = new HashMap<>();
-
-  public static RoutinesPanel getInstance(ViewerDatabase database) {
-    return instances.computeIfAbsent(database.getUuid(), k -> new RoutinesPanel(database));
-  }
 
   interface SchemaRoutinesUiBinder extends UiBinder<Widget, RoutinesPanel> {
   }
 
   private static SchemaRoutinesUiBinder uiBinder = GWT.create(SchemaRoutinesUiBinder.class);
 
+  @UiField
+  FlowPanel header;
+
+  @UiField
+  FlowPanel content;
+
+  private static Map<String, RoutinesPanel> instances = new HashMap<>();
   private ViewerDatabase database;
 
-  @UiField
-  FlowPanel contentItems;
-
-  @UiField
-  Label title;
+  public static RoutinesPanel getInstance(ViewerDatabase database) {
+    return instances.computeIfAbsent(database.getUuid(), k -> new RoutinesPanel(database));
+  }
 
   private RoutinesPanel(ViewerDatabase database) {
     this.database = database;
@@ -64,19 +66,24 @@ public class RoutinesPanel extends RightPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forSchemaRoutines(database.getUuid(), database.getMetadata().getName()));
+    BreadcrumbManager.updateBreadcrumb(breadcrumb,
+      BreadcrumbManager.forSchemaRoutines(database.getUuid(), database.getMetadata().getName()));
   }
 
   private void init() {
+    header.add(CommonClientUtils.getHeaderHTML(FontAwesomeIconManager.getTag(FontAwesomeIconManager.SCHEMA_ROUTINES),
+      messages.menusidebar_routines(), "h1"));
+
+    MetadataField instance = MetadataField.createInstance(messages.includingStoredProceduresAndFunctions());
+    instance.setCSS("table-row-description", "font-size-description");
+    content.add(instance);
+
     if (database.getMetadata().getSchemas().size() == 1) {
-      contentItems.add(buildRoutinesForSingleSchema(database.getMetadata().getSchemas().get(0)));
+      content.add(buildRoutinesForSingleSchema(database.getMetadata().getSchemas().get(0)));
     } else {
       buildRoutinesForMultipleSchemas();
     }
-
-    title.setText(messages.menusidebar_routines());
-
-    JavascriptUtils.runHighlighter(contentItems.getElement());
+    JavascriptUtils.runHighlighter(content.getElement());
   }
 
   private FlowPanel buildRoutinesForSingleSchema(ViewerSchema schema) {
@@ -108,7 +115,7 @@ public class RoutinesPanel extends RightPanel {
 
     }
     tabPanel.selectTab(0);
-    contentItems.add(tabPanel);
+    content.add(tabPanel);
   }
 
   private FlowPanel getRoutineDescription(ViewerRoutine viewerRoutine) {
@@ -116,38 +123,34 @@ public class RoutinesPanel extends RightPanel {
 
     if (ViewerStringUtils.isNotBlank(viewerRoutine.getName())) {
       MetadataField schemaName = MetadataField.createInstance(messages.name(), viewerRoutine.getName());
-      schemaName.setCSS("metadata-field", "metadata-information-element-label",
-              "metadata-information-element-value");
+      schemaName.setCSS("metadata-field", "metadata-information-element-label", "metadata-information-element-value");
       panel.add(schemaName);
     }
     if (ViewerStringUtils.isNotBlank(viewerRoutine.getDescription())) {
       MetadataField description = MetadataField.createInstance(messages.description(), viewerRoutine.getDescription());
-      description.setCSS("metadata-field", "metadata-information-element-label",
-              "metadata-information-element-value");
+      description.setCSS("metadata-field", "metadata-information-element-label", "metadata-information-element-value");
       panel.add(description);
     }
     if (ViewerStringUtils.isNotBlank(viewerRoutine.getSource())) {
       MetadataField sourceCode = MetadataField.createInstance(messages.routine_sourceCode(), viewerRoutine.getSource());
-      sourceCode.setCSS("metadata-field", "metadata-information-element-label",
-              "metadata-information-element-value");
+      sourceCode.setCSS("metadata-field", "metadata-information-element-label", "metadata-information-element-value");
       panel.add(sourceCode);
     }
     if (ViewerStringUtils.isNotBlank(viewerRoutine.getBody())) {
       GenericField field = GenericField.createInstance(messages.routine_body(), new HTMLPanel(SafeHtmlUtils
-              .fromSafeConstant("<pre><code>" + SafeHtmlUtils.htmlEscape(viewerRoutine.getBody()) + "</code></pre>")));
+        .fromSafeConstant("<pre><code>" + SafeHtmlUtils.htmlEscape(viewerRoutine.getBody()) + "</code></pre>")));
       field.setCSSMetadata("metadata-field", "metadata-information-element-label");
       panel.add(field);
     }
     if (ViewerStringUtils.isNotBlank(viewerRoutine.getCharacteristic())) {
-      MetadataField field = MetadataField.createInstance(messages.routine_characteristic(), viewerRoutine.getCharacteristic());
-      field.setCSS("metadata-field", "metadata-information-element-label",
-              "metadata-information-element-value");
+      MetadataField field = MetadataField.createInstance(messages.routine_characteristic(),
+        viewerRoutine.getCharacteristic());
+      field.setCSS("metadata-field", "metadata-information-element-label", "metadata-information-element-value");
       panel.add(field);
     }
     if (ViewerStringUtils.isNotBlank(viewerRoutine.getReturnType())) {
       MetadataField field = MetadataField.createInstance(messages.routine_returnType(), viewerRoutine.getReturnType());
-      field.setCSS("metadata-field", "metadata-information-element-label",
-              "metadata-information-element-value");
+      field.setCSS("metadata-field", "metadata-information-element-label", "metadata-information-element-value");
       panel.add(field);
     }
 

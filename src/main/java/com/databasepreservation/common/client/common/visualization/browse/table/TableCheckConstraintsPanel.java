@@ -8,6 +8,7 @@ import com.databasepreservation.common.client.models.structure.ViewerCheckConstr
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.TextColumn;
@@ -60,9 +61,7 @@ public class TableCheckConstraintsPanel extends Composite {
     Label header = new Label(messages.menusidebar_checkConstraints());
     header.addStyleName("h5");
 
-    HTMLPanel info = new HTMLPanel("");
-
-    return new BasicTablePanel<ViewerCheckConstraint>(header, info, table.getCheckConstraints().iterator(),
+    return new BasicTablePanel<ViewerCheckConstraint>(header, SafeHtmlUtils.EMPTY_SAFE_HTML, table.getCheckConstraints().iterator(),
 
       new BasicTablePanel.ColumnInfo<>(messages.name(), 15, new TextColumn<ViewerCheckConstraint>() {
         @Override

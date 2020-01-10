@@ -62,7 +62,7 @@ public class MetadataRoles implements MetadataEditPanel {
 
   @Override
   public Column<ViewerRoleStructure, String> getDescriptionColumn() {
-    Column<ViewerRoleStructure, String> description = new Column<ViewerRoleStructure, String>(new EditableCell() {
+    Column<ViewerRoleStructure, String> description = new Column<ViewerRoleStructure, String>(new EditableCell(messages.metadataDoesNotContainDescription()) {
       @Override
       public void onBrowserEvent(Context context, Element parent, String value, NativeEvent event,
         ValueUpdater<String> valueUpdater) {

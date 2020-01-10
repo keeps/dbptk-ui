@@ -255,7 +255,7 @@ public class MainPanel extends Composite {
           new RightPanelLoader() {
             @Override
             public RightPanel load(ViewerDatabase database, CollectionStatus status) {
-              return ColumnsManagementPanel.getInstance(database, status);
+              return ColumnsManagementPanel.getInstance(status, database, null, sidebar);
             }
           });
       } else if (currentHistoryPath.size() == 3) {
@@ -263,7 +263,7 @@ public class MainPanel extends Composite {
         setContent(databaseUUID, HistoryManager.ROUTE_COLUMNS_MANAGEMENT, tableUUID, sidebar, new RightPanelLoader() {
           @Override
           public RightPanel load(ViewerDatabase database, CollectionStatus status) {
-            return ColumnsManagementPanel.getInstance(status, database, tableUUID);
+            return ColumnsManagementPanel.getInstance(status, database, tableUUID, sidebar);
           }
         });
       }

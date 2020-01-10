@@ -2,6 +2,7 @@ package com.databasepreservation.common.client.models.status.collection;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -11,7 +12,7 @@ import java.util.List;
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 @JsonPropertyOrder({"id", "name", "customName", "description", "customDescription", "nestedColumn", "order", "search", "details"})
-public class ColumnStatus implements Serializable {
+public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
 
   private String id;
   private String name;
@@ -100,9 +101,13 @@ public class ColumnStatus implements Serializable {
     this.detailsStatus = detailsStatus;
   }
 
-  public void updateHidingAttribute(boolean value) {
-    this.getSearchStatus().getList().setHide(value);
+  public void updateTableShowValue(boolean value) {
+    this.getSearchStatus().getList().setShow(value);
   }
+
+  public void updateDetailsShowValue(boolean value) { this.getDetailsStatus().setShow(value); }
+
+  public void updateAdvancedSearchShowValue(boolean value) { this.getSearchStatus().getAdvanced().setFixed(value); }
 
   @Override
   public String toString() {
@@ -118,4 +123,19 @@ public class ColumnStatus implements Serializable {
         ", detailsStatus=" + detailsStatus +
         '}';
   }
+
+	@Override
+	public int hashCode() {
+		return super.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return super.equals(obj);
+	}
+
+	@Override
+	public int compareTo(@NotNull ColumnStatus o) {
+		return (this.getOrder() - o.getOrder());
+	}
 }

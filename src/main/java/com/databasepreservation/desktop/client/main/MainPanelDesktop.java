@@ -232,7 +232,7 @@ public class MainPanelDesktop extends Composite {
         setContent(databaseUUID, currentHistoryPath.get(0), tableUUID, new RightPanelLoader() {
           @Override
           public RightPanel load(ViewerDatabase database, CollectionStatus status) {
-            return TablePanel.getInstance(database, tableUUID, currentHistoryPath.get(0));
+            return TablePanel.getInstance(status, database, tableUUID, currentHistoryPath.get(0));
           }
         });
 
