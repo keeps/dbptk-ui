@@ -7,6 +7,7 @@ import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
@@ -124,7 +125,7 @@ public class ConfigurationManager {
       if (databaseStatus.getCollections().size() >= 1) {
         final String collectionId = databaseStatus.getCollections().get(0);
         final CollectionStatus collectionStatus = getCollectionStatus(databaseUUID, collectionId);
-        TableStatus table = collectionStatus.getTable(tableUUID);
+        TableStatus table = collectionStatus.getTableStatus(tableUUID);
         table.getColumns().removeIf(ColumnStatus::isNestedColumn);
         int order = table.getLastColumnOrder();
         for (ColumnStatus columnStatus : columnStatusList) {

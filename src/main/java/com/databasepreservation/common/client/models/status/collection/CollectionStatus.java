@@ -163,11 +163,4 @@ public class CollectionStatus implements Serializable {
         table.setCustomDescription(value);
     }
   }
-  @JsonIgnore
-  public TableStatus getTable(String uuid){
-    for (TableStatus table : tables) {
-     if(table.getUuid().equals(uuid)) return table;
-    }
-    return null;
-  }
 }
