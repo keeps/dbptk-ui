@@ -74,7 +74,7 @@ public class StatusUtils {
     status.setCustomName(column.getDisplayName());
     status.setDescription(column.getDescription());
     status.setCustomDescription(column.getDescription());
-    status.setNestedColumn(false);
+    status.setNestedColumns(new ArrayList<>());
     status.setOrder(order);
     status.setSearchStatus(getSearchStatus(hide));
     status.setDetailsStatus(getDetailsStatus(hide));

@@ -33,6 +33,8 @@ public class EditableCell extends TextInputCell {
     template = GWT.create(Template.class);
   }
 
+
+
   @Override
   public void render(Context context, String value, SafeHtmlBuilder sb) {
 

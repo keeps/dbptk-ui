@@ -107,7 +107,7 @@ public class ColumnsManagementPanel extends RightPanel {
     btnUpdate.addClickHandler(clickEvent -> {
       List<ColumnStatus> statuses = new ArrayList<>();
       for (ColumnStatus column : collectionStatus.getTableStatus(tableUUID).getColumns()) {
-        column.updateHidingAttribute(multipleSelectionTablePanel.getSelectionModel().isSelected(column));
+        column.updateHidingAttribute(!multipleSelectionTablePanel.getSelectionModel().isSelected(column));
         if (editableValues.get(column.getId()) != null) {
           column.setCustomDescription(editableValues.get(column.getId()).getDescription());
           column.setCustomName(editableValues.get(column.getId()).getLabel());

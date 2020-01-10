@@ -2,14 +2,16 @@ package com.databasepreservation.common.client.common.lists;
 
 import static com.databasepreservation.common.client.models.structure.ViewerType.dbTypes.BINARY;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
-import com.databasepreservation.common.client.common.utils.TableRowListWrapper;
-import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
-import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
-import com.databasepreservation.common.client.models.status.collection.TableStatus;
+import com.databasepreservation.common.client.models.structure.ViewerCell;
 import org.fusesource.restygwt.client.MethodCallback;
-import org.roda.core.data.v2.common.Pair;
 import org.roda.core.data.v2.index.filter.Filter;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
@@ -20,15 +22,20 @@ import com.databasepreservation.common.client.common.helpers.HelperExportTableDa
 import com.databasepreservation.common.client.common.lists.utils.AsyncTableCell;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.utils.ExportResourcesUtils;
-import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.ConfigurationHandler;
+import com.databasepreservation.common.client.common.utils.TableRowListWrapper;
 import com.databasepreservation.common.client.index.ExportRequest;
 import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.index.facets.Facets;
 import com.databasepreservation.common.client.index.sort.Sorter;
-import com.databasepreservation.common.client.models.configuration.collection.CollectionConfiguration;
-import com.databasepreservation.common.client.models.structure.*;
-import com.databasepreservation.common.client.services.ConfigurationService;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
+import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
+import com.databasepreservation.common.client.models.status.collection.TableStatus;
+import com.databasepreservation.common.client.models.structure.ViewerColumn;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.structure.ViewerRow;
+import com.databasepreservation.common.client.models.structure.ViewerTable;
+import com.databasepreservation.common.client.models.structure.ViewerType;
 import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.tools.FilterUtils;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
@@ -125,53 +132,123 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     int columnIndex = 0;
 
     for (ColumnStatus columnStatus : tableStatus.getColumns()) {
-      ViewerColumn viewerColumn = null;
-      for (ViewerColumn column : table.getColumns()) {
-        if(columnStatus.getId().equals(column.getSolrName())){
-          viewerColumn = column;
-          break;
+      if (columnStatus.getNestedColumns().isEmpty()) {
+        ViewerColumn viewerColumn = null;
+        for (ViewerColumn column : table.getColumns()) {
+          if(columnStatus.getId().equals(column.getSolrName())){
+            viewerColumn = column;
+            break;
+          }
         }
-      }
-      if(viewerColumn == null) continue;
-
-      final ViewerType viewerColumnType = viewerColumn.getType();
-      final int thisColumnIndex = columnIndex++;
-      final String solrColumnName = viewerColumn.getSolrName();
-      final ViewerType.dbTypes type = viewerColumnType.getDbType();
-      if (type.equals(BINARY)) {
-        ViewerColumn finalViewerColumn = viewerColumn;
-        Column<ViewerRow, SafeHtml> column = new Column<ViewerRow, SafeHtml>(new SafeHtmlCell()) {
-          @Override
-          public void render(Cell.Context context, ViewerRow object, SafeHtmlBuilder sb) {
-            SafeHtml value = getValue(object);
-            if (value != null) {
-              sb.appendHtmlConstant("<div title=\"" + messages.row_downloadLOB() + "\">");
-              sb.append(value);
-              sb.appendHtmlConstant("</div");
+        if(viewerColumn == null) continue;
+  
+        final ViewerType viewerColumnType = viewerColumn.getType();
+        final int thisColumnIndex = columnIndex++;
+        final String solrColumnName = viewerColumn.getSolrName();
+        final ViewerType.dbTypes type = viewerColumnType.getDbType();
+        if (type.equals(BINARY)) {
+          ViewerColumn finalViewerColumn = viewerColumn;
+          Column<ViewerRow, SafeHtml> column = new Column<ViewerRow, SafeHtml>(new SafeHtmlCell()) {
+            @Override
+            public void render(Cell.Context context, ViewerRow object, SafeHtmlBuilder sb) {
+              SafeHtml value = getValue(object);
+              if (value != null) {
+                sb.appendHtmlConstant("<div title=\"" + messages.row_downloadLOB() + "\">");
+                sb.append(value);
+                sb.appendHtmlConstant("</div");
+              }
             }
-          }
-
-          @Override
-          public SafeHtml getValue(ViewerRow row) {
-            SafeHtml ret = null;
-            if (row == null) {
-              logger.error("Trying to display a NULL ViewerRow");
-            } else if (row.getCells() == null) {
-              logger.error("Trying to display NULL Cells");
-            } else if (row.getCells().get(solrColumnName) != null) {
-              final String value = row.getCells().get(solrColumnName).getValue();
-              ret = SafeHtmlUtils
-                .fromTrustedString(CommonClientUtils.getAnchorForLOBDownload(database.getUuid(),
-                  table.getUuid(), row.getUuid(), finalViewerColumn.getColumnIndexInEnclosingTable(), value).toString());
+  
+            @Override
+            public SafeHtml getValue(ViewerRow row) {
+              SafeHtml ret = null;
+              if (row == null) {
+                logger.error("Trying to display a NULL ViewerRow");
+              } else if (row.getCells() == null) {
+                logger.error("Trying to display NULL Cells");
+              } else if (row.getCells().get(solrColumnName) != null) {
+                final String value = row.getCells().get(solrColumnName).getValue();
+                ret = SafeHtmlUtils
+                  .fromTrustedString(CommonClientUtils.getAnchorForLOBDownload(database.getUuid(),
+                    table.getUuid(), row.getUuid(), finalViewerColumn.getColumnIndexInEnclosingTable(), value).toString());
+              }
+  
+              return ret;
             }
-
-            return ret;
-          }
-        };
-        column.setSortable(viewerColumn.sortable());
-        addColumn(viewerColumn, column);
-        columns.put(viewerColumn, column);
+          };
+          column.setSortable(viewerColumn.sortable());
+          addColumn(viewerColumn, column);
+          columns.put(viewerColumn, column);
+        } else {
+          Column<ViewerRow, SafeHtml> column = new Column<ViewerRow, SafeHtml>(new SafeHtmlCell()) {
+            @Override
+            public void render(Cell.Context context, ViewerRow object, SafeHtmlBuilder sb) {
+              SafeHtml value = getValue(object);
+              if (value != null) {
+                sb.appendHtmlConstant("<div title=\"" + SafeHtmlUtils.htmlEscape(value.asString()) + "\">");
+                sb.append(value);
+                sb.appendHtmlConstant("</div");
+              }
+            }
+  
+            @Override
+            public SafeHtml getValue(ViewerRow row) {
+              SafeHtml ret = null;
+              if (row == null) {
+                logger.error("Trying to display a NULL ViewerRow");
+              } else if (row.getCells() == null) {
+                logger.error("Trying to display NULL Cells");
+              } else if (row.getCells().get(solrColumnName) != null) {
+                ViewerType.dbTypes type = viewerColumnType.getDbType();
+                String value = row.getCells().get(solrColumnName).getValue();
+  
+                // if it exists in Solr, it is not null
+                switch (type) {
+                  case BINARY:
+                    // case DATETIME:
+                    // ret =
+                    // SafeHtmlUtils.fromString(JodaUtils.solrDateTimeDisplay(JodaUtils.solrDateParse(value)));
+                    // break;
+                    // case DATETIME_JUST_DATE:
+                    // ret =
+                    // SafeHtmlUtils.fromString(JodaUtils.solrDateDisplay(JodaUtils.solrDateParse(value)));
+                    // break;
+                    // case DATETIME_JUST_TIME:
+                    // ret =
+                    // SafeHtmlUtils.fromString(JodaUtils.solrTimeDisplay(JodaUtils.solrDateParse(value)));
+                    // ret = SafeHtmlUtils.fromString(new Date().)
+                    // break;
+                  case BOOLEAN:
+                  case ENUMERATION:
+                  case TIME_INTERVAL:
+                  case NUMERIC_FLOATING_POINT:
+                  case NUMERIC_INTEGER:
+                  case COMPOSED_STRUCTURE:
+                  case COMPOSED_ARRAY:
+                  case STRING:
+                  default:
+                    ret = SafeHtmlUtils.fromString(value);
+                }
+              }
+              return ret;
+            }
+          };
+          column.setSortable(viewerColumn.sortable());
+          addColumn(columnStatus, column);
+          columns.put(viewerColumn, column);
+        }
       } else {
+        //this is the table of nested document
+        ViewerTable nestedTable = database.getMetadata().getTableById(columnStatus.getId());
+        List<ViewerColumn> columnsToAggregate = new ArrayList<>();
+        for (String nestedColumn : columnStatus.getNestedColumns()) {
+          for (ViewerColumn column : nestedTable.getColumns()) {
+            if(column.getSolrName().equals(nestedColumn)){
+              columnsToAggregate.add(column);
+            }
+          }
+        }
+
         Column<ViewerRow, SafeHtml> column = new Column<ViewerRow, SafeHtml>(new SafeHtmlCell()) {
           @Override
           public void render(Cell.Context context, ViewerRow object, SafeHtmlBuilder sb) {
@@ -182,52 +259,40 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
               sb.appendHtmlConstant("</div");
             }
           }
-
           @Override
           public SafeHtml getValue(ViewerRow row) {
-            SafeHtml ret = null;
-            if (row == null) {
-              logger.error("Trying to display a NULL ViewerRow");
-            } else if (row.getCells() == null) {
-              logger.error("Trying to display NULL Cells");
-            } else if (row.getCells().get(solrColumnName) != null) {
-              ViewerType.dbTypes type = viewerColumnType.getDbType();
-              String value = row.getCells().get(solrColumnName).getValue();
-
-              // if it exists in Solr, it is not null
-              switch (type) {
-                case BINARY:
-                  // case DATETIME:
-                  // ret =
-                  // SafeHtmlUtils.fromString(JodaUtils.solrDateTimeDisplay(JodaUtils.solrDateParse(value)));
-                  // break;
-                  // case DATETIME_JUST_DATE:
-                  // ret =
-                  // SafeHtmlUtils.fromString(JodaUtils.solrDateDisplay(JodaUtils.solrDateParse(value)));
-                  // break;
-                  // case DATETIME_JUST_TIME:
-                  // ret =
-                  // SafeHtmlUtils.fromString(JodaUtils.solrTimeDisplay(JodaUtils.solrDateParse(value)));
-                  // ret = SafeHtmlUtils.fromString(new Date().)
-                  // break;
-                case BOOLEAN:
-                case ENUMERATION:
-                case TIME_INTERVAL:
-                case NUMERIC_FLOATING_POINT:
-                case NUMERIC_INTEGER:
-                case COMPOSED_STRUCTURE:
-                case COMPOSED_ARRAY:
-                case STRING:
-                default:
-                  ret = SafeHtmlUtils.fromString(value);
+            String aggregationColumn = null;
+            if(row.getNestedRowList() != null){
+              for (ViewerRow nestedRow : row.getNestedRowList()) {
+                if (nestedRow == null || nestedRow.getCells() == null || nestedRow.getCells().isEmpty()) {
+                  continue;
+                }else if(nestedRow.getTableId().equals(nestedTable.getId())){
+                  Map<String, ViewerCell> cells = nestedRow.getCells();
+                  String aggregationCell = null;
+                  for (Map.Entry<String, ViewerCell> entry : cells.entrySet()) {
+                    if(aggregationCell == null){
+                      aggregationCell = entry.getValue().getValue();
+                    } else {
+                      aggregationCell = aggregationCell + "," + entry.getValue().getValue();
+                    }
+                  }
+                  if(aggregationColumn == null){
+                    aggregationColumn = aggregationCell;
+                  } else {
+                    aggregationColumn = aggregationColumn + ";" + aggregationCell;
+                  }
+                }
               }
             }
+
+            SafeHtml ret = SafeHtmlUtils.fromString(aggregationColumn);
             return ret;
           }
         };
-        column.setSortable(viewerColumn.sortable());
         addColumn(columnStatus, column);
-        columns.put(viewerColumn, column);
+        for (ViewerColumn viewerColumn : columnsToAggregate) {
+          columns.put(viewerColumn, column);
+        }
       }
     }
 

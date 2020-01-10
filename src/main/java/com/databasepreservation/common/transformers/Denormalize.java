@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.models.structure.ViewerColumn;
+import com.databasepreservation.common.utils.StatusUtils;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.common.SolrInputDocument;
 import org.roda.core.data.exceptions.GenericException;
@@ -78,18 +80,22 @@ public class Denormalize {
   }
 
   private void updateCollectionStatus(DenormalizeConfiguration denormalizeConfiguration) throws GenericException {
-    List<ColumnStatus> columnStatusList = new ArrayList<>();
     for (RelatedTablesConfiguration relatedTable : denormalizeConfiguration.getRelatedTables()) {
+      if(relatedTable.getColumnsIncluded().isEmpty()) continue;
+      ViewerColumn viewerColumn = new ViewerColumn();
+      viewerColumn.setDescription("Please EDIT");
+      viewerColumn.setSolrName(relatedTable.getTableID());
+      List<String> columnsId = new ArrayList<>();
+      List<String> columnName = new ArrayList<>();
+
       for (RelatedColumnConfiguration column : relatedTable.getColumnsIncluded()) {
-        ColumnStatus columnStatus = new ColumnStatus();
-        columnStatus.setId(denormalizeConfiguration.getTableID() + "." + column.getSolrName());
-        columnStatus.setName(column.getColumnName());
-        columnStatus.setNestedColumn(true);
-        columnStatusList.add(columnStatus);
+        columnsId.add(column.getSolrName());
+        columnName.add(column.getColumnName());
       }
+      viewerColumn.setDisplayName(columnName.toString());
+      ViewerFactory.getConfigurationManager().addDenormalizationColumns(databaseUUID,
+          denormalizeConfiguration.getTableUUID(), viewerColumn, columnsId);
     }
-    ViewerFactory.getConfigurationManager().addDenormalizationColumns(databaseUUID,
-      denormalizeConfiguration.getTableUUID(), columnStatusList);
   }
 
   /**

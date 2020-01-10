@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -16,7 +18,7 @@ public class ColumnStatus implements Serializable {
   private String customName;
   private String description;
   private String customDescription;
-  private boolean nestedColumn;
+  private List<String> nestedColumns = new ArrayList<>();
   private int order;
   private SearchStatus searchStatus;
   private DetailsStatus detailsStatus;
@@ -48,12 +50,12 @@ public class ColumnStatus implements Serializable {
     this.description = description;
   }
 
-  public boolean isNestedColumn() {
-    return nestedColumn;
+  public List<String> getNestedColumns() {
+    return nestedColumns;
   }
 
-  public void setNestedColumn(boolean nestedColumn) {
-    this.nestedColumn = nestedColumn;
+  public void setNestedColumns(List<String> nestedColumns) {
+    this.nestedColumns = nestedColumns;
   }
 
   public int getOrder() {
@@ -110,7 +112,7 @@ public class ColumnStatus implements Serializable {
         ", customName='" + customName + '\'' +
         ", description='" + description + '\'' +
         ", customDescription='" + customDescription + '\'' +
-        ", nestedColumn=" + nestedColumn +
+        ", nestedColumn=" + nestedColumns.toString() +
         ", order=" + order +
         ", searchStatus=" + searchStatus.toString() +
         ", detailsStatus=" + detailsStatus +

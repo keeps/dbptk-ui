@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.utils.JsonUtils;
@@ -118,7 +119,7 @@ public class ConfigurationManager {
     }
   }
 
-  public void addDenormalizationColumns(String databaseUUID, String tableUUID, List<ColumnStatus> columnStatusList)
+  public void addDenormalizationColumns(String databaseUUID, String tableUUID, ViewerColumn column, List<String> nestedId)
     throws GenericException {
     try {
       final DatabaseStatus databaseStatus = getDatabaseStatus(databaseUUID);
@@ -126,12 +127,12 @@ public class ConfigurationManager {
         final String collectionId = databaseStatus.getCollections().get(0);
         final CollectionStatus collectionStatus = getCollectionStatus(databaseUUID, collectionId);
         TableStatus table = collectionStatus.getTableStatus(tableUUID);
-        table.getColumns().removeIf(ColumnStatus::isNestedColumn);
+        table.getColumns().removeIf(c -> !c.getNestedColumns().isEmpty());
+
         int order = table.getLastColumnOrder();
-        for (ColumnStatus columnStatus : columnStatusList) {
-          columnStatus.setOrder(++order);
-          table.addColumnStatus(columnStatus);
-        }
+        ColumnStatus columnStatus = StatusUtils.getColumnStatus(column, false, ++order);
+        columnStatus.getNestedColumns().addAll(nestedId);
+        table.addColumnStatus(columnStatus);
 
         // Update collection
         updateCollectionStatus(databaseUUID, collectionStatus);
