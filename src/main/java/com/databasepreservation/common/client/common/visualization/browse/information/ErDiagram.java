@@ -551,15 +551,37 @@ public class ErDiagram extends Composite {
             },
             "physics": {
                 "enabled": true,
-                "solver": "repulsion",
                 "repulsion": {
                     "centralGravity": 0.1,
                     "springLength": 25,
-                    "springConstant": 0,
-                    "nodeDistance": 150,
-                    "damping": 0.09
-                }
-            }//, configure: {enabled: true, showButton: true, container: $wnd.document.getElementById('erconfig')}
+                    "springConstant": 0.01,
+                    "nodeDistance": 250,
+                    "damping": 0.09,
+                },
+                "forceAtlas2Based": {
+                    "gravitationalConstant": -20,
+                    "centralGravity": 0.001,
+                    "springLength": 50,
+                    "springConstant": 0.001,
+                    "damping": 0.7,
+                    "avoidOverlap": 1
+                },
+                "maxVelocity": 150,
+                "minVelocity": 0.75,
+                "solver": "forceAtlas2Based",
+                "timestep": 0.9,
+                "stabilization": {
+                    "enabled":true,
+                    "iterations":1000,
+                    "updateInterval":25
+                },
+            },
+//            "configure": {
+//                "enabled": true,
+//                "showButton": true,
+//                "filter" : "physics",
+//                "container": $wnd.document.getElementById('erconfig')
+//            }
         };
   
         // initialize your network!
@@ -582,10 +604,11 @@ public class ErDiagram extends Composite {
         });
   
         network.on("stabilized", function (params) {
-            if(params.iterations > 1){
-                options.physics.enabled = false;
-                network.setOptions(options);
-            }
+//            if(params.iterations > 1){
+//                options.physics.enabled = true;
+//                network.setOptions(options);
+//            }
+            network.fit();
         });
   
         network.on("dragEnd", function (params) {

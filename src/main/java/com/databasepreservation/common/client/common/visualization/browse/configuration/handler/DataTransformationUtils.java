@@ -3,7 +3,10 @@ package com.databasepreservation.common.client.common.visualization.browse.confi
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.TableNode;
+import com.databasepreservation.common.client.configuration.observer.CollectionObserver;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
 import com.databasepreservation.common.client.models.status.denormalization.ReferencesConfiguration;
 import com.databasepreservation.common.client.models.status.denormalization.RelatedColumnConfiguration;
@@ -76,9 +79,11 @@ public class DataTransformationUtils {
     return references;
   }
 
-  public static void saveConfiguration(String databaseUUID, DenormalizeConfiguration denormalizeConfiguration) {
+  public static void saveConfiguration(String databaseUUID, DenormalizeConfiguration denormalizeConfiguration, CollectionStatus collectionStatus) {
     if (denormalizeConfiguration != null && denormalizeConfiguration.getState().equals(ViewerJobStatus.NEW)) {
       DatabaseService.Util.call((Boolean result) -> {
+        final CollectionObserver collectionObserver = ObserverManager.getCollectionObserver();
+        collectionObserver.setCollectionStatus(collectionStatus);
         JobService.Util.call((Boolean run) -> {
           Toast.showInfo("Configuration file",
             "Created denormalization configuration file with success for " + denormalizeConfiguration.getTableID());

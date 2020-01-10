@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.LoadingDiv;
 import com.databasepreservation.common.client.common.RightPanel;
@@ -14,6 +15,7 @@ import com.databasepreservation.common.client.common.lists.widgets.MultipleSelec
 import com.databasepreservation.common.client.common.sidebar.DataTransformationSidebar;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.DataTransformationUtils;
 import com.databasepreservation.common.client.common.visualization.browse.information.ErDiagram;
+import com.databasepreservation.common.client.configuration.observer.CollectionStatusObserver;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
 import com.databasepreservation.common.client.models.status.denormalization.RelatedTablesConfiguration;
@@ -46,7 +48,13 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
-public class DataTransformation extends RightPanel {
+public class DataTransformation extends RightPanel implements CollectionStatusObserver {
+  @Override
+  public void updateCollection(CollectionStatus collectionStatus) {
+    instances.clear();
+    this.collectionStatus = collectionStatus;
+  }
+
   interface DataTransformerUiBinder extends UiBinder<Widget, DataTransformation> {
   }
 
@@ -101,6 +109,7 @@ public class DataTransformation extends RightPanel {
   private DataTransformation(CollectionStatus collectionStatus, ViewerDatabase database, String tableUUID,
     DataTransformationSidebar sidebar) {
     initWidget(binder.createAndBindUi(this));
+    ObserverManager.getCollectionObserver().addObserver(this);
     this.database = database;
     this.sidebar = sidebar;
     this.collectionStatus = collectionStatus;
@@ -176,7 +185,7 @@ public class DataTransformation extends RightPanel {
     btnRunConfiguration.setText("Run this");
     btnRunConfiguration.setStyleName("btn btn-run");
     btnRunConfiguration.addClickHandler(clickEvent -> {
-      DataTransformationUtils.saveConfiguration(database.getUuid(), denormalizeConfiguration);
+      DataTransformationUtils.saveConfiguration(database.getUuid(), denormalizeConfiguration, collectionStatus);
       HistoryManager.gotoJobs();
     });
 
@@ -185,7 +194,7 @@ public class DataTransformation extends RightPanel {
     btnRunAllConfiguration.addClickHandler(clickEvent -> {
       HistoryManager.gotoJobs();
       for (Map.Entry<String, DenormalizeConfiguration> entry : denormalizeConfigurationList.entrySet()) {
-        DataTransformationUtils.saveConfiguration(database.getUuid(), entry.getValue());
+        DataTransformationUtils.saveConfiguration(database.getUuid(), entry.getValue(), collectionStatus);
       }
     });
 
@@ -243,6 +252,7 @@ public class DataTransformation extends RightPanel {
     MultipleSelectionTablePanel selectTable = tableInstance.createTable();
 
     SwitchBtn switchBtn = new SwitchBtn("Enable", false);
+
     switchBtn.setClickHandler(event -> {
       switchBtn.getButton().setValue(!switchBtn.getButton().getValue(), true); // workaround for ie11
       if (switchBtn.getButton().getValue()) {

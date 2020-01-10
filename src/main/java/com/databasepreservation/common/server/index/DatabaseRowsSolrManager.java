@@ -5,6 +5,7 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -167,7 +168,7 @@ public class DatabaseRowsSolrManager {
   public <T extends IsIndexed> IndexResult<T> find(Class<T> classToReturn, Filter filter, Sorter sorter,
     Sublist sublist, Facets facets, List<String> fieldsToReturn) throws GenericException, RequestNotValidException {
     return SolrUtils.find(client, SolrDefaultCollectionRegistry.get(classToReturn), filter, sorter, sublist, facets,
-      fieldsToReturn);
+      fieldsToReturn, new HashMap<>());
   }
 
   public <T extends IsIndexed> IndexResult<T> find(Class<T> classToReturn, Filter filter, Sorter sorter,
@@ -191,8 +192,13 @@ public class DatabaseRowsSolrManager {
   }
 
   public IndexResult<ViewerRow> findRows(String databaseUUID, Filter filter, Sorter sorter, Sublist sublist,
-    Facets facets, List<String> fieldsToReturn) throws GenericException, RequestNotValidException {
-    return SolrUtils.findRows(client, databaseUUID, filter, sorter, sublist, facets, fieldsToReturn);
+                                         Facets facets, List<String> fieldsToReturn) throws GenericException, RequestNotValidException {
+    return SolrUtils.findRows(client, databaseUUID, filter, sorter, sublist, facets, fieldsToReturn, new HashMap<>());
+  }
+
+  public IndexResult<ViewerRow> findRows(String databaseUUID, Filter filter, Sorter sorter, Sublist sublist,
+    Facets facets, List<String> fieldsToReturn, Map<String, String> extraParameters) throws GenericException, RequestNotValidException {
+    return SolrUtils.findRows(client, databaseUUID, filter, sorter, sublist, facets, fieldsToReturn, extraParameters);
   }
 
   public IterableIndexResult findAllRows(String databaseUUID, final Filter filter, final Sorter sorter,

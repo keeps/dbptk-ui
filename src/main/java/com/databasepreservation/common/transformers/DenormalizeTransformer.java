@@ -91,6 +91,8 @@ public class DenormalizeTransformer {
   }
 
   private void updateCollectionStatus() throws GenericException {
+    ViewerFactory.getConfigurationManager().removeDenormalizationColumns(databaseUUID,
+        denormalizeConfiguration.getTableUUID());
     for (RelatedTablesConfiguration relatedTable : denormalizeConfiguration.getRelatedTables()) {
       setAllColumnsToInclude(relatedTable);
     }
@@ -134,7 +136,6 @@ public class DenormalizeTransformer {
       }
     }
 
-    // try {
     IterableIndexResult sourceRows = solrManager.findAllRows(databaseUUID, filter, null, fieldsToReturn);
     long processedRows = 0;
     long rowToProcess = sourceRows.getTotalCount();
@@ -210,24 +211,25 @@ public class DenormalizeTransformer {
         queryOverRelatedTables(nestedRow, innerRelatedTable, nestedDocuments);
       }
       if (!columnsToDisplay.isEmpty()) {
-        createdNestedDocument(nestedRow, row.getUuid(), nestedDocuments);
+        createdNestedDocument(nestedRow, row.getUuid(), nestedDocuments, columnsToDisplay);
       }
     }
   }
 
-  private void createdNestedDocument(ViewerRow row, String parentUUID, List<SolrInputDocument> nestedDocuments) {
+  private void createdNestedDocument(ViewerRow row, String parentUUID, List<SolrInputDocument> nestedDocuments, List<String> columnsToDisplay) {
     Map<String, ViewerCell> cells = row.getCells();
     String uuid = parentUUID + ViewerConstants.API_SEP + row.getUuid();
 
     Map<String, Object> fields = new HashMap<>();
     for (Map.Entry<String, ViewerCell> cell : cells.entrySet()) {
       String key = cell.getKey();
-
-      ViewerCell cellValue = cell.getValue();
-      if (key.endsWith(ViewerConstants.SOLR_DYN_DATE)) {
-        fields.put(key, JodaUtils.xsDateParse(cellValue.getValue()).toString());
-      } else {
-        fields.put(key, cellValue.getValue());
+      if(columnsToDisplay.contains(key)){
+        ViewerCell cellValue = cell.getValue();
+        if (key.endsWith(ViewerConstants.SOLR_DYN_DATE)) {
+          fields.put(key, JodaUtils.xsDateParse(cellValue.getValue()).toString());
+        } else {
+          fields.put(key, cellValue.getValue());
+        }
       }
     }
     if (!fields.isEmpty()) {

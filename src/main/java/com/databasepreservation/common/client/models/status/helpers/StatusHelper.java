@@ -7,9 +7,6 @@ public class StatusHelper {
 
   private String label;
   private String description;
-  private boolean showInTable;
-  private boolean showInDetails;
-  private boolean showInAdvancedSearch;
 
   public StatusHelper() {
   }
@@ -17,14 +14,6 @@ public class StatusHelper {
   public StatusHelper(String label, String description) {
     this.label = label;
     this.description = description;
-  }
-
-  public StatusHelper(String label, String description, boolean table, boolean details, boolean advancedSearch) {
-    this.label = label;
-    this.description = description;
-    this.showInTable = table;
-    this.showInDetails = details;
-    this.showInAdvancedSearch = advancedSearch;
   }
 
   public String getLabel() {
@@ -41,29 +30,5 @@ public class StatusHelper {
 
   public void setDescription(String description) {
     this.description = description;
-  }
-
-  public boolean isShowInTable() {
-    return showInTable;
-  }
-
-  public void setShowInTable(boolean showInTable) {
-    this.showInTable = showInTable;
-  }
-
-  public boolean isShowInDetails() {
-    return showInDetails;
-  }
-
-  public void setShowInDetails(boolean showInDetails) {
-    this.showInDetails = showInDetails;
-  }
-
-  public boolean isShowInAdvancedSearch() {
-    return showInAdvancedSearch;
-  }
-
-  public void setShowInAdvancedSearch(boolean showInAdvancedSearch) {
-    this.showInAdvancedSearch = showInAdvancedSearch;
   }
 }

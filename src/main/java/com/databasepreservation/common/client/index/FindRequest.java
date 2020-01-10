@@ -8,7 +8,9 @@
 package com.databasepreservation.common.client.index;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.databasepreservation.common.client.index.filter.Filter;
 import org.roda.core.data.v2.index.sublist.Sublist;
@@ -35,6 +37,8 @@ public class FindRequest extends CountRequest {
   public boolean exportFacets;
   /** The index fields to return and use to construct the indexed object. */
   public List<String> fieldsToReturn;
+
+  public Map<String, String> extraParameters;
 
   /**
    * Constructor.
@@ -82,12 +86,36 @@ public class FindRequest extends CountRequest {
    */
   public FindRequest(final String classToReturn, final Filter filter, final Sorter sorter, final Sublist sublist,
     final Facets facets, final boolean exportFacets, final List<String> fieldsToReturn) {
+    this(classToReturn, filter, sorter, sublist, facets, false, fieldsToReturn, new HashMap<>());
+  }
+
+  /**
+   * Constructor.
+   *
+   * @param classToReturn
+   *          Class name of resources to return.
+   * @param filter
+   *          Filter.
+   * @param sorter
+   *          Sorter.
+   * @param sublist
+   *          Sublist (paging).
+   * @param facets
+   *          Facets to return.
+   * @param exportFacets
+   *          for CSV results, export only facets?
+   * @param fieldsToReturn
+   *          the index fields to return.
+   */
+  public FindRequest(final String classToReturn, final Filter filter, final Sorter sorter, final Sublist sublist,
+                     final Facets facets, final boolean exportFacets, final List<String> fieldsToReturn, final Map<String, String> extraParameters) {
     super(classToReturn, filter);
     this.sorter = sorter;
     this.sublist = sublist;
     this.facets = facets;
     this.exportFacets = exportFacets;
     this.fieldsToReturn = fieldsToReturn;
+    this.extraParameters = extraParameters;
   }
 
 }

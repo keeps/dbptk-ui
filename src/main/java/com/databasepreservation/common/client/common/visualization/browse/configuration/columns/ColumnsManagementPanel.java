@@ -1,6 +1,7 @@
 package com.databasepreservation.common.client.common.visualization.browse.configuration.columns;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -13,9 +14,11 @@ import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.lists.cells.ActionsCell;
+import com.databasepreservation.common.client.common.lists.cells.EditableCell;
 import com.databasepreservation.common.client.common.lists.cells.RequiredEditableCell;
 import com.databasepreservation.common.client.common.lists.cells.TextAreaInputCell;
 import com.databasepreservation.common.client.common.lists.widgets.BasicTablePanel;
+import com.databasepreservation.common.client.common.lists.widgets.MultipleSelectionTablePanel;
 import com.databasepreservation.common.client.common.sidebar.ColumnsManagementSidebar;
 import com.databasepreservation.common.client.common.sidebar.Sidebar;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
@@ -58,6 +61,7 @@ import config.i18n.client.ClientMessages;
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 public class ColumnsManagementPanel extends RightPanel implements CollectionStatusObserver, ISaveButtonObserver {
+
   private ClientMessages messages = GWT.create(ClientMessages.class);
 
   @UiField
@@ -88,7 +92,6 @@ public class ColumnsManagementPanel extends RightPanel implements CollectionStat
     } else {
       value = tableUUID;
     }
-
     return instances.computeIfAbsent(database.getUuid() + value,
       k -> new ColumnsManagementPanel(database, status, value, sidebar));
   }
@@ -122,7 +125,6 @@ public class ColumnsManagementPanel extends RightPanel implements CollectionStat
 
     btnSave.setText(messages.basicActionSave());
     btnSave.addStyleName("btn btn-primary btn-save");
-
     // insure that every new instance of a certain database has the save button
     // enabled or disabled according to the overall status
     instances.forEach((key, object) -> {
@@ -152,7 +154,8 @@ public class ColumnsManagementPanel extends RightPanel implements CollectionStat
           Toast.showInfo(messages.columnManagementPageTitle(), messages.columnManagementPageToastDescription());
         }).updateCollectionConfiguration(database.getUuid(), database.getUuid(), collectionStatus);
       } else {
-        Dialogs.showErrors(messages.columnManagementPageTitle(), "ERROR", messages.basicActionClose());
+        Dialogs.showErrors(messages.columnManagementPageTitle(), messages.columnManagementPageDialogErrorDescription(),
+          messages.basicActionClose());
       }
     });
 
@@ -370,7 +373,6 @@ public class ColumnsManagementPanel extends RightPanel implements CollectionStat
                 });
               }
             });
-
           }
         }
         super.onBrowserEvent(context, parent, value, event, valueUpdater);
@@ -455,7 +457,6 @@ public class ColumnsManagementPanel extends RightPanel implements CollectionStat
         }
       }
     }
-
     return true;
   }
 

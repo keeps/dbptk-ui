@@ -27,7 +27,6 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 
-import com.databasepreservation.common.client.models.user.User;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -46,8 +45,6 @@ import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RequestNotValidException;
 import org.roda.core.data.v2.index.sublist.Sublist;
-import org.roda.core.data.v2.ip.AIPState;
-import org.roda.core.data.v2.ip.Permissions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -124,11 +121,11 @@ public class SolrUtils {
 
   public static <T extends IsIndexed> IndexResult<T> find(SolrClient index, SolrCollection<T> collection, Filter filter,
     Sorter sorter, Sublist sublist) throws GenericException, RequestNotValidException {
-    return find(index, collection, filter, sorter, sublist, Facets.NONE, new ArrayList<>());
+    return find(index, collection, filter, sorter, sublist, Facets.NONE, new ArrayList<>(), new HashMap<>());
   }
 
   public static <T extends IsIndexed> IndexResult<T> find(SolrClient index, SolrCollection<T> collection, Filter filter,
-    Sorter sorter, Sublist sublist, Facets facets, List<String> fieldsToReturn)
+    Sorter sorter, Sublist sublist, Facets facets, List<String> fieldsToReturn, Map<String, String> extraParameters)
     throws GenericException, RequestNotValidException {
     IndexResult<T> ret;
     SolrQuery query = new SolrQuery();
@@ -136,6 +133,15 @@ public class SolrUtils {
     query.setSorts(parseSorter(sorter));
     query.setStart(sublist.getFirstElementIndex());
     query.setRows(sublist.getMaximumElementCount());
+
+    if (!extraParameters.isEmpty()) {
+      List<String> extraFields = new ArrayList<>();
+      for (Map.Entry<String, String> entry : extraParameters.entrySet()) {
+        query.setParam(entry.getKey(), entry.getValue());
+        extraFields.add(entry.getKey());
+      }
+    }
+
     if (!fieldsToReturn.isEmpty()) {
       query.setFields(fieldsToReturn.toArray(new String[0]));
     }
@@ -167,23 +173,26 @@ public class SolrUtils {
   }
 
   public static IndexResult<ViewerRow> findRows(SolrClient index, String databaseUUID, Filter filter, Sorter sorter,
-                                                Sublist sublist) throws GenericException, RequestNotValidException {
+    Sublist sublist) throws GenericException, RequestNotValidException {
     return findRows(index, databaseUUID, filter, sorter, sublist, Facets.NONE);
   }
 
   public static IndexResult<ViewerRow> findRows(SolrClient index, String databaseUUID, Filter filter, Sorter sorter,
     Sublist sublist, Facets facets) throws GenericException, RequestNotValidException {
-    return find(index, SolrRowsCollectionRegistry.get(databaseUUID), filter, sorter, sublist, facets,
-      new ArrayList<>());
+    return find(index, SolrRowsCollectionRegistry.get(databaseUUID), filter, sorter, sublist, facets, new ArrayList<>(),
+      new HashMap<>());
   }
 
   public static IndexResult<ViewerRow> findRows(SolrClient index, String databaseUUID, Filter filter, Sorter sorter,
-    Sublist sublist, Facets facets, List<String> fieldsToReturn) throws GenericException, RequestNotValidException {
-    return find(index, SolrRowsCollectionRegistry.get(databaseUUID), filter, sorter, sublist, facets, fieldsToReturn);
+    Sublist sublist, Facets facets, List<String> fieldsToReturn, Map<String, String> extraParameters)
+    throws GenericException, RequestNotValidException {
+    return find(index, SolrRowsCollectionRegistry.get(databaseUUID), filter, sorter, sublist, facets, fieldsToReturn,
+      extraParameters);
   }
 
-  public static Pair<IndexResult<ViewerRow>, String> findRows(SolrClient index, String databaseUUID, Filter filter, Sorter sorter, int pageSize, String cursorMark, List<String> fieldsToReturn)
-      throws GenericException, RequestNotValidException {
+  public static Pair<IndexResult<ViewerRow>, String> findRows(SolrClient index, String databaseUUID, Filter filter,
+    Sorter sorter, int pageSize, String cursorMark, List<String> fieldsToReturn)
+    throws GenericException, RequestNotValidException {
 
     Pair<IndexResult<ViewerRow>, String> ret;
     SolrQuery query = new SolrQuery();
@@ -206,7 +215,7 @@ public class SolrUtils {
       QueryResponse response = index.query(collection.getIndexName(), query);
       final IndexResult<ViewerRow> result = queryResponseToIndexResult(response, collection, Facets.NONE);
       ret = Pair.of(result, response.getNextCursorMark());
-    } catch (SolrServerException | IOException  e) {
+    } catch (SolrServerException | IOException e) {
       throw new GenericException("Could not query index", e);
     } catch (SolrException e) {
       throw new RequestNotValidException(e);
@@ -217,8 +226,8 @@ public class SolrUtils {
     return ret;
   }
 
-  public static Pair<IndexResult<ViewerRow>, String> findRows(SolrClient index, String databaseUUID, SolrQuery query, Sorter sorter, int pageSize, String cursorMark)
-      throws GenericException, RequestNotValidException {
+  public static Pair<IndexResult<ViewerRow>, String> findRows(SolrClient index, String databaseUUID, SolrQuery query,
+    Sorter sorter, int pageSize, String cursorMark) throws GenericException, RequestNotValidException {
 
     Pair<IndexResult<ViewerRow>, String> ret;
 
@@ -234,7 +243,7 @@ public class SolrUtils {
       QueryResponse response = index.query(collection.getIndexName(), query);
       final IndexResult<ViewerRow> result = queryResponseToIndexResult(response, collection, Facets.NONE);
       ret = Pair.of(result, response.getNextCursorMark());
-    } catch (SolrServerException | IOException  e) {
+    } catch (SolrServerException | IOException e) {
       throw new GenericException("Could not query index", e);
     } catch (SolrException e) {
       throw new RequestNotValidException(e);
@@ -257,21 +266,20 @@ public class SolrUtils {
   }
 
   public static IndexResult<ViewerRow> findRowsWithSubQuery(SolrClient index, String databaseUUID,
-    List<SolrQuery> queryList)
-      throws GenericException, RequestNotValidException {
+    List<SolrQuery> queryList) throws GenericException, RequestNotValidException {
     IndexResult<ViewerRow> ret;
 
     SolrQuery query = new SolrQuery();
     String nestedPath = "";
     for (int i = 0; i < queryList.size(); i++) {
       SolrQuery subquery = queryList.get(i);
-      if(i  == 0){
+      if (i == 0) {
         query.set("q", subquery.getQuery());
         if (subquery.getFields() != null && !subquery.getFields().isEmpty()) {
           query.set("fl", subquery.getFields());
         }
       } else {
-        if(nestedPath.isEmpty()){
+        if (nestedPath.isEmpty()) {
           nestedPath = "nested";
         } else {
           nestedPath = nestedPath + ".nested";
@@ -288,7 +296,7 @@ public class SolrUtils {
     try {
       QueryResponse response = index.query(collection.getIndexName(), query);
       ret = queryResponseToIndexResult(response, collection, Facets.NONE);
-    } catch (SolrServerException | IOException  e) {
+    } catch (SolrServerException | IOException e) {
       throw new GenericException("Could not query index", e);
     } catch (SolrException e) {
       throw new RequestNotValidException(e);
@@ -298,7 +306,6 @@ public class SolrUtils {
 
     return ret;
   }
-
 
   public static List<SolrQuery.SortClause> parseSorter(Sorter sorter) {
     List<SolrQuery.SortClause> ret = new ArrayList<SolrQuery.SortClause>();
@@ -494,7 +501,7 @@ public class SolrUtils {
   }
 
   private static void parseFilterParameter(StringBuilder ret, FilterParameter parameter,
-                                           boolean prefixWithANDOperatorIfBuilderNotEmpty) throws RequestNotValidException {
+    boolean prefixWithANDOperatorIfBuilderNotEmpty) throws RequestNotValidException {
     if (parameter instanceof SimpleFilterParameter) {
       SimpleFilterParameter simplePar = (SimpleFilterParameter) parameter;
       appendExactMatch(ret, simplePar.getName(), simplePar.getValue(), true, prefixWithANDOperatorIfBuilderNotEmpty);
@@ -511,38 +518,38 @@ public class SolrUtils {
     } else if (parameter instanceof DateRangeFilterParameter) {
       DateRangeFilterParameter param = (DateRangeFilterParameter) parameter;
       appendRange(ret, param.getName(), Date.class, param.getFromValue(), String.class,
-          processToDate(param.getToValue(), param.getGranularity(), false),
-          prefixWithANDOperatorIfBuilderNotEmpty);
+        processToDate(param.getToValue(), param.getGranularity(), false), prefixWithANDOperatorIfBuilderNotEmpty);
     } else if (parameter instanceof DateIntervalFilterParameter) {
       DateIntervalFilterParameter param = (DateIntervalFilterParameter) parameter;
       appendRangeInterval(ret, param.getFromName(), param.getToName(), param.getFromValue(), param.getToValue(),
-          param.getGranularity(), prefixWithANDOperatorIfBuilderNotEmpty);
+        param.getGranularity(), prefixWithANDOperatorIfBuilderNotEmpty);
     } else if (parameter instanceof LongRangeFilterParameter) {
       LongRangeFilterParameter param = (LongRangeFilterParameter) parameter;
       appendRange(ret, param.getName(), Long.class, param.getFromValue(), Long.class, param.getToValue(),
-          prefixWithANDOperatorIfBuilderNotEmpty);
+        prefixWithANDOperatorIfBuilderNotEmpty);
     } else if (parameter instanceof NotSimpleFilterParameter) {
       NotSimpleFilterParameter notSimplePar = (NotSimpleFilterParameter) parameter;
       appendNotExactMatch(ret, notSimplePar.getName(), notSimplePar.getValue(), true,
-          prefixWithANDOperatorIfBuilderNotEmpty);
+        prefixWithANDOperatorIfBuilderNotEmpty);
     } else if (parameter instanceof OrFiltersParameters || parameter instanceof AndFiltersParameters) {
       FiltersParameters filters = (FiltersParameters) parameter;
       appendFiltersWithOperator(ret, parameter instanceof OrFiltersParameters ? "OR" : "AND", filters.getValues(),
-          prefixWithANDOperatorIfBuilderNotEmpty);
+        prefixWithANDOperatorIfBuilderNotEmpty);
     } else if (parameter instanceof TermsFilterParameter) {
       TermsFilterParameter param = (TermsFilterParameter) parameter;
       ret.append("({!terms f=" + param.getField() + " v=" + param.getParameterValue() + "})");
-    } else if(parameter instanceof InnerJoinFilterParameter){
+    } else if (parameter instanceof InnerJoinFilterParameter) {
       InnerJoinFilterParameter param = (InnerJoinFilterParameter) parameter;
-      ret.append("(tableId:" + param.getNestedTableId() +" AND {!join from=nestedOriginalUUID to=uuid }_root_:" + param.getRowUUID() + ")");
-    }else {
+      ret.append("(tableId:" + param.getNestedTableId() + " AND {!join from=nestedOriginalUUID to=uuid }_root_:"
+        + param.getRowUUID() + ")");
+    } else {
       LOGGER.error("Unsupported filter parameter class: {}", parameter.getClass().getName());
       throw new RequestNotValidException("Unsupported filter parameter class: " + parameter.getClass().getName());
     }
   }
 
   private static void appendRangeInterval(StringBuilder ret, String fromKey, String toKey, Date fromValue, Date toValue,
-                                          RodaConstants.DateGranularity granularity, boolean prefixWithANDOperatorIfBuilderNotEmpty) {
+    RodaConstants.DateGranularity granularity, boolean prefixWithANDOperatorIfBuilderNotEmpty) {
     if (fromValue != null || toValue != null) {
       appendANDOperator(ret, prefixWithANDOperatorIfBuilderNotEmpty);
       ret.append("(");
@@ -560,8 +567,8 @@ public class SolrUtils {
       ret.append("]");
 
       if (fromValue != null && toValue != null) {
-        ret.append(" OR ").append("(").append(fromKey).append(":[* TO ")
-            .append(processToDate(fromValue, granularity)).append("]");
+        ret.append(" OR ").append("(").append(fromKey).append(":[* TO ").append(processToDate(fromValue, granularity))
+          .append("]");
         ret.append(" AND ").append(toKey).append(":[").append(processFromDate(toValue)).append(" TO *]").append(")");
       }
 
@@ -623,7 +630,7 @@ public class SolrUtils {
   }
 
   private static void appendNotExactMatch(StringBuilder ret, String key, String value, boolean appendDoubleQuotes,
-                                          boolean prefixWithANDOperatorIfBuilderNotEmpty) {
+    boolean prefixWithANDOperatorIfBuilderNotEmpty) {
     appendExactMatch(ret, "*:* -" + key, value, appendDoubleQuotes, prefixWithANDOperatorIfBuilderNotEmpty);
   }
 
@@ -646,7 +653,7 @@ public class SolrUtils {
   }
 
   private static <T extends Serializable, T1 extends Serializable> void appendRange(StringBuilder ret, String key,
-                                                                                    Class<T> fromClass, T fromValue, Class<T1> toClass, T1 toValue, boolean prefixWithANDOperatorIfBuilderNotEmpty) {
+    Class<T> fromClass, T fromValue, Class<T1> toClass, T1 toValue, boolean prefixWithANDOperatorIfBuilderNotEmpty) {
     if (fromValue != null || toValue != null) {
       appendANDOperator(ret, prefixWithANDOperatorIfBuilderNotEmpty);
 
@@ -731,7 +738,7 @@ public class SolrUtils {
   }
 
   private static void appendFiltersWithOperator(StringBuilder ret, String operator, List<FilterParameter> values,
-                                                boolean prefixWithANDOperatorIfBuilderNotEmpty) throws RequestNotValidException {
+    boolean prefixWithANDOperatorIfBuilderNotEmpty) throws RequestNotValidException {
     if (!values.isEmpty()) {
       appendANDOperator(ret, prefixWithANDOperatorIfBuilderNotEmpty);
 

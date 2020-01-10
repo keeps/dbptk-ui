@@ -24,7 +24,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import com.databasepreservation.common.utils.LobPathManager;
 import org.apache.commons.lang.StringUtils;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
@@ -47,6 +46,7 @@ import com.databasepreservation.common.client.common.search.SavedSearch;
 import com.databasepreservation.common.client.common.search.SearchInfo;
 import com.databasepreservation.common.client.exceptions.RESTException;
 import com.databasepreservation.common.client.exceptions.SavedSearchException;
+import com.databasepreservation.common.client.index.FindNestedRequest;
 import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.index.filter.Filter;
@@ -76,6 +76,7 @@ import com.databasepreservation.common.server.index.utils.IterableIndexResult;
 import com.databasepreservation.common.server.index.utils.JsonTransformer;
 import com.databasepreservation.common.server.index.utils.SolrUtils;
 import com.databasepreservation.common.utils.ControllerAssistant;
+import com.databasepreservation.common.utils.LobPathManager;
 import com.databasepreservation.common.utils.UserUtility;
 
 import io.swagger.annotations.ApiOperation;
@@ -591,7 +592,7 @@ public class DatabaseResource implements DatabaseService {
 
     try {
       final IndexResult<ViewerRow> viewerRowIndexResult = ViewerFactory.getSolrManager().findRows(databaseUUID,
-        findRequest.filter, findRequest.sorter, findRequest.sublist, findRequest.facets, findRequest.fieldsToReturn);
+        findRequest.filter, findRequest.sorter, findRequest.sublist, findRequest.facets, findRequest.fieldsToReturn, findRequest.extraParameters);
       count = viewerRowIndexResult.getTotalCount();
       return viewerRowIndexResult;
     } catch (GenericException | RequestNotValidException e) {

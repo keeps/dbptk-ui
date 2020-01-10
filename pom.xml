@@ -523,6 +523,11 @@
             <version>5.10.1</version>
         </dependency>
         <!-- / Font Awesome -->
+        <dependency>
+            <groupId>org.webjars.npm</groupId>
+            <artifactId>vis-network</artifactId>
+            <version>6.4.4</version>
+        </dependency>
 
         <!-- File upload -->
         <dependency>

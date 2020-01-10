@@ -11,8 +11,10 @@ import com.databasepreservation.common.client.common.lists.JobList;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
 import com.databasepreservation.common.client.index.filter.Filter;
+import com.databasepreservation.common.client.models.structure.ViewerJob;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
+import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.databasepreservation.common.client.widgets.wcag.AccessibleFocusPanel;
 import com.google.gwt.core.client.GWT;
@@ -23,6 +25,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.view.client.SelectionChangeEvent;
 
 import config.i18n.client.ClientMessages;
 
@@ -64,6 +67,15 @@ public class JobManager extends ContentPanel {
   private JobManager() {
     jobList = new JobList();
     initWidget(binder.createAndBindUi(this));
+    jobList.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+      @Override
+      public void onSelectionChange(SelectionChangeEvent selectionChangeEvent) {
+        ViewerJob selected = jobList.getSelectionModel().getSelectedObject();
+        String databaseUuid = selected.getDatabaseUuid();
+        String tableUuid = selected.getTableUuid();
+        HistoryManager.gotoTable(databaseUuid, tableUuid);
+      }
+    });
 
     header.add(CommonClientUtils.getHeaderHTML(
       FontAwesomeIconManager.getTag(FontAwesomeIconManager.NETWORK_WIRED), messages.batchJobsTextForPageTitle(), "h1"));

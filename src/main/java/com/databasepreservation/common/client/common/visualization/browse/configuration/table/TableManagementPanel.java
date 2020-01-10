@@ -44,7 +44,6 @@ import config.i18n.client.ClientMessages;
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 public class TableManagementPanel extends ContentPanel {
-  private static final String INVALID_CSS_CLASSNAME = "text-box-invalid";
   private ClientMessages messages = GWT.create(ClientMessages.class);
 
   @UiField

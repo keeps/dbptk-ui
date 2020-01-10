@@ -10,12 +10,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.http.client.RequestBuilder;
 import org.fusesource.restygwt.client.MethodCallback;
-import org.restlet.data.Method;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
 import com.databasepreservation.common.client.ClientLogger;
+import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.helpers.HelperExportTableData;
@@ -23,7 +22,6 @@ import com.databasepreservation.common.client.common.lists.utils.AsyncTableCell;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.utils.ExportResourcesUtils;
 import com.databasepreservation.common.client.common.utils.TableRowListWrapper;
-import com.databasepreservation.common.client.index.ExportRequest;
 import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.index.facets.Facets;
@@ -135,6 +133,8 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     int columnIndex = 0;
 
     for (ColumnStatus columnStatus : tableStatus.getColumns()) {
+      if (!status.showColumn(tableStatus.getUuid(), columnStatus.getId()))
+        continue;
       if (columnStatus.getNestedColumns().isEmpty()) {
         ViewerColumn viewerColumn = null;
         for (ViewerColumn column : table.getColumns()) {
@@ -319,16 +319,29 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     MethodCallback<IndexResult<ViewerRow>> callback) {
     TableRowListWrapper wrapper = getObject();
     ViewerTable table = wrapper.getTable();
-    Filter filter;
+    CollectionStatus status = wrapper.getStatus();
+    Map<String, String> extraParameters = new HashMap<>();
     List<String> fieldsToReturn = new ArrayList<>();
+    Filter filter;
+    Boolean hasNested = false;
     if (wrapper.isNested()) {
       filter = getFilter();
     } else {
       filter = FilterUtils.filterByTable(getFilter(), table.getId());
     }
-    fieldsToReturn.add("*");
-    fieldsToReturn.add("[child limit=100]");
-    // fieldsToReturn.add(buildNestedFieldsToReturn(wrapper));
+    for (ColumnStatus column : status.getTableStatus(table.getUuid()).getColumns()) {
+      if (status.showColumn(table.getUuid(), column.getId())) {
+        if (column.getNestedColumns().isEmpty()) {
+          fieldsToReturn.add(column.getId());
+        } else {
+          hasNested = true;
+        }
+      }
+    }
+    // fieldsToReturn.add("*, [child limit=100]");
+    if (hasNested) {
+      buildNestedFieldsToReturn(wrapper, extraParameters, fieldsToReturn);
+    }
     currentSubList = sublist;
 
     Map<Column<ViewerRow, ?>, List<String>> columnSortingKeyMap = new HashMap<>();
@@ -346,31 +359,41 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     GWT.log("isNested: " + wrapper.isNested());
 
     FindRequest findRequest = new FindRequest(ViewerDatabase.class.getName(), filter, currentSorter, sublist,
-      getFacets(), false, fieldsToReturn);
+      getFacets(), false, fieldsToReturn, extraParameters);
 
     DatabaseService.Util.call(callback).findRows(wrapper.getDatabase().getUuid(), wrapper.getDatabase().getUuid(), findRequest,
       LocaleInfo.getCurrentLocale().getLocaleName());
   }
 
   // TODO
-  private String buildNestedFieldsToReturn(TableRowListWrapper wrapper) {
+  private void buildNestedFieldsToReturn(TableRowListWrapper wrapper, Map<String, String> extraParameters,
+    List<String> fieldsToReturn) {
     StringBuilder sb = new StringBuilder();
     ViewerTable table = wrapper.getTable();
     CollectionStatus status = wrapper.getStatus();
 
     TableStatus tableStatus = status.getTableStatus(table.getUuid());
+    fieldsToReturn.add(ViewerConstants.INDEX_ID);
     int nestedCount = 0;
+    String keys = "";
+    String separator = "";
     for (ColumnStatus column : tableStatus.getColumns()) {
       if (!column.getNestedColumns().isEmpty()) {
-        nestedCount++;
         String nestedTableId = column.getId();
-        sb.append("son" + nestedCount + ":[subquery]");
-        sb.append("&son" + nestedCount + ".q=+nestedTableId:" + nestedTableId + " AND +{!terms f=_root_ v=$row.uuid}");
-        sb.append("&son" + nestedCount + ".row=10");
+        fieldsToReturn.add(ViewerConstants.SOLR_ROWS_NESTED + nestedCount + ":[subquery]");
+        extraParameters.put(ViewerConstants.SOLR_ROWS_NESTED + nestedCount + ".q",
+          "+nestedTableId:" + nestedTableId + " AND {!terms f=_root_ v=$row.uuid}");
+        extraParameters.put(ViewerConstants.SOLR_ROWS_NESTED + nestedCount + ".row", "2");
+//        String key = ViewerConstants.SOLR_ROWS_NESTED + "." + nestedCount;
+//        keys = keys + separator  + key;
+//        separator = ",";
+//        fieldsToReturn.add(key + ":[subquery]");
+//        extraParameters.put(key + ".q", "+nestedTableId:" + nestedTableId + " AND {!terms f=_root_ v=$row.uuid}");
+//        extraParameters.put(key + ".rows", "2");
+//        nestedCount++;
       }
     }
-
-    return sb.toString();
+    fieldsToReturn.add( ViewerConstants.SOLR_ROWS_NESTED + ":" + "\"" + keys + "\"");
   }
 
   @Override

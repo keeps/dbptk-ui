@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
+import com.databasepreservation.common.client.configuration.observer.CollectionStatusObserver;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
@@ -32,9 +34,15 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class DataTransformationSidebar extends Composite implements Sidebar {
+public class DataTransformationSidebar extends Composite implements Sidebar, CollectionStatusObserver {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, DataTransformationSidebar> instances = new HashMap<>();
+
+  @Override
+  public void updateCollection(CollectionStatus collectionStatus) {
+    instances.clear();
+    this.collectionStatus = collectionStatus;
+  }
 
   interface DatabaseSidebarUiBinder extends UiBinder<Widget, DataTransformationSidebar> {
   }
@@ -181,9 +189,7 @@ public class DataTransformationSidebar extends Composite implements Sidebar {
         }
         if (!table.isCustomView() && !table.isMaterializedView()) {
           if (collectionStatus.showTable(table.getUuid())) {
-
             sidebarGroup.add(createTableItem(schema, table, totalSchemas, iconTag));
-
           }
         }
       }
@@ -196,11 +202,12 @@ public class DataTransformationSidebar extends Composite implements Sidebar {
   private SidebarHyperlink createTableItem(final ViewerSchema schema, final ViewerTable table, final int totalSchemas,
     final String iconTag) {
     SafeHtml html;
+    String customName = collectionStatus.getTableStatus(table.getUuid()).getCustomName();
     if (totalSchemas == 1) {
-      html = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE, table.getName());
+      html = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE, customName);
     } else {
       html = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE,
-        schema.getName() + " " + iconTag + " " + table.getName());
+        schema.getName() + " " + iconTag + " " + customName);
     }
     SidebarHyperlink tableLink = new SidebarHyperlink(html,
       HistoryManager.linkToDataTransformationTable(database.getUuid(), table.getUuid()));
@@ -221,6 +228,7 @@ public class DataTransformationSidebar extends Composite implements Sidebar {
       if (db != null && (databaseUUID == null || databaseUUID.equals(db.getUuid()))) {
         initialized = true;
         database = db;
+        ObserverManager.getCollectionObserver().addObserver(this);
         collectionStatus = status;
         databaseUUID = db.getUuid();
         init();
