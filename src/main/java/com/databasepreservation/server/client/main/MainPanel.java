@@ -13,6 +13,7 @@ import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.RightPanel;
 import com.databasepreservation.common.client.common.UserLogin;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
+import com.databasepreservation.common.client.common.sidebar.ColumnsManagementSidebar;
 import com.databasepreservation.common.client.common.sidebar.DataTransformationSidebar;
 import com.databasepreservation.common.client.common.sidebar.DatabaseSidebar;
 import com.databasepreservation.common.client.common.sidebar.Sidebar;
@@ -28,6 +29,7 @@ import com.databasepreservation.common.client.common.visualization.browse.Refere
 import com.databasepreservation.common.client.common.visualization.browse.RowPanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.AdvancedConfiguration;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.DataTransformation;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.ColumnsManagementPanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.table.TableManagementPanel;
 import com.databasepreservation.common.client.common.visualization.browse.foreignKey.ForeignKeyPanel;
 import com.databasepreservation.common.client.common.visualization.browse.foreignKey.ForeignKeyPanelOptions;
@@ -245,6 +247,27 @@ public class MainPanel extends Composite {
           return TableManagementPanel.getInstance(database, status);
         }
       });
+    } else if (HistoryManager.ROUTE_COLUMNS_MANAGEMENT.equals(currentHistoryPath.get(0))) {
+      final String databaseUUID = currentHistoryPath.get(1);
+      Sidebar sidebar = ColumnsManagementSidebar.getInstance(databaseUUID);
+      if (currentHistoryPath.size() == 2) {
+        setContent(databaseUUID, HistoryManager.ROUTE_COLUMNS_MANAGEMENT, databaseUUID, sidebar,
+          new RightPanelLoader() {
+            @Override
+            public RightPanel load(ViewerDatabase database, CollectionStatus status) {
+              return ColumnsManagementPanel.getInstance(database, status);
+            }
+          });
+      } else if (currentHistoryPath.size() == 3) {
+        final String tableUUID = currentHistoryPath.get(2);
+        setContent(databaseUUID, HistoryManager.ROUTE_COLUMNS_MANAGEMENT, tableUUID, sidebar, new RightPanelLoader() {
+          @Override
+          public RightPanel load(ViewerDatabase database, CollectionStatus status) {
+            return ColumnsManagementPanel.getInstance(status, database, tableUUID);
+          }
+        });
+      }
+
     } else if (HistoryManager.ROUTE_JOBS.equals(currentHistoryPath.get(0))) {
       setContent(new ContentPanelLoader() {
         @Override

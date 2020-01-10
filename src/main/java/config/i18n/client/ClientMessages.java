@@ -610,6 +610,8 @@ public interface ClientMessages extends Messages {
 
   String breadcrumbTextForTableManagement();
 
+  String breadcrumbTextForColumnManagement();
+
   /*********************************************
    * Home Page
    ********************************************/
@@ -1363,4 +1365,18 @@ public interface ClientMessages extends Messages {
   String tableManagementPageTableHeaderTextForLabel();
 
   String tableManagementPageTableHeaderTextForDescription();
+
+  /********************************************
+   * Column Management Panel
+   *******************************************/
+  String columnManagementPageTitle();
+
+  String columnManagementPageToastDescription();
+
+  String columnManagementPageTableTextForDescription();
+
+  /********************************************
+   * Sidebar
+   *******************************************/
+  String tableHeader();
 }

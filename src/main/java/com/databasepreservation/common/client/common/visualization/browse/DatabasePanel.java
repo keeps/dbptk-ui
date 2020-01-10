@@ -3,6 +3,8 @@ package com.databasepreservation.common.client.common.visualization.browse;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.databasepreservation.common.client.ObserverManager;
+import com.databasepreservation.common.client.configuration.observer.CollectionStatusObserver;
 import org.roda.core.data.v2.user.User;
 
 import com.databasepreservation.common.client.ViewerConstants;
@@ -46,7 +48,7 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
-public class DatabasePanel extends Composite {
+public class DatabasePanel extends Composite implements CollectionStatusObserver {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
 
   private static Map<String, DatabasePanel> instances = new HashMap<>();
@@ -99,6 +101,9 @@ public class DatabasePanel extends Composite {
 
   public DatabasePanel(String databaseUUID, boolean initMenu, Sidebar sidebar) {
     initWidget(uiBinder.createAndBindUi(this));
+
+    GWT.log("Register databasePanel");
+    ObserverManager.getCollectionObserver().addObserver(this);
 
     this.databaseUUID = databaseUUID;
 
@@ -321,5 +326,11 @@ public class DatabasePanel extends Composite {
 
   public void setTopLevelPanelCSS(String css) {
     toplevel.addStyleName(css);
+  }
+
+  @Override
+  public void updateCollection(CollectionStatus collectionStatus) {
+    this.collectionStatus = collectionStatus;
+    instances.clear();
   }
 }

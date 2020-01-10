@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.configuration.observer.CollectionObserver;
 import com.databasepreservation.common.client.index.facets.FacetParameter;
 import com.databasepreservation.common.client.index.facets.Facets;
 import com.databasepreservation.common.client.index.facets.SimpleFacetParameter;

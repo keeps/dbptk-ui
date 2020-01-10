@@ -1,5 +1,10 @@
 package com.databasepreservation.common.client.common.visualization.browse.table;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.common.RightPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.fields.MetadataField;
@@ -7,6 +12,8 @@ import com.databasepreservation.common.client.common.search.SearchInfo;
 import com.databasepreservation.common.client.common.search.TableSearchPanel;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.visualization.browse.foreignKey.ForeignKeyPanelOptions;
+import com.databasepreservation.common.client.configuration.observer.CollectionObserver;
+import com.databasepreservation.common.client.configuration.observer.CollectionStatusObserver;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
@@ -20,20 +27,19 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import config.i18n.client.ClientMessages;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import config.i18n.client.ClientMessages;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class TablePanel extends RightPanel {
+public class TablePanel extends RightPanel implements CollectionStatusObserver {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, TablePanel> instances = new HashMap<>();
+  private static final String SEPARATOR = "/";
 
-  public static TablePanel getInstance(CollectionStatus status, ViewerDatabase database, String tableUUID, String route) {
+  public static TablePanel getInstance(CollectionStatus status, ViewerDatabase database, String tableUUID,
+    String route) {
     return getInstance(status, database, tableUUID, null, route);
   }
 
@@ -41,26 +47,32 @@ public class TablePanel extends RightPanel {
     return getInstance(null, database, tableUUID, null, route);
   }
 
-  public static TablePanel getInstance(CollectionStatus status, ViewerDatabase database, String tableUUID, String searchInfoJson, String route) {
-    String separator = "/";
-    String code = database.getUuid() + separator + tableUUID;
+  public static TablePanel getInstance(CollectionStatus status, ViewerDatabase database, String tableUUID,
+    String searchInfoJson, String route) {
+
+    String code = database.getUuid() + SEPARATOR + tableUUID;
     TablePanel instance = instances.get(code);
     if (instance == null) {
-      instance = new TablePanel(database, tableUUID, searchInfoJson, route);
+      instance = new TablePanel(status, database, tableUUID, searchInfoJson, route);
       instances.put(code, instance);
     } else if (searchInfoJson != null) {
       instance.applySearchInfoJson(searchInfoJson);
     } else if (instance.tableSearchPanel.isSearchInfoDefined()) {
-      instance = new TablePanel(database, tableUUID, route);
+      instance = new TablePanel(status, database, tableUUID, route);
       instances.put(code, instance);
     }
 
     return instance;
   }
 
-  public static TablePanel createInstance(ViewerDatabase database, ViewerTable table, SearchInfo searchInfo,
-    String route) {
-    return new TablePanel(database, table, searchInfo, route);
+  public static TablePanel createInstance(CollectionStatus status, ViewerDatabase database, ViewerTable table,
+    SearchInfo searchInfo, String route) {
+    return new TablePanel(status, database, table, searchInfo, route);
+  }
+
+  @Override
+  public void updateCollection(CollectionStatus collectionStatus) {
+    instances.clear();
   }
 
   interface TablePanelUiBinder extends UiBinder<Widget, TablePanel> {
@@ -86,6 +98,7 @@ public class TablePanel extends RightPanel {
   @UiField
   Button options;
 
+  private CollectionStatus collectionStatus;
   private ViewerDatabase database;
   private ViewerTable table;
   private String route;
@@ -102,11 +115,13 @@ public class TablePanel extends RightPanel {
    * @param searchInfo
    *          the predefined search
    */
-  private TablePanel(ViewerDatabase database, ViewerTable table, SearchInfo searchInfo, String route) {
+  private TablePanel(CollectionStatus status, ViewerDatabase database, ViewerTable table, SearchInfo searchInfo,
+    String route) {
     tableSearchPanel = new TableSearchPanel(searchInfo);
 
     initWidget(uiBinder.createAndBindUi(this));
 
+    this.collectionStatus = status;
     this.database = database;
     this.table = table;
     this.route = route;
@@ -122,8 +137,8 @@ public class TablePanel extends RightPanel {
    * @param tableUUID
    *          the table UUID
    */
-  private TablePanel(ViewerDatabase viewerDatabase, final String tableUUID, String route) {
-    this(viewerDatabase, tableUUID, null, route);
+  private TablePanel(CollectionStatus status, ViewerDatabase viewerDatabase, final String tableUUID, String route) {
+    this(status, viewerDatabase, tableUUID, null, route);
   }
 
   /**
@@ -138,7 +153,9 @@ public class TablePanel extends RightPanel {
    * @param searchInfoJson
    *          the SearchInfo instance as a JSON String
    */
-  private TablePanel(ViewerDatabase viewerDatabase, final String tableUUID, String searchInfoJson, String route) {
+  private TablePanel(CollectionStatus status, ViewerDatabase viewerDatabase, final String tableUUID,
+    String searchInfoJson, String route) {
+    collectionStatus = status;
     database = viewerDatabase;
     table = database.getMetadata().getTable(tableUUID);
     this.route = route;
@@ -156,8 +173,8 @@ public class TablePanel extends RightPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-      BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forTable(database.getMetadata().getName(),
-      database.getUuid(), table.getNameWithoutPrefix(), table.getUuid()));
+    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forTable(database.getMetadata().getName(),
+      database.getUuid(), collectionStatus.getTableStatus(table.getUuid()).getCustomName(), table.getUuid()));
   }
 
   public void setColumnsAndValues(List<String> columnsAndValues) {
@@ -177,7 +194,11 @@ public class TablePanel extends RightPanel {
   }
 
   private void init() {
-    mainHeader.setWidget(CommonClientUtils.getHeader(table, "h1", database.getMetadata().getSchemas().size() > 1));
+    final CollectionObserver collectionObserver = ObserverManager.getCollectionObserver();
+    collectionObserver.addObserver(this);
+
+    mainHeader.setWidget(CommonClientUtils.getHeader(collectionStatus.getTableStatus(table.getUuid()), table, "h1",
+      database.getMetadata().getSchemas().size() > 1));
     options.setText(messages.basicActionOptions());
 
     options.addClickHandler(event -> {
@@ -188,8 +209,9 @@ public class TablePanel extends RightPanel {
       }
     });
 
-    if (ViewerStringUtils.isNotBlank(table.getDescription())) {
-      MetadataField instance = MetadataField.createInstance(table.getDescription());
+    if (ViewerStringUtils.isNotBlank(collectionStatus.getTableStatus(table.getUuid()).getCustomDescription())) {
+      MetadataField instance = MetadataField
+        .createInstance(collectionStatus.getTableStatus(table.getUuid()).getCustomDescription());
       instance.setCSS("table-row-description");
       description.add(instance);
     }

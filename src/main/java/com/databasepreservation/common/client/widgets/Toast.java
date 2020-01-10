@@ -116,8 +116,6 @@ public class Toast extends PopupPanel {
           slotOffset += slots[i].getOffsetHeight() + PADDING_HEIGHT;
         }
       }
-      GWT.log("win: " + Window.getClientWidth());
-      GWT.log("offset: " + offsetWidth);
       Toast.this.setPopupPosition(Window.getClientWidth() - offsetWidth - PADDING_WIDTH,
         Window.getScrollTop() + PADDING_HEIGHT + slotOffset);
     });

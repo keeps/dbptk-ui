@@ -65,12 +65,11 @@ public class AdvancedConfiguration extends ContentPanel {
 
     FocusPanel ManagementTablesPanel = createOptions(messages.advancedConfigurationLabelForTableManagement(),
       messages.advancedConfigurationTextForTableManagement());
-    ManagementTablesPanel.addClickHandler(clickEvent -> {
-      HistoryManager.gotoTableManagement(database.getUuid());
-    });
+    ManagementTablesPanel.addClickHandler(event -> HistoryManager.gotoTableManagement(database.getUuid()));
 
     FocusPanel ManagementColumnsPanel = createOptions(messages.advancedConfigurationLabelForColumnsManagement(),
       messages.advancedConfigurationTextForColumnsManagement());
+    ManagementColumnsPanel.addClickHandler(event -> HistoryManager.gotoColumnsManagement(database.getUuid()));
 
     FocusPanel DataTransformationPanel = createOptions(messages.advancedConfigurationLabelForDataTransformation(),
       messages.advancedConfigurationTextForDataTransformation());

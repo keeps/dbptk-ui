@@ -1,4 +1,4 @@
-package com.databasepreservation.common.client.common.visualization.browse.configuration.table;
+package com.databasepreservation.common.client.common.visualization.browse.configuration.columns;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -6,12 +6,13 @@ import java.util.List;
 import java.util.Map;
 
 import com.databasepreservation.common.client.ObserverManager;
-import com.databasepreservation.common.client.common.ContentPanel;
+import com.databasepreservation.common.client.common.RightPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.lists.cells.EditableCell;
 import com.databasepreservation.common.client.common.lists.widgets.MultipleSelectionTablePanel;
+import com.databasepreservation.common.client.common.sidebar.Sidebar;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.configuration.observer.CollectionObserver;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
@@ -40,7 +41,7 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-public class TableManagementPanel extends ContentPanel {
+public class ColumnsManagementPanel extends RightPanel {
   private ClientMessages messages = GWT.create(ClientMessages.class);
 
   @UiField
@@ -49,39 +50,48 @@ public class TableManagementPanel extends ContentPanel {
   @UiField
   FlowPanel content;
 
-  interface TableManagementPanelUiBinder extends UiBinder<Widget, TableManagementPanel> {
+  interface TableManagementPanelUiBinder extends UiBinder<Widget, ColumnsManagementPanel> {
   }
 
   private static TableManagementPanelUiBinder binder = GWT.create(TableManagementPanelUiBinder.class);
 
-  private static Map<String, TableManagementPanel> instances = new HashMap<>();
+  private static Map<String, ColumnsManagementPanel> instances = new HashMap<>();
   private ViewerDatabase database;
   private CollectionStatus collectionStatus;
   private Map<String, MultipleSelectionTablePanel<ViewerTable>> tables = new HashMap<>();
   private Map<String, Boolean> initialLoading = new HashMap<>();
   private Map<String, TableStatusHelper> editableValues = new HashMap<>();
 
-  public static TableManagementPanel getInstance(ViewerDatabase database, CollectionStatus status) {
-    return instances.computeIfAbsent(database.getUuid(), k -> new TableManagementPanel(database, status));
+  public static ColumnsManagementPanel getInstance(ViewerDatabase database, CollectionStatus status) {
+    return instances.computeIfAbsent(database.getUuid(),
+      k -> new ColumnsManagementPanel(database, status, null));
   }
 
-  private TableManagementPanel(ViewerDatabase database, CollectionStatus collectionStatus) {
+  public static ColumnsManagementPanel getInstance(CollectionStatus status, ViewerDatabase database, String tableUUID) {
+    return instances.computeIfAbsent(database.getUuid() + tableUUID,
+      k -> new ColumnsManagementPanel(database, status, tableUUID));
+  }
+
+  private ColumnsManagementPanel(ViewerDatabase database, CollectionStatus collectionStatus, String tableUUID) {
     initWidget(binder.createAndBindUi(this));
     this.database = database;
     this.collectionStatus = collectionStatus;
-
-    init();
+    if (tableUUID != null) {
+      init();
+    }
   }
 
   private void init() {
     configureHeader();
-    for (ViewerSchema schema : database.getMetadata().getSchemas()) {
-      MultipleSelectionTablePanel<ViewerTable> schemaTable = createCellTableForViewerTable();
-      schemaTable.setHeight("100%");
-      populateTable(schemaTable, database.getMetadata().getSchema(schema.getUuid()));
-      tables.put(schema.getUuid(), schemaTable);
-      content.add(schemaTable);
-    }
+    // for (ViewerSchema schema : database.getMetadata().getSchemas()) {
+    // MultipleSelectionTablePanel<ViewerTable> schemaTable =
+    // createCellTableForViewerTable();
+    // schemaTable.setHeight("100%");
+    // populateTable(schemaTable,
+    // database.getMetadata().getSchema(schema.getUuid()));
+    // tables.put(schema.getUuid(), schemaTable);
+    // content.add(schemaTable);
+    // }
 
     configureButtonsPanel();
   }
@@ -111,7 +121,7 @@ public class TableManagementPanel extends ContentPanel {
       ConfigurationService.Util.call((Boolean result) -> {
         final CollectionObserver collectionObserver = ObserverManager.getCollectionObserver();
         collectionObserver.setCollectionStatus(collectionStatus);
-        Toast.showInfo(messages.tableManagementPageTitle(), messages.tableManagementPageToastDescription());
+        Toast.showInfo(messages.columnManagementPageTitle(), messages.columnManagementPageToastDescription());
       }).updateCollectionStatus(database.getUuid(), database.getUuid(), collectionStatus);
     });
 
@@ -121,9 +131,9 @@ public class TableManagementPanel extends ContentPanel {
 
   private void configureHeader() {
     mainHeader.setWidget(CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE),
-      messages.tableManagementPageTitle(), "h1"));
+      messages.columnManagementPageTitle(), "h1"));
 
-    MetadataField instance = MetadataField.createInstance(messages.tableManagementPageTableTextForDescription());
+    MetadataField instance = MetadataField.createInstance(messages.columnManagementPageTableTextForDescription());
     instance.setCSS("table-row-description", "font-size-description");
 
     content.add(instance);
@@ -208,7 +218,7 @@ public class TableManagementPanel extends ContentPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forTableManagement(database.getUuid(),
+    List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forColumnsManagement(database.getUuid(),
       database.getMetadata().getName());
     BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
   }

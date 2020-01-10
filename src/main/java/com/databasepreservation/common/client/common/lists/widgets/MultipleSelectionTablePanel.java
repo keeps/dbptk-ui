@@ -204,7 +204,9 @@ public class MultipleSelectionTablePanel<C> extends Composite {
     for (ColumnInfo<C> column : columns) {
       if (!column.hide) {
         cellTable.addColumn(column.column, column.header);
-        cellTable.setColumnWidth(column.column, column.widthEM, Style.Unit.EM);
+        if (column.widthEM > 0) {
+          cellTable.setColumnWidth(column.column, column.widthEM, Style.Unit.EM);
+        }
       }
     }
 

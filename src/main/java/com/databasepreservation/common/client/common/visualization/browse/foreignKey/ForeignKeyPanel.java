@@ -127,7 +127,7 @@ public class ForeignKeyPanel extends RightPanel {
       } else {
         // display a TablePanel
         SearchInfo searchInfo = new SearchInfo(table, columnAndValueMapping);
-        TablePanel tablePanel = TablePanel.createInstance(database, table, searchInfo, HistoryManager.ROUTE_FOREIGN_KEY);
+        TablePanel tablePanel = TablePanel.createInstance(null, database, table, searchInfo, HistoryManager.ROUTE_FOREIGN_KEY);
         tablePanel.setColumnsAndValues(columnsAndValues);
         if (toUpdate) {
           tablePanel.update();

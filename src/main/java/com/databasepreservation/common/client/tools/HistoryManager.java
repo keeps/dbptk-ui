@@ -56,6 +56,7 @@ public class HistoryManager {
   public static final String ROUTE_ADVANCED_CONFIGURATION = "advanced-configuration";
   public static final String ROUTE_DATA_TRANSFORMATION = "data-transformation";
   public static final String ROUTE_TABLE_MANAGEMENT = "table-management";
+  public static final String ROUTE_COLUMNS_MANAGEMENT = "columns-management";
   public static final String ROUTE_JOBS = "jobs";
   public static final String ROUTE_PREFERENCES = "preferences";
 
@@ -293,6 +294,11 @@ public class HistoryManager {
     newHistory(params);
   }
 
+  public static void gotoColumnsManagement(String databaseUUID) {
+    List<String> params = Arrays.asList(ROUTE_COLUMNS_MANAGEMENT, databaseUUID);
+    newHistory(params);
+  }
+
   public static void gotoJobs() {
     List<String> params = Collections.singletonList(ROUTE_JOBS);
     newHistory(params);
@@ -479,5 +485,9 @@ public class HistoryManager {
 
   public static String linkToDataTransformationTable(String database_uuid, String tableUUID) {
     return createHistoryToken(Arrays.asList(ROUTE_DATA_TRANSFORMATION, database_uuid, tableUUID));
+  }
+
+  public static String linkToColumnManagement(String databaseUUID, String tableUUID) {
+    return createHistoryToken(Arrays.asList(ROUTE_COLUMNS_MANAGEMENT, databaseUUID, tableUUID));
   }
 }

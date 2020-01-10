@@ -2,6 +2,7 @@ package com.databasepreservation.common.client.common.utils;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.fields.GenericField;
+import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.models.structure.ViewerView;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
@@ -61,6 +62,35 @@ public class CommonClientUtils {
     }
   }
 
+  public static FlowPanel getHeader(TableStatus tableStatus, ViewerTable table, String hClass, boolean multiSchema) {
+    if (multiSchema) {
+      return getHeaderMultiSchema(tableStatus, table, hClass);
+    } else {
+      return getHeaderSingleSchema(tableStatus, table, hClass);
+    }
+  }
+
+  private static FlowPanel getHeaderMultiSchema(TableStatus status, ViewerTable table, String hClass) {
+    String separatorIconTag = FontAwesomeIconManager.getTagWithStyleName(FontAwesomeIconManager.SCHEMA_TABLE_SEPARATOR,
+        "schema-table-separator");
+
+    if (table.isCustomView()) {
+      final SafeHtml stackedIconSafeHtml = FontAwesomeIconManager.getStackedIconSafeHtml(
+          FontAwesomeIconManager.SCHEMA_VIEWS, FontAwesomeIconManager.COG,
+          table.getSchemaName() + " " + separatorIconTag + " " + status.getCustomName());
+      return getHeader(stackedIconSafeHtml, hClass);
+    } else if (table.isMaterializedView()) {
+      final SafeHtml stackedIconSafeHtml = FontAwesomeIconManager.getStackedIconSafeHtml(
+          FontAwesomeIconManager.SCHEMA_VIEWS, FontAwesomeIconManager.TABLE,
+          table.getSchemaName() + " " + separatorIconTag + " " + status.getCustomName());
+      return getHeader(stackedIconSafeHtml, hClass);
+    } else {
+      final SafeHtml tagSafeHtml = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE,
+          table.getSchemaName() + " " + separatorIconTag + " " + status.getCustomName());
+      return getHeader(tagSafeHtml, hClass);
+    }
+  }
+
   private static FlowPanel getHeaderMultiSchema(ViewerTable table, String hClass) {
     String separatorIconTag = FontAwesomeIconManager.getTagWithStyleName(FontAwesomeIconManager.SCHEMA_TABLE_SEPARATOR,
       "schema-table-separator");
@@ -94,6 +124,21 @@ public class CommonClientUtils {
     } else {
       final String tag = FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE);
       return getHeader(tag, table, hClass);
+    }
+  }
+
+  private static FlowPanel getHeaderSingleSchema(TableStatus status, ViewerTable table, String hClass) {
+    if (table.isCustomView()) {
+      final SafeHtml stackedIconSafeHtml = FontAwesomeIconManager.getStackedIconSafeHtml(
+          FontAwesomeIconManager.SCHEMA_VIEWS, FontAwesomeIconManager.COG, status.getCustomName());
+      return getHeader(stackedIconSafeHtml, hClass);
+    } else if (table.isMaterializedView()) {
+      final SafeHtml stackedIconSafeHtml = FontAwesomeIconManager.getStackedIconSafeHtml(
+          FontAwesomeIconManager.SCHEMA_VIEWS, FontAwesomeIconManager.TABLE, status.getCustomName());
+      return getHeader(stackedIconSafeHtml, hClass);
+    } else {
+      final String tag = FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE);
+      return getHeader(tag, status.getCustomName(), hClass);
     }
   }
 
