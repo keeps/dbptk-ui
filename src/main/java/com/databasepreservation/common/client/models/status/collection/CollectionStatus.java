@@ -15,7 +15,7 @@ import org.fusesource.restygwt.client.Json;
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-@JsonPropertyOrder({"version", "id", "solrCollectionPrefix", "name", "description", "tables", "searches" , "denormalizations"})
+@JsonPropertyOrder({"version", "id", "solrCollectionPrefix", "name", "description", "tables", "savedSearches" , "denormalizations"})
 public class CollectionStatus implements Serializable {
 
   private String version;
@@ -81,7 +81,6 @@ public class CollectionStatus implements Serializable {
     this.tables = tables;
   }
 
-  @JsonProperty("searches")
   public List<SavedSearch> getSavedSearches() {
     return savedSearches;
   }

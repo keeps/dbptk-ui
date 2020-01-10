@@ -24,11 +24,11 @@ import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.widgets.Toast;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.storage.client.Storage;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
-import com.google.gwt.user.client.Cookies;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -36,10 +36,9 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
-import org.geotools.xml.xLink.XLinkSchema;
 
 /**
- * @author Gabriel Barros <gbarros@keep.pt>
+ * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 public class TableManagementPanel extends ContentPanel {
   private ClientMessages messages = GWT.create(ClientMessages.class);
@@ -55,6 +54,7 @@ public class TableManagementPanel extends ContentPanel {
 
   private static TableManagementPanelUiBinder binder = GWT.create(TableManagementPanelUiBinder.class);
 
+  private static final String SHOW_TOAST_AFTER = "showToastAfter";
   private static Map<String, TableManagementPanel> instances = new HashMap<>();
   private ViewerDatabase database;
   private CollectionStatus collectionStatus;
@@ -94,7 +94,7 @@ public class TableManagementPanel extends ContentPanel {
     btnCancel.setText(messages.basicActionCancel());
     btnCancel.addStyleName("btn btn-danger btn-times-circle");
     Button btnUpdate = new Button();
-    btnUpdate.setText(messages.basicActionUpdate());
+    btnUpdate.setText(messages.basicActionSave());
     btnUpdate.addStyleName("btn btn-primary btn-save");
 
     btnCancel.addClickHandler(clickEvent -> HistoryManager.gotoAdvancedConfiguration(database.getUuid()));
@@ -112,7 +112,10 @@ public class TableManagementPanel extends ContentPanel {
       }
 
       ConfigurationService.Util.call((Boolean result) -> {
-        Cookies.setCookie("reload", "true");
+        Storage storage = Storage.getSessionStorageIfSupported();
+        if (storage != null) {
+          storage.setItem(SHOW_TOAST_AFTER, Boolean.toString(true));
+        }
         Window.Location.reload();
       }).updateCollectionStatus(database.getUuid(), database.getUuid(), collectionStatus);
     });
@@ -209,9 +212,12 @@ public class TableManagementPanel extends ContentPanel {
   }
 
   private void displayToast() {
-    if (Cookies.getCookie("reload") != null && Cookies.getCookie("reload").equals("true")) {
-      Cookies.removeCookie("reload");
-      Toast.showInfo(messages.tableManagementPageTitle(), messages.tableManagementPageToastDescription());
+    Storage storage = Storage.getSessionStorageIfSupported();
+    if (storage != null) {
+      if (Boolean.TRUE.toString().equals(storage.getItem(SHOW_TOAST_AFTER))) {
+        Toast.showInfo(messages.tableManagementPageTitle(), messages.tableManagementPageToastDescription());
+        storage.removeItem(SHOW_TOAST_AFTER);
+      }
     }
   }
 

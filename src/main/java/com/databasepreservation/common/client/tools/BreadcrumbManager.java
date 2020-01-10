@@ -45,7 +45,7 @@ public class BreadcrumbManager {
   }
 
   public static List<BreadcrumbItem> forNewUpload() {
-    List<BreadcrumbItem> items = forHome();
+    List<BreadcrumbItem> items = forManageDatabase();
     items.add(
       new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.NEW_UPLOAD)
         + SafeHtmlUtils.htmlEscape(messages.newUpload())), HistoryManager::gotoNewUpload));

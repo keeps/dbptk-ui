@@ -7,7 +7,6 @@ import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
@@ -188,7 +187,7 @@ public class ConfigurationManager {
   }
 
   public void updateCollectionStatus(String databaseUUID, CollectionStatus status) throws ViewerException {
-    synchronized (databaseStatusFileLock) {
+    synchronized (collectionStatusFileLock) {
       Path statusFile = getCollectionStatusPath(databaseUUID, status.getId());
       JsonTransformer.writeObjectToFile(status, statusFile);
     }

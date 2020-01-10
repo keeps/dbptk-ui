@@ -8,7 +8,7 @@ import java.io.Serializable;
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-@JsonPropertyOrder({"id", "name", "customName", "description", "customDescription", "hide", "nestedColumn", "order", "template"})
+@JsonPropertyOrder({"id", "name", "customName", "description", "customDescription", "nestedColumn", "order", "search", "details"})
 public class ColumnStatus implements Serializable {
 
   private String id;
@@ -16,10 +16,10 @@ public class ColumnStatus implements Serializable {
   private String customName;
   private String description;
   private String customDescription;
-  private boolean hide;
   private boolean nestedColumn;
   private int order;
-  private TemplateStatus templateStatus;
+  private SearchStatus searchStatus;
+  private DetailsStatus detailsStatus;
 
   public ColumnStatus() {
   }
@@ -48,14 +48,6 @@ public class ColumnStatus implements Serializable {
     this.description = description;
   }
 
-  public boolean isHide() {
-    return hide;
-  }
-
-  public void setHide(boolean hide) {
-    this.hide = hide;
-  }
-
   public boolean isNestedColumn() {
     return nestedColumn;
   }
@@ -72,15 +64,6 @@ public class ColumnStatus implements Serializable {
     this.order = order;
   }
 
-  @JsonProperty("template")
-  public TemplateStatus getTemplateStatus() {
-    return templateStatus;
-  }
-
-  public void setTemplateStatus(TemplateStatus templateStatus) {
-    this.templateStatus = templateStatus;
-  }
-
   public String getCustomName() {
     return customName;
   }
@@ -95,5 +78,23 @@ public class ColumnStatus implements Serializable {
 
   public void setCustomDescription(String customDescription) {
     this.customDescription = customDescription;
+  }
+
+  @JsonProperty("search")
+  public SearchStatus getSearchStatus() {
+    return searchStatus;
+  }
+
+  public void setSearchStatus(SearchStatus searchStatus) {
+    this.searchStatus = searchStatus;
+  }
+
+  @JsonProperty("details")
+  public DetailsStatus getDetailsStatus() {
+    return detailsStatus;
+  }
+
+  public void setDetailsStatus(DetailsStatus detailsStatus) {
+    this.detailsStatus = detailsStatus;
   }
 }

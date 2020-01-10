@@ -3,12 +3,17 @@ package com.databasepreservation.common.utils;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.models.status.collection.AdvancedStatus;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
+import com.databasepreservation.common.client.models.status.collection.DetailsStatus;
+import com.databasepreservation.common.client.models.status.collection.FacetsStatus;
+import com.databasepreservation.common.client.models.status.collection.ListStatus;
+import com.databasepreservation.common.client.models.status.collection.SearchStatus;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
+import com.databasepreservation.common.client.models.status.collection.TemplateStatus;
 import com.databasepreservation.common.client.models.status.database.DatabaseStatus;
 import com.databasepreservation.common.client.models.status.database.Indicators;
 import com.databasepreservation.common.client.models.status.database.SiardStatus;
@@ -69,11 +74,49 @@ public class StatusUtils {
     status.setCustomName(column.getDisplayName());
     status.setDescription(column.getDescription());
     status.setCustomDescription(column.getDescription());
-    status.setHide(hide);
     status.setNestedColumn(false);
     status.setOrder(order);
+    status.setSearchStatus(getSearchStatus(hide));
+    status.setDetailsStatus(getDetailsStatus(hide));
 
     return status;
+  }
+
+  public static DetailsStatus getDetailsStatus(boolean hide) {
+    DetailsStatus status = new DetailsStatus();
+    status.setHide(hide);
+    status.setTemplateStatus(getTemplateStatus());
+
+    return status;
+  }
+
+  public static SearchStatus getSearchStatus(boolean hide) {
+    SearchStatus status = new SearchStatus();
+    status.setAdvanced(getAdvancedStatus());
+    status.setList(getListStatus(hide));
+    status.setFacets(getFacetsStatus());
+
+    return status;
+  }
+
+  public static AdvancedStatus getAdvancedStatus() {
+    return new AdvancedStatus();
+  }
+
+  public static ListStatus getListStatus(boolean hide) {
+    ListStatus status = new ListStatus();
+    status.setHide(hide);
+    status.setTemplate(getTemplateStatus());
+
+    return status;
+  }
+
+  public static TemplateStatus getTemplateStatus() {
+    return new TemplateStatus();
+  }
+
+  public static FacetsStatus getFacetsStatus() {
+    return new FacetsStatus();
   }
 
   public static DatabaseStatus getDatabaseStatus(ViewerDatabase database) {
