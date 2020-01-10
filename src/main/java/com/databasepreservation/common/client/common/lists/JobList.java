@@ -45,6 +45,7 @@ public class JobList extends BasicAsyncTableCell<ViewerJob> {
   private Column<ViewerJob, SafeHtml> createTimeColumn;
   private Column<ViewerJob, SafeHtml> startTimeColumn;
   private Column<ViewerJob, SafeHtml> endTimeColumn;
+  private Column<ViewerJob, SafeHtml> progressColumn;
   private Column<ViewerJob, SafeHtml> statusColumn;
   private Column<ViewerJob, SafeHtml> detailColumn;
 
@@ -54,7 +55,7 @@ public class JobList extends BasicAsyncTableCell<ViewerJob> {
 
   private JobList(Filter filter, Facets facets, String summary, boolean selectable, boolean exportable) {
     super(filter, facets, summary, selectable, exportable, 15, 15);
-    autoUpdate(10000);
+    autoUpdate(5000);
   }
 
   @Override
@@ -119,12 +120,23 @@ public class JobList extends BasicAsyncTableCell<ViewerJob> {
       public SafeHtml getValue(ViewerJob viewerJob) {
         if (viewerJob != null && viewerJob.getEndTime() != null) {
           return SafeHtmlUtils.fromString(Humanize.formatDateTime(viewerJob.getEndTime()));
-        } else if(viewerJob != null && viewerJob.getStartTime() != null){
-          Date spendTime = new Date();
-          spendTime.setTime(new Date().getTime() - viewerJob.getStartTime().getTime());
-          return SafeHtmlUtils.fromString(DateTimeFormat.getFormat("HH:mm:ss").format(spendTime));
         } else {
           return SafeHtmlUtils.fromString("unknown");
+        }
+      }
+    };
+
+    progressColumn = new TooltipColumn<ViewerJob>() {
+      @Override
+      public SafeHtml getValue(ViewerJob viewerJob) {
+        if (viewerJob != null && viewerJob.getProcessRows() != null && viewerJob.getRowsToProcess() != null) {
+          int currentGlobalPercent = new Double(
+            (viewerJob.getProcessRows() * 1.0D / viewerJob.getRowsToProcess()) * 100).intValue();
+
+          return SafeHtmlUtils.fromString(
+            currentGlobalPercent + "% (" + viewerJob.getProcessRows() + " of " + viewerJob.getRowsToProcess() + ")");
+        } else {
+          return SafeHtmlUtils.fromString("0%");
         }
       }
     };
@@ -154,6 +166,7 @@ public class JobList extends BasicAsyncTableCell<ViewerJob> {
     addColumn(createTimeColumn, messages.batchJobsTextForCreateTime(), true, TextAlign.NONE, 10);
     addColumn(startTimeColumn, messages.batchJobsTextForStartTime(), true, TextAlign.NONE, 10);
     addColumn(endTimeColumn, messages.batchJobsTextForEndTime(), true, TextAlign.NONE, 10);
+    addColumn(progressColumn, "Progress", true, TextAlign.NONE, 10);
     addColumn(statusColumn, messages.batchJobsTextForStatus(), true, TextAlign.NONE, 8);
     addColumn(detailColumn, messages.batchJobsTextForDetail(), true, TextAlign.NONE, 30);
 

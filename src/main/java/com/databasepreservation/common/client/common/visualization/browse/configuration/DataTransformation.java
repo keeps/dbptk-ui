@@ -54,6 +54,7 @@ public class DataTransformation extends RightPanel {
 
   private static DataTransformerUiBinder binder = GWT.create(DataTransformerUiBinder.class);
   private static Map<String, DataTransformation> instances = new HashMap<>();
+  private static Map<String, DenormalizeConfiguration> denormalizeConfigurationList = new HashMap<>();
 
   @UiField
   public ClientMessages messages = GWT.create(ClientMessages.class);
@@ -79,7 +80,6 @@ public class DataTransformation extends RightPanel {
   private Button btnRunAllConfiguration = new Button();
   private Button btnClearConfiguration = new Button();
   private Boolean isInformation;
-  private DataTransformationProgressPanel progressPanel;
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
@@ -106,10 +106,8 @@ public class DataTransformation extends RightPanel {
     this.database = database;
     this.sidebar = sidebar;
     this.collectionStatus = collectionStatus;
-    this.progressPanel = DataTransformationProgressPanel.getInstance(database);
     if (tableUUID == null) {
       isInformation = true;
-      content.add(progressPanel);
     } else {
       isInformation = false;
       this.table = database.getMetadata().getTable(tableUUID);
@@ -126,17 +124,18 @@ public class DataTransformation extends RightPanel {
       .contains(ViewerConstants.DENORMALIZATION_STATUS_PREFIX + table.getUuid())) {
       ConfigurationService.Util.call((DenormalizeConfiguration response) -> {
         denormalizeConfiguration = response;
-        loading.setVisible(false);
         init();
       }).getDenormalizeConfigurationFile(database.getUuid(), table.getUuid());
     } else {
       denormalizeConfiguration = new DenormalizeConfiguration(database.getUuid(), table);
-      loading.setVisible(false);
       init();
     }
   }
 
   private void init() {
+    denormalizeConfigurationList.put(table.getUuid(), denormalizeConfiguration);
+    loading.setVisible(false);
+
     Alert alert = new Alert(Alert.MessageAlertType.INFO, messages.dataTransformationTextForAlertColumnsOrder(), true,
       FontAwesomeIconManager.DATABASE_INFORMATION);
     content.add(alert);
@@ -177,8 +176,8 @@ public class DataTransformation extends RightPanel {
     btnSaveAllConfiguration.setText("Save All");
     btnSaveAllConfiguration.setStyleName("btn btn-save");
     btnSaveAllConfiguration.addClickHandler(clickEvent -> {
-      for (DataTransformation dataTransformation : instances.values()) {
-        DataTransformationUtils.saveConfiguration(database.getUuid(), dataTransformation.denormalizeConfiguration);
+      for (Map.Entry<String, DenormalizeConfiguration> entry : denormalizeConfigurationList.entrySet()) {
+        DataTransformationUtils.saveConfiguration(database.getUuid(), entry.getValue());
       }
       btnRunConfiguration.setEnabled(true);
     });
@@ -188,18 +187,16 @@ public class DataTransformation extends RightPanel {
     btnRunConfiguration.addClickHandler(clickEvent -> {
       JobService.Util.call((Boolean result) -> {
       }).denormalizeTableJob(database.getUuid(), table.getUuid());
-      progressPanel.initProgress();
-      HistoryManager.gotoDataTransformation(database.getUuid());
+      HistoryManager.gotoJobs();
     });
 
     btnRunAllConfiguration.setEnabled(true);
     btnRunAllConfiguration.setText("Run All");
     btnRunAllConfiguration.setStyleName("btn btn-run");
     btnRunAllConfiguration.addClickHandler(clickEvent -> {
-      JobService.Util.call((Boolean result) -> {
+      JobService.Util.call((List<String> jobs) -> {
       }).denormalizeCollectionJob(database.getUuid());
-      progressPanel.initProgress();
-      HistoryManager.gotoDataTransformation(database.getUuid());
+      HistoryManager.gotoJobs();
     });
 
     String btnSaveText = "run";

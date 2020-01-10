@@ -1,9 +1,9 @@
 package com.databasepreservation.common.client.models.structure;
 
-import com.databasepreservation.common.client.index.IsIndexed;
-
 import java.io.Serializable;
 import java.util.Date;
+
+import com.databasepreservation.common.client.index.IsIndexed;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -23,6 +23,8 @@ public class ViewerJob extends IsIndexed implements Serializable {
   private Date endTime;
   private String exitCode;
   private String exitDescription;
+  private Long rowsToProcess;
+  private Long processRows;
 
   @Override
   public void setUuid(String uuid) {
@@ -128,5 +130,21 @@ public class ViewerJob extends IsIndexed implements Serializable {
 
   public void setTableName(String tableName) {
     this.tableName = tableName;
+  }
+
+  public Long getRowsToProcess() {
+    return rowsToProcess;
+  }
+
+  public void setRowsToProcess(Long rowsToProcess) {
+    this.rowsToProcess = rowsToProcess;
+  }
+
+  public Long getProcessRows() {
+    return processRows;
+  }
+
+  public void setProcessRows(Long processRows) {
+    this.processRows = processRows;
   }
 }

@@ -6,15 +6,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.databasepreservation.common.client.common.dialogs.Dialogs;
-import com.databasepreservation.common.client.common.visualization.browse.configuration.DataTransformationProgressPanel;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerSchema;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
-import com.databasepreservation.common.client.services.JobService;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
@@ -23,10 +20,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.DisclosurePanel;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.TextBox;
@@ -164,17 +159,7 @@ public class DataTransformationSidebar extends Composite implements Sidebar {
     // database metadata
     final ViewerMetadata metadata = database.getMetadata();
 
-    SidebarHyperlink informationLink = new SidebarHyperlink(FontAwesomeIconManager
-      .getTagSafeHtml(FontAwesomeIconManager.DATABASE_INFORMATION, messages.menusidebar_information()),
-      HistoryManager.linkToDataTransformation(database.getUuid()));
-    informationLink.setH5().setIndent0();
-    list.put(database.getUuid(), informationLink);
-    sidebarGroup.add(informationLink);
-
     /* Schemas */
-    SidebarItem schemasHeader = createSidebarSubItemHeaderSafeHMTL("Tables", FontAwesomeIconManager.LIST);
-    FlowPanel schemaItems = new FlowPanel();
-
     final int totalSchemas = metadata.getSchemas().size();
 
     String iconTag = FontAwesomeIconManager.getTagWithStyleName(FontAwesomeIconManager.SCHEMA_TABLE_SEPARATOR, "fa-sm");
@@ -185,13 +170,13 @@ public class DataTransformationSidebar extends Composite implements Sidebar {
       for (ViewerTable table : schema.getTables()) {
         if (!table.isCustomView() && !table.isMaterializedView()) {
           if (collectionStatus.showTable(table.getUuid())) {
-            schemaItems.add(createTableItem(schema, table, totalSchemas, iconTag));
+
+            sidebarGroup.add(createTableItem(schema, table, totalSchemas, iconTag));
+
           }
         }
       }
     }
-
-    createSubItem(schemasHeader, schemaItems, false);
 
     searchInit();
     setVisible(true);
@@ -208,9 +193,8 @@ public class DataTransformationSidebar extends Composite implements Sidebar {
     }
     SidebarHyperlink tableLink = new SidebarHyperlink(html,
       HistoryManager.linkToDataTransformationTable(database.getUuid(), table.getUuid()));
-    tableLink.setH6().setIndent2();
+    tableLink.setH6().setIndent0();
     list.put(table.getUuid(), tableLink);
-    sidebarGroup.add(tableLink);
 
     return tableLink;
   }
@@ -231,20 +215,6 @@ public class DataTransformationSidebar extends Composite implements Sidebar {
         init();
       }
     }
-  }
-
-  private SidebarItem createSidebarSubItemHeaderSafeHMTL(String headerText, String headerIcon) {
-    return new SidebarItem(FontAwesomeIconManager.getTagSafeHtml(headerIcon, headerText)).setH5().setIndent0();
-  }
-
-  private void createSubItem(SidebarItem header, FlowPanel content, boolean collapsed) {
-    DisclosurePanel panel = new DisclosurePanel();
-    panel.setOpen(!collapsed);
-    panel.setAnimationEnabled(true);
-    panel.setHeader(header);
-    panel.setContent(content);
-    panel.getElement().addClassName("sidebar-collapse");
-    sidebarGroup.add(panel);
   }
 
   @Override
@@ -279,44 +249,33 @@ public class DataTransformationSidebar extends Composite implements Sidebar {
     // show all
     for (Widget widget : sidebarGroup) {
       widget.setVisible(true);
-
-      if (widget instanceof DisclosurePanel) {
-        DisclosurePanel disclosurePanel = (DisclosurePanel) widget;
-        FlowPanel fp = (FlowPanel) disclosurePanel.getContent();
-        for (Widget value : fp) {
-          SidebarItem sb = (SidebarItem) value;
+      if (widget instanceof SidebarItem) {
+          SidebarItem sb = (SidebarItem) widget;
           sb.setVisible(true);
-        }
       }
     }
   }
 
   private void showMatching(final String searchValue) {
     // show matching and their parents
-    Set<DisclosurePanel> disclosurePanelsThatShouldBeVisible = new HashSet<>();
+    Set<Widget> disclosurePanelsThatShouldBeVisible = new HashSet<>();
 
     for (Widget widget : sidebarGroup) {
-      if (widget instanceof DisclosurePanel) {
-        DisclosurePanel disclosurePanel = (DisclosurePanel) widget;
-        disclosurePanel.setOpen(true);
-        FlowPanel fp = (FlowPanel) disclosurePanel.getContent();
-
-        for (Widget value : fp) {
-          SidebarItem sb = (SidebarItem) value;
+      if (widget instanceof SidebarHyperlink) {
+          SidebarItem sb = (SidebarItem) widget;
           if (sb.getText().toLowerCase().contains(searchValue.toLowerCase())) {
             sb.setVisible(true);
-            disclosurePanelsThatShouldBeVisible.add(disclosurePanel);
+            disclosurePanelsThatShouldBeVisible.add(widget);
           } else {
             sb.setVisible(false);
-            disclosurePanel.setVisible(false);
+            widget.setVisible(false);
           }
-        }
       } else {
         widget.setVisible(true);
       }
     }
 
-    for (DisclosurePanel disclosurePanel : disclosurePanelsThatShouldBeVisible) {
+    for (Widget disclosurePanel : disclosurePanelsThatShouldBeVisible) {
       disclosurePanel.setVisible(true);
     }
   }

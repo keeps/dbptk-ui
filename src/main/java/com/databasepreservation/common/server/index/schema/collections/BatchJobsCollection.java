@@ -8,6 +8,8 @@ import static com.databasepreservation.common.client.ViewerConstants.SOLR_BATCH_
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_BATCH_JOB_EXIT_DESCRIPTION;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_BATCH_JOB_ID;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_BATCH_JOB_NAME;
+import static com.databasepreservation.common.client.ViewerConstants.SOLR_BATCH_JOB_ROWS_PROCESSED;
+import static com.databasepreservation.common.client.ViewerConstants.SOLR_BATCH_JOB_ROWS_TO_PROCESS;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_BATCH_JOB_START_TIME;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_BATCH_JOB_STATUS;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_BATCH_JOB_TABLE_NAME;
@@ -61,18 +63,20 @@ public class BatchJobsCollection extends AbstractSolrCollection<ViewerJob> {
   public List<Field> getFields() {
     List<Field> fields = new ArrayList<>(super.getFields());
 
-    fields.add(new Field(SOLR_BATCH_JOB_ID, Field.TYPE_LONG).setIndexed(true).setRequired(true));
-    fields.add(new Field(SOLR_BATCH_JOB_DATABASE_UUID, Field.TYPE_STRING).setIndexed(true).setRequired(true));
-    fields.add(new Field(SOLR_BATCH_JOB_DATABASE_NAME, Field.TYPE_STRING).setIndexed(true).setRequired(true));
-    fields.add(new Field(SOLR_BATCH_JOB_TABLE_UUID, Field.TYPE_STRING).setIndexed(true).setRequired(true));
-    fields.add(new Field(SOLR_BATCH_JOB_TABLE_NAME, Field.TYPE_STRING).setIndexed(true).setRequired(true));
-    fields.add(new Field(SOLR_BATCH_JOB_NAME, Field.TYPE_STRING).setIndexed(true).setRequired(true));
-    fields.add(new Field(SOLR_BATCH_JOB_STATUS, Field.TYPE_STRING).setIndexed(true).setRequired(true));
-    fields.add(new Field(SOLR_BATCH_JOB_CREATE_TIME, Field.TYPE_DATE).setIndexed(true).setRequired(true));
+    fields.add(new Field(SOLR_BATCH_JOB_ID, Field.TYPE_LONG).setIndexed(true).setRequired(false));
+    fields.add(new Field(SOLR_BATCH_JOB_DATABASE_UUID, Field.TYPE_STRING).setIndexed(true).setRequired(false));
+    fields.add(new Field(SOLR_BATCH_JOB_DATABASE_NAME, Field.TYPE_STRING).setIndexed(true).setRequired(false));
+    fields.add(new Field(SOLR_BATCH_JOB_TABLE_UUID, Field.TYPE_STRING).setIndexed(true).setRequired(false));
+    fields.add(new Field(SOLR_BATCH_JOB_TABLE_NAME, Field.TYPE_STRING).setIndexed(true).setRequired(false));
+    fields.add(new Field(SOLR_BATCH_JOB_NAME, Field.TYPE_STRING).setIndexed(true).setRequired(false));
+    fields.add(new Field(SOLR_BATCH_JOB_STATUS, Field.TYPE_STRING).setIndexed(true).setRequired(false));
+    fields.add(new Field(SOLR_BATCH_JOB_CREATE_TIME, Field.TYPE_DATE).setIndexed(true).setRequired(false));
     fields.add(new Field(SOLR_BATCH_JOB_START_TIME, Field.TYPE_DATE).setIndexed(true).setRequired(false));
     fields.add(new Field(SOLR_BATCH_JOB_END_TIME, Field.TYPE_DATE).setIndexed(true).setRequired(false));
     fields.add(new Field(SOLR_BATCH_JOB_EXIT_CODE, Field.TYPE_STRING).setIndexed(true).setRequired(false));
     fields.add(new Field(SOLR_BATCH_JOB_EXIT_DESCRIPTION, Field.TYPE_STRING).setIndexed(true).setRequired(false));
+    fields.add(new Field(SOLR_BATCH_JOB_ROWS_TO_PROCESS, Field.TYPE_LONG).setIndexed(true).setRequired(false));
+    fields.add(new Field(SOLR_BATCH_JOB_ROWS_PROCESSED, Field.TYPE_LONG).setIndexed(true).setRequired(false));
 
     return fields;
   }
@@ -94,6 +98,8 @@ public class BatchJobsCollection extends AbstractSolrCollection<ViewerJob> {
     doc.addField(SOLR_BATCH_JOB_END_TIME, viewerJob.getEndTime());
     doc.addField(SOLR_BATCH_JOB_EXIT_CODE, viewerJob.getExitCode());
     doc.addField(SOLR_BATCH_JOB_EXIT_DESCRIPTION, viewerJob.getExitDescription());
+    doc.addField(SOLR_BATCH_JOB_ROWS_TO_PROCESS, viewerJob.getRowsToProcess());
+    doc.addField(SOLR_BATCH_JOB_ROWS_PROCESSED, viewerJob.getProcessRows());
 
     return doc;
   }
@@ -115,6 +121,8 @@ public class BatchJobsCollection extends AbstractSolrCollection<ViewerJob> {
     viewerJob.setEndTime(SolrUtils.objectToDate(doc.get(SOLR_BATCH_JOB_END_TIME)));
     viewerJob.setExitCode(SolrUtils.objectToString(doc.get(SOLR_BATCH_JOB_EXIT_CODE), null));
     viewerJob.setExitDescription(SolrUtils.objectToString(doc.get(SOLR_BATCH_JOB_EXIT_DESCRIPTION), null));
+    viewerJob.setRowsToProcess(SolrUtils.objectToLong(doc.get(SOLR_BATCH_JOB_ROWS_TO_PROCESS), null));
+    viewerJob.setProcessRows(SolrUtils.objectToLong(doc.get(SOLR_BATCH_JOB_ROWS_PROCESSED), null));
 
     return viewerJob;
   }

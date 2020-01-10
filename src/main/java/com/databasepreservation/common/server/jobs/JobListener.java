@@ -45,7 +45,7 @@ public class JobListener extends JobExecutionListenerSupport {
   @Override
   public void afterJob(JobExecution jobExecution) {
     try {
-      JobController.addSolrBatchJob(jobExecution);
+      JobController.editSolrBatchJob(jobExecution);
       if(jobExecution.getStatus() == BatchStatus.COMPLETED) {
         String databaseUUID = jobExecution.getJobParameters().getString(ViewerConstants.CONTROLLER_DATABASE_ID_PARAM);
         String tableUUID = jobExecution.getJobParameters().getString(ViewerConstants.CONTROLLER_TABLE_ID_PARAM);

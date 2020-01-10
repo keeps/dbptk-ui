@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.client.models.structure.ViewerJob;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest;
@@ -36,11 +35,11 @@ import com.databasepreservation.common.client.index.IsIndexed;
 import com.databasepreservation.common.client.index.facets.Facets;
 import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.activity.logs.ActivityLogEntry;
-import com.databasepreservation.common.client.models.configuration.collection.CollectionConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseFromToolkit;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
+import com.databasepreservation.common.client.models.structure.ViewerJob;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
@@ -252,6 +251,44 @@ public class DatabaseRowsSolrManager {
       LOGGER.debug("Solr error while attempting to save batch job", e);
     } catch (IOException e) {
       LOGGER.debug("IOException while attempting to save batch job", e);
+    }
+  }
+
+  public void editBatchJob(String jobUUID, long countRows, long processedRows) throws NotFoundException, GenericException {
+    SolrInputDocument doc = new SolrInputDocument();
+    doc.addField(ViewerConstants.INDEX_ID, jobUUID);
+    doc.addField(ViewerConstants.SOLR_BATCH_JOB_ROWS_TO_PROCESS, SolrUtils.asValueUpdate(countRows));
+    doc.addField(ViewerConstants.SOLR_BATCH_JOB_ROWS_PROCESSED, SolrUtils.asValueUpdate(processedRows));
+    try {
+      client.add(ViewerConstants.SOLR_INDEX_BATCH_JOBS_COLLECTION_NAME, doc);
+      client.commit(ViewerConstants.SOLR_INDEX_BATCH_JOBS_COLLECTION_NAME, true, true);
+
+    } catch (SolrServerException e) {
+      LOGGER.debug("Solr error while attempting to save batch job", e);
+    } catch (IOException e) {
+      LOGGER.debug("IOException while attempting to save batch job", e);
+    }
+  }
+
+  public void editBatchJob(ViewerJob job) throws NotFoundException, GenericException {
+    SolrCollection<ViewerJob> viewerJobSolrCollection = SolrDefaultCollectionRegistry.get(ViewerJob.class);
+    try {
+      SolrInputDocument doc = new SolrInputDocument();;
+      doc.addField(ViewerConstants.INDEX_ID, job.getUuid());
+      for (SolrInputField field : viewerJobSolrCollection.toSolrDocument(job)) {
+        if(!field.getName().equals(ViewerConstants.INDEX_ID) && field.getValue() != null){
+          doc.addField(field.getName(), SolrUtils.asValueUpdate(field.getValue()));
+        }
+      }
+
+      client.add(ViewerConstants.SOLR_INDEX_BATCH_JOBS_COLLECTION_NAME, doc);
+      client.commit(ViewerConstants.SOLR_INDEX_BATCH_JOBS_COLLECTION_NAME, true, true);
+    } catch (SolrServerException e) {
+      LOGGER.debug("Solr error while attempting to save batch job", e);
+    } catch (IOException e) {
+      LOGGER.debug("IOException while attempting to save batch job", e);
+    } catch (ViewerException | AuthorizationDeniedException | RequestNotValidException e) {
+      LOGGER.debug("Solr error while converting to document", e);
     }
   }
 

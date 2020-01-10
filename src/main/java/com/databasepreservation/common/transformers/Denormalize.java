@@ -48,12 +48,14 @@ public class Denormalize {
   private final DatabaseRowsSolrManager solrManager;
   private ViewerDatabase database;
   private String databaseUUID;
+  private String jobUUID;
   private Map<DenormalizeConfiguration, List<Tree<RelatedTablesConfiguration>>> structure = new HashMap<>();
   private DataTransformationObserver observer;
 
-  public Denormalize(String databaseUUID, String tableUUID) throws ModuleException {
+  public Denormalize(String databaseUUID, String tableUUID, String jobUUID) throws ModuleException {
     this.solrManager = ViewerFactory.getSolrManager();
     this.databaseUUID = databaseUUID;
+    this.jobUUID = jobUUID;
     observer = new DataTransformationObserver(databaseUUID, tableUUID);
     try {
       database = solrManager.retrieve(ViewerDatabase.class, this.databaseUUID);
@@ -150,18 +152,23 @@ public class Denormalize {
         }
       }
 
-      for (SolrQuery query : queryList) {
-        IterableNestedIndexResult sourceRows = solrManager.findAllRows(databaseUUID, query, null);
-        observer.notifyStartDataTransformation(sourceRows.getTotalCount());
-        for (ViewerRow row : sourceRows) {
-          observer.notifyProcessedRow();
-          List<SolrInputDocument> nestedDocument = new ArrayList<>();
-          createdNestedDocument(row, nestedDocument);
-          if (!nestedDocument.isEmpty()) {
-            solrManager.addDatabaseField(databaseUUID, row.getUuid(), nestedDocument);
+      try {
+        long processedRows = 0;
+        for (SolrQuery query : queryList) {
+          IterableNestedIndexResult sourceRows = solrManager.findAllRows(databaseUUID, query, null);
+          Long rowToProcess = sourceRows.getTotalCount() * queryList.size();
+          solrManager.editBatchJob(jobUUID, rowToProcess, processedRows);
+          for (ViewerRow row : sourceRows) {
+            solrManager.editBatchJob(jobUUID, rowToProcess, ++processedRows);
+            List<SolrInputDocument> nestedDocument = new ArrayList<>();
+            createdNestedDocument(row, nestedDocument);
+            if (!nestedDocument.isEmpty()) {
+              solrManager.addDatabaseField(databaseUUID, row.getUuid(), nestedDocument);
+            }
           }
         }
-        observer.notifyFinishDataTransformation();
+      } catch (NotFoundException | GenericException e) {
+        throw new ModuleException().withMessage("Cannot update batch row in solr");
       }
     }
   }

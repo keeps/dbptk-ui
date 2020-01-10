@@ -46,4 +46,10 @@ public class JobController {
     viewerJob.setTableName(database.getMetadata().getTable(viewerJob.getTableUuid()).getName());
     solrManager.addBatchJob(viewerJob);
   }
+
+  public static void editSolrBatchJob(JobExecution jobExecution) throws NotFoundException, GenericException {
+    DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
+    ViewerJob viewerJob = createViewerJob(jobExecution);
+    solrManager.editBatchJob(viewerJob);
+  }
 }

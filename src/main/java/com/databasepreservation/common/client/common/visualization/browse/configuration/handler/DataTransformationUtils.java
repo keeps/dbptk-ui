@@ -15,7 +15,6 @@ import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
 import com.databasepreservation.common.client.models.structure.ViewerReference;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.services.ConfigurationService;
-import com.databasepreservation.common.client.services.JobService;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -70,7 +69,7 @@ public class DataTransformationUtils {
   }
 
   public static void saveConfiguration(String databaseUUID, DenormalizeConfiguration denormalizeConfiguration) {
-    if (denormalizeConfiguration.getState().equals(ViewerJobStatus.NEW)) {
+    if (denormalizeConfiguration != null && denormalizeConfiguration.getState().equals(ViewerJobStatus.NEW)) {
       ConfigurationService.Util.call((Boolean result) -> {
         Dialogs.showInformationDialog("Configuration file", "Created denormalization configuration file with success",
           "OK");

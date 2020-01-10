@@ -20,9 +20,12 @@ public class DenormalizeProcessor implements Tasklet {
       .getString(ViewerConstants.CONTROLLER_DATABASE_ID_PARAM);
     String tableUUID = chunkContext.getStepContext().getStepExecution().getJobParameters()
       .getString(ViewerConstants.CONTROLLER_TABLE_ID_PARAM);
-    System.out.println("Processor " + databaseUUID);
+    String jobUUID = chunkContext.getStepContext().getStepExecution().getJobParameters()
+        .getString(ViewerConstants.INDEX_ID);
+    System.out.println("JobUUID " + jobUUID);
+    System.out.println("databaseUUID " + databaseUUID);
     System.out.println("tableUUID " + tableUUID);
-    Denormalize denormalize = new Denormalize(databaseUUID, tableUUID);
+    Denormalize denormalize = new Denormalize(databaseUUID, tableUUID, jobUUID);
     return RepeatStatus.FINISHED;
   }
 }

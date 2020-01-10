@@ -165,6 +165,8 @@ public class ViewerConstants {
   public static final String SOLR_BATCH_JOB_END_TIME = "endTime";
   public static final String SOLR_BATCH_JOB_EXIT_CODE = "exitCode";
   public static final String SOLR_BATCH_JOB_EXIT_DESCRIPTION = "exitCodeDescription";
+  public static final String SOLR_BATCH_JOB_ROWS_TO_PROCESS = "rowsToProcess";
+  public static final String SOLR_BATCH_JOB_ROWS_PROCESSED = "rowsProcessed";
 
   public static final String ACTIVITY_LOG_PROPERTY = "activityLogEntry";
 
