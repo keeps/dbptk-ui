@@ -4,6 +4,7 @@ import java.util.*;
 
 import com.databasepreservation.common.client.common.lists.TableRowList;
 import com.databasepreservation.common.client.common.search.TableSearchPanel;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import org.roda.core.data.v2.index.filter.*;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
@@ -44,12 +45,12 @@ import config.i18n.client.ClientMessages;
 public class RowPanel extends RightPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
 
-  public static RowPanel createInstance(ViewerDatabase database, String tableUUID, String rowUUID) {
-    return new RowPanel(database, tableUUID, rowUUID);
+  public static RowPanel createInstance(ViewerDatabase database, String tableUUID, String rowUUID, CollectionStatus status) {
+    return new RowPanel(database, tableUUID, rowUUID, status);
   }
 
-  public static RowPanel createInstance(ViewerDatabase database, ViewerTable table, ViewerRow row) {
-    return new RowPanel(database, table, row);
+  public static RowPanel createInstance(ViewerDatabase database, ViewerTable table, ViewerRow row, CollectionStatus status) {
+    return new RowPanel(database, table, row, status);
   }
 
   interface RowPanelUiBinder extends UiBinder<Widget, RowPanel> {
@@ -61,6 +62,7 @@ public class RowPanel extends RightPanel {
   private ViewerTable table;
   private final String rowUUID;
   private ViewerRow row;
+  private CollectionStatus status;
 
   @UiField
   SimplePanel recordHeader;
@@ -71,11 +73,12 @@ public class RowPanel extends RightPanel {
   @UiField
   FlowPanel description;
 
-  private RowPanel(ViewerDatabase database, ViewerTable table, ViewerRow row) {
+  private RowPanel(ViewerDatabase database, ViewerTable table, ViewerRow row, CollectionStatus status) {
     this.rowUUID = row.getUuid();
     this.database = database;
     this.table = table;
     this.row = row;
+    this.status = status;
 
     initWidget(uiBinder.createAndBindUi(this));
 
@@ -83,10 +86,11 @@ public class RowPanel extends RightPanel {
     init();
   }
 
-  private RowPanel(ViewerDatabase viewerDatabase, final String tableUUID, final String rowUUID) {
+  private RowPanel(ViewerDatabase viewerDatabase, final String tableUUID, final String rowUUID, CollectionStatus status) {
     this.rowUUID = rowUUID;
     this.database = viewerDatabase;
     this.table = database.getMetadata().getTable(tableUUID);
+    this.status = status;
 
     initWidget(uiBinder.createAndBindUi(this));
 
@@ -304,7 +308,7 @@ public class RowPanel extends RightPanel {
 
       ViewerTable table = database.getMetadata().getTableById(entry.getKey());
 
-      final TableSearchPanel tableSearchPanel = new TableSearchPanel();
+      final TableSearchPanel tableSearchPanel = new TableSearchPanel(status);
           tableSearchPanel.provideSource(database, table, filter);
 
       //TableRowList tableRowList = new TableRowList(database, table, filter, null, null, false, false);

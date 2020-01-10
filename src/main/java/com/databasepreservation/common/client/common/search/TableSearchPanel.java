@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.databasepreservation.common.client.common.utils.AdvancedSearchUtils;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import org.roda.core.data.v2.index.filter.Filter;
 
 import com.databasepreservation.common.client.ViewerConstants;
@@ -37,6 +38,7 @@ import config.i18n.client.ClientMessages;
 public class TableSearchPanel extends Composite {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static final Binder uiBinder = GWT.create(Binder.class);
+  private CollectionStatus status;
 
   interface Binder extends UiBinder<Widget, TableSearchPanel> {
   }
@@ -70,8 +72,8 @@ public class TableSearchPanel extends Composite {
   /**
    * Table search panel with a SearchInfo predefined search
    */
-  public TableSearchPanel(SearchInfo searchInfo) {
-    this();
+  public TableSearchPanel(SearchInfo searchInfo, CollectionStatus status) {
+    this.status = status;
     if (SearchInfo.isPresentAndValid(searchInfo)) {
       currentSearchInfo = searchInfo;
     }
@@ -82,8 +84,8 @@ public class TableSearchPanel extends Composite {
    * 
    * @param searchInfoJson
    */
-  public TableSearchPanel(String searchInfoJson) {
-    this();
+  public TableSearchPanel(String searchInfoJson, CollectionStatus status) {
+    this(status);
     setCurrentSearchInfoFromJson(searchInfoJson);
   }
 
@@ -94,9 +96,10 @@ public class TableSearchPanel extends Composite {
   /**
    * Table search panel without a predefined search
    */
-  public TableSearchPanel() {
+  public TableSearchPanel(CollectionStatus status) {
     itemsSearchAdvancedFieldsPanel = new FlowPanel();
     searchAdvancedFieldOptions = new ListBox();
+    this.status = status;
 
     initWidget(uiBinder.createAndBindUi(this));
 
@@ -126,7 +129,7 @@ public class TableSearchPanel extends Composite {
     this.database = database;
     this.table = table;
 
-    tableRowList = new TableRowList(database, table, initialFilter, null, null, false, table.getCountRows() != 0);
+    tableRowList = new TableRowList(database, table, initialFilter, null, null, false, table.getCountRows() != 0, status);
     tableRowList.setColumnVisibility(columnDisplayNameToVisibleState);
 
     GWT.log("initial filter: " + initialFilter);

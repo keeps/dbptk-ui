@@ -117,7 +117,7 @@ public class TablePanel extends RightPanel implements CollectionStatusObserver {
    */
   private TablePanel(CollectionStatus status, ViewerDatabase database, ViewerTable table, SearchInfo searchInfo,
     String route) {
-    tableSearchPanel = new TableSearchPanel(searchInfo);
+    tableSearchPanel = new TableSearchPanel(searchInfo, status);
 
     initWidget(uiBinder.createAndBindUi(this));
 
@@ -161,9 +161,9 @@ public class TablePanel extends RightPanel implements CollectionStatusObserver {
     this.route = route;
 
     if (searchInfoJson != null) {
-      tableSearchPanel = new TableSearchPanel(searchInfoJson);
+      tableSearchPanel = new TableSearchPanel(searchInfoJson, collectionStatus);
     } else {
-      tableSearchPanel = new TableSearchPanel();
+      tableSearchPanel = new TableSearchPanel(collectionStatus);
     }
 
     initWidget(uiBinder.createAndBindUi(this));

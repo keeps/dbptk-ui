@@ -1,5 +1,6 @@
 package com.databasepreservation.common.client.common.visualization.browse.table;
 
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.RightPanel;
@@ -28,8 +29,8 @@ import config.i18n.client.ClientMessages;
 public class TableSavedSearchPanel extends RightPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
 
-  public static TableSavedSearchPanel createInstance(ViewerDatabase database, String savedSearchUUID) {
-    return new TableSavedSearchPanel(database, savedSearchUUID);
+  public static TableSavedSearchPanel createInstance(ViewerDatabase database, String savedSearchUUID, CollectionStatus status) {
+    return new TableSavedSearchPanel(database, savedSearchUUID, status);
   }
 
   interface TableSavedSearchPanelUiBinder extends UiBinder<Widget, TableSavedSearchPanel> {
@@ -40,6 +41,7 @@ public class TableSavedSearchPanel extends RightPanel {
   private ViewerDatabase database;
   private String savedSearchUUID;
   private SavedSearch savedSearch;
+  private CollectionStatus status;
 
   @UiField
   SimplePanel mainHeader;
@@ -50,8 +52,9 @@ public class TableSavedSearchPanel extends RightPanel {
   @UiField
   SimplePanel tableSearchPanelContainer;
 
-  private TableSavedSearchPanel(ViewerDatabase viewerDatabase, final String savedSearchUUID) {
+  private TableSavedSearchPanel(ViewerDatabase viewerDatabase, final String savedSearchUUID, CollectionStatus status) {
     database = viewerDatabase;
+    this.status = status;
     this.savedSearchUUID = savedSearchUUID;
 
     initWidget(uiBinder.createAndBindUi(this));
@@ -98,7 +101,7 @@ public class TableSavedSearchPanel extends RightPanel {
     // set searchForm and table
     SearchInfo searchInfo = ViewerJsonUtils.getSearchInfoMapper().read(savedSearch.getSearchInfoJson());
     if (SearchInfo.isPresentAndValid(searchInfo)) {
-      TableSearchPanel tableSearchPanel = new TableSearchPanel(searchInfo);
+      TableSearchPanel tableSearchPanel = new TableSearchPanel(searchInfo, status);
       tableSearchPanel.provideSource(database, database.getMetadata().getTable(tableUUID));
       tableSearchPanelContainer.setWidget(tableSearchPanel);
     } else {

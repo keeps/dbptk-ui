@@ -1,6 +1,7 @@
 package com.databasepreservation.common.client.common.visualization.browse;
 
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.models.structure.ViewerSchema;
@@ -43,9 +44,10 @@ import java.util.Map;
 public class DatabaseSearchPanel extends RightPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, DatabaseSearchPanel> instances = new HashMap<>();
+  private final CollectionStatus status;
 
-  public static DatabaseSearchPanel getInstance(ViewerDatabase database) {
-    return instances.computeIfAbsent(database.getUuid(), k -> new DatabaseSearchPanel(database));
+  public static DatabaseSearchPanel getInstance(ViewerDatabase database, CollectionStatus status) {
+    return instances.computeIfAbsent(database.getUuid(), k -> new DatabaseSearchPanel(database, status));
   }
 
   interface DatabaseSearchPanelUiBinder extends UiBinder<Widget, DatabaseSearchPanel> {
@@ -84,9 +86,10 @@ public class DatabaseSearchPanel extends RightPanel {
 
   private ViewerDatabase database;
 
-  private DatabaseSearchPanel(ViewerDatabase database) {
+  private DatabaseSearchPanel(ViewerDatabase database, CollectionStatus status) {
     tableSearchPanelContainers = new ArrayList<>();
     noResults = new Alert(Alert.MessageAlertType.INFO, messages.noRecordsMatchTheSearchTerms());
+    this.status = status;
 
     initWidget(uiBinder.createAndBindUi(this));
     title.setText(messages.searchAllRecords());
@@ -120,7 +123,7 @@ public class DatabaseSearchPanel extends RightPanel {
     for (ViewerSchema viewerSchema : database.getMetadata().getSchemas()) {
       for (ViewerTable viewerTable : viewerSchema.getTables()) {
         TableSearchPanelContainer tableSearchPanelContainer = new TableSearchPanelContainer(database, viewerTable,
-          searchCompletedCallback);
+          searchCompletedCallback, status);
         tableSearchPanelContainers.add(tableSearchPanelContainer);
         content.add(tableSearchPanelContainer);
       }
@@ -171,6 +174,7 @@ public class DatabaseSearchPanel extends RightPanel {
   private static class TableSearchPanelContainer extends FlowPanel {
     private final Widget header;
     private final SimplePanel tableContainer;
+    private final CollectionStatus status;
     private TableRowList tableRowList;
     private final ViewerDatabase database;
     private final ViewerTable table;
@@ -179,11 +183,12 @@ public class DatabaseSearchPanel extends RightPanel {
     private boolean stillSearching = false;
 
     public TableSearchPanelContainer(ViewerDatabase database, ViewerTable table,
-      Callback<TableSearchPanelContainer, Void> searchCompletedEvent) {
+                                     Callback<TableSearchPanelContainer, Void> searchCompletedEvent, CollectionStatus status) {
       super();
       this.database = database;
       this.table = table;
       this.searchCompletedCallback = searchCompletedEvent;
+      this.status = status;
 
       tableContainer = new SimplePanel();
       tableContainer.setVisible(false);
@@ -200,7 +205,7 @@ public class DatabaseSearchPanel extends RightPanel {
         filter = ViewerConstants.DEFAULT_FILTER;
       }
 
-      tableRowList = new TableRowList(database, table, filter, null, null, false, false);
+      tableRowList = new TableRowList(database, table, filter, null, null, false, false, status);
 
       tableContainer.setWidget(tableRowList);
 

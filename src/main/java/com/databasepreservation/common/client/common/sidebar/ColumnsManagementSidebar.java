@@ -162,6 +162,7 @@ public class ColumnsManagementSidebar extends Composite implements Sidebar, Coll
   }
 
   public void init() {
+
     // database metadata
     final ViewerMetadata metadata = database.getMetadata();
 
@@ -179,7 +180,7 @@ public class ColumnsManagementSidebar extends Composite implements Sidebar, Coll
       for (ViewerTable table : schema.getTables()) {
         if (!table.isCustomView() && !table.isMaterializedView()) {
           if (collectionStatus.showTable(table.getUuid())) {
-            schemaItems.add(createTableItem(schema, table, totalSchemas, iconTag));
+            sidebarGroup.add(createTableItem(schema, table, totalSchemas, iconTag));
           }
         }
       }
@@ -187,11 +188,9 @@ public class ColumnsManagementSidebar extends Composite implements Sidebar, Coll
       for (ViewerView view : schema.getViews()) {
         final SidebarHyperlink viewItem = createViewItem(schema, view, totalSchemas, iconTag);
         if (viewItem != null)
-          schemaItems.add(viewItem);
+          sidebarGroup.add(viewItem);
       }
     }
-
-    createSubItem(tableHeader, schemaItems, false);
 
     searchInit();
     setVisible(true);
@@ -211,7 +210,6 @@ public class ColumnsManagementSidebar extends Composite implements Sidebar, Coll
       HistoryManager.linkToColumnManagement(database.getUuid(), table.getUuid()));
     tableLink.setH6().setIndent2();
     list.put(table.getUuid(), tableLink);
-    sidebarGroup.add(tableLink);
 
     return tableLink;
   }
@@ -250,7 +248,6 @@ public class ColumnsManagementSidebar extends Composite implements Sidebar, Coll
     }
     if (viewLink != null) {
       viewLink.setH6().setIndent2();
-      sidebarGroup.add(viewLink);
     }
 
     return viewLink;

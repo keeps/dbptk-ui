@@ -322,7 +322,7 @@ public class MainPanel extends Composite {
         setContent(databaseUUID, HistoryManager.ROUTE_DATABASE, currentHistoryPath.get(2), new RightPanelLoader() {
           @Override
           public RightPanel load(ViewerDatabase database, CollectionStatus status) {
-            return DatabaseSearchPanel.getInstance(database);
+            return DatabaseSearchPanel.getInstance(database, status);
           }
         });
 
@@ -429,7 +429,7 @@ public class MainPanel extends Composite {
         setContent(databaseUUID, currentHistoryPath.get(0), tableUUID, new RightPanelLoader() {
           @Override
           public RightPanel load(ViewerDatabase database, CollectionStatus status) {
-            return RowPanel.createInstance(database, tableUUID, recordUUID);
+            return RowPanel.createInstance(database, tableUUID, recordUUID, status);
           }
         });
 
@@ -448,7 +448,7 @@ public class MainPanel extends Composite {
         setContent(databaseUUID, currentHistoryPath.get(0), tableUUID, new RightPanelLoader() {
           @Override
           public RightPanel load(ViewerDatabase database, CollectionStatus status) {
-            return ReferencesPanel.getInstance(database, tableUUID, recordUUID, columnIndex);
+            return ReferencesPanel.getInstance(database, tableUUID, recordUUID, columnIndex, status);
           }
         });
 
@@ -479,14 +479,14 @@ public class MainPanel extends Composite {
             public RightPanel load(ViewerDatabase database, CollectionStatus status) {
               GWT.log("Col: " + columnsAndValues);
               return ForeignKeyPanel.createInstance(database, tableUUID,
-                columnsAndValues.subList(0, columnsAndValues.size() - 1), true);
+                columnsAndValues.subList(0, columnsAndValues.size() - 1), true, status);
             }
           });
         } else if (columnsAndValues.size() % 2 == 0) {
           setContent(databaseUUID, currentHistoryPath.get(0), tableUUID, new RightPanelLoader() {
             @Override
             public RightPanel load(ViewerDatabase database, CollectionStatus status) {
-              return ForeignKeyPanel.createInstance(database, tableUUID, columnsAndValues);
+              return ForeignKeyPanel.createInstance(database, tableUUID, columnsAndValues, status);
             }
           });
         } else {
@@ -513,7 +513,7 @@ public class MainPanel extends Composite {
         setContent(databaseUUID, currentHistoryPath.get(0), currentHistoryPath.get(0), new RightPanelLoader() {
           @Override
           public RightPanel load(ViewerDatabase database, CollectionStatus status) {
-            return TableSavedSearchPanel.createInstance(database, searchUUID);
+            return TableSavedSearchPanel.createInstance(database, searchUUID, status);
           }
         });
 

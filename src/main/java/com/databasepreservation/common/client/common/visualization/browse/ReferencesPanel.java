@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
 
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.services.DatabaseService;
 import org.roda.core.data.v2.index.filter.EmptyKeyFilterParameter;
 import org.roda.core.data.v2.index.filter.Filter;
@@ -47,8 +48,8 @@ public class ReferencesPanel extends RightPanel {
   private static Map<String, ReferencesPanel> instances = new HashMap<>();
 
   public static ReferencesPanel getInstance(ViewerDatabase database, String tableUUID, String recordUUID,
-    String columnIndexInTable) {
-    return new ReferencesPanel(database, tableUUID, recordUUID, columnIndexInTable);
+    String columnIndexInTable, CollectionStatus status) {
+    return new ReferencesPanel(database, tableUUID, recordUUID, columnIndexInTable, status);
   }
 
   interface ReferencesPanelUiBinder extends UiBinder<Widget, ReferencesPanel> {
@@ -62,6 +63,7 @@ public class ReferencesPanel extends RightPanel {
   private ViewerRow record;
   private Integer columnIndexInTable;
   private String columnName;
+  private final CollectionStatus status;
 
   @UiField
   FlowPanel content;
@@ -77,10 +79,12 @@ public class ReferencesPanel extends RightPanel {
   Label cellColumn;
 
   private ReferencesPanel(ViewerDatabase viewerDatabase, final String tableUUID, final String recordUUID,
-    final String columnIndexInTableAsString) {
+    final String columnIndexInTableAsString, CollectionStatus status) {
     this.recordUUID = recordUUID;
     this.columnIndexInTable = Integer.valueOf(columnIndexInTableAsString);
     this.database = viewerDatabase;
+    this.status = status;
+
     table = database.getMetadata().getTable(tableUUID);
 
     columnName = "<unknown>";
@@ -304,7 +308,7 @@ public class ReferencesPanel extends RightPanel {
     Filter filter = new Filter(filterParameters);
 
     // create the table with the filter
-    final TableSearchPanel tableSearchPanel = new TableSearchPanel();
+    final TableSearchPanel tableSearchPanel = new TableSearchPanel(status);
     tableSearchPanel.provideSource(database, otherTable, filter);
 
     return tableSearchPanel;

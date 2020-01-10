@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import org.roda.core.data.v2.index.filter.Filter;
 import org.roda.core.data.v2.index.filter.FilterParameter;
 import org.roda.core.data.v2.index.filter.SimpleFilterParameter;
@@ -33,13 +34,13 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class ForeignKeyPanel extends RightPanel {
   public static ForeignKeyPanel createInstance(ViewerDatabase database, String tableUUID,
-                                               List<String> columnsAndValues) {
-    return new ForeignKeyPanel(database, tableUUID, columnsAndValues, false);
+                                               List<String> columnsAndValues, CollectionStatus status) {
+    return new ForeignKeyPanel(database, tableUUID, columnsAndValues, false, status);
   }
 
   public static ForeignKeyPanel createInstance(ViewerDatabase database, String tableUUID,
-    List<String> columnsAndValues, boolean update) {
-    return new ForeignKeyPanel(database, tableUUID, columnsAndValues, update);
+    List<String> columnsAndValues, boolean update, CollectionStatus status) {
+    return new ForeignKeyPanel(database, tableUUID, columnsAndValues, update, status);
   }
 
   interface ForeignKeyPanelUiBinder extends UiBinder<Widget, ForeignKeyPanel> {
@@ -54,6 +55,7 @@ public class ForeignKeyPanel extends RightPanel {
   private Long rowCount;
   private ViewerRow row;
   private boolean toUpdate;
+  private CollectionStatus status;
 
   private RightPanel innerRightPanel = null;
   private BreadcrumbPanel breadcrumb = null;
@@ -61,11 +63,12 @@ public class ForeignKeyPanel extends RightPanel {
   @UiField
   SimplePanel panel;
 
-  private ForeignKeyPanel(ViewerDatabase viewerDatabase, final String tableUUID, List<String> columnsAndValues, boolean update) {
+  private ForeignKeyPanel(ViewerDatabase viewerDatabase, final String tableUUID, List<String> columnsAndValues, boolean update, CollectionStatus status) {
     database = viewerDatabase;
     table = database.getMetadata().getTable(tableUUID);
     toUpdate = update;
     this.columnsAndValues = columnsAndValues;
+    this.status = status;
     initWidget(uiBinder.createAndBindUi(this));
 
     // prepare search
@@ -122,7 +125,7 @@ public class ForeignKeyPanel extends RightPanel {
     if (rowCount != null) {
       if (rowCount == 1) {
         // display a RowPanel
-        innerRightPanel = RowPanel.createInstance(database, table, row);
+        innerRightPanel = RowPanel.createInstance(database, table, row, status);
 
       } else {
         // display a TablePanel

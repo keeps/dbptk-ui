@@ -30,4 +30,12 @@ public class ListStatus implements Serializable {
   public void setTemplate(TemplateStatus template) {
     this.template = template;
   }
+
+  @Override
+  public String toString() {
+    return "ListStatus{" +
+        "hide=" + hide +
+        ", template=" + template +
+        '}';
+  }
 }

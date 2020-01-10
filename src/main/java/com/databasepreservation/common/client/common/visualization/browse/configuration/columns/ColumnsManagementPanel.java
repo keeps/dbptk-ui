@@ -1,5 +1,6 @@
 package com.databasepreservation.common.client.common.visualization.browse.configuration.columns;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -12,14 +13,13 @@ import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.lists.cells.EditableCell;
 import com.databasepreservation.common.client.common.lists.widgets.MultipleSelectionTablePanel;
-import com.databasepreservation.common.client.common.sidebar.Sidebar;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.configuration.observer.CollectionObserver;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
-import com.databasepreservation.common.client.models.status.helpers.TableStatusHelper;
+import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
+import com.databasepreservation.common.client.models.status.collection.TableStatus;
+import com.databasepreservation.common.client.models.status.helpers.ColumnStatusHelper;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
-import com.databasepreservation.common.client.models.structure.ViewerSchema;
-import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.services.ConfigurationService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
@@ -57,10 +57,11 @@ public class ColumnsManagementPanel extends RightPanel {
 
   private static Map<String, ColumnsManagementPanel> instances = new HashMap<>();
   private ViewerDatabase database;
+  private String tableUUID;
   private CollectionStatus collectionStatus;
-  private Map<String, MultipleSelectionTablePanel<ViewerTable>> tables = new HashMap<>();
+  private MultipleSelectionTablePanel<ColumnStatus> multipleSelectionTablePanel;
   private Map<String, Boolean> initialLoading = new HashMap<>();
-  private Map<String, TableStatusHelper> editableValues = new HashMap<>();
+  private Map<String, ColumnStatusHelper> editableValues = new HashMap<>();
 
   public static ColumnsManagementPanel getInstance(ViewerDatabase database, CollectionStatus status) {
     return instances.computeIfAbsent(database.getUuid(),
@@ -76,6 +77,7 @@ public class ColumnsManagementPanel extends RightPanel {
     initWidget(binder.createAndBindUi(this));
     this.database = database;
     this.collectionStatus = collectionStatus;
+    this.tableUUID = tableUUID;
     if (tableUUID != null) {
       init();
     }
@@ -83,15 +85,11 @@ public class ColumnsManagementPanel extends RightPanel {
 
   private void init() {
     configureHeader();
-    // for (ViewerSchema schema : database.getMetadata().getSchemas()) {
-    // MultipleSelectionTablePanel<ViewerTable> schemaTable =
-    // createCellTableForViewerTable();
-    // schemaTable.setHeight("100%");
-    // populateTable(schemaTable,
-    // database.getMetadata().getSchema(schema.getUuid()));
-    // tables.put(schema.getUuid(), schemaTable);
-    // content.add(schemaTable);
-    // }
+    final TableStatus table = collectionStatus.getTableStatus(tableUUID);
+
+    multipleSelectionTablePanel = createCellTable();
+    populateTable(multipleSelectionTablePanel, table);
+    content.add(multipleSelectionTablePanel);
 
     configureButtonsPanel();
   }
@@ -107,16 +105,18 @@ public class ColumnsManagementPanel extends RightPanel {
     btnCancel.addClickHandler(clickEvent -> HistoryManager.gotoAdvancedConfiguration(database.getUuid()));
 
     btnUpdate.addClickHandler(clickEvent -> {
-      for (MultipleSelectionTablePanel<ViewerTable> value : tables.values()) {
-        for (ViewerTable table : database.getMetadata().getTables().values()) {
-          collectionStatus.updateTableHidingCondition(table.getUuid(), !value.getSelectionModel().isSelected(table));
-          if (editableValues.get(table.getUuid()) != null) {
-            collectionStatus.updateTableCustomDescription(table.getUuid(),
-              editableValues.get(table.getUuid()).getDescription());
-            collectionStatus.updateTableCustomName(table.getUuid(), editableValues.get(table.getUuid()).getLabel());
-          }
+      List<ColumnStatus> statuses = new ArrayList<>();
+      for (ColumnStatus column : collectionStatus.getTableStatus(tableUUID).getColumns()) {
+        column.updateHidingAttribute(multipleSelectionTablePanel.getSelectionModel().isSelected(column));
+        if (editableValues.get(column.getId()) != null) {
+          column.setCustomDescription(editableValues.get(column.getId()).getDescription());
+          column.setCustomName(editableValues.get(column.getId()).getLabel());
         }
+        statuses.add(column);
+        GWT.log(column.toString());
       }
+
+      collectionStatus.getTableStatus(tableUUID).setColumns(statuses);
 
       ConfigurationService.Util.call((Boolean result) -> {
         final CollectionObserver collectionObserver = ObserverManager.getCollectionObserver();
@@ -131,86 +131,85 @@ public class ColumnsManagementPanel extends RightPanel {
 
   private void configureHeader() {
     mainHeader.setWidget(CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE),
-      messages.columnManagementPageTitle(), "h1"));
+      collectionStatus.getTableStatus(tableUUID).getCustomName(), "h1"));
 
-    MetadataField instance = MetadataField.createInstance(messages.columnManagementPageTableTextForDescription());
+    MetadataField instance = MetadataField
+      .createInstance(collectionStatus.getTableStatus(tableUUID).getCustomDescription());
     instance.setCSS("table-row-description", "font-size-description");
 
     content.add(instance);
   }
 
-  private MultipleSelectionTablePanel<ViewerTable> createCellTableForViewerTable() {
+  private MultipleSelectionTablePanel<ColumnStatus> createCellTable() {
     return new MultipleSelectionTablePanel<>();
   }
 
-  private void populateTable(MultipleSelectionTablePanel<ViewerTable> selectionTablePanel,
-    final ViewerSchema viewerSchema) {
-    selectionTablePanel.createTable(new FlowPanel(), Arrays.asList(1, 2), viewerSchema.getTables().iterator(),
-      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableManagementPageTableHeaderTextForShow(), 4,
-        new Column<ViewerTable, Boolean>(new CheckboxCell(true, true)) {
+  private void populateTable(MultipleSelectionTablePanel<ColumnStatus> selectionTablePanel,
+    final TableStatus tableStatus) {
+    selectionTablePanel.createTable(new FlowPanel(), Arrays.asList(1, 2), tableStatus.getColumns().iterator(),
+      new MultipleSelectionTablePanel.ColumnInfo<>(messages.basicTableHeaderShow(), 4,
+        new Column<ColumnStatus, Boolean>(new CheckboxCell(true, true)) {
           @Override
-          public Boolean getValue(ViewerTable viewerTable) {
-            if (initialLoading.get(viewerTable.getUuid()) == null) {
-              initialLoading.put(viewerTable.getUuid(), false);
-              selectionTablePanel.getSelectionModel().setSelected(viewerTable,
-                collectionStatus.showTable(viewerTable.getUuid()));
+          public Boolean getValue(ColumnStatus column) {
+            if (initialLoading.get(column.getId()) == null) {
+              initialLoading.put(column.getId(), false);
+              selectionTablePanel.getSelectionModel().setSelected(column,
+                collectionStatus.showColumn(tableUUID, column.getId()));
             }
 
-            return selectionTablePanel.getSelectionModel().isSelected(viewerTable);
+            return selectionTablePanel.getSelectionModel().isSelected(column);
           }
         }),
-      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableManagementPageTableHeaderTextForOriginalTableName(),
-        10, new TextColumn<ViewerTable>() {
+      new MultipleSelectionTablePanel.ColumnInfo<>(messages.basicTableHeaderTableOrColumn("original"),
+        10, new TextColumn<ColumnStatus>() {
           @Override
-          public String getValue(ViewerTable table) {
-            return table.getName();
+          public String getValue(ColumnStatus column) {
+            return column.getName();
           }
         }),
-      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableManagementPageTableHeaderTextForLabel(), 15,
+      new MultipleSelectionTablePanel.ColumnInfo<>(messages.basicTableHeaderLabel(), 15,
         getLabelColumn()),
-      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableManagementPageTableHeaderTextForDescription(), 0,
+      new MultipleSelectionTablePanel.ColumnInfo<>(messages.basicTableHeaderDescription(), 0,
         getDescriptionColumn()));
   }
 
-  private Column<ViewerTable, String> getLabelColumn() {
-    Column<ViewerTable, String> label = new Column<ViewerTable, String>(new EditableCell() {}) {
+  private Column<ColumnStatus, String> getLabelColumn() {
+    Column<ColumnStatus, String> label = new Column<ColumnStatus, String>(new EditableCell() {}) {
       @Override
-      public String getValue(ViewerTable table) {
-        return collectionStatus.getTableStatus(table.getUuid()).getCustomName();
+      public String getValue(ColumnStatus column) {
+        return column.getCustomName();
       }
     };
 
-    label.setFieldUpdater((index, table, value) -> {
-      if (editableValues.get(table.getUuid()) != null) {
-        final TableStatusHelper tableStatusHelper = editableValues.get(table.getUuid());
-        tableStatusHelper.setLabel(value);
-        editableValues.put(table.getUuid(), tableStatusHelper);
+    label.setFieldUpdater((index, column, value) -> {
+      if (editableValues.get(column.getId()) != null) {
+        final ColumnStatusHelper columnStatusHelper = editableValues.get(column.getId());
+        columnStatusHelper.setLabel(value);
+        editableValues.put(column.getId(), columnStatusHelper);
       } else {
-        TableStatusHelper helper = new TableStatusHelper(value,
-          collectionStatus.getTableStatus(table.getUuid()).getCustomDescription());
-        editableValues.put(table.getUuid(), helper);
+        ColumnStatusHelper helper = new ColumnStatusHelper(value, column.getCustomDescription());
+        editableValues.put(column.getId(), helper);
       }
     });
     return label;
   }
 
-  private Column<ViewerTable, String> getDescriptionColumn() {
-    Column<ViewerTable, String> description = new Column<ViewerTable, String>(new EditableCell() {}) {
+  private Column<ColumnStatus, String> getDescriptionColumn() {
+    Column<ColumnStatus, String> description = new Column<ColumnStatus, String>(new EditableCell() {}) {
       @Override
-      public String getValue(ViewerTable table) {
-        return collectionStatus.getTableStatus(table.getUuid()).getCustomDescription();
+      public String getValue(ColumnStatus column) {
+        return column.getCustomDescription();
       }
     };
 
-    description.setFieldUpdater((index, table, value) -> {
-      if (editableValues.get(table.getUuid()) != null) {
-        final TableStatusHelper tableStatusHelper = editableValues.get(table.getUuid());
-        tableStatusHelper.setDescription(value);
-        editableValues.put(table.getUuid(), tableStatusHelper);
+    description.setFieldUpdater((index, column, value) -> {
+      if (editableValues.get(column.getId()) != null) {
+        final ColumnStatusHelper columnStatusHelper = editableValues.get(column.getId());
+        columnStatusHelper.setDescription(value);
+        editableValues.put(column.getId(), columnStatusHelper);
       } else {
-        TableStatusHelper helper = new TableStatusHelper(
-          collectionStatus.getTableStatus(table.getUuid()).getCustomName(), value);
-        editableValues.put(table.getUuid(), helper);
+        ColumnStatusHelper helper = new ColumnStatusHelper(column.getCustomName(), value);
+        editableValues.put(column.getId(), helper);
       }
     });
     return description;

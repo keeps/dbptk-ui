@@ -39,4 +39,13 @@ public class SearchStatus implements Serializable {
   public void setFacets(FacetsStatus facets) {
     this.facets = facets;
   }
+
+  @Override
+  public String toString() {
+    return "SearchStatus{" +
+        "advanced=" + advanced +
+        ", list=" + list.toString() +
+        ", facets=" + facets +
+        '}';
+  }
 }

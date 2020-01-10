@@ -97,4 +97,23 @@ public class ColumnStatus implements Serializable {
   public void setDetailsStatus(DetailsStatus detailsStatus) {
     this.detailsStatus = detailsStatus;
   }
+
+  public void updateHidingAttribute(boolean value) {
+    this.getSearchStatus().getList().setHide(value);
+  }
+
+  @Override
+  public String toString() {
+    return "ColumnStatus{" +
+        "id='" + id + '\'' +
+        ", name='" + name + '\'' +
+        ", customName='" + customName + '\'' +
+        ", description='" + description + '\'' +
+        ", customDescription='" + customDescription + '\'' +
+        ", nestedColumn=" + nestedColumn +
+        ", order=" + order +
+        ", searchStatus=" + searchStatus.toString() +
+        ", detailsStatus=" + detailsStatus +
+        '}';
+  }
 }

@@ -504,6 +504,17 @@ public interface ClientMessages extends Messages {
   String humanizedTextForViewerJobStatus(@Select String status);
 
   /********************************************
+   * Basic Table Headers
+   ********************************************/
+  String basicTableHeaderShow();
+
+  String basicTableHeaderDescription();
+
+  String basicTableHeaderLabel();
+
+  String basicTableHeaderTableOrColumn(@Select String value);
+
+  /********************************************
    * Basic Actions
    ********************************************/
   String basicActionClose();
@@ -1374,6 +1385,7 @@ public interface ClientMessages extends Messages {
   String columnManagementPageToastDescription();
 
   String columnManagementPageTableTextForDescription();
+
 
   /********************************************
    * Sidebar

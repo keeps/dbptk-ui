@@ -4,6 +4,10 @@ import static com.databasepreservation.common.client.models.structure.ViewerType
 
 import java.util.*;
 
+import com.databasepreservation.common.client.common.utils.TableRowListWrapper;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
+import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
+import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.roda.core.data.v2.common.Pair;
 import org.roda.core.data.v2.index.filter.Filter;
@@ -48,7 +52,7 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase, ViewerTable>> {
+public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper> {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private final ClientLogger logger = new ClientLogger(getClass().getName());
 
@@ -62,8 +66,8 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
   private ViewerTable viewerTable;
 
   public TableRowList(ViewerDatabase database, ViewerTable table, Filter filter, Facets facets, String summary,
-    boolean selectable, boolean exportable) {
-    super(filter, false, facets, summary, selectable, exportable, new Pair<>(database, table));
+    boolean selectable, boolean exportable, CollectionStatus status) {
+    super(filter, false, facets, summary, selectable, exportable, new TableRowListWrapper(database, table, status));
     this.viewerTable = table;
   }
 
@@ -102,9 +106,14 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
   @Override
   protected void configureDisplay(CellTable<ViewerRow> display) {
     this.display = display;
-    final ViewerTable table = getObject().getSecond();
-    final ViewerDatabase database = getObject().getFirst();
+    TableRowListWrapper wrapper = getObject();
+    final ViewerTable table = wrapper.getTable();
+    final ViewerDatabase database = wrapper.getDatabase();
+    final CollectionStatus status = wrapper.getStatus();
+
     columns = new LinkedHashMap<>(table.getColumns().size());
+
+    TableStatus tableStatus = status.getTableStatus(table.getUuid());
 
     final int columnWithBinary = getColumnWithBinary(table);
     if (columnWithBinary != -1) {
@@ -115,12 +124,22 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
 
     int columnIndex = 0;
 
-    for (ViewerColumn viewerColumn : table.getColumns()) {
+    for (ColumnStatus columnStatus : tableStatus.getColumns()) {
+      ViewerColumn viewerColumn = null;
+      for (ViewerColumn column : table.getColumns()) {
+        if(columnStatus.getId().equals(column.getSolrName())){
+          viewerColumn = column;
+          break;
+        }
+      }
+      if(viewerColumn == null) continue;
+
       final ViewerType viewerColumnType = viewerColumn.getType();
       final int thisColumnIndex = columnIndex++;
       final String solrColumnName = viewerColumn.getSolrName();
       final ViewerType.dbTypes type = viewerColumnType.getDbType();
       if (type.equals(BINARY)) {
+        ViewerColumn finalViewerColumn = viewerColumn;
         Column<ViewerRow, SafeHtml> column = new Column<ViewerRow, SafeHtml>(new SafeHtmlCell()) {
           @Override
           public void render(Cell.Context context, ViewerRow object, SafeHtmlBuilder sb) {
@@ -142,8 +161,8 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
             } else if (row.getCells().get(solrColumnName) != null) {
               final String value = row.getCells().get(solrColumnName).getValue();
               ret = SafeHtmlUtils
-                .fromTrustedString(CommonClientUtils.getAnchorForLOBDownload(getObject().getFirst().getUuid(),
-                  table.getUuid(), row.getUuid(), viewerColumn.getColumnIndexInEnclosingTable(), value).toString());
+                .fromTrustedString(CommonClientUtils.getAnchorForLOBDownload(database.getUuid(),
+                  table.getUuid(), row.getUuid(), finalViewerColumn.getColumnIndexInEnclosingTable(), value).toString());
             }
 
             return ret;
@@ -207,7 +226,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
           }
         };
         column.setSortable(viewerColumn.sortable());
-        addColumn(viewerColumn, column);
+        addColumn(columnStatus, column);
         columns.put(viewerColumn, column);
       }
     }
@@ -279,7 +298,8 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
   @Override
   protected void getData(Sublist sublist, ColumnSortList columnSortList,
     MethodCallback<IndexResult<ViewerRow>> callback) {
-    ViewerTable table = getObject().getSecond();
+    TableRowListWrapper wrapper = getObject();
+    ViewerTable table = wrapper.getTable();
     Filter filter = FilterUtils.filterByTable(getFilter(), table.getId());
     currentSubList = sublist;
 
@@ -302,7 +322,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
     FindRequest findRequest = new FindRequest(ViewerDatabase.class.getName(), filter, currentSorter, sublist,
       getFacets(), false, fieldsToReturn);
 
-    DatabaseService.Util.call(callback).findRows(getObject().getFirst().getUuid(), findRequest,
+    DatabaseService.Util.call(callback).findRows(wrapper.getDatabase().getUuid(), findRequest,
       LocaleInfo.getCurrentLocale().getLocaleName());
   }
 
@@ -361,25 +381,41 @@ public class TableRowList extends AsyncTableCell<ViewerRow, Pair<ViewerDatabase,
     handleScrollChanges();
   }
 
-  private void addColumn(ViewerColumn viewerColumn, Column<ViewerRow, ?> displayColumn) {
+  private void addColumn(ColumnStatus viewerColumn, Column<ViewerRow, ?> displayColumn) {
     if (ViewerStringUtils.isNotBlank(viewerColumn.getDescription())) {
-      SafeHtmlBuilder spanTitle = CommonClientUtils.constructSpan(viewerColumn.getDisplayName(),
+      SafeHtmlBuilder spanTitle = CommonClientUtils.constructSpan(viewerColumn.getCustomName(),
         viewerColumn.getDescription(), "column-description-block");
       SafeHtmlBuilder spanDescription = CommonClientUtils.constructSpan(viewerColumn.getDescription(),
         viewerColumn.getDescription(), "column-description-block column-description");
       addColumn(displayColumn, CommonClientUtils.wrapOnDiv(Arrays.asList(spanTitle, spanDescription)), true,
         TextAlign.LEFT, 10);
     } else {
-      SafeHtmlBuilder spanTitle = CommonClientUtils.constructSpan(viewerColumn.getDisplayName(),
+      SafeHtmlBuilder spanTitle = CommonClientUtils.constructSpan(viewerColumn.getCustomName(),
         viewerColumn.getDescription(), "column-description-block");
+      addColumn(displayColumn, spanTitle.toSafeHtml(), true, TextAlign.LEFT, 10);
+    }
+  }
+
+  private void addColumn(ViewerColumn viewerColumn, Column<ViewerRow, ?> displayColumn) {
+    if (ViewerStringUtils.isNotBlank(viewerColumn.getDescription())) {
+      SafeHtmlBuilder spanTitle = CommonClientUtils.constructSpan(viewerColumn.getDisplayName(),
+          viewerColumn.getDescription(), "column-description-block");
+      SafeHtmlBuilder spanDescription = CommonClientUtils.constructSpan(viewerColumn.getDescription(),
+          viewerColumn.getDescription(), "column-description-block column-description");
+      addColumn(displayColumn, CommonClientUtils.wrapOnDiv(Arrays.asList(spanTitle, spanDescription)), true,
+          TextAlign.LEFT, 10);
+    } else {
+      SafeHtmlBuilder spanTitle = CommonClientUtils.constructSpan(viewerColumn.getDisplayName(),
+          viewerColumn.getDescription(), "column-description-block");
       addColumn(displayColumn, spanTitle.toSafeHtml(), true, TextAlign.LEFT, 10);
     }
   }
 
   private String getExportURL(String zipFilename, String filename, boolean exportAll, boolean description,
     boolean exportLobs) {
-    ViewerDatabase database = getObject().getFirst();
-    ViewerTable table = getObject().getSecond();
+    TableRowListWrapper wrapper = getObject();
+    ViewerDatabase database = wrapper.getDatabase();
+    ViewerTable table = wrapper.getTable();
 
     // prepare parameter: field list
     List<String> solrColumns = new ArrayList<>();

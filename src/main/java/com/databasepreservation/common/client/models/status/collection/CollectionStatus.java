@@ -8,9 +8,7 @@ import java.util.Set;
 
 import com.databasepreservation.common.client.common.search.SavedSearch;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import org.fusesource.restygwt.client.Json;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -138,6 +136,20 @@ public class CollectionStatus implements Serializable {
     for (TableStatus table : tables) {
       if (table.getUuid().equals(id))
         return !table.isHide();
+    }
+
+    return true;
+  }
+
+  public boolean showColumn(String tableId, String columnId) {
+    final TableStatus tableStatus = getTableStatus(tableId);
+    if (tableStatus != null) {
+      for (ColumnStatus column : tableStatus.getColumns()) {
+        if (column.getId().equals(columnId)) {
+          return !column.getSearchStatus().getList().isHide();
+        }
+      }
+
     }
 
     return true;
