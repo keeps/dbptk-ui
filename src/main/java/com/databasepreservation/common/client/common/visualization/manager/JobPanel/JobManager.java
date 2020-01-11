@@ -34,7 +34,7 @@ public class JobManager extends ContentPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forManageDatabase();
+    List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forJobManager();
     BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
   }
 

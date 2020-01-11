@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
@@ -287,5 +288,11 @@ public class DataTransformationSidebar extends Composite implements Sidebar {
         controller.add(button);
       }
     }
+  }
+
+  @Override
+  protected void onLoad() {
+    super.onLoad();
+    JavascriptUtils.stickSidebar();
   }
 }

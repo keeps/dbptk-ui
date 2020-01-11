@@ -360,6 +360,14 @@ public class BreadcrumbManager {
     return items;
   }
 
+  public static List<BreadcrumbItem> forJobManager() {
+    List<BreadcrumbItem> items = forManageDatabase();
+        items
+          .add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.NETWORK_WIRED)
+            + SafeHtmlUtils.htmlEscape(messages.breadcrumbTextForActivityLog())), HistoryManager::gotoActivityLog));
+        return items;
+    }
+
   public static List<BreadcrumbItem> forPreferencesPanel() {
     List<BreadcrumbItem> items = forManageDatabase();
     items.add(new BreadcrumbItem(

@@ -617,6 +617,8 @@ public interface ClientMessages extends Messages {
 
   String breadcrumbTextForDataTransformation();
 
+  String breadcrumbTextForJobManager();
+
   String breadcrumbTextForPreferences();
 
   String breadcrumbTextForTableManagement();
