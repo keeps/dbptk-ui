@@ -8,9 +8,9 @@ import com.databasepreservation.common.client.models.activity.logs.LogEntryState
 import com.databasepreservation.common.client.models.activity.logs.PresenceState;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.utils.JsonUtils;
-import org.roda.core.data.v2.index.filter.Filter;
-import org.roda.core.data.v2.index.filter.FilterParameter;
-import org.roda.core.data.v2.index.filter.SimpleFilterParameter;
+import com.databasepreservation.common.client.index.filter.Filter;
+import com.databasepreservation.common.client.index.filter.FilterParameter;
+import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

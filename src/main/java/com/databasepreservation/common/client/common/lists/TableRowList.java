@@ -10,9 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.client.models.structure.ViewerCell;
 import org.fusesource.restygwt.client.MethodCallback;
-import org.roda.core.data.v2.index.filter.Filter;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
 import com.databasepreservation.common.client.ClientLogger;
@@ -27,10 +25,12 @@ import com.databasepreservation.common.client.index.ExportRequest;
 import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.index.facets.Facets;
+import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
+import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
@@ -73,8 +73,9 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
   private ViewerTable viewerTable;
 
   public TableRowList(ViewerDatabase database, ViewerTable table, Filter filter, Facets facets, String summary,
-    boolean selectable, boolean exportable, CollectionStatus status) {
-    super(filter, false, facets, summary, selectable, exportable, new TableRowListWrapper(database, table, status));
+    boolean selectable, boolean exportable, CollectionStatus status, Boolean isNested) {
+    super(filter, false, facets, summary, selectable, exportable,
+      new TableRowListWrapper(database, table, status, isNested));
     this.viewerTable = table;
   }
 
@@ -135,13 +136,14 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
       if (columnStatus.getNestedColumns().isEmpty()) {
         ViewerColumn viewerColumn = null;
         for (ViewerColumn column : table.getColumns()) {
-          if(columnStatus.getId().equals(column.getSolrName())){
+          if (columnStatus.getId().equals(column.getSolrName())) {
             viewerColumn = column;
             break;
           }
         }
-        if(viewerColumn == null) continue;
-  
+        if (viewerColumn == null)
+          continue;
+
         final ViewerType viewerColumnType = viewerColumn.getType();
         final int thisColumnIndex = columnIndex++;
         final String solrColumnName = viewerColumn.getSolrName();
@@ -158,7 +160,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
                 sb.appendHtmlConstant("</div");
               }
             }
-  
+
             @Override
             public SafeHtml getValue(ViewerRow row) {
               SafeHtml ret = null;
@@ -169,10 +171,10 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
               } else if (row.getCells().get(solrColumnName) != null) {
                 final String value = row.getCells().get(solrColumnName).getValue();
                 ret = SafeHtmlUtils
-                  .fromTrustedString(CommonClientUtils.getAnchorForLOBDownload(database.getUuid(),
-                    table.getUuid(), row.getUuid(), finalViewerColumn.getColumnIndexInEnclosingTable(), value).toString());
+                  .fromTrustedString(CommonClientUtils.getAnchorForLOBDownload(database.getUuid(), table.getUuid(),
+                    row.getUuid(), finalViewerColumn.getColumnIndexInEnclosingTable(), value).toString());
               }
-  
+
               return ret;
             }
           };
@@ -190,7 +192,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
                 sb.appendHtmlConstant("</div");
               }
             }
-  
+
             @Override
             public SafeHtml getValue(ViewerRow row) {
               SafeHtml ret = null;
@@ -201,7 +203,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
               } else if (row.getCells().get(solrColumnName) != null) {
                 ViewerType.dbTypes type = viewerColumnType.getDbType();
                 String value = row.getCells().get(solrColumnName).getValue();
-  
+
                 // if it exists in Solr, it is not null
                 switch (type) {
                   case BINARY:
@@ -238,12 +240,12 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
           columns.put(viewerColumn, column);
         }
       } else {
-        //this is the table of nested document
+        // this is the table of nested document
         ViewerTable nestedTable = database.getMetadata().getTableById(columnStatus.getId());
         List<ViewerColumn> columnsToAggregate = new ArrayList<>();
         for (String nestedColumn : columnStatus.getNestedColumns()) {
           for (ViewerColumn column : nestedTable.getColumns()) {
-            if(column.getSolrName().equals(nestedColumn)){
+            if (column.getSolrName().equals(nestedColumn)) {
               columnsToAggregate.add(column);
             }
           }
@@ -259,33 +261,35 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
               sb.appendHtmlConstant("</div");
             }
           }
+
           @Override
           public SafeHtml getValue(ViewerRow row) {
             String aggregationColumn = null;
-            if(row.getNestedRowList() != null){
+            SafeHtml ret = null;
+            if (row.getNestedRowList() != null) {
               for (ViewerRow nestedRow : row.getNestedRowList()) {
                 if (nestedRow == null || nestedRow.getCells() == null || nestedRow.getCells().isEmpty()) {
                   continue;
-                }else if(nestedRow.getTableId().equals(nestedTable.getId())){
+                } else if (nestedRow.getTableId().equals(nestedTable.getId())) {
                   Map<String, ViewerCell> cells = nestedRow.getCells();
                   String aggregationCell = null;
                   for (Map.Entry<String, ViewerCell> entry : cells.entrySet()) {
-                    if(aggregationCell == null){
+                    if (aggregationCell == null) {
                       aggregationCell = entry.getValue().getValue();
                     } else {
                       aggregationCell = aggregationCell + "," + entry.getValue().getValue();
                     }
                   }
-                  if(aggregationColumn == null){
+                  if (aggregationColumn == null) {
                     aggregationColumn = aggregationCell;
                   } else {
                     aggregationColumn = aggregationColumn + ";" + aggregationCell;
                   }
+                  ret = SafeHtmlUtils.fromString(aggregationColumn);
                 }
               }
             }
 
-            SafeHtml ret = SafeHtmlUtils.fromString(aggregationColumn);
             return ret;
           }
         };
@@ -295,58 +299,6 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
         }
       }
     }
-
-//    ConfigurationService.Util.call((CollectionConfiguration response) -> {
-//      ConfigurationHandler configuration = ConfigurationHandler.getInstance(database, response);
-//      Map<String, List<ViewerColumn>> allColumnsToInclude = configuration.getAllColumnsToInclude(table);
-//
-//      for (Map.Entry<String, List<ViewerColumn>> entry : allColumnsToInclude.entrySet()) {
-//        String tableName = entry.getKey();
-//        List<ViewerColumn> columnsToInclude = entry.getValue();
-//
-//        for (ViewerColumn columnToInclude : columnsToInclude) {
-//
-//          Column<ViewerRow, SafeHtml> column = new Column<ViewerRow, SafeHtml>(new SafeHtmlCell()) {
-//            @Override
-//            public void render(Cell.Context context, ViewerRow object, SafeHtmlBuilder sb) {
-//              SafeHtml value = getValue(object);
-//              if (value != null) {
-//                sb.appendHtmlConstant("<div title=\"" + SafeHtmlUtils.htmlEscape(value.asString()) + "\">");
-//                sb.append(value);
-//                sb.appendHtmlConstant("</div");
-//              }
-//            }
-//
-//            @Override
-//            public SafeHtml getValue(ViewerRow row) {
-//              SafeHtml ret = null;
-//              String aggregationColumn = null;
-//
-//              if (row.getNestedRowList() != null) {
-//                for (ViewerRow nestedRow : row.getNestedRowList()) {
-//                  if (nestedRow.getCells() == null || nestedRow.getCells().isEmpty()) {
-//                    continue;
-//                  } else if (nestedRow.getTableId().equals(tableName)) {
-//                    if (aggregationColumn == null) {
-//                      aggregationColumn = nestedRow.getCells().get(columnToInclude.getSolrName()).getValue();
-//                    } else {
-//                      aggregationColumn = aggregationColumn + ","
-//                        + nestedRow.getCells().get(columnToInclude.getSolrName()).getValue();
-//                    }
-//                    ret = SafeHtmlUtils.fromString(aggregationColumn);
-//                  }
-//                }
-//              }
-//              return ret;
-//            }
-//          };
-//          addColumn(columnToInclude, column);
-//          columns.put(columnToInclude, column);
-//        }
-//      }
-//
-//    }).getConfiguration(database.getUuid());
-
 
     Alert alert = new Alert(Alert.MessageAlertType.LIGHT, messages.noItemsToDisplay());
     display.setEmptyTableWidget(alert);
@@ -365,7 +317,16 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     MethodCallback<IndexResult<ViewerRow>> callback) {
     TableRowListWrapper wrapper = getObject();
     ViewerTable table = wrapper.getTable();
-    Filter filter = FilterUtils.filterByTable(getFilter(), table.getId());
+    Filter filter;
+    List<String> fieldsToReturn = new ArrayList<>();
+    if (wrapper.isNested()) {
+      filter = getFilter();
+    } else {
+      filter = FilterUtils.filterByTable(getFilter(), table.getId());
+    }
+    fieldsToReturn.add("*");
+    fieldsToReturn.add("[child limit=100]");
+    // fieldsToReturn.add(buildNestedFieldsToReturn(wrapper));
     currentSubList = sublist;
 
     Map<Column<ViewerRow, ?>, List<String>> columnSortingKeyMap = new HashMap<>();
@@ -380,15 +341,34 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     currentSorter = createSorter(columnSortList, columnSortingKeyMap);
 
     GWT.log("Filter: " + filter);
-
-    List<String> fieldsToReturn = new ArrayList<>();
-    fieldsToReturn.add("*,[child]");
+    GWT.log("isNested: " + wrapper.isNested());
 
     FindRequest findRequest = new FindRequest(ViewerDatabase.class.getName(), filter, currentSorter, sublist,
       getFacets(), false, fieldsToReturn);
 
     DatabaseService.Util.call(callback).findRows(wrapper.getDatabase().getUuid(), findRequest,
       LocaleInfo.getCurrentLocale().getLocaleName());
+  }
+
+  // TODO
+  private String buildNestedFieldsToReturn(TableRowListWrapper wrapper) {
+    StringBuilder sb = new StringBuilder();
+    ViewerTable table = wrapper.getTable();
+    CollectionStatus status = wrapper.getStatus();
+
+    TableStatus tableStatus = status.getTableStatus(table.getUuid());
+    int nestedCount = 0;
+    for (ColumnStatus column : tableStatus.getColumns()) {
+      if (!column.getNestedColumns().isEmpty()) {
+        nestedCount++;
+        String nestedTableId = column.getId();
+        sb.append("son" + nestedCount + ":[subquery]");
+        sb.append("&son" + nestedCount + ".q=+nestedTableId:" + nestedTableId + " AND +{!terms f=_root_ v=$row.uuid}");
+        sb.append("&son" + nestedCount + ".row=10");
+      }
+    }
+
+    return sb.toString();
   }
 
   @Override
@@ -464,14 +444,14 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
   private void addColumn(ViewerColumn viewerColumn, Column<ViewerRow, ?> displayColumn) {
     if (ViewerStringUtils.isNotBlank(viewerColumn.getDescription())) {
       SafeHtmlBuilder spanTitle = CommonClientUtils.constructSpan(viewerColumn.getDisplayName(),
-          viewerColumn.getDescription(), "column-description-block");
+        viewerColumn.getDescription(), "column-description-block");
       SafeHtmlBuilder spanDescription = CommonClientUtils.constructSpan(viewerColumn.getDescription(),
-          viewerColumn.getDescription(), "column-description-block column-description");
+        viewerColumn.getDescription(), "column-description-block column-description");
       addColumn(displayColumn, CommonClientUtils.wrapOnDiv(Arrays.asList(spanTitle, spanDescription)), true,
-          TextAlign.LEFT, 10);
+        TextAlign.LEFT, 10);
     } else {
       SafeHtmlBuilder spanTitle = CommonClientUtils.constructSpan(viewerColumn.getDisplayName(),
-          viewerColumn.getDescription(), "column-description-block");
+        viewerColumn.getDescription(), "column-description-block");
       addColumn(displayColumn, spanTitle.toSafeHtml(), true, TextAlign.LEFT, 10);
     }
   }

@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import com.databasepreservation.common.client.common.search.SavedSearch;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
-import org.roda.core.data.v2.index.filter.Filter;
+import com.databasepreservation.common.client.index.filter.Filter;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
 import com.databasepreservation.common.client.index.ExportRequest;

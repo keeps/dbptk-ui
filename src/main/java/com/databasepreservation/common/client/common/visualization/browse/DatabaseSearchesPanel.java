@@ -15,8 +15,8 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import config.i18n.client.ClientMessages;
-import org.roda.core.data.v2.index.filter.BasicSearchFilterParameter;
-import org.roda.core.data.v2.index.filter.Filter;
+import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
+import com.databasepreservation.common.client.index.filter.Filter;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>

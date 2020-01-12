@@ -10,7 +10,7 @@ package com.databasepreservation.common.client.index;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.roda.core.data.v2.index.filter.Filter;
+import com.databasepreservation.common.client.index.filter.Filter;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
 import com.databasepreservation.common.client.index.facets.Facets;

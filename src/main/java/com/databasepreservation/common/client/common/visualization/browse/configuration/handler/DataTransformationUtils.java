@@ -46,7 +46,13 @@ public class DataTransformationUtils {
       relatedTable.getReferences().add(createReference(sourceColumn, referencedColumn));
     }
 
-    denormalizeConfiguration.addRelatedTable(relatedTable);
+    RelatedTablesConfiguration returnedRelatedTable = denormalizeConfiguration.getRelatedTable(childNode.getParentNode().getUuid());
+    if(returnedRelatedTable == null){
+      denormalizeConfiguration.addRelatedTable(relatedTable);
+    } else {
+      returnedRelatedTable.addRelatedTable(relatedTable);
+    }
+
   }
 
   private static ReferencesConfiguration createReference(ViewerColumn sourceColumn, ViewerColumn referencedColumn) {

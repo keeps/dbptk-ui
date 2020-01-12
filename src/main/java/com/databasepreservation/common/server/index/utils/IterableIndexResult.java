@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.databasepreservation.common.client.index.sort.Sorter;
 import org.apache.solr.client.solrj.SolrClient;
-import org.roda.core.data.v2.index.filter.Filter;
+import com.databasepreservation.common.client.index.filter.Filter;
 
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.utils.CloseableIterable;

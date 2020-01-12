@@ -21,8 +21,8 @@ import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RequestNotValidException;
-import org.roda.core.data.v2.index.filter.Filter;
-import org.roda.core.data.v2.index.filter.SimpleFilterParameter;
+import com.databasepreservation.common.client.index.filter.Filter;
+import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
 import org.roda.core.data.v2.index.sublist.Sublist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -223,6 +223,10 @@ public class DatabaseRowsSolrManager {
     return SolrUtils.retrieveRows(client, databaseUUID, rowUUID);
   }
 
+  public ViewerRow retrieveNestedRows(String databaseUUID, String rowUUID) throws NotFoundException, GenericException {
+    return SolrUtils.retrieveRows(client, databaseUUID, rowUUID);
+  }
+
   public void addLogEntry(ActivityLogEntry logEntry) throws NotFoundException, GenericException {
     SolrCollection<ActivityLogEntry> activityLogEntrySolrCollection = SolrDefaultCollectionRegistry
       .get(ActivityLogEntry.class);
@@ -254,7 +258,8 @@ public class DatabaseRowsSolrManager {
     }
   }
 
-  public void editBatchJob(String jobUUID, long countRows, long processedRows) throws NotFoundException, GenericException {
+  public void editBatchJob(String jobUUID, long countRows, long processedRows)
+    throws NotFoundException, GenericException {
     SolrInputDocument doc = new SolrInputDocument();
     doc.addField(ViewerConstants.INDEX_ID, jobUUID);
     doc.addField(ViewerConstants.SOLR_BATCH_JOB_ROWS_TO_PROCESS, SolrUtils.asValueUpdate(countRows));
@@ -273,10 +278,11 @@ public class DatabaseRowsSolrManager {
   public void editBatchJob(ViewerJob job) throws NotFoundException, GenericException {
     SolrCollection<ViewerJob> viewerJobSolrCollection = SolrDefaultCollectionRegistry.get(ViewerJob.class);
     try {
-      SolrInputDocument doc = new SolrInputDocument();;
+      SolrInputDocument doc = new SolrInputDocument();
+      ;
       doc.addField(ViewerConstants.INDEX_ID, job.getUuid());
       for (SolrInputField field : viewerJobSolrCollection.toSolrDocument(job)) {
-        if(!field.getName().equals(ViewerConstants.INDEX_ID) && field.getValue() != null){
+        if (!field.getName().equals(ViewerConstants.INDEX_ID) && field.getValue() != null) {
           doc.addField(field.getName(), SolrUtils.asValueUpdate(field.getValue()));
         }
       }
@@ -310,7 +316,8 @@ public class DatabaseRowsSolrManager {
     }
   }
 
-  public void editSavedSearch(String databaseUUID, String uuid, String name, String description) throws SavedSearchException {
+  public void editSavedSearch(String databaseUUID, String uuid, String name, String description)
+    throws SavedSearchException {
     SolrInputDocument doc = new SolrInputDocument();
 
     doc.addField(ViewerConstants.INDEX_ID, uuid);

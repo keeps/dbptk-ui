@@ -5,7 +5,9 @@ import java.util.*;
 import com.databasepreservation.common.client.common.lists.TableRowList;
 import com.databasepreservation.common.client.common.search.TableSearchPanel;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
-import org.roda.core.data.v2.index.filter.*;
+import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
+import com.databasepreservation.common.client.models.status.collection.TableStatus;
+import com.databasepreservation.common.client.index.filter.*;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
 import com.databasepreservation.common.client.ViewerConstants;
@@ -45,11 +47,13 @@ import config.i18n.client.ClientMessages;
 public class RowPanel extends RightPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
 
-  public static RowPanel createInstance(ViewerDatabase database, String tableUUID, String rowUUID, CollectionStatus status) {
+  public static RowPanel createInstance(ViewerDatabase database, String tableUUID, String rowUUID,
+    CollectionStatus status) {
     return new RowPanel(database, tableUUID, rowUUID, status);
   }
 
-  public static RowPanel createInstance(ViewerDatabase database, ViewerTable table, ViewerRow row, CollectionStatus status) {
+  public static RowPanel createInstance(ViewerDatabase database, ViewerTable table, ViewerRow row,
+    CollectionStatus status) {
     return new RowPanel(database, table, row, status);
   }
 
@@ -86,7 +90,8 @@ public class RowPanel extends RightPanel {
     init();
   }
 
-  private RowPanel(ViewerDatabase viewerDatabase, final String tableUUID, final String rowUUID, CollectionStatus status) {
+  private RowPanel(ViewerDatabase viewerDatabase, final String tableUUID, final String rowUUID,
+    CollectionStatus status) {
     this.rowUUID = rowUUID;
     this.database = viewerDatabase;
     this.table = database.getMetadata().getTable(tableUUID);
@@ -178,7 +183,8 @@ public class RowPanel extends RightPanel {
         isPrimaryKeyColumn);
     }
 
-    getNestedHTML(row.getNestedRowList());
+    // getNestedHTML(row.getNestedRowList());
+    getNestedHTML();
 
     Button btn = new Button();
     btn.addStyleName("btn btn-primary btn-download");
@@ -285,35 +291,36 @@ public class RowPanel extends RightPanel {
     content.add(rowField);
   }
 
-  private void getNestedHTML(List<ViewerRow> nestedRowList) {
-    Filter filter = new Filter();
-    List<FilterParameter> filterParameterList = new ArrayList<>();
+  private void getNestedHTML() {
+    TableStatus tableStatus = status.getTableStatus(table.getUuid());
+    for (ColumnStatus column : tableStatus.getColumns()) {
+      List<String> nestedColumns = column.getNestedColumns();
+      if (!nestedColumns.isEmpty()) {
+        String nestedTableId = column.getId();
+        FlowPanel card = new FlowPanel();
+        card.setStyleName("card");
 
-    Map<String, List<String>> columnsMap = new HashMap<>();
-    for (ViewerRow nestedRow : nestedRowList) {
-      filterParameterList.add(new SimpleFilterParameter(ViewerConstants.INDEX_ID, nestedRow.getNestedOriginalUUID()));
+        List<FilterParameter> filterParameterList = new ArrayList<>();
+        filterParameterList.add(new InnerJoinFilterParameter(rowUUID, nestedTableId));
+        Filter filter = new Filter();
+        filter.add(new AndFiltersParameters(filterParameterList));
 
-      columnsMap.computeIfAbsent(nestedRow.getTableId(), k -> new ArrayList<>());
-      Map<String, ViewerCell> cells = nestedRow.getCells();
-      for (Map.Entry<String, ViewerCell> entry : cells.entrySet()) {
-        columnsMap.get(nestedRow.getTableId()).add(entry.getValue().getValue());
+        RowField rowField = RowField.createInstance(nestedTableId, null);
+        rowField.addStyleName("card-header");
+        card.add(rowField);
+
+        ViewerTable nestedTable = database.getMetadata().getTableById(nestedTableId);
+
+//         final TableSearchPanel tablePanel = new TableSearchPanel(status);
+//         tablePanel.provideSource(database, nestedTable, filter, true);
+
+        TableRowList tablePanel = new TableRowList(database, nestedTable, filter, null, null, false,
+          nestedTable.getCountRows() != 0, status, true);
+
+        card.add(tablePanel);
+        content.add(card);
+
       }
-    }
-
-    filter.add(new OrFiltersParameters(filterParameterList));
-
-    for (Map.Entry<String, List<String>> entry : columnsMap.entrySet()) {
-      RowField rowField = RowField.createInstance(entry.getKey(), null);
-      content.add(rowField);
-
-      ViewerTable table = database.getMetadata().getTableById(entry.getKey());
-
-      final TableSearchPanel tableSearchPanel = new TableSearchPanel(status);
-          tableSearchPanel.provideSource(database, table, filter);
-
-      //TableRowList tableRowList = new TableRowList(database, table, filter, null, null, false, false);
-
-      content.add(tableSearchPanel);
     }
   }
 

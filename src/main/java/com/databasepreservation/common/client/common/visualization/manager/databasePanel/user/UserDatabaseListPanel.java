@@ -2,8 +2,8 @@ package com.databasepreservation.common.client.common.visualization.manager.data
 
 import java.util.List;
 
-import org.roda.core.data.v2.index.filter.BasicSearchFilterParameter;
-import org.roda.core.data.v2.index.filter.Filter;
+import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
+import com.databasepreservation.common.client.index.filter.Filter;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.ContentPanel;

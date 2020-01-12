@@ -3,9 +3,9 @@ package com.databasepreservation.common.client.tools;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.roda.core.data.v2.index.filter.Filter;
-import org.roda.core.data.v2.index.filter.FilterParameter;
-import org.roda.core.data.v2.index.filter.SimpleFilterParameter;
+import com.databasepreservation.common.client.index.filter.Filter;
+import com.databasepreservation.common.client.index.filter.FilterParameter;
+import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
 
 import com.databasepreservation.common.client.ViewerConstants;
 

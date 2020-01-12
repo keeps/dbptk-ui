@@ -1,7 +1,7 @@
 package com.databasepreservation.common.filter.solr;
 
-import org.roda.core.data.v2.index.filter.BasicSearchFilterParameter;
-import org.roda.core.data.v2.index.filter.FilterParameter;
+import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
+import com.databasepreservation.common.client.index.filter.FilterParameter;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>

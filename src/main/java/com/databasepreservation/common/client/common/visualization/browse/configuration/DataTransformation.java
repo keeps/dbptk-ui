@@ -277,6 +277,7 @@ public class DataTransformation extends RightPanel {
     panel.add(card);
     panel.add(grandChild);
 
+    //TODO change
     if (denormalizeConfiguration != null) {
       for (RelatedTablesConfiguration relatedTable : denormalizeConfiguration.getRelatedTables()) {
         if (relatedTable.getUuid().equals(childNode.getUuid())) {

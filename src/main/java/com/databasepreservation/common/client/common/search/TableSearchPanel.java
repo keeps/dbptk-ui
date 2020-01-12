@@ -5,8 +5,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.databasepreservation.common.client.common.utils.AdvancedSearchUtils;
+import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
-import org.roda.core.data.v2.index.filter.Filter;
+import org.apache.xpath.operations.Bool;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
@@ -118,10 +119,10 @@ public class TableSearchPanel extends Composite {
   }
 
   public void provideSource(final ViewerDatabase database, final ViewerTable table) {
-    provideSource(database, table, null);
+    provideSource(database, table, null, false);
   }
 
-  public void provideSource(final ViewerDatabase database, final ViewerTable table, Filter initialFilter) {
+  public void provideSource(final ViewerDatabase database, final ViewerTable table, Filter initialFilter, Boolean isNested) {
     if (initialFilter == null) {
       initialFilter = new Filter();
     }
@@ -129,7 +130,7 @@ public class TableSearchPanel extends Composite {
     this.database = database;
     this.table = table;
 
-    tableRowList = new TableRowList(database, table, initialFilter, null, null, false, table.getCountRows() != 0, status);
+    tableRowList = new TableRowList(database, table, initialFilter, null, null, false, table.getCountRows() != 0, status, isNested);
     tableRowList.setColumnVisibility(columnDisplayNameToVisibleState);
 
     GWT.log("initial filter: " + initialFilter);

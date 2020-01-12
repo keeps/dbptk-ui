@@ -1,5 +1,6 @@
 package com.databasepreservation.common.server.jobs;
 
+import com.databasepreservation.common.transformers.DenormalizeTransformer;
 import com.databasepreservation.model.exception.ModuleException;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
@@ -25,7 +26,8 @@ public class DenormalizeProcessor implements Tasklet {
     System.out.println("JobUUID " + jobUUID);
     System.out.println("databaseUUID " + databaseUUID);
     System.out.println("tableUUID " + tableUUID);
-    Denormalize denormalize = new Denormalize(databaseUUID, tableUUID, jobUUID);
+    DenormalizeTransformer denormalizeTransformer = new DenormalizeTransformer(databaseUUID, tableUUID, jobUUID);
+    //Denormalize denormalize = new Denormalize(databaseUUID, tableUUID, jobUUID);
     return RepeatStatus.FINISHED;
   }
 }

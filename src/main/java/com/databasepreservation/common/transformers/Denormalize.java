@@ -15,10 +15,10 @@ import org.apache.solr.common.SolrInputDocument;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RequestNotValidException;
-import org.roda.core.data.v2.index.filter.AndFiltersParameters;
-import org.roda.core.data.v2.index.filter.Filter;
-import org.roda.core.data.v2.index.filter.FilterParameter;
-import org.roda.core.data.v2.index.filter.SimpleFilterParameter;
+import com.databasepreservation.common.client.index.filter.AndFiltersParameters;
+import com.databasepreservation.common.client.index.filter.Filter;
+import com.databasepreservation.common.client.index.filter.FilterParameter;
+import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.utils.Tree;

@@ -2,8 +2,8 @@ package com.databasepreservation.common.client.common.utils.html;
 
 import java.util.List;
 
-import org.roda.core.data.v2.index.filter.BasicSearchFilterParameter;
-import org.roda.core.data.v2.index.filter.FilterParameter;
+import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
+import com.databasepreservation.common.client.index.filter.FilterParameter;
 
 import com.databasepreservation.common.client.common.search.SearchField;
 import com.databasepreservation.common.client.common.search.SearchInfo;

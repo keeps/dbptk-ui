@@ -2,12 +2,12 @@ package com.databasepreservation.common.client.common.utils.html;
 
 import java.util.List;
 
-import org.roda.core.data.v2.index.filter.BasicSearchFilterParameter;
-import org.roda.core.data.v2.index.filter.DateRangeFilterParameter;
-import org.roda.core.data.v2.index.filter.Filter;
-import org.roda.core.data.v2.index.filter.FilterParameter;
-import org.roda.core.data.v2.index.filter.LongRangeFilterParameter;
-import org.roda.core.data.v2.index.filter.SimpleFilterParameter;
+import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
+import com.databasepreservation.common.client.index.filter.DateRangeFilterParameter;
+import com.databasepreservation.common.client.index.filter.Filter;
+import com.databasepreservation.common.client.index.filter.FilterParameter;
+import com.databasepreservation.common.client.index.filter.LongRangeFilterParameter;
+import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
 
 import com.databasepreservation.common.client.tools.Humanize;
 import com.google.gwt.core.client.GWT;

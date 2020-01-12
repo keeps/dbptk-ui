@@ -7,7 +7,7 @@
  */
 package com.databasepreservation.common.client.index;
 
-import org.roda.core.data.v2.index.filter.Filter;
+import com.databasepreservation.common.client.index.filter.Filter;
 
 import java.io.Serializable;
 

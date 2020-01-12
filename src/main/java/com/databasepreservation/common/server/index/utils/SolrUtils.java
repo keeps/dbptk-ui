@@ -18,6 +18,8 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 
+import com.databasepreservation.common.client.index.filter.*;
+import com.databasepreservation.common.client.index.filter.InnerJoinFilterParameter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -35,7 +37,6 @@ import org.roda.core.data.common.RodaConstants;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RequestNotValidException;
-import org.roda.core.data.v2.index.filter.*;
 import org.roda.core.data.v2.index.sublist.Sublist;
 import org.roda.core.data.v2.ip.AIPState;
 import org.roda.core.data.v2.ip.Permissions;
@@ -521,9 +522,12 @@ public class SolrUtils {
       FiltersParameters filters = (FiltersParameters) parameter;
       appendFiltersWithOperator(ret, parameter instanceof OrFiltersParameters ? "OR" : "AND", filters.getValues(),
           prefixWithANDOperatorIfBuilderNotEmpty);
-    } else if (parameter instanceof TermsFilterParameter){
-      TermsFilterParameter param = (TermsFilterParameter)parameter;
-      ret.append("({!terms f="+param.getField()+" v=" + param.getParameterValue() + "})");
+    } else if (parameter instanceof TermsFilterParameter) {
+      TermsFilterParameter param = (TermsFilterParameter) parameter;
+      ret.append("({!terms f=" + param.getField() + " v=" + param.getParameterValue() + "})");
+    } else if(parameter instanceof InnerJoinFilterParameter){
+      InnerJoinFilterParameter param = (InnerJoinFilterParameter) parameter;
+      ret.append("(tableId:" + param.getNestedTableId() +" AND {!join from=nestedOriginalUUID to=uuid }_root_:" + param.getRowUUID() + ")");
     }else {
       LOGGER.error("Unsupported filter parameter class: {}", parameter.getClass().getName());
       throw new RequestNotValidException("Unsupported filter parameter class: " + parameter.getClass().getName());

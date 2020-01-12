@@ -9,7 +9,7 @@ import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.common.params.CursorMarkParams;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.RequestNotValidException;
-import org.roda.core.data.v2.index.filter.Filter;
+import com.databasepreservation.common.client.index.filter.Filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

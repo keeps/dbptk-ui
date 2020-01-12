@@ -63,12 +63,14 @@ public interface DatabaseService extends DirectRestService {
   @Path("/schemaInformation")
   @Produces({MediaType.APPLICATION_JSON})
   @ApiOperation(value = "Retrieves the schema information", notes = "", response = ViewerMetadata.class)
-  ViewerMetadata getSchemaInformation(@ApiParam(value = "connection parameters") final ConnectionParameters connectionParameters);
+  ViewerMetadata getSchemaInformation(
+    @ApiParam(value = "connection parameters") final ConnectionParameters connectionParameters);
 
   @POST
   @Path("/executeQuery")
   @ApiOperation(value = "Retrieves the first 5 rows of the query execution", notes = "", response = List.class, responseContainer = "List")
-  List<List<String>> validateCustomViewQuery(@ApiParam(value = "connection parameters") ConnectionParameters parameters, @QueryParam("q") String query);
+  List<List<String>> validateCustomViewQuery(@ApiParam(value = "connection parameters") ConnectionParameters parameters,
+    @QueryParam("q") String query);
 
   @GET
   @Path("/progress/{databaseUUID}")

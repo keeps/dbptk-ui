@@ -1,8 +1,8 @@
 package com.databasepreservation.common.client;
 
 import org.roda.core.data.common.RodaConstants;
-import org.roda.core.data.v2.index.filter.BasicSearchFilterParameter;
-import org.roda.core.data.v2.index.filter.Filter;
+import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
+import com.databasepreservation.common.client.index.filter.Filter;
 
 import com.databasepreservation.modules.siard.SIARD2ModuleFactory;
 

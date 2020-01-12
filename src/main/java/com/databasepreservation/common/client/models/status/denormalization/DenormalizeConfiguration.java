@@ -96,13 +96,19 @@ public class DenormalizeConfiguration implements Serializable {
     for (RelatedTablesConfiguration relatedTable : relatedTables) {
       if (relatedTable.getUuid().equals(uuid)) {
         return relatedTable;
+      } else {
+        if (!relatedTable.getRelatedTables().isEmpty()) {
+          RelatedTablesConfiguration innerRelatedTable = relatedTable.getRelatedTable(uuid);
+          if (innerRelatedTable != null)
+            return innerRelatedTable;
+        }
       }
     }
     return null;
   }
 
-  public void addRelatedTable(RelatedTablesConfiguration relatedTable){
-      relatedTables.add(relatedTable);
+  public void addRelatedTable(RelatedTablesConfiguration relatedTable) {
+    relatedTables.add(relatedTable);
   }
 
   public void setRelatedTables(List<RelatedTablesConfiguration> relatedTables) {

@@ -10,10 +10,10 @@ import java.util.TreeMap;
 
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.services.DatabaseService;
-import org.roda.core.data.v2.index.filter.EmptyKeyFilterParameter;
-import org.roda.core.data.v2.index.filter.Filter;
-import org.roda.core.data.v2.index.filter.FilterParameter;
-import org.roda.core.data.v2.index.filter.SimpleFilterParameter;
+import com.databasepreservation.common.client.index.filter.EmptyKeyFilterParameter;
+import com.databasepreservation.common.client.index.filter.Filter;
+import com.databasepreservation.common.client.index.filter.FilterParameter;
+import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
 
 import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
@@ -309,7 +309,7 @@ public class ReferencesPanel extends RightPanel {
 
     // create the table with the filter
     final TableSearchPanel tableSearchPanel = new TableSearchPanel(status);
-    tableSearchPanel.provideSource(database, otherTable, filter);
+    tableSearchPanel.provideSource(database, otherTable, filter, false);
 
     return tableSearchPanel;
   }

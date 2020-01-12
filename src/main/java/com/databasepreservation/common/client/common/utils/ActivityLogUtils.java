@@ -11,7 +11,7 @@ import static com.databasepreservation.common.client.ViewerConstants.CONTROLLER_
 
 import java.util.Map;
 
-import org.roda.core.data.v2.index.filter.SimpleFilterParameter;
+import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.fields.GenericField;
