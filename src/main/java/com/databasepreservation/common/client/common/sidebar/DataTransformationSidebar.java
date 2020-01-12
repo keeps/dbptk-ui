@@ -62,6 +62,7 @@ public class DataTransformationSidebar extends Composite implements Sidebar {
   private CollectionStatus collectionStatus;
   private boolean initialized = false;
   private Map<String, SidebarHyperlink> list = new HashMap<>();
+  private String firstElement = null;
 
   /**
    * Creates a new DatabaseSidebar, rarely hitting the database more than once for
@@ -160,6 +161,13 @@ public class DataTransformationSidebar extends Composite implements Sidebar {
     // database metadata
     final ViewerMetadata metadata = database.getMetadata();
 
+    SidebarHyperlink informationLink = new SidebarHyperlink(FontAwesomeIconManager
+      .getTagSafeHtml(FontAwesomeIconManager.DATABASE_INFORMATION, messages.menusidebar_information()),
+      HistoryManager.linkToDataTransformation(database.getUuid()));
+    informationLink.setH5().setIndent0();
+    list.put(databaseUUID, informationLink);
+    sidebarGroup.add(informationLink);
+
     /* Schemas */
     final int totalSchemas = metadata.getSchemas().size();
 
@@ -169,6 +177,9 @@ public class DataTransformationSidebar extends Composite implements Sidebar {
       schema.setViewsSchemaUUID();
 
       for (ViewerTable table : schema.getTables()) {
+        if (firstElement == null) {
+          firstElement = table.getUuid();
+        }
         if (!table.isCustomView() && !table.isMaterializedView()) {
           if (collectionStatus.showTable(table.getUuid())) {
 
@@ -251,8 +262,8 @@ public class DataTransformationSidebar extends Composite implements Sidebar {
     for (Widget widget : sidebarGroup) {
       widget.setVisible(true);
       if (widget instanceof SidebarItem) {
-          SidebarItem sb = (SidebarItem) widget;
-          sb.setVisible(true);
+        SidebarItem sb = (SidebarItem) widget;
+        sb.setVisible(true);
       }
     }
   }
@@ -263,14 +274,14 @@ public class DataTransformationSidebar extends Composite implements Sidebar {
 
     for (Widget widget : sidebarGroup) {
       if (widget instanceof SidebarHyperlink) {
-          SidebarItem sb = (SidebarItem) widget;
-          if (sb.getText().toLowerCase().contains(searchValue.toLowerCase())) {
-            sb.setVisible(true);
-            disclosurePanelsThatShouldBeVisible.add(widget);
-          } else {
-            sb.setVisible(false);
-            widget.setVisible(false);
-          }
+        SidebarItem sb = (SidebarItem) widget;
+        if (sb.getText().toLowerCase().contains(searchValue.toLowerCase())) {
+          sb.setVisible(true);
+          disclosurePanelsThatShouldBeVisible.add(widget);
+        } else {
+          sb.setVisible(false);
+          widget.setVisible(false);
+        }
       } else {
         widget.setVisible(true);
       }
@@ -283,16 +294,24 @@ public class DataTransformationSidebar extends Composite implements Sidebar {
 
   public void updateControllerPanel(List<Button> buttonList) {
     controller.clear();
-    if(buttonList != null){
+    if (buttonList != null) {
       for (Button button : buttonList) {
         controller.add(button);
       }
     }
   }
 
+  public String getFirstElement() {
+    return firstElement;
+  }
+
   @Override
   protected void onLoad() {
     super.onLoad();
     JavascriptUtils.stickSidebar();
+  }
+
+  public static void clear(String databaseUUID) {
+    instances.remove(databaseUUID);
   }
 }

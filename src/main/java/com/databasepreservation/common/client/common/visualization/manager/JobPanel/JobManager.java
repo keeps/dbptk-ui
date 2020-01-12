@@ -74,10 +74,10 @@ public class JobManager extends ContentPanel {
     mainHeader
       .setWidget(CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.NETWORK_WIRED), "Jobs", "h1"));
 
-    MetadataField instance = MetadataField.createInstance(messages.manageDatabasePageDescription());
-    instance.setCSS("table-row-description", "font-size-description");
-
-    description.setWidget(instance);
+//    MetadataField instance = MetadataField.createInstance(messages.manageDatabasePageDescription());
+//    instance.setCSS("table-row-description", "font-size-description");
+//
+//    description.setWidget(instance);
 
     searchInputBox.getElement().setPropertyString("placeholder", messages.searchPlaceholder());
 

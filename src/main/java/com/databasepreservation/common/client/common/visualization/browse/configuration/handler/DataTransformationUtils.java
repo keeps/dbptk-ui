@@ -15,6 +15,8 @@ import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
 import com.databasepreservation.common.client.models.structure.ViewerReference;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.services.ConfigurationService;
+import com.databasepreservation.common.client.services.JobService;
+import com.databasepreservation.common.client.widgets.Toast;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -46,8 +48,9 @@ public class DataTransformationUtils {
       relatedTable.getReferences().add(createReference(sourceColumn, referencedColumn));
     }
 
-    RelatedTablesConfiguration returnedRelatedTable = denormalizeConfiguration.getRelatedTable(childNode.getParentNode().getUuid());
-    if(returnedRelatedTable == null){
+    RelatedTablesConfiguration returnedRelatedTable = denormalizeConfiguration
+      .getRelatedTable(childNode.getParentNode().getUuid());
+    if (returnedRelatedTable == null) {
       denormalizeConfiguration.addRelatedTable(relatedTable);
     } else {
       returnedRelatedTable.addRelatedTable(relatedTable);
@@ -77,8 +80,10 @@ public class DataTransformationUtils {
   public static void saveConfiguration(String databaseUUID, DenormalizeConfiguration denormalizeConfiguration) {
     if (denormalizeConfiguration != null && denormalizeConfiguration.getState().equals(ViewerJobStatus.NEW)) {
       ConfigurationService.Util.call((Boolean result) -> {
-        Dialogs.showInformationDialog("Configuration file", "Created denormalization configuration file with success",
-          "OK");
+        JobService.Util.call((Boolean run) -> {
+          Toast.showInfo("Configuration file",
+            "Created denormalization configuration file with success for " + denormalizeConfiguration.getTableID());
+        }).denormalizeTableJob(databaseUUID, denormalizeConfiguration.getTableUUID());
       }).createDenormalizeConfigurationFile(databaseUUID, denormalizeConfiguration.getTableUUID(),
         denormalizeConfiguration);
     }

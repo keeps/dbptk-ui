@@ -8,8 +8,8 @@ import com.databasepreservation.common.client.models.DataTransformationProgressD
 public class DataTransformationObserver {
   private DataTransformationProgressData progressData;
 
-  public DataTransformationObserver(String databaseUUID, String tableUUID) {
-    progressData = DataTransformationProgressData.getInstance(databaseUUID, tableUUID);
+  public DataTransformationObserver(String jobUUID) {
+    progressData = DataTransformationProgressData.getInstance(jobUUID);
     progressData.setProcessedRows(0);
     progressData.setFinished(false);
   }

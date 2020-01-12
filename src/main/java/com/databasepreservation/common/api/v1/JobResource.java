@@ -167,29 +167,8 @@ public class JobResource implements JobService {
   }
 
   @Override
-  public List<DataTransformationProgressData> progress(String databaseUUID) {
-    List<DataTransformationProgressData> progressDataList = new ArrayList<>();
-
-    try {
-      CollectionStatus collectionStatus = getConfiguration(
-        Paths
-          .get(ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + databaseUUID + ViewerConstants.JSON_EXTENSION),
-        databaseUUID, CollectionStatus.class);
-
-      for (String denormalization : collectionStatus.getDenormalizations()) {
-        DenormalizeConfiguration denormalizeConfiguration = getConfiguration(
-          Paths.get(denormalization + ViewerConstants.JSON_EXTENSION), databaseUUID, DenormalizeConfiguration.class);
-        if (denormalizeConfiguration.getState().equals(ViewerJobStatus.NEW)) {
-          progressDataList
-            .add(DataTransformationProgressData.getInstance(databaseUUID, denormalizeConfiguration.getTableUUID()));
-        }
-
-      }
-    } catch (ModuleException e) {
-      throw new RESTException(e);
-    }
-
-    return progressDataList;
+  public Map<String, DataTransformationProgressData> getProgress() {
+    return DataTransformationProgressData.getInstances();
   }
 
   @Override

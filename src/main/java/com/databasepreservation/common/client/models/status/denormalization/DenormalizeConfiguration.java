@@ -29,6 +29,7 @@ public class DenormalizeConfiguration implements Serializable {
     setUuid(table.getUuid());
     setTableUUID(table.getUuid());
     setTableID(table.getId());
+    setState(ViewerJobStatus.UNKNOWN);
     relatedTables = new ArrayList<>();
   }
 

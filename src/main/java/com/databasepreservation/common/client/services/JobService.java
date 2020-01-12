@@ -1,6 +1,8 @@
 package com.databasepreservation.common.client.services;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import javax.ws.rs.GET;
@@ -67,8 +69,8 @@ public interface JobService extends DirectRestService {
   Boolean startDenormalizeJob(@PathParam("databaseuuid") String databaseuuid, @PathParam("tableuuid") String tableuuid);
 
   @GET
-  @Path("/progress/{databaseuuid}")
-  List<DataTransformationProgressData> progress(@PathParam("databaseuuid") String databaseuuid);
+  @Path("/progress")
+  Map<String, DataTransformationProgressData> getProgress();
 
   @POST
   @Path("/find")

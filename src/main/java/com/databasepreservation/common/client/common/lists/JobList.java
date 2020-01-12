@@ -1,11 +1,13 @@
 package com.databasepreservation.common.client.common.lists;
 
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
+import com.databasepreservation.common.api.v1.JobResource;
+import com.databasepreservation.common.client.models.DataTransformationProgressData;
 import org.fusesource.restygwt.client.MethodCallback;
 import com.databasepreservation.common.client.index.filter.Filter;
 import org.roda.core.data.v2.index.sublist.Sublist;
@@ -22,7 +24,6 @@ import com.databasepreservation.common.client.models.structure.ViewerJob;
 import com.databasepreservation.common.client.services.JobService;
 import com.databasepreservation.common.client.tools.Humanize;
 import com.google.gwt.core.shared.GWT;
-import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -65,8 +66,8 @@ public class JobList extends BasicAsyncTableCell<ViewerJob> {
       @Override
       public SafeHtml getValue(ViewerJob viewerJob) {
         return viewerJob != null && viewerJob.getJobId() != null
-            ? SafeHtmlUtils.fromString(viewerJob.getJobId().toString())
-            : SafeHtmlUtils.fromString("unknown");
+          ? SafeHtmlUtils.fromString(viewerJob.getJobId().toString())
+          : SafeHtmlUtils.fromString("unknown");
       }
     };
 
@@ -74,8 +75,8 @@ public class JobList extends BasicAsyncTableCell<ViewerJob> {
       @Override
       public SafeHtml getValue(ViewerJob viewerJob) {
         return viewerJob != null && viewerJob.getDatabaseName() != null
-            ? SafeHtmlUtils.fromString(viewerJob.getDatabaseName())
-            : SafeHtmlUtils.fromString("unknown");
+          ? SafeHtmlUtils.fromString(viewerJob.getDatabaseName())
+          : SafeHtmlUtils.fromString("unknown");
       }
     };
 
@@ -83,17 +84,16 @@ public class JobList extends BasicAsyncTableCell<ViewerJob> {
       @Override
       public SafeHtml getValue(ViewerJob viewerJob) {
         return viewerJob != null && viewerJob.getTableName() != null
-            ? SafeHtmlUtils.fromString(viewerJob.getTableName())
-            : SafeHtmlUtils.fromString("unknown");
+          ? SafeHtmlUtils.fromString(viewerJob.getTableName())
+          : SafeHtmlUtils.fromString("unknown");
       }
     };
 
     nameColumn = new TooltipColumn<ViewerJob>() {
       @Override
       public SafeHtml getValue(ViewerJob viewerJob) {
-        return viewerJob != null && viewerJob.getName() != null
-            ? SafeHtmlUtils.fromString(viewerJob.getName())
-            : SafeHtmlUtils.fromString("unknown");
+        return viewerJob != null && viewerJob.getName() != null ? SafeHtmlUtils.fromString(viewerJob.getName())
+          : SafeHtmlUtils.fromString("unknown");
       }
     };
 
@@ -101,8 +101,8 @@ public class JobList extends BasicAsyncTableCell<ViewerJob> {
       @Override
       public SafeHtml getValue(ViewerJob viewerJob) {
         return viewerJob != null && viewerJob.getCreateTime() != null
-            ? SafeHtmlUtils.fromString(Humanize.formatDateTime(viewerJob.getStartTime()))
-            : SafeHtmlUtils.fromString("unknown");
+          ? SafeHtmlUtils.fromString(Humanize.formatDateTime(viewerJob.getStartTime()))
+          : SafeHtmlUtils.fromString("unknown");
       }
     };
 
@@ -110,8 +110,8 @@ public class JobList extends BasicAsyncTableCell<ViewerJob> {
       @Override
       public SafeHtml getValue(ViewerJob viewerJob) {
         return viewerJob != null && viewerJob.getStartTime() != null
-            ? SafeHtmlUtils.fromString(Humanize.formatDateTime(viewerJob.getStartTime()))
-            : SafeHtmlUtils.fromString("unknown");
+          ? SafeHtmlUtils.fromString(Humanize.formatDateTime(viewerJob.getStartTime()))
+          : SafeHtmlUtils.fromString("unknown");
       }
     };
 
@@ -144,9 +144,8 @@ public class JobList extends BasicAsyncTableCell<ViewerJob> {
     statusColumn = new TooltipColumn<ViewerJob>() {
       @Override
       public SafeHtml getValue(ViewerJob viewerJob) {
-        return viewerJob != null && viewerJob.getStatus() != null
-            ?  LabelUtils.getJobStatus(viewerJob.getStatus())
-            : SafeHtmlUtils.fromString("unknown");
+        return viewerJob != null && viewerJob.getStatus() != null ? LabelUtils.getJobStatus(viewerJob.getStatus())
+          : SafeHtmlUtils.fromString("unknown");
       }
     };
 
@@ -154,8 +153,8 @@ public class JobList extends BasicAsyncTableCell<ViewerJob> {
       @Override
       public SafeHtml getValue(ViewerJob viewerJob) {
         return viewerJob != null && viewerJob.getExitDescription() != null
-            ? SafeHtmlUtils.fromString(viewerJob.getExitDescription())
-            : SafeHtmlUtils.fromString("");
+          ? SafeHtmlUtils.fromString(viewerJob.getExitDescription())
+          : SafeHtmlUtils.fromString("");
       }
     };
 
@@ -201,4 +200,33 @@ public class JobList extends BasicAsyncTableCell<ViewerJob> {
     super.onAttach();
     refresh();
   }
+
+//  @Override
+//  public void refresh() {
+//    super.refresh();
+//
+//    JobResource.Util.call((HashMap<String, DataTransformationProgressData> progressDataMap) -> {
+//      GWT.log("JobResource::");
+//      progressColumn = new TooltipColumn<ViewerJob>() {
+//        @Override
+//        public SafeHtml getValue(ViewerJob viewerJob) {
+//          DataTransformationProgressData progressData = progressDataMap.get(viewerJob.getUuid());
+//          long rowToProcess;
+//          long processedRows;
+//          if (viewerJob.getEndTime() == null && progressData != null) {
+//            rowToProcess = progressData.getRowsToProcess();
+//            processedRows = progressData.getProcessedRows();
+//          } else {
+//            rowToProcess = viewerJob.getRowsToProcess();
+//            processedRows = viewerJob.getProcessRows();
+//          }
+//          int currentGlobalPercent = new Double((processedRows * 1.0D / rowToProcess) * 100).intValue();
+//          GWT.log("currentGlobalPercent::" + currentGlobalPercent);
+//          return SafeHtmlUtils.fromString(currentGlobalPercent + "% (" + processedRows + " of " + rowToProcess + ")");
+//        }
+//      };
+//
+//    }).getProgress();
+//
+//  }
 }

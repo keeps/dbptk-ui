@@ -1,14 +1,11 @@
 package com.databasepreservation.common.client.common.visualization.browse.configuration;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.databasepreservation.common.client.common.lists.widgets.MultipleSelectionTablePanel;
-import com.databasepreservation.common.client.common.sidebar.DataTransformationSidebar;
-import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.ConfigurationHandler;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.DataTransformationUtils;
 import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
 import com.databasepreservation.common.client.models.status.denormalization.RelatedColumnConfiguration;
@@ -35,33 +32,34 @@ public class TransformationChildTables {
   private ViewerTable childTable;
   private Map<Integer, Boolean> isLoading = new HashMap<>();
   private String uuid;
-  private Button btnSave;
+  List<Button> buttons = new ArrayList<>();
 
   /**
    *
    * @param childTable
    * @param denormalizeConfiguration
    * @param rootTable
-   * @param btnSave
+   * @param buttons
    * @return
    */
-  public static TransformationChildTables getInstance(TableNode childTable, DenormalizeConfiguration denormalizeConfiguration, TransformationTable rootTable, Button btnSave) {
+  public static TransformationChildTables getInstance(TableNode childTable, DenormalizeConfiguration denormalizeConfiguration, TransformationTable rootTable, List<Button> buttons) {
     return instances.computeIfAbsent(childTable.getUuid(),
-        k -> new TransformationChildTables(childTable, denormalizeConfiguration, rootTable, btnSave));
+        k -> new TransformationChildTables(childTable, denormalizeConfiguration, rootTable, buttons));
   }
 
   /**
+   *
    * @param childTable
    * @param denormalizeConfiguration
    * @param rootTable
-   * @param btnSave
+   * @param buttons
    */
-  private TransformationChildTables(TableNode childTable, DenormalizeConfiguration denormalizeConfiguration, TransformationTable rootTable, Button btnSave) {
+  private TransformationChildTables(TableNode childTable, DenormalizeConfiguration denormalizeConfiguration, TransformationTable rootTable, List<Button> buttons) {
     this.denormalizeConfiguration = denormalizeConfiguration;
     this.rootTable = rootTable;
     this.childTable = childTable.getTable();
     this.uuid = childTable.getUuid();
-    this.btnSave = btnSave;
+    this.buttons = buttons;
     preset();
   }
 
@@ -127,7 +125,9 @@ public class TransformationChildTables {
             }
             int currentSize = selectionTablePanel.getSelectionModel().getSelectedSet().size();
             if(selectionSize != currentSize){
-              btnSave.setEnabled(true);
+              for (Button button : buttons) {
+                button.setEnabled(true);
+              }
             }
           }
 
@@ -149,6 +149,10 @@ public class TransformationChildTables {
       }
     }
     return false;
+  }
+
+  public static void clear(){
+    instances.clear();
   }
 
 }

@@ -2,6 +2,7 @@ package com.databasepreservation.common.client.models;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -9,21 +10,19 @@ import java.util.HashMap;
 public class DataTransformationProgressData implements Serializable {
   private long rowsToProcess;
   private long processedRows;
-  private String tableUUID;
   private boolean finished = false;
 
-  private static HashMap<String, DataTransformationProgressData> instances = new HashMap<>();
+  private static Map<String, DataTransformationProgressData> instances = new HashMap<>();
 
   public DataTransformationProgressData() {
   }
 
-  public static DataTransformationProgressData getInstance(String databaseUUID, String tableUUID) {
-    String uuid = databaseUUID + tableUUID;
-    return instances.computeIfAbsent(uuid, k -> new DataTransformationProgressData(tableUUID));
+  public static DataTransformationProgressData getInstance(String jobUUID) {
+    return instances.computeIfAbsent(jobUUID, k -> new DataTransformationProgressData());
   }
 
-  private DataTransformationProgressData(String tableUUID) {
-    this.tableUUID = tableUUID;
+  public static Map<String, DataTransformationProgressData> getInstances() {
+    return instances;
   }
 
   public long getRowsToProcess() {
@@ -46,14 +45,6 @@ public class DataTransformationProgressData implements Serializable {
     if(this.processedRows <= this.rowsToProcess){
       this.processedRows++;
     }
-  }
-
-  public void setTableUUID(String tableUUID) {
-    this.tableUUID = tableUUID;
-  }
-
-  public String getTableUUID() {
-    return tableUUID;
   }
 
   public boolean getFinished() {

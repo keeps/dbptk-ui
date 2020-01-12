@@ -265,13 +265,9 @@ public class DatabaseRowsSolrManager {
     doc.addField(ViewerConstants.SOLR_BATCH_JOB_ROWS_TO_PROCESS, SolrUtils.asValueUpdate(countRows));
     doc.addField(ViewerConstants.SOLR_BATCH_JOB_ROWS_PROCESSED, SolrUtils.asValueUpdate(processedRows));
     try {
-      client.add(ViewerConstants.SOLR_INDEX_BATCH_JOBS_COLLECTION_NAME, doc);
-      client.commit(ViewerConstants.SOLR_INDEX_BATCH_JOBS_COLLECTION_NAME, true, true);
-
-    } catch (SolrServerException e) {
-      LOGGER.debug("Solr error while attempting to save batch job", e);
-    } catch (IOException e) {
-      LOGGER.debug("IOException while attempting to save batch job", e);
+      insertDocument(ViewerConstants.SOLR_INDEX_BATCH_JOBS_COLLECTION_NAME, doc);
+    } catch (ViewerException e) {
+      LOGGER.debug("Solr error while converting to document", e);
     }
   }
 
@@ -286,13 +282,7 @@ public class DatabaseRowsSolrManager {
           doc.addField(field.getName(), SolrUtils.asValueUpdate(field.getValue()));
         }
       }
-
-      client.add(ViewerConstants.SOLR_INDEX_BATCH_JOBS_COLLECTION_NAME, doc);
-      client.commit(ViewerConstants.SOLR_INDEX_BATCH_JOBS_COLLECTION_NAME, true, true);
-    } catch (SolrServerException e) {
-      LOGGER.debug("Solr error while attempting to save batch job", e);
-    } catch (IOException e) {
-      LOGGER.debug("IOException while attempting to save batch job", e);
+      insertDocument(ViewerConstants.SOLR_INDEX_BATCH_JOBS_COLLECTION_NAME, doc);
     } catch (ViewerException | AuthorizationDeniedException | RequestNotValidException e) {
       LOGGER.debug("Solr error while converting to document", e);
     }

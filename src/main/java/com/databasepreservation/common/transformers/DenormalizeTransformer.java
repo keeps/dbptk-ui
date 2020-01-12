@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
+import com.databasepreservation.common.server.DataTransformationObserver;
 import org.apache.solr.common.SolrInputDocument;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
@@ -44,11 +45,13 @@ public class DenormalizeTransformer {
   private final String databaseUUID;
   private final String jobUUID;
   private final String tableUUID;
+  private DataTransformationObserver observer;
 
   public DenormalizeTransformer(String databaseUUID, String tableUUID, String jobUUID) throws ModuleException {
     this.databaseUUID = databaseUUID;
     this.jobUUID = jobUUID;
     this.tableUUID = tableUUID;
+    observer = new DataTransformationObserver(jobUUID);
     solrManager = ViewerFactory.getSolrManager();
     try {
       database = solrManager.retrieve(ViewerDatabase.class, this.databaseUUID);
@@ -59,6 +62,7 @@ public class DenormalizeTransformer {
       queryOverRootTable();
       updateCollectionStatus();
     } catch (NotFoundException | GenericException e) {
+      observer.notifyFinishDataTransformation();
       throw new ModuleException().withMessage("Cannot retrieved database from solr");
     }
   }
@@ -134,24 +138,26 @@ public class DenormalizeTransformer {
     IterableIndexResult sourceRows = solrManager.findAllRows(databaseUUID, filter, null, fieldsToReturn);
     long processedRows = 0;
     long rowToProcess = sourceRows.getTotalCount();
-    // solrManager.editBatchJob(jobUUID, rowToProcess, processedRows);
-    for (ViewerRow row : sourceRows) {
-      // solrManager.editBatchJob(jobUUID, rowToProcess, ++processedRows);
-      List<SolrInputDocument> nestedDocuments = new ArrayList<>();
-      for (RelatedTablesConfiguration relatedTable : denormalizeConfiguration.getRelatedTables()) {
-        queryOverRelatedTables(row, relatedTable, nestedDocuments);
-      }
+    try {
+      solrManager.editBatchJob(jobUUID, rowToProcess, processedRows);
+      for (ViewerRow row : sourceRows) {
+        List<SolrInputDocument> nestedDocuments = new ArrayList<>();
+        for (RelatedTablesConfiguration relatedTable : denormalizeConfiguration.getRelatedTables()) {
+          queryOverRelatedTables(row, relatedTable, nestedDocuments);
+        }
 
-      if (!nestedDocuments.isEmpty()) {
-        solrManager.addDatabaseField(databaseUUID, row.getUuid(), nestedDocuments);
+        if (!nestedDocuments.isEmpty()) {
+          solrManager.addDatabaseField(databaseUUID, row.getUuid(), nestedDocuments);
+        }
+        solrManager.editBatchJob(jobUUID, rowToProcess, ++processedRows);
       }
+    } catch (NotFoundException | GenericException e) {
+      throw new ModuleException().withMessage("Cannot update batch row in solr");
     }
-    // } catch (NotFoundException | GenericException e) {
-    // throw new ModuleException().withMessage("Cannot update batch row in solr");
-    // }
   }
 
-  private void queryOverRelatedTables(ViewerRow row, RelatedTablesConfiguration relatedTable, List<SolrInputDocument> nestedDocuments) {
+  private void queryOverRelatedTables(ViewerRow row, RelatedTablesConfiguration relatedTable,
+    List<SolrInputDocument> nestedDocuments) {
     String tableId = relatedTable.getTableID();
     Filter resultingFilter = new Filter();
     List<FilterParameter> filterParameterList = new ArrayList<>();
@@ -172,7 +178,8 @@ public class DenormalizeTransformer {
           break;
         }
       }
-      if(value == null) return;
+      if (value == null)
+        return;
       filterParameterList.add(new SimpleFilterParameter(sourceSolrName, value));
     }
 

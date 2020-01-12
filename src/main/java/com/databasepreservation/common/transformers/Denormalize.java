@@ -58,7 +58,7 @@ public class Denormalize {
     this.solrManager = ViewerFactory.getSolrManager();
     this.databaseUUID = databaseUUID;
     this.jobUUID = jobUUID;
-    observer = new DataTransformationObserver(databaseUUID, tableUUID);
+    observer = new DataTransformationObserver(jobUUID);
     try {
       database = solrManager.retrieve(ViewerDatabase.class, this.databaseUUID);
       DenormalizeConfiguration denormalizeConfiguration = getConfiguration(

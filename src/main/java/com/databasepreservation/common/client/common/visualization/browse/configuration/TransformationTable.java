@@ -120,4 +120,8 @@ public class TransformationTable extends Composite {
   public ViewerTable getTable() {
     return table;
   }
+
+  public static void clear(){
+    instances.clear();
+  }
 }
