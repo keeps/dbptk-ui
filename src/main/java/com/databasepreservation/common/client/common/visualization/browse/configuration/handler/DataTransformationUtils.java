@@ -3,7 +3,6 @@ package com.databasepreservation.common.client.common.visualization.browse.confi
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.TableNode;
 import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
 import com.databasepreservation.common.client.models.status.denormalization.ReferencesConfiguration;
@@ -14,7 +13,7 @@ import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
 import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
 import com.databasepreservation.common.client.models.structure.ViewerReference;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
-import com.databasepreservation.common.client.services.ConfigurationService;
+import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.services.JobService;
 import com.databasepreservation.common.client.widgets.Toast;
 
@@ -79,12 +78,12 @@ public class DataTransformationUtils {
 
   public static void saveConfiguration(String databaseUUID, DenormalizeConfiguration denormalizeConfiguration) {
     if (denormalizeConfiguration != null && denormalizeConfiguration.getState().equals(ViewerJobStatus.NEW)) {
-      ConfigurationService.Util.call((Boolean result) -> {
+      DatabaseService.Util.call((Boolean result) -> {
         JobService.Util.call((Boolean run) -> {
           Toast.showInfo("Configuration file",
             "Created denormalization configuration file with success for " + denormalizeConfiguration.getTableID());
         }).denormalizeTableJob(databaseUUID, denormalizeConfiguration.getTableUUID());
-      }).createDenormalizeConfigurationFile(databaseUUID, denormalizeConfiguration.getTableUUID(),
+      }).createDenormalizeConfigurationFile(databaseUUID, databaseUUID, denormalizeConfiguration.getTableUUID(),
         denormalizeConfiguration);
     }
   }

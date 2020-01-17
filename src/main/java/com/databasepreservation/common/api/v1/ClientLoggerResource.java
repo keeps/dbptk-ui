@@ -29,117 +29,119 @@ public class ClientLoggerResource implements ClientLoggerService {
   }
 
   @Override
-  public void trace(String classname, String object) {
+  public void log(String type, String classname, String object) {
+    switch (type) {
+      case "trace":
+        trace(classname, object);
+        break;
+      case "debug":
+        debug(classname, object);
+        break;
+      case "warn":
+        warn(classname, object);
+        break;
+      case "error":
+        error(classname, object);
+        break;
+      case "fatal":
+        fatal(classname, object);
+        break;
+      case "info":
+      default:
+        info(classname, object);
+        break;
+    }
+  }
+
+  @Override
+  public void detailedLog(String type, String classname, String object, Throwable error) {
+    switch (type) {
+      case "trace":
+        trace(classname, object, error);
+        break;
+      case "debug":
+        debug(classname, object, error);
+        break;
+      case "warn":
+        warn(classname, object, error);
+        break;
+      case "error":
+        error(classname, object, error);
+        break;
+      case "fatal":
+        fatal(classname, object, error);
+        break;
+      case "info":
+      default:
+        info(classname, object, error);
+        break;
+    }
+  }
+
+  private void trace(String classname, String object) {
     Logger logger = LoggerFactory.getLogger(classname);
     logger.trace(getUserInfo() + object);
   }
 
-  @Override
-  public void trace(String classname, String object, Throwable error) {
+  private void trace(String classname, String object, Throwable error) {
     Logger logger = LoggerFactory.getLogger(classname);
     logger.trace(getUserInfo() + object, error);
   }
 
-  @Override
-  public void debug(String classname, String object) {
+  private void debug(String classname, String object) {
     Logger logger = LoggerFactory.getLogger(classname);
     logger.debug(getUserInfo() + object);
   }
 
-  @Override
-  public void debug(String classname, String object, Throwable error) {
+  private void debug(String classname, String object, Throwable error) {
     Logger logger = LoggerFactory.getLogger(classname);
     logger.debug(getUserInfo() + object, error);
   }
 
-  @Override
-  public void info(String classname, String object) {
+  private void info(String classname, String object) {
     Logger logger = LoggerFactory.getLogger(classname);
     logger.info(getUserInfo() + object);
   }
 
-  @Override
-  public void info(String classname, String object, Throwable error) {
+  private void info(String classname, String object, Throwable error) {
     Logger logger = LoggerFactory.getLogger(classname);
     logger.info(getUserInfo() + object, error);
   }
 
-  @Override
-  public void warn(String classname, String object) {
+  private void warn(String classname, String object) {
     Logger logger = LoggerFactory.getLogger(classname);
     logger.warn(getUserInfo() + object);
   }
 
-  @Override
-  public void warn(String classname, String object, Throwable error) {
+  private void warn(String classname, String object, Throwable error) {
     Logger logger = LoggerFactory.getLogger(classname);
     logger.warn(getUserInfo() + object, error);
   }
 
-  @Override
-  public void error(String classname, String object) {
+  private void error(String classname, String object) {
     Logger logger = LoggerFactory.getLogger(classname);
     logger.error(getUserInfo() + object);
     sendError(classname, object, null);
   }
 
-  @Override
-  public void error(String classname, String object, Throwable error) {
+  private void error(String classname, String object, Throwable error) {
     Logger logger = LoggerFactory.getLogger(classname);
     logger.error(getUserInfo() + object, error);
     sendError(classname, object, error);
   }
 
-  @Override
-  public void fatal(String classname, String object) {
+  private void fatal(String classname, String object) {
     Logger logger = LoggerFactory.getLogger(classname);
     logger.error(getUserInfo() + object);
     sendError(classname, object, null);
   }
 
-  @Override
-  public void fatal(String classname, String object, Throwable error) {
+  private void fatal(String classname, String object, Throwable error) {
     Logger logger = LoggerFactory.getLogger(classname);
     logger.error(getUserInfo() + object, error);
     sendError(classname, object, error);
   }
 
-  @Override
-  public void pagehit(String pagename) {
-    Logger logger = LoggerFactory.getLogger(ClientLoggerResource.class);
-    // try {
-    // RODAClient rodaClient = RodaClientFactory.getRodaWuiClient();
-    // String username = RodaClientFactory.getRodaClient(
-    // this.getThreadLocalRequest().getSession()).getUsername();
-    // LogEntryParameter[] parameters = new LogEntryParameter[] {
-    // new LogEntryParameter("hostname", getThreadLocalRequest()
-    // .getRemoteHost()),
-    // new LogEntryParameter("address", getThreadLocalRequest()
-    // .getRemoteAddr()),
-    // new LogEntryParameter("user", getThreadLocalRequest()
-    // .getRemoteUser()),
-    // new LogEntryParameter("pagename", pagename) };
-    //
-    // LogEntry logEntry = new LogEntry();
-    // logEntry.setAction(LOG_ACTION_WUI_PAGEHIT);
-    // logEntry.setParameters(parameters);
-    // logEntry.setUsername(username);
-    //
-    // rodaClient.getLoggerService().addLogEntry(logEntry);
-    // } catch (RemoteException e) {
-    // logger.error("Error logging page hit", e);
-    // } catch (RODAClientException e) {
-    // logger.error("Error logging page hit", e);
-    // } catch (LoginException e) {
-    // logger.error("Error logging page hit", e);
-    // } catch (LoggerException e) {
-    // logger.error("Error logging page hit", e);
-    // }
-  }
-
-  public void destroy() {
-    LogManager.shutdown();
-  }
 
   public void sendError(String classname, String message, Throwable error) {
     Logger logger = LoggerFactory.getLogger(ClientLoggerResource.class);

@@ -71,11 +71,6 @@ public class DatabaseRowsSolrManager {
     this.client = client;
   }
 
-  public String findSIARDFile(String path) throws GenericException, RequestNotValidException {
-    Filter pathFilter = new Filter(new SimpleFilterParameter(ViewerConstants.SOLR_DATABASES_SIARD_PATH, path));
-    return SolrUtils.findSIARDFile(client, ViewerConstants.SOLR_INDEX_DATABASES_COLLECTION_NAME, pathFilter);
-  }
-
   /**
    * Adds a database to the databases collection
    * 

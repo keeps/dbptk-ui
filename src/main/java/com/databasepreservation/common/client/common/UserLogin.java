@@ -7,12 +7,11 @@ package com.databasepreservation.common.client.common;
 import java.util.List;
 import java.util.Vector;
 
-import org.fusesource.restygwt.client.Method;
 import org.fusesource.restygwt.client.MethodCallback;
-import org.roda.core.data.v2.user.User;
 
 import com.databasepreservation.common.client.ClientLogger;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
+import com.databasepreservation.common.client.models.user.User;
 import com.databasepreservation.common.client.services.AuthenticationService;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.google.gwt.core.client.GWT;
@@ -96,23 +95,6 @@ public class UserLogin {
       "");
   }
 
-  public void login(String username, String password, final MethodCallback<User> callback) {
-    GWT.log("logging in with user " + username);
-    AuthenticationService.Util.call(new MethodCallback<User>() {
-      @Override
-      public void onFailure(Method method, Throwable exception) {
-        callback.onFailure(method, exception);
-      }
-
-      @Override
-      public void onSuccess(Method method, User newUser) {
-        getUserRequest.setCached(newUser);
-        onLoginStatusChanged(newUser);
-        callback.onSuccess(method, newUser);
-      }
-    }).login(username, password);
-  }
-
   public void logout() {
     // 2017-06-1 bferreira: this could probably be changed to use getPath() as
     // the service and pass in a separate hash parameter (similar to what login
@@ -150,8 +132,8 @@ public class UserLogin {
   }
 
   public void showSuggestLoginDialog() {
-    Dialogs.showConfirmDialog(messages.loginDialogTitle(), messages.casForwardWarning(),
-      messages.basicActionCancel(), messages.loginDialogLogin(), new AsyncCallback<Boolean>() {
+    Dialogs.showConfirmDialog(messages.loginDialogTitle(), messages.casForwardWarning(), messages.basicActionCancel(),
+      messages.loginDialogLogin(), new AsyncCallback<Boolean>() {
 
         @Override
         public void onSuccess(Boolean result) {

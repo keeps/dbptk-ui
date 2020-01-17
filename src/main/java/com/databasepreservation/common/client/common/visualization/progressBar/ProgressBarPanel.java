@@ -6,7 +6,7 @@ import java.util.function.Consumer;
 import com.databasepreservation.common.client.common.Progressbar;
 import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
-import com.databasepreservation.common.client.models.ProgressData;
+import com.databasepreservation.common.client.models.progress.ProgressData;
 import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.google.gwt.core.client.GWT;
@@ -26,7 +26,8 @@ import config.i18n.client.ClientMessages;
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 public class ProgressBarPanel extends Composite {
-  interface ProgressBarPanelUiBinder extends UiBinder<Widget, ProgressBarPanel> { }
+  interface ProgressBarPanelUiBinder extends UiBinder<Widget, ProgressBarPanel> {
+  }
 
   private static ProgressBarPanelUiBinder uiBinder = GWT.create(ProgressBarPanelUiBinder.class);
 
@@ -54,11 +55,7 @@ public class ProgressBarPanel extends Composite {
   SimplePanel description;
 
   public static ProgressBarPanel getInstance(String uuid) {
-    if (instances.get(uuid) == null) {
-      instances.put(uuid, new ProgressBarPanel(uuid));
-    }
-
-    return instances.get(uuid);
+    return instances.computeIfAbsent(uuid, k -> new ProgressBarPanel(uuid));
   }
 
   private ProgressBarPanel(String uuid) {

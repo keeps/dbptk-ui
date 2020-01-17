@@ -13,9 +13,7 @@ import com.databasepreservation.common.client.common.utils.html.LabelUtils;
 import com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.SIARDManagerPage;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
-import com.databasepreservation.common.client.services.ConfigurationService;
 import com.databasepreservation.common.client.services.DatabaseService;
-import com.databasepreservation.common.client.services.SIARDService;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Button;
@@ -62,17 +60,17 @@ public class BrowseNavigationPanel {
 
     btnDelete.addClickHandler(event -> {
       if (database.getStatus().equals(ViewerDatabaseStatus.AVAILABLE)
-        || database.getStatus().equals(ViewerDatabaseStatus.ERROR)) {
+          || database.getStatus().equals(ViewerDatabaseStatus.ERROR)) {
         CommonDialogs.showConfirmDialog(messages.SIARDHomePageDialogTitleForDeleteBrowseContent(),
-          messages.SIARDHomePageTextForDeleteFromSolr(), messages.basicActionCancel(), messages.basicActionConfirm(),
-          CommonDialogs.Level.DANGER, "500px", new DefaultAsyncCallback<Boolean>() {
-            @Override
-            public void onSuccess(Boolean result) {
-              if (result) {
-                delete();
+            messages.SIARDHomePageTextForDeleteFromSolr(), messages.basicActionCancel(), messages.basicActionConfirm(),
+            CommonDialogs.Level.DANGER, "500px", new DefaultAsyncCallback<Boolean>() {
+              @Override
+              public void onSuccess(Boolean result) {
+                if (result) {
+                  delete();
+                }
               }
-            }
-          });
+            });
       }
     });
   }
@@ -90,20 +88,20 @@ public class BrowseNavigationPanel {
           btnIngestClicked = true;
 
           HistoryManager.gotoIngestSIARDData(database.getUuid(), database.getMetadata().getName());
-          SIARDService.Util.call((String databaseUUID) -> {
+          DatabaseService.Util.call((String databaseUUID) -> {
             HistoryManager.gotoDatabase(databaseUUID);
             Dialogs.showInformationDialog(messages.SIARDHomePageDialogTitleForBrowsing(),
-              messages.SIARDHomePageTextForIngestSuccess(), messages.basicActionClose(), "btn btn-link");
+                messages.SIARDHomePageTextForIngestSuccess(), messages.basicActionClose(), "btn btn-link");
           }, (String errorMessage) -> {
             instances.clear();
             HistoryManager.gotoSIARDInfo(database.getUuid());
             Dialogs.showErrors(messages.SIARDHomePageDialogTitleForBrowsing(), errorMessage,
-              messages.basicActionClose());
-          }).uploadSIARD(database.getUuid(), database.getPath());
+                messages.basicActionClose());
+          }).createCollection(database.getUuid());
         }
       } else {
         Dialogs.showInformationDialog(messages.SIARDHomePageDialogTitleForBrowsing(),
-          messages.SIARDHomePageTextForIngestNotSupported(), messages.basicActionUnderstood(), "btn btn-link");
+            messages.SIARDHomePageTextForIngestNotSupported(), messages.basicActionUnderstood(), "btn btn-link");
       }
     });
   }
@@ -138,11 +136,11 @@ public class BrowseNavigationPanel {
     browse.addButton(btnDelete);
     browse.addButton(btnAdvancedConfiguration);
 
-    if (database.getStatus().equals(ViewerDatabaseStatus.AVAILABLE)){
+    if (database.getStatus().equals(ViewerDatabaseStatus.AVAILABLE)) {
       btnBrowse.setVisible(true);
       btnDelete.setVisible(true);
       btnAdvancedConfiguration.setVisible(true);
-    } else if( database.getStatus().equals(ViewerDatabaseStatus.ERROR)) {
+    } else if (database.getStatus().equals(ViewerDatabaseStatus.ERROR)) {
       btnBrowse.setVisible(true);
       btnDelete.setVisible(true);
       btnAdvancedConfiguration.setVisible(false);
@@ -158,7 +156,7 @@ public class BrowseNavigationPanel {
     }
 
     browsingStatus = MetadataField.createInstance(messages.SIARDHomePageLabelForBrowseStatus(),
-      LabelUtils.getDatabaseStatus(database.getStatus()));
+        LabelUtils.getDatabaseStatus(database.getStatus()));
     browsingStatus.setCSS(null, "label-field", "value-field");
 
     browse.addToInfoPanel(browsingStatus);
@@ -170,12 +168,12 @@ public class BrowseNavigationPanel {
     this.database = database;
     browsingStatus.updateText(LabelUtils.getDatabaseStatus(database.getStatus()));
 
-    if (database.getStatus().equals(ViewerDatabaseStatus.AVAILABLE)){
+    if (database.getStatus().equals(ViewerDatabaseStatus.AVAILABLE)) {
       btnIngest.setVisible(false);
       btnBrowse.setVisible(true);
       btnDelete.setVisible(true);
       btnAdvancedConfiguration.setVisible(true);
-    } else if(database.getStatus().equals(ViewerDatabaseStatus.ERROR)) {
+    } else if (database.getStatus().equals(ViewerDatabaseStatus.ERROR)) {
       btnIngest.setVisible(false);
       btnBrowse.setVisible(true);
       btnDelete.setVisible(true);
@@ -187,7 +185,7 @@ public class BrowseNavigationPanel {
         btnBrowse.setVisible(false);
         btnAdvancedConfiguration.setVisible(false);
         btnIngest.addClickHandler(
-          event -> HistoryManager.gotoIngestSIARDData(database.getUuid(), database.getMetadata().getName()));
+            event -> HistoryManager.gotoIngestSIARDData(database.getUuid(), database.getMetadata().getName()));
       }
     } else if (database.getStatus().equals(ViewerDatabaseStatus.METADATA_ONLY)) {
       btnIngest.setVisible(true);
@@ -209,10 +207,10 @@ public class BrowseNavigationPanel {
 
   private void delete() {
     if (database.getStatus().equals(ViewerDatabaseStatus.AVAILABLE)
-      || database.getStatus().equals(ViewerDatabaseStatus.ERROR)) {
+        || database.getStatus().equals(ViewerDatabaseStatus.ERROR)) {
       DatabaseService.Util.call((Boolean result) -> {
         SIARDManagerPage.getInstance(database).refreshInstance(database.getUuid());
-      }).deleteSolrData(database.getUuid());
+      }).deleteCollection(database.getUuid());
     }
   }
 }

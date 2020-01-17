@@ -11,9 +11,9 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.jasig.cas.client.authentication.AttributePrincipal;
 import org.roda.core.data.v2.user.RodaPrincipal;
-import org.roda.core.data.v2.user.User;
 
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.models.user.User;
 import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.utils.UserUtility;
 
@@ -48,6 +48,7 @@ public class UserLoginHelper {
       mapCasAttributeString(user, attributes, fullNameConfigurationValue, RodaPrincipal::setFullName);
       mapCasAttributeString(user, attributes, emailConfigurationValue, User::setEmail);
     }
+    user.setAdmin(UserUtility.userIsAdmin(user));
 
     UserUtility.setUser(request, user);
     return user;

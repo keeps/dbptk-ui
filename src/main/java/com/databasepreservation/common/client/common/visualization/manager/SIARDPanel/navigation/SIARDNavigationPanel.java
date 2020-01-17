@@ -15,7 +15,7 @@ import com.databasepreservation.common.client.common.visualization.manager.SIARD
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
-import com.databasepreservation.common.client.services.SIARDService;
+import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.Humanize;
 import com.databasepreservation.common.client.tools.PathUtils;
@@ -98,7 +98,7 @@ public class SIARDNavigationPanel {
       btnDeleteSIARD.setText(messages.SIARDHomePageButtonTextForDeleteIngested());
       btnDeleteSIARD.addClickHandler(event -> {
         if (!database.getStatus().equals(ViewerDatabaseStatus.REMOVING)
-            && !database.getStatus().equals(ViewerDatabaseStatus.INGESTING)) {
+          && !database.getStatus().equals(ViewerDatabaseStatus.INGESTING)) {
           CommonDialogs.showConfirmDialog(messages.SIARDHomePageDialogTitleForDelete(),
             messages.SIARDHomePageTextForDeleteSIARD(), messages.basicActionCancel(), messages.basicActionConfirm(),
             CommonDialogs.Level.DANGER, "500px", new DefaultAsyncCallback<Boolean>() {
@@ -115,12 +115,12 @@ public class SIARDNavigationPanel {
 
     // version information
     MetadataField version = MetadataField.createInstance(messages.SIARDHomePageLabelForSIARDVersion(),
-        database.getVersion());
+      database.getVersion());
     version.setCSS(null, "label-field", "value-field");
 
     // size information
     MetadataField size = MetadataField.createInstance(messages.SIARDHomePageLabelForSIARDSize(),
-        Humanize.readableFileSize(database.getSize()));
+      Humanize.readableFileSize(database.getSize()));
     size.setCSS(null, "label-field", "value-field");
 
     // path information
@@ -164,9 +164,9 @@ public class SIARDNavigationPanel {
     if (!database.getStatus().equals(ViewerDatabaseStatus.REMOVING)
       && !database.getStatus().equals(ViewerDatabaseStatus.INGESTING)
       && !database.getValidationStatus().equals(ViewerDatabaseValidationStatus.VALIDATION_RUNNING)) {
-      SIARDService.Util.call((Void result) -> {
+      DatabaseService.Util.call((Void result) -> {
         SIARDManagerPage.getInstance(database).refreshInstance(database.getUuid());
-      }).deleteSIARDFile(database.getUuid(), database.getPath());
+      }).deleteSIARDFile(database.getUuid(), database.getUuid());
     }
   }
 }

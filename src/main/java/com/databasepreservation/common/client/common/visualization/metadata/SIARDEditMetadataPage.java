@@ -1,16 +1,20 @@
 package com.databasepreservation.common.client.common.visualization.metadata;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.index.IsIndexed;
-import com.databasepreservation.common.client.models.structure.ViewerDatabase;
-import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
-import com.databasepreservation.common.client.models.structure.ViewerSIARDBundle;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.sidebar.MetadataEditSidebar;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
-import com.databasepreservation.common.client.tools.BreadcrumbManager;
+import com.databasepreservation.common.client.index.IsIndexed;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
+import com.databasepreservation.common.client.models.structure.ViewerSIARDBundle;
 import com.databasepreservation.common.client.services.DatabaseService;
+import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -19,11 +23,8 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.MenuBar;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import config.i18n.client.ClientMessages;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import config.i18n.client.ClientMessages;
 
 /**
  * @autor Gabriel Barros <gbarros@keep.pt>
@@ -76,7 +77,7 @@ public class SIARDEditMetadataPage extends Composite {
 
     initWidget(binder.createAndBindUi(this));
 
-    if(ApplicationType.getType().equals(ViewerConstants.SERVER)){
+    if (ApplicationType.getType().equals(ViewerConstants.SERVER)) {
       toolbar.getElement().addClassName("filePreviewToolbar");
       breadcrumb = breadcrumbServer;
       breadcrumbDesktop.removeFromParent();
@@ -101,10 +102,11 @@ public class SIARDEditMetadataPage extends Composite {
   private void loadPanelWithDatabase(MetadataPanelLoad rightPanelLoader, String sidebarSelected) {
     DatabaseService.Util.call((IsIndexed result) -> {
       database = (ViewerDatabase) result;
-      List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forSIARDEditMetadataPage(databaseUUID, database.getMetadata().getName());
+      List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forSIARDEditMetadataPage(databaseUUID,
+        database.getMetadata().getName());
       BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
       loadPanel(rightPanelLoader, sidebarSelected);
-    }).retrieve(databaseUUID, databaseUUID);
+    }).retrieve(databaseUUID);
   }
 
   private void loadPanel(MetadataPanelLoad rightPanelLoader, String sidebarSelected) {

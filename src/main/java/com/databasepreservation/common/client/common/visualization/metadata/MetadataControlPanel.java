@@ -15,7 +15,7 @@ import com.databasepreservation.common.client.models.parameters.SIARDUpdateParam
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerSIARDBundle;
-import com.databasepreservation.common.client.services.SIARDService;
+import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.widgets.Toast;
 import com.google.gwt.core.client.GWT;
@@ -141,7 +141,7 @@ public class MetadataControlPanel extends Composite {
     loading.setVisible(true);
     reset();
 
-    SIARDService.Util.call((ViewerMetadata result) -> {
+    DatabaseService.Util.call((ViewerMetadata result) -> {
       loading.setVisible(false);
       Toast.showInfo(messages.metadataSuccessUpdated(), "");
     }, (String errorString) -> {
@@ -150,7 +150,7 @@ public class MetadataControlPanel extends Composite {
       buttonSave.setEnabled(true);
       buttonClear.setEnabled(true);
       toolTip.setVisible(true);
-    }).updateMetadataInformation(database.getUuid(), database.getPath(),
+    }).updateMetadataInformation(database.getUuid(), database.getUuid(), database.getPath(),
       new SIARDUpdateParameters(metadata, SIARDbundle));
   }
 

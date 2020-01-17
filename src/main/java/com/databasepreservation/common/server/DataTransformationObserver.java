@@ -1,6 +1,6 @@
 package com.databasepreservation.common.server;
 
-import com.databasepreservation.common.client.models.DataTransformationProgressData;
+import com.databasepreservation.common.client.models.progress.DataTransformationProgressData;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>

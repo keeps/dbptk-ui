@@ -104,7 +104,7 @@ public class RowPanel extends RightPanel {
     DatabaseService.Util.call((ViewerRow result) -> {
       row = result;
       init();
-    }).retrieveRow(database.getUuid(), rowUUID);
+    }).retrieveRow(database.getUuid(), database.getUuid(), rowUUID);
   }
 
   private void setTitle() {
@@ -336,9 +336,8 @@ public class RowPanel extends RightPanel {
 
     FindRequest findRequest = new FindRequest(ViewerRow.class.getName(), new Filter(filterParameters), Sorter.NONE,
       new Sublist(), Facets.NONE, false, solrColumns);
-    ExportRequest exportRequest = new ExportRequest(filename, zipFilename, description, exportLOBs, true);
 
-    return ExportResourcesUtils.getExportURL(database.getUuid(), table.getUuid(), findRequest, exportRequest);
+    return ExportResourcesUtils.getExportURL(database.getUuid(), table.getUuid(), findRequest, zipFilename, filename, description, exportLOBs, true);
   }
 
   /**

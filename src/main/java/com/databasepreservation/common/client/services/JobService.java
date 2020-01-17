@@ -1,6 +1,5 @@
 package com.databasepreservation.common.client.services;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -11,6 +10,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import io.swagger.annotations.Api;
 import org.fusesource.restygwt.client.DirectRestService;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.fusesource.restygwt.client.REST;
@@ -19,7 +20,7 @@ import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultMethodCallback;
 import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
-import com.databasepreservation.common.client.models.DataTransformationProgressData;
+import com.databasepreservation.common.client.models.progress.DataTransformationProgressData;
 import com.databasepreservation.common.client.models.structure.ViewerJob;
 import com.google.gwt.core.client.GWT;
 
@@ -30,7 +31,9 @@ import io.swagger.annotations.ApiParam;
  * @author Gabriel Barros <gbarros@keep.pt>
  */
 @Path(".." + ViewerConstants.ENDPOINT_JOB)
+@Api(value = JobService.SWAGGER_ENDPOINT)
 public interface JobService extends DirectRestService {
+  public static final String SWAGGER_ENDPOINT = "v1 job";
   class Util {
     /**
      * @return the singleton instance
@@ -51,6 +54,17 @@ public interface JobService extends DirectRestService {
       return REST.withCallback(DefaultMethodCallback.get(callback, errorHandler)).call(get());
     }
   }
+
+  @GET
+  @Path("/{jobUUID}")
+  @ApiOperation(value = "Retrieves a specific job", notes = "", response = ViewerJob.class)
+  ViewerJob retrieve(@PathParam("jobUUID") String jobUUID);
+
+  @POST
+  @Path("/")
+  @ApiOperation(value = "Finds jobs", notes = "", response = ViewerJob.class, responseContainer = "IndexResult")
+  IndexResult<ViewerJob> findJobs(@ApiParam(ViewerConstants.API_QUERY_PARAM_FILTER) FindRequest filter,
+                                            @QueryParam(ViewerConstants.API_QUERY_PARAM_LOCALE) String localeString);
 
   @POST
   @Path("/{databaseuuid}")

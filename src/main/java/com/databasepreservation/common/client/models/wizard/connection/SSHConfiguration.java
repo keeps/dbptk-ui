@@ -1,4 +1,4 @@
-package com.databasepreservation.common.client.models.parameters;
+package com.databasepreservation.common.client.models.wizard.connection;
 
 import java.io.Serializable;
 import java.util.Objects;

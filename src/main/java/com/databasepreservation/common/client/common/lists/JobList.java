@@ -4,10 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 
-import com.databasepreservation.common.api.v1.JobResource;
-import com.databasepreservation.common.client.models.DataTransformationProgressData;
 import org.fusesource.restygwt.client.MethodCallback;
 import com.databasepreservation.common.client.index.filter.Filter;
 import org.roda.core.data.v2.index.sublist.Sublist;

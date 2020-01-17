@@ -101,7 +101,7 @@ public class ReferencesPanel extends RightPanel {
     DatabaseService.Util.call((ViewerRow result) -> {
       record = result;
       init();
-    }).retrieveRow(database.getUuid(), recordUUID);
+    }).retrieveRow(database.getUuid(), database.getUuid(), recordUUID);
   }
 
   @Override

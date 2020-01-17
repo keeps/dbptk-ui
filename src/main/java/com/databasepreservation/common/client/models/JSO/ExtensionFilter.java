@@ -1,4 +1,4 @@
-package com.databasepreservation.common.client.models;
+package com.databasepreservation.common.client.models.JSO;
 
 import com.databasepreservation.common.client.ViewerConstants;
 

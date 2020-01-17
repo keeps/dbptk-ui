@@ -5,11 +5,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.fusesource.restygwt.client.MethodCallback;
-import com.databasepreservation.common.client.index.filter.Filter;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
 import com.databasepreservation.common.client.ClientLogger;
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.common.DefaultAsyncCallback;
+import com.databasepreservation.common.client.common.UserLogin;
 import com.databasepreservation.common.client.common.lists.columns.ButtonColumn;
 import com.databasepreservation.common.client.common.lists.columns.TooltipColumn;
 import com.databasepreservation.common.client.common.lists.utils.BasicAsyncTableCell;
@@ -19,9 +20,10 @@ import com.databasepreservation.common.client.common.utils.html.LabelUtils;
 import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.index.facets.Facets;
+import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
-import com.databasepreservation.common.client.services.AuthenticationService;
+import com.databasepreservation.common.client.models.user.User;
 import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.Humanize;
@@ -63,126 +65,140 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
 
   @Override
   protected void configureDisplay(CellTable<ViewerDatabase> display) {
-    AuthenticationService.Util.call((Boolean result) -> {
-      display.setSelectionModel(display.getSelectionModel(), DefaultSelectionEventManager.createBlacklistManager(4, 9));
+    display.setSelectionModel(display.getSelectionModel(), DefaultSelectionEventManager.createBlacklistManager(4, 9));
 
-      Column<ViewerDatabase, SafeHtml> nameColumn = new TooltipColumn<ViewerDatabase>() {
-        @Override
-        public SafeHtml getValue(ViewerDatabase database) {
-          return database != null && database.getMetadata() != null
-              ? SafeHtmlUtils.fromString(database.getMetadata().getName())
-              : SafeHtmlUtils.fromString("unknown");
-        }
-      };
+    Column<ViewerDatabase, SafeHtml> nameColumn = new TooltipColumn<ViewerDatabase>() {
+      @Override
+      public SafeHtml getValue(ViewerDatabase database) {
+        return database != null && database.getMetadata() != null
+          ? SafeHtmlUtils.fromString(database.getMetadata().getName())
+          : SafeHtmlUtils.fromString("unknown");
+      }
+    };
 
-      Column<ViewerDatabase, SafeHtml> description = new TooltipColumn<ViewerDatabase>() {
-        @Override
-        public SafeHtml getValue(ViewerDatabase database) {
-          return database != null && database.getMetadata() != null
-              ? SafeHtmlUtils.fromString(database.getMetadata().getDescription())
-              : SafeHtmlUtils.fromString("unknown");
-        }
-      };
+    Column<ViewerDatabase, SafeHtml> description = new TooltipColumn<ViewerDatabase>() {
+      @Override
+      public SafeHtml getValue(ViewerDatabase database) {
+        return database != null && database.getMetadata() != null
+          ? SafeHtmlUtils.fromString(database.getMetadata().getDescription())
+          : SafeHtmlUtils.fromString("unknown");
+      }
+    };
 
-      Column<ViewerDatabase, SafeHtml> dbmsColumn = new TooltipColumn<ViewerDatabase>() {
-        @Override
-        public SafeHtml getValue(ViewerDatabase database) {
-          return database != null && database.getMetadata() != null
-              ? SafeHtmlUtils.fromString(database.getMetadata().getDatabaseProduct())
-              : SafeHtmlUtils.fromString("unknown");
-        }
-      };
+    Column<ViewerDatabase, SafeHtml> dbmsColumn = new TooltipColumn<ViewerDatabase>() {
+      @Override
+      public SafeHtml getValue(ViewerDatabase database) {
+        return database != null && database.getMetadata() != null
+          ? SafeHtmlUtils.fromString(database.getMetadata().getDatabaseProduct())
+          : SafeHtmlUtils.fromString("unknown");
+      }
+    };
 
-      Column<ViewerDatabase, SafeHtml> dataOwnerColumn = new TooltipColumn<ViewerDatabase>() {
-        @Override
-        public SafeHtml getValue(ViewerDatabase database) {
-          return database != null && database.getMetadata() != null
-              ? SafeHtmlUtils.fromString(database.getMetadata().getDataOwner())
-              : SafeHtmlUtils.fromString("unknown");
-        }
-      };
+    Column<ViewerDatabase, SafeHtml> dataOwnerColumn = new TooltipColumn<ViewerDatabase>() {
+      @Override
+      public SafeHtml getValue(ViewerDatabase database) {
+        return database != null && database.getMetadata() != null
+          ? SafeHtmlUtils.fromString(database.getMetadata().getDataOwner())
+          : SafeHtmlUtils.fromString("unknown");
+      }
+    };
 
-      Column<ViewerDatabase, SafeHtml> archivalDateColumn = new TooltipColumn<ViewerDatabase>() {
-        @Override
-        public SafeHtml getValue(ViewerDatabase database) {
-          return database != null && database.getMetadata() != null
-              ? SafeHtmlUtils.fromString(database.getMetadata().getArchivalDate().substring(0, 10))
-              : null;
-        }
-      };
+    Column<ViewerDatabase, SafeHtml> archivalDateColumn = new TooltipColumn<ViewerDatabase>() {
+      @Override
+      public SafeHtml getValue(ViewerDatabase database) {
+        return database != null && database.getMetadata() != null
+          ? SafeHtmlUtils.fromString(database.getMetadata().getArchivalDate().substring(0, 10))
+          : null;
+      }
+    };
 
-      Column<ViewerDatabase, String> locationColumn = new ButtonColumn<ViewerDatabase>() {
+    Column<ViewerDatabase, String> locationColumn = new ButtonColumn<ViewerDatabase>() {
+      @Override
+      public String getValue(ViewerDatabase database) {
+        return database != null && database.getMetadata() != null ? PathUtils.getFileName(database.getPath()) : null;
+      }
+    };
+    locationColumn.setFieldUpdater((index, object, value) -> {
+      if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
+        JavascriptUtils.showItemInFolder(object.getPath());
+      } else {
+        SafeUri downloadUri = RestUtils.createFileResourceDownloadSIARDUri(object.getUuid());
+        Window.Location.assign(downloadUri.asString());
+      }
+    });
+
+    Column<ViewerDatabase, SafeHtml> sizeColumn = new TooltipColumn<ViewerDatabase>() {
+      @Override
+      public SafeHtml getValue(ViewerDatabase database) {
+        return database != null ? SafeHtmlUtils.fromString(Humanize.readableFileSize(database.getSize()))
+          : SafeHtmlUtils.fromString("unknown");
+      }
+    };
+
+    Column<ViewerDatabase, SafeHtml> versionColumn = new TooltipColumn<ViewerDatabase>() {
+      @Override
+      public SafeHtml getValue(ViewerDatabase database) {
+        return database != null ? SafeHtmlUtils.fromString(database.getVersion()) : SafeHtmlUtils.fromString("unknown");
+      }
+    };
+
+    Column<ViewerDatabase, SafeHtml> validColumn = new Column<ViewerDatabase, SafeHtml>(new SafeHtmlCell()) {
+      @Override
+      public SafeHtml getValue(ViewerDatabase database) {
+        return database != null ? LabelUtils.getSIARDValidationStatus(database.getValidationStatus()) : null;
+      }
+    };
+
+    Column<ViewerDatabase, SafeHtml> statusColumn = new Column<ViewerDatabase, SafeHtml>(new SafeHtmlCell()) {
+      @Override
+      public SafeHtml getValue(ViewerDatabase database) {
+        return database != null ? LabelUtils.getDatabaseStatus(database.getStatus()) : null;
+      }
+    };
+
+    Column<ViewerDatabase, String> openColumn = new ButtonColumn<ViewerDatabase>() {
+      @Override
+      public String getValue(ViewerDatabase object) {
+        return messages.basicActionOpen();
+      }
+    };
+    openColumn.setFieldUpdater((index, object, value) -> HistoryManager.gotoSIARDInfo(object.getUuid()));
+
+    if (ApplicationType.getType().equals(ViewerConstants.SERVER)) {
+      UserLogin.getInstance().getAuthenticatedUser(new DefaultAsyncCallback<User>() {
         @Override
-        public String getValue(ViewerDatabase database) {
-          return database != null && database.getMetadata() != null ? PathUtils.getFileName(database.getPath()) : null;
-        }
-      };
-      locationColumn.setFieldUpdater((index, object, value) -> {
-        if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
-          JavascriptUtils.showItemInFolder(object.getPath());
-        } else {
-          SafeUri downloadUri = RestUtils.createFileResourceDownloadSIARDUri(object.getUuid());
-          Window.Location.assign(downloadUri.asString());
+        public void onSuccess(User user) {
+          addColumn(nameColumn, messages.managePageTableHeaderTextForDatabaseName(), true, TextAlign.NONE, 8);
+          addColumn(description, messages.managePageTableHeaderTextForDatabaseName(), true, TextAlign.NONE, 15);
+          addColumn(dataOwnerColumn, messages.managePageTableHeaderTextForDataOwner(), true, TextAlign.NONE, 5);
+          addColumn(archivalDateColumn, messages.managePageTableHeaderTextForArchivalDate(), true, TextAlign.NONE, 5);
+          if (user.isAdmin()) {
+            addColumn(dbmsColumn, messages.managePageTableHeaderTextForProductName(), true, TextAlign.NONE, 10);
+            addColumn(sizeColumn, messages.managePageTableHeaderTextForSIARDSize(), true, TextAlign.NONE, 4);
+            addColumn(versionColumn, messages.managePageTableHeaderTextForSIARDVersion(), true, TextAlign.NONE, 4);
+            addColumn(validColumn, messages.managePageTableHeaderTextForSIARDValidationStatus(), true, TextAlign.NONE,
+              5);
+            addColumn(statusColumn, messages.managePageTableHeaderTextForDatabaseStatus(), true, TextAlign.NONE, 5);
+            addColumn(openColumn, messages.managePageTableHeaderTextForActions(), true, TextAlign.NONE, 5);
+          }
         }
       });
-
-      Column<ViewerDatabase, SafeHtml> sizeColumn = new TooltipColumn<ViewerDatabase>() {
-        @Override
-        public SafeHtml getValue(ViewerDatabase database) {
-          return database != null ? SafeHtmlUtils.fromString(Humanize.readableFileSize(database.getSize()))
-              : SafeHtmlUtils.fromString("unknown");
-        }
-      };
-
-      Column<ViewerDatabase, SafeHtml> versionColumn = new TooltipColumn<ViewerDatabase>() {
-        @Override
-        public SafeHtml getValue(ViewerDatabase database) {
-          return database != null ? SafeHtmlUtils.fromString(database.getVersion()) : SafeHtmlUtils.fromString("unknown");
-        }
-      };
-
-      Column<ViewerDatabase, SafeHtml> validColumn = new Column<ViewerDatabase, SafeHtml>(new SafeHtmlCell()) {
-        @Override
-        public SafeHtml getValue(ViewerDatabase database) {
-          return database != null ? LabelUtils.getSIARDValidationStatus(database.getValidationStatus()) : null;
-        }
-      };
-
-      Column<ViewerDatabase, SafeHtml> statusColumn = new Column<ViewerDatabase, SafeHtml>(new SafeHtmlCell()) {
-        @Override
-        public SafeHtml getValue(ViewerDatabase database) {
-          return database != null ? LabelUtils.getDatabaseStatus(database.getStatus()) : null;
-        }
-      };
-
-      Column<ViewerDatabase, String> openColumn = new ButtonColumn<ViewerDatabase>() {
-        @Override
-        public String getValue(ViewerDatabase object) {
-          return messages.basicActionOpen();
-        }
-      };
-      openColumn.setFieldUpdater((index, object, value) -> HistoryManager.gotoSIARDInfo(object.getUuid()));
-
+    } else {
       addColumn(nameColumn, messages.managePageTableHeaderTextForDatabaseName(), true, TextAlign.NONE, 8);
       addColumn(description, messages.managePageTableHeaderTextForDatabaseName(), true, TextAlign.NONE, 15);
       addColumn(dataOwnerColumn, messages.managePageTableHeaderTextForDataOwner(), true, TextAlign.NONE, 5);
       addColumn(archivalDateColumn, messages.managePageTableHeaderTextForArchivalDate(), true, TextAlign.NONE, 5);
-      if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
-        addColumn(locationColumn, messages.managePageTableHeaderTextForSIARDLocation(), true, TextAlign.NONE, 8);
-      }
+      addColumn(locationColumn, messages.managePageTableHeaderTextForSIARDLocation(), true, TextAlign.NONE, 8);
+      addColumn(dbmsColumn, messages.managePageTableHeaderTextForProductName(), true, TextAlign.NONE, 10);
+      addColumn(sizeColumn, messages.managePageTableHeaderTextForSIARDSize(), true, TextAlign.NONE, 4);
+      addColumn(versionColumn, messages.managePageTableHeaderTextForSIARDVersion(), true, TextAlign.NONE, 4);
+      addColumn(validColumn, messages.managePageTableHeaderTextForSIARDValidationStatus(), true, TextAlign.NONE, 5);
+      addColumn(statusColumn, messages.managePageTableHeaderTextForDatabaseStatus(), true, TextAlign.NONE, 5);
+      addColumn(openColumn, messages.managePageTableHeaderTextForActions(), true, TextAlign.NONE, 5);
+    }
 
-      if (result) {
-        addColumn(dbmsColumn, messages.managePageTableHeaderTextForProductName(), true, TextAlign.NONE, 10);
-        addColumn(sizeColumn, messages.managePageTableHeaderTextForSIARDSize(), true, TextAlign.NONE, 4);
-        addColumn(versionColumn, messages.managePageTableHeaderTextForSIARDVersion(), true, TextAlign.NONE, 4);
-        addColumn(validColumn, messages.managePageTableHeaderTextForSIARDValidationStatus(), true, TextAlign.NONE, 5);
-        addColumn(statusColumn, messages.managePageTableHeaderTextForDatabaseStatus(), true, TextAlign.NONE, 5);
-        addColumn(openColumn, messages.managePageTableHeaderTextForActions(), true, TextAlign.NONE, 5);
-      }
-
-      Alert alert = new Alert(Alert.MessageAlertType.LIGHT, messages.noItemsToDisplay());
-      display.setEmptyTableWidget(alert);
-    }).userIsAdmin();
+    Alert alert = new Alert(Alert.MessageAlertType.LIGHT, messages.noItemsToDisplay());
+    display.setEmptyTableWidget(alert);
   }
 
   @Override
@@ -207,9 +223,5 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
   protected void onAttach() {
     super.onAttach();
     refresh();
-  }
-
-  private void manageDesktopTable() {
-
   }
 }

@@ -1,19 +1,22 @@
 package com.databasepreservation.desktop.client.dbptk.wizard.common.exportOptions;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.fields.GenericField;
-import com.databasepreservation.common.client.models.DBPTKModule;
-import com.databasepreservation.common.client.models.parameters.MetadataExportOptionsParameters;
+import com.databasepreservation.common.client.models.dbptk.Module;
 import com.databasepreservation.common.client.models.parameters.PreservationParameter;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
+import com.databasepreservation.common.client.models.wizard.export.MetadataExportOptionsParameters;
 import com.databasepreservation.common.client.services.ContextService;
 import com.databasepreservation.common.client.services.DatabaseService;
-import com.databasepreservation.common.client.services.ModulesService;
+import com.databasepreservation.common.client.services.MigrationService;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.databasepreservation.desktop.client.dbptk.wizard.WizardPanel;
 import com.databasepreservation.modules.siard.SIARD2ModuleFactory;
-import com.github.nmorel.gwtjackson.client.ObjectMapper;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -23,10 +26,8 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import config.i18n.client.ClientMessages;
 
-import java.util.HashMap;
-import java.util.Map;
+import config.i18n.client.ClientMessages;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -36,9 +37,6 @@ public class MetadataExportOptions extends WizardPanel<MetadataExportOptionsPara
   ClientMessages messages = GWT.create(ClientMessages.class);
 
   interface MetadataUiBinder extends UiBinder<Widget, MetadataExportOptions> {
-  }
-
-  interface DBPTKModuleMapper extends ObjectMapper<DBPTKModule> {
   }
 
   private static MetadataUiBinder binder = GWT.create(MetadataUiBinder.class);
@@ -77,7 +75,7 @@ public class MetadataExportOptions extends WizardPanel<MetadataExportOptionsPara
       DatabaseService.Util.call((ViewerDatabase result) -> {
         metadata = result.getMetadata();
         obtainMetadataExportOptions(moduleName, spinner);
-      }).retrieve(databaseUUID,databaseUUID);
+      }).retrieve(databaseUUID);
     } else {
       obtainMetadataExportOptions(moduleName, spinner);
     }
@@ -129,7 +127,8 @@ public class MetadataExportOptions extends WizardPanel<MetadataExportOptionsPara
         if (populate) {
           populate(parameter.getName(), defaultTextBox);
         }
-        genericField = GenericField.createInstance(messages.wizardExportOptionsLabels(parameter.getName()), defaultTextBox);
+        genericField = GenericField.createInstance(messages.wizardExportOptionsLabels(parameter.getName()),
+          defaultTextBox);
 
         if (parameter.getName().equals(ViewerConstants.SIARD_METADATA_CLIENT_MACHINE)) {
           ContextService.Util.call(defaultTextBox::setText);
@@ -177,13 +176,14 @@ public class MetadataExportOptions extends WizardPanel<MetadataExportOptionsPara
 
   private void obtainMetadataExportOptions(final String moduleName, Widget spinner) {
 
-    ModulesService.Util.call((DBPTKModule result) -> {
-      for (PreservationParameter p : result.getParameters(moduleName)) {
-        if (p.getExportOption() != null && p.getExportOption().equals(ViewerConstants.METADATA_EXPORT_OPTIONS)) {
-          buildGenericWidget(p);
+    MigrationService.Util.call((List<Module> result) -> {
+      result.get(0).getParameters().forEach(preservationParameter -> {
+        if (preservationParameter.getExportOption() != null
+          && preservationParameter.getExportOption().equals(ViewerConstants.METADATA_EXPORT_OPTIONS)) {
+          buildGenericWidget(preservationParameter);
         }
-      }
+      });
       content.remove(spinner);
-    }).getSIARDExportModule(moduleName);
+    }).getSiardModules("export", moduleName);
   }
 }

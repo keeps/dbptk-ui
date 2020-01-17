@@ -6,28 +6,25 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.client.common.lists.cells.ActionsCell;
 import org.fusesource.restygwt.client.MethodCallback;
-import com.databasepreservation.common.client.index.filter.Filter;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
 import com.databasepreservation.common.client.ClientLogger;
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.common.lists.cells.FontAwesomeActionCell;
+import com.databasepreservation.common.client.common.lists.cells.ActionsCell;
 import com.databasepreservation.common.client.common.lists.utils.AsyncTableCell;
 import com.databasepreservation.common.client.common.search.SavedSearch;
 import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.index.facets.Facets;
+import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
-import com.databasepreservation.common.client.services.SearchService;
+import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.widgets.Alert;
-import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.CompositeCell;
-import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.HasCell;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.i18n.client.LocaleInfo;
@@ -97,10 +94,10 @@ public class SavedSearchList extends AsyncTableCell<SavedSearch, String> {
     cells.add(new ActionsCell<>(messages.edit(), FontAwesomeIconManager.ACTION_EDIT,
         object -> HistoryManager.gotoEditSavedSearch(object.getDatabaseUUID(), object.getUuid())));
     cells.add(new ActionsCell<>(messages.delete(), FontAwesomeIconManager.ACTION_DELETE, "btn-danger",
-        object -> SearchService.Util.call((Void result) ->{
+      object -> DatabaseService.Util.call((Void result) -> {
         GWT.log("deleted " + object.getUuid());
         SavedSearchList.this.refresh();
-        }).delete(getDatabaseUUID(), object.getUuid())));
+      }).deleteSavedSearch(getDatabaseUUID(), getDatabaseUUID(), object.getUuid())));
     CompositeCell<SavedSearch> compositeCell = new CompositeCell<>(cells);
 
     actionsColumn = new Column<SavedSearch, SavedSearch>(compositeCell) {
@@ -161,6 +158,7 @@ public class SavedSearchList extends AsyncTableCell<SavedSearch, String> {
     GWT.log("Filter: " + filter);
 
     FindRequest findRequest = new FindRequest(ViewerDatabase.class.getName(), filter, sorter, sublist, getFacets());
-    SearchService.Util.call(callback).find(getDatabaseUUID(), findRequest, LocaleInfo.getCurrentLocale().getLocaleName());
+    DatabaseService.Util.call(callback).findSavedSearches(getDatabaseUUID(), getDatabaseUUID(), findRequest,
+      LocaleInfo.getCurrentLocale().getLocaleName());
   }
 }

@@ -4,14 +4,14 @@
  */
 package com.databasepreservation.common.client.common.utils;
 
-import com.databasepreservation.common.client.common.dialogs.CommonDialogs;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.roda.core.data.exceptions.NotFoundException;
-import org.roda.core.data.v2.user.User;
 
 import com.databasepreservation.common.client.ClientLogger;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.UserLogin;
+import com.databasepreservation.common.client.common.dialogs.CommonDialogs;
+import com.databasepreservation.common.client.models.user.User;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.widgets.Toast;
 import com.google.gwt.core.client.GWT;
@@ -38,8 +38,8 @@ public class AsyncCallbackUtils {
       UserLogin.getInstance().getAuthenticatedUser(new AsyncCallback<User>() {
         @Override
         public void onFailure(Throwable caught2) {
-          CommonDialogs.showInformationDialog(messages.dialogPermissionDenied(), caught.getMessage(), messages.dialogLogin(),
-            new DefaultAsyncCallback<Void>() {
+          CommonDialogs.showInformationDialog(messages.dialogPermissionDenied(), caught.getMessage(),
+            messages.dialogLogin(), new DefaultAsyncCallback<Void>() {
               @Override
               public void onSuccess(Void result) {
                 UserLogin.getInstance().login();
@@ -82,7 +82,8 @@ public class AsyncCallbackUtils {
 
   public static final void defaultFailureTreatment(Throwable caught, boolean toast) {
     if (!treatCommonFailures(caught)) {
-      if (toast) Toast.showError(caught.getClass().getSimpleName(), caught.getMessage());
+      if (toast)
+        Toast.showError(caught.getClass().getSimpleName(), caught.getMessage());
       new ClientLogger(AsyncCallbackUtils.class.getName())
         .error("AsyncCallback error - " + caught.getClass().getSimpleName() + ": " + caught.getMessage(), caught);
     }

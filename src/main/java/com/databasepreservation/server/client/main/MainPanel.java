@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.roda.core.data.v2.user.User;
-
 import com.databasepreservation.common.client.ClientConfigurationManager;
 import com.databasepreservation.common.client.common.ContentPanel;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
@@ -61,13 +59,12 @@ import com.databasepreservation.common.client.common.visualization.validation.Va
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerSIARDBundle;
-import com.databasepreservation.common.client.services.AuthenticationService;
+import com.databasepreservation.common.client.models.user.User;
 import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.widgets.wcag.AccessibleFocusPanel;
 import com.databasepreservation.server.client.browse.HomePanel;
-import com.databasepreservation.server.client.browse.LoginPanel;
 import com.databasepreservation.server.client.browse.UploadPanel;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -138,35 +135,24 @@ public class MainPanel extends Composite {
               }
             });
           } else {
-            AuthenticationService.Util.call((Boolean isAdmin) -> {
-              if (isAdmin) {
-                setContent(new ContentPanelLoader() {
-                  @Override
-                  public ContentPanel load(ViewerDatabase database, CollectionStatus status) {
-                    return DatabaseManage.getInstance();
-                  }
-                });
-              } else {
-                setContent(new ContentPanelLoader() {
-                  @Override
-                  public ContentPanel load(ViewerDatabase database, CollectionStatus status) {
-                    return UserDatabaseListPanel.getInstance();
-                  }
-                });
-              }
-            }).userIsAdmin();
+            if (result.isAdmin()) {
+              setContent(new ContentPanelLoader() {
+                @Override
+                public ContentPanel load(ViewerDatabase database, CollectionStatus status) {
+                  return DatabaseManage.getInstance();
+                }
+              });
+            } else {
+              setContent(new ContentPanelLoader() {
+                @Override
+                public ContentPanel load(ViewerDatabase database, CollectionStatus status) {
+                  return UserDatabaseListPanel.getInstance();
+                }
+              });
+            }
           }
         }
       });
-    } else if (HistoryManager.ROUTE_LOGIN.equals(currentHistoryPath.get(0))) {
-      // #login
-      setContent(new ContentPanelLoader() {
-        @Override
-        public ContentPanel load(ViewerDatabase database, CollectionStatus status) {
-          return LoginPanel.getInstance();
-        }
-      });
-
     } else if (HistoryManager.ROUTE_ACTIVITY_LOG.equals(currentHistoryPath.get(0))) {
       if (currentHistoryPath.size() == 1) {
         // #activityLog
@@ -645,7 +631,7 @@ public class MainPanel extends Composite {
 
         databaseNames.put(databaseUUID, databaseName);
         reSetHeader(databaseUUID, databaseName);
-      }).retrieve(databaseUUID, databaseUUID);
+      }).retrieve(databaseUUID);
     }
   }
 

@@ -10,7 +10,7 @@
  */
 package com.databasepreservation.common.client.common;
 
-import org.roda.core.data.v2.user.User;
+import com.databasepreservation.common.client.models.user.User;
 
 /**
  * @author Luis Faria

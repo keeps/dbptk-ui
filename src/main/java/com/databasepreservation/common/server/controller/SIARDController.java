@@ -30,8 +30,6 @@ import org.joda.time.DateTime;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RequestNotValidException;
-import com.databasepreservation.common.client.index.filter.Filter;
-import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
@@ -41,30 +39,27 @@ import com.databasepreservation.SIARDEdition;
 import com.databasepreservation.SIARDValidation;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.search.SavedSearch;
-import com.databasepreservation.common.client.models.ConnectionResponse;
-import com.databasepreservation.common.client.models.DBPTKModule;
-import com.databasepreservation.common.client.models.ExternalLobDBPTK;
-import com.databasepreservation.common.client.models.parameters.ConnectionParameters;
-import com.databasepreservation.common.client.models.parameters.CustomViewsParameter;
-import com.databasepreservation.common.client.models.parameters.CustomViewsParameters;
-import com.databasepreservation.common.client.models.parameters.ExportOptionsParameters;
-import com.databasepreservation.common.client.models.parameters.ExternalLOBsParameter;
-import com.databasepreservation.common.client.models.parameters.MetadataExportOptionsParameters;
+import com.databasepreservation.common.client.index.filter.Filter;
+import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
+import com.databasepreservation.common.client.models.dbptk.ExternalLob;
+import com.databasepreservation.common.client.models.dbptk.Module;
 import com.databasepreservation.common.client.models.parameters.PreservationParameter;
 import com.databasepreservation.common.client.models.parameters.SIARDUpdateParameters;
-import com.databasepreservation.common.client.models.parameters.SSHConfiguration;
-import com.databasepreservation.common.client.models.parameters.TableAndColumnsParameters;
-import com.databasepreservation.common.client.models.status.database.DatabaseStatus;
-import com.databasepreservation.common.client.models.status.database.Indicators;
-import com.databasepreservation.common.client.models.status.database.SiardStatus;
-import com.databasepreservation.common.client.models.status.database.ValidationStatus;
-import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseFromToolkit;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerSIARDBundle;
+import com.databasepreservation.common.client.models.wizard.connection.ConnectionParameters;
+import com.databasepreservation.common.client.models.wizard.connection.ConnectionResponse;
+import com.databasepreservation.common.client.models.wizard.connection.SSHConfiguration;
+import com.databasepreservation.common.client.models.wizard.customViews.CustomViewsParameter;
+import com.databasepreservation.common.client.models.wizard.customViews.CustomViewsParameters;
+import com.databasepreservation.common.client.models.wizard.export.ExportOptionsParameters;
+import com.databasepreservation.common.client.models.wizard.export.MetadataExportOptionsParameters;
+import com.databasepreservation.common.client.models.wizard.table.ExternalLOBsParameter;
+import com.databasepreservation.common.client.models.wizard.table.TableAndColumnsParameters;
 import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.server.SIARDProgressObserver;
 import com.databasepreservation.common.server.ValidationProgressObserver;
@@ -240,10 +235,11 @@ public class SIARDController {
     }
   }
 
-  public static boolean createSIARD(String databaseUUID, ConnectionParameters connectionParameters,
+  public static String createSIARD(String uniqueId, ConnectionParameters connectionParameters,
     TableAndColumnsParameters tableAndColumnsParameters, CustomViewsParameters customViewsParameters,
     ExportOptionsParameters exportOptionsParameters, MetadataExportOptionsParameters metadataExportOptionsParameters)
     throws GenericException {
+    final String databaseUUID = SolrUtils.randomUUID();
     Reporter reporter = getReporterForMigration(databaseUUID);
     LOGGER.info("starting to convert database {}", exportOptionsParameters.getSiardPath());
 
@@ -285,9 +281,9 @@ public class SIARDController {
 
     // External Lobs
     if (!tableAndColumnsParameters.getExternalLOBsParameters().isEmpty()) {
-      final List<ExternalLobDBPTK> externalLobDBPTKS = constructExternalLobFilter(tableAndColumnsParameters);
+      final List<ExternalLob> externalLobs = constructExternalLobFilter(tableAndColumnsParameters);
       int index = 0;
-      for (ExternalLobDBPTK parameter : externalLobDBPTKS) {
+      for (ExternalLob parameter : externalLobs) {
         LOGGER.info("column-list: {}", parameter.getPathToColumnList());
         LOGGER.info("base-path: {}", parameter.getBasePath());
         LOGGER.info("reference-type: {}", parameter.getReferenceType());
@@ -298,7 +294,7 @@ public class SIARDController {
       }
     }
 
-    databaseMigration.filter(new ObservableFilter(new SIARDProgressObserver(databaseUUID)));
+    databaseMigration.filter(new ObservableFilter(new SIARDProgressObserver(uniqueId)));
 
     long startTime = System.currentTimeMillis();
     try {
@@ -310,7 +306,7 @@ public class SIARDController {
     }
     long duration = System.currentTimeMillis() - startTime;
     LOGGER.info("Conversion time {}m {}s", duration / 60000, duration % 60000 / 1000);
-    return true;
+    return databaseUUID;
   }
 
   public static ViewerMetadata getDatabaseMetadata(ConnectionParameters parameters) throws GenericException {
@@ -341,10 +337,7 @@ public class SIARDController {
     }
   }
 
-  public static DBPTKModule getSIARDExportModule(String moduleName) throws GenericException {
-
-    DBPTKModule dbptkModule = new DBPTKModule();
-
+  public static List<Module> getSIARDExportModule(String moduleName) throws GenericException {
     final DatabaseModuleFactory factory = getDatabaseExportModuleFactory(moduleName);
     if (factory == null) {
       throw new GenericException("Unable to retrieve the database export module factory");
@@ -352,16 +345,86 @@ public class SIARDController {
 
     try {
       final Parameters exportModuleParameters = factory.getExportModuleParameters();
-      getParameters(dbptkModule, factory.getModuleName(), exportModuleParameters);
-
-      return dbptkModule;
+      return Collections.singletonList(getParameters(factory.getModuleName(), exportModuleParameters));
     } catch (UnsupportedModuleException e) {
       throw new GenericException(e);
     }
   }
 
-  public static DBPTKModule getSIARDExportModules() throws GenericException {
-    DBPTKModule dbptkModule = new DBPTKModule();
+  public static List<Module> getSIARDModules(String moduleName) throws GenericException {
+    List<Module> modules = new ArrayList<>(getSIARDImportModule(moduleName));
+    modules.addAll(getSIARDExportModule(moduleName));
+
+    return modules;
+  }
+
+  public static List<Module> getSIARDImportModule(String moduleName) throws GenericException {
+    final DatabaseModuleFactory factory = getDatabaseImportModuleFactory(moduleName);
+    if (factory == null) {
+      throw new GenericException("Unable to retrieve the database export module factory");
+    }
+
+    try {
+      final Parameters importModuleParameters = factory.getImportModuleParameters();
+      return Collections.singletonList(getParameters(factory.getModuleName(), importModuleParameters));
+    } catch (UnsupportedModuleException e) {
+      throw new GenericException(e);
+    }
+  }
+
+  public static List<Module> getDBMSModules() throws GenericException {
+    List<Module> modules = new ArrayList<>(getDatabaseExportModules());
+    modules.addAll(getDatabaseImportModules());
+
+    return modules;
+  }
+
+  public static List<Module> getDBMSModules(String moduleName) throws GenericException {
+    List<Module> modules = new ArrayList<>();
+    final DatabaseModuleFactory databaseExportModuleFactory = getDatabaseExportModuleFactory(moduleName);
+    final DatabaseModuleFactory databaseImportModuleFactory = getDatabaseImportModuleFactory(moduleName);
+
+    if (databaseExportModuleFactory != null) {
+      modules.add(getDatabaseModuleParameters(databaseExportModuleFactory));
+    }
+
+    if (databaseImportModuleFactory != null) {
+      modules.add(getDatabaseModuleParameters(databaseImportModuleFactory));
+    }
+
+    return modules;
+  }
+
+  public static List<Module> getSiardModules() throws GenericException {
+    List<Module> modules = new ArrayList<>(getSIARDExportModules());
+    modules.addAll(getSIARDImportModules());
+
+    return modules;
+  }
+
+  public static List<Module> getSIARDImportModules() throws GenericException {
+    List<Module> modules = new ArrayList<>();
+
+    Set<DatabaseModuleFactory> databaseModuleFactories = ReflectionUtils.collectDatabaseModuleFactories();
+
+    for (DatabaseModuleFactory factory : databaseModuleFactories) {
+      if (factory.isEnabled() && factory.producesImportModules()
+        && factory.getModuleName().startsWith(ViewerConstants.SIARD)) {
+        final Parameters exportModuleParameters;
+        try {
+          exportModuleParameters = factory.getExportModuleParameters();
+          modules.add(getParameters(factory.getModuleName(), exportModuleParameters));
+        } catch (UnsupportedModuleException e) {
+          throw new GenericException(e);
+        }
+      }
+    }
+
+    return modules;
+  }
+
+  public static List<Module> getSIARDExportModules() throws GenericException {
+    List<Module> modules = new ArrayList<>();
 
     Set<DatabaseModuleFactory> databaseModuleFactories = ReflectionUtils.collectDatabaseModuleFactories();
 
@@ -371,42 +434,74 @@ public class SIARDController {
         final Parameters exportModuleParameters;
         try {
           exportModuleParameters = factory.getExportModuleParameters();
-          getParameters(dbptkModule, factory.getModuleName(), exportModuleParameters);
+          modules.add(getParameters(factory.getModuleName(), exportModuleParameters));
         } catch (UnsupportedModuleException e) {
           throw new GenericException(e);
         }
       }
     }
 
-    return dbptkModule;
+    return modules;
   }
 
-  public static DBPTKModule getDatabaseExportModules() throws GenericException {
-    DBPTKModule dbptkModule = new DBPTKModule();
+  public static List<Module> getDatabaseExportModules() throws GenericException {
+    List<Module> modules = new ArrayList<>();
     Set<DatabaseModuleFactory> databaseModuleFactories = ReflectionUtils.collectDatabaseModuleFactories();
     for (DatabaseModuleFactory factory : databaseModuleFactories) {
       if (!factory.getModuleName().equals("list-tables")
         && !factory.getModuleName().toLowerCase().contains(ViewerConstants.SIARD)
         && !factory.getModuleName().equalsIgnoreCase("internal-dbvtk-export") && factory.isEnabled()
         && factory.producesExportModules()) {
-        getDatabaseModulesParameters(factory, dbptkModule);
+        modules.add(getDatabaseModuleParameters(factory));
       }
     }
 
-    return dbptkModule;
+    return modules;
   }
 
-  public static DBPTKModule getDatabaseImportModules() throws GenericException {
-    DBPTKModule dbptkModule = new DBPTKModule();
+  public static List<Module> getDatabaseExportModule(String moduleName) throws GenericException {
+    List<Module> modules = new ArrayList<>();
+    Set<DatabaseModuleFactory> databaseModuleFactories = ReflectionUtils.collectDatabaseModuleFactories();
+    for (DatabaseModuleFactory factory : databaseModuleFactories) {
+      if (!factory.getModuleName().equals("list-tables")
+        && !factory.getModuleName().toLowerCase().contains(ViewerConstants.SIARD)
+        && !factory.getModuleName().equalsIgnoreCase("internal-dbvtk-export") && factory.isEnabled()
+        && factory.producesExportModules()) {
+        if (factory.getModuleName().equals(moduleName)) {
+          modules.add(getDatabaseModuleParameters(factory));
+        }
+      }
+    }
+
+    return modules;
+  }
+
+  public static List<Module> getDatabaseImportModules() throws GenericException {
+    List<Module> modules = new ArrayList<>();
     Set<DatabaseModuleFactory> databaseModuleFactories = ReflectionUtils.collectDatabaseModuleFactories();
     for (DatabaseModuleFactory factory : databaseModuleFactories) {
       if (factory.isEnabled() && factory.producesImportModules()
         && !factory.getModuleName().toLowerCase().contains(ViewerConstants.SIARD)) {
-        getDatabaseModulesParameters(factory, dbptkModule);
+        modules.add(getDatabaseModuleParameters(factory));
       }
     }
 
-    return dbptkModule;
+    return modules;
+  }
+
+  public static List<Module> getDatabaseImportModule(String moduleName) throws GenericException {
+    List<Module> modules = new ArrayList<>();
+    Set<DatabaseModuleFactory> databaseModuleFactories = ReflectionUtils.collectDatabaseModuleFactories();
+    for (DatabaseModuleFactory factory : databaseModuleFactories) {
+      if (factory.isEnabled() && factory.producesImportModules()
+        && !factory.getModuleName().toLowerCase().contains(ViewerConstants.SIARD)) {
+        if (factory.getModuleName().equals(moduleName)) {
+          modules.add(getDatabaseModuleParameters(factory));
+        }
+      }
+    }
+
+    return modules;
   }
 
   public static String loadMetadataFromLocal(String localPath) throws GenericException {
@@ -414,7 +509,7 @@ public class SIARDController {
     return loadMetadataFromLocal(databaseUUID, localPath);
   }
 
-  public static String loadMetadataFromLocal(String databaseUUID, String localPath) throws GenericException {
+  private static String loadMetadataFromLocal(String databaseUUID, String localPath) throws GenericException {
     Path basePath = Paths.get(ViewerConfiguration.getInstance().getViewerConfigurationAsString("/",
       ViewerConfiguration.PROPERTY_BASE_UPLOAD_PATH));
     Path siardPath = basePath.resolve(localPath);
@@ -810,8 +905,9 @@ public class SIARDController {
     return factory;
   }
 
-  private static void getDatabaseModulesParameters(DatabaseModuleFactory factory, DBPTKModule dbptkModule)
-    throws GenericException {
+  private static Module getDatabaseModuleParameters(DatabaseModuleFactory factory) throws GenericException {
+    Module module = new Module(factory.getModuleName());
+
     PreservationParameter preservationParameter;
     final Parameters parameters;
     try {
@@ -825,7 +921,7 @@ public class SIARDController {
         if (param.valueIfNotSet() != null) {
           preservationParameter.setDefaultValue(param.valueIfNotSet());
         }
-        dbptkModule.addPreservationParameter(factory.getModuleName(), preservationParameter);
+        module.addPreservationParameter(preservationParameter);
       }
 
       for (ParameterGroup pg : parameters.getGroups()) {
@@ -835,17 +931,18 @@ public class SIARDController {
           if (param.getFileFilter() != null) {
             preservationParameter.setFileFilter(param.getFileFilter().name());
           }
-          dbptkModule.addPreservationParameter(factory.getModuleName(), preservationParameter);
+          module.addPreservationParameter(preservationParameter);
         }
       }
     } catch (UnsupportedModuleException e) {
       throw new GenericException(e);
     }
+
+    return module;
   }
 
-  private static void getParameters(DBPTKModule dbptkModule, String moduleName, Parameters parameters) {
-    if (dbptkModule == null)
-      dbptkModule = new DBPTKModule();
+  private static Module getParameters(String moduleName, Parameters parameters) {
+    Module module = new Module(moduleName);
     PreservationParameter preservationParameter;
 
     for (Parameter param : parameters.getParameters()) {
@@ -867,8 +964,10 @@ public class SIARDController {
         preservationParameter.setDefaultValue(param.valueIfNotSet());
       }
 
-      dbptkModule.addPreservationParameter(moduleName, preservationParameter);
+      module.addPreservationParameter(preservationParameter);
     }
+
+    return module;
   }
 
   private static String createTemporaryFile(final String tmpFileName, final String tmpFileSuffix, final String content)
@@ -893,37 +992,37 @@ public class SIARDController {
     return Paths.get(tmpFile.toURI()).normalize().toAbsolutePath().toString();
   }
 
-  private static List<ExternalLobDBPTK> constructExternalLobFilter(TableAndColumnsParameters parameters)
+  private static List<ExternalLob> constructExternalLobFilter(TableAndColumnsParameters parameters)
     throws GenericException {
     final List<ExternalLOBsParameter> externalLOBsParameters = parameters.getExternalLOBsParameters();
-    List<ExternalLobDBPTK> externalLobDBPTKParameters = new ArrayList<>();
-    ExternalLobDBPTK externalLobDBPTK = new ExternalLobDBPTK();
+    List<ExternalLob> externalLobParameters = new ArrayList<>();
+    ExternalLob externalLob = new ExternalLob();
     for (ExternalLOBsParameter parameter : externalLOBsParameters) {
-      externalLobDBPTK.setBasePath(parameter.getBasePath());
-      externalLobDBPTK.setReferenceType(parameter.getReferenceType());
+      externalLob.setBasePath(parameter.getBasePath());
+      externalLob.setReferenceType(parameter.getReferenceType());
       String sb = parameter.getTable().getSchemaName() + "." + parameter.getTable().getName() + "{"
         + parameter.getColumnName() + ";" + "}";
-      externalLobDBPTK.setPathToColumnList(createTemporaryFile(SolrUtils.randomUUID(), ViewerConstants.TXT_SUFFIX, sb));
+      externalLob.setPathToColumnList(createTemporaryFile(SolrUtils.randomUUID(), ViewerConstants.TXT_SUFFIX, sb));
 
-      externalLobDBPTKParameters.add(externalLobDBPTK);
+      externalLobParameters.add(externalLob);
     }
 
-    return externalLobDBPTKParameters;
+    return externalLobParameters;
   }
 
   private static String constructTableFilter(TableAndColumnsParameters parameters) throws GenericException {
-    final Map<String, List<ViewerColumn>> columns = parameters.getColumns();
+    final Map<String, List<String>> columns = parameters.getColumns();
     StringBuilder tf = new StringBuilder();
 
-    for (Map.Entry<String, List<ViewerColumn>> entry : columns.entrySet()) {
-      if (!entry.getValue().isEmpty()) {
-        tf.append(entry.getKey()).append("{");
-        for (ViewerColumn column : entry.getValue()) {
-          tf.append(column.getDisplayName()).append(";");
-        }
+    columns.forEach((key, object) -> {
+      if (!object.isEmpty()) {
+        tf.append(key).append("{");
+        object.forEach(name -> {
+          tf.append(name).append(";");
+        });
         tf.append("}").append("\n");
       }
-    }
+    });
 
     return createTemporaryFile(SolrUtils.randomUUID(), ViewerConstants.TXT_SUFFIX, tf.toString());
   }

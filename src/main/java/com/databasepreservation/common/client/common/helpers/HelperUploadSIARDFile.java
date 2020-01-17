@@ -2,19 +2,28 @@ package com.databasepreservation.common.client.common.helpers;
 
 import java.util.Collections;
 
-import com.databasepreservation.common.client.models.ExtensionFilter;
+import org.roda.core.data.v2.index.sublist.Sublist;
+
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
+import com.databasepreservation.common.client.index.FindRequest;
+import com.databasepreservation.common.client.index.IndexResult;
+import com.databasepreservation.common.client.index.facets.Facets;
+import com.databasepreservation.common.client.index.filter.Filter;
+import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
+import com.databasepreservation.common.client.index.sort.Sorter;
+import com.databasepreservation.common.client.models.JSO.ExtensionFilter;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.JSOUtils;
 import com.databasepreservation.common.client.widgets.Toast;
-import com.databasepreservation.common.client.services.SIARDService;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
@@ -53,14 +62,17 @@ public class HelperUploadSIARDFile {
   private void openSIARDPath(FlowPanel panel, String path) {
     if (path != null) {
       panel.add(loading);
-      SIARDService.Util.call((String databaseUUID) -> {
-        if (databaseUUID != null) {
+      FindRequest request = new FindRequest(ViewerDatabase.class.getName(),
+        new Filter(new SimpleFilterParameter(ViewerConstants.SOLR_DATABASES_SIARD_PATH, path)), Sorter.NONE,
+        new Sublist(), Facets.NONE, false, Collections.singletonList(ViewerConstants.INDEX_ID));
+      DatabaseService.Util.call((IndexResult<ViewerDatabase> result) -> {
+        if (result.getTotalCount() == 1) {
           if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
             JavascriptUtils.confirmationDialog(messages.dialogReimportSIARDTitle(), messages.dialogReimportSIARD(),
               messages.basicActionCancel(), messages.basicActionConfirm(), new DefaultAsyncCallback<Boolean>() {
                 @Override
                 public void onSuccess(Boolean confirm) {
-                  successHandler(confirm, panel, databaseUUID, path);
+                  successHandler(confirm, panel, result.getResults().get(0).getUuid(), path);
                 }
               });
           } else {
@@ -68,33 +80,34 @@ public class HelperUploadSIARDFile {
               messages.basicActionCancel(), messages.basicActionConfirm(), new DefaultAsyncCallback<Boolean>() {
                 @Override
                 public void onSuccess(Boolean confirm) {
-                  successHandler(confirm, panel, databaseUUID, path);
+                  successHandler(confirm, panel, result.getResults().get(0).getUuid(), path);
                 }
               });
           }
-        } else {
+        } else if (result.getTotalCount() == 0) {
           uploadMetadataSIARD(path, panel);
-        }
+        } else {
 
-      }).findSIARDFile(path);
+        }
+      }).findDatabases(request, LocaleInfo.getCurrentLocale().getLocaleName());
     }
   }
 
   private void uploadMetadataSIARD(String path, FlowPanel panel) {
-    DatabaseService.Util.call((String result)->{
-      SIARDService.Util.call((String newDatabaseUUID) -> {
+    DatabaseService.Util.call((String databaseUUID) -> {
         panel.remove(loading);
-        HistoryManager.gotoSIARDInfo(newDatabaseUUID);
+        HistoryManager.gotoSIARDInfo(databaseUUID);
       }, (String errorMessage) -> {
         Toast.showError(messages.errorMessagesOpenFile(), errorMessage);
         panel.remove(loading);
-      }).uploadMetadataSIARD(result, path);
-    }).generateUUID();
+    }).createDatabase(path);
   }
 
   private void successHandler(Boolean confirm, FlowPanel panel, String databaseUUID, String path) {
     if (confirm) {
-      uploadMetadataSIARD(path, panel);
+      DatabaseService.Util.call((Boolean value) -> {
+        uploadMetadataSIARD(path, panel);
+      }).deleteDatabase(databaseUUID);
     } else {
       panel.remove(loading);
       HistoryManager.gotoSIARDInfo(databaseUUID);

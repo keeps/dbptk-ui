@@ -22,10 +22,10 @@ import org.roda.core.data.common.RodaConstants;
 import org.roda.core.data.exceptions.AuthenticationDeniedException;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.v2.common.Pair;
-import org.roda.core.data.v2.user.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.databasepreservation.common.client.models.user.User;
 import com.databasepreservation.common.server.controller.UserLoginController;
 import com.databasepreservation.common.utils.UserUtility;
 

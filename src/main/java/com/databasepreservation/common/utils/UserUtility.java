@@ -29,6 +29,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
+import com.databasepreservation.common.client.models.user.User;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
@@ -41,7 +42,6 @@ import org.roda.core.data.utils.JsonUtils;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
 import org.roda.core.data.v2.ip.DIP;
-import org.roda.core.data.v2.user.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -202,11 +202,7 @@ public class UserUtility {
     return canAccess;
   }
 
-  public static boolean userIsAdmin(HttpServletRequest request) {
-    return userIsAdmin(getUser(request));
-  }
-
-  private static boolean userIsAdmin(User user) {
+  public static boolean userIsAdmin(User user) {
     final List<String> rolesToCheck = ViewerConfiguration.getInstance()
       .getViewerConfigurationAsList(ViewerConfiguration.PROPERTY_AUTHORIZATION_ADMINISTRATORS);
     return (!rolesToCheck.isEmpty() && !Sets.intersection(user.getAllRoles(), new HashSet<>(rolesToCheck)).isEmpty());

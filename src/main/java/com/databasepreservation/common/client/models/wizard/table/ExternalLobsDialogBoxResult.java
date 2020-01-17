@@ -1,4 +1,4 @@
-package com.databasepreservation.common.client.models;
+package com.databasepreservation.common.client.models.wizard.table;
 
 import java.io.Serializable;
 import java.util.Objects;

@@ -31,6 +31,8 @@ public class ViewerConstants {
     + ViewerConstants.API_V1_AUTHENTICATION_RESOURCE;
   public static final String ENDPOINT_CLIENT_LOGGER = ViewerConstants.API_SEP + ViewerConstants.API_SERVLET
     + ViewerConstants.API_V1_CLIENT_LOGGER_RESOURCE;
+  public static final String ENDPOINT_MIGRATION = ViewerConstants.API_SEP + ViewerConstants.API_SERVLET
+      + ViewerConstants.API_V1_MIGRATION_RESOURCE;
   public static final String ENDPOINT_ACTIVITY_LOG = ViewerConstants.API_SEP + ViewerConstants.API_SERVLET
     + ViewerConstants.API_V1_ACTIVITY_LOG_RESOURCE;
   public static final String ENDPOINT_CONFIGURATION = ViewerConstants.API_SEP + ViewerConstants.API_SERVLET
@@ -295,6 +297,7 @@ public class ViewerConstants {
   public static final String API_SERVLET = "api";
   public static final String API_V1_EXPORT_RESOURCE = "/v1/exports";
   public static final String API_PATH_PARAM_DATABASE_UUID = "databaseUUID";
+  public static final String API_PATH_PARAM_COLLECTION_UUID = "collectionUUID";
   public static final String API_PATH_PARAM_EXPORT_DESCRIPTION = "description";
   public static final String API_PATH_PARAM_EXPORT_LOBS = "lobs";
   public static final String API_PATH_PARAM_FILENAME = "fn";
@@ -325,6 +328,7 @@ public class ViewerConstants {
 
   public static final String API_V1_FILE_RESOURCE = "/v1/file";
   public static final String API_PATH_PARAM_SIARD = "siard";
+  public static final String API_PATH_PARAM_DOWNLOAD = "download";
   public static final String API_PATH_PARAM_VALIDATION_REPORT = "validation";
 
   public static final String API_V1_LOGIN_RESOURCE = "/v1/login";
@@ -336,6 +340,7 @@ public class ViewerConstants {
   public static final String API_V1_SEARCH_RESOURCE = "/v1/search";
   public static final String API_V1_AUTHENTICATION_RESOURCE = "/v1/authentication";
   public static final String API_V1_CLIENT_LOGGER_RESOURCE = "/v1/logger";
+  public static final String API_V1_MIGRATION_RESOURCE = "/v1/migration";
   public static final String API_V1_ACTIVITY_LOG_RESOURCE = "/v1/activity";
   public static final String API_V1_CONFIGURATION_RESOURCE = "/v1/configuration";
   public static final String API_V1_JOB_RESOURCE = "/v1/job";

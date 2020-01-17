@@ -10,7 +10,6 @@ import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.TableNode;
 import com.databasepreservation.common.client.models.configuration.collection.CollectionConfiguration;
 import com.databasepreservation.common.client.models.configuration.collection.TableConfiguration;
-import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
 import com.databasepreservation.common.client.models.status.denormalization.ReferencesConfiguration;
 import com.databasepreservation.common.client.models.status.denormalization.RelatedColumnConfiguration;
@@ -21,7 +20,7 @@ import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
 import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
 import com.databasepreservation.common.client.models.structure.ViewerReference;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
-import com.databasepreservation.common.client.services.ConfigurationService;
+import com.databasepreservation.common.client.services.DatabaseService;
 import com.google.gwt.core.client.GWT;
 
 /**
@@ -87,10 +86,11 @@ public class ConfigurationHandler {
   }
 
   public void addDenormalizationConfiguration(DenormalizeConfiguration denormalizeConfiguration){
-    ConfigurationService.Util.call((Boolean result) -> {
+    DatabaseService.Util.call((Boolean result) -> {
       Dialogs.showInformationDialog("Configuration file", "Created denormalization configuration file with success",
           "OK");
-    }).createDenormalizeConfigurationFile(database.getUuid(), denormalizeConfiguration.getTableUUID(), denormalizeConfiguration);
+    }).createDenormalizeConfigurationFile(database.getUuid(), database.getUuid(),
+      denormalizeConfiguration.getTableUUID(), denormalizeConfiguration);
   }
 
   /**

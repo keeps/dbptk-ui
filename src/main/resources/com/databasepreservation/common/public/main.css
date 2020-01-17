@@ -2930,7 +2930,7 @@ rgba(0, 0, 0, .125);
     border-left: 2px solid #d9534f !important;
 }
 
-.form-textbox:invalid {
+.management .form-textbox:invalid {
     background-color: #eebcba;
     border: none;
     border-left: 2px solid #d9534f;

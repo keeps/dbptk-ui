@@ -1,27 +1,27 @@
 package com.databasepreservation.desktop.client.dbptk.wizard.upload;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.visualization.progressBar.ProgressBarPanel;
-import com.databasepreservation.common.client.models.ConnectionResponse;
-import com.databasepreservation.common.client.models.parameters.ConnectionParameters;
-import com.databasepreservation.common.client.models.parameters.CreateSIARDParameters;
-import com.databasepreservation.common.client.models.parameters.CustomViewsParameters;
-import com.databasepreservation.common.client.models.parameters.ExportOptionsParameters;
-import com.databasepreservation.common.client.models.parameters.MetadataExportOptionsParameters;
-import com.databasepreservation.common.client.models.parameters.TableAndColumnsParameters;
+import com.databasepreservation.common.client.models.wizard.CreateSIARDParameters;
+import com.databasepreservation.common.client.models.wizard.connection.ConnectionParameters;
+import com.databasepreservation.common.client.models.wizard.connection.ConnectionResponse;
+import com.databasepreservation.common.client.models.wizard.customViews.CustomViewsParameters;
+import com.databasepreservation.common.client.models.wizard.export.ExportOptionsParameters;
+import com.databasepreservation.common.client.models.wizard.export.MetadataExportOptionsParameters;
+import com.databasepreservation.common.client.models.wizard.table.TableAndColumnsParameters;
 import com.databasepreservation.common.client.services.DatabaseService;
-import com.databasepreservation.common.client.services.ModulesService;
-import com.databasepreservation.common.client.services.SIARDService;
+import com.databasepreservation.common.client.services.MigrationService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
-import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.widgets.Toast;
 import com.databasepreservation.desktop.client.dbptk.wizard.WizardManager;
-import com.databasepreservation.desktop.client.dbptk.wizard.WizardPanel;
 import com.databasepreservation.desktop.client.dbptk.wizard.common.connection.Connection;
 import com.databasepreservation.desktop.client.dbptk.wizard.common.exportOptions.MetadataExportOptions;
 import com.databasepreservation.desktop.client.dbptk.wizard.common.exportOptions.SIARDExportOptions;
@@ -29,15 +29,14 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
-import config.i18n.client.ClientMessages;
 
-import java.util.ArrayList;
-import java.util.List;
+import config.i18n.client.ClientMessages;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -72,7 +71,7 @@ public class CreateWizardManager extends WizardManager {
   private static CreateWizardManager instance = null;
   private int position = 0;
   private final int positions = 5;
-  private String databaseUUID;
+  private String uniqueId;
   private ConnectionParameters connectionParameters;
   private TableAndColumnsParameters tableAndColumnsParameters;
   private CustomViewsParameters customViewsParameters;
@@ -92,14 +91,12 @@ public class CreateWizardManager extends WizardManager {
     updateButtons();
     updateBreadcrumb();
 
-    DatabaseService.Util.call((String result) -> {
-      databaseUUID = result;
-      Connection connection = Connection.getInstance(databaseUUID);
-      connection.initImportDBMS(ViewerConstants.UPLOAD_WIZARD_MANAGER, HistoryManager.ROUTE_CREATE_SIARD);
-      wizardContent.clear();
-      wizardInstances.add(0, connection);
-      wizardContent.add(connection);
-    }).generateUUID();
+    uniqueId = DOM.createUniqueId();
+    Connection connection = Connection.getInstance(this.uniqueId);
+    connection.initImportDBMS(ViewerConstants.UPLOAD_WIZARD_MANAGER, HistoryManager.ROUTE_CREATE_SIARD);
+    wizardContent.clear();
+    wizardInstances.add(0, connection);
+    wizardContent.add(connection);
   }
 
   private CreateWizardManager() {
@@ -166,22 +163,21 @@ public class CreateWizardManager extends WizardManager {
 
       wizardContent.add(spinner);
 
-      ModulesService.Util.call((ConnectionResponse result) -> {
+      MigrationService.Util.call((ConnectionResponse result) -> {
         if (result.isConnected()) {
           wizardContent.clear();
           position = 1;
-          TableAndColumns tableAndColumns = TableAndColumns.getInstance(databaseUUID, connectionParameters);
+          TableAndColumns tableAndColumns = TableAndColumns.getInstance(uniqueId, connectionParameters);
           wizardInstances.add(position, tableAndColumns);
           wizardContent.add(tableAndColumns);
           updateButtons();
           updateBreadcrumb();
           wizardContent.remove(spinner);
         } else {
-          Dialogs.showErrors(messages.errorMessagesConnectionTitle(), result.getMessage(),
-              messages.basicActionClose());
+          Dialogs.showErrors(messages.errorMessagesConnectionTitle(), result.getMessage(), messages.basicActionClose());
           wizardContent.remove(spinner);
         }
-      }).testDBConnection(connectionParameters);
+      }).testConnection(connectionParameters);
     } else {
       Connection connection = (Connection) wizardInstances.get(position);
       if (connection.sidebarWasClicked()) {
@@ -189,7 +185,7 @@ public class CreateWizardManager extends WizardManager {
         connection.clearPasswords();
       } else {
         Toast.showError(messages.createSIARDWizardManagerErrorTitle(),
-            messages.createSIARDWizardManagerSelectDataSourceError());
+          messages.createSIARDWizardManagerSelectDataSourceError());
       }
     }
   }
@@ -201,7 +197,7 @@ public class CreateWizardManager extends WizardManager {
       wizardContent.clear();
       position = 2;
       CustomViews customViews = CustomViews.getInstance(tableAndColumnsParameters.getSelectedSchemas(), btnNext,
-        connectionParameters, databaseUUID);
+        connectionParameters, uniqueId);
       customViews.refreshCustomButtons();
       wizardInstances.add(position, customViews);
       wizardContent.add(customViews);
@@ -228,7 +224,7 @@ public class CreateWizardManager extends WizardManager {
                 final DialogBox dialogBox = Dialogs.showWaitResponse(messages.customViewsPageTitle(),
                   messages.customViewsPageTextForDialogValidatingQuery());
 
-                DatabaseService.Util.call((List<List<String>> queryResult) -> {
+                MigrationService.Util.call((List<List<String>> queryResult) -> {
                   dialogBox.hide();
                   customViewsParameters = customViewInstance.getValues();
                   wizardContent.clear();
@@ -241,9 +237,8 @@ public class CreateWizardManager extends WizardManager {
                   customButtons.clear();
                 }, (String errorMessage) -> {
                   dialogBox.hide();
-                  Dialogs.showErrors(messages.customViewsPageTitle(), errorMessage,
-                      messages.basicActionClose());
-                }).validateCustomViewQuery(connectionParameters, customViewInstance.getCustomViewParameter().getCustomViewQuery());
+                  Dialogs.showErrors(messages.customViewsPageTitle(), errorMessage, messages.basicActionClose());
+                }).testQuery(connectionParameters, customViewInstance.getCustomViewParameter().getCustomViewQuery());
               }
             } else {
               customViewsParameters = (CustomViewsParameters) wizardInstances.get(position).getValues();
@@ -310,12 +305,12 @@ public class CreateWizardManager extends WizardManager {
     position = 5;
     updateBreadcrumb();
 
-    ProgressBarPanel progressBarPanel = ProgressBarPanel.getInstance(databaseUUID);
+    ProgressBarPanel progressBarPanel = ProgressBarPanel.getInstance(uniqueId);
     progressBarPanel.setTitleText(messages.progressBarPanelTextForCreateWizardProgressTitle());
     progressBarPanel.setSubtitleText(messages.progressBarPanelTextForCreateWizardProgressSubTitle());
     wizardContent.add(progressBarPanel);
 
-    SIARDService.Util.call((Boolean result) -> {
+    MigrationService.Util.call((String done) -> {
       if (redirect) {
         final String siardPath = exportOptionsParameters.getSiardPath();
         Dialogs.showConfirmDialog(messages.createSIARDWizardManagerInformationMessagesTitle(),
@@ -347,8 +342,8 @@ public class CreateWizardManager extends WizardManager {
       updateBreadcrumb();
       Dialogs.showErrors(messages.createSIARDWizardManagerInformationMessagesTitle(), errorMessage,
         messages.basicActionClose());
-    }).createSIARD(databaseUUID, new CreateSIARDParameters(connectionParameters, tableAndColumnsParameters,
-      customViewsParameters, exportOptionsParameters, metadataExportOptionsParameters));
+    }).run(null, new CreateSIARDParameters(connectionParameters, tableAndColumnsParameters, customViewsParameters,
+      exportOptionsParameters, metadataExportOptionsParameters, uniqueId));
   }
 
   @Override
@@ -428,23 +423,22 @@ public class CreateWizardManager extends WizardManager {
       HistoryManager.gotoCreateSIARD();
     } else {
 
-      WizardPanel wizardPanel = wizardInstances.get(position);
       switch (wizardPage) {
         case HistoryManager.ROUTE_WIZARD_CONNECTION:
-          if (wizardPanel instanceof Connection) {
-            Connection connection = (Connection) wizardPanel;
+          if (wizardInstances.get(position) instanceof Connection) {
+            Connection connection = (Connection) wizardInstances.get(position);
             connection.sideBarHighlighter(toSelect);
           }
           break;
         case HistoryManager.ROUTE_WIZARD_TABLES_COLUMNS:
-          if (wizardPanel instanceof TableAndColumns) {
-            TableAndColumns tableAndColumns = (TableAndColumns) wizardPanel;
+          if (wizardInstances.get(position) instanceof TableAndColumns) {
+            TableAndColumns tableAndColumns = (TableAndColumns) wizardInstances.get(position);
             tableAndColumns.sideBarHighlighter(toSelect, schemaUUID, tableUUID);
           }
           break;
         case HistoryManager.ROUTE_WIZARD_CUSTOM_VIEWS:
-          if (wizardPanel instanceof CustomViews) {
-            CustomViews customViews = (CustomViews) wizardPanel;
+          if (wizardInstances.get(position) instanceof CustomViews) {
+            CustomViews customViews = (CustomViews) wizardInstances.get(position);
             customViews.sideBarHighlighter(toSelect, schemaUUID);
           }
           break;
@@ -461,15 +455,15 @@ public class CreateWizardManager extends WizardManager {
     final Widget loading = new HTML(SafeHtmlUtils.fromSafeConstant(
       "<div id='loading' class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
     wizardContent.add(loading);
-    SIARDService.Util.call((String result) -> {
+    DatabaseService.Util.call((String result) -> {
       clear();
       instance = null;
       wizardContent.remove(loading);
-      HistoryManager.gotoSIARDInfo(databaseUUID);
+      HistoryManager.gotoSIARDInfo(result);
     }, (String errorMessage) -> {
       HistoryManager.gotoHome();
       Dialogs.showErrors(messages.createSIARDWizardManagerInformationMessagesTitle(), errorMessage,
-          messages.basicActionClose());
-    }).uploadMetadataSIARD(databaseUUID, path);
+        messages.basicActionClose());
+    }).createDatabase(path);
   }
 }

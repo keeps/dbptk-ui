@@ -1,14 +1,20 @@
 package com.databasepreservation.desktop.client.dbptk.wizard.common.connection;
 
-import com.databasepreservation.common.client.models.ConnectionResponse;
-import com.databasepreservation.common.client.models.DBPTKModule;
-import com.databasepreservation.common.client.models.parameters.PreservationParameter;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
+import com.databasepreservation.common.client.models.dbptk.Module;
+import com.databasepreservation.common.client.models.parameters.PreservationParameter;
+import com.databasepreservation.common.client.models.wizard.connection.ConnectionParameters;
+import com.databasepreservation.common.client.models.wizard.connection.ConnectionResponse;
+import com.databasepreservation.common.client.services.MigrationService;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.widgets.Toast;
-import com.databasepreservation.common.client.models.parameters.ConnectionParameters;
-import com.databasepreservation.common.client.services.ModulesService;
 import com.databasepreservation.desktop.client.common.sidebar.ConnectionSidebar;
 import com.databasepreservation.desktop.client.dbptk.wizard.WizardPanel;
 import com.google.gwt.core.client.GWT;
@@ -20,13 +26,8 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.Widget;
-import config.i18n.client.ClientMessages;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import config.i18n.client.ClientMessages;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -53,7 +54,7 @@ public class Connection extends WizardPanel<ConnectionParameters> {
   FlowPanel connectionInputPanel;
 
   private final String databaseUUID;
-  private DBPTKModule dbmsModule;
+  private List<Module> dbmsModules;
   private ConnectionSidebar connectionSidebar;
   private SSHTunnelPanel sshTunnelPanel;
   private String selectedConnection;
@@ -89,7 +90,7 @@ public class Connection extends WizardPanel<ConnectionParameters> {
 
         final ConnectionParameters connectionParameters = getValues();
 
-        ModulesService.Util.call((ConnectionResponse result) -> {
+        MigrationService.Util.call((ConnectionResponse result) -> {
           if (result.isConnected()) {
             Dialogs.showInformationDialog(messages.errorMessagesConnectionTitle(),
                 messages.connectionPageTextForConnectionSuccess(
@@ -100,7 +101,7 @@ public class Connection extends WizardPanel<ConnectionParameters> {
             mainPanel.remove(spinner);
             Dialogs.showErrors(messages.errorMessagesConnectionTitle(), result.getMessage(), messages.basicActionClose());
           }
-        }).testDBConnection(connectionParameters);
+        }).testConnection(connectionParameters);
       } else {
         Toast.showError(messages.errorMessagesConnectionTitle(), messages.connectionPageErrorMessageFor(1));
       }
@@ -119,17 +120,17 @@ public class Connection extends WizardPanel<ConnectionParameters> {
     connectionInputPanel.clear();
     connectionInputPanel.add(connectionHomePanel);
 
-    ModulesService.Util.call((DBPTKModule module) -> {
+    MigrationService.Util.call((List<Module> modules) -> {
       leftSideContainer.removeStyleName("loading-sidebar");
       jdbcListConnections.remove(spinner);
       connectionSidebar = ConnectionSidebar.getInstance(databaseUUID, messages.sidebarMenuTextForDatabases(),
-          FontAwesomeIconManager.DATABASE, module, targetToken);
+          FontAwesomeIconManager.DATABASE, modules, targetToken);
       jdbcListConnections.add(connectionSidebar);
       leftSideContainer.removeStyleName("loading-sidebar");
       jdbcListConnections.remove(spinner);
       countRows = true;
-      dbmsModule = module;
-    }).getImportDBPTKModules();
+      dbmsModules = modules;
+    }).getDBMSModules("import", null);
   }
 
   public void initExportDBMS(final String type, final String targetToken) {
@@ -144,16 +145,16 @@ public class Connection extends WizardPanel<ConnectionParameters> {
     connectionInputPanel.clear();
     connectionInputPanel.add(connectionHomePanel);
 
-    ModulesService.Util.call((DBPTKModule module) -> {
+    MigrationService.Util.call((List<Module> modules) -> {
       connectionSidebar = ConnectionSidebar.getInstance(databaseUUID, messages.sidebarMenuTextForDatabases(),
-          FontAwesomeIconManager.DATABASE, module, targetToken);
+          FontAwesomeIconManager.DATABASE, modules, targetToken);
 
       jdbcListConnections.add(connectionSidebar);
       leftSideContainer.removeStyleName("loading-sidebar");
       jdbcListConnections.remove(spinner);
       countRows = false;
-      dbmsModule = module;
-    }).getExportDBPTKModules();
+      dbmsModules = modules;
+    }).getDBMSModules("export", null);
   }
 
   public void sideBarHighlighter(String connection) {
@@ -166,7 +167,9 @@ public class Connection extends WizardPanel<ConnectionParameters> {
 
     selectedConnection = connection;
 
-    List<PreservationParameter> preservationParametersSelected = dbmsModule.getParameters(connection);
+    final Module module = dbmsModules.stream().filter(c -> c.getModuleName().equals(connection)).findFirst().orElse(new Module());
+
+    List<PreservationParameter> preservationParametersSelected = module.getParameters();
 
     TabPanel tabPanel = new TabPanel();
     tabPanel.addStyleName("browseItemMetadata connection-panel");

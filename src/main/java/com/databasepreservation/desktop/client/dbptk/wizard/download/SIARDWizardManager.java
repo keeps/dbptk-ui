@@ -1,26 +1,29 @@
 package com.databasepreservation.desktop.client.dbptk.wizard.download;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.index.IsIndexed;
-import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
-import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.visualization.progressBar.ProgressBarPanel;
+import com.databasepreservation.common.client.index.IsIndexed;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.wizard.CreateSIARDParameters;
+import com.databasepreservation.common.client.models.wizard.export.ExportOptionsParameters;
+import com.databasepreservation.common.client.models.wizard.export.MetadataExportOptionsParameters;
+import com.databasepreservation.common.client.models.wizard.table.TableAndColumnsParameters;
+import com.databasepreservation.common.client.services.DatabaseService;
+import com.databasepreservation.common.client.services.MigrationService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
-import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.PathUtils;
 import com.databasepreservation.common.client.widgets.Toast;
-import com.databasepreservation.common.client.models.parameters.CreateSIARDParameters;
-import com.databasepreservation.common.client.models.parameters.ExportOptionsParameters;
-import com.databasepreservation.common.client.models.parameters.MetadataExportOptionsParameters;
-import com.databasepreservation.common.client.models.parameters.TableAndColumnsParameters;
-import com.databasepreservation.common.client.services.DatabaseService;
-import com.databasepreservation.common.client.services.SIARDService;
 import com.databasepreservation.desktop.client.dbptk.wizard.WizardManager;
 import com.databasepreservation.desktop.client.dbptk.wizard.WizardPanel;
 import com.databasepreservation.desktop.client.dbptk.wizard.common.exportOptions.MetadataExportOptions;
@@ -83,7 +86,7 @@ public class SIARDWizardManager extends WizardManager {
 
     DatabaseService.Util.call((IsIndexed result) -> {
       database = (ViewerDatabase) result;
-    }).retrieve(databaseUUID, databaseUUID);
+    }).retrieve(databaseUUID);
     this.databaseUUID = databaseUUID;
     this.databaseName = databaseName;
     init();
@@ -111,7 +114,7 @@ public class SIARDWizardManager extends WizardManager {
   private void init() {
     DatabaseService.Util.call((IsIndexed result) -> {
       database = (ViewerDatabase) result;
-    }).retrieve(databaseUUID, databaseUUID);
+    }).retrieve(databaseUUID);
     wizardContent.clear();
     TableAndColumns tableAndColumns = TableAndColumns.getInstance(databaseUUID);
     wizardInstances.add(0, tableAndColumns);
@@ -166,7 +169,7 @@ public class SIARDWizardManager extends WizardManager {
         migrateToSIARD();
       } else {
         MetadataExportOptions metadataExportOptions = MetadataExportOptions
-            .getInstance(exportOptionsParameters.getSiardVersion(), true, databaseUUID);
+          .getInstance(exportOptionsParameters.getSiardVersion(), true, databaseUUID);
         wizardInstances.add(position, metadataExportOptions);
         wizardContent.add(metadataExportOptions);
         updateButtons();
@@ -190,35 +193,28 @@ public class SIARDWizardManager extends WizardManager {
     enableButtons(false);
     position = 3;
     updateBreadcrumb();
+    ProgressBarPanel progressBarPanel = ProgressBarPanel.getInstance(databaseUUID);
+    progressBarPanel.setTitleText(messages.progressBarPanelTextForCreateWizardProgressTitle());
+    progressBarPanel.setSubtitleText(messages.progressBarPanelTextForCreateWizardProgressSubTitle());
+    wizardContent.add(progressBarPanel);
 
-    DatabaseService.Util.call((ViewerDatabase result) -> {
-      final String siardPath = result.getPath();
-      ProgressBarPanel progressBarPanel = ProgressBarPanel.getInstance(databaseUUID);
-      progressBarPanel.setTitleText(messages.progressBarPanelTextForCreateWizardProgressTitle());
-      progressBarPanel.setSubtitleText(messages.progressBarPanelTextForCreateWizardProgressSubTitle());
-      wizardContent.add(progressBarPanel);
-
-      SIARDService.Util.call((Boolean response) -> {
-        if (response) {
-          Dialogs.showInformationDialog(messages.sendToWizardManagerInformationTitle(),
-              messages.sendToWizardManagerInformationMessageSIARD(), messages.basicActionClose(), "btn btn-link",
-              new DefaultAsyncCallback<Void>() {
-                @Override
-                public void onSuccess(Void result) {
-                  clear();
-                  instances.clear();
-                  HistoryManager.gotoSIARDInfo(databaseUUID);
-                }
-              });
-        }
-      }, (String errorMessage) -> {
-        enableButtons(true);
-        enableNext(false);
-        Toast.showError(messages.alertErrorTitle(), errorMessage);
-      }).migrateToSIARD(databaseUUID, result.getVersion(), siardPath, new CreateSIARDParameters(null,
-          tableAndColumnsParameters, null, exportOptionsParameters, metadataExportOptionsParameters));
-
-    }).retrieve(databaseUUID, databaseUUID);
+    MigrationService.Util.call((String response) -> {
+      Dialogs.showInformationDialog(messages.sendToWizardManagerInformationTitle(),
+        messages.sendToWizardManagerInformationMessageSIARD(), messages.basicActionClose(), "btn btn-link",
+        new DefaultAsyncCallback<Void>() {
+          @Override
+          public void onSuccess(Void result) {
+            clear();
+            instances.clear();
+            HistoryManager.gotoSIARDInfo(databaseUUID);
+          }
+        });
+    }, (String errorMessage) -> {
+      enableButtons(true);
+      enableNext(false);
+      Toast.showError(messages.alertErrorTitle(), errorMessage);
+    }).run(databaseUUID, new CreateSIARDParameters(null, tableAndColumnsParameters, null, exportOptionsParameters,
+      metadataExportOptionsParameters));
   }
 
   @Override

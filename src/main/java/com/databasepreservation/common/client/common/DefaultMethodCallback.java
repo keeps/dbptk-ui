@@ -4,11 +4,11 @@ import java.util.function.Consumer;
 
 import org.fusesource.restygwt.client.Method;
 import org.fusesource.restygwt.client.MethodCallback;
-import org.roda.core.data.v2.user.User;
 
 import com.databasepreservation.common.client.ClientLogger;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.utils.AsyncCallbackUtils;
+import com.databasepreservation.common.client.models.user.User;
 import com.databasepreservation.common.client.services.AuthenticationService;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.google.gwt.core.client.GWT;
@@ -69,8 +69,8 @@ public abstract class DefaultMethodCallback<T> implements MethodCallback<T> {
         if (user.isGuest()) {
           UserLogin.getInstance().showSuggestLoginDialog();
         } else {
-          Dialogs.showInformationDialog(messages.loginDialogTitle(), messages.loginMissingPermissions(), messages.basicActionClose(),
-            "btn btn-close", new AsyncCallback<Void>() {
+          Dialogs.showInformationDialog(messages.loginDialogTitle(), messages.loginMissingPermissions(),
+            messages.basicActionClose(), "btn btn-close", new AsyncCallback<Void>() {
               @Override
               public void onFailure(Throwable caught) {
                 HistoryManager.gotoHome();
@@ -86,20 +86,19 @@ public abstract class DefaultMethodCallback<T> implements MethodCallback<T> {
 
     } else if (method.getResponse().getStatusCode() == Response.SC_NOT_FOUND) {
       Dialogs.showInformationDialog(messages.loginDialogTitle(), messages.objectNotFound(), messages.basicActionClose(),
-          "btn btn-close", new AsyncCallback<Void>() {
-            @Override
-            public void onFailure(Throwable caught) {
-              HistoryManager.gotoHome();
-            }
+        "btn btn-close", new AsyncCallback<Void>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            HistoryManager.gotoHome();
+          }
 
-            @Override
-            public void onSuccess(Void result) {
-              HistoryManager.gotoHome();
-            }
-          });
+          @Override
+          public void onSuccess(Void result) {
+            HistoryManager.gotoHome();
+          }
+        });
     }
 
-    new ClientLogger(AsyncCallbackUtils.class.getName())
-        .error("AsyncCallback error - " + message);
+    new ClientLogger(AsyncCallbackUtils.class.getName()).error("AsyncCallback error - " + message);
   }
 }

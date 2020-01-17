@@ -10,7 +10,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gwt.http.client.RequestBuilder;
 import org.fusesource.restygwt.client.MethodCallback;
+import org.restlet.data.Method;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
 import com.databasepreservation.common.client.ClientLogger;
@@ -346,7 +348,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     FindRequest findRequest = new FindRequest(ViewerDatabase.class.getName(), filter, currentSorter, sublist,
       getFacets(), false, fieldsToReturn);
 
-    DatabaseService.Util.call(callback).findRows(wrapper.getDatabase().getUuid(), findRequest,
+    DatabaseService.Util.call(callback).findRows(wrapper.getDatabase().getUuid(), wrapper.getDatabase().getUuid(), findRequest,
       LocaleInfo.getCurrentLocale().getLocaleName());
   }
 
@@ -486,9 +488,8 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
 
     FindRequest findRequest = new FindRequest(ViewerRow.class.getName(), getFilter(), currentSorter, sublist,
       Facets.NONE, false, solrColumns);
-    ExportRequest exportRequest = new ExportRequest(filename, zipFilename, description, exportLobs, false);
 
-    return ExportResourcesUtils.getExportURL(database.getUuid(), table.getUuid(), findRequest, exportRequest);
+    return ExportResourcesUtils.getExportURL(database.getUuid(), table.getUuid(), findRequest, zipFilename, filename, description, exportLobs, false);
   }
 
   private String getExportURL(String filename, boolean exportAll, boolean description) {

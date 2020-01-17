@@ -14,12 +14,10 @@ import com.databasepreservation.common.client.common.utils.ApplicationType;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.SIARDManagerPage;
-import com.databasepreservation.common.client.models.ValidationProgressData;
-import com.databasepreservation.common.client.models.ValidationRequirement;
+import com.databasepreservation.common.client.models.progress.ValidationProgressData;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
-import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
+import com.databasepreservation.common.client.models.validation.ValidationRequirement;
 import com.databasepreservation.common.client.services.DatabaseService;
-import com.databasepreservation.common.client.services.SIARDService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
@@ -152,16 +150,14 @@ public class ValidatorPage extends ContentPanel {
       BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
 
       populateValidationInfo(false, false);
-      SIARDService.Util.call((Void response) -> {
-        content.clear();
-        initProgress();
-      }).clearValidationProgressData(databaseUUID);
-    }).retrieve(databaseUUID, databaseUUID);
+      content.clear();
+      initProgress();
+    }).retrieve(databaseUUID);
   }
 
   private void configureHeader() {
     header.add(CommonClientUtils.getHeaderHTML(FontAwesomeIconManager.getTag(FontAwesomeIconManager.SIARD_VALIDATIONS),
-        messages.validatorPageTextForTitle(), "h1"));
+      messages.validatorPageTextForTitle(), "h1"));
 
     MetadataField instance = MetadataField.createInstance(messages.preferencesPanelTextForDescription());
     instance.setCSS("table-row-description", "font-size-description");
@@ -170,7 +166,7 @@ public class ValidatorPage extends ContentPanel {
   }
 
   private void initProgress() {
-    SIARDService.Util.call((ValidationProgressData result) -> {
+    DatabaseService.Util.call((ValidationProgressData result) -> {
       resetInfos();
       populateValidationInfo(false, false);
       autoUpdateTimer.scheduleRepeating(1000);
@@ -181,20 +177,18 @@ public class ValidatorPage extends ContentPanel {
   }
 
   private void runValidator() {
-    SIARDService.Util.call((Boolean result) -> {
+    DatabaseService.Util.call((Boolean result) -> {
       // Do nothing, wait for update finish
       GWT.log("Running validator...");
     }, (String errorMessage) -> {
       stopUpdating();
       Dialogs.showErrors(messages.validatorPageTextForTitle(), errorMessage, messages.basicActionClose());
-      SIARDService.Util.call((Void result) -> {
-        populateValidationInfo(false, true);
-      }).updateStatusValidate(databaseUUID, ViewerDatabaseValidationStatus.ERROR);
-    }).validateSIARD(database.getUuid(), database.getPath(), reporterPath, udtPath, skipAdditionalChecks);
+      populateValidationInfo(false, true);
+    }).validateSiard(database.getUuid(), database.getUuid(), reporterPath, udtPath, skipAdditionalChecks);
   }
 
   private void update() {
-    SIARDService.Util.call((ValidationProgressData result) -> {
+    DatabaseService.Util.call((ValidationProgressData result) -> {
       update(result);
       GWT.log("result.isFinished(): " + result.getFinished());
       GWT.log("result.getRequirementsList().size(): " + result.getRequirementsList().size());
@@ -509,9 +503,7 @@ public class ValidatorPage extends ContentPanel {
   @UiHandler("btnRunAgain")
   void setBtnRunAgainHandler(ClickEvent e) {
     clear(databaseUUID);
-    SIARDService.Util.call((Void response) -> {
-      initProgress();
-    }).clearValidationProgressData(databaseUUID);
+    initProgress();
   }
 
   @UiHandler("contentScroll")

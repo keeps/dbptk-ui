@@ -26,7 +26,7 @@ import com.databasepreservation.common.client.models.status.collection.ColumnSta
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.status.helpers.StatusHelper;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
-import com.databasepreservation.common.client.services.ConfigurationService;
+import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
@@ -146,11 +146,11 @@ public class ColumnsManagementPanel extends RightPanel implements CollectionStat
           }
         });
 
-        ConfigurationService.Util.call((Boolean result) -> {
+        DatabaseService.Util.call((Boolean result) -> {
           ObserverManager.getCollectionObserver().setCollectionStatus(collectionStatus);
           sidebar.reset(database, collectionStatus);
           Toast.showInfo(messages.columnManagementPageTitle(), messages.columnManagementPageToastDescription());
-        }).updateCollectionStatus(database.getUuid(), database.getUuid(), collectionStatus);
+        }).updateCollectionConfiguration(database.getUuid(), database.getUuid(), collectionStatus);
       } else {
         Dialogs.showErrors(messages.columnManagementPageTitle(), "ERROR", messages.basicActionClose());
       }

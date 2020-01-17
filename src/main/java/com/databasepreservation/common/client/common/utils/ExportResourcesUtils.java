@@ -1,7 +1,6 @@
 package com.databasepreservation.common.client.common.utils;
 
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.index.ExportRequest;
 import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.tools.ViewerJsonUtils;
 import com.google.gwt.core.client.GWT;
@@ -11,21 +10,33 @@ import com.google.gwt.core.client.GWT;
  */
 public class ExportResourcesUtils {
 
-  public static String getExportURL(final String databaseUUID, final String tableUUID, FindRequest findRequest, ExportRequest exportRequest) {
+  public static String getExportURL(String databaseUUID, String tableUUID, FindRequest findRequest, String zipFilename,
+    String filename, boolean descriptions, boolean lobs, boolean singleRow) {
     final String paramFindRequest = ViewerJsonUtils.getFindRequestMapper().write(findRequest);
-    final String paramExportRequest = ViewerJsonUtils.getExportRequestMapper().write(exportRequest);
 
-    final StringBuilder urlBuilder = getHeader(GWT.getHostPageBaseURL(), ViewerConstants.API_SERVLET,
-      ViewerConstants.API_V1_EXPORT_RESOURCE, "/csv/");
+    StringBuilder urlBuilder = new StringBuilder();
+
+    urlBuilder.append(GWT.getHostPageBaseURL()).append(ViewerConstants.API_SERVLET)
+      .append(ViewerConstants.API_V1_DATABASE_RESOURCE).append("/").append(databaseUUID).append("/collection/").append(databaseUUID)
+      .append("/tables/").append(tableUUID).append("/export");
 
     String queryStart = "?";
-    urlBuilder.append(databaseUUID).append("/").append(tableUUID).append(queryStart);
+    urlBuilder.append(queryStart);
 
     urlBuilder.append(ViewerConstants.API_QUERY_PARAM_FILTER).append("=")
-        .append(UriQueryUtils.encodeQuery(paramFindRequest)).append("&");
+      .append(UriQueryUtils.encodeQuery(paramFindRequest)).append("&");
 
-    urlBuilder.append(ViewerConstants.API_QUERY_PARAM_EXPORT).append("=")
-        .append(UriQueryUtils.encodeQuery(paramExportRequest));
+    urlBuilder.append("filename").append("=").append(UriQueryUtils.encodeQuery(filename)).append("&");
+
+    if (lobs) {
+      urlBuilder.append("zipFilename").append("=").append(UriQueryUtils.encodeQuery(zipFilename)).append("&");
+    }
+
+    urlBuilder.append("descriptions").append("=").append(descriptions).append("&");
+
+    urlBuilder.append("lobs").append("=").append(lobs).append("&");
+
+    urlBuilder.append("singleRow").append("=").append(singleRow);
 
     return urlBuilder.toString();
   }

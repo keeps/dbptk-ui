@@ -1,9 +1,9 @@
 package com.databasepreservation.common.server;
 
 import com.databasepreservation.common.ValidationObserver;
-import com.databasepreservation.common.client.models.ValidationRequirement;
+import com.databasepreservation.common.client.models.validation.ValidationRequirement;
 import com.databasepreservation.common.server.controller.SIARDController;
-import com.databasepreservation.common.client.models.ValidationProgressData;
+import com.databasepreservation.common.client.models.progress.ValidationProgressData;
 import com.databasepreservation.model.reporters.ValidationReporterStatus;
 
 /**

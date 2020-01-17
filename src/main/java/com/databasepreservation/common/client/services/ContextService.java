@@ -25,7 +25,7 @@ import io.swagger.annotations.ApiOperation;
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 @Path(".." + ViewerConstants.ENDPOINT_CONTEXT)
-@Api(value = ContextService.SWAGGER_ENDPOINT)
+@Api(value = ContextService.SWAGGER_ENDPOINT, hidden = true)
 public interface ContextService extends DirectRestService {
   public static final String SWAGGER_ENDPOINT = "v1 context";
 

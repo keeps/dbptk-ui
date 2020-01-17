@@ -3,12 +3,12 @@ package com.databasepreservation.common.utils;
 import java.lang.reflect.Method;
 import java.util.Date;
 
-import com.databasepreservation.common.client.exceptions.AuthorizationException;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
-import org.roda.core.data.v2.user.User;
 
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.exceptions.AuthorizationException;
 import com.databasepreservation.common.client.models.activity.logs.LogEntryState;
+import com.databasepreservation.common.client.models.user.User;
 import com.databasepreservation.common.server.ViewerConfiguration;
 
 /**

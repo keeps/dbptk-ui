@@ -1,14 +1,16 @@
 package com.databasepreservation.desktop.client.dbptk.wizard.common.exportOptions;
 
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import com.databasepreservation.common.client.common.fields.ComboBoxField;
-import com.databasepreservation.common.client.models.DBPTKModule;
-import com.databasepreservation.common.client.models.parameters.ExportOptionsParameters;
+import com.databasepreservation.common.client.models.dbptk.Module;
 import com.databasepreservation.common.client.models.parameters.PreservationParameter;
-import com.databasepreservation.common.client.services.ModulesService;
+import com.databasepreservation.common.client.models.wizard.export.ExportOptionsParameters;
+import com.databasepreservation.common.client.services.MigrationService;
 import com.databasepreservation.common.client.tools.ToolkitModuleName2ViewerModuleName;
 import com.databasepreservation.desktop.client.dbptk.wizard.WizardPanel;
-import com.github.nmorel.gwtjackson.client.ObjectMapper;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -17,11 +19,8 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
-import config.i18n.client.ClientMessages;
 
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import config.i18n.client.ClientMessages;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -39,9 +38,6 @@ public class SIARDExportOptions extends WizardPanel<ExportOptionsParameters> {
   interface SIARDUiBinder extends UiBinder<Widget, SIARDExportOptions> {
   }
 
-  interface DBPTKModuleMapper extends ObjectMapper<DBPTKModule> {
-  }
-
   private static SIARDUiBinder binder = GWT.create(SIARDUiBinder.class);
 
   @UiField
@@ -52,7 +48,7 @@ public class SIARDExportOptions extends WizardPanel<ExportOptionsParameters> {
 
   private static SIARDExportOptions instance = null;
   private String version;
-  private DBPTKModule dbptkModule;
+  private List<Module> modules;
   private int validationError = 0;
 
   public static SIARDExportOptions getInstance(String path) {
@@ -70,21 +66,26 @@ public class SIARDExportOptions extends WizardPanel<ExportOptionsParameters> {
     initWidget(binder.createAndBindUi(this));
 
     Widget spinner = new HTML(SafeHtmlUtils.fromSafeConstant(
-        "<div class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
+      "<div class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
 
     content.add(spinner);
 
-    ModulesService.Util.call((DBPTKModule result) -> {
+    MigrationService.Util.call((List<Module> result) -> {
       content.remove(spinner);
       ComboBoxField comboBoxField = ComboBoxField.createInstance(messages.wizardExportOptionsLabels("version"));
-      final Map<String, List<PreservationParameter>> modules = new TreeMap<>(result.getParameters());
-      for (String moduleName : modules.keySet()) {
+      final Map<String, List<PreservationParameter>> modulesMap = new TreeMap<>();
+
+      result.forEach(module -> {
+        modulesMap.put(module.getModuleName(), module.getParameters());
+      });
+
+      for (String moduleName : modulesMap.keySet()) {
         comboBoxField.setComboBoxValue(ToolkitModuleName2ViewerModuleName.transform(moduleName), moduleName);
       }
       comboBoxField.addChangeHandler(() -> {
         version = comboBoxField.getSelectedValue();
-        dbptkModule = result;
-        final SIARDExportOptionsCurrent instance = SIARDExportOptionsCurrent.getInstance(version, dbptkModule, path);
+        modules = result;
+        final SIARDExportOptionsCurrent instance = SIARDExportOptionsCurrent.getInstance(version, modules, path);
         content.clear();
         content.add(instance);
       });
@@ -92,29 +93,29 @@ public class SIARDExportOptions extends WizardPanel<ExportOptionsParameters> {
       comboBoxField.select(1);
 
       listBox.add(comboBoxField);
-    }).getSIARDExportModules();
+    }).getSiardModules("export", null);
   }
 
   @Override
   public void clear() {
-    SIARDExportOptionsCurrent.getInstance(version, dbptkModule).clear();
+    SIARDExportOptionsCurrent.getInstance(version, modules).clear();
     instance = null;
     validationError = 0;
   }
 
   @Override
   public boolean validate() {
-    validationError = SIARDExportOptionsCurrent.getInstance(version, dbptkModule).validate();
+    validationError = SIARDExportOptionsCurrent.getInstance(version, modules).validate();
     return validationError == SIARDExportOptions.OK;
   }
 
   @Override
   public ExportOptionsParameters getValues() {
-    return SIARDExportOptionsCurrent.getInstance(version, dbptkModule).getValues();
+    return SIARDExportOptionsCurrent.getInstance(version, modules).getValues();
   }
 
   @Override
   public void error() {
-    SIARDExportOptionsCurrent.getInstance(version, dbptkModule).error();
+    SIARDExportOptionsCurrent.getInstance(version, modules).error();
   }
 }

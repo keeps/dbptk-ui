@@ -8,10 +8,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
-import com.databasepreservation.common.client.models.DBPTKModule;
-import com.databasepreservation.common.client.models.activity.logs.ActivityLogWrapper;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
 import org.fusesource.restygwt.client.DirectRestService;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.fusesource.restygwt.client.REST;
@@ -21,10 +17,12 @@ import com.databasepreservation.common.client.common.DefaultMethodCallback;
 import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.models.activity.logs.ActivityLogEntry;
+import com.databasepreservation.common.client.models.activity.logs.ActivityLogWrapper;
 import com.google.gwt.core.client.GWT;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -57,12 +55,13 @@ public interface ActivityLogService extends DirectRestService {
 
   @POST
   @Path("/find")
-  @ApiOperation(value = "Find all logs", response =  IndexResult.class)
-  IndexResult<ActivityLogEntry> find(@ApiParam(ViewerConstants.API_QUERY_PARAM_FILTER) FindRequest findRequest,
-    @QueryParam(ViewerConstants.API_QUERY_PARAM_LOCALE) String locale);
+  @ApiOperation(value = "Finds logs", response = IndexResult.class)
+  IndexResult<ActivityLogEntry> find(
+    @ApiParam(value = "Find request to filter/limit the search", required = true, name = ViewerConstants.API_QUERY_PARAM_FILTER) FindRequest findRequest,
+    @ApiParam(value = "Locale") @QueryParam(ViewerConstants.API_QUERY_PARAM_LOCALE) String locale);
 
   @GET
-  @Path("/find/{logUUID}")
+  @Path("/{logUUID}")
   @ApiOperation(value = "Retrieve a specific log detail", response = ActivityLogWrapper.class)
-  ActivityLogWrapper retrieve(@PathParam("logUUID") String logUUID);
+  ActivityLogWrapper retrieve( @ApiParam(value = "The log unique identifier") @PathParam("logUUID") String logUUID);
 }

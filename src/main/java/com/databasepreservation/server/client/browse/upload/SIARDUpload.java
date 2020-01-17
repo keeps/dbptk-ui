@@ -3,30 +3,33 @@ package com.databasepreservation.server.client.browse.upload;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.databasepreservation.common.client.tools.HistoryManager;
-import com.databasepreservation.common.client.services.SIARDService;
-import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.EventListener;
-import com.google.gwt.user.client.ui.*;
 import org.roda.core.data.common.RodaConstants;
 
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.RightPanel;
+import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
+import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
+import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.PathUtils;
 import com.databasepreservation.common.client.widgets.Toast;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.dom.client.DragLeaveEvent;
+import com.google.gwt.event.dom.client.DragOverEvent;
+import com.google.gwt.event.dom.client.DropEvent;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Event;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
 
@@ -104,50 +107,36 @@ public class SIARDUpload extends RightPanel {
     uploadMessage.setHTML("<span class='success'>" + messages.uploadSIARDTextForDoneUpload() + "</span>");
     uploadMessage.setVisible(false);
 
-      updateUploadForm();
+    updateUploadForm();
   }
 
   private String getLayout() {
     SafeHtmlBuilder b = new SafeHtmlBuilder();
 
     String item = "<li class='working'>"
-      + "<input type='text' value='0' data-width='30' data-height='30' data-fgColor='#089de3' data-readOnly='1' data-bgColor='#3e4043'/>"
-      + "<p></p><span class='icon'></span></li>";
+        + "<input type='text' value='0' data-width='30' data-height='30' data-fgColor='#089de3' data-readOnly='1' data-bgColor='#3e4043'/>"
+        + "<p></p><span class='icon'></span></li>";
     return item;
   }
+
   private void updateUploadForm() {
     String layout = getLayout();
     String uploadUrl = getUploadUrl();
 
     if (uploadUrl != null) {
       SafeHtml html = SafeHtmlUtils.fromSafeConstant("<form id='upload' method='post' action='" + uploadUrl
-        + "' enctype='multipart/form-data'>" + "<div id='drop'><h4>" + messages.uploadPanelTextForLabelDropHere()
-        + "</h4><a>" + messages.uploadPanelTextForLabelBrowseFiles() + "</a>" + "<input title='"
-        + RodaConstants.API_PARAM_UPLOAD + "' type='file' name='" + RodaConstants.API_PARAM_UPLOAD
-        + "' multiple='true' />" + " </div>" + "<input title='hiddenSubmit' type='submit' hidden/> </form>");
+          + "' enctype='multipart/form-data'>" + "<div id='drop'><h4>" + messages.uploadPanelTextForLabelDropHere()
+          + "</h4><a>" + messages.uploadPanelTextForLabelBrowseFiles() + "</a>" + "<input title='"
+          + RodaConstants.API_PARAM_UPLOAD + "' type='file' name='" + RodaConstants.API_PARAM_UPLOAD
+          + "' multiple='true' />" + " </div>" + "<input title='hiddenSubmit' type='submit' hidden/> </form>");
 
       uploadForm.setHTML(html);
 
-      uploadForm.addDomHandler(new DragOverHandler() {
-        @Override
-        public void onDragOver(DragOverEvent event) {
-          uploadForm.addStyleName(DRAGOVER);
-        }
-      }, DragOverEvent.getType());
+      uploadForm.addDomHandler(event -> uploadForm.addStyleName(DRAGOVER), DragOverEvent.getType());
 
-      uploadForm.addDomHandler(new DragLeaveHandler() {
-        @Override
-        public void onDragLeave(DragLeaveEvent event) {
-          uploadForm.removeStyleName(DRAGOVER);
-        }
-      }, DragLeaveEvent.getType());
+      uploadForm.addDomHandler(event -> uploadForm.removeStyleName(DRAGOVER), DragLeaveEvent.getType());
 
-      uploadForm.addDomHandler(new DropHandler() {
-        @Override
-        public void onDrop(DropEvent event) {
-          uploadForm.removeStyleName(DRAGOVER);
-        }
-      }, DropEvent.getType());
+      uploadForm.addDomHandler(event -> uploadForm.removeStyleName(DRAGOVER), DropEvent.getType());
 
       JavascriptUtils.runMiniUploadForm(layout, new DefaultAsyncCallback<String>() {
         @Override
@@ -155,14 +144,14 @@ public class SIARDUpload extends RightPanel {
           Element item = Document.get().getElementById(id);
           String path = item.getAttribute("path");
           startItemLoadHandler(item);
-          SIARDService.Util.call((String newDatabaseUUID) -> {
+          DatabaseService.Util.call((String newDatabaseUUID) -> {
             Toast.showInfo("SIARD created with success", PathUtils.getFileName(path));
             doneItemLoadHandler(item, "", newDatabaseUUID);
           }, (String errorMessage) -> {
             Toast.showError("Cannot create SIARD", PathUtils.getFileName(path));
             item.addClassName("error");
             doneItemLoadHandler(item, errorMessage, null);
-          }).uploadMetadataSIARDServer(path);
+          }).createDatabase(path);
         }
       });
     } else {
@@ -170,42 +159,38 @@ public class SIARDUpload extends RightPanel {
     }
   }
 
-  private void startItemLoadHandler(Element item){
+  private void startItemLoadHandler(Element item) {
     itemList.add(item);
     Element loadStatus = item.getElementsByTagName("span").getItem(0);
     loadStatus.addClassName("flash");
     loadStatus.setInnerText(messages.uploadPanelTextForLoading());
   }
-  private void doneItemLoadHandler(Element item, String message, String databaseUUID){
+
+  private void doneItemLoadHandler(Element item, String message, String databaseUUID) {
     Element loadStatus = item.getElementsByTagName("span").getItem(0);
 
     item.removeClassName("working");
     loadStatus.setInnerText(message);
     loadStatus.removeClassName("flash");
-    if(databaseUUID != null){
+    if (databaseUUID != null) {
       Button btn = new Button();
       btn.setText(messages.uploadPanelTextForLabelGoToSIARDInfo());
       Element buttonElement = btn.getElement();
       buttonElement.addClassName("btn btn-goto-siard-info");
 
       Event.sinkEvents(buttonElement, Event.ONCLICK);
-      Event.setEventListener(buttonElement, new EventListener() {
-
-        @Override
-        public void onBrowserEvent(Event event) {
-          System.out.println("ok");
-          if(Event.ONCLICK == event.getTypeInt()) {
-            HistoryManager.gotoSIARDInfo(databaseUUID);
-          }
-
+      Event.setEventListener(buttonElement, event -> {
+        if (Event.ONCLICK == event.getTypeInt()) {
+          HistoryManager.gotoSIARDInfo(databaseUUID);
         }
+
       });
 
       item.appendChild(buttonElement);
     }
 
     itemList.remove(item);
-    if(itemList.isEmpty()){
+    if (itemList.isEmpty()) {
       uploadMessage.setVisible(true);
     }
   }

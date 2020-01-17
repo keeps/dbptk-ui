@@ -4,19 +4,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.client.common.utils.AdvancedSearchUtils;
-import com.databasepreservation.common.client.index.filter.Filter;
-import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
-import org.apache.xpath.operations.Bool;
-
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.lists.TableRowList;
+import com.databasepreservation.common.client.common.utils.AdvancedSearchUtils;
 import com.databasepreservation.common.client.common.utils.ListboxUtils;
+import com.databasepreservation.common.client.index.filter.Filter;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
-import com.databasepreservation.common.client.services.SearchService;
+import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.ViewerJsonUtils;
 import com.github.nmorel.gwtjackson.client.exception.JsonDeserializationException;
@@ -328,11 +326,12 @@ public class TableSearchPanel extends Composite {
 
   private void saveQuery() {
     SearchInfo currentSearchInfo = createSearchInfo();
-    SearchService.Util.call((String savedSearchUUID) -> {
+    DatabaseService.Util.call((String savedSearchUUID) -> {
       searchPanel.querySavedHandler(true, database, savedSearchUUID);
     }, (String errorMessage) -> {
       searchPanel.querySavedHandler(false, database, null);
-    }).save(database.getUuid(), table.getUuid(), table.getName(), messages.searchOnTable(table.getName()), "",
+    }).saveSavedSearch(database.getUuid(), database.getUuid(), table.getUuid(), messages.searchOnTable(table.getName()),
+      "",
       currentSearchInfo);
   }
 }

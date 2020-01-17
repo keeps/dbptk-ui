@@ -6,7 +6,6 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
 
-import com.databasepreservation.common.client.ClientConfigurationManager;
 import org.fusesource.restygwt.client.DirectRestService;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.fusesource.restygwt.client.REST;
@@ -16,6 +15,7 @@ import com.databasepreservation.common.client.common.DefaultMethodCallback;
 import com.google.gwt.core.client.GWT;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiParam;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -24,6 +24,7 @@ import io.swagger.annotations.Api;
 @Api(value = ClientLoggerService.SWAGGER_ENDPOINT)
 public interface ClientLoggerService extends DirectRestService {
   public static final String SWAGGER_ENDPOINT = "v1 client logger";
+
   class Util {
     /**
      * @return the singleton instance
@@ -46,54 +47,15 @@ public interface ClientLoggerService extends DirectRestService {
   }
 
   @POST
-  @Path("/trace")
-  void trace(@QueryParam("classname") String classname, @QueryParam("object") String object);
+  @Path("/log")
+  void log(
+    @ApiParam(value = "Log type", allowableValues = "debug, error, fatal, info, trace, warn", required = true) @QueryParam("type") String type,
+    @ApiParam(required = true) @QueryParam("classname") String classname, @QueryParam("object") String object);
 
   @POST
-  @Path("/trace-detailed")
-  void trace(@QueryParam("classname") String classname, @QueryParam("object") String object, Throwable error);
-
-  @POST
-  @Path("/debug")
-  void debug(@QueryParam("classname") String classname, @QueryParam("object") String object);
-
-  @POST
-  @Path("/debug-detailed")
-  void debug(@QueryParam("classname") String classname, @QueryParam("object") String object, Throwable error);
-
-  @POST
-  @Path("/info")
-  void info(@QueryParam("classname") String classname, @QueryParam("object") String object);
-
-  @POST
-  @Path("/info-detailed")
-  void info(@QueryParam("classname") String classname, @QueryParam("object") String object, Throwable error);
-
-  @POST
-  @Path("/warn")
-  void warn(@QueryParam("classname") String classname, @QueryParam("object") String object);
-
-  @POST
-  @Path("/warn-detailed")
-  void warn(@QueryParam("classname") String classname, @QueryParam("object") String object, Throwable error);
-
-  @POST
-  @Path("/error")
-  void error(@QueryParam("classname") String classname, @QueryParam("object") String object);
-
-  @POST
-  @Path("/error-detailed")
-  void error(@QueryParam("classname") String classname, @QueryParam("object") String object, Throwable error);
-
-  @POST
-  @Path("/fatal")
-  void fatal(@QueryParam("classname") String classname, @QueryParam("object") String object);
-
-  @POST
-  @Path("/fatal-detailed")
-  void fatal(@QueryParam("classname") String classname, @QueryParam("object") String object, Throwable error);
-
-  @POST
-  @Path("/pagehit")
-  void pagehit(@QueryParam("pagename") String pagename);
+  @Path("/detailedLog")
+  void detailedLog(
+    @ApiParam(value = "Log type", allowableValues = "debug, error, fatal, info, trace, warn", required = true) @QueryParam("type") String type,
+    @ApiParam(required = true) @QueryParam("classname") String classname, @QueryParam("object") String object,
+    Throwable error);
 }

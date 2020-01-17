@@ -8,10 +8,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Path;
+import javax.ws.rs.core.Context;
 
 import org.roda.core.data.exceptions.GenericException;
+import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RequestNotValidException;
+import org.roda.core.data.utils.JsonUtils;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
@@ -36,17 +40,21 @@ import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.exceptions.RESTException;
 import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
-import com.databasepreservation.common.client.models.DataTransformationProgressData;
+import com.databasepreservation.common.client.models.activity.logs.LogEntryState;
+import com.databasepreservation.common.client.models.progress.DataTransformationProgressData;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerJob;
 import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
+import com.databasepreservation.common.client.models.user.User;
 import com.databasepreservation.common.client.services.JobService;
 import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.index.utils.JsonTransformer;
 import com.databasepreservation.common.server.index.utils.SolrUtils;
+import com.databasepreservation.common.utils.ControllerAssistant;
 import com.databasepreservation.common.utils.I18nUtility;
+import com.databasepreservation.common.utils.UserUtility;
 import com.databasepreservation.model.exception.ModuleException;
 
 /**
@@ -55,6 +63,9 @@ import com.databasepreservation.model.exception.ModuleException;
 @Service
 @Path(ViewerConstants.ENDPOINT_JOB)
 public class JobResource implements JobService {
+  @Context
+  private HttpServletRequest request;
+
   @Autowired
   ApplicationContext context;
 
@@ -77,6 +88,51 @@ public class JobResource implements JobService {
   JobExplorer jobExplorer;
 
   Map<String, JobExecution> jobExecutionMap = new HashMap<>();
+
+  @Override
+  public ViewerJob retrieve(String jobUUID) {
+    ControllerAssistant controllerAssistant = new ControllerAssistant() {};
+    User user = UserUtility.getUser(request);
+    LogEntryState state = LogEntryState.SUCCESS;
+
+    controllerAssistant.checkRoles(user);
+
+    try {
+      return ViewerFactory.getSolrManager().retrieve(ViewerJob.class, jobUUID);
+    } catch (GenericException | NotFoundException e) {
+      state = LogEntryState.FAILURE;
+      throw new RESTException(e);
+    } finally {
+      // register action
+      controllerAssistant.registerAction(user, state);
+    }
+  }
+
+  @Override
+  public IndexResult<ViewerJob> findJobs(FindRequest findRequest, String localeString) {
+    ControllerAssistant controllerAssistant = new ControllerAssistant() {};
+    User user = UserUtility.getUser(request);
+    LogEntryState state = LogEntryState.SUCCESS;
+
+    controllerAssistant.checkRoles(user);
+    long count = 0;
+
+    try {
+      final IndexResult<ViewerJob> result = ViewerFactory.getSolrManager().find(ViewerJob.class, findRequest.filter,
+        findRequest.sorter, findRequest.sublist, findRequest.facets);
+      count = result.getTotalCount();
+      return result;
+    } catch (GenericException | RequestNotValidException e) {
+      state = LogEntryState.FAILURE;
+      throw new RESTException(e);
+    } finally {
+      // register action
+      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_FILTER_PARAM,
+        JsonUtils.getJsonFromObject(findRequest.filter), ViewerConstants.CONTROLLER_FACET_PARAM,
+        JsonUtils.getJsonFromObject(findRequest.facets), ViewerConstants.CONTROLLER_SUBLIST_PARAM,
+        JsonUtils.getJsonFromObject(findRequest.sublist), ViewerConstants.CONTROLLER_RETRIEVE_COUNT, count);
+    }
+  }
 
   @Override
   public List<String> denormalizeCollectionJob(String databaseUUID) {

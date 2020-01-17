@@ -1,11 +1,14 @@
 package com.databasepreservation.common.client.common.helpers;
 
+import java.util.Collections;
+import java.util.Date;
+
 import com.databasepreservation.Constants;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.fields.GenericField;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
-import com.databasepreservation.common.client.models.ExtensionFilter;
+import com.databasepreservation.common.client.models.JSO.ExtensionFilter;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.JSOUtils;
 import com.databasepreservation.common.client.tools.PathUtils;
@@ -19,10 +22,8 @@ import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Label;
-import config.i18n.client.ClientMessages;
 
-import java.util.Collections;
-import java.util.Date;
+import config.i18n.client.ClientMessages;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -48,7 +49,9 @@ public class HelperValidator {
     return udtPathFile;
   }
 
-  public String skipAdditionalChecks() { return String.valueOf(skipAdditionalChecks); }
+  public String skipAdditionalChecks() {
+    return String.valueOf(skipAdditionalChecks);
+  }
 
   public FlowPanel additionalChecksPanel() {
     CheckBox checkbox = new CheckBox();
@@ -101,7 +104,8 @@ public class HelperValidator {
       pathLabelReporter.setText(reporterPathFile);
     });
 
-    return buildPanel(messages.reporterDestinationFolder(), pathLabelReporter, messages.reporterTip(), reporterButton, clearButton);
+    return buildPanel(messages.reporterDestinationFolder(), pathLabelReporter, messages.reporterTip(), reporterButton,
+      clearButton);
   }
 
   public FlowPanel udtValidatorPanel() {
@@ -129,7 +133,6 @@ public class HelperValidator {
       pathLabelUDT.setText(udtPathFile);
     });
 
-
     return buildPanel(messages.allowedTypes(), pathLabelUDT, messages.allowedTypesTip(), udtButton, clearButton);
   }
 
@@ -144,7 +147,8 @@ public class HelperValidator {
     btn.setText(messages.basicActionBrowse());
     btn.addStyleName("btn btn-link-info btn-validator");
 
-    clear.setHTML(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTagRegular(FontAwesomeIconManager.ACTION_DELETE)));
+    clear.setHTML(
+      SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTagRegular(FontAwesomeIconManager.ACTION_DELETE)));
     clear.addStyleName("btn btn-link-info btn-validator");
 
     pathLabel.addStyleName("text-muted");

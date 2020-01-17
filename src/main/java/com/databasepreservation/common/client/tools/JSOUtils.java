@@ -2,7 +2,7 @@ package com.databasepreservation.common.client.tools;
 
 import java.util.List;
 
-import com.databasepreservation.common.client.models.ExtensionFilter;
+import com.databasepreservation.common.client.models.JSO.ExtensionFilter;
 import com.databasepreservation.common.client.models.JSO.FilterJSO;
 import com.databasepreservation.common.client.models.JSO.OpenFileDialogOptions;
 import com.google.gwt.core.client.JavaScriptObject;

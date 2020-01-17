@@ -1,12 +1,17 @@
 package com.databasepreservation.desktop.client.dbptk.wizard.upload;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.fields.ComboBoxField;
-import com.databasepreservation.common.client.models.parameters.ConnectionParameters;
-import com.databasepreservation.common.client.models.parameters.CustomViewsParameter;
-import com.databasepreservation.common.client.models.parameters.CustomViewsParameters;
-import com.databasepreservation.common.client.services.DatabaseService;
+import com.databasepreservation.common.client.models.wizard.connection.ConnectionParameters;
+import com.databasepreservation.common.client.models.wizard.customViews.CustomViewsParameter;
+import com.databasepreservation.common.client.models.wizard.customViews.CustomViewsParameters;
+import com.databasepreservation.common.client.services.MigrationService;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.databasepreservation.common.client.widgets.Toast;
@@ -25,12 +30,8 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextArea;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import config.i18n.client.ClientMessages;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import config.i18n.client.ClientMessages;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -227,13 +228,13 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
       btnUpdate.addClickHandler(event -> {
         final int valid = customViewFormValidatorUpdate(parameter.getCustomViewName());
         if (valid == -1) {
-          DatabaseService.Util.call((List<List<String>> result) -> {
+          MigrationService.Util.call((List<List<String>> result) -> {
             updateCustomViewParameters(parameter.getCustomViewID(), customViewSchemaName.getSelectedValue(),
-                customViewName.getText(), customViewDescription.getText(), customViewQuery.getText());
+              customViewName.getText(), customViewDescription.getText(), customViewQuery.getText());
             Toast.showInfo(messages.customViewsPageTitle(), messages.customViewsUpdateMessage());
           }, (String errorMessage) -> {
             Dialogs.showErrors(messages.customViewsPageTitle(), errorMessage, messages.basicActionClose());
-          }).validateCustomViewQuery(connectionParameters, customViewQuery.getText());
+          }).testQuery(connectionParameters, customViewQuery.getText());
         } else {
           Toast.showError(messages.customViewsPageTitle(), messages.customViewsPageErrorMessagesFor(valid));
           highlightFieldsWhenRequired();
@@ -352,12 +353,12 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
     btnSave.addClickHandler(event -> {
       final int valid = customViewFormValidator();
       if (valid == -1) {
-        DatabaseService.Util.call((List<List<String>> result) -> {
+        MigrationService.Util.call((List<List<String>> result) -> {
           customViewsSidebar.addSideBarHyperLink(customViewName.getText(), String.valueOf(counter),
-              HistoryManager.linkToCreateWizardCustomViewsDelete(String.valueOf(counter)));
+            HistoryManager.linkToCreateWizardCustomViewsDelete(String.valueOf(counter)));
 
-          CustomViewsParameter parameter = new CustomViewsParameter(customViewSchemaName.getSelectedValue(),
-              counter, customViewName.getText(), customViewDescription.getText(), customViewQuery.getText());
+          CustomViewsParameter parameter = new CustomViewsParameter(customViewSchemaName.getSelectedValue(), counter,
+            customViewName.getText(), customViewDescription.getText(), customViewQuery.getText());
           customViewsParameters.put(String.valueOf(counter), parameter);
           counter++;
           setTextboxText("", "", "", "");
@@ -370,7 +371,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
         }, (String errorMessage) -> {
           Dialogs.showErrors(messages.customViewsPageTitle(), errorMessage, messages.basicActionClose());
           checkIfHaveCustomViews();
-        }).validateCustomViewQuery(connectionParameters, customViewQuery.getText());
+        }).testQuery(connectionParameters, customViewQuery.getText());
       } else {
         Toast.showError(messages.customViewsPageTitle(), messages.customViewsPageErrorMessagesFor(valid));
         highlightFieldsWhenRequired();
@@ -438,14 +439,14 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
           "<div class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
         content.add(spinner);
 
-        DatabaseService.Util.call((List<List<String>> result) -> {
+        MigrationService.Util.call((List<List<String>> result) -> {
           content.remove(spinner);
-          Dialogs.showQueryResult(messages.customViewsPageTextForQueryResultsDialogTitle(),
-              messages.basicActionClose(), result);
+          Dialogs.showQueryResult(messages.customViewsPageTextForQueryResultsDialogTitle(), messages.basicActionClose(),
+            result);
         }, (String errorMessage) -> {
           content.remove(spinner);
           Dialogs.showErrors(messages.customViewsPageTitle(), errorMessage, messages.basicActionClose());
-        }).validateCustomViewQuery(connectionParameters, customViewQuery.getText());
+        }).testQuery(connectionParameters, customViewQuery.getText());
       } else {
         Toast.showError(messages.customViewsPageTitle(), messages.customViewsPageErrorMessageForQueryError());
       }

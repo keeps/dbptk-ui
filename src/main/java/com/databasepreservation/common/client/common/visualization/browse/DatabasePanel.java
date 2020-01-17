@@ -1,9 +1,8 @@
 package com.databasepreservation.common.client.common.visualization.browse;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-
-import org.roda.core.data.v2.user.User;
 
 import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.ViewerConstants;
@@ -22,8 +21,8 @@ import com.databasepreservation.common.client.index.IsIndexed;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
+import com.databasepreservation.common.client.models.user.User;
 import com.databasepreservation.common.client.services.AuthenticationService;
-import com.databasepreservation.common.client.services.ConfigurationService;
 import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
@@ -66,8 +65,7 @@ public class DatabasePanel extends Composite implements CollectionStatusObserver
 
   public static DatabasePanel getInstance(String databaseUUID, String route, boolean initMenu, Sidebar sidebar) {
     String key = databaseUUID + route;
-    instances.computeIfAbsent(key, k -> new DatabasePanel(databaseUUID, initMenu, sidebar));
-    return instances.get(databaseUUID + route);
+    return instances.computeIfAbsent(key, k -> new DatabasePanel(databaseUUID, initMenu, sidebar));
   }
 
   @UiField
@@ -168,34 +166,33 @@ public class DatabasePanel extends Composite implements CollectionStatusObserver
             MenuBar subMenu = new MenuBar(true);
             subMenu.addItem(messages.loginLogout(), (Command) () -> UserLogin.getInstance().logout());
             menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.USER, user.getFullName()), subMenu);
-            AuthenticationService.Util.call((Boolean userIsAdmin) -> {
-              if (userIsAdmin) {
-                MenuBar administrationMenu = new MenuBar(true);
-                administrationMenu.addItem(
-                  FontAwesomeIconManager.loaded(FontAwesomeIconManager.ACTIVITY_LOG, messages.activityLogMenuText()),
-                  (Command) HistoryManager::gotoActivityLog);
-                administrationMenu.addItem(
-                  FontAwesomeIconManager.loaded(FontAwesomeIconManager.NETWORK_WIRED, messages.menuTextForJobs()),
-                  (Command) HistoryManager::gotoJobs);
-                administrationMenu.addItem(
-                  FontAwesomeIconManager.loaded(FontAwesomeIconManager.PREFERENCES, messages.menuTextForPreferences()),
-                  (Command) HistoryManager::gotoPreferences);
-                menu.addItem(messages.menuTextForAdministration(), administrationMenu);
-              }
+            if (user.isAdmin()) {
+              MenuBar administrationMenu = new MenuBar(true);
+              administrationMenu.addItem(
+                FontAwesomeIconManager.loaded(FontAwesomeIconManager.ACTIVITY_LOG, messages.activityLogMenuText()),
+                (Command) HistoryManager::gotoActivityLog);
+              administrationMenu.addItem(
+                FontAwesomeIconManager.loaded(FontAwesomeIconManager.NETWORK_WIRED, messages.menuTextForJobs()),
+                (Command) HistoryManager::gotoJobs);
+              administrationMenu.addItem(
+                FontAwesomeIconManager.loaded(FontAwesomeIconManager.PREFERENCES, messages.menuTextForPreferences()),
+                (Command) HistoryManager::gotoPreferences);
+              menu.addItem(messages.menuTextForAdministration(), administrationMenu);
+            }
 
-              MenuBar languagesMenu = new MenuBar(true);
+            MenuBar languagesMenu = new MenuBar(true);
 
-              setLanguageMenu(languagesMenu);
+            setLanguageMenu(languagesMenu);
 
-              MenuItem languagesMenuItem = new MenuItem(
-                FontAwesomeIconManager.loaded(FontAwesomeIconManager.GLOBE, selectedLanguage), languagesMenu);
-              languagesMenuItem.addStyleName("menu-item menu-item-label menu-item-language");
-              menu.addItem(languagesMenuItem);
-            }).userIsAdmin();
+            MenuItem languagesMenuItem = new MenuItem(
+              FontAwesomeIconManager.loaded(FontAwesomeIconManager.GLOBE, selectedLanguage), languagesMenu);
+            languagesMenuItem.addStyleName("menu-item menu-item-label menu-item-language");
+            menu.addItem(languagesMenuItem);
           }
         }
       } else {
-        menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.NEW_UPLOAD, messages.uploadPanelTextForTitle()),
+        menu.addItem(
+          FontAwesomeIconManager.loaded(FontAwesomeIconManager.NEW_UPLOAD, messages.uploadPanelTextForTitle()),
           (Command) HistoryManager::gotoNewUpload);
         menu.addItem(
           FontAwesomeIconManager.loaded(FontAwesomeIconManager.DATABASES, messages.menusidebar_manageDatabases()),
@@ -260,13 +257,13 @@ public class DatabasePanel extends Composite implements CollectionStatusObserver
   }
 
   private void loadPanelWithDatabase(final ContentPanelLoader panelLoader) {
-    DatabaseService.Util.call((IsIndexed result) -> {
-      database = (ViewerDatabase) result;
-      ConfigurationService.Util.call((CollectionStatus status) -> {
-        collectionStatus = status;
+    DatabaseService.Util.call((ViewerDatabase result) -> {
+      database = result;
+      DatabaseService.Util.call((List<CollectionStatus> status) -> {
+        collectionStatus = status.get(0);
         loadPanel(panelLoader);
-      }).getCollectionStatus(database.getUuid(), database.getUuid());
-    }).retrieve(databaseUUID, databaseUUID);
+      }).getCollectionConfiguration(database.getUuid(), database.getUuid());
+    }).retrieve(databaseUUID);
   }
 
   private void loadPanel(ContentPanelLoader panelLoader) {
@@ -298,11 +295,11 @@ public class DatabasePanel extends Composite implements CollectionStatusObserver
   private void loadPanelWithDatabase(final RightPanelLoader rightPanelLoader, String toSelect) {
     DatabaseService.Util.call((IsIndexed result) -> {
       database = (ViewerDatabase) result;
-      ConfigurationService.Util.call((CollectionStatus status) -> {
-        collectionStatus = status;
+      DatabaseService.Util.call((List<CollectionStatus> status) -> {
+        collectionStatus = status.get(0);
         loadPanel(rightPanelLoader, toSelect);
-      }).getCollectionStatus(database.getUuid(), database.getUuid());
-    }).retrieve(databaseUUID, databaseUUID);
+      }).getCollectionConfiguration(database.getUuid(), database.getUuid());
+    }).retrieve(databaseUUID);
   }
 
   private void loadPanel(RightPanelLoader rightPanelLoader, String toSelect) {

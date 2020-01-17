@@ -17,7 +17,7 @@ import com.databasepreservation.common.client.common.visualization.manager.SIARD
 import com.databasepreservation.common.client.common.visualization.validation.ValidatorPage;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
-import com.databasepreservation.common.client.services.SIARDService;
+import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.Humanize;
@@ -313,9 +313,9 @@ public class ValidationNavigationPanel {
 
   private void delete() {
     if (!database.getValidationStatus().equals(ViewerDatabaseValidationStatus.VALIDATION_RUNNING)) {
-      SIARDService.Util.call((Void result) -> {
+      DatabaseService.Util.call((Void result) -> {
         SIARDManagerPage.getInstance(database).refreshInstance(database.getUuid());
-      }).deleteSIARDValidatorReportFile(database.getUuid(), database.getValidatorReportPath());
+      }).deleteValidationReport(database.getUuid(), database.getValidatorReportPath());
     }
   }
 }

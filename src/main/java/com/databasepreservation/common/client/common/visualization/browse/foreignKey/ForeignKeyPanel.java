@@ -5,10 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
-import com.databasepreservation.common.client.index.filter.Filter;
-import com.databasepreservation.common.client.index.filter.FilterParameter;
-import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
 import com.databasepreservation.common.client.common.RightPanel;
@@ -18,12 +14,17 @@ import com.databasepreservation.common.client.common.visualization.browse.RowPan
 import com.databasepreservation.common.client.common.visualization.browse.table.TablePanel;
 import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
+import com.databasepreservation.common.client.index.filter.Filter;
+import com.databasepreservation.common.client.index.filter.FilterParameter;
+import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -33,13 +34,13 @@ import com.google.gwt.user.client.ui.Widget;
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class ForeignKeyPanel extends RightPanel {
-  public static ForeignKeyPanel createInstance(ViewerDatabase database, String tableUUID,
-                                               List<String> columnsAndValues, CollectionStatus status) {
+  public static ForeignKeyPanel createInstance(ViewerDatabase database, String tableUUID, List<String> columnsAndValues,
+    CollectionStatus status) {
     return new ForeignKeyPanel(database, tableUUID, columnsAndValues, false, status);
   }
 
-  public static ForeignKeyPanel createInstance(ViewerDatabase database, String tableUUID,
-    List<String> columnsAndValues, boolean update, CollectionStatus status) {
+  public static ForeignKeyPanel createInstance(ViewerDatabase database, String tableUUID, List<String> columnsAndValues,
+    boolean update, CollectionStatus status) {
     return new ForeignKeyPanel(database, tableUUID, columnsAndValues, update, status);
   }
 
@@ -63,7 +64,8 @@ public class ForeignKeyPanel extends RightPanel {
   @UiField
   SimplePanel panel;
 
-  private ForeignKeyPanel(ViewerDatabase viewerDatabase, final String tableUUID, List<String> columnsAndValues, boolean update, CollectionStatus status) {
+  private ForeignKeyPanel(ViewerDatabase viewerDatabase, final String tableUUID, List<String> columnsAndValues,
+    boolean update, CollectionStatus status) {
     database = viewerDatabase;
     table = database.getMetadata().getTable(tableUUID);
     toUpdate = update;
@@ -88,13 +90,13 @@ public class ForeignKeyPanel extends RightPanel {
 
     // search (count)
     FindRequest findRequest = new FindRequest(ViewerRow.class.getName(), filter, null, new Sublist(0, 1), null);
-    DatabaseService.Util.call((IndexResult<ViewerRow> result)->{
+    DatabaseService.Util.call((IndexResult<ViewerRow> result) -> {
       rowCount = result.getTotalCount();
       if (rowCount >= 1) {
         row = result.getResults().get(0);
       }
       init();
-    }).findRows(database.getUuid(), findRequest, null);
+    }).findRows(database.getUuid(), database.getUuid(), findRequest, LocaleInfo.getCurrentLocale().getLocaleName());
   }
 
   /**
@@ -130,7 +132,8 @@ public class ForeignKeyPanel extends RightPanel {
       } else {
         // display a TablePanel
         SearchInfo searchInfo = new SearchInfo(table, columnAndValueMapping);
-        TablePanel tablePanel = TablePanel.createInstance(null, database, table, searchInfo, HistoryManager.ROUTE_FOREIGN_KEY);
+        TablePanel tablePanel = TablePanel.createInstance(null, database, table, searchInfo,
+          HistoryManager.ROUTE_FOREIGN_KEY);
         tablePanel.setColumnsAndValues(columnsAndValues);
         if (toUpdate) {
           tablePanel.update();

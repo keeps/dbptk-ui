@@ -1,4 +1,4 @@
-package com.databasepreservation.common.client.models.parameters;
+package com.databasepreservation.common.client.models.wizard.export;
 
 import java.io.Serializable;
 import java.util.HashMap;

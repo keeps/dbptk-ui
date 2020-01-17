@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
@@ -16,17 +17,18 @@ import com.databasepreservation.common.client.common.lists.widgets.MultipleSelec
 import com.databasepreservation.common.client.common.utils.ApplicationType;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.index.IsIndexed;
-import com.databasepreservation.common.client.models.ExternalLobsDialogBoxResult;
-import com.databasepreservation.common.client.models.parameters.ConnectionParameters;
-import com.databasepreservation.common.client.models.parameters.ExternalLOBsParameter;
-import com.databasepreservation.common.client.models.parameters.TableAndColumnsParameters;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerSchema;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.models.structure.ViewerView;
+import com.databasepreservation.common.client.models.wizard.connection.ConnectionParameters;
+import com.databasepreservation.common.client.models.wizard.table.ExternalLOBsParameter;
+import com.databasepreservation.common.client.models.wizard.table.ExternalLobsDialogBoxResult;
+import com.databasepreservation.common.client.models.wizard.table.TableAndColumnsParameters;
 import com.databasepreservation.common.client.services.DatabaseService;
+import com.databasepreservation.common.client.services.MigrationService;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.JSOUtils;
 import com.databasepreservation.common.client.tools.PathUtils;
@@ -36,7 +38,6 @@ import com.databasepreservation.desktop.client.common.sidebar.TableAndColumnsSen
 import com.databasepreservation.desktop.client.common.sidebar.TableAndColumnsSidebar;
 import com.databasepreservation.desktop.client.dbptk.wizard.WizardPanel;
 import com.databasepreservation.desktop.client.dbptk.wizard.common.diagram.ErDiagram;
-import com.github.nmorel.gwtjackson.client.ObjectMapper;
 import com.google.gwt.cell.client.ButtonCell;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.CheckboxCell;
@@ -75,9 +76,6 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
 
   interface TableAndColumnsUiBinder extends UiBinder<Widget, TableAndColumns> {
-  }
-
-  interface ViewerMetadataMapper extends ObjectMapper<ViewerMetadata> {
   }
 
   private static TableAndColumnsUiBinder binder = GWT.create(TableAndColumnsUiBinder.class);
@@ -151,7 +149,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
       content.remove(spinner);
       HistoryManager.gotoSIARDInfo(databaseUUID);
       Dialogs.showErrors(messages.tableAndColumnsPageTitle(), errorMessage, messages.basicActionClose());
-    }).retrieve(databaseUUID, databaseUUID);
+    }).retrieve(databaseUUID);
   }
 
   private TableAndColumns(String databaseUUID, ConnectionParameters values) {
@@ -164,7 +162,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
       messages.tableAndColumnsPageDialogMessageForRetrievingInformation());
     CreateWizardManager.getInstance().enableNext(false);
 
-    DatabaseService.Util.call((ViewerMetadata metadata) -> {
+    MigrationService.Util.call((ViewerMetadata metadata) -> {
       this.metadata = metadata;
       tableAndColumnsSidebar = TableAndColumnsSidebar.newInstance(metadata);
       tableAndColumnsList.add(tableAndColumnsSidebar);
@@ -175,7 +173,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
     }, (String errorMessage) -> {
       dialogBox.hide();
       Dialogs.showErrors(messages.tableAndColumnsPageTitle(), errorMessage, messages.basicActionClose());
-    }).getSchemaInformation(values);
+    }).getMetadata(values);
   }
 
   @Override
@@ -222,21 +220,21 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
   public TableAndColumnsParameters getValues() {
     TableAndColumnsParameters parameters = new TableAndColumnsParameters();
     List<String> schemas = new ArrayList<>();
-    Map<String, List<ViewerColumn>> values = new HashMap<>();
+    Map<String, List<String>> values = new HashMap<>();
     for (Map.Entry<String, MultipleSelectionTablePanel<ViewerColumn>> cellTables : columns.entrySet()) {
       String tableUUID = cellTables.getKey();
       ViewerTable table = metadata.getTable(tableUUID);
       if (table != null) {
         schemas.add(table.getSchemaName());
-        List<ViewerColumn> selectedColumns = new ArrayList<>(
-          cellTables.getValue().getSelectionModel().getSelectedSet());
+        List<String> selectedColumns = new ArrayList<>(
+          getSelectColumnNames(cellTables.getValue().getSelectionModel().getSelectedSet()));
         String key = table.getSchemaName() + "." + table.getName();
         values.put(key, selectedColumns);
       } else {
         ViewerView view = metadata.getView(tableUUID);
         if (view != null) {
-          List<ViewerColumn> selectedColumns = new ArrayList<>(
-            cellTables.getValue().getSelectionModel().getSelectedSet());
+          List<String> selectedColumns = new ArrayList<>(
+            getSelectColumnNames(cellTables.getValue().getSelectionModel().getSelectedSet()));
           String key = view.getSchemaName() + "." + view.getName();
           values.put(key, selectedColumns);
         }
@@ -248,6 +246,15 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
     parameters.setSelectedSchemas(schemas);
 
     return parameters;
+  }
+
+  private List<String> getSelectColumnNames(Set<ViewerColumn> columns) {
+    List<String> list = new ArrayList<>();
+    for (ViewerColumn column : columns) {
+      list.add(column.getDisplayName());
+    }
+
+    return list;
   }
 
   @Override

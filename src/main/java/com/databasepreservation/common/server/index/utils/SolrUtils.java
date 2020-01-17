@@ -16,10 +16,18 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TimeZone;
+import java.util.UUID;
 
-import com.databasepreservation.common.client.index.filter.*;
-import com.databasepreservation.common.client.index.filter.InnerJoinFilterParameter;
+import com.databasepreservation.common.client.models.user.User;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -40,15 +48,31 @@ import org.roda.core.data.exceptions.RequestNotValidException;
 import org.roda.core.data.v2.index.sublist.Sublist;
 import org.roda.core.data.v2.ip.AIPState;
 import org.roda.core.data.v2.ip.Permissions;
-import org.roda.core.data.v2.user.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.search.SavedSearch;
 import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.index.IsIndexed;
-import com.databasepreservation.common.client.index.facets.*;
+import com.databasepreservation.common.client.index.facets.FacetFieldResult;
+import com.databasepreservation.common.client.index.facets.FacetParameter;
+import com.databasepreservation.common.client.index.facets.Facets;
+import com.databasepreservation.common.client.index.facets.RangeFacetParameter;
+import com.databasepreservation.common.client.index.facets.SimpleFacetParameter;
+import com.databasepreservation.common.client.index.filter.AndFiltersParameters;
+import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
+import com.databasepreservation.common.client.index.filter.DateIntervalFilterParameter;
+import com.databasepreservation.common.client.index.filter.DateRangeFilterParameter;
+import com.databasepreservation.common.client.index.filter.EmptyKeyFilterParameter;
+import com.databasepreservation.common.client.index.filter.Filter;
+import com.databasepreservation.common.client.index.filter.FilterParameter;
+import com.databasepreservation.common.client.index.filter.FiltersParameters;
+import com.databasepreservation.common.client.index.filter.InnerJoinFilterParameter;
+import com.databasepreservation.common.client.index.filter.LongRangeFilterParameter;
+import com.databasepreservation.common.client.index.filter.NotSimpleFilterParameter;
+import com.databasepreservation.common.client.index.filter.OneOfManyFilterParameter;
+import com.databasepreservation.common.client.index.filter.OrFiltersParameters;
+import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
 import com.databasepreservation.common.client.index.sort.SortParameter;
 import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
@@ -101,23 +125,6 @@ public class SolrUtils {
   public static <T extends IsIndexed> IndexResult<T> find(SolrClient index, SolrCollection<T> collection, Filter filter,
     Sorter sorter, Sublist sublist) throws GenericException, RequestNotValidException {
     return find(index, collection, filter, sorter, sublist, Facets.NONE, new ArrayList<>());
-  }
-
-  public static String findSIARDFile(SolrClient index, String collectionName, Filter filter)
-    throws RequestNotValidException, GenericException {
-    SolrQuery query = new SolrQuery();
-    query.setQuery(parseFilter(filter));
-    try {
-      QueryResponse response = index.query(collectionName, query);
-      SolrDocumentList list = response.getResults();
-      if (list.isEmpty()) {
-        return null;
-      }
-      SolrDocument entry = list.get(0);
-      return objectToString(entry.get(ViewerConstants.INDEX_ID), null);
-    } catch (SolrException | SolrServerException | IOException e) {
-      throw buildGenericException(e);
-    }
   }
 
   public static <T extends IsIndexed> IndexResult<T> find(SolrClient index, SolrCollection<T> collection, Filter filter,
@@ -801,28 +808,28 @@ public class SolrUtils {
    * Roda user > Apache Solr filter query
    * ____________________________________________________________________________________________________________________
    */
-  private static String getFilterQueries(User user, boolean justActive) {
-
-    StringBuilder fq = new StringBuilder();
-
-    // TODO find a better way to define admin super powers
-    if (user != null && !user.getName().equals("admin")) {
-      fq.append("(");
-      String usersKey = RodaConstants.INDEX_PERMISSION_USERS_PREFIX + Permissions.PermissionType.READ;
-      appendExactMatch(fq, usersKey, user.getId(), true, false);
-
-      String groupsKey = RodaConstants.INDEX_PERMISSION_GROUPS_PREFIX + Permissions.PermissionType.READ;
-      appendValuesUsingOROperatorForQuery(fq, groupsKey, new ArrayList<>(user.getGroups()), true);
-
-      fq.append(")");
-    }
-
-    if (justActive) {
-      appendExactMatch(fq, RodaConstants.INDEX_STATE, AIPState.ACTIVE.toString(), true, true);
-    }
-
-    return fq.toString();
-  }
+//  private static String getFilterQueries(User user, boolean justActive) {
+//
+//    StringBuilder fq = new StringBuilder();
+//
+//    // TODO find a better way to define admin super powers
+//    if (user != null && !user.getName().equals("admin")) {
+//      fq.append("(");
+//      String usersKey = RodaConstants.INDEX_PERMISSION_USERS_PREFIX + Permissions.PermissionType.READ;
+//      appendExactMatch(fq, usersKey, user.getId(), true, false);
+//
+//      String groupsKey = RodaConstants.INDEX_PERMISSION_GROUPS_PREFIX + Permissions.PermissionType.READ;
+//      appendValuesUsingOROperatorForQuery(fq, groupsKey, new ArrayList<>(user.getGroups()), true);
+//
+//      fq.append(")");
+//    }
+//
+//    if (justActive) {
+//      appendExactMatch(fq, RodaConstants.INDEX_STATE, AIPState.ACTIVE.toString(), true, true);
+//    }
+//
+//    return fq.toString();
+//  }
 
   private static void appendValuesUsingOROperatorForQuery(StringBuilder ret, String key, List<String> values,
     boolean prependWithOrIfNeeded) {

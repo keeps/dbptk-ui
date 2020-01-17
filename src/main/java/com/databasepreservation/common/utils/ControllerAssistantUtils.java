@@ -1,18 +1,17 @@
 package com.databasepreservation.common.utils;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
+import com.databasepreservation.common.client.models.activity.logs.ActivityLogEntry;
+import com.databasepreservation.common.client.models.activity.logs.LogEntryState;
+import com.databasepreservation.common.client.models.user.User;
+import com.databasepreservation.common.server.ViewerFactory;
+import com.databasepreservation.common.server.index.utils.SolrUtils;
 import org.roda.core.data.exceptions.GenericException;
-import org.roda.core.data.v2.user.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.databasepreservation.common.client.models.activity.logs.ActivityLogEntry;
-import com.databasepreservation.common.client.models.activity.logs.LogEntryState;
-import com.databasepreservation.common.server.ViewerFactory;
-import com.databasepreservation.common.server.index.utils.SolrUtils;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>

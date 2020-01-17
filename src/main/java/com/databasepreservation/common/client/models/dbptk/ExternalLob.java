@@ -1,20 +1,20 @@
-package com.databasepreservation.common.client.models;
+package com.databasepreservation.common.client.models.dbptk;
 
 import java.io.Serializable;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-public class ExternalLobDBPTK implements Serializable {
+public class ExternalLob implements Serializable {
 
   private String pathToColumnList;
   private String basePath;
   private String referenceType;
 
-  public ExternalLobDBPTK() {
+  public ExternalLob() {
   }
 
-  public ExternalLobDBPTK(String pathToColumnList, String basePath, String referenceType) {
+  public ExternalLob(String pathToColumnList, String basePath, String referenceType) {
     this.pathToColumnList = pathToColumnList;
     this.basePath = basePath;
     this.referenceType = referenceType;

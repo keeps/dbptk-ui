@@ -1,19 +1,19 @@
 package com.databasepreservation.common.client.common.visualization.browse.table;
 
-import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
-import com.databasepreservation.common.client.models.structure.ViewerDatabase;
-import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.RightPanel;
+import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.search.SavedSearch;
 import com.databasepreservation.common.client.common.search.SearchInfo;
 import com.databasepreservation.common.client.common.search.TableSearchPanel;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.ViewerJsonUtils;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
-import com.databasepreservation.common.client.services.SearchService;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -29,7 +29,8 @@ import config.i18n.client.ClientMessages;
 public class TableSavedSearchPanel extends RightPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
 
-  public static TableSavedSearchPanel createInstance(ViewerDatabase database, String savedSearchUUID, CollectionStatus status) {
+  public static TableSavedSearchPanel createInstance(ViewerDatabase database, String savedSearchUUID,
+    CollectionStatus status) {
     return new TableSavedSearchPanel(database, savedSearchUUID, status);
   }
 
@@ -62,11 +63,11 @@ public class TableSavedSearchPanel extends RightPanel {
     mainHeader.setWidget(
       CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.LOADING), "Loading...", "h1"));
 
-    SearchService.Util.call((SavedSearch result) ->{
+    DatabaseService.Util.call((SavedSearch result) -> {
       GWT.log("-----" + result);
       savedSearch = result;
       init();
-    } ).retrieve(database.getUuid(), savedSearchUUID);
+    }).retrieveSavedSearch(database.getUuid(), database.getUuid(), savedSearchUUID);
   }
 
   /**
@@ -77,8 +78,8 @@ public class TableSavedSearchPanel extends RightPanel {
    */
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-      BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager
-        .forDatabaseSavedSearch(database.getMetadata().getName(), database.getUuid(), savedSearchUUID));
+    BreadcrumbManager.updateBreadcrumb(breadcrumb,
+      BreadcrumbManager.forDatabaseSavedSearch(database.getMetadata().getName(), database.getUuid(), savedSearchUUID));
   }
 
   /**

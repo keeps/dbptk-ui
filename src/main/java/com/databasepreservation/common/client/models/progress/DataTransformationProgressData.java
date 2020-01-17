@@ -1,4 +1,4 @@
-package com.databasepreservation.common.client.models;
+package com.databasepreservation.common.client.models.progress;
 
 import java.io.Serializable;
 import java.util.HashMap;

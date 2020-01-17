@@ -131,7 +131,7 @@ public class SIARDManagerPage extends ContentPanel {
       BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
 
       loading.setVisible(false);
-    }).retrieve(databaseUUID, databaseUUID);
+    }).retrieve(databaseUUID);
   }
 
   private void setupFooterButtons() {

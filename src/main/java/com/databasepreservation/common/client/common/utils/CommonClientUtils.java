@@ -1,5 +1,7 @@
 package com.databasepreservation.common.client.common.utils;
 
+import java.util.List;
+
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.fields.GenericField;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
@@ -17,10 +19,8 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.Widget;
-import config.i18n.client.ClientMessages;
-import dk.sa.xmlns.diark._1_0.fileindex.FileIndexType;
 
-import java.util.List;
+import config.i18n.client.ClientMessages;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -72,21 +72,21 @@ public class CommonClientUtils {
 
   private static FlowPanel getHeaderMultiSchema(TableStatus status, ViewerTable table, String hClass) {
     String separatorIconTag = FontAwesomeIconManager.getTagWithStyleName(FontAwesomeIconManager.SCHEMA_TABLE_SEPARATOR,
-        "schema-table-separator");
+      "schema-table-separator");
 
     if (table.isCustomView()) {
       final SafeHtml stackedIconSafeHtml = FontAwesomeIconManager.getStackedIconSafeHtml(
-          FontAwesomeIconManager.SCHEMA_VIEWS, FontAwesomeIconManager.COG,
-          table.getSchemaName() + " " + separatorIconTag + " " + status.getCustomName());
+        FontAwesomeIconManager.SCHEMA_VIEWS, FontAwesomeIconManager.COG,
+        table.getSchemaName() + " " + separatorIconTag + " " + status.getCustomName());
       return getHeader(stackedIconSafeHtml, hClass);
     } else if (table.isMaterializedView()) {
       final SafeHtml stackedIconSafeHtml = FontAwesomeIconManager.getStackedIconSafeHtml(
-          FontAwesomeIconManager.SCHEMA_VIEWS, FontAwesomeIconManager.TABLE,
-          table.getSchemaName() + " " + separatorIconTag + " " + status.getCustomName());
+        FontAwesomeIconManager.SCHEMA_VIEWS, FontAwesomeIconManager.TABLE,
+        table.getSchemaName() + " " + separatorIconTag + " " + status.getCustomName());
       return getHeader(stackedIconSafeHtml, hClass);
     } else {
       final SafeHtml tagSafeHtml = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE,
-          table.getSchemaName() + " " + separatorIconTag + " " + status.getCustomName());
+        table.getSchemaName() + " " + separatorIconTag + " " + status.getCustomName());
       return getHeader(tagSafeHtml, hClass);
     }
   }
@@ -130,11 +130,11 @@ public class CommonClientUtils {
   private static FlowPanel getHeaderSingleSchema(TableStatus status, ViewerTable table, String hClass) {
     if (table.isCustomView()) {
       final SafeHtml stackedIconSafeHtml = FontAwesomeIconManager.getStackedIconSafeHtml(
-          FontAwesomeIconManager.SCHEMA_VIEWS, FontAwesomeIconManager.COG, status.getCustomName());
+        FontAwesomeIconManager.SCHEMA_VIEWS, FontAwesomeIconManager.COG, status.getCustomName());
       return getHeader(stackedIconSafeHtml, hClass);
     } else if (table.isMaterializedView()) {
       final SafeHtml stackedIconSafeHtml = FontAwesomeIconManager.getStackedIconSafeHtml(
-          FontAwesomeIconManager.SCHEMA_VIEWS, FontAwesomeIconManager.TABLE, status.getCustomName());
+        FontAwesomeIconManager.SCHEMA_VIEWS, FontAwesomeIconManager.TABLE, status.getCustomName());
       return getHeader(stackedIconSafeHtml, hClass);
     } else {
       final String tag = FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE);
@@ -158,7 +158,7 @@ public class CommonClientUtils {
   public static HTML getHeaderHTML(String iconTag, String title, String styleName) {
     SafeHtmlBuilder safeHtmlBuilder = new SafeHtmlBuilder();
     safeHtmlBuilder.append(SafeHtmlUtils.fromSafeConstant(iconTag)).appendEscaped(" ")
-        .append(SafeHtmlUtils.fromString(title));
+      .append(SafeHtmlUtils.fromString(title));
 
     HTML html = new HTML(safeHtmlBuilder.toSafeHtml());
     html.addStyleName(styleName);
@@ -171,7 +171,7 @@ public class CommonClientUtils {
 
     SafeHtmlBuilder safeHtmlBuilder = new SafeHtmlBuilder();
     safeHtmlBuilder.append(SafeHtmlUtils.fromSafeConstant(iconTag)).appendEscaped(" ")
-        .append(SafeHtmlUtils.fromString(title));
+      .append(SafeHtmlUtils.fromString(title));
 
     HTML html = new HTML(safeHtmlBuilder.toSafeHtml());
     html.addStyleName(hClass);
@@ -184,8 +184,7 @@ public class CommonClientUtils {
     FlowPanel panel = new FlowPanel();
 
     SafeHtmlBuilder safeHtmlBuilder = new SafeHtmlBuilder();
-    safeHtmlBuilder.append(SafeHtmlUtils.fromSafeConstant(iconTag)).appendEscaped(" ")
-        .append(title);
+    safeHtmlBuilder.append(SafeHtmlUtils.fromSafeConstant(iconTag)).appendEscaped(" ").append(title);
 
     HTML html = new HTML(safeHtmlBuilder.toSafeHtml());
     html.addStyleName(hClass);
@@ -197,9 +196,12 @@ public class CommonClientUtils {
   public static Anchor getAnchorForLOBDownload(final String databaseUUID, final String tableUUID, final String rowUUID,
     final int columnIndexInEnclosingTable, final String lobName) {
     String servlet = ViewerConstants.API_SERVLET;
-    String resource = ViewerConstants.API_V1_LOBS_RESOURCE;
-    String urlBuilder = servlet + resource + "/" + databaseUUID + "/" + tableUUID +
-        "/" + rowUUID + "/" + columnIndexInEnclosingTable + "/" + lobName;
+    String resource = ViewerConstants.API_V1_DATABASE_RESOURCE;
+
+    // http://localhost:8080/api/v1/database/61212bf3-942e-45e5-87d5-6fbbf5f05ea1/collection/61212bf3-942e-45e5-87d5-6fbbf5f05ea1/tables/4b0e3990-ac56-4c3b-b94f-ef1294b2dba6/lob?rowUUID=8161ff4b-4e10-3d43-b5a8-6c728c65b5b7&columnUUID=4&lobfilename=sakila_staff_0.bin
+
+    String urlBuilder = servlet + resource + "/" + databaseUUID + "/collection/" + databaseUUID + "/tables/"
+      + tableUUID + "/lob?rowUUID=" + rowUUID + "&columnUUID=" + columnIndexInEnclosingTable + "&lobfilename=" + lobName;
     return new Anchor(messages.row_downloadLOB(), urlBuilder);
   }
 
@@ -222,15 +224,13 @@ public class CommonClientUtils {
   public static SafeHtmlBuilder constructSpan(String value, String title, String css) {
     SafeHtmlBuilder span = new SafeHtmlBuilder();
 
-    if (title == null) title = "";
+    if (title == null)
+      title = "";
 
-    span.append(SafeHtmlUtils.fromSafeConstant("<span class='"))
-            .append(SafeHtmlUtils.fromSafeConstant(css))
-            .append(SafeHtmlUtils.fromSafeConstant("' title='"))
-            .append(SafeHtmlUtils.fromSafeConstant(title))
-            .append(SafeHtmlUtils.fromSafeConstant("'>"))
-            .append(SafeHtmlUtils.fromSafeConstant(value))
-            .append(SafeHtmlUtils.fromSafeConstant("</span>"));
+    span.append(SafeHtmlUtils.fromSafeConstant("<span class='")).append(SafeHtmlUtils.fromSafeConstant(css))
+      .append(SafeHtmlUtils.fromSafeConstant("' title='")).append(SafeHtmlUtils.fromSafeConstant(title))
+      .append(SafeHtmlUtils.fromSafeConstant("'>")).append(SafeHtmlUtils.fromSafeConstant(value))
+      .append(SafeHtmlUtils.fromSafeConstant("</span>"));
     return span;
   }
 
@@ -261,7 +261,8 @@ public class CommonClientUtils {
     panel.addStyleName("schema-table-header");
 
     String iconTag = FontAwesomeIconManager.getTag(FontAwesomeIconManager.SCHEMA_TABLE_SEPARATOR);
-    final SafeHtml html = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE, table.getSchemaName() + iconTag + table.getName());
+    final SafeHtml html = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE,
+      table.getSchemaName() + iconTag + table.getName());
     Hyperlink tableLink = new Hyperlink(html, HistoryManager.linkToTable(databaseUUID, table.getUuid()));
     tableLink.addStyleName(hClass);
     panel.add(tableLink);

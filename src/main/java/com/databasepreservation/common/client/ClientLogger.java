@@ -112,7 +112,7 @@ public class ClientLogger implements IsSerializable {
           // do nothing
         }
       };
-      ClientLoggerService.Util.call(errorcallback).trace(classname, message);
+      ClientLoggerService.Util.call(errorcallback).log("trace", classname, message);
     }
   }
 
@@ -137,7 +137,7 @@ public class ClientLogger implements IsSerializable {
           GWT.log(message, error);
         }
       };
-      ClientLoggerService.Util.call(errorcallback).trace(classname, message,
+      ClientLoggerService.Util.call(errorcallback).detailedLog("trace", classname, message,
         SerializableThrowable.fromThrowable(error));
     }
   }
@@ -162,7 +162,7 @@ public class ClientLogger implements IsSerializable {
           // do nothing
         }
       };
-      ClientLoggerService.Util.call(errorcallback).debug(classname, message);
+      ClientLoggerService.Util.call(errorcallback).log("debug", classname, message);
     }
   }
 
@@ -187,7 +187,8 @@ public class ClientLogger implements IsSerializable {
           GWT.log(object, error);
         }
       };
-      ClientLoggerService.Util.call(errorcallback).debug(classname, object, SerializableThrowable.fromThrowable(error));
+      ClientLoggerService.Util.call(errorcallback).detailedLog("debug", classname, object,
+        SerializableThrowable.fromThrowable(error));
     }
   }
 
@@ -210,7 +211,7 @@ public class ClientLogger implements IsSerializable {
           // do nothing
         }
       };
-      ClientLoggerService.Util.call(errorcallback).info(classname, message);
+      ClientLoggerService.Util.call(errorcallback).log("info", classname, message);
     }
   }
 
@@ -235,7 +236,8 @@ public class ClientLogger implements IsSerializable {
           GWT.log(message, error);
         }
       };
-      ClientLoggerService.Util.call(errorcallback).info(classname, message, SerializableThrowable.fromThrowable(error));
+      ClientLoggerService.Util.call(errorcallback).detailedLog("info", classname, message,
+        SerializableThrowable.fromThrowable(error));
     }
   }
 
@@ -258,7 +260,7 @@ public class ClientLogger implements IsSerializable {
           // do nothing
         }
       };
-      ClientLoggerService.Util.call(errorcallback).warn(classname, message);
+      ClientLoggerService.Util.call(errorcallback).log("warn", classname, message);
     }
   }
 
@@ -282,7 +284,8 @@ public class ClientLogger implements IsSerializable {
           GWT.log(message, error);
         }
       };
-      ClientLoggerService.Util.call(errorcallback).warn(classname, message, SerializableThrowable.fromThrowable(error));
+      ClientLoggerService.Util.call(errorcallback).detailedLog("warn", classname, message,
+        SerializableThrowable.fromThrowable(error));
     }
   }
 
@@ -306,7 +309,7 @@ public class ClientLogger implements IsSerializable {
         }
       };
       GWT.log(message, null);
-      ClientLoggerService.Util.call(errorCallback).error(classname, message);
+      ClientLoggerService.Util.call(errorCallback).log("error", classname, message);
 
       // if (SHOW_ERROR_MESSAGES) {
       // Toast.showError(message);
@@ -337,7 +340,7 @@ public class ClientLogger implements IsSerializable {
         }
       };
 
-      ClientLoggerService.Util.call(errorcallback).error(classname, message,
+      ClientLoggerService.Util.call(errorcallback).detailedLog("error", classname, message,
         SerializableThrowable.fromThrowable(error));
       // if (SHOW_ERROR_MESSAGES) {
       // Toast.showError(message, error.getMessage()
@@ -368,7 +371,7 @@ public class ClientLogger implements IsSerializable {
       };
       GWT.log(message);
       logger.log(Level.SEVERE, message);
-      ClientLoggerService.Util.call(errorcallback).fatal(classname, message);
+      ClientLoggerService.Util.call(errorcallback).log("fatal", classname, message);
       // if (SHOW_ERROR_MESSAGES) {
       // Toast.showError(message);
       // }
@@ -398,7 +401,7 @@ public class ClientLogger implements IsSerializable {
         }
       };
 
-      ClientLoggerService.Util.call(errorcallback).fatal(classname, message,
+      ClientLoggerService.Util.call(errorcallback).detailedLog("fatal", classname, message,
         SerializableThrowable.fromThrowable(error));
 
       // if (SHOW_ERROR_MESSAGES) {

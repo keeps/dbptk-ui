@@ -21,7 +21,7 @@ import com.databasepreservation.common.client.models.status.helpers.StatusHelper
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerSchema;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
-import com.databasepreservation.common.client.services.ConfigurationService;
+import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
@@ -114,11 +114,11 @@ public class TableManagementPanel extends ContentPanel {
             }
           }
 
-          ConfigurationService.Util.call((Boolean result) -> {
+          DatabaseService.Util.call((Boolean result) -> {
             final CollectionObserver collectionObserver = ObserverManager.getCollectionObserver();
             collectionObserver.setCollectionStatus(collectionStatus);
             Toast.showInfo(messages.tableManagementPageTitle(), messages.tableManagementPageToastDescription());
-          }).updateCollectionStatus(database.getUuid(), database.getUuid(), collectionStatus);
+          }).updateCollectionConfiguration(database.getUuid(), database.getUuid(), collectionStatus);
         } else {
           Dialogs.showErrors(messages.tableManagementPageTitle(), messages.tableManagementPageDialogInputError(),
             messages.basicActionClose());

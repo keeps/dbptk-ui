@@ -1,4 +1,6 @@
-package com.databasepreservation.common.client.models;
+package com.databasepreservation.common.client.models.progress;
+
+import com.databasepreservation.common.client.models.validation.ValidationRequirement;
 
 import java.io.Serializable;
 import java.util.ArrayList;

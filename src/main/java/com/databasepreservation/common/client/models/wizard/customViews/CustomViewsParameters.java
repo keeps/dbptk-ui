@@ -1,4 +1,4 @@
-package com.databasepreservation.common.client.models.parameters;
+package com.databasepreservation.common.client.models.wizard.customViews;
 
 import java.io.Serializable;
 import java.util.List;

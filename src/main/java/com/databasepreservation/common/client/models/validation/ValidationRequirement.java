@@ -1,4 +1,4 @@
-package com.databasepreservation.common.client.models;
+package com.databasepreservation.common.client.models.validation;
 
 import java.io.Serializable;
 

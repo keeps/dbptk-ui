@@ -23,7 +23,7 @@ import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
 import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
 import com.databasepreservation.common.client.models.structure.ViewerReference;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
-import com.databasepreservation.common.client.services.ConfigurationService;
+import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
@@ -127,10 +127,10 @@ public class DataTransformation extends RightPanel {
     loading.setVisible(true);
     if (collectionStatus.getDenormalizations()
       .contains(ViewerConstants.DENORMALIZATION_STATUS_PREFIX + table.getUuid())) {
-      ConfigurationService.Util.call((DenormalizeConfiguration response) -> {
+      DatabaseService.Util.call((DenormalizeConfiguration response) -> {
         denormalizeConfiguration = response;
         init();
-      }).getDenormalizeConfigurationFile(database.getUuid(), table.getUuid());
+      }).getDenormalizeConfigurationFile(database.getUuid(), database.getUuid(), table.getUuid());
     } else {
       denormalizeConfiguration = new DenormalizeConfiguration(database.getUuid(), table);
       init();

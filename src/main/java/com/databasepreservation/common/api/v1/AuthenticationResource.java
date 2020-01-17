@@ -4,18 +4,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 
-import org.roda.core.data.exceptions.AuthenticationDeniedException;
-import org.roda.core.data.exceptions.GenericException;
-import org.roda.core.data.v2.user.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.exceptions.RESTException;
+import com.databasepreservation.common.client.models.user.User;
 import com.databasepreservation.common.client.services.AuthenticationService;
 import com.databasepreservation.common.server.ViewerConfiguration;
-import com.databasepreservation.common.server.controller.UserLoginController;
 import com.databasepreservation.common.utils.UserUtility;
 
 /**
@@ -39,24 +35,5 @@ public class AuthenticationResource implements AuthenticationService {
     User user = UserUtility.getUser(request);
     LOGGER.debug("Serving user {}", user);
     return user;
-  }
-
-  @Override
-  public Boolean userIsAdmin() {
-    if (ViewerConstants.DESKTOP.equals(System.getProperty("env", "server"))) {
-      return true;
-    }
-    return UserUtility.userIsAdmin(request);
-  }
-
-  @Override
-  public User login(String username, String password) throws RESTException {
-    try {
-      User user = UserLoginController.login(username, password, request);
-      LOGGER.debug("Logged user {}", user);
-      return user;
-    } catch (AuthenticationDeniedException | GenericException e) {
-      throw new RESTException(e);
-    }
   }
 }

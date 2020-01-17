@@ -5,9 +5,9 @@ import com.databasepreservation.common.client.common.fields.FileUploadField;
 import com.databasepreservation.common.client.common.fields.GenericField;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
-import com.databasepreservation.common.client.models.DBPTKModule;
-import com.databasepreservation.common.client.models.ExtensionFilter;
-import com.databasepreservation.common.client.models.parameters.ExportOptionsParameters;
+import com.databasepreservation.common.client.models.dbptk.Module;
+import com.databasepreservation.common.client.models.JSO.ExtensionFilter;
+import com.databasepreservation.common.client.models.wizard.export.ExportOptionsParameters;
 import com.databasepreservation.common.client.models.parameters.PreservationParameter;
 import com.databasepreservation.common.client.tools.JSOUtils;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
@@ -51,8 +51,7 @@ public class SIARDExportOptionsCurrent extends Composite {
   private Map<String, TextBox> textBoxInputs = new HashMap<>();
   private Map<String, CheckBox> checkBoxInputs = new HashMap<>();
   private Map<String, String> fileInputs = new HashMap<>();
-  private DBPTKModule dbptkModule;
-  private List<PreservationParameter> parameters;
+  private Module module;
   private List<Label> externalLobsLabels = new ArrayList<>();
   private Map<String, TextBox> externalLobsInputs = new HashMap<>();
   private CheckBox externalLobCheckbox;
@@ -60,27 +59,26 @@ public class SIARDExportOptionsCurrent extends Composite {
   private String version;
   private String defaultPath;
 
-  public static SIARDExportOptionsCurrent getInstance(String key, DBPTKModule dbptkModule) {
-    instances.computeIfAbsent(key, k -> new SIARDExportOptionsCurrent(key, dbptkModule, null));
+  public static SIARDExportOptionsCurrent getInstance(String key, List<Module> modules) {
+    instances.computeIfAbsent(key, k -> new SIARDExportOptionsCurrent(key, modules, null));
     return instances.get(key);
   }
 
-  public static SIARDExportOptionsCurrent getInstance(String key, DBPTKModule dbptkModule, String defaultPath) {
-    instances.computeIfAbsent(key, k -> new SIARDExportOptionsCurrent(key, dbptkModule, defaultPath));
+  public static SIARDExportOptionsCurrent getInstance(String key, List<Module> modules, String defaultPath) {
+    instances.computeIfAbsent(key, k -> new SIARDExportOptionsCurrent(key, modules, defaultPath));
     return instances.get(key);
   }
 
-  private SIARDExportOptionsCurrent(String version, DBPTKModule dbptkModule, String defaultPath) {
+  private SIARDExportOptionsCurrent(String version, List<Module> modules, String defaultPath) {
     initWidget(binder.createAndBindUi(this));
 
     this.version = version;
-    this.parameters = dbptkModule.getParameters(version);
-    this.dbptkModule = dbptkModule;
+    this.module =  modules.stream().filter(c -> c.getModuleName().equals(version)).findFirst().orElse(new Module());
     this.defaultPath = defaultPath;
 
     FlowPanel panel = new FlowPanel();
 
-    for (PreservationParameter p : parameters) {
+    for (PreservationParameter p : module.getParameters()) {
       if (p.getExportOption() != null) {
         if (p.getExportOption().equals(ViewerConstants.SIARD_EXPORT_OPTIONS)) {
           buildGenericWidget(p);
@@ -96,7 +94,7 @@ public class SIARDExportOptionsCurrent extends Composite {
 
     HashMap<String, String> exportParameters = new HashMap<>();
 
-    for (PreservationParameter parameter : parameters) {
+    for (PreservationParameter parameter : module.getParameters()) {
       switch (parameter.getInputType()) {
         case ViewerConstants.INPUT_TYPE_CHECKBOX:
           if (checkBoxInputs.get(parameter.getName()) != null) {
@@ -153,7 +151,7 @@ public class SIARDExportOptionsCurrent extends Composite {
       return SIARDExportOptions.EXTERNAL_LOBS_ERROR;
     }
 
-    final List<PreservationParameter> requiredParameters = dbptkModule.getRequiredParameters(version);
+    final List<PreservationParameter> requiredParameters = module.getRequiredParameters();
 
     for (PreservationParameter parameter : requiredParameters) {
       switch (parameter.getInputType()) {
