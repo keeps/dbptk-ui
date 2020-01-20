@@ -2708,6 +2708,12 @@ rgba(0, 0, 0, .125);
 
 }
 
+.card-disabled .bootstrap-card-title-panel,
+.card-disabled .bootstrap-card-description,
+.card-disabled .bootstrap-card-extra-content{
+    opacity: 0.5;
+}
+
 /************************************************
 * Switch Button
  ************************************************/
@@ -2821,19 +2827,24 @@ rgba(0, 0, 0, .125);
     display: flex;
     flex-wrap: wrap;
     padding: 2rem;
-    position: absolute;
-    bottom: 0;
     width: 300px;
+    padding-bottom: 0;
 }
 .leftSidebar-controller .btn {
     margin-right: 10px;
     margin-bottom: 10px;
 }
+.data-transformation-toolbar{
+    display: flex;
+    flex-wrap: wrap;
+    padding: 2rem;
+    padding-bottom: 0;
+}
 .data-transformation-sidebar{
-    height: 70vh;
+    height: 100%;
+    padding-top: 0;
 }
 .data-transformation{
-    height: 80vh;
     box-sizing: border-box;
     position: relative;
     padding: 2px;
@@ -2898,6 +2909,11 @@ rgba(0, 0, 0, .125);
 
 .data-transformation-wrapper:last-child::after {
     height: 52px;
+}
+
+.table-item-link{
+    color: #089de3;
+    text-transform: uppercase;
 }
 
 .aggregation-panel{

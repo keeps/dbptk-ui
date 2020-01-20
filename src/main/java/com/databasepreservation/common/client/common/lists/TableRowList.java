@@ -380,17 +380,13 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     for (ColumnStatus column : tableStatus.getColumns()) {
       if (!column.getNestedColumns().isEmpty()) {
         String nestedTableId = column.getId();
-        fieldsToReturn.add(ViewerConstants.SOLR_ROWS_NESTED + nestedCount + ":[subquery]");
-        extraParameters.put(ViewerConstants.SOLR_ROWS_NESTED + nestedCount + ".q",
-          "+nestedTableId:" + nestedTableId + " AND {!terms f=_root_ v=$row.uuid}");
-        extraParameters.put(ViewerConstants.SOLR_ROWS_NESTED + nestedCount + ".row", "2");
-//        String key = ViewerConstants.SOLR_ROWS_NESTED + "." + nestedCount;
-//        keys = keys + separator  + key;
-//        separator = ",";
-//        fieldsToReturn.add(key + ":[subquery]");
-//        extraParameters.put(key + ".q", "+nestedTableId:" + nestedTableId + " AND {!terms f=_root_ v=$row.uuid}");
-//        extraParameters.put(key + ".rows", "2");
-//        nestedCount++;
+        String key = ViewerConstants.SOLR_ROWS_NESTED + "." + nestedCount;
+        keys = keys + separator  + key;
+        separator = ",";
+        fieldsToReturn.add(key + ":[subquery]");
+        extraParameters.put(key + ".q", "+nestedTableId:" + nestedTableId + " AND {!terms f=_root_ v=$row.uuid}");
+        extraParameters.put(key + ".rows", "10");
+        nestedCount++;
       }
     }
     fieldsToReturn.add( ViewerConstants.SOLR_ROWS_NESTED + ":" + "\"" + keys + "\"");

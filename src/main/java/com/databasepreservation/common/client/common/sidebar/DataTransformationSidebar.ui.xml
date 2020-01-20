@@ -20,9 +20,9 @@
                 </g:FlowPanel>
             </g:FlowPanel>
         </g:FlowPanel>
+        <g:FlowPanel addStyleNames="leftSidebar-controller" ui:field="controller"></g:FlowPanel>
         <g:FlowPanel addStyleNames="leftSidebar data-transformation-sidebar">
             <g:FlowPanel styleName="leftSidebar-group" ui:field="sidebarGroup" />
         </g:FlowPanel>
-        <g:FlowPanel addStyleNames="leftSidebar-controller" ui:field="controller"></g:FlowPanel>
     </g:FlowPanel>
 </ui:UiBinder>

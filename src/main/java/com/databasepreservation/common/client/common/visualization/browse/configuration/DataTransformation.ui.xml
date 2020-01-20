@@ -2,10 +2,12 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:c='urn:import:com.databasepreservation.common.client.common'>
     <ui:with field='messages' type='config.i18n.client.ClientMessages' />
-    <g:ScrollPanel ui:field="scrollPanel" addStyleNames="data-transformation">
+<!--    <g:ScrollPanel ui:field="scrollPanel" addStyleNames="data-transformation">-->
         <g:FlowPanel ui:field="content" >
-            <c:LoadingDiv visible="false" ui:field="loading"/>
-            <g:FlowPanel ui:field="rootTablePanel" />
+            <g:FlowPanel ui:field="toolbar" addStyleNames="data-transformation-toolbar sticky-flow"></g:FlowPanel>
+            <g:FlowPanel ui:field="rootTablePanel" >
+                <c:LoadingDiv visible="false" ui:field="loading"/>
+            </g:FlowPanel>
         </g:FlowPanel>
-    </g:ScrollPanel>
+<!--    </g:ScrollPanel>-->
 </ui:UiBinder>

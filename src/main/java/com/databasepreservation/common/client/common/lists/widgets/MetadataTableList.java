@@ -21,6 +21,7 @@ import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
+import com.google.gwt.view.client.SingleSelectionModel;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -35,6 +36,7 @@ public class MetadataTableList<C> extends Composite {
   ListDataProvider<C> dataProvider;
   CellTable<C> display;
 
+  private final SingleSelectionModel<C> selectionModel;
   private ScrollPanel displayScroll;
   private SimplePanel displayScrollWrapper;
 
@@ -49,6 +51,9 @@ public class MetadataTableList<C> extends Composite {
     initWidget(uiBinder.createAndBindUi(this));
 
     display = createTable(rowItems, columns);
+    selectionModel = new SingleSelectionModel<>();
+    display.setSelectionModel(selectionModel);
+
     displayScroll = new ScrollPanel(display);
     displayScroll.setSize("100%", "100%");
     displayScrollWrapper = new SimplePanel(displayScroll);
@@ -69,6 +74,7 @@ public class MetadataTableList<C> extends Composite {
     info.setWidget(new HTMLPanel(b.toSafeHtml()));
 
     table.setVisible(false);
+    selectionModel = null;
   }
 
   public List getData() {
@@ -124,6 +130,10 @@ public class MetadataTableList<C> extends Composite {
     public ColumnInfo(String header, double widthEM, Column<C, ?> column, String... addCellStyleNames) {
       this(SafeHtmlUtils.fromString(header), widthEM, column, addCellStyleNames);
     }
+  }
+
+  public SingleSelectionModel<C> getSelectionModel() {
+    return selectionModel;
   }
 
   @Override

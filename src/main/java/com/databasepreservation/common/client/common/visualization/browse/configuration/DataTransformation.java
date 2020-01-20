@@ -13,6 +13,7 @@ import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.lists.widgets.MultipleSelectionTablePanel;
 import com.databasepreservation.common.client.common.sidebar.DataTransformationSidebar;
+import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.DataTransformationUtils;
 import com.databasepreservation.common.client.common.visualization.browse.information.ErDiagram;
 import com.databasepreservation.common.client.configuration.observer.CollectionStatusObserver;
@@ -66,10 +67,13 @@ public class DataTransformation extends RightPanel implements CollectionStatusOb
   public ClientMessages messages = GWT.create(ClientMessages.class);
 
   @UiField
-  FlowPanel content;
+  FlowPanel toolbar;
 
   @UiField
-  ScrollPanel scrollPanel;
+  FlowPanel content;
+
+//  @UiField
+//  ScrollPanel scrollPanel;
 
   @UiField
   LoadingDiv loading;
@@ -97,7 +101,6 @@ public class DataTransformation extends RightPanel implements CollectionStatusOb
     DataTransformationSidebar sidebar) {
     return instances.computeIfAbsent(database.getUuid(),
       k -> new DataTransformation(collectionStatus, database, null, sidebar));
-
   }
 
   public static DataTransformation getInstance(CollectionStatus collectionStatus, ViewerDatabase database,
@@ -244,7 +247,9 @@ public class DataTransformation extends RightPanel implements CollectionStatusOb
     card.setTitleIcon(FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE));
     card.setTitle(childTable.getId());
     card.setDescription(childTable.getDescription());
+    card.addStyleName("card-disabled");
     card.addExtraContent(getInformationAboutRelashionship(childNode));
+    card.getElement().setId(childNode.getUuid());
 
     FlowPanel container = new FlowPanel();
     TransformationChildTables tableInstance = TransformationChildTables.getInstance(childNode, denormalizeConfiguration,
@@ -256,11 +261,13 @@ public class DataTransformation extends RightPanel implements CollectionStatusOb
     switchBtn.setClickHandler(event -> {
       switchBtn.getButton().setValue(!switchBtn.getButton().getValue(), true); // workaround for ie11
       if (switchBtn.getButton().getValue()) {
+        card.removeStyleName("card-disabled");
         grandChild.add(expandLevel(childNode));
         DataTransformationUtils.includeRelatedTable(childNode, denormalizeConfiguration);
         container.add(selectTable);
       } else {
         DataTransformationUtils.removeRelatedTable(childNode, denormalizeConfiguration);
+        card.addStyleName("card-disabled");
         grandChild.clear();
         container.clear();
         rootTable.redrawTable();
@@ -278,26 +285,22 @@ public class DataTransformation extends RightPanel implements CollectionStatusOb
     panel.add(card);
     panel.add(grandChild);
 
-//    if (denormalizeConfiguration != null) {
-//      for (RelatedTablesConfiguration relatedTable : denormalizeConfiguration.getRelatedTables()) {
-//        setup(relatedTable, childNode, switchBtn, card, grandChild, container, selectTable);
-//      }
-//    }
+    if (denormalizeConfiguration != null) {
+        setup(childNode, switchBtn, card, grandChild, container, selectTable);
+    }
 
     return panel;
   }
 
-  private void setup(RelatedTablesConfiguration relatedTable, TableNode childNode, SwitchBtn switchBtn,
-    BootstrapCard card, FlowPanel grandChild, FlowPanel container, MultipleSelectionTablePanel selectTable) {
-    if (relatedTable.getUuid().equals(childNode.getUuid())) {
+  private void setup(TableNode childNode, SwitchBtn switchBtn,
+                     BootstrapCard card,FlowPanel grandChild, FlowPanel container, MultipleSelectionTablePanel selectTable){
+    RelatedTablesConfiguration targetTable = denormalizeConfiguration.getRelatedTable(childNode.getUuid());
+    if(targetTable != null){
       switchBtn.getButton().setValue(true, true);
-      card.setHideContentVisible(true);
       grandChild.add(expandLevel(childNode));
+      card.setHideContentVisible(true);
+      card.removeStyleName("card-disabled");
       container.add(selectTable);
-    } else {
-      for (RelatedTablesConfiguration innerRelatedTable : relatedTable.getRelatedTables()) {
-        setup(innerRelatedTable, childNode, switchBtn, card, grandChild, container, selectTable);
-      }
     }
   }
 
@@ -389,5 +392,11 @@ public class DataTransformation extends RightPanel implements CollectionStatusOb
     if (database != null) {
       updateControllerPanel();
     }
+  }
+
+  @Override
+  protected void onLoad() {
+    super.onLoad();
+    JavascriptUtils.stickSidebar();
   }
 }

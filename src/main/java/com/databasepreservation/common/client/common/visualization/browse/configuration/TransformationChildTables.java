@@ -32,7 +32,7 @@ public class TransformationChildTables {
   private ViewerTable childTable;
   private Map<Integer, Boolean> isLoading = new HashMap<>();
   private String uuid;
-  List<Button> buttons = new ArrayList<>();
+  List<Button> buttons;
 
   /**
    *
@@ -42,9 +42,11 @@ public class TransformationChildTables {
    * @param buttons
    * @return
    */
-  public static TransformationChildTables getInstance(TableNode childTable, DenormalizeConfiguration denormalizeConfiguration, TransformationTable rootTable, List<Button> buttons) {
-    return instances.computeIfAbsent(childTable.getUuid(),
-        k -> new TransformationChildTables(childTable, denormalizeConfiguration, rootTable, buttons));
+  public static TransformationChildTables getInstance(TableNode childTable,
+    DenormalizeConfiguration denormalizeConfiguration, TransformationTable rootTable, List<Button> buttons) {
+     return new TransformationChildTables(childTable, denormalizeConfiguration, rootTable, buttons);
+//    return instances.computeIfAbsent(childTable.getUuid(),
+//      k -> new TransformationChildTables(childTable, denormalizeConfiguration, rootTable, buttons));
   }
 
   /**
@@ -54,7 +56,8 @@ public class TransformationChildTables {
    * @param rootTable
    * @param buttons
    */
-  private TransformationChildTables(TableNode childTable, DenormalizeConfiguration denormalizeConfiguration, TransformationTable rootTable, List<Button> buttons) {
+  private TransformationChildTables(TableNode childTable, DenormalizeConfiguration denormalizeConfiguration,
+    TransformationTable rootTable, List<Button> buttons) {
     this.denormalizeConfiguration = denormalizeConfiguration;
     this.rootTable = rootTable;
     this.childTable = childTable.getTable();
@@ -79,7 +82,8 @@ public class TransformationChildTables {
   public MultipleSelectionTablePanel createTable() {
     MultipleSelectionTablePanel<ViewerColumn> selectionTablePanel = new MultipleSelectionTablePanel<>();
     Label header = new Label("");
-    selectionTablePanel.createTable(header, new ArrayList<>(), childTable.getColumns().iterator(), createCheckbox(selectionTablePanel),
+    selectionTablePanel.createTable(header, new ArrayList<>(), childTable.getColumns().iterator(),
+      createCheckbox(selectionTablePanel),
       new MultipleSelectionTablePanel.ColumnInfo<>(messages.columnName(), 7, new TextColumn<ViewerColumn>() {
         @Override
         public String getValue(ViewerColumn object) {
@@ -105,6 +109,7 @@ public class TransformationChildTables {
     return new MultipleSelectionTablePanel.ColumnInfo<>("", 4,
       new Column<ViewerColumn, Boolean>(new CheckboxCell(true, true)) {
         int selectionSize;
+
         @Override
         public Boolean getValue(ViewerColumn object) {
           int index = object.getColumnIndexInEnclosingTable();
@@ -113,7 +118,7 @@ public class TransformationChildTables {
             if (isSet(uuid, index)) {
               selectionTablePanel.getSelectionModel().setSelected(object, true);
             }
-            //save preset size to check if this table has changes
+            // save preset size to check if this table has changes
             selectionSize = selectionTablePanel.getSelectionModel().getSelectedSet().size();
           } else {
             if (selectionTablePanel.getSelectionModel().isSelected(object)) {
@@ -124,7 +129,7 @@ public class TransformationChildTables {
               rootTable.redrawTable();
             }
             int currentSize = selectionTablePanel.getSelectionModel().getSelectedSet().size();
-            if(selectionSize != currentSize){
+            if (selectionSize != currentSize) {
               for (Button button : buttons) {
                 button.setEnabled(true);
               }
@@ -137,12 +142,12 @@ public class TransformationChildTables {
   }
 
   private boolean isSet(String uuid, int index) {
-    //RelatedTablesConfiguration relatedTable = configuration.getRelatedTable(uuid);
-    if(denormalizeConfiguration != null){
+    if (denormalizeConfiguration != null) {
       RelatedTablesConfiguration relatedTable = denormalizeConfiguration.getRelatedTable(uuid);
-      if(relatedTable != null){
+      if (relatedTable != null) {
         for (RelatedColumnConfiguration column : relatedTable.getColumnsIncluded()) {
           if (column.getIndex() == index) {
+            GWT.log("Column: " + column.getColumnName());
             return true;
           }
         }
@@ -151,7 +156,7 @@ public class TransformationChildTables {
     return false;
   }
 
-  public static void clear(){
+  public static void clear() {
     instances.clear();
   }
 
