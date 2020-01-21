@@ -2,12 +2,11 @@ package com.databasepreservation.common.client.tools;
 
 import java.util.List;
 
-import com.databasepreservation.common.client.index.filter.Filter;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
 import com.databasepreservation.common.client.common.search.SearchInfo;
-import com.databasepreservation.common.client.index.ExportRequest;
 import com.databasepreservation.common.client.index.FindRequest;
+import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.sort.Sorter;
 import com.github.nmorel.gwtjackson.client.ObjectMapper;
 import com.google.gwt.core.client.GWT;
@@ -16,10 +15,6 @@ import com.google.gwt.core.client.GWT;
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class ViewerJsonUtils {
-
-  public interface ExportRequestMapper extends ObjectMapper<ExportRequest> {
-  }
-
   public interface FindRequestMapper extends ObjectMapper<FindRequest> {
   }
 
@@ -43,7 +38,6 @@ public class ViewerJsonUtils {
   private static SubListMapper subListMapper;
   private static StringListMapper stringListMapper;
   private static SearchInfoMapper searchInfoMapper;
-  private static ExportRequestMapper exportRequestMapper;
   private static FindRequestMapper findRequestMapper;
 
   public static FilterMapper getFilterMapper() {
@@ -79,13 +73,6 @@ public class ViewerJsonUtils {
       searchInfoMapper = GWT.create(SearchInfoMapper.class);
     }
     return searchInfoMapper;
-  }
-
-  public static ExportRequestMapper getExportRequestMapper() {
-    if (exportRequestMapper == null) {
-      exportRequestMapper = GWT.create(ExportRequestMapper.class);
-    }
-    return exportRequestMapper;
   }
 
   public static FindRequestMapper getFindRequestMapper() {

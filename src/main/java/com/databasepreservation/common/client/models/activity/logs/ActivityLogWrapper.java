@@ -2,14 +2,13 @@ package com.databasepreservation.common.client.models.activity.logs;
 
 import java.io.Serializable;
 
-import com.databasepreservation.common.client.common.search.SavedSearch;
-import com.databasepreservation.common.client.models.structure.ViewerRow;
-import com.databasepreservation.common.client.index.filter.Filter;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
-import com.databasepreservation.common.client.index.ExportRequest;
+import com.databasepreservation.common.client.common.search.SavedSearch;
 import com.databasepreservation.common.client.index.facets.Facets;
+import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 
 /**
@@ -43,9 +42,6 @@ public class ActivityLogWrapper implements Serializable {
 
   private PresenceState facetsPresence = PresenceState.NONE;
   private Facets facets;
-
-  private PresenceState exportRequestPresence = PresenceState.NONE;
-  private ExportRequest exportRequest;
 
   public ActivityLogWrapper() {
   }
@@ -148,22 +144,6 @@ public class ActivityLogWrapper implements Serializable {
 
   public void setFacets(Facets facets) {
     this.facets = facets;
-  }
-
-  public PresenceState getExportRequestPresence() {
-    return exportRequestPresence;
-  }
-
-  public void setExportRequestPresence(PresenceState exportRequestPresence) {
-    this.exportRequestPresence = exportRequestPresence;
-  }
-
-  public ExportRequest getExportRequest() {
-    return exportRequest;
-  }
-
-  public void setExportRequest(ExportRequest exportRequest) {
-    this.exportRequest = exportRequest;
   }
 
   public String getColumnName() {

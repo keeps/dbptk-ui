@@ -366,11 +366,11 @@ public class ToolkitStructure2ViewerStructure {
     if (table.getName().startsWith(ViewerConstants.CUSTOM_VIEW_PREFIX)) {
       result.setCustomView(true);
       result.setMaterializedView(false);
-      result.setNameWithoutPrefix(table.getName().replaceFirst(ViewerConstants.CUSTOM_VIEW_PREFIX,""));
+      result.setNameWithoutPrefix(table.getName().replaceFirst(ViewerConstants.CUSTOM_VIEW_PREFIX, ""));
     } else if (table.getName().startsWith(ViewerConstants.MATERIALIZED_VIEW_PREFIX)) {
       result.setCustomView(false);
       result.setMaterializedView(true);
-      result.setNameWithoutPrefix(table.getName().replaceFirst(ViewerConstants.MATERIALIZED_VIEW_PREFIX,""));
+      result.setNameWithoutPrefix(table.getName().replaceFirst(ViewerConstants.MATERIALIZED_VIEW_PREFIX, ""));
     } else {
       result.setCustomView(false);
       result.setMaterializedView(false);
@@ -639,7 +639,8 @@ public class ToolkitStructure2ViewerStructure {
   public static ViewerRow getRow(ViewerAbstractConfiguration configuration, String databaseUUID, ViewerTable table,
     Row row, long rowIndex) throws ViewerException {
     ViewerRow result = new ViewerRow();
-    String rowUUID = SolrUtils.UUIDFromString(table.getUuid() + "." + rowIndex);
+    // String rowUUID = SolrUtils.UUIDFromString(table.getUuid() + "." + rowIndex);
+    String rowUUID = String.valueOf(rowIndex);
     result.setTableId(table.getId());
     result.setTableUUID(table.getUuid());
     result.setUuid(rowUUID);
@@ -763,7 +764,8 @@ public class ToolkitStructure2ViewerStructure {
     }
 
     public String getTableUUID(String tableID) {
-      if (infoByTableID.get(tableID) != null) return infoByTableID.get(tableID).getKey();
+      if (infoByTableID.get(tableID) != null)
+        return infoByTableID.get(tableID).getKey();
 
       return "";
     }

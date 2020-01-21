@@ -2,16 +2,10 @@ package com.databasepreservation.common.client.common.utils;
 
 import static com.databasepreservation.common.client.ViewerConstants.CONTROLLER_ACTIVITY_LOG_RESOURCE;
 import static com.databasepreservation.common.client.ViewerConstants.CONTROLLER_DATABASE_RESOURCE;
-import static com.databasepreservation.common.client.ViewerConstants.CONTROLLER_EXPORT_RESOURCE;
 import static com.databasepreservation.common.client.ViewerConstants.CONTROLLER_FILE_RESOURCE;
-import static com.databasepreservation.common.client.ViewerConstants.CONTROLLER_LOB_RESOURCE;
-import static com.databasepreservation.common.client.ViewerConstants.CONTROLLER_SEARCH_RESOURCE;
-import static com.databasepreservation.common.client.ViewerConstants.CONTROLLER_SIARD_RESOURCE;
 import static com.databasepreservation.common.client.ViewerConstants.CONTROLLER_USER_LOGIN_CONTROLLER;
 
 import java.util.Map;
-
-import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.fields.GenericField;
@@ -20,7 +14,7 @@ import com.databasepreservation.common.client.common.search.SearchInfo;
 import com.databasepreservation.common.client.common.utils.html.FilterHtmlUtils;
 import com.databasepreservation.common.client.common.utils.html.SearchInfoHtmlUtils;
 import com.databasepreservation.common.client.common.utils.html.SublistHtmlUtils;
-import com.databasepreservation.common.client.index.ExportRequest;
+import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
 import com.databasepreservation.common.client.models.activity.logs.ActivityLogWrapper;
 import com.databasepreservation.common.client.models.activity.logs.PresenceState;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
@@ -51,14 +45,6 @@ public class ActivityLogUtils {
         return getDatabaseParameters(entry);
       case CONTROLLER_FILE_RESOURCE:
         return getFileParameters(entry);
-      case CONTROLLER_EXPORT_RESOURCE:
-        return getExportParameters(entry);
-      case CONTROLLER_LOB_RESOURCE:
-        return getLOBParameters(entry);
-      case CONTROLLER_SIARD_RESOURCE:
-        return getSIARDParameters(entry);
-      case CONTROLLER_SEARCH_RESOURCE:
-        return getSearchParameters(entry);
       case CONTROLLER_USER_LOGIN_CONTROLLER:
         return getLoginParameters(entry);
       default:
@@ -89,6 +75,19 @@ public class ActivityLogUtils {
   private static FlowPanel getDatabaseParameters(ActivityLogWrapper wrapper) {
     FlowPanel panel = new FlowPanel();
     switch (wrapper.getActivityLogEntry().getActionMethod()) {
+      case "getLOB":
+        handleDatabaseInfo(panel, wrapper);
+        handleTableInfo(panel, wrapper);
+        handleRowInfo(panel, wrapper);
+        handleColumnInfo(panel, wrapper);
+        handleFilenameInfo(panel, wrapper, messages.activityLogFilenameRelated(),
+          ViewerConstants.CONTROLLER_FILENAME_PARAM);
+        return panel;
+      case "exportToCSV":
+        handleDatabaseInfo(panel, wrapper);
+        handleTableInfo(panel, wrapper);
+        handleExportOptions(panel, wrapper);
+        return panel;
       case "findDatabases":
         handleFilterInfo(panel, wrapper);
         handleSublistInfo(panel, wrapper);
@@ -98,13 +97,52 @@ public class ActivityLogUtils {
         handleFilterInfo(panel, wrapper);
         handleSublistInfo(panel, wrapper);
         return panel;
-      case "deleteSolrData":
+      case "createCollection":
+      case "getProgressData":
+      case "getReport":
+      case "getValidationProgressData":
+      case "getCollectionConfiguration":
       case "retrieve":
+      case "deleteCollection":
+      case "deleteDatabase":
+      case "updateCollectionConfiguration":
+      case "deleteSIARDFile":
+      case "deleteValidationReport":
+      case "updateMetadataInformation":
+      case "validateSiard":
+      case "getValidationReportFile":
+      case "deleteSavedSearch":
         handleDatabaseInfo(panel, wrapper);
+        break;
+      case "getDenormalizeConfigurationFile":
+      case "createDenormalizeConfigurationFile":
+      case "deleteDenormalizeConfigurationFile":
+      case "run":
+        handleDatabaseInfo(panel, wrapper);
+        handleTableInfo(panel, wrapper);
         break;
       case "retrieveRow":
         handleDatabaseInfo(panel, wrapper);
         handleRowInfo(panel, wrapper);
+        break;
+      case "updateSavedSearch":
+        handleDatabaseInfo(panel, wrapper);
+        handleSavedSearchInfo(panel, wrapper);
+        handleSavedSearchEdit(panel, wrapper);
+        break;
+      case "findSavedSearches":
+        handleDatabaseInfo(panel, wrapper);
+        handleSublistInfo(panel, wrapper);
+        break;
+      case "retrieveSavedSearch":
+        handleDatabaseInfo(panel, wrapper);
+        handleSavedSearchInfo(panel, wrapper);
+        break;
+      case "saveSavedSearch":
+        handleDatabaseInfo(panel, wrapper);
+        handleTableInfo(panel, wrapper);
+        handleSavedSearchEdit(panel, wrapper);
+        handleSearchInfo(panel, wrapper);
         break;
     }
     return panel;
@@ -115,74 +153,13 @@ public class ActivityLogUtils {
 
     switch (wrapper.getActivityLogEntry().getActionMethod()) {
       case "createSIARDFile":
-        panel.add(RowField.createInstance(messages.activityLogPathRelated(), new HTML(messages.activityLogFilenameParameter(
-          wrapper.getActivityLogEntry().getParameters().get(ViewerConstants.CONTROLLER_FILENAME_PARAM)))));
-        break;
       case "getSIARDFile":
-      case "getValidationReportFile":
-        handleDatabaseInfo(panel, wrapper);
+      case "deleteSiardFile":
+        panel.add(
+          RowField.createInstance(messages.activityLogPathRelated(), new HTML(messages.activityLogFilenameParameter(
+            wrapper.getActivityLogEntry().getParameters().get(ViewerConstants.CONTROLLER_FILENAME_PARAM)))));
         break;
     }
-    return panel;
-  }
-
-  private static FlowPanel getSIARDParameters(ActivityLogWrapper wrapper) {
-    FlowPanel panel = new FlowPanel();
-    switch (wrapper.getActivityLogEntry().getActionMethod()) {
-      case "deleteSIARDFile":
-        handleDatabaseInfo(panel, wrapper);
-        handleFilenameInfo(panel, wrapper, messages.activityLogPathRelated(), ViewerConstants.CONTROLLER_SIARD_PATH_PARAM);
-        break;
-      case "deleteSIARDValidatorReportFile":
-        handleDatabaseInfo(panel, wrapper);
-        handleFilenameInfo(panel, wrapper, messages.activityLogPathRelated(), ViewerConstants.CONTROLLER_REPORT_PATH_PARAM);
-        break;
-      case "updateMetadataInformation":
-        handleDatabaseInfo(panel, wrapper);
-        break;
-      case "updateStatusValidate":
-        break;
-      case "uploadSIARD":
-      case "uploadMetadataSIARDServer":
-        handleFilenameInfo(panel, wrapper, messages.activityLogPathRelated(), ViewerConstants.CONTROLLER_SIARD_PATH_PARAM);
-        break;
-      case "validateSIARD":
-        handleDatabaseInfo(panel, wrapper);
-        handleFilenameInfo(panel, wrapper, messages.activityLogPathRelated(), ViewerConstants.CONTROLLER_SIARD_PATH_PARAM);
-        handleFilenameInfo(panel, wrapper, messages.activityLogPathRelated(), ViewerConstants.CONTROLLER_REPORT_PATH_PARAM);
-        break;
-    }
-
-    return panel;
-  }
-
-  private static FlowPanel getSearchParameters(ActivityLogWrapper wrapper) {
-    FlowPanel panel = new FlowPanel();
-    switch (wrapper.getActivityLogEntry().getActionMethod()) {
-      case "delete":
-        handleDatabaseInfo(panel, wrapper);
-        break;
-      case "edit":
-        handleDatabaseInfo(panel, wrapper);
-        handleSavedSearchInfo(panel, wrapper);
-        handleSavedSearchEdit(panel, wrapper);
-        break;
-      case "find":
-        handleDatabaseInfo(panel, wrapper);
-        handleSublistInfo(panel, wrapper);
-        break;
-      case "retrieve":
-        handleDatabaseInfo(panel, wrapper);
-        handleSavedSearchInfo(panel, wrapper);
-        break;
-      case "save":
-        handleDatabaseInfo(panel, wrapper);
-        handleTableInfo(panel, wrapper);
-        handleSavedSearchEdit(panel, wrapper);
-        handleSearchInfo(panel, wrapper);
-        break;
-    }
-
     return panel;
   }
 
@@ -195,38 +172,7 @@ public class ActivityLogUtils {
     if (ViewerStringUtils.isNotBlank(username)) {
       SafeHtmlBuilder safeHtmlBuilder = new SafeHtmlBuilder();
       safeHtmlBuilder.append(SafeHtmlUtils.fromSafeConstant(username));
-      panel.add(RowField.createInstance(messages.activityLogUsernameRelated(),new HTML(safeHtmlBuilder.toSafeHtml())));
-    }
-    return panel;
-  }
-
-  private static FlowPanel getExportParameters(ActivityLogWrapper wrapper) {
-    FlowPanel panel = new FlowPanel();
-    if (wrapper.getActivityLogEntry().getActionMethod().equals("getCSVResultsPost")) {
-      handleDatabaseInfo(panel, wrapper);
-      handleTableInfo(panel, wrapper);
-      if (wrapper.getFilterPresence().equals(PresenceState.YES)) {
-        if (wrapper.getFilter().getParameters().get(0) instanceof SimpleFilterParameter
-          && wrapper.getExportRequestPresence().equals(PresenceState.YES) && wrapper.getExportRequest().record) {
-          SimpleFilterParameter parameter = (SimpleFilterParameter) wrapper.getFilter().getParameters().get(0);
-          final String rowUUID = parameter.getValue();
-          handleRowInfo(panel, wrapper.getDatabase().getUuid(), wrapper.getTable().getUuid(), rowUUID);
-        }
-      }
-      handleExportOptions(panel, wrapper);
-    }
-    return panel;
-  }
-
-  private static FlowPanel getLOBParameters(ActivityLogWrapper wrapper) {
-    FlowPanel panel = new FlowPanel();
-    if (wrapper.getActivityLogEntry().getActionMethod().equals("getLOB")) {
-      handleDatabaseInfo(panel, wrapper);
-      handleTableInfo(panel, wrapper);
-      handleRowInfo(panel, wrapper);
-      handleColumnInfo(panel, wrapper);
-      handleFilenameInfo(panel, wrapper, messages.activityLogFilenameRelated(),
-        ViewerConstants.CONTROLLER_FILENAME_PARAM);
+      panel.add(RowField.createInstance(messages.activityLogUsernameRelated(), new HTML(safeHtmlBuilder.toSafeHtml())));
     }
     return panel;
   }
@@ -295,44 +241,58 @@ public class ActivityLogUtils {
   }
 
   private static void handleExportOptions(FlowPanel panel, ActivityLogWrapper wrapper) {
-    if (wrapper.getExportRequestPresence().equals(PresenceState.YES)) {
-      final ExportRequest exportRequest = wrapper.getExportRequest();
+    final String singleRecord = wrapper.getActivityLogEntry().getParameters()
+      .get(ViewerConstants.CONTROLLER_EXPORT_SINGLE_ROW_PARAM);
 
-      final boolean record = exportRequest.record;
-      if (record) {
-        panel.add(RowField.createInstance(messages.activityLogLabelForExportType(),
-          new HTML(SafeHtmlUtils.fromSafeConstant(messages.activityLogTextForExportTypeTable()))));
-      } else {
-        panel.add(RowField.createInstance(messages.activityLogLabelForExportType(),
-          new HTML(SafeHtmlUtils.fromSafeConstant(messages.activityLogTextForExportTypeRow()))));
+    if (singleRecord.equalsIgnoreCase(Boolean.TRUE.toString())) {
+      if (wrapper.getFilter().getParameters().get(0) instanceof SimpleFilterParameter) {
+        SimpleFilterParameter parameter = (SimpleFilterParameter) wrapper.getFilter().getParameters().get(0);
+        final String rowUUID = parameter.getValue();
+        handleRowInfo(panel, wrapper.getDatabase().getUuid(), wrapper.getTable().getUuid(), rowUUID);
       }
+    }
 
-      if (ViewerStringUtils.isNotBlank(exportRequest.filename)) {
-        panel.add(RowField.createInstance(messages.csvExportDialogLabelForFilename(),
-          new HTML(SafeHtmlUtils.fromSafeConstant(exportRequest.filename))));
-      }
-      if (ViewerStringUtils.isNotBlank(exportRequest.zipFilename)) {
-        panel.add(RowField.createInstance(messages.csvExportDialogLabelForZipFilename(),
-          new HTML(SafeHtmlUtils.fromSafeConstant(exportRequest.zipFilename))));
-      }
+    final String zipFilename = wrapper.getActivityLogEntry().getParameters()
+      .get(ViewerConstants.CONTROLLER_ZIP_FILENAME_PARAM);
+    final String filename = wrapper.getActivityLogEntry().getParameters()
+      .get(ViewerConstants.CONTROLLER_FILENAME_PARAM);
+    final String exportDescriptions = wrapper.getActivityLogEntry().getParameters()
+      .get(ViewerConstants.CONTROLLER_EXPORT_DESCRIPTIONS_PARAM);
+    final String exportLobs = wrapper.getActivityLogEntry().getParameters()
+      .get(ViewerConstants.CONTROLLER_EXPORT_LOBS_PARAM);
 
-      final boolean exportDescription = exportRequest.exportDescription;
-      if (exportDescription) {
-        panel.add(RowField.createInstance(messages.csvExportDialogLabelForExportHeaderWithDescriptions(),
-          new HTML(SafeHtmlUtils.fromSafeConstant(messages.yes()))));
-      } else {
-        panel.add(RowField.createInstance(messages.csvExportDialogLabelForExportHeaderWithDescriptions(),
-          new HTML(SafeHtmlUtils.fromSafeConstant(messages.no()))));
-      }
+    if (singleRecord.equalsIgnoreCase(Boolean.FALSE.toString())) {
+      panel.add(RowField.createInstance(messages.activityLogLabelForExportType(),
+        new HTML(SafeHtmlUtils.fromSafeConstant(messages.activityLogTextForExportTypeTable()))));
+    } else {
+      panel.add(RowField.createInstance(messages.activityLogLabelForExportType(),
+        new HTML(SafeHtmlUtils.fromSafeConstant(messages.activityLogTextForExportTypeRow()))));
+    }
 
-      final boolean exportLobs = exportRequest.exportLOBs;
-      if (exportLobs) {
-        panel.add(RowField.createInstance(messages.csvExportDialogLabelForExportLOBs(),
-          new HTML(SafeHtmlUtils.fromSafeConstant(messages.yes()))));
-      } else {
-        panel.add(RowField.createInstance(messages.csvExportDialogLabelForExportLOBs(),
-          new HTML(SafeHtmlUtils.fromSafeConstant(messages.no()))));
-      }
+    if (ViewerStringUtils.isNotBlank(filename)) {
+      panel.add(RowField.createInstance(messages.csvExportDialogLabelForFilename(),
+        new HTML(SafeHtmlUtils.fromSafeConstant(filename))));
+    }
+
+    if (ViewerStringUtils.isNotBlank(zipFilename)) {
+      panel.add(RowField.createInstance(messages.csvExportDialogLabelForZipFilename(),
+        new HTML(SafeHtmlUtils.fromSafeConstant(zipFilename))));
+    }
+
+    if (exportDescriptions.equalsIgnoreCase(Boolean.TRUE.toString())) {
+      panel.add(RowField.createInstance(messages.csvExportDialogLabelForExportHeaderWithDescriptions(),
+        new HTML(SafeHtmlUtils.fromSafeConstant(messages.yes()))));
+    } else {
+      panel.add(RowField.createInstance(messages.csvExportDialogLabelForExportHeaderWithDescriptions(),
+        new HTML(SafeHtmlUtils.fromSafeConstant(messages.no()))));
+    }
+
+    if (exportLobs.equalsIgnoreCase(Boolean.TRUE.toString())) {
+      panel.add(RowField.createInstance(messages.csvExportDialogLabelForExportLOBs(),
+        new HTML(SafeHtmlUtils.fromSafeConstant(messages.yes()))));
+    } else {
+      panel.add(RowField.createInstance(messages.csvExportDialogLabelForExportLOBs(),
+        new HTML(SafeHtmlUtils.fromSafeConstant(messages.no()))));
     }
   }
 
@@ -376,9 +336,8 @@ public class ActivityLogUtils {
     }
 
     if (ViewerStringUtils.isNotBlank(description)) {
-      panel.add(
-        RowField.createInstance(messages.activityLogSavedSearchDescription(),
-          new HTML(SafeHtmlUtils.fromSafeConstant(description))));
+      panel.add(RowField.createInstance(messages.activityLogSavedSearchDescription(),
+        new HTML(SafeHtmlUtils.fromSafeConstant(description))));
     }
   }
 

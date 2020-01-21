@@ -88,7 +88,7 @@ public class DataTransformation extends RightPanel implements CollectionStatusOb
   private Button btnRunAllConfiguration = new Button();
   private Button btnClearConfiguration = new Button();
   private Boolean isInformation;
-  List<Button> buttons = new ArrayList<>();
+  private List<Button> buttons = new ArrayList<>();
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {

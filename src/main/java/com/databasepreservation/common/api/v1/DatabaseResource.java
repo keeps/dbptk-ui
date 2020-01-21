@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -46,7 +47,6 @@ import com.databasepreservation.common.client.common.search.SavedSearch;
 import com.databasepreservation.common.client.common.search.SearchInfo;
 import com.databasepreservation.common.client.exceptions.RESTException;
 import com.databasepreservation.common.client.exceptions.SavedSearchException;
-import com.databasepreservation.common.client.index.FindNestedRequest;
 import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.index.filter.Filter;
@@ -376,14 +376,13 @@ public class DatabaseResource implements DatabaseService {
   @Produces({MediaType.APPLICATION_OCTET_STREAM})
   @ApiOperation(value = "Downloads a LOB for a specific row within a database", notes = "download the specified LOB.", response = Response.class)
   public Response getLOB(@PathParam(ViewerConstants.API_PATH_PARAM_DATABASE_UUID) String databaseUUID,
-                         @PathParam(ViewerConstants.API_PATH_PARAM_COLLECTION_UUID) String collectionUUID,
-                         @PathParam(ViewerConstants.API_PATH_PARAM_TABLE_UUID) String tableUUID,
-                         @QueryParam(ViewerConstants.API_PATH_PARAM_ROW_UUID) String rowUUID,
-                         @QueryParam(ViewerConstants.API_PATH_PARAM_COLUMN_ID) Integer columnID,
-                         @QueryParam(ViewerConstants.API_PATH_PARAM_LOB_FILENAME) String filename) {
+    @PathParam(ViewerConstants.API_PATH_PARAM_COLLECTION_UUID) String collectionUUID,
+    @PathParam(ViewerConstants.API_PATH_PARAM_TABLE_UUID) String tableUUID,
+    @QueryParam(ViewerConstants.API_PATH_PARAM_ROW_UUID) String rowUUID,
+    @QueryParam(ViewerConstants.API_PATH_PARAM_COLUMN_ID) Integer columnID,
+    @QueryParam(ViewerConstants.API_PATH_PARAM_LOB_FILENAME) String filename) {
 
-    ControllerAssistant controllerAssistant = new ControllerAssistant() {
-    };
+    ControllerAssistant controllerAssistant = new ControllerAssistant() {};
     User user = UserUtility.getUser(request);
     LogEntryState state = LogEntryState.SUCCESS;
 
@@ -396,8 +395,8 @@ public class DatabaseResource implements DatabaseService {
       if (row != null) {
         try {
           return ApiUtils.okResponse(new StreamResponse(filename, MediaType.APPLICATION_OCTET_STREAM,
-              DownloadUtils.stream(Files.newInputStream(LobPathManager.getPath(ViewerFactory.getViewerConfiguration(),
-                  databaseUUID, tableUUID, columnID, rowUUID)))));
+            DownloadUtils.stream(Files.newInputStream(LobPathManager.getPath(ViewerFactory.getViewerConfiguration(),
+              databaseUUID, tableUUID, columnID, rowUUID)))));
         } catch (IOException e) {
           throw new GenericException("There was an IO problem retrieving the LOB.", e);
         }
@@ -410,8 +409,8 @@ public class DatabaseResource implements DatabaseService {
     } finally {
       // register action
       controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,
-          ViewerConstants.CONTROLLER_TABLE_ID_PARAM, tableUUID, ViewerConstants.CONTROLLER_ROW_ID_PARAM, rowUUID,
-          ViewerConstants.CONTROLLER_COLUMN_ID_PARAM, columnID, ViewerConstants.CONTROLLER_FILENAME_PARAM, filename);
+        ViewerConstants.CONTROLLER_TABLE_ID_PARAM, tableUUID, ViewerConstants.CONTROLLER_ROW_ID_PARAM, rowUUID,
+        ViewerConstants.CONTROLLER_COLUMN_ID_PARAM, columnID, ViewerConstants.CONTROLLER_FILENAME_PARAM, filename);
     }
   }
 
@@ -428,7 +427,7 @@ public class DatabaseResource implements DatabaseService {
     @ApiParam(value = "The Zip filename") @QueryParam("zipFilename") String zipFilename,
     @ApiParam(value = "Export description", allowableValues = "true, false") @QueryParam("descriptions") boolean exportDescription,
     @ApiParam(value = "Export LOBs", allowableValues = "true, false") @QueryParam("lobs") boolean exportLobs,
-    @ApiParam(value = "Export only one record", allowableValues = "true, false") @QueryParam("singleRecord") boolean record) {
+    @ApiParam(value = "Export only one record", allowableValues = "true, false") @QueryParam("singleRecord") boolean singleRecord) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
     User user = UserUtility.getUser(request);
     LogEntryState state = LogEntryState.SUCCESS;
@@ -454,12 +453,21 @@ public class DatabaseResource implements DatabaseService {
       throw new RESTException(e);
     } finally {
       if (findRequest != null) {
-        // register action
-        controllerAssistant.registerAction(user, databaseUUID, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM,
-          databaseUUID, ViewerConstants.CONTROLLER_TABLE_ID_PARAM, tableUUID, ViewerConstants.CONTROLLER_FILTER_PARAM,
-          JsonUtils.getJsonFromObject(findRequest.filter), ViewerConstants.CONTROLLER_SUBLIST_PARAM,
+        Object[] list = new Object[] {ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,
+          ViewerConstants.CONTROLLER_TABLE_ID_PARAM, tableUUID, ViewerConstants.CONTROLLER_FILTER_PARAM,
+          JsonUtils.getJsonFromObject(findRequest.filter), ViewerConstants.CONTROLLER_EXPORT_SINGLE_ROW_PARAM,
+          singleRecord, ViewerConstants.CONTROLLER_EXPORT_DESCRIPTIONS_PARAM, exportDescription,
+          ViewerConstants.CONTROLLER_EXPORT_LOBS_PARAM, exportLobs, ViewerConstants.CONTROLLER_FILENAME_PARAM, filename,
+          ViewerConstants.CONTROLLER_SUBLIST_PARAM,
           findRequest.sublist == null ? JsonUtils.getJsonFromObject(Sublist.NONE)
-            : JsonUtils.getJsonFromObject(findRequest.sublist));
+            : JsonUtils.getJsonFromObject(findRequest.sublist)};
+
+        if (StringUtils.isNotBlank(zipFilename)) {
+          list = appendValue(list, ViewerConstants.CONTROLLER_ZIP_FILENAME_PARAM);
+          list = appendValue(list, zipFilename);
+        }
+        // register action
+        controllerAssistant.registerAction(user, state, list);
       }
     }
   }
@@ -592,7 +600,8 @@ public class DatabaseResource implements DatabaseService {
 
     try {
       final IndexResult<ViewerRow> viewerRowIndexResult = ViewerFactory.getSolrManager().findRows(databaseUUID,
-        findRequest.filter, findRequest.sorter, findRequest.sublist, findRequest.facets, findRequest.fieldsToReturn, findRequest.extraParameters);
+        findRequest.filter, findRequest.sorter, findRequest.sublist, findRequest.facets, findRequest.fieldsToReturn,
+        findRequest.extraParameters);
       count = viewerRowIndexResult.getTotalCount();
       return viewerRowIndexResult;
     } catch (GenericException | RequestNotValidException e) {
@@ -912,4 +921,11 @@ public class DatabaseResource implements DatabaseService {
 
     return validationReportPath;
   }
+
+  private Object[] appendValue(Object[] obj, Object newObj) {
+    ArrayList<Object> temp = new ArrayList<Object>(Arrays.asList(obj));
+    temp.add(newObj);
+    return temp.toArray();
+  }
+
 }

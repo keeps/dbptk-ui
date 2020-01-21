@@ -36,7 +36,7 @@ public class ExportResourcesUtils {
 
     urlBuilder.append("lobs").append("=").append(lobs).append("&");
 
-    urlBuilder.append("singleRow").append("=").append(singleRow);
+    urlBuilder.append("singleRecord").append("=").append(singleRow);
 
     return urlBuilder.toString();
   }

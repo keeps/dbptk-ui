@@ -467,7 +467,6 @@ public class ViewerConstants {
   public static final String CONTROLLER_FILENAME_PARAM = "filename";
   public static final String CONTROLLER_FILTER_PARAM = "filter";
   public static final String CONTROLLER_FACET_PARAM = "facets";
-  public static final String CONTROLLER_EXPORT_PARAM = "export";
   public static final String CONTROLLER_SUBLIST_PARAM = "sublist";
   public static final String CONTROLLER_SKIP_ADDITIONAL_CHECKS_PARAM = "additional-checks";
   public static final String CONTROLLER_SAVED_SEARCH_NAME_PARAM = "name";
@@ -476,17 +475,19 @@ public class ViewerConstants {
   public static final String CONTROLLER_SAVED_SEARCH_UUID_PARAM = "saved-search-uuid";
   public static final String CONTROLLER_RETRIEVE_COUNT = "total-count";
   public static final String CONTROLLER_USERNAME_PARAM = "username";
+  public static final String CONTROLLER_EXPORT_SINGLE_ROW_PARAM = "singleRow";
+  public static final String CONTROLLER_EXPORT_DESCRIPTIONS_PARAM = "exportDescription";
+  public static final String CONTROLLER_EXPORT_LOBS_PARAM = "exportLobs";
+  public static final String CONTROLLER_ZIP_FILENAME_PARAM = "zipFilename";
 
   /*
    * REST CONTROLLERS
    */
   public static final String CONTROLLER_ACTIVITY_LOG_RESOURCE = "com.databasepreservation.common.api.v1.ActivityLogResource";
   public static final String CONTROLLER_DATABASE_RESOURCE = "com.databasepreservation.common.api.v1.DatabaseResource";
-  public static final String CONTROLLER_EXPORT_RESOURCE = "com.databasepreservation.common.api.v1.ExportsResource";
   public static final String CONTROLLER_FILE_RESOURCE = "com.databasepreservation.common.api.v1.FileResource";
-  public static final String CONTROLLER_LOB_RESOURCE = "com.databasepreservation.common.api.v1.LobsResource";
-  public static final String CONTROLLER_SIARD_RESOURCE = "com.databasepreservation.common.api.v1.SIARDResource";
-  public static final String CONTROLLER_SEARCH_RESOURCE = "com.databasepreservation.common.api.v1.SearchResource";
+  public static final String CONTROLLER_JOB_RESOURCE = "com.databasepreservation.common.api.v1.JobResource";
+  public static final String CONTROLLER_MIGRATION_RESOURCE = "com.databasepreservation.common.api.v1.MigrationResource";
   public static final String CONTROLLER_USER_LOGIN_CONTROLLER = "com.databasepreservation.common.server.controller.UserLoginController";
 
   /*

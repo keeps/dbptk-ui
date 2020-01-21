@@ -328,6 +328,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
       filter = getFilter();
     } else {
       filter = FilterUtils.filterByTable(getFilter(), table.getId());
+      fieldsToReturn.add(ViewerConstants.INDEX_ID);
     }
     for (ColumnStatus column : status.getTableStatus(table.getUuid()).getColumns()) {
       if (status.showColumn(table.getUuid(), column.getId())) {

@@ -63,5 +63,5 @@ public interface ActivityLogService extends DirectRestService {
   @GET
   @Path("/{logUUID}")
   @ApiOperation(value = "Retrieve a specific log detail", response = ActivityLogWrapper.class)
-  ActivityLogWrapper retrieve( @ApiParam(value = "The log unique identifier") @PathParam("logUUID") String logUUID);
+  ActivityLogWrapper retrieve(@ApiParam(value = "The unique log identifier") @PathParam("logUUID") String logUUID);
 }

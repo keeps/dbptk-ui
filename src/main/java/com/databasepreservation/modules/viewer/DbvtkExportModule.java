@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Set;
 
-import com.databasepreservation.common.server.index.schema.SolrRowsCollectionRegistry;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
@@ -14,6 +13,7 @@ import com.databasepreservation.common.client.models.structure.ViewerDatabaseFro
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
+import com.databasepreservation.common.server.index.schema.SolrRowsCollectionRegistry;
 import com.databasepreservation.common.transformers.ToolkitStructure2ViewerStructure;
 import com.databasepreservation.model.Reporter;
 import com.databasepreservation.model.data.Row;
@@ -43,7 +43,7 @@ public class DbvtkExportModule implements DatabaseExportModule {
 
   private String databaseUUID;
 
-  private long rowIndex = 0;
+  private long rowIndex = 1;
 
   private Reporter reporter;
 
@@ -138,7 +138,7 @@ public class DbvtkExportModule implements DatabaseExportModule {
   public void handleDataOpenTable(String tableId) throws ModuleException {
     currentTable = retrieved.getMetadata().getTableById(tableId);
     solrManager.addTable(retrieved.getUuid(), currentTable);
-    rowIndex = 0;
+    //rowIndex = 1;
   }
 
   /**
