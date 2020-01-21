@@ -502,6 +502,8 @@ public interface ClientMessages extends Messages {
 
   String basicTableHeaderDescription();
 
+  String basicTableHeaderOptions();
+
   String basicTableHeaderLabel();
 
   String basicTableHeaderTableOrColumn(@Select String value);
@@ -1322,7 +1324,7 @@ public interface ClientMessages extends Messages {
 
   String dataTransformationTextForAggregationRadioButton();
 
-  String dataTransformationTableRowList(List<String> columns);
+  String dataTransformationTableRowList(@PluralCount List<String> columns);
 
   /********************************************
    * Preferences Panel

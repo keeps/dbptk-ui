@@ -15,6 +15,7 @@ import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.lists.cells.ActionsCell;
 import com.databasepreservation.common.client.common.lists.cells.RequiredEditableCell;
 import com.databasepreservation.common.client.common.lists.cells.TextAreaInputCell;
+import com.databasepreservation.common.client.common.lists.columns.ButtonColumn;
 import com.databasepreservation.common.client.common.lists.widgets.BasicTablePanel;
 import com.databasepreservation.common.client.common.sidebar.Sidebar;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
@@ -32,6 +33,7 @@ import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.databasepreservation.common.client.widgets.ConfigurationCellTableResources;
 import com.databasepreservation.common.client.widgets.Toast;
+import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.CompositeCell;
 import com.google.gwt.cell.client.HasCell;
@@ -41,6 +43,7 @@ import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -48,7 +51,9 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
@@ -202,6 +207,9 @@ public class ColumnsManagementPanel extends RightPanel implements CollectionStat
         }),
       new BasicTablePanel.ColumnInfo<>(messages.basicTableHeaderLabel(), 15, getLabelColumn()),
       new BasicTablePanel.ColumnInfo<>(messages.basicTableHeaderDescription(), 0, getDescriptionColumn()),
+      new BasicTablePanel.ColumnInfo<>(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager
+        .getTagWithStyleName(FontAwesomeIconManager.COG, messages.basicTableHeaderOptions(), "fa-fw")), false, 3,
+        getOptionsColumn()),
       new BasicTablePanel.ColumnInfo<>(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager
         .getTagWithStyleName(FontAwesomeIconManager.TABLE, messages.columnManagementPageTooltipForTable(), "fa-fw")),
         false, 3, getTableCheckboxColumn()),
@@ -426,6 +434,62 @@ public class ColumnsManagementPanel extends RightPanel implements CollectionStat
       sidebar.updateSidebarItem(tableId, true);
     });
     return description;
+  }
+
+  private Column<ColumnStatus, String> getOptionsColumn() {
+    Column<ColumnStatus, String> options = new ButtonColumn<ColumnStatus>() {
+      @Override
+      public void render(Cell.Context context, ColumnStatus object, SafeHtmlBuilder sb) {
+        sb.appendHtmlConstant(
+          "<div class=\"center-cell\"><button class=\"btn btn-cell-action\" type=\"button\" tabindex=\"-1\"><i class=\"fa fa-cog\"></i></button></div>");
+      }
+
+      @Override
+      public String getValue(ColumnStatus object) {
+        return messages.basicActionOpen();
+      }
+    };
+    options.setFieldUpdater((index, columnStatus, value) -> {
+
+      List<FlowPanel> configurations = new ArrayList<>();
+
+      List<String> nestedFields = columnStatus.getNestedColumns().getNestedFields();
+
+      FlowPanel allowedFieldsPanel = new FlowPanel();
+      Label allowedFields = new Label(nestedFields.toString());
+      allowedFieldsPanel.add(allowedFields);
+      configurations.add(allowedFieldsPanel);
+
+      Label templateListLabel = new Label("Template list");
+      templateListLabel.setStyleName("form-label");
+      TextBox templateList = new TextBox();
+      templateList.setStyleName("form-textbox");
+      templateList.setText(columnStatus.getSearchStatus().getList().getTemplate().getTemplate());
+      templateList.addChangeHandler(event -> {
+        columnStatus.getSearchStatus().getList().getTemplate().setTemplate(templateList.getText());
+      });
+      FlowPanel templateListPanel = new FlowPanel();
+      templateListPanel.add(templateListLabel);
+      templateListPanel.add(templateList);
+      configurations.add(templateListPanel);
+
+      Label templateDetailLabel = new Label("Template Detail");
+      templateDetailLabel.setStyleName("form-label");
+      TextBox templateDetail = new TextBox();
+      templateDetail.setStyleName("form-textbox");
+      templateDetail.setText(columnStatus.getDetailsStatus().getTemplateStatus().getTemplate());
+      templateDetail.addChangeHandler(event -> {
+        columnStatus.getDetailsStatus().getTemplateStatus().setTemplate(templateDetail.getText());
+      });
+      FlowPanel templateDetailPanel = new FlowPanel();
+      templateDetailPanel.add(templateDetailLabel);
+      templateDetailPanel.add(templateDetail);
+      configurations.add(templateDetailPanel);
+
+      Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), messages.basicTableHeaderOptions(),
+        configurations, "continue", "btn btn-close");
+    });
+    return options;
   }
 
   private void updateColumnOrder(List<ColumnStatus> list, int relativeToClickIndex, int clickedIndex) {

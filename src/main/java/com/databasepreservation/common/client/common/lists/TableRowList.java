@@ -20,7 +20,9 @@ import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.helpers.HelperExportTableData;
 import com.databasepreservation.common.client.common.lists.utils.AsyncTableCell;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
+import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.common.utils.TableRowListWrapper;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.DataTransformationUtils;
 import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.index.facets.Facets;
@@ -36,6 +38,7 @@ import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.models.structure.ViewerType;
 import com.databasepreservation.common.client.services.CollectionService;
+import com.databasepreservation.common.client.tools.JSOUtils;
 import com.databasepreservation.common.client.tools.RestUtils;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.databasepreservation.common.client.widgets.Alert;
@@ -134,7 +137,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     for (ColumnStatus columnStatus : tableStatus.getColumns()) {
       if (!status.showColumn(tableStatus.getUuid(), columnStatus.getId()))
         continue;
-      if (columnStatus.getNestedColumns().isEmpty()) {
+      if (columnStatus.getNestedColumns() == null) {
         ViewerColumn viewerColumn = null;
         for (ViewerColumn column : table.getColumns()) {
           if (columnStatus.getId().equals(column.getSolrName())) {
@@ -243,11 +246,12 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
         }
       } else {
         // this is the table of nested document
-        ViewerTable nestedTable = database.getMetadata().getTableById(columnStatus.getId());
+        ViewerTable nestedTable = database.getMetadata()
+          .getTableById(columnStatus.getNestedColumns().getOriginalTable());
         List<ViewerColumn> columnsToAggregate = new ArrayList<>();
-        for (String nestedColumn : columnStatus.getNestedColumns()) {
+        for (String nestedColumn : columnStatus.getNestedColumns().getNestedFields()) {
           for (ViewerColumn column : nestedTable.getColumns()) {
-            if (column.getSolrName().equals(nestedColumn)) {
+            if (column.getDisplayName().equals(nestedColumn)) {
               columnsToAggregate.add(column);
             }
           }
@@ -267,31 +271,43 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
           @Override
           public SafeHtml getValue(ViewerRow row) {
             String aggregationColumn = null;
+            List<String> aggregationList = new ArrayList<>();
             SafeHtml ret = null;
             if (row.getNestedRowList() != null) {
               for (ViewerRow nestedRow : row.getNestedRowList()) {
                 if (nestedRow == null || nestedRow.getCells() == null || nestedRow.getCells().isEmpty()) {
                   continue;
-                } else if (nestedRow.getTableId().equals(nestedTable.getId())) {
+                } else if (nestedRow.getUuid().equals(columnStatus.getId())) {
                   Map<String, ViewerCell> cells = nestedRow.getCells();
-                  String aggregationCell = null;
-                  for (Map.Entry<String, ViewerCell> entry : cells.entrySet()) {
-                    if (aggregationCell == null) {
-                      aggregationCell = entry.getValue().getValue();
-                    } else {
-                      aggregationCell = aggregationCell + "," + entry.getValue().getValue();
-                    }
-                  }
-                  if (aggregationColumn == null) {
-                    aggregationColumn = aggregationCell;
+
+                  // ColumnStatus columnStatus = status.getColumnByTableAndColumn(table.getUuid(),
+                  // row.getNestedUUID());
+
+                  String template = columnStatus.getSearchStatus().getList().getTemplate().getTemplate();
+                  if (template != null && !template.isEmpty()) {
+                    String json = JSOUtils.cellsToJson(cells, nestedTable);
+                    String s = JavascriptUtils.compileTemplate(template, json);
+                    aggregationList.add(s);
+                    ret = SafeHtmlUtils.fromSafeConstant(messages.dataTransformationTableRowList(aggregationList));
                   } else {
-                    aggregationColumn = aggregationColumn + ";" + aggregationCell;
+                    String aggregationCell = null;
+                    for (Map.Entry<String, ViewerCell> entry : cells.entrySet()) {
+                      if (aggregationCell == null) {
+                        aggregationCell = entry.getValue().getValue();
+                      } else {
+                        aggregationCell = aggregationCell + "," + entry.getValue().getValue();
+                      }
+                    }
+                    if (aggregationColumn == null) {
+                      aggregationColumn = aggregationCell;
+                    } else {
+                      aggregationColumn = aggregationColumn + ";" + aggregationCell;
+                    }
+                    ret = SafeHtmlUtils.fromString(aggregationColumn);
                   }
-                  ret = SafeHtmlUtils.fromString(aggregationColumn);
                 }
               }
             }
-
             return ret;
           }
         };
@@ -328,16 +344,18 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
 
     for (ColumnStatus column : status.getTableStatus(table.getUuid()).getColumns()) {
       if (status.showColumn(table.getUuid(), column.getId())) {
-        if (column.getNestedColumns().isEmpty()) {
-          fieldsToReturn.add(column.getId());
-        } else {
+        if (column.getNestedColumns() != null) {
           hasNested = true;
+          GWT.log("HAS nested");
+        } else {
+          fieldsToReturn.add(column.getId());
         }
       }
     }
-    // fieldsToReturn.add("*, [child limit=100]");
+
     if (hasNested) {
-      buildNestedFieldsToReturn(wrapper, extraParameters, fieldsToReturn);
+      DataTransformationUtils.buildNestedFieldsToReturn(wrapper.getTable(), wrapper.getStatus(), extraParameters,
+        fieldsToReturn);
     }
     currentSubList = sublist;
 
@@ -360,33 +378,6 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
 
     CollectionService.Util.call(callback).findRows(wrapper.getDatabase().getUuid(), wrapper.getDatabase().getUuid(),
       table.getSchemaName(), table.getName(), findRequest, LocaleInfo.getCurrentLocale().getLocaleName());
-  }
-
-  // TODO
-  private void buildNestedFieldsToReturn(TableRowListWrapper wrapper, Map<String, String> extraParameters,
-    List<String> fieldsToReturn) {
-    StringBuilder sb = new StringBuilder();
-    ViewerTable table = wrapper.getTable();
-    CollectionStatus status = wrapper.getStatus();
-
-    TableStatus tableStatus = status.getTableStatus(table.getUuid());
-    fieldsToReturn.add(ViewerConstants.INDEX_ID);
-    int nestedCount = 0;
-    StringBuilder keys = new StringBuilder();
-    String separator = "";
-    for (ColumnStatus column : tableStatus.getColumns()) {
-      if (!column.getNestedColumns().isEmpty()) {
-        String nestedTableId = column.getId();
-        String key = ViewerConstants.SOLR_ROWS_NESTED + "." + nestedCount;
-        keys.append(separator).append(key);
-        separator = ",";
-        fieldsToReturn.add(key + ":[subquery]");
-        extraParameters.put(key + ".q", "+nestedTableId:" + nestedTableId + " AND {!terms f=_root_ v=$row.uuid}");
-        extraParameters.put(key + ".rows", "10");
-        nestedCount++;
-      }
-    }
-    fieldsToReturn.add(ViewerConstants.SOLR_ROWS_NESTED + ":" + "\"" + keys + "\"");
   }
 
   @Override

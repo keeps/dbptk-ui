@@ -552,6 +552,14 @@
         </dependency>
         <!-- / File upload -->
 
+        <!-- Handlerbars -->
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>handlebars</artifactId>
+            <version>4.0.2</version>
+        </dependency>
+        <!-- / Handlerbars -->
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>

@@ -218,6 +218,15 @@ public class ViewerTable implements Serializable {
     return null;
   }
 
+  @JsonIgnore
+  public ViewerColumn getColumnBySolrName(String solrName) {
+    for (ViewerColumn column : columns) {
+      if (column.getSolrName().equals(solrName))
+        return column;
+    }
+    return null;
+  }
+
   public boolean containsBinaryColumns() {
     for (ViewerColumn column : columns) {
       if (column.getType().getDbType().equals(ViewerType.dbTypes.BINARY)) {

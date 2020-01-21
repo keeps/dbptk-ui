@@ -13,7 +13,6 @@ import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.lists.widgets.MultipleSelectionTablePanel;
 import com.databasepreservation.common.client.common.sidebar.DataTransformationSidebar;
-import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.DataTransformationUtils;
 import com.databasepreservation.common.client.common.visualization.browse.information.ErDiagram;
 import com.databasepreservation.common.client.configuration.observer.CollectionStatusObserver;
@@ -66,19 +65,14 @@ public class DataTransformation extends RightPanel implements CollectionStatusOb
   public ClientMessages messages = GWT.create(ClientMessages.class);
 
   @UiField
-  FlowPanel toolbar;
-
-  @UiField
   FlowPanel content;
-
-//  @UiField
-//  ScrollPanel scrollPanel;
 
   @UiField
   LoadingDiv loading;
 
   private ViewerDatabase database;
   private ViewerTable table;
+  private String tableUUID;
   private TransformationTable rootTable;
   private DataTransformationSidebar sidebar;
   private CollectionStatus collectionStatus;
@@ -115,14 +109,14 @@ public class DataTransformation extends RightPanel implements CollectionStatusOb
     this.database = database;
     this.sidebar = sidebar;
     this.collectionStatus = collectionStatus;
+    this.tableUUID = tableUUID;
     if (tableUUID == null) {
       isInformation = true;
       content.add(new Alert(Alert.MessageAlertType.INFO, "Under construction"));
       content.add(informationPanel());
     } else {
       isInformation = false;
-      this.table = database.getMetadata().getTable(tableUUID);
-      getDenormalizeConfigurationFile();
+      getDenormalizeConfigurationFile(tableUUID);
     }
   }
 
@@ -134,14 +128,14 @@ public class DataTransformation extends RightPanel implements CollectionStatusOb
   /**
    * Check if exist a configuration file for this database, if exist use to
    */
-  private void getDenormalizeConfigurationFile() {
+  private void getDenormalizeConfigurationFile(String tableUUID) {
     loading.setVisible(true);
-    if (collectionStatus.getDenormalizations()
-      .contains(ViewerConstants.DENORMALIZATION_STATUS_PREFIX + table.getUuid())) {
+    this.table = database.getMetadata().getTable(tableUUID);
+    if (collectionStatus.getDenormalizations().contains(ViewerConstants.DENORMALIZATION_STATUS_PREFIX + tableUUID)) {
       CollectionService.Util.call((DenormalizeConfiguration response) -> {
         denormalizeConfiguration = response;
         init();
-      }).getDenormalizeConfigurationFile(database.getUuid(), database.getUuid(), table.getUuid());
+      }).getDenormalizeConfigurationFile(database.getUuid(), database.getUuid(), tableUUID);
     } else {
       denormalizeConfiguration = new DenormalizeConfiguration(database.getUuid(), table);
       init();
@@ -158,6 +152,7 @@ public class DataTransformation extends RightPanel implements CollectionStatusOb
 
     // root table
     TableNode parentNode = new TableNode(database, table);
+    parentNode.setUuid(table.getUuid());
     parentNode.setupChildren();
     ViewerTable table = parentNode.getTable();
     content.add(createRootTableCard(table));
@@ -179,7 +174,7 @@ public class DataTransformation extends RightPanel implements CollectionStatusOb
       denormalizeConfigurationList.clear();
       for (DataTransformation dataTransformation : instances.values()) {
         dataTransformation.clear();
-        dataTransformation.getDenormalizeConfigurationFile();
+        dataTransformation.getDenormalizeConfigurationFile(tableUUID);
       }
     });
 
@@ -244,7 +239,7 @@ public class DataTransformation extends RightPanel implements CollectionStatusOb
     BootstrapCard card = new BootstrapCard();
 
     card.setTitleIcon(FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE));
-    card.setTitle(childTable.getId());
+    card.setTitle(childTable.getName());
     card.setDescription(childTable.getDescription());
     card.addStyleName("card-disabled");
     card.addExtraContent(getInformationAboutRelashionship(childNode));
@@ -285,14 +280,14 @@ public class DataTransformation extends RightPanel implements CollectionStatusOb
     panel.add(grandChild);
 
     if (denormalizeConfiguration != null) {
-        setup(childNode, switchBtn, card, grandChild, container, selectTable);
+      setup(childNode, switchBtn, card, grandChild, container, selectTable);
     }
 
     return panel;
   }
 
   private void setup(TableNode childNode, SwitchBtn switchBtn,
-                     BootstrapCard card,FlowPanel grandChild, FlowPanel container, MultipleSelectionTablePanel selectTable){
+    BootstrapCard card, FlowPanel grandChild, FlowPanel container, MultipleSelectionTablePanel selectTable) {
     RelatedTablesConfiguration targetTable = denormalizeConfiguration.getRelatedTable(childNode.getUuid());
     if(targetTable != null){
       switchBtn.getButton().setValue(true, true);
@@ -391,11 +386,5 @@ public class DataTransformation extends RightPanel implements CollectionStatusOb
     if (database != null) {
       updateControllerPanel();
     }
-  }
-
-  @Override
-  protected void onLoad() {
-    super.onLoad();
-    JavascriptUtils.stickSidebar();
   }
 }

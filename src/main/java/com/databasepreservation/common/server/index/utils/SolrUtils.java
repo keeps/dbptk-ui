@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 
+import com.databasepreservation.common.client.index.filter.BlockJoinParentFilterParameter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -540,8 +541,11 @@ public class SolrUtils {
       ret.append("({!terms f=" + param.getField() + " v=" + param.getParameterValue() + "})");
     } else if (parameter instanceof InnerJoinFilterParameter) {
       InnerJoinFilterParameter param = (InnerJoinFilterParameter) parameter;
-      ret.append("(tableId:" + param.getNestedTableId() + " AND {!join from=nestedOriginalUUID to=uuid }_root_:"
-        + param.getRowUUID() + ")");
+      ret.append("{!join from=nestedOriginalUUID to=uuid }_root_:"
+        + param.getRowUUID() + " AND nestedUUID:" + param.getNestedOriginalUUID());
+    } else if (parameter instanceof BlockJoinParentFilterParameter) {
+      BlockJoinParentFilterParameter param = (BlockJoinParentFilterParameter) parameter;
+      ret.append("+{!parent which='tableId:" + param.getParentTableId() +"' filters='nestedTableId:"+ param.getNestedTableId() +"' }" + param.getSolrName() + ":" + param.getValue());
     } else {
       LOGGER.error("Unsupported filter parameter class: {}", parameter.getClass().getName());
       throw new RequestNotValidException("Unsupported filter parameter class: " + parameter.getClass().getName());

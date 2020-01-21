@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.index.filter.BlockJoinParentFilterParameter;
 import org.roda.core.data.common.RodaConstants;
 import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
 import com.databasepreservation.common.client.index.filter.DateRangeFilterParameter;
@@ -521,6 +522,8 @@ public class SearchFieldPanel extends Composite {
         // valid(inputSearchSuggestBox)) {
         // filterParameter = new SimpleFilterParameter(field,
         // inputSearchSuggestBox.getValue());
+      } else if(type.equals(ViewerConstants.SEARCH_FIELD_TYPE_NESTED)){
+        filterParameter = new BlockJoinParentFilterParameter(field, inputText.getValue(), searchFields.get(1), searchFields.get(2));
       } else if (valid(inputText)) {
         filterParameter = new BasicSearchFilterParameter(field, inputText.getValue());
       }

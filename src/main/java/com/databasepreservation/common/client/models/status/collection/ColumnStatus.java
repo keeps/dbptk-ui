@@ -19,7 +19,7 @@ public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
   private String customName;
   private String description;
   private String customDescription;
-  private List<String> nestedColumns = new ArrayList<>();
+  private NestedColumnStatus nestedColumns;
   private int order;
   private SearchStatus searchStatus;
   private DetailsStatus detailsStatus;
@@ -51,11 +51,11 @@ public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
     this.description = description;
   }
 
-  public List<String> getNestedColumns() {
+  public NestedColumnStatus getNestedColumns() {
     return nestedColumns;
   }
 
-  public void setNestedColumns(List<String> nestedColumns) {
+  public void setNestedColumns(NestedColumnStatus nestedColumns) {
     this.nestedColumns = nestedColumns;
   }
 

@@ -521,6 +521,8 @@ public class DatabaseRowsSolrManager {
     // add a non-stored field for search only
     doc.addField("token" + ViewerConstants.SOLR_DYN_NEST_MULTI, fields);
 
+    doc.addField("type" + ViewerConstants.SOLR_DYN_TEXT_GENERAL, "parent");
+
     // add nested documents to root document
     doc.addField(ViewerConstants.SOLR_ROWS_NESTED, SolrUtils.addValueUpdate(nestedDocuments));
 
@@ -531,13 +533,13 @@ public class DatabaseRowsSolrManager {
     }
   }
 
-  public SolrInputDocument createNestedDocument(String uuid, String parentUUID, String tableRowUUID,
+  public SolrInputDocument createNestedDocument(String uuid, String originalRowUUID, String tableRowUUID,
     Map<String, ?> fields, String tableId, String nestedUUID) {
     SolrInputDocument nestedDoc = new SolrInputDocument();
     nestedDoc.addField(ViewerConstants.INDEX_ID, uuid);
     nestedDoc.addField(ViewerConstants.SOLR_ROWS_NESTED_UUID, nestedUUID);
     nestedDoc.addField(ViewerConstants.SOLR_ROWS_NESTED_TABLE_ID, tableId);
-    nestedDoc.addField("parentUUID_t", parentUUID);
+    nestedDoc.addField("originalRowUUID_t", originalRowUUID);
     nestedDoc.addField(ViewerConstants.SOLR_ROWS_NESTED_ORIGINAL_UUID, tableRowUUID);
     for (Map.Entry<String, ?> entry : fields.entrySet()) {
       if (entry.getKey().equals(ViewerConstants.SOLR_ROWS_NESTED)) {

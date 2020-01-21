@@ -343,4 +343,14 @@ public class JavascriptUtils {
                                             callback.@com.databasepreservation.common.client.common.DefaultAsyncCallback::onSuccess(*)(value);
                                             });
                                             }-*/;
+
+  public static native String compileTemplate(String templateString, String object) /*-{
+      var template = $wnd.Handlebars.compile(templateString);
+      var result = template(JSON.parse(object));
+      $wnd.console.log(":::compileTemplate:::");
+      $wnd.console.log("template: " + template);
+      $wnd.console.log("object: " + object);
+      $wnd.console.log("result: " + result);
+      return result;
+      }-*/;
 }

@@ -41,7 +41,7 @@ public class TableNode {
       // avoid to add the same table in the same tree path
       if (this.searchTop(viewerTable) == null) {
         TableNode childNode = new TableNode(database, viewerTable);
-        childNode.uuid = generateUUID(foreignKey);
+        childNode.uuid = generateUUID(foreignKey, viewerTable);
         children.put(foreignKey, childNode);
       }
     }
@@ -52,7 +52,7 @@ public class TableNode {
         for (ViewerForeignKey foreignKey : viewerTable.getForeignKeys()) {
           if (foreignKey.getReferencedTableUUID().equals(table.getUuid()) && this.searchTop(viewerTable) == null) {
             TableNode childNode = new TableNode(database, viewerTable);
-            childNode.uuid = generateUUID(foreignKey);
+            childNode.uuid = generateUUID(foreignKey, viewerTable);
             children.put(foreignKey, childNode);
           }
         }
@@ -60,9 +60,12 @@ public class TableNode {
     }
   }
 
-  private String generateUUID(ViewerForeignKey foreignKey){
-    StringBuilder uuid = new StringBuilder(table.getUuid());
-    uuid.append(ViewerConstants.API_SEP).append(foreignKey.getReferencedTableUUID());
+  private String generateUUID(ViewerForeignKey foreignKey, ViewerTable viewerTable){
+    StringBuilder uuid = new StringBuilder();
+    uuid.append(this.uuid);
+
+    uuid.append(ViewerConstants.API_SEP).append(viewerTable.getUuid());
+
     for (ViewerReference reference : foreignKey.getReferences()) {
       uuid.append(ViewerConstants.API_SEP).append(reference.getSourceColumnIndex());
     }
@@ -112,6 +115,10 @@ public class TableNode {
 
   public String getUuid() {
     return uuid;
+  }
+
+  public void setUuid(String uuid) {
+    this.uuid = uuid;
   }
 
   public ViewerForeignKey getForeignKey() {

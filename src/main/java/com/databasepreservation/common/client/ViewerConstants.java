@@ -357,6 +357,7 @@ public class ViewerConstants {
   public static final String SEARCH_FIELD_TYPE_DATETIME = RodaConstants.SEARCH_FIELD_TYPE_DATE;
   public static final String SEARCH_FIELD_TYPE_DATE = RodaConstants.SEARCH_FIELD_TYPE_DATE + "justdate";
   public static final String SEARCH_FIELD_TYPE_TIME = RodaConstants.SEARCH_FIELD_TYPE_DATE + "justtime";
+  public static final String SEARCH_FIELD_TYPE_NESTED = SOLR_ROWS_NESTED;
 
   /*
    * Misc

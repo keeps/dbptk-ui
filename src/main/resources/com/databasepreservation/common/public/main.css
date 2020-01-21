@@ -2914,9 +2914,20 @@ rgba(0, 0, 0, .125);
     height: 52px;
 }
 
-.table-item-link{
-    color: #089de3;
-    text-transform: uppercase;
+.table-ref-link:hover{
+    text-decoration: underline;
+}
+
+.table-ref-link .fa {
+    margin: 0 2px;
+}
+
+.table-ref-link .fa-chevron-right {
+    color: #aaa;
+}
+
+.table-ref-path{
+    white-space: nowrap;
 }
 
 .aggregation-panel{
@@ -2947,4 +2958,21 @@ rgba(0, 0, 0, .125);
     background-color: #eebcba;
     border: none;
     border-left: 2px solid #d9534f;
+}
+
+.center-cell {
+    width: 100%;
+    text-align: center;
+}
+
+.center-cell .btn-cell-action{
+    margin:0 auto;
+    margin-top: 3px;
+}
+
+.card .searchPanelContainer {
+    margin-bottom:15px;
+    margin-top:-15px;
+    margin-left:-15px;
+    margin-right:-15px
 }

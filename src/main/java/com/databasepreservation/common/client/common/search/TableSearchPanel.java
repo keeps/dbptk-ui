@@ -201,7 +201,7 @@ public class TableSearchPanel extends Composite {
   }
 
   private void initAdvancedSearch() {
-    final List<SearchField> searchFieldsFromTable = AdvancedSearchUtils.getSearchFieldsFromTable(table);
+    final List<SearchField> searchFieldsFromTable = AdvancedSearchUtils.getSearchFieldsFromTable(table, status, database.getMetadata());
     TableSearchPanel.this.searchFields.clear();
     for (SearchField searchField : searchFieldsFromTable) {
       ListboxUtils.insertItemByAlphabeticOrder(searchAdvancedFieldOptions, searchField.getLabel(), searchField.getId());

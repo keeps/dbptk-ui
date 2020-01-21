@@ -97,6 +97,10 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
 
     viewerRow.setTableId(SolrUtils.objectToString(doc.get(ViewerConstants.SOLR_ROWS_TABLE_ID), null));
     viewerRow.setTableUUID(SolrUtils.objectToString(doc.get(ViewerConstants.SOLR_ROWS_TABLE_UUID), null));
+    viewerRow.setNestedUUID(SolrUtils.objectToString(doc.get(ViewerConstants.SOLR_ROWS_NESTED_UUID), null));
+    viewerRow
+        .setNestedOriginalUUID(SolrUtils.objectToString(doc.get(ViewerConstants.SOLR_ROWS_NESTED_ORIGINAL_UUID), null));
+    viewerRow.setTableId(SolrUtils.objectToString(doc.get(ViewerConstants.SOLR_ROWS_NESTED_TABLE_ID), null));
 
     Map<String, ViewerCell> cells = new LinkedHashMap<>();
     for (Map.Entry<String, Object> entry : doc) {

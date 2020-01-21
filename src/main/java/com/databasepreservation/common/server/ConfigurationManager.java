@@ -9,8 +9,8 @@ import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.List;
 
+import com.databasepreservation.common.client.models.status.collection.NestedColumnStatus;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.utils.JsonUtils;
@@ -132,18 +132,18 @@ public class ConfigurationManager {
   }
 
   public void addDenormalizationColumns(String databaseUUID, String tableUUID, ViewerColumn column,
-    List<String> nestedId) throws GenericException {
+                                        NestedColumnStatus nestedId) throws GenericException {
     try {
       final DatabaseStatus databaseStatus = getDatabaseStatus(databaseUUID);
       if (databaseStatus.getCollections().size() >= 1) {
         final String collectionId = databaseStatus.getCollections().get(0);
         final CollectionStatus collectionStatus = getCollectionStatus(databaseUUID, collectionId);
         TableStatus table = collectionStatus.getTableStatus(tableUUID);
-        // table.getColumns().removeIf(c -> !c.getNestedColumns().isEmpty());
+//        table.getColumns().removeIf(c -> c.getNestedColumns() != null);
 
         int order = table.getLastColumnOrder();
-        ColumnStatus columnStatus = StatusUtils.getColumnStatus(column, false, ++order);
-        columnStatus.getNestedColumns().addAll(nestedId);
+        ColumnStatus columnStatus = StatusUtils.getColumnStatus(column, true, ++order);
+        columnStatus.setNestedColumns(nestedId);
         table.addColumnStatus(columnStatus);
 
         // Update collection
@@ -161,7 +161,7 @@ public class ConfigurationManager {
         final String collectionId = databaseStatus.getCollections().get(0);
         final CollectionStatus collectionStatus = getCollectionStatus(databaseUUID, collectionId);
         TableStatus table = collectionStatus.getTableStatus(tableUUID);
-        table.getColumns().removeIf(c -> !c.getNestedColumns().isEmpty());
+        table.getColumns().removeIf(c -> c.getNestedColumns() != null);
         // Update collection
         updateCollectionStatus(databaseUUID, collectionStatus);
       }

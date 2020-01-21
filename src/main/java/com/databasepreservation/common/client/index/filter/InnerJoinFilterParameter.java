@@ -1,15 +1,12 @@
 package com.databasepreservation.common.client.index.filter;
 
-import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
-import com.databasepreservation.common.client.index.filter.FilterParameter;
-
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
 public class InnerJoinFilterParameter extends FilterParameter {
   private static final long serialVersionUID = 2618241901314423671L;
   private String rowUUID;
-  private String nestedTableId;
+  private String nestedOriginalUUID;
 
   /**
    * Constructs an empty {@link BasicSearchFilterParameter}.
@@ -19,12 +16,12 @@ public class InnerJoinFilterParameter extends FilterParameter {
   }
 
   public InnerJoinFilterParameter(InnerJoinFilterParameter innerJoinFilterParameter) {
-    this(innerJoinFilterParameter.getRowUUID(), innerJoinFilterParameter.getNestedTableId());
+    this(innerJoinFilterParameter.getRowUUID(), innerJoinFilterParameter.getNestedOriginalUUID());
   }
 
   public InnerJoinFilterParameter(String rowUUID, String nestedTableId) {
     setRowUUID(rowUUID);
-    setNestedTableId(nestedTableId);
+    setNestedOriginalUUID(nestedTableId);
   }
 
   public String getRowUUID() {
@@ -35,17 +32,17 @@ public class InnerJoinFilterParameter extends FilterParameter {
     this.rowUUID = rowUUID;
   }
 
-  public String getNestedTableId() {
-    return nestedTableId;
+  public String getNestedOriginalUUID() {
+    return nestedOriginalUUID;
   }
 
-  public void setNestedTableId(String nestedTableId) {
-    this.nestedTableId = nestedTableId;
+  public void setNestedOriginalUUID(String nestedOriginalUUID) {
+    this.nestedOriginalUUID = nestedOriginalUUID;
   }
 
 
   @Override
   public String toString() {
-    return "InnerJoinFilterParameter(tableId:" + getNestedTableId() +" AND {!join from=nestedOriginalUUID to=uuid }_root_:" + getRowUUID() + ")";
+    return "InnerJoinFilterParameter({!join from=nestedOriginalUUID to=uuid }_root_:" + getRowUUID() + " AND nestedUUID:" + getNestedOriginalUUID() +")";
   }
 }

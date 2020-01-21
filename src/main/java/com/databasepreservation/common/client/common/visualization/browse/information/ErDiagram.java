@@ -32,7 +32,7 @@ public class ErDiagram extends Composite {
 
   public static ErDiagram getInstance(ViewerDatabase database, ViewerSchema schema, String path) {
     String separator = "/";
-    String code = database.getUuid() + separator + schema.getUuid();
+    String code = database.getUuid() + separator + schema.getUuid() + separator + path;
     return instances.computeIfAbsent(code, k -> new ErDiagram(database, schema, path));
   }
 
@@ -557,8 +557,8 @@ public class ErDiagram extends Composite {
                 "repulsion": {
                     "centralGravity": 0.1,
                     "springLength": 25,
-                    "springConstant": 0.01,
-                    "nodeDistance": 250,
+                    "springConstant": 0,
+                    "nodeDistance": 150,
                     "damping": 0.09,
                 },
                 "forceAtlas2Based": {
@@ -571,7 +571,7 @@ public class ErDiagram extends Composite {
                 },
                 "maxVelocity": 150,
                 "minVelocity": 0.75,
-                "solver": "forceAtlas2Based",
+                "solver": "repulsion",
                 "timestep": 0.9,
                 "stabilization": {
                     "enabled":true,
@@ -593,7 +593,7 @@ public class ErDiagram extends Composite {
         network.on("selectNode", function (params) {
             //params.event = "[original event]";
             if(params.nodes.length === 1) {
-//                console.log("go to db" + dbuuid + " and table " + params.nodes[0] + " and path " + path);
+  //                console.log("go to db" + dbuuid + " and table " + params.nodes[0] + " and path " + path);
                 var tableId = params.nodes[0];
   
                 network.unselectAll();
@@ -606,11 +606,11 @@ public class ErDiagram extends Composite {
         });
   
         network.on("stabilized", function (params) {
-  //            if(params.iterations > 1){
-  //                options.physics.enabled = true;
-  //                network.setOptions(options);
-  //            }
-            network.fit();
+            if(params.iterations > 1){
+                options.physics.enabled = false;
+                network.setOptions(options);
+            }
+  //            network.fit();
         });
   
         network.on("dragEnd", function (params) {

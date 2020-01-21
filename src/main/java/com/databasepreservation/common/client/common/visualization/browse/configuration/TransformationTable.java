@@ -84,7 +84,10 @@ public class TransformationTable extends Composite {
    */
   private void createTable() {
     for (ViewerColumn column : table.getColumns()) {
-      originalColumns.add(new ColumnWrapper(table.getName(), column));
+      ColumnWrapper columnWrapper = new ColumnWrapper(table.getName(), denormalizeConfiguration, database.getMetadata());
+      columnWrapper.setColumnDisplayName(column.getDisplayName());
+      columnWrapper.setColumnDescription(column.getDescription());
+      originalColumns.add(columnWrapper);
     }
     drawTable(originalColumns);
   }
@@ -102,10 +105,16 @@ public class TransformationTable extends Composite {
   }
 
   private void setColumnsToInclude(RelatedTablesConfiguration relatedTable, List<ColumnWrapper> columns) {
+    ViewerTable referencedTable = database.getMetadata().getTable(relatedTable.getTableUUID());
+    ColumnWrapper columnWrapper = new ColumnWrapper(relatedTable.getUuid(), referencedTable.getName(), relatedTable,
+      denormalizeConfiguration, database.getMetadata());
     for (RelatedColumnConfiguration columnToInclude : relatedTable.getColumnsIncluded()) {
-      ViewerTable referencedTable = database.getMetadata().getTable(relatedTable.getTableUUID());
       ViewerColumn col = referencedTable.getColumns().get(columnToInclude.getIndex());
-      columns.add(new ColumnWrapper(relatedTable.getUuid(), referencedTable.getName(), col));
+      columnWrapper.setColumnDisplayName(col.getDisplayName());
+      columnWrapper.setColumnDescription(col.getDescription());
+    }
+    if (columnWrapper.getColumnDisplayName() != null) {
+      columns.add(columnWrapper);
     }
 
     for (RelatedTablesConfiguration innerTable : relatedTable.getRelatedTables()) {
@@ -119,43 +128,34 @@ public class TransformationTable extends Composite {
       tablePanel = new MetadataTableList<>(messages.tableDoesNotContainColumns());
     } else {
       tablePanel = new MetadataTableList<ColumnWrapper>(columns.iterator(),
-        new MetadataTableList.ColumnInfo<>("", 1.2, new Column<ColumnWrapper, SafeHtml>(new SafeHtmlCell()) {
+        new MetadataTableList.ColumnInfo<>("", 0.6, new Column<ColumnWrapper, SafeHtml>(new SafeHtmlCell()) {
 
           @Override
           public SafeHtml getValue(ColumnWrapper columnWrapper) {
             if (columnWrapper.getReferencedTableName().equals(table.getName())) {
-              return SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE));
+              return SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.COLUMN));
             }
             return SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.REFERENCE));
           }
-        }), new MetadataTableList.ColumnInfo<>(messages.columnName(), 7, new TextColumn<ColumnWrapper>() {
+        }), new MetadataTableList.ColumnInfo<>(messages.columnName(), 12, new TextColumn<ColumnWrapper>() {
 
           @Override
           public void render(Cell.Context context, ColumnWrapper object, SafeHtmlBuilder sb) {
             if (object.getReferencedTableName().equals(table.getName())) {
               super.render(context, object, sb);
             } else {
-              String value = getValue(object);
-              sb.appendHtmlConstant("<span class=\"table-item-link\">");
-              if (value != null) {
-                sb.append(SafeHtmlUtils.fromString(value));
-              }
-              sb.appendHtmlConstant("</span>");
-              sb.appendHtmlConstant(" <i class=\"fas fa-caret-right table-item-link\"></i> ");
-              sb.appendHtmlConstant("<span class=\"table-item-link\">");
-              sb.append(SafeHtmlUtils.fromString( object.getReferencedTableName()));
-              sb.appendHtmlConstant("</span>");
+              sb.append(object.createPath());
             }
           }
 
           @Override
           public String getValue(ColumnWrapper object) {
-            return object.getColumn().getDisplayName();
+            return object.getColumnDisplayName();
           }
-        }), new MetadataTableList.ColumnInfo<>(messages.description(), 25, new TextColumn<ColumnWrapper>() {
+        }), new MetadataTableList.ColumnInfo<>(messages.description(), 15, new TextColumn<ColumnWrapper>() {
           @Override
           public String getValue(ColumnWrapper object) {
-            return object.getColumn().getDescription();
+            return object.getColumnDescription();
           }
         }));
     }

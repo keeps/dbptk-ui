@@ -4,9 +4,12 @@ import java.util.List;
 import java.util.Map;
 
 import com.databasepreservation.common.client.ObserverManager;
+import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.TableNode;
 import com.databasepreservation.common.client.configuration.observer.CollectionObserver;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
+import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
+import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
 import com.databasepreservation.common.client.models.status.denormalization.ReferencesConfiguration;
 import com.databasepreservation.common.client.models.status.denormalization.RelatedColumnConfiguration;
@@ -136,5 +139,27 @@ public class DataTransformationUtils {
         }
       }
     }
+  }
+
+  public static void buildNestedFieldsToReturn(ViewerTable table, CollectionStatus status,
+    Map<String, String> extraParameters, List<String> fieldsToReturn) {
+    TableStatus tableStatus = status.getTableStatus(table.getUuid());
+    fieldsToReturn.add(ViewerConstants.INDEX_ID);
+    int nestedCount = 0;
+    String keys = "";
+    String separator = "";
+    for (ColumnStatus column : tableStatus.getColumns()) {
+      if (column.getNestedColumns() != null) {
+        String nestedTableId = column.getId();
+        String key = ViewerConstants.SOLR_ROWS_NESTED + "." + nestedCount;
+        keys = keys + separator + key;
+        separator = ",";
+        fieldsToReturn.add(key + ":[subquery]");
+        extraParameters.put(key + ".q", "+nestedUUID:" + nestedTableId + " AND {!terms f=_root_ v=$row.uuid}");
+        extraParameters.put(key + ".rows", "10");
+        nestedCount++;
+      }
+    }
+    fieldsToReturn.add(ViewerConstants.SOLR_ROWS_NESTED + ":" + "\"" + keys + "\"");
   }
 }

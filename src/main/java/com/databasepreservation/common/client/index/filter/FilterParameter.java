@@ -32,6 +32,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
   @Type(value = SimpleFilterParameter.class, name = "SimpleFilterParameter"),
   @Type(value = AndFiltersParameters.class, name = "AndFiltersParameters"),
   @Type(value = InnerJoinFilterParameter.class, name = "InnerJoinFilterParameter"),
+  @Type(value = BlockJoinParentFilterParameter.class, name = "BlockJoinParentFilterParameter"),
   @Type(value = OrFiltersParameters.class, name = "OrFiltersParameters")})
 
 public abstract class FilterParameter implements Serializable {

@@ -8,25 +8,26 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.client.models.structure.ViewerColumn;
-import com.databasepreservation.common.server.DataTransformationObserver;
+import com.databasepreservation.common.client.models.status.collection.NestedColumnStatus;
 import org.apache.solr.common.SolrInputDocument;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
+
+import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.index.filter.AndFiltersParameters;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.filter.FilterParameter;
 import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
-
-import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
 import com.databasepreservation.common.client.models.status.denormalization.ReferencesConfiguration;
 import com.databasepreservation.common.client.models.status.denormalization.RelatedColumnConfiguration;
 import com.databasepreservation.common.client.models.status.denormalization.RelatedTablesConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerCell;
+import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.tools.FilterUtils;
+import com.databasepreservation.common.server.DataTransformationObserver;
 import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
@@ -104,17 +105,18 @@ public class DenormalizeTransformer {
     if (!columnsIncluded.isEmpty()) {
       ViewerColumn viewerColumn = new ViewerColumn();
       viewerColumn.setDescription("Please EDIT");
-      viewerColumn.setSolrName(relatedTable.getTableID());
-      List<String> columnsId = new ArrayList<>();
-      List<String> columnName = new ArrayList<>();
+      viewerColumn.setSolrName(relatedTable.getUuid());
+      NestedColumnStatus nestedColumn = new NestedColumnStatus();
+      nestedColumn.setOriginalTable(relatedTable.getTableID());
+      List<String> columnName = new ArrayList();
 
       for (RelatedColumnConfiguration column : columnsIncluded) {
-        columnsId.add(column.getSolrName());
+        nestedColumn.getNestedFields().add(column.getColumnName());
         columnName.add(column.getColumnName());
       }
       viewerColumn.setDisplayName(columnName.toString());
       ViewerFactory.getConfigurationManager().addDenormalizationColumns(databaseUUID,
-        denormalizeConfiguration.getTableUUID(), viewerColumn, columnsId);
+        denormalizeConfiguration.getTableUUID(), viewerColumn, nestedColumn);
     }
     for (RelatedTablesConfiguration innerRelatedTable : relatedTable.getRelatedTables()) {
       setAllColumnsToInclude(innerRelatedTable);
@@ -165,7 +167,11 @@ public class DenormalizeTransformer {
     List<String> fieldsToReturn = new ArrayList<>();
 
     fieldsToReturn.add(ViewerConstants.INDEX_ID);
-    fieldsToReturn.add(ViewerConstants.SOLR_ROWS_TABLE_ID);
+    fieldsToReturn.add(String.format("%s:\"%s\"", ViewerConstants.SOLR_ROWS_NESTED_UUID, relatedTable.getUuid()));
+    fieldsToReturn
+      .add(String.format("%s:%s", ViewerConstants.SOLR_ROWS_NESTED_ORIGINAL_UUID, ViewerConstants.INDEX_ID));
+    fieldsToReturn
+      .add(String.format("%s:%s", ViewerConstants.SOLR_ROWS_NESTED_TABLE_ID, ViewerConstants.SOLR_ROWS_TABLE_ID));
 
     filterParameterList.add(new SimpleFilterParameter(ViewerConstants.SOLR_ROWS_TABLE_ID, tableId));
     for (ReferencesConfiguration reference : relatedTable.getReferences()) {
@@ -218,7 +224,7 @@ public class DenormalizeTransformer {
 
   private void createdNestedDocument(ViewerRow row, String parentUUID, List<SolrInputDocument> nestedDocuments, List<String> columnsToDisplay) {
     Map<String, ViewerCell> cells = row.getCells();
-    String uuid = parentUUID + ViewerConstants.API_SEP + row.getUuid();
+    String uuid = row.getNestedUUID();
 
     Map<String, Object> fields = new HashMap<>();
     for (Map.Entry<String, ViewerCell> cell : cells.entrySet()) {
@@ -233,7 +239,8 @@ public class DenormalizeTransformer {
       }
     }
     if (!fields.isEmpty()) {
-      nestedDocuments.add(solrManager.createNestedDocument(uuid, parentUUID, row.getUuid(), fields, row.getTableId(),
+      nestedDocuments.add(solrManager.createNestedDocument(uuid, row.getUuid(), row.getNestedOriginalUUID(), fields,
+        row.getTableId(),
         row.getNestedUUID()));
     }
   }

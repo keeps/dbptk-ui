@@ -7,10 +7,15 @@
  */
 package com.databasepreservation.common.client.common.dialogs;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.databasepreservation.common.client.common.NoAsyncCallback;
 import com.databasepreservation.common.client.common.fields.GenericField;
 import com.databasepreservation.common.client.common.helpers.HelperValidator;
 import com.databasepreservation.common.client.common.lists.columns.IndexedColumn;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
+import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.wizard.table.ExternalLobsDialogBoxResult;
 import com.databasepreservation.common.client.widgets.MyCellTableResources;
 import com.google.gwt.core.client.GWT;
@@ -31,10 +36,8 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
-import config.i18n.client.ClientMessages;
 
-import java.util.ArrayList;
-import java.util.List;
+import config.i18n.client.ClientMessages;
 
 public class Dialogs {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
@@ -514,6 +517,47 @@ public class Dialogs {
     continueButton.addClickHandler(event -> {
       dialogBox.hide();
       callback.onSuccess(null);
+    });
+
+    dialogBox.addStyleName("wui-dialog-information");
+    layout.addStyleName("wui-dialog-layout");
+    messageLabel.addStyleName("wui-dialog-message");
+    if (continueButtonStyle != null) {
+      continueButton.addStyleName(continueButtonStyle);
+    } else {
+      continueButton.addStyleName("btn btn-play");
+    }
+
+    dialogBox.center();
+    dialogBox.show();
+  }
+
+  public static void showDialogColumnConfiguration(String title, String message, List<FlowPanel> configurations, String continueButtonText,
+                                                   String continueButtonStyle) {
+    final DialogBox dialogBox = new DialogBox(false, true);
+    dialogBox.setText(title);
+
+    FlowPanel layout = new FlowPanel();
+    FlowPanel form = new FlowPanel();
+    Label messageLabel = new Label(message);
+    Button continueButton = new Button(continueButtonText);
+
+    for (FlowPanel configuration : configurations) {
+      form.add(configuration);
+    }
+
+    layout.add(messageLabel);
+    layout.add(form);
+    layout.add(continueButton);
+
+    form.setStyleName("content");
+
+    dialogBox.setWidget(layout);
+    dialogBox.setGlassEnabled(true);
+    dialogBox.setAnimationEnabled(false);
+
+    continueButton.addClickHandler(event -> {
+      dialogBox.hide();
     });
 
     dialogBox.addStyleName("wui-dialog-information");

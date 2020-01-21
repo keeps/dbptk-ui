@@ -12,6 +12,7 @@ import com.databasepreservation.common.client.index.filter.LongRangeFilterParame
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.utils.AdvancedSearchUtils;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.tools.ViewerJsonUtils;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
@@ -30,6 +31,9 @@ public class SearchInfo implements Serializable {
 
   /**
    * Empty instance
+   * @param status
+   * @param table
+   * @param columnAndValueMapping
    */
   public SearchInfo() {
   }
@@ -43,11 +47,11 @@ public class SearchInfo implements Serializable {
    *          map of solr column names to column values, to be used as advanced
    *          search fields
    */
-  public SearchInfo(ViewerTable viewerTable, Map<String, String> solrColumnAndValue) {
+  public SearchInfo(CollectionStatus status, ViewerTable viewerTable, Map<String, String> solrColumnAndValue) {
     defaultFilter = ViewerConstants.DEFAULT_FILTER;
     currentFilter = "";
 
-    fields = AdvancedSearchUtils.getSearchFieldsFromTable(viewerTable);
+    fields = AdvancedSearchUtils.getSearchFieldsFromTable(viewerTable, status);
 
     fieldParameters = new ArrayList<>();
     for (SearchField field : fields) {

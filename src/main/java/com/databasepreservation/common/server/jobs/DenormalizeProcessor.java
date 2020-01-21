@@ -8,7 +8,6 @@ import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.transformers.Denormalize;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>

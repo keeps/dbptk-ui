@@ -447,8 +447,8 @@ public class DatabaseSidebar extends Composite implements Sidebar, CollectionSta
   }
 
   @Override
-  protected void onLoad() {
-    super.onLoad();
+  protected void onAttach() {
+    super.onAttach();
     JavascriptUtils.stickSidebar();
   }
 }

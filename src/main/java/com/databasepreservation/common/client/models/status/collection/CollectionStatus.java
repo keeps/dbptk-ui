@@ -176,6 +176,44 @@ public class CollectionStatus implements Serializable {
     return true;
   }
 
+  public boolean showColumnInDetail(String tableId, String columnId) {
+    final TableStatus tableStatus = getTableStatus(tableId);
+    if (tableStatus != null) {
+      for (ColumnStatus column : tableStatus.getColumns()) {
+        if (column.getId().equals(columnId)) {
+          return column.getDetailsStatus().isShow();
+        }
+      }
+    }
+
+    return true;
+  }
+
+  public ColumnStatus getColumnByTableAndColumn(String tableId, String columnId) {
+    final TableStatus tableStatus = getTableStatus(tableId);
+    if (tableStatus != null) {
+      for (ColumnStatus column : tableStatus.getColumns()) {
+        if (column.getId().equals(columnId)) {
+          return column;
+        }
+      }
+    }
+    return null;
+  }
+
+  public boolean showAdvancedSearch(String tableId, String columnId) {
+    final TableStatus tableStatus = getTableStatus(tableId);
+    if (tableStatus != null) {
+      for (ColumnStatus column : tableStatus.getColumns()) {
+        if (column.getId().equals(columnId)) {
+          return column.getSearchStatus().getAdvanced().isFixed();
+        }
+      }
+    }
+
+    return true;
+  }
+
   public void updateTableShowCondition(String id, boolean value) {
     for (TableStatus table : tables) {
       if (table.getUuid().equals(id))

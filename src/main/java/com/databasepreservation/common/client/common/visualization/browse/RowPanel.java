@@ -16,14 +16,14 @@ import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.fields.RowField;
 import com.databasepreservation.common.client.common.helpers.HelperExportTableData;
-import com.databasepreservation.common.client.common.lists.TableRowList;
+import com.databasepreservation.common.client.common.search.TableSearchPanel;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
-import com.databasepreservation.common.client.index.filter.AndFiltersParameters;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.filter.FilterParameter;
 import com.databasepreservation.common.client.index.filter.InnerJoinFilterParameter;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
+import com.databasepreservation.common.client.models.status.collection.NestedColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
@@ -193,13 +193,14 @@ public class RowPanel extends RightPanel {
     }
 
     for (ViewerColumn column : table.getColumns()) {
+      if (!status.showColumnInDetail(table.getUuid(), column.getSolrName()))
+        continue;
       boolean isPrimaryKeyColumn = table.getPrimaryKey() != null
         && table.getPrimaryKey().getColumnIndexesInViewerTable().contains(column.getColumnIndexInEnclosingTable());
       getCellHTML(column, colIndexRelatedTo.get(column.getSolrName()), colIndexReferencedBy.get(column.getSolrName()),
         isPrimaryKeyColumn);
     }
 
-    // getNestedHTML(row.getNestedRowList());
     getNestedHTML();
 
     Button btn = new Button();
@@ -311,33 +312,27 @@ public class RowPanel extends RightPanel {
 
   private void getNestedHTML() {
     TableStatus tableStatus = status.getTableStatus(table.getUuid());
-    for (ColumnStatus column : tableStatus.getColumns()) {
-      List<String> nestedColumns = column.getNestedColumns();
-      if (!nestedColumns.isEmpty()) {
-        String nestedTableId = column.getId();
+    for (ColumnStatus columnStatus : tableStatus.getColumns()) {
+      if (!status.showColumnInDetail(table.getUuid(), columnStatus.getId()))
+        continue;
+      NestedColumnStatus nestedColumns = columnStatus.getNestedColumns();
+
+      if (nestedColumns != null) {
+        ViewerTable nestedTable = database.getMetadata().getTableById(nestedColumns.getOriginalTable());
+
         FlowPanel card = new FlowPanel();
         card.setStyleName("card");
 
         List<FilterParameter> filterParameterList = new ArrayList<>();
-        filterParameterList.add(new InnerJoinFilterParameter(rowUUID, nestedTableId));
+        filterParameterList.add(new InnerJoinFilterParameter(rowUUID, columnStatus.getId()));
         Filter filter = new Filter();
-        filter.add(new AndFiltersParameters(filterParameterList));
+        filter.add(filterParameterList);
 
-        RowField rowField = RowField.createInstance(nestedTableId, null);
-        rowField.addStyleName("card-header");
-        card.add(rowField);
-
-        ViewerTable nestedTable = database.getMetadata().getTableById(nestedTableId);
-
-        // final TableSearchPanel tablePanel = new TableSearchPanel(status);
-        // tablePanel.provideSource(database, nestedTable, filter, true);
-
-        TableRowList tablePanel = new TableRowList(database, nestedTable, filter, null, null, false,
-          nestedTable.getCountRows() != 0, status, true);
-
+        final TableSearchPanel tablePanel = new TableSearchPanel(status);
+        tablePanel.provideSource(database, nestedTable, filter, true);
         card.add(tablePanel);
-        content.add(card);
 
+        content.add(card);
       }
     }
   }

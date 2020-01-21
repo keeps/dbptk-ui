@@ -25,7 +25,6 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import com.google.gwt.view.client.SelectionChangeEvent;
 
 import config.i18n.client.ClientMessages;
 
@@ -69,9 +68,11 @@ public class JobManager extends ContentPanel {
     initWidget(binder.createAndBindUi(this));
     jobList.getSelectionModel().addSelectionChangeHandler(selectionChangeEvent -> {
       ViewerJob selected = jobList.getSelectionModel().getSelectedObject();
-      String databaseUuid = selected.getDatabaseUuid();
-      String tableUuid = selected.getTableUuid();
-      HistoryManager.gotoTable(databaseUuid, selected.getTableId());
+      if (selected != null) {
+        String databaseUuid = selected.getDatabaseUuid();
+        String tableUuid = selected.getTableUuid();
+        HistoryManager.gotoTable(databaseUuid, tableUuid);
+      }
     });
 
     header.add(CommonClientUtils.getHeaderHTML(

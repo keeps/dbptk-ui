@@ -302,8 +302,8 @@ public class ColumnsManagementSidebar extends Composite implements Sidebar, Coll
   }
 
   @Override
-  protected void onLoad() {
-    super.onLoad();
+  protected void onAttach() {
+    super.onAttach();
     JavascriptUtils.stickSidebar();
   }
 }
