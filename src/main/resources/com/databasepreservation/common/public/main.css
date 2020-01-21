@@ -2940,12 +2940,6 @@ rgba(0, 0, 0, .125);
 	word-break: break-word;
 }
 
-.text-box-invalid {
-    background-color: #eebcba;
-    border: none !important;
-    border-left: 2px solid #d9534f !important;
-}
-
 .management .form-textbox:invalid {
     background-color: #eebcba;
     border: none;

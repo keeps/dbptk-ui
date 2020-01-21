@@ -22,9 +22,9 @@ public class RestUtils {
   }
 
   public static SafeUri createFileResourceDownloadSIARDUri(String databaseUUID) {
-    // api/v1/database/{databaseUUID}/download/siard/
+    // api/v1/file/download/siard/
     StringBuilder b = new StringBuilder().append(ViewerConstants.API_SERVLET);
-    b.append(ViewerConstants.API_V1_DATABASE_RESOURCE).append(ViewerConstants.API_SEP).append(databaseUUID)
+    b.append(ViewerConstants.API_V1_FILE_RESOURCE).append(ViewerConstants.API_SEP).append(databaseUUID)
       .append(ViewerConstants.API_SEP).append(ViewerConstants.API_PATH_PARAM_DOWNLOAD).append(ViewerConstants.API_SEP)
       .append(ViewerConstants.API_PATH_PARAM_SIARD);
 

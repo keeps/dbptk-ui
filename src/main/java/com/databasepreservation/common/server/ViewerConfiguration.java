@@ -574,7 +574,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     return inputStream;
   }
 
-  private static boolean checkPathIsWithin(Path path, Path folder) {
+  public static boolean checkPathIsWithin(Path path, Path folder) {
     boolean ret = true;
     Path absolutePath = path.toAbsolutePath();
     // check against normalized path

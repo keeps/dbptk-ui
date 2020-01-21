@@ -1,7 +1,6 @@
 package com.databasepreservation.common.client.common.visualization.browse.configuration.columns;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -14,12 +13,9 @@ import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.lists.cells.ActionsCell;
-import com.databasepreservation.common.client.common.lists.cells.EditableCell;
 import com.databasepreservation.common.client.common.lists.cells.RequiredEditableCell;
 import com.databasepreservation.common.client.common.lists.cells.TextAreaInputCell;
 import com.databasepreservation.common.client.common.lists.widgets.BasicTablePanel;
-import com.databasepreservation.common.client.common.lists.widgets.MultipleSelectionTablePanel;
-import com.databasepreservation.common.client.common.sidebar.ColumnsManagementSidebar;
 import com.databasepreservation.common.client.common.sidebar.Sidebar;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.configuration.observer.CollectionStatusObserver;
@@ -282,8 +278,7 @@ public class ColumnsManagementPanel extends RightPanel implements CollectionStat
         editableValues.put(column.getId(), helper);
       }
 
-      ColumnsManagementSidebar.getInstance(database.getUuid()).updateSidebarItem(tableUUID,
-        !value.equals(column.getSearchStatus().getList().isShow()));
+      sidebar.updateSidebarItem(tableUUID, true);
     });
 
     return checkbox;
@@ -312,8 +307,7 @@ public class ColumnsManagementPanel extends RightPanel implements CollectionStat
         editableValues.put(column.getId(), helper);
       }
 
-      ColumnsManagementSidebar.getInstance(database.getUuid()).updateSidebarItem(tableUUID,
-        !value.equals(column.getDetailsStatus().isShow()));
+      sidebar.updateSidebarItem(tableUUID, true);
     });
 
     return checkbox;
@@ -342,7 +336,7 @@ public class ColumnsManagementPanel extends RightPanel implements CollectionStat
         editableValues.put(column.getId(), helper);
       }
 
-      sidebar.updateSidebarItem(tableUUID, !value.equals(column.getSearchStatus().getAdvanced().isFixed()));
+      sidebar.updateSidebarItem(tableUUID, true);
     });
 
     return checkbox;
@@ -369,7 +363,6 @@ public class ColumnsManagementPanel extends RightPanel implements CollectionStat
                     btnSave.setEnabled(false);
                     ObserverManager.getSaveObserver().setEnabled(database.getUuid(), false);
                   }
-
                 });
               }
             });

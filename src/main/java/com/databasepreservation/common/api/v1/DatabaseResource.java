@@ -869,36 +869,6 @@ public class DatabaseResource implements DatabaseService {
   }
 
   @GET
-  @Path("/{databaseUUID}/download/siard")
-  @Produces(MediaType.APPLICATION_OCTET_STREAM)
-  @ApiOperation(value = "Downloads a specific SIARD file from the storage location", notes = "")
-  public Response getSIARDFile(@PathParam(ViewerConstants.API_PATH_PARAM_DATABASE_UUID) String databaseUUID) {
-    ControllerAssistant controllerAssistant = new ControllerAssistant() {};
-    User user = UserUtility.getUser(request);
-    LogEntryState state = LogEntryState.SUCCESS;
-
-    controllerAssistant.checkRoles(user);
-    DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
-
-    try {
-      ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
-      File file = new File(database.getPath());
-      if (!file.exists()) {
-        throw new NotFoundException("SIARD file not found");
-      }
-      Response.ResponseBuilder responseBuilder = Response.ok(file);
-      responseBuilder.header("Content-Disposition", "attachment; filename=\"" + file.getName() + "\"");
-      return responseBuilder.build();
-    } catch (NotFoundException | GenericException e) {
-      state = LogEntryState.FAILURE;
-      throw new RESTException(e);
-    } finally {
-      // register action
-      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID);
-    }
-  }
-
-  @GET
   @Path("/{databaseUUID}/siard/{siardUUID}/validation")
   @Produces(MediaType.APPLICATION_OCTET_STREAM)
   @ApiOperation(value = "Downloads a specific SIARD validation report file from the storage location", notes = "")

@@ -85,6 +85,37 @@ public class FileResource {
     }
   }
 
+  @GET
+  @Path("/download/siard")
+  @Produces(MediaType.APPLICATION_OCTET_STREAM)
+  @ApiOperation(value = "Downloads a specific SIARD file from the storage location", notes = "")
+  public Response getSIARDFile(
+    @ApiParam(required = true, value = "The name of the SIARD file to download") @QueryParam(ViewerConstants.API_FILE) String filename) {
+    ControllerAssistant controllerAssistant = new ControllerAssistant() {};
+    User user = UserUtility.getUser(request);
+    LogEntryState state = LogEntryState.SUCCESS;
+
+    controllerAssistant.checkRoles(user);
+    try {
+      java.nio.file.Path siardFilesPath = ViewerConfiguration.getInstance().getSIARDFilesPath();
+      java.nio.file.Path siardPath = siardFilesPath.resolve(filename);
+      if (java.nio.file.Files.exists(siardPath) && !java.nio.file.Files.isDirectory(siardPath)
+        && ViewerConfiguration.checkPathIsWithin(siardPath, siardFilesPath)) {
+        Response.ResponseBuilder responseBuilder = Response.ok(siardPath.toFile());
+        responseBuilder.header("Content-Disposition", "attachment; filename=\"" + siardPath.toFile().getName() + "\"");
+        return responseBuilder.build();
+      } else {
+        throw new NotFoundException("SIARD file not found");
+      }
+    } catch (NotFoundException e) {
+      state = LogEntryState.FAILURE;
+      throw new RESTException(e);
+    } finally {
+      // register action
+      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_FILENAME_PARAM, filename);
+    }
+  }
+
   @DELETE
   @ApiOperation(value = "Deletes a SIARD file", notes = "")
   public void deleteSiardFile(
