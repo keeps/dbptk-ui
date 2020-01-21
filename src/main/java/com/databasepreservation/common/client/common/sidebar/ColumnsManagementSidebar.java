@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.databasepreservation.common.client.ObserverManager;
+import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.configuration.observer.CollectionStatusObserver;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
@@ -298,5 +299,11 @@ public class ColumnsManagementSidebar extends Composite implements Sidebar, Coll
     for (DisclosurePanel disclosurePanel : disclosurePanelsThatShouldBeVisible) {
       disclosurePanel.setVisible(true);
     }
+  }
+
+  @Override
+  protected void onLoad() {
+    super.onLoad();
+    JavascriptUtils.stickSidebar();
   }
 }
