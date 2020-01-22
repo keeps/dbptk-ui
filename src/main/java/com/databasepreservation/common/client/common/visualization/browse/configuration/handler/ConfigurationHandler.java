@@ -20,7 +20,7 @@ import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
 import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
 import com.databasepreservation.common.client.models.structure.ViewerReference;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
-import com.databasepreservation.common.client.services.DatabaseService;
+import com.databasepreservation.common.client.services.CollectionService;
 import com.google.gwt.core.client.GWT;
 
 /**
@@ -45,9 +45,10 @@ public class ConfigurationHandler {
       k -> new ConfigurationHandler(database, collectionConfiguration));
   }
 
-  public static ConfigurationHandler getInstance(ViewerDatabase database, DenormalizeConfiguration denormalizeConfiguration){
+  public static ConfigurationHandler getInstance(ViewerDatabase database,
+    DenormalizeConfiguration denormalizeConfiguration) {
     return instances.computeIfAbsent(database.getUuid(),
-        k -> new ConfigurationHandler(database, denormalizeConfiguration));
+      k -> new ConfigurationHandler(database, denormalizeConfiguration));
   }
 
   /**
@@ -85,10 +86,10 @@ public class ConfigurationHandler {
     }
   }
 
-  public void addDenormalizationConfiguration(DenormalizeConfiguration denormalizeConfiguration){
-    DatabaseService.Util.call((Boolean result) -> {
+  public void addDenormalizationConfiguration(DenormalizeConfiguration denormalizeConfiguration) {
+    CollectionService.Util.call((Boolean result) -> {
       Dialogs.showInformationDialog("Configuration file", "Created denormalization configuration file with success",
-          "OK");
+        "OK");
     }).createDenormalizeConfigurationFile(database.getUuid(), database.getUuid(),
       denormalizeConfiguration.getTableUUID(), denormalizeConfiguration);
   }

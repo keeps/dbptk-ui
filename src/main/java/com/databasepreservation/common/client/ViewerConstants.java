@@ -300,7 +300,7 @@ public class ViewerConstants {
   public static final String API_PATH_PARAM_COLLECTION_UUID = "collectionUUID";
   public static final String API_PATH_PARAM_EXPORT_DESCRIPTION = "description";
   public static final String API_PATH_PARAM_EXPORT_LOBS = "lobs";
-  public static final String API_PATH_PARAM_FILENAME = "fn";
+  public static final String API_PATH_PARAM_FILENAME = "filename";
   public static final String API_PATH_PARAM_ZIP_FILENAME = "zfn";
   public static final String API_PATH_PARAM_TABLE_UUID = "tableUUID";
   public static final String API_QUERY_PARAM_FIELDS = "fl";

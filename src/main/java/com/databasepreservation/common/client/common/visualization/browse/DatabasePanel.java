@@ -23,6 +23,7 @@ import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.models.user.User;
 import com.databasepreservation.common.client.services.AuthenticationService;
+import com.databasepreservation.common.client.services.CollectionService;
 import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
@@ -259,7 +260,7 @@ public class DatabasePanel extends Composite implements CollectionStatusObserver
   private void loadPanelWithDatabase(final ContentPanelLoader panelLoader) {
     DatabaseService.Util.call((ViewerDatabase result) -> {
       database = result;
-      DatabaseService.Util.call((List<CollectionStatus> status) -> {
+      CollectionService.Util.call((List<CollectionStatus> status) -> {
         collectionStatus = status.get(0);
         loadPanel(panelLoader);
       }).getCollectionConfiguration(database.getUuid(), database.getUuid());
@@ -295,7 +296,7 @@ public class DatabasePanel extends Composite implements CollectionStatusObserver
   private void loadPanelWithDatabase(final RightPanelLoader rightPanelLoader, String toSelect) {
     DatabaseService.Util.call((IsIndexed result) -> {
       database = (ViewerDatabase) result;
-      DatabaseService.Util.call((List<CollectionStatus> status) -> {
+      CollectionService.Util.call((List<CollectionStatus> status) -> {
         collectionStatus = status.get(0);
         loadPanel(rightPanelLoader, toSelect);
       }).getCollectionConfiguration(database.getUuid(), database.getUuid());
@@ -318,7 +319,6 @@ public class DatabasePanel extends Composite implements CollectionStatusObserver
       rightPanel.setVisible(true);
       rightPanelContainer.setWidget(rightPanel);
     }
-    GWT.log("END");
   }
 
   public void setTopLevelPanelCSS(String css) {

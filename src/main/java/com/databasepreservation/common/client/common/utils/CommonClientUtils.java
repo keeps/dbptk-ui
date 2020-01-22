@@ -193,16 +193,8 @@ public class CommonClientUtils {
     return panel;
   }
 
-  public static Anchor getAnchorForLOBDownload(final String databaseUUID, final String tableUUID, final String rowUUID,
-    final int columnIndexInEnclosingTable, final String lobName) {
-    String servlet = ViewerConstants.API_SERVLET;
-    String resource = ViewerConstants.API_V1_DATABASE_RESOURCE;
-
-    // http://localhost:8080/api/v1/database/61212bf3-942e-45e5-87d5-6fbbf5f05ea1/collection/61212bf3-942e-45e5-87d5-6fbbf5f05ea1/tables/4b0e3990-ac56-4c3b-b94f-ef1294b2dba6/lob?rowUUID=8161ff4b-4e10-3d43-b5a8-6c728c65b5b7&columnUUID=4&lobfilename=sakila_staff_0.bin
-
-    String urlBuilder = servlet + resource + "/" + databaseUUID + "/collection/" + databaseUUID + "/tables/"
-      + tableUUID + "/lob?rowUUID=" + rowUUID + "&columnUUID=" + columnIndexInEnclosingTable + "&lobfilename=" + lobName;
-    return new Anchor(messages.row_downloadLOB(), urlBuilder);
+  public static Anchor wrapOnAnchor(String message, String uri) {
+    return new Anchor(message, uri);
   }
 
   public static SafeHtmlBuilder constructViewQuery(ViewerView view) {
@@ -263,7 +255,7 @@ public class CommonClientUtils {
     String iconTag = FontAwesomeIconManager.getTag(FontAwesomeIconManager.SCHEMA_TABLE_SEPARATOR);
     final SafeHtml html = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE,
       table.getSchemaName() + iconTag + table.getName());
-    Hyperlink tableLink = new Hyperlink(html, HistoryManager.linkToTable(databaseUUID, table.getUuid()));
+    Hyperlink tableLink = new Hyperlink(html, HistoryManager.linkToTable(databaseUUID, table.getSchemaName(), table.getName()));
     tableLink.addStyleName(hClass);
     panel.add(tableLink);
 

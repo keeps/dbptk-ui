@@ -5,11 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.common.utils.ApplicationType;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
 import com.databasepreservation.common.client.models.structure.ViewerSchema;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
-import com.databasepreservation.common.client.common.utils.ApplicationType;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.github.nmorel.gwtjackson.client.ObjectMapper;
@@ -105,7 +105,7 @@ public class ErDiagram extends Composite {
           && (viewerTable.isMaterializedView() || viewerTable.isCustomView())) {
           continue;
         }
-        VisNode visNode = new VisNode(viewerTable.getUuid(), viewerTable.getName());
+        VisNode visNode = new VisNode(viewerTable.getId(), viewerTable.getName());
 
         if (ViewerStringUtils.isNotBlank(viewerTable.getDescription())) {
           visNode.description = viewerTable.getDescription();
@@ -182,7 +182,7 @@ public class ErDiagram extends Composite {
         visNodeList.add(visNode);
 
         for (ViewerForeignKey viewerForeignKey : viewerTable.getForeignKeys()) {
-          jsniEdgeList.add(new JsniEdge(viewerTable.getUuid(), viewerForeignKey.getReferencedTableUUID()));
+          jsniEdgeList.add(new JsniEdge(viewerTable.getId(), viewerForeignKey.getReferencedTableId()));
         }
       }
 
@@ -500,6 +500,7 @@ public class ErDiagram extends Composite {
   
         // create an array with nodes
         var rawNodes = eval(nodesJson);
+  
         var rawNodesLen = rawNodes.length;
         for(var i=0; i<rawNodesLen; i+=1){
             if(rawNodes[i].title == null || rawNodes[i].title.length === 0){
@@ -507,6 +508,8 @@ public class ErDiagram extends Composite {
             }
         }
         var nodes = new $wnd.vis.DataSet(rawNodes);
+  
+  
   
         // create an array with edges
         var edges = new $wnd.vis.DataSet(eval(edgesJson));
@@ -576,12 +579,12 @@ public class ErDiagram extends Composite {
                     "updateInterval":25
                 },
             },
-//            "configure": {
-//                "enabled": true,
-//                "showButton": true,
-//                "filter" : "physics",
-//                "container": $wnd.document.getElementById('erconfig')
-//            }
+  //            "configure": {
+  //                "enabled": true,
+  //                "showButton": true,
+  //                "filter" : "physics",
+  //                "container": $wnd.document.getElementById('erconfig')
+  //            }
         };
   
         // initialize your network!
@@ -589,25 +592,24 @@ public class ErDiagram extends Composite {
   
         network.on("selectNode", function (params) {
             //params.event = "[original event]";
-            //console.log(params);
-  
             if(params.nodes.length === 1) {
-                //console.log("go to db" + dbuuid + " and table " + params.nodes[0]);
-                var tableUUID = params.nodes[0];
+//                console.log("go to db" + dbuuid + " and table " + params.nodes[0] + " and path " + path);
+                var tableId = params.nodes[0];
+  
                 network.unselectAll();
                 if(path === "data-transformation"){
-                    @com.databasepreservation.common.client.tools.HistoryManager::gotoDataTransformation(Ljava/lang/String;Ljava/lang/String;)(dbuuid, tableUUID);
-                } else if (path === "table"){
-                    @com.databasepreservation.common.client.tools.HistoryManager::gotoTable(Ljava/lang/String;Ljava/lang/String;)(dbuuid, tableUUID);
+                    @com.databasepreservation.common.client.tools.HistoryManager::gotoDataTransformation(Ljava/lang/String;Ljava/lang/String;)(dbuuid, tableId);
+                } else if (path === "database"){
+                    @com.databasepreservation.common.client.tools.HistoryManager::gotoTable(Ljava/lang/String;Ljava/lang/String;)(dbuuid, tableId);
                 }
             }
         });
   
         network.on("stabilized", function (params) {
-//            if(params.iterations > 1){
-//                options.physics.enabled = true;
-//                network.setOptions(options);
-//            }
+  //            if(params.iterations > 1){
+  //                options.physics.enabled = true;
+  //                network.setOptions(options);
+  //            }
             network.fit();
         });
   

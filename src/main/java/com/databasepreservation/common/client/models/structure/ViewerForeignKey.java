@@ -9,6 +9,7 @@ import java.util.List;
 public class ViewerForeignKey implements Serializable {
   private String name;
   private String referencedTableUUID;
+  private String referencedTableId;
   private List<ViewerReference> references;
   private String matchType;
   private String deleteAction;
@@ -56,6 +57,14 @@ public class ViewerForeignKey implements Serializable {
 
   public void setReferencedTableUUID(String referencedTableUUID) {
     this.referencedTableUUID = referencedTableUUID;
+  }
+
+  public String getReferencedTableId() {
+    return referencedTableId;
+  }
+
+  public void setReferencedTableId(String referencedTableId) {
+    this.referencedTableId = referencedTableId;
   }
 
   public List<ViewerReference> getReferences() {

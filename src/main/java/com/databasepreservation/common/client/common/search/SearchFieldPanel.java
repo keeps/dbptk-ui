@@ -300,11 +300,9 @@ public class SearchFieldPanel extends Composite {
       DateRangeFilterParameter dateRangeFilterParameter = (DateRangeFilterParameter) filterParam;
       // if (filterParam.getName().endsWith(ViewerConstants.SOLR_DYN_TDATE)) {
       // if (begin != null) {
-      // GWT.log("HERE!!!");
       // inputDateFromForDate.setValue(begin);
       // }
       // if (end != null) {
-      // GWT.log("HERE 2!!!!");
       // inputDateToForDate.setValue(end);
       // }
       // } else if (filterParam.getName().endsWith(ViewerConstants.SOLR_DYN_TTIME)) {

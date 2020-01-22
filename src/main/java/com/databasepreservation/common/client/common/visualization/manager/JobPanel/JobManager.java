@@ -67,14 +67,11 @@ public class JobManager extends ContentPanel {
   private JobManager() {
     jobList = new JobList();
     initWidget(binder.createAndBindUi(this));
-    jobList.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
-      @Override
-      public void onSelectionChange(SelectionChangeEvent selectionChangeEvent) {
-        ViewerJob selected = jobList.getSelectionModel().getSelectedObject();
-        String databaseUuid = selected.getDatabaseUuid();
-        String tableUuid = selected.getTableUuid();
-        HistoryManager.gotoTable(databaseUuid, tableUuid);
-      }
+    jobList.getSelectionModel().addSelectionChangeHandler(selectionChangeEvent -> {
+      ViewerJob selected = jobList.getSelectionModel().getSelectedObject();
+      String databaseUuid = selected.getDatabaseUuid();
+      String tableUuid = selected.getTableUuid();
+      HistoryManager.gotoTable(databaseUuid, selected.getTableId());
     });
 
     header.add(CommonClientUtils.getHeaderHTML(

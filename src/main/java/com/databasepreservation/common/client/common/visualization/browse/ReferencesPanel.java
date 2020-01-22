@@ -8,13 +8,14 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
 
-import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
-import com.databasepreservation.common.client.services.DatabaseService;
+import com.databasepreservation.common.client.common.RightPanel;
+import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
+import com.databasepreservation.common.client.common.search.TableSearchPanel;
 import com.databasepreservation.common.client.index.filter.EmptyKeyFilterParameter;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.filter.FilterParameter;
 import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
-
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
@@ -22,9 +23,7 @@ import com.databasepreservation.common.client.models.structure.ViewerReference;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.models.structure.ViewerSchema;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
-import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
-import com.databasepreservation.common.client.common.RightPanel;
-import com.databasepreservation.common.client.common.search.TableSearchPanel;
+import com.databasepreservation.common.client.services.CollectionService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
@@ -98,18 +97,16 @@ public class ReferencesPanel extends RightPanel {
     cellSchema.setText(table.getName());
     cellColumn.setText(columnName);
 
-    DatabaseService.Util.call((ViewerRow result) -> {
+    CollectionService.Util.call((ViewerRow result) -> {
       record = result;
       init();
-    }).retrieveRow(database.getUuid(), database.getUuid(), recordUUID);
+    }).retrieveRow(database.getUuid(), database.getUuid(), table.getSchemaName(), table.getName(), recordUUID);
   }
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-      BreadcrumbManager.updateBreadcrumb(breadcrumb,
-      BreadcrumbManager.forReferences(database.getMetadata().getName(), database.getUuid(), table.getName(),
-        table.getUuid(), recordUUID, columnName,
-              columnIndexInTable.toString()));
+    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forReferences(database.getMetadata().getName(),
+      database.getUuid(), table.getName(), table.getUuid(), recordUUID, columnName, columnIndexInTable.toString()));
   }
 
   private void init() {
@@ -258,7 +255,7 @@ public class ReferencesPanel extends RightPanel {
     descriptionBuilder.appendHtmlConstant("<div class=\"label\">" + messages.references_relatedTable() + "</div>");
     descriptionBuilder.appendHtmlConstant("<div class=\"value\">")
       .appendHtmlConstant(new Hyperlink(otherTable.getSchemaName() + " . " + otherTable.getName(),
-        HistoryManager.linkToTable(database.getUuid(), otherTable.getUuid())).toString())
+        HistoryManager.linkToTable(database.getUuid(), otherTable.getSchemaName(), otherTable.getName())).toString())
       .appendHtmlConstant("</div>");
 
     descriptionBuilder.appendHtmlConstant("<div class=\"label\">" + messages.references_foreignKeyName() + "</div>");

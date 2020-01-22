@@ -21,7 +21,7 @@ import com.databasepreservation.common.client.models.status.collection.Collectio
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
-import com.databasepreservation.common.client.services.DatabaseService;
+import com.databasepreservation.common.client.services.CollectionService;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.LocaleInfo;
@@ -34,14 +34,14 @@ import com.google.gwt.user.client.ui.Widget;
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class ForeignKeyPanel extends RightPanel {
-  public static ForeignKeyPanel createInstance(ViewerDatabase database, String tableUUID, List<String> columnsAndValues,
+  public static ForeignKeyPanel createInstance(ViewerDatabase database, String tableId, List<String> columnsAndValues,
     CollectionStatus status) {
-    return new ForeignKeyPanel(database, tableUUID, columnsAndValues, false, status);
+    return new ForeignKeyPanel(database, tableId, columnsAndValues, false, status);
   }
 
-  public static ForeignKeyPanel createInstance(ViewerDatabase database, String tableUUID, List<String> columnsAndValues,
+  public static ForeignKeyPanel createInstance(ViewerDatabase database, String tableId, List<String> columnsAndValues,
     boolean update, CollectionStatus status) {
-    return new ForeignKeyPanel(database, tableUUID, columnsAndValues, update, status);
+    return new ForeignKeyPanel(database, tableId, columnsAndValues, update, status);
   }
 
   interface ForeignKeyPanelUiBinder extends UiBinder<Widget, ForeignKeyPanel> {
@@ -64,10 +64,10 @@ public class ForeignKeyPanel extends RightPanel {
   @UiField
   SimplePanel panel;
 
-  private ForeignKeyPanel(ViewerDatabase viewerDatabase, final String tableUUID, List<String> columnsAndValues,
+  private ForeignKeyPanel(ViewerDatabase viewerDatabase, final String tableId, List<String> columnsAndValues,
     boolean update, CollectionStatus status) {
     database = viewerDatabase;
-    table = database.getMetadata().getTable(tableUUID);
+    table = database.getMetadata().getTableById(tableId);
     toUpdate = update;
     this.columnsAndValues = columnsAndValues;
     this.status = status;
@@ -90,13 +90,14 @@ public class ForeignKeyPanel extends RightPanel {
 
     // search (count)
     FindRequest findRequest = new FindRequest(ViewerRow.class.getName(), filter, null, new Sublist(0, 1), null);
-    DatabaseService.Util.call((IndexResult<ViewerRow> result) -> {
+    CollectionService.Util.call((IndexResult<ViewerRow> result) -> {
       rowCount = result.getTotalCount();
       if (rowCount >= 1) {
         row = result.getResults().get(0);
       }
       init();
-    }).findRows(database.getUuid(), database.getUuid(), findRequest, LocaleInfo.getCurrentLocale().getLocaleName());
+    }).findRows(database.getUuid(), database.getUuid(), table.getSchemaName(), table.getName(), findRequest,
+      LocaleInfo.getCurrentLocale().getLocaleName());
   }
 
   /**
@@ -132,7 +133,7 @@ public class ForeignKeyPanel extends RightPanel {
       } else {
         // display a TablePanel
         SearchInfo searchInfo = new SearchInfo(table, columnAndValueMapping);
-        TablePanel tablePanel = TablePanel.createInstance(null, database, table, searchInfo,
+        TablePanel tablePanel = TablePanel.getInstance(status, database, table.getId(), searchInfo.asJson(),
           HistoryManager.ROUTE_FOREIGN_KEY);
         tablePanel.setColumnsAndValues(columnsAndValues);
         if (toUpdate) {

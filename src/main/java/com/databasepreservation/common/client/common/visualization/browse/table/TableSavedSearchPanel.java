@@ -9,7 +9,7 @@ import com.databasepreservation.common.client.common.search.TableSearchPanel;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
-import com.databasepreservation.common.client.services.DatabaseService;
+import com.databasepreservation.common.client.services.CollectionService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.ViewerJsonUtils;
@@ -63,8 +63,7 @@ public class TableSavedSearchPanel extends RightPanel {
     mainHeader.setWidget(
       CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.LOADING), "Loading...", "h1"));
 
-    DatabaseService.Util.call((SavedSearch result) -> {
-      GWT.log("-----" + result);
+    CollectionService.Util.call((SavedSearch result) -> {
       savedSearch = result;
       init();
     }).retrieveSavedSearch(database.getUuid(), database.getUuid(), savedSearchUUID);
@@ -87,7 +86,7 @@ public class TableSavedSearchPanel extends RightPanel {
    * result, otherwise show a TablePanel
    */
   private void init() {
-    String tableUUID = savedSearch.getTableUUID();
+    String tableId = savedSearch.getTableUUID();
 
     // set UI
     mainHeader.setWidget(CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.SAVED_SEARCH),
@@ -102,8 +101,8 @@ public class TableSavedSearchPanel extends RightPanel {
     // set searchForm and table
     SearchInfo searchInfo = ViewerJsonUtils.getSearchInfoMapper().read(savedSearch.getSearchInfoJson());
     if (SearchInfo.isPresentAndValid(searchInfo)) {
-      TableSearchPanel tableSearchPanel = new TableSearchPanel(searchInfo, status);
-      tableSearchPanel.provideSource(database, database.getMetadata().getTable(tableUUID));
+      TableSearchPanel tableSearchPanel = new TableSearchPanel(savedSearch.getSearchInfoJson(), status);
+      tableSearchPanel.provideSource(database, database.getMetadata().getTableById(tableId));
       tableSearchPanelContainer.setWidget(tableSearchPanel);
     } else {
       GWT.log("search info was invalid. JSON: " + savedSearch.getSearchInfoJson());

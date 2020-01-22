@@ -84,8 +84,7 @@ public class Connection extends WizardPanel<ConnectionParameters> {
     btnTestConnection.addClickHandler(event -> {
       if (validate()) {
 
-        Widget spinner = new HTML(SafeHtmlUtils.fromSafeConstant(
-            SPINNER_DIV));
+        Widget spinner = new HTML(SafeHtmlUtils.fromSafeConstant(SPINNER_DIV));
         mainPanel.add(spinner);
 
         final ConnectionParameters connectionParameters = getValues();
@@ -93,13 +92,14 @@ public class Connection extends WizardPanel<ConnectionParameters> {
         MigrationService.Util.call((ConnectionResponse result) -> {
           if (result.isConnected()) {
             Dialogs.showInformationDialog(messages.errorMessagesConnectionTitle(),
-                messages.connectionPageTextForConnectionSuccess(
-                    connectionParameters.getJdbcParameters().getConnection().get("database")),
-                messages.basicActionClose(), "btn btn-link");
+              messages.connectionPageTextForConnectionSuccess(
+                connectionParameters.getJdbcParameters().getConnection().get("database")),
+              messages.basicActionClose(), "btn btn-link");
             mainPanel.remove(spinner);
           } else {
             mainPanel.remove(spinner);
-            Dialogs.showErrors(messages.errorMessagesConnectionTitle(), result.getMessage(), messages.basicActionClose());
+            Dialogs.showErrors(messages.errorMessagesConnectionTitle(), result.getMessage(),
+              messages.basicActionClose());
           }
         }).testConnection(connectionParameters);
       } else {
@@ -110,21 +110,20 @@ public class Connection extends WizardPanel<ConnectionParameters> {
 
   public void initImportDBMS(final String type, final String targetToken) {
     this.type = type;
-    Widget spinner = new HTML(SafeHtmlUtils.fromSafeConstant(
-        SPINNER_DIV));
+    Widget spinner = new HTML(SafeHtmlUtils.fromSafeConstant(SPINNER_DIV));
 
     jdbcListConnections.add(spinner);
 
     CreateConnectionHomePanel connectionHomePanel = CreateConnectionHomePanel
-        .getInstance(ViewerConstants.EXPORT_FORMAT_SIARD);
+      .getInstance(ViewerConstants.EXPORT_FORMAT_SIARD);
     connectionInputPanel.clear();
     connectionInputPanel.add(connectionHomePanel);
 
     MigrationService.Util.call((List<Module> modules) -> {
       leftSideContainer.removeStyleName("loading-sidebar");
       jdbcListConnections.remove(spinner);
-      connectionSidebar = ConnectionSidebar.getInstance(databaseUUID, messages.sidebarMenuTextForDatabases(),
-          FontAwesomeIconManager.DATABASE, modules, targetToken);
+      connectionSidebar = ConnectionSidebar.getInstance(databaseUUID, messages.sidebarMenuTextForDatabases(), modules,
+        targetToken);
       jdbcListConnections.add(connectionSidebar);
       leftSideContainer.removeStyleName("loading-sidebar");
       jdbcListConnections.remove(spinner);
@@ -135,19 +134,17 @@ public class Connection extends WizardPanel<ConnectionParameters> {
 
   public void initExportDBMS(final String type, final String targetToken) {
     this.type = type;
-    Widget spinner = new HTML(SafeHtmlUtils.fromSafeConstant(
-        SPINNER_DIV));
+    Widget spinner = new HTML(SafeHtmlUtils.fromSafeConstant(SPINNER_DIV));
 
     jdbcListConnections.add(spinner);
 
     CreateConnectionHomePanel connectionHomePanel = CreateConnectionHomePanel
-        .getInstance(ViewerConstants.EXPORT_FORMAT_DBMS);
+      .getInstance(ViewerConstants.EXPORT_FORMAT_DBMS);
     connectionInputPanel.clear();
     connectionInputPanel.add(connectionHomePanel);
 
     MigrationService.Util.call((List<Module> modules) -> {
-      connectionSidebar = ConnectionSidebar.getInstance(databaseUUID, messages.sidebarMenuTextForDatabases(),
-          FontAwesomeIconManager.DATABASE, modules, targetToken);
+      connectionSidebar = ConnectionSidebar.getInstance(databaseUUID, messages.sidebarMenuTextForDatabases(), modules, targetToken);
 
       jdbcListConnections.add(connectionSidebar);
       leftSideContainer.removeStyleName("loading-sidebar");
@@ -167,7 +164,8 @@ public class Connection extends WizardPanel<ConnectionParameters> {
 
     selectedConnection = connection;
 
-    final Module module = dbmsModules.stream().filter(c -> c.getModuleName().equals(connection)).findFirst().orElse(new Module());
+    final Module module = dbmsModules.stream().filter(c -> c.getModuleName().equals(connection)).findFirst()
+      .orElse(new Module());
 
     List<PreservationParameter> preservationParametersSelected = module.getParameters();
 

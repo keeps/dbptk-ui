@@ -12,6 +12,12 @@ import com.google.gwt.user.client.Window;
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class HistoryManager {
+
+  /**********************************************************
+   * Collection Routes
+   *********************************************************/
+  public static final String ROUTE_DATA = "data";
+
   public static final String ROUTE_HOME = "home";
   public static final String ROUTE_LOGIN = "login";
   public static final String ROUTE_DATABASE = "database";
@@ -19,20 +25,14 @@ public class HistoryManager {
   public static final String ROUTE_DATABASE_SEARCH = "search";
   public static final String ROUTE_DATABASE_REPORT = "report";
   public static final String ROUTE_SCHEMA = "schema";
-  public static final String ROUTE_SCHEMA_STRUCTURE = "structure";
   public static final String ROUTE_SCHEMA_ROUTINES = "routines";
-  public static final String ROUTE_SCHEMA_TRIGGERS = "triggers";
-  public static final String ROUTE_SCHEMA_VIEWS = "views";
-  public static final String ROUTE_SCHEMA_DATA = "data";
   public static final String ROUTE_TABLE = "table";
   public static final String ROUTE_RECORD = "record";
   public static final String ROUTE_FOREIGN_KEY = "relation";
   public static final String ROUTE_REFERENCES = "references";
-  public static final String ROUTE_SCHEMA_CHECK_CONSTRAINTS = "constraints";
   public static final String ROUTE_SAVED_SEARCHES = "searches";
   public static final String ROUTE_SAVED_SEARCHES_EDIT = "edit";
   public static final String ROUTE_UPLOADS = "uploads";
-  public static final String ROUTE_UPLOADS_NEW = "upload";
   public static final String ROUTE_SIARD_INFO = "siard";
   public static final String ROUTE_CREATE_SIARD = "create";
   public static final String ROUTE_WIZARD_CONNECTION = "connection";
@@ -43,11 +43,9 @@ public class HistoryManager {
   public static final String ROUTE_WIZARD_EXPORT_METADATA_OPTIONS = "metadata-export-options";
   public static final String ROUTE_SEND_TO_LIVE_DBMS = "send-to-live-dbms";
   public static final String ROUTE_MIGRATE_TO_SIARD = "migrate-to-siard";
-  public static final String ROUTE_WIZARD_EXPORT_FORMAT = "export-format";
   public static final String ROUTE_SIARD_EDIT_METADATA = "metadata";
   public static final String ROUTE_SIARD_EDIT_METADATA_USERS = "users";
   public static final String ROUTE_VIEW = "view";
-  public static final String ROUTE_ROUTINE = "routine";
   public static final String ROUTE_SIARD_VALIDATOR = "validator";
   public static final String ROUTE_TABLE_OPTIONS = "options";
   public static final String ROUTE_TABLE_UPDATE = "update";
@@ -59,17 +57,9 @@ public class HistoryManager {
   public static final String ROUTE_COLUMNS_MANAGEMENT = "columns-management";
   public static final String ROUTE_JOBS = "jobs";
   public static final String ROUTE_PREFERENCES = "preferences";
-
-  /****************************************************
-   * DESKTOP ROUTES
-   ****************************************************/
-  public static final String ROUTE_DESKTOP_DATABASE = "desktop-database";
   public static final String ROUTE_DESKTOP_METADATA_TABLE = "desktop-metadata-table";
   public static final String ROUTE_DESKTOP_METADATA_VIEW = "desktop-metadata-view";
   public static final String ROUTE_DESKTOP_METADATA_ROUTINE = "desktop-metadata-routine";
-  public static final String ROUTE_DESKTOP_SAVED_SEARCHES = "desktop-searches";
-  public static final String ROUTE_DESKTOP_SCHEMA = "desktop-schema";
-  public static final String ROUTE_DESKTOP_TABLE = "desktop-table";
 
   public static final String HISTORY_SEP = "/";
   public static final String HISTORY_SEP_REGEX = "/";
@@ -151,27 +141,32 @@ public class HistoryManager {
     newHistory(Arrays.asList(ROUTE_SAVED_SEARCHES, databaseUUID, savedSearchUUID, ROUTE_SAVED_SEARCHES_EDIT));
   }
 
-  public static void gotoTable(String databaseUUID, String tableUUID) {
-    newHistory(Arrays.asList(ROUTE_TABLE, databaseUUID, tableUUID));
+  public static void gotoTable(String databaseUUID, String tableId) {
+    final String[] split = tableId.split("\\.");
+    newHistory(Arrays.asList(ROUTE_TABLE, databaseUUID, ROUTE_DATA, split[0], split[1]));
   }
 
-  public static void gotoTableUpdate(String databaseUUID, String tableUUID) {
-    newHistory(Arrays.asList(ROUTE_TABLE, databaseUUID, tableUUID, ROUTE_TABLE_UPDATE));
+  public static void gotoTableUpdate(String databaseUUID, String tableId) {
+    final String[] split = tableId.split("\\.");
+    newHistory(Arrays.asList(ROUTE_TABLE, databaseUUID, ROUTE_DATA, split[0], split[1], ROUTE_TABLE_UPDATE));
   }
 
-  public static void gotoTableOptions(String databaseUUID, String tableUUID) {
-    newHistory(Arrays.asList(ROUTE_TABLE, databaseUUID, tableUUID, ROUTE_TABLE_OPTIONS));
+  public static void gotoTableOptions(String databaseUUID, String tableId) {
+    final String[] split = tableId.split("\\.");
+    newHistory(Arrays.asList(ROUTE_TABLE, databaseUUID, ROUTE_DATA, split[0], split[1], ROUTE_TABLE_OPTIONS));
   }
 
-  public static void gotoRelationOptions(String databaseUUID, String tableUUID, List<String> searchInfo) {
-    List<String> params = new ArrayList<>(Arrays.asList(ROUTE_FOREIGN_KEY, databaseUUID, tableUUID));
+  public static void gotoRelationOptions(String databaseUUID, String tableId, List<String> searchInfo) {
+    final String[] split = tableId.split("\\.");
+    List<String> params = new ArrayList<>(Arrays.asList(ROUTE_FOREIGN_KEY, databaseUUID, ROUTE_DATA, split[0], split[1]));
     params.addAll(searchInfo);
     params.add(ROUTE_TABLE_OPTIONS);
     newHistory(params);
   }
 
-  public static void gotoForeignKeyUpdate(String databaseUUID, String tableUUID, List<String> searchInfo) {
-    List<String> params = new ArrayList<>(Arrays.asList(ROUTE_FOREIGN_KEY, databaseUUID, tableUUID));
+  public static void gotoForeignKeyUpdate(String databaseUUID, String tableId, List<String> searchInfo) {
+    final String[] split = tableId.split("\\.");
+    List<String> params = new ArrayList<>(Arrays.asList(ROUTE_FOREIGN_KEY, databaseUUID, ROUTE_DATA, split[0], split[1]));
     params.addAll(searchInfo);
     params.add(ROUTE_TABLE_UPDATE);
     newHistory(params);
@@ -185,8 +180,9 @@ public class HistoryManager {
     newHistory(Arrays.asList(ROUTE_VIEW, databaseUUID, tableUUID, ROUTE_TABLE_OPTIONS));
   }
 
-  public static void gotoRecord(String databaseUUID, String tableUUID, String recordUUID) {
-    newHistory(Arrays.asList(ROUTE_RECORD, databaseUUID, tableUUID, recordUUID));
+  public static void gotoRecord(String databaseUUID, String tableId, String recordIndex) {
+    final String[] split = tableId.split("\\.");
+    newHistory(Arrays.asList(ROUTE_RECORD, databaseUUID, ROUTE_DATA, split[0], split[1], recordIndex));
   }
 
   public static void gotoReferences(String databaseUUID, String tableUUID, String recordUUID,
@@ -194,8 +190,9 @@ public class HistoryManager {
     newHistory(Arrays.asList(ROUTE_REFERENCES, databaseUUID, tableUUID, recordUUID, columnIndexInTable));
   }
 
-  public static void gotoForeignKey(String databaseUUID, String tableUUID, List<String> solrColumnsAndValues) {
-    List<String> params = new ArrayList<>(Arrays.asList(ROUTE_FOREIGN_KEY, databaseUUID, tableUUID));
+  public static void gotoForeignKey(String databaseUUID, String tableId, List<String> solrColumnsAndValues) {
+    final String[] split = tableId.split("\\.");
+    List<String> params = new ArrayList<>(Arrays.asList(ROUTE_FOREIGN_KEY, databaseUUID, ROUTE_DATA, split[0], split[1]));
     params.addAll(solrColumnsAndValues);
     newHistory(params);
   }
@@ -361,8 +358,8 @@ public class HistoryManager {
     return createHistoryToken(pathLogin());
   }
 
-  public static String linkToTable(String database_uuid, String table_uuid) {
-    return createHistoryToken(Arrays.asList(ROUTE_TABLE, database_uuid, table_uuid));
+  public static String linkToTable(String databaseUUID, String schema, String table) {
+    return createHistoryToken(Arrays.asList(ROUTE_TABLE, databaseUUID, ROUTE_DATA, schema, table));
   }
 
   public static String linkToView(String database_uuid, String viewUUID) {
@@ -409,8 +406,9 @@ public class HistoryManager {
     return createHistoryToken(Arrays.asList(ROUTE_SAVED_SEARCHES, databaseUUID, savedSearchUUID));
   }
 
-  public static String linkToForeignKey(String database_uuid, String table_uuid, List<String> solrColumnsAndValues) {
-    List<String> params = new ArrayList<>(Arrays.asList(ROUTE_FOREIGN_KEY, database_uuid, table_uuid));
+  public static String linkToForeignKey(String database_uuid, String tableId, List<String> solrColumnsAndValues) {
+    final String[] split = tableId.split("\\.");
+    List<String> params = new ArrayList<>(Arrays.asList(ROUTE_FOREIGN_KEY, database_uuid, ROUTE_DATA, split[0], split[1]));
     params.addAll(solrColumnsAndValues);
     return createHistoryToken(params);
   }
@@ -487,7 +485,8 @@ public class HistoryManager {
     return createHistoryToken(Arrays.asList(ROUTE_DATA_TRANSFORMATION, database_uuid, tableUUID));
   }
 
-  public static String linkToColumnManagement(String databaseUUID, String tableUUID) {
-    return createHistoryToken(Arrays.asList(ROUTE_COLUMNS_MANAGEMENT, databaseUUID, tableUUID));
+  public static String linkToColumnManagement(String databaseUUID, String tableId) {
+    final String[] split = tableId.split("\\.");
+    return createHistoryToken(Arrays.asList(ROUTE_COLUMNS_MANAGEMENT, databaseUUID, split[0], split[1]));
   }
 }

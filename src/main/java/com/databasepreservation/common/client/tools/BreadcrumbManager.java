@@ -4,9 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.common.DefaultAsyncCallback;
+import com.databasepreservation.common.client.common.UserLogin;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
+import com.databasepreservation.common.client.models.user.User;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 
@@ -151,36 +154,36 @@ public class BreadcrumbManager {
   }
 
   public static List<BreadcrumbItem> forTable(final String databaseName, final String databaseUUID,
-    final String tableName, final String tableUUID) {
+    final String tableName, final String tableId) {
     List<BreadcrumbItem> items;
     items = forSIARDMainPage(databaseUUID, databaseName);
 
     items.add(new BreadcrumbItem(
       SafeHtmlUtils.fromSafeConstant(
         FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE) + SafeHtmlUtils.htmlEscape(tableName)),
-      () -> HistoryManager.gotoTable(databaseUUID, tableUUID)));
+      () -> HistoryManager.gotoTable(databaseUUID, tableId)));
     return items;
   }
 
   public static List<BreadcrumbItem> forRecord(final String databaseName, final String databaseUUID,
-    final String tableName, final String tableUUID, final String recordUUID) {
-    List<BreadcrumbItem> items = forTable(databaseName, databaseUUID, tableName, tableUUID);
+    final String tableName, final String tableId, final String recordUUID) {
+    List<BreadcrumbItem> items = forTable(databaseName, databaseUUID, tableName, tableId);
     items.add(new BreadcrumbItem(
       SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.RECORD)
         + SafeHtmlUtils.htmlEscape(messages.menusidebar_record())),
-      () -> HistoryManager.gotoRecord(databaseUUID, tableUUID, recordUUID)));
+      () -> HistoryManager.gotoRecord(databaseUUID, tableId, recordUUID)));
     return items;
   }
 
   public static List<BreadcrumbItem> forReferences(final String databaseName, final String databaseUUID,
     final String tableName, final String tableUUID, final String recordUUID, final String columnNameInTable,
     final String columnIndexInTable) {
-    List<BreadcrumbItem> items = forRecord(databaseName, databaseUUID, tableName, tableUUID, recordUUID);
-    items.add(new BreadcrumbItem(
-      SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.REFERENCE)
-        + SafeHtmlUtils.htmlEscape(messages.menusidebar_referencesForColumn(columnNameInTable))),
-      () -> HistoryManager.gotoReferences(databaseUUID, tableUUID, recordUUID, columnIndexInTable)));
-    return items;
+//    List<BreadcrumbItem> items = forRecord(databaseName, databaseUUID, tableName, tableUUID, recordUUID);
+//    items.add(new BreadcrumbItem(
+//      SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.REFERENCE)
+//        + SafeHtmlUtils.htmlEscape(messages.menusidebar_referencesForColumn(columnNameInTable))),
+//      () -> HistoryManager.gotoReferences(databaseUUID, tableUUID, recordUUID, columnIndexInTable)));
+    return new ArrayList<>();
   }
 
   public static List<BreadcrumbItem> loadingDatabase(final String databaseUUID) {
@@ -195,10 +198,19 @@ public class BreadcrumbManager {
 
   public static List<BreadcrumbItem> forSIARDMainPage(final String databaseUUID, final String databaseName) {
     List<BreadcrumbItem> items = forManageDatabase();
-    items.add(new BreadcrumbItem(
-      SafeHtmlUtils.fromSafeConstant(
-        FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE) + SafeHtmlUtils.htmlEscape(databaseName)),
-      () -> HistoryManager.gotoSIARDInfo(databaseUUID)));
+
+    UserLogin.getInstance().getAuthenticatedUser(new DefaultAsyncCallback<User>() {
+      @Override
+      public void onSuccess(User user) {
+        if (user.isAdmin()) {
+          items.add(new BreadcrumbItem(
+              SafeHtmlUtils.fromSafeConstant(
+                  FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE) + SafeHtmlUtils.htmlEscape(databaseName)),
+              () -> HistoryManager.gotoSIARDInfo(databaseUUID)));
+        }
+      }
+    });
+
     return items;
   }
 
@@ -346,7 +358,7 @@ public class BreadcrumbManager {
   public static List<BreadcrumbItem> forAdvancedConfiguration(final String databaseUUID, final String databaseName) {
     List<BreadcrumbItem> items = forSIARDMainPage(databaseUUID, databaseName);
     items.add(new BreadcrumbItem(
-      SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.COG)
+      SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.COGS)
         + SafeHtmlUtils.htmlEscape(messages.breadcrumbTextForAdvancedConfiguration())),
       () -> HistoryManager.gotoAdvancedConfiguration(databaseUUID)));
     return items;
@@ -380,7 +392,7 @@ public class BreadcrumbManager {
   public static List<BreadcrumbItem> forTableManagement(final String databaseUUID, final String databaseName) {
     List<BreadcrumbItem> items = forAdvancedConfiguration(databaseUUID, databaseName);
     items.add(new BreadcrumbItem(
-        SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE)
+        SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.COG)
             + SafeHtmlUtils.htmlEscape(messages.breadcrumbTextForTableManagement()))));
     return items;
   }
@@ -388,7 +400,7 @@ public class BreadcrumbManager {
   public static List<BreadcrumbItem> forColumnsManagement(final String databaseUUID, final String databaseName) {
     List<BreadcrumbItem> items = forAdvancedConfiguration(databaseUUID, databaseName);
     items.add(new BreadcrumbItem(
-        SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE)
+        SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.COG)
             + SafeHtmlUtils.htmlEscape(messages.breadcrumbTextForColumnManagement()))));
     return items;
   }

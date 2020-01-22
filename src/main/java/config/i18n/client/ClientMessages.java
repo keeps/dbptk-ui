@@ -998,7 +998,7 @@ public interface ClientMessages extends Messages {
    ********************************************/
   String dialogOpenSIARDMessage();
 
-  String errorMessagesOpenFile();
+  String errorMessagesOpenFile(String filename);
 
   /*********************************************
    * SIARD Validator

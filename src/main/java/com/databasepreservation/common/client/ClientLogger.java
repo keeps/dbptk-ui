@@ -7,9 +7,12 @@ package com.databasepreservation.common.client;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.google.gwt.http.client.Response;
 import org.fusesource.restygwt.client.Method;
 import org.fusesource.restygwt.client.MethodCallback;
 
+import com.databasepreservation.common.client.common.dialogs.Dialogs;
+import com.databasepreservation.common.client.exceptions.RESTException;
 import com.databasepreservation.common.client.services.ClientLoggerService;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.GWT.UncaughtExceptionHandler;
@@ -87,6 +90,18 @@ public class ClientLogger implements IsSerializable {
       ClientLogger clientlogger = new ClientLogger("Uncaught");
 
       public void onUncaughtException(Throwable e) {
+        String title;
+        StringBuilder message = new StringBuilder();
+        if (e instanceof RESTException) {
+          title = "Unexpected error in the server";
+          message.append("[").append(((RESTException) e).getStatus()).append("] ").append(e.getMessage());
+        } else {
+          title = "Unexpected error";
+          message.append("[").append(e.getClass().getSimpleName()).append("] ").append(e.getMessage());
+        }
+
+        Dialogs.showErrors(title, message.toString(), "close");
+
         clientlogger.fatal("Uncaught Exception: " + e.getMessage(), e);
       }
 

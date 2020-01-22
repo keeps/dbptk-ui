@@ -99,7 +99,7 @@ public class ColumnsManagementSidebar extends Composite implements Sidebar, Coll
 
       for (ViewerTable table : schema.getTables()) {
         if (!table.isCustomView() && !table.isMaterializedView()) {
-          if (collectionStatus.showTable(table.getUuid())) {
+          if (collectionStatus.showTable(table.getId())) {
             sidebarGroup.add(createTableItem(schema, table, totalSchemas, iconTag));
           }
         }
@@ -121,15 +121,15 @@ public class ColumnsManagementSidebar extends Composite implements Sidebar, Coll
     SafeHtml html;
     if (totalSchemas == 1) {
       html = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE,
-        collectionStatus.getTableStatus(table.getUuid()).getCustomName());
+        collectionStatus.getTableStatusByTableId(table.getId()).getCustomName());
     } else {
       html = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE,
-        schema.getName() + " " + iconTag + " " + collectionStatus.getTableStatus(table.getUuid()).getCustomName());
+        schema.getName() + " " + iconTag + " " + collectionStatus.getTableStatusByTableId(table.getId()).getCustomName());
     }
     SidebarHyperlink tableLink = new SidebarHyperlink(html,
-      HistoryManager.linkToColumnManagement(database.getUuid(), table.getUuid()));
+      HistoryManager.linkToColumnManagement(database.getUuid(), table.getId()));
     tableLink.setH6().setIndent0();
-    list.put(table.getUuid(), tableLink);
+    list.put(table.getId(), tableLink);
 
     return tableLink;
   }
@@ -142,29 +142,29 @@ public class ColumnsManagementSidebar extends Composite implements Sidebar, Coll
     if (materializedTable != null) {
       if (totalSchemas == 1) {
         html = FontAwesomeIconManager.getStackedIconSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS,
-          FontAwesomeIconManager.TABLE, collectionStatus.getTableStatus(materializedTable.getUuid()).getCustomName());
+          FontAwesomeIconManager.TABLE, collectionStatus.getTableStatusByTableId(materializedTable.getId()).getCustomName());
       } else {
         html = FontAwesomeIconManager.getStackedIconSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS,
           FontAwesomeIconManager.TABLE, schema.getName() + " " + iconTag + " "
-            + collectionStatus.getTableStatus(materializedTable.getUuid()).getCustomName());
+            + collectionStatus.getTableStatusByTableId(materializedTable.getId()).getCustomName());
       }
       viewLink = new SidebarHyperlink(html,
-        HistoryManager.linkToColumnManagement(database.getUuid(), materializedTable.getUuid()))
+        HistoryManager.linkToColumnManagement(database.getUuid(), materializedTable.getId()))
           .setTooltip("Materialized View");
-      list.put(materializedTable.getUuid(), viewLink);
+      list.put(materializedTable.getId(), viewLink);
     } else if (schema.getCustomViewTable(view.getName()) != null) {
       final ViewerTable customViewTable = schema.getCustomViewTable(view.getName());
       if (totalSchemas == 1) {
         html = FontAwesomeIconManager.getStackedIconSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS,
-          FontAwesomeIconManager.COG, collectionStatus.getTableStatus(customViewTable.getUuid()).getCustomName());
+          FontAwesomeIconManager.COG, collectionStatus.getTableStatusByTableId(customViewTable.getId()).getCustomName());
       } else {
         html = FontAwesomeIconManager.getStackedIconSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS,
           FontAwesomeIconManager.COG, schema.getName() + " " + iconTag + " "
-            + collectionStatus.getTableStatus(customViewTable.getUuid()).getCustomName());
+            + collectionStatus.getTableStatusByTableId(customViewTable.getId()).getCustomName());
       }
       viewLink = new SidebarHyperlink(html,
-        HistoryManager.linkToColumnManagement(database.getUuid(), customViewTable.getUuid())).setTooltip("Custom View");
-      list.put(customViewTable.getUuid(), viewLink);
+        HistoryManager.linkToColumnManagement(database.getUuid(), customViewTable.getId())).setTooltip("Custom View");
+      list.put(customViewTable.getId(), viewLink);
     }
     if (viewLink != null) {
       viewLink.setH6().setIndent0();
@@ -215,7 +215,7 @@ public class ColumnsManagementSidebar extends Composite implements Sidebar, Coll
 
   @Override
   public void selectFirst() {
-    final String uuid = collectionStatus.getTables().get(0).getUuid();
+    final String uuid = collectionStatus.getTables().get(0).getId();
     list.forEach((key, hyperlink) -> {
       if (key.equals(uuid)) {
         hyperlink.setSelected(true);

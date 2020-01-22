@@ -30,13 +30,6 @@
             <g:FlowPanel addStyleNames="database-list">
                 <lists:DatabaseList ui:field="databaseList"/>
             </g:FlowPanel>
-            <g:FlowPanel addStyleNames="button-group-panel">
-                <g:SimplePanel addStyleNames="button-group-panel-btn">
-                    <g:Button addStyleNames="btn btn btn-primary" ui:field="download">
-                        <ui:text from='{messages.managePageButtonTextForDownloadDBPTK}'/>
-                    </g:Button>
-                </g:SimplePanel>
-            </g:FlowPanel>
         </g:FlowPanel>
     </g:FlowPanel>
 </ui:UiBinder>

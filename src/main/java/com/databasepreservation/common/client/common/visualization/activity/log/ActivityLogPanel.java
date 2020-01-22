@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.common.DefaultAsyncCallback;
+import com.databasepreservation.common.client.common.UserLogin;
 import com.databasepreservation.common.client.index.filter.Filter;
 
 import com.databasepreservation.common.client.ClientConfigurationManager;
@@ -19,9 +21,13 @@ import com.databasepreservation.common.client.common.utils.AdvancedSearchUtils;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.utils.ListboxUtils;
 import com.databasepreservation.common.client.models.activity.logs.ActivityLogEntry;
+import com.databasepreservation.common.client.models.user.User;
+import com.databasepreservation.common.client.services.AuthenticationService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
+import com.databasepreservation.common.server.controller.UserLoginController;
+import com.databasepreservation.common.utils.UserUtility;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;

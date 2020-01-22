@@ -14,7 +14,7 @@ import com.databasepreservation.common.client.models.status.collection.Collectio
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
-import com.databasepreservation.common.client.services.DatabaseService;
+import com.databasepreservation.common.client.services.CollectionService;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.ViewerJsonUtils;
 import com.github.nmorel.gwtjackson.client.exception.JsonDeserializationException;
@@ -23,7 +23,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.ListBox;
@@ -31,7 +30,6 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
-import org.apache.commons.collections.BagUtils;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -122,7 +120,8 @@ public class TableSearchPanel extends Composite {
     provideSource(database, table, null, false);
   }
 
-  public void provideSource(final ViewerDatabase database, final ViewerTable table, Filter initialFilter, Boolean isNested) {
+  public void provideSource(final ViewerDatabase database, final ViewerTable table, Filter initialFilter,
+    Boolean isNested) {
     if (initialFilter == null) {
       initialFilter = new Filter();
     }
@@ -130,7 +129,8 @@ public class TableSearchPanel extends Composite {
     this.database = database;
     this.table = table;
 
-    tableRowList = new TableRowList(database, table, initialFilter, null, null, false, table.getCountRows() != 0, status, isNested);
+    tableRowList = new TableRowList(database, table, initialFilter, null, null, false, table.getCountRows() != 0,
+      status, isNested);
     tableRowList.setColumnVisibility(columnDisplayNameToVisibleState);
 
     GWT.log("initial filter: " + initialFilter);
@@ -162,7 +162,7 @@ public class TableSearchPanel extends Composite {
     tableRowList.getSelectionModel().addSelectionChangeHandler(event -> {
       ViewerRow record = tableRowList.getSelectionModel().getSelectedObject();
       if (record != null) {
-        HistoryManager.gotoRecord(database.getUuid(), table.getUuid(), record.getUuid());
+        HistoryManager.gotoRecord(database.getUuid(), table.getId(), record.getUuid());
       }
     });
 
@@ -204,8 +204,7 @@ public class TableSearchPanel extends Composite {
     final List<SearchField> searchFieldsFromTable = AdvancedSearchUtils.getSearchFieldsFromTable(table);
     TableSearchPanel.this.searchFields.clear();
     for (SearchField searchField : searchFieldsFromTable) {
-      ListboxUtils.insertItemByAlphabeticOrder(searchAdvancedFieldOptions, searchField.getLabel(),
-          searchField.getId());
+      ListboxUtils.insertItemByAlphabeticOrder(searchAdvancedFieldOptions, searchField.getLabel(), searchField.getId());
       TableSearchPanel.this.searchFields.put(searchField.getId(), searchField);
     }
     updateSearchFields(searchFieldsFromTable);
@@ -328,12 +327,11 @@ public class TableSearchPanel extends Composite {
 
   private void saveQuery() {
     SearchInfo currentSearchInfo = createSearchInfo();
-    DatabaseService.Util.call((String savedSearchUUID) -> {
+    CollectionService.Util.call((String savedSearchUUID) -> {
       searchPanel.querySavedHandler(true, database, savedSearchUUID);
     }, (String errorMessage) -> {
       searchPanel.querySavedHandler(false, database, null);
-    }).saveSavedSearch(database.getUuid(), database.getUuid(), table.getUuid(), messages.searchOnTable(table.getName()),
-      "",
-      currentSearchInfo);
+    }).saveSavedSearch(database.getUuid(), database.getUuid(), table.getId(), messages.searchOnTable(table.getName()),
+      "", currentSearchInfo);
   }
 }

@@ -2,23 +2,20 @@ package com.databasepreservation.common.client.common.visualization.manager.data
 
 import java.util.List;
 
-import com.databasepreservation.common.client.common.fields.MetadataField;
-import com.databasepreservation.common.client.common.utils.CommonClientUtils;
-import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.SimplePanel;
-import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
-import com.databasepreservation.common.client.index.filter.Filter;
-
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.ContentPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
+import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.helpers.HelperUploadSIARDFile;
 import com.databasepreservation.common.client.common.lists.DatabaseList;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
+import com.databasepreservation.common.client.common.utils.CommonClientUtils;
+import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
+import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
+import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.databasepreservation.common.client.widgets.wcag.AccessibleFocusPanel;
@@ -26,7 +23,9 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -85,7 +84,7 @@ public class DatabaseManage extends ContentPanel {
     initWidget(binder.createAndBindUi(this));
 
     mainHeader.setWidget(CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.SERVER),
-        messages.menusidebar_databases(), "h1"));
+      messages.menusidebar_databases(), "h1"));
 
     MetadataField instance = MetadataField.createInstance(messages.manageDatabasePageDescription());
     instance.setCSS("table-row-description", "font-size-description");
@@ -105,7 +104,7 @@ public class DatabaseManage extends ContentPanel {
     databaseList.getSelectionModel().addSelectionChangeHandler(event -> {
       ViewerDatabase selected = databaseList.getSelectionModel().getSelectedObject();
       if (selected != null) {
-        if(ApplicationType.getType().equals(ViewerConstants.SERVER)){
+        if (ApplicationType.getType().equals(ViewerConstants.SERVER)) {
           HistoryManager.gotoSIARDInfo(selected.getUuid());
         }
         databaseList.getSelectionModel().clear();

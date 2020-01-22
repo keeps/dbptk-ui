@@ -48,7 +48,7 @@ public interface AuthenticationService extends DirectRestService {
   }
 
   @GET
-  @Path("/isEnabled")
+  @Path("/status")
   @ApiOperation(value = "Checks if authentication is enabled", response = Boolean.class)
   Boolean isAuthenticationEnabled();
 

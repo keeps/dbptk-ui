@@ -233,7 +233,7 @@ public class ActivityLogUtils {
       final SafeHtml tagSafeHtml = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE,
         wrapper.getTable().getName());
       Hyperlink hyperlink = new Hyperlink(tagSafeHtml,
-        HistoryManager.linkToTable(wrapper.getDatabase().getUuid(), wrapper.getTable().getUuid()));
+        HistoryManager.linkToTable(wrapper.getDatabase().getUuid(), wrapper.getTable().getSchemaName(), wrapper.getTable().getName()));
       hyperlink.addStyleName("btn btn-link");
 
       panel.add(RowField.createInstance(messages.activityLogTableRelated(), hyperlink));

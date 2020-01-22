@@ -16,7 +16,7 @@ import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
 import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
 import com.databasepreservation.common.client.models.structure.ViewerReference;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
-import com.databasepreservation.common.client.services.DatabaseService;
+import com.databasepreservation.common.client.services.CollectionService;
 import com.databasepreservation.common.client.services.JobService;
 import com.databasepreservation.common.client.widgets.Toast;
 
@@ -79,12 +79,13 @@ public class DataTransformationUtils {
     return references;
   }
 
-  public static void saveConfiguration(String databaseUUID, DenormalizeConfiguration denormalizeConfiguration, CollectionStatus collectionStatus) {
+  public static void saveConfiguration(String databaseUUID, DenormalizeConfiguration denormalizeConfiguration,
+    CollectionStatus collectionStatus) {
     if (denormalizeConfiguration != null && denormalizeConfiguration.getState().equals(ViewerJobStatus.NEW)) {
-      DatabaseService.Util.call((Boolean result) -> {
+      CollectionService.Util.call((Boolean result) -> {
         final CollectionObserver collectionObserver = ObserverManager.getCollectionObserver();
         collectionObserver.setCollectionStatus(collectionStatus);
-        JobService.Util.call((Boolean run) -> {
+        JobService.Util.call((String run) -> {
           Toast.showInfo("Configuration file",
             "Created denormalization configuration file with success for " + denormalizeConfiguration.getTableID());
         }).denormalizeTableJob(databaseUUID, denormalizeConfiguration.getTableUUID());

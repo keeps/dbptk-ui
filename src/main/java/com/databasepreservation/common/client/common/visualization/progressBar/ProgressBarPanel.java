@@ -7,7 +7,7 @@ import com.databasepreservation.common.client.common.Progressbar;
 import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.models.progress.ProgressData;
-import com.databasepreservation.common.client.services.DatabaseService;
+import com.databasepreservation.common.client.services.CollectionService;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.NumberFormat;
@@ -65,7 +65,7 @@ public class ProgressBarPanel extends Composite {
   }
 
   private void init() {
-    DatabaseService.Util.call((ProgressData result) -> {
+    CollectionService.Util.call((ProgressData result) -> {
       if (!initialized) {
         result.reset();
         initialized = true;
@@ -107,7 +107,7 @@ public class ProgressBarPanel extends Composite {
   }
 
   private void update() {
-    DatabaseService.Util.call((Consumer<ProgressData>) this::update).getProgressData(databaseUUID);
+    CollectionService.Util.call((Consumer<ProgressData>) this::update).getProgressData(databaseUUID);
   }
 
   private void update(ProgressData progressData) {

@@ -90,7 +90,7 @@ public class DataPanel extends Composite {
     table.getSelectionModel().addSelectionChangeHandler(event -> {
       ViewerTable item = table.getSelectionModel().getSelectedObject();
       if (item != null) {
-        HistoryManager.gotoTable(database.getUuid(), item.getUuid());
+        HistoryManager.gotoTable(database.getUuid(), item.getId());
       }
     });
     tableContent.add(table);

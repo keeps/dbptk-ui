@@ -25,7 +25,7 @@ import com.databasepreservation.common.client.models.status.collection.ColumnSta
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.status.helpers.StatusHelper;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
-import com.databasepreservation.common.client.services.DatabaseService;
+import com.databasepreservation.common.client.services.CollectionService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
@@ -75,7 +75,7 @@ public class ColumnsManagementPanel extends RightPanel implements CollectionStat
   private CollectionStatus collectionStatus;
   private ViewerDatabase database;
   private Sidebar sidebar;
-  private String tableUUID;
+  private String tableId;
   private Button btnSave = new Button();
   private BasicTablePanel<ColumnStatus> cellTable;
   private Map<String, StatusHelper> editableValues = new HashMap<>();
@@ -84,7 +84,7 @@ public class ColumnsManagementPanel extends RightPanel implements CollectionStat
     Sidebar sidebar) {
     final String value;
     if (tableUUID == null) {
-      value = status.getTables().get(0).getUuid();
+      value = status.getTables().get(0).getId();
     } else {
       value = tableUUID;
     }
@@ -92,14 +92,14 @@ public class ColumnsManagementPanel extends RightPanel implements CollectionStat
       k -> new ColumnsManagementPanel(database, status, value, sidebar));
   }
 
-  private ColumnsManagementPanel(ViewerDatabase database, CollectionStatus collectionStatus, String tableUUID,
+  private ColumnsManagementPanel(ViewerDatabase database, CollectionStatus collectionStatus, String tableId,
     Sidebar sidebar) {
     initWidget(binder.createAndBindUi(this));
     ObserverManager.getCollectionObserver().addObserver(this);
     ObserverManager.getSaveObserver().addObserver(this);
     this.database = database;
     this.collectionStatus = collectionStatus;
-    this.tableUUID = tableUUID;
+    this.tableId = tableId;
     this.sidebar = sidebar;
 
     init();
@@ -107,7 +107,7 @@ public class ColumnsManagementPanel extends RightPanel implements CollectionStat
 
   private void init() {
     configureHeader();
-    final TableStatus table = collectionStatus.getTableStatus(tableUUID);
+    final TableStatus table = collectionStatus.getTableStatusByTableId(tableId);
     cellTable = populateTable(table);
     content.add(cellTable);
 
@@ -139,12 +139,12 @@ public class ColumnsManagementPanel extends RightPanel implements CollectionStat
       if (validateCheckboxes()) {
         instances.forEach((key, object) -> {
           if (key.startsWith(database.getUuid())) {
-            object.collectionStatus.getTableStatus(object.tableUUID)
-              .setColumns(saveChanges(object.cellTable, object.tableUUID, object.editableValues));
+            object.collectionStatus.getTableStatus(object.tableId)
+              .setColumns(saveChanges(object.cellTable, object.tableId, object.editableValues));
           }
         });
 
-        DatabaseService.Util.call((Boolean result) -> {
+        CollectionService.Util.call((Boolean result) -> {
           ObserverManager.getCollectionObserver().setCollectionStatus(collectionStatus);
           sidebar.reset(database, collectionStatus);
           Toast.showInfo(messages.columnManagementPageTitle(), messages.columnManagementPageToastDescription());
@@ -161,10 +161,10 @@ public class ColumnsManagementPanel extends RightPanel implements CollectionStat
 
   private void configureHeader() {
     mainHeader.setWidget(CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE),
-      collectionStatus.getTableStatus(tableUUID).getCustomName(), "h1"));
+      collectionStatus.getTableStatusByTableId(tableId).getCustomName(), "h1"));
 
     MetadataField instance = MetadataField
-      .createInstance(collectionStatus.getTableStatus(tableUUID).getCustomDescription());
+      .createInstance(collectionStatus.getTableStatusByTableId(tableId).getCustomDescription());
     instance.setCSS("table-row-description", "font-size-description");
 
     content.add(instance);
@@ -239,7 +239,7 @@ public class ColumnsManagementPanel extends RightPanel implements CollectionStat
     cells.add(
       new ActionsCell<>(messages.columnManagementPageTextForArrowDown(), FontAwesomeIconManager.ARROW_DOWN, object -> {
         List<ColumnStatus> list = cellTable.getDataProvider().getList();
-        if (object.getOrder() != collectionStatus.getTableStatus(tableUUID).getColumns().size()) {
+        if (object.getOrder() != collectionStatus.getTableStatusByTableId(tableId).getColumns().size()) {
           updateColumnOrder(list, object.getOrder(), object.getOrder() - 1);
           cellTable.getDataProvider().setList(list);
           cellTable.getDataProvider().refresh();
@@ -278,7 +278,7 @@ public class ColumnsManagementPanel extends RightPanel implements CollectionStat
         editableValues.put(column.getId(), helper);
       }
 
-      sidebar.updateSidebarItem(tableUUID, true);
+      sidebar.updateSidebarItem(tableId, true);
     });
 
     return checkbox;
@@ -307,7 +307,7 @@ public class ColumnsManagementPanel extends RightPanel implements CollectionStat
         editableValues.put(column.getId(), helper);
       }
 
-      sidebar.updateSidebarItem(tableUUID, true);
+      sidebar.updateSidebarItem(tableId, true);
     });
 
     return checkbox;
@@ -336,7 +336,7 @@ public class ColumnsManagementPanel extends RightPanel implements CollectionStat
         editableValues.put(column.getId(), helper);
       }
 
-      sidebar.updateSidebarItem(tableUUID, true);
+      sidebar.updateSidebarItem(tableId, true);
     });
 
     return checkbox;
@@ -393,7 +393,7 @@ public class ColumnsManagementPanel extends RightPanel implements CollectionStat
         editableValues.put(column.getId(), helper);
       }
 
-      sidebar.updateSidebarItem(tableUUID, true);
+      sidebar.updateSidebarItem(tableId, true);
     });
 
     return label;
@@ -423,7 +423,7 @@ public class ColumnsManagementPanel extends RightPanel implements CollectionStat
         editableValues.put(column.getId(), helper);
       }
 
-      sidebar.updateSidebarItem(tableUUID, true);
+      sidebar.updateSidebarItem(tableId, true);
     });
     return description;
   }
@@ -445,7 +445,7 @@ public class ColumnsManagementPanel extends RightPanel implements CollectionStat
   private boolean validateCheckboxes() {
     for (Map.Entry<String, ColumnsManagementPanel> entry : instances.entrySet()) {
       if (entry.getKey().startsWith(database.getUuid())) {
-        if (!validateCheckbox(entry.getValue().editableValues)) {
+        if (!validateCheckbox(entry.getValue().editableValues, collectionStatus.getTableStatusByTableId(tableId))) {
           return false;
         }
       }
@@ -453,7 +453,7 @@ public class ColumnsManagementPanel extends RightPanel implements CollectionStat
     return true;
   }
 
-  private boolean validateCheckbox(Map<String, StatusHelper> editableValues) {
+  private boolean validateCheckbox(Map<String, StatusHelper> editableValues, TableStatus tableStatus) {
     int countDetails = 0;
     int countTable = 0;
 
@@ -462,13 +462,20 @@ public class ColumnsManagementPanel extends RightPanel implements CollectionStat
     }
 
     for (StatusHelper helper : editableValues.values()) {
-      if (helper.isShowInDetails())
+      if (!helper.isShowInDetails()) {
         countDetails++;
-      if (helper.isShowInTable())
+      }
+      if (!helper.isShowInTable()) {
         countTable++;
+      }
     }
 
-    return countDetails != 0 && countTable != 0;
+    int remainingDetails = (int) tableStatus.getColumns().stream().filter(p -> p.getDetailsStatus().isShow()).count()
+      - countDetails;
+    int remainingTable = (int) tableStatus.getColumns().stream().filter(p -> p.getSearchStatus().getList().isShow())
+      .count() - countTable;
+
+    return remainingDetails > 0 && remainingTable > 0;
   }
 
   @Override

@@ -85,7 +85,7 @@ public abstract class DefaultMethodCallback<T> implements MethodCallback<T> {
       }).getAuthenticatedUser();
 
     } else if (method.getResponse().getStatusCode() == Response.SC_NOT_FOUND) {
-      Dialogs.showInformationDialog(messages.loginDialogTitle(), messages.objectNotFound(), messages.basicActionClose(),
+      Dialogs.showInformationDialog(messages.dialogResourceNotFound(), messages.objectNotFound(), messages.basicActionClose(),
         "btn btn-close", new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {

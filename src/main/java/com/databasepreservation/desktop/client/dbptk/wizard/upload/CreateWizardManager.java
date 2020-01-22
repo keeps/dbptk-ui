@@ -464,6 +464,6 @@ public class CreateWizardManager extends WizardManager {
       HistoryManager.gotoHome();
       Dialogs.showErrors(messages.createSIARDWizardManagerInformationMessagesTitle(), errorMessage,
         messages.basicActionClose());
-    }).createDatabase(path);
+    }).create(path);
   }
 }

@@ -122,7 +122,7 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
       if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
         JavascriptUtils.showItemInFolder(object.getPath());
       } else {
-        SafeUri downloadUri = RestUtils.createFileResourceDownloadSIARDUri(object.getUuid());
+        SafeUri downloadUri = RestUtils.createFileResourceDownloadSIARDUri(object.getPath());
         Window.Location.assign(downloadUri.asString());
       }
     });
@@ -211,7 +211,7 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
 
     FindRequest findRequest = new FindRequest(ViewerDatabase.class.getName(), filter, sorter, sublist, getFacets());
 
-    DatabaseService.Util.call(callback).findDatabases(findRequest, LocaleInfo.getCurrentLocale().getLocaleName());
+    DatabaseService.Util.call(callback).find(findRequest, LocaleInfo.getCurrentLocale().getLocaleName());
   }
 
   @Override

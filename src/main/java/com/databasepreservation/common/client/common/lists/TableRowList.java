@@ -20,7 +20,6 @@ import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.helpers.HelperExportTableData;
 import com.databasepreservation.common.client.common.lists.utils.AsyncTableCell;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
-import com.databasepreservation.common.client.common.utils.ExportResourcesUtils;
 import com.databasepreservation.common.client.common.utils.TableRowListWrapper;
 import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
@@ -36,8 +35,8 @@ import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.models.structure.ViewerType;
-import com.databasepreservation.common.client.services.DatabaseService;
-import com.databasepreservation.common.client.tools.FilterUtils;
+import com.databasepreservation.common.client.services.CollectionService;
+import com.databasepreservation.common.client.tools.RestUtils;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.databasepreservation.common.client.widgets.Alert;
 import com.google.gwt.cell.client.Cell;
@@ -172,9 +171,10 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
                 logger.error("Trying to display NULL Cells");
               } else if (row.getCells().get(solrColumnName) != null) {
                 final String value = row.getCells().get(solrColumnName).getValue();
-                ret = SafeHtmlUtils
-                  .fromTrustedString(CommonClientUtils.getAnchorForLOBDownload(database.getUuid(), table.getUuid(),
-                    row.getUuid(), finalViewerColumn.getColumnIndexInEnclosingTable(), value).toString());
+                ret = SafeHtmlUtils.fromTrustedString(CommonClientUtils.wrapOnAnchor(messages.row_downloadLOB(),
+                  RestUtils.createExportLobUri(database.getUuid(), table.getSchemaName(), table.getName(),
+                    row.getUuid(), finalViewerColumn.getColumnIndexInEnclosingTable(), value))
+                  .toString());
               }
 
               return ret;
@@ -322,14 +322,10 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     CollectionStatus status = wrapper.getStatus();
     Map<String, String> extraParameters = new HashMap<>();
     List<String> fieldsToReturn = new ArrayList<>();
-    Filter filter;
-    Boolean hasNested = false;
-    if (wrapper.isNested()) {
-      filter = getFilter();
-    } else {
-      filter = FilterUtils.filterByTable(getFilter(), table.getId());
-      fieldsToReturn.add(ViewerConstants.INDEX_ID);
-    }
+    fieldsToReturn.add(ViewerConstants.INDEX_ID);
+    Filter filter = getFilter();
+    boolean hasNested = false;
+
     for (ColumnStatus column : status.getTableStatus(table.getUuid()).getColumns()) {
       if (status.showColumn(table.getUuid(), column.getId())) {
         if (column.getNestedColumns().isEmpty()) {
@@ -362,8 +358,8 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     FindRequest findRequest = new FindRequest(ViewerDatabase.class.getName(), filter, currentSorter, sublist,
       getFacets(), false, fieldsToReturn, extraParameters);
 
-    DatabaseService.Util.call(callback).findRows(wrapper.getDatabase().getUuid(), wrapper.getDatabase().getUuid(), findRequest,
-      LocaleInfo.getCurrentLocale().getLocaleName());
+    CollectionService.Util.call(callback).findRows(wrapper.getDatabase().getUuid(), wrapper.getDatabase().getUuid(),
+      table.getSchemaName(), table.getName(), findRequest, LocaleInfo.getCurrentLocale().getLocaleName());
   }
 
   // TODO
@@ -376,13 +372,13 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     TableStatus tableStatus = status.getTableStatus(table.getUuid());
     fieldsToReturn.add(ViewerConstants.INDEX_ID);
     int nestedCount = 0;
-    String keys = "";
+    StringBuilder keys = new StringBuilder();
     String separator = "";
     for (ColumnStatus column : tableStatus.getColumns()) {
       if (!column.getNestedColumns().isEmpty()) {
         String nestedTableId = column.getId();
         String key = ViewerConstants.SOLR_ROWS_NESTED + "." + nestedCount;
-        keys = keys + separator  + key;
+        keys.append(separator).append(key);
         separator = ",";
         fieldsToReturn.add(key + ":[subquery]");
         extraParameters.put(key + ".q", "+nestedTableId:" + nestedTableId + " AND {!terms f=_root_ v=$row.uuid}");
@@ -390,7 +386,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
         nestedCount++;
       }
     }
-    fieldsToReturn.add( ViewerConstants.SOLR_ROWS_NESTED + ":" + "\"" + keys + "\"");
+    fieldsToReturn.add(ViewerConstants.SOLR_ROWS_NESTED + ":" + "\"" + keys + "\"");
   }
 
   @Override
@@ -509,7 +505,8 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     FindRequest findRequest = new FindRequest(ViewerRow.class.getName(), getFilter(), currentSorter, sublist,
       Facets.NONE, false, solrColumns);
 
-    return ExportResourcesUtils.getExportURL(database.getUuid(), table.getUuid(), findRequest, zipFilename, filename, description, exportLobs, false);
+    return RestUtils.createExportTableUri(database.getUuid(), table.getSchemaName(), table.getName(), findRequest,
+      zipFilename, filename, description, exportLobs);
   }
 
   private String getExportURL(String filename, boolean exportAll, boolean description) {

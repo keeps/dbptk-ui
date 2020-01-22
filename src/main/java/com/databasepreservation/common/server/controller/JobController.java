@@ -1,6 +1,5 @@
 package com.databasepreservation.common.server.controller;
 
-import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.slf4j.Logger;
@@ -8,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
 
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerJob;
 import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
 import com.databasepreservation.common.server.ViewerFactory;
@@ -31,7 +31,7 @@ public class JobController {
     viewerJob.setEndTime(jobExecution.getEndTime());
     viewerJob.setStatus(ViewerJobStatus.valueOf(jobExecution.getStatus().name()));
     viewerJob.setExitCode(jobExecution.getExitStatus().getExitCode());
-    if(!jobExecution.getAllFailureExceptions().isEmpty()){
+    if (!jobExecution.getAllFailureExceptions().isEmpty()) {
       viewerJob.setExitDescription(jobExecution.getAllFailureExceptions().get(0).getMessage());
     }
 
@@ -44,6 +44,7 @@ public class JobController {
     ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, viewerJob.getDatabaseUuid());
     viewerJob.setDatabaseName(database.getMetadata().getName());
     viewerJob.setTableName(database.getMetadata().getTable(viewerJob.getTableUuid()).getName());
+    viewerJob.setSchemaName(database.getMetadata().getTable(viewerJob.getTableUuid()).getSchemaName());
     solrManager.addBatchJob(viewerJob);
   }
 

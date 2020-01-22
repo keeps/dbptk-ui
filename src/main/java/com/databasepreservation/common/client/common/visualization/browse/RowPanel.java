@@ -9,9 +9,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.roda.core.data.v2.index.sublist.Sublist;
-
-import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.RightPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
@@ -21,15 +18,10 @@ import com.databasepreservation.common.client.common.fields.RowField;
 import com.databasepreservation.common.client.common.helpers.HelperExportTableData;
 import com.databasepreservation.common.client.common.lists.TableRowList;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
-import com.databasepreservation.common.client.common.utils.ExportResourcesUtils;
-import com.databasepreservation.common.client.index.FindRequest;
-import com.databasepreservation.common.client.index.facets.Facets;
 import com.databasepreservation.common.client.index.filter.AndFiltersParameters;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.filter.FilterParameter;
 import com.databasepreservation.common.client.index.filter.InnerJoinFilterParameter;
-import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
-import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
@@ -43,10 +35,11 @@ import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.models.structure.ViewerSchema;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.models.structure.ViewerType;
-import com.databasepreservation.common.client.services.DatabaseService;
+import com.databasepreservation.common.client.services.CollectionService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
+import com.databasepreservation.common.client.tools.RestUtils;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -70,9 +63,9 @@ import config.i18n.client.ClientMessages;
 public class RowPanel extends RightPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
 
-  public static RowPanel createInstance(ViewerDatabase database, String tableUUID, String rowUUID,
+  public static RowPanel createInstance(ViewerDatabase database, String tableId, String rowIndex,
     CollectionStatus status) {
-    return new RowPanel(database, tableUUID, rowUUID, status);
+    return new RowPanel(database, tableId, rowIndex, status);
   }
 
   public static RowPanel createInstance(ViewerDatabase database, ViewerTable table, ViewerRow row,
@@ -113,21 +106,21 @@ public class RowPanel extends RightPanel {
     init();
   }
 
-  private RowPanel(ViewerDatabase viewerDatabase, final String tableUUID, final String rowUUID,
+  private RowPanel(ViewerDatabase viewerDatabase, final String tableId, final String rowIndex,
     CollectionStatus status) {
-    this.rowUUID = rowUUID;
+    this.rowUUID = rowIndex;
     this.database = viewerDatabase;
-    this.table = database.getMetadata().getTable(tableUUID);
+    this.table = database.getMetadata().getTableById(tableId);
     this.status = status;
 
     initWidget(uiBinder.createAndBindUi(this));
 
     setTitle();
 
-    DatabaseService.Util.call((ViewerRow result) -> {
+    CollectionService.Util.call((ViewerRow result) -> {
       row = result;
       init();
-    }).retrieveRow(database.getUuid(), database.getUuid(), rowUUID);
+    }).retrieveRow(database.getUuid(), database.getUuid(), table.getSchemaName(), table.getName(), rowUUID);
   }
 
   private void setTitle() {
@@ -137,7 +130,7 @@ public class RowPanel extends RightPanel {
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
     BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forRecord(database.getMetadata().getName(),
-      database.getUuid(), table.getNameWithoutPrefix(), table.getUuid(), rowUUID));
+      database.getUuid(), table.getNameWithoutPrefix(), table.getId(), rowUUID));
   }
 
   private void init() {
@@ -257,7 +250,7 @@ public class RowPanel extends RightPanel {
         }
 
         Hyperlink hyperlink = new Hyperlink(ref.getSchemaAndTableName(),
-          HistoryManager.linkToForeignKey(database.getUuid(), ref.refTable.getUuid(), columnNamesAndValues));
+          HistoryManager.linkToForeignKey(database.getUuid(), ref.refTable.getId(), columnNamesAndValues));
         hyperlink.addStyleName("related-records-link");
         b.appendHtmlConstant(hyperlink.toString());
         firstRef = false;
@@ -292,8 +285,10 @@ public class RowPanel extends RightPanel {
       rowField = RowField.createInstance(label, new HTML("NULL"));
     } else {
       if (column.getType().getDbType().equals(ViewerType.dbTypes.BINARY)) {
-        rowField = RowField.createInstance(label, CommonClientUtils.getAnchorForLOBDownload(database.getUuid(),
-          table.getUuid(), row.getUuid(), column.getColumnIndexInEnclosingTable(), cell.getValue()));
+        rowField = RowField.createInstance(label,
+          CommonClientUtils.wrapOnAnchor(messages.row_downloadLOB(),
+            RestUtils.createExportLobUri(database.getUuid(), table.getSchemaName(), table.getName(), row.getUuid(),
+              column.getColumnIndexInEnclosingTable(), cell.getValue())));
       } else {
         rowField = RowField.createInstance(label, new HTML(value));
       }
@@ -334,8 +329,8 @@ public class RowPanel extends RightPanel {
 
         ViewerTable nestedTable = database.getMetadata().getTableById(nestedTableId);
 
-//         final TableSearchPanel tablePanel = new TableSearchPanel(status);
-//         tablePanel.provideSource(database, nestedTable, filter, true);
+        // final TableSearchPanel tablePanel = new TableSearchPanel(status);
+        // tablePanel.provideSource(database, nestedTable, filter, true);
 
         TableRowList tablePanel = new TableRowList(database, nestedTable, filter, null, null, false,
           nestedTable.getCountRows() != 0, status, true);
@@ -348,19 +343,8 @@ public class RowPanel extends RightPanel {
   }
 
   private String getExportURL(String zipFilename, String filename, boolean description, boolean exportLOBs) {
-    List<FilterParameter> filterParameters = new ArrayList<>();
-    filterParameters.add(new SimpleFilterParameter(ViewerConstants.INDEX_ID, row.getUuid()));
-
-    // prepare parameter: field list
-    List<String> solrColumns = new ArrayList<>();
-    for (Map.Entry<String, ViewerCell> entry : row.getCells().entrySet()) {
-      solrColumns.add(entry.getKey());
-    }
-
-    FindRequest findRequest = new FindRequest(ViewerRow.class.getName(), new Filter(filterParameters), Sorter.NONE,
-      new Sublist(), Facets.NONE, false, solrColumns);
-
-    return ExportResourcesUtils.getExportURL(database.getUuid(), table.getUuid(), findRequest, zipFilename, filename, description, exportLOBs, true);
+    return RestUtils.createExportRowUri(database.getUuid(), table.getSchemaName(), table.getName(), row.getUuid(),
+      zipFilename, filename, description, exportLOBs);
   }
 
   /**

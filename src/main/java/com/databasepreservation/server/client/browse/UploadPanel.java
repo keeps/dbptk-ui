@@ -62,11 +62,11 @@ public class UploadPanel extends ContentPanel {
     header.add(CommonClientUtils.getHeaderHTML(FontAwesomeIconManager.getTag(FontAwesomeIconManager.NEW_UPLOAD),
         messages.uploadPanelTextForTitle(), "h1"));
 
-    MetadataField instance = MetadataField
-        .createInstance(messages.uploadPanelTextForDescription());
-    instance.setCSS("table-row-description", "font-size-description");
-
-    content.add(instance);
+//    MetadataField instance = MetadataField
+//        .createInstance(messages.uploadPanelTextForDescription());
+//    instance.setCSS("table-row-description", "font-size-description");
+//
+//    content.add(instance);
     content.add(SIARDUpload.getInstance());
   }
 

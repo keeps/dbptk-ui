@@ -143,7 +143,7 @@ public class DatabaseSidebar extends Composite implements Sidebar, CollectionSta
    */
   private DatabaseSidebar(ViewerDatabase database, CollectionStatus status) {
     initWidget(uiBinder.createAndBindUi(this));
-    init(database, collectionStatus);
+    init(database, status);
   }
 
   /**
@@ -259,9 +259,9 @@ public class DatabaseSidebar extends Composite implements Sidebar, CollectionSta
         schema.getName() + " " + iconTag + " " + collectionStatus.getTableStatus(table.getUuid()).getCustomName());
       }
       SidebarHyperlink tableLink = new SidebarHyperlink(html,
-          HistoryManager.linkToTable(database.getUuid(), table.getUuid()));
+          HistoryManager.linkToTable(database.getUuid(), table.getSchemaName(), table.getName()));
       tableLink.setH6().setIndent2();
-      list.put(table.getUuid(), tableLink);
+      list.put(table.getId(), tableLink);
       sidebarGroup.add(tableLink);
 
       return tableLink;
@@ -282,7 +282,7 @@ public class DatabaseSidebar extends Composite implements Sidebar, CollectionSta
             + collectionStatus.getTableStatus(materializedTable.getUuid()).getCustomName());
       }
       viewLink = new SidebarHyperlink(html,
-        HistoryManager.linkToTable(database.getUuid(), materializedTable.getUuid())).setTooltip("Materialized View");
+        HistoryManager.linkToTable(database.getUuid(), materializedTable.getSchemaName(), materializedTable.getName())).setTooltip("Materialized View");
       list.put(materializedTable.getUuid(), viewLink);
     } else if (schema.getCustomViewTable(view.getName()) != null) {
       final ViewerTable customViewTable = schema.getCustomViewTable(view.getName());
@@ -294,7 +294,7 @@ public class DatabaseSidebar extends Composite implements Sidebar, CollectionSta
           FontAwesomeIconManager.COG, schema.getName() + " " + iconTag + " "
             + collectionStatus.getTableStatus(customViewTable.getUuid()).getCustomName());
       }
-      viewLink = new SidebarHyperlink(html, HistoryManager.linkToTable(database.getUuid(), customViewTable.getUuid())).setTooltip("Custom View");
+      viewLink = new SidebarHyperlink(html, HistoryManager.linkToTable(database.getUuid(), customViewTable.getSchemaName(), customViewTable.getName())).setTooltip("Custom View");
       list.put(customViewTable.getUuid(), viewLink);
     } else {
       if (totalSchemas == 1) {

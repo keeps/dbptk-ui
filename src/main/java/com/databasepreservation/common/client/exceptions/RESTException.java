@@ -25,18 +25,32 @@ public class RESTException extends RuntimeException {
   }
 
   public RESTException(String message, Throwable cause) {
-    super(message);
+    super(message + getCauseMessage(cause));
     this.status = getResponseStatusCode(cause);
   }
 
   public RESTException(Throwable cause) {
-    super(cause.getMessage());
+    super("Remote exception" + getCauseMessage(cause));
     this.status = getResponseStatusCode(cause);
   }
 
   public RESTException(Throwable cause, int status) {
-    super(cause.getMessage());
+    super("Remote exception" + getCauseMessage(cause));
     this.status = status;
+  }
+
+  private static String getCauseMessage(Throwable e) {
+    StringBuilder message = new StringBuilder();
+    Throwable cause = e;
+
+    while (cause != null) {
+      message.append(" caused by ").append(cause.getClass().getSimpleName()).append(": ");
+      if (cause.getMessage() != null) {
+        message.append(cause.getMessage());
+      }
+      cause = cause.getCause();
+    }
+    return message.toString();
   }
 
   public int getStatus() {

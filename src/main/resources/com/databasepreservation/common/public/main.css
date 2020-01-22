@@ -1086,10 +1086,13 @@ p[data-value]:after {
 }
 
 .loadStatus, .errorMessage {
-    margin-right: 0px;
+    margin-right: 0;
     position: absolute;
     right: 110px;
     top: 6px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    max-width: 40em;
 }
 
 .searchButton-html-label {

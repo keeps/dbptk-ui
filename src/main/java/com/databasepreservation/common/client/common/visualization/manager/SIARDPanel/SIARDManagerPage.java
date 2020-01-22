@@ -46,7 +46,7 @@ public class SIARDManagerPage extends ContentPanel {
   private SIARDNavigationPanel siardNavigationPanel = null;
   private ValidationNavigationPanel validationNavigationPanel = null;
   private BrowseNavigationPanel browseNavigationPanel = null;
-  private Boolean populationFieldsCompleted = false;
+  private Boolean populationFieldsCompleted;
   private boolean initialized = false;
 
   @UiField
@@ -166,6 +166,6 @@ public class SIARDManagerPage extends ContentPanel {
   }
 
   private void deleteAll() {
-    DatabaseService.Util.call((Boolean success) -> HistoryManager.gotoDatabase()).deleteDatabase(database.getUuid());
+    DatabaseService.Util.call((Boolean success) -> HistoryManager.gotoDatabase()).delete(database.getUuid());
   }
 }

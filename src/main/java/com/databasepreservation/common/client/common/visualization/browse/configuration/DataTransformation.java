@@ -26,7 +26,7 @@ import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
 import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
 import com.databasepreservation.common.client.models.structure.ViewerReference;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
-import com.databasepreservation.common.client.services.DatabaseService;
+import com.databasepreservation.common.client.services.CollectionService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
@@ -41,7 +41,6 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.ScrollPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
@@ -139,7 +138,7 @@ public class DataTransformation extends RightPanel implements CollectionStatusOb
     loading.setVisible(true);
     if (collectionStatus.getDenormalizations()
       .contains(ViewerConstants.DENORMALIZATION_STATUS_PREFIX + table.getUuid())) {
-      DatabaseService.Util.call((DenormalizeConfiguration response) -> {
+      CollectionService.Util.call((DenormalizeConfiguration response) -> {
         denormalizeConfiguration = response;
         init();
       }).getDenormalizeConfigurationFile(database.getUuid(), database.getUuid(), table.getUuid());

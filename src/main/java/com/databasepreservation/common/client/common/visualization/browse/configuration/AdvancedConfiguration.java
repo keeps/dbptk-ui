@@ -7,10 +7,12 @@ import java.util.Map;
 import com.databasepreservation.common.client.common.ContentPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
+import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
+import com.databasepreservation.desktop.client.common.Card;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -27,27 +29,20 @@ import config.i18n.client.ClientMessages;
  * @author Gabriel Barros <gbarros@keep.pt>
  */
 public class AdvancedConfiguration extends ContentPanel {
-  private static Map<String, AdvancedConfiguration> instances = new HashMap<>();
-  private ViewerDatabase database;
-
-  @Override
-  public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forAdvancedConfiguration(database.getUuid(),
-      database.getMetadata().getName());
-    BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
-  }
-
-  @UiField
-  public ClientMessages messages = GWT.create(ClientMessages.class);
-  @UiField
-  Label title;
-  @UiField
-  FlowPanel options;
+  private ClientMessages messages = GWT.create(ClientMessages.class);
 
   interface AdvancedConfigurationUiBinder extends UiBinder<Widget, AdvancedConfiguration> {
   }
 
   private static AdvancedConfigurationUiBinder binder = GWT.create(AdvancedConfigurationUiBinder.class);
+  @UiField
+  FlowPanel content;
+
+  @UiField
+  FlowPanel header;
+
+  private static Map<String, AdvancedConfiguration> instances = new HashMap<>();
+  private ViewerDatabase database;
 
   public static AdvancedConfiguration getInstance(ViewerDatabase database) {
     return instances.computeIfAbsent(database.getUuid(), k -> new AdvancedConfiguration(database));
@@ -61,7 +56,7 @@ public class AdvancedConfiguration extends ContentPanel {
   }
 
   private void init() {
-    title.setText(messages.advancedConfigurationLabelForMainTitle());
+    configureHeader();
 
     FocusPanel ManagementTablesPanel = createOptions(messages.advancedConfigurationLabelForTableManagement(),
       messages.advancedConfigurationTextForTableManagement());
@@ -75,9 +70,21 @@ public class AdvancedConfiguration extends ContentPanel {
       messages.advancedConfigurationTextForDataTransformation());
     DataTransformationPanel.addClickHandler(event -> HistoryManager.gotoDataTransformation(database.getUuid()));
 
-    options.add(ManagementTablesPanel);
-    options.add(ManagementColumnsPanel);
-    options.add(DataTransformationPanel);
+//    Card createCard = Card.createInstance(messages.homePageHeaderTextForCreateSIARD(), messages.homePageDescriptionTextForCreateSIARD(), btnCreate);
+//
+    content.add(ManagementTablesPanel);
+    content.add(ManagementColumnsPanel);
+    content.add(DataTransformationPanel);
+  }
+
+  private void configureHeader() {
+    header.add(CommonClientUtils.getHeaderHTML(FontAwesomeIconManager.getTag(FontAwesomeIconManager.COGS),
+      messages.advancedConfigurationLabelForMainTitle(), "h1"));
+
+    // MetadataField instance =
+    // MetadataField.createInstance(messages.tableManagementPageTableTextForDescription());
+    // instance.setCSS("table-row-description", "font-size-description");
+    // content.add(instance);
   }
 
   private FocusPanel createOptions(String title, String description) {
@@ -107,5 +114,12 @@ public class AdvancedConfiguration extends ContentPanel {
 
     panel.add(content);
     return panel;
+  }
+
+  @Override
+  public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
+    List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forAdvancedConfiguration(database.getUuid(),
+      database.getMetadata().getName());
+    BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
   }
 }

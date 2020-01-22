@@ -32,10 +32,7 @@ public class DatabaseInformationPanel extends RightPanel {
   private static Map<String, DatabaseInformationPanel> instances = new HashMap<>();
 
   public static DatabaseInformationPanel getInstance(ViewerDatabase database) {
-    String code = database.getUuid();
-
-    instances.computeIfAbsent(code, k -> new DatabaseInformationPanel(database));
-    return instances.get(code);
+    return instances.computeIfAbsent(database.getUuid(), k -> new DatabaseInformationPanel(database));
   }
 
   interface DatabaseInformationPanelUiBinder extends UiBinder<Widget, DatabaseInformationPanel> {
@@ -83,7 +80,8 @@ public class DatabaseInformationPanel extends RightPanel {
 
     SwitchBtn switchTechInformation = new SwitchBtn(messages.schemaStructurePanelTextForAdvancedOption(), false);
     switchTechInformation.setClickHandler(clickEvent -> {
-      switchTechInformation.getButton().setValue(!switchTechInformation.getButton().getValue(), true); // workaround for ie11
+      switchTechInformation.getButton().setValue(!switchTechInformation.getButton().getValue(), true); // workaround for
+                                                                                                       // ie11
       advancedMode = !advancedMode;
       metadataContent.clear();
       initMetadataContent();

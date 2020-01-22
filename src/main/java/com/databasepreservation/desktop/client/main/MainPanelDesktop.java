@@ -246,7 +246,7 @@ public class MainPanelDesktop extends Composite {
           setContent(databaseUUID, currentHistoryPath.get(0), tableUUID, new RightPanelLoader() {
             @Override
             public RightPanel load(ViewerDatabase database, CollectionStatus status) {
-              return TablePanelOptions.getInstance(database, tableUUID);
+              return TablePanelOptions.getInstance(status, database, tableUUID);
             }
           });
 
@@ -255,7 +255,7 @@ public class MainPanelDesktop extends Composite {
           setContent(databaseUUID, currentHistoryPath.get(0), tableUUID, new RightPanelLoader() {
             @Override
             public RightPanel load(ViewerDatabase database, CollectionStatus status) {
-              final TablePanel instance = TablePanel.getInstance(database, tableUUID, currentHistoryPath.get(0));
+              final TablePanel instance = TablePanel.getInstance(status, database, tableUUID, currentHistoryPath.get(0));
               instance.update();
               return instance;
             }
@@ -265,7 +265,7 @@ public class MainPanelDesktop extends Composite {
           setContent(databaseUUID, currentHistoryPath.get(0), tableUUID, new RightPanelLoader() {
             @Override
             public RightPanel load(ViewerDatabase database, CollectionStatus status) {
-              return TablePanel.getInstance(database, tableUUID, page);
+              return TablePanel.getInstance(status, database, tableUUID, page);
             }
           });
         }

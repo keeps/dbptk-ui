@@ -38,27 +38,22 @@ public class TablePanel extends RightPanel implements CollectionStatusObserver {
   private static Map<String, TablePanel> instances = new HashMap<>();
   private static final String SEPARATOR = "/";
 
-  public static TablePanel getInstance(CollectionStatus status, ViewerDatabase database, String tableUUID,
-    String route) {
-    return getInstance(status, database, tableUUID, null, route);
+  public static TablePanel getInstance(CollectionStatus status, ViewerDatabase database, String tableId, String route) {
+    return getInstance(status, database, tableId, null, route);
   }
 
-  public static TablePanel getInstance(ViewerDatabase database, String tableUUID, String route) {
-    return getInstance(null, database, tableUUID, null, route);
-  }
-
-  public static TablePanel getInstance(CollectionStatus status, ViewerDatabase database, String tableUUID,
+  public static TablePanel getInstance(CollectionStatus status, ViewerDatabase database, String tableId,
     String searchInfoJson, String route) {
 
-    String code = database.getUuid() + SEPARATOR + tableUUID;
+    String code = database.getUuid() + SEPARATOR + tableId;
     TablePanel instance = instances.get(code);
     if (instance == null) {
-      instance = new TablePanel(status, database, tableUUID, searchInfoJson, route);
+      instance = new TablePanel(status, database, tableId, searchInfoJson, route);
       instances.put(code, instance);
     } else if (searchInfoJson != null) {
       instance.applySearchInfoJson(searchInfoJson);
     } else if (instance.tableSearchPanel.isSearchInfoDefined()) {
-      instance = new TablePanel(status, database, tableUUID, route);
+      instance = new TablePanel(status, database, tableId, route);
       instances.put(code, instance);
     }
 
@@ -134,11 +129,11 @@ public class TablePanel extends RightPanel implements CollectionStatusObserver {
    *
    * @param viewerDatabase
    *          the database
-   * @param tableUUID
-   *          the table UUID
+   * @param tableId
+   *          the table ID
    */
-  private TablePanel(CollectionStatus status, ViewerDatabase viewerDatabase, final String tableUUID, String route) {
-    this(status, viewerDatabase, tableUUID, null, route);
+  private TablePanel(CollectionStatus status, ViewerDatabase viewerDatabase, final String tableId, String route) {
+    this(status, viewerDatabase, tableId, null, route);
   }
 
   /**
@@ -148,16 +143,17 @@ public class TablePanel extends RightPanel implements CollectionStatusObserver {
    *
    * @param viewerDatabase
    *          the database
-   * @param tableUUID
-   *          the table UUID
+   * @param tableId
+   *          the table Id ('schema'.'table'
    * @param searchInfoJson
    *          the SearchInfo instance as a JSON String
    */
-  private TablePanel(CollectionStatus status, ViewerDatabase viewerDatabase, final String tableUUID,
+  private TablePanel(CollectionStatus status, ViewerDatabase viewerDatabase, final String tableId,
     String searchInfoJson, String route) {
     collectionStatus = status;
     database = viewerDatabase;
-    table = database.getMetadata().getTable(tableUUID);
+    table = database.getMetadata().getTableById(tableId);
+
     this.route = route;
 
     if (searchInfoJson != null) {
@@ -174,7 +170,7 @@ public class TablePanel extends RightPanel implements CollectionStatusObserver {
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
     BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forTable(database.getMetadata().getName(),
-      database.getUuid(), collectionStatus.getTableStatus(table.getUuid()).getCustomName(), table.getUuid()));
+      database.getUuid(), collectionStatus.getTableStatus(table.getUuid()).getCustomName(), table.getId()));
   }
 
   public void setColumnsAndValues(List<String> columnsAndValues) {
@@ -184,10 +180,10 @@ public class TablePanel extends RightPanel implements CollectionStatusObserver {
   public void update() {
     final Map<String, Boolean> selectedColumns;
     if (HistoryManager.ROUTE_FOREIGN_KEY.equals(route)) {
-      selectedColumns = ForeignKeyPanelOptions.getInstance(database, table.getUuid(), columnsAndValues)
+      selectedColumns = ForeignKeyPanelOptions.getInstance(database, table.getId(), columnsAndValues)
         .getSelectedColumns();
     } else {
-      selectedColumns = TablePanelOptions.getInstance(database, table.getUuid()).getSelectedColumns();
+      selectedColumns = TablePanelOptions.getInstance(collectionStatus, database, table.getId()).getSelectedColumns();
     }
     tableSearchPanel.setColumnVisibility(selectedColumns);
     applyCurrentSearchInfoJsonIfExists();
@@ -203,9 +199,9 @@ public class TablePanel extends RightPanel implements CollectionStatusObserver {
 
     options.addClickHandler(event -> {
       if (HistoryManager.ROUTE_TABLE.equals(route)) {
-        HistoryManager.gotoTableOptions(database.getUuid(), table.getUuid());
+        HistoryManager.gotoTableOptions(database.getUuid(), table.getId());
       } else if (HistoryManager.ROUTE_FOREIGN_KEY.equals(route)) {
-        HistoryManager.gotoRelationOptions(database.getUuid(), table.getUuid(), columnsAndValues);
+        HistoryManager.gotoRelationOptions(database.getUuid(), table.getId(), columnsAndValues);
       }
     });
 

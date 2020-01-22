@@ -445,6 +445,9 @@ public class ToolkitStructure2ViewerStructure {
     result.setReferencedTableUUID(
       referenceHolder.getTableUUID(foreignKey.getReferencedSchema(), foreignKey.getReferencedTable()));
 
+    result.setReferencedTableId(
+        referenceHolder.getIdFromNames(foreignKey.getReferencedSchema(), foreignKey.getReferencedTable()));
+
     List<ViewerReference> resultReferences = new ArrayList<>();
     for (Reference reference : foreignKey.getReferences()) {
       ViewerReference resultReference = new ViewerReference();
@@ -678,7 +681,7 @@ public class ToolkitStructure2ViewerStructure {
 
       InputStream stream = null;
       try {
-        Path outputPath = LobPathManager.getPath(configuration, databaseUUID, table.getUuid(), colIndex, rowUUID);
+        Path outputPath = LobPathManager.getPath(configuration, databaseUUID, table.getId(), colIndex, rowUUID);
         Files.createDirectories(outputPath.getParent());
         stream = binaryCell.createInputStream();
         Files.copy(stream, outputPath, StandardCopyOption.REPLACE_EXISTING);

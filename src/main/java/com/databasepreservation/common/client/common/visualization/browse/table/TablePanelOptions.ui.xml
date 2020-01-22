@@ -14,7 +14,7 @@
 
         <g:FlowPanel ui:field="content" addStyleNames="option-container"/>
 
-        <g:FlowPanel addStyleNames="footer-buttons-container">
+        <g:FlowPanel addStyleNames="navigation-panel-buttons">
             <g:FlowPanel ui:field="customButtons" addStyleNames="button-panel-right"/>
             <g:FlowPanel addStyleNames="button-panel-right">
                 <g:SimplePanel addStyleNames="btn-item">

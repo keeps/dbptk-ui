@@ -9,6 +9,7 @@ import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.RightPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
+import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
@@ -148,10 +149,12 @@ public class SIARDUpload extends RightPanel {
             Toast.showInfo("SIARD created with success", PathUtils.getFileName(path));
             doneItemLoadHandler(item, "", newDatabaseUUID);
           }, (String errorMessage) -> {
-            Toast.showError("Cannot create SIARD", PathUtils.getFileName(path));
+            Dialogs.showErrors(messages.errorMessagesOpenFile(PathUtils.getFileName(path)), errorMessage,
+              messages.basicActionClose());
+            // Toast.showError("Cannot create SIARD", PathUtils.getFileName(path));
             item.addClassName("error");
             doneItemLoadHandler(item, errorMessage, null);
-          }).createDatabase(path);
+          }).create(path);
         }
       });
     } else {
@@ -171,6 +174,7 @@ public class SIARDUpload extends RightPanel {
 
     item.removeClassName("working");
     loadStatus.setInnerText(message);
+    loadStatus.setAttribute("title", message);
     loadStatus.removeClassName("flash");
     if (databaseUUID != null) {
       Button btn = new Button();

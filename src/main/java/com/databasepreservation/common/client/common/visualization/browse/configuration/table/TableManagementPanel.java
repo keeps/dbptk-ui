@@ -21,7 +21,7 @@ import com.databasepreservation.common.client.models.status.helpers.StatusHelper
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerSchema;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
-import com.databasepreservation.common.client.services.DatabaseService;
+import com.databasepreservation.common.client.services.CollectionService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
@@ -113,7 +113,7 @@ public class TableManagementPanel extends ContentPanel {
             }
           }
 
-          DatabaseService.Util.call((Boolean result) -> {
+          CollectionService.Util.call((Boolean result) -> {
             final CollectionObserver collectionObserver = ObserverManager.getCollectionObserver();
             collectionObserver.setCollectionStatus(collectionStatus);
             Toast.showInfo(messages.tableManagementPageTitle(), messages.tableManagementPageToastDescription());
@@ -133,7 +133,7 @@ public class TableManagementPanel extends ContentPanel {
   }
 
   private void configureHeader() {
-    header.add(CommonClientUtils.getHeaderHTML(FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE),
+    header.add(CommonClientUtils.getHeaderHTML(FontAwesomeIconManager.getTag(FontAwesomeIconManager.COG),
       messages.tableManagementPageTitle(), "h1"));
 
     MetadataField instance = MetadataField.createInstance(messages.tableManagementPageTableTextForDescription());

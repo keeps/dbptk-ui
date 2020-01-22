@@ -122,10 +122,32 @@ public class CollectionStatus implements Serializable {
     }
   }
 
+  public List<String> getFieldsToReturn(String tableId) {
+    List<String> fieldsToReturn = new ArrayList<>();
+    final List<ColumnStatus> columns = getTableStatusByTableId(tableId).getColumns();
+    columns.forEach(column -> {
+      if (column.getDetailsStatus().isShow()) {
+        fieldsToReturn.add(column.getId());
+      }
+    });
+
+    return fieldsToReturn;
+  }
+
   @JsonIgnore
   public TableStatus getTableStatus(String id) {
     for (TableStatus table : tables) {
       if (table.getUuid().equals(id))
+        return table;
+    }
+
+    return null;
+  }
+
+  @JsonIgnore
+  public TableStatus getTableStatusByTableId(String id) {
+    for (TableStatus table : tables) {
+      if (table.getId().equals(id))
         return table;
     }
 

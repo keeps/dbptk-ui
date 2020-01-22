@@ -47,6 +47,16 @@ public class ConfigurationManager {
   public ConfigurationManager() {
   }
 
+  public CollectionStatus getConfigurationCollection(String databaseUUID, String collectionUUID)
+    throws GenericException {
+    Path databasesDirectoryPath = ViewerFactory.getViewerConfiguration().getDatabasesPath();
+    Path databaseDirectoryPath = databasesDirectoryPath.resolve(databaseUUID);
+    Path collectionStatusFile = databaseDirectoryPath
+      .resolve(ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + collectionUUID + ".json");
+
+    return JsonUtils.readObjectFromFile(collectionStatusFile, CollectionStatus.class);
+  }
+
   public void editSearch(String databaseUUID, String uuid, String name, String description) {
     try {
       final CollectionStatus collectionStatus = getCollectionStatus(databaseUUID,
@@ -303,10 +313,7 @@ public class ConfigurationManager {
     final Path databasesDirectoryPath = ViewerFactory.getViewerConfiguration().getDatabasesPath();
     final Path databaseDirectoryPath = databasesDirectoryPath.resolve(databaseUUID);
     try {
-      Files.walk(databaseDirectoryPath)
-          .sorted(Comparator.reverseOrder())
-          .map(Path::toFile)
-          .forEach(File::delete);
+      Files.walk(databaseDirectoryPath).sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
       LOGGER.info("Database folder removed from system ({})", databaseDirectoryPath.toAbsolutePath());
     } catch (IOException e) {
       throw new GenericException("Could not delete the database folder for uuid: " + databaseUUID + " from the system",

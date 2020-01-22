@@ -18,6 +18,7 @@ public class ResultsCSVOutputStream extends CSVOutputStream {
   /** The results to write to output stream. */
   private final IndexResult<ViewerRow> results;
   private final ViewerTable table;
+  private final ViewerRow row;
   private final List<String> fieldsToReturn;
   private final boolean exportDescription;
   /**
@@ -37,12 +38,39 @@ public class ResultsCSVOutputStream extends CSVOutputStream {
     this.table = table;
     this.fieldsToReturn = fieldsToReturn;
     this.exportDescription = exportDescription;
+    this.row = null;
+  }
+
+  public ResultsCSVOutputStream(final ViewerRow row, final ViewerTable table, final List<String> fieldsToReturn, final String filename,
+                                final boolean exportDescription, final char delimiter) {
+    super(filename, delimiter);
+    this.row = row;
+    this.results = null;
+    this.table = table;
+    this.fieldsToReturn = fieldsToReturn;
+    this.exportDescription = exportDescription;
   }
 
   @Override
   public void consumeOutputStream(final OutputStream out) throws IOException {
     final OutputStreamWriter writer = new OutputStreamWriter(out);
     CSVPrinter printer = null;
+
+    if (this.results == null) {
+      singleRow(writer, printer);
+    } else {
+      multiRow(writer, printer);
+    }
+
+    writer.flush();
+  }
+
+  private void singleRow(OutputStreamWriter writer, CSVPrinter printer) throws IOException {
+    printer = getFormat().withHeader(table.getCSVHeaders(fieldsToReturn, exportDescription).toArray(new String[0])).print(writer);
+    printer.printRecord(row.getCellValues(fieldsToReturn));
+  }
+
+  private void multiRow(OutputStreamWriter writer, CSVPrinter printer) throws IOException {
     boolean isFirst = true;
     for (final ViewerRow row : this.results.getResults()) {
       if (isFirst) {
@@ -52,6 +80,5 @@ public class ResultsCSVOutputStream extends CSVOutputStream {
 
       printer.printRecord(row.getCellValues(fieldsToReturn));
     }
-    writer.flush();
   }
 }

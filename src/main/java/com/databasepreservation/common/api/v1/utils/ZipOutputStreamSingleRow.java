@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.file.Files;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -15,7 +14,6 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.io.IOUtils;
-import org.roda.core.data.v2.index.sublist.Sublist;
 
 import com.databasepreservation.common.api.utils.ExtraMediaType;
 import com.databasepreservation.common.client.ViewerConstants;
@@ -24,66 +22,42 @@ import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.server.ViewerFactory;
-import com.databasepreservation.common.server.index.utils.IterableIndexResult;
 import com.databasepreservation.common.utils.LobPathManager;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-public class ZipOutputStream extends CSVOutputStream {
+public class ZipOutputStreamSingleRow extends CSVOutputStream {
   private final String databaseUUID;
   private final ViewerTable table;
   private final String zipFilename;
   private final String csvFilename;
-  private final IterableIndexResult viewerRows;
-  private final IterableIndexResult viewerRowsClone;
+  private final ViewerRow row;
   private final List<String> fieldsToReturn;
-  private Sublist sublist;
   private final boolean exportDescriptions;
 
-  public ZipOutputStream(final String databaseUUID, final ViewerTable table, final IterableIndexResult viewerRows,
-    final IterableIndexResult viewerRowsClone, final String zipFilename, final String csvFilename,
-    List<String> fieldsToReturn, Sublist sublist, boolean exportDescriptions) {
+  public ZipOutputStreamSingleRow(String databaseUUID, ViewerTable table, ViewerRow row, String zipFilename,
+    String csvFilename, List<String> fieldsToReturn, boolean exportDescriptions) {
     super(zipFilename, ',');
     this.databaseUUID = databaseUUID;
     this.table = table;
+    this.row = row;
     this.zipFilename = zipFilename;
     this.csvFilename = csvFilename;
-    this.viewerRows = viewerRows;
     this.fieldsToReturn = fieldsToReturn;
-    this.viewerRowsClone = viewerRowsClone;
-    this.sublist = sublist;
     this.exportDescriptions = exportDescriptions;
   }
 
   @Override
   public void consumeOutputStream(OutputStream out) throws IOException {
-    boolean all = false;
-    if (sublist == null) {
-      sublist = Sublist.NONE;
-      all = true;
-    }
-    Iterator<ViewerRow> iterator = viewerRows.iterator();
-    int nIndex = 0;
-
     try (ZipArchiveOutputStream zipArchiveOutputStream = new ZipArchiveOutputStream(out)) {
       zipArchiveOutputStream.setUseZip64(Zip64Mode.AsNeeded);
       zipArchiveOutputStream.setMethod(ZipArchiveOutputStream.DEFLATED);
 
       final List<ViewerColumn> binaryColumns = table.getBinaryColumns();
-      while (iterator.hasNext() && (nIndex <= sublist.getMaximumElementCount() || all)) {
-        ViewerRow row = iterator.next();
-        if (nIndex < (sublist.getFirstElementIndex())) {
-          nIndex++;
-          continue;
-        } else {
-          writeToZipFile(zipArchiveOutputStream, row, binaryColumns);
-        }
-        nIndex++;
-      }
+      writeToZipFile(zipArchiveOutputStream, row, binaryColumns);
 
-      nIndex = 0;
-      final ByteArrayOutputStream byteArrayOutputStream = writeCSVFile(nIndex, all);
+      final ByteArrayOutputStream byteArrayOutputStream = writeCSVFile();
       zipArchiveOutputStream.putArchiveEntry(new ZipArchiveEntry(csvFilename));
       zipArchiveOutputStream.write(byteArrayOutputStream.toByteArray());
       byteArrayOutputStream.close();
@@ -131,32 +105,13 @@ public class ZipOutputStream extends CSVOutputStream {
     }
   }
 
-  private ByteArrayOutputStream writeCSVFile(int nIndex, boolean all) throws IOException {
+  private ByteArrayOutputStream writeCSVFile() throws IOException {
     ByteArrayOutputStream listBytes = new ByteArrayOutputStream();
     try (final OutputStreamWriter writer = new OutputStreamWriter(listBytes)) {
-      CSVPrinter printer = null;
-      boolean isFirst = true;
-
-      Iterator<ViewerRow> iterator = viewerRowsClone.iterator();
-      while (iterator.hasNext() && (nIndex <= sublist.getMaximumElementCount() || all)) {
-        ViewerRow row = iterator.next();
-        if (nIndex < sublist.getFirstElementIndex()) {
-          nIndex++;
-          continue;
-        } else {
-          if (isFirst) {
-            printer = new CSVPrinter(writer,
-              getFormat().withHeader(table.getCSVHeaders(fieldsToReturn, exportDescriptions).toArray(new String[0])));
-            isFirst = false;
-          }
-
-          printer.printRecord(row.getCellValues(fieldsToReturn));
-        }
-        nIndex++;
-      }
-      viewerRowsClone.close();
+      CSVPrinter printer = new CSVPrinter(writer,
+        getFormat().withHeader(table.getCSVHeaders(fieldsToReturn, exportDescriptions).toArray(new String[0])));
+      printer.printRecord(row.getCellValues(fieldsToReturn));
     }
-
     return listBytes;
   }
 }

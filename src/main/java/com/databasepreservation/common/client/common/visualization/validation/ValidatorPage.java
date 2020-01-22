@@ -18,6 +18,7 @@ import com.databasepreservation.common.client.models.progress.ValidationProgress
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.validation.ValidationRequirement;
 import com.databasepreservation.common.client.services.DatabaseService;
+import com.databasepreservation.common.client.services.SiardService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
@@ -47,7 +48,6 @@ import config.i18n.client.ClientMessages;
  * @author Gabriel Barros <gbarros@keep.pt>
  */
 public class ValidatorPage extends ContentPanel {
-  private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, ValidatorPage> instances = new HashMap<>();
   private String databaseUUID;
   private String reporterPath;
@@ -80,25 +80,12 @@ public class ValidatorPage extends ContentPanel {
     }
   };
 
+  private static final ClientMessages messages = GWT.create(ClientMessages.class);
+
   interface ValidatorUiBinder extends UiBinder<Widget, ValidatorPage> {
   }
 
   private static ValidatorUiBinder binder = GWT.create(ValidatorUiBinder.class);
-
-  // For server
-  public static ValidatorPage getInstance(ViewerDatabase database, String skipAdditionalChecks) {
-    return ValidatorPage.getInstance(database, null, null, skipAdditionalChecks);
-  }
-
-  public static ValidatorPage getInstance(ViewerDatabase database, String reporterPath, String skipAdditionalChecks) {
-    return ValidatorPage.getInstance(database, reporterPath, null, skipAdditionalChecks);
-  }
-
-  public static ValidatorPage getInstance(ViewerDatabase database, String reporterPath, String udtPath,
-    String skipAdditionalChecks) {
-    return instances.computeIfAbsent(database.getUuid(),
-      k -> new ValidatorPage(database.getUuid(), reporterPath, udtPath, skipAdditionalChecks));
-  }
 
   @UiField
   FlowPanel container;
@@ -126,6 +113,21 @@ public class ValidatorPage extends ContentPanel {
 
   @UiField
   Button btnRunAgain;
+
+  // For server
+  public static ValidatorPage getInstance(ViewerDatabase database, String skipAdditionalChecks) {
+    return ValidatorPage.getInstance(database, null, null, skipAdditionalChecks);
+  }
+
+  public static ValidatorPage getInstance(ViewerDatabase database, String reporterPath, String skipAdditionalChecks) {
+    return ValidatorPage.getInstance(database, reporterPath, null, skipAdditionalChecks);
+  }
+
+  public static ValidatorPage getInstance(ViewerDatabase database, String reporterPath, String udtPath,
+    String skipAdditionalChecks) {
+    return instances.computeIfAbsent(database.getUuid(),
+      k -> new ValidatorPage(database.getUuid(), reporterPath, udtPath, skipAdditionalChecks));
+  }
 
   private ValidatorPage(String databaseUUID, String reporterPath, String udtPath, String skipAdditionalChecks) {
     this.databaseUUID = databaseUUID;
@@ -166,7 +168,7 @@ public class ValidatorPage extends ContentPanel {
   }
 
   private void initProgress() {
-    DatabaseService.Util.call((ValidationProgressData result) -> {
+    SiardService.Util.call((ValidationProgressData result) -> {
       resetInfos();
       populateValidationInfo(false, false);
       autoUpdateTimer.scheduleRepeating(1000);
@@ -177,7 +179,7 @@ public class ValidatorPage extends ContentPanel {
   }
 
   private void runValidator() {
-    DatabaseService.Util.call((Boolean result) -> {
+    SiardService.Util.call((Boolean result) -> {
       // Do nothing, wait for update finish
       GWT.log("Running validator...");
     }, (String errorMessage) -> {
@@ -188,7 +190,7 @@ public class ValidatorPage extends ContentPanel {
   }
 
   private void update() {
-    DatabaseService.Util.call((ValidationProgressData result) -> {
+    SiardService.Util.call((ValidationProgressData result) -> {
       update(result);
       GWT.log("result.isFinished(): " + result.getFinished());
       GWT.log("result.getRequirementsList().size(): " + result.getRequirementsList().size());

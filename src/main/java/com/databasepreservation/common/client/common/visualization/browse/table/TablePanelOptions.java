@@ -3,6 +3,7 @@ package com.databasepreservation.common.client.common.visualization.browse.table
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 
 import com.databasepreservation.common.client.ViewerConstants;
@@ -11,6 +12,7 @@ import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.lists.widgets.MultipleSelectionTablePanel;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
@@ -48,11 +50,10 @@ public class TablePanelOptions extends RightPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, TablePanelOptions> instances = new HashMap<>();
 
-  public static TablePanelOptions getInstance(ViewerDatabase database, String tableUUID) {
+  public static TablePanelOptions getInstance(CollectionStatus status, ViewerDatabase database, String tableId) {
     String separator = "/";
-    String code = database.getUuid() + separator + tableUUID;
-
-    instances.computeIfAbsent(code, k -> new TablePanelOptions(database, tableUUID));
+    String code = database.getUuid() + separator + tableId;
+    instances.computeIfAbsent(code, k -> new TablePanelOptions(status, database, tableId));
     return instances.get(code);
   }
 
@@ -83,6 +84,7 @@ public class TablePanelOptions extends RightPanel {
   Button options;
 
   private ViewerDatabase database;
+  private CollectionStatus status;
   private ViewerTable table;
   private boolean allSelected = true; // true: select all; false; select none;
   private boolean showTechnicalInformation = false; // true: show; false: hide;
@@ -92,9 +94,10 @@ public class TablePanelOptions extends RightPanel {
   private Label switchLabel, labelForSwitch;
   private SimpleCheckBox advancedSwitch;
 
-  private TablePanelOptions(ViewerDatabase viewerDatabase, final String tableUUID) {
+  private TablePanelOptions(CollectionStatus status, ViewerDatabase viewerDatabase, final String tableID) {
+    this.status = status;
     database = viewerDatabase;
-    table = database.getMetadata().getTable(tableUUID);
+    table = database.getMetadata().getTableById(tableID);
 
     initWidget(uiBinder.createAndBindUi(this));
 
@@ -104,7 +107,7 @@ public class TablePanelOptions extends RightPanel {
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
     BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forTable(database.getMetadata().getName(),
-      database.getUuid(), table.getNameWithoutPrefix(), table.getUuid()));
+      database.getUuid(), table.getNameWithoutPrefix(), table.getId()));
   }
 
   public Map<String, Boolean> getSelectedColumns() {
@@ -173,15 +176,15 @@ public class TablePanelOptions extends RightPanel {
   private void configureButtons() {
     btnBack.setText(messages.basicActionBack());
 
-    btnBack.addClickHandler(event -> HistoryManager.gotoTable(database.getUuid(), table.getUuid()));
+    btnBack.addClickHandler(event -> HistoryManager.gotoTable(database.getUuid(), table.getId()));
 
     btnUpdate.setText(messages.basicActionUpdate());
 
-    btnUpdate.addClickHandler(event -> HistoryManager.gotoTableUpdate(database.getUuid(), table.getUuid()));
+    btnUpdate.addClickHandler(event -> HistoryManager.gotoTableUpdate(database.getUuid(), table.getId()));
 
     options.setText(messages.basicActionOptions());
 
-    options.addClickHandler(event -> HistoryManager.gotoTable(database.getUuid(), table.getUuid()));
+    options.addClickHandler(event -> HistoryManager.gotoTable(database.getUuid(), table.getId()));
   }
 
   private void initTable() {
@@ -193,7 +196,12 @@ public class TablePanelOptions extends RightPanel {
 
   private void refreshCellTable(boolean value) {
     showTechnicalInformation = value;
+    final MultiSelectionModel<ViewerColumn> selectionModel = columnsTable.getSelectionModel();
+    columnsTable = createCellTableForViewerColumn();
     populateTableColumns(columnsTable, table);
+    selectionModel.getSelectedSet().forEach(viewerColumn -> {
+      columnsTable.getSelectionModel().setSelected(viewerColumn, selectionModel.isSelected(viewerColumn));
+    });
     content.add(columnsTable);
   }
 
@@ -213,8 +221,15 @@ public class TablePanelOptions extends RightPanel {
       }
     }
 
-    selectionTablePanel.createTable(getToggleSelectPanel(), new ArrayList<>(), viewerTable.getColumns().iterator(),
-      new MultipleSelectionTablePanel.ColumnInfo<>("Show", 4,
+    List<ViewerColumn> columnList = new ArrayList<>();
+    viewerTable.getColumns().forEach(column -> {
+      if (status.showColumn(viewerTable.getUuid(), column.getSolrName())) {
+        columnList.add(column);
+      }
+    });
+
+    selectionTablePanel.createTable(getToggleSelectPanel(), new ArrayList<>(), columnList.iterator(),
+      new MultipleSelectionTablePanel.ColumnInfo<>(messages.basicTableHeaderShow(), 4,
         new Column<ViewerColumn, Boolean>(new CheckboxCell(true, true)) {
           @Override
           public Boolean getValue(ViewerColumn viewerColumn) {

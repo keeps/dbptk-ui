@@ -15,7 +15,7 @@ import com.databasepreservation.common.client.common.visualization.manager.SIARD
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
-import com.databasepreservation.common.client.services.DatabaseService;
+import com.databasepreservation.common.client.services.SiardService;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.Humanize;
 import com.databasepreservation.common.client.tools.PathUtils;
@@ -85,7 +85,7 @@ public class SIARDNavigationPanel {
         });
       } else {
         btnShowFiles.addClickHandler(clickEvent -> {
-          SafeUri downloadUri = RestUtils.createFileResourceDownloadSIARDUri(database.getUuid());
+          SafeUri downloadUri = RestUtils.createFileResourceDownloadSIARDUri(database.getPath());
           Window.Location.assign(downloadUri.asString());
         });
       }
@@ -164,7 +164,7 @@ public class SIARDNavigationPanel {
     if (!database.getStatus().equals(ViewerDatabaseStatus.REMOVING)
       && !database.getStatus().equals(ViewerDatabaseStatus.INGESTING)
       && !database.getValidationStatus().equals(ViewerDatabaseValidationStatus.VALIDATION_RUNNING)) {
-      DatabaseService.Util.call((Void result) -> {
+      SiardService.Util.call((Void result) -> {
         SIARDManagerPage.getInstance(database).refreshInstance(database.getUuid());
       }).deleteSIARDFile(database.getUuid(), database.getUuid());
     }

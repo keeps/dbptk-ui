@@ -13,7 +13,7 @@ import com.databasepreservation.common.client.common.utils.html.LabelUtils;
 import com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.SIARDManagerPage;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
-import com.databasepreservation.common.client.services.DatabaseService;
+import com.databasepreservation.common.client.services.CollectionService;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.ui.Button;
@@ -60,17 +60,17 @@ public class BrowseNavigationPanel {
 
     btnDelete.addClickHandler(event -> {
       if (database.getStatus().equals(ViewerDatabaseStatus.AVAILABLE)
-          || database.getStatus().equals(ViewerDatabaseStatus.ERROR)) {
+        || database.getStatus().equals(ViewerDatabaseStatus.ERROR)) {
         CommonDialogs.showConfirmDialog(messages.SIARDHomePageDialogTitleForDeleteBrowseContent(),
-            messages.SIARDHomePageTextForDeleteFromSolr(), messages.basicActionCancel(), messages.basicActionConfirm(),
-            CommonDialogs.Level.DANGER, "500px", new DefaultAsyncCallback<Boolean>() {
-              @Override
-              public void onSuccess(Boolean result) {
-                if (result) {
-                  delete();
-                }
+          messages.SIARDHomePageTextForDeleteFromSolr(), messages.basicActionCancel(), messages.basicActionConfirm(),
+          CommonDialogs.Level.DANGER, "500px", new DefaultAsyncCallback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean result) {
+              if (result) {
+                delete();
               }
-            });
+            }
+          });
       }
     });
   }
@@ -88,20 +88,20 @@ public class BrowseNavigationPanel {
           btnIngestClicked = true;
 
           HistoryManager.gotoIngestSIARDData(database.getUuid(), database.getMetadata().getName());
-          DatabaseService.Util.call((String databaseUUID) -> {
+          CollectionService.Util.call((String databaseUUID) -> {
             HistoryManager.gotoDatabase(databaseUUID);
             Dialogs.showInformationDialog(messages.SIARDHomePageDialogTitleForBrowsing(),
-                messages.SIARDHomePageTextForIngestSuccess(), messages.basicActionClose(), "btn btn-link");
+              messages.SIARDHomePageTextForIngestSuccess(), messages.basicActionClose(), "btn btn-link");
           }, (String errorMessage) -> {
             instances.clear();
             HistoryManager.gotoSIARDInfo(database.getUuid());
             Dialogs.showErrors(messages.SIARDHomePageDialogTitleForBrowsing(), errorMessage,
-                messages.basicActionClose());
+              messages.basicActionClose());
           }).createCollection(database.getUuid());
         }
       } else {
         Dialogs.showInformationDialog(messages.SIARDHomePageDialogTitleForBrowsing(),
-            messages.SIARDHomePageTextForIngestNotSupported(), messages.basicActionUnderstood(), "btn btn-link");
+          messages.SIARDHomePageTextForIngestNotSupported(), messages.basicActionUnderstood(), "btn btn-link");
       }
     });
   }
@@ -156,7 +156,7 @@ public class BrowseNavigationPanel {
     }
 
     browsingStatus = MetadataField.createInstance(messages.SIARDHomePageLabelForBrowseStatus(),
-        LabelUtils.getDatabaseStatus(database.getStatus()));
+      LabelUtils.getDatabaseStatus(database.getStatus()));
     browsingStatus.setCSS(null, "label-field", "value-field");
 
     browse.addToInfoPanel(browsingStatus);
@@ -185,7 +185,7 @@ public class BrowseNavigationPanel {
         btnBrowse.setVisible(false);
         btnAdvancedConfiguration.setVisible(false);
         btnIngest.addClickHandler(
-            event -> HistoryManager.gotoIngestSIARDData(database.getUuid(), database.getMetadata().getName()));
+          event -> HistoryManager.gotoIngestSIARDData(database.getUuid(), database.getMetadata().getName()));
       }
     } else if (database.getStatus().equals(ViewerDatabaseStatus.METADATA_ONLY)) {
       btnIngest.setVisible(true);
@@ -207,8 +207,8 @@ public class BrowseNavigationPanel {
 
   private void delete() {
     if (database.getStatus().equals(ViewerDatabaseStatus.AVAILABLE)
-        || database.getStatus().equals(ViewerDatabaseStatus.ERROR)) {
-      DatabaseService.Util.call((Boolean result) -> {
+      || database.getStatus().equals(ViewerDatabaseStatus.ERROR)) {
+      CollectionService.Util.call((Boolean result) -> {
         SIARDManagerPage.getInstance(database).refreshInstance(database.getUuid());
       }).deleteCollection(database.getUuid());
     }

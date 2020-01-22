@@ -90,7 +90,7 @@ public class FileResource {
   @Produces(MediaType.APPLICATION_OCTET_STREAM)
   @ApiOperation(value = "Downloads a specific SIARD file from the storage location", notes = "")
   public Response getSIARDFile(
-    @ApiParam(required = true, value = "The name of the SIARD file to download") @QueryParam(ViewerConstants.API_FILE) String filename) {
+    @ApiParam(required = true, value = "The name of the SIARD file to download") @QueryParam(ViewerConstants.API_PATH_PARAM_FILENAME) String filename) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
     User user = UserUtility.getUser(request);
     LogEntryState state = LogEntryState.SUCCESS;

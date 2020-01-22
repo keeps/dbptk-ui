@@ -6,7 +6,7 @@ import com.databasepreservation.common.client.common.search.SavedSearch;
 import com.databasepreservation.common.client.common.search.SearchInfo;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
-import com.databasepreservation.common.client.services.DatabaseService;
+import com.databasepreservation.common.client.services.CollectionService;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.ViewerJsonUtils;
@@ -66,7 +66,7 @@ public class TableSavedSearchEditPanel extends RightPanel {
     mainHeader.setWidget(CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.SAVED_SEARCH),
       messages.loading(), "h1"));
 
-    DatabaseService.Util.call((SavedSearch result) -> {
+    CollectionService.Util.call((SavedSearch result) -> {
       savedSearch = result;
       init();
     }).retrieveSavedSearch(database.getUuid(), database.getUuid(), savedSearchUUID);
@@ -110,7 +110,7 @@ public class TableSavedSearchEditPanel extends RightPanel {
     buttonCancel.setEnabled(false);
 
     // update info & commit
-    DatabaseService.Util.call((Void result) -> {
+    CollectionService.Util.call((Void result) -> {
       buttonApply.setEnabled(true);
       buttonCancel.setEnabled(true);
 

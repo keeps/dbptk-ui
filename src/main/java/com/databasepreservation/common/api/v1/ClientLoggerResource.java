@@ -4,7 +4,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 
-import org.apache.log4j.LogManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -141,7 +140,6 @@ public class ClientLoggerResource implements ClientLoggerService {
     logger.error(getUserInfo() + object, error);
     sendError(classname, object, error);
   }
-
 
   public void sendError(String classname, String message, Throwable error) {
     Logger logger = LoggerFactory.getLogger(ClientLoggerResource.class);

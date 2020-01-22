@@ -89,7 +89,7 @@ public class HelperUploadSIARDFile {
         } else {
 
         }
-      }).findDatabases(request, LocaleInfo.getCurrentLocale().getLocaleName());
+      }).find(request, LocaleInfo.getCurrentLocale().getLocaleName());
     }
   }
 
@@ -98,16 +98,17 @@ public class HelperUploadSIARDFile {
         panel.remove(loading);
         HistoryManager.gotoSIARDInfo(databaseUUID);
       }, (String errorMessage) -> {
-        Toast.showError(messages.errorMessagesOpenFile(), errorMessage);
+      Dialogs.showErrors(messages.errorMessagesOpenFile(path), errorMessage, messages.basicActionClose());
+        //Toast.showError(messages.errorMessagesOpenFile(), errorMessage);
         panel.remove(loading);
-    }).createDatabase(path);
+    }).create(path);
   }
 
   private void successHandler(Boolean confirm, FlowPanel panel, String databaseUUID, String path) {
     if (confirm) {
       DatabaseService.Util.call((Boolean value) -> {
         uploadMetadataSIARD(path, panel);
-      }).deleteDatabase(databaseUUID);
+      }).delete(databaseUUID);
     } else {
       panel.remove(loading);
       HistoryManager.gotoSIARDInfo(databaseUUID);

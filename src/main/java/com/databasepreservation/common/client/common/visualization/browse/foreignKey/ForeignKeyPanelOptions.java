@@ -22,7 +22,6 @@ import com.databasepreservation.common.client.models.structure.ViewerPrimaryKey;
 import com.databasepreservation.common.client.models.structure.ViewerReference;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.models.structure.ViewerView;
-import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.SafeHtmlCell;
@@ -52,12 +51,12 @@ public class ForeignKeyPanelOptions extends RightPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, ForeignKeyPanelOptions> instances = new HashMap<>();
 
-  public static ForeignKeyPanelOptions getInstance(ViewerDatabase database, String tableUUID,
+  public static ForeignKeyPanelOptions getInstance(ViewerDatabase database, String tableId,
     List<String> columnsAndValues) {
     String separator = "/";
-    String code = database.getUuid() + separator + tableUUID;
+    String code = database.getUuid() + separator + tableId;
 
-    instances.computeIfAbsent(code, k -> new ForeignKeyPanelOptions(database, tableUUID, columnsAndValues));
+    instances.computeIfAbsent(code, k -> new ForeignKeyPanelOptions(database, tableId, columnsAndValues));
     return instances.get(code);
   }
 
@@ -99,10 +98,10 @@ public class ForeignKeyPanelOptions extends RightPanel {
   private SimpleCheckBox advancedSwitch;
   private List<String> columnsAndValues;
 
-  private ForeignKeyPanelOptions(ViewerDatabase viewerDatabase, final String tableUUID,
+  private ForeignKeyPanelOptions(ViewerDatabase viewerDatabase, final String tableId,
     final List<String> columnsAndValues) {
     database = viewerDatabase;
-    table = database.getMetadata().getTable(tableUUID);
+    table = database.getMetadata().getTableById(tableId);
     this.columnsAndValues = columnsAndValues;
     initWidget(uiBinder.createAndBindUi(this));
 
@@ -111,8 +110,9 @@ public class ForeignKeyPanelOptions extends RightPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forTable(database.getMetadata().getName(),
-      database.getUuid(), table.getName(), table.getUuid()));
+    // BreadcrumbManager.updateBreadcrumb(breadcrumb,
+    // BreadcrumbManager.forTable(database.getMetadata().getName(),
+    // database.getUuid(), table.getName(), table.getUuid()));
 
   }
 
@@ -126,8 +126,7 @@ public class ForeignKeyPanelOptions extends RightPanel {
   }
 
   private void init() {
-    mainHeader
-      .setWidget(CommonClientUtils.getHeader(table, "h1", database.getMetadata().getSchemas().size() > 1));
+    mainHeader.setWidget(CommonClientUtils.getHeader(table, "h1", database.getMetadata().getSchemas().size() > 1));
     configureButtons();
     configureTechnicalInformationSwitch();
     initTable();
@@ -183,15 +182,18 @@ public class ForeignKeyPanelOptions extends RightPanel {
   private void configureButtons() {
     btnBack.setText(messages.basicActionBack());
 
-    btnBack.addClickHandler(event -> HistoryManager.gotoForeignKey(database.getUuid(), table.getUuid(), columnsAndValues));
+    btnBack
+      .addClickHandler(event -> HistoryManager.gotoForeignKey(database.getUuid(), table.getId(), columnsAndValues));
 
     btnUpdate.setText(messages.basicActionUpdate());
 
-    btnUpdate.addClickHandler(event -> HistoryManager.gotoForeignKeyUpdate(database.getUuid(), table.getUuid(), columnsAndValues));
+    btnUpdate.addClickHandler(
+      event -> HistoryManager.gotoForeignKeyUpdate(database.getUuid(), table.getId(), columnsAndValues));
 
     options.setText(messages.basicActionOptions());
 
-    options.addClickHandler(event -> HistoryManager.gotoForeignKey(database.getUuid(), table.getUuid(), columnsAndValues));
+    options
+      .addClickHandler(event -> HistoryManager.gotoForeignKey(database.getUuid(), table.getId(), columnsAndValues));
   }
 
   private void initTable() {
@@ -203,7 +205,11 @@ public class ForeignKeyPanelOptions extends RightPanel {
 
   private void refreshCellTable(boolean value) {
     showTechnicalInformation = value;
+    final MultiSelectionModel<ViewerColumn> selectionModel = columnsTable.getSelectionModel();
+    columnsTable = createCellTableForViewerColumn();
     populateTableColumns(columnsTable, table);
+    selectionModel.getSelectedSet().forEach(viewerColumn -> columnsTable.getSelectionModel().setSelected(viewerColumn,
+      selectionModel.isSelected(viewerColumn)));
     content.add(columnsTable);
   }
 

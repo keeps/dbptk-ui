@@ -2,9 +2,6 @@ package com.databasepreservation.common.client.common.visualization.manager.data
 
 import java.util.List;
 
-import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
-import com.databasepreservation.common.client.index.filter.Filter;
-
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.ContentPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
@@ -13,6 +10,8 @@ import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.lists.DatabaseList;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
+import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
+import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
@@ -23,8 +22,6 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -60,9 +57,6 @@ public class UserDatabaseListPanel extends ContentPanel {
 
   @UiField
   SimplePanel description;
-
-  @UiField
-  Button download;
 
   @UiField(provided = true)
   DatabaseList databaseList;
@@ -106,14 +100,6 @@ public class UserDatabaseListPanel extends ContentPanel {
         }
         databaseList.getSelectionModel().clear();
       }
-    });
-
-    initButtons();
-  }
-
-  private void initButtons() {
-    download.addClickHandler(event -> {
-      Window.open("https://database-preservation.com/#desktop", "_blank", "");
     });
   }
 

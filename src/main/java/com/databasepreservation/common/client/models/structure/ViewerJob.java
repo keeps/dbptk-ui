@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 import com.databasepreservation.common.client.index.IsIndexed;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -15,6 +16,7 @@ public class ViewerJob extends IsIndexed implements Serializable {
   private String databaseUuid;
   private String databaseName;
   private String tableUuid;
+  private String schemaName;
   private String tableName;
   private String name;
   private ViewerJobStatus status;
@@ -128,6 +130,11 @@ public class ViewerJob extends IsIndexed implements Serializable {
     return tableName;
   }
 
+  @JsonIgnore
+  public String getTableId() {
+    return schemaName + "." + tableName;
+  }
+
   public void setTableName(String tableName) {
     this.tableName = tableName;
   }
@@ -146,5 +153,13 @@ public class ViewerJob extends IsIndexed implements Serializable {
 
   public void setProcessRows(Long processRows) {
     this.processRows = processRows;
+  }
+
+  public String getSchemaName() {
+    return schemaName;
+  }
+
+  public void setSchemaName(String schemaName) {
+    this.schemaName = schemaName;
   }
 }

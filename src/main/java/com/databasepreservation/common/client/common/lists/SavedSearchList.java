@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.client.common.lists.cells.ActionsCell;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
@@ -21,7 +20,7 @@ import com.databasepreservation.common.client.index.facets.Facets;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
-import com.databasepreservation.common.client.services.DatabaseService;
+import com.databasepreservation.common.client.services.CollectionService;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.widgets.Alert;
@@ -52,7 +51,7 @@ public class SavedSearchList extends AsyncTableCell<SavedSearch, String> {
   private Column<SavedSearch, SavedSearch> actionsColumn;
 
   public SavedSearchList(String databaseUUID, Filter filter, Facets facets, String summary, boolean selectable,
-                         boolean exportable) {
+    boolean exportable) {
     super(filter, false, facets, summary, selectable, exportable, databaseUUID);
   }
 
@@ -93,9 +92,9 @@ public class SavedSearchList extends AsyncTableCell<SavedSearch, String> {
     // column with 2 buttons (edit and delete)
     ArrayList<HasCell<SavedSearch, ?>> cells = new ArrayList<>();
     cells.add(new ActionsCell<>(messages.edit(), FontAwesomeIconManager.ACTION_EDIT,
-        object -> HistoryManager.gotoEditSavedSearch(object.getDatabaseUUID(), object.getUuid())));
+      object -> HistoryManager.gotoEditSavedSearch(object.getDatabaseUUID(), object.getUuid())));
     cells.add(new ActionsCell<>(messages.delete(), FontAwesomeIconManager.ACTION_DELETE, "btn-danger",
-      object -> DatabaseService.Util.call((Void result) -> {
+      object -> CollectionService.Util.call((Void result) -> {
         GWT.log("deleted " + object.getUuid());
         SavedSearchList.this.refresh();
       }).deleteSavedSearch(getDatabaseUUID(), getDatabaseUUID(), object.getUuid())));
@@ -159,7 +158,7 @@ public class SavedSearchList extends AsyncTableCell<SavedSearch, String> {
     GWT.log("Filter: " + filter);
 
     FindRequest findRequest = new FindRequest(ViewerDatabase.class.getName(), filter, sorter, sublist, getFacets());
-    DatabaseService.Util.call(callback).findSavedSearches(getDatabaseUUID(), getDatabaseUUID(), findRequest,
+    CollectionService.Util.call(callback).findSavedSearches(getDatabaseUUID(), getDatabaseUUID(), findRequest,
       LocaleInfo.getCurrentLocale().getLocaleName());
   }
 }

@@ -15,7 +15,7 @@ import com.databasepreservation.common.client.models.parameters.SIARDUpdateParam
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerSIARDBundle;
-import com.databasepreservation.common.client.services.DatabaseService;
+import com.databasepreservation.common.client.services.SiardService;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.widgets.Toast;
 import com.google.gwt.core.client.GWT;
@@ -37,13 +37,13 @@ import config.i18n.client.ClientMessages;
  * @author Gabriel Barros <gbarros@keep.pt>
  */
 public class MetadataControlPanel extends Composite {
+  private static final ClientMessages messages = GWT.create(ClientMessages.class);
 
   interface MetadataControlPanelUiBinder extends UiBinder<Widget, MetadataControlPanel> {
   }
 
   private static MetadataControlPanelUiBinder uiBinder = GWT.create(MetadataControlPanelUiBinder.class);
 
-  private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, MetadataControlPanel> instances = new HashMap<>();
   private ViewerDatabase database = null;
   private ViewerSIARDBundle SIARDbundle = null;
@@ -141,7 +141,7 @@ public class MetadataControlPanel extends Composite {
     loading.setVisible(true);
     reset();
 
-    DatabaseService.Util.call((ViewerMetadata result) -> {
+    SiardService.Util.call((ViewerMetadata result) -> {
       loading.setVisible(false);
       Toast.showInfo(messages.metadataSuccessUpdated(), "");
     }, (String errorString) -> {
