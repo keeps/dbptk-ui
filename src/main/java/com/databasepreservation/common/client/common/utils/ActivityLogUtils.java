@@ -1,8 +1,10 @@
 package com.databasepreservation.common.client.common.utils;
 
 import static com.databasepreservation.common.client.ViewerConstants.CONTROLLER_ACTIVITY_LOG_RESOURCE;
+import static com.databasepreservation.common.client.ViewerConstants.CONTROLLER_COLLECTION_RESOURCE;
 import static com.databasepreservation.common.client.ViewerConstants.CONTROLLER_DATABASE_RESOURCE;
 import static com.databasepreservation.common.client.ViewerConstants.CONTROLLER_FILE_RESOURCE;
+import static com.databasepreservation.common.client.ViewerConstants.CONTROLLER_SIARD_RESOURCE;
 import static com.databasepreservation.common.client.ViewerConstants.CONTROLLER_USER_LOGIN_CONTROLLER;
 
 import java.util.Map;
@@ -14,7 +16,6 @@ import com.databasepreservation.common.client.common.search.SearchInfo;
 import com.databasepreservation.common.client.common.utils.html.FilterHtmlUtils;
 import com.databasepreservation.common.client.common.utils.html.SearchInfoHtmlUtils;
 import com.databasepreservation.common.client.common.utils.html.SublistHtmlUtils;
-import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
 import com.databasepreservation.common.client.models.activity.logs.ActivityLogWrapper;
 import com.databasepreservation.common.client.models.activity.logs.PresenceState;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
@@ -47,6 +48,10 @@ public class ActivityLogUtils {
         return getFileParameters(entry);
       case CONTROLLER_USER_LOGIN_CONTROLLER:
         return getLoginParameters(entry);
+      case CONTROLLER_COLLECTION_RESOURCE:
+        return getCollectionParameters(entry);
+      case CONTROLLER_SIARD_RESOURCE:
+        return getSiardParameters(entry);
       default:
         break;
     }
@@ -75,7 +80,25 @@ public class ActivityLogUtils {
   private static FlowPanel getDatabaseParameters(ActivityLogWrapper wrapper) {
     FlowPanel panel = new FlowPanel();
     switch (wrapper.getActivityLogEntry().getActionMethod()) {
-      case "getLOB":
+      case "findDatabases":
+        handleFilterInfo(panel, wrapper);
+        handleSublistInfo(panel, wrapper);
+        return panel;
+      case "retrieve":
+      case "deleteDatabase":
+        handleDatabaseInfo(panel, wrapper);
+        break;
+      case "create":
+        handleFilenameInfo(panel, wrapper, messages.activityLogFilenameRelated(),
+          ViewerConstants.CONTROLLER_FILENAME_PARAM);
+    }
+    return panel;
+  }
+
+  private static FlowPanel getCollectionParameters(ActivityLogWrapper wrapper) {
+    FlowPanel panel = new FlowPanel();
+    switch (wrapper.getActivityLogEntry().getActionMethod()) {
+      case "exportLOB":
         handleDatabaseInfo(panel, wrapper);
         handleTableInfo(panel, wrapper);
         handleRowInfo(panel, wrapper);
@@ -83,10 +106,15 @@ public class ActivityLogUtils {
         handleFilenameInfo(panel, wrapper, messages.activityLogFilenameRelated(),
           ViewerConstants.CONTROLLER_FILENAME_PARAM);
         return panel;
-      case "exportToCSV":
+      case "exportFindToCSV":
         handleDatabaseInfo(panel, wrapper);
         handleTableInfo(panel, wrapper);
-        handleExportOptions(panel, wrapper);
+        handleExportOptions(panel, wrapper, false);
+        return panel;
+      case "exportSingleRowToCSV":
+        handleDatabaseInfo(panel, wrapper);
+        handleTableInfo(panel, wrapper);
+        handleExportOptions(panel, wrapper, true);
         return panel;
       case "findDatabases":
         handleFilterInfo(panel, wrapper);
@@ -100,17 +128,10 @@ public class ActivityLogUtils {
       case "createCollection":
       case "getProgressData":
       case "getReport":
-      case "getValidationProgressData":
       case "getCollectionConfiguration":
       case "retrieve":
       case "deleteCollection":
-      case "deleteDatabase":
       case "updateCollectionConfiguration":
-      case "deleteSIARDFile":
-      case "deleteValidationReport":
-      case "updateMetadataInformation":
-      case "validateSiard":
-      case "getValidationReportFile":
       case "deleteSavedSearch":
         handleDatabaseInfo(panel, wrapper);
         break;
@@ -143,6 +164,23 @@ public class ActivityLogUtils {
         handleTableInfo(panel, wrapper);
         handleSavedSearchEdit(panel, wrapper);
         handleSearchInfo(panel, wrapper);
+        break;
+    }
+    return panel;
+  }
+
+  private static FlowPanel getSiardParameters(ActivityLogWrapper wrapper) {
+    FlowPanel panel = new FlowPanel();
+
+    switch (wrapper.getActivityLogEntry().getActionMethod()) {
+      case "getValidationProgressData":
+      case "deleteSIARDFile":
+      case "deleteValidationReport":
+      case "updateMetadataInformation":
+      case "getMetadataInformation":
+      case "validateSiard":
+      case "getValidationReportFile":
+        handleDatabaseInfo(panel, wrapper);
         break;
     }
     return panel;
@@ -215,14 +253,15 @@ public class ActivityLogUtils {
 
   private static void handleRowInfo(FlowPanel panel, ActivityLogWrapper wrapper) {
     if (wrapper.getRowPresence().equals(PresenceState.YES)) {
-      panel.add(getRecordHyperLink(wrapper.getDatabase().getUuid(), wrapper.getRow().getTableUUID(),
-        wrapper.getRow().getUuid()));
+      panel.add(
+        getRecordHyperLink(wrapper.getDatabase().getUuid(), wrapper.getRow().getTableId(), wrapper.getRow().getUuid()));
     }
   }
 
-  private static RowField getRecordHyperLink(String databaseUUID, String tableUUID, String rowUUID) {
+  private static RowField getRecordHyperLink(String databaseUUID, String tableId, String rowUUID) {
     final SafeHtml tagSafeHtml = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.RECORD, "Row");
-    Hyperlink hyperlink = new Hyperlink(tagSafeHtml, HistoryManager.linkToRecord(databaseUUID, tableUUID, rowUUID));
+    GWT.log(tableId);
+    Hyperlink hyperlink = new Hyperlink(tagSafeHtml, HistoryManager.linkToRecord(databaseUUID, tableId, rowUUID));
     hyperlink.addStyleName("btn btn-link");
 
     return RowField.createInstance(messages.activityLogRecordRelated(), hyperlink);
@@ -232,24 +271,18 @@ public class ActivityLogUtils {
     if (wrapper.getTablePresence().equals(PresenceState.YES)) {
       final SafeHtml tagSafeHtml = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE,
         wrapper.getTable().getName());
-      Hyperlink hyperlink = new Hyperlink(tagSafeHtml,
-        HistoryManager.linkToTable(wrapper.getDatabase().getUuid(), wrapper.getTable().getSchemaName(), wrapper.getTable().getName()));
+      Hyperlink hyperlink = new Hyperlink(tagSafeHtml, HistoryManager.linkToTable(wrapper.getDatabase().getUuid(),
+        wrapper.getTable().getSchemaName(), wrapper.getTable().getName()));
       hyperlink.addStyleName("btn btn-link");
 
       panel.add(RowField.createInstance(messages.activityLogTableRelated(), hyperlink));
     }
   }
 
-  private static void handleExportOptions(FlowPanel panel, ActivityLogWrapper wrapper) {
-    final String singleRecord = wrapper.getActivityLogEntry().getParameters()
-      .get(ViewerConstants.CONTROLLER_EXPORT_SINGLE_ROW_PARAM);
-
-    if (singleRecord.equalsIgnoreCase(Boolean.TRUE.toString())) {
-      if (wrapper.getFilter().getParameters().get(0) instanceof SimpleFilterParameter) {
-        SimpleFilterParameter parameter = (SimpleFilterParameter) wrapper.getFilter().getParameters().get(0);
-        final String rowUUID = parameter.getValue();
-        handleRowInfo(panel, wrapper.getDatabase().getUuid(), wrapper.getTable().getUuid(), rowUUID);
-      }
+  private static void handleExportOptions(FlowPanel panel, ActivityLogWrapper wrapper, boolean singleRecord) {
+    if (singleRecord) {
+      final String rowUUID = wrapper.getActivityLogEntry().getParameters().get(ViewerConstants.CONTROLLER_ROW_ID_PARAM);
+      handleRowInfo(panel, wrapper.getDatabase().getUuid(), wrapper.getTable().getId(), rowUUID);
     }
 
     final String zipFilename = wrapper.getActivityLogEntry().getParameters()
@@ -261,7 +294,7 @@ public class ActivityLogUtils {
     final String exportLobs = wrapper.getActivityLogEntry().getParameters()
       .get(ViewerConstants.CONTROLLER_EXPORT_LOBS_PARAM);
 
-    if (singleRecord.equalsIgnoreCase(Boolean.FALSE.toString())) {
+    if (!singleRecord) {
       panel.add(RowField.createInstance(messages.activityLogLabelForExportType(),
         new HTML(SafeHtmlUtils.fromSafeConstant(messages.activityLogTextForExportTypeTable()))));
     } else {

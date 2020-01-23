@@ -32,7 +32,7 @@ public class RowOperation implements Operation {
 
     if (wrapper.getDatabase() != null) {
       try {
-        List<String> fieldsToReturn = Arrays.asList(ViewerConstants.INDEX_ID, ViewerConstants.SOLR_ROWS_TABLE_UUID);
+        List<String> fieldsToReturn = Arrays.asList(ViewerConstants.INDEX_ID, ViewerConstants.SOLR_ROWS_TABLE_ID);
         Filter filterParam = new Filter(new SimpleFilterParameter(ViewerConstants.INDEX_ID, rowUUID));
         final IndexResult<ViewerRow> viewerRow = ViewerFactory.getSolrManager().findRows(wrapper.getDatabase().getUuid(),
             filterParam, Sorter.NONE, new Sublist(), Facets.NONE, fieldsToReturn);

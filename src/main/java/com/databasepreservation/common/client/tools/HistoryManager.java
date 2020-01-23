@@ -350,8 +350,9 @@ public class HistoryManager {
       Arrays.asList(ROUTE_REFERENCES, database_uuid, table_uuid, record_uuid, columnIndexInTable));
   }
 
-  public static String linkToRecord(String database_uuid, String table_uuid, String record_uuid) {
-    return createHistoryToken(Arrays.asList(ROUTE_RECORD, database_uuid, table_uuid, record_uuid));
+  public static String linkToRecord(String databaseUUID, String tableId, String recordIndex) {
+    final String[] split = tableId.split("\\.");
+    return createHistoryToken(Arrays.asList(ROUTE_RECORD, databaseUUID, ROUTE_DATA, split[0], split[1], recordIndex));
   }
 
   public static String linkToLogin() {

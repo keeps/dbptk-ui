@@ -511,8 +511,8 @@ public class CollectionResource implements CollectionService {
       throw new RESTException(e);
     } finally {
       Object[] list = new Object[] {ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,
-        ViewerConstants.CONTROLLER_TABLE_ID_PARAM, schema + "." + table,
-        ViewerConstants.CONTROLLER_EXPORT_DESCRIPTIONS_PARAM, exportDescription,
+        ViewerConstants.CONTROLLER_TABLE_ID_PARAM, schema + "." + table, ViewerConstants.CONTROLLER_ROW_ID_PARAM,
+        rowIndex, ViewerConstants.CONTROLLER_EXPORT_DESCRIPTIONS_PARAM, exportDescription,
         ViewerConstants.CONTROLLER_EXPORT_LOBS_PARAM, exportLobs, ViewerConstants.CONTROLLER_FILENAME_PARAM, filename};
 
       if (StringUtils.isNotBlank(zipFilename)) {

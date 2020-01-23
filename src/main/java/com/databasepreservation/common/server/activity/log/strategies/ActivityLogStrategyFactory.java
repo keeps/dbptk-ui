@@ -34,34 +34,26 @@ public class ActivityLogStrategyFactory {
       switch (actionMethod) {
         case "createDatabase":
           return identityLogStrategy;
-        case "getLOB":
+        case "retrieve":
+        case "deleteDatabase":
           composeLogStrategy.clearOperationList();
           composeLogStrategy.getOperationList().add(new DatabaseOperation());
-          composeLogStrategy.getOperationList().add(new TableOperation());
-          composeLogStrategy.getOperationList().add(new ColumnOperation());
-          composeLogStrategy.getOperationList().add(new RowOperation());
           return composeLogStrategy;
-        case "exportToCSV":
+        case "findDatabases":
           composeLogStrategy.clearOperationList();
-          composeLogStrategy.getOperationList().add(new DatabaseOperation());
-          composeLogStrategy.getOperationList().add(new TableOperation());
           composeLogStrategy.getOperationList().add(new FilterOperation());
+          composeLogStrategy.getOperationList().add(new FacetsOperation());
           composeLogStrategy.getOperationList().add(new SublistOperation());
           return composeLogStrategy;
+      }
+    } else if (ViewerConstants.CONTROLLER_COLLECTION_RESOURCE.equals(actionComponent)) {
+      switch (actionMethod) {
         case "createCollection":
         case "getProgressData":
         case "getReport":
-        case "getValidationProgressData":
-        case "getCollectionConfiguration":
-        case "retrieve":
         case "deleteCollection":
-        case "deleteDatabase":
+        case "getCollectionConfiguration":
         case "updateCollectionConfiguration":
-        case "deleteSIARDFile":
-        case "deleteValidationReport":
-        case "updateMetadataInformation":
-        case "validateSiard":
-        case "getValidationReportFile":
           composeLogStrategy.clearOperationList();
           composeLogStrategy.getOperationList().add(new DatabaseOperation());
           return composeLogStrategy;
@@ -80,15 +72,29 @@ public class ActivityLogStrategyFactory {
           composeLogStrategy.getOperationList().add(new FacetsOperation());
           composeLogStrategy.getOperationList().add(new SublistOperation());
           return composeLogStrategy;
-        case "findDatabases":
-          composeLogStrategy.clearOperationList();
-          composeLogStrategy.getOperationList().add(new FilterOperation());
-          composeLogStrategy.getOperationList().add(new FacetsOperation());
-          composeLogStrategy.getOperationList().add(new SublistOperation());
-          return composeLogStrategy;
         case "retrieveRow":
           composeLogStrategy.clearOperationList();
           composeLogStrategy.getOperationList().add(new DatabaseOperation());
+          composeLogStrategy.getOperationList().add(new RowOperation());
+          return composeLogStrategy;
+        case "exportLOB":
+          composeLogStrategy.clearOperationList();
+          composeLogStrategy.getOperationList().add(new DatabaseOperation());
+          composeLogStrategy.getOperationList().add(new TableOperation());
+          composeLogStrategy.getOperationList().add(new ColumnOperation());
+          composeLogStrategy.getOperationList().add(new RowOperation());
+          return composeLogStrategy;
+        case "exportFindToCSV":
+          composeLogStrategy.clearOperationList();
+          composeLogStrategy.getOperationList().add(new DatabaseOperation());
+          composeLogStrategy.getOperationList().add(new TableOperation());
+          composeLogStrategy.getOperationList().add(new FilterOperation());
+          composeLogStrategy.getOperationList().add(new SublistOperation());
+          return composeLogStrategy;
+        case "exportSingleRowToCSV":
+          composeLogStrategy.clearOperationList();
+          composeLogStrategy.getOperationList().add(new DatabaseOperation());
+          composeLogStrategy.getOperationList().add(new TableOperation());
           composeLogStrategy.getOperationList().add(new RowOperation());
           return composeLogStrategy;
         case "deleteSavedSearch":
@@ -137,6 +143,19 @@ public class ActivityLogStrategyFactory {
           return composeLogStrategy;
         case "retrieve":
           return identityLogStrategy;
+      }
+    } else if (ViewerConstants.CONTROLLER_SIARD_RESOURCE.equals(actionComponent)) {
+      switch (actionMethod) {
+        case "getValidationProgressData":
+        case "deleteSIARDFile":
+        case "deleteValidationReport":
+        case "updateMetadataInformation":
+        case "validateSiard":
+        case "getValidationReportFile":
+        case "getMetadataInformation":
+          composeLogStrategy.clearOperationList();
+          composeLogStrategy.getOperationList().add(new DatabaseOperation());
+          return composeLogStrategy;
       }
     }
 

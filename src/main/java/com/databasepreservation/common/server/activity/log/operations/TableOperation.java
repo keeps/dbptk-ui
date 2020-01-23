@@ -11,11 +11,12 @@ import com.databasepreservation.common.client.models.structure.ViewerTable;
 public class TableOperation implements Operation {
   @Override
   public ActivityLogWrapper execute(ActivityLogWrapper wrapper) {
-    final String tableUUID = wrapper.getActivityLogEntry().getParameters().get(ViewerConstants.CONTROLLER_TABLE_ID_PARAM);
+    final String tableUUID = wrapper.getActivityLogEntry().getParameters()
+      .get(ViewerConstants.CONTROLLER_TABLE_ID_PARAM);
 
     if (tableUUID != null) {
       if (wrapper.getDatabase() != null) {
-        ViewerTable table = wrapper.getDatabase().getMetadata().getTable(tableUUID);
+        ViewerTable table = wrapper.getDatabase().getMetadata().getTableById(tableUUID);
         wrapper.setTable(table);
         wrapper.setTablePresence(PresenceState.YES);
       } else {

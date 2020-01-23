@@ -485,9 +485,11 @@ public class ViewerConstants {
    */
   public static final String CONTROLLER_ACTIVITY_LOG_RESOURCE = "com.databasepreservation.common.api.v1.ActivityLogResource";
   public static final String CONTROLLER_DATABASE_RESOURCE = "com.databasepreservation.common.api.v1.DatabaseResource";
+  public static final String CONTROLLER_COLLECTION_RESOURCE = "com.databasepreservation.common.api.v1.CollectionResource";
   public static final String CONTROLLER_FILE_RESOURCE = "com.databasepreservation.common.api.v1.FileResource";
   public static final String CONTROLLER_JOB_RESOURCE = "com.databasepreservation.common.api.v1.JobResource";
   public static final String CONTROLLER_MIGRATION_RESOURCE = "com.databasepreservation.common.api.v1.MigrationResource";
+  public static final String CONTROLLER_SIARD_RESOURCE = "com.databasepreservation.common.api.v1.SiardResource";
   public static final String CONTROLLER_USER_LOGIN_CONTROLLER = "com.databasepreservation.common.server.controller.UserLoginController";
 
   /*
