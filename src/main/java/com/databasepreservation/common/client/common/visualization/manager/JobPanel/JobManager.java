@@ -70,8 +70,8 @@ public class JobManager extends ContentPanel {
       ViewerJob selected = jobList.getSelectionModel().getSelectedObject();
       if (selected != null) {
         String databaseUuid = selected.getDatabaseUuid();
-        String tableUuid = selected.getTableUuid();
-        HistoryManager.gotoTable(databaseUuid, tableUuid);
+        String tableId = selected.getTableId();
+        HistoryManager.gotoTable(databaseUuid, tableId);
       }
     });
 

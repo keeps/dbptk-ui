@@ -11,6 +11,7 @@ public class NestedColumnStatus implements Serializable {
   private String id;
   private String name;
   private String originalTable;
+  private Boolean multiValue = false;
   private List<String> nestedFields = new ArrayList<>();
 
   public String getId() {
@@ -43,5 +44,13 @@ public class NestedColumnStatus implements Serializable {
 
   public void setNestedFields(List<String> nestedFields) {
     this.nestedFields = nestedFields;
+  }
+
+  public Boolean getMultiValue() {
+    return multiValue;
+  }
+
+  public void setMultiValue(Boolean multiValue) {
+    this.multiValue = multiValue;
   }
 }

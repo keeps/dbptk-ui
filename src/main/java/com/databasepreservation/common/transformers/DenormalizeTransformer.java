@@ -107,6 +107,7 @@ public class DenormalizeTransformer {
       viewerColumn.setDescription("Please EDIT");
       viewerColumn.setSolrName(relatedTable.getUuid());
       NestedColumnStatus nestedColumn = new NestedColumnStatus();
+      nestedColumn.setMultiValue(relatedTable.getMultiValue());
       nestedColumn.setOriginalTable(relatedTable.getTableID());
       List<String> columnName = new ArrayList();
 

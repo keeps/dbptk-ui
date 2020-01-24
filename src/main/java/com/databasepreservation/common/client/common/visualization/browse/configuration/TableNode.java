@@ -22,6 +22,7 @@ public class TableNode {
   private ViewerDatabase database;
   private ViewerMetadata metadata;
   private ViewerTable table;
+  private Boolean multiValue = false;
 
   public TableNode(ViewerDatabase database, ViewerTable table) {
     this.children = new HashMap<>();
@@ -42,6 +43,7 @@ public class TableNode {
       if (this.searchTop(viewerTable) == null) {
         TableNode childNode = new TableNode(database, viewerTable);
         childNode.uuid = generateUUID(foreignKey, viewerTable);
+        childNode.multiValue = this.parentIsMultiValue(this);
         children.put(foreignKey, childNode);
       }
     }
@@ -53,6 +55,7 @@ public class TableNode {
           if (foreignKey.getReferencedTableUUID().equals(table.getUuid()) && this.searchTop(viewerTable) == null) {
             TableNode childNode = new TableNode(database, viewerTable);
             childNode.uuid = generateUUID(foreignKey, viewerTable);
+            childNode.multiValue = true;
             children.put(foreignKey, childNode);
           }
         }
@@ -85,6 +88,17 @@ public class TableNode {
       return this.getParentNode();
     }
     return this.getParentNode().searchTop(table);
+  }
+
+  public Boolean parentIsMultiValue(TableNode table) {
+    if(table == null){
+      return false;
+    }
+    if(table.multiValue){
+      return true;
+    } else {
+      return parentIsMultiValue(table.getParentNode());
+    }
   }
 
   public TableNode getParentNode() {
@@ -123,5 +137,9 @@ public class TableNode {
 
   public ViewerForeignKey getForeignKey() {
     return foreignKey;
+  }
+
+  public Boolean getMultiValue() {
+    return multiValue;
   }
 }

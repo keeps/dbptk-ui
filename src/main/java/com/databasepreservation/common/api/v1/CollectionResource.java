@@ -325,7 +325,7 @@ public class CollectionResource implements CollectionService {
 
     try {
       final IndexResult<ViewerRow> viewerRowIndexResult = ViewerFactory.getSolrManager().findRows(databaseUUID,
-        FilterUtils.filterByTable(findRequest.filter, schema + "." + table), findRequest.sorter, findRequest.sublist,
+        findRequest.filter, findRequest.sorter, findRequest.sublist,
         findRequest.facets, findRequest.fieldsToReturn, findRequest.extraParameters);
       count = viewerRowIndexResult.getTotalCount();
       return viewerRowIndexResult;

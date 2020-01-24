@@ -10,6 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.tools.FilterUtils;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
@@ -346,7 +347,6 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
       if (status.showColumn(table.getUuid(), column.getId())) {
         if (column.getNestedColumns() != null) {
           hasNested = true;
-          GWT.log("HAS nested");
         } else {
           fieldsToReturn.add(column.getId());
         }
@@ -370,11 +370,16 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
 
     currentSorter = createSorter(columnSortList, columnSortingKeyMap);
 
+    GWT.log("sorter: " + currentSorter);
     GWT.log("Filter: " + filter);
     GWT.log("isNested: " + wrapper.isNested());
 
     FindRequest findRequest = new FindRequest(ViewerDatabase.class.getName(), filter, currentSorter, sublist,
       getFacets(), false, fieldsToReturn, extraParameters);
+
+    if(!wrapper.isNested()){
+      FilterUtils.filterByTable(filter, table.getSchemaName() + "." + table.getName());
+    }
 
     CollectionService.Util.call(callback).findRows(wrapper.getDatabase().getUuid(), wrapper.getDatabase().getUuid(),
       table.getSchemaName(), table.getName(), findRequest, LocaleInfo.getCurrentLocale().getLocaleName());

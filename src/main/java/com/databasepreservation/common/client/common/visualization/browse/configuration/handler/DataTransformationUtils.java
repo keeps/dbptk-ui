@@ -37,6 +37,7 @@ public class DataTransformationUtils {
 
     RelatedTablesConfiguration relatedTable = new RelatedTablesConfiguration();
     relatedTable.setUuid(childNode.getUuid());
+    relatedTable.setMultiValue(childNode.getMultiValue());
     relatedTable.setTableUUID(sourceTable.getUuid());
     relatedTable.setTableID(sourceTable.getId());
     relatedTable.setReferencedTableUUID(referencedTable.getUuid());

@@ -9,6 +9,9 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import com.databasepreservation.common.client.index.IndexResult;
+import org.roda.core.data.v2.index.sublist.Sublist;
+
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.RightPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
@@ -18,9 +21,12 @@ import com.databasepreservation.common.client.common.fields.RowField;
 import com.databasepreservation.common.client.common.helpers.HelperExportTableData;
 import com.databasepreservation.common.client.common.search.TableSearchPanel;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
+import com.databasepreservation.common.client.common.utils.JavascriptUtils;
+import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.filter.FilterParameter;
 import com.databasepreservation.common.client.index.filter.InnerJoinFilterParameter;
+import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.NestedColumnStatus;
@@ -39,9 +45,11 @@ import com.databasepreservation.common.client.services.CollectionService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
+import com.databasepreservation.common.client.tools.JSOUtils;
 import com.databasepreservation.common.client.tools.RestUtils;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -52,6 +60,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Hyperlink;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -320,19 +329,40 @@ public class RowPanel extends RightPanel {
       if (nestedColumns != null) {
         ViewerTable nestedTable = database.getMetadata().getTableById(nestedColumns.getOriginalTable());
 
-        FlowPanel card = new FlowPanel();
-        card.setStyleName("card");
-
         List<FilterParameter> filterParameterList = new ArrayList<>();
         filterParameterList.add(new InnerJoinFilterParameter(rowUUID, columnStatus.getId()));
         Filter filter = new Filter();
         filter.add(filterParameterList);
 
-        final TableSearchPanel tablePanel = new TableSearchPanel(status);
-        tablePanel.provideSource(database, nestedTable, filter, true);
-        card.add(tablePanel);
+        if (columnStatus.getNestedColumns().getMultiValue()) {
+          FlowPanel card = new FlowPanel();
+          card.setStyleName("card");
 
-        content.add(card);
+          RowField rowField = RowField.createInstance(nestedTable.getName(), null);
+          rowField.addStyleName("card-header");
+          card.add(rowField);
+
+          final TableSearchPanel tablePanel = new TableSearchPanel(status);
+          tablePanel.provideSource(database, nestedTable, filter, true);
+          card.add(tablePanel);
+
+          content.add(card);
+        } else {
+          String template = columnStatus.getDetailsStatus().getTemplateStatus().getTemplate();
+          if (template != null) {
+            FindRequest findRequest = new FindRequest(ViewerDatabase.class.getName(), filter, new Sorter(),
+              new Sublist(), null, false, new ArrayList<>());
+            CollectionService.Util.call((IndexResult<ViewerRow> result) -> {
+              if (result.getTotalCount() >= 1) {
+                String json = JSOUtils.cellsToJson(result.getResults().get(0).getCells(), nestedTable);
+                String s = JavascriptUtils.compileTemplate(template, json);
+                RowField rowField = RowField.createInstance(nestedTable.getName(), new Label(s));
+                content.add(rowField);
+              }
+            }).findRows(database.getUuid(), database.getUuid(), nestedTable.getSchemaName(), nestedColumns.getName(),
+              findRequest, LocaleInfo.getCurrentLocale().getLocaleName());
+          }
+        }
       }
     }
   }

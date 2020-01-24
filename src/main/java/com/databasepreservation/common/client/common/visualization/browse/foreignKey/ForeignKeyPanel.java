@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.tools.FilterUtils;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
 import com.databasepreservation.common.client.common.RightPanel;
@@ -87,6 +88,7 @@ public class ForeignKeyPanel extends RightPanel {
       }
     }
     Filter filter = new Filter(filterParameters);
+    FilterUtils.filterByTable(filter, table.getSchemaName() + "." + table.getName());
 
     // search (count)
     FindRequest findRequest = new FindRequest(ViewerRow.class.getName(), filter, null, new Sublist(0, 1), null);

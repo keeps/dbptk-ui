@@ -16,6 +16,7 @@ public class RelatedTablesConfiguration implements Serializable {
   private String tableID;
   private String referencedTableUUID;
   private String referencedTableID;
+  private Boolean multiValue = false;
   private List<ReferencesConfiguration> references;
   private List<RelatedColumnConfiguration> columnsIncluded;
   private DisplaySettingsConfiguration displaySettings;
@@ -121,5 +122,13 @@ public class RelatedTablesConfiguration implements Serializable {
 
   public void setRelatedTables(List<RelatedTablesConfiguration> relatedTables) {
     this.relatedTables = relatedTables;
+  }
+
+  public Boolean getMultiValue() {
+    return multiValue;
+  }
+
+  public void setMultiValue(Boolean multiValue) {
+    this.multiValue = multiValue;
   }
 }

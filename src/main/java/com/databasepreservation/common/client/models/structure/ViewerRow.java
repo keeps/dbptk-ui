@@ -18,6 +18,7 @@ public class ViewerRow extends IsIndexed {
   private Map<String, ViewerCell> cells;
   private List<ViewerRow> nestedRowList;
   private String nestedUUID;
+  private String nestedTableId;
   private String nestedOriginalUUID;
 
   public ViewerRow() {
@@ -108,5 +109,13 @@ public class ViewerRow extends IsIndexed {
 
   public void setNestedOriginalUUID(String nestedOriginalUUID) {
     this.nestedOriginalUUID = nestedOriginalUUID;
+  }
+
+  public String getNestedTableId() {
+    return nestedTableId;
+  }
+
+  public void setNestedTableId(String nestedTableId) {
+    this.nestedTableId = nestedTableId;
   }
 }
