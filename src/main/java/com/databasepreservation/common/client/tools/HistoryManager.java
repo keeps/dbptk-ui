@@ -281,8 +281,9 @@ public class HistoryManager {
     newHistory(params);
   }
 
-  public static void gotoDataTransformation(String databaseUUID, String tableUUID) {
-    List<String> params = Arrays.asList(ROUTE_DATA_TRANSFORMATION, databaseUUID, tableUUID);
+  public static void gotoDataTransformation(String databaseUUID, String tableId) {
+    final String[] split = tableId.split("\\.");
+    List<String> params = Arrays.asList(ROUTE_DATA_TRANSFORMATION, databaseUUID, split[0], split[1]);
     newHistory(params);
   }
 
@@ -482,8 +483,9 @@ public class HistoryManager {
     return createHistoryToken(Arrays.asList(ROUTE_DATA_TRANSFORMATION, database_uuid));
   }
 
-  public static String linkToDataTransformationTable(String database_uuid, String tableUUID) {
-    return createHistoryToken(Arrays.asList(ROUTE_DATA_TRANSFORMATION, database_uuid, tableUUID));
+  public static String linkToDataTransformationTable(String database_uuid, String tableId) {
+    final String[] split = tableId.split("\\.");
+    return createHistoryToken(Arrays.asList(ROUTE_DATA_TRANSFORMATION, database_uuid, split[0], split[1]));
   }
 
   public static String linkToColumnManagement(String databaseUUID, String tableId) {

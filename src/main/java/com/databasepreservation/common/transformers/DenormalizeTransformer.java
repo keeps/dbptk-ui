@@ -95,12 +95,15 @@ public class DenormalizeTransformer {
     ViewerFactory.getConfigurationManager().removeDenormalizationColumns(databaseUUID,
         denormalizeConfiguration.getTableUUID());
     for (RelatedTablesConfiguration relatedTable : denormalizeConfiguration.getRelatedTables()) {
-      setAllColumnsToInclude(relatedTable);
+      List<String> path = new ArrayList<>();
+      path.add(database.getMetadata().getTable(tableUUID).getName());
+      setAllColumnsToInclude(relatedTable, path);
     }
   }
 
-  private void setAllColumnsToInclude(RelatedTablesConfiguration relatedTable) throws GenericException {
+  private void setAllColumnsToInclude(RelatedTablesConfiguration relatedTable, List<String> path) throws GenericException {
     List<RelatedColumnConfiguration> columnsIncluded = relatedTable.getColumnsIncluded();
+    path.add(database.getMetadata().getTable(relatedTable.getTableUUID()).getName());
 
     if (!columnsIncluded.isEmpty()) {
       ViewerColumn viewerColumn = new ViewerColumn();
@@ -113,14 +116,29 @@ public class DenormalizeTransformer {
 
       for (RelatedColumnConfiguration column : columnsIncluded) {
         nestedColumn.getNestedFields().add(column.getColumnName());
+        nestedColumn.getNestedSolrNames().add(column.getSolrName());
         columnName.add(column.getColumnName());
       }
-      viewerColumn.setDisplayName(columnName.toString());
+
+      String template = "";
+      for (String templateName : columnName) {
+        template = template + "{{" + templateName + "}} ";
+      }
+
+      String columnStatusName = "";
+      String separator = "";
+      for (String tableName : path) {
+        columnStatusName = columnStatusName + separator + tableName;
+        separator = " > ";
+      }
+
+
+      viewerColumn.setDisplayName(columnStatusName + separator + columnName.toString());
       ViewerFactory.getConfigurationManager().addDenormalizationColumns(databaseUUID,
-        denormalizeConfiguration.getTableUUID(), viewerColumn, nestedColumn);
+        denormalizeConfiguration.getTableUUID(), viewerColumn, nestedColumn, template);
     }
     for (RelatedTablesConfiguration innerRelatedTable : relatedTable.getRelatedTables()) {
-      setAllColumnsToInclude(innerRelatedTable);
+      setAllColumnsToInclude(innerRelatedTable, path);
     }
 
   }

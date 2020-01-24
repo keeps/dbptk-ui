@@ -215,12 +215,12 @@ public class MainPanel extends Composite {
               return DataTransformation.getInstance(status, database, sidebar);
             }
           });
-      } else if (currentHistoryPath.size() == 3) {
-        final String tableUUID = currentHistoryPath.get(2);
-        setContent(databaseUUID, HistoryManager.ROUTE_DATA_TRANSFORMATION, tableUUID, sidebar, new RightPanelLoader() {
+      } else if (currentHistoryPath.size() == 4) {
+        final String tableId = currentHistoryPath.get(2) + "." + currentHistoryPath.get(3);
+        setContent(databaseUUID, HistoryManager.ROUTE_DATA_TRANSFORMATION, tableId, sidebar, new RightPanelLoader() {
           @Override
           public RightPanel load(ViewerDatabase database, CollectionStatus status) {
-            return DataTransformation.getInstance(status, database, tableUUID, sidebar);
+            return DataTransformation.getInstance(status, database, tableId, sidebar);
           }
         });
       }

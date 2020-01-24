@@ -13,6 +13,7 @@ public class NestedColumnStatus implements Serializable {
   private String originalTable;
   private Boolean multiValue = false;
   private List<String> nestedFields = new ArrayList<>();
+  private List<String> nestedSolrNames = new ArrayList<>();
 
   public String getId() {
     return id;
@@ -52,5 +53,13 @@ public class NestedColumnStatus implements Serializable {
 
   public void setMultiValue(Boolean multiValue) {
     this.multiValue = multiValue;
+  }
+
+  public List<String> getNestedSolrNames() {
+    return nestedSolrNames;
+  }
+
+  public void setNestedSolrNames(List<String> nestedSolrNames) {
+    this.nestedSolrNames = nestedSolrNames;
   }
 }

@@ -2,6 +2,7 @@ package com.databasepreservation.common.client.models.status.collection;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -101,5 +102,15 @@ public class TableStatus implements Serializable {
      if(column.getOrder() > lastIndex) lastIndex = column.getOrder();
     }
     return lastIndex;
+  }
+
+  public void reorderColumns(){
+    for (int i = 0; i < columns.size(); i++) {
+      ColumnStatus column = columns.get(i);
+      int currentIndex = i + 1;
+      if(column.getOrder() != currentIndex){
+        column.setOrder(currentIndex);
+      }
+    }
   }
 }

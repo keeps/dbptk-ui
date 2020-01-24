@@ -271,7 +271,6 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
 
           @Override
           public SafeHtml getValue(ViewerRow row) {
-            String aggregationColumn = null;
             List<String> aggregationList = new ArrayList<>();
             SafeHtml ret = null;
             if (row.getNestedRowList() != null) {
@@ -280,34 +279,15 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
                   continue;
                 } else if (nestedRow.getUuid().equals(columnStatus.getId())) {
                   Map<String, ViewerCell> cells = nestedRow.getCells();
-
-                  // ColumnStatus columnStatus = status.getColumnByTableAndColumn(table.getUuid(),
-                  // row.getNestedUUID());
-
                   String template = columnStatus.getSearchStatus().getList().getTemplate().getTemplate();
                   if (template != null && !template.isEmpty()) {
                     String json = JSOUtils.cellsToJson(cells, nestedTable);
                     String s = JavascriptUtils.compileTemplate(template, json);
                     aggregationList.add(s);
-                    ret = SafeHtmlUtils.fromSafeConstant(messages.dataTransformationTableRowList(aggregationList));
-                  } else {
-                    String aggregationCell = null;
-                    for (Map.Entry<String, ViewerCell> entry : cells.entrySet()) {
-                      if (aggregationCell == null) {
-                        aggregationCell = entry.getValue().getValue();
-                      } else {
-                        aggregationCell = aggregationCell + "," + entry.getValue().getValue();
-                      }
-                    }
-                    if (aggregationColumn == null) {
-                      aggregationColumn = aggregationCell;
-                    } else {
-                      aggregationColumn = aggregationColumn + ";" + aggregationCell;
-                    }
-                    ret = SafeHtmlUtils.fromString(aggregationColumn);
                   }
                 }
               }
+              ret = SafeHtmlUtils.fromSafeConstant(messages.dataTransformationTableRowList(aggregationList));
             }
             return ret;
           }

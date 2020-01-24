@@ -160,6 +160,7 @@ public class ViewerConstants {
   public static final String SOLR_BATCH_JOB_DATABASE_NAME = "databaseName";
   public static final String SOLR_BATCH_JOB_TABLE_UUID = "tableUUID";
   public static final String SOLR_BATCH_JOB_TABLE_NAME = "tableName";
+  public static final String SOLR_BATCH_JOB_SCHEMA_NAME = "schemaName";
   public static final String SOLR_BATCH_JOB_NAME = "name";
   public static final String SOLR_BATCH_JOB_STATUS = "status";
   public static final String SOLR_BATCH_JOB_CREATE_TIME = "createTime";

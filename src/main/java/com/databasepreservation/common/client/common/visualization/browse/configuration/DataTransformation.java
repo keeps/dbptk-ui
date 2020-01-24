@@ -72,7 +72,7 @@ public class DataTransformation extends RightPanel implements CollectionStatusOb
 
   private ViewerDatabase database;
   private ViewerTable table;
-  private String tableUUID;
+  private String tableId;
   private TransformationTable rootTable;
   private DataTransformationSidebar sidebar;
   private CollectionStatus collectionStatus;
@@ -97,26 +97,26 @@ public class DataTransformation extends RightPanel implements CollectionStatusOb
   }
 
   public static DataTransformation getInstance(CollectionStatus collectionStatus, ViewerDatabase database,
-    String tableUUID, DataTransformationSidebar sidebar) {
-    return instances.computeIfAbsent(database.getUuid() + tableUUID,
-      k -> new DataTransformation(collectionStatus, database, tableUUID, sidebar));
+    String tableId, DataTransformationSidebar sidebar) {
+    return instances.computeIfAbsent(database.getUuid() + tableId,
+      k -> new DataTransformation(collectionStatus, database, tableId, sidebar));
   }
 
-  private DataTransformation(CollectionStatus collectionStatus, ViewerDatabase database, String tableUUID,
+  private DataTransformation(CollectionStatus collectionStatus, ViewerDatabase database, String tableId,
     DataTransformationSidebar sidebar) {
     initWidget(binder.createAndBindUi(this));
     ObserverManager.getCollectionObserver().addObserver(this);
     this.database = database;
     this.sidebar = sidebar;
     this.collectionStatus = collectionStatus;
-    this.tableUUID = tableUUID;
-    if (tableUUID == null) {
+    this.tableId = tableId;
+    if (this.tableId == null) {
       isInformation = true;
       content.add(new Alert(Alert.MessageAlertType.INFO, "Under construction"));
       content.add(informationPanel());
     } else {
       isInformation = false;
-      getDenormalizeConfigurationFile(tableUUID);
+      getDenormalizeConfigurationFile(this.tableId);
     }
   }
 
@@ -128,14 +128,14 @@ public class DataTransformation extends RightPanel implements CollectionStatusOb
   /**
    * Check if exist a configuration file for this database, if exist use to
    */
-  private void getDenormalizeConfigurationFile(String tableUUID) {
+  private void getDenormalizeConfigurationFile(String tableId) {
     loading.setVisible(true);
-    this.table = database.getMetadata().getTable(tableUUID);
-    if (collectionStatus.getDenormalizations().contains(ViewerConstants.DENORMALIZATION_STATUS_PREFIX + tableUUID)) {
+    this.table = database.getMetadata().getTableById(tableId);
+    if (collectionStatus.getDenormalizations().contains(ViewerConstants.DENORMALIZATION_STATUS_PREFIX + table.getUuid())) {
       CollectionService.Util.call((DenormalizeConfiguration response) -> {
         denormalizeConfiguration = response;
         init();
-      }).getDenormalizeConfigurationFile(database.getUuid(), database.getUuid(), tableUUID);
+      }).getDenormalizeConfigurationFile(database.getUuid(), database.getUuid(), table.getUuid());
     } else {
       denormalizeConfiguration = new DenormalizeConfiguration(database.getUuid(), table);
       init();
@@ -174,7 +174,7 @@ public class DataTransformation extends RightPanel implements CollectionStatusOb
       denormalizeConfigurationList.clear();
       for (DataTransformation dataTransformation : instances.values()) {
         dataTransformation.clear();
-        dataTransformation.getDenormalizeConfigurationFile(tableUUID);
+        dataTransformation.getDenormalizeConfigurationFile(tableId);
       }
     });
 

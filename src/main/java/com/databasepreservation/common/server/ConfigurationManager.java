@@ -132,19 +132,20 @@ public class ConfigurationManager {
   }
 
   public void addDenormalizationColumns(String databaseUUID, String tableUUID, ViewerColumn column,
-                                        NestedColumnStatus nestedId) throws GenericException {
+                                        NestedColumnStatus nestedId, String template) throws GenericException {
     try {
       final DatabaseStatus databaseStatus = getDatabaseStatus(databaseUUID);
       if (databaseStatus.getCollections().size() >= 1) {
         final String collectionId = databaseStatus.getCollections().get(0);
         final CollectionStatus collectionStatus = getCollectionStatus(databaseUUID, collectionId);
         TableStatus table = collectionStatus.getTableStatus(tableUUID);
-//        table.getColumns().removeIf(c -> c.getNestedColumns() != null);
 
         int order = table.getLastColumnOrder();
         ColumnStatus columnStatus = StatusUtils.getColumnStatus(column, true, ++order);
         columnStatus.setNestedColumns(nestedId);
         table.addColumnStatus(columnStatus);
+        columnStatus.getDetailsStatus().getTemplateStatus().setTemplate(template);
+        columnStatus.getSearchStatus().getList().getTemplate().setTemplate(template);
 
         // Update collection
         updateCollectionStatus(databaseUUID, collectionStatus);
@@ -162,6 +163,7 @@ public class ConfigurationManager {
         final CollectionStatus collectionStatus = getCollectionStatus(databaseUUID, collectionId);
         TableStatus table = collectionStatus.getTableStatus(tableUUID);
         table.getColumns().removeIf(c -> c.getNestedColumns() != null);
+        table.reorderColumns();
         // Update collection
         updateCollectionStatus(databaseUUID, collectionStatus);
       }

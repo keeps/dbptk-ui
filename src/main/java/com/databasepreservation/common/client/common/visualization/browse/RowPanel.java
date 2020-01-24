@@ -9,7 +9,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import com.databasepreservation.common.client.index.IndexResult;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
@@ -23,6 +22,7 @@ import com.databasepreservation.common.client.common.search.TableSearchPanel;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.index.FindRequest;
+import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.filter.FilterParameter;
 import com.databasepreservation.common.client.index.filter.InnerJoinFilterParameter;
@@ -30,7 +30,6 @@ import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.NestedColumnStatus;
-import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
@@ -201,16 +200,19 @@ public class RowPanel extends RightPanel {
       b.appendHtmlConstant("</div>");
     }
 
-    for (ViewerColumn column : table.getColumns()) {
-      if (!status.showColumnInDetail(table.getUuid(), column.getSolrName()))
-        continue;
-      boolean isPrimaryKeyColumn = table.getPrimaryKey() != null
-        && table.getPrimaryKey().getColumnIndexesInViewerTable().contains(column.getColumnIndexInEnclosingTable());
-      getCellHTML(column, colIndexRelatedTo.get(column.getSolrName()), colIndexReferencedBy.get(column.getSolrName()),
-        isPrimaryKeyColumn);
+    for (ColumnStatus columnStatus : status.getTableStatus(table.getUuid()).getColumns()) {
+      if (columnStatus.getDetailsStatus().isShow()) {
+        if (columnStatus.getNestedColumns() == null) {
+          ViewerColumn column = table.getColumnBySolrName(columnStatus.getId());
+          boolean isPrimaryKeyColumn = table.getPrimaryKey() != null
+            && table.getPrimaryKey().getColumnIndexesInViewerTable().contains(column.getColumnIndexInEnclosingTable());
+          getCellHTML(column, colIndexRelatedTo.get(column.getSolrName()),
+            colIndexReferencedBy.get(column.getSolrName()), isPrimaryKeyColumn, columnStatus);
+        } else {
+          getNestedHTML(columnStatus);
+        }
+      }
     }
-
-    getNestedHTML();
 
     Button btn = new Button();
     btn.addStyleName("btn btn-primary btn-download");
@@ -276,8 +278,9 @@ public class RowPanel extends RightPanel {
     }
   }
 
-  private void getCellHTML(ViewerColumn column, Set<Ref> relatedTo, Set<Ref> referencedBy, boolean isPrimaryKeyColumn) {
-    String label = column.getDisplayName();
+  private void getCellHTML(ViewerColumn column, Set<Ref> relatedTo, Set<Ref> referencedBy, boolean isPrimaryKeyColumn,
+    ColumnStatus columnStatus) {
+    String label = columnStatus.getCustomName();
 
     String value = null;
     ViewerCell cell = row.getCells().get(column.getSolrName());
@@ -304,8 +307,8 @@ public class RowPanel extends RightPanel {
       }
     }
 
-    if (ViewerStringUtils.isNotBlank(column.getDescription())) {
-      rowField.addColumnDescription(column.getDescription());
+    if (ViewerStringUtils.isNotBlank(columnStatus.getCustomDescription())) {
+      rowField.addColumnDescription(columnStatus.getCustomDescription());
     }
 
     if (relatedTo != null && !relatedTo.isEmpty()) {
@@ -319,49 +322,48 @@ public class RowPanel extends RightPanel {
     content.add(rowField);
   }
 
-  private void getNestedHTML() {
-    TableStatus tableStatus = status.getTableStatus(table.getUuid());
-    for (ColumnStatus columnStatus : tableStatus.getColumns()) {
-      if (!status.showColumnInDetail(table.getUuid(), columnStatus.getId()))
-        continue;
-      NestedColumnStatus nestedColumns = columnStatus.getNestedColumns();
+  private void getNestedHTML(ColumnStatus columnStatus) {
+    NestedColumnStatus nestedColumns = columnStatus.getNestedColumns();
 
-      if (nestedColumns != null) {
-        ViewerTable nestedTable = database.getMetadata().getTableById(nestedColumns.getOriginalTable());
+    if (nestedColumns != null) {
+      ViewerTable nestedTable = database.getMetadata().getTableById(nestedColumns.getOriginalTable());
 
-        List<FilterParameter> filterParameterList = new ArrayList<>();
-        filterParameterList.add(new InnerJoinFilterParameter(rowUUID, columnStatus.getId()));
-        Filter filter = new Filter();
-        filter.add(filterParameterList);
+      List<FilterParameter> filterParameterList = new ArrayList<>();
+      filterParameterList.add(new InnerJoinFilterParameter(rowUUID, columnStatus.getId()));
+      Filter filter = new Filter();
+      filter.add(filterParameterList);
 
-        if (columnStatus.getNestedColumns().getMultiValue()) {
-          FlowPanel card = new FlowPanel();
-          card.setStyleName("card");
+      if (columnStatus.getNestedColumns().getMultiValue()) {
+        FlowPanel card = new FlowPanel();
+        card.setStyleName("card");
 
-          RowField rowField = RowField.createInstance(nestedTable.getName(), null);
-          rowField.addStyleName("card-header");
-          card.add(rowField);
+        RowField rowField = RowField.createInstance(nestedTable.getName(), null);
+        rowField.addStyleName("card-header");
+        card.add(rowField);
 
-          final TableSearchPanel tablePanel = new TableSearchPanel(status);
-          tablePanel.provideSource(database, nestedTable, filter, true);
-          card.add(tablePanel);
+        final TableSearchPanel tablePanel = new TableSearchPanel(status);
+        tablePanel.provideSource(database, nestedTable, filter, true);
+        card.add(tablePanel);
 
-          content.add(card);
-        } else {
-          String template = columnStatus.getDetailsStatus().getTemplateStatus().getTemplate();
-          if (template != null) {
-            FindRequest findRequest = new FindRequest(ViewerDatabase.class.getName(), filter, new Sorter(),
-              new Sublist(), null, false, new ArrayList<>());
-            CollectionService.Util.call((IndexResult<ViewerRow> result) -> {
-              if (result.getTotalCount() >= 1) {
-                String json = JSOUtils.cellsToJson(result.getResults().get(0).getCells(), nestedTable);
-                String s = JavascriptUtils.compileTemplate(template, json);
-                RowField rowField = RowField.createInstance(nestedTable.getName(), new Label(s));
-                content.add(rowField);
-              }
-            }).findRows(database.getUuid(), database.getUuid(), nestedTable.getSchemaName(), nestedColumns.getName(),
-              findRequest, LocaleInfo.getCurrentLocale().getLocaleName());
-          }
+        content.add(card);
+      } else {
+        String template = columnStatus.getDetailsStatus().getTemplateStatus().getTemplate();
+        FlowPanel panel = new FlowPanel();
+        content.add(panel);
+        if (template != null) {
+          FindRequest findRequest = new FindRequest(ViewerDatabase.class.getName(), filter, new Sorter(), new Sublist(),
+            null, false, new ArrayList<>());
+          CollectionService.Util.call((IndexResult<ViewerRow> result) -> {
+            if (result.getTotalCount() >= 1) {
+              String json = JSOUtils.cellsToJson(result.getResults().get(0).getCells(), nestedTable);
+              String s = JavascriptUtils.compileTemplate(template, json);
+              RowField rowField = RowField.createInstance(columnStatus.getCustomName(), new Label(s));
+              rowField.addColumnDescription(columnStatus.getCustomDescription());
+
+              panel.add(rowField);
+            }
+          }).findRows(database.getUuid(), database.getUuid(), nestedTable.getSchemaName(), nestedColumns.getName(),
+            findRequest, LocaleInfo.getCurrentLocale().getLocaleName());
         }
       }
     }

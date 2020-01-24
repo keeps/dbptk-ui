@@ -3,6 +3,8 @@ package com.databasepreservation.common.server.jobs;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.server.ViewerFactory;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.slf4j.Logger;
@@ -34,6 +36,7 @@ public class JobListener extends JobExecutionListenerSupport {
       JobController.addSolrBatchJob(jobExecution);
       String databaseUUID = jobExecution.getJobParameters().getString(ViewerConstants.CONTROLLER_DATABASE_ID_PARAM);
       String tableUUID = jobExecution.getJobParameters().getString(ViewerConstants.CONTROLLER_TABLE_ID_PARAM);
+      ViewerDatabase database = ViewerFactory.getSolrManager().retrieve(ViewerDatabase.class, databaseUUID);
       updateConfigurationFile(databaseUUID, tableUUID, ViewerJobStatus.valueOf(jobExecution.getStatus().name()));
       LOGGER.info("Job STARTED for table " + tableUUID);
 

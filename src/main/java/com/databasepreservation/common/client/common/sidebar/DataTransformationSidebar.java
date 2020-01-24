@@ -185,10 +185,10 @@ public class DataTransformationSidebar extends Composite implements Sidebar, Col
 
       for (ViewerTable table : schema.getTables()) {
         if (firstElement == null) {
-          firstElement = table.getUuid();
+          firstElement = table.getId();
         }
         if (!table.isCustomView() && !table.isMaterializedView()) {
-          if (collectionStatus.showTable(table.getUuid())) {
+          if (collectionStatus.showTable(table.getId())) {
             sidebarGroup.add(createTableItem(schema, table, totalSchemas, iconTag));
           }
         }
@@ -210,9 +210,9 @@ public class DataTransformationSidebar extends Composite implements Sidebar, Col
         schema.getName() + " " + iconTag + " " + customName);
     }
     SidebarHyperlink tableLink = new SidebarHyperlink(html,
-      HistoryManager.linkToDataTransformationTable(database.getUuid(), table.getUuid()));
+      HistoryManager.linkToDataTransformationTable(database.getUuid(), table.getId()));
     tableLink.setH6().setIndent0();
-    list.put(table.getUuid(), tableLink);
+    list.put(table.getId(), tableLink);
 
     return tableLink;
   }

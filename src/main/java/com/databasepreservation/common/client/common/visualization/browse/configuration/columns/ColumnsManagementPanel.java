@@ -450,44 +450,47 @@ public class ColumnsManagementPanel extends RightPanel implements CollectionStat
       }
     };
     options.setFieldUpdater((index, columnStatus, value) -> {
-
       List<FlowPanel> configurations = new ArrayList<>();
+      if(columnStatus.getNestedColumns() != null) {
+        List<String> nestedFields = columnStatus.getNestedColumns().getNestedFields();
 
-      List<String> nestedFields = columnStatus.getNestedColumns().getNestedFields();
+        //hint for allowed fields
+        FlowPanel allowedFieldsPanel = new FlowPanel();
+        Label allowedFields = new Label(nestedFields.toString());
+        allowedFieldsPanel.add(allowedFields);
+        configurations.add(allowedFieldsPanel);
 
-      FlowPanel allowedFieldsPanel = new FlowPanel();
-      Label allowedFields = new Label(nestedFields.toString());
-      allowedFieldsPanel.add(allowedFields);
-      configurations.add(allowedFieldsPanel);
+        Label templateListLabel = new Label("Template list");
+        templateListLabel.setStyleName("form-label");
+        TextBox templateList = new TextBox();
+        templateList.setStyleName("form-textbox");
+        templateList.setText(columnStatus.getSearchStatus().getList().getTemplate().getTemplate());
+        templateList.addChangeHandler(event -> {
+          columnStatus.getSearchStatus().getList().getTemplate().setTemplate(templateList.getText());
+        });
 
-      Label templateListLabel = new Label("Template list");
-      templateListLabel.setStyleName("form-label");
-      TextBox templateList = new TextBox();
-      templateList.setStyleName("form-textbox");
-      templateList.setText(columnStatus.getSearchStatus().getList().getTemplate().getTemplate());
-      templateList.addChangeHandler(event -> {
-        columnStatus.getSearchStatus().getList().getTemplate().setTemplate(templateList.getText());
-      });
-      FlowPanel templateListPanel = new FlowPanel();
-      templateListPanel.add(templateListLabel);
-      templateListPanel.add(templateList);
-      configurations.add(templateListPanel);
+        FlowPanel templateListPanel = new FlowPanel();
+        templateListPanel.add(templateListLabel);
+        templateListPanel.add(templateList);
+        configurations.add(templateListPanel);
 
-      Label templateDetailLabel = new Label("Template Detail");
-      templateDetailLabel.setStyleName("form-label");
-      TextBox templateDetail = new TextBox();
-      templateDetail.setStyleName("form-textbox");
-      templateDetail.setText(columnStatus.getDetailsStatus().getTemplateStatus().getTemplate());
-      templateDetail.addChangeHandler(event -> {
-        columnStatus.getDetailsStatus().getTemplateStatus().setTemplate(templateDetail.getText());
-      });
-      FlowPanel templateDetailPanel = new FlowPanel();
-      templateDetailPanel.add(templateDetailLabel);
-      templateDetailPanel.add(templateDetail);
-      configurations.add(templateDetailPanel);
+        Label templateDetailLabel = new Label("Template Detail");
+        templateDetailLabel.setStyleName("form-label");
+        TextBox templateDetail = new TextBox();
+        templateDetail.setStyleName("form-textbox");
+        templateDetail.setText(columnStatus.getDetailsStatus().getTemplateStatus().getTemplate());
+        templateDetail.addChangeHandler(event -> {
+          columnStatus.getDetailsStatus().getTemplateStatus().setTemplate(templateDetail.getText());
+        });
+
+        FlowPanel templateDetailPanel = new FlowPanel();
+        templateDetailPanel.add(templateDetailLabel);
+        templateDetailPanel.add(templateDetail);
+        configurations.add(templateDetailPanel);
+      }
 
       Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), messages.basicTableHeaderOptions(),
-        configurations, "continue", "btn btn-close");
+          configurations, messages.basicActionClose(), "btn btn-close");
     });
     return options;
   }
