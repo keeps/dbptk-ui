@@ -2,8 +2,10 @@ package com.databasepreservation.common.client.common.visualization.browse.confi
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.common.ContentPanel;
@@ -102,22 +104,27 @@ public class TableManagementPanel extends ContentPanel {
     btnSave.addClickHandler(clickEvent -> {
       if (selectionValidation()) {
         if (inputValidation()) {
-          for (MultipleSelectionTablePanel<ViewerTable> value : tables.values()) {
-            for (ViewerTable table : database.getMetadata().getTables().values()) {
-              collectionStatus.updateTableShowCondition(table.getUuid(), value.getSelectionModel().isSelected(table));
-              if (editableValues.get(table.getUuid()) != null) {
-                collectionStatus.updateTableCustomDescription(table.getUuid(),
-                  editableValues.get(table.getUuid()).getDescription());
-                collectionStatus.updateTableCustomName(table.getUuid(), editableValues.get(table.getUuid()).getLabel());
+          if (uniquenessValidation()) {
+            for (MultipleSelectionTablePanel<ViewerTable> value : tables.values()) {
+              for (ViewerTable table : database.getMetadata().getTables().values()) {
+                collectionStatus.updateTableShowCondition(table.getUuid(), value.getSelectionModel().isSelected(table));
+                if (editableValues.get(table.getUuid()) != null) {
+                  collectionStatus.updateTableCustomDescription(table.getUuid(),
+                      editableValues.get(table.getUuid()).getDescription());
+                  collectionStatus.updateTableCustomName(table.getUuid(), editableValues.get(table.getUuid()).getLabel());
+                }
               }
             }
-          }
 
-          CollectionService.Util.call((Boolean result) -> {
-            final CollectionObserver collectionObserver = ObserverManager.getCollectionObserver();
-            collectionObserver.setCollectionStatus(collectionStatus);
-            Toast.showInfo(messages.tableManagementPageTitle(), messages.tableManagementPageToastDescription());
-          }).updateCollectionConfiguration(database.getUuid(), database.getUuid(), collectionStatus);
+            CollectionService.Util.call((Boolean result) -> {
+              final CollectionObserver collectionObserver = ObserverManager.getCollectionObserver();
+              collectionObserver.setCollectionStatus(collectionStatus);
+              Toast.showInfo(messages.tableManagementPageTitle(), messages.tableManagementPageToastDescription());
+            }).updateCollectionConfiguration(database.getUuid(), database.getUuid(), collectionStatus);
+          } else {
+            Dialogs.showErrors(messages.tableManagementPageTitle(), messages.tableManagementPageDialogUniqueError(),
+                messages.basicActionClose());
+          }
         } else {
           Dialogs.showErrors(messages.tableManagementPageTitle(), messages.tableManagementPageDialogInputError(),
             messages.basicActionClose());
@@ -179,6 +186,9 @@ public class TableManagementPanel extends ContentPanel {
       @Override
       public String getValue(ViewerTable table) {
         if (editableValues.get(table.getUuid()) == null) {
+          StatusHelper helper = new StatusHelper(collectionStatus.getTableStatus(table.getUuid()).getCustomName(),
+              collectionStatus.getTableStatus(table.getUuid()).getCustomDescription());
+          editableValues.put(table.getUuid(), helper);
           return collectionStatus.getTableStatus(table.getUuid()).getCustomName();
         } else {
           return editableValues.get(table.getUuid()).getLabel();
@@ -234,10 +244,23 @@ public class TableManagementPanel extends ContentPanel {
     return true;
   }
 
+  private boolean uniquenessValidation() {
+    Set<String> uniques = new HashSet<>();
+
+    for (StatusHelper value : editableValues.values()) {
+      if (!uniques.add(value.getLabel())) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   private boolean inputValidation() {
     for (StatusHelper value : editableValues.values()) {
-      if (ViewerStringUtils.isBlank(value.getLabel()))
+      if (ViewerStringUtils.isBlank(value.getLabel())) {
         return false;
+      }
     }
 
     return true;

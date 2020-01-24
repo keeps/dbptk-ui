@@ -1375,6 +1375,8 @@ public interface ClientMessages extends Messages {
 
   String tableManagementPageDialogInputError();
 
+  String tableManagementPageDialogUniqueError();
+
   /********************************************
    * Column Management Panel
    *******************************************/
@@ -1385,6 +1387,8 @@ public interface ClientMessages extends Messages {
   String columnManagementPageTableTextForDescription();
 
   String columnManagementPageDialogErrorDescription();
+
+  String columnManagementPageDialogErrorUnique();
 
   String columnManagementPageTextForArrowUp();
 

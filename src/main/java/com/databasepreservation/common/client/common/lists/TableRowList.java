@@ -421,16 +421,16 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
   }
 
   private void addColumn(ColumnStatus viewerColumn, Column<ViewerRow, ?> displayColumn) {
-    if (ViewerStringUtils.isNotBlank(viewerColumn.getDescription())) {
+    if (ViewerStringUtils.isNotBlank(viewerColumn.getCustomDescription())) {
       SafeHtmlBuilder spanTitle = CommonClientUtils.constructSpan(viewerColumn.getCustomName(),
-        viewerColumn.getDescription(), "column-description-block");
-      SafeHtmlBuilder spanDescription = CommonClientUtils.constructSpan(viewerColumn.getDescription(),
-        viewerColumn.getDescription(), "column-description-block column-description");
+        viewerColumn.getCustomDescription(), "column-description-block");
+      SafeHtmlBuilder spanDescription = CommonClientUtils.constructSpan(viewerColumn.getCustomDescription(),
+        viewerColumn.getCustomDescription(), "column-description-block column-description");
       addColumn(displayColumn, CommonClientUtils.wrapOnDiv(Arrays.asList(spanTitle, spanDescription)), true,
         TextAlign.LEFT, 10);
     } else {
       SafeHtmlBuilder spanTitle = CommonClientUtils.constructSpan(viewerColumn.getCustomName(),
-        viewerColumn.getDescription(), "column-description-block");
+        viewerColumn.getCustomDescription(), "column-description-block");
       addColumn(displayColumn, spanTitle.toSafeHtml(), true, TextAlign.LEFT, 10);
     }
   }

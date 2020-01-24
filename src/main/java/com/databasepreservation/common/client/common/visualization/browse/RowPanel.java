@@ -142,8 +142,9 @@ public class RowPanel extends RightPanel {
   }
 
   private void init() {
-    if (ViewerStringUtils.isNotBlank(table.getDescription())) {
-      MetadataField instance = MetadataField.createInstance(table.getDescription());
+    if (ViewerStringUtils.isNotBlank(status.getTableStatusByTableId(table.getId()).getCustomDescription())) {
+      MetadataField instance = MetadataField
+        .createInstance(status.getTableStatusByTableId(table.getId()).getCustomDescription());
       instance.setCSS("table-row-description");
       description.add(instance);
     }

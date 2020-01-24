@@ -11,7 +11,6 @@ import com.databasepreservation.common.client.models.status.collection.ColumnSta
 import com.databasepreservation.common.client.models.status.collection.DetailsStatus;
 import com.databasepreservation.common.client.models.status.collection.FacetsStatus;
 import com.databasepreservation.common.client.models.status.collection.ListStatus;
-import com.databasepreservation.common.client.models.status.collection.NestedColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.SearchStatus;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.status.collection.TemplateStatus;
@@ -72,6 +71,9 @@ public class StatusUtils {
     ColumnStatus status = new ColumnStatus();
     status.setId(column.getSolrName());
     status.setName(column.getDisplayName());
+    status.setOriginalType(column.getType().getOriginalTypeName());
+    status.setTypeName(column.getType().getTypeName());
+    status.setNullable(column.getNillable().toString());
     status.setCustomName(column.getDisplayName());
     status.setDescription(column.getDescription());
     status.setCustomDescription(column.getDescription());

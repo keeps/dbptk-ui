@@ -3,8 +3,10 @@ package com.databasepreservation.common.client.common.visualization.browse.confi
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.common.RightPanel;
@@ -141,22 +143,26 @@ public class ColumnsManagementPanel extends RightPanel implements CollectionStat
     });
 
     btnSave.addClickHandler(clickEvent -> {
-      if (validateCheckboxes()) {
-        instances.forEach((key, object) -> {
-          if (key.startsWith(database.getUuid())) {
-            object.collectionStatus.getTableStatusByTableId(object.tableId)
-              .setColumns(saveChanges(object.cellTable, object.tableId, object.editableValues));
-          }
-        });
+      if (validateUniqueInputs()) {
+        if (validateCheckboxes()) {
+          instances.forEach((key, object) -> {
+            if (key.startsWith(database.getUuid())) {
+              object.collectionStatus.getTableStatusByTableId(object.tableId)
+                .setColumns(saveChanges(object.cellTable, object.tableId, object.editableValues));
+            }
+          });
 
-        CollectionService.Util.call((Boolean result) -> {
-          ObserverManager.getCollectionObserver().setCollectionStatus(collectionStatus);
-          sidebar.reset(database, collectionStatus);
-          Toast.showInfo(messages.columnManagementPageTitle(), messages.columnManagementPageToastDescription());
-        }).updateCollectionConfiguration(database.getUuid(), database.getUuid(), collectionStatus);
+          CollectionService.Util.call((Boolean result) -> {
+            ObserverManager.getCollectionObserver().setCollectionStatus(collectionStatus);
+            sidebar.reset(database, collectionStatus);
+            Toast.showInfo(messages.columnManagementPageTitle(), messages.columnManagementPageToastDescription());
+          }).updateCollectionConfiguration(database.getUuid(), database.getUuid(), collectionStatus);
+        } else {
+          Dialogs.showErrors(messages.columnManagementPageTitle(),
+            messages.columnManagementPageDialogErrorDescription(), messages.basicActionClose());
+        }
       } else {
-        Dialogs.showErrors(messages.columnManagementPageTitle(), messages.columnManagementPageDialogErrorDescription(),
-          messages.basicActionClose());
+        Dialogs.showErrors(messages.columnManagementPageTitle(), messages.columnManagementPageDialogErrorUnique(), messages.basicActionClose());
       }
     });
 
@@ -268,6 +274,10 @@ public class ColumnsManagementPanel extends RightPanel implements CollectionStat
       @Override
       public Boolean getValue(ColumnStatus column) {
         if (editableValues.get(column.getId()) == null) {
+          StatusHelper helper = new StatusHelper(column.getCustomName(), column.getCustomDescription(),
+            column.getSearchStatus().getList().isShow(), column.getDetailsStatus().isShow(),
+            column.getSearchStatus().getAdvanced().isFixed());
+          editableValues.put(column.getId(), helper);
           return column.getSearchStatus().getList().isShow();
         } else {
           return editableValues.get(column.getId()).isShowInTable();
@@ -297,6 +307,10 @@ public class ColumnsManagementPanel extends RightPanel implements CollectionStat
       @Override
       public Boolean getValue(ColumnStatus column) {
         if (editableValues.get(column.getId()) == null) {
+          StatusHelper helper = new StatusHelper(column.getCustomName(), column.getCustomDescription(),
+            column.getSearchStatus().getList().isShow(), column.getDetailsStatus().isShow(),
+            column.getSearchStatus().getAdvanced().isFixed());
+          editableValues.put(column.getId(), helper);
           return column.getDetailsStatus().isShow();
         } else {
           return editableValues.get(column.getId()).isShowInDetails();
@@ -382,6 +396,10 @@ public class ColumnsManagementPanel extends RightPanel implements CollectionStat
       @Override
       public String getValue(ColumnStatus column) {
         if (editableValues.get(column.getId()) == null) {
+          StatusHelper helper = new StatusHelper(column.getCustomName(), column.getCustomDescription(),
+            column.getSearchStatus().getList().isShow(), column.getDetailsStatus().isShow(),
+            column.getSearchStatus().getAdvanced().isFixed());
+          editableValues.put(column.getId(), helper);
           return column.getCustomName();
         } else {
           return editableValues.get(column.getId()).getLabel();
@@ -509,6 +527,29 @@ public class ColumnsManagementPanel extends RightPanel implements CollectionStat
     list.set(relativeToClickIndex, clicked);
   }
 
+  private boolean validateUniqueInputs() {
+    for (Map.Entry<String, ColumnsManagementPanel> entry : instances.entrySet()) {
+      if (entry.getKey().startsWith(database.getUuid())) {
+        if (!validateUniqueInput(entry.getValue().editableValues)) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  private boolean validateUniqueInput(Map<String, StatusHelper> editableValues) {
+    Set<String> uniques = new HashSet<>();
+
+    for (StatusHelper value : editableValues.values()) {
+      if (!uniques.add(value.getLabel())) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   private boolean validateCheckboxes() {
     for (Map.Entry<String, ColumnsManagementPanel> entry : instances.entrySet()) {
       if (entry.getKey().startsWith(database.getUuid())) {
@@ -537,10 +578,8 @@ public class ColumnsManagementPanel extends RightPanel implements CollectionStat
       }
     }
 
-    int remainingDetails = (int) tableStatus.getColumns().stream().filter(p -> p.getDetailsStatus().isShow()).count()
-      - countDetails;
-    int remainingTable = (int) tableStatus.getColumns().stream().filter(p -> p.getSearchStatus().getList().isShow())
-      .count() - countTable;
+    int remainingDetails = tableStatus.getColumns().size() - countDetails;
+    int remainingTable = tableStatus.getColumns().size() - countTable;
 
     return remainingDetails > 0 && remainingTable > 0;
   }

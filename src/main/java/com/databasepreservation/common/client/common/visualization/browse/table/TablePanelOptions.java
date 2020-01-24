@@ -90,7 +90,7 @@ public class TablePanelOptions extends RightPanel {
   private boolean allSelected = true; // true: select all; false; select none;
   private boolean showTechnicalInformation = false; // true: show; false: hide;
   private Map<String, Boolean> initialLoading = new HashMap<>();
-  private MultipleSelectionTablePanel<ViewerColumn> columnsTable;
+  private MultipleSelectionTablePanel<ColumnStatus> columnsTable;
   private Button btnSelectToggle;
   private Label switchLabel, labelForSwitch;
   private SimpleCheckBox advancedSwitch;
@@ -113,8 +113,8 @@ public class TablePanelOptions extends RightPanel {
 
   public Map<String, Boolean> getSelectedColumns() {
     Map<String, Boolean> columnVisibility = new HashMap<>();
-    for (ViewerColumn column : table.getColumns()) {
-      columnVisibility.put(column.getDisplayName(), columnsTable.getSelectionModel().isSelected(column));
+    for (ColumnStatus column : status.getTableStatusByTableId(table.getId()).getColumns()) {
+      columnVisibility.put(column.getCustomName(), columnsTable.getSelectionModel().isSelected(column));
     }
 
     return columnVisibility;
@@ -197,7 +197,7 @@ public class TablePanelOptions extends RightPanel {
 
   private void refreshCellTable(boolean value) {
     showTechnicalInformation = value;
-    final MultiSelectionModel<ViewerColumn> selectionModel = columnsTable.getSelectionModel();
+    final MultiSelectionModel<ColumnStatus> selectionModel = columnsTable.getSelectionModel();
     columnsTable = createCellTableForViewerColumn();
     populateTableColumns(columnsTable, table);
     selectionModel.getSelectedSet().forEach(viewerColumn -> {
@@ -206,11 +206,11 @@ public class TablePanelOptions extends RightPanel {
     content.add(columnsTable);
   }
 
-  private MultipleSelectionTablePanel<ViewerColumn> createCellTableForViewerColumn() {
+  private MultipleSelectionTablePanel<ColumnStatus> createCellTableForViewerColumn() {
     return new MultipleSelectionTablePanel<>();
   }
 
-  private void populateTableColumns(MultipleSelectionTablePanel<ViewerColumn> selectionTablePanel,
+  private void populateTableColumns(MultipleSelectionTablePanel<ColumnStatus> selectionTablePanel,
     final ViewerTable viewerTable) {
 
     // auxiliary
@@ -222,6 +222,8 @@ public class TablePanelOptions extends RightPanel {
       }
     }
 
+
+
     List<ViewerColumn> columnList = new ArrayList<>();
     viewerTable.getColumns().forEach(column -> {
       if (status.showColumn(viewerTable.getUuid(), column.getSolrName())) {
@@ -229,16 +231,16 @@ public class TablePanelOptions extends RightPanel {
       }
     });
 
-    selectionTablePanel.createTable(getToggleSelectPanel(), new ArrayList<>(), columnList.iterator(),
+    selectionTablePanel.createTable(getToggleSelectPanel(), new ArrayList<>(), status.getTableStatusByTableId(table.getId()).getColumns().iterator(),
       new MultipleSelectionTablePanel.ColumnInfo<>(messages.basicTableHeaderShow(), 4,
-        new Column<ViewerColumn, Boolean>(new CheckboxCell(true, true)) {
+        new Column<ColumnStatus, Boolean>(new CheckboxCell(true, true)) {
           @Override
-          public Boolean getValue(ViewerColumn viewerColumn) {
-            if (initialLoading.get(viewerColumn.getDisplayName())) {
+          public Boolean getValue(ColumnStatus viewerColumn) {
+            if (initialLoading.get(viewerColumn.getId())) {
               selectionTablePanel.getSelectionModel().setSelected(viewerColumn, true);
-              initialLoading.put(viewerColumn.getDisplayName(), false);
+              initialLoading.put(viewerColumn.getId(), false);
             } else {
-              if (selectionTablePanel.getSelectionModel().getSelectedSet().size() == viewerTable.getColumns().size()) {
+              if (selectionTablePanel.getSelectionModel().getSelectedSet().size() == status.getTableStatusByTableId(table.getId()).getColumns().size()) {
                 toggleButton(true);
               }
 
@@ -256,12 +258,12 @@ public class TablePanelOptions extends RightPanel {
         }),
 
       new MultipleSelectionTablePanel.ColumnInfo<>(SafeHtmlUtils.EMPTY_SAFE_HTML, !showTechnicalInformation, 2.2,
-        new Column<ViewerColumn, SafeHtml>(new SafeHtmlCell()) {
+        new Column<ColumnStatus, SafeHtml>(new SafeHtmlCell()) {
           @Override
-          public SafeHtml getValue(ViewerColumn column) {
-            if (pk != null && pk.getColumnIndexesInViewerTable().contains(column.getColumnIndexInEnclosingTable())) {
+          public SafeHtml getValue(ColumnStatus column) {
+            if (pk != null && pk.getColumnIndexesInViewerTable().contains(column.getOrder())) {
               return SafeHtmlUtils.fromSafeConstant("<i class='fa fa-key' title='" + messages.primaryKey() + "'></i>");
-            } else if (columnIndexesWithForeignKeys.contains(column.getColumnIndexInEnclosingTable())) {
+            } else if (columnIndexesWithForeignKeys.contains(column.getOrder())) {
               return SafeHtmlUtils.fromSafeConstant(
                 "<i class='fa fa-exchange' title='" + messages.foreignKeys_usedByAForeignKeyRelation() + "'></i>");
             } else {
@@ -271,41 +273,41 @@ public class TablePanelOptions extends RightPanel {
         }, "primary-key-col"),
 
       new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForColumnName(), 10,
-        new TextColumn<ViewerColumn>() {
+        new TextColumn<ColumnStatus>() {
 
           @Override
-          public String getValue(ViewerColumn column) {
-            return column.getDisplayName();
+          public String getValue(ColumnStatus column) {
+            return column.getCustomName();
           }
         }),
       new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForDescription(), 35,
-        new TextColumn<ViewerColumn>() {
+        new TextColumn<ColumnStatus>() {
           @Override
-          public String getValue(ViewerColumn column) {
-            return column.getDescription();
+          public String getValue(ColumnStatus column) {
+            return column.getCustomDescription();
           }
         }),
       new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForOriginalTypeName(),
-        !showTechnicalInformation, 10, new TextColumn<ViewerColumn>() {
+        !showTechnicalInformation, 10, new TextColumn<ColumnStatus>() {
 
           @Override
-          public String getValue(ViewerColumn column) {
-            return column.getType().getOriginalTypeName();
+          public String getValue(ColumnStatus column) {
+            return column.getOriginalType();
           }
         }),
       new MultipleSelectionTablePanel.ColumnInfo<>(messages.typeName(), !showTechnicalInformation, 15,
-        new TextColumn<ViewerColumn>() {
+        new TextColumn<ColumnStatus>() {
           @Override
-          public String getValue(ViewerColumn column) {
-            return column.getType().getTypeName();
+          public String getValue(ColumnStatus column) {
+            return column.getTypeName();
           }
         }),
 
       new MultipleSelectionTablePanel.ColumnInfo<>(messages.nullable(), !showTechnicalInformation, 8,
-        new TextColumn<ViewerColumn>() {
+        new TextColumn<ColumnStatus>() {
           @Override
-          public String getValue(ViewerColumn column) {
-            if (column.getNillable()) {
+          public String getValue(ColumnStatus column) {
+            if (column.getNullable().equalsIgnoreCase(Boolean.TRUE.toString())) {
               return messages.yes();
             } else {
               return messages.no();
@@ -321,8 +323,8 @@ public class TablePanelOptions extends RightPanel {
 
     btnSelectToggle.addClickHandler(event -> {
       allSelected = !allSelected;
-      MultiSelectionModel<ViewerColumn> selectionModel = columnsTable.getSelectionModel();
-      for (ViewerColumn column : table.getColumns()) {
+      MultiSelectionModel<ColumnStatus> selectionModel = columnsTable.getSelectionModel();
+      for (ColumnStatus column : status.getTableStatusByTableId(table.getId()).getColumns()) {
         selectionModel.setSelected(column, allSelected);
       }
 
