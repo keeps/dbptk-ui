@@ -372,8 +372,8 @@ public class TablePanelOptions extends RightPanel {
   }
 
   private void defaultSetSelectAll() {
-    for (ViewerColumn column : table.getColumns()) {
-      initialLoading.put(column.getDisplayName(), true);
+    for (ColumnStatus column : status.getTableStatusByTableId(table.getId()).getColumns()) {
+      initialLoading.put(column.getId(), true);
     }
   }
 }

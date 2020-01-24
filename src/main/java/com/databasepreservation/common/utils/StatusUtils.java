@@ -71,9 +71,11 @@ public class StatusUtils {
     ColumnStatus status = new ColumnStatus();
     status.setId(column.getSolrName());
     status.setName(column.getDisplayName());
-    status.setOriginalType(column.getType().getOriginalTypeName());
-    status.setTypeName(column.getType().getTypeName());
-    status.setNullable(column.getNillable().toString());
+    if (column.getType() != null) {
+      status.setOriginalType(column.getType().getOriginalTypeName());
+      status.setTypeName(column.getType().getTypeName());
+      status.setNullable(column.getNillable().toString());
+    }
     status.setCustomName(column.getDisplayName());
     status.setDescription(column.getDescription());
     status.setCustomDescription(column.getDescription());
