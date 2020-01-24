@@ -254,7 +254,6 @@ public class MainPanel extends Composite {
           }
         });
       }
-
     } else if (HistoryManager.ROUTE_JOBS.equals(currentHistoryPath.get(0))) {
       setContent(new ContentPanelLoader() {
         @Override

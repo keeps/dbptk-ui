@@ -199,18 +199,25 @@ public class BreadcrumbManager {
   public static List<BreadcrumbItem> forSIARDMainPage(final String databaseUUID, final String databaseName) {
     List<BreadcrumbItem> items = forManageDatabase();
 
-    UserLogin.getInstance().getAuthenticatedUser(new DefaultAsyncCallback<User>() {
-      @Override
-      public void onSuccess(User user) {
-        if (user.isAdmin()) {
-          items.add(new BreadcrumbItem(
-              SafeHtmlUtils.fromSafeConstant(
-                  FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE) + SafeHtmlUtils.htmlEscape(databaseName)),
-              () -> HistoryManager.gotoSIARDInfo(databaseUUID)));
-        }
-      }
-    });
+    if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
+      items.add(new BreadcrumbItem(
+          SafeHtmlUtils.fromSafeConstant(
+              FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE) + SafeHtmlUtils.htmlEscape(databaseName)),
+          () -> HistoryManager.gotoSIARDInfo(databaseUUID)));
+    } else {
 
+      UserLogin.getInstance().getAuthenticatedUser(new DefaultAsyncCallback<User>() {
+        @Override
+        public void onSuccess(User user) {
+          if (user.isAdmin()) {
+            items.add(new BreadcrumbItem(
+                SafeHtmlUtils.fromSafeConstant(
+                    FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE) + SafeHtmlUtils.htmlEscape(databaseName)),
+                () -> HistoryManager.gotoSIARDInfo(databaseUUID)));
+          }
+        }
+      });
+    }
     return items;
   }
 

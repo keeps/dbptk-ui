@@ -541,7 +541,7 @@ public class SIARDController {
       viewerDatabase.setStatus(ViewerDatabaseStatus.METADATA_ONLY);
       viewerDatabase.setUuid(databaseUUID);
 
-      viewerDatabase.setPath(siardPath.toAbsolutePath().getFileName().toString());
+      viewerDatabase.setPath(siardPath.toAbsolutePath().toString());
       viewerDatabase.setSize(siardPath.toFile().length());
       viewerDatabase.setVersion(siardEdition.getSIARDVersion());
       viewerDatabase.setValidationStatus(ViewerDatabaseValidationStatus.NOT_VALIDATED);
@@ -561,11 +561,12 @@ public class SIARDController {
     }
   }
 
-  public static String loadFromLocal(String filename, String databaseUUID) throws GenericException {
+  public static String loadFromLocal(String localPath, String databaseUUID) throws GenericException {
     LOGGER.info("converting database {}", databaseUUID);
-    Path siardFilesPath = ViewerConfiguration.getInstance().getSIARDFilesPath();
-    Path siardPath = siardFilesPath.resolve(filename);
+    Path basePath = Paths.get(ViewerConfiguration.getInstance().getViewerConfigurationAsString("/",
+        ViewerConfiguration.PROPERTY_BASE_UPLOAD_PATH));
     try {
+      Path siardPath = basePath.resolve(localPath);
       convertSIARDtoSolr(siardPath, databaseUUID);
       LOGGER.info("Conversion to SIARD successful, database: {}", databaseUUID);
     } catch (GenericException e) {

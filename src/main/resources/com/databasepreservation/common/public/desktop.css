@@ -169,7 +169,7 @@
 /***********************************************
                     TEXTAREA
 ***********************************************/
-.form-textarea {
+.form-textarea-custom-view {
     resize: vertical;
     min-height: 100px;
     width: 100%;

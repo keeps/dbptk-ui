@@ -46,7 +46,7 @@
                                 <g:Label ui:field="customViewQueryLabel" addStyleNames="form-label-spaced">
                                     <ui:text from='{messages.customViewsPageLabelForQuery}'/>
                                 </g:Label>
-                                <g:TextArea ui:field="customViewQuery" addStyleNames="form-textarea form-textbox"/>
+                                <g:TextArea ui:field="customViewQuery" addStyleNames="form-textarea-custom-view form-textbox"/>
                             </g:FlowPanel>
                             <g:InlineHTML addStyleNames="form-text-helper text-muted">
                                 <ui:text from='{messages.customViewsPageTextForHelpViewQuery}'/>

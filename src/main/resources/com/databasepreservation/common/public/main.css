@@ -2951,6 +2951,7 @@ rgba(0, 0, 0, .125);
 .form-textarea {
 	resize: vertical;
 	min-height: 27px;
+    height: 27px;
 	word-break: break-word;
 }
 
