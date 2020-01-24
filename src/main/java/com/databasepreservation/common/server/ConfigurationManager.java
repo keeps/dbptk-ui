@@ -10,7 +10,6 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 
-import com.databasepreservation.common.client.models.status.collection.NestedColumnStatus;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.utils.JsonUtils;
@@ -22,6 +21,7 @@ import com.databasepreservation.common.client.common.search.SavedSearch;
 import com.databasepreservation.common.client.models.activity.logs.ActivityLogEntry;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
+import com.databasepreservation.common.client.models.status.collection.NestedColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.status.database.DatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
@@ -132,7 +132,8 @@ public class ConfigurationManager {
   }
 
   public void addDenormalizationColumns(String databaseUUID, String tableUUID, ViewerColumn column,
-                                        NestedColumnStatus nestedId, String template) throws GenericException {
+    NestedColumnStatus nestedId, String template, String originalType, String typeName, String nullable)
+    throws GenericException {
     try {
       final DatabaseStatus databaseStatus = getDatabaseStatus(databaseUUID);
       if (databaseStatus.getCollections().size() >= 1) {
@@ -143,6 +144,9 @@ public class ConfigurationManager {
         int order = table.getLastColumnOrder();
         ColumnStatus columnStatus = StatusUtils.getColumnStatus(column, true, ++order);
         columnStatus.setNestedColumns(nestedId);
+        columnStatus.setOriginalType(originalType);
+        columnStatus.setTypeName(typeName);
+        columnStatus.setNullable(nullable);
         table.addColumnStatus(columnStatus);
         columnStatus.getDetailsStatus().getTemplateStatus().setTemplate(template);
         columnStatus.getSearchStatus().getList().getTemplate().setTemplate(template);

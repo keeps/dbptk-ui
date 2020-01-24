@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.client.models.status.collection.NestedColumnStatus;
 import org.apache.solr.common.SolrInputDocument;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
@@ -18,6 +17,7 @@ import com.databasepreservation.common.client.index.filter.AndFiltersParameters;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.filter.FilterParameter;
 import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
+import com.databasepreservation.common.client.models.status.collection.NestedColumnStatus;
 import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
 import com.databasepreservation.common.client.models.status.denormalization.ReferencesConfiguration;
 import com.databasepreservation.common.client.models.status.denormalization.RelatedColumnConfiguration;
@@ -113,11 +113,19 @@ public class DenormalizeTransformer {
       nestedColumn.setMultiValue(relatedTable.getMultiValue());
       nestedColumn.setOriginalTable(relatedTable.getTableID());
       List<String> columnName = new ArrayList();
+      List<String> originalType = new ArrayList();
+      List<String> typeName = new ArrayList();
+      List<String> nullable = new ArrayList();
 
       for (RelatedColumnConfiguration column : columnsIncluded) {
+        ViewerColumn columnBySolrName = database.getMetadata().getTable(relatedTable.getTableUUID())
+          .getColumnBySolrName(column.getSolrName());
         nestedColumn.getNestedFields().add(column.getColumnName());
         nestedColumn.getNestedSolrNames().add(column.getSolrName());
         columnName.add(column.getColumnName());
+        originalType.add(column.getColumnName() + ":" + columnBySolrName.getType().getOriginalTypeName());
+        typeName.add(column.getColumnName() + ":" + columnBySolrName.getType().getTypeName());
+        nullable.add(column.getColumnName() + ":" + columnBySolrName.getNillable());
       }
 
       String template = "";
@@ -135,12 +143,16 @@ public class DenormalizeTransformer {
 
       viewerColumn.setDisplayName(columnStatusName + separator + columnName.toString());
       ViewerFactory.getConfigurationManager().addDenormalizationColumns(databaseUUID,
-        denormalizeConfiguration.getTableUUID(), viewerColumn, nestedColumn, template);
+        denormalizeConfiguration.getTableUUID(), viewerColumn, nestedColumn, template, removeBrackets(originalType),
+        removeBrackets(typeName), removeBrackets(nullable));
     }
     for (RelatedTablesConfiguration innerRelatedTable : relatedTable.getRelatedTables()) {
       setAllColumnsToInclude(innerRelatedTable, path);
     }
+  }
 
+  private String removeBrackets(List<String> list) {
+    return list.toString().replace("[", "").replace("]", "");
   }
 
   private void queryOverRootTable() throws ModuleException {
