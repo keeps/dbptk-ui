@@ -139,7 +139,7 @@ public class ColumnsManagementPanel extends RightPanel implements CollectionStat
       if (validateCheckboxes()) {
         instances.forEach((key, object) -> {
           if (key.startsWith(database.getUuid())) {
-            object.collectionStatus.getTableStatus(object.tableId)
+            object.collectionStatus.getTableStatusByTableId(object.tableId)
               .setColumns(saveChanges(object.cellTable, object.tableId, object.editableValues));
           }
         });
