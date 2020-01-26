@@ -16,7 +16,7 @@ public class DenormalizeConfiguration implements Serializable {
   private String uuid;
   private String version;
   private ViewerJobStatus state;
-  private String job;
+  private Long job;
   private String tableUUID;
   private String tableID;
   private List<RelatedTablesConfiguration> relatedTables;
@@ -65,11 +65,11 @@ public class DenormalizeConfiguration implements Serializable {
     this.state = state;
   }
 
-  public String getJob() {
+  public Long getJob() {
     return job;
   }
 
-  public void setJob(String job) {
+  public void setJob(Long job) {
     this.job = job;
   }
 

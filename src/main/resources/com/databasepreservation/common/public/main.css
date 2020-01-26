@@ -1853,6 +1853,10 @@ html, body, .desktop-main {
     content: "\f2ed";
 }
 
+.btn-table:after {
+    content: "\f0ce";
+}
+
 .btn-fixed-width {
     width: 11.75rem;
     text-align: center;
@@ -2693,7 +2697,7 @@ rgba(0, 0, 0, .125);
     position: absolute;
     display: flex;
     align-items: center;
-    height: 50px;
+    height: 80px;
     top: 0px;
     right: 10px;
 }
@@ -2830,19 +2834,17 @@ rgba(0, 0, 0, .125);
     display: flex;
     flex-wrap: wrap;
     padding: 2rem;
-    width: 300px;
     padding-bottom: 0;
+    justify-content: space-between;
 }
-.leftSidebar-controller .btn {
+.leftSidebar-controller .btn{
+    flex: 1 auto;
+}
+
+.leftSidebar-controller .btn:first-child {
     margin-right: 10px;
-    margin-bottom: 10px;
 }
-.data-transformation-toolbar{
-    display: flex;
-    flex-wrap: wrap;
-    padding: 2rem;
-    padding-bottom: 0;
-}
+
 .data-transformation-sidebar{
     height: 100%;
     padding-top: 0;
@@ -2851,6 +2853,38 @@ rgba(0, 0, 0, .125);
     box-sizing: border-box;
     position: relative;
     padding: 2px;
+}
+
+.data-transformation-toolbar{
+    background-color: #fff;
+    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+    padding: 2rem 1rem;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+}
+
+.data-transformation-title{
+    display: flex;
+}
+
+.data-transformation-title-icon{
+    font-size: 30px;
+    line-height: 50px;
+    margin-right: 20px;
+}
+
+.data-transformation-toolbar-actions{
+    display: flex;
+    align-items: center;
+}
+.data-transformation-toolbar-actions .btn{
+    margin-left: 20px;
+}
+
+.data-transformation-title-label{
+    font-size: 30px;
+    line-height: 50px;
 }
 
 .data-transformation-header {
@@ -2976,4 +3010,16 @@ rgba(0, 0, 0, .125);
     margin-top:-15px;
     margin-left:-15px;
     margin-right:-15px
+}
+
+.search-context{
+    line-height: 4rem;
+    background-color:  #089de3;
+    color: white;
+    border: none;
+    padding: 0 20px;
+    position: relative;
+    white-space: nowrap;
+    overflow: hidden;
+    min-width: 0;
 }

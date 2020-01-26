@@ -158,7 +158,8 @@ public class HistoryManager {
 
   public static void gotoRelationOptions(String databaseUUID, String tableId, List<String> searchInfo) {
     final String[] split = tableId.split("\\.");
-    List<String> params = new ArrayList<>(Arrays.asList(ROUTE_FOREIGN_KEY, databaseUUID, ROUTE_DATA, split[0], split[1]));
+    List<String> params = new ArrayList<>(
+      Arrays.asList(ROUTE_FOREIGN_KEY, databaseUUID, ROUTE_DATA, split[0], split[1]));
     params.addAll(searchInfo);
     params.add(ROUTE_TABLE_OPTIONS);
     newHistory(params);
@@ -166,7 +167,8 @@ public class HistoryManager {
 
   public static void gotoForeignKeyUpdate(String databaseUUID, String tableId, List<String> searchInfo) {
     final String[] split = tableId.split("\\.");
-    List<String> params = new ArrayList<>(Arrays.asList(ROUTE_FOREIGN_KEY, databaseUUID, ROUTE_DATA, split[0], split[1]));
+    List<String> params = new ArrayList<>(
+      Arrays.asList(ROUTE_FOREIGN_KEY, databaseUUID, ROUTE_DATA, split[0], split[1]));
     params.addAll(searchInfo);
     params.add(ROUTE_TABLE_UPDATE);
     newHistory(params);
@@ -192,7 +194,8 @@ public class HistoryManager {
 
   public static void gotoForeignKey(String databaseUUID, String tableId, List<String> solrColumnsAndValues) {
     final String[] split = tableId.split("\\.");
-    List<String> params = new ArrayList<>(Arrays.asList(ROUTE_FOREIGN_KEY, databaseUUID, ROUTE_DATA, split[0], split[1]));
+    List<String> params = new ArrayList<>(
+      Arrays.asList(ROUTE_FOREIGN_KEY, databaseUUID, ROUTE_DATA, split[0], split[1]));
     params.addAll(solrColumnsAndValues);
     newHistory(params);
   }
@@ -294,6 +297,12 @@ public class HistoryManager {
 
   public static void gotoColumnsManagement(String databaseUUID) {
     List<String> params = Arrays.asList(ROUTE_COLUMNS_MANAGEMENT, databaseUUID);
+    newHistory(params);
+  }
+
+  public static void gotoColumnsManagement(String databaseUUID, String tableId) {
+    final String[] split = tableId.split("\\.");
+    List<String> params = Arrays.asList(ROUTE_COLUMNS_MANAGEMENT, databaseUUID, split[0], split[1]);
     newHistory(params);
   }
 
@@ -410,7 +419,8 @@ public class HistoryManager {
 
   public static String linkToForeignKey(String database_uuid, String tableId, List<String> solrColumnsAndValues) {
     final String[] split = tableId.split("\\.");
-    List<String> params = new ArrayList<>(Arrays.asList(ROUTE_FOREIGN_KEY, database_uuid, ROUTE_DATA, split[0], split[1]));
+    List<String> params = new ArrayList<>(
+      Arrays.asList(ROUTE_FOREIGN_KEY, database_uuid, ROUTE_DATA, split[0], split[1]));
     params.addAll(solrColumnsAndValues);
     return createHistoryToken(params);
   }

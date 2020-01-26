@@ -36,12 +36,13 @@ public class JobListener extends JobExecutionListenerSupport {
       JobController.addSolrBatchJob(jobExecution);
       String databaseUUID = jobExecution.getJobParameters().getString(ViewerConstants.CONTROLLER_DATABASE_ID_PARAM);
       String tableUUID = jobExecution.getJobParameters().getString(ViewerConstants.CONTROLLER_TABLE_ID_PARAM);
-      ViewerDatabase database = ViewerFactory.getSolrManager().retrieve(ViewerDatabase.class, databaseUUID);
-      updateConfigurationFile(databaseUUID, tableUUID, ViewerJobStatus.valueOf(jobExecution.getStatus().name()));
+      updateConfigurationFile(databaseUUID, tableUUID, ViewerJobStatus.valueOf(jobExecution.getStatus().name()),
+        jobExecution.getJobId());
       LOGGER.info("Job STARTED for table " + tableUUID);
-
     } catch (GenericException | NotFoundException e) {
       LOGGER.error("Cannot insert job on SOLR", e);
+    } catch (ViewerException e) {
+      LOGGER.error("Cannot update configuration file", e);
     }
   }
 
@@ -49,30 +50,29 @@ public class JobListener extends JobExecutionListenerSupport {
   public void afterJob(JobExecution jobExecution) {
     try {
       JobController.editSolrBatchJob(jobExecution);
-      if(jobExecution.getStatus() == BatchStatus.COMPLETED) {
+      if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
         String databaseUUID = jobExecution.getJobParameters().getString(ViewerConstants.CONTROLLER_DATABASE_ID_PARAM);
         String tableUUID = jobExecution.getJobParameters().getString(ViewerConstants.CONTROLLER_TABLE_ID_PARAM);
-        updateConfigurationFile(databaseUUID, tableUUID, ViewerJobStatus.valueOf(jobExecution.getStatus().name()));
+        updateConfigurationFile(databaseUUID, tableUUID, ViewerJobStatus.valueOf(jobExecution.getStatus().name()),
+          jobExecution.getJobId());
         LOGGER.info("Job FINISHED for table " + tableUUID);
       }
     } catch (NotFoundException | GenericException e) {
       LOGGER.error("Cannot update job on SOLR", e);
+    } catch (ViewerException e) {
+      LOGGER.error("Cannot update configuration file", e);
     }
   }
 
-  private Boolean updateConfigurationFile(String databaseUUID, String tableUUID, ViewerJobStatus status){
+  private void updateConfigurationFile(String databaseUUID, String tableUUID, ViewerJobStatus status, Long jobId)
+    throws ViewerException {
     Path path = ViewerConfiguration.getInstance().getDatabasesPath().resolve(databaseUUID)
       .resolve(ViewerConstants.DENORMALIZATION_STATUS_PREFIX + tableUUID + ViewerConstants.JSON_EXTENSION);
     if (Files.exists(path)) {
-      try {
-        DenormalizeConfiguration configuration = JsonTransformer.readObjectFromFile(path, DenormalizeConfiguration.class);
-        configuration.setState(status);
-        JsonTransformer.writeObjectToFile(configuration, path);
-        return true;
-      } catch (ViewerException e) {
-        return false;
-      }
+      DenormalizeConfiguration configuration = JsonTransformer.readObjectFromFile(path, DenormalizeConfiguration.class);
+      configuration.setJob(jobId);
+      configuration.setState(status);
+      JsonTransformer.writeObjectToFile(configuration, path);
     }
-    return false;
   }
 }

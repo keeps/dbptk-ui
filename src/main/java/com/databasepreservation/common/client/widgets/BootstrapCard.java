@@ -15,33 +15,23 @@ import config.i18n.client.ClientMessages;
 public class BootstrapCard extends FocusPanel {
 
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
-  private FlowPanel card, body, extraContent;
-  private Label title;
-  private HTML titleIcon;
-  private Label description;
+  private FlowPanel card = new FlowPanel();
+  private FlowPanel titlePanel = new FlowPanel();
+  private FlowPanel body = new FlowPanel();
+  private FlowPanel extraContent = new FlowPanel();
+  private Label title = new Label();
+  private HTML titleIcon = new HTML();
+  private Label description = new Label();
   private String uuid;
 
   public BootstrapCard() {
     super();
     setStyleName("bootstrap-card");
-    card = new FlowPanel();
-    body = new FlowPanel();
-    extraContent = new FlowPanel();
-    title = new Label();
-    titleIcon = new HTML();
-    description = new Label();
-    titleIcon.setStyleName("bootstrap-card-title-icon");
-    title.setStyleName("bootstrap-card-title");
     description.setStyleName("bootstrap-card-description");
-
-    FlowPanel titlePanel = new FlowPanel();
     titlePanel.add(titleIcon);
     titlePanel.add(title);
-    titlePanel.setStyleName("bootstrap-card-title-panel");
-
     body.add(titlePanel);
     body.add(description);
-    body.setStyleName("bootstrap-card-body");
     card.add(body);
     add(card);
   }
@@ -55,11 +45,14 @@ public class BootstrapCard extends FocusPanel {
   }
 
   public void setTitle(String title){
+    this.title.setStyleName("bootstrap-card-title");
     this.title.setText(title);
+    this.titlePanel.setStyleName("bootstrap-card-title-panel");
   }
 
   public void setTitleIcon(String icon){
-    this.titleIcon.setHTML(SafeHtmlUtils.fromSafeConstant(icon));
+    titleIcon.setStyleName("bootstrap-card-title-icon");
+    titleIcon.setHTML(SafeHtmlUtils.fromSafeConstant(icon));
   }
 
   public void setDescription(String description) {
@@ -70,12 +63,14 @@ public class BootstrapCard extends FocusPanel {
     FlowPanel extraContent = content;
     extraContent.setStyleName("bootstrap-card-extra-content");
     body.add(extraContent);
+    body.setStyleName("bootstrap-card-body");
   }
 
   public void addHideContent(FlowPanel content, FlowPanel action){
     extraContent = content;
     extraContent.setStyleName("bootstrap-card-extra-content");
     body.add(extraContent);
+    body.setStyleName("bootstrap-card-body");
 
     action.addStyleName("bootstrap-card-extra-content-btn");
     card.add(action);

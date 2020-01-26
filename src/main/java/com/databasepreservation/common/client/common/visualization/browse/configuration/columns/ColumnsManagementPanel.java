@@ -458,8 +458,13 @@ public class ColumnsManagementPanel extends RightPanel implements CollectionStat
     Column<ColumnStatus, String> options = new ButtonColumn<ColumnStatus>() {
       @Override
       public void render(Cell.Context context, ColumnStatus object, SafeHtmlBuilder sb) {
-        sb.appendHtmlConstant(
-          "<div class=\"center-cell\"><button class=\"btn btn-cell-action\" type=\"button\" tabindex=\"-1\"><i class=\"fa fa-cog\"></i></button></div>");
+        if (object.getNestedColumns() != null) {
+          sb.appendHtmlConstant(
+            "<div class=\"center-cell\"><button class=\"btn btn-cell-action\" type=\"button\" tabindex=\"-1\"><i class=\"fa fa-cog\"></i></button></div>");
+        } else {
+          sb.appendHtmlConstant(
+            "<div class=\"center-cell\"><button class=\"btn btn-cell-action\" type=\"button\" tabindex=\"-1\" disabled><i class=\"fa fa-cog\"></i></button></div>");
+        }
       }
 
       @Override

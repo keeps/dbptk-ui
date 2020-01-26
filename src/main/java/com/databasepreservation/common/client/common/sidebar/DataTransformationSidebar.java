@@ -328,8 +328,8 @@ public class DataTransformationSidebar extends Composite implements Sidebar, Col
   }
 
   @Override
-  protected void onLoad() {
-    super.onLoad();
+  protected void onAttach() {
+    super.onAttach();
     JavascriptUtils.stickSidebar();
   }
 

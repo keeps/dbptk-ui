@@ -1,4 +1,4 @@
-package com.databasepreservation.common.client.common.visualization.browse.configuration;
+package com.databasepreservation.common.client.common.visualization.browse.configuration.dataTransformation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,6 +13,7 @@ import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.lists.widgets.MultipleSelectionTablePanel;
 import com.databasepreservation.common.client.common.sidebar.DataTransformationSidebar;
+import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.DataTransformationUtils;
 import com.databasepreservation.common.client.common.visualization.browse.information.ErDiagram;
 import com.databasepreservation.common.client.configuration.observer.CollectionStatusObserver;
@@ -40,6 +41,8 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
@@ -68,6 +71,12 @@ public class DataTransformation extends RightPanel implements CollectionStatusOb
   FlowPanel content;
 
   @UiField
+  SimplePanel message;
+
+  @UiField
+  FlowPanel toolBar;
+
+  @UiField
   LoadingDiv loading;
 
   private ViewerDatabase database;
@@ -79,9 +88,11 @@ public class DataTransformation extends RightPanel implements CollectionStatusOb
   private DenormalizeConfiguration denormalizeConfiguration;
   private Button btnRunConfiguration = new Button();
   private Button btnRunAllConfiguration = new Button();
-  private Button btnClearConfiguration = new Button();
-  private Boolean isInformation;
+  private Button btnGotoTable = new Button();
+  private Button btnCancel = new Button();
   private List<Button> buttons = new ArrayList<>();
+  private List<Button> buttonsToSidebar = new ArrayList<>();
+  private Boolean isInformation;
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
@@ -112,17 +123,37 @@ public class DataTransformation extends RightPanel implements CollectionStatusOb
     this.tableId = tableId;
     if (this.tableId == null) {
       isInformation = true;
-      content.add(new Alert(Alert.MessageAlertType.INFO, "Under construction"));
+      message.setWidget(new Alert(Alert.MessageAlertType.INFO, "Under construction"));
       content.add(informationPanel());
+      toolBar.setVisible(false);
     } else {
       isInformation = false;
       getDenormalizeConfigurationFile(this.tableId);
     }
   }
 
+  private void createToolBar() {
+    FlowPanel tablePanel = new FlowPanel();
+    HTML icon = new HTML(FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE));
+    icon.addStyleName("data-transformation-title-icon");
+    Label tableName = new Label(table.getId());
+    tableName.addStyleName("data-transformation-title-label");
+    tablePanel.add(icon);
+    tablePanel.add(tableName);
+    tablePanel.setStyleName("data-transformation-title");
 
-  private ErDiagram informationPanel(){
-    return ErDiagram.getInstance(database, database.getMetadata().getSchemas().get(0), HistoryManager.getCurrentHistoryPath().get(0));
+    FlowPanel panel = new FlowPanel();
+    panel.addStyleName("data-transformation-toolbar-actions");
+    panel.add(btnRunConfiguration);
+    panel.add(btnGotoTable);
+
+    toolBar.add(tablePanel);
+    toolBar.add(panel);
+  }
+
+  private ErDiagram informationPanel() {
+    return ErDiagram.getInstance(database, database.getMetadata().getSchemas().get(0),
+      HistoryManager.getCurrentHistoryPath().get(0));
   }
 
   /**
@@ -131,7 +162,8 @@ public class DataTransformation extends RightPanel implements CollectionStatusOb
   private void getDenormalizeConfigurationFile(String tableId) {
     loading.setVisible(true);
     this.table = database.getMetadata().getTableById(tableId);
-    if (collectionStatus.getDenormalizations().contains(ViewerConstants.DENORMALIZATION_STATUS_PREFIX + table.getUuid())) {
+    if (collectionStatus.getDenormalizations()
+      .contains(ViewerConstants.DENORMALIZATION_STATUS_PREFIX + table.getUuid())) {
       CollectionService.Util.call((DenormalizeConfiguration response) -> {
         denormalizeConfiguration = response;
         init();
@@ -148,7 +180,7 @@ public class DataTransformation extends RightPanel implements CollectionStatusOb
 
     Alert alert = new Alert(Alert.MessageAlertType.INFO, messages.dataTransformationTextForAlertColumnsOrder(), true,
       FontAwesomeIconManager.DATABASE_INFORMATION);
-    content.add(alert);
+    message.setWidget(alert);
 
     // root table
     TableNode parentNode = new TableNode(database, table);
@@ -164,18 +196,24 @@ public class DataTransformation extends RightPanel implements CollectionStatusOb
     content.add(relationShipPanel);
 
     createButtons();
+    createToolBar();
   }
 
   private void createButtons() {
-    btnClearConfiguration.setEnabled(false);
-    btnClearConfiguration.setText(messages.basicActionCancel());
-    btnClearConfiguration.addStyleName("btn btn-times-circle btn-danger");
-    btnClearConfiguration.addClickHandler(event -> {
-      denormalizeConfigurationList.clear();
-      for (DataTransformation dataTransformation : instances.values()) {
-        dataTransformation.clear();
-        dataTransformation.getDenormalizeConfigurationFile(tableId);
-      }
+    btnCancel.setEnabled(false);
+    btnCancel.setText(messages.basicActionCancel());
+    btnCancel.addStyleName("btn btn-times-circle btn-danger");
+    btnCancel.addClickHandler(clickEvent -> {
+      instances.entrySet().removeIf(e -> e.getKey().startsWith(database.getUuid()));
+      sidebar.reset(database, collectionStatus);
+      HistoryManager.gotoAdvancedConfiguration(database.getUuid());
+    });
+
+    btnGotoTable = new Button();
+    btnGotoTable.setText(messages.dataTransformationBtnGoToTable(table.getName()));
+    btnGotoTable.setStyleName("btn btn-table");
+    btnGotoTable.addClickHandler(event -> {
+      HistoryManager.gotoTable(database.getUuid(), tableId);
     });
 
     btnRunConfiguration.setEnabled(false);
@@ -195,6 +233,10 @@ public class DataTransformation extends RightPanel implements CollectionStatusOb
       }
     });
 
+    buttons.add(btnCancel);
+    buttons.add(btnRunConfiguration);
+    buttons.add(btnRunAllConfiguration);
+
     updateControllerPanel();
   }
 
@@ -212,8 +254,8 @@ public class DataTransformation extends RightPanel implements CollectionStatusOb
    */
   private BootstrapCard createRootTableCard(ViewerTable table) {
     BootstrapCard card = new BootstrapCard();
-    card.setTitleIcon(FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE));
-    card.setTitle(table.getId());
+    // card.setTitleIcon(FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE));
+    // card.setTitle(table.getId());
     card.setDescription(table.getDescription());
     rootTable = TransformationTable.getInstance(database, table, denormalizeConfiguration);
     FlowPanel rootTablePanel = new FlowPanel();
@@ -286,10 +328,10 @@ public class DataTransformation extends RightPanel implements CollectionStatusOb
     return panel;
   }
 
-  private void setup(TableNode childNode, SwitchBtn switchBtn,
-    BootstrapCard card, FlowPanel grandChild, FlowPanel container, MultipleSelectionTablePanel selectTable) {
+  private void setup(TableNode childNode, SwitchBtn switchBtn, BootstrapCard card, FlowPanel grandChild,
+    FlowPanel container, MultipleSelectionTablePanel selectTable) {
     RelatedTablesConfiguration targetTable = denormalizeConfiguration.getRelatedTable(childNode.getUuid());
-    if(targetTable != null){
+    if (targetTable != null) {
       switchBtn.getButton().setValue(true, true);
       grandChild.add(expandLevel(childNode));
       card.setHideContentVisible(true);
@@ -360,21 +402,22 @@ public class DataTransformation extends RightPanel implements CollectionStatusOb
   private void updateControllerPanel() {
     if (!isInformation) {
       btnRunAllConfiguration.setEnabled(false);
-      btnClearConfiguration.setEnabled(false);
+      btnCancel.setEnabled(false);
+      //btnClearConfiguration.setEnabled(false);
       if (!denormalizeConfigurationList.isEmpty()) {
         for (DenormalizeConfiguration value : denormalizeConfigurationList.values()) {
           if (value.getState() != null && value.getState().equals(ViewerJobStatus.NEW)) {
             btnRunAllConfiguration.setEnabled(true);
-            btnClearConfiguration.setEnabled(true);
+            btnCancel.setEnabled(true);
+            //btnClearConfiguration.setEnabled(true);
             break;
           }
         }
       }
-      buttons.clear();
-      buttons.add(btnRunConfiguration);
-      buttons.add(btnRunAllConfiguration);
-      buttons.add(btnClearConfiguration);
-      sidebar.updateControllerPanel(buttons);
+      buttonsToSidebar.clear();
+      buttonsToSidebar.add(btnRunAllConfiguration);
+      buttonsToSidebar.add(btnCancel);
+      sidebar.updateControllerPanel(buttonsToSidebar);
     } else {
       sidebar.updateControllerPanel(null);
     }
@@ -385,6 +428,7 @@ public class DataTransformation extends RightPanel implements CollectionStatusOb
     super.onAttach();
     if (database != null) {
       updateControllerPanel();
+      JavascriptUtils.stickSidebar();
     }
   }
 }

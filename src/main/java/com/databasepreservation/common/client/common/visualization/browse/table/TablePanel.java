@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.databasepreservation.common.client.ObserverManager;
+import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.RightPanel;
+import com.databasepreservation.common.client.common.UserLogin;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.search.SearchInfo;
@@ -17,14 +19,19 @@ import com.databasepreservation.common.client.configuration.observer.CollectionS
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
+import com.databasepreservation.common.client.models.user.User;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
+import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.MenuBar;
+import com.google.gwt.user.client.ui.MenuItem;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -92,6 +99,9 @@ public class TablePanel extends RightPanel implements CollectionStatusObserver {
 
   @UiField
   Button options;
+
+  @UiField
+  MenuBar configurationMenu;
 
   private CollectionStatus collectionStatus;
   private ViewerDatabase database;
@@ -195,6 +205,14 @@ public class TablePanel extends RightPanel implements CollectionStatusObserver {
 
     mainHeader.setWidget(CommonClientUtils.getHeader(collectionStatus.getTableStatus(table.getUuid()), table, "h1",
       database.getMetadata().getSchemas().size() > 1));
+    UserLogin.getInstance().getAuthenticatedUser(new DefaultAsyncCallback<User>() {
+      @Override
+      public void onSuccess(User user) {
+        if(user.isAdmin()){
+          buildMenu();
+        }
+      }
+    });
     options.setText(messages.basicActionOptions());
 
     options.addClickHandler(event -> {
@@ -213,6 +231,23 @@ public class TablePanel extends RightPanel implements CollectionStatusObserver {
     }
 
     tableSearchPanel.provideSource(database, table);
+  }
+
+  private void buildMenu() {
+    MenuBar configurationSubMenuBar = new MenuBar(true);
+    MenuItem columnMenuItem = new MenuItem(
+      FontAwesomeIconManager.loaded(FontAwesomeIconManager.COG,
+        messages.advancedConfigurationLabelForColumnsManagement()),
+      () -> HistoryManager.gotoColumnsManagement(database.getUuid(), table.getId()));
+    configurationSubMenuBar.addItem(columnMenuItem);
+    MenuItem dataTransformationMenuItem = new MenuItem(
+      FontAwesomeIconManager.loaded(FontAwesomeIconManager.COG,
+        messages.advancedConfigurationLabelForDataTransformation()),
+      () -> HistoryManager.gotoDataTransformation(database.getUuid(), table.getId()));
+    configurationSubMenuBar.addItem(dataTransformationMenuItem);
+    configurationMenu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.COG,
+            messages.advancedConfigurationLabelForMainTitle()), configurationSubMenuBar);
+    configurationMenu.setStyleName("btn btn-link");
   }
 
   private void applyCurrentSearchInfoJsonIfExists() {

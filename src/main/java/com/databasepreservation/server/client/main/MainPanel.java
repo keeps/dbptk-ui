@@ -26,7 +26,7 @@ import com.databasepreservation.common.client.common.visualization.browse.Databa
 import com.databasepreservation.common.client.common.visualization.browse.ReferencesPanel;
 import com.databasepreservation.common.client.common.visualization.browse.RowPanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.AdvancedConfiguration;
-import com.databasepreservation.common.client.common.visualization.browse.configuration.DataTransformation;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.dataTransformation.DataTransformation;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.ColumnsManagementPanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.table.TableManagementPanel;
 import com.databasepreservation.common.client.common.visualization.browse.foreignKey.ForeignKeyPanel;

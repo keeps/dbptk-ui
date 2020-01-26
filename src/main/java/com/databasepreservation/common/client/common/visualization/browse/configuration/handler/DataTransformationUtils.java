@@ -5,7 +5,7 @@ import java.util.Map;
 
 import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.common.visualization.browse.configuration.TableNode;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.dataTransformation.TableNode;
 import com.databasepreservation.common.client.configuration.observer.CollectionObserver;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;

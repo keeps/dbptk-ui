@@ -13,6 +13,7 @@ import com.databasepreservation.common.client.index.filter.FilterParameter;
 
 import com.databasepreservation.common.client.common.lists.utils.AsyncTableCell;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.widgets.wcag.AccessibleFocusPanel;
 import com.google.gwt.core.client.GWT;
@@ -23,6 +24,7 @@ import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -53,6 +55,9 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
 
   @UiField
   FlowPanel searchPanel;
+
+  @UiField
+  FlowPanel searchContextPanel;
 
   @UiField
   Dropdown searchInputListBox;
@@ -108,6 +113,7 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
     searchInputListBox.setVisible(showSearchInputListBox);
     searchAdvancedDisclosureButton.setVisible(showSearchAdvancedDisclosureButton);
     searchAdvancedPanel.setVisible(false);
+    searchContextPanel.setVisible(false);
 
     searchInputBox.addKeyDownHandler(event -> {
       if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
@@ -121,6 +127,13 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
     if (showSearchAdvancedDisclosureButton) {
       searchPanel.addStyleName("searchPanelAdvanced");
     }
+  }
+
+  public SearchPanel(Filter defaultFilter, String allFilter, String placeholder, String context,
+      boolean showSearchAdvancedDisclosureButton, final AsyncCallback<Void> saveQueryCallback) {
+    this(defaultFilter, allFilter, placeholder, false, showSearchAdvancedDisclosureButton, saveQueryCallback);
+    searchContextPanel.setVisible(true);
+    searchContextPanel.add(new HTML(FontAwesomeIconManager.loaded(FontAwesomeIconManager.TABLE, context)));
   }
 
   public SearchPanel(Filter defaultFilter, String allFilter, String placeholder, boolean showSearchInputListBox,
@@ -137,6 +150,7 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
 
     searchInputListBox.setVisible(showSearchInputListBox);
     searchAdvancedDisclosureButton.setVisible(showSearchAdvancedDisclosureButton);
+    searchContextPanel.setVisible(false);
     searchAdvancedPanel.setVisible(false);
 
     searchInputBox.addKeyDownHandler(event -> {

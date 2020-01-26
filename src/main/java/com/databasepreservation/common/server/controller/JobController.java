@@ -17,8 +17,6 @@ import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
  * @author Gabriel Barros <gbarros@keep.pt>
  */
 public class JobController {
-  private static final Logger LOGGER = LoggerFactory.getLogger(JobController.class);
-
   private static ViewerJob createViewerJob(JobExecution jobExecution) {
     ViewerJob viewerJob = new ViewerJob();
     viewerJob.setUuid(jobExecution.getJobParameters().getString(ViewerConstants.INDEX_ID));
@@ -51,6 +49,14 @@ public class JobController {
   public static void editSolrBatchJob(JobExecution jobExecution) throws NotFoundException, GenericException {
     DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
     ViewerJob viewerJob = createViewerJob(jobExecution);
+    solrManager.editBatchJob(viewerJob);
+  }
+
+  public static void setMessageToSolrBatchJob(JobExecution jobExecution, String message)
+    throws NotFoundException, GenericException {
+    DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
+    ViewerJob viewerJob = createViewerJob(jobExecution);
+    viewerJob.setExitDescription(message);
     solrManager.editBatchJob(viewerJob);
   }
 }

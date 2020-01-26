@@ -93,7 +93,7 @@ public class DenormalizeTransformer {
 
   private void updateCollectionStatus() throws GenericException {
     ViewerFactory.getConfigurationManager().removeDenormalizationColumns(databaseUUID,
-        denormalizeConfiguration.getTableUUID());
+      denormalizeConfiguration.getTableUUID());
     for (RelatedTablesConfiguration relatedTable : denormalizeConfiguration.getRelatedTables()) {
       List<String> path = new ArrayList<>();
       path.add(database.getMetadata().getTable(tableUUID).getName());
@@ -101,7 +101,8 @@ public class DenormalizeTransformer {
     }
   }
 
-  private void setAllColumnsToInclude(RelatedTablesConfiguration relatedTable, List<String> path) throws GenericException {
+  private void setAllColumnsToInclude(RelatedTablesConfiguration relatedTable, List<String> path)
+    throws GenericException {
     List<RelatedColumnConfiguration> columnsIncluded = relatedTable.getColumnsIncluded();
     path.add(database.getMetadata().getTable(relatedTable.getTableUUID()).getName());
 
@@ -140,7 +141,6 @@ public class DenormalizeTransformer {
         separator = " > ";
       }
 
-
       viewerColumn.setDisplayName(columnStatusName + separator + columnName.toString());
       ViewerFactory.getConfigurationManager().addDenormalizationColumns(databaseUUID,
         denormalizeConfiguration.getTableUUID(), viewerColumn, nestedColumn, template, removeBrackets(originalType),
@@ -172,21 +172,18 @@ public class DenormalizeTransformer {
     IterableIndexResult sourceRows = solrManager.findAllRows(databaseUUID, filter, null, fieldsToReturn);
     long processedRows = 0;
     long rowToProcess = sourceRows.getTotalCount();
-    try {
-      solrManager.editBatchJob(jobUUID, rowToProcess, processedRows);
-      for (ViewerRow row : sourceRows) {
-        List<SolrInputDocument> nestedDocuments = new ArrayList<>();
-        for (RelatedTablesConfiguration relatedTable : denormalizeConfiguration.getRelatedTables()) {
-          queryOverRelatedTables(row, relatedTable, nestedDocuments);
-        }
 
-        if (!nestedDocuments.isEmpty()) {
-          solrManager.addDatabaseField(databaseUUID, row.getUuid(), nestedDocuments);
-        }
-        solrManager.editBatchJob(jobUUID, rowToProcess, ++processedRows);
+    solrManager.editBatchJob(jobUUID, rowToProcess, processedRows);
+    for (ViewerRow row : sourceRows) {
+      List<SolrInputDocument> nestedDocuments = new ArrayList<>();
+      for (RelatedTablesConfiguration relatedTable : denormalizeConfiguration.getRelatedTables()) {
+        queryOverRelatedTables(row, relatedTable, nestedDocuments);
       }
-    } catch (NotFoundException | GenericException e) {
-      throw new ModuleException().withMessage("Cannot update batch row in solr");
+
+      if (!nestedDocuments.isEmpty()) {
+        solrManager.addDatabaseField(databaseUUID, row.getUuid(), nestedDocuments);
+      }
+      solrManager.editBatchJob(jobUUID, rowToProcess, ++processedRows);
     }
   }
 
@@ -253,14 +250,15 @@ public class DenormalizeTransformer {
     }
   }
 
-  private void createdNestedDocument(ViewerRow row, String parentUUID, List<SolrInputDocument> nestedDocuments, List<String> columnsToDisplay) {
+  private void createdNestedDocument(ViewerRow row, String parentUUID, List<SolrInputDocument> nestedDocuments,
+    List<String> columnsToDisplay) {
     Map<String, ViewerCell> cells = row.getCells();
     String uuid = row.getNestedUUID();
 
     Map<String, Object> fields = new HashMap<>();
     for (Map.Entry<String, ViewerCell> cell : cells.entrySet()) {
       String key = cell.getKey();
-      if(columnsToDisplay.contains(key)){
+      if (columnsToDisplay.contains(key)) {
         ViewerCell cellValue = cell.getValue();
         if (key.endsWith(ViewerConstants.SOLR_DYN_DATE)) {
           fields.put(key, JodaUtils.xsDateParse(cellValue.getValue()).toString());
@@ -271,8 +269,7 @@ public class DenormalizeTransformer {
     }
     if (!fields.isEmpty()) {
       nestedDocuments.add(solrManager.createNestedDocument(uuid, row.getUuid(), row.getNestedOriginalUUID(), fields,
-        row.getTableId(),
-        row.getNestedUUID()));
+        row.getTableId(), row.getNestedUUID()));
     }
   }
 }

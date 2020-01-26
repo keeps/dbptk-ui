@@ -4,9 +4,10 @@
              xmlns:search="urn:import:com.databasepreservation.common.client.common.search">
 
     <ui:with field='messages' type='config.i18n.client.ClientMessages' />
-    <g:FlowPanel>
+    <g:FlowPanel styleName="searchPanelContainer">
         <g:FlowPanel styleName="searchPanel" ui:field="searchPanel">
             <g:FlowPanel styleName="searchPanelLeft">
+                <g:FlowPanel ui:field="searchContextPanel" styleName="search-context" />
                 <search:Dropdown ui:field="searchInputListBox"
                                  addStyleNames="searchInputListBox" />
                 <g:FlowPanel styleName="searchPanelLeftInput">

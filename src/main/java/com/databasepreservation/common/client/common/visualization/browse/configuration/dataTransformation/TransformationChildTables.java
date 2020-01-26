@@ -1,4 +1,4 @@
-package com.databasepreservation.common.client.common.visualization.browse.configuration;
+package com.databasepreservation.common.client.common.visualization.browse.configuration.dataTransformation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,8 +45,6 @@ public class TransformationChildTables {
   public static TransformationChildTables getInstance(TableNode childTable,
     DenormalizeConfiguration denormalizeConfiguration, TransformationTable rootTable, List<Button> buttons) {
      return new TransformationChildTables(childTable, denormalizeConfiguration, rootTable, buttons);
-//    return instances.computeIfAbsent(childTable.getUuid(),
-//      k -> new TransformationChildTables(childTable, denormalizeConfiguration, rootTable, buttons));
   }
 
   /**

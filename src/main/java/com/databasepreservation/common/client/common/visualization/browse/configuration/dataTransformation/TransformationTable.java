@@ -1,4 +1,4 @@
-package com.databasepreservation.common.client.common.visualization.browse.configuration;
+package com.databasepreservation.common.client.common.visualization.browse.configuration.dataTransformation;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -9,6 +9,7 @@
                 <g:Label><ui:text from='{messages.loadingTableInfo}' /></g:Label>
             </g:SimplePanel>
             <g:FlowPanel addStyleNames="advancedOptionsButton">
+                <g:MenuBar ui:field="configurationMenu" />
                <g:Button ui:field="options" addStyleNames="btn btn-link btn-pull-right" />
             </g:FlowPanel>
         </g:FlowPanel>

@@ -264,8 +264,7 @@ public class DatabaseRowsSolrManager {
     }
   }
 
-  public void editBatchJob(String jobUUID, long countRows, long processedRows)
-    throws NotFoundException, GenericException {
+  public void editBatchJob(String jobUUID, long countRows, long processedRows){
     SolrInputDocument doc = new SolrInputDocument();
     doc.addField(ViewerConstants.INDEX_ID, jobUUID);
     doc.addField(ViewerConstants.SOLR_BATCH_JOB_ROWS_TO_PROCESS, SolrUtils.asValueUpdate(countRows));
@@ -281,7 +280,6 @@ public class DatabaseRowsSolrManager {
     SolrCollection<ViewerJob> viewerJobSolrCollection = SolrDefaultCollectionRegistry.get(ViewerJob.class);
     try {
       SolrInputDocument doc = new SolrInputDocument();
-      ;
       doc.addField(ViewerConstants.INDEX_ID, job.getUuid());
       for (SolrInputField field : viewerJobSolrCollection.toSolrDocument(job)) {
         if (!field.getName().equals(ViewerConstants.INDEX_ID) && field.getValue() != null) {

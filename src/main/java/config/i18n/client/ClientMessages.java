@@ -1326,6 +1326,8 @@ public interface ClientMessages extends Messages {
 
   String dataTransformationTableRowList(@PluralCount List<String> columns);
 
+  String dataTransformationBtnGoToTable(String table);
+
   /********************************************
    * Preferences Panel
    *******************************************/

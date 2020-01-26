@@ -135,16 +135,14 @@ public class TableSearchPanel extends Composite {
 
     GWT.log("initial filter: " + initialFilter);
 
-    if (initialFilter == null) {
-      searchPanel = new SearchPanel(ViewerConstants.DEFAULT_FILTER, ViewerConstants.INDEX_SEARCH,
-        messages.searchPlaceholder(), false, true, new DefaultAsyncCallback<Void>() {
+    if (isNested) {
+      searchPanel = new SearchPanel(initialFilter, ViewerConstants.INDEX_SEARCH, messages.searchPlaceholder(), table.getName(),
+        true, new DefaultAsyncCallback<Void>() {
           @Override
           public void onSuccess(Void result) {
             TableSearchPanel.this.saveQuery();
           }
         });
-      searchPanel.setList(tableRowList);
-      searchPanel.setDefaultFilterIncremental(false);
     } else {
       searchPanel = new SearchPanel(initialFilter, ViewerConstants.INDEX_SEARCH, messages.searchPlaceholder(), false,
         true, new DefaultAsyncCallback<Void>() {
@@ -153,9 +151,9 @@ public class TableSearchPanel extends Composite {
             TableSearchPanel.this.saveQuery();
           }
         });
-      searchPanel.setList(tableRowList);
-      searchPanel.setDefaultFilterIncremental(true);
     }
+    searchPanel.setList(tableRowList);
+    searchPanel.setDefaultFilterIncremental(true);
 
     showSearchAdvancedFieldsPanel();
 
@@ -201,7 +199,8 @@ public class TableSearchPanel extends Composite {
   }
 
   private void initAdvancedSearch() {
-    final List<SearchField> searchFieldsFromTable = AdvancedSearchUtils.getSearchFieldsFromTable(table, status, database.getMetadata());
+    final List<SearchField> searchFieldsFromTable = AdvancedSearchUtils.getSearchFieldsFromTable(table, status,
+      database.getMetadata());
     TableSearchPanel.this.searchFields.clear();
     for (SearchField searchField : searchFieldsFromTable) {
       ListboxUtils.insertItemByAlphabeticOrder(searchAdvancedFieldOptions, searchField.getLabel(), searchField.getId());

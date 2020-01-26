@@ -338,9 +338,9 @@ public class RowPanel extends RightPanel {
         FlowPanel card = new FlowPanel();
         card.setStyleName("card");
 
-        RowField rowField = RowField.createInstance(nestedTable.getName(), null);
-        rowField.addStyleName("card-header");
-        card.add(rowField);
+//        RowField rowField = RowField.createInstance(nestedTable.getName(), null);
+//        rowField.addStyleName("card-header");
+//        card.add(rowField);
 
         final TableSearchPanel tablePanel = new TableSearchPanel(status);
         tablePanel.provideSource(database, nestedTable, filter, true);
