@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -113,4 +114,16 @@ public class TableStatus implements Serializable {
       }
     }
   }
+
+  @JsonIgnore
+  public List<ColumnStatus> getVisibleColumnsList() {
+  	return columns.stream().filter(c -> c.getSearchStatus().getList().isShow()).sorted()
+				.collect(Collectors.toList());
+	}
+
+	@JsonIgnore
+	public List<ColumnStatus> getVisibleColumnsDetails() {
+		return columns.stream().filter(c -> c.getDetailsStatus().isShow()).sorted()
+				.collect(Collectors.toList());
+	}
 }

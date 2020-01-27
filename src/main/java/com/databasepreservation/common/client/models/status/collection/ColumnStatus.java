@@ -2,6 +2,7 @@ package com.databasepreservation.common.client.models.status.collection;
 
 import java.io.Serializable;
 
+import com.databasepreservation.common.client.models.structure.ViewerType;
 import org.jetbrains.annotations.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -11,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 @JsonPropertyOrder({"id", "name", "customName", "description", "customDescription", "originalType", "typeName",
-  "nullable", "nestedColumn", "order", "search", "details"})
+  "nullable", "type", "nestedColumn", "order", "search", "details"})
 public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
   private String id;
   private String name;
@@ -21,6 +22,7 @@ public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
   private String originalType;
   private String typeName;
   private String nullable;
+  private ViewerType.dbTypes type;
   private NestedColumnStatus nestedColumns;
   private int order;
   private SearchStatus searchStatus;
@@ -77,7 +79,16 @@ public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
     this.nullable = nullable;
   }
 
-  public NestedColumnStatus getNestedColumns() {
+  @JsonProperty("type")
+	public ViewerType.dbTypes getType() {
+		return type;
+	}
+
+	public void setType(ViewerType.dbTypes type) {
+		this.type = type;
+	}
+
+	public NestedColumnStatus getNestedColumns() {
     return nestedColumns;
   }
 

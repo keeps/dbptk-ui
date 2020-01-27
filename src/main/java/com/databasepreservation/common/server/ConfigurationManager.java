@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 
+import com.databasepreservation.common.client.models.structure.ViewerType;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.utils.JsonUtils;
@@ -136,7 +137,7 @@ public class ConfigurationManager {
     throws GenericException {
     try {
       final DatabaseStatus databaseStatus = getDatabaseStatus(databaseUUID);
-      if (databaseStatus.getCollections().size() >= 1) {
+      if (!databaseStatus.getCollections().isEmpty()) {
         final String collectionId = databaseStatus.getCollections().get(0);
         final CollectionStatus collectionStatus = getCollectionStatus(databaseUUID, collectionId);
         TableStatus table = collectionStatus.getTableStatus(tableUUID);
@@ -147,6 +148,7 @@ public class ConfigurationManager {
         columnStatus.setOriginalType(originalType);
         columnStatus.setTypeName(typeName);
         columnStatus.setNullable(nullable);
+        columnStatus.setType(ViewerType.dbTypes.NESTED);
         table.addColumnStatus(columnStatus);
         columnStatus.getDetailsStatus().getTemplateStatus().setTemplate(template);
         columnStatus.getSearchStatus().getList().getTemplate().setTemplate(template);

@@ -1,14 +1,18 @@
 package com.databasepreservation.common.client.common.lists;
 
 import static com.databasepreservation.common.client.models.structure.ViewerType.dbTypes.BINARY;
+import static com.databasepreservation.common.client.models.structure.ViewerType.dbTypes.NESTED;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.databasepreservation.common.client.tools.FilterUtils;
 import org.fusesource.restygwt.client.MethodCallback;
@@ -67,6 +71,8 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
   private final ClientLogger logger = new ClientLogger(getClass().getName());
 
   private LinkedHashMap<ViewerColumn, Column<ViewerRow, ?>> columns;
+  private LinkedHashMap<ColumnStatus, Column<ViewerRow, ?>> configColumns;
+  private Map<String, Integer> originalBinaryColumnIndexes = new HashMap<>();
   private Map<String, Boolean> columnDisplayNameToVisibleState = new HashMap<>();
 
   private CellTable<ViewerRow> display;
@@ -88,7 +94,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
 
   /**
    * Checks if the column should be displayed. When uncertain, show it.
-   * 
+   *
    * @param column
    *          the column
    * @return the visible state
@@ -101,203 +107,74 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     return visibleState == null || visibleState;
   }
 
-  private int getColumnWithBinary(ViewerTable table) {
-    int columnIndex = 0;
-    for (ViewerColumn viewerColumn : table.getColumns()) {
-      columnIndex++;
-      final ViewerType viewerColumnType = viewerColumn.getType();
-      ViewerType.dbTypes type = viewerColumnType.getDbType();
-      if (type.equals(BINARY)) {
-        return columnIndex - 1;
-      }
-    }
-    return -1;
+	protected boolean isColumnVisible(String column) {
+		// NULL -> true (show)
+		// true -> true (show)
+		// false -> false (hide)
+		Boolean visibleState = columnDisplayNameToVisibleState.get(column);
+		return visibleState == null || visibleState;
+	}
+
+  private Map<String, Integer> getColumnWithBinary(TableStatus table) {
+  	Map<String, Integer> binaryColumns = new HashMap<>();
+		originalBinaryColumnIndexes = new HashMap<>();
+  	int index = 0;
+		for (ColumnStatus configColumn : table.getVisibleColumnsList()) {
+			if (configColumn.getType().equals(BINARY)) {
+				binaryColumns.put(configColumn.getId(), index);
+				Optional<ViewerColumn> first = getObject().getTable().getBinaryColumns().stream().filter(p -> p.getDisplayName().equals(configColumn.getName())).findFirst();
+				first.ifPresent(viewerColumn -> originalBinaryColumnIndexes.put(configColumn.getId(), viewerColumn.getColumnIndexInEnclosingTable()));
+			}
+			index++;
+		}
+
+  	return binaryColumns;
   }
 
   @Override
   protected void configureDisplay(CellTable<ViewerRow> display) {
-    this.display = display;
-    TableRowListWrapper wrapper = getObject();
-    final ViewerTable table = wrapper.getTable();
-    final ViewerDatabase database = wrapper.getDatabase();
-    final CollectionStatus status = wrapper.getStatus();
+		this.display = display;
+		TableRowListWrapper wrapper = getObject();
+		final ViewerTable table = wrapper.getTable();
+		final ViewerDatabase database = wrapper.getDatabase();
+		final CollectionStatus status = wrapper.getStatus();
+		TableStatus tableStatus = status.getTableStatus(table.getUuid());
 
-    columns = new LinkedHashMap<>(table.getColumns().size());
+		columns = new LinkedHashMap<>(tableStatus.getVisibleColumnsList().size());
+		configColumns = new LinkedHashMap<>(tableStatus.getVisibleColumnsList().size());
 
-    TableStatus tableStatus = status.getTableStatus(table.getUuid());
+		final Map<String, Integer> columnWithBinary = getColumnWithBinary(tableStatus);
+		if (!columnWithBinary.isEmpty()) {
+			final CellPreviewEvent.Handler<ViewerRow> selectionEventManager = DefaultSelectionEventManager
+					.createBlacklistManager(columnWithBinary.values().stream().mapToInt(Integer::intValue).toArray());
+			display.setSelectionModel(getSelectionModel(), selectionEventManager);
+		}
 
-    final int columnWithBinary = getColumnWithBinary(table);
-    if (columnWithBinary != -1) {
-      final CellPreviewEvent.Handler<ViewerRow> selectionEventManager = DefaultSelectionEventManager
-        .createBlacklistManager(columnWithBinary);
-      display.setSelectionModel(getSelectionModel(), selectionEventManager);
-    }
+		for (ColumnStatus configColumn : tableStatus.getVisibleColumnsList()) {
+			if (!configColumn.getType().equals(NESTED)) {
+				//Treat as non nested
+				if (configColumn.getType().equals(BINARY)) {
+					Column<ViewerRow, SafeHtml> binaryColumn = buildBinaryColumn(configColumn, database, table, originalBinaryColumnIndexes.get(configColumn.getId()));
+					binaryColumn.setSortable(true); // add to configuration file sortable options
+					addColumn(configColumn, binaryColumn);
+					configColumns.put(configColumn, binaryColumn);
+				} else {
+					Column<ViewerRow, SafeHtml> column = buildSimpleColumn(configColumn);
+					column.setSortable(true);
+					addColumn(configColumn, column);
+					configColumns.put(configColumn, column);
+				}
+			} else {
+				//Treat as nested
+				// this is the table of nested document
+				ViewerTable nestedTable = database.getMetadata().getTableById(configColumn.getNestedColumns().getOriginalTable());
 
-    int columnIndex = 0;
-
-    for (ColumnStatus columnStatus : tableStatus.getColumns()) {
-      if (!status.showColumn(tableStatus.getUuid(), columnStatus.getId()))
-        continue;
-      if (columnStatus.getNestedColumns() == null) {
-        ViewerColumn viewerColumn = null;
-        for (ViewerColumn column : table.getColumns()) {
-          if (columnStatus.getId().equals(column.getSolrName())) {
-            viewerColumn = column;
-            break;
-          }
-        }
-        if (viewerColumn == null)
-          continue;
-
-        final ViewerType viewerColumnType = viewerColumn.getType();
-        final int thisColumnIndex = columnIndex++;
-        final String solrColumnName = viewerColumn.getSolrName();
-        final ViewerType.dbTypes type = viewerColumnType.getDbType();
-        if (type.equals(BINARY)) {
-          ViewerColumn finalViewerColumn = viewerColumn;
-          Column<ViewerRow, SafeHtml> column = new Column<ViewerRow, SafeHtml>(new SafeHtmlCell()) {
-            @Override
-            public void render(Cell.Context context, ViewerRow object, SafeHtmlBuilder sb) {
-              SafeHtml value = getValue(object);
-              if (value != null) {
-                sb.appendHtmlConstant("<div title=\"" + messages.row_downloadLOB() + "\">");
-                sb.append(value);
-                sb.appendHtmlConstant("</div");
-              }
-            }
-
-            @Override
-            public SafeHtml getValue(ViewerRow row) {
-              SafeHtml ret = null;
-              if (row == null) {
-                logger.error("Trying to display a NULL ViewerRow");
-              } else if (row.getCells() == null) {
-                logger.error("Trying to display NULL Cells");
-              } else if (row.getCells().get(solrColumnName) != null) {
-                final String value = row.getCells().get(solrColumnName).getValue();
-                ret = SafeHtmlUtils.fromTrustedString(CommonClientUtils.wrapOnAnchor(messages.row_downloadLOB(),
-                  RestUtils.createExportLobUri(database.getUuid(), table.getSchemaName(), table.getName(),
-                    row.getUuid(), finalViewerColumn.getColumnIndexInEnclosingTable(), value))
-                  .toString());
-              }
-
-              return ret;
-            }
-          };
-          column.setSortable(viewerColumn.sortable());
-          addColumn(viewerColumn, column);
-          columns.put(viewerColumn, column);
-        } else {
-          Column<ViewerRow, SafeHtml> column = new Column<ViewerRow, SafeHtml>(new SafeHtmlCell()) {
-            @Override
-            public void render(Cell.Context context, ViewerRow object, SafeHtmlBuilder sb) {
-              SafeHtml value = getValue(object);
-              if (value != null) {
-                sb.appendHtmlConstant("<div title=\"" + SafeHtmlUtils.htmlEscape(value.asString()) + "\">");
-                sb.append(value);
-                sb.appendHtmlConstant("</div");
-              }
-            }
-
-            @Override
-            public SafeHtml getValue(ViewerRow row) {
-              SafeHtml ret = null;
-              if (row == null) {
-                logger.error("Trying to display a NULL ViewerRow");
-              } else if (row.getCells() == null) {
-                logger.error("Trying to display NULL Cells");
-              } else if (row.getCells().get(solrColumnName) != null) {
-                ViewerType.dbTypes type = viewerColumnType.getDbType();
-                String value = row.getCells().get(solrColumnName).getValue();
-
-                // if it exists in Solr, it is not null
-                switch (type) {
-                  case BINARY:
-                    // case DATETIME:
-                    // ret =
-                    // SafeHtmlUtils.fromString(JodaUtils.solrDateTimeDisplay(JodaUtils.solrDateParse(value)));
-                    // break;
-                    // case DATETIME_JUST_DATE:
-                    // ret =
-                    // SafeHtmlUtils.fromString(JodaUtils.solrDateDisplay(JodaUtils.solrDateParse(value)));
-                    // break;
-                    // case DATETIME_JUST_TIME:
-                    // ret =
-                    // SafeHtmlUtils.fromString(JodaUtils.solrTimeDisplay(JodaUtils.solrDateParse(value)));
-                    // ret = SafeHtmlUtils.fromString(new Date().)
-                    // break;
-                  case BOOLEAN:
-                  case ENUMERATION:
-                  case TIME_INTERVAL:
-                  case NUMERIC_FLOATING_POINT:
-                  case NUMERIC_INTEGER:
-                  case COMPOSED_STRUCTURE:
-                  case COMPOSED_ARRAY:
-                  case STRING:
-                  default:
-                    ret = SafeHtmlUtils.fromString(value);
-                }
-              }
-              return ret;
-            }
-          };
-          column.setSortable(viewerColumn.sortable());
-          addColumn(columnStatus, column);
-          columns.put(viewerColumn, column);
-        }
-      } else {
-        // this is the table of nested document
-        ViewerTable nestedTable = database.getMetadata()
-          .getTableById(columnStatus.getNestedColumns().getOriginalTable());
-        List<ViewerColumn> columnsToAggregate = new ArrayList<>();
-        for (String nestedColumn : columnStatus.getNestedColumns().getNestedFields()) {
-          for (ViewerColumn column : nestedTable.getColumns()) {
-            if (column.getDisplayName().equals(nestedColumn)) {
-              columnsToAggregate.add(column);
-            }
-          }
-        }
-
-        Column<ViewerRow, SafeHtml> column = new Column<ViewerRow, SafeHtml>(new SafeHtmlCell()) {
-          @Override
-          public void render(Cell.Context context, ViewerRow object, SafeHtmlBuilder sb) {
-            SafeHtml value = getValue(object);
-            if (value != null) {
-              sb.appendHtmlConstant("<div title=\"" + SafeHtmlUtils.htmlEscape(value.asString()) + "\">");
-              sb.append(value);
-              sb.appendHtmlConstant("</div");
-            }
-          }
-
-          @Override
-          public SafeHtml getValue(ViewerRow row) {
-            List<String> aggregationList = new ArrayList<>();
-            SafeHtml ret = null;
-            if (row.getNestedRowList() != null) {
-              for (ViewerRow nestedRow : row.getNestedRowList()) {
-                if (nestedRow == null || nestedRow.getCells() == null || nestedRow.getCells().isEmpty()) {
-                  continue;
-                } else if (nestedRow.getUuid().equals(columnStatus.getId())) {
-                  Map<String, ViewerCell> cells = nestedRow.getCells();
-                  String template = columnStatus.getSearchStatus().getList().getTemplate().getTemplate();
-                  if (template != null && !template.isEmpty()) {
-                    String json = JSOUtils.cellsToJson(cells, nestedTable);
-                    String s = JavascriptUtils.compileTemplate(template, json);
-                    aggregationList.add(s);
-                  }
-                }
-              }
-              ret = SafeHtmlUtils.fromSafeConstant(messages.dataTransformationTableRowList(aggregationList));
-            }
-            return ret;
-          }
-        };
-        addColumn(columnStatus, column);
-        for (ViewerColumn viewerColumn : columnsToAggregate) {
-          columns.put(viewerColumn, column);
-        }
-      }
-    }
+				Column<ViewerRow, SafeHtml> templateColumn = buildTemplateColumn(configColumn, nestedTable);
+				templateColumn.setSortable(true);
+				addColumn(configColumn, templateColumn);
+				configColumns.put(configColumn, templateColumn);
+			}
+		}
 
     Alert alert = new Alert(Alert.MessageAlertType.LIGHT, messages.noItemsToDisplay());
     display.setEmptyTableWidget(alert);
@@ -311,6 +188,128 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     // emptyInfo.addStyleName("my-collections-empty-info");
   }
 
+  private Column<ViewerRow, SafeHtml> buildTemplateColumn(ColumnStatus configColumn, ViewerTable nestedTable) {
+		return new Column<ViewerRow, SafeHtml>(new SafeHtmlCell()) {
+			@Override
+			public void render(Cell.Context context, ViewerRow object, SafeHtmlBuilder sb) {
+				SafeHtml value = getValue(object);
+				if (value != null) {
+					sb.appendHtmlConstant("<div title=\"" + SafeHtmlUtils.htmlEscape(value.asString()) + "\">");
+					sb.append(value);
+					sb.appendHtmlConstant("</div");
+				}
+			}
+
+			@Override
+			public SafeHtml getValue(ViewerRow row) {
+				List<String> aggregationList = new ArrayList<>();
+				SafeHtml ret = null;
+				if (row.getNestedRowList() != null) {
+					for (ViewerRow nestedRow : row.getNestedRowList()) {
+						if (nestedRow != null && nestedRow.getCells() != null && !nestedRow.getCells().isEmpty() && nestedRow.getUuid().equals(configColumn.getId())) {
+							Map<String, ViewerCell> cells = nestedRow.getCells();
+							String template = configColumn.getSearchStatus().getList().getTemplate().getTemplate();
+							if (template != null && !template.isEmpty()) {
+								String json = JSOUtils.cellsToJson(cells, nestedTable);
+								String s = JavascriptUtils.compileTemplate(template, json);
+								aggregationList.add(s);
+							}
+						}
+					}
+					ret = SafeHtmlUtils.fromSafeConstant(messages.dataTransformationTableRowList(aggregationList));
+				}
+				return ret;
+			}
+		};
+	}
+
+  private Column<ViewerRow, SafeHtml> buildSimpleColumn(ColumnStatus configColumn) {
+		return new Column<ViewerRow, SafeHtml>(new SafeHtmlCell()) {
+			@Override
+			public void render(Cell.Context context, ViewerRow object, SafeHtmlBuilder sb) {
+				SafeHtml value = getValue(object);
+				if (value != null) {
+					sb.appendHtmlConstant("<div title=\"" + SafeHtmlUtils.htmlEscape(value.asString()) + "\">");
+					sb.append(value);
+					sb.appendHtmlConstant("</div");
+				}
+			}
+
+			@Override
+			public SafeHtml getValue(ViewerRow row) {
+				SafeHtml ret = null;
+				if (row == null) {
+					logger.error("Trying to display a NULL ViewerRow");
+				} else if (row.getCells() == null) {
+					logger.error("Trying to display NULL Cells");
+				} else if (row.getCells().get(configColumn.getId()) != null) {
+					String value = row.getCells().get(configColumn.getId()).getValue();
+
+					// if it exists in Solr, it is not null
+					switch (configColumn.getType()) {
+							// case DATETIME:
+							// ret =
+							// SafeHtmlUtils.fromString(JodaUtils.solrDateTimeDisplay(JodaUtils.solrDateParse(value)));
+							// break;
+							// case DATETIME_JUST_DATE:
+							// ret =
+							// SafeHtmlUtils.fromString(JodaUtils.solrDateDisplay(JodaUtils.solrDateParse(value)));
+							// break;
+							// case DATETIME_JUST_TIME:
+							// ret =
+							// SafeHtmlUtils.fromString(JodaUtils.solrTimeDisplay(JodaUtils.solrDateParse(value)));
+							// ret = SafeHtmlUtils.fromString(new Date().)
+							// break;
+						case BOOLEAN:
+						case ENUMERATION:
+						case TIME_INTERVAL:
+						case NUMERIC_FLOATING_POINT:
+						case NUMERIC_INTEGER:
+						case COMPOSED_STRUCTURE:
+						case COMPOSED_ARRAY:
+						case STRING:
+						default:
+							ret = SafeHtmlUtils.fromString(value);
+					}
+				}
+				return ret;
+			}
+		};
+	}
+
+  private Column<ViewerRow, SafeHtml> buildBinaryColumn(ColumnStatus configColumn, ViewerDatabase database, ViewerTable table, int columnIndex) {
+		return new Column<ViewerRow, SafeHtml>(new SafeHtmlCell()) {
+			@Override
+			public void render(Cell.Context context, ViewerRow object, SafeHtmlBuilder sb) {
+				SafeHtml value = getValue(object);
+				if (value != null) {
+					sb.appendHtmlConstant("<div title=\"" + messages.row_downloadLOB() + "\">");
+					sb.append(value);
+					sb.appendHtmlConstant("</div");
+				}
+			}
+
+			@Override
+			public SafeHtml getValue(ViewerRow row) {
+				SafeHtml ret = null;
+				if (row == null) {
+					logger.error("Trying to display a NULL ViewerRow");
+				} else if (row.getCells() == null) {
+					logger.error("Trying to display NULL Cells");
+				} else if (row.getCells().get(configColumn.getId()) != null) {
+					final String value = row.getCells().get(configColumn.getId()).getValue();
+					ret = SafeHtmlUtils.fromTrustedString(CommonClientUtils.wrapOnAnchor(messages.row_downloadLOB(),
+							RestUtils.createExportLobUri(database.getUuid(), table.getSchemaName(), table.getName(),
+									row.getUuid(), columnIndex, value))
+							.toString());
+				}
+
+				return ret;
+			}
+		};
+	}
+
+
   @Override
   protected void getData(Sublist sublist, ColumnSortList columnSortList,
     MethodCallback<IndexResult<ViewerRow>> callback) {
@@ -323,14 +322,12 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     Filter filter = getFilter();
     boolean hasNested = false;
 
-    for (ColumnStatus column : status.getTableStatus(table.getUuid()).getColumns()) {
-      if (status.showColumn(table.getUuid(), column.getId())) {
-        if (column.getNestedColumns() != null) {
-          hasNested = true;
-        } else {
-          fieldsToReturn.add(column.getId());
-        }
-      }
+    for (ColumnStatus column : status.getTableStatus(table.getUuid()).getVisibleColumnsList()) {
+			if (column.getNestedColumns() != null) {
+				hasNested = true;
+			} else {
+				fieldsToReturn.add(column.getId());
+			}
     }
 
     if (hasNested) {
@@ -376,12 +373,13 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     HelperExportTableData helperExportTableData = new HelperExportTableData(viewerTable, false);
 
     boolean buildZipHelper = false;
-    final List<ViewerColumn> binaryColumns = viewerTable.getBinaryColumns();
-    for (ViewerColumn column : binaryColumns) {
-      if (isColumnVisible(column)) {
-        buildZipHelper = true;
-      }
-    }
+
+		Map<String, Integer> binaryColumns = getColumnWithBinary(getObject().getStatus().getTableStatusByTableId(viewerTable.getId()));
+		for (String columnName : binaryColumns.keySet()) {
+			if (isColumnVisible(columnName)) {
+				buildZipHelper = true;
+			}
+		}
 
     Dialogs.showCSVSetupDialog(messages.csvExportDialogTitle(), helperExportTableData.getWidget(buildZipHelper),
       messages.basicActionCancel(), messages.basicActionConfirm(), new DefaultAsyncCallback<Boolean>() {
@@ -410,13 +408,12 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
       display.removeColumn(0);
     }
 
-    for (ViewerColumn viewerColumn : columns.keySet()) {
-      Column<ViewerRow, ?> displayColumn = columns.get(viewerColumn);
-
-      if (isColumnVisible(viewerColumn)) {
-        addColumn(viewerColumn, displayColumn);
-      }
-    }
+		configColumns.keySet().forEach(configColumn -> {
+			Column<ViewerRow, ?> displayColumn = configColumns.get(configColumn);
+			if (isColumnVisible(configColumn.getName())) {
+				addColumn(configColumn, displayColumn);
+			}
+		});
     handleScrollChanges();
   }
 
@@ -431,21 +428,6 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     } else {
       SafeHtmlBuilder spanTitle = CommonClientUtils.constructSpan(viewerColumn.getCustomName(),
         viewerColumn.getCustomDescription(), "column-description-block");
-      addColumn(displayColumn, spanTitle.toSafeHtml(), true, TextAlign.LEFT, 10);
-    }
-  }
-
-  private void addColumn(ViewerColumn viewerColumn, Column<ViewerRow, ?> displayColumn) {
-    if (ViewerStringUtils.isNotBlank(viewerColumn.getDescription())) {
-      SafeHtmlBuilder spanTitle = CommonClientUtils.constructSpan(viewerColumn.getDisplayName(),
-        viewerColumn.getDescription(), "column-description-block");
-      SafeHtmlBuilder spanDescription = CommonClientUtils.constructSpan(viewerColumn.getDescription(),
-        viewerColumn.getDescription(), "column-description-block column-description");
-      addColumn(displayColumn, CommonClientUtils.wrapOnDiv(Arrays.asList(spanTitle, spanDescription)), true,
-        TextAlign.LEFT, 10);
-    } else {
-      SafeHtmlBuilder spanTitle = CommonClientUtils.constructSpan(viewerColumn.getDisplayName(),
-        viewerColumn.getDescription(), "column-description-block");
       addColumn(displayColumn, spanTitle.toSafeHtml(), true, TextAlign.LEFT, 10);
     }
   }
