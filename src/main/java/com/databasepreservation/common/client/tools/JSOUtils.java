@@ -1,18 +1,23 @@
 package com.databasepreservation.common.client.tools;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.databasepreservation.common.client.models.JSO.ExtensionFilter;
 import com.databasepreservation.common.client.models.JSO.FilterJSO;
 import com.databasepreservation.common.client.models.JSO.OpenFileDialogOptions;
+import com.databasepreservation.common.client.models.status.collection.NestedColumnStatus;
+import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
+import org.roda.core.data.utils.JsonUtils;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>

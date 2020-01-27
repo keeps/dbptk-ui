@@ -9,6 +9,8 @@ import java.nio.file.Files;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.compress.archivers.zip.Zip64Mode;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
@@ -19,10 +21,10 @@ import org.roda.core.data.v2.index.sublist.Sublist;
 
 import com.databasepreservation.common.api.utils.ExtraMediaType;
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
+import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.structure.ViewerCell;
-import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
-import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.index.utils.IterableIndexResult;
 import com.databasepreservation.common.utils.LobPathManager;
@@ -32,7 +34,7 @@ import com.databasepreservation.common.utils.LobPathManager;
  */
 public class ZipOutputStream extends CSVOutputStream {
   private final String databaseUUID;
-  private final ViewerTable table;
+  private final TableStatus configTable;
   private final String zipFilename;
   private final String csvFilename;
   private final IterableIndexResult viewerRows;
@@ -41,16 +43,16 @@ public class ZipOutputStream extends CSVOutputStream {
   private Sublist sublist;
   private final boolean exportDescriptions;
 
-  public ZipOutputStream(final String databaseUUID, final ViewerTable table, final IterableIndexResult viewerRows,
+  public ZipOutputStream(final String databaseUUID, final TableStatus configTable, final IterableIndexResult viewerRows,
     final IterableIndexResult viewerRowsClone, final String zipFilename, final String csvFilename,
-    List<String> fieldsToReturn, Sublist sublist, boolean exportDescriptions) {
+    List<String> fieldsToReturn, Sublist sublist, boolean exportDescriptions, String fieldsToHeader) {
     super(zipFilename, ',');
     this.databaseUUID = databaseUUID;
-    this.table = table;
+    this.configTable = configTable;
     this.zipFilename = zipFilename;
     this.csvFilename = csvFilename;
     this.viewerRows = viewerRows;
-    this.fieldsToReturn = fieldsToReturn;
+    this.fieldsToReturn = Stream.of(fieldsToHeader.split(",")).collect(Collectors.toList());;
     this.viewerRowsClone = viewerRowsClone;
     this.sublist = sublist;
     this.exportDescriptions = exportDescriptions;
@@ -70,7 +72,7 @@ public class ZipOutputStream extends CSVOutputStream {
       zipArchiveOutputStream.setUseZip64(Zip64Mode.AsNeeded);
       zipArchiveOutputStream.setMethod(ZipArchiveOutputStream.DEFLATED);
 
-      final List<ViewerColumn> binaryColumns = table.getBinaryColumns();
+      final List<ColumnStatus> binaryColumns = configTable.getBinaryColumns();
       while (iterator.hasNext() && (nIndex <= sublist.getMaximumElementCount() || all)) {
         ViewerRow row = iterator.next();
         if (nIndex < (sublist.getFirstElementIndex())) {
@@ -104,26 +106,26 @@ public class ZipOutputStream extends CSVOutputStream {
     return ExtraMediaType.APPLICATION_ZIP;
   }
 
-  private ViewerColumn findBinaryColumn(final List<ViewerColumn> columns, final String cell) {
-    for (ViewerColumn column : columns) {
-      if (column.getSolrName().equals(cell)) {
+  private ColumnStatus findBinaryColumn(final List<ColumnStatus> columns, final String cell) {
+    for (ColumnStatus column : columns) {
+      if (column.getId().equals(cell)) {
         return column;
       }
     }
     return null;
   }
 
-  private void writeToZipFile(ZipArchiveOutputStream out, ViewerRow row, List<ViewerColumn> binaryColumns)
+  private void writeToZipFile(ZipArchiveOutputStream out, ViewerRow row, List<ColumnStatus> binaryColumns)
     throws IOException {
     for (Map.Entry<String, ViewerCell> cellEntry : row.getCells().entrySet()) {
-      final ViewerColumn binaryColumn = findBinaryColumn(binaryColumns, cellEntry.getKey());
+      final ColumnStatus binaryColumn = findBinaryColumn(binaryColumns, cellEntry.getKey());
 
       if (binaryColumn != null) {
         out.putArchiveEntry(
           new ZipArchiveEntry(ViewerConstants.INTERNAL_ZIP_LOB_FOLDER + cellEntry.getValue().getValue()));
         final InputStream inputStream = Files
-          .newInputStream(LobPathManager.getPath(ViewerFactory.getViewerConfiguration(), databaseUUID, table.getId(),
-            binaryColumn.getColumnIndexInEnclosingTable(), row.getUuid()));
+          .newInputStream(LobPathManager.getPath(ViewerFactory.getViewerConfiguration(), databaseUUID,
+            configTable.getId(), binaryColumn.getColumnIndex(), row.getUuid()));
         IOUtils.copy(inputStream, out);
         inputStream.close();
         out.closeArchiveEntry();
@@ -145,8 +147,8 @@ public class ZipOutputStream extends CSVOutputStream {
           continue;
         } else {
           if (isFirst) {
-            printer = new CSVPrinter(writer,
-              getFormat().withHeader(table.getCSVHeaders(fieldsToReturn, exportDescriptions).toArray(new String[0])));
+            printer = new CSVPrinter(writer, getFormat()
+              .withHeader(configTable.getCSVHeaders(fieldsToReturn, exportDescriptions).toArray(new String[0])));
             isFirst = false;
           }
 

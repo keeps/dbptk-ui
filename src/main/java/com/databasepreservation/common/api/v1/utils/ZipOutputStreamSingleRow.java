@@ -9,6 +9,8 @@ import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
+import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import org.apache.commons.compress.archivers.zip.Zip64Mode;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
@@ -29,18 +31,18 @@ import com.databasepreservation.common.utils.LobPathManager;
  */
 public class ZipOutputStreamSingleRow extends CSVOutputStream {
   private final String databaseUUID;
-  private final ViewerTable table;
+  private final TableStatus configTable;
   private final String zipFilename;
   private final String csvFilename;
   private final ViewerRow row;
   private final List<String> fieldsToReturn;
   private final boolean exportDescriptions;
 
-  public ZipOutputStreamSingleRow(String databaseUUID, ViewerTable table, ViewerRow row, String zipFilename,
-    String csvFilename, List<String> fieldsToReturn, boolean exportDescriptions) {
+  public ZipOutputStreamSingleRow(String databaseUUID, TableStatus configTable, ViewerRow row, String zipFilename,
+                                  String csvFilename, List<String> fieldsToReturn, boolean exportDescriptions) {
     super(zipFilename, ',');
     this.databaseUUID = databaseUUID;
-    this.table = table;
+    this.configTable = configTable;
     this.row = row;
     this.zipFilename = zipFilename;
     this.csvFilename = csvFilename;
@@ -54,7 +56,7 @@ public class ZipOutputStreamSingleRow extends CSVOutputStream {
       zipArchiveOutputStream.setUseZip64(Zip64Mode.AsNeeded);
       zipArchiveOutputStream.setMethod(ZipArchiveOutputStream.DEFLATED);
 
-      final List<ViewerColumn> binaryColumns = table.getBinaryColumns();
+      final List<ColumnStatus> binaryColumns = configTable.getBinaryColumns();
       writeToZipFile(zipArchiveOutputStream, row, binaryColumns);
 
       final ByteArrayOutputStream byteArrayOutputStream = writeCSVFile();
@@ -78,26 +80,26 @@ public class ZipOutputStreamSingleRow extends CSVOutputStream {
     return ExtraMediaType.APPLICATION_ZIP;
   }
 
-  private ViewerColumn findBinaryColumn(final List<ViewerColumn> columns, final String cell) {
-    for (ViewerColumn column : columns) {
-      if (column.getSolrName().equals(cell)) {
+  private ColumnStatus findBinaryColumn(final List<ColumnStatus> columns, final String cell) {
+    for (ColumnStatus column : columns) {
+      if (column.getId().equals(cell)) {
         return column;
       }
     }
     return null;
   }
 
-  private void writeToZipFile(ZipArchiveOutputStream out, ViewerRow row, List<ViewerColumn> binaryColumns)
+  private void writeToZipFile(ZipArchiveOutputStream out, ViewerRow row, List<ColumnStatus> binaryColumns)
     throws IOException {
     for (Map.Entry<String, ViewerCell> cellEntry : row.getCells().entrySet()) {
-      final ViewerColumn binaryColumn = findBinaryColumn(binaryColumns, cellEntry.getKey());
+      final ColumnStatus binaryColumn = findBinaryColumn(binaryColumns, cellEntry.getKey());
 
       if (binaryColumn != null) {
         out.putArchiveEntry(
           new ZipArchiveEntry(ViewerConstants.INTERNAL_ZIP_LOB_FOLDER + cellEntry.getValue().getValue()));
         final InputStream inputStream = Files
-          .newInputStream(LobPathManager.getPath(ViewerFactory.getViewerConfiguration(), databaseUUID, table.getId(),
-            binaryColumn.getColumnIndexInEnclosingTable(), row.getUuid()));
+          .newInputStream(LobPathManager.getPath(ViewerFactory.getViewerConfiguration(), databaseUUID, configTable.getId(),
+            binaryColumn.getColumnIndex(), row.getUuid()));
         IOUtils.copy(inputStream, out);
         inputStream.close();
         out.closeArchiveEntry();
@@ -109,7 +111,7 @@ public class ZipOutputStreamSingleRow extends CSVOutputStream {
     ByteArrayOutputStream listBytes = new ByteArrayOutputStream();
     try (final OutputStreamWriter writer = new OutputStreamWriter(listBytes)) {
       CSVPrinter printer = new CSVPrinter(writer,
-        getFormat().withHeader(table.getCSVHeaders(fieldsToReturn, exportDescriptions).toArray(new String[0])));
+        getFormat().withHeader(configTable.getCSVHeaders(fieldsToReturn, exportDescriptions).toArray(new String[0])));
       printer.printRecord(row.getCellValues(fieldsToReturn));
     }
     return listBytes;

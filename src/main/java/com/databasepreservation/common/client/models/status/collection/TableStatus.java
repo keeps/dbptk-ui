@@ -6,6 +6,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.databasepreservation.common.client.models.structure.ViewerColumn;
+import com.databasepreservation.common.client.models.structure.ViewerType;
+import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
@@ -126,4 +129,33 @@ public class TableStatus implements Serializable {
 		return columns.stream().filter(c -> c.getDetailsStatus().isShow()).sorted()
 				.collect(Collectors.toList());
 	}
+
+	@JsonIgnore
+  public List<ColumnStatus> getBinaryColumns() {
+    return getVisibleColumnsList().stream().filter(c -> c.getType().equals(ViewerType.dbTypes.BINARY)).collect(Collectors.toList());
+  }
+
+  @JsonIgnore
+  public ColumnStatus getColumnById(String id) {
+    return columns.stream().filter(c -> c.getId().equals(id)).findFirst().orElse(null);
+  }
+
+  @JsonIgnore
+  public List<String> getCSVHeaders(List<String> fieldsToReturn, boolean exportDescriptions) {
+    List<String> values = new ArrayList<>();
+    for (ColumnStatus column : columns) {
+      if (fieldsToReturn.contains(column.getId())) {
+        if (exportDescriptions) {
+          if (ViewerStringUtils.isBlank(column.getCustomDescription())) {
+            values.add(column.getCustomName());
+          } else {
+            values.add(column.getCustomName() + ": " + column.getCustomDescription());
+          }
+        } else {
+          values.add(column.getCustomName());
+        }
+      }
+    }
+    return values;
+  }
 }

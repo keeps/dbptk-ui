@@ -27,7 +27,6 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 
-import com.databasepreservation.common.client.index.filter.BlockJoinParentFilterParameter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -59,6 +58,7 @@ import com.databasepreservation.common.client.index.facets.RangeFacetParameter;
 import com.databasepreservation.common.client.index.facets.SimpleFacetParameter;
 import com.databasepreservation.common.client.index.filter.AndFiltersParameters;
 import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
+import com.databasepreservation.common.client.index.filter.BlockJoinParentFilterParameter;
 import com.databasepreservation.common.client.index.filter.DateIntervalFilterParameter;
 import com.databasepreservation.common.client.index.filter.DateRangeFilterParameter;
 import com.databasepreservation.common.client.index.filter.EmptyKeyFilterParameter;
@@ -194,6 +194,13 @@ public class SolrUtils {
   public static Pair<IndexResult<ViewerRow>, String> findRows(SolrClient index, String databaseUUID, Filter filter,
     Sorter sorter, int pageSize, String cursorMark, List<String> fieldsToReturn)
     throws GenericException, RequestNotValidException {
+    return SolrUtils.findRows(index, databaseUUID, filter, sorter, pageSize, cursorMark, fieldsToReturn,
+      new HashMap<>());
+  }
+
+  public static Pair<IndexResult<ViewerRow>, String> findRows(SolrClient index, String databaseUUID, Filter filter,
+    Sorter sorter, int pageSize, String cursorMark, List<String> fieldsToReturn, Map<String, String> extraParameters)
+    throws GenericException, RequestNotValidException {
 
     Pair<IndexResult<ViewerRow>, String> ret;
     SolrQuery query = new SolrQuery();
@@ -205,6 +212,14 @@ public class SolrUtils {
     final List<SolrQuery.SortClause> sortClauses = parseSorter(sorter);
     sortClauses.add(SolrQuery.SortClause.asc(RodaConstants.INDEX_UUID));
     query.setSorts(sortClauses);
+
+    if (!extraParameters.isEmpty()) {
+      List<String> extraFields = new ArrayList<>();
+      for (Map.Entry<String, String> entry : extraParameters.entrySet()) {
+        query.setParam(entry.getKey(), entry.getValue());
+        extraFields.add(entry.getKey());
+      }
+    }
 
     if (!fieldsToReturn.isEmpty()) {
       query.setFields(fieldsToReturn.toArray(new String[0]));
@@ -541,11 +556,12 @@ public class SolrUtils {
       ret.append("({!terms f=" + param.getField() + " v=" + param.getParameterValue() + "})");
     } else if (parameter instanceof InnerJoinFilterParameter) {
       InnerJoinFilterParameter param = (InnerJoinFilterParameter) parameter;
-      ret.append("{!join from=nestedOriginalUUID to=uuid }_root_:"
-        + param.getRowUUID() + " AND nestedUUID:" + param.getNestedOriginalUUID());
+      ret.append("{!join from=nestedOriginalUUID to=uuid }_root_:" + param.getRowUUID() + " AND nestedUUID:"
+        + param.getNestedOriginalUUID());
     } else if (parameter instanceof BlockJoinParentFilterParameter) {
       BlockJoinParentFilterParameter param = (BlockJoinParentFilterParameter) parameter;
-      ret.append("+{!parent which='tableId:" + param.getParentTableId() +"' filters='nestedTableId:"+ param.getNestedTableId() +"' }" + param.getSolrName() + ":" + param.getValue());
+      ret.append("+{!parent which='tableId:" + param.getParentTableId() + "' filters='nestedTableId:"
+        + param.getNestedTableId() + "' }" + param.getSolrName() + ":" + param.getValue());
     } else {
       LOGGER.error("Unsupported filter parameter class: {}", parameter.getClass().getName());
       throw new RequestNotValidException("Unsupported filter parameter class: " + parameter.getClass().getName());
@@ -819,28 +835,32 @@ public class SolrUtils {
    * Roda user > Apache Solr filter query
    * ____________________________________________________________________________________________________________________
    */
-//  private static String getFilterQueries(User user, boolean justActive) {
-//
-//    StringBuilder fq = new StringBuilder();
-//
-//    // TODO find a better way to define admin super powers
-//    if (user != null && !user.getName().equals("admin")) {
-//      fq.append("(");
-//      String usersKey = RodaConstants.INDEX_PERMISSION_USERS_PREFIX + Permissions.PermissionType.READ;
-//      appendExactMatch(fq, usersKey, user.getId(), true, false);
-//
-//      String groupsKey = RodaConstants.INDEX_PERMISSION_GROUPS_PREFIX + Permissions.PermissionType.READ;
-//      appendValuesUsingOROperatorForQuery(fq, groupsKey, new ArrayList<>(user.getGroups()), true);
-//
-//      fq.append(")");
-//    }
-//
-//    if (justActive) {
-//      appendExactMatch(fq, RodaConstants.INDEX_STATE, AIPState.ACTIVE.toString(), true, true);
-//    }
-//
-//    return fq.toString();
-//  }
+  // private static String getFilterQueries(User user, boolean justActive) {
+  //
+  // StringBuilder fq = new StringBuilder();
+  //
+  // // TODO find a better way to define admin super powers
+  // if (user != null && !user.getName().equals("admin")) {
+  // fq.append("(");
+  // String usersKey = RodaConstants.INDEX_PERMISSION_USERS_PREFIX +
+  // Permissions.PermissionType.READ;
+  // appendExactMatch(fq, usersKey, user.getId(), true, false);
+  //
+  // String groupsKey = RodaConstants.INDEX_PERMISSION_GROUPS_PREFIX +
+  // Permissions.PermissionType.READ;
+  // appendValuesUsingOROperatorForQuery(fq, groupsKey, new
+  // ArrayList<>(user.getGroups()), true);
+  //
+  // fq.append(")");
+  // }
+  //
+  // if (justActive) {
+  // appendExactMatch(fq, RodaConstants.INDEX_STATE, AIPState.ACTIVE.toString(),
+  // true, true);
+  // }
+  //
+  // return fq.toString();
+  // }
 
   private static void appendValuesUsingOROperatorForQuery(StringBuilder ret, String key, List<String> values,
     boolean prependWithOrIfNeeded) {

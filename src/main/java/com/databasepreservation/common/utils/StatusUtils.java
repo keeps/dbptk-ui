@@ -77,6 +77,7 @@ public class StatusUtils {
       status.setNullable(column.getNillable().toString());
       status.setType(column.getType().getDbType());
     }
+    status.setColumnIndex(column.getColumnIndexInEnclosingTable());
     status.setCustomName(column.getDisplayName());
     status.setDescription(column.getDescription());
     status.setCustomDescription(column.getDescription());

@@ -3,6 +3,7 @@ package com.databasepreservation.common.server.index.utils;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import com.databasepreservation.common.client.index.sort.Sorter;
 import org.apache.solr.client.solrj.SolrClient;
@@ -22,8 +23,8 @@ public class IterableIndexResult implements CloseableIterable<ViewerRow> {
   private final IndexResultIterator iterator;
 
   public IterableIndexResult(final SolrClient solrClient, String databaseUUID, final Filter filter, final Sorter sorter,
-    final List<String> fieldsToReturn) {
-    iterator = new IndexResultIterator(solrClient, databaseUUID, filter, sorter, fieldsToReturn);
+    final List<String> fieldsToReturn, final Map<String, String> extraParameters) {
+    iterator = new IndexResultIterator(solrClient, databaseUUID, filter, sorter, fieldsToReturn, extraParameters);
 
     if (PAGE_SIZE > 0) {
       iterator.setPageSize(PAGE_SIZE);

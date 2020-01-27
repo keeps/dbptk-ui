@@ -2,6 +2,7 @@ package com.databasepreservation.common.server.index.utils;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 import com.databasepreservation.common.client.index.IndexResult;
@@ -41,15 +42,17 @@ public class IndexResultIterator implements Iterator<ViewerRow> {
   private final Sorter sorter;
   private final String databaseUUID;
   private final List<String> fieldsToReturn;
+  private final Map<String, String> extraParameters;
 
   private ViewerRow next = null;
 
-  public IndexResultIterator(SolrClient index, String databaseUUID, Filter filter, Sorter sorter, List<String> fieldsToReturn) {
+  public IndexResultIterator(SolrClient index, String databaseUUID, Filter filter, Sorter sorter, List<String> fieldsToReturn, Map<String, String> extraParameters) {
     this.index = index;
     this.filter = filter;
     this.sorter = sorter;
     this.databaseUUID = databaseUUID;
     this.fieldsToReturn = fieldsToReturn;
+    this.extraParameters = extraParameters;
 
     getCurrentAndPrepareNext();
   }

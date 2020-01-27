@@ -4,12 +4,14 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.csv.CSVPrinter;
 
-import com.databasepreservation.common.server.index.utils.IterableIndexResult;
+import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
-import com.databasepreservation.common.client.models.structure.ViewerTable;
+import com.databasepreservation.common.server.index.utils.IterableIndexResult;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -17,9 +19,10 @@ import com.databasepreservation.common.client.models.structure.ViewerTable;
 public class IterableIndexResultsCSVOutputStream extends CSVOutputStream {
   /** The results to write to output stream. */
   private final IterableIndexResult results;
-  private final ViewerTable table;
+  private final TableStatus configTable;
   private final List<String> fieldsToReturn;
   private final boolean exportDescription;
+
   /**
    * Constructor.
    *
@@ -30,12 +33,12 @@ public class IterableIndexResultsCSVOutputStream extends CSVOutputStream {
    * @param delimiter
    *          the CSV field delimiter.
    */
-  public IterableIndexResultsCSVOutputStream(final IterableIndexResult results, final ViewerTable table, final List<String> fieldsToReturn, final String filename,
-                                             final boolean exportDescription, final char delimiter) {
+  public IterableIndexResultsCSVOutputStream(final IterableIndexResult results, final TableStatus configTable,
+    final String filename, final boolean exportDescription, final char delimiter, String fieldsToHeader) {
     super(filename, delimiter);
     this.results = results;
-    this.table = table;
-    this.fieldsToReturn = fieldsToReturn;
+    this.configTable = configTable;
+    this.fieldsToReturn = Stream.of(fieldsToHeader.split(",")).collect(Collectors.toList());
     this.exportDescription = exportDescription;
   }
 
@@ -47,7 +50,9 @@ public class IterableIndexResultsCSVOutputStream extends CSVOutputStream {
 
     for (ViewerRow row : results) {
       if (isFirst) {
-        printer = getFormat().withHeader(table.getCSVHeaders(fieldsToReturn, exportDescription).toArray(new String[0])).print(writer);
+        printer = getFormat()
+          .withHeader(configTable.getCSVHeaders(fieldsToReturn, exportDescription).toArray(new String[0]))
+          .print(writer);
         isFirst = false;
       }
 

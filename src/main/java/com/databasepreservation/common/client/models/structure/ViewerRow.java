@@ -1,12 +1,17 @@
 package com.databasepreservation.common.client.models.structure;
 
-import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.index.IsIndexed;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.common.utils.JavascriptUtils;
+import com.databasepreservation.common.client.index.IsIndexed;
+import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
+import com.databasepreservation.common.client.models.status.collection.TableStatus;
+import com.databasepreservation.common.client.tools.JSOUtils;
+import com.google.gwt.core.client.GWT;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -70,12 +75,28 @@ public class ViewerRow extends IsIndexed {
     fieldsToReturn.remove(ViewerConstants.SOLR_ROWS_TABLE_ID);
     fieldsToReturn.remove(ViewerConstants.SOLR_ROWS_TABLE_UUID);
     for (String solrColumnName : fieldsToReturn) {
+      // treat nested
+      // if (!nestedRowList.isEmpty()) {
+      // String template =
+      // status.getSearchStatus().getList().getTemplate().getTemplate();
+      // nestedRowList.forEach(row -> {
+      // if (row.nestedUUID.equals(solrColumnName)) {
+      // if (template != null && !template.isEmpty()) {
+      // String json = JSOUtils.cellsToJson(row.cells, status.getNestedColumns());
+      // String s = JavascriptUtils.compileTemplate(template, json);
+      // values.add(s);
+      // }
+      // }
+      // });
+      // } else {
+      // treat non-nested
       if (cells.get(solrColumnName) == null) {
         values.add("");
       } else {
         values.add(cells.get(solrColumnName).getValue());
       }
     }
+    // }
 
     return values;
   }
@@ -89,7 +110,7 @@ public class ViewerRow extends IsIndexed {
   }
 
   public void addNestedRow(ViewerRow nestedRowList) {
-    if(this.nestedRowList == null) {
+    if (this.nestedRowList == null) {
       this.nestedRowList = new ArrayList<>();
     }
     this.nestedRowList.add(nestedRowList);

@@ -11,6 +11,9 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class RestUtils {
 
   private RestUtils() {
@@ -59,9 +62,9 @@ public class RestUtils {
   }
 
   public static String createExportTableUri(String databaseUUID, String schemaName, String tableName,
-                                            FindRequest findRequest, String zipFilename, String filename, boolean descriptions, boolean lobs) {
+                                            FindRequest findRequest, String zipFilename, String filename, boolean descriptions, boolean lobs, List<String> fieldsToHeader) {
     // api/v1/database/{databaseUUID}/collection/{collectionUUID}/data/{schema}/{table}/find/export
-    return exportMultiRowCSV(databaseUUID, schemaName, tableName, findRequest, zipFilename, filename, descriptions, lobs);
+    return exportMultiRowCSV(databaseUUID, schemaName, tableName, findRequest, zipFilename, filename, descriptions, lobs, fieldsToHeader);
   }
 
   public static String createExportRowUri(String databaseUUID, String schemaName, String tableName, String rowIndex, String zipFilename, String filename, boolean descriptions, boolean lobs) {
@@ -78,22 +81,22 @@ public class RestUtils {
       .append(databaseUUID).append("/data/").append(schemaName).append("/").append(tableName).append("/")
       .append(rowIndex).append("/export");
 
-    return getCollectionResourceExportCSVUri(urlBuilder, null, zipFilename, filename, descriptions, lobs);
+    return getCollectionResourceExportCSVUri(urlBuilder, null, zipFilename, filename, descriptions, lobs, new ArrayList<>());
   }
 
   private static String exportMultiRowCSV(String databaseUUID, String schemaName, String tableName,
-    FindRequest findRequest, String zipFilename, String filename, boolean descriptions, boolean lobs) {
+    FindRequest findRequest, String zipFilename, String filename, boolean descriptions, boolean lobs, List<String> fieldsToHeader) {
     StringBuilder urlBuilder = new StringBuilder();
 
     urlBuilder.append(GWT.getHostPageBaseURL()).append(ViewerConstants.API_SERVLET)
       .append(ViewerConstants.API_V1_DATABASE_RESOURCE).append("/").append(databaseUUID).append("/collection/")
       .append(databaseUUID).append("/data/").append(schemaName).append("/").append(tableName).append("/find/export");
 
-    return getCollectionResourceExportCSVUri(urlBuilder, findRequest, zipFilename, filename, descriptions, lobs);
+    return getCollectionResourceExportCSVUri(urlBuilder, findRequest, zipFilename, filename, descriptions, lobs, fieldsToHeader);
   }
 
   private static String getCollectionResourceExportCSVUri(StringBuilder header, FindRequest findRequest,
-    String zipFilename, String filename, boolean descriptions, boolean lobs) {
+    String zipFilename, String filename, boolean descriptions, boolean lobs, List<String> fieldsToHeader) {
     String paramFindRequest = null;
     if (findRequest != null) {
       paramFindRequest = ViewerJsonUtils.getFindRequestMapper().write(findRequest);
@@ -110,7 +113,11 @@ public class RestUtils {
       header.append("zipFilename").append("=").append(UriQueryUtils.encodeQuery(zipFilename)).append("&");
     }
     header.append("descriptions").append("=").append(descriptions).append("&");
-    header.append("lobs").append("=").append(lobs);
+    header.append("lobs").append("=").append(lobs).append("&");
+
+    if (!fieldsToHeader.isEmpty()) {
+      header.append("fl").append("=").append(UriQueryUtils.encodeQuery(String.join(",", fieldsToHeader)));
+    }
 
     return header.toString();
   }

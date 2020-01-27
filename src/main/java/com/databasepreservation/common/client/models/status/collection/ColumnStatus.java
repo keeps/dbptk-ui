@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 @JsonPropertyOrder({"id", "name", "customName", "description", "customDescription", "originalType", "typeName",
-  "nullable", "type", "nestedColumn", "order", "search", "details"})
+  "nullable", "type", "columnIndex", "nestedColumn", "order", "search", "details"})
 public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
   private String id;
   private String name;
@@ -23,6 +23,7 @@ public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
   private String typeName;
   private String nullable;
   private ViewerType.dbTypes type;
+  private int columnIndex;
   private NestedColumnStatus nestedColumns;
   private int order;
   private SearchStatus searchStatus;
@@ -88,7 +89,15 @@ public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
 		this.type = type;
 	}
 
-	public NestedColumnStatus getNestedColumns() {
+  public int getColumnIndex() {
+    return columnIndex;
+  }
+
+  public void setColumnIndex(int columnIndex) {
+    this.columnIndex = columnIndex;
+  }
+
+  public NestedColumnStatus getNestedColumns() {
     return nestedColumns;
   }
 
