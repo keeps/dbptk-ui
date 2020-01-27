@@ -14,6 +14,7 @@ import com.databasepreservation.common.client.common.NoAsyncCallback;
 import com.databasepreservation.common.client.common.fields.GenericField;
 import com.databasepreservation.common.client.common.helpers.HelperValidator;
 import com.databasepreservation.common.client.common.lists.columns.IndexedColumn;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.ColumnsOptionsPanel;
 import com.databasepreservation.common.client.models.wizard.table.ExternalLobsDialogBoxResult;
 import com.databasepreservation.common.client.widgets.MyCellTableResources;
 import com.google.gwt.core.client.GWT;
@@ -537,26 +538,22 @@ public class Dialogs {
     dialogBox.show();
   }
 
-  public static void showDialogColumnConfiguration(String title, String message, List<FlowPanel> configurations,
-    String continueButtonText) {
-    showDialogColumnConfiguration(title, message, configurations, continueButtonText, BTN_PLAY_STYLE);
+  public static void showDialogColumnConfiguration(String title, ColumnsOptionsPanel optionsPanel,
+    String continueButtonText, final AsyncCallback<Void> callback) {
+    showDialogColumnConfiguration(title, optionsPanel, continueButtonText, BTN_PLAY_STYLE, callback);
   }
 
-  public static void showDialogColumnConfiguration(String title, String message, List<FlowPanel> configurations,
-    String continueButtonText, String continueButtonStyle) {
+  public static void showDialogColumnConfiguration(String title, ColumnsOptionsPanel optionsPanel,
+    String continueButtonText, String continueButtonStyle, final AsyncCallback<Void> callback) {
     final DialogBox dialogBox = new DialogBox(false, true);
     dialogBox.setText(title);
 
     FlowPanel layout = new FlowPanel();
     FlowPanel form = new FlowPanel();
-    Label messageLabel = new Label(message);
     Button continueButton = new Button(continueButtonText);
 
-    for (FlowPanel configuration : configurations) {
-      form.add(configuration);
-    }
+    form.add(optionsPanel);
 
-    layout.add(messageLabel);
     layout.add(form);
     layout.add(continueButton);
 
@@ -566,12 +563,14 @@ public class Dialogs {
     dialogBox.setGlassEnabled(true);
     dialogBox.setAnimationEnabled(false);
 
-    continueButton.addClickHandler(event -> dialogBox.hide());
-    continueButton.addStyleName(continueButtonStyle);
+    continueButton.addClickHandler(event -> {
+      dialogBox.hide();
+      callback.onSuccess(null);
+    });
 
-    dialogBox.addStyleName(WUI_DIALOG_INFORMATION);
-    layout.addStyleName(WUI_DIALOG_LAYOUT);
-    messageLabel.addStyleName(WUI_DIALOG_MESSAGE);
+    dialogBox.addStyleName("wui-dialog-information");
+    layout.addStyleName("wui-dialog-layout");
+    continueButton.addStyleName(continueButtonStyle);
 
     dialogBox.center();
     dialogBox.show();

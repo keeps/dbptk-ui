@@ -29,6 +29,7 @@ import com.databasepreservation.common.client.models.status.collection.ColumnSta
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.status.helpers.StatusHelper;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.structure.ViewerType;
 import com.databasepreservation.common.client.services.CollectionService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
@@ -40,12 +41,14 @@ import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.CompositeCell;
 import com.google.gwt.cell.client.HasCell;
+import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -54,9 +57,7 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
@@ -73,6 +74,9 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
 
   @UiField
   FlowPanel content;
+
+  @UiField
+  Button btnGotoTable;
 
   interface TableManagementPanelUiBinder extends UiBinder<Widget, ColumnsManagementPanel> {
   }
@@ -141,7 +145,6 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
     btnCancel.addClickHandler(e -> handleCancelEvent(changes));
 
     btnSave.addClickHandler(e -> handleSaveEvent(changes));
-
     content.add(CommonClientUtils.wrapOnDiv("navigation-panel-buttons",
       CommonClientUtils.wrapOnDiv("btn-item", btnSave), CommonClientUtils.wrapOnDiv("btn-item", btnCancel)));
   }
@@ -149,6 +152,11 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
   private void configureHeader() {
     mainHeader.setWidget(CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE),
       collectionStatus.getTableStatusByTableId(tableId).getCustomName(), "h1"));
+
+    btnGotoTable.setText(collectionStatus.getTableStatusByTableId(tableId).getCustomName());
+    btnGotoTable.addClickHandler(event -> {
+      HistoryManager.gotoTable(database.getUuid(), tableId);
+    });
 
     MetadataField instance = MetadataField
       .createInstance(collectionStatus.getTableStatusByTableId(tableId).getCustomDescription());
@@ -229,11 +237,14 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
       SafeHtmlUtils.EMPTY_SAFE_HTML, GWT.create(ConfigurationCellTableResources.class),
       tableStatus.getColumns().iterator(),
       new BasicTablePanel.ColumnInfo<>(messages.basicTableHeaderOrder(), 6, getOrderColumn()),
-      new BasicTablePanel.ColumnInfo<>(messages.basicTableHeaderTableOrColumn("name"), 10,
-        new TextColumn<ColumnStatus>() {
+      new BasicTablePanel.ColumnInfo<>(messages.basicTableHeaderTableOrColumn("name"), 0,
+        new Column<ColumnStatus, SafeHtml >(new SafeHtmlCell()){
           @Override
-          public String getValue(ColumnStatus column) {
-            return column.getName();
+          public SafeHtml getValue(ColumnStatus column) {
+            if(column.getType().equals(ViewerType.dbTypes.NESTED)){
+              return SafeHtmlUtils.fromSafeConstant(column.getNestedColumns().getPath());
+            }
+            return SafeHtmlUtils.fromString(column.getName());
           }
         }),
       new BasicTablePanel.ColumnInfo<>(messages.basicTableHeaderLabel(), 15, getLabelColumn()),
@@ -504,49 +515,14 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
     };
 
     options.setFieldUpdater((index, columnStatus, value) -> {
-      List<FlowPanel> configurations = new ArrayList<>();
-      if (columnStatus.getNestedColumns() != null) {
-        List<String> nestedFields = columnStatus.getNestedColumns().getNestedFields();
-
-        // hint for allowed fields
-        FlowPanel allowedFieldsPanel = new FlowPanel();
-        Label allowedFields = new Label(nestedFields.toString());
-        allowedFieldsPanel.add(allowedFields);
-        configurations.add(allowedFieldsPanel);
-      }
-
-      Label templateListLabel = new Label("Template list");
-      templateListLabel.setStyleName("form-label");
-      TextBox templateList = new TextBox();
-      templateList.setStyleName("form-textbox");
-      templateList.setText(columnStatus.getSearchStatus().getList().getTemplate().getTemplate());
-      templateList.addChangeHandler(event -> {
-        columnStatus.getSearchStatus().getList().getTemplate().setTemplate(templateList.getText());
-      });
-
-      FlowPanel templateListPanel = new FlowPanel();
-      templateListPanel.add(templateListLabel);
-      templateListPanel.add(templateList);
-      configurations.add(templateListPanel);
-
-      Label templateDetailLabel = new Label("Template Detail");
-      templateDetailLabel.setStyleName("form-label");
-      TextBox templateDetail = new TextBox();
-      templateDetail.setStyleName("form-textbox");
-      templateDetail.setText(columnStatus.getDetailsStatus().getTemplateStatus().getTemplate());
-      templateDetail.addChangeHandler(event -> {
-        columnStatus.getDetailsStatus().getTemplateStatus().setTemplate(templateDetail.getText());
-      });
-
-      FlowPanel templateDetailPanel = new FlowPanel();
-      templateDetailPanel.add(templateDetailLabel);
-      templateDetailPanel.add(templateDetail);
-      configurations.add(templateDetailPanel);
-
-      changes = true;
-
-      Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), messages.basicTableHeaderOptions(),
-        configurations, messages.basicActionClose(), "btn btn-close");
+      Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), ColumnsOptionsPanel.getInstance(database.getUuid(), columnStatus),
+        messages.basicActionClose(), "btn btn-close", new DefaultAsyncCallback<Void>() {
+          @Override
+          public void onSuccess(Void aVoid) {
+            // todo save just options
+            changes = true;
+          }
+        });
     });
     return options;
   }

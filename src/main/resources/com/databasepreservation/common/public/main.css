@@ -2948,6 +2948,11 @@ rgba(0, 0, 0, .125);
     height: 52px;
 }
 
+.table-ref-link {
+    display: flex;
+    flex-wrap: wrap;
+}
+
 .table-ref-link:hover{
     text-decoration: underline;
 }
@@ -3008,8 +3013,8 @@ rgba(0, 0, 0, .125);
 .card .searchPanelContainer {
     margin-bottom:15px;
     margin-top:-15px;
-    margin-left:-15px;
-    margin-right:-15px
+    margin-left:-16px;
+    margin-right:-16px
 }
 
 .search-context{

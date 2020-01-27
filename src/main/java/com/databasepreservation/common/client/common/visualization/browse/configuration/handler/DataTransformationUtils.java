@@ -1,5 +1,6 @@
 package com.databasepreservation.common.client.common.visualization.browse.configuration.handler;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -22,6 +23,8 @@ import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.services.CollectionService;
 import com.databasepreservation.common.client.services.JobService;
 import com.databasepreservation.common.client.widgets.Toast;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -54,6 +57,8 @@ public class DataTransformationUtils {
       relatedTable.getReferences().add(createReference(sourceColumn, referencedColumn));
     }
 
+
+
     RelatedTablesConfiguration returnedRelatedTable = denormalizeConfiguration
       .getRelatedTable(childNode.getParentNode().getUuid());
     if (returnedRelatedTable == null) {
@@ -61,7 +66,6 @@ public class DataTransformationUtils {
     } else {
       returnedRelatedTable.addRelatedTable(relatedTable);
     }
-
   }
 
   private static ReferencesConfiguration createReference(ViewerColumn sourceColumn, ViewerColumn referencedColumn) {
@@ -157,7 +161,12 @@ public class DataTransformationUtils {
         separator = ",";
         fieldsToReturn.add(key + ":[subquery]");
         extraParameters.put(key + ".q", "+nestedUUID:" + nestedTableId + " AND {!terms f=_root_ v=$row.uuid}");
-        extraParameters.put(key + ".rows", "10");
+        Integer quantity = column.getNestedColumns().getQuantityInList();
+        if(quantity <= column.getNestedColumns().getMaxQuantityInList()){
+          extraParameters.put(key + ".rows", quantity.toString());
+        } else {
+          extraParameters.put(key + ".rows", column.getNestedColumns().getMaxQuantityInList().toString());
+        }
         nestedCount++;
       }
     }

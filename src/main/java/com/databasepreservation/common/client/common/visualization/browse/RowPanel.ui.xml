@@ -3,7 +3,12 @@
 >
 
     <g:FlowPanel>
-        <g:SimplePanel ui:field="recordHeader" addStyleNames="structure-header" />
+        <g:FlowPanel addStyleNames="structure-header">
+            <g:SimplePanel ui:field="recordHeader" addStyleNames="h1" />
+            <g:FlowPanel addStyleNames="data-transformation-toolbar-actions">
+                <g:Button ui:field="btnExport" addStyleNames="btn btn-primary btn-download" />
+            </g:FlowPanel>
+        </g:FlowPanel>
         <g:FlowPanel ui:field="description" />
         <g:FlowPanel addStyleNames="rowData" ui:field="content" />
     </g:FlowPanel>

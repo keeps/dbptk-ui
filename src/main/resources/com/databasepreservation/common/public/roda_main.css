@@ -19,6 +19,7 @@ body {
 
 .roda {
     background-color: #414042;
+    min-width: 1280px;
 }
 
 a {

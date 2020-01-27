@@ -1,5 +1,7 @@
 package com.databasepreservation.common.client.models.status.collection;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,28 +10,15 @@ import java.util.List;
  * @author Gabriel Barros <gbarros@keep.pt>
  */
 public class NestedColumnStatus implements Serializable {
-  private String id;
-  private String name;
   private String originalTable;
+  private String path;
   private Boolean multiValue = false;
   private List<String> nestedFields = new ArrayList<>();
   private List<String> nestedSolrNames = new ArrayList<>();
+  private Integer quantityInList = 10;
 
-  public String getId() {
-    return id;
-  }
-
-  public void setId(String id) {
-    this.id = id;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
-  }
+  @JsonIgnore
+  private final Integer MAX_QUANTITY_IN_LIST = 20;
 
   public String getOriginalTable() {
     return originalTable;
@@ -47,8 +36,29 @@ public class NestedColumnStatus implements Serializable {
     this.nestedFields = nestedFields;
   }
 
+  public String getPath() {
+    return path;
+  }
+
+  public void setPath(String path) {
+    this.path = path;
+  }
+
   public Boolean getMultiValue() {
     return multiValue;
+  }
+
+  public Integer getQuantityInList() {
+    return quantityInList;
+  }
+
+  public void setQuantityInList(Integer quantityInList) {
+    this.quantityInList = quantityInList;
+  }
+
+  @JsonIgnore
+  public Integer getMaxQuantityInList() {
+    return MAX_QUANTITY_IN_LIST;
   }
 
   public void setMultiValue(Boolean multiValue) {

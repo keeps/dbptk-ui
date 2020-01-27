@@ -138,10 +138,11 @@ public class DenormalizeTransformer {
       String separator = "";
       for (String tableName : path) {
         columnStatusName = columnStatusName + separator + tableName;
-        separator = " > ";
+        separator = ">";
       }
 
       viewerColumn.setDisplayName(columnStatusName + separator + columnName.toString());
+      nestedColumn.setPath(relatedTable.getPath());
       ViewerFactory.getConfigurationManager().addDenormalizationColumns(databaseUUID,
         denormalizeConfiguration.getTableUUID(), viewerColumn, nestedColumn, template, removeBrackets(originalType),
         removeBrackets(typeName), removeBrackets(nullable));
@@ -195,6 +196,7 @@ public class DenormalizeTransformer {
     List<String> fieldsToReturn = new ArrayList<>();
 
     fieldsToReturn.add(ViewerConstants.INDEX_ID);
+    fieldsToReturn.add(ViewerConstants.SOLR_ROWS_TABLE_ID);
     fieldsToReturn.add(String.format("%s:\"%s\"", ViewerConstants.SOLR_ROWS_NESTED_UUID, relatedTable.getUuid()));
     fieldsToReturn
       .add(String.format("%s:%s", ViewerConstants.SOLR_ROWS_NESTED_ORIGINAL_UUID, ViewerConstants.INDEX_ID));

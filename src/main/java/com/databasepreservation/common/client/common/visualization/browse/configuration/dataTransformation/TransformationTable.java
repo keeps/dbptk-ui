@@ -144,7 +144,8 @@ public class TransformationTable extends Composite {
             if (object.getReferencedTableName().equals(table.getName())) {
               super.render(context, object, sb);
             } else {
-              sb.append(object.createPath());
+              SafeHtml path = object.createPath();
+              sb.append(path);
             }
           }
 

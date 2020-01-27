@@ -1404,6 +1404,18 @@ public interface ClientMessages extends Messages {
 
   String columnManagementPageTooltipForAdvancedSearch();
 
+  String columnManagementLabelForTemplateOptions();
+
+  String columnManagementTextForTemplateHint();
+
+  String columnManagementTextForPossibleFields(List<String> fields);
+
+  String columnManagementTextForMultiValueFields();
+
+  String columnManagementLabelForTemplateList();
+
+  String columnManagementLabelForTemplateDetail();
+
   /********************************************
    * Sidebar
    *******************************************/

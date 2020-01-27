@@ -96,6 +96,9 @@ public class RowPanel extends RightPanel {
   SimplePanel recordHeader;
 
   @UiField
+  Button btnExport;
+
+  @UiField
   FlowPanel content;
 
   @UiField
@@ -215,10 +218,8 @@ public class RowPanel extends RightPanel {
       }
     }
 
-    Button btn = new Button();
-    btn.addStyleName("btn btn-primary btn-download");
-    btn.setText(messages.rowPanelTextForButtonExportSingleRow());
-    btn.addClickHandler(event -> {
+    btnExport.setText(messages.rowPanelTextForButtonExportSingleRow());
+    btnExport.addClickHandler(event -> {
       HelperExportTableData helperExportTableData = new HelperExportTableData(table, true);
       Dialogs.showCSVSetupDialog(messages.csvExportDialogTitle(),
         helperExportTableData.getWidget(table.containsBinaryColumns()), messages.basicActionCancel(),
@@ -241,8 +242,6 @@ public class RowPanel extends RightPanel {
           }
         });
     });
-
-    content.add(btn);
   }
 
   private SafeHtml getForeignKeyHTML(String prefix, Set<Ref> refs, ViewerRow row) {
@@ -338,10 +337,6 @@ public class RowPanel extends RightPanel {
         FlowPanel card = new FlowPanel();
         card.setStyleName("card");
 
-//        RowField rowField = RowField.createInstance(nestedTable.getName(), null);
-//        rowField.addStyleName("card-header");
-//        card.add(rowField);
-
         final TableSearchPanel tablePanel = new TableSearchPanel(status);
         tablePanel.provideSource(database, nestedTable, filter, true);
         card.add(tablePanel);
@@ -363,7 +358,7 @@ public class RowPanel extends RightPanel {
 
               panel.add(rowField);
             }
-          }).findRows(database.getUuid(), database.getUuid(), nestedTable.getSchemaName(), nestedColumns.getName(),
+          }).findRows(database.getUuid(), database.getUuid(), nestedTable.getSchemaName(), nestedTable.getName(),
             findRequest, LocaleInfo.getCurrentLocale().getLocaleName());
         }
       }

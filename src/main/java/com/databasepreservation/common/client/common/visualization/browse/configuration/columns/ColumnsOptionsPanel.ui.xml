@@ -1,0 +1,36 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <ui:with field='messages' type='config.i18n.client.ClientMessages'/>
+    <g:FlowPanel>
+        <g:Label addStyleNames="form-label">
+            <ui:text from='{messages.columnManagementLabelForTemplateOptions}'/>
+        </g:Label>
+        <g:Label addStyleNames="column-description">
+            <ui:text from='{messages.columnManagementTextForTemplateHint}'/>
+        </g:Label>
+
+        <g:FlowPanel>
+            <g:Label addStyleNames="form-label">
+                <ui:text from='{messages.columnManagementLabelForTemplateList}'/>
+            </g:Label>
+            <g:TextBox addStyleNames="form-textbox" ui:field="templateList"/>
+            <g:Label addStyleNames="column-description" ui:field="templateListHint"/>
+        </g:FlowPanel>
+
+        <g:FlowPanel ui:field="templateDetailPanel">
+            <g:Label addStyleNames="form-label">
+                <ui:text from='{messages.columnManagementLabelForTemplateDetail}'/>
+            </g:Label>
+            <g:TextBox addStyleNames="form-textbox" ui:field="templateDetail"/>
+            <g:Label addStyleNames="column-description" ui:field="templateDetailHint"/>
+        </g:FlowPanel>
+
+        <g:FlowPanel>
+            <g:Label addStyleNames="form-label">
+                <ui:text from='{messages.columnManagementLabelForTemplateList}'/>
+            </g:Label>
+            <g:IntegerBox addStyleNames="form-textbox" ui:field="quantityList"/>
+            <g:Label addStyleNames="column-description" ui:field="quantityListHint"/>
+        </g:FlowPanel>
+    </g:FlowPanel>
+</ui:UiBinder>

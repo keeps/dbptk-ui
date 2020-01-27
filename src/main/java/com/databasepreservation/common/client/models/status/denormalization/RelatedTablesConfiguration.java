@@ -1,11 +1,10 @@
 package com.databasepreservation.common.client.models.status.denormalization;
 
-import com.databasepreservation.common.client.models.configuration.collection.ColumnConfiguration;
-import com.databasepreservation.common.client.models.structure.ViewerColumn;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.databasepreservation.common.client.models.structure.ViewerColumn;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -16,16 +15,15 @@ public class RelatedTablesConfiguration implements Serializable {
   private String tableID;
   private String referencedTableUUID;
   private String referencedTableID;
+  private String path;
   private Boolean multiValue = false;
   private List<ReferencesConfiguration> references;
   private List<RelatedColumnConfiguration> columnsIncluded;
-  private DisplaySettingsConfiguration displaySettings;
   private List<RelatedTablesConfiguration> relatedTables;
 
   public RelatedTablesConfiguration() {
     references = new ArrayList<>();
     columnsIncluded = new ArrayList<>();
-    displaySettings = new DisplaySettingsConfiguration();
     relatedTables = new ArrayList<>();
   }
 
@@ -69,6 +67,14 @@ public class RelatedTablesConfiguration implements Serializable {
     this.referencedTableID = referencedTableID;
   }
 
+  public String getPath() {
+    return path;
+  }
+
+  public void setPath(String path) {
+    this.path = path;
+  }
+
   public List<ReferencesConfiguration> getReferences() {
     return references;
   }
@@ -87,14 +93,6 @@ public class RelatedTablesConfiguration implements Serializable {
 
   public void addColumnToInclude(ViewerColumn column) {
     columnsIncluded.add(new RelatedColumnConfiguration(column));
-  }
-
-  public DisplaySettingsConfiguration getDisplaySettings() {
-    return displaySettings;
-  }
-
-  public void setDisplaySettings(DisplaySettingsConfiguration displaySettings) {
-    this.displaySettings = displaySettings;
   }
 
   public List<RelatedTablesConfiguration> getRelatedTables() {

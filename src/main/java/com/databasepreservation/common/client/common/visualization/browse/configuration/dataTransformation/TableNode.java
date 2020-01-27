@@ -1,6 +1,7 @@
 package com.databasepreservation.common.client.common.visualization.browse.configuration.dataTransformation;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.databasepreservation.common.client.ViewerConstants;
@@ -74,6 +75,13 @@ public class TableNode {
     }
 
     return uuid.toString();
+  }
+
+  public void convertTreePathToList(List<TableNode> list){
+    if(this.getParentNode() != null){
+      this.getParentNode().convertTreePathToList(list);
+      list.add(this);
+    }
   }
 
   public void setChildren(Map<ViewerForeignKey, TableNode> children) {

@@ -84,11 +84,12 @@ public class ColumnWrapper {
     sb.appendHtmlConstant("<span class=\"table-ref-link\">");
     createPathRelatedTo(relatedTable, sb);
     sb.appendHtmlConstant("<span class=\"table-ref-path\"><b>");
-    sb.appendHtmlConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.BREADCRUMB_SEPARATOR));
+    //sb.appendHtmlConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.BREADCRUMB_SEPARATOR));
     sb.appendHtmlConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.COLUMN));
     sb.append(SafeHtmlUtils.fromString(columnDisplayName));
     sb.appendHtmlConstant("</b></span>");
     sb.appendHtmlConstant("</span>");
+    relatedTable.setPath(sb.toSafeHtml().asString());
     return sb.toSafeHtml();
   }
 

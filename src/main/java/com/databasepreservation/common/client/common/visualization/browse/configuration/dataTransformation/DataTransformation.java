@@ -123,7 +123,6 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
     this.tableId = tableId;
     if (this.tableId == null) {
       isInformation = true;
-      message.setWidget(new Alert(Alert.MessageAlertType.INFO, "Under construction"));
       content.add(informationPanel());
       toolBar.setVisible(false);
     } else {

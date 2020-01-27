@@ -467,8 +467,8 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     FindRequest findRequest = new FindRequest(ViewerRow.class.getName(), getFilter(), currentSorter, sublist,
       Facets.NONE, false, fieldsToSolr, extraParameters);
 
-    if (!nested) {
-      FilterUtils.filterByTable(findRequest.filter, table.getSchemaName() + "." + table.getName());
+    if (!nested && !wrapper.isNested()) {
+        FilterUtils.filterByTable(findRequest.filter, table.getSchemaName() + "." + table.getName());
     }
 
     return RestUtils.createExportTableUri(database.getUuid(), table.getSchemaName(), table.getName(), findRequest,
