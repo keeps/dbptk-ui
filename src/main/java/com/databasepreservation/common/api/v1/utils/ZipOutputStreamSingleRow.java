@@ -9,8 +9,6 @@ import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
-import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import org.apache.commons.compress.archivers.zip.Zip64Mode;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
@@ -18,11 +16,12 @@ import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.io.IOUtils;
 
 import com.databasepreservation.common.api.utils.ExtraMediaType;
+import com.databasepreservation.common.api.utils.HandlebarsUtils;
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
+import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.structure.ViewerCell;
-import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
-import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.utils.LobPathManager;
 
@@ -39,7 +38,7 @@ public class ZipOutputStreamSingleRow extends CSVOutputStream {
   private final boolean exportDescriptions;
 
   public ZipOutputStreamSingleRow(String databaseUUID, TableStatus configTable, ViewerRow row, String zipFilename,
-                                  String csvFilename, List<String> fieldsToReturn, boolean exportDescriptions) {
+    String csvFilename, List<String> fieldsToReturn, boolean exportDescriptions) {
     super(zipFilename, ',');
     this.databaseUUID = databaseUUID;
     this.configTable = configTable;
@@ -98,8 +97,8 @@ public class ZipOutputStreamSingleRow extends CSVOutputStream {
         out.putArchiveEntry(
           new ZipArchiveEntry(ViewerConstants.INTERNAL_ZIP_LOB_FOLDER + cellEntry.getValue().getValue()));
         final InputStream inputStream = Files
-          .newInputStream(LobPathManager.getPath(ViewerFactory.getViewerConfiguration(), databaseUUID, configTable.getId(),
-            binaryColumn.getColumnIndex(), row.getUuid()));
+          .newInputStream(LobPathManager.getPath(ViewerFactory.getViewerConfiguration(), databaseUUID,
+            configTable.getId(), binaryColumn.getColumnIndex(), row.getUuid()));
         IOUtils.copy(inputStream, out);
         inputStream.close();
         out.closeArchiveEntry();
@@ -112,7 +111,7 @@ public class ZipOutputStreamSingleRow extends CSVOutputStream {
     try (final OutputStreamWriter writer = new OutputStreamWriter(listBytes)) {
       CSVPrinter printer = new CSVPrinter(writer,
         getFormat().withHeader(configTable.getCSVHeaders(fieldsToReturn, exportDescriptions).toArray(new String[0])));
-      printer.printRecord(row.getCellValues(fieldsToReturn));
+      printer.printRecord(HandlebarsUtils.getCellValues(row, configTable, fieldsToReturn));
     }
     return listBytes;
   }

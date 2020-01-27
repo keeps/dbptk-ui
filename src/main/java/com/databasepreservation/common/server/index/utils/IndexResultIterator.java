@@ -72,7 +72,7 @@ public class IndexResultIterator implements Iterator<ViewerRow> {
       do {
         try {
           Pair<IndexResult<ViewerRow>, String> page = SolrUtils.findRows(index, databaseUUID, filter, sorter, pageSize,
-            cursorMark, fieldsToReturn);
+            cursorMark, fieldsToReturn, extraParameters);
           result = page.getFirst();
           nextCursorMark = page.getSecond();
 

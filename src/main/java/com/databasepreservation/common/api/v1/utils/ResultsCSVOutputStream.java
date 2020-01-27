@@ -10,8 +10,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.databasepreservation.common.api.utils.HandlebarsUtils;
 import org.apache.commons.csv.CSVPrinter;
-import org.roda.core.data.utils.JsonUtils;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.index.IndexResult;
@@ -72,7 +72,7 @@ public class ResultsCSVOutputStream extends CSVOutputStream {
     CSVPrinter printer = null;
 
     if (this.results == null) {
-      singleRow(writer, printer);
+      singleRow(writer);
     } else {
       multiRow(writer, printer);
     }
@@ -80,10 +80,10 @@ public class ResultsCSVOutputStream extends CSVOutputStream {
     writer.flush();
   }
 
-  private void singleRow(OutputStreamWriter writer, CSVPrinter printer) throws IOException {
-    printer = getFormat()
+  private void singleRow(OutputStreamWriter writer) throws IOException {
+    CSVPrinter printer = getFormat()
       .withHeader(configTable.getCSVHeaders(fieldsToReturn, exportDescription).toArray(new String[0])).print(writer);
-    printer.printRecord(row.getCellValues(fieldsToReturn));
+    printer.printRecord(HandlebarsUtils.getCellValues(row, configTable, fieldsToReturn));
   }
 
   private void multiRow(OutputStreamWriter writer, CSVPrinter printer) throws IOException {
@@ -96,66 +96,7 @@ public class ResultsCSVOutputStream extends CSVOutputStream {
         isFirst = false;
       }
 
-      printer.printRecord(getCellValues(row));
+      printer.printRecord(HandlebarsUtils.getCellValues(row, configTable, fieldsToReturn));
     }
-  }
-
-  private List<String> getCellValues(ViewerRow row) {
-    List<String> values = new ArrayList<>();
-    fieldsToReturn.remove(ViewerConstants.SOLR_ROWS_TABLE_ID);
-    fieldsToReturn.remove(ViewerConstants.SOLR_ROWS_TABLE_UUID);
-
-    for (String solrColumnName : fieldsToReturn) {
-      final ColumnStatus columnConfig = configTable.getColumnById(solrColumnName);
-
-      if (columnConfig != null && columnConfig.getType().equals(ViewerType.dbTypes.NESTED)) {
-        // treat nested
-        if (!row.getNestedRowList().isEmpty()) {
-          String template = columnConfig.getSearchStatus().getList().getTemplate().getTemplate();
-          StringBuilder stringBuilder = new StringBuilder();
-          row.getNestedRowList().forEach(nestedRow -> {
-            if (nestedRow.getNestedUUID().equals(solrColumnName)) {
-              if (template != null && !template.isEmpty()) {
-                final Map<String, String> map = cellsToJson(nestedRow.getCells(), columnConfig.getNestedColumns());
-                Handlebars handlebars = new Handlebars();
-                try {
-                  Template handlebarTemplate = handlebars.compileInline(template);
-                  stringBuilder.append(handlebarTemplate.apply(map));
-                } catch (IOException e) {
-                  e.printStackTrace();
-                }
-              }
-            }
-          });
-          values.add(stringBuilder.toString());
-        }
-      } else {
-        // treat non-nested
-        if (row.getCells().get(solrColumnName) == null) {
-          values.add("");
-        } else {
-          values.add(row.getCells().get(solrColumnName).getValue());
-        }
-      }
-    }
-
-    return values;
-  }
-
-  private static Map<String, String> cellsToJson(Map<String, ViewerCell> cells, NestedColumnStatus nestedConfig) {
-    final List<String> nestedFields = nestedConfig.getNestedFields();
-    final List<String> nestedSolrNames = nestedConfig.getNestedSolrNames();
-    int index = 0;
-
-    Map<String, String> nestedValues = new HashMap<>();
-
-    if (cells != null && !cells.isEmpty()) {
-      for (String nestedField : nestedFields) {
-        final String solrName = nestedSolrNames.get(index++);
-        nestedValues.put(nestedField, cells.get(solrName).getValue());
-      }
-    }
-
-    return nestedValues;
   }
 }

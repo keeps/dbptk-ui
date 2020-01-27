@@ -7,7 +7,6 @@ import java.util.List;
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 public class SaveButtonObserver {
-
   private List<ISaveButtonObserver> observerList = new ArrayList<>();
 
   public void addObserver(ISaveButtonObserver observer) {

@@ -5,6 +5,6 @@ import com.databasepreservation.common.client.models.status.collection.Collectio
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-public interface CollectionStatusObserver {
+public interface ICollectionStatusObserver {
   void updateCollection(CollectionStatus collectionStatus);
 }

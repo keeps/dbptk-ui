@@ -8,7 +8,7 @@ import java.util.Set;
 
 import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
-import com.databasepreservation.common.client.configuration.observer.CollectionStatusObserver;
+import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
@@ -34,7 +34,7 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-public class ColumnsManagementSidebar extends Composite implements Sidebar, CollectionStatusObserver {
+public class ColumnsManagementSidebar extends Composite implements Sidebar, ICollectionStatusObserver {
   protected static final ClientMessages messages = GWT.create(ClientMessages.class);
   protected static Map<String, ColumnsManagementSidebar> instances = new HashMap<>();
 

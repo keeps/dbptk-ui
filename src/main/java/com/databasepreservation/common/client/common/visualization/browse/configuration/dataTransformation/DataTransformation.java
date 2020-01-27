@@ -16,7 +16,7 @@ import com.databasepreservation.common.client.common.sidebar.DataTransformationS
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.DataTransformationUtils;
 import com.databasepreservation.common.client.common.visualization.browse.information.ErDiagram;
-import com.databasepreservation.common.client.configuration.observer.CollectionStatusObserver;
+import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
 import com.databasepreservation.common.client.models.status.denormalization.RelatedTablesConfiguration;
@@ -50,7 +50,7 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
-public class DataTransformation extends RightPanel implements CollectionStatusObserver {
+public class DataTransformation extends RightPanel implements ICollectionStatusObserver {
   @Override
   public void updateCollection(CollectionStatus collectionStatus) {
     instances.clear();

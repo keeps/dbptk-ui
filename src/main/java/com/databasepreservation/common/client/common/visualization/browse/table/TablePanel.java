@@ -15,7 +15,8 @@ import com.databasepreservation.common.client.common.search.TableSearchPanel;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.visualization.browse.foreignKey.ForeignKeyPanelOptions;
 import com.databasepreservation.common.client.configuration.observer.CollectionObserver;
-import com.databasepreservation.common.client.configuration.observer.CollectionStatusObserver;
+import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
+import com.databasepreservation.common.client.configuration.observer.IColumnVisibilityObserver;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
@@ -27,7 +28,6 @@ import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.MenuBar;
@@ -40,7 +40,7 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class TablePanel extends RightPanel implements CollectionStatusObserver {
+public class TablePanel extends RightPanel implements ICollectionStatusObserver, IColumnVisibilityObserver {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, TablePanel> instances = new HashMap<>();
   private static final String SEPARATOR = "/";
@@ -70,11 +70,6 @@ public class TablePanel extends RightPanel implements CollectionStatusObserver {
   public static TablePanel createInstance(CollectionStatus status, ViewerDatabase database, ViewerTable table,
     SearchInfo searchInfo, String route) {
     return new TablePanel(status, database, table, searchInfo, route);
-  }
-
-  @Override
-  public void updateCollection(CollectionStatus collectionStatus) {
-    instances.clear();
   }
 
   interface TablePanelUiBinder extends UiBinder<Widget, TablePanel> {
@@ -163,7 +158,6 @@ public class TablePanel extends RightPanel implements CollectionStatusObserver {
     collectionStatus = status;
     database = viewerDatabase;
     table = database.getMetadata().getTableById(tableId);
-
     this.route = route;
 
     if (searchInfoJson != null) {
@@ -187,21 +181,9 @@ public class TablePanel extends RightPanel implements CollectionStatusObserver {
     this.columnsAndValues = columnsAndValues;
   }
 
-  public void update() {
-    final Map<String, Boolean> selectedColumns;
-    if (HistoryManager.ROUTE_FOREIGN_KEY.equals(route)) {
-      selectedColumns = ForeignKeyPanelOptions.getInstance(database, table.getId(), columnsAndValues)
-        .getSelectedColumns();
-    } else {
-      selectedColumns = TablePanelOptions.getInstance(collectionStatus, database, table.getId()).getSelectedColumns();
-    }
-    tableSearchPanel.setColumnVisibility(selectedColumns);
-    applyCurrentSearchInfoJsonIfExists();
-  }
-
   private void init() {
-    final CollectionObserver collectionObserver = ObserverManager.getCollectionObserver();
-    collectionObserver.addObserver(this);
+    ObserverManager.getCollectionObserver().addObserver(this);
+    ObserverManager.getColumnVisibilityObserver().addObserver(this);
 
     mainHeader.setWidget(CommonClientUtils.getHeader(collectionStatus.getTableStatus(table.getUuid()), table, "h1",
       database.getMetadata().getSchemas().size() > 1));
@@ -258,5 +240,18 @@ public class TablePanel extends RightPanel implements CollectionStatusObserver {
 
   private void applySearchInfoJson(String searchInfoJson) {
     tableSearchPanel.applySearchInfoJson(searchInfoJson);
+  }
+
+  @Override
+  public void updateCollection(CollectionStatus collectionStatus) {
+    instances.clear();
+  }
+
+  @Override
+  public void updateColumnVisibility(String tableId, Map<String, Boolean> columns) {
+    if (table.getId().equals(tableId)) {
+      tableSearchPanel.setColumnVisibility(columns);
+      applyCurrentSearchInfoJsonIfExists();
+    }
   }
 }

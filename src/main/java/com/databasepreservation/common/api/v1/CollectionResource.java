@@ -425,7 +425,7 @@ public class CollectionResource implements CollectionService {
     @ApiParam(value = "The Zip filename") @QueryParam("zipFilename") String zipFilename,
     @ApiParam(value = "Export description", allowableValues = "true, false") @QueryParam("descriptions") boolean exportDescription,
     @ApiParam(value = "Export LOBs", allowableValues = "true, false") @QueryParam("lobs") boolean exportLobs,
-    @ApiParam(value = "Export LOBs", allowableValues = "true, false", required = true) @QueryParam("fl") String fieldsToHeader) {
+    @ApiParam(value = "Fields to export", required = true) @QueryParam("fl") String fieldsToHeader) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
     User user = UserUtility.getUser(request);
     LogEntryState state = LogEntryState.SUCCESS;

@@ -20,8 +20,8 @@ import com.databasepreservation.common.client.common.visualization.browse.Refere
 import com.databasepreservation.common.client.common.visualization.browse.RowPanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.AdvancedConfiguration;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.ColumnsManagementPanel;
-import com.databasepreservation.common.client.common.visualization.browse.configuration.table.TableManagementPanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.dataTransformation.DataTransformation;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.table.TableManagementPanel;
 import com.databasepreservation.common.client.common.visualization.browse.foreignKey.ForeignKeyPanel;
 import com.databasepreservation.common.client.common.visualization.browse.foreignKey.ForeignKeyPanelOptions;
 import com.databasepreservation.common.client.common.visualization.browse.information.DatabaseInformationPanel;
@@ -252,17 +252,6 @@ public class MainPanelDesktop extends Composite {
               return TablePanelOptions.getInstance(status, database, tableId);
             }
           });
-
-        } else if (page.equals(HistoryManager.ROUTE_TABLE_UPDATE)) {
-          // #table/<databaseUUID>/data/<schema>/<table>/update
-          setContent(databaseUUID, currentHistoryPath.get(0), tableId, new RightPanelLoader() {
-            @Override
-            public RightPanel load(ViewerDatabase database, CollectionStatus status) {
-              final TablePanel instance = TablePanel.getInstance(status, database, tableId, currentHistoryPath.get(0));
-              instance.update();
-              return instance;
-            }
-          });
         } else {
           /// #table/<databaseUUID>/data/<schema>/<table>/<searchInfoJSON>
           setContent(databaseUUID, currentHistoryPath.get(0), tableId, new RightPanelLoader() {
@@ -326,14 +315,6 @@ public class MainPanelDesktop extends Composite {
             public RightPanel load(ViewerDatabase database, CollectionStatus status) {
               return ForeignKeyPanelOptions.getInstance(database, tableID,
                 columnsAndValues.subList(0, columnsAndValues.size() - 1));
-            }
-          });
-        } else if (page.equals(HistoryManager.ROUTE_TABLE_UPDATE)) {
-          setContent(databaseUUID, currentHistoryPath.get(0), tableID, new RightPanelLoader() {
-            @Override
-            public RightPanel load(ViewerDatabase database, CollectionStatus status) {
-              return ForeignKeyPanel.createInstance(database, tableID,
-                columnsAndValues.subList(0, columnsAndValues.size() - 1), true, status);
             }
           });
         } else if (columnsAndValues.size() % 2 == 0) {

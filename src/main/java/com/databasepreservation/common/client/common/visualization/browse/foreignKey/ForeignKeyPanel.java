@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.client.tools.FilterUtils;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
 import com.databasepreservation.common.client.common.RightPanel;
@@ -23,6 +22,7 @@ import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.services.CollectionService;
+import com.databasepreservation.common.client.tools.FilterUtils;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.LocaleInfo;
@@ -37,12 +37,7 @@ import com.google.gwt.user.client.ui.Widget;
 public class ForeignKeyPanel extends RightPanel {
   public static ForeignKeyPanel createInstance(ViewerDatabase database, String tableId, List<String> columnsAndValues,
     CollectionStatus status) {
-    return new ForeignKeyPanel(database, tableId, columnsAndValues, false, status);
-  }
-
-  public static ForeignKeyPanel createInstance(ViewerDatabase database, String tableId, List<String> columnsAndValues,
-    boolean update, CollectionStatus status) {
-    return new ForeignKeyPanel(database, tableId, columnsAndValues, update, status);
+    return new ForeignKeyPanel(database, tableId, columnsAndValues, status);
   }
 
   interface ForeignKeyPanelUiBinder extends UiBinder<Widget, ForeignKeyPanel> {
@@ -56,7 +51,6 @@ public class ForeignKeyPanel extends RightPanel {
   private List<String> columnsAndValues;
   private Long rowCount;
   private ViewerRow row;
-  private boolean toUpdate;
   private CollectionStatus status;
 
   private RightPanel innerRightPanel = null;
@@ -66,10 +60,9 @@ public class ForeignKeyPanel extends RightPanel {
   SimplePanel panel;
 
   private ForeignKeyPanel(ViewerDatabase viewerDatabase, final String tableId, List<String> columnsAndValues,
-    boolean update, CollectionStatus status) {
+    CollectionStatus status) {
     database = viewerDatabase;
     table = database.getMetadata().getTableById(tableId);
-    toUpdate = update;
     this.columnsAndValues = columnsAndValues;
     this.status = status;
     initWidget(uiBinder.createAndBindUi(this));
@@ -103,6 +96,30 @@ public class ForeignKeyPanel extends RightPanel {
   }
 
   /**
+   * Choose and display the correct panel: a RowPanel when search returns one
+   * result, otherwise show a TablePanel
+   */
+  private void init() {
+    if (rowCount != null) {
+      if (rowCount == 1) {
+        // display a RowPanel
+        innerRightPanel = RowPanel.createInstance(database, table, row, status);
+
+      } else {
+        // display a TablePanel
+        SearchInfo searchInfo = new SearchInfo(status, table, columnAndValueMapping);
+        TablePanel tablePanel = TablePanel.getInstance(status, database, table.getId(), searchInfo.asJson(),
+          HistoryManager.ROUTE_FOREIGN_KEY);
+        tablePanel.setColumnsAndValues(columnsAndValues);
+        innerRightPanel = tablePanel;
+      }
+
+      handleBreadcrumb(breadcrumb);
+      panel.setWidget(innerRightPanel);
+    }
+  }
+
+  /**
    * Delegates the method to the innerRightPanel
    *
    * @param breadcrumb
@@ -119,33 +136,6 @@ public class ForeignKeyPanel extends RightPanel {
     // externally; or handleBreadcrumb was called first and init is finishing up
     if (innerRightPanel != null && breadcrumb != null) {
       innerRightPanel.handleBreadcrumb(breadcrumb);
-    }
-  }
-
-  /**
-   * Choose and display the correct panel: a RowPanel when search returns one
-   * result, otherwise show a TablePanel
-   */
-  private void init() {
-    if (rowCount != null) {
-      if (rowCount == 1) {
-        // display a RowPanel
-        innerRightPanel = RowPanel.createInstance(database, table, row, status);
-
-      } else {
-        // display a TablePanel
-        SearchInfo searchInfo = new SearchInfo(status, table, columnAndValueMapping);
-        TablePanel tablePanel = TablePanel.getInstance(status, database, table.getId(), searchInfo.asJson(),
-          HistoryManager.ROUTE_FOREIGN_KEY);
-        tablePanel.setColumnsAndValues(columnsAndValues);
-        if (toUpdate) {
-          tablePanel.update();
-        }
-        innerRightPanel = tablePanel;
-      }
-
-      handleBreadcrumb(breadcrumb);
-      panel.setWidget(innerRightPanel);
     }
   }
 }

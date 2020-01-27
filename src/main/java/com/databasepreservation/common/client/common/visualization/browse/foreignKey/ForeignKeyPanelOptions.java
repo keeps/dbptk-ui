@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.RightPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
@@ -116,7 +117,7 @@ public class ForeignKeyPanelOptions extends RightPanel {
 
   }
 
-  public Map<String, Boolean> getSelectedColumns() {
+  private Map<String, Boolean> getSelectedColumns() {
     Map<String, Boolean> columnVisibility = new HashMap<>();
     for (ViewerColumn column : table.getColumns()) {
       columnVisibility.put(column.getDisplayName(), columnsTable.getSelectionModel().isSelected(column));
@@ -187,9 +188,10 @@ public class ForeignKeyPanelOptions extends RightPanel {
 
     btnUpdate.setText(messages.basicActionUpdate());
 
-    btnUpdate.addClickHandler(
-      event -> HistoryManager.gotoForeignKeyUpdate(database.getUuid(), table.getId(), columnsAndValues));
-
+    btnUpdate.addClickHandler(event -> {
+      ObserverManager.getColumnVisibilityObserver().setCollectionStatus(table.getId(), getSelectedColumns());
+      HistoryManager.gotoForeignKey(database.getUuid(), table.getId(), columnsAndValues);
+    });
     options.setText(messages.basicActionOptions());
 
     options

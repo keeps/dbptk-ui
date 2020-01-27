@@ -20,7 +20,6 @@ import com.databasepreservation.common.client.tools.ViewerJsonUtils;
 import com.github.nmorel.gwtjackson.client.exception.JsonDeserializationException;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
@@ -59,7 +58,7 @@ public class TableSearchPanel extends Composite {
 
   private Filter initialFilter;
 
-  private final Map<String, SearchField> searchFields = new HashMap<String, SearchField>();
+  private final Map<String, SearchField> searchFields = new HashMap<>();
 
   private final Map<String, Boolean> columnDisplayNameToVisibleState = new HashMap<>();
 
@@ -136,8 +135,8 @@ public class TableSearchPanel extends Composite {
     GWT.log("initial filter: " + initialFilter);
 
     if (isNested) {
-      searchPanel = new SearchPanel(initialFilter, ViewerConstants.INDEX_SEARCH, messages.searchPlaceholder(), table.getName(),
-        true, new DefaultAsyncCallback<Void>() {
+      searchPanel = new SearchPanel(initialFilter, ViewerConstants.INDEX_SEARCH, messages.searchPlaceholder(),
+        table.getName(), true, new DefaultAsyncCallback<Void>() {
           @Override
           public void onSuccess(Void result) {
             TableSearchPanel.this.saveQuery();
@@ -214,22 +213,6 @@ public class TableSearchPanel extends Composite {
     searchPanel.setSearchAdvancedFieldOptionsAddVisible(true);
   }
 
-  private void handleColumnVisibilityChanges(SearchFieldPanel searchFieldPanel, ValueChangeEvent<Boolean> event) {
-    String columnDisplayName = searchFieldPanel.getSearchField().getLabel();
-    columnDisplayNameToVisibleState.put(columnDisplayName, event.getValue());
-    GWT.log("visible state changed: " + columnDisplayName + " is now " + event.getValue());
-    tableRowList.refreshColumnVisibility();
-
-    // update other references
-    for (int i = 0; i < itemsSearchAdvancedFieldsPanel.getWidgetCount(); i++) {
-      SearchFieldPanel otherSearchFieldPanel = (SearchFieldPanel) itemsSearchAdvancedFieldsPanel.getWidget(i);
-      if (searchFieldPanel != otherSearchFieldPanel
-        && searchFieldPanel.getSearchField().getLabel().equals(otherSearchFieldPanel.getSearchField().getLabel())) {
-        otherSearchFieldPanel.setVisibilityCheckboxValue(searchFieldPanel.getVisibilityCheckboxValue(), false);
-      }
-    }
-  }
-
   public void applySearchInfoJson(String searchInfoJson) {
     GWT.log("SearchInfo: " + searchInfoJson);
     setCurrentSearchInfoFromJson(searchInfoJson);
@@ -256,7 +239,7 @@ public class TableSearchPanel extends Composite {
         this.searchFields.put(searchField.getId(), searchField);
       }
 
-      updateSearchFields(currentSearchInfo.getFields());
+      updateSearchFields(currentSearchInfo.getFields(), true);
 
       // update search panel and trigger a search
       searchPanel.updateSearchPanel(currentSearchInfo);
@@ -268,12 +251,15 @@ public class TableSearchPanel extends Composite {
   }
 
   private void updateSearchFields(List<SearchField> newSearchFields) {
+    updateSearchFields(newSearchFields, false);
+  }
+
+  private void updateSearchFields(List<SearchField> newSearchFields, boolean ignoreIsFixed) {
     for (SearchField searchField : newSearchFields) {
-      if (searchField.isFixed()) {
+      if (searchField.isFixed() || ignoreIsFixed) {
         final SearchFieldPanel searchFieldPanel = new SearchFieldPanel(columnDisplayNameToVisibleState);
         searchFieldPanel.setSearchAdvancedFields(searchAdvancedFieldOptions);
         searchFieldPanel.setSearchFields(TableSearchPanel.this.searchFields);
-        searchFieldPanel.setVisibilityChangedHandler(event -> handleColumnVisibilityChanges(searchFieldPanel, event));
         addSearchFieldPanel(searchFieldPanel);
         searchFieldPanel.selectSearchField(searchField.getId());
       }
@@ -283,7 +269,6 @@ public class TableSearchPanel extends Composite {
       final SearchFieldPanel searchFieldPanel = new SearchFieldPanel(columnDisplayNameToVisibleState);
       searchFieldPanel.setSearchAdvancedFields(searchAdvancedFieldOptions);
       searchFieldPanel.setSearchFields(TableSearchPanel.this.searchFields);
-      searchFieldPanel.setVisibilityChangedHandler(event1 -> handleColumnVisibilityChanges(searchFieldPanel, event1));
       searchFieldPanel.selectFirstSearchField();
       addSearchFieldPanel(searchFieldPanel);
     });

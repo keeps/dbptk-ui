@@ -26,8 +26,8 @@ public class AdvancedSearchUtils {
     List<SearchField> searchFields = new ArrayList<>();
 
     SearchField address = new SearchField(ViewerConstants.SOLR_ACTIVITY_LOG_IP_ADDRESS,
-      Collections.singletonList(ViewerConstants.SOLR_ACTIVITY_LOG_IP_ADDRESS),
-      messages.activityLogTextForAddress(), ViewerConstants.SEARCH_FIELD_TYPE_TEXT);
+      Collections.singletonList(ViewerConstants.SOLR_ACTIVITY_LOG_IP_ADDRESS), messages.activityLogTextForAddress(),
+      ViewerConstants.SEARCH_FIELD_TYPE_TEXT);
     address.setFixed(true);
 
     SearchField date = new SearchField(ViewerConstants.SOLR_ACTIVITY_LOG_DATETIME,
@@ -41,17 +41,19 @@ public class AdvancedSearchUtils {
     return searchFields;
   }
 
-  public static List<SearchField> getSearchFieldsFromTable(ViewerTable viewerTable,  CollectionStatus status) {
+  public static List<SearchField> getSearchFieldsFromTable(ViewerTable viewerTable, CollectionStatus status) {
     return getSearchFieldsFromTable(viewerTable, status, null);
   }
 
-  public static List<SearchField> getSearchFieldsFromTable(ViewerTable viewerTable, CollectionStatus status, ViewerMetadata metadata) {
+  public static List<SearchField> getSearchFieldsFromTable(ViewerTable viewerTable, CollectionStatus status,
+    ViewerMetadata metadata) {
     List<SearchField> searchFields = new ArrayList<>();
 
     for (ViewerColumn viewerColumn : viewerTable.getColumns()) {
       SearchField searchField = new SearchField(
         viewerTable.getUuid() + "-" + viewerColumn.getColumnIndexInEnclosingTable(),
-        Collections.singletonList(viewerColumn.getSolrName()), viewerColumn.getDisplayName(),
+        Collections.singletonList(viewerColumn.getSolrName()),
+        status.getTableStatusByTableId(viewerTable.getId()).getColumnById(viewerColumn.getSolrName()).getCustomName(),
         viewerTypeToSearchFieldType(viewerColumn.getType()));
       searchField.setFixed(status.showAdvancedSearch(viewerTable.getUuid(), viewerColumn.getSolrName()));
       searchFields.add(searchField);
@@ -60,11 +62,11 @@ public class AdvancedSearchUtils {
     // Add nested columns
     for (ColumnStatus columnStatus : status.getTableStatus(viewerTable.getUuid()).getColumns()) {
       NestedColumnStatus nestedColumns = columnStatus.getNestedColumns();
-      if(nestedColumns != null) {
+      if (nestedColumns != null) {
         for (String nestedColumn : nestedColumns.getNestedFields()) {
           ViewerTable nestedTable = metadata.getTableById(nestedColumns.getOriginalTable());
           for (ViewerColumn column : nestedTable.getColumns()) {
-            if(column.getDisplayName().equals(nestedColumn)){
+            if (column.getDisplayName().equals(nestedColumn)) {
               ViewerType nestedType = new ViewerType();
               nestedType.setDbType(ViewerType.dbTypes.NESTED);
               List<String> fields = new ArrayList<>();
@@ -72,9 +74,8 @@ public class AdvancedSearchUtils {
               fields.add(viewerTable.getId());
               fields.add(nestedTable.getId());
               SearchField searchField = new SearchField(
-                  columnStatus.getId() + "-" + column.getColumnIndexInEnclosingTable(),
-                  fields, nestedTable.getName() + ":" + column.getDisplayName(),
-                  viewerTypeToSearchFieldType(nestedType));
+                columnStatus.getId() + "-" + column.getColumnIndexInEnclosingTable(), fields,
+                nestedTable.getName() + ":" + column.getDisplayName(), viewerTypeToSearchFieldType(nestedType));
 
               searchField.setFixed(status.showAdvancedSearch(viewerTable.getUuid(), columnStatus.getId()));
               searchFields.add(searchField);

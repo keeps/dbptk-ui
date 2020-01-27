@@ -107,128 +107,129 @@ public class JavascriptUtils {
                                            $wnd.jQuery('.sticky-flow').stick_in_parent();
                                            $wnd.jQuery('body').trigger("sticky_kit:recalc");
                                            }-*/;
+
   public static native void runMiniUploadForm(String layout, DefaultAsyncCallback<String> callback) /*-{
-                                                $wnd.jQuery(function () {
-                                                  var ul = $wnd.jQuery('#upload-list');
-                                                  $wnd.jQuery('#drop a').click(function () {
-                                                    // Simulate a click on the file input button
-                                                    // to show the file browser dialog
-                                                    $wnd.jQuery(this).parent().find('input').click();
-                                                  });
-                                                  // Initialize the jQuery File Upload plugin
-                                                  $wnd.jQuery('#upload').fileupload({
-                                                    // This element will accept file drag/drop uploading
-                                                    dropZone: $wnd.jQuery('#drop'),
-                                                    // This function is called when a file is added to the queue;
-                                                    // either via the browse button, or via drag/drop:
-                                                    add: function (e, data) {
-                                                      $wnd.jQuery('.btn').prop('disabled', true);
-                                                      $wnd.jQuery('#upload-message').hide();
-                                                      var tpl = $wnd.jQuery(layout).uniqueId();
-                                                      //var tpl = $wnd.jQuery('<li class="working"><input type="text" value="0" data-width="30" data-height="30"'
-                                                      //        + ' data-fgColor="#089de3" data-readOnly="1" data-bgColor="#3e4043" /><p></p><span class="icon"></span></li>');
-                                                      // Append the file name and file size
-                                                      tpl.find('p').text(data.files[0].name)
-                                                              .append('<span class="loadStatus"></span>')
-                                                              .append('<span class="errorMessage"></span>')
-                                                              .append('<i>' + formatFileSize(data.files[0].size) + '</i>');
-                                                      // Add the HTML to the UL element
-                                                      data.context = tpl.appendTo(ul);
-                                                      // Initialize the knob plugin
-                                                      tpl.find('input').knob();
-                                                      // Listen for clicks on the cancel icon
-                                                      tpl.find('span').click(function () {
-                                                        if (tpl.hasClass('working')) {
-                                                          jqXHR.abort();
-                                                        }
-                                                        tpl.fadeOut(function () {
-                                                          tpl.remove();
-                                                        });
-                                                      });
-                                                      // Automatically upload the file once it is added to the queue
-                                                      var jqXHR = data.submit();
-                                                    },
-                                                    done: function (e, data) {
-                                                        var path = data.jqXHR.statusText;
-                                                        if (typeof data.jqXHR.responseJSON !== 'undefined') {
-                                                          path = data.jqXHR.responseJSON.message;
-                                                        }
-                                                        var id = data.context[0].id;
-                                                        $wnd.jQuery("#" + id).attr('path', path);
-                                                        callback.@com.databasepreservation.common.client.common.DefaultAsyncCallback::onSuccess(*)(id);
-                                                    },
-                                                    // Callback for uploads start.
-                                                    start: function (e) {
-                                                      $wnd.jQuery('.btn').prop('disabled', true);
-                                                      $wnd.jQuery('#upload-message').hide();
-                                                    },
-                                                    // Callback for uploads stop.
-                                                    stop: function (e, data) {
-                                                      $wnd.jQuery('.btn').prop('disabled', false);
-                                                      //$wnd.jQuery('#upload-message').show();
-                                                      $wnd.jQuery('html, body').animate({
-                                                        scrollTop: $wnd.jQuery('#upload-message').offset().top
-                                                      }, 150);
-                                                    },
-                                                    // Callback for upload progress events.
-                                                    progress: function (e, data) {
-                                                      // Calculate the completion percentage of the upload
-                                                      var progress = parseInt(data.loaded
-                                                              / data.total * 100, 10);
-                                                      // Update the hidden input field and trigger a change
-                                                      // so that the jQuery knob plugin knows to update the dial
-                                                      data.context.find('input').val(
-                                                              progress).change();
-                                                      if (progress == 100) {
-//                                                        data.context
-//                                                                .removeClass('working');
-                                                      }
-                                                    },
-                                                    fail: function (e, data) {
-                                                      // Something has gone wrong!
-                                                      data.context.addClass('error');
-                                                      data.context[0].setAttribute(
-                                                              "data-toggle", "tooltip");
-                                                      var message = data.jqXHR.statusText;
-                                                      if (typeof data.jqXHR.responseJSON !== 'undefined') {
-                                                        message = data.jqXHR.responseJSON.message;
-                                                      }
-                                                      data.context[0].setAttribute("title", message);
-                                                      data.context.find('span.errorMessage').text('(' + message + ')');
-                                                    },
-                                                  });
-                                                  // Prevent the default action when a file is dropped on the window
-                                                  $wnd.jQuery(document).on('drop dragover', function (e) {
-                                                    e.preventDefault();
-                                                  });
-                                                  function getMethods(obj) {
-                                                    var result = [];
-                                                    for (var id in obj) {
-                                                      try {
-                                                        if (typeof (obj[id]) == "function") {
-                                                          result.push(id + ": " + obj[id].toString());
-                                                        }
-                                                      } catch (err) {
-                                                        result.push(id + ": inaccessible");
-                                                      }
-                                                    }
-                                                    return result;
-                                                  }
-                                                  // Helper function that formats the file sizes
-                                                  function formatFileSize(bytes) {
-                                                    if (typeof bytes !== 'number') {
-                                                      return '';
-                                                    }
-                                                    if (bytes >= 1000000000) {
-                                                      return (bytes / 1000000000).toFixed(2) + ' GB';
-                                                    }
-                                                    if (bytes >= 1000000) {
-                                                      return (bytes / 1000000).toFixed(2) + ' MB';
-                                                    }
-                                                    return (bytes / 1000).toFixed(2) + ' KB';
-                                                  }
-                                                });
-                                                }-*/;
+                                                                                                    $wnd.jQuery(function () {
+                                                                                                    var ul = $wnd.jQuery('#upload-list');
+                                                                                                    $wnd.jQuery('#drop a').click(function () {
+                                                                                                    // Simulate a click on the file input button
+                                                                                                    // to show the file browser dialog
+                                                                                                    $wnd.jQuery(this).parent().find('input').click();
+                                                                                                    });
+                                                                                                    // Initialize the jQuery File Upload plugin
+                                                                                                    $wnd.jQuery('#upload').fileupload({
+                                                                                                    // This element will accept file drag/drop uploading
+                                                                                                    dropZone: $wnd.jQuery('#drop'),
+                                                                                                    // This function is called when a file is added to the queue;
+                                                                                                    // either via the browse button, or via drag/drop:
+                                                                                                    add: function (e, data) {
+                                                                                                    $wnd.jQuery('.btn').prop('disabled', true);
+                                                                                                    $wnd.jQuery('#upload-message').hide();
+                                                                                                    var tpl = $wnd.jQuery(layout).uniqueId();
+                                                                                                    //var tpl = $wnd.jQuery('<li class="working"><input type="text" value="0" data-width="30" data-height="30"'
+                                                                                                    //        + ' data-fgColor="#089de3" data-readOnly="1" data-bgColor="#3e4043" /><p></p><span class="icon"></span></li>');
+                                                                                                    // Append the file name and file size
+                                                                                                    tpl.find('p').text(data.files[0].name)
+                                                                                                    .append('<span class="loadStatus"></span>')
+                                                                                                    .append('<span class="errorMessage"></span>')
+                                                                                                    .append('<i>' + formatFileSize(data.files[0].size) + '</i>');
+                                                                                                    // Add the HTML to the UL element
+                                                                                                    data.context = tpl.appendTo(ul);
+                                                                                                    // Initialize the knob plugin
+                                                                                                    tpl.find('input').knob();
+                                                                                                    // Listen for clicks on the cancel icon
+                                                                                                    tpl.find('span').click(function () {
+                                                                                                    if (tpl.hasClass('working')) {
+                                                                                                    jqXHR.abort();
+                                                                                                    }
+                                                                                                    tpl.fadeOut(function () {
+                                                                                                    tpl.remove();
+                                                                                                    });
+                                                                                                    });
+                                                                                                    // Automatically upload the file once it is added to the queue
+                                                                                                    var jqXHR = data.submit();
+                                                                                                    },
+                                                                                                    done: function (e, data) {
+                                                                                                    var path = data.jqXHR.statusText;
+                                                                                                    if (typeof data.jqXHR.responseJSON !== 'undefined') {
+                                                                                                    path = data.jqXHR.responseJSON.message;
+                                                                                                    }
+                                                                                                    var id = data.context[0].id;
+                                                                                                    $wnd.jQuery("#" + id).attr('path', path);
+                                                                                                    callback.@com.databasepreservation.common.client.common.DefaultAsyncCallback::onSuccess(*)(id);
+                                                                                                    },
+                                                                                                    // Callback for uploads start.
+                                                                                                    start: function (e) {
+                                                                                                    $wnd.jQuery('.btn').prop('disabled', true);
+                                                                                                    $wnd.jQuery('#upload-message').hide();
+                                                                                                    },
+                                                                                                    // Callback for uploads stop.
+                                                                                                    stop: function (e, data) {
+                                                                                                    $wnd.jQuery('.btn').prop('disabled', false);
+                                                                                                    //$wnd.jQuery('#upload-message').show();
+                                                                                                    $wnd.jQuery('html, body').animate({
+                                                                                                    scrollTop: $wnd.jQuery('#upload-message').offset().top
+                                                                                                    }, 150);
+                                                                                                    },
+                                                                                                    // Callback for upload progress events.
+                                                                                                    progress: function (e, data) {
+                                                                                                    // Calculate the completion percentage of the upload
+                                                                                                    var progress = parseInt(data.loaded
+                                                                                                    / data.total * 100, 10);
+                                                                                                    // Update the hidden input field and trigger a change
+                                                                                                    // so that the jQuery knob plugin knows to update the dial
+                                                                                                    data.context.find('input').val(
+                                                                                                    progress).change();
+                                                                                                    if (progress == 100) {
+                                                                                                    //                                                        data.context
+                                                                                                    //                                                                .removeClass('working');
+                                                                                                    }
+                                                                                                    },
+                                                                                                    fail: function (e, data) {
+                                                                                                    // Something has gone wrong!
+                                                                                                    data.context.addClass('error');
+                                                                                                    data.context[0].setAttribute(
+                                                                                                    "data-toggle", "tooltip");
+                                                                                                    var message = data.jqXHR.statusText;
+                                                                                                    if (typeof data.jqXHR.responseJSON !== 'undefined') {
+                                                                                                    message = data.jqXHR.responseJSON.message;
+                                                                                                    }
+                                                                                                    data.context[0].setAttribute("title", message);
+                                                                                                    data.context.find('span.errorMessage').text('(' + message + ')');
+                                                                                                    },
+                                                                                                    });
+                                                                                                    // Prevent the default action when a file is dropped on the window
+                                                                                                    $wnd.jQuery(document).on('drop dragover', function (e) {
+                                                                                                    e.preventDefault();
+                                                                                                    });
+                                                                                                    function getMethods(obj) {
+                                                                                                    var result = [];
+                                                                                                    for (var id in obj) {
+                                                                                                    try {
+                                                                                                    if (typeof (obj[id]) == "function") {
+                                                                                                    result.push(id + ": " + obj[id].toString());
+                                                                                                    }
+                                                                                                    } catch (err) {
+                                                                                                    result.push(id + ": inaccessible");
+                                                                                                    }
+                                                                                                    }
+                                                                                                    return result;
+                                                                                                    }
+                                                                                                    // Helper function that formats the file sizes
+                                                                                                    function formatFileSize(bytes) {
+                                                                                                    if (typeof bytes !== 'number') {
+                                                                                                    return '';
+                                                                                                    }
+                                                                                                    if (bytes >= 1000000000) {
+                                                                                                    return (bytes / 1000000000).toFixed(2) + ' GB';
+                                                                                                    }
+                                                                                                    if (bytes >= 1000000) {
+                                                                                                    return (bytes / 1000000).toFixed(2) + ' MB';
+                                                                                                    }
+                                                                                                    return (bytes / 1000).toFixed(2) + ' KB';
+                                                                                                    }
+                                                                                                    });
+                                                                                                    }-*/;
 
   public static native int isUploadRunning() /*-{
                                              var activeUploads = $wnd.jQuery('#upload').fileupload('active');
@@ -345,12 +346,7 @@ public class JavascriptUtils {
                                             }-*/;
 
   public static native String compileTemplate(String templateString, String object) /*-{
-      var template = $wnd.Handlebars.compile(templateString);
-      var result = template(JSON.parse(object));
-      $wnd.console.log(":::compileTemplate:::");
-      $wnd.console.log("template: " + template);
-      $wnd.console.log("object: " + object);
-      $wnd.console.log("result: " + result);
-      return result;
-      }-*/;
+                                                                                    var template = $wnd.Handlebars.compile(templateString);
+                                                                                    return  template(JSON.parse(object));
+                                                                                    }-*/;
 }

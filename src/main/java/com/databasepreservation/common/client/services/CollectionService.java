@@ -148,6 +148,7 @@ public interface CollectionService extends DirectRestService {
    *******************************************************************************/
   @POST
   @Path("/{databaseUUID}/collection/{collectionUUID}/savedSearch/")
+  @Produces(MediaType.TEXT_PLAIN)
   @ApiOperation(value = "Saves a search for a specific table within a database", notes = "", response = String.class)
   String saveSavedSearch(@PathParam("databaseUUID") String databaseUUID,
     @PathParam("collectionUUID") String collectionUUID, @QueryParam("tableUUID") String tableUUID,

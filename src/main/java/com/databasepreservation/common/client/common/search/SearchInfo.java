@@ -31,9 +31,6 @@ public class SearchInfo implements Serializable {
 
   /**
    * Empty instance
-   * @param status
-   * @param table
-   * @param columnAndValueMapping
    */
   public SearchInfo() {
   }

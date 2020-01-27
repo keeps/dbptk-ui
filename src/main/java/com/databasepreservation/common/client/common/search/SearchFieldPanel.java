@@ -117,11 +117,6 @@ public class SearchFieldPanel extends Composite {
     inputPanel = new FlowPanel();
     fieldLabel = new Label();
     searchAdvancedFields = new ListBox();
-    // columnVisibility = new CheckBox();
-
-    setVisibilityCheckboxValue(true, false);
-
-    // columnVisibilityPanel = new SimplePanel(columnVisibility);
 
     DateBox.DefaultFormat dateFormat = new DateBox.DefaultFormat(DateTimeFormat.getFormat("yyyy-MM-dd"));
 
@@ -557,20 +552,6 @@ public class SearchFieldPanel extends Composite {
     panel.removeStyleName("full_width");
   }
 
-  public void simpleSearchField(String field, String label, String type) {
-    List<String> searchFields = new ArrayList<String>();
-    searchFields.add(field);
-    setSearchField(new SearchField(field, searchFields, label, type));
-
-    fieldLabel.setText(label);
-    leftPanel.clear();
-    leftPanel.add(fieldLabel);
-    // leftPanel.add(columnVisibilityPanel);
-    leftPanel.add(inputPanel);
-    setInputPanel(type);
-    panel.addStyleName("full_width");
-  }
-
   private void setInputPanel(String type) {
     inputPanel.clear();
     inputPanel.removeStyleName("full_width");
@@ -682,18 +663,6 @@ public class SearchFieldPanel extends Composite {
     }
 
     return valid;
-  }
-
-  public void setVisibilityChangedHandler(ValueChangeHandler<Boolean> handler) {
-    // columnVisibility.addValueChangeHandler(handler);
-  }
-
-  public void setVisibilityCheckboxValue(boolean value, boolean triggerEvents) {
-    // columnVisibility.setValue(value, triggerEvents);
-  }
-
-  public Boolean getVisibilityCheckboxValue() {
-    return true; // columnVisibility.getValue();
   }
 
   public void clear() {

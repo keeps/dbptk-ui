@@ -48,7 +48,6 @@ public class HistoryManager {
   public static final String ROUTE_VIEW = "view";
   public static final String ROUTE_SIARD_VALIDATOR = "validator";
   public static final String ROUTE_TABLE_OPTIONS = "options";
-  public static final String ROUTE_TABLE_UPDATE = "update";
   public static final String ROUTE_UPLOAD_SIARD_DATA = "ingest-siard";
   public static final String ROUTE_ACTIVITY_LOG = "activity-log";
   public static final String ROUTE_ADVANCED_CONFIGURATION = "advanced-configuration";
@@ -146,11 +145,6 @@ public class HistoryManager {
     newHistory(Arrays.asList(ROUTE_TABLE, databaseUUID, ROUTE_DATA, split[0], split[1]));
   }
 
-  public static void gotoTableUpdate(String databaseUUID, String tableId) {
-    final String[] split = tableId.split("\\.");
-    newHistory(Arrays.asList(ROUTE_TABLE, databaseUUID, ROUTE_DATA, split[0], split[1], ROUTE_TABLE_UPDATE));
-  }
-
   public static void gotoTableOptions(String databaseUUID, String tableId) {
     final String[] split = tableId.split("\\.");
     newHistory(Arrays.asList(ROUTE_TABLE, databaseUUID, ROUTE_DATA, split[0], split[1], ROUTE_TABLE_OPTIONS));
@@ -162,15 +156,6 @@ public class HistoryManager {
       Arrays.asList(ROUTE_FOREIGN_KEY, databaseUUID, ROUTE_DATA, split[0], split[1]));
     params.addAll(searchInfo);
     params.add(ROUTE_TABLE_OPTIONS);
-    newHistory(params);
-  }
-
-  public static void gotoForeignKeyUpdate(String databaseUUID, String tableId, List<String> searchInfo) {
-    final String[] split = tableId.split("\\.");
-    List<String> params = new ArrayList<>(
-      Arrays.asList(ROUTE_FOREIGN_KEY, databaseUUID, ROUTE_DATA, split[0], split[1]));
-    params.addAll(searchInfo);
-    params.add(ROUTE_TABLE_UPDATE);
     newHistory(params);
   }
 

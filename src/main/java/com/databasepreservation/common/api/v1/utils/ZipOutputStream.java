@@ -20,6 +20,7 @@ import org.apache.commons.io.IOUtils;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
 import com.databasepreservation.common.api.utils.ExtraMediaType;
+import com.databasepreservation.common.api.utils.HandlebarsUtils;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
@@ -52,7 +53,8 @@ public class ZipOutputStream extends CSVOutputStream {
     this.zipFilename = zipFilename;
     this.csvFilename = csvFilename;
     this.viewerRows = viewerRows;
-    this.fieldsToReturn = Stream.of(fieldsToHeader.split(",")).collect(Collectors.toList());;
+    this.fieldsToReturn = Stream.of(fieldsToHeader.split(",")).collect(Collectors.toList());
+    ;
     this.viewerRowsClone = viewerRowsClone;
     this.sublist = sublist;
     this.exportDescriptions = exportDescriptions;
@@ -152,7 +154,7 @@ public class ZipOutputStream extends CSVOutputStream {
             isFirst = false;
           }
 
-          printer.printRecord(row.getCellValues(fieldsToReturn));
+          printer.printRecord(HandlebarsUtils.getCellValues(row, configTable, fieldsToReturn));
         }
         nIndex++;
       }

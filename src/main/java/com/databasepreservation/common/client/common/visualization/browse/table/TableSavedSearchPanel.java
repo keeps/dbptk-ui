@@ -7,6 +7,7 @@ import com.databasepreservation.common.client.common.search.SavedSearch;
 import com.databasepreservation.common.client.common.search.SearchInfo;
 import com.databasepreservation.common.client.common.search.TableSearchPanel;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
+import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.services.CollectionService;
@@ -101,7 +102,7 @@ public class TableSavedSearchPanel extends RightPanel {
     // set searchForm and table
     SearchInfo searchInfo = ViewerJsonUtils.getSearchInfoMapper().read(savedSearch.getSearchInfoJson());
     if (SearchInfo.isPresentAndValid(searchInfo)) {
-      TableSearchPanel tableSearchPanel = new TableSearchPanel(savedSearch.getSearchInfoJson(), status);
+      TableSearchPanel tableSearchPanel = new TableSearchPanel(searchInfo.asJson(), status);
       tableSearchPanel.provideSource(database, database.getMetadata().getTableById(tableId));
       tableSearchPanelContainer.setWidget(tableSearchPanel);
     } else {

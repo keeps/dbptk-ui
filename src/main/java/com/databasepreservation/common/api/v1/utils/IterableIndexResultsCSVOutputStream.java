@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 
 import org.apache.commons.csv.CSVPrinter;
 
+import com.databasepreservation.common.api.utils.HandlebarsUtils;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.server.index.utils.IterableIndexResult;
@@ -56,7 +57,7 @@ public class IterableIndexResultsCSVOutputStream extends CSVOutputStream {
         isFirst = false;
       }
 
-      printer.printRecord(row.getCellValues(fieldsToReturn));
+      printer.printRecord(HandlebarsUtils.getCellValues(row, configTable, fieldsToReturn));
 
     }
 

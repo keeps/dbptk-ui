@@ -1,6 +1,7 @@
 package com.databasepreservation.common.client;
 
 import com.databasepreservation.common.client.configuration.observer.CollectionObserver;
+import com.databasepreservation.common.client.configuration.observer.ColumnVisibilityObserver;
 import com.databasepreservation.common.client.configuration.observer.SaveButtonObserver;
 
 /**
@@ -10,12 +11,14 @@ public class ObserverManager {
 
   private static CollectionObserver collectionObserver;
   private static SaveButtonObserver saveObserver;
+  private static ColumnVisibilityObserver columnVisibilityObserver;
   private static boolean instantiated = false;
 
   private static void instantiate() {
     if (!instantiated) {
       collectionObserver = new CollectionObserver();
       saveObserver = new SaveButtonObserver();
+      columnVisibilityObserver = new ColumnVisibilityObserver();
       instantiated = true;
     }
   }
@@ -29,4 +32,10 @@ public class ObserverManager {
     instantiate();
     return saveObserver;
   }
+
+  public static ColumnVisibilityObserver getColumnVisibilityObserver() {
+    instantiate();
+    return columnVisibilityObserver;
+  }
+
 }
