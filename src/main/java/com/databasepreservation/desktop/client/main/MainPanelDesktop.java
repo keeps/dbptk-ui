@@ -477,26 +477,6 @@ public class MainPanelDesktop extends Composite {
           return AdvancedConfiguration.getInstance(database);
         }
       });
-    } else if (HistoryManager.ROUTE_DATA_TRANSFORMATION.equals(currentHistoryPath.get(0))) {
-      final String databaseUUID = currentHistoryPath.get(1);
-      DataTransformationSidebar sidebar = DataTransformationSidebar.getInstance(databaseUUID);
-      if (currentHistoryPath.size() == 2) {
-        setContent(databaseUUID, HistoryManager.ROUTE_DATA_TRANSFORMATION, databaseUUID, sidebar,
-          new RightPanelLoader() {
-            @Override
-            public RightPanel load(ViewerDatabase database, CollectionStatus status) {
-              return DataTransformation.getInstance(status, database, sidebar);
-            }
-          });
-      } else if (currentHistoryPath.size() == 4) {
-        final String tableId = currentHistoryPath.get(2) + "." + currentHistoryPath.get(3);
-        setContent(databaseUUID, HistoryManager.ROUTE_DATA_TRANSFORMATION, tableId, sidebar, new RightPanelLoader() {
-          @Override
-          public RightPanel load(ViewerDatabase database, CollectionStatus status) {
-            return DataTransformation.getInstance(status, database, tableId, sidebar);
-          }
-        });
-      }
     } else if (HistoryManager.ROUTE_TABLE_MANAGEMENT.equals(currentHistoryPath.get(0))) {
       final String databaseUUID = currentHistoryPath.get(1);
       setContent(databaseUUID, new ContentPanelLoader() {

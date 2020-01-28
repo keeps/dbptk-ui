@@ -4,9 +4,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.ContentPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
+import com.databasepreservation.common.client.common.utils.ApplicationType;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
@@ -65,13 +67,16 @@ public class AdvancedConfiguration extends ContentPanel {
       messages.advancedConfigurationTextForColumnsManagement(), FontAwesomeIconManager.COLUMN);
     ManagementColumnsPanel.addClickHandler(event -> HistoryManager.gotoColumnsManagement(database.getUuid()));
 
-    FocusPanel DataTransformationPanel = createOptions(messages.advancedConfigurationLabelForDataTransformation(),
-      messages.advancedConfigurationTextForDataTransformation(), FontAwesomeIconManager.DATA_TRANSFORMATION);
-    DataTransformationPanel.addClickHandler(event -> HistoryManager.gotoDataTransformation(database.getUuid()));
-
     content.add(ManagementTablesPanel);
     content.add(ManagementColumnsPanel);
-    content.add(DataTransformationPanel);
+
+    if (ApplicationType.getType().equals(ViewerConstants.SERVER)) {
+      FocusPanel DataTransformationPanel = createOptions(messages.advancedConfigurationLabelForDataTransformation(),
+        messages.advancedConfigurationTextForDataTransformation(), FontAwesomeIconManager.DATA_TRANSFORMATION);
+      DataTransformationPanel.addClickHandler(event -> HistoryManager.gotoDataTransformation(database.getUuid()));
+      content.add(DataTransformationPanel);
+    }
+
   }
 
   private void configureHeader() {

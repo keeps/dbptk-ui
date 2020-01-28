@@ -96,6 +96,9 @@ public class TablePanel extends RightPanel implements ICollectionStatusObserver,
   Button options;
 
   @UiField
+  FlowPanel advancedOptions;
+
+  @UiField
   MenuBar configurationMenu;
 
   private CollectionStatus collectionStatus;
@@ -190,8 +193,16 @@ public class TablePanel extends RightPanel implements ICollectionStatusObserver,
     UserLogin.getInstance().getAuthenticatedUser(new DefaultAsyncCallback<User>() {
       @Override
       public void onSuccess(User user) {
-        if(user.isAdmin() || ApplicationType.getType().equals(ViewerConstants.DESKTOP)){
+        if (user.isAdmin() && ApplicationType.getType().equals(ViewerConstants.SERVER)) {
           buildMenu();
+        } else if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
+          advancedOptions.remove(configurationMenu);
+          Button columnsManagementBtn = new Button(messages
+            .dataTransformationBtnManageTable(collectionStatus.getTableStatus(table.getUuid()).getCustomName()));
+          columnsManagementBtn.setStyleName("btn btn-link");
+          columnsManagementBtn
+            .addClickHandler(event -> HistoryManager.gotoColumnsManagement(database.getUuid(), table.getId()));
+          advancedOptions.insert(columnsManagementBtn, 0);
         }
       }
     });
@@ -224,7 +235,9 @@ public class TablePanel extends RightPanel implements ICollectionStatusObserver,
     MenuItem dataTransformationMenuItem = new MenuItem(
       SafeHtmlUtils.fromString(messages.dataTransformationBtnTransformTable(collectionStatus.getTableStatus(table.getUuid()).getCustomName())),
       () -> HistoryManager.gotoDataTransformation(database.getUuid(), table.getId()));
-    configurationSubMenuBar.addItem(dataTransformationMenuItem);
+    if (ApplicationType.getType().equals(ViewerConstants.SERVER)) {
+      configurationSubMenuBar.addItem(dataTransformationMenuItem);
+    }
     configurationMenu.addItem(SafeHtmlUtils.fromString(messages.advancedConfigurationLabelForMainTitle()),
       configurationSubMenuBar);
     configurationMenu.setStyleName("btn btn-link");

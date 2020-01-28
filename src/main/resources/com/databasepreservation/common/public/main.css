@@ -3021,6 +3021,10 @@ rgba(0, 0, 0, .125);
     margin-right:-16px
 }
 
+.card + .row-field {
+    margin-top: 20px;
+}
+
 .search-context{
     line-height: 4rem;
     background-color:  #089de3;

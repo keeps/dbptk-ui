@@ -154,7 +154,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
           .getTableById(configColumn.getNestedColumns().getOriginalTable());
 
         Column<ViewerRow, SafeHtml> templateColumn = buildTemplateColumn(configColumn, nestedTable);
-        templateColumn.setSortable(true);
+        templateColumn.setSortable(false);
         addColumn(configColumn, templateColumn);
         configColumns.put(configColumn, templateColumn);
       }
@@ -326,7 +326,9 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
       ColumnStatus viewerColumn = entry.getKey();
       Column<ViewerRow, ?> column = entry.getValue();
 
+      // if(!viewerColumn.getType().equals(NESTED)){
       columnSortingKeyMap.put(column, Collections.singletonList(viewerColumn.getId()));
+      // }
     }
 
     currentSorter = createSorter(columnSortList, columnSortingKeyMap);
