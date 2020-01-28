@@ -5,12 +5,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.LoadingDiv;
 import com.databasepreservation.common.client.common.RightPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.lists.TableRowList;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
+import com.databasepreservation.common.client.common.utils.TableRowListWrapper;
+import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
 import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
 import com.databasepreservation.common.client.index.filter.Filter;
@@ -42,7 +45,7 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class DatabaseSearchPanel extends RightPanel {
+public class DatabaseSearchPanel extends RightPanel implements ICollectionStatusObserver {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, DatabaseSearchPanel> instances = new HashMap<>();
   private final CollectionStatus status;
@@ -93,6 +96,9 @@ public class DatabaseSearchPanel extends RightPanel {
     this.status = status;
 
     initWidget(uiBinder.createAndBindUi(this));
+
+    ObserverManager.getCollectionObserver().addObserver(this);
+
     mainHeader.setWidget(CommonClientUtils.getHeaderHTML(
       FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE_SEARCH), messages.searchAllRecords(), "h1"));
 
@@ -144,12 +150,6 @@ public class DatabaseSearchPanel extends RightPanel {
     searchInputButton.addClickHandler(event -> doSearch());
   }
 
-  @Override
-  public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-      BreadcrumbManager.updateBreadcrumb(breadcrumb,
-          BreadcrumbManager.forDatabaseSearchPanel(database.getUuid(), database.getMetadata().getName()));
-  }
-
   private void doSearch() {
     // hide everything
     noResultsContent.setVisible(false);
@@ -173,10 +173,21 @@ public class DatabaseSearchPanel extends RightPanel {
 
   }
 
+  @Override
+  public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
+    BreadcrumbManager.updateBreadcrumb(breadcrumb,
+        BreadcrumbManager.forDatabaseSearchPanel(database.getUuid(), database.getMetadata().getName()));
+  }
+
+  @Override
+  public void updateCollection(CollectionStatus collectionStatus) {
+    instances.remove(collectionStatus.getDatabaseUUID());
+  }
+
   private static class TableSearchPanelContainer extends FlowPanel {
     private final Widget header;
     private final SimplePanel tableContainer;
-    private final CollectionStatus status;
+    private CollectionStatus status;
     private TableRowList tableRowList;
     private final ViewerDatabase database;
     private final ViewerTable table;
@@ -219,6 +230,10 @@ public class DatabaseSearchPanel extends RightPanel {
           HistoryManager.gotoRecord(database.getUuid(), table.getId(), record.getUuid());
         }
       });
+    }
+
+    public void setCollectionStatus(CollectionStatus status) {
+      this.status = status;
     }
 
     private void searchCompletedEventHandler(ValueChangeEvent<IndexResult<ViewerRow>> event) {

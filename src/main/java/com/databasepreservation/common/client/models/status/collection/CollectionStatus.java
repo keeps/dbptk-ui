@@ -13,10 +13,11 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-@JsonPropertyOrder({"version", "id", "solrCollectionPrefix", "name", "description", "tables", "savedSearches" , "denormalizations"})
+@JsonPropertyOrder({"version", "id", "solrCollectionPrefix", "databaseUUID", "name", "description", "tables", "savedSearches" , "denormalizations"})
 public class CollectionStatus implements Serializable {
 
   private String version;
+  private String databaseUUID;
   private String id;
   private String solrCollectionPrefix;
   private String name;
@@ -37,6 +38,14 @@ public class CollectionStatus implements Serializable {
 
   public void setVersion(String version) {
     this.version = version;
+  }
+
+  public String getDatabaseUUID() {
+    return databaseUUID;
+  }
+
+  public void setDatabaseUUID(String databaseUUID) {
+    this.databaseUUID = databaseUUID;
   }
 
   public String getId() {

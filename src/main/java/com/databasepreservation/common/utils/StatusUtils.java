@@ -185,9 +185,10 @@ public class StatusUtils {
     return status;
   }
 
-  public static CollectionStatus getCollectionStatus(String solrCollectionName) {
+  public static CollectionStatus getCollectionStatus(final String databaseUUID, final String solrCollectionName) {
     CollectionStatus status = new CollectionStatus();
     status.setVersion(ViewerConstants.COLLECTION_STATUS_VERSION);
+    status.setDatabaseUUID(databaseUUID);
     status.setSolrCollectionPrefix(ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX);
     status.setId(solrCollectionName);
 

@@ -1384,6 +1384,8 @@ public interface ClientMessages extends Messages {
    *******************************************/
   String columnManagementPageTitle();
 
+  String columnManagementPageCancelEventDialog();
+
   String columnManagementPageToastDescription();
 
   String columnManagementPageTableTextForDescription();

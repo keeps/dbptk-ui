@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.databasepreservation.common.client.ObserverManager;
+import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.RightPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
@@ -85,6 +86,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
   private String tableId;
   private Button btnSave = new Button();
   private BasicTablePanel<ColumnStatus> cellTable;
+  private boolean changes = false;
   private Map<String, StatusHelper> editableValues = new HashMap<>();
 
   public static ColumnsManagementPanel getInstance(CollectionStatus status, ViewerDatabase database, String tableUUID,
@@ -136,35 +138,9 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
       }
     });
 
-    btnCancel.addClickHandler(clickEvent -> {
-      instances.entrySet().removeIf(e -> e.getKey().startsWith(database.getUuid()));
-      sidebar.reset(database, collectionStatus);
-      HistoryManager.gotoAdvancedConfiguration(database.getUuid());
-    });
+    btnCancel.addClickHandler(e -> handleCancelEvent(changes));
 
-    btnSave.addClickHandler(clickEvent -> {
-      if (validateUniqueInputs()) {
-        if (validateCheckboxes()) {
-          instances.forEach((key, object) -> {
-            if (key.startsWith(database.getUuid())) {
-              object.collectionStatus.getTableStatusByTableId(object.tableId)
-                .setColumns(saveChanges(object.cellTable, object.tableId, object.editableValues));
-            }
-          });
-
-          CollectionService.Util.call((Boolean result) -> {
-            ObserverManager.getCollectionObserver().setCollectionStatus(collectionStatus);
-            sidebar.reset(database, collectionStatus);
-            Toast.showInfo(messages.columnManagementPageTitle(), messages.columnManagementPageToastDescription());
-          }).updateCollectionConfiguration(database.getUuid(), database.getUuid(), collectionStatus);
-        } else {
-          Dialogs.showErrors(messages.columnManagementPageTitle(),
-            messages.columnManagementPageDialogErrorDescription(), messages.basicActionClose());
-        }
-      } else {
-        Dialogs.showErrors(messages.columnManagementPageTitle(), messages.columnManagementPageDialogErrorUnique(), messages.basicActionClose());
-      }
-    });
+    btnSave.addClickHandler(e -> handleSaveEvent(changes));
 
     content.add(CommonClientUtils.wrapOnDiv("navigation-panel-buttons",
       CommonClientUtils.wrapOnDiv("btn-item", btnSave), CommonClientUtils.wrapOnDiv("btn-item", btnCancel)));
@@ -196,6 +172,55 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
     }
 
     return statuses;
+  }
+
+  private void handleCancelEvent(boolean changes) {
+    if (changes) {
+      Dialogs.showConfirmDialog(messages.columnManagementPageTitle(), messages.columnManagementPageCancelEventDialog(),
+        messages.basicActionDiscard(), "btn btn-danger btn-times-circle", messages.basicActionBack(), "btn btn-link",
+        new DefaultAsyncCallback<Boolean>() {
+          @Override
+          public void onSuccess(Boolean aBoolean) {
+            if (!aBoolean) {
+              instances.entrySet().removeIf(e -> e.getKey().startsWith(database.getUuid()));
+              sidebar.reset(database, collectionStatus);
+              HistoryManager.gotoAdvancedConfiguration(database.getUuid());
+            }
+          }
+        });
+    } else {
+      HistoryManager.gotoAdvancedConfiguration(database.getUuid());
+    }
+  }
+
+  private void handleSaveEvent(boolean changes) {
+    if (changes) {
+      if (validateUniqueInputs()) {
+        if (validateCheckboxes()) {
+          instances.forEach((key, object) -> {
+            if (key.startsWith(database.getUuid())) {
+              object.collectionStatus.getTableStatusByTableId(object.tableId)
+                .setColumns(saveChanges(object.cellTable, object.tableId, object.editableValues));
+            }
+          });
+
+          CollectionService.Util.call((Boolean result) -> {
+            ObserverManager.getCollectionObserver().setCollectionStatus(collectionStatus);
+            sidebar.reset(database, collectionStatus);
+            this.changes = false;
+            Toast.showInfo(messages.columnManagementPageTitle(), messages.columnManagementPageToastDescription());
+          }).updateCollectionConfiguration(database.getUuid(), database.getUuid(), collectionStatus);
+        } else {
+          Dialogs.showErrors(messages.columnManagementPageTitle(),
+            messages.columnManagementPageDialogErrorDescription(), messages.basicActionClose());
+        }
+      } else {
+        Dialogs.showErrors(messages.columnManagementPageTitle(), messages.columnManagementPageDialogErrorUnique(),
+          messages.basicActionClose());
+      }
+    } else {
+      Toast.showInfo(messages.columnManagementPageTitle(), messages.columnManagementPageToastDescription());
+    }
   }
 
   private BasicTablePanel<ColumnStatus> populateTable(final TableStatus tableStatus) {
@@ -296,6 +321,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
         editableValues.put(column.getId(), helper);
       }
 
+      changes = true;
       sidebar.updateSidebarItem(tableId, true);
     });
 
@@ -329,6 +355,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
         editableValues.put(column.getId(), helper);
       }
 
+      changes = true;
       sidebar.updateSidebarItem(tableId, true);
     });
 
@@ -358,6 +385,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
         editableValues.put(column.getId(), helper);
       }
 
+      changes = true;
       sidebar.updateSidebarItem(tableId, true);
     });
 
@@ -419,6 +447,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
         editableValues.put(column.getId(), helper);
       }
 
+      changes = true;
       sidebar.updateSidebarItem(tableId, true);
     });
 
@@ -449,6 +478,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
         editableValues.put(column.getId(), helper);
       }
 
+      changes = true;
       sidebar.updateSidebarItem(tableId, true);
     });
     return description;
@@ -472,6 +502,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
         return messages.basicActionOpen();
       }
     };
+
     options.setFieldUpdater((index, columnStatus, value) -> {
       List<FlowPanel> configurations = new ArrayList<>();
       if (columnStatus.getNestedColumns() != null) {
@@ -512,6 +543,8 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
       templateDetailPanel.add(templateDetail);
       configurations.add(templateDetailPanel);
 
+      changes = true;
+
       Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), messages.basicTableHeaderOptions(),
         configurations, messages.basicActionClose(), "btn btn-close");
     });
@@ -530,6 +563,8 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
 
     list.set(clickedIndex, relative);
     list.set(relativeToClickIndex, clicked);
+
+    changes = true;
   }
 
   private boolean validateUniqueInputs() {

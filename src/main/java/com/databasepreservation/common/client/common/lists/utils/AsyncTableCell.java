@@ -14,7 +14,6 @@ import java.util.Set;
 
 import org.fusesource.restygwt.client.Method;
 import org.fusesource.restygwt.client.MethodCallback;
-import com.databasepreservation.common.client.index.filter.Filter;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
 import com.databasepreservation.common.client.ClientConfigurationManager;
@@ -26,6 +25,7 @@ import com.databasepreservation.common.client.index.facets.FacetFieldResult;
 import com.databasepreservation.common.client.index.facets.FacetParameter;
 import com.databasepreservation.common.client.index.facets.FacetValue;
 import com.databasepreservation.common.client.index.facets.Facets;
+import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.select.SelectedItems;
 import com.databasepreservation.common.client.index.select.SelectedItemsFilter;
 import com.databasepreservation.common.client.index.select.SelectedItemsList;

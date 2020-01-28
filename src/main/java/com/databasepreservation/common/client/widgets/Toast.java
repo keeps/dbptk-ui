@@ -100,6 +100,7 @@ public class Toast extends PopupPanel {
     messageLabel.addStyleName("toast-message");
   }
 
+  @Override
   public void hide() {
     super.hide();
     slots[slotNumber] = null;

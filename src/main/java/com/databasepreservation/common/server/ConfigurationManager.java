@@ -179,7 +179,7 @@ public class ConfigurationManager {
   }
 
   public void addCollection(String databaseUUID, String solrCollectionName) {
-    final CollectionStatus collectionStatus = StatusUtils.getCollectionStatus(solrCollectionName);
+    final CollectionStatus collectionStatus = StatusUtils.getCollectionStatus(databaseUUID, solrCollectionName);
 
     try {
       final DatabaseStatus databaseStatus = getDatabaseStatus(databaseUUID);

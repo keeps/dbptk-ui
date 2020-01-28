@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.fusesource.restygwt.client.MethodCallback;
 import org.roda.core.data.v2.index.sublist.Sublist;
@@ -447,7 +446,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
 
     if (nested) {
       DataTransformationUtils.buildNestedFieldsToReturn(wrapper.getTable(), wrapper.getStatus(), extraParameters,
-          fieldsToSolr);
+        fieldsToSolr);
     }
 
     // if all columns are hidden, export all
@@ -469,7 +468,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
       Facets.NONE, false, fieldsToSolr, extraParameters);
 
     if (!nested) {
-        FilterUtils.filterByTable(findRequest.filter, table.getSchemaName() + "." + table.getName());
+      FilterUtils.filterByTable(findRequest.filter, table.getSchemaName() + "." + table.getName());
     }
 
     return RestUtils.createExportTableUri(database.getUuid(), table.getSchemaName(), table.getName(), findRequest,

@@ -14,8 +14,6 @@ import com.databasepreservation.common.client.common.NoAsyncCallback;
 import com.databasepreservation.common.client.common.fields.GenericField;
 import com.databasepreservation.common.client.common.helpers.HelperValidator;
 import com.databasepreservation.common.client.common.lists.columns.IndexedColumn;
-import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
-import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.wizard.table.ExternalLobsDialogBoxResult;
 import com.databasepreservation.common.client.widgets.MyCellTableResources;
 import com.google.gwt.core.client.GWT;
@@ -41,6 +39,16 @@ import config.i18n.client.ClientMessages;
 
 public class Dialogs {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
+  private static final String BTN_LINK_STYLE = "btn btn-link";
+  private static final String BTN_PLAY_STYLE = "btn btn-play";
+  private static final String BTN_ITEM = "btn-item";
+  private static final String WUI_DIALOG_LAYOUT_FOOTER = "wui-dialog-layout-footer";
+  private static final String WUI_DIALOG_LAYOUT = "wui-dialog-layout";
+  private static final String WUI_DIALOG_INFORMATION = "wui-dialog-information";
+  private static final String WUI_DIALOG_MESSAGE = "wui-dialog-message";
+
+  private Dialogs() {
+  }
 
   public static void showErrors(String title, String message, String closeButtonText) {
     final DialogBox dialogBox = new DialogBox(false, true);
@@ -61,14 +69,12 @@ public class Dialogs {
     dialogBox.setAnimationEnabled(false);
     dialogBox.setWidth("400px");
 
-    btnClose.addClickHandler(event -> {
-      dialogBox.hide();
-    });
+    btnClose.addClickHandler(event -> dialogBox.hide());
 
     dialogBox.addStyleName("dialog-persist-errors");
     layout.addStyleName("dialog-persist-errors-layout");
     footer.addStyleName("dialog-persist-errors-layout-footer");
-    btnClose.addStyleName("btn btn-link");
+    btnClose.addStyleName(BTN_LINK_STYLE);
 
     dialogBox.center();
     dialogBox.show();
@@ -119,7 +125,6 @@ public class Dialogs {
     final SimplePanel displayScrollWrapper = new SimplePanel(displayScroll);
     displayScrollWrapper.addStyleName("query-result-scroll-wrapper");
 
-
     int nrows = rows.size();
     int ncols = rows.get(0).size();
     ArrayList<List<String>> rowsL = new ArrayList<>(nrows);
@@ -153,9 +158,9 @@ public class Dialogs {
     layout.addStyleName("dialog-custom-view-test-result-layout");
     footer.addStyleName("dialog-custom-view-test-result-layout-footer");
     FlowPanel btnItemCloseButton = new FlowPanel();
-    btnItemCloseButton.addStyleName("btn-item");
+    btnItemCloseButton.addStyleName(BTN_ITEM);
     btnItemCloseButton.add(closeButton);
-    closeButton.addStyleName("btn btn-link");
+    closeButton.addStyleName(BTN_LINK_STYLE);
     footer.add(btnItemCloseButton);
 
     dialogBox.setWidget(layout);
@@ -163,7 +168,8 @@ public class Dialogs {
     dialogBox.show();
   }
 
-  public static void showCSVSetupDialog(String title, Widget helper, String cancelButtonText, String confirmButtonText, final AsyncCallback<Boolean> callback) {
+  public static void showCSVSetupDialog(String title, Widget helper, String cancelButtonText, String confirmButtonText,
+    final AsyncCallback<Boolean> callback) {
     final DialogBox dialogBox = new DialogBox(false, true);
     final Button cancelButton = new Button(cancelButtonText);
     final Button confirmButton = new Button(confirmButtonText);
@@ -173,18 +179,18 @@ public class Dialogs {
 
     footer.add(cancelButton);
     footer.add(confirmButton);
-    footer.addStyleName("wui-dialog-layout-footer");
+    footer.addStyleName(WUI_DIALOG_LAYOUT_FOOTER);
     layout.add(helper);
-    layout.addStyleName("wui-dialog-layout");
+    layout.addStyleName(WUI_DIALOG_LAYOUT);
     layout.add(footer);
 
-    cancelButton.addStyleName("btn btn-link");
+    cancelButton.addStyleName(BTN_LINK_STYLE);
     cancelButton.addClickHandler(event -> {
       dialogBox.hide();
       callback.onSuccess(false);
     });
 
-    confirmButton.addStyleName("btn btn-play");
+    confirmButton.addStyleName(BTN_PLAY_STYLE);
     confirmButton.addClickHandler(event -> {
       dialogBox.hide();
       callback.onSuccess(true);
@@ -195,7 +201,7 @@ public class Dialogs {
     dialogBox.setWidth("360px");
     dialogBox.setGlassEnabled(true);
     dialogBox.setAnimationEnabled(false);
-    dialogBox.addStyleName("wui-dialog-information");
+    dialogBox.addStyleName(WUI_DIALOG_INFORMATION);
 
     dialogBox.center();
     dialogBox.show();
@@ -251,18 +257,18 @@ public class Dialogs {
     layout.addStyleName("dialog-external-lobs-layout");
     footer.addStyleName("dialog-external-lobs-layout-footer");
     FlowPanel btnItemCancelButton = new FlowPanel();
-    btnItemCancelButton.addStyleName("btn-item");
+    btnItemCancelButton.addStyleName(BTN_ITEM);
     btnItemCancelButton.add(cancelButton);
-    cancelButton.addStyleName("btn btn-link");
+    cancelButton.addStyleName(BTN_LINK_STYLE);
     FlowPanel btnItemConfirmButton = new FlowPanel();
-    btnItemConfirmButton.addStyleName("btn-item");
+    btnItemConfirmButton.addStyleName(BTN_ITEM);
     btnItemConfirmButton.add(confirmButton);
-    confirmButton.addStyleName("btn btn-play");
+    confirmButton.addStyleName(BTN_PLAY_STYLE);
     footer.add(btnItemCancelButton);
     footer.add(btnItemConfirmButton);
     if (deleteButton != null) {
       FlowPanel btnItemDeleteButton = new FlowPanel();
-      btnItemDeleteButton.addStyleName("btn-item");
+      btnItemDeleteButton.addStyleName(BTN_ITEM);
       btnItemDeleteButton.add(deleteButton);
       footer.add(btnItemDeleteButton);
       deleteButton.addStyleName("btn");
@@ -273,12 +279,11 @@ public class Dialogs {
   }
 
   public static void showValidatorSettings(String title, String cancelButtonText, String confirmButtonText,
-                                           HelperValidator validator, final AsyncCallback<Boolean> callback) {
+    HelperValidator validator, final AsyncCallback<Boolean> callback) {
 
     final DialogBox dialogBox = new DialogBox(false, true);
     final Button cancelButton = new Button(cancelButtonText);
     final Button confirmButton = new Button(confirmButtonText);
-    final Button clearButton = new Button(messages.basicActionClear());
     FlowPanel layout = new FlowPanel();
     FlowPanel layoutTop = new FlowPanel();
     FlowPanel layoutBottom = new FlowPanel();
@@ -286,7 +291,7 @@ public class Dialogs {
 
     footer.add(cancelButton);
     footer.add(confirmButton);
-    footer.addStyleName("wui-dialog-layout-footer");
+    footer.addStyleName(WUI_DIALOG_LAYOUT_FOOTER);
 
     layoutTop.add(validator.reporterValidatorPanel());
     layoutTop.add(validator.udtValidatorPanel());
@@ -295,29 +300,29 @@ public class Dialogs {
     layoutBottom.add(footer);
     layout.add(layoutTop);
     layout.add(layoutBottom);
-    layout.addStyleName("wui-dialog-layout");
+    layout.addStyleName(WUI_DIALOG_LAYOUT);
 
-    cancelButton.addStyleName("btn btn-link");
+    cancelButton.addStyleName(BTN_LINK_STYLE);
     cancelButton.addClickHandler(event -> dialogBox.hide());
 
-    confirmButton.addStyleName("btn btn-play");
+    confirmButton.addStyleName(BTN_PLAY_STYLE);
     confirmButton.addClickHandler(event -> {
       dialogBox.hide();
       callback.onSuccess(true);
     });
-    
+
     dialogBox.setText(title);
     dialogBox.setWidget(layout);
     dialogBox.setGlassEnabled(true);
     dialogBox.setAnimationEnabled(false);
-    dialogBox.addStyleName("wui-dialog-information");
+    dialogBox.addStyleName(WUI_DIALOG_INFORMATION);
 
     dialogBox.center();
     dialogBox.show();
   }
 
-  public static void showExternalLobsSetupDialog(String title, FlowPanel referencesType,
-    FlowPanel genericField, String cancelButtonText, String confirmButtonText, boolean toDelete,
+  public static void showExternalLobsSetupDialog(String title, FlowPanel referencesType, FlowPanel genericField,
+    String cancelButtonText, String confirmButtonText, boolean toDelete,
     final AsyncCallback<ExternalLobsDialogBoxResult> callback) {
 
     final DialogBox dialogBox = new DialogBox(false, true);
@@ -366,8 +371,8 @@ public class Dialogs {
     dialogBox.addStyleName("dialog-external-lobs");
     layout.addStyleName("dialog-external-lobs-layout");
     footer.addStyleName("dialog-external-lobs-layout-footer");
-    cancelButton.addStyleName("btn btn-link");
-    confirmButton.addStyleName("btn btn-play");
+    cancelButton.addStyleName(BTN_LINK_STYLE);
+    confirmButton.addStyleName(BTN_PLAY_STYLE);
     if (deleteButton != null) {
       deleteButton.addStyleName("btn");
     }
@@ -411,20 +416,20 @@ public class Dialogs {
       }
     });
 
-    dialogBox.addStyleName("wui-dialog-information");
-    layout.addStyleName("wui-dialog-layout");
-    footer.addStyleName("wui-dialog-layout-footer");
-    messageLabel.addStyleName("wui-dialog-message");
+    dialogBox.addStyleName(WUI_DIALOG_INFORMATION);
+    layout.addStyleName(WUI_DIALOG_LAYOUT);
+    footer.addStyleName(WUI_DIALOG_LAYOUT_FOOTER);
+    messageLabel.addStyleName(WUI_DIALOG_MESSAGE);
     pathInput.addStyleName("form-textbox wui-dialog-input");
-    cancelButton.addStyleName("btn btn-link");
-    confirmButton.addStyleName("btn btn-play");
+    cancelButton.addStyleName(BTN_LINK_STYLE);
+    confirmButton.addStyleName(BTN_PLAY_STYLE);
     dialogBox.center();
     dialogBox.show();
 
   }
 
-  public static void showConfirmDialog(String title, String message, String cancelButtonText, String confirmButtonText,
-    final AsyncCallback<Boolean> callback) {
+  public static void showConfirmDialog(String title, String message, String cancelButtonText, String cancelButtonStyle,
+    String confirmButtonText, String confirmButtonStyle, final AsyncCallback<Boolean> callback) {
     final DialogBox dialogBox = new DialogBox(false, true);
     dialogBox.setText(title);
 
@@ -455,23 +460,28 @@ public class Dialogs {
     });
 
     dialogBox.addStyleName("wui-dialog-confirm");
-    layout.addStyleName("wui-dialog-layout");
-    footer.addStyleName("wui-dialog-layout-footer");
-    messageLabel.addStyleName("wui-dialog-message");
-    cancelButton.addStyleName("btn btn-link");
-    confirmButton.addStyleName("btn btn-play");
+    layout.addStyleName(WUI_DIALOG_LAYOUT);
+    footer.addStyleName(WUI_DIALOG_LAYOUT_FOOTER);
+    messageLabel.addStyleName(WUI_DIALOG_MESSAGE);
+    cancelButton.addStyleName(cancelButtonStyle);
+    confirmButton.addStyleName(confirmButtonStyle);
 
     dialogBox.center();
     dialogBox.show();
   }
 
+  public static void showConfirmDialog(String title, String message, String cancelButtonText, String confirmButtonText,
+    final AsyncCallback<Boolean> callback) {
+    showConfirmDialog(title, message, cancelButtonText, BTN_LINK_STYLE, confirmButtonText, BTN_PLAY_STYLE, callback);
+  }
+
   public static void showInformationDialog(String title, String message, String continueButtonText) {
-    showInformationDialog(title, message, continueButtonText, null, new NoAsyncCallback<Void>());
+    showInformationDialog(title, message, continueButtonText, BTN_PLAY_STYLE, new NoAsyncCallback<Void>());
   }
 
   public static void showInformationDialog(String title, String message, String continueButtonText,
     String continueButtonStyle) {
-    final DialogBox dialogBox = createDialogBoxSkeleton(false, true, true, false, title,"wui-dialog-information");
+    final DialogBox dialogBox = createDialogBoxSkeleton(false, true, true, false, title, WUI_DIALOG_INFORMATION);
 
     FlowPanel layout = new FlowPanel();
     Label messageLabel = new Label(message);
@@ -497,8 +507,7 @@ public class Dialogs {
   }
 
   public static void showInformationDialog(String title, String message, String continueButtonText,
-    String continueButtonStyle,
-    final AsyncCallback<Void> callback) {
+    String continueButtonStyle, final AsyncCallback<Void> callback) {
     final DialogBox dialogBox = new DialogBox(false, true);
     dialogBox.setText(title);
 
@@ -519,21 +528,22 @@ public class Dialogs {
       callback.onSuccess(null);
     });
 
-    dialogBox.addStyleName("wui-dialog-information");
-    layout.addStyleName("wui-dialog-layout");
-    messageLabel.addStyleName("wui-dialog-message");
-    if (continueButtonStyle != null) {
-      continueButton.addStyleName(continueButtonStyle);
-    } else {
-      continueButton.addStyleName("btn btn-play");
-    }
+    dialogBox.addStyleName(WUI_DIALOG_INFORMATION);
+    layout.addStyleName(WUI_DIALOG_LAYOUT);
+    messageLabel.addStyleName(WUI_DIALOG_MESSAGE);
+    continueButton.addStyleName(continueButtonStyle);
 
     dialogBox.center();
     dialogBox.show();
   }
 
-  public static void showDialogColumnConfiguration(String title, String message, List<FlowPanel> configurations, String continueButtonText,
-                                                   String continueButtonStyle) {
+  public static void showDialogColumnConfiguration(String title, String message, List<FlowPanel> configurations,
+    String continueButtonText) {
+    showDialogColumnConfiguration(title, message, configurations, continueButtonText, BTN_PLAY_STYLE);
+  }
+
+  public static void showDialogColumnConfiguration(String title, String message, List<FlowPanel> configurations,
+    String continueButtonText, String continueButtonStyle) {
     final DialogBox dialogBox = new DialogBox(false, true);
     dialogBox.setText(title);
 
@@ -556,18 +566,12 @@ public class Dialogs {
     dialogBox.setGlassEnabled(true);
     dialogBox.setAnimationEnabled(false);
 
-    continueButton.addClickHandler(event -> {
-      dialogBox.hide();
-    });
+    continueButton.addClickHandler(event -> dialogBox.hide());
+    continueButton.addStyleName(continueButtonStyle);
 
-    dialogBox.addStyleName("wui-dialog-information");
-    layout.addStyleName("wui-dialog-layout");
-    messageLabel.addStyleName("wui-dialog-message");
-    if (continueButtonStyle != null) {
-      continueButton.addStyleName(continueButtonStyle);
-    } else {
-      continueButton.addStyleName("btn btn-play");
-    }
+    dialogBox.addStyleName(WUI_DIALOG_INFORMATION);
+    layout.addStyleName(WUI_DIALOG_LAYOUT);
+    messageLabel.addStyleName(WUI_DIALOG_MESSAGE);
 
     dialogBox.center();
     dialogBox.show();
@@ -597,9 +601,9 @@ public class Dialogs {
     dialogBox.setGlassEnabled(true);
     dialogBox.setAnimationEnabled(false);
 
-    dialogBox.addStyleName("wui-dialog-information");
-    layout.addStyleName("wui-dialog-layout");
-    messageLabel.addStyleName("wui-dialog-message");
+    dialogBox.addStyleName(WUI_DIALOG_INFORMATION);
+    layout.addStyleName(WUI_DIALOG_LAYOUT);
+    messageLabel.addStyleName(WUI_DIALOG_MESSAGE);
 
     dialogBox.center();
     dialogBox.show();
@@ -616,7 +620,7 @@ public class Dialogs {
     if (message != null) {
       final Label messageLabel = new Label(message);
       layout.add(messageLabel);
-      messageLabel.addStyleName("wui-dialog-message");
+      messageLabel.addStyleName(WUI_DIALOG_MESSAGE);
     }
 
     final TextBox inputBox = new TextBox();
@@ -674,9 +678,9 @@ public class Dialogs {
     confirmButton.setEnabled(validator.test(inputBox.getText()));
 
     dialogBox.addStyleName("wui-dialog-prompt");
-    layout.addStyleName("wui-dialog-layout");
+    layout.addStyleName(WUI_DIALOG_LAYOUT);
     inputBox.addStyleName("form-textbox wui-dialog-message");
-    cancelButton.addStyleName("btn btn-link");
+    cancelButton.addStyleName(BTN_LINK_STYLE);
     confirmButton.addStyleName("pull-right btn btn-play");
 
     dialogBox.center();
