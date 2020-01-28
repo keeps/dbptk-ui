@@ -27,7 +27,7 @@
 
         <g:FlowPanel>
             <g:Label addStyleNames="form-label">
-                <ui:text from='{messages.columnManagementLabelForTemplateList}'/>
+                <ui:text from='{messages.columnManagementLabelForQuantityList}'/>
             </g:Label>
             <g:IntegerBox addStyleNames="form-textbox" ui:field="quantityList"/>
             <g:Label addStyleNames="column-description" ui:field="quantityListHint"/>

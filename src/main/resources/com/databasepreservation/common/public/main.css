@@ -265,6 +265,10 @@ p[data-value]:after {
     content: "\f085";
 }
 
+.btn-play:after {
+    content: "\f04b";
+}
+
 .btn-test:after {
     content: "\f0e7";
 }

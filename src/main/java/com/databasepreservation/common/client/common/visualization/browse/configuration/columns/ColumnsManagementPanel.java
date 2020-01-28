@@ -54,7 +54,6 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -153,7 +152,8 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
     mainHeader.setWidget(CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE),
       collectionStatus.getTableStatusByTableId(tableId).getCustomName(), "h1"));
 
-    btnGotoTable.setText(collectionStatus.getTableStatusByTableId(tableId).getCustomName());
+    btnGotoTable.setText(
+      messages.dataTransformationBtnBrowseTable(collectionStatus.getTableStatusByTableId(tableId).getCustomName()));
     btnGotoTable.addClickHandler(event -> {
       HistoryManager.gotoTable(database.getUuid(), tableId);
     });
@@ -603,7 +603,8 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
     List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forColumnsManagement(database.getUuid(),
-      database.getMetadata().getName());
+      database.getMetadata().getName(),
+      collectionStatus.getTableStatusByTableId(tableId).getCustomName());
     BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
   }
 

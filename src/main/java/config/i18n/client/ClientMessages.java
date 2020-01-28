@@ -1308,25 +1308,25 @@ public interface ClientMessages extends Messages {
   /********************************************
    * Data Transformation
    *******************************************/
-  String dataTransformationSidebarDialogTitle();
-
-  String dataTransformationSidebarWaitDialogMessage();
-
-  String dataTransformationSidebarSuccessDialogMessage();
-
   String dataTransformationTextForAlertColumnsOrder();
 
   SafeHtml dataTransformationTextForIsReferencedBy(String table, String column);
 
   SafeHtml dataTransformationTextForIsRelatedTo(String table, String column);
 
-  String dataTransformationTextForSeparetedRadioButton();
-
-  String dataTransformationTextForAggregationRadioButton();
-
   String dataTransformationTableRowList(@PluralCount List<String> columns);
 
-  String dataTransformationBtnGoToTable(String table);
+  String dataTransformationBtnBrowseTable(String table);
+
+  String dataTransformationBtnManageTable(String table);
+
+  String dataTransformationBtnTransformTable(String table);
+
+  String dataTransformationBtnRunTable(String table);
+
+  String dataTransformationBtnRunAll();
+
+  String dataTransformationTextForDescription();
 
   /********************************************
    * Preferences Panel
@@ -1415,6 +1415,8 @@ public interface ClientMessages extends Messages {
   String columnManagementLabelForTemplateList();
 
   String columnManagementLabelForTemplateDetail();
+
+  String columnManagementLabelForQuantityList();
 
   /********************************************
    * Sidebar

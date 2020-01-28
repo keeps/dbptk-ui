@@ -12,7 +12,6 @@ import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
-import com.databasepreservation.desktop.client.common.Card;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -59,35 +58,28 @@ public class AdvancedConfiguration extends ContentPanel {
     configureHeader();
 
     FocusPanel ManagementTablesPanel = createOptions(messages.advancedConfigurationLabelForTableManagement(),
-      messages.advancedConfigurationTextForTableManagement());
+      messages.advancedConfigurationTextForTableManagement(), FontAwesomeIconManager.TABLE);
     ManagementTablesPanel.addClickHandler(event -> HistoryManager.gotoTableManagement(database.getUuid()));
 
     FocusPanel ManagementColumnsPanel = createOptions(messages.advancedConfigurationLabelForColumnsManagement(),
-      messages.advancedConfigurationTextForColumnsManagement());
+      messages.advancedConfigurationTextForColumnsManagement(), FontAwesomeIconManager.COLUMN);
     ManagementColumnsPanel.addClickHandler(event -> HistoryManager.gotoColumnsManagement(database.getUuid()));
 
     FocusPanel DataTransformationPanel = createOptions(messages.advancedConfigurationLabelForDataTransformation(),
-      messages.advancedConfigurationTextForDataTransformation());
+      messages.advancedConfigurationTextForDataTransformation(), FontAwesomeIconManager.DATA_TRANSFORMATION);
     DataTransformationPanel.addClickHandler(event -> HistoryManager.gotoDataTransformation(database.getUuid()));
 
-//    Card createCard = Card.createInstance(messages.homePageHeaderTextForCreateSIARD(), messages.homePageDescriptionTextForCreateSIARD(), btnCreate);
-//
     content.add(ManagementTablesPanel);
     content.add(ManagementColumnsPanel);
     content.add(DataTransformationPanel);
   }
 
   private void configureHeader() {
-    header.add(CommonClientUtils.getHeaderHTML(FontAwesomeIconManager.getTag(FontAwesomeIconManager.COGS),
+    header.add(CommonClientUtils.getHeaderHTML(FontAwesomeIconManager.getTag(FontAwesomeIconManager.SLIDERS),
       messages.advancedConfigurationLabelForMainTitle(), "h1"));
-
-    // MetadataField instance =
-    // MetadataField.createInstance(messages.tableManagementPageTableTextForDescription());
-    // instance.setCSS("table-row-description", "font-size-description");
-    // content.add(instance);
   }
 
-  private FocusPanel createOptions(String title, String description) {
+  private FocusPanel createOptions(String title, String description, String iconName) {
     FocusPanel panel = new FocusPanel();
     FlowPanel content = new FlowPanel();
     content.setStyleName("advanced-configuration-option");
@@ -96,7 +88,7 @@ public class AdvancedConfiguration extends ContentPanel {
     FlowPanel right = new FlowPanel();
     right.setStyleName("right");
 
-    String iconTag = FontAwesomeIconManager.getTag(FontAwesomeIconManager.COG);
+    String iconTag = FontAwesomeIconManager.getTag(iconName);
     HTML icon = new HTML(SafeHtmlUtils.fromSafeConstant(iconTag));
     icon.setStyleName("icon");
 

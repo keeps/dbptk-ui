@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.databasepreservation.common.client.ObserverManager;
+import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.RightPanel;
 import com.databasepreservation.common.client.common.UserLogin;
@@ -12,9 +13,8 @@ import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.search.SearchInfo;
 import com.databasepreservation.common.client.common.search.TableSearchPanel;
+import com.databasepreservation.common.client.common.utils.ApplicationType;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
-import com.databasepreservation.common.client.common.visualization.browse.foreignKey.ForeignKeyPanelOptions;
-import com.databasepreservation.common.client.configuration.observer.CollectionObserver;
 import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
 import com.databasepreservation.common.client.configuration.observer.IColumnVisibilityObserver;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
@@ -22,10 +22,10 @@ import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.models.user.User;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
-import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
@@ -190,7 +190,7 @@ public class TablePanel extends RightPanel implements ICollectionStatusObserver,
     UserLogin.getInstance().getAuthenticatedUser(new DefaultAsyncCallback<User>() {
       @Override
       public void onSuccess(User user) {
-        if(user.isAdmin()){
+        if(user.isAdmin() || ApplicationType.getType().equals(ViewerConstants.DESKTOP)){
           buildMenu();
         }
       }
@@ -218,17 +218,15 @@ public class TablePanel extends RightPanel implements ICollectionStatusObserver,
   private void buildMenu() {
     MenuBar configurationSubMenuBar = new MenuBar(true);
     MenuItem columnMenuItem = new MenuItem(
-      FontAwesomeIconManager.loaded(FontAwesomeIconManager.COG,
-        messages.advancedConfigurationLabelForColumnsManagement()),
+      SafeHtmlUtils.fromString(messages.dataTransformationBtnManageTable(collectionStatus.getTableStatus(table.getUuid()).getCustomName())),
       () -> HistoryManager.gotoColumnsManagement(database.getUuid(), table.getId()));
     configurationSubMenuBar.addItem(columnMenuItem);
     MenuItem dataTransformationMenuItem = new MenuItem(
-      FontAwesomeIconManager.loaded(FontAwesomeIconManager.COG,
-        messages.advancedConfigurationLabelForDataTransformation()),
+      SafeHtmlUtils.fromString(messages.dataTransformationBtnTransformTable(collectionStatus.getTableStatus(table.getUuid()).getCustomName())),
       () -> HistoryManager.gotoDataTransformation(database.getUuid(), table.getId()));
     configurationSubMenuBar.addItem(dataTransformationMenuItem);
-    configurationMenu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.COG,
-            messages.advancedConfigurationLabelForMainTitle()), configurationSubMenuBar);
+    configurationMenu.addItem(SafeHtmlUtils.fromString(messages.advancedConfigurationLabelForMainTitle()),
+      configurationSubMenuBar);
     configurationMenu.setStyleName("btn btn-link");
   }
 

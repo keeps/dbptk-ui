@@ -71,6 +71,8 @@ public class FontAwesomeIconManager {
   public static final String TASKS = "tasks";
   public static final String ASTERISK = "asterisk";
   public static final String COLUMN = "at";
+  public static final String DATA_TRANSFORMATION = "project-diagram";
+  public static final String SLIDERS = "sliders-h";
 
   public static String getTag(String icon) {
     return "<i class=\"fa fa-" + icon + "\"></i>";

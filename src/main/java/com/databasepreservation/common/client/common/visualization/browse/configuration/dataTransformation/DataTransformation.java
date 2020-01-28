@@ -96,8 +96,14 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forDataTransformation(database.getUuid(),
-      database.getMetadata().getName());
+    List<BreadcrumbItem> breadcrumbItems = new ArrayList<>();
+    if (tableId == null) {
+      breadcrumbItems = BreadcrumbManager.forDataTransformation(database.getUuid(), database.getUuid(),
+        messages.breadcrumbTextForDataTransformation());
+    } else {
+      breadcrumbItems = BreadcrumbManager.forDataTransformation(database.getUuid(), database.getUuid(),
+        collectionStatus.getTableStatusByTableId(tableId).getCustomName());
+    }
     BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
   }
 
@@ -209,22 +215,24 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
     });
 
     btnGotoTable = new Button();
-    btnGotoTable.setText(messages.dataTransformationBtnGoToTable(table.getName()));
+    btnGotoTable.setText(
+      messages.dataTransformationBtnBrowseTable(collectionStatus.getTableStatusByTableId(tableId).getCustomName()));
     btnGotoTable.setStyleName("btn btn-table");
     btnGotoTable.addClickHandler(event -> {
       HistoryManager.gotoTable(database.getUuid(), tableId);
     });
 
     btnRunConfiguration.setEnabled(false);
-    btnRunConfiguration.setText("Run this");
-    btnRunConfiguration.setStyleName("btn btn-run");
+    btnRunConfiguration.setText(
+      messages.dataTransformationBtnRunTable(collectionStatus.getTableStatusByTableId(tableId).getCustomName()));
+    btnRunConfiguration.setStyleName("btn btn-play");
     btnRunConfiguration.addClickHandler(clickEvent -> {
       DataTransformationUtils.saveConfiguration(database.getUuid(), denormalizeConfiguration, collectionStatus);
       HistoryManager.gotoJobs();
     });
 
-    btnRunAllConfiguration.setText("Run All");
-    btnRunAllConfiguration.setStyleName("btn btn-run");
+    btnRunAllConfiguration.setText(messages.dataTransformationBtnRunAll());
+    btnRunAllConfiguration.setStyleName("btn btn-play");
     btnRunAllConfiguration.addClickHandler(clickEvent -> {
       HistoryManager.gotoJobs();
       for (Map.Entry<String, DenormalizeConfiguration> entry : denormalizeConfigurationList.entrySet()) {
