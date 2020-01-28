@@ -157,6 +157,7 @@ public class ViewerConstants {
    */
   public static final String SOLR_BATCH_JOB_ID = "jobId";
   public static final String SOLR_BATCH_JOB_DATABASE_UUID = "databaseUUID";
+  public static final String SOLR_BATCH_JOB_COLLECTION_UUID = "collectionUUID";
   public static final String SOLR_BATCH_JOB_DATABASE_NAME = "databaseName";
   public static final String SOLR_BATCH_JOB_TABLE_UUID = "tableUUID";
   public static final String SOLR_BATCH_JOB_TABLE_NAME = "tableName";
@@ -462,6 +463,7 @@ public class ViewerConstants {
   public static final String CONTROLLER_SIARD_VALIDATION_STATUS_PARAM = "siard-validation-status";
   public static final String CONTROLLER_REPORT_PATH_PARAM = "path";
   public static final String CONTROLLER_DATABASE_ID_PARAM = "databaseUUID";
+  public static final String CONTROLLER_COLLECTION_ID_PARAM = "collectionUUID";
   public static final String CONTROLLER_TABLE_ID_PARAM = "tableUUID";
   public static final String CONTROLLER_ROW_ID_PARAM = "rowUUID";
   public static final String CONTROLLER_COLUMN_ID_PARAM = "columnID";

@@ -197,33 +197,4 @@ public class JobList extends BasicAsyncTableCell<ViewerJob> {
     super.onAttach();
     refresh();
   }
-
-//  @Override
-//  public void refresh() {
-//    super.refresh();
-//
-//    JobResource.Util.call((HashMap<String, DataTransformationProgressData> progressDataMap) -> {
-//      GWT.log("JobResource::");
-//      progressColumn = new TooltipColumn<ViewerJob>() {
-//        @Override
-//        public SafeHtml getValue(ViewerJob viewerJob) {
-//          DataTransformationProgressData progressData = progressDataMap.get(viewerJob.getUuid());
-//          long rowToProcess;
-//          long processedRows;
-//          if (viewerJob.getEndTime() == null && progressData != null) {
-//            rowToProcess = progressData.getRowsToProcess();
-//            processedRows = progressData.getProcessedRows();
-//          } else {
-//            rowToProcess = viewerJob.getRowsToProcess();
-//            processedRows = viewerJob.getProcessRows();
-//          }
-//          int currentGlobalPercent = new Double((processedRows * 1.0D / rowToProcess) * 100).intValue();
-//          GWT.log("currentGlobalPercent::" + currentGlobalPercent);
-//          return SafeHtmlUtils.fromString(currentGlobalPercent + "% (" + processedRows + " of " + rowToProcess + ")");
-//        }
-//      };
-//
-//    }).getProgress();
-//
-//  }
 }

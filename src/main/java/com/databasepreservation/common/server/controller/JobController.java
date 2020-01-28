@@ -21,6 +21,7 @@ public class JobController {
     ViewerJob viewerJob = new ViewerJob();
     viewerJob.setUuid(jobExecution.getJobParameters().getString(ViewerConstants.INDEX_ID));
     viewerJob.setDatabaseUuid(jobExecution.getJobParameters().getString(ViewerConstants.CONTROLLER_DATABASE_ID_PARAM));
+    viewerJob.setCollectionUuid(jobExecution.getJobParameters().getString(ViewerConstants.CONTROLLER_COLLECTION_ID_PARAM));
     viewerJob.setTableUuid(jobExecution.getJobParameters().getString(ViewerConstants.CONTROLLER_TABLE_ID_PARAM));
     viewerJob.setJobId(jobExecution.getJobId());
     viewerJob.setName(jobExecution.getJobInstance().getJobName());

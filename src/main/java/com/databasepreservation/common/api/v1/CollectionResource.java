@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -27,6 +28,18 @@ import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RequestNotValidException;
 import org.roda.core.data.utils.JsonUtils;
 import org.roda.core.data.v2.index.sublist.Sublist;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersBuilder;
+import org.springframework.batch.core.JobParametersInvalidException;
+import org.springframework.batch.core.explore.JobExplorer;
+import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.launch.JobOperator;
+import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
+import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
+import org.springframework.batch.core.repository.JobRestartException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.databasepreservation.common.api.utils.ApiUtils;
@@ -82,6 +95,24 @@ import io.swagger.annotations.ApiParam;
 public class CollectionResource implements CollectionService {
   @Context
   private HttpServletRequest request;
+
+  @Autowired
+  @Qualifier("denormalizeJob")
+  Job job;
+
+  @Autowired
+  @Qualifier("customJobLauncher")
+  JobLauncher jobLauncher;
+
+  @Autowired
+  @Qualifier("customJobOperator")
+  JobOperator jobOperator;
+
+  @Autowired
+  org.springframework.batch.core.configuration.JobRegistry JobRegistry;
+
+  @Autowired
+  JobExplorer jobExplorer;
 
   @GET
   @Path("/{databaseUUID}/collection/{collectionUUID}/report")
@@ -249,7 +280,8 @@ public class CollectionResource implements CollectionService {
       throw new RESTException(e.getMessage());
     } finally {
       // register action
-      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID);
+      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,
+        ViewerConstants.CONTROLLER_TABLE_ID_PARAM, tableUUID);
     }
   }
 
@@ -273,7 +305,8 @@ public class CollectionResource implements CollectionService {
       throw new RESTException(e.getMessage());
     } finally {
       // register action
-      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID);
+      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,
+        ViewerConstants.CONTROLLER_TABLE_ID_PARAM, tableUUID);
     }
     return true;
   }
@@ -299,14 +332,39 @@ public class CollectionResource implements CollectionService {
       throw new RESTException(e.getMessage());
     } finally {
       // register action
-      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID);
+      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,
+          ViewerConstants.CONTROLLER_TABLE_ID_PARAM, tableUUID);
     }
     return true;
   }
 
   @Override
-  public Boolean run(String databaseUUID, String collectionUUID, String tableUUID) {
-    return true;
+  public void run(String databaseUUID, String collectionUUID, String tableUUID) {
+    ControllerAssistant controllerAssistant = new ControllerAssistant() {};
+    User user = UserUtility.getUser(request);
+    LogEntryState state = LogEntryState.SUCCESS;
+
+    controllerAssistant.checkRoles(user);
+
+    JobParametersBuilder jobBuilder = new JobParametersBuilder();
+    jobBuilder.addDate(ViewerConstants.SOLR_SEARCHES_DATE_ADDED, new Date());
+    jobBuilder.addString(ViewerConstants.INDEX_ID, SolrUtils.randomUUID());
+    jobBuilder.addString(ViewerConstants.CONTROLLER_COLLECTION_ID_PARAM, collectionUUID);
+    jobBuilder.addString(ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID);
+    jobBuilder.addString(ViewerConstants.CONTROLLER_TABLE_ID_PARAM, tableUUID);
+    JobParameters jobParameters = jobBuilder.toJobParameters();
+
+    try {
+      jobLauncher.run(job, jobParameters);
+    } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
+      | JobParametersInvalidException e) {
+      state = LogEntryState.FAILURE;
+      throw new RESTException();
+    } finally {
+      // register action
+      controllerAssistant.registerAction(user, databaseUUID, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM,
+        databaseUUID, ViewerConstants.CONTROLLER_TABLE_ID_PARAM, tableUUID);
+    }
   }
 
   /*******************************************************************************

@@ -17,6 +17,9 @@ public class TableOperation implements Operation {
     if (tableUUID != null) {
       if (wrapper.getDatabase() != null) {
         ViewerTable table = wrapper.getDatabase().getMetadata().getTableById(tableUUID);
+        if(table == null){
+          table = wrapper.getDatabase().getMetadata().getTable(tableUUID);
+        }
         wrapper.setTable(table);
         wrapper.setTablePresence(PresenceState.YES);
       } else {

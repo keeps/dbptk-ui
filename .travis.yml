@@ -30,7 +30,7 @@ script:
 
 before_deploy:
 - sed -ri "s/VERSION/$TRAVIS_BRANCH/g" .travis/descriptor.json
-- sed -ri "s/RELEASED/`date "+%y-%d-%m"`/g" .travis/descriptor*.json
+- sed -ri "s/RELEASED/`date "+%y-%m-%d"`/g" .travis/descriptor*.json
 
 deploy:
   - provider: bintray

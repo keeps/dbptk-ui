@@ -14,6 +14,7 @@ public class ViewerJob extends IsIndexed implements Serializable {
   private String uuid;
   private Long jobId;
   private String databaseUuid;
+  private String collectionUuid;
   private String databaseName;
   private String tableUuid;
   private String schemaName;
@@ -36,6 +37,14 @@ public class ViewerJob extends IsIndexed implements Serializable {
   @Override
   public String getUuid() {
     return uuid;
+  }
+
+  public String getCollectionUuid() {
+    return collectionUuid;
+  }
+
+  public void setCollectionUuid(String collectionUuid) {
+    this.collectionUuid = collectionUuid;
   }
 
   public Long getJobId() {

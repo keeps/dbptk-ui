@@ -4,6 +4,7 @@ import static com.databasepreservation.common.client.ViewerConstants.CONTROLLER_
 import static com.databasepreservation.common.client.ViewerConstants.CONTROLLER_COLLECTION_RESOURCE;
 import static com.databasepreservation.common.client.ViewerConstants.CONTROLLER_DATABASE_RESOURCE;
 import static com.databasepreservation.common.client.ViewerConstants.CONTROLLER_FILE_RESOURCE;
+import static com.databasepreservation.common.client.ViewerConstants.CONTROLLER_JOB_RESOURCE;
 import static com.databasepreservation.common.client.ViewerConstants.CONTROLLER_SIARD_RESOURCE;
 import static com.databasepreservation.common.client.ViewerConstants.CONTROLLER_USER_LOGIN_CONTROLLER;
 
@@ -52,6 +53,8 @@ public class ActivityLogUtils {
         return getCollectionParameters(entry);
       case CONTROLLER_SIARD_RESOURCE:
         return getSiardParameters(entry);
+      case CONTROLLER_JOB_RESOURCE:
+        return getJobParameters(entry);
       default:
         break;
     }
@@ -198,6 +201,12 @@ public class ActivityLogUtils {
             wrapper.getActivityLogEntry().getParameters().get(ViewerConstants.CONTROLLER_FILENAME_PARAM)))));
         break;
     }
+    return panel;
+  }
+
+  private static FlowPanel getJobParameters(ActivityLogWrapper wrapper) {
+    FlowPanel panel = new FlowPanel();
+    handleFilterInfo(panel, wrapper);
     return panel;
   }
 

@@ -157,6 +157,10 @@ public class ActivityLogStrategyFactory {
           composeLogStrategy.getOperationList().add(new DatabaseOperation());
           return composeLogStrategy;
       }
+    } else if (ViewerConstants.CONTROLLER_JOB_RESOURCE.equals(actionComponent)){
+      composeLogStrategy.clearOperationList();
+      composeLogStrategy.getOperationList().add(new FilterOperation());
+      return composeLogStrategy;
     }
 
     return identityLogStrategy;

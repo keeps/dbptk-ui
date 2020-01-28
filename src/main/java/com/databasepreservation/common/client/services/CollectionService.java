@@ -121,8 +121,8 @@ public interface CollectionService extends DirectRestService {
 
   @GET
   @Path("{databaseUUID}/collection/{collectionUUID}/config/{tableUUID}/run")
-  @ApiOperation(value = "Runs a specific denormalization configuration for a certain table within a database", response = DenormalizeConfiguration.class)
-  Boolean run(@PathParam("databaseUUID") String databaseUUID, @PathParam("collectionUUID") String collectionUUID,
+  @ApiOperation(value = "Runs a specific denormalization configuration for a certain table within a database")
+  void run(@PathParam("databaseUUID") String databaseUUID, @PathParam("collectionUUID") String collectionUUID,
     @PathParam("tableUUID") String tableUUID);
 
   /*******************************************************************************

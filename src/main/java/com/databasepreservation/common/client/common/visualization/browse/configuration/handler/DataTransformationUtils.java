@@ -93,10 +93,10 @@ public class DataTransformationUtils {
       CollectionService.Util.call((Boolean result) -> {
         final CollectionObserver collectionObserver = ObserverManager.getCollectionObserver();
         collectionObserver.setCollectionStatus(collectionStatus);
-        JobService.Util.call((String run) -> {
+        CollectionService.Util.call((Void response) -> {
           Toast.showInfo("Configuration file",
             "Created denormalization configuration file with success for " + denormalizeConfiguration.getTableID());
-        }).denormalizeTableJob(databaseUUID, denormalizeConfiguration.getTableUUID());
+        }).run(databaseUUID,databaseUUID, denormalizeConfiguration.getTableUUID());
       }).createDenormalizeConfigurationFile(databaseUUID, databaseUUID, denormalizeConfiguration.getTableUUID(),
         denormalizeConfiguration);
     }

@@ -57,38 +57,6 @@ public interface JobService extends DirectRestService {
     }
   }
 
-  @GET
-  @Path("/{jobUUID}")
-  @ApiOperation(value = "Retrieves a specific job", notes = "", response = ViewerJob.class)
-  ViewerJob retrieve(@PathParam("jobUUID") String jobUUID);
-
-  @POST
-  @Path("/")
-  @ApiOperation(value = "Finds jobs", notes = "", response = ViewerJob.class, responseContainer = "IndexResult")
-  IndexResult<ViewerJob> findJobs(@ApiParam(ViewerConstants.API_QUERY_PARAM_FILTER) FindRequest filter,
-    @QueryParam(ViewerConstants.API_QUERY_PARAM_LOCALE) String localeString);
-
-  @POST
-  @Path("/{databaseuuid}")
-  List<String> denormalizeCollectionJob(@PathParam("databaseuuid") String databaseuuid);
-
-  @POST
-  @Path("/{databaseuuid}/{tableuuid}")
-  @Produces(MediaType.TEXT_PLAIN)
-  String denormalizeTableJob(@PathParam("databaseuuid") String databaseuuid, @PathParam("tableuuid") String tableuuid);
-
-  @POST
-  @Path("/stop/{databaseuuid}/{tableuuid}")
-  Boolean stopDenormalizeJob(@PathParam("databaseuuid") String databaseuuid, @PathParam("tableuuid") String tableuuid);
-
-  @POST
-  @Path("/start/{databaseuuid}/{tableuuid}")
-  Boolean startDenormalizeJob(@PathParam("databaseuuid") String databaseuuid, @PathParam("tableuuid") String tableuuid);
-
-  @GET
-  @Path("/progress")
-  Map<String, DataTransformationProgressData> getProgress();
-
   @POST
   @Path("/find")
   @ApiOperation(value = "Find all jobs", response = IndexResult.class)
