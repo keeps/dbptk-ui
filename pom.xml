@@ -115,6 +115,15 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${springboot.version}</version>
             </plugin>
+            <plugin>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>3.2.3</version>
+                <configuration>
+                    <packagingExcludes>
+                        WEB-INF/lib/gwt-dev-*.jar
+                    </packagingExcludes>
+                </configuration>
+            </plugin>
         </plugins>
 
         <pluginManagement>
@@ -529,11 +538,6 @@
             <version>5.10.1</version>
         </dependency>
         <!-- / Font Awesome -->
-        <dependency>
-            <groupId>org.webjars.npm</groupId>
-            <artifactId>vis-network</artifactId>
-            <version>6.4.4</version>
-        </dependency>
 
         <!-- File upload -->
         <dependency>
