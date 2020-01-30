@@ -11,6 +11,7 @@ import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.helpers.HelperValidator;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
+import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.common.utils.html.LabelUtils;
 import com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.SIARDManagerPage;
@@ -66,7 +67,7 @@ public class ValidationNavigationPanel {
     validator = new HelperValidator(database.getPath());
     btnRunValidator = new Button();
     btnRunValidator.setText(messages.SIARDHomePageButtonTextValidateNow());
-    btnRunValidator.addStyleName("btn btn-link-info");
+    btnRunValidator.addStyleName("btn btn-play");
     btnRunValidator.addClickHandler(event -> {
       if (database.getVersion().equals(ViewerConstants.SIARD_V21)) {
         if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
@@ -99,7 +100,7 @@ public class ValidationNavigationPanel {
     // Open validator btn
     btnOpenValidator = new Button();
     btnOpenValidator.setText(messages.SIARDHomePageButtonTextOpenValidate());
-    btnOpenValidator.addStyleName("btn btn-link-info");
+    btnOpenValidator.addStyleName("btn btn-validate");
     btnOpenValidator.addClickHandler(event -> {
       if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
         HistoryManager.gotoSIARDValidator(database.getUuid(), validator.getReporterPathFile());
@@ -112,14 +113,16 @@ public class ValidationNavigationPanel {
 
     // See Report btn
     btnSeeReport = new Button();
-    btnSeeReport.addStyleName("btn btn-link-info");
+    btnSeeReport.addStyleName("btn btn-outline-primary");
     if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
       btnSeeReport.setText(messages.SIARDHomePageButtonTextForOpenReport());
+      btnSeeReport.addStyleName("btn-open");
       btnSeeReport.addClickHandler(clickEvent -> {
         JavascriptUtils.showItem(database.getValidatorReportPath());
       });
     } else {
       btnSeeReport.setText(messages.SIARDHomePageButtonTextForDownloadReport());
+      btnSeeReport.addStyleName("btn-download");
       btnSeeReport.addClickHandler(clickEvent -> {
         SafeUri downloadUri = RestUtils.createFileResourceDownloadValidationReportUri(database.getUuid());
         Window.Location.assign(downloadUri.asString());
@@ -129,7 +132,7 @@ public class ValidationNavigationPanel {
     // Delete Report btn
     btnDeleteReport = new Button();
     btnDeleteReport.setText(messages.SIARDHomePageButtonTextForDeleteIngested());
-    btnDeleteReport.addStyleName("btn btn-link-info");
+    btnDeleteReport.addStyleName("btn btn-danger btn-delete");
     btnDeleteReport.addClickHandler(event -> {
       if (!database.getValidationStatus().equals(ViewerDatabaseValidationStatus.VALIDATION_RUNNING)) {
         CommonDialogs.showConfirmDialog(messages.SIARDHomePageDialogTitleForDeleteValidationReport(),
@@ -144,9 +147,6 @@ public class ValidationNavigationPanel {
           });
       }
     });
-
-    // buttons
-    updateValidationButtons();
 
     // information
     validatedAt = MetadataField.createInstance(messages.SIARDHomePageLabelForValidatedAt(),
@@ -165,10 +165,13 @@ public class ValidationNavigationPanel {
     version.setCSS(null, "label-field", "value-field");
 
     NavigationPanel validation = NavigationPanel.createInstance(messages.SIARDHomePageOptionsHeaderForValidation());
-    validation.addButton(btnRunValidator);
-    validation.addButton(btnOpenValidator);
-    validation.addButton(btnSeeReport);
-    validation.addButton(btnDeleteReport);
+    validation.addButton(CommonClientUtils.wrapOnDiv("btn-item", btnRunValidator));
+    validation.addButton(CommonClientUtils.wrapOnDiv("btn-item", btnOpenValidator));
+    validation.addButton(CommonClientUtils.wrapOnDiv("btn-item", btnSeeReport));
+    validation.addButton(CommonClientUtils.wrapOnDiv("btn-item", btnDeleteReport));
+
+    // buttons
+    updateValidationButtons();
 
     validation.addToInfoPanel(validationStatus);
     validation.addToInfoPanel(validatedAt);
@@ -222,28 +225,39 @@ public class ValidationNavigationPanel {
       case VALIDATION_FAILED:
         btnSeeReport.setVisible(true);
         updateRunValidatorButton(messages.SIARDHomePageButtonTextRunValidationAgain());
-        btnOpenValidator.setVisible(ValidatorPage.checkInstance(database.getUuid()));
+        handleBtnOpenVisibility();
         btnDeleteReport
           .setVisible(database.getValidatorReportPath() != null && !database.getValidatorReportPath().isEmpty());
         break;
       case VALIDATION_RUNNING:
         btnSeeReport.setVisible(false);
         btnRunValidator.setVisible(false);
-        btnOpenValidator.setVisible(ValidatorPage.checkInstance(database.getUuid()));
+        handleBtnOpenVisibility();
         btnDeleteReport.setVisible(false);
         break;
       case NOT_VALIDATED:
         btnSeeReport.setVisible(false);
         updateRunValidatorButton(messages.SIARDHomePageButtonTextValidateNow());
         btnOpenValidator.setVisible(false);
+        btnOpenValidator.getElement().getParentElement().addClassName("btn-hidden");
         btnDeleteReport.setVisible(false);
         break;
       case ERROR:
         btnSeeReport.setVisible(false);
         updateRunValidatorButton(messages.SIARDHomePageButtonTextValidateNow());
-        btnOpenValidator.setVisible(ValidatorPage.checkInstance(database.getUuid()));
+        handleBtnOpenVisibility();
         btnDeleteReport.setVisible(false);
         break;
+    }
+  }
+
+  private void handleBtnOpenVisibility() {
+    if(ValidatorPage.checkInstance(database.getUuid())){
+      btnOpenValidator.setVisible(true);
+      btnOpenValidator.getParent().removeStyleName("btn-item-hidden");
+    } else {
+      btnOpenValidator.setVisible(false);
+      btnOpenValidator.getParent().addStyleName("btn-item-hidden");
     }
   }
 

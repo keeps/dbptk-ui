@@ -265,4 +265,12 @@ public class TablePanel extends RightPanel implements ICollectionStatusObserver,
       applyCurrentSearchInfoJsonIfExists();
     }
   }
+
+  @Override
+  protected void onLoad() {
+    super.onLoad();
+    if(!collectionStatus.getTableStatusByTableId(table.getId()).isShow()){
+      HistoryManager.gotoDatabase(database.getUuid());
+    }
+  }
 }

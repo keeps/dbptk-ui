@@ -8,6 +8,7 @@ import java.util.Date;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -83,14 +84,13 @@ public class SiardResource implements SiardService {
     LogEntryState state = LogEntryState.SUCCESS;
     controllerAssistant.checkRoles(user);
     String result = null;
-    String path = "";
+    String siardPath = "";
     try {
       final ViewerDatabase database = ViewerFactory.getSolrManager().retrieve(ViewerDatabase.class, databaseUUID);
       java.nio.file.Path siardFilesPath = ViewerConfiguration.getInstance().getSIARDFilesPath();
-      java.nio.file.Path siardPath = siardFilesPath.resolve(database.getPath());
-      path = database.getPath();
-      result = getValidationReportPath(validationReportPath, siardPath);
-      return SIARDController.validateSIARD(databaseUUID, siardPath.toAbsolutePath().toString(), result, allowedTypePath,
+      siardPath =  siardFilesPath.resolve(database.getPath()).toString();
+      result = getValidationReportPath(validationReportPath, database.getMetadata().getName());
+      return SIARDController.validateSIARD(databaseUUID, siardPath, result, allowedTypePath,
         skipAdditionalChecks);
     } catch (GenericException | NotFoundException e) {
       state = LogEntryState.FAILURE;
@@ -98,7 +98,7 @@ public class SiardResource implements SiardService {
     } finally {
       // register action
       controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,
-        ViewerConstants.CONTROLLER_SIARD_PATH_PARAM, path, ViewerConstants.CONTROLLER_REPORT_PATH_PARAM, result,
+        ViewerConstants.CONTROLLER_SIARD_PATH_PARAM, siardPath, ViewerConstants.CONTROLLER_REPORT_PATH_PARAM, result,
         ViewerConstants.CONTROLLER_SKIP_ADDITIONAL_CHECKS_PARAM, skipAdditionalChecks);
     }
   }
@@ -120,10 +120,10 @@ public class SiardResource implements SiardService {
   }
 
   @GET
-  @Path("/{databaseUUID}/siard/{siardUUID}/validation")
+  @Path("/{databaseUUID}/siard/{siardUUID}/download/validation")
   @Produces(MediaType.APPLICATION_OCTET_STREAM)
   @ApiOperation(value = "Downloads a specific SIARD validation report file from the storage location", notes = "")
-  public Response getValidationReportFile(String databaseUUID) {
+  public Response getValidationReportFile(@PathParam("databaseUUID") String databaseUUID, @PathParam("siardUUID") String siardUUID) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
     User user = UserUtility.getUser(request);
     LogEntryState state = LogEntryState.SUCCESS;
@@ -213,9 +213,9 @@ public class SiardResource implements SiardService {
     }
   }
 
-  private String getValidationReportPath(String validationReportPath, java.nio.file.Path siardPath) {
+  private String getValidationReportPath(String validationReportPath, String databaseName) {
     if (validationReportPath == null) {
-      String filename = siardPath.toString().replaceFirst("[.][^.]+$", "") + "-"
+      String filename = databaseName + "-"
         + new SimpleDateFormat("yyyyMMddHHmmssSSS").format(new Date()) + ".txt";
       validationReportPath = Paths
         .get(ViewerConfiguration.getInstance().getSIARDReportValidationPath().toString(), filename).toAbsolutePath()

@@ -2,17 +2,22 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:c='urn:import:com.databasepreservation.common.client.common'>
 
-    <g:FlowPanel addStyleNames="application-container" ui:field="container">
+    <g:FlowPanel addStyleNames="col_12" ui:field="container">
         <g:FlowPanel addStyleNames="browseContentPreviewPanel" ui:field="panel">
             <c:LoadingDiv visible="false" ui:field="loading"/>
+            <g:FlowPanel addStyleNames="structure-header">
+                <g:SimplePanel addStyleNames="h1" ui:field="mainHeader"/>
+            </g:FlowPanel>
+            <g:SimplePanel ui:field="description"/>
             <g:FlowPanel ui:field="metadataInformation"/>
             <g:FlowPanel addStyleNames="navigation-panels" ui:field="navigationPanels"/>
-            <g:FlowPanel addStyleNames="navigation-buttons">
+            <g:FlowPanel addStyleNames="clearfix"/>
+            <g:FlowPanel addStyleNames="navigation-panel-buttons">
                 <g:SimplePanel addStyleNames="btn-item">
-                  <g:Button ui:field="btnBack" addStyleNames="btn btn-primary btn-back-wizard"/>
+                    <g:Button ui:field="btnExclude" addStyleNames="btn btn-danger btn-delete"/>
                 </g:SimplePanel>
                 <g:SimplePanel addStyleNames="btn-item">
-                  <g:Button ui:field="btnExclude" addStyleNames="btn btn-danger btn-delete"/>
+                  <g:Button ui:field="btnBack" addStyleNames="btn btn-primary btn-back-wizard"/>
                 </g:SimplePanel>
             </g:FlowPanel>
         </g:FlowPanel>

@@ -40,4 +40,8 @@ public class NavigationPanel extends Composite {
   public void addButton(Button button) {
     this.navigationPanelOptions.add(button);
   }
+
+  public void addButton(FlowPanel button) {
+    this.navigationPanelOptions.add(button);
+  }
 }

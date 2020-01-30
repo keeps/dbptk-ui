@@ -98,10 +98,10 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
     List<BreadcrumbItem> breadcrumbItems = new ArrayList<>();
     if (tableId == null) {
-      breadcrumbItems = BreadcrumbManager.forDataTransformation(database.getUuid(), database.getUuid(),
+      breadcrumbItems = BreadcrumbManager.forDataTransformation(database.getUuid(), database.getMetadata().getName(),
         messages.breadcrumbTextForDataTransformation());
     } else {
-      breadcrumbItems = BreadcrumbManager.forDataTransformation(database.getUuid(), database.getUuid(),
+      breadcrumbItems = BreadcrumbManager.forDataTransformation(database.getUuid(), database.getMetadata().getName(),
         collectionStatus.getTableStatusByTableId(tableId).getCustomName());
     }
     BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);

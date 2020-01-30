@@ -188,7 +188,7 @@ public class DataTransformationSidebar extends Composite implements Sidebar, ICo
           firstElement = table.getId();
         }
         if (!table.isCustomView() && !table.isMaterializedView()) {
-          if (collectionStatus.showTable(table.getId())) {
+          if (collectionStatus.showTable(table.getUuid())) {
             sidebarGroup.add(createTableItem(schema, table, totalSchemas, iconTag));
           }
         }

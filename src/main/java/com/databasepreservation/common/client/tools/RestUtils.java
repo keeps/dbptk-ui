@@ -4,15 +4,15 @@
  */
 package com.databasepreservation.common.client.tools;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.utils.UriQueryUtils;
 import com.databasepreservation.common.client.index.FindRequest;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class RestUtils {
 
@@ -37,8 +37,9 @@ public class RestUtils {
   }
 
   public static SafeUri createFileResourceDownloadValidationReportUri(String databaseUUID) {
-    // api/v1/database/{databaseUUID}/download/validation/
+    // api/v1/database/{databaseUUID}/siard/{siardUUID}/validation
     String b = ViewerConstants.API_SERVLET + ViewerConstants.API_V1_DATABASE_RESOURCE + ViewerConstants.API_SEP
+      + databaseUUID + ViewerConstants.API_SEP + ViewerConstants.API_PATH_PARAM_SIARD + ViewerConstants.API_SEP
       + databaseUUID + ViewerConstants.API_SEP + ViewerConstants.API_PATH_PARAM_DOWNLOAD + ViewerConstants.API_SEP
       + ViewerConstants.API_PATH_PARAM_VALIDATION_REPORT;
     return UriUtils.fromSafeConstant(b);

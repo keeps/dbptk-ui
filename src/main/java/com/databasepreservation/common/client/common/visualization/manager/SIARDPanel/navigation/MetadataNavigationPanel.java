@@ -17,7 +17,6 @@ public class MetadataNavigationPanel {
   private static Map<String, MetadataNavigationPanel> instances = new HashMap<>();
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private ViewerDatabase database;
-  private MetadataField dbname;
   private MetadataField archivalDate;
   private MetadataField archiver;
   private MetadataField archiverContact;
@@ -26,7 +25,6 @@ public class MetadataNavigationPanel {
   private MetadataField dataOriginTimespan;
   private MetadataField dataOwner;
   private MetadataField producerApplication;
-  private MetadataField descriptionPanel;
 
   public static MetadataNavigationPanel getInstance(ViewerDatabase database) {
     String databaseUUID = database.getUuid();
@@ -48,9 +46,6 @@ public class MetadataNavigationPanel {
     FlowPanel right = new FlowPanel();
     right.addStyleName("metadata-information");
 
-    dbname = MetadataField.createInstance(messages.SIARDHomePageLabelForViewerMetadataName(),
-      database.getMetadata().getName());
-    dbname.setCSS("metadata-field", "metadata-information-element-label", "metadata-information-element-value");
     archivalDate = MetadataField.createInstance(messages.SIARDHomePageLabelForViewerMetadataArchivalDate(),
         Humanize.formatDateTime(database.getMetadata().getArchivalDate()));
     archivalDate.setCSS("metadata-field", "metadata-information-element-label",
@@ -68,7 +63,6 @@ public class MetadataNavigationPanel {
     clientMachine.setCSS("metadata-field", "metadata-information-element-label",
       "metadata-information-element-value");
 
-    left.add(dbname);
     left.add(archivalDate);
     left.add(archiver);
     left.add(archiverContact);
@@ -102,29 +96,7 @@ public class MetadataNavigationPanel {
     return panel;
   }
 
-  public SimplePanel buildDescription() {
-    SimplePanel panel = new SimplePanel();
-    panel.setStyleName("metadata-description");
-    String descriptionTxt = database.getMetadata().getDescription();
-
-    if (ViewerStringUtils.isBlank(descriptionTxt) || descriptionTxt.contentEquals("unspecified")) {
-      descriptionPanel = MetadataField.createInstance(messages.SIARDHomePageLabelForViewerMetadataDescription(),
-        messages.SIARDHomePageTextForMissingDescription());
-    } else {
-      descriptionPanel = MetadataField.createInstance(messages.SIARDHomePageLabelForViewerMetadataDescription(),
-        descriptionTxt);
-    }
-
-    descriptionPanel.setCSS("metadata-field", "metadata-information-description-label",
-      "metadata-information-element-value");
-
-    panel.add(descriptionPanel);
-
-    return panel;
-  }
-
   public void update(ViewerDatabase database) {
-    dbname.updateText(database.getMetadata().getName());
     archivalDate.updateText(Humanize.formatDateTime(database.getMetadata().getArchivalDate()));
     archiver.updateText(database.getMetadata().getArchiver());
     archiverContact.updateText(database.getMetadata().getArchiverContact());
@@ -133,6 +105,5 @@ public class MetadataNavigationPanel {
     dataOriginTimespan.updateText(database.getMetadata().getDataOriginTimespan());
     dataOwner.updateText(database.getMetadata().getDataOwner());
     producerApplication.updateText(database.getMetadata().getProducerApplication());
-    descriptionPanel.updateText(database.getMetadata().getDescription());
   }
 }

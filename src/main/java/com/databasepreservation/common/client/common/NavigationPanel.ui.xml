@@ -1,7 +1,7 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
-    <g:FlowPanel addStyleNames="navigation-panel">
+    <g:FlowPanel addStyleNames="navigation-card">
         <g:FlowPanel addStyleNames="navigation-panel-header" ui:field="navigationPanelHeader"/>
         <g:FlowPanel addStyleNames="navigation-panel-info" ui:field="navigationPanelInfo"/>
         <g:FlowPanel addStyleNames="navigation-panel-options" ui:field="navigationPanelOptions"/>

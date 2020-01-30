@@ -10,6 +10,7 @@ import com.databasepreservation.common.client.common.dialogs.CommonDialogs;
 import com.databasepreservation.common.client.common.fields.GenericField;
 import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
+import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.SIARDManagerPage;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
@@ -26,6 +27,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 
 import config.i18n.client.ClientMessages;
+import javafx.scene.layout.FlowPane;
 
 public class SIARDNavigationPanel {
 
@@ -52,7 +54,7 @@ public class SIARDNavigationPanel {
     // Edit button
     btnEditMetadata = new Button();
     btnEditMetadata.setText(messages.SIARDHomePageButtonTextEditMetadata());
-    btnEditMetadata.addStyleName("btn btn-link-info");
+    btnEditMetadata.addStyleName("btn btn-edit");
     btnEditMetadata.addClickHandler(clickEvent -> {
       HistoryManager.gotoSIARDEditMetadata(database.getUuid());
     });
@@ -93,7 +95,7 @@ public class SIARDNavigationPanel {
 
     // Delete SIARD file button
     btnDeleteSIARD = new Button();
-    btnDeleteSIARD.addStyleName("btn btn-link-info");
+    btnDeleteSIARD.addStyleName("btn btn-danger btn-delete");
     if (database.getPath() != null && !database.getPath().isEmpty()) {
       btnDeleteSIARD.setText(messages.SIARDHomePageButtonTextForDeleteIngested());
       btnDeleteSIARD.addClickHandler(event -> {
@@ -131,12 +133,12 @@ public class SIARDNavigationPanel {
     siard.addToInfoPanel(path);
     siard.addToInfoPanel(size);
 
-    siard.addButton(btnEditMetadata);
+    siard.addButton(CommonClientUtils.wrapOnDiv("btn-item", btnEditMetadata));
     if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
-      siard.addButton(btnMigrateToSIARD);
-      siard.addButton(btnSendToLiveDBMS);
+      siard.addButton(CommonClientUtils.wrapOnDiv("btn-item", btnMigrateToSIARD));
+      siard.addButton(CommonClientUtils.wrapOnDiv("btn-item", btnSendToLiveDBMS));
     } else {
-      siard.addButton(btnDeleteSIARD);
+      siard.addButton(CommonClientUtils.wrapOnDiv("btn-item", btnDeleteSIARD));
     }
     update(database);
 

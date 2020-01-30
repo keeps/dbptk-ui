@@ -12,7 +12,9 @@ import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.dialogs.CommonDialogs;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
+import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
+import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.navigation.BrowseNavigationPanel;
 import com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.navigation.MetadataNavigationPanel;
 import com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.navigation.SIARDNavigationPanel;
@@ -22,6 +24,7 @@ import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
+import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtml;
@@ -29,6 +32,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
@@ -53,6 +57,12 @@ public class SIARDManagerPage extends ContentPanel {
   LoadingDiv loading;
 
   @UiField
+  SimplePanel mainHeader;
+
+  @UiField
+  SimplePanel description;
+
+  @UiField
   FlowPanel metadataInformation;
 
   @UiField
@@ -72,6 +82,18 @@ public class SIARDManagerPage extends ContentPanel {
     initWidget(binder.createAndBindUi(this));
     this.database = database;
     loading.setVisible(true);
+    init();
+  }
+
+  private void init() {
+    mainHeader.setWidget(CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.BOX_OPEN),
+        database.getMetadata().getName(), "h1"));
+
+    MetadataField instance = MetadataField.createInstance(database.getMetadata().getDescription());
+    instance.setCSS("table-row-description", "font-size-description");
+
+    description.setWidget(instance);
+
     populateMetadataInfo();
     populateNavigationPanels();
     setupFooterButtons();
@@ -90,7 +112,6 @@ public class SIARDManagerPage extends ContentPanel {
   private void populateMetadataInfo() {
     metadataNavigationPanel = MetadataNavigationPanel.getInstance(database);
     metadataInformation.add(metadataNavigationPanel.build());
-    metadataInformation.add(metadataNavigationPanel.buildDescription());
   }
 
   private void populateNavigationPanels() {

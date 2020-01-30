@@ -99,7 +99,7 @@ public class ColumnsManagementSidebar extends Composite implements Sidebar, ICol
 
       for (ViewerTable table : schema.getTables()) {
         if (!table.isCustomView() && !table.isMaterializedView()) {
-          if (collectionStatus.showTable(table.getId())) {
+          if (collectionStatus.showTable(table.getUuid())) {
             sidebarGroup.add(createTableItem(schema, table, totalSchemas, iconTag));
           }
         }

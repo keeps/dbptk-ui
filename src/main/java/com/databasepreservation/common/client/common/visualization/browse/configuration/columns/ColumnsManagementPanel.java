@@ -100,6 +100,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
     } else {
       value = tableUUID;
     }
+
     return instances.computeIfAbsent(database.getUuid() + value,
       k -> new ColumnsManagementPanel(database, status, value, sidebar));
   }
@@ -617,6 +618,14 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
   public void update(String databaseUUID, boolean enabled) {
     if (database.getUuid().equals(databaseUUID)) {
       btnSave.setEnabled(enabled);
+    }
+  }
+
+  @Override
+  protected void onLoad() {
+    super.onLoad();
+    if(!collectionStatus.getTableStatusByTableId(tableId).isShow()){
+      HistoryManager.gotoAdvancedConfiguration(database.getUuid());
     }
   }
 }
