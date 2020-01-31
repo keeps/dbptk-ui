@@ -15,13 +15,16 @@ import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
@@ -36,11 +39,9 @@ public class AdvancedConfiguration extends ContentPanel {
   }
 
   private static AdvancedConfigurationUiBinder binder = GWT.create(AdvancedConfigurationUiBinder.class);
-  @UiField
-  FlowPanel content;
 
   @UiField
-  FlowPanel header;
+  FlowPanel header, content;
 
   private static Map<String, AdvancedConfiguration> instances = new HashMap<>();
   private ViewerDatabase database;
@@ -59,22 +60,24 @@ public class AdvancedConfiguration extends ContentPanel {
   private void init() {
     configureHeader();
 
-    FocusPanel ManagementTablesPanel = createOptions(messages.advancedConfigurationLabelForTableManagement(),
-      messages.advancedConfigurationTextForTableManagement(), FontAwesomeIconManager.TABLE);
-    ManagementTablesPanel.addClickHandler(event -> HistoryManager.gotoTableManagement(database.getUuid()));
+    Button btnTableManagement = new Button();
+    btnTableManagement.addClickHandler(event -> {
+      HistoryManager.gotoTableManagement(database.getUuid());
+    });
+    content.add(createCard(FontAwesomeIconManager.TABLE, messages.advancedConfigurationLabelForTableManagement(), btnTableManagement));
 
-    FocusPanel ManagementColumnsPanel = createOptions(messages.advancedConfigurationLabelForColumnsManagement(),
-      messages.advancedConfigurationTextForColumnsManagement(), FontAwesomeIconManager.COLUMN);
-    ManagementColumnsPanel.addClickHandler(event -> HistoryManager.gotoColumnsManagement(database.getUuid()));
-
-    content.add(ManagementTablesPanel);
-    content.add(ManagementColumnsPanel);
+    Button btnColumnManagement = new Button();
+    btnColumnManagement.addClickHandler(event -> {
+      HistoryManager.gotoColumnsManagement(database.getUuid());
+    });
+    content.add(createCard(FontAwesomeIconManager.COLUMN, messages.advancedConfigurationLabelForColumnsManagement(), btnColumnManagement));
 
     if (ApplicationType.getType().equals(ViewerConstants.SERVER)) {
-      FocusPanel DataTransformationPanel = createOptions(messages.advancedConfigurationLabelForDataTransformation(),
-        messages.advancedConfigurationTextForDataTransformation(), FontAwesomeIconManager.DATA_TRANSFORMATION);
-      DataTransformationPanel.addClickHandler(event -> HistoryManager.gotoDataTransformation(database.getUuid()));
-      content.add(DataTransformationPanel);
+      Button btnDataTransformation = new Button();
+      btnDataTransformation.addClickHandler(event -> {
+        HistoryManager.gotoDataTransformation(database.getUuid());
+      });
+      content.add(createCard(FontAwesomeIconManager.DATA_TRANSFORMATION, messages.advancedConfigurationLabelForDataTransformation(), btnDataTransformation));
     }
 
   }
@@ -84,35 +87,15 @@ public class AdvancedConfiguration extends ContentPanel {
       messages.advancedConfigurationLabelForMainTitle(), "h1"));
   }
 
-  private FocusPanel createOptions(String title, String description, String iconName) {
-    FocusPanel panel = new FocusPanel();
-    FlowPanel content = new FlowPanel();
-    content.setStyleName("advanced-configuration-option");
-    FlowPanel left = new FlowPanel();
-    left.setStyleName("left");
-    FlowPanel right = new FlowPanel();
-    right.setStyleName("right");
+  private FlowPanel createCard(String icon, String title, Button button){
+    FlowPanel headerPanel = CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(icon),
+        title, "h3");
+    button.setStyleName("btn btn-play");
+    FlowPanel footerPanel = new FlowPanel();
+    footerPanel.add(button);
 
-    String iconTag = FontAwesomeIconManager.getTag(iconName);
-    HTML icon = new HTML(SafeHtmlUtils.fromSafeConstant(iconTag));
-    icon.setStyleName("icon");
-
-    Label panelTitle = new Label(title);
-    panelTitle.setStyleName("title");
-    Label panelDescription = new Label(description);
-    panelDescription.setStyleName("description");
-
-    left.add(icon);
-    right.add(panelTitle);
-    right.add(panelDescription);
-
-    content.add(left);
-    content.add(right);
-
-    panel.add(content);
-    return panel;
+    return CommonClientUtils.wrapOnDiv("navigation-card", headerPanel, footerPanel);
   }
-
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
     List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forAdvancedConfiguration(database.getUuid(),

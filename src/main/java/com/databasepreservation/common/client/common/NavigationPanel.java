@@ -19,7 +19,7 @@ public class NavigationPanel extends Composite {
   private static navigationPanelUiBinder binder = GWT.create(navigationPanelUiBinder.class);
 
   @UiField
-  FlowPanel navigationPanelHeader, navigationPanelInfo, navigationPanelOptions;
+  FlowPanel navigationPanelHeader, navigationPanelDescription, navigationPanelInfo, navigationPanelOptions;
 
   public static NavigationPanel createInstance(String title) {
     return new NavigationPanel(title);
@@ -31,6 +31,13 @@ public class NavigationPanel extends Composite {
     Label l = new Label();
     l.setText(title);
     navigationPanelHeader.add(l);
+  }
+
+  public void addToDescriptionPanel(String description){
+    Label l = new Label();
+    l.setText(description);
+
+    navigationPanelDescription.add(l);
   }
 
   public void addToInfoPanel(Widget widget) {

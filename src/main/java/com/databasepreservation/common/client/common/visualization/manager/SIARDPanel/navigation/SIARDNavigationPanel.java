@@ -27,7 +27,6 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 
 import config.i18n.client.ClientMessages;
-import javafx.scene.layout.FlowPane;
 
 public class SIARDNavigationPanel {
 
@@ -50,6 +49,7 @@ public class SIARDNavigationPanel {
 
   public NavigationPanel build() {
     NavigationPanel siard = NavigationPanel.createInstance(messages.SIARDHomePageOptionsHeaderForSIARD());
+    siard.addToDescriptionPanel(messages.SIARDHomePageOptionsDescriptionForSIARD());
 
     // Edit button
     btnEditMetadata = new Button();
@@ -117,7 +117,7 @@ public class SIARDNavigationPanel {
 
     // version information
     MetadataField version = MetadataField.createInstance(messages.SIARDHomePageLabelForSIARDVersion(),
-      database.getVersion());
+      messages.SIARDHomePageLabelForSIARDStandardVersion(database.getVersion(), ViewerConstants.DBPTK_RELEASE_LINK));
     version.setCSS(null, "label-field", "value-field");
 
     // size information

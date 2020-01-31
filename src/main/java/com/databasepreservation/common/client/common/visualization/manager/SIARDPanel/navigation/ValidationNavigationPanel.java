@@ -46,7 +46,8 @@ public class ValidationNavigationPanel {
   private HelperValidator validator = null;
   private MetadataField validatedAt = null;
   private MetadataField validationStatus = null;
-  private FlowPanel validationIndicators = new FlowPanel();
+  private FlowPanel validationDetails = new FlowPanel();
+  private MetadataField validationWarnings = null;
   private MetadataField version = null;
 
   public static ValidationNavigationPanel getInstance(ViewerDatabase database) {
@@ -151,7 +152,7 @@ public class ValidationNavigationPanel {
     // information
     validatedAt = MetadataField.createInstance(messages.SIARDHomePageLabelForValidatedAt(),
       messages.humanizedTextForSIARDNotValidated());
-    version = MetadataField.createInstance(messages.SIARDHomePageLabelForValidationVersion(),
+    version = MetadataField.createInstance(messages.SIARDHomePageLabelForValidateBy(),
       messages.humanizedTextForSIARDNotValidated());
     updateValidationInformation();
 
@@ -159,12 +160,17 @@ public class ValidationNavigationPanel {
     validationStatus = MetadataField.createInstance(messages.SIARDHomePageLabelForValidationStatus(),
       LabelUtils.getSIARDValidationStatus(database.getValidationStatus()));
     validationStatus.setCSS(null, "label-field", "value-field");
+
+//    validationWarnings = MetadataField.createInstance(messages.SIARDHomePageLabelForValidationWarnings(),
+//      LabelUtils.getSIARDValidationStatus(database.getValidationStatus()));
+//    validationWarnings.setCSS(null, "label-field", "value-field");
     // updateValidationStatus();
 
     validatedAt.setCSS(null, "label-field", "value-field");
     version.setCSS(null, "label-field", "value-field");
 
     NavigationPanel validation = NavigationPanel.createInstance(messages.SIARDHomePageOptionsHeaderForValidation());
+    validation.addToDescriptionPanel(messages.SIARDHomePageOptionsDescriptionForSIARD());
     validation.addButton(CommonClientUtils.wrapOnDiv("btn-item", btnRunValidator));
     validation.addButton(CommonClientUtils.wrapOnDiv("btn-item", btnOpenValidator));
     validation.addButton(CommonClientUtils.wrapOnDiv("btn-item", btnSeeReport));
@@ -174,9 +180,10 @@ public class ValidationNavigationPanel {
     updateValidationButtons();
 
     validation.addToInfoPanel(validationStatus);
+    validation.addToInfoPanel(validationDetails);
+//    validation.addToInfoPanel(validationWarnings);
     validation.addToInfoPanel(validatedAt);
     validation.addToInfoPanel(version);
-    validation.addToInfoPanel(validationIndicators);
 
     return validation;
   }
@@ -185,14 +192,16 @@ public class ValidationNavigationPanel {
     if (database.getValidationStatus().equals(ViewerDatabaseValidationStatus.VALIDATION_SUCCESS)
       || database.getValidationStatus().equals(ViewerDatabaseValidationStatus.VALIDATION_FAILED)) {
       validatedAt.updateText(Humanize.formatDateTime(database.getValidatedAt()));
-      version.updateText(database.getValidatedVersion());
+      version.updateText(
+        messages.SIARDHomePageLabelDBPTKVersion(database.getValidatedVersion(), ViewerConstants.DBPTK_RELEASE_LINK));
       validatedAt.setVisible(true);
       version.setVisible(true);
       // indicators
       updateValidationIndicators();
-      validationIndicators.setVisible(true);
+
+      validationDetails.setVisible(true);
     } else { // NOT_VALIDATE, RUNNING, ERROR
-      validationIndicators.setVisible(false);
+      validationDetails.setVisible(false);
       validatedAt.setVisible(false);
       version.setVisible(false);
     }
@@ -273,47 +282,50 @@ public class ValidationNavigationPanel {
   }
 
   private void updateValidationIndicators() {
-    validationIndicators.clear();
-    validationIndicators.addStyleName("validation-indicators");
+    validationDetails.clear();
+    validationDetails.addStyleName("validation-indicators");
     GWT.log("ValidationStatus::" + database.getValidationStatus());
     if (database.getValidationStatus().equals(ViewerDatabaseValidationStatus.VALIDATION_SUCCESS)
       || database.getValidationStatus().equals(ViewerDatabaseValidationStatus.VALIDATION_FAILED)) {
-      Label label = new Label(messages.SIARDHomePageTextForValidationIndicators());
+      Label label = new Label(messages.SIARDHomePageLabelForValidationDetails());
       label.addStyleName("label-field");
-      validationIndicators.add(label);
+      validationDetails.add(label);
       FlowPanel panel = new FlowPanel();
       panel.addStyleName("validation-indicators");
       if (database.getValidationPassed() != null) {
-        panel.add(buildIndicators(database.getValidationPassed(), FontAwesomeIconManager.CHECK, "passed",
+        panel.add(buildIndicators(FontAwesomeIconManager.CHECK, "passed",
           messages.SIARDHomePageTextForValidationIndicatorsSuccess(Integer.parseInt(database.getValidationPassed()))));
       }
       if (database.getValidationErrors() != null) {
-        panel.add(buildIndicators(database.getValidationErrors(), FontAwesomeIconManager.TIMES, "errors",
+        panel.add(buildIndicators(FontAwesomeIconManager.TIMES, "errors",
           messages.SIARDHomePageTextForValidationIndicatorsFailed(Integer.parseInt(database.getValidationErrors()))));
       }
-      if (database.getValidationWarnings() != null) {
-        panel.add(buildIndicators(database.getValidationWarnings(), FontAwesomeIconManager.WARNING, "warnings", messages
-          .SIARDHomePageTextForValidationIndicatorsWarnings(Integer.parseInt(database.getValidationWarnings()))));
-      }
+      // if (database.getValidationWarnings() != null) {
+      // panel.add(buildIndicators(database.getValidationWarnings(),
+      // FontAwesomeIconManager.WARNING, "warnings", messages
+      // .SIARDHomePageTextForValidationIndicatorsWarnings(Integer.parseInt(database.getValidationWarnings()))));
+      // }
       if (database.getValidationSkipped() != null) {
-        panel.add(buildIndicators(database.getValidationSkipped(), FontAwesomeIconManager.SKIPPED, "skipped",
+        panel.add(buildIndicators(FontAwesomeIconManager.SKIPPED, "skipped",
           messages.SIARDHomePageTextForValidationIndicatorsSkipped(Integer.parseInt(database.getValidationSkipped()))));
       }
       if (panel.getWidgetCount() > 0) {
-        validationIndicators.add(panel);
+        validationDetails.add(panel);
       }
+//      if (database.getValidationWarnings() != null) {
+//        validationWarnings.updateText();
+//      }
     }
   }
 
-  private FlowPanel buildIndicators(String indicator, String icon, String style, String title) {
+  private FlowPanel buildIndicators(String icon, String style, String title) {
     FlowPanel panel = new FlowPanel();
     panel.setStyleName("indicator");
     panel.setTitle(title);
-    Label label = new Label(indicator);
     HTML iconHTML = new HTML(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(icon)));
     iconHTML.addStyleName(style);
     panel.add(iconHTML);
-    panel.add(label);
+    panel.add(new Label(title));
 
     return panel;
   }

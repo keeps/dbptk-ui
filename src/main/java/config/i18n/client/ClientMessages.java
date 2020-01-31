@@ -710,6 +710,8 @@ public interface ClientMessages extends Messages {
 
   String SIARDHomePageOptionsHeaderForSIARD();
 
+  String SIARDHomePageOptionsDescriptionForSIARD();
+
   String SIARDHomePageOptionsHeaderForValidation();
 
   String SIARDHomePageOptionsHeaderForBrowsing();
@@ -736,19 +738,25 @@ public interface ClientMessages extends Messages {
 
   String SIARDHomePageLabelForSIARDVersion();
 
+  SafeHtml SIARDHomePageLabelForSIARDStandardVersion(String version, String specification);
+
   String SIARDHomePageLabelForSIARDSize();
 
   String SIARDHomePageLabelForSIARDPath();
 
   String SIARDHomePageLabelForValidatedAt();
 
-  String SIARDHomePageLabelForValidationVersion();
+  String SIARDHomePageLabelForValidateBy();
+
+  SafeHtml SIARDHomePageLabelDBPTKVersion(String version, String releaseLink);
 
   String SIARDHomePageTextForMissingDescription();
 
   String SIARDHomePageLabelForValidationStatus();
 
-  String SIARDHomePageTextForValidationIndicators();
+  String SIARDHomePageLabelForValidationDetails();
+
+  String SIARDHomePageLabelForValidationWarnings();
 
   String SIARDHomePageTextForValidationIndicatorsSuccess(@PluralCount int passed);
 

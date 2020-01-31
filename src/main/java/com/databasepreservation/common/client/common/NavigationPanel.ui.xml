@@ -3,6 +3,7 @@
 
     <g:FlowPanel addStyleNames="navigation-card">
         <g:FlowPanel addStyleNames="navigation-panel-header" ui:field="navigationPanelHeader"/>
+        <g:FlowPanel addStyleNames="navigation-panel-description" ui:field="navigationPanelDescription"/>
         <g:FlowPanel addStyleNames="navigation-panel-info" ui:field="navigationPanelInfo"/>
         <g:FlowPanel addStyleNames="navigation-panel-options" ui:field="navigationPanelOptions"/>
     </g:FlowPanel>
