@@ -1238,6 +1238,18 @@ html, body, .desktop-main {
     padding-right: 0;
 }
 
+.link-info {
+    color: #337AB7;
+    text-transform: uppercase;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.link-info:hover {
+    color: #23527c;
+    text-decoration: underline;
+    background-color: transparent;
+}
 
 .btn-link-info {
     background-color: transparent;
@@ -1314,6 +1326,10 @@ html, body, .desktop-main {
 
 .btn-item .btn-back-wizard {
     padding-left: 25px;
+}
+
+.navigation-panel-buttons .btn-item:first-child {
+    padding-right: 0;
 }
 
 .button-panel-container {
@@ -1544,8 +1560,7 @@ html, body, .desktop-main {
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
     transition: all 0.3s cubic-bezier(.25, .8, .25, 1);
     border-radius: 2px;
-    padding: 14px 16px;
-    width: 27%;
+    padding: 14px 14px;
     display: flex;
     flex-flow: column wrap;
     flex: 1 0 5%;

@@ -110,6 +110,7 @@ public class ValidationNavigationPanel {
       }
     });
 
+    GWT.log("");
     btnOpenValidator.setVisible(ValidatorPage.checkInstance(database.getUuid()));
 
     // See Report btn
@@ -157,7 +158,6 @@ public class ValidationNavigationPanel {
     validationWarnings = MetadataField.createInstance(messages.SIARDHomePageLabelForValidationWarnings(),
       messages.humanizedTextForSIARDNotValidated());
     updateValidationInformation();
-    validationWarnings.setVisible(false);
 
     // Validation Status info
     validationStatus = MetadataField.createInstance(messages.SIARDHomePageLabelForValidationStatus(),
@@ -205,6 +205,7 @@ public class ValidationNavigationPanel {
       validationDetails.setVisible(false);
       validatedAt.setVisible(false);
       version.setVisible(false);
+      validationWarnings.setVisible(false);
     }
   }
 

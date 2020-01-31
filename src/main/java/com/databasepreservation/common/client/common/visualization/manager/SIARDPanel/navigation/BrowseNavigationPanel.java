@@ -104,7 +104,7 @@ public class BrowseNavigationPanel {
     btnConfiguration = new Button();
     btnConfiguration.setText("Configuration");
     btnConfiguration.addStyleName("btn btn-outline-primary btn-configuration");
-    btnConfiguration.setVisible(true);
+    btnConfiguration.setVisible(false);
 
     btnConfiguration.addClickHandler(event -> {
       HistoryManager.gotoAdvancedConfiguration(database.getUuid());
@@ -128,20 +128,20 @@ public class BrowseNavigationPanel {
     browse.addButton(CommonClientUtils.wrapOnDiv("btn-item", btnDelete));
 
     if (database.getStatus().equals(ViewerDatabaseStatus.AVAILABLE)) {
-      btnBrowse.setVisible(true);
       btnDelete.setVisible(true);
       btnConfiguration.setVisible(true);
     } else if (database.getStatus().equals(ViewerDatabaseStatus.ERROR)) {
-      btnBrowse.setVisible(true);
       btnDelete.setVisible(true);
       btnConfiguration.setVisible(false);
     } else if (database.getStatus().equals(ViewerDatabaseStatus.METADATA_ONLY)) {
       btnDelete.setVisible(false);
       btnConfiguration.setVisible(false);
     }
+    btnBrowse.setVisible(true);
 
     if (database.getPath() == null || database.getPath().isEmpty()) {
       btnIngestClicked = false;
+      btnBrowse.setVisible(false);
     }
 
     browsingStatus = MetadataField.createInstance(messages.SIARDHomePageLabelForBrowseStatus(),
@@ -165,13 +165,8 @@ public class BrowseNavigationPanel {
       btnBrowse.setVisible(true);
       btnDelete.setVisible(true);
       btnConfiguration.setVisible(false);
-    } else if (database.getStatus().equals(ViewerDatabaseStatus.INGESTING)) {
-      if (btnIngestClicked) {
-        btnBrowse.setVisible(false);
-        btnConfiguration.setVisible(false);
-      }
     } else if (database.getStatus().equals(ViewerDatabaseStatus.METADATA_ONLY)) {
-      btnBrowse.setVisible(false);
+      btnBrowse.setVisible(true);
       btnDelete.setVisible(false);
       btnConfiguration.setVisible(false);
       btnIngestClicked = false;

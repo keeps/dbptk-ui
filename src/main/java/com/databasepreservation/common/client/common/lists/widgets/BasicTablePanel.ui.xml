@@ -4,5 +4,6 @@
         <g:SimplePanel ui:field="header"/>
         <g:SimplePanel ui:field="info"/>
         <g:SimplePanel ui:field="table"/>
+        <g:SimplePanel addStyleNames="clearfix"/>
     </g:FlowPanel>
 </ui:UiBinder>
