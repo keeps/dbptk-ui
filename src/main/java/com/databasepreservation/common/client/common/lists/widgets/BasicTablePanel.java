@@ -6,8 +6,6 @@ import java.util.List;
 import com.databasepreservation.common.client.widgets.MyCellTableResources;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ScrollEvent;
-import com.google.gwt.event.dom.client.ScrollHandler;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -112,12 +110,7 @@ public class BasicTablePanel<C> extends Composite {
     displayScrollWrapper.addStyleName("my-asyncdatagrid-display-scroll-wrapper");
     table.setWidget(displayScrollWrapper);
 
-    displayScroll.addScrollHandler(new ScrollHandler() {
-      @Override
-      public void onScroll(ScrollEvent event) {
-        handleScrollChanges();
-      }
-    });
+    displayScroll.addScrollHandler(event -> handleScrollChanges());
     handleScrollChanges();
   }
 

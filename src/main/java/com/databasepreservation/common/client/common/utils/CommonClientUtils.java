@@ -2,33 +2,56 @@ package com.databasepreservation.common.client.common.utils;
 
 import java.util.List;
 
-import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.fields.GenericField;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.models.structure.ViewerView;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
-import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Hyperlink;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
+import org.intellij.lang.annotations.Flow;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class CommonClientUtils {
-  private static final ClientMessages messages = GWT.create(ClientMessages.class);
+	private static final ClientMessages messages = GWT.create(ClientMessages.class);
+	private static final String CLOSE_DIV = "</div>";
 
-  public static FlowPanel getPanelInformation(String label, String text, String classes) {
+	private CommonClientUtils() {}
+
+	public static FlowPanel getAdvancedSearchDivider(final String label) {
+		FlowPanel panel = new FlowPanel();
+		panel.addStyleName("divider");
+
+		FlowPanel dividerHeader = new FlowPanel();
+		dividerHeader.addStyleName("divider-header");
+		dividerHeader.add(new Label(label));
+
+		FlowPanel dividerLine = new FlowPanel();
+		dividerLine.addStyleName("divider-line");
+		Element el = DOM.createSpan();
+		dividerLine.getElement().appendChild(el);
+
+		panel.add(dividerHeader);
+		panel.add(dividerLine);
+
+		return panel;
+	}
+
+	public static FlowPanel getPanelInformation(String label, String text, String classes) {
     FlowPanel panel = new FlowPanel();
 
     SafeHtmlBuilder safeHtmlBuilder = new SafeHtmlBuilder();
@@ -54,7 +77,7 @@ public class CommonClientUtils {
     return panel;
   }
 
-  public static FlowPanel getHeader(ViewerTable table, String hClass, boolean multiSchema) {
+  public static HTML getHeader(ViewerTable table, String hClass, boolean multiSchema) {
     if (multiSchema) {
       return getHeaderMultiSchema(table, hClass);
     } else {
@@ -62,7 +85,7 @@ public class CommonClientUtils {
     }
   }
 
-  public static FlowPanel getHeader(TableStatus tableStatus, ViewerTable table, String hClass, boolean multiSchema) {
+  public static HTML getHeader(TableStatus tableStatus, ViewerTable table, String hClass, boolean multiSchema) {
     if (multiSchema) {
       return getHeaderMultiSchema(tableStatus, table, hClass);
     } else {
@@ -70,7 +93,7 @@ public class CommonClientUtils {
     }
   }
 
-  private static FlowPanel getHeaderMultiSchema(TableStatus status, ViewerTable table, String hClass) {
+  private static HTML getHeaderMultiSchema(TableStatus status, ViewerTable table, String hClass) {
     String separatorIconTag = FontAwesomeIconManager.getTagWithStyleName(FontAwesomeIconManager.SCHEMA_TABLE_SEPARATOR,
       "schema-table-separator");
 
@@ -91,7 +114,7 @@ public class CommonClientUtils {
     }
   }
 
-  private static FlowPanel getHeaderMultiSchema(ViewerTable table, String hClass) {
+  private static HTML getHeaderMultiSchema(ViewerTable table, String hClass) {
     String separatorIconTag = FontAwesomeIconManager.getTagWithStyleName(FontAwesomeIconManager.SCHEMA_TABLE_SEPARATOR,
       "schema-table-separator");
 
@@ -112,7 +135,7 @@ public class CommonClientUtils {
     }
   }
 
-  private static FlowPanel getHeaderSingleSchema(ViewerTable table, String hClass) {
+  private static HTML getHeaderSingleSchema(ViewerTable table, String hClass) {
     if (table.isCustomView()) {
       final SafeHtml stackedIconSafeHtml = FontAwesomeIconManager.getStackedIconSafeHtml(
         FontAwesomeIconManager.SCHEMA_VIEWS, FontAwesomeIconManager.COG, table.getNameWithoutPrefix());
@@ -127,7 +150,7 @@ public class CommonClientUtils {
     }
   }
 
-  private static FlowPanel getHeaderSingleSchema(TableStatus status, ViewerTable table, String hClass) {
+  private static HTML getHeaderSingleSchema(TableStatus status, ViewerTable table, String hClass) {
     if (table.isCustomView()) {
       final SafeHtml stackedIconSafeHtml = FontAwesomeIconManager.getStackedIconSafeHtml(
         FontAwesomeIconManager.SCHEMA_VIEWS, FontAwesomeIconManager.COG, status.getCustomName());
@@ -142,16 +165,14 @@ public class CommonClientUtils {
     }
   }
 
-  public static FlowPanel getHeader(SafeHtml iconStack, String hClass) {
-    FlowPanel panel = new FlowPanel();
+  public static HTML getHeader(SafeHtml iconStack, String hClass) {
     HTML html = new HTML(iconStack);
     html.addStyleName(hClass);
-    panel.add(html);
 
-    return panel;
+    return html;
   }
 
-  private static FlowPanel getHeader(String iconTag, ViewerTable table, String hClass) {
+  private static HTML getHeader(String iconTag, ViewerTable table, String hClass) {
     return getHeader(iconTag, table.getNameWithoutPrefix(), hClass);
   }
 
@@ -166,18 +187,15 @@ public class CommonClientUtils {
     return html;
   }
 
-  public static FlowPanel getHeader(String iconTag, String title, String hClass) {
-    FlowPanel panel = new FlowPanel();
-
-    SafeHtmlBuilder safeHtmlBuilder = new SafeHtmlBuilder();
+  public static HTML getHeader(String iconTag, String title, String hClass) {
+		SafeHtmlBuilder safeHtmlBuilder = new SafeHtmlBuilder();
     safeHtmlBuilder.append(SafeHtmlUtils.fromSafeConstant(iconTag)).appendEscaped(" ")
       .append(SafeHtmlUtils.fromString(title));
 
     HTML html = new HTML(safeHtmlBuilder.toSafeHtml());
     html.addStyleName(hClass);
-    panel.add(html);
 
-    return panel;
+    return html;
   }
 
   public static FlowPanel getHeader(String iconTag, SafeHtml title, String hClass) {
@@ -233,7 +251,7 @@ public class CommonClientUtils {
     for (SafeHtmlBuilder builder : builders) {
       div.append(builder.toSafeHtml());
     }
-    div.append(SafeHtmlUtils.fromSafeConstant("</div>"));
+    div.append(SafeHtmlUtils.fromSafeConstant(CLOSE_DIV));
 
     return div.toSafeHtml();
   }
@@ -244,20 +262,6 @@ public class CommonClientUtils {
     for (Widget widget : widgets) {
       panel.add(widget);
     }
-
-    return panel;
-  }
-
-  public static FlowPanel getSchemaAndTableHeader(String databaseUUID, ViewerTable table, String hClass) {
-    FlowPanel panel = new FlowPanel();
-    panel.addStyleName("schema-table-header");
-
-    String iconTag = FontAwesomeIconManager.getTag(FontAwesomeIconManager.SCHEMA_TABLE_SEPARATOR);
-    final SafeHtml html = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE,
-      table.getSchemaName() + iconTag + table.getName());
-    Hyperlink tableLink = new Hyperlink(html, HistoryManager.linkToTable(databaseUUID, table.getSchemaName(), table.getName()));
-    tableLink.addStyleName(hClass);
-    panel.add(tableLink);
 
     return panel;
   }
@@ -274,11 +278,11 @@ public class CommonClientUtils {
       b.append(SafeHtmlUtils.fromSafeConstant("<div class=\"field\">"));
       b.append(SafeHtmlUtils.fromSafeConstant("<div class=\"label\">"));
       b.append(SafeHtmlUtils.fromString(label));
-      b.append(SafeHtmlUtils.fromSafeConstant("</div>"));
+      b.append(SafeHtmlUtils.fromSafeConstant(CLOSE_DIV));
       b.append(SafeHtmlUtils.fromSafeConstant("<div class=\"value\">"));
       b.append(SafeHtmlUtils.fromString(value));
-      b.append(SafeHtmlUtils.fromSafeConstant("</div>"));
-      b.append(SafeHtmlUtils.fromSafeConstant("</div>"));
+      b.append(SafeHtmlUtils.fromSafeConstant(CLOSE_DIV));
+      b.append(SafeHtmlUtils.fromSafeConstant(CLOSE_DIV));
       return b.toSafeHtml();
     }
   }
@@ -295,11 +299,11 @@ public class CommonClientUtils {
       b.append(SafeHtmlUtils.fromSafeConstant("<div class=\"field\">"));
       b.append(SafeHtmlUtils.fromSafeConstant("<div class=\"label\">"));
       b.append(SafeHtmlUtils.fromString(label));
-      b.append(SafeHtmlUtils.fromSafeConstant("</div>"));
+      b.append(SafeHtmlUtils.fromSafeConstant(CLOSE_DIV));
       b.append(SafeHtmlUtils.fromSafeConstant("<div class=\"value\">"));
       b.append(value);
-      b.append(SafeHtmlUtils.fromSafeConstant("</div>"));
-      b.append(SafeHtmlUtils.fromSafeConstant("</div>"));
+      b.append(SafeHtmlUtils.fromSafeConstant(CLOSE_DIV));
+      b.append(SafeHtmlUtils.fromSafeConstant(CLOSE_DIV));
       return b.toSafeHtml();
     }
   }

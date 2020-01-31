@@ -3,8 +3,8 @@
              xmlns:c='urn:import:com.databasepreservation.common.client.common'>
     <ui:with field='messages' type='config.i18n.client.ClientMessages'/>
     <g:FlowPanel ui:field="content">
-        <g:SimplePanel ui:field="message"></g:SimplePanel>
-        <g:FlowPanel ui:field="toolBar" addStyleNames="data-transformation-toolbar sticky-flow"></g:FlowPanel>
+        <g:SimplePanel ui:field="message" />
+        <g:FlowPanel ui:field="toolBar" addStyleNames="data-transformation-toolbar sticky-flow" />
         <g:FlowPanel ui:field="rootTablePanel">
             <c:LoadingDiv visible="false" ui:field="loading"/>
         </g:FlowPanel>

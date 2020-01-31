@@ -38,8 +38,6 @@
         <g:FlowPanel addStyleNames="searchAdvancedPanel" ui:field="searchAdvancedPanel">
             <g:FlowPanel styleName="searchAdvancedPanelButtons"
                          ui:field="searchAdvancedPanelButtons">
-                <g:Button styleName="btn btn-plus advancedAddButton"
-                          ui:field="searchAdvancedFieldOptionsAdd"><ui:text from='{messages.addSearchField}' /></g:Button>
                 <g:Button styleName="btn btn-search advancedSearchButton"
                           ui:field="searchAdvancedGo" enabled="false"><ui:text from='{messages.search}' /></g:Button>
                 <g:Button styleName="btn btn-save searchPanelAdvancedSaveSearchButton"

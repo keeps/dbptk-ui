@@ -57,7 +57,7 @@ public class SIARDManagerPage extends ContentPanel {
   LoadingDiv loading;
 
   @UiField
-  SimplePanel mainHeader;
+  FlowPanel mainHeader;
 
   @UiField
   SimplePanel description;
@@ -86,7 +86,7 @@ public class SIARDManagerPage extends ContentPanel {
   }
 
   private void init() {
-    mainHeader.setWidget(CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.BOX_OPEN),
+    mainHeader.add(CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.BOX_OPEN),
         database.getMetadata().getName(), "h1"));
 
     MetadataField instance = MetadataField.createInstance(database.getMetadata().getDescription());

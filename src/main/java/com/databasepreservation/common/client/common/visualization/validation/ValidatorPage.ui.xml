@@ -14,15 +14,16 @@
                 <g:FocusPanel ui:field="contentScroll" addStyleNames="progress-report validation">
                     <g:FlowPanel ui:field="content"/>
                 </g:FocusPanel>
-                <g:FlowPanel addStyleNames="bottom-panel">
+				<g:SimplePanel addStyleNames="clearfix" />
+                <g:FlowPanel addStyleNames="navigation-panel-buttons">
+					<g:SimplePanel addStyleNames="btn-item">
+						<g:Button ui:field="btnRunAgain" addStyleNames="btn btn-primary btn-play btn-run-again">
+							<ui:text from='{messages.SIARDHomePageButtonTextRunValidationAgain}'/>
+						</g:Button>
+					</g:SimplePanel>
                     <g:SimplePanel addStyleNames="btn-item">
                         <g:Button ui:field="btnBack" addStyleNames="btn btn-primary btn-back-wizard">
                             <ui:text from='{messages.basicActionBack}'/>
-                        </g:Button>
-                    </g:SimplePanel>
-                    <g:SimplePanel addStyleNames="btn-item">
-                        <g:Button ui:field="btnRunAgain" addStyleNames="btn btn-primary btn-play btn-run-again">
-                            <ui:text from='{messages.SIARDHomePageButtonTextRunValidationAgain}'/>
                         </g:Button>
                     </g:SimplePanel>
                 </g:FlowPanel>

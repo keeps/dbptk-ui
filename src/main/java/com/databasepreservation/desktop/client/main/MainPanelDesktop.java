@@ -313,7 +313,7 @@ public class MainPanelDesktop extends Composite {
           setContent(databaseUUID, currentHistoryPath.get(0), tableID, new RightPanelLoader() {
             @Override
             public RightPanel load(ViewerDatabase database, CollectionStatus status) {
-              return ForeignKeyPanelOptions.getInstance(database, tableID,
+              return ForeignKeyPanelOptions.getInstance(database, status,tableID,
                 columnsAndValues.subList(0, columnsAndValues.size() - 1));
             }
           });

@@ -26,6 +26,7 @@ import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.models.structure.ViewerView;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
+import com.databasepreservation.common.client.widgets.ConfigurationCellTableResources;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
@@ -51,8 +52,9 @@ import config.i18n.client.ClientMessages;
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class TablePanelOptions extends RightPanel implements ICollectionStatusObserver {
-  private static final ClientMessages messages = GWT.create(ClientMessages.class);
-  private static Map<String, TablePanelOptions> instances = new HashMap<>();
+	private static final ClientMessages messages = GWT.create(ClientMessages.class);
+	private static final String BTN_SELECT_ALL = "btn-select-all";
+	private static Map<String, TablePanelOptions> instances = new HashMap<>();
 
   public static TablePanelOptions getInstance(CollectionStatus status, ViewerDatabase database, String tableId) {
     String separator = "/";
@@ -67,16 +69,13 @@ public class TablePanelOptions extends RightPanel implements ICollectionStatusOb
   private static TablePanelUiBinder uiBinder = GWT.create(TablePanelUiBinder.class);
 
   @UiField
-  SimplePanel mainHeader;
+  FlowPanel mainHeader;
 
   @UiField
   FlowPanel mainContainer;
 
   @UiField
   FlowPanel content;
-
-  @UiField
-  FlowPanel customButtons;
 
   @UiField
   Button btnBack;
@@ -90,12 +89,13 @@ public class TablePanelOptions extends RightPanel implements ICollectionStatusOb
   private ViewerDatabase database;
   private CollectionStatus status;
   private ViewerTable table;
-  private boolean allSelected = true; // true: select all; false; select none;
-  private boolean showTechnicalInformation = false; // true: show; false: hide;
+  private boolean allSelected = true; 	// true: select all; false; select none;
+	private boolean showTechnicalInformation = false; // true: show; false: hide;
   private Map<String, Boolean> initialLoading = new HashMap<>();
   private MultipleSelectionTablePanel<ColumnStatus> columnsTable;
   private Button btnSelectToggle;
-  private Label switchLabel, labelForSwitch;
+  private Label switchLabel;
+  private Label labelForSwitch;
   private SimpleCheckBox advancedSwitch;
 
   private TablePanelOptions(CollectionStatus status, ViewerDatabase viewerDatabase, final String tableID) {
@@ -126,7 +126,7 @@ public class TablePanelOptions extends RightPanel implements ICollectionStatusOb
   }
 
   private void init() {
-    mainHeader.setWidget(CommonClientUtils.getHeader(table, "h1", database.getMetadata().getSchemas().size() > 1));
+    mainHeader.insert(CommonClientUtils.getHeader(status.getTableStatusByTableId(table.getId()), table, "h1", database.getMetadata().getSchemas().size() > 1),0);
     configureButtons();
     configureTechnicalInformationSwitch();
     initTable();
@@ -208,14 +208,13 @@ public class TablePanelOptions extends RightPanel implements ICollectionStatusOb
     final MultiSelectionModel<ColumnStatus> selectionModel = columnsTable.getSelectionModel();
     columnsTable = createCellTableForViewerColumn();
     populateTableColumns(columnsTable);
-    selectionModel.getSelectedSet().forEach(configColumn -> {
-      columnsTable.getSelectionModel().setSelected(configColumn, selectionModel.isSelected(configColumn));
-    });
+    selectionModel.getSelectedSet().forEach(configColumn ->
+      columnsTable.getSelectionModel().setSelected(configColumn, selectionModel.isSelected(configColumn)));
     content.add(columnsTable);
   }
 
   private MultipleSelectionTablePanel<ColumnStatus> createCellTableForViewerColumn() {
-    return new MultipleSelectionTablePanel<>();
+    return new MultipleSelectionTablePanel<>(GWT.create(ConfigurationCellTableResources.class));
   }
 
   private void populateTableColumns(MultipleSelectionTablePanel<ColumnStatus> selectionTablePanel) {
@@ -331,12 +330,12 @@ public class TablePanelOptions extends RightPanel implements ICollectionStatusOb
 
       if (allSelected) {
         btnSelectToggle.setText(messages.basicActionSelectNone());
-        btnSelectToggle.removeStyleName("btn-select-all");
+        btnSelectToggle.removeStyleName(BTN_SELECT_ALL);
         btnSelectToggle.addStyleName("btn-select-none");
       } else {
         btnSelectToggle.setText(messages.basicActionSelectAll());
         btnSelectToggle.removeStyleName("btn-select-none");
-        btnSelectToggle.addStyleName("btn-select-all");
+        btnSelectToggle.addStyleName(BTN_SELECT_ALL);
       }
     });
 
@@ -363,12 +362,12 @@ public class TablePanelOptions extends RightPanel implements ICollectionStatusOb
 
     if (allSelected) {
       btnSelectToggle.setText(messages.basicActionSelectNone());
-      btnSelectToggle.removeStyleName("btn-select-all");
+      btnSelectToggle.removeStyleName(BTN_SELECT_ALL);
       btnSelectToggle.addStyleName("btn-select-none");
     } else {
       btnSelectToggle.setText(messages.basicActionSelectAll());
       btnSelectToggle.removeStyleName("btn-select-none");
-      btnSelectToggle.addStyleName("btn-select-all");
+      btnSelectToggle.addStyleName(BTN_SELECT_ALL);
     }
   }
 

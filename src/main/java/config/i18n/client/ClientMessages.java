@@ -1338,7 +1338,7 @@ public interface ClientMessages extends Messages {
 
   String dataTransformationBtnTransformTable(String table);
 
-  String dataTransformationBtnRunTable(String table);
+  String dataTransformationBtnRunTable();
 
   String dataTransformationBtnRunAll();
 

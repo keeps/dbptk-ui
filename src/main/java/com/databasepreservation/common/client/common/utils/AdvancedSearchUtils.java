@@ -88,34 +88,35 @@ public class AdvancedSearchUtils {
     return searchFields;
   }
 
+  private static String viewerTypeToSearchFieldType(ViewerType.dbTypes type) {
+		switch (type) {
+			case BOOLEAN:
+				return ViewerConstants.SEARCH_FIELD_TYPE_BOOLEAN;
+			case DATETIME:
+				return ViewerConstants.SEARCH_FIELD_TYPE_DATETIME;
+			case DATETIME_JUST_DATE:
+				return ViewerConstants.SEARCH_FIELD_TYPE_DATE;
+			case DATETIME_JUST_TIME:
+				return ViewerConstants.SEARCH_FIELD_TYPE_TIME;
+			case TIME_INTERVAL:
+				return ViewerConstants.SEARCH_FIELD_TYPE_DATE_INTERVAL;
+			case NUMERIC_FLOATING_POINT:
+			case NUMERIC_INTEGER:
+				return ViewerConstants.SEARCH_FIELD_TYPE_NUMERIC_INTERVAL;
+			case ENUMERATION:
+			case STRING:
+				return ViewerConstants.SEARCH_FIELD_TYPE_TEXT;
+			case NESTED:
+				return ViewerConstants.SEARCH_FIELD_TYPE_NESTED;
+			case BINARY:
+			case COMPOSED_STRUCTURE:
+			case COMPOSED_ARRAY:
+			default:
+				return "unsupported";
+		}
+	}
+
   private static String viewerTypeToSearchFieldType(ViewerType viewerType) {
-    ViewerType.dbTypes dbType = viewerType.getDbType();
-
-    switch (dbType) {
-
-      case BOOLEAN:
-        return ViewerConstants.SEARCH_FIELD_TYPE_BOOLEAN;
-      case DATETIME:
-        return ViewerConstants.SEARCH_FIELD_TYPE_DATETIME;
-      case DATETIME_JUST_DATE:
-        return ViewerConstants.SEARCH_FIELD_TYPE_DATE;
-      case DATETIME_JUST_TIME:
-        return ViewerConstants.SEARCH_FIELD_TYPE_TIME;
-      case TIME_INTERVAL:
-        return ViewerConstants.SEARCH_FIELD_TYPE_DATE_INTERVAL;
-      case NUMERIC_FLOATING_POINT:
-      case NUMERIC_INTEGER:
-        return ViewerConstants.SEARCH_FIELD_TYPE_NUMERIC_INTERVAL;
-      case ENUMERATION:
-      case STRING:
-        return ViewerConstants.SEARCH_FIELD_TYPE_TEXT;
-      case NESTED:
-        return ViewerConstants.SEARCH_FIELD_TYPE_NESTED;
-      case BINARY:
-      case COMPOSED_STRUCTURE:
-      case COMPOSED_ARRAY:
-      default:
-        return "unsupported";
-    }
+    return viewerTypeToSearchFieldType(viewerType.getDbType());
   }
 }

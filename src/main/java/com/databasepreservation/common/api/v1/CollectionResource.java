@@ -116,8 +116,9 @@ public class CollectionResource implements CollectionService {
 
   @GET
   @Path("/{databaseUUID}/collection/{collectionUUID}/report")
+	@Produces({MediaType.APPLICATION_OCTET_STREAM})
   @ApiOperation(value = "Downloads the migration report for a specific database")
-  public Response getReport(String databaseUUID) {
+  public Response getReport(@PathParam("databaseUUID") String databaseUUID) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
     final User user = UserUtility.getUser(request);
     LogEntryState state = LogEntryState.SUCCESS;

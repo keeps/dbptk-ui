@@ -374,7 +374,7 @@ public class BreadcrumbManager {
   public static List<BreadcrumbItem> forDataTransformation(final String databaseUUID, final String databaseName, final String tableName) {
     List<BreadcrumbItem> items = forAdvancedConfiguration(databaseUUID, databaseName);
     items.add(new BreadcrumbItem(
-        SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE)
+        SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATA_TRANSFORMATION)
         + SafeHtmlUtils.htmlEscape(tableName))));
     return items;
   }
@@ -404,11 +404,11 @@ public class BreadcrumbManager {
     return items;
   }
 
-  public static List<BreadcrumbItem> forColumnsManagement(final String databaseUUID, final String databaseName, final String tableName) {
+  public static List<BreadcrumbItem> forColumnsManagement(final String databaseUUID, final String databaseName) {
     List<BreadcrumbItem> items = forAdvancedConfiguration(databaseUUID, databaseName);
     items.add(new BreadcrumbItem(
-        SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE)
-            + SafeHtmlUtils.htmlEscape(tableName))));
+        SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.COLUMN)
+            + SafeHtmlUtils.htmlEscape(messages.breadcrumbTextForColumnManagement()))));
     return items;
   }
 }

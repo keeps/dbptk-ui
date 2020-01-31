@@ -2,8 +2,7 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
     <g:FlowPanel ui:field="content" addStyleNames="management">
-        <g:FlowPanel addStyleNames="structure-header">
-            <g:SimplePanel addStyleNames="h1" ui:field="mainHeader"/>
+        <g:FlowPanel addStyleNames="structure-header" ui:field="mainHeader">
             <g:FlowPanel addStyleNames="data-transformation-toolbar-actions">
                 <g:Button ui:field="btnGotoTable" addStyleNames="btn btn-table" />
             </g:FlowPanel>

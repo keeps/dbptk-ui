@@ -243,4 +243,13 @@ public class CollectionStatus implements Serializable {
         table.setCustomDescription(value);
     }
   }
+
+  @JsonIgnore
+  public String getFirstTableVisible() {
+		for (TableStatus table : tables) {
+			if (table.isShow()) return table.getId();
+		}
+
+		return null;
+	}
 }

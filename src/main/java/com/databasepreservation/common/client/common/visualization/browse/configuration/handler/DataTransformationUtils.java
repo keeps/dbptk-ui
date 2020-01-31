@@ -1,6 +1,5 @@
 package com.databasepreservation.common.client.common.visualization.browse.configuration.handler;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -21,15 +20,14 @@ import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
 import com.databasepreservation.common.client.models.structure.ViewerReference;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.services.CollectionService;
-import com.databasepreservation.common.client.services.JobService;
 import com.databasepreservation.common.client.widgets.Toast;
-import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
 public class DataTransformationUtils {
+	private DataTransformationUtils() {}
+
   public static void includeRelatedTable(TableNode childNode, DenormalizeConfiguration denormalizeConfiguration) {
     TableNode parentNode = childNode.getParentNode();
     ViewerTable sourceTable = childNode.getTable();

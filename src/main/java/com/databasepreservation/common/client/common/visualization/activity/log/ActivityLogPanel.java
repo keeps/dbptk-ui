@@ -1,39 +1,31 @@
 package com.databasepreservation.common.client.common.visualization.activity.log;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import com.databasepreservation.common.client.common.DefaultAsyncCallback;
-import com.databasepreservation.common.client.common.UserLogin;
 import com.databasepreservation.common.client.index.filter.Filter;
 
 import com.databasepreservation.common.client.ClientConfigurationManager;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.ContentPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
-import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.lists.ActivityLogList;
 import com.databasepreservation.common.client.common.search.SearchField;
 import com.databasepreservation.common.client.common.search.SearchFieldPanel;
 import com.databasepreservation.common.client.common.search.SearchPanel;
 import com.databasepreservation.common.client.common.utils.AdvancedSearchUtils;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
-import com.databasepreservation.common.client.common.utils.ListboxUtils;
 import com.databasepreservation.common.client.models.activity.logs.ActivityLogEntry;
-import com.databasepreservation.common.client.models.user.User;
-import com.databasepreservation.common.client.services.AuthenticationService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
-import com.databasepreservation.common.server.controller.UserLoginController;
-import com.databasepreservation.common.utils.UserUtility;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.ListBox;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -61,7 +53,7 @@ public class ActivityLogPanel extends ContentPanel {
   SimplePanel advancedSearch;
 
   @UiField
-  SimplePanel mainHeader;
+  FlowPanel mainHeader;
 
   @UiField
   SimplePanel description;
@@ -73,27 +65,19 @@ public class ActivityLogPanel extends ContentPanel {
 
   private SearchPanel searchPanel;
   private FlowPanel itemsSearchAdvancedFieldsPanel;
-  private ListBox searchAdvancedFieldOptions;
-  private final Map<String, SearchField> searchFields = new HashMap<>();
 
   private ActivityLogPanel() {
     activityLogList = new ActivityLogList(new Filter(),
       ClientConfigurationManager.FacetFactory.getFacets(ViewerConstants.ACTIVITY_LOG_PROPERTY), false, false);
-    itemsSearchAdvancedFieldsPanel = new FlowPanel();
-    searchAdvancedFieldOptions = new ListBox();
-    itemsSearchAdvancedFieldsPanel.addStyleName("searchAdvancedFieldsPanel empty");
 
     initWidget(uiBinder.createAndBindUi(this));
 
-    mainHeader.setWidget(CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.ACTIVITY_LOG),
-      messages.activityLogMenuText(), "h1"));
+		initHeader();
 
-    MetadataField instance = MetadataField.createInstance(messages.activityLogDescription());
-    instance.setCSS("table-row-description", "font-size-description");
+		itemsSearchAdvancedFieldsPanel = new FlowPanel();
+		itemsSearchAdvancedFieldsPanel.addStyleName("searchAdvancedFieldsPanel empty");
 
-    description.setWidget(instance);
-
-    activityLogList.getSelectionModel().addSelectionChangeHandler(event -> {
+		activityLogList.getSelectionModel().addSelectionChangeHandler(event -> {
       ActivityLogEntry selected = activityLogList.getSelectionModel().getSelectedObject();
       if (selected != null) {
         activityLogList.getSelectionModel().clear();
@@ -105,49 +89,40 @@ public class ActivityLogPanel extends ContentPanel {
       messages.searchPlaceholder(), false, true);
     searchPanel.setList(activityLogList);
     searchPanel.setDefaultFilterIncremental(false);
-    showSearchAdvancedFieldsPanel();
-
     advancedSearch.add(searchPanel);
 
     initAdvancedSearch();
+		showSearchAdvancedFieldsPanel();
   }
 
-  public void showSearchAdvancedFieldsPanel() {
+	private void initHeader() {
+		mainHeader.add(CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.ACTIVITY_LOG),
+			messages.activityLogMenuText(), "h1"));
+
+		HTML html = new HTML(messages.activityLogDescription());
+		html.addStyleName("font-size-description");
+
+		description.setWidget(html);
+	}
+
+	public void showSearchAdvancedFieldsPanel() {
     searchPanel.setVariables(ViewerConstants.DEFAULT_FILTER, ViewerConstants.INDEX_SEARCH, activityLogList,
       itemsSearchAdvancedFieldsPanel);
-    searchPanel.setSearchAdvancedFieldOptionsAddVisible(true);
   }
 
   private void initAdvancedSearch() {
     final List<SearchField> searchFieldsForLog = AdvancedSearchUtils.getSearchFieldsForLog();
 
-    for (SearchField searchField : searchFieldsForLog) {
-      ListboxUtils.insertItemByAlphabeticOrder(searchAdvancedFieldOptions, searchField.getLabel(), searchField.getId());
-      searchFields.put(searchField.getId(), searchField);
-    }
+		itemsSearchAdvancedFieldsPanel.add(CommonClientUtils.getAdvancedSearchDivider("Activity-log"));
 
-    updateSearchFields(searchFieldsForLog);
-  }
-
-  private void updateSearchFields(List<SearchField> newSearchFields) {
-    for (SearchField searchField : newSearchFields) {
-      if (searchField.isFixed()) {
-        final SearchFieldPanel searchFieldPanel = new SearchFieldPanel();
-        searchFieldPanel.setSearchAdvancedFields(searchAdvancedFieldOptions);
-        searchFieldPanel.setSearchFields(searchFields);
-        addSearchFieldPanel(searchFieldPanel);
-        searchFieldPanel.selectSearchField(searchField.getId());
-      }
-    }
-
-    searchPanel.addSearchAdvancedFieldAddHandler(event -> {
-      final SearchFieldPanel searchFieldPanel = new SearchFieldPanel();
-      searchFieldPanel.setSearchAdvancedFields(searchAdvancedFieldOptions);
-      searchFieldPanel.setSearchFields(searchFields);
-      searchFieldPanel.selectFirstSearchField();
-      addSearchFieldPanel(searchFieldPanel);
-    });
-
+    searchFieldsForLog.forEach(searchField -> {
+    	if (searchField.isFixed()) {
+    		final SearchFieldPanel searchFieldPanel = new SearchFieldPanel();
+    		searchFieldPanel.setSearchField(searchField);
+    		addSearchFieldPanel(searchFieldPanel);
+    		searchFieldPanel.selectSearchField();
+			}
+		});
   }
 
   private void addSearchFieldPanel(final SearchFieldPanel searchFieldPanel) {
@@ -156,17 +131,6 @@ public class ActivityLogPanel extends ContentPanel {
 
     searchPanel.setSearchAdvancedGoEnabled(true);
     searchPanel.setClearSearchButtonEnabled(true);
-
-    ClickHandler clickHandler = event -> {
-      itemsSearchAdvancedFieldsPanel.remove(searchFieldPanel);
-      if (itemsSearchAdvancedFieldsPanel.getWidgetCount() == 0) {
-        itemsSearchAdvancedFieldsPanel.addStyleName("empty");
-        searchPanel.setSearchAdvancedGoEnabled(false);
-        searchPanel.setClearSearchButtonEnabled(false);
-      }
-    };
-
-    searchFieldPanel.addRemoveClickHandler(clickHandler);
   }
 
   @Override

@@ -37,17 +37,9 @@ public class JobList extends BasicAsyncTableCell<ViewerJob> {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
 
   private Column<ViewerJob, SafeHtml> idColumn;
-  private Column<ViewerJob, SafeHtml> databaseColumn;
-  private Column<ViewerJob, SafeHtml> tableColumn;
-  private Column<ViewerJob, SafeHtml> nameColumn;
-  private Column<ViewerJob, SafeHtml> createTimeColumn;
-  private Column<ViewerJob, SafeHtml> startTimeColumn;
-  private Column<ViewerJob, SafeHtml> endTimeColumn;
-  private Column<ViewerJob, SafeHtml> progressColumn;
-  private Column<ViewerJob, SafeHtml> statusColumn;
-  private Column<ViewerJob, SafeHtml> detailColumn;
+	private Column<ViewerJob, SafeHtml> statusColumn;
 
-  public JobList() {
+	public JobList() {
     this(new Filter(), null, null, false, false);
   }
 
@@ -68,75 +60,75 @@ public class JobList extends BasicAsyncTableCell<ViewerJob> {
       }
     };
 
-    databaseColumn = new TooltipColumn<ViewerJob>() {
-      @Override
-      public SafeHtml getValue(ViewerJob viewerJob) {
-        return viewerJob != null && viewerJob.getDatabaseName() != null
-          ? SafeHtmlUtils.fromString(viewerJob.getDatabaseName())
-          : SafeHtmlUtils.fromString("unknown");
-      }
-    };
+		Column<ViewerJob, SafeHtml> databaseColumn = new TooltipColumn<ViewerJob>() {
+			@Override
+			public SafeHtml getValue(ViewerJob viewerJob) {
+				return viewerJob != null && viewerJob.getDatabaseName() != null
+						? SafeHtmlUtils.fromString(viewerJob.getDatabaseName())
+						: SafeHtmlUtils.fromString("unknown");
+			}
+		};
 
-    tableColumn = new TooltipColumn<ViewerJob>() {
-      @Override
-      public SafeHtml getValue(ViewerJob viewerJob) {
-        return viewerJob != null && viewerJob.getTableName() != null
-          ? SafeHtmlUtils.fromString(viewerJob.getTableName())
-          : SafeHtmlUtils.fromString("unknown");
-      }
-    };
+		Column<ViewerJob, SafeHtml> tableColumn = new TooltipColumn<ViewerJob>() {
+			@Override
+			public SafeHtml getValue(ViewerJob viewerJob) {
+				return viewerJob != null && viewerJob.getTableName() != null
+						? SafeHtmlUtils.fromString(viewerJob.getTableName())
+						: SafeHtmlUtils.fromString("unknown");
+			}
+		};
 
-    nameColumn = new TooltipColumn<ViewerJob>() {
-      @Override
-      public SafeHtml getValue(ViewerJob viewerJob) {
-        return viewerJob != null && viewerJob.getName() != null ? SafeHtmlUtils.fromString(viewerJob.getName())
-          : SafeHtmlUtils.fromString("unknown");
-      }
-    };
+		Column<ViewerJob, SafeHtml> nameColumn = new TooltipColumn<ViewerJob>() {
+			@Override
+			public SafeHtml getValue(ViewerJob viewerJob) {
+				return viewerJob != null && viewerJob.getName() != null ? SafeHtmlUtils.fromString(viewerJob.getName())
+						: SafeHtmlUtils.fromString("unknown");
+			}
+		};
 
-    createTimeColumn = new TooltipColumn<ViewerJob>() {
-      @Override
-      public SafeHtml getValue(ViewerJob viewerJob) {
-        return viewerJob != null && viewerJob.getCreateTime() != null
-          ? SafeHtmlUtils.fromString(Humanize.formatDateTime(viewerJob.getStartTime()))
-          : SafeHtmlUtils.fromString("unknown");
-      }
-    };
+		Column<ViewerJob, SafeHtml> createTimeColumn = new TooltipColumn<ViewerJob>() {
+			@Override
+			public SafeHtml getValue(ViewerJob viewerJob) {
+				return viewerJob != null && viewerJob.getCreateTime() != null
+						? SafeHtmlUtils.fromString(Humanize.formatDateTime(viewerJob.getStartTime()))
+						: SafeHtmlUtils.fromString("unknown");
+			}
+		};
 
-    startTimeColumn = new TooltipColumn<ViewerJob>() {
-      @Override
-      public SafeHtml getValue(ViewerJob viewerJob) {
-        return viewerJob != null && viewerJob.getStartTime() != null
-          ? SafeHtmlUtils.fromString(Humanize.formatDateTime(viewerJob.getStartTime()))
-          : SafeHtmlUtils.fromString("unknown");
-      }
-    };
+		Column<ViewerJob, SafeHtml> startTimeColumn = new TooltipColumn<ViewerJob>() {
+			@Override
+			public SafeHtml getValue(ViewerJob viewerJob) {
+				return viewerJob != null && viewerJob.getStartTime() != null
+						? SafeHtmlUtils.fromString(Humanize.formatDateTime(viewerJob.getStartTime()))
+						: SafeHtmlUtils.fromString("unknown");
+			}
+		};
 
-    endTimeColumn = new TooltipColumn<ViewerJob>() {
-      @Override
-      public SafeHtml getValue(ViewerJob viewerJob) {
-        if (viewerJob != null && viewerJob.getEndTime() != null) {
-          return SafeHtmlUtils.fromString(Humanize.formatDateTime(viewerJob.getEndTime()));
-        } else {
-          return SafeHtmlUtils.fromString("unknown");
-        }
-      }
-    };
+		Column<ViewerJob, SafeHtml> endTimeColumn = new TooltipColumn<ViewerJob>() {
+			@Override
+			public SafeHtml getValue(ViewerJob viewerJob) {
+				if (viewerJob != null && viewerJob.getEndTime() != null) {
+					return SafeHtmlUtils.fromString(Humanize.formatDateTime(viewerJob.getEndTime()));
+				} else {
+					return SafeHtmlUtils.fromString("unknown");
+				}
+			}
+		};
 
-    progressColumn = new TooltipColumn<ViewerJob>() {
-      @Override
-      public SafeHtml getValue(ViewerJob viewerJob) {
-        if (viewerJob != null && viewerJob.getProcessRows() != null && viewerJob.getRowsToProcess() != null) {
-          int currentGlobalPercent = new Double(
-            (viewerJob.getProcessRows() * 1.0D / viewerJob.getRowsToProcess()) * 100).intValue();
+		Column<ViewerJob, SafeHtml> progressColumn = new TooltipColumn<ViewerJob>() {
+			@Override
+			public SafeHtml getValue(ViewerJob viewerJob) {
+				if (viewerJob != null && viewerJob.getProcessRows() != null && viewerJob.getRowsToProcess() != null) {
+					int currentGlobalPercent = new Double(
+							(viewerJob.getProcessRows() * 1.0D / viewerJob.getRowsToProcess()) * 100).intValue();
 
-          return SafeHtmlUtils.fromString(
-            currentGlobalPercent + "% (" + viewerJob.getProcessRows() + " of " + viewerJob.getRowsToProcess() + ")");
-        } else {
-          return SafeHtmlUtils.fromString("0%");
-        }
-      }
-    };
+					return SafeHtmlUtils.fromString(
+							currentGlobalPercent + "% (" + viewerJob.getProcessRows() + " of " + viewerJob.getRowsToProcess() + ")");
+				} else {
+					return SafeHtmlUtils.fromString("0%");
+				}
+			}
+		};
 
     statusColumn = new TooltipColumn<ViewerJob>() {
       @Override
@@ -146,14 +138,14 @@ public class JobList extends BasicAsyncTableCell<ViewerJob> {
       }
     };
 
-    detailColumn = new TooltipColumn<ViewerJob>() {
-      @Override
-      public SafeHtml getValue(ViewerJob viewerJob) {
-        return viewerJob != null && viewerJob.getExitDescription() != null
-          ? SafeHtmlUtils.fromString(viewerJob.getExitDescription())
-          : SafeHtmlUtils.fromString("");
-      }
-    };
+		Column<ViewerJob, SafeHtml> detailColumn = new TooltipColumn<ViewerJob>() {
+			@Override
+			public SafeHtml getValue(ViewerJob viewerJob) {
+				return viewerJob != null && viewerJob.getExitDescription() != null
+						? SafeHtmlUtils.fromString(viewerJob.getExitDescription())
+						: SafeHtmlUtils.fromString("");
+			}
+		};
 
     addColumn(idColumn, messages.batchJobsTextForJobId(), true, TextAlign.NONE, 5);
     addColumn(databaseColumn, messages.batchJobsTextForDatabase(), true, TextAlign.NONE, 10);
@@ -164,7 +156,7 @@ public class JobList extends BasicAsyncTableCell<ViewerJob> {
     addColumn(endTimeColumn, messages.batchJobsTextForEndTime(), true, TextAlign.NONE, 10);
     addColumn(progressColumn, "Progress", true, TextAlign.NONE, 10);
     addColumn(statusColumn, messages.batchJobsTextForStatus(), true, TextAlign.NONE, 8);
-    addColumn(detailColumn, messages.batchJobsTextForDetail(), true, TextAlign.NONE, 30);
+    addColumn(detailColumn, messages.batchJobsTextForDetail(), true, TextAlign.NONE, 0);
 
     idColumn.setSortable(true);
     statusColumn.setSortable(true);

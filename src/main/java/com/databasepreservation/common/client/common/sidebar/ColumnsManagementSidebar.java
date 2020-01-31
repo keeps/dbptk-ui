@@ -215,14 +215,8 @@ public class ColumnsManagementSidebar extends Composite implements Sidebar, ICol
 
   @Override
   public void selectFirst() {
-    final String uuid = collectionStatus.getTables().get(0).getId();
-    list.forEach((key, hyperlink) -> {
-      if (key.equals(uuid)) {
-        hyperlink.setSelected(true);
-      } else {
-        hyperlink.setSelected(false);
-      }
-    });
+    final String uuid = collectionStatus.getFirstTableVisible();
+    list.forEach((key, hyperlink) -> hyperlink.setSelected(key.equals(uuid)));
   }
 
   @Override

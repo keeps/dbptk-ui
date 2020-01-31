@@ -26,7 +26,6 @@ import config.i18n.client.ClientMessages;
  */
 public class TransformationChildTables {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
-  private static Map<String, TransformationChildTables> instances = new HashMap<>();
   private DenormalizeConfiguration denormalizeConfiguration;
   private TransformationTable rootTable;
   private ViewerTable childTable;
@@ -34,26 +33,11 @@ public class TransformationChildTables {
   private String uuid;
   List<Button> buttons;
 
-  /**
-   *
-   * @param childTable
-   * @param denormalizeConfiguration
-   * @param rootTable
-   * @param buttons
-   * @return
-   */
-  public static TransformationChildTables getInstance(TableNode childTable,
+  public static TransformationChildTables createInstance(TableNode childTable,
     DenormalizeConfiguration denormalizeConfiguration, TransformationTable rootTable, List<Button> buttons) {
-     return new TransformationChildTables(childTable, denormalizeConfiguration, rootTable, buttons);
+    return new TransformationChildTables(childTable, denormalizeConfiguration, rootTable, buttons);
   }
 
-  /**
-   *
-   * @param childTable
-   * @param denormalizeConfiguration
-   * @param rootTable
-   * @param buttons
-   */
   private TransformationChildTables(TableNode childTable, DenormalizeConfiguration denormalizeConfiguration,
     TransformationTable rootTable, List<Button> buttons) {
     this.denormalizeConfiguration = denormalizeConfiguration;
@@ -73,11 +57,7 @@ public class TransformationChildTables {
     }
   }
 
-  /**
-   *
-   * @return
-   */
-  public MultipleSelectionTablePanel createTable() {
+  public MultipleSelectionTablePanel<ViewerColumn> createTable() {
     MultipleSelectionTablePanel<ViewerColumn> selectionTablePanel = new MultipleSelectionTablePanel<>();
     Label header = new Label("");
     selectionTablePanel.createTable(header, new ArrayList<>(), childTable.getColumns().iterator(),
@@ -97,11 +77,6 @@ public class TransformationChildTables {
     return selectionTablePanel;
   }
 
-  /**
-   *
-   * @param selectionTablePanel
-   * @return
-   */
   private MultipleSelectionTablePanel.ColumnInfo<ViewerColumn> createCheckbox(
     MultipleSelectionTablePanel<ViewerColumn> selectionTablePanel) {
     return new MultipleSelectionTablePanel.ColumnInfo<>("", 4,
@@ -153,9 +128,4 @@ public class TransformationChildTables {
     }
     return false;
   }
-
-  public static void clear() {
-    instances.clear();
-  }
-
 }

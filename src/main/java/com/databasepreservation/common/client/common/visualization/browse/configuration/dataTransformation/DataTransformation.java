@@ -96,14 +96,9 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    List<BreadcrumbItem> breadcrumbItems = new ArrayList<>();
-    if (tableId == null) {
-      breadcrumbItems = BreadcrumbManager.forDataTransformation(database.getUuid(), database.getMetadata().getName(),
-        messages.breadcrumbTextForDataTransformation());
-    } else {
-      breadcrumbItems = BreadcrumbManager.forDataTransformation(database.getUuid(), database.getMetadata().getName(),
-        collectionStatus.getTableStatusByTableId(tableId).getCustomName());
-    }
+    List<BreadcrumbItem> breadcrumbItems;
+    breadcrumbItems = BreadcrumbManager.forDataTransformation(database.getUuid(), database.getMetadata().getName(),
+      messages.breadcrumbTextForDataTransformation());
     BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
   }
 
@@ -217,13 +212,11 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
     btnGotoTable = new Button();
     btnGotoTable.setText(messages.dataTransformationBtnBrowseTable());
     btnGotoTable.setStyleName("btn btn-table");
-    btnGotoTable.addClickHandler(event -> {
-      HistoryManager.gotoTable(database.getUuid(), tableId);
-    });
+    btnGotoTable.addClickHandler(event -> HistoryManager.gotoTable(database.getUuid(), tableId));
 
     btnRunConfiguration.setEnabled(false);
     btnRunConfiguration.setText(
-      messages.dataTransformationBtnRunTable(collectionStatus.getTableStatusByTableId(tableId).getCustomName()));
+      messages.dataTransformationBtnRunTable());
     btnRunConfiguration.setStyleName("btn btn-play");
     btnRunConfiguration.addClickHandler(clickEvent -> {
       DataTransformationUtils.saveConfiguration(database.getUuid(), denormalizeConfiguration, collectionStatus);
@@ -246,16 +239,9 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
     updateControllerPanel();
   }
 
-  private void clear() {
-    content.clear();
-    TransformationTable.clear();
-    TransformationChildTables.clear();
-  }
-
   /**
    * Creates the root card of relationship tree
    *
-   * @param table
    * @return BootstrapCard
    */
   private BootstrapCard createRootTableCard(ViewerTable table) {
@@ -273,7 +259,6 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
   /**
    * Creates the child card of relationship tree
    *
-   * @param childNode
    * @return BootstrapCard
    */
   private FlowPanel createChildTableCard(TableNode childNode) {
@@ -294,9 +279,9 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
     card.getElement().setId(childNode.getUuid());
 
     FlowPanel container = new FlowPanel();
-    TransformationChildTables tableInstance = TransformationChildTables.getInstance(childNode, denormalizeConfiguration,
+    TransformationChildTables tableInstance = TransformationChildTables.createInstance(childNode, denormalizeConfiguration,
       rootTable, buttons);
-    MultipleSelectionTablePanel selectTable = tableInstance.createTable();
+    MultipleSelectionTablePanel<ViewerColumn> selectTable = tableInstance.createTable();
 
     SwitchBtn switchBtn = new SwitchBtn("Enable", false);
 
@@ -335,7 +320,7 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
   }
 
   private void setup(TableNode childNode, SwitchBtn switchBtn, BootstrapCard card, FlowPanel grandChild,
-    FlowPanel container, MultipleSelectionTablePanel selectTable) {
+    FlowPanel container, MultipleSelectionTablePanel<ViewerColumn> selectTable) {
     RelatedTablesConfiguration targetTable = denormalizeConfiguration.getRelatedTable(childNode.getUuid());
     if (targetTable != null) {
       switchBtn.getButton().setValue(true, true);
@@ -346,11 +331,6 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
     }
   }
 
-  /**
-   *
-   * @param node
-   * @return
-   */
   private FlowPanel expandLevel(TableNode node) {
     FlowPanel relationShipList = new FlowPanel();
     for (Map.Entry<ViewerForeignKey, TableNode> entry : node.getChildren().entrySet()) {
@@ -388,8 +368,6 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
   /**
    * Create a reference information panel
    *
-   * @param message
-   * @return FlowPanel
    */
   private FlowPanel buildReferenceInformation(SafeHtml message) {
     FlowPanel referenceInformation = new FlowPanel();

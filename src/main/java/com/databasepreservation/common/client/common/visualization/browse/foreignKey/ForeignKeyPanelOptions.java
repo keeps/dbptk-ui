@@ -16,6 +16,7 @@ import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.common.visualization.browse.table.TableCheckConstraintsPanel;
 import com.databasepreservation.common.client.common.visualization.browse.table.TableForeignKeysPanel;
 import com.databasepreservation.common.client.common.visualization.browse.table.TableTriggersPanel;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
@@ -24,6 +25,7 @@ import com.databasepreservation.common.client.models.structure.ViewerReference;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.models.structure.ViewerView;
 import com.databasepreservation.common.client.tools.HistoryManager;
+import com.databasepreservation.common.client.widgets.ConfigurationCellTableResources;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.core.client.GWT;
@@ -52,13 +54,12 @@ public class ForeignKeyPanelOptions extends RightPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, ForeignKeyPanelOptions> instances = new HashMap<>();
 
-  public static ForeignKeyPanelOptions getInstance(ViewerDatabase database, String tableId,
-    List<String> columnsAndValues) {
+  public static ForeignKeyPanelOptions getInstance(ViewerDatabase database, CollectionStatus status, String tableId,
+																									 List<String> columnsAndValues) {
     String separator = "/";
     String code = database.getUuid() + separator + tableId;
 
-    instances.computeIfAbsent(code, k -> new ForeignKeyPanelOptions(database, tableId, columnsAndValues));
-    return instances.get(code);
+    return instances.computeIfAbsent(code, k -> new ForeignKeyPanelOptions(database, status, tableId, columnsAndValues));
   }
 
   interface TablePanelUiBinder extends UiBinder<Widget, ForeignKeyPanelOptions> {
@@ -67,16 +68,13 @@ public class ForeignKeyPanelOptions extends RightPanel {
   private static TablePanelUiBinder uiBinder = GWT.create(TablePanelUiBinder.class);
 
   @UiField
-  SimplePanel mainHeader;
+  FlowPanel mainHeader;
 
   @UiField
   FlowPanel mainContainer;
 
   @UiField
   FlowPanel content;
-
-  @UiField
-  FlowPanel customButtons;
 
   @UiField
   Button btnBack;
@@ -88,6 +86,7 @@ public class ForeignKeyPanelOptions extends RightPanel {
   Button options;
 
   private ViewerDatabase database;
+  private CollectionStatus status;
   private ViewerTable table;
   private boolean allSelected = true; // true: select all; false; select none;
   private boolean showTechnicalInformation = false; // true: show; false: hide;
@@ -99,9 +98,10 @@ public class ForeignKeyPanelOptions extends RightPanel {
   private SimpleCheckBox advancedSwitch;
   private List<String> columnsAndValues;
 
-  private ForeignKeyPanelOptions(ViewerDatabase viewerDatabase, final String tableId,
+  private ForeignKeyPanelOptions(ViewerDatabase viewerDatabase, CollectionStatus status, final String tableId,
     final List<String> columnsAndValues) {
     database = viewerDatabase;
+    this.status = status;
     table = database.getMetadata().getTableById(tableId);
     this.columnsAndValues = columnsAndValues;
     initWidget(uiBinder.createAndBindUi(this));
@@ -111,10 +111,7 @@ public class ForeignKeyPanelOptions extends RightPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    // BreadcrumbManager.updateBreadcrumb(breadcrumb,
-    // BreadcrumbManager.forTable(database.getMetadata().getName(),
-    // database.getUuid(), table.getName(), table.getUuid()));
-
+  	// do nothing
   }
 
   private Map<String, Boolean> getSelectedColumns() {
@@ -127,7 +124,7 @@ public class ForeignKeyPanelOptions extends RightPanel {
   }
 
   private void init() {
-    mainHeader.setWidget(CommonClientUtils.getHeader(table, "h1", database.getMetadata().getSchemas().size() > 1));
+    mainHeader.insert(CommonClientUtils.getHeader(status.getTableStatusByTableId(table.getId()), table, "h1", database.getMetadata().getSchemas().size() > 1),0);
     configureButtons();
     configureTechnicalInformationSwitch();
     initTable();
@@ -216,7 +213,7 @@ public class ForeignKeyPanelOptions extends RightPanel {
   }
 
   private MultipleSelectionTablePanel<ViewerColumn> createCellTableForViewerColumn() {
-    return new MultipleSelectionTablePanel<>();
+    return new MultipleSelectionTablePanel<>(GWT.create(ConfigurationCellTableResources.class));
   }
 
   private void populateTableColumns(MultipleSelectionTablePanel<ViewerColumn> selectionTablePanel,
@@ -280,7 +277,7 @@ public class ForeignKeyPanelOptions extends RightPanel {
             return column.getDisplayName();
           }
         }),
-      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForDescription(), 35,
+      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForDescription(), 0,
         new TextColumn<ViewerColumn>() {
           @Override
           public String getValue(ViewerColumn column) {

@@ -45,9 +45,6 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static final String FILTER_ICON = "<i class='fa fa-filter' aria-hidden='true'></i>";
 
-  // private static final BrowseMessages messages =
-  // GWT.create(BrowseMessages.class);
-
   private static final Binder binder = GWT.create(Binder.class);
 
   interface Binder extends UiBinder<Widget, SearchPanel> {
@@ -76,9 +73,6 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
 
   @UiField
   FlowPanel searchAdvancedPanelButtons;
-
-  @UiField
-  Button searchAdvancedFieldOptionsAdd;
 
   @UiField
   Button searchAdvancedGo;
@@ -227,12 +221,14 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
 
     if (fieldsPanel != null && fieldsPanel.getParent() != null && fieldsPanel.getParent().isVisible()) {
       for (int i = 0; i < fieldsPanel.getWidgetCount(); i++) {
-        SearchFieldPanel searchAdvancedFieldPanel = (SearchFieldPanel) fieldsPanel.getWidget(i);
-        FilterParameter filterParameter = searchAdvancedFieldPanel.getFilter();
+      	if (fieldsPanel.getWidget(i) instanceof SearchFieldPanel) {
+					SearchFieldPanel searchAdvancedFieldPanel = (SearchFieldPanel) fieldsPanel.getWidget(i);
+					FilterParameter filterParameter = searchAdvancedFieldPanel.getFilter();
 
-        if (filterParameter != null) {
-          parameters.add(filterParameter);
-        }
+					if (filterParameter != null) {
+						parameters.add(filterParameter);
+					}
+				}
       }
     }
 
@@ -255,18 +251,6 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
     return filter;
   }
 
-  public String getDropdownSelectedValue() {
-    return searchInputListBox.getSelectedValue();
-  }
-
-  public void setDropdownLabel(String label) {
-    searchInputListBox.setLabel(label);
-  }
-
-  public void addDropdownItem(String label, String value) {
-    searchInputListBox.addItem(label, value);
-  }
-
   private void showSearchAdvancedPanel() {
     searchAdvancedPanel.setVisible(!searchAdvancedPanel.isVisible());
     if (searchAdvancedPanel.isVisible()) {
@@ -284,10 +268,6 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
     if (searchAdvancedPanel.isVisible()) {
       searchAdvancedDisclosureButton.addStyleName("open");
     }
-  }
-
-  public void addDropdownPopupStyleName(String styleName) {
-    searchInputListBox.addPopupStyleName(styleName);
   }
 
   public void setFieldsPanel(FlowPanel fieldsPanel) {
@@ -321,21 +301,15 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
     this.defaultFilterIncremental = defaultFilterIncremental;
   }
 
-  public void clearSearchInputBox() {
-    searchInputBox.setText("");
-  }
-
   public void clearAdvancedSearchInputBox() {
     if (fieldsPanel != null && fieldsPanel.getParent() != null && fieldsPanel.getParent().isVisible()) {
       for (int i = 0; i < fieldsPanel.getWidgetCount(); i++) {
-        SearchFieldPanel searchAdvancedFieldPanel = (SearchFieldPanel) fieldsPanel.getWidget(i);
-        searchAdvancedFieldPanel.clear();
+      	if (fieldsPanel.getWidget(i) instanceof SearchFieldPanel) {
+					SearchFieldPanel searchAdvancedFieldPanel = (SearchFieldPanel) fieldsPanel.getWidget(i);
+					searchAdvancedFieldPanel.clear();
+				}
       }
     }
-  }
-
-  public void setSearchAdvancedFieldOptionsAddVisible(boolean visible) {
-    searchAdvancedFieldOptionsAdd.setVisible(visible);
   }
 
   public void setSearchAdvancedGoEnabled(boolean enabled) {
@@ -344,10 +318,6 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
 
   public void setClearSearchButtonEnabled(boolean enabled) {
     clearSearchButton.setEnabled(enabled);
-  }
-
-  public void addSearchAdvancedFieldAddHandler(ClickHandler handler) {
-    searchAdvancedFieldOptionsAdd.addClickHandler(handler);
   }
 
   @UiHandler("searchAdvancedGo")

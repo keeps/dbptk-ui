@@ -34,9 +34,10 @@ import config.i18n.client.ClientMessages;
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class TableSearchPanel extends Composite {
-  private static final ClientMessages messages = GWT.create(ClientMessages.class);
+	private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static final Binder uiBinder = GWT.create(Binder.class);
-  private CollectionStatus status;
+	private static final String EMPTY = "empty";
+	private CollectionStatus status;
 
   interface Binder extends UiBinder<Widget, TableSearchPanel> {
   }
@@ -48,13 +49,9 @@ public class TableSearchPanel extends Composite {
   @UiField
   SimplePanel tableContainer;
 
-  // @UiField
-  // Button logJsonSearch;
-
   private TableRowList tableRowList;
 
   FlowPanel itemsSearchAdvancedFieldsPanel;
-  ListBox searchAdvancedFieldOptions;
 
   private Filter initialFilter;
 
@@ -79,7 +76,7 @@ public class TableSearchPanel extends Composite {
 
   /**
    * Table search panel with a SearchInfo (as JSON string) predefined search
-   * 
+   *
    * @param searchInfoJson
    */
   public TableSearchPanel(String searchInfoJson, CollectionStatus status) {
@@ -96,21 +93,9 @@ public class TableSearchPanel extends Composite {
    */
   public TableSearchPanel(CollectionStatus status) {
     itemsSearchAdvancedFieldsPanel = new FlowPanel();
-    searchAdvancedFieldOptions = new ListBox();
     this.status = status;
 
     initWidget(uiBinder.createAndBindUi(this));
-
-    // logJsonSearch.addClickHandler(new ClickHandler() {
-    // @Override
-    // public void onClick(ClickEvent event) {
-    // GWT.log("----- BEGIN");
-    // GWT.log(createSearchInfo().asJson());
-    // GWT.log("----- encoded:");
-    // GWT.log(createSearchInfo().asUrlEncodedJson());
-    // GWT.log("----- END");
-    // }
-    // });
 
     itemsSearchAdvancedFieldsPanel.addStyleName("searchAdvancedFieldsPanel empty");
   }
@@ -180,37 +165,29 @@ public class TableSearchPanel extends Composite {
 
   private void addSearchFieldPanel(final SearchFieldPanel searchFieldPanel) {
     itemsSearchAdvancedFieldsPanel.add(searchFieldPanel);
-    itemsSearchAdvancedFieldsPanel.removeStyleName("empty");
+    itemsSearchAdvancedFieldsPanel.removeStyleName(EMPTY);
 
     searchPanel.setSearchAdvancedGoEnabled(true);
     searchPanel.setClearSearchButtonEnabled(true);
-
-    ClickHandler clickHandler = event -> {
-      itemsSearchAdvancedFieldsPanel.remove(searchFieldPanel);
-      if (itemsSearchAdvancedFieldsPanel.getWidgetCount() == 0) {
-        itemsSearchAdvancedFieldsPanel.addStyleName("empty");
-        searchPanel.setSearchAdvancedGoEnabled(false);
-        searchPanel.setClearSearchButtonEnabled(false);
-      }
-    };
-
-    searchFieldPanel.addRemoveClickHandler(clickHandler);
   }
 
   private void initAdvancedSearch() {
     final List<SearchField> searchFieldsFromTable = AdvancedSearchUtils.getSearchFieldsFromTable(table, status,
       database.getMetadata());
     TableSearchPanel.this.searchFields.clear();
-    for (SearchField searchField : searchFieldsFromTable) {
-      ListboxUtils.insertItemByAlphabeticOrder(searchAdvancedFieldOptions, searchField.getLabel(), searchField.getId());
-      TableSearchPanel.this.searchFields.put(searchField.getId(), searchField);
-    }
-    updateSearchFields(searchFieldsFromTable);
+
+		searchFieldsFromTable.forEach(searchField -> {
+			if (searchField.isFixed()) {
+				final SearchFieldPanel searchFieldPanel = new SearchFieldPanel();
+				searchFieldPanel.setSearchField(searchField);
+				addSearchFieldPanel(searchFieldPanel);
+				searchFieldPanel.selectSearchField();
+			}
+		});
   }
 
   public void showSearchAdvancedFieldsPanel() {
     searchPanel.setVariables(initialFilter, ViewerConstants.INDEX_SEARCH, tableRowList, itemsSearchAdvancedFieldsPanel);
-    searchPanel.setSearchAdvancedFieldOptionsAddVisible(true);
   }
 
   public void applySearchInfoJson(String searchInfoJson) {
@@ -229,17 +206,19 @@ public class TableSearchPanel extends Composite {
       // clear existing advanced search fields
       this.searchPanel.openSearchAdvancedPanel();
       itemsSearchAdvancedFieldsPanel.clear();
-      itemsSearchAdvancedFieldsPanel.addStyleName("empty");
+      itemsSearchAdvancedFieldsPanel.addStyleName(EMPTY);
 
       // handle creating / editing search fields
       this.searchFields.clear();
-      for (SearchField searchField : currentSearchInfo.getFields()) {
-        ListboxUtils.insertItemByAlphabeticOrder(searchAdvancedFieldOptions, searchField.getLabel(),
-          searchField.getId());
-        this.searchFields.put(searchField.getId(), searchField);
-      }
 
-      updateSearchFields(currentSearchInfo.getFields(), true);
+			currentSearchInfo.getFields().forEach(searchField -> {
+				if (searchField.isFixed()) {
+					final SearchFieldPanel searchFieldPanel = new SearchFieldPanel();
+					searchFieldPanel.setSearchField(searchField);
+					addSearchFieldPanel(searchFieldPanel);
+					searchFieldPanel.selectSearchField();
+				}
+			});
 
       // update search panel and trigger a search
       searchPanel.updateSearchPanel(currentSearchInfo);
@@ -250,34 +229,10 @@ public class TableSearchPanel extends Composite {
     }
   }
 
-  private void updateSearchFields(List<SearchField> newSearchFields) {
-    updateSearchFields(newSearchFields, false);
-  }
-
-  private void updateSearchFields(List<SearchField> newSearchFields, boolean ignoreIsFixed) {
-    for (SearchField searchField : newSearchFields) {
-      if (searchField.isFixed() || ignoreIsFixed) {
-        final SearchFieldPanel searchFieldPanel = new SearchFieldPanel(columnDisplayNameToVisibleState);
-        searchFieldPanel.setSearchAdvancedFields(searchAdvancedFieldOptions);
-        searchFieldPanel.setSearchFields(TableSearchPanel.this.searchFields);
-        addSearchFieldPanel(searchFieldPanel);
-        searchFieldPanel.selectSearchField(searchField.getId());
-      }
-    }
-
-    searchPanel.addSearchAdvancedFieldAddHandler(event -> {
-      final SearchFieldPanel searchFieldPanel = new SearchFieldPanel(columnDisplayNameToVisibleState);
-      searchFieldPanel.setSearchAdvancedFields(searchAdvancedFieldOptions);
-      searchFieldPanel.setSearchFields(TableSearchPanel.this.searchFields);
-      searchFieldPanel.selectFirstSearchField();
-      addSearchFieldPanel(searchFieldPanel);
-    });
-  }
-
   /**
    * Converts searchInfoJson to a SearchInfo object and if it is valid puts it
    * into currentSearchInfo
-   * 
+   *
    * @param searchInfoJson
    *          the SearchInfo object provided as Json
    */
@@ -310,12 +265,12 @@ public class TableSearchPanel extends Composite {
   }
 
   private void saveQuery() {
-    SearchInfo currentSearchInfo = createSearchInfo();
-    CollectionService.Util.call((String savedSearchUUID) -> {
-      searchPanel.querySavedHandler(true, database, savedSearchUUID);
-    }, (String errorMessage) -> {
-      searchPanel.querySavedHandler(false, database, null);
-    }).saveSavedSearch(database.getUuid(), database.getUuid(), table.getId(), messages.searchOnTable(table.getName()),
-      "", currentSearchInfo);
+    SearchInfo searchInfo = createSearchInfo();
+    CollectionService.Util.call((String savedSearchUUID) ->
+      searchPanel.querySavedHandler(true, database, savedSearchUUID)
+    , (String errorMessage) ->
+      searchPanel.querySavedHandler(false, database, null)
+    ).saveSavedSearch(database.getUuid(), database.getUuid(), table.getId(), messages.searchOnTable(table.getName()),
+      "", searchInfo);
   }
 }

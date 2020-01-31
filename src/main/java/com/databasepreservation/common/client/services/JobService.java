@@ -34,7 +34,7 @@ import io.swagger.annotations.ApiParam;
 @Path(".." + ViewerConstants.ENDPOINT_JOB)
 @Api(value = JobService.SWAGGER_ENDPOINT)
 public interface JobService extends DirectRestService {
-  public static final String SWAGGER_ENDPOINT = "v1 job";
+  String SWAGGER_ENDPOINT = "v1 job";
 
   class Util {
     /**
@@ -62,5 +62,4 @@ public interface JobService extends DirectRestService {
   @ApiOperation(value = "Find all jobs", response = IndexResult.class)
   IndexResult<ViewerJob> find(@ApiParam(ViewerConstants.API_QUERY_PARAM_FILTER) FindRequest findRequest,
     @QueryParam(ViewerConstants.API_QUERY_PARAM_LOCALE) String locale);
-
 }

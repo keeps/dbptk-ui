@@ -33,7 +33,10 @@ import com.google.gwt.view.client.MultiSelectionModel;
  *          SafeHtml>
  */
 public class MultipleSelectionTablePanel<C> extends Composite {
-  interface MultipleSelectionTablePanelUiBinder extends UiBinder<Widget, MultipleSelectionTablePanel> {
+	private static final String MY_ASYNCDATAGRID_DISPLAY_SCROLL_WRAPPER_LEFT = "my-asyncdatagrid-display-scroll-wrapper-left";
+	private static final String MY_ASYNCDATAGRID_DISPLAY_SCROLL_WRAPPER_RIGHT = "my-asyncdatagrid-display-scroll-wrapper-right";
+
+	interface MultipleSelectionTablePanelUiBinder extends UiBinder<Widget, MultipleSelectionTablePanel> {
   }
 
   private static MultipleSelectionTablePanelUiBinder uiBinder = GWT.create(MultipleSelectionTablePanelUiBinder.class);
@@ -137,10 +140,8 @@ public class MultipleSelectionTablePanel<C> extends Composite {
     display = internalCreateTable(rowItems, columns);
 
     display.addCellPreviewHandler(event -> {
-      if (BrowserEvents.CLICK.equals(event.getNativeEvent().getType())) {
-        if (whitelistedColumns.isEmpty() || whitelistedColumns.contains(event.getColumn()+1)) {
-          handleRowSelection(event);
-        }
+      if (BrowserEvents.CLICK.equals(event.getNativeEvent().getType()) && (whitelistedColumns.isEmpty() || whitelistedColumns.contains(event.getColumn()+1))) {
+      	handleRowSelection(event);
       }
     });
 
@@ -181,23 +182,23 @@ public class MultipleSelectionTablePanel<C> extends Composite {
 
       if (percent > 0) {
         // show left shadow
-        displayScrollWrapper.addStyleName("my-asyncdatagrid-display-scroll-wrapper-left");
+        displayScrollWrapper.addStyleName(MY_ASYNCDATAGRID_DISPLAY_SCROLL_WRAPPER_LEFT);
       } else {
         // hide left shadow
-        displayScrollWrapper.removeStyleName("my-asyncdatagrid-display-scroll-wrapper-left");
+        displayScrollWrapper.removeStyleName(MY_ASYNCDATAGRID_DISPLAY_SCROLL_WRAPPER_LEFT);
       }
 
       if (percent < 100) {
         // show right shadow
-        displayScrollWrapper.addStyleName("my-asyncdatagrid-display-scroll-wrapper-right");
+        displayScrollWrapper.addStyleName(MY_ASYNCDATAGRID_DISPLAY_SCROLL_WRAPPER_RIGHT);
       } else {
         // hide right shadow
-        displayScrollWrapper.removeStyleName("my-asyncdatagrid-display-scroll-wrapper-right");
+        displayScrollWrapper.removeStyleName(MY_ASYNCDATAGRID_DISPLAY_SCROLL_WRAPPER_RIGHT);
       }
     } else {
       // hide both shadows
-      displayScrollWrapper.removeStyleName("my-asyncdatagrid-display-scroll-wrapper-left");
-      displayScrollWrapper.removeStyleName("my-asyncdatagrid-display-scroll-wrapper-right");
+      displayScrollWrapper.removeStyleName(MY_ASYNCDATAGRID_DISPLAY_SCROLL_WRAPPER_LEFT);
+      displayScrollWrapper.removeStyleName(MY_ASYNCDATAGRID_DISPLAY_SCROLL_WRAPPER_RIGHT);
     }
   }
 
@@ -235,10 +236,6 @@ public class MultipleSelectionTablePanel<C> extends Composite {
 
     return cellTable;
   }
-
-	public ListDataProvider<C> getDataProvider() {
-		return dataProvider;
-	}
 
 	public MultiSelectionModel<C> getSelectionModel() {
     return selectionModel;
