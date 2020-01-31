@@ -6,8 +6,10 @@ import java.util.Map;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.ContentPanel;
+import com.databasepreservation.common.client.common.NavigationPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
+import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
@@ -43,6 +45,9 @@ public class AdvancedConfiguration extends ContentPanel {
   @UiField
   FlowPanel header, content;
 
+  @UiField
+  SimplePanel description;
+
   private static Map<String, AdvancedConfiguration> instances = new HashMap<>();
   private ViewerDatabase database;
 
@@ -60,24 +65,36 @@ public class AdvancedConfiguration extends ContentPanel {
   private void init() {
     configureHeader();
 
-    Button btnTableManagement = new Button();
+    NavigationPanel tableManagement = NavigationPanel.createInstance(messages.advancedConfigurationLabelForTableManagement());
+    tableManagement.addToDescriptionPanel(messages.advancedConfigurationTextForTableManagement());
+    Button btnTableManagement = new Button(messages.basicActionOpen());
+    btnTableManagement.setStyleName("btn btn-outline-primary btn-open");
     btnTableManagement.addClickHandler(event -> {
       HistoryManager.gotoTableManagement(database.getUuid());
     });
-    content.add(createCard(FontAwesomeIconManager.TABLE, messages.advancedConfigurationLabelForTableManagement(), btnTableManagement));
+    tableManagement.addButton(btnTableManagement);
+    content.add(tableManagement);
 
-    Button btnColumnManagement = new Button();
+    NavigationPanel columnManagement = NavigationPanel.createInstance(messages.advancedConfigurationLabelForColumnsManagement());
+    columnManagement.addToDescriptionPanel(messages.advancedConfigurationTextForColumnsManagement());
+    Button btnColumnManagement = new Button(messages.basicActionOpen());
+    btnColumnManagement.setStyleName("btn btn-outline-primary btn-open");
     btnColumnManagement.addClickHandler(event -> {
       HistoryManager.gotoColumnsManagement(database.getUuid());
     });
-    content.add(createCard(FontAwesomeIconManager.COLUMN, messages.advancedConfigurationLabelForColumnsManagement(), btnColumnManagement));
+    columnManagement.addButton(btnColumnManagement);
+    content.add(columnManagement);
 
     if (ApplicationType.getType().equals(ViewerConstants.SERVER)) {
-      Button btnDataTransformation = new Button();
+      NavigationPanel dataTransformation = NavigationPanel.createInstance(messages.advancedConfigurationLabelForDataTransformation());
+      dataTransformation.addToDescriptionPanel(messages.advancedConfigurationTextForDataTransformation());
+      Button btnDataTransformation = new Button(messages.basicActionOpen());
+      btnDataTransformation.setStyleName("btn btn-outline-primary btn-open");
       btnDataTransformation.addClickHandler(event -> {
         HistoryManager.gotoDataTransformation(database.getUuid());
       });
-      content.add(createCard(FontAwesomeIconManager.DATA_TRANSFORMATION, messages.advancedConfigurationLabelForDataTransformation(), btnDataTransformation));
+      dataTransformation.addButton(btnDataTransformation);
+      content.add(dataTransformation);
     }
 
   }
@@ -85,17 +102,13 @@ public class AdvancedConfiguration extends ContentPanel {
   private void configureHeader() {
     header.add(CommonClientUtils.getHeaderHTML(FontAwesomeIconManager.getTag(FontAwesomeIconManager.SLIDERS),
       messages.advancedConfigurationLabelForMainTitle(), "h1"));
+
+    MetadataField instance = MetadataField.createInstance(database.getMetadata().getDescription());
+    instance.setCSS("table-row-description", "font-size-description");
+
+    description.setWidget(instance);
   }
 
-  private FlowPanel createCard(String icon, String title, Button button){
-    FlowPanel headerPanel = CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(icon),
-        title, "h3");
-    button.setStyleName("btn btn-play");
-    FlowPanel footerPanel = new FlowPanel();
-    footerPanel.add(button);
-
-    return CommonClientUtils.wrapOnDiv("navigation-card", headerPanel, footerPanel);
-  }
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
     List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forAdvancedConfiguration(database.getUuid(),
