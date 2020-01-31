@@ -257,52 +257,6 @@ p[data-value]:after {
     float: right;
 }
 
-.btn-save:after {
-    content: "\f0c7";
-}
-
-.btn-run:after {
-    content: "\f085";
-}
-
-.btn-play:after {
-    content: "\f04b";
-}
-
-.btn-test:after {
-    content: "\f0e7";
-}
-
-.btn-manage:after {
-    content: "\f233";
-}
-
-.btn-erase:after {
-    content: "\f12d";
-}
-
-.btn-export {
-    padding: 4px 8px 4px 8px;
-    font-size: 11px;
-    font-weight: 400;
-    float: right;
-    margin-top: 3px;
-    border-radius: 0px;
-    margin-left: 5px;
-    display: inline-block;
-    font-family: "Ubuntu", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
-    text-transform: none;
-    width: 8.4rem;
-}
-
-.btn-export-all {
-    width: 8.4rem;
-}
-
-.btn-export-visible {
-    width: 8.4rem;
-}
-
 .search-field-left-panel .form-textbox-small {
     max-width: 100px;
 }
@@ -402,7 +356,7 @@ p[data-value]:after {
 .browseContentFilePreviewPanel .filePreviewToolbar .browseContentBreadcrumb {
     margin: 0;
     float: left;
-    margin-left: 30px;
+    margin-left: 14px;
     height: 3.5rem;
     line-height: 3.5rem;
 }
@@ -1195,7 +1149,7 @@ html, body, .desktop-main {
 
 .metadata-information-panel {
     display: flex;
-    margin: 0 10rem 0 10rem;
+    padding: 30px 0;
 }
 
 .metadata-information {
@@ -1243,7 +1197,6 @@ html, body, .desktop-main {
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: space-between;
-    margin: 0 10rem 0 10rem;
 }
 
 .navigation-panel {
@@ -1255,29 +1208,36 @@ html, body, .desktop-main {
     margin-right: 10px;
 }
 
+
 .navigation-panel:last-of-type {
     margin-right: 0;
 }
 
 .navigation-panel-header {
     font-size: x-large;
-    margin-left: 20px;
-    margin-top: 10px;
+    font-weight:500
+}
+
+.navigation-panel-description{
+    font-size: small;
+    font-weight: 400;
+    color: #575757;
 }
 
 .navigation-panel-info {
     margin-top: 1.25rem;
     margin-bottom: 1rem;
     flex: 1 1 auto;
-    margin-left: 20px;
-    margin-rigth: 20px;
 }
 
 .navigation-panel-options {
-    margin-bottom: 1.25rem;
     vertical-align: bottom;
-    margin-left: 20px;
 }
+
+.navigation-panel-options .btn-item:last-child {
+    padding-right: 0;
+}
+
 
 .btn-link-info {
     background-color: transparent;
@@ -1342,8 +1302,7 @@ html, body, .desktop-main {
 
 .btn-item {
     position: relative;
-    padding-top: 1%;
-    padding-left: 10px;
+    padding-right: 10px;
     display: table-cell;
 }
 
@@ -1578,6 +1537,23 @@ html, body, .desktop-main {
     display: flex;
     flex-direction: row-reverse;
     width: 100%;
+}
+
+.navigation-card {
+    background-color: white;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+    transition: all 0.3s cubic-bezier(.25, .8, .25, 1);
+    border-radius: 2px;
+    padding: 14px 16px;
+    width: 27%;
+    display: flex;
+    flex-flow: column wrap;
+    flex: 1 0 5%;
+    margin-right: 39px;
+}
+
+.navigation-card:last-of-type{
+    margin-right: 0;
 }
 
 /**********************************************
@@ -1826,6 +1802,52 @@ html, body, .desktop-main {
 /***********************************************
                     BUTTONS
 ***********************************************/
+.btn-save:after {
+    content: "\f0c7";
+}
+
+.btn-run:after {
+    content: "\f085";
+}
+
+.btn-play:after {
+    content: "\f04b";
+}
+
+.btn-test:after {
+    content: "\f0e7";
+}
+
+.btn-manage:after {
+    content: "\f233";
+}
+
+.btn-erase:after {
+    content: "\f12d";
+}
+
+.btn-export {
+    padding: 4px 8px 4px 8px;
+    font-size: 11px;
+    font-weight: 400;
+    float: right;
+    margin-top: 3px;
+    border-radius: 0px;
+    margin-left: 5px;
+    display: inline-block;
+    font-family: "Ubuntu", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    text-transform: none;
+    width: 8.4rem;
+}
+
+.btn-export-all {
+    width: 8.4rem;
+}
+
+.btn-export-visible {
+    width: 8.4rem;
+}
+
 .btn-back-wizard:before {
     content: "\f053";
 }
@@ -1849,10 +1871,6 @@ html, body, .desktop-main {
     content: "\f56d";
 }
 
-.btn-save:after {
-    content: "\f0c7";
-}
-
 .btn-delete:after {
     content: "\f2ed";
 }
@@ -1861,9 +1879,47 @@ html, body, .desktop-main {
     content: "\f0ce";
 }
 
+.btn-validate:after{
+    content: "\f46c";
+}
+
+.btn-open:after{
+    content: "\f07c";
+}
+
+.btn-configuration:after {
+    content: "\f1de";
+}
+
+.btn-item-hidden{
+    padding: 0px;
+}
+
 .btn-fixed-width {
     width: 11.75rem;
     text-align: center;
+}
+
+.btn-outline-primary{
+    background-color: transparent;
+    border: solid 1px #089de3;
+    color: #089de3;
+}
+
+.btn-outline-primary:hover{
+    background-color: #089de3;
+    color: #fff;
+}
+
+.btn-outline-danger{
+    background-color: transparent;
+    border: solid 1px #d9534f;
+    color: #d9534f;
+}
+
+.btn-outline-danger:hover{
+    background-color: #d9534f;
+    color: #fff;
 }
 
 /**********************************************
@@ -2992,10 +3048,10 @@ rgba(0, 0, 0, .125);
 }
 
 .form-textarea {
-	resize: vertical;
-	min-height: 27px;
+    resize: vertical;
+    min-height: 27px;
     height: 27px;
-	word-break: break-word;
+    word-break: break-word;
 }
 
 .management .form-textbox:invalid {

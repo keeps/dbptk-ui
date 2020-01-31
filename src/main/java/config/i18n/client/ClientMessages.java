@@ -696,9 +696,11 @@ public interface ClientMessages extends Messages {
 
   String SIARDHomePageButtonTextOpenValidate();
 
-  String SIARDHomePageButtonTextSeeReport();
+  String SIARDHomePageButtonTextForDownloadReport();
 
-  String SIARDHomePageButtonTextForBrowseNow();
+  String SIARDHomePageButtonTextForOpenReport();
+
+  String SIARDHomePageButtonTextForBrowse();
 
   String SIARDHomePageButtonTextForIngest();
 

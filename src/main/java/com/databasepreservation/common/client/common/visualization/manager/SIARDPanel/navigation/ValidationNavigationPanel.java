@@ -112,13 +112,14 @@ public class ValidationNavigationPanel {
 
     // See Report btn
     btnSeeReport = new Button();
-    btnSeeReport.setText(messages.SIARDHomePageButtonTextSeeReport());
     btnSeeReport.addStyleName("btn btn-link-info");
     if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
+      btnSeeReport.setText(messages.SIARDHomePageButtonTextForOpenReport());
       btnSeeReport.addClickHandler(clickEvent -> {
         JavascriptUtils.showItem(database.getValidatorReportPath());
       });
     } else {
+      btnSeeReport.setText(messages.SIARDHomePageButtonTextForDownloadReport());
       btnSeeReport.addClickHandler(clickEvent -> {
         SafeUri downloadUri = RestUtils.createFileResourceDownloadValidationReportUri(database.getUuid());
         Window.Location.assign(downloadUri.asString());

@@ -27,7 +27,6 @@ public class BrowseNavigationPanel {
   private ViewerDatabase database;
   private Button btnDelete;
   private Button btnBrowse;
-  private Button btnIngest;
   private Button btnAdvancedConfiguration;
   private boolean btnIngestClicked = false;
   private MetadataField browsingStatus = null;
@@ -41,15 +40,41 @@ public class BrowseNavigationPanel {
   }
 
   private void browseButton() {
-    // Browser now Button
     btnBrowse = new Button();
-    btnBrowse.setText(messages.SIARDHomePageButtonTextForBrowseNow());
-    btnBrowse.addStyleName("btn btn-link-info");
+    btnBrowse.setText(messages.SIARDHomePageButtonTextForBrowse());
+    btnBrowse.addStyleName("btn btn-outline-primary btn-play");
     btnBrowse.setVisible(false);
 
-    btnBrowse.addClickHandler(event -> {
+    btnBrowse.addClickHandler(e -> handleBrowseAction());
+  }
+
+  private void handleBrowseAction() {
+    if (database.getStatus().equals(ViewerDatabaseStatus.METADATA_ONLY)) { // Initial state
+      if (database.getVersion().equals(ViewerConstants.SIARD_V21)) {
+        if (!btnIngestClicked) {
+          btnIngestClicked = true;
+
+          HistoryManager.gotoIngestSIARDData(database.getUuid(), database.getMetadata().getName());
+          CollectionService.Util.call((String databaseUUID) -> {
+            HistoryManager.gotoDatabase(databaseUUID);
+            Dialogs.showInformationDialog(messages.SIARDHomePageDialogTitleForBrowsing(),
+              messages.SIARDHomePageTextForIngestSuccess(), messages.basicActionClose(), "btn btn-link");
+          }, (String errorMessage) -> {
+            instances.clear();
+            HistoryManager.gotoSIARDInfo(database.getUuid());
+            Dialogs.showErrors(messages.SIARDHomePageDialogTitleForBrowsing(), errorMessage,
+              messages.basicActionClose());
+          }).createCollection(database.getUuid());
+        }
+      } else {
+        Dialogs.showInformationDialog(messages.SIARDHomePageDialogTitleForBrowsing(),
+          messages.SIARDHomePageTextForIngestNotSupported(), messages.basicActionUnderstood(), "btn btn-link");
+      }
+    } else if (database.getStatus().equals(ViewerDatabaseStatus.INGESTING)) { // Ingest the data
+      HistoryManager.gotoIngestSIARDData(database.getUuid(), database.getMetadata().getName());
+    } else if (database.getStatus().equals(ViewerDatabaseStatus.AVAILABLE)) { // show the data
       HistoryManager.gotoDatabase(database.getUuid());
-    });
+    }
   }
 
   private void deleteButton() {
@@ -75,46 +100,13 @@ public class BrowseNavigationPanel {
     });
   }
 
-  private void ingestButton() {
-    btnIngest = new Button();
-    btnIngest.setText(messages.SIARDHomePageButtonTextForBrowseNow());
-    btnIngest.addStyleName("btn btn-link-info");
-    btnIngest.setVisible(false);
-
-    btnIngest.addClickHandler(event -> {
-      if (database.getVersion().equals(ViewerConstants.SIARD_V21)) {
-
-        if (!btnIngestClicked) {
-          btnIngestClicked = true;
-
-          HistoryManager.gotoIngestSIARDData(database.getUuid(), database.getMetadata().getName());
-          CollectionService.Util.call((String databaseUUID) -> {
-            HistoryManager.gotoDatabase(databaseUUID);
-            Dialogs.showInformationDialog(messages.SIARDHomePageDialogTitleForBrowsing(),
-              messages.SIARDHomePageTextForIngestSuccess(), messages.basicActionClose(), "btn btn-link");
-          }, (String errorMessage) -> {
-            instances.clear();
-            HistoryManager.gotoSIARDInfo(database.getUuid());
-            Dialogs.showErrors(messages.SIARDHomePageDialogTitleForBrowsing(), errorMessage,
-              messages.basicActionClose());
-          }).createCollection(database.getUuid());
-        }
-      } else {
-        Dialogs.showInformationDialog(messages.SIARDHomePageDialogTitleForBrowsing(),
-          messages.SIARDHomePageTextForIngestNotSupported(), messages.basicActionUnderstood(), "btn btn-link");
-      }
-    });
-  }
-
   private void advancedConfigurationButton() {
     btnAdvancedConfiguration = new Button();
     btnAdvancedConfiguration.setText("Configuration");
     btnAdvancedConfiguration.addStyleName("btn btn-link-info");
     btnAdvancedConfiguration.setVisible(true);
 
-    btnAdvancedConfiguration.addClickHandler(event -> {
-      HistoryManager.gotoAdvancedConfiguration(database.getUuid());
-    });
+    btnAdvancedConfiguration.addClickHandler(e -> HistoryManager.gotoAdvancedConfiguration(database.getUuid()));
   }
 
   public NavigationPanel build() {
@@ -124,14 +116,10 @@ public class BrowseNavigationPanel {
     // Delete Button
     deleteButton();
 
-    // Ingest Button
-    ingestButton();
-
     advancedConfigurationButton();
 
     NavigationPanel browse = NavigationPanel.createInstance(messages.SIARDHomePageOptionsHeaderForBrowsing());
 
-    browse.addButton(btnIngest);
     browse.addButton(btnBrowse);
     browse.addButton(btnDelete);
     browse.addButton(btnAdvancedConfiguration);
@@ -145,13 +133,11 @@ public class BrowseNavigationPanel {
       btnDelete.setVisible(true);
       btnAdvancedConfiguration.setVisible(false);
     } else if (database.getStatus().equals(ViewerDatabaseStatus.METADATA_ONLY)) {
-      btnIngest.setVisible(true);
       btnDelete.setVisible(false);
       btnAdvancedConfiguration.setVisible(false);
     }
 
     if (database.getPath() == null || database.getPath().isEmpty()) {
-      btnIngest.setVisible(false);
       btnIngestClicked = false;
     }
 
@@ -169,26 +155,18 @@ public class BrowseNavigationPanel {
     browsingStatus.updateText(LabelUtils.getDatabaseStatus(database.getStatus()));
 
     if (database.getStatus().equals(ViewerDatabaseStatus.AVAILABLE)) {
-      btnIngest.setVisible(false);
       btnBrowse.setVisible(true);
       btnDelete.setVisible(true);
       btnAdvancedConfiguration.setVisible(true);
     } else if (database.getStatus().equals(ViewerDatabaseStatus.ERROR)) {
-      btnIngest.setVisible(false);
       btnBrowse.setVisible(true);
       btnDelete.setVisible(true);
       btnAdvancedConfiguration.setVisible(false);
     } else if (database.getStatus().equals(ViewerDatabaseStatus.INGESTING)) {
       if (btnIngestClicked) {
-        btnIngest.setVisible(true);
-        btnIngest.setText(messages.SIARDHomePageButtonTextForStartIngest());
-        btnBrowse.setVisible(false);
         btnAdvancedConfiguration.setVisible(false);
-        btnIngest.addClickHandler(
-          event -> HistoryManager.gotoIngestSIARDData(database.getUuid(), database.getMetadata().getName()));
       }
     } else if (database.getStatus().equals(ViewerDatabaseStatus.METADATA_ONLY)) {
-      btnIngest.setVisible(true);
       btnBrowse.setVisible(false);
       btnDelete.setVisible(false);
       btnAdvancedConfiguration.setVisible(false);
@@ -196,12 +174,12 @@ public class BrowseNavigationPanel {
     }
 
     if (database.getPath() == null || database.getPath().isEmpty()) {
-      btnIngest.setEnabled(false);
-      btnIngest.setTitle(messages.SIARDHomePageTextForRequiredSIARDFile());
+      btnBrowse.setEnabled(false);
+      btnBrowse.setTitle(messages.SIARDHomePageTextForRequiredSIARDFile());
       btnIngestClicked = false;
     } else {
-      btnIngest.setEnabled(true);
-      btnIngest.setTitle(null);
+      btnBrowse.setEnabled(true);
+      btnBrowse.setTitle("");
     }
   }
 
