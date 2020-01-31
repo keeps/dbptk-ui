@@ -151,15 +151,15 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
   private void configureHeader() {
     mainHeader.setWidget(CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE),
       collectionStatus.getTableStatusByTableId(tableId).getCustomName(), "h1"));
+    mainHeader.setTitle(collectionStatus.getTableStatusByTableId(tableId).getCustomDescription());
 
-    btnGotoTable.setText(
-      messages.dataTransformationBtnBrowseTable(collectionStatus.getTableStatusByTableId(tableId).getCustomName()));
+    btnGotoTable.setText(messages.dataTransformationBtnBrowseTable());
     btnGotoTable.addClickHandler(event -> {
       HistoryManager.gotoTable(database.getUuid(), tableId);
     });
 
     MetadataField instance = MetadataField
-      .createInstance(collectionStatus.getTableStatusByTableId(tableId).getCustomDescription());
+      .createInstance(messages.columnManagementPageDescription());
     instance.setCSS("table-row-description", "font-size-description");
 
     content.add(instance);
@@ -238,10 +238,10 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
       tableStatus.getColumns().iterator(),
       new BasicTablePanel.ColumnInfo<>(messages.basicTableHeaderOrder(), 6, getOrderColumn()),
       new BasicTablePanel.ColumnInfo<>(messages.basicTableHeaderTableOrColumn("name"), 0,
-        new Column<ColumnStatus, SafeHtml >(new SafeHtmlCell()){
+        new Column<ColumnStatus, SafeHtml>(new SafeHtmlCell()) {
           @Override
           public SafeHtml getValue(ColumnStatus column) {
-            if(column.getType().equals(ViewerType.dbTypes.NESTED)){
+            if (column.getType().equals(ViewerType.dbTypes.NESTED)) {
               return SafeHtmlUtils.fromSafeConstant(column.getNestedColumns().getPath());
             }
             return SafeHtmlUtils.fromString(column.getName());
@@ -515,8 +515,9 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
     };
 
     options.setFieldUpdater((index, columnStatus, value) -> {
-      Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), ColumnsOptionsPanel.getInstance(database.getUuid(), columnStatus),
-        messages.basicActionClose(), "btn btn-close", new DefaultAsyncCallback<Void>() {
+      Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(),
+        ColumnsOptionsPanel.getInstance(database.getUuid(), columnStatus), messages.basicActionClose(), "btn btn-close",
+        new DefaultAsyncCallback<Void>() {
           @Override
           public void onSuccess(Void aVoid) {
             // todo save just options
@@ -603,8 +604,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
     List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forColumnsManagement(database.getUuid(),
-      database.getMetadata().getName(),
-      collectionStatus.getTableStatusByTableId(tableId).getCustomName());
+      database.getMetadata().getName(), collectionStatus.getTableStatusByTableId(tableId).getCustomName());
     BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
   }
 

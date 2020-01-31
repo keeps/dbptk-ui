@@ -215,8 +215,7 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
     });
 
     btnGotoTable = new Button();
-    btnGotoTable.setText(
-      messages.dataTransformationBtnBrowseTable(collectionStatus.getTableStatusByTableId(tableId).getCustomName()));
+    btnGotoTable.setText(messages.dataTransformationBtnBrowseTable());
     btnGotoTable.setStyleName("btn btn-table");
     btnGotoTable.addClickHandler(event -> {
       HistoryManager.gotoTable(database.getUuid(), tableId);
@@ -410,13 +409,13 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
     if (!isInformation) {
       btnRunAllConfiguration.setEnabled(false);
       btnCancel.setEnabled(false);
-      //btnClearConfiguration.setEnabled(false);
+      // btnClearConfiguration.setEnabled(false);
       if (!denormalizeConfigurationList.isEmpty()) {
         for (DenormalizeConfiguration value : denormalizeConfigurationList.values()) {
           if (value.getState() != null && value.getState().equals(ViewerJobStatus.NEW)) {
             btnRunAllConfiguration.setEnabled(true);
             btnCancel.setEnabled(true);
-            //btnClearConfiguration.setEnabled(true);
+            // btnClearConfiguration.setEnabled(true);
             break;
           }
         }

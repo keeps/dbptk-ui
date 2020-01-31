@@ -1316,7 +1316,7 @@ public interface ClientMessages extends Messages {
 
   String dataTransformationTableRowList(@PluralCount List<String> columns);
 
-  String dataTransformationBtnBrowseTable(String table);
+  String dataTransformationBtnBrowseTable();
 
   String dataTransformationBtnManageTable(String table);
 
@@ -1383,6 +1383,8 @@ public interface ClientMessages extends Messages {
    * Column Management Panel
    *******************************************/
   String columnManagementPageTitle();
+
+  String columnManagementPageDescription();
 
   String columnManagementPageCancelEventDialog();
 

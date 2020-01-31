@@ -9,6 +9,7 @@ import java.util.Set;
 
 import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.common.ContentPanel;
+import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
@@ -63,6 +64,7 @@ public class TableManagementPanel extends ContentPanel {
   private ViewerDatabase database;
   private CollectionStatus collectionStatus;
   private Button btnSave = new Button();
+  private boolean changes = false;
   private Map<String, MultipleSelectionTablePanel<ViewerTable>> tables = new HashMap<>();
   private Map<String, Boolean> initialLoading = new HashMap<>();
   private Map<String, StatusHelper> editableValues = new HashMap<>();
@@ -81,6 +83,7 @@ public class TableManagementPanel extends ContentPanel {
 
   private void init() {
     configureHeader();
+
     for (ViewerSchema schema : database.getMetadata().getSchemas()) {
       MultipleSelectionTablePanel<ViewerTable> schemaTable = createCellTableForViewerTable();
       schemaTable.setHeight("100%");
@@ -99,7 +102,7 @@ public class TableManagementPanel extends ContentPanel {
     btnSave.setText(messages.basicActionSave());
     btnSave.addStyleName("btn btn-primary btn-save");
 
-    btnCancel.addClickHandler(clickEvent -> HistoryManager.gotoAdvancedConfiguration(database.getUuid()));
+    btnCancel.addClickHandler(e -> handleCancelEvent(changes));
 
     btnSave.addClickHandler(clickEvent -> {
       if (selectionValidation()) {
@@ -140,12 +143,30 @@ public class TableManagementPanel extends ContentPanel {
   }
 
   private void configureHeader() {
-    header.add(CommonClientUtils.getHeaderHTML(FontAwesomeIconManager.getTag(FontAwesomeIconManager.COG),
+    header.add(CommonClientUtils.getHeaderHTML(FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE),
       messages.tableManagementPageTitle(), "h1"));
 
     MetadataField instance = MetadataField.createInstance(messages.tableManagementPageTableTextForDescription());
     instance.setCSS("table-row-description", "font-size-description");
     content.add(instance);
+  }
+
+  private void handleCancelEvent(boolean changes) {
+    if (changes) {
+      Dialogs.showConfirmDialog(messages.columnManagementPageTitle(), messages.columnManagementPageCancelEventDialog(),
+          messages.basicActionDiscard(), "btn btn-danger btn-times-circle", messages.basicActionBack(), "btn btn-link",
+          new DefaultAsyncCallback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean aBoolean) {
+              if (!aBoolean) {
+                instances.entrySet().removeIf(e -> e.getKey().startsWith(database.getUuid()));
+                HistoryManager.gotoAdvancedConfiguration(database.getUuid());
+              }
+            }
+          });
+    } else {
+      HistoryManager.gotoAdvancedConfiguration(database.getUuid());
+    }
   }
 
   private MultipleSelectionTablePanel<ViewerTable> createCellTableForViewerTable() {
@@ -206,6 +227,8 @@ public class TableManagementPanel extends ContentPanel {
           collectionStatus.getTableStatus(table.getUuid()).getCustomDescription());
         editableValues.put(table.getUuid(), helper);
       }
+
+      changes = true;
     });
     return label;
   }
