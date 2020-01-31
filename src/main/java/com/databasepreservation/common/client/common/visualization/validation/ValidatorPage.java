@@ -22,6 +22,7 @@ import com.databasepreservation.common.client.services.SiardService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
+import com.databasepreservation.common.client.tools.Humanize;
 import com.databasepreservation.common.client.tools.RestUtils;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -161,10 +162,10 @@ public class ValidatorPage extends ContentPanel {
     header.add(CommonClientUtils.getHeaderHTML(FontAwesomeIconManager.getTag(FontAwesomeIconManager.SIARD_VALIDATIONS),
       messages.validatorPageTextForTitle(), "h1"));
 
-    MetadataField instance = MetadataField.createInstance(messages.preferencesPanelTextForDescription());
+    MetadataField instance = MetadataField.createInstance(messages.validatorPageDescription());
     instance.setCSS("table-row-description", "font-size-description");
 
-    content.add(instance);
+    description.setWidget(instance);
   }
 
   private void initProgress() {
@@ -377,7 +378,7 @@ public class ValidatorPage extends ContentPanel {
     FlowPanel right = new FlowPanel();
 
     // Database Name
-    left.add(validationInfoBuilder(messages.managePageTableHeaderTextForDatabaseName(),
+    left.add(validationInfoBuilder(messages.validatorPageTextForDatabaseName(),
       new Label(database.getMetadata().getName())));
 
     // counts
@@ -391,13 +392,10 @@ public class ValidatorPage extends ContentPanel {
     if (error) {
       Label statusLabel = new Label(messages.alertErrorTitle());
       statusLabel.setStyleName("label-danger label-error");
-      left.add(validationInfoBuilder(messages.managePageTableHeaderTextForDatabaseStatus(), statusLabel));
+      left.add(validationInfoBuilder(messages.validatorPageTextForStatus(), statusLabel));
     } else {
-      left.add(validationInfoBuilder(messages.managePageTableHeaderTextForDatabaseStatus(), updateStatus()));
+      left.add(validationInfoBuilder(messages.validatorPageTextForStatus(), updateStatus()));
     }
-
-    // SIARD Version
-    right.add(validationInfoBuilder(messages.validatorPageTextForSIARDVersion(), new Label(ViewerConstants.SIARD2_1)));
 
     // SIARD specification link
     Button SIARDSpecification = new Button(ViewerConstants.SIARD2_1);

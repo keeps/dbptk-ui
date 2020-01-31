@@ -46,7 +46,7 @@ public class FontAwesomeIconManager {
   public static final String KEY = "key";
   public static final String SERVER = "server";
   public static final String QUESTION = "question-circle";
-  public static final String SIARD_VALIDATIONS = "check";
+  public static final String SIARD_VALIDATIONS = "clipboard-check";
   public static final String COG = "cog";
   public static final String COGS = "cogs";
   public static final String PREFERENCES = "tools";

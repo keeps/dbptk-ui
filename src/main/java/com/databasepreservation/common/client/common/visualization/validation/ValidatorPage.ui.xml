@@ -2,12 +2,11 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
 >
 
-    <ui:with field='messages' type='config.i18n.client.ClientMessages' />
+    <ui:with field='messages' type='config.i18n.client.ClientMessages'/>
     <g:FlowPanel addStyleNames="col_12" ui:field="container">
         <g:FlowPanel addStyleNames="validation">
             <g:FlowPanel addStyleNames="validator">
-                <g:FlowPanel addStyleNames="structure-header" ui:field="header">
-                </g:FlowPanel>
+                <g:FlowPanel addStyleNames="structure-header" ui:field="header"/>
                 <g:SimplePanel ui:field="description"/>
 
                 <g:FlowPanel ui:field="validationInformation" addStyleNames="validation-information"/>

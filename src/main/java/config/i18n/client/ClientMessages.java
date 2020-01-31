@@ -1005,6 +1005,12 @@ public interface ClientMessages extends Messages {
   /*********************************************
    * SIARD Validator
    ********************************************/
+  String validatorPageDescription();
+
+  String validatorPageTextForDatabaseName();
+
+  String validatorPageTextForStatus();
+
   String SIARDValidatorSettings();
 
   String SIARDValidatorDialogInformationTitle();
