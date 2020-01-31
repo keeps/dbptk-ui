@@ -80,7 +80,7 @@ public class BrowseNavigationPanel {
   private void deleteButton() {
     btnDelete = new Button();
     btnDelete.setText(messages.SIARDHomePageButtonTextForDeleteIngested());
-    btnDelete.addStyleName("btn btn-danger btn-delete");
+    btnDelete.addStyleName("btn btn-outline-danger btn-delete");
     btnDelete.setVisible(false);
 
     btnDelete.addClickHandler(event -> {
@@ -103,7 +103,7 @@ public class BrowseNavigationPanel {
   private void advancedConfigurationButton() {
     btnConfiguration = new Button();
     btnConfiguration.setText("Configuration");
-    btnConfiguration.addStyleName("btn btn-configuration");
+    btnConfiguration.addStyleName("btn btn-outline-primary btn-configuration");
     btnConfiguration.setVisible(true);
 
     btnConfiguration.addClickHandler(event -> {

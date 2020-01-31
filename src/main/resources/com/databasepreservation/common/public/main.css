@@ -2200,6 +2200,7 @@ html, body, .desktop-main {
 .validation-indicators .indicator {
     display: flex;
     margin-right: 0.7em;
+    white-space: nowrap;
 }
 
 .indicator .passed {

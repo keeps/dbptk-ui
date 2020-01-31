@@ -54,7 +54,7 @@ public class SIARDNavigationPanel {
     // Edit button
     btnEditMetadata = new Button();
     btnEditMetadata.setText(messages.SIARDHomePageButtonTextEditMetadata());
-    btnEditMetadata.addStyleName("btn btn-edit");
+    btnEditMetadata.addStyleName("btn btn-outline-primary btn-edit");
     btnEditMetadata.addClickHandler(clickEvent -> {
       HistoryManager.gotoSIARDEditMetadata(database.getUuid());
     });
@@ -95,7 +95,7 @@ public class SIARDNavigationPanel {
 
     // Delete SIARD file button
     btnDeleteSIARD = new Button();
-    btnDeleteSIARD.addStyleName("btn btn-danger btn-delete");
+    btnDeleteSIARD.addStyleName("btn btn-outline-danger btn-delete");
     if (database.getPath() != null && !database.getPath().isEmpty()) {
       btnDeleteSIARD.setText(messages.SIARDHomePageButtonTextForDeleteIngested());
       btnDeleteSIARD.addClickHandler(event -> {

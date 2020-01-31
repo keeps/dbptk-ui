@@ -68,7 +68,7 @@ public class ValidationNavigationPanel {
     validator = new HelperValidator(database.getPath());
     btnRunValidator = new Button();
     btnRunValidator.setText(messages.SIARDHomePageButtonTextValidateNow());
-    btnRunValidator.addStyleName("btn btn-play");
+    btnRunValidator.addStyleName("btn btn-outline-primary btn-play");
     btnRunValidator.addClickHandler(event -> {
       if (database.getVersion().equals(ViewerConstants.SIARD_V21)) {
         if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
@@ -101,7 +101,7 @@ public class ValidationNavigationPanel {
     // Open validator btn
     btnOpenValidator = new Button();
     btnOpenValidator.setText(messages.SIARDHomePageButtonTextOpenValidate());
-    btnOpenValidator.addStyleName("btn btn-validate");
+    btnOpenValidator.addStyleName("btn btn-outline-primary btn-validate");
     btnOpenValidator.addClickHandler(event -> {
       if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
         HistoryManager.gotoSIARDValidator(database.getUuid(), validator.getReporterPathFile());
@@ -133,7 +133,7 @@ public class ValidationNavigationPanel {
     // Delete Report btn
     btnDeleteReport = new Button();
     btnDeleteReport.setText(messages.SIARDHomePageButtonTextForDeleteIngested());
-    btnDeleteReport.addStyleName("btn btn-danger btn-delete");
+    btnDeleteReport.addStyleName("btn btn-outline-danger btn-delete");
     btnDeleteReport.addClickHandler(event -> {
       if (!database.getValidationStatus().equals(ViewerDatabaseValidationStatus.VALIDATION_RUNNING)) {
         CommonDialogs.showConfirmDialog(messages.SIARDHomePageDialogTitleForDeleteValidationReport(),
@@ -154,20 +154,21 @@ public class ValidationNavigationPanel {
       messages.humanizedTextForSIARDNotValidated());
     version = MetadataField.createInstance(messages.SIARDHomePageLabelForValidateBy(),
       messages.humanizedTextForSIARDNotValidated());
+    validationWarnings = MetadataField.createInstance(messages.SIARDHomePageLabelForValidationWarnings(),
+      messages.humanizedTextForSIARDNotValidated());
     updateValidationInformation();
+    validationWarnings.setVisible(false);
 
     // Validation Status info
     validationStatus = MetadataField.createInstance(messages.SIARDHomePageLabelForValidationStatus(),
       LabelUtils.getSIARDValidationStatus(database.getValidationStatus()));
     validationStatus.setCSS(null, "label-field", "value-field");
 
-//    validationWarnings = MetadataField.createInstance(messages.SIARDHomePageLabelForValidationWarnings(),
-//      LabelUtils.getSIARDValidationStatus(database.getValidationStatus()));
-//    validationWarnings.setCSS(null, "label-field", "value-field");
     // updateValidationStatus();
 
     validatedAt.setCSS(null, "label-field", "value-field");
     version.setCSS(null, "label-field", "value-field");
+    validationWarnings.setCSS(null, "label-field", "value-field");
 
     NavigationPanel validation = NavigationPanel.createInstance(messages.SIARDHomePageOptionsHeaderForValidation());
     validation.addToDescriptionPanel(messages.SIARDHomePageOptionsDescriptionForSIARD());
@@ -181,7 +182,7 @@ public class ValidationNavigationPanel {
 
     validation.addToInfoPanel(validationStatus);
     validation.addToInfoPanel(validationDetails);
-//    validation.addToInfoPanel(validationWarnings);
+    validation.addToInfoPanel(validationWarnings);
     validation.addToInfoPanel(validatedAt);
     validation.addToInfoPanel(version);
 
@@ -248,7 +249,7 @@ public class ValidationNavigationPanel {
         btnSeeReport.setVisible(false);
         updateRunValidatorButton(messages.SIARDHomePageButtonTextValidateNow());
         btnOpenValidator.setVisible(false);
-        btnOpenValidator.getElement().getParentElement().addClassName("btn-hidden");
+        btnOpenValidator.getElement().getParentElement().addClassName("btn-item-hidden");
         btnDeleteReport.setVisible(false);
         break;
       case ERROR:
@@ -300,11 +301,7 @@ public class ValidationNavigationPanel {
         panel.add(buildIndicators(FontAwesomeIconManager.TIMES, "errors",
           messages.SIARDHomePageTextForValidationIndicatorsFailed(Integer.parseInt(database.getValidationErrors()))));
       }
-      // if (database.getValidationWarnings() != null) {
-      // panel.add(buildIndicators(database.getValidationWarnings(),
-      // FontAwesomeIconManager.WARNING, "warnings", messages
-      // .SIARDHomePageTextForValidationIndicatorsWarnings(Integer.parseInt(database.getValidationWarnings()))));
-      // }
+
       if (database.getValidationSkipped() != null) {
         panel.add(buildIndicators(FontAwesomeIconManager.SKIPPED, "skipped",
           messages.SIARDHomePageTextForValidationIndicatorsSkipped(Integer.parseInt(database.getValidationSkipped()))));
@@ -312,9 +309,13 @@ public class ValidationNavigationPanel {
       if (panel.getWidgetCount() > 0) {
         validationDetails.add(panel);
       }
-//      if (database.getValidationWarnings() != null) {
-//        validationWarnings.updateText();
-//      }
+      if (database.getValidationWarnings() != null) {
+        validationWarnings.setVisible(true);
+        validationWarnings.updateText(messages
+          .SIARDHomePageTextForValidationIndicatorsWarnings(Integer.parseInt(database.getValidationWarnings())));
+      } else {
+        validationWarnings.setVisible(false);
+      }
     }
   }
 
