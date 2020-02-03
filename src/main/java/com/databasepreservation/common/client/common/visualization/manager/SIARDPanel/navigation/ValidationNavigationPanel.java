@@ -171,7 +171,7 @@ public class ValidationNavigationPanel {
     validationWarnings.setCSS(null, "label-field", "value-field");
 
     NavigationPanel validation = NavigationPanel.createInstance(messages.SIARDHomePageOptionsHeaderForValidation());
-    validation.addToDescriptionPanel(messages.SIARDHomePageOptionsDescriptionForSIARD());
+    validation.addToDescriptionPanel(messages.SIARDHomePageOptionsDescriptionForValidation());
     validation.addButton(CommonClientUtils.wrapOnDiv("btn-item", btnRunValidator));
     validation.addButton(CommonClientUtils.wrapOnDiv("btn-item", btnOpenValidator));
     validation.addButton(CommonClientUtils.wrapOnDiv("btn-item", btnSeeReport));

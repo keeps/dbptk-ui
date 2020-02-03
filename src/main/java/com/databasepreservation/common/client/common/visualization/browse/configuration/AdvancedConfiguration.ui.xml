@@ -3,7 +3,7 @@
 
     <g:FlowPanel addStyleNames="col_12">
         <g:FlowPanel addStyleNames="structure-header" ui:field="header" />
-        <g:SimplePanel ui:field="description"/>
+        <g:SimplePanel ui:field="description" addStyleNames="table-row-description"/>
         <g:FlowPanel addStyleNames="navigation-panels" ui:field="content"/>
     </g:FlowPanel>
 </ui:UiBinder>

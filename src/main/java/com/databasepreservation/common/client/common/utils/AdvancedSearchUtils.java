@@ -2,13 +2,16 @@ package com.databasepreservation.common.client.common.utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.search.SearchField;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.NestedColumnStatus;
+import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
@@ -43,6 +46,51 @@ public class AdvancedSearchUtils {
 
   public static List<SearchField> getSearchFieldsFromTable(ViewerTable viewerTable, CollectionStatus status) {
     return getSearchFieldsFromTable(viewerTable, status, null);
+  }
+
+  public static Map<String, List<SearchField>> getSearchFieldsFromTableMap(ViewerTable viewerTable,
+    CollectionStatus status, ViewerMetadata metadata) {
+    Map<String, List<SearchField>> map = new LinkedHashMap<>();
+    final TableStatus configTable = status.getTableStatusByTableId(viewerTable.getId());
+
+    for (ColumnStatus column : configTable.getColumns()) {
+      if (!column.getType().equals(ViewerType.dbTypes.NESTED)) {
+        SearchField searchField = new SearchField(configTable.getId() + "-" + column.getColumnIndex(),
+          Collections.singletonList(column.getId()), column.getCustomName(),
+          viewerTypeToSearchFieldType(column.getType()));
+        searchField.setFixed(column.getSearchStatus().getAdvanced().isFixed());
+        updateSearchFieldMap(map, configTable.getCustomName(), searchField);
+      }
+    }
+
+    // Add nested columns
+    for (ColumnStatus columnStatus : configTable.getColumns()) {
+      NestedColumnStatus nestedColumns = columnStatus.getNestedColumns();
+      if (nestedColumns != null) {
+        for (String nestedColumn : nestedColumns.getNestedSolrNames()) {
+          TableStatus configNestedTable = status.getTableStatusByTableId(nestedColumns.getOriginalTable());
+
+          ViewerTable nestedTable = metadata.getTableById(nestedColumns.getOriginalTable());
+          for (ColumnStatus column : configNestedTable.getColumns()) {
+            if (column.getId().equals(nestedColumn)) {
+              ViewerType nestedType = new ViewerType();
+              nestedType.setDbType(ViewerType.dbTypes.NESTED);
+              List<String> fields = new ArrayList<>();
+              fields.add(nestedColumn);
+              fields.add(configTable.getId());
+              fields.add(configNestedTable.getId());
+              SearchField searchField = new SearchField(
+                  columnStatus.getId() + "-" + columnStatus.getColumnIndex(), fields, column.getCustomName(),
+                  viewerTypeToSearchFieldType(nestedType));
+              searchField.setFixed(status.showAdvancedSearch(viewerTable.getUuid(), columnStatus.getId()));
+              updateSearchFieldMap(map, nestedTable.getName(), searchField);
+            }
+          }
+        }
+      }
+    }
+
+    return map;
   }
 
   public static List<SearchField> getSearchFieldsFromTable(ViewerTable viewerTable, CollectionStatus status,
@@ -88,33 +136,44 @@ public class AdvancedSearchUtils {
     return searchFields;
   }
 
+  private static void updateSearchFieldMap(Map<String, List<SearchField>> map, String table, SearchField searchField) {
+    if (map.get(table) != null) {
+      final List<SearchField> searchFields = map.get(table);
+      searchFields.add(searchField);
+    } else {
+      List<SearchField> searchFields = new ArrayList<>();
+      searchFields.add(searchField);
+      map.put(table, searchFields);
+    }
+  }
+
   private static String viewerTypeToSearchFieldType(ViewerType.dbTypes type) {
-		switch (type) {
-			case BOOLEAN:
-				return ViewerConstants.SEARCH_FIELD_TYPE_BOOLEAN;
-			case DATETIME:
-				return ViewerConstants.SEARCH_FIELD_TYPE_DATETIME;
-			case DATETIME_JUST_DATE:
-				return ViewerConstants.SEARCH_FIELD_TYPE_DATE;
-			case DATETIME_JUST_TIME:
-				return ViewerConstants.SEARCH_FIELD_TYPE_TIME;
-			case TIME_INTERVAL:
-				return ViewerConstants.SEARCH_FIELD_TYPE_DATE_INTERVAL;
-			case NUMERIC_FLOATING_POINT:
-			case NUMERIC_INTEGER:
-				return ViewerConstants.SEARCH_FIELD_TYPE_NUMERIC_INTERVAL;
-			case ENUMERATION:
-			case STRING:
-				return ViewerConstants.SEARCH_FIELD_TYPE_TEXT;
-			case NESTED:
-				return ViewerConstants.SEARCH_FIELD_TYPE_NESTED;
-			case BINARY:
-			case COMPOSED_STRUCTURE:
-			case COMPOSED_ARRAY:
-			default:
-				return "unsupported";
-		}
-	}
+    switch (type) {
+      case BOOLEAN:
+        return ViewerConstants.SEARCH_FIELD_TYPE_BOOLEAN;
+      case DATETIME:
+        return ViewerConstants.SEARCH_FIELD_TYPE_DATETIME;
+      case DATETIME_JUST_DATE:
+        return ViewerConstants.SEARCH_FIELD_TYPE_DATE;
+      case DATETIME_JUST_TIME:
+        return ViewerConstants.SEARCH_FIELD_TYPE_TIME;
+      case TIME_INTERVAL:
+        return ViewerConstants.SEARCH_FIELD_TYPE_DATE_INTERVAL;
+      case NUMERIC_FLOATING_POINT:
+      case NUMERIC_INTEGER:
+        return ViewerConstants.SEARCH_FIELD_TYPE_NUMERIC_INTERVAL;
+      case ENUMERATION:
+      case STRING:
+        return ViewerConstants.SEARCH_FIELD_TYPE_TEXT;
+      case NESTED:
+        return ViewerConstants.SEARCH_FIELD_TYPE_NESTED;
+      case BINARY:
+      case COMPOSED_STRUCTURE:
+      case COMPOSED_ARRAY:
+      default:
+        return "unsupported";
+    }
+  }
 
   private static String viewerTypeToSearchFieldType(ViewerType viewerType) {
     return viewerTypeToSearchFieldType(viewerType.getDbType());

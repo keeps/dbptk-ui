@@ -692,6 +692,10 @@ public interface ClientMessages extends Messages {
 
   String SIARDHomePageButtonTextValidateNow();
 
+  String SIARDHomePageOptionsDescriptionForValidation();
+
+  String SIARDHomePageOptionsDescriptionForBrowse();
+
   String SIARDHomePageButtonTextRunValidationAgain();
 
   String SIARDHomePageButtonTextOpenValidate();
@@ -1308,6 +1312,8 @@ public interface ClientMessages extends Messages {
    * Advanced Configuration
    *******************************************/
   String advancedConfigurationLabelForMainTitle();
+
+  String advancedConfigurationPageDescription();
 
   String advancedConfigurationLabelForTableManagement();
 

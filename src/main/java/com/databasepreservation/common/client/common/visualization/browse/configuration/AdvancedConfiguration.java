@@ -100,13 +100,13 @@ public class AdvancedConfiguration extends ContentPanel {
   }
 
   private void configureHeader() {
-    header.add(CommonClientUtils.getHeaderHTML(FontAwesomeIconManager.getTag(FontAwesomeIconManager.SLIDERS),
-      messages.advancedConfigurationLabelForMainTitle(), "h1"));
+    header.add(CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.SLIDERS),
+        messages.advancedConfigurationLabelForMainTitle(), "h1"));
 
-    MetadataField instance = MetadataField.createInstance(database.getMetadata().getDescription());
-    instance.setCSS("table-row-description", "font-size-description");
+    HTML html = new HTML(messages.advancedConfigurationPageDescription());
+    html.addStyleName("font-size-description");
 
-    description.setWidget(instance);
+    description.setWidget(html);
   }
 
   @Override

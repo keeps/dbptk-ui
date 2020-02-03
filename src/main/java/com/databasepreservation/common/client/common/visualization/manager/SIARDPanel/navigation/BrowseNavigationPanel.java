@@ -122,7 +122,7 @@ public class BrowseNavigationPanel {
 
     NavigationPanel browse = NavigationPanel.createInstance(messages.SIARDHomePageOptionsHeaderForBrowsing());
 
-    browse.addToDescriptionPanel(messages.SIARDHomePageOptionsDescriptionForSIARD());
+    browse.addToDescriptionPanel(messages.SIARDHomePageOptionsDescriptionForBrowse());
     browse.addButton(CommonClientUtils.wrapOnDiv("btn-item", btnBrowse));
     browse.addButton(CommonClientUtils.wrapOnDiv("btn-item", btnConfiguration));
     browse.addButton(CommonClientUtils.wrapOnDiv("btn-item", btnDelete));

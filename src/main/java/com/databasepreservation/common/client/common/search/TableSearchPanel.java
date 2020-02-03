@@ -8,6 +8,7 @@ import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.lists.TableRowList;
 import com.databasepreservation.common.client.common.utils.AdvancedSearchUtils;
+import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.utils.ListboxUtils;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
@@ -172,18 +173,31 @@ public class TableSearchPanel extends Composite {
   }
 
   private void initAdvancedSearch() {
-    final List<SearchField> searchFieldsFromTable = AdvancedSearchUtils.getSearchFieldsFromTable(table, status,
+    final Map<String, List<SearchField>> searchFieldsFromTable = AdvancedSearchUtils.getSearchFieldsFromTableMap(table, status,
       database.getMetadata());
     TableSearchPanel.this.searchFields.clear();
 
-		searchFieldsFromTable.forEach(searchField -> {
-			if (searchField.isFixed()) {
-				final SearchFieldPanel searchFieldPanel = new SearchFieldPanel();
-				searchFieldPanel.setSearchField(searchField);
-				addSearchFieldPanel(searchFieldPanel);
-				searchFieldPanel.selectSearchField();
-			}
-		});
+    if (searchFieldsFromTable.keySet().size() == 1) {
+      searchFieldsFromTable.forEach((key , value) -> {
+        buildSearchFieldPanel(value);
+      });
+    } else {
+      searchFieldsFromTable.forEach((key , value) -> {
+        itemsSearchAdvancedFieldsPanel.add(CommonClientUtils.getAdvancedSearchDivider(key));
+        buildSearchFieldPanel(value);
+      });
+    }
+  }
+
+  private void buildSearchFieldPanel(List<SearchField> list) {
+    list.forEach(searchField -> {
+      if (searchField.isFixed()) {
+        final SearchFieldPanel searchFieldPanel = new SearchFieldPanel();
+        searchFieldPanel.setSearchField(searchField);
+        addSearchFieldPanel(searchFieldPanel);
+        searchFieldPanel.selectSearchField();
+      }
+    });
   }
 
   public void showSearchAdvancedFieldsPanel() {

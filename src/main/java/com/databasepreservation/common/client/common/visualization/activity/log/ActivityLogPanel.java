@@ -113,8 +113,6 @@ public class ActivityLogPanel extends ContentPanel {
   private void initAdvancedSearch() {
     final List<SearchField> searchFieldsForLog = AdvancedSearchUtils.getSearchFieldsForLog();
 
-		itemsSearchAdvancedFieldsPanel.add(CommonClientUtils.getAdvancedSearchDivider("Activity-log"));
-
     searchFieldsForLog.forEach(searchField -> {
     	if (searchField.isFixed()) {
     		final SearchFieldPanel searchFieldPanel = new SearchFieldPanel();

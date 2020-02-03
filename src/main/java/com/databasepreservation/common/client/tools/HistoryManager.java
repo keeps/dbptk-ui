@@ -50,7 +50,7 @@ public class HistoryManager {
   public static final String ROUTE_TABLE_OPTIONS = "options";
   public static final String ROUTE_UPLOAD_SIARD_DATA = "ingest-siard";
   public static final String ROUTE_ACTIVITY_LOG = "activity-log";
-  public static final String ROUTE_ADVANCED_CONFIGURATION = "advanced-configuration";
+  public static final String ROUTE_ADVANCED_CONFIGURATION = "configuration";
   public static final String ROUTE_DATA_TRANSFORMATION = "data-transformation";
   public static final String ROUTE_TABLE_MANAGEMENT = "table-management";
   public static final String ROUTE_COLUMNS_MANAGEMENT = "columns-management";

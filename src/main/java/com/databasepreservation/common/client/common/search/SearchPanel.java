@@ -369,9 +369,10 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
 
     if (fieldsPanel != null && fieldsPanel.getParent() != null && fieldsPanel.getParent().isVisible()) {
       for (int i = 0; i < fieldsPanel.getWidgetCount(); i++) {
-        SearchFieldPanel searchAdvancedFieldPanel = (SearchFieldPanel) fieldsPanel.getWidget(i);
-
-        parameters.add(searchAdvancedFieldPanel.getFilter());
+        if (fieldsPanel.getWidget(i) instanceof SearchFieldPanel) {
+          SearchFieldPanel searchAdvancedFieldPanel = (SearchFieldPanel) fieldsPanel.getWidget(i);
+          parameters.add(searchAdvancedFieldPanel.getFilter());
+        }
       }
     }
 
@@ -383,8 +384,10 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
 
     if (fieldsPanel != null && fieldsPanel.getParent() != null && fieldsPanel.getParent().isVisible()) {
       for (int i = 0; i < fieldsPanel.getWidgetCount(); i++) {
-        SearchFieldPanel searchAdvancedFieldPanel = (SearchFieldPanel) fieldsPanel.getWidget(i);
-        searchFields.add(searchAdvancedFieldPanel.getSearchField());
+        if (fieldsPanel.getWidget(i) instanceof  SearchFieldPanel) {
+          SearchFieldPanel searchAdvancedFieldPanel = (SearchFieldPanel) fieldsPanel.getWidget(i);
+          searchFields.add(searchAdvancedFieldPanel.getSearchField());
+        }
       }
     }
 

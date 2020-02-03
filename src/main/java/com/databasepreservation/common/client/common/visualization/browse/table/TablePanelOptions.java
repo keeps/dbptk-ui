@@ -273,7 +273,7 @@ public class TablePanelOptions extends RightPanel implements ICollectionStatusOb
           }
         }, "primary-key-col"),
 
-      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForColumnName(), 10,
+      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForColumnName(), 15,
         new TextColumn<ColumnStatus>() {
           @Override
           public String getValue(ColumnStatus column) {
