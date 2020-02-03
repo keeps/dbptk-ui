@@ -11,7 +11,7 @@
                     </h3>
                     <ul>
                         <li>
-                            <a href="http://www.database-preservation.com/">
+                            <a href="https://database-preservation.com/#enterprise">
                                 <ui:text from='{messages.whatIsDBVTK}'/>
                             </a>
                         </li>
@@ -60,7 +60,7 @@
                     </h3>
                     <ul>
                         <li>
-                            <a href="http://www.database-preservation.com/#information--commercial-support">
+                            <a href="https://www.keep.pt/en/contacts-proposals-information-telephone-address/">
                                 <ui:text from='{messages.infoAndSupport}'/>
                             </a>
                         </li>
