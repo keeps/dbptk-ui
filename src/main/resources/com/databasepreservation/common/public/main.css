@@ -1968,6 +1968,12 @@ html, body, .desktop-main {
     color: #fff;
 }
 
+.btn-small{
+    font-size: 0.6em;
+    padding: 4px;
+    margin: 0 2px;
+}
+
 /**********************************************
 		         Dialog ExternalLob
 ***********************************************/
@@ -3023,12 +3029,12 @@ rgba(0, 0, 0, .125);
 }
 
 .data-transformation-panel {
-    margin-left: 10px;
+    margin-left: 15px;
     margin-bottom: 10px;
 }
 
 .data-transformation-child {
-    margin-left: 10px;
+    margin-left: 15px;
 }
 
 .data-transformation-wrapper::after {

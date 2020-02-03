@@ -1,6 +1,8 @@
 package com.databasepreservation.common.client.common.visualization.browse.configuration.columns;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.databasepreservation.common.client.ViewerConstants;
@@ -10,9 +12,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
@@ -30,6 +34,9 @@ public class ColumnsOptionsPanel extends Composite {
 
   private static ColumnsOptionsPanelUiBinder binder = GWT.create(ColumnsOptionsPanelUiBinder.class);
   private static Map<String, ColumnsOptionsPanel> instances = new HashMap<>();
+  private final String COMMA_SEPARATOR=",";
+  private final String BREAK_LINE_SEPARATOR="<br>";
+  private final String WHITE_LINE_SEPARATOR=" ";
 
   @UiField
   ClientMessages messages = GWT.create(ClientMessages.class);
@@ -38,13 +45,13 @@ public class ColumnsOptionsPanel extends Composite {
   TextBox templateList, templateDetail, templateExport;
 
   @UiField
-  Label templateListHint, templateDetailHint, templateExportHint;
+  FlowPanel templateListHint, templateDetailHint, templateExportHint;
 
   @UiField
   HTML templateEngineLabel;
 
   @UiField
-  FlowPanel templateDetailPanel, templateExportPanel, separatorPanel;
+  FlowPanel content, templateDetailPanel, templateExportPanel, separatorPanel;
 
   @UiField
   ListBox items;
@@ -60,7 +67,7 @@ public class ColumnsOptionsPanel extends Composite {
   private ColumnsOptionsPanel(ColumnStatus columnStatus) {
     initWidget(binder.createAndBindUi(this));
 
-    templateEngineLabel.setText(messages.columnManagementTextForTemplateHint());
+    templateEngineLabel.setHTML(messages.columnManagementTextForTemplateHint(ViewerConstants.TEMPLATE_ENGINE_LINK));
 
     //Template list, used on tablePanel
     templateList.setText(columnStatus.getSearchStatus().getList().getTemplate().getTemplate());
@@ -68,18 +75,25 @@ public class ColumnsOptionsPanel extends Composite {
       columnStatus.getSearchStatus().getList().getTemplate().setTemplate(templateList.getText());
     });
 
-    items.addItem(messages.columnManagementLabelForSeparatorComma(), ",");
-    items.addItem(messages.columnManagementLabelForSeparatorBreakLine(),"<br>");
-    items.addItem(messages.columnManagementLabelForSeparatorSpace()," ");
-    items.setSelectedIndex(0);
+    items.addItem(messages.columnManagementLabelForSeparatorComma(), COMMA_SEPARATOR);
+    items.addItem(messages.columnManagementLabelForSeparatorBreakLine(),BREAK_LINE_SEPARATOR);
+    items.addItem(messages.columnManagementLabelForSeparatorSpace(),WHITE_LINE_SEPARATOR);
     String separator = columnStatus.getSearchStatus().getList().getTemplate().getSeparator();
-    for (int i = 0; i < items.getItemCount(); i++) {
-      if (items.getItemText(i).equals(separator)) {
-        items.setSelectedIndex(i);
+
+    if(separator == null){
+      items.setSelectedIndex(0);
+    } else {
+      for (int i = 0; i < items.getItemCount(); i++) {
+        GWT.log("items.getItemText(i): " + items.getItemText(i));
+        GWT.log("separator: " + separator);
+        if (items.getValue(i).equals(separator)) {
+          items.setSelectedIndex(i);
+        }
       }
     }
+
     items.addChangeHandler(event -> {
-      columnStatus.getSearchStatus().getList().getTemplate().setTemplate(items.getSelectedValue());
+      columnStatus.getSearchStatus().getList().getTemplate().setSeparator(items.getSelectedValue());
     });
 
     //Template detail, used on rowPanel
@@ -95,12 +109,10 @@ public class ColumnsOptionsPanel extends Composite {
     });
 
     if (columnStatus.getNestedColumns() != null) {
-      templateListHint
-        .setText(messages.columnManagementTextForPossibleFields(columnStatus.getNestedColumns().getNestedFields()));
-      templateDetailHint
-        .setText(messages.columnManagementTextForPossibleFields(columnStatus.getNestedColumns().getNestedFields()));
-      templateExportHint
-          .setText(messages.columnManagementTextForPossibleFields(columnStatus.getNestedColumns().getNestedFields()));
+
+      templateListHint.add(buildHintWithButtons(columnStatus, templateList));
+      templateDetailHint.add(buildHintWithButtons(columnStatus, templateDetail));
+      templateExportHint.add(buildHintWithButtons(columnStatus, templateExport));
 
       quantityList.setValue(columnStatus.getNestedColumns().getMaxQuantityInList());
       quantityList.setText(columnStatus.getNestedColumns().getMaxQuantityInList().toString());
@@ -121,4 +133,21 @@ public class ColumnsOptionsPanel extends Composite {
     }
   }
 
+  private FlowPanel buildHintWithButtons(ColumnStatus columnStatus, TextBox target){
+    FlowPanel hintPanel = new FlowPanel();
+    hintPanel.setStyleName("data-transformation-title");
+    hintPanel.add(new Label(messages.columnManagementTextForPossibleFields()));
+
+    for (String nestedField : columnStatus.getNestedColumns().getNestedFields()) {
+      Button btnField = new Button(messages.columnManagementBtnTextForFields(nestedField));
+      btnField.setStyleName("btn btn-primary btn-small");
+      btnField.addClickHandler(click -> {
+        target.setText(target.getText() + btnField.getText());
+      });
+
+      hintPanel.add(btnField);
+    }
+
+    return hintPanel;
+  }
 }

@@ -1429,9 +1429,13 @@ public interface ClientMessages extends Messages {
 
   String columnManagementLabelForTemplateOptions();
 
-  String columnManagementTextForTemplateHint();
+  SafeHtml columnManagementTextForTemplateHint(String link);
 
-  String columnManagementTextForPossibleFields(List<String> fields);
+  String columnManagementTextForTemplateDocumentation();
+
+  String columnManagementTextForPossibleFields();
+
+  String columnManagementBtnTextForFields(String label);
 
   String columnManagementTextForMultiValueFields();
 

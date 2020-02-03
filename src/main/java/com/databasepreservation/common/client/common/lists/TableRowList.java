@@ -187,6 +187,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
       @Override
       public SafeHtml getValue(ViewerRow row) {
         List<String> aggregationList = new ArrayList<>();
+        StringBuilder sb = new StringBuilder();
         SafeHtml ret = null;
         if (row.getNestedRowList() != null) {
           for (ViewerRow nestedRow : row.getNestedRowList()) {
@@ -201,7 +202,18 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
               }
             }
           }
-          ret = SafeHtmlUtils.fromSafeConstant(messages.dataTransformationTableRowList(aggregationList));
+          String separatorText = configColumn.getSearchStatus().getList().getTemplate().getSeparator();
+          if (separatorText != null) {
+            String separator = "";
+            for (String s : aggregationList) {
+              sb.append(separator);
+              sb.append(s);
+              separator = separatorText;
+            }
+            ret = SafeHtmlUtils.fromSafeConstant(sb.toString());
+          } else {
+            ret = SafeHtmlUtils.fromSafeConstant(messages.dataTransformationTableRowList(aggregationList));
+          }
         }
         return ret;
       }
