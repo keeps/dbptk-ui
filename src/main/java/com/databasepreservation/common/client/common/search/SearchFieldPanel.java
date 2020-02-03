@@ -7,17 +7,17 @@ package com.databasepreservation.common.client.common.search;
 import java.util.Date;
 import java.util.List;
 
-import com.databasepreservation.common.client.index.filter.BlockJoinParentFilterParameter;
 import org.roda.core.data.common.RodaConstants;
-import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
-import com.databasepreservation.common.client.index.filter.DateRangeFilterParameter;
-import com.databasepreservation.common.client.index.filter.FilterParameter;
-import com.databasepreservation.common.client.index.filter.LongRangeFilterParameter;
-import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
 
 import com.databasepreservation.common.client.ClientLogger;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
+import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
+import com.databasepreservation.common.client.index.filter.BlockJoinParentFilterParameter;
+import com.databasepreservation.common.client.index.filter.DateRangeFilterParameter;
+import com.databasepreservation.common.client.index.filter.FilterParameter;
+import com.databasepreservation.common.client.index.filter.LongRangeFilterParameter;
+import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
 import com.databasepreservation.common.client.tools.Humanize;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -410,8 +410,9 @@ public class SearchFieldPanel extends Composite {
         // valid(inputSearchSuggestBox)) {
         // filterParameter = new SimpleFilterParameter(field,
         // inputSearchSuggestBox.getValue());
-      } else if(type.equals(ViewerConstants.SEARCH_FIELD_TYPE_NESTED)){
-        filterParameter = new BlockJoinParentFilterParameter(field, inputText.getValue(), searchFields.get(1), searchFields.get(2));
+      } else if (type.equals(ViewerConstants.SEARCH_FIELD_TYPE_NESTED) && !inputText.getValue().isEmpty()) {
+        filterParameter = new BlockJoinParentFilterParameter(field, inputText.getValue(), searchFields.get(1),
+          searchFields.get(2));
       } else if (valid(inputText)) {
         filterParameter = new BasicSearchFilterParameter(field, inputText.getValue());
       }
