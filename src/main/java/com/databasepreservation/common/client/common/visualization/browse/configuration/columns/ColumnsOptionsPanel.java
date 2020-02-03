@@ -3,6 +3,7 @@ package com.databasepreservation.common.client.common.visualization.browse.confi
 import java.util.HashMap;
 import java.util.Map;
 
+import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.widgets.Alert;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -11,8 +12,10 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -32,19 +35,19 @@ public class ColumnsOptionsPanel extends Composite {
   ClientMessages messages = GWT.create(ClientMessages.class);
 
   @UiField
-  TextBox templateList;
+  TextBox templateList, templateDetail, templateExport;
 
   @UiField
-  Label templateListHint;
+  Label templateListHint, templateDetailHint, templateExportHint;
 
   @UiField
-  FlowPanel templateDetailPanel;
+  HTML templateEngineLabel;
 
   @UiField
-  TextBox templateDetail;
+  FlowPanel templateDetailPanel, templateExportPanel, separatorPanel;
 
   @UiField
-  Label templateDetailHint;
+  ListBox items;
 
   @UiField
   IntegerBox quantityList;
@@ -57,14 +60,38 @@ public class ColumnsOptionsPanel extends Composite {
   private ColumnsOptionsPanel(ColumnStatus columnStatus) {
     initWidget(binder.createAndBindUi(this));
 
+    templateEngineLabel.setHTML(messages.columnManagementTextForTemplateHint(ViewerConstants.TEMPLATE_ENGINE_LINK));
+
+    //Template list, used on tablePanel
     templateList.setText(columnStatus.getSearchStatus().getList().getTemplate().getTemplate());
     templateList.addChangeHandler(event -> {
       columnStatus.getSearchStatus().getList().getTemplate().setTemplate(templateList.getText());
     });
 
+    items.addItem(messages.columnManagementLabelForSeparatorComma(), ",");
+    items.addItem(messages.columnManagementLabelForSeparatorBreakLine(),"<br>");
+    items.addItem(messages.columnManagementLabelForSeparatorSpace()," ");
+    items.setSelectedIndex(0);
+    String separator = columnStatus.getSearchStatus().getList().getTemplate().getSeparator();
+    for (int i = 0; i < items.getItemCount(); i++) {
+      if (items.getItemText(i).equals(separator)) {
+        items.setSelectedIndex(i);
+      }
+    }
+    items.addChangeHandler(event -> {
+      columnStatus.getSearchStatus().getList().getTemplate().setTemplate(items.getSelectedValue());
+    });
+
+    //Template detail, used on rowPanel
     templateDetail.setText(columnStatus.getDetailsStatus().getTemplateStatus().getTemplate());
     templateDetail.addChangeHandler(event -> {
       columnStatus.getDetailsStatus().getTemplateStatus().setTemplate(templateDetail.getText());
+    });
+
+    //Template export, used on export data to CSV
+    templateExport.setText(columnStatus.getExportStatus().getTemplateStatus().getTemplate());
+    templateExport.addChangeHandler(event -> {
+      columnStatus.getExportStatus().getTemplateStatus().setTemplate(templateExport.getText());
     });
 
     if (columnStatus.getNestedColumns() != null) {
@@ -72,6 +99,8 @@ public class ColumnsOptionsPanel extends Composite {
         .setText(messages.columnManagementTextForPossibleFields(columnStatus.getNestedColumns().getNestedFields()));
       templateDetailHint
         .setText(messages.columnManagementTextForPossibleFields(columnStatus.getNestedColumns().getNestedFields()));
+      templateExportHint
+          .setText(messages.columnManagementTextForPossibleFields(columnStatus.getNestedColumns().getNestedFields()));
 
       quantityList.setValue(columnStatus.getNestedColumns().getMaxQuantityInList());
       quantityList.setText(columnStatus.getNestedColumns().getMaxQuantityInList().toString());
@@ -85,6 +114,7 @@ public class ColumnsOptionsPanel extends Composite {
     }
 
     if(columnStatus.getNestedColumns().getMultiValue()){
+      separatorPanel.setVisible(true);
       templateDetail.setVisible(false);
       templateDetailHint.setVisible(false);
       templateDetailPanel.insert(new Alert(Alert.MessageAlertType.INFO, messages.columnManagementTextForMultiValueFields()), 2);

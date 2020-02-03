@@ -5,7 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
+import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
 import com.databasepreservation.common.client.models.structure.ViewerSchema;
@@ -26,14 +29,27 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class ErDiagram extends Composite {
+public class ErDiagram extends Composite implements ICollectionStatusObserver {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, ErDiagram> instances = new HashMap<>();
+  private CollectionStatus collectionStatus;
 
   public static ErDiagram getInstance(ViewerDatabase database, ViewerSchema schema, String path) {
     String separator = "/";
     String code = database.getUuid() + separator + schema.getUuid() + separator + path;
-    return instances.computeIfAbsent(code, k -> new ErDiagram(database, schema, path));
+    return instances.computeIfAbsent(code, k -> new ErDiagram(database, schema, path, null));
+  }
+
+  public static ErDiagram getInstance(ViewerDatabase database, ViewerSchema schema, String path, CollectionStatus collectionStatus) {
+    String separator = "/";
+    String code = database.getUuid() + separator + schema.getUuid() + separator + path;
+    return instances.computeIfAbsent(code, k -> new ErDiagram(database, schema, path, collectionStatus ));
+  }
+
+  @Override
+  public void updateCollection(CollectionStatus collectionStatus) {
+    this.collectionStatus = collectionStatus;
+    instances.keySet().removeIf(p -> p.startsWith(collectionStatus.getDatabaseUUID()));
   }
 
   interface ErDiagramUiBinder extends UiBinder<Widget, ErDiagram> {
@@ -62,9 +78,12 @@ public class ErDiagram extends Composite {
 
   private final String databaseUUID;
 
-  private ErDiagram(final ViewerDatabase database, final ViewerSchema schema, String path) {
+  private ErDiagram(final ViewerDatabase database, final ViewerSchema schema, String path, CollectionStatus collectionStatus) {
     databaseUUID = database.getUuid();
+    this.collectionStatus = collectionStatus;
     initWidget(uiBinder.createAndBindUi(this));
+
+    ObserverManager.getCollectionObserver().addObserver(this);
 
     // contentItems.add(new HTMLPanel(
     // CommonClientUtils.getFieldHTML(messages.diagram_usingTheDiagram(),
@@ -105,7 +124,7 @@ public class ErDiagram extends Composite {
           && (viewerTable.isMaterializedView() || viewerTable.isCustomView())) {
           continue;
         }
-        VisNode visNode = new VisNode(viewerTable.getId(), viewerTable.getName());
+        VisNode visNode = new VisNode(viewerTable.getId(), viewerTable.getName(), collectionStatus);
 
         if (ViewerStringUtils.isNotBlank(viewerTable.getDescription())) {
           visNode.description = viewerTable.getDescription();
@@ -260,13 +279,15 @@ public class ErDiagram extends Composite {
     int numRelationsTotal;
     int numColumns;
     int numColumnsAndRows;
+    CollectionStatus collectionStatus;
 
-    public VisNode(String id, String label) {
+    public VisNode(String id, String label, CollectionStatus collectionStatus) {
       this.id = id;
       this.label = label;
       this.font = new VisNodeFont(25);
       this.size = 20;
       this.color = new VisNodeColor();
+      this.collectionStatus = collectionStatus;
     }
 
     public String getId() {
@@ -331,7 +352,11 @@ public class ErDiagram extends Composite {
 
     public void adjustBackgroundColor(double value) {
       // this.color.background = "#" + hslToRgb(0.59722222222, 1.0, 0.91);
-      this.color.background = "#" + hslToRgb(0.59722222222, 1.0, 0.91 - value);
+      if(collectionStatus != null && !collectionStatus.getTableStatusByTableId(id).isShow()){
+        this.color.background = "#" + hslToRgb(0, 0, 0.784);
+      } else {
+        this.color.background = "#" + hslToRgb(0.59722222222, 1.0, 0.91 - value);
+      }
     }
 
     /**

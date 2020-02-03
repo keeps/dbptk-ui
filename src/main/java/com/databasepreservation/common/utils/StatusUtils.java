@@ -9,6 +9,7 @@ import com.databasepreservation.common.client.models.status.collection.AdvancedS
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.DetailsStatus;
+import com.databasepreservation.common.client.models.status.collection.ExportStatus;
 import com.databasepreservation.common.client.models.status.collection.FacetsStatus;
 import com.databasepreservation.common.client.models.status.collection.ListStatus;
 import com.databasepreservation.common.client.models.status.collection.SearchStatus;
@@ -83,8 +84,16 @@ public class StatusUtils {
     status.setCustomDescription(column.getDescription());
     status.setNestedColumns(null);
     status.setOrder(order);
+    status.setExportStatus(getExportStatus());
     status.setSearchStatus(getSearchStatus(show));
     status.setDetailsStatus(getDetailsStatus(show));
+
+    return status;
+  }
+
+  private static ExportStatus getExportStatus() {
+    ExportStatus status = new ExportStatus();
+    status.setTemplateStatus(getTemplateStatus());
 
     return status;
   }

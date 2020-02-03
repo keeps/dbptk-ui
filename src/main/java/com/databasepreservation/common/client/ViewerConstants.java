@@ -442,6 +442,7 @@ public class ViewerConstants {
   public static final String SIARD_SPECIFICATION_LINK = "https://dilcis.eu/content-types/siard/";
   public static final String DBPTK_RELEASE_LINK = "https://github.com/keeps/db-preservation-toolkit/releases/tag/v";
   public static final String ADDITIONAL_CHECKS_SPECIFICATIONLINK = "https://github.com/keeps/db-preservation-toolkit/wiki/Validation#additional-checks";
+  public static final String TEMPLATE_ENGINE_LINK = "https://handlebarsjs.com/guide/";
 
   /**
    * FILE EXTENSIONS

@@ -5,9 +5,7 @@
         <g:Label addStyleNames="form-label">
             <ui:text from='{messages.columnManagementLabelForTemplateOptions}'/>
         </g:Label>
-        <g:Label addStyleNames="column-description">
-            <ui:text from='{messages.columnManagementTextForTemplateHint}'/>
-        </g:Label>
+        <g:HTML addStyleNames="column-description" ui:field="templateEngineLabel" />
 
         <g:FlowPanel>
             <g:Label addStyleNames="form-label">
@@ -17,12 +15,27 @@
             <g:Label addStyleNames="column-description" ui:field="templateListHint"/>
         </g:FlowPanel>
 
+        <g:FlowPanel ui:field="separatorPanel" visible="false">
+            <g:Label addStyleNames="form-label">
+                <ui:text from='{messages.columnManagementLabelForSeparator}'/>
+            </g:Label>
+            <g:ListBox ui:field="items" addStyleNames="advancedOptionsSeparator form-selectbox" />
+        </g:FlowPanel>
+
         <g:FlowPanel ui:field="templateDetailPanel">
             <g:Label addStyleNames="form-label">
                 <ui:text from='{messages.columnManagementLabelForTemplateDetail}'/>
             </g:Label>
             <g:TextBox addStyleNames="form-textbox" ui:field="templateDetail"/>
             <g:Label addStyleNames="column-description" ui:field="templateDetailHint"/>
+        </g:FlowPanel>
+
+        <g:FlowPanel ui:field="templateExportPanel">
+            <g:Label addStyleNames="form-label">
+                <ui:text from='{messages.columnManagementLabelForTemplateExport}'/>
+            </g:Label>
+            <g:TextBox addStyleNames="form-textbox" ui:field="templateExport"/>
+            <g:Label addStyleNames="column-description" ui:field="templateExportHint"/>
         </g:FlowPanel>
 
         <g:FlowPanel>

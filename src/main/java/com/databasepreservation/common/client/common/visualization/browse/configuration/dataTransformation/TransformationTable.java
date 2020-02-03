@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.client.common.lists.widgets.MetadataTableList;
+import com.databasepreservation.common.client.common.lists.widgets.BasicTablePanel;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.models.status.denormalization.ColumnWrapper;
 import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
@@ -84,7 +84,8 @@ public class TransformationTable extends Composite {
    */
   private void createTable() {
     for (ViewerColumn column : table.getColumns()) {
-      ColumnWrapper columnWrapper = new ColumnWrapper(table.getName(), denormalizeConfiguration, database.getMetadata());
+      ColumnWrapper columnWrapper = new ColumnWrapper(table.getName(), denormalizeConfiguration,
+        database.getMetadata());
       columnWrapper.setColumnDisplayName(column.getDisplayName());
       columnWrapper.setColumnDescription(column.getDescription());
       originalColumns.add(columnWrapper);
@@ -123,43 +124,40 @@ public class TransformationTable extends Composite {
   }
 
   private void drawTable(List<ColumnWrapper> columns) {
-    MetadataTableList<ColumnWrapper> tablePanel;
-    if (columns.isEmpty()) {
-      tablePanel = new MetadataTableList<>(messages.tableDoesNotContainColumns());
-    } else {
-      tablePanel = new MetadataTableList<ColumnWrapper>(columns.iterator(),
-        new MetadataTableList.ColumnInfo<>("", 0.6, new Column<ColumnWrapper, SafeHtml>(new SafeHtmlCell()) {
+    BasicTablePanel<ColumnWrapper> tablePanel = new BasicTablePanel<ColumnWrapper>(new FlowPanel(),
+      SafeHtmlUtils.EMPTY_SAFE_HTML, columns.iterator(),
+      new BasicTablePanel.ColumnInfo<ColumnWrapper>("", 3, new Column<ColumnWrapper, SafeHtml>(new SafeHtmlCell()) {
 
-          @Override
-          public SafeHtml getValue(ColumnWrapper columnWrapper) {
-            if (columnWrapper.getReferencedTableName().equals(table.getName())) {
-              return SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.COLUMN));
-            }
-            return SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.REFERENCE));
+        @Override
+        public SafeHtml getValue(ColumnWrapper columnWrapper) {
+          if (columnWrapper.getReferencedTableName().equals(table.getName())) {
+            return SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.COLUMN));
           }
-        }), new MetadataTableList.ColumnInfo<>(messages.columnName(), 12, new TextColumn<ColumnWrapper>() {
+          return SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.REFERENCE));
+        }
+      }), new BasicTablePanel.ColumnInfo<ColumnWrapper>(messages.columnName(), 35, new TextColumn<ColumnWrapper>() {
+        @Override
+        public void render(Cell.Context context, ColumnWrapper object, SafeHtmlBuilder sb) {
+          if (object.getReferencedTableName().equals(table.getName())) {
+            super.render(context, object, sb);
+          } else {
+            SafeHtml path = object.createPath();
+            sb.append(path);
+          }
+        }
 
-          @Override
-          public void render(Cell.Context context, ColumnWrapper object, SafeHtmlBuilder sb) {
-            if (object.getReferencedTableName().equals(table.getName())) {
-              super.render(context, object, sb);
-            } else {
-              SafeHtml path = object.createPath();
-              sb.append(path);
-            }
-          }
-
-          @Override
-          public String getValue(ColumnWrapper object) {
-            return object.getColumnDisplayName();
-          }
-        }), new MetadataTableList.ColumnInfo<>(messages.description(), 15, new TextColumn<ColumnWrapper>() {
+        @Override
+        public String getValue(ColumnWrapper object) {
+          return object.getColumnDisplayName();
+        }
+      }), new BasicTablePanel.ColumnInfo<ColumnWrapper>(messages.basicTableHeaderDescription(), 0,
+        new TextColumn<ColumnWrapper>() {
           @Override
           public String getValue(ColumnWrapper object) {
             return object.getColumnDescription();
           }
         }));
-    }
+
     content.clear();
     tablePanel.getSelectionModel().addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
       @Override

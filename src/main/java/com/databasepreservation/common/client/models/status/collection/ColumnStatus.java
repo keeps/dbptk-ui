@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 @JsonPropertyOrder({"id", "name", "customName", "description", "customDescription", "originalType", "typeName",
-  "nullable", "type", "columnIndex", "nestedColumn", "order", "search", "details"})
+  "nullable", "type", "columnIndex", "nestedColumn", "order", "export", "search", "details"})
 public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
   private String id;
   private String name;
@@ -26,6 +26,7 @@ public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
   private int columnIndex;
   private NestedColumnStatus nestedColumns;
   private int order;
+  private ExportStatus exportStatus;
   private SearchStatus searchStatus;
   private DetailsStatus detailsStatus;
 
@@ -141,6 +142,15 @@ public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
   @JsonProperty("details")
   public DetailsStatus getDetailsStatus() {
     return detailsStatus;
+  }
+
+  @JsonProperty("export")
+  public ExportStatus getExportStatus() {
+    return exportStatus;
+  }
+
+  public void setExportStatus(ExportStatus exportStatus) {
+    this.exportStatus = exportStatus;
   }
 
   public void setDetailsStatus(DetailsStatus detailsStatus) {

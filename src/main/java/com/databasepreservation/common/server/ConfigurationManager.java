@@ -150,6 +150,7 @@ public class ConfigurationManager {
         columnStatus.setNullable(nullable);
         columnStatus.setType(ViewerType.dbTypes.NESTED);
         table.addColumnStatus(columnStatus);
+        columnStatus.getExportStatus().getTemplateStatus().setTemplate(template);
         columnStatus.getDetailsStatus().getTemplateStatus().setTemplate(template);
         columnStatus.getSearchStatus().getList().getTemplate().setTemplate(template);
 

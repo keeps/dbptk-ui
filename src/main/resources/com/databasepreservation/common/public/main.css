@@ -937,6 +937,10 @@ p[data-value]:after {
     position: relative;
 }
 
+.advancedOptionsSeparator {
+    max-width: 100px;
+}
+
 .advancedOptionsPanel .switch-label {
     align-self: center;
     padding-right: 27px;

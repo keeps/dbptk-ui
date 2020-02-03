@@ -1430,7 +1430,7 @@ public interface ClientMessages extends Messages {
 
   String columnManagementLabelForTemplateOptions();
 
-  String columnManagementTextForTemplateHint();
+  SafeHtml columnManagementTextForTemplateHint(String link);
 
   String columnManagementTextForPossibleFields(List<String> fields);
 
@@ -1438,7 +1438,17 @@ public interface ClientMessages extends Messages {
 
   String columnManagementLabelForTemplateList();
 
+  String columnManagementLabelForSeparator();
+
+  String columnManagementLabelForSeparatorComma();
+
+  String columnManagementLabelForSeparatorBreakLine();
+
+  String columnManagementLabelForSeparatorSpace();
+
   String columnManagementLabelForTemplateDetail();
+
+  String columnManagementLabelForTemplateExport();
 
   String columnManagementLabelForQuantityList();
 

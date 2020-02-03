@@ -32,7 +32,7 @@ public class HandlebarsUtils {
       if (columnConfig != null && columnConfig.getType().equals(ViewerType.dbTypes.NESTED)) {
         // treat nested
         if (!row.getNestedRowList().isEmpty()) {
-          String template = columnConfig.getSearchStatus().getList().getTemplate().getTemplate();
+          String template = columnConfig.getExportStatus().getTemplateStatus().getTemplate();
           StringBuilder stringBuilder = new StringBuilder();
           row.getNestedRowList().forEach(nestedRow -> {
             if (nestedRow.getNestedUUID().equals(solrColumnName)) {

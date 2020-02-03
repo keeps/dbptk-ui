@@ -153,7 +153,7 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
 
   private ErDiagram informationPanel() {
     return ErDiagram.getInstance(database, database.getMetadata().getSchemas().get(0),
-      HistoryManager.getCurrentHistoryPath().get(0));
+      HistoryManager.getCurrentHistoryPath().get(0), collectionStatus);
   }
 
   /**
