@@ -8,7 +8,7 @@ public class BlockJoinParentFilterParameter extends FilterParameter {
   private String solrName;
   private String value;
   private String parentTableId;
-  private String nestedTableId;
+  private String nestedUUID;
 
   /**
    * Constructs an empty {@link BasicSearchFilterParameter}.
@@ -18,14 +18,14 @@ public class BlockJoinParentFilterParameter extends FilterParameter {
   }
 
   public BlockJoinParentFilterParameter(BlockJoinParentFilterParameter filterParameter) {
-    this(filterParameter.getSolrName(), filterParameter.getValue(), filterParameter.getParentTableId(), filterParameter.getNestedTableId());
+    this(filterParameter.getSolrName(), filterParameter.getValue(), filterParameter.getParentTableId(), filterParameter.getNestedUUID());
   }
 
-  public BlockJoinParentFilterParameter(String solrName, String value, String parentTableId, String nestedTableId) {
+  public BlockJoinParentFilterParameter(String solrName, String value, String parentTableId, String nestedUUID) {
     setSolrName(solrName);
     setValue(value);
     setParentTableId(parentTableId);
-    setNestedTableId(nestedTableId);
+    setNestedUUID(nestedUUID);
   }
 
   public String getSolrName() {
@@ -52,15 +52,15 @@ public class BlockJoinParentFilterParameter extends FilterParameter {
     this.parentTableId = parentTableId;
   }
 
-  public String getNestedTableId() {
-    return nestedTableId;
+  public String getNestedUUID() {
+    return nestedUUID;
   }
 
-  public void setNestedTableId(String nestedTableId) {
-    this.nestedTableId = nestedTableId;
+  public void setNestedUUID(String nestedUUID) {
+    this.nestedUUID = nestedUUID;
   }
 
   @Override
-  public String toString() { return "{!parent which='tableId:" + parentTableId +"' filters='nestedTableId:"+ nestedTableId +"' }" + solrName + ":" + value;
+  public String toString() { return "{!parent which='tableId:" + parentTableId +"' filters='uuid:"+ nestedUUID +"' }" + solrName + ":" + value;
   }
 }

@@ -9,7 +9,6 @@ import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.lists.TableRowList;
 import com.databasepreservation.common.client.common.utils.AdvancedSearchUtils;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
-import com.databasepreservation.common.client.common.utils.ListboxUtils;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
@@ -20,12 +19,10 @@ import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.ViewerJsonUtils;
 import com.github.nmorel.gwtjackson.client.exception.JsonDeserializationException;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -35,10 +32,10 @@ import config.i18n.client.ClientMessages;
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class TableSearchPanel extends Composite {
-	private static final ClientMessages messages = GWT.create(ClientMessages.class);
+  private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static final Binder uiBinder = GWT.create(Binder.class);
-	private static final String EMPTY = "empty";
-	private CollectionStatus status;
+  private static final String EMPTY = "empty";
+  private CollectionStatus status;
 
   interface Binder extends UiBinder<Widget, TableSearchPanel> {
   }
@@ -173,20 +170,13 @@ public class TableSearchPanel extends Composite {
   }
 
   private void initAdvancedSearch() {
-    final Map<String, List<SearchField>> searchFieldsFromTable = AdvancedSearchUtils.getSearchFieldsFromTableMap(table, status,
-      database.getMetadata());
+    final Map<String, List<SearchField>> searchFieldsFromTable = AdvancedSearchUtils.getSearchFieldsFromTableMap(table,
+      status, database.getMetadata());
     TableSearchPanel.this.searchFields.clear();
-
-    if (searchFieldsFromTable.keySet().size() == 1) {
-      searchFieldsFromTable.forEach((key , value) -> {
-        buildSearchFieldPanel(value);
-      });
-    } else {
-      searchFieldsFromTable.forEach((key , value) -> {
+      searchFieldsFromTable.forEach((key, value) -> {
         itemsSearchAdvancedFieldsPanel.add(CommonClientUtils.getAdvancedSearchDivider(key));
         buildSearchFieldPanel(value);
       });
-    }
   }
 
   private void buildSearchFieldPanel(List<SearchField> list) {
@@ -225,14 +215,14 @@ public class TableSearchPanel extends Composite {
       // handle creating / editing search fields
       this.searchFields.clear();
 
-			currentSearchInfo.getFields().forEach(searchField -> {
-				if (searchField.isFixed()) {
-					final SearchFieldPanel searchFieldPanel = new SearchFieldPanel();
-					searchFieldPanel.setSearchField(searchField);
-					addSearchFieldPanel(searchFieldPanel);
-					searchFieldPanel.selectSearchField();
-				}
-			});
+      currentSearchInfo.getFields().forEach(searchField -> {
+        if (searchField.isFixed()) {
+          final SearchFieldPanel searchFieldPanel = new SearchFieldPanel();
+          searchFieldPanel.setSearchField(searchField);
+          addSearchFieldPanel(searchFieldPanel);
+          searchFieldPanel.selectSearchField();
+        }
+      });
 
       // update search panel and trigger a search
       searchPanel.updateSearchPanel(currentSearchInfo);
@@ -280,11 +270,10 @@ public class TableSearchPanel extends Composite {
 
   private void saveQuery() {
     SearchInfo searchInfo = createSearchInfo();
-    CollectionService.Util.call((String savedSearchUUID) ->
-      searchPanel.querySavedHandler(true, database, savedSearchUUID)
-    , (String errorMessage) ->
-      searchPanel.querySavedHandler(false, database, null)
-    ).saveSavedSearch(database.getUuid(), database.getUuid(), table.getId(), messages.searchOnTable(table.getName()),
-      "", searchInfo);
+    CollectionService.Util
+      .call((String savedSearchUUID) -> searchPanel.querySavedHandler(true, database, savedSearchUUID),
+        (String errorMessage) -> searchPanel.querySavedHandler(false, database, null))
+      .saveSavedSearch(database.getUuid(), database.getUuid(), table.getId(), messages.searchOnTable(table.getName()),
+        "", searchInfo);
   }
 }

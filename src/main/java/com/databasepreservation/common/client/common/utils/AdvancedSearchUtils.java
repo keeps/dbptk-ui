@@ -55,35 +55,31 @@ public class AdvancedSearchUtils {
 
     for (ColumnStatus column : configTable.getColumns()) {
       if (!column.getType().equals(ViewerType.dbTypes.NESTED)) {
-        SearchField searchField = new SearchField(configTable.getId() + "-" + column.getColumnIndex(),
-          Collections.singletonList(column.getId()), column.getCustomName(),
-          viewerTypeToSearchFieldType(column.getType()));
-        searchField.setFixed(column.getSearchStatus().getAdvanced().isFixed());
-        updateSearchFieldMap(map, configTable.getCustomName(), searchField);
-      }
-    }
-
-    // Add nested columns
-    for (ColumnStatus columnStatus : configTable.getColumns()) {
-      NestedColumnStatus nestedColumns = columnStatus.getNestedColumns();
-      if (nestedColumns != null) {
-        for (String nestedColumn : nestedColumns.getNestedSolrNames()) {
-          TableStatus configNestedTable = status.getTableStatusByTableId(nestedColumns.getOriginalTable());
-
-          ViewerTable nestedTable = metadata.getTableById(nestedColumns.getOriginalTable());
-          for (ColumnStatus column : configNestedTable.getColumns()) {
-            if (column.getId().equals(nestedColumn)) {
-              ViewerType nestedType = new ViewerType();
-              nestedType.setDbType(ViewerType.dbTypes.NESTED);
-              List<String> fields = new ArrayList<>();
-              fields.add(nestedColumn);
-              fields.add(configTable.getId());
-              fields.add(configNestedTable.getId());
-              SearchField searchField = new SearchField(
-                  columnStatus.getId() + "-" + columnStatus.getColumnIndex(), fields, column.getCustomName(),
-                  viewerTypeToSearchFieldType(nestedType));
-              searchField.setFixed(status.showAdvancedSearch(viewerTable.getUuid(), columnStatus.getId()));
-              updateSearchFieldMap(map, nestedTable.getName(), searchField);
+        if (column.getSearchStatus().getAdvanced().isFixed()) {
+          SearchField searchField = new SearchField(configTable.getId() + "-" + column.getColumnIndex(),
+            Collections.singletonList(column.getId()), column.getCustomName(),
+            viewerTypeToSearchFieldType(column.getType()));
+          searchField.setFixed(column.getSearchStatus().getAdvanced().isFixed());
+          updateSearchFieldMap(map, configTable.getCustomName(), searchField);
+        }
+      } else {
+        NestedColumnStatus nestedColumns = column.getNestedColumns();
+        if (nestedColumns != null) {
+          for (String columnSolrName : nestedColumns.getNestedSolrNames()) {
+            TableStatus configNestedTable = status.getTableStatusByTableId(nestedColumns.getOriginalTable());
+            for (ColumnStatus nestedColumn : configNestedTable.getColumns()) {
+              if (nestedColumn.getId().equals(columnSolrName) && column.getSearchStatus().getAdvanced().isFixed()) {
+                ViewerType nestedType = new ViewerType();
+                nestedType.setDbType(ViewerType.dbTypes.NESTED);
+                List<String> fields = new ArrayList<>();
+                fields.add(columnSolrName);
+                fields.add(configTable.getId());
+                fields.add(column.getId());
+                SearchField searchField = new SearchField(column.getId() + "-" + column.getColumnIndex(),
+                    fields, nestedColumn.getCustomName(), viewerTypeToSearchFieldType(nestedType));
+                searchField.setFixed(status.showAdvancedSearch(viewerTable.getUuid(), column.getId()));
+                updateSearchFieldMap(map, column.getCustomName(), searchField);
+              }
             }
           }
         }
