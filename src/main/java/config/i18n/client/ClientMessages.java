@@ -24,7 +24,6 @@ public interface ClientMessages extends Messages {
   String titleUsers();
 
   String titleReport();
-
   String titleDescription();
 
   String titleAdmin();
@@ -1430,7 +1429,7 @@ public interface ClientMessages extends Messages {
 
   String columnManagementLabelForTemplateOptions();
 
-  SafeHtml columnManagementTextForTemplateHint(String link);
+  String columnManagementTextForTemplateHint();
 
   String columnManagementTextForPossibleFields(List<String> fields);
 

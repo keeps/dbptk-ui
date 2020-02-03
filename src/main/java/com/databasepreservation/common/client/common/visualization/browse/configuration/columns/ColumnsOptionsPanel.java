@@ -60,7 +60,7 @@ public class ColumnsOptionsPanel extends Composite {
   private ColumnsOptionsPanel(ColumnStatus columnStatus) {
     initWidget(binder.createAndBindUi(this));
 
-    templateEngineLabel.setHTML(messages.columnManagementTextForTemplateHint(ViewerConstants.TEMPLATE_ENGINE_LINK));
+    templateEngineLabel.setText(messages.columnManagementTextForTemplateHint());
 
     //Template list, used on tablePanel
     templateList.setText(columnStatus.getSearchStatus().getList().getTemplate().getTemplate());
