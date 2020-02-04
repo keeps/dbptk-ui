@@ -117,9 +117,12 @@ public class TableSearchPanel extends Composite {
 
     GWT.log("initial filter: " + initialFilter);
 
+    final boolean showSearchAdvancedDisclosureButton = status.getTableStatusByTableId(table.getId())
+      .showAdvancedSearchOption();
+
     if (isNested) {
       searchPanel = new SearchPanel(initialFilter, ViewerConstants.INDEX_SEARCH, messages.searchPlaceholder(),
-        table.getName(), true, new DefaultAsyncCallback<Void>() {
+        table.getName(), showSearchAdvancedDisclosureButton, new DefaultAsyncCallback<Void>() {
           @Override
           public void onSuccess(Void result) {
             TableSearchPanel.this.saveQuery();
@@ -127,7 +130,7 @@ public class TableSearchPanel extends Composite {
         });
     } else {
       searchPanel = new SearchPanel(initialFilter, ViewerConstants.INDEX_SEARCH, messages.searchPlaceholder(), false,
-        true, new DefaultAsyncCallback<Void>() {
+        showSearchAdvancedDisclosureButton, new DefaultAsyncCallback<Void>() {
           @Override
           public void onSuccess(Void result) {
             TableSearchPanel.this.saveQuery();

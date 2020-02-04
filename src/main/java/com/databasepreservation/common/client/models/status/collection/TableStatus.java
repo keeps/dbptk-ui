@@ -11,6 +11,7 @@ import com.databasepreservation.common.client.models.structure.ViewerType;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.google.gwt.core.client.GWT;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -124,11 +125,9 @@ public class TableStatus implements Serializable {
 				.collect(Collectors.toList());
 	}
 
-	@JsonIgnore
-	public List<ColumnStatus> getVisibleColumnsDetails() {
-		return columns.stream().filter(c -> c.getDetailsStatus().isShow()).sorted()
-				.collect(Collectors.toList());
-	}
+	public boolean showAdvancedSearchOption() {
+    return columns.stream().anyMatch(c -> c.getSearchStatus().getAdvanced().isFixed());
+  }
 
 	@JsonIgnore
   public List<ColumnStatus> getBinaryColumns() {
