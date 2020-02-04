@@ -454,10 +454,9 @@ public class DatabaseRowsSolrManager {
       validatorReportLocation, DBPTKVersion);
   }
 
-  public void updateSIARDValidationIndicators(String databaseUUID, String passed, String ok, String failed,
+  public void updateSIARDValidationIndicators(String databaseUUID, String passed, String failed,
     String errors, String warnings, String skipped) {
     updateValidationFields(databaseUUID, Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATION_PASSED, passed),
-      Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATION_OK, ok),
       Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATION_FAILED, failed),
       Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATION_ERRORS, errors),
       Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATION_WARNINGS, warnings),

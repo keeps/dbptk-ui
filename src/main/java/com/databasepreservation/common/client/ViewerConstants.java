@@ -132,7 +132,6 @@ public class ViewerConstants {
   public static final String SOLR_DATABASES_VALIDATOR_REPORT_PATH = "siard_validator_report";
   public static final String SOLR_DATABASES_VALIDATION_STATUS = "siard_validation_status";
   public static final String SOLR_DATABASES_VALIDATION_PASSED = "siard_validation_passed";
-  public static final String SOLR_DATABASES_VALIDATION_OK = "siard_validation_ok";
   public static final String SOLR_DATABASES_VALIDATION_FAILED = "siard_validation_failed";
   public static final String SOLR_DATABASES_VALIDATION_ERRORS = "siard_validation_errors";
   public static final String SOLR_DATABASES_VALIDATION_WARNINGS = "siard_validation_warnings";

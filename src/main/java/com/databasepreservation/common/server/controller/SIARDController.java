@@ -708,10 +708,10 @@ public class SIARDController {
     return valid;
   }
 
-  public static void updateSIARDValidatorIndicators(String databaseUUID, String passed, String ok, String failed,
+  public static void updateSIARDValidatorIndicators(String databaseUUID, String passed, String failed,
     String errors, String warnings, String skipped) {
     final DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
-    solrManager.updateSIARDValidationIndicators(databaseUUID, passed, ok, errors, failed, warnings, skipped);
+    solrManager.updateSIARDValidationIndicators(databaseUUID, passed, errors, failed, warnings, skipped);
   }
 
   public static void updateStatusValidate(String databaseUUID, ViewerDatabaseValidationStatus status) {
@@ -782,7 +782,7 @@ public class SIARDController {
       Files.delete(path);
       LOGGER.info("SIARD validator report file removed from system ({})", path.toAbsolutePath());
       updateStatusValidate(databaseUUID, ViewerDatabaseValidationStatus.NOT_VALIDATED);
-      updateSIARDValidatorIndicators(databaseUUID, null, null, null, null, null, null);
+      updateSIARDValidatorIndicators(databaseUUID, null, null, null, null, null);
     } catch (IOException e) {
       throw new GenericException("Could not delete SIARD validator report file from system", e);
     }
