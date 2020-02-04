@@ -219,8 +219,8 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
       messages.dataTransformationBtnRunTable());
     btnRunConfiguration.setStyleName("btn btn-play");
     btnRunConfiguration.addClickHandler(clickEvent -> {
-      DataTransformationUtils.saveConfiguration(database.getUuid(), denormalizeConfiguration, collectionStatus);
-      HistoryManager.gotoJobs();
+        DataTransformationUtils.saveConfiguration(database.getUuid(), denormalizeConfiguration, collectionStatus);
+        HistoryManager.gotoJobs();
     });
 
     btnRunAllConfiguration.setText(messages.dataTransformationBtnRunAll());

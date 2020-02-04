@@ -3,15 +3,15 @@ package com.databasepreservation.common.server.jobs;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import com.databasepreservation.common.client.models.structure.ViewerDatabase;
-import com.databasepreservation.common.server.ViewerFactory;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.listener.JobExecutionListenerSupport;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.databasepreservation.common.client.ViewerConstants;

@@ -27,7 +27,6 @@ import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.tools.FilterUtils;
-import com.databasepreservation.common.server.DataTransformationObserver;
 import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
@@ -46,13 +45,11 @@ public class DenormalizeTransformer {
   private final String databaseUUID;
   private final String jobUUID;
   private final String tableUUID;
-  private DataTransformationObserver observer;
 
   public DenormalizeTransformer(String databaseUUID, String tableUUID, String jobUUID) throws ModuleException {
     this.databaseUUID = databaseUUID;
     this.jobUUID = jobUUID;
     this.tableUUID = tableUUID;
-    observer = new DataTransformationObserver(jobUUID);
     solrManager = ViewerFactory.getSolrManager();
     try {
       database = solrManager.retrieve(ViewerDatabase.class, this.databaseUUID);
@@ -63,7 +60,6 @@ public class DenormalizeTransformer {
       queryOverRootTable();
       updateCollectionStatus();
     } catch (NotFoundException | GenericException e) {
-      observer.notifyFinishDataTransformation();
       throw new ModuleException().withMessage("Cannot retrieved database from solr");
     }
   }

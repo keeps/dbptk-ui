@@ -34,6 +34,11 @@ public class RESTException extends RuntimeException {
     this.status = getResponseStatusCode(cause);
   }
 
+  public RESTException(String message, int status) {
+    super(message);
+    this.status = status;
+  }
+
   public RESTException(Throwable cause, int status) {
     super("Remote exception" + getCauseMessage(cause));
     this.status = status;

@@ -1,16 +1,10 @@
 package com.databasepreservation.common.client.services;
 
-import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 
-import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
 
 import org.fusesource.restygwt.client.DirectRestService;
 import org.fusesource.restygwt.client.MethodCallback;
@@ -20,7 +14,6 @@ import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultMethodCallback;
 import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
-import com.databasepreservation.common.client.models.progress.DataTransformationProgressData;
 import com.databasepreservation.common.client.models.structure.ViewerJob;
 import com.google.gwt.core.client.GWT;
 

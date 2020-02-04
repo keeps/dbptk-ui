@@ -29,12 +29,14 @@ import org.roda.core.data.exceptions.RequestNotValidException;
 import org.roda.core.data.utils.JsonUtils;
 import org.roda.core.data.v2.index.sublist.Sublist;
 import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.JobOperator;
+import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
@@ -287,13 +289,21 @@ public class CollectionResource implements CollectionService {
   }
 
   @Override
-  public Boolean createDenormalizeConfigurationFile(String databaseUUID, String collectionUUID, String tableUUID,
+  public synchronized Boolean createDenormalizeConfigurationFile(String databaseUUID, String collectionUUID, String tableUUID,
     DenormalizeConfiguration configuration) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
     User user = UserUtility.getUser(request);
     LogEntryState state = LogEntryState.SUCCESS;
 
     controllerAssistant.checkRoles(user);
+
+    // check if there is no job running on table
+    for (JobExecution runningJobExecution : jobExplorer.findRunningJobExecutions("denormalizeJob")) {
+      System.out.println(runningJobExecution);
+      if (runningJobExecution.getJobParameters().getString(ViewerConstants.CONTROLLER_TABLE_ID_PARAM).equals(tableUUID)) {
+        throw new RESTException("A job is already running on this table", com.google.gwt.http.client.Response.SC_CONFLICT);
+      }
+    }
 
     try {
       JsonTransformer.writeObjectToFile(configuration,
@@ -340,12 +350,20 @@ public class CollectionResource implements CollectionService {
   }
 
   @Override
-  public void run(String databaseUUID, String collectionUUID, String tableUUID) {
+  public synchronized void run(String databaseUUID, String collectionUUID, String tableUUID) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
     User user = UserUtility.getUser(request);
     LogEntryState state = LogEntryState.SUCCESS;
 
     controllerAssistant.checkRoles(user);
+
+    // check if there is no job running on table
+    for (JobExecution runningJobExecution : jobExplorer.findRunningJobExecutions("denormalizeJob")) {
+      System.out.println(runningJobExecution);
+      if (runningJobExecution.getJobParameters().getString(ViewerConstants.CONTROLLER_TABLE_ID_PARAM).equals(tableUUID)) {
+        throw new RESTException("A job is already running on this table", com.google.gwt.http.client.Response.SC_CONFLICT);
+      }
+    }
 
     JobParametersBuilder jobBuilder = new JobParametersBuilder();
     jobBuilder.addDate(ViewerConstants.SOLR_SEARCHES_DATE_ADDED, new Date());

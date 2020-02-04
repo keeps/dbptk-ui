@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.dataTransformation.TableNode;
 import com.databasepreservation.common.client.configuration.observer.CollectionObserver;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
@@ -21,11 +22,15 @@ import com.databasepreservation.common.client.models.structure.ViewerReference;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.services.CollectionService;
 import com.databasepreservation.common.client.widgets.Toast;
+import com.google.gwt.core.client.GWT;
+
+import config.i18n.client.ClientMessages;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
 public class DataTransformationUtils {
+  public static ClientMessages messages = GWT.create(ClientMessages.class);
 	private DataTransformationUtils() {}
 
   public static void includeRelatedTable(TableNode childNode, DenormalizeConfiguration denormalizeConfiguration) {
@@ -92,9 +97,15 @@ public class DataTransformationUtils {
         final CollectionObserver collectionObserver = ObserverManager.getCollectionObserver();
         collectionObserver.setCollectionStatus(collectionStatus);
         CollectionService.Util.call((Void response) -> {
-          Toast.showInfo("Configuration file",
+          Toast.showInfo(messages.advancedConfigurationLabelForDataTransformation(),
             "Created denormalization configuration file with success for " + denormalizeConfiguration.getTableID());
+        }, errorMessage -> {
+          Dialogs.showErrors(messages.advancedConfigurationLabelForDataTransformation(), errorMessage,
+            messages.basicActionClose());
         }).run(databaseUUID,databaseUUID, denormalizeConfiguration.getTableUUID());
+      }, errorMessage -> {
+        Dialogs.showErrors(messages.advancedConfigurationLabelForDataTransformation(), errorMessage,
+          messages.basicActionClose());
       }).createDenormalizeConfigurationFile(databaseUUID, databaseUUID, denormalizeConfiguration.getTableUUID(),
         denormalizeConfiguration);
     }
