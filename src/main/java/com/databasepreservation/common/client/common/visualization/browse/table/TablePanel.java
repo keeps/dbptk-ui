@@ -10,6 +10,7 @@ import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.RightPanel;
 import com.databasepreservation.common.client.common.UserLogin;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
+import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.search.SearchInfo;
 import com.databasepreservation.common.client.common.search.TableSearchPanel;
@@ -28,6 +29,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.MenuBar;
@@ -58,7 +60,9 @@ public class TablePanel extends RightPanel implements ICollectionStatusObserver,
       instance = new TablePanel(status, database, tableId, searchInfoJson, route);
       instances.put(code, instance);
     } else if (searchInfoJson != null) {
+      instance = new TablePanel(status, database, tableId, searchInfoJson, route);
       instance.applySearchInfoJson(searchInfoJson);
+      instances.put(code, instance);
     } else if (instance.tableSearchPanel.isSearchInfoDefined()) {
       instance = new TablePanel(status, database, tableId, route);
       instances.put(code, instance);
@@ -120,7 +124,7 @@ public class TablePanel extends RightPanel implements ICollectionStatusObserver,
    */
   private TablePanel(CollectionStatus status, ViewerDatabase database, ViewerTable table, SearchInfo searchInfo,
     String route) {
-    tableSearchPanel = new TableSearchPanel(searchInfo, status);
+    tableSearchPanel = new TableSearchPanel(searchInfo, status, route);
 
     initWidget(uiBinder.createAndBindUi(this));
 
@@ -164,7 +168,7 @@ public class TablePanel extends RightPanel implements ICollectionStatusObserver,
     this.route = route;
 
     if (searchInfoJson != null) {
-      tableSearchPanel = new TableSearchPanel(searchInfoJson, collectionStatus);
+      tableSearchPanel = new TableSearchPanel(searchInfoJson, collectionStatus, route);
     } else {
       tableSearchPanel = new TableSearchPanel(collectionStatus);
     }
@@ -229,11 +233,13 @@ public class TablePanel extends RightPanel implements ICollectionStatusObserver,
   private void buildMenu() {
     MenuBar configurationSubMenuBar = new MenuBar(true);
     MenuItem columnMenuItem = new MenuItem(
-      SafeHtmlUtils.fromString(messages.dataTransformationBtnManageTable(collectionStatus.getTableStatus(table.getUuid()).getCustomName())),
+      SafeHtmlUtils.fromString(
+        messages.dataTransformationBtnManageTable(collectionStatus.getTableStatus(table.getUuid()).getCustomName())),
       () -> HistoryManager.gotoColumnsManagement(database.getUuid(), table.getId()));
     configurationSubMenuBar.addItem(columnMenuItem);
     MenuItem dataTransformationMenuItem = new MenuItem(
-      SafeHtmlUtils.fromString(messages.dataTransformationBtnTransformTable(collectionStatus.getTableStatus(table.getUuid()).getCustomName())),
+      SafeHtmlUtils.fromString(
+        messages.dataTransformationBtnTransformTable(collectionStatus.getTableStatus(table.getUuid()).getCustomName())),
       () -> HistoryManager.gotoDataTransformation(database.getUuid(), table.getId()));
     if (ApplicationType.getType().equals(ViewerConstants.SERVER)) {
       configurationSubMenuBar.addItem(dataTransformationMenuItem);
@@ -269,8 +275,12 @@ public class TablePanel extends RightPanel implements ICollectionStatusObserver,
   @Override
   protected void onLoad() {
     super.onLoad();
-    if(!collectionStatus.getTableStatusByTableId(table.getId()).isShow()){
-      HistoryManager.gotoDatabase(database.getUuid());
+    if (!collectionStatus.getTableStatusByTableId(table.getId()).isShow()) {
+      History.back();
+      Dialogs.showInformationDialog(messages.resourceNotAvailableTitle(),
+        messages.resourceNotAvailableTableHiddenDescription(
+          collectionStatus.getTableStatusByTableId(table.getId()).getCustomName()),
+        messages.basicActionClose());
     }
   }
 }

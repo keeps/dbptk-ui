@@ -24,6 +24,7 @@ public interface ClientMessages extends Messages {
   String titleUsers();
 
   String titleReport();
+
   String titleDescription();
 
   String titleAdmin();
@@ -1454,7 +1455,9 @@ public interface ClientMessages extends Messages {
   String columnManagementLabelForQuantityList();
 
   /********************************************
-   * Sidebar
+   * Resources
    *******************************************/
-  String tableHeader();
+  String resourceNotAvailableTitle();
+
+  String resourceNotAvailableTableHiddenDescription(String value);
 }

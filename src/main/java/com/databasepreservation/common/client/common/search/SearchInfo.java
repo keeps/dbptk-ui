@@ -15,6 +15,7 @@ import com.databasepreservation.common.client.models.status.collection.Collectio
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.tools.ViewerJsonUtils;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.UriUtils;
 
 /**

@@ -13,6 +13,7 @@ import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.services.CollectionService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
+import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.ViewerJsonUtils;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.google.gwt.core.client.GWT;
@@ -102,7 +103,7 @@ public class TableSavedSearchPanel extends RightPanel {
     // set searchForm and table
     SearchInfo searchInfo = ViewerJsonUtils.getSearchInfoMapper().read(savedSearch.getSearchInfoJson());
     if (SearchInfo.isPresentAndValid(searchInfo)) {
-      TableSearchPanel tableSearchPanel = new TableSearchPanel(searchInfo.asJson(), status);
+      TableSearchPanel tableSearchPanel = new TableSearchPanel(searchInfo.asJson(), status, HistoryManager.ROUTE_FOREIGN_KEY);
       tableSearchPanel.provideSource(database, database.getMetadata().getTableById(tableId));
       tableSearchPanelContainer.setWidget(tableSearchPanel);
     } else {

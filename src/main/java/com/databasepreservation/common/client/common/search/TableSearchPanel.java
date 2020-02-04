@@ -35,6 +35,7 @@ public class TableSearchPanel extends Composite {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static final Binder uiBinder = GWT.create(Binder.class);
   private static final String EMPTY = "empty";
+  private String route;
   private CollectionStatus status;
 
   interface Binder extends UiBinder<Widget, TableSearchPanel> {
@@ -65,8 +66,9 @@ public class TableSearchPanel extends Composite {
   /**
    * Table search panel with a SearchInfo predefined search
    */
-  public TableSearchPanel(SearchInfo searchInfo, CollectionStatus status) {
+  public TableSearchPanel(SearchInfo searchInfo, CollectionStatus status, String route) {
     this.status = status;
+    this.route = route;
     if (SearchInfo.isPresentAndValid(searchInfo)) {
       currentSearchInfo = searchInfo;
     }
@@ -77,8 +79,9 @@ public class TableSearchPanel extends Composite {
    *
    * @param searchInfoJson
    */
-  public TableSearchPanel(String searchInfoJson, CollectionStatus status) {
+  public TableSearchPanel(String searchInfoJson, CollectionStatus status, String route) {
     this(status);
+    this.route = route;
     setCurrentSearchInfoFromJson(searchInfoJson);
   }
 
@@ -218,14 +221,16 @@ public class TableSearchPanel extends Composite {
       // handle creating / editing search fields
       this.searchFields.clear();
 
-      currentSearchInfo.getFields().forEach(searchField -> {
-        if (searchField.isFixed()) {
-          final SearchFieldPanel searchFieldPanel = new SearchFieldPanel();
-          searchFieldPanel.setSearchField(searchField);
-          addSearchFieldPanel(searchFieldPanel);
-          searchFieldPanel.selectSearchField();
+      for (int i = 0; i < currentSearchInfo.getFields().size() ; i++) {
+        if (currentSearchInfo.getFieldParameters().get(i) != null) {
+          if (currentSearchInfo.getFields().get(i).isFixed() || route.equals(HistoryManager.ROUTE_FOREIGN_KEY)) {
+            final SearchFieldPanel searchFieldPanel = new SearchFieldPanel();
+            searchFieldPanel.setSearchField(currentSearchInfo.getFields().get(i));
+            addSearchFieldPanel(searchFieldPanel);
+            searchFieldPanel.selectSearchField();
+          }
         }
-      });
+      }
 
       // update search panel and trigger a search
       searchPanel.updateSearchPanel(currentSearchInfo);
