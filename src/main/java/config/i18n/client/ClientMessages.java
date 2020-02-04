@@ -1316,9 +1316,15 @@ public interface ClientMessages extends Messages {
 
   String advancedConfigurationLabelForTableManagement();
 
+  String advancedConfigurationBtnForTableManagement();
+
   String advancedConfigurationLabelForColumnsManagement();
 
+  String advancedConfigurationBtnForColumnsManagement();
+
   String advancedConfigurationLabelForDataTransformation();
+
+  String advancedConfigurationBtnForDataTransformation();
 
   String advancedConfigurationTextForTableManagement();
 
@@ -1431,11 +1437,7 @@ public interface ClientMessages extends Messages {
 
   SafeHtml columnManagementTextForTemplateHint(String link);
 
-  String columnManagementTextForTemplateDocumentation();
-
   String columnManagementTextForPossibleFields();
-
-  String columnManagementBtnTextForFields(String label);
 
   String columnManagementTextForMultiValueFields();
 
@@ -1443,11 +1445,7 @@ public interface ClientMessages extends Messages {
 
   String columnManagementLabelForSeparator();
 
-  String columnManagementLabelForSeparatorComma();
-
-  String columnManagementLabelForSeparatorBreakLine();
-
-  String columnManagementLabelForSeparatorSpace();
+  String columnManagementLabelForSeparatorHint();
 
   String columnManagementLabelForTemplateDetail();
 

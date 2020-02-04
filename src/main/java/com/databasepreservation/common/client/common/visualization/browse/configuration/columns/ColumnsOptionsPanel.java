@@ -1,14 +1,11 @@
 package com.databasepreservation.common.client.common.visualization.browse.configuration.columns;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.widgets.Alert;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -16,7 +13,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Hyperlink;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.ListBox;
@@ -34,15 +30,12 @@ public class ColumnsOptionsPanel extends Composite {
 
   private static ColumnsOptionsPanelUiBinder binder = GWT.create(ColumnsOptionsPanelUiBinder.class);
   private static Map<String, ColumnsOptionsPanel> instances = new HashMap<>();
-  private final String COMMA_SEPARATOR=",";
-  private final String BREAK_LINE_SEPARATOR="<br>";
-  private final String WHITE_LINE_SEPARATOR=" ";
 
   @UiField
   ClientMessages messages = GWT.create(ClientMessages.class);
 
   @UiField
-  TextBox templateList, templateDetail, templateExport;
+  TextBox templateList, templateDetail, templateExport, items;
 
   @UiField
   FlowPanel templateListHint, templateDetailHint, templateExportHint;
@@ -52,9 +45,6 @@ public class ColumnsOptionsPanel extends Composite {
 
   @UiField
   FlowPanel content, templateDetailPanel, templateExportPanel, separatorPanel;
-
-  @UiField
-  ListBox items;
 
   @UiField
   IntegerBox quantityList;
@@ -75,25 +65,10 @@ public class ColumnsOptionsPanel extends Composite {
       columnStatus.getSearchStatus().getList().getTemplate().setTemplate(templateList.getText());
     });
 
-    items.addItem(messages.columnManagementLabelForSeparatorComma(), COMMA_SEPARATOR);
-    items.addItem(messages.columnManagementLabelForSeparatorBreakLine(),BREAK_LINE_SEPARATOR);
-    items.addItem(messages.columnManagementLabelForSeparatorSpace(),WHITE_LINE_SEPARATOR);
-    String separator = columnStatus.getSearchStatus().getList().getTemplate().getSeparator();
-
-    if(separator == null){
-      items.setSelectedIndex(0);
-    } else {
-      for (int i = 0; i < items.getItemCount(); i++) {
-        GWT.log("items.getItemText(i): " + items.getItemText(i));
-        GWT.log("separator: " + separator);
-        if (items.getValue(i).equals(separator)) {
-          items.setSelectedIndex(i);
-        }
-      }
-    }
-
+    //separator, used on tablePanel
+    items.setText(columnStatus.getSearchStatus().getList().getTemplate().getSeparator());
     items.addChangeHandler(event -> {
-      columnStatus.getSearchStatus().getList().getTemplate().setSeparator(items.getSelectedValue());
+      columnStatus.getSearchStatus().getList().getTemplate().setSeparator(items.getText());
     });
 
     //Template detail, used on rowPanel
@@ -139,10 +114,11 @@ public class ColumnsOptionsPanel extends Composite {
     hintPanel.add(new Label(messages.columnManagementTextForPossibleFields()));
 
     for (String nestedField : columnStatus.getNestedColumns().getNestedFields()) {
-      Button btnField = new Button(messages.columnManagementBtnTextForFields(nestedField));
+      Button btnField = new Button(nestedField);
       btnField.setStyleName("btn btn-primary btn-small");
       btnField.addClickHandler(click -> {
-        target.setText(target.getText() + btnField.getText());
+        target.setText(target.getText() + ViewerConstants.OPEN_TEMPLATE_ENGINE + btnField.getText()
+          + ViewerConstants.CLOSE_TEMPLATE_ENGINE);
       });
 
       hintPanel.add(btnField);

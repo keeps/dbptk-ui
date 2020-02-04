@@ -1,7 +1,7 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
     <ui:with field='messages' type='config.i18n.client.ClientMessages'/>
-    <g:FlowPanel ui:field="content">
+    <g:FlowPanel ui:field="content" addStyleNames="columns-management-options">
         <g:Label addStyleNames="form-label">
             <ui:text from='{messages.columnManagementLabelForTemplateOptions}'/>
         </g:Label>
@@ -12,7 +12,6 @@
                 <ui:text from='{messages.columnManagementLabelForTemplateList}'/>
             </g:Label>
             <g:TextBox addStyleNames="form-textbox" ui:field="templateList"/>
-<!--            <g:Label addStyleNames="column-description" ui:field="templateListHint"/>-->
             <g:FlowPanel ui:field="templateListHint"/>
         </g:FlowPanel>
 
@@ -20,7 +19,10 @@
             <g:Label addStyleNames="form-label">
                 <ui:text from='{messages.columnManagementLabelForSeparator}'/>
             </g:Label>
-            <g:ListBox ui:field="items" addStyleNames="advancedOptionsSeparator form-selectbox" />
+            <g:TextBox addStyleNames="form-textbox" ui:field="items"/>
+            <g:Label addStyleNames="column-description">
+                <ui:text from='{messages.columnManagementLabelForSeparatorHint}'/>
+            </g:Label>
         </g:FlowPanel>
 
         <g:FlowPanel ui:field="templateDetailPanel">
@@ -28,7 +30,6 @@
                 <ui:text from='{messages.columnManagementLabelForTemplateDetail}'/>
             </g:Label>
             <g:TextBox addStyleNames="form-textbox" ui:field="templateDetail"/>
-<!--            <g:Label addStyleNames="column-description" ui:field="templateDetailHint"/>-->
             <g:FlowPanel ui:field="templateDetailHint"/>
         </g:FlowPanel>
 
@@ -37,7 +38,6 @@
                 <ui:text from='{messages.columnManagementLabelForTemplateExport}'/>
             </g:Label>
             <g:TextBox addStyleNames="form-textbox" ui:field="templateExport"/>
-<!--            <g:Label addStyleNames="column-description" ui:field="templateExportHint"/>-->
             <g:FlowPanel ui:field="templateExportHint"/>
         </g:FlowPanel>
 

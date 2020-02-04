@@ -9,11 +9,9 @@ import com.databasepreservation.common.client.models.structure.ViewerView;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
@@ -40,13 +38,7 @@ public class CommonClientUtils {
     dividerHeader.addStyleName("divider-header");
     dividerHeader.add(new Label(label));
 
-    FlowPanel dividerLine = new FlowPanel();
-    dividerLine.addStyleName("divider-line");
-    Element el = DOM.createSpan();
-    dividerLine.getElement().appendChild(el);
-
     panel.add(dividerHeader);
-    panel.add(dividerLine);
 
     return panel;
   }

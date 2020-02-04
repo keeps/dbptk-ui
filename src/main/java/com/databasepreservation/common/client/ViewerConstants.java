@@ -506,6 +506,12 @@ public class ViewerConstants {
   public static final String DENORMALIZATION_STATUS_VERSION = "1.0.0";
 
   /**
+   * Template Engine
+   */
+  public static final String OPEN_TEMPLATE_ENGINE = "{{";
+  public static final String CLOSE_TEMPLATE_ENGINE = "}} ";
+
+  /**
    * private constructor
    */
   private ViewerConstants() {

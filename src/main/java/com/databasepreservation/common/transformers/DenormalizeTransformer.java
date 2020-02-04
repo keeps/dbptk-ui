@@ -131,7 +131,7 @@ public class DenormalizeTransformer {
 
       String template = "";
       for (String templateName : columnName) {
-        template = template + "{{" + templateName + "}} ";
+        template = template + ViewerConstants.OPEN_TEMPLATE_ENGINE + templateName + ViewerConstants.CLOSE_TEMPLATE_ENGINE;
       }
 
       String columnStatusName = "";

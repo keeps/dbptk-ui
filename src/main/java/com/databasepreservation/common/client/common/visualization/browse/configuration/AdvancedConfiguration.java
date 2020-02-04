@@ -67,8 +67,8 @@ public class AdvancedConfiguration extends ContentPanel {
 
     NavigationPanel tableManagement = NavigationPanel.createInstance(messages.advancedConfigurationLabelForTableManagement());
     tableManagement.addToDescriptionPanel(messages.advancedConfigurationTextForTableManagement());
-    Button btnTableManagement = new Button(messages.basicActionOpen());
-    btnTableManagement.setStyleName("btn btn-outline-primary btn-open");
+    Button btnTableManagement = new Button(messages.advancedConfigurationBtnForTableManagement());
+    btnTableManagement.setStyleName("btn btn-outline-primary btn-play btn-block");
     btnTableManagement.addClickHandler(event -> {
       HistoryManager.gotoTableManagement(database.getUuid());
     });
@@ -77,8 +77,8 @@ public class AdvancedConfiguration extends ContentPanel {
 
     NavigationPanel columnManagement = NavigationPanel.createInstance(messages.advancedConfigurationLabelForColumnsManagement());
     columnManagement.addToDescriptionPanel(messages.advancedConfigurationTextForColumnsManagement());
-    Button btnColumnManagement = new Button(messages.basicActionOpen());
-    btnColumnManagement.setStyleName("btn btn-outline-primary btn-open");
+    Button btnColumnManagement = new Button(messages.advancedConfigurationBtnForColumnsManagement());
+    btnColumnManagement.setStyleName("btn btn-outline-primary btn-play btn-block");
     btnColumnManagement.addClickHandler(event -> {
       HistoryManager.gotoColumnsManagement(database.getUuid());
     });
@@ -88,8 +88,8 @@ public class AdvancedConfiguration extends ContentPanel {
     if (ApplicationType.getType().equals(ViewerConstants.SERVER)) {
       NavigationPanel dataTransformation = NavigationPanel.createInstance(messages.advancedConfigurationLabelForDataTransformation());
       dataTransformation.addToDescriptionPanel(messages.advancedConfigurationTextForDataTransformation());
-      Button btnDataTransformation = new Button(messages.basicActionOpen());
-      btnDataTransformation.setStyleName("btn btn-outline-primary btn-open");
+      Button btnDataTransformation = new Button(messages.advancedConfigurationBtnForDataTransformation());
+      btnDataTransformation.setStyleName("btn btn-outline-primary btn-play btn-block");
       btnDataTransformation.addClickHandler(event -> {
         HistoryManager.gotoDataTransformation(database.getUuid());
       });
@@ -104,7 +104,7 @@ public class AdvancedConfiguration extends ContentPanel {
         messages.advancedConfigurationLabelForMainTitle(), "h1"));
 
     HTML html = new HTML(messages.advancedConfigurationPageDescription());
-    html.addStyleName("font-size-description");
+    html.addStyleName("font-size-description advanced-configuration-description");
 
     description.setWidget(html);
   }
