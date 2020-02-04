@@ -37,11 +37,14 @@ import config.i18n.client.ClientMessages;
 public class ValidationNavigationPanel {
 
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
+  private static final String LABEL_FIELD = "label-field";
+  private static final String VALUE_FIELD = "value-field";
+  private static final String BTN_ITEM = "btn-item";
   private static Map<String, ValidationNavigationPanel> instances = new HashMap<>();
   private ViewerDatabase database;
-  private Button btnRunValidator;
+  private Button btnValidate;
   private Button btnOpenValidator;
-  private Button btnSeeReport;
+  private Button btnReport;
   private Button btnDeleteReport;
   private HelperValidator validator = null;
   private MetadataField validatedAt = null;
@@ -49,13 +52,10 @@ public class ValidationNavigationPanel {
   private FlowPanel validationDetails = new FlowPanel();
   private MetadataField validationWarnings = null;
   private MetadataField version = null;
+  private NavigationPanel navigationPanel;
 
   public static ValidationNavigationPanel getInstance(ViewerDatabase database) {
-    String databaseUUID = database.getUuid();
-    if (instances.get(databaseUUID) == null) {
-      instances.put(databaseUUID, new ValidationNavigationPanel(database));
-    }
-    return instances.get(databaseUUID);
+    return instances.computeIfAbsent(database.getUuid(), k -> new ValidationNavigationPanel(database));
   }
 
   private ValidationNavigationPanel(ViewerDatabase database) {
@@ -63,13 +63,50 @@ public class ValidationNavigationPanel {
   }
 
   public NavigationPanel build() {
+    buildValidateButton();
+    buildReportButton();
+    buildOpenButton();
+    buildDeleteButton();
 
-    // Run validator btn
+    // information
+    validatedAt = MetadataField.createInstance(messages.SIARDHomePageLabelForValidatedAt(),
+      messages.humanizedTextForSIARDNotValidated());
+    version = MetadataField.createInstance(messages.SIARDHomePageLabelForValidateBy(),
+      messages.humanizedTextForSIARDNotValidated());
+    validationWarnings = MetadataField.createInstance(messages.SIARDHomePageLabelForValidationWarnings(),
+      messages.humanizedTextForSIARDNotValidated());
+    updateValidationInformation();
+
+    // Validation Status info
+    validationStatus = MetadataField.createInstance(messages.SIARDHomePageLabelForValidationStatus(),
+      LabelUtils.getSIARDValidationStatus(database.getValidationStatus()));
+    validationStatus.setCSS(null, LABEL_FIELD, VALUE_FIELD);
+
+    validatedAt.setCSS(null, LABEL_FIELD, VALUE_FIELD);
+    version.setCSS(null, LABEL_FIELD, VALUE_FIELD);
+    validationWarnings.setCSS(null, LABEL_FIELD, VALUE_FIELD);
+
+    navigationPanel = NavigationPanel.createInstance(messages.SIARDHomePageOptionsHeaderForValidation());
+    navigationPanel.addToDescriptionPanel(messages.SIARDHomePageOptionsDescriptionForValidation());
+
+    // buttons
+    updateValidationButtons();
+
+    navigationPanel.addToInfoPanel(validationStatus);
+    navigationPanel.addToInfoPanel(validationDetails);
+    navigationPanel.addToInfoPanel(validationWarnings);
+    navigationPanel.addToInfoPanel(validatedAt);
+    navigationPanel.addToInfoPanel(version);
+
+    return navigationPanel;
+  }
+
+  private void buildValidateButton() {
     validator = new HelperValidator(database.getPath());
-    btnRunValidator = new Button();
-    btnRunValidator.setText(messages.SIARDHomePageButtonTextValidateNow());
-    btnRunValidator.addStyleName("btn btn-outline-primary btn-play");
-    btnRunValidator.addClickHandler(event -> {
+    btnValidate = new Button();
+    btnValidate.setText(messages.SIARDHomePageButtonTextValidateNow());
+    btnValidate.addStyleName("btn btn-outline-primary btn-play");
+    btnValidate.addClickHandler(event -> {
       if (database.getVersion().equals(ViewerConstants.SIARD_V21)) {
         if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
           Dialogs.showValidatorSettings(messages.SIARDValidatorSettings(), messages.basicActionCancel(),
@@ -77,60 +114,59 @@ public class ValidationNavigationPanel {
               @Override
               public void onSuccess(Boolean result) {
                 if (result && validator.getReporterPathFile() != null) {
-                  ValidatorPage.clear(database.getUuid());
-                  if (validator.getUdtPathFile() == null) {
-                    HistoryManager.gotoSIARDValidator(database.getUuid(), validator.getReporterPathFile(),
-                      validator.skipAdditionalChecks());
-                  } else {
-                    HistoryManager.gotoSIARDValidator(database.getUuid(), validator.getReporterPathFile(),
-                      validator.getUdtPathFile(), validator.skipAdditionalChecks());
-                  }
+                  runValidation();
                 }
               }
             });
         } else {
-          ValidatorPage.clear(database.getUuid());
-          HistoryManager.gotoSIARDValidator(database.getUuid(), validator.skipAdditionalChecks());
+          runValidation();
         }
       } else {
         Dialogs.showInformationDialog(messages.SIARDValidatorDialogInformationTitle(),
           messages.SIARDValidatorTextForVersionCannotBeValidated(), messages.basicActionUnderstood(), "btn btn-link");
       }
     });
+  }
 
-    // Open validator btn
-    btnOpenValidator = new Button();
-    btnOpenValidator.setText(messages.SIARDHomePageButtonTextOpenValidate());
-    btnOpenValidator.addStyleName("btn btn-outline-primary btn-validate");
-    btnOpenValidator.addClickHandler(event -> {
-      if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
-        HistoryManager.gotoSIARDValidator(database.getUuid(), validator.getReporterPathFile());
-      } else {
-        HistoryManager.gotoSIARDValidator(database.getUuid(), validator.skipAdditionalChecks());
-      }
-    });
+  private void runValidation() {
+    ValidatorPage.clear(database.getUuid());
+    HistoryManager.gotoSIARDValidator(database.getUuid());
+    SiardService.Util.call((Boolean result) -> {
+      // Do nothing, wait for update finish
+    }, (String errorMessage) -> {
+      ValidatorPage.getInstance(database).error();
+      Dialogs.showErrors(messages.validatorPageTextForTitle(), errorMessage, messages.basicActionClose());
+    }).validateSiard(database.getUuid(), database.getUuid(), validator.getReporterPathFile(),
+      validator.getUdtPathFile(), Boolean.parseBoolean(validator.skipAdditionalChecks()));
+  }
 
-    GWT.log("");
-    btnOpenValidator.setVisible(ValidatorPage.checkInstance(database.getUuid()));
-
+  private void buildReportButton() {
     // See Report btn
-    btnSeeReport = new Button();
-    btnSeeReport.addStyleName("btn btn-outline-primary");
+    btnReport = new Button();
+    btnReport.addStyleName("btn btn-outline-primary");
     if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
-      btnSeeReport.setText(messages.SIARDHomePageButtonTextForOpenReport());
-      btnSeeReport.addStyleName("btn-open");
-      btnSeeReport.addClickHandler(clickEvent -> {
-        JavascriptUtils.showItem(database.getValidatorReportPath());
-      });
+      btnReport.setText(messages.SIARDHomePageButtonTextForOpenReport());
+      btnReport.addStyleName("btn-open");
+      btnReport.addClickHandler(clickEvent -> JavascriptUtils.showItem(database.getValidatorReportPath()));
     } else {
-      btnSeeReport.setText(messages.SIARDHomePageButtonTextForDownloadReport());
-      btnSeeReport.addStyleName("btn-download");
-      btnSeeReport.addClickHandler(clickEvent -> {
+      btnReport.setText(messages.SIARDHomePageButtonTextForDownloadReport());
+      btnReport.addStyleName("btn-download");
+      btnReport.addClickHandler(clickEvent -> {
         SafeUri downloadUri = RestUtils.createFileResourceDownloadValidationReportUri(database.getUuid());
         Window.Location.assign(downloadUri.asString());
       });
     }
+  }
 
+  private void buildOpenButton() {
+    // Open validator btn
+    btnOpenValidator = new Button();
+    btnOpenValidator.setText(messages.SIARDHomePageButtonTextOpenValidate());
+    btnOpenValidator.addStyleName("btn btn-outline-primary btn-validate");
+    btnOpenValidator.addClickHandler(event -> HistoryManager.gotoSIARDValidator(database.getUuid()));
+  }
+
+  private void buildDeleteButton() {
     // Delete Report btn
     btnDeleteReport = new Button();
     btnDeleteReport.setText(messages.SIARDHomePageButtonTextForDeleteIngested());
@@ -149,44 +185,6 @@ public class ValidationNavigationPanel {
           });
       }
     });
-
-    // information
-    validatedAt = MetadataField.createInstance(messages.SIARDHomePageLabelForValidatedAt(),
-      messages.humanizedTextForSIARDNotValidated());
-    version = MetadataField.createInstance(messages.SIARDHomePageLabelForValidateBy(),
-      messages.humanizedTextForSIARDNotValidated());
-    validationWarnings = MetadataField.createInstance(messages.SIARDHomePageLabelForValidationWarnings(),
-      messages.humanizedTextForSIARDNotValidated());
-    updateValidationInformation();
-
-    // Validation Status info
-    validationStatus = MetadataField.createInstance(messages.SIARDHomePageLabelForValidationStatus(),
-      LabelUtils.getSIARDValidationStatus(database.getValidationStatus()));
-    validationStatus.setCSS(null, "label-field", "value-field");
-
-    // updateValidationStatus();
-
-    validatedAt.setCSS(null, "label-field", "value-field");
-    version.setCSS(null, "label-field", "value-field");
-    validationWarnings.setCSS(null, "label-field", "value-field");
-
-    NavigationPanel validation = NavigationPanel.createInstance(messages.SIARDHomePageOptionsHeaderForValidation());
-    validation.addToDescriptionPanel(messages.SIARDHomePageOptionsDescriptionForValidation());
-    validation.addButton(CommonClientUtils.wrapOnDiv("btn-item", btnRunValidator));
-    validation.addButton(CommonClientUtils.wrapOnDiv("btn-item", btnOpenValidator));
-    validation.addButton(CommonClientUtils.wrapOnDiv("btn-item", btnSeeReport));
-    validation.addButton(CommonClientUtils.wrapOnDiv("btn-item", btnDeleteReport));
-
-    // buttons
-    updateValidationButtons();
-
-    validation.addToInfoPanel(validationStatus);
-    validation.addToInfoPanel(validationDetails);
-    validation.addToInfoPanel(validationWarnings);
-    validation.addToInfoPanel(validatedAt);
-    validation.addToInfoPanel(version);
-
-    return validation;
   }
 
   private void updateValidationInformation() {
@@ -218,12 +216,13 @@ public class ValidationNavigationPanel {
       case VALIDATION_FAILED:
         validationStatus.getMetadataValue().setStyleName("label-danger");
         break;
-      case VALIDATION_RUNNING:
-        validationStatus.getMetadataValue().setStyleName("label-info");
-        break;
       case ERROR:
         validationStatus.getMetadataValue().setStyleName("label-danger label-error");
         break;
+      case NOT_VALIDATED:
+        validationStatus.getMetadataValue().setStyleName("label-default");
+        break;
+      case VALIDATION_RUNNING:
       default:
         validationStatus.getMetadataValue().setStyleName("label-info");
         break;
@@ -231,56 +230,42 @@ public class ValidationNavigationPanel {
   }
 
   private void updateValidationButtons() {
+    navigationPanel.clearButtonsPanel();
+
     switch (database.getValidationStatus()) {
       case VALIDATION_SUCCESS:
       case VALIDATION_FAILED:
-        btnSeeReport.setVisible(true);
-        updateRunValidatorButton(messages.SIARDHomePageButtonTextRunValidationAgain());
-        handleBtnOpenVisibility();
-        btnDeleteReport
-          .setVisible(database.getValidatorReportPath() != null && !database.getValidatorReportPath().isEmpty());
+        btnValidate.setText(messages.SIARDHomePageButtonTextRunValidationAgain());
+        navigationPanel.addButton(CommonClientUtils.wrapOnDiv(BTN_ITEM, btnValidate));
+        if (ValidatorPage.checkInstance(database.getUuid())) {
+          navigationPanel.addButton(CommonClientUtils.wrapOnDiv(BTN_ITEM, btnOpenValidator));
+        }
+        navigationPanel.addButton(CommonClientUtils.wrapOnDiv(BTN_ITEM, btnReport));
+        if (database.getValidatorReportPath() != null && !database.getValidatorReportPath().isEmpty()) {
+          navigationPanel.addButton(CommonClientUtils.wrapOnDiv(BTN_ITEM, btnDeleteReport));
+        }
         break;
       case VALIDATION_RUNNING:
-        btnSeeReport.setVisible(false);
-        btnRunValidator.setVisible(false);
-        handleBtnOpenVisibility();
-        btnDeleteReport.setVisible(false);
+        if (ValidatorPage.checkInstance(database.getUuid())) {
+          navigationPanel.addButton(CommonClientUtils.wrapOnDiv(BTN_ITEM, btnOpenValidator));
+        }
         break;
       case NOT_VALIDATED:
-        btnSeeReport.setVisible(false);
-        updateRunValidatorButton(messages.SIARDHomePageButtonTextValidateNow());
-        btnOpenValidator.setVisible(false);
-        btnOpenValidator.getElement().getParentElement().addClassName("btn-item-hidden");
-        btnDeleteReport.setVisible(false);
+        btnValidate.setText(messages.SIARDHomePageButtonTextValidateNow());
+        navigationPanel.addButton(CommonClientUtils.wrapOnDiv(BTN_ITEM, btnValidate));
         break;
       case ERROR:
-        btnSeeReport.setVisible(false);
-        updateRunValidatorButton(messages.SIARDHomePageButtonTextValidateNow());
-        handleBtnOpenVisibility();
-        btnDeleteReport.setVisible(false);
+        if (database.getPath() != null && !database.getPath().isEmpty()) {
+          btnValidate.setEnabled(true);
+          btnValidate.setTitle("");
+        } else {
+          btnValidate.setEnabled(false);
+          btnValidate.setTitle(messages.SIARDHomePageTextForRequiredSIARDFile());
+        }
+        btnValidate.setText(messages.SIARDHomePageButtonTextValidateNow());
+        navigationPanel.addButton(CommonClientUtils.wrapOnDiv(BTN_ITEM, btnValidate));
         break;
     }
-  }
-
-  private void handleBtnOpenVisibility() {
-    if(ValidatorPage.checkInstance(database.getUuid())){
-      btnOpenValidator.setVisible(true);
-      btnOpenValidator.getParent().removeStyleName("btn-item-hidden");
-    } else {
-      btnOpenValidator.setVisible(false);
-      btnOpenValidator.getParent().addStyleName("btn-item-hidden");
-    }
-  }
-
-  private void updateRunValidatorButton(String msg) {
-    if (database.getPath() != null && !database.getPath().isEmpty()) {
-      btnRunValidator.setEnabled(true);
-      btnRunValidator.setTitle(null);
-    } else {
-      btnRunValidator.setEnabled(false);
-      btnRunValidator.setTitle(messages.SIARDHomePageTextForRequiredSIARDFile());
-    }
-    btnRunValidator.setText(msg);
   }
 
   private void updateValidationIndicators() {
@@ -290,7 +275,7 @@ public class ValidationNavigationPanel {
     if (database.getValidationStatus().equals(ViewerDatabaseValidationStatus.VALIDATION_SUCCESS)
       || database.getValidationStatus().equals(ViewerDatabaseValidationStatus.VALIDATION_FAILED)) {
       Label label = new Label(messages.SIARDHomePageLabelForValidationDetails());
-      label.addStyleName("label-field");
+      label.addStyleName(LABEL_FIELD);
       validationDetails.add(label);
       FlowPanel panel = new FlowPanel();
       panel.addStyleName("validation-indicators");
@@ -342,9 +327,9 @@ public class ValidationNavigationPanel {
 
   private void delete() {
     if (!database.getValidationStatus().equals(ViewerDatabaseValidationStatus.VALIDATION_RUNNING)) {
-      SiardService.Util.call((Void result) -> {
-        SIARDManagerPage.getInstance(database).refreshInstance(database.getUuid());
-      }).deleteValidationReport(database.getUuid(), database.getValidatorReportPath());
+      SiardService.Util
+        .call((Void result) -> SIARDManagerPage.getInstance(database).refreshInstance(database.getUuid()))
+        .deleteValidationReport(database.getUuid(), database.getValidatorReportPath());
     }
   }
 }

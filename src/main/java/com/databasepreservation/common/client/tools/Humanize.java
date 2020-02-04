@@ -15,7 +15,6 @@ import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 
 import config.i18n.client.ClientMessages;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -84,7 +83,8 @@ public class Humanize {
   }
 
   public static String formatDateTime(String dateTimeString) {
-    if (ViewerStringUtils.isBlank(dateTimeString)) return dateTimeString;
+    if (ViewerStringUtils.isBlank(dateTimeString))
+      return dateTimeString;
     DateTimeFormat archivalDateFormat = DateTimeFormat.getFormat("yyyy-MM-ddTHH:mm:ss.SSSZZZZ");
     DateTimeFormat normalizedDateFormat = DateTimeFormat.getFormat("yyyy-MM-dd HH:mm (zzzz)");
     try {
@@ -109,7 +109,7 @@ public class Humanize {
     return formatDateTime(date, false);
   }
 
-  public static String logEntryState(@NotNull LogEntryState state) {
+  public static String logEntryState(LogEntryState state) {
     switch (state) {
       case SUCCESS:
         return messages.activityLogHumanizedTextForSuccess();

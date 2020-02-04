@@ -48,7 +48,7 @@ public class BreadcrumbManager {
   }
 
   public static List<BreadcrumbItem> forUpload() {
-    List<BreadcrumbItem> items = forManageDatabase()  ;
+    List<BreadcrumbItem> items = forManageDatabase();
     items.add(
       new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.NEW_UPLOAD)
         + SafeHtmlUtils.htmlEscape(messages.uploadPanelTextForTitle())), HistoryManager::gotoNewUpload));
@@ -91,10 +91,12 @@ public class BreadcrumbManager {
     List<BreadcrumbItem> items;
     items = forSIARDMainPage(databaseUUID, databaseName);
 
-    items.add(new BreadcrumbItem(
-      SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE_REPORT)
-        + SafeHtmlUtils.htmlEscape(messages.titleReport())),
-      () -> HistoryManager.gotoDatabaseReport(databaseUUID)));
+    items
+      .add(
+        new BreadcrumbItem(
+          SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE_REPORT)
+            + SafeHtmlUtils.htmlEscape(messages.titleReport())),
+          () -> HistoryManager.gotoDatabaseReport(databaseUUID)));
     return items;
   }
 
@@ -178,11 +180,14 @@ public class BreadcrumbManager {
   public static List<BreadcrumbItem> forReferences(final String databaseName, final String databaseUUID,
     final String tableName, final String tableUUID, final String recordUUID, final String columnNameInTable,
     final String columnIndexInTable) {
-//    List<BreadcrumbItem> items = forRecord(databaseName, databaseUUID, tableName, tableUUID, recordUUID);
-//    items.add(new BreadcrumbItem(
-//      SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.REFERENCE)
-//        + SafeHtmlUtils.htmlEscape(messages.menusidebar_referencesForColumn(columnNameInTable))),
-//      () -> HistoryManager.gotoReferences(databaseUUID, tableUUID, recordUUID, columnIndexInTable)));
+    // List<BreadcrumbItem> items = forRecord(databaseName, databaseUUID, tableName,
+    // tableUUID, recordUUID);
+    // items.add(new BreadcrumbItem(
+    // SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.REFERENCE)
+    // +
+    // SafeHtmlUtils.htmlEscape(messages.menusidebar_referencesForColumn(columnNameInTable))),
+    // () -> HistoryManager.gotoReferences(databaseUUID, tableUUID, recordUUID,
+    // columnIndexInTable)));
     return new ArrayList<>();
   }
 
@@ -201,19 +206,17 @@ public class BreadcrumbManager {
 
     if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
       items.add(new BreadcrumbItem(
-          SafeHtmlUtils.fromSafeConstant(
-              FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE) + SafeHtmlUtils.htmlEscape(databaseName)),
-          () -> HistoryManager.gotoSIARDInfo(databaseUUID)));
+        SafeHtmlUtils.fromSafeConstant(
+          FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE) + SafeHtmlUtils.htmlEscape(databaseName)),
+        () -> HistoryManager.gotoSIARDInfo(databaseUUID)));
     } else {
-
       UserLogin.getInstance().getAuthenticatedUser(new DefaultAsyncCallback<User>() {
         @Override
         public void onSuccess(User user) {
           if (user.isAdmin()) {
-            items.add(new BreadcrumbItem(
-                SafeHtmlUtils.fromSafeConstant(
-                    FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE) + SafeHtmlUtils.htmlEscape(databaseName)),
-                () -> HistoryManager.gotoSIARDInfo(databaseUUID)));
+            items.add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(
+              FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE) + SafeHtmlUtils.htmlEscape(databaseName)),
+              () -> HistoryManager.gotoSIARDInfo(databaseUUID)));
           }
         }
       });
@@ -348,17 +351,18 @@ public class BreadcrumbManager {
 
   public static List<BreadcrumbItem> forActivityLog() {
     List<BreadcrumbItem> items = forManageDatabase();
-    items
-      .add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.ACTIVITY_LOG)
-        + SafeHtmlUtils.htmlEscape(messages.breadcrumbTextForActivityLog())), HistoryManager::gotoActivityLog));
+    items.add(new BreadcrumbItem(
+      SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.ACTIVITY_LOG)
+        + SafeHtmlUtils.htmlEscape(messages.breadcrumbTextForActivityLog())),
+      HistoryManager::gotoActivityLog));
     return items;
   }
 
   public static List<BreadcrumbItem> forActivityLogDetailed() {
     List<BreadcrumbItem> items = forActivityLog();
-    items
-        .add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.ACTIVITY_LOG)
-            + SafeHtmlUtils.htmlEscape(messages.breadcrumbTextForActivityLogDetail()))));
+    items.add(new BreadcrumbItem(
+      SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.ACTIVITY_LOG)
+        + SafeHtmlUtils.htmlEscape(messages.breadcrumbTextForActivityLogDetail()))));
     return items;
   }
 
@@ -371,21 +375,23 @@ public class BreadcrumbManager {
     return items;
   }
 
-  public static List<BreadcrumbItem> forDataTransformation(final String databaseUUID, final String databaseName, final String tableName) {
+  public static List<BreadcrumbItem> forDataTransformation(final String databaseUUID, final String databaseName,
+    final String tableName) {
     List<BreadcrumbItem> items = forAdvancedConfiguration(databaseUUID, databaseName);
     items.add(new BreadcrumbItem(
-        SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATA_TRANSFORMATION)
+      SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATA_TRANSFORMATION)
         + SafeHtmlUtils.htmlEscape(tableName))));
     return items;
   }
 
   public static List<BreadcrumbItem> forJobManager() {
     List<BreadcrumbItem> items = forManageDatabase();
-        items
-          .add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.NETWORK_WIRED)
-            + SafeHtmlUtils.htmlEscape(messages.breadcrumbTextForJobManager())), HistoryManager::gotoJobs));
-        return items;
-    }
+    items.add(new BreadcrumbItem(
+      SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.NETWORK_WIRED)
+        + SafeHtmlUtils.htmlEscape(messages.breadcrumbTextForJobManager())),
+      HistoryManager::gotoJobs));
+    return items;
+  }
 
   public static List<BreadcrumbItem> forPreferencesPanel() {
     List<BreadcrumbItem> items = forManageDatabase();
@@ -398,17 +404,17 @@ public class BreadcrumbManager {
 
   public static List<BreadcrumbItem> forTableManagement(final String databaseUUID, final String databaseName) {
     List<BreadcrumbItem> items = forAdvancedConfiguration(databaseUUID, databaseName);
-    items.add(new BreadcrumbItem(
-        SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE)
-            + SafeHtmlUtils.htmlEscape(messages.breadcrumbTextForTableManagement()))));
+    items
+      .add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE)
+        + SafeHtmlUtils.htmlEscape(messages.breadcrumbTextForTableManagement()))));
     return items;
   }
 
   public static List<BreadcrumbItem> forColumnsManagement(final String databaseUUID, final String databaseName) {
     List<BreadcrumbItem> items = forAdvancedConfiguration(databaseUUID, databaseName);
-    items.add(new BreadcrumbItem(
-        SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.COLUMN)
-            + SafeHtmlUtils.htmlEscape(messages.breadcrumbTextForColumnManagement()))));
+    items.add(
+      new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.COLUMN)
+        + SafeHtmlUtils.htmlEscape(messages.breadcrumbTextForColumnManagement()))));
     return items;
   }
 }

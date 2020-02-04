@@ -128,4 +128,16 @@ public class ValidationProgressData implements Serializable {
   public void setNumberOfSkipped(int numberOfSkipped) {
     this.numberOfSkipped = numberOfSkipped;
   }
+
+  public void reset() {
+    this.finished = false;
+    this.requirementsList = new ArrayList<>();
+    this.requirement = null;
+    this.numberOfPassed = 0;
+    this.numberOfOks = 0;
+    this.numberOfFailed = 0;
+    this.numberOfErrors = 0;
+    this.numberOfWarnings = 0;
+    this.numberOfSkipped = 0;
+  }
 }

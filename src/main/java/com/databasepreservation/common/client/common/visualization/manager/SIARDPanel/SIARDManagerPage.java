@@ -147,10 +147,6 @@ public class SIARDManagerPage extends ContentPanel {
       browseNavigationPanel.update(database);
       validationNavigationPanel.update(database);
 
-      List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forSIARDMainPage(databaseUUID,
-        database.getMetadata().getName());
-      BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
-
       loading.setVisible(false);
     }).retrieve(databaseUUID);
   }

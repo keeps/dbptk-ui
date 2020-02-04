@@ -232,20 +232,8 @@ public class HistoryManager {
     newHistory(params);
   }
 
-  public static void gotoSIARDValidator(String databaseUUID, String reporterPath, String udtPath,
-    String skipAdditionalChecks) {
-    List<String> params = Arrays.asList(ROUTE_SIARD_VALIDATOR, databaseUUID, reporterPath, udtPath,
-      skipAdditionalChecks);
-    newHistory(params);
-  }
-
-  public static void gotoSIARDValidator(String databaseUUID, String reporterPath, String skipAdditionalChecks) {
-    List<String> params = Arrays.asList(ROUTE_SIARD_VALIDATOR, databaseUUID, reporterPath, skipAdditionalChecks);
-    newHistory(params);
-  }
-
-  public static void gotoSIARDValidator(String databaseUUID, String skipAdditionalChecks) {
-    List<String> params = Arrays.asList(ROUTE_SIARD_VALIDATOR, databaseUUID, skipAdditionalChecks);
+  public static void gotoSIARDValidator(String databaseUUID) {
+    List<String> params = Arrays.asList(ROUTE_SIARD_VALIDATOR, databaseUUID);
     newHistory(params);
   }
 

@@ -5,13 +5,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.common.utils.AdvancedSearchUtils;
 import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.filter.FilterParameter;
 import com.databasepreservation.common.client.index.filter.LongRangeFilterParameter;
-
-import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.common.utils.AdvancedSearchUtils;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.tools.ViewerJsonUtils;

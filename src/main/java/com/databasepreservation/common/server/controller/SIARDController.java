@@ -696,6 +696,9 @@ public class SIARDController {
           throw new GenericException(e.getMessage() + ": " + ((SIARDVersionNotSupportedException) e).getVersionInfo());
         }
         throw new GenericException(e);
+      } catch (RuntimeException e) {
+        updateStatusValidate(databaseUUID, ViewerDatabaseValidationStatus.ERROR);
+        throw new GenericException(e.getMessage(), e);
       }
     } catch (IOException e) {
       updateStatusValidate(databaseUUID, ViewerDatabaseValidationStatus.ERROR);

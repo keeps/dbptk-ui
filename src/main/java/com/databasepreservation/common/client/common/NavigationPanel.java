@@ -13,13 +13,22 @@ import com.google.gwt.user.client.ui.Widget;
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 public class NavigationPanel extends Composite {
-  interface navigationPanelUiBinder extends UiBinder<Widget, NavigationPanel> {
+  interface NavigationPanelUiBinder extends UiBinder<Widget, NavigationPanel> {
   }
 
-  private static navigationPanelUiBinder binder = GWT.create(navigationPanelUiBinder.class);
+  private static NavigationPanelUiBinder binder = GWT.create(NavigationPanelUiBinder.class);
 
   @UiField
-  FlowPanel navigationPanelHeader, navigationPanelDescription, navigationPanelInfo, navigationPanelOptions;
+  FlowPanel navigationPanelHeader;
+
+  @UiField
+  FlowPanel navigationPanelDescription;
+
+  @UiField
+  FlowPanel navigationPanelInfo;
+
+  @UiField
+  FlowPanel navigationPanelOptions;
 
   public static NavigationPanel createInstance(String title) {
     return new NavigationPanel(title);
@@ -33,7 +42,7 @@ public class NavigationPanel extends Composite {
     navigationPanelHeader.add(l);
   }
 
-  public void addToDescriptionPanel(String description){
+  public void addToDescriptionPanel(String description) {
     Label l = new Label();
     l.setText(description);
 
@@ -51,4 +60,6 @@ public class NavigationPanel extends Composite {
   public void addButton(FlowPanel button) {
     this.navigationPanelOptions.add(button);
   }
+
+  public void clearButtonsPanel() { this.navigationPanelOptions.clear(); }
 }

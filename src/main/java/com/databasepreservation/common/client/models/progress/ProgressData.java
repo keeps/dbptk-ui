@@ -32,10 +32,6 @@ public class ProgressData implements Serializable {
   public ProgressData() {
   }
 
-  public void incrementCurrentProcessedTableRows(long value) {
-    this.currentProcessedTableRows += value;
-  }
-
   public void incrementProcessedRows(long value) {
     this.processedRows += (value - this.previousProcessedRows);
     this.previousProcessedRows = value;

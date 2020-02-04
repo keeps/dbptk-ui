@@ -7,24 +7,21 @@ package com.databasepreservation.common.client.common.search;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.databasepreservation.common.client.common.lists.utils.AsyncTableCell;
 import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.filter.FilterParameter;
-
-import com.databasepreservation.common.client.common.lists.utils.AsyncTableCell;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.widgets.wcag.AccessibleFocusPanel;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.logical.shared.HasValueChangeHandlers;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -124,7 +121,7 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
   }
 
   public SearchPanel(Filter defaultFilter, String allFilter, String placeholder, String context,
-      boolean showSearchAdvancedDisclosureButton, final AsyncCallback<Void> saveQueryCallback) {
+    boolean showSearchAdvancedDisclosureButton, final AsyncCallback<Void> saveQueryCallback) {
     this(defaultFilter, allFilter, placeholder, false, showSearchAdvancedDisclosureButton, saveQueryCallback);
     searchContextPanel.setVisible(true);
     searchContextPanel.add(new HTML(FontAwesomeIconManager.loaded(FontAwesomeIconManager.TABLE, context)));
@@ -221,14 +218,14 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
 
     if (fieldsPanel != null && fieldsPanel.getParent() != null && fieldsPanel.getParent().isVisible()) {
       for (int i = 0; i < fieldsPanel.getWidgetCount(); i++) {
-      	if (fieldsPanel.getWidget(i) instanceof SearchFieldPanel) {
-					SearchFieldPanel searchAdvancedFieldPanel = (SearchFieldPanel) fieldsPanel.getWidget(i);
-					FilterParameter filterParameter = searchAdvancedFieldPanel.getFilter();
+        if (fieldsPanel.getWidget(i) instanceof SearchFieldPanel) {
+          SearchFieldPanel searchAdvancedFieldPanel = (SearchFieldPanel) fieldsPanel.getWidget(i);
+          FilterParameter filterParameter = searchAdvancedFieldPanel.getFilter();
 
-					if (filterParameter != null) {
-						parameters.add(filterParameter);
-					}
-				}
+          if (filterParameter != null) {
+            parameters.add(filterParameter);
+          }
+        }
       }
     }
 
@@ -304,10 +301,10 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
   public void clearAdvancedSearchInputBox() {
     if (fieldsPanel != null && fieldsPanel.getParent() != null && fieldsPanel.getParent().isVisible()) {
       for (int i = 0; i < fieldsPanel.getWidgetCount(); i++) {
-      	if (fieldsPanel.getWidget(i) instanceof SearchFieldPanel) {
-					SearchFieldPanel searchAdvancedFieldPanel = (SearchFieldPanel) fieldsPanel.getWidget(i);
-					searchAdvancedFieldPanel.clear();
-				}
+        if (fieldsPanel.getWidget(i) instanceof SearchFieldPanel) {
+          SearchFieldPanel searchAdvancedFieldPanel = (SearchFieldPanel) fieldsPanel.getWidget(i);
+          searchAdvancedFieldPanel.clear();
+        }
       }
     }
   }
@@ -384,7 +381,7 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
 
     if (fieldsPanel != null && fieldsPanel.getParent() != null && fieldsPanel.getParent().isVisible()) {
       for (int i = 0; i < fieldsPanel.getWidgetCount(); i++) {
-        if (fieldsPanel.getWidget(i) instanceof  SearchFieldPanel) {
+        if (fieldsPanel.getWidget(i) instanceof SearchFieldPanel) {
           SearchFieldPanel searchAdvancedFieldPanel = (SearchFieldPanel) fieldsPanel.getWidget(i);
           searchFields.add(searchAdvancedFieldPanel.getSearchField());
         }

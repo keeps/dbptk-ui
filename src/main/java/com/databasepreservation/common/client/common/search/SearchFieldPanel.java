@@ -36,16 +36,16 @@ import config.i18n.client.ClientMessages;
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class SearchFieldPanel extends Composite {
-	private static final ClientMessages messages = GWT.create(ClientMessages.class);
+  private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static final DateTimeFormat timeFormat = DateTimeFormat
     .getFormat(DateTimeFormat.PredefinedFormat.HOUR24_MINUTE_SECOND);
-	private static final String NUMBER = "number";
-	private static final String FALSE = "false";
-	private static final String FULL_WIDTH = "full_width";
-	private static final String LABEL = "label";
-	private static final String FORM_TEXTBOX_FORM_TEXTBOX_SMALL = "form-textbox form-textbox-small";
+  private static final String NUMBER = "number";
+  private static final String FALSE = "false";
+  private static final String FULL_WIDTH = "full_width";
+  private static final String LABEL = "label";
+  private static final String FORM_TEXTBOX_FORM_TEXTBOX_SMALL = "form-textbox form-textbox-small";
 
-	@SuppressWarnings("unused")
+  @SuppressWarnings("unused")
   private ClientLogger logger = new ClientLogger(getClass().getName());
 
   private FlowPanel panel;
@@ -87,7 +87,7 @@ public class SearchFieldPanel extends Composite {
   // Boolean
   private ListBox inputCheckBox;
 
-	public SearchFieldPanel() {
+  public SearchFieldPanel() {
     panel = new FlowPanel();
     leftPanel = new FlowPanel();
     inputPanel = new FlowPanel();
@@ -186,9 +186,9 @@ public class SearchFieldPanel extends Composite {
   }
 
   public void selectSearchField() {
-		leftPanel.clear();
-		fieldLabel.setText(searchField.getLabel());
-		fieldLabel.setTitle(searchField.getLabel());
+    leftPanel.clear();
+    fieldLabel.setText(searchField.getLabel());
+    fieldLabel.setTitle(searchField.getLabel());
     leftPanel.add(fieldLabel);
     leftPanel.add(inputPanel);
     setInputPanel(searchField.getType());
@@ -437,57 +437,57 @@ public class SearchFieldPanel extends Composite {
     inputPanel.clear();
     inputPanel.removeStyleName(FULL_WIDTH);
 
-		switch (type) {
-			case ViewerConstants.SEARCH_FIELD_TYPE_DATE:
-				inputPanel.add(inputDateFromForDate);
-				inputPanel.add(labelTo);
-				inputPanel.add(inputDateToForDate);
-				break;
-			case ViewerConstants.SEARCH_FIELD_TYPE_TIME:
-				inputPanel.add(inputTimeFromForTime);
-				inputPanel.add(labelTo);
-				inputPanel.add(inputTimeToForTime);
-				break;
-			case ViewerConstants.SEARCH_FIELD_TYPE_DATETIME:
-				inputPanel.add(inputDateFromForDateTime);
-				inputPanel.add(labelAt1);
-				inputPanel.add(inputTimeFromForDateTime);
-				inputPanel.add(labelTo);
-				inputPanel.add(inputDateToForDateTime);
-				inputPanel.add(labelAt2);
-				inputPanel.add(inputTimeToForDateTime);
-				break;
-			case ViewerConstants.SEARCH_FIELD_TYPE_DATE_INTERVAL:
-				// TODO: support date interval
-				break;
-			case ViewerConstants.SEARCH_FIELD_TYPE_NUMERIC:
-				inputPanel.add(inputNumeric);
-				break;
-			case ViewerConstants.SEARCH_FIELD_TYPE_NUMERIC_INTERVAL:
-				inputPanel.add(inputNumericFrom);
-				inputPanel.add(labelTo);
-				inputPanel.add(inputNumericTo);
-				break;
-			case ViewerConstants.SEARCH_FIELD_TYPE_STORAGE:
-				inputPanel.add(inputStorageSizeFrom);
-				inputPanel.add(inputStorageSizeTo);
-				inputPanel.add(inputStorageSizeList);
-				break;
-			case ViewerConstants.SEARCH_FIELD_TYPE_BOOLEAN:
-				inputPanel.add(inputCheckBox);
-				break;
-			case ViewerConstants.SEARCH_FIELD_TYPE_SUGGEST:
-				break;
-			default:
-				inputPanel.add(inputText);
-				inputPanel.addStyleName(FULL_WIDTH);
-				break;
-		}
+    switch (type) {
+      case ViewerConstants.SEARCH_FIELD_TYPE_DATE:
+        inputPanel.add(inputDateFromForDate);
+        inputPanel.add(labelTo);
+        inputPanel.add(inputDateToForDate);
+        break;
+      case ViewerConstants.SEARCH_FIELD_TYPE_TIME:
+        inputPanel.add(inputTimeFromForTime);
+        inputPanel.add(labelTo);
+        inputPanel.add(inputTimeToForTime);
+        break;
+      case ViewerConstants.SEARCH_FIELD_TYPE_DATETIME:
+        inputPanel.add(inputDateFromForDateTime);
+        inputPanel.add(labelAt1);
+        inputPanel.add(inputTimeFromForDateTime);
+        inputPanel.add(labelTo);
+        inputPanel.add(inputDateToForDateTime);
+        inputPanel.add(labelAt2);
+        inputPanel.add(inputTimeToForDateTime);
+        break;
+      case ViewerConstants.SEARCH_FIELD_TYPE_DATE_INTERVAL:
+        // TODO: support date interval
+        break;
+      case ViewerConstants.SEARCH_FIELD_TYPE_NUMERIC:
+        inputPanel.add(inputNumeric);
+        break;
+      case ViewerConstants.SEARCH_FIELD_TYPE_NUMERIC_INTERVAL:
+        inputPanel.add(inputNumericFrom);
+        inputPanel.add(labelTo);
+        inputPanel.add(inputNumericTo);
+        break;
+      case ViewerConstants.SEARCH_FIELD_TYPE_STORAGE:
+        inputPanel.add(inputStorageSizeFrom);
+        inputPanel.add(inputStorageSizeTo);
+        inputPanel.add(inputStorageSizeList);
+        break;
+      case ViewerConstants.SEARCH_FIELD_TYPE_BOOLEAN:
+        inputPanel.add(inputCheckBox);
+        break;
+      case ViewerConstants.SEARCH_FIELD_TYPE_SUGGEST:
+        break;
+      default:
+        inputPanel.add(inputText);
+        inputPanel.addStyleName(FULL_WIDTH);
+        break;
+    }
   }
 
   private boolean dateIntervalValid(UTCDateBox inputFrom, UTCDateBox inputTo) {
     if (inputFrom.getValue() != null && inputTo.getValue() != null) {
-        return inputFrom.getValue() <= inputTo.getValue();
+      return inputFrom.getValue() <= inputTo.getValue();
     }
 
     return true;

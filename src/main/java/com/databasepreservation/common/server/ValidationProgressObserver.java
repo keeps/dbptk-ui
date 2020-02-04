@@ -19,6 +19,11 @@ public class ValidationProgressObserver implements ValidationObserver {
   }
 
   @Override
+  public void notifyValidationStart() {
+    progressData.reset();
+  }
+
+  @Override
   public void notifyStartValidationModule(String componentName, String ID) {
     progressData.createRequirement(ValidationRequirement.Type.REQUIREMENT);
     progressData.setRequirementID(ID);

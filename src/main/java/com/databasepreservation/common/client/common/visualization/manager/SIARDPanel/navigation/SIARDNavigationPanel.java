@@ -62,7 +62,7 @@ public class SIARDNavigationPanel {
     // Migration button
     Button btnMigrateToSIARD = new Button();
     btnMigrateToSIARD.setText(messages.SIARDHomePageButtonTextMigrateToSIARD());
-    btnMigrateToSIARD.addStyleName("btn btn-link-info");
+    btnMigrateToSIARD.addStyleName("btn btn-outline-primary btn-play");
 
     btnMigrateToSIARD.addClickHandler(event -> {
       HistoryManager.gotoMigrateSIARD(database.getUuid(), database.getMetadata().getName());
@@ -71,7 +71,7 @@ public class SIARDNavigationPanel {
     // Send to Live DBMS button
     Button btnSendToLiveDBMS = new Button();
     btnSendToLiveDBMS.setText(messages.SIARDHomePageButtonTextSendToLiveDBMS());
-    btnSendToLiveDBMS.addStyleName("btn btn-link-info");
+    btnSendToLiveDBMS.addStyleName("btn btn-outline-primary btn-play");
 
     btnSendToLiveDBMS.addClickHandler(event -> {
       HistoryManager.gotoSendToLiveDBMSExportFormat(database.getUuid(), database.getMetadata().getName());

@@ -173,10 +173,10 @@ public class TableSearchPanel extends Composite {
     final Map<String, List<SearchField>> searchFieldsFromTable = AdvancedSearchUtils.getSearchFieldsFromTableMap(table,
       status, database.getMetadata());
     TableSearchPanel.this.searchFields.clear();
-      searchFieldsFromTable.forEach((key, value) -> {
-        itemsSearchAdvancedFieldsPanel.add(CommonClientUtils.getAdvancedSearchDivider(key));
-        buildSearchFieldPanel(value);
-      });
+    searchFieldsFromTable.forEach((key, value) -> {
+      itemsSearchAdvancedFieldsPanel.add(CommonClientUtils.getAdvancedSearchDivider(key));
+      buildSearchFieldPanel(value);
+    });
   }
 
   private void buildSearchFieldPanel(List<SearchField> list) {

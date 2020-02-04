@@ -21,37 +21,37 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
-import org.intellij.lang.annotations.Flow;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class CommonClientUtils {
-	private static final ClientMessages messages = GWT.create(ClientMessages.class);
-	private static final String CLOSE_DIV = "</div>";
+  private static final ClientMessages messages = GWT.create(ClientMessages.class);
+  private static final String CLOSE_DIV = "</div>";
 
-	private CommonClientUtils() {}
+  private CommonClientUtils() {
+  }
 
-	public static FlowPanel getAdvancedSearchDivider(final String label) {
-		FlowPanel panel = new FlowPanel();
-		panel.addStyleName("divider");
+  public static FlowPanel getAdvancedSearchDivider(final String label) {
+    FlowPanel panel = new FlowPanel();
+    panel.addStyleName("divider");
 
-		FlowPanel dividerHeader = new FlowPanel();
-		dividerHeader.addStyleName("divider-header");
-		dividerHeader.add(new Label(label));
+    FlowPanel dividerHeader = new FlowPanel();
+    dividerHeader.addStyleName("divider-header");
+    dividerHeader.add(new Label(label));
 
-		FlowPanel dividerLine = new FlowPanel();
-		dividerLine.addStyleName("divider-line");
-		Element el = DOM.createSpan();
-		dividerLine.getElement().appendChild(el);
+    FlowPanel dividerLine = new FlowPanel();
+    dividerLine.addStyleName("divider-line");
+    Element el = DOM.createSpan();
+    dividerLine.getElement().appendChild(el);
 
-		panel.add(dividerHeader);
-		panel.add(dividerLine);
+    panel.add(dividerHeader);
+    panel.add(dividerLine);
 
-		return panel;
-	}
+    return panel;
+  }
 
-	public static FlowPanel getPanelInformation(String label, String text, String classes) {
+  public static FlowPanel getPanelInformation(String label, String text, String classes) {
     FlowPanel panel = new FlowPanel();
 
     SafeHtmlBuilder safeHtmlBuilder = new SafeHtmlBuilder();
@@ -188,7 +188,7 @@ public class CommonClientUtils {
   }
 
   public static HTML getHeader(String iconTag, String title, String hClass) {
-		SafeHtmlBuilder safeHtmlBuilder = new SafeHtmlBuilder();
+    SafeHtmlBuilder safeHtmlBuilder = new SafeHtmlBuilder();
     safeHtmlBuilder.append(SafeHtmlUtils.fromSafeConstant(iconTag)).appendEscaped(" ")
       .append(SafeHtmlUtils.fromString(title));
 

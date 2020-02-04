@@ -7,7 +7,6 @@ import com.databasepreservation.common.client.common.ContentPanel;
 import com.databasepreservation.common.client.common.RightPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.sidebar.ColumnsManagementSidebar;
-import com.databasepreservation.common.client.common.sidebar.DataTransformationSidebar;
 import com.databasepreservation.common.client.common.sidebar.DatabaseSidebar;
 import com.databasepreservation.common.client.common.sidebar.Sidebar;
 import com.databasepreservation.common.client.common.utils.ContentPanelLoader;
@@ -20,7 +19,6 @@ import com.databasepreservation.common.client.common.visualization.browse.Refere
 import com.databasepreservation.common.client.common.visualization.browse.RowPanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.AdvancedConfiguration;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.ColumnsManagementPanel;
-import com.databasepreservation.common.client.common.visualization.browse.configuration.dataTransformation.DataTransformation;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.table.TableManagementPanel;
 import com.databasepreservation.common.client.common.visualization.browse.foreignKey.ForeignKeyPanel;
 import com.databasepreservation.common.client.common.visualization.browse.foreignKey.ForeignKeyPanelOptions;
@@ -313,7 +311,7 @@ public class MainPanelDesktop extends Composite {
           setContent(databaseUUID, currentHistoryPath.get(0), tableID, new RightPanelLoader() {
             @Override
             public RightPanel load(ViewerDatabase database, CollectionStatus status) {
-              return ForeignKeyPanelOptions.getInstance(database, status,tableID,
+              return ForeignKeyPanelOptions.getInstance(database, status, tableID,
                 columnsAndValues.subList(0, columnsAndValues.size() - 1));
             }
           });
@@ -437,28 +435,13 @@ public class MainPanelDesktop extends Composite {
         });
       }
     } else if (HistoryManager.ROUTE_SIARD_VALIDATOR.equals(currentHistoryPath.get(0))) {
-      if (currentHistoryPath.size() == 4) {
+      if (currentHistoryPath.size() == 2) {
         final String databaseUUID = currentHistoryPath.get(1);
-        final String reporterPath = currentHistoryPath.get(2);
-        final String skipAdditionalChecks = currentHistoryPath.get(3);
 
         setContent(databaseUUID, new ContentPanelLoader() {
           @Override
           public ContentPanel load(ViewerDatabase database, CollectionStatus status) {
-            return ValidatorPage.getInstance(database, reporterPath, skipAdditionalChecks);
-          }
-        });
-
-      } else if (currentHistoryPath.size() == 5) {
-        final String databaseUUID = currentHistoryPath.get(1);
-        final String reporterPath = currentHistoryPath.get(2);
-        final String udtPath = currentHistoryPath.get(3);
-        final String skipAdditionalChecks = currentHistoryPath.get(4);
-
-        setContent(databaseUUID, new ContentPanelLoader() {
-          @Override
-          public ContentPanel load(ViewerDatabase database, CollectionStatus status) {
-            return ValidatorPage.getInstance(database, reporterPath, udtPath, skipAdditionalChecks);
+            return ValidatorPage.getInstance(database);
           }
         });
       }
