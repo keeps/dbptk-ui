@@ -20,7 +20,7 @@ npm install github-release-notes -g
 1. Make sure the dependencies are installed by running `gren`
 2. Security check: `mvn com.redhat.victims.maven:security-versions:check`
 3. Update check: `./scripts/check_versions.sh MINOR`
-
+4. I18n check: `./scripts/check_i18n.sh`
 ### Releasing a new version
 
 Example release new 2.2.0 version (up from 2.1.0) and prepare for next version 2.3.0
