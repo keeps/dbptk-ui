@@ -35,7 +35,6 @@ public class TableSearchPanel extends Composite {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static final Binder uiBinder = GWT.create(Binder.class);
   private static final String EMPTY = "empty";
-  private String route;
   private CollectionStatus status;
 
   interface Binder extends UiBinder<Widget, TableSearchPanel> {
@@ -66,9 +65,8 @@ public class TableSearchPanel extends Composite {
   /**
    * Table search panel with a SearchInfo predefined search
    */
-  public TableSearchPanel(SearchInfo searchInfo, CollectionStatus status, String route) {
+  public TableSearchPanel(SearchInfo searchInfo, CollectionStatus status) {
     this.status = status;
-    this.route = route;
     if (SearchInfo.isPresentAndValid(searchInfo)) {
       currentSearchInfo = searchInfo;
     }
@@ -79,9 +77,8 @@ public class TableSearchPanel extends Composite {
    *
    * @param searchInfoJson
    */
-  public TableSearchPanel(String searchInfoJson, CollectionStatus status, String route) {
+  public TableSearchPanel(String searchInfoJson, CollectionStatus status) {
     this(status);
-    this.route = route;
     setCurrentSearchInfoFromJson(searchInfoJson);
   }
 
@@ -223,12 +220,10 @@ public class TableSearchPanel extends Composite {
 
       for (int i = 0; i < currentSearchInfo.getFields().size() ; i++) {
         if (currentSearchInfo.getFieldParameters().get(i) != null) {
-          if (currentSearchInfo.getFields().get(i).isFixed() || route.equals(HistoryManager.ROUTE_FOREIGN_KEY)) {
             final SearchFieldPanel searchFieldPanel = new SearchFieldPanel();
             searchFieldPanel.setSearchField(currentSearchInfo.getFields().get(i));
             addSearchFieldPanel(searchFieldPanel);
             searchFieldPanel.selectSearchField();
-          }
         }
       }
 

@@ -312,6 +312,7 @@ public class ViewerConstants {
   public static final String API_QUERY_PARAM_FACETS = "facets";
   public static final String API_QUERY_PARAM_LOCALE = "locale";
   public static final String API_QUERY_PARAM_SEARCH = "search";
+  public static final String API_PATH_PARAM_REPORT = "report";
 
   public static final String API_V1_LOBS_RESOURCE = "/v1/lobs";
   public static final String API_PATH_PARAM_ROW_UUID = "rowUUID";

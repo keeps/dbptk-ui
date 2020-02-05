@@ -3,5 +3,6 @@
 >
     <g:FlowPanel ui:field="content">
         <g:FlowPanel addStyleNames="structure-header" ui:field="header"/>
+        <g:SimplePanel ui:field="description" addStyleNames="table-row-description"/>
     </g:FlowPanel>
 </ui:UiBinder>

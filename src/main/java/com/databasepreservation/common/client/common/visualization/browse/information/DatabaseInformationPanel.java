@@ -18,6 +18,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TabPanel;
 import com.google.gwt.user.client.ui.Widget;
@@ -45,6 +46,9 @@ public class DatabaseInformationPanel extends RightPanel {
 
   @UiField
   FlowPanel header;
+
+  @UiField
+  SimplePanel description;
 
   @UiField
   FlowPanel metadataContent;
@@ -77,6 +81,11 @@ public class DatabaseInformationPanel extends RightPanel {
     header
       .add(CommonClientUtils.getHeaderHTML(FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE_INFORMATION),
         messages.databaseInformationTextForTitle(), "h1"));
+
+    HTML html = new HTML();
+    html.addStyleName("font-size-description");
+
+    description.setWidget(html);
 
     SwitchBtn switchTechInformation = new SwitchBtn(messages.schemaStructurePanelTextForAdvancedOption(), false);
     switchTechInformation.setClickHandler(clickEvent -> {

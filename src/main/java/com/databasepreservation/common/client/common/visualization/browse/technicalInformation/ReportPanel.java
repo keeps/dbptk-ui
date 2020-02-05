@@ -15,6 +15,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
@@ -32,6 +34,9 @@ public class ReportPanel extends RightPanel {
 
   @UiField
   FlowPanel header;
+
+  @UiField
+  SimplePanel description;
 
   @UiField
   FlowPanel content;
@@ -55,9 +60,10 @@ public class ReportPanel extends RightPanel {
     header.add(CommonClientUtils.getHeaderHTML(FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE_REPORT),
       messages.titleReport(), "h1"));
 
-    MetadataField instance = MetadataField.createInstance(messages.includingStoredProceduresAndFunctions());
-    instance.setCSS("table-row-description", "font-size-description");
-    content.add(instance);
+    HTML html = new HTML();
+    html.addStyleName("font-size-description");
+
+    description.setWidget(html);
   }
 
   @Override

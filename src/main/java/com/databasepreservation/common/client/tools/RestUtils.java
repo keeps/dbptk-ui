@@ -21,9 +21,10 @@ public class RestUtils {
   }
 
   public static SafeUri createReportResourceUri(String databaseUUID) {
-    // api/v1/report/{databaseUUID}
-    String b = ViewerConstants.API_SERVLET + ViewerConstants.API_V1_REPORT_RESOURCE + ViewerConstants.API_SEP
-      + databaseUUID;
+    //api/v1/database/{databaseUUID}/collection/{collectionUUID}/report
+    String b = ViewerConstants.API_SERVLET + ViewerConstants.API_V1_DATABASE_RESOURCE + ViewerConstants.API_SEP
+      + databaseUUID + ViewerConstants.API_SEP + ViewerConstants.API_PATH_PARAM_SOLR_COLLECTION + ViewerConstants.API_SEP
+        + databaseUUID + ViewerConstants.API_SEP + ViewerConstants.API_PATH_PARAM_REPORT;
     return UriUtils.fromSafeConstant(b);
   }
 

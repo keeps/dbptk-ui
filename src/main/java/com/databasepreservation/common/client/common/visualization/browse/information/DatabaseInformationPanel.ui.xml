@@ -2,7 +2,8 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
 >
     <g:FlowPanel>
-        <g:FlowPanel addStyleNames="structure-header" ui:field="header" />
+        <g:FlowPanel addStyleNames="structure-header" ui:field="header"/>
+        <g:SimplePanel ui:field="description" addStyleNames="table-row-description"/>
 
         <g:FlowPanel addStyleNames="card">
             <g:SimplePanel ui:field="cardTitle" addStyleNames="card-header" />

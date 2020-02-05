@@ -60,9 +60,9 @@ public class TablePanel extends RightPanel implements ICollectionStatusObserver,
       instance = new TablePanel(status, database, tableId, searchInfoJson, route);
       instances.put(code, instance);
     } else if (searchInfoJson != null) {
-      instance = new TablePanel(status, database, tableId, searchInfoJson, route);
+      // instance = new TablePanel(status, database, tableId, searchInfoJson, route);
       instance.applySearchInfoJson(searchInfoJson);
-      instances.put(code, instance);
+      // instances.put(code, instance);
     } else if (instance.tableSearchPanel.isSearchInfoDefined()) {
       instance = new TablePanel(status, database, tableId, route);
       instances.put(code, instance);
@@ -124,7 +124,7 @@ public class TablePanel extends RightPanel implements ICollectionStatusObserver,
    */
   private TablePanel(CollectionStatus status, ViewerDatabase database, ViewerTable table, SearchInfo searchInfo,
     String route) {
-    tableSearchPanel = new TableSearchPanel(searchInfo, status, route);
+    tableSearchPanel = new TableSearchPanel(searchInfo, status);
 
     initWidget(uiBinder.createAndBindUi(this));
 
@@ -168,7 +168,7 @@ public class TablePanel extends RightPanel implements ICollectionStatusObserver,
     this.route = route;
 
     if (searchInfoJson != null) {
-      tableSearchPanel = new TableSearchPanel(searchInfoJson, collectionStatus, route);
+      tableSearchPanel = new TableSearchPanel(searchInfoJson, collectionStatus);
     } else {
       tableSearchPanel = new TableSearchPanel(collectionStatus);
     }

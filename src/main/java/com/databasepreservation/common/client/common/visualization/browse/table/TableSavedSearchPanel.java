@@ -103,7 +103,7 @@ public class TableSavedSearchPanel extends RightPanel {
     // set searchForm and table
     SearchInfo searchInfo = ViewerJsonUtils.getSearchInfoMapper().read(savedSearch.getSearchInfoJson());
     if (SearchInfo.isPresentAndValid(searchInfo)) {
-      TableSearchPanel tableSearchPanel = new TableSearchPanel(searchInfo.asJson(), status, HistoryManager.ROUTE_FOREIGN_KEY);
+      TableSearchPanel tableSearchPanel = new TableSearchPanel(searchInfo.asJson(), status);
       tableSearchPanel.provideSource(database, database.getMetadata().getTableById(tableId));
       tableSearchPanelContainer.setWidget(tableSearchPanel);
     } else {
