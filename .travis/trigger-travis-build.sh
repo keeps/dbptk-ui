@@ -10,6 +10,7 @@ function trigger_travis_build(){
   echo "Triggered build for ${REPO}"
   body="{
    \"request\": {
+    \"message\": \"This is an api request\",
     \"branch\":\"$BRANCH\"
   }}"
 
@@ -25,4 +26,10 @@ function trigger_travis_build(){
 if [ "$TRAVIS_BRANCH" == "staging" ]; then
   echo "Logic for staging"
   trigger_travis_build $SERVER_REPO "staging"
+elif [ "`echo $TRAVIS_BRANCH | egrep "^v[1-9]+" | wc -l`" -eq "1" ]; then
+  echo "Logic for $TRAVIS_BRANCH tag"
+  trigger_travis_build $SERVER_REPO $TRAVIS_BRANCH
+elif [ "$TRAVIS_BRANCH" == "master" ]; then
+  echo "Logic for $TRAVIS_BRANCH branch"
+  trigger_travis_build $SERVER_REPO $TRAVIS_BRANCH
 fi
