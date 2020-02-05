@@ -11,3 +11,13 @@
     vertical-align: bottom;
     line-height: 110px;
 }
+
+.static-page .row .col_6{
+    padding-bottom: 30px;
+}
+
+@media (min-width: 768px) {
+    .max-width {
+        max-width: 1280px;
+    }
+}

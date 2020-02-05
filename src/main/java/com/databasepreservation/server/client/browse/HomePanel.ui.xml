@@ -1,20 +1,10 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:layout="urn:import:com.databasepreservation.common.client.widgets"
 >
 
     <ui:with field='messages' type='config.i18n.client.ClientMessages' />
-    <g:FlowPanel addStyleNames="browseContent wrapper skip_padding">
-        <g:FlowPanel addStyleNames="row full_width skip_padding">
-            <g:FlowPanel addStyleNames="homePanel">
-                <g:HTML>
-                    <p><ui:text from='{messages.homePageDescriptionTop}' />
-                    </p>
-                    <p>
-                    <ui:text from='{messages.homePageDescriptionBottom}' /> <a href="http://visualization.database-preservation.com/">
-                        <ui:text from='{messages.homePageDescriptionHere}' /></a>.
-                    </p>
-                </g:HTML>
-            </g:FlowPanel>
-        </g:FlowPanel>
+    <g:FlowPanel>
+        <layout:HTMLWidgetWrapper ui:field="layout"/>
     </g:FlowPanel>
 </ui:UiBinder>

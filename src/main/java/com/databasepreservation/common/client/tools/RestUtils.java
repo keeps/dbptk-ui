@@ -11,6 +11,7 @@ import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.utils.UriQueryUtils;
 import com.databasepreservation.common.client.index.FindRequest;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
 
@@ -122,5 +123,26 @@ public class RestUtils {
     }
 
     return header.toString();
+  }
+
+  public static SafeUri createThemeResourceUri(String resourceId, String defaultResourceId, boolean inline) {
+    // api/v1/theme/?resource_id={resourceId}&default_resource_od={defaultResourceId}
+    StringBuilder b = new StringBuilder();
+
+    b.append(ViewerConstants.API_SERVLET).append(ViewerConstants.API_V1_THEME_RESOURCE).append(ViewerConstants.API_SEP).append(ViewerConstants.API_QUERY_START)
+        .append(ViewerConstants.API_QUERY_PARAM_RESOURCE_ID).append(ViewerConstants.API_QUERY_ASSIGN_SYMBOL)
+        .append(resourceId);
+
+    if (defaultResourceId != null) {
+      b.append(ViewerConstants.API_QUERY_SEP).append(ViewerConstants.API_QUERY_PARAM_DEFAULT_RESOURCE_ID)
+          .append(ViewerConstants.API_QUERY_ASSIGN_SYMBOL).append(defaultResourceId);
+    }
+
+    if (inline) {
+      b.append(ViewerConstants.API_QUERY_SEP).append(ViewerConstants.API_QUERY_PARAM_INLINE)
+          .append(ViewerConstants.API_QUERY_ASSIGN_SYMBOL).append(inline);
+    }
+
+    return UriUtils.fromSafeConstant(b.toString());
   }
 }

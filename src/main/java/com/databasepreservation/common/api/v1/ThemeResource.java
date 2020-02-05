@@ -21,7 +21,6 @@ import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
-import org.roda.core.data.common.RodaConstants;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.v2.common.Pair;
 import org.springframework.stereotype.Service;
@@ -45,9 +44,9 @@ public class ThemeResource {
   @GET
   @ApiOperation(value = "Gets the custom theme")
   public Response getResource(
-    @ApiParam(value = "The resource id", required = true) @QueryParam(RodaConstants.API_QUERY_PARAM_RESOURCE_ID) String resourceId,
-    @ApiParam(value = "The default resource id", required = false) @QueryParam(RodaConstants.API_QUERY_PARAM_DEFAULT_RESOURCE_ID) String fallbackResourceId,
-    @ApiParam(value = "If the resource is served inline", required = false) @QueryParam(RodaConstants.API_QUERY_PARAM_INLINE) boolean inline,
+    @ApiParam(value = "The resource id", required = true) @QueryParam(ViewerConstants.API_QUERY_PARAM_RESOURCE_ID) String resourceId,
+    @ApiParam(value = "The default resource id", required = false) @QueryParam(ViewerConstants.API_QUERY_PARAM_DEFAULT_RESOURCE_ID) String fallbackResourceId,
+    @ApiParam(value = "If the resource is served inline", required = false) @QueryParam(ViewerConstants.API_QUERY_PARAM_INLINE) boolean inline,
     @Context Request req) throws IOException, NotFoundException {
 
     Pair<String, InputStream> themeResource = Theme.getThemeResource(resourceId, fallbackResourceId);

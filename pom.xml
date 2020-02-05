@@ -237,9 +237,9 @@
                             <moduleName>${server}</moduleName>
                             <launcherDir>${project.build.directory}/${project.build.finalName}/WEB-INF/classes/public/</launcherDir>
                             <jvmArgs>-Djavax.xml.parsers.SAXParserFactory=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl</jvmArgs>
-                            <codeserverArgs>
-                                <arg>-bindAddress</arg><arg>0.0.0.0</arg>
-                            </codeserverArgs>
+<!--                            <codeserverArgs>-->
+<!--                                <arg>-bindAddress</arg><arg>0.0.0.0</arg>-->
+<!--                            </codeserverArgs>-->
                         </configuration>
                         <executions>
                             <execution>

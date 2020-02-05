@@ -49,7 +49,28 @@
     border-radius: 3px;
     margin-right: 5px;
 }
+.static-page .row .col_6 {
+    padding-left: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+}
 
+.static-page .feature-text{
+    margin-left: 90px;
+}
+
+.static-page .feature-img {
+    text-align: center;
+}
+
+.feature-title {
+    font-weight: 500;
+    margin-bottom: 0px;
+}
+
+.feature-subtitle{
+    margin-top: 0px;
+}
 .homeText {
     white-space: nowrap;
     overflow: hidden;
