@@ -1113,6 +1113,7 @@ public interface ClientMessages extends Messages {
    * Database Information Panel
    ********************************************/
   String databaseInformationTextForTitle();
+
   /********************************************
    * Upload SIARD
    ********************************************/
