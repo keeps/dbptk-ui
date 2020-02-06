@@ -33,7 +33,7 @@
         <version.jackson>2.9.10</version.jackson>
         <cas.client.version>3.6.1</cas.client.version>
         <cas.client.version>3.5.0</cas.client.version>
-        <solr.version>8.3.0</solr.version>
+        <solr.version>8.4.1</solr.version>
         <springboot.version>2.2.2.RELEASE</springboot.version>
         <desktop>com.databasepreservation.desktop.Desktop</desktop>
         <server>com.databasepreservation.server.Server</server>
