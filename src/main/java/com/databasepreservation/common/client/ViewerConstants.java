@@ -460,6 +460,7 @@ public class ViewerConstants {
   public static final String DEFAULT_ATTRIBUTE_FULLNAME = "fullname";
   public static final String DEFAULT_ATTRIBUTE_EMAIL = "email";
   public static final String DEFAULT_ATTRIBUTE_ROLES = "memberOf";
+  public static final String ROLES_PREFIX = "user.attribute.roles.";
 
   /*
    * ASSISTANT CONTROLLER

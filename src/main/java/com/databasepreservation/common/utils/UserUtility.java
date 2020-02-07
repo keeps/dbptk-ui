@@ -77,8 +77,10 @@ public class UserUtility {
         classParam);
     if (ViewerFactory.getViewerConfiguration().getConfiguration().containsKey(configKey)) {
       LOGGER.trace("Testing if user '{}' has permissions to '{}'", user.getName(), configKey);
-      final List<String> roles = ViewerFactory.getViewerConfiguration().getViewerConfigurationAsList(configKey);
-      checkRoles(user, roles);
+
+      final List<String> rolesToCheck = ViewerConfiguration.getInstance()
+          .getViewerConfigurationAsList(ViewerConstants.ROLES_PREFIX + configKey);
+      checkRoles(user, rolesToCheck);
     } else {
       LOGGER.error("Unable to determine which roles the user '{}' needs because the config. key '{}' is not defined",
           user.getName(), configKey);
