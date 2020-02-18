@@ -1,16 +1,21 @@
-# Database Visualization Toolkit
+# Database Preservation Toolkit Enterprise/Desktop
+Formerly known as Database Visualization Toolkit
+
+***THIS INFORMATION IS OUTDATED and will be updated soon***
+
+***In the meanwhile, check https://database-preservation.com for updated information***
 
 Lightweight web viewer for relational databases, specially if preserved in SIARD 2, that uses SOLR as a backend, and allows browsing, search, and export. It uses the [Database Preservation Toolkit](https://github.com/keeps/db-preservation-toolkit) to process new relational databases that are in the SIARD2 format or on the original live DBMS.
 
 A compreensive list of features, screenshots and other documentation will be produced soon and available here.
 
-## Setting up the Database Visualization Toolkit
+## Setting up the Database Preservation Toolkit Enterprise
 
 After version 2.0.0 the deploy is made using docker containers and docker compose.
 
-Check [Database Preservation Toolkit Docker](https://github.com/keeps/db-preservation-toolkit-docker) for more information.
+Check [Database Preservation Toolkit Enterprise](https://github.com/keeps/db-visualization-toolkit-docker) for more information.
 
-### To add more databases to DBVTK
+### To add more databases
 
 1. Put the SIARD files in the SIARD folder defined on install.
 2. Open DBVTK, click on the "Load SIARD file" button on the top menu
@@ -19,17 +24,17 @@ Check [Database Preservation Toolkit Docker](https://github.com/keeps/db-preserv
 
 ## More information
 
-Configuration options are detailed in the [Database Visualization Toolkit Wiki](https://github.com/keeps/db-visualization-toolkit/wiki).
+Configuration options are detailed in the [Wiki](https://github.com/keeps/db-visualization-toolkit/wiki).
 
-Database Visualization Toolkit logos can be downloaded [here](https://github.com/keeps/db-preservation-toolkit/wiki/Logos).
+DBPTK logos can be downloaded [here](https://github.com/keeps/db-preservation-toolkit/wiki/Logos).
 
-More information about these tools can be found at http://database-preservation.com
+More information about these tools can be found at https://database-preservation.com
 
 ## To report a problem or make a suggestion
 
 Create a new issue at https://github.com/keeps/db-visualization-toolkit/issues/new
 
-Or if the problem/suggestion is related to the Database Preservation Toolkit, create the issue at https://github.com/keeps/db-preservation-toolkit/issues/new
+Or if the problem/suggestion is related to the Database Preservation Toolkit Developer, create the issue at https://github.com/keeps/db-preservation-toolkit/issues/new
 
 ## Information & Commercial support
 
