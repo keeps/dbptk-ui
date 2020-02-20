@@ -2094,14 +2094,6 @@ html, body, .desktop-main {
     background-color: #089de3;
 }
 
-.my-asyncdatagrid-display-scroll-wrapper input[type="checkbox"]:checked:after {
-    content: '\f00c';
-    font-size: 17px;
-    font-weight: 600;
-    margin-left: -4px;
-    font-family: 'Font Awesome 5 Free';
-}
-
 .connection-panel input[type="checkbox"] {
     padding-left: 5px;
     padding-right: 5px;

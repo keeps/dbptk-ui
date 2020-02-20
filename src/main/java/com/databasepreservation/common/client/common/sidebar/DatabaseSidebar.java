@@ -188,7 +188,7 @@ public class DatabaseSidebar extends Composite implements Sidebar, ICollectionSt
     sidebarGroup.add(savedSearchesLink);
 
     /* Schemas */
-    SidebarItem schemasHeader = createSidebarSubItemHeaderSafeHMTL("Tables", FontAwesomeIconManager.LIST);
+    SidebarItem schemasHeader = createSidebarSubItemHeaderSafeHMTL(messages.menusidebar_tables(), FontAwesomeIconManager.LIST);
     FlowPanel schemaItems = new FlowPanel();
 
     final int totalSchemas = metadata.getSchemas().size();
@@ -214,7 +214,7 @@ public class DatabaseSidebar extends Composite implements Sidebar, ICollectionSt
       createSubItem(schemasHeader, schemaItems, true);
 
     /* Technical Information */
-    SidebarItem technicalHeader = createSidebarSubItemHeaderSafeHMTL("Technical Information",
+    SidebarItem technicalHeader = createSidebarSubItemHeaderSafeHMTL(messages.menusidebar_technicalInformation(),
       FontAwesomeIconManager.TECHNICAL);
     FlowPanel technicalItems = new FlowPanel();
 

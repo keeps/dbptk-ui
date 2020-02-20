@@ -381,7 +381,6 @@ public class TablePanelOptions extends RightPanel implements ICollectionStatusOb
   public void updateCollection(CollectionStatus collectionStatus) {
     this.status = collectionStatus;
     content.remove(columnsTable);
-    defaultSetSelectAll();
     refreshCellTable(showTechnicalInformation);
   }
 }

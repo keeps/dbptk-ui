@@ -89,6 +89,10 @@ public interface ClientMessages extends Messages {
 
   String menusidebar_searchAllRecords();
 
+  String menusidebar_technicalInformation();
+
+  String menusidebar_tables();
+
   String menusidebar_structure();
 
   String menusidebar_routines();
