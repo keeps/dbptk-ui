@@ -218,12 +218,12 @@ public class TableSearchPanel extends Composite {
       // handle creating / editing search fields
       this.searchFields.clear();
 
-      for (int i = 0; i < currentSearchInfo.getFields().size() ; i++) {
+      for (int i = 0; i < currentSearchInfo.getFields().size(); i++) {
         if (currentSearchInfo.getFieldParameters().get(i) != null) {
-            final SearchFieldPanel searchFieldPanel = new SearchFieldPanel();
-            searchFieldPanel.setSearchField(currentSearchInfo.getFields().get(i));
-            addSearchFieldPanel(searchFieldPanel);
-            searchFieldPanel.selectSearchField();
+          final SearchFieldPanel searchFieldPanel = new SearchFieldPanel();
+          searchFieldPanel.setSearchField(currentSearchInfo.getFields().get(i));
+          addSearchFieldPanel(searchFieldPanel);
+          searchFieldPanel.selectSearchField();
         }
       }
 

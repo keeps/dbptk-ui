@@ -342,10 +342,17 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
       this.searchInputBox.setText(searchInfo.getCurrentFilter());
 
       openSearchAdvancedPanel();
+      // TODO: FIX-ME PLEASE I MAY NOT NEED SO MUCH LOOPS
       if (fieldsPanel != null && fieldsPanel.getParent() != null && fieldsPanel.getParent().isVisible()) {
         for (int i = 0; i < fieldsPanel.getWidgetCount(); i++) {
-          SearchFieldPanel searchAdvancedFieldPanel = (SearchFieldPanel) fieldsPanel.getWidget(i);
-          searchAdvancedFieldPanel.setInputFromFilterParam(searchInfo.getFieldParameters().get(i));
+          if (fieldsPanel.getWidget(i) instanceof SearchFieldPanel) {
+            SearchFieldPanel searchAdvancedFieldPanel = (SearchFieldPanel) fieldsPanel.getWidget(i);
+            for (FilterParameter fieldParameter : searchInfo.getFieldParameters()) {
+              if (fieldParameter != null) {
+                searchAdvancedFieldPanel.setInputFromFilterParam(fieldParameter);
+              }
+            }
+          }
         }
       }
 
