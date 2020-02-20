@@ -24,6 +24,7 @@
     <!-- I18N: languages -->
     <extend-property name="locale" values="en" />
     <extend-property name="locale" values="pt_PT" />
+    <extend-property name="locale" values="cs" />
     <set-property-fallback name="locale" value="en"/>
 
     <stylesheet src="roda_main.css" />
