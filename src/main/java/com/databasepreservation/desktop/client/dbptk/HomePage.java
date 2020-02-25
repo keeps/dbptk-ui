@@ -46,6 +46,9 @@ public class HomePage extends Composite {
   @UiField
   Image NAEFinanciersLink;
 
+  @UiField
+  Image regionalFund;
+
   private static HomePage instance = null;
 
   public static HomePage getInstance() {
@@ -80,9 +83,12 @@ public class HomePage extends Composite {
 
     btnManage.addClickHandler(event -> HistoryManager.gotoDatabase());
 
-    Card createCard = Card.createInstance(messages.homePageHeaderTextForCreateSIARD(), messages.homePageDescriptionTextForCreateSIARD(), btnCreate);
-    Card openCard = Card.createInstance(messages.homePageHeaderTextForOpenSIARD(), messages.homePageDescriptionTextForOpenSIARD(), btnOpen);
-    Card manageCard = Card.createInstance(messages.homePageHeaderTextForManageSIARD(), messages.homePageDescriptionTextForManageSIARD(), btnManage);
+    Card createCard = Card.createInstance(messages.homePageHeaderTextForCreateSIARD(),
+      messages.homePageDescriptionTextForCreateSIARD(), btnCreate);
+    Card openCard = Card.createInstance(messages.homePageHeaderTextForOpenSIARD(),
+      messages.homePageDescriptionTextForOpenSIARD(), btnOpen);
+    Card manageCard = Card.createInstance(messages.homePageHeaderTextForManageSIARD(),
+      messages.homePageDescriptionTextForManageSIARD(), btnManage);
 
     options.add(createCard);
     options.add(openCard);
@@ -99,6 +105,9 @@ public class HomePage extends Composite {
 
     DGLABFinanciersLink
       .addClickHandler(event -> Window.open(ViewerConstants.DGLAB_FINANCIER_LINK, ViewerConstants.BLANK_LINK, null));
+
+    regionalFund
+      .addClickHandler(event -> Window.open("https://www.struktuurifondid.ee/", ViewerConstants.BLANK_LINK, null));
 
     ownerLink.addClickHandler(event -> Window.open(ViewerConstants.OWNER_LINK, ViewerConstants.BLANK_LINK, null));
   }

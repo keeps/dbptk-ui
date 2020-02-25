@@ -16,6 +16,7 @@
                 <g:Image ui:field="DGLABFinanciersLink" addStyleNames="logo-keep" url="/img/DGLAB-logo.jpg" />
                 <g:Image ui:field="EARKFinanciersLink" addStyleNames="logo-keep" url="/img/e-ark-logo.png" />
                 <g:Image ui:field="NAEFinanciersLink" addStyleNames="logo-keep" url="/img/NAE-white.png" />
+                <g:Image ui:field="regionalFund" addStyleNames="logo-keep" url="/img/eu_regional_development_fund_horizontal.jpg" />
             </g:FlowPanel>
             <g:FlowPanel addStyleNames="owner">
                 <g:Label  addStyleNames="footer-label">
