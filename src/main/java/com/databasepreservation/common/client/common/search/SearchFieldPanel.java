@@ -237,6 +237,9 @@ public class SearchFieldPanel extends Composite {
       } else {
         inputCheckBox.setSelectedIndex(0);
       }
+    } else if (filterParam instanceof BlockJoinParentFilterParameter) {
+      BlockJoinParentFilterParameter blockJoinParentFilterParameter = (BlockJoinParentFilterParameter) filterParam;
+      inputText.setValue(blockJoinParentFilterParameter.getValue());
     }
   }
 

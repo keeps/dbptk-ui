@@ -342,19 +342,37 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
       this.searchInputBox.setText(searchInfo.getCurrentFilter());
 
       openSearchAdvancedPanel();
-      // TODO: FIX-ME PLEASE I MAY NOT NEED SO MUCH LOOPS
+
+      GWT.log("search info: " + searchInfo.asJson());
+      int fieldParameterIndex = 0;
       if (fieldsPanel != null && fieldsPanel.getParent() != null && fieldsPanel.getParent().isVisible()) {
         for (int i = 0; i < fieldsPanel.getWidgetCount(); i++) {
           if (fieldsPanel.getWidget(i) instanceof SearchFieldPanel) {
             SearchFieldPanel searchAdvancedFieldPanel = (SearchFieldPanel) fieldsPanel.getWidget(i);
-            for (FilterParameter fieldParameter : searchInfo.getFieldParameters()) {
-              if (fieldParameter != null) {
-                searchAdvancedFieldPanel.setInputFromFilterParam(fieldParameter);
-              }
+            final FilterParameter filterParameter = searchInfo.getFieldParameters().get(fieldParameterIndex);
+            if (filterParameter != null) {
+              searchAdvancedFieldPanel.setInputFromFilterParam(filterParameter);
             }
+            fieldParameterIndex++;
           }
         }
       }
+      // } else {
+      // if (fieldsPanel != null && fieldsPanel.getParent() != null &&
+      // fieldsPanel.getParent().isVisible()) {
+      // for (int i = 0; i < fieldsPanel.getWidgetCount(); i++) {
+      // if (fieldsPanel.getWidget(i) instanceof SearchFieldPanel) {
+      // SearchFieldPanel searchAdvancedFieldPanel = (SearchFieldPanel)
+      // fieldsPanel.getWidget(i);
+      // for (FilterParameter fieldParameter : searchInfo.getFieldParameters()) {
+      // if (fieldParameter != null) {
+      // searchAdvancedFieldPanel.setInputFromFilterParam(fieldParameter);
+      // }
+      // }
+      // }
+      // }
+      // }
+      // }
 
       doSearch();
     }

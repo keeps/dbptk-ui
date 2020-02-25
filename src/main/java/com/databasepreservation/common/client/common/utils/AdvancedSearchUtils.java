@@ -49,7 +49,7 @@ public class AdvancedSearchUtils {
   }
 
   public static Map<String, List<SearchField>> getSearchFieldsFromTableMap(ViewerTable viewerTable,
-    CollectionStatus status, ViewerMetadata metadata) {
+    CollectionStatus status) {
     Map<String, List<SearchField>> map = new LinkedHashMap<>();
     final TableStatus configTable = status.getTableStatusByTableId(viewerTable.getId());
 

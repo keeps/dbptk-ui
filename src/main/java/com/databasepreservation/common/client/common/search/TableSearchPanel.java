@@ -10,7 +10,10 @@ import com.databasepreservation.common.client.common.lists.TableRowList;
 import com.databasepreservation.common.client.common.utils.AdvancedSearchUtils;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.index.filter.Filter;
+import com.databasepreservation.common.client.index.filter.FilterParameter;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
+import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
+import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
@@ -174,7 +177,7 @@ public class TableSearchPanel extends Composite {
 
   private void initAdvancedSearch() {
     final Map<String, List<SearchField>> searchFieldsFromTable = AdvancedSearchUtils.getSearchFieldsFromTableMap(table,
-      status, database.getMetadata());
+      status);
     TableSearchPanel.this.searchFields.clear();
     searchFieldsFromTable.forEach((key, value) -> {
       itemsSearchAdvancedFieldsPanel.add(CommonClientUtils.getAdvancedSearchDivider(key));
@@ -218,14 +221,45 @@ public class TableSearchPanel extends Composite {
       // handle creating / editing search fields
       this.searchFields.clear();
 
-      for (int i = 0; i < currentSearchInfo.getFields().size(); i++) {
-        if (currentSearchInfo.getFieldParameters().get(i) != null) {
-          final SearchFieldPanel searchFieldPanel = new SearchFieldPanel();
-          searchFieldPanel.setSearchField(currentSearchInfo.getFields().get(i));
-          addSearchFieldPanel(searchFieldPanel);
-          searchFieldPanel.selectSearchField();
-        }
-      }
+      // se a route for foreign key
+
+      // for (int i = 0; i < currentSearchInfo.getFields().size(); i++) {
+      // if (currentSearchInfo.getFieldParameters().get(i) != null) {
+      // final SearchFieldPanel searchFieldPanel = new SearchFieldPanel();
+      // GWT.log("---- " + currentSearchInfo.getFields().get(i));
+      // searchFieldPanel.setSearchField(currentSearchInfo.getFields().get(i));
+      // addSearchFieldPanel(searchFieldPanel);
+      // searchFieldPanel.selectSearchField();
+      // }
+      // }
+
+
+        initAdvancedSearch();
+//      } else {
+//        for (int i = 0; i < currentSearchInfo.getFields().size(); i++) {
+//          if (currentSearchInfo.getFieldParameters().get(i) != null) {
+//            final SearchFieldPanel searchFieldPanel = new SearchFieldPanel();
+//            GWT.log("---- " + currentSearchInfo.getFields().get(i));
+//            searchFieldPanel.setSearchField(currentSearchInfo.getFields().get(i));
+//            addSearchFieldPanel(searchFieldPanel);
+//            searchFieldPanel.selectSearchField();
+//          }
+//        }
+//      }
+
+      // for (int i = 0; i < currentSearchInfo.getFields().size(); i++) {
+      // if (currentSearchInfo.getFieldParameters().get(i) != null) {
+      // final SearchFieldPanel searchFieldPanel = new SearchFieldPanel();
+      // GWT.log("---- " + currentSearchInfo.getFields().get(i));
+      // searchFieldPanel.setSearchField(currentSearchInfo.getFields().get(i));
+      // addSearchFieldPanel(searchFieldPanel);
+      // searchFieldPanel.selectSearchField();
+      // }
+      // }
+
+      // se nao for
+
+      // END
 
       // update search panel and trigger a search
       searchPanel.updateSearchPanel(currentSearchInfo);
@@ -245,8 +279,7 @@ public class TableSearchPanel extends Composite {
    */
   private void setCurrentSearchInfoFromJson(String searchInfoJson) {
     try {
-      SearchInfo searchInfo = null;
-      searchInfo = ViewerJsonUtils.getSearchInfoMapper().read(searchInfoJson);
+      SearchInfo searchInfo = ViewerJsonUtils.getSearchInfoMapper().read(searchInfoJson);
       if (SearchInfo.isPresentAndValid(searchInfo)) {
         currentSearchInfo = searchInfo;
       } else {

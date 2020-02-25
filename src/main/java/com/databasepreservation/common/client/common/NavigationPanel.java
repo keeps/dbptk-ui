@@ -1,11 +1,13 @@
 package com.databasepreservation.common.client.common;
 
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -47,6 +49,13 @@ public class NavigationPanel extends Composite {
     l.setText(description);
 
     navigationPanelDescription.add(l);
+  }
+
+  public void addToDescriptionPanel(SafeHtml description) {
+    final InlineHTML inlineHTML = new InlineHTML();
+    inlineHTML.setHTML(description);
+
+    navigationPanelDescription.add(inlineHTML);
   }
 
   public void addToInfoPanel(Widget widget) {

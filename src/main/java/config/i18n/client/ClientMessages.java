@@ -2,6 +2,7 @@ package config.i18n.client;
 
 import com.google.gwt.i18n.client.Messages;
 import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 
 import java.util.List;
 
@@ -1336,7 +1337,9 @@ public interface ClientMessages extends Messages {
 
   String advancedConfigurationTextForColumnsManagement();
 
-  String advancedConfigurationTextForDataTransformation();
+  SafeHtml advancedConfigurationTextForDataTransformationServer();
+
+  SafeHtml advancedConfigurationTextForDataTransformationDesktop();
 
   /********************************************
    * Data Transformation

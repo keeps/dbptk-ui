@@ -9,7 +9,6 @@ import com.databasepreservation.common.client.common.ContentPanel;
 import com.databasepreservation.common.client.common.NavigationPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
-import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
@@ -17,15 +16,12 @@ import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.FocusPanel;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -65,7 +61,8 @@ public class AdvancedConfiguration extends ContentPanel {
   private void init() {
     configureHeader();
 
-    NavigationPanel tableManagement = NavigationPanel.createInstance(messages.advancedConfigurationLabelForTableManagement());
+    NavigationPanel tableManagement = NavigationPanel
+      .createInstance(messages.advancedConfigurationLabelForTableManagement());
     tableManagement.addToDescriptionPanel(messages.advancedConfigurationTextForTableManagement());
     Button btnTableManagement = new Button(messages.advancedConfigurationBtnForTableManagement());
     btnTableManagement.setStyleName("btn btn-outline-primary btn-play btn-block");
@@ -75,7 +72,8 @@ public class AdvancedConfiguration extends ContentPanel {
     tableManagement.addButton(btnTableManagement);
     content.add(tableManagement);
 
-    NavigationPanel columnManagement = NavigationPanel.createInstance(messages.advancedConfigurationLabelForColumnsManagement());
+    NavigationPanel columnManagement = NavigationPanel
+      .createInstance(messages.advancedConfigurationLabelForColumnsManagement());
     columnManagement.addToDescriptionPanel(messages.advancedConfigurationTextForColumnsManagement());
     Button btnColumnManagement = new Button(messages.advancedConfigurationBtnForColumnsManagement());
     btnColumnManagement.setStyleName("btn btn-outline-primary btn-play btn-block");
@@ -85,23 +83,32 @@ public class AdvancedConfiguration extends ContentPanel {
     columnManagement.addButton(btnColumnManagement);
     content.add(columnManagement);
 
+    NavigationPanel dataTransformation = NavigationPanel
+      .createInstance(messages.advancedConfigurationLabelForDataTransformation());
+    Button btnDataTransformation = new Button(messages.advancedConfigurationBtnForDataTransformation());
+
+    String style;
+    SafeHtml messageDescription;
     if (ApplicationType.getType().equals(ViewerConstants.SERVER)) {
-      NavigationPanel dataTransformation = NavigationPanel.createInstance(messages.advancedConfigurationLabelForDataTransformation());
-      dataTransformation.addToDescriptionPanel(messages.advancedConfigurationTextForDataTransformation());
-      Button btnDataTransformation = new Button(messages.advancedConfigurationBtnForDataTransformation());
-      btnDataTransformation.setStyleName("btn btn-outline-primary btn-play btn-block");
+      messageDescription = messages.advancedConfigurationTextForDataTransformationServer();
+      style = "btn btn-outline-primary btn-play btn-block";
       btnDataTransformation.addClickHandler(event -> {
         HistoryManager.gotoDataTransformation(database.getUuid());
       });
-      dataTransformation.addButton(btnDataTransformation);
-      content.add(dataTransformation);
+    } else {
+      messageDescription = messages.advancedConfigurationTextForDataTransformationDesktop();
+      style = "btn btn-play btn-block";
+      btnDataTransformation.setEnabled(false);
     }
-
+    dataTransformation.addToDescriptionPanel(messageDescription);
+    btnDataTransformation.setStyleName(style);
+    dataTransformation.addButton(btnDataTransformation);
+    content.add(dataTransformation);
   }
 
   private void configureHeader() {
     header.add(CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.SLIDERS),
-        messages.advancedConfigurationLabelForMainTitle(), "h1"));
+      messages.advancedConfigurationLabelForMainTitle(), "h1"));
 
     HTML html = new HTML(messages.advancedConfigurationPageDescription());
     html.addStyleName("font-size-description advanced-configuration-description");
