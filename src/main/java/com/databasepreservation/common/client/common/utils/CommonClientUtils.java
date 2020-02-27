@@ -9,12 +9,15 @@ import com.databasepreservation.common.client.models.structure.ViewerView;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.ParagraphElement;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -221,6 +224,10 @@ public class CommonClientUtils {
     }
 
     return infoBuilder;
+  }
+
+  public static Widget constructParagraph(String text) {
+    return new HTMLPanel(ParagraphElement.TAG, text);
   }
 
   public static SafeHtmlBuilder constructSpan(String value, String title, String css) {

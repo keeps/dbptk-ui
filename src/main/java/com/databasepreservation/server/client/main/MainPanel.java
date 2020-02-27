@@ -1,6 +1,5 @@
 package com.databasepreservation.server.client.main;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,7 +9,6 @@ import com.databasepreservation.common.client.common.ContentPanel;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.RightPanel;
 import com.databasepreservation.common.client.common.UserLogin;
-import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.sidebar.ColumnsManagementSidebar;
 import com.databasepreservation.common.client.common.sidebar.DataTransformationSidebar;
 import com.databasepreservation.common.client.common.sidebar.DatabaseSidebar;
@@ -107,19 +105,27 @@ public class MainPanel extends Composite {
 
   public void onHistoryChanged(String token) {
     List<String> currentHistoryPath = HistoryManager.getCurrentHistoryPath();
-    List<BreadcrumbItem> breadcrumbItemList = new ArrayList<>();
     // reSetHeader(currentHistoryPath);
+
     if (currentHistoryPath.isEmpty()) {
       // #
       HistoryManager.gotoHome();
 
     } else if (HistoryManager.ROUTE_UPLOADS.equals(currentHistoryPath.get(0))) {
       // #uploads
-      // #uploads/...
-      setContent(new ContentPanelLoader() {
+      UserLogin.getInstance().getAuthenticatedUser(new DefaultAsyncCallback<User>() {
         @Override
-        public ContentPanel load(ViewerDatabase database, CollectionStatus status) {
-          return UploadPanel.getInstance();
+        public void onSuccess(User result) {
+          if (result.isAdmin()) {
+            setContent(new ContentPanelLoader() {
+              @Override
+              public ContentPanel load(ViewerDatabase database, CollectionStatus status) {
+                return UploadPanel.getInstance();
+              }
+            });
+          } else {
+            HistoryManager.gotoHome();
+          }
         }
       });
     } else if (HistoryManager.ROUTE_HOME.equals(currentHistoryPath.get(0))) {
@@ -153,120 +159,204 @@ public class MainPanel extends Composite {
         }
       });
     } else if (HistoryManager.ROUTE_ACTIVITY_LOG.equals(currentHistoryPath.get(0))) {
-      if (currentHistoryPath.size() == 1) {
-        // #activityLog
-        setContent(new ContentPanelLoader() {
-          @Override
-          public ContentPanel load(ViewerDatabase database, CollectionStatus status) {
-            return ActivityLogPanel.getInstance();
+      UserLogin.getInstance().getAuthenticatedUser(new DefaultAsyncCallback<User>() {
+        @Override
+        public void onSuccess(User result) {
+          if (!result.isAdmin()) {
+            HistoryManager.gotoHome();
+          } else {
+            if (currentHistoryPath.size() == 1) {
+              // #activityLog
+              setContent(new ContentPanelLoader() {
+                @Override
+                public ContentPanel load(ViewerDatabase database, CollectionStatus status) {
+                  return ActivityLogPanel.getInstance();
+                }
+              });
+            } else if (currentHistoryPath.size() == 2) {
+              // #activityLog/<logUUID>
+              String logUUID = currentHistoryPath.get(1);
+              setContent(new ContentPanelLoader() {
+                @Override
+                public ContentPanel load(ViewerDatabase database, CollectionStatus status) {
+                  return ActivityLogDetailedPanel.getInstance(logUUID);
+                }
+              });
+            }
           }
-        });
-      } else if (currentHistoryPath.size() == 2) {
-        // #activityLog/<logUUID>
-        String logUUID = currentHistoryPath.get(1);
-        setContent(new ContentPanelLoader() {
-          @Override
-          public ContentPanel load(ViewerDatabase database, CollectionStatus status) {
-            return ActivityLogDetailedPanel.getInstance(logUUID);
-          }
-        });
-      }
+        }
+      });
     } else if (HistoryManager.ROUTE_SIARD_INFO.equals(currentHistoryPath.get(0))) {
-      String databaseUUID = currentHistoryPath.get(1);
-      setContent(databaseUUID, new ContentPanelLoader() {
+      UserLogin.getInstance().getAuthenticatedUser(new DefaultAsyncCallback<User>() {
         @Override
-        public ContentPanel load(ViewerDatabase database, CollectionStatus status) {
-          return SIARDManagerPage.getInstance(database);
+        public void onSuccess(User user) {
+          if (user.isAdmin()) {
+            String databaseUUID = currentHistoryPath.get(1);
+            setContent(databaseUUID, new ContentPanelLoader() {
+              @Override
+              public ContentPanel load(ViewerDatabase database, CollectionStatus status) {
+                return SIARDManagerPage.getInstance(database);
+              }
+            });
+          } else {
+            HistoryManager.gotoHome();
+          }
         }
-      });
+      }, true);
     } else if (HistoryManager.ROUTE_UPLOAD_SIARD_DATA.equals(currentHistoryPath.get(0))) {
-      String databaseUUID = currentHistoryPath.get(1);
-      setContent(databaseUUID, new ContentPanelLoader() {
+      UserLogin.getInstance().getAuthenticatedUser(new DefaultAsyncCallback<User>() {
         @Override
-        public ContentPanel load(ViewerDatabase database, CollectionStatus status) {
-          return IngestPage.getInstance(database);
+        public void onSuccess(User user) {
+          if (user.isAdmin()) {
+            String databaseUUID = currentHistoryPath.get(1);
+            setContent(databaseUUID, new ContentPanelLoader() {
+              @Override
+              public ContentPanel load(ViewerDatabase database, CollectionStatus status) {
+                return IngestPage.getInstance(database);
+              }
+            });
+          } else {
+            HistoryManager.gotoHome();
+          }
         }
-      });
+      }, true);
     } else if (HistoryManager.ROUTE_SIARD_VALIDATOR.equals(currentHistoryPath.get(0))) {
-      final String databaseUUID = currentHistoryPath.get(1);
-      setContent(databaseUUID, new ContentPanelLoader() {
+      UserLogin.getInstance().getAuthenticatedUser(new DefaultAsyncCallback<User>() {
         @Override
-        public ContentPanel load(ViewerDatabase database, CollectionStatus status) {
-          return ValidatorPage.getInstance(database);
+        public void onSuccess(User user) {
+          if (user.isAdmin()) {
+            final String databaseUUID = currentHistoryPath.get(1);
+            setContent(databaseUUID, new ContentPanelLoader() {
+              @Override
+              public ContentPanel load(ViewerDatabase database, CollectionStatus status) {
+                return ValidatorPage.getInstance(database);
+              }
+            });
+          } else {
+            HistoryManager.gotoHome();
+          }
         }
-      });
+      }, true);
     } else if (HistoryManager.ROUTE_ADVANCED_CONFIGURATION.equals(currentHistoryPath.get(0))) {
-      final String databaseUUID = currentHistoryPath.get(1);
-      setContent(databaseUUID, new ContentPanelLoader() {
+      UserLogin.getInstance().getAuthenticatedUser(new DefaultAsyncCallback<User>() {
         @Override
-        public ContentPanel load(ViewerDatabase database, CollectionStatus status) {
-          return AdvancedConfiguration.getInstance(database);
+        public void onSuccess(User user) {
+          if (user.isAdmin()) {
+            final String databaseUUID = currentHistoryPath.get(1);
+            setContent(databaseUUID, new ContentPanelLoader() {
+              @Override
+              public ContentPanel load(ViewerDatabase database, CollectionStatus status) {
+                return AdvancedConfiguration.getInstance(database);
+              }
+            });
+          } else {
+            HistoryManager.gotoHome();
+          }
         }
-      });
+      }, true);
     } else if (HistoryManager.ROUTE_DATA_TRANSFORMATION.equals(currentHistoryPath.get(0))) {
-      final String databaseUUID = currentHistoryPath.get(1);
-      DataTransformationSidebar sidebar = DataTransformationSidebar.getInstance(databaseUUID);
-      if (currentHistoryPath.size() == 2) {
-        setContent(databaseUUID, HistoryManager.ROUTE_DATA_TRANSFORMATION, databaseUUID, sidebar,
-          new RightPanelLoader() {
-            @Override
-            public RightPanel load(ViewerDatabase database, CollectionStatus status) {
-              return DataTransformation.getInstance(status, database, sidebar);
+      UserLogin.getInstance().getAuthenticatedUser(new DefaultAsyncCallback<User>() {
+        @Override
+        public void onSuccess(User user) {
+          if (user.isAdmin()) {
+            final String databaseUUID = currentHistoryPath.get(1);
+            DataTransformationSidebar sidebar = DataTransformationSidebar.getInstance(databaseUUID);
+            if (currentHistoryPath.size() == 2) {
+              setContent(databaseUUID, HistoryManager.ROUTE_DATA_TRANSFORMATION, databaseUUID, sidebar,
+                new RightPanelLoader() {
+                  @Override
+                  public RightPanel load(ViewerDatabase database, CollectionStatus status) {
+                    return DataTransformation.getInstance(status, database, sidebar);
+                  }
+                });
+            } else if (currentHistoryPath.size() == 4) {
+              final String tableId = currentHistoryPath.get(2) + "." + currentHistoryPath.get(3);
+              setContent(databaseUUID, HistoryManager.ROUTE_DATA_TRANSFORMATION, tableId, sidebar,
+                new RightPanelLoader() {
+                  @Override
+                  public RightPanel load(ViewerDatabase database, CollectionStatus status) {
+                    return DataTransformation.getInstance(status, database, tableId, sidebar);
+                  }
+                });
             }
-          });
-      } else if (currentHistoryPath.size() == 4) {
-        final String tableId = currentHistoryPath.get(2) + "." + currentHistoryPath.get(3);
-        setContent(databaseUUID, HistoryManager.ROUTE_DATA_TRANSFORMATION, tableId, sidebar, new RightPanelLoader() {
-          @Override
-          public RightPanel load(ViewerDatabase database, CollectionStatus status) {
-            return DataTransformation.getInstance(status, database, tableId, sidebar);
+          } else {
+            HistoryManager.gotoHome();
           }
-        });
-      }
+        }
+      }, true);
     } else if (HistoryManager.ROUTE_TABLE_MANAGEMENT.equals(currentHistoryPath.get(0))) {
-      final String databaseUUID = currentHistoryPath.get(1);
-      setContent(databaseUUID, new ContentPanelLoader() {
+      UserLogin.getInstance().getAuthenticatedUser(new DefaultAsyncCallback<User>() {
         @Override
-        public ContentPanel load(ViewerDatabase database, CollectionStatus status) {
-          return TableManagementPanel.getInstance(database, status);
+        public void onSuccess(User user) {
+          if (user.isAdmin()) {
+            final String databaseUUID = currentHistoryPath.get(1);
+            setContent(databaseUUID, new ContentPanelLoader() {
+              @Override
+              public ContentPanel load(ViewerDatabase database, CollectionStatus status) {
+                return TableManagementPanel.getInstance(database, status);
+              }
+            });
+          } else {
+            HistoryManager.gotoHome();
+          }
         }
-      });
+      }, true);
     } else if (HistoryManager.ROUTE_COLUMNS_MANAGEMENT.equals(currentHistoryPath.get(0))) {
-      final String databaseUUID = currentHistoryPath.get(1);
-      Sidebar sidebar = ColumnsManagementSidebar.getInstance(databaseUUID);
-      if (currentHistoryPath.size() == 2) {
-        // columns-management/<databaseUUID>
-        setContent(databaseUUID, HistoryManager.ROUTE_COLUMNS_MANAGEMENT, databaseUUID, sidebar,
-          new RightPanelLoader() {
+      UserLogin.getInstance().getAuthenticatedUser(new DefaultAsyncCallback<User>() {
+        @Override
+        public void onSuccess(User user) {
+          if (user.isAdmin()) {
+            final String databaseUUID = currentHistoryPath.get(1);
+            Sidebar sidebar = ColumnsManagementSidebar.getInstance(databaseUUID);
+            if (currentHistoryPath.size() == 2) {
+              // columns-management/<databaseUUID>
+              setContent(databaseUUID, HistoryManager.ROUTE_COLUMNS_MANAGEMENT, databaseUUID, sidebar,
+                new RightPanelLoader() {
+                  @Override
+                  public RightPanel load(ViewerDatabase database, CollectionStatus status) {
+                    return ColumnsManagementPanel.getInstance(status, database, null, sidebar);
+                  }
+                });
+            } else if (currentHistoryPath.size() == 4) {
+              // columns-management/<databaseUUID>/<schema>/<table>
+              final String tableId = currentHistoryPath.get(2) + "." + currentHistoryPath.get(3);
+              setContent(databaseUUID, HistoryManager.ROUTE_COLUMNS_MANAGEMENT, tableId, sidebar,
+                new RightPanelLoader() {
+                  @Override
+                  public RightPanel load(ViewerDatabase database, CollectionStatus status) {
+                    return ColumnsManagementPanel.getInstance(status, database, tableId, sidebar);
+                  }
+                });
+            }
+          } else {
+            HistoryManager.gotoHome();
+          }
+        }
+      }, true);
+    } else if (HistoryManager.ROUTE_JOBS.equals(currentHistoryPath.get(0))) {
+      UserLogin.getInstance().getAuthenticatedUser(new DefaultAsyncCallback<User>() {
+        @Override
+        public void onSuccess(User user) {
+          setContent(new ContentPanelLoader() {
             @Override
-            public RightPanel load(ViewerDatabase database, CollectionStatus status) {
-              return ColumnsManagementPanel.getInstance(status, database, null, sidebar);
+            public ContentPanel load(ViewerDatabase database, CollectionStatus status) {
+              return JobManager.getInstance();
             }
           });
-      } else if (currentHistoryPath.size() == 4) {
-        // columns-management/<databaseUUID>/<schema>/<table>
-        final String tableId = currentHistoryPath.get(2) + "." + currentHistoryPath.get(3);
-        setContent(databaseUUID, HistoryManager.ROUTE_COLUMNS_MANAGEMENT, tableId, sidebar, new RightPanelLoader() {
-          @Override
-          public RightPanel load(ViewerDatabase database, CollectionStatus status) {
-            return ColumnsManagementPanel.getInstance(status, database, tableId, sidebar);
-          }
-        });
-      }
-    } else if (HistoryManager.ROUTE_JOBS.equals(currentHistoryPath.get(0))) {
-      setContent(new ContentPanelLoader() {
-        @Override
-        public ContentPanel load(ViewerDatabase database, CollectionStatus status) {
-          return JobManager.getInstance();
         }
-      });
+      }, true);
     } else if (HistoryManager.ROUTE_PREFERENCES.equals(currentHistoryPath.get(0))) {
-      setContent(new ContentPanelLoader() {
+      UserLogin.getInstance().getAuthenticatedUser(new DefaultAsyncCallback<User>() {
         @Override
-        public ContentPanel load(ViewerDatabase database, CollectionStatus status) {
-          return PreferencesPanel.createInstance();
+        public void onSuccess(User user) {
+          setContent(new ContentPanelLoader() {
+            @Override
+            public ContentPanel load(ViewerDatabase database, CollectionStatus status) {
+              return PreferencesPanel.createInstance();
+            }
+          });
         }
-      });
+      }, true);
     } else if (HistoryManager.ROUTE_DATABASE.equals(currentHistoryPath.get(0))) {
       if (currentHistoryPath.size() == 2) {
         // #database/<database_uuid>
@@ -558,7 +648,7 @@ public class MainPanel extends Composite {
       setContent(new ContentPanelLoader() {
         @Override
         public ContentPanel load(ViewerDatabase database, CollectionStatus status) {
-          return new Sponsors();
+          return new SponsorsPanel();
         }
       });
     } else {
@@ -678,5 +768,16 @@ public class MainPanel extends Composite {
     instance.setTopLevelPanelCSS("browseContent wrapper skip_padding server");
     contentPanel.setWidget(instance);
     instance.load(rightPanelLoader, sidebarSelected);
+  }
+
+  private void checkAccessPermission() {
+    UserLogin.getInstance().getAuthenticatedUser(new DefaultAsyncCallback<User>() {
+      @Override
+      public void onSuccess(User result) {
+        if (result.isGuest()) {
+          HistoryManager.gotoHome();
+        }
+      }
+    });
   }
 }

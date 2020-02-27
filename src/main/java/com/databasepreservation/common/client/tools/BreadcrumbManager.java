@@ -217,6 +217,8 @@ public class BreadcrumbManager {
             items.add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(
               FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE) + SafeHtmlUtils.htmlEscape(databaseName)),
               () -> HistoryManager.gotoSIARDInfo(databaseUUID)));
+          } else {
+            items.add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE) + SafeHtmlUtils.htmlEscape(databaseName))));
           }
         }
       });

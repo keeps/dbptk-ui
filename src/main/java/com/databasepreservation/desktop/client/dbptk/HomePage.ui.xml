@@ -13,16 +13,16 @@
                 <g:Label  addStyleNames="footer-label">
                     <ui:text from='{messages.homePageTextForFinancedBy}'/>
                 </g:Label>
-                <g:Image ui:field="DGLABFinanciersLink" addStyleNames="logo-keep" url="/img/DGLAB-logo.jpg" />
-                <g:Image ui:field="EARKFinanciersLink" addStyleNames="logo-keep" url="/img/e-ark-logo.png" />
-                <g:Image ui:field="NAEFinanciersLink" addStyleNames="logo-keep" url="/img/NAE-white.png" />
-                <g:Image ui:field="regionalFund" addStyleNames="logo-keep" url="/img/eu_regional_development_fund_horizontal.jpg" />
+                <g:Image ui:field="DGLABFinanciersLink" addStyleNames="logo-keep" url="/img/sponsors/DGLAB.jpg" />
+                <g:Image ui:field="EARKFinanciersLink" addStyleNames="logo-keep" url="/img/sponsors/E-ARK.png" />
+                <g:Image ui:field="NAEFinanciersLink" addStyleNames="logo-keep" url="/img/sponsors/NAE.png" />
+                <g:Image ui:field="regionalFund" addStyleNames="logo-keep" url="/img/sponsors/NAE-FEDER.jpg" />
             </g:FlowPanel>
             <g:FlowPanel addStyleNames="owner">
                 <g:Label  addStyleNames="footer-label">
                     <ui:text from='{messages.homePageTextForDevelopedBy}'/>
                 </g:Label>
-                <g:Image ui:field="ownerLink" addStyleNames="logo-keep" url="/img/keeps_logo_white_pt_small.png" />
+                <g:Image ui:field="ownerLink" addStyleNames="logo-keep" url="/img/sponsors/KEEP.svg" />
             </g:FlowPanel>
         </g:FlowPanel>
     </g:FlowPanel>
