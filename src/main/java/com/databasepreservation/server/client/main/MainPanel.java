@@ -554,6 +554,13 @@ public class MainPanel extends Composite {
           }
         });
       }
+    } else if (HistoryManager.ROUTE_SPONSORS.equals(currentHistoryPath.get(0))) {
+      setContent(new ContentPanelLoader() {
+        @Override
+        public ContentPanel load(ViewerDatabase database, CollectionStatus status) {
+          return new Sponsors();
+        }
+      });
     } else {
       handleErrorPath(currentHistoryPath);
     }

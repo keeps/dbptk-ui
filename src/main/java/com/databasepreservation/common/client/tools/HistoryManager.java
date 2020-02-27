@@ -65,6 +65,7 @@ public class HistoryManager {
   public static final String HISTORY_SEP_ESCAPE = "%2F";
 
   public static final String ACTION_DELETE = "delete";
+  public static final String ROUTE_SPONSORS = "sponsors";
 
   public static void gotoRoot() {
     newHistory(Collections.singletonList(ROUTE_HOME));

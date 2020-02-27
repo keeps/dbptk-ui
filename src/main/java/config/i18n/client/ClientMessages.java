@@ -622,6 +622,8 @@ public interface ClientMessages extends Messages {
 
   String breadcrumbTextForColumnManagement();
 
+  String breadcrumbTextForSponsors();
+
   /*********************************************
    * Home Page
    ********************************************/
@@ -1363,6 +1365,11 @@ public interface ClientMessages extends Messages {
   String dataTransformationBtnRunAll();
 
   String dataTransformationTextForDescription();
+
+  /********************************************
+   * Sponsors Panel
+   *******************************************/
+  String sponsorsPanelTextForDescription();
 
   /********************************************
    * Preferences Panel

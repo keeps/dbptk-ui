@@ -3171,3 +3171,18 @@ rgba(0, 0, 0, .125);
     overflow: hidden;
     min-width: 0;
 }
+
+.contributors-content {
+    margin-top: 50px;
+}
+
+.contributors-row {
+    display: flex;
+}
+
+.contributors-column {
+    flex: 50%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}

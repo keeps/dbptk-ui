@@ -2,8 +2,6 @@ package com.databasepreservation.common.client.common.visualization.activity.log
 
 import java.util.List;
 
-import com.databasepreservation.common.client.index.filter.Filter;
-
 import com.databasepreservation.common.client.ClientConfigurationManager;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.ContentPanel;
@@ -14,16 +12,14 @@ import com.databasepreservation.common.client.common.search.SearchFieldPanel;
 import com.databasepreservation.common.client.common.search.SearchPanel;
 import com.databasepreservation.common.client.common.utils.AdvancedSearchUtils;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
+import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.models.activity.logs.ActivityLogEntry;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Element;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.SimplePanel;
@@ -72,12 +68,12 @@ public class ActivityLogPanel extends ContentPanel {
 
     initWidget(uiBinder.createAndBindUi(this));
 
-		initHeader();
+    initHeader();
 
-		itemsSearchAdvancedFieldsPanel = new FlowPanel();
-		itemsSearchAdvancedFieldsPanel.addStyleName("searchAdvancedFieldsPanel empty");
+    itemsSearchAdvancedFieldsPanel = new FlowPanel();
+    itemsSearchAdvancedFieldsPanel.addStyleName("searchAdvancedFieldsPanel empty");
 
-		activityLogList.getSelectionModel().addSelectionChangeHandler(event -> {
+    activityLogList.getSelectionModel().addSelectionChangeHandler(event -> {
       ActivityLogEntry selected = activityLogList.getSelectionModel().getSelectedObject();
       if (selected != null) {
         activityLogList.getSelectionModel().clear();
@@ -92,20 +88,20 @@ public class ActivityLogPanel extends ContentPanel {
     advancedSearch.add(searchPanel);
 
     initAdvancedSearch();
-		showSearchAdvancedFieldsPanel();
+    showSearchAdvancedFieldsPanel();
   }
 
-	private void initHeader() {
-		mainHeader.add(CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.ACTIVITY_LOG),
-			messages.activityLogMenuText(), "h1"));
+  private void initHeader() {
+    mainHeader.add(CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.ACTIVITY_LOG),
+      messages.activityLogMenuText(), "h1"));
 
-		HTML html = new HTML(messages.activityLogDescription());
-		html.addStyleName("font-size-description");
+    HTML html = new HTML(messages.activityLogDescription());
+    html.addStyleName("font-size-description");
 
-		description.setWidget(html);
-	}
+    description.setWidget(html);
+  }
 
-	public void showSearchAdvancedFieldsPanel() {
+  public void showSearchAdvancedFieldsPanel() {
     searchPanel.setVariables(ViewerConstants.DEFAULT_FILTER, ViewerConstants.INDEX_SEARCH, activityLogList,
       itemsSearchAdvancedFieldsPanel);
   }
@@ -114,13 +110,13 @@ public class ActivityLogPanel extends ContentPanel {
     final List<SearchField> searchFieldsForLog = AdvancedSearchUtils.getSearchFieldsForLog();
 
     searchFieldsForLog.forEach(searchField -> {
-    	if (searchField.isFixed()) {
-    		final SearchFieldPanel searchFieldPanel = new SearchFieldPanel();
-    		searchFieldPanel.setSearchField(searchField);
-    		addSearchFieldPanel(searchFieldPanel);
-    		searchFieldPanel.selectSearchField();
-			}
-		});
+      if (searchField.isFixed()) {
+        final SearchFieldPanel searchFieldPanel = new SearchFieldPanel();
+        searchFieldPanel.setSearchField(searchField);
+        addSearchFieldPanel(searchFieldPanel);
+        searchFieldPanel.selectSearchField();
+      }
+    });
   }
 
   private void addSearchFieldPanel(final SearchFieldPanel searchFieldPanel) {

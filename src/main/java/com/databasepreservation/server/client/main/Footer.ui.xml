@@ -11,14 +11,17 @@
                     </h3>
                     <ul>
                         <li>
-                            <a href="https://database-preservation.com/#enterprise">
+                            <a href="https://database-preservation.com/#enterprise" target="_blank">
                                 <ui:text from='{messages.whatIsDBVTK}'/>
                             </a>
                         </li>
                         <li>
-                            <a href="http://www.database-preservation.com/#license">
+                            <a href="https://github.com/keeps/db-visualization-toolkit/blob/master/LICENSE" target="_blank">
                                 <ui:text from='{messages.license}'/>
                             </a>
+                        </li>
+                        <li>
+                            <g:Hyperlink ui:field="contributors"/>
                         </li>
                     </ul>
                 </div>
@@ -60,7 +63,7 @@
                     </h3>
                     <ul>
                         <li>
-                            <a href="https://www.keep.pt/en/contacts-proposals-information-telephone-address/">
+                            <a href="https://www.keep.pt/en/contacts-proposals-information-telephone-address/" target="_blank">
                                 <ui:text from='{messages.infoAndSupport}'/>
                             </a>
                         </li>

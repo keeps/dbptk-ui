@@ -417,4 +417,22 @@ public class BreadcrumbManager {
         + SafeHtmlUtils.htmlEscape(messages.breadcrumbTextForColumnManagement()))));
     return items;
   }
+
+  public static List<BreadcrumbItem> forSponsorsGuest() {
+    List<BreadcrumbItem> items = forHome();
+    items.add(
+      new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.HANDS_HELP)
+        + SafeHtmlUtils.htmlEscape(messages.breadcrumbTextForSponsors()))));
+
+    return items;
+  }
+
+  public static List<BreadcrumbItem> forSponsors() {
+    List<BreadcrumbItem> items = forDatabases();
+    items.add(
+      new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.HANDS_HELP)
+        + SafeHtmlUtils.htmlEscape(messages.breadcrumbTextForSponsors()))));
+
+    return items;
+  }
 }
