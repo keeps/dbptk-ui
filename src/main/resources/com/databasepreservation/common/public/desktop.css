@@ -31,10 +31,6 @@
     background-color: #DCDCDC;
     height: 100%;
     width: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-content: center;
 }
 
 /*Brand*/
@@ -56,6 +52,7 @@
     box-sizing: border-box;
     display: flex;
     justify-content: space-around;
+    margin-top: 100px;
 }
 
 .options {

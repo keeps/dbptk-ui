@@ -9,6 +9,7 @@ import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.sidebar.ColumnsManagementSidebar;
 import com.databasepreservation.common.client.common.sidebar.DatabaseSidebar;
 import com.databasepreservation.common.client.common.sidebar.Sidebar;
+import com.databasepreservation.common.client.common.sponsors.SponsorsPanel;
 import com.databasepreservation.common.client.common.utils.ContentPanelLoader;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.common.utils.RightPanelLoader;
@@ -490,6 +491,13 @@ public class MainPanelDesktop extends Composite {
           }
         });
       }
+    } else if (HistoryManager.ROUTE_SPONSORS.equals(currentHistoryPath.get(0))) {
+      setContent(new ContentPanelLoader() {
+        @Override
+        public ContentPanel load(ViewerDatabase database, CollectionStatus status) {
+          return new SponsorsPanel();
+        }
+      });
     } else {
       handleErrorPath(currentHistoryPath);
     }

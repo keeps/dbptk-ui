@@ -31,24 +31,6 @@ public class HomePage extends Composite {
   @UiField
   FlowPanel options;
 
-  @UiField
-  Image ownerLink;
-
-  @UiField
-  Image DGLABFinanciersLink;
-
-  @UiField
-  Image EARKFinanciersLink;
-
-  @UiField
-  Image applicationLink;
-
-  @UiField
-  Image NAEFinanciersLink;
-
-  @UiField
-  Image regionalFund;
-
   private static HomePage instance = null;
 
   public static HomePage getInstance() {
@@ -93,22 +75,5 @@ public class HomePage extends Composite {
     options.add(createCard);
     options.add(openCard);
     options.add(manageCard);
-
-    applicationLink
-      .addClickHandler(event -> Window.open(ViewerConstants.APPLICATION_LINK, ViewerConstants.BLANK_LINK, null));
-
-    NAEFinanciersLink
-      .addClickHandler(event -> Window.open(ViewerConstants.NAE_FINANCIER_LINK, ViewerConstants.BLANK_LINK, null));
-
-    EARKFinanciersLink
-      .addClickHandler(event -> Window.open(ViewerConstants.EARK_FINANCIER_LINK, ViewerConstants.BLANK_LINK, null));
-
-    DGLABFinanciersLink
-      .addClickHandler(event -> Window.open(ViewerConstants.DGLAB_FINANCIER_LINK, ViewerConstants.BLANK_LINK, null));
-
-    regionalFund
-      .addClickHandler(event -> Window.open("https://www.struktuurifondid.ee/", ViewerConstants.BLANK_LINK, null));
-
-    ownerLink.addClickHandler(event -> Window.open(ViewerConstants.OWNER_LINK, ViewerConstants.BLANK_LINK, null));
   }
 }

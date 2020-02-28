@@ -8,23 +8,6 @@
             <g:Image ui:field="applicationLink" url="/img/dbptk_horizontal_black_vector.svg" />
         </g:FlowPanel>
         <g:FlowPanel addStyleNames="options" ui:field="options"/>
-        <g:FlowPanel addStyleNames="home-page-footer">
-            <g:FlowPanel addStyleNames="financiers">
-                <g:Label  addStyleNames="footer-label">
-                    <ui:text from='{messages.homePageTextForFinancedBy}'/>
-                </g:Label>
-                <g:Image ui:field="DGLABFinanciersLink" addStyleNames="logo-keep" url="/img/sponsors/DGLAB.jpg" />
-                <g:Image ui:field="EARKFinanciersLink" addStyleNames="logo-keep" url="/img/sponsors/E-ARK.png" />
-                <g:Image ui:field="NAEFinanciersLink" addStyleNames="logo-keep" url="/img/sponsors/NAE.png" />
-                <g:Image ui:field="regionalFund" addStyleNames="logo-keep" url="/img/sponsors/NAE-FEDER.jpg" />
-            </g:FlowPanel>
-            <g:FlowPanel addStyleNames="owner">
-                <g:Label  addStyleNames="footer-label">
-                    <ui:text from='{messages.homePageTextForDevelopedBy}'/>
-                </g:Label>
-                <g:Image ui:field="ownerLink" addStyleNames="logo-keep" url="/img/sponsors/KEEP.svg" />
-            </g:FlowPanel>
-        </g:FlowPanel>
     </g:FlowPanel>
 
 </ui:UiBinder>

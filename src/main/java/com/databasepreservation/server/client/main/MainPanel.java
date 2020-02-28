@@ -13,6 +13,7 @@ import com.databasepreservation.common.client.common.sidebar.ColumnsManagementSi
 import com.databasepreservation.common.client.common.sidebar.DataTransformationSidebar;
 import com.databasepreservation.common.client.common.sidebar.DatabaseSidebar;
 import com.databasepreservation.common.client.common.sidebar.Sidebar;
+import com.databasepreservation.common.client.common.sponsors.SponsorsPanel;
 import com.databasepreservation.common.client.common.utils.ContentPanelLoader;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.common.utils.RightPanelLoader;

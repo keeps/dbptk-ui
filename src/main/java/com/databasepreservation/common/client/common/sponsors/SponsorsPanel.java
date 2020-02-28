@@ -1,4 +1,4 @@
-package com.databasepreservation.server.client.main;
+package com.databasepreservation.common.client.common.sponsors;
 
 import com.databasepreservation.common.client.common.ContentPanel;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
