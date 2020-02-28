@@ -765,6 +765,7 @@ pre code {
 
 .btn:disabled {
     background-color: #ddd;
+    cursor: not-allowed;
 }
 
 .btn:active {
