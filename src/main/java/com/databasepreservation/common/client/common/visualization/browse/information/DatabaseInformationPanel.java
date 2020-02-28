@@ -7,6 +7,7 @@ import com.databasepreservation.common.client.common.RightPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerSchema;
@@ -32,8 +33,8 @@ public class DatabaseInformationPanel extends RightPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, DatabaseInformationPanel> instances = new HashMap<>();
 
-  public static DatabaseInformationPanel getInstance(ViewerDatabase database) {
-    return instances.computeIfAbsent(database.getUuid(), k -> new DatabaseInformationPanel(database));
+  public static DatabaseInformationPanel getInstance(ViewerDatabase database, CollectionStatus status) {
+    return instances.computeIfAbsent(database.getUuid(), k -> new DatabaseInformationPanel(database, status));
   }
 
   interface DatabaseInformationPanelUiBinder extends UiBinder<Widget, DatabaseInformationPanel> {
@@ -43,6 +44,7 @@ public class DatabaseInformationPanel extends RightPanel {
 
   private ViewerDatabase database;
   private boolean advancedMode = false; // True means advanced attributes are on, false means advanced view is off
+  private CollectionStatus status;
 
   @UiField
   FlowPanel header;
@@ -62,8 +64,9 @@ public class DatabaseInformationPanel extends RightPanel {
   @UiField
   SimplePanel cardTitle;
 
-  private DatabaseInformationPanel(ViewerDatabase database) {
+  private DatabaseInformationPanel(ViewerDatabase database, CollectionStatus status) {
     this.database = database;
+    this.status = status;
     initWidget(uiBinder.createAndBindUi(this));
 
     init();

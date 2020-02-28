@@ -364,7 +364,7 @@ public class MainPanel extends Composite {
         setContent(databaseUUID, HistoryManager.ROUTE_DATABASE, currentHistoryPath.get(0), new RightPanelLoader() {
           @Override
           public RightPanel load(ViewerDatabase database, CollectionStatus status) {
-            return DatabaseInformationPanel.getInstance(database);
+            return DatabaseInformationPanel.getInstance(database, status);
           }
         });
 

@@ -123,6 +123,7 @@ public class TableManagementPanel extends ContentPanel {
               final CollectionObserver collectionObserver = ObserverManager.getCollectionObserver();
               collectionObserver.setCollectionStatus(collectionStatus);
               Toast.showInfo(messages.tableManagementPageTitle(), messages.tableManagementPageToastDescription());
+              changes = false;
             }).updateCollectionConfiguration(database.getUuid(), database.getUuid(), collectionStatus);
           } else {
             Dialogs.showErrors(messages.tableManagementPageTitle(), messages.tableManagementPageDialogUniqueError(),

@@ -18,6 +18,7 @@ import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
+import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.models.structure.ViewerSchema;
@@ -206,7 +207,9 @@ public class DatabaseSearchPanel extends RightPanel implements ICollectionStatus
       tableContainer = new SimplePanel();
       tableContainer.setVisible(false);
 
-      header = CommonClientUtils.getHeader(table, "h3", database.getMetadata().getSchemas().size() > 1);
+      final TableStatus tableStatus = status.getTableStatusByTableId(table.getId());
+
+      header = CommonClientUtils.getHeader(tableStatus, table, "h3", database.getMetadata().getSchemas().size() > 1);
       header.setVisible(false);
 
       add(header);
