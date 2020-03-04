@@ -71,6 +71,7 @@ public class ViewerConstants {
   public static final String VIEWER_INDEX_FOLDER = "index";
   public static final String VIEWER_ACTIVITY_LOG_FOLDER = "activity-logs";
   public static final String VIEWER_DATABASES_FOLDER = "databases";
+  public static final String VIEWER_H2_DATA_FOLDER = "h2/data";
 
   public static final String MEDIA_TYPE_APPLICATION_OCTET_STREAM = "application/octet-stream";
   public static final String MEDIA_TYPE_TEXT_HTML = "text/html";

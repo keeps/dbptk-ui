@@ -6,10 +6,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import javax.servlet.http.HttpServlet;
+import javax.sql.DataSource;
 
 import org.jasig.cas.client.session.SingleSignOutHttpSessionListener;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.servlet.ServletRegistrationBean;
 import org.springframework.boot.web.servlet.context.ServletWebServerInitializedEvent;
@@ -26,6 +28,7 @@ import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.filter.OnOffFilter;
 import com.databasepreservation.common.server.BrowserServiceImpl;
 import com.databasepreservation.common.server.ViewerConfiguration;
+
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @SpringBootApplication
@@ -220,6 +223,20 @@ public class DBVTK {
     registrationBean.addUrlPatterns("/login", "/logout");
 
     return registrationBean;
+  }
+
+  /*********************
+   * H2 Datasource
+   *********************/
+  @Bean
+  public DataSource getDataSource() {
+    DataSourceBuilder dataSourceBuilder = DataSourceBuilder.create();
+    dataSourceBuilder.driverClassName("org.h2.Driver");
+    dataSourceBuilder
+      .url("jdbc:h2:file:" + ViewerConfiguration.getInstance().getH2Path().normalize().toAbsolutePath().toString());
+    dataSourceBuilder.username("sa");
+    dataSourceBuilder.password("");
+    return dataSourceBuilder.build();
   }
 
   // @Bean

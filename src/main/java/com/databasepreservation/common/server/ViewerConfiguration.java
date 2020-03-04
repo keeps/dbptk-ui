@@ -112,6 +112,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   private static Path mapDBPath;
   private static Path activityLogsPath;
   private static Path databasesPath;
+  private static Path h2Path;
 
   // Configuration related objects
   private static CompositeConfiguration viewerConfiguration = null;
@@ -322,6 +323,10 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     return databasesPath;
   }
 
+  public Path getH2Path() {
+    return h2Path;
+  }
+
   /*
    * Specific parts to the configuration used in the DBVTK
    * ____________________________________________________________________________________________________________________
@@ -423,6 +428,8 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     mapDBPath = viewerHomePath.resolve(ViewerConstants.VIEWER_MAPDB_FOLDER);
     activityLogsPath = viewerHomePath.resolve(ViewerConstants.VIEWER_ACTIVITY_LOG_FOLDER);
     databasesPath = viewerHomePath.resolve(ViewerConstants.VIEWER_DATABASES_FOLDER);
+
+    h2Path = viewerHomePath.resolve(ViewerConstants.VIEWER_H2_DATA_FOLDER);
 
     configureLogback();
 
