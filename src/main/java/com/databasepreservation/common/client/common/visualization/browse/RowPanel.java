@@ -135,13 +135,13 @@ public class RowPanel extends RightPanel {
   }
 
   private void setTitle() {
-    recordHeader.setWidget(CommonClientUtils.getHeader(table, "h1", database.getMetadata().getSchemas().size() > 1));
+    recordHeader.setWidget(CommonClientUtils.getHeader(status.getTableStatusByTableId(table.getId()), table, "h1", database.getMetadata().getSchemas().size() > 1));
   }
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
     BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forRecord(database.getMetadata().getName(),
-      database.getUuid(), table.getNameWithoutPrefix(), table.getId(), rowUUID));
+      database.getUuid(), status.getTableStatus(table.getUuid()).getCustomName(), table.getId(), rowUUID));
   }
 
   private void init() {
