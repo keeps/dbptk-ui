@@ -70,12 +70,14 @@ public class ZipOutputStream extends CSVOutputStream {
     Iterator<ViewerRow> iterator = viewerRows.iterator();
     int nIndex = 0;
 
+    int maxIndex = sublist.getFirstElementIndex() + sublist.getMaximumElementCount();
+
     try (ZipArchiveOutputStream zipArchiveOutputStream = new ZipArchiveOutputStream(out)) {
       zipArchiveOutputStream.setUseZip64(Zip64Mode.AsNeeded);
       zipArchiveOutputStream.setMethod(ZipArchiveOutputStream.DEFLATED);
 
       final List<ColumnStatus> binaryColumns = configTable.getBinaryColumns();
-      while (iterator.hasNext() && (nIndex <= sublist.getMaximumElementCount() || all)) {
+      while (iterator.hasNext() && (nIndex < maxIndex || all)) {
         ViewerRow row = iterator.next();
         if (nIndex < (sublist.getFirstElementIndex())) {
           nIndex++;
@@ -141,8 +143,10 @@ public class ZipOutputStream extends CSVOutputStream {
       CSVPrinter printer = null;
       boolean isFirst = true;
 
+      int maxIndex = sublist.getFirstElementIndex() + sublist.getMaximumElementCount();
+
       Iterator<ViewerRow> iterator = viewerRowsClone.iterator();
-      while (iterator.hasNext() && (nIndex <= sublist.getMaximumElementCount() || all)) {
+      while (iterator.hasNext() && (nIndex < maxIndex || all)) {
         ViewerRow row = iterator.next();
         if (nIndex < sublist.getFirstElementIndex()) {
           nIndex++;

@@ -199,7 +199,7 @@ public class DatabaseSidebar extends Composite implements Sidebar, ICollectionSt
       schema.setViewsSchemaUUID();
 
       for (ViewerTable table : schema.getTables()) {
-        if (!table.isCustomView() && !table.isMaterializedView()) {
+        if (!table.isMaterializedView()) {
           if (collectionStatus.showTable(table.getUuid())) {
             schemaItems.add(createTableItem(schema, table, totalSchemas, iconTag));
           }

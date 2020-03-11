@@ -7,14 +7,22 @@
  */
 package com.databasepreservation.common.server.index.schema.collections;
 
-import static com.databasepreservation.common.client.ViewerConstants.*;
+import static com.databasepreservation.common.client.ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX;
+import static com.databasepreservation.common.client.ViewerConstants.SOLR_ROWS_NESTED_TABLE_ID;
+import static com.databasepreservation.common.client.ViewerConstants.SOLR_ROWS_TABLE_ID;
+import static com.databasepreservation.common.client.ViewerConstants.SOLR_ROWS_TABLE_UUID;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
-import com.databasepreservation.common.client.models.structure.ViewerNestedRow;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
-import org.joda.time.DateTime;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
@@ -27,9 +35,13 @@ import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.server.index.factory.SolrClientFactory;
-import com.databasepreservation.common.server.index.schema.*;
+import com.databasepreservation.common.server.index.schema.AbstractSolrCollection;
+import com.databasepreservation.common.server.index.schema.CopyField;
+import com.databasepreservation.common.server.index.schema.Field;
+import com.databasepreservation.common.server.index.schema.SolrBootstrapUtils;
+import com.databasepreservation.common.server.index.schema.SolrCollection;
+import com.databasepreservation.common.server.index.schema.SolrRowsCollectionRegistry;
 import com.databasepreservation.common.server.index.utils.SolrUtils;
-import com.databasepreservation.utils.JodaUtils;
 
 public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
   private static final Logger LOGGER = LoggerFactory.getLogger(RowsCollection.class);
@@ -99,7 +111,7 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
     viewerRow.setTableUUID(SolrUtils.objectToString(doc.get(ViewerConstants.SOLR_ROWS_TABLE_UUID), null));
     viewerRow.setNestedUUID(SolrUtils.objectToString(doc.get(ViewerConstants.SOLR_ROWS_NESTED_UUID), null));
     viewerRow
-        .setNestedOriginalUUID(SolrUtils.objectToString(doc.get(ViewerConstants.SOLR_ROWS_NESTED_ORIGINAL_UUID), null));
+      .setNestedOriginalUUID(SolrUtils.objectToString(doc.get(ViewerConstants.SOLR_ROWS_NESTED_ORIGINAL_UUID), null));
     viewerRow.setNestedTableId(SolrUtils.objectToString(doc.get(ViewerConstants.SOLR_ROWS_NESTED_TABLE_ID), null));
 
     Map<String, ViewerCell> cells = new LinkedHashMap<>();
@@ -134,14 +146,13 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
   private ViewerRow populateNestedRow(SolrDocument doc) throws ViewerException {
     ViewerRow nestedRow = super.fromSolrDocument(doc);
 
-    nestedRow.setTableId(SolrUtils.objectToString(doc.get(ViewerConstants.SOLR_ROWS_TABLE_ID), null));
-    nestedRow.setTableUUID(SolrUtils.objectToString(doc.get(ViewerConstants.SOLR_ROWS_TABLE_UUID), null));
-    nestedRow.setTableId(SolrUtils.objectToString(doc.get(ViewerConstants.SOLR_ROWS_NESTED_TABLE_ID), null));
+    nestedRow.setTableId(SolrUtils.objectToString(doc.get(SOLR_ROWS_TABLE_ID), null));
+    nestedRow.setTableUUID(SolrUtils.objectToString(doc.get(SOLR_ROWS_TABLE_UUID), null));
+    nestedRow.setTableId(SolrUtils.objectToString(doc.get(SOLR_ROWS_NESTED_TABLE_ID), null));
     nestedRow.setNestedUUID(SolrUtils.objectToString(doc.get(ViewerConstants.SOLR_ROWS_NESTED_UUID), null));
     nestedRow
       .setNestedOriginalUUID(SolrUtils.objectToString(doc.get(ViewerConstants.SOLR_ROWS_NESTED_ORIGINAL_UUID), null));
-    nestedRow
-        .setNestedTableId(SolrUtils.objectToString(doc.get(SOLR_ROWS_NESTED_TABLE_ID), null));
+    nestedRow.setNestedTableId(SolrUtils.objectToString(doc.get(SOLR_ROWS_NESTED_TABLE_ID), null));
 
     Map<String, ViewerCell> cells = new LinkedHashMap<>();
     for (Map.Entry<String, Object> entry : doc) {
@@ -166,13 +177,14 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
 
     if (columnName.startsWith(ViewerConstants.SOLR_INDEX_ROW_COLUMN_NAME_PREFIX)) {
       if (value instanceof Date) {
-        DateTime date = new DateTime(value, JodaUtils.DEFAULT_CHRONOLOGY);
+        // DateTime date = new DateTime(value, JodaUtils.DEFAULT_CHRONOLOGY);
+        final String dateTimeString = ((Date) value).toInstant().toString();
         if (columnName.endsWith(ViewerConstants.SOLR_DYN_TDATE)) {
-          viewerCell = Optional.of(new ViewerCell(JodaUtils.solrDateDisplay(date)));
+          viewerCell = Optional.of(new ViewerCell(dateTimeString));
         } else if (columnName.endsWith(ViewerConstants.SOLR_DYN_TTIME)) {
-          viewerCell = Optional.of(new ViewerCell(JodaUtils.solrTimeDisplay(date)));
+          viewerCell = Optional.of(new ViewerCell(dateTimeString));
         } else if (columnName.endsWith(ViewerConstants.SOLR_DYN_TDATETIME)) {
-          viewerCell = Optional.of(new ViewerCell(JodaUtils.solrDateTimeDisplay(date)));
+          viewerCell = Optional.of(new ViewerCell(dateTimeString));
         } else {
           viewerCell = Optional.of(new ViewerCell(value.toString()));
         }

@@ -703,7 +703,7 @@ public class ToolkitStructure2ViewerStructure {
 
       switch (columnType.getDbType()) {
         case DATETIME:
-          result.setValue(JodaUtils.xsDatetimeParse(simpleData).withZone(DateTimeZone.UTC).toString());
+        result.setValue(JodaUtils.xsDatetimeParse(simpleData).withZone(DateTimeZone.UTC).toString());
           break;
         case DATETIME_JUST_DATE:
           result.setValue(JodaUtils.xsDateParse(simpleData).withTime(0, 0, 0, 0).withZone(DateTimeZone.UTC).toString());

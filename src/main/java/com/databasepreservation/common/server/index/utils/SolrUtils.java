@@ -131,7 +131,9 @@ public class SolrUtils {
     IndexResult<T> ret;
     SolrQuery query = new SolrQuery();
     query.setQuery(parseFilter(filter));
-    query.setSorts(parseSorter(sorter));
+    final List<SolrQuery.SortClause> sortClauses = parseSorter(sorter);
+    sortClauses.add(SolrQuery.SortClause.asc(RodaConstants.INDEX_UUID));
+    query.setSorts(sortClauses);
     query.setStart(sublist.getFirstElementIndex());
     query.setRows(sublist.getMaximumElementCount());
 
@@ -560,8 +562,8 @@ public class SolrUtils {
         + param.getNestedOriginalUUID());
     } else if (parameter instanceof BlockJoinParentFilterParameter) {
       BlockJoinParentFilterParameter param = (BlockJoinParentFilterParameter) parameter;
-      ret.append("+({!parent which='tableId:" + param.getParentTableId() + "' filters='uuid:"
-        + param.getNestedUUID() + "' }" + param.getSolrName() + ":" + param.getValue() + ")");
+      ret.append("+({!parent which='tableId:" + param.getParentTableId() + "' filters='uuid:" + param.getNestedUUID()
+        + "' }" + param.getSolrName() + ":" + param.getValue() + ")");
     } else {
       LOGGER.error("Unsupported filter parameter class: {}", parameter.getClass().getName());
       throw new RequestNotValidException("Unsupported filter parameter class: " + parameter.getClass().getName());

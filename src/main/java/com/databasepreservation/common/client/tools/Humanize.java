@@ -83,15 +83,40 @@ public class Humanize {
   }
 
   public static String formatDateTime(String dateTimeString) {
-    if (ViewerStringUtils.isBlank(dateTimeString))
+    if (ViewerStringUtils.isBlank(dateTimeString)) {
       return dateTimeString;
+    }
+
     DateTimeFormat archivalDateFormat = DateTimeFormat.getFormat("yyyy-MM-ddTHH:mm:ss.SSSZZZZ");
     DateTimeFormat normalizedDateFormat = DateTimeFormat.getFormat("yyyy-MM-dd HH:mm (zzzz)");
+
     try {
       final Date parsed = archivalDateFormat.parse(dateTimeString);
       return normalizedDateFormat.format(parsed);
     } catch (IllegalArgumentException e) {
       return dateTimeString;
+    }
+  }
+
+  public static String formatDateTimeFromSolr(String dateTimeString, String outputDateTimeFormat) {
+    if (ViewerStringUtils.isBlank(dateTimeString)) {
+      return dateTimeString;
+    }
+
+
+
+    DateTimeFormat input = DateTimeFormat.getFormat("yyyy-MM-ddTHH:mm:ss.SSSZZZ");
+    DateTimeFormat output = DateTimeFormat.getFormat(outputDateTimeFormat);
+
+    try {
+      return output.format(input.parse(dateTimeString));
+    } catch (IllegalArgumentException e) {
+      input = DateTimeFormat.getFormat("yyyy-MM-ddTHH:mm:ssZZZ");
+      try {
+        return output.format(input.parse(dateTimeString));
+      } catch (IllegalArgumentException ea) {
+        return dateTimeString;
+      }
     }
   }
 

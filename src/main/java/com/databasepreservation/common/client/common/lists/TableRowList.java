@@ -39,6 +39,7 @@ import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.services.CollectionService;
 import com.databasepreservation.common.client.tools.FilterUtils;
+import com.databasepreservation.common.client.tools.Humanize;
 import com.databasepreservation.common.client.tools.JSOUtils;
 import com.databasepreservation.common.client.tools.RestUtils;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
@@ -244,19 +245,15 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
 
           // if it exists in Solr, it is not null
           switch (configColumn.getType()) {
-            // case DATETIME:
-            // ret =
-            // SafeHtmlUtils.fromString(JodaUtils.solrDateTimeDisplay(JodaUtils.solrDateParse(value)));
-            // break;
-            // case DATETIME_JUST_DATE:
-            // ret =
-            // SafeHtmlUtils.fromString(JodaUtils.solrDateDisplay(JodaUtils.solrDateParse(value)));
-            // break;
-            // case DATETIME_JUST_TIME:
-            // ret =
-            // SafeHtmlUtils.fromString(JodaUtils.solrTimeDisplay(JodaUtils.solrDateParse(value)));
-            // ret = SafeHtmlUtils.fromString(new Date().)
-            // break;
+            case DATETIME:
+              ret = SafeHtmlUtils.fromString(Humanize.formatDateTimeFromSolr(value, "yyyy-MM-dd HH:mm:ss"));
+              break;
+            case DATETIME_JUST_DATE:
+              ret = SafeHtmlUtils.fromString(Humanize.formatDateTimeFromSolr(value, "yyyy-MM-dd"));
+              break;
+            case DATETIME_JUST_TIME:
+              ret = SafeHtmlUtils.fromString(Humanize.formatDateTimeFromSolr(value, "HH:mm:ss"));
+              break;
             case BOOLEAN:
             case ENUMERATION:
             case TIME_INTERVAL:
@@ -472,17 +469,21 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
 
     Sublist sublist;
 
+    GWT.log("exportall:" + exportAll);
+
     if (!exportAll) {
       sublist = currentSubList;
     } else {
       sublist = null;
     }
 
+    GWT.log("s: " + sublist);
+
     FindRequest findRequest = new FindRequest(ViewerRow.class.getName(), getFilter(), currentSorter, sublist,
       Facets.NONE, false, fieldsToSolr, extraParameters);
 
     if (!nested && !wrapper.isNested()) {
-        FilterUtils.filterByTable(findRequest.filter, table.getSchemaName() + "." + table.getName());
+      FilterUtils.filterByTable(findRequest.filter, table.getSchemaName() + "." + table.getName());
     }
 
     return RestUtils.createExportTableUri(database.getUuid(), table.getSchemaName(), table.getName(), findRequest,
