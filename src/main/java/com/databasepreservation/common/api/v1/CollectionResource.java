@@ -650,7 +650,6 @@ public class CollectionResource implements CollectionService {
       fields, findRequest.extraParameters);
     final IterableIndexResult clone = solrManager.findAllRows(databaseUUID, findRequest.filter, findRequest.sorter,
       fields, findRequest.extraParameters);
-    fields.remove(ViewerConstants.INDEX_ID);
     return ApiUtils.okResponse(new StreamResponse(new ZipOutputStream(databaseUUID, configTable, allRows, clone,
       zipFilename, filename, findRequest.fieldsToReturn, findRequest.sublist, exportDescription, fieldsToHeader)));
   }

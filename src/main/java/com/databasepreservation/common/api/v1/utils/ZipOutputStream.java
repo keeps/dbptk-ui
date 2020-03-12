@@ -54,7 +54,6 @@ public class ZipOutputStream extends CSVOutputStream {
     this.csvFilename = csvFilename;
     this.viewerRows = viewerRows;
     this.fieldsToReturn = Stream.of(fieldsToHeader.split(",")).collect(Collectors.toList());
-    ;
     this.viewerRowsClone = viewerRowsClone;
     this.sublist = sublist;
     this.exportDescriptions = exportDescriptions;

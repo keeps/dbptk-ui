@@ -103,8 +103,6 @@ public class Humanize {
       return dateTimeString;
     }
 
-
-
     DateTimeFormat input = DateTimeFormat.getFormat("yyyy-MM-ddTHH:mm:ss.SSSZZZ");
     DateTimeFormat output = DateTimeFormat.getFormat(outputDateTimeFormat);
 
