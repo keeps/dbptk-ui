@@ -297,7 +297,8 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
         card.addStyleName("card-disabled");
         grandChild.clear();
         container.clear();
-        rootTable.redrawTable();
+        selectTable.getSelectionModel().clear();
+        rootTable.redrawTable(denormalizeConfiguration);
         for (Button button : buttons) {
           button.setEnabled(true);
         }

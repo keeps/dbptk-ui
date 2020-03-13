@@ -37,5 +37,4 @@ public class ObserverManager {
     instantiate();
     return columnVisibilityObserver;
   }
-
 }

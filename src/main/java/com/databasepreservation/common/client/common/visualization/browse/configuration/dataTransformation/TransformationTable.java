@@ -93,10 +93,7 @@ public class TransformationTable extends Composite {
     drawTable(originalColumns);
   }
 
-  /**
-   *
-   */
-  public void redrawTable() {
+  public void redrawTable(DenormalizeConfiguration denormalizeConfiguration) {
     List<ColumnWrapper> columns = new ArrayList<>(originalColumns);
     for (RelatedTablesConfiguration relatedTable : denormalizeConfiguration.getRelatedTables()) {
       setColumnsToInclude(relatedTable, columns);

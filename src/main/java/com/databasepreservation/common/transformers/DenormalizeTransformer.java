@@ -33,7 +33,6 @@ import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
 import com.databasepreservation.common.server.index.utils.IterableIndexResult;
 import com.databasepreservation.common.server.index.utils.JsonTransformer;
 import com.databasepreservation.model.exception.ModuleException;
-import com.databasepreservation.utils.JodaUtils;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -109,10 +108,10 @@ public class DenormalizeTransformer {
       NestedColumnStatus nestedColumn = new NestedColumnStatus();
       nestedColumn.setMultiValue(relatedTable.getMultiValue());
       nestedColumn.setOriginalTable(relatedTable.getTableID());
-      List<String> columnName = new ArrayList();
-      List<String> originalType = new ArrayList();
-      List<String> typeName = new ArrayList();
-      List<String> nullable = new ArrayList();
+      List<String> columnName = new ArrayList<>();
+      List<String> originalType = new ArrayList<>();
+      List<String> typeName = new ArrayList<>();
+      List<String> nullable = new ArrayList<>();
 
       for (RelatedColumnConfiguration column : columnsIncluded) {
         ViewerColumn columnBySolrName = database.getMetadata().getTable(relatedTable.getTableUUID())
@@ -127,7 +126,8 @@ public class DenormalizeTransformer {
 
       String template = "";
       for (String templateName : columnName) {
-        template = template + ViewerConstants.OPEN_TEMPLATE_ENGINE + templateName + ViewerConstants.CLOSE_TEMPLATE_ENGINE;
+        template = template + ViewerConstants.OPEN_TEMPLATE_ENGINE + templateName
+          + ViewerConstants.CLOSE_TEMPLATE_ENGINE;
       }
 
       String columnStatusName = "";
@@ -258,11 +258,7 @@ public class DenormalizeTransformer {
       String key = cell.getKey();
       if (columnsToDisplay.contains(key)) {
         ViewerCell cellValue = cell.getValue();
-        if (key.endsWith(ViewerConstants.SOLR_DYN_DATE)) {
-          fields.put(key, JodaUtils.xsDateParse(cellValue.getValue()).toString());
-        } else {
-          fields.put(key, cellValue.getValue());
-        }
+        fields.put(key, cellValue.getValue());
       }
     }
     if (!fields.isEmpty()) {

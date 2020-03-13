@@ -65,8 +65,8 @@ import config.i18n.client.ClientMessages;
  */
 public class ColumnsManagementPanel extends RightPanel implements ICollectionStatusObserver, ISaveButtonObserver {
 
-	private static final String FA_FW = "fa-fw";
-	private ClientMessages messages = GWT.create(ClientMessages.class);
+  private static final String FA_FW = "fa-fw";
+  private ClientMessages messages = GWT.create(ClientMessages.class);
 
   @UiField
   FlowPanel mainHeader;
@@ -154,11 +154,10 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
       collectionStatus.getTableStatusByTableId(tableId).getCustomName(), "h1"), 0);
     mainHeader.setTitle(collectionStatus.getTableStatusByTableId(tableId).getCustomDescription());
 
-		MetadataField instance = MetadataField
-				.createInstance(messages.columnManagementPageDescription());
-		instance.setCSS("table-row-description", "font-size-description");
+    MetadataField instance = MetadataField.createInstance(messages.columnManagementPageDescription());
+    instance.setCSS("table-row-description", "font-size-description");
 
-		content.add(instance);
+    content.add(instance);
 
     btnGotoTable.setText(messages.dataTransformationBtnBrowseTable());
     btnGotoTable.addClickHandler(e -> HistoryManager.gotoTable(database.getUuid(), tableId));
@@ -232,9 +231,8 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
 
   private BasicTablePanel<ColumnStatus> populateTable(final TableStatus tableStatus) {
     Collections.sort(tableStatus.getColumns());
-    BasicTablePanel<ColumnStatus> tablePanel = new BasicTablePanel<>(new FlowPanel(),
-      SafeHtmlUtils.EMPTY_SAFE_HTML, GWT.create(ConfigurationCellTableResources.class),
-      tableStatus.getColumns().iterator(),
+    BasicTablePanel<ColumnStatus> tablePanel = new BasicTablePanel<>(new FlowPanel(), SafeHtmlUtils.EMPTY_SAFE_HTML,
+      GWT.create(ConfigurationCellTableResources.class), tableStatus.getColumns().iterator(),
       new BasicTablePanel.ColumnInfo<>(messages.basicTableHeaderOrder(), 6, getOrderColumn()),
       new BasicTablePanel.ColumnInfo<>(messages.basicTableHeaderTableOrColumn("name"), 0,
         new Column<ColumnStatus, SafeHtml>(new SafeHtmlCell()) {
@@ -514,17 +512,17 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
     };
 
     options.setFieldUpdater((index, columnStatus, value) -> {
-    	if (columnStatus.getType().equals(ViewerType.dbTypes.NESTED)) {
-				Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(),
-						ColumnsOptionsPanel.getInstance(database.getUuid(), columnStatus), messages.basicActionClose(), "btn btn-close",
-						new DefaultAsyncCallback<Void>() {
-							@Override
-							public void onSuccess(Void aVoid) {
-								// todo save just options
-								changes = true;
-							}
-						});
-			}
+      if (columnStatus.getType().equals(ViewerType.dbTypes.NESTED)) {
+        Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(),
+          ColumnsOptionsPanel.getInstance(database.getUuid(), columnStatus), messages.basicActionClose(),
+          "btn btn-close", new DefaultAsyncCallback<Void>() {
+            @Override
+            public void onSuccess(Void aVoid) {
+              // todo save just options
+              changes = true;
+            }
+          });
+      }
     });
     return options;
   }
@@ -548,8 +546,8 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
   private boolean validateUniqueInputs() {
     for (Map.Entry<String, ColumnsManagementPanel> entry : instances.entrySet()) {
       if (entry.getKey().startsWith(database.getUuid()) && (!validateUniqueInput(entry.getValue().editableValues))) {
-				return false;
-			}
+        return false;
+      }
     }
     return true;
   }
@@ -567,8 +565,9 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
 
   private boolean validateCheckboxes() {
     for (Map.Entry<String, ColumnsManagementPanel> entry : instances.entrySet()) {
-      if (entry.getKey().startsWith(database.getUuid()) && (!validateCheckbox(entry.getValue().editableValues, collectionStatus.getTableStatusByTableId(tableId)))) {
-      	return false;
+      if (entry.getKey().startsWith(database.getUuid())
+        && (!validateCheckbox(entry.getValue().editableValues, collectionStatus.getTableStatusByTableId(tableId)))) {
+        return false;
       }
     }
     return true;
@@ -607,7 +606,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
   @Override
   public void updateCollection(CollectionStatus collectionStatus) {
     sidebar.reset(database, collectionStatus);
-  	this.collectionStatus = collectionStatus;
+    this.collectionStatus = collectionStatus;
   }
 
   @Override
@@ -620,7 +619,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
   @Override
   protected void onLoad() {
     super.onLoad();
-    if(!collectionStatus.getTableStatusByTableId(tableId).isShow()){
+    if (!collectionStatus.getTableStatusByTableId(tableId).isShow()) {
       HistoryManager.gotoAdvancedConfiguration(database.getUuid());
     }
   }

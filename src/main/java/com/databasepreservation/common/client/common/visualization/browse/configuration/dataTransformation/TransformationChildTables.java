@@ -96,10 +96,10 @@ public class TransformationChildTables {
           } else {
             if (selectionTablePanel.getSelectionModel().isSelected(object)) {
               DataTransformationUtils.addColumnToInclude(uuid, object, denormalizeConfiguration);
-              rootTable.redrawTable();
+              rootTable.redrawTable(denormalizeConfiguration);
             } else {
               DataTransformationUtils.removeColumnToInclude(uuid, object, denormalizeConfiguration);
-              rootTable.redrawTable();
+              rootTable.redrawTable(denormalizeConfiguration);
             }
             int currentSize = selectionTablePanel.getSelectionModel().getSelectedSet().size();
             if (selectionSize != currentSize) {
