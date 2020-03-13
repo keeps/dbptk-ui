@@ -190,6 +190,10 @@ public class ViewerConstants {
   public static final String LISTS_FACETS_PARAMETERS_ARGS_MINCOUNT_PROPERTY = "minCount";
 
   public static final String I18N_UI_FACETS_PREFIX = "ui.facets";
+
+  public static final String UI_INTERFACE = "ui.interface";
+  public static final String UI_INTERFACE_ROW_PANEL_PROPERTY = "rowPanel";
+  public static final String SHOW_NULL_VALUES = "showNullValues";
   /*
    * SEARCHES FIELDS
    */

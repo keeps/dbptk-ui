@@ -11,6 +11,8 @@ import java.util.TreeSet;
 
 import org.roda.core.data.v2.index.sublist.Sublist;
 
+import com.databasepreservation.common.client.ClientConfigurationManager;
+import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.RightPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
@@ -135,7 +137,8 @@ public class RowPanel extends RightPanel {
   }
 
   private void setTitle() {
-    recordHeader.setWidget(CommonClientUtils.getHeader(status.getTableStatusByTableId(table.getId()), table, "h1", database.getMetadata().getSchemas().size() > 1));
+    recordHeader.setWidget(CommonClientUtils.getHeader(status.getTableStatusByTableId(table.getId()), table, "h1",
+      database.getMetadata().getSchemas().size() > 1));
   }
 
   @Override
@@ -307,6 +310,11 @@ public class RowPanel extends RightPanel {
       }
     }
 
+    final boolean showNullValues = ClientConfigurationManager.getBoolean(false, ViewerConstants.UI_INTERFACE,
+      ViewerConstants.UI_INTERFACE_ROW_PANEL_PROPERTY, ViewerConstants.SHOW_NULL_VALUES);
+
+    GWT.log("showNullValues: " + showNullValues);
+
     if (ViewerStringUtils.isNotBlank(columnStatus.getCustomDescription())) {
       rowField.addColumnDescription(columnStatus.getCustomDescription());
     }
@@ -319,7 +327,13 @@ public class RowPanel extends RightPanel {
       rowField.addReferencedBy(getForeignKeyHTML(messages.references_isReferencedBy(), referencedBy, row), "field");
     }
 
-    content.add(rowField);
+    if (showNullValues) {
+      content.add(rowField);
+    } else {
+      if (value != null) {
+        content.add(rowField);
+      }
+    }
   }
 
   private void getNestedHTML(ColumnStatus columnStatus) {
