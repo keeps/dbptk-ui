@@ -2146,14 +2146,6 @@ html, body, .desktop-main {
     background-color: #089de3;
 }
 
-.form-checkbox input[type="checkbox"]:checked:after {
-    content: '\f00c';
-    font-weight: 600;
-    font-size: 17px;
-    margin-left: -4px;
-    font-family: 'Font Awesome 5 Free';
-}
-
 .form-checkbox {
     width: 100%;
 }

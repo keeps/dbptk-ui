@@ -3,14 +3,17 @@ package com.databasepreservation.common.api.v1;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_SEARCHES_DATABASE_UUID;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.Buffer;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.zip.ZipFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
@@ -36,7 +39,6 @@ import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.JobOperator;
-import org.springframework.batch.core.launch.NoSuchJobException;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
@@ -118,7 +120,7 @@ public class CollectionResource implements CollectionService {
 
   @GET
   @Path("/{databaseUUID}/collection/{collectionUUID}/report")
-	@Produces({MediaType.APPLICATION_OCTET_STREAM})
+  @Produces({MediaType.APPLICATION_OCTET_STREAM})
   @ApiOperation(value = "Downloads the migration report for a specific database")
   public Response getReport(@PathParam("databaseUUID") String databaseUUID) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
@@ -289,8 +291,8 @@ public class CollectionResource implements CollectionService {
   }
 
   @Override
-  public synchronized Boolean createDenormalizeConfigurationFile(String databaseUUID, String collectionUUID, String tableUUID,
-    DenormalizeConfiguration configuration) {
+  public synchronized Boolean createDenormalizeConfigurationFile(String databaseUUID, String collectionUUID,
+    String tableUUID, DenormalizeConfiguration configuration) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
     User user = UserUtility.getUser(request);
     LogEntryState state = LogEntryState.SUCCESS;
@@ -300,8 +302,10 @@ public class CollectionResource implements CollectionService {
     // check if there is no job running on table
     for (JobExecution runningJobExecution : jobExplorer.findRunningJobExecutions("denormalizeJob")) {
       System.out.println(runningJobExecution);
-      if (runningJobExecution.getJobParameters().getString(ViewerConstants.CONTROLLER_TABLE_ID_PARAM).equals(tableUUID)) {
-        throw new RESTException("A job is already running on this table", com.google.gwt.http.client.Response.SC_CONFLICT);
+      if (runningJobExecution.getJobParameters().getString(ViewerConstants.CONTROLLER_TABLE_ID_PARAM)
+        .equals(tableUUID)) {
+        throw new RESTException("A job is already running on this table",
+          com.google.gwt.http.client.Response.SC_CONFLICT);
       }
     }
 
@@ -344,7 +348,7 @@ public class CollectionResource implements CollectionService {
     } finally {
       // register action
       controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,
-          ViewerConstants.CONTROLLER_TABLE_ID_PARAM, tableUUID);
+        ViewerConstants.CONTROLLER_TABLE_ID_PARAM, tableUUID);
     }
     return true;
   }
@@ -360,8 +364,10 @@ public class CollectionResource implements CollectionService {
     // check if there is no job running on table
     for (JobExecution runningJobExecution : jobExplorer.findRunningJobExecutions("denormalizeJob")) {
       System.out.println(runningJobExecution);
-      if (runningJobExecution.getJobParameters().getString(ViewerConstants.CONTROLLER_TABLE_ID_PARAM).equals(tableUUID)) {
-        throw new RESTException("A job is already running on this table", com.google.gwt.http.client.Response.SC_CONFLICT);
+      if (runningJobExecution.getJobParameters().getString(ViewerConstants.CONTROLLER_TABLE_ID_PARAM)
+        .equals(tableUUID)) {
+        throw new RESTException("A job is already running on this table",
+          com.google.gwt.http.client.Response.SC_CONFLICT);
       }
     }
 
@@ -463,20 +469,22 @@ public class CollectionResource implements CollectionService {
 
     DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
 
+    // content/schemaX/tableY/lobZ/recordP.bin
     try {
       ViewerRow row = solrManager.retrieveRows(databaseUUID, rowIndex);
-      if (row != null && row.getTableId().equals(schema + "." + table)) {
-        try {
-          return ApiUtils.okResponse(new StreamResponse(filename, MediaType.APPLICATION_OCTET_STREAM,
-            DownloadUtils.stream(Files.newInputStream(LobPathManager.getPath(ViewerFactory.getViewerConfiguration(),
-              databaseUUID, row.getTableId(), columnIndex, rowIndex)))));
-        } catch (IOException e) {
-          throw new GenericException("There was an IO problem retrieving the LOB.", e);
-        }
+      final ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
+
+      ZipFile zipFile = new ZipFile(database.getPath());
+      final InputStream inputStream = new BufferedInputStream(zipFile.getInputStream(
+        zipFile.getEntry(LobPathManager.getZipFilePath(database, row.getTableUUID(), columnIndex, rowIndex))));
+      if (row.getTableId().equals(schema + "." + table)) {
+        return ApiUtils.okResponse(
+          new StreamResponse(filename, MediaType.APPLICATION_OCTET_STREAM, DownloadUtils.stream(inputStream)));
       } else {
+        state = LogEntryState.FAILURE;
         throw new NotFoundException("LOB not found.");
       }
-    } catch (NotFoundException | GenericException e) {
+    } catch (NotFoundException | GenericException | IOException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
@@ -512,6 +520,7 @@ public class CollectionResource implements CollectionService {
     FindRequest findRequest = null;
 
     try {
+      final ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
       findRequest = JsonUtils.getObjectFromJson(findRequestJson, FindRequest.class);
       final CollectionStatus configurationCollection = ViewerFactory.getConfigurationManager()
         .getConfigurationCollection(databaseUUID, databaseUUID);
@@ -521,10 +530,10 @@ public class CollectionResource implements CollectionService {
         return handleCSVExport(solrManager, databaseUUID, configTable, findRequest, filename, exportDescription,
           fieldsToHeader);
       } else {
-        return handleCSVExportWithLobs(solrManager, databaseUUID, configTable, findRequest, zipFilename, filename,
+        return handleCSVExportWithLobs(solrManager, database, databaseUUID, configTable, findRequest, zipFilename, filename,
           exportDescription, fieldsToHeader);
       }
-    } catch (GenericException | RequestNotValidException e) {
+    } catch (GenericException | RequestNotValidException | NotFoundException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
@@ -569,6 +578,7 @@ public class CollectionResource implements CollectionService {
     controllerAssistant.checkRoles(user);
 
     try {
+      final ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
       final ViewerRow viewerRow = solrManager.retrieveRows(databaseUUID, rowIndex);
       final CollectionStatus configurationCollection = ViewerFactory.getConfigurationManager()
         .getConfigurationCollection(databaseUUID, databaseUUID);
@@ -578,7 +588,7 @@ public class CollectionResource implements CollectionService {
         if (Boolean.FALSE.equals(exportLobs) && StringUtils.isBlank(zipFilename)) {
           return handleSingleCSVExportWithoutLOBs(databaseUUID, configTable, viewerRow, filename, exportDescription);
         } else {
-          return handleSingleCSVExportWithLOBs(databaseUUID, configTable, viewerRow, filename, zipFilename,
+          return handleSingleCSVExportWithLOBs(database, configTable, viewerRow, filename, zipFilename,
             exportDescription);
         }
       } else {
@@ -613,13 +623,13 @@ public class CollectionResource implements CollectionService {
         .toStreamResponse());
   }
 
-  private Response handleSingleCSVExportWithLOBs(String databaseUUID, TableStatus configTable, ViewerRow row,
+  private Response handleSingleCSVExportWithLOBs(ViewerDatabase database, TableStatus configTable, ViewerRow row,
     String filename, String zipFilename, boolean exportDescriptions) throws GenericException {
     final CollectionStatus configurationCollection = ViewerFactory.getConfigurationManager()
-      .getConfigurationCollection(databaseUUID, databaseUUID);
+      .getConfigurationCollection(database.getUuid(), database.getUuid());
 
     final List<String> fieldsToReturn = configurationCollection.getFieldsToReturn(configTable.getId());
-    return ApiUtils.okResponse(new StreamResponse(new ZipOutputStreamSingleRow(databaseUUID, configTable, row,
+    return ApiUtils.okResponse(new StreamResponse(new ZipOutputStreamSingleRow(database, configTable, row,
       zipFilename, filename, fieldsToReturn, exportDescriptions)));
   }
 
@@ -641,7 +651,7 @@ public class CollectionResource implements CollectionService {
     }
   }
 
-  private Response handleCSVExportWithLobs(DatabaseRowsSolrManager solrManager, final String databaseUUID,
+  private Response handleCSVExportWithLobs(DatabaseRowsSolrManager solrManager, ViewerDatabase database, final String databaseUUID,
     final TableStatus configTable, final FindRequest findRequest, final String zipFilename, final String filename,
     final boolean exportDescription, String fieldsToHeader) {
     List<String> fields = findRequest.fieldsToReturn;
@@ -650,7 +660,7 @@ public class CollectionResource implements CollectionService {
       fields, findRequest.extraParameters);
     final IterableIndexResult clone = solrManager.findAllRows(databaseUUID, findRequest.filter, findRequest.sorter,
       fields, findRequest.extraParameters);
-    return ApiUtils.okResponse(new StreamResponse(new ZipOutputStream(databaseUUID, configTable, allRows, clone,
+    return ApiUtils.okResponse(new StreamResponse(new ZipOutputStream(databaseUUID, database, configTable, allRows, clone,
       zipFilename, filename, findRequest.fieldsToReturn, findRequest.sublist, exportDescription, fieldsToHeader)));
   }
 

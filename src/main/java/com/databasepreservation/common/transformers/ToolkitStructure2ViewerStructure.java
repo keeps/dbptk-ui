@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -94,6 +96,7 @@ import com.databasepreservation.utils.XMLUtils;
 public class ToolkitStructure2ViewerStructure {
   private static final Logger LOGGER = LoggerFactory.getLogger(ToolkitStructure2ViewerStructure.class);
   private static boolean simpleMetadata = false;
+  private static Pattern rowIndexPattern = Pattern.compile("^(.*\\.)?(\\d+)$");
 
   /**
    * Private empty constructor
@@ -243,6 +246,7 @@ public class ToolkitStructure2ViewerStructure {
     ViewerSchema result = new ViewerSchema();
     result.setUuid(SolrUtils.randomUUID());
     result.setName(schema.getName());
+    result.setSiardName(ViewerConstants.SIARD_SCHEMA_PREFIX + schema.getIndex());
     result.setDescription(schema.getDescription());
     if (!simpleMetadata) {
       result.setRoutines(getRoutines(vdb, schema.getRoutines()));
@@ -351,6 +355,7 @@ public class ToolkitStructure2ViewerStructure {
     result.setId(table.getId());
     result.setUuid(references.getTableUUID(table.getId()));
     result.setName(table.getName());
+    result.setSiardName(ViewerConstants.SIARD_TABLE_PREFIX + table.getIndex());
     result.setDescription(table.getDescription());
     result.setCountRows(table.getRows());
     result.setSchemaName(table.getSchema());
@@ -677,22 +682,25 @@ public class ToolkitStructure2ViewerStructure {
     ViewerType columnType = table.getColumns().get(colIndex).getType();
 
     if (cell instanceof BinaryCell) {
-      BinaryCell binaryCell = (BinaryCell) cell;
+//      BinaryCell binaryCell = (BinaryCell) cell;
+//      binaryCell.cleanResources();
+//
+//      InputStream stream = null;
+//      try {
+//        Path outputPath = LobPathManager.getPath(configuration, databaseUUID, table.getId(), colIndex, rowUUID);
+//        Files.createDirectories(outputPath.getParent());
+//        stream = binaryCell.createInputStream();
+//        Files.copy(stream, outputPath, StandardCopyOption.REPLACE_EXISTING);
+//      } catch (IOException | ModuleException e) {
+//        throw new ViewerException("Could not copy blob", e);
+//      } finally {
+//        IOUtils.closeQuietly(stream);
+//        binaryCell.cleanResources();
+//      }
 
-      InputStream stream = null;
-      try {
-        Path outputPath = LobPathManager.getPath(configuration, databaseUUID, table.getId(), colIndex, rowUUID);
-        Files.createDirectories(outputPath.getParent());
-        stream = binaryCell.createInputStream();
-        Files.copy(stream, outputPath, StandardCopyOption.REPLACE_EXISTING);
-      } catch (IOException | ModuleException e) {
-        throw new ViewerException("Could not copy blob", e);
-      } finally {
-        IOUtils.closeQuietly(stream);
-        binaryCell.cleanResources();
-      }
+      String index = getRowIndex(cell.getId());
 
-      result.setValue(table.getSchemaName() + "_" + table.getName() + "_" + rowIndex + ".bin");
+      result.setValue(ViewerConstants.SIARD_RECORD_PREFIX + index + ViewerConstants.SIARD_LOB_FILE_EXTENSION);
     } else if (cell instanceof ComposedCell) {
       ComposedCell composedCell = (ComposedCell) cell;
       LOGGER.debug("composed cell not supported yet");
@@ -720,6 +728,15 @@ public class ToolkitStructure2ViewerStructure {
     }
 
     return result;
+  }
+
+  private static String getRowIndex(String cellId) throws ViewerException {
+    final Matcher matcher = rowIndexPattern.matcher(cellId);
+    if (matcher.matches()) {
+      return matcher.group(2);
+    }
+
+    throw new ViewerException("Could not obtain row index for cell with id: " + cellId);
   }
 
   private static String removeUnicode(String string) {

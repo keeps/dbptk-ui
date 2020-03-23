@@ -5,12 +5,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.nio.file.Files;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.zip.ZipFile;
 
 import org.apache.commons.compress.archivers.zip.Zip64Mode;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
@@ -25,8 +25,8 @@ import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.structure.ViewerCell;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
-import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.index.utils.IterableIndexResult;
 import com.databasepreservation.common.utils.LobPathManager;
 
@@ -35,6 +35,7 @@ import com.databasepreservation.common.utils.LobPathManager;
  */
 public class ZipOutputStream extends CSVOutputStream {
   private final String databaseUUID;
+  private final ViewerDatabase database;
   private final TableStatus configTable;
   private final String zipFilename;
   private final String csvFilename;
@@ -44,11 +45,13 @@ public class ZipOutputStream extends CSVOutputStream {
   private Sublist sublist;
   private final boolean exportDescriptions;
 
-  public ZipOutputStream(final String databaseUUID, final TableStatus configTable, final IterableIndexResult viewerRows,
-    final IterableIndexResult viewerRowsClone, final String zipFilename, final String csvFilename,
-    List<String> fieldsToReturn, Sublist sublist, boolean exportDescriptions, String fieldsToHeader) {
+  public ZipOutputStream(final String databaseUUID, final ViewerDatabase database, final TableStatus configTable,
+    final IterableIndexResult viewerRows, final IterableIndexResult viewerRowsClone, final String zipFilename,
+    final String csvFilename, List<String> fieldsToReturn, Sublist sublist, boolean exportDescriptions,
+    String fieldsToHeader) {
     super(zipFilename, ',');
     this.databaseUUID = databaseUUID;
+    this.database = database;
     this.configTable = configTable;
     this.zipFilename = zipFilename;
     this.csvFilename = csvFilename;
@@ -61,6 +64,8 @@ public class ZipOutputStream extends CSVOutputStream {
 
   @Override
   public void consumeOutputStream(OutputStream out) throws IOException {
+    ZipFile siardArchive = new ZipFile(database.getPath());
+
     boolean all = false;
     if (sublist == null) {
       sublist = Sublist.NONE;
@@ -82,7 +87,7 @@ public class ZipOutputStream extends CSVOutputStream {
           nIndex++;
           continue;
         } else {
-          writeToZipFile(zipArchiveOutputStream, row, binaryColumns);
+          writeToZipFile(siardArchive, zipArchiveOutputStream, row, binaryColumns);
         }
         nIndex++;
       }
@@ -118,19 +123,20 @@ public class ZipOutputStream extends CSVOutputStream {
     return null;
   }
 
-  private void writeToZipFile(ZipArchiveOutputStream out, ViewerRow row, List<ColumnStatus> binaryColumns)
-    throws IOException {
+  private void writeToZipFile(ZipFile siardArchive, ZipArchiveOutputStream out, ViewerRow row,
+    List<ColumnStatus> binaryColumns) throws IOException {
+
     for (Map.Entry<String, ViewerCell> cellEntry : row.getCells().entrySet()) {
       final ColumnStatus binaryColumn = findBinaryColumn(binaryColumns, cellEntry.getKey());
 
       if (binaryColumn != null) {
+        final InputStream siardArchiveInputStream = siardArchive.getInputStream(siardArchive.getEntry(
+          LobPathManager.getZipFilePath(database, configTable.getUuid(), binaryColumn.getColumnIndex(), row.getUuid())));
+
         out.putArchiveEntry(
           new ZipArchiveEntry(ViewerConstants.INTERNAL_ZIP_LOB_FOLDER + cellEntry.getValue().getValue()));
-        final InputStream inputStream = Files
-          .newInputStream(LobPathManager.getPath(ViewerFactory.getViewerConfiguration(), databaseUUID,
-            configTable.getId(), binaryColumn.getColumnIndex(), row.getUuid()));
-        IOUtils.copy(inputStream, out);
-        inputStream.close();
+        IOUtils.copy(siardArchiveInputStream, out);
+        siardArchiveInputStream.close();
         out.closeArchiveEntry();
       }
     }

@@ -1,5 +1,8 @@
 package com.databasepreservation.common.utils;
 
+import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+
 import java.io.File;
 import java.nio.file.Path;
 
@@ -7,6 +10,16 @@ import java.nio.file.Path;
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class LobPathManager {
+  public static String getZipFilePath(ViewerDatabase database, String tableUUID, int columnIndex, String rowIndex) {
+
+    String siardTableFolder = database.getMetadata().getTable(tableUUID).getSiardName();
+    String siardSchemaFolder = database.getMetadata().getSchemaFromTableUUID(tableUUID).getSiardName();
+    String siardLobFolder = ViewerConstants.SIARD_LOB_FOLDER_PREFIX + (columnIndex+1);
+    String recordFile = ViewerConstants.SIARD_RECORD_PREFIX + rowIndex + ViewerConstants.SIARD_LOB_FILE_EXTENSION;
+
+    return "content" + "/" + siardSchemaFolder + "/" + siardTableFolder + "/" + siardLobFolder + "/" + recordFile;
+  }
+
   public static Path getPath(ViewerAbstractConfiguration configuration, String databaseUUID, String tableUUID,
                              int columnIndex, String rowUUID) {
     Path tmpPath = configuration.getLobPath().resolve(databaseUUID).resolve(tableUUID)

@@ -2,6 +2,7 @@ package com.databasepreservation.modules.viewer;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.solr.client.solrj.SolrServerException;
@@ -15,12 +16,11 @@ import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
 import com.databasepreservation.common.server.index.schema.SolrRowsCollectionRegistry;
 import com.databasepreservation.common.transformers.ToolkitStructure2ViewerStructure;
-import com.databasepreservation.model.Reporter;
 import com.databasepreservation.model.data.Row;
 import com.databasepreservation.model.exception.ModuleException;
 import com.databasepreservation.model.exception.UnknownTypeException;
-import com.databasepreservation.model.modules.DatabaseExportModule;
-import com.databasepreservation.model.modules.ModuleSettings;
+import com.databasepreservation.model.modules.filters.DatabaseFilterModule;
+import com.databasepreservation.model.reporters.Reporter;
 import com.databasepreservation.model.structure.DatabaseStructure;
 import com.databasepreservation.modules.DefaultExceptionNormalizer;
 
@@ -28,7 +28,7 @@ import com.databasepreservation.modules.DefaultExceptionNormalizer;
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class DbvtkExportModule implements DatabaseExportModule {
+public class DbvtkExportModule implements DatabaseFilterModule {
   private final DbvtkModuleConfiguration configuration;
 
   private final DatabaseRowsSolrManager solrManager;
@@ -60,17 +60,6 @@ public class DbvtkExportModule implements DatabaseExportModule {
     }
     this.databaseUUID = databaseUUID;
     configuration = DbvtkModuleConfiguration.getInstance(lobFolder);
-  }
-
-  /**
-   * Gets custom settings set by the export module that modify behaviour of the
-   * import module.
-   *
-   * @throws ModuleException
-   */
-  @Override
-  public ModuleSettings getModuleSettings() throws ModuleException {
-    return new ModuleSettings();
   }
 
   /**
@@ -200,6 +189,11 @@ public class DbvtkExportModule implements DatabaseExportModule {
     solrManager.markDatabaseAsReady(databaseUUID);
   }
 
+  @Override
+  public void updateModuleConfiguration(String s, Map<String, String> map, Map<String, String> map1) {
+    // do nothing
+  }
+
   /**
    * Provide a reporter through which potential conversion problems should be
    * reported. This reporter should be provided only once for the export module
@@ -211,6 +205,11 @@ public class DbvtkExportModule implements DatabaseExportModule {
   @Override
   public void setOnceReporter(Reporter reporter) {
     this.reporter = reporter;
+  }
+
+  @Override
+  public DatabaseFilterModule migrateDatabaseTo(DatabaseFilterModule databaseFilterModule) throws ModuleException {
+    return this;
   }
 
   @Override

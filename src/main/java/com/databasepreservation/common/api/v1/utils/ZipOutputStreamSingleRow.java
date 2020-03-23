@@ -8,7 +8,9 @@ import java.io.OutputStreamWriter;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipFile;
 
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import org.apache.commons.compress.archivers.zip.Zip64Mode;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
@@ -30,6 +32,7 @@ import com.databasepreservation.common.utils.LobPathManager;
  */
 public class ZipOutputStreamSingleRow extends CSVOutputStream {
   private final String databaseUUID;
+  private final ViewerDatabase database;
   private final TableStatus configTable;
   private final String zipFilename;
   private final String csvFilename;
@@ -37,10 +40,11 @@ public class ZipOutputStreamSingleRow extends CSVOutputStream {
   private final List<String> fieldsToReturn;
   private final boolean exportDescriptions;
 
-  public ZipOutputStreamSingleRow(String databaseUUID, TableStatus configTable, ViewerRow row, String zipFilename,
+  public ZipOutputStreamSingleRow(ViewerDatabase database, TableStatus configTable, ViewerRow row, String zipFilename,
     String csvFilename, List<String> fieldsToReturn, boolean exportDescriptions) {
     super(zipFilename, ',');
-    this.databaseUUID = databaseUUID;
+    this.databaseUUID = database.getUuid();
+    this.database = database;
     this.configTable = configTable;
     this.row = row;
     this.zipFilename = zipFilename;
@@ -56,7 +60,7 @@ public class ZipOutputStreamSingleRow extends CSVOutputStream {
       zipArchiveOutputStream.setMethod(ZipArchiveOutputStream.DEFLATED);
 
       final List<ColumnStatus> binaryColumns = configTable.getBinaryColumns();
-      writeToZipFile(zipArchiveOutputStream, row, binaryColumns);
+      writeToZipFile(new ZipFile(database.getPath()), zipArchiveOutputStream, row, binaryColumns);
 
       final ByteArrayOutputStream byteArrayOutputStream = writeCSVFile();
       zipArchiveOutputStream.putArchiveEntry(new ZipArchiveEntry(csvFilename));
@@ -88,19 +92,19 @@ public class ZipOutputStreamSingleRow extends CSVOutputStream {
     return null;
   }
 
-  private void writeToZipFile(ZipArchiveOutputStream out, ViewerRow row, List<ColumnStatus> binaryColumns)
+  private void writeToZipFile(ZipFile siardArchive, ZipArchiveOutputStream out, ViewerRow row, List<ColumnStatus> binaryColumns)
     throws IOException {
     for (Map.Entry<String, ViewerCell> cellEntry : row.getCells().entrySet()) {
       final ColumnStatus binaryColumn = findBinaryColumn(binaryColumns, cellEntry.getKey());
 
       if (binaryColumn != null) {
+        final InputStream siardArchiveInputStream = siardArchive.getInputStream(siardArchive.getEntry(
+            LobPathManager.getZipFilePath(database, configTable.getUuid(), binaryColumn.getColumnIndex(), row.getUuid())));
+
         out.putArchiveEntry(
           new ZipArchiveEntry(ViewerConstants.INTERNAL_ZIP_LOB_FOLDER + cellEntry.getValue().getValue()));
-        final InputStream inputStream = Files
-          .newInputStream(LobPathManager.getPath(ViewerFactory.getViewerConfiguration(), databaseUUID,
-            configTable.getId(), binaryColumn.getColumnIndex(), row.getUuid()));
-        IOUtils.copy(inputStream, out);
-        inputStream.close();
+        IOUtils.copy(siardArchiveInputStream, out);
+        siardArchiveInputStream.close();
         out.closeArchiveEntry();
       }
     }

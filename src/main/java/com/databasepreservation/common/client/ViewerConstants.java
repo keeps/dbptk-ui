@@ -521,6 +521,15 @@ public class ViewerConstants {
   public static final String CLOSE_TEMPLATE_ENGINE = "}} ";
 
   /**
+   * SIARD prefixes
+   */
+  public static final String SIARD_TABLE_PREFIX = "table";
+  public static final String SIARD_SCHEMA_PREFIX = "schema";
+  public static final String SIARD_LOB_FOLDER_PREFIX = "lob";
+  public static final String SIARD_RECORD_PREFIX = "record";
+  public static final String SIARD_LOB_FILE_EXTENSION = ".bin";
+
+  /**
    * private constructor
    */
   private ViewerConstants() {

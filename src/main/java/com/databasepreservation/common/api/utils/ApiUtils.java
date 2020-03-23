@@ -102,11 +102,9 @@ public class ApiUtils {
 
   public static Response okResponse(StreamResponse streamResponse, boolean inline) {
     StreamingOutput so = new StreamingOutput() {
-
       @Override
       public void write(OutputStream output) throws IOException, WebApplicationException {
         streamResponse.getStream().consumeOutputStream(output);
-
       }
     };
     return Response.ok(so, streamResponse.getMediaType())

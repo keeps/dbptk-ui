@@ -8,14 +8,14 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.databasepreservation.model.Reporter;
 import com.databasepreservation.model.exception.LicenseNotAcceptedException;
 import com.databasepreservation.model.exception.UnsupportedModuleException;
-import com.databasepreservation.model.modules.DatabaseExportModule;
 import com.databasepreservation.model.modules.DatabaseImportModule;
 import com.databasepreservation.model.modules.DatabaseModuleFactory;
+import com.databasepreservation.model.modules.filters.DatabaseFilterModule;
 import com.databasepreservation.model.parameters.Parameter;
 import com.databasepreservation.model.parameters.Parameters;
+import com.databasepreservation.model.reporters.Reporter;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -80,7 +80,7 @@ public class DbvtkModuleFactory implements DatabaseModuleFactory {
   }
 
   @Override
-  public DatabaseExportModule buildExportModule(Map<Parameter, String> parameters, Reporter reporter)
+  public DatabaseFilterModule buildExportModule(Map<Parameter, String> parameters, Reporter reporter)
     throws UnsupportedModuleException, LicenseNotAcceptedException {
     String pDatabaseUUID = parameters.get(databaseUUID);
 

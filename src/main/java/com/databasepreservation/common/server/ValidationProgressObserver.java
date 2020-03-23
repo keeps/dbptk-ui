@@ -1,9 +1,9 @@
 package com.databasepreservation.common.server;
 
-import com.databasepreservation.common.ValidationObserver;
-import com.databasepreservation.common.client.models.validation.ValidationRequirement;
-import com.databasepreservation.common.server.controller.SIARDController;
 import com.databasepreservation.common.client.models.progress.ValidationProgressData;
+import com.databasepreservation.common.client.models.validation.ValidationRequirement;
+import com.databasepreservation.common.observer.ValidationObserver;
+import com.databasepreservation.common.server.controller.SIARDController;
 import com.databasepreservation.model.reporters.ValidationReporterStatus;
 
 /**
@@ -66,8 +66,8 @@ public class ValidationProgressObserver implements ValidationObserver {
 
   @Override
   public void notifyIndicators(int passed, int ok, int failed, int errors, int warnings, int skipped) {
-    SIARDController.updateSIARDValidatorIndicators(databaseUUID, Integer.toString(passed), Integer.toString(failed), Integer.toString(errors),
-      Integer.toString(warnings), Integer.toString(skipped));
+    SIARDController.updateSIARDValidatorIndicators(databaseUUID, Integer.toString(passed), Integer.toString(failed),
+      Integer.toString(errors), Integer.toString(warnings), Integer.toString(skipped));
     progressData.setIndicators(passed, ok, failed, errors, warnings, skipped);
   }
 

@@ -70,8 +70,6 @@ import com.databasepreservation.common.server.index.factory.SolrClientFactory;
 import com.databasepreservation.common.server.index.schema.SolrDefaultCollectionRegistry;
 import com.databasepreservation.common.server.index.utils.SolrUtils;
 import com.databasepreservation.common.transformers.ToolkitStructure2ViewerStructure;
-import com.databasepreservation.model.NoOpReporter;
-import com.databasepreservation.model.Reporter;
 import com.databasepreservation.model.exception.ModuleException;
 import com.databasepreservation.model.exception.SIARDVersionNotSupportedException;
 import com.databasepreservation.model.exception.UnsupportedModuleException;
@@ -82,6 +80,8 @@ import com.databasepreservation.model.modules.filters.ObservableFilter;
 import com.databasepreservation.model.parameters.Parameter;
 import com.databasepreservation.model.parameters.ParameterGroup;
 import com.databasepreservation.model.parameters.Parameters;
+import com.databasepreservation.model.reporters.NoOpReporter;
+import com.databasepreservation.model.reporters.Reporter;
 import com.databasepreservation.model.structure.DatabaseStructure;
 import com.databasepreservation.modules.jdbc.in.JDBCImportModule;
 import com.databasepreservation.modules.siard.SIARD2ModuleFactory;
@@ -322,7 +322,7 @@ public class SIARDController {
 
       if (importModule instanceof JDBCImportModule) {
         JDBCImportModule jdbcImportModule = (JDBCImportModule) importModule;
-        schemaInformation = jdbcImportModule.getSchemaInformation(parameters.getJdbcParameters().isShouldCountRows());
+        schemaInformation = jdbcImportModule.getSchemaInformation();
         jdbcImportModule.closeConnection();
       }
     } catch (ModuleException e) {
@@ -564,7 +564,7 @@ public class SIARDController {
   public static String loadFromLocal(String localPath, String databaseUUID) throws GenericException {
     LOGGER.info("converting database {}", databaseUUID);
     Path basePath = Paths.get(ViewerConfiguration.getInstance().getViewerConfigurationAsString("/",
-        ViewerConfiguration.PROPERTY_BASE_UPLOAD_PATH));
+      ViewerConfiguration.PROPERTY_BASE_UPLOAD_PATH));
     try {
       Path siardPath = basePath.resolve(localPath);
       convertSIARDtoSolr(siardPath, databaseUUID);
@@ -591,7 +591,8 @@ public class SIARDController {
       databaseMigration.filterFactories(new ArrayList<>());
 
       databaseMigration.importModule(new SIARD2ModuleFactory())
-        .importModuleParameter(SIARD2ModuleFactory.PARAMETER_FILE, siardPath.toAbsolutePath().toString());
+        .importModuleParameter(SIARD2ModuleFactory.PARAMETER_FILE, siardPath.toAbsolutePath().toString())
+        .importModuleParameter(SIARD2ModuleFactory.PARAMETER_IGNORE_LOBS, "true");
 
       databaseMigration.exportModule(new DbvtkModuleFactory())
         .exportModuleParameter(DbvtkModuleFactory.PARAMETER_LOB_FOLDER, configuration.getLobPath().toString())
@@ -708,8 +709,8 @@ public class SIARDController {
     return valid;
   }
 
-  public static void updateSIARDValidatorIndicators(String databaseUUID, String passed, String failed,
-    String errors, String warnings, String skipped) {
+  public static void updateSIARDValidatorIndicators(String databaseUUID, String passed, String failed, String errors,
+    String warnings, String skipped) {
     final DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
     solrManager.updateSIARDValidationIndicators(databaseUUID, passed, errors, failed, warnings, skipped);
   }
