@@ -1,20 +1,22 @@
 package com.databasepreservation.common.api.utils;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.exceptions.RESTException;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.NestedColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.models.structure.ViewerType;
+import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -61,6 +63,36 @@ public class HandlebarsUtils {
     }
 
     return values;
+  }
+
+  public static String applyHandlebarsTemplate(ViewerRow row, TableStatus tableConfiguration, int columnIndex) {
+    Map<String, String> map = cellsToObject(row.getCells(), tableConfiguration);
+    final String template = tableConfiguration.getColumnByIndex(columnIndex).getSearchStatus().getList().getTemplate()
+      .getTemplate();
+
+    if (ViewerStringUtils.isBlank(template)) {
+      return null;
+    }
+
+    Handlebars handlebars = new Handlebars();
+    try {
+      Template handlebarTemplate = handlebars.compileInline(template);
+      return handlebarTemplate.apply(map);
+    } catch (IOException e) {
+      throw new RESTException(e);
+    }
+  }
+
+  private static Map<String, String> cellsToObject(Map<String, ViewerCell> cells, TableStatus tableConfiguration) {
+    Map<String, String> map = new HashMap<>();
+
+    for (ColumnStatus column : tableConfiguration.getColumns()) {
+      if (cells.get(column.getId()) != null) {
+        map.put(ViewerStringUtils.replaceAllFor(column.getCustomName(), "\\s", "_"), cells.get(column.getId()).getValue());
+      }
+    }
+
+    return map;
   }
 
   private static Map<String, String> cellsToJson(Map<String, ViewerCell> cells, NestedColumnStatus nestedConfig) {

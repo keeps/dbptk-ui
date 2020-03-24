@@ -1,0 +1,25 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <ui:with field='messages' type='config.i18n.client.ClientMessages'/>
+    <g:FlowPanel ui:field="content" addStyleNames="columns-management-options">
+        <g:Label addStyleNames="form-label">
+            <ui:text from='{messages.columnManagementLabelForTemplateOptions}'/>
+        </g:Label>
+        <g:HTML addStyleNames="column-description" ui:field="templateEngineLabel" />
+
+        <g:FlowPanel>
+            <g:Label addStyleNames="form-label">
+                <ui:text from='{messages.columnManagementLabelForTemplateList}'/>
+            </g:Label>
+            <g:TextBox addStyleNames="form-textbox" ui:field="templateList"/>
+            <g:FlowPanel ui:field="templateListHint"/>
+        </g:FlowPanel>
+
+        <g:FlowPanel>
+            <g:Label addStyleNames="form-label">
+                <ui:text from='{messages.columnManagementLabelForTemplateList}'/>
+            </g:Label>
+            <g:TextBox addStyleNames="form-textbox" ui:field="applicationType"/>
+        </g:FlowPanel>
+    </g:FlowPanel>
+</ui:UiBinder>

@@ -140,6 +140,11 @@ public class TableStatus implements Serializable {
   }
 
   @JsonIgnore
+  public ColumnStatus getColumnByIndex(int index) {
+    return columns.stream().filter(c -> c.getColumnIndex() ==  index).findFirst().orElse(null);
+  }
+
+  @JsonIgnore
   public List<String> getCSVHeaders(List<String> fieldsToReturn, boolean exportDescriptions) {
     List<String> values = new ArrayList<>();
     for (ColumnStatus column : columns) {

@@ -14,7 +14,7 @@ public class ViewerStringUtils {
     return cs == null || cs.length() == 0;
   }
 
-  public static String concat(final String ... values) {
+  public static String concat(final String... values) {
     String concat = "";
     for (String value : values) {
       concat = concat.concat(value).concat("_");
@@ -28,5 +28,19 @@ public class ViewerStringUtils {
     String method = actionMethod.substring(0, 1).toUpperCase() + actionMethod.substring(1);
     method = method.replaceAll("([A-Z])", " $1").trim();
     return method.replaceAll("S I A R D", "SIARD");
+  }
+
+  public static String removeWhiteSpaces(String target) {
+    return target.replaceAll("\\s", "");
+  }
+
+  public static String replaceAllFor(String target, String regexToReplace, String replacement) {
+    return target.replaceAll(regexToReplace, replacement);
+  }
+
+  public static String addStringOnPosition(String str, String ch, int position) {
+    StringBuilder sb = new StringBuilder(str);
+    sb.insert(position, ch);
+    return sb.toString();
   }
 }

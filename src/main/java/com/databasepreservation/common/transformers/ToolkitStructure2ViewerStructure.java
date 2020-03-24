@@ -1,10 +1,5 @@
 package com.databasepreservation.common.transformers;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -13,7 +8,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -47,7 +41,6 @@ import com.databasepreservation.common.client.models.structure.ViewerUserStructu
 import com.databasepreservation.common.client.models.structure.ViewerView;
 import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.server.index.utils.SolrUtils;
-import com.databasepreservation.common.utils.LobPathManager;
 import com.databasepreservation.common.utils.ViewerAbstractConfiguration;
 import com.databasepreservation.common.utils.ViewerUtils;
 import com.databasepreservation.model.data.BinaryCell;
@@ -56,7 +49,6 @@ import com.databasepreservation.model.data.ComposedCell;
 import com.databasepreservation.model.data.NullCell;
 import com.databasepreservation.model.data.Row;
 import com.databasepreservation.model.data.SimpleCell;
-import com.databasepreservation.model.exception.ModuleException;
 import com.databasepreservation.model.structure.CandidateKey;
 import com.databasepreservation.model.structure.CheckConstraint;
 import com.databasepreservation.model.structure.ColumnStructure;
@@ -451,7 +443,7 @@ public class ToolkitStructure2ViewerStructure {
       referenceHolder.getTableUUID(foreignKey.getReferencedSchema(), foreignKey.getReferencedTable()));
 
     result.setReferencedTableId(
-        referenceHolder.getIdFromNames(foreignKey.getReferencedSchema(), foreignKey.getReferencedTable()));
+      referenceHolder.getIdFromNames(foreignKey.getReferencedSchema(), foreignKey.getReferencedTable()));
 
     List<ViewerReference> resultReferences = new ArrayList<>();
     for (Reference reference : foreignKey.getReferences()) {
@@ -682,21 +674,22 @@ public class ToolkitStructure2ViewerStructure {
     ViewerType columnType = table.getColumns().get(colIndex).getType();
 
     if (cell instanceof BinaryCell) {
-//      BinaryCell binaryCell = (BinaryCell) cell;
-//      binaryCell.cleanResources();
-//
-//      InputStream stream = null;
-//      try {
-//        Path outputPath = LobPathManager.getPath(configuration, databaseUUID, table.getId(), colIndex, rowUUID);
-//        Files.createDirectories(outputPath.getParent());
-//        stream = binaryCell.createInputStream();
-//        Files.copy(stream, outputPath, StandardCopyOption.REPLACE_EXISTING);
-//      } catch (IOException | ModuleException e) {
-//        throw new ViewerException("Could not copy blob", e);
-//      } finally {
-//        IOUtils.closeQuietly(stream);
-//        binaryCell.cleanResources();
-//      }
+      // BinaryCell binaryCell = (BinaryCell) cell;
+      // binaryCell.cleanResources();
+      //
+      // InputStream stream = null;
+      // try {
+      // Path outputPath = LobPathManager.getPath(configuration, databaseUUID,
+      // table.getId(), colIndex, rowUUID);
+      // Files.createDirectories(outputPath.getParent());
+      // stream = binaryCell.createInputStream();
+      // Files.copy(stream, outputPath, StandardCopyOption.REPLACE_EXISTING);
+      // } catch (IOException | ModuleException e) {
+      // throw new ViewerException("Could not copy blob", e);
+      // } finally {
+      // IOUtils.closeQuietly(stream);
+      // binaryCell.cleanResources();
+      // }
 
       String index = getRowIndex(cell.getId());
 
@@ -711,7 +704,7 @@ public class ToolkitStructure2ViewerStructure {
 
       switch (columnType.getDbType()) {
         case DATETIME:
-        result.setValue(JodaUtils.xsDatetimeParse(simpleData).withZone(DateTimeZone.UTC).toString());
+          result.setValue(JodaUtils.xsDatetimeParse(simpleData).withZone(DateTimeZone.UTC).toString());
           break;
         case DATETIME_JUST_DATE:
           result.setValue(JodaUtils.xsDateParse(simpleData).withTime(0, 0, 0, 0).withZone(DateTimeZone.UTC).toString());

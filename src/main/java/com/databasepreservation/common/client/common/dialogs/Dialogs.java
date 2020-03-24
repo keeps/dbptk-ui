@@ -14,7 +14,8 @@ import com.databasepreservation.common.client.common.NoAsyncCallback;
 import com.databasepreservation.common.client.common.fields.GenericField;
 import com.databasepreservation.common.client.common.helpers.HelperValidator;
 import com.databasepreservation.common.client.common.lists.columns.IndexedColumn;
-import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.ColumnsOptionsPanel;
+import com.databasepreservation.common.client.common.utils.CommonClientUtils;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.ColumnOptionsPanel;
 import com.databasepreservation.common.client.models.wizard.table.ExternalLobsDialogBoxResult;
 import com.databasepreservation.common.client.widgets.MyCellTableResources;
 import com.google.gwt.core.client.GWT;
@@ -538,12 +539,50 @@ public class Dialogs {
     dialogBox.show();
   }
 
-  public static void showDialogColumnConfiguration(String title, ColumnsOptionsPanel optionsPanel,
+  public static void showDialogColumnConfiguration(String title, ColumnOptionsPanel optionsPanel,
     String continueButtonText, final AsyncCallback<Void> callback) {
     showDialogColumnConfiguration(title, optionsPanel, continueButtonText, BTN_PLAY_STYLE, callback);
   }
 
-  public static void showDialogColumnConfiguration(String title, ColumnsOptionsPanel optionsPanel,
+  public static void showDialogColumnConfiguration(String title, String saveButtonText, String cancelButtonText,
+    ColumnOptionsPanel optionsPanel, final AsyncCallback<Boolean> callback) {
+    final DialogBox dialogBox = new DialogBox(false, true);
+    dialogBox.setText(title);
+
+    FlowPanel layout = new FlowPanel();
+    FlowPanel form = new FlowPanel();
+
+    Button btnCancel = new Button(cancelButtonText);
+    btnCancel.addStyleName("btn btn-danger btn-times-circle");
+    btnCancel.addClickHandler(event -> {
+      dialogBox.hide();
+      callback.onSuccess(false);
+    });
+
+    Button btnSave = new Button(saveButtonText);
+    btnSave.addStyleName("btn btn-save");
+    btnSave.addClickHandler(event -> {
+      dialogBox.hide();
+      callback.onSuccess(true);
+    });
+
+    form.add(optionsPanel);
+    form.setStyleName("content");
+
+    layout.add(form);
+    layout.add(CommonClientUtils.wrapOnDiv("btn-item", btnCancel));
+    layout.add(CommonClientUtils.wrapOnDiv("btn-item", btnSave));
+    layout.addStyleName("wui-dialog-layout");
+
+    dialogBox.setWidget(layout);
+    dialogBox.setGlassEnabled(true);
+    dialogBox.setAnimationEnabled(false);
+    dialogBox.addStyleName("wui-dialog-information");
+    dialogBox.center();
+    dialogBox.show();
+  }
+
+  public static void showDialogColumnConfiguration(String title, ColumnOptionsPanel optionsPanel,
     String continueButtonText, String continueButtonStyle, final AsyncCallback<Void> callback) {
     final DialogBox dialogBox = new DialogBox(false, true);
     dialogBox.setText(title);

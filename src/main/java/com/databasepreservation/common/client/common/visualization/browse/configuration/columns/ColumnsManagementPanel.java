@@ -22,6 +22,9 @@ import com.databasepreservation.common.client.common.lists.columns.ButtonColumn;
 import com.databasepreservation.common.client.common.lists.widgets.BasicTablePanel;
 import com.databasepreservation.common.client.common.sidebar.Sidebar;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.BinaryColumnOptionsPanel;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.ColumnOptionsPanel;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.NestedColumnOptionsPanel;
 import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
 import com.databasepreservation.common.client.configuration.observer.ISaveButtonObserver;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
@@ -209,13 +212,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
                 .setColumns(saveChanges(object.cellTable, object.editableValues));
             }
           });
-
-          CollectionService.Util.call((Boolean result) -> {
-            ObserverManager.getCollectionObserver().setCollectionStatus(collectionStatus);
-            sidebar.reset(database, collectionStatus);
-            this.changes = false;
-            Toast.showInfo(messages.columnManagementPageTitle(), messages.columnManagementPageToastDescription());
-          }).updateCollectionConfiguration(database.getUuid(), database.getUuid(), collectionStatus);
+          saveChanges();
         } else {
           Dialogs.showErrors(messages.columnManagementPageTitle(),
             messages.columnManagementPageDialogErrorDescription(), messages.basicActionClose());
@@ -496,7 +493,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
     Column<ColumnStatus, String> options = new ButtonColumn<ColumnStatus>() {
       @Override
       public void render(Cell.Context context, ColumnStatus object, SafeHtmlBuilder sb) {
-        if (object.getNestedColumns() != null) {
+        if (object.getType().equals(ViewerType.dbTypes.BINARY) || object.getType().equals(ViewerType.dbTypes.NESTED)) {
           sb.appendHtmlConstant(
             "<div class=\"center-cell\"><button class=\"btn btn-cell-action\" type=\"button\" tabindex=\"-1\"><i class=\"fa fa-cog\"></i></button></div>");
         } else {
@@ -513,13 +510,39 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
 
     options.setFieldUpdater((index, columnStatus, value) -> {
       if (columnStatus.getType().equals(ViewerType.dbTypes.NESTED)) {
-        Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(),
-          ColumnsOptionsPanel.getInstance(database.getUuid(), columnStatus), messages.basicActionClose(),
-          "btn btn-close", new DefaultAsyncCallback<Void>() {
+        final ColumnOptionsPanel nestedColumnOptionPanel = NestedColumnOptionsPanel.createInstance(columnStatus);
+        Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), messages.basicActionSave(),
+          messages.basicActionCancel(), nestedColumnOptionPanel, new DefaultAsyncCallback<Boolean>() {
             @Override
-            public void onSuccess(Void aVoid) {
-              // todo save just options
-              changes = true;
+            public void onSuccess(Boolean value) {
+              if (value) {
+                collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
+                  .updateSearchListTemplate(nestedColumnOptionPanel.getSearchTemplate());
+                collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
+                  .updateDetailsTemplate(nestedColumnOptionPanel.getDetailsTemplate());
+                collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
+                  .updateExportTemplate(nestedColumnOptionPanel.getExportTemplate());
+                collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
+                  .updateNestedColumnsQuantityList(
+                    ((NestedColumnOptionsPanel) nestedColumnOptionPanel).getQuantityInList());
+                saveChanges();
+              }
+            }
+          });
+      } else if (columnStatus.getType().equals(ViewerType.dbTypes.BINARY)) {
+        ColumnOptionsPanel binaryColumnOptionPanel = BinaryColumnOptionsPanel.createInstance(
+          collectionStatus.getTableStatusByTableId(tableId),
+          collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId()));
+
+        Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), messages.basicActionSave(),
+          messages.basicActionCancel(), binaryColumnOptionPanel, new DefaultAsyncCallback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean value) {
+              if (value) {
+                collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
+                  .updateSearchListTemplate(binaryColumnOptionPanel.getSearchTemplate());
+                saveChanges();
+              }
             }
           });
       }
@@ -594,6 +617,15 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
     int remainingTable = tableStatus.getColumns().size() - countTable;
 
     return remainingDetails > 0 && remainingTable > 0;
+  }
+
+  private void saveChanges() {
+    CollectionService.Util.call((Boolean result) -> {
+      ObserverManager.getCollectionObserver().setCollectionStatus(collectionStatus);
+      sidebar.reset(database, collectionStatus);
+      this.changes = false;
+      Toast.showInfo(messages.columnManagementPageTitle(), messages.columnManagementPageToastDescription());
+    }).updateCollectionConfiguration(database.getUuid(), database.getUuid(), collectionStatus);
   }
 
   @Override

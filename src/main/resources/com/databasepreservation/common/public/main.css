@@ -1954,10 +1954,6 @@ html, body, .desktop-main {
     content: "\f1de";
 }
 
-.btn-item-hidden {
-    padding: 0px;
-}
-
 .btn-fixed-width {
     width: 11.75rem;
     text-align: center;
@@ -2959,6 +2955,9 @@ rgba(0, 0, 0, .125);
 /************************************************
 * Columns Management
  ************************************************/
+.columns-management-options {
+    margin-bottom: 1rem;
+}
 
 .columns-management-options .form-textbox {
     font-family: "Ubuntu Mono";

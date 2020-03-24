@@ -167,6 +167,22 @@ public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
     this.getSearchStatus().getAdvanced().setFixed(value);
   }
 
+  public void updateSearchListTemplate(TemplateStatus templateStatus) {
+    this.getSearchStatus().getList().setTemplate(templateStatus);
+  }
+
+  public void updateExportTemplate(TemplateStatus templateStatus) {
+    this.getExportStatus().setTemplateStatus(templateStatus);
+  }
+
+  public void updateDetailsTemplate(TemplateStatus templateStatus) {
+    this.getDetailsStatus().setTemplateStatus(templateStatus);
+  }
+
+  public void updateNestedColumnsQuantityList(int quantity) {
+    this.getNestedColumns().setQuantityInList(quantity);
+  }
+
   @Override
   public String toString() {
     return "ColumnStatus{" + "id='" + id + '\'' + ", name='" + name + '\'' + ", customName='" + customName + '\''

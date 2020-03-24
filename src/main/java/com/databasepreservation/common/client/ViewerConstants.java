@@ -518,7 +518,7 @@ public class ViewerConstants {
    * Template Engine
    */
   public static final String OPEN_TEMPLATE_ENGINE = "{{";
-  public static final String CLOSE_TEMPLATE_ENGINE = "}} ";
+  public static final String CLOSE_TEMPLATE_ENGINE = "}}";
 
   /**
    * SIARD prefixes

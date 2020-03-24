@@ -1,21 +1,20 @@
-package com.databasepreservation.common.client.common.visualization.browse.configuration.columns;
+package com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
+import com.databasepreservation.common.client.models.status.collection.TemplateStatus;
 import com.databasepreservation.common.client.widgets.Alert;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.IntegerBox;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -24,12 +23,11 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
-public class ColumnsOptionsPanel extends Composite {
-  interface ColumnsOptionsPanelUiBinder extends UiBinder<Widget, ColumnsOptionsPanel> {
+public class NestedColumnOptionsPanel extends ColumnOptionsPanel {
+  interface ColumnsOptionsPanelUiBinder extends UiBinder<Widget, NestedColumnOptionsPanel> {
   }
 
   private static ColumnsOptionsPanelUiBinder binder = GWT.create(ColumnsOptionsPanelUiBinder.class);
-  private static Map<String, ColumnsOptionsPanel> instances = new HashMap<>();
 
   @UiField
   ClientMessages messages = GWT.create(ClientMessages.class);
@@ -49,39 +47,52 @@ public class ColumnsOptionsPanel extends Composite {
   @UiField
   IntegerBox quantityList;
 
-  public static ColumnsOptionsPanel getInstance(String databaseUUID, ColumnStatus columnStatus) {
-    return instances.computeIfAbsent(databaseUUID + columnStatus.getId(),
-        k -> new ColumnsOptionsPanel(columnStatus));
+  public static ColumnOptionsPanel createInstance(ColumnStatus columnStatus) {
+    return new NestedColumnOptionsPanel(columnStatus);
   }
 
-  private ColumnsOptionsPanel(ColumnStatus columnStatus) {
+  @Override
+  public TemplateStatus getSearchTemplate() {
+    TemplateStatus templateStatus = new TemplateStatus();
+    templateStatus.setTemplate(templateList.getText());
+    templateStatus.setSeparator(items.getText());
+    return templateStatus;
+  }
+
+  @Override
+  public TemplateStatus getDetailsTemplate() {
+    TemplateStatus templateStatus = new TemplateStatus();
+    templateStatus.setTemplate(templateDetail.getText());
+    return templateStatus;
+  }
+
+  @Override
+  public TemplateStatus getExportTemplate() {
+    TemplateStatus templateStatus = new TemplateStatus();
+    templateStatus.setTemplate(templateExport.getText());
+    return templateStatus;
+  }
+
+  public int getQuantityInList() {
+    return quantityList.getValue();
+  }
+
+  private NestedColumnOptionsPanel(ColumnStatus columnStatus) {
     initWidget(binder.createAndBindUi(this));
 
     templateEngineLabel.setHTML(messages.columnManagementTextForTemplateHint(ViewerConstants.TEMPLATE_ENGINE_LINK));
 
     //Template list, used on tablePanel
     templateList.setText(columnStatus.getSearchStatus().getList().getTemplate().getTemplate());
-    templateList.addChangeHandler(event -> {
-      columnStatus.getSearchStatus().getList().getTemplate().setTemplate(templateList.getText());
-    });
 
     //separator, used on tablePanel
     items.setText(columnStatus.getSearchStatus().getList().getTemplate().getSeparator());
-    items.addChangeHandler(event -> {
-      columnStatus.getSearchStatus().getList().getTemplate().setSeparator(items.getText());
-    });
 
     //Template detail, used on rowPanel
     templateDetail.setText(columnStatus.getDetailsStatus().getTemplateStatus().getTemplate());
-    templateDetail.addChangeHandler(event -> {
-      columnStatus.getDetailsStatus().getTemplateStatus().setTemplate(templateDetail.getText());
-    });
 
     //Template export, used on export data to CSV
     templateExport.setText(columnStatus.getExportStatus().getTemplateStatus().getTemplate());
-    templateExport.addChangeHandler(event -> {
-      columnStatus.getExportStatus().getTemplateStatus().setTemplate(templateExport.getText());
-    });
 
     if (columnStatus.getNestedColumns() != null) {
 
@@ -89,18 +100,23 @@ public class ColumnsOptionsPanel extends Composite {
       templateDetailHint.add(buildHintWithButtons(columnStatus, templateDetail));
       templateExportHint.add(buildHintWithButtons(columnStatus, templateExport));
 
-      quantityList.setValue(columnStatus.getNestedColumns().getMaxQuantityInList());
-      quantityList.setText(columnStatus.getNestedColumns().getMaxQuantityInList().toString());
+      if (columnStatus.getNestedColumns().getQuantityInList() == null) {
+        quantityList.setValue(columnStatus.getNestedColumns().getMaxQuantityInList());
+        quantityList.setText(columnStatus.getNestedColumns().getMaxQuantityInList().toString());
+      } else {
+        quantityList.setValue(columnStatus.getNestedColumns().getQuantityInList());
+        quantityList.setText(columnStatus.getNestedColumns().getQuantityInList().toString());
+      }
 
-      quantityList.addChangeHandler(event ->{
+      quantityList.addChangeHandler(event -> {
         if(quantityList.getValue() > columnStatus.getNestedColumns().getMaxQuantityInList()){
           quantityList.setValue(columnStatus.getNestedColumns().getMaxQuantityInList());
+          quantityList.setText(columnStatus.getNestedColumns().getMaxQuantityInList().toString());
         }
-        columnStatus.getNestedColumns().setQuantityInList(quantityList.getValue());
       });
     }
 
-    if(columnStatus.getNestedColumns().getMultiValue()){
+    if(columnStatus.getNestedColumns() != null && columnStatus.getNestedColumns().getMultiValue()){
       separatorPanel.setVisible(true);
       templateDetail.setVisible(false);
       templateDetailHint.setVisible(false);

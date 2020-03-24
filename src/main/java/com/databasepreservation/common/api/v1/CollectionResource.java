@@ -6,7 +6,6 @@ import static com.databasepreservation.common.client.ViewerConstants.SOLR_SEARCH
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.Buffer;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,6 +47,7 @@ import org.springframework.stereotype.Service;
 
 import com.databasepreservation.common.api.utils.ApiUtils;
 import com.databasepreservation.common.api.utils.DownloadUtils;
+import com.databasepreservation.common.api.utils.HandlebarsUtils;
 import com.databasepreservation.common.api.utils.StreamResponse;
 import com.databasepreservation.common.api.utils.ViewerStreamingOutput;
 import com.databasepreservation.common.api.v1.utils.IterableIndexResultsCSVOutputStream;
@@ -74,6 +74,7 @@ import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.models.user.User;
 import com.databasepreservation.common.client.services.CollectionService;
+import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.server.ViewerFactory;
@@ -477,6 +478,16 @@ public class CollectionResource implements CollectionService {
       ZipFile zipFile = new ZipFile(database.getPath());
       final InputStream inputStream = new BufferedInputStream(zipFile.getInputStream(
         zipFile.getEntry(LobPathManager.getZipFilePath(database, row.getTableUUID(), columnIndex, rowIndex))));
+      final CollectionStatus configurationCollection = ViewerFactory.getConfigurationManager()
+        .getConfigurationCollection(databaseUUID, databaseUUID);
+
+      String handlebarsFilename = HandlebarsUtils.applyHandlebarsTemplate(row,
+        configurationCollection.getTableStatusByTableId(row.getTableId()), columnIndex);
+
+      if (ViewerStringUtils.isNotBlank(handlebarsFilename)) {
+        filename = handlebarsFilename;
+      }
+
       if (row.getTableId().equals(schema + "." + table)) {
         return ApiUtils.okResponse(
           new StreamResponse(filename, MediaType.APPLICATION_OCTET_STREAM, DownloadUtils.stream(inputStream)));
@@ -530,8 +541,8 @@ public class CollectionResource implements CollectionService {
         return handleCSVExport(solrManager, databaseUUID, configTable, findRequest, filename, exportDescription,
           fieldsToHeader);
       } else {
-        return handleCSVExportWithLobs(solrManager, database, databaseUUID, configTable, findRequest, zipFilename, filename,
-          exportDescription, fieldsToHeader);
+        return handleCSVExportWithLobs(solrManager, database, databaseUUID, configTable, findRequest, zipFilename,
+          filename, exportDescription, fieldsToHeader);
       }
     } catch (GenericException | RequestNotValidException | NotFoundException e) {
       state = LogEntryState.FAILURE;
@@ -629,8 +640,8 @@ public class CollectionResource implements CollectionService {
       .getConfigurationCollection(database.getUuid(), database.getUuid());
 
     final List<String> fieldsToReturn = configurationCollection.getFieldsToReturn(configTable.getId());
-    return ApiUtils.okResponse(new StreamResponse(new ZipOutputStreamSingleRow(database, configTable, row,
-      zipFilename, filename, fieldsToReturn, exportDescriptions)));
+    return ApiUtils.okResponse(new StreamResponse(new ZipOutputStreamSingleRow(database, configTable, row, zipFilename,
+      filename, fieldsToReturn, exportDescriptions)));
   }
 
   private Response handleCSVExport(DatabaseRowsSolrManager solrManager, final String databaseUUID,
@@ -651,17 +662,18 @@ public class CollectionResource implements CollectionService {
     }
   }
 
-  private Response handleCSVExportWithLobs(DatabaseRowsSolrManager solrManager, ViewerDatabase database, final String databaseUUID,
-    final TableStatus configTable, final FindRequest findRequest, final String zipFilename, final String filename,
-    final boolean exportDescription, String fieldsToHeader) {
+  private Response handleCSVExportWithLobs(DatabaseRowsSolrManager solrManager, ViewerDatabase database,
+    final String databaseUUID, final TableStatus configTable, final FindRequest findRequest, final String zipFilename,
+    final String filename, final boolean exportDescription, String fieldsToHeader) {
     List<String> fields = findRequest.fieldsToReturn;
     fields.add(ViewerConstants.INDEX_ID);
     final IterableIndexResult allRows = solrManager.findAllRows(databaseUUID, findRequest.filter, findRequest.sorter,
       fields, findRequest.extraParameters);
     final IterableIndexResult clone = solrManager.findAllRows(databaseUUID, findRequest.filter, findRequest.sorter,
       fields, findRequest.extraParameters);
-    return ApiUtils.okResponse(new StreamResponse(new ZipOutputStream(databaseUUID, database, configTable, allRows, clone,
-      zipFilename, filename, findRequest.fieldsToReturn, findRequest.sublist, exportDescription, fieldsToHeader)));
+    return ApiUtils
+      .okResponse(new StreamResponse(new ZipOutputStream(databaseUUID, database, configTable, allRows, clone,
+        zipFilename, filename, findRequest.fieldsToReturn, findRequest.sublist, exportDescription, fieldsToHeader)));
   }
 
   private Object[] appendValue(Object[] obj, Object newObj) {
