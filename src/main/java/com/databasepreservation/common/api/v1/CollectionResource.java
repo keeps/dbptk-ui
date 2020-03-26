@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import javax.servlet.http.HttpServletRequest;
@@ -476,8 +477,12 @@ public class CollectionResource implements CollectionService {
       final ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
 
       ZipFile zipFile = new ZipFile(database.getPath());
-      final InputStream inputStream = new BufferedInputStream(zipFile.getInputStream(
-        zipFile.getEntry(LobPathManager.getZipFilePath(database, row.getTableUUID(), columnIndex, rowIndex))));
+      final ZipEntry entry = zipFile
+        .getEntry(LobPathManager.getZipFilePath(database, row.getTableUUID(), columnIndex, row));
+      if (entry == null) {
+        throw new GenericException("Zip archive entry is missing");
+      }
+      final InputStream inputStream = new BufferedInputStream(zipFile.getInputStream(entry));
       final CollectionStatus configurationCollection = ViewerFactory.getConfigurationManager()
         .getConfigurationCollection(databaseUUID, databaseUUID);
 

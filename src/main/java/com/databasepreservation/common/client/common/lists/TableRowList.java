@@ -74,6 +74,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
 
   private Sublist currentSubList;
   private Sorter currentSorter;
+  private ViewerDatabase database;
   private ViewerTable viewerTable;
 
   public TableRowList(ViewerDatabase database, ViewerTable table, Filter filter, Facets facets, String summary,
@@ -81,6 +82,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     super(filter, false, facets, summary, selectable, exportable,
       new TableRowListWrapper(database, table, status, isNested));
     this.viewerTable = table;
+    this.database = database;
   }
 
   public void setColumnVisibility(Map<String, Boolean> columnDisplayNameToVisibleState) {
@@ -277,8 +279,12 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
       @Override
       public void render(Cell.Context context, ViewerRow object, SafeHtmlBuilder sb) {
         SafeHtml value = getValue(object);
+        String title = messages.row_downloadLOB();
+        if (database.getPath() == null || database.getPath().isEmpty()) {
+          title = messages.rowPanelTextForLobUnavailable();
+        }
         if (value != null) {
-          sb.appendHtmlConstant("<div title=\"" + messages.row_downloadLOB() + "\">");
+          sb.appendHtmlConstant("<div title=\"" + title + "\">");
           sb.append(value);
           sb.appendHtmlConstant("</div");
         }
@@ -292,10 +298,15 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
         } else if (row.getCells() == null) {
           logger.error("Trying to display NULL Cells");
         } else if (row.getCells().get(configColumn.getId()) != null) {
-          final String value = row.getCells().get(configColumn.getId()).getValue();
-          ret = SafeHtmlUtils.fromTrustedString(
-            CommonClientUtils.wrapOnAnchor(messages.row_downloadLOB(), RestUtils.createExportLobUri(database.getUuid(),
-              table.getSchemaName(), table.getName(), row.getUuid(), columnIndex, value)).toString());
+          if (database.getPath() == null || database.getPath().isEmpty()) {
+            ret = SafeHtmlUtils.fromTrustedString(messages.tablePanelTextForLobUnavailable());
+          } else {
+            final String value = row.getCells().get(configColumn.getId()).getValue();
+            ret = SafeHtmlUtils.fromTrustedString(CommonClientUtils
+              .wrapOnAnchor(messages.row_downloadLOB(), RestUtils.createExportLobUri(database.getUuid(),
+                table.getSchemaName(), table.getName(), row.getUuid(), columnIndex, value))
+              .toString());
+          }
         }
 
         return ret;
@@ -369,11 +380,13 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
 
     boolean buildZipHelper = false;
 
-    Map<String, Integer> binaryColumns = getColumnWithBinary(
-      getObject().getStatus().getTableStatusByTableId(viewerTable.getId()));
-    for (String columnName : binaryColumns.keySet()) {
-      if (isColumnVisible(columnName)) {
-        buildZipHelper = true;
+    if (database.getPath() != null && !database.getPath().isEmpty()) {
+      Map<String, Integer> binaryColumns = getColumnWithBinary(
+          getObject().getStatus().getTableStatusByTableId(viewerTable.getId()));
+      for (String columnName : binaryColumns.keySet()) {
+        if (isColumnVisible(columnName)) {
+          buildZipHelper = true;
+        }
       }
     }
 

@@ -116,8 +116,8 @@ public class SIARDNavigationPanel {
     }
 
     // version information
-    MetadataField version = MetadataField.createInstance(messages.SIARDHomePageLabelForSIARDVersion(),
-      messages.SIARDHomePageLabelForSIARDStandardVersion(database.getVersion(), ViewerConstants.SIARD_SPECIFICATION_LINK));
+    MetadataField version = MetadataField.createInstance(messages.SIARDHomePageLabelForSIARDVersion(), messages
+      .SIARDHomePageLabelForSIARDStandardVersion(database.getVersion(), ViewerConstants.SIARD_SPECIFICATION_LINK));
     version.setCSS(null, "label-field", "value-field");
 
     // size information

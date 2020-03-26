@@ -1170,6 +1170,11 @@ public interface ClientMessages extends Messages {
   String showAdvancedSearch();
 
   /********************************************
+   * Table Panel
+   *******************************************/
+  String tablePanelTextForLobUnavailable();
+
+  /********************************************
    * View Panel
    *******************************************/
   String viewPanelViewerNotMaterialized();
@@ -1184,6 +1189,8 @@ public interface ClientMessages extends Messages {
   String rowPanelTextForButtonExportSingleRow();
 
   String informationNotAvailable();
+
+  String rowPanelTextForLobUnavailable();
 
   /********************************************
    * Advanced Search

@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.exceptions.RESTException;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
@@ -57,7 +59,14 @@ public class HandlebarsUtils {
         if (row.getCells().get(solrColumnName) == null) {
           values.add("");
         } else {
-          values.add(row.getCells().get(solrColumnName).getValue());
+          if (columnConfig != null) {
+            final String applied = applyHandlebarsTemplate(row, configTable, columnConfig.getColumnIndex());
+            if (StringUtils.isNotBlank(applied)) {
+              values.add(applied);
+            } else {
+              values.add(row.getCells().get(solrColumnName).getValue());
+            }
+          }
         }
       }
     }
@@ -88,7 +97,8 @@ public class HandlebarsUtils {
 
     for (ColumnStatus column : tableConfiguration.getColumns()) {
       if (cells.get(column.getId()) != null) {
-        map.put(ViewerStringUtils.replaceAllFor(column.getCustomName(), "\\s", "_"), cells.get(column.getId()).getValue());
+        map.put(ViewerStringUtils.replaceAllFor(column.getCustomName(), "\\s", "_"),
+          cells.get(column.getId()).getValue());
       }
     }
 

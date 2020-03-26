@@ -106,20 +106,23 @@ public class ValidationNavigationPanel {
     btnValidate = new Button();
     btnValidate.setText(messages.SIARDHomePageButtonTextValidateNow());
     btnValidate.addStyleName("btn btn-outline-primary btn-play");
+
     btnValidate.addClickHandler(event -> {
       if (database.getVersion().equals(ViewerConstants.SIARD_V21)) {
-        if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
-          Dialogs.showValidatorSettings(messages.SIARDValidatorSettings(), messages.basicActionCancel(),
-            messages.basicActionConfirm(), validator, new DefaultAsyncCallback<Boolean>() {
-              @Override
-              public void onSuccess(Boolean result) {
-                if (result && validator.getReporterPathFile() != null) {
-                  runValidation();
+        if (database.getPath() != null && !database.getPath().isEmpty()) {
+          if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
+            Dialogs.showValidatorSettings(messages.SIARDValidatorSettings(), messages.basicActionCancel(),
+              messages.basicActionConfirm(), validator, new DefaultAsyncCallback<Boolean>() {
+                @Override
+                public void onSuccess(Boolean result) {
+                  if (result && validator.getReporterPathFile() != null) {
+                    runValidation();
+                  }
                 }
-              }
-            });
-        } else {
-          runValidation();
+              });
+          } else {
+            runValidation();
+          }
         }
       } else {
         Dialogs.showInformationDialog(messages.SIARDValidatorDialogInformationTitle(),
@@ -265,6 +268,11 @@ public class ValidationNavigationPanel {
         btnValidate.setText(messages.SIARDHomePageButtonTextValidateNow());
         navigationPanel.addButton(CommonClientUtils.wrapOnDiv(BTN_ITEM, btnValidate));
         break;
+    }
+
+    if (database.getPath() == null || database.getPath().isEmpty()) {
+      btnValidate.setEnabled(false);
+      btnValidate.setTitle(messages.SIARDHomePageTextForRequiredSIARDFile());
     }
   }
 

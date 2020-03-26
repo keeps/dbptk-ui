@@ -301,10 +301,14 @@ public class RowPanel extends RightPanel {
       rowField = RowField.createInstance(label, new HTML("NULL"));
     } else {
       if (column.getType().getDbType().equals(ViewerType.dbTypes.BINARY)) {
-        rowField = RowField.createInstance(label,
-          CommonClientUtils.wrapOnAnchor(messages.row_downloadLOB(),
-            RestUtils.createExportLobUri(database.getUuid(), table.getSchemaName(), table.getName(), row.getUuid(),
-              column.getColumnIndexInEnclosingTable(), cell.getValue())));
+        if (database.getPath() == null || database.getPath().isEmpty()) {
+          rowField = RowField.createInstance(label, new HTML(messages.rowPanelTextForLobUnavailable()));
+        } else {
+          rowField = RowField.createInstance(label,
+              CommonClientUtils.wrapOnAnchor(messages.row_downloadLOB(),
+                  RestUtils.createExportLobUri(database.getUuid(), table.getSchemaName(), table.getName(), row.getUuid(),
+                      column.getColumnIndexInEnclosingTable(), cell.getValue())));
+        }
       } else {
         rowField = RowField.createInstance(label, new HTML(value));
       }

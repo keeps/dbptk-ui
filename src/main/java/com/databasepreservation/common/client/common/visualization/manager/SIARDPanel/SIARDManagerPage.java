@@ -44,7 +44,6 @@ public class SIARDManagerPage extends ContentPanel {
   private static SIARDManagerPageUiBinder binder = GWT.create(SIARDManagerPageUiBinder.class);
   private static Map<String, SIARDManagerPage> instances = new HashMap<>();
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
-  private BreadcrumbPanel breadcrumb;
   private ViewerDatabase database;
   private MetadataNavigationPanel metadataNavigationPanel = null;
   private SIARDNavigationPanel siardNavigationPanel = null;
@@ -87,7 +86,7 @@ public class SIARDManagerPage extends ContentPanel {
 
   private void init() {
     mainHeader.add(CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.BOX_OPEN),
-        database.getMetadata().getName(), "h1"));
+      database.getMetadata().getName(), "h1"));
 
     MetadataField instance = MetadataField.createInstance(database.getMetadata().getDescription());
     instance.setCSS("table-row-description", "font-size-description");
@@ -103,7 +102,6 @@ public class SIARDManagerPage extends ContentPanel {
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
-    this.breadcrumb = breadcrumb;
     List<BreadcrumbItem> breadcrumbItems = BreadcrumbManager.forSIARDMainPage(database.getUuid(),
       database.getMetadata().getName());
     BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
@@ -170,7 +168,7 @@ public class SIARDManagerPage extends ContentPanel {
           new DefaultAsyncCallback<Boolean>() {
             @Override
             public void onSuccess(Boolean result) {
-              if (Boolean.TRUE.equals(result)) {
+              if (result) {
                 deleteAll();
               }
             }

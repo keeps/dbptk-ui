@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipFile;
 
+import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import org.apache.commons.compress.archivers.zip.Zip64Mode;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
@@ -133,8 +134,16 @@ public class ZipOutputStream extends CSVOutputStream {
         final InputStream siardArchiveInputStream = siardArchive.getInputStream(siardArchive.getEntry(
           LobPathManager.getZipFilePath(database, configTable.getUuid(), binaryColumn.getColumnIndex(), row.getUuid())));
 
+        String handlebarsFilename = HandlebarsUtils.applyHandlebarsTemplate(row,
+            configTable, binaryColumn.getColumnIndex());
+        String zipArchiveEntryName = cellEntry.getValue().getValue();
+
+        if (ViewerStringUtils.isNotBlank(handlebarsFilename)) {
+          zipArchiveEntryName = handlebarsFilename;
+        }
+
         out.putArchiveEntry(
-          new ZipArchiveEntry(ViewerConstants.INTERNAL_ZIP_LOB_FOLDER + cellEntry.getValue().getValue()));
+          new ZipArchiveEntry(ViewerConstants.INTERNAL_ZIP_LOB_FOLDER + zipArchiveEntryName));
         IOUtils.copy(siardArchiveInputStream, out);
         siardArchiveInputStream.close();
         out.closeArchiveEntry();

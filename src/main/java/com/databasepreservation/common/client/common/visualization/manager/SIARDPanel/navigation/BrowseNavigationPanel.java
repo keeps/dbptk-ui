@@ -45,7 +45,15 @@ public class BrowseNavigationPanel {
     btnBrowse.setText(messages.SIARDHomePageButtonTextForBrowse());
     btnBrowse.addStyleName("btn btn-outline-primary btn-play");
     btnBrowse.setVisible(false);
-    btnBrowse.addClickHandler(e -> handleBrowseAction());
+
+    if (database.getPath() != null && !database.getPath().isEmpty()) {
+      btnBrowse.addClickHandler(e -> handleBrowseAction());
+    } else {
+      if (database.getStatus().equals(ViewerDatabaseStatus.AVAILABLE)) {
+        btnBrowse.addClickHandler(e -> handleBrowseAction());
+      }
+    }
+
   }
 
   private void handleBrowseAction() {
@@ -139,9 +147,12 @@ public class BrowseNavigationPanel {
     }
     btnBrowse.setVisible(true);
 
-    if (database.getPath() == null || database.getPath().isEmpty()) {
-      btnIngestClicked = false;
-      btnBrowse.setVisible(false);
+    if (!database.getStatus().equals(ViewerDatabaseStatus.AVAILABLE)) {
+      if (database.getPath() == null || database.getPath().isEmpty()) {
+        btnIngestClicked = false;
+        btnBrowse.setTitle(messages.SIARDHomePageTextForRequiredSIARDFile());
+        btnBrowse.setEnabled(false);
+      }
     }
 
     browsingStatus = MetadataField.createInstance(messages.SIARDHomePageLabelForBrowseStatus(),
@@ -172,13 +183,15 @@ public class BrowseNavigationPanel {
       btnIngestClicked = false;
     }
 
-    if (database.getPath() == null || database.getPath().isEmpty()) {
-      btnBrowse.setEnabled(false);
-      btnBrowse.setTitle(messages.SIARDHomePageTextForRequiredSIARDFile());
-      btnIngestClicked = false;
-    } else {
-      btnBrowse.setEnabled(true);
-      btnBrowse.setTitle("");
+    if (!database.getStatus().equals(ViewerDatabaseStatus.AVAILABLE)) {
+      if (database.getPath() == null || database.getPath().isEmpty()) {
+        btnIngestClicked = false;
+        btnBrowse.setTitle(messages.SIARDHomePageTextForRequiredSIARDFile());
+        btnBrowse.setEnabled(false);
+      } else {
+        btnBrowse.setEnabled(true);
+        btnBrowse.setTitle("");
+      }
     }
   }
 
