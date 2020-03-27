@@ -16,11 +16,13 @@ import com.google.gwt.core.client.GWT;
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-@JsonPropertyOrder({"uuid", "id", "name", "customName", "description", "customDescription", "show", "columns"})
+@JsonPropertyOrder({"uuid", "id", "schemaFolder", "tableFolder", "name", "customName", "description", "customDescription", "show", "columns"})
 public class TableStatus implements Serializable {
 
   private String uuid;
   private String id;
+  private String schemaFolder;
+  private String tableFolder;
   private String name;
   private String customName;
   private String description;
@@ -46,6 +48,22 @@ public class TableStatus implements Serializable {
 
   public void setId(String id) {
     this.id = id;
+  }
+
+  public String getSchemaFolder() {
+    return schemaFolder;
+  }
+
+  public void setSchemaFolder(String schemaFolder) {
+    this.schemaFolder = schemaFolder;
+  }
+
+  public String getTableFolder() {
+    return tableFolder;
+  }
+
+  public void setTableFolder(String tableFolder) {
+    this.tableFolder = tableFolder;
   }
 
   public String getName() {

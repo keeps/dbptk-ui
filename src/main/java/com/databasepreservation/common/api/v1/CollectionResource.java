@@ -4,9 +4,12 @@ import static com.databasepreservation.common.client.ViewerConstants.SOLR_INDEX_
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_SEARCHES_DATABASE_UUID;
 
 import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -471,34 +474,17 @@ public class CollectionResource implements CollectionService {
 
     DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
 
-    // content/schemaX/tableY/lobZ/recordP.bin
     try {
       ViewerRow row = solrManager.retrieveRows(databaseUUID, rowIndex);
       final ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
-
-      ZipFile zipFile = new ZipFile(database.getPath());
-      final ZipEntry entry = zipFile
-        .getEntry(LobPathManager.getZipFilePath(database, row.getTableUUID(), columnIndex, row));
-      if (entry == null) {
-        throw new GenericException("Zip archive entry is missing");
-      }
-      final InputStream inputStream = new BufferedInputStream(zipFile.getInputStream(entry));
       final CollectionStatus configurationCollection = ViewerFactory.getConfigurationManager()
         .getConfigurationCollection(databaseUUID, databaseUUID);
+      final TableStatus configTable = configurationCollection.getTableStatusByTableId(row.getTableId());
 
-      String handlebarsFilename = HandlebarsUtils.applyHandlebarsTemplate(row,
-        configurationCollection.getTableStatusByTableId(row.getTableId()), columnIndex);
-
-      if (ViewerStringUtils.isNotBlank(handlebarsFilename)) {
-        filename = handlebarsFilename;
-      }
-
-      if (row.getTableId().equals(schema + "." + table)) {
-        return ApiUtils.okResponse(
-          new StreamResponse(filename, MediaType.APPLICATION_OCTET_STREAM, DownloadUtils.stream(inputStream)));
+      if (configTable.getColumnByIndex(columnIndex).isExternalLob()) {
+        return handleExternalLobDownload(configTable, row, columnIndex);
       } else {
-        state = LogEntryState.FAILURE;
-        throw new NotFoundException("LOB not found.");
+        return handleInternalLobDownload(database.getPath(), configTable, row, columnIndex);
       }
     } catch (NotFoundException | GenericException | IOException e) {
       state = LogEntryState.FAILURE;
@@ -510,6 +496,41 @@ public class CollectionResource implements CollectionService {
         rowIndex, ViewerConstants.CONTROLLER_COLUMN_ID_PARAM, columnIndex, ViewerConstants.CONTROLLER_FILENAME_PARAM,
         filename);
     }
+  }
+
+  private Response handleExternalLobDownload(TableStatus tableConfiguration, ViewerRow row, int columnIndex)
+    throws FileNotFoundException {
+    final String lobLocation = row.getCells().get(tableConfiguration.getColumnByIndex(columnIndex).getId()).getValue();
+    final java.nio.file.Path lobPath = Paths.get(lobLocation);
+    final java.nio.file.Path completeLobPath = ViewerFactory.getViewerConfiguration().getSIARDFilesPath()
+      .resolve(lobPath);
+
+    String handlebarsFilename = HandlebarsUtils.applyHandlebarsTemplate(row, tableConfiguration, columnIndex);
+
+    if (ViewerStringUtils.isBlank(handlebarsFilename)) {
+      handlebarsFilename = completeLobPath.getFileName().toString();
+    }
+
+    return ApiUtils.okResponse(new StreamResponse(handlebarsFilename, MediaType.APPLICATION_OCTET_STREAM,
+      DownloadUtils.stream(new FileInputStream(completeLobPath.toFile()))));
+  }
+
+  private Response handleInternalLobDownload(String databasePath, TableStatus tableConfiguration, ViewerRow row,
+    int columnIndex) throws IOException, GenericException {
+    ZipFile zipFile = new ZipFile(databasePath);
+    final ZipEntry entry = zipFile.getEntry(LobPathManager.getZipFilePath(tableConfiguration, columnIndex, row));
+    if (entry == null) {
+      throw new GenericException("Zip archive entry is missing");
+    }
+
+    String handlebarsFilename = HandlebarsUtils.applyHandlebarsTemplate(row, tableConfiguration, columnIndex);
+
+    if (ViewerStringUtils.isBlank(handlebarsFilename)) {
+      handlebarsFilename = row.getCells().get(tableConfiguration.getColumnByIndex(columnIndex).getId()).getValue();
+    }
+
+    return ApiUtils.okResponse(new StreamResponse(handlebarsFilename, MediaType.APPLICATION_OCTET_STREAM,
+      DownloadUtils.stream(new BufferedInputStream(zipFile.getInputStream(entry)))));
   }
 
   @GET

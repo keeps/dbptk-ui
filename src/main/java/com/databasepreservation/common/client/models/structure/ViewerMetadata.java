@@ -1,6 +1,7 @@
 package com.databasepreservation.common.client.models.structure;
 
 import java.io.Serializable;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -247,4 +248,29 @@ public class ViewerMetadata implements Serializable {
   public ViewerSchema getSchema(String schemaUUID) {
     return schemasMap.get(schemaUUID);
   }
+
+  @JsonIgnore
+  public int getSchemaIndex(String schemaUUID) {
+    int i = 1;
+
+    for (Map.Entry<String, ViewerSchema> next : schemasMap.entrySet()) {
+      if (next.getKey().equals(schemaUUID)) return i;
+      i++;
+    }
+
+    return -1;
+  }
+
+  @JsonIgnore
+  public int getTableIndex(String tableUUID) {
+    int i = 1;
+
+    for (Map.Entry<String, ViewerTable> next : tables.entrySet()) {
+      if (next.getKey().equals(tableUUID)) return i;
+      i++;
+    }
+
+    return -1;
+  }
+
 }

@@ -14,8 +14,6 @@ public class ViewerSchema implements Serializable {
 
   private String name;
 
-  private String siardName;
-
   private String description;
 
   private List<ViewerTable> tables;
@@ -34,14 +32,6 @@ public class ViewerSchema implements Serializable {
 
   public void setName(String name) {
     this.name = name;
-  }
-
-  public String getSiardName() {
-    return siardName;
-  }
-
-  public void setSiardName(String siardName) {
-    this.siardName = siardName;
   }
 
   public List<ViewerTable> getTables() {

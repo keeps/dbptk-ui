@@ -1,10 +1,13 @@
 package com.databasepreservation.common.api.v1.utils;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -12,7 +15,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipFile;
 
-import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import org.apache.commons.compress.archivers.zip.Zip64Mode;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
@@ -28,6 +30,8 @@ import com.databasepreservation.common.client.models.status.collection.TableStat
 import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
+import com.databasepreservation.common.client.tools.ViewerStringUtils;
+import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.index.utils.IterableIndexResult;
 import com.databasepreservation.common.utils.LobPathManager;
 
@@ -131,22 +135,11 @@ public class ZipOutputStream extends CSVOutputStream {
       final ColumnStatus binaryColumn = findBinaryColumn(binaryColumns, cellEntry.getKey());
 
       if (binaryColumn != null) {
-        final InputStream siardArchiveInputStream = siardArchive.getInputStream(siardArchive.getEntry(
-          LobPathManager.getZipFilePath(database, configTable.getUuid(), binaryColumn.getColumnIndex(), row.getUuid())));
-
-        String handlebarsFilename = HandlebarsUtils.applyHandlebarsTemplate(row,
-            configTable, binaryColumn.getColumnIndex());
-        String zipArchiveEntryName = cellEntry.getValue().getValue();
-
-        if (ViewerStringUtils.isNotBlank(handlebarsFilename)) {
-          zipArchiveEntryName = handlebarsFilename;
+        if (configTable.getColumnByIndex(binaryColumn.getColumnIndex()).isExternalLob()) {
+          handleWriteExternalLobs(out, binaryColumn, row, cellEntry.getValue());
+        } else {
+          handleWriteInternalLobs(out, siardArchive, binaryColumn, row, cellEntry.getValue());
         }
-
-        out.putArchiveEntry(
-          new ZipArchiveEntry(ViewerConstants.INTERNAL_ZIP_LOB_FOLDER + zipArchiveEntryName));
-        IOUtils.copy(siardArchiveInputStream, out);
-        siardArchiveInputStream.close();
-        out.closeArchiveEntry();
       }
     }
   }
@@ -180,5 +173,45 @@ public class ZipOutputStream extends CSVOutputStream {
     }
 
     return listBytes;
+  }
+
+  private void handleWriteInternalLobs(ZipArchiveOutputStream out, ZipFile siardArchive, ColumnStatus binaryColumn,
+    ViewerRow row, ViewerCell cell) throws IOException {
+    final InputStream siardArchiveInputStream = siardArchive.getInputStream(
+      siardArchive.getEntry(LobPathManager.getZipFilePath(configTable, binaryColumn.getColumnIndex(), row)));
+
+    String handlebarsFilename = HandlebarsUtils.applyHandlebarsTemplate(row, configTable,
+      binaryColumn.getColumnIndex());
+    String zipArchiveEntryName = cell.getValue();
+
+    if (ViewerStringUtils.isNotBlank(handlebarsFilename)) {
+      zipArchiveEntryName = handlebarsFilename;
+    }
+
+    out.putArchiveEntry(new ZipArchiveEntry(ViewerConstants.INTERNAL_ZIP_LOB_FOLDER + zipArchiveEntryName));
+    IOUtils.copy(siardArchiveInputStream, out);
+    siardArchiveInputStream.close();
+    out.closeArchiveEntry();
+  }
+
+  private void handleWriteExternalLobs(ZipArchiveOutputStream out, ColumnStatus binaryColumn, ViewerRow row, ViewerCell cell)
+    throws IOException {
+    final String lobLocation = cell.getValue();
+    final Path lobPath = Paths.get(lobLocation);
+    final Path completeLobPath = ViewerFactory.getViewerConfiguration().getSIARDFilesPath().resolve(lobPath);
+
+    String handlebarsFilename = HandlebarsUtils.applyHandlebarsTemplate(row, configTable,
+      binaryColumn.getColumnIndex());
+
+    if (ViewerStringUtils.isBlank(handlebarsFilename)) {
+      handlebarsFilename = completeLobPath.getFileName().toString();
+    }
+
+    InputStream inputStream = new FileInputStream(completeLobPath.toFile());
+
+    out.putArchiveEntry(new ZipArchiveEntry(ViewerConstants.INTERNAL_ZIP_LOB_FOLDER + handlebarsFilename));
+    IOUtils.copy(inputStream, out);
+    inputStream.close();
+    out.closeArchiveEntry();
   }
 }

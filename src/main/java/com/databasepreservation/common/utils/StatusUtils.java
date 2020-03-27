@@ -29,22 +29,27 @@ import com.databasepreservation.common.client.models.structure.ViewerTable;
  */
 public class StatusUtils {
 
-  public static List<TableStatus> getTableStatusFromList(Collection<ViewerTable> tables) {
+  public static List<TableStatus> getTableStatusFromList(ViewerDatabase database) {
     List<TableStatus> tableStatus = new ArrayList<>();
-    for (ViewerTable table : tables) {
-      tableStatus.add(getTableStatus(table));
+    for (ViewerTable table : database.getMetadata().getTables().values()) {
+      tableStatus.add(getTableStatus(database, table));
     }
     return tableStatus;
   }
 
-  public static TableStatus getTableStatus(ViewerTable table) {
-    return getTableStatus(table, true);
+  public static TableStatus getTableStatus(ViewerDatabase database, ViewerTable table) {
+    return getTableStatus(database, table, true);
   }
 
-  public static TableStatus getTableStatus(ViewerTable table, boolean show) {
+  public static TableStatus getTableStatus(ViewerDatabase database, ViewerTable table, boolean show) {
+    final int schemaIndex = database.getMetadata().getSchemaIndex(table.getSchemaUUID());
+    final int tableIndex = database.getMetadata().getTableIndex(table.getUuid());
+
     TableStatus status = new TableStatus();
     status.setUuid(table.getUuid());
     status.setId(table.getId());
+    status.setSchemaFolder(ViewerConstants.SIARD_SCHEMA_PREFIX + schemaIndex);
+    status.setTableFolder(ViewerConstants.SIARD_TABLE_PREFIX + tableIndex);
     status.setName(table.getName());
     status.setCustomName(table.getName());
     status.setDescription(table.getDescription());

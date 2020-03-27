@@ -9,8 +9,8 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
-import com.databasepreservation.common.client.models.structure.ViewerDatabaseFromToolkit;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
@@ -24,42 +24,27 @@ import com.databasepreservation.model.reporters.Reporter;
 import com.databasepreservation.model.structure.DatabaseStructure;
 import com.databasepreservation.modules.DefaultExceptionNormalizer;
 
-
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class DbvtkExportModule implements DatabaseFilterModule {
-  private final DbvtkModuleConfiguration configuration;
-
   private final DatabaseRowsSolrManager solrManager;
-
-  private DatabaseStructure structure;
-
-  private ViewerDatabaseFromToolkit viewerDatabase;
-
+  private CollectionStatus collectionConfiguration;
   private ViewerDatabase retrieved;
-
   private ViewerTable currentTable;
-
   private String databaseUUID;
-
   private long rowIndex = 1;
 
-  private Reporter reporter;
-
-  public DbvtkExportModule(Path lobFolder) {
-    this(null, lobFolder);
-  }
-
-  public DbvtkExportModule(String databaseUUID, Path lobFolder) {
+  public DbvtkExportModule(String databaseUUID) {
     solrManager = ViewerFactory.getSolrManager();
     try {
       retrieved = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
+      collectionConfiguration = ViewerFactory.getConfigurationManager().getConfigurationCollection(databaseUUID,
+        databaseUUID);
     } catch (NotFoundException | GenericException e) {
       retrieved = null;
     }
     this.databaseUUID = databaseUUID;
-    configuration = DbvtkModuleConfiguration.getInstance(lobFolder);
   }
 
   /**
@@ -96,7 +81,6 @@ public class DbvtkExportModule implements DatabaseFilterModule {
    */
   @Override
   public void handleStructure(DatabaseStructure structure) throws ModuleException {
-    this.structure = structure;
     solrManager.addDatabaseRowCollection(databaseUUID);
   }
 
@@ -127,7 +111,7 @@ public class DbvtkExportModule implements DatabaseFilterModule {
   public void handleDataOpenTable(String tableId) throws ModuleException {
     currentTable = retrieved.getMetadata().getTableById(tableId);
     solrManager.addTable(retrieved.getUuid(), currentTable);
-    //rowIndex = 1;
+    // rowIndex = 1;
   }
 
   /**
@@ -141,7 +125,7 @@ public class DbvtkExportModule implements DatabaseFilterModule {
   @Override
   public void handleDataRow(Row row) throws ModuleException {
     solrManager.addRow(retrieved.getUuid(),
-      ToolkitStructure2ViewerStructure.getRow(configuration, databaseUUID, currentTable, row, rowIndex++));
+      ToolkitStructure2ViewerStructure.getRow(collectionConfiguration, currentTable, row, rowIndex++));
   }
 
   /**
@@ -171,9 +155,7 @@ public class DbvtkExportModule implements DatabaseFilterModule {
 
     try {
       ViewerFactory.getSolrClient().commit(SolrRowsCollectionRegistry.get(databaseUUID).getIndexName());
-    } catch (SolrServerException e) {
-      e.printStackTrace();
-    } catch (IOException e) {
+    } catch (SolrServerException | IOException e) {
       e.printStackTrace();
     }
   }
@@ -187,6 +169,7 @@ public class DbvtkExportModule implements DatabaseFilterModule {
   @Override
   public void finishDatabase() throws ModuleException {
     solrManager.markDatabaseAsReady(databaseUUID);
+    ViewerFactory.getConfigurationManager().updateCollectionStatus(databaseUUID, collectionConfiguration);
   }
 
   @Override
@@ -204,7 +187,6 @@ public class DbvtkExportModule implements DatabaseFilterModule {
    */
   @Override
   public void setOnceReporter(Reporter reporter) {
-    this.reporter = reporter;
   }
 
   @Override

@@ -595,7 +595,6 @@ public class SIARDController {
         .importModuleParameter(SIARD2ModuleFactory.PARAMETER_IGNORE_LOBS, "true");
 
       databaseMigration.exportModule(new DbvtkModuleFactory())
-        .exportModuleParameter(DbvtkModuleFactory.PARAMETER_LOB_FOLDER, configuration.getLobPath().toString())
         .exportModuleParameter(DbvtkModuleFactory.PARAMETER_DATABASE_UUID, databaseUUID);
 
       databaseMigration.filter(new ObservableFilter(new SIARDProgressObserver(databaseUUID)));

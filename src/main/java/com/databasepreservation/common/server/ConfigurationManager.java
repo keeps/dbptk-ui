@@ -85,16 +85,16 @@ public class ConfigurationManager {
     }
   }
 
-  public void addTable(String databaseUUID, Collection<ViewerTable> tables) {
+  public void addTable(ViewerDatabase database) {
     try {
-      final DatabaseStatus databaseStatus = getDatabaseStatus(databaseUUID);
+      final DatabaseStatus databaseStatus = getDatabaseStatus(database.getUuid());
       // At the moment there is only one collection per database
       if (databaseStatus.getCollections().size() >= 1) {
         final String collectionId = databaseStatus.getCollections().get(0);
-        final CollectionStatus collectionStatus = getCollectionStatus(databaseUUID, collectionId);
-        collectionStatus.setTables(StatusUtils.getTableStatusFromList(tables));
+        final CollectionStatus collectionStatus = getCollectionStatus(database.getUuid(), collectionId);
+        collectionStatus.setTables(StatusUtils.getTableStatusFromList(database));
         // Update collection
-        updateCollectionStatus(databaseUUID, collectionStatus);
+        updateCollectionStatus(database.getUuid(), collectionStatus);
       }
     } catch (GenericException | ViewerException e) {
       LOGGER.debug("Failed to manipulate the JSON file", e);
@@ -308,7 +308,7 @@ public class ConfigurationManager {
           JsonUtils.writeObjectToFile(StatusUtils.getDatabaseStatus(database), databaseStatusPath);
 
           addCollection(database.getUuid(), ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + database.getUuid());
-          addTable(database.getUuid(), database.getMetadata().getTables().values());
+          addTable(database);
         } catch (FileAlreadyExistsException e) {
           // do nothing (just caused due to concurrency)
         } catch (IOException e) {
