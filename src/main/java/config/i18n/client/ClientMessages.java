@@ -1477,6 +1477,13 @@ public interface ClientMessages extends Messages {
   String columnManagementLabelForQuantityList();
 
   /********************************************
+   * Column Management Panel - Binary Column
+   *******************************************/
+  String binaryColumnTemplateForFilename();
+
+  String binaryColumnMIMEType();
+
+  /********************************************
    * Resources
    *******************************************/
   String resourceNotAvailableTitle();

@@ -9,7 +9,7 @@
 
         <g:FlowPanel>
             <g:Label addStyleNames="form-label">
-                <ui:text from='{messages.columnManagementLabelForTemplateList}'/>
+                <ui:text from='{messages.binaryColumnTemplateForFilename}'/>
             </g:Label>
             <g:TextBox addStyleNames="form-textbox" ui:field="templateList"/>
             <g:FlowPanel ui:field="templateListHint"/>
@@ -17,7 +17,7 @@
 
         <g:FlowPanel>
             <g:Label addStyleNames="form-label">
-                <ui:text from='{messages.columnManagementLabelForTemplateList}'/>
+                <ui:text from='{messages.binaryColumnMIMEType}'/>
             </g:Label>
             <g:TextBox addStyleNames="form-textbox" ui:field="applicationType"/>
         </g:FlowPanel>
