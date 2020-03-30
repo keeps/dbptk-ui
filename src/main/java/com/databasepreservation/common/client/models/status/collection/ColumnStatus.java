@@ -3,6 +3,7 @@ package com.databasepreservation.common.client.models.status.collection;
 import java.io.Serializable;
 
 import com.databasepreservation.common.client.models.structure.ViewerType;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
@@ -22,6 +23,7 @@ public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
   private String nullable;
   private ViewerType.dbTypes type;
   private int columnIndex;
+  @JsonInclude(JsonInclude.Include.NON_DEFAULT)
   private boolean externalLob;
   private NestedColumnStatus nestedColumns;
   private int order;

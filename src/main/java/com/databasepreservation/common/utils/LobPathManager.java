@@ -35,7 +35,7 @@ public class LobPathManager {
     return "content" + "/" + siardSchemaFolder + "/" + siardTableFolder + "/" + siardLobFolder + "/" + recordFile;
   }
 
-  public static Path getPath(ViewerAbstractConfiguration configuration, String databaseUUID, String tableUUID,
+  public static Path getConsolidatedPath(ViewerAbstractConfiguration configuration, String databaseUUID, String tableUUID,
     int columnIndex, String rowUUID) {
     Path tmpPath = configuration.getLobPath().resolve(databaseUUID).resolve(tableUUID)
       .resolve(String.valueOf(columnIndex));

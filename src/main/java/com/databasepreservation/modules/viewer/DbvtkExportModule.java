@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.Set;
 
+import com.databasepreservation.common.client.models.status.collection.LargeObjectConsolidateProperty;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
@@ -169,6 +170,7 @@ public class DbvtkExportModule implements DatabaseFilterModule {
   @Override
   public void finishDatabase() throws ModuleException {
     solrManager.markDatabaseAsReady(databaseUUID);
+    collectionConfiguration.setConsolidateProperty(LargeObjectConsolidateProperty.NOT_CONSOLIDATED);
     ViewerFactory.getConfigurationManager().updateCollectionStatus(databaseUUID, collectionConfiguration);
   }
 

@@ -70,6 +70,7 @@ import com.databasepreservation.common.client.index.filter.SimpleFilterParameter
 import com.databasepreservation.common.client.models.activity.logs.LogEntryState;
 import com.databasepreservation.common.client.models.progress.ProgressData;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
+import com.databasepreservation.common.client.models.status.collection.LargeObjectConsolidateProperty;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
@@ -228,11 +229,9 @@ public class CollectionResource implements CollectionService {
     controllerAssistant.checkRoles(user);
 
     try {
-      final java.nio.file.Path databasesDirectoryPath = ViewerFactory.getViewerConfiguration().getDatabasesPath();
-      final java.nio.file.Path databaseDirectoryPath = databasesDirectoryPath.resolve(databaseUUID);
-      final java.nio.file.Path collectionStatusFile = databaseDirectoryPath
-        .resolve(ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + collectionUUID + ".json");
-      return Collections.singletonList(JsonUtils.readObjectFromFile(collectionStatusFile, CollectionStatus.class));
+      final CollectionStatus configurationCollection = ViewerFactory.getConfigurationManager()
+        .getConfigurationCollection(databaseUUID, collectionUUID);
+      return Collections.singletonList(configurationCollection);
     } catch (GenericException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
@@ -481,10 +480,14 @@ public class CollectionResource implements CollectionService {
         .getConfigurationCollection(databaseUUID, databaseUUID);
       final TableStatus configTable = configurationCollection.getTableStatusByTableId(row.getTableId());
 
-      if (configTable.getColumnByIndex(columnIndex).isExternalLob()) {
-        return handleExternalLobDownload(configTable, row, columnIndex);
+      if (configurationCollection.getConsolidateProperty().equals(LargeObjectConsolidateProperty.CONSOLIDATED)) {
+        return handleConsolidatedLobDownload(databaseUUID, configTable, columnIndex, row, rowIndex);
       } else {
-        return handleInternalLobDownload(database.getPath(), configTable, row, columnIndex);
+        if (configTable.getColumnByIndex(columnIndex).isExternalLob()) {
+          return handleExternalLobDownload(configTable, row, columnIndex);
+        } else {
+          return handleInternalLobDownload(database.getPath(), configTable, row, columnIndex);
+        }
       }
     } catch (NotFoundException | GenericException | IOException e) {
       state = LogEntryState.FAILURE;
@@ -496,6 +499,21 @@ public class CollectionResource implements CollectionService {
         rowIndex, ViewerConstants.CONTROLLER_COLUMN_ID_PARAM, columnIndex, ViewerConstants.CONTROLLER_FILENAME_PARAM,
         filename);
     }
+  }
+
+  private Response handleConsolidatedLobDownload(String databaseUUID, TableStatus tableConfiguration, int columnIndex,
+    ViewerRow row, String rowIndex) throws IOException {
+    final java.nio.file.Path consolidatedPath = LobPathManager.getConsolidatedPath(
+      ViewerFactory.getViewerConfiguration(), databaseUUID, tableConfiguration.getUuid(), columnIndex, rowIndex);
+    String handlebarsFilename = HandlebarsUtils.applyHandlebarsTemplate(row, tableConfiguration, columnIndex);
+    if (ViewerStringUtils.isBlank(handlebarsFilename)) {
+      handlebarsFilename = consolidatedPath.getFileName().toString();
+    }
+
+    return ApiUtils.okResponse(new StreamResponse(handlebarsFilename, MediaType.APPLICATION_OCTET_STREAM,
+      DownloadUtils
+        .stream(Files.newInputStream(LobPathManager.getConsolidatedPath(ViewerFactory.getViewerConfiguration(),
+          databaseUUID, row.getTableId(), columnIndex, rowIndex)))));
   }
 
   private Response handleExternalLobDownload(TableStatus tableConfiguration, ViewerRow row, int columnIndex)
@@ -567,7 +585,7 @@ public class CollectionResource implements CollectionService {
         return handleCSVExport(solrManager, databaseUUID, configTable, findRequest, filename, exportDescription,
           fieldsToHeader);
       } else {
-        return handleCSVExportWithLobs(solrManager, database, databaseUUID, configTable, findRequest, zipFilename,
+        return handleCSVExportWithLobs(solrManager, configurationCollection, database, databaseUUID, configTable, findRequest, zipFilename,
           filename, exportDescription, fieldsToHeader);
       }
     } catch (GenericException | RequestNotValidException | NotFoundException e) {
@@ -625,7 +643,7 @@ public class CollectionResource implements CollectionService {
         if (Boolean.FALSE.equals(exportLobs) && StringUtils.isBlank(zipFilename)) {
           return handleSingleCSVExportWithoutLOBs(databaseUUID, configTable, viewerRow, filename, exportDescription);
         } else {
-          return handleSingleCSVExportWithLOBs(database, configTable, viewerRow, filename, zipFilename,
+          return handleSingleCSVExportWithLOBs(configurationCollection, database, configTable, viewerRow, filename, zipFilename,
             exportDescription);
         }
       } else {
@@ -660,13 +678,10 @@ public class CollectionResource implements CollectionService {
         .toStreamResponse());
   }
 
-  private Response handleSingleCSVExportWithLOBs(ViewerDatabase database, TableStatus configTable, ViewerRow row,
+  private Response handleSingleCSVExportWithLOBs(CollectionStatus configurationCollection, ViewerDatabase database, TableStatus configTable, ViewerRow row,
     String filename, String zipFilename, boolean exportDescriptions) throws GenericException {
-    final CollectionStatus configurationCollection = ViewerFactory.getConfigurationManager()
-      .getConfigurationCollection(database.getUuid(), database.getUuid());
-
     final List<String> fieldsToReturn = configurationCollection.getFieldsToReturn(configTable.getId());
-    return ApiUtils.okResponse(new StreamResponse(new ZipOutputStreamSingleRow(database, configTable, row, zipFilename,
+    return ApiUtils.okResponse(new StreamResponse(new ZipOutputStreamSingleRow(configurationCollection, database, configTable, row, zipFilename,
       filename, fieldsToReturn, exportDescriptions)));
   }
 
@@ -688,7 +703,7 @@ public class CollectionResource implements CollectionService {
     }
   }
 
-  private Response handleCSVExportWithLobs(DatabaseRowsSolrManager solrManager, ViewerDatabase database,
+  private Response handleCSVExportWithLobs(DatabaseRowsSolrManager solrManager, CollectionStatus configurationCollection, ViewerDatabase database,
     final String databaseUUID, final TableStatus configTable, final FindRequest findRequest, final String zipFilename,
     final String filename, final boolean exportDescription, String fieldsToHeader) {
     List<String> fields = findRequest.fieldsToReturn;
@@ -698,7 +713,7 @@ public class CollectionResource implements CollectionService {
     final IterableIndexResult clone = solrManager.findAllRows(databaseUUID, findRequest.filter, findRequest.sorter,
       fields, findRequest.extraParameters);
     return ApiUtils
-      .okResponse(new StreamResponse(new ZipOutputStream(databaseUUID, database, configTable, allRows, clone,
+      .okResponse(new StreamResponse(new ZipOutputStream(configurationCollection, databaseUUID, database, configTable, allRows, clone,
         zipFilename, filename, findRequest.fieldsToReturn, findRequest.sublist, exportDescription, fieldsToHeader)));
   }
 

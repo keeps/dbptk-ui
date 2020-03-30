@@ -21,7 +21,9 @@ import org.apache.commons.io.IOUtils;
 import com.databasepreservation.common.api.utils.ExtraMediaType;
 import com.databasepreservation.common.api.utils.HandlebarsUtils;
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
+import com.databasepreservation.common.client.models.status.collection.LargeObjectConsolidateProperty;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
@@ -34,7 +36,7 @@ import com.databasepreservation.common.utils.LobPathManager;
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 public class ZipOutputStreamSingleRow extends CSVOutputStream {
-  private final String databaseUUID;
+  private final CollectionStatus configurationCollection;
   private final ViewerDatabase database;
   private final TableStatus configTable;
   private final String zipFilename;
@@ -43,10 +45,11 @@ public class ZipOutputStreamSingleRow extends CSVOutputStream {
   private final List<String> fieldsToReturn;
   private final boolean exportDescriptions;
 
-  public ZipOutputStreamSingleRow(ViewerDatabase database, TableStatus configTable, ViewerRow row, String zipFilename,
-    String csvFilename, List<String> fieldsToReturn, boolean exportDescriptions) {
+  public ZipOutputStreamSingleRow(CollectionStatus configurationCollection, ViewerDatabase database,
+    TableStatus configTable, ViewerRow row, String zipFilename, String csvFilename, List<String> fieldsToReturn,
+    boolean exportDescriptions) {
     super(zipFilename, ',');
-    this.databaseUUID = database.getUuid();
+    this.configurationCollection = configurationCollection;
     this.database = database;
     this.configTable = configTable;
     this.row = row;
@@ -101,10 +104,14 @@ public class ZipOutputStreamSingleRow extends CSVOutputStream {
       final ColumnStatus binaryColumn = findBinaryColumn(binaryColumns, cellEntry.getKey());
 
       if (binaryColumn != null) {
-        if (configTable.getColumnByIndex(binaryColumn.getColumnIndex()).isExternalLob()) {
-          handleWriteExternalLobs(out, binaryColumn, row, cellEntry.getValue());
+        if (configurationCollection.getConsolidateProperty().equals(LargeObjectConsolidateProperty.CONSOLIDATED)) {
+          handleWriteConsolidateLobs(out, binaryColumn, row);
         } else {
-          handleWriteInternalLobs(out, siardArchive, binaryColumn, row, cellEntry.getValue());
+          if (configTable.getColumnByIndex(binaryColumn.getColumnIndex()).isExternalLob()) {
+            handleWriteExternalLobs(out, binaryColumn, row, cellEntry.getValue());
+          } else {
+            handleWriteInternalLobs(out, siardArchive, binaryColumn, row, cellEntry.getValue());
+          }
         }
       }
     }
@@ -120,23 +127,22 @@ public class ZipOutputStreamSingleRow extends CSVOutputStream {
     return listBytes;
   }
 
+  private void handleWriteConsolidateLobs(ZipArchiveOutputStream out, ColumnStatus binaryColumn, ViewerRow row)
+    throws IOException {
+    final Path consolidatedPath = LobPathManager.getConsolidatedPath(ViewerFactory.getViewerConfiguration(),
+      database.getUuid(), configTable.getId(), binaryColumn.getColumnIndex(), row.getUuid());
+
+    InputStream in = new FileInputStream(consolidatedPath.toFile());
+    final String templateFilename = getTemplateFilename(row, binaryColumn, consolidatedPath.getFileName().toString());
+    addEntryToZip(out, in, templateFilename);
+  }
+
   private void handleWriteInternalLobs(ZipArchiveOutputStream out, ZipFile siardArchive, ColumnStatus binaryColumn,
     ViewerRow row, ViewerCell cell) throws IOException {
-    final InputStream siardArchiveInputStream = siardArchive.getInputStream(
+    final String templateFilename = getTemplateFilename(row, binaryColumn, cell.getValue());
+    final InputStream in = siardArchive.getInputStream(
       siardArchive.getEntry(LobPathManager.getZipFilePath(configTable, binaryColumn.getColumnIndex(), row)));
-
-    String handlebarsFilename = HandlebarsUtils.applyHandlebarsTemplate(row, configTable,
-      binaryColumn.getColumnIndex());
-    String zipArchiveEntryName = cell.getValue();
-
-    if (ViewerStringUtils.isNotBlank(handlebarsFilename)) {
-      zipArchiveEntryName = handlebarsFilename;
-    }
-
-    out.putArchiveEntry(new ZipArchiveEntry(ViewerConstants.INTERNAL_ZIP_LOB_FOLDER + zipArchiveEntryName));
-    IOUtils.copy(siardArchiveInputStream, out);
-    siardArchiveInputStream.close();
-    out.closeArchiveEntry();
+    addEntryToZip(out, in, templateFilename);
   }
 
   private void handleWriteExternalLobs(ZipArchiveOutputStream out, ColumnStatus binaryColumn, ViewerRow row,
@@ -145,18 +151,24 @@ public class ZipOutputStreamSingleRow extends CSVOutputStream {
     final Path lobPath = Paths.get(lobLocation);
     final Path completeLobPath = ViewerFactory.getViewerConfiguration().getSIARDFilesPath().resolve(lobPath);
 
+    final String templateFilename = getTemplateFilename(row, binaryColumn, completeLobPath.getFileName().toString());
+    InputStream inputStream = new FileInputStream(lobPath.toFile());
+    addEntryToZip(out, inputStream, templateFilename);
+  }
+
+  private String getTemplateFilename(ViewerRow row, ColumnStatus binaryColumn, String defaultValue) {
     String handlebarsFilename = HandlebarsUtils.applyHandlebarsTemplate(row, configTable,
       binaryColumn.getColumnIndex());
-
     if (ViewerStringUtils.isBlank(handlebarsFilename)) {
-      handlebarsFilename = completeLobPath.getFileName().toString();
+      handlebarsFilename = defaultValue;
     }
+    return handlebarsFilename;
+  }
 
-    InputStream inputStream = new FileInputStream(completeLobPath.toFile());
-
-    out.putArchiveEntry(new ZipArchiveEntry(ViewerConstants.INTERNAL_ZIP_LOB_FOLDER + handlebarsFilename));
-    IOUtils.copy(inputStream, out);
-    inputStream.close();
+  private void addEntryToZip(ZipArchiveOutputStream out, InputStream in, String templateFilename) throws IOException {
+    out.putArchiveEntry(new ZipArchiveEntry(ViewerConstants.INTERNAL_ZIP_LOB_FOLDER + templateFilename));
+    IOUtils.copy(in, out);
+    in.close();
     out.closeArchiveEntry();
   }
 }

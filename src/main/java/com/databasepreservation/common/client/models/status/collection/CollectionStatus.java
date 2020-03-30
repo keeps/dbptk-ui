@@ -8,12 +8,13 @@ import java.util.Set;
 
 import com.databasepreservation.common.client.common.search.SavedSearch;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-@JsonPropertyOrder({"version", "id", "solrCollectionPrefix", "databaseUUID", "name", "description", "tables", "savedSearches" , "denormalizations"})
+@JsonPropertyOrder({"version", "id", "solrCollectionPrefix", "databaseUUID", "name", "description", "consolidateProperty", "tables", "savedSearches" , "denormalizations"})
 public class CollectionStatus implements Serializable {
 
   private String version;
@@ -22,6 +23,7 @@ public class CollectionStatus implements Serializable {
   private String solrCollectionPrefix;
   private String name;
   private String description;
+  private LargeObjectConsolidateProperty consolidateProperty;
   private List<TableStatus> tables;
   private List<SavedSearch> savedSearches;
   private Set<String> denormalizations;
@@ -30,6 +32,7 @@ public class CollectionStatus implements Serializable {
     tables = new ArrayList<>();
     savedSearches = new ArrayList<>();
     denormalizations = new HashSet<>();
+    consolidateProperty = LargeObjectConsolidateProperty.CONSOLIDATED;
   }
 
   public String getVersion() {
@@ -78,6 +81,14 @@ public class CollectionStatus implements Serializable {
 
   public void setDescription(String description) {
     this.description = description;
+  }
+
+  public LargeObjectConsolidateProperty getConsolidateProperty() {
+    return consolidateProperty;
+  }
+
+  public void setConsolidateProperty(LargeObjectConsolidateProperty consolidateProperty) {
+    this.consolidateProperty = consolidateProperty;
   }
 
   public List<TableStatus> getTables() {
