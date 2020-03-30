@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import com.databasepreservation.common.client.models.status.collection.LargeObjectConsolidateProperty;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
 import com.databasepreservation.common.client.ClientConfigurationManager;
@@ -301,7 +302,7 @@ public class RowPanel extends RightPanel {
       rowField = RowField.createInstance(label, new HTML("NULL"));
     } else {
       if (column.getType().getDbType().equals(ViewerType.dbTypes.BINARY)) {
-        if (database.getPath() == null || database.getPath().isEmpty()) {
+        if ((database.getPath() == null || database.getPath().isEmpty()) && !status.getConsolidateProperty().equals(LargeObjectConsolidateProperty.CONSOLIDATED)) {
           rowField = RowField.createInstance(label, new HTML(messages.rowPanelTextForLobUnavailable()));
         } else {
           rowField = RowField.createInstance(label,
