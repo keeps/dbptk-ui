@@ -32,7 +32,16 @@ public class AuthenticationResource implements AuthenticationService {
 
   @Override
   public User getAuthenticatedUser() {
-    User user = UserUtility.getUser(request);
+    final boolean isAuthenticationEnabled = ViewerConfiguration.getInstance().getIsAuthenticationEnabled();
+
+    User user;
+
+    if (isAuthenticationEnabled) {
+      user = UserUtility.getUser(request);
+    } else {
+      user = UserUtility.getNoAuthenticationUser();
+      UserUtility.setUser(request, user);
+    }
     LOGGER.debug("Serving user {}", user);
     return user;
   }

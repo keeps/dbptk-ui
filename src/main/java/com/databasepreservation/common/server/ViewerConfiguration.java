@@ -2,8 +2,10 @@ package com.databasepreservation.common.server;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -364,7 +366,15 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
 
   public List<String> getWhitelistedIPs() {
     if (cachedWhitelistedIPs == null) {
-      cachedWhitelistedIPs = getViewerConfigurationAsList(ViewerConfiguration.PROPERTY_FILTER_ONOFF_WHITELISTED_IPS);
+      cachedWhitelistedIPs = new ArrayList<>();
+      for (String whitelistedIP : getViewerConfigurationAsList(ViewerConfiguration.PROPERTY_FILTER_ONOFF_WHITELISTED_IPS)) {
+        try {
+          final InetAddress address = InetAddress.getByName(whitelistedIP);
+          cachedWhitelistedIPs.add(address.getHostAddress());
+        } catch (UnknownHostException e) {
+          LOGGER.debug("Invalid IP address from config: {}", whitelistedIP, e);
+        }
+      }
     }
     return cachedWhitelistedIPs;
   }

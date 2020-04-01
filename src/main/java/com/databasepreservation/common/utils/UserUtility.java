@@ -231,6 +231,21 @@ public class UserUtility {
     return userIsAdmin(user) || userIsManager(user);
   }
 
+  public static User getNoAuthenticationUser() {
+    User user = new User(ViewerConstants.DEFAULT_USERNAME);
+    final List<String> adminRoles = ViewerConfiguration.getInstance()
+        .getViewerConfigurationAsList(ViewerConfiguration.PROPERTY_AUTHORIZATION_ADMINISTRATORS);
+
+    user.setAdmin(true);
+    user.setDirectRoles(new HashSet<>(adminRoles));
+    user.setAllRoles(new HashSet<>(adminRoles));
+
+    user.setGuest(false);
+    user.setFullName(ViewerConstants.DEFAULT_FULL_NAME);
+
+    return user;
+  }
+
   public static class Authorization {
     private static final Map<Class, String> filterParameterDatabaseUUID;
 

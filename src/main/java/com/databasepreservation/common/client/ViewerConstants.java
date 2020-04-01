@@ -1,5 +1,6 @@
 package com.databasepreservation.common.client;
 
+import com.databasepreservation.common.client.models.user.User;
 import org.roda.core.data.common.RodaConstants;
 import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
 import com.databasepreservation.common.client.index.filter.Filter;
@@ -528,6 +529,9 @@ public class ViewerConstants {
   public static final String SIARD_LOB_FOLDER_PREFIX = "lob";
   public static final String SIARD_RECORD_PREFIX = "record";
   public static final String SIARD_LOB_FILE_EXTENSION = ".bin";
+
+  public static final String DEFAULT_USERNAME = "admin";
+  public static final String DEFAULT_FULL_NAME = "admin";
 
   /**
    * private constructor

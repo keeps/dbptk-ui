@@ -152,54 +152,60 @@ public class DatabasePanel extends Composite implements ICollectionStatusObserve
     AuthenticationService.Util.call((Boolean authenticationIsEnabled) -> {
       if (authenticationIsEnabled) {
         if (user.isGuest()) {
-          menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.USER, messages.loginLogin()),
-            (Command) () -> UserLogin.getInstance().login());
-          MenuBar languagesMenu = new MenuBar(true);
-
-          setLanguageMenu(languagesMenu);
-
-          MenuItem languagesMenuItem = new MenuItem(
-            FontAwesomeIconManager.loaded(FontAwesomeIconManager.GLOBE, selectedLanguage), languagesMenu);
-          languagesMenuItem.addStyleName("menu-item menu-item-label menu-item-language");
-          menu.addItem(languagesMenuItem);
+          buildGuestMenu();
         } else {
-          if (!hideMenu) {
-            MenuBar subMenu = new MenuBar(true);
-            subMenu.addItem(messages.loginLogout(), (Command) () -> UserLogin.getInstance().logout());
-            menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.USER, user.getFullName()), subMenu);
-            if (user.isAdmin()) {
-              MenuBar administrationMenu = new MenuBar(true);
-              administrationMenu.addItem(
-                FontAwesomeIconManager.loaded(FontAwesomeIconManager.ACTIVITY_LOG, messages.activityLogMenuText()),
-                (Command) HistoryManager::gotoActivityLog);
-              administrationMenu.addItem(
-                FontAwesomeIconManager.loaded(FontAwesomeIconManager.NETWORK_WIRED, messages.menuTextForJobs()),
-                (Command) HistoryManager::gotoJobs);
-              administrationMenu.addItem(
-                FontAwesomeIconManager.loaded(FontAwesomeIconManager.PREFERENCES, messages.menuTextForPreferences()),
-                (Command) HistoryManager::gotoPreferences);
-              menu.addItem(messages.menuTextForAdministration(), administrationMenu);
-            }
-
-            MenuBar languagesMenu = new MenuBar(true);
-
-            setLanguageMenu(languagesMenu);
-
-            MenuItem languagesMenuItem = new MenuItem(
-              FontAwesomeIconManager.loaded(FontAwesomeIconManager.GLOBE, selectedLanguage), languagesMenu);
-            languagesMenuItem.addStyleName("menu-item menu-item-label menu-item-language");
-            menu.addItem(languagesMenuItem);
-          }
+          buildDefaultMenu(user, true, hideMenu);
         }
       } else {
-        menu.addItem(
-          FontAwesomeIconManager.loaded(FontAwesomeIconManager.NEW_UPLOAD, messages.uploadPanelTextForTitle()),
-          (Command) HistoryManager::gotoNewUpload);
-        menu.addItem(
-          FontAwesomeIconManager.loaded(FontAwesomeIconManager.DATABASES, messages.menusidebar_manageDatabases()),
-          (Command) HistoryManager::gotoDatabaseList);
+        buildDefaultMenu(user, false, hideMenu);
       }
     }).isAuthenticationEnabled();
+  }
+
+  private void buildGuestMenu() {
+    menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.USER, messages.loginLogin()),
+      (Command) () -> UserLogin.getInstance().login());
+    MenuBar languagesMenu = new MenuBar(true);
+
+    setLanguageMenu(languagesMenu);
+
+    MenuItem languagesMenuItem = new MenuItem(
+      FontAwesomeIconManager.loaded(FontAwesomeIconManager.GLOBE, selectedLanguage), languagesMenu);
+    languagesMenuItem.addStyleName("menu-item menu-item-label menu-item-language");
+    menu.addItem(languagesMenuItem);
+  }
+
+  private void buildDefaultMenu(User user, boolean authenticationIsEnabled, boolean hideMenu) {
+    if (!hideMenu) {
+      GWT.log("authentication: " + authenticationIsEnabled);
+      if (authenticationIsEnabled) {
+        MenuBar subMenu = new MenuBar(true);
+        subMenu.addItem(messages.loginLogout(), (Command) () -> UserLogin.getInstance().logout());
+        menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.USER, user.getFullName()), subMenu);
+      }
+      if (user.isAdmin()) {
+        MenuBar administrationMenu = new MenuBar(true);
+        administrationMenu.addItem(
+          FontAwesomeIconManager.loaded(FontAwesomeIconManager.ACTIVITY_LOG, messages.activityLogMenuText()),
+          (Command) HistoryManager::gotoActivityLog);
+        administrationMenu.addItem(
+          FontAwesomeIconManager.loaded(FontAwesomeIconManager.NETWORK_WIRED, messages.menuTextForJobs()),
+          (Command) HistoryManager::gotoJobs);
+        administrationMenu.addItem(
+          FontAwesomeIconManager.loaded(FontAwesomeIconManager.PREFERENCES, messages.menuTextForPreferences()),
+          (Command) HistoryManager::gotoPreferences);
+        menu.addItem(messages.menuTextForAdministration(), administrationMenu);
+      }
+
+      MenuBar languagesMenu = new MenuBar(true);
+
+      setLanguageMenu(languagesMenu);
+
+      MenuItem languagesMenuItem = new MenuItem(
+        FontAwesomeIconManager.loaded(FontAwesomeIconManager.GLOBE, selectedLanguage), languagesMenu);
+      languagesMenuItem.addStyleName("menu-item menu-item-label menu-item-language");
+      menu.addItem(languagesMenuItem);
+    }
   }
 
   private void setLanguageMenu(MenuBar languagesMenu) {
