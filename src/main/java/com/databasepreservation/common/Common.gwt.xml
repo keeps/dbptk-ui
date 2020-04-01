@@ -31,7 +31,6 @@
     <stylesheet src="roda_main.css" />
     <stylesheet src="main.css" />
     <stylesheet src="print.css" />
-    <stylesheet src="/api/v1/theme?resource_id=theme.css" />
 
     <source path="client"/>
 
