@@ -3,6 +3,7 @@ package com.databasepreservation.common.client.common.visualization.manager.SIAR
 import java.util.HashMap;
 import java.util.Map;
 
+import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.NavigationPanel;
@@ -33,7 +34,9 @@ public class SIARDNavigationPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, SIARDNavigationPanel> instances = new HashMap<>();
   private ViewerDatabase database;
-  private Button btnDeleteSIARD, btnShowFiles, btnEditMetadata;
+  private Button btnDelete;
+  private Button btnShowFiles;
+  private Button btnEditMetadata;
 
   public static SIARDNavigationPanel getInstance(ViewerDatabase database) {
     String databaseUUID = database.getUuid();
@@ -94,11 +97,11 @@ public class SIARDNavigationPanel {
     }
 
     // Delete SIARD file button
-    btnDeleteSIARD = new Button();
-    btnDeleteSIARD.addStyleName("btn btn-outline-danger btn-delete");
+    btnDelete = new Button();
+    btnDelete.addStyleName("btn btn-outline-danger btn-delete");
     if (database.getPath() != null && !database.getPath().isEmpty()) {
-      btnDeleteSIARD.setText(messages.SIARDHomePageButtonTextForDeleteIngested());
-      btnDeleteSIARD.addClickHandler(event -> {
+      btnDelete.setText(messages.SIARDHomePageButtonTextForDeleteIngested());
+      btnDelete.addClickHandler(event -> {
         if (!database.getStatus().equals(ViewerDatabaseStatus.REMOVING)
           && !database.getStatus().equals(ViewerDatabaseStatus.INGESTING)) {
           CommonDialogs.showConfirmDialog(messages.SIARDHomePageDialogTitleForDelete(),
@@ -138,7 +141,7 @@ public class SIARDNavigationPanel {
       siard.addButton(CommonClientUtils.wrapOnDiv("btn-item", btnMigrateToSIARD));
       siard.addButton(CommonClientUtils.wrapOnDiv("btn-item", btnSendToLiveDBMS));
     } else {
-      siard.addButton(CommonClientUtils.wrapOnDiv("btn-item", btnDeleteSIARD));
+      siard.addButton(CommonClientUtils.wrapOnDiv("btn-item", btnDelete));
     }
     update(database);
 
@@ -150,13 +153,13 @@ public class SIARDNavigationPanel {
     if (database.getPath() == null || database.getPath().isEmpty()) {
       btnShowFiles.setText(null);
       btnShowFiles.setVisible(false);
-      btnDeleteSIARD.setVisible(false);
+      btnDelete.setVisible(false);
       btnEditMetadata.setEnabled(false);
       btnEditMetadata.setTitle(messages.SIARDHomePageTextForRequiredSIARDFile());
     } else {
       btnShowFiles.setText(PathUtils.getFileName(database.getPath()));
       btnShowFiles.setVisible(true);
-      btnDeleteSIARD.setVisible(true);
+      btnDelete.setVisible(true);
       btnEditMetadata.setEnabled(true);
       btnEditMetadata.setTitle(null);
     }

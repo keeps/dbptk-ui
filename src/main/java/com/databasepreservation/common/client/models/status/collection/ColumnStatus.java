@@ -7,11 +7,13 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import javax.ws.rs.core.MediaType;
+
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 @JsonPropertyOrder({"id", "name", "customName", "description", "customDescription", "originalType", "typeName",
-  "nullable", "type", "columnIndex", "externalLob", "nestedColumn", "order", "export", "search", "details"})
+  "nullable", "type", "columnIndex", "externalLob", "applicationType", "nestedColumn", "order", "export", "search", "details"})
 public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
   private String id;
   private String name;
@@ -25,6 +27,7 @@ public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
   private int columnIndex;
   @JsonInclude(JsonInclude.Include.NON_DEFAULT)
   private boolean externalLob;
+  private String applicationType;
   private NestedColumnStatus nestedColumns;
   private int order;
   private ExportStatus exportStatus;
@@ -33,6 +36,7 @@ public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
 
   public ColumnStatus() {
     externalLob = false;
+    applicationType = MediaType.APPLICATION_OCTET_STREAM;
   }
 
   public String getId() {
@@ -106,6 +110,14 @@ public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
 
   public void setExternalLob(boolean externalLob) {
     this.externalLob = externalLob;
+  }
+
+  public String getApplicationType() {
+    return applicationType;
+  }
+
+  public void setApplicationType(String applicationType) {
+    this.applicationType = applicationType;
   }
 
   public NestedColumnStatus getNestedColumns() {

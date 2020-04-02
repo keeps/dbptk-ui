@@ -69,12 +69,17 @@ public class BinaryColumnOptionsPanel extends ColumnOptionsPanel {
     return templateStatus;
   }
 
+  public String getApplicationType() {
+    return this.applicationType.getText();
+  }
+
   private BinaryColumnOptionsPanel(TableStatus tableConfiguration, ColumnStatus columnConfiguration) {
     initWidget(binder.createAndBindUi(this));
 
     templateEngineLabel.setHTML(messages.columnManagementTextForTemplateHint(ViewerConstants.TEMPLATE_ENGINE_LINK));
 
     templateList.setText(columnConfiguration.getSearchStatus().getList().getTemplate().getTemplate());
+    applicationType.setText(columnConfiguration.getApplicationType());
     templateListHint.add(buildHintWithButtons(tableConfiguration, templateList));
   }
 

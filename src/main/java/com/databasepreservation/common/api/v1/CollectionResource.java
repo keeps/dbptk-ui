@@ -447,7 +447,6 @@ public class CollectionResource implements CollectionService {
 
   @GET
   @Path("/{databaseUUID}/collection/{collectionUUID}/data/{schema}/{table}/{rowIndex}/{columnIndex}")
-  @Produces({MediaType.APPLICATION_OCTET_STREAM})
   @ApiOperation(value = "Downloads a LOB for a specific row within a database", notes = "download the specified LOB.", response = Response.class)
   public Response exportLOB(@PathParam(ViewerConstants.API_PATH_PARAM_DATABASE_UUID) String databaseUUID,
     @PathParam(ViewerConstants.API_PATH_PARAM_COLLECTION_UUID) String collectionUUID,
@@ -499,7 +498,7 @@ public class CollectionResource implements CollectionService {
       handlebarsFilename = consolidatedPath.getFileName().toString();
     }
 
-    return ApiUtils.okResponse(new StreamResponse(handlebarsFilename, MediaType.APPLICATION_OCTET_STREAM,
+    return ApiUtils.okResponse(new StreamResponse(handlebarsFilename, tableConfiguration.getColumnByIndex(columnIndex).getApplicationType(),
       DownloadUtils
         .stream(Files.newInputStream(LobPathManager.getConsolidatedPath(ViewerFactory.getViewerConfiguration(),
           databaseUUID, row.getTableId(), columnIndex, rowIndex)))));
@@ -518,7 +517,7 @@ public class CollectionResource implements CollectionService {
       handlebarsFilename = completeLobPath.getFileName().toString();
     }
 
-    return ApiUtils.okResponse(new StreamResponse(handlebarsFilename, MediaType.APPLICATION_OCTET_STREAM,
+    return ApiUtils.okResponse(new StreamResponse(handlebarsFilename, tableConfiguration.getColumnByIndex(columnIndex).getApplicationType(),
       DownloadUtils.stream(new FileInputStream(completeLobPath.toFile()))));
   }
 
@@ -536,7 +535,7 @@ public class CollectionResource implements CollectionService {
       handlebarsFilename = row.getCells().get(tableConfiguration.getColumnByIndex(columnIndex).getId()).getValue();
     }
 
-    return ApiUtils.okResponse(new StreamResponse(handlebarsFilename, MediaType.APPLICATION_OCTET_STREAM,
+    return ApiUtils.okResponse(new StreamResponse(handlebarsFilename, tableConfiguration.getColumnByIndex(columnIndex).getApplicationType(),
       DownloadUtils.stream(new BufferedInputStream(zipFile.getInputStream(entry)))));
   }
 
