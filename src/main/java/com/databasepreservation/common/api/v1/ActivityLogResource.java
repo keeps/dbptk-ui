@@ -27,8 +27,6 @@ import com.databasepreservation.common.utils.ControllerAssistant;
 import com.databasepreservation.common.utils.I18nUtility;
 import com.databasepreservation.common.utils.UserUtility;
 
-import io.swagger.annotations.Api;
-
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
@@ -43,10 +41,10 @@ public class ActivityLogResource implements ActivityLogService {
   @Override
   public IndexResult<ActivityLogEntry> find(FindRequest findRequest, String locale) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
-    User user = UserUtility.getUser(request);
-    LogEntryState state = LogEntryState.SUCCESS;
 
-    controllerAssistant.checkRoles(user);
+    LogEntryState state = LogEntryState.SUCCESS;
+    User user = controllerAssistant.checkRoles(request);
+
     long count = 0;
 
     try {
@@ -69,10 +67,9 @@ public class ActivityLogResource implements ActivityLogService {
   @Override
   public ActivityLogWrapper retrieve(String logUUID) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
-    User user = UserUtility.getUser(request);
-    LogEntryState state = LogEntryState.SUCCESS;
 
-    controllerAssistant.checkRoles(user);
+    LogEntryState state = LogEntryState.SUCCESS;
+    User user = controllerAssistant.checkRoles(request);
 
     try {
       final ActivityLogEntry retrieve = ViewerFactory.getSolrManager().retrieve(ActivityLogEntry.class, logUUID);

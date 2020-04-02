@@ -40,7 +40,6 @@ import com.databasepreservation.common.client.models.user.User;
 import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.server.controller.Browser;
 import com.databasepreservation.common.utils.ControllerAssistant;
-import com.databasepreservation.common.utils.UserUtility;
 import com.google.common.io.Files;
 
 import io.swagger.annotations.Api;
@@ -67,10 +66,9 @@ public class FileResource {
   @ApiOperation(value = "Lists all the SIARD files in the server", notes = "")
   public List<String> list() {
     final ControllerAssistant controllerAssistant = new ControllerAssistant() {};
-    final User user = UserUtility.getUser(request);
 
     LogEntryState state = LogEntryState.SUCCESS;
-    controllerAssistant.checkRoles(user);
+    User user = controllerAssistant.checkRoles(request);
 
     final java.nio.file.Path path = ViewerConfiguration.getInstance().getSIARDFilesPath();
     try {
@@ -92,15 +90,18 @@ public class FileResource {
   public Response getSIARDFile(
     @ApiParam(required = true, value = "The name of the SIARD file to download") @QueryParam(ViewerConstants.API_PATH_PARAM_FILENAME) String filename) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
-    User user = UserUtility.getUser(request);
-    LogEntryState state = LogEntryState.SUCCESS;
 
-    controllerAssistant.checkRoles(user);
+    LogEntryState state = LogEntryState.SUCCESS;
+    User user = controllerAssistant.checkRoles(request);
+
     try {
       java.nio.file.Path siardFilesPath = ViewerConfiguration.getInstance().getSIARDFilesPath();
+      java.nio.file.Path basePath = Paths.get(ViewerConfiguration.getInstance().getViewerConfigurationAsString("/",
+        ViewerConfiguration.PROPERTY_BASE_UPLOAD_PATH));
       java.nio.file.Path siardPath = siardFilesPath.resolve(filename);
       if (java.nio.file.Files.exists(siardPath) && !java.nio.file.Files.isDirectory(siardPath)
-        && ViewerConfiguration.checkPathIsWithin(siardPath, siardFilesPath)) {
+        && (ViewerConfiguration.checkPathIsWithin(siardPath, siardFilesPath)
+          || ViewerConfiguration.checkPathIsWithin(siardPath, basePath))) {
         Response.ResponseBuilder responseBuilder = Response.ok(siardPath.toFile());
         responseBuilder.header("Content-Disposition", "attachment; filename=\"" + siardPath.toFile().getName() + "\"");
         return responseBuilder.build();
@@ -121,10 +122,10 @@ public class FileResource {
   public void deleteSiardFile(
     @ApiParam(value = "Filename to be deleted", required = true) @QueryParam(value = "filename") String filename) {
     final ControllerAssistant controllerAssistant = new ControllerAssistant() {};
-    final User user = UserUtility.getUser(request);
 
     LogEntryState state = LogEntryState.SUCCESS;
-    controllerAssistant.checkRoles(user);
+    User user = controllerAssistant.checkRoles(request);
+
     try {
       java.nio.file.Files.walk(ViewerConfiguration.getInstance().getSIARDFilesPath()).map(java.nio.file.Path::toFile)
         .filter(p -> p.getName().equals(filename)).forEach(File::delete);
@@ -151,10 +152,9 @@ public class FileResource {
     @ApiParam(value = "Choose format in which to get the response", allowableValues = RodaConstants.API_POST_PUT_MEDIA_TYPES) @QueryParam(RodaConstants.API_QUERY_KEY_ACCEPT_FORMAT) String acceptFormat,
     @ApiParam(value = "JSONP callback name", required = false, allowMultiple = false, defaultValue = RodaConstants.API_QUERY_DEFAULT_JSONP_CALLBACK) @QueryParam(RodaConstants.API_QUERY_KEY_JSONP_CALLBACK) String jsonpCallbackName) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
-    User user = UserUtility.getUser(request);
-    LogEntryState state = LogEntryState.SUCCESS;
 
-    controllerAssistant.checkRoles(user);
+    LogEntryState state = LogEntryState.SUCCESS;
+    User user = controllerAssistant.checkRoles(request);
 
     String mediaType = ApiUtils.getMediaType(acceptFormat, request);
     String fileExtension = Files.getFileExtension(fileDetail.getFileName());

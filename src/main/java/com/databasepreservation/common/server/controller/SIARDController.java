@@ -361,7 +361,7 @@ public class SIARDController {
   public static List<Module> getSIARDImportModule(String moduleName) throws GenericException {
     final DatabaseModuleFactory factory = getDatabaseImportModuleFactory(moduleName);
     if (factory == null) {
-      throw new GenericException("Unable to retrieve the database export module factory");
+      throw new GenericException("Unable to retrieve the database import module factory");
     }
 
     try {
@@ -448,9 +448,9 @@ public class SIARDController {
     List<Module> modules = new ArrayList<>();
     Set<DatabaseModuleFactory> databaseModuleFactories = ReflectionUtils.collectDatabaseModuleFactories();
     for (DatabaseModuleFactory factory : databaseModuleFactories) {
-      if (!factory.getModuleName().equals("list-tables")
+      if (!factory.getModuleName().equals("import-config")
         && !factory.getModuleName().toLowerCase().contains(ViewerConstants.SIARD)
-        && !factory.getModuleName().equalsIgnoreCase("internal-dbvtk-export") && factory.isEnabled()
+        && !factory.getModuleName().equalsIgnoreCase("internal-dbptke-export") && factory.isEnabled()
         && factory.producesExportModules()) {
         modules.add(getDatabaseModuleParameters(factory));
       }
@@ -463,9 +463,9 @@ public class SIARDController {
     List<Module> modules = new ArrayList<>();
     Set<DatabaseModuleFactory> databaseModuleFactories = ReflectionUtils.collectDatabaseModuleFactories();
     for (DatabaseModuleFactory factory : databaseModuleFactories) {
-      if (!factory.getModuleName().equals("list-tables")
+      if (!factory.getModuleName().equals("import-config")
         && !factory.getModuleName().toLowerCase().contains(ViewerConstants.SIARD)
-        && !factory.getModuleName().equalsIgnoreCase("internal-dbvtk-export") && factory.isEnabled()
+        && !factory.getModuleName().equalsIgnoreCase("internal-dbptke-export") && factory.isEnabled()
         && factory.producesExportModules()) {
         if (factory.getModuleName().equals(moduleName)) {
           modules.add(getDatabaseModuleParameters(factory));
@@ -481,7 +481,8 @@ public class SIARDController {
     Set<DatabaseModuleFactory> databaseModuleFactories = ReflectionUtils.collectDatabaseModuleFactories();
     for (DatabaseModuleFactory factory : databaseModuleFactories) {
       if (factory.isEnabled() && factory.producesImportModules()
-        && !factory.getModuleName().toLowerCase().contains(ViewerConstants.SIARD)) {
+        && !factory.getModuleName().toLowerCase().contains(ViewerConstants.SIARD)
+        && !factory.getModuleName().equals("import-config")) {
         modules.add(getDatabaseModuleParameters(factory));
       }
     }
@@ -518,10 +519,9 @@ public class SIARDController {
   }
 
   private static void convertSIARDMetadataToSolr(Path siardPath, String databaseUUID) throws GenericException {
+    validateSIARDLocation(siardPath);
+
     LOGGER.info("starting to import metadata database {}", siardPath.toAbsolutePath());
-    if (!siardPath.toFile().exists()) {
-      throw new GenericException("File not found at path " + siardPath.toAbsolutePath().toString());
-    }
 
     Path reporterPath = ViewerConfiguration.getInstance().getReportPath(databaseUUID).toAbsolutePath();
     try (Reporter reporter = new Reporter(reporterPath.getParent().toString(), reporterPath.getFileName().toString())) {
@@ -561,6 +561,30 @@ public class SIARDController {
     }
   }
 
+  private static void validateSIARDLocation(Path siardPath) throws GenericException {
+    LOGGER.info("starting to check if path: {} is valid", siardPath.toAbsolutePath());
+    // Checks if path is within the internal SIARD file path
+    final boolean internal = ViewerConfiguration.checkPathIsWithin(siardPath,
+      ViewerConfiguration.getInstance().getSIARDFilesPath());
+
+    if (internal) {
+      if (!siardPath.toFile().exists()) {
+        throw new GenericException("File not found at path");
+      }
+    } else {
+      // checks if is on the property base path
+      final boolean onBasePath = ViewerConfiguration.checkPathIsWithin(siardPath, Paths.get(ViewerConfiguration
+        .getInstance().getViewerConfigurationAsString("/", ViewerConfiguration.PROPERTY_BASE_UPLOAD_PATH)));
+      if (onBasePath) {
+        if (!siardPath.toFile().exists()) {
+          throw new GenericException("File not found");
+        }
+      } else {
+        throw new GenericException("File not found");
+      }
+    }
+  }
+
   public static String loadFromLocal(String localPath, String databaseUUID) throws GenericException {
     LOGGER.info("converting database {}", databaseUUID);
     Path basePath = Paths.get(ViewerConfiguration.getInstance().getViewerConfigurationAsString("/",
@@ -577,6 +601,8 @@ public class SIARDController {
   }
 
   private static void convertSIARDtoSolr(Path siardPath, String databaseUUID) throws GenericException {
+    validateSIARDLocation(siardPath);
+
     LOGGER.info("starting to convert database {}", siardPath.toAbsolutePath());
 
     // build the SIARD import module, Solr export module, and start the

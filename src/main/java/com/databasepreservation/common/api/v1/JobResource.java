@@ -34,10 +34,9 @@ public class JobResource implements JobService {
   @Override
   public IndexResult<ViewerJob> find(FindRequest findRequest, String locale) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
-    User user = UserUtility.getUser(request);
-    LogEntryState state = LogEntryState.SUCCESS;
 
-    controllerAssistant.checkRoles(user);
+    LogEntryState state = LogEntryState.SUCCESS;
+    User user = controllerAssistant.checkRoles(request);
 
     try {
       final IndexResult<ViewerJob> result = ViewerFactory.getSolrManager().find(ViewerJob.class, findRequest.filter,

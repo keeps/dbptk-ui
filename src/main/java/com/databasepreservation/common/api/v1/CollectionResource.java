@@ -130,8 +130,9 @@ public class CollectionResource implements CollectionService {
   @ApiOperation(value = "Downloads the migration report for a specific database")
   public Response getReport(@PathParam("databaseUUID") String databaseUUID) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
-    final User user = UserUtility.getUser(request);
+
     LogEntryState state = LogEntryState.SUCCESS;
+    User user = controllerAssistant.checkRoles(request);
 
     try {
       java.nio.file.Path reportPath = ViewerConfiguration.getInstance().getReportPath(databaseUUID);
@@ -156,10 +157,10 @@ public class CollectionResource implements CollectionService {
   @Override
   public String createCollection(String databaseUUID) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
-    final User user = UserUtility.getUser(request);
 
     LogEntryState state = LogEntryState.SUCCESS;
-    controllerAssistant.checkRoles(user);
+    User user = controllerAssistant.checkRoles(request);
+
     try {
       final ViewerDatabase database = ViewerFactory.getSolrManager().retrieve(ViewerDatabase.class, databaseUUID);
       return SIARDController.loadFromLocal(database.getPath(), databaseUUID);
@@ -175,10 +176,10 @@ public class CollectionResource implements CollectionService {
   @Override
   public ProgressData getProgressData(String databaseUUID) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
-    final User user = UserUtility.getUser(request);
-    LogEntryState state = LogEntryState.SUCCESS;
 
-    controllerAssistant.checkRoles(user);
+    LogEntryState state = LogEntryState.SUCCESS;
+    User user = controllerAssistant.checkRoles(request);
+
     try {
       return ProgressData.getInstance(databaseUUID);
     } finally {
@@ -190,11 +191,9 @@ public class CollectionResource implements CollectionService {
   @Override
   public Boolean deleteCollection(String databaseUUID) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
-    User user = UserUtility.getUser(request);
 
     LogEntryState state = LogEntryState.SUCCESS;
-
-    controllerAssistant.checkRoles(user);
+    User user = controllerAssistant.checkRoles(request);
 
     try {
       final String collectionName = SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + databaseUUID;
@@ -223,10 +222,9 @@ public class CollectionResource implements CollectionService {
   @Override
   public List<CollectionStatus> getCollectionConfiguration(String databaseUUID, String collectionUUID) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
-    User user = UserUtility.getUser(request);
-    LogEntryState state = LogEntryState.SUCCESS;
 
-    controllerAssistant.checkRoles(user);
+    LogEntryState state = LogEntryState.SUCCESS;
+    User user = controllerAssistant.checkRoles(request);
 
     try {
       final CollectionStatus configurationCollection = ViewerFactory.getConfigurationManager()
@@ -244,10 +242,9 @@ public class CollectionResource implements CollectionService {
   @Override
   public Boolean updateCollectionConfiguration(String databaseUUID, String collectionUUID, CollectionStatus status) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
-    User user = UserUtility.getUser(request);
-    LogEntryState state = LogEntryState.SUCCESS;
 
-    controllerAssistant.checkRoles(user);
+    LogEntryState state = LogEntryState.SUCCESS;
+    User user = controllerAssistant.checkRoles(request);
 
     try {
       ViewerFactory.getConfigurationManager().updateCollectionStatus(databaseUUID, status);
@@ -269,10 +266,9 @@ public class CollectionResource implements CollectionService {
   public DenormalizeConfiguration getDenormalizeConfigurationFile(String databaseUUID, String collectionUUID,
     String tableUUID) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
-    User user = UserUtility.getUser(request);
-    LogEntryState state = LogEntryState.SUCCESS;
 
-    controllerAssistant.checkRoles(user);
+    LogEntryState state = LogEntryState.SUCCESS;
+    User user = controllerAssistant.checkRoles(request);
 
     try {
       java.nio.file.Path path = ViewerConfiguration.getInstance().getDatabasesPath().resolve(databaseUUID)
@@ -298,10 +294,9 @@ public class CollectionResource implements CollectionService {
   public synchronized Boolean createDenormalizeConfigurationFile(String databaseUUID, String collectionUUID,
     String tableUUID, DenormalizeConfiguration configuration) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
-    User user = UserUtility.getUser(request);
-    LogEntryState state = LogEntryState.SUCCESS;
 
-    controllerAssistant.checkRoles(user);
+    LogEntryState state = LogEntryState.SUCCESS;
+    User user = controllerAssistant.checkRoles(request);
 
     // check if there is no job running on table
     for (JobExecution runningJobExecution : jobExplorer.findRunningJobExecutions("denormalizeJob")) {
@@ -333,10 +328,9 @@ public class CollectionResource implements CollectionService {
   @Override
   public Boolean deleteDenormalizeConfigurationFile(String databaseUUID, String collectionUUID, String tableUUID) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
-    User user = UserUtility.getUser(request);
-    LogEntryState state = LogEntryState.SUCCESS;
 
-    controllerAssistant.checkRoles(user);
+    LogEntryState state = LogEntryState.SUCCESS;
+    User user = controllerAssistant.checkRoles(request);
 
     try {
       ViewerFactory.getConfigurationManager().removeDenormalization(databaseUUID,
@@ -360,10 +354,9 @@ public class CollectionResource implements CollectionService {
   @Override
   public synchronized void run(String databaseUUID, String collectionUUID, String tableUUID) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
-    User user = UserUtility.getUser(request);
-    LogEntryState state = LogEntryState.SUCCESS;
 
-    controllerAssistant.checkRoles(user);
+    LogEntryState state = LogEntryState.SUCCESS;
+    User user = controllerAssistant.checkRoles(request);
 
     // check if there is no job running on table
     for (JobExecution runningJobExecution : jobExplorer.findRunningJobExecutions("denormalizeJob")) {
@@ -403,10 +396,9 @@ public class CollectionResource implements CollectionService {
   public IndexResult<ViewerRow> findRows(String databaseUUID, String collectionUUID, String schema, String table,
     FindRequest findRequest, String localeString) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
-    User user = UserUtility.getUser(request);
-    LogEntryState state = LogEntryState.SUCCESS;
 
-    controllerAssistant.checkRoles(user);
+    LogEntryState state = LogEntryState.SUCCESS;
+    User user = controllerAssistant.checkRoles(request);
 
     long count = 0;
 
@@ -432,11 +424,9 @@ public class CollectionResource implements CollectionService {
   public ViewerRow retrieveRow(String databaseUUID, String collectionUUID, String schema, String table,
     String rowIndex) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
-    User user = UserUtility.getUser(request);
 
     LogEntryState state = LogEntryState.SUCCESS;
-
-    controllerAssistant.checkRoles(user);
+    User user = controllerAssistant.checkRoles(request);
 
     try {
       final ViewerRow viewerRow = ViewerFactory.getSolrManager().retrieveRows(databaseUUID, rowIndex);
@@ -466,10 +456,9 @@ public class CollectionResource implements CollectionService {
     @QueryParam(ViewerConstants.API_PATH_PARAM_LOB_FILENAME) String filename) {
 
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
-    User user = UserUtility.getUser(request);
-    LogEntryState state = LogEntryState.SUCCESS;
 
-    controllerAssistant.checkRoles(user);
+    LogEntryState state = LogEntryState.SUCCESS;
+    User user = controllerAssistant.checkRoles(request);
 
     DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
 
@@ -567,9 +556,10 @@ public class CollectionResource implements CollectionService {
     @ApiParam(value = "Export LOBs", allowableValues = "true, false") @QueryParam("lobs") boolean exportLobs,
     @ApiParam(value = "Fields to export", required = true) @QueryParam("fl") String fieldsToHeader) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
-    User user = UserUtility.getUser(request);
+
     LogEntryState state = LogEntryState.SUCCESS;
-    controllerAssistant.checkRoles(user);
+    User user = controllerAssistant.checkRoles(request);
+
     DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
 
     FindRequest findRequest = null;
@@ -626,11 +616,10 @@ public class CollectionResource implements CollectionService {
     @ApiParam(value = "Export description", allowableValues = "true, false", required = true) @QueryParam("descriptions") boolean exportDescription,
     @ApiParam(value = "Export LOBs", allowableValues = "true, false", required = true) @QueryParam("lobs") boolean exportLobs) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
-    User user = UserUtility.getUser(request);
-    LogEntryState state = LogEntryState.SUCCESS;
-
     DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
-    controllerAssistant.checkRoles(user);
+
+    LogEntryState state = LogEntryState.SUCCESS;
+    User user = controllerAssistant.checkRoles(request);
 
     try {
       final ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
@@ -730,10 +719,9 @@ public class CollectionResource implements CollectionService {
   public String saveSavedSearch(String databaseUUID, String collectionUUID, String tableUUID, String name,
     String description, SearchInfo searchInfo) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
-    User user = UserUtility.getUser(request);
-    LogEntryState state = LogEntryState.SUCCESS;
 
-    controllerAssistant.checkRoles(user);
+    LogEntryState state = LogEntryState.SUCCESS;
+    User user = controllerAssistant.checkRoles(request);
 
     String searchInfoJson = JsonUtils.getJsonFromObject(searchInfo);
 
@@ -766,10 +754,10 @@ public class CollectionResource implements CollectionService {
   public IndexResult<SavedSearch> findSavedSearches(String databaseUUID, String collectionUUID, FindRequest findRequest,
     String localeString) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
-    User user = UserUtility.getUser(request);
-    LogEntryState state = LogEntryState.SUCCESS;
 
-    controllerAssistant.checkRoles(user);
+    LogEntryState state = LogEntryState.SUCCESS;
+    User user = controllerAssistant.checkRoles(request);
+
     long count = 0;
 
     try {
@@ -792,10 +780,9 @@ public class CollectionResource implements CollectionService {
   @Override
   public SavedSearch retrieveSavedSearch(String databaseUUID, String collectionUUID, String savedSearchUUID) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
-    User user = UserUtility.getUser(request);
-    LogEntryState state = LogEntryState.SUCCESS;
 
-    controllerAssistant.checkRoles(user);
+    LogEntryState state = LogEntryState.SUCCESS;
+    User user = controllerAssistant.checkRoles(request);
 
     try {
       return ViewerFactory.getSolrManager().retrieve(SavedSearch.class, savedSearchUUID);
@@ -813,10 +800,9 @@ public class CollectionResource implements CollectionService {
   public void updateSavedSearch(String databaseUUID, String collectionUUID, String savedSearchUUID, String name,
     String description) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
-    User user = UserUtility.getUser(request);
-    LogEntryState state = LogEntryState.SUCCESS;
 
-    controllerAssistant.checkRoles(user);
+    LogEntryState state = LogEntryState.SUCCESS;
+    User user = controllerAssistant.checkRoles(request);
 
     try {
       ViewerFactory.getSolrManager().editSavedSearch(databaseUUID, savedSearchUUID, name, description);
@@ -835,10 +821,9 @@ public class CollectionResource implements CollectionService {
   @Override
   public void deleteSavedSearch(String databaseUUID, String collectionUUID, String savedSearchUUID) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
-    User user = UserUtility.getUser(request);
-    LogEntryState state = LogEntryState.SUCCESS;
 
-    controllerAssistant.checkRoles(user);
+    LogEntryState state = LogEntryState.SUCCESS;
+    User user = controllerAssistant.checkRoles(request);
 
     try {
       ViewerFactory.getSolrManager().deleteSavedSearch(savedSearchUUID);

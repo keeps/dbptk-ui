@@ -86,7 +86,8 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   public static final String PROPERTY_AUTHORIZATION_RODA_DIP_PATH = "ui.authorization.roda.dip.path";
 
   public static final String PROPERTY_FILTER_ONOFF_ALLOW_ALL_IPS = "ui.filter.onOff.protectedResourcesAllowAllIPs";
-  public static final String PROPERTY_FILTER_ONOFF_WHITELISTED_IPS = "ui.filter.onOff.protectedResourcesWhitelistedIP";
+  public static final String PROPERTY_FILTER_ONOFF_WHITELISTED_IPS = "ui.filter.onOff.protectedResourcesWhitelistedIP[].ip";
+  public static final String PROPERTY_FILTER_ONOFF_WHITELISTED_USERNAME = "ui.filter.onOff.protectedResourcesWhitelistedIP[].username";
 
   public static final String PROPERTY_AUTHORIZATION_FULLNAME_ATTRIBUTE = "user.attribute.fullname";
   public static final String PROPERTY_AUTHORIZATION_EMAIL_ATTRIBUTE = "user.attribute.email";
@@ -121,6 +122,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   private static List<String> configurationFiles = null;
 
   private List<String> cachedWhitelistedIPs = null;
+  private List<String> cachedWhiteListedUsername = null;
   private Boolean cachedWhitelistAllIPs = null;
   private static LoadingCache<Locale, Messages> I18N_CACHE = CacheBuilder.newBuilder()
     .build(new CacheLoader<Locale, Messages>() {
@@ -292,6 +294,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     SHARED_PROPERTIES_CACHE.invalidateAll();
     cachedWhitelistAllIPs = null;
     cachedWhitelistedIPs = null;
+    cachedWhiteListedUsername = null;
     sharedConfigurationPropertiesCache = null;
     LOGGER.info("Reloaded dbvtk configurations after file change!");
   }
@@ -362,6 +365,13 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
 
   public Path getReportPathForValidation(String databaseUUID) {
     return reportsPath.resolve("report-validation-" + databaseUUID + ".md");
+  }
+
+  public List<String> getWhiteListedUsername() {
+    if (cachedWhiteListedUsername == null) {
+      cachedWhiteListedUsername = getViewerConfigurationAsList(ViewerConfiguration.PROPERTY_FILTER_ONOFF_WHITELISTED_USERNAME);
+    }
+    return cachedWhiteListedUsername;
   }
 
   public List<String> getWhitelistedIPs() {

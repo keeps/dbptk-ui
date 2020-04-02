@@ -11,8 +11,6 @@ import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RequestNotValidException;
 import org.roda.core.data.utils.JsonUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.databasepreservation.common.client.ViewerConstants;
@@ -45,11 +43,9 @@ public class DatabaseResource implements DatabaseService {
   @Override
   public IndexResult<ViewerDatabase> find(FindRequest findRequest, String localeString) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
-    User user = UserUtility.getUser(request);
 
     LogEntryState state = LogEntryState.SUCCESS;
-
-    controllerAssistant.checkRoles(user);
+    User user = controllerAssistant.checkRoles(request);
 
     if (ViewerConfiguration.getInstance().getApplicationEnvironment().equals(ViewerConstants.SERVER)) {
       if (user.isAdmin()) {
@@ -73,10 +69,10 @@ public class DatabaseResource implements DatabaseService {
   @Override
   public String create(String path) {
     final ControllerAssistant controllerAssistant = new ControllerAssistant() {};
-    final User user = UserUtility.getUser(request);
 
     LogEntryState state = LogEntryState.SUCCESS;
-    controllerAssistant.checkRoles(user);
+    User user = controllerAssistant.checkRoles(request);
+
     try {
       return SIARDController.loadMetadataFromLocal(path);
     } catch (GenericException e) {
@@ -128,11 +124,9 @@ public class DatabaseResource implements DatabaseService {
   @Override
   public ViewerDatabase retrieve(String databaseUUID) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
-    User user = UserUtility.getUser(request);
 
     LogEntryState state = LogEntryState.SUCCESS;
-
-    controllerAssistant.checkRoles(user);
+    User user = controllerAssistant.checkRoles(request);
 
     try {
       return ViewerFactory.getSolrManager().retrieve(ViewerDatabase.class, databaseUUID);
@@ -149,10 +143,9 @@ public class DatabaseResource implements DatabaseService {
   @Override
   public Boolean delete(String databaseUUID) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
-    User user = UserUtility.getUser(request);
 
     LogEntryState state = LogEntryState.SUCCESS;
-    controllerAssistant.checkRoles(user);
+    User user = controllerAssistant.checkRoles(request);
 
     try {
       return SIARDController.deleteAll(databaseUUID);

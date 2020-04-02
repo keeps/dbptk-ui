@@ -48,10 +48,10 @@ public class SiardResource implements SiardService {
   @Override
   public void deleteSIARDFile(String databaseUUID, String siardUUID) {
     final ControllerAssistant controllerAssistant = new ControllerAssistant() {};
-    final User user = UserUtility.getUser(request);
 
     LogEntryState state = LogEntryState.SUCCESS;
-    controllerAssistant.checkRoles(user);
+    User user = controllerAssistant.checkRoles(request);
+
     String path = "";
     try {
       final ViewerDatabase database = ViewerFactory.getSolrManager().retrieve(ViewerDatabase.class, databaseUUID);
@@ -79,10 +79,10 @@ public class SiardResource implements SiardService {
   public Boolean validateSiard(String databaseUUID, String siardUUID, String validationReportPath,
     String allowedTypePath, boolean skipAdditionalChecks) {
     final ControllerAssistant controllerAssistant = new ControllerAssistant() {};
-    final User user = UserUtility.getUser(request);
 
     LogEntryState state = LogEntryState.SUCCESS;
-    controllerAssistant.checkRoles(user);
+    User user = controllerAssistant.checkRoles(request);
+
     String result = null;
     String siardPath = "";
     try {
@@ -106,10 +106,9 @@ public class SiardResource implements SiardService {
   @Override
   public ValidationProgressData getValidationProgressData(String databaseUUID) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
-    final User user = UserUtility.getUser(request);
-    LogEntryState state = LogEntryState.SUCCESS;
 
-    controllerAssistant.checkRoles(user);
+    LogEntryState state = LogEntryState.SUCCESS;
+    User user = controllerAssistant.checkRoles(request);
 
     try {
       return ValidationProgressData.getInstance(databaseUUID);
@@ -125,10 +124,9 @@ public class SiardResource implements SiardService {
   @ApiOperation(value = "Downloads a specific SIARD validation report file from the storage location", notes = "")
   public Response getValidationReportFile(@PathParam("databaseUUID") String databaseUUID, @PathParam("siardUUID") String siardUUID) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
-    User user = UserUtility.getUser(request);
-    LogEntryState state = LogEntryState.SUCCESS;
 
-    controllerAssistant.checkRoles(user);
+    LogEntryState state = LogEntryState.SUCCESS;
+    User user = controllerAssistant.checkRoles(request);
 
     DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
 
@@ -155,10 +153,10 @@ public class SiardResource implements SiardService {
   @Override
   public void deleteValidationReport(String databaseUUID, String path) {
     final ControllerAssistant controllerAssistant = new ControllerAssistant() {};
-    final User user = UserUtility.getUser(request);
 
     LogEntryState state = LogEntryState.SUCCESS;
-    controllerAssistant.checkRoles(user);
+    User user = controllerAssistant.checkRoles(request);
+
     try {
       SIARDController.deleteValidatorReportFileFromPath(path, databaseUUID);
     } catch (GenericException e) {
@@ -178,10 +176,10 @@ public class SiardResource implements SiardService {
   public ViewerMetadata updateMetadataInformation(String databaseUUID, String siardUUID, String path,
     SIARDUpdateParameters parameters) {
     final ControllerAssistant controllerAssistant = new ControllerAssistant() {};
-    final User user = UserUtility.getUser(request);
 
     LogEntryState state = LogEntryState.SUCCESS;
-    controllerAssistant.checkRoles(user);
+    User user = controllerAssistant.checkRoles(request);
+
     try {
       return SIARDController.updateMetadataInformation(databaseUUID, path, parameters);
     } catch (GenericException e) {
@@ -197,10 +195,10 @@ public class SiardResource implements SiardService {
   @Override
   public ViewerMetadata getMetadataInformation(String databaseUUID, String siardUUID) {
     final ControllerAssistant controllerAssistant = new ControllerAssistant() {};
-    final User user = UserUtility.getUser(request);
 
     LogEntryState state = LogEntryState.SUCCESS;
-    controllerAssistant.checkRoles(user);
+    User user = controllerAssistant.checkRoles(request);
+
     try {
       final ViewerDatabase database = ViewerFactory.getSolrManager().retrieve(ViewerDatabase.class, databaseUUID);
       return database.getMetadata();
