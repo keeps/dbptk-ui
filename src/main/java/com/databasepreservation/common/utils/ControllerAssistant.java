@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import com.databasepreservation.common.server.ViewerFactory;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
 
 import com.databasepreservation.common.client.ViewerConstants;
@@ -60,6 +61,12 @@ public class ControllerAssistant {
   }
 
   public User checkRoles(HttpServletRequest request) {
+    if (!ViewerFactory.getViewerConfiguration().getIsAuthenticationEnabled()) {
+      final User noAuthenticationUser = UserUtility.getNoAuthenticationUser();
+      noAuthenticationUser.setIpAddress(request.getRemoteAddr());
+      return noAuthenticationUser;
+    }
+
     if (ViewerConfiguration.getInstance().getApplicationEnvironment().equals(ViewerConstants.SERVER)) {
       try {
         User user = UserUtility.getUser(request);
@@ -74,7 +81,7 @@ public class ControllerAssistant {
         return user;
       }
     } else {
-      return UserUtility.getGuest(request);
+        return UserUtility.getGuest(request);
     }
   }
 
