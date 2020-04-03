@@ -7,18 +7,18 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import com.databasepreservation.common.server.ViewerFactory;
+import javax.servlet.http.HttpServletRequest;
+
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.exceptions.AuthorizationException;
 import com.databasepreservation.common.client.models.activity.logs.LogEntryState;
 import com.databasepreservation.common.client.models.user.User;
 import com.databasepreservation.common.server.ViewerConfiguration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.servlet.http.HttpServletRequest;
+import com.databasepreservation.common.server.ViewerFactory;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -81,20 +81,9 @@ public class ControllerAssistant {
         return user;
       }
     } else {
-        return UserUtility.getGuest(request);
+      return UserUtility.getGuest(request);
     }
   }
-
-//  public void checkRoles(final User user) throws AuthorizationException {
-//    if (ViewerConfiguration.getInstance().getApplicationEnvironment().equals(ViewerConstants.SERVER)) {
-//      try {
-//        UserUtility.checkRoles(user, this.getClass());
-//      } catch (final AuthorizationDeniedException e) {
-//        registerAction(user, LogEntryState.UNAUTHORIZED);
-//        throw new AuthorizationException(e);
-//      }
-//    }
-//  }
 
   public void registerAction(final User user, final String relatedObjectId, final LogEntryState state,
     final Object... parameters) {

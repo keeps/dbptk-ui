@@ -99,6 +99,8 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   public static final String SHARED_PROPERTY_WHITELIST_CONFIGURATION_PREFIX = "ui.sharedProperties.whitelist.configuration.prefix";
   public static final String SHARED_PROPERTY_WHITELIST_CONFIGURATION_PROPERTY = "ui.sharedProperties.whitelist.configuration.property";
 
+  public static final String PROPERTY_DISABLE_SIARD_DELETION = "ui.disable.siard.deletion";
+
   private static boolean instantiatedWithoutErrors = true;
   private static String applicationEnvironment = ViewerConstants.SERVER;
 

@@ -12,7 +12,7 @@
             <g:FlowPanel addStyleNames="clearfix"/>
             <g:FlowPanel addStyleNames="navigation-panel-buttons">
                 <g:SimplePanel addStyleNames="btn-item">
-                    <g:Button ui:field="btnExclude" addStyleNames="btn btn-danger btn-delete"/>
+                    <g:Button ui:field="btnDeleteAll" addStyleNames="btn btn-danger btn-delete"/>
                 </g:SimplePanel>
                 <g:SimplePanel addStyleNames="btn-item">
                   <g:Button ui:field="btnBack" addStyleNames="btn btn-primary btn-back-wizard"/>

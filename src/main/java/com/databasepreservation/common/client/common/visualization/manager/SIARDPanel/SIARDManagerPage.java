@@ -71,7 +71,7 @@ public class SIARDManagerPage extends ContentPanel {
   Button btnBack;
 
   @UiField
-  Button btnExclude;
+  Button btnDeleteAll;
 
   public static SIARDManagerPage getInstance(ViewerDatabase database) {
     return instances.computeIfAbsent(database.getUuid(), k -> new SIARDManagerPage(database));
@@ -151,11 +151,11 @@ public class SIARDManagerPage extends ContentPanel {
 
   private void setupFooterButtons() {
     btnBack.setText(messages.basicActionBack());
-    btnExclude.setText(messages.basicActionDelete());
+    btnDeleteAll.setText(messages.basicActionDelete());
 
     btnBack.addClickHandler(event -> HistoryManager.gotoDatabase());
 
-    btnExclude.addClickHandler(event -> {
+    btnDeleteAll.addClickHandler(event -> {
       if (ViewerDatabaseStatus.AVAILABLE.equals(database.getStatus())
         || ViewerDatabaseStatus.ERROR.equals(database.getStatus())
         || ViewerDatabaseStatus.METADATA_ONLY.equals(database.getStatus())) {

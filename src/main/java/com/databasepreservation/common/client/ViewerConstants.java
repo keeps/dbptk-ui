@@ -181,7 +181,6 @@ public class ViewerConstants {
   public static final String LISTS_FACETS_PARAMETERS_PROPERTY = "facets.parameters";
   public static final String LISTS_FACETS_PARAMETERS_TYPE_PROPERTY = "type";
   public static final String LISTS_FACETS_PARAMETERS_ARGS_PROPERTY = "args";
-  public static final String LISTS_FACETS_PARAMETERS_ARGS_NAME_PROPERTY = "name";
   public static final String LISTS_FACETS_PARAMETERS_ARGS_START_PROPERTY = "start";
   public static final String LISTS_FACETS_PARAMETERS_ARGS_END_PROPERTY = "end";
   public static final String LISTS_FACETS_PARAMETERS_ARGS_GAP_PROPERTY = "gap";
@@ -214,7 +213,6 @@ public class ViewerConstants {
   public static final String SOLR_ROWS_NESTED_UUID = "nestedUUID";
   public static final String SOLR_ROWS_NESTED_ORIGINAL_UUID = "nestedOriginalUUID";
   public static final String SOLR_ROWS_NESTED_TABLE_ID = "nestedTableId";
-  public static final String SOLR_ROWS_NESTED_TABLE_UUID = "nestedTableUUID";
   public static final String SOLR_ROWS_NESTED = "nested";
 
   /*
@@ -442,11 +440,6 @@ public class ViewerConstants {
   /*
    * LINKS
    */
-  public static final String APPLICATION_LINK = "https://visualization.database-preservation.com/";
-  public static final String OWNER_LINK = "https://www.keep.pt";
-  public static final String NAE_FINANCIER_LINK = "http://www.ra.ee/";
-  public static final String DGLAB_FINANCIER_LINK = "http://dglab.gov.pt/";
-  public static final String EARK_FINANCIER_LINK = "https://www.eark-project.com/";
   public static final String BLANK_LINK = "_blank";
   public static final String SIARD_SPECIFICATION_LINK = "https://dilcis.eu/content-types/siard/";
   public static final String DBPTK_RELEASE_LINK = "https://github.com/keeps/db-preservation-toolkit/releases/tag/v";
@@ -472,7 +465,6 @@ public class ViewerConstants {
    * ASSISTANT CONTROLLER
    */
   public static final String CONTROLLER_SIARD_PATH_PARAM = "siard-path";
-  public static final String CONTROLLER_SIARD_VALIDATION_STATUS_PARAM = "siard-validation-status";
   public static final String CONTROLLER_REPORT_PATH_PARAM = "path";
   public static final String CONTROLLER_DATABASE_ID_PARAM = "databaseUUID";
   public static final String CONTROLLER_COLLECTION_ID_PARAM = "collectionUUID";
@@ -491,7 +483,6 @@ public class ViewerConstants {
   public static final String CONTROLLER_SAVED_SEARCH_UUID_PARAM = "saved-search-uuid";
   public static final String CONTROLLER_RETRIEVE_COUNT = "total-count";
   public static final String CONTROLLER_USERNAME_PARAM = "username";
-  public static final String CONTROLLER_EXPORT_SINGLE_ROW_PARAM = "singleRow";
   public static final String CONTROLLER_EXPORT_DESCRIPTIONS_PARAM = "exportDescription";
   public static final String CONTROLLER_EXPORT_LOBS_PARAM = "exportLobs";
   public static final String CONTROLLER_ZIP_FILENAME_PARAM = "zipFilename";
@@ -504,7 +495,6 @@ public class ViewerConstants {
   public static final String CONTROLLER_COLLECTION_RESOURCE = "com.databasepreservation.common.api.v1.CollectionResource";
   public static final String CONTROLLER_FILE_RESOURCE = "com.databasepreservation.common.api.v1.FileResource";
   public static final String CONTROLLER_JOB_RESOURCE = "com.databasepreservation.common.api.v1.JobResource";
-  public static final String CONTROLLER_MIGRATION_RESOURCE = "com.databasepreservation.common.api.v1.MigrationResource";
   public static final String CONTROLLER_SIARD_RESOURCE = "com.databasepreservation.common.api.v1.SiardResource";
   public static final String CONTROLLER_USER_LOGIN_CONTROLLER = "com.databasepreservation.common.server.controller.UserLoginController";
 
@@ -534,6 +524,8 @@ public class ViewerConstants {
 
   public static final String DEFAULT_USERNAME = "admin";
   public static final String DEFAULT_FULL_NAME = "admin";
+
+  public static final String PROPERTY_DISABLE_SIARD_DELETION = "ui.disable.siard.deletion";
 
   /**
    * private constructor

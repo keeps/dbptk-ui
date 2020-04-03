@@ -753,7 +753,9 @@ public class SIARDController {
 
     if (System.getProperty("env", "server").equals(ViewerConstants.SERVER)) {
       String siardPath = database.getPath();
-      if (StringUtils.isNotBlank(siardPath) && Paths.get(siardPath).toFile().exists()) {
+      final boolean deleteSiard = !ViewerConfiguration.getInstance().getViewerConfigurationAsBoolean(false,
+        ViewerConfiguration.PROPERTY_DISABLE_SIARD_DELETION);
+      if (StringUtils.isNotBlank(siardPath) && Paths.get(siardPath).toFile().exists() && deleteSiard) {
         deleteSIARDFileFromPath(siardPath, databaseUUID);
       }
     }

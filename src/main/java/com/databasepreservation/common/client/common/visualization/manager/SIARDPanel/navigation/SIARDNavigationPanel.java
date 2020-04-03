@@ -3,7 +3,7 @@ package com.databasepreservation.common.client.common.visualization.manager.SIAR
 import java.util.HashMap;
 import java.util.Map;
 
-import com.databasepreservation.common.client.ObserverManager;
+import com.databasepreservation.common.client.ClientConfigurationManager;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.NavigationPanel;
@@ -22,6 +22,7 @@ import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.Humanize;
 import com.databasepreservation.common.client.tools.PathUtils;
 import com.databasepreservation.common.client.tools.RestUtils;
+import com.databasepreservation.common.server.ViewerConfiguration;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.user.client.Window;
@@ -141,7 +142,9 @@ public class SIARDNavigationPanel {
       siard.addButton(CommonClientUtils.wrapOnDiv("btn-item", btnMigrateToSIARD));
       siard.addButton(CommonClientUtils.wrapOnDiv("btn-item", btnSendToLiveDBMS));
     } else {
-      siard.addButton(CommonClientUtils.wrapOnDiv("btn-item", btnDelete));
+      if (!ClientConfigurationManager.getBoolean(false, ViewerConstants.PROPERTY_DISABLE_SIARD_DELETION)) {
+        siard.addButton(CommonClientUtils.wrapOnDiv("btn-item", btnDelete));
+      }
     }
     update(database);
 
