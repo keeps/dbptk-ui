@@ -21,6 +21,11 @@ import config.i18n.client.ClientMessages;
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 public class BinaryColumnOptionsPanel extends ColumnOptionsPanel {
+  private static String DEFAULT_LABEL_TEMPLATE = "<a href=\"" + ViewerConstants.OPEN_TEMPLATE_ENGINE
+    + ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK + ViewerConstants.CLOSE_TEMPLATE_ENGINE + "\">"
+    + ViewerConstants.OPEN_TEMPLATE_ENGINE + ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL
+    + ViewerConstants.CLOSE_TEMPLATE_ENGINE + "</a>";
+
   interface ColumnsOptionsPanelUiBinder extends UiBinder<Widget, BinaryColumnOptionsPanel> {
   }
 
@@ -57,7 +62,12 @@ public class BinaryColumnOptionsPanel extends ColumnOptionsPanel {
   @Override
   public TemplateStatus getSearchTemplate() {
     TemplateStatus templateStatus = new TemplateStatus();
-    templateStatus.setTemplate(this.displayList.getText());
+    if (ViewerStringUtils.isBlank(this.displayList.getText())) {
+      templateStatus.setTemplate(DEFAULT_LABEL_TEMPLATE);
+    } else {
+      templateStatus.setTemplate(this.displayList.getText());
+    }
+
     return templateStatus;
   }
 
@@ -97,9 +107,7 @@ public class BinaryColumnOptionsPanel extends ColumnOptionsPanel {
     String template = columnConfiguration.getSearchStatus().getList().getTemplate().getTemplate();
 
     if (ViewerStringUtils.isBlank(template)) {
-      template = "<a href=\"" + ViewerConstants.OPEN_TEMPLATE_ENGINE + ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK
-        + ViewerConstants.CLOSE_TEMPLATE_ENGINE + "\">" + ViewerConstants.OPEN_TEMPLATE_ENGINE
-        + ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL + ViewerConstants.CLOSE_TEMPLATE_ENGINE + "</a>";
+      template = DEFAULT_LABEL_TEMPLATE;
     }
 
     return template;
