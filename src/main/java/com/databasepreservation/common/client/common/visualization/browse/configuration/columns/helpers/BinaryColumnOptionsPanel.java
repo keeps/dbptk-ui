@@ -33,13 +33,19 @@ public class BinaryColumnOptionsPanel extends ColumnOptionsPanel {
   TextBox templateList;
 
   @UiField
-  TextBox applicationType;
-
-  @UiField
   FlowPanel templateListHint;
 
   @UiField
   HTML templateEngineLabel;
+
+  @UiField
+  TextBox applicationType;
+
+  @UiField
+  TextBox displayList;
+
+  @UiField
+  FlowPanel displayListHint;
 
   @UiField
   FlowPanel content;
@@ -51,14 +57,14 @@ public class BinaryColumnOptionsPanel extends ColumnOptionsPanel {
   @Override
   public TemplateStatus getSearchTemplate() {
     TemplateStatus templateStatus = new TemplateStatus();
-    templateStatus.setTemplate(this.templateList.getText());
+    templateStatus.setTemplate(this.displayList.getText());
     return templateStatus;
   }
 
   @Override
   public TemplateStatus getDetailsTemplate() {
     TemplateStatus templateStatus = new TemplateStatus();
-    templateStatus.setTemplate(this.templateList.getText());
+    templateStatus.setTemplate(this.displayList.getText());
     return templateStatus;
   }
 
@@ -77,10 +83,50 @@ public class BinaryColumnOptionsPanel extends ColumnOptionsPanel {
     initWidget(binder.createAndBindUi(this));
 
     templateEngineLabel.setHTML(messages.columnManagementTextForTemplateHint(ViewerConstants.TEMPLATE_ENGINE_LINK));
-
-    templateList.setText(columnConfiguration.getSearchStatus().getList().getTemplate().getTemplate());
-    applicationType.setText(columnConfiguration.getApplicationType());
+    templateList.setText(columnConfiguration.getExportStatus().getTemplateStatus().getTemplate());
     templateListHint.add(buildHintWithButtons(tableConfiguration, templateList));
+
+    displayList.setText(getDefaultTextOrValue(columnConfiguration));
+    displayListHint.add(buildHintForLabel(displayList));
+
+    applicationType.setText(columnConfiguration.getApplicationType());
+
+  }
+
+  private String getDefaultTextOrValue(ColumnStatus columnConfiguration) {
+    String template = columnConfiguration.getSearchStatus().getList().getTemplate().getTemplate();
+
+    if (ViewerStringUtils.isBlank(template)) {
+      template = "<a href=\"" + ViewerConstants.OPEN_TEMPLATE_ENGINE + ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK
+        + ViewerConstants.CLOSE_TEMPLATE_ENGINE + "\">" + ViewerConstants.OPEN_TEMPLATE_ENGINE
+        + ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL + ViewerConstants.CLOSE_TEMPLATE_ENGINE + "</a>";
+    }
+
+    return template;
+  }
+
+  private FlowPanel buildHintForLabel(TextBox target) {
+    FlowPanel hintPanel = new FlowPanel();
+    hintPanel.setStyleName("data-transformation-title");
+    hintPanel.add(new Label(messages.columnManagementTextForPossibleFields()));
+
+    Button btnDownloadLink = new Button(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK);
+    btnDownloadLink.setStyleName("btn btn-primary btn-small");
+    btnDownloadLink.addClickHandler(event -> {
+      target.setText(target.getText() + ViewerConstants.OPEN_TEMPLATE_ENGINE
+        + ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK + ViewerConstants.CLOSE_TEMPLATE_ENGINE);
+    });
+    Button btnDownloadLabel = new Button(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL);
+    btnDownloadLabel.setStyleName("btn btn-primary btn-small");
+    btnDownloadLabel.addClickHandler(event -> {
+      target.setText(target.getText() + ViewerConstants.OPEN_TEMPLATE_ENGINE
+        + ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL + ViewerConstants.CLOSE_TEMPLATE_ENGINE);
+    });
+
+    hintPanel.add(btnDownloadLink);
+    hintPanel.add(btnDownloadLabel);
+
+    return hintPanel;
   }
 
   private FlowPanel buildHintWithButtons(TableStatus tableConfiguration, TextBox target) {

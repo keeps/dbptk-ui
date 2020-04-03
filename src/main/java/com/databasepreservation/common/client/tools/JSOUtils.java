@@ -1,28 +1,27 @@
 package com.databasepreservation.common.client.tools;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.common.client.models.JSO.ExtensionFilter;
 import com.databasepreservation.common.client.models.JSO.FilterJSO;
 import com.databasepreservation.common.client.models.JSO.OpenFileDialogOptions;
-import com.databasepreservation.common.client.models.status.collection.NestedColumnStatus;
-import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
-import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
-import org.roda.core.data.utils.JsonUtils;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 public class JSOUtils {
+  //private static final Logger LOGGER = LoggerFactory.getLogger(JSOUtils.class);
 
   public static JavaScriptObject getOpenDialogOptions(List<String> propertiesList, List<ExtensionFilter> filtersList) {
 
@@ -45,6 +44,21 @@ public class JSOUtils {
     }
 
     return OpenFileDialogOptions.create(properties, filters);
+  }
+
+  public static String cellsToJson(String... parameters) {
+    String json = "";
+
+    if ((parameters.length % 2) != 0) {
+     // LOGGER.warn("transform cells to JSON failed because parameters array must have pairs of elements (even length)");
+      return json;
+    } else {
+      JSONObject jsonObj = new JSONObject();
+      for (int i = 0; i < parameters.length; i+=2) {
+        jsonObj.put(parameters[i], new JSONString(parameters[i+1]));
+      }
+      return jsonObj.toString();
+    }
   }
 
   public static String cellsToJson(Map<String, ViewerCell> map, ViewerTable nestedTable) {

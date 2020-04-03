@@ -92,7 +92,6 @@ import com.databasepreservation.common.server.index.utils.JsonTransformer;
 import com.databasepreservation.common.server.index.utils.SolrUtils;
 import com.databasepreservation.common.utils.ControllerAssistant;
 import com.databasepreservation.common.utils.LobPathManager;
-import com.databasepreservation.common.utils.UserUtility;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -493,7 +492,7 @@ public class CollectionResource implements CollectionService {
     ViewerRow row, String rowIndex) throws IOException {
     final java.nio.file.Path consolidatedPath = LobPathManager.getConsolidatedPath(
       ViewerFactory.getViewerConfiguration(), databaseUUID, tableConfiguration.getUuid(), columnIndex, rowIndex);
-    String handlebarsFilename = HandlebarsUtils.applyHandlebarsTemplate(row, tableConfiguration, columnIndex);
+    String handlebarsFilename = HandlebarsUtils.applyExportTemplate(row, tableConfiguration, columnIndex);
     if (ViewerStringUtils.isBlank(handlebarsFilename)) {
       handlebarsFilename = consolidatedPath.getFileName().toString();
     }
@@ -511,7 +510,7 @@ public class CollectionResource implements CollectionService {
     final java.nio.file.Path completeLobPath = ViewerFactory.getViewerConfiguration().getSIARDFilesPath()
       .resolve(lobPath);
 
-    String handlebarsFilename = HandlebarsUtils.applyHandlebarsTemplate(row, tableConfiguration, columnIndex);
+    String handlebarsFilename = HandlebarsUtils.applyExportTemplate(row, tableConfiguration, columnIndex);
 
     if (ViewerStringUtils.isBlank(handlebarsFilename)) {
       handlebarsFilename = completeLobPath.getFileName().toString();
@@ -529,7 +528,7 @@ public class CollectionResource implements CollectionService {
       throw new GenericException("Zip archive entry is missing");
     }
 
-    String handlebarsFilename = HandlebarsUtils.applyHandlebarsTemplate(row, tableConfiguration, columnIndex);
+    String handlebarsFilename = HandlebarsUtils.applyExportTemplate(row, tableConfiguration, columnIndex);
 
     if (ViewerStringUtils.isBlank(handlebarsFilename)) {
       handlebarsFilename = row.getCells().get(tableConfiguration.getColumnByIndex(columnIndex).getId()).getValue();

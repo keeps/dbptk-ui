@@ -520,6 +520,8 @@ public class ViewerConstants {
    */
   public static final String OPEN_TEMPLATE_ENGINE = "{{";
   public static final String CLOSE_TEMPLATE_ENGINE = "}}";
+  public static final String TEMPLATE_LOB_DOWNLOAD_LABEL = "download_label";
+  public static final String TEMPLATE_LOB_DOWNLOAD_LINK = "download_link";
 
   /**
    * SIARD prefixes

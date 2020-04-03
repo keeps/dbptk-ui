@@ -157,7 +157,7 @@ public class ZipOutputStreamSingleRow extends CSVOutputStream {
   }
 
   private String getTemplateFilename(ViewerRow row, ColumnStatus binaryColumn, String defaultValue) {
-    String handlebarsFilename = HandlebarsUtils.applyHandlebarsTemplate(row, configTable,
+    String handlebarsFilename = HandlebarsUtils.applyExportTemplate(row, configTable,
       binaryColumn.getColumnIndex());
     if (ViewerStringUtils.isBlank(handlebarsFilename)) {
       handlebarsFilename = defaultValue;

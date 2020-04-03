@@ -60,7 +60,7 @@ public class HandlebarsUtils {
           values.add("");
         } else {
           if (columnConfig != null) {
-            final String applied = applyHandlebarsTemplate(row, configTable, columnConfig.getColumnIndex());
+            final String applied = applyExportTemplate(row, configTable, columnConfig.getColumnIndex());
             if (StringUtils.isNotBlank(applied)) {
               values.add(applied);
             } else {
@@ -74,9 +74,9 @@ public class HandlebarsUtils {
     return values;
   }
 
-  public static String applyHandlebarsTemplate(ViewerRow row, TableStatus tableConfiguration, int columnIndex) {
+  public static String applyExportTemplate(ViewerRow row, TableStatus tableConfiguration, int columnIndex) {
     Map<String, String> map = cellsToObject(row.getCells(), tableConfiguration);
-    final String template = tableConfiguration.getColumnByIndex(columnIndex).getSearchStatus().getList().getTemplate()
+    final String template = tableConfiguration.getColumnByIndex(columnIndex).getExportStatus().getTemplateStatus()
       .getTemplate();
 
     if (ViewerStringUtils.isBlank(template)) {

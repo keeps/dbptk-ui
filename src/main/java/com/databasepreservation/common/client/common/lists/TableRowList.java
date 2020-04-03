@@ -303,27 +303,33 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
           logger.error("Trying to display NULL Cells");
         } else if (row.getCells().get(configColumn.getId()) != null) {
           if (collectionConfiguration.getConsolidateProperty().equals(LargeObjectConsolidateProperty.CONSOLIDATED)) {
-            ret = getLobDownloadLink(database, configColumn, table, row, columnIndex);
+            ret = getLobDownload(database, configColumn, table, row, columnIndex);
           } else {
             if (database.getPath() == null || database.getPath().isEmpty()) {
               ret = SafeHtmlUtils.fromTrustedString(messages.tablePanelTextForLobUnavailable());
             } else {
-              ret = getLobDownloadLink(database, configColumn, table, row, columnIndex);
+              ret = getLobDownload(database, configColumn, table, row, columnIndex);
             }
           }
         }
-
         return ret;
       }
     };
   }
 
-  private SafeHtml getLobDownloadLink(ViewerDatabase database, ColumnStatus configColumn, ViewerTable table,
-    ViewerRow row, int columnIndex) {
+  private SafeHtml getLobDownload(ViewerDatabase database, ColumnStatus configColumn, ViewerTable table, ViewerRow row,
+    int columnIndex) {
     final String value = row.getCells().get(configColumn.getId()).getValue();
-    return SafeHtmlUtils.fromTrustedString(
-      CommonClientUtils.wrapOnAnchor(messages.row_downloadLOB(), RestUtils.createExportLobUri(database.getUuid(),
-        table.getSchemaName(), table.getName(), row.getUuid(), columnIndex, value)).toString());
+
+    String template = configColumn.getSearchStatus().getList().getTemplate().getTemplate();
+    if (template != null && !template.isEmpty()) {
+      String json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_downloadLOB(),
+        ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK, RestUtils.createExportLobUri(database.getUuid(),
+          table.getSchemaName(), table.getName(), row.getUuid(), columnIndex, value));
+      return SafeHtmlUtils.fromSafeConstant(JavascriptUtils.compileTemplate(template, json));
+    }
+
+    return SafeHtmlUtils.fromSafeConstant("");
   }
 
   @Override

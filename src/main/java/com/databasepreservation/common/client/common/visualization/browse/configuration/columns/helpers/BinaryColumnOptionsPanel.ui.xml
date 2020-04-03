@@ -17,6 +17,14 @@
 
         <g:FlowPanel>
             <g:Label addStyleNames="form-label">
+                <ui:text from='{messages.columnManagementLabelForTemplateList}'/>
+            </g:Label>
+            <g:TextBox addStyleNames="form-textbox" ui:field="displayList"/>
+            <g:FlowPanel ui:field="displayListHint"/>
+        </g:FlowPanel>
+
+        <g:FlowPanel>
+            <g:Label addStyleNames="form-label">
                 <ui:text from='{messages.binaryColumnMIMEType}'/>
             </g:Label>
             <g:TextBox addStyleNames="form-textbox" ui:field="applicationType"/>

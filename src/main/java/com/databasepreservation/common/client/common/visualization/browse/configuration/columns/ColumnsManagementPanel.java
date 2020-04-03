@@ -540,7 +540,9 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
             public void onSuccess(Boolean value) {
               if (value) {
                 collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
-                  .updateSearchListTemplate(binaryColumnOptionPanel.getSearchTemplate());
+                  .updateExportTemplate(binaryColumnOptionPanel.getExportTemplate());
+                collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
+                    .updateSearchListTemplate(binaryColumnOptionPanel.getSearchTemplate());
                 collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
                   .setApplicationType(((BinaryColumnOptionsPanel) binaryColumnOptionPanel).getApplicationType());
                 saveChanges();
