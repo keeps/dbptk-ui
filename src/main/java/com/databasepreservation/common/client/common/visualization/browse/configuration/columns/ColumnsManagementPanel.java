@@ -16,8 +16,10 @@ import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.lists.cells.ActionsCell;
+import com.databasepreservation.common.client.common.lists.cells.DisableableCheckboxCell;
 import com.databasepreservation.common.client.common.lists.cells.RequiredEditableCell;
 import com.databasepreservation.common.client.common.lists.cells.TextAreaInputCell;
+import com.databasepreservation.common.client.common.lists.cells.helper.CheckboxData;
 import com.databasepreservation.common.client.common.lists.columns.ButtonColumn;
 import com.databasepreservation.common.client.common.lists.widgets.BasicTablePanel;
 import com.databasepreservation.common.client.common.sidebar.Sidebar;
@@ -367,14 +369,23 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
     return checkbox;
   }
 
-  private Column<ColumnStatus, Boolean> getAdvancedSearchCheckboxColumn() {
-    Column<ColumnStatus, Boolean> checkbox = new Column<ColumnStatus, Boolean>(new CheckboxCell(true, true)) {
+  private Column<ColumnStatus, CheckboxData> getAdvancedSearchCheckboxColumn() {
+    Column<ColumnStatus, CheckboxData> checkbox = new Column<ColumnStatus, CheckboxData>(
+      new DisableableCheckboxCell(false, true)) {
       @Override
-      public Boolean getValue(ColumnStatus column) {
+      public CheckboxData getValue(ColumnStatus column) {
         if (editableValues.get(column.getId()) == null) {
-          return column.getSearchStatus().getAdvanced().isFixed();
+          final CheckboxData checkboxData = new CheckboxData();
+          checkboxData.setChecked(column.getSearchStatus().getAdvanced().isFixed());
+          checkboxData.setDisable(column.getType().equals(ViewerType.dbTypes.BINARY));
+          return checkboxData;
+          // return column.getSearchStatus().getAdvanced().isFixed();
         } else {
-          return editableValues.get(column.getId()).isShowInAdvancedSearch();
+          final CheckboxData checkboxData = new CheckboxData();
+          checkboxData.setChecked(editableValues.get(column.getId()).isShowInAdvancedSearch());
+          checkboxData.setDisable(column.getType().equals(ViewerType.dbTypes.BINARY));
+          return checkboxData;
+          // return editableValues.get(column.getId()).isShowInAdvancedSearch();
         }
       }
     };
@@ -382,11 +393,11 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
     checkbox.setFieldUpdater((index, column, value) -> {
       if (editableValues.get(column.getId()) != null) {
         StatusHelper statusHelper = editableValues.get(column.getId());
-        statusHelper.setShowInAdvancedSearch(value);
+        statusHelper.setShowInAdvancedSearch(value.isChecked());
         editableValues.replace(column.getId(), statusHelper);
       } else {
         StatusHelper helper = new StatusHelper(column.getCustomName(), column.getCustomDescription(),
-          column.getSearchStatus().getList().isShow(), column.getDetailsStatus().isShow(), value);
+          column.getSearchStatus().getList().isShow(), column.getDetailsStatus().isShow(), value.isChecked());
         editableValues.put(column.getId(), helper);
       }
 
