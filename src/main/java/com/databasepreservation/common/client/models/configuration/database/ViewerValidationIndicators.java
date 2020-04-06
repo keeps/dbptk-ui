@@ -1,4 +1,4 @@
-package com.databasepreservation.common.client.models.status.database;
+package com.databasepreservation.common.client.models.configuration.database;
 
 import java.io.Serializable;
 
@@ -8,17 +8,17 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 @JsonPropertyOrder({"success", "failed", "warnings", "skipped"})
-public class Indicators implements Serializable {
+public class ViewerValidationIndicators implements Serializable {
 
   private String success;
   private String failed;
   private String warnings;
   private String skipped;
 
-  public Indicators() {
+  public ViewerValidationIndicators() {
   }
 
-  public Indicators(String success, String failed, String warnings, String skipped) {
+  public ViewerValidationIndicators(String success, String failed, String warnings, String skipped) {
     this.success = success;
     this.failed = failed;
     this.warnings = warnings;

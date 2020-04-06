@@ -29,10 +29,10 @@ import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.index.facets.Facets;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.sort.Sorter;
-import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
-import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
-import com.databasepreservation.common.client.models.status.collection.LargeObjectConsolidateProperty;
-import com.databasepreservation.common.client.models.status.collection.TableStatus;
+import com.databasepreservation.common.client.models.configuration.collection.ViewerCollectionConfiguration;
+import com.databasepreservation.common.client.models.configuration.collection.ViewerColumnConfiguration;
+import com.databasepreservation.common.client.models.configuration.collection.LargeObjectConsolidateProperty;
+import com.databasepreservation.common.client.models.configuration.collection.ViewerTableConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
@@ -68,7 +68,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private final ClientLogger logger = new ClientLogger(getClass().getName());
 
-  private LinkedHashMap<ColumnStatus, Column<ViewerRow, ?>> configColumns;
+  private LinkedHashMap<ViewerColumnConfiguration, Column<ViewerRow, ?>> configColumns;
   private Map<String, Boolean> columnDisplayNameToVisibleState = new HashMap<>();
 
   private CellTable<ViewerRow> display;
@@ -77,10 +77,10 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
   private Sorter currentSorter;
   private ViewerDatabase database;
   private ViewerTable viewerTable;
-  private CollectionStatus collectionConfiguration;
+  private ViewerCollectionConfiguration collectionConfiguration;
 
   public TableRowList(ViewerDatabase database, ViewerTable table, Filter filter, Facets facets, String summary,
-    boolean selectable, boolean exportable, CollectionStatus status, Boolean isNested) {
+                      boolean selectable, boolean exportable, ViewerCollectionConfiguration status, Boolean isNested) {
     super(filter, false, facets, summary, selectable, exportable,
       new TableRowListWrapper(database, table, status, isNested));
     this.viewerTable = table;
@@ -107,10 +107,10 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     return visibleState == null || visibleState;
   }
 
-  private Map<String, Integer> getColumnWithBinary(TableStatus table) {
+  private Map<String, Integer> getColumnWithBinary(ViewerTableConfiguration table) {
     Map<String, Integer> binaryColumns = new HashMap<>();
     int index = 0;
-    for (ColumnStatus configColumn : table.getVisibleColumnsList()) {
+    for (ViewerColumnConfiguration configColumn : table.getVisibleColumnsList()) {
       if (configColumn.getType().equals(BINARY)) {
         binaryColumns.put(configColumn.getId(), index);
       }
@@ -126,19 +126,19 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     TableRowListWrapper wrapper = getObject();
     final ViewerTable table = wrapper.getTable();
     final ViewerDatabase database = wrapper.getDatabase();
-    final CollectionStatus status = wrapper.getStatus();
-    TableStatus tableStatus = status.getTableStatus(table.getUuid());
+    final ViewerCollectionConfiguration status = wrapper.getStatus();
+    ViewerTableConfiguration viewerTableConfiguration = status.getViewerTableConfiguration(table.getUuid());
 
-    configColumns = new LinkedHashMap<>(tableStatus.getVisibleColumnsList().size());
+    configColumns = new LinkedHashMap<>(viewerTableConfiguration.getVisibleColumnsList().size());
 
-    final Map<String, Integer> columnWithBinary = getColumnWithBinary(tableStatus);
+    final Map<String, Integer> columnWithBinary = getColumnWithBinary(viewerTableConfiguration);
     if (!columnWithBinary.isEmpty()) {
       final CellPreviewEvent.Handler<ViewerRow> selectionEventManager = DefaultSelectionEventManager
         .createBlacklistManager(columnWithBinary.values().stream().mapToInt(Integer::intValue).toArray());
       display.setSelectionModel(getSelectionModel(), selectionEventManager);
     }
 
-    for (ColumnStatus configColumn : tableStatus.getVisibleColumnsList()) {
+    for (ViewerColumnConfiguration configColumn : viewerTableConfiguration.getVisibleColumnsList()) {
       if (!configColumn.getType().equals(NESTED)) {
         // Treat as non nested
         if (configColumn.getType().equals(BINARY)) {
@@ -178,7 +178,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     // emptyInfo.addStyleName("my-collections-empty-info");
   }
 
-  private Column<ViewerRow, SafeHtml> buildTemplateColumn(ColumnStatus configColumn, ViewerTable nestedTable) {
+  private Column<ViewerRow, SafeHtml> buildTemplateColumn(ViewerColumnConfiguration configColumn, ViewerTable nestedTable) {
     return new Column<ViewerRow, SafeHtml>(new SafeHtmlCell()) {
       @Override
       public void render(Cell.Context context, ViewerRow object, SafeHtmlBuilder sb) {
@@ -200,7 +200,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
             if (nestedRow != null && nestedRow.getCells() != null && !nestedRow.getCells().isEmpty()
               && nestedRow.getUuid().equals(configColumn.getId())) {
               Map<String, ViewerCell> cells = nestedRow.getCells();
-              String template = configColumn.getSearchStatus().getList().getTemplate().getTemplate();
+              String template = configColumn.getViewerSearchConfiguration().getList().getTemplate().getTemplate();
               if (template != null && !template.isEmpty()) {
                 String json = JSOUtils.cellsToJson(cells, nestedTable);
                 String s = JavascriptUtils.compileTemplate(template, json);
@@ -208,7 +208,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
               }
             }
           }
-          String separatorText = configColumn.getSearchStatus().getList().getTemplate().getSeparator();
+          String separatorText = configColumn.getViewerSearchConfiguration().getList().getTemplate().getSeparator();
           if (separatorText != null) {
             String separator = "";
             for (String s : aggregationList) {
@@ -226,7 +226,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     };
   }
 
-  private Column<ViewerRow, SafeHtml> buildSimpleColumn(ColumnStatus configColumn) {
+  private Column<ViewerRow, SafeHtml> buildSimpleColumn(ViewerColumnConfiguration configColumn) {
     return new Column<ViewerRow, SafeHtml>(new SafeHtmlCell()) {
       @Override
       public void render(Cell.Context context, ViewerRow object, SafeHtmlBuilder sb) {
@@ -276,8 +276,8 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     };
   }
 
-  private Column<ViewerRow, SafeHtml> buildDownloadColumn(ColumnStatus configColumn, ViewerDatabase database,
-    ViewerTable table, int columnIndex) {
+  private Column<ViewerRow, SafeHtml> buildDownloadColumn(ViewerColumnConfiguration configColumn, ViewerDatabase database,
+                                                          ViewerTable table, int columnIndex) {
     return new Column<ViewerRow, SafeHtml>(new SafeHtmlCell()) {
       @Override
       public void render(Cell.Context context, ViewerRow object, SafeHtmlBuilder sb) {
@@ -317,11 +317,11 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     };
   }
 
-  private SafeHtml getLobDownload(ViewerDatabase database, ColumnStatus configColumn, ViewerTable table, ViewerRow row,
-    int columnIndex) {
+  private SafeHtml getLobDownload(ViewerDatabase database, ViewerColumnConfiguration configColumn, ViewerTable table, ViewerRow row,
+                                  int columnIndex) {
     final String value = row.getCells().get(configColumn.getId()).getValue();
 
-    String template = configColumn.getSearchStatus().getList().getTemplate().getTemplate();
+    String template = configColumn.getViewerSearchConfiguration().getList().getTemplate().getTemplate();
     if (template != null && !template.isEmpty()) {
       String json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_downloadLOB(),
         ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK, RestUtils.createExportLobUri(database.getUuid(),
@@ -337,14 +337,14 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     MethodCallback<IndexResult<ViewerRow>> callback) {
     TableRowListWrapper wrapper = getObject();
     ViewerTable table = wrapper.getTable();
-    CollectionStatus status = wrapper.getStatus();
+    ViewerCollectionConfiguration status = wrapper.getStatus();
     Map<String, String> extraParameters = new HashMap<>();
     List<String> fieldsToReturn = new ArrayList<>();
     fieldsToReturn.add(ViewerConstants.INDEX_ID);
     Filter filter = getFilter();
     boolean hasNested = false;
 
-    for (ColumnStatus column : status.getTableStatus(table.getUuid()).getVisibleColumnsList()) {
+    for (ViewerColumnConfiguration column : status.getViewerTableConfiguration(table.getUuid()).getVisibleColumnsList()) {
       if (column.getNestedColumns() != null) {
         hasNested = true;
       } else {
@@ -360,8 +360,8 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
 
     Map<Column<ViewerRow, ?>, List<String>> columnSortingKeyMap = new HashMap<>();
 
-    for (Map.Entry<ColumnStatus, Column<ViewerRow, ?>> entry : configColumns.entrySet()) {
-      ColumnStatus viewerColumn = entry.getKey();
+    for (Map.Entry<ViewerColumnConfiguration, Column<ViewerRow, ?>> entry : configColumns.entrySet()) {
+      ViewerColumnConfiguration viewerColumn = entry.getKey();
       Column<ViewerRow, ?> column = entry.getValue();
 
       // if(!viewerColumn.getType().equals(NESTED)){
@@ -400,7 +400,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
 
     if (database.getPath() != null && !database.getPath().isEmpty()) {
       Map<String, Integer> binaryColumns = getColumnWithBinary(
-        getObject().getStatus().getTableStatusByTableId(viewerTable.getId()));
+        getObject().getStatus().getViewerTableConfigurationByTableId(viewerTable.getId()));
       for (String columnName : binaryColumns.keySet()) {
         if (isColumnVisible(columnName)) {
           buildZipHelper = true;
@@ -444,7 +444,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     handleScrollChanges();
   }
 
-  private void addColumn(ColumnStatus viewerColumn, Column<ViewerRow, ?> displayColumn) {
+  private void addColumn(ViewerColumnConfiguration viewerColumn, Column<ViewerRow, ?> displayColumn) {
     if (ViewerStringUtils.isNotBlank(viewerColumn.getCustomDescription())) {
       SafeHtmlBuilder spanTitle = CommonClientUtils.constructSpan(viewerColumn.getCustomName(),
         viewerColumn.getCustomDescription(), "column-description-block");
@@ -464,16 +464,16 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     TableRowListWrapper wrapper = getObject();
     ViewerDatabase database = wrapper.getDatabase();
     ViewerTable table = wrapper.getTable();
-    CollectionStatus status = wrapper.getStatus();
+    ViewerCollectionConfiguration status = wrapper.getStatus();
 
-    final List<ColumnStatus> visibleColumnsList = status.getTableStatusByTableId(table.getId()).getVisibleColumnsList();
+    final List<ViewerColumnConfiguration> visibleColumnsList = status.getViewerTableConfigurationByTableId(table.getId()).getVisibleColumnsList();
     Map<String, String> extraParameters = new HashMap<>();
     boolean nested = false;
 
     // prepare parameter: field list
     List<String> fieldsToSolr = new ArrayList<>();
     List<String> fieldsToHeader = new ArrayList<>();
-    for (ColumnStatus configColumn : visibleColumnsList) {
+    for (ViewerColumnConfiguration configColumn : visibleColumnsList) {
       if (isColumnVisible(configColumn.getName())) {
         if (!configColumn.getType().equals(NESTED)) {
           fieldsToSolr.add(configColumn.getId());

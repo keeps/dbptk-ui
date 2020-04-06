@@ -12,13 +12,12 @@ import com.databasepreservation.common.client.common.RightPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.lists.TableRowList;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
-import com.databasepreservation.common.client.common.utils.TableRowListWrapper;
 import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
 import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
 import com.databasepreservation.common.client.index.filter.Filter;
-import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
-import com.databasepreservation.common.client.models.status.collection.TableStatus;
+import com.databasepreservation.common.client.models.configuration.collection.ViewerCollectionConfiguration;
+import com.databasepreservation.common.client.models.configuration.collection.ViewerTableConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.models.structure.ViewerSchema;
@@ -36,7 +35,6 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
@@ -49,9 +47,9 @@ import config.i18n.client.ClientMessages;
 public class DatabaseSearchPanel extends RightPanel implements ICollectionStatusObserver {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, DatabaseSearchPanel> instances = new HashMap<>();
-  private final CollectionStatus status;
+  private final ViewerCollectionConfiguration status;
 
-  public static DatabaseSearchPanel getInstance(ViewerDatabase database, CollectionStatus status) {
+  public static DatabaseSearchPanel getInstance(ViewerDatabase database, ViewerCollectionConfiguration status) {
     return instances.computeIfAbsent(database.getUuid(), k -> new DatabaseSearchPanel(database, status));
   }
 
@@ -91,7 +89,7 @@ public class DatabaseSearchPanel extends RightPanel implements ICollectionStatus
 
   private ViewerDatabase database;
 
-  private DatabaseSearchPanel(ViewerDatabase database, CollectionStatus status) {
+  private DatabaseSearchPanel(ViewerDatabase database, ViewerCollectionConfiguration status) {
     tableSearchPanelContainers = new ArrayList<>();
     noResults = new Alert(Alert.MessageAlertType.INFO, messages.noRecordsMatchTheSearchTerms());
     this.status = status;
@@ -181,14 +179,14 @@ public class DatabaseSearchPanel extends RightPanel implements ICollectionStatus
   }
 
   @Override
-  public void updateCollection(CollectionStatus collectionStatus) {
-    instances.remove(collectionStatus.getDatabaseUUID());
+  public void updateCollection(ViewerCollectionConfiguration viewerCollectionConfiguration) {
+    instances.remove(viewerCollectionConfiguration.getDatabaseUUID());
   }
 
   private static class TableSearchPanelContainer extends FlowPanel {
     private final Widget header;
     private final SimplePanel tableContainer;
-    private CollectionStatus status;
+    private ViewerCollectionConfiguration status;
     private TableRowList tableRowList;
     private final ViewerDatabase database;
     private final ViewerTable table;
@@ -197,7 +195,7 @@ public class DatabaseSearchPanel extends RightPanel implements ICollectionStatus
     private boolean stillSearching = false;
 
     public TableSearchPanelContainer(ViewerDatabase database, ViewerTable table,
-                                     Callback<TableSearchPanelContainer, Void> searchCompletedEvent, CollectionStatus status) {
+                                     Callback<TableSearchPanelContainer, Void> searchCompletedEvent, ViewerCollectionConfiguration status) {
       super();
       this.database = database;
       this.table = table;
@@ -207,9 +205,9 @@ public class DatabaseSearchPanel extends RightPanel implements ICollectionStatus
       tableContainer = new SimplePanel();
       tableContainer.setVisible(false);
 
-      final TableStatus tableStatus = status.getTableStatusByTableId(table.getId());
+      final ViewerTableConfiguration viewerTableConfiguration = status.getViewerTableConfigurationByTableId(table.getId());
 
-      header = CommonClientUtils.getHeader(tableStatus, table, "h3", database.getMetadata().getSchemas().size() > 1);
+      header = CommonClientUtils.getHeader(viewerTableConfiguration, table, "h3", database.getMetadata().getSchemas().size() > 1);
       header.setVisible(false);
 
       add(header);
@@ -235,7 +233,7 @@ public class DatabaseSearchPanel extends RightPanel implements ICollectionStatus
       });
     }
 
-    public void setCollectionStatus(CollectionStatus status) {
+    public void setCollectionStatus(ViewerCollectionConfiguration status) {
       this.status = status;
     }
 

@@ -1,9 +1,9 @@
 package com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers;
 
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
-import com.databasepreservation.common.client.models.status.collection.TableStatus;
-import com.databasepreservation.common.client.models.status.collection.TemplateStatus;
+import com.databasepreservation.common.client.models.configuration.collection.ViewerColumnConfiguration;
+import com.databasepreservation.common.client.models.configuration.collection.ViewerTableConfiguration;
+import com.databasepreservation.common.client.models.configuration.collection.ViewerTemplateConfiguration;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -21,11 +21,6 @@ import config.i18n.client.ClientMessages;
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 public class BinaryColumnOptionsPanel extends ColumnOptionsPanel {
-  private static String DEFAULT_LABEL_TEMPLATE = "<a href=\"" + ViewerConstants.OPEN_TEMPLATE_ENGINE
-    + ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK + ViewerConstants.CLOSE_TEMPLATE_ENGINE + "\">"
-    + ViewerConstants.OPEN_TEMPLATE_ENGINE + ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL
-    + ViewerConstants.CLOSE_TEMPLATE_ENGINE + "</a>";
-
   interface ColumnsOptionsPanelUiBinder extends UiBinder<Widget, BinaryColumnOptionsPanel> {
   }
 
@@ -53,61 +48,74 @@ public class BinaryColumnOptionsPanel extends ColumnOptionsPanel {
   FlowPanel displayListHint;
 
   @UiField
+  TextBox detailsList;
+
+  @UiField
+  FlowPanel detailsListHint;
+
+  @UiField
   FlowPanel content;
 
-  public static ColumnOptionsPanel createInstance(TableStatus tableConfiguration, ColumnStatus columnConfiguration) {
+  public static ColumnOptionsPanel createInstance(ViewerTableConfiguration tableConfiguration, ViewerColumnConfiguration columnConfiguration) {
     return new BinaryColumnOptionsPanel(tableConfiguration, columnConfiguration);
   }
 
   @Override
-  public TemplateStatus getSearchTemplate() {
-    TemplateStatus templateStatus = new TemplateStatus();
+  public ViewerTemplateConfiguration getSearchTemplate() {
+    ViewerTemplateConfiguration viewerTemplateConfiguration = new ViewerTemplateConfiguration();
     if (ViewerStringUtils.isBlank(this.displayList.getText())) {
-      templateStatus.setTemplate(DEFAULT_LABEL_TEMPLATE);
+      viewerTemplateConfiguration.setTemplate(ViewerConstants.DEFAULT_DOWNLOAD_LABEL_TEMPLATE);
     } else {
-      templateStatus.setTemplate(this.displayList.getText());
+      viewerTemplateConfiguration.setTemplate(this.displayList.getText());
     }
 
-    return templateStatus;
+    return viewerTemplateConfiguration;
   }
 
   @Override
-  public TemplateStatus getDetailsTemplate() {
-    TemplateStatus templateStatus = new TemplateStatus();
-    templateStatus.setTemplate(this.displayList.getText());
-    return templateStatus;
+  public ViewerTemplateConfiguration getDetailsTemplate() {
+    ViewerTemplateConfiguration viewerTemplateConfiguration = new ViewerTemplateConfiguration();
+    if (ViewerStringUtils.isBlank(this.detailsList.getText())) {
+      viewerTemplateConfiguration.setTemplate(ViewerConstants.DEFAULT_DOWNLOAD_LABEL_TEMPLATE);
+    } else {
+      viewerTemplateConfiguration.setTemplate(this.detailsList.getText());
+    }
+    return viewerTemplateConfiguration;
   }
 
   @Override
-  public TemplateStatus getExportTemplate() {
-    TemplateStatus templateStatus = new TemplateStatus();
-    templateStatus.setTemplate(this.templateList.getText());
-    return templateStatus;
+  public ViewerTemplateConfiguration getExportTemplate() {
+    ViewerTemplateConfiguration viewerTemplateConfiguration = new ViewerTemplateConfiguration();
+    viewerTemplateConfiguration.setTemplate(this.templateList.getText());
+    return viewerTemplateConfiguration;
   }
 
   public String getApplicationType() {
     return this.applicationType.getText();
   }
 
-  private BinaryColumnOptionsPanel(TableStatus tableConfiguration, ColumnStatus columnConfiguration) {
+  private BinaryColumnOptionsPanel(ViewerTableConfiguration tableConfiguration, ViewerColumnConfiguration columnConfiguration) {
     initWidget(binder.createAndBindUi(this));
 
     templateEngineLabel.setHTML(messages.columnManagementTextForTemplateHint(ViewerConstants.TEMPLATE_ENGINE_LINK));
-    templateList.setText(columnConfiguration.getExportStatus().getTemplateStatus().getTemplate());
+    templateList.setText(columnConfiguration.getViewerExportConfiguration().getViewerTemplateConfiguration().getTemplate());
     templateListHint.add(buildHintWithButtons(tableConfiguration, templateList));
 
-    displayList.setText(getDefaultTextOrValue(columnConfiguration));
+    displayList.setText(getDefaultTextOrValue(columnConfiguration.getViewerSearchConfiguration().getList().getTemplate()));
     displayListHint.add(buildHintForLabel(displayList));
+
+    detailsList.setText(getDefaultTextOrValue(columnConfiguration.getViewerDetailsConfiguration().getViewerTemplateConfiguration()));
+    detailsListHint.add(buildHintForLabel(detailsList));
 
     applicationType.setText(columnConfiguration.getApplicationType());
 
   }
 
-  private String getDefaultTextOrValue(ColumnStatus columnConfiguration) {
-    String template = columnConfiguration.getSearchStatus().getList().getTemplate().getTemplate();
+  private String getDefaultTextOrValue(ViewerTemplateConfiguration viewerTemplateConfiguration) {
+    String template = viewerTemplateConfiguration.getTemplate();
 
     if (ViewerStringUtils.isBlank(template)) {
-      template = DEFAULT_LABEL_TEMPLATE;
+      template = ViewerConstants.DEFAULT_DOWNLOAD_LABEL_TEMPLATE;
     }
 
     return template;
@@ -137,12 +145,12 @@ public class BinaryColumnOptionsPanel extends ColumnOptionsPanel {
     return hintPanel;
   }
 
-  private FlowPanel buildHintWithButtons(TableStatus tableConfiguration, TextBox target) {
+  private FlowPanel buildHintWithButtons(ViewerTableConfiguration tableConfiguration, TextBox target) {
     FlowPanel hintPanel = new FlowPanel();
     hintPanel.setStyleName("data-transformation-title");
     hintPanel.add(new Label(messages.columnManagementTextForPossibleFields()));
 
-    for (ColumnStatus column : tableConfiguration.getColumns()) {
+    for (ViewerColumnConfiguration column : tableConfiguration.getColumns()) {
       Button btnField = new Button(column.getCustomName());
       btnField.setStyleName("btn btn-primary btn-small");
       btnField.addClickHandler(handler -> {

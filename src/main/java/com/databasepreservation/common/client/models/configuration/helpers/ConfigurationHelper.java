@@ -1,9 +1,9 @@
-package com.databasepreservation.common.client.models.status.helpers;
+package com.databasepreservation.common.client.models.configuration.helpers;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-public class StatusHelper {
+public class ConfigurationHelper {
 
   private String label;
   private String description;
@@ -11,15 +11,15 @@ public class StatusHelper {
   private boolean showInDetails;
   private boolean showInAdvancedSearch;
 
-  public StatusHelper() {
+  public ConfigurationHelper() {
   }
 
-  public StatusHelper(String label, String description) {
+  public ConfigurationHelper(String label, String description) {
     this.label = label;
     this.description = description;
   }
 
-  public StatusHelper(String label, String description, boolean table, boolean details, boolean advancedSearch) {
+  public ConfigurationHelper(String label, String description, boolean table, boolean details, boolean advancedSearch) {
     this.label = label;
     this.description = description;
     this.showInTable = table;

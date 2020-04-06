@@ -1,16 +1,15 @@
 package com.databasepreservation.modules.viewer;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Map;
 import java.util.Set;
 
-import com.databasepreservation.common.client.models.status.collection.LargeObjectConsolidateProperty;
+import com.databasepreservation.common.client.models.configuration.collection.LargeObjectConsolidateProperty;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 
-import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
+import com.databasepreservation.common.client.models.configuration.collection.ViewerCollectionConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.server.ViewerFactory;
@@ -30,7 +29,7 @@ import com.databasepreservation.modules.DefaultExceptionNormalizer;
  */
 public class DbvtkExportModule implements DatabaseFilterModule {
   private final DatabaseRowsSolrManager solrManager;
-  private CollectionStatus collectionConfiguration;
+  private ViewerCollectionConfiguration collectionConfiguration;
   private ViewerDatabase retrieved;
   private ViewerTable currentTable;
   private String databaseUUID;
@@ -40,7 +39,7 @@ public class DbvtkExportModule implements DatabaseFilterModule {
     solrManager = ViewerFactory.getSolrManager();
     try {
       retrieved = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
-      collectionConfiguration = ViewerFactory.getConfigurationManager().getConfigurationCollection(databaseUUID,
+      collectionConfiguration = ViewerFactory.getConfigurationManager().getViewerCollectionConfiguration(databaseUUID,
         databaseUUID);
     } catch (NotFoundException | GenericException e) {
       retrieved = null;
@@ -171,7 +170,7 @@ public class DbvtkExportModule implements DatabaseFilterModule {
   public void finishDatabase() throws ModuleException {
     solrManager.markDatabaseAsReady(databaseUUID);
     collectionConfiguration.setConsolidateProperty(LargeObjectConsolidateProperty.NOT_CONSOLIDATED);
-    ViewerFactory.getConfigurationManager().updateCollectionStatus(databaseUUID, collectionConfiguration);
+    ViewerFactory.getConfigurationManager().updateCollectionConfiguration(databaseUUID, collectionConfiguration);
   }
 
   @Override

@@ -21,10 +21,10 @@ import org.apache.commons.io.IOUtils;
 import com.databasepreservation.common.api.utils.ExtraMediaType;
 import com.databasepreservation.common.api.utils.HandlebarsUtils;
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
-import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
-import com.databasepreservation.common.client.models.status.collection.LargeObjectConsolidateProperty;
-import com.databasepreservation.common.client.models.status.collection.TableStatus;
+import com.databasepreservation.common.client.models.configuration.collection.ViewerCollectionConfiguration;
+import com.databasepreservation.common.client.models.configuration.collection.ViewerColumnConfiguration;
+import com.databasepreservation.common.client.models.configuration.collection.LargeObjectConsolidateProperty;
+import com.databasepreservation.common.client.models.configuration.collection.ViewerTableConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
@@ -36,18 +36,18 @@ import com.databasepreservation.common.utils.LobPathManager;
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 public class ZipOutputStreamSingleRow extends CSVOutputStream {
-  private final CollectionStatus configurationCollection;
+  private final ViewerCollectionConfiguration configurationCollection;
   private final ViewerDatabase database;
-  private final TableStatus configTable;
+  private final ViewerTableConfiguration configTable;
   private final String zipFilename;
   private final String csvFilename;
   private final ViewerRow row;
   private final List<String> fieldsToReturn;
   private final boolean exportDescriptions;
 
-  public ZipOutputStreamSingleRow(CollectionStatus configurationCollection, ViewerDatabase database,
-    TableStatus configTable, ViewerRow row, String zipFilename, String csvFilename, List<String> fieldsToReturn,
-    boolean exportDescriptions) {
+  public ZipOutputStreamSingleRow(ViewerCollectionConfiguration configurationCollection, ViewerDatabase database,
+                                  ViewerTableConfiguration configTable, ViewerRow row, String zipFilename, String csvFilename, List<String> fieldsToReturn,
+                                  boolean exportDescriptions) {
     super(zipFilename, ',');
     this.configurationCollection = configurationCollection;
     this.database = database;
@@ -65,7 +65,7 @@ public class ZipOutputStreamSingleRow extends CSVOutputStream {
       zipArchiveOutputStream.setUseZip64(Zip64Mode.AsNeeded);
       zipArchiveOutputStream.setMethod(ZipArchiveOutputStream.DEFLATED);
 
-      final List<ColumnStatus> binaryColumns = configTable.getBinaryColumns();
+      final List<ViewerColumnConfiguration> binaryColumns = configTable.getBinaryColumns();
       writeToZipFile(new ZipFile(database.getPath()), zipArchiveOutputStream, row, binaryColumns);
 
       final ByteArrayOutputStream byteArrayOutputStream = writeCSVFile();
@@ -89,8 +89,8 @@ public class ZipOutputStreamSingleRow extends CSVOutputStream {
     return ExtraMediaType.APPLICATION_ZIP;
   }
 
-  private ColumnStatus findBinaryColumn(final List<ColumnStatus> columns, final String cell) {
-    for (ColumnStatus column : columns) {
+  private ViewerColumnConfiguration findBinaryColumn(final List<ViewerColumnConfiguration> columns, final String cell) {
+    for (ViewerColumnConfiguration column : columns) {
       if (column.getId().equals(cell)) {
         return column;
       }
@@ -99,9 +99,9 @@ public class ZipOutputStreamSingleRow extends CSVOutputStream {
   }
 
   private void writeToZipFile(ZipFile siardArchive, ZipArchiveOutputStream out, ViewerRow row,
-    List<ColumnStatus> binaryColumns) throws IOException {
+    List<ViewerColumnConfiguration> binaryColumns) throws IOException {
     for (Map.Entry<String, ViewerCell> cellEntry : row.getCells().entrySet()) {
-      final ColumnStatus binaryColumn = findBinaryColumn(binaryColumns, cellEntry.getKey());
+      final ViewerColumnConfiguration binaryColumn = findBinaryColumn(binaryColumns, cellEntry.getKey());
 
       if (binaryColumn != null) {
         if (configurationCollection.getConsolidateProperty().equals(LargeObjectConsolidateProperty.CONSOLIDATED)) {
@@ -127,7 +127,7 @@ public class ZipOutputStreamSingleRow extends CSVOutputStream {
     return listBytes;
   }
 
-  private void handleWriteConsolidateLobs(ZipArchiveOutputStream out, ColumnStatus binaryColumn, ViewerRow row)
+  private void handleWriteConsolidateLobs(ZipArchiveOutputStream out, ViewerColumnConfiguration binaryColumn, ViewerRow row)
     throws IOException {
     final Path consolidatedPath = LobPathManager.getConsolidatedPath(ViewerFactory.getViewerConfiguration(),
       database.getUuid(), configTable.getId(), binaryColumn.getColumnIndex(), row.getUuid());
@@ -137,7 +137,7 @@ public class ZipOutputStreamSingleRow extends CSVOutputStream {
     addEntryToZip(out, in, templateFilename);
   }
 
-  private void handleWriteInternalLobs(ZipArchiveOutputStream out, ZipFile siardArchive, ColumnStatus binaryColumn,
+  private void handleWriteInternalLobs(ZipArchiveOutputStream out, ZipFile siardArchive, ViewerColumnConfiguration binaryColumn,
     ViewerRow row, ViewerCell cell) throws IOException {
     final String templateFilename = getTemplateFilename(row, binaryColumn, cell.getValue());
     final InputStream in = siardArchive.getInputStream(
@@ -145,8 +145,8 @@ public class ZipOutputStreamSingleRow extends CSVOutputStream {
     addEntryToZip(out, in, templateFilename);
   }
 
-  private void handleWriteExternalLobs(ZipArchiveOutputStream out, ColumnStatus binaryColumn, ViewerRow row,
-    ViewerCell cell) throws IOException {
+  private void handleWriteExternalLobs(ZipArchiveOutputStream out, ViewerColumnConfiguration binaryColumn, ViewerRow row,
+                                       ViewerCell cell) throws IOException {
     final String lobLocation = cell.getValue();
     final Path lobPath = Paths.get(lobLocation);
     final Path completeLobPath = ViewerFactory.getViewerConfiguration().getSIARDFilesPath().resolve(lobPath);
@@ -156,7 +156,7 @@ public class ZipOutputStreamSingleRow extends CSVOutputStream {
     addEntryToZip(out, inputStream, templateFilename);
   }
 
-  private String getTemplateFilename(ViewerRow row, ColumnStatus binaryColumn, String defaultValue) {
+  private String getTemplateFilename(ViewerRow row, ViewerColumnConfiguration binaryColumn, String defaultValue) {
     String handlebarsFilename = HandlebarsUtils.applyExportTemplate(row, configTable,
       binaryColumn.getColumnIndex());
     if (ViewerStringUtils.isBlank(handlebarsFilename)) {

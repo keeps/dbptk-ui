@@ -6,7 +6,6 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 
@@ -20,19 +19,18 @@ import org.slf4j.LoggerFactory;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.search.SavedSearch;
 import com.databasepreservation.common.client.models.activity.logs.ActivityLogEntry;
-import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
-import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
-import com.databasepreservation.common.client.models.status.collection.NestedColumnStatus;
-import com.databasepreservation.common.client.models.status.collection.TableStatus;
-import com.databasepreservation.common.client.models.status.database.DatabaseStatus;
+import com.databasepreservation.common.client.models.configuration.collection.ViewerCollectionConfiguration;
+import com.databasepreservation.common.client.models.configuration.collection.ViewerColumnConfiguration;
+import com.databasepreservation.common.client.models.configuration.collection.ViewerNestedColumnConfiguration;
+import com.databasepreservation.common.client.models.configuration.collection.ViewerTableConfiguration;
+import com.databasepreservation.common.client.models.configuration.database.ViewerDatabaseConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
-import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.server.index.utils.JsonTransformer;
 import com.databasepreservation.common.server.storage.fs.FSUtils;
-import com.databasepreservation.common.utils.StatusUtils;
+import com.databasepreservation.common.utils.ViewerConfigurationUtils;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -41,34 +39,34 @@ public class ConfigurationManager {
   private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationManager.class);
 
   private final Object logFileLock = new Object();
-  private final Object databaseStatusFileLock = new Object();
-  private final Object collectionStatusFileLock = new Object();
+  private final Object databaseConfigurationFileLock = new Object();
+  private final Object collectionConfigurationFileLock = new Object();
   private long entryLogLineNumber = -1;
 
   public ConfigurationManager() {
   }
 
-  public CollectionStatus getConfigurationCollection(String databaseUUID, String collectionUUID)
+  public ViewerCollectionConfiguration getViewerCollectionConfiguration(String databaseUUID, String collectionUUID)
     throws GenericException {
     Path databasesDirectoryPath = ViewerFactory.getViewerConfiguration().getDatabasesPath();
     Path databaseDirectoryPath = databasesDirectoryPath.resolve(databaseUUID);
     Path collectionStatusFile = databaseDirectoryPath
       .resolve(ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + collectionUUID + ".json");
 
-    return JsonUtils.readObjectFromFile(collectionStatusFile, CollectionStatus.class);
+    return JsonUtils.readObjectFromFile(collectionStatusFile, ViewerCollectionConfiguration.class);
   }
 
   public void editSearch(String databaseUUID, String uuid, String name, String description) {
     try {
-      final CollectionStatus collectionStatus = getCollectionStatus(databaseUUID,
+      final ViewerCollectionConfiguration viewerCollectionConfiguration = getCollectionConfiguration(databaseUUID,
         ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + databaseUUID);
 
-      final SavedSearch savedSearch = collectionStatus.getSavedSearch(uuid);
+      final SavedSearch savedSearch = viewerCollectionConfiguration.getSavedSearch(uuid);
       savedSearch.setName(name);
       savedSearch.setDescription(description);
-      collectionStatus.updateSavedSearch(savedSearch);
+      viewerCollectionConfiguration.updateSavedSearch(savedSearch);
 
-      updateCollectionStatus(databaseUUID, collectionStatus);
+      updateCollectionConfiguration(databaseUUID, viewerCollectionConfiguration);
     } catch (GenericException | ViewerException e) {
       LOGGER.debug("Failed to manipulate the JSON file", e);
     }
@@ -76,10 +74,10 @@ public class ConfigurationManager {
 
   public void addSearch(SavedSearch savedSearch) {
     try {
-      final CollectionStatus collectionStatus = getCollectionStatus(savedSearch.getDatabaseUUID(),
+      final ViewerCollectionConfiguration viewerCollectionConfiguration = getCollectionConfiguration(savedSearch.getDatabaseUUID(),
         ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + savedSearch.getDatabaseUUID());
-      collectionStatus.addSavedSearch(savedSearch);
-      updateCollectionStatus(savedSearch.getDatabaseUUID(), collectionStatus);
+      viewerCollectionConfiguration.addSavedSearch(savedSearch);
+      updateCollectionConfiguration(savedSearch.getDatabaseUUID(), viewerCollectionConfiguration);
     } catch (GenericException | ViewerException e) {
       LOGGER.debug("Failed to manipulate the JSON file", e);
     }
@@ -87,14 +85,14 @@ public class ConfigurationManager {
 
   public void addTable(ViewerDatabase database) {
     try {
-      final DatabaseStatus databaseStatus = getDatabaseStatus(database.getUuid());
+      final ViewerDatabaseConfiguration viewerDatabaseConfiguration = getDatabaseConfiguration(database.getUuid());
       // At the moment there is only one collection per database
-      if (databaseStatus.getCollections().size() >= 1) {
-        final String collectionId = databaseStatus.getCollections().get(0);
-        final CollectionStatus collectionStatus = getCollectionStatus(database.getUuid(), collectionId);
-        collectionStatus.setTables(StatusUtils.getTableStatusFromList(database));
+      if (viewerDatabaseConfiguration.getCollections().size() >= 1) {
+        final String collectionId = viewerDatabaseConfiguration.getCollections().get(0);
+        final ViewerCollectionConfiguration viewerCollectionConfiguration = getCollectionConfiguration(database.getUuid(), collectionId);
+        viewerCollectionConfiguration.setTables(ViewerConfigurationUtils.getTableConfigurationFromList(database));
         // Update collection
-        updateCollectionStatus(database.getUuid(), collectionStatus);
+        updateCollectionConfiguration(database.getUuid(), viewerCollectionConfiguration);
       }
     } catch (GenericException | ViewerException e) {
       LOGGER.debug("Failed to manipulate the JSON file", e);
@@ -103,14 +101,14 @@ public class ConfigurationManager {
 
   public void addDenormalization(String databaseUUID, String denormalizationUUID) throws GenericException {
     try {
-      final DatabaseStatus databaseStatus = getDatabaseStatus(databaseUUID);
+      final ViewerDatabaseConfiguration viewerDatabaseConfiguration = getDatabaseConfiguration(databaseUUID);
       // At the moment there is only one collection per database
-      if (databaseStatus.getCollections().size() >= 1) {
-        final String collectionId = databaseStatus.getCollections().get(0);
-        final CollectionStatus collectionStatus = getCollectionStatus(databaseUUID, collectionId);
-        collectionStatus.addDenormalization(denormalizationUUID);
+      if (viewerDatabaseConfiguration.getCollections().size() >= 1) {
+        final String collectionId = viewerDatabaseConfiguration.getCollections().get(0);
+        final ViewerCollectionConfiguration viewerCollectionConfiguration = getCollectionConfiguration(databaseUUID, collectionId);
+        viewerCollectionConfiguration.addDenormalization(denormalizationUUID);
         // Update collection
-        updateCollectionStatus(databaseUUID, collectionStatus);
+        updateCollectionConfiguration(databaseUUID, viewerCollectionConfiguration);
       }
     } catch (GenericException | ViewerException e) {
       throw new GenericException("Failed to manipulate the JSON file", e);
@@ -119,13 +117,13 @@ public class ConfigurationManager {
 
   public void removeDenormalization(String databaseUUID, String denormalizationUUID) throws GenericException {
     try {
-      final DatabaseStatus databaseStatus = getDatabaseStatus(databaseUUID);
-      if (databaseStatus.getCollections().size() >= 1) {
-        final String collectionId = databaseStatus.getCollections().get(0);
-        final CollectionStatus collectionStatus = getCollectionStatus(databaseUUID, collectionId);
-        collectionStatus.getDenormalizations().remove(denormalizationUUID);
+      final ViewerDatabaseConfiguration viewerDatabaseConfiguration = getDatabaseConfiguration(databaseUUID);
+      if (viewerDatabaseConfiguration.getCollections().size() >= 1) {
+        final String collectionId = viewerDatabaseConfiguration.getCollections().get(0);
+        final ViewerCollectionConfiguration viewerCollectionConfiguration = getCollectionConfiguration(databaseUUID, collectionId);
+        viewerCollectionConfiguration.getDenormalizations().remove(denormalizationUUID);
         // Update collection
-        updateCollectionStatus(databaseUUID, collectionStatus);
+        updateCollectionConfiguration(databaseUUID, viewerCollectionConfiguration);
       }
     } catch (GenericException | ViewerException e) {
       throw new GenericException("Failed to manipulate the JSON file", e);
@@ -133,29 +131,29 @@ public class ConfigurationManager {
   }
 
   public void addDenormalizationColumns(String databaseUUID, String tableUUID, ViewerColumn column,
-    NestedColumnStatus nestedId, String template, String originalType, String typeName, String nullable)
+                                        ViewerNestedColumnConfiguration nestedId, String template, String originalType, String typeName, String nullable)
     throws GenericException {
     try {
-      final DatabaseStatus databaseStatus = getDatabaseStatus(databaseUUID);
-      if (!databaseStatus.getCollections().isEmpty()) {
-        final String collectionId = databaseStatus.getCollections().get(0);
-        final CollectionStatus collectionStatus = getCollectionStatus(databaseUUID, collectionId);
-        TableStatus table = collectionStatus.getTableStatus(tableUUID);
+      final ViewerDatabaseConfiguration viewerDatabaseConfiguration = getDatabaseConfiguration(databaseUUID);
+      if (!viewerDatabaseConfiguration.getCollections().isEmpty()) {
+        final String collectionId = viewerDatabaseConfiguration.getCollections().get(0);
+        final ViewerCollectionConfiguration viewerCollectionConfiguration = getCollectionConfiguration(databaseUUID, collectionId);
+        ViewerTableConfiguration table = viewerCollectionConfiguration.getViewerTableConfiguration(tableUUID);
 
         int order = table.getLastColumnOrder();
-        ColumnStatus columnStatus = StatusUtils.getColumnStatus(column, true, ++order);
-        columnStatus.setNestedColumns(nestedId);
-        columnStatus.setOriginalType(originalType);
-        columnStatus.setTypeName(typeName);
-        columnStatus.setNullable(nullable);
-        columnStatus.setType(ViewerType.dbTypes.NESTED);
-        table.addColumnStatus(columnStatus);
-        columnStatus.getExportStatus().getTemplateStatus().setTemplate(template);
-        columnStatus.getDetailsStatus().getTemplateStatus().setTemplate(template);
-        columnStatus.getSearchStatus().getList().getTemplate().setTemplate(template);
+        ViewerColumnConfiguration viewerColumnConfiguration = ViewerConfigurationUtils.getColumnConfiguration(column, true, ++order);
+        viewerColumnConfiguration.setNestedColumns(nestedId);
+        viewerColumnConfiguration.setOriginalType(originalType);
+        viewerColumnConfiguration.setTypeName(typeName);
+        viewerColumnConfiguration.setNullable(nullable);
+        viewerColumnConfiguration.setType(ViewerType.dbTypes.NESTED);
+        table.addColumnStatus(viewerColumnConfiguration);
+        viewerColumnConfiguration.getViewerExportConfiguration().getViewerTemplateConfiguration().setTemplate(template);
+        viewerColumnConfiguration.getViewerDetailsConfiguration().getViewerTemplateConfiguration().setTemplate(template);
+        viewerColumnConfiguration.getViewerSearchConfiguration().getList().getTemplate().setTemplate(template);
 
         // Update collection
-        updateCollectionStatus(databaseUUID, collectionStatus);
+        updateCollectionConfiguration(databaseUUID, viewerCollectionConfiguration);
       }
     } catch (GenericException | ViewerException e) {
       throw new GenericException("Failed to manipulate the JSON file", e);
@@ -164,15 +162,15 @@ public class ConfigurationManager {
 
   public void removeDenormalizationColumns(String databaseUUID, String tableUUID) throws GenericException {
     try {
-      final DatabaseStatus databaseStatus = getDatabaseStatus(databaseUUID);
-      if (databaseStatus.getCollections().size() >= 1) {
-        final String collectionId = databaseStatus.getCollections().get(0);
-        final CollectionStatus collectionStatus = getCollectionStatus(databaseUUID, collectionId);
-        TableStatus table = collectionStatus.getTableStatus(tableUUID);
+      final ViewerDatabaseConfiguration viewerDatabaseConfiguration = getDatabaseConfiguration(databaseUUID);
+      if (viewerDatabaseConfiguration.getCollections().size() >= 1) {
+        final String collectionId = viewerDatabaseConfiguration.getCollections().get(0);
+        final ViewerCollectionConfiguration viewerCollectionConfiguration = getCollectionConfiguration(databaseUUID, collectionId);
+        ViewerTableConfiguration table = viewerCollectionConfiguration.getViewerTableConfiguration(tableUUID);
         table.getColumns().removeIf(c -> c.getNestedColumns() != null);
         table.reorderColumns();
         // Update collection
-        updateCollectionStatus(databaseUUID, collectionStatus);
+        updateCollectionConfiguration(databaseUUID, viewerCollectionConfiguration);
       }
     } catch (GenericException | ViewerException e) {
       throw new GenericException("Failed to manipulate the JSON file", e);
@@ -180,10 +178,10 @@ public class ConfigurationManager {
   }
 
   public void addCollection(String databaseUUID, String solrCollectionName) {
-    final CollectionStatus collectionStatus = StatusUtils.getCollectionStatus(databaseUUID, solrCollectionName);
+    final ViewerCollectionConfiguration viewerCollectionConfiguration = ViewerConfigurationUtils.getCollectionConfiguration(databaseUUID, solrCollectionName);
 
     try {
-      final DatabaseStatus databaseStatus = getDatabaseStatus(databaseUUID);
+      final ViewerDatabaseConfiguration viewerDatabaseConfiguration = getDatabaseConfiguration(databaseUUID);
 
       Path collectionFile = getCollectionStatusPath(databaseUUID, solrCollectionName);
       // verify if file exists
@@ -197,10 +195,10 @@ public class ConfigurationManager {
         }
 
         // Save collection file and update database file
-        JsonUtils.writeObjectToFile(collectionStatus, collectionFile);
-        synchronized (databaseStatusFileLock) {
-          databaseStatus.addBrowseCollection(solrCollectionName);
-          updateDatabaseStatus(databaseStatus);
+        JsonUtils.writeObjectToFile(viewerCollectionConfiguration, collectionFile);
+        synchronized (databaseConfigurationFileLock) {
+          viewerDatabaseConfiguration.addBrowseCollection(solrCollectionName);
+          updateDatabaseConfiguration(viewerDatabaseConfiguration);
         }
       }
     } catch (GenericException | ViewerException e) {
@@ -208,21 +206,21 @@ public class ConfigurationManager {
     }
   }
 
-  private DatabaseStatus getDatabaseStatus(String databaseUUID) throws GenericException {
-    synchronized (databaseStatusFileLock) {
-      final Path databaseStatusFile = getDatabaseStatusPath(databaseUUID);
-      return JsonUtils.readObjectFromFile(databaseStatusFile, DatabaseStatus.class);
+  private ViewerDatabaseConfiguration getDatabaseConfiguration(String databaseUUID) throws GenericException {
+    synchronized (databaseConfigurationFileLock) {
+      final Path databaseStatusFile = getDatabaseConfigurationPath(databaseUUID);
+      return JsonUtils.readObjectFromFile(databaseStatusFile, ViewerDatabaseConfiguration.class);
     }
   }
 
-  private CollectionStatus getCollectionStatus(String databaseUUID, String id) throws GenericException {
-    synchronized (collectionStatusFileLock) {
+  private ViewerCollectionConfiguration getCollectionConfiguration(String databaseUUID, String id) throws GenericException {
+    synchronized (collectionConfigurationFileLock) {
       Path collectionStatusFile = getCollectionStatusPath(databaseUUID, id);
-      return JsonUtils.readObjectFromFile(collectionStatusFile, CollectionStatus.class);
+      return JsonUtils.readObjectFromFile(collectionStatusFile, ViewerCollectionConfiguration.class);
     }
   }
 
-  private Path getDatabaseStatusPath(String id) {
+  private Path getDatabaseConfigurationPath(String id) {
     final Path databasesDirectoryPath = ViewerFactory.getViewerConfiguration().getDatabasesPath();
     final Path databaseDirectoryPath = databasesDirectoryPath.resolve(id);
 
@@ -237,7 +235,7 @@ public class ConfigurationManager {
   }
 
   public void updateIndicators(String id, String passed, String failed, String warnings, String skipped) {
-    synchronized (databaseStatusFileLock) {
+    synchronized (databaseConfigurationFileLock) {
       try {
         final Path databasesDirectoryPath = ViewerFactory.getViewerConfiguration().getDatabasesPath();
         final Path databaseDirectoryPath = databasesDirectoryPath.resolve(id);
@@ -245,12 +243,12 @@ public class ConfigurationManager {
         Path databaseFile = databaseDirectoryPath.resolve(ViewerConstants.DATABASE_STATUS_PREFIX + id + ".json");
         // verify if file exists
         if (FSUtils.exists(databaseFile)) {
-          final DatabaseStatus databaseStatus = JsonUtils.readObjectFromFile(databaseFile, DatabaseStatus.class);
-          databaseStatus.getValidationStatus()
-            .setIndicators(StatusUtils.getIndicators(passed, failed, warnings, skipped));
+          final ViewerDatabaseConfiguration viewerDatabaseConfiguration = JsonUtils.readObjectFromFile(databaseFile, ViewerDatabaseConfiguration.class);
+          viewerDatabaseConfiguration.getViewerValidationConfiguration()
+            .setViewerValidationIndicators(ViewerConfigurationUtils.getIndicators(passed, failed, warnings, skipped));
 
           // update database file
-          JsonTransformer.writeObjectToFile(databaseStatus, databaseFile);
+          JsonTransformer.writeObjectToFile(viewerDatabaseConfiguration, databaseFile);
         }
       } catch (GenericException | ViewerException e) {
         LOGGER.debug(e.getMessage(), e);
@@ -258,23 +256,23 @@ public class ConfigurationManager {
     }
   }
 
-  public void updateDatabaseStatus(DatabaseStatus status) throws ViewerException {
-    synchronized (databaseStatusFileLock) {
-      Path statusFile = getDatabaseStatusPath(status.getId());
+  public void updateDatabaseConfiguration(ViewerDatabaseConfiguration status) throws ViewerException {
+    synchronized (databaseConfigurationFileLock) {
+      Path statusFile = getDatabaseConfigurationPath(status.getId());
       JsonTransformer.writeObjectToFile(status, statusFile);
     }
   }
 
-  public void updateCollectionStatus(String databaseUUID, CollectionStatus status) throws ViewerException {
-    synchronized (collectionStatusFileLock) {
-      Path statusFile = getCollectionStatusPath(databaseUUID, status.getId());
-      JsonTransformer.writeObjectToFile(status, statusFile);
+  public void updateCollectionConfiguration(String databaseUUID, ViewerCollectionConfiguration configuration) throws ViewerException {
+    synchronized (collectionConfigurationFileLock) {
+      Path path = getCollectionStatusPath(databaseUUID, configuration.getId());
+      JsonTransformer.writeObjectToFile(configuration, path);
     }
   }
 
-  public void updateValidationStatus(String id, ViewerDatabaseValidationStatus status, String date,
+  public void updateValidationStatus(String id, ViewerDatabaseValidationStatus validationStatus, String date,
     String validationReportPath, String dbptkVersion) {
-    synchronized (databaseStatusFileLock) {
+    synchronized (databaseConfigurationFileLock) {
       try {
         final Path databasesDirectoryPath = ViewerFactory.getViewerConfiguration().getDatabasesPath();
         final Path databaseDirectoryPath = databasesDirectoryPath.resolve(id);
@@ -283,11 +281,11 @@ public class ConfigurationManager {
 
         // verify if file exists
         if (FSUtils.exists(databaseFile)) {
-          final DatabaseStatus databaseStatus = JsonUtils.readObjectFromFile(databaseFile, DatabaseStatus.class);
-          databaseStatus.setValidationStatus(StatusUtils.getValidationStatus(status, date, validationReportPath,
-            dbptkVersion, databaseStatus.getValidationStatus().getIndicators()));
+          final ViewerDatabaseConfiguration viewerDatabaseConfiguration = JsonUtils.readObjectFromFile(databaseFile, ViewerDatabaseConfiguration.class);
+          viewerDatabaseConfiguration.setViewerValidationConfiguration(ViewerConfigurationUtils.getValidationConfiguration(validationStatus, date, validationReportPath,
+            dbptkVersion, viewerDatabaseConfiguration.getViewerValidationConfiguration().getViewerValidationIndicators()));
 
-          JsonTransformer.writeObjectToFile(databaseStatus, databaseFile);
+          JsonTransformer.writeObjectToFile(viewerDatabaseConfiguration, databaseFile);
         }
       } catch (GenericException | ViewerException e) {
         LOGGER.debug(e.getMessage(), e);
@@ -305,7 +303,7 @@ public class ConfigurationManager {
         try {
           Files.createFile(databaseStatusPath);
           // Write file
-          JsonUtils.writeObjectToFile(StatusUtils.getDatabaseStatus(database), databaseStatusPath);
+          JsonUtils.writeObjectToFile(ViewerConfigurationUtils.getDatabaseConfiguration(database), databaseStatusPath);
 
           addCollection(database.getUuid(), ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + database.getUuid());
           addTable(database);

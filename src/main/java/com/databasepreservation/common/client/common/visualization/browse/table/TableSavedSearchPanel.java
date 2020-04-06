@@ -7,13 +7,11 @@ import com.databasepreservation.common.client.common.search.SavedSearch;
 import com.databasepreservation.common.client.common.search.SearchInfo;
 import com.databasepreservation.common.client.common.search.TableSearchPanel;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
-import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
-import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
+import com.databasepreservation.common.client.models.configuration.collection.ViewerCollectionConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.services.CollectionService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
-import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.ViewerJsonUtils;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.google.gwt.core.client.GWT;
@@ -32,7 +30,7 @@ public class TableSavedSearchPanel extends RightPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
 
   public static TableSavedSearchPanel createInstance(ViewerDatabase database, String savedSearchUUID,
-    CollectionStatus status) {
+    ViewerCollectionConfiguration status) {
     return new TableSavedSearchPanel(database, savedSearchUUID, status);
   }
 
@@ -44,7 +42,7 @@ public class TableSavedSearchPanel extends RightPanel {
   private ViewerDatabase database;
   private String savedSearchUUID;
   private SavedSearch savedSearch;
-  private CollectionStatus status;
+  private ViewerCollectionConfiguration status;
 
   @UiField
   SimplePanel mainHeader;
@@ -55,7 +53,7 @@ public class TableSavedSearchPanel extends RightPanel {
   @UiField
   SimplePanel tableSearchPanelContainer;
 
-  private TableSavedSearchPanel(ViewerDatabase viewerDatabase, final String savedSearchUUID, CollectionStatus status) {
+  private TableSavedSearchPanel(ViewerDatabase viewerDatabase, final String savedSearchUUID, ViewerCollectionConfiguration status) {
     database = viewerDatabase;
     this.status = status;
     this.savedSearchUUID = savedSearchUUID;

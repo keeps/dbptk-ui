@@ -512,6 +512,10 @@ public class ViewerConstants {
   public static final String CLOSE_TEMPLATE_ENGINE = "}}";
   public static final String TEMPLATE_LOB_DOWNLOAD_LABEL = "download_label";
   public static final String TEMPLATE_LOB_DOWNLOAD_LINK = "download_link";
+  public static final String DEFAULT_DOWNLOAD_LABEL_TEMPLATE = "<a href=\"" + ViewerConstants.OPEN_TEMPLATE_ENGINE
+      + ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK + ViewerConstants.CLOSE_TEMPLATE_ENGINE + "\">"
+      + ViewerConstants.OPEN_TEMPLATE_ENGINE + ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL
+      + ViewerConstants.CLOSE_TEMPLATE_ENGINE + "</a>";
 
   /**
    * SIARD prefixes

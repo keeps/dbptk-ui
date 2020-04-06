@@ -15,7 +15,7 @@ import com.databasepreservation.common.client.index.filter.EmptyKeyFilterParamet
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.filter.FilterParameter;
 import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
-import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
+import com.databasepreservation.common.client.models.configuration.collection.ViewerCollectionConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
@@ -47,7 +47,7 @@ public class ReferencesPanel extends RightPanel {
   private static Map<String, ReferencesPanel> instances = new HashMap<>();
 
   public static ReferencesPanel getInstance(ViewerDatabase database, String tableUUID, String recordUUID,
-    String columnIndexInTable, CollectionStatus status) {
+    String columnIndexInTable, ViewerCollectionConfiguration status) {
     return new ReferencesPanel(database, tableUUID, recordUUID, columnIndexInTable, status);
   }
 
@@ -62,7 +62,7 @@ public class ReferencesPanel extends RightPanel {
   private ViewerRow record;
   private Integer columnIndexInTable;
   private String columnName;
-  private final CollectionStatus status;
+  private final ViewerCollectionConfiguration status;
 
   @UiField
   FlowPanel content;
@@ -78,7 +78,7 @@ public class ReferencesPanel extends RightPanel {
   Label cellColumn;
 
   private ReferencesPanel(ViewerDatabase viewerDatabase, final String tableUUID, final String recordUUID,
-    final String columnIndexInTableAsString, CollectionStatus status) {
+    final String columnIndexInTableAsString, ViewerCollectionConfiguration status) {
     this.recordUUID = recordUUID;
     this.columnIndexInTable = Integer.valueOf(columnIndexInTableAsString);
     this.database = viewerDatabase;

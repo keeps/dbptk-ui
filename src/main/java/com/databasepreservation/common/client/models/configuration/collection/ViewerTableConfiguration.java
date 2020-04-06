@@ -1,23 +1,21 @@
-package com.databasepreservation.common.client.models.status.collection;
+package com.databasepreservation.common.client.models.configuration.collection;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerType;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.google.gwt.core.client.GWT;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-@JsonPropertyOrder({"uuid", "id", "schemaFolder", "tableFolder", "name", "customName", "description", "customDescription", "show", "columns"})
-public class TableStatus implements Serializable {
+@JsonPropertyOrder({"uuid", "id", "schemaFolder", "tableFolder", "name", "customName", "description",
+  "customDescription", "show", "columns"})
+public class ViewerTableConfiguration implements Serializable {
 
   private String uuid;
   private String id;
@@ -28,9 +26,9 @@ public class TableStatus implements Serializable {
   private String description;
   private String customDescription;
   private boolean show;
-  private List<ColumnStatus> columns;
+  private List<ViewerColumnConfiguration> columns;
 
-  public TableStatus() {
+  public ViewerTableConfiguration() {
     columns = new ArrayList<>();
   }
 
@@ -90,11 +88,11 @@ public class TableStatus implements Serializable {
     this.show = show;
   }
 
-  public List<ColumnStatus> getColumns() {
+  public List<ViewerColumnConfiguration> getColumns() {
     return columns;
   }
 
-  public void setColumns(List<ColumnStatus> columns) {
+  public void setColumns(List<ViewerColumnConfiguration> columns) {
     this.columns = columns;
   }
 
@@ -114,58 +112,59 @@ public class TableStatus implements Serializable {
     this.customDescription = customDescription;
   }
 
-  public void addColumnStatus(ColumnStatus status) {
+  public void addColumnStatus(ViewerColumnConfiguration status) {
     this.columns.add(status);
   }
 
   @JsonIgnore
-  public int getLastColumnOrder(){
+  public int getLastColumnOrder() {
     int lastIndex = 0;
-    for (ColumnStatus column : columns) {
-     if(column.getOrder() > lastIndex) lastIndex = column.getOrder();
+    for (ViewerColumnConfiguration column : columns) {
+      if (column.getOrder() > lastIndex)
+        lastIndex = column.getOrder();
     }
     return lastIndex;
   }
 
-  public void reorderColumns(){
+  public void reorderColumns() {
     for (int i = 0; i < columns.size(); i++) {
-      ColumnStatus column = columns.get(i);
+      ViewerColumnConfiguration column = columns.get(i);
       int currentIndex = i + 1;
-      if(column.getOrder() != currentIndex){
+      if (column.getOrder() != currentIndex) {
         column.setOrder(currentIndex);
       }
     }
   }
 
   @JsonIgnore
-  public List<ColumnStatus> getVisibleColumnsList() {
-  	return columns.stream().filter(c -> c.getSearchStatus().getList().isShow()).sorted()
-				.collect(Collectors.toList());
-	}
-
-	public boolean showAdvancedSearchOption() {
-    return columns.stream().anyMatch(c -> c.getSearchStatus().getAdvanced().isFixed());
+  public List<ViewerColumnConfiguration> getVisibleColumnsList() {
+    return columns.stream().filter(c -> c.getViewerSearchConfiguration().getList().isShow()).sorted().collect(Collectors.toList());
   }
 
-	@JsonIgnore
-  public List<ColumnStatus> getBinaryColumns() {
-    return getVisibleColumnsList().stream().filter(c -> c.getType().equals(ViewerType.dbTypes.BINARY)).collect(Collectors.toList());
+  public boolean showAdvancedSearchOption() {
+    return columns.stream().anyMatch(c -> c.getViewerSearchConfiguration().getAdvanced().isFixed());
   }
 
   @JsonIgnore
-  public ColumnStatus getColumnById(String id) {
+  public List<ViewerColumnConfiguration> getBinaryColumns() {
+    return getVisibleColumnsList().stream().filter(c -> c.getType().equals(ViewerType.dbTypes.BINARY))
+      .collect(Collectors.toList());
+  }
+
+  @JsonIgnore
+  public ViewerColumnConfiguration getColumnById(String id) {
     return columns.stream().filter(c -> c.getId().equals(id)).findFirst().orElse(null);
   }
 
   @JsonIgnore
-  public ColumnStatus getColumnByIndex(int index) {
-    return columns.stream().filter(c -> c.getColumnIndex() ==  index).findFirst().orElse(null);
+  public ViewerColumnConfiguration getColumnByIndex(int index) {
+    return columns.stream().filter(c -> c.getColumnIndex() == index).findFirst().orElse(null);
   }
 
   @JsonIgnore
   public List<String> getCSVHeaders(List<String> fieldsToReturn, boolean exportDescriptions) {
     List<String> values = new ArrayList<>();
-    for (ColumnStatus column : columns) {
+    for (ViewerColumnConfiguration column : columns) {
       if (fieldsToReturn.contains(column.getId())) {
         if (exportDescriptions) {
           if (ViewerStringUtils.isBlank(column.getCustomDescription())) {

@@ -1,11 +1,8 @@
 package com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
-import com.databasepreservation.common.client.models.status.collection.TemplateStatus;
+import com.databasepreservation.common.client.models.configuration.collection.ViewerColumnConfiguration;
+import com.databasepreservation.common.client.models.configuration.collection.ViewerTemplateConfiguration;
 import com.databasepreservation.common.client.widgets.Alert;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -47,76 +44,76 @@ public class NestedColumnOptionsPanel extends ColumnOptionsPanel {
   @UiField
   IntegerBox quantityList;
 
-  public static ColumnOptionsPanel createInstance(ColumnStatus columnStatus) {
-    return new NestedColumnOptionsPanel(columnStatus);
+  public static ColumnOptionsPanel createInstance(ViewerColumnConfiguration viewerColumnConfiguration) {
+    return new NestedColumnOptionsPanel(viewerColumnConfiguration);
   }
 
   @Override
-  public TemplateStatus getSearchTemplate() {
-    TemplateStatus templateStatus = new TemplateStatus();
-    templateStatus.setTemplate(templateList.getText());
-    templateStatus.setSeparator(items.getText());
-    return templateStatus;
+  public ViewerTemplateConfiguration getSearchTemplate() {
+    ViewerTemplateConfiguration viewerTemplateConfiguration = new ViewerTemplateConfiguration();
+    viewerTemplateConfiguration.setTemplate(templateList.getText());
+    viewerTemplateConfiguration.setSeparator(items.getText());
+    return viewerTemplateConfiguration;
   }
 
   @Override
-  public TemplateStatus getDetailsTemplate() {
-    TemplateStatus templateStatus = new TemplateStatus();
-    templateStatus.setTemplate(templateDetail.getText());
-    return templateStatus;
+  public ViewerTemplateConfiguration getDetailsTemplate() {
+    ViewerTemplateConfiguration viewerTemplateConfiguration = new ViewerTemplateConfiguration();
+    viewerTemplateConfiguration.setTemplate(templateDetail.getText());
+    return viewerTemplateConfiguration;
   }
 
   @Override
-  public TemplateStatus getExportTemplate() {
-    TemplateStatus templateStatus = new TemplateStatus();
-    templateStatus.setTemplate(templateExport.getText());
-    return templateStatus;
+  public ViewerTemplateConfiguration getExportTemplate() {
+    ViewerTemplateConfiguration viewerTemplateConfiguration = new ViewerTemplateConfiguration();
+    viewerTemplateConfiguration.setTemplate(templateExport.getText());
+    return viewerTemplateConfiguration;
   }
 
   public int getQuantityInList() {
     return quantityList.getValue();
   }
 
-  private NestedColumnOptionsPanel(ColumnStatus columnStatus) {
+  private NestedColumnOptionsPanel(ViewerColumnConfiguration viewerColumnConfiguration) {
     initWidget(binder.createAndBindUi(this));
 
     templateEngineLabel.setHTML(messages.columnManagementTextForTemplateHint(ViewerConstants.TEMPLATE_ENGINE_LINK));
 
     //Template list, used on tablePanel
-    templateList.setText(columnStatus.getSearchStatus().getList().getTemplate().getTemplate());
+    templateList.setText(viewerColumnConfiguration.getViewerSearchConfiguration().getList().getTemplate().getTemplate());
 
     //separator, used on tablePanel
-    items.setText(columnStatus.getSearchStatus().getList().getTemplate().getSeparator());
+    items.setText(viewerColumnConfiguration.getViewerSearchConfiguration().getList().getTemplate().getSeparator());
 
     //Template detail, used on rowPanel
-    templateDetail.setText(columnStatus.getDetailsStatus().getTemplateStatus().getTemplate());
+    templateDetail.setText(viewerColumnConfiguration.getViewerDetailsConfiguration().getViewerTemplateConfiguration().getTemplate());
 
     //Template export, used on export data to CSV
-    templateExport.setText(columnStatus.getExportStatus().getTemplateStatus().getTemplate());
+    templateExport.setText(viewerColumnConfiguration.getViewerExportConfiguration().getViewerTemplateConfiguration().getTemplate());
 
-    if (columnStatus.getNestedColumns() != null) {
+    if (viewerColumnConfiguration.getNestedColumns() != null) {
 
-      templateListHint.add(buildHintWithButtons(columnStatus, templateList));
-      templateDetailHint.add(buildHintWithButtons(columnStatus, templateDetail));
-      templateExportHint.add(buildHintWithButtons(columnStatus, templateExport));
+      templateListHint.add(buildHintWithButtons(viewerColumnConfiguration, templateList));
+      templateDetailHint.add(buildHintWithButtons(viewerColumnConfiguration, templateDetail));
+      templateExportHint.add(buildHintWithButtons(viewerColumnConfiguration, templateExport));
 
-      if (columnStatus.getNestedColumns().getQuantityInList() == null) {
-        quantityList.setValue(columnStatus.getNestedColumns().getMaxQuantityInList());
-        quantityList.setText(columnStatus.getNestedColumns().getMaxQuantityInList().toString());
+      if (viewerColumnConfiguration.getNestedColumns().getQuantityInList() == null) {
+        quantityList.setValue(viewerColumnConfiguration.getNestedColumns().getMaxQuantityInList());
+        quantityList.setText(viewerColumnConfiguration.getNestedColumns().getMaxQuantityInList().toString());
       } else {
-        quantityList.setValue(columnStatus.getNestedColumns().getQuantityInList());
-        quantityList.setText(columnStatus.getNestedColumns().getQuantityInList().toString());
+        quantityList.setValue(viewerColumnConfiguration.getNestedColumns().getQuantityInList());
+        quantityList.setText(viewerColumnConfiguration.getNestedColumns().getQuantityInList().toString());
       }
 
       quantityList.addChangeHandler(event -> {
-        if(quantityList.getValue() > columnStatus.getNestedColumns().getMaxQuantityInList()){
-          quantityList.setValue(columnStatus.getNestedColumns().getMaxQuantityInList());
-          quantityList.setText(columnStatus.getNestedColumns().getMaxQuantityInList().toString());
+        if(quantityList.getValue() > viewerColumnConfiguration.getNestedColumns().getMaxQuantityInList()){
+          quantityList.setValue(viewerColumnConfiguration.getNestedColumns().getMaxQuantityInList());
+          quantityList.setText(viewerColumnConfiguration.getNestedColumns().getMaxQuantityInList().toString());
         }
       });
     }
 
-    if(columnStatus.getNestedColumns() != null && columnStatus.getNestedColumns().getMultiValue()){
+    if(viewerColumnConfiguration.getNestedColumns() != null && viewerColumnConfiguration.getNestedColumns().getMultiValue()){
       separatorPanel.setVisible(true);
       templateDetail.setVisible(false);
       templateDetailHint.setVisible(false);
@@ -124,12 +121,12 @@ public class NestedColumnOptionsPanel extends ColumnOptionsPanel {
     }
   }
 
-  private FlowPanel buildHintWithButtons(ColumnStatus columnStatus, TextBox target){
+  private FlowPanel buildHintWithButtons(ViewerColumnConfiguration viewerColumnConfiguration, TextBox target){
     FlowPanel hintPanel = new FlowPanel();
     hintPanel.setStyleName("data-transformation-title");
     hintPanel.add(new Label(messages.columnManagementTextForPossibleFields()));
 
-    for (String nestedField : columnStatus.getNestedColumns().getNestedFields()) {
+    for (String nestedField : viewerColumnConfiguration.getNestedColumns().getNestedFields()) {
       Button btnField = new Button(nestedField);
       btnField.setStyleName("btn btn-primary btn-small");
       btnField.addClickHandler(click -> {

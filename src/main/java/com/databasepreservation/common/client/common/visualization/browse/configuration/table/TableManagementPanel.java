@@ -19,8 +19,8 @@ import com.databasepreservation.common.client.common.lists.cells.TextAreaInputCe
 import com.databasepreservation.common.client.common.lists.widgets.MultipleSelectionTablePanel;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.configuration.observer.CollectionObserver;
-import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
-import com.databasepreservation.common.client.models.status.helpers.StatusHelper;
+import com.databasepreservation.common.client.models.configuration.collection.ViewerCollectionConfiguration;
+import com.databasepreservation.common.client.models.configuration.helpers.ConfigurationHelper;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerSchema;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
@@ -62,21 +62,21 @@ public class TableManagementPanel extends ContentPanel {
 
   private static Map<String, TableManagementPanel> instances = new HashMap<>();
   private ViewerDatabase database;
-  private CollectionStatus collectionStatus;
+  private ViewerCollectionConfiguration viewerCollectionConfiguration;
   private Button btnSave = new Button();
   private boolean changes = false;
   private Map<String, MultipleSelectionTablePanel<ViewerTable>> tables = new HashMap<>();
   private Map<String, Boolean> initialLoading = new HashMap<>();
-  private Map<String, StatusHelper> editableValues = new HashMap<>();
+  private Map<String, ConfigurationHelper> editableValues = new HashMap<>();
 
-  public static TableManagementPanel getInstance(ViewerDatabase database, CollectionStatus status) {
+  public static TableManagementPanel getInstance(ViewerDatabase database, ViewerCollectionConfiguration status) {
     return instances.computeIfAbsent(database.getUuid(), k -> new TableManagementPanel(database, status));
   }
 
-  private TableManagementPanel(ViewerDatabase database, CollectionStatus collectionStatus) {
+  private TableManagementPanel(ViewerDatabase database, ViewerCollectionConfiguration viewerCollectionConfiguration) {
     initWidget(binder.createAndBindUi(this));
     this.database = database;
-    this.collectionStatus = collectionStatus;
+    this.viewerCollectionConfiguration = viewerCollectionConfiguration;
 
     init();
   }
@@ -110,21 +110,21 @@ public class TableManagementPanel extends ContentPanel {
           if (uniquenessValidation()) {
             for (MultipleSelectionTablePanel<ViewerTable> value : tables.values()) {
               for (ViewerTable table : database.getMetadata().getTables().values()) {
-                collectionStatus.updateTableShowCondition(table.getUuid(), value.getSelectionModel().isSelected(table));
+                viewerCollectionConfiguration.updateTableShowCondition(table.getUuid(), value.getSelectionModel().isSelected(table));
                 if (editableValues.get(table.getUuid()) != null) {
-                  collectionStatus.updateTableCustomDescription(table.getUuid(),
+                  viewerCollectionConfiguration.updateTableCustomDescription(table.getUuid(),
                       editableValues.get(table.getUuid()).getDescription());
-                  collectionStatus.updateTableCustomName(table.getUuid(), editableValues.get(table.getUuid()).getLabel());
+                  viewerCollectionConfiguration.updateTableCustomName(table.getUuid(), editableValues.get(table.getUuid()).getLabel());
                 }
               }
             }
 
             CollectionService.Util.call((Boolean result) -> {
               final CollectionObserver collectionObserver = ObserverManager.getCollectionObserver();
-              collectionObserver.setCollectionStatus(collectionStatus);
+              collectionObserver.setCollectionStatus(viewerCollectionConfiguration);
               Toast.showInfo(messages.tableManagementPageTitle(), messages.tableManagementPageToastDescription());
               changes = false;
-            }).updateCollectionConfiguration(database.getUuid(), database.getUuid(), collectionStatus);
+            }).updateCollectionConfiguration(database.getUuid(), database.getUuid(), viewerCollectionConfiguration);
           } else {
             Dialogs.showErrors(messages.tableManagementPageTitle(), messages.tableManagementPageDialogUniqueError(),
                 messages.basicActionClose());
@@ -184,7 +184,7 @@ public class TableManagementPanel extends ContentPanel {
             if (initialLoading.get(viewerTable.getUuid()) == null) {
               initialLoading.put(viewerTable.getUuid(), false);
               selectionTablePanel.getSelectionModel().setSelected(viewerTable,
-                collectionStatus.showTable(viewerTable.getUuid()));
+                viewerCollectionConfiguration.showTable(viewerTable.getUuid()));
             }
 
             return selectionTablePanel.getSelectionModel().isSelected(viewerTable);
@@ -208,10 +208,10 @@ public class TableManagementPanel extends ContentPanel {
       @Override
       public String getValue(ViewerTable table) {
         if (editableValues.get(table.getUuid()) == null) {
-          StatusHelper helper = new StatusHelper(collectionStatus.getTableStatus(table.getUuid()).getCustomName(),
-              collectionStatus.getTableStatus(table.getUuid()).getCustomDescription());
+          ConfigurationHelper helper = new ConfigurationHelper(viewerCollectionConfiguration.getViewerTableConfiguration(table.getUuid()).getCustomName(),
+              viewerCollectionConfiguration.getViewerTableConfiguration(table.getUuid()).getCustomDescription());
           editableValues.put(table.getUuid(), helper);
-          return collectionStatus.getTableStatus(table.getUuid()).getCustomName();
+          return viewerCollectionConfiguration.getViewerTableConfiguration(table.getUuid()).getCustomName();
         } else {
           return editableValues.get(table.getUuid()).getLabel();
         }
@@ -220,12 +220,12 @@ public class TableManagementPanel extends ContentPanel {
 
     label.setFieldUpdater((index, table, value) -> {
       if (editableValues.get(table.getUuid()) != null) {
-        final StatusHelper statusHelper = editableValues.get(table.getUuid());
-        statusHelper.setLabel(value);
-        editableValues.put(table.getUuid(), statusHelper);
+        final ConfigurationHelper configurationHelper = editableValues.get(table.getUuid());
+        configurationHelper.setLabel(value);
+        editableValues.put(table.getUuid(), configurationHelper);
       } else {
-        StatusHelper helper = new StatusHelper(value,
-          collectionStatus.getTableStatus(table.getUuid()).getCustomDescription());
+        ConfigurationHelper helper = new ConfigurationHelper(value,
+          viewerCollectionConfiguration.getViewerTableConfiguration(table.getUuid()).getCustomDescription());
         editableValues.put(table.getUuid(), helper);
       }
 
@@ -239,7 +239,7 @@ public class TableManagementPanel extends ContentPanel {
       @Override
       public String getValue(ViewerTable table) {
         if (editableValues.get(table.getUuid()) == null) {
-          return collectionStatus.getTableStatus(table.getUuid()).getCustomDescription();
+          return viewerCollectionConfiguration.getViewerTableConfiguration(table.getUuid()).getCustomDescription();
         } else {
           return editableValues.get(table.getUuid()).getDescription();
         }
@@ -248,11 +248,11 @@ public class TableManagementPanel extends ContentPanel {
 
     description.setFieldUpdater((index, table, value) -> {
       if (editableValues.get(table.getUuid()) != null) {
-        final StatusHelper statusHelper = editableValues.get(table.getUuid());
-        statusHelper.setDescription(value);
-        editableValues.put(table.getUuid(), statusHelper);
+        final ConfigurationHelper configurationHelper = editableValues.get(table.getUuid());
+        configurationHelper.setDescription(value);
+        editableValues.put(table.getUuid(), configurationHelper);
       } else {
-        StatusHelper helper = new StatusHelper(collectionStatus.getTableStatus(table.getUuid()).getCustomName(), value);
+        ConfigurationHelper helper = new ConfigurationHelper(viewerCollectionConfiguration.getViewerTableConfiguration(table.getUuid()).getCustomName(), value);
         editableValues.put(table.getUuid(), helper);
       }
     });
@@ -271,7 +271,7 @@ public class TableManagementPanel extends ContentPanel {
   private boolean uniquenessValidation() {
     Set<String> uniques = new HashSet<>();
 
-    for (StatusHelper value : editableValues.values()) {
+    for (ConfigurationHelper value : editableValues.values()) {
       if (!uniques.add(value.getLabel())) {
         return false;
       }
@@ -281,7 +281,7 @@ public class TableManagementPanel extends ContentPanel {
   }
 
   private boolean inputValidation() {
-    for (StatusHelper value : editableValues.values()) {
+    for (ConfigurationHelper value : editableValues.values()) {
       if (ViewerStringUtils.isBlank(value.getLabel())) {
         return false;
       }

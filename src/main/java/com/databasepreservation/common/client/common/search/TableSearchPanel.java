@@ -10,10 +10,7 @@ import com.databasepreservation.common.client.common.lists.TableRowList;
 import com.databasepreservation.common.client.common.utils.AdvancedSearchUtils;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.index.filter.Filter;
-import com.databasepreservation.common.client.index.filter.FilterParameter;
-import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
-import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
-import com.databasepreservation.common.client.models.status.collection.TableStatus;
+import com.databasepreservation.common.client.models.configuration.collection.ViewerCollectionConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
@@ -38,7 +35,7 @@ public class TableSearchPanel extends Composite {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static final Binder uiBinder = GWT.create(Binder.class);
   private static final String EMPTY = "empty";
-  private CollectionStatus status;
+  private ViewerCollectionConfiguration status;
 
   interface Binder extends UiBinder<Widget, TableSearchPanel> {
   }
@@ -68,7 +65,7 @@ public class TableSearchPanel extends Composite {
   /**
    * Table search panel with a SearchInfo predefined search
    */
-  public TableSearchPanel(SearchInfo searchInfo, CollectionStatus status) {
+  public TableSearchPanel(SearchInfo searchInfo, ViewerCollectionConfiguration status) {
     this.status = status;
     if (SearchInfo.isPresentAndValid(searchInfo)) {
       currentSearchInfo = searchInfo;
@@ -80,7 +77,7 @@ public class TableSearchPanel extends Composite {
    *
    * @param searchInfoJson
    */
-  public TableSearchPanel(String searchInfoJson, CollectionStatus status) {
+  public TableSearchPanel(String searchInfoJson, ViewerCollectionConfiguration status) {
     this(status);
     setCurrentSearchInfoFromJson(searchInfoJson);
   }
@@ -92,7 +89,7 @@ public class TableSearchPanel extends Composite {
   /**
    * Table search panel without a predefined search
    */
-  public TableSearchPanel(CollectionStatus status) {
+  public TableSearchPanel(ViewerCollectionConfiguration status) {
     itemsSearchAdvancedFieldsPanel = new FlowPanel();
     this.status = status;
 
@@ -120,7 +117,7 @@ public class TableSearchPanel extends Composite {
 
     GWT.log("initial filter: " + initialFilter);
 
-    final boolean showSearchAdvancedDisclosureButton = status.getTableStatusByTableId(table.getId())
+    final boolean showSearchAdvancedDisclosureButton = status.getViewerTableConfigurationByTableId(table.getId())
       .showAdvancedSearchOption();
 
     if (isNested) {

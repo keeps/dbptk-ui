@@ -1,6 +1,6 @@
 package com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers;
 
-import com.databasepreservation.common.client.models.status.collection.TemplateStatus;
+import com.databasepreservation.common.client.models.configuration.collection.ViewerTemplateConfiguration;
 import com.google.gwt.user.client.ui.Composite;
 
 /**
@@ -8,9 +8,9 @@ import com.google.gwt.user.client.ui.Composite;
  */
 public abstract class ColumnOptionsPanel extends Composite {
 
-  public abstract TemplateStatus getSearchTemplate();
+  public abstract ViewerTemplateConfiguration getSearchTemplate();
 
-  public abstract TemplateStatus getDetailsTemplate();
+  public abstract ViewerTemplateConfiguration getDetailsTemplate();
 
-  public abstract TemplateStatus getExportTemplate();
+  public abstract ViewerTemplateConfiguration getExportTemplate();
 }

@@ -17,7 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
+import com.databasepreservation.common.client.models.configuration.collection.ViewerCollectionConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerCandidateKey;
 import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerCheckConstraint;
@@ -637,7 +637,7 @@ public class ToolkitStructure2ViewerStructure {
     return result;
   }
 
-  public static ViewerRow getRow(CollectionStatus collectionConfiguration, ViewerTable table, Row row, long rowIndex) {
+  public static ViewerRow getRow(ViewerCollectionConfiguration collectionConfiguration, ViewerTable table, Row row, long rowIndex) {
     ViewerRow result = new ViewerRow();
     // String rowUUID = SolrUtils.UUIDFromString(table.getUuid() + "." + rowIndex);
     String rowUUID = String.valueOf(rowIndex);
@@ -648,8 +648,8 @@ public class ToolkitStructure2ViewerStructure {
     return result;
   }
 
-  private static Map<String, ViewerCell> getCells(CollectionStatus collectionConfiguration, ViewerTable table,
-    Row row) {
+  private static Map<String, ViewerCell> getCells(ViewerCollectionConfiguration collectionConfiguration, ViewerTable table,
+                                                  Row row) {
     Map<String, ViewerCell> result = new LinkedHashMap<>();
 
     int colIndex = 0;
@@ -666,8 +666,8 @@ public class ToolkitStructure2ViewerStructure {
     return result;
   }
 
-  private static ViewerCell getCell(CollectionStatus collectionConfiguration, ViewerTable table, Cell cell,
-    int colIndex) throws ViewerException {
+  private static ViewerCell getCell(ViewerCollectionConfiguration collectionConfiguration, ViewerTable table, Cell cell,
+                                    int colIndex) throws ViewerException {
     ViewerCell result = new ViewerCell();
 
     ViewerType columnType = table.getColumns().get(colIndex).getType();
@@ -679,11 +679,11 @@ public class ToolkitStructure2ViewerStructure {
         final Path siardFilesPath = ViewerFactory.getViewerConfiguration().getSIARDFilesPath();
         final Path lobPath = pathInputStreamProvider.getPath();
         result.setValue(siardFilesPath.relativize(lobPath).normalize().toString());
-        collectionConfiguration.getTableStatusByTableId(table.getId()).getColumnByIndex(colIndex).setExternalLob(true);
+        collectionConfiguration.getViewerTableConfigurationByTableId(table.getId()).getColumnByIndex(colIndex).setExternalLob(true);
       } else {
         String index = getRowIndex(cell.getId());
         result.setValue(ViewerConstants.SIARD_RECORD_PREFIX + index + ViewerConstants.SIARD_LOB_FILE_EXTENSION);
-        collectionConfiguration.getTableStatusByTableId(table.getId()).getColumnByIndex(colIndex).setExternalLob(false);
+        collectionConfiguration.getViewerTableConfigurationByTableId(table.getId()).getColumnByIndex(colIndex).setExternalLob(false);
       }
     } else if (cell instanceof ComposedCell) {
       ComposedCell composedCell = (ComposedCell) cell;

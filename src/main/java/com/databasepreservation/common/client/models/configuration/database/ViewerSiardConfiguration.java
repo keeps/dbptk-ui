@@ -1,15 +1,15 @@
-package com.databasepreservation.common.client.models.status.database;
+package com.databasepreservation.common.client.models.configuration.database;
 
 import java.io.Serializable;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-public class SiardStatus implements Serializable {
+public class ViewerSiardConfiguration implements Serializable {
 
   private String location;
 
-  public SiardStatus() {}
+  public ViewerSiardConfiguration() {}
 
   public String getLocation() {
     return location;

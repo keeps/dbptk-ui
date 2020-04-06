@@ -8,13 +8,13 @@ import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.dataTransformation.TableNode;
 import com.databasepreservation.common.client.configuration.observer.CollectionObserver;
-import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
-import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
-import com.databasepreservation.common.client.models.status.collection.TableStatus;
-import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
-import com.databasepreservation.common.client.models.status.denormalization.ReferencesConfiguration;
-import com.databasepreservation.common.client.models.status.denormalization.RelatedColumnConfiguration;
-import com.databasepreservation.common.client.models.status.denormalization.RelatedTablesConfiguration;
+import com.databasepreservation.common.client.models.configuration.collection.ViewerCollectionConfiguration;
+import com.databasepreservation.common.client.models.configuration.collection.ViewerColumnConfiguration;
+import com.databasepreservation.common.client.models.configuration.collection.ViewerTableConfiguration;
+import com.databasepreservation.common.client.models.configuration.denormalization.DenormalizeConfiguration;
+import com.databasepreservation.common.client.models.configuration.denormalization.ReferencesConfiguration;
+import com.databasepreservation.common.client.models.configuration.denormalization.RelatedColumnConfiguration;
+import com.databasepreservation.common.client.models.configuration.denormalization.RelatedTablesConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
 import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
@@ -91,11 +91,11 @@ public class DataTransformationUtils {
   }
 
   public static void saveConfiguration(String databaseUUID, DenormalizeConfiguration denormalizeConfiguration,
-    CollectionStatus collectionStatus) {
+    ViewerCollectionConfiguration viewerCollectionConfiguration) {
     if (denormalizeConfiguration != null && denormalizeConfiguration.getState().equals(ViewerJobStatus.NEW)) {
       CollectionService.Util.call((Boolean result) -> {
         final CollectionObserver collectionObserver = ObserverManager.getCollectionObserver();
-        collectionObserver.setCollectionStatus(collectionStatus);
+        collectionObserver.setCollectionStatus(viewerCollectionConfiguration);
         CollectionService.Util.call((Void response) -> {
           Toast.showInfo(messages.advancedConfigurationLabelForDataTransformation(),
             "Created denormalization configuration file with success for " + denormalizeConfiguration.getTableID());
@@ -155,14 +155,14 @@ public class DataTransformationUtils {
     }
   }
 
-  public static void buildNestedFieldsToReturn(ViewerTable table, CollectionStatus status,
+  public static void buildNestedFieldsToReturn(ViewerTable table, ViewerCollectionConfiguration status,
     Map<String, String> extraParameters, List<String> fieldsToReturn) {
-    TableStatus tableStatus = status.getTableStatus(table.getUuid());
+    ViewerTableConfiguration viewerTableConfiguration = status.getViewerTableConfiguration(table.getUuid());
     fieldsToReturn.add(ViewerConstants.INDEX_ID);
     int nestedCount = 0;
     String keys = "";
     String separator = "";
-    for (ColumnStatus column : tableStatus.getColumns()) {
+    for (ViewerColumnConfiguration column : viewerTableConfiguration.getColumns()) {
       if (column.getNestedColumns() != null) {
         String nestedTableId = column.getId();
         String key = ViewerConstants.SOLR_ROWS_NESTED + "." + nestedCount;

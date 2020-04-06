@@ -16,8 +16,8 @@ import com.databasepreservation.common.client.common.lists.widgets.MultipleSelec
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
-import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
-import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
+import com.databasepreservation.common.client.models.configuration.collection.ViewerCollectionConfiguration;
+import com.databasepreservation.common.client.models.configuration.collection.ViewerColumnConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
 import com.databasepreservation.common.client.models.structure.ViewerPrimaryKey;
@@ -42,7 +42,6 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimpleCheckBox;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.MultiSelectionModel;
 
@@ -56,7 +55,7 @@ public class TablePanelOptions extends RightPanel implements ICollectionStatusOb
 	private static final String BTN_SELECT_ALL = "btn-select-all";
 	private static Map<String, TablePanelOptions> instances = new HashMap<>();
 
-  public static TablePanelOptions getInstance(CollectionStatus status, ViewerDatabase database, String tableId) {
+  public static TablePanelOptions getInstance(ViewerCollectionConfiguration status, ViewerDatabase database, String tableId) {
     String separator = "/";
     String code = database.getUuid() + separator + tableId;
     instances.computeIfAbsent(code, k -> new TablePanelOptions(status, database, tableId));
@@ -87,18 +86,18 @@ public class TablePanelOptions extends RightPanel implements ICollectionStatusOb
   Button options;
 
   private ViewerDatabase database;
-  private CollectionStatus status;
+  private ViewerCollectionConfiguration status;
   private ViewerTable table;
   private boolean allSelected = true; 	// true: select all; false; select none;
 	private boolean showTechnicalInformation = false; // true: show; false: hide;
   private Map<String, Boolean> initialLoading = new HashMap<>();
-  private MultipleSelectionTablePanel<ColumnStatus> columnsTable;
+  private MultipleSelectionTablePanel<ViewerColumnConfiguration> columnsTable;
   private Button btnSelectToggle;
   private Label switchLabel;
   private Label labelForSwitch;
   private SimpleCheckBox advancedSwitch;
 
-  private TablePanelOptions(CollectionStatus status, ViewerDatabase viewerDatabase, final String tableID) {
+  private TablePanelOptions(ViewerCollectionConfiguration status, ViewerDatabase viewerDatabase, final String tableID) {
     this.status = status;
     database = viewerDatabase;
     table = database.getMetadata().getTableById(tableID);
@@ -118,7 +117,7 @@ public class TablePanelOptions extends RightPanel implements ICollectionStatusOb
 
   private Map<String, Boolean> getSelectedColumns() {
     Map<String, Boolean> columnVisibility = new HashMap<>();
-    for (ColumnStatus column : status.getTableStatusByTableId(table.getId()).getColumns()) {
+    for (ViewerColumnConfiguration column : status.getViewerTableConfigurationByTableId(table.getId()).getColumns()) {
       columnVisibility.put(column.getName(), columnsTable.getSelectionModel().isSelected(column));
     }
 
@@ -126,7 +125,7 @@ public class TablePanelOptions extends RightPanel implements ICollectionStatusOb
   }
 
   private void init() {
-    mainHeader.insert(CommonClientUtils.getHeader(status.getTableStatusByTableId(table.getId()), table, "h1", database.getMetadata().getSchemas().size() > 1),0);
+    mainHeader.insert(CommonClientUtils.getHeader(status.getViewerTableConfigurationByTableId(table.getId()), table, "h1", database.getMetadata().getSchemas().size() > 1),0);
     configureButtons();
     configureTechnicalInformationSwitch();
     initTable();
@@ -205,7 +204,7 @@ public class TablePanelOptions extends RightPanel implements ICollectionStatusOb
 
   private void refreshCellTable(boolean value) {
     showTechnicalInformation = value;
-    final MultiSelectionModel<ColumnStatus> selectionModel = columnsTable.getSelectionModel();
+    final MultiSelectionModel<ViewerColumnConfiguration> selectionModel = columnsTable.getSelectionModel();
     columnsTable = createCellTableForViewerColumn();
     populateTableColumns(columnsTable);
     selectionModel.getSelectedSet().forEach(configColumn ->
@@ -213,11 +212,11 @@ public class TablePanelOptions extends RightPanel implements ICollectionStatusOb
     content.add(columnsTable);
   }
 
-  private MultipleSelectionTablePanel<ColumnStatus> createCellTableForViewerColumn() {
+  private MultipleSelectionTablePanel<ViewerColumnConfiguration> createCellTableForViewerColumn() {
     return new MultipleSelectionTablePanel<>(GWT.create(ConfigurationCellTableResources.class));
   }
 
-  private void populateTableColumns(MultipleSelectionTablePanel<ColumnStatus> selectionTablePanel) {
+  private void populateTableColumns(MultipleSelectionTablePanel<ViewerColumnConfiguration> selectionTablePanel) {
     final ViewerPrimaryKey pk = table.getPrimaryKey();
     final HashSet<Integer> columnIndexesWithForeignKeys = new HashSet<>();
     for (ViewerForeignKey viewerForeignKey : table.getForeignKeys()) {
@@ -226,17 +225,17 @@ public class TablePanelOptions extends RightPanel implements ICollectionStatusOb
       }
     }
 
-    List<ColumnStatus> collect = status.getTableStatusByTableId(table.getId()).getColumns().stream()
-      .filter(p -> p.getSearchStatus().getList().isShow()).sorted().collect(Collectors.toList());
+    List<ViewerColumnConfiguration> collect = status.getViewerTableConfigurationByTableId(table.getId()).getColumns().stream()
+      .filter(p -> p.getViewerSearchConfiguration().getList().isShow()).sorted().collect(Collectors.toList());
 
     int size = collect.size();
-    Iterator<ColumnStatus> iterator = collect.iterator();
+    Iterator<ViewerColumnConfiguration> iterator = collect.iterator();
 
     selectionTablePanel.createTable(getToggleSelectPanel(), new ArrayList<>(), iterator,
       new MultipleSelectionTablePanel.ColumnInfo<>(messages.basicTableHeaderShow(), 4,
-        new Column<ColumnStatus, Boolean>(new CheckboxCell(true, true)) {
+        new Column<ViewerColumnConfiguration, Boolean>(new CheckboxCell(true, true)) {
           @Override
-          public Boolean getValue(ColumnStatus viewerColumn) {
+          public Boolean getValue(ViewerColumnConfiguration viewerColumn) {
             if (initialLoading.get(viewerColumn.getId())) {
               selectionTablePanel.getSelectionModel().setSelected(viewerColumn, true);
               initialLoading.put(viewerColumn.getId(), false);
@@ -259,9 +258,9 @@ public class TablePanelOptions extends RightPanel implements ICollectionStatusOb
         }),
 
       new MultipleSelectionTablePanel.ColumnInfo<>(SafeHtmlUtils.EMPTY_SAFE_HTML, !showTechnicalInformation, 2.2,
-        new Column<ColumnStatus, SafeHtml>(new SafeHtmlCell()) {
+        new Column<ViewerColumnConfiguration, SafeHtml>(new SafeHtmlCell()) {
           @Override
-          public SafeHtml getValue(ColumnStatus column) {
+          public SafeHtml getValue(ViewerColumnConfiguration column) {
             if (pk != null && pk.getColumnIndexesInViewerTable().contains(column.getOrder())) {
               return SafeHtmlUtils.fromSafeConstant("<i class='fa fa-key' title='" + messages.primaryKey() + "'></i>");
             } else if (columnIndexesWithForeignKeys.contains(column.getOrder())) {
@@ -274,39 +273,39 @@ public class TablePanelOptions extends RightPanel implements ICollectionStatusOb
         }, "primary-key-col"),
 
       new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForColumnName(), 15,
-        new TextColumn<ColumnStatus>() {
+        new TextColumn<ViewerColumnConfiguration>() {
           @Override
-          public String getValue(ColumnStatus column) {
+          public String getValue(ViewerColumnConfiguration column) {
             return column.getCustomName();
           }
         }),
       new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForDescription(), 0,
-        new TextColumn<ColumnStatus>() {
+        new TextColumn<ViewerColumnConfiguration>() {
           @Override
-          public String getValue(ColumnStatus column) {
+          public String getValue(ViewerColumnConfiguration column) {
             return column.getCustomDescription();
           }
         }),
       new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForOriginalTypeName(),
-        !showTechnicalInformation, 10, new TextColumn<ColumnStatus>() {
+        !showTechnicalInformation, 10, new TextColumn<ViewerColumnConfiguration>() {
 
           @Override
-          public String getValue(ColumnStatus column) {
+          public String getValue(ViewerColumnConfiguration column) {
             return column.getOriginalType();
           }
         }),
       new MultipleSelectionTablePanel.ColumnInfo<>(messages.typeName(), !showTechnicalInformation, 15,
-        new TextColumn<ColumnStatus>() {
+        new TextColumn<ViewerColumnConfiguration>() {
           @Override
-          public String getValue(ColumnStatus column) {
+          public String getValue(ViewerColumnConfiguration column) {
             return column.getTypeName();
           }
         }),
 
       new MultipleSelectionTablePanel.ColumnInfo<>(messages.nullable(), !showTechnicalInformation, 8,
-        new TextColumn<ColumnStatus>() {
+        new TextColumn<ViewerColumnConfiguration>() {
           @Override
-          public String getValue(ColumnStatus column) {
+          public String getValue(ViewerColumnConfiguration column) {
             if (column.getNullable().equalsIgnoreCase(Boolean.TRUE.toString())) {
               return messages.yes();
             } else {
@@ -323,8 +322,8 @@ public class TablePanelOptions extends RightPanel implements ICollectionStatusOb
 
     btnSelectToggle.addClickHandler(event -> {
       allSelected = !allSelected;
-      MultiSelectionModel<ColumnStatus> selectionModel = columnsTable.getSelectionModel();
-      for (ColumnStatus column : status.getTableStatusByTableId(table.getId()).getColumns()) {
+      MultiSelectionModel<ViewerColumnConfiguration> selectionModel = columnsTable.getSelectionModel();
+      for (ViewerColumnConfiguration column : status.getViewerTableConfigurationByTableId(table.getId()).getColumns()) {
         selectionModel.setSelected(column, allSelected);
       }
 
@@ -372,14 +371,14 @@ public class TablePanelOptions extends RightPanel implements ICollectionStatusOb
   }
 
   private void defaultSetSelectAll() {
-    for (ColumnStatus column : status.getTableStatusByTableId(table.getId()).getColumns()) {
+    for (ViewerColumnConfiguration column : status.getViewerTableConfigurationByTableId(table.getId()).getColumns()) {
       initialLoading.put(column.getId(), true);
     }
   }
 
   @Override
-  public void updateCollection(CollectionStatus collectionStatus) {
-    this.status = collectionStatus;
+  public void updateCollection(ViewerCollectionConfiguration viewerCollectionConfiguration) {
+    this.status = viewerCollectionConfiguration;
     content.remove(columnsTable);
     refreshCellTable(showTechnicalInformation);
   }

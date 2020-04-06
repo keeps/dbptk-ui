@@ -1,4 +1,4 @@
-package com.databasepreservation.common.client.models.status.collection;
+package com.databasepreservation.common.client.models.configuration.collection;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
-public class NestedColumnStatus implements Serializable {
+public class ViewerNestedColumnConfiguration implements Serializable {
   private String originalTable;
   private String path;
   private Boolean multiValue = false;

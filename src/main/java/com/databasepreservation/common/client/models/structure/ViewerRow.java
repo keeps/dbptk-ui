@@ -6,12 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.index.IsIndexed;
-import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
-import com.databasepreservation.common.client.models.status.collection.TableStatus;
-import com.databasepreservation.common.client.tools.JSOUtils;
-import com.google.gwt.core.client.GWT;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>

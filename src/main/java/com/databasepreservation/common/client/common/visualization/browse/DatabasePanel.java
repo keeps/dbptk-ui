@@ -18,7 +18,7 @@ import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.common.utils.RightPanelLoader;
 import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
 import com.databasepreservation.common.client.index.IsIndexed;
-import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
+import com.databasepreservation.common.client.models.configuration.collection.ViewerCollectionConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.models.user.User;
@@ -93,7 +93,7 @@ public class DatabasePanel extends Composite implements ICollectionStatusObserve
   private static ViewerPanelUiBinder uiBinder = GWT.create(ViewerPanelUiBinder.class);
   private String databaseUUID;
   private ViewerDatabase database = null;
-  private CollectionStatus collectionStatus = null;
+  private ViewerCollectionConfiguration viewerCollectionConfiguration = null;
   private String selectedLanguage;
   private BreadcrumbPanel breadcrumb = null;
   private Sidebar sidebar;
@@ -266,8 +266,8 @@ public class DatabasePanel extends Composite implements ICollectionStatusObserve
   private void loadPanelWithDatabase(final ContentPanelLoader panelLoader) {
     DatabaseService.Util.call((ViewerDatabase result) -> {
       database = result;
-      CollectionService.Util.call((List<CollectionStatus> status) -> {
-        collectionStatus = status.get(0);
+      CollectionService.Util.call((List<ViewerCollectionConfiguration> status) -> {
+        viewerCollectionConfiguration = status.get(0);
         loadPanel(panelLoader);
       }).getCollectionConfiguration(database.getUuid(), database.getUuid());
     }).retrieve(databaseUUID);
@@ -278,7 +278,7 @@ public class DatabasePanel extends Composite implements ICollectionStatusObserve
     // ConfigurationService.Util.call((CollectionStatus status) -> {
     // collectionStatus = status;
 
-    ContentPanel contentPanel = panelLoader.load(database, collectionStatus);
+    ContentPanel contentPanel = panelLoader.load(database, viewerCollectionConfiguration);
 
     if (contentPanel != null) {
       contentPanel.handleBreadcrumb(breadcrumb);
@@ -302,8 +302,8 @@ public class DatabasePanel extends Composite implements ICollectionStatusObserve
   private void loadPanelWithDatabase(final RightPanelLoader rightPanelLoader, String toSelect) {
     DatabaseService.Util.call((IsIndexed result) -> {
       database = (ViewerDatabase) result;
-      CollectionService.Util.call((List<CollectionStatus> status) -> {
-        collectionStatus = status.get(0);
+      CollectionService.Util.call((List<ViewerCollectionConfiguration> status) -> {
+        viewerCollectionConfiguration = status.get(0);
         loadPanel(rightPanelLoader, toSelect);
       }).getCollectionConfiguration(database.getUuid(), database.getUuid());
     }).retrieve(databaseUUID);
@@ -312,10 +312,10 @@ public class DatabasePanel extends Composite implements ICollectionStatusObserve
   private void loadPanel(RightPanelLoader rightPanelLoader, String toSelect) {
     GWT.log("have db: " + database + " sb.init: " + sidebar.isInitialized());
 
-    RightPanel rightPanel = rightPanelLoader.load(database, collectionStatus);
+    RightPanel rightPanel = rightPanelLoader.load(database, viewerCollectionConfiguration);
 
     if (database != null && !sidebar.isInitialized()) {
-      sidebar.init(database, collectionStatus);
+      sidebar.init(database, viewerCollectionConfiguration);
       sidebar.select(toSelect);
     }
 
@@ -332,8 +332,8 @@ public class DatabasePanel extends Composite implements ICollectionStatusObserve
   }
 
   @Override
-  public void updateCollection(CollectionStatus collectionStatus) {
-    this.collectionStatus = collectionStatus;
+  public void updateCollection(ViewerCollectionConfiguration viewerCollectionConfiguration) {
+    this.viewerCollectionConfiguration = viewerCollectionConfiguration;
     instances.clear();
   }
 }

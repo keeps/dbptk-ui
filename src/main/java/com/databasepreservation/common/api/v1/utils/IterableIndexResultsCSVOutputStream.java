@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 import org.apache.commons.csv.CSVPrinter;
 
 import com.databasepreservation.common.api.utils.HandlebarsUtils;
-import com.databasepreservation.common.client.models.status.collection.TableStatus;
+import com.databasepreservation.common.client.models.configuration.collection.ViewerTableConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.server.index.utils.IterableIndexResult;
 
@@ -20,7 +20,7 @@ import com.databasepreservation.common.server.index.utils.IterableIndexResult;
 public class IterableIndexResultsCSVOutputStream extends CSVOutputStream {
   /** The results to write to output stream. */
   private final IterableIndexResult results;
-  private final TableStatus configTable;
+  private final ViewerTableConfiguration configTable;
   private final List<String> fieldsToReturn;
   private final boolean exportDescription;
 
@@ -34,7 +34,7 @@ public class IterableIndexResultsCSVOutputStream extends CSVOutputStream {
    * @param delimiter
    *          the CSV field delimiter.
    */
-  public IterableIndexResultsCSVOutputStream(final IterableIndexResult results, final TableStatus configTable,
+  public IterableIndexResultsCSVOutputStream(final IterableIndexResult results, final ViewerTableConfiguration configTable,
     final String filename, final boolean exportDescription, final char delimiter, String fieldsToHeader) {
     super(filename, delimiter);
     this.results = results;

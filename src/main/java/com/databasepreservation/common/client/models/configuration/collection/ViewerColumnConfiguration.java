@@ -1,4 +1,4 @@
-package com.databasepreservation.common.client.models.status.collection;
+package com.databasepreservation.common.client.models.configuration.collection;
 
 import java.io.Serializable;
 
@@ -14,7 +14,7 @@ import javax.ws.rs.core.MediaType;
  */
 @JsonPropertyOrder({"id", "name", "customName", "description", "customDescription", "originalType", "typeName",
   "nullable", "type", "columnIndex", "externalLob", "applicationType", "nestedColumn", "order", "export", "search", "details"})
-public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
+public class ViewerColumnConfiguration implements Serializable, Comparable<ViewerColumnConfiguration> {
   private String id;
   private String name;
   private String customName;
@@ -28,13 +28,13 @@ public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
   @JsonInclude(JsonInclude.Include.NON_DEFAULT)
   private boolean externalLob;
   private String applicationType;
-  private NestedColumnStatus nestedColumns;
+  private ViewerNestedColumnConfiguration nestedColumns;
   private int order;
-  private ExportStatus exportStatus;
-  private SearchStatus searchStatus;
-  private DetailsStatus detailsStatus;
+  private ViewerExportConfiguration viewerExportConfiguration;
+  private ViewerSearchConfiguration viewerSearchConfiguration;
+  private ViewerDetailsConfiguration viewerDetailsConfiguration;
 
-  public ColumnStatus() {
+  public ViewerColumnConfiguration() {
     externalLob = false;
     applicationType = MediaType.APPLICATION_OCTET_STREAM;
   }
@@ -120,11 +120,11 @@ public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
     this.applicationType = applicationType;
   }
 
-  public NestedColumnStatus getNestedColumns() {
+  public ViewerNestedColumnConfiguration getNestedColumns() {
     return nestedColumns;
   }
 
-  public void setNestedColumns(NestedColumnStatus nestedColumns) {
+  public void setNestedColumns(ViewerNestedColumnConfiguration nestedColumns) {
     this.nestedColumns = nestedColumns;
   }
 
@@ -153,54 +153,54 @@ public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
   }
 
   @JsonProperty("search")
-  public SearchStatus getSearchStatus() {
-    return searchStatus;
+  public ViewerSearchConfiguration getViewerSearchConfiguration() {
+    return viewerSearchConfiguration;
   }
 
-  public void setSearchStatus(SearchStatus searchStatus) {
-    this.searchStatus = searchStatus;
+  public void setViewerSearchConfiguration(ViewerSearchConfiguration viewerSearchConfiguration) {
+    this.viewerSearchConfiguration = viewerSearchConfiguration;
   }
 
   @JsonProperty("details")
-  public DetailsStatus getDetailsStatus() {
-    return detailsStatus;
+  public ViewerDetailsConfiguration getViewerDetailsConfiguration() {
+    return viewerDetailsConfiguration;
   }
 
   @JsonProperty("export")
-  public ExportStatus getExportStatus() {
-    return exportStatus;
+  public ViewerExportConfiguration getViewerExportConfiguration() {
+    return viewerExportConfiguration;
   }
 
-  public void setExportStatus(ExportStatus exportStatus) {
-    this.exportStatus = exportStatus;
+  public void setViewerExportConfiguration(ViewerExportConfiguration viewerExportConfiguration) {
+    this.viewerExportConfiguration = viewerExportConfiguration;
   }
 
-  public void setDetailsStatus(DetailsStatus detailsStatus) {
-    this.detailsStatus = detailsStatus;
+  public void setViewerDetailsConfiguration(ViewerDetailsConfiguration viewerDetailsConfiguration) {
+    this.viewerDetailsConfiguration = viewerDetailsConfiguration;
   }
 
   public void updateTableShowValue(boolean value) {
-    this.getSearchStatus().getList().setShow(value);
+    this.getViewerSearchConfiguration().getList().setShow(value);
   }
 
   public void updateDetailsShowValue(boolean value) {
-    this.getDetailsStatus().setShow(value);
+    this.getViewerDetailsConfiguration().setShow(value);
   }
 
   public void updateAdvancedSearchShowValue(boolean value) {
-    this.getSearchStatus().getAdvanced().setFixed(value);
+    this.getViewerSearchConfiguration().getAdvanced().setFixed(value);
   }
 
-  public void updateSearchListTemplate(TemplateStatus templateStatus) {
-    this.getSearchStatus().getList().setTemplate(templateStatus);
+  public void updateSearchListTemplate(ViewerTemplateConfiguration viewerTemplateConfiguration) {
+    this.getViewerSearchConfiguration().getList().setTemplate(viewerTemplateConfiguration);
   }
 
-  public void updateExportTemplate(TemplateStatus templateStatus) {
-    this.getExportStatus().setTemplateStatus(templateStatus);
+  public void updateExportTemplate(ViewerTemplateConfiguration viewerTemplateConfiguration) {
+    this.getViewerExportConfiguration().setViewerTemplateConfiguration(viewerTemplateConfiguration);
   }
 
-  public void updateDetailsTemplate(TemplateStatus templateStatus) {
-    this.getDetailsStatus().setTemplateStatus(templateStatus);
+  public void updateDetailsTemplate(ViewerTemplateConfiguration viewerTemplateConfiguration) {
+    this.getViewerDetailsConfiguration().setViewerTemplateConfiguration(viewerTemplateConfiguration);
   }
 
   public void updateNestedColumnsQuantityList(int quantity) {
@@ -209,10 +209,10 @@ public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
 
   @Override
   public String toString() {
-    return "ColumnStatus{" + "id='" + id + '\'' + ", name='" + name + '\'' + ", customName='" + customName + '\''
+    return "ColumnConfiguration{" + "id='" + id + '\'' + ", name='" + name + '\'' + ", customName='" + customName + '\''
       + ", description='" + description + '\'' + ", customDescription='" + customDescription + '\'' + ", originalType='"
       + originalType + '\'' + ", typeName='" + typeName + '\'' + ", nullable=" + nullable + ", nestedColumns="
-      + nestedColumns + ", order=" + order + ", searchStatus=" + searchStatus + ", detailsStatus=" + detailsStatus
+      + nestedColumns + ", order=" + order + ", searchConfiguration=" + viewerSearchConfiguration + ", detailsConfiguration=" + viewerDetailsConfiguration
       + '}';
   }
 
@@ -227,7 +227,7 @@ public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
   }
 
   @Override
-  public int compareTo(ColumnStatus o) {
+  public int compareTo(ViewerColumnConfiguration o) {
     return (this.getOrder() - o.getOrder());
   }
 }

@@ -9,7 +9,7 @@ import java.util.Set;
 import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
-import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
+import com.databasepreservation.common.client.models.configuration.collection.ViewerCollectionConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
@@ -39,9 +39,9 @@ public class DataTransformationSidebar extends Composite implements Sidebar, ICo
   private static Map<String, DataTransformationSidebar> instances = new HashMap<>();
 
   @Override
-  public void updateCollection(CollectionStatus collectionStatus) {
+  public void updateCollection(ViewerCollectionConfiguration viewerCollectionConfiguration) {
     instances.clear();
-    this.collectionStatus = collectionStatus;
+    this.viewerCollectionConfiguration = viewerCollectionConfiguration;
   }
 
   interface DatabaseSidebarUiBinder extends UiBinder<Widget, DataTransformationSidebar> {
@@ -66,7 +66,7 @@ public class DataTransformationSidebar extends Composite implements Sidebar, ICo
 
   private ViewerDatabase database;
   private String databaseUUID;
-  private CollectionStatus collectionStatus;
+  private ViewerCollectionConfiguration viewerCollectionConfiguration;
   private boolean initialized = false;
   private Map<String, SidebarHyperlink> list = new HashMap<>();
   private String firstElement = null;
@@ -101,7 +101,7 @@ public class DataTransformationSidebar extends Composite implements Sidebar, ICo
    *          the database
    * @return a DatabaseSidebar instance
    */
-  public static DataTransformationSidebar getInstance(ViewerDatabase database, CollectionStatus status) {
+  public static DataTransformationSidebar getInstance(ViewerDatabase database, ViewerCollectionConfiguration status) {
     if (database == null) {
       return getEmptyInstance();
     }
@@ -137,13 +137,13 @@ public class DataTransformationSidebar extends Composite implements Sidebar, ICo
     initialized = other.initialized;
     initWidget(uiBinder.createAndBindUi(this));
     searchInputBox.setText(other.searchInputBox.getText());
-    init(other.database, other.collectionStatus);
+    init(other.database, other.viewerCollectionConfiguration);
   }
 
   /**
    * Use DatabaseSidebar.getInstance to obtain an instance
    */
-  private DataTransformationSidebar(ViewerDatabase database, CollectionStatus status) {
+  private DataTransformationSidebar(ViewerDatabase database, ViewerCollectionConfiguration status) {
     initWidget(uiBinder.createAndBindUi(this));
     init(database, status);
   }
@@ -188,7 +188,7 @@ public class DataTransformationSidebar extends Composite implements Sidebar, ICo
           firstElement = table.getId();
         }
         if (!table.isCustomView() && !table.isMaterializedView()) {
-          if (collectionStatus.showTable(table.getUuid())) {
+          if (viewerCollectionConfiguration.showTable(table.getUuid())) {
             sidebarGroup.add(createTableItem(schema, table, totalSchemas, iconTag));
           }
         }
@@ -202,7 +202,7 @@ public class DataTransformationSidebar extends Composite implements Sidebar, ICo
   private SidebarHyperlink createTableItem(final ViewerSchema schema, final ViewerTable table, final int totalSchemas,
     final String iconTag) {
     SafeHtml html;
-    String customName = collectionStatus.getTableStatus(table.getUuid()).getCustomName();
+    String customName = viewerCollectionConfiguration.getViewerTableConfiguration(table.getUuid()).getCustomName();
     if (totalSchemas == 1) {
       html = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE, customName);
     } else {
@@ -222,14 +222,14 @@ public class DataTransformationSidebar extends Composite implements Sidebar, ICo
   }
 
   @Override
-  public void init(ViewerDatabase db, CollectionStatus status) {
+  public void init(ViewerDatabase db, ViewerCollectionConfiguration status) {
     GWT.log("init with db: " + db + "; status: " + db.getStatus().toString());
     if (ViewerDatabaseStatus.AVAILABLE.equals(db.getStatus())) {
       if (db != null && (databaseUUID == null || databaseUUID.equals(db.getUuid()))) {
         initialized = true;
         database = db;
         ObserverManager.getCollectionObserver().addObserver(this);
-        collectionStatus = status;
+        viewerCollectionConfiguration = status;
         databaseUUID = db.getUuid();
         init();
       }
@@ -237,7 +237,7 @@ public class DataTransformationSidebar extends Composite implements Sidebar, ICo
   }
 
   @Override
-  public void reset(ViewerDatabase database, CollectionStatus status) {
+  public void reset(ViewerDatabase database, ViewerCollectionConfiguration status) {
 
   }
 

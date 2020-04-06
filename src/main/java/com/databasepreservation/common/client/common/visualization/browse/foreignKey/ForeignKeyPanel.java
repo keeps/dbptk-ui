@@ -17,7 +17,7 @@ import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.filter.FilterParameter;
 import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
-import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
+import com.databasepreservation.common.client.models.configuration.collection.ViewerCollectionConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
@@ -36,7 +36,7 @@ import com.google.gwt.user.client.ui.Widget;
  */
 public class ForeignKeyPanel extends RightPanel {
   public static ForeignKeyPanel createInstance(ViewerDatabase database, String tableId, List<String> columnsAndValues,
-    CollectionStatus status) {
+    ViewerCollectionConfiguration status) {
     return new ForeignKeyPanel(database, tableId, columnsAndValues, status);
   }
 
@@ -51,7 +51,7 @@ public class ForeignKeyPanel extends RightPanel {
   private List<String> columnsAndValues;
   private Long rowCount;
   private ViewerRow row;
-  private CollectionStatus status;
+  private ViewerCollectionConfiguration status;
 
   private RightPanel innerRightPanel = null;
   private BreadcrumbPanel breadcrumb = null;
@@ -60,7 +60,7 @@ public class ForeignKeyPanel extends RightPanel {
   SimplePanel panel;
 
   private ForeignKeyPanel(ViewerDatabase viewerDatabase, final String tableId, List<String> columnsAndValues,
-    CollectionStatus status) {
+    ViewerCollectionConfiguration status) {
     database = viewerDatabase;
     table = database.getMetadata().getTableById(tableId);
     this.columnsAndValues = columnsAndValues;

@@ -8,10 +8,10 @@ import java.util.Map;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.search.SearchField;
-import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
-import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
-import com.databasepreservation.common.client.models.status.collection.NestedColumnStatus;
-import com.databasepreservation.common.client.models.status.collection.TableStatus;
+import com.databasepreservation.common.client.models.configuration.collection.ViewerCollectionConfiguration;
+import com.databasepreservation.common.client.models.configuration.collection.ViewerColumnConfiguration;
+import com.databasepreservation.common.client.models.configuration.collection.ViewerNestedColumnConfiguration;
+import com.databasepreservation.common.client.models.configuration.collection.ViewerTableConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
@@ -44,31 +44,31 @@ public class AdvancedSearchUtils {
     return searchFields;
   }
 
-  public static List<SearchField> getSearchFieldsFromTable(ViewerTable viewerTable, CollectionStatus status) {
+  public static List<SearchField> getSearchFieldsFromTable(ViewerTable viewerTable, ViewerCollectionConfiguration status) {
     return getSearchFieldsFromTable(viewerTable, status, null);
   }
 
   public static Map<String, List<SearchField>> getSearchFieldsFromTableMap(ViewerTable viewerTable,
-    CollectionStatus status) {
+    ViewerCollectionConfiguration status) {
     Map<String, List<SearchField>> map = new LinkedHashMap<>();
-    final TableStatus configTable = status.getTableStatusByTableId(viewerTable.getId());
+    final ViewerTableConfiguration configTable = status.getViewerTableConfigurationByTableId(viewerTable.getId());
 
-    for (ColumnStatus column : configTable.getColumns()) {
+    for (ViewerColumnConfiguration column : configTable.getColumns()) {
       if (!column.getType().equals(ViewerType.dbTypes.NESTED)) {
-        if (column.getSearchStatus().getAdvanced().isFixed()) {
+        if (column.getViewerSearchConfiguration().getAdvanced().isFixed()) {
           SearchField searchField = new SearchField(configTable.getId() + "-" + column.getColumnIndex(),
             Collections.singletonList(column.getId()), column.getCustomName(),
             viewerTypeToSearchFieldType(column.getType()));
-          searchField.setFixed(column.getSearchStatus().getAdvanced().isFixed());
+          searchField.setFixed(column.getViewerSearchConfiguration().getAdvanced().isFixed());
           updateSearchFieldMap(map, configTable.getCustomName(), searchField);
         }
       } else {
-        NestedColumnStatus nestedColumns = column.getNestedColumns();
+        ViewerNestedColumnConfiguration nestedColumns = column.getNestedColumns();
         if (nestedColumns != null) {
           for (String columnSolrName : nestedColumns.getNestedSolrNames()) {
-            TableStatus configNestedTable = status.getTableStatusByTableId(nestedColumns.getOriginalTable());
-            for (ColumnStatus nestedColumn : configNestedTable.getColumns()) {
-              if (nestedColumn.getId().equals(columnSolrName) && column.getSearchStatus().getAdvanced().isFixed()) {
+            ViewerTableConfiguration configNestedTable = status.getViewerTableConfigurationByTableId(nestedColumns.getOriginalTable());
+            for (ViewerColumnConfiguration nestedColumn : configNestedTable.getColumns()) {
+              if (nestedColumn.getId().equals(columnSolrName) && column.getViewerSearchConfiguration().getAdvanced().isFixed()) {
                 ViewerType nestedType = new ViewerType();
                 nestedType.setDbType(ViewerType.dbTypes.NESTED);
                 List<String> fields = new ArrayList<>();
@@ -89,7 +89,7 @@ public class AdvancedSearchUtils {
     return map;
   }
 
-  public static List<SearchField> getSearchFieldsFromTable(ViewerTable viewerTable, CollectionStatus status,
+  public static List<SearchField> getSearchFieldsFromTable(ViewerTable viewerTable, ViewerCollectionConfiguration status,
     ViewerMetadata metadata) {
     List<SearchField> searchFields = new ArrayList<>();
 
@@ -97,15 +97,15 @@ public class AdvancedSearchUtils {
       SearchField searchField = new SearchField(
         viewerTable.getUuid() + "-" + viewerColumn.getColumnIndexInEnclosingTable(),
         Collections.singletonList(viewerColumn.getSolrName()),
-        status.getTableStatusByTableId(viewerTable.getId()).getColumnById(viewerColumn.getSolrName()).getCustomName(),
+        status.getViewerTableConfigurationByTableId(viewerTable.getId()).getColumnById(viewerColumn.getSolrName()).getCustomName(),
         viewerTypeToSearchFieldType(viewerColumn.getType()));
       searchField.setFixed(status.showAdvancedSearch(viewerTable.getUuid(), viewerColumn.getSolrName()));
       searchFields.add(searchField);
     }
 
     // Add nested columns
-    for (ColumnStatus columnStatus : status.getTableStatus(viewerTable.getUuid()).getColumns()) {
-      NestedColumnStatus nestedColumns = columnStatus.getNestedColumns();
+    for (ViewerColumnConfiguration viewerColumnConfiguration : status.getViewerTableConfiguration(viewerTable.getUuid()).getColumns()) {
+      ViewerNestedColumnConfiguration nestedColumns = viewerColumnConfiguration.getNestedColumns();
       if (nestedColumns != null) {
         for (String nestedColumn : nestedColumns.getNestedFields()) {
           ViewerTable nestedTable = metadata.getTableById(nestedColumns.getOriginalTable());
@@ -118,10 +118,10 @@ public class AdvancedSearchUtils {
               fields.add(viewerTable.getId());
               fields.add(nestedTable.getId());
               SearchField searchField = new SearchField(
-                columnStatus.getId() + "-" + column.getColumnIndexInEnclosingTable(), fields,
+                viewerColumnConfiguration.getId() + "-" + column.getColumnIndexInEnclosingTable(), fields,
                 nestedTable.getName() + ":" + column.getDisplayName(), viewerTypeToSearchFieldType(nestedType));
 
-              searchField.setFixed(status.showAdvancedSearch(viewerTable.getUuid(), columnStatus.getId()));
+              searchField.setFixed(status.showAdvancedSearch(viewerTable.getUuid(), viewerColumnConfiguration.getId()));
               searchFields.add(searchField);
             }
           }

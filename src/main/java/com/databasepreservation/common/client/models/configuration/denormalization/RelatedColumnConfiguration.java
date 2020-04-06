@@ -1,4 +1,4 @@
-package com.databasepreservation.common.client.models.status.denormalization;
+package com.databasepreservation.common.client.models.configuration.denormalization;
 
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 

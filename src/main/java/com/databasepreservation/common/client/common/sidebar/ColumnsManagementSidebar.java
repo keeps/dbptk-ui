@@ -9,7 +9,7 @@ import java.util.Set;
 import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
-import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
+import com.databasepreservation.common.client.models.configuration.collection.ViewerCollectionConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerSchema;
@@ -57,7 +57,7 @@ public class ColumnsManagementSidebar extends Composite implements Sidebar, ICol
 
   private ViewerDatabase database;
   private String databaseUUID;
-  private CollectionStatus collectionStatus;
+  private ViewerCollectionConfiguration viewerCollectionConfiguration;
   private boolean initialized = false;
   private Map<String, SidebarHyperlink> list = new LinkedHashMap<>();
 
@@ -99,7 +99,7 @@ public class ColumnsManagementSidebar extends Composite implements Sidebar, ICol
 
       for (ViewerTable table : schema.getTables()) {
         if (!table.isMaterializedView()) {
-          if (collectionStatus.showTable(table.getUuid())) {
+          if (viewerCollectionConfiguration.showTable(table.getUuid())) {
             sidebarGroup.add(createTableItem(schema, table, totalSchemas, iconTag));
           }
         }
@@ -121,10 +121,10 @@ public class ColumnsManagementSidebar extends Composite implements Sidebar, ICol
     SafeHtml html;
     if (totalSchemas == 1) {
       html = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE,
-        collectionStatus.getTableStatusByTableId(table.getId()).getCustomName());
+        viewerCollectionConfiguration.getViewerTableConfigurationByTableId(table.getId()).getCustomName());
     } else {
       html = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE,
-        schema.getName() + " " + iconTag + " " + collectionStatus.getTableStatusByTableId(table.getId()).getCustomName());
+        schema.getName() + " " + iconTag + " " + viewerCollectionConfiguration.getViewerTableConfigurationByTableId(table.getId()).getCustomName());
     }
     SidebarHyperlink tableLink = new SidebarHyperlink(html,
       HistoryManager.linkToColumnManagement(database.getUuid(), table.getId()));
@@ -142,11 +142,11 @@ public class ColumnsManagementSidebar extends Composite implements Sidebar, ICol
     if (materializedTable != null) {
       if (totalSchemas == 1) {
         html = FontAwesomeIconManager.getStackedIconSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS,
-          FontAwesomeIconManager.TABLE, collectionStatus.getTableStatusByTableId(materializedTable.getId()).getCustomName());
+          FontAwesomeIconManager.TABLE, viewerCollectionConfiguration.getViewerTableConfigurationByTableId(materializedTable.getId()).getCustomName());
       } else {
         html = FontAwesomeIconManager.getStackedIconSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS,
           FontAwesomeIconManager.TABLE, schema.getName() + " " + iconTag + " "
-            + collectionStatus.getTableStatusByTableId(materializedTable.getId()).getCustomName());
+            + viewerCollectionConfiguration.getViewerTableConfigurationByTableId(materializedTable.getId()).getCustomName());
       }
       viewLink = new SidebarHyperlink(html,
         HistoryManager.linkToColumnManagement(database.getUuid(), materializedTable.getId()))
@@ -156,11 +156,11 @@ public class ColumnsManagementSidebar extends Composite implements Sidebar, ICol
       final ViewerTable customViewTable = schema.getCustomViewTable(view.getName());
       if (totalSchemas == 1) {
         html = FontAwesomeIconManager.getStackedIconSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS,
-          FontAwesomeIconManager.COG, collectionStatus.getTableStatusByTableId(customViewTable.getId()).getCustomName());
+          FontAwesomeIconManager.COG, viewerCollectionConfiguration.getViewerTableConfigurationByTableId(customViewTable.getId()).getCustomName());
       } else {
         html = FontAwesomeIconManager.getStackedIconSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS,
           FontAwesomeIconManager.COG, schema.getName() + " " + iconTag + " "
-            + collectionStatus.getTableStatusByTableId(customViewTable.getId()).getCustomName());
+            + viewerCollectionConfiguration.getViewerTableConfigurationByTableId(customViewTable.getId()).getCustomName());
       }
       viewLink = new SidebarHyperlink(html,
         HistoryManager.linkToColumnManagement(database.getUuid(), customViewTable.getId())).setTooltip("Custom View");
@@ -174,8 +174,8 @@ public class ColumnsManagementSidebar extends Composite implements Sidebar, ICol
   }
 
   @Override
-  public void updateCollection(CollectionStatus collectionStatus) {
-    this.collectionStatus = collectionStatus;
+  public void updateCollection(ViewerCollectionConfiguration viewerCollectionConfiguration) {
+    this.viewerCollectionConfiguration = viewerCollectionConfiguration;
   }
 
   @Override
@@ -184,22 +184,22 @@ public class ColumnsManagementSidebar extends Composite implements Sidebar, ICol
   }
 
   @Override
-  public void init(ViewerDatabase db, CollectionStatus status) {
+  public void init(ViewerDatabase db, ViewerCollectionConfiguration status) {
     if (!isInitialized()) {
       initialized = true;
       ObserverManager.getCollectionObserver().addObserver(this);
       database = db;
-      collectionStatus = status;
+      viewerCollectionConfiguration = status;
       databaseUUID = db.getUuid();
       init();
     }
   }
 
   @Override
-  public void reset(ViewerDatabase database, CollectionStatus collectionStatus) {
+  public void reset(ViewerDatabase database, ViewerCollectionConfiguration viewerCollectionConfiguration) {
     sidebarGroup.clear();
     initialized = false;
-    init(database, collectionStatus);
+    init(database, viewerCollectionConfiguration);
   }
 
   @Override
@@ -215,7 +215,7 @@ public class ColumnsManagementSidebar extends Composite implements Sidebar, ICol
 
   @Override
   public void selectFirst() {
-    final String uuid = collectionStatus.getFirstTableVisible();
+    final String uuid = viewerCollectionConfiguration.getFirstTableVisible();
     list.forEach((key, hyperlink) -> hyperlink.setSelected(key.equals(uuid)));
   }
 
