@@ -17,9 +17,9 @@ import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.DataTransformationUtils;
 import com.databasepreservation.common.client.common.visualization.browse.information.ErDiagram;
 import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
-import com.databasepreservation.common.client.models.configuration.collection.ViewerCollectionConfiguration;
-import com.databasepreservation.common.client.models.configuration.denormalization.DenormalizeConfiguration;
-import com.databasepreservation.common.client.models.configuration.denormalization.RelatedTablesConfiguration;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
+import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
+import com.databasepreservation.common.client.models.status.denormalization.RelatedTablesConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
@@ -52,9 +52,9 @@ import config.i18n.client.ClientMessages;
  */
 public class DataTransformation extends RightPanel implements ICollectionStatusObserver {
   @Override
-  public void updateCollection(ViewerCollectionConfiguration viewerCollectionConfiguration) {
+  public void updateCollection(CollectionStatus collectionStatus) {
     instances.clear();
-    this.viewerCollectionConfiguration = viewerCollectionConfiguration;
+    this.collectionStatus = collectionStatus;
   }
 
   interface DataTransformerUiBinder extends UiBinder<Widget, DataTransformation> {
@@ -84,7 +84,7 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
   private String tableId;
   private TransformationTable rootTable;
   private DataTransformationSidebar sidebar;
-  private ViewerCollectionConfiguration viewerCollectionConfiguration;
+  private CollectionStatus collectionStatus;
   private DenormalizeConfiguration denormalizeConfiguration;
   private Button btnRunConfiguration = new Button();
   private Button btnRunAllConfiguration = new Button();
@@ -102,25 +102,25 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
     BreadcrumbManager.updateBreadcrumb(breadcrumb, breadcrumbItems);
   }
 
-  public static DataTransformation getInstance(ViewerCollectionConfiguration viewerCollectionConfiguration, ViewerDatabase database,
-                                               DataTransformationSidebar sidebar) {
+  public static DataTransformation getInstance(CollectionStatus collectionStatus, ViewerDatabase database,
+    DataTransformationSidebar sidebar) {
     return instances.computeIfAbsent(database.getUuid(),
-      k -> new DataTransformation(viewerCollectionConfiguration, database, null, sidebar));
+      k -> new DataTransformation(collectionStatus, database, null, sidebar));
   }
 
-  public static DataTransformation getInstance(ViewerCollectionConfiguration viewerCollectionConfiguration, ViewerDatabase database,
-                                               String tableId, DataTransformationSidebar sidebar) {
+  public static DataTransformation getInstance(CollectionStatus collectionStatus, ViewerDatabase database,
+    String tableId, DataTransformationSidebar sidebar) {
     return instances.computeIfAbsent(database.getUuid() + tableId,
-      k -> new DataTransformation(viewerCollectionConfiguration, database, tableId, sidebar));
+      k -> new DataTransformation(collectionStatus, database, tableId, sidebar));
   }
 
-  private DataTransformation(ViewerCollectionConfiguration viewerCollectionConfiguration, ViewerDatabase database, String tableId,
-                             DataTransformationSidebar sidebar) {
+  private DataTransformation(CollectionStatus collectionStatus, ViewerDatabase database, String tableId,
+    DataTransformationSidebar sidebar) {
     initWidget(binder.createAndBindUi(this));
     ObserverManager.getCollectionObserver().addObserver(this);
     this.database = database;
     this.sidebar = sidebar;
-    this.viewerCollectionConfiguration = viewerCollectionConfiguration;
+    this.collectionStatus = collectionStatus;
     this.tableId = tableId;
     if (this.tableId == null) {
       isInformation = true;
@@ -153,7 +153,7 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
 
   private ErDiagram informationPanel() {
     return ErDiagram.getInstance(database, database.getMetadata().getSchemas().get(0),
-      HistoryManager.getCurrentHistoryPath().get(0), viewerCollectionConfiguration);
+      HistoryManager.getCurrentHistoryPath().get(0), collectionStatus);
   }
 
   /**
@@ -162,7 +162,7 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
   private void getDenormalizeConfigurationFile(String tableId) {
     loading.setVisible(true);
     this.table = database.getMetadata().getTableById(tableId);
-    if (viewerCollectionConfiguration.getDenormalizations()
+    if (collectionStatus.getDenormalizations()
       .contains(ViewerConstants.DENORMALIZATION_STATUS_PREFIX + table.getUuid())) {
       CollectionService.Util.call((DenormalizeConfiguration response) -> {
         denormalizeConfiguration = response;
@@ -205,7 +205,7 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
     btnCancel.addStyleName("btn btn-times-circle btn-danger");
     btnCancel.addClickHandler(clickEvent -> {
       instances.entrySet().removeIf(e -> e.getKey().startsWith(database.getUuid()));
-      sidebar.reset(database, viewerCollectionConfiguration);
+      sidebar.reset(database, collectionStatus);
       HistoryManager.gotoAdvancedConfiguration(database.getUuid());
     });
 
@@ -219,7 +219,7 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
       messages.dataTransformationBtnRunTable());
     btnRunConfiguration.setStyleName("btn btn-play");
     btnRunConfiguration.addClickHandler(clickEvent -> {
-        DataTransformationUtils.saveConfiguration(database.getUuid(), denormalizeConfiguration, viewerCollectionConfiguration);
+        DataTransformationUtils.saveConfiguration(database.getUuid(), denormalizeConfiguration, collectionStatus);
         HistoryManager.gotoJobs();
     });
 
@@ -228,7 +228,7 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
     btnRunAllConfiguration.addClickHandler(clickEvent -> {
       HistoryManager.gotoJobs();
       for (Map.Entry<String, DenormalizeConfiguration> entry : denormalizeConfigurationList.entrySet()) {
-        DataTransformationUtils.saveConfiguration(database.getUuid(), entry.getValue(), viewerCollectionConfiguration);
+        DataTransformationUtils.saveConfiguration(database.getUuid(), entry.getValue(), collectionStatus);
       }
     });
 

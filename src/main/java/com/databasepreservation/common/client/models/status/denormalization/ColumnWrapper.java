@@ -1,4 +1,4 @@
-package com.databasepreservation.common.client.models.configuration.denormalization;
+package com.databasepreservation.common.client.models.status.denormalization;
 
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
@@ -10,13 +10,13 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
  * @author Gabriel Barros <gbarros@keep.pt>
  */
 public class ColumnWrapper {
-  private String uuid;
-  private String referencedTableName;
-  private String columnDisplayName;
-  private String columnDescription;
-  private RelatedTablesConfiguration relatedTable;
-  private DenormalizeConfiguration configuration;
-  private ViewerMetadata metadata;
+  String uuid;
+  String referencedTableName;
+  String columnDisplayName;
+  String columnDescription;
+  RelatedTablesConfiguration relatedTable;
+  DenormalizeConfiguration configuration;
+  ViewerMetadata metadata;
 
   public ColumnWrapper(String referencedTableName, DenormalizeConfiguration configuration, ViewerMetadata metadata) {
     this(null, referencedTableName, null, configuration, metadata);
@@ -84,7 +84,7 @@ public class ColumnWrapper {
     sb.appendHtmlConstant("<span class=\"table-ref-link\">");
     createPathRelatedTo(relatedTable, sb);
     sb.appendHtmlConstant("<span class=\"table-ref-path\"><b>");
-    // sb.appendHtmlConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.BREADCRUMB_SEPARATOR));
+    //sb.appendHtmlConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.BREADCRUMB_SEPARATOR));
     sb.appendHtmlConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.COLUMN));
     sb.append(SafeHtmlUtils.fromString(columnDisplayName));
     sb.appendHtmlConstant("</b></span>");
@@ -96,7 +96,7 @@ public class ColumnWrapper {
   private void createPathRelatedTo(RelatedTablesConfiguration relatedTable, SafeHtmlBuilder sb) {
     if (!relatedTable.getReferencedTableID().equals(configuration.getTableID())) {
       for (RelatedTablesConfiguration table : configuration.getRelatedTables()) {
-        boolean innerPath = false;
+        Boolean innerPath = false;
         if (table.getTableID().equals(relatedTable.getReferencedTableID())) {
           createPathRelatedTo(table, sb);
           break;
@@ -109,9 +109,7 @@ public class ColumnWrapper {
             break;
           }
         }
-        if (innerPath) {
-          break;
-        }
+        if(innerPath) break;
       }
     }
 

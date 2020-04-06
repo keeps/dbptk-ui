@@ -1,15 +1,15 @@
-package com.databasepreservation.common.client.models.configuration.collection;
+package com.databasepreservation.common.client.models.status.collection;
 
 import java.io.Serializable;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-public class ViewerFacetsConfiguration implements Serializable {
+public class FacetsStatus implements Serializable {
 
   private String parameter;
 
-  public ViewerFacetsConfiguration() {
+  public FacetsStatus() {
   }
 
   public String getParameter() {

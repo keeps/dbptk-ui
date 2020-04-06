@@ -18,7 +18,7 @@ import com.databasepreservation.common.client.common.utils.ApplicationType;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
 import com.databasepreservation.common.client.configuration.observer.IColumnVisibilityObserver;
-import com.databasepreservation.common.client.models.configuration.collection.ViewerCollectionConfiguration;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.models.user.User;
@@ -47,12 +47,12 @@ public class TablePanel extends RightPanel implements ICollectionStatusObserver,
   private static Map<String, TablePanel> instances = new HashMap<>();
   private static final String SEPARATOR = "/";
 
-  public static TablePanel getInstance(ViewerCollectionConfiguration status, ViewerDatabase database, String tableId, String route) {
+  public static TablePanel getInstance(CollectionStatus status, ViewerDatabase database, String tableId, String route) {
     return getInstance(status, database, tableId, null, route);
   }
 
-  public static TablePanel getInstance(ViewerCollectionConfiguration status, ViewerDatabase database, String tableId,
-                                       String searchInfoJson, String route) {
+  public static TablePanel getInstance(CollectionStatus status, ViewerDatabase database, String tableId,
+    String searchInfoJson, String route) {
 
     String code = database.getUuid() + SEPARATOR + tableId;
     TablePanel instance = instances.get(code);
@@ -71,8 +71,8 @@ public class TablePanel extends RightPanel implements ICollectionStatusObserver,
     return instance;
   }
 
-  public static TablePanel createInstance(ViewerCollectionConfiguration status, ViewerDatabase database, ViewerTable table,
-                                          SearchInfo searchInfo, String route) {
+  public static TablePanel createInstance(CollectionStatus status, ViewerDatabase database, ViewerTable table,
+    SearchInfo searchInfo, String route) {
     return new TablePanel(status, database, table, searchInfo, route);
   }
 
@@ -105,7 +105,7 @@ public class TablePanel extends RightPanel implements ICollectionStatusObserver,
   @UiField
   MenuBar configurationMenu;
 
-  private ViewerCollectionConfiguration viewerCollectionConfiguration;
+  private CollectionStatus collectionStatus;
   private ViewerDatabase database;
   private ViewerTable table;
   private String route;
@@ -122,13 +122,13 @@ public class TablePanel extends RightPanel implements ICollectionStatusObserver,
    * @param searchInfo
    *          the predefined search
    */
-  private TablePanel(ViewerCollectionConfiguration status, ViewerDatabase database, ViewerTable table, SearchInfo searchInfo,
-                     String route) {
+  private TablePanel(CollectionStatus status, ViewerDatabase database, ViewerTable table, SearchInfo searchInfo,
+    String route) {
     tableSearchPanel = new TableSearchPanel(searchInfo, status);
 
     initWidget(uiBinder.createAndBindUi(this));
 
-    this.viewerCollectionConfiguration = status;
+    this.collectionStatus = status;
     this.database = database;
     this.table = table;
     this.route = route;
@@ -144,7 +144,7 @@ public class TablePanel extends RightPanel implements ICollectionStatusObserver,
    * @param tableId
    *          the table ID
    */
-  private TablePanel(ViewerCollectionConfiguration status, ViewerDatabase viewerDatabase, final String tableId, String route) {
+  private TablePanel(CollectionStatus status, ViewerDatabase viewerDatabase, final String tableId, String route) {
     this(status, viewerDatabase, tableId, null, route);
   }
 
@@ -160,17 +160,17 @@ public class TablePanel extends RightPanel implements ICollectionStatusObserver,
    * @param searchInfoJson
    *          the SearchInfo instance as a JSON String
    */
-  private TablePanel(ViewerCollectionConfiguration status, ViewerDatabase viewerDatabase, final String tableId,
-                     String searchInfoJson, String route) {
-    viewerCollectionConfiguration = status;
+  private TablePanel(CollectionStatus status, ViewerDatabase viewerDatabase, final String tableId,
+    String searchInfoJson, String route) {
+    collectionStatus = status;
     database = viewerDatabase;
     table = database.getMetadata().getTableById(tableId);
     this.route = route;
 
     if (searchInfoJson != null) {
-      tableSearchPanel = new TableSearchPanel(searchInfoJson, viewerCollectionConfiguration);
+      tableSearchPanel = new TableSearchPanel(searchInfoJson, collectionStatus);
     } else {
-      tableSearchPanel = new TableSearchPanel(viewerCollectionConfiguration);
+      tableSearchPanel = new TableSearchPanel(collectionStatus);
     }
 
     initWidget(uiBinder.createAndBindUi(this));
@@ -181,7 +181,7 @@ public class TablePanel extends RightPanel implements ICollectionStatusObserver,
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
     BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forTable(database.getMetadata().getName(),
-      database.getUuid(), viewerCollectionConfiguration.getViewerTableConfiguration(table.getUuid()).getCustomName(), table.getId()));
+      database.getUuid(), collectionStatus.getTableStatus(table.getUuid()).getCustomName(), table.getId()));
   }
 
   public void setColumnsAndValues(List<String> columnsAndValues) {
@@ -192,7 +192,7 @@ public class TablePanel extends RightPanel implements ICollectionStatusObserver,
     ObserverManager.getCollectionObserver().addObserver(this);
     ObserverManager.getColumnVisibilityObserver().addObserver(this);
 
-    mainHeader.setWidget(CommonClientUtils.getHeader(viewerCollectionConfiguration.getViewerTableConfiguration(table.getUuid()), table, "h1",
+    mainHeader.setWidget(CommonClientUtils.getHeader(collectionStatus.getTableStatus(table.getUuid()), table, "h1",
       database.getMetadata().getSchemas().size() > 1));
     UserLogin.getInstance().getAuthenticatedUser(new DefaultAsyncCallback<User>() {
       @Override
@@ -202,7 +202,7 @@ public class TablePanel extends RightPanel implements ICollectionStatusObserver,
         } else if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
           advancedOptions.remove(configurationMenu);
           Button columnsManagementBtn = new Button(messages
-            .dataTransformationBtnManageTable(viewerCollectionConfiguration.getViewerTableConfiguration(table.getUuid()).getCustomName()));
+            .dataTransformationBtnManageTable(collectionStatus.getTableStatus(table.getUuid()).getCustomName()));
           columnsManagementBtn.setStyleName("btn btn-link");
           columnsManagementBtn
             .addClickHandler(event -> HistoryManager.gotoColumnsManagement(database.getUuid(), table.getId()));
@@ -220,9 +220,9 @@ public class TablePanel extends RightPanel implements ICollectionStatusObserver,
       }
     });
 
-    if (ViewerStringUtils.isNotBlank(viewerCollectionConfiguration.getViewerTableConfiguration(table.getUuid()).getCustomDescription())) {
+    if (ViewerStringUtils.isNotBlank(collectionStatus.getTableStatus(table.getUuid()).getCustomDescription())) {
       MetadataField instance = MetadataField
-        .createInstance(viewerCollectionConfiguration.getViewerTableConfiguration(table.getUuid()).getCustomDescription());
+        .createInstance(collectionStatus.getTableStatus(table.getUuid()).getCustomDescription());
       instance.setCSS("table-row-description");
       description.add(instance);
     }
@@ -234,12 +234,12 @@ public class TablePanel extends RightPanel implements ICollectionStatusObserver,
     MenuBar configurationSubMenuBar = new MenuBar(true);
     MenuItem columnMenuItem = new MenuItem(
       SafeHtmlUtils.fromString(
-        messages.dataTransformationBtnManageTable(viewerCollectionConfiguration.getViewerTableConfiguration(table.getUuid()).getCustomName())),
+        messages.dataTransformationBtnManageTable(collectionStatus.getTableStatus(table.getUuid()).getCustomName())),
       () -> HistoryManager.gotoColumnsManagement(database.getUuid(), table.getId()));
     configurationSubMenuBar.addItem(columnMenuItem);
     MenuItem dataTransformationMenuItem = new MenuItem(
       SafeHtmlUtils.fromString(
-        messages.dataTransformationBtnTransformTable(viewerCollectionConfiguration.getViewerTableConfiguration(table.getUuid()).getCustomName())),
+        messages.dataTransformationBtnTransformTable(collectionStatus.getTableStatus(table.getUuid()).getCustomName())),
       () -> HistoryManager.gotoDataTransformation(database.getUuid(), table.getId()));
     if (ApplicationType.getType().equals(ViewerConstants.SERVER)) {
       configurationSubMenuBar.addItem(dataTransformationMenuItem);
@@ -260,7 +260,7 @@ public class TablePanel extends RightPanel implements ICollectionStatusObserver,
   }
 
   @Override
-  public void updateCollection(ViewerCollectionConfiguration viewerCollectionConfiguration) {
+  public void updateCollection(CollectionStatus collectionStatus) {
     instances.clear();
   }
 
@@ -275,11 +275,11 @@ public class TablePanel extends RightPanel implements ICollectionStatusObserver,
   @Override
   protected void onLoad() {
     super.onLoad();
-    if (!viewerCollectionConfiguration.getViewerTableConfigurationByTableId(table.getId()).isShow()) {
+    if (!collectionStatus.getTableStatusByTableId(table.getId()).isShow()) {
       History.back();
       Dialogs.showInformationDialog(messages.resourceNotAvailableTitle(),
         messages.resourceNotAvailableTableHiddenDescription(
-          viewerCollectionConfiguration.getViewerTableConfigurationByTableId(table.getId()).getCustomName()),
+          collectionStatus.getTableStatusByTableId(table.getId()).getCustomName()),
         messages.basicActionClose());
     }
   }

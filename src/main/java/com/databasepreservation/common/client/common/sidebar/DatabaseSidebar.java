@@ -8,7 +8,7 @@ import java.util.Set;
 import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
-import com.databasepreservation.common.client.models.configuration.collection.ViewerCollectionConfiguration;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
@@ -57,7 +57,7 @@ public class DatabaseSidebar extends Composite implements Sidebar, ICollectionSt
 
   protected ViewerDatabase database;
   protected String databaseUUID;
-  protected ViewerCollectionConfiguration viewerCollectionConfiguration;
+  protected CollectionStatus collectionStatus;
   protected boolean initialized = false;
   protected Map<String, SidebarHyperlink> list = new HashMap<>();
 
@@ -96,7 +96,7 @@ public class DatabaseSidebar extends Composite implements Sidebar, ICollectionSt
    *          the database
    * @return a DatabaseSidebar instance
    */
-  public static DatabaseSidebar getInstance(ViewerDatabase database, ViewerCollectionConfiguration status) {
+  public static DatabaseSidebar getInstance(ViewerDatabase database, CollectionStatus status) {
     if (database == null) {
       return getEmptyInstance();
     }
@@ -135,13 +135,13 @@ public class DatabaseSidebar extends Composite implements Sidebar, ICollectionSt
     initialized = other.initialized;
     initWidget(uiBinder.createAndBindUi(this));
     searchInputBox.setText(other.searchInputBox.getText());
-    init(other.database, other.viewerCollectionConfiguration);
+    init(other.database, other.collectionStatus);
   }
 
   /**
    * Use DatabaseSidebar.getInstance to obtain an instance
    */
-  private DatabaseSidebar(ViewerDatabase database, ViewerCollectionConfiguration status) {
+  private DatabaseSidebar(ViewerDatabase database, CollectionStatus status) {
     initWidget(uiBinder.createAndBindUi(this));
     init(database, status);
   }
@@ -200,7 +200,7 @@ public class DatabaseSidebar extends Composite implements Sidebar, ICollectionSt
 
       for (ViewerTable table : schema.getTables()) {
         if (!table.isMaterializedView()) {
-          if (viewerCollectionConfiguration.showTable(table.getUuid())) {
+          if (collectionStatus.showTable(table.getUuid())) {
             schemaItems.add(createTableItem(schema, table, totalSchemas, iconTag));
           }
         }
@@ -253,10 +253,10 @@ public class DatabaseSidebar extends Composite implements Sidebar, ICollectionSt
       SafeHtml html;
       if (totalSchemas == 1) {
       html = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE,
-        viewerCollectionConfiguration.getViewerTableConfiguration(table.getUuid()).getCustomName());
+        collectionStatus.getTableStatus(table.getUuid()).getCustomName());
       } else {
         html = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE,
-        schema.getName() + " " + iconTag + " " + viewerCollectionConfiguration.getViewerTableConfiguration(table.getUuid()).getCustomName());
+        schema.getName() + " " + iconTag + " " + collectionStatus.getTableStatus(table.getUuid()).getCustomName());
       }
       SidebarHyperlink tableLink = new SidebarHyperlink(html,
           HistoryManager.linkToTable(database.getUuid(), table.getSchemaName(), table.getName()));
@@ -275,11 +275,11 @@ public class DatabaseSidebar extends Composite implements Sidebar, ICollectionSt
     if (materializedTable != null) {
       if (totalSchemas == 1) {
         html = FontAwesomeIconManager.getStackedIconSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS,
-          FontAwesomeIconManager.TABLE, viewerCollectionConfiguration.getViewerTableConfiguration(materializedTable.getUuid()).getCustomName());
+          FontAwesomeIconManager.TABLE, collectionStatus.getTableStatus(materializedTable.getUuid()).getCustomName());
       } else {
         html = FontAwesomeIconManager.getStackedIconSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS,
           FontAwesomeIconManager.TABLE, schema.getName() + " " + iconTag + " "
-            + viewerCollectionConfiguration.getViewerTableConfiguration(materializedTable.getUuid()).getCustomName());
+            + collectionStatus.getTableStatus(materializedTable.getUuid()).getCustomName());
       }
       viewLink = new SidebarHyperlink(html,
         HistoryManager.linkToTable(database.getUuid(), materializedTable.getSchemaName(), materializedTable.getName())).setTooltip("Materialized View");
@@ -288,11 +288,11 @@ public class DatabaseSidebar extends Composite implements Sidebar, ICollectionSt
       final ViewerTable customViewTable = schema.getCustomViewTable(view.getName());
       if (totalSchemas == 1) {
         html = FontAwesomeIconManager.getStackedIconSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS,
-          FontAwesomeIconManager.COG, viewerCollectionConfiguration.getViewerTableConfiguration(customViewTable.getUuid()).getCustomName());
+          FontAwesomeIconManager.COG, collectionStatus.getTableStatus(customViewTable.getUuid()).getCustomName());
       } else {
         html = FontAwesomeIconManager.getStackedIconSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS,
           FontAwesomeIconManager.COG, schema.getName() + " " + iconTag + " "
-            + viewerCollectionConfiguration.getViewerTableConfiguration(customViewTable.getUuid()).getCustomName());
+            + collectionStatus.getTableStatus(customViewTable.getUuid()).getCustomName());
       }
       viewLink = new SidebarHyperlink(html, HistoryManager.linkToTable(database.getUuid(), customViewTable.getSchemaName(), customViewTable.getName())).setTooltip("Custom View");
       list.put(customViewTable.getUuid(), viewLink);
@@ -315,8 +315,8 @@ public class DatabaseSidebar extends Composite implements Sidebar, ICollectionSt
   }
 
   @Override
-  public void updateCollection(ViewerCollectionConfiguration viewerCollectionConfiguration) {
-    this.viewerCollectionConfiguration = viewerCollectionConfiguration;
+  public void updateCollection(CollectionStatus collectionStatus) {
+    this.collectionStatus = collectionStatus;
     instances.clear();
   }
 
@@ -326,14 +326,14 @@ public class DatabaseSidebar extends Composite implements Sidebar, ICollectionSt
   }
 
   @Override
-  public void init(ViewerDatabase db, ViewerCollectionConfiguration status) {
+  public void init(ViewerDatabase db, CollectionStatus status) {
     GWT.log("init with db: " + db + "; status: " + db.getStatus().toString());
     if (ViewerDatabaseStatus.AVAILABLE.equals(db.getStatus())) {
       if (db != null && (databaseUUID == null || databaseUUID.equals(db.getUuid()))) {
         initialized = true;
         ObserverManager.getCollectionObserver().addObserver(this);
         database = db;
-        viewerCollectionConfiguration = status;
+        collectionStatus = status;
         databaseUUID = db.getUuid();
         init();
       }
@@ -341,7 +341,7 @@ public class DatabaseSidebar extends Composite implements Sidebar, ICollectionSt
   }
 
   @Override
-  public void reset(ViewerDatabase database, ViewerCollectionConfiguration status) {
+  public void reset(ViewerDatabase database, CollectionStatus status) {
 
   }
 

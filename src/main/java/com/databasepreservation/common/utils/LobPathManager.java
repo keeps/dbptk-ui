@@ -6,7 +6,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.models.configuration.collection.ViewerTableConfiguration;
+import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 
@@ -14,7 +14,7 @@ import com.databasepreservation.common.client.models.structure.ViewerRow;
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class LobPathManager {
-  public static String getZipFilePath(ViewerTableConfiguration configTable, int columnIndex, ViewerRow row) {
+  public static String getZipFilePath(TableStatus configTable, int columnIndex, ViewerRow row) {
     String siardSchemaFolder = configTable.getSchemaFolder();
     String siardTableFolder = configTable.getTableFolder();
     String siardLobFolder = ViewerConstants.SIARD_LOB_FOLDER_PREFIX + (columnIndex + 1);

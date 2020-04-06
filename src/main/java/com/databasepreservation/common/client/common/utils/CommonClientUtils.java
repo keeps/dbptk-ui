@@ -3,7 +3,7 @@ package com.databasepreservation.common.client.common.utils;
 import java.util.List;
 
 import com.databasepreservation.common.client.common.fields.GenericField;
-import com.databasepreservation.common.client.models.configuration.collection.ViewerTableConfiguration;
+import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.models.structure.ViewerView;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
@@ -13,6 +13,7 @@ import com.google.gwt.dom.client.ParagraphElement;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
@@ -79,15 +80,15 @@ public class CommonClientUtils {
     }
   }
 
-  public static HTML getHeader(ViewerTableConfiguration viewerTableConfiguration, ViewerTable table, String hClass, boolean multiSchema) {
+  public static HTML getHeader(TableStatus tableStatus, ViewerTable table, String hClass, boolean multiSchema) {
     if (multiSchema) {
-      return getHeaderMultiSchema(viewerTableConfiguration, table, hClass);
+      return getHeaderMultiSchema(tableStatus, table, hClass);
     } else {
-      return getHeaderSingleSchema(viewerTableConfiguration, table, hClass);
+      return getHeaderSingleSchema(tableStatus, table, hClass);
     }
   }
 
-  private static HTML getHeaderMultiSchema(ViewerTableConfiguration status, ViewerTable table, String hClass) {
+  private static HTML getHeaderMultiSchema(TableStatus status, ViewerTable table, String hClass) {
     String separatorIconTag = FontAwesomeIconManager.getTagWithStyleName(FontAwesomeIconManager.SCHEMA_TABLE_SEPARATOR,
       "schema-table-separator");
 
@@ -144,7 +145,7 @@ public class CommonClientUtils {
     }
   }
 
-  private static HTML getHeaderSingleSchema(ViewerTableConfiguration status, ViewerTable table, String hClass) {
+  private static HTML getHeaderSingleSchema(TableStatus status, ViewerTable table, String hClass) {
     if (table.isCustomView()) {
       final SafeHtml stackedIconSafeHtml = FontAwesomeIconManager.getStackedIconSafeHtml(
         FontAwesomeIconManager.SCHEMA_VIEWS, FontAwesomeIconManager.COG, status.getCustomName());

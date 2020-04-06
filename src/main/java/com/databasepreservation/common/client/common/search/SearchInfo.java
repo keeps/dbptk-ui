@@ -11,10 +11,11 @@ import com.databasepreservation.common.client.index.filter.BasicSearchFilterPara
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.filter.FilterParameter;
 import com.databasepreservation.common.client.index.filter.LongRangeFilterParameter;
-import com.databasepreservation.common.client.models.configuration.collection.ViewerCollectionConfiguration;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.tools.ViewerJsonUtils;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.UriUtils;
 
 /**
@@ -43,7 +44,7 @@ public class SearchInfo implements Serializable {
    *          map of solr column names to column values, to be used as advanced
    *          search fields
    */
-  public SearchInfo(ViewerCollectionConfiguration status, ViewerTable viewerTable, Map<String, String> solrColumnAndValue) {
+  public SearchInfo(CollectionStatus status, ViewerTable viewerTable, Map<String, String> solrColumnAndValue) {
     defaultFilter = ViewerConstants.DEFAULT_FILTER;
     currentFilter = "";
 

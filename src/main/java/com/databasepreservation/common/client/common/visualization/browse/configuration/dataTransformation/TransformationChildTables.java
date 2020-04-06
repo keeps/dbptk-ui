@@ -7,9 +7,9 @@ import java.util.Map;
 
 import com.databasepreservation.common.client.common.lists.widgets.MultipleSelectionTablePanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.handler.DataTransformationUtils;
-import com.databasepreservation.common.client.models.configuration.denormalization.DenormalizeConfiguration;
-import com.databasepreservation.common.client.models.configuration.denormalization.RelatedColumnConfiguration;
-import com.databasepreservation.common.client.models.configuration.denormalization.RelatedTablesConfiguration;
+import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
+import com.databasepreservation.common.client.models.status.denormalization.RelatedColumnConfiguration;
+import com.databasepreservation.common.client.models.status.denormalization.RelatedTablesConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.google.gwt.cell.client.CheckboxCell;

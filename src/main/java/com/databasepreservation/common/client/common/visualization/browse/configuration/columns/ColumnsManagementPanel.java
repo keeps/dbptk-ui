@@ -27,10 +27,10 @@ import com.databasepreservation.common.client.common.visualization.browse.config
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.NestedColumnOptionsPanel;
 import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
 import com.databasepreservation.common.client.configuration.observer.ISaveButtonObserver;
-import com.databasepreservation.common.client.models.configuration.collection.ViewerCollectionConfiguration;
-import com.databasepreservation.common.client.models.configuration.collection.ViewerColumnConfiguration;
-import com.databasepreservation.common.client.models.configuration.collection.ViewerTableConfiguration;
-import com.databasepreservation.common.client.models.configuration.helpers.ConfigurationHelper;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
+import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
+import com.databasepreservation.common.client.models.status.collection.TableStatus;
+import com.databasepreservation.common.client.models.status.helpers.StatusHelper;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerType;
 import com.databasepreservation.common.client.services.CollectionService;
@@ -86,17 +86,17 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
   private static TableManagementPanelUiBinder binder = GWT.create(TableManagementPanelUiBinder.class);
 
   private static Map<String, ColumnsManagementPanel> instances = new HashMap<>();
-  private ViewerCollectionConfiguration viewerCollectionConfiguration;
+  private CollectionStatus collectionStatus;
   private ViewerDatabase database;
   private Sidebar sidebar;
   private String tableId;
   private Button btnSave = new Button();
-  private BasicTablePanel<ViewerColumnConfiguration> cellTable;
+  private BasicTablePanel<ColumnStatus> cellTable;
   private boolean changes = false;
-  private Map<String, ConfigurationHelper> editableValues = new HashMap<>();
+  private Map<String, StatusHelper> editableValues = new HashMap<>();
 
-  public static ColumnsManagementPanel getInstance(ViewerCollectionConfiguration status, ViewerDatabase database, String tableUUID,
-                                                   Sidebar sidebar) {
+  public static ColumnsManagementPanel getInstance(CollectionStatus status, ViewerDatabase database, String tableUUID,
+    Sidebar sidebar) {
     final String value;
     if (tableUUID == null) {
       value = status.getFirstTableVisible();
@@ -108,13 +108,13 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
       k -> new ColumnsManagementPanel(database, status, value, sidebar));
   }
 
-  private ColumnsManagementPanel(ViewerDatabase database, ViewerCollectionConfiguration viewerCollectionConfiguration, String tableId,
-                                 Sidebar sidebar) {
+  private ColumnsManagementPanel(ViewerDatabase database, CollectionStatus collectionStatus, String tableId,
+    Sidebar sidebar) {
     initWidget(binder.createAndBindUi(this));
     ObserverManager.getCollectionObserver().addObserver(this);
     ObserverManager.getSaveObserver().addObserver(this);
     this.database = database;
-    this.viewerCollectionConfiguration = viewerCollectionConfiguration;
+    this.collectionStatus = collectionStatus;
     this.tableId = tableId;
     this.sidebar = sidebar;
 
@@ -123,7 +123,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
 
   private void init() {
     configureHeader();
-    final ViewerTableConfiguration table = viewerCollectionConfiguration.getViewerTableConfigurationByTableId(tableId);
+    final TableStatus table = collectionStatus.getTableStatusByTableId(tableId);
     cellTable = populateTable(table);
     content.add(cellTable);
 
@@ -154,8 +154,8 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
 
   private void configureHeader() {
     mainHeader.insert(CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.TABLE),
-      viewerCollectionConfiguration.getViewerTableConfigurationByTableId(tableId).getCustomName(), "h1"), 0);
-    mainHeader.setTitle(viewerCollectionConfiguration.getViewerTableConfigurationByTableId(tableId).getCustomDescription());
+      collectionStatus.getTableStatusByTableId(tableId).getCustomName(), "h1"), 0);
+    mainHeader.setTitle(collectionStatus.getTableStatusByTableId(tableId).getCustomDescription());
 
     MetadataField instance = MetadataField.createInstance(messages.columnManagementPageDescription());
     instance.setCSS("table-row-description", "font-size-description");
@@ -166,10 +166,10 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
     btnGotoTable.addClickHandler(e -> HistoryManager.gotoTable(database.getUuid(), tableId));
   }
 
-  private List<ViewerColumnConfiguration> saveChanges(BasicTablePanel<ViewerColumnConfiguration> cellTable,
-                                                      Map<String, ConfigurationHelper> editableValues) {
-    List<ViewerColumnConfiguration> statuses = new ArrayList<>();
-    for (ViewerColumnConfiguration column : cellTable.getDataProvider().getList()) {
+  private List<ColumnStatus> saveChanges(BasicTablePanel<ColumnStatus> cellTable,
+    Map<String, StatusHelper> editableValues) {
+    List<ColumnStatus> statuses = new ArrayList<>();
+    for (ColumnStatus column : cellTable.getDataProvider().getList()) {
       if (editableValues.get(column.getId()) != null) {
         column.setCustomDescription(editableValues.get(column.getId()).getDescription());
         column.setCustomName(editableValues.get(column.getId()).getLabel());
@@ -192,7 +192,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
           public void onSuccess(Boolean aBoolean) {
             if (!aBoolean) {
               instances.entrySet().removeIf(e -> e.getKey().startsWith(database.getUuid()));
-              sidebar.reset(database, viewerCollectionConfiguration);
+              sidebar.reset(database, collectionStatus);
               HistoryManager.gotoAdvancedConfiguration(database.getUuid());
             }
           }
@@ -208,7 +208,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
         if (validateCheckboxes()) {
           instances.forEach((key, object) -> {
             if (key.startsWith(database.getUuid())) {
-              object.viewerCollectionConfiguration.getViewerTableConfigurationByTableId(object.tableId)
+              object.collectionStatus.getTableStatusByTableId(object.tableId)
                 .setColumns(saveChanges(object.cellTable, object.editableValues));
             }
           });
@@ -226,15 +226,15 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
     }
   }
 
-  private BasicTablePanel<ViewerColumnConfiguration> populateTable(final ViewerTableConfiguration viewerTableConfiguration) {
-    Collections.sort(viewerTableConfiguration.getColumns());
-    BasicTablePanel<ViewerColumnConfiguration> tablePanel = new BasicTablePanel<>(new FlowPanel(), SafeHtmlUtils.EMPTY_SAFE_HTML,
-      GWT.create(ConfigurationCellTableResources.class), viewerTableConfiguration.getColumns().iterator(),
+  private BasicTablePanel<ColumnStatus> populateTable(final TableStatus tableStatus) {
+    Collections.sort(tableStatus.getColumns());
+    BasicTablePanel<ColumnStatus> tablePanel = new BasicTablePanel<>(new FlowPanel(), SafeHtmlUtils.EMPTY_SAFE_HTML,
+      GWT.create(ConfigurationCellTableResources.class), tableStatus.getColumns().iterator(),
       new BasicTablePanel.ColumnInfo<>(messages.basicTableHeaderOrder(), 6, getOrderColumn()),
       new BasicTablePanel.ColumnInfo<>(messages.basicTableHeaderTableOrColumn("name"), 0,
-        new Column<ViewerColumnConfiguration, SafeHtml>(new SafeHtmlCell()) {
+        new Column<ColumnStatus, SafeHtml>(new SafeHtmlCell()) {
           @Override
-          public SafeHtml getValue(ViewerColumnConfiguration column) {
+          public SafeHtml getValue(ColumnStatus column) {
             if (column.getType().equals(ViewerType.dbTypes.NESTED)) {
               return SafeHtmlUtils.fromSafeConstant(column.getNestedColumns().getPath());
             }
@@ -258,7 +258,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
         false, 3, getAdvancedSearchCheckboxColumn()));
 
     tablePanel.getSelectionModel().addSelectionChangeHandler(event -> {
-      final ViewerColumnConfiguration selected = tablePanel.getSelectionModel().getSelectedObject();
+      final ColumnStatus selected = tablePanel.getSelectionModel().getSelectedObject();
       if (selected != null) {
         tablePanel.getSelectionModel().clear();
       }
@@ -267,12 +267,12 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
     return tablePanel;
   }
 
-  private Column<ViewerColumnConfiguration, ViewerColumnConfiguration> getOrderColumn() {
-    List<HasCell<ViewerColumnConfiguration, ?>> cells = new ArrayList<>();
+  private Column<ColumnStatus, ColumnStatus> getOrderColumn() {
+    List<HasCell<ColumnStatus, ?>> cells = new ArrayList<>();
 
     cells
       .add(new ActionsCell<>(messages.columnManagementPageTextForArrowUp(), FontAwesomeIconManager.ARROW_UP, object -> {
-        List<ViewerColumnConfiguration> list = cellTable.getDataProvider().getList();
+        List<ColumnStatus> list = cellTable.getDataProvider().getList();
         if (object.getOrder() != 1) {
           updateColumnOrder(list, object.getOrder() - 2, object.getOrder() - 1);
           cellTable.getDataProvider().setList(list);
@@ -282,33 +282,33 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
 
     cells.add(
       new ActionsCell<>(messages.columnManagementPageTextForArrowDown(), FontAwesomeIconManager.ARROW_DOWN, object -> {
-        List<ViewerColumnConfiguration> list = cellTable.getDataProvider().getList();
-        if (object.getOrder() != viewerCollectionConfiguration.getViewerTableConfigurationByTableId(tableId).getColumns().size()) {
+        List<ColumnStatus> list = cellTable.getDataProvider().getList();
+        if (object.getOrder() != collectionStatus.getTableStatusByTableId(tableId).getColumns().size()) {
           updateColumnOrder(list, object.getOrder(), object.getOrder() - 1);
           cellTable.getDataProvider().setList(list);
           cellTable.getDataProvider().refresh();
         }
       }));
 
-    CompositeCell<ViewerColumnConfiguration> compositeCell = new CompositeCell<>(cells);
-    return new Column<ViewerColumnConfiguration, ViewerColumnConfiguration>(compositeCell) {
+    CompositeCell<ColumnStatus> compositeCell = new CompositeCell<>(cells);
+    return new Column<ColumnStatus, ColumnStatus>(compositeCell) {
       @Override
-      public ViewerColumnConfiguration getValue(ViewerColumnConfiguration viewerColumnConfiguration) {
-        return viewerColumnConfiguration;
+      public ColumnStatus getValue(ColumnStatus columnStatus) {
+        return columnStatus;
       }
     };
   }
 
-  private Column<ViewerColumnConfiguration, Boolean> getTableCheckboxColumn() {
-    Column<ViewerColumnConfiguration, Boolean> checkbox = new Column<ViewerColumnConfiguration, Boolean>(new CheckboxCell(true, true)) {
+  private Column<ColumnStatus, Boolean> getTableCheckboxColumn() {
+    Column<ColumnStatus, Boolean> checkbox = new Column<ColumnStatus, Boolean>(new CheckboxCell(true, true)) {
       @Override
-      public Boolean getValue(ViewerColumnConfiguration column) {
+      public Boolean getValue(ColumnStatus column) {
         if (editableValues.get(column.getId()) == null) {
-          ConfigurationHelper helper = new ConfigurationHelper(column.getCustomName(), column.getCustomDescription(),
-            column.getViewerSearchConfiguration().getList().isShow(), column.getViewerDetailsConfiguration().isShow(),
-            column.getViewerSearchConfiguration().getAdvanced().isFixed());
+          StatusHelper helper = new StatusHelper(column.getCustomName(), column.getCustomDescription(),
+            column.getSearchStatus().getList().isShow(), column.getDetailsStatus().isShow(),
+            column.getSearchStatus().getAdvanced().isFixed());
           editableValues.put(column.getId(), helper);
-          return column.getViewerSearchConfiguration().getList().isShow();
+          return column.getSearchStatus().getList().isShow();
         } else {
           return editableValues.get(column.getId()).isShowInTable();
         }
@@ -317,12 +317,12 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
 
     checkbox.setFieldUpdater((index, column, value) -> {
       if (editableValues.get(column.getId()) != null) {
-        ConfigurationHelper configurationHelper = editableValues.get(column.getId());
-        configurationHelper.setShowInTable(value);
-        editableValues.replace(column.getId(), configurationHelper);
+        StatusHelper statusHelper = editableValues.get(column.getId());
+        statusHelper.setShowInTable(value);
+        editableValues.replace(column.getId(), statusHelper);
       } else {
-        ConfigurationHelper helper = new ConfigurationHelper(column.getCustomName(), column.getCustomDescription(), value,
-          column.getViewerDetailsConfiguration().isShow(), column.getViewerSearchConfiguration().getAdvanced().isFixed());
+        StatusHelper helper = new StatusHelper(column.getCustomName(), column.getCustomDescription(), value,
+          column.getDetailsStatus().isShow(), column.getSearchStatus().getAdvanced().isFixed());
         editableValues.put(column.getId(), helper);
       }
 
@@ -333,16 +333,16 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
     return checkbox;
   }
 
-  private Column<ViewerColumnConfiguration, Boolean> getDetailsCheckboxColumn() {
-    Column<ViewerColumnConfiguration, Boolean> checkbox = new Column<ViewerColumnConfiguration, Boolean>(new CheckboxCell(true, true)) {
+  private Column<ColumnStatus, Boolean> getDetailsCheckboxColumn() {
+    Column<ColumnStatus, Boolean> checkbox = new Column<ColumnStatus, Boolean>(new CheckboxCell(true, true)) {
       @Override
-      public Boolean getValue(ViewerColumnConfiguration column) {
+      public Boolean getValue(ColumnStatus column) {
         if (editableValues.get(column.getId()) == null) {
-          ConfigurationHelper helper = new ConfigurationHelper(column.getCustomName(), column.getCustomDescription(),
-            column.getViewerSearchConfiguration().getList().isShow(), column.getViewerDetailsConfiguration().isShow(),
-            column.getViewerSearchConfiguration().getAdvanced().isFixed());
+          StatusHelper helper = new StatusHelper(column.getCustomName(), column.getCustomDescription(),
+            column.getSearchStatus().getList().isShow(), column.getDetailsStatus().isShow(),
+            column.getSearchStatus().getAdvanced().isFixed());
           editableValues.put(column.getId(), helper);
-          return column.getViewerDetailsConfiguration().isShow();
+          return column.getDetailsStatus().isShow();
         } else {
           return editableValues.get(column.getId()).isShowInDetails();
         }
@@ -351,12 +351,12 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
 
     checkbox.setFieldUpdater((index, column, value) -> {
       if (editableValues.get(column.getId()) != null) {
-        ConfigurationHelper configurationHelper = editableValues.get(column.getId());
-        configurationHelper.setShowInDetails(value);
-        editableValues.replace(column.getId(), configurationHelper);
+        StatusHelper statusHelper = editableValues.get(column.getId());
+        statusHelper.setShowInDetails(value);
+        editableValues.replace(column.getId(), statusHelper);
       } else {
-        ConfigurationHelper helper = new ConfigurationHelper(column.getCustomName(), column.getCustomDescription(),
-          column.getViewerSearchConfiguration().getList().isShow(), value, column.getViewerSearchConfiguration().getAdvanced().isFixed());
+        StatusHelper helper = new StatusHelper(column.getCustomName(), column.getCustomDescription(),
+          column.getSearchStatus().getList().isShow(), value, column.getSearchStatus().getAdvanced().isFixed());
         editableValues.put(column.getId(), helper);
       }
 
@@ -367,12 +367,12 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
     return checkbox;
   }
 
-  private Column<ViewerColumnConfiguration, Boolean> getAdvancedSearchCheckboxColumn() {
-    Column<ViewerColumnConfiguration, Boolean> checkbox = new Column<ViewerColumnConfiguration, Boolean>(new CheckboxCell(true, true)) {
+  private Column<ColumnStatus, Boolean> getAdvancedSearchCheckboxColumn() {
+    Column<ColumnStatus, Boolean> checkbox = new Column<ColumnStatus, Boolean>(new CheckboxCell(true, true)) {
       @Override
-      public Boolean getValue(ViewerColumnConfiguration column) {
+      public Boolean getValue(ColumnStatus column) {
         if (editableValues.get(column.getId()) == null) {
-          return column.getViewerSearchConfiguration().getAdvanced().isFixed();
+          return column.getSearchStatus().getAdvanced().isFixed();
         } else {
           return editableValues.get(column.getId()).isShowInAdvancedSearch();
         }
@@ -381,12 +381,12 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
 
     checkbox.setFieldUpdater((index, column, value) -> {
       if (editableValues.get(column.getId()) != null) {
-        ConfigurationHelper configurationHelper = editableValues.get(column.getId());
-        configurationHelper.setShowInAdvancedSearch(value);
-        editableValues.replace(column.getId(), configurationHelper);
+        StatusHelper statusHelper = editableValues.get(column.getId());
+        statusHelper.setShowInAdvancedSearch(value);
+        editableValues.replace(column.getId(), statusHelper);
       } else {
-        ConfigurationHelper helper = new ConfigurationHelper(column.getCustomName(), column.getCustomDescription(),
-          column.getViewerSearchConfiguration().getList().isShow(), column.getViewerDetailsConfiguration().isShow(), value);
+        StatusHelper helper = new StatusHelper(column.getCustomName(), column.getCustomDescription(),
+          column.getSearchStatus().getList().isShow(), column.getDetailsStatus().isShow(), value);
         editableValues.put(column.getId(), helper);
       }
 
@@ -397,8 +397,8 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
     return checkbox;
   }
 
-  private Column<ViewerColumnConfiguration, String> getLabelColumn() {
-    Column<ViewerColumnConfiguration, String> label = new Column<ViewerColumnConfiguration, String>(new RequiredEditableCell("") {
+  private Column<ColumnStatus, String> getLabelColumn() {
+    Column<ColumnStatus, String> label = new Column<ColumnStatus, String>(new RequiredEditableCell("") {
       @Override
       public void onBrowserEvent(Context context, Element parent, String value, NativeEvent event,
         ValueUpdater<String> valueUpdater) {
@@ -410,11 +410,11 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
           } else {
             btnSave.setEnabled(true);
             ObserverManager.getSaveObserver().setEnabled(database.getUuid(), true);
-            ViewerColumnConfiguration viewerColumnConfiguration = cellTable.getDataProvider().getList().get(context.getIndex());
+            ColumnStatus columnStatus = cellTable.getDataProvider().getList().get(context.getIndex());
             instances.forEach((key, instance) -> {
               if (key.startsWith(database.getUuid())) {
                 instance.editableValues.forEach((k, object) -> {
-                  if (!k.equals(viewerColumnConfiguration.getId()) && ViewerStringUtils.isBlank(object.getLabel())) {
+                  if (!k.equals(columnStatus.getId()) && ViewerStringUtils.isBlank(object.getLabel())) {
                     btnSave.setEnabled(false);
                     ObserverManager.getSaveObserver().setEnabled(database.getUuid(), false);
                   }
@@ -427,11 +427,11 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
       }
     }) {
       @Override
-      public String getValue(ViewerColumnConfiguration column) {
+      public String getValue(ColumnStatus column) {
         if (editableValues.get(column.getId()) == null) {
-          ConfigurationHelper helper = new ConfigurationHelper(column.getCustomName(), column.getCustomDescription(),
-            column.getViewerSearchConfiguration().getList().isShow(), column.getViewerDetailsConfiguration().isShow(),
-            column.getViewerSearchConfiguration().getAdvanced().isFixed());
+          StatusHelper helper = new StatusHelper(column.getCustomName(), column.getCustomDescription(),
+            column.getSearchStatus().getList().isShow(), column.getDetailsStatus().isShow(),
+            column.getSearchStatus().getAdvanced().isFixed());
           editableValues.put(column.getId(), helper);
           return column.getCustomName();
         } else {
@@ -442,13 +442,13 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
 
     label.setFieldUpdater((index, column, value) -> {
       if (editableValues.get(column.getId()) != null) {
-        final ConfigurationHelper configurationHelper = editableValues.get(column.getId());
-        configurationHelper.setLabel(value);
-        editableValues.put(column.getId(), configurationHelper);
+        final StatusHelper statusHelper = editableValues.get(column.getId());
+        statusHelper.setLabel(value);
+        editableValues.put(column.getId(), statusHelper);
       } else {
-        ConfigurationHelper helper = new ConfigurationHelper(value, column.getCustomDescription(),
-          column.getViewerSearchConfiguration().getList().isShow(), column.getViewerDetailsConfiguration().isShow(),
-          column.getViewerSearchConfiguration().getAdvanced().isFixed());
+        StatusHelper helper = new StatusHelper(value, column.getCustomDescription(),
+          column.getSearchStatus().getList().isShow(), column.getDetailsStatus().isShow(),
+          column.getSearchStatus().getAdvanced().isFixed());
         editableValues.put(column.getId(), helper);
       }
 
@@ -459,10 +459,10 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
     return label;
   }
 
-  private Column<ViewerColumnConfiguration, String> getDescriptionColumn() {
-    Column<ViewerColumnConfiguration, String> description = new Column<ViewerColumnConfiguration, String>(new TextAreaInputCell() {}) {
+  private Column<ColumnStatus, String> getDescriptionColumn() {
+    Column<ColumnStatus, String> description = new Column<ColumnStatus, String>(new TextAreaInputCell() {}) {
       @Override
-      public String getValue(ViewerColumnConfiguration column) {
+      public String getValue(ColumnStatus column) {
         if (editableValues.get(column.getId()) == null) {
           return column.getCustomDescription();
         } else {
@@ -473,13 +473,13 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
 
     description.setFieldUpdater((index, column, value) -> {
       if (editableValues.get(column.getId()) != null) {
-        final ConfigurationHelper configurationHelper = editableValues.get(column.getId());
-        configurationHelper.setDescription(value);
-        editableValues.put(column.getId(), configurationHelper);
+        final StatusHelper statusHelper = editableValues.get(column.getId());
+        statusHelper.setDescription(value);
+        editableValues.put(column.getId(), statusHelper);
       } else {
-        ConfigurationHelper helper = new ConfigurationHelper(column.getCustomName(), value,
-          column.getViewerSearchConfiguration().getList().isShow(), column.getViewerDetailsConfiguration().isShow(),
-          column.getViewerSearchConfiguration().getAdvanced().isFixed());
+        StatusHelper helper = new StatusHelper(column.getCustomName(), value,
+          column.getSearchStatus().getList().isShow(), column.getDetailsStatus().isShow(),
+          column.getSearchStatus().getAdvanced().isFixed());
         editableValues.put(column.getId(), helper);
       }
 
@@ -489,10 +489,10 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
     return description;
   }
 
-  private Column<ViewerColumnConfiguration, String> getOptionsColumn() {
-    Column<ViewerColumnConfiguration, String> options = new ButtonColumn<ViewerColumnConfiguration>() {
+  private Column<ColumnStatus, String> getOptionsColumn() {
+    Column<ColumnStatus, String> options = new ButtonColumn<ColumnStatus>() {
       @Override
-      public void render(Cell.Context context, ViewerColumnConfiguration object, SafeHtmlBuilder sb) {
+      public void render(Cell.Context context, ColumnStatus object, SafeHtmlBuilder sb) {
         if (object.getType().equals(ViewerType.dbTypes.BINARY) || object.getType().equals(ViewerType.dbTypes.NESTED)) {
           sb.appendHtmlConstant(
             "<div class=\"center-cell\"><button class=\"btn btn-cell-action\" type=\"button\" tabindex=\"-1\"><i class=\"fa fa-cog\"></i></button></div>");
@@ -503,7 +503,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
       }
 
       @Override
-      public String getValue(ViewerColumnConfiguration object) {
+      public String getValue(ColumnStatus object) {
         return messages.basicActionOpen();
       }
     };
@@ -516,13 +516,13 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
             @Override
             public void onSuccess(Boolean value) {
               if (value) {
-                viewerCollectionConfiguration.getViewerTableConfigurationByTableId(tableId).getColumnById(columnStatus.getId())
+                collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
                   .updateSearchListTemplate(nestedColumnOptionPanel.getSearchTemplate());
-                viewerCollectionConfiguration.getViewerTableConfigurationByTableId(tableId).getColumnById(columnStatus.getId())
+                collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
                   .updateDetailsTemplate(nestedColumnOptionPanel.getDetailsTemplate());
-                viewerCollectionConfiguration.getViewerTableConfigurationByTableId(tableId).getColumnById(columnStatus.getId())
+                collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
                   .updateExportTemplate(nestedColumnOptionPanel.getExportTemplate());
-                viewerCollectionConfiguration.getViewerTableConfigurationByTableId(tableId).getColumnById(columnStatus.getId())
+                collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
                   .updateNestedColumnsQuantityList(
                     ((NestedColumnOptionsPanel) nestedColumnOptionPanel).getQuantityInList());
                 saveChanges();
@@ -531,21 +531,19 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
           });
       } else if (columnStatus.getType().equals(ViewerType.dbTypes.BINARY)) {
         ColumnOptionsPanel binaryColumnOptionPanel = BinaryColumnOptionsPanel.createInstance(
-          viewerCollectionConfiguration.getViewerTableConfigurationByTableId(tableId),
-          viewerCollectionConfiguration.getViewerTableConfigurationByTableId(tableId).getColumnById(columnStatus.getId()));
+          collectionStatus.getTableStatusByTableId(tableId),
+          collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId()));
 
         Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), messages.basicActionSave(),
           messages.basicActionCancel(), binaryColumnOptionPanel, new DefaultAsyncCallback<Boolean>() {
             @Override
             public void onSuccess(Boolean value) {
               if (value) {
-                viewerCollectionConfiguration.getViewerTableConfigurationByTableId(tableId).getColumnById(columnStatus.getId())
+                collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
                   .updateExportTemplate(binaryColumnOptionPanel.getExportTemplate());
-                viewerCollectionConfiguration.getViewerTableConfigurationByTableId(tableId).getColumnById(columnStatus.getId())
+                collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
                     .updateSearchListTemplate(binaryColumnOptionPanel.getSearchTemplate());
-                viewerCollectionConfiguration.getViewerTableConfigurationByTableId(tableId).getColumnById(columnStatus.getId())
-                    .updateDetailsTemplate(binaryColumnOptionPanel.getDetailsTemplate());
-                viewerCollectionConfiguration.getViewerTableConfigurationByTableId(tableId).getColumnById(columnStatus.getId())
+                collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
                   .setApplicationType(((BinaryColumnOptionsPanel) binaryColumnOptionPanel).getApplicationType());
                 saveChanges();
               }
@@ -556,9 +554,9 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
     return options;
   }
 
-  private void updateColumnOrder(List<ViewerColumnConfiguration> list, int relativeToClickIndex, int clickedIndex) {
-    ViewerColumnConfiguration relative = list.get(relativeToClickIndex);
-    ViewerColumnConfiguration clicked = list.get(clickedIndex);
+  private void updateColumnOrder(List<ColumnStatus> list, int relativeToClickIndex, int clickedIndex) {
+    ColumnStatus relative = list.get(relativeToClickIndex);
+    ColumnStatus clicked = list.get(clickedIndex);
 
     int relativeOrder = relative.getOrder();
     int clickedOrder = clicked.getOrder();
@@ -581,10 +579,10 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
     return true;
   }
 
-  private boolean validateUniqueInput(Map<String, ConfigurationHelper> editableValues) {
+  private boolean validateUniqueInput(Map<String, StatusHelper> editableValues) {
     Set<String> uniques = new HashSet<>();
 
-    for (ConfigurationHelper value : editableValues.values()) {
+    for (StatusHelper value : editableValues.values()) {
       if (!uniques.add(value.getLabel())) {
         return false;
       }
@@ -595,14 +593,14 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
   private boolean validateCheckboxes() {
     for (Map.Entry<String, ColumnsManagementPanel> entry : instances.entrySet()) {
       if (entry.getKey().startsWith(database.getUuid())
-        && (!validateCheckbox(entry.getValue().editableValues, viewerCollectionConfiguration.getViewerTableConfigurationByTableId(tableId)))) {
+        && (!validateCheckbox(entry.getValue().editableValues, collectionStatus.getTableStatusByTableId(tableId)))) {
         return false;
       }
     }
     return true;
   }
 
-  private boolean validateCheckbox(Map<String, ConfigurationHelper> editableValues, ViewerTableConfiguration viewerTableConfiguration) {
+  private boolean validateCheckbox(Map<String, StatusHelper> editableValues, TableStatus tableStatus) {
     int countDetails = 0;
     int countTable = 0;
 
@@ -610,7 +608,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
       return true;
     }
 
-    for (ConfigurationHelper helper : editableValues.values()) {
+    for (StatusHelper helper : editableValues.values()) {
       if (!helper.isShowInDetails()) {
         countDetails++;
       }
@@ -619,19 +617,19 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
       }
     }
 
-    int remainingDetails = viewerTableConfiguration.getColumns().size() - countDetails;
-    int remainingTable = viewerTableConfiguration.getColumns().size() - countTable;
+    int remainingDetails = tableStatus.getColumns().size() - countDetails;
+    int remainingTable = tableStatus.getColumns().size() - countTable;
 
     return remainingDetails > 0 && remainingTable > 0;
   }
 
   private void saveChanges() {
     CollectionService.Util.call((Boolean result) -> {
-      ObserverManager.getCollectionObserver().setCollectionStatus(viewerCollectionConfiguration);
-      sidebar.reset(database, viewerCollectionConfiguration);
+      ObserverManager.getCollectionObserver().setCollectionStatus(collectionStatus);
+      sidebar.reset(database, collectionStatus);
       this.changes = false;
       Toast.showInfo(messages.columnManagementPageTitle(), messages.columnManagementPageToastDescription());
-    }).updateCollectionConfiguration(database.getUuid(), database.getUuid(), viewerCollectionConfiguration);
+    }).updateCollectionConfiguration(database.getUuid(), database.getUuid(), collectionStatus);
   }
 
   @Override
@@ -642,9 +640,9 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
   }
 
   @Override
-  public void updateCollection(ViewerCollectionConfiguration viewerCollectionConfiguration) {
-    sidebar.reset(database, viewerCollectionConfiguration);
-    this.viewerCollectionConfiguration = viewerCollectionConfiguration;
+  public void updateCollection(CollectionStatus collectionStatus) {
+    sidebar.reset(database, collectionStatus);
+    this.collectionStatus = collectionStatus;
   }
 
   @Override
@@ -657,7 +655,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
   @Override
   protected void onLoad() {
     super.onLoad();
-    if (!viewerCollectionConfiguration.getViewerTableConfigurationByTableId(tableId).isShow()) {
+    if (!collectionStatus.getTableStatusByTableId(tableId).isShow()) {
       HistoryManager.gotoAdvancedConfiguration(database.getUuid());
     }
   }

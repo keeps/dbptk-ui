@@ -1,4 +1,4 @@
-package com.databasepreservation.common.client.models.configuration.collection;
+package com.databasepreservation.common.client.models.status.collection;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
@@ -8,12 +8,12 @@ import java.io.Serializable;
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 @JsonPropertyOrder({"show", "template"})
-public class ViewerListConfiguration implements Serializable {
+public class ListStatus implements Serializable {
 
   private boolean show;
-  private ViewerTemplateConfiguration template;
+  private TemplateStatus template;
 
-  public ViewerListConfiguration() { }
+  public ListStatus() { }
 
   public boolean isShow() {
     return show;
@@ -23,11 +23,11 @@ public class ViewerListConfiguration implements Serializable {
     this.show = show;
   }
 
-  public ViewerTemplateConfiguration getTemplate() {
+  public TemplateStatus getTemplate() {
     return template;
   }
 
-  public void setTemplate(ViewerTemplateConfiguration template) {
+  public void setTemplate(TemplateStatus template) {
     this.template = template;
   }
 

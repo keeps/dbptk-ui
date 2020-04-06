@@ -1,4 +1,4 @@
-package com.databasepreservation.common.client.models.configuration.collection;
+package com.databasepreservation.common.client.models.status.collection;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
@@ -8,12 +8,12 @@ import java.io.Serializable;
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 @JsonPropertyOrder({"fixed", "picker"})
-public class ViewerAdvancedConfiguration implements Serializable {
+public class AdvancedStatus implements Serializable {
 
   private boolean fixed;
   private String picker;
 
-  public ViewerAdvancedConfiguration() { }
+  public AdvancedStatus() { }
 
   public boolean isFixed() {
     return fixed;

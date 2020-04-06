@@ -3,16 +3,26 @@ package com.databasepreservation.common.api.v1.utils;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.databasepreservation.common.api.utils.HandlebarsUtils;
 import org.apache.commons.csv.CSVPrinter;
 
+import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.index.IndexResult;
-import com.databasepreservation.common.client.models.configuration.collection.ViewerTableConfiguration;
+import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
+import com.databasepreservation.common.client.models.status.collection.NestedColumnStatus;
+import com.databasepreservation.common.client.models.status.collection.TableStatus;
+import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
+import com.databasepreservation.common.client.models.structure.ViewerType;
+import com.github.jknack.handlebars.Handlebars;
+import com.github.jknack.handlebars.Template;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -20,7 +30,7 @@ import com.databasepreservation.common.client.models.structure.ViewerRow;
 public class ResultsCSVOutputStream extends CSVOutputStream {
   /** The results to write to output stream. */
   private final IndexResult<ViewerRow> results;
-  private final ViewerTableConfiguration configTable;
+  private final TableStatus configTable;
   private final ViewerRow row;
   private final List<String> fieldsToReturn;
   private final boolean exportDescription;
@@ -35,7 +45,7 @@ public class ResultsCSVOutputStream extends CSVOutputStream {
    * @param delimiter
    *          the CSV field delimiter.
    */
-  public ResultsCSVOutputStream(final IndexResult<ViewerRow> results, final ViewerTableConfiguration configTable,
+  public ResultsCSVOutputStream(final IndexResult<ViewerRow> results, final TableStatus configTable,
     final String filename, final boolean exportDescription, final char delimiter, String fieldsToHeader) {
     super(filename, delimiter);
     this.results = results;
@@ -46,8 +56,8 @@ public class ResultsCSVOutputStream extends CSVOutputStream {
     this.row = null;
   }
 
-  public ResultsCSVOutputStream(final ViewerRow row, final ViewerTableConfiguration configTable, final String filename,
-                                final boolean exportDescription, final char delimiter, String fieldsToHeader) {
+  public ResultsCSVOutputStream(final ViewerRow row, final TableStatus configTable, final String filename,
+    final boolean exportDescription, final char delimiter, String fieldsToHeader) {
     super(filename, delimiter);
     this.row = row;
     this.results = null;

@@ -1,6 +1,6 @@
 package com.databasepreservation.common.client.common.utils;
 
-import com.databasepreservation.common.client.models.configuration.collection.ViewerCollectionConfiguration;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 
@@ -10,10 +10,10 @@ import com.databasepreservation.common.client.models.structure.ViewerTable;
 public class TableRowListWrapper {
   private ViewerDatabase database;
   private ViewerTable table;
-  private ViewerCollectionConfiguration status;
+  private CollectionStatus status;
   private Boolean isNested;
 
-  public TableRowListWrapper(ViewerDatabase database, ViewerTable table, ViewerCollectionConfiguration status, Boolean isNested) {
+  public TableRowListWrapper(ViewerDatabase database, ViewerTable table, CollectionStatus status, Boolean isNested) {
     this.database = database;
     this.table = table;
     this.status = status;
@@ -36,11 +36,11 @@ public class TableRowListWrapper {
     this.table = table;
   }
 
-  public ViewerCollectionConfiguration getStatus() {
+  public CollectionStatus getStatus() {
     return status;
   }
 
-  public void setStatus(ViewerCollectionConfiguration status) {
+  public void setStatus(CollectionStatus status) {
     this.status = status;
   }
 

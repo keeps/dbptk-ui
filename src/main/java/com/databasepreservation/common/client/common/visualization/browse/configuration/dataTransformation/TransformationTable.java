@@ -7,10 +7,10 @@ import java.util.Map;
 
 import com.databasepreservation.common.client.common.lists.widgets.BasicTablePanel;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
-import com.databasepreservation.common.client.models.configuration.denormalization.ColumnWrapper;
-import com.databasepreservation.common.client.models.configuration.denormalization.DenormalizeConfiguration;
-import com.databasepreservation.common.client.models.configuration.denormalization.RelatedColumnConfiguration;
-import com.databasepreservation.common.client.models.configuration.denormalization.RelatedTablesConfiguration;
+import com.databasepreservation.common.client.models.status.denormalization.ColumnWrapper;
+import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
+import com.databasepreservation.common.client.models.status.denormalization.RelatedColumnConfiguration;
+import com.databasepreservation.common.client.models.status.denormalization.RelatedTablesConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerTable;

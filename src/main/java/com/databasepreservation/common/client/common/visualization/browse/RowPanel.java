@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import com.databasepreservation.common.client.models.status.collection.LargeObjectConsolidateProperty;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
 import com.databasepreservation.common.client.ClientConfigurationManager;
@@ -29,10 +30,9 @@ import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.filter.FilterParameter;
 import com.databasepreservation.common.client.index.filter.InnerJoinFilterParameter;
 import com.databasepreservation.common.client.index.sort.Sorter;
-import com.databasepreservation.common.client.models.configuration.collection.ViewerCollectionConfiguration;
-import com.databasepreservation.common.client.models.configuration.collection.ViewerColumnConfiguration;
-import com.databasepreservation.common.client.models.configuration.collection.LargeObjectConsolidateProperty;
-import com.databasepreservation.common.client.models.configuration.collection.ViewerNestedColumnConfiguration;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
+import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
+import com.databasepreservation.common.client.models.status.collection.NestedColumnStatus;
 import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
@@ -75,12 +75,12 @@ public class RowPanel extends RightPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
 
   public static RowPanel createInstance(ViewerDatabase database, String tableId, String rowIndex,
-    ViewerCollectionConfiguration status) {
+    CollectionStatus status) {
     return new RowPanel(database, tableId, rowIndex, status);
   }
 
   public static RowPanel createInstance(ViewerDatabase database, ViewerTable table, ViewerRow row,
-    ViewerCollectionConfiguration status) {
+    CollectionStatus status) {
     return new RowPanel(database, table, row, status);
   }
 
@@ -93,7 +93,7 @@ public class RowPanel extends RightPanel {
   private ViewerTable table;
   private final String rowUUID;
   private ViewerRow row;
-  private ViewerCollectionConfiguration status;
+  private CollectionStatus status;
 
   @UiField
   SimplePanel recordHeader;
@@ -107,7 +107,7 @@ public class RowPanel extends RightPanel {
   @UiField
   FlowPanel description;
 
-  private RowPanel(ViewerDatabase database, ViewerTable table, ViewerRow row, ViewerCollectionConfiguration status) {
+  private RowPanel(ViewerDatabase database, ViewerTable table, ViewerRow row, CollectionStatus status) {
     this.rowUUID = row.getUuid();
     this.database = database;
     this.table = table;
@@ -121,7 +121,7 @@ public class RowPanel extends RightPanel {
   }
 
   private RowPanel(ViewerDatabase viewerDatabase, final String tableId, final String rowIndex,
-    ViewerCollectionConfiguration status) {
+    CollectionStatus status) {
     this.rowUUID = rowIndex;
     this.database = viewerDatabase;
     this.table = database.getMetadata().getTableById(tableId);
@@ -138,20 +138,20 @@ public class RowPanel extends RightPanel {
   }
 
   private void setTitle() {
-    recordHeader.setWidget(CommonClientUtils.getHeader(status.getViewerTableConfigurationByTableId(table.getId()), table, "h1",
+    recordHeader.setWidget(CommonClientUtils.getHeader(status.getTableStatusByTableId(table.getId()), table, "h1",
       database.getMetadata().getSchemas().size() > 1));
   }
 
   @Override
   public void handleBreadcrumb(BreadcrumbPanel breadcrumb) {
     BreadcrumbManager.updateBreadcrumb(breadcrumb, BreadcrumbManager.forRecord(database.getMetadata().getName(),
-      database.getUuid(), status.getViewerTableConfiguration(table.getUuid()).getCustomName(), table.getId(), rowUUID));
+      database.getUuid(), status.getTableStatus(table.getUuid()).getCustomName(), table.getId(), rowUUID));
   }
 
   private void init() {
-    if (ViewerStringUtils.isNotBlank(status.getViewerTableConfigurationByTableId(table.getId()).getCustomDescription())) {
+    if (ViewerStringUtils.isNotBlank(status.getTableStatusByTableId(table.getId()).getCustomDescription())) {
       MetadataField instance = MetadataField
-        .createInstance(status.getViewerTableConfigurationByTableId(table.getId()).getCustomDescription());
+        .createInstance(status.getTableStatusByTableId(table.getId()).getCustomDescription());
       instance.setCSS("table-row-description");
       description.add(instance);
     }
@@ -208,16 +208,16 @@ public class RowPanel extends RightPanel {
       b.appendHtmlConstant("</div>");
     }
 
-    for (ViewerColumnConfiguration viewerColumnConfiguration : status.getViewerTableConfiguration(table.getUuid()).getColumns()) {
-      if (viewerColumnConfiguration.getViewerDetailsConfiguration().isShow()) {
-        if (viewerColumnConfiguration.getNestedColumns() == null) {
-          ViewerColumn column = table.getColumnBySolrName(viewerColumnConfiguration.getId());
+    for (ColumnStatus columnStatus : status.getTableStatus(table.getUuid()).getColumns()) {
+      if (columnStatus.getDetailsStatus().isShow()) {
+        if (columnStatus.getNestedColumns() == null) {
+          ViewerColumn column = table.getColumnBySolrName(columnStatus.getId());
           boolean isPrimaryKeyColumn = table.getPrimaryKey() != null
             && table.getPrimaryKey().getColumnIndexesInViewerTable().contains(column.getColumnIndexInEnclosingTable());
           getCellHTML(column, colIndexRelatedTo.get(column.getSolrName()),
-            colIndexReferencedBy.get(column.getSolrName()), isPrimaryKeyColumn, viewerColumnConfiguration);
+            colIndexReferencedBy.get(column.getSolrName()), isPrimaryKeyColumn, columnStatus);
         } else {
-          getNestedHTML(viewerColumnConfiguration);
+          getNestedHTML(columnStatus);
         }
       }
     }
@@ -283,8 +283,8 @@ public class RowPanel extends RightPanel {
   }
 
   private void getCellHTML(ViewerColumn column, Set<Ref> relatedTo, Set<Ref> referencedBy, boolean isPrimaryKeyColumn,
-    ViewerColumnConfiguration viewerColumnConfiguration) {
-    String label = viewerColumnConfiguration.getCustomName();
+    ColumnStatus columnStatus) {
+    String label = columnStatus.getCustomName();
 
     String value = null;
     ViewerCell cell = row.getCells().get(column.getSolrName());
@@ -302,20 +302,13 @@ public class RowPanel extends RightPanel {
       rowField = RowField.createInstance(label, new HTML("NULL"));
     } else {
       if (column.getType().getDbType().equals(ViewerType.dbTypes.BINARY)) {
-        if ((database.getPath() == null || database.getPath().isEmpty())
-          && !status.getConsolidateProperty().equals(LargeObjectConsolidateProperty.CONSOLIDATED)) {
+        if ((database.getPath() == null || database.getPath().isEmpty()) && !status.getConsolidateProperty().equals(LargeObjectConsolidateProperty.CONSOLIDATED)) {
           rowField = RowField.createInstance(label, new HTML(messages.rowPanelTextForLobUnavailable()));
         } else {
-          SafeHtml safeHtml = SafeHtmlUtils.EMPTY_SAFE_HTML;
-            String template = viewerColumnConfiguration.getViewerDetailsConfiguration().getViewerTemplateConfiguration().getTemplate();
-            if (template != null && !template.isEmpty()) {
-              String json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_downloadLOB(),
-                  ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK, RestUtils.createExportLobUri(database.getUuid(),
-                      table.getSchemaName(), table.getName(), row.getUuid(), viewerColumnConfiguration.getColumnIndex(), value));
-              safeHtml = SafeHtmlUtils.fromSafeConstant(JavascriptUtils.compileTemplate(template, json));
-            }
-
-          rowField = RowField.createInstance(label, new HTML(safeHtml));
+          rowField = RowField.createInstance(label,
+              CommonClientUtils.wrapOnAnchor(messages.row_downloadLOB(),
+                  RestUtils.createExportLobUri(database.getUuid(), table.getSchemaName(), table.getName(), row.getUuid(),
+                      column.getColumnIndexInEnclosingTable(), cell.getValue())));
         }
       } else {
         rowField = RowField.createInstance(label, new HTML(value));
@@ -327,8 +320,8 @@ public class RowPanel extends RightPanel {
 
     GWT.log("showNullValues: " + showNullValues);
 
-    if (ViewerStringUtils.isNotBlank(viewerColumnConfiguration.getCustomDescription())) {
-      rowField.addColumnDescription(viewerColumnConfiguration.getCustomDescription());
+    if (ViewerStringUtils.isNotBlank(columnStatus.getCustomDescription())) {
+      rowField.addColumnDescription(columnStatus.getCustomDescription());
     }
 
     if (relatedTo != null && !relatedTo.isEmpty()) {
@@ -348,18 +341,18 @@ public class RowPanel extends RightPanel {
     }
   }
 
-  private void getNestedHTML(ViewerColumnConfiguration viewerColumnConfiguration) {
-    ViewerNestedColumnConfiguration nestedColumns = viewerColumnConfiguration.getNestedColumns();
+  private void getNestedHTML(ColumnStatus columnStatus) {
+    NestedColumnStatus nestedColumns = columnStatus.getNestedColumns();
 
     if (nestedColumns != null) {
       ViewerTable nestedTable = database.getMetadata().getTableById(nestedColumns.getOriginalTable());
 
       List<FilterParameter> filterParameterList = new ArrayList<>();
-      filterParameterList.add(new InnerJoinFilterParameter(rowUUID, viewerColumnConfiguration.getId()));
+      filterParameterList.add(new InnerJoinFilterParameter(rowUUID, columnStatus.getId()));
       Filter filter = new Filter();
       filter.add(filterParameterList);
 
-      if (viewerColumnConfiguration.getNestedColumns().getMultiValue()) {
+      if (columnStatus.getNestedColumns().getMultiValue()) {
         FlowPanel card = new FlowPanel();
         card.setStyleName("card");
 
@@ -369,7 +362,7 @@ public class RowPanel extends RightPanel {
 
         content.add(card);
       } else {
-        String template = viewerColumnConfiguration.getViewerDetailsConfiguration().getViewerTemplateConfiguration().getTemplate();
+        String template = columnStatus.getDetailsStatus().getTemplateStatus().getTemplate();
         FlowPanel panel = new FlowPanel();
         content.add(panel);
         if (template != null) {
@@ -379,8 +372,8 @@ public class RowPanel extends RightPanel {
             if (result.getTotalCount() >= 1) {
               String json = JSOUtils.cellsToJson(result.getResults().get(0).getCells(), nestedTable);
               String s = JavascriptUtils.compileTemplate(template, json);
-              RowField rowField = RowField.createInstance(viewerColumnConfiguration.getCustomName(), new Label(s));
-              rowField.addColumnDescription(viewerColumnConfiguration.getCustomDescription());
+              RowField rowField = RowField.createInstance(columnStatus.getCustomName(), new Label(s));
+              rowField.addColumnDescription(columnStatus.getCustomDescription());
 
               panel.add(rowField);
             }

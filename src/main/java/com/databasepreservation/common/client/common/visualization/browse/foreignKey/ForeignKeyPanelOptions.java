@@ -16,7 +16,7 @@ import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.common.visualization.browse.table.TableCheckConstraintsPanel;
 import com.databasepreservation.common.client.common.visualization.browse.table.TableForeignKeysPanel;
 import com.databasepreservation.common.client.common.visualization.browse.table.TableTriggersPanel;
-import com.databasepreservation.common.client.models.configuration.collection.ViewerCollectionConfiguration;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
@@ -41,6 +41,7 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimpleCheckBox;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.MultiSelectionModel;
 
@@ -53,8 +54,8 @@ public class ForeignKeyPanelOptions extends RightPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, ForeignKeyPanelOptions> instances = new HashMap<>();
 
-  public static ForeignKeyPanelOptions getInstance(ViewerDatabase database, ViewerCollectionConfiguration status, String tableId,
-                                                   List<String> columnsAndValues) {
+  public static ForeignKeyPanelOptions getInstance(ViewerDatabase database, CollectionStatus status, String tableId,
+																									 List<String> columnsAndValues) {
     String separator = "/";
     String code = database.getUuid() + separator + tableId;
 
@@ -85,7 +86,7 @@ public class ForeignKeyPanelOptions extends RightPanel {
   Button options;
 
   private ViewerDatabase database;
-  private ViewerCollectionConfiguration status;
+  private CollectionStatus status;
   private ViewerTable table;
   private boolean allSelected = true; // true: select all; false; select none;
   private boolean showTechnicalInformation = false; // true: show; false: hide;
@@ -97,8 +98,8 @@ public class ForeignKeyPanelOptions extends RightPanel {
   private SimpleCheckBox advancedSwitch;
   private List<String> columnsAndValues;
 
-  private ForeignKeyPanelOptions(ViewerDatabase viewerDatabase, ViewerCollectionConfiguration status, final String tableId,
-                                 final List<String> columnsAndValues) {
+  private ForeignKeyPanelOptions(ViewerDatabase viewerDatabase, CollectionStatus status, final String tableId,
+    final List<String> columnsAndValues) {
     database = viewerDatabase;
     this.status = status;
     table = database.getMetadata().getTableById(tableId);
@@ -123,7 +124,7 @@ public class ForeignKeyPanelOptions extends RightPanel {
   }
 
   private void init() {
-    mainHeader.insert(CommonClientUtils.getHeader(status.getViewerTableConfigurationByTableId(table.getId()), table, "h1", database.getMetadata().getSchemas().size() > 1),0);
+    mainHeader.insert(CommonClientUtils.getHeader(status.getTableStatusByTableId(table.getId()), table, "h1", database.getMetadata().getSchemas().size() > 1),0);
     configureButtons();
     configureTechnicalInformationSwitch();
     initTable();

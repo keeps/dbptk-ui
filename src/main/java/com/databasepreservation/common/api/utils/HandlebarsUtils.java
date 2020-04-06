@@ -10,9 +10,9 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.exceptions.RESTException;
-import com.databasepreservation.common.client.models.configuration.collection.ViewerColumnConfiguration;
-import com.databasepreservation.common.client.models.configuration.collection.ViewerNestedColumnConfiguration;
-import com.databasepreservation.common.client.models.configuration.collection.ViewerTableConfiguration;
+import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
+import com.databasepreservation.common.client.models.status.collection.NestedColumnStatus;
+import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.models.structure.ViewerType;
@@ -25,18 +25,18 @@ import com.github.jknack.handlebars.Template;
  */
 public class HandlebarsUtils {
 
-  public static List<String> getCellValues(ViewerRow row, ViewerTableConfiguration configTable, List<String> fieldsToReturn) {
+  public static List<String> getCellValues(ViewerRow row, TableStatus configTable, List<String> fieldsToReturn) {
     List<String> values = new ArrayList<>();
     fieldsToReturn.remove(ViewerConstants.SOLR_ROWS_TABLE_ID);
     fieldsToReturn.remove(ViewerConstants.SOLR_ROWS_TABLE_UUID);
 
     for (String solrColumnName : fieldsToReturn) {
-      final ViewerColumnConfiguration columnConfig = configTable.getColumnById(solrColumnName);
+      final ColumnStatus columnConfig = configTable.getColumnById(solrColumnName);
 
       if (columnConfig != null && columnConfig.getType().equals(ViewerType.dbTypes.NESTED)) {
         // treat nested
         if (!row.getNestedRowList().isEmpty()) {
-          String template = columnConfig.getViewerExportConfiguration().getViewerTemplateConfiguration().getTemplate();
+          String template = columnConfig.getExportStatus().getTemplateStatus().getTemplate();
           StringBuilder stringBuilder = new StringBuilder();
           row.getNestedRowList().forEach(nestedRow -> {
             if (nestedRow.getNestedUUID().equals(solrColumnName)) {
@@ -74,9 +74,9 @@ public class HandlebarsUtils {
     return values;
   }
 
-  public static String applyExportTemplate(ViewerRow row, ViewerTableConfiguration tableConfiguration, int columnIndex) {
+  public static String applyExportTemplate(ViewerRow row, TableStatus tableConfiguration, int columnIndex) {
     Map<String, String> map = cellsToObject(row.getCells(), tableConfiguration);
-    final String template = tableConfiguration.getColumnByIndex(columnIndex).getViewerExportConfiguration().getViewerTemplateConfiguration()
+    final String template = tableConfiguration.getColumnByIndex(columnIndex).getExportStatus().getTemplateStatus()
       .getTemplate();
 
     if (ViewerStringUtils.isBlank(template)) {
@@ -92,10 +92,10 @@ public class HandlebarsUtils {
     }
   }
 
-  private static Map<String, String> cellsToObject(Map<String, ViewerCell> cells, ViewerTableConfiguration tableConfiguration) {
+  private static Map<String, String> cellsToObject(Map<String, ViewerCell> cells, TableStatus tableConfiguration) {
     Map<String, String> map = new HashMap<>();
 
-    for (ViewerColumnConfiguration column : tableConfiguration.getColumns()) {
+    for (ColumnStatus column : tableConfiguration.getColumns()) {
       if (cells.get(column.getId()) != null) {
         map.put(ViewerStringUtils.replaceAllFor(column.getCustomName(), "\\s", "_"),
           cells.get(column.getId()).getValue());
@@ -105,7 +105,7 @@ public class HandlebarsUtils {
     return map;
   }
 
-  private static Map<String, String> cellsToJson(Map<String, ViewerCell> cells, ViewerNestedColumnConfiguration nestedConfig) {
+  private static Map<String, String> cellsToJson(Map<String, ViewerCell> cells, NestedColumnStatus nestedConfig) {
     final List<String> nestedFields = nestedConfig.getNestedFields();
     final List<String> nestedSolrNames = nestedConfig.getNestedSolrNames();
     int index = 0;

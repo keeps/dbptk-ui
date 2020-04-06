@@ -8,7 +8,7 @@ import java.util.Map;
 import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
 import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
-import com.databasepreservation.common.client.models.configuration.collection.ViewerCollectionConfiguration;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
 import com.databasepreservation.common.client.models.structure.ViewerSchema;
@@ -32,7 +32,7 @@ import config.i18n.client.ClientMessages;
 public class ErDiagram extends Composite implements ICollectionStatusObserver {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, ErDiagram> instances = new HashMap<>();
-  private ViewerCollectionConfiguration viewerCollectionConfiguration;
+  private CollectionStatus collectionStatus;
 
   public static ErDiagram getInstance(ViewerDatabase database, ViewerSchema schema, String path) {
     String separator = "/";
@@ -40,16 +40,16 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
     return instances.computeIfAbsent(code, k -> new ErDiagram(database, schema, path, null));
   }
 
-  public static ErDiagram getInstance(ViewerDatabase database, ViewerSchema schema, String path, ViewerCollectionConfiguration viewerCollectionConfiguration) {
+  public static ErDiagram getInstance(ViewerDatabase database, ViewerSchema schema, String path, CollectionStatus collectionStatus) {
     String separator = "/";
     String code = database.getUuid() + separator + schema.getUuid() + separator + path;
-    return instances.computeIfAbsent(code, k -> new ErDiagram(database, schema, path, viewerCollectionConfiguration));
+    return instances.computeIfAbsent(code, k -> new ErDiagram(database, schema, path, collectionStatus ));
   }
 
   @Override
-  public void updateCollection(ViewerCollectionConfiguration viewerCollectionConfiguration) {
-    this.viewerCollectionConfiguration = viewerCollectionConfiguration;
-    instances.keySet().removeIf(p -> p.startsWith(viewerCollectionConfiguration.getDatabaseUUID()));
+  public void updateCollection(CollectionStatus collectionStatus) {
+    this.collectionStatus = collectionStatus;
+    instances.keySet().removeIf(p -> p.startsWith(collectionStatus.getDatabaseUUID()));
   }
 
   interface ErDiagramUiBinder extends UiBinder<Widget, ErDiagram> {
@@ -78,9 +78,9 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
 
   private final String databaseUUID;
 
-  private ErDiagram(final ViewerDatabase database, final ViewerSchema schema, String path, ViewerCollectionConfiguration viewerCollectionConfiguration) {
+  private ErDiagram(final ViewerDatabase database, final ViewerSchema schema, String path, CollectionStatus collectionStatus) {
     databaseUUID = database.getUuid();
-    this.viewerCollectionConfiguration = viewerCollectionConfiguration;
+    this.collectionStatus = collectionStatus;
     initWidget(uiBinder.createAndBindUi(this));
 
     ObserverManager.getCollectionObserver().addObserver(this);
@@ -124,7 +124,7 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
           && (viewerTable.isMaterializedView() || viewerTable.isCustomView())) {
           continue;
         }
-        VisNode visNode = new VisNode(viewerTable.getId(), viewerTable.getName(), viewerCollectionConfiguration);
+        VisNode visNode = new VisNode(viewerTable.getId(), viewerTable.getName(), collectionStatus);
 
         if (ViewerStringUtils.isNotBlank(viewerTable.getDescription())) {
           visNode.description = viewerTable.getDescription();
@@ -279,15 +279,15 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
     int numRelationsTotal;
     int numColumns;
     int numColumnsAndRows;
-    ViewerCollectionConfiguration viewerCollectionConfiguration;
+    CollectionStatus collectionStatus;
 
-    public VisNode(String id, String label, ViewerCollectionConfiguration viewerCollectionConfiguration) {
+    public VisNode(String id, String label, CollectionStatus collectionStatus) {
       this.id = id;
       this.label = label;
       this.font = new VisNodeFont(25);
       this.size = 20;
       this.color = new VisNodeColor();
-      this.viewerCollectionConfiguration = viewerCollectionConfiguration;
+      this.collectionStatus = collectionStatus;
     }
 
     public String getId() {
@@ -352,7 +352,7 @@ public class ErDiagram extends Composite implements ICollectionStatusObserver {
 
     public void adjustBackgroundColor(double value) {
       // this.color.background = "#" + hslToRgb(0.59722222222, 1.0, 0.91);
-      if(viewerCollectionConfiguration != null && !viewerCollectionConfiguration.getViewerTableConfigurationByTableId(id).isShow()){
+      if(collectionStatus != null && !collectionStatus.getTableStatusByTableId(id).isShow()){
         this.color.background = "#" + hslToRgb(0, 0, 0.784);
       } else {
         this.color.background = "#" + hslToRgb(0.59722222222, 1.0, 0.91 - value);

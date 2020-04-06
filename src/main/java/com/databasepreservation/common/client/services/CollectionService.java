@@ -24,8 +24,8 @@ import com.databasepreservation.common.client.common.search.SearchInfo;
 import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.models.progress.ProgressData;
-import com.databasepreservation.common.client.models.configuration.collection.ViewerCollectionConfiguration;
-import com.databasepreservation.common.client.models.configuration.denormalization.DenormalizeConfiguration;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
+import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.google.gwt.core.client.GWT;
 
@@ -86,16 +86,16 @@ public interface CollectionService extends DirectRestService {
    *******************************************************************************/
   @GET
   @Path("{databaseUUID}/collection/{collectionUUID}/config")
-  @ApiOperation(value = "Gets the internal collection configuration", response = ViewerCollectionConfiguration.class)
-  List<ViewerCollectionConfiguration> getCollectionConfiguration(@PathParam("databaseUUID") String databaseUUID,
-                                                                 @PathParam("databaseUUID") String collectionUUID);
+  @ApiOperation(value = "Gets the internal collection configuration", response = CollectionStatus.class)
+  List<CollectionStatus> getCollectionConfiguration(@PathParam("databaseUUID") String databaseUUID,
+    @PathParam("databaseUUID") String collectionUUID);
 
   @PUT
   @Path("{databaseUUID}/collection/{collectionUUID}/config")
   @ApiOperation(value = "Updates the internal collection configuration", response = Boolean.class)
   Boolean updateCollectionConfiguration(@PathParam("databaseUUID") String databaseUUID,
     @PathParam("collectionUUID") String collectionUUID,
-    @ApiParam(value = "collectionStatus", required = true) ViewerCollectionConfiguration status);
+    @ApiParam(value = "collectionStatus", required = true) CollectionStatus status);
 
   /*******************************************************************************
    * Collection Resource - Config Sub-resource - Denormalization Sub-resource

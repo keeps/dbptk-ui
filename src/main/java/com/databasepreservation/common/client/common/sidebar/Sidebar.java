@@ -1,16 +1,18 @@
 package com.databasepreservation.common.client.common.sidebar;
 
-import com.databasepreservation.common.client.models.configuration.collection.ViewerCollectionConfiguration;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.google.gwt.user.client.ui.IsWidget;
+
+import java.util.Map;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
 public interface Sidebar extends IsWidget {
-  void init(ViewerDatabase vb, ViewerCollectionConfiguration status);
+  void init(ViewerDatabase vb, CollectionStatus status);
 
-  void reset(ViewerDatabase database, ViewerCollectionConfiguration status);
+  void reset(ViewerDatabase database, CollectionStatus status);
 
   boolean isInitialized();
 

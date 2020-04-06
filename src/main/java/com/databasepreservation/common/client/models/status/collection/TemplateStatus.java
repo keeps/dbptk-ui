@@ -1,16 +1,16 @@
-package com.databasepreservation.common.client.models.configuration.collection;
+package com.databasepreservation.common.client.models.status.collection;
 
 import java.io.Serializable;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-public class ViewerTemplateConfiguration implements Serializable {
+public class TemplateStatus implements Serializable {
 
   private String template;
   private String separator;
 
-  public ViewerTemplateConfiguration() {
+  public TemplateStatus() {
   }
 
   public String getTemplate() {

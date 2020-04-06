@@ -1,4 +1,4 @@
-package com.databasepreservation.common.client.models.configuration.collection;
+package com.databasepreservation.common.client.models.status.collection;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -8,14 +8,14 @@ import java.util.Set;
 
 import com.databasepreservation.common.client.common.search.SavedSearch;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-@JsonPropertyOrder({"version", "id", "solrCollectionPrefix", "databaseUUID", "name", "description",
-  "consolidateProperty", "tables", "savedSearches", "denormalizations"})
-public class ViewerCollectionConfiguration implements Serializable {
+@JsonPropertyOrder({"version", "id", "solrCollectionPrefix", "databaseUUID", "name", "description", "consolidateProperty", "tables", "savedSearches" , "denormalizations"})
+public class CollectionStatus implements Serializable {
 
   private String version;
   private String databaseUUID;
@@ -24,11 +24,11 @@ public class ViewerCollectionConfiguration implements Serializable {
   private String name;
   private String description;
   private LargeObjectConsolidateProperty consolidateProperty;
-  private List<ViewerTableConfiguration> tables;
+  private List<TableStatus> tables;
   private List<SavedSearch> savedSearches;
   private Set<String> denormalizations;
 
-  public ViewerCollectionConfiguration() {
+  public CollectionStatus() {
     tables = new ArrayList<>();
     savedSearches = new ArrayList<>();
     denormalizations = new HashSet<>();
@@ -91,11 +91,11 @@ public class ViewerCollectionConfiguration implements Serializable {
     this.consolidateProperty = consolidateProperty;
   }
 
-  public List<ViewerTableConfiguration> getTables() {
+  public List<TableStatus> getTables() {
     return tables;
   }
 
-  public void setTables(List<ViewerTableConfiguration> tables) {
+  public void setTables(List<TableStatus> tables) {
     this.tables = tables;
   }
 
@@ -107,8 +107,8 @@ public class ViewerCollectionConfiguration implements Serializable {
     this.savedSearches = savedSearches;
   }
 
-  public void addViewerTableConfiguration(ViewerTableConfiguration viewerTableConfiguration) {
-    this.tables.add(viewerTableConfiguration);
+  public void addTableStatus(TableStatus status) {
+    this.tables.add(status);
   }
 
   public Set<String> getDenormalizations() {
@@ -119,9 +119,7 @@ public class ViewerCollectionConfiguration implements Serializable {
     this.denormalizations = denormalizations;
   }
 
-  public void addDenormalization(String denormalization) {
-    this.denormalizations.add(denormalization);
-  }
+  public void addDenormalization(String denormalization) { this.denormalizations.add(denormalization);}
 
   public void addSavedSearch(SavedSearch savedSearch) {
     this.savedSearches.add(savedSearch);
@@ -130,8 +128,7 @@ public class ViewerCollectionConfiguration implements Serializable {
   @JsonIgnore
   public SavedSearch getSavedSearch(String id) {
     for (SavedSearch savedSearch : savedSearches) {
-      if (savedSearch.getUuid().equals(id))
-        return savedSearch;
+      if (savedSearch.getUuid().equals(id)) return savedSearch;
     }
     return null;
   }
@@ -147,9 +144,9 @@ public class ViewerCollectionConfiguration implements Serializable {
 
   public List<String> getFieldsToReturn(String tableId) {
     List<String> fieldsToReturn = new ArrayList<>();
-    final List<ViewerColumnConfiguration> columns = getViewerTableConfigurationByTableId(tableId).getColumns();
+    final List<ColumnStatus> columns = getTableStatusByTableId(tableId).getColumns();
     columns.forEach(column -> {
-      if (column.getViewerDetailsConfiguration().isShow()) {
+      if (column.getDetailsStatus().isShow()) {
         fieldsToReturn.add(column.getId());
       }
     });
@@ -158,8 +155,8 @@ public class ViewerCollectionConfiguration implements Serializable {
   }
 
   @JsonIgnore
-  public ViewerTableConfiguration getViewerTableConfiguration(String id) {
-    for (ViewerTableConfiguration table : tables) {
+  public TableStatus getTableStatus(String id) {
+    for (TableStatus table : tables) {
       if (table.getUuid().equals(id))
         return table;
     }
@@ -168,8 +165,8 @@ public class ViewerCollectionConfiguration implements Serializable {
   }
 
   @JsonIgnore
-  public ViewerTableConfiguration getViewerTableConfigurationByTableId(String id) {
-    for (ViewerTableConfiguration table : tables) {
+  public TableStatus getTableStatusByTableId(String id) {
+    for (TableStatus table : tables) {
       if (table.getId().equals(id))
         return table;
     }
@@ -178,7 +175,7 @@ public class ViewerCollectionConfiguration implements Serializable {
   }
 
   public boolean showTable(String id) {
-    for (ViewerTableConfiguration table : tables) {
+    for (TableStatus table : tables) {
       if (table.getUuid().equals(id))
         return table.isShow();
     }
@@ -187,11 +184,11 @@ public class ViewerCollectionConfiguration implements Serializable {
   }
 
   public boolean showColumn(String tableId, String columnId) {
-    final ViewerTableConfiguration viewerTableConfiguration = getViewerTableConfiguration(tableId);
-    if (viewerTableConfiguration != null) {
-      for (ViewerColumnConfiguration column : viewerTableConfiguration.getColumns()) {
+    final TableStatus tableStatus = getTableStatus(tableId);
+    if (tableStatus != null) {
+      for (ColumnStatus column : tableStatus.getColumns()) {
         if (column.getId().equals(columnId)) {
-          return column.getViewerSearchConfiguration().getList().isShow();
+          return column.getSearchStatus().getList().isShow();
         }
       }
     }
@@ -200,11 +197,11 @@ public class ViewerCollectionConfiguration implements Serializable {
   }
 
   public boolean showColumnInDetail(String tableId, String columnId) {
-    final ViewerTableConfiguration viewerTableConfiguration = getViewerTableConfiguration(tableId);
-    if (viewerTableConfiguration != null) {
-      for (ViewerColumnConfiguration column : viewerTableConfiguration.getColumns()) {
+    final TableStatus tableStatus = getTableStatus(tableId);
+    if (tableStatus != null) {
+      for (ColumnStatus column : tableStatus.getColumns()) {
         if (column.getId().equals(columnId)) {
-          return column.getViewerDetailsConfiguration().isShow();
+          return column.getDetailsStatus().isShow();
         }
       }
     }
@@ -212,10 +209,10 @@ public class ViewerCollectionConfiguration implements Serializable {
     return true;
   }
 
-  public ViewerColumnConfiguration getColumnByTableAndColumn(String tableId, String columnId) {
-    final ViewerTableConfiguration viewerTableConfiguration = getViewerTableConfiguration(tableId);
-    if (viewerTableConfiguration != null) {
-      for (ViewerColumnConfiguration column : viewerTableConfiguration.getColumns()) {
+  public ColumnStatus getColumnByTableAndColumn(String tableId, String columnId) {
+    final TableStatus tableStatus = getTableStatus(tableId);
+    if (tableStatus != null) {
+      for (ColumnStatus column : tableStatus.getColumns()) {
         if (column.getId().equals(columnId)) {
           return column;
         }
@@ -225,11 +222,11 @@ public class ViewerCollectionConfiguration implements Serializable {
   }
 
   public boolean showAdvancedSearch(String tableId, String columnId) {
-    final ViewerTableConfiguration viewerTableConfiguration = getViewerTableConfiguration(tableId);
-    if (viewerTableConfiguration != null) {
-      for (ViewerColumnConfiguration column : viewerTableConfiguration.getColumns()) {
+    final TableStatus tableStatus = getTableStatus(tableId);
+    if (tableStatus != null) {
+      for (ColumnStatus column : tableStatus.getColumns()) {
         if (column.getId().equals(columnId)) {
-          return column.getViewerSearchConfiguration().getAdvanced().isFixed();
+          return column.getSearchStatus().getAdvanced().isFixed();
         }
       }
     }
@@ -238,21 +235,21 @@ public class ViewerCollectionConfiguration implements Serializable {
   }
 
   public void updateTableShowCondition(String id, boolean value) {
-    for (ViewerTableConfiguration table : tables) {
+    for (TableStatus table : tables) {
       if (table.getUuid().equals(id))
         table.setShow(value);
     }
   }
 
   public void updateTableCustomName(String id, String value) {
-    for (ViewerTableConfiguration table : tables) {
+    for (TableStatus table : tables) {
       if (table.getUuid().equals(id))
         table.setCustomName(value);
     }
   }
 
   public void updateTableCustomDescription(String id, String value) {
-    for (ViewerTableConfiguration table : tables) {
+    for (TableStatus table : tables) {
       if (table.getUuid().equals(id))
         table.setCustomDescription(value);
     }
@@ -260,11 +257,10 @@ public class ViewerCollectionConfiguration implements Serializable {
 
   @JsonIgnore
   public String getFirstTableVisible() {
-    for (ViewerTableConfiguration table : tables) {
-      if (table.isShow())
-        return table.getId();
-    }
+		for (TableStatus table : tables) {
+			if (table.isShow()) return table.getId();
+		}
 
-    return null;
-  }
+		return null;
+	}
 }

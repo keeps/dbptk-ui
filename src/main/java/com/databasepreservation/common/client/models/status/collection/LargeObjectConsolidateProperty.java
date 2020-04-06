@@ -1,4 +1,4 @@
-package com.databasepreservation.common.client.models.configuration.collection;
+package com.databasepreservation.common.client.models.status.collection;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>

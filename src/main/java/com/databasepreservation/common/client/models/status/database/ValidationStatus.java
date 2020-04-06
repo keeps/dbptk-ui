@@ -1,4 +1,4 @@
-package com.databasepreservation.common.client.models.configuration.database;
+package com.databasepreservation.common.client.models.status.database;
 
 import java.io.Serializable;
 
@@ -9,23 +9,23 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 @JsonPropertyOrder({"validationStatus", "createdOn", "reportLocation", "validatorVersion", "indicators"})
-public class ViewerValidationConfiguration implements Serializable {
+public class ValidationStatus implements Serializable {
 
   private ViewerDatabaseValidationStatus validationStatus;
   private String createdOn;
   private String reportLocation;
   private String validatorVersion;
-  private ViewerValidationIndicators viewerValidationIndicators;
+  private Indicators indicators;
 
-  public ViewerValidationConfiguration() {
+  public ValidationStatus() {
   }
 
-  public ViewerValidationConfiguration(ViewerDatabaseValidationStatus validationStatus, String createdOn, String reportLocation, String validatorVersion, ViewerValidationIndicators viewerValidationIndicators) {
+  public ValidationStatus(ViewerDatabaseValidationStatus validationStatus, String createdOn, String reportLocation, String validatorVersion, Indicators indicators) {
     this.validationStatus = validationStatus;
     this.createdOn = createdOn;
     this.reportLocation = reportLocation;
     this.validatorVersion = validatorVersion;
-    this.viewerValidationIndicators = viewerValidationIndicators;
+    this.indicators = indicators;
   }
 
   public ViewerDatabaseValidationStatus getValidationStatus() {
@@ -60,11 +60,11 @@ public class ViewerValidationConfiguration implements Serializable {
     this.validatorVersion = validatorVersion;
   }
 
-  public ViewerValidationIndicators getViewerValidationIndicators() {
-    return viewerValidationIndicators;
+  public Indicators getIndicators() {
+    return indicators;
   }
 
-  public void setViewerValidationIndicators(ViewerValidationIndicators viewerValidationIndicators) {
-    this.viewerValidationIndicators = viewerValidationIndicators;
+  public void setIndicators(Indicators indicators) {
+    this.indicators = indicators;
   }
 }
