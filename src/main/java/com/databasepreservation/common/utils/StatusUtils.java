@@ -1,7 +1,6 @@
 package com.databasepreservation.common.utils;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import com.databasepreservation.common.client.ViewerConstants;
@@ -23,6 +22,7 @@ import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
+import com.databasepreservation.common.client.models.structure.ViewerType;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -92,6 +92,13 @@ public class StatusUtils {
     status.setExportStatus(getExportStatus());
     status.setSearchStatus(getSearchStatus(show));
     status.setDetailsStatus(getDetailsStatus(show));
+
+    if (column.getType().getDbType().equals(ViewerType.dbTypes.BINARY)) {
+      final TemplateStatus template = getTemplateStatus();
+      template.setTemplate(ViewerConstants.DEFAULT_DOWNLOAD_LABEL_TEMPLATE);
+      status.updateSearchListTemplate(template);
+      status.updateDetailsTemplate(template);
+    }
 
     return status;
   }

@@ -9,7 +9,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import com.databasepreservation.common.client.models.status.collection.LargeObjectConsolidateProperty;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
 import com.databasepreservation.common.client.ClientConfigurationManager;
@@ -32,6 +31,7 @@ import com.databasepreservation.common.client.index.filter.InnerJoinFilterParame
 import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
+import com.databasepreservation.common.client.models.status.collection.LargeObjectConsolidateProperty;
 import com.databasepreservation.common.client.models.status.collection.NestedColumnStatus;
 import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
@@ -302,13 +302,20 @@ public class RowPanel extends RightPanel {
       rowField = RowField.createInstance(label, new HTML("NULL"));
     } else {
       if (column.getType().getDbType().equals(ViewerType.dbTypes.BINARY)) {
-        if ((database.getPath() == null || database.getPath().isEmpty()) && !status.getConsolidateProperty().equals(LargeObjectConsolidateProperty.CONSOLIDATED)) {
+        if ((database.getPath() == null || database.getPath().isEmpty())
+          && !status.getConsolidateProperty().equals(LargeObjectConsolidateProperty.CONSOLIDATED)) {
           rowField = RowField.createInstance(label, new HTML(messages.rowPanelTextForLobUnavailable()));
         } else {
-          rowField = RowField.createInstance(label,
-              CommonClientUtils.wrapOnAnchor(messages.row_downloadLOB(),
-                  RestUtils.createExportLobUri(database.getUuid(), table.getSchemaName(), table.getName(), row.getUuid(),
-                      column.getColumnIndexInEnclosingTable(), cell.getValue())));
+          SafeHtml safeHtml = SafeHtmlUtils.EMPTY_SAFE_HTML;
+          String template = columnStatus.getDetailsStatus().getTemplateStatus().getTemplate();
+          if (template != null && !template.isEmpty()) {
+            String json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_downloadLOB(),
+              ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK, RestUtils.createExportLobUri(database.getUuid(),
+                table.getSchemaName(), table.getName(), row.getUuid(), columnStatus.getColumnIndex(), value));
+            safeHtml = SafeHtmlUtils.fromSafeConstant(JavascriptUtils.compileTemplate(template, json));
+          }
+
+          rowField = RowField.createInstance(label, new HTML(safeHtml));
         }
       } else {
         rowField = RowField.createInstance(label, new HTML(value));

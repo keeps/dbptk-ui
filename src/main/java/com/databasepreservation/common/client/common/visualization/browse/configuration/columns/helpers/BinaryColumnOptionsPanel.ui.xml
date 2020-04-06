@@ -9,18 +9,26 @@
 
         <g:FlowPanel>
             <g:Label addStyleNames="form-label">
-                <ui:text from='{messages.binaryColumnTemplateForFilename}'/>
-            </g:Label>
-            <g:TextBox addStyleNames="form-textbox" ui:field="templateList"/>
-            <g:FlowPanel ui:field="templateListHint"/>
-        </g:FlowPanel>
-
-        <g:FlowPanel>
-            <g:Label addStyleNames="form-label">
                 <ui:text from='{messages.columnManagementLabelForTemplateList}'/>
             </g:Label>
             <g:TextBox addStyleNames="form-textbox" ui:field="displayList"/>
             <g:FlowPanel ui:field="displayListHint"/>
+        </g:FlowPanel>
+
+        <g:FlowPanel>
+            <g:Label addStyleNames="form-label">
+                <ui:text from='{messages.columnManagementLabelForTemplateDetail}'/>
+            </g:Label>
+            <g:TextBox addStyleNames="form-textbox" ui:field="detailsList"/>
+            <g:FlowPanel ui:field="detailsListHint"/>
+        </g:FlowPanel>
+
+        <g:FlowPanel>
+            <g:Label addStyleNames="form-label">
+                <ui:text from='{messages.binaryColumnTemplateForFilename}'/>
+            </g:Label>
+            <g:TextBox addStyleNames="form-textbox" ui:field="templateList"/>
+            <g:FlowPanel ui:field="templateListHint"/>
         </g:FlowPanel>
 
         <g:FlowPanel>

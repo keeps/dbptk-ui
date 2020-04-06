@@ -1,10 +1,9 @@
 package com.databasepreservation.common.client;
 
-import com.databasepreservation.common.client.models.user.User;
 import org.roda.core.data.common.RodaConstants;
+
 import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
 import com.databasepreservation.common.client.index.filter.Filter;
-
 import com.databasepreservation.modules.siard.SIARD2ModuleFactory;
 
 /**
@@ -33,13 +32,13 @@ public class ViewerConstants {
   public static final String ENDPOINT_CLIENT_LOGGER = ViewerConstants.API_SEP + ViewerConstants.API_SERVLET
     + ViewerConstants.API_V1_CLIENT_LOGGER_RESOURCE;
   public static final String ENDPOINT_MIGRATION = ViewerConstants.API_SEP + ViewerConstants.API_SERVLET
-      + ViewerConstants.API_V1_MIGRATION_RESOURCE;
+    + ViewerConstants.API_V1_MIGRATION_RESOURCE;
   public static final String ENDPOINT_ACTIVITY_LOG = ViewerConstants.API_SEP + ViewerConstants.API_SERVLET
     + ViewerConstants.API_V1_ACTIVITY_LOG_RESOURCE;
   public static final String ENDPOINT_CONFIGURATION = ViewerConstants.API_SEP + ViewerConstants.API_SERVLET
     + ViewerConstants.API_V1_CONFIGURATION_RESOURCE;
   public static final String ENDPOINT_JOB = ViewerConstants.API_SEP + ViewerConstants.API_SERVLET
-      + ViewerConstants.API_V1_JOB_RESOURCE;
+    + ViewerConstants.API_V1_JOB_RESOURCE;
 
   /*
    * DBVTK CONFIG
@@ -512,6 +511,10 @@ public class ViewerConstants {
   public static final String CLOSE_TEMPLATE_ENGINE = "}}";
   public static final String TEMPLATE_LOB_DOWNLOAD_LABEL = "download_label";
   public static final String TEMPLATE_LOB_DOWNLOAD_LINK = "download_link";
+  public static final String DEFAULT_DOWNLOAD_LABEL_TEMPLATE = "<a href=\"" + ViewerConstants.OPEN_TEMPLATE_ENGINE
+    + ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK + ViewerConstants.CLOSE_TEMPLATE_ENGINE + "\">"
+    + ViewerConstants.OPEN_TEMPLATE_ENGINE + ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL
+    + ViewerConstants.CLOSE_TEMPLATE_ENGINE + "</a>";
 
   /**
    * SIARD prefixes

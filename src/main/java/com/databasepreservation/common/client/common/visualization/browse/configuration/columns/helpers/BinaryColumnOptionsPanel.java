@@ -1,5 +1,7 @@
 package com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers;
 
+import static com.databasepreservation.common.client.ViewerConstants.DEFAULT_DOWNLOAD_LABEL_TEMPLATE;
+
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
@@ -21,11 +23,6 @@ import config.i18n.client.ClientMessages;
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 public class BinaryColumnOptionsPanel extends ColumnOptionsPanel {
-  private static String DEFAULT_LABEL_TEMPLATE = "<a href=\"" + ViewerConstants.OPEN_TEMPLATE_ENGINE
-    + ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK + ViewerConstants.CLOSE_TEMPLATE_ENGINE + "\">"
-    + ViewerConstants.OPEN_TEMPLATE_ENGINE + ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL
-    + ViewerConstants.CLOSE_TEMPLATE_ENGINE + "</a>";
-
   interface ColumnsOptionsPanelUiBinder extends UiBinder<Widget, BinaryColumnOptionsPanel> {
   }
 
@@ -53,6 +50,12 @@ public class BinaryColumnOptionsPanel extends ColumnOptionsPanel {
   FlowPanel displayListHint;
 
   @UiField
+  TextBox detailsList;
+
+  @UiField
+  FlowPanel detailsListHint;
+
+  @UiField
   FlowPanel content;
 
   public static ColumnOptionsPanel createInstance(TableStatus tableConfiguration, ColumnStatus columnConfiguration) {
@@ -63,7 +66,7 @@ public class BinaryColumnOptionsPanel extends ColumnOptionsPanel {
   public TemplateStatus getSearchTemplate() {
     TemplateStatus templateStatus = new TemplateStatus();
     if (ViewerStringUtils.isBlank(this.displayList.getText())) {
-      templateStatus.setTemplate(DEFAULT_LABEL_TEMPLATE);
+      templateStatus.setTemplate(DEFAULT_DOWNLOAD_LABEL_TEMPLATE);
     } else {
       templateStatus.setTemplate(this.displayList.getText());
     }
@@ -74,7 +77,11 @@ public class BinaryColumnOptionsPanel extends ColumnOptionsPanel {
   @Override
   public TemplateStatus getDetailsTemplate() {
     TemplateStatus templateStatus = new TemplateStatus();
-    templateStatus.setTemplate(this.displayList.getText());
+    if (ViewerStringUtils.isBlank(this.detailsList.getText())) {
+      templateStatus.setTemplate(DEFAULT_DOWNLOAD_LABEL_TEMPLATE);
+    } else {
+      templateStatus.setTemplate(this.detailsList.getText());
+    }
     return templateStatus;
   }
 
@@ -96,18 +103,20 @@ public class BinaryColumnOptionsPanel extends ColumnOptionsPanel {
     templateList.setText(columnConfiguration.getExportStatus().getTemplateStatus().getTemplate());
     templateListHint.add(buildHintWithButtons(tableConfiguration, templateList));
 
-    displayList.setText(getDefaultTextOrValue(columnConfiguration));
+    displayList.setText(getDefaultTextOrValue(columnConfiguration.getSearchStatus().getList().getTemplate()));
     displayListHint.add(buildHintForLabel(displayList));
 
-    applicationType.setText(columnConfiguration.getApplicationType());
+    detailsList.setText(getDefaultTextOrValue(columnConfiguration.getDetailsStatus().getTemplateStatus()));
+    detailsListHint.add(buildHintForLabel(detailsList));
 
+    applicationType.setText(columnConfiguration.getApplicationType());
   }
 
-  private String getDefaultTextOrValue(ColumnStatus columnConfiguration) {
-    String template = columnConfiguration.getSearchStatus().getList().getTemplate().getTemplate();
+  private String getDefaultTextOrValue(TemplateStatus templateConfig) {
+    String template = templateConfig.getTemplate();
 
     if (ViewerStringUtils.isBlank(template)) {
-      template = DEFAULT_LABEL_TEMPLATE;
+      template = DEFAULT_DOWNLOAD_LABEL_TEMPLATE;
     }
 
     return template;
