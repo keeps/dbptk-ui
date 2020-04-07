@@ -8,13 +8,13 @@ import java.util.Set;
 
 import com.databasepreservation.common.client.common.search.SavedSearch;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-@JsonPropertyOrder({"version", "id", "solrCollectionPrefix", "databaseUUID", "name", "description", "consolidateProperty", "tables", "savedSearches" , "denormalizations"})
+@JsonPropertyOrder({"version", "id", "solrCollectionPrefix", "databaseUUID", "name", "description",
+  "consolidateProperty", "tables", "savedSearches", "denormalizations"})
 public class CollectionStatus implements Serializable {
 
   private String version;
@@ -119,7 +119,9 @@ public class CollectionStatus implements Serializable {
     this.denormalizations = denormalizations;
   }
 
-  public void addDenormalization(String denormalization) { this.denormalizations.add(denormalization);}
+  public void addDenormalization(String denormalization) {
+    this.denormalizations.add(denormalization);
+  }
 
   public void addSavedSearch(SavedSearch savedSearch) {
     this.savedSearches.add(savedSearch);
@@ -128,7 +130,9 @@ public class CollectionStatus implements Serializable {
   @JsonIgnore
   public SavedSearch getSavedSearch(String id) {
     for (SavedSearch savedSearch : savedSearches) {
-      if (savedSearch.getUuid().equals(id)) return savedSearch;
+      if (savedSearch.getUuid().equals(id)) {
+        return savedSearch;
+      }
     }
     return null;
   }
@@ -176,8 +180,9 @@ public class CollectionStatus implements Serializable {
 
   public boolean showTable(String id) {
     for (TableStatus table : tables) {
-      if (table.getUuid().equals(id))
+      if (table.getUuid().equals(id)) {
         return table.isShow();
+      }
     }
 
     return true;
@@ -236,31 +241,36 @@ public class CollectionStatus implements Serializable {
 
   public void updateTableShowCondition(String id, boolean value) {
     for (TableStatus table : tables) {
-      if (table.getUuid().equals(id))
+      if (table.getUuid().equals(id)) {
         table.setShow(value);
+      }
     }
   }
 
   public void updateTableCustomName(String id, String value) {
     for (TableStatus table : tables) {
-      if (table.getUuid().equals(id))
+      if (table.getUuid().equals(id)) {
         table.setCustomName(value);
+      }
     }
   }
 
   public void updateTableCustomDescription(String id, String value) {
     for (TableStatus table : tables) {
-      if (table.getUuid().equals(id))
+      if (table.getUuid().equals(id)) {
         table.setCustomDescription(value);
+      }
     }
   }
 
   @JsonIgnore
   public String getFirstTableVisible() {
-		for (TableStatus table : tables) {
-			if (table.isShow()) return table.getId();
-		}
+    for (TableStatus table : tables) {
+      if (table.isShow()) {
+        return table.getId();
+      }
+    }
 
-		return null;
-	}
+    return null;
+  }
 }

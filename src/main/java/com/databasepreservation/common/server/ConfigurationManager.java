@@ -6,11 +6,9 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 
-import com.databasepreservation.common.client.models.structure.ViewerType;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.utils.JsonUtils;
@@ -28,7 +26,7 @@ import com.databasepreservation.common.client.models.status.database.DatabaseSta
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
-import com.databasepreservation.common.client.models.structure.ViewerTable;
+import com.databasepreservation.common.client.models.structure.ViewerType;
 import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.server.index.utils.JsonTransformer;
 import com.databasepreservation.common.server.storage.fs.FSUtils;
@@ -50,10 +48,20 @@ public class ConfigurationManager {
 
   public CollectionStatus getConfigurationCollection(String databaseUUID, String collectionUUID)
     throws GenericException {
+    return getConfigurationCollection(databaseUUID, collectionUUID, false);
+  }
+
+  public CollectionStatus getConfigurationCollection(String databaseUUID, String collectionUUID, boolean prefixed)
+    throws GenericException {
     Path databasesDirectoryPath = ViewerFactory.getViewerConfiguration().getDatabasesPath();
     Path databaseDirectoryPath = databasesDirectoryPath.resolve(databaseUUID);
-    Path collectionStatusFile = databaseDirectoryPath
-      .resolve(ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + collectionUUID + ".json");
+    Path collectionStatusFile;
+    if (prefixed) {
+      collectionStatusFile = databaseDirectoryPath.resolve(collectionUUID + ViewerConstants.JSON_EXTENSION);
+    } else {
+      collectionStatusFile = databaseDirectoryPath.resolve(
+        ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + collectionUUID + ViewerConstants.JSON_EXTENSION);
+    }
 
     return JsonUtils.readObjectFromFile(collectionStatusFile, CollectionStatus.class);
   }
@@ -208,7 +216,7 @@ public class ConfigurationManager {
     }
   }
 
-  private DatabaseStatus getDatabaseStatus(String databaseUUID) throws GenericException {
+  public DatabaseStatus getDatabaseStatus(String databaseUUID) throws GenericException {
     synchronized (databaseStatusFileLock) {
       final Path databaseStatusFile = getDatabaseStatusPath(databaseUUID);
       return JsonUtils.readObjectFromFile(databaseStatusFile, DatabaseStatus.class);
@@ -226,14 +234,14 @@ public class ConfigurationManager {
     final Path databasesDirectoryPath = ViewerFactory.getViewerConfiguration().getDatabasesPath();
     final Path databaseDirectoryPath = databasesDirectoryPath.resolve(id);
 
-    return databaseDirectoryPath.resolve(ViewerConstants.DATABASE_STATUS_PREFIX + id + ".json");
+    return databaseDirectoryPath.resolve(ViewerConstants.DATABASE_STATUS_PREFIX + id + ViewerConstants.JSON_EXTENSION);
   }
 
   private Path getCollectionStatusPath(String databaseUUID, String id) {
     final Path databasesDirectoryPath = ViewerFactory.getViewerConfiguration().getDatabasesPath();
     final Path databaseDirectoryPath = databasesDirectoryPath.resolve(databaseUUID);
 
-    return databaseDirectoryPath.resolve(id + ".json");
+    return databaseDirectoryPath.resolve(id + ViewerConstants.JSON_EXTENSION);
   }
 
   public void updateIndicators(String id, String passed, String failed, String warnings, String skipped) {
@@ -242,7 +250,8 @@ public class ConfigurationManager {
         final Path databasesDirectoryPath = ViewerFactory.getViewerConfiguration().getDatabasesPath();
         final Path databaseDirectoryPath = databasesDirectoryPath.resolve(id);
 
-        Path databaseFile = databaseDirectoryPath.resolve(ViewerConstants.DATABASE_STATUS_PREFIX + id + ".json");
+        Path databaseFile = databaseDirectoryPath
+          .resolve(ViewerConstants.DATABASE_STATUS_PREFIX + id + ViewerConstants.JSON_EXTENSION);
         // verify if file exists
         if (FSUtils.exists(databaseFile)) {
           final DatabaseStatus databaseStatus = JsonUtils.readObjectFromFile(databaseFile, DatabaseStatus.class);
@@ -279,7 +288,8 @@ public class ConfigurationManager {
         final Path databasesDirectoryPath = ViewerFactory.getViewerConfiguration().getDatabasesPath();
         final Path databaseDirectoryPath = databasesDirectoryPath.resolve(id);
 
-        Path databaseFile = databaseDirectoryPath.resolve(ViewerConstants.DATABASE_STATUS_PREFIX + id + ".json");
+        Path databaseFile = databaseDirectoryPath
+          .resolve(ViewerConstants.DATABASE_STATUS_PREFIX + id + ViewerConstants.JSON_EXTENSION);
 
         // verify if file exists
         if (FSUtils.exists(databaseFile)) {
@@ -300,7 +310,7 @@ public class ConfigurationManager {
     Path databasePath = databasesFolder.resolve(database.getUuid());
     if (FSUtils.createDirectory(databasePath)) {
       String filename = ViewerConstants.DATABASE_STATUS_PREFIX + database.getUuid();
-      Path databaseStatusPath = databasePath.resolve(filename + ".json");
+      Path databaseStatusPath = databasePath.resolve(filename + ViewerConstants.JSON_EXTENSION);
       if (!FSUtils.exists(databaseStatusPath)) {
         try {
           Files.createFile(databaseStatusPath);
@@ -327,6 +337,37 @@ public class ConfigurationManager {
     } catch (IOException e) {
       throw new GenericException("Could not delete the database folder for uuid: " + databaseUUID + " from the system",
         e);
+    }
+  }
+
+  public void deleteCollection(String databaseUUID, String collectionUUID) throws GenericException {
+    final Path databasesDirectoryPath = ViewerFactory.getViewerConfiguration().getDatabasesPath();
+    final Path databaseDirectoryPath = databasesDirectoryPath.resolve(databaseUUID);
+
+    final Path denormalizationFilePath = databaseDirectoryPath.resolve(collectionUUID + ViewerConstants.JSON_EXTENSION);
+
+    try {
+      Files.deleteIfExists(denormalizationFilePath);
+    } catch (IOException e) {
+      throw new GenericException(
+        "Could not delete the collection file " + collectionUUID + ViewerConstants.JSON_EXTENSION + " from the system",
+        e);
+    }
+  }
+
+  public void deleteDenormalizationFromCollection(String databaseUUID, String denormalizationUUID)
+    throws GenericException {
+    final Path databasesDirectoryPath = ViewerFactory.getViewerConfiguration().getDatabasesPath();
+    final Path databaseDirectoryPath = databasesDirectoryPath.resolve(databaseUUID);
+
+    final Path denormalizationFilePath = databaseDirectoryPath
+      .resolve(denormalizationUUID + ViewerConstants.JSON_EXTENSION);
+
+    try {
+      Files.deleteIfExists(denormalizationFilePath);
+    } catch (IOException e) {
+      throw new GenericException("Could not delete the denormalization file " + denormalizationUUID
+        + ViewerConstants.JSON_EXTENSION + " from the system", e);
     }
   }
 

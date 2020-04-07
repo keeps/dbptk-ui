@@ -1,8 +1,10 @@
 package com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.navigation;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.NavigationPanel;
@@ -12,6 +14,7 @@ import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.utils.html.LabelUtils;
 import com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.SIARDManagerPage;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.services.CollectionService;
@@ -200,6 +203,9 @@ public class BrowseNavigationPanel {
       || database.getStatus().equals(ViewerDatabaseStatus.ERROR)) {
       CollectionService.Util.call((Boolean result) -> {
         SIARDManagerPage.getInstance(database).refreshInstance(database.getUuid());
+        CollectionService.Util.call((List<CollectionStatus> collectionStatus) -> {
+          ObserverManager.getCollectionObserver().setCollectionStatus(collectionStatus.get(0));
+        }).getCollectionConfiguration(database.getUuid(), database.getUuid());
       }).deleteCollection(database.getUuid());
     }
   }
