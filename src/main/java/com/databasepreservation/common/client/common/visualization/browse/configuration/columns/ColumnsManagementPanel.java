@@ -379,13 +379,11 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
           checkboxData.setChecked(column.getSearchStatus().getAdvanced().isFixed());
           checkboxData.setDisable(column.getType().equals(ViewerType.dbTypes.BINARY));
           return checkboxData;
-          // return column.getSearchStatus().getAdvanced().isFixed();
         } else {
           final CheckboxData checkboxData = new CheckboxData();
           checkboxData.setChecked(editableValues.get(column.getId()).isShowInAdvancedSearch());
           checkboxData.setDisable(column.getType().equals(ViewerType.dbTypes.BINARY));
           return checkboxData;
-          // return editableValues.get(column.getId()).isShowInAdvancedSearch();
         }
       }
     };

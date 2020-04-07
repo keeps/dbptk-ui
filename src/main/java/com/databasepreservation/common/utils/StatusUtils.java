@@ -93,7 +93,7 @@ public class StatusUtils {
     status.setSearchStatus(getSearchStatus(show));
     status.setDetailsStatus(getDetailsStatus(show));
 
-    if (column.getType().getDbType().equals(ViewerType.dbTypes.BINARY)) {
+    if (column.getType() != null && column.getType().getDbType().equals(ViewerType.dbTypes.BINARY)) {
       final TemplateStatus template = getTemplateStatus();
       template.setTemplate(ViewerConstants.DEFAULT_DOWNLOAD_LABEL_TEMPLATE);
       status.updateSearchListTemplate(template);
