@@ -336,6 +336,11 @@
         </dependency>
         <dependency>
             <groupId>com.databasepreservation</groupId>
+            <artifactId>dbptk-module-ms-access</artifactId>
+            <version>${version.dbptk}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.databasepreservation</groupId>
             <artifactId>dbptk-module-siard</artifactId>
             <version>${version.dbptk}</version>
         </dependency>

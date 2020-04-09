@@ -1,13 +1,20 @@
 package com.databasepreservation.desktop.client.dbptk.wizard.common.connection;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.fields.FileUploadField;
 import com.databasepreservation.common.client.common.fields.GenericField;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.models.JSO.ExtensionFilter;
-import com.databasepreservation.common.client.models.wizard.connection.JDBCParameters;
 import com.databasepreservation.common.client.models.parameters.PreservationParameter;
+import com.databasepreservation.common.client.models.wizard.connection.JDBCParameters;
 import com.databasepreservation.common.client.tools.JSOUtils;
 import com.databasepreservation.common.client.tools.PathUtils;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
@@ -26,13 +33,8 @@ import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.PasswordTextBox;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import config.i18n.client.ClientMessages;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import config.i18n.client.ClientMessages;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -171,7 +173,7 @@ public class JDBCPanel extends Composite {
         fileUploadField.setRequired(parameter.isRequired());
         fileUploadField.buttonAction(() -> {
           if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
-            ExtensionFilter mdb = new ExtensionFilter("MS Access", Collections.singletonList("mdb"));
+            ExtensionFilter mdb = new ExtensionFilter("MS Access", Arrays.asList("mdb", "accdb"));
             JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.singletonList("openFile"),
               Collections.singletonList(mdb));
 
@@ -313,7 +315,14 @@ public class JDBCPanel extends Composite {
         }
         if (parameter.getInputType().equals(ViewerConstants.INPUT_TYPE_DRIVER)
           && ViewerStringUtils.isBlank(pathToDriver)) {
+          arrayList.add(parameter);
+        }
+
+        if (parameter.getInputType().equals(ViewerConstants.INPUT_TYPE_FILE_OPEN)) {
+          final FileUploadField fileUploadField = fileInputs.get(parameter.getName());
+          if (ViewerStringUtils.isBlank(fileUploadField.getPathLocation())) {
             arrayList.add(parameter);
+          }
         }
       }
     }
@@ -350,6 +359,8 @@ public class JDBCPanel extends Composite {
   @Override
   protected void onAttach() {
     super.onAttach();
-    focusElement.setFocus(true);
+    if (focusElement != null) {
+      focusElement.setFocus(true);
+    }
   }
 }
