@@ -203,33 +203,10 @@ public class CollectionResource implements CollectionService {
         SolrUtils.delete(ViewerFactory.getSolrClient(), SolrDefaultCollectionRegistry.get(SavedSearch.class),
           savedSearchFilter);
 
-        final ConfigurationManager configurationManager = ViewerFactory.getConfigurationManager();
-        final DatabaseStatus databaseStatus = configurationManager.getDatabaseStatus(databaseUUID);
-        final ViewerDatabase database = ViewerFactory.getSolrManager().retrieve(ViewerDatabase.class, databaseUUID);
-
-        for (String collectionUUID : databaseStatus.getCollections()) {
-
-          final CollectionStatus configurationCollection = configurationManager.getConfigurationCollection(databaseUUID,
-            collectionUUID, true);
-          for (String denormalizationUUID : configurationCollection.getDenormalizations()) {
-            configurationManager.deleteDenormalizationFromCollection(databaseUUID, denormalizationUUID);
-          }
-
-          configurationManager.deleteCollection(databaseUUID, collectionUUID);
-          configurationManager.addCollection(database.getUuid(),
-            SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + database.getUuid());
-
-          configurationManager.addTable(database);
-        }
-
-        databaseStatus.setCollections(
-          Collections.singletonList(ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + database.getUuid()));
-        configurationManager.updateDatabaseStatus(databaseStatus);
-
         ViewerFactory.getSolrManager().markDatabaseCollection(databaseUUID, ViewerDatabaseStatus.METADATA_ONLY);
         return true;
       }
-    } catch (GenericException | RequestNotValidException | ViewerException | NotFoundException e) {
+    } catch (GenericException | RequestNotValidException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
