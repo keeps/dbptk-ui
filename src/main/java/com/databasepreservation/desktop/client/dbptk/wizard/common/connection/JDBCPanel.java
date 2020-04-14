@@ -24,6 +24,7 @@ import com.databasepreservation.desktop.client.dbptk.wizard.upload.CreateWizardM
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -56,19 +57,18 @@ public class JDBCPanel extends Composite {
   private TextBox focusElement = null;
   private String databaseUUID;
   private final String type;
-  private boolean shouldCountRows = false;
 
   @UiField
   FlowPanel content;
 
   public static JDBCPanel getInstance(String connection, List<PreservationParameter> parameters, String databaseUUID,
-    String type, boolean countRows) {
+    String type) {
     String code = databaseUUID + ViewerConstants.API_SEP + connection;
-    instances.computeIfAbsent(code, k -> new JDBCPanel(parameters, databaseUUID, type, countRows));
+    instances.computeIfAbsent(code, k -> new JDBCPanel(parameters, databaseUUID, type));
     return instances.get(code);
   }
 
-  private JDBCPanel(List<PreservationParameter> parameters, String databaseUUID, String type, boolean countRows) {
+  private JDBCPanel(List<PreservationParameter> parameters, String databaseUUID, String type) {
     initWidget(binder.createAndBindUi(this));
 
     this.databaseUUID = databaseUUID;
@@ -77,11 +77,6 @@ public class JDBCPanel extends Composite {
 
     for (PreservationParameter p : parameters) {
       buildGenericWidget(p);
-    }
-
-    if (countRows) {
-      buildCheckboxWidget(messages.connectionPageLabelsFor("count-rows"),
-        messages.connectionPageDescriptionsFor("count-rows"));
     }
   }
 
@@ -113,8 +108,6 @@ public class JDBCPanel extends Composite {
       jdbcParameters.setDriverPath(pathToDriver);
     }
 
-    jdbcParameters.setShouldCountRows(shouldCountRows);
-
     return jdbcParameters;
   }
 
@@ -122,7 +115,7 @@ public class JDBCPanel extends Composite {
     CheckBox checkbox = new CheckBox();
     checkbox.setText(label);
     checkbox.addStyleName("form-checkbox");
-    checkbox.addValueChangeHandler(event -> this.shouldCountRows = event.getValue());
+    checkbox.addValueChangeHandler(ValueChangeEvent::getValue);
     GenericField genericField = GenericField.createInstance(checkbox);
 
     FlowPanel helper = new FlowPanel();
@@ -285,7 +278,6 @@ public class JDBCPanel extends Composite {
     } else {
       input.removeStyleName("wizard-connection-validator");
     }
-    GWT.log(type);
     validate(type);
   }
 

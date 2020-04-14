@@ -14,7 +14,6 @@ public class ConnectionParameters implements Serializable {
   private JDBCParameters jdbcParameters;
   private SSHConfiguration sshConfiguration;
 
-
   public ConnectionParameters() {
   }
 
@@ -60,8 +59,6 @@ public class ConnectionParameters implements Serializable {
     for (Map.Entry<String, String> entry : jdbcParameters.getConnection().entrySet()) {
       sb.append(entry.getKey()).append("=").append(entry.getValue());
     }
-
-    sb.append(jdbcParameters.isShouldCountRows());
 
     return sb.toString();
   }

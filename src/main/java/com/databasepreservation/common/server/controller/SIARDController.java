@@ -4,22 +4,14 @@ import static com.databasepreservation.common.client.ViewerConstants.SOLR_INDEX_
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_SEARCHES_DATABASE_UUID;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,7 +24,6 @@ import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RequestNotValidException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yaml.snakeyaml.Yaml;
 
 import com.databasepreservation.DatabaseMigration;
 import com.databasepreservation.SIARDEdition;
@@ -41,7 +32,6 @@ import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.search.SavedSearch;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
-import com.databasepreservation.common.client.models.dbptk.ExternalLob;
 import com.databasepreservation.common.client.models.dbptk.Module;
 import com.databasepreservation.common.client.models.parameters.PreservationParameter;
 import com.databasepreservation.common.client.models.parameters.SIARDUpdateParameters;
@@ -53,12 +43,9 @@ import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerSIARDBundle;
 import com.databasepreservation.common.client.models.wizard.connection.ConnectionParameters;
 import com.databasepreservation.common.client.models.wizard.connection.ConnectionResponse;
-import com.databasepreservation.common.client.models.wizard.connection.SSHConfiguration;
-import com.databasepreservation.common.client.models.wizard.customViews.CustomViewsParameter;
 import com.databasepreservation.common.client.models.wizard.customViews.CustomViewsParameters;
 import com.databasepreservation.common.client.models.wizard.export.ExportOptionsParameters;
 import com.databasepreservation.common.client.models.wizard.export.MetadataExportOptionsParameters;
-import com.databasepreservation.common.client.models.wizard.table.ExternalLOBsParameter;
 import com.databasepreservation.common.client.models.wizard.table.TableAndColumnsParameters;
 import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.server.SIARDProgressObserver;
@@ -83,6 +70,7 @@ import com.databasepreservation.model.parameters.Parameters;
 import com.databasepreservation.model.reporters.NoOpReporter;
 import com.databasepreservation.model.reporters.Reporter;
 import com.databasepreservation.model.structure.DatabaseStructure;
+import com.databasepreservation.modules.config.ImportConfigurationModuleFactory;
 import com.databasepreservation.modules.jdbc.in.JDBCImportModule;
 import com.databasepreservation.modules.siard.SIARD2ModuleFactory;
 import com.databasepreservation.modules.siard.SIARDEditFactory;
@@ -168,15 +156,23 @@ public class SIARDController {
       LOGGER.info("starting to convert database");
       final DatabaseMigration databaseMigration = initializeDatabaseMigration(reporter);
 
-      databaseMigration.filterFactories(new ArrayList<>());
+      if (tableAndColumnsParameters.isExternalLobConfigurationSet()) {
+        final List<DatabaseFilterFactory> databaseFilterFactories = ReflectionUtils.collectDatabaseFilterFactory();
+        databaseMigration.filterFactories(databaseFilterFactories);
+      } else {
+        databaseMigration.filterFactories(new ArrayList<>());
+      }
 
-      // BUILD Import Module
-      databaseMigration.importModule(getSIARDImportModuleFactory(siardVersion));
-      databaseMigration.importModuleParameter(SIARD2ModuleFactory.PARAMETER_FILE, siardPath);
+      // Build Import Config Module
+      DatabaseModuleFactory importConfigurationModuleFactory = new ImportConfigurationModuleFactory();
+      databaseMigration.importModule(importConfigurationModuleFactory);
+
+      String importConfigTmpPath = SiardControllerHelper.buildModuleConfigurationForSIARD(siardVersion, siardPath,
+        tableAndColumnsParameters);
+      databaseMigration.importModuleParameter(ImportConfigurationModuleFactory.PARAMETER_FILE, importConfigTmpPath);
 
       // BUILD Export Module
-      setupSIARDExportModule(databaseMigration, tableAndColumnsParameters, exportOptionsParameters,
-        metadataExportOptionsParameters);
+      setupSIARDExportModule(databaseMigration, exportOptionsParameters, metadataExportOptionsParameters);
 
       databaseMigration.filter(new ObservableFilter(new SIARDProgressObserver(databaseUUID)));
 
@@ -211,7 +207,8 @@ public class SIARDController {
       // BUILD Export Module
       final DatabaseModuleFactory exportModuleFactory = getDatabaseExportModuleFactory(
         connectionParameters.getModuleName());
-      setupExportModuleSSHConfiguration(databaseMigration, connectionParameters);
+      SiardControllerHelper.setupExportModuleSSHConfiguration(databaseMigration, connectionParameters);
+
       for (Map.Entry<String, String> entry : connectionParameters.getJdbcParameters().getConnection().entrySet()) {
         LOGGER.info("Connection Options - {} -> {}", entry.getKey(), entry.getValue());
         databaseMigration.exportModuleParameter(entry.getKey(), entry.getValue());
@@ -245,54 +242,29 @@ public class SIARDController {
 
     final DatabaseMigration databaseMigration = initializeDatabaseMigration(reporter);
 
-    if (tableAndColumnsParameters.getExternalLOBsParameters().isEmpty()) {
-      databaseMigration.filterFactories(new ArrayList<>());
-    } else {
+    if (tableAndColumnsParameters.isExternalLobConfigurationSet()) {
       final List<DatabaseFilterFactory> databaseFilterFactories = ReflectionUtils.collectDatabaseFilterFactory();
       databaseMigration.filterFactories(databaseFilterFactories);
+    } else {
+      databaseMigration.filterFactories(new ArrayList<>());
     }
 
-    // BUILD Import Module
-    final DatabaseModuleFactory databaseImportModuleFactory = getDatabaseImportModuleFactory(
-      connectionParameters.getModuleName());
-    databaseMigration.importModule(databaseImportModuleFactory);
-    setupImportModuleSSHConfiguration(databaseMigration, connectionParameters);
+    // Build Import Config Module
+    DatabaseModuleFactory importConfigurationModuleFactory = new ImportConfigurationModuleFactory();
+    databaseMigration.importModule(importConfigurationModuleFactory);
 
     try {
-      setupPathToDriver(connectionParameters);
+      SiardControllerHelper.setupPathToDriver(connectionParameters);
     } catch (Exception e) {
       throw new GenericException("Could not load the driver", e);
     }
 
-    for (Map.Entry<String, String> entry : connectionParameters.getJdbcParameters().getConnection().entrySet()) {
-      LOGGER.info("Connection Options: {} -> {}", entry.getKey(), entry.getValue());
-      databaseMigration.importModuleParameter(entry.getKey(), entry.getValue());
-    }
+    String importConfigTmpPath = SiardControllerHelper.buildModuleConfiguration(connectionParameters,
+      tableAndColumnsParameters, customViewsParameters);
+    databaseMigration.importModuleParameter(ImportConfigurationModuleFactory.PARAMETER_FILE, importConfigTmpPath);
 
-    if (!customViewsParameters.getCustomViewsParameter().isEmpty()) {
-      final String pathToCustomViews = constructCustomViews(customViewsParameters);
-      LOGGER.info("Custom view path: {}", pathToCustomViews);
-      databaseMigration.importModuleParameter("custom-views", pathToCustomViews);
-    }
-
-    // BUILD Export Module
-    setupSIARDExportModule(databaseMigration, tableAndColumnsParameters, exportOptionsParameters,
-      metadataExportOptionsParameters);
-
-    // External Lobs
-    if (!tableAndColumnsParameters.getExternalLOBsParameters().isEmpty()) {
-      final List<ExternalLob> externalLobs = constructExternalLobFilter(tableAndColumnsParameters);
-      int index = 0;
-      for (ExternalLob parameter : externalLobs) {
-        LOGGER.info("column-list: {}", parameter.getPathToColumnList());
-        LOGGER.info("base-path: {}", parameter.getBasePath());
-        LOGGER.info("reference-type: {}", parameter.getReferenceType());
-        databaseMigration.filterParameter("base-path", parameter.getBasePath(), index);
-        databaseMigration.filterParameter("column-list", parameter.getPathToColumnList(), index);
-        databaseMigration.filterParameter("reference-type", parameter.getReferenceType(), index);
-        index++;
-      }
-    }
+    // Build Export Module
+    setupSIARDExportModule(databaseMigration, exportOptionsParameters, metadataExportOptionsParameters);
 
     databaseMigration.filter(new ObservableFilter(new SIARDProgressObserver(uniqueId)));
 
@@ -300,7 +272,7 @@ public class SIARDController {
     try {
       databaseMigration.migrate();
     } catch (RuntimeException e) {
-      throw new GenericException("Could not convert the database", e);
+      throw new GenericException("Could not create the SIARD file", e);
     } catch (ModuleException e) {
       throw new GenericException(e.getMessage(), e);
     }
@@ -841,9 +813,9 @@ public class SIARDController {
 
     if (factory != null) {
       databaseMigration.importModule(factory);
-      setupImportModuleSSHConfiguration(databaseMigration, parameters);
+      SiardControllerHelper.setupImportModuleSSHConfiguration(databaseMigration, parameters);
       try {
-        setupPathToDriver(parameters);
+        SiardControllerHelper.setupPathToDriver(parameters);
       } catch (Exception e) {
         throw new GenericException("Could not load the driver", e);
       }
@@ -855,8 +827,7 @@ public class SIARDController {
   }
 
   private static void setupSIARDExportModule(DatabaseMigration databaseMigration,
-    TableAndColumnsParameters tableAndColumnsParameters, ExportOptionsParameters exportOptionsParameters,
-    MetadataExportOptionsParameters metadataExportOptionsParameters) throws GenericException {
+    ExportOptionsParameters exportOptionsParameters, MetadataExportOptionsParameters metadataExportOptionsParameters) {
     final DatabaseModuleFactory databaseExportModuleFactory = getDatabaseExportModuleFactory(
       exportOptionsParameters.getSiardVersion());
 
@@ -875,10 +846,6 @@ public class SIARDController {
         databaseMigration.exportModuleParameter(entry.getKey(), entry.getValue());
       }
     }
-
-    final String pathToTableFilter = constructTableFilter(tableAndColumnsParameters);
-    LOGGER.info("Path to table-filter: {}", pathToTableFilter);
-    databaseMigration.exportModuleParameter("table-filter", pathToTableFilter);
   }
 
   private static DatabaseModuleFactory getDatabaseImportModuleFactory(String moduleName) {
@@ -994,142 +961,5 @@ public class SIARDController {
     }
 
     return module;
-  }
-
-  private static String createTemporaryFile(final String tmpFileName, final String tmpFileSuffix, final String content)
-    throws GenericException {
-    File tmpDir = new File(System.getProperty("java.io.tmpdir"));
-    final File tmpFile;
-    try {
-      tmpFile = File.createTempFile(tmpFileName, tmpFileSuffix, tmpDir);
-    } catch (IOException e) {
-      throw new GenericException("Could not create the temporary file", e);
-    }
-
-    try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(tmpFile))) {
-      writer.write(content);
-      writer.flush();
-    } catch (FileNotFoundException e) {
-      throw new GenericException("Could not find the temporary file", e);
-    } catch (IOException e) {
-      throw new GenericException("Could not close the temporary file", e);
-    }
-
-    return Paths.get(tmpFile.toURI()).normalize().toAbsolutePath().toString();
-  }
-
-  private static List<ExternalLob> constructExternalLobFilter(TableAndColumnsParameters parameters)
-    throws GenericException {
-    final List<ExternalLOBsParameter> externalLOBsParameters = parameters.getExternalLOBsParameters();
-    List<ExternalLob> externalLobParameters = new ArrayList<>();
-    ExternalLob externalLob = new ExternalLob();
-    for (ExternalLOBsParameter parameter : externalLOBsParameters) {
-      externalLob.setBasePath(parameter.getBasePath());
-      externalLob.setReferenceType(parameter.getReferenceType());
-      String sb = parameter.getTable().getSchemaName() + "." + parameter.getTable().getName() + "{"
-        + parameter.getColumnName() + ";" + "}";
-      externalLob.setPathToColumnList(createTemporaryFile(SolrUtils.randomUUID(), ViewerConstants.TXT_SUFFIX, sb));
-
-      externalLobParameters.add(externalLob);
-    }
-
-    return externalLobParameters;
-  }
-
-  private static String constructTableFilter(TableAndColumnsParameters parameters) throws GenericException {
-    final Map<String, List<String>> columns = parameters.getColumns();
-    StringBuilder tf = new StringBuilder();
-
-    columns.forEach((key, object) -> {
-      if (!object.isEmpty()) {
-        tf.append(key).append("{");
-        object.forEach(name -> {
-          tf.append(name).append(";");
-        });
-        tf.append("}").append("\n");
-      }
-    });
-
-    return createTemporaryFile(SolrUtils.randomUUID(), ViewerConstants.TXT_SUFFIX, tf.toString());
-  }
-
-  private static String constructCustomViews(CustomViewsParameters customViewsParameters) throws GenericException {
-    final List<CustomViewsParameter> customViewParameters = customViewsParameters.getCustomViewsParameter();
-    Map<String, Object> data = new HashMap<>();
-    Map<String, Object> view = new HashMap<>();
-
-    for (CustomViewsParameter parameter : customViewParameters) {
-      Map<String, Object> customViewInformation = new HashMap<>();
-      customViewInformation.put("query", parameter.getCustomViewQuery());
-      customViewInformation.put("description", parameter.getCustomViewDescription());
-      view.put(parameter.getCustomViewName(), customViewInformation);
-      data.put(parameter.getSchemaName(), view);
-    }
-
-    Yaml yaml = new Yaml();
-
-    File tmpDir = new File(System.getProperty("java.io.tmpdir"));
-    try {
-      final File tmpFile = File.createTempFile(SolrUtils.randomUUID(), ViewerConstants.YAML_SUFFIX, tmpDir);
-      try (FileOutputStream outputStream = new FileOutputStream(tmpFile)) {
-        String path = Paths.get(tmpFile.toURI()).normalize().toAbsolutePath().toString();
-
-        OutputStreamWriter writer = new OutputStreamWriter(outputStream);
-        yaml.dump(data, writer);
-        writer.close();
-        return path;
-      } catch (IOException e) {
-        throw new GenericException("Could not create custom views temporary file", e);
-      }
-    } catch (IOException e) {
-      throw new GenericException("Could not create custom views temporary file", e);
-    }
-  }
-
-  /**
-   * For Java 8 or below: check
-   * http://robertmaldon.blogspot.com/2007/11/dynamically-add-to-eclipse-junit.html
-   * (last access: 22-07-2019)
-   */
-  private static void addURL(URL url) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-    URLClassLoader classLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
-    Class<URLClassLoader> clazz = URLClassLoader.class;
-
-    // Use reflection
-    Method method = clazz.getDeclaredMethod("addURL", URL.class);
-    method.setAccessible(true);
-    method.invoke(classLoader, url);
-  }
-
-  private static void setupImportModuleSSHConfiguration(DatabaseMigration databaseMigration,
-    ConnectionParameters parameters) {
-    if (parameters.doSSH()) {
-      final SSHConfiguration sshConfiguration = parameters.getSshConfiguration();
-
-      databaseMigration.importModuleParameter("ssh", "true");
-      databaseMigration.importModuleParameter("ssh-host", sshConfiguration.getHostname());
-      databaseMigration.importModuleParameter("ssh-user", sshConfiguration.getUsername());
-      databaseMigration.importModuleParameter("ssh-password", sshConfiguration.getPassword());
-      databaseMigration.importModuleParameter("ssh-port", sshConfiguration.getPort());
-    }
-  }
-
-  private static void setupExportModuleSSHConfiguration(DatabaseMigration databaseMigration,
-    ConnectionParameters parameters) {
-    if (parameters.doSSH()) {
-      final SSHConfiguration sshConfiguration = parameters.getSshConfiguration();
-
-      databaseMigration.exportModuleParameter("ssh", "true");
-      databaseMigration.exportModuleParameter("ssh-host", sshConfiguration.getHostname());
-      databaseMigration.exportModuleParameter("ssh-user", sshConfiguration.getUsername());
-      databaseMigration.exportModuleParameter("ssh-password", sshConfiguration.getPassword());
-      databaseMigration.exportModuleParameter("ssh-port", sshConfiguration.getPort());
-    }
-  }
-
-  private static void setupPathToDriver(ConnectionParameters parameters) throws Exception {
-    if (parameters.getJdbcParameters().isDriver()) {
-      addURL(new File(parameters.getJdbcParameters().getDriverPath()).toURI().toURL());
-    }
   }
 }

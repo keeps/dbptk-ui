@@ -3,7 +3,8 @@
 }
 
 .desktop-main .metadata .browseContentFocusPanel,
-.desktop-main .database .browseContentFocusPanel{
+.desktop-main .database .browseContentFocusPanel,
+.desktop-main .wizard .browseContentFocusPanel {
     padding-top: 40px;
 }
 

@@ -139,7 +139,6 @@ public class BasicTablePanel<C> extends Composite {
   }
 
   public void handleScrollChanges() {
-    GWT.log("maximum: " + displayScroll.getMaximumHorizontalScrollPosition());
     if (displayScroll.getMaximumHorizontalScrollPosition() > 0) {
       double percent = displayScroll.getHorizontalScrollPosition() * 100F
         / displayScroll.getMaximumHorizontalScrollPosition();

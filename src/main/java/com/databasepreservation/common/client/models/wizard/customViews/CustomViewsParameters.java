@@ -1,7 +1,8 @@
 package com.databasepreservation.common.client.models.wizard.customViews;
 
 import java.io.Serializable;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -9,27 +10,30 @@ import java.util.Objects;
  */
 public class CustomViewsParameters implements Serializable {
 
-  private List<CustomViewsParameter> customViewsParameter;
+  private Map<String, CustomViewsParameter> customViewsParameterMap;
 
   public CustomViewsParameters() {
+    this.customViewsParameterMap = new HashMap<>();
   }
 
-  public CustomViewsParameters(List<CustomViewsParameter> customViewsParameter) {
-    this.customViewsParameter = customViewsParameter;
+  public CustomViewsParameters(Map<String, CustomViewsParameter> customViewsParameter) {
+    this.customViewsParameterMap = customViewsParameter;
   }
 
-  public List<CustomViewsParameter> getCustomViewsParameter() {
-    return customViewsParameter;
+  public Map<String, CustomViewsParameter> getCustomViewsParameter() {
+    return customViewsParameterMap;
   }
 
-  public void setCustomViewsParameter(List<CustomViewsParameter> customViewsParameter) {
-    this.customViewsParameter = customViewsParameter;
+  public void setCustomViewsParameter(Map<String, CustomViewsParameter> customViewsParameter) {
+    this.customViewsParameterMap = customViewsParameter;
   }
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o)
+      return true;
+    if (o == null || getClass() != o.getClass())
+      return false;
     CustomViewsParameters that = (CustomViewsParameters) o;
     return Objects.equals(getCustomViewsParameter(), that.getCustomViewsParameter());
   }

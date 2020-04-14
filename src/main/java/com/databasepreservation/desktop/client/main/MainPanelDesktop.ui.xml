@@ -1,9 +1,18 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
 >
+
     <g:FlowPanel styleName="main desktop-main">
+
+        <!-- Content -->
         <g:FlowPanel addStyleNames="contentPanel">
-            <g:SimplePanel ui:field="contentPanel" />
+            <g:SimplePanel ui:field="contentPanel"/>
         </g:FlowPanel>
     </g:FlowPanel>
+
+    <!--    <g:FlowPanel styleName="main desktop-main">-->
+    <!--        <g:FlowPanel addStyleNames="contentPanel">-->
+    <!--            <g:SimplePanel ui:field="contentPanel" />-->
+    <!--        </g:FlowPanel>-->
+    <!--    </g:FlowPanel>-->
 </ui:UiBinder>

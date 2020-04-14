@@ -3,9 +3,7 @@ package com.databasepreservation.desktop.client.dbptk.wizard.upload;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
@@ -24,7 +22,7 @@ import com.databasepreservation.common.client.models.structure.ViewerSchema;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.models.structure.ViewerView;
 import com.databasepreservation.common.client.models.wizard.connection.ConnectionParameters;
-import com.databasepreservation.common.client.models.wizard.table.ExternalLOBsParameter;
+import com.databasepreservation.common.client.models.wizard.table.ExternalLobParameter;
 import com.databasepreservation.common.client.models.wizard.table.ExternalLobsDialogBoxResult;
 import com.databasepreservation.common.client.models.wizard.table.TableAndColumnsParameters;
 import com.databasepreservation.common.client.services.DatabaseService;
@@ -33,6 +31,8 @@ import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.JSOUtils;
 import com.databasepreservation.common.client.tools.PathUtils;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
+import com.databasepreservation.common.client.tools.WizardUtils;
+import com.databasepreservation.common.client.widgets.ConfigurationCellTableResources;
 import com.databasepreservation.common.client.widgets.Toast;
 import com.databasepreservation.desktop.client.common.sidebar.TableAndColumnsSendToSidebar;
 import com.databasepreservation.desktop.client.common.sidebar.TableAndColumnsSidebar;
@@ -98,8 +98,8 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
   private Map<String, MultipleSelectionTablePanel<ViewerView>> views = new HashMap<>();
   private Map<String, Boolean> tableSelectedStatus = new HashMap<>();
   private Map<String, Boolean> viewSelectedStatus = new HashMap<>();
-  private Map<String, ExternalLOBsParameter> externalLOBsParameters = new HashMap<>();
-  private String currentTableUUID = null;
+  private Map<String, Boolean> viewMaterializationStatus = new HashMap<>();
+  private Map<String, ExternalLobParameter> externalLOBsParameters = new HashMap<>();
   private String currentBasePath = null;
   private String databaseUUID;
   // false: "SELECT ALL"; true: "SELECT NONE";
@@ -218,43 +218,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
 
   @Override
   public TableAndColumnsParameters getValues() {
-    TableAndColumnsParameters parameters = new TableAndColumnsParameters();
-    List<String> schemas = new ArrayList<>();
-    Map<String, List<String>> values = new HashMap<>();
-    for (Map.Entry<String, MultipleSelectionTablePanel<ViewerColumn>> cellTables : columns.entrySet()) {
-      String tableUUID = cellTables.getKey();
-      ViewerTable table = metadata.getTable(tableUUID);
-      if (table != null) {
-        schemas.add(table.getSchemaName());
-        List<String> selectedColumns = new ArrayList<>(
-          getSelectColumnNames(cellTables.getValue().getSelectionModel().getSelectedSet()));
-        String key = table.getSchemaName() + "." + table.getName();
-        values.put(key, selectedColumns);
-      } else {
-        ViewerView view = metadata.getView(tableUUID);
-        if (view != null) {
-          List<String> selectedColumns = new ArrayList<>(
-            getSelectColumnNames(cellTables.getValue().getSelectionModel().getSelectedSet()));
-          String key = view.getSchemaName() + "." + view.getName();
-          values.put(key, selectedColumns);
-        }
-      }
-    }
-
-    parameters.setColumns(values);
-    parameters.setExternalLOBsParameters(new ArrayList<>(externalLOBsParameters.values()));
-    parameters.setSelectedSchemas(schemas);
-
-    return parameters;
-  }
-
-  private List<String> getSelectColumnNames(Set<ViewerColumn> columns) {
-    List<String> list = new ArrayList<>();
-    for (ViewerColumn column : columns) {
-      list.add(column.getDisplayName());
-    }
-
-    return list;
+    return WizardUtils.getTableAndColumnsParameter(metadata, columns, externalLOBsParameters, viewMaterializationStatus);
   }
 
   @Override
@@ -270,7 +234,6 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
       if (toSelect.equals(TableAndColumnsSidebar.VIEW_LINK) || toSelect.equals(TableAndColumnsSidebar.TABLE_LINK)) {
         toSelect = ViewerStringUtils.concat(schemaUUID, tableUUID);
       }
-      currentTableUUID = tableUUID;
     } else if (schemaUUID != null) {
       Label title = new Label();
       title.setText(metadata.getSchema(schemaUUID).getName());
@@ -366,15 +329,15 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
   }
 
   private MultipleSelectionTablePanel<ViewerColumn> createCellTableForViewerColumn() {
-    return new MultipleSelectionTablePanel<>();
+    return new MultipleSelectionTablePanel<>(GWT.create(ConfigurationCellTableResources.class));
   }
 
   private MultipleSelectionTablePanel<ViewerTable> createCellTableForViewerTable() {
-    return new MultipleSelectionTablePanel<>();
+    return new MultipleSelectionTablePanel<>(GWT.create(ConfigurationCellTableResources.class));
   }
 
   private MultipleSelectionTablePanel<ViewerView> createCellTableForViewerView() {
-    return new MultipleSelectionTablePanel<>();
+    return new MultipleSelectionTablePanel<>(GWT.create(ConfigurationCellTableResources.class));
   }
 
   private FlowPanel getSelectPanel(final String id, final String schemaUUID) {
@@ -547,8 +510,21 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
 
   private void populateViews(MultipleSelectionTablePanel<ViewerView> selectionTablePanel,
     final ViewerSchema viewerSchema) {
-    selectionTablePanel.createTable(getSelectPanel(SELECT_VIEWS, viewerSchema.getUuid()), new ArrayList<>(),
-      viewerSchema.getViews().iterator(), new MultipleSelectionTablePanel.ColumnInfo<>("", 4,
+
+    final Column<ViewerView, Boolean> column = new Column<ViewerView, Boolean>(new CheckboxCell(false, false)) {
+      @Override
+      public Boolean getValue(ViewerView viewerView) {
+        viewMaterializationStatus.put(viewerView.getUuid(), false);
+        return false;
+      }
+    };
+
+    column.setFieldUpdater((i, viewerView, value) -> {
+      viewMaterializationStatus.put(viewerView.getUuid(), value);
+    });
+
+    selectionTablePanel.createTable(getSelectPanel(SELECT_VIEWS, viewerSchema.getUuid()), Collections.singletonList(1),
+      viewerSchema.getViews().iterator(), new MultipleSelectionTablePanel.ColumnInfo<>("Export", 4,
         new Column<ViewerView, Boolean>(new CheckboxCell(true, true)) {
           @Override
           public Boolean getValue(ViewerView viewerView) {
@@ -572,6 +548,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
             return selectionTablePanel.getSelectionModel().isSelected(viewerView);
           }
         }),
+      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForMaterializeViewOption(), 4, column),
       new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForViewName(), 10,
         new TextColumn<ViewerView>() {
           @Override
@@ -623,16 +600,6 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
           @Override
           public String getValue(ViewerTable table) {
             return table.getName();
-          }
-        }),
-      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForNumberOfRows(), 4,
-        new TextColumn<ViewerTable>() {
-          @Override
-          public String getValue(ViewerTable table) {
-            if (table.getCountRows() == -1) {
-              return messages.informationNotAvailable();
-            }
-            return String.valueOf(table.getCountRows());
           }
         }),
       new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForDescription(), 15,
@@ -723,16 +690,14 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
             @Override
             public void onSuccess(ExternalLobsDialogBoxResult result) {
               if (result.getOption().equals("add") && result.isResult()) {
-                ExternalLOBsParameter externalLOBsParameter = new ExternalLOBsParameter();
-                externalLOBsParameter.setBasePath(currentBasePath);
-                externalLOBsParameter.setReferenceType(referenceType.getSelectedValue());
-                externalLOBsParameter.setTable(metadata.getTable(currentTableUUID));
-                externalLOBsParameter.setColumnName(object.getDisplayName());
+                ExternalLobParameter externalLobParameter = new ExternalLobParameter();
+                externalLobParameter.setBasePath(currentBasePath);
+                externalLobParameter.setReferenceType(referenceType.getSelectedValue());
 
                 MultipleSelectionTablePanel<ViewerColumn> viewerColumnMultipleSelectionTablePanel = getColumns(
                   viewerTable.getUuid());
                 viewerColumnMultipleSelectionTablePanel.getDisplay().redrawRow(index);
-                externalLOBsParameters.put(id, externalLOBsParameter);
+                externalLOBsParameters.put(id, externalLobParameter);
               }
               if (result.getOption().equals("delete") && result.isResult()) {
                 String id = object.getDisplayName() + "_" + viewerTable.getUuid();
@@ -762,11 +727,9 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
             @Override
             public void onSuccess(ExternalLobsDialogBoxResult result) {
               if (result.getOption().equals("add") && result.isResult()) {
-                ExternalLOBsParameter externalLOBsParameter = new ExternalLOBsParameter();
+                ExternalLobParameter externalLOBsParameter = new ExternalLobParameter();
                 externalLOBsParameter.setBasePath(textBox.getText());
                 externalLOBsParameter.setReferenceType(referenceType.getSelectedValue());
-                externalLOBsParameter.setTable(metadata.getTable(currentTableUUID));
-                externalLOBsParameter.setColumnName(object.getDisplayName());
 
                 MultipleSelectionTablePanel<ViewerColumn> viewerColumnMultipleSelectionTablePanel = getColumns(
                   viewerTable.getUuid());
@@ -786,9 +749,9 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
     });
 
     selectionTablePanel.createTable(header,
-      getSelectPanel(SELECT_COLUMNS_TABLE, viewerTable.getSchemaUUID(), viewerTable.getUuid()), new ArrayList<>(),
-      viewerTable.getColumns().iterator(), new MultipleSelectionTablePanel.ColumnInfo<>("", 4,
-        new Column<ViewerColumn, Boolean>(new CheckboxCell(true, true)) {
+      getSelectPanel(SELECT_COLUMNS_TABLE, viewerTable.getSchemaUUID(), viewerTable.getUuid()),
+      Collections.singletonList(5), viewerTable.getColumns().iterator(), new MultipleSelectionTablePanel.ColumnInfo<>(
+        "", 4, new Column<ViewerColumn, Boolean>(new CheckboxCell(true, true)) {
           @Override
           public Boolean getValue(ViewerColumn viewerColumn) {
             MultipleSelectionTablePanel<ViewerTable> viewerTableMultipleSelectionTablePanel = getTable(
@@ -852,7 +815,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
             if (externalLOBsParameters.get(id) != null) {
               StringBuilder sb = new StringBuilder();
 
-              final ExternalLOBsParameter externalLOBsParameter = externalLOBsParameters.get(id);
+              final ExternalLobParameter externalLOBsParameter = externalLOBsParameters.get(id);
               sb.append(messages.tableAndColumnsPageLabelForReferenceType()).append(": ")
                 .append(externalLOBsParameter.getReferenceType()).append("\n")
                 .append(messages.tableAndColumnsPageLabelForBasePath()).append(": ");

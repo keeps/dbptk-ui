@@ -11,7 +11,6 @@ public class JDBCParameters implements Serializable {
   private Map<String, String> connection;
   private boolean driver = false;
   private String driverPath;
-  private boolean shouldCountRows = true;
 
   public JDBCParameters() {}
 
@@ -43,14 +42,6 @@ public class JDBCParameters implements Serializable {
 
   public void setDriverPath(String driverPath) {
     this.driverPath = driverPath;
-  }
-
-  public void setShouldCountRows(boolean shouldCountRows) {
-    this.shouldCountRows = shouldCountRows;
-  }
-
-  public boolean isShouldCountRows() {
-    return shouldCountRows;
   }
 }
 

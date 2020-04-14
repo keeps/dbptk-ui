@@ -1,6 +1,8 @@
 package com.databasepreservation.common.client.models.wizard.table;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -10,34 +12,38 @@ import java.util.stream.Collectors;
  */
 public class TableAndColumnsParameters implements Serializable {
 
-  private Map<String, List<String>> columns; // Key: schema, Values: columns
-  private List<ExternalLOBsParameter> externalLOBsParameters;
+  private Map<String, TableAndColumnsParameter> tableAndColumnsParameterMap;
+  private Map<String, ViewAndColumnsParameter> viewAndColumnsParameterMap;
   private List<String> selectedSchemas;
+  private boolean externalLobConfigurationSet;
 
   public TableAndColumnsParameters() {
+    this.tableAndColumnsParameterMap = new LinkedHashMap<>();
+    this.viewAndColumnsParameterMap = new LinkedHashMap<>();
+    this.selectedSchemas = new ArrayList<>();
+    this.externalLobConfigurationSet = false;
   }
 
-  public TableAndColumnsParameters(Map<String, List<String>> columns,
-    List<ExternalLOBsParameter> externalLOBsParameters, List<String> selectedSchemas) {
-    this.columns = columns;
-    this.externalLOBsParameters = externalLOBsParameters;
+  public TableAndColumnsParameters(Map<String, TableAndColumnsParameter> tableAndColumnsParameterMap,
+    List<String> selectedSchemas) {
+    this.tableAndColumnsParameterMap = tableAndColumnsParameterMap;
     this.selectedSchemas = selectedSchemas;
   }
 
-  public Map<String, List<String>> getColumns() {
-    return columns;
+  public Map<String, TableAndColumnsParameter> getTableAndColumnsParameterMap() {
+    return tableAndColumnsParameterMap;
   }
 
-  public void setColumns(Map<String, List<String>> columns) {
-    this.columns = columns;
+  public void setTableAndColumnsParameterMap(Map<String, TableAndColumnsParameter> tableAndColumnsParameterMap) {
+    this.tableAndColumnsParameterMap = tableAndColumnsParameterMap;
   }
 
-  public List<ExternalLOBsParameter> getExternalLOBsParameters() {
-    return externalLOBsParameters;
+  public Map<String, ViewAndColumnsParameter> getViewAndColumnsParameterMap() {
+    return viewAndColumnsParameterMap;
   }
 
-  public void setExternalLOBsParameters(List<ExternalLOBsParameter> externalLOBsParameters) {
-    this.externalLOBsParameters = externalLOBsParameters;
+  public void setViewAndColumnsParameterMap(Map<String, ViewAndColumnsParameter> viewAndColumnsParameterMap) {
+    this.viewAndColumnsParameterMap = viewAndColumnsParameterMap;
   }
 
   public List<String> getSelectedSchemas() {
@@ -46,5 +52,13 @@ public class TableAndColumnsParameters implements Serializable {
 
   public void setSelectedSchemas(List<String> schemas) {
     this.selectedSchemas = schemas;
+  }
+
+  public boolean isExternalLobConfigurationSet() {
+    return externalLobConfigurationSet;
+  }
+
+  public void setExternalLobConfigurationSet(boolean externalLobConfigurationSet) {
+    this.externalLobConfigurationSet = externalLobConfigurationSet;
   }
 }

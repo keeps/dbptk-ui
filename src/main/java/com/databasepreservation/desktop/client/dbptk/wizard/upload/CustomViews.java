@@ -163,16 +163,16 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
 
   @Override
   public CustomViewsParameters getValues() {
-    CustomViewsParameters customViewsParameters = new CustomViewsParameters();
-    ArrayList<CustomViewsParameter> parameters = new ArrayList<>(this.customViewsParameters.values());
+    CustomViewsParameters parameters = new CustomViewsParameters();
     if (toSave) {
       CustomViewsParameter parameter = new CustomViewsParameter(customViewSchemaName.getSelectedValue(), counter,
         customViewName.getText(), customViewDescription.getText(), customViewQuery.getText());
-      parameters.add(parameter);
+      customViewsParameters.put(parameter.getSchemaName(), parameter);
     }
-    customViewsParameters.setCustomViewsParameter(parameters);
 
-    return customViewsParameters;
+    parameters.setCustomViewsParameter(customViewsParameters);
+
+    return parameters;
   }
 
   @Override

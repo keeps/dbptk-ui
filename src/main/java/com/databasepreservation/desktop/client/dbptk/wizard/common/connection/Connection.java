@@ -62,7 +62,6 @@ public class Connection extends WizardPanel<ConnectionParameters> {
   private Set<JDBCPanel> jdbcPanels = new HashSet<>();
   private String type;
   private boolean clickedOnSidebar = false;
-  private boolean countRows = false;
   private Button btnTestConnection;
 
   private static Map<String, Connection> instances = new HashMap<>();
@@ -127,7 +126,6 @@ public class Connection extends WizardPanel<ConnectionParameters> {
       jdbcListConnections.add(connectionSidebar);
       leftSideContainer.removeStyleName("loading-sidebar");
       jdbcListConnections.remove(spinner);
-      countRows = true;
       dbmsModules = modules;
     }).getDBMSModules("import", null);
   }
@@ -149,7 +147,6 @@ public class Connection extends WizardPanel<ConnectionParameters> {
       jdbcListConnections.add(connectionSidebar);
       leftSideContainer.removeStyleName("loading-sidebar");
       jdbcListConnections.remove(spinner);
-      countRows = false;
       dbmsModules = modules;
     }).getDBMSModules("export", null);
   }
@@ -171,7 +168,7 @@ public class Connection extends WizardPanel<ConnectionParameters> {
 
     TabPanel tabPanel = new TabPanel();
     tabPanel.addStyleName("browseItemMetadata connection-panel");
-    selected = JDBCPanel.getInstance(connection, preservationParametersSelected, databaseUUID, type, countRows);
+    selected = JDBCPanel.getInstance(connection, preservationParametersSelected, databaseUUID, type);
     jdbcPanels.add(selected);
     tabPanel.add(selected, messages.connectionPageTextForTabGeneral());
     tabPanel.add(sshTunnelPanel, messages.connectionPageTextForTabSSHTunnel());

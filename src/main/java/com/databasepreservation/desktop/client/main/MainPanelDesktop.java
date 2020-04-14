@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.databasepreservation.common.client.common.ContentPanel;
+import com.databasepreservation.common.client.common.Progressbar;
 import com.databasepreservation.common.client.common.RightPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.sidebar.ColumnsManagementSidebar;
@@ -45,6 +46,7 @@ import com.databasepreservation.common.client.common.visualization.metadata.sche
 import com.databasepreservation.common.client.common.visualization.metadata.schemas.tables.MetadataTablePanel;
 import com.databasepreservation.common.client.common.visualization.metadata.schemas.views.MetadataViewPanel;
 import com.databasepreservation.common.client.common.visualization.metadata.users.MetadataUsersPanel;
+import com.databasepreservation.common.client.common.visualization.progressBar.ProgressBarPanel;
 import com.databasepreservation.common.client.common.visualization.validation.ValidatorPage;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;

@@ -1,6 +1,10 @@
 package com.databasepreservation.common.client.models.wizard.connection;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.io.Serializable;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -54,6 +58,19 @@ public class SSHConfiguration implements Serializable {
 
   public void setPassword(String password) {
     this.password = password;
+  }
+
+  @JsonIgnore
+  public Map<String, String> getRemoteProperties() {
+    Map<String, String> properties = new LinkedHashMap<>();
+
+    properties.put("ssh", "true");
+    properties.put("ssh-host", this.getHostname());
+    properties.put("ssh-user", this.getUsername());
+    properties.put("ssh-password", this.getPassword());
+    properties.put("ssh-port", this.getPort());
+
+    return properties;
   }
 
   @Override

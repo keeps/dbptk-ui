@@ -145,7 +145,7 @@ public class MultipleSelectionTablePanel<C> extends Composite {
       }
     });
 
-    final CellPreviewEvent.Handler<C> selectionEventManager = DefaultSelectionEventManager.createCheckboxManager();
+    final CellPreviewEvent.Handler<C> selectionEventManager = DefaultSelectionEventManager.createCheckboxManager(0);
     display.setSelectionModel(getSelectionModel(), selectionEventManager);
 
     displayScroll = new ScrollPanel(display);
@@ -173,7 +173,6 @@ public class MultipleSelectionTablePanel<C> extends Composite {
   }
 
   public void handleScrollChanges() {
-    GWT.log("maximum: " + displayScroll.getMaximumHorizontalScrollPosition());
     if (displayScroll.getMaximumHorizontalScrollPosition() > 0) {
       double percent = displayScroll.getHorizontalScrollPosition() * 100F
         / displayScroll.getMaximumHorizontalScrollPosition();
