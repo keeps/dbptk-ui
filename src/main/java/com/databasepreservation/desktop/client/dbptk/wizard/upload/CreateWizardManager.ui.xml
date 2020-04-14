@@ -13,7 +13,7 @@
                 <g:FlowPanel ui:field="customButtons" addStyleNames="button-panel-right"/>
                 <g:FlowPanel addStyleNames="button-panel-right">
                     <g:SimplePanel addStyleNames="btn-item">
-                        <g:Button ui:field="btnCancel" addStyleNames="btn btn-primary">
+                        <g:Button ui:field="btnCancel" addStyleNames="btn btn-outline-danger btn-times-circle">
                             <ui:text from='{messages.basicActionCancel}'/>
                         </g:Button>
                     </g:SimplePanel>

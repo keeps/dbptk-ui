@@ -28,7 +28,6 @@
         <scope.gwt-dev>provided</scope.gwt-dev>
         <version.dbptk>2.9.0-SNAPSHOT</version.dbptk>
         <version.roda>3.0.2</version.roda>
-
         <version.jersey>2.29.1</version.jersey>
         <version.swagger>1.5.20</version.swagger>
         <version.springfox-swagger>2.9.2</version.springfox-swagger>
@@ -37,9 +36,9 @@
         <cas.client.version>3.5.0</cas.client.version>
         <solr.version>8.4.1</solr.version>
         <springboot.version>2.2.2.RELEASE</springboot.version>
+
         <desktop>com.databasepreservation.desktop.Desktop</desktop>
         <server>com.databasepreservation.server.Server</server>
-
     </properties>
 
     <repositories>
@@ -66,7 +65,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.1.9.RELEASE</version>
+        <version>2.2.2.RELEASE</version>
     </parent>
 
     <build>

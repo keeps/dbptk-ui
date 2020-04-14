@@ -1,14 +1,21 @@
 package com.databasepreservation.desktop.client.dbptk.wizard.common.exportOptions;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.common.fields.ComboBoxField;
 import com.databasepreservation.common.client.common.fields.FileUploadField;
 import com.databasepreservation.common.client.common.fields.GenericField;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
-import com.databasepreservation.common.client.models.dbptk.Module;
 import com.databasepreservation.common.client.models.JSO.ExtensionFilter;
-import com.databasepreservation.common.client.models.wizard.export.ExportOptionsParameters;
+import com.databasepreservation.common.client.models.dbptk.Module;
 import com.databasepreservation.common.client.models.parameters.PreservationParameter;
+import com.databasepreservation.common.client.models.wizard.export.ExportOptionsParameters;
 import com.databasepreservation.common.client.tools.JSOUtils;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.databasepreservation.common.client.widgets.Toast;
@@ -25,13 +32,8 @@ import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
-import config.i18n.client.ClientMessages;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import config.i18n.client.ClientMessages;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -73,7 +75,7 @@ public class SIARDExportOptionsCurrent extends Composite {
     initWidget(binder.createAndBindUi(this));
 
     this.version = version;
-    this.module =  modules.stream().filter(c -> c.getModuleName().equals(version)).findFirst().orElse(new Module());
+    this.module = modules.stream().filter(c -> c.getModuleName().equals(version)).findFirst().orElse(new Module());
     this.defaultPath = defaultPath;
 
     FlowPanel panel = new FlowPanel();
@@ -155,7 +157,7 @@ public class SIARDExportOptionsCurrent extends Composite {
 
     for (PreservationParameter parameter : requiredParameters) {
       switch (parameter.getInputType()) {
-        case "TEXT":
+        case ViewerConstants.INPUT_TYPE_TEXT:
           if (textBoxInputs.get(parameter.getName()) != null) {
             final TextBox textBox = textBoxInputs.get(parameter.getName());
             if (ViewerStringUtils.isBlank(textBox.getText())) {
@@ -196,14 +198,14 @@ public class SIARDExportOptionsCurrent extends Composite {
     return SIARDExportOptions.OK;
   }
 
-//  public void setDefaultPath(String path) {
-//    GWT.log(path);
-//    if (!version.equals(ViewerConstants.SIARDDK)) {
-//      fileInputs.put(ViewerConstants.INPUT_TYPE_FILE_SAVE.toLowerCase(), path);
-//      SIARDInputFile.setPathLocation(path, path);
-//      SIARDInputFile.setInformationPathCSS("gwt-Label-disabled information-path");
-//    }
-//  }
+  // public void setDefaultPath(String path) {
+  // GWT.log(path);
+  // if (!version.equals(ViewerConstants.SIARDDK)) {
+  // fileInputs.put(ViewerConstants.INPUT_TYPE_FILE_SAVE.toLowerCase(), path);
+  // SIARDInputFile.setPathLocation(path, path);
+  // SIARDInputFile.setInformationPathCSS("gwt-Label-disabled information-path");
+  // }
+  // }
 
   public void clear() {
     instances.clear();
@@ -315,6 +317,13 @@ public class SIARDExportOptionsCurrent extends Composite {
     String spanCSSClass = "form-text-helper text-muted";
 
     switch (parameter.getInputType()) {
+      case ViewerConstants.INPUT_TYPE_COMBOBOX:
+        ComboBoxField comboBoxField = ComboBoxField.createInstance(parameter.getName());
+        parameter.getPossibleValues().forEach(key -> comboBoxField.setComboBoxValue(key, "value"));
+        // comboBoxField.setComboBoxValue();
+        genericField = GenericField.createInstance(comboBoxField);
+        break;
+
       case ViewerConstants.INPUT_TYPE_CHECKBOX:
         CheckBox checkbox = new CheckBox();
         checkbox.setText(messages.wizardExportOptionsLabels(parameter.getName()));
@@ -334,7 +343,8 @@ public class SIARDExportOptionsCurrent extends Composite {
         fileUploadField.buttonAction(() -> {
           if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
             JavaScriptObject.createArray();
-            ExtensionFilter extensionFilter = new ExtensionFilter().createFilterTypeFromDBPTK(parameter.getFileFilter());
+            ExtensionFilter extensionFilter = new ExtensionFilter()
+              .createFilterTypeFromDBPTK(parameter.getFileFilter());
             JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.emptyList(),
               Collections.singletonList(extensionFilter));
             String path = null;
@@ -394,7 +404,6 @@ public class SIARDExportOptionsCurrent extends Composite {
         helperFolder.add(spanFolder);
         content.add(helperFolder);
         break;
-      case ViewerConstants.INPUT_TYPE_COMBOBOX:
       case ViewerConstants.INPUT_TYPE_NONE:
         genericField = null;
         break;

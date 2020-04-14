@@ -920,6 +920,8 @@ public interface ClientMessages extends Messages {
 
   String tableAndColumnsPageTableHeaderTextForMaterializeViewOption();
 
+  String tableAndColumnsPageTableHeaderTextForMerkleOption();
+
   String tableAndColumnsPageTableHeaderTextForViewName();
 
   String tableAndColumnsPageTableHeaderTextForTableName();

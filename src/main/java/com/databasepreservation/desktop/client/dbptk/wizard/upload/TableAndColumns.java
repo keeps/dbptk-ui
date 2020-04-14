@@ -1,6 +1,7 @@
 package com.databasepreservation.desktop.client.dbptk.wizard.upload;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,6 +12,8 @@ import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.fields.ComboBoxField;
 import com.databasepreservation.common.client.common.fields.FileUploadField;
 import com.databasepreservation.common.client.common.fields.GenericField;
+import com.databasepreservation.common.client.common.lists.cells.DisableableCheckboxCell;
+import com.databasepreservation.common.client.common.lists.cells.helper.CheckboxData;
 import com.databasepreservation.common.client.common.lists.widgets.MultipleSelectionTablePanel;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
@@ -55,6 +58,8 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
+import com.google.gwt.user.client.ui.HasVerticalAlignment;
 import com.google.gwt.user.client.ui.InlineHTML;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TabPanel;
@@ -99,6 +104,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
   private Map<String, Boolean> tableSelectedStatus = new HashMap<>();
   private Map<String, Boolean> viewSelectedStatus = new HashMap<>();
   private Map<String, Boolean> viewMaterializationStatus = new HashMap<>();
+  private Map<String, Boolean> merkleColumnStatus = new HashMap<>();
   private Map<String, ExternalLobParameter> externalLOBsParameters = new HashMap<>();
   private String currentBasePath = null;
   private String databaseUUID;
@@ -218,7 +224,8 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
 
   @Override
   public TableAndColumnsParameters getValues() {
-    return WizardUtils.getTableAndColumnsParameter(metadata, columns, externalLOBsParameters, viewMaterializationStatus);
+    return WizardUtils.getTableAndColumnsParameter(tables, views, columns, externalLOBsParameters,
+      viewMaterializationStatus, merkleColumnStatus);
   }
 
   @Override
@@ -481,8 +488,9 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
     header.addStyleName("h1");
 
     selectionTablePanel.createTable(header,
-      getSelectPanel(SELECT_COLUMNS_VIEW, viewerView.getSchemaUUID(), viewerView.getUuid()), new ArrayList<>(),
-      viewerView.getColumns().iterator(), new MultipleSelectionTablePanel.ColumnInfo<>("", 4,
+      getSelectPanel(SELECT_COLUMNS_VIEW, viewerView.getSchemaUUID(), viewerView.getUuid()),
+      Collections.singletonList(2), viewerView.getColumns().iterator(),
+      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForSelect(), 4,
         new Column<ViewerColumn, Boolean>(new CheckboxCell(true, true)) {
           @Override
           public Boolean getValue(ViewerColumn viewerColumn) {
@@ -499,7 +507,9 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
             return obj.getDisplayName();
           }
         }),
-      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForDescription(), 15,
+      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForMerkleOption(), 8,
+        getMerkleTreeColumn(viewerView.getUuid())),
+      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForDescription(), 0,
         new TextColumn<ViewerColumn>() {
           @Override
           public String getValue(ViewerColumn obj) {
@@ -511,20 +521,24 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
   private void populateViews(MultipleSelectionTablePanel<ViewerView> selectionTablePanel,
     final ViewerSchema viewerSchema) {
 
-    final Column<ViewerView, Boolean> column = new Column<ViewerView, Boolean>(new CheckboxCell(false, false)) {
+    final Column<ViewerView, CheckboxData> column = new Column<ViewerView, CheckboxData>(
+      new DisableableCheckboxCell(false, false)) {
       @Override
-      public Boolean getValue(ViewerView viewerView) {
+      public CheckboxData getValue(ViewerView viewerView) {
         viewMaterializationStatus.put(viewerView.getUuid(), false);
-        return false;
+        final CheckboxData checkboxData = new CheckboxData();
+        checkboxData.setChecked(false);
+        return checkboxData;
       }
     };
 
     column.setFieldUpdater((i, viewerView, value) -> {
-      viewMaterializationStatus.put(viewerView.getUuid(), value);
+      viewMaterializationStatus.put(viewerView.getUuid(), value.isChecked());
     });
 
     selectionTablePanel.createTable(getSelectPanel(SELECT_VIEWS, viewerSchema.getUuid()), Collections.singletonList(1),
-      viewerSchema.getViews().iterator(), new MultipleSelectionTablePanel.ColumnInfo<>("Export", 4,
+      viewerSchema.getViews().iterator(),
+      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForSelect(), 4,
         new Column<ViewerView, Boolean>(new CheckboxCell(true, true)) {
           @Override
           public Boolean getValue(ViewerView viewerView) {
@@ -548,7 +562,8 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
             return selectionTablePanel.getSelectionModel().isSelected(viewerView);
           }
         }),
-      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForMaterializeViewOption(), 4, column),
+      new MultipleSelectionTablePanel.ColumnInfo<>(
+        messages.tableAndColumnsPageTableHeaderTextForMaterializeViewOption(), 4, column),
       new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForViewName(), 10,
         new TextColumn<ViewerView>() {
           @Override
@@ -568,7 +583,8 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
   private void populateTable(MultipleSelectionTablePanel<ViewerTable> selectionTablePanel,
     final ViewerSchema viewerSchema) {
     selectionTablePanel.createTable(getSelectPanel(SELECT_TABLES, viewerSchema.getUuid()), new ArrayList<>(),
-      viewerSchema.getTables().iterator(), new MultipleSelectionTablePanel.ColumnInfo<>("", 4,
+      viewerSchema.getTables().iterator(),
+      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForSelect(), 4,
         new Column<ViewerTable, Boolean>(new CheckboxCell(true, true)) {
           @Override
           public Boolean getValue(ViewerTable viewerTable) {
@@ -609,6 +625,27 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
             return table.getDescription();
           }
         }));
+  }
+
+  private Column<ViewerColumn, Boolean> getMerkleTreeColumn(String uuid) {
+    final Column<ViewerColumn, Boolean> merkleCheckboxOption = new Column<ViewerColumn, Boolean>(
+      new CheckboxCell(false, false)) {
+      @Override
+      public Boolean getValue(ViewerColumn column) {
+        merkleColumnStatus.put(WizardUtils.generateMerkleTreeMapKey(uuid, column.getSolrName()), true);
+        return true;
+      }
+    };
+
+    merkleCheckboxOption.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
+    merkleCheckboxOption.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
+
+    merkleCheckboxOption.setFieldUpdater((i, column, value) -> {
+      String key = uuid + "_" + column.getSolrName();
+      merkleColumnStatus.put(key, value);
+    });
+
+    return merkleCheckboxOption;
   }
 
   private void populateTableColumns(MultipleSelectionTablePanel<ViewerColumn> selectionTablePanel,
@@ -749,9 +786,10 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
     });
 
     selectionTablePanel.createTable(header,
-      getSelectPanel(SELECT_COLUMNS_TABLE, viewerTable.getSchemaUUID(), viewerTable.getUuid()),
-      Collections.singletonList(5), viewerTable.getColumns().iterator(), new MultipleSelectionTablePanel.ColumnInfo<>(
-        "", 4, new Column<ViewerColumn, Boolean>(new CheckboxCell(true, true)) {
+      getSelectPanel(SELECT_COLUMNS_TABLE, viewerTable.getSchemaUUID(), viewerTable.getUuid()), Arrays.asList(4, 6),
+      viewerTable.getColumns().iterator(),
+      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForSelect(), 4,
+        new Column<ViewerColumn, Boolean>(new CheckboxCell(true, true)) {
           @Override
           public Boolean getValue(ViewerColumn viewerColumn) {
             MultipleSelectionTablePanel<ViewerTable> viewerTableMultipleSelectionTablePanel = getTable(
@@ -792,7 +830,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
             return column.getDisplayName();
           }
         }),
-      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForOriginalTypeName(), 10,
+      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForOriginalTypeName(), 15,
         new TextColumn<ViewerColumn>() {
 
           @Override
@@ -800,13 +838,15 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
             return column.getType().getOriginalTypeName();
           }
         }),
-      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForDescription(), 15,
+      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForDescription(), 0,
         new TextColumn<ViewerColumn>() {
           @Override
           public String getValue(ViewerColumn column) {
             return column.getDescription();
           }
         }),
+      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForMerkleOption(), 8,
+        getMerkleTreeColumn(viewerTable.getUuid())),
       new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForColumnFilters(), 10,
         new TooltipDatabaseColumn() {
           @Override

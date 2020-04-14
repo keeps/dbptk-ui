@@ -1,6 +1,8 @@
 package com.databasepreservation.common.client.models.parameters;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -16,6 +18,7 @@ public class PreservationParameter implements Serializable {
   private String fileFilter = null;
   private String exportOption = null;
   private String defaultValue = null;
+  private List<String> possibleValues = new ArrayList<>();
 
   public PreservationParameter() {
   }
@@ -101,6 +104,14 @@ public class PreservationParameter implements Serializable {
 
   public void setFileFilter(String fileFilter) {
     this.fileFilter = fileFilter;
+  }
+
+  public List<String> getPossibleValues() {
+    return possibleValues;
+  }
+
+  public void setPossibleValues(List<String> possibleValues) {
+    this.possibleValues = possibleValues;
   }
 
   @Override

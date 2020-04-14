@@ -945,11 +945,17 @@ public class SIARDController {
         if (param.getFileFilter() != null) {
           preservationParameter.setFileFilter(param.getFileFilter().name());
         }
+        if (param.getPossibleValues() != null) {
+          preservationParameter.setPossibleValues(param.getPossibleValues());
+        }
       } else {
         preservationParameter = new PreservationParameter(param.longName(), param.description(), param.required(),
           param.hasArgument(), param.getInputType().name());
         if (param.getFileFilter() != null) {
           preservationParameter.setFileFilter(param.getFileFilter().name());
+        }
+        if (param.getPossibleValues() != null) {
+          preservationParameter.setPossibleValues(param.getPossibleValues());
         }
       }
 
