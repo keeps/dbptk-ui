@@ -19,27 +19,40 @@ public class PreservationParameter implements Serializable {
   private String exportOption = null;
   private String defaultValue = null;
   private List<String> possibleValues = new ArrayList<>();
+  private Integer defaultIndex = 0;
 
   public PreservationParameter() {
   }
 
-  public PreservationParameter(String name, String description, boolean required,
-    boolean hasArgument, String inputType) {
+  public PreservationParameter(String name, String description, boolean required, boolean hasArgument,
+    String inputType) {
+    this(name, description, required, hasArgument, inputType, 0);
+  }
+
+  public PreservationParameter(String name, String description, boolean required, boolean hasArgument, String inputType,
+    Integer defaultIndex) {
     this.name = name;
     this.description = description;
     this.required = required;
     this.hasArgument = hasArgument;
     this.inputType = inputType;
+    this.defaultIndex = defaultIndex;
   }
 
-  public PreservationParameter(String name, String description, boolean required,
-    boolean hasArgument, String inputType, String exportOption) {
+  public PreservationParameter(String name, String description, boolean required, boolean hasArgument, String inputType,
+    String exportOption) {
+    this(name, description, required, hasArgument, inputType, exportOption, 0);
+  }
+
+  public PreservationParameter(String name, String description, boolean required, boolean hasArgument, String inputType,
+    String exportOption, Integer defaultIndex) {
     this.name = name;
     this.description = description;
     this.required = required;
     this.hasArgument = hasArgument;
     this.inputType = inputType;
     this.exportOption = exportOption;
+    this.defaultIndex = defaultIndex;
   }
 
   public String getName() {
@@ -114,15 +127,23 @@ public class PreservationParameter implements Serializable {
     this.possibleValues = possibleValues;
   }
 
+  public Integer getDefaultIndex() {
+    return defaultIndex;
+  }
+
+  public void setDefaultIndex(Integer defaultIndex) {
+    this.defaultIndex = defaultIndex;
+  }
+
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o)
+      return true;
+    if (o == null || getClass() != o.getClass())
+      return false;
     PreservationParameter that = (PreservationParameter) o;
-    return isRequired() == that.isRequired() &&
-        hasArgument() == that.hasArgument() &&
-        Objects.equals(getName(), that.getName()) &&
-        Objects.equals(getDescription(), that.getDescription());
+    return isRequired() == that.isRequired() && hasArgument() == that.hasArgument()
+      && Objects.equals(getName(), that.getName()) && Objects.equals(getDescription(), that.getDescription());
   }
 
   @Override
@@ -132,11 +153,7 @@ public class PreservationParameter implements Serializable {
 
   @Override
   public String toString() {
-    return "PreservationParameter{" +
-        "name='" + name + '\'' +
-        ", description='" + description + '\'' +
-        ", required=" + required +
-        ", hasArgument=" + hasArgument +
-        '}';
+    return "PreservationParameter{" + "name='" + name + '\'' + ", description='" + description + '\'' + ", required="
+      + required + ", hasArgument=" + hasArgument + '}';
   }
 }

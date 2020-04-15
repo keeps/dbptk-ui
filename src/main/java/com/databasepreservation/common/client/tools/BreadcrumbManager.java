@@ -218,7 +218,9 @@ public class BreadcrumbManager {
               FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE) + SafeHtmlUtils.htmlEscape(databaseName)),
               () -> HistoryManager.gotoSIARDInfo(databaseUUID)));
           } else {
-            items.add(new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE) + SafeHtmlUtils.htmlEscape(databaseName))));
+            items.add(new BreadcrumbItem(
+              SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE)
+                + SafeHtmlUtils.htmlEscape(databaseName))));
           }
         }
       });
@@ -291,6 +293,14 @@ public class BreadcrumbManager {
     items.add(
       new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.WIZARD)
         + SafeHtmlUtils.htmlEscape(messages.breadcrumbTextForWizardCreateSIARDCustomViews()))));
+    return items;
+  }
+
+  public static List<BreadcrumbItem> forMerkleTreeFilter() {
+    List<BreadcrumbItem> items = forHome();
+    items.add(
+      new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.WIZARD)
+        + SafeHtmlUtils.htmlEscape(messages.breadcrumbTextForWizardCreateMerkleTreeFilter()))));
     return items;
   }
 

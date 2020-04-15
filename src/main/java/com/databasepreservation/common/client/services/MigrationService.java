@@ -66,6 +66,11 @@ public interface MigrationService extends DirectRestService {
   @ApiOperation(value = "Retrieves the DBPTK developer DBMS migration modules", notes = "", response = Module.class, responseContainer = "List")
   List<Module> getDBMSModules(@QueryParam("type") String type, @QueryParam("moduleName") String moduleName);
 
+  @GET
+  @Path("/filter/modules")
+  @ApiOperation(value = "Retrieves the DBPTK developer filter modules", notes = "", response = Module.class, responseContainer = "List")
+  List<Module> getFilterModules(@QueryParam("moduleName") String moduleName);
+
   @POST
   @Path("/dbms/test/connection")
   @ApiOperation(value = "Tests the connection to the database", notes = "", response = ConnectionResponse.class)

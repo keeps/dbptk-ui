@@ -15,6 +15,7 @@ import com.databasepreservation.common.client.models.wizard.connection.Connectio
 import com.databasepreservation.common.client.models.wizard.customViews.CustomViewsParameters;
 import com.databasepreservation.common.client.models.wizard.export.ExportOptionsParameters;
 import com.databasepreservation.common.client.models.wizard.export.MetadataExportOptionsParameters;
+import com.databasepreservation.common.client.models.wizard.filter.MerkleTreeFilterParameters;
 import com.databasepreservation.common.client.models.wizard.table.TableAndColumnsParameters;
 import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.services.MigrationService;
@@ -25,6 +26,7 @@ import com.databasepreservation.desktop.client.dbptk.wizard.WizardManager;
 import com.databasepreservation.desktop.client.dbptk.wizard.common.connection.Connection;
 import com.databasepreservation.desktop.client.dbptk.wizard.common.exportOptions.MetadataExportOptions;
 import com.databasepreservation.desktop.client.dbptk.wizard.common.exportOptions.SIARDExportOptions;
+import com.databasepreservation.desktop.client.dbptk.wizard.common.filter.MerkleTreeFilter;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -70,11 +72,11 @@ public class CreateWizardManager extends WizardManager {
 
   private static CreateWizardManager instance = null;
   private int position = 0;
-  private final int positions = 5;
   private String uniqueId;
   private ConnectionParameters connectionParameters;
   private TableAndColumnsParameters tableAndColumnsParameters;
   private CustomViewsParameters customViewsParameters;
+  private MerkleTreeFilterParameters merkleTreeFilterParameters;
   private ExportOptionsParameters exportOptionsParameters;
   private MetadataExportOptionsParameters metadataExportOptionsParameters = null;
 
@@ -145,9 +147,12 @@ public class CreateWizardManager extends WizardManager {
         handleCustomViewsPanel();
         break;
       case 3:
-        handleSIARDExportOptions();
+        handleMerkleTreeFilterPanel();
         break;
       case 4:
+        handleSIARDExportOptions();
+        break;
+      case 5:
         handleMetadataExportOptions();
         break;
     }
@@ -197,7 +202,7 @@ public class CreateWizardManager extends WizardManager {
       wizardContent.clear();
       position = 2;
       CustomViews customViews = CustomViews.getInstance(tableAndColumnsParameters.getSelectedSchemas(), btnNext,
-        connectionParameters, uniqueId);
+        connectionParameters);
       customViews.refreshCustomButtons();
       wizardInstances.add(position, customViews);
       wizardContent.add(customViews);
@@ -229,11 +234,12 @@ public class CreateWizardManager extends WizardManager {
                   customViewsParameters = customViewInstance.getValues();
                   wizardContent.clear();
                   position = 3;
-                  SIARDExportOptions exportOptions = SIARDExportOptions.getInstance();
-                  wizardInstances.add(position, exportOptions);
-                  wizardContent.add(exportOptions);
+                  MerkleTreeFilter merkleTreeFilter = MerkleTreeFilter.getInstance(btnNext);
+                  wizardInstances.add(position, merkleTreeFilter);
+                  wizardContent.add(merkleTreeFilter);
                   updateButtons();
                   updateBreadcrumb();
+                  merkleTreeFilter.changeBtnNextText();
                   customButtons.clear();
                 }, (String errorMessage) -> {
                   dialogBox.hide();
@@ -246,11 +252,12 @@ public class CreateWizardManager extends WizardManager {
                 .remove(customViewsParameters.getCustomViewsParameter().size() - 1); // DISCARD THE LAST
               wizardContent.clear();
               position = 3;
-              SIARDExportOptions exportOptions = SIARDExportOptions.getInstance();
-              wizardInstances.add(position, exportOptions);
-              wizardContent.add(exportOptions);
+              MerkleTreeFilter merkleTreeFilter = MerkleTreeFilter.getInstance(btnNext);
+              wizardInstances.add(position, merkleTreeFilter);
+              wizardContent.add(merkleTreeFilter);
               updateButtons();
               updateBreadcrumb();
+              merkleTreeFilter.changeBtnNextText();
               customButtons.clear();
             }
           }
@@ -259,12 +266,30 @@ public class CreateWizardManager extends WizardManager {
       customViewsParameters = (CustomViewsParameters) wizardInstances.get(position).getValues();
       wizardContent.clear();
       position = 3;
+      MerkleTreeFilter merkleTreeFilter = MerkleTreeFilter.getInstance(btnNext);
+      wizardInstances.add(position, merkleTreeFilter);
+      wizardContent.add(merkleTreeFilter);
+      updateButtons();
+      updateBreadcrumb();
+      merkleTreeFilter.changeBtnNextText();
+      customButtons.clear();
+    }
+  }
+
+  private void handleMerkleTreeFilterPanel() {
+    final boolean valid = wizardInstances.get(position).validate();
+    if (valid) {
+      merkleTreeFilterParameters = (MerkleTreeFilterParameters) wizardInstances.get(position).getValues();
+      wizardContent.clear();
+      position = 4;
       SIARDExportOptions exportOptions = SIARDExportOptions.getInstance();
       wizardInstances.add(position, exportOptions);
       wizardContent.add(exportOptions);
       updateButtons();
       updateBreadcrumb();
       customButtons.clear();
+    } else {
+      wizardInstances.get(position).error();
     }
   }
 
@@ -275,7 +300,7 @@ public class CreateWizardManager extends WizardManager {
 
       if (!exportOptionsParameters.getSiardVersion().equals(ViewerConstants.SIARDDK)) {
         wizardContent.clear();
-        position = 4;
+        position = 5;
         MetadataExportOptions metadataExportOptions = MetadataExportOptions
           .getInstance(exportOptionsParameters.getSiardVersion(), false);
         wizardInstances.add(position, metadataExportOptions);
@@ -302,7 +327,7 @@ public class CreateWizardManager extends WizardManager {
   private void createSIARD(final boolean redirect) {
     wizardContent.clear();
     enableButtons(false);
-    position = 5;
+    position = 6;
     updateBreadcrumb();
 
     ProgressBarPanel progressBarPanel = ProgressBarPanel.getInstance(uniqueId);
@@ -343,7 +368,7 @@ public class CreateWizardManager extends WizardManager {
       Dialogs.showErrors(messages.createSIARDWizardManagerInformationMessagesTitle(), errorMessage,
         messages.basicActionClose());
     }).run(null, new CreateSIARDParameters(connectionParameters, tableAndColumnsParameters, customViewsParameters,
-      exportOptionsParameters, metadataExportOptionsParameters, uniqueId));
+      merkleTreeFilterParameters, exportOptionsParameters, metadataExportOptionsParameters, uniqueId));
   }
 
   @Override
@@ -357,6 +382,7 @@ public class CreateWizardManager extends WizardManager {
       btnBack.setEnabled(false);
     }
 
+    int positions = 6;
     if (position == positions - 1) {
       btnNext.setText(messages.basicActionMigrate());
     }
@@ -389,12 +415,15 @@ public class CreateWizardManager extends WizardManager {
         breadcrumbItems = BreadcrumbManager.forCustomViews();
         break;
       case 3:
-        breadcrumbItems = BreadcrumbManager.forSIARDExportOptions();
+        breadcrumbItems = BreadcrumbManager.forMerkleTreeFilter();
         break;
       case 4:
-        breadcrumbItems = BreadcrumbManager.forMetadataExportOptions();
+        breadcrumbItems = BreadcrumbManager.forSIARDExportOptions();
         break;
       case 5:
+        breadcrumbItems = BreadcrumbManager.forMetadataExportOptions();
+        break;
+      case 6:
         breadcrumbItems = BreadcrumbManager.forCreateSIARD();
         break;
       default:

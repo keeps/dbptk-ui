@@ -133,7 +133,6 @@ public class Dialogs {
 
     for (int irow = 1; irow < nrows; irow++) {
       List<String> rowL = rows.get(irow);
-      GWT.log("" + rowL.toString());
       rowsL.add(rowL);
     }
 

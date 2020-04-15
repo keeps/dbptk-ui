@@ -45,6 +45,10 @@ public class ExtensionFilter {
         this.name = "XML";
         this.extensions.add("xml");
         return this;
+      case "JSON_EXTENSION":
+        this.name = "JSON";
+        this.extensions.add("json");
+        return this;
       default:
         this.name = ViewerConstants.SIARD_FILES;
         this.extensions.add(ViewerConstants.SIARD);

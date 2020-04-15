@@ -1,5 +1,7 @@
 package com.databasepreservation.common.client.models.wizard.table;
 
+import io.swagger.models.auth.In;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -16,6 +18,7 @@ public class TableAndColumnsParameters implements Serializable {
   private Map<String, ViewAndColumnsParameter> viewAndColumnsParameterMap;
   private List<String> selectedSchemas;
   private boolean externalLobConfigurationSet;
+  private Integer dbptkFilterIndex;
 
   public TableAndColumnsParameters() {
     this.tableAndColumnsParameterMap = new LinkedHashMap<>();
@@ -60,5 +63,13 @@ public class TableAndColumnsParameters implements Serializable {
 
   public void setExternalLobConfigurationSet(boolean externalLobConfigurationSet) {
     this.externalLobConfigurationSet = externalLobConfigurationSet;
+  }
+
+  public Integer getDbptkFilterIndex() {
+    return dbptkFilterIndex;
+  }
+
+  public void setDbptkFilterIndex(Integer dbptkFilterIndex) {
+    this.dbptkFilterIndex = dbptkFilterIndex;
   }
 }

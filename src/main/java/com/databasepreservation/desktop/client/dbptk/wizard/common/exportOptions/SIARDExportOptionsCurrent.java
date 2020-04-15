@@ -49,17 +49,18 @@ public class SIARDExportOptionsCurrent extends Composite {
   @UiField
   FlowPanel content;
 
-  private static Map<String, SIARDExportOptionsCurrent> instances = new HashMap<>();
-  private Map<String, TextBox> textBoxInputs = new HashMap<>();
-  private Map<String, CheckBox> checkBoxInputs = new HashMap<>();
-  private Map<String, String> fileInputs = new HashMap<>();
-  private Module module;
-  private List<Label> externalLobsLabels = new ArrayList<>();
-  private Map<String, TextBox> externalLobsInputs = new HashMap<>();
+  private static final Map<String, SIARDExportOptionsCurrent> instances = new HashMap<>();
+  private final Map<String, TextBox> textBoxInputs = new HashMap<>();
+  private final Map<String, CheckBox> checkBoxInputs = new HashMap<>();
+  private final Map<String, ComboBoxField> comboBoxInputs = new HashMap<>();
+  private final Map<String, String> fileInputs = new HashMap<>();
+  private final Module module;
+  private final List<Label> externalLobsLabels = new ArrayList<>();
+  private final Map<String, TextBox> externalLobsInputs = new HashMap<>();
   private CheckBox externalLobCheckbox;
   private int validationError = -1;
-  private String version;
-  private String defaultPath;
+  private final String version;
+  private final String defaultPath;
 
   public static SIARDExportOptionsCurrent getInstance(String key, List<Module> modules) {
     instances.computeIfAbsent(key, k -> new SIARDExportOptionsCurrent(key, modules, null));
@@ -130,6 +131,11 @@ public class SIARDExportOptionsCurrent extends Composite {
             exportParameters.put(parameter.getName(), path);
           }
           break;
+        case ViewerConstants.INPUT_TYPE_COMBOBOX:
+          if (comboBoxInputs.get(parameter.getName()) != null) {
+            exportParameters.put(parameter.getName(), comboBoxInputs.get(parameter.getName()).getSelectedValue());
+          }
+          break;
         case ViewerConstants.INPUT_TYPE_DEFAULT:
         case ViewerConstants.INPUT_TYPE_NONE:
         default:
@@ -197,15 +203,6 @@ public class SIARDExportOptionsCurrent extends Composite {
     }
     return SIARDExportOptions.OK;
   }
-
-  // public void setDefaultPath(String path) {
-  // GWT.log(path);
-  // if (!version.equals(ViewerConstants.SIARDDK)) {
-  // fileInputs.put(ViewerConstants.INPUT_TYPE_FILE_SAVE.toLowerCase(), path);
-  // SIARDInputFile.setPathLocation(path, path);
-  // SIARDInputFile.setInformationPathCSS("gwt-Label-disabled information-path");
-  // }
-  // }
 
   public void clear() {
     instances.clear();
@@ -276,7 +273,6 @@ public class SIARDExportOptionsCurrent extends Composite {
         externalLobsLabels.add(label);
         TextBox defaultTextBox = new TextBox();
         defaultTextBox.addStyleName("form-textbox-external-lobs");
-        GWT.log("" + parameter);
         defaultTextBox.setText(parameter.getDefaultValue());
         externalLobsInputs.put(parameter.getName(), defaultTextBox);
         Label labelEnd = new Label();
@@ -318,9 +314,11 @@ public class SIARDExportOptionsCurrent extends Composite {
 
     switch (parameter.getInputType()) {
       case ViewerConstants.INPUT_TYPE_COMBOBOX:
-        ComboBoxField comboBoxField = ComboBoxField.createInstance(parameter.getName());
-        parameter.getPossibleValues().forEach(key -> comboBoxField.setComboBoxValue(key, "value"));
-        // comboBoxField.setComboBoxValue();
+        ComboBoxField comboBoxField = ComboBoxField.createInstance(messages.wizardExportOptionsLabels(parameter.getName()));
+        parameter.getPossibleValues().forEach(key -> comboBoxField.setComboBoxValue(messages.wizardExportOptionsForPossibleValues(key), key));
+        comboBoxField.setCSSMetadata("form-row", "form-label-spaced", "form-combobox");
+        comboBoxField.select(parameter.getDefaultIndex());
+        comboBoxInputs.put(parameter.getName(), comboBoxField);
         genericField = GenericField.createInstance(comboBoxField);
         break;
 

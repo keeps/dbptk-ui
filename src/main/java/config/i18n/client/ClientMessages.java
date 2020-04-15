@@ -1,10 +1,9 @@
 package config.i18n.client;
 
+import java.util.List;
+
 import com.google.gwt.i18n.client.Messages;
 import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
-
-import java.util.List;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -588,6 +587,8 @@ public interface ClientMessages extends Messages {
 
   String breadcrumbTextForWizardCreateSIARDCustomViews();
 
+  String breadcrumbTextForWizardCreateMerkleTreeFilter();
+
   String breadcrumbTextForSIARDEditMetadata();
 
   String breadcrumbTextForCreateSIARD();
@@ -980,6 +981,15 @@ public interface ClientMessages extends Messages {
   String customViewsPageTextForHelpViewQuery();
 
   /********************************************
+   * Create Wizard: Merkle Tree Filter
+   ********************************************/
+  String wizardMerkleTreeFilterTitle();
+
+  SafeHtml wizardMerkleTreeFilterDescription(String link);
+
+  String wizardMerkleTreeFilterErrorMessages();
+
+  /********************************************
    * Wizard Export Options
    ********************************************/
   String wizardExportOptionsTitle();
@@ -991,6 +1001,8 @@ public interface ClientMessages extends Messages {
   String wizardMetadataExportOptionsDescription();
 
   String wizardExportOptionsLabels(@Select String fieldName);
+
+  String wizardExportOptionsForPossibleValues(@Select String value);
 
   String wizardExportOptionsHelperText(@Select String fieldName);
 
@@ -1018,7 +1030,6 @@ public interface ClientMessages extends Messages {
   String sendToWizardManagerInformationMessageSIARD();
 
   String sendToWizardManagerInformationMessageDBMS(String name);
-
 
   /*********************************************
    * Open SIARD
@@ -1143,7 +1154,7 @@ public interface ClientMessages extends Messages {
   String uploadSIARDTextForDoneUpload();
 
   /*********************************************
-   *  CSV Export Dialog
+   * CSV Export Dialog
    *********************************************/
   String csvExportDialogTitle();
 
@@ -1289,6 +1300,7 @@ public interface ClientMessages extends Messages {
   String activityLogTextForExportTypeRow();
 
   String activityLogUsernameRelated();
+
   /********************************************
    * HTML Utils
    *******************************************/

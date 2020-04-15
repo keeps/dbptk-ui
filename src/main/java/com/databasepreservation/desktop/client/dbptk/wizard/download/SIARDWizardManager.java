@@ -213,7 +213,7 @@ public class SIARDWizardManager extends WizardManager {
       enableButtons(true);
       enableNext(false);
       Toast.showError(messages.alertErrorTitle(), errorMessage);
-    }).run(databaseUUID, new CreateSIARDParameters(null, tableAndColumnsParameters, null, exportOptionsParameters,
+    }).run(databaseUUID, new CreateSIARDParameters(null, tableAndColumnsParameters, null, null, exportOptionsParameters,
       metadataExportOptionsParameters));
   }
 

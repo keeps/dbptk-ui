@@ -1,6 +1,5 @@
 package com.databasepreservation.desktop.client.dbptk.wizard.upload;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +42,7 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
   interface CustomViewsUiBinder extends UiBinder<Widget, CustomViews> {
   }
 
-  private static CustomViewsUiBinder binder = GWT.create(CustomViewsUiBinder.class);
+  private static final CustomViewsUiBinder binder = GWT.create(CustomViewsUiBinder.class);
 
   @UiField
   FlowPanel customViewsList;
@@ -83,26 +82,22 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
   private Map<String, CustomViewsParameter> customViewsParameters = new HashMap<>();
   private int counter = 0;
   private boolean toSave;
-  private ComboBoxField customViewSchemaName;
-  private Button btnNext;
-  private ConnectionParameters connectionParameters;
-  private String databaseUUID;
+  private final ComboBoxField customViewSchemaName;
+  private final Button btnNext;
+  private final ConnectionParameters connectionParameters;
 
-  public static CustomViews getInstance(List<String> schemas, Button btnNext, ConnectionParameters connectionParameters,
-    String databaseUUID) {
+  public static CustomViews getInstance(List<String> schemas, Button btnNext, ConnectionParameters connectionParameters) {
     if (instance == null) {
-      instance = new CustomViews(schemas, btnNext, connectionParameters, databaseUUID);
+      instance = new CustomViews(schemas, btnNext, connectionParameters);
     }
     return instance;
   }
 
-  private CustomViews(List<String> schemas, Button btnNext, ConnectionParameters connectionParameters,
-    String databaseUUID) {
+  private CustomViews(List<String> schemas, Button btnNext, ConnectionParameters connectionParameters) {
     initWidget(binder.createAndBindUi(this));
 
     this.btnNext = btnNext;
     this.connectionParameters = connectionParameters;
-    this.databaseUUID = databaseUUID;
     customViewsSidebar = CustomViewsSidebar.getInstance();
     customViewsList.add(customViewsSidebar);
 

@@ -46,6 +46,7 @@ import com.databasepreservation.common.client.models.wizard.connection.Connectio
 import com.databasepreservation.common.client.models.wizard.customViews.CustomViewsParameters;
 import com.databasepreservation.common.client.models.wizard.export.ExportOptionsParameters;
 import com.databasepreservation.common.client.models.wizard.export.MetadataExportOptionsParameters;
+import com.databasepreservation.common.client.models.wizard.filter.MerkleTreeFilterParameters;
 import com.databasepreservation.common.client.models.wizard.table.TableAndColumnsParameters;
 import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.server.SIARDProgressObserver;
@@ -234,20 +235,31 @@ public class SIARDController {
 
   public static String createSIARD(String uniqueId, ConnectionParameters connectionParameters,
     TableAndColumnsParameters tableAndColumnsParameters, CustomViewsParameters customViewsParameters,
-    ExportOptionsParameters exportOptionsParameters, MetadataExportOptionsParameters metadataExportOptionsParameters)
-    throws GenericException {
+    MerkleTreeFilterParameters merkleTreeFilterParameters, ExportOptionsParameters exportOptionsParameters,
+    MetadataExportOptionsParameters metadataExportOptionsParameters) throws GenericException {
     final String databaseUUID = SolrUtils.randomUUID();
     Reporter reporter = getReporterForMigration(databaseUUID);
     LOGGER.info("starting to convert database {}", exportOptionsParameters.getSiardPath());
 
     final DatabaseMigration databaseMigration = initializeDatabaseMigration(reporter);
 
-    if (tableAndColumnsParameters.isExternalLobConfigurationSet()) {
-      final List<DatabaseFilterFactory> databaseFilterFactories = ReflectionUtils.collectDatabaseFilterFactory();
-      databaseMigration.filterFactories(databaseFilterFactories);
-    } else {
-      databaseMigration.filterFactories(new ArrayList<>());
+    List<DatabaseFilterFactory> filterFactories = new ArrayList<>();
+    int index = 0;
+    for (DatabaseFilterFactory factory : ReflectionUtils.collectDatabaseFilterFactory()) {
+      if (!merkleTreeFilterParameters.getValues().isEmpty() && factory.getFilterName().equals("merkle-tree")) {
+        filterFactories.add(factory);
+        merkleTreeFilterParameters.setDbptkFilterIndex(index);
+      }
+
+      if (tableAndColumnsParameters.isExternalLobConfigurationSet() && factory.getFilterName().equals("external-lobs")) {
+        filterFactories.add(factory);
+        tableAndColumnsParameters.setDbptkFilterIndex(index);
+      }
+
+      index++;
     }
+
+    databaseMigration.filterFactories(filterFactories);
 
     // Build Import Config Module
     DatabaseModuleFactory importConfigurationModuleFactory = new ImportConfigurationModuleFactory();
@@ -265,6 +277,17 @@ public class SIARDController {
 
     // Build Export Module
     setupSIARDExportModule(databaseMigration, exportOptionsParameters, metadataExportOptionsParameters);
+
+    // Merkle Tree Filter
+    if (!merkleTreeFilterParameters.getValues().isEmpty()) {
+      merkleTreeFilterParameters.getValues().forEach((k, v) -> {
+        databaseMigration.filterParameter(k, v, merkleTreeFilterParameters.getDbptkFilterIndex());
+      });
+    }
+
+    if (tableAndColumnsParameters.isExternalLobConfigurationSet()) {
+      databaseMigration.filterParameter("", "", tableAndColumnsParameters.getDbptkFilterIndex());
+    }
 
     databaseMigration.filter(new ObservableFilter(new SIARDProgressObserver(uniqueId)));
 
@@ -475,6 +498,57 @@ public class SIARDController {
     }
 
     return modules;
+  }
+
+  public static List<Module> getDatabaseFilterModules() {
+    List<Module> modules = new ArrayList<>();
+    final List<DatabaseFilterFactory> databaseFilterFactories = ReflectionUtils.collectDatabaseFilterFactory();
+    for (DatabaseFilterFactory factory : databaseFilterFactories) {
+      if (factory.isEnabled()) {
+        modules.add(getFilterModuleParameters(factory));
+      }
+    }
+
+    return modules;
+  }
+
+  public static List<Module> getDatabaseFilterModule(String moduleName) {
+    List<Module> modules = new ArrayList<>();
+    final List<DatabaseFilterFactory> databaseFilterFactories = ReflectionUtils.collectDatabaseFilterFactory();
+    for (DatabaseFilterFactory factory : databaseFilterFactories) {
+      if (factory.isEnabled() && factory.getFilterName().equals(moduleName)) {
+        modules.add(getFilterModuleParameters(factory));
+      }
+    }
+
+    return modules;
+  }
+
+  private static Module getFilterModuleParameters(DatabaseFilterFactory factory) {
+    Module module = new Module(factory.getFilterName());
+
+    PreservationParameter preservationParameter;
+    for (Parameter parameter : factory.getParameters().getParameters()) {
+      preservationParameter = new PreservationParameter(parameter.longName(), parameter.description(),
+        parameter.required(), parameter.hasArgument(), parameter.getInputType().name(),
+        parameter.getDefaultSelectedIndex());
+
+      if (parameter.getPossibleValues() != null) {
+        preservationParameter.setPossibleValues(parameter.getPossibleValues());
+      }
+
+      if (parameter.getFileFilter() != null) {
+        preservationParameter.setFileFilter(parameter.getFileFilter().name());
+      }
+
+      if (parameter.valueIfNotSet() != null) {
+        preservationParameter.setDefaultValue(parameter.valueIfNotSet());
+      }
+
+      module.addPreservationParameter(preservationParameter);
+    }
+
+    return module;
   }
 
   public static String loadMetadataFromLocal(String localPath) throws GenericException {
@@ -941,7 +1015,8 @@ public class SIARDController {
     for (Parameter param : parameters.getParameters()) {
       if (param.getExportOptions() != null) {
         preservationParameter = new PreservationParameter(param.longName(), param.description(), param.required(),
-          param.hasArgument(), param.getInputType().name(), param.getExportOptions().name());
+          param.hasArgument(), param.getInputType().name(), param.getExportOptions().name(),
+          param.getDefaultSelectedIndex());
         if (param.getFileFilter() != null) {
           preservationParameter.setFileFilter(param.getFileFilter().name());
         }
@@ -950,7 +1025,7 @@ public class SIARDController {
         }
       } else {
         preservationParameter = new PreservationParameter(param.longName(), param.description(), param.required(),
-          param.hasArgument(), param.getInputType().name());
+          param.hasArgument(), param.getInputType().name(), param.getDefaultSelectedIndex());
         if (param.getFileFilter() != null) {
           preservationParameter.setFileFilter(param.getFileFilter().name());
         }

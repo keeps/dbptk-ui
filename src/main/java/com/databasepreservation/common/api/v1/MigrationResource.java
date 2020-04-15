@@ -113,6 +113,23 @@ public class MigrationResource implements MigrationService {
   }
 
   @Override
+  public List<Module> getFilterModules(String moduleName) {
+    ControllerAssistant controllerAssistant = new ControllerAssistant() {};
+    User user = UserUtility.getUser(request);
+    LogEntryState state = LogEntryState.SUCCESS;
+
+    try {
+      if (moduleName != null) {
+        return SIARDController.getDatabaseFilterModule(moduleName);
+      } else {
+        return SIARDController.getDatabaseFilterModules();
+      }
+    } finally {
+      controllerAssistant.registerAction(user, state);
+    }
+  }
+
+  @Override
   public ConnectionResponse testConnection(ConnectionParameters connectionParameters) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
     User user = UserUtility.getUser(request);
@@ -180,7 +197,7 @@ public class MigrationResource implements MigrationService {
         return databaseUUID;
       } else {
         return SIARDController.createSIARD(parameters.getUniqueID(), parameters.getConnectionParameters(),
-          parameters.getTableAndColumnsParameters(), parameters.getCustomViewsParameters(),
+          parameters.getTableAndColumnsParameters(), parameters.getCustomViewsParameters(), parameters.getMerkleTreeFilterParameters(),
           parameters.getExportOptionsParameters(), parameters.getMetadataExportOptionsParameters());
       }
     } catch (GenericException | NotFoundException e) {
