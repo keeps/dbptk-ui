@@ -314,8 +314,9 @@ public class BreadcrumbManager {
 
   public static List<BreadcrumbItem> forCreateSIARD() {
     List<BreadcrumbItem> items = forHome();
-    items.add(new BreadcrumbItem(
-      SafeHtmlUtils.fromSafeConstant(SafeHtmlUtils.htmlEscape(messages.breadcrumbTextForCreateSIARD()))));
+    items.add(
+      new BreadcrumbItem(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.WIZARD)
+        + SafeHtmlUtils.htmlEscape(messages.breadcrumbTextForCreateSIARD()))));
     return items;
   }
 

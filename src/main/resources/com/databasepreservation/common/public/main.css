@@ -259,6 +259,57 @@ p[data-value]:after {
 
 /* Now we are good to duplicate html code for other skills and then add the css code for the new skill based on data-skill */
 
+.progress-line, .progress-line:before {
+    height: 20px;
+    width: 100%;
+    margin: 0 0 1.5em 0;
+    border-radius: 3px;
+    border: 1px solid #E1E1E1;
+}
+
+.progress-line {
+    display: -webkit-flex;
+    display: flex;
+    background-color: whiteSmoke;
+}
+
+.progress-line:before {
+    background-image: -webkit-linear-gradient(135deg, transparent, transparent 33%, rgba(0, 0, 0, .1) 33%, rgba(0, 0, 0, .1) 66%, transparent 66%), -webkit-linear-gradient(top, rgba(255, 255, 255, .25), rgba(0, 0, 0, .2)), -webkit-linear-gradient(left, #089DE3, #089DE3);
+    content: '';
+    -webkit-animation: running-progress 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    animation: running-progress 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@-webkit-keyframes running-progress {
+    0% {
+        margin-left: 0;
+        margin-right: 100%;
+    }
+    50% {
+        margin-left: 25%;
+        margin-right: 0;
+    }
+    100% {
+        margin-left: 100%;
+        margin-right: 0;
+    }
+}
+
+@keyframes running-progress {
+    0% {
+        margin-left: 0;
+        margin-right: 100%;
+    }
+    50% {
+        margin-left: 25%;
+        margin-right: 0;
+    }
+    100% {
+        margin-left: 100%;
+        margin-right: 0;
+    }
+}
+
 /***********************************************
               Table search panel
 ************************************************/

@@ -248,11 +248,18 @@ public class SIARDController {
     for (DatabaseFilterFactory factory : ReflectionUtils.collectDatabaseFilterFactory()) {
       if (!merkleTreeFilterParameters.getValues().isEmpty() && factory.getFilterName().equals("merkle-tree")) {
         filterFactories.add(factory);
-        merkleTreeFilterParameters.setDbptkFilterIndex(index);
       }
 
       if (tableAndColumnsParameters.isExternalLobConfigurationSet() && factory.getFilterName().equals("external-lobs")) {
         filterFactories.add(factory);
+      }
+    }
+
+    for (DatabaseFilterFactory factory : filterFactories) {
+      if (factory.getFilterName().equals("merkle-tree")) {
+        merkleTreeFilterParameters.setDbptkFilterIndex(index);
+      }
+      if (factory.getFilterName().equals("external-lobs")) {
         tableAndColumnsParameters.setDbptkFilterIndex(index);
       }
 

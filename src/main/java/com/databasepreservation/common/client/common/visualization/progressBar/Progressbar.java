@@ -1,4 +1,4 @@
-package com.databasepreservation.common.client.common;
+package com.databasepreservation.common.client.common.visualization.progressBar;
 
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.client.ui.HTMLPanel;

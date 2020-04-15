@@ -45,7 +45,7 @@ public class MerkleTreeFilter extends WizardPanel<MerkleTreeFilterParameters> {
   interface MetadataUiBinder extends UiBinder<Widget, MerkleTreeFilter> {
   }
 
-  private static MetadataUiBinder binder = GWT.create(MetadataUiBinder.class);
+  private static final MetadataUiBinder binder = GWT.create(MetadataUiBinder.class);
 
   @UiField
   FlowPanel content;
@@ -54,10 +54,10 @@ public class MerkleTreeFilter extends WizardPanel<MerkleTreeFilterParameters> {
   HTML description;
 
   private static MerkleTreeFilter instance = null;
-  private Map<String, TextBox> textBoxInputs = new HashMap<>();
-  private Map<String, ComboBoxField> comboBoxInputs = new HashMap<>();
-  private Map<String, CheckBox> checkBoxInputs = new HashMap<>();
-  private Map<String, String> fileInputs = new HashMap<>();
+  private final Map<String, TextBox> textBoxInputs = new HashMap<>();
+  private final Map<String, ComboBoxField> comboBoxInputs = new HashMap<>();
+  private final Map<String, CheckBox> checkBoxInputs = new HashMap<>();
+  private final Map<String, String> fileInputs = new HashMap<>();
   private Module module;
   private final Button btnNext;
   private boolean skipFilter = true;

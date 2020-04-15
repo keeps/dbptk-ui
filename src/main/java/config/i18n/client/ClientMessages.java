@@ -921,7 +921,7 @@ public interface ClientMessages extends Messages {
 
   String tableAndColumnsPageTableHeaderTextForMaterializeViewOption();
 
-  String tableAndColumnsPageTableHeaderTextForMerkleOption();
+  SafeHtml tableAndColumnsPageTableHeaderTextForMerkleOption();
 
   String tableAndColumnsPageTableHeaderTextForViewName();
 
@@ -1111,6 +1111,8 @@ public interface ClientMessages extends Messages {
   String progressBarPanelTextForCurrentTable();
 
   String progressBarPanelTextForCurrentRows();
+
+  String progressBarPanelTextForTotalRowsProcess();
 
   String progressBarPanelTextForRetrievingTableStructure();
 

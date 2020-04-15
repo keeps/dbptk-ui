@@ -507,7 +507,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
             return obj.getDisplayName();
           }
         }),
-      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForMerkleOption(), 8,
+      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForMerkleOption(), 10,
         getMerkleTreeColumn(viewerView.getUuid())),
       new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForDescription(), 0,
         new TextColumn<ViewerColumn>() {
@@ -845,7 +845,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
             return column.getDescription();
           }
         }),
-      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForMerkleOption(), 8,
+      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForMerkleOption(), 10,
         getMerkleTreeColumn(viewerTable.getUuid())),
       new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForColumnFilters(), 10,
         new TooltipDatabaseColumn() {

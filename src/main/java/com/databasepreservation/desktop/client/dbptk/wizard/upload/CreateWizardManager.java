@@ -8,7 +8,7 @@ import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
-import com.databasepreservation.common.client.common.visualization.progressBar.ProgressBarPanel;
+import com.databasepreservation.common.client.common.visualization.progressBar.IndeterminateProgressBarPanel;
 import com.databasepreservation.common.client.models.wizard.CreateSIARDParameters;
 import com.databasepreservation.common.client.models.wizard.connection.ConnectionParameters;
 import com.databasepreservation.common.client.models.wizard.connection.ConnectionResponse;
@@ -330,7 +330,7 @@ public class CreateWizardManager extends WizardManager {
     position = 6;
     updateBreadcrumb();
 
-    ProgressBarPanel progressBarPanel = ProgressBarPanel.getInstance(uniqueId);
+    IndeterminateProgressBarPanel progressBarPanel = IndeterminateProgressBarPanel.getInstance(uniqueId);
     progressBarPanel.setTitleText(messages.progressBarPanelTextForCreateWizardProgressTitle());
     progressBarPanel.setSubtitleText(messages.progressBarPanelTextForCreateWizardProgressSubTitle());
     wizardContent.add(progressBarPanel);

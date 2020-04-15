@@ -6,7 +6,7 @@
         <g:SimplePanel addStyleNames="structure-header" ui:field="header"/>
         <g:SimplePanel ui:field="description"/>
         <g:FlowPanel addStyleNames="progress-report-panel">
-            <progressBar:Progressbar ui:field="progressBar"/>
+            <g:SimplePanel addStyleNames="progress-line" ui:field="progress"/>
             <g:FlowPanel ui:field="content" addStyleNames="progress-report"/>
         </g:FlowPanel>
     </g:FlowPanel>
