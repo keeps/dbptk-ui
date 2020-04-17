@@ -1507,4 +1507,9 @@ public interface ClientMessages extends Messages {
   String resourceNotAvailableTitle();
 
   String resourceNotAvailableTableHiddenDescription(String value);
+
+  /********************************************
+   * Configuration Errors
+   *******************************************/
+  String configErrorTextForMissingProperty(String property);
 }

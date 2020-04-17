@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.databasepreservation.common.client.ClientConfigurationManager;
+import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.ContentPanel;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.RightPanel;
@@ -672,9 +673,13 @@ public class MainPanel extends Composite {
    * ____________________________________________________________________________________________________________________
    */
   private void reSetHeader() {
+    if (ClientConfigurationManager.getString(ViewerConstants.PROPERTY_UI_HEADER_TITLE) == null) {
+      throw new NullPointerException(
+        messages.configErrorTextForMissingProperty(ViewerConstants.PROPERTY_UI_HEADER_TITLE));
+    }
 
-    HTMLPanel headerText = new HTMLPanel(
-      SafeHtmlUtils.fromTrustedString(ClientConfigurationManager.getString("ui.header.title")));
+    HTMLPanel headerText = new HTMLPanel(SafeHtmlUtils
+      .fromTrustedString(ClientConfigurationManager.getString(ViewerConstants.PROPERTY_UI_HEADER_TITLE)));
     headerText.addStyleName("homeText");
 
     bannerLogo.setWidget(headerText);

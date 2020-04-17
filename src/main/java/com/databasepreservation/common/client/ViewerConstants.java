@@ -531,6 +531,11 @@ public class ViewerConstants {
   public static final String PROPERTY_DISABLE_SIARD_DELETION = "ui.disable.siard.deletion";
 
   /**
+   * Header
+   */
+  public static final String PROPERTY_UI_HEADER_TITLE = "ui.header.title";
+
+  /**
    * private constructor
    */
   private ViewerConstants() {
