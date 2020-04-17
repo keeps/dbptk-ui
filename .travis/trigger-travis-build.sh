@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -ex
+
 SERVER_REPO=db-visualization-toolkit-docker
 ELECTRON_REPO=db-visualization-toolkit-electron
 
