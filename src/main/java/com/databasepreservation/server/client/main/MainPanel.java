@@ -673,13 +673,9 @@ public class MainPanel extends Composite {
    * ____________________________________________________________________________________________________________________
    */
   private void reSetHeader() {
-    if (ClientConfigurationManager.getString(ViewerConstants.PROPERTY_UI_HEADER_TITLE) == null) {
-      throw new NullPointerException(
-        messages.configErrorTextForMissingProperty(ViewerConstants.PROPERTY_UI_HEADER_TITLE));
-    }
-
-    HTMLPanel headerText = new HTMLPanel(SafeHtmlUtils
-      .fromTrustedString(ClientConfigurationManager.getString(ViewerConstants.PROPERTY_UI_HEADER_TITLE)));
+    HTMLPanel headerText = new HTMLPanel(
+      SafeHtmlUtils.fromTrustedString(ClientConfigurationManager.getStringWithDefault(
+        ViewerConstants.DEFAULT_PROPERTY_UI_HEADER_TITLE, ViewerConstants.PROPERTY_UI_HEADER_TITLE)));
     headerText.addStyleName("homeText");
 
     bannerLogo.setWidget(headerText);
