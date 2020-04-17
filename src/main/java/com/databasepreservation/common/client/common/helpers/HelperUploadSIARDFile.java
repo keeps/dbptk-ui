@@ -20,7 +20,6 @@ import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.JSOUtils;
-import com.databasepreservation.common.client.widgets.Toast;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.i18n.client.LocaleInfo;
@@ -40,7 +39,7 @@ public class HelperUploadSIARDFile {
     "<div id='loading' class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
 
   public void openFile(FlowPanel panel) {
-    if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
+    if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_DESKTOP)) {
 
       ExtensionFilter siard = new ExtensionFilter("SIARD", Collections.singletonList("siard"));
 
@@ -67,7 +66,7 @@ public class HelperUploadSIARDFile {
         new Sublist(), Facets.NONE, false, Collections.singletonList(ViewerConstants.INDEX_ID));
       DatabaseService.Util.call((IndexResult<ViewerDatabase> result) -> {
         if (result.getTotalCount() == 1) {
-          if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
+          if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_DESKTOP)) {
             JavascriptUtils.confirmationDialog(messages.dialogReimportSIARDTitle(), messages.dialogReimportSIARD(),
               messages.basicActionCancel(), messages.basicActionConfirm(), new DefaultAsyncCallback<Boolean>() {
                 @Override

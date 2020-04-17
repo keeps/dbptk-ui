@@ -95,7 +95,7 @@ public class UserDatabaseListPanel extends ContentPanel {
     databaseList.getSelectionModel().addSelectionChangeHandler(event -> {
       ViewerDatabase selected = databaseList.getSelectionModel().getSelectedObject();
       if (selected != null) {
-        if (ApplicationType.getType().equals(ViewerConstants.SERVER)) {
+        if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
           HistoryManager.gotoDatabase(selected.getUuid());
         }
         databaseList.getSelectionModel().clear();

@@ -68,7 +68,7 @@ public class HelperExportTableData {
   private FlowPanel buildCSVExport() {
     FlowPanel panel = new FlowPanel();
 
-    if (ViewerConstants.SERVER.equals(ApplicationType.getType())) {
+    if (ViewerConstants.APPLICATION_ENV_SERVER.equals(ApplicationType.getType())) {
       GenericField genericFieldFilename = GenericField.createInstance(messages.csvExportDialogLabelForFilename(),
         filenameTextBox);
       filenameTextBox.addStyleName("form-textbox");

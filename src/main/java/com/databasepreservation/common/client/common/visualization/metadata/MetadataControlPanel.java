@@ -162,7 +162,7 @@ public class MetadataControlPanel extends Composite {
       message = messages.dialogLargeFileConfirmUpdateMetadata();
     }
 
-    if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
+    if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_DESKTOP)) {
       JavascriptUtils.confirmationDialog(messages.dialogUpdateMetadata(), message, messages.basicActionCancel(),
         messages.basicActionConfirm(), new DefaultAsyncCallback<Boolean>() {
 

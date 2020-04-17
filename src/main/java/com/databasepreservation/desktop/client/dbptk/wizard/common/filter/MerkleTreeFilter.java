@@ -223,7 +223,7 @@ public class MerkleTreeFilter extends WizardPanel<MerkleTreeFilterParameters> {
         fileUploadField.setButtonCSS("btn btn-link form-button");
         fileUploadField.setRequired(parameter.isRequired());
         fileUploadField.buttonAction(() -> {
-          if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
+          if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_DESKTOP)) {
             ExtensionFilter extensionFilter = new ExtensionFilter()
               .createFilterTypeFromDBPTK(parameter.getFileFilter());
             JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.emptyList(),

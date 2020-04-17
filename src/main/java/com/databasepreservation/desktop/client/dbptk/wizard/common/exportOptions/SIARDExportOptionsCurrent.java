@@ -339,7 +339,7 @@ public class SIARDExportOptionsCurrent extends Composite {
         fileUploadField.setButtonCSS("btn btn-link form-button");
         fileUploadField.setRequired(parameter.isRequired());
         fileUploadField.buttonAction(() -> {
-          if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
+          if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_DESKTOP)) {
             JavaScriptObject.createArray();
             ExtensionFilter extensionFilter = new ExtensionFilter()
               .createFilterTypeFromDBPTK(parameter.getFileFilter());
@@ -382,7 +382,7 @@ public class SIARDExportOptionsCurrent extends Composite {
         folder.setButtonCSS("btn btn-link form-button");
         folder.setRequired(parameter.isRequired());
         folder.buttonAction(() -> {
-          if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
+          if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_DESKTOP)) {
             JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.singletonList("openDirectory"),
               Collections.emptyList());
             String path = JavascriptUtils.openFileDialog(options);

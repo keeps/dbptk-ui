@@ -83,7 +83,7 @@ public class HelperValidator {
     Button clearButton = new Button();
 
     reporterButton.addClickHandler((ClickEvent event) -> {
-      if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
+      if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_DESKTOP)) {
         JavaScriptObject.createArray();
         ExtensionFilter extensionFilter = new ExtensionFilter();
         extensionFilter.setName(ViewerConstants.REPORT_FILES);
@@ -114,7 +114,7 @@ public class HelperValidator {
     Button clearButton = new Button();
 
     udtButton.addClickHandler((ClickEvent event) -> {
-      if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
+      if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_DESKTOP)) {
         ExtensionFilter txt = new ExtensionFilter(Constants.UDT, Collections.singletonList("txt"));
 
         JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.singletonList("openFile"),

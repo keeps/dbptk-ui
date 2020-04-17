@@ -165,7 +165,7 @@ public class JDBCPanel extends Composite {
         fileUploadField.setButtonCSS("btn btn-link form-button form-button-jar");
         fileUploadField.setRequired(parameter.isRequired());
         fileUploadField.buttonAction(() -> {
-          if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
+          if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_DESKTOP)) {
             ExtensionFilter mdb = new ExtensionFilter("MS Access", Arrays.asList("mdb", "accdb"));
             JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.singletonList("openFile"),
               Collections.singletonList(mdb));
@@ -200,7 +200,7 @@ public class JDBCPanel extends Composite {
         fileUploadField.setButtonCSS("btn btn-link form-button form-button-jar");
         fileUploadField.setRequired(parameter.isRequired());
         fileUploadField.buttonAction(() -> {
-          if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
+          if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_DESKTOP)) {
             ExtensionFilter jar = new ExtensionFilter("JAR File", Collections.singletonList("jar"));
             JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.singletonList("openFile"),
               Collections.singletonList(jar));

@@ -67,7 +67,7 @@ public class ControllerAssistant {
       return noAuthenticationUser;
     }
 
-    if (ViewerConfiguration.getInstance().getApplicationEnvironment().equals(ViewerConstants.SERVER)) {
+    if (ViewerConfiguration.getInstance().getApplicationEnvironment().equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
       try {
         User user = UserUtility.getUser(request);
         UserUtility.checkRoles(user, this.getClass());

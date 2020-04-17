@@ -110,7 +110,7 @@ public class ValidationNavigationPanel {
     btnValidate.addClickHandler(event -> {
       if (database.getVersion().equals(ViewerConstants.SIARD_V21)) {
         if (database.getPath() != null && !database.getPath().isEmpty()) {
-          if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
+          if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_DESKTOP)) {
             Dialogs.showValidatorSettings(messages.SIARDValidatorSettings(), messages.basicActionCancel(),
               messages.basicActionConfirm(), validator, new DefaultAsyncCallback<Boolean>() {
                 @Override
@@ -147,7 +147,7 @@ public class ValidationNavigationPanel {
     // See Report btn
     btnReport = new Button();
     btnReport.addStyleName("btn btn-outline-primary");
-    if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
+    if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_DESKTOP)) {
       btnReport.setText(messages.SIARDHomePageButtonTextForOpenReport());
       btnReport.addStyleName("btn-open");
       btnReport.addClickHandler(clickEvent -> JavascriptUtils.showItem(database.getValidatorReportPath()));

@@ -115,7 +115,7 @@ public class DatabasePanel extends Composite implements ICollectionStatusObserve
       initMenu();
     }
 
-    if (ApplicationType.getType().equals(ViewerConstants.SERVER)) {
+    if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
       toolbar.getElement().addClassName("filePreviewToolbar");
       breadcrumb = breadcrumbServer;
       breadcrumbDesktop.removeFromParent();

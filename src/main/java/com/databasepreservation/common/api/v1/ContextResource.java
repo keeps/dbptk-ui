@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javax.ws.rs.Path;
 
+import com.databasepreservation.common.server.ViewerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -27,7 +28,7 @@ public class ContextResource implements ContextService {
 
   @Override
   public String getEnvironment() {
-    return System.getProperty("env", "server");
+    return ViewerFactory.getViewerConfiguration().getApplicationEnvironment();
   }
 
   @Override

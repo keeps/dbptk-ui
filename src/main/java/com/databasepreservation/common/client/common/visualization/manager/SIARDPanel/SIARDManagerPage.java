@@ -160,7 +160,7 @@ public class SIARDManagerPage extends ContentPanel {
         || ViewerDatabaseStatus.ERROR.equals(database.getStatus())
         || ViewerDatabaseStatus.METADATA_ONLY.equals(database.getStatus())) {
         SafeHtml message = messages.SIARDHomePageTextForDeleteAllFromServer();
-        if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
+        if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_DESKTOP)) {
           message = messages.SIARDHomePageTextForDeleteAllFromDesktop();
         }
         CommonDialogs.showConfirmDialog(messages.SIARDHomePageDialogTitleForDelete(), message,

@@ -104,7 +104,7 @@ public class DatabaseManage extends ContentPanel {
     databaseList.getSelectionModel().addSelectionChangeHandler(event -> {
       ViewerDatabase selected = databaseList.getSelectionModel().getSelectedObject();
       if (selected != null) {
-        if (ApplicationType.getType().equals(ViewerConstants.SERVER)) {
+        if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
           HistoryManager.gotoSIARDInfo(selected.getUuid());
         }
         databaseList.getSelectionModel().clear();
@@ -115,7 +115,7 @@ public class DatabaseManage extends ContentPanel {
   }
 
   private void initButtons() {
-    if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
+    if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_DESKTOP)) {
       create.addClickHandler(event -> HistoryManager.gotoCreateSIARD());
       open.addClickHandler(event -> new HelperUploadSIARDFile().openFile(databaseList));
     } else {

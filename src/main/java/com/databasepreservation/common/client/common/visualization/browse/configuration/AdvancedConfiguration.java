@@ -89,7 +89,7 @@ public class AdvancedConfiguration extends ContentPanel {
 
     String style;
     SafeHtml messageDescription;
-    if (ApplicationType.getType().equals(ViewerConstants.SERVER)) {
+    if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
       messageDescription = messages.advancedConfigurationTextForDataTransformationServer();
       style = "btn btn-outline-primary btn-play btn-block";
       btnDataTransformation.addClickHandler(event -> {

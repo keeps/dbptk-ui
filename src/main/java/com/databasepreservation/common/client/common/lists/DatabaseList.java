@@ -119,7 +119,7 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
       }
     };
     locationColumn.setFieldUpdater((index, object, value) -> {
-      if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
+      if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_DESKTOP)) {
         JavascriptUtils.showItemInFolder(object.getPath());
       } else {
         SafeUri downloadUri = RestUtils.createFileResourceDownloadSIARDUri(object.getPath());
@@ -164,7 +164,7 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
     };
     openColumn.setFieldUpdater((index, object, value) -> HistoryManager.gotoSIARDInfo(object.getUuid()));
 
-    if (ApplicationType.getType().equals(ViewerConstants.SERVER)) {
+    if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
       UserLogin.getInstance().getAuthenticatedUser(new DefaultAsyncCallback<User>() {
         @Override
         public void onSuccess(User user) {

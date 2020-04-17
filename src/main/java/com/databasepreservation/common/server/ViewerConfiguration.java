@@ -102,7 +102,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   public static final String PROPERTY_DISABLE_SIARD_DELETION = "ui.disable.siard.deletion";
 
   private static boolean instantiatedWithoutErrors = true;
-  private static String applicationEnvironment = ViewerConstants.SERVER;
+  private static String applicationEnvironment = ViewerConstants.APPLICATION_ENV_SERVER;
 
   // configurable paths related objects
   private static Path viewerHomePath;
@@ -254,7 +254,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
       addConfiguration("dbvtk-roles.properties");
       LOGGER.debug("Finished loading dbvtk-roles.properties");
 
-      applicationEnvironment = System.getProperty("env", "server");
+      applicationEnvironment = System.getProperty(ViewerConstants.APPLICATION_ENV_KEY, ViewerConstants.APPLICATION_ENV_SERVER);
 
     } catch (ConfigurationException e) {
       LOGGER.error("Error loading dbvtk properties", e);

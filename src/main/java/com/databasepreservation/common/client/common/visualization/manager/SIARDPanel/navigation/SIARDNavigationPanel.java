@@ -22,7 +22,6 @@ import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.Humanize;
 import com.databasepreservation.common.client.tools.PathUtils;
 import com.databasepreservation.common.client.tools.RestUtils;
-import com.databasepreservation.common.server.ViewerConfiguration;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.user.client.Window;
@@ -85,7 +84,7 @@ public class SIARDNavigationPanel {
     btnShowFiles = new Button(PathUtils.getFileName(database.getPath()));
     btnShowFiles.addStyleName("btn btn-link-info");
     if (database.getPath() != null && !database.getPath().isEmpty()) {
-      if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
+      if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_DESKTOP)) {
         btnShowFiles.addClickHandler(clickEvent -> {
           JavascriptUtils.showItemInFolder(database.getPath());
         });
@@ -138,7 +137,7 @@ public class SIARDNavigationPanel {
     siard.addToInfoPanel(size);
 
     siard.addButton(CommonClientUtils.wrapOnDiv("btn-item", btnEditMetadata));
-    if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
+    if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_DESKTOP)) {
       siard.addButton(CommonClientUtils.wrapOnDiv("btn-item", btnMigrateToSIARD));
       siard.addButton(CommonClientUtils.wrapOnDiv("btn-item", btnSendToLiveDBMS));
     } else {

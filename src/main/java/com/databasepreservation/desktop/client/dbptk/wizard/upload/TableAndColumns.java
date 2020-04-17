@@ -681,7 +681,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
       helperReferenceType.add(spanReferenceType);
 
       GenericField genericField;
-      if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
+      if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_DESKTOP)) {
         FileUploadField fileUploadField = FileUploadField.createInstance(messages.tableAndColumnsPageLabelForBasePath(),
           messages.tableAndColumnsPageTableHeaderTextForSelect());
         fileUploadField.setParentCSS("form-row");
@@ -707,7 +707,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
         }
 
         fileUploadField.buttonAction(() -> {
-          if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
+          if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_DESKTOP)) {
             JavaScriptObject options = JSOUtils.getOpenDialogOptions(Collections.singletonList("openDirectory"),
               Collections.emptyList());
 

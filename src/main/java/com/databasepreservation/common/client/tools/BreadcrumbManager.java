@@ -204,7 +204,7 @@ public class BreadcrumbManager {
   public static List<BreadcrumbItem> forSIARDMainPage(final String databaseUUID, final String databaseName) {
     List<BreadcrumbItem> items = forManageDatabase();
 
-    if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
+    if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_DESKTOP)) {
       items.add(new BreadcrumbItem(
         SafeHtmlUtils.fromSafeConstant(
           FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE) + SafeHtmlUtils.htmlEscape(databaseName)),
@@ -247,7 +247,7 @@ public class BreadcrumbManager {
 
   public static List<BreadcrumbItem> forManageDatabase() {
     List<BreadcrumbItem> items = new ArrayList<>();
-    if (ViewerConstants.DESKTOP.equals(ApplicationType.getType())) {
+    if (ViewerConstants.APPLICATION_ENV_DESKTOP.equals(ApplicationType.getType())) {
       items = forHome();
     }
     items.add(

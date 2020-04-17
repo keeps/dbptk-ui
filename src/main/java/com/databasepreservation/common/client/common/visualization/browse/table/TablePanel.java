@@ -197,9 +197,9 @@ public class TablePanel extends RightPanel implements ICollectionStatusObserver,
     UserLogin.getInstance().getAuthenticatedUser(new DefaultAsyncCallback<User>() {
       @Override
       public void onSuccess(User user) {
-        if (user.isAdmin() && ApplicationType.getType().equals(ViewerConstants.SERVER)) {
+        if (user.isAdmin() && ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
           buildMenu();
-        } else if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
+        } else if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_DESKTOP)) {
           advancedOptions.remove(configurationMenu);
           Button columnsManagementBtn = new Button(messages
             .dataTransformationBtnManageTable(collectionStatus.getTableStatus(table.getUuid()).getCustomName()));
@@ -241,7 +241,7 @@ public class TablePanel extends RightPanel implements ICollectionStatusObserver,
       SafeHtmlUtils.fromString(
         messages.dataTransformationBtnTransformTable(collectionStatus.getTableStatus(table.getUuid()).getCustomName())),
       () -> HistoryManager.gotoDataTransformation(database.getUuid(), table.getId()));
-    if (ApplicationType.getType().equals(ViewerConstants.SERVER)) {
+    if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
       configurationSubMenuBar.addItem(dataTransformationMenuItem);
     }
     configurationMenu.addItem(SafeHtmlUtils.fromString(messages.advancedConfigurationLabelForMainTitle()),

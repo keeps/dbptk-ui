@@ -132,7 +132,7 @@ public class Toast extends PopupPanel {
   public static void showError(String message) {
     Toast errorPopup = new Toast(MessagePopupType.ERROR_MESSAGE, messages.alertErrorTitle(), message);
     errorPopup.start();
-    if(ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
+    if(ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_DESKTOP)) {
       JavascriptUtils.showNotification(messages.alertErrorTitle(),message);
     }
   }
@@ -146,7 +146,7 @@ public class Toast extends PopupPanel {
   public static void showError(String title, String message) {
     Toast errorPopup = new Toast(MessagePopupType.ERROR_MESSAGE, title, message);
     errorPopup.start();
-    if(ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
+    if(ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_DESKTOP)) {
       JavascriptUtils.showNotification(title,message);
     }
   }
@@ -159,7 +159,7 @@ public class Toast extends PopupPanel {
   public static void showInfo(String title, String message) {
     Toast errorPopup = new Toast(MessagePopupType.INFO, title, message);
     errorPopup.start();
-    if(ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
+    if(ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_DESKTOP)) {
       JavascriptUtils.showNotification(title,message);
     }
   }

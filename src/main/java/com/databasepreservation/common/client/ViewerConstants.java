@@ -384,8 +384,9 @@ public class ViewerConstants {
   /*
    * Application Environment
    */
-  public static final String DESKTOP = "desktop";
-  public static final String SERVER = "server";
+  public static final String APPLICATION_ENV_KEY = "env";
+  public static final String APPLICATION_ENV_DESKTOP = "desktop";
+  public static final String APPLICATION_ENV_SERVER = "server";
 
   /*
    * DBPTK Parameters

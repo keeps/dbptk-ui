@@ -250,7 +250,8 @@ public class SIARDController {
         filterFactories.add(factory);
       }
 
-      if (tableAndColumnsParameters.isExternalLobConfigurationSet() && factory.getFilterName().equals("external-lobs")) {
+      if (tableAndColumnsParameters.isExternalLobConfigurationSet()
+        && factory.getFilterName().equals("external-lobs")) {
         filterFactories.add(factory);
       }
     }
@@ -615,25 +616,28 @@ public class SIARDController {
   }
 
   private static void validateSIARDLocation(Path siardPath) throws GenericException {
-    LOGGER.info("starting to check if path: {} is valid", siardPath.toAbsolutePath());
-    // Checks if path is within the internal SIARD file path
-    final boolean internal = ViewerConfiguration.checkPathIsWithin(siardPath,
-      ViewerConfiguration.getInstance().getSIARDFilesPath());
+    if (ViewerFactory.getViewerConfiguration().getApplicationEnvironment()
+      .equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
+      LOGGER.info("starting to check if path: {} is valid", siardPath.toAbsolutePath());
+      // Checks if path is within the internal SIARD file path
+      final boolean internal = ViewerConfiguration.checkPathIsWithin(siardPath,
+        ViewerConfiguration.getInstance().getSIARDFilesPath());
 
-    if (internal) {
-      if (!siardPath.toFile().exists()) {
-        throw new GenericException("File not found at path");
-      }
-    } else {
-      // checks if is on the property base path
-      final boolean onBasePath = ViewerConfiguration.checkPathIsWithin(siardPath, Paths.get(ViewerConfiguration
-        .getInstance().getViewerConfigurationAsString("/", ViewerConfiguration.PROPERTY_BASE_UPLOAD_PATH)));
-      if (onBasePath) {
+      if (internal) {
         if (!siardPath.toFile().exists()) {
-          throw new GenericException("File not found");
+          throw new GenericException("File not found at path");
         }
       } else {
-        throw new GenericException("File not found");
+        // checks if is on the property base path
+        final boolean onBasePath = ViewerConfiguration.checkPathIsWithin(siardPath, Paths.get(ViewerConfiguration
+          .getInstance().getViewerConfigurationAsString("/", ViewerConfiguration.PROPERTY_BASE_UPLOAD_PATH)));
+        if (onBasePath) {
+          if (!siardPath.toFile().exists()) {
+            throw new GenericException("File not found");
+          }
+        } else {
+          throw new GenericException("File not found");
+        }
       }
     }
   }
@@ -804,7 +808,8 @@ public class SIARDController {
 
     ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
 
-    if (System.getProperty("env", "server").equals(ViewerConstants.SERVER)) {
+    if (ViewerFactory.getViewerConfiguration().getApplicationEnvironment()
+      .equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
       String siardPath = database.getPath();
       final boolean deleteSiard = !ViewerConfiguration.getInstance().getViewerConfigurationAsBoolean(false,
         ViewerConfiguration.PROPERTY_DISABLE_SIARD_DELETION);

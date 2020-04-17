@@ -369,7 +369,7 @@ public class ValidatorPage extends ContentPanel {
     // Report link
     Button report = new Button(messages.basicActionOpen());
     report.addClickHandler(event -> {
-      if (ApplicationType.getType().equals(ViewerConstants.DESKTOP)) {
+      if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_DESKTOP)) {
         JavascriptUtils.showItem(database.getValidatorReportPath());
       } else {
         SafeUri downloadUri = RestUtils.createFileResourceDownloadValidationReportUri(database.getUuid());

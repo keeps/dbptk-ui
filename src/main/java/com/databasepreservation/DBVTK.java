@@ -44,7 +44,8 @@ public class DBVTK {
 
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
-      if (ViewerConstants.DESKTOP.equals(System.getProperty("env", "server"))) {
+      if (ViewerConstants.APPLICATION_ENV_DESKTOP
+        .equals(System.getProperty(ViewerConstants.APPLICATION_ENV_KEY, ViewerConstants.APPLICATION_ENV_SERVER))) {
         registry.addViewController("/").setViewName("forward:/desktop.html");
         registry.setOrder(Ordered.HIGHEST_PRECEDENCE);
       }
@@ -56,7 +57,8 @@ public class DBVTK {
   @Bean
   public ServletRegistrationBean<HttpServlet> browserService() {
     ServletRegistrationBean<HttpServlet> bean;
-    if (ViewerConstants.DESKTOP.equals(System.getProperty("env", "server"))) {
+    if (ViewerConstants.APPLICATION_ENV_DESKTOP
+      .equals(System.getProperty(ViewerConstants.APPLICATION_ENV_KEY, ViewerConstants.APPLICATION_ENV_SERVER))) {
       bean = new ServletRegistrationBean<>(new BrowserServiceImpl(),
         "/com.databasepreservation.desktop.Desktop/browse");
     } else {

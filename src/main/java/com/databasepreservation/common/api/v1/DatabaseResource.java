@@ -29,7 +29,6 @@ import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.controller.SIARDController;
 import com.databasepreservation.common.utils.ControllerAssistant;
-import com.databasepreservation.common.utils.UserUtility;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -47,7 +46,7 @@ public class DatabaseResource implements DatabaseService {
     LogEntryState state = LogEntryState.SUCCESS;
     User user = controllerAssistant.checkRoles(request);
 
-    if (ViewerConfiguration.getInstance().getApplicationEnvironment().equals(ViewerConstants.SERVER)) {
+    if (ViewerConfiguration.getInstance().getApplicationEnvironment().equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
       if (user.isAdmin()) {
         return getViewerDatabaseIndexResult(findRequest, controllerAssistant, user, state);
       } else {
