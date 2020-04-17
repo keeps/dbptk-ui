@@ -29,7 +29,7 @@ function trigger_travis_build(){
   TAG=$3
 
   echo "Triggered build for ${REPO}"
-  BODY=trigger_travis_build $2 $3
+  BODY=$(trigger_travis_build "$2" "$3")
 
   curl -s -X POST \
    -H "Content-Type: application/json" \
