@@ -52,10 +52,8 @@ deploy:
       tags: true
 
 after_script:
-  - rm $HOME/.m2/settings.xml
-
-after_deploy:
   - .travis/trigger-travis-build.sh
+  - rm $HOME/.m2/settings.xml
 
 cache:
   directories:
