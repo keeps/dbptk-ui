@@ -2142,6 +2142,10 @@ html, body, .desktop-main {
     margin-left: unset;
 }
 
+.my-asyncdatagrid-display-scroll-wrapper input[type="checkbox"]:disabled {
+    cursor: not-allowed;
+}
+
 .my-asyncdatagrid-display-scroll-wrapper input[type="checkbox"]:checked {
     background-color: #089de3;
 }
