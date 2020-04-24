@@ -75,6 +75,7 @@ public class DatabaseResource implements DatabaseService {
     try {
       return SIARDController.loadMetadataFromLocal(path);
     } catch (GenericException e) {
+      state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
       // register action
