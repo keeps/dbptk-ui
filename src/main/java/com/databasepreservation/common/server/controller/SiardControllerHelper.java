@@ -12,6 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.models.wizard.customViews.CustomViewsParameter;
 import com.databasepreservation.modules.siard.SIARD2ModuleFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.roda.core.data.exceptions.GenericException;
@@ -218,25 +219,23 @@ public class SiardControllerHelper {
   private static void buildCustomViewConfiguration(ModuleConfiguration moduleConfiguration,
     CustomViewsParameters customViewsParameters) {
     customViewsParameters.getCustomViewsParameter().forEach((key, value) -> {
-      SchemaConfiguration schemaConfiguration = moduleConfiguration.getSchemaConfigurations().get(key);
+      SchemaConfiguration schemaConfiguration = moduleConfiguration.getSchemaConfigurations().get(value.getSchemaName());
 
       if (schemaConfiguration == null) {
         schemaConfiguration = new SchemaConfiguration();
       }
 
-      schemaConfiguration.getCustomViewConfigurations().add(getCustomViewConfiguration(customViewsParameters));
+      schemaConfiguration.getCustomViewConfigurations().add(getCustomViewConfiguration(value));
       moduleConfiguration.getSchemaConfigurations().put(value.getSchemaName(), schemaConfiguration);
     });
   }
 
-  private static CustomViewConfiguration getCustomViewConfiguration(CustomViewsParameters customViewsParameters) {
+  private static CustomViewConfiguration getCustomViewConfiguration(CustomViewsParameter customViewsParameter) {
     CustomViewConfiguration customViewConfiguration = new CustomViewConfiguration();
 
-    customViewsParameters.getCustomViewsParameter().forEach((key, customViewsParameter) -> {
-      customViewConfiguration.setName(customViewsParameter.getCustomViewName());
-      customViewConfiguration.setDescription(customViewsParameter.getCustomViewDescription());
-      customViewConfiguration.setQuery(customViewsParameter.getCustomViewQuery());
-    });
+    customViewConfiguration.setName(customViewsParameter.getCustomViewName());
+    customViewConfiguration.setDescription(customViewsParameter.getCustomViewDescription());
+    customViewConfiguration.setQuery(customViewsParameter.getCustomViewQuery());
 
     return customViewConfiguration;
   }
