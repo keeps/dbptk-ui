@@ -64,6 +64,10 @@
     text-align: center;
 }
 
+.static-page .center {
+    text-align: center;
+}
+
 .feature-title {
     font-weight: 500;
     margin-bottom: 0px;
