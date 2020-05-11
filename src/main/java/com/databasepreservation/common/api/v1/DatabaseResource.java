@@ -79,7 +79,7 @@ public class DatabaseResource implements DatabaseService {
       throw new RESTException(e);
     } finally {
       // register action
-      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_SIARD_PATH_PARAM, path);
+      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_FILENAME_PARAM, path);
     }
   }
 
