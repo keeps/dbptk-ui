@@ -100,6 +100,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   public static final String SHARED_PROPERTY_WHITELIST_CONFIGURATION_PROPERTY = "ui.sharedProperties.whitelist.configuration.property";
 
   public static final String PROPERTY_DISABLE_SIARD_DELETION = "ui.disable.siard.deletion";
+  public static final String PROPERTY_PLUGIN_LOAD_ON_ACCESS = "ui.plugin.loadOnAccess";
 
   private static boolean instantiatedWithoutErrors = true;
   private static String applicationEnvironment = ViewerConstants.APPLICATION_ENV_SERVER;

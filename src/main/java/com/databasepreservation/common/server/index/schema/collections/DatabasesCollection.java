@@ -7,6 +7,7 @@
  */
 package com.databasepreservation.common.server.index.schema.collections;
 
+import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_BROWSE_LOAD_DATE;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_METADATA;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_SIARD_PATH;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_SIARD_SIZE;
@@ -83,6 +84,7 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_VALIDATION_ERRORS, Field.TYPE_STRING));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_VALIDATION_WARNINGS, Field.TYPE_STRING));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_VALIDATION_SKIPPED, Field.TYPE_STRING));
+    fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_BROWSE_LOAD_DATE, Field.TYPE_STRING));
 
     return fields;
   }
@@ -112,6 +114,7 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
     doc.addField(SOLR_DATABASES_VALIDATION_ERRORS, object.getValidationWarnings());
     doc.addField(SOLR_DATABASES_VALIDATION_WARNINGS, object.getValidationWarnings());
     doc.addField(SOLR_DATABASES_VALIDATION_SKIPPED, object.getValidationSkipped());
+    doc.addField(SOLR_DATABASES_BROWSE_LOAD_DATE, object.getLoadedAt());
 
     return doc;
   }
@@ -140,6 +143,7 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
     viewerDatabase.setValidationErrors(SolrUtils.objectToString(doc.get(SOLR_DATABASES_VALIDATION_ERRORS), ""));
     viewerDatabase.setValidationWarnings(SolrUtils.objectToString(doc.get(SOLR_DATABASES_VALIDATION_WARNINGS), ""));
     viewerDatabase.setValidationSkipped(SolrUtils.objectToString(doc.get(SOLR_DATABASES_VALIDATION_SKIPPED), ""));
+    viewerDatabase.setLoadedAt(SolrUtils.objectToString(doc.get(SOLR_DATABASES_BROWSE_LOAD_DATE), ""));
 
     return viewerDatabase;
   }

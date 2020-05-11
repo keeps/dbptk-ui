@@ -15,6 +15,7 @@ public class ViewerDatabase extends IsIndexed {
   private long size;
   private String version;
 
+  private String loadedAt;
   private String validatedAt;
   private String validatedVersion;
   private String validatorReportPath;
@@ -178,5 +179,13 @@ public class ViewerDatabase extends IsIndexed {
 
   public void setValidatorReportPath(String validatorReportPath) {
     this.validatorReportPath = validatorReportPath;
+  }
+
+  public void setLoadedAt(String loadedAt) {
+    this.loadedAt = loadedAt;
+  }
+
+  public String getLoadedAt() {
+    return loadedAt;
   }
 }

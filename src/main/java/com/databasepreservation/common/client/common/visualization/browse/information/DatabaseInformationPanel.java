@@ -3,17 +3,24 @@ package com.databasepreservation.common.client.common.visualization.browse.infor
 import java.util.HashMap;
 import java.util.Map;
 
+import com.databasepreservation.common.client.ClientConfigurationManager;
+import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.RightPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
+import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerSchema;
+import com.databasepreservation.common.client.services.CollectionService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
+import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
+import com.databasepreservation.common.client.widgets.HTMLWidgetWrapper;
 import com.databasepreservation.common.client.widgets.SwitchBtn;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -45,6 +52,9 @@ public class DatabaseInformationPanel extends RightPanel {
   private ViewerDatabase database;
   private boolean advancedMode = false; // True means advanced attributes are on, false means advanced view is off
   private CollectionStatus status;
+
+  @UiField
+  FlowPanel mainPanel;
 
   @UiField
   FlowPanel header;
@@ -79,12 +89,25 @@ public class DatabaseInformationPanel extends RightPanel {
   }
 
   private void init() {
-    cardTitle.setWidget(CommonClientUtils.getCardTitle(messages.menusidebar_database()));
+    final boolean loadOnAccess = ClientConfigurationManager.getBoolean(false, ViewerConstants.PROPERTY_PLUGIN_LOAD_ON_ACCESS);
 
+    if (ViewerDatabaseStatus.METADATA_ONLY.equals(database.getStatus())) {
+      if (loadOnAccess) {
+        loadOnAccess();
+      } else {
+        mainPanel.clear();
+        mainPanel.add(new HTMLWidgetWrapper("loadOnAccess.html"));
+      }
+    } else {
+      initContent();
+    }
+  }
+
+  private void initContent() {
+    cardTitle.setWidget(CommonClientUtils.getCardTitle(messages.menusidebar_database()));
     header
       .add(CommonClientUtils.getHeaderHTML(FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE_INFORMATION),
         messages.databaseInformationTextForTitle(), "h1"));
-
     HTML html = new HTML();
     html.addStyleName("font-size-description");
 
@@ -92,18 +115,33 @@ public class DatabaseInformationPanel extends RightPanel {
 
     SwitchBtn switchTechInformation = new SwitchBtn(messages.schemaStructurePanelTextForAdvancedOption(), false);
     switchTechInformation.setClickHandler(clickEvent -> {
-      switchTechInformation.getButton().setValue(!switchTechInformation.getButton().getValue(), true); // workaround for
-                                                                                                       // ie11
+      switchTechInformation.getButton().setValue(!switchTechInformation.getButton().getValue(), true); // workaround
+      // for
+      // ie11
       advancedMode = !advancedMode;
       metadataContent.clear();
-      initMetadataContent();
       dataContent.clear();
+      initMetadataContent();
       initDataContent();
     });
     header.add(switchTechInformation);
 
     initMetadataContent();
     initDataContent();
+  }
+
+  private void loadOnAccess() {
+    HistoryManager.gotoIngestSIARDData(database.getUuid(), database.getMetadata().getName());
+    CollectionService.Util.call((String databaseUUID) -> {
+      instances.remove(database.getUuid());
+      HistoryManager.gotoDatabase(databaseUUID);
+      Dialogs.showInformationDialog(messages.SIARDHomePageDialogTitleForBrowsing(),
+        messages.SIARDHomePageTextForIngestSuccess(), messages.basicActionClose(), "btn btn-link");
+    }, (String errorMessage) -> {
+      instances.remove(database.getUuid());
+      HistoryManager.gotoSIARDInfo(database.getUuid());
+      Dialogs.showErrors(messages.SIARDHomePageDialogTitleForBrowsing(), errorMessage, messages.basicActionClose());
+    }).createCollection(database.getUuid());
   }
 
   private void initDataContent() {

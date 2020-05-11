@@ -116,15 +116,8 @@ public class ViewerConstants {
    * DATABASE FIELDS
    */
   public static final String SOLR_DATABASES_STATUS = "status";
+  public static final String SOLR_DATABASES_BROWSE_LOAD_DATE = "browse_loaded_date";
   public static final String SOLR_DATABASES_METADATA = "metadata";
-  public static final String SOLR_DATABASES_TOTAL_ROWS = "total_rows";
-  public static final String SOLR_DATABASES_TOTAL_TABLES = "total_tables";
-  public static final String SOLR_DATABASES_TOTAL_SCHEMAS = "total_schemas";
-  public static final String SOLR_DATABASES_INGESTED_ROWS = "ingested_rows";
-  public static final String SOLR_DATABASES_INGESTED_TABLES = "ingested_tables";
-  public static final String SOLR_DATABASES_INGESTED_SCHEMAS = "ingested_schemas";
-  public static final String SOLR_DATABASES_CURRENT_TABLE_NAME = "current_table_name";
-  public static final String SOLR_DATABASES_CURRENT_SCHEMA_NAME = "current_schema_name";
   public static final String SOLR_DATABASES_SIARD_PATH = "siard_path";
   public static final String SOLR_DATABASES_SIARD_SIZE = "siard_size";
   public static final String SOLR_DATABASES_SIARD_VERSION = "siard_version";
@@ -530,6 +523,7 @@ public class ViewerConstants {
   public static final String DEFAULT_FULL_NAME = "admin";
 
   public static final String PROPERTY_DISABLE_SIARD_DELETION = "ui.disable.siard.deletion";
+  public static final String PROPERTY_PLUGIN_LOAD_ON_ACCESS = "ui.plugin.loadOnAccess";
 
   /**
    * Header

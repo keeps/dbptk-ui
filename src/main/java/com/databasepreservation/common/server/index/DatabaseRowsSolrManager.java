@@ -18,12 +18,11 @@ import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
+import org.joda.time.DateTime;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RequestNotValidException;
-import com.databasepreservation.common.client.index.filter.Filter;
-import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
 import org.roda.core.data.v2.index.sublist.Sublist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +33,8 @@ import com.databasepreservation.common.client.exceptions.SavedSearchException;
 import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.index.IsIndexed;
 import com.databasepreservation.common.client.index.facets.Facets;
+import com.databasepreservation.common.client.index.filter.Filter;
+import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
 import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.activity.logs.ActivityLogEntry;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
@@ -192,17 +193,18 @@ public class DatabaseRowsSolrManager {
   }
 
   public IndexResult<ViewerRow> findRows(String databaseUUID, Filter filter, Sorter sorter, Sublist sublist,
-                                         Facets facets, List<String> fieldsToReturn) throws GenericException, RequestNotValidException {
+    Facets facets, List<String> fieldsToReturn) throws GenericException, RequestNotValidException {
     return SolrUtils.findRows(client, databaseUUID, filter, sorter, sublist, facets, fieldsToReturn, new HashMap<>());
   }
 
   public IndexResult<ViewerRow> findRows(String databaseUUID, Filter filter, Sorter sorter, Sublist sublist,
-    Facets facets, List<String> fieldsToReturn, Map<String, String> extraParameters) throws GenericException, RequestNotValidException {
+    Facets facets, List<String> fieldsToReturn, Map<String, String> extraParameters)
+    throws GenericException, RequestNotValidException {
     return SolrUtils.findRows(client, databaseUUID, filter, sorter, sublist, facets, fieldsToReturn, extraParameters);
   }
 
   public IterableIndexResult findAllRows(String databaseUUID, final Filter filter, final Sorter sorter,
-                                         final List<String> fieldsToReturn) {
+    final List<String> fieldsToReturn) {
     return findAllRows(databaseUUID, filter, sorter, fieldsToReturn, new HashMap<>());
   }
 
@@ -264,7 +266,7 @@ public class DatabaseRowsSolrManager {
     }
   }
 
-  public void editBatchJob(String jobUUID, long countRows, long processedRows){
+  public void editBatchJob(String jobUUID, long countRows, long processedRows) {
     SolrInputDocument doc = new SolrInputDocument();
     doc.addField(ViewerConstants.INDEX_ID, jobUUID);
     doc.addField(ViewerConstants.SOLR_BATCH_JOB_ROWS_TO_PROCESS, SolrUtils.asValueUpdate(countRows));
@@ -419,7 +421,8 @@ public class DatabaseRowsSolrManager {
 
   public void markDatabaseAsReady(final String databaseUUID) throws ViewerException {
     updateDatabaseFields(databaseUUID,
-      Pair.of(ViewerConstants.SOLR_DATABASES_STATUS, ViewerDatabaseStatus.AVAILABLE.toString()));
+      Pair.of(ViewerConstants.SOLR_DATABASES_STATUS, ViewerDatabaseStatus.AVAILABLE.toString()),
+      Pair.of(ViewerConstants.SOLR_DATABASES_BROWSE_LOAD_DATE, new DateTime().toString()));
   }
 
   @SafeVarargs
@@ -454,8 +457,8 @@ public class DatabaseRowsSolrManager {
       validatorReportLocation, DBPTKVersion);
   }
 
-  public void updateSIARDValidationIndicators(String databaseUUID, String passed, String failed,
-    String errors, String warnings, String skipped) {
+  public void updateSIARDValidationIndicators(String databaseUUID, String passed, String failed, String errors,
+    String warnings, String skipped) {
     updateValidationFields(databaseUUID, Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATION_PASSED, passed),
       Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATION_FAILED, failed),
       Pair.of(ViewerConstants.SOLR_DATABASES_VALIDATION_ERRORS, errors),
