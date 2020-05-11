@@ -25,9 +25,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.server.ViewerFactory;
-import com.databasepreservation.common.client.ViewerConstants;
 
 /**
  * A filter that can be turned on/off using RODA configuration file.
@@ -84,7 +84,7 @@ public class OnOffFilter implements Filter {
 
   @Override
   public void doFilter(final ServletRequest servletRequest, final ServletResponse servletResponse,
-                       final FilterChain filterChain) throws IOException, ServletException {
+    final FilterChain filterChain) throws IOException, ServletException {
     if (isOn() && !shouldSkipFilters(servletRequest)) {
       this.innerFilter.doFilter(servletRequest, servletResponse, filterChain);
     } else {
@@ -110,7 +110,7 @@ public class OnOffFilter implements Filter {
       HttpServletRequest request = (HttpServletRequest) servletRequest;
       String requestURI = request.getRequestURI();
       if (StringUtils.isNotBlank(requestURI)
-          && requestURI.startsWith("/" + ViewerConstants.API_SERVLET + ViewerConstants.API_V1_MANAGE_RESOURCE)) {
+        && requestURI.startsWith("/" + ViewerConstants.API_SERVLET + ViewerConstants.API_V1_MANAGE_RESOURCE)) {
         String remoteIP = request.getRemoteAddr();
         return whitelistAllIPs || whitelistedIPs.contains(remoteIP);
       }
@@ -149,7 +149,7 @@ public class OnOffFilter implements Filter {
    */
   private boolean isConfigAvailable() {
     return ViewerFactory.getViewerConfiguration() != null
-        && ViewerFactory.getViewerConfiguration().getConfiguration() != null;
+      && ViewerFactory.getViewerConfiguration().getConfiguration() != null;
   }
 
   /**
@@ -162,11 +162,13 @@ public class OnOffFilter implements Filter {
     final Configuration rodaConfig = ViewerFactory.getViewerConfiguration().getConfiguration();
     if (rodaConfig == null) {
       LOGGER.info("DBVTK configuration not available yet. Delaying init of "
-          + this.webXmlFilterConfig.getInitParameter(PARAM_INNER_FILTER_CLASS) + ".");
+        + this.webXmlFilterConfig.getInitParameter(PARAM_INNER_FILTER_CLASS) + ".");
     } else {
-      final String innerFilterClass = this.webXmlFilterConfig.getInitParameter(PARAM_INNER_FILTER_CLASS);
       final String configPrefix = this.webXmlFilterConfig.getInitParameter(PARAM_CONFIG_PREFIX);
       this.isOn = rodaConfig.getBoolean(configPrefix + ".enabled", false);
+      final String innerFilterClass = rodaConfig.getString(
+        configPrefix + "." + this.webXmlFilterConfig.getFilterName() + "." + PARAM_INNER_FILTER_CLASS,
+        this.webXmlFilterConfig.getInitParameter(PARAM_INNER_FILTER_CLASS));
       LOGGER.info(getFilterConfig().getFilterName() + " is " + (this.isOn ? "ON" : "OFF"));
       if (this.isOn) {
         try {
@@ -187,7 +189,7 @@ public class OnOffFilter implements Filter {
   private FilterConfig getFilterConfig() {
     if (filterConfig == null) {
       filterConfig = new OnOffFilterConfig(this.webXmlFilterConfig,
-          ViewerFactory.getViewerConfiguration().getConfiguration());
+        ViewerFactory.getViewerConfiguration().getConfiguration());
     }
     return filterConfig;
   }
