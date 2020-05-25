@@ -364,7 +364,6 @@ public class MainPanel extends Composite {
         @Override
         public void onSuccess(User user) {
           if (!user.isGuest()) {
-
             if (currentHistoryPath.size() == 2) {
               // #database/<database_uuid>
               String databaseUUID = currentHistoryPath.get(1);
@@ -428,7 +427,7 @@ public class MainPanel extends Composite {
               handleErrorPath(currentHistoryPath);
             }
           } else {
-            HistoryManager.gotoHome();
+            UserLogin.getInstance().showSuggestLoginDialog();
           }
         }
       });

@@ -28,6 +28,10 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.databasepreservation.common.client.exceptions.AuthorizationException;
+import com.databasepreservation.common.server.controller.UserLoginController;
+import com.databasepreservation.common.server.controller.UserLoginHelper;
+import com.databasepreservation.common.utils.UserUtility;
 import org.apache.commons.lang.StringUtils;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
@@ -160,7 +164,19 @@ public class CollectionResource implements CollectionService {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
-    User user = controllerAssistant.checkRoles(request);
+    User user;
+    // Checks if property ui.plugin.loadOnAccess is enable. If so, let the authenticated user
+    // creates a collection for that SIARD. If the user is a guest it will throw an AuthorizationException
+    final boolean loadOnAccess = ViewerFactory.getViewerConfiguration().getViewerConfigurationAsBoolean(false, ViewerConstants.PROPERTY_PLUGIN_LOAD_ON_ACCESS);
+    if (loadOnAccess) {
+      user = UserUtility.getUser(request);
+      if (user.isGuest()) {
+        controllerAssistant.registerAction(UserUtility.getGuest(request), LogEntryState.UNAUTHORIZED);
+        throw new AuthorizationException("The user '" + user.getId() + "' does not have all needed permissions");
+      }
+    } else {
+      user = controllerAssistant.checkRoles(request);
+    }
 
     try {
       final ViewerDatabase database = ViewerFactory.getSolrManager().retrieve(ViewerDatabase.class, databaseUUID);
