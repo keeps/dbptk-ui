@@ -10,5 +10,4 @@ import javax.ws.rs.Path;
 @Path("/api/swagger.{type:json|yaml}")
 public class MyApiListingResource extends ApiListingResource {
 
-
 }
