@@ -1,12 +1,12 @@
 package com.databasepreservation.common.client.tools;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.databasepreservation.common.client.common.lists.widgets.MultipleSelectionTablePanel;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
+import com.databasepreservation.common.client.models.structure.ViewerMetadata;
+import com.databasepreservation.common.client.models.structure.ViewerSchema;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.models.structure.ViewerView;
 import com.databasepreservation.common.client.models.wizard.table.ColumnParameter;
@@ -24,12 +24,10 @@ public class WizardUtils {
     Map<String, MultipleSelectionTablePanel<ViewerTable>> tables,
     Map<String, MultipleSelectionTablePanel<ViewerView>> views,
     Map<String, MultipleSelectionTablePanel<ViewerColumn>> columns,
-    Map<String, ExternalLobParameter> externalLobParameterMap,
-    Map<String, Boolean> viewMaterializationStatus,
-    Map<String, Boolean> merkleTreeColumnStatus) {
+    Map<String, ExternalLobParameter> externalLobParameterMap, Map<String, Boolean> viewMaterializationStatus,
+    Map<String, Boolean> merkleTreeColumnStatus, ViewerMetadata metadata) {
 
     TableAndColumnsParameters tableAndColumnsParameters = new TableAndColumnsParameters();
-    Set<String> selectedSchemas = new HashSet<>();
 
     tables.forEach((schemaUUID, value) -> {
       value.getSelectionModel().getSelectedSet().forEach(table -> {
@@ -39,7 +37,6 @@ public class WizardUtils {
         getColumnParameter(columns, externalLobParameterMap, merkleTreeColumnStatus, parameter, table.getUuid());
 
         tableAndColumnsParameters.getTableAndColumnsParameterMap().put(table.getUuid(), parameter);
-        selectedSchemas.add(table.getSchemaName());
       });
     });
 
@@ -53,7 +50,6 @@ public class WizardUtils {
         getColumnParameter(columns, externalLobParameterMap, merkleTreeColumnStatus, parameter, view.getUuid());
 
         tableAndColumnsParameters.getViewAndColumnsParameterMap().put(view.getUuid(), parameter);
-        selectedSchemas.add(view.getSchemaName());
       });
     });
 
@@ -61,13 +57,15 @@ public class WizardUtils {
       tableAndColumnsParameters.setExternalLobConfigurationSet(true);
     }
 
-    tableAndColumnsParameters.setSelectedSchemas(new ArrayList<>(selectedSchemas));
+    tableAndColumnsParameters.setSelectedSchemas(
+      metadata.getSchemas().stream().distinct().map(ViewerSchema::getName).collect(Collectors.toList()));
 
     return tableAndColumnsParameters;
   }
 
   private static void getColumnParameter(Map<String, MultipleSelectionTablePanel<ViewerColumn>> columns,
-    Map<String, ExternalLobParameter> externalLobParameterMap, Map<String, Boolean> merkleTreeColumnStatus, TableAndColumnsParameter parameter, String uuid) {
+    Map<String, ExternalLobParameter> externalLobParameterMap, Map<String, Boolean> merkleTreeColumnStatus,
+    TableAndColumnsParameter parameter, String uuid) {
     columns.get(uuid).getSelectionModel().getSelectedSet().forEach(column -> {
       ColumnParameter columnParameter = new ColumnParameter();
       columnParameter.setName(column.getDisplayName());

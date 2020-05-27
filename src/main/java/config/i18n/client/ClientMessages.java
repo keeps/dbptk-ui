@@ -980,6 +980,8 @@ public interface ClientMessages extends Messages {
 
   String customViewsPageTextForHelpViewQuery();
 
+  String customViewsPageHintForDisableNext();
+
   /********************************************
    * Create Wizard: Merkle Tree Filter
    ********************************************/

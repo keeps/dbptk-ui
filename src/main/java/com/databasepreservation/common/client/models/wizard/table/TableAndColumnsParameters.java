@@ -1,5 +1,6 @@
 package com.databasepreservation.common.client.models.wizard.table;
 
+import com.google.gwt.core.client.GWT;
 import io.swagger.models.auth.In;
 
 import java.io.Serializable;
@@ -55,6 +56,10 @@ public class TableAndColumnsParameters implements Serializable {
 
   public void setSelectedSchemas(List<String> schemas) {
     this.selectedSchemas = schemas;
+  }
+
+  public boolean isSelectionEmpty() {
+    return tableAndColumnsParameterMap.isEmpty() && viewAndColumnsParameterMap.isEmpty();
   }
 
   public boolean isExternalLobConfigurationSet() {

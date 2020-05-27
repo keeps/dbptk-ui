@@ -85,19 +85,21 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
   private final ComboBoxField customViewSchemaName;
   private final Button btnNext;
   private final ConnectionParameters connectionParameters;
+  private boolean isSelectionEmpty;
 
-  public static CustomViews getInstance(List<String> schemas, Button btnNext, ConnectionParameters connectionParameters) {
+  public static CustomViews getInstance(List<String> schemas, Button btnNext, ConnectionParameters connectionParameters, boolean isSelectionEmpty) {
     if (instance == null) {
-      instance = new CustomViews(schemas, btnNext, connectionParameters);
+      instance = new CustomViews(schemas, btnNext, connectionParameters, isSelectionEmpty);
     }
     return instance;
   }
 
-  private CustomViews(List<String> schemas, Button btnNext, ConnectionParameters connectionParameters) {
+  private CustomViews(List<String> schemas, Button btnNext, ConnectionParameters connectionParameters, boolean isSelectionEmpty) {
     initWidget(binder.createAndBindUi(this));
 
     this.btnNext = btnNext;
     this.connectionParameters = connectionParameters;
+    this.isSelectionEmpty = isSelectionEmpty;
     customViewsSidebar = CustomViewsSidebar.getInstance();
     customViewsList.add(customViewsSidebar);
 
@@ -115,10 +117,21 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
   }
 
   void checkIfHaveCustomViews() {
+    GWT.log("is selection empty: " + isSelectionEmpty);
     if (customViewsParameters.isEmpty()) {
-      btnNext.setText(messages.basicActionSkip());
+      if (isSelectionEmpty) {
+        btnNext.setText(messages.basicActionNext());
+        btnNext.setEnabled(false);
+        btnNext.setTitle(messages.customViewsPageHintForDisableNext());
+      } else {
+        btnNext.setText(messages.basicActionSkip());
+        btnNext.setEnabled(true);
+        btnNext.setTitle("");
+      }
     } else {
       btnNext.setText(messages.basicActionNext());
+      btnNext.setEnabled(true);
+      btnNext.setTitle("");
     }
   }
 
@@ -255,9 +268,10 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
     }
   }
 
-  void refreshCustomButtons() {
+  void refreshCustomButtons(boolean isSelectionEmpty) {
     customViewsButtons.clear();
     customViewsButtons.add(createCustomViewButton());
+    this.isSelectionEmpty = isSelectionEmpty;
     checkIfHaveCustomViews();
   }
 
@@ -267,8 +281,9 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
 
     boolean value = ViewerStringUtils.isBlank(viewNameText) || ViewerStringUtils.isBlank(viewQueryText);
 
-    if (value)
+    if (value) {
       return 1;
+    }
 
     boolean sameName = false;
     for (CustomViewsParameter p : customViewsParameters.values()) {
@@ -277,8 +292,9 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
       }
     }
 
-    if (sameName)
+    if (sameName) {
       return 2;
+    }
 
     return -1;
   }
@@ -289,8 +305,9 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
 
     boolean value = ViewerStringUtils.isBlank(viewNameText) || ViewerStringUtils.isBlank(viewQueryText);
 
-    if (value)
+    if (value) {
       return 1;
+    }
 
     boolean sameName = false;
     for (CustomViewsParameter p : customViewsParameters.values()) {
@@ -300,8 +317,9 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
       }
     }
 
-    if (sameName)
+    if (sameName) {
       return 2;
+    }
 
     return -1;
   }
