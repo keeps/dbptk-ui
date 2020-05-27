@@ -10,6 +10,7 @@ import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
+import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
@@ -151,7 +152,7 @@ public class DatabaseInformationPanel extends RightPanel {
         cardTitlePanel.addStyleName("card-header");
         dataContentCard.insert(cardTitlePanel, 0);
       }
-      final DataPanel instance = DataPanel.getInstance(database, database.getMetadata().getSchemas().get(0).getUuid());
+      final DataPanel instance = DataPanel.getInstance(database, database.getMetadata().getSchemas().get(0).getUuid(), status);
       instance.reload(advancedMode);
       dataContent.add(instance);
     } else {
@@ -159,7 +160,7 @@ public class DatabaseInformationPanel extends RightPanel {
       TabPanel tabPanel = new TabPanel();
       tabPanel.addStyleName("information-panel-multi-schemas-tab");
       for (ViewerSchema schema : database.getMetadata().getSchemas()) {
-        final DataPanel instance = DataPanel.getInstance(database, schema.getUuid());
+        final DataPanel instance = DataPanel.getInstance(database, schema.getUuid(), status);
         instance.reload(advancedMode);
         tabPanel.add(instance, schema.getName());
 

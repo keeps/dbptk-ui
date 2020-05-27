@@ -106,9 +106,12 @@ public class ColumnsManagementSidebar extends Composite implements Sidebar, ICol
       }
 
       for (ViewerView view : schema.getViews()) {
-        final SidebarHyperlink viewItem = createViewItem(schema, view, totalSchemas, iconTag);
-        if (viewItem != null)
-          sidebarGroup.add(viewItem);
+        if (!view.getColumns().isEmpty()) {
+          final SidebarHyperlink viewItem = createViewItem(schema, view, totalSchemas, iconTag);
+          if (viewItem != null) {
+            sidebarGroup.add(viewItem);
+          }
+        }
       }
     }
 

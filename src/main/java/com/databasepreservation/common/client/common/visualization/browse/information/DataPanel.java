@@ -5,14 +5,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.common.lists.widgets.BasicTablePanel;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
+import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerSchema;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.tools.HistoryManager;
+import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
@@ -29,14 +33,14 @@ import config.i18n.client.ClientMessages;
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
-public class DataPanel extends Composite {
+public class DataPanel extends Composite implements ICollectionStatusObserver {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static Map<String, DataPanel> instances = new HashMap<>();
 
-  public static DataPanel getInstance(ViewerDatabase database, String schemaUUID) {
+  public static DataPanel getInstance(ViewerDatabase database, String schemaUUID, CollectionStatus status) {
     String separator = "/";
     String code = database.getUuid() + separator + schemaUUID;
-    return instances.computeIfAbsent(code, k -> new DataPanel(database, schemaUUID));
+    return instances.computeIfAbsent(code, k -> new DataPanel(database, schemaUUID, status));
   }
 
   interface SchemaDataPanelUiBinder extends UiBinder<Widget, DataPanel> {
@@ -44,8 +48,9 @@ public class DataPanel extends Composite {
 
   private static SchemaDataPanelUiBinder uiBinder = GWT.create(SchemaDataPanelUiBinder.class);
 
-  private ViewerDatabase database;
-  private ViewerSchema schema;
+  private final ViewerDatabase database;
+  private final ViewerSchema schema;
+  private CollectionStatus status;
   private boolean advancedMode;
 
   @UiField
@@ -57,9 +62,12 @@ public class DataPanel extends Composite {
   @UiField
   SimplePanel schemaDescription;
 
-  private DataPanel(ViewerDatabase viewerDatabase, final String schemaUUID) {
+  private DataPanel(ViewerDatabase viewerDatabase, final String schemaUUID, CollectionStatus status) {
     database = viewerDatabase;
     schema = database.getMetadata().getSchema(schemaUUID);
+    this.status = status;
+
+    ObserverManager.getCollectionObserver().addObserver(this);
 
     initWidget(uiBinder.createAndBindUi(this));
     init();
@@ -71,6 +79,11 @@ public class DataPanel extends Composite {
       tableContent.clear();
       initTableContent();
     }
+  }
+
+  public void reload() {
+    tableContent.clear();
+    initTableContent();
   }
 
   private void init() {
@@ -101,11 +114,11 @@ public class DataPanel extends Composite {
 
     List<ViewerTable> tables = new ArrayList<>(schema.getTables());
 
-    tables.sort((o1, o2) -> {
+/*    tables.sort((o1, o2) -> {
       Long r1 = o1.getCountRows();
       Long r2 = o2.getCountRows();
       return r2.compareTo(r1);
-    });
+    });*/
 
     return new BasicTablePanel<ViewerTable>(new HTMLPanel(SafeHtmlUtils.EMPTY_SAFE_HTML),
       SafeHtmlUtils.EMPTY_SAFE_HTML, tables.iterator(),
@@ -113,15 +126,15 @@ public class DataPanel extends Composite {
       new BasicTablePanel.ColumnInfo<>(messages.schema_tableName(), false, 17, new TextColumn<ViewerTable>() {
         @Override
         public String getValue(ViewerTable table) {
-          return table.getName();
+          return status.getTableStatusByTableId(table.getId()).getCustomName();
         }
       }),
 
       new BasicTablePanel.ColumnInfo<>(messages.description(), false, 35, new TextColumn<ViewerTable>() {
         @Override
         public String getValue(ViewerTable table) {
-          if (table.getDescription() != null) {
-            return table.getDescription();
+          if (ViewerStringUtils.isNotBlank(status.getTableStatusByTableId(table.getId()).getCustomDescription())) {
+            return status.getTableStatusByTableId(table.getId()).getCustomDescription();
           } else {
             return "";
           }
@@ -179,5 +192,11 @@ public class DataPanel extends Composite {
       })
 
     );
+  }
+
+  @Override
+  public void updateCollection(CollectionStatus collectionStatus) {
+    this.status = collectionStatus;
+    reload();
   }
 }
