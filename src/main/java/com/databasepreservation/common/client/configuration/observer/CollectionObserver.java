@@ -9,7 +9,7 @@ import com.databasepreservation.common.client.models.status.collection.Collectio
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 public class CollectionObserver {
-  private List<ICollectionStatusObserver> observerList = new ArrayList<>();
+  private final List<ICollectionStatusObserver> observerList = new ArrayList<>();
 
   public void addObserver(ICollectionStatusObserver observer) {
     if (!this.observerList.contains(observer)) {
