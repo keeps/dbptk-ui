@@ -13,7 +13,9 @@ public class AdvancedStatus implements Serializable {
   private boolean fixed;
   private String picker;
 
-  public AdvancedStatus() { }
+  public AdvancedStatus() {
+    this.fixed = true;
+  }
 
   public boolean isFixed() {
     return fixed;
