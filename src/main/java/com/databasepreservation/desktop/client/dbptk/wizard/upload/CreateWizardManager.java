@@ -117,7 +117,7 @@ public class CreateWizardManager extends WizardManager {
 
         if (wizardInstances.get(position) instanceof CustomViews) {
           CustomViews customViews = (CustomViews) wizardInstances.get(position);
-          customViews.refreshCustomButtons();
+          customViews.refreshCustomButtons(tableAndColumnsParameters.isSelectionEmpty());
         } else {
           customButtons.clear();
         }
@@ -202,8 +202,8 @@ public class CreateWizardManager extends WizardManager {
       wizardContent.clear();
       position = 2;
       CustomViews customViews = CustomViews.getInstance(tableAndColumnsParameters.getSelectedSchemas(), btnNext,
-        connectionParameters);
-      customViews.refreshCustomButtons();
+        connectionParameters, tableAndColumnsParameters.isSelectionEmpty());
+      customViews.refreshCustomButtons(tableAndColumnsParameters.isSelectionEmpty());
       wizardInstances.add(position, customViews);
       wizardContent.add(customViews);
       updateButtons();
@@ -376,6 +376,7 @@ public class CreateWizardManager extends WizardManager {
     btnBack.setEnabled(true);
     if (position != 2) {
       btnNext.setText(messages.basicActionNext());
+      btnNext.setEnabled(true);
     }
 
     if (position == 0) {

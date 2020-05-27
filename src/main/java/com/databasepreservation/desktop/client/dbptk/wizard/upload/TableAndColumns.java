@@ -202,7 +202,9 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
 
   @Override
   public boolean validate() {
-    boolean tablesEmpty = false;
+    return true;
+
+    /*boolean tablesEmpty = false;
     boolean viewsEmpty = false;
 
     for (MultipleSelectionTablePanel<ViewerTable> cellTable : tables.values()) {
@@ -219,13 +221,13 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
       return !tablesEmpty;
     }
 
-    return !tablesEmpty || !viewsEmpty;
+    return !tablesEmpty || !viewsEmpty;*/
   }
 
   @Override
   public TableAndColumnsParameters getValues() {
     return WizardUtils.getTableAndColumnsParameter(tables, views, columns, externalLOBsParameters,
-      viewMaterializationStatus, merkleColumnStatus);
+      viewMaterializationStatus, merkleColumnStatus, metadata);
   }
 
   @Override
