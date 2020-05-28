@@ -3,11 +3,13 @@ package com.databasepreservation.common.client.common.visualization.progressBar;
 import java.util.HashMap;
 import java.util.function.Consumer;
 
+import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.models.progress.ProgressData;
 import com.databasepreservation.common.client.services.CollectionService;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
+import com.databasepreservation.common.client.tools.HistoryManager;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -31,6 +33,7 @@ public class ProgressBarPanel extends Composite {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
   private static final HashMap<String, ProgressBarPanel> instances = new HashMap<>();
   private final String databaseUUID;
+  private final boolean redirect;
   private boolean initialized = false;
   private final Timer autoUpdateTimer = new Timer() {
     @Override
@@ -52,12 +55,17 @@ public class ProgressBarPanel extends Composite {
   SimplePanel description;
 
   public static ProgressBarPanel getInstance(String uuid) {
-    return instances.computeIfAbsent(uuid, k -> new ProgressBarPanel(uuid));
+    return ProgressBarPanel.getInstance(uuid, false);
   }
 
-  private ProgressBarPanel(String uuid) {
+  public static ProgressBarPanel getInstance(String uuid, boolean redirect) {
+    return instances.computeIfAbsent(uuid, k -> new ProgressBarPanel(uuid, redirect));
+  }
+
+  private ProgressBarPanel(String uuid, boolean redirect) {
     initWidget(uiBinder.createAndBindUi(this));
     this.databaseUUID = uuid;
+    this.redirect = redirect;
     update();
   }
 
@@ -67,6 +75,7 @@ public class ProgressBarPanel extends Composite {
         result.reset();
         initialized = true;
       }
+
       progressBar.setCurrent(0);
       content.clear();
       stopUpdating();
@@ -135,6 +144,11 @@ public class ProgressBarPanel extends Composite {
 
     if (progressData.isFinished()) {
       stopUpdating();
+      if (redirect) {
+        HistoryManager.gotoDatabase(databaseUUID);
+        Dialogs.showInformationDialog(messages.SIARDHomePageDialogTitleForBrowsing(),
+          messages.SIARDHomePageTextForIngestSuccess(), messages.basicActionClose(), "btn btn-link");
+      }
     }
   }
 

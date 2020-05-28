@@ -67,9 +67,9 @@ public class BrowseNavigationPanel {
 
           HistoryManager.gotoIngestSIARDData(database.getUuid(), database.getMetadata().getName());
           CollectionService.Util.call((String databaseUUID) -> {
-            HistoryManager.gotoDatabase(databaseUUID);
+            /*HistoryManager.gotoDatabase(databaseUUID);
             Dialogs.showInformationDialog(messages.SIARDHomePageDialogTitleForBrowsing(),
-              messages.SIARDHomePageTextForIngestSuccess(), messages.basicActionClose(), "btn btn-link");
+              messages.SIARDHomePageTextForIngestSuccess(), messages.basicActionClose(), "btn btn-link");*/
           }, (String errorMessage) -> {
             instances.clear();
             HistoryManager.gotoSIARDInfo(database.getUuid());

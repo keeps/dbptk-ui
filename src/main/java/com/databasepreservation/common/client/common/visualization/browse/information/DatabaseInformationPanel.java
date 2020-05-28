@@ -10,13 +10,14 @@ import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
-import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
+import com.databasepreservation.common.client.index.IsIndexed;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerSchema;
 import com.databasepreservation.common.client.services.CollectionService;
+import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
@@ -90,18 +91,20 @@ public class DatabaseInformationPanel extends RightPanel {
   }
 
   private void init() {
-    final boolean loadOnAccess = ClientConfigurationManager.getBoolean(false, ViewerConstants.PROPERTY_PLUGIN_LOAD_ON_ACCESS);
+    final boolean loadOnAccess = ClientConfigurationManager.getBoolean(false,
+      ViewerConstants.PROPERTY_PLUGIN_LOAD_ON_ACCESS);
 
-    if (ViewerDatabaseStatus.METADATA_ONLY.equals(database.getStatus())) {
+    if (ViewerDatabaseStatus.METADATA_ONLY.equals(database.getStatus())
+      || ViewerDatabaseStatus.INGESTING.equals(database.getStatus())) {
       if (loadOnAccess) {
         loadOnAccess();
       } else {
         mainPanel.clear();
         mainPanel.add(new HTMLWidgetWrapper("loadOnAccess.html"));
       }
-    } else {
-      initContent();
     }
+
+    initContent();
   }
 
   private void initContent() {
@@ -133,16 +136,18 @@ public class DatabaseInformationPanel extends RightPanel {
 
   private void loadOnAccess() {
     HistoryManager.gotoIngestSIARDData(database.getUuid(), database.getMetadata().getName());
-    CollectionService.Util.call((String databaseUUID) -> {
-      instances.remove(database.getUuid());
-      HistoryManager.gotoDatabase(databaseUUID);
-      Dialogs.showInformationDialog(messages.SIARDHomePageDialogTitleForBrowsing(),
-        messages.SIARDHomePageTextForIngestSuccess(), messages.basicActionClose(), "btn btn-link");
-    }, (String errorMessage) -> {
-      instances.remove(database.getUuid());
-      HistoryManager.gotoSIARDInfo(database.getUuid());
-      Dialogs.showErrors(messages.SIARDHomePageDialogTitleForBrowsing(), errorMessage, messages.basicActionClose());
-    }).createCollection(database.getUuid());
+    if (ViewerDatabaseStatus.METADATA_ONLY.equals(database.getStatus())) {
+      CollectionService.Util.call((String databaseUUID) -> {
+        instances.remove(database.getUuid());
+        HistoryManager.gotoDatabase(databaseUUID);
+        Dialogs.showInformationDialog(messages.SIARDHomePageDialogTitleForBrowsing(),
+          messages.SIARDHomePageTextForIngestSuccess(), messages.basicActionClose(), "btn btn-link");
+      }, (String errorMessage) -> {
+        instances.remove(database.getUuid());
+        HistoryManager.gotoSIARDInfo(database.getUuid());
+        Dialogs.showErrors(messages.SIARDHomePageDialogTitleForBrowsing(), errorMessage, messages.basicActionClose());
+      }).createCollection(database.getUuid());
+    }
   }
 
   private void initDataContent() {
@@ -152,7 +157,8 @@ public class DatabaseInformationPanel extends RightPanel {
         cardTitlePanel.addStyleName("card-header");
         dataContentCard.insert(cardTitlePanel, 0);
       }
-      final DataPanel instance = DataPanel.getInstance(database, database.getMetadata().getSchemas().get(0).getUuid(), status);
+      final DataPanel instance = DataPanel.getInstance(database, database.getMetadata().getSchemas().get(0).getUuid(),
+        status);
       instance.reload(advancedMode);
       dataContent.add(instance);
     } else {
@@ -210,5 +216,18 @@ public class DatabaseInformationPanel extends RightPanel {
     instance.setCSS("metadata-field", "metadata-information-element-label", "metadata-information-element-value");
 
     return instance;
+  }
+
+  @Override
+  protected void onAttach() {
+    super.onAttach();
+
+    DatabaseService.Util.call((IsIndexed result) -> {
+      database = (ViewerDatabase) result;
+      if (ViewerDatabaseStatus.METADATA_ONLY.equals(database.getStatus())
+        || ViewerDatabaseStatus.INGESTING.equals(database.getStatus())) {
+        HistoryManager.gotoIngestSIARDData(database.getUuid(), database.getMetadata().getName());
+      }
+    }).retrieve(database.getUuid());
   }
 }
