@@ -117,7 +117,6 @@ public class CustomViews extends WizardPanel<CustomViewsParameters> {
   }
 
   void checkIfHaveCustomViews() {
-    GWT.log("is selection empty: " + isSelectionEmpty);
     if (customViewsParameters.isEmpty()) {
       if (isSelectionEmpty) {
         btnNext.setText(messages.basicActionNext());

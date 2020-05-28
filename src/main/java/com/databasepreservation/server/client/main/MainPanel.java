@@ -675,7 +675,7 @@ public class MainPanel extends Composite {
   private void handleErrorPath(List<String> currentHistoryPath) {
     if (currentHistoryPath.size() >= 2) {
       String databaseUUID = currentHistoryPath.get(1);
-      reSetHeader(databaseUUID);
+      //reSetHeader(databaseUUID);
       HistoryManager.gotoDatabase(databaseUUID);
     } else {
       HistoryManager.gotoHome();

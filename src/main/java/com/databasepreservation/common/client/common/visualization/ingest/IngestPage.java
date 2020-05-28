@@ -4,15 +4,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.common.DefaultAsyncCallback;
+import com.databasepreservation.common.client.common.UserLogin;
 import com.databasepreservation.common.client.common.visualization.progressBar.IndeterminateProgressBarPanel;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.ContentPanel;
+import com.databasepreservation.common.client.models.user.User;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.common.visualization.progressBar.ProgressBarPanel;
+import com.databasepreservation.common.utils.UserUtility;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -64,7 +68,7 @@ public class IngestPage extends ContentPanel {
     this.databaseUUID = databaseUUID;
     this.databaseName = databaseName;
 
-    final ProgressBarPanel instance = ProgressBarPanel.getInstance(databaseUUID);
+    final ProgressBarPanel instance = ProgressBarPanel.getInstance(databaseUUID, true);
     instance.setTitleText(messages.SIARDHomePageTextForIngestSIARDTitle());
     instance.setSubtitleText(messages.SIARDHomePageTextForIngestSIARDSubtitle());
     
@@ -74,7 +78,16 @@ public class IngestPage extends ContentPanel {
   }
 
   private void configureBtnBack(final String databaseUUID) {
-    btnBack.setText(messages.basicActionBack());
-    btnBack.addClickHandler(event -> HistoryManager.gotoSIARDInfo(databaseUUID));
+    UserLogin.getInstance().getAuthenticatedUser(new DefaultAsyncCallback<User>() {
+      @Override
+      public void onSuccess(User user) {
+        if (user.isAdmin()) {
+          btnBack.setText(messages.basicActionBack());
+          btnBack.addClickHandler(event -> HistoryManager.gotoSIARDInfo(databaseUUID));
+        } else {
+          btnBack.setVisible(false);
+        }
+      }
+    });
   }
 }

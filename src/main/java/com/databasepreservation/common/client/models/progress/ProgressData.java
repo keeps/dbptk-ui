@@ -121,7 +121,6 @@ public class ProgressData implements Serializable {
     this.currentSchemaName = currentSchemaName;
   }
 
-
   public boolean isFinished() {
     return finished;
   }
