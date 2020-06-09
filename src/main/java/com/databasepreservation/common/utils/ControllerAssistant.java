@@ -44,6 +44,8 @@ public class ControllerAssistant {
           if (Arrays.equals(address.getAddress(), whitelistAddress.getAddress())) {
             final String username = ViewerConfiguration.getInstance().getWhiteListedUsername().get(index);
             User user = new User(username);
+            //user.setAdmin(true);
+            user.setWhiteList(true);
             user.setIpAddress(address.toString());
             index++;
 
