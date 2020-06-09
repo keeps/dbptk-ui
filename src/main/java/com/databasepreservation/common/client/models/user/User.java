@@ -32,6 +32,11 @@ public class User extends RodaPrincipal {
   private boolean admin;
 
   /**
+   * Is a whiteList user?
+   */
+  private boolean whiteList;
+
+  /**
    * Constructor.
    */
   public User() {
@@ -48,7 +53,7 @@ public class User extends RodaPrincipal {
   }
 
   public User(final User user) {
-    this(user.getId(), user.getName(), user.getFullName(), user.isAdmin(), user.isActive(), user.getAllRoles(), user.getDirectRoles(),
+    this(user.getId(), user.getName(), user.getFullName(), user.isAdmin(),user.isWhiteList(), user.isActive(), user.getAllRoles(), user.getDirectRoles(),
         user.getEmail(), user.isGuest(), user.getIpAddress());
   }
 
@@ -62,14 +67,15 @@ public class User extends RodaPrincipal {
 
   public User(final String id, final String name, final String email, final boolean guest, final String ipAddress,
               final Set<String> allRoles, final Set<String> directRoles) {
-    this(id, name, name, false, true, allRoles, directRoles, email, guest, ipAddress);
+    this(id, name, name, false, false, true, allRoles, directRoles, email, guest, ipAddress);
   }
 
-  public User(final String id, final String name, final String fullName, final boolean admin, final boolean active,
+  public User(final String id, final String name, final String fullName, final boolean admin, final boolean whiteList, final boolean active,
               final Set<String> allRoles, final Set<String> directRoles, final String email,
               final boolean guest, final String ipAddress) {
     super(id, name, fullName, active, allRoles, directRoles);
     this.admin = admin;
+    this.whiteList=whiteList;
     this.email = email;
     this.guest = guest;
     this.ipAddress = ipAddress;
@@ -106,6 +112,14 @@ public class User extends RodaPrincipal {
 
   public void setAdmin(boolean admin) {
     this.admin = admin;
+  }
+
+  public boolean isWhiteList() {
+    return whiteList;
+  }
+
+  public void setWhiteList(boolean whiteList) {
+    this.whiteList = whiteList;
   }
 
   @Override

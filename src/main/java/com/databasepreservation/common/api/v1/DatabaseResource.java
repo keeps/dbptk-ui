@@ -47,7 +47,7 @@ public class DatabaseResource implements DatabaseService {
     User user = controllerAssistant.checkRoles(request);
 
     if (ViewerConfiguration.getInstance().getApplicationEnvironment().equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
-      if (user.isAdmin()) {
+      if (user.isAdmin() || user.isWhiteList()) {
         return getViewerDatabaseIndexResult(findRequest, controllerAssistant, user, state);
       } else {
         List<String> fieldsToReturn = new ArrayList<>();
@@ -88,7 +88,7 @@ public class DatabaseResource implements DatabaseService {
     long count = 0;
     try {
       final IndexResult<ViewerDatabase> result = ViewerFactory.getSolrManager().find(ViewerDatabase.class,
-        findRequest.filter, findRequest.sorter, findRequest.sublist, findRequest.facets);
+        findRequest.filter, findRequest.sorter, findRequest.sublist, findRequest.facets,findRequest.fieldsToReturn);
       count = result.getTotalCount();
       return result;
     } catch (GenericException | RequestNotValidException e) {
