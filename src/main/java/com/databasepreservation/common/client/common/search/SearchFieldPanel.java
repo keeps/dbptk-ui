@@ -7,6 +7,8 @@ package com.databasepreservation.common.client.common.search;
 import java.util.Date;
 import java.util.List;
 
+import com.databasepreservation.common.client.ClientConfigurationManager;
+import com.google.gwt.i18n.client.TimeZone;
 import org.roda.core.data.common.RodaConstants;
 
 import com.databasepreservation.common.client.ClientLogger;
@@ -558,5 +560,9 @@ public class SearchFieldPanel extends Composite {
     inputStorageSizeFrom.setText("");
     inputStorageSizeTo.setText("");
     inputCheckBox.setSelectedIndex(0);
+    inputDateFromForDateTime.getDateBox().setValue(null);
+    inputDateToForDateTime.getDateBox().setValue(null);
+    inputDateFromForDate.getDateBox().setValue(null);
+    inputDateToForDate.getDateBox().setValue(null);
   }
 }
