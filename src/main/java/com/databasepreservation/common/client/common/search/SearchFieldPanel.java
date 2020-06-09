@@ -9,6 +9,7 @@ import java.util.List;
 
 import com.databasepreservation.common.client.ClientConfigurationManager;
 import com.google.gwt.i18n.client.TimeZone;
+import oracle.ons.Cli;
 import org.roda.core.data.common.RodaConstants;
 
 import com.databasepreservation.common.client.ClientLogger;
@@ -435,7 +436,13 @@ public class SearchFieldPanel extends Composite {
   }
 
   private Date getDateFromInput(UTCDateBox dateBox, UTCTimeBox timeBox) {
-    return new Date(dateBox.getValue() + timeBox.getValue());
+    boolean isUTC = ClientConfigurationManager.getBoolean(false, "ui.interface.show.datetime.utc");
+    if (isUTC) {
+      return new Date(dateBox.getValue() + timeBox.getValue());
+    } else {
+      DateTimeFormat format = DateTimeFormat.getFormat("yyyy-MM-ddTHH:mm:ss");
+      return format.parse(dateBox.getText() + "T" + timeBox.getText());
+    }
   }
 
   private void setInputPanel(String type) {

@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.fusesource.restygwt.client.MethodCallback;
-import com.databasepreservation.common.client.index.filter.Filter;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
+import com.databasepreservation.common.client.ClientConfigurationManager;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.lists.columns.TooltipColumn;
 import com.databasepreservation.common.client.common.lists.utils.BasicAsyncTableCell;
@@ -16,6 +16,7 @@ import com.databasepreservation.common.client.common.utils.html.LabelUtils;
 import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.index.facets.Facets;
+import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.activity.logs.ActivityLogEntry;
 import com.databasepreservation.common.client.services.ActivityLogService;
@@ -48,6 +49,7 @@ public class ActivityLogList extends BasicAsyncTableCell<ActivityLogEntry> {
   private Column<ActivityLogEntry, SafeHtml> durationColumn;
   private Column<ActivityLogEntry, SafeHtml> addressColumn;
   private Column<ActivityLogEntry, SafeHtml> outcomeColumn;
+  private final boolean showInUTC;
 
   public ActivityLogList() {
     this(null, null, null, false, false);
@@ -59,6 +61,7 @@ public class ActivityLogList extends BasicAsyncTableCell<ActivityLogEntry> {
 
   private ActivityLogList(Filter filter, Facets facets, String summary, boolean selectable, boolean exportable) {
     super(filter, facets, summary, selectable, exportable, INITIAL_PAGE_SIZE, INITIAL_PAGE_SIZE_INCREMENT);
+    this.showInUTC = ClientConfigurationManager.getBoolean(false, "ui.interface.show.datetime.utc");
   }
 
   @Override
@@ -69,7 +72,9 @@ public class ActivityLogList extends BasicAsyncTableCell<ActivityLogEntry> {
     dateColumn = new TooltipColumn<ActivityLogEntry>() {
       @Override
       public SafeHtml getValue(ActivityLogEntry log) {
-        return log != null ? SafeHtmlUtils.fromString(Humanize.formatDateTime(log.getDatetime()))
+        return log != null
+          ? SafeHtmlUtils
+            .fromString(Humanize.formatDateTimeFromSolr(log.getDatetime(), "yyyy-MM-dd HH:mm:ss", showInUTC))
           : SafeHtmlUtils.fromString("unknown");
       }
     };

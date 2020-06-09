@@ -13,7 +13,9 @@ import java.net.ConnectException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -602,8 +604,12 @@ public class SolrUtils {
     final String ret;
 
     if (fromValue != null) {
-      Instant instant = Instant.ofEpochMilli(fromValue.getTime());
-      return instant.toString();
+      SimpleDateFormat format = new SimpleDateFormat(RodaConstants.ISO8601_NO_MILLIS);
+      format.setTimeZone(TimeZone.getTimeZone(ZoneOffset.UTC));
+
+      // Instant instant = Instant.ofEpochMilli(fromValue.getTime());
+      // return instant.toString();
+      return format.format(fromValue);
     } else {
       ret = "*";
     }
@@ -620,7 +626,11 @@ public class SolrUtils {
     final String ret;
     StringBuilder sb = new StringBuilder();
     if (toValue != null) {
-      sb.append(Instant.ofEpochMilli(toValue.getTime()).toString());
+      SimpleDateFormat format = new SimpleDateFormat(RodaConstants.ISO8601_NO_MILLIS);
+      format.setTimeZone(TimeZone.getTimeZone(ZoneOffset.UTC));
+
+      sb.append(format.format(toValue));
+      // sb.append(Instant.ofEpochMilli(toValue.getTime()).toString());
       switch (granularity) {
         case YEAR:
           sb.append("+1YEAR-1MILLISECOND");
@@ -659,7 +669,9 @@ public class SolrUtils {
   private static <T extends Serializable> void generateRangeValue(StringBuilder ret, Class<T> valueClass, T value) {
     if (value != null) {
       if (valueClass.equals(Date.class)) {
-        String date = Instant.ofEpochMilli((((Date) value).getTime())).toString();
+        SimpleDateFormat format = new SimpleDateFormat(RodaConstants.ISO8601_NO_MILLIS);
+        format.setTimeZone(TimeZone.getTimeZone(ZoneOffset.UTC));
+        final String date = format.format((Date) value);
         LOGGER.trace("Appending date value \"{}\" to range", date);
         ret.append(date);
       } else if (valueClass.equals(Long.class)) {

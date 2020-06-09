@@ -192,7 +192,10 @@
                                 <id>${desktop}</id>
                                 <configuration>
                                     <moduleName>${desktop}</moduleName>
-                                    <jvmArgs>-Djava.net.preferIPv4Stack=true -Djavax.xml.parsers.SAXParserFactory=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl</jvmArgs>
+                                    <jvmArgs>
+                                        -Djava.net.preferIPv4Stack=true
+                                        -Djavax.xml.parsers.SAXParserFactory=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl
+                                    </jvmArgs>
                                 </configuration>
                                 <goals>
                                     <goal>compile</goal>
@@ -203,7 +206,10 @@
                                 <id>${server}</id>
                                 <configuration>
                                     <moduleName>${server}</moduleName>
-                                    <jvmArgs>-Djava.net.preferIPv4Stack=true -Djavax.xml.parsers.SAXParserFactory=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl</jvmArgs>
+                                    <jvmArgs>
+                                        -Djava.net.preferIPv4Stack=true
+                                        -Djavax.xml.parsers.SAXParserFactory=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl
+                                    </jvmArgs>
                                 </configuration>
                                 <goals>
                                     <goal>compile</goal>

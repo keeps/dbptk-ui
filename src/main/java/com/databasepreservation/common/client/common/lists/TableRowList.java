@@ -11,6 +11,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.ClientConfigurationManager;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
@@ -78,6 +79,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
   private ViewerDatabase database;
   private ViewerTable viewerTable;
   private CollectionStatus collectionConfiguration;
+  private final boolean showInUTC;
 
   public TableRowList(ViewerDatabase database, ViewerTable table, Filter filter, Facets facets, String summary,
     boolean selectable, boolean exportable, CollectionStatus status, Boolean isNested) {
@@ -86,6 +88,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     this.viewerTable = table;
     this.database = database;
     this.collectionConfiguration = status;
+    this.showInUTC = ClientConfigurationManager.getBoolean(false, "ui.interface.show.datetime.utc");
   }
 
   public void setColumnVisibility(Map<String, Boolean> columnDisplayNameToVisibleState) {
@@ -251,7 +254,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
           // if it exists in Solr, it is not null
           switch (configColumn.getType()) {
             case DATETIME:
-              ret = SafeHtmlUtils.fromString(Humanize.formatDateTimeFromSolr(value, "yyyy-MM-dd HH:mm:ss"));
+              ret = SafeHtmlUtils.fromString(Humanize.formatDateTimeFromSolr(value, "yyyy-MM-dd HH:mm:ss", showInUTC));
               break;
             case DATETIME_JUST_DATE:
               ret = SafeHtmlUtils.fromString(Humanize.formatDateTimeFromSolr(value, "yyyy-MM-dd"));

@@ -14,6 +14,7 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.i18n.client.NumberFormat;
 
+import com.google.gwt.i18n.client.TimeZone;
 import config.i18n.client.ClientMessages;
 
 /**
@@ -99,6 +100,16 @@ public class Humanize {
   }
 
   public static String formatDateTimeFromSolr(String dateTimeString, String outputDateTimeFormat) {
+    return Humanize.formatDateTimeFromSolr(dateTimeString, outputDateTimeFormat, false);
+  }
+
+  public static String formatDateTimeFromSolr(Date datetime, String outputDateTimeFormat, boolean viewInUTC) {
+    DateTimeFormat fmt = DateTimeFormat.getFormat("yyyy-MM-dd'T'HH:mm:ssZZZ");
+    GWT.log("UTC: " + viewInUTC);
+    return Humanize.formatDateTimeFromSolr(fmt.format(datetime), outputDateTimeFormat, viewInUTC);
+  }
+
+  public static String formatDateTimeFromSolr(String dateTimeString, String outputDateTimeFormat, boolean viewInUTC) {
     if (ViewerStringUtils.isBlank(dateTimeString)) {
       return dateTimeString;
     }
@@ -107,11 +118,19 @@ public class Humanize {
     DateTimeFormat output = DateTimeFormat.getFormat(outputDateTimeFormat);
 
     try {
-      return output.format(input.parse(dateTimeString));
+      if (!viewInUTC) {
+        return output.format(input.parse(dateTimeString));
+      } else {
+        return output.format(input.parse(dateTimeString), TimeZone.createTimeZone(0));
+      }
     } catch (IllegalArgumentException e) {
       input = DateTimeFormat.getFormat("yyyy-MM-ddTHH:mm:ssZZZ");
       try {
-        return output.format(input.parse(dateTimeString));
+        if (!viewInUTC) {
+          return output.format(input.parse(dateTimeString));
+        } else {
+          return output.format(input.parse(dateTimeString), TimeZone.createTimeZone(0));
+        }
       } catch (IllegalArgumentException ea) {
         return dateTimeString;
       }
