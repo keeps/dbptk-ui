@@ -113,7 +113,7 @@ public class BrowseNavigationPanel {
 
   private void advancedConfigurationButton() {
     btnConfiguration = new Button();
-    btnConfiguration.setText("Configuration");
+    btnConfiguration.setText(messages.basicActionConfiguration());
     btnConfiguration.addStyleName("btn btn-outline-primary btn-configuration");
     btnConfiguration.setVisible(false);
 

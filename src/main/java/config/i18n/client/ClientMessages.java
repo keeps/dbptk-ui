@@ -563,6 +563,8 @@ public interface ClientMessages extends Messages {
 
   String basicActionExport();
 
+  String basicActionConfiguration();
+
   /*********************************************
    * Sidebar Menus
    ********************************************/
