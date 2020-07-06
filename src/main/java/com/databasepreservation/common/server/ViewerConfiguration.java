@@ -102,6 +102,8 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   public static final String PROPERTY_DISABLE_SIARD_DELETION = "ui.disable.siard.deletion";
   public static final String PROPERTY_PLUGIN_LOAD_ON_ACCESS = "ui.plugin.loadOnAccess";
 
+  public static final String PROPERTY_DISABLE_WHITELIST_CACHE = "DISABLE_WHITELIST_CACHE";
+
   private static boolean instantiatedWithoutErrors = true;
   private static String applicationEnvironment = ViewerConstants.APPLICATION_ENV_SERVER;
 
@@ -378,18 +380,22 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   }
 
   public List<String> getWhitelistedIPs() {
-    if (cachedWhitelistedIPs == null) {
-      cachedWhitelistedIPs = new ArrayList<>();
-      for (String whitelistedIP : getViewerConfigurationAsList(ViewerConfiguration.PROPERTY_FILTER_ONOFF_WHITELISTED_IPS)) {
-        try {
-          final InetAddress address = InetAddress.getByName(whitelistedIP);
-          cachedWhitelistedIPs.add(address.getHostAddress());
-        } catch (UnknownHostException e) {
-          LOGGER.debug("Invalid IP address from config: {}", whitelistedIP, e);
+    if(System.getenv(PROPERTY_DISABLE_WHITELIST_CACHE).equals("1")) {
+      if (cachedWhitelistedIPs == null) {
+        cachedWhitelistedIPs = new ArrayList<>();
+        for (String whitelistedIP : getViewerConfigurationAsList(ViewerConfiguration.PROPERTY_FILTER_ONOFF_WHITELISTED_IPS)) {
+          try {
+            final InetAddress address = InetAddress.getByName(whitelistedIP);
+            cachedWhitelistedIPs.add(address.getHostAddress());
+          } catch (UnknownHostException e) {
+            LOGGER.debug("Invalid IP address from config: {}", whitelistedIP, e);
+          }
         }
       }
+      return cachedWhitelistedIPs;
+    }else{
+      return getViewerConfigurationAsList(ViewerConfiguration.PROPERTY_FILTER_ONOFF_WHITELISTED_IPS);
     }
-    return cachedWhitelistedIPs;
   }
 
   public boolean getWhitelistAllIPs() {
