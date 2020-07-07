@@ -102,7 +102,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   public static final String PROPERTY_DISABLE_SIARD_DELETION = "ui.disable.siard.deletion";
   public static final String PROPERTY_PLUGIN_LOAD_ON_ACCESS = "ui.plugin.loadOnAccess";
 
-  public static final String PROPERTY_DISABLE_WHITELIST_CACHE = "DISABLE_WHITELIST_CACHE";
+  public static final String PROPERTY_DISABLE_WHITELIST_CACHE = "ui.disable.whitelist.cache";
 
   private static boolean instantiatedWithoutErrors = true;
   private static String applicationEnvironment = ViewerConstants.APPLICATION_ENV_SERVER;
@@ -380,7 +380,9 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   }
 
   public List<String> getWhitelistedIPs() {
-    if(System.getenv(PROPERTY_DISABLE_WHITELIST_CACHE).equals("1")) {
+    Boolean disableWhitelistCache = ViewerConfiguration.getInstance().getViewerConfigurationAsBoolean(null,
+            ViewerConfiguration.PROPERTY_DISABLE_WHITELIST_CACHE);
+    if(disableWhitelistCache.equals(false)) {
       if (cachedWhitelistedIPs == null) {
         cachedWhitelistedIPs = new ArrayList<>();
         for (String whitelistedIP : getViewerConfigurationAsList(ViewerConfiguration.PROPERTY_FILTER_ONOFF_WHITELISTED_IPS)) {
