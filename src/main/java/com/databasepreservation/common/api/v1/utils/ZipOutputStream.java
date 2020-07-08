@@ -32,9 +32,9 @@ import com.databasepreservation.common.client.models.status.collection.TableStat
 import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
-import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.index.utils.IterableIndexResult;
+import com.databasepreservation.common.utils.FilenameUtils;
 import com.databasepreservation.common.utils.LobPathManager;
 
 /**
@@ -189,13 +189,14 @@ public class ZipOutputStream extends CSVOutputStream {
       databaseUUID, configTable.getId(), binaryColumn.getColumnIndex(), row.getUuid());
 
     InputStream in = new FileInputStream(consolidatedPath.toFile());
-    final String templateFilename = getTemplateFilename(row, binaryColumn, consolidatedPath.getFileName().toString());
+    final String templateFilename = FilenameUtils.getTemplateFilename(row, configTable, binaryColumn,
+      consolidatedPath.getFileName().toString());
     addEntryToZip(out, in, templateFilename);
   }
 
   private void handleWriteInternalLobs(ZipArchiveOutputStream out, ZipFile siardArchive, ColumnStatus binaryColumn,
     ViewerRow row, ViewerCell cell) throws IOException {
-    final String templateFilename = getTemplateFilename(row, binaryColumn, cell.getValue());
+    final String templateFilename = FilenameUtils.getTemplateFilename(row, configTable, binaryColumn, cell.getValue());
     final InputStream in = siardArchive.getInputStream(
       siardArchive.getEntry(LobPathManager.getZipFilePath(configTable, binaryColumn.getColumnIndex(), row)));
     addEntryToZip(out, in, templateFilename);
@@ -207,18 +208,10 @@ public class ZipOutputStream extends CSVOutputStream {
     final Path lobPath = Paths.get(lobLocation);
     final Path completeLobPath = ViewerFactory.getViewerConfiguration().getSIARDFilesPath().resolve(lobPath);
 
-    final String templateFilename = getTemplateFilename(row, binaryColumn, completeLobPath.getFileName().toString());
+    final String templateFilename = FilenameUtils.getTemplateFilename(row, configTable, binaryColumn,
+      completeLobPath.getFileName().toString());
     InputStream inputStream = new FileInputStream(lobPath.toFile());
     addEntryToZip(out, inputStream, templateFilename);
-  }
-
-  private String getTemplateFilename(ViewerRow row, ColumnStatus binaryColumn, String defaultValue) {
-    String handlebarsFilename = HandlebarsUtils.applyExportTemplate(row, configTable,
-      binaryColumn.getColumnIndex());
-    if (ViewerStringUtils.isBlank(handlebarsFilename)) {
-      handlebarsFilename = defaultValue;
-    }
-    return handlebarsFilename;
   }
 
   private void addEntryToZip(ZipArchiveOutputStream out, InputStream in, String templateFilename) throws IOException {
