@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.utils.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.databasepreservation.common.client.ViewerConstants;
@@ -63,9 +64,12 @@ public class HandlebarsUtils {
           if (columnConfig != null) {
             final String applied = applyExportTemplate(row, configTable, columnConfig.getColumnIndex());
             if (StringUtils.isNotBlank(applied)) {
-              values.add(applied);
+              if (columnConfig.getType().equals(ViewerType.dbTypes.BINARY)) {
+                values.add(FilenameUtils.sanitizeFilename(applied));
+              } else {
+                values.add(applied);
+              }
             } else {
-              final String value = row.getCells().get(solrColumnName).getValue();
               if (columnConfig.getType().equals(ViewerType.dbTypes.BINARY)) {
                 values.add(LobManagerUtils.getDefaultFilename(row.getUuid()));
               } else {
