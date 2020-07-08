@@ -1,5 +1,7 @@
 package com.databasepreservation.common.transformers;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,6 +11,9 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.databasepreservation.model.exception.ModuleException;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -43,6 +48,7 @@ import com.databasepreservation.common.client.models.structure.ViewerUserStructu
 import com.databasepreservation.common.client.models.structure.ViewerView;
 import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.io.providers.PathInputStreamProvider;
+import com.databasepreservation.common.io.providers.TemporaryPathInputStreamProvider;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.index.utils.SolrUtils;
 import com.databasepreservation.common.utils.ViewerUtils;
@@ -91,7 +97,7 @@ import com.databasepreservation.utils.XMLUtils;
 public class ToolkitStructure2ViewerStructure {
   private static final Logger LOGGER = LoggerFactory.getLogger(ToolkitStructure2ViewerStructure.class);
   private static boolean simpleMetadata = false;
-  private static Pattern rowIndexPattern = Pattern.compile("^(.*\\.)?(\\d+)$");
+  private static final Pattern rowIndexPattern = Pattern.compile("^(.*\\.)?(\\d+)$");
 
   /**
    * Private empty constructor
@@ -637,7 +643,8 @@ public class ToolkitStructure2ViewerStructure {
     return result;
   }
 
-  public static ViewerRow getRow(CollectionStatus collectionConfiguration, ViewerTable table, Row row, long rowIndex) {
+  public static ViewerRow getRow(CollectionStatus collectionConfiguration, ViewerTable table,
+    Row row, long rowIndex) {
     ViewerRow result = new ViewerRow();
     // String rowUUID = SolrUtils.UUIDFromString(table.getUuid() + "." + rowIndex);
     String rowUUID = String.valueOf(rowIndex);
@@ -648,8 +655,8 @@ public class ToolkitStructure2ViewerStructure {
     return result;
   }
 
-  private static Map<String, ViewerCell> getCells(CollectionStatus collectionConfiguration, ViewerTable table,
-    Row row) {
+  private static Map<String, ViewerCell> getCells(CollectionStatus collectionConfiguration,
+    ViewerTable table, Row row) {
     Map<String, ViewerCell> result = new LinkedHashMap<>();
 
     int colIndex = 0;
@@ -657,7 +664,8 @@ public class ToolkitStructure2ViewerStructure {
     for (ViewerColumn viewerColumn : table.getColumns()) {
       String solrColumnName = viewerColumn.getSolrName();
       try {
-        result.put(solrColumnName, getCell(collectionConfiguration, table, toolkitCells.get(colIndex), colIndex++));
+        result.put(solrColumnName,
+          getCell(collectionConfiguration, table, toolkitCells.get(colIndex), colIndex++));
       } catch (ViewerException e) {
         LOGGER.error("Problem converting cell, omitted it (as if it were NULL)", e);
       }
@@ -666,15 +674,30 @@ public class ToolkitStructure2ViewerStructure {
     return result;
   }
 
-  private static ViewerCell getCell(CollectionStatus collectionConfiguration, ViewerTable table, Cell cell,
-    int colIndex) throws ViewerException {
+  private static ViewerCell getCell(CollectionStatus collectionConfiguration, ViewerTable table,
+    Cell cell, int colIndex) throws ViewerException {
     ViewerCell result = new ViewerCell();
 
     ViewerType columnType = table.getColumns().get(colIndex).getType();
 
     if (cell instanceof BinaryCell) {
       BinaryCell binaryCell = (BinaryCell) cell;
-      if (binaryCell.getInputStreamProvider() instanceof PathInputStreamProvider) {
+      if (binaryCell.getInputStreamProvider() instanceof TemporaryPathInputStreamProvider) {
+        TemporaryPathInputStreamProvider temporaryPathInputStreamProvider = (TemporaryPathInputStreamProvider) binaryCell
+          .getInputStreamProvider();
+        try {
+          final InputStream inputStream = temporaryPathInputStreamProvider.createInputStream();
+          byte[] bytes = IOUtils.toByteArray(inputStream);
+          final String encodeBase64String = Base64.encodeBase64String(bytes);
+          result.setValue(ViewerConstants.SIARD_EMBEDDED_LOB_PREFIX + encodeBase64String);
+          collectionConfiguration.getTableStatusByTableId(table.getId()).getColumnByIndex(colIndex)
+            .setExternalLob(false);
+        } catch (ModuleException e) {
+          throw new ViewerException(e.getMessage(),e);
+        } catch (IOException e) {
+          throw new ViewerException("Could not convert the LOB to BASE64" ,e);
+        }
+      } else if (binaryCell.getInputStreamProvider() instanceof PathInputStreamProvider) {
         PathInputStreamProvider pathInputStreamProvider = (PathInputStreamProvider) binaryCell.getInputStreamProvider();
         final Path siardFilesPath = ViewerFactory.getViewerConfiguration().getSIARDFilesPath();
         final Path lobPath = pathInputStreamProvider.getPath();

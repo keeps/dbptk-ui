@@ -4,6 +4,7 @@ import static com.databasepreservation.common.client.ViewerConstants.SOLR_INDEX_
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_SEARCHES_DATABASE_UUID;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -28,10 +29,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import com.databasepreservation.common.client.exceptions.AuthorizationException;
-import com.databasepreservation.common.server.controller.UserLoginController;
-import com.databasepreservation.common.server.controller.UserLoginHelper;
-import com.databasepreservation.common.utils.UserUtility;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
@@ -65,6 +63,7 @@ import com.databasepreservation.common.api.v1.utils.ZipOutputStreamSingleRow;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.search.SavedSearch;
 import com.databasepreservation.common.client.common.search.SearchInfo;
+import com.databasepreservation.common.client.exceptions.AuthorizationException;
 import com.databasepreservation.common.client.exceptions.RESTException;
 import com.databasepreservation.common.client.exceptions.SavedSearchException;
 import com.databasepreservation.common.client.index.FindRequest;
@@ -76,7 +75,6 @@ import com.databasepreservation.common.client.models.progress.ProgressData;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.LargeObjectConsolidateProperty;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
-import com.databasepreservation.common.client.models.status.database.DatabaseStatus;
 import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
@@ -86,7 +84,6 @@ import com.databasepreservation.common.client.models.user.User;
 import com.databasepreservation.common.client.services.CollectionService;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.databasepreservation.common.exceptions.ViewerException;
-import com.databasepreservation.common.server.ConfigurationManager;
 import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.controller.SIARDController;
@@ -97,7 +94,8 @@ import com.databasepreservation.common.server.index.utils.IterableIndexResult;
 import com.databasepreservation.common.server.index.utils.JsonTransformer;
 import com.databasepreservation.common.server.index.utils.SolrUtils;
 import com.databasepreservation.common.utils.ControllerAssistant;
-import com.databasepreservation.common.utils.LobPathManager;
+import com.databasepreservation.common.utils.LobManagerUtils;
+import com.databasepreservation.common.utils.UserUtility;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -165,9 +163,12 @@ public class CollectionResource implements CollectionService {
 
     LogEntryState state = LogEntryState.SUCCESS;
     User user;
-    // Checks if property ui.plugin.loadOnAccess is enable. If so, let the authenticated user
-    // creates a collection for that SIARD. If the user is a guest it will throw an AuthorizationException
-    final boolean loadOnAccess = ViewerFactory.getViewerConfiguration().getViewerConfigurationAsBoolean(false, ViewerConstants.PROPERTY_PLUGIN_LOAD_ON_ACCESS);
+    // Checks if property ui.plugin.loadOnAccess is enable. If so, let the
+    // authenticated user
+    // creates a collection for that SIARD. If the user is a guest it will throw an
+    // AuthorizationException
+    final boolean loadOnAccess = ViewerFactory.getViewerConfiguration().getViewerConfigurationAsBoolean(false,
+      ViewerConstants.PROPERTY_PLUGIN_LOAD_ON_ACCESS);
     if (loadOnAccess) {
       user = UserUtility.getUser(request);
       if (user.isGuest()) {
@@ -468,8 +469,7 @@ public class CollectionResource implements CollectionService {
   public Response exportLOB(@PathParam(ViewerConstants.API_PATH_PARAM_DATABASE_UUID) String databaseUUID,
     @PathParam(ViewerConstants.API_PATH_PARAM_COLLECTION_UUID) String collectionUUID,
     @PathParam("schema") String schema, @PathParam("table") String table, @PathParam("rowIndex") String rowIndex,
-    @PathParam("columnIndex") Integer columnIndex,
-    @QueryParam(ViewerConstants.API_PATH_PARAM_LOB_FILENAME) String filename) {
+    @PathParam("columnIndex") Integer columnIndex) {
 
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
@@ -501,14 +501,13 @@ public class CollectionResource implements CollectionService {
       // register action
       controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,
         ViewerConstants.CONTROLLER_TABLE_ID_PARAM, schema + "." + table, ViewerConstants.CONTROLLER_ROW_ID_PARAM,
-        rowIndex, ViewerConstants.CONTROLLER_COLUMN_ID_PARAM, columnIndex, ViewerConstants.CONTROLLER_FILENAME_PARAM,
-        filename);
+        rowIndex, ViewerConstants.CONTROLLER_COLUMN_ID_PARAM, columnIndex);
     }
   }
 
   private Response handleConsolidatedLobDownload(String databaseUUID, TableStatus tableConfiguration, int columnIndex,
     ViewerRow row, String rowIndex) throws IOException {
-    final java.nio.file.Path consolidatedPath = LobPathManager.getConsolidatedPath(
+    final java.nio.file.Path consolidatedPath = LobManagerUtils.getConsolidatedPath(
       ViewerFactory.getViewerConfiguration(), databaseUUID, tableConfiguration.getUuid(), columnIndex, rowIndex);
     String handlebarsFilename = HandlebarsUtils.applyExportTemplate(row, tableConfiguration, columnIndex);
     if (ViewerStringUtils.isBlank(handlebarsFilename)) {
@@ -518,7 +517,7 @@ public class CollectionResource implements CollectionService {
     return ApiUtils.okResponse(
       new StreamResponse(handlebarsFilename, tableConfiguration.getColumnByIndex(columnIndex).getApplicationType(),
         DownloadUtils
-          .stream(Files.newInputStream(LobPathManager.getConsolidatedPath(ViewerFactory.getViewerConfiguration(),
+          .stream(Files.newInputStream(LobManagerUtils.getConsolidatedPath(ViewerFactory.getViewerConfiguration(),
             databaseUUID, row.getTableId(), columnIndex, rowIndex)))));
   }
 
@@ -542,21 +541,34 @@ public class CollectionResource implements CollectionService {
 
   private Response handleInternalLobDownload(String databasePath, TableStatus tableConfiguration, ViewerRow row,
     int columnIndex) throws IOException, GenericException {
-    ZipFile zipFile = new ZipFile(databasePath);
-    final ZipEntry entry = zipFile.getEntry(LobPathManager.getZipFilePath(tableConfiguration, columnIndex, row));
-    if (entry == null) {
-      throw new GenericException("Zip archive entry is missing");
-    }
-
     String handlebarsFilename = HandlebarsUtils.applyExportTemplate(row, tableConfiguration, columnIndex);
 
     if (ViewerStringUtils.isBlank(handlebarsFilename)) {
-      handlebarsFilename = row.getCells().get(tableConfiguration.getColumnByIndex(columnIndex).getId()).getValue();
+      handlebarsFilename = ViewerConstants.SIARD_RECORD_PREFIX + row.getUuid()
+        + ViewerConstants.SIARD_LOB_FILE_EXTENSION;
     }
 
-    return ApiUtils.okResponse(
-      new StreamResponse(handlebarsFilename, tableConfiguration.getColumnByIndex(columnIndex).getApplicationType(),
-        DownloadUtils.stream(new BufferedInputStream(zipFile.getInputStream(entry)))));
+    if (LobManagerUtils.isLobEmbedded(tableConfiguration, row, columnIndex)) {
+      // handle lob as embedded
+      String lobCellValue = LobManagerUtils.getLobCellValue(tableConfiguration, row, columnIndex);
+      lobCellValue = lobCellValue.replace(ViewerConstants.SIARD_EMBEDDED_LOB_PREFIX, "");
+      String decodedString = new String(Base64.decodeBase64(lobCellValue.getBytes()));
+
+      return ApiUtils.okResponse(
+        new StreamResponse(handlebarsFilename, tableConfiguration.getColumnByIndex(columnIndex).getApplicationType(),
+          DownloadUtils.stream(new BufferedInputStream(new ByteArrayInputStream(decodedString.getBytes())))));
+    } else {
+      // handle lob as internal on separated folder
+      ZipFile zipFile = new ZipFile(databasePath);
+      final ZipEntry entry = zipFile.getEntry(LobManagerUtils.getZipFilePath(tableConfiguration, columnIndex, row));
+      if (entry == null) {
+        throw new GenericException("Zip archive entry is missing");
+      }
+
+      return ApiUtils.okResponse(
+        new StreamResponse(handlebarsFilename, tableConfiguration.getColumnByIndex(columnIndex).getApplicationType(),
+          DownloadUtils.stream(new BufferedInputStream(zipFile.getInputStream(entry)))));
+    }
   }
 
   @GET

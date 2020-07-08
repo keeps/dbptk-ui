@@ -17,6 +17,7 @@ import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.models.structure.ViewerType;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
+import com.databasepreservation.common.utils.LobManagerUtils;
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
 
@@ -64,7 +65,12 @@ public class HandlebarsUtils {
             if (StringUtils.isNotBlank(applied)) {
               values.add(applied);
             } else {
-              values.add(row.getCells().get(solrColumnName).getValue());
+              final String value = row.getCells().get(solrColumnName).getValue();
+              if (columnConfig.getType().equals(ViewerType.dbTypes.BINARY)) {
+                values.add(LobManagerUtils.getDefaultFilename(row.getUuid()));
+              } else {
+                values.add(row.getCells().get(solrColumnName).getValue());
+              }
             }
           }
         }

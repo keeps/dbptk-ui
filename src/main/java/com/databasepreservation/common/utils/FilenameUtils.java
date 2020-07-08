@@ -1,6 +1,7 @@
 package com.databasepreservation.common.utils;
 
 import com.databasepreservation.common.api.utils.HandlebarsUtils;
+import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
@@ -13,6 +14,11 @@ public class FilenameUtils {
 
   public static String sanitizeFilename(String name) {
     return name.replaceAll("[:\\\\/*?|<>]", "_");
+  }
+
+  public static String getTemplateFilename(ViewerRow row, TableStatus configTable, ColumnStatus binaryColumn) {
+    String defaultValue = ViewerConstants.SIARD_RECORD_PREFIX + row.getUuid() + ViewerConstants.SIARD_LOB_FILE_EXTENSION;
+    return getTemplateFilename(row, configTable, binaryColumn, defaultValue);
   }
 
   public static String getTemplateFilename(ViewerRow row, TableStatus configTable, ColumnStatus binaryColumn, String defaultValue) {

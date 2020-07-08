@@ -517,6 +517,9 @@ public class ViewerConstants {
   public static final String SIARD_SCHEMA_PREFIX = "schema";
   public static final String SIARD_LOB_FOLDER_PREFIX = "lob";
   public static final String SIARD_RECORD_PREFIX = "record";
+  public static final String SIARD_LOB_OUTSIDE_PREFIX = "external:";
+  public static final String SIARD_LOB_INSIDE_PREFIX = "internal:";
+  public static final String SIARD_EMBEDDED_LOB_PREFIX = "base64:";
   public static final String SIARD_LOB_FILE_EXTENSION = ".bin";
 
   public static final String DEFAULT_USERNAME = "admin";

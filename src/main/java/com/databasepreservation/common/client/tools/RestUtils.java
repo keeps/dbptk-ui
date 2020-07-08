@@ -56,8 +56,7 @@ public class RestUtils {
 
     return GWT.getHostPageBaseURL() + ViewerConstants.API_SERVLET + ViewerConstants.API_V1_DATABASE_RESOURCE + "/"
       + databaseUUID + "/collection/" + databaseUUID + "/data/" + schemaName + "/" + tableName + "/" + rowIndex + "/"
-      + columnIndex + ViewerConstants.API_QUERY_START + ViewerConstants.API_PATH_PARAM_LOB_FILENAME + "="
-      + UriQueryUtils.encodeQuery(filename);
+      + columnIndex;
   }
 
   public static String createExportTableUri(String databaseUUID, String schemaName, String tableName,

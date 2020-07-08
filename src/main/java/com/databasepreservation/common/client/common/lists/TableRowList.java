@@ -503,8 +503,6 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
 
     Sublist sublist;
 
-    GWT.log("exportall:" + exportAll);
-
     if (!exportAll) {
       sublist = currentSubList;
     } else {
