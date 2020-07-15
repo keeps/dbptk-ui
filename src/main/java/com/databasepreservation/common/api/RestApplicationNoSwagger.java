@@ -1,5 +1,6 @@
 package com.databasepreservation.common.api;
 
+import com.databasepreservation.common.api.utils.CacheFilterFactory;
 import com.databasepreservation.common.api.v1.CollectionResource;
 import com.databasepreservation.common.api.v1.SiardResource;
 import org.glassfish.jersey.jackson.JacksonFeature;
@@ -57,6 +58,7 @@ public class RestApplicationNoSwagger {
       register(MoxyXmlFeature.class);
       register(RestExceptionMapper.class);
       register(MultiPartFeature.class);
+      register(CacheFilterFactory.class);
 
       register(MyApiListingResource.class);
       register(SwaggerSerializers.class);
