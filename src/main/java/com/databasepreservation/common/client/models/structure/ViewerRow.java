@@ -28,6 +28,7 @@ public class ViewerRow extends IsIndexed {
 
   public ViewerRow() {
     cells = new LinkedHashMap<>();
+    nestedRowList = new ArrayList<>();
   }
 
   @Override
