@@ -201,7 +201,9 @@ public class DatabaseSidebar extends Composite implements Sidebar, ICollectionSt
       for (ViewerTable table : schema.getTables()) {
         if (!table.isMaterializedView()) {
           if (collectionStatus.showTable(table.getUuid())) {
-            schemaItems.add(createTableItem(schema, table, totalSchemas, iconTag));
+            if (schema.getCustomViewTable(table.getName()) == null) {
+              schemaItems.add(createTableItem(schema, table, totalSchemas, iconTag));
+            }
           }
         }
       }
@@ -283,7 +285,7 @@ public class DatabaseSidebar extends Composite implements Sidebar, ICollectionSt
       }
       viewLink = new SidebarHyperlink(html,
         HistoryManager.linkToTable(database.getUuid(), materializedTable.getSchemaName(), materializedTable.getName())).setTooltip("Materialized View");
-      list.put(materializedTable.getUuid(), viewLink);
+      list.put(materializedTable.getId(), viewLink);
     } else if (schema.getCustomViewTable(view.getName()) != null) {
       final ViewerTable customViewTable = schema.getCustomViewTable(view.getName());
       if (totalSchemas == 1) {
@@ -295,7 +297,7 @@ public class DatabaseSidebar extends Composite implements Sidebar, ICollectionSt
             + collectionStatus.getTableStatus(customViewTable.getUuid()).getCustomName());
       }
       viewLink = new SidebarHyperlink(html, HistoryManager.linkToTable(database.getUuid(), customViewTable.getSchemaName(), customViewTable.getName())).setTooltip("Custom View");
-      list.put(customViewTable.getUuid(), viewLink);
+      list.put(customViewTable.getId(), viewLink);
     } else {
       if (totalSchemas == 1) {
         html = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS, view.getName());
@@ -361,8 +363,12 @@ public class DatabaseSidebar extends Composite implements Sidebar, ICollectionSt
 
   @Override
   public void select(String value) {
+    GWT.log("SELECT: " + value);
+    //GWT.log("LIST: " + list.entrySet().toString());
     for (Map.Entry<String, SidebarHyperlink> entry : list.entrySet()) {
+      GWT.log("KEY: " + entry.getKey());
       if (entry.getKey().equals(value)) {
+        GWT.log(entry.getKey());
         list.get(value).setSelected(true);
       } else {
         list.get(entry.getKey()).setSelected(false);
