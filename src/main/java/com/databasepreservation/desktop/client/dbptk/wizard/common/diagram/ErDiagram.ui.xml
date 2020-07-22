@@ -2,13 +2,7 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
              xmlns:c='urn:import:com.databasepreservation.common.client.common'
 >
-    <ui:with field='messages' type='config.i18n.client.ClientMessages'/>
     <g:FlowPanel>
-        <g:SimplePanel addStyleNames="h1" ui:field="mainHeader">
-            <g:Label>
-                <ui:text from='{messages.diagram}'/>
-            </g:Label>
-        </g:SimplePanel>
         <g:TabPanel ui:field="tabPanel" addStyleNames="browseItemMetadata metadata-edit-tab diagram-tab"/>
         <c:LoadingDiv visible="false" ui:field="loading"/>
     </g:FlowPanel>

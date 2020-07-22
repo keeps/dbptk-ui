@@ -35,8 +35,10 @@ import com.databasepreservation.common.client.tools.JSOUtils;
 import com.databasepreservation.common.client.tools.PathUtils;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.databasepreservation.common.client.tools.WizardUtils;
+import com.databasepreservation.common.client.widgets.Alert;
 import com.databasepreservation.common.client.widgets.ConfigurationCellTableResources;
 import com.databasepreservation.common.client.widgets.Toast;
+import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.desktop.client.common.sidebar.TableAndColumnsSendToSidebar;
 import com.databasepreservation.desktop.client.common.sidebar.TableAndColumnsSidebar;
 import com.databasepreservation.desktop.client.dbptk.wizard.WizardPanel;
@@ -165,7 +167,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
     this.doSSH = values.doSSH();
     final DialogBox dialogBox = Dialogs.showWaitResponse(
       messages.tableAndColumnsPageDialogTitleForRetrievingInformation(),
-      messages.tableAndColumnsPageDialogMessageForRetrievingInformation());
+        messages.tableAndColumnsPageDialogMessageForRetrievingInformation());
     CreateWizardManager.getInstance().enableNext(false);
 
     MigrationService.Util.call((ViewerMetadata metadata) -> {
@@ -204,24 +206,21 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
   public boolean validate() {
     return true;
 
-    /*boolean tablesEmpty = false;
-    boolean viewsEmpty = false;
-
-    for (MultipleSelectionTablePanel<ViewerTable> cellTable : tables.values()) {
-      if (cellTable.getSelectionModel().getSelectedSet().isEmpty())
-        tablesEmpty = true;
-    }
-
-    for (MultipleSelectionTablePanel<ViewerView> cellTable : views.values()) {
-      if (cellTable.getSelectionModel().getSelectedSet().isEmpty())
-        viewsEmpty = true;
-    }
-
-    if (views.values().isEmpty()) {
-      return !tablesEmpty;
-    }
-
-    return !tablesEmpty || !viewsEmpty;*/
+    /*
+     * boolean tablesEmpty = false; boolean viewsEmpty = false;
+     * 
+     * for (MultipleSelectionTablePanel<ViewerTable> cellTable : tables.values()) {
+     * if (cellTable.getSelectionModel().getSelectedSet().isEmpty()) tablesEmpty =
+     * true; }
+     * 
+     * for (MultipleSelectionTablePanel<ViewerView> cellTable : views.values()) { if
+     * (cellTable.getSelectionModel().getSelectedSet().isEmpty()) viewsEmpty = true;
+     * }
+     * 
+     * if (views.values().isEmpty()) { return !tablesEmpty; }
+     * 
+     * return !tablesEmpty || !viewsEmpty;
+     */
   }
 
   @Override
@@ -244,18 +243,24 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
         toSelect = ViewerStringUtils.concat(schemaUUID, tableUUID);
       }
     } else if (schemaUUID != null) {
-      Label title = new Label();
+      /*Label title = new Label();
       title.setText(metadata.getSchema(schemaUUID).getName());
-      title.addStyleName("h1");
+      title.addStyleName("h1");*/
 
       FlowPanel flowPanelTables = new FlowPanel();
       if (getTable(schemaUUID) != null) {
         flowPanelTables.add(getTable(schemaUUID));
+      } else {
+        Alert alert = new Alert(Alert.MessageAlertType.LIGHT, messages.noItemsToDisplay());
+        flowPanelTables.add(alert);
       }
 
       FlowPanel flowPanelViews = new FlowPanel();
       if (getView(schemaUUID) != null) {
         flowPanelViews.add(getView(schemaUUID));
+      } else {
+        Alert alert = new Alert(Alert.MessageAlertType.LIGHT, messages.noItemsToDisplay());
+        flowPanelViews.add(alert);
       }
 
       TabPanel tabPanel = new TabPanel();
@@ -264,11 +269,12 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
       tabPanel.add(flowPanelViews, messages.sidebarMenuTextForViews());
       tabPanel.selectTab(0);
 
-      panel.add(title);
+      //panel.add(title);
       panel.add(tabPanel);
       toSelect = schemaUUID;
     } else {
-      panel.add(ErDiagram.getInstance(databaseUUID, metadata, HistoryManager.getCurrentHistoryPath().get(0)));
+      final ErDiagram instance = ErDiagram.getInstance(databaseUUID, metadata, HistoryManager.getCurrentHistoryPath().get(0));
+      panel.add(instance);
     }
 
     if (tableAndColumnsSidebar != null)
@@ -509,15 +515,15 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
             return obj.getDisplayName();
           }
         }),
-      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForMerkleOption(), 10,
-        getMerkleTreeColumn(viewerView.getUuid())),
       new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForDescription(), 0,
         new TextColumn<ViewerColumn>() {
           @Override
           public String getValue(ViewerColumn obj) {
             return obj.getDescription();
           }
-        }));
+        }),
+        new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForMerkleOption(), 5,
+        getMerkleTreeColumn(viewerView.getUuid())));
   }
 
   private void populateViews(MultipleSelectionTablePanel<ViewerView> selectionTablePanel,
@@ -540,7 +546,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
 
     selectionTablePanel.createTable(getSelectPanel(SELECT_VIEWS, viewerSchema.getUuid()), Collections.singletonList(1),
       viewerSchema.getViews().iterator(),
-      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForSelect(), 4,
+      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForSelect(), 5,
         new Column<ViewerView, Boolean>(new CheckboxCell(true, true)) {
           @Override
           public Boolean getValue(ViewerView viewerView) {
@@ -565,15 +571,15 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
           }
         }),
       new MultipleSelectionTablePanel.ColumnInfo<>(
-        messages.tableAndColumnsPageTableHeaderTextForMaterializeViewOption(), 4, column),
-      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForViewName(), 10,
+        messages.tableAndColumnsPageTableHeaderTextForMaterializeViewOption(), 8, column),
+      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForViewName(), 20,
         new TextColumn<ViewerView>() {
           @Override
           public String getValue(ViewerView obj) {
             return obj.getName();
           }
         }),
-      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForDescription(), 15,
+      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForDescription(), 50,
         new TextColumn<ViewerView>() {
           @Override
           public String getValue(ViewerView obj) {
@@ -840,15 +846,13 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
             return column.getType().getOriginalTypeName();
           }
         }),
-      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForDescription(), 0,
+      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForDescription(), 20,
         new TextColumn<ViewerColumn>() {
           @Override
           public String getValue(ViewerColumn column) {
             return column.getDescription();
           }
         }),
-      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForMerkleOption(), 10,
-        getMerkleTreeColumn(viewerTable.getUuid())),
       new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForColumnFilters(), 10,
         new TooltipDatabaseColumn() {
           @Override
@@ -872,7 +876,9 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
           }
         }),
       new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForOptions(), 10,
-        buttonDatabaseColumn));
+        buttonDatabaseColumn),
+      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForMerkleOption(), 5,
+        getMerkleTreeColumn(viewerTable.getUuid())));
   }
 
   private abstract static class ButtonDatabaseColumn extends Column<ViewerColumn, String> {

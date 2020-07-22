@@ -6,8 +6,7 @@
     <g:FlowPanel addStyleNames="wizard browseContent wrapper">
         <g:FlowPanel addStyleNames="row full_width skip_padding">
             <m:BreadcrumbPanel ui:field="breadcrumb" addStyleNames="browseContentBreadcrumb"/>
-            <g:FlowPanel addStyleNames="browseContentFocusPanel">
-                <g:FlowPanel addStyleNames="col_12" ui:field="wizardContent"/>
+            <g:FlowPanel addStyleNames="browseContentFocusPanel" ui:field="wizardContent">
             </g:FlowPanel>
             <g:FlowPanel addStyleNames="button-panel-container">
                 <g:FlowPanel ui:field="customButtons" addStyleNames="button-panel-right"/>

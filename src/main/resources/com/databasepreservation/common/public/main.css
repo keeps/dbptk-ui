@@ -444,7 +444,7 @@ p[data-value]:after {
     min-height: 35px;
     background-color: #eee;
     position: relative;
-    z-index: 1;
+/*    z-index: 1;*/
 }
 
 .browseContentFilePreviewPanel .filePreviewToolbar .browseContentBreadcrumb {
@@ -1301,6 +1301,13 @@ html, body, .desktop-main {
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: space-between;
+    margin-left: -39px;
+    margin-top: -10px;
+}
+
+.navigation-panels > * {
+    margin-left: 39px;
+    margin-top: 10px;
 }
 
 .navigation-panel {
@@ -1378,7 +1385,6 @@ html, body, .desktop-main {
     display: inline-block;
     text-align: left;
     font-weight: bold;
-    width: 36%;
     min-width: 100px;
 }
 
@@ -1465,7 +1471,7 @@ html, body, .desktop-main {
 .form-container {
     width: auto;
     height: auto;
-    margin: 2.5rem 4rem 0rem 6rem;
+    margin-top: 1.5rem;
 }
 
 .form-container-left {
@@ -1664,16 +1670,15 @@ html, body, .desktop-main {
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
     transition: all 0.3s cubic-bezier(.25, .8, .25, 1);
     border-radius: 2px;
-    padding: 14px 14px;
+    padding: 14px;
     display: flex;
     flex-flow: column wrap;
     flex: 1 0 5%;
-    margin-right: 39px;
 }
 
-.navigation-card:last-of-type {
+/*.navigation-card:last-of-type {
     margin-right: 0;
-}
+}*/
 
 /**********************************************
 				EDIT METADATA
@@ -1684,7 +1689,7 @@ html, body, .desktop-main {
 }
 
 .metadata-panel {
-    padding: 0px 10px;
+    padding: 0 10px;
     height: 100%;
     display: flex;
     justify-content: space-between;
@@ -1900,7 +1905,7 @@ html, body, .desktop-main {
 }
 
 .wizard-title {
-    margin-left: 6rem;
+    margin: 2rem 2rem 0 2rem;
 }
 
 /***********************************************
@@ -1920,6 +1925,14 @@ html, body, .desktop-main {
 /***********************************************
                     BUTTONS
 ***********************************************/
+.btn-show-password:after {
+    content: "\f06e";
+}
+
+.btn-hide-password:after {
+    content: "\f070";
+}
+
 .btn-save:after {
     content: "\f0c7";
 }
@@ -2128,7 +2141,7 @@ html, body, .desktop-main {
 /***********************************************
 				    CHECKBOX
 ************************************************/
-
+/*
 .my-asyncdatagrid-display-scroll-wrapper input[type="checkbox"] {
     padding-left: 5px;
     padding-right: 5px;
@@ -2204,7 +2217,7 @@ html, body, .desktop-main {
     cursor: pointer;
     margin-inline-start: 10px;
 }
-
+*/
 @media (max-width: 698px) {
     .form-inline input {
         margin: 10px 0;

@@ -4,8 +4,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.UserLogin;
+import com.databasepreservation.common.client.common.utils.ApplicationType;
 import com.databasepreservation.common.client.common.visualization.progressBar.IndeterminateProgressBarPanel;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
@@ -67,6 +69,10 @@ public class IngestPage extends ContentPanel {
     initWidget(binder.createAndBindUi(this));
     this.databaseUUID = databaseUUID;
     this.databaseName = databaseName;
+
+    if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_DESKTOP)) {
+      panel.removeStyleName("browseContentPreviewPanel");
+    }
 
     final ProgressBarPanel instance = ProgressBarPanel.getInstance(databaseUUID, true);
     instance.setTitleText(messages.SIARDHomePageTextForIngestSIARDTitle());

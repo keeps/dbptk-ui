@@ -1,9 +1,7 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-             xmlns:g='urn:import:com.google.gwt.user.client.ui'
-             xmlns:m='urn:import:com.databasepreservation.common.client.common.breadcrumb'>
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
 
     <g:FlowPanel addStyleNames="application-container" ui:field="container">
-<!--        <m:BreadcrumbPanel ui:field="breadcrumb"/>-->
         <g:FlowPanel addStyleNames="browseContentPreviewPanel" ui:field="panel">
         </g:FlowPanel>
         <g:FlowPanel addStyleNames="button-panel-container">

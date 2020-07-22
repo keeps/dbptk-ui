@@ -7,11 +7,11 @@ import java.util.HashMap;
 import java.util.List;
 
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.common.LoadingDiv;
 import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerSchema;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
-import com.databasepreservation.common.client.common.LoadingDiv;
 import com.databasepreservation.common.client.tools.HistoryManager;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.github.nmorel.gwtjackson.client.ObjectMapper;
@@ -66,8 +66,6 @@ public class ErDiagram extends Composite {
 
   @UiField
   LoadingDiv loading;
-
-  // final String databaseUUID;
 
   private ErDiagram(final ViewerMetadata metadata, String databaseUUID, String path) {
     initWidget(uiBinder.createAndBindUi(this));
