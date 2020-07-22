@@ -33,16 +33,16 @@ import com.google.gwt.view.client.MultiSelectionModel;
  *          SafeHtml>
  */
 public class MultipleSelectionTablePanel<C> extends Composite {
-	private static final String MY_ASYNCDATAGRID_DISPLAY_SCROLL_WRAPPER_LEFT = "my-asyncdatagrid-display-scroll-wrapper-left";
-	private static final String MY_ASYNCDATAGRID_DISPLAY_SCROLL_WRAPPER_RIGHT = "my-asyncdatagrid-display-scroll-wrapper-right";
+  private static final String MY_ASYNCDATAGRID_DISPLAY_SCROLL_WRAPPER_LEFT = "my-asyncdatagrid-display-scroll-wrapper-left";
+  private static final String MY_ASYNCDATAGRID_DISPLAY_SCROLL_WRAPPER_RIGHT = "my-asyncdatagrid-display-scroll-wrapper-right";
 
-	interface MultipleSelectionTablePanelUiBinder extends UiBinder<Widget, MultipleSelectionTablePanel> {
+  interface MultipleSelectionTablePanelUiBinder extends UiBinder<Widget, MultipleSelectionTablePanel> {
   }
 
   private static MultipleSelectionTablePanelUiBinder uiBinder = GWT.create(MultipleSelectionTablePanelUiBinder.class);
 
   private final MultiSelectionModel<C> selectionModel;
-	private ListDataProvider<C> dataProvider = new ListDataProvider<>();
+  private ListDataProvider<C> dataProvider = new ListDataProvider<>();
   private CellTable<C> display;
   private ScrollPanel displayScroll;
   private SimplePanel displayScrollWrapper;
@@ -140,8 +140,9 @@ public class MultipleSelectionTablePanel<C> extends Composite {
     display = internalCreateTable(rowItems, columns);
 
     display.addCellPreviewHandler(event -> {
-      if (BrowserEvents.CLICK.equals(event.getNativeEvent().getType()) && (whitelistedColumns.isEmpty() || whitelistedColumns.contains(event.getColumn()+1))) {
-      	handleRowSelection(event);
+      if (BrowserEvents.CLICK.equals(event.getNativeEvent().getType())
+        && (whitelistedColumns.isEmpty() || whitelistedColumns.contains(event.getColumn() + 1))) {
+        handleRowSelection(event);
       }
     });
 
@@ -236,7 +237,7 @@ public class MultipleSelectionTablePanel<C> extends Composite {
     return cellTable;
   }
 
-	public MultiSelectionModel<C> getSelectionModel() {
+  public MultiSelectionModel<C> getSelectionModel() {
     return selectionModel;
   }
 }
