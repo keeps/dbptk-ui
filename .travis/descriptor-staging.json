@@ -1,12 +1,12 @@
 {
   "package": {
-    "name": "db-visualization-toolkit",
-    "repo": "db-visualization-toolkit",
+    "name": "dbptk-ui",
+    "repo": "dbptk-ui",
     "subject": "keeps",
-    "desc": "Relational Database Viewer for databases based on SIARD 2",
+    "desc": "Lightweight web viewer for relational databases based on SIARD 2",
     "website_url": "http://database-preservation.com/",
     "issue_tracker_url": "",
-    "vcs_url": "https://github.com/keeps/db-visualization-toolkit",
+    "vcs_url": "https://github.com/keeps/dbptk-ui.git",
     "github_use_tag_release_notes": true,
     "github_release_notes_file": "RELEASE.txt",
     "public_download_numbers": false,
