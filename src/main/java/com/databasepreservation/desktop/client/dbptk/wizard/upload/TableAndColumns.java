@@ -225,6 +225,9 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
 
   @Override
   public TableAndColumnsParameters getValues() {
+    merkleColumnStatus.forEach((k,v) -> {
+      GWT.log("key: " +k + " ; value: " + v);
+    });
     return WizardUtils.getTableAndColumnsParameter(tables, views, columns, externalLOBsParameters,
       viewMaterializationStatus, merkleColumnStatus, metadata);
   }
@@ -640,7 +643,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
       new CheckboxCell(false, false)) {
       @Override
       public Boolean getValue(ViewerColumn column) {
-        merkleColumnStatus.put(WizardUtils.generateMerkleTreeMapKey(uuid, column.getSolrName()), true);
+        merkleColumnStatus.put(WizardUtils.generateMerkleTreeMapKey(uuid, column.getDisplayName()), true);
         return true;
       }
     };
@@ -649,8 +652,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
     merkleCheckboxOption.setVerticalAlignment(HasVerticalAlignment.ALIGN_MIDDLE);
 
     merkleCheckboxOption.setFieldUpdater((i, column, value) -> {
-      String key = uuid + "_" + column.getSolrName();
-      merkleColumnStatus.put(key, value);
+      merkleColumnStatus.put(WizardUtils.generateMerkleTreeMapKey(uuid, column.getDisplayName()), value);
     });
 
     return merkleCheckboxOption;
@@ -794,7 +796,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
     });
 
     selectionTablePanel.createTable(header,
-      getSelectPanel(SELECT_COLUMNS_TABLE, viewerTable.getSchemaUUID(), viewerTable.getUuid()), Arrays.asList(4, 6),
+      getSelectPanel(SELECT_COLUMNS_TABLE, viewerTable.getSchemaUUID(), viewerTable.getUuid()), Arrays.asList(1, 2),
       viewerTable.getColumns().iterator(),
       new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForSelect(), 4,
         new Column<ViewerColumn, Boolean>(new CheckboxCell(true, true)) {

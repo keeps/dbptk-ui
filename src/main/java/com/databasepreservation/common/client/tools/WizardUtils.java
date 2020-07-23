@@ -69,7 +69,7 @@ public class WizardUtils {
     columns.get(uuid).getSelectionModel().getSelectedSet().forEach(column -> {
       ColumnParameter columnParameter = new ColumnParameter();
       columnParameter.setName(column.getDisplayName());
-      columnParameter.setUseOnMerkle(merkleTreeColumnStatus.get(generateMerkleTreeMapKey(uuid, column.getSolrName())));
+      columnParameter.setUseOnMerkle(merkleTreeColumnStatus.get(generateMerkleTreeMapKey(uuid, column.getDisplayName())));
       columnParameter.setExternalLobParameter(getExternalLobParameter(uuid, column, externalLobParameterMap));
 
       parameter.getColumns().add(columnParameter);

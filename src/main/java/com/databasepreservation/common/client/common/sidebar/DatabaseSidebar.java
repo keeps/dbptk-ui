@@ -363,12 +363,8 @@ public class DatabaseSidebar extends Composite implements Sidebar, ICollectionSt
 
   @Override
   public void select(String value) {
-    GWT.log("SELECT: " + value);
-    //GWT.log("LIST: " + list.entrySet().toString());
     for (Map.Entry<String, SidebarHyperlink> entry : list.entrySet()) {
-      GWT.log("KEY: " + entry.getKey());
       if (entry.getKey().equals(value)) {
-        GWT.log(entry.getKey());
         list.get(value).setSelected(true);
       } else {
         list.get(entry.getKey()).setSelected(false);
@@ -455,6 +451,6 @@ public class DatabaseSidebar extends Composite implements Sidebar, ICollectionSt
   @Override
   protected void onAttach() {
     super.onAttach();
-    JavascriptUtils.stickSidebar();
+    //JavascriptUtils.stickSidebar();
   }
 }

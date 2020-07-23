@@ -303,6 +303,6 @@ public class ColumnsManagementSidebar extends Composite implements Sidebar, ICol
   @Override
   protected void onAttach() {
     super.onAttach();
-    JavascriptUtils.stickSidebar();
+    //JavascriptUtils.stickSidebar();
   }
 }

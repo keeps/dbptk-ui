@@ -330,7 +330,7 @@ public class DataTransformationSidebar extends Composite implements Sidebar, ICo
   @Override
   protected void onAttach() {
     super.onAttach();
-    JavascriptUtils.stickSidebar();
+    //JavascriptUtils.stickSidebar();
   }
 
   public static void clear(String databaseUUID) {
