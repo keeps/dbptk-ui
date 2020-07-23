@@ -45,10 +45,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.joran.JoranConfigurator;
-import ch.qos.logback.core.joran.spi.JoranException;
-
 /**
  * Singleton configuration instance used by the Database Visualization Toolkit
  * 
@@ -461,7 +457,6 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     databasesPath = viewerHomePath.resolve(ViewerConstants.VIEWER_DATABASES_FOLDER);
 
     h2Path = viewerHomePath.resolve(ViewerConstants.VIEWER_H2_DATA_FOLDER);
-
     configureLogback();
 
     return viewerHomePath;
@@ -475,16 +470,6 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     // used in logback.xml to set file or stdout logger
     System.setProperty(ViewerConstants.LOGGER_METHOD_PROPERTY,
       isRunningInDocker() ? ViewerConstants.LOGGER_DOCKER_METHOD : ViewerConstants.LOGGER_DEFAULT_METHOD);
-
-    try {
-      LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-      JoranConfigurator configurator = new JoranConfigurator();
-      configurator.setContext(context);
-      context.reset();
-      configurator.doConfigure(getConfigurationFile("logback.xml"));
-    } catch (JoranException e) {
-      LOGGER.error("Error configuring logback", e);
-    }
   }
 
   private static void instantiateEssentialDirectories() {

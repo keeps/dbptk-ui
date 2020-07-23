@@ -52,7 +52,7 @@ public class ViewerConstants {
   // from logback.xml
   public static final String LOGGER_METHOD_PROPERTY = "dbvtk.loggerMethod";
   public static final String LOGGER_DEFAULT_METHOD = "FILEOUT";
-  public static final String LOGGER_DOCKER_METHOD = "STDOUT";
+  public static final String LOGGER_DOCKER_METHOD = "CONSOLE";
 
   public static final String DEFAULT_ENCODING = "UTF-8";
   public static final String VIEWER_CONFIG_FOLDER = "config";
