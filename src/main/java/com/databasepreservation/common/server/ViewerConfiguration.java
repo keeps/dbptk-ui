@@ -468,8 +468,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
 
   private static void configureLogback() {
     // used in logback.xml to set file or stdout logger
-    System.setProperty(ViewerConstants.LOGGER_METHOD_PROPERTY,
-      isRunningInDocker() ? ViewerConstants.LOGGER_DOCKER_METHOD : ViewerConstants.LOGGER_DEFAULT_METHOD);
+    System.setProperty(ViewerConstants.LOGGER_METHOD_PROPERTY, ViewerConstants.LOGGER_DEFAULT_METHOD);
   }
 
   private static void instantiateEssentialDirectories() {

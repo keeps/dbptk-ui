@@ -214,7 +214,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
                 .setColumns(saveChanges(object.cellTable, object.editableValues));
             }
           });
-          saveChanges();
+          saveChanges(false);
         } else {
           Dialogs.showErrors(messages.columnManagementPageTitle(),
             messages.columnManagementPageDialogErrorDescription(), messages.basicActionClose());
@@ -534,7 +534,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
                 collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
                   .updateNestedColumnsQuantityList(
                     ((NestedColumnOptionsPanel) nestedColumnOptionPanel).getQuantityInList());
-                saveChanges();
+                saveChanges(true);
               }
             }
           });
@@ -556,7 +556,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
                   .updateDetailsTemplate(binaryColumnOptionPanel.getDetailsTemplate());
                 collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
                   .setApplicationType(((BinaryColumnOptionsPanel) binaryColumnOptionPanel).getApplicationType());
-                saveChanges();
+                saveChanges(true);
               }
             }
           });
@@ -634,11 +634,11 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
     return remainingDetails > 0 && remainingTable > 0;
   }
 
-  private void saveChanges() {
+  private void saveChanges(boolean value) {
     CollectionService.Util.call((Boolean result) -> {
       ObserverManager.getCollectionObserver().setCollectionStatus(collectionStatus);
       sidebar.reset(database, collectionStatus);
-      this.changes = false;
+      this.changes = value;
       Toast.showInfo(messages.columnManagementPageTitle(), messages.columnManagementPageToastDescription());
     }).updateCollectionConfiguration(database.getUuid(), database.getUuid(), collectionStatus);
   }

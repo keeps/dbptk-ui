@@ -38,7 +38,6 @@ import com.databasepreservation.common.client.tools.WizardUtils;
 import com.databasepreservation.common.client.widgets.Alert;
 import com.databasepreservation.common.client.widgets.ConfigurationCellTableResources;
 import com.databasepreservation.common.client.widgets.Toast;
-import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.desktop.client.common.sidebar.TableAndColumnsSendToSidebar;
 import com.databasepreservation.desktop.client.common.sidebar.TableAndColumnsSidebar;
 import com.databasepreservation.desktop.client.dbptk.wizard.WizardPanel;
@@ -167,7 +166,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
     this.doSSH = values.doSSH();
     final DialogBox dialogBox = Dialogs.showWaitResponse(
       messages.tableAndColumnsPageDialogTitleForRetrievingInformation(),
-        messages.tableAndColumnsPageDialogMessageForRetrievingInformation());
+      messages.tableAndColumnsPageDialogMessageForRetrievingInformation());
     CreateWizardManager.getInstance().enableNext(false);
 
     MigrationService.Util.call((ViewerMetadata metadata) -> {
@@ -225,9 +224,6 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
 
   @Override
   public TableAndColumnsParameters getValues() {
-    merkleColumnStatus.forEach((k,v) -> {
-      GWT.log("key: " +k + " ; value: " + v);
-    });
     return WizardUtils.getTableAndColumnsParameter(tables, views, columns, externalLOBsParameters,
       viewMaterializationStatus, merkleColumnStatus, metadata);
   }
@@ -246,9 +242,11 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
         toSelect = ViewerStringUtils.concat(schemaUUID, tableUUID);
       }
     } else if (schemaUUID != null) {
-      /*Label title = new Label();
-      title.setText(metadata.getSchema(schemaUUID).getName());
-      title.addStyleName("h1");*/
+      /*
+       * Label title = new Label();
+       * title.setText(metadata.getSchema(schemaUUID).getName());
+       * title.addStyleName("h1");
+       */
 
       FlowPanel flowPanelTables = new FlowPanel();
       if (getTable(schemaUUID) != null) {
@@ -272,11 +270,12 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
       tabPanel.add(flowPanelViews, messages.sidebarMenuTextForViews());
       tabPanel.selectTab(0);
 
-      //panel.add(title);
+      // panel.add(title);
       panel.add(tabPanel);
       toSelect = schemaUUID;
     } else {
-      final ErDiagram instance = ErDiagram.getInstance(databaseUUID, metadata, HistoryManager.getCurrentHistoryPath().get(0));
+      final ErDiagram instance = ErDiagram.getInstance(databaseUUID, metadata,
+        HistoryManager.getCurrentHistoryPath().get(0));
       panel.add(instance);
     }
 
@@ -525,7 +524,7 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
             return obj.getDescription();
           }
         }),
-        new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForMerkleOption(), 5,
+      new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableAndColumnsPageTableHeaderTextForMerkleOption(), 5,
         getMerkleTreeColumn(viewerView.getUuid())));
   }
 
