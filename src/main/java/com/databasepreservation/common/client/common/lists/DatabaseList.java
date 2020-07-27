@@ -65,7 +65,7 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
 
   @Override
   protected void configureDisplay(CellTable<ViewerDatabase> display) {
-    display.setSelectionModel(display.getSelectionModel(), DefaultSelectionEventManager.createBlacklistManager(4, 9));
+    display.setSelectionModel(display.getSelectionModel(), DefaultSelectionEventManager.createBlacklistManager(4, 10));
 
     Column<ViewerDatabase, SafeHtml> nameColumn = new TooltipColumn<ViewerDatabase>() {
       @Override

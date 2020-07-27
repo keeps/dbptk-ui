@@ -2,8 +2,8 @@
 
 set -ex
 
-SERVER_REPO=db-visualization-toolkit-docker
-ELECTRON_REPO=db-visualization-toolkit-electron
+SERVER_REPO=dbptk-enterprise
+ELECTRON_REPO=dbptk-desktop
 
 function build_body_request() {
   BRANCH=$1

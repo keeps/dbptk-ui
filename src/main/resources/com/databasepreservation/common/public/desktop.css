@@ -6,6 +6,7 @@
 .desktop-main .database .browseContentFocusPanel,
 .desktop-main .wizard .browseContentFocusPanel {
     padding-top: 40px;
+    box-sizing: border-box;
 }
 
 /*.browseContentPreviewPanel > tbody > tr > td:first-child {*/

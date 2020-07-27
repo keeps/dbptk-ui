@@ -1451,11 +1451,12 @@ html, body {
     align-items: flex-end;
     justify-content: space-between;
     padding-left: 315px;
-    position: absolute;
+    position: fixed;
     right: 10px;
     bottom: 10px;
     width: 100%;
     box-sizing: border-box;
+    background-color: #fff
 }
 
 .loading-sidebar {
@@ -1910,6 +1911,7 @@ html, body {
 
 .wizard-title {
     margin: 2rem 2rem 0 2rem;
+    padding-bottom: 40px;
 }
 
 .wizard-parent {
