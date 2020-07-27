@@ -201,15 +201,15 @@ public class DatabaseSidebar extends Composite implements Sidebar, ICollectionSt
       for (ViewerTable table : schema.getTables()) {
         if (!table.isMaterializedView()) {
           if (collectionStatus.showTable(table.getUuid())) {
-            if (schema.getCustomViewTable(table.getName()) == null) {
               schemaItems.add(createTableItem(schema, table, totalSchemas, iconTag));
-            }
           }
         }
       }
 
       for (ViewerView view : schema.getViews()) {
-        schemaItems.add(createViewItem(schema, view, totalSchemas, iconTag));
+        if (schema.getCustomViewTable(view.getName()) == null) {
+          schemaItems.add(createViewItem(schema, view, totalSchemas, iconTag));
+        }
       }
     }
 

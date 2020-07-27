@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.databasepreservation.common.client.ObserverManager;
-import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
@@ -100,18 +99,18 @@ public class ColumnsManagementSidebar extends Composite implements Sidebar, ICol
       for (ViewerTable table : schema.getTables()) {
         if (!table.isMaterializedView()) {
           if (collectionStatus.showTable(table.getUuid())) {
-            if (schema.getCustomViewTable(table.getName()) == null) {
-              sidebarGroup.add(createTableItem(schema, table, totalSchemas, iconTag));
-            }
+            sidebarGroup.add(createTableItem(schema, table, totalSchemas, iconTag));
           }
         }
       }
 
       for (ViewerView view : schema.getViews()) {
         if (!view.getColumns().isEmpty()) {
-          final SidebarHyperlink viewItem = createViewItem(schema, view, totalSchemas, iconTag);
-          if (viewItem != null) {
-            sidebarGroup.add(viewItem);
+          if (schema.getCustomViewTable(view.getName()) == null) {
+            final SidebarHyperlink viewItem = createViewItem(schema, view, totalSchemas, iconTag);
+            if (viewItem != null) {
+              sidebarGroup.add(viewItem);
+            }
           }
         }
       }
@@ -128,8 +127,8 @@ public class ColumnsManagementSidebar extends Composite implements Sidebar, ICol
       html = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE,
         collectionStatus.getTableStatusByTableId(table.getId()).getCustomName());
     } else {
-      html = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE,
-        schema.getName() + " " + iconTag + " " + collectionStatus.getTableStatusByTableId(table.getId()).getCustomName());
+      html = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE, schema.getName() + " " + iconTag + " "
+        + collectionStatus.getTableStatusByTableId(table.getId()).getCustomName());
     }
     SidebarHyperlink tableLink = new SidebarHyperlink(html,
       HistoryManager.linkToColumnManagement(database.getUuid(), table.getId()));
@@ -147,7 +146,8 @@ public class ColumnsManagementSidebar extends Composite implements Sidebar, ICol
     if (materializedTable != null) {
       if (totalSchemas == 1) {
         html = FontAwesomeIconManager.getStackedIconSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS,
-          FontAwesomeIconManager.TABLE, collectionStatus.getTableStatusByTableId(materializedTable.getId()).getCustomName());
+          FontAwesomeIconManager.TABLE,
+          collectionStatus.getTableStatusByTableId(materializedTable.getId()).getCustomName());
       } else {
         html = FontAwesomeIconManager.getStackedIconSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS,
           FontAwesomeIconManager.TABLE, schema.getName() + " " + iconTag + " "
@@ -161,7 +161,8 @@ public class ColumnsManagementSidebar extends Composite implements Sidebar, ICol
       final ViewerTable customViewTable = schema.getCustomViewTable(view.getName());
       if (totalSchemas == 1) {
         html = FontAwesomeIconManager.getStackedIconSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS,
-          FontAwesomeIconManager.COG, collectionStatus.getTableStatusByTableId(customViewTable.getId()).getCustomName());
+          FontAwesomeIconManager.COG,
+          collectionStatus.getTableStatusByTableId(customViewTable.getId()).getCustomName());
       } else {
         html = FontAwesomeIconManager.getStackedIconSafeHtml(FontAwesomeIconManager.SCHEMA_VIEWS,
           FontAwesomeIconManager.COG, schema.getName() + " " + iconTag + " "
@@ -303,6 +304,6 @@ public class ColumnsManagementSidebar extends Composite implements Sidebar, ICol
   @Override
   protected void onAttach() {
     super.onAttach();
-    //JavascriptUtils.stickSidebar();
+    // JavascriptUtils.stickSidebar();
   }
 }

@@ -13,7 +13,6 @@ import com.google.gwt.dom.client.ParagraphElement;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
@@ -113,12 +112,14 @@ public class CommonClientUtils {
     String separatorIconTag = FontAwesomeIconManager.getTagWithStyleName(FontAwesomeIconManager.SCHEMA_TABLE_SEPARATOR,
       "schema-table-separator");
 
-    if (table.isCustomView()) {
-      final SafeHtml stackedIconSafeHtml = FontAwesomeIconManager.getStackedIconSafeHtml(
-        FontAwesomeIconManager.SCHEMA_VIEWS, FontAwesomeIconManager.COG,
-        table.getSchemaName() + " " + separatorIconTag + " " + table.getNameWithoutPrefix());
-      return getHeader(stackedIconSafeHtml, hClass);
-    } else if (table.isMaterializedView()) {
+    /*
+     * if (table.isCustomView()) { final SafeHtml stackedIconSafeHtml =
+     * FontAwesomeIconManager.getStackedIconSafeHtml(
+     * FontAwesomeIconManager.SCHEMA_VIEWS, FontAwesomeIconManager.COG,
+     * table.getSchemaName() + " " + separatorIconTag + " " +
+     * table.getNameWithoutPrefix()); return getHeader(stackedIconSafeHtml, hClass);
+     * } else
+     */ if (table.isMaterializedView()) {
       final SafeHtml stackedIconSafeHtml = FontAwesomeIconManager.getStackedIconSafeHtml(
         FontAwesomeIconManager.SCHEMA_VIEWS, FontAwesomeIconManager.TABLE,
         table.getSchemaName() + " " + separatorIconTag + " " + table.getNameWithoutPrefix());
@@ -131,11 +132,13 @@ public class CommonClientUtils {
   }
 
   private static HTML getHeaderSingleSchema(ViewerTable table, String hClass) {
-    if (table.isCustomView()) {
-      final SafeHtml stackedIconSafeHtml = FontAwesomeIconManager.getStackedIconSafeHtml(
-        FontAwesomeIconManager.SCHEMA_VIEWS, FontAwesomeIconManager.COG, table.getNameWithoutPrefix());
-      return getHeader(stackedIconSafeHtml, hClass);
-    } else if (table.isMaterializedView()) {
+    /*
+     * if (table.isCustomView()) { final SafeHtml stackedIconSafeHtml =
+     * FontAwesomeIconManager.getStackedIconSafeHtml(
+     * FontAwesomeIconManager.SCHEMA_VIEWS, FontAwesomeIconManager.COG,
+     * table.getNameWithoutPrefix()); return getHeader(stackedIconSafeHtml, hClass);
+     * } else
+     */ if (table.isMaterializedView()) {
       final SafeHtml stackedIconSafeHtml = FontAwesomeIconManager.getStackedIconSafeHtml(
         FontAwesomeIconManager.SCHEMA_VIEWS, FontAwesomeIconManager.TABLE, table.getNameWithoutPrefix());
       return getHeader(stackedIconSafeHtml, hClass);
@@ -146,11 +149,13 @@ public class CommonClientUtils {
   }
 
   private static HTML getHeaderSingleSchema(TableStatus status, ViewerTable table, String hClass) {
-    if (table.isCustomView()) {
-      final SafeHtml stackedIconSafeHtml = FontAwesomeIconManager.getStackedIconSafeHtml(
-        FontAwesomeIconManager.SCHEMA_VIEWS, FontAwesomeIconManager.COG, status.getCustomName());
-      return getHeader(stackedIconSafeHtml, hClass);
-    } else if (table.isMaterializedView()) {
+    /*
+     * if (table.isCustomView()) { final SafeHtml stackedIconSafeHtml =
+     * FontAwesomeIconManager.getStackedIconSafeHtml(
+     * FontAwesomeIconManager.SCHEMA_VIEWS, FontAwesomeIconManager.COG,
+     * status.getCustomName()); return getHeader(stackedIconSafeHtml, hClass); }
+     * else
+     */ if (table.isMaterializedView()) {
       final SafeHtml stackedIconSafeHtml = FontAwesomeIconManager.getStackedIconSafeHtml(
         FontAwesomeIconManager.SCHEMA_VIEWS, FontAwesomeIconManager.TABLE, status.getCustomName());
       return getHeader(stackedIconSafeHtml, hClass);
