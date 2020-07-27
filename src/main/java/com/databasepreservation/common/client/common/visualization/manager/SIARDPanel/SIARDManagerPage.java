@@ -140,6 +140,9 @@ public class SIARDManagerPage extends ContentPanel {
 
     DatabaseService.Util.call((IsIndexed result) -> {
       database = (ViewerDatabase) result;
+      mainHeader.clear();
+      mainHeader.add(CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.BOX_OPEN),
+          database.getMetadata().getName(), "h1"));
       metadataNavigationPanel.update(database);
       siardNavigationPanel.update(database);
       browseNavigationPanel.update(database);
