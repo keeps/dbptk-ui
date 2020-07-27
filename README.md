@@ -25,15 +25,15 @@ More information about these tools can be found at https://database-preservation
 
 ## To report a problem or make a suggestion
 
-Create a new issue at https://github.com/keeps/db-visualization-toolkit/issues/new
+Create a new issue at https://github.com/keeps/dbptk-ui/issues/new
 
-Or if the problem/suggestion is related to the Database Preservation Toolkit Developer, create the issue at https://github.com/keeps/db-preservation-toolkit/issues/new
+Or if the problem/suggestion is related to the Database Preservation Toolkit Developer, create the issue at https://github.com/keeps/dbptk-developer/issues/new
 
 ## Information & Commercial support
 
 For more information or commercial support, contact [KEEP SOLUTIONS](http://www.keep.pt/contactos/?lang=en).
 
-## Development [![Build Status](https://travis-ci.org/keeps/db-visualization-toolkit.png?branch=master)](https://travis-ci.org/keeps/db-visualization-toolkit)
+## Development [![Build Status](https://travis-ci.org/keeps/dbptk-ui.png?branch=master)](https://travis-ci.org/keeps/dbptk-ui)
 
 ## License
 
