@@ -1446,6 +1446,18 @@ html, body {
     padding-right: 0;
 }
 
+.button-panel-container-ingest {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding-left: 315px;
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
 .button-panel-container {
     display: flex;
     align-items: flex-end;

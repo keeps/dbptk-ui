@@ -103,11 +103,6 @@ public class JavascriptUtils {
                                                                       }, 10);
                                                                       }-*/;
 
-  public static native void stickSidebar() /*-{
-                                           $wnd.jQuery('.sticky-flow').stick_in_parent();
-                                           $wnd.jQuery('body').trigger("sticky_kit:recalc");
-                                           }-*/;
-
   public static native void runMiniUploadForm(String layout, DefaultAsyncCallback<String> callback) /*-{
                                                                                                     $wnd.jQuery(function () {
                                                                                                     var ul = $wnd.jQuery('#upload-list');

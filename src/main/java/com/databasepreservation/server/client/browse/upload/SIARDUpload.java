@@ -84,7 +84,6 @@ public class SIARDUpload extends RightPanel {
   protected void onLoad() {
     super.onLoad();
     itemList.clear();
-    //JavascriptUtils.stickSidebar();
   }
 
   private String getUploadUrl() {

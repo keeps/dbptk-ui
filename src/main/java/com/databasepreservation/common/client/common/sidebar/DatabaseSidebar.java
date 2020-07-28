@@ -447,10 +447,4 @@ public class DatabaseSidebar extends Composite implements Sidebar, ICollectionSt
       disclosurePanel.setVisible(true);
     }
   }
-
-  @Override
-  protected void onAttach() {
-    super.onAttach();
-    //JavascriptUtils.stickSidebar();
-  }
 }

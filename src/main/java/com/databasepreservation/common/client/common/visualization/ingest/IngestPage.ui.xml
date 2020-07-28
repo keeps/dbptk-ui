@@ -4,7 +4,7 @@
     <g:FlowPanel addStyleNames="application-container" ui:field="container">
         <g:FlowPanel addStyleNames="browseContentPreviewPanel" ui:field="panel">
         </g:FlowPanel>
-        <g:FlowPanel addStyleNames="button-panel-container">
+        <g:FlowPanel addStyleNames="button-panel-container-ingest">
             <g:FlowPanel ui:field="customButtons" addStyleNames="button-panel-right"/>
             <g:FlowPanel addStyleNames="button-panel-right">
                 <g:SimplePanel addStyleNames="btn-item">

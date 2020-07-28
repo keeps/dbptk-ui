@@ -413,7 +413,6 @@ public class DataTransformation extends RightPanel implements ICollectionStatusO
     super.onAttach();
     if (database != null) {
       updateControllerPanel();
-      //JavascriptUtils.stickSidebar();
     }
   }
 }

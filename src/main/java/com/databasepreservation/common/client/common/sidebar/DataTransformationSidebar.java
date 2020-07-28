@@ -327,12 +327,6 @@ public class DataTransformationSidebar extends Composite implements Sidebar, ICo
     return firstElement;
   }
 
-  @Override
-  protected void onAttach() {
-    super.onAttach();
-    //JavascriptUtils.stickSidebar();
-  }
-
   public static void clear(String databaseUUID) {
     instances.remove(databaseUUID);
   }

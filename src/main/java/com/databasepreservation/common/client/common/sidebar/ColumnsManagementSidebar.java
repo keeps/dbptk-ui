@@ -300,10 +300,4 @@ public class ColumnsManagementSidebar extends Composite implements Sidebar, ICol
       disclosurePanel.setVisible(true);
     }
   }
-
-  @Override
-  protected void onAttach() {
-    super.onAttach();
-    // JavascriptUtils.stickSidebar();
-  }
 }
