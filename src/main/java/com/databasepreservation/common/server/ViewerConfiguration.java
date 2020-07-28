@@ -51,7 +51,7 @@ import com.google.common.cache.LoadingCache;
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class ViewerConfiguration extends ViewerAbstractConfiguration {
-  private static final Logger LOGGER = LoggerFactory.getLogger(ViewerConfiguration.class);
+  private static Logger LOGGER;
 
   public static final String PROPERTY_SOLR_ZOOKEEPER_HOSTS = "solr.zookeeper.hosts";
   public static final String PROPERTY_SOLR_HEALTHCHECK_RETRIES = "solr.healthcheck.retries";
@@ -239,6 +239,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     try {
       // determine DBVTK HOME
       viewerHomePath = determineViewerHomePath();
+      LOGGER = LoggerFactory.getLogger(ViewerConfiguration.class);
       LOGGER.debug("DBVTK HOME is {}", viewerHomePath);
 
       // instantiate essential directories

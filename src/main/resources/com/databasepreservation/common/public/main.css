@@ -1450,11 +1450,9 @@ html, body {
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
-    padding-left: 315px;
     position: fixed;
     right: 10px;
     bottom: 10px;
-    width: 100%;
     box-sizing: border-box;
     background-color: #fff
 }
