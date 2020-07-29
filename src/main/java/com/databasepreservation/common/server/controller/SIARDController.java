@@ -700,7 +700,7 @@ public class SIARDController {
   public static ViewerMetadata updateMetadataInformation(String databaseUUID, String siardPath,
     SIARDUpdateParameters parameters) throws GenericException {
 
-    Path reporterPath = ViewerConfiguration.getInstance().getReportPath(databaseUUID).toAbsolutePath();
+    Path reporterPath = ViewerConfiguration.getInstance().getReportPathForEdition(databaseUUID).toAbsolutePath();
     ViewerMetadata metadata = parameters.getMetadata();
     try (Reporter reporter = new Reporter(reporterPath.getParent().toString(), reporterPath.getFileName().toString())) {
 

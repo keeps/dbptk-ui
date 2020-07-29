@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -359,6 +360,10 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
 
   public Path getReportPath(String databaseUUID) {
     return reportsPath.resolve("report-" + databaseUUID + ".md");
+  }
+
+  public Path getReportPathForEdition(String databaseUUID) {
+    return reportsPath.resolve("report-metadata-edition-" + databaseUUID + "-" + Instant.now().toString() + ".md");
   }
 
   public Path getReportPathForMigration(String databaseUUID) {
