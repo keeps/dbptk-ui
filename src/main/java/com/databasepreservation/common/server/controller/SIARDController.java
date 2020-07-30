@@ -48,6 +48,7 @@ import com.databasepreservation.common.client.models.wizard.export.ExportOptions
 import com.databasepreservation.common.client.models.wizard.export.MetadataExportOptionsParameters;
 import com.databasepreservation.common.client.models.wizard.filter.MerkleTreeFilterParameters;
 import com.databasepreservation.common.client.models.wizard.table.TableAndColumnsParameters;
+import com.databasepreservation.common.client.tools.ToolkitModuleName2ViewerModuleName;
 import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.server.SIARDProgressObserver;
 import com.databasepreservation.common.server.ValidationProgressObserver;
@@ -151,7 +152,7 @@ public class SIARDController {
   public static boolean migrateToSIARD(String databaseUUID, String siardVersion, String siardPath,
     TableAndColumnsParameters tableAndColumnsParameters, ExportOptionsParameters exportOptionsParameters,
     MetadataExportOptionsParameters metadataExportOptionsParameters) throws GenericException {
-    Reporter reporter = getReporter(databaseUUID);
+    Reporter reporter = getReporter(databaseUUID, ReporterType.MIGRATE_TO_SIARD);
     File f = new File(siardPath);
     if (f.exists() && !f.isDirectory()) {
       LOGGER.info("starting to convert database");
@@ -180,8 +181,11 @@ public class SIARDController {
       long startTime = System.currentTimeMillis();
       try {
         databaseMigration.migrate();
+        reporter.close();
       } catch (ModuleException | RuntimeException e) {
         throw new GenericException("Could not convert the database", e);
+      } catch (IOException e) {
+        throw new GenericException("Could not close the reporter file", e);
       }
       long duration = System.currentTimeMillis() - startTime;
       LOGGER.info("Conversion time {}m {}s", duration / 60000, duration % 60000 / 1000);
@@ -193,10 +197,11 @@ public class SIARDController {
 
   public static boolean migrateToDBMS(String databaseUUID, String siardVersion, String siardPath,
     ConnectionParameters connectionParameters) throws GenericException {
-    Reporter reporter = getReporter(databaseUUID);
+    Reporter reporter = getReporter(databaseUUID, ReporterType.MIGRATE_TO_LIVE_DBMS);
     File f = new File(siardPath);
     if (f.exists() && !f.isDirectory()) {
-      LOGGER.info("starting to convert database");
+      LOGGER.info("starting to migrate the database to a live DBMS ("
+        + ToolkitModuleName2ViewerModuleName.transform(connectionParameters.getModuleName()) + ")");
       final DatabaseMigration databaseMigration = initializeDatabaseMigration(reporter);
 
       databaseMigration.filterFactories(new ArrayList<>());
@@ -222,8 +227,11 @@ public class SIARDController {
       long startTime = System.currentTimeMillis();
       try {
         databaseMigration.migrate();
+        reporter.close();
       } catch (ModuleException | RuntimeException e) {
         throw new GenericException(e.getMessage(), e);
+      } catch (IOException e) {
+        throw new GenericException("Could not close the reporter file", e);
       }
       long duration = System.currentTimeMillis() - startTime;
       LOGGER.info("Conversion time {}m {}s", duration / 60000, duration % 60000 / 1000);
@@ -238,8 +246,8 @@ public class SIARDController {
     MerkleTreeFilterParameters merkleTreeFilterParameters, ExportOptionsParameters exportOptionsParameters,
     MetadataExportOptionsParameters metadataExportOptionsParameters) throws GenericException {
     final String databaseUUID = SolrUtils.randomUUID();
-    Reporter reporter = getReporterForMigration(databaseUUID);
-    LOGGER.info("starting to convert database {}", exportOptionsParameters.getSiardPath());
+    Reporter reporter = getReporter(databaseUUID, ReporterType.CREATE);
+    LOGGER.info("starting to create SIARD archive at {}", exportOptionsParameters.getSiardPath());
 
     final DatabaseMigration databaseMigration = initializeDatabaseMigration(reporter);
 
@@ -302,10 +310,13 @@ public class SIARDController {
     long startTime = System.currentTimeMillis();
     try {
       databaseMigration.migrate();
+      reporter.close();
     } catch (RuntimeException e) {
       throw new GenericException("Could not create the SIARD file", e);
     } catch (ModuleException e) {
       throw new GenericException(e.getMessage(), e);
+    } catch (IOException e) {
+      throw new GenericException("Could not close the reporter file", e);
     }
     long duration = System.currentTimeMillis() - startTime;
     LOGGER.info("Conversion time {}m {}s", duration / 60000, duration % 60000 / 1000);
@@ -643,7 +654,7 @@ public class SIARDController {
   }
 
   public static String loadFromLocal(String localPath, String databaseUUID) throws GenericException {
-    LOGGER.info("converting database {}", databaseUUID);
+    LOGGER.info("Preparing the SIARD to be browsable ({})", databaseUUID);
     Path basePath = Paths.get(ViewerConfiguration.getInstance().getViewerConfigurationAsString("/",
       ViewerConfiguration.PROPERTY_BASE_UPLOAD_PATH));
     try {
@@ -664,8 +675,7 @@ public class SIARDController {
 
     // build the SIARD import module, Solr export module, and start the
     // conversion
-    Path reporterPath = ViewerConfiguration.getInstance().getReportPath(databaseUUID).toAbsolutePath();
-    try (Reporter reporter = new Reporter(reporterPath.getParent().toString(), reporterPath.getFileName().toString())) {
+    try (Reporter reporter = getReporter(databaseUUID, ReporterType.BROWSE)) {
       ViewerConfiguration configuration = ViewerConfiguration.getInstance();
 
       DatabaseMigration databaseMigration = DatabaseMigration.newInstance();
@@ -699,14 +709,11 @@ public class SIARDController {
 
   public static ViewerMetadata updateMetadataInformation(String databaseUUID, String siardPath,
     SIARDUpdateParameters parameters) throws GenericException {
-
-    Path reporterPath = ViewerConfiguration.getInstance().getReportPathForEdition(databaseUUID).toAbsolutePath();
+    LOGGER.info("Start the edit metadata process for {}, siard is located at {}", databaseUUID, siardPath);
     ViewerMetadata metadata = parameters.getMetadata();
-    try (Reporter reporter = new Reporter(reporterPath.getParent().toString(), reporterPath.getFileName().toString())) {
-
+    try (Reporter reporter = getReporter(databaseUUID, ReporterType.EDIT_METADATA)) {
       ViewerSIARDBundle bundleSiard = parameters.getSiardBundle();
       if (new File(siardPath).isFile()) {
-        LOGGER.info("Updating {}", siardPath);
         SIARDEdition siardEdition = SIARDEdition.newInstance();
 
         siardEdition.editModule(new SIARDEditFactory())
@@ -720,7 +727,7 @@ public class SIARDController {
 
       final DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
       solrManager.updateDatabaseMetadata(databaseUUID, metadata);
-
+      LOGGER.info("Finish the edit metadata process for {}, siard is located at {}", databaseUUID, siardPath);
     } catch (IOException e) {
       throw new GenericException("Could not initialize conversion modules.", e);
     } catch (ModuleException | RuntimeException e) {
@@ -732,10 +739,9 @@ public class SIARDController {
 
   public static boolean validateSIARD(String databaseUUID, String siardPath, String validationReportPath,
     String allowedTypesPath, boolean skipAdditionalChecks) throws GenericException {
-    Path reporterPath = ViewerConfiguration.getInstance().getReportPathForValidation(databaseUUID).toAbsolutePath();
     boolean valid;
-
-    try (Reporter reporter = new Reporter(reporterPath.getParent().toString(), reporterPath.getFileName().toString())) {
+    LOGGER.info("Start the SIARD validation process for {}, siard is located at {}", databaseUUID, siardPath);
+    try (Reporter reporter = getReporter(databaseUUID, ReporterType.VALIDATE)) {
       SIARDValidation siardValidation = SIARDValidation.newInstance();
       siardValidation.validateModule(new SIARDValidateFactory())
         .validateModuleParameter(SIARDValidateFactory.PARAMETER_FILE, siardPath)
@@ -769,6 +775,7 @@ public class SIARDController {
 
         solrManager.updateSIARDValidationInformation(databaseUUID, status, validationReportPath, dbptkVersion,
           new DateTime().toString());
+        LOGGER.info("Finish the SIARD validation process for {}, siard is located at {}", databaseUUID, siardPath);
       } catch (IOException e) {
         updateStatusValidate(databaseUUID, ViewerDatabaseValidationStatus.ERROR);
         throw new GenericException("Failed to obtain the DBPTK version from properties", e);
@@ -877,6 +884,11 @@ public class SIARDController {
   /****************************************************************************
    * Private auxiliary Methods
    ****************************************************************************/
+  private static Reporter getReporter(final String databaseUUID, ReporterType reporterType) {
+    Path reporterPath = ViewerConfiguration.getInstance().getReportsPath(databaseUUID, reporterType).toAbsolutePath();
+    return new Reporter(reporterPath.getParent().toString(), reporterPath.getFileName().toString());
+  }
+
   private static Reporter getReporter(final String databaseUUID) {
     Path reporterPath = ViewerConfiguration.getInstance().getReportPath(databaseUUID).toAbsolutePath();
     return new Reporter(reporterPath.getParent().toString(), reporterPath.getFileName().toString());

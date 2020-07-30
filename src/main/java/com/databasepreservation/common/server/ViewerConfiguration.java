@@ -40,6 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.server.controller.ReporterType;
 import com.databasepreservation.common.utils.ViewerAbstractConfiguration;
 import com.databasepreservation.utils.FileUtils;
 import com.google.common.cache.CacheBuilder;
@@ -255,7 +256,8 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
       addConfiguration("dbvtk-roles.properties");
       LOGGER.debug("Finished loading dbvtk-roles.properties");
 
-      applicationEnvironment = System.getProperty(ViewerConstants.APPLICATION_ENV_KEY, ViewerConstants.APPLICATION_ENV_SERVER);
+      applicationEnvironment = System.getProperty(ViewerConstants.APPLICATION_ENV_KEY,
+        ViewerConstants.APPLICATION_ENV_SERVER);
 
     } catch (ConfigurationException e) {
       LOGGER.error("Error loading dbvtk properties", e);
@@ -358,11 +360,30 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     }
   }
 
+  public Path getReportsPath(String databaseUUID, ReporterType reporterType) {
+    switch (reporterType) {
+      case BROWSE:
+        return getReportPathForBrowse(databaseUUID);
+      case CREATE:
+        return getReportPathForMigration(databaseUUID);
+      case VALIDATE:
+        return getReportPathForValidation(databaseUUID);
+      case EDIT_METADATA:
+        return getReportPathForEdition(databaseUUID);
+      case MIGRATE_TO_SIARD:
+        return getReportsPathForMigrationSIARD(databaseUUID);
+      case MIGRATE_TO_LIVE_DBMS:
+        return getReportsPathForMigrationLiveDBMS(databaseUUID);
+      default:
+        return getReportPath(databaseUUID);
+    }
+  }
+
   public Path getReportPath(String databaseUUID) {
     return reportsPath.resolve("report-" + databaseUUID + ".md");
   }
 
-  public Path getReportPathForEdition(String databaseUUID) {
+  private Path getReportPathForEdition(String databaseUUID) {
     return reportsPath.resolve("report-metadata-edition-" + databaseUUID + "-" + Instant.now().toString() + ".md");
   }
 
@@ -370,24 +391,38 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     return reportsPath.resolve("report-migration-" + databaseUUID + ".md");
   }
 
+  public Path getReportsPathForMigrationLiveDBMS(String databaseUUID) {
+    return reportsPath.resolve("report-migration-live-dbms-" + databaseUUID + "-" + Instant.now().toString() + ".md");
+  }
+
+  public Path getReportsPathForMigrationSIARD(String databaseUUID) {
+    return reportsPath.resolve("report-migration-siard-" + databaseUUID + "-" + Instant.now().toString() + ".md");
+  }
+
   public Path getReportPathForValidation(String databaseUUID) {
     return reportsPath.resolve("report-validation-" + databaseUUID + ".md");
   }
 
+  public Path getReportPathForBrowse(String databaseUUID) {
+    return reportsPath.resolve("report-browse-" + databaseUUID + ".md");
+  }
+
   public List<String> getWhiteListedUsername() {
     if (cachedWhiteListedUsername == null) {
-      cachedWhiteListedUsername = getViewerConfigurationAsList(ViewerConfiguration.PROPERTY_FILTER_ONOFF_WHITELISTED_USERNAME);
+      cachedWhiteListedUsername = getViewerConfigurationAsList(
+        ViewerConfiguration.PROPERTY_FILTER_ONOFF_WHITELISTED_USERNAME);
     }
     return cachedWhiteListedUsername;
   }
 
   public List<String> getWhitelistedIPs() {
     Boolean disableWhitelistCache = ViewerConfiguration.getInstance().getViewerConfigurationAsBoolean(null,
-            ViewerConfiguration.PROPERTY_DISABLE_WHITELIST_CACHE);
-    if(disableWhitelistCache.equals(false)) {
+      ViewerConfiguration.PROPERTY_DISABLE_WHITELIST_CACHE);
+    if (disableWhitelistCache.equals(false)) {
       if (cachedWhitelistedIPs == null) {
         cachedWhitelistedIPs = new ArrayList<>();
-        for (String whitelistedIP : getViewerConfigurationAsList(ViewerConfiguration.PROPERTY_FILTER_ONOFF_WHITELISTED_IPS)) {
+        for (String whitelistedIP : getViewerConfigurationAsList(
+          ViewerConfiguration.PROPERTY_FILTER_ONOFF_WHITELISTED_IPS)) {
           try {
             final InetAddress address = InetAddress.getByName(whitelistedIP);
             cachedWhitelistedIPs.add(address.getHostAddress());
@@ -397,7 +432,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
         }
       }
       return cachedWhitelistedIPs;
-    }else{
+    } else {
       return getViewerConfigurationAsList(ViewerConfiguration.PROPERTY_FILTER_ONOFF_WHITELISTED_IPS);
     }
   }
