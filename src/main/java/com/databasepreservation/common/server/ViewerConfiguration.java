@@ -360,7 +360,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     }
   }
 
-  public Path getReportsPath(String databaseUUID, ReporterType reporterType) {
+  public Path getReportPath(String databaseUUID, ReporterType reporterType) {
     switch (reporterType) {
       case BROWSE:
         return getReportPathForBrowse(databaseUUID);
@@ -379,7 +379,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     }
   }
 
-  public Path getReportPath(String databaseUUID) {
+  private Path getReportPath(String databaseUUID) {
     return reportsPath.resolve("report-" + databaseUUID + ".md");
   }
 
@@ -387,23 +387,23 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     return reportsPath.resolve("report-metadata-edition-" + databaseUUID + "-" + Instant.now().toString() + ".md");
   }
 
-  public Path getReportPathForMigration(String databaseUUID) {
+  private Path getReportPathForMigration(String databaseUUID) {
     return reportsPath.resolve("report-migration-" + databaseUUID + ".md");
   }
 
-  public Path getReportsPathForMigrationLiveDBMS(String databaseUUID) {
+  private Path getReportsPathForMigrationLiveDBMS(String databaseUUID) {
     return reportsPath.resolve("report-migration-live-dbms-" + databaseUUID + "-" + Instant.now().toString() + ".md");
   }
 
-  public Path getReportsPathForMigrationSIARD(String databaseUUID) {
+  private Path getReportsPathForMigrationSIARD(String databaseUUID) {
     return reportsPath.resolve("report-migration-siard-" + databaseUUID + "-" + Instant.now().toString() + ".md");
   }
 
-  public Path getReportPathForValidation(String databaseUUID) {
+  private Path getReportPathForValidation(String databaseUUID) {
     return reportsPath.resolve("report-validation-" + databaseUUID + ".md");
   }
 
-  public Path getReportPathForBrowse(String databaseUUID) {
+  private Path getReportPathForBrowse(String databaseUUID) {
     return reportsPath.resolve("report-browse-" + databaseUUID + ".md");
   }
 

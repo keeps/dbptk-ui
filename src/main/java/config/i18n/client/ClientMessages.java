@@ -663,6 +663,8 @@ public interface ClientMessages extends Messages {
 
   String managePageTableHeaderTextForDatabaseName();
 
+  String managePageTableHeaderTextForDescription();
+
   String managePageTableHeaderTextForDataOwner();
 
   String managePageTableHeaderTextForProductName();

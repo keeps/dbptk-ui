@@ -126,7 +126,11 @@ public class DataPanel extends Composite implements ICollectionStatusObserver {
       new BasicTablePanel.ColumnInfo<>(messages.schema_tableName(), false, 17, new TextColumn<ViewerTable>() {
         @Override
         public String getValue(ViewerTable table) {
-          return status.getTableStatusByTableId(table.getId()).getCustomName();
+          if (ViewerStringUtils.isNotBlank(status.getTableStatusByTableId(table.getId()).getCustomName())) {
+            return status.getTableStatusByTableId(table.getId()).getCustomName();
+          } else {
+            return status.getTableStatusByTableId(table.getId()).getName();
+          }
         }
       }),
 

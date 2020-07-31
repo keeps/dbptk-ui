@@ -185,7 +185,7 @@ public class DatabaseList extends BasicAsyncTableCell<ViewerDatabase> {
       });
     } else {
       addColumn(nameColumn, messages.managePageTableHeaderTextForDatabaseName(), true, TextAlign.NONE, 8);
-      addColumn(description, messages.managePageTableHeaderTextForDatabaseName(), true, TextAlign.NONE, 15);
+      addColumn(description, messages.managePageTableHeaderTextForDescription(), true, TextAlign.NONE, 15);
       addColumn(dataOwnerColumn, messages.managePageTableHeaderTextForDataOwner(), true, TextAlign.NONE, 5);
       addColumn(archivalDateColumn, messages.managePageTableHeaderTextForArchivalDate(), true, TextAlign.NONE, 5);
       addColumn(locationColumn, messages.managePageTableHeaderTextForSIARDLocation(), true, TextAlign.NONE, 8);

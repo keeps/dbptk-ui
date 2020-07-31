@@ -86,8 +86,8 @@ import com.databasepreservation.utils.ReflectionUtils;
 public class SIARDController {
   private static final Logger LOGGER = LoggerFactory.getLogger(SIARDController.class);
 
-  public static String getReportFileContents(String databaseUUID) throws NotFoundException {
-    Path reportPath = ViewerConfiguration.getInstance().getReportPath(databaseUUID);
+  public static String getReportFileContents(String databaseUUID, ReporterType reporterType) throws NotFoundException {
+    Path reportPath = ViewerConfiguration.getInstance().getReportPath(databaseUUID, reporterType);
     String result;
     if (reportPath.toFile().exists()) {
       try (InputStream in = Files.newInputStream(reportPath)) {
@@ -588,8 +588,8 @@ public class SIARDController {
 
     LOGGER.info("starting to import metadata database {}", siardPath.toAbsolutePath());
 
-    Path reporterPath = ViewerConfiguration.getInstance().getReportPath(databaseUUID).toAbsolutePath();
-    try (Reporter reporter = new Reporter(reporterPath.getParent().toString(), reporterPath.getFileName().toString())) {
+    try {
+      Reporter reporter = new NoOpReporter();
       SIARDEdition siardEdition = SIARDEdition.newInstance();
 
       siardEdition.editModule(new SIARDEditFactory()).editModuleParameter(SIARDEditFactory.PARAMETER_FILE,
@@ -617,12 +617,10 @@ public class SIARDController {
 
       solrManager.addDatabaseMetadata(viewerDatabase);
 
-    } catch (IOException e) {
-      throw new GenericException("Could not initialize conversion modules", e);
     } catch (ViewerException e) {
       throw new GenericException(e.getMessage(), e);
     } catch (ModuleException | RuntimeException e) {
-      throw new GenericException("Could not convert the database to the Solr instance.", e);
+      throw new GenericException("Could not import the metadata to the Solr instance.", e);
     }
   }
 
@@ -885,17 +883,7 @@ public class SIARDController {
    * Private auxiliary Methods
    ****************************************************************************/
   private static Reporter getReporter(final String databaseUUID, ReporterType reporterType) {
-    Path reporterPath = ViewerConfiguration.getInstance().getReportsPath(databaseUUID, reporterType).toAbsolutePath();
-    return new Reporter(reporterPath.getParent().toString(), reporterPath.getFileName().toString());
-  }
-
-  private static Reporter getReporter(final String databaseUUID) {
-    Path reporterPath = ViewerConfiguration.getInstance().getReportPath(databaseUUID).toAbsolutePath();
-    return new Reporter(reporterPath.getParent().toString(), reporterPath.getFileName().toString());
-  }
-
-  private static Reporter getReporterForMigration(final String databaseUUID) {
-    Path reporterPath = ViewerConfiguration.getInstance().getReportPathForMigration(databaseUUID).toAbsolutePath();
+    Path reporterPath = ViewerConfiguration.getInstance().getReportPath(databaseUUID, reporterType).toAbsolutePath();
     return new Reporter(reporterPath.getParent().toString(), reporterPath.getFileName().toString());
   }
 

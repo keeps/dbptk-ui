@@ -86,6 +86,7 @@ import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.server.ViewerFactory;
+import com.databasepreservation.common.server.controller.ReporterType;
 import com.databasepreservation.common.server.controller.SIARDController;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
 import com.databasepreservation.common.server.index.factory.SolrClientFactory;
@@ -138,7 +139,8 @@ public class CollectionResource implements CollectionService {
     User user = controllerAssistant.checkRoles(request);
 
     try {
-      java.nio.file.Path reportPath = ViewerConfiguration.getInstance().getReportPath(databaseUUID);
+      java.nio.file.Path reportPath = ViewerConfiguration.getInstance().getReportPath(databaseUUID,
+        ReporterType.BROWSE);
       String filename = reportPath.getFileName().toString();
       if (!Files.exists(reportPath)) {
         throw new NotFoundException("Missing report file: " + filename);
