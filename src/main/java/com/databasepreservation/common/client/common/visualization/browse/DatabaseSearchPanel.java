@@ -131,10 +131,12 @@ public class DatabaseSearchPanel extends RightPanel implements ICollectionStatus
 
     for (ViewerSchema viewerSchema : database.getMetadata().getSchemas()) {
       for (ViewerTable viewerTable : viewerSchema.getTables()) {
-        TableSearchPanelContainer tableSearchPanelContainer = new TableSearchPanelContainer(database, viewerTable,
-          searchCompletedCallback, status);
-        tableSearchPanelContainers.add(tableSearchPanelContainer);
-        content.add(tableSearchPanelContainer);
+        if (status.showTable(viewerTable.getUuid())) {
+          TableSearchPanelContainer tableSearchPanelContainer = new TableSearchPanelContainer(database, viewerTable,
+              searchCompletedCallback, status);
+          tableSearchPanelContainers.add(tableSearchPanelContainer);
+          content.add(tableSearchPanelContainer);
+        }
       }
     }
 

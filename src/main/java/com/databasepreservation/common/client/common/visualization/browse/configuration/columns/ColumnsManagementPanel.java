@@ -670,4 +670,20 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
       HistoryManager.gotoAdvancedConfiguration(database.getUuid());
     }
   }
+
+  private void reset(CollectionStatus collectionStatus) {
+    this.collectionStatus = collectionStatus;
+    final TableStatus table = collectionStatus.getTableStatusByTableId(tableId);
+    content.remove(cellTable);
+    cellTable = populateTable(table);
+    content.insert(cellTable, 2);
+  }
+
+  @Override
+  protected void onAttach() {
+    super.onAttach();
+    CollectionService.Util.call((List<CollectionStatus> collectionStatus) -> {
+      reset(collectionStatus.get(0));
+    }).getCollectionConfiguration(database.getUuid(), database.getUuid());
+  }
 }

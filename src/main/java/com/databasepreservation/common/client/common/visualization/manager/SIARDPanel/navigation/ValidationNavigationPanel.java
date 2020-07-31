@@ -88,6 +88,7 @@ public class ValidationNavigationPanel {
 
     navigationPanel = NavigationPanel.createInstance(messages.SIARDHomePageOptionsHeaderForValidation());
     navigationPanel.addToDescriptionPanel(messages.SIARDHomePageOptionsDescriptionForValidation());
+    updateValidationStatus();
 
     // buttons
     updateValidationButtons();
@@ -249,9 +250,11 @@ public class ValidationNavigationPanel {
         }
         break;
       case VALIDATION_RUNNING:
-        if (ValidatorPage.checkInstance(database.getUuid())) {
+        //if (ValidatorPage.checkInstance(database.getUuid())) {
           navigationPanel.addButton(CommonClientUtils.wrapOnDiv(BTN_ITEM, btnOpenValidator));
-        }
+        //} else {
+          //GWT.log("ELSE!!!!!");
+        //}
         break;
       case NOT_VALIDATED:
         btnValidate.setText(messages.SIARDHomePageButtonTextValidateNow());

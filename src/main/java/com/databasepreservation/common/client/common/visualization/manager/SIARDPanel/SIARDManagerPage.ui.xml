@@ -5,7 +5,7 @@
     <g:FlowPanel addStyleNames="col_12" ui:field="container">
         <g:FlowPanel addStyleNames="browseContentPreviewPanel" ui:field="panel">
             <c:LoadingDiv visible="false" ui:field="loading"/>
-            <g:FlowPanel addStyleNames="structure-header" ui:field="mainHeader" />
+            <g:FlowPanel addStyleNames="structure-header-siard" ui:field="mainHeader" />
             <g:SimplePanel ui:field="description"/>
             <g:FlowPanel ui:field="metadataInformation"/>
             <g:FlowPanel addStyleNames="navigation-panels" ui:field="navigationPanels"/>

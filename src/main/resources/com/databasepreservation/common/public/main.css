@@ -989,6 +989,10 @@ p[data-value]:after {
     justify-content: space-between;
 }
 
+.structure-header-siard {
+    display: flex;
+}
+
 .advancedOptionsButton {
     align-self: center;
     margin-top: 2rem;
@@ -1093,6 +1097,15 @@ p[data-value]:after {
 
 .structure-header .h1 {
     margin: 0;
+}
+
+.structure-header-siard .h1 {
+    margin: 0;
+}
+
+.structure-header-siard .text-muted {
+    padding-top: 25px;
+    padding-left: 5px;
 }
 
 .search-panel-container {

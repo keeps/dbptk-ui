@@ -32,6 +32,8 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -85,8 +87,7 @@ public class SIARDManagerPage extends ContentPanel {
   }
 
   private void init() {
-    mainHeader.add(CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.BOX_OPEN),
-      database.getMetadata().getName(), "h1"));
+    createHeader();
 
     MetadataField instance = MetadataField.createInstance(database.getMetadata().getDescription());
     instance.setCSS("table-row-description", "font-size-description");
@@ -140,9 +141,7 @@ public class SIARDManagerPage extends ContentPanel {
 
     DatabaseService.Util.call((IsIndexed result) -> {
       database = (ViewerDatabase) result;
-      mainHeader.clear();
-      mainHeader.add(CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.BOX_OPEN),
-          database.getMetadata().getName(), "h1"));
+      createHeader();
       metadataNavigationPanel.update(database);
       siardNavigationPanel.update(database);
       browseNavigationPanel.update(database);
@@ -150,6 +149,18 @@ public class SIARDManagerPage extends ContentPanel {
 
       loading.setVisible(false);
     }).retrieve(databaseUUID);
+  }
+
+  private void createHeader() {
+    mainHeader.clear();
+    mainHeader.add(CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.BOX_OPEN),
+        database.getMetadata().getName(), "h1"));
+
+    Label label = new Label();
+    label.addStyleName("text-muted font-size-small");
+    label.setText("(" + database.getUuid() + ")");
+
+    mainHeader.add(label);
   }
 
   private void setupFooterButtons() {
