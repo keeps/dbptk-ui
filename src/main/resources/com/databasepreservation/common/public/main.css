@@ -1106,6 +1106,11 @@ p[data-value]:after {
     padding: 20px;
 }
 
+.user-menu-item{
+    position: relative;
+    z-index: 1;
+}
+
 /**********************************************
 				SIARD Upload
 ************************************************/
@@ -3299,4 +3304,5 @@ rgba(0, 0, 0, .125);
     position: -webkit-sticky;
     position: sticky;
     top: 0;
+    z-index: 1;
 }

@@ -180,11 +180,13 @@ public class DatabasePanel extends Composite implements ICollectionStatusObserve
       GWT.log("authentication: " + authenticationIsEnabled);
       if (authenticationIsEnabled) {
         MenuBar subMenu = new MenuBar(true);
+        subMenu.getElement().addClassName("user-menu-item");
         subMenu.addItem(messages.loginLogout(), (Command) () -> UserLogin.getInstance().logout());
         menu.addItem(FontAwesomeIconManager.loaded(FontAwesomeIconManager.USER, user.getFullName()), subMenu);
       }
       if (user.isAdmin()) {
         MenuBar administrationMenu = new MenuBar(true);
+        administrationMenu.getElement().addClassName("user-menu-item");
         administrationMenu.addItem(
           FontAwesomeIconManager.loaded(FontAwesomeIconManager.ACTIVITY_LOG, messages.activityLogMenuText()),
           (Command) HistoryManager::gotoActivityLog);
@@ -198,7 +200,8 @@ public class DatabasePanel extends Composite implements ICollectionStatusObserve
       }
 
       MenuBar languagesMenu = new MenuBar(true);
-
+      languagesMenu.getElement().addClassName("user-menu-item");
+      
       setLanguageMenu(languagesMenu);
 
       MenuItem languagesMenuItem = new MenuItem(
