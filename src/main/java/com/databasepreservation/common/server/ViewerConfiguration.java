@@ -102,6 +102,10 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
 
   public static final String PROPERTY_DISABLE_WHITELIST_CACHE = "ui.disable.whitelist.cache";
 
+  public static final String PROPERTY_BATCH_JOBS_CORE_POOL_SIZE = "batch.jobs.corePoolSize";
+  public static final String PROPERTY_BATCH_JOBS_MAX_POOL_SIZE = "batch.jobs.maxPoolSize";
+  public static final String PROPERTY_BATCH_JOBS_QUEUE_SIZE = "batch.jobs.queueSize";
+
   private static boolean instantiatedWithoutErrors = true;
   private static String applicationEnvironment = ViewerConstants.APPLICATION_ENV_SERVER;
 

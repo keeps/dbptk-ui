@@ -91,6 +91,8 @@ public class LabelUtils {
         style = "label-success";
         break;
       case STARTING:
+        style = "label-warning";
+        break;
       case STARTED:
       case STOPPING:
       case STOPPED:

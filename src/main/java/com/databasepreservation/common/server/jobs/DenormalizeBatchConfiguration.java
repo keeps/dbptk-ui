@@ -18,6 +18,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import com.databasepreservation.common.server.ViewerConfiguration;
+
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
@@ -35,9 +37,14 @@ public class DenormalizeBatchConfiguration {
   @Bean(name = "customTaskExecutor")
   public ThreadPoolTaskExecutor taskExecutor() {
     ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
-    taskExecutor.setCorePoolSize(10);
-    taskExecutor.setMaxPoolSize(20);
-    taskExecutor.setQueueCapacity(30);
+    RejectedTaskHandler handler = new RejectedTaskHandler();
+    taskExecutor.setRejectedExecutionHandler(handler);
+    taskExecutor.setCorePoolSize(ViewerConfiguration.getInstance().getViewerConfigurationAsInt(5,
+      ViewerConfiguration.PROPERTY_BATCH_JOBS_CORE_POOL_SIZE));
+    taskExecutor.setMaxPoolSize(ViewerConfiguration.getInstance().getViewerConfigurationAsInt(Integer.MAX_VALUE,
+      ViewerConfiguration.PROPERTY_BATCH_JOBS_MAX_POOL_SIZE));
+    taskExecutor.setQueueCapacity(ViewerConfiguration.getInstance().getViewerConfigurationAsInt(Integer.MAX_VALUE,
+      ViewerConfiguration.PROPERTY_BATCH_JOBS_QUEUE_SIZE));
     return taskExecutor;
   }
 
@@ -63,7 +70,7 @@ public class DenormalizeBatchConfiguration {
 
   @Bean(name = "customJobOperator")
   public SimpleJobOperator jobOperator(JobExplorer jobExplorer, JobRepository jobRepository, JobRegistry jobRegistry,
-                                       @Qualifier("customJobLauncher") JobLauncher jobLauncher) {
+    @Qualifier("customJobLauncher") JobLauncher jobLauncher) {
     SimpleJobOperator jobOperator = new SimpleJobOperator();
 
     jobOperator.setJobExplorer(jobExplorer);

@@ -36,6 +36,7 @@ import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RequestNotValidException;
 import org.roda.core.data.utils.JsonUtils;
 import org.roda.core.data.v2.index.sublist.Sublist;
+import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
@@ -86,6 +87,7 @@ import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.server.ViewerFactory;
+import com.databasepreservation.common.server.controller.JobController;
 import com.databasepreservation.common.server.controller.ReporterType;
 import com.databasepreservation.common.server.controller.SIARDController;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
@@ -320,7 +322,6 @@ public class CollectionResource implements CollectionService {
 
     // check if there is no job running on table
     for (JobExecution runningJobExecution : jobExplorer.findRunningJobExecutions("denormalizeJob")) {
-      System.out.println(runningJobExecution);
       if (runningJobExecution.getJobParameters().getString(ViewerConstants.CONTROLLER_TABLE_ID_PARAM)
         .equals(tableUUID)) {
         throw new RESTException("A job is already running on this table",
@@ -380,7 +381,6 @@ public class CollectionResource implements CollectionService {
 
     // check if there is no job running on table
     for (JobExecution runningJobExecution : jobExplorer.findRunningJobExecutions("denormalizeJob")) {
-      System.out.println(runningJobExecution);
       if (runningJobExecution.getJobParameters().getString(ViewerConstants.CONTROLLER_TABLE_ID_PARAM)
         .equals(tableUUID)) {
         throw new RESTException("A job is already running on this table",
@@ -397,11 +397,17 @@ public class CollectionResource implements CollectionService {
     JobParameters jobParameters = jobBuilder.toJobParameters();
 
     try {
-      jobLauncher.run(job, jobParameters);
+      JobController.addMinimalSolrBatchJob(jobParameters);
+      JobExecution jobExecution = jobLauncher.run(job, jobParameters);
+      JobController.editSolrBatchJob(jobExecution);
+
+      if (jobExecution.getStatus().equals(BatchStatus.FAILED)) {
+        JobController.setMessageToSolrBatchJob(jobExecution, "Queue is full, please try later");
+      }
     } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
-      | JobParametersInvalidException e) {
+      | JobParametersInvalidException | NotFoundException | GenericException e) {
       state = LogEntryState.FAILURE;
-      throw new RESTException();
+      throw new RESTException(e.getMessage());
     } finally {
       // register action
       controllerAssistant.registerAction(user, databaseUUID, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM,
