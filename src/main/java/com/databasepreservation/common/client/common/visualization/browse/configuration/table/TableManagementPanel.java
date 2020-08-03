@@ -12,6 +12,7 @@ import com.databasepreservation.common.client.common.ContentPanel;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
+import com.databasepreservation.common.client.common.dialogs.CommonDialogs;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.lists.cells.RequiredEditableCell;
@@ -33,6 +34,7 @@ import com.databasepreservation.common.client.widgets.ConfigurationCellTableReso
 import com.databasepreservation.common.client.widgets.Toast;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.cellview.client.Column;
@@ -113,8 +115,9 @@ public class TableManagementPanel extends ContentPanel {
                 collectionStatus.updateTableShowCondition(table.getUuid(), value.getSelectionModel().isSelected(table));
                 if (editableValues.get(table.getUuid()) != null) {
                   collectionStatus.updateTableCustomDescription(table.getUuid(),
-                      editableValues.get(table.getUuid()).getDescription());
-                  collectionStatus.updateTableCustomName(table.getUuid(), editableValues.get(table.getUuid()).getLabel());
+                    editableValues.get(table.getUuid()).getDescription());
+                  collectionStatus.updateTableCustomName(table.getUuid(),
+                    editableValues.get(table.getUuid()).getLabel());
                 }
               }
             }
@@ -127,7 +130,7 @@ public class TableManagementPanel extends ContentPanel {
             }).updateCollectionConfiguration(database.getUuid(), database.getUuid(), collectionStatus);
           } else {
             Dialogs.showErrors(messages.tableManagementPageTitle(), messages.tableManagementPageDialogUniqueError(),
-                messages.basicActionClose());
+              messages.basicActionClose());
           }
         } else {
           Dialogs.showErrors(messages.tableManagementPageTitle(), messages.tableManagementPageDialogInputError(),
@@ -154,17 +157,17 @@ public class TableManagementPanel extends ContentPanel {
 
   private void handleCancelEvent(boolean changes) {
     if (changes) {
-      Dialogs.showConfirmDialog(messages.columnManagementPageTitle(), messages.columnManagementPageCancelEventDialog(),
-          messages.basicActionDiscard(), "btn btn-danger btn-times-circle", messages.basicActionBack(), "btn btn-link",
-          new DefaultAsyncCallback<Boolean>() {
-            @Override
-            public void onSuccess(Boolean aBoolean) {
-              if (!aBoolean) {
-                instances.entrySet().removeIf(e -> e.getKey().startsWith(database.getUuid()));
-                HistoryManager.gotoAdvancedConfiguration(database.getUuid());
-              }
+      CommonDialogs.showConfirmDialog(messages.columnManagementPageTitle(), SafeHtmlUtils.fromSafeConstant(messages.columnManagementPageCancelEventDialog()),
+          messages.basicActionCancel(), messages.basicActionDiscard(), CommonDialogs.Level.DANGER, "400px",
+        new DefaultAsyncCallback<Boolean>() {
+          @Override
+          public void onSuccess(Boolean aBoolean) {
+            if (aBoolean) {
+              instances.entrySet().removeIf(e -> e.getKey().startsWith(database.getUuid()));
+              HistoryManager.gotoAdvancedConfiguration(database.getUuid());
             }
-          });
+          }
+        });
     } else {
       HistoryManager.gotoAdvancedConfiguration(database.getUuid());
     }
@@ -178,18 +181,7 @@ public class TableManagementPanel extends ContentPanel {
     final ViewerSchema viewerSchema) {
     selectionTablePanel.createTable(new FlowPanel(), Arrays.asList(1, 2), viewerSchema.getTables().iterator(),
       new MultipleSelectionTablePanel.ColumnInfo<>(messages.tableManagementPageTableHeaderTextForShow(), 4,
-        new Column<ViewerTable, Boolean>(new CheckboxCell(true, true)) {
-          @Override
-          public Boolean getValue(ViewerTable viewerTable) {
-            if (initialLoading.get(viewerTable.getUuid()) == null) {
-              initialLoading.put(viewerTable.getUuid(), false);
-              selectionTablePanel.getSelectionModel().setSelected(viewerTable,
-                collectionStatus.showTable(viewerTable.getUuid()));
-            }
-
-            return selectionTablePanel.getSelectionModel().isSelected(viewerTable);
-          }
-        }),
+        getCheckboxColumn(selectionTablePanel)),
       new MultipleSelectionTablePanel.ColumnInfo<>(messages.basicTableHeaderTableOrColumn("name"), 15,
         new TextColumn<ViewerTable>() {
           @Override
@@ -203,13 +195,35 @@ public class TableManagementPanel extends ContentPanel {
         getDescriptionColumn()));
   }
 
+  private Column<ViewerTable, Boolean> getCheckboxColumn(MultipleSelectionTablePanel<ViewerTable> selectionTablePanel) {
+    Column<ViewerTable, Boolean> column = new Column<ViewerTable, Boolean>(new CheckboxCell(false, false)) {
+      @Override
+      public Boolean getValue(ViewerTable viewerTable) {
+        if (initialLoading.get(viewerTable.getUuid()) == null) {
+          initialLoading.put(viewerTable.getUuid(), false);
+          selectionTablePanel.getSelectionModel().setSelected(viewerTable,
+            collectionStatus.showTable(viewerTable.getUuid()));
+        }
+
+        return selectionTablePanel.getSelectionModel().isSelected(viewerTable);
+      }
+    };
+
+    column.setFieldUpdater((i, viewerTable, aBoolean) -> {
+      selectionTablePanel.getSelectionModel().setSelected(viewerTable, aBoolean);
+      changes = true;
+    });
+
+    return column;
+  }
+
   private Column<ViewerTable, String> getLabelColumn() {
     Column<ViewerTable, String> label = new Column<ViewerTable, String>(new RequiredEditableCell() {}) {
       @Override
       public String getValue(ViewerTable table) {
         if (editableValues.get(table.getUuid()) == null) {
           StatusHelper helper = new StatusHelper(collectionStatus.getTableStatus(table.getUuid()).getCustomName(),
-              collectionStatus.getTableStatus(table.getUuid()).getCustomDescription());
+            collectionStatus.getTableStatus(table.getUuid()).getCustomDescription());
           editableValues.put(table.getUuid(), helper);
           return collectionStatus.getTableStatus(table.getUuid()).getCustomName();
         } else {

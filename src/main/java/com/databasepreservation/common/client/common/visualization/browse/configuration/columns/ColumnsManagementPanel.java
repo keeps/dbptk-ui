@@ -13,6 +13,7 @@ import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.RightPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
+import com.databasepreservation.common.client.common.dialogs.CommonDialogs;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.lists.cells.ActionsCell;
@@ -187,12 +188,12 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
 
   private void handleCancelEvent(boolean changes) {
     if (changes) {
-      Dialogs.showConfirmDialog(messages.columnManagementPageTitle(), messages.columnManagementPageCancelEventDialog(),
-        messages.basicActionDiscard(), "btn btn-danger btn-times-circle", messages.basicActionBack(), "btn btn-link",
-        new DefaultAsyncCallback<Boolean>() {
+      CommonDialogs.showConfirmDialog(messages.columnManagementPageTitle(),
+        SafeHtmlUtils.fromSafeConstant(messages.columnManagementPageCancelEventDialog()), messages.basicActionCancel(),
+        messages.basicActionDiscard(), CommonDialogs.Level.DANGER, "400px", new DefaultAsyncCallback<Boolean>() {
           @Override
           public void onSuccess(Boolean aBoolean) {
-            if (!aBoolean) {
+            if (aBoolean) {
               instances.entrySet().removeIf(e -> e.getKey().startsWith(database.getUuid()));
               sidebar.reset(database, collectionStatus);
               HistoryManager.gotoAdvancedConfiguration(database.getUuid());

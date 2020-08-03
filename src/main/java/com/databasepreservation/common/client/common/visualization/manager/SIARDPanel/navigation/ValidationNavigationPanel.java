@@ -282,7 +282,6 @@ public class ValidationNavigationPanel {
   private void updateValidationIndicators() {
     validationDetails.clear();
     validationDetails.addStyleName("validation-indicators");
-    GWT.log("ValidationStatus::" + database.getValidationStatus());
     if (database.getValidationStatus().equals(ViewerDatabaseValidationStatus.VALIDATION_SUCCESS)
       || database.getValidationStatus().equals(ViewerDatabaseValidationStatus.VALIDATION_FAILED)) {
       Label label = new Label(messages.SIARDHomePageLabelForValidationDetails());

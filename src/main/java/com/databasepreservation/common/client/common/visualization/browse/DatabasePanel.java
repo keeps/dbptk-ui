@@ -177,7 +177,6 @@ public class DatabasePanel extends Composite implements ICollectionStatusObserve
 
   private void buildDefaultMenu(User user, boolean authenticationIsEnabled, boolean hideMenu) {
     if (!hideMenu) {
-      GWT.log("authentication: " + authenticationIsEnabled);
       if (authenticationIsEnabled) {
         MenuBar subMenu = new MenuBar(true);
         subMenu.getElement().addClassName("user-menu-item");
