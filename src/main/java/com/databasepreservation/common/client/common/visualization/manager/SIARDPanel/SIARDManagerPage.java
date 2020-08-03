@@ -61,7 +61,7 @@ public class SIARDManagerPage extends ContentPanel {
   FlowPanel mainHeader;
 
   @UiField
-  SimplePanel description;
+  FlowPanel description;
 
   @UiField
   FlowPanel metadataInformation;
@@ -89,10 +89,16 @@ public class SIARDManagerPage extends ContentPanel {
   private void init() {
     createHeader();
 
+    Label label = new Label();
+    label.addStyleName("text-muted font-size-small");
+    label.setText("(" + database.getUuid() + ")");
+
+    description.add(label);
+
     MetadataField instance = MetadataField.createInstance(database.getMetadata().getDescription());
     instance.setCSS("table-row-description", "font-size-description");
 
-    description.setWidget(instance);
+    description.add(instance);
 
     populateMetadataInfo();
     populateNavigationPanels();
@@ -155,12 +161,6 @@ public class SIARDManagerPage extends ContentPanel {
     mainHeader.clear();
     mainHeader.add(CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.BOX_OPEN),
         database.getMetadata().getName(), "h1"));
-
-    Label label = new Label();
-    label.addStyleName("text-muted font-size-small");
-    label.setText("(" + database.getUuid() + ")");
-
-    mainHeader.add(label);
   }
 
   private void setupFooterButtons() {
