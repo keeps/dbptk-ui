@@ -40,7 +40,7 @@ public class DenormalizeProcessor implements Tasklet {
         chunkContext.getStepContext().getStepExecution()
           .setExitStatus(new ExitStatus(ViewerJobStatus.FAILED.name(), e.getMessage()));
         JobController.setMessageToSolrBatchJob(jobExecution, e.getMessage());
-        throw new ModuleException().withCause(e);
+        throw new ModuleException().withCause(e).withMessage(e.getMessage());
       } catch (NotFoundException | GenericException ex) {
         LOGGER.error("Cannot update job on SOLR", e);
       }

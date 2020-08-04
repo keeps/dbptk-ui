@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gwt.cell.client.Cell;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
@@ -22,9 +20,11 @@ import com.databasepreservation.common.client.index.sort.Sorter;
 import com.databasepreservation.common.client.models.structure.ViewerJob;
 import com.databasepreservation.common.client.services.JobService;
 import com.databasepreservation.common.client.tools.Humanize;
+import com.google.gwt.cell.client.Cell;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.Column;
@@ -142,13 +142,14 @@ public class JobList extends BasicAsyncTableCell<ViewerJob> {
       @Override
       public void render(Cell.Context context, ViewerJob viewerJob, SafeHtmlBuilder sb) {
         if (viewerJob != null && viewerJob.getStatus() != null) {
-          if(viewerJob.getExitDescription() != null){
+          if (viewerJob.getExitDescription() != null) {
             sb.appendHtmlConstant("<div title=\"" + SafeHtmlUtils.htmlEscape(viewerJob.getExitDescription()) + "\">");
-            sb.append(getValue(viewerJob));
-            sb.appendHtmlConstant("</div");
           } else {
-            super.render(context, viewerJob, sb);
+            sb.appendHtmlConstant(
+              "<div title=\"" + SafeHtmlUtils.htmlEscape(Humanize.jobStatus(viewerJob.getStatus())) + "\">");
           }
+          sb.append(getValue(viewerJob));
+          sb.appendHtmlConstant("</div");
         }
       }
     };
