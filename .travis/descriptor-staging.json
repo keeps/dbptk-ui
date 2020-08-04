@@ -16,17 +16,17 @@
     ]
   },
   "version": {
-    "name": "Staging",
+    "name": "developer",
     "description": "",
     "released": "RELEASED",
-    "vcs_tag": "staging",
+    "vcs_tag": "developer",
     "attributes": [],
     "gpgSign": false
   },
   "files": [
     {
       "includePattern": "target/(.*).war$",
-      "uploadPattern": "dbvtk-staging.war",
+      "uploadPattern": "dbvtk-developer.war",
       "matrixParams": {
         "override": 1
       }
