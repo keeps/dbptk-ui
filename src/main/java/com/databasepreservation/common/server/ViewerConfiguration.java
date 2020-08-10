@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.server.controller.ReporterType;
+import com.databasepreservation.common.utils.FilenameUtils;
 import com.databasepreservation.common.utils.ViewerAbstractConfiguration;
 import com.databasepreservation.utils.FileUtils;
 import com.google.common.cache.CacheBuilder;
@@ -388,7 +389,8 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   }
 
   private Path getReportPathForEdition(String databaseUUID) {
-    return reportsPath.resolve("report-metadata-edition-" + databaseUUID + "-" + Instant.now().toString() + ".md");
+    return reportsPath.resolve(FilenameUtils
+      .sanitizeFilename("report-metadata-edition-" + databaseUUID + "-" + Instant.now().toString() + ".md"));
   }
 
   private Path getReportPathForMigration(String databaseUUID) {
@@ -396,11 +398,13 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   }
 
   private Path getReportsPathForMigrationLiveDBMS(String databaseUUID) {
-    return reportsPath.resolve("report-migration-live-dbms-" + databaseUUID + "-" + Instant.now().toString() + ".md");
+    return reportsPath.resolve(FilenameUtils
+      .sanitizeFilename("report-migration-live-dbms-" + databaseUUID + "-" + Instant.now().toString() + ".md"));
   }
 
   private Path getReportsPathForMigrationSIARD(String databaseUUID) {
-    return reportsPath.resolve("report-migration-siard-" + databaseUUID + "-" + Instant.now().toString() + ".md");
+    return reportsPath.resolve(FilenameUtils
+      .sanitizeFilename("report-migration-siard-" + databaseUUID + "-" + Instant.now().toString() + ".md"));
   }
 
   private Path getReportPathForValidation(String databaseUUID) {
