@@ -2,7 +2,7 @@
 
 Hey devs, here are some notes that may be of use to you!
 
-[![Build Status](https://travis-ci.org/keeps/db-preservation-toolkit.png?branch=master)](https://travis-ci.org/keeps/db-preservation-toolkit)
+[![Build Status](https://travis-ci.org/keeps/db-preservation-toolkit.png?branch=master)](https://travis-ci.org/keeps/dbptk-developer)
 
 ## How to prepare and release a new version
 
