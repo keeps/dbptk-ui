@@ -4,6 +4,21 @@ Hey devs, here are some notes that may be of use to you!
 
 [![Build Status](https://api.travis-ci.org/keeps/dbptk-ui.png?branch=master)](https://travis-ci.org/keeps/dbptk-ui)
 
+## Debug WUI
+
+```bash
+# Open Spring boot
+mvn spring-boot:run -Pdebug-server
+
+# Open codeserver
+mvn gwt:codeserver -Dscope.gwt-dev=compile -Pdebug-server
+
+# Open codeserver http://127.0.0.1:9876/ and add bookmarks
+# Open DBPTK http://localhost:8080 and click the "Dev Mode On" bookmark
+
+```
+Optional: Check Google Chrome "RemoteLiveReload" extension for automatic reloading with spring boot.
+
 ## How to prepare and release a new version
 
 This release build/deploy method requires `gren`:
