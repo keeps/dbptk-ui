@@ -48,6 +48,7 @@ public class MetadataExportOptions extends WizardPanel<MetadataExportOptionsPara
   private Map<String, TextBox> textBoxInputs = new HashMap<>();
   private final boolean populate;
   private ViewerMetadata metadata = null;
+  private String clientMachine = "";
 
   public static MetadataExportOptions getInstance(String moduleName, boolean populate) {
     if (instance == null) {
@@ -71,14 +72,18 @@ public class MetadataExportOptions extends WizardPanel<MetadataExportOptionsPara
       "<div class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
 
     content.add(spinner);
-    if (populate) {
-      DatabaseService.Util.call((ViewerDatabase result) -> {
-        metadata = result.getMetadata();
+    ContextService.Util.call((String client) -> {
+      clientMachine = client;
+      if (populate) {
+        DatabaseService.Util.call((ViewerDatabase result) -> {
+          metadata = result.getMetadata();
+          obtainMetadataExportOptions(moduleName, spinner);
+        }).retrieve(databaseUUID);
+      } else {
         obtainMetadataExportOptions(moduleName, spinner);
-      }).retrieve(databaseUUID);
-    } else {
-      obtainMetadataExportOptions(moduleName, spinner);
-    }
+      }
+    }).getClientMachine();
+
   }
 
   @Override
@@ -131,7 +136,7 @@ public class MetadataExportOptions extends WizardPanel<MetadataExportOptionsPara
           defaultTextBox);
 
         if (parameter.getName().equals(ViewerConstants.SIARD_METADATA_CLIENT_MACHINE)) {
-          ContextService.Util.call(defaultTextBox::setText);
+          defaultTextBox.setText(clientMachine);
         }
         break;
       default:
@@ -171,6 +176,8 @@ public class MetadataExportOptions extends WizardPanel<MetadataExportOptionsPara
       case SIARD2ModuleFactory.PARAMETER_META_DATA_ORIGIN_TIMESPAN:
         textBox.setText(metadata.getDataOriginTimespan());
         break;
+      case SIARD2ModuleFactory.PARAMETER_META_CLIENT_MACHINE:
+        textBox.setText(metadata.getClientMachine());
     }
   }
 
