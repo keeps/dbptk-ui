@@ -26,7 +26,11 @@
 
         <version.gwt>2.8.2-jetty941</version.gwt>
         <scope.gwt-dev>provided</scope.gwt-dev>
+<<<<<<< HEAD
         <version.dbptk>2.9.5</version.dbptk>
+=======
+        <version.dbptk>2.9.6</version.dbptk>
+>>>>>>> update javax.xml.parsers due to oracle XDB dependency added with DBPTK-Developer 2.9.6
         <version.roda>3.0.2</version.roda>
         <version.jersey>2.29.1</version.jersey>
         <version.swagger>1.5.20</version.swagger>
@@ -192,10 +196,9 @@
                                 <id>${desktop}</id>
                                 <configuration>
                                     <moduleName>${desktop}</moduleName>
-                                    <jvmArgs>
-                                        -Djava.net.preferIPv4Stack=true
-                                        -Djavax.xml.parsers.SAXParserFactory=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl
-                                    </jvmArgs>
+                                    <systemProperties>
+                                        <javax.xml.parsers.SAXParserFactory>org.apache.xerces.jaxp.SAXParserFactoryImpl</javax.xml.parsers.SAXParserFactory>
+                                    </systemProperties>
                                 </configuration>
                                 <goals>
                                     <goal>compile</goal>
@@ -206,10 +209,9 @@
                                 <id>${server}</id>
                                 <configuration>
                                     <moduleName>${server}</moduleName>
-                                    <jvmArgs>
-                                        -Djava.net.preferIPv4Stack=true
-                                        -Djavax.xml.parsers.SAXParserFactory=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl
-                                    </jvmArgs>
+                                    <systemProperties>
+                                        <javax.xml.parsers.SAXParserFactory>org.apache.xerces.jaxp.SAXParserFactoryImpl</javax.xml.parsers.SAXParserFactory>
+                                    </systemProperties>
                                 </configuration>
                                 <goals>
                                     <goal>compile</goal>
@@ -236,7 +238,8 @@
                         <configuration>
                             <jvmArguments>
                                 -Djava.net.preferIPv4Stack=true
-                                -Djavax.xml.parsers.SAXParserFactory=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl -Dgwt.codeServerPort=9876
+                                -Djavax.xml.parsers.SAXParserFactory=org.apache.xerces.jaxp.SAXParserFactoryImpl -Dgwt.codeServerPort=9876
+                                -Djavax.xml.parsers.DocumentBuilderFactory=org.apache.xerces.jaxp.DocumentBuilderFactoryImpl
                                 -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005
                             </jvmArguments>
                         </configuration>
@@ -249,8 +252,13 @@
                         <configuration>
                             <moduleName>${server}</moduleName>
                             <launcherDir>${project.build.directory}/${project.build.finalName}/WEB-INF/classes/public/</launcherDir>
-                            <jvmArgs>-Djavax.xml.parsers.SAXParserFactory=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl</jvmArgs>
-                            <codeserverArgs><arg>-bindAddress</arg><arg>0.0.0.0</arg></codeserverArgs>
+                            <jvmArgs>
+                                -Djavax.xml.parsers.SAXParserFactory=org.apache.xerces.jaxp.SAXParserFactoryImpl
+                            </jvmArgs>
+                            <codeserverArgs>
+                                <arg>-bindAddress</arg>
+                                <arg>0.0.0.0</arg>
+                            </codeserverArgs>
                         </configuration>
                         <executions>
                             <execution>
@@ -274,6 +282,9 @@
                         <version>${springboot.version}</version>
                         <configuration>
                             <jvmArguments>
+                                -Djava.net.preferIPv4Stack=true
+                                -Djavax.xml.parsers.SAXParserFactory=org.apache.xerces.jaxp.SAXParserFactoryImpl
+                                -Djavax.xml.parsers.DocumentBuilderFactory=org.apache.xerces.jaxp.DocumentBuilderFactoryImpl
                                 -Dgwt.codeServerPort=9876 -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005 -Denv=desktop
                             </jvmArguments>
                         </configuration>
@@ -286,7 +297,9 @@
                         <configuration>
                             <moduleName>${desktop}</moduleName>
                             <launcherDir>${project.build.directory}/${project.build.finalName}/WEB-INF/classes/public/</launcherDir>
-                            <jvmArgs>-Djavax.xml.parsers.SAXParserFactory=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl</jvmArgs>
+                            <jvmArgs>
+                                -Djavax.xml.parsers.SAXParserFactory=org.apache.xerces.jaxp.SAXParserFactoryImpl
+                            </jvmArgs>
                         </configuration>
                         <executions>
                             <execution>
