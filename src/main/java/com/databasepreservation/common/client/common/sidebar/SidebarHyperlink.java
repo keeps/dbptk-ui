@@ -2,6 +2,7 @@ package com.databasepreservation.common.client.common.sidebar;
 
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.http.client.URL;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -43,7 +44,7 @@ public class SidebarHyperlink extends SidebarItem {
 
   public SidebarHyperlink(SafeHtml text, String targetHistoryToken) {
     initWidget(uiBinder.createAndBindUi(this));
-    setTargetHistoryToken(targetHistoryToken);
+    setTargetHistoryToken(URL.decode(targetHistoryToken));
     setTextBySafeHTML(text);
     label.addStyleName("sidebar-hyperlink sidebarItem");
   }

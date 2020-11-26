@@ -4,7 +4,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 
-import com.databasepreservation.common.client.models.user.User;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RequestNotValidException;
@@ -20,12 +19,12 @@ import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.models.activity.logs.ActivityLogEntry;
 import com.databasepreservation.common.client.models.activity.logs.ActivityLogWrapper;
 import com.databasepreservation.common.client.models.activity.logs.LogEntryState;
+import com.databasepreservation.common.client.models.user.User;
 import com.databasepreservation.common.client.services.ActivityLogService;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.activity.log.strategies.ActivityLogStrategy;
 import com.databasepreservation.common.utils.ControllerAssistant;
 import com.databasepreservation.common.utils.I18nUtility;
-import com.databasepreservation.common.utils.UserUtility;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>

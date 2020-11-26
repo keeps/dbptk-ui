@@ -261,7 +261,7 @@ public class DatabaseSidebar extends Composite implements Sidebar, ICollectionSt
         schema.getName() + " " + iconTag + " " + collectionStatus.getTableStatus(table.getUuid()).getCustomName());
       }
       SidebarHyperlink tableLink = new SidebarHyperlink(html,
-          HistoryManager.linkToTable(database.getUuid(), table.getSchemaName(), table.getName()));
+         HistoryManager.linkToTable(database.getUuid(), table.getSchemaName(), table.getName()));
       tableLink.setH6().setIndent2();
       list.put(table.getId(), tableLink);
       sidebarGroup.add(tableLink);

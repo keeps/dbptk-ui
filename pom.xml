@@ -26,11 +26,7 @@
 
         <version.gwt>2.8.2-jetty941</version.gwt>
         <scope.gwt-dev>provided</scope.gwt-dev>
-<<<<<<< HEAD
-        <version.dbptk>2.9.5</version.dbptk>
-=======
         <version.dbptk>2.9.6</version.dbptk>
->>>>>>> update javax.xml.parsers due to oracle XDB dependency added with DBPTK-Developer 2.9.6
         <version.roda>3.0.2</version.roda>
         <version.jersey>2.29.1</version.jersey>
         <version.swagger>1.5.20</version.swagger>
