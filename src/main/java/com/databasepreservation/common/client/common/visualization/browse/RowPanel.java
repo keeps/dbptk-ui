@@ -318,14 +318,12 @@ public class RowPanel extends RightPanel {
           rowField = RowField.createInstance(label, new HTML(safeHtml));
         }
       } else {
-        rowField = RowField.createInstance(label, new HTML(value));
+        rowField = RowField.createInstance(label, new HTML(SafeHtmlUtils.fromString(value)));
       }
     }
 
     final boolean showNullValues = ClientConfigurationManager.getBoolean(false, ViewerConstants.UI_INTERFACE,
       ViewerConstants.UI_INTERFACE_ROW_PANEL_PROPERTY, ViewerConstants.SHOW_NULL_VALUES);
-
-    GWT.log("showNullValues: " + showNullValues);
 
     if (ViewerStringUtils.isNotBlank(columnStatus.getCustomDescription())) {
       rowField.addColumnDescription(columnStatus.getCustomDescription());
