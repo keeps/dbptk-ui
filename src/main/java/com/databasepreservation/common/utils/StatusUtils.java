@@ -80,7 +80,7 @@ public class StatusUtils {
     if (column.getType() != null) {
       status.setOriginalType(column.getType().getOriginalTypeName());
       status.setTypeName(column.getType().getTypeName());
-      status.setNullable(column.getNillable().toString());
+      status.setNullable(column.getNillable() != null ? column.getNillable().toString() : "true");
       status.setType(column.getType().getDbType());
     }
     status.setColumnIndex(column.getColumnIndexInEnclosingTable());
@@ -93,7 +93,8 @@ public class StatusUtils {
     status.setSearchStatus(getSearchStatus(show));
     status.setDetailsStatus(getDetailsStatus(show));
 
-    if (column.getType() != null && column.getType().getDbType().equals(ViewerType.dbTypes.BINARY)) {
+    if (column.getType() != null && (column.getType().getDbType().equals(ViewerType.dbTypes.BINARY)
+      || column.getType().getDbType().equals(ViewerType.dbTypes.CLOB))) {
       final TemplateStatus template = getTemplateStatus();
       template.setTemplate(ViewerConstants.DEFAULT_DOWNLOAD_LABEL_TEMPLATE);
       status.updateSearchListTemplate(template);
