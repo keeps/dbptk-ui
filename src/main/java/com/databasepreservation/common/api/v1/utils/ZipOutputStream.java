@@ -2,123 +2,94 @@ package com.databasepreservation.common.api.v1.utils;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.util.zip.ZipFile;
-
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.compress.archivers.zip.Zip64Mode;
-import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
-import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
-import org.apache.commons.csv.CSVPrinter;
-import org.apache.commons.io.IOUtils;
-import org.roda.core.data.v2.index.sublist.Sublist;
 
 import com.databasepreservation.common.api.utils.ExtraMediaType;
 import com.databasepreservation.common.api.utils.HandlebarsUtils;
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.LargeObjectConsolidateProperty;
-import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.structure.ViewerCell;
-import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
+import com.databasepreservation.common.client.models.structure.ViewerType;
+import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.databasepreservation.common.server.ViewerFactory;
-import com.databasepreservation.common.server.index.utils.IterableIndexResult;
 import com.databasepreservation.common.utils.FilenameUtils;
 import com.databasepreservation.common.utils.LobManagerUtils;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
+import org.apache.commons.io.IOUtils;
+import org.roda.core.data.v2.index.sublist.Sublist;
+
+import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
+import com.databasepreservation.common.client.models.status.collection.TableStatus;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-public class ZipOutputStream extends CSVOutputStream {
+public abstract class ZipOutputStream extends CSVOutputStream {
+
   private final CollectionStatus configurationCollection;
-  private final String databaseUUID;
   private final ViewerDatabase database;
   private final TableStatus configTable;
   private final String zipFilename;
   private final String csvFilename;
-  private final IterableIndexResult viewerRows;
-  private final IterableIndexResult viewerRowsClone;
   private final List<String> fieldsToReturn;
-  private Sublist sublist;
   private final boolean exportDescriptions;
 
-  public ZipOutputStream(final CollectionStatus configurationCollection, final String databaseUUID,
-    final ViewerDatabase database, final TableStatus configTable, final IterableIndexResult viewerRows,
-    final IterableIndexResult viewerRowsClone, final String zipFilename, final String csvFilename,
-    List<String> fieldsToReturn, Sublist sublist, boolean exportDescriptions, String fieldsToHeader) {
+  public ZipOutputStream(CollectionStatus configurationCollection, ViewerDatabase database, TableStatus configTable,
+    String zipFilename, String csvFilename, List<String> fieldsToReturn, boolean exportDescriptions) {
     super(zipFilename, ',');
     this.configurationCollection = configurationCollection;
-    this.databaseUUID = databaseUUID;
     this.database = database;
     this.configTable = configTable;
     this.zipFilename = zipFilename;
     this.csvFilename = csvFilename;
-    this.viewerRows = viewerRows;
-    this.fieldsToReturn = Stream.of(fieldsToHeader.split(",")).collect(Collectors.toList());
-    this.viewerRowsClone = viewerRowsClone;
-    this.sublist = sublist;
+    this.fieldsToReturn = fieldsToReturn;
     this.exportDescriptions = exportDescriptions;
   }
 
-  @Override
-  public void consumeOutputStream(OutputStream out) throws IOException {
-    ZipFile siardArchive = new ZipFile(database.getPath());
+  public CollectionStatus getConfigurationCollection() {
+    return configurationCollection;
+  }
 
-    boolean all = false;
-    if (sublist == null) {
-      sublist = Sublist.NONE;
-      all = true;
-    }
-    Iterator<ViewerRow> iterator = viewerRows.iterator();
-    int nIndex = 0;
+  public ViewerDatabase getDatabase() {
+    return database;
+  }
 
-    int maxIndex = sublist.getFirstElementIndex() + sublist.getMaximumElementCount();
+  public TableStatus getConfigTable() {
+    return configTable;
+  }
 
-    try (ZipArchiveOutputStream zipArchiveOutputStream = new ZipArchiveOutputStream(out)) {
-      zipArchiveOutputStream.setUseZip64(Zip64Mode.AsNeeded);
-      zipArchiveOutputStream.setMethod(ZipArchiveOutputStream.DEFLATED);
+  public String getZipFilename() {
+    return zipFilename;
+  }
 
-      final List<ColumnStatus> binaryColumns = configTable.getBinaryColumns();
-      while (iterator.hasNext() && (nIndex < maxIndex || all)) {
-        ViewerRow row = iterator.next();
-        if (nIndex < (sublist.getFirstElementIndex())) {
-          nIndex++;
-          continue;
-        } else {
-          writeToZipFile(siardArchive, zipArchiveOutputStream, row, binaryColumns);
-        }
-        nIndex++;
-      }
+  public String getCsvFilename() {
+    return csvFilename;
+  }
 
-      nIndex = 0;
-      final ByteArrayOutputStream byteArrayOutputStream = writeCSVFile(nIndex, all);
-      zipArchiveOutputStream.putArchiveEntry(new ZipArchiveEntry(csvFilename));
-      zipArchiveOutputStream.write(byteArrayOutputStream.toByteArray());
-      byteArrayOutputStream.close();
-      zipArchiveOutputStream.closeArchiveEntry();
+  public List<String> getFieldsToReturn() {
+    return fieldsToReturn;
+  }
 
-      zipArchiveOutputStream.finish();
-      zipArchiveOutputStream.flush();
-    }
+  public boolean isExportDescriptions() {
+    return exportDescriptions;
   }
 
   @Override
   public String getFileName() {
-    return this.zipFilename;
+    return getZipFilename();
   }
 
   @Override
@@ -126,7 +97,10 @@ public class ZipOutputStream extends CSVOutputStream {
     return ExtraMediaType.APPLICATION_ZIP;
   }
 
-  private ColumnStatus findBinaryColumn(final List<ColumnStatus> columns, final String cell) {
+  @Override
+  public abstract void consumeOutputStream(OutputStream out) throws IOException;
+
+  protected ColumnStatus findLobColumn(final List<ColumnStatus> columns, final String cell) {
     for (ColumnStatus column : columns) {
       if (column.getId().equals(cell)) {
         return column;
@@ -135,14 +109,16 @@ public class ZipOutputStream extends CSVOutputStream {
     return null;
   }
 
-  private void writeToZipFile(ZipFile siardArchive, ZipArchiveOutputStream out, ViewerRow row,
-    List<ColumnStatus> binaryColumns) throws IOException {
+  protected void writeToZipFile(ZipFile siardArchive, ZipArchiveOutputStream out, ViewerRow row,
+                              List<ColumnStatus> binaryColumns) throws IOException {
 
     for (Map.Entry<String, ViewerCell> cellEntry : row.getCells().entrySet()) {
-      final ColumnStatus binaryColumn = findBinaryColumn(binaryColumns, cellEntry.getKey());
+      final ColumnStatus binaryColumn = findLobColumn(binaryColumns, cellEntry.getKey());
 
       if (binaryColumn != null) {
-        if (configurationCollection.getConsolidateProperty().equals(LargeObjectConsolidateProperty.CONSOLIDATED)) {
+        if (ViewerType.dbTypes.CLOB.equals(binaryColumn.getType())) {
+          handleWriteClob(out, binaryColumn, row);
+        } else if (configurationCollection.getConsolidateProperty().equals(LargeObjectConsolidateProperty.CONSOLIDATED)) {
           handleWriteConsolidateLobs(out, binaryColumn, row);
         } else {
           if (configTable.getColumnByIndex(binaryColumn.getColumnIndex()).isExternalLob()) {
@@ -155,50 +131,19 @@ public class ZipOutputStream extends CSVOutputStream {
     }
   }
 
-  private ByteArrayOutputStream writeCSVFile(int nIndex, boolean all) throws IOException {
-    ByteArrayOutputStream listBytes = new ByteArrayOutputStream();
-    try (final OutputStreamWriter writer = new OutputStreamWriter(listBytes)) {
-      CSVPrinter printer = null;
-      boolean isFirst = true;
-
-      int maxIndex = sublist.getFirstElementIndex() + sublist.getMaximumElementCount();
-
-      Iterator<ViewerRow> iterator = viewerRowsClone.iterator();
-      while (iterator.hasNext() && (nIndex < maxIndex || all)) {
-        ViewerRow row = iterator.next();
-        if (nIndex < sublist.getFirstElementIndex()) {
-          nIndex++;
-          continue;
-        } else {
-          if (isFirst) {
-            printer = new CSVPrinter(writer, getFormat()
-              .withHeader(configTable.getCSVHeaders(fieldsToReturn, exportDescriptions).toArray(new String[0])));
-            isFirst = false;
-          }
-
-          printer.printRecord(HandlebarsUtils.getCellValues(row, configTable, fieldsToReturn));
-        }
-        nIndex++;
-      }
-      viewerRowsClone.close();
-    }
-
-    return listBytes;
-  }
-
   private void handleWriteConsolidateLobs(ZipArchiveOutputStream out, ColumnStatus binaryColumn, ViewerRow row)
-    throws IOException {
+      throws IOException {
     final Path consolidatedPath = LobManagerUtils.getConsolidatedPath(ViewerFactory.getViewerConfiguration(),
-      databaseUUID, configTable.getId(), binaryColumn.getColumnIndex(), row.getUuid());
+        database.getUuid(), configTable.getId(), binaryColumn.getColumnIndex(), row.getUuid());
 
     InputStream in = new FileInputStream(consolidatedPath.toFile());
     final String templateFilename = FilenameUtils.getTemplateFilename(row, configTable, binaryColumn,
-      consolidatedPath.getFileName().toString());
+        consolidatedPath.getFileName().toString());
     addEntryToZip(out, in, templateFilename);
   }
 
   private void handleWriteInternalLobs(ZipArchiveOutputStream out, ZipFile siardArchive, ColumnStatus binaryColumn,
-    ViewerRow row) throws IOException {
+                                       ViewerRow row) throws IOException {
     final String templateFilename = FilenameUtils.getTemplateFilename(row, configTable, binaryColumn);
 
     if (LobManagerUtils.isLobEmbedded(configTable, row, binaryColumn.getColumnIndex())) {
@@ -209,21 +154,43 @@ public class ZipOutputStream extends CSVOutputStream {
       addEntryToZip(out, new BufferedInputStream(new ByteArrayInputStream(decodedString.getBytes())), templateFilename);
     } else {
       final InputStream in = siardArchive.getInputStream(
-        siardArchive.getEntry(LobManagerUtils.getZipFilePath(configTable, binaryColumn.getColumnIndex(), row)));
+          siardArchive.getEntry(LobManagerUtils.getZipFilePath(configTable, binaryColumn.getColumnIndex(), row)));
       addEntryToZip(out, in, templateFilename);
     }
   }
 
   private void handleWriteExternalLobs(ZipArchiveOutputStream out, ColumnStatus binaryColumn, ViewerRow row,
-    ViewerCell cell) throws IOException {
+                                       ViewerCell cell) throws IOException {
     final String lobLocation = cell.getValue();
     final Path lobPath = Paths.get(lobLocation);
     final Path completeLobPath = ViewerFactory.getViewerConfiguration().getSIARDFilesPath().resolve(lobPath);
 
     final String templateFilename = FilenameUtils.getTemplateFilename(row, configTable, binaryColumn,
-      completeLobPath.getFileName().toString());
+        completeLobPath.getFileName().toString());
     InputStream inputStream = new FileInputStream(lobPath.toFile());
     addEntryToZip(out, inputStream, templateFilename);
+  }
+
+  private void handleWriteClob(ZipArchiveOutputStream out, ColumnStatus binaryColumn, ViewerRow row)
+      throws IOException {
+
+    String handlebarsFilename = HandlebarsUtils.applyExportTemplate(row, configTable, binaryColumn.getColumnIndex());
+
+    if (ViewerStringUtils.isBlank(handlebarsFilename)) {
+      handlebarsFilename = "file_" + binaryColumn.getColumnIndex();
+    }
+
+    ByteArrayInputStream in = new ByteArrayInputStream(
+        row.getCells().get(binaryColumn.getId()).getValue().getBytes());
+
+    addClobEntryToZip(out, in, handlebarsFilename);
+  }
+
+  private void addClobEntryToZip(ZipArchiveOutputStream out, InputStream in, String templateFilename) throws IOException {
+    out.putArchiveEntry(new ZipArchiveEntry(ViewerConstants.INTERNAL_ZIP_CLOB_FOLDER + templateFilename));
+    IOUtils.copy(in, out);
+    in.close();
+    out.closeArchiveEntry();
   }
 
   private void addEntryToZip(ZipArchiveOutputStream out, InputStream in, String templateFilename) throws IOException {

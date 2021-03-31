@@ -302,7 +302,7 @@ public class RowPanel extends RightPanel {
     } else if (value == null) {
       rowField = RowField.createInstance(label, new HTML("NULL"));
     } else {
-      if (column.getType().getDbType().equals(ViewerType.dbTypes.BINARY)) {
+      if (ViewerType.dbTypes.BINARY.equals(column.getType().getDbType())) {
         if ((database.getPath() == null || database.getPath().isEmpty())
           && !status.getConsolidateProperty().equals(LargeObjectConsolidateProperty.CONSOLIDATED)) {
           rowField = RowField.createInstance(label, new HTML(messages.rowPanelTextForLobUnavailable()));
@@ -312,11 +312,27 @@ public class RowPanel extends RightPanel {
           if (template != null && !template.isEmpty()) {
             String json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_downloadLOB(),
               ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK, RestUtils.createExportLobUri(database.getUuid(),
-                table.getSchemaName(), table.getName(), row.getUuid(), columnStatus.getColumnIndex(), value));
+                table.getSchemaName(), table.getName(), row.getUuid(), columnStatus.getColumnIndex()));
             safeHtml = SafeHtmlUtils.fromSafeConstant(JavascriptUtils.compileTemplate(template, json));
           }
 
           rowField = RowField.createInstance(label, new HTML(safeHtml));
+        }
+      } else if (ViewerType.dbTypes.CLOB.equals(column.getType().getDbType())) {
+        if (columnStatus.getDetailsStatus().isShowContent()) {
+          rowField = RowField.createInstance(label, new HTML(SafeHtmlUtils.fromString(value)));
+        } else {
+          SafeHtml safeHtml = SafeHtmlUtils.EMPTY_SAFE_HTML;
+          String template = columnStatus.getDetailsStatus().getTemplateStatus().getTemplate();
+          if (template != null && !template.isEmpty()) {
+            String json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_downloadLOB(),
+                ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK, RestUtils.createExportLobUri(database.getUuid(),
+                    table.getSchemaName(), table.getName(), row.getUuid(), columnStatus.getColumnIndex()));
+            safeHtml = SafeHtmlUtils.fromSafeConstant(JavascriptUtils.compileTemplate(template, json));
+            rowField = RowField.createInstance(label, new HTML(safeHtml));
+          } else {
+            rowField = RowField.createInstance(label, new HTML(SafeHtmlUtils.fromString(value)));
+          }
         }
       } else {
         if (ViewerType.dbTypes.NUMERIC_FLOATING_POINT.equals(column.getType().getDbType())) {

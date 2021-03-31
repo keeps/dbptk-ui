@@ -622,7 +622,11 @@ public class ToolkitStructure2ViewerStructure {
           result.setDbType(ViewerType.dbTypes.NUMERIC_FLOATING_POINT);
         }
       } else if (type instanceof SimpleTypeString) {
-        result.setDbType(ViewerType.dbTypes.STRING);
+        if ("CHARACTER LARGE OBJECT".equalsIgnoreCase(type.getSql2008TypeName())) {
+          result.setDbType(ViewerType.dbTypes.CLOB);
+        } else {
+          result.setDbType(ViewerType.dbTypes.STRING);
+        }
       } else if (type instanceof ComposedTypeArray) {
         result = new ViewerTypeArray();
         result.setDbType(ViewerType.dbTypes.COMPOSED_ARRAY);

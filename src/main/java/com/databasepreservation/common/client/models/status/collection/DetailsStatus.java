@@ -2,19 +2,22 @@ package com.databasepreservation.common.client.models.status.collection;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-@JsonPropertyOrder({"show", "template"})
+@JsonPropertyOrder({"show", "showContent", "template"})
 public class DetailsStatus implements Serializable {
 
   private boolean show;
   private TemplateStatus templateStatus;
+  private boolean showContent;
 
   public DetailsStatus() {
+    this.showContent = true;
   }
 
   public boolean isShow() {
@@ -32,5 +35,13 @@ public class DetailsStatus implements Serializable {
 
   public void setTemplateStatus(TemplateStatus templateStatus) {
     this.templateStatus = templateStatus;
+  }
+
+  public boolean isShowContent() {
+    return showContent;
+  }
+
+  public void setShowContent(boolean showContent) {
+    this.showContent = showContent;
   }
 }

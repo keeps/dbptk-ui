@@ -2,11 +2,9 @@ package com.databasepreservation.common.client.models.status.collection;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerType;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -16,7 +14,8 @@ import com.google.gwt.core.client.GWT;
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-@JsonPropertyOrder({"uuid", "id", "schemaFolder", "tableFolder", "name", "customName", "description", "customDescription", "show", "columns"})
+@JsonPropertyOrder({"uuid", "id", "schemaFolder", "tableFolder", "name", "customName", "description",
+  "customDescription", "show", "columns"})
 public class TableStatus implements Serializable {
 
   private String uuid;
@@ -119,19 +118,20 @@ public class TableStatus implements Serializable {
   }
 
   @JsonIgnore
-  public int getLastColumnOrder(){
+  public int getLastColumnOrder() {
     int lastIndex = 0;
     for (ColumnStatus column : columns) {
-     if(column.getOrder() > lastIndex) lastIndex = column.getOrder();
+      if (column.getOrder() > lastIndex)
+        lastIndex = column.getOrder();
     }
     return lastIndex;
   }
 
-  public void reorderColumns(){
+  public void reorderColumns() {
     for (int i = 0; i < columns.size(); i++) {
       ColumnStatus column = columns.get(i);
       int currentIndex = i + 1;
-      if(column.getOrder() != currentIndex){
+      if (column.getOrder() != currentIndex) {
         column.setOrder(currentIndex);
       }
     }
@@ -139,17 +139,18 @@ public class TableStatus implements Serializable {
 
   @JsonIgnore
   public List<ColumnStatus> getVisibleColumnsList() {
-  	return columns.stream().filter(c -> c.getSearchStatus().getList().isShow()).sorted()
-				.collect(Collectors.toList());
-	}
+    return columns.stream().filter(c -> c.getSearchStatus().getList().isShow()).sorted().collect(Collectors.toList());
+  }
 
-	public boolean showAdvancedSearchOption() {
+  public boolean showAdvancedSearchOption() {
     return columns.stream().anyMatch(c -> c.getSearchStatus().getAdvanced().isFixed());
   }
 
-	@JsonIgnore
-  public List<ColumnStatus> getBinaryColumns() {
-    return getVisibleColumnsList().stream().filter(c -> c.getType().equals(ViewerType.dbTypes.BINARY)).collect(Collectors.toList());
+  @JsonIgnore
+  public List<ColumnStatus> getLobColumns() {
+    return getVisibleColumnsList().stream()
+      .filter(c -> c.getType().equals(ViewerType.dbTypes.BINARY) || c.getType().equals(ViewerType.dbTypes.CLOB))
+      .collect(Collectors.toList());
   }
 
   @JsonIgnore
@@ -159,7 +160,7 @@ public class TableStatus implements Serializable {
 
   @JsonIgnore
   public ColumnStatus getColumnByIndex(int index) {
-    return columns.stream().filter(c -> c.getColumnIndex() ==  index).findFirst().orElse(null);
+    return columns.stream().filter(c -> c.getColumnIndex() == index).findFirst().orElse(null);
   }
 
   @JsonIgnore

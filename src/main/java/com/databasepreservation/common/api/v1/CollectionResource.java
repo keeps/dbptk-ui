@@ -59,7 +59,7 @@ import com.databasepreservation.common.api.utils.StreamResponse;
 import com.databasepreservation.common.api.utils.ViewerStreamingOutput;
 import com.databasepreservation.common.api.v1.utils.IterableIndexResultsCSVOutputStream;
 import com.databasepreservation.common.api.v1.utils.ResultsCSVOutputStream;
-import com.databasepreservation.common.api.v1.utils.ZipOutputStream;
+import com.databasepreservation.common.api.v1.utils.ZipOutputStreamMultiRow;
 import com.databasepreservation.common.api.v1.utils.ZipOutputStreamSingleRow;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.search.SavedSearch;
@@ -81,6 +81,7 @@ import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
+import com.databasepreservation.common.client.models.structure.ViewerType;
 import com.databasepreservation.common.client.models.user.User;
 import com.databasepreservation.common.client.services.CollectionService;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
@@ -493,6 +494,10 @@ public class CollectionResource implements CollectionService {
         .getConfigurationCollection(databaseUUID, databaseUUID);
       final TableStatus configTable = configurationCollection.getTableStatusByTableId(row.getTableId());
 
+      if (ViewerType.dbTypes.CLOB.equals(configTable.getColumnByIndex(columnIndex).getType())) {
+        return handleClobDownload(configTable, row, columnIndex);
+      }
+
       if (configurationCollection.getConsolidateProperty().equals(LargeObjectConsolidateProperty.CONSOLIDATED)) {
         return handleConsolidatedLobDownload(databaseUUID, configTable, columnIndex, row, rowIndex);
       } else {
@@ -527,6 +532,20 @@ public class CollectionResource implements CollectionService {
         DownloadUtils
           .stream(Files.newInputStream(LobManagerUtils.getConsolidatedPath(ViewerFactory.getViewerConfiguration(),
             databaseUUID, row.getTableId(), columnIndex, rowIndex)))));
+  }
+
+  private Response handleClobDownload(TableStatus tableConfiguration, ViewerRow row, int columnIndex) {
+    String handlebarsFilename = HandlebarsUtils.applyExportTemplate(row, tableConfiguration, columnIndex);
+
+    if (ViewerStringUtils.isBlank(handlebarsFilename)) {
+      handlebarsFilename = "file_" + columnIndex;
+    }
+
+    ByteArrayInputStream inputStream = new ByteArrayInputStream(
+      row.getCells().get(tableConfiguration.getColumnByIndex(columnIndex).getId()).getValue().getBytes());
+
+    return ApiUtils.okResponse(new StreamResponse(handlebarsFilename,
+      tableConfiguration.getColumnByIndex(columnIndex).getApplicationType(), DownloadUtils.stream(inputStream)));
   }
 
   private Response handleExternalLobDownload(TableStatus tableConfiguration, ViewerRow row, int columnIndex)
@@ -743,8 +762,8 @@ public class CollectionResource implements CollectionService {
     final IterableIndexResult clone = solrManager.findAllRows(databaseUUID, findRequest.filter, findRequest.sorter,
       fields, findRequest.extraParameters);
     return ApiUtils.okResponse(new StreamResponse(
-      new ZipOutputStream(configurationCollection, databaseUUID, database, configTable, allRows, clone, zipFilename,
-        filename, findRequest.fieldsToReturn, findRequest.sublist, exportDescription, fieldsToHeader)));
+      new ZipOutputStreamMultiRow(configurationCollection, database, configTable, allRows, clone, zipFilename,
+        filename, findRequest.sublist, exportDescription, fieldsToHeader)));
   }
 
   private Object[] appendValue(Object[] obj, Object newObj) {

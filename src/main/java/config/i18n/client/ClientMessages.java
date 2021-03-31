@@ -1508,6 +1508,11 @@ public interface ClientMessages extends Messages {
   String binaryColumnMIMEType();
 
   /********************************************
+   * Column Management Panel - Clob Column
+   *******************************************/
+  String clobColumnDisplayContent();
+
+  /********************************************
    * Resources
    *******************************************/
   String resourceNotAvailableTitle();

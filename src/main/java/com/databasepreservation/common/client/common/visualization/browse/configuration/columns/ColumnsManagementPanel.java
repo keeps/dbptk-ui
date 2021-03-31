@@ -26,6 +26,7 @@ import com.databasepreservation.common.client.common.lists.widgets.BasicTablePan
 import com.databasepreservation.common.client.common.sidebar.Sidebar;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.BinaryColumnOptionsPanel;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.ClobColumnOptionsPanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.ColumnOptionsPanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.NestedColumnOptionsPanel;
 import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
@@ -499,11 +500,16 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
     return description;
   }
 
+  private boolean isAnOptionColumn(ViewerType.dbTypes type) {
+    return ViewerType.dbTypes.BINARY.equals(type) || ViewerType.dbTypes.NESTED.equals(type)
+      || ViewerType.dbTypes.CLOB.equals(type);
+  }
+
   private Column<ColumnStatus, String> getOptionsColumn() {
     Column<ColumnStatus, String> options = new ButtonColumn<ColumnStatus>() {
       @Override
       public void render(Cell.Context context, ColumnStatus object, SafeHtmlBuilder sb) {
-        if (object.getType().equals(ViewerType.dbTypes.BINARY) || object.getType().equals(ViewerType.dbTypes.NESTED)) {
+        if (isAnOptionColumn(object.getType())) {
           sb.appendHtmlConstant(
             "<div class=\"center-cell\"><button class=\"btn btn-cell-action\" type=\"button\" tabindex=\"-1\"><i class=\"fa fa-cog\"></i></button></div>");
         } else {
@@ -519,7 +525,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
     };
 
     options.setFieldUpdater((index, columnStatus, value) -> {
-      if (columnStatus.getType().equals(ViewerType.dbTypes.NESTED)) {
+      if (ViewerType.dbTypes.NESTED.equals(columnStatus.getType())) {
         final ColumnOptionsPanel nestedColumnOptionPanel = NestedColumnOptionsPanel.createInstance(columnStatus);
         Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), messages.basicActionSave(),
           messages.basicActionCancel(), nestedColumnOptionPanel, new DefaultAsyncCallback<Boolean>() {
@@ -539,7 +545,31 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
               }
             }
           });
-      } else if (columnStatus.getType().equals(ViewerType.dbTypes.BINARY)) {
+      } else if (ViewerType.dbTypes.CLOB.equals(columnStatus.getType())) {
+        ColumnOptionsPanel clobColumnOptionPanel = ClobColumnOptionsPanel.createInstance(
+          collectionStatus.getTableStatusByTableId(tableId),
+          collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId()));
+
+        Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), messages.basicActionSave(),
+          messages.basicActionCancel(), clobColumnOptionPanel, new DefaultAsyncCallback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean value) {
+              if (value) {
+                collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
+                  .updateExportTemplate(clobColumnOptionPanel.getExportTemplate());
+                collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
+                  .updateSearchListTemplate(clobColumnOptionPanel.getSearchTemplate());
+                collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
+                  .updateDetailsTemplate(clobColumnOptionPanel.getDetailsTemplate());
+                collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
+                  .updateDetailsShowContent(((ClobColumnOptionsPanel) clobColumnOptionPanel).showContent());
+                collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
+                  .setApplicationType(((ClobColumnOptionsPanel) clobColumnOptionPanel).getApplicationType());
+                saveChanges(true);
+              }
+            }
+          });
+      } else if (ViewerType.dbTypes.BINARY.equals(columnStatus.getType())) {
         ColumnOptionsPanel binaryColumnOptionPanel = BinaryColumnOptionsPanel.createInstance(
           collectionStatus.getTableStatusByTableId(tableId),
           collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId()));

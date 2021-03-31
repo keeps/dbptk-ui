@@ -50,7 +50,7 @@ public class RestUtils {
   }
 
   public static String createExportLobUri(String databaseUUID, String schemaName, String tableName, String rowIndex,
-    int columnIndex, String filename) {
+    int columnIndex) {
     // api/v1/database/{databaseUUID}/collection/{collectionUUID}/data/{schema}/{table}/{row
     // index}/{col index}
 

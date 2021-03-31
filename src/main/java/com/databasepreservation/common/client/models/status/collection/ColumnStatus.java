@@ -187,6 +187,10 @@ public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
     this.getDetailsStatus().setShow(value);
   }
 
+  public void updateDetailsShowContent(boolean value) {
+    this.getDetailsStatus().setShowContent(value);
+  }
+
   public void updateAdvancedSearchShowValue(boolean value) {
     this.getSearchStatus().getAdvanced().setFixed(value);
   }

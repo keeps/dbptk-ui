@@ -1,8 +1,8 @@
 package com.databasepreservation.common.client.common.lists;
 
 import static com.databasepreservation.common.client.models.structure.ViewerType.dbTypes.BINARY;
-import static com.databasepreservation.common.client.models.structure.ViewerType.dbTypes.NESTED;
 import static com.databasepreservation.common.client.models.structure.ViewerType.dbTypes.CLOB;
+import static com.databasepreservation.common.client.models.structure.ViewerType.dbTypes.NESTED;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -13,10 +13,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.client.ClientConfigurationManager;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
+import com.databasepreservation.common.client.ClientConfigurationManager;
 import com.databasepreservation.common.client.ClientLogger;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
@@ -116,7 +116,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     Map<String, Integer> binaryColumns = new HashMap<>();
     int index = 0;
     for (ColumnStatus configColumn : table.getVisibleColumnsList()) {
-      if (configColumn.getType().equals(BINARY)) {
+      if (configColumn.getType().equals(BINARY) || configColumn.getType().equals(CLOB)) {
         binaryColumns.put(configColumn.getId(), index);
       }
       index++;
@@ -148,7 +148,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
         // Treat as non nested
         if (configColumn.getType().equals(BINARY) || configColumn.getType().equals(CLOB)) {
           Column<ViewerRow, SafeHtml> binaryColumn = buildDownloadColumn(configColumn, database, table,
-              configColumn.getColumnIndex());
+            configColumn.getColumnIndex());
           binaryColumn.setSortable(true); // add to configuration file sortable options
           addColumn(configColumn, binaryColumn);
           configColumns.put(configColumn, binaryColumn);
@@ -326,13 +326,11 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
 
   private SafeHtml getLobDownload(ViewerDatabase database, ColumnStatus configColumn, ViewerTable table, ViewerRow row,
     int columnIndex) {
-    final String value = row.getCells().get(configColumn.getId()).getValue();
-
     String template = configColumn.getSearchStatus().getList().getTemplate().getTemplate();
     if (template != null && !template.isEmpty()) {
       String json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_downloadLOB(),
         ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK, RestUtils.createExportLobUri(database.getUuid(),
-          table.getSchemaName(), table.getName(), row.getUuid(), columnIndex, value));
+          table.getSchemaName(), table.getName(), row.getUuid(), columnIndex));
       return SafeHtmlUtils.fromSafeConstant(JavascriptUtils.compileTemplate(template, json));
     }
 
@@ -377,10 +375,6 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     }
 
     currentSorter = createSorter(columnSortList, columnSortingKeyMap);
-
-    GWT.log("sorter: " + currentSorter);
-    GWT.log("Filter: " + filter);
-    GWT.log("isNested: " + wrapper.isNested());
 
     FindRequest findRequest = new FindRequest(ViewerDatabase.class.getName(), filter, currentSorter, sublist,
       getFacets(), false, fieldsToReturn, extraParameters);
@@ -512,8 +506,6 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     } else {
       sublist = null;
     }
-
-    GWT.log("s: " + sublist);
 
     FindRequest findRequest = new FindRequest(ViewerRow.class.getName(), getFilter(), currentSorter, sublist,
       Facets.NONE, false, fieldsToSolr, extraParameters);
