@@ -1,5 +1,6 @@
 package com.databasepreservation.common.client.common.visualization.browse;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -318,7 +319,12 @@ public class RowPanel extends RightPanel {
           rowField = RowField.createInstance(label, new HTML(safeHtml));
         }
       } else {
-        rowField = RowField.createInstance(label, new HTML(SafeHtmlUtils.fromString(value)));
+        if (ViewerType.dbTypes.NUMERIC_FLOATING_POINT.equals(column.getType().getDbType())) {
+          SafeHtml safeHtml = SafeHtmlUtils.fromString(new BigDecimal(value).toPlainString());
+          rowField = RowField.createInstance(label, new HTML(safeHtml));
+        } else {
+          rowField = RowField.createInstance(label, new HTML(SafeHtmlUtils.fromString(value)));
+        }
       }
     }
 

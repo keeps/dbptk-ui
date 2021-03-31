@@ -1,6 +1,7 @@
 package com.databasepreservation.common.api.utils;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -73,7 +74,11 @@ public class HandlebarsUtils {
               if (columnConfig.getType().equals(ViewerType.dbTypes.BINARY)) {
                 values.add(LobManagerUtils.getDefaultFilename(row.getUuid()));
               } else {
-                values.add(row.getCells().get(solrColumnName).getValue());
+                if (columnConfig.getType().equals(ViewerType.dbTypes.NUMERIC_FLOATING_POINT)) {
+                  values.add(new BigDecimal(row.getCells().get(solrColumnName).getValue()).toPlainString());
+                } else {
+                  values.add(row.getCells().get(solrColumnName).getValue());
+                }
               }
             }
           }

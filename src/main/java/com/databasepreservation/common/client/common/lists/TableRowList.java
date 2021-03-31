@@ -2,7 +2,9 @@ package com.databasepreservation.common.client.common.lists;
 
 import static com.databasepreservation.common.client.models.structure.ViewerType.dbTypes.BINARY;
 import static com.databasepreservation.common.client.models.structure.ViewerType.dbTypes.NESTED;
+import static com.databasepreservation.common.client.models.structure.ViewerType.dbTypes.CLOB;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -144,9 +146,9 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     for (ColumnStatus configColumn : tableStatus.getVisibleColumnsList()) {
       if (!configColumn.getType().equals(NESTED)) {
         // Treat as non nested
-        if (configColumn.getType().equals(BINARY)) {
+        if (configColumn.getType().equals(BINARY) || configColumn.getType().equals(CLOB)) {
           Column<ViewerRow, SafeHtml> binaryColumn = buildDownloadColumn(configColumn, database, table,
-            configColumn.getColumnIndex());
+              configColumn.getColumnIndex());
           binaryColumn.setSortable(true); // add to configuration file sortable options
           addColumn(configColumn, binaryColumn);
           configColumns.put(configColumn, binaryColumn);
@@ -262,10 +264,12 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
             case DATETIME_JUST_TIME:
               ret = SafeHtmlUtils.fromString(Humanize.formatDateTimeFromSolr(value, "HH:mm:ss"));
               break;
+            case NUMERIC_FLOATING_POINT:
+              ret = SafeHtmlUtils.fromString(new BigDecimal(value).toPlainString());
+              break;
             case BOOLEAN:
             case ENUMERATION:
             case TIME_INTERVAL:
-            case NUMERIC_FLOATING_POINT:
             case NUMERIC_INTEGER:
             case COMPOSED_STRUCTURE:
             case COMPOSED_ARRAY:
