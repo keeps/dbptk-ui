@@ -11,5 +11,6 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 1.8
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Run Tests
         run: mvn test
