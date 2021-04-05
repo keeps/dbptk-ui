@@ -227,9 +227,10 @@ public class ViewerTable implements Serializable {
     return null;
   }
 
-  public boolean containsBinaryColumns() {
+  public boolean containsLOBColumns() {
     for (ViewerColumn column : columns) {
-      if (column.getType().getDbType().equals(ViewerType.dbTypes.BINARY)) {
+      if (ViewerType.dbTypes.BINARY.equals(column.getType().getDbType())
+        || ViewerType.dbTypes.CLOB.equals(column.getType().getDbType())) {
         return true;
       }
     }

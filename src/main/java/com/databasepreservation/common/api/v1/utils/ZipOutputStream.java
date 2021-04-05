@@ -177,20 +177,13 @@ public abstract class ZipOutputStream extends CSVOutputStream {
     String handlebarsFilename = HandlebarsUtils.applyExportTemplate(row, configTable, binaryColumn.getColumnIndex());
 
     if (ViewerStringUtils.isBlank(handlebarsFilename)) {
-      handlebarsFilename = "file_" + binaryColumn.getColumnIndex();
+      handlebarsFilename = "file_" + binaryColumn.getCustomName();
     }
 
     ByteArrayInputStream in = new ByteArrayInputStream(
         row.getCells().get(binaryColumn.getId()).getValue().getBytes());
 
-    addClobEntryToZip(out, in, handlebarsFilename);
-  }
-
-  private void addClobEntryToZip(ZipArchiveOutputStream out, InputStream in, String templateFilename) throws IOException {
-    out.putArchiveEntry(new ZipArchiveEntry(ViewerConstants.INTERNAL_ZIP_CLOB_FOLDER + templateFilename));
-    IOUtils.copy(in, out);
-    in.close();
-    out.closeArchiveEntry();
+    addEntryToZip(out, in, handlebarsFilename);
   }
 
   private void addEntryToZip(ZipArchiveOutputStream out, InputStream in, String templateFilename) throws IOException {

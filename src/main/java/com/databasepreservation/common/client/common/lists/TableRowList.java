@@ -144,14 +144,27 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     }
 
     for (ColumnStatus configColumn : tableStatus.getVisibleColumnsList()) {
-      if (!configColumn.getType().equals(NESTED)) {
+      if (!NESTED.equals(configColumn.getType())) {
         // Treat as non nested
-        if (configColumn.getType().equals(BINARY) || configColumn.getType().equals(CLOB)) {
+        if (BINARY.equals(configColumn.getType())) {
           Column<ViewerRow, SafeHtml> binaryColumn = buildDownloadColumn(configColumn, database, table,
             configColumn.getColumnIndex());
           binaryColumn.setSortable(true); // add to configuration file sortable options
           addColumn(configColumn, binaryColumn);
           configColumns.put(configColumn, binaryColumn);
+        } else if (CLOB.equals(configColumn.getType())) {
+          if (configColumn.getSearchStatus().getList().isShowContent()) {
+            Column<ViewerRow, SafeHtml> column = buildSimpleColumn(configColumn);
+            column.setSortable(true);
+            addColumn(configColumn, column);
+            configColumns.put(configColumn, column);
+          } else {
+            Column<ViewerRow, SafeHtml> binaryColumn = buildDownloadColumn(configColumn, database, table,
+                configColumn.getColumnIndex());
+            binaryColumn.setSortable(true); // add to configuration file sortable options
+            addColumn(configColumn, binaryColumn);
+            configColumns.put(configColumn, binaryColumn);
+          }
         } else {
           Column<ViewerRow, SafeHtml> column = buildSimpleColumn(configColumn);
           column.setSortable(true);

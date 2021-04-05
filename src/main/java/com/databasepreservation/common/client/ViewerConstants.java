@@ -82,7 +82,6 @@ public class ViewerConstants {
   public static final String DENORMALIZATION_STATUS_PREFIX = "denormalization-";
 
   public static final String INTERNAL_ZIP_LOB_FOLDER = "lobs/";
-  public static final String INTERNAL_ZIP_CLOB_FOLDER = "clobs/";
 
   /*
    * SOLR CONFIGSETS

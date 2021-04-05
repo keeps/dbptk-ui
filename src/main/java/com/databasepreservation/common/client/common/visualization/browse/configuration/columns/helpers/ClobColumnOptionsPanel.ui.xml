@@ -1,5 +1,6 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:w="urn:import:com.databasepreservation.common.client.widgets">
     <ui:with field='messages' type='config.i18n.client.ClientMessages'/>
     <g:FlowPanel ui:field="content" addStyleNames="columns-management-options">
         <g:Label addStyleNames="form-label">
@@ -7,34 +8,24 @@
         </g:Label>
         <g:HTML addStyleNames="column-description" ui:field="templateEngineLabel"/>
 
-        <g:FlowPanel>
-            <g:Label addStyleNames="form-label">
-                <ui:text from='{messages.columnManagementLabelForTemplateList}'/>
-            </g:Label>
-            <g:TextBox addStyleNames="form-textbox" ui:field="displayList"/>
-            <g:FlowPanel ui:field="displayListHint"/>
+        <g:FlowPanel >
+            <g:Label addStyleNames="form-label" />
+            <g:CheckBox addStyleNames="form-checkbox" ui:field="overallOption">
+                <ui:text from='{messages.clobColumnDisplayContentOnListPanel}'/>
+            </g:CheckBox>
+            <w:ColumnTemplateOptions ui:field="templateToOverallView" />
         </g:FlowPanel>
 
         <g:FlowPanel>
             <g:Label addStyleNames="form-label" />
-            <g:CheckBox addStyleNames="form-checkbox" ui:field="showContent">
-                <ui:text from='{messages.clobColumnDisplayContent}'/>
+            <g:CheckBox addStyleNames="form-checkbox" ui:field="detailedOption">
+                <ui:text from='{messages.clobColumnDisplayContentOnDetailedPanel}'/>
             </g:CheckBox>
+            <w:ColumnTemplateOptions ui:field="templateToDetailedView" />
         </g:FlowPanel>
 
-        <g:FlowPanel>
-            <g:Label addStyleNames="form-label">
-                <ui:text from='{messages.binaryColumnTemplateForFilename}'/>
-            </g:Label>
-            <g:TextBox addStyleNames="form-textbox" ui:field="templateList"/>
-            <g:FlowPanel ui:field="templateListHint"/>
-        </g:FlowPanel>
+        <w:ColumnTemplateOptions ui:field="templateToRenderFile" />
 
-        <g:FlowPanel>
-            <g:Label addStyleNames="form-label">
-                <ui:text from='{messages.binaryColumnMIMEType}'/>
-            </g:Label>
-            <g:TextBox addStyleNames="form-textbox" ui:field="applicationType"/>
-        </g:FlowPanel>
+        <w:ColumnTemplateOptions ui:field="applicationType" />
     </g:FlowPanel>
 </ui:UiBinder>

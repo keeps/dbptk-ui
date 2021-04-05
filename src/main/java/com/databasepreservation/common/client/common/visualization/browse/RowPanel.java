@@ -227,7 +227,7 @@ public class RowPanel extends RightPanel {
     btnExport.addClickHandler(event -> {
       HelperExportTableData helperExportTableData = new HelperExportTableData(table, true);
       Dialogs.showCSVSetupDialog(messages.csvExportDialogTitle(),
-        helperExportTableData.getWidget(table.containsBinaryColumns()), messages.basicActionCancel(),
+        helperExportTableData.getWidget(table.containsLOBColumns()), messages.basicActionCancel(),
         messages.basicActionConfirm(), new DefaultAsyncCallback<Boolean>() {
 
           @Override
@@ -322,7 +322,7 @@ public class RowPanel extends RightPanel {
         if (columnStatus.getDetailsStatus().isShowContent()) {
           rowField = RowField.createInstance(label, new HTML(SafeHtmlUtils.fromString(value)));
         } else {
-          SafeHtml safeHtml = SafeHtmlUtils.EMPTY_SAFE_HTML;
+          SafeHtml safeHtml;
           String template = columnStatus.getDetailsStatus().getTemplateStatus().getTemplate();
           if (template != null && !template.isEmpty()) {
             String json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_downloadLOB(),

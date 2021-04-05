@@ -562,7 +562,9 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
                 collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
                   .updateDetailsTemplate(clobColumnOptionPanel.getDetailsTemplate());
                 collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
-                  .updateDetailsShowContent(((ClobColumnOptionsPanel) clobColumnOptionPanel).showContent());
+                  .updateDetailsShowContent(((ClobColumnOptionsPanel) clobColumnOptionPanel).showContentInDetails());
+                collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
+                    .getSearchStatus().getList().setShowContent(((ClobColumnOptionsPanel) clobColumnOptionPanel).showContentInList());
                 collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
                   .setApplicationType(((ClobColumnOptionsPanel) clobColumnOptionPanel).getApplicationType());
                 saveChanges(true);

@@ -23,6 +23,7 @@ public class HelperExportTableData {
   private RadioButton radioButtonExportAll;
   private CheckBox checkBoxExportDescription;
   private CheckBox checkBoxExportLOBs;
+  private CheckBox includeCLOBInsideCSV;
   private boolean isZipHelper;
   private final boolean singleRow;
   private String defaultZipFilename;

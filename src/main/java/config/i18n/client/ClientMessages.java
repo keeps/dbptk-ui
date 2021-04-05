@@ -1510,7 +1510,9 @@ public interface ClientMessages extends Messages {
   /********************************************
    * Column Management Panel - Clob Column
    *******************************************/
-  String clobColumnDisplayContent();
+  String clobColumnDisplayContentOnDetailedPanel();
+
+  String clobColumnDisplayContentOnListPanel();
 
   /********************************************
    * Resources

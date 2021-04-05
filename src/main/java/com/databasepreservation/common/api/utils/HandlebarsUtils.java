@@ -36,7 +36,7 @@ public class HandlebarsUtils {
     for (String solrColumnName : fieldsToReturn) {
       final ColumnStatus columnConfig = configTable.getColumnById(solrColumnName);
 
-      if (columnConfig != null && columnConfig.getType().equals(ViewerType.dbTypes.NESTED)) {
+      if (columnConfig != null && ViewerType.dbTypes.NESTED.equals(columnConfig.getType())) {
         // treat nested
         if (!row.getNestedRowList().isEmpty()) {
           String template = columnConfig.getExportStatus().getTemplateStatus().getTemplate();
@@ -67,6 +67,8 @@ public class HandlebarsUtils {
             if (StringUtils.isNotBlank(applied)) {
               if (columnConfig.getType().equals(ViewerType.dbTypes.BINARY)) {
                 values.add(FilenameUtils.sanitizeFilename(applied));
+              } else if (columnConfig.getSearchStatus().getList().isShowContent()) {
+                values.add(row.getCells().get(solrColumnName).getValue());
               } else {
                 values.add(applied);
               }
