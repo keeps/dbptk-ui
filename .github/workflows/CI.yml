@@ -22,7 +22,7 @@ jobs:
           java-version: 8
           distribution: 'adopt'
       - name: Cache
-        uses: actions/cache@v1.0.0
+        uses: actions/cache@v2
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
@@ -31,4 +31,3 @@ jobs:
         run: mvn $MAVEN_CLI_OPTS -Dtestng.groups="travis-ci" clean org.jacoco:jacoco-maven-plugin:prepare-agent install
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-

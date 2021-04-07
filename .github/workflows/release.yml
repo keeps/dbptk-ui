@@ -1,0 +1,80 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "**"
+    branches-ignore:
+      - "**"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set up JDK 8
+        uses: actions/setup-java@v2
+        with:
+          java-version: 8
+          distribution: 'adopt'
+      - name: Cache
+        uses: actions/cache@v1.0.0
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-maven-
+      - name: Run Tests
+        run: mvn $MAVEN_CLI_OPTS -Dtestng.groups="travis-ci" test
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set up JDK 8
+        uses: actions/setup-java@v2
+        with:
+          java-version: 8
+          distribution: 'adopt'
+      - name: Cache
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-maven-
+      - name: Deploy to GitHub packages
+        run: mvn $MAVEN_CLI_OPTS clean package deploy -Dmaven.test.skip=true -Pdefault
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  dispatch:
+    needs: build
+    strategy:
+      matrix:
+        repo: [ 'keeps/dbptk-desktop', 'keeps/dbptk-enterprise' ]
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get release version
+        id: tag
+        run: echo ::set-output name=result::${GITHUB_REF/refs\/tags\/v/}
+      - name: Repository Dispatch
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          repository: ${{ matrix.repo }}
+          event-type: dispatch-main
+          client-payload: '{"version": "${{ steps.tag.outputs.result }}"}'
