@@ -27,36 +27,8 @@ jobs:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-maven-
-      - name: Notify slack success
-        if: success()
-        id: slack # IMPORTANT: reference this step ID value in future Slack steps
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_DBPTK_TOKEN }}
-        uses: voxmedia/github-action-slack-notify-build@v1
-        with:
-          channel: dbptk
-          status: STARTING
-          color: warning
       - name: Build DBPTK-UI
         run: mvn $MAVEN_CLI_OPTS -Dtestng.groups="travis-ci" clean org.jacoco:jacoco-maven-plugin:prepare-agent install
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Notify slack success
-        if: success()
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_DBPTK_TOKEN }}
-        uses: voxmedia/github-action-slack-notify-build@v1
-        with:
-          channel: dbptk
-          status: SUCCESS
-          color: good
-      - name: Notify slack fail
-        if: failure()
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_DBPTK_TOKEN }}
-        uses: voxmedia/github-action-slack-notify-build@v1
-        with:
-          channel: dbptk
-          status: FAILED
-          color: danger
 
