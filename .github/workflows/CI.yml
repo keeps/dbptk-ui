@@ -1,0 +1,30 @@
+name: "Test"
+
+on:
+  push:
+    branches:
+      - "**"
+    tags-ignore:
+      - "**"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version"
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK 8
+        uses: actions/setup-java@v2
+        with:
+          java-version: 8
+          distribution: 'adopt'
+      - name: Cache
+        uses: actions/cache@v1.0.0
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-maven-
+      - name: Build DBPTK-UI
+        run: mvn $MAVEN_CLI_OPTS -Dtestng.groups="travis-ci" clean org.jacoco:jacoco-maven-plugin:prepare-agent install
+

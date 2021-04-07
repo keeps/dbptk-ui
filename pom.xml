@@ -12,7 +12,7 @@
     <description>A viewer and explorer for preserved databases</description>
     <organization>
         <name>KEEP SOLUTIONS</name>
-        <url>http://www.keep.pt</url>
+        <url>https://www.keep.pt</url>
     </organization>
 
     <properties>
@@ -24,9 +24,9 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
 
-        <version.gwt>2.8.2-jetty941</version.gwt>
+        <version.gwt>2.9.0-jetty94</version.gwt>
         <scope.gwt-dev>provided</scope.gwt-dev>
-        <version.dbptk>2.10.0-SNAPSHOT</version.dbptk>
+        <version.dbptk>2.9.7</version.dbptk>
         <version.roda>3.0.2</version.roda>
         <version.jersey>2.29.1</version.jersey>
         <version.swagger>1.5.20</version.swagger>
@@ -45,20 +45,20 @@
         <repository>
             <id>KEEPS-Artifacts</id>
             <name>KEEP Artifacts-releases</name>
-            <url>http://artifactory.keep.pt/keep</url>
+            <url>https://artifactory.keep.pt/keep</url>
         </repository>
         <repository>
             <id>github</id>
-            <name>GitHub 006627 Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/006627/gwt</url>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/keeps/*</url>
         </repository>
     </repositories>
 
     <distributionManagement>
         <repository>
-            <id>KEEPS-Artifacts-Deploy</id>
-            <name>KEEP Artifacts-releases</name>
-            <url>http://artifactory.keep.pt/keep</url>
+            <id>Github-packages</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/keeps/dbptk-ui</url>
         </repository>
     </distributionManagement>
 
