@@ -10,10 +10,8 @@ import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 
@@ -101,13 +99,18 @@ public class BinaryColumnOptionsPanel extends ColumnOptionsPanel {
 
     templateEngineLabel.setHTML(messages.columnManagementTextForTemplateHint(ViewerConstants.TEMPLATE_ENGINE_LINK));
     templateList.setText(columnConfiguration.getExportStatus().getTemplateStatus().getTemplate());
-    templateListHint.add(ColumnOptionUtils.buildHintWithButtons(tableConfiguration, templateList, messages.columnManagementTextForPossibleFields()));
+    templateListHint.add(ColumnOptionUtils.buildHintWithButtons(tableConfiguration, templateList,
+      messages.columnManagementTextForPossibleFields()));
 
-    displayList.setText(ColumnOptionUtils.getDefaultTextOrValue(columnConfiguration.getSearchStatus().getList().getTemplate()));
-    displayListHint.add(ColumnOptionUtils.buildHintForLabel(displayList, messages.columnManagementTextForPossibleFields()));
+    displayList
+      .setText(ColumnOptionUtils.getDefaultTextOrValue(columnConfiguration.getSearchStatus().getList().getTemplate()));
+    displayListHint
+      .add(ColumnOptionUtils.buildHintForLabel(displayList, messages.columnManagementTextForPossibleFields()));
 
-    detailsList.setText(ColumnOptionUtils.getDefaultTextOrValue(columnConfiguration.getDetailsStatus().getTemplateStatus()));
-    detailsListHint.add(ColumnOptionUtils.buildHintForLabel(detailsList, messages.columnManagementTextForPossibleFields()));
+    detailsList
+      .setText(ColumnOptionUtils.getDefaultTextOrValue(columnConfiguration.getDetailsStatus().getTemplateStatus()));
+    detailsListHint
+      .add(ColumnOptionUtils.buildHintForLabel(detailsList, messages.columnManagementTextForPossibleFields()));
 
     applicationType.setText(columnConfiguration.getApplicationType());
   }

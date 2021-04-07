@@ -1,8 +1,5 @@
 package com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.TemplateStatus;
@@ -82,16 +79,16 @@ public class NestedColumnOptionsPanel extends ColumnOptionsPanel {
 
     templateEngineLabel.setHTML(messages.columnManagementTextForTemplateHint(ViewerConstants.TEMPLATE_ENGINE_LINK));
 
-    //Template list, used on tablePanel
+    // Template list, used on tablePanel
     templateList.setText(columnStatus.getSearchStatus().getList().getTemplate().getTemplate());
 
-    //separator, used on tablePanel
+    // separator, used on tablePanel
     items.setText(columnStatus.getSearchStatus().getList().getTemplate().getSeparator());
 
-    //Template detail, used on rowPanel
+    // Template detail, used on rowPanel
     templateDetail.setText(columnStatus.getDetailsStatus().getTemplateStatus().getTemplate());
 
-    //Template export, used on export data to CSV
+    // Template export, used on export data to CSV
     templateExport.setText(columnStatus.getExportStatus().getTemplateStatus().getTemplate());
 
     if (columnStatus.getNestedColumns() != null) {
@@ -109,22 +106,23 @@ public class NestedColumnOptionsPanel extends ColumnOptionsPanel {
       }
 
       quantityList.addChangeHandler(event -> {
-        if(quantityList.getValue() > columnStatus.getNestedColumns().getMaxQuantityInList()){
+        if (quantityList.getValue() > columnStatus.getNestedColumns().getMaxQuantityInList()) {
           quantityList.setValue(columnStatus.getNestedColumns().getMaxQuantityInList());
           quantityList.setText(columnStatus.getNestedColumns().getMaxQuantityInList().toString());
         }
       });
     }
 
-    if(columnStatus.getNestedColumns() != null && columnStatus.getNestedColumns().getMultiValue()){
+    if (columnStatus.getNestedColumns() != null && columnStatus.getNestedColumns().getMultiValue()) {
       separatorPanel.setVisible(true);
       templateDetail.setVisible(false);
       templateDetailHint.setVisible(false);
-      templateDetailPanel.insert(new Alert(Alert.MessageAlertType.INFO, messages.columnManagementTextForMultiValueFields()), 2);
+      templateDetailPanel
+        .insert(new Alert(Alert.MessageAlertType.INFO, messages.columnManagementTextForMultiValueFields()), 2);
     }
   }
 
-  private FlowPanel buildHintWithButtons(ColumnStatus columnStatus, TextBox target){
+  private FlowPanel buildHintWithButtons(ColumnStatus columnStatus, TextBox target) {
     FlowPanel hintPanel = new FlowPanel();
     hintPanel.setStyleName("data-transformation-title");
     hintPanel.add(new Label(messages.columnManagementTextForPossibleFields()));

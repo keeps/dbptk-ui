@@ -8,7 +8,6 @@ import com.databasepreservation.common.client.models.status.collection.TableStat
 import com.databasepreservation.common.client.models.status.collection.TemplateStatus;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.databasepreservation.common.client.widgets.ColumnTemplateOptions;
-import com.databasepreservation.model.modules.configuration.ColumnConfiguration;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -17,8 +16,6 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
-import javafx.scene.layout.ColumnConstraints;
-import org.apache.logging.log4j.core.appender.db.jdbc.ColumnConfig;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
