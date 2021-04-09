@@ -25,13 +25,15 @@ jobs:
           java-version: 8
           distribution: 'adopt'
       - name: Cache
-        uses: actions/cache@v1.0.0
+        uses: actions/cache@v2
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-maven-
       - name: Run Tests
         run: mvn $MAVEN_CLI_OPTS -Dtestng.groups="travis-ci" test
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   deploy:
     needs: build
@@ -55,12 +57,12 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-maven-
       - name: Deploy to GitHub packages
-        run: mvn $MAVEN_CLI_OPTS clean package deploy -Dmaven.test.skip=true -Pdefault
+        run: mvn $MAVEN_CLI_OPTS clean deploy -Dmaven.test.skip=true -Pdefault
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   dispatch:
-    needs: build
+    needs: [build, deploy]
     strategy:
       matrix:
         repo: [ 'keeps/dbptk-desktop', 'keeps/dbptk-enterprise' ]
@@ -77,4 +79,4 @@ jobs:
           token: ${{ secrets.REPO_ACCESS_TOKEN }}
           repository: ${{ matrix.repo }}
           event-type: dispatch-main
-          client-payload: '{"version": "${{ steps.tag.outputs.result }}"}'
+          client-payload: '{"version": "${{ steps.tag.outputs.result }}", "flow": "main"}'
