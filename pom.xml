@@ -169,6 +169,28 @@
                     <artifactId>maven-clean-plugin</artifactId>
                     <version>3.1.0</version>
                 </plugin>
+                <plugin>
+                    <groupId>com.mycila</groupId>
+                    <artifactId>license-maven-plugin</artifactId>
+                    <version>3.0</version>
+                    <configuration>
+                        <!--<header>com/mycila/maven/plugin/license/templates/LGPL-3.txt</header> -->
+                        <header>LICENSE_HEADER.txt</header>
+                        <keywords>
+                            <keyword>license</keyword>
+                            <keyword>copyright</keyword>
+                        </keywords>
+                        <properties>
+                            <!--<project.name>RODA - Repositório de Objetos Digitais Autênticos</project.name> -->
+                            <project.license.url>https://github.com/keeps/dbptk-ui</project.license.url>
+                        </properties>
+                        <includes>
+                            <include>**/*.java</include>
+                        </includes>
+                    </configuration>
+                </plugin>
+
+
             </plugins>
         </pluginManagement>
     </build>

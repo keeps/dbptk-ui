@@ -1,9 +1,11 @@
+[![CI](https://github.com/keeps/dbptk-ui/actions/workflows/CI.yml/badge.svg)](https://github.com/keeps/dbptk-ui/actions/workflows/CI.yml)
+
 # Database Preservation Toolkit Enterprise/Desktop
 Formerly known as Database Visualization Toolkit
 
 Lightweight web viewer for relational databases, specially if preserved in SIARD 2, that uses SOLR as a backend, and allows browsing, search, and export. It uses the [Database Preservation Toolkit](https://github.com/keeps/db-preservation-toolkit) to process new relational databases that are in the SIARD2 format or on the original live DBMS.
 
-A compreensive list of features, screenshots and other documentation will be produced soon and available here.
+A comprehensive list of features, screenshots and other documentation will be produced soon and available here.
 
 ## Install and use Database Preservation Toolkit Desktop
 
@@ -11,7 +13,7 @@ To use this system in the desktop app modality, download the [latest release](ht
 
 ## Setting up the Database Preservation Toolkit Enterprise
 
-After version 2.0.0 the deploy is made using docker containers and docker compose.
+After version 2.0.0 the deployment is made using docker containers and docker compose.
 
 Check [Database Preservation Toolkit Enterprise](https://github.com/keeps/db-visualization-toolkit-docker) for more information.
 
@@ -32,8 +34,6 @@ Or if the problem/suggestion is related to the Database Preservation Toolkit Dev
 ## Information & Commercial support
 
 For more information or commercial support, contact [KEEP SOLUTIONS](http://www.keep.pt/contactos/?lang=en).
-
-## Development [![Build Status](https://travis-ci.org/keeps/dbptk-ui.png?branch=master)](https://travis-ci.org/keeps/dbptk-ui)
 
 ## License
 

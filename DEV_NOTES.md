@@ -2,7 +2,9 @@
 
 Hey devs, here are some notes that may be of use to you!
 
-[![Build Status](https://api.travis-ci.org/keeps/dbptk-ui.png?branch=master)](https://travis-ci.org/keeps/dbptk-ui)
+[![CI](https://github.com/keeps/dbptk-ui/actions/workflows/CI.yml/badge.svg)](https://github.com/keeps/dbptk-ui/actions/workflows/CI.yml)
+[![Release](https://github.com/keeps/dbptk-ui/actions/workflows/release.yml/badge.svg)](https://github.com/keeps/dbptk-ui/actions/workflows/release.yml)
+[![CodeQL](https://github.com/keeps/dbptk-ui/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/keeps/dbptk-ui/actions/workflows/codeql-analysis.yml)
 
 ## Debug WUI
 
@@ -41,13 +43,8 @@ npm install github-release-notes -g
 Example release new 2.2.0 version (up from 2.1.0) and prepare for next version 2.3.0
 
 1. Run `./scripts/release.sh 2.2.0`
-2. Wait for [travis tag build](https://travis-ci.org/keeps/dbptk-ui/) to be finished and successful
-3. Local compile to generate dbptk-app.jar artifact `mvn clean package -Dmaven.test.skip`
-4. `gren release --draft -t v2.1.0..v2.2.0`
-5. Review release and accept release:
+2. Wait for [GitHub action build](https://github.com/keeps/dbptk-ui/actions/workflows/release.yml) to be finished and successful
+3. Review release and accept release:
 	1. Review issues
-	2. Add docker run instructions
-	3. Upload dbptk-app.jar artifact
-	4. Accept release
-6. Run `./scripts/update_changelog.sh 2.2.0`
-7. Run `./scripts/prepare_next_version.sh 2.3.0`
+	2. Accept release
+4. Run `./scripts/prepare_next_version.sh 2.3.0`

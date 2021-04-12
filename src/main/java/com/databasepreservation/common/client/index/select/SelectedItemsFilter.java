@@ -2,8 +2,8 @@
  * The contents of this file are subject to the license and copyright
  * detailed in the LICENSE file at the root of the source
  * tree and available online at
- * <p>
- * https://github.com/keeps/roda
+ *
+ * https://github.com/keeps/dbptk-ui
  */
 package com.databasepreservation.common.client.index.select;
 
