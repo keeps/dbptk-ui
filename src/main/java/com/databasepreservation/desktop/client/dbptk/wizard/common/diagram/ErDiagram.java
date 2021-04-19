@@ -38,13 +38,9 @@ import config.i18n.client.ClientMessages;
  */
 public class ErDiagram extends Composite {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
-  private static HashMap<String, ErDiagram> instances = new HashMap<>();
 
   public static ErDiagram getInstance(String databaseUUID, ViewerMetadata metadata, String path) {
-    if (instances.get(databaseUUID) == null) {
-      instances.put(databaseUUID, new ErDiagram(metadata, databaseUUID, path));
-    }
-    return instances.get(databaseUUID);
+    return new ErDiagram(metadata, databaseUUID, path);
   }
 
   interface ErDiagramUiBinder extends UiBinder<Widget, ErDiagram> {

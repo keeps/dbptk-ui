@@ -102,7 +102,6 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
   @UiField
   FlowPanel panel;
 
-  private static Map<String, TableAndColumns> instances = new HashMap<>();
   private TableAndColumnsSidebar tableAndColumnsSidebar;
   private TableAndColumnsSendToSidebar tableAndColumnsSendToSidebar;
   private ViewerMetadata metadata;
@@ -127,18 +126,11 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
   private boolean doSSH = false;
 
   public static TableAndColumns getInstance(String databaseUUID, ConnectionParameters values) {
-    if (instances.get(values.getURLConnection()) == null) {
-      instances.put(values.getURLConnection(), new TableAndColumns(databaseUUID, values));
-    }
-    return instances.get(values.getURLConnection());
+    return new TableAndColumns(databaseUUID, values);
   }
 
   public static TableAndColumns getInstance(String databaseUUID) {
-    if (instances.get(databaseUUID) == null) {
-      instances.put(databaseUUID, new TableAndColumns(databaseUUID));
-    }
-
-    return instances.get(databaseUUID);
+    return new TableAndColumns(databaseUUID);
   }
 
   private TableAndColumns(String databaseUUID) {
@@ -192,7 +184,6 @@ public class TableAndColumns extends WizardPanel<TableAndColumnsParameters> {
 
   @Override
   public void clear() {
-    instances.clear();
     if (columns != null)
       columns.clear();
     if (tables != null)
