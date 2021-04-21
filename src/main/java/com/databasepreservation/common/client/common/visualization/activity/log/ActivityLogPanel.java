@@ -15,8 +15,9 @@ import com.databasepreservation.common.client.common.ContentPanel;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbPanel;
 import com.databasepreservation.common.client.common.lists.ActivityLogList;
 import com.databasepreservation.common.client.common.search.SearchField;
-import com.databasepreservation.common.client.common.search.SearchFieldPanel;
 import com.databasepreservation.common.client.common.search.SearchPanel;
+import com.databasepreservation.common.client.common.search.panel.SearchFieldPanel;
+import com.databasepreservation.common.client.common.search.panel.SearchFieldPanelFactory;
 import com.databasepreservation.common.client.common.utils.AdvancedSearchUtils;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.index.filter.Filter;
@@ -118,10 +119,9 @@ public class ActivityLogPanel extends ContentPanel {
 
     searchFieldsForLog.forEach(searchField -> {
       if (searchField.isFixed()) {
-        final SearchFieldPanel searchFieldPanel = new SearchFieldPanel();
-        searchFieldPanel.setSearchField(searchField);
+        final SearchFieldPanel searchFieldPanel = SearchFieldPanelFactory.getSearchFieldPanel(searchField);
+        searchFieldPanel.setup();
         addSearchFieldPanel(searchFieldPanel);
-        searchFieldPanel.selectSearchField();
       }
     });
   }

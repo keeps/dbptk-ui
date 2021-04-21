@@ -276,6 +276,8 @@
                             <codeserverArgs>
                                 <arg>-bindAddress</arg>
                                 <arg>0.0.0.0</arg>
+                                <arg>-style</arg>
+                                <arg>PRETTY</arg>
                             </codeserverArgs>
                         </configuration>
                         <executions>

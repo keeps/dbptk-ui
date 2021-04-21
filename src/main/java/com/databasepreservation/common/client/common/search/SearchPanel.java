@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.databasepreservation.common.client.common.lists.utils.AsyncTableCell;
+import com.databasepreservation.common.client.common.search.panel.SearchFieldPanel;
 import com.databasepreservation.common.client.index.filter.BasicSearchFilterParameter;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.filter.FilterParameter;
@@ -162,47 +163,6 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
     saveSearchReset();
 
     searchPreFilters.setVisible(!defaultFilter.getParameters().isEmpty());
-    drawSearchPreFilters();
-  }
-
-  private void drawSearchPreFilters() {
-    searchPreFilters.clear();
-
-    for (FilterParameter parameter : defaultFilter.getParameters()) {
-      // HTML header = new HTML(SafeHtmlUtils.fromSafeConstant(FILTER_ICON));
-      // header.addStyleName("inline gray");
-      // searchPreFilters.add(header);
-
-      HTML html = null;
-
-      /*
-       * Unused in DBViewer, for now if (parameter instanceof SimpleFilterParameter) {
-       * SimpleFilterParameter p = (SimpleFilterParameter) parameter; html = new
-       * HTML(messages.searchPreFilterSimpleFilterParameter
-       * (messages.searchPreFilterName(p.getName()),
-       * messages.searchPreFilterValue(p.getValue()))); } else if (parameter
-       * instanceof BasicSearchFilterParameter) { BasicSearchFilterParameter p =
-       * (BasicSearchFilterParameter) parameter; // TODO put '*' in some constant, see
-       * Search if (!"*".equals(p.getValue())) { html = new HTML(messages
-       * .searchPreFilterBasicSearchFilterParameter(messages.searchPreFilterName
-       * (p.getName()), messages.searchPreFilterValue(p.getValue()))); } } else if
-       * (parameter instanceof NotSimpleFilterParameter) { NotSimpleFilterParameter p
-       * = (NotSimpleFilterParameter) parameter; html = new
-       * HTML(messages.searchPreFilterNotSimpleFilterParameter(messages.
-       * searchPreFilterName(p.getName()),
-       * messages.searchPreFilterValue(p.getValue()))); } else if (parameter
-       * instanceof EmptyKeyFilterParameter) { EmptyKeyFilterParameter p =
-       * (EmptyKeyFilterParameter) parameter; html = new
-       * HTML(messages.searchPreFilterEmptyKeyFilterParameter
-       * (messages.searchPreFilterName(p.getName()))); } else { html = new
-       * HTML(SafeHtmlUtils.fromString(parameter.getClass().getSimpleName())); }
-       */
-
-      if (html != null) {
-        html.addStyleName("xsmall gray inline nowrap");
-        searchPreFilters.add(html);
-      }
-    }
   }
 
   public void doSearch() {
@@ -283,7 +243,6 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
 
   public void setDefaultFilter(Filter defaultFilter) {
     this.defaultFilter = defaultFilter;
-    drawSearchPreFilters();
   }
 
   public void setAllFilter(String allFilter) {
@@ -354,7 +313,7 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
             SearchFieldPanel searchAdvancedFieldPanel = (SearchFieldPanel) fieldsPanel.getWidget(i);
             FilterParameter filterParameter;
             try {
-              filterParameter= searchInfo.getFieldParameters().get(fieldParameterIndex);
+              filterParameter = searchInfo.getFieldParameters().get(fieldParameterIndex);
             } catch (IndexOutOfBoundsException e) {
               filterParameter = null;
             }
@@ -365,22 +324,6 @@ public class SearchPanel extends Composite implements HasValueChangeHandlers<Str
           }
         }
       }
-      // } else {
-      // if (fieldsPanel != null && fieldsPanel.getParent() != null &&
-      // fieldsPanel.getParent().isVisible()) {
-      // for (int i = 0; i < fieldsPanel.getWidgetCount(); i++) {
-      // if (fieldsPanel.getWidget(i) instanceof SearchFieldPanel) {
-      // SearchFieldPanel searchAdvancedFieldPanel = (SearchFieldPanel)
-      // fieldsPanel.getWidget(i);
-      // for (FilterParameter fieldParameter : searchInfo.getFieldParameters()) {
-      // if (fieldParameter != null) {
-      // searchAdvancedFieldPanel.setInputFromFilterParam(fieldParameter);
-      // }
-      // }
-      // }
-      // }
-      // }
-      // }
 
       doSearch();
     }

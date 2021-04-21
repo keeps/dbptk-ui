@@ -14,13 +14,12 @@ import java.util.Map;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.lists.TableRowList;
+import com.databasepreservation.common.client.common.search.panel.SearchFieldPanel;
+import com.databasepreservation.common.client.common.search.panel.SearchFieldPanelFactory;
 import com.databasepreservation.common.client.common.utils.AdvancedSearchUtils;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.index.filter.Filter;
-import com.databasepreservation.common.client.index.filter.FilterParameter;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
-import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
-import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
@@ -174,7 +173,8 @@ public class TableSearchPanel extends Composite {
     tableRowList.refreshColumnVisibility();
   }
 
-  private void addSearchFieldPanel(final SearchFieldPanel searchFieldPanel) {
+  private void addSearchFieldPanel(
+    final com.databasepreservation.common.client.common.search.panel.SearchFieldPanel searchFieldPanel) {
     itemsSearchAdvancedFieldsPanel.add(searchFieldPanel);
     itemsSearchAdvancedFieldsPanel.removeStyleName(EMPTY);
 
@@ -193,14 +193,15 @@ public class TableSearchPanel extends Composite {
   }
 
   private void buildSearchFieldPanel(List<SearchField> list) {
-    list.forEach(searchField -> {
+    GWT.log("List size: " + list.size());
+    for (SearchField searchField : list) {
+      GWT.log("type: " + searchField.getType());
       if (searchField.isFixed()) {
-        final SearchFieldPanel searchFieldPanel = new SearchFieldPanel();
-        searchFieldPanel.setSearchField(searchField);
+        SearchFieldPanel searchFieldPanel = SearchFieldPanelFactory.getSearchFieldPanel(searchField);
+        searchFieldPanel.setup();
         addSearchFieldPanel(searchFieldPanel);
-        searchFieldPanel.selectSearchField();
       }
-    });
+    }
   }
 
   public void showSearchAdvancedFieldsPanel() {
@@ -240,19 +241,18 @@ public class TableSearchPanel extends Composite {
       // }
       // }
 
-
-        initAdvancedSearch();
-//      } else {
-//        for (int i = 0; i < currentSearchInfo.getFields().size(); i++) {
-//          if (currentSearchInfo.getFieldParameters().get(i) != null) {
-//            final SearchFieldPanel searchFieldPanel = new SearchFieldPanel();
-//            GWT.log("---- " + currentSearchInfo.getFields().get(i));
-//            searchFieldPanel.setSearchField(currentSearchInfo.getFields().get(i));
-//            addSearchFieldPanel(searchFieldPanel);
-//            searchFieldPanel.selectSearchField();
-//          }
-//        }
-//      }
+      initAdvancedSearch();
+      // } else {
+      // for (int i = 0; i < currentSearchInfo.getFields().size(); i++) {
+      // if (currentSearchInfo.getFieldParameters().get(i) != null) {
+      // final SearchFieldPanel searchFieldPanel = new SearchFieldPanel();
+      // GWT.log("---- " + currentSearchInfo.getFields().get(i));
+      // searchFieldPanel.setSearchField(currentSearchInfo.getFields().get(i));
+      // addSearchFieldPanel(searchFieldPanel);
+      // searchFieldPanel.selectSearchField();
+      // }
+      // }
+      // }
 
       // for (int i = 0; i < currentSearchInfo.getFields().size(); i++) {
       // if (currentSearchInfo.getFieldParameters().get(i) != null) {
