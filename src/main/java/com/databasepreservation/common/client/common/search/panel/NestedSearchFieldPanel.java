@@ -33,8 +33,10 @@ public class NestedSearchFieldPanel extends SearchFieldPanel {
 
     if (searchFields != null && searchFields.size() >= 1) {
       String field = searchFields.get(0);
-      filterParameter = new BlockJoinParentFilterParameter(field, inputText.getValue(), searchFields.get(1),
-        searchFields.get(2));
+      if (!inputText.getValue().isEmpty()) {
+        filterParameter = new BlockJoinParentFilterParameter(field, inputText.getValue(), searchFields.get(1),
+          searchFields.get(2));
+      }
     }
     return filterParameter;
   }

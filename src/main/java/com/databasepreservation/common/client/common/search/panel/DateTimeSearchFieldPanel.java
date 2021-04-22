@@ -106,10 +106,8 @@ public class DateTimeSearchFieldPanel extends SearchFieldPanel {
           && inputDateFromForDateTime.getValue().equals(inputDateToForDateTime.getValue())) {
           if (inputTimeFromForDateTime.getValue() == null && inputTimeToForDateTime.getValue() != null) {
             inputTimeFromForDateTime.setValue(0L);
-            // inputTimeFromForDateTime.setValue(inputTimeToForDateTime.getValue());
           } else if (inputTimeFromForDateTime.getValue() != null && inputTimeToForDateTime.getValue() == null) {
             inputTimeToForDateTime.setValue(ViewerConstants.MILLISECONDS_IN_A_DAY - 1);
-            // inputTimeToForDateTime.setValue(inputTimeFromForDateTime.getValue());
           } else if (inputTimeFromForDateTime.getValue() == null && inputTimeToForDateTime.getValue() == null) {
             inputTimeFromForDateTime.setValue(0L);
             inputTimeToForDateTime.setValue(ViewerConstants.MILLISECONDS_IN_A_DAY - 1);

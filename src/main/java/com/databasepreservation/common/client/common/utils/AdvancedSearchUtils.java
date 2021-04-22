@@ -51,10 +51,6 @@ public class AdvancedSearchUtils {
     return searchFields;
   }
 
-  public static List<SearchField> getSearchFieldsFromTable(ViewerTable viewerTable, CollectionStatus status) {
-    return getSearchFieldsFromTable(viewerTable, status, null);
-  }
-
   public static Map<String, List<SearchField>> getSearchFieldsFromTableMap(ViewerTable viewerTable,
     CollectionStatus status) {
     Map<String, List<SearchField>> map = new LinkedHashMap<>();
@@ -82,8 +78,8 @@ public class AdvancedSearchUtils {
                 fields.add(columnSolrName);
                 fields.add(configTable.getId());
                 fields.add(column.getId());
-                SearchField searchField = new SearchField(column.getId() + "-" + column.getColumnIndex(),
-                    fields, nestedColumn.getCustomName(), viewerTypeToSearchFieldType(nestedType));
+                SearchField searchField = new SearchField(column.getId() + "-" + column.getColumnIndex(), fields,
+                  nestedColumn.getCustomName(), viewerTypeToSearchFieldType(nestedType));
                 searchField.setFixed(status.showAdvancedSearch(viewerTable.getUuid(), column.getId()));
                 updateSearchFieldMap(map, column.getCustomName(), searchField);
               }
@@ -96,8 +92,7 @@ public class AdvancedSearchUtils {
     return map;
   }
 
-  public static List<SearchField> getSearchFieldsFromTable(ViewerTable viewerTable, CollectionStatus status,
-    ViewerMetadata metadata) {
+  public static List<SearchField> getSearchFieldsFromTable(ViewerTable viewerTable, CollectionStatus status, ViewerMetadata metadata) {
     List<SearchField> searchFields = new ArrayList<>();
 
     for (ViewerColumn viewerColumn : viewerTable.getColumns()) {

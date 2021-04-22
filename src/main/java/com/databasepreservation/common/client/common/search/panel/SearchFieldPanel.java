@@ -104,7 +104,7 @@ public abstract class SearchFieldPanel extends Composite {
   }
 
   protected boolean valid(ListBox input) {
-    return (input.getSelectedValue().equals("true") || input.getSelectedValue().equals(FALSE));
+    return (input.getSelectedValue().equals(TRUE) || input.getSelectedValue().equals(FALSE));
   }
 
   /**
