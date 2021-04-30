@@ -20,6 +20,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.models.structure.*;
+import com.databasepreservation.common.client.tools.*;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
@@ -43,17 +45,7 @@ import com.databasepreservation.common.client.models.status.collection.Collectio
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.LargeObjectConsolidateProperty;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
-import com.databasepreservation.common.client.models.structure.ViewerCell;
-import com.databasepreservation.common.client.models.structure.ViewerColumn;
-import com.databasepreservation.common.client.models.structure.ViewerDatabase;
-import com.databasepreservation.common.client.models.structure.ViewerRow;
-import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.services.CollectionService;
-import com.databasepreservation.common.client.tools.FilterUtils;
-import com.databasepreservation.common.client.tools.Humanize;
-import com.databasepreservation.common.client.tools.JSOUtils;
-import com.databasepreservation.common.client.tools.RestUtils;
-import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.databasepreservation.common.client.widgets.Alert;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.SafeHtmlCell;
@@ -491,6 +483,8 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     Map<String, String> extraParameters = new HashMap<>();
     boolean nested = false;
 
+    // TODO tfraga: check if is visible and binary , add field
+
     // prepare parameter: field list
     List<String> fieldsToSolr = new ArrayList<>();
     List<String> fieldsToHeader = new ArrayList<>();
@@ -498,6 +492,10 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
       if (isColumnVisible(configColumn.getName())) {
         if (!configColumn.getType().equals(NESTED)) {
           fieldsToSolr.add(configColumn.getId());
+          if(configColumn.getType().equals(BINARY)){ ;
+            fieldsToSolr.add(MimeTypeUtils.getMimeTypeSolrName(configColumn.getId()));
+            fieldsToSolr.add(MimeTypeUtils.getFileExtensionSolrName(configColumn.getId()));
+          }
         }
         fieldsToHeader.add(configColumn.getId());
       }

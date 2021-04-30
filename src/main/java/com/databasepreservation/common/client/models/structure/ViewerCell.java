@@ -14,12 +14,20 @@ import java.io.Serializable;
  */
 public class ViewerCell implements Serializable {
   private String value;
+  private String mimeType;
+  private String fileExtension;
 
   public ViewerCell() {
   }
 
   public ViewerCell(String value) {
     this.value = value;
+  }
+
+  public ViewerCell(String value, String mimeType, String fileExtension) {
+    this.value = value;
+    this.mimeType = mimeType;
+    this.fileExtension = fileExtension;
   }
 
   /**
@@ -35,9 +43,25 @@ public class ViewerCell implements Serializable {
     this.value = value;
   }
 
+  public String getMimeType() {
+    return mimeType;
+  }
+
+  public void setMimeType(String mimeType) {
+    this.mimeType = mimeType;
+  }
+
+  public String getFileExtension() {
+    return fileExtension;
+  }
+
+  public void setFileExtension(String fileExtension) {
+    this.fileExtension = fileExtension;
+  }
 
   @Override
   public String toString() {
-    return value;
+    return "ViewerCell{" + "value='" + value + '\'' + ", mimeType='" + mimeType + '\'' + ", fileExtension='"
+      + fileExtension + '\'' + '}';
   }
 }

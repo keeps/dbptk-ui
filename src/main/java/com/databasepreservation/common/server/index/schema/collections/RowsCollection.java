@@ -12,15 +12,10 @@ import static com.databasepreservation.common.client.ViewerConstants.SOLR_ROWS_N
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_ROWS_TABLE_ID;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_ROWS_TABLE_UUID;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
+import com.databasepreservation.common.client.models.structure.ViewerMimeType;
+import com.databasepreservation.common.client.tools.MimeTypeUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
@@ -96,8 +91,20 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
     for (Map.Entry<String, ViewerCell> cellEntry : row.getCells().entrySet()) {
       String solrColumnName = cellEntry.getKey();
       String cellValue = cellEntry.getValue().getValue();
-
       doc.addField(solrColumnName, cellValue);
+    }
+
+    for (Map.Entry<String, ViewerMimeType> cellEntry : row.getColsMimeTypeList().entrySet()) {
+      String solrColumnName = cellEntry.getKey();
+
+      String mimeTypeField = MimeTypeUtils.getMimeTypeSolrName(solrColumnName);
+      String mimeType = cellEntry.getValue().getMimeType();
+
+      String fileExtensionField = MimeTypeUtils.getFileExtensionSolrName(solrColumnName);
+      String fileExtension = cellEntry.getValue().getFileExtension();
+
+      doc.addField(mimeTypeField, mimeType);
+      doc.addField(fileExtensionField, fileExtension);
     }
 
     return doc;
@@ -118,7 +125,7 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
     for (Map.Entry<String, Object> entry : doc) {
       String columnName = entry.getKey();
       Object value = entry.getValue();
-      cellFromEntry(columnName, value).ifPresent(viewerCell -> cells.put(columnName, viewerCell));
+      cellFromEntry(columnName, value, doc).ifPresent(viewerCell -> cells.put(columnName, viewerCell));
     }
     viewerRow.setCells(cells);
 
@@ -158,7 +165,7 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
     for (Map.Entry<String, Object> entry : doc) {
       String columnName = entry.getKey();
       Object value = entry.getValue();
-      cellFromEntry(columnName, value).ifPresent(viewerCell -> cells.put(columnName, viewerCell));
+      cellFromEntry(columnName, value, doc).ifPresent(viewerCell -> cells.put(columnName, viewerCell));
     }
     nestedRow.setCells(cells);
 
@@ -172,7 +179,7 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
     return nestedRow;
   }
 
-  private Optional<ViewerCell> cellFromEntry(String columnName, Object value) {
+  private Optional<ViewerCell> cellFromEntry(String columnName, Object value, SolrDocument doc) {
     Optional<ViewerCell> viewerCell = Optional.empty();
 
     if (columnName.startsWith(ViewerConstants.SOLR_INDEX_ROW_COLUMN_NAME_PREFIX)) {
@@ -192,7 +199,20 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
         viewerCell = Optional.of(new ViewerCell(value.toString()));
       }
     } else if (columnName.startsWith(ViewerConstants.SOLR_INDEX_ROW_LOB_COLUMN_NAME_PREFIX)) {
-      viewerCell = Optional.of(new ViewerCell(value.toString()));
+      if (!columnName.endsWith(MimeTypeUtils.getMimeTypeSuffix())
+        && !columnName.endsWith(MimeTypeUtils.getFileExtensionSuffix())) {
+
+        Object mimeTypeObj = doc.get(MimeTypeUtils.getMimeTypeSolrName(columnName));
+        Object fileExtensionObj = doc.get(MimeTypeUtils.getFileExtensionSolrName(columnName));
+
+        if (mimeTypeObj != null && fileExtensionObj != null) {
+          viewerCell = Optional
+            .of(new ViewerCell(value.toString(), mimeTypeObj.toString(), fileExtensionObj.toString()));
+        } else {
+          viewerCell = Optional.of(new ViewerCell(value.toString()));
+        }
+
+      }
     }
 
     return viewerCell;

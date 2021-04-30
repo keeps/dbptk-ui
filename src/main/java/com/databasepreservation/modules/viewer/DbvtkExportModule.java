@@ -132,7 +132,7 @@ public class DbvtkExportModule implements DatabaseFilterModule {
   @Override
   public void handleDataRow(Row row) throws ModuleException {
     solrManager.addRow(retrieved.getUuid(),
-      ToolkitStructure2ViewerStructure.getRow(collectionConfiguration, currentTable, row, rowIndex++));
+      ToolkitStructure2ViewerStructure.getRow(collectionConfiguration, currentTable, row, rowIndex++,retrieved.getPath()));
   }
 
   /**

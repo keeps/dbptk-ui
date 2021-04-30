@@ -2127,6 +2127,17 @@ html, body {
     margin-left: 10px;
 }
 
+.dialog-blob-options{
+    margin-top: 15px;
+}
+
+.dialog-blog-mime-type-panel{
+    margin-bottom: 15px;
+}
+
+.dialog-blog-mime-type-hint{
+    margin-bottom: 5px;
+}
 
 /**********************************************
 		         Dialog Errors
@@ -3066,6 +3077,7 @@ rgba(0, 0, 0, .125);
     font-family: "Ubuntu Mono";
 }
 
+
 /************************************************
 * Data Transformation
  ************************************************/
@@ -3107,6 +3119,7 @@ rgba(0, 0, 0, .125);
 
 .data-transformation-title {
     display: flex;
+    flex-wrap: wrap;
 }
 
 .data-transformation-title-icon {

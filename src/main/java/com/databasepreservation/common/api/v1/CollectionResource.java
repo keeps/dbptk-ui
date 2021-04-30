@@ -568,9 +568,14 @@ public class CollectionResource implements CollectionService {
       handlebarsFilename = completeLobPath.getFileName().toString();
     }
 
-    return ApiUtils.okResponse(
-      new StreamResponse(handlebarsFilename, tableConfiguration.getColumnByIndex(columnIndex).getApplicationType(),
-        DownloadUtils.stream(new FileInputStream(completeLobPath.toFile()))));
+    String handlebarsMimeType = HandlebarsUtils.applyMimeTypeTemplate(row, tableConfiguration, columnIndex);
+
+    if (ViewerStringUtils.isBlank(handlebarsMimeType)) {
+      handlebarsMimeType = tableConfiguration.getColumnByIndex(columnIndex).getApplicationType();
+    }
+
+    return ApiUtils.okResponse(new StreamResponse(handlebarsFilename, handlebarsMimeType,
+      DownloadUtils.stream(new FileInputStream(completeLobPath.toFile()))));
   }
 
   private Response handleInternalLobDownload(String databasePath, TableStatus tableConfiguration, ViewerRow row,
@@ -581,6 +586,11 @@ public class CollectionResource implements CollectionService {
       handlebarsFilename = ViewerConstants.SIARD_RECORD_PREFIX + row.getUuid()
         + ViewerConstants.SIARD_LOB_FILE_EXTENSION;
     }
+    String handlebarsMimeType = HandlebarsUtils.applyMimeTypeTemplate(row, tableConfiguration, columnIndex);
+
+    if (ViewerStringUtils.isBlank(handlebarsMimeType)) {
+      handlebarsMimeType = tableConfiguration.getColumnByIndex(columnIndex).getApplicationType();
+    }
 
     if (LobManagerUtils.isLobEmbedded(tableConfiguration, row, columnIndex)) {
       // handle lob as embedded
@@ -588,9 +598,8 @@ public class CollectionResource implements CollectionService {
       lobCellValue = lobCellValue.replace(ViewerConstants.SIARD_EMBEDDED_LOB_PREFIX, "");
       String decodedString = new String(Base64.decodeBase64(lobCellValue.getBytes()));
 
-      return ApiUtils.okResponse(
-        new StreamResponse(handlebarsFilename, tableConfiguration.getColumnByIndex(columnIndex).getApplicationType(),
-          DownloadUtils.stream(new BufferedInputStream(new ByteArrayInputStream(decodedString.getBytes())))));
+      return ApiUtils.okResponse(new StreamResponse(handlebarsFilename, handlebarsMimeType,
+        DownloadUtils.stream(new BufferedInputStream(new ByteArrayInputStream(decodedString.getBytes())))));
     } else {
       // handle lob as internal on separated folder
       ZipFile zipFile = new ZipFile(databasePath);
@@ -599,9 +608,8 @@ public class CollectionResource implements CollectionService {
         throw new GenericException("Zip archive entry is missing");
       }
 
-      return ApiUtils.okResponse(
-        new StreamResponse(handlebarsFilename, tableConfiguration.getColumnByIndex(columnIndex).getApplicationType(),
-          DownloadUtils.stream(new BufferedInputStream(zipFile.getInputStream(entry)))));
+      return ApiUtils.okResponse(new StreamResponse(handlebarsFilename, handlebarsMimeType,
+        DownloadUtils.stream(new BufferedInputStream(zipFile.getInputStream(entry)))));
     }
   }
 
@@ -768,9 +776,8 @@ public class CollectionResource implements CollectionService {
       fields, findRequest.extraParameters);
     final IterableIndexResult clone = solrManager.findAllRows(databaseUUID, findRequest.filter, findRequest.sorter,
       fields, findRequest.extraParameters);
-    return ApiUtils.okResponse(new StreamResponse(
-      new ZipOutputStreamMultiRow(configurationCollection, database, configTable, allRows, clone, zipFilename,
-        filename, findRequest.sublist, exportDescription, fieldsToHeader)));
+    return ApiUtils.okResponse(new StreamResponse(new ZipOutputStreamMultiRow(configurationCollection, database,
+      configTable, allRows, clone, zipFilename, filename, findRequest.sublist, exportDescription, fieldsToHeader)));
   }
 
   private Object[] appendValue(Object[] obj, Object newObj) {

@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.tools.MimeTypeUtils;
 import com.databasepreservation.common.utils.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -98,8 +99,25 @@ public class HandlebarsUtils {
     return values;
   }
 
+  public static String applyMimeTypeTemplate(ViewerRow row, TableStatus tableConfiguration, int columnIndex) {
+    Map<String, String> map = cellsToObject(row.getCells(), tableConfiguration, row.getUuid());
+    final String template = tableConfiguration.getColumnByIndex(columnIndex).getApplicationType();
+
+    if (ViewerStringUtils.isBlank(template) || !template.equals(MimeTypeUtils.getAutoDetectMimeTypeTemplate())) {
+      return null;
+    }
+
+    Handlebars handlebars = new Handlebars();
+    try {
+      Template handlebarTemplate = handlebars.compileInline(template);
+      return handlebarTemplate.apply(map);
+    } catch (IOException e) {
+      throw new RESTException(e);
+    }
+  }
+
   public static String applyExportTemplate(ViewerRow row, TableStatus tableConfiguration, int columnIndex) {
-    Map<String, String> map = cellsToObject(row.getCells(), tableConfiguration);
+    Map<String, String> map = cellsToObject(row.getCells(), tableConfiguration, row.getUuid());
     final String template = tableConfiguration.getColumnByIndex(columnIndex).getExportStatus().getTemplateStatus()
       .getTemplate();
 
@@ -116,13 +134,29 @@ public class HandlebarsUtils {
     }
   }
 
-  private static Map<String, String> cellsToObject(Map<String, ViewerCell> cells, TableStatus tableConfiguration) {
+  private static Map<String, String> cellsToObject(Map<String, ViewerCell> cells, TableStatus tableConfiguration,
+    String rowIndex) {
     Map<String, String> map = new HashMap<>();
 
     for (ColumnStatus column : tableConfiguration.getColumns()) {
-      if (cells.get(column.getId()) != null) {
-        map.put(ViewerStringUtils.replaceAllFor(column.getCustomName(), "\\s", "_"),
-          cells.get(column.getId()).getValue());
+      ViewerCell cell = cells.get(column.getId());
+
+      if (cell != null) {
+        map.put(ViewerStringUtils.replaceAllFor(column.getCustomName(), "\\s", "_"), cell.getValue());
+
+        if (column.getType().equals(ViewerType.dbTypes.BINARY)) {
+          map.put(ViewerConstants.TEMPLATE_LOB_ROW_INDEX, rowIndex);
+
+          map.put(ViewerConstants.TEMPLATE_LOB_COLUMN_INDEX, String.valueOf(column.getColumnIndex()));
+
+          if (StringUtils.isNotBlank(cell.getMimeType())) {
+            map.put(ViewerConstants.TEMPLATE_LOB_AUTO_DETECTED_MIME_TYPE, cell.getMimeType());
+          }
+
+          if (StringUtils.isNotBlank(cell.getFileExtension())) {
+            map.put(ViewerConstants.TEMPLATE_LOB_AUTO_DETECTED_EXTENSION, cell.getFileExtension());
+          }
+        }
       }
     }
 

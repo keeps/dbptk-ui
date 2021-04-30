@@ -5,9 +5,9 @@
         <g:Label addStyleNames="form-label">
             <ui:text from='{messages.columnManagementLabelForTemplateOptions}'/>
         </g:Label>
-        <g:HTML addStyleNames="column-description" ui:field="templateEngineLabel" />
+        <g:HTML addStyleNames="column-description" ui:field="templateEngineLabel"/>
 
-        <g:FlowPanel>
+        <g:FlowPanel addStyleNames="dialog-blob-options">
             <g:Label addStyleNames="form-label">
                 <ui:text from='{messages.columnManagementLabelForTemplateList}'/>
             </g:Label>
@@ -15,7 +15,7 @@
             <g:FlowPanel ui:field="displayListHint"/>
         </g:FlowPanel>
 
-        <g:FlowPanel>
+        <g:FlowPanel addStyleNames="dialog-blob-options">
             <g:Label addStyleNames="form-label">
                 <ui:text from='{messages.columnManagementLabelForTemplateDetail}'/>
             </g:Label>
@@ -23,7 +23,7 @@
             <g:FlowPanel ui:field="detailsListHint"/>
         </g:FlowPanel>
 
-        <g:FlowPanel>
+        <g:FlowPanel addStyleNames="dialog-blob-options">
             <g:Label addStyleNames="form-label">
                 <ui:text from='{messages.binaryColumnTemplateForFilename}'/>
             </g:Label>
@@ -31,11 +31,20 @@
             <g:FlowPanel ui:field="templateListHint"/>
         </g:FlowPanel>
 
-        <g:FlowPanel>
+        <g:FlowPanel addStyleNames="dialog-blob-options">
             <g:Label addStyleNames="form-label">
                 <ui:text from='{messages.binaryColumnMIMEType}'/>
             </g:Label>
-            <g:TextBox addStyleNames="form-textbox" ui:field="applicationType"/>
+            <g:HTML addStyleNames="column-description" ui:field="applicationTypeHintLabel"/>
+            <g:FlowPanel addStyleNames="col_12" ui:field="applicationTypePanel">
+                <g:FlowPanel addStyleNames="col_2">
+                    <g:VerticalPanel addStyleNames="form-textbox" ui:field="applicationTypeBtnPanel"/>
+                </g:FlowPanel>
+
+                <g:FlowPanel addStyleNames="col_4">
+                    <g:TextBox addStyleNames="form-textbox" ui:field="applicationTypeValue"/>
+                </g:FlowPanel>
+            </g:FlowPanel>
         </g:FlowPanel>
     </g:FlowPanel>
 </ui:UiBinder>

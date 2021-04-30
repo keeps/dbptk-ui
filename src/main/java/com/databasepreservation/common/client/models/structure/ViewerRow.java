@@ -7,10 +7,7 @@
  */
 package com.databasepreservation.common.client.models.structure;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.utils.JavascriptUtils;
@@ -32,10 +29,12 @@ public class ViewerRow extends IsIndexed {
   private String nestedUUID;
   private String nestedTableId;
   private String nestedOriginalUUID;
+  private Map<String, ViewerMimeType> colsMimeTypeList;
 
   public ViewerRow() {
     cells = new LinkedHashMap<>();
     nestedRowList = new ArrayList<>();
+    colsMimeTypeList = new HashMap<>();
   }
 
   @Override
@@ -147,4 +146,17 @@ public class ViewerRow extends IsIndexed {
   public void setNestedTableId(String nestedTableId) {
     this.nestedTableId = nestedTableId;
   }
+
+  public Map<String, ViewerMimeType> getColsMimeTypeList() {
+    return colsMimeTypeList;
+  }
+
+  public void setColsMimeTypeList(Map<String, ViewerMimeType> colsMimeTypeList) {
+    this.colsMimeTypeList = colsMimeTypeList;
+  }
+
+  public void addMimeTypeListEntry(String colName, ViewerMimeType viewerMimeType) {
+    this.colsMimeTypeList.put(colName, viewerMimeType);
+  }
+
 }

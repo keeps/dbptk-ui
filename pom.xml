@@ -620,6 +620,19 @@
         </dependency>
         <!-- / Handlerbars -->
 
+        <!-- Mime Type detection -->
+        <dependency>
+            <groupId>org.apache.tika</groupId>
+            <artifactId>tika-core</artifactId>
+            <version>1.26</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tika</groupId>
+            <artifactId>tika-parsers</artifactId>
+            <version>1.4</version>
+        </dependency>
+        <!-- / Mime Type detection -->
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>

@@ -1507,6 +1507,10 @@ public interface ClientMessages extends Messages {
 
   String columnManagementLabelForQuantityList();
 
+  String columnManagementApplicationTypeAction(@Select String action);
+
+  String columnManagementTextForApplicationTypeHint();
+
   /********************************************
    * Column Management Panel - Binary Column
    *******************************************/

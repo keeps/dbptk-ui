@@ -10,17 +10,18 @@ package com.databasepreservation.common.client.common.visualization.browse.confi
 import static com.databasepreservation.common.client.ViewerConstants.DEFAULT_DOWNLOAD_LABEL_TEMPLATE;
 
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.common.utils.ApplicationTypeActions;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.status.collection.TemplateStatus;
+import com.databasepreservation.common.client.tools.MimeTypeUtils;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.TextBox;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 
 import config.i18n.client.ClientMessages;
 
@@ -45,8 +46,21 @@ public class BinaryColumnOptionsPanel extends ColumnOptionsPanel {
   @UiField
   HTML templateEngineLabel;
 
+  /* --- Application Type --- */
+
   @UiField
-  TextBox applicationType;
+  FlowPanel applicationTypePanel;
+
+  @UiField
+  HTML applicationTypeHintLabel;
+
+  @UiField
+  VerticalPanel applicationTypeBtnPanel;
+
+  @UiField
+  TextBox applicationTypeValue;
+
+  /* ----------- */
 
   @UiField
   TextBox displayList;
@@ -62,6 +76,10 @@ public class BinaryColumnOptionsPanel extends ColumnOptionsPanel {
 
   @UiField
   FlowPanel content;
+
+  private final String applicationTypeActionsGroup = "applicationTypeActionsGroup";
+  private RadioButton autoDetectRadioBtn;
+  private RadioButton staticValueRadioBtn;
 
   public static ColumnOptionsPanel createInstance(TableStatus tableConfiguration, ColumnStatus columnConfiguration) {
     return new BinaryColumnOptionsPanel(tableConfiguration, columnConfiguration);
@@ -98,16 +116,21 @@ public class BinaryColumnOptionsPanel extends ColumnOptionsPanel {
   }
 
   public String getApplicationType() {
-    return this.applicationType.getText();
+    if (autoDetectRadioBtn.getValue()) {
+      return MimeTypeUtils.getAutoDetectMimeTypeTemplate();
+    } else {
+      return applicationTypeValue.getText();
+    }
   }
 
   private BinaryColumnOptionsPanel(TableStatus tableConfiguration, ColumnStatus columnConfiguration) {
     initWidget(binder.createAndBindUi(this));
 
     templateEngineLabel.setHTML(messages.columnManagementTextForTemplateHint(ViewerConstants.TEMPLATE_ENGINE_LINK));
-    templateList.setText(columnConfiguration.getExportStatus().getTemplateStatus().getTemplate());
     templateListHint.add(ColumnOptionUtils.buildHintWithButtons(tableConfiguration, templateList,
-      messages.columnManagementTextForPossibleFields()));
+      messages.columnManagementTextForPossibleFields(), true));
+
+    templateList.setText(columnConfiguration.getExportStatus().getTemplateStatus().getTemplate());
 
     displayList
       .setText(ColumnOptionUtils.getDefaultTextOrValue(columnConfiguration.getSearchStatus().getList().getTemplate()));
@@ -119,6 +142,50 @@ public class BinaryColumnOptionsPanel extends ColumnOptionsPanel {
     detailsListHint
       .add(ColumnOptionUtils.buildHintForLabel(detailsList, messages.columnManagementTextForPossibleFields()));
 
-    applicationType.setText(columnConfiguration.getApplicationType());
+    staticValueRadioBtn = new RadioButton(applicationTypeActionsGroup,
+      messages.columnManagementApplicationTypeAction(ApplicationTypeActions.STATIC_VALUE.toString()));
+    autoDetectRadioBtn = new RadioButton(applicationTypeActionsGroup,
+      messages.columnManagementApplicationTypeAction(ApplicationTypeActions.AUTO_DETECT.toString()));
+
+    applicationTypeHintLabel.setHTML(messages.columnManagementTextForApplicationTypeHint());
+    applicationTypeHintLabel.addStyleName("dialog-blog-mime-type-hint");
+    applicationTypeBtnPanel.add(staticValueRadioBtn);
+    applicationTypeBtnPanel.add(autoDetectRadioBtn);
+
+    if (columnConfiguration.getApplicationType().equals(MimeTypeUtils.getAutoDetectMimeTypeTemplate())) {
+      autoDetectRadioBtn.setValue(true);
+      applicationTypeValue.setVisible(false);
+      applicationTypeValue.setText("");
+    } else {
+      staticValueRadioBtn.setValue(true);
+      applicationTypeValue.setVisible(true);
+      applicationTypeValue.setText(columnConfiguration.getApplicationType());
+    }
+
+    autoDetectRadioBtn.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent clickEvent) {
+        applicationTypeValue.setVisible(false);
+        if (columnConfiguration.getApplicationType().equals(MimeTypeUtils.getAutoDetectMimeTypeTemplate())) {
+          applicationTypeValue.setText(ViewerConstants.MEDIA_TYPE_APPLICATION_OCTET_STREAM);
+        } else {
+          applicationTypeValue.setText(columnConfiguration.getApplicationType());
+        }
+      }
+    });
+
+    staticValueRadioBtn.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent clickEvent) {
+        applicationTypeValue.setVisible(true);
+        if (columnConfiguration.getApplicationType().equals(MimeTypeUtils.getAutoDetectMimeTypeTemplate())) {
+          applicationTypeValue.setText(ViewerConstants.MEDIA_TYPE_APPLICATION_OCTET_STREAM);
+        } else {
+          applicationTypeValue.setText(columnConfiguration.getApplicationType());
+        }
+      }
+    });
+
+    applicationTypePanel.addStyleName("dialog-blog-mime-type-panel");
   }
 }

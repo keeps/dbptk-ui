@@ -230,6 +230,8 @@ public class ViewerConstants {
   public static final String SOLR_DYN_TEXT_GENERAL = "_t";
   public static final String SOLR_DYN_TEXT_MULTI = "_txt";
   public static final String SOLR_DYN_NEST_MULTI = "_nst";
+  public static final String SOLR_DYN_MIMETYPE = "_mimetype";
+  public static final String SOLR_DYN_FILE_EXTENSION = "_fileExtension";
 
   // indexed, stored, multiValued
   public static final String SOLR_DYN_BOOLEANS = "_bs";
@@ -512,6 +514,10 @@ public class ViewerConstants {
   public static final String CLOSE_TEMPLATE_ENGINE = "}}";
   public static final String TEMPLATE_LOB_DOWNLOAD_LABEL = "download_label";
   public static final String TEMPLATE_LOB_DOWNLOAD_LINK = "download_link";
+  public static final String TEMPLATE_LOB_ROW_INDEX = "row_index";
+  public static final String TEMPLATE_LOB_COLUMN_INDEX = "column_index";
+  public static final String TEMPLATE_LOB_AUTO_DETECTED_MIME_TYPE = "auto_detected_mime_type";
+  public static final String TEMPLATE_LOB_AUTO_DETECTED_EXTENSION = "auto_detected_extension";
   public static final String DEFAULT_DOWNLOAD_LABEL_TEMPLATE = "<a href=\"" + ViewerConstants.OPEN_TEMPLATE_ENGINE
     + ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK + ViewerConstants.CLOSE_TEMPLATE_ENGINE + "\">"
     + ViewerConstants.OPEN_TEMPLATE_ENGINE + ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL

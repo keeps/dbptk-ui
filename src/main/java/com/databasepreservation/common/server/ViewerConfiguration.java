@@ -114,6 +114,8 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   public static final String PROPERTY_BATCH_JOBS_MAX_POOL_SIZE = "batch.jobs.maxPoolSize";
   public static final String PROPERTY_BATCH_JOBS_QUEUE_SIZE = "batch.jobs.queueSize";
 
+  public static final String PROPERTY_BLOB_PREFIX_NAME ="ui.blob.prefix.name";
+
   private static boolean instantiatedWithoutErrors = true;
   private static String applicationEnvironment = ViewerConstants.APPLICATION_ENV_SERVER;
 

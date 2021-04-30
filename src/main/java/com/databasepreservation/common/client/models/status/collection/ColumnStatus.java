@@ -34,7 +34,9 @@ public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
   private int columnIndex;
   @JsonInclude(JsonInclude.Include.NON_DEFAULT)
   private boolean externalLob;
+  //introduzir
   private String applicationType;
+  // adicionar file extension
   private NestedColumnStatus nestedColumns;
   private int order;
   private ExportStatus exportStatus;

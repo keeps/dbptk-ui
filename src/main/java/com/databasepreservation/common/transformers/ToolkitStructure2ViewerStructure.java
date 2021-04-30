@@ -7,6 +7,8 @@
  */
 package com.databasepreservation.common.transformers;
 
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -17,42 +19,38 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
+import com.databasepreservation.common.client.models.status.collection.TableStatus;
+import com.databasepreservation.common.client.models.structure.*;
+import com.databasepreservation.common.client.tools.MimeTypeUtils;
+import com.databasepreservation.common.server.ViewerConfiguration;
+import com.databasepreservation.common.utils.LobManagerUtils;
 import com.databasepreservation.model.exception.ModuleException;
+import org.apache.calcite.adapter.enumerable.RexImpTable;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.tika.Tika;
+import org.apache.tika.exception.TikaException;
+import org.apache.tika.io.TikaInputStream;
+import org.apache.tika.metadata.Metadata;
+import org.apache.tika.mime.MediaType;
+import org.apache.tika.mime.MimeTypeException;
+import org.apache.tika.mime.MimeTypes;
+import org.apache.tika.parser.AutoDetectParser;
+import org.apache.tika.parser.ParseContext;
+import org.apache.tika.parser.microsoft.ooxml.OOXMLParser;
+import org.apache.tika.sax.BodyContentHandler;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
-import com.databasepreservation.common.client.models.structure.ViewerCandidateKey;
-import com.databasepreservation.common.client.models.structure.ViewerCell;
-import com.databasepreservation.common.client.models.structure.ViewerCheckConstraint;
-import com.databasepreservation.common.client.models.structure.ViewerColumn;
-import com.databasepreservation.common.client.models.structure.ViewerDatabaseFromToolkit;
-import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
-import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
-import com.databasepreservation.common.client.models.structure.ViewerMetadata;
-import com.databasepreservation.common.client.models.structure.ViewerPrimaryKey;
-import com.databasepreservation.common.client.models.structure.ViewerPrivilegeStructure;
-import com.databasepreservation.common.client.models.structure.ViewerReference;
-import com.databasepreservation.common.client.models.structure.ViewerRoleStructure;
-import com.databasepreservation.common.client.models.structure.ViewerRoutine;
-import com.databasepreservation.common.client.models.structure.ViewerRoutineParameter;
-import com.databasepreservation.common.client.models.structure.ViewerRow;
-import com.databasepreservation.common.client.models.structure.ViewerSchema;
-import com.databasepreservation.common.client.models.structure.ViewerTable;
-import com.databasepreservation.common.client.models.structure.ViewerTrigger;
-import com.databasepreservation.common.client.models.structure.ViewerType;
-import com.databasepreservation.common.client.models.structure.ViewerTypeArray;
-import com.databasepreservation.common.client.models.structure.ViewerTypeStructure;
-import com.databasepreservation.common.client.models.structure.ViewerUserStructure;
-import com.databasepreservation.common.client.models.structure.ViewerView;
 import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.io.providers.PathInputStreamProvider;
 import com.databasepreservation.common.io.providers.TemporaryPathInputStreamProvider;
@@ -94,17 +92,21 @@ import com.databasepreservation.model.structure.type.SimpleTypeString;
 import com.databasepreservation.model.structure.type.Type;
 import com.databasepreservation.utils.JodaUtils;
 import com.databasepreservation.utils.XMLUtils;
+import org.xml.sax.SAXException;
 
 /**
  * Utility class used to convert a DatabaseStructure (used in Database
  * Preservation Toolkit) to a ViewerStructure (used in Database Viewer)
- * 
+ *
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class ToolkitStructure2ViewerStructure {
   private static final Logger LOGGER = LoggerFactory.getLogger(ToolkitStructure2ViewerStructure.class);
   private static boolean simpleMetadata = false;
   private static final Pattern rowIndexPattern = Pattern.compile("^(.*\\.)?(\\d+)$");
+
+  private static final Tika tika = new Tika();
+  private static String currentTable;
 
   /**
    * Private empty constructor
@@ -541,7 +543,7 @@ public class ToolkitStructure2ViewerStructure {
 
   /**
    * Gets a column name for a type, including the dynamic type suffix
-   * 
+   *
    * @param index
    *          zero based index
    * @param type
@@ -654,20 +656,28 @@ public class ToolkitStructure2ViewerStructure {
     return result;
   }
 
-  public static ViewerRow getRow(CollectionStatus collectionConfiguration, ViewerTable table,
-    Row row, long rowIndex) {
+  public static ViewerRow getRow(CollectionStatus collectionConfiguration, ViewerTable table, Row row, long rowIndex,
+    String databasePath) {
+    setCurrentTable(table);
+
     ViewerRow result = new ViewerRow();
     // String rowUUID = SolrUtils.UUIDFromString(table.getUuid() + "." + rowIndex);
     String rowUUID = String.valueOf(rowIndex);
     result.setTableId(table.getId());
     result.setTableUUID(table.getUuid());
     result.setUuid(rowUUID);
-    result.setCells(getCells(collectionConfiguration, table, row));
+    result.setCells(getCells(collectionConfiguration, table, row, databasePath, result));
     return result;
   }
 
-  private static Map<String, ViewerCell> getCells(CollectionStatus collectionConfiguration,
-    ViewerTable table, Row row) {
+  private static void setCurrentTable(ViewerTable table) {
+    if (StringUtils.isAllBlank(currentTable) || (!currentTable.equals(table.getId()))) {
+      currentTable = table.getId();
+    }
+  }
+
+  private static Map<String, ViewerCell> getCells(CollectionStatus collectionConfiguration, ViewerTable table, Row row,
+    String databasePath, ViewerRow actualViewerRow) {
     Map<String, ViewerCell> result = new LinkedHashMap<>();
 
     int colIndex = 0;
@@ -675,8 +685,8 @@ public class ToolkitStructure2ViewerStructure {
     for (ViewerColumn viewerColumn : table.getColumns()) {
       String solrColumnName = viewerColumn.getSolrName();
       try {
-        result.put(solrColumnName,
-          getCell(collectionConfiguration, table, toolkitCells.get(colIndex), colIndex++));
+        result.put(solrColumnName, getCell(collectionConfiguration, table, toolkitCells.get(colIndex), colIndex++,
+          databasePath, actualViewerRow));
       } catch (ViewerException e) {
         LOGGER.error("Problem converting cell, omitted it (as if it were NULL)", e);
       }
@@ -685,8 +695,8 @@ public class ToolkitStructure2ViewerStructure {
     return result;
   }
 
-  private static ViewerCell getCell(CollectionStatus collectionConfiguration, ViewerTable table,
-    Cell cell, int colIndex) throws ViewerException {
+  private static ViewerCell getCell(CollectionStatus collectionConfiguration, ViewerTable table, Cell cell,
+    int colIndex, String databasePath, ViewerRow actualViewerRow) throws ViewerException {
     ViewerCell result = new ViewerCell();
 
     ViewerType columnType = table.getColumns().get(colIndex).getType();
@@ -694,6 +704,8 @@ public class ToolkitStructure2ViewerStructure {
     if (cell instanceof BinaryCell) {
       BinaryCell binaryCell = (BinaryCell) cell;
       if (binaryCell.getInputStreamProvider() instanceof TemporaryPathInputStreamProvider) {
+        // BLOB is internal to the SIARD and is located in table.xml
+
         TemporaryPathInputStreamProvider temporaryPathInputStreamProvider = (TemporaryPathInputStreamProvider) binaryCell
           .getInputStreamProvider();
         try {
@@ -703,21 +715,40 @@ public class ToolkitStructure2ViewerStructure {
           result.setValue(ViewerConstants.SIARD_EMBEDDED_LOB_PREFIX + encodeBase64String);
           collectionConfiguration.getTableStatusByTableId(table.getId()).getColumnByIndex(colIndex)
             .setExternalLob(false);
+          String index = getRowIndex(cell.getId());
+          String lobName = ViewerConstants.SIARD_RECORD_PREFIX + index + ViewerConstants.SIARD_LOB_FILE_EXTENSION;
+
+          detectMimeType(actualViewerRow, result, databasePath, collectionConfiguration, table, colIndex, lobName,
+            true);
+
         } catch (ModuleException e) {
-          throw new ViewerException(e.getMessage(),e);
+          throw new ViewerException(e.getMessage(), e);
         } catch (IOException e) {
-          throw new ViewerException("Could not convert the LOB to BASE64" ,e);
+          throw new ViewerException("Could not convert the LOB to BASE64", e);
         }
       } else if (binaryCell.getInputStreamProvider() instanceof PathInputStreamProvider) {
+        // BLOB is external to the SIARD
+
         PathInputStreamProvider pathInputStreamProvider = (PathInputStreamProvider) binaryCell.getInputStreamProvider();
         final Path siardFilesPath = ViewerFactory.getViewerConfiguration().getSIARDFilesPath();
         final Path lobPath = pathInputStreamProvider.getPath();
+        String index = getRowIndex(cell.getId());
+        String lobName = ViewerConstants.SIARD_RECORD_PREFIX + index + ViewerConstants.SIARD_LOB_FILE_EXTENSION;
         result.setValue(siardFilesPath.relativize(lobPath).normalize().toString());
         collectionConfiguration.getTableStatusByTableId(table.getId()).getColumnByIndex(colIndex).setExternalLob(true);
+
+        detectMimeType(actualViewerRow, result, databasePath, collectionConfiguration, table, colIndex, lobName, false);
+
       } else {
+        // BLOB is internal to the SIARD but it is outside the table.xml (Normal)
+
         String index = getRowIndex(cell.getId());
-        result.setValue(ViewerConstants.SIARD_RECORD_PREFIX + index + ViewerConstants.SIARD_LOB_FILE_EXTENSION);
+        String lobName = ViewerConstants.SIARD_RECORD_PREFIX + index + ViewerConstants.SIARD_LOB_FILE_EXTENSION;
+        result.setValue(lobName);
         collectionConfiguration.getTableStatusByTableId(table.getId()).getColumnByIndex(colIndex).setExternalLob(false);
+
+        detectMimeType(actualViewerRow, result, databasePath, collectionConfiguration, table, colIndex, lobName, true);
+
       }
     } else if (cell instanceof ComposedCell) {
       ComposedCell composedCell = (ComposedCell) cell;
@@ -748,6 +779,75 @@ public class ToolkitStructure2ViewerStructure {
     return result;
   }
 
+  private static void detectMimeType(ViewerRow row, ViewerCell cell, String databasePath,
+    CollectionStatus collectionConfiguration, ViewerTable table, int colIndex, String lobName,
+    boolean blobIsInsideSiard) {
+    try {
+      String mimeType;
+      String fileExtension;
+      InputStream inputStream;
+
+      TableStatus tableStatus = collectionConfiguration.getTableStatusByTableId(table.getId());
+      String siardLobPath = LobManagerUtils.getZipFilePath(tableStatus, colIndex, lobName);
+
+      ZipFile zipFile = new ZipFile(databasePath);
+      ZipEntry entry = zipFile.getEntry(siardLobPath);
+
+      String lobCellValue = cell.getValue();
+
+      if (entry != null && blobIsInsideSiard) {
+        inputStream = zipFile.getInputStream(entry);
+
+      } else if (blobIsInsideSiard) {
+        lobCellValue = lobCellValue.replace(ViewerConstants.SIARD_EMBEDDED_LOB_PREFIX, "");
+        inputStream = new ByteArrayInputStream(Base64.decodeBase64(lobCellValue.getBytes()));
+
+      } else {
+        lobCellValue = cell.getValue();
+        inputStream = new FileInputStream(lobCellValue);
+      }
+
+      mimeType = tika.detect(inputStream);
+      fileExtension = MimeTypes.getDefaultMimeTypes().forName(mimeType).getExtension();
+
+      if (StringUtils.isAllBlank(fileExtension)) {
+        try {
+          if (blobIsInsideSiard) {
+            inputStream = zipFile.getInputStream(entry);
+          } else {
+            inputStream = new FileInputStream(lobCellValue);
+          }
+
+          AutoDetectParser parser = new AutoDetectParser();
+          Metadata metadata = new Metadata();
+
+          parser.parse(inputStream, new BodyContentHandler(), metadata, new ParseContext());
+          mimeType = metadata.get("Content-Type");
+          fileExtension = MimeTypes.getDefaultMimeTypes().forName(mimeType).getExtension();
+
+        } catch (SAXException | TikaException e) {
+          LOGGER.error("Could not calculate mimeType for special extensions in the cell: [" + cell.getValue() + "]", e);
+        }
+
+      }
+
+      cell.setMimeType(mimeType);
+      cell.setFileExtension(fileExtension);
+
+
+      collectionConfiguration.updateColumnMimeType(table.getUuid(), colIndex);
+      collectionConfiguration.updateLobFileName(table.getUuid(), colIndex);
+
+      ViewerMimeType viewerMimeType = new ViewerMimeType(mimeType, fileExtension);
+      String colName = collectionConfiguration.getTableStatusByTableId(table.getId()).getColumnByIndex(colIndex)
+        .getId();
+      row.addMimeTypeListEntry(colName, viewerMimeType);
+
+    } catch (IOException | MimeTypeException e) {
+      LOGGER.error("Could not calculate mimeType for cell: [" + cell.getValue() + "]", e);
+    }
+  }
+
   private static String getRowIndex(String cellId) throws ViewerException {
     final Matcher matcher = rowIndexPattern.matcher(cellId);
     if (matcher.matches()) {
@@ -775,7 +875,7 @@ public class ToolkitStructure2ViewerStructure {
 
     /**
      * build references from the database
-     * 
+     *
      * @param database
      *          the database from DBPTK
      */

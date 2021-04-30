@@ -77,7 +77,7 @@ public class ColumnTemplateOptions extends FlowPanel {
   }
 
   public void buildHintForButtons(TableStatus table, String i18nText) {
-    displayHint.add(ColumnOptionUtils.buildHintWithButtons(table, template, i18nText));
+    displayHint.add(ColumnOptionUtils.buildHintWithButtons(table, template, i18nText,false));
   }
 
   public String getText() {
