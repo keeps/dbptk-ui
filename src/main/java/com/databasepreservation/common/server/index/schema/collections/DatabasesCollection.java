@@ -126,7 +126,7 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
     viewerDatabase.setStatus(SolrUtils.objectToEnum(doc.get(SOLR_DATABASES_STATUS), ViewerDatabaseStatus.class,
         ViewerDatabaseStatus.INGESTING));
 
-    String jsonMetadata = SolrUtils.objectToString(doc.get(SOLR_DATABASES_METADATA), "");
+    String jsonMetadata = SolrUtils.objectToString(doc.get(SOLR_DATABASES_METADATA), null);
     ViewerMetadata metadata = JsonTransformer.getObjectFromJson(jsonMetadata, ViewerMetadata.class);
     viewerDatabase.setMetadata(metadata);
 

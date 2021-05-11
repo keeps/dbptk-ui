@@ -284,9 +284,8 @@ public class JavascriptUtils {
                                                                       }-*/;
 
   public static native String openFileDialog(JavaScriptObject options) /*-{
-                                                                       var dialog = $wnd.nodeRequire('electron').remote.dialog;
-                                                                       
-                                                                       var result = dialog.showOpenDialog(options);
+                                                                       var ipcRenderer = $wnd.nodeRequire('electron').ipcRenderer
+                                                                       var result = ipcRenderer.sendSync('show-open-dialog', options)
                                                                        
                                                                        if (typeof result != "undefined") { return result[0]; }
                                                                        else return null;
@@ -294,22 +293,21 @@ public class JavascriptUtils {
                                                                        }-*/;
 
   public static native void showItem(String path) /*-{
-                                                  var shell = $wnd.nodeRequire('electron').remote.shell;
+                                                  var shell = $wnd.nodeRequire('electron').shell;
                                                   
-                                                  shell.openItem(path);
+                                                  shell.openPath(path);
                                                   }-*/;
 
   public static native void showItemInFolder(String path) /*-{
-                                                          var shell = $wnd.nodeRequire('electron').remote.shell;
+                                                          var shell = $wnd.nodeRequire('electron').shell;
                                                           
                                                           shell.showItemInFolder(path);
                                                           }-*/;
 
   public static native String saveFileDialog(JavaScriptObject options) /*-{
-                                                                       var dialog = $wnd.nodeRequire('electron').remote.dialog
-                                                                       
-                                                                       var result = dialog.showSaveDialog(options);
-                                                                       
+                                                                       var ipcRenderer = $wnd.nodeRequire('electron').ipcRenderer
+                                                                       var result = ipcRenderer.sendSync('show-save-dialog', options)
+
                                                                        if (typeof result != "undefined") { return result; }
                                                                        else return null;
                                                                        }-*/;
@@ -330,16 +328,16 @@ public class JavascriptUtils {
                                             title: title,
                                             message: message
                                             };
-                                            
-                                            var dialog = $wnd.nodeRequire('electron').remote.dialog;
-                                            
-                                            return dialog.showMessageBox(null, options, function(response){
+
+                                            var ipcRenderer = $wnd.nodeRequire('electron').ipcRenderer
+                                            var response = ipcRenderer.sendSync('show-confirmation-dialog', options)
+
                                             var value = false;
                                             if(response === 0) {
-                                            value = true;
+                                              value = true;
                                             }
                                             callback.@com.databasepreservation.common.client.common.DefaultAsyncCallback::onSuccess(*)(value);
-                                            });
+
                                             }-*/;
 
   public static native String compileTemplate(String templateString, String object) /*-{
