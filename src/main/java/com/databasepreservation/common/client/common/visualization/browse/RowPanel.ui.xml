@@ -1,9 +1,14 @@
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
              xmlns:g='urn:import:com.google.gwt.user.client.ui'
 >
-
+    <ui:with field='messages' type='config.i18n.client.ClientMessages' />
     <g:FlowPanel>
         <g:FlowPanel addStyleNames="structure-header">
+            <g:SimplePanel addStyleNames="back-button">
+                <g:Button ui:field="foreignKeyNavigatorBtn" addStyleNames="btn btn-back">
+                    <ui:text from="{messages.basicActionBack}" />
+                </g:Button>
+            </g:SimplePanel>
             <g:SimplePanel ui:field="recordHeader" addStyleNames="h1" />
             <g:FlowPanel addStyleNames="data-transformation-toolbar-actions">
                 <g:Button ui:field="btnExport" addStyleNames="btn btn-primary btn-download" />

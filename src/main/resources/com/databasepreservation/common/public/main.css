@@ -986,7 +986,6 @@ p[data-value]:after {
 
 .structure-header {
     display: flex;
-    justify-content: space-between;
 }
 
 .structure-header-siard {
@@ -1097,6 +1096,12 @@ p[data-value]:after {
 
 .structure-header .h1 {
     margin: 0;
+    flex-grow: 1;
+}
+
+.structure-header .back-button {
+    margin-right: 2rem;
+    margin-top: 1rem;
 }
 
 .structure-header-siard .h1 {

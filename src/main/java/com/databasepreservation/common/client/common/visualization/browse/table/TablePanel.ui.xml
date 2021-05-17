@@ -5,6 +5,11 @@
     <ui:with field='messages' type='config.i18n.client.ClientMessages' />
     <g:FlowPanel ui:field="mainContent">
         <g:FlowPanel addStyleNames="structure-header">
+            <g:SimplePanel addStyleNames="back-button" ui:field="foreignKeyNavigator">
+                <g:Button addStyleNames="btn btn-back" ui:field="foreignKeyNavigatorBtn">
+                    <ui:text from="{messages.basicActionBack}" />
+                </g:Button>
+            </g:SimplePanel>
             <g:SimplePanel addStyleNames="h1" ui:field="mainHeader">
                 <g:Label><ui:text from='{messages.loadingTableInfo}' /></g:Label>
             </g:SimplePanel>

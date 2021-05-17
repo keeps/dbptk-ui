@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import com.google.gwt.user.client.History;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
 import com.databasepreservation.common.client.ClientConfigurationManager;
@@ -107,6 +108,9 @@ public class RowPanel extends RightPanel {
   SimplePanel recordHeader;
 
   @UiField
+  Button foreignKeyNavigatorBtn;
+
+  @UiField
   Button btnExport;
 
   @UiField
@@ -157,6 +161,10 @@ public class RowPanel extends RightPanel {
   }
 
   private void init() {
+    this.foreignKeyNavigatorBtn.addClickHandler(e -> {
+      History.back();
+    });
+
     if (ViewerStringUtils.isNotBlank(status.getTableStatusByTableId(table.getId()).getCustomDescription())) {
       MetadataField instance = MetadataField
         .createInstance(status.getTableStatusByTableId(table.getId()).getCustomDescription());

@@ -91,6 +91,12 @@ public class TablePanel extends RightPanel implements ICollectionStatusObserver,
   @UiField
   SimplePanel mainHeader;
 
+  @UiField
+  SimplePanel foreignKeyNavigator;
+
+  @UiField
+  Button foreignKeyNavigatorBtn;
+
   @UiField(provided = true)
   TableSearchPanel tableSearchPanel;
 
@@ -198,6 +204,12 @@ public class TablePanel extends RightPanel implements ICollectionStatusObserver,
   private void init() {
     ObserverManager.getCollectionObserver().addObserver(this);
     ObserverManager.getColumnVisibilityObserver().addObserver(this);
+
+    if (HistoryManager.ROUTE_TABLE.equals(route)) {
+      foreignKeyNavigator.setVisible(false);
+    }
+
+    foreignKeyNavigatorBtn.addClickHandler(e -> History.back());
 
     mainHeader.setWidget(CommonClientUtils.getHeader(collectionStatus.getTableStatus(table.getUuid()), table, "h1",
       database.getMetadata().getSchemas().size() > 1));
