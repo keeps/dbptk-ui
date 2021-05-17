@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.databasepreservation.common.client.ObserverManager;
 import com.databasepreservation.common.client.common.ContentPanel;
@@ -76,7 +77,8 @@ public class TableManagementPanel extends ContentPanel {
   private boolean changes = false;
   private Map<String, MultipleSelectionTablePanel<ViewerTable>> tables = new HashMap<>();
   private Map<String, Boolean> initialLoading = new HashMap<>();
-  private Map<String, StatusHelper> editableValues = new HashMap<>();
+
+  private Map<String, Map<String, StatusHelper>> tableManagementData = new HashMap<>();
 
   public static TableManagementPanel getInstance(ViewerDatabase database, CollectionStatus status) {
     return instances.computeIfAbsent(database.getUuid(), k -> new TableManagementPanel(database, status));
@@ -99,7 +101,8 @@ public class TableManagementPanel extends ContentPanel {
       populateTable(schemaTable, database.getMetadata().getSchema(schema.getUuid()));
       tables.put(schema.getUuid(), schemaTable);
       FlowPanel widgets = CommonClientUtils.wrapOnDiv("table-management-schema-divider",
-        CommonClientUtils.getHeader(SafeHtmlUtils.fromSafeConstant(schema.getName()), "table-management-schema-title"), schemaTable);
+        CommonClientUtils.getHeader(SafeHtmlUtils.fromSafeConstant(schema.getName()), "table-management-schema-title"),
+        schemaTable);
       content.add(widgets);
     }
 
@@ -122,11 +125,10 @@ public class TableManagementPanel extends ContentPanel {
             for (MultipleSelectionTablePanel<ViewerTable> value : tables.values()) {
               for (ViewerTable table : database.getMetadata().getTables().values()) {
                 collectionStatus.updateTableShowCondition(table.getUuid(), value.getSelectionModel().isSelected(table));
-                if (editableValues.get(table.getUuid()) != null) {
+                if (!checkTableManagementDataIsEmpty(table)) {
                   collectionStatus.updateTableCustomDescription(table.getUuid(),
-                    editableValues.get(table.getUuid()).getDescription());
-                  collectionStatus.updateTableCustomName(table.getUuid(),
-                    editableValues.get(table.getUuid()).getLabel());
+                    getTableManagementData(table).getDescription());
+                  collectionStatus.updateTableCustomName(table.getUuid(), getTableManagementData(table).getLabel());
                 }
               }
             }
@@ -182,7 +184,7 @@ public class TableManagementPanel extends ContentPanel {
     }
   }
 
-  private MultipleSelectionTablePanel<ViewerTable> createCellTableForViewerTable() {
+  private MultipleSelectionTablePanel<ViewerTable>createCellTableForViewerTable() {
     return new MultipleSelectionTablePanel<>(GWT.create(ConfigurationCellTableResources.class));
   }
 
@@ -230,26 +232,26 @@ public class TableManagementPanel extends ContentPanel {
     Column<ViewerTable, String> label = new Column<ViewerTable, String>(new RequiredEditableCell() {}) {
       @Override
       public String getValue(ViewerTable table) {
-        if (editableValues.get(table.getUuid()) == null) {
+        if (checkTableManagementDataIsEmpty(table)) {
           StatusHelper helper = new StatusHelper(collectionStatus.getTableStatus(table.getUuid()).getCustomName(),
             collectionStatus.getTableStatus(table.getUuid()).getCustomDescription());
-          editableValues.put(table.getUuid(), helper);
+          addToTableManagementData(table, helper);
           return collectionStatus.getTableStatus(table.getUuid()).getCustomName();
         } else {
-          return editableValues.get(table.getUuid()).getLabel();
+          return getTableManagementData(table).getLabel();
         }
       }
     };
 
     label.setFieldUpdater((index, table, value) -> {
-      if (editableValues.get(table.getUuid()) != null) {
-        final StatusHelper statusHelper = editableValues.get(table.getUuid());
-        statusHelper.setLabel(value);
-        editableValues.put(table.getUuid(), statusHelper);
-      } else {
+      if (checkTableManagementDataIsEmpty(table)) {
         StatusHelper helper = new StatusHelper(value,
           collectionStatus.getTableStatus(table.getUuid()).getCustomDescription());
-        editableValues.put(table.getUuid(), helper);
+        addToTableManagementData(table, helper);
+      } else {
+        StatusHelper data = getTableManagementData(table);
+        data.setLabel(value);
+        addToTableManagementData(table, data);
       }
 
       changes = true;
@@ -261,42 +263,47 @@ public class TableManagementPanel extends ContentPanel {
     Column<ViewerTable, String> description = new Column<ViewerTable, String>(new TextAreaInputCell() {}) {
       @Override
       public String getValue(ViewerTable table) {
-        if (editableValues.get(table.getUuid()) == null) {
-          return collectionStatus.getTableStatus(table.getUuid()).getCustomDescription();
-        } else {
-          return editableValues.get(table.getUuid()).getDescription();
-        }
+        return collectionStatus.getTableStatus(table.getUuid()).getCustomDescription();
       }
     };
 
     description.setFieldUpdater((index, table, value) -> {
-      if (editableValues.get(table.getUuid()) != null) {
-        final StatusHelper statusHelper = editableValues.get(table.getUuid());
-        statusHelper.setDescription(value);
-        editableValues.put(table.getUuid(), statusHelper);
-      } else {
+      if (checkTableManagementDataIsEmpty(table)) {
         StatusHelper helper = new StatusHelper(collectionStatus.getTableStatus(table.getUuid()).getCustomName(), value);
-        editableValues.put(table.getUuid(), helper);
+        addToTableManagementData(table, helper);
+      } else {
+        final StatusHelper statusHelper = getTableManagementData(table);
+        statusHelper.setDescription(value);
+        addToTableManagementData(table, statusHelper);
       }
     });
     return description;
   }
 
   private boolean selectionValidation() {
-    for (MultipleSelectionTablePanel<ViewerTable> value : tables.values()) {
-      if (value.getSelectionModel().getSelectedSet().isEmpty())
-        return false;
+    boolean result = false;
+
+    for (MultipleSelectionTablePanel<ViewerTable> table : tables.values()) {
+      boolean notEmpty = !table.getSelectionModel().getSelectedSet().isEmpty();
+      result |= notEmpty;
+
     }
 
-    return true;
+    return result;
   }
 
   private boolean uniquenessValidation() {
-    Set<String> uniques = new HashSet<>();
+    for (String schemaUUID : tables.keySet()) {
+      Set<String> uniques = new HashSet<>();
 
-    for (StatusHelper value : editableValues.values()) {
-      if (!uniques.add(value.getLabel())) {
-        return false;
+      Map<String, StatusHelper> helperMap = tableManagementData.get(schemaUUID);
+      List<String> selectedSet = tables.get(schemaUUID).getSelectionModel().getSelectedSet().stream()
+        .map(ViewerTable::getId).collect(Collectors.toList());
+
+      for (String tableId : selectedSet) {
+        if (!uniques.add(helperMap.get(tableId).getLabel())) {
+          return false;
+        }
       }
     }
 
@@ -304,13 +311,41 @@ public class TableManagementPanel extends ContentPanel {
   }
 
   private boolean inputValidation() {
-    for (StatusHelper value : editableValues.values()) {
-      if (ViewerStringUtils.isBlank(value.getLabel())) {
-        return false;
+    for (String schemaUUID : tables.keySet()) {
+      Map<String, StatusHelper> helperMap = tableManagementData.get(schemaUUID);
+      List<String> selectedSet = tables.get(schemaUUID).getSelectionModel().getSelectedSet().stream()
+        .map(ViewerTable::getId).collect(Collectors.toList());
+
+      for (String tableId : selectedSet) {
+        if (ViewerStringUtils.isBlank(helperMap.get(tableId).getLabel())) {
+          return false;
+        }
       }
     }
 
     return true;
+  }
+
+  private void addToTableManagementData(ViewerTable table, StatusHelper helper) {
+    Map<String, StatusHelper> helperMap = tableManagementData.get(table.getSchemaUUID());
+
+    if (helperMap == null) {
+      helperMap = new HashMap<>();
+    }
+
+    helperMap.put(table.getId(), helper);
+    tableManagementData.put(table.getSchemaUUID(), helperMap);
+  }
+
+  private boolean checkTableManagementDataIsEmpty(ViewerTable table) {
+    if (tableManagementData.get(table.getSchemaUUID()) == null)
+      return true;
+
+    return tableManagementData.get(table.getSchemaUUID()).get(table.getId()) == null;
+  }
+
+  private StatusHelper getTableManagementData(ViewerTable table) {
+    return tableManagementData.get(table.getSchemaUUID()).get(table.getId());
   }
 
   @Override
