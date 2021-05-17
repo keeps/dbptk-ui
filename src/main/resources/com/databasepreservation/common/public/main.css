@@ -3072,6 +3072,24 @@ rgba(0, 0, 0, .125);
 }
 
 /************************************************
+* Table Management
+ ************************************************/
+.table-management-schema-divider {
+    border-left-color: #089de3;
+    border-left-style: solid;
+    border-left-width: 4px;
+    padding-left: 10px;
+}
+
+.table-management-schema-divider + .table-management-schema-divider {
+    margin-top: 25px;
+}
+
+.table-management-schema-title {
+    font-weight: bold;
+}
+
+/************************************************
 * Columns Management
  ************************************************/
 .columns-management-options {

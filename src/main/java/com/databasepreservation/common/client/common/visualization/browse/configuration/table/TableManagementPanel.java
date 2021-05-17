@@ -98,7 +98,9 @@ public class TableManagementPanel extends ContentPanel {
       schemaTable.setHeight("100%");
       populateTable(schemaTable, database.getMetadata().getSchema(schema.getUuid()));
       tables.put(schema.getUuid(), schemaTable);
-      content.add(schemaTable);
+      FlowPanel widgets = CommonClientUtils.wrapOnDiv("table-management-schema-divider",
+        CommonClientUtils.getHeader(SafeHtmlUtils.fromSafeConstant(schema.getName()), "table-management-schema-title"), schemaTable);
+      content.add(widgets);
     }
 
     configureButtonsPanel();
@@ -164,9 +166,9 @@ public class TableManagementPanel extends ContentPanel {
 
   private void handleCancelEvent(boolean changes) {
     if (changes) {
-      CommonDialogs.showConfirmDialog(messages.columnManagementPageTitle(), SafeHtmlUtils.fromSafeConstant(messages.columnManagementPageCancelEventDialog()),
-          messages.basicActionCancel(), messages.basicActionDiscard(), CommonDialogs.Level.DANGER, "400px",
-        new DefaultAsyncCallback<Boolean>() {
+      CommonDialogs.showConfirmDialog(messages.columnManagementPageTitle(),
+        SafeHtmlUtils.fromSafeConstant(messages.columnManagementPageCancelEventDialog()), messages.basicActionCancel(),
+        messages.basicActionDiscard(), CommonDialogs.Level.DANGER, "400px", new DefaultAsyncCallback<Boolean>() {
           @Override
           public void onSuccess(Boolean aBoolean) {
             if (aBoolean) {
