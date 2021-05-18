@@ -17,7 +17,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import com.google.gwt.user.client.History;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
 import com.databasepreservation.common.client.ClientConfigurationManager;
@@ -66,6 +65,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
+import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -341,8 +341,8 @@ public class RowPanel extends RightPanel {
           String template = columnStatus.getDetailsStatus().getTemplateStatus().getTemplate();
           if (template != null && !template.isEmpty()) {
             String json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_downloadLOB(),
-                ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK, RestUtils.createExportLobUri(database.getUuid(),
-                    table.getSchemaName(), table.getName(), row.getUuid(), columnStatus.getColumnIndex()));
+              ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK, RestUtils.createExportLobUri(database.getUuid(),
+                table.getSchemaName(), table.getName(), row.getUuid(), columnStatus.getColumnIndex()));
             safeHtml = SafeHtmlUtils.fromSafeConstant(JavascriptUtils.compileTemplate(template, json));
             rowField = RowField.createInstance(label, new HTML(safeHtml));
           } else {
@@ -445,31 +445,35 @@ public class RowPanel extends RightPanel {
       refTable = otherTable;
       foreignSolrColumnToRowSolrColumn = new TreeMap<>();
 
-      // tableUUID to use in URL is always otherTable.getUUID()
-      if (foreignKey.getReferencedTableUUID().equals(otherTable.getUuid())) {
-        // related to
-        // currentTable -> otherTable
-        // fk belongs to current table, fk target is otherTable
-        // get column names from fk target (use otherTable to map indexes to
-        // names)
-        // get column indexes from fk source
-        for (ViewerReference viewerReference : foreignKey.getReferences()) {
-          String solrColumnName = otherTable.getColumns().get(viewerReference.getReferencedColumnIndex()).getSolrName();
-          Integer columnIndexToGetValue = viewerReference.getSourceColumnIndex();
-          String solrColumnNameToGetValue = currentTable.getColumns().get(columnIndexToGetValue).getSolrName();
-          foreignSolrColumnToRowSolrColumn.put(solrColumnName, solrColumnNameToGetValue);
-        }
-      } else {
-        // referenced by
-        // currentTable <- otherTable
-        // fk belongs to otherTable, fk target is current table
-        // get column names from source (use otherTable to map indexes to names)
-        // get column indexes from fk target
-        for (ViewerReference viewerReference : foreignKey.getReferences()) {
-          String solrColumnName = otherTable.getColumns().get(viewerReference.getSourceColumnIndex()).getSolrName();
-          Integer columnIndexToGetValue = viewerReference.getReferencedColumnIndex();
-          String solrColumnNameToGetValue = currentTable.getColumns().get(columnIndexToGetValue).getSolrName();
-          foreignSolrColumnToRowSolrColumn.put(solrColumnName, solrColumnNameToGetValue);
+      if (otherTable != null) {
+
+        // tableUUID to use in URL is always otherTable.getUUID()
+        if (foreignKey.getReferencedTableUUID().equals(otherTable.getUuid())) {
+          // related to
+          // currentTable -> otherTable
+          // fk belongs to current table, fk target is otherTable
+          // get column names from fk target (use otherTable to map indexes to
+          // names)
+          // get column indexes from fk source
+          for (ViewerReference viewerReference : foreignKey.getReferences()) {
+            String solrColumnName = otherTable.getColumns().get(viewerReference.getReferencedColumnIndex())
+              .getSolrName();
+            Integer columnIndexToGetValue = viewerReference.getSourceColumnIndex();
+            String solrColumnNameToGetValue = currentTable.getColumns().get(columnIndexToGetValue).getSolrName();
+            foreignSolrColumnToRowSolrColumn.put(solrColumnName, solrColumnNameToGetValue);
+          }
+        } else {
+          // referenced by
+          // currentTable <- otherTable
+          // fk belongs to otherTable, fk target is current table
+          // get column names from source (use otherTable to map indexes to names)
+          // get column indexes from fk target
+          for (ViewerReference viewerReference : foreignKey.getReferences()) {
+            String solrColumnName = otherTable.getColumns().get(viewerReference.getSourceColumnIndex()).getSolrName();
+            Integer columnIndexToGetValue = viewerReference.getReferencedColumnIndex();
+            String solrColumnNameToGetValue = currentTable.getColumns().get(columnIndexToGetValue).getSolrName();
+            foreignSolrColumnToRowSolrColumn.put(solrColumnName, solrColumnNameToGetValue);
+          }
         }
       }
     }
