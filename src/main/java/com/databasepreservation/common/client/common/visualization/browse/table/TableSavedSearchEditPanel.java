@@ -132,7 +132,16 @@ public class TableSavedSearchEditPanel extends RightPanel {
 
   @UiHandler("buttonCancel")
   void handleButtonCancel(ClickEvent e) {
+    buttonApply.setEnabled(false);
+    buttonCancel.setEnabled(false);
     // goto list
-    HistoryManager.gotoSavedSearches(database.getUuid());
+    CollectionService.Util.call((Void result) -> {
+      buttonApply.setEnabled(true);
+      buttonCancel.setEnabled(true);
+      HistoryManager.gotoSavedSearches(database.getUuid());
+    }, (String errorMessage) -> {
+      buttonApply.setEnabled(true);
+      buttonCancel.setEnabled(true);
+    }).deleteSavedSearch(database.getUuid(), database.getUuid(), savedSearchUUID);
   }
 }
