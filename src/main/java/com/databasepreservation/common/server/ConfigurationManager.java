@@ -15,6 +15,7 @@ import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
@@ -286,6 +287,29 @@ public class ConfigurationManager {
       Path statusFile = getCollectionStatusPath(databaseUUID, status.getId());
       JsonTransformer.writeObjectToFile(status, statusFile);
     }
+  }
+
+  public void updateCollectionStatus(String databaseUUID, List<TableStatus> list, boolean updateCustomDescription)
+    throws GenericException, ViewerException {
+    CollectionStatus collectionStatus = getCollectionStatus(databaseUUID,
+      ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + databaseUUID);
+
+    for (TableStatus table : list) {
+      collectionStatus.getTableStatusByTableId(table.getId()).setDescription(table.getDescription());
+      if (updateCustomDescription) {
+        collectionStatus.getTableStatusByTableId(table.getId()).setCustomDescription(table.getDescription());
+      }
+      for (ColumnStatus column : table.getColumns()) {
+        collectionStatus.getColumnByTableAndColumn(table.getUuid(), column.getId())
+          .setDescription(column.getDescription());
+        if (updateCustomDescription) {
+          collectionStatus.getColumnByTableAndColumn(table.getUuid(), column.getId())
+            .setCustomDescription(column.getDescription());
+        }
+      }
+    }
+
+    updateCollectionStatus(databaseUUID, collectionStatus);
   }
 
   public void updateValidationStatus(String id, ViewerDatabaseValidationStatus status, String date,

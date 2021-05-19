@@ -9,6 +9,7 @@ package config.i18n.client;
 
 import java.util.List;
 
+import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.google.gwt.i18n.client.Messages;
 import com.google.gwt.safehtml.shared.SafeHtml;
 
@@ -431,6 +432,10 @@ public interface ClientMessages extends Messages {
   String routines_parametersList();
 
   String dialogUpdateMetadata();
+
+  String dialogConfirmMetadataUpdateWhenReady();
+
+  String dialogConfirmMetadataUpdateWhenNotReady();
 
   String dialogConfirmUpdateMetadata();
 

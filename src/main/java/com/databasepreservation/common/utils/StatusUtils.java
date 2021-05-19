@@ -28,6 +28,7 @@ import com.databasepreservation.common.client.models.status.database.ValidationS
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
+import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.models.structure.ViewerType;
 
@@ -35,6 +36,16 @@ import com.databasepreservation.common.client.models.structure.ViewerType;
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 public class StatusUtils {
+
+  public static List<TableStatus> getTableStatusFromList(ViewerMetadata metadata) {
+    List<TableStatus> tableStatus = new ArrayList<>();
+
+    for (ViewerTable table : metadata.getTables().values()) {
+      tableStatus.add(getTableStatus(metadata, table));
+    }
+
+    return tableStatus;
+  }
 
   public static List<TableStatus> getTableStatusFromList(ViewerDatabase database) {
     List<TableStatus> tableStatus = new ArrayList<>();
@@ -49,8 +60,16 @@ public class StatusUtils {
   }
 
   public static TableStatus getTableStatus(ViewerDatabase database, ViewerTable table, boolean show) {
-    final int schemaIndex = database.getMetadata().getSchemaIndex(table.getSchemaUUID());
-    final int tableIndex = database.getMetadata().getTableIndex(table.getUuid());
+    return getTableStatus(database.getMetadata(), table, show);
+  }
+
+  public static TableStatus getTableStatus(ViewerMetadata metadata, ViewerTable table) {
+    return getTableStatus(metadata, table, true);
+  }
+
+  public static TableStatus getTableStatus(ViewerMetadata metadata, ViewerTable table, boolean show) {
+    final int schemaIndex = metadata.getSchemaIndex(table.getSchemaUUID());
+    final int tableIndex = metadata.getTableIndex(table.getUuid());
 
     TableStatus status = new TableStatus();
     status.setUuid(table.getUuid());

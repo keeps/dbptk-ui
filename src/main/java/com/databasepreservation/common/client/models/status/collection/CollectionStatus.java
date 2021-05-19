@@ -168,9 +168,9 @@ public class CollectionStatus implements Serializable {
   }
 
   @JsonIgnore
-  public TableStatus getTableStatus(String id) {
+  public TableStatus getTableStatus(String uuid) {
     for (TableStatus table : tables) {
-      if (table.getUuid().equals(id))
+      if (table.getUuid().equals(uuid))
         return table;
     }
 

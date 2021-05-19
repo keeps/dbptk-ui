@@ -500,7 +500,7 @@ public class DatabaseRowsSolrManager {
   }
 
   public void updateDatabaseMetadata(String databaseUUID, ViewerMetadata metadata) {
-    LOGGER.debug("updateDatabaseMetadata");
+    LOGGER.debug("Starting to update database metadata ({})", databaseUUID);
 
     // create document to update this DB
     SolrInputDocument doc = new SolrInputDocument();
@@ -510,9 +510,9 @@ public class DatabaseRowsSolrManager {
       doc.addField(ViewerConstants.SOLR_DATABASES_METADATA,
         SolrUtils.asValueUpdate(JsonTransformer.getJsonFromObject(metadata)));
       insertDocument(ViewerConstants.SOLR_INDEX_DATABASES_COLLECTION_NAME, doc);
-      LOGGER.debug("SUCCESS updateDatabaseMetadata");
+      LOGGER.debug("Finish updating database metadata ({})", databaseUUID);
     } catch (ViewerException e) {
-      LOGGER.error("Could not update database progress for {}", databaseUUID, e);
+      LOGGER.error("Could not update database metadata ({})", databaseUUID, e);
     }
 
   }

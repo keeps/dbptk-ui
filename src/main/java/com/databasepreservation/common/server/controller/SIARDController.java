@@ -42,6 +42,7 @@ import com.databasepreservation.common.client.index.filter.SimpleFilterParameter
 import com.databasepreservation.common.client.models.dbptk.Module;
 import com.databasepreservation.common.client.models.parameters.PreservationParameter;
 import com.databasepreservation.common.client.models.parameters.SIARDUpdateParameters;
+import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseFromToolkit;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
@@ -66,6 +67,7 @@ import com.databasepreservation.common.server.index.factory.SolrClientFactory;
 import com.databasepreservation.common.server.index.schema.SolrDefaultCollectionRegistry;
 import com.databasepreservation.common.server.index.utils.SolrUtils;
 import com.databasepreservation.common.transformers.ToolkitStructure2ViewerStructure;
+import com.databasepreservation.common.utils.StatusUtils;
 import com.databasepreservation.model.exception.ModuleException;
 import com.databasepreservation.model.exception.SIARDVersionNotSupportedException;
 import com.databasepreservation.model.exception.UnsupportedModuleException;
@@ -713,7 +715,7 @@ public class SIARDController {
   }
 
   public static ViewerMetadata updateMetadataInformation(String databaseUUID, String siardPath,
-    SIARDUpdateParameters parameters) throws GenericException {
+    SIARDUpdateParameters parameters, boolean updateOnModel) throws GenericException {
     LOGGER.info("Start the edit metadata process for {}, siard is located at {}", databaseUUID, siardPath);
     ViewerMetadata metadata = parameters.getMetadata();
     try (Reporter reporter = getReporter(databaseUUID, ReporterType.EDIT_METADATA)) {
@@ -732,11 +734,13 @@ public class SIARDController {
 
       final DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
       solrManager.updateDatabaseMetadata(databaseUUID, metadata);
-      LOGGER.info("Finish the edit metadata process for {}, siard is located at {}", databaseUUID, siardPath);
-    } catch (IOException e) {
-      throw new GenericException("Could not initialize conversion modules.", e);
-    } catch (ModuleException | RuntimeException e) {
-      throw new GenericException("Could not convert the database to the Solr instance.", e);
+
+      List<TableStatus> tableStatusFromList = StatusUtils.getTableStatusFromList(metadata);
+      ViewerFactory.getConfigurationManager().updateCollectionStatus(databaseUUID, tableStatusFromList, updateOnModel);
+
+      LOGGER.info("Finish edit metadata process for {}, SIARD is located at {}", databaseUUID, siardPath);
+    } catch (IOException | ModuleException | RuntimeException e) {
+      throw new GenericException("Could not update the database metadata information", e);
     }
 
     return metadata;

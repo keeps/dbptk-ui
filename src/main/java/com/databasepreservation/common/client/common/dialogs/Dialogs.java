@@ -18,9 +18,12 @@ import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.ColumnOptionsPanel;
 import com.databasepreservation.common.client.models.wizard.table.ExternalLobsDialogBoxResult;
 import com.databasepreservation.common.client.widgets.MyCellTableResources;
+import com.databasepreservation.common.server.index.utils.Pair;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.regexp.shared.RegExp;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
@@ -723,5 +726,57 @@ public class Dialogs {
     dialogBox.center();
     dialogBox.show();
     inputBox.setFocus(true);
+  }
+
+  public static void showDialogWithTwoOptions(String title, SafeHtml description, String firstOptionBtnText, String firstOptionBtnCSS,
+                                              String secondOptionBtnText, String secondOptionBtnCSS, AsyncCallback<Boolean> callback) {
+    FlowPanel layout = new FlowPanel();
+    FlowPanel footer = new FlowPanel();
+    final DialogBox dialogBox = new DialogBox(false, true);
+    dialogBox.setText(title);
+
+    layout.addStyleName("content");
+    layout.addStyleName("wui-dialog-layout");
+    footer.addStyleName("wui-dialog-layout-footer");
+
+    Button cancelButton = new Button(messages.basicActionCancel());
+    cancelButton.addStyleName("btn btn-link");
+    cancelButton.addClickHandler(event -> {
+      dialogBox.hide();
+    });
+
+    HTML messageLabel = new HTML(description);
+    messageLabel.addStyleName("wui-dialog-message");
+
+    Button applyToManualInclusiveButton = new Button();
+    applyToManualInclusiveButton.setText(firstOptionBtnText);
+    applyToManualInclusiveButton.addStyleName(firstOptionBtnCSS);
+    applyToManualInclusiveButton.getElement().getStyle().setMarginRight(10, Style.Unit.PX);
+    applyToManualInclusiveButton.addClickHandler(clickEvent -> {
+      dialogBox.hide();
+      callback.onSuccess(true);
+    });
+
+    Button applyToManualExclusiveButton = new Button();
+    applyToManualExclusiveButton.setText(secondOptionBtnText);
+    applyToManualExclusiveButton.addStyleName(secondOptionBtnCSS);
+    applyToManualExclusiveButton.addClickHandler(event -> {
+      dialogBox.hide();
+      callback.onSuccess(false);
+    });
+
+    footer.add(cancelButton);
+    footer.add(applyToManualInclusiveButton);
+    footer.add(applyToManualExclusiveButton);
+
+    layout.add(messageLabel);
+    layout.add(footer);
+
+    dialogBox.setGlassEnabled(true);
+    dialogBox.setAnimationEnabled(false);
+
+    dialogBox.setWidget(layout);
+    dialogBox.center();
+    dialogBox.show();
   }
 }

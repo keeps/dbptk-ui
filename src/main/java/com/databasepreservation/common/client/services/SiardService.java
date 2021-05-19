@@ -104,7 +104,7 @@ public interface SiardService extends DirectRestService {
   @Path("/{databaseUUID}/siard/{siardUUID}/metadata")
   @ApiOperation(value = "Updates the SIARD metadata information", notes = "", response = ViewerMetadata.class)
   ViewerMetadata updateMetadataInformation(@PathParam("databaseUUID") String databaseUUID,
-    @PathParam("siardUUID") String siardUUID, @QueryParam("path") String path, SIARDUpdateParameters parameters);
+    @PathParam("siardUUID") String siardUUID, @QueryParam("path") String path, SIARDUpdateParameters parameters, @QueryParam("updateOnModel") boolean updateOnModel);
 
   @GET
   @Path("/{databaseUUID}/siard/{siardUUID}/metadata")
