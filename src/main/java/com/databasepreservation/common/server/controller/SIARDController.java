@@ -732,6 +732,14 @@ public class SIARDController {
       }
       bundleSiard.clearCommandList();
 
+      // Extract updated metadata
+      SIARDEdition siardEdition = SIARDEdition.newInstance();
+      siardEdition.editModule(new SIARDEditFactory()).editModuleParameter(SIARDEditFactory.PARAMETER_FILE,
+          Collections.singletonList(siardPath));
+      siardEdition.reporter(new NoOpReporter());
+      DatabaseStructure updatedDatabaseStructure = siardEdition.getMetadata();
+
+      ToolkitStructure2ViewerStructure.mergeMetadata(updatedDatabaseStructure, metadata);
       final DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
       solrManager.updateDatabaseMetadata(databaseUUID, metadata);
 

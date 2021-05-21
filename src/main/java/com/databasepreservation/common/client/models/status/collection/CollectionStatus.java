@@ -223,8 +223,21 @@ public class CollectionStatus implements Serializable {
     return true;
   }
 
-  public ColumnStatus getColumnByTableAndColumn(String tableId, String columnId) {
-    final TableStatus tableStatus = getTableStatus(tableId);
+  public ColumnStatus getColumnByTableIdAndColumn(String tableId, String columnId) {
+    final TableStatus tableStatus = getTableStatusByTableId(tableId);
+    if (tableStatus != null) {
+      for (ColumnStatus column : tableStatus.getColumns()) {
+        if (column.getId().equals(columnId)) {
+          return column;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  public ColumnStatus getColumnByTableAndColumn(String tableUUID, String columnId) {
+    final TableStatus tableStatus = getTableStatus(tableUUID);
     if (tableStatus != null) {
       for (ColumnStatus column : tableStatus.getColumns()) {
         if (column.getId().equals(columnId)) {

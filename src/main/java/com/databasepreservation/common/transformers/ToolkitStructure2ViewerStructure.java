@@ -174,6 +174,20 @@ public class ToolkitStructure2ViewerStructure {
     return result;
   }
 
+  public static ViewerMetadata mergeMetadata(DatabaseStructure updatedDatabaseStructure, ViewerMetadata metadata) {
+    for (SchemaStructure schema : updatedDatabaseStructure.getSchemas()) {
+      for (TableStructure table : schema.getTables()) {
+        metadata.getTableById(table.getId()).setDescription(table.getDescription());
+        int index = 0;
+        for (ColumnStructure column : table.getColumns()) {
+          metadata.getTableById(table.getId()).getColumnByIndexInEnclosingTable(index++).setDescription(column.getDescription());
+        }
+      }
+    }
+
+    return metadata;
+  }
+
   private static List<ViewerPrivilegeStructure> getPrivileges(List<PrivilegeStructure> privileges) {
     ArrayList<ViewerPrivilegeStructure> result = new ArrayList<>();
     if (privileges != null) {

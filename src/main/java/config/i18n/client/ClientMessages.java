@@ -433,9 +433,11 @@ public interface ClientMessages extends Messages {
 
   String dialogUpdateMetadata();
 
-  String dialogConfirmMetadataUpdateWhenReady();
+  SafeHtml dialogUpdateMetadataDescription();
 
-  String dialogConfirmMetadataUpdateWhenNotReady();
+  String dialogUpdateMetadataButtonTextForUpdateBoth();
+
+  String dialogUpdateMetadataButtonTextForUpdateSIARD();
 
   String dialogConfirmUpdateMetadata();
 

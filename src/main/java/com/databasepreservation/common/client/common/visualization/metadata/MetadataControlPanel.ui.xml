@@ -8,7 +8,7 @@
     <g:FlowPanel addStyleNames="metadata-save" ui:field="saveMetadataPanel">
         <c:LoadingDiv visible="false" ui:field="loading"/>
         <g:FlowPanel addStyleNames="btn-item">
-        <g:Button addStyleNames="btn btn-times-circle btn-danger" ui:field="buttonClear">
+        <g:Button addStyleNames="btn btn-erase btn-danger" ui:field="buttonClear">
             <ui:text from='{messages.basicActionClear}'/>
         </g:Button>
         </g:FlowPanel>
@@ -20,7 +20,7 @@
         </g:FlowPanel>
 
         <g:FlowPanel addStyleNames="btn-item">
-            <g:Button addStyleNames="btn btn-primary" ui:field="buttonCancel">
+            <g:Button addStyleNames="btn btn-times-circle btn-primary" ui:field="buttonCancel">
                 <ui:text from='{messages.basicActionCancel}'/>
             </g:Button>
         </g:FlowPanel>

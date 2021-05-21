@@ -734,6 +734,7 @@ public class Dialogs {
     FlowPanel footer = new FlowPanel();
     final DialogBox dialogBox = new DialogBox(false, true);
     dialogBox.setText(title);
+    dialogBox.setWidth("500px");
 
     layout.addStyleName("content");
     layout.addStyleName("wui-dialog-layout");

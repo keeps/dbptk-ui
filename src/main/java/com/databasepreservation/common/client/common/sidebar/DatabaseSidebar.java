@@ -173,6 +173,8 @@ public class DatabaseSidebar extends Composite implements Sidebar, ICollectionSt
     // database metadata
     final ViewerMetadata metadata = database.getMetadata();
 
+    GWT.log("metadata: " + database.getMetadata().getTableById("sakila.actor").getUuid());
+
     SidebarHyperlink informationLink = new SidebarHyperlink(FontAwesomeIconManager
       .getTagSafeHtml(FontAwesomeIconManager.DATABASE_INFORMATION, messages.menusidebar_information()),
       HistoryManager.linkToDatabase(database.getUuid()));
@@ -261,6 +263,7 @@ public class DatabaseSidebar extends Composite implements Sidebar, ICollectionSt
     final String iconTag) {
       SafeHtml html;
       if (totalSchemas == 1) {
+        GWT.log(table.getUuid());
       html = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE,
         collectionStatus.getTableStatus(table.getUuid()).getCustomName());
       } else {

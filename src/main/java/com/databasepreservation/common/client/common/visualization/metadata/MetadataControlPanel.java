@@ -12,12 +12,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.LoadingDiv;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
-import com.databasepreservation.common.client.common.utils.ApplicationType;
-import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.models.parameters.SIARDUpdateParameters;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
@@ -25,11 +22,9 @@ import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerSIARDBundle;
 import com.databasepreservation.common.client.services.SiardService;
 import com.databasepreservation.common.client.tools.HistoryManager;
-import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.databasepreservation.common.client.widgets.Toast;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -172,21 +167,31 @@ public class MetadataControlPanel extends Composite {
     // METADATA_ONLY state, confirm with the user if we wants to edit the metadata
     // and update it on both SIARD and model
 
-    String message = "";
-
     if (ViewerDatabaseStatus.AVAILABLE.equals(database.getStatus())) {
-      if (ViewerConstants.APPLICATION_ENV_SERVER.equals(ApplicationType.getType())) {
-        Dialogs.showDialogWithTwoOptions(messages.dialogUpdateMetadata(), SafeHtmlUtils.fromSafeConstant("test"),
-          "Update on both", "btn btn-info", "Update on SIARD", "btn btn-info", new DefaultAsyncCallback<Boolean>() {
-            @Override
-            public void onSuccess(Boolean result) {
+      Dialogs.showDialogWithTwoOptions(messages.dialogUpdateMetadata(), messages.dialogUpdateMetadataDescription(),
+        messages.dialogUpdateMetadataButtonTextForUpdateBoth(), "btn btn-play",
+        messages.dialogUpdateMetadataButtonTextForUpdateSIARD(), "btn btn-play", new DefaultAsyncCallback<Boolean>() {
+          @Override
+          public void onSuccess(Boolean result) {
+            if (database.getSize() > ALERT_SIARD_FILE_SIZE) {
+              Dialogs.showConfirmDialog(messages.dialogUpdateMetadata(),
+                messages.dialogLargeFileConfirmUpdateMetadata(), messages.basicActionCancel(),
+                messages.basicActionConfirm(), new DefaultAsyncCallback<Boolean>() {
+                  @Override
+                  public void onSuccess(Boolean confirm) {
+                    if (confirm) {
+                      updateMetadata(result);
+                    }
+                  }
+                });
+            } else {
               updateMetadata(result);
             }
-          });
-      }
+          }
+        });
     } else if (ViewerDatabaseStatus.METADATA_ONLY.equals(database.getStatus())) {
-      Dialogs.showConfirmDialog(messages.dialogUpdateMetadata(), message, messages.basicActionCancel(),
-        messages.basicActionConfirm(), new DefaultAsyncCallback<Boolean>() {
+      Dialogs.showConfirmDialog(messages.dialogUpdateMetadata(), messages.dialogConfirmUpdateMetadata(),
+        messages.basicActionCancel(), messages.basicActionConfirm(), new DefaultAsyncCallback<Boolean>() {
           @Override
           public void onFailure(Throwable caught) {
             Toast.showError(messages.metadataFailureUpdated(), caught.getMessage());
@@ -195,38 +200,24 @@ public class MetadataControlPanel extends Composite {
           @Override
           public void onSuccess(Boolean confirm) {
             if (confirm) {
-              updateMetadata(true);
+              if (database.getSize() > ALERT_SIARD_FILE_SIZE) {
+                Dialogs.showConfirmDialog(messages.dialogUpdateMetadata(),
+                  messages.dialogLargeFileConfirmUpdateMetadata(), messages.basicActionCancel(),
+                  messages.basicActionConfirm(), new DefaultAsyncCallback<Boolean>() {
+                    @Override
+                    public void onSuccess(Boolean confirm) {
+                      if (confirm) {
+                        updateMetadata(true);
+                      }
+                    }
+                  });
+              } else {
+                updateMetadata(true);
+              }
             }
           }
         });
     }
-
-    // Check if file was loaded already, if true, alert the user that this changes
-    // will not be reflected on the Browser part
-    if (ViewerStringUtils.isNotBlank(database.getLoadedAt())) {
-      message = "Database already loaded";
-    } else {
-      message = messages.dialogConfirmUpdateMetadata();
-      if (database.getSize() > ALERT_SIARD_FILE_SIZE) {
-        message = messages.dialogLargeFileConfirmUpdateMetadata();
-      }
-    }
-
-//    if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_DESKTOP)) {
-//      JavascriptUtils.confirmationDialog(messages.dialogUpdateMetadata(), message, messages.basicActionCancel(),
-//        messages.basicActionConfirm(), new DefaultAsyncCallback<Boolean>() {
-//
-//          @Override
-//          public void onSuccess(Boolean confirm) {
-//            if (confirm) {
-//              updateMetadata(true);
-//            }
-//          }
-//
-//        });
-//    } else {
-//
-//    }
   }
 
   @UiHandler("buttonCancel")

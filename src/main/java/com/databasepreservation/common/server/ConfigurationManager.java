@@ -300,10 +300,10 @@ public class ConfigurationManager {
         collectionStatus.getTableStatusByTableId(table.getId()).setCustomDescription(table.getDescription());
       }
       for (ColumnStatus column : table.getColumns()) {
-        collectionStatus.getColumnByTableAndColumn(table.getUuid(), column.getId())
+        collectionStatus.getColumnByTableIdAndColumn(table.getId(), column.getId())
           .setDescription(column.getDescription());
         if (updateCustomDescription) {
-          collectionStatus.getColumnByTableAndColumn(table.getUuid(), column.getId())
+          collectionStatus.getColumnByTableIdAndColumn(table.getId(), column.getId())
             .setCustomDescription(column.getDescription());
         }
       }
