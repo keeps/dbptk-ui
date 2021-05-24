@@ -14,15 +14,25 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-@JsonPropertyOrder({"show", "showContent", "template"})
+@JsonPropertyOrder({"width", "show", "showContent", "template"})
 public class ListStatus implements Serializable {
 
+  private String columnWidth;
   private boolean show;
   private boolean showContent;
   private TemplateStatus template;
 
   public ListStatus() {
     showContent = true;
+    columnWidth = "10";
+  }
+
+  public String getColumnWidth() {
+    return columnWidth;
+  }
+
+  public void setColumnWidth(String columnWidth) {
+    this.columnWidth = columnWidth;
   }
 
   public boolean isShow() {

@@ -472,17 +472,12 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
         viewerColumn.getCustomDescription(), "column-description-block");
       SafeHtmlBuilder spanDescription = CommonClientUtils.constructSpan(viewerColumn.getCustomDescription(),
         viewerColumn.getCustomDescription(), "column-description-block column-description");
-      if (viewerColumn.getCustomName().equals("actor_id")) {
-        addColumn(displayColumn, CommonClientUtils.wrapOnDiv(Arrays.asList(spanTitle, spanDescription)), true,
-          TextAlign.LEFT, 20);
-      } else {
-        addColumn(displayColumn, CommonClientUtils.wrapOnDiv(Arrays.asList(spanTitle, spanDescription)), true,
-          TextAlign.LEFT, 10);
-      }
+      addColumn(displayColumn, CommonClientUtils.wrapOnDiv(Arrays.asList(spanTitle, spanDescription)), true,
+        TextAlign.LEFT, Double.parseDouble(viewerColumn.getSearchStatus().getList().getColumnWidth()));
     } else {
       SafeHtmlBuilder spanTitle = CommonClientUtils.constructSpan(viewerColumn.getCustomName(),
         viewerColumn.getCustomDescription(), "column-description-block");
-      addColumn(displayColumn, spanTitle.toSafeHtml(), true, TextAlign.LEFT, 10);
+      addColumn(displayColumn, spanTitle.toSafeHtml(), true, TextAlign.LEFT, Double.parseDouble(viewerColumn.getSearchStatus().getList().getColumnWidth()));
     }
   }
 

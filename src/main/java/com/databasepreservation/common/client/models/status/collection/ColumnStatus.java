@@ -32,7 +32,6 @@ public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
   private String nullable;
   private ViewerType.dbTypes type;
   private int columnIndex;
-  private int width;
   @JsonInclude(JsonInclude.Include.NON_DEFAULT)
   private boolean externalLob;
   //introduzir
@@ -203,6 +202,10 @@ public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
 
   public void updateAdvancedSearchShowValue(boolean value) {
     this.getSearchStatus().getAdvanced().setFixed(value);
+  }
+
+  public void updateColumnWidth(String value) {
+    this.getSearchStatus().getList().setColumnWidth(value);
   }
 
   public void updateSearchListTemplate(TemplateStatus templateStatus) {

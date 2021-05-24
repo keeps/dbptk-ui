@@ -17,6 +17,7 @@ public class StatusHelper {
   private boolean showInTable;
   private boolean showInDetails;
   private boolean showInAdvancedSearch;
+  private String width;
 
   public StatusHelper() {
   }
@@ -26,12 +27,13 @@ public class StatusHelper {
     this.description = description;
   }
 
-  public StatusHelper(String label, String description, boolean table, boolean details, boolean advancedSearch) {
+  public StatusHelper(String label, String description, boolean table, boolean details, boolean advancedSearch, String width) {
     this.label = label;
     this.description = description;
     this.showInTable = table;
     this.showInDetails = details;
     this.showInAdvancedSearch = advancedSearch;
+    this.width = width;
   }
 
   public String getLabel() {
@@ -72,5 +74,13 @@ public class StatusHelper {
 
   public void setShowInAdvancedSearch(boolean showInAdvancedSearch) {
     this.showInAdvancedSearch = showInAdvancedSearch;
+  }
+
+  public String getWidth() {
+    return width;
+  }
+
+  public void setWidth(String width) {
+    this.width = width;
   }
 }

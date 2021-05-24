@@ -56,7 +56,6 @@ import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.CompositeCell;
 import com.google.gwt.cell.client.HasCell;
-import com.google.gwt.cell.client.NumberCell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
@@ -64,7 +63,6 @@ import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -190,6 +188,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
         column.updateTableShowValue(editableValues.get(column.getId()).isShowInTable());
         column.updateDetailsShowValue(editableValues.get(column.getId()).isShowInDetails());
         column.updateAdvancedSearchShowValue(editableValues.get(column.getId()).isShowInAdvancedSearch());
+        column.updateColumnWidth(editableValues.get(column.getId()).getWidth());
       }
       statuses.add(column);
     }
@@ -257,12 +256,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
         }),
       new BasicTablePanel.ColumnInfo<>(messages.basicTableHeaderLabel(), 15, getLabelColumn()),
       new BasicTablePanel.ColumnInfo<>(messages.basicTableHeaderDescription(), 0, getDescriptionColumn()),
-      new BasicTablePanel.ColumnInfo<>("Set width (EM)", 10, new Column<ColumnStatus, String>(new EditableNumberCell()) {
-        @Override
-        public String getValue(ColumnStatus object) {
-          return "";
-        }
-      }),
+      new BasicTablePanel.ColumnInfo<>("Set width (EM)", 10, getNumberColumn()),
       new BasicTablePanel.ColumnInfo<>(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager
         .getTagWithStyleName(FontAwesomeIconManager.COG, messages.basicTableHeaderOptions(), FA_FW)), false, 3,
         getOptionsColumn()),
@@ -319,6 +313,41 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
     };
   }
 
+  private Column<ColumnStatus, String> getNumberColumn() {
+    Column<ColumnStatus, String> number = new Column<ColumnStatus, String>(new EditableNumberCell()) {
+      @Override
+      public String getValue(ColumnStatus column) {
+        if (editableValues.get(column.getId()) == null) {
+          StatusHelper helper = new StatusHelper(column.getCustomName(), column.getCustomDescription(),
+            column.getSearchStatus().getList().isShow(), column.getDetailsStatus().isShow(),
+            column.getSearchStatus().getAdvanced().isFixed(), column.getSearchStatus().getList().getColumnWidth());
+          editableValues.put(column.getId(), helper);
+          return column.getSearchStatus().getList().getColumnWidth();
+        } else {
+          return editableValues.get(column.getId()).getWidth();
+        }
+      }
+    };
+
+    number.setFieldUpdater((index, column, value) -> {
+      if (editableValues.get(column.getId()) != null) {
+        StatusHelper statusHelper = editableValues.get(column.getId());
+        statusHelper.setWidth(value);
+        editableValues.replace(column.getId(), statusHelper);
+      } else {
+        StatusHelper helper = new StatusHelper(column.getCustomName(), column.getCustomDescription(),
+          column.getSearchStatus().getList().isShow(), column.getDetailsStatus().isShow(),
+          column.getSearchStatus().getAdvanced().isFixed(), value);
+        editableValues.put(column.getId(), helper);
+      }
+
+      changes = true;
+      sidebar.updateSidebarItem(tableId, true);
+    });
+
+    return number;
+  }
+
   private Column<ColumnStatus, Boolean> getTableCheckboxColumn() {
     Column<ColumnStatus, Boolean> checkbox = new Column<ColumnStatus, Boolean>(new CheckboxCell(true, true)) {
       @Override
@@ -326,7 +355,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
         if (editableValues.get(column.getId()) == null) {
           StatusHelper helper = new StatusHelper(column.getCustomName(), column.getCustomDescription(),
             column.getSearchStatus().getList().isShow(), column.getDetailsStatus().isShow(),
-            column.getSearchStatus().getAdvanced().isFixed());
+            column.getSearchStatus().getAdvanced().isFixed(), column.getSearchStatus().getList().getColumnWidth());
           editableValues.put(column.getId(), helper);
           return column.getSearchStatus().getList().isShow();
         } else {
@@ -342,7 +371,8 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
         editableValues.replace(column.getId(), statusHelper);
       } else {
         StatusHelper helper = new StatusHelper(column.getCustomName(), column.getCustomDescription(), value,
-          column.getDetailsStatus().isShow(), column.getSearchStatus().getAdvanced().isFixed());
+          column.getDetailsStatus().isShow(), column.getSearchStatus().getAdvanced().isFixed(),
+          column.getSearchStatus().getList().getColumnWidth());
         editableValues.put(column.getId(), helper);
       }
 
@@ -360,7 +390,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
         if (editableValues.get(column.getId()) == null) {
           StatusHelper helper = new StatusHelper(column.getCustomName(), column.getCustomDescription(),
             column.getSearchStatus().getList().isShow(), column.getDetailsStatus().isShow(),
-            column.getSearchStatus().getAdvanced().isFixed());
+            column.getSearchStatus().getAdvanced().isFixed(), column.getSearchStatus().getList().getColumnWidth());
           editableValues.put(column.getId(), helper);
           return column.getDetailsStatus().isShow();
         } else {
@@ -376,7 +406,8 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
         editableValues.replace(column.getId(), statusHelper);
       } else {
         StatusHelper helper = new StatusHelper(column.getCustomName(), column.getCustomDescription(),
-          column.getSearchStatus().getList().isShow(), value, column.getSearchStatus().getAdvanced().isFixed());
+          column.getSearchStatus().getList().isShow(), value, column.getSearchStatus().getAdvanced().isFixed(),
+          column.getSearchStatus().getList().getColumnWidth());
         editableValues.put(column.getId(), helper);
       }
 
@@ -413,7 +444,8 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
         editableValues.replace(column.getId(), statusHelper);
       } else {
         StatusHelper helper = new StatusHelper(column.getCustomName(), column.getCustomDescription(),
-          column.getSearchStatus().getList().isShow(), column.getDetailsStatus().isShow(), value.isChecked());
+          column.getSearchStatus().getList().isShow(), column.getDetailsStatus().isShow(), value.isChecked(),
+          column.getSearchStatus().getList().getColumnWidth());
         editableValues.put(column.getId(), helper);
       }
 
@@ -458,7 +490,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
         if (editableValues.get(column.getId()) == null) {
           StatusHelper helper = new StatusHelper(column.getCustomName(), column.getCustomDescription(),
             column.getSearchStatus().getList().isShow(), column.getDetailsStatus().isShow(),
-            column.getSearchStatus().getAdvanced().isFixed());
+            column.getSearchStatus().getAdvanced().isFixed(), column.getSearchStatus().getList().getColumnWidth());
           editableValues.put(column.getId(), helper);
           return column.getCustomName();
         } else {
@@ -475,7 +507,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
       } else {
         StatusHelper helper = new StatusHelper(value, column.getCustomDescription(),
           column.getSearchStatus().getList().isShow(), column.getDetailsStatus().isShow(),
-          column.getSearchStatus().getAdvanced().isFixed());
+          column.getSearchStatus().getAdvanced().isFixed(), column.getSearchStatus().getList().getColumnWidth());
         editableValues.put(column.getId(), helper);
       }
 
@@ -506,7 +538,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
       } else {
         StatusHelper helper = new StatusHelper(column.getCustomName(), value,
           column.getSearchStatus().getList().isShow(), column.getDetailsStatus().isShow(),
-          column.getSearchStatus().getAdvanced().isFixed());
+          column.getSearchStatus().getAdvanced().isFixed(), column.getSearchStatus().getList().getColumnWidth());
         editableValues.put(column.getId(), helper);
       }
 
