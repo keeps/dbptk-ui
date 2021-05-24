@@ -284,8 +284,6 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
       double percent = displayScroll.getHorizontalScrollPosition() * 100F
         / displayScroll.getMaximumHorizontalScrollPosition();
 
-      GWT.log(String.valueOf(percent));
-
       if (percent > 0) {
         // show left shadow
         displayScrollWrapper.addStyleName("my-asyncdatagrid-display-scroll-wrapper-left");

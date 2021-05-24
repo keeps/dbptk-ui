@@ -96,8 +96,6 @@ public class SIARDEditMetadataPage extends Composite {
   }
 
   public void load(MetadataPanelLoad rightPanelLoader, String sidebarSelected) {
-    GWT.log("load. uuid: " + databaseUUID + ", database: " + database);
-
     if (databaseUUID != null
       && (database == null || !ViewerDatabaseStatus.METADATA_ONLY.equals(database.getStatus()))) {
       loadPanelWithDatabase(rightPanelLoader, sidebarSelected);

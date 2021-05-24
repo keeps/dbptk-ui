@@ -127,7 +127,6 @@ public class TransformationChildTables {
       if (relatedTable != null) {
         for (RelatedColumnConfiguration column : relatedTable.getColumnsIncluded()) {
           if (column.getIndex() == index) {
-            GWT.log("Column: " + column.getColumnName());
             return true;
           }
         }

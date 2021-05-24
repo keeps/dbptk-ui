@@ -34,7 +34,6 @@ public class SearchInfoHtmlUtils {
     for (int i = 0; i < fields.size(); i++) {
       SearchField field = fields.get(i);
       final String label = field.getLabel();
-      GWT.log(label);
       if (fieldParameters.get(i) != null && fieldParameters.get(i) instanceof BasicSearchFilterParameter) {
         BasicSearchFilterParameter parameter = (BasicSearchFilterParameter) fieldParameters.get(i);
         final String value = parameter.getValue();

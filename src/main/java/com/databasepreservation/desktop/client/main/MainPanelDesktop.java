@@ -533,7 +533,6 @@ public class MainPanelDesktop extends Composite {
 
   private void setContent(String databaseUUID, String route, String toSelect, Sidebar sidebar,
     RightPanelLoader rightPanelLoader) {
-    GWT.log("setContent, dbuid " + databaseUUID);
     DatabasePanel databasePanel = DatabasePanel.getInstance(databaseUUID, route, true, sidebar);
     databasePanel.setTopLevelPanelCSS("browseContent wrapper skip_padding");
     contentPanel.setWidget(databasePanel);
@@ -542,8 +541,6 @@ public class MainPanelDesktop extends Composite {
   }
 
   private void setContent(String databaseUUID, String route, String toSelect, RightPanelLoader rightPanelLoader) {
-    GWT.log("setContent, dbuid " + databaseUUID);
-
     Sidebar sidebar = DatabaseSidebar.getInstance(databaseUUID);
     DatabasePanel containerPanel = DatabasePanel.getInstance(databaseUUID, route, true, sidebar);
     containerPanel.setTopLevelPanelCSS("browseContent wrapper skip_padding");

@@ -336,7 +336,6 @@ public class DatabaseSidebar extends Composite implements Sidebar, ICollectionSt
 
   @Override
   public void init(ViewerDatabase db, CollectionStatus status) {
-    GWT.log("init with db: " + db + "; status: " + db.getStatus().toString());
     if (ViewerDatabaseStatus.AVAILABLE.equals(db.getStatus())) {
       if (db != null && (databaseUUID == null || databaseUUID.equals(db.getUuid()))) {
         initialized = true;

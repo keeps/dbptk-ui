@@ -124,8 +124,6 @@ public class TableSearchPanel extends Composite {
       status, isNested);
     tableRowList.setColumnVisibility(columnDisplayNameToVisibleState);
 
-    GWT.log("initial filter: " + initialFilter);
-
     final boolean showSearchAdvancedDisclosureButton = status.getTableStatusByTableId(table.getId())
       .showAdvancedSearchOption();
 
@@ -193,9 +191,7 @@ public class TableSearchPanel extends Composite {
   }
 
   private void buildSearchFieldPanel(List<SearchField> list) {
-    GWT.log("List size: " + list.size());
     for (SearchField searchField : list) {
-      GWT.log("type: " + searchField.getType());
       if (searchField.isFixed()) {
         SearchFieldPanel searchFieldPanel = SearchFieldPanelFactory.getSearchFieldPanel(searchField);
         searchFieldPanel.setup();
@@ -209,13 +205,11 @@ public class TableSearchPanel extends Composite {
   }
 
   public void applySearchInfoJson(String searchInfoJson) {
-    GWT.log("SearchInfo: " + searchInfoJson);
     setCurrentSearchInfoFromJson(searchInfoJson);
     applyCurrentSearchInfo();
   }
 
   public void applySearchInfoJson() {
-    GWT.log("currentSearchInfo: " + currentSearchInfo);
     applyCurrentSearchInfo();
   }
 

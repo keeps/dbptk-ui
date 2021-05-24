@@ -102,7 +102,6 @@ public class SavedSearchList extends AsyncTableCell<SavedSearch, String> {
       object -> HistoryManager.gotoEditSavedSearch(object.getDatabaseUUID(), object.getUuid())));
     cells.add(new ActionsCell<>(messages.delete(), FontAwesomeIconManager.ACTION_DELETE, "btn-danger",
       object -> CollectionService.Util.call((Void result) -> {
-        GWT.log("deleted " + object.getUuid());
         SavedSearchList.this.refresh();
       }).deleteSavedSearch(getDatabaseUUID(), getDatabaseUUID(), object.getUuid())));
     CompositeCell<SavedSearch> compositeCell = new CompositeCell<>(cells);

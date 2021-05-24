@@ -129,7 +129,6 @@ public class MetadataEditSidebar extends Composite {
   }
 
   public void init(ViewerDatabase db) {
-    GWT.log("init with db: " + db + "; status: " + db.getStatus().toString());
     if (ViewerDatabaseStatus.AVAILABLE.equals(db.getStatus())
       || ViewerDatabaseStatus.METADATA_ONLY.equals(db.getStatus())) {
       if (db != null && (databaseUUID == null || databaseUUID.equals(db.getUuid()))) {

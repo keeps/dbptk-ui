@@ -108,7 +108,6 @@ public class DatabasePanel extends Composite implements ICollectionStatusObserve
   public DatabasePanel(String databaseUUID, boolean initMenu, Sidebar sidebar) {
     initWidget(uiBinder.createAndBindUi(this));
 
-    GWT.log("Register databasePanel");
     ObserverManager.getCollectionObserver().addObserver(this);
 
     this.databaseUUID = databaseUUID;
@@ -283,7 +282,6 @@ public class DatabasePanel extends Composite implements ICollectionStatusObserve
   }
 
   private void loadPanel(ContentPanelLoader panelLoader) {
-    GWT.log("have db: " + database);
     // ConfigurationService.Util.call((CollectionStatus status) -> {
     // collectionStatus = status;
 
@@ -298,10 +296,8 @@ public class DatabasePanel extends Composite implements ICollectionStatusObserve
   }
 
   public void load(RightPanelLoader rightPanelLoader, String toSelect) {
-    GWT.log("load. uuid: " + databaseUUID + ", database: " + database);
     if (databaseUUID != null && (database == null || !ViewerDatabaseStatus.AVAILABLE.equals(database.getStatus()))) {
       // need to load database (not present or not available), go get it
-      GWT.log("getting db");
       loadPanelWithDatabase(rightPanelLoader, toSelect);
     } else {
       loadPanel(rightPanelLoader, toSelect);
@@ -319,8 +315,6 @@ public class DatabasePanel extends Composite implements ICollectionStatusObserve
   }
 
   private void loadPanel(RightPanelLoader rightPanelLoader, String toSelect) {
-    GWT.log("have db: " + database + " sb.init: " + sidebar.isInitialized());
-
     RightPanel rightPanel = rightPanelLoader.load(database, collectionStatus);
 
     if (database != null && !sidebar.isInitialized()) {

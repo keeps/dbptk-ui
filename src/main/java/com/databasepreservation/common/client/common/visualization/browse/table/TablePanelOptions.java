@@ -49,7 +49,6 @@ import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTMLPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimpleCheckBox;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.MultiSelectionModel;
 
@@ -59,9 +58,9 @@ import config.i18n.client.ClientMessages;
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class TablePanelOptions extends RightPanel implements ICollectionStatusObserver {
-	private static final ClientMessages messages = GWT.create(ClientMessages.class);
-	private static final String BTN_SELECT_ALL = "btn-select-all";
-	private static Map<String, TablePanelOptions> instances = new HashMap<>();
+  private static final ClientMessages messages = GWT.create(ClientMessages.class);
+  private static final String BTN_SELECT_ALL = "btn-select-all";
+  private static Map<String, TablePanelOptions> instances = new HashMap<>();
 
   public static TablePanelOptions getInstance(CollectionStatus status, ViewerDatabase database, String tableId) {
     String separator = "/";
@@ -96,9 +95,9 @@ public class TablePanelOptions extends RightPanel implements ICollectionStatusOb
   private ViewerDatabase database;
   private CollectionStatus status;
   private ViewerTable table;
-  private boolean allSelected = true; 	// true: select all; false; select none;
-	private boolean showTechnicalInformation = false; // true: show; false: hide;
-  private Map<String, Boolean> initialLoading = new HashMap<>();
+  private boolean allSelected = true; // true: select all; false; select none;
+  private boolean showTechnicalInformation = false; // true: show; false: hide;
+  private final Map<String, Boolean> initialLoading = new HashMap<>();
   private MultipleSelectionTablePanel<ColumnStatus> columnsTable;
   private Button btnSelectToggle;
   private Label switchLabel;
@@ -133,7 +132,8 @@ public class TablePanelOptions extends RightPanel implements ICollectionStatusOb
   }
 
   private void init() {
-    mainHeader.insert(CommonClientUtils.getHeader(status.getTableStatusByTableId(table.getId()), table, "h1", database.getMetadata().getSchemas().size() > 1),0);
+    mainHeader.insert(CommonClientUtils.getHeader(status.getTableStatusByTableId(table.getId()), table, "h1",
+      database.getMetadata().getSchemas().size() > 1), 0);
     configureButtons();
     configureTechnicalInformationSwitch();
     initTable();
@@ -212,11 +212,10 @@ public class TablePanelOptions extends RightPanel implements ICollectionStatusOb
 
   private void refreshCellTable(boolean value) {
     showTechnicalInformation = value;
-    final MultiSelectionModel<ColumnStatus> selectionModel = columnsTable.getSelectionModel();
+    defaultSetSelectAll();
+
     columnsTable = createCellTableForViewerColumn();
     populateTableColumns(columnsTable);
-    selectionModel.getSelectedSet().forEach(configColumn ->
-      columnsTable.getSelectionModel().setSelected(configColumn, selectionModel.isSelected(configColumn)));
     content.add(columnsTable);
   }
 
@@ -252,12 +251,7 @@ public class TablePanelOptions extends RightPanel implements ICollectionStatusOb
                 toggleButton(true);
               }
 
-              if (selectionTablePanel.getSelectionModel().getSelectedSet().size() == 1) {
-                toggleButton(false);
-              }
-
-              if (selectionTablePanel.getSelectionModel().getSelectedSet().size() < 1) {
-                selectionTablePanel.getSelectionModel().setSelected(viewerColumn, true);
+              if (selectionTablePanel.getSelectionModel().getSelectedSet().size() <= 1) {
                 toggleButton(false);
               }
             }

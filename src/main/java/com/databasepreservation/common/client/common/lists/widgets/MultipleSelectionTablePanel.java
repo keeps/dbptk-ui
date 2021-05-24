@@ -102,7 +102,6 @@ public class MultipleSelectionTablePanel<C> extends Composite {
     table.setVisible(false);
     selectionModel = new MultiSelectionModel<>();
     this.height = "";
-
   }
 
   public MultipleSelectionTablePanel(CellTable.Resources resources) {
@@ -112,7 +111,6 @@ public class MultipleSelectionTablePanel<C> extends Composite {
     selectionModel = new MultiSelectionModel<>();
     this.height = "";
     this.resources = resources;
-
   }
 
   @Override
