@@ -25,6 +25,7 @@ import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.lists.cells.ActionsCell;
 import com.databasepreservation.common.client.common.lists.cells.DisableableCheckboxCell;
+import com.databasepreservation.common.client.common.lists.cells.EditableNumberCell;
 import com.databasepreservation.common.client.common.lists.cells.RequiredEditableCell;
 import com.databasepreservation.common.client.common.lists.cells.TextAreaInputCell;
 import com.databasepreservation.common.client.common.lists.cells.helper.CheckboxData;
@@ -55,6 +56,7 @@ import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.cell.client.CompositeCell;
 import com.google.gwt.cell.client.HasCell;
+import com.google.gwt.cell.client.NumberCell;
 import com.google.gwt.cell.client.SafeHtmlCell;
 import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
@@ -62,6 +64,7 @@ import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
@@ -254,6 +257,12 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
         }),
       new BasicTablePanel.ColumnInfo<>(messages.basicTableHeaderLabel(), 15, getLabelColumn()),
       new BasicTablePanel.ColumnInfo<>(messages.basicTableHeaderDescription(), 0, getDescriptionColumn()),
+      new BasicTablePanel.ColumnInfo<>("Set width (EM)", 10, new Column<ColumnStatus, String>(new EditableNumberCell()) {
+        @Override
+        public String getValue(ColumnStatus object) {
+          return "";
+        }
+      }),
       new BasicTablePanel.ColumnInfo<>(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager
         .getTagWithStyleName(FontAwesomeIconManager.COG, messages.basicTableHeaderOptions(), FA_FW)), false, 3,
         getOptionsColumn()),
@@ -570,8 +579,8 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
                   .updateDetailsTemplate(clobColumnOptionPanel.getDetailsTemplate());
                 collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
                   .updateDetailsShowContent(((ClobColumnOptionsPanel) clobColumnOptionPanel).showContentInDetails());
-                collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
-                    .getSearchStatus().getList().setShowContent(((ClobColumnOptionsPanel) clobColumnOptionPanel).showContentInList());
+                collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId()).getSearchStatus()
+                  .getList().setShowContent(((ClobColumnOptionsPanel) clobColumnOptionPanel).showContentInList());
                 collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
                   .setApplicationType(((ClobColumnOptionsPanel) clobColumnOptionPanel).getApplicationType());
                 saveChanges(true);

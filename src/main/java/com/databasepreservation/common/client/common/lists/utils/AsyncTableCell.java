@@ -780,8 +780,8 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
 
   protected void addColumn(Column<T, ?> column, SafeHtml headerHTML, boolean nowrap, TextAlign textAlign,
     double fixedSize) {
-    addColumn(column, headerHTML, nowrap, textAlign);
     display.setColumnWidth(column, fixedSize, Style.Unit.EM);
+    addColumn(column, headerHTML, nowrap, textAlign);
   }
 
   protected void addColumn(Column<T, ?> column, String headerText, boolean nowrap, TextAlign textAlign) {

@@ -22,13 +22,6 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import com.databasepreservation.common.client.models.status.collection.TableStatus;
-import com.databasepreservation.common.client.models.structure.*;
-import com.databasepreservation.common.client.tools.MimeTypeUtils;
-import com.databasepreservation.common.server.ViewerConfiguration;
-import com.databasepreservation.common.utils.LobManagerUtils;
-import com.databasepreservation.model.exception.ModuleException;
-import org.apache.calcite.adapter.enumerable.RexImpTable;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -36,26 +29,50 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.tika.Tika;
 import org.apache.tika.exception.TikaException;
-import org.apache.tika.io.TikaInputStream;
 import org.apache.tika.metadata.Metadata;
-import org.apache.tika.mime.MediaType;
 import org.apache.tika.mime.MimeTypeException;
 import org.apache.tika.mime.MimeTypes;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.ParseContext;
-import org.apache.tika.parser.microsoft.ooxml.OOXMLParser;
 import org.apache.tika.sax.BodyContentHandler;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
+import com.databasepreservation.common.client.models.status.collection.TableStatus;
+import com.databasepreservation.common.client.models.structure.ViewerCandidateKey;
+import com.databasepreservation.common.client.models.structure.ViewerCell;
+import com.databasepreservation.common.client.models.structure.ViewerCheckConstraint;
+import com.databasepreservation.common.client.models.structure.ViewerColumn;
+import com.databasepreservation.common.client.models.structure.ViewerDatabaseFromToolkit;
+import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
+import com.databasepreservation.common.client.models.structure.ViewerForeignKey;
+import com.databasepreservation.common.client.models.structure.ViewerMetadata;
+import com.databasepreservation.common.client.models.structure.ViewerMimeType;
+import com.databasepreservation.common.client.models.structure.ViewerPrimaryKey;
+import com.databasepreservation.common.client.models.structure.ViewerPrivilegeStructure;
+import com.databasepreservation.common.client.models.structure.ViewerReference;
+import com.databasepreservation.common.client.models.structure.ViewerRoleStructure;
+import com.databasepreservation.common.client.models.structure.ViewerRoutine;
+import com.databasepreservation.common.client.models.structure.ViewerRoutineParameter;
+import com.databasepreservation.common.client.models.structure.ViewerRow;
+import com.databasepreservation.common.client.models.structure.ViewerSchema;
+import com.databasepreservation.common.client.models.structure.ViewerTable;
+import com.databasepreservation.common.client.models.structure.ViewerTrigger;
+import com.databasepreservation.common.client.models.structure.ViewerType;
+import com.databasepreservation.common.client.models.structure.ViewerTypeArray;
+import com.databasepreservation.common.client.models.structure.ViewerTypeStructure;
+import com.databasepreservation.common.client.models.structure.ViewerUserStructure;
+import com.databasepreservation.common.client.models.structure.ViewerView;
 import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.io.providers.PathInputStreamProvider;
 import com.databasepreservation.common.io.providers.TemporaryPathInputStreamProvider;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.index.utils.SolrUtils;
+import com.databasepreservation.common.utils.LobManagerUtils;
 import com.databasepreservation.common.utils.ViewerUtils;
 import com.databasepreservation.model.data.BinaryCell;
 import com.databasepreservation.model.data.Cell;
@@ -63,6 +80,7 @@ import com.databasepreservation.model.data.ComposedCell;
 import com.databasepreservation.model.data.NullCell;
 import com.databasepreservation.model.data.Row;
 import com.databasepreservation.model.data.SimpleCell;
+import com.databasepreservation.model.exception.ModuleException;
 import com.databasepreservation.model.structure.CandidateKey;
 import com.databasepreservation.model.structure.CheckConstraint;
 import com.databasepreservation.model.structure.ColumnStructure;
@@ -92,7 +110,6 @@ import com.databasepreservation.model.structure.type.SimpleTypeString;
 import com.databasepreservation.model.structure.type.Type;
 import com.databasepreservation.utils.JodaUtils;
 import com.databasepreservation.utils.XMLUtils;
-import org.xml.sax.SAXException;
 
 /**
  * Utility class used to convert a DatabaseStructure (used in Database
@@ -180,7 +197,8 @@ public class ToolkitStructure2ViewerStructure {
         metadata.getTableById(table.getId()).setDescription(table.getDescription());
         int index = 0;
         for (ColumnStructure column : table.getColumns()) {
-          metadata.getTableById(table.getId()).getColumnByIndexInEnclosingTable(index++).setDescription(column.getDescription());
+          metadata.getTableById(table.getId()).getColumnByIndexInEnclosingTable(index++)
+            .setDescription(column.getDescription());
         }
       }
     }
@@ -847,7 +865,6 @@ public class ToolkitStructure2ViewerStructure {
 
       cell.setMimeType(mimeType);
       cell.setFileExtension(fileExtension);
-
 
       collectionConfiguration.updateColumnMimeType(table.getUuid(), colIndex);
       collectionConfiguration.updateLobFileName(table.getUuid(), colIndex);

@@ -20,8 +20,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.client.models.structure.*;
-import com.databasepreservation.common.client.tools.*;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
@@ -45,7 +43,18 @@ import com.databasepreservation.common.client.models.status.collection.Collectio
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.LargeObjectConsolidateProperty;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
+import com.databasepreservation.common.client.models.structure.ViewerCell;
+import com.databasepreservation.common.client.models.structure.ViewerColumn;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.structure.ViewerRow;
+import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.services.CollectionService;
+import com.databasepreservation.common.client.tools.FilterUtils;
+import com.databasepreservation.common.client.tools.Humanize;
+import com.databasepreservation.common.client.tools.JSOUtils;
+import com.databasepreservation.common.client.tools.MimeTypeUtils;
+import com.databasepreservation.common.client.tools.RestUtils;
+import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.databasepreservation.common.client.widgets.Alert;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.SafeHtmlCell;
@@ -159,7 +168,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
             configColumns.put(configColumn, column);
           } else {
             Column<ViewerRow, SafeHtml> binaryColumn = buildDownloadColumn(configColumn, database, table,
-                configColumn.getColumnIndex());
+              configColumn.getColumnIndex());
             binaryColumn.setSortable(true); // add to configuration file sortable options
             addColumn(configColumn, binaryColumn);
             configColumns.put(configColumn, binaryColumn);
@@ -463,8 +472,13 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
         viewerColumn.getCustomDescription(), "column-description-block");
       SafeHtmlBuilder spanDescription = CommonClientUtils.constructSpan(viewerColumn.getCustomDescription(),
         viewerColumn.getCustomDescription(), "column-description-block column-description");
-      addColumn(displayColumn, CommonClientUtils.wrapOnDiv(Arrays.asList(spanTitle, spanDescription)), true,
-        TextAlign.LEFT, 10);
+      if (viewerColumn.getCustomName().equals("actor_id")) {
+        addColumn(displayColumn, CommonClientUtils.wrapOnDiv(Arrays.asList(spanTitle, spanDescription)), true,
+          TextAlign.LEFT, 20);
+      } else {
+        addColumn(displayColumn, CommonClientUtils.wrapOnDiv(Arrays.asList(spanTitle, spanDescription)), true,
+          TextAlign.LEFT, 10);
+      }
     } else {
       SafeHtmlBuilder spanTitle = CommonClientUtils.constructSpan(viewerColumn.getCustomName(),
         viewerColumn.getCustomDescription(), "column-description-block");
@@ -492,7 +506,8 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
       if (isColumnVisible(configColumn.getName())) {
         if (!configColumn.getType().equals(NESTED)) {
           fieldsToSolr.add(configColumn.getId());
-          if(configColumn.getType().equals(BINARY)){ ;
+          if (configColumn.getType().equals(BINARY)) {
+            ;
             fieldsToSolr.add(MimeTypeUtils.getMimeTypeSolrName(configColumn.getId()));
             fieldsToSolr.add(MimeTypeUtils.getFileExtensionSolrName(configColumn.getId()));
           }
