@@ -9,7 +9,6 @@ package com.databasepreservation.common.client.common;
 
 import java.util.function.Consumer;
 
-import org.apache.commons.lang3.StringUtils;
 import org.fusesource.restygwt.client.Method;
 import org.fusesource.restygwt.client.MethodCallback;
 
@@ -19,6 +18,7 @@ import com.databasepreservation.common.client.common.utils.AsyncCallbackUtils;
 import com.databasepreservation.common.client.models.user.User;
 import com.databasepreservation.common.client.services.AuthenticationService;
 import com.databasepreservation.common.client.tools.HistoryManager;
+import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.http.client.Response;
 import com.google.gwt.json.client.JSONParser;
@@ -64,7 +64,7 @@ public abstract class DefaultMethodCallback<T> implements MethodCallback<T> {
   @Override
   public void onFailure(Method method, Throwable throwable) {
     String message;
-    if (StringUtils.isBlank(method.getResponse().getText())) {
+    if (ViewerStringUtils.isBlank(method.getResponse().getText())) {
       message = throwable.getMessage();
     } else {
       final JSONValue parse = JSONParser.parseStrict(method.getResponse().getText());
@@ -96,8 +96,8 @@ public abstract class DefaultMethodCallback<T> implements MethodCallback<T> {
       }).getAuthenticatedUser();
 
     } else if (method.getResponse().getStatusCode() == Response.SC_NOT_FOUND) {
-      Dialogs.showInformationDialog(messages.dialogResourceNotFound(), messages.objectNotFound(), messages.basicActionClose(),
-        "btn btn-close", new AsyncCallback<Void>() {
+      Dialogs.showInformationDialog(messages.dialogResourceNotFound(), messages.objectNotFound(),
+        messages.basicActionClose(), "btn btn-close", new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {
             HistoryManager.gotoHome();
