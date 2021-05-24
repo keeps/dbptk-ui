@@ -9,6 +9,7 @@ package com.databasepreservation.common.client.common;
 
 import java.util.function.Consumer;
 
+import org.apache.commons.lang3.StringUtils;
 import org.fusesource.restygwt.client.Method;
 import org.fusesource.restygwt.client.MethodCallback;
 
@@ -62,10 +63,13 @@ public abstract class DefaultMethodCallback<T> implements MethodCallback<T> {
 
   @Override
   public void onFailure(Method method, Throwable throwable) {
-    final JSONValue parse = JSONParser.parseStrict(method.getResponse().getText());
-    String message = parse.isObject().get("message").isString().stringValue();
-
-    GWT.log(method.getResponse().getText());
+    String message;
+    if (StringUtils.isBlank(method.getResponse().getText())) {
+      message = throwable.getMessage();
+    } else {
+      final JSONValue parse = JSONParser.parseStrict(method.getResponse().getText());
+      message = parse.isObject().get("message").isString().stringValue();
+    }
 
     // TODO resolve specific exceptions
     if (method.getResponse().getStatusCode() == Response.SC_UNAUTHORIZED) {

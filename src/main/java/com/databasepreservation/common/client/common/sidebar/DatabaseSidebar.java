@@ -173,8 +173,6 @@ public class DatabaseSidebar extends Composite implements Sidebar, ICollectionSt
     // database metadata
     final ViewerMetadata metadata = database.getMetadata();
 
-    GWT.log("metadata: " + database.getMetadata().getTableById("sakila.actor").getUuid());
-
     SidebarHyperlink informationLink = new SidebarHyperlink(FontAwesomeIconManager
       .getTagSafeHtml(FontAwesomeIconManager.DATABASE_INFORMATION, messages.menusidebar_information()),
       HistoryManager.linkToDatabase(database.getUuid()));
