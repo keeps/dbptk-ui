@@ -547,12 +547,19 @@ public class Dialogs {
   }
 
   public static void showDialogColumnConfiguration(String title, String saveButtonText, String cancelButtonText,
+                                                   ColumnOptionsPanel optionsPanel, final AsyncCallback<Boolean> callback) {
+    showDialogColumnConfiguration(title, "", saveButtonText, cancelButtonText, optionsPanel, callback);
+  }
+
+  public static void showDialogColumnConfiguration(String title, String width, String saveButtonText, String cancelButtonText,
     ColumnOptionsPanel optionsPanel, final AsyncCallback<Boolean> callback) {
     final DialogBox dialogBox = new DialogBox(false, true);
     dialogBox.setText(title);
 
     FlowPanel layout = new FlowPanel();
     FlowPanel form = new FlowPanel();
+
+    dialogBox.setWidth(width);
 
     Button btnCancel = new Button(cancelButtonText);
     btnCancel.addStyleName("btn btn-danger btn-times-circle");

@@ -599,6 +599,10 @@ pre code {
     margin-bottom: 5px;
 }
 
+.form-checkbox label {
+    vertical-align: text-bottom;
+}
+
 .form-radiogroup {
     margin-left: 10px;
     margin-bottom: 10px;

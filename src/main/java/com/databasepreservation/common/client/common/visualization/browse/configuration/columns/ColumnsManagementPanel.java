@@ -37,6 +37,7 @@ import com.databasepreservation.common.client.common.visualization.browse.config
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.ClobColumnOptionsPanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.ColumnOptionsPanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.NestedColumnOptionsPanel;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.NumericColumnOptionsPanel;
 import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
 import com.databasepreservation.common.client.configuration.observer.ISaveButtonObserver;
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
@@ -550,7 +551,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
 
   private boolean isAnOptionColumn(ViewerType.dbTypes type) {
     return ViewerType.dbTypes.BINARY.equals(type) || ViewerType.dbTypes.NESTED.equals(type)
-      || ViewerType.dbTypes.CLOB.equals(type);
+      || ViewerType.dbTypes.CLOB.equals(type) || ViewerType.dbTypes.NUMERIC_FLOATING_POINT.equals(type);
   }
 
   private Column<ColumnStatus, String> getOptionsColumn() {
@@ -639,6 +640,19 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
                   .setApplicationType(((BinaryColumnOptionsPanel) binaryColumnOptionPanel).getApplicationType());
                 saveChanges(true);
               }
+            }
+          });
+      } else if (ViewerType.dbTypes.NUMERIC_FLOATING_POINT.equals(columnStatus.getType())) {
+        ColumnOptionsPanel numericColumnOptionPanel = NumericColumnOptionsPanel.createInstance(
+          collectionStatus.getTableStatus(tableId),
+          collectionStatus.getColumnByTableIdAndColumn(tableId, columnStatus.getId()));
+
+        Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), "400px", messages.basicActionSave(),
+          messages.basicActionCancel(), numericColumnOptionPanel, new DefaultAsyncCallback<Boolean>() {
+
+            @Override
+            public void onSuccess(Boolean aBoolean) {
+
             }
           });
       }
