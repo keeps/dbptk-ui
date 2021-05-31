@@ -2,12 +2,53 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
     <ui:with field='messages' type='config.i18n.client.ClientMessages'/>
     <g:FlowPanel ui:field="content" addStyleNames="columns-management-options">
+        <g:HTML addStyleNames="dialog-numeric-description" ui:field="description"/>
 
-        <g:FlowPanel>
-            <g:Label addStyleNames="form-label" />
-            <g:CheckBox addStyleNames="form-checkbox" ui:field="overallOption">
+        <g:FlowPanel addStyleNames="dialog-numeric-options">
+            <g:CheckBox addStyleNames="form-checkbox" ui:field="thousandsSeparatorOption">
                 Thousands separator
             </g:CheckBox>
+        </g:FlowPanel>
+
+        <g:FlowPanel addStyleNames="dialog-numeric-options">
+            <g:FlowPanel addStyleNames="dialog-numeric-option">
+            <g:CheckBox addStyleNames="form-checkbox" ui:field="decimalsOption">
+                Decimals
+            </g:CheckBox>
+                <g:IntegerBox addStyleNames="form-textbox" ui:field="decimalOptionContent"/>
+            </g:FlowPanel>
+        </g:FlowPanel>
+
+        <g:FlowPanel addStyleNames="dialog-numeric-options">
+            <g:FlowPanel addStyleNames="dialog-numeric-option">
+                <g:CheckBox addStyleNames="form-checkbox" ui:field="multiplierOption">
+                    Multiplier
+                </g:CheckBox>
+                <g:IntegerBox addStyleNames="form-textbox" ui:field="multiplierOptionContent"/>
+            </g:FlowPanel>
+        </g:FlowPanel>
+
+        <g:FlowPanel addStyleNames="dialog-numeric-options">
+            <g:FlowPanel addStyleNames="dialog-numeric-option">
+                <g:CheckBox addStyleNames="form-checkbox" ui:field="prefixOption">
+                    Prefix
+                </g:CheckBox>
+                <g:TextBox addStyleNames="form-textbox" ui:field="prefixOptionContent"/>
+            </g:FlowPanel>
+        </g:FlowPanel>
+
+        <g:FlowPanel addStyleNames="dialog-numeric-options">
+            <g:FlowPanel addStyleNames="dialog-numeric-option">
+                <g:CheckBox addStyleNames="form-checkbox" ui:field="suffixOption">
+                    Suffix
+                </g:CheckBox>
+                <g:TextBox addStyleNames="form-textbox" ui:field="suffixOptionContent"/>
+            </g:FlowPanel>
+        </g:FlowPanel>
+
+        <g:FlowPanel addStyleNames="dialog-numeric-preview">
+                <g:HTML addStyleNames="dialog-numeric-description" ui:field="previewDescription"/>
+                <g:TextBox addStyleNames="form-textbox" ui:field="previewContent"/>
         </g:FlowPanel>
     </g:FlowPanel>
 </ui:UiBinder>

@@ -1,12 +1,15 @@
 package com.databasepreservation.common.client.models.structure;
 
+import com.google.gwt.aria.client.SearchRole;
+
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
  * @author Tiago Fraga <tfraga@keep.pt>
  */
 
-public class ViewerMimeType {
+public class ViewerMimeType implements Serializable {
 
   private String mimeType;
   private String fileExtension;

@@ -1520,6 +1520,8 @@ public interface ClientMessages extends Messages {
 
   String columnManagementTextForApplicationTypeHint();
 
+  String columnManagementHeaderWidthColumnText();
+
   /********************************************
    * Column Management Panel - Binary Column
    *******************************************/

@@ -152,7 +152,7 @@ public class BinaryColumnOptionsPanel extends ColumnOptionsPanel {
     applicationTypeBtnPanel.add(staticValueRadioBtn);
     applicationTypeBtnPanel.add(autoDetectRadioBtn);
 
-    if (columnConfiguration.getApplicationType().equals(MimeTypeUtils.getAutoDetectMimeTypeTemplate())) {
+    if (MimeTypeUtils.getAutoDetectMimeTypeTemplate().equals(columnConfiguration.getApplicationType())) {
       autoDetectRadioBtn.setValue(true);
       applicationTypeValue.setVisible(false);
       applicationTypeValue.setText("");
@@ -162,27 +162,21 @@ public class BinaryColumnOptionsPanel extends ColumnOptionsPanel {
       applicationTypeValue.setText(columnConfiguration.getApplicationType());
     }
 
-    autoDetectRadioBtn.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent clickEvent) {
-        applicationTypeValue.setVisible(false);
-        if (columnConfiguration.getApplicationType().equals(MimeTypeUtils.getAutoDetectMimeTypeTemplate())) {
-          applicationTypeValue.setText(ViewerConstants.MEDIA_TYPE_APPLICATION_OCTET_STREAM);
-        } else {
-          applicationTypeValue.setText(columnConfiguration.getApplicationType());
-        }
+    autoDetectRadioBtn.addClickHandler(clickEvent -> {
+      applicationTypeValue.setVisible(false);
+      if (MimeTypeUtils.getAutoDetectMimeTypeTemplate().equals(columnConfiguration.getApplicationType())) {
+        applicationTypeValue.setText(ViewerConstants.MEDIA_TYPE_APPLICATION_OCTET_STREAM);
+      } else {
+        applicationTypeValue.setText(columnConfiguration.getApplicationType());
       }
     });
 
-    staticValueRadioBtn.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent clickEvent) {
-        applicationTypeValue.setVisible(true);
-        if (columnConfiguration.getApplicationType().equals(MimeTypeUtils.getAutoDetectMimeTypeTemplate())) {
-          applicationTypeValue.setText(ViewerConstants.MEDIA_TYPE_APPLICATION_OCTET_STREAM);
-        } else {
-          applicationTypeValue.setText(columnConfiguration.getApplicationType());
-        }
+    staticValueRadioBtn.addClickHandler(clickEvent -> {
+      applicationTypeValue.setVisible(true);
+      if (MimeTypeUtils.getAutoDetectMimeTypeTemplate().equals(columnConfiguration.getApplicationType())) {
+        applicationTypeValue.setText(ViewerConstants.MEDIA_TYPE_APPLICATION_OCTET_STREAM);
+      } else {
+        applicationTypeValue.setText(columnConfiguration.getApplicationType());
       }
     });
 

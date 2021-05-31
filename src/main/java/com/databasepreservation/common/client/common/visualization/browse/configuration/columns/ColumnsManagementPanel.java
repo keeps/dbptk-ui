@@ -43,6 +43,7 @@ import com.databasepreservation.common.client.configuration.observer.ISaveButton
 import com.databasepreservation.common.client.models.status.collection.CollectionStatus;
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
+import com.databasepreservation.common.client.models.status.formatters.Formatter;
 import com.databasepreservation.common.client.models.status.helpers.StatusHelper;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerType;
@@ -257,7 +258,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
         }),
       new BasicTablePanel.ColumnInfo<>(messages.basicTableHeaderLabel(), 15, getLabelColumn()),
       new BasicTablePanel.ColumnInfo<>(messages.basicTableHeaderDescription(), 0, getDescriptionColumn()),
-      new BasicTablePanel.ColumnInfo<>("Set width (EM)", 10, getNumberColumn()),
+      new BasicTablePanel.ColumnInfo<>(messages.columnManagementHeaderWidthColumnText(), 10, getNumberColumn()),
       new BasicTablePanel.ColumnInfo<>(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager
         .getTagWithStyleName(FontAwesomeIconManager.COG, messages.basicTableHeaderOptions(), FA_FW)), false, 3,
         getOptionsColumn()),
@@ -616,7 +617,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
                   .getList().setShowContent(((ClobColumnOptionsPanel) clobColumnOptionPanel).showContentInList());
                 collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
                   .setApplicationType(((ClobColumnOptionsPanel) clobColumnOptionPanel).getApplicationType());
-                saveChanges(true);
+                saveChanges(false);
               }
             }
           });
@@ -638,7 +639,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
                   .updateDetailsTemplate(binaryColumnOptionPanel.getDetailsTemplate());
                 collectionStatus.getTableStatusByTableId(tableId).getColumnById(columnStatus.getId())
                   .setApplicationType(((BinaryColumnOptionsPanel) binaryColumnOptionPanel).getApplicationType());
-                saveChanges(true);
+                saveChanges(false);
               }
             }
           });
@@ -651,8 +652,12 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
           messages.basicActionCancel(), numericColumnOptionPanel, new DefaultAsyncCallback<Boolean>() {
 
             @Override
-            public void onSuccess(Boolean aBoolean) {
-
+            public void onSuccess(Boolean value) {
+              if (value) {
+                Formatter formatter = ((NumericColumnOptionsPanel) numericColumnOptionPanel).getFormatter();
+                collectionStatus.getColumnByTableIdAndColumn(tableId, columnStatus.getId()).setFormatter(formatter);
+                saveChanges(false);
+              }
             }
           });
       }

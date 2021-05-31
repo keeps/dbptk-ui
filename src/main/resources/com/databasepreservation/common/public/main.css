@@ -2145,6 +2145,51 @@ html, body {
 }
 
 /**********************************************
+		         Dialog Numeric
+***********************************************/
+.dialog-numeric-description {
+    font-size: 75%;
+    font-weight: lighter;
+    color: #6c757d !important;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.dialog-numeric-options {
+    margin-bottom: 5px;
+}
+
+.dialog-numeric-options .dialog-numeric-option .form-checkbox {
+    width: 115px;
+}
+
+.dialog-numeric-options .form-textbox {
+    flex: 1 1 0;
+}
+
+.dialog-numeric-options .form-textbox:disabled {
+    background-color: #6f6f6f0a;
+    border-left: 2px solid #484848;
+}
+
+.dialog-numeric-options .form-textbox:invalid {
+    background-color: #eebcba;
+    border-top-style: none;
+    border-right-style: none;
+    border-bottom-style: none;
+    border-left: 2px solid #d9534f;
+}
+
+.dialog-numeric-option {
+    display: flex;
+}
+
+.dialog-numeric-preview .isWrong {
+    background-color: #eebcba;
+    border-left: 2px solid #d9534f;
+}
+
+/**********************************************
 		         Dialog Errors
 ***********************************************/
 .dialog-persist-errors table {

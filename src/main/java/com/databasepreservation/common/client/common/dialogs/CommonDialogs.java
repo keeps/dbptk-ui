@@ -51,8 +51,8 @@ public class CommonDialogs {
 
     layout.add(messageLabel);
     layout.add(footer);
-    footer.add(cancelButton);
     footer.add(confirmButton);
+    footer.add(cancelButton);
 
     dialogBox.setWidget(layout);
     dialogBox.setWidth(width);

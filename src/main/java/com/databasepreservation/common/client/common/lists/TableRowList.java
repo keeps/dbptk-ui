@@ -11,7 +11,6 @@ import static com.databasepreservation.common.client.models.structure.ViewerType
 import static com.databasepreservation.common.client.models.structure.ViewerType.dbTypes.CLOB;
 import static com.databasepreservation.common.client.models.structure.ViewerType.dbTypes.NESTED;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -20,6 +19,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.models.status.formatters.NoFormatter;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
@@ -43,6 +43,7 @@ import com.databasepreservation.common.client.models.status.collection.Collectio
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.LargeObjectConsolidateProperty;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
+import com.databasepreservation.common.client.models.status.formatters.NumberFormatter;
 import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
@@ -53,6 +54,7 @@ import com.databasepreservation.common.client.tools.FilterUtils;
 import com.databasepreservation.common.client.tools.Humanize;
 import com.databasepreservation.common.client.tools.JSOUtils;
 import com.databasepreservation.common.client.tools.MimeTypeUtils;
+import com.databasepreservation.common.client.tools.NumberFormatUtils;
 import com.databasepreservation.common.client.tools.RestUtils;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.databasepreservation.common.client.widgets.Alert;
@@ -286,7 +288,13 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
               ret = SafeHtmlUtils.fromString(Humanize.formatDateTimeFromSolr(value, "HH:mm:ss"));
               break;
             case NUMERIC_FLOATING_POINT:
-              ret = SafeHtmlUtils.fromString(new BigDecimal(value).toPlainString());
+              if (configColumn.getFormatter() instanceof NoFormatter) {
+                ret = SafeHtmlUtils
+                    .fromString(NumberFormatUtils.getFormattedValue(new NumberFormatter(), value));
+              } else {
+              ret = SafeHtmlUtils
+                .fromString(NumberFormatUtils.getFormattedValue((NumberFormatter) configColumn.getFormatter(), value));
+              }
               break;
             case BOOLEAN:
             case ENUMERATION:
@@ -477,7 +485,8 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     } else {
       SafeHtmlBuilder spanTitle = CommonClientUtils.constructSpan(viewerColumn.getCustomName(),
         viewerColumn.getCustomDescription(), "column-description-block");
-      addColumn(displayColumn, spanTitle.toSafeHtml(), true, TextAlign.LEFT, Double.parseDouble(viewerColumn.getSearchStatus().getList().getColumnWidth()));
+      addColumn(displayColumn, spanTitle.toSafeHtml(), true, TextAlign.LEFT,
+        Double.parseDouble(viewerColumn.getSearchStatus().getList().getColumnWidth()));
     }
   }
 

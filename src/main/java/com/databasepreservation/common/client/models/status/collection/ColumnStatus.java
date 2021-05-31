@@ -9,18 +9,21 @@ package com.databasepreservation.common.client.models.status.collection;
 
 import java.io.Serializable;
 
+import javax.ws.rs.core.MediaType;
+
+import com.databasepreservation.common.client.models.status.formatters.Formatter;
+import com.databasepreservation.common.client.models.status.formatters.NoFormatter;
 import com.databasepreservation.common.client.models.structure.ViewerType;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import javax.ws.rs.core.MediaType;
-
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 @JsonPropertyOrder({"id", "name", "customName", "description", "customDescription", "originalType", "typeName",
-  "nullable", "type", "columnIndex", "externalLob", "applicationType", "nestedColumn", "order", "export", "search", "details"})
+  "nullable", "type", "columnIndex", "externalLob", "formatterJson", "applicationType", "nestedColumn", "order",
+  "export", "search", "details"})
 public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
   private String id;
   private String name;
@@ -34,9 +37,8 @@ public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
   private int columnIndex;
   @JsonInclude(JsonInclude.Include.NON_DEFAULT)
   private boolean externalLob;
-  //introduzir
+  private Formatter formatter;
   private String applicationType;
-  // adicionar file extension
   private NestedColumnStatus nestedColumns;
   private int order;
   private ExportStatus exportStatus;
@@ -46,6 +48,7 @@ public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
   public ColumnStatus() {
     externalLob = false;
     applicationType = MediaType.APPLICATION_OCTET_STREAM;
+    formatter = new NoFormatter();
   }
 
   public String getId() {
@@ -119,6 +122,14 @@ public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
 
   public void setExternalLob(boolean externalLob) {
     this.externalLob = externalLob;
+  }
+
+  public Formatter getFormatter() {
+    return formatter;
+  }
+
+  public void setFormatter(Formatter formatter) {
+    this.formatter = formatter;
   }
 
   public String getApplicationType() {
@@ -228,9 +239,10 @@ public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
   public String toString() {
     return "ColumnStatus{" + "id='" + id + '\'' + ", name='" + name + '\'' + ", customName='" + customName + '\''
       + ", description='" + description + '\'' + ", customDescription='" + customDescription + '\'' + ", originalType='"
-      + originalType + '\'' + ", typeName='" + typeName + '\'' + ", nullable=" + nullable + ", nestedColumns="
-      + nestedColumns + ", order=" + order + ", searchStatus=" + searchStatus + ", detailsStatus=" + detailsStatus
-      + '}';
+      + originalType + '\'' + ", typeName='" + typeName + '\'' + ", nullable='" + nullable + '\'' + ", type=" + type
+      + ", columnIndex=" + columnIndex + ", externalLob=" + externalLob + ", formatter='" + formatter + '\''
+      + ", applicationType='" + applicationType + '\'' + ", nestedColumns=" + nestedColumns + ", order=" + order
+      + ", exportStatus=" + exportStatus + ", searchStatus=" + searchStatus + ", detailsStatus=" + detailsStatus + '}';
   }
 
   @Override

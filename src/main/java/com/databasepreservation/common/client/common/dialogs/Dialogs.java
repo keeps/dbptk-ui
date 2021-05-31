@@ -18,7 +18,6 @@ import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.ColumnOptionsPanel;
 import com.databasepreservation.common.client.models.wizard.table.ExternalLobsDialogBoxResult;
 import com.databasepreservation.common.client.widgets.MyCellTableResources;
-import com.databasepreservation.common.server.index.utils.Pair;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -547,12 +546,12 @@ public class Dialogs {
   }
 
   public static void showDialogColumnConfiguration(String title, String saveButtonText, String cancelButtonText,
-                                                   ColumnOptionsPanel optionsPanel, final AsyncCallback<Boolean> callback) {
+    ColumnOptionsPanel optionsPanel, final AsyncCallback<Boolean> callback) {
     showDialogColumnConfiguration(title, "", saveButtonText, cancelButtonText, optionsPanel, callback);
   }
 
-  public static void showDialogColumnConfiguration(String title, String width, String saveButtonText, String cancelButtonText,
-    ColumnOptionsPanel optionsPanel, final AsyncCallback<Boolean> callback) {
+  public static void showDialogColumnConfiguration(String title, String width, String saveButtonText,
+    String cancelButtonText, ColumnOptionsPanel optionsPanel, final AsyncCallback<Boolean> callback) {
     final DialogBox dialogBox = new DialogBox(false, true);
     dialogBox.setText(title);
 
@@ -579,8 +578,9 @@ public class Dialogs {
     form.setStyleName("content");
 
     layout.add(form);
-    layout.add(CommonClientUtils.wrapOnDiv("btn-item", btnCancel));
-    layout.add(CommonClientUtils.wrapOnDiv("btn-item", btnSave));
+
+    layout.add(CommonClientUtils.wrapOnDiv("navigation-panel-buttons", CommonClientUtils.wrapOnDiv("btn-item", btnSave),
+      CommonClientUtils.wrapOnDiv("btn-item", btnCancel)));
     layout.addStyleName("wui-dialog-layout");
 
     dialogBox.setWidget(layout);
@@ -735,8 +735,8 @@ public class Dialogs {
     inputBox.setFocus(true);
   }
 
-  public static void showDialogWithTwoOptions(String title, SafeHtml description, String firstOptionBtnText, String firstOptionBtnCSS,
-                                              String secondOptionBtnText, String secondOptionBtnCSS, AsyncCallback<Boolean> callback) {
+  public static void showDialogWithTwoOptions(String title, SafeHtml description, String firstOptionBtnText,
+    String firstOptionBtnCSS, String secondOptionBtnText, String secondOptionBtnCSS, AsyncCallback<Boolean> callback) {
     FlowPanel layout = new FlowPanel();
     FlowPanel footer = new FlowPanel();
     final DialogBox dialogBox = new DialogBox(false, true);
