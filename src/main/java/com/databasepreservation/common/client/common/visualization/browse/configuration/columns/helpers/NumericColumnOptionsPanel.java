@@ -9,10 +9,10 @@ import com.databasepreservation.common.client.models.status.collection.TemplateS
 import com.databasepreservation.common.client.models.status.formatters.Formatter;
 import com.databasepreservation.common.client.models.status.formatters.NumberFormatter;
 import com.databasepreservation.common.client.tools.NumberFormatUtils;
+import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyUpHandler;
-import com.google.gwt.i18n.client.NumberFormat;
-import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.CheckBox;
@@ -28,7 +28,7 @@ import config.i18n.client.ClientMessages;
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 public class NumericColumnOptionsPanel extends ColumnOptionsPanel {
-  private static BigDecimal DEFAULT_PREVIEW_VALUE = new BigDecimal("1234569");
+  private static final BigDecimal DEFAULT_PREVIEW_VALUE = new BigDecimal("3453.34");
 
   interface ColumnsOptionsPanelUiBinder extends UiBinder<Widget, NumericColumnOptionsPanel> {
   }
@@ -77,14 +77,16 @@ public class NumericColumnOptionsPanel extends ColumnOptionsPanel {
   @UiField
   TextBox previewContent;
 
+  private String customValue = "";
+
   public static ColumnOptionsPanel createInstance(TableStatus tableConfiguration, ColumnStatus columnConfiguration) {
     return new NumericColumnOptionsPanel(tableConfiguration, columnConfiguration);
   }
 
   private NumericColumnOptionsPanel(TableStatus tableConfiguration, ColumnStatus columnConfiguration) {
     initWidget(binder.createAndBindUi(this));
-    description.setHTML(messages.columnManagementTextForTemplateHint(ViewerConstants.TEMPLATE_ENGINE_LINK));
-    previewDescription.setHTML(SafeHtmlUtils.fromSafeConstant("Edit the value to preview a specific configuration"));
+    description.setHTML(messages.columnManagementNumericFormatterTextForDescription());
+    previewDescription.setHTML(messages.columnManagementNumericFormatterTextForPreviewDescription());
 
     setupPreviewContent();
     setupNumericTextBox(decimalOptionContent, multiplierOptionContent);
@@ -97,17 +99,32 @@ public class NumericColumnOptionsPanel extends ColumnOptionsPanel {
 
   private void setupHandlers() {
     KeyUpHandler keyUpHandler = keyUpEvent -> updatePreviewValue();
+    ClickHandler clickHandler = ClickHandler -> updatePreviewValue();
 
     decimalOptionContent.addKeyUpHandler(keyUpHandler);
-    decimalOptionContent.addClickHandler(clickEvent -> updatePreviewValue());
+    decimalOptionContent.addClickHandler(clickHandler);
     multiplierOptionContent.addKeyUpHandler(keyUpHandler);
-    multiplierOptionContent.addClickHandler(clickEvent -> updatePreviewValue());
+    multiplierOptionContent.addClickHandler(clickHandler);
     prefixOptionContent.addKeyUpHandler(keyUpHandler);
     suffixOptionContent.addKeyUpHandler(keyUpHandler);
   }
 
   private void setupPreviewContent() {
     previewContent.setText(String.valueOf(DEFAULT_PREVIEW_VALUE));
+
+    previewContent.addValueChangeHandler(e -> {
+      if (ViewerStringUtils.isBlank(previewContent.getText())) {
+        customValue = "";
+      } else {
+        if (NumberFormatUtils.isNumber(previewContent.getText())) {
+          customValue = previewContent.getText();
+        } else {
+          customValue = "";
+        }
+      }
+
+      updatePreviewValue();
+    });
   }
 
   private void setup(ColumnStatus config) {
@@ -170,60 +187,56 @@ public class NumericColumnOptionsPanel extends ColumnOptionsPanel {
   private void updatePreviewValue() {
     String value = DEFAULT_PREVIEW_VALUE.toString();
 
-    if (multiplierOption.getValue() && NumberFormatUtils.isNumber(multiplierOptionContent.getText())) {
-      BigDecimal multiply = DEFAULT_PREVIEW_VALUE.multiply(new BigDecimal(multiplierOptionContent.getText()));
-      value = multiply.toString();
+    if (ViewerStringUtils.isNotBlank(customValue)) {
+      value = customValue;
     }
 
-    if (decimalsOption.getValue() && NumberFormatUtils.isNumber(decimalOptionContent.getText())) {
-      value = NumberFormatUtils.getFormatted(new BigDecimal(value).doubleValue(), decimalOptionContent.getValue(),
-        thousandsSeparatorOption.getValue());
+    if (validate()) {
+      NumberFormatter numberFormatter = (NumberFormatter) getFormatter();
+      String result = NumberFormatUtils.getFormattedValue(numberFormatter, value);
+
+      previewContent.setText(result);
+    }
+  }
+
+  public boolean validate() {
+    if (!decimalsOption.getValue() && !multiplierOption.getValue()) {
+      return true;
     }
 
-    if (thousandsSeparatorOption.getValue() && !decimalsOption.getValue()) {
-      value = NumberFormat.getDecimalFormat().format(new BigDecimal(value).doubleValue());
+    String decimalsPlace = decimalOptionContent.getText();
+    String multiplier = multiplierOptionContent.getText();
+
+    if (decimalsOption.getValue() && !multiplierOption.getValue()) {
+      return NumberFormatUtils.isNumber(decimalsPlace);
     }
 
-    if (suffixOption.getValue()) {
-      String suffix = suffixOptionContent.getText();
-      value = value.concat(suffix);
+    if (!decimalsOption.getValue() && multiplierOption.getValue()) {
+      return NumberFormatUtils.isNumber(multiplier);
     }
 
-    if (prefixOption.getValue()) {
-      String prefix = prefixOptionContent.getText();
-      value = prefix.concat(value);
-    }
-
-    previewContent.setText(value);
+    return NumberFormatUtils.isNumber(decimalsPlace) && NumberFormatUtils.isNumber(multiplier);
   }
 
   public Formatter getFormatter() {
     NumberFormatter numberFormatter = new NumberFormatter();
     numberFormatter.setThousandsSeparator(thousandsSeparatorOption.getValue());
 
-    numberFormatter.setDecimals(false);
-    numberFormatter.setDecimalPlaces(0);
     if (decimalsOption.getValue()) {
       numberFormatter.setDecimals(true);
       numberFormatter.setDecimalPlaces(decimalOptionContent.getValue());
     }
 
-    numberFormatter.setMultiplier(false);
-    numberFormatter.setMultiplierNumber(1);
     if (multiplierOption.getValue()) {
       numberFormatter.setMultiplier(true);
       numberFormatter.setMultiplierNumber(multiplierOptionContent.getValue());
     }
 
-    numberFormatter.setPrefix(false);
-    numberFormatter.setPrefixContent("");
     if (prefixOption.getValue()) {
       numberFormatter.setPrefix(true);
       numberFormatter.setPrefixContent(prefixOptionContent.getText());
     }
 
-    numberFormatter.setSuffix(false);
-    numberFormatter.setSuffixContent("");
     if (suffixOption.getValue()) {
       numberFormatter.setSuffix(true);
       numberFormatter.setSuffixContent(suffixOptionContent.getText());

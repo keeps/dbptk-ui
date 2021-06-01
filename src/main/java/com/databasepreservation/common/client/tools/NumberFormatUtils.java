@@ -16,7 +16,7 @@ public class NumberFormatUtils {
     }
 
     try {
-      Double.parseDouble(text);
+      new BigDecimal(text);
     } catch (NumberFormatException e) {
       return false;
     }

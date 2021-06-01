@@ -654,9 +654,14 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
             @Override
             public void onSuccess(Boolean value) {
               if (value) {
-                Formatter formatter = ((NumericColumnOptionsPanel) numericColumnOptionPanel).getFormatter();
-                collectionStatus.getColumnByTableIdAndColumn(tableId, columnStatus.getId()).setFormatter(formatter);
-                saveChanges(false);
+                if (((NumericColumnOptionsPanel) numericColumnOptionPanel).validate()) {
+                  Formatter formatter = ((NumericColumnOptionsPanel) numericColumnOptionPanel).getFormatter();
+                  collectionStatus.getColumnByTableIdAndColumn(tableId, columnStatus.getId()).setFormatter(formatter);
+                  saveChanges(false);
+                } else {
+                  Dialogs.showErrors(messages.columnManagementPageTitle(), messages.columnManagementPageDialogErrorUnique(),
+                      messages.basicActionClose());
+                }
               }
             }
           });

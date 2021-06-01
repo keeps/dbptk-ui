@@ -1522,6 +1522,10 @@ public interface ClientMessages extends Messages {
 
   String columnManagementHeaderWidthColumnText();
 
+  SafeHtml columnManagementNumericFormatterTextForDescription();
+
+  SafeHtml columnManagementNumericFormatterTextForPreviewDescription();
+
   /********************************************
    * Column Management Panel - Binary Column
    *******************************************/
