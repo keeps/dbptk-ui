@@ -8,7 +8,6 @@
 package com.databasepreservation.common.client.models.structure;
 
 import java.io.Serializable;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -240,6 +239,10 @@ public class ViewerMetadata implements Serializable {
     return views.get(viewUUID);
   }
 
+  public Map<String, ViewerView> getViews() {
+    return views;
+  }
+
   public ViewerRoutine getRoutine(String routineUUID) {
     return routines.get(routineUUID);
   }
@@ -254,6 +257,17 @@ public class ViewerMetadata implements Serializable {
 
   public ViewerSchema getSchema(String schemaUUID) {
     return schemasMap.get(schemaUUID);
+  }
+
+  @JsonIgnore
+  public ViewerSchema getSchemaByName(String schemaName) {
+    for (ViewerSchema schema : schemas) {
+      if (schemaName.equals(schema.getName())) {
+        return schema;
+      }
+    }
+
+    return null;
   }
 
   @JsonIgnore
@@ -280,4 +294,7 @@ public class ViewerMetadata implements Serializable {
     return -1;
   }
 
+  public Map<String, ViewerRoutine> getRoutines() {
+    return routines;
+  }
 }

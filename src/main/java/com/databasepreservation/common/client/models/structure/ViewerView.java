@@ -7,6 +7,8 @@
  */
 package com.databasepreservation.common.client.models.structure;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -94,5 +96,14 @@ public class ViewerView implements Serializable {
 
   public void setSchemaName(String schemaName) {
     this.schemaName = schemaName;
+  }
+
+  @JsonIgnore
+  public ViewerColumn getColumnByIndexInEnclosing(int index) {
+    for (ViewerColumn column : columns) {
+      if (column.getColumnIndexInEnclosingTable() == index)
+        return column;
+    }
+    return null;
   }
 }

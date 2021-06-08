@@ -191,19 +191,73 @@ public class ToolkitStructure2ViewerStructure {
     return result;
   }
 
-  public static ViewerMetadata mergeMetadata(DatabaseStructure updatedDatabaseStructure, ViewerMetadata metadata) {
+  public static void mergeMetadata(DatabaseStructure updatedDatabaseStructure, ViewerMetadata metadata) {
     for (SchemaStructure schema : updatedDatabaseStructure.getSchemas()) {
       for (TableStructure table : schema.getTables()) {
         metadata.getTableById(table.getId()).setDescription(table.getDescription());
+
+        metadata.getTableById(table.getId()).getPrimaryKey().setDescription(table.getPrimaryKey().getDescription());
+
+        for (ViewerForeignKey foreignKey : metadata.getTableById(table.getId()).getForeignKeys()) {
+          foreignKey.setDescription(table.getForeignKeyByName(foreignKey.getName()).getDescription());
+        }
+
+        for (ViewerCandidateKey candidateKey : metadata.getTableById(table.getId()).getCandidateKeys()) {
+          candidateKey.setDescription(table.getCandidateKeyByName(candidateKey.getName()).getDescription());
+        }
+
+        for (ViewerCheckConstraint checkConstraint : metadata.getTableById(table.getId()).getCheckConstraints()) {
+          checkConstraint.setDescription(table.getCheckConstraintByName(checkConstraint.getName()).getDescription());
+        }
+
+        for (ViewerTrigger trigger : metadata.getTableById(table.getId()).getTriggers()) {
+          trigger.setDescription(table.getTriggerByName(trigger.getName()).getDescription());
+        }
+
         int index = 0;
         for (ColumnStructure column : table.getColumns()) {
           metadata.getTableById(table.getId()).getColumnByIndexInEnclosingTable(index++)
             .setDescription(column.getDescription());
         }
       }
+
+      for (ViewStructure view : schema.getViews()) {
+        ViewerSchema viewerSchema = metadata.getSchemaByName(schema.getName());
+
+        for (ViewerView viewerView : viewerSchema.getViews()) {
+          if (view.getName().equals(viewerView.getName())) {
+            metadata.getView(viewerView.getUuid()).setDescription(view.getDescription());
+
+            int index = 0;
+            for (ColumnStructure column : view.getColumns()) {
+              metadata.getView(viewerView.getUuid()).getColumnByIndexInEnclosing(index++)
+                .setDescription(column.getDescription());
+            }
+          }
+        }
+      }
+
+      for (RoutineStructure routine : schema.getRoutines()) {
+        for (ViewerRoutine viewerRoutine : metadata.getSchemaByName(schema.getName()).getRoutines()) {
+          if (viewerRoutine.getName().equals(routine.getName())) {
+            viewerRoutine.setDescription(routine.getDescription());
+
+            for (ViewerRoutineParameter parameter : viewerRoutine.getParameters()) {
+              parameter.setDescription(routine.getParameterByName(parameter.getName()).getDescription());
+            }
+          }
+        }
+      }
+
+      for (UserStructure user : updatedDatabaseStructure.getUsers()) {
+        for (ViewerUserStructure metadataUser : metadata.getUsers()) {
+          if (metadataUser.getName().equals(user.getName())) {
+            metadataUser.setDescription(user.getDescription());
+          }
+        }
+      }
     }
 
-    return metadata;
   }
 
   private static List<ViewerPrivilegeStructure> getPrivileges(List<PrivilegeStructure> privileges) {
@@ -857,6 +911,8 @@ public class ToolkitStructure2ViewerStructure {
           LOGGER.error("Could not calculate mimeType for special extensions in the cell: [{}]", cell.getValue(), e);
         }
       }
+
+      zipFile.close();
 
       cell.setMimeType(mimeType);
       cell.setFileExtension(fileExtension);
