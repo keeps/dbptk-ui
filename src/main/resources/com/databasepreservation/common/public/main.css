@@ -444,7 +444,7 @@ p[data-value]:after {
     min-height: 35px;
     background-color: #eee;
     position: relative;
-/*    z-index: 1;*/
+    /*    z-index: 1;*/
 }
 
 .browseContentFilePreviewPanel .filePreviewToolbar .browseContentBreadcrumb {
@@ -1124,7 +1124,7 @@ p[data-value]:after {
     padding: 20px;
 }
 
-.user-menu-item{
+.user-menu-item {
     position: relative;
     z-index: 1;
 }
@@ -2132,18 +2132,50 @@ html, body {
     margin-left: 10px;
 }
 
-.dialog-blob-options{
+.dialog-blob-options {
     margin-top: 15px;
 }
 
-.dialog-blog-mime-type-panel{
+.dialog-blog-mime-type-panel {
     margin-bottom: 15px;
 }
 
-.dialog-blog-mime-type-hint{
+.dialog-blog-mime-type-hint {
     margin-bottom: 5px;
 }
 
+/**********************************************
+		         Dialog Customize columns
+***********************************************/
+.dialog-customize-columns-elements {
+    display: flex;
+}
+
+.dialog-customize-columns-left-element {
+    flex: auto;
+    margin-right: 10px;
+}
+
+.dialog-customize-columns-right-element {
+    flex: 1 1 0;
+    padding-bottom: 5px;
+}
+
+.dialog-customize-columns-option:last-child {
+    margin-bottom: 10px;
+}
+
+.dialog-customize-columns-elements select {
+    padding: 0;
+}
+
+.dialog-customize-columns-elements .form-textbox:invalid {
+    background-color: #eebcba;
+    border-top-style: none;
+    border-right-style: none;
+    border-bottom-style: none;
+    border-left: 2px solid #d9534f;
+}
 /**********************************************
 		         Dialog Numeric
 ***********************************************/
@@ -3142,7 +3174,7 @@ rgba(0, 0, 0, .125);
 }
 
 .columns-management-options .form-textbox {
-    font-family: "Ubuntu Mono";
+    font-family: "Ubuntu", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 

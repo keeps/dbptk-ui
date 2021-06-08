@@ -188,7 +188,9 @@ public class ColumnsManagementSidebar extends Composite implements Sidebar, ICol
 
   @Override
   public void updateCollection(CollectionStatus collectionStatus) {
-    this.collectionStatus = collectionStatus;
+    if (collectionStatus.getDatabaseUUID().equals(databaseUUID)) {
+      this.collectionStatus = collectionStatus;
+    }
   }
 
   @Override
@@ -210,9 +212,12 @@ public class ColumnsManagementSidebar extends Composite implements Sidebar, ICol
 
   @Override
   public void reset(ViewerDatabase database, CollectionStatus collectionStatus) {
-    sidebarGroup.clear();
-    initialized = false;
-    init(database, collectionStatus);
+    if (collectionStatus.getDatabaseUUID().equals(databaseUUID)) {
+      sidebarGroup.clear();
+      initialized = false;
+      ObserverManager.getCollectionObserver().removeObserver(this);
+      init(database, collectionStatus);
+    }
   }
 
   @Override

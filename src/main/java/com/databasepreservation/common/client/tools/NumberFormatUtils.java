@@ -3,6 +3,7 @@ package com.databasepreservation.common.client.tools;
 import java.math.BigDecimal;
 
 import com.databasepreservation.common.client.models.status.formatters.NumberFormatter;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.NumberFormat;
 
 /**
@@ -23,10 +24,16 @@ public class NumberFormatUtils {
     return true;
   }
 
-  public static String getFormatted(double value, int decimalCount, boolean thousandsSeparator) {
+  public static String getFormatted(BigDecimal value, int decimalCount, boolean thousandsSeparator) {
     String pattern = NumberFormat.getDecimalFormat().getPattern();
 
-    StringBuilder numberPattern = new StringBuilder((decimalCount <= 0) ? "" : ".");
+    String defaultDecimalPart = "0.";
+
+    if (thousandsSeparator) {
+      defaultDecimalPart = ".";
+    }
+
+    StringBuilder numberPattern = new StringBuilder((decimalCount <= 0) ? "" : defaultDecimalPart);
     for (int i = 0; i < decimalCount; i++) {
       numberPattern.append('0');
     }
@@ -46,7 +53,7 @@ public class NumberFormatUtils {
     }
 
     if (numberFormatter.isDecimals()) {
-      result = NumberFormatUtils.getFormatted(new BigDecimal(result).doubleValue(), numberFormatter.getDecimalPlaces(),
+      result = NumberFormatUtils.getFormatted(new BigDecimal(result), numberFormatter.getDecimalPlaces(),
         numberFormatter.isThousandsSeparator());
     }
 

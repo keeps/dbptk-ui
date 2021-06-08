@@ -481,12 +481,12 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
       SafeHtmlBuilder spanDescription = CommonClientUtils.constructSpan(viewerColumn.getCustomDescription(),
         viewerColumn.getCustomDescription(), "column-description-block column-description");
       addColumn(displayColumn, CommonClientUtils.wrapOnDiv(Arrays.asList(spanTitle, spanDescription)), true,
-        TextAlign.LEFT, Double.parseDouble(viewerColumn.getSearchStatus().getList().getColumnWidth()));
+        TextAlign.LEFT, viewerColumn.getSearchStatus().getList().getCustomizeProperties());
     } else {
       SafeHtmlBuilder spanTitle = CommonClientUtils.constructSpan(viewerColumn.getCustomName(),
         viewerColumn.getCustomDescription(), "column-description-block");
       addColumn(displayColumn, spanTitle.toSafeHtml(), true, TextAlign.LEFT,
-        Double.parseDouble(viewerColumn.getSearchStatus().getList().getColumnWidth()));
+        viewerColumn.getSearchStatus().getList().getCustomizeProperties());
     }
   }
 

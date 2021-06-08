@@ -34,6 +34,7 @@ import com.databasepreservation.common.client.index.select.SelectedItemsFilter;
 import com.databasepreservation.common.client.index.select.SelectedItemsList;
 import com.databasepreservation.common.client.index.sort.SortParameter;
 import com.databasepreservation.common.client.index.sort.Sorter;
+import com.databasepreservation.common.client.models.status.collection.CustomizeProperties;
 import com.databasepreservation.common.client.widgets.Alert;
 import com.databasepreservation.common.client.widgets.MyCellTableResources;
 import com.databasepreservation.common.client.widgets.wcag.AccessibleCellTable;
@@ -791,6 +792,21 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
   protected void addColumn(Column<T, ?> column, String headerText, boolean nowrap, TextAlign textAlign,
     double fixedSize) {
     addColumn(column, SafeHtmlUtils.fromString(headerText), nowrap, textAlign, fixedSize);
+  }
+
+  protected void addColumn(Column<T, ?> column, SafeHtml headerHTML, boolean nowrap, TextAlign textAlign,
+    CustomizeProperties properties) {
+    String width = properties.getWidth();
+    Style.Unit unit = properties.getUnit();
+    double fixedSize;
+
+    try {
+      fixedSize = Double.parseDouble(width);
+    } catch (NumberFormatException e) {
+      fixedSize = 10.0;
+    }
+    display.setColumnWidth(column, fixedSize, unit);
+    addColumn(column, headerHTML, nowrap, textAlign);
   }
 
   public abstract void exportClickHandler();

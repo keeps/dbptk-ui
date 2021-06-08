@@ -22,7 +22,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 @JsonPropertyOrder({"id", "name", "customName", "description", "customDescription", "originalType", "typeName",
-  "nullable", "type", "columnIndex", "externalLob", "formatterJson", "applicationType", "nestedColumn", "order",
+  "nullable", "type", "columnIndex", "externalLob", "formatter", "applicationType", "nestedColumn", "order",
   "export", "search", "details"})
 public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
   private String id;
@@ -215,8 +215,8 @@ public class ColumnStatus implements Serializable, Comparable<ColumnStatus> {
     this.getSearchStatus().getAdvanced().setFixed(value);
   }
 
-  public void updateColumnWidth(String value) {
-    this.getSearchStatus().getList().setColumnWidth(value);
+  public void updateCustomizeProperties(CustomizeProperties properties) {
+    this.getSearchStatus().getList().setCustomizeProperties(properties);
   }
 
   public void updateSearchListTemplate(TemplateStatus templateStatus) {

@@ -7,6 +7,8 @@
  */
 package com.databasepreservation.common.client.models.status.helpers;
 
+import com.databasepreservation.common.client.models.status.collection.CustomizeProperties;
+
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
@@ -17,7 +19,7 @@ public class StatusHelper {
   private boolean showInTable;
   private boolean showInDetails;
   private boolean showInAdvancedSearch;
-  private String width;
+  private CustomizeProperties properties;
 
   public StatusHelper() {
   }
@@ -27,13 +29,13 @@ public class StatusHelper {
     this.description = description;
   }
 
-  public StatusHelper(String label, String description, boolean table, boolean details, boolean advancedSearch, String width) {
+  public StatusHelper(String label, String description, boolean table, boolean details, boolean advancedSearch, CustomizeProperties properties) {
     this.label = label;
     this.description = description;
     this.showInTable = table;
     this.showInDetails = details;
     this.showInAdvancedSearch = advancedSearch;
-    this.width = width;
+    this.properties = properties;
   }
 
   public String getLabel() {
@@ -76,11 +78,11 @@ public class StatusHelper {
     this.showInAdvancedSearch = showInAdvancedSearch;
   }
 
-  public String getWidth() {
-    return width;
+  public CustomizeProperties getProperties() {
+    return properties;
   }
 
-  public void setWidth(String width) {
-    this.width = width;
+  public void setProperties(CustomizeProperties properties) {
+    this.properties = properties;
   }
 }

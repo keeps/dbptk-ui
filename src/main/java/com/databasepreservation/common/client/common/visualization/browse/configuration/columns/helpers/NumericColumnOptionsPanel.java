@@ -79,11 +79,11 @@ public class NumericColumnOptionsPanel extends ColumnOptionsPanel {
 
   private String customValue = "";
 
-  public static ColumnOptionsPanel createInstance(TableStatus tableConfiguration, ColumnStatus columnConfiguration) {
-    return new NumericColumnOptionsPanel(tableConfiguration, columnConfiguration);
+  public static ColumnOptionsPanel createInstance(ColumnStatus columnConfiguration) {
+    return new NumericColumnOptionsPanel(columnConfiguration);
   }
 
-  private NumericColumnOptionsPanel(TableStatus tableConfiguration, ColumnStatus columnConfiguration) {
+  private NumericColumnOptionsPanel(ColumnStatus columnConfiguration) {
     initWidget(binder.createAndBindUi(this));
     description.setHTML(messages.columnManagementNumericFormatterTextForDescription());
     previewDescription.setHTML(messages.columnManagementNumericFormatterTextForPreviewDescription());

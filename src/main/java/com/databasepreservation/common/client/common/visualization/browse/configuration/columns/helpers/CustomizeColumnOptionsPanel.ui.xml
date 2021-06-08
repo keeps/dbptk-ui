@@ -1,0 +1,24 @@
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <ui:with field='messages' type='config.i18n.client.ClientMessages'/>
+    <g:FlowPanel ui:field="content" addStyleNames="columns-customize-options">
+        <g:HTML addStyleNames="dialog-numeric-description" ui:field="description"/>
+        <g:FlowPanel addStyleNames="dialog-customize-columns-options">
+            <g:FlowPanel addStyleNames="dialog-customize-columns-option">
+                <g:Label addStyleNames="form-label">
+                    <ui:text from='{messages.columnManagementHeaderWidthColumnText}'/>
+                </g:Label>
+                <g:HTML addStyleNames="dialog-numeric-description" ui:field="widthDescription"/>
+                <g:FlowPanel addStyleNames="dialog-customize-columns-elements">
+                    <g:FlowPanel addStyleNames="dialog-customize-columns-left-element">
+                        <g:IntegerBox addStyleNames="form-textbox" ui:field="widthContent"/>
+                    </g:FlowPanel>
+                    <g:FlowPanel addStyleNames="dialog-customize-columns-right-element">
+                        <g:ListBox ui:field="unitListBox" />
+                    </g:FlowPanel>
+                </g:FlowPanel>
+
+            </g:FlowPanel>
+        </g:FlowPanel>
+    </g:FlowPanel>
+</ui:UiBinder>

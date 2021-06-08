@@ -1486,6 +1486,8 @@ public interface ClientMessages extends Messages {
 
   String columnManagementPageDialogErrorUnique();
 
+  String columnManagementPageDialogErrorValueMustBeAnInteger();
+
   String columnManagementPageTextForArrowUp();
 
   String columnManagementPageTextForArrowDown();
@@ -1525,6 +1527,8 @@ public interface ClientMessages extends Messages {
   SafeHtml columnManagementNumericFormatterTextForDescription();
 
   SafeHtml columnManagementNumericFormatterTextForPreviewDescription();
+
+  SafeHtml columnManagementCustomizeColumnTextForWidthDescription(String link);
 
   /********************************************
    * Column Management Panel - Binary Column

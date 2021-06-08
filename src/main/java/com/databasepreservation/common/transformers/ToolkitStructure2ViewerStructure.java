@@ -319,8 +319,8 @@ public class ToolkitStructure2ViewerStructure {
     try {
       result.setColumns(getColumns(view.getColumns()));
     } catch (ViewerException e) {
-      LOGGER.error("Could not convert the columns for view " + view.toString(), e);
-      result.setColumns(new ArrayList<ViewerColumn>());
+      LOGGER.error("Could not convert the columns for view {}", view, e);
+      result.setColumns(new ArrayList<>());
     }
 
     result.setQuery(view.getQuery());
@@ -736,8 +736,7 @@ public class ToolkitStructure2ViewerStructure {
     if (cell instanceof BinaryCell) {
       BinaryCell binaryCell = (BinaryCell) cell;
       if (binaryCell.getInputStreamProvider() instanceof TemporaryPathInputStreamProvider) {
-        // BLOB is internal to the SIARD and is located in table.xml
-
+        // BLOB is internal to the SIARD and is stored inside table.xml
         TemporaryPathInputStreamProvider temporaryPathInputStreamProvider = (TemporaryPathInputStreamProvider) binaryCell
           .getInputStreamProvider();
         try {
@@ -772,8 +771,7 @@ public class ToolkitStructure2ViewerStructure {
         detectMimeType(actualViewerRow, result, databasePath, collectionConfiguration, table, colIndex, lobName, false);
 
       } else {
-        // BLOB is internal to the SIARD but it is outside the table.xml (Normal)
-
+        // BLOB is internal to the SIARD but is stored outside the table.xml (Normal)
         String index = getRowIndex(cell.getId());
         String lobName = ViewerConstants.SIARD_RECORD_PREFIX + index + ViewerConstants.SIARD_LOB_FILE_EXTENSION;
         result.setValue(lobName);
@@ -829,11 +827,9 @@ public class ToolkitStructure2ViewerStructure {
 
       if (entry != null && blobIsInsideSiard) {
         inputStream = zipFile.getInputStream(entry);
-
       } else if (blobIsInsideSiard) {
         lobCellValue = lobCellValue.replace(ViewerConstants.SIARD_EMBEDDED_LOB_PREFIX, "");
         inputStream = new ByteArrayInputStream(Base64.decodeBase64(lobCellValue.getBytes()));
-
       } else {
         lobCellValue = cell.getValue();
         inputStream = new FileInputStream(lobCellValue);
@@ -858,9 +854,8 @@ public class ToolkitStructure2ViewerStructure {
           fileExtension = MimeTypes.getDefaultMimeTypes().forName(mimeType).getExtension();
 
         } catch (SAXException | TikaException e) {
-          LOGGER.error("Could not calculate mimeType for special extensions in the cell: [" + cell.getValue() + "]", e);
+          LOGGER.error("Could not calculate mimeType for special extensions in the cell: [{}]", cell.getValue(), e);
         }
-
       }
 
       cell.setMimeType(mimeType);

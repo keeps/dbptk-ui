@@ -25,7 +25,6 @@ import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.lists.cells.ActionsCell;
 import com.databasepreservation.common.client.common.lists.cells.DisableableCheckboxCell;
-import com.databasepreservation.common.client.common.lists.cells.EditableNumberCell;
 import com.databasepreservation.common.client.common.lists.cells.RequiredEditableCell;
 import com.databasepreservation.common.client.common.lists.cells.TextAreaInputCell;
 import com.databasepreservation.common.client.common.lists.cells.helper.CheckboxData;
@@ -36,6 +35,7 @@ import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.BinaryColumnOptionsPanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.ClobColumnOptionsPanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.ColumnOptionsPanel;
+import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.CustomizeColumnOptionsPanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.NestedColumnOptionsPanel;
 import com.databasepreservation.common.client.common.visualization.browse.configuration.columns.helpers.NumericColumnOptionsPanel;
 import com.databasepreservation.common.client.configuration.observer.ICollectionStatusObserver;
@@ -190,7 +190,6 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
         column.updateTableShowValue(editableValues.get(column.getId()).isShowInTable());
         column.updateDetailsShowValue(editableValues.get(column.getId()).isShowInDetails());
         column.updateAdvancedSearchShowValue(editableValues.get(column.getId()).isShowInAdvancedSearch());
-        column.updateColumnWidth(editableValues.get(column.getId()).getWidth());
       }
       statuses.add(column);
     }
@@ -258,7 +257,9 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
         }),
       new BasicTablePanel.ColumnInfo<>(messages.basicTableHeaderLabel(), 15, getLabelColumn()),
       new BasicTablePanel.ColumnInfo<>(messages.basicTableHeaderDescription(), 0, getDescriptionColumn()),
-      new BasicTablePanel.ColumnInfo<>(messages.columnManagementHeaderWidthColumnText(), 10, getNumberColumn()),
+      new BasicTablePanel.ColumnInfo<>(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager
+        .getTagWithStyleName(FontAwesomeIconManager.PAINT_BRUSH, messages.basicTableHeaderOptions(), FA_FW)), false, 3,
+        getTableCustomizationColumn()),
       new BasicTablePanel.ColumnInfo<>(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager
         .getTagWithStyleName(FontAwesomeIconManager.COG, messages.basicTableHeaderOptions(), FA_FW)), false, 3,
         getOptionsColumn()),
@@ -315,41 +316,6 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
     };
   }
 
-  private Column<ColumnStatus, String> getNumberColumn() {
-    Column<ColumnStatus, String> number = new Column<ColumnStatus, String>(new EditableNumberCell()) {
-      @Override
-      public String getValue(ColumnStatus column) {
-        if (editableValues.get(column.getId()) == null) {
-          StatusHelper helper = new StatusHelper(column.getCustomName(), column.getCustomDescription(),
-            column.getSearchStatus().getList().isShow(), column.getDetailsStatus().isShow(),
-            column.getSearchStatus().getAdvanced().isFixed(), column.getSearchStatus().getList().getColumnWidth());
-          editableValues.put(column.getId(), helper);
-          return column.getSearchStatus().getList().getColumnWidth();
-        } else {
-          return editableValues.get(column.getId()).getWidth();
-        }
-      }
-    };
-
-    number.setFieldUpdater((index, column, value) -> {
-      if (editableValues.get(column.getId()) != null) {
-        StatusHelper statusHelper = editableValues.get(column.getId());
-        statusHelper.setWidth(value);
-        editableValues.replace(column.getId(), statusHelper);
-      } else {
-        StatusHelper helper = new StatusHelper(column.getCustomName(), column.getCustomDescription(),
-          column.getSearchStatus().getList().isShow(), column.getDetailsStatus().isShow(),
-          column.getSearchStatus().getAdvanced().isFixed(), value);
-        editableValues.put(column.getId(), helper);
-      }
-
-      changes = true;
-      sidebar.updateSidebarItem(tableId, true);
-    });
-
-    return number;
-  }
-
   private Column<ColumnStatus, Boolean> getTableCheckboxColumn() {
     Column<ColumnStatus, Boolean> checkbox = new Column<ColumnStatus, Boolean>(new CheckboxCell(true, true)) {
       @Override
@@ -357,7 +323,8 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
         if (editableValues.get(column.getId()) == null) {
           StatusHelper helper = new StatusHelper(column.getCustomName(), column.getCustomDescription(),
             column.getSearchStatus().getList().isShow(), column.getDetailsStatus().isShow(),
-            column.getSearchStatus().getAdvanced().isFixed(), column.getSearchStatus().getList().getColumnWidth());
+            column.getSearchStatus().getAdvanced().isFixed(),
+            column.getSearchStatus().getList().getCustomizeProperties());
           editableValues.put(column.getId(), helper);
           return column.getSearchStatus().getList().isShow();
         } else {
@@ -374,7 +341,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
       } else {
         StatusHelper helper = new StatusHelper(column.getCustomName(), column.getCustomDescription(), value,
           column.getDetailsStatus().isShow(), column.getSearchStatus().getAdvanced().isFixed(),
-          column.getSearchStatus().getList().getColumnWidth());
+          column.getSearchStatus().getList().getCustomizeProperties());
         editableValues.put(column.getId(), helper);
       }
 
@@ -392,7 +359,8 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
         if (editableValues.get(column.getId()) == null) {
           StatusHelper helper = new StatusHelper(column.getCustomName(), column.getCustomDescription(),
             column.getSearchStatus().getList().isShow(), column.getDetailsStatus().isShow(),
-            column.getSearchStatus().getAdvanced().isFixed(), column.getSearchStatus().getList().getColumnWidth());
+            column.getSearchStatus().getAdvanced().isFixed(),
+            column.getSearchStatus().getList().getCustomizeProperties());
           editableValues.put(column.getId(), helper);
           return column.getDetailsStatus().isShow();
         } else {
@@ -409,7 +377,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
       } else {
         StatusHelper helper = new StatusHelper(column.getCustomName(), column.getCustomDescription(),
           column.getSearchStatus().getList().isShow(), value, column.getSearchStatus().getAdvanced().isFixed(),
-          column.getSearchStatus().getList().getColumnWidth());
+          column.getSearchStatus().getList().getCustomizeProperties());
         editableValues.put(column.getId(), helper);
       }
 
@@ -447,7 +415,7 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
       } else {
         StatusHelper helper = new StatusHelper(column.getCustomName(), column.getCustomDescription(),
           column.getSearchStatus().getList().isShow(), column.getDetailsStatus().isShow(), value.isChecked(),
-          column.getSearchStatus().getList().getColumnWidth());
+          column.getSearchStatus().getList().getCustomizeProperties());
         editableValues.put(column.getId(), helper);
       }
 
@@ -492,7 +460,8 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
         if (editableValues.get(column.getId()) == null) {
           StatusHelper helper = new StatusHelper(column.getCustomName(), column.getCustomDescription(),
             column.getSearchStatus().getList().isShow(), column.getDetailsStatus().isShow(),
-            column.getSearchStatus().getAdvanced().isFixed(), column.getSearchStatus().getList().getColumnWidth());
+            column.getSearchStatus().getAdvanced().isFixed(),
+            column.getSearchStatus().getList().getCustomizeProperties());
           editableValues.put(column.getId(), helper);
           return column.getCustomName();
         } else {
@@ -509,7 +478,8 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
       } else {
         StatusHelper helper = new StatusHelper(value, column.getCustomDescription(),
           column.getSearchStatus().getList().isShow(), column.getDetailsStatus().isShow(),
-          column.getSearchStatus().getAdvanced().isFixed(), column.getSearchStatus().getList().getColumnWidth());
+          column.getSearchStatus().getAdvanced().isFixed(),
+          column.getSearchStatus().getList().getCustomizeProperties());
         editableValues.put(column.getId(), helper);
       }
 
@@ -540,7 +510,8 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
       } else {
         StatusHelper helper = new StatusHelper(column.getCustomName(), value,
           column.getSearchStatus().getList().isShow(), column.getDetailsStatus().isShow(),
-          column.getSearchStatus().getAdvanced().isFixed(), column.getSearchStatus().getList().getColumnWidth());
+          column.getSearchStatus().getAdvanced().isFixed(),
+          column.getSearchStatus().getList().getCustomizeProperties());
         editableValues.put(column.getId(), helper);
       }
 
@@ -553,6 +524,43 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
   private boolean isAnOptionColumn(ViewerType.dbTypes type) {
     return ViewerType.dbTypes.BINARY.equals(type) || ViewerType.dbTypes.NESTED.equals(type)
       || ViewerType.dbTypes.CLOB.equals(type) || ViewerType.dbTypes.NUMERIC_FLOATING_POINT.equals(type);
+  }
+
+  private Column<ColumnStatus, String> getTableCustomizationColumn() {
+    Column<ColumnStatus, String> option = new ButtonColumn<ColumnStatus>() {
+      @Override
+      public String getValue(ColumnStatus columnStatus) {
+        return messages.basicActionOpen();
+      }
+
+      @Override
+      public void render(Cell.Context context, ColumnStatus object, SafeHtmlBuilder sb) {
+        sb.appendHtmlConstant(
+          "<div class=\"center-cell\"><button class=\"btn btn-cell-action\" type=\"button\" tabindex=\"-1\"><i class=\"fas fa-paint-brush\"></i></button></div>");
+      }
+    };
+
+    option.setFieldUpdater((index, columnStatus, value) -> {
+      CustomizeColumnOptionsPanel optionsPanel = CustomizeColumnOptionsPanel.createInstance(columnStatus);
+      Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), "300px", messages.basicActionSave(),
+        messages.basicActionCancel(), optionsPanel, new DefaultAsyncCallback<Boolean>() {
+          @Override
+          public void onSuccess(Boolean value) {
+            if (value) {
+              if (optionsPanel.validate()) {
+                collectionStatus.getColumnByTableIdAndColumn(tableId, columnStatus.getId())
+                  .updateCustomizeProperties(optionsPanel.getProperties());
+                saveChanges(true);
+              } else {
+                Dialogs.showErrors(messages.columnManagementPageTitle(),
+                  messages.columnManagementPageDialogErrorValueMustBeAnInteger(), messages.basicActionClose());
+              }
+            }
+          }
+        });
+    });
+
+    return option;
   }
 
   private Column<ColumnStatus, String> getOptionsColumn() {
@@ -644,9 +652,8 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
             }
           });
       } else if (ViewerType.dbTypes.NUMERIC_FLOATING_POINT.equals(columnStatus.getType())) {
-        ColumnOptionsPanel numericColumnOptionPanel = NumericColumnOptionsPanel.createInstance(
-          collectionStatus.getTableStatus(tableId),
-          collectionStatus.getColumnByTableIdAndColumn(tableId, columnStatus.getId()));
+        ColumnOptionsPanel numericColumnOptionPanel = NumericColumnOptionsPanel
+          .createInstance(collectionStatus.getColumnByTableIdAndColumn(tableId, columnStatus.getId()));
 
         Dialogs.showDialogColumnConfiguration(messages.basicTableHeaderOptions(), "400px", messages.basicActionSave(),
           messages.basicActionCancel(), numericColumnOptionPanel, new DefaultAsyncCallback<Boolean>() {
@@ -659,8 +666,8 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
                   collectionStatus.getColumnByTableIdAndColumn(tableId, columnStatus.getId()).setFormatter(formatter);
                   saveChanges(false);
                 } else {
-                  Dialogs.showErrors(messages.columnManagementPageTitle(), messages.columnManagementPageDialogErrorUnique(),
-                      messages.basicActionClose());
+                  Dialogs.showErrors(messages.columnManagementPageTitle(),
+                    messages.columnManagementPageDialogErrorValueMustBeAnInteger(), messages.basicActionClose());
                 }
               }
             }
@@ -742,7 +749,6 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
   private void saveChanges(boolean value) {
     CollectionService.Util.call((Boolean result) -> {
       ObserverManager.getCollectionObserver().setCollectionStatus(collectionStatus);
-      sidebar.reset(database, collectionStatus);
       this.changes = value;
       Toast.showInfo(messages.columnManagementPageTitle(), messages.columnManagementPageToastDescription());
     }).updateCollectionConfiguration(database.getUuid(), database.getUuid(), collectionStatus);
@@ -757,8 +763,10 @@ public class ColumnsManagementPanel extends RightPanel implements ICollectionSta
 
   @Override
   public void updateCollection(CollectionStatus collectionStatus) {
-    sidebar.reset(database, collectionStatus);
-    this.collectionStatus = collectionStatus;
+    if (collectionStatus.getDatabaseUUID().equals(database.getUuid())) {
+      sidebar.reset(database, collectionStatus);
+      this.collectionStatus = collectionStatus;
+    }
   }
 
   @Override
