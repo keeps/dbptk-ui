@@ -198,7 +198,7 @@ public abstract class AsyncTableCell<T extends IsIndexed, O> extends FlowPanel
       GWT.create(SimplePager.ImageButtonsConstants.class));
     resultsPager.setDisplay(display);
 
-    pageSizePager = new RodaPageSizePager(getPageSizePagerIncrement());
+    pageSizePager = new RodaPageSizePager(getInitialPageSize(), getPageSizePagerIncrement());
     pageSizePager.setDisplay(display);
 
     createSelectAllPanel();

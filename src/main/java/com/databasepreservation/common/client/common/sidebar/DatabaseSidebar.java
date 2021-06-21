@@ -261,7 +261,6 @@ public class DatabaseSidebar extends Composite implements Sidebar, ICollectionSt
     final String iconTag) {
       SafeHtml html;
       if (totalSchemas == 1) {
-        GWT.log(table.getUuid());
       html = FontAwesomeIconManager.getTagSafeHtml(FontAwesomeIconManager.TABLE,
         collectionStatus.getTableStatus(table.getUuid()).getCustomName());
       } else {

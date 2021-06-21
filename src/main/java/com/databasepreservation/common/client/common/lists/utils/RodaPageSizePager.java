@@ -33,6 +33,8 @@ public class RodaPageSizePager extends AbstractPager {
    */
   private final int increment;
 
+  private final int initialPageSize;
+
   /**
    * The main layout widget.
    */
@@ -48,10 +50,11 @@ public class RodaPageSizePager extends AbstractPager {
    *          the amount by which to increase the page size
    */
   @UiConstructor
-  public RodaPageSizePager(final int increment) {
+  public RodaPageSizePager(final int initialPageSize, final int increment) {
     showMoreButton = new Anchor(messages.showMore());
     showLessButton = new Anchor(messages.showLess());
     this.increment = increment;
+    this.initialPageSize = initialPageSize;
     initWidget(layout);
     layout.setCellPadding(0);
     layout.setCellSpacing(0);
@@ -75,8 +78,8 @@ public class RodaPageSizePager extends AbstractPager {
         HasRows display = getDisplay();
         if (display != null) {
           Range range = display.getVisibleRange();
-          int pageSize = Math.max(range.getLength() - increment, increment);
-          display.setVisibleRange(range.getStart(), pageSize);
+          int pageSize = range.getLength() - increment;
+          display.setVisibleRange(range.getStart(), Math.max(pageSize, initialPageSize));
         }
       }
     });
@@ -111,7 +114,7 @@ public class RodaPageSizePager extends AbstractPager {
     // Assumes a page start index of 0.
     HasRows display = getDisplay();
     int pageSize = display.getVisibleRange().getLength();
-    boolean hasLess = pageSize > increment;
+    boolean hasLess = pageSize > initialPageSize;
     boolean hasMore = !display.isRowCountExact() || pageSize < display.getRowCount();
     showLessButton.setVisible(hasLess);
     showMoreButton.setVisible(hasMore);
