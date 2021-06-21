@@ -48,7 +48,7 @@ public class TableNode {
     for (ViewerForeignKey foreignKey : table.getForeignKeys()) {
       ViewerTable viewerTable = metadata.getTable(foreignKey.getReferencedTableUUID());
       // avoid to add the same table in the same tree path
-      if (this.searchTop(viewerTable) == null) {
+      if (this.searchTop(viewerTable) == null && viewerTable != null) {
         TableNode childNode = new TableNode(database, viewerTable);
         childNode.uuid = generateUUID(foreignKey, viewerTable);
         childNode.multiValue = this.parentIsMultiValue(this);
