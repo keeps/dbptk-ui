@@ -735,7 +735,7 @@ public class SIARDController {
       // Extract updated metadata
       SIARDEdition siardEdition = SIARDEdition.newInstance();
       siardEdition.editModule(new SIARDEditFactory()).editModuleParameter(SIARDEditFactory.PARAMETER_FILE,
-          Collections.singletonList(siardPath));
+        Collections.singletonList(siardPath));
       siardEdition.reporter(new NoOpReporter());
       DatabaseStructure updatedDatabaseStructure = siardEdition.getMetadata();
 
@@ -748,6 +748,7 @@ public class SIARDController {
 
       LOGGER.info("Finish edit metadata process for {}, SIARD is located at {}", databaseUUID, siardPath);
     } catch (IOException | ModuleException | RuntimeException e) {
+      LOGGER.error("Failed to update database metadata information from {}", databaseUUID, e);
       throw new GenericException("Could not update the database metadata information", e);
     }
 
