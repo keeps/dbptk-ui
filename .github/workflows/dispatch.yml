@@ -11,7 +11,7 @@ jobs:
   dispatch:
     strategy:
       matrix:
-        repo: [ 'keeps/dbptk-enterprise' ]
+        repo: [ 'keeps/dbptk-desktop' ]
 
     runs-on: ubuntu-latest
 
