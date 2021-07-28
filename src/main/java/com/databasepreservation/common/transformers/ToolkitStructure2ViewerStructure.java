@@ -196,7 +196,9 @@ public class ToolkitStructure2ViewerStructure {
       for (TableStructure table : schema.getTables()) {
         metadata.getTableById(table.getId()).setDescription(table.getDescription());
 
-        metadata.getTableById(table.getId()).getPrimaryKey().setDescription(table.getPrimaryKey().getDescription());
+        if (metadata.getTableById(table.getId()).getPrimaryKey() != null) {
+          metadata.getTableById(table.getId()).getPrimaryKey().setDescription(table.getPrimaryKey().getDescription());
+        }
 
         for (ViewerForeignKey foreignKey : metadata.getTableById(table.getId()).getForeignKeys()) {
           foreignKey.setDescription(table.getForeignKeyByName(foreignKey.getName()).getDescription());
