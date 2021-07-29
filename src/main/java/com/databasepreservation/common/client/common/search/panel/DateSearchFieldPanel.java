@@ -10,6 +10,7 @@ package com.databasepreservation.common.client.common.search.panel;
 import java.util.Date;
 import java.util.List;
 
+import com.google.gwt.core.client.GWT;
 import org.roda.core.data.common.RodaConstants;
 
 import com.databasepreservation.common.client.ViewerConstants;
@@ -89,14 +90,14 @@ public class DateSearchFieldPanel extends SearchFieldPanel {
           Date end = getDateFromInput(inputDateToForDate);
           filterParameter = new DateRangeFilterParameter(field, inputDateFromForDate.getDateBox().getValue(), end,
             RodaConstants.DateGranularity.DAY);
-        } else {
+        } else if (dateIntervalValid(inputDateFromForDate, inputDateToForDate)) {
           Date begin = getDateFromInput(inputDateFromForDate);
           Date end = getDateFromInput(inputDateToForDate);
           filterParameter = new DateRangeFilterParameter(field, begin, end, RodaConstants.DateGranularity.DAY);
+        } else {
+          Dialogs.showErrors(messages.advancedSearchDialogTitle(), messages.advancedSearchErrorMessageForDateInvalid(),
+              messages.basicActionClose());
         }
-      } else {
-        Dialogs.showErrors(messages.advancedSearchDialogTitle(), messages.advancedSearchErrorMessageForDateInvalid(),
-          messages.basicActionClose());
       }
     }
 
