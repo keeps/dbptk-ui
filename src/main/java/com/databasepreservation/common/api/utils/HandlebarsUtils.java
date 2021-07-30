@@ -100,7 +100,7 @@ public class HandlebarsUtils {
   }
 
   public static String applyMimeTypeTemplate(ViewerRow row, TableStatus tableConfiguration, int columnIndex) {
-    Map<String, String> map = cellsToObject(row.getCells(), tableConfiguration, row.getUuid());
+    Map<String, String> map = cellsToObject(row.getCells(), tableConfiguration, row.getUuid(), columnIndex);
     final String template = tableConfiguration.getColumnByIndex(columnIndex).getApplicationType();
 
     if (ViewerStringUtils.isBlank(template) || !template.equals(MimeTypeUtils.getAutoDetectMimeTypeTemplate())) {
@@ -117,7 +117,7 @@ public class HandlebarsUtils {
   }
 
   public static String applyExportTemplate(ViewerRow row, TableStatus tableConfiguration, int columnIndex) {
-    Map<String, String> map = cellsToObject(row.getCells(), tableConfiguration, row.getUuid());
+    Map<String, String> map = cellsToObject(row.getCells(), tableConfiguration, row.getUuid(), columnIndex);
     final String template = tableConfiguration.getColumnByIndex(columnIndex).getExportStatus().getTemplateStatus()
       .getTemplate();
 
@@ -135,7 +135,7 @@ public class HandlebarsUtils {
   }
 
   private static Map<String, String> cellsToObject(Map<String, ViewerCell> cells, TableStatus tableConfiguration,
-    String rowIndex) {
+    String rowIndex, int columnIndex) {
     Map<String, String> map = new HashMap<>();
 
     for (ColumnStatus column : tableConfiguration.getColumns()) {
@@ -144,7 +144,7 @@ public class HandlebarsUtils {
       if (cell != null) {
         map.put(ViewerStringUtils.replaceAllFor(column.getCustomName(), "\\s", "_"), cell.getValue());
 
-        if (column.getType().equals(ViewerType.dbTypes.BINARY)) {
+        if (column.getType().equals(ViewerType.dbTypes.BINARY) && column.getColumnIndex() == columnIndex) {
           map.put(ViewerConstants.TEMPLATE_LOB_ROW_INDEX, rowIndex);
 
           map.put(ViewerConstants.TEMPLATE_LOB_COLUMN_INDEX, String.valueOf(column.getColumnIndex()));
