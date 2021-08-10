@@ -54,13 +54,13 @@ public class ControllerAssistant {
             //user.setAdmin(true);
             user.setWhiteList(true);
             user.setIpAddress(address.toString());
-            index++;
 
             return user;
           }
         } catch (UnknownHostException e) {
           LOGGER.debug("Invalid IP address from config: {}", request.getRemoteAddr(), e);
         }
+        index++;
       }
     } catch (UnknownHostException e) {
       LOGGER.debug("Invalid IP address: {}", request.getRemoteAddr(), e);
