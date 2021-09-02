@@ -227,7 +227,7 @@ public class BreadcrumbManager {
           } else {
             items.add(new BreadcrumbItem(
               SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.DATABASE)
-                + SafeHtmlUtils.htmlEscape(databaseName))));
+                + SafeHtmlUtils.htmlEscape(databaseName)), () -> HistoryManager.gotoDatabase(databaseUUID)));
           }
         }
       });
