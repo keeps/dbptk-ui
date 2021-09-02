@@ -25,17 +25,12 @@ import com.databasepreservation.common.client.models.status.database.DatabaseSta
 import com.databasepreservation.common.client.models.status.database.Indicators;
 import com.databasepreservation.common.client.models.status.database.SiardStatus;
 import com.databasepreservation.common.client.models.status.database.ValidationStatus;
-import com.databasepreservation.common.client.models.status.formatters.Formatter;
-import com.databasepreservation.common.client.models.status.formatters.NoFormatter;
-import com.databasepreservation.common.client.models.status.formatters.NumberFormatter;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.models.structure.ViewerType;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -238,10 +233,13 @@ public class StatusUtils {
     return status;
   }
 
-  public static CollectionStatus getCollectionStatus(final String databaseUUID, final String solrCollectionName) {
+  public static CollectionStatus getCollectionStatus(final String databaseUUID, String databaseName,
+    String databaseDescription, final String solrCollectionName) {
     CollectionStatus status = new CollectionStatus();
     status.setVersion(ViewerConstants.COLLECTION_STATUS_VERSION);
     status.setDatabaseUUID(databaseUUID);
+    status.setName(databaseName);
+    status.setDescription(databaseDescription);
     status.setSolrCollectionPrefix(ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX);
     status.setId(solrCollectionName);
 

@@ -34,6 +34,7 @@ import com.databasepreservation.common.client.models.status.database.DatabaseSta
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
+import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerType;
 import com.databasepreservation.common.exceptions.ViewerException;
 import com.databasepreservation.common.server.index.utils.JsonTransformer;
@@ -195,8 +196,10 @@ public class ConfigurationManager {
     }
   }
 
-  public void addCollection(String databaseUUID, String solrCollectionName) {
-    final CollectionStatus collectionStatus = StatusUtils.getCollectionStatus(databaseUUID, solrCollectionName);
+  public void addCollection(String databaseUUID, String databaseName, String databaseDescription,
+    String solrCollectionName) {
+    final CollectionStatus collectionStatus = StatusUtils.getCollectionStatus(databaseUUID, databaseName,
+      databaseDescription, solrCollectionName);
 
     try {
       final DatabaseStatus databaseStatus = getDatabaseStatus(databaseUUID);
@@ -289,20 +292,27 @@ public class ConfigurationManager {
     }
   }
 
-  public void updateCollectionStatus(String databaseUUID, List<TableStatus> list, boolean updateCustomDescription)
+  public void updateCollectionStatus(String databaseUUID, ViewerMetadata metadata, boolean updateOnModel)
     throws GenericException, ViewerException {
+    List<TableStatus> list = StatusUtils.getTableStatusFromList(metadata);
+
     CollectionStatus collectionStatus = getCollectionStatus(databaseUUID,
       ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + databaseUUID);
 
+    if (updateOnModel) {
+      collectionStatus.setName(metadata.getName());
+      collectionStatus.setDescription(metadata.getDescription());
+    }
+
     for (TableStatus table : list) {
       collectionStatus.getTableStatusByTableId(table.getId()).setDescription(table.getDescription());
-      if (updateCustomDescription) {
+      if (updateOnModel) {
         collectionStatus.getTableStatusByTableId(table.getId()).setCustomDescription(table.getDescription());
       }
       for (ColumnStatus column : table.getColumns()) {
         collectionStatus.getColumnByTableIdAndColumn(table.getId(), column.getId())
           .setDescription(column.getDescription());
-        if (updateCustomDescription) {
+        if (updateOnModel) {
           collectionStatus.getColumnByTableIdAndColumn(table.getId(), column.getId())
             .setCustomDescription(column.getDescription());
         }
@@ -348,7 +358,8 @@ public class ConfigurationManager {
           // Write file
           JsonUtils.writeObjectToFile(StatusUtils.getDatabaseStatus(database), databaseStatusPath);
 
-          addCollection(database.getUuid(), ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + database.getUuid());
+          addCollection(database.getUuid(), database.getMetadata().getName(), database.getMetadata().getDescription(),
+            ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + database.getUuid());
           addTable(database);
         } catch (FileAlreadyExistsException e) {
           // do nothing (just caused due to concurrency)

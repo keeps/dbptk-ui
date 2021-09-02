@@ -743,8 +743,7 @@ public class SIARDController {
       final DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
       solrManager.updateDatabaseMetadata(databaseUUID, metadata);
 
-      List<TableStatus> tableStatusFromList = StatusUtils.getTableStatusFromList(metadata);
-      ViewerFactory.getConfigurationManager().updateCollectionStatus(databaseUUID, tableStatusFromList, updateOnModel);
+      ViewerFactory.getConfigurationManager().updateCollectionStatus(databaseUUID, metadata, updateOnModel);
 
       LOGGER.info("Finish edit metadata process for {}, SIARD is located at {}", databaseUUID, siardPath);
     } catch (IOException | ModuleException | RuntimeException e) {
@@ -758,7 +757,7 @@ public class SIARDController {
   public static boolean validateSIARD(String databaseUUID, String siardPath, String validationReportPath,
     String allowedTypesPath, boolean skipAdditionalChecks) throws GenericException {
     boolean valid;
-    LOGGER.info("Start the SIARD validation process for {}, siard is located at {}", databaseUUID, siardPath);
+    LOGGER.info("Start the SIARD validation process for {}, SIARD is located at {}", databaseUUID, siardPath);
     try (Reporter reporter = getReporter(databaseUUID, ReporterType.VALIDATE)) {
       SIARDValidation siardValidation = SIARDValidation.newInstance();
       siardValidation.validateModule(new SIARDValidateFactory())
