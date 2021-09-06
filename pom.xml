@@ -31,7 +31,7 @@
         <version.jersey>2.29.1</version.jersey>
         <version.swagger>1.5.20</version.swagger>
         <version.springfox-swagger>2.9.2</version.springfox-swagger>
-        <version.jackson>2.10.3</version.jackson>
+        <version.jackson>2.10.5</version.jackson>
         <cas.client.version>3.6.1</cas.client.version>
         <cas.client.version>3.5.0</cas.client.version>
         <solr.version>8.4.1</solr.version>
@@ -619,6 +619,22 @@
             <version>4.0.2</version>
         </dependency>
         <!-- / Handlerbars -->
+
+        <!-- visjs -->
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>visjs</artifactId>
+            <version>4.21.0</version>
+        </dependency>
+        <!-- / visjs -->
+
+        <!-- highlight.js -->
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>highlightjs</artifactId>
+            <version>9.15.8</version>
+        </dependency>
+        <!-- / highlight.js -->
 
         <!-- Mime Type detection -->
         <dependency>
