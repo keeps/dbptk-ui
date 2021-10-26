@@ -26,7 +26,7 @@
 
         <version.gwt>2.9.0-jetty94</version.gwt>
         <scope.gwt-dev>provided</scope.gwt-dev>
-        <version.dbptk>2.9.9</version.dbptk>
+        <version.dbptk>2.9.10</version.dbptk>
         <version.roda>3.0.2</version.roda>
         <version.jersey>2.29.1</version.jersey>
         <version.swagger>1.5.20</version.swagger>
