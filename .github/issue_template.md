@@ -1,11 +1,9 @@
 Description: 
 
 
-Browser (Internet explorer, Chrome, Firefox, etc):
-
-
-Browser version:
-
+Context:
+* DBPTK Desktop: Operative System name and version
+* DBPTK Enterprise: Browser name and version (Internet explorer, Chrome, Firefox, etc)
 
 Steps required to reproduce the bug:
 
