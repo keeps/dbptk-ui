@@ -36,7 +36,7 @@
         <cas.client.version>3.6.1</cas.client.version>
         <cas.client.version>3.5.0</cas.client.version>
         <solr.version>8.4.1</solr.version>
-        <springboot.version>2.2.2.RELEASE</springboot.version>
+        <springboot.version>2.5.12</springboot.version>
 
         <desktop>com.databasepreservation.desktop.Desktop</desktop>
         <server>com.databasepreservation.server.Server</server>
