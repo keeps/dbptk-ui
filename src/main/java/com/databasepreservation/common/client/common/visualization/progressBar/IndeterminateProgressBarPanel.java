@@ -80,7 +80,7 @@ public class IndeterminateProgressBarPanel extends Composite {
       content.clear();
       stopUpdating();
       autoUpdateTimer.scheduleRepeating(1000);
-    }).getProgressData(databaseUUID);
+    }).getProgressData(databaseUUID, databaseUUID);
   }
 
   public void setTitleText(String text) {
@@ -112,7 +112,7 @@ public class IndeterminateProgressBarPanel extends Composite {
   }
 
   private void update() {
-    CollectionService.Util.call((Consumer<ProgressData>) this::update).getProgressData(databaseUUID);
+    CollectionService.Util.call((Consumer<ProgressData>) this::update).getProgressData(databaseUUID, databaseUUID);
   }
 
   private void update(ProgressData progressData) {

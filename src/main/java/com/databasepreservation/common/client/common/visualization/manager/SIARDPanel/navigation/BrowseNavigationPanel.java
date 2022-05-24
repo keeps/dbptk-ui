@@ -213,7 +213,7 @@ public class BrowseNavigationPanel {
         CollectionService.Util.call((List<CollectionStatus> collectionStatus) -> {
           ObserverManager.getCollectionObserver().setCollectionStatus(collectionStatus.get(0));
         }).getCollectionConfiguration(database.getUuid(), database.getUuid());
-      }).deleteCollection(database.getUuid());
+      }).deleteCollection(database.getUuid(), database.getUuid());
     }
   }
 }

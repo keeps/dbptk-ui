@@ -29,25 +29,25 @@ import com.databasepreservation.common.api.utils.ApiUtils;
 import com.databasepreservation.common.api.utils.Theme;
 import com.databasepreservation.common.client.ViewerConstants;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Service
 @Path(ThemeResource.ENDPOINT)
-@Api(value = ThemeResource.SWAGGER_ENDPOINT)
+@Tag(name = ThemeResource.SWAGGER_ENDPOINT)
 public class ThemeResource {
   public static final String ENDPOINT = "/" + ViewerConstants.API_SERVLET + ViewerConstants.API_V1_THEME_RESOURCE;
   public static final String SWAGGER_ENDPOINT = "v1 theme";
   public static final int CACHE_CONTROL_MAX_AGE = 60;
 
   @GET
-  @ApiOperation(value = "Gets the custom theme")
+  @Operation(summary = "Gets the custom theme")
   public Response getResource(
-    @ApiParam(value = "The resource id", required = true) @QueryParam(ViewerConstants.API_QUERY_PARAM_RESOURCE_ID) String resourceId,
-    @ApiParam(value = "The default resource id", required = false) @QueryParam(ViewerConstants.API_QUERY_PARAM_DEFAULT_RESOURCE_ID) String fallbackResourceId,
-    @ApiParam(value = "If the resource is served inline", required = false) @QueryParam(ViewerConstants.API_QUERY_PARAM_INLINE) boolean inline,
-    @Context Request req) throws IOException, NotFoundException {
+      @Parameter(name = "The resource id", required = true) @QueryParam(ViewerConstants.API_QUERY_PARAM_RESOURCE_ID) String resourceId,
+      @Parameter(name = "The default resource id", required = false) @QueryParam(ViewerConstants.API_QUERY_PARAM_DEFAULT_RESOURCE_ID) String fallbackResourceId,
+      @Parameter(name = "If the resource is served inline", required = false) @QueryParam(ViewerConstants.API_QUERY_PARAM_INLINE) boolean inline,
+      @Context Request req) throws IOException, NotFoundException {
 
     Pair<String, InputStream> themeResource = Theme.getThemeResource(resourceId, fallbackResourceId);
 

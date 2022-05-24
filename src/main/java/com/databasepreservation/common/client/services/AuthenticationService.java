@@ -23,16 +23,17 @@ import com.databasepreservation.common.client.common.DefaultMethodCallback;
 import com.databasepreservation.common.client.models.user.User;
 import com.google.gwt.core.client.GWT;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
 @Path(".." + ViewerConstants.ENDPOINT_AUTHENTICATION)
-@Api(value = AuthenticationService.SWAGGER_ENDPOINT)
+@Tag(name = AuthenticationService.SWAGGER_ENDPOINT)
 public interface AuthenticationService extends DirectRestService {
   public static final String SWAGGER_ENDPOINT = "v1 authentication";
+
   class Util {
     /**
      * @return the singleton instance
@@ -56,12 +57,12 @@ public interface AuthenticationService extends DirectRestService {
 
   @GET
   @Path("/status")
-  @ApiOperation(value = "Checks if authentication is enabled", response = Boolean.class)
+  @Operation(summary = "Checks if authentication is enabled")
   Boolean isAuthenticationEnabled();
 
   @GET
   @Path("/user")
-  @ApiOperation(value = "Gets the authenticated user", response = User.class)
+  @Operation(summary = "Gets the authenticated user")
   @Produces(MediaType.APPLICATION_JSON)
   User getAuthenticatedUser();
 }

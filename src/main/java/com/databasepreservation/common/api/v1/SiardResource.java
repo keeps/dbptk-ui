@@ -40,7 +40,7 @@ import com.databasepreservation.common.server.controller.SIARDController;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
 import com.databasepreservation.common.utils.ControllerAssistant;
 
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -109,7 +109,7 @@ public class SiardResource implements SiardService {
   }
 
   @Override
-  public ValidationProgressData getValidationProgressData(String databaseUUID) {
+  public ValidationProgressData getValidationProgressData(String databaseUUID, String siardUUID) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
@@ -126,7 +126,7 @@ public class SiardResource implements SiardService {
   @GET
   @Path("/{databaseUUID}/siard/{siardUUID}/download/validation")
   @Produces(MediaType.APPLICATION_OCTET_STREAM)
-  @ApiOperation(value = "Downloads a specific SIARD validation report file from the storage location", notes = "")
+  @Operation(summary = "Downloads a specific SIARD validation report file from the storage location", description = "")
   public Response getValidationReportFile(@PathParam("databaseUUID") String databaseUUID,
     @PathParam("siardUUID") String siardUUID) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
@@ -157,7 +157,7 @@ public class SiardResource implements SiardService {
   }
 
   @Override
-  public void deleteValidationReport(String databaseUUID, String path) {
+  public void deleteValidationReport(String databaseUUID, String siardUUID, String path) {
     final ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;

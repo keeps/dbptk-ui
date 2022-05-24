@@ -108,8 +108,9 @@ import com.databasepreservation.common.utils.ControllerAssistant;
 import com.databasepreservation.common.utils.LobManagerUtils;
 import com.databasepreservation.common.utils.UserUtility;
 
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -141,8 +142,8 @@ public class CollectionResource implements CollectionService {
   @GET
   @Path("/{databaseUUID}/collection/{collectionUUID}/report")
   @Produces({MediaType.APPLICATION_OCTET_STREAM})
-  @ApiOperation(value = "Downloads the migration report for a specific database")
-  public Response getReport(@PathParam("databaseUUID") String databaseUUID) {
+  @Operation(summary = "Downloads the migration report for a specific database")
+  public Response getReport(@PathParam("databaseUUID") String databaseUUID, @PathParam("collectionUUID") String collectionUUID) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
@@ -150,7 +151,7 @@ public class CollectionResource implements CollectionService {
 
     try {
       java.nio.file.Path reportPath = ViewerConfiguration.getInstance().getReportPath(databaseUUID,
-        ReporterType.BROWSE);
+          ReporterType.BROWSE);
       String filename = reportPath.getFileName().toString();
       if (!Files.exists(reportPath)) {
         throw new NotFoundException("Missing report file: " + filename);
@@ -165,7 +166,7 @@ public class CollectionResource implements CollectionService {
     } finally {
       // register action
       controllerAssistant.registerAction(user, databaseUUID, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM,
-        databaseUUID);
+          databaseUUID);
     }
   }
 
@@ -180,7 +181,7 @@ public class CollectionResource implements CollectionService {
     // creates a collection for that SIARD. If the user is a guest it will throw an
     // AuthorizationException
     final boolean loadOnAccess = ViewerFactory.getViewerConfiguration().getViewerConfigurationAsBoolean(false,
-      ViewerConstants.PROPERTY_PLUGIN_LOAD_ON_ACCESS);
+        ViewerConstants.PROPERTY_PLUGIN_LOAD_ON_ACCESS);
     if (loadOnAccess) {
       user = UserUtility.getUser(request);
       if (user.isGuest()) {
@@ -204,7 +205,7 @@ public class CollectionResource implements CollectionService {
   }
 
   @Override
-  public ProgressData getProgressData(String databaseUUID) {
+  public ProgressData getProgressData(String databaseUUID, String collectionUUID) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
@@ -219,7 +220,7 @@ public class CollectionResource implements CollectionService {
   }
 
   @Override
-  public Boolean deleteCollection(String databaseUUID) {
+  public Boolean deleteCollection(String databaseUUID, String collectionUUID) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
@@ -230,7 +231,7 @@ public class CollectionResource implements CollectionService {
       if (SolrClientFactory.get().deleteCollection(collectionName)) {
         Filter savedSearchFilter = new Filter(new SimpleFilterParameter(SOLR_SEARCHES_DATABASE_UUID, databaseUUID));
         SolrUtils.delete(ViewerFactory.getSolrClient(), SolrDefaultCollectionRegistry.get(SavedSearch.class),
-          savedSearchFilter);
+            savedSearchFilter);
 
         ViewerFactory.getSolrManager().markDatabaseCollection(databaseUUID, ViewerDatabaseStatus.METADATA_ONLY);
         return true;
@@ -241,7 +242,7 @@ public class CollectionResource implements CollectionService {
     } finally {
       // register action
       controllerAssistant.registerAction(user, databaseUUID, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM,
-        databaseUUID);
+          databaseUUID);
     }
     return false;
   }
@@ -258,7 +259,7 @@ public class CollectionResource implements CollectionService {
 
     try {
       final CollectionStatus configurationCollection = ViewerFactory.getConfigurationManager()
-        .getConfigurationCollection(databaseUUID, collectionUUID);
+          .getConfigurationCollection(databaseUUID, collectionUUID);
       return Collections.singletonList(configurationCollection);
     } catch (GenericException e) {
       state = LogEntryState.FAILURE;
@@ -294,7 +295,7 @@ public class CollectionResource implements CollectionService {
    ******************************************************************************/
   @Override
   public DenormalizeConfiguration getDenormalizeConfigurationFile(String databaseUUID, String collectionUUID,
-    String tableUUID) {
+      String tableUUID) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
@@ -302,7 +303,7 @@ public class CollectionResource implements CollectionService {
 
     try {
       java.nio.file.Path path = ViewerConfiguration.getInstance().getDatabasesPath().resolve(databaseUUID)
-        .resolve(ViewerConstants.DENORMALIZATION_STATUS_PREFIX + tableUUID + ViewerConstants.JSON_EXTENSION);
+          .resolve(ViewerConstants.DENORMALIZATION_STATUS_PREFIX + tableUUID + ViewerConstants.JSON_EXTENSION);
       if (Files.exists(path)) {
         return JsonTransformer.readObjectFromFile(path, DenormalizeConfiguration.class);
       } else {
@@ -316,13 +317,13 @@ public class CollectionResource implements CollectionService {
     } finally {
       // register action
       controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,
-        ViewerConstants.CONTROLLER_TABLE_ID_PARAM, tableUUID);
+          ViewerConstants.CONTROLLER_TABLE_ID_PARAM, tableUUID);
     }
   }
 
   @Override
   public synchronized Boolean createDenormalizeConfigurationFile(String databaseUUID, String collectionUUID,
-    String tableUUID, DenormalizeConfiguration configuration) {
+      String tableUUID, DenormalizeConfiguration configuration) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
@@ -331,25 +332,25 @@ public class CollectionResource implements CollectionService {
     // check if there is no job running on table
     for (JobExecution runningJobExecution : jobExplorer.findRunningJobExecutions("denormalizeJob")) {
       if (runningJobExecution.getJobParameters().getString(ViewerConstants.CONTROLLER_TABLE_ID_PARAM)
-        .equals(tableUUID)) {
+          .equals(tableUUID)) {
         throw new RESTException("A job is already running on this table",
-          com.google.gwt.http.client.Response.SC_CONFLICT);
+            com.google.gwt.http.client.Response.SC_CONFLICT);
       }
     }
 
     try {
       JsonTransformer.writeObjectToFile(configuration,
-        ViewerConfiguration.getInstance().getDatabasesPath().resolve(databaseUUID)
-          .resolve(ViewerConstants.DENORMALIZATION_STATUS_PREFIX + tableUUID + ViewerConstants.JSON_EXTENSION));
+          ViewerConfiguration.getInstance().getDatabasesPath().resolve(databaseUUID)
+              .resolve(ViewerConstants.DENORMALIZATION_STATUS_PREFIX + tableUUID + ViewerConstants.JSON_EXTENSION));
       ViewerFactory.getConfigurationManager().addDenormalization(databaseUUID,
-        ViewerConstants.DENORMALIZATION_STATUS_PREFIX + tableUUID);
+          ViewerConstants.DENORMALIZATION_STATUS_PREFIX + tableUUID);
     } catch (GenericException | ViewerException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e.getMessage());
     } finally {
       // register action
       controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,
-        ViewerConstants.CONTROLLER_TABLE_ID_PARAM, tableUUID);
+          ViewerConstants.CONTROLLER_TABLE_ID_PARAM, tableUUID);
     }
     return true;
   }
@@ -363,9 +364,9 @@ public class CollectionResource implements CollectionService {
 
     try {
       ViewerFactory.getConfigurationManager().removeDenormalization(databaseUUID,
-        ViewerConstants.DENORMALIZATION_STATUS_PREFIX + tableUUID);
+          ViewerConstants.DENORMALIZATION_STATUS_PREFIX + tableUUID);
       java.nio.file.Path path = ViewerConfiguration.getInstance().getDatabasesPath().resolve(databaseUUID)
-        .resolve(ViewerConstants.DENORMALIZATION_STATUS_PREFIX + tableUUID + ViewerConstants.JSON_EXTENSION);
+          .resolve(ViewerConstants.DENORMALIZATION_STATUS_PREFIX + tableUUID + ViewerConstants.JSON_EXTENSION);
       if (Files.exists(path)) {
         Files.delete(path);
       }
@@ -375,7 +376,7 @@ public class CollectionResource implements CollectionService {
     } finally {
       // register action
       controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,
-        ViewerConstants.CONTROLLER_TABLE_ID_PARAM, tableUUID);
+          ViewerConstants.CONTROLLER_TABLE_ID_PARAM, tableUUID);
     }
     return true;
   }
@@ -390,9 +391,9 @@ public class CollectionResource implements CollectionService {
     // check if there is no job running on table
     for (JobExecution runningJobExecution : jobExplorer.findRunningJobExecutions("denormalizeJob")) {
       if (runningJobExecution.getJobParameters().getString(ViewerConstants.CONTROLLER_TABLE_ID_PARAM)
-        .equals(tableUUID)) {
+          .equals(tableUUID)) {
         throw new RESTException("A job is already running on this table",
-          com.google.gwt.http.client.Response.SC_CONFLICT);
+            com.google.gwt.http.client.Response.SC_CONFLICT);
       }
     }
 
@@ -413,13 +414,13 @@ public class CollectionResource implements CollectionService {
         JobController.setMessageToSolrBatchJob(jobExecution, "Queue is full, please try later");
       }
     } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException
-      | JobParametersInvalidException | NotFoundException | GenericException e) {
+             | JobParametersInvalidException | NotFoundException | GenericException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e.getMessage());
     } finally {
       // register action
       controllerAssistant.registerAction(user, databaseUUID, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM,
-        databaseUUID, ViewerConstants.CONTROLLER_TABLE_ID_PARAM, tableUUID);
+          databaseUUID, ViewerConstants.CONTROLLER_TABLE_ID_PARAM, tableUUID);
     }
   }
 
@@ -428,7 +429,7 @@ public class CollectionResource implements CollectionService {
    ******************************************************************************/
   @Override
   public IndexResult<ViewerRow> findRows(String databaseUUID, String collectionUUID, String schema, String table,
-    FindRequest findRequest, String localeString) {
+      FindRequest findRequest, String localeString) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
@@ -438,8 +439,8 @@ public class CollectionResource implements CollectionService {
 
     try {
       final IndexResult<ViewerRow> viewerRowIndexResult = ViewerFactory.getSolrManager().findRows(databaseUUID,
-        findRequest.filter, findRequest.sorter, findRequest.sublist, findRequest.facets, findRequest.fieldsToReturn,
-        findRequest.extraParameters);
+          findRequest.filter, findRequest.sorter, findRequest.sublist, findRequest.facets, findRequest.fieldsToReturn,
+          findRequest.extraParameters);
       count = viewerRowIndexResult.getTotalCount();
       return viewerRowIndexResult;
     } catch (GenericException | RequestNotValidException e) {
@@ -448,15 +449,15 @@ public class CollectionResource implements CollectionService {
     } finally {
       // register action
       controllerAssistant.registerAction(user, databaseUUID, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM,
-        databaseUUID, ViewerConstants.CONTROLLER_FILTER_PARAM, JsonUtils.getJsonFromObject(findRequest.filter),
-        ViewerConstants.CONTROLLER_SUBLIST_PARAM, JsonUtils.getJsonFromObject(findRequest.sublist),
-        ViewerConstants.CONTROLLER_RETRIEVE_COUNT, count);
+          databaseUUID, ViewerConstants.CONTROLLER_FILTER_PARAM, JsonUtils.getJsonFromObject(findRequest.filter),
+          ViewerConstants.CONTROLLER_SUBLIST_PARAM, JsonUtils.getJsonFromObject(findRequest.sublist),
+          ViewerConstants.CONTROLLER_RETRIEVE_COUNT, count);
     }
   }
 
   @Override
   public ViewerRow retrieveRow(String databaseUUID, String collectionUUID, String schema, String table,
-    String rowIndex) {
+      String rowIndex) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
@@ -475,17 +476,17 @@ public class CollectionResource implements CollectionService {
     } finally {
       // register action
       controllerAssistant.registerAction(user, databaseUUID, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM,
-        databaseUUID, ViewerConstants.CONTROLLER_ROW_ID_PARAM, rowIndex);
+          databaseUUID, ViewerConstants.CONTROLLER_ROW_ID_PARAM, rowIndex);
     }
   }
 
   @GET
   @Path("/{databaseUUID}/collection/{collectionUUID}/data/{schema}/{table}/{rowIndex}/{columnIndex}")
-  @ApiOperation(value = "Downloads a LOB for a specific row within a database", notes = "download the specified LOB.", response = Response.class)
+  @Operation(summary = "Downloads a LOB for a specific row within a database")
   public Response exportLOB(@PathParam(ViewerConstants.API_PATH_PARAM_DATABASE_UUID) String databaseUUID,
-    @PathParam(ViewerConstants.API_PATH_PARAM_COLLECTION_UUID) String collectionUUID,
-    @PathParam("schema") String schema, @PathParam("table") String table, @PathParam("rowIndex") String rowIndex,
-    @PathParam("columnIndex") Integer columnIndex) {
+      @PathParam(ViewerConstants.API_PATH_PARAM_COLLECTION_UUID) String collectionUUID,
+      @PathParam("schema") String schema, @PathParam("table") String table, @PathParam("rowIndex") String rowIndex,
+      @PathParam("columnIndex") Integer columnIndex) {
 
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
@@ -498,7 +499,7 @@ public class CollectionResource implements CollectionService {
       ViewerRow row = solrManager.retrieveRows(databaseUUID, rowIndex);
       final ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
       final CollectionStatus configurationCollection = ViewerFactory.getConfigurationManager()
-        .getConfigurationCollection(databaseUUID, databaseUUID);
+          .getConfigurationCollection(databaseUUID, databaseUUID);
       final TableStatus configTable = configurationCollection.getTableStatusByTableId(row.getTableId());
 
       if (ViewerType.dbTypes.CLOB.equals(configTable.getColumnByIndex(columnIndex).getType())) {
@@ -520,25 +521,25 @@ public class CollectionResource implements CollectionService {
     } finally {
       // register action
       controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,
-        ViewerConstants.CONTROLLER_TABLE_ID_PARAM, schema + "." + table, ViewerConstants.CONTROLLER_ROW_ID_PARAM,
-        rowIndex, ViewerConstants.CONTROLLER_COLUMN_ID_PARAM, columnIndex);
+          ViewerConstants.CONTROLLER_TABLE_ID_PARAM, schema + "." + table, ViewerConstants.CONTROLLER_ROW_ID_PARAM,
+          rowIndex, ViewerConstants.CONTROLLER_COLUMN_ID_PARAM, columnIndex);
     }
   }
 
   private Response handleConsolidatedLobDownload(String databaseUUID, TableStatus tableConfiguration, int columnIndex,
-    ViewerRow row, String rowIndex) throws IOException {
+      ViewerRow row, String rowIndex) throws IOException {
     final java.nio.file.Path consolidatedPath = LobManagerUtils.getConsolidatedPath(
-      ViewerFactory.getViewerConfiguration(), databaseUUID, tableConfiguration.getUuid(), columnIndex, rowIndex);
+        ViewerFactory.getViewerConfiguration(), databaseUUID, tableConfiguration.getUuid(), columnIndex, rowIndex);
     String handlebarsFilename = HandlebarsUtils.applyExportTemplate(row, tableConfiguration, columnIndex);
     if (ViewerStringUtils.isBlank(handlebarsFilename)) {
       handlebarsFilename = consolidatedPath.getFileName().toString();
     }
 
     return ApiUtils.okResponse(
-      new StreamResponse(handlebarsFilename, tableConfiguration.getColumnByIndex(columnIndex).getApplicationType(),
-        DownloadUtils
-          .stream(Files.newInputStream(LobManagerUtils.getConsolidatedPath(ViewerFactory.getViewerConfiguration(),
-            databaseUUID, row.getTableId(), columnIndex, rowIndex)))));
+        new StreamResponse(handlebarsFilename, tableConfiguration.getColumnByIndex(columnIndex).getApplicationType(),
+            DownloadUtils
+                .stream(Files.newInputStream(LobManagerUtils.getConsolidatedPath(ViewerFactory.getViewerConfiguration(),
+                    databaseUUID, row.getTableId(), columnIndex, rowIndex)))));
   }
 
   private Response handleClobDownload(TableStatus tableConfiguration, ViewerRow row, int columnIndex) {
@@ -549,18 +550,18 @@ public class CollectionResource implements CollectionService {
     }
 
     ByteArrayInputStream inputStream = new ByteArrayInputStream(
-      row.getCells().get(tableConfiguration.getColumnByIndex(columnIndex).getId()).getValue().getBytes());
+        row.getCells().get(tableConfiguration.getColumnByIndex(columnIndex).getId()).getValue().getBytes());
 
     return ApiUtils.okResponse(new StreamResponse(handlebarsFilename,
-      tableConfiguration.getColumnByIndex(columnIndex).getApplicationType(), DownloadUtils.stream(inputStream)));
+        tableConfiguration.getColumnByIndex(columnIndex).getApplicationType(), DownloadUtils.stream(inputStream)));
   }
 
   private Response handleExternalLobDownload(TableStatus tableConfiguration, ViewerRow row, int columnIndex)
-    throws FileNotFoundException {
+      throws FileNotFoundException {
     final String lobLocation = row.getCells().get(tableConfiguration.getColumnByIndex(columnIndex).getId()).getValue();
     final java.nio.file.Path lobPath = Paths.get(lobLocation);
     final java.nio.file.Path completeLobPath = ViewerFactory.getViewerConfiguration().getSIARDFilesPath()
-      .resolve(lobPath);
+        .resolve(lobPath);
 
     String handlebarsFilename = HandlebarsUtils.applyExportTemplate(row, tableConfiguration, columnIndex);
 
@@ -575,16 +576,16 @@ public class CollectionResource implements CollectionService {
     }
 
     return ApiUtils.okResponse(new StreamResponse(handlebarsFilename, handlebarsMimeType,
-      DownloadUtils.stream(new FileInputStream(completeLobPath.toFile()))));
+        DownloadUtils.stream(new FileInputStream(completeLobPath.toFile()))));
   }
 
   private Response handleInternalLobDownload(String databasePath, TableStatus tableConfiguration, ViewerRow row,
-    int columnIndex) throws IOException, GenericException {
+      int columnIndex) throws IOException, GenericException {
     String handlebarsFilename = HandlebarsUtils.applyExportTemplate(row, tableConfiguration, columnIndex);
 
     if (ViewerStringUtils.isBlank(handlebarsFilename)) {
       handlebarsFilename = ViewerConstants.SIARD_RECORD_PREFIX + row.getUuid()
-        + ViewerConstants.SIARD_LOB_FILE_EXTENSION;
+          + ViewerConstants.SIARD_LOB_FILE_EXTENSION;
     }
     String handlebarsMimeType = HandlebarsUtils.applyMimeTypeTemplate(row, tableConfiguration, columnIndex);
 
@@ -599,7 +600,7 @@ public class CollectionResource implements CollectionService {
       String decodedString = new String(Base64.decodeBase64(lobCellValue.getBytes()));
 
       return ApiUtils.okResponse(new StreamResponse(handlebarsFilename, handlebarsMimeType,
-        DownloadUtils.stream(new BufferedInputStream(new ByteArrayInputStream(decodedString.getBytes())))));
+          DownloadUtils.stream(new BufferedInputStream(new ByteArrayInputStream(decodedString.getBytes())))));
     } else {
       // handle lob as internal on separated folder
       ZipFile zipFile = new ZipFile(databasePath);
@@ -609,25 +610,25 @@ public class CollectionResource implements CollectionService {
       }
 
       return ApiUtils.okResponse(new StreamResponse(handlebarsFilename, handlebarsMimeType,
-        DownloadUtils.stream(new BufferedInputStream(zipFile.getInputStream(entry)))));
+          DownloadUtils.stream(new BufferedInputStream(zipFile.getInputStream(entry)))));
     }
   }
 
   @GET
   @Path("{databaseUUID}/collection/{collectionUUID}/data/{schema}/{table}/find/export")
   @Produces({MediaType.APPLICATION_OCTET_STREAM})
-  @ApiOperation(value = "Export the rows as CSV", notes = "", response = Response.class)
+  @Operation(summary = "Export the rows as CSV")
   public Response exportFindToCSV(
-    @ApiParam(value = "The database unique identifier", required = true) @PathParam("databaseUUID") String databaseUUID,
-    @ApiParam(value = "The collection unique identifier", required = true) @PathParam("collectionUUID") String collectionUUID,
-    @ApiParam(value = "The schema name", required = true) @PathParam("schema") String schema,
-    @ApiParam(value = "The table name", required = true) @PathParam("table") String table,
-    @ApiParam(value = "Find request to filter/limit the search") @QueryParam("f") String findRequestJson,
-    @ApiParam(value = "The CSV filename") @QueryParam("filename") String filename,
-    @ApiParam(value = "The Zip filename") @QueryParam("zipFilename") String zipFilename,
-    @ApiParam(value = "Export description", allowableValues = "true, false") @QueryParam("descriptions") boolean exportDescription,
-    @ApiParam(value = "Export LOBs", allowableValues = "true, false") @QueryParam("lobs") boolean exportLobs,
-    @ApiParam(value = "Fields to export", required = true) @QueryParam("fl") String fieldsToHeader) {
+      @Parameter(name = "The database unique identifier", required = true) @PathParam("databaseUUID") String databaseUUID,
+      @Parameter(name = "The collection unique identifier", required = true) @PathParam("collectionUUID") String collectionUUID,
+      @Parameter(name = "The schema name", required = true) @PathParam("schema") String schema,
+      @Parameter(name = "The table name", required = true) @PathParam("table") String table,
+      @Parameter(name = "Find request to filter/limit the search") @QueryParam("f") String findRequestJson,
+      @Parameter(name = "The CSV filename") @QueryParam("filename") String filename,
+      @Parameter(name = "The Zip filename") @QueryParam("zipFilename") String zipFilename,
+      @Parameter(name = "Export description", schema = @Schema(allowableValues = "true, false")) @QueryParam("descriptions") boolean exportDescription,
+      @Parameter(name = "Export LOBs", schema = @Schema(allowableValues = "true, false")) @QueryParam("lobs") boolean exportLobs,
+      @Parameter(name = "Fields to export", required = true) @QueryParam("fl") String fieldsToHeader) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
@@ -641,15 +642,15 @@ public class CollectionResource implements CollectionService {
       final ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
       findRequest = JsonUtils.getObjectFromJson(findRequestJson, FindRequest.class);
       final CollectionStatus configurationCollection = ViewerFactory.getConfigurationManager()
-        .getConfigurationCollection(databaseUUID, databaseUUID);
+          .getConfigurationCollection(databaseUUID, databaseUUID);
       final TableStatus configTable = configurationCollection.getTableStatusByTableId(schema + "." + table);
 
       if (Boolean.FALSE.equals(exportLobs) && StringUtils.isBlank(zipFilename)) {
         return handleCSVExport(solrManager, databaseUUID, configTable, findRequest, filename, exportDescription,
-          fieldsToHeader);
+            fieldsToHeader);
       } else {
         return handleCSVExportWithLobs(solrManager, configurationCollection, database, databaseUUID, configTable,
-          findRequest, zipFilename, filename, exportDescription, fieldsToHeader);
+            findRequest, zipFilename, filename, exportDescription, fieldsToHeader);
       }
     } catch (GenericException | RequestNotValidException | NotFoundException e) {
       state = LogEntryState.FAILURE;
@@ -657,12 +658,12 @@ public class CollectionResource implements CollectionService {
     } finally {
       if (findRequest != null) {
         Object[] list = new Object[] {ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,
-          ViewerConstants.CONTROLLER_TABLE_ID_PARAM, schema + "." + table, ViewerConstants.CONTROLLER_FILTER_PARAM,
-          JsonUtils.getJsonFromObject(findRequest.filter), ViewerConstants.CONTROLLER_EXPORT_DESCRIPTIONS_PARAM,
-          exportDescription, ViewerConstants.CONTROLLER_EXPORT_LOBS_PARAM, exportLobs,
-          ViewerConstants.CONTROLLER_FILENAME_PARAM, filename, ViewerConstants.CONTROLLER_SUBLIST_PARAM,
-          findRequest.sublist == null ? JsonUtils.getJsonFromObject(Sublist.NONE)
-            : JsonUtils.getJsonFromObject(findRequest.sublist)};
+            ViewerConstants.CONTROLLER_TABLE_ID_PARAM, schema + "." + table, ViewerConstants.CONTROLLER_FILTER_PARAM,
+            JsonUtils.getJsonFromObject(findRequest.filter), ViewerConstants.CONTROLLER_EXPORT_DESCRIPTIONS_PARAM,
+            exportDescription, ViewerConstants.CONTROLLER_EXPORT_LOBS_PARAM, exportLobs,
+            ViewerConstants.CONTROLLER_FILENAME_PARAM, filename, ViewerConstants.CONTROLLER_SUBLIST_PARAM,
+            findRequest.sublist == null ? JsonUtils.getJsonFromObject(Sublist.NONE)
+                : JsonUtils.getJsonFromObject(findRequest.sublist)};
 
         if (StringUtils.isNotBlank(zipFilename)) {
           list = appendValue(list, ViewerConstants.CONTROLLER_ZIP_FILENAME_PARAM);
@@ -677,17 +678,17 @@ public class CollectionResource implements CollectionService {
   @GET
   @Path("{databaseUUID}/collection/{collectionUUID}/data/{schema}/{table}/{rowIndex}/export")
   @Produces({MediaType.APPLICATION_OCTET_STREAM})
-  @ApiOperation(value = "Export the a single row as CSV", notes = "", response = Response.class)
+  @Operation(summary = "Export the a single row as CSV")
   public Response exportSingleRowToCSV(
-    @ApiParam(value = "The database unique identifier", required = true) @PathParam("databaseUUID") String databaseUUID,
-    @ApiParam(value = "The collection unique identifier", required = true) @PathParam("collectionUUID") String collectionUUID,
-    @ApiParam(value = "The schema name", required = true) @PathParam("schema") String schema,
-    @ApiParam(value = "The table name", required = true) @PathParam("table") String table,
-    @ApiParam(value = "The index of the row", required = true) @PathParam("rowIndex") String rowIndex,
-    @ApiParam(value = "The CSV filename", required = true) @QueryParam("filename") String filename,
-    @ApiParam(value = "The Zip filename") @QueryParam("zipFilename") String zipFilename,
-    @ApiParam(value = "Export description", allowableValues = "true, false", required = true) @QueryParam("descriptions") boolean exportDescription,
-    @ApiParam(value = "Export LOBs", allowableValues = "true, false", required = true) @QueryParam("lobs") boolean exportLobs) {
+      @Parameter(name = "The database unique identifier", required = true) @PathParam("databaseUUID") String databaseUUID,
+      @Parameter(name = "The collection unique identifier", required = true) @PathParam("collectionUUID") String collectionUUID,
+      @Parameter(name = "The schema name", required = true) @PathParam("schema") String schema,
+      @Parameter(name = "The table name", required = true) @PathParam("table") String table,
+      @Parameter(name = "The index of the row", required = true) @PathParam("rowIndex") String rowIndex,
+      @Parameter(name = "The CSV filename", required = true) @QueryParam("filename") String filename,
+      @Parameter(name = "The Zip filename") @QueryParam("zipFilename") String zipFilename,
+      @Parameter(name = "Export description", schema = @Schema(allowableValues = "true, false"), required = true) @QueryParam("descriptions") boolean exportDescription,
+      @Parameter(name = "Export LOBs", schema = @Schema(allowableValues = "true, false"), required = true) @QueryParam("lobs") boolean exportLobs) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
     DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
 
@@ -698,7 +699,7 @@ public class CollectionResource implements CollectionService {
       final ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
       final ViewerRow viewerRow = solrManager.retrieveRows(databaseUUID, rowIndex);
       final CollectionStatus configurationCollection = ViewerFactory.getConfigurationManager()
-        .getConfigurationCollection(databaseUUID, databaseUUID);
+          .getConfigurationCollection(databaseUUID, databaseUUID);
       final TableStatus configTable = configurationCollection.getTableStatusByTableId(schema + "." + table);
 
       if (viewerRow != null && viewerRow.getTableId().equals(schema + "." + table)) {
@@ -706,7 +707,7 @@ public class CollectionResource implements CollectionService {
           return handleSingleCSVExportWithoutLOBs(databaseUUID, configTable, viewerRow, filename, exportDescription);
         } else {
           return handleSingleCSVExportWithLOBs(configurationCollection, database, configTable, viewerRow, filename,
-            zipFilename, exportDescription);
+              zipFilename, exportDescription);
         }
       } else {
         throw new NotFoundException("Table not found.");
@@ -716,9 +717,9 @@ public class CollectionResource implements CollectionService {
       throw new RESTException(e);
     } finally {
       Object[] list = new Object[] {ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID,
-        ViewerConstants.CONTROLLER_TABLE_ID_PARAM, schema + "." + table, ViewerConstants.CONTROLLER_ROW_ID_PARAM,
-        rowIndex, ViewerConstants.CONTROLLER_EXPORT_DESCRIPTIONS_PARAM, exportDescription,
-        ViewerConstants.CONTROLLER_EXPORT_LOBS_PARAM, exportLobs, ViewerConstants.CONTROLLER_FILENAME_PARAM, filename};
+          ViewerConstants.CONTROLLER_TABLE_ID_PARAM, schema + "." + table, ViewerConstants.CONTROLLER_ROW_ID_PARAM,
+          rowIndex, ViewerConstants.CONTROLLER_EXPORT_DESCRIPTIONS_PARAM, exportDescription,
+          ViewerConstants.CONTROLLER_EXPORT_LOBS_PARAM, exportLobs, ViewerConstants.CONTROLLER_FILENAME_PARAM, filename};
 
       if (StringUtils.isNotBlank(zipFilename)) {
         list = appendValue(list, ViewerConstants.CONTROLLER_ZIP_FILENAME_PARAM);
@@ -730,54 +731,54 @@ public class CollectionResource implements CollectionService {
   }
 
   private Response handleSingleCSVExportWithoutLOBs(String databaseUUID, TableStatus configTable, ViewerRow row,
-    String filename, boolean exportDescriptions) throws GenericException {
+      String filename, boolean exportDescriptions) throws GenericException {
     final CollectionStatus configurationCollection = ViewerFactory.getConfigurationManager()
-      .getConfigurationCollection(databaseUUID, databaseUUID);
+        .getConfigurationCollection(databaseUUID, databaseUUID);
 
     final List<String> fieldsToReturn = configurationCollection.getFieldsToReturn(configTable.getId());
     return ApiUtils.okResponse(new ViewerStreamingOutput(
-      new ResultsCSVOutputStream(row, configTable, filename, exportDescriptions, ',', String.join(",", fieldsToReturn)))
+        new ResultsCSVOutputStream(row, configTable, filename, exportDescriptions, ',', String.join(",", fieldsToReturn)))
         .toStreamResponse());
   }
 
   private Response handleSingleCSVExportWithLOBs(CollectionStatus configurationCollection, ViewerDatabase database,
-    TableStatus configTable, ViewerRow row, String filename, String zipFilename, boolean exportDescriptions)
-    throws GenericException {
+      TableStatus configTable, ViewerRow row, String filename, String zipFilename, boolean exportDescriptions)
+      throws GenericException {
     final List<String> fieldsToReturn = configurationCollection.getFieldsToReturn(configTable.getId());
     return ApiUtils.okResponse(new StreamResponse(new ZipOutputStreamSingleRow(configurationCollection, database,
-      configTable, row, zipFilename, filename, fieldsToReturn, exportDescriptions)));
+        configTable, row, zipFilename, filename, fieldsToReturn, exportDescriptions)));
   }
 
   private Response handleCSVExport(DatabaseRowsSolrManager solrManager, final String databaseUUID,
-    final TableStatus configTable, final FindRequest findRequest, final String filename,
-    final boolean exportDescriptions, String fieldsToHeader) throws GenericException, RequestNotValidException {
+      final TableStatus configTable, final FindRequest findRequest, final String filename,
+      final boolean exportDescriptions, String fieldsToHeader) throws GenericException, RequestNotValidException {
     if (findRequest.sublist == null) {
       final IterableIndexResult allRows = solrManager.findAllRows(databaseUUID, findRequest.filter, findRequest.sorter,
-        findRequest.fieldsToReturn, findRequest.extraParameters);
+          findRequest.fieldsToReturn, findRequest.extraParameters);
       return ApiUtils.okResponse(new ViewerStreamingOutput(new IterableIndexResultsCSVOutputStream(allRows, configTable,
-        filename, exportDescriptions, ',', fieldsToHeader)).toStreamResponse());
+          filename, exportDescriptions, ',', fieldsToHeader)).toStreamResponse());
     } else {
       final IndexResult<ViewerRow> rows = solrManager.findRows(databaseUUID, findRequest.filter, findRequest.sorter,
-        findRequest.sublist, null, findRequest.fieldsToReturn, findRequest.extraParameters);
+          findRequest.sublist, null, findRequest.fieldsToReturn, findRequest.extraParameters);
 
       return ApiUtils.okResponse(new ViewerStreamingOutput(
-        new ResultsCSVOutputStream(rows, configTable, filename, exportDescriptions, ',', fieldsToHeader))
+          new ResultsCSVOutputStream(rows, configTable, filename, exportDescriptions, ',', fieldsToHeader))
           .toStreamResponse());
     }
   }
 
   private Response handleCSVExportWithLobs(DatabaseRowsSolrManager solrManager,
-    CollectionStatus configurationCollection, ViewerDatabase database, final String databaseUUID,
-    final TableStatus configTable, final FindRequest findRequest, final String zipFilename, final String filename,
-    final boolean exportDescription, String fieldsToHeader) {
+      CollectionStatus configurationCollection, ViewerDatabase database, final String databaseUUID,
+      final TableStatus configTable, final FindRequest findRequest, final String zipFilename, final String filename,
+      final boolean exportDescription, String fieldsToHeader) {
     List<String> fields = findRequest.fieldsToReturn;
     fields.add(ViewerConstants.INDEX_ID);
     final IterableIndexResult allRows = solrManager.findAllRows(databaseUUID, findRequest.filter, findRequest.sorter,
-      fields, findRequest.extraParameters);
+        fields, findRequest.extraParameters);
     final IterableIndexResult clone = solrManager.findAllRows(databaseUUID, findRequest.filter, findRequest.sorter,
-      fields, findRequest.extraParameters);
+        fields, findRequest.extraParameters);
     return ApiUtils.okResponse(new StreamResponse(new ZipOutputStreamMultiRow(configurationCollection, database,
-      configTable, allRows, clone, zipFilename, filename, findRequest.sublist, exportDescription, fieldsToHeader)));
+        configTable, allRows, clone, zipFilename, filename, findRequest.sublist, exportDescription, fieldsToHeader)));
   }
 
   private Object[] appendValue(Object[] obj, Object newObj) {
@@ -791,7 +792,7 @@ public class CollectionResource implements CollectionService {
    ******************************************************************************/
   @Override
   public String saveSavedSearch(String databaseUUID, String collectionUUID, String tableUUID, String name,
-    String description, SearchInfo searchInfo) {
+      String description, SearchInfo searchInfo) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
@@ -817,16 +818,16 @@ public class CollectionResource implements CollectionService {
     } finally {
       // register action
       controllerAssistant.registerAction(user, databaseUUID, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM,
-        databaseUUID, ViewerConstants.CONTROLLER_TABLE_ID_PARAM, tableUUID,
-        ViewerConstants.CONTROLLER_SAVED_SEARCH_NAME_PARAM, name,
-        ViewerConstants.CONTROLLER_SAVED_SEARCH_DESCRIPTION_PARAM, description,
-        ViewerConstants.CONTROLLER_SAVED_SEARCH_PARAM, JsonUtils.getJsonFromObject(savedSearch));
+          databaseUUID, ViewerConstants.CONTROLLER_TABLE_ID_PARAM, tableUUID,
+          ViewerConstants.CONTROLLER_SAVED_SEARCH_NAME_PARAM, name,
+          ViewerConstants.CONTROLLER_SAVED_SEARCH_DESCRIPTION_PARAM, description,
+          ViewerConstants.CONTROLLER_SAVED_SEARCH_PARAM, JsonUtils.getJsonFromObject(savedSearch));
     }
   }
 
   @Override
   public IndexResult<SavedSearch> findSavedSearches(String databaseUUID, String collectionUUID, FindRequest findRequest,
-    String localeString) {
+      String localeString) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
@@ -836,7 +837,7 @@ public class CollectionResource implements CollectionService {
 
     try {
       final IndexResult<SavedSearch> savedSearchIndexResult = ViewerFactory.getSolrManager().find(SavedSearch.class,
-        findRequest.filter, findRequest.sorter, findRequest.sublist, findRequest.facets);
+          findRequest.filter, findRequest.sorter, findRequest.sublist, findRequest.facets);
       count = savedSearchIndexResult.getTotalCount();
       return savedSearchIndexResult;
     } catch (GenericException | RequestNotValidException e) {
@@ -845,9 +846,9 @@ public class CollectionResource implements CollectionService {
     } finally {
       // register action
       controllerAssistant.registerAction(user, databaseUUID, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM,
-        databaseUUID, ViewerConstants.CONTROLLER_FILTER_PARAM, JsonUtils.getJsonFromObject(findRequest.filter),
-        ViewerConstants.CONTROLLER_SUBLIST_PARAM, JsonUtils.getJsonFromObject(findRequest.sublist),
-        ViewerConstants.CONTROLLER_RETRIEVE_COUNT, count);
+          databaseUUID, ViewerConstants.CONTROLLER_FILTER_PARAM, JsonUtils.getJsonFromObject(findRequest.filter),
+          ViewerConstants.CONTROLLER_SUBLIST_PARAM, JsonUtils.getJsonFromObject(findRequest.sublist),
+          ViewerConstants.CONTROLLER_RETRIEVE_COUNT, count);
     }
   }
 
@@ -866,13 +867,13 @@ public class CollectionResource implements CollectionService {
     } finally {
       // register action
       controllerAssistant.registerAction(user, databaseUUID, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM,
-        databaseUUID, ViewerConstants.CONTROLLER_SAVED_SEARCH_UUID_PARAM, savedSearchUUID);
+          databaseUUID, ViewerConstants.CONTROLLER_SAVED_SEARCH_UUID_PARAM, savedSearchUUID);
     }
   }
 
   @Override
   public void updateSavedSearch(String databaseUUID, String collectionUUID, String savedSearchUUID, String name,
-    String description) {
+      String description) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
@@ -886,9 +887,9 @@ public class CollectionResource implements CollectionService {
     } finally {
       // register action
       controllerAssistant.registerAction(user, databaseUUID, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM,
-        databaseUUID, ViewerConstants.CONTROLLER_SAVED_SEARCH_UUID_PARAM, savedSearchUUID,
-        ViewerConstants.CONTROLLER_SAVED_SEARCH_NAME_PARAM, name,
-        ViewerConstants.CONTROLLER_SAVED_SEARCH_DESCRIPTION_PARAM, description);
+          databaseUUID, ViewerConstants.CONTROLLER_SAVED_SEARCH_UUID_PARAM, savedSearchUUID,
+          ViewerConstants.CONTROLLER_SAVED_SEARCH_NAME_PARAM, name,
+          ViewerConstants.CONTROLLER_SAVED_SEARCH_DESCRIPTION_PARAM, description);
     }
   }
 
@@ -907,7 +908,7 @@ public class CollectionResource implements CollectionService {
     } finally {
       // register action
       controllerAssistant.registerAction(user, databaseUUID, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM,
-        databaseUUID, ViewerConstants.CONTROLLER_SAVED_SEARCH_UUID_PARAM, savedSearchUUID);
+          databaseUUID, ViewerConstants.CONTROLLER_SAVED_SEARCH_UUID_PARAM, savedSearchUUID);
     }
   }
 }

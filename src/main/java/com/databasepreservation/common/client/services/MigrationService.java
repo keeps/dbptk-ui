@@ -30,15 +30,15 @@ import com.databasepreservation.common.client.models.wizard.connection.Connectio
 import com.databasepreservation.common.client.models.wizard.connection.ConnectionResponse;
 import com.google.gwt.core.client.GWT;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 @Path(".." + ViewerConstants.ENDPOINT_MIGRATION)
-@Api(value = MigrationService.SWAGGER_ENDPOINT)
+@Tag(name = MigrationService.SWAGGER_ENDPOINT)
 public interface MigrationService extends DirectRestService {
   public static final String SWAGGER_ENDPOINT = "v1 migration";
 
@@ -65,40 +65,41 @@ public interface MigrationService extends DirectRestService {
 
   @GET
   @Path("/siard/modules")
-  @ApiOperation(value = "Retrieves the DBPTK developer SIARD migration modules", notes = "", response = Module.class, responseContainer = "List")
+  @Operation(summary = "Retrieves the DBPTK developer SIARD migration modules")
   List<Module> getSiardModules(@QueryParam("type") String type, @QueryParam("moduleName") String moduleName);
 
   @GET
   @Path("/dbms/modules")
-  @ApiOperation(value = "Retrieves the DBPTK developer DBMS migration modules", notes = "", response = Module.class, responseContainer = "List")
+  @Operation(summary = "Retrieves the DBPTK developer DBMS migration modules")
   List<Module> getDBMSModules(@QueryParam("type") String type, @QueryParam("moduleName") String moduleName);
 
   @GET
   @Path("/filter/modules")
-  @ApiOperation(value = "Retrieves the DBPTK developer filter modules", notes = "", response = Module.class, responseContainer = "List")
+  @Operation(summary = "Retrieves the DBPTK developer filter modules")
   List<Module> getFilterModules(@QueryParam("moduleName") String moduleName);
 
   @POST
   @Path("/dbms/test/connection")
-  @ApiOperation(value = "Tests the connection to the database", notes = "", response = ConnectionResponse.class)
+  @Operation(summary = "Tests the connection to the database")
   ConnectionResponse testConnection(
-    @ApiParam(value = "DBMS connection parameters") final ConnectionParameters connectionParameters);
+      @Parameter(name = "DBMS connection parameters") final ConnectionParameters connectionParameters);
 
   @POST
   @Path("/dbms/test/query")
-  @ApiOperation(value = "Retrieves the first 5 rows of the query execution", notes = "", response = String.class, responseContainer = "List")
-  List<List<String>> testQuery(@ApiParam(value = "connection parameters") ConnectionParameters parameters,
-    @QueryParam("query") String query);
+  @Operation(summary = "Retrieves the first 5 rows of the query execution")
+  List<List<String>> testQuery(@Parameter(name = "connection parameters") ConnectionParameters parameters,
+      @QueryParam("query") String query);
 
   @POST
   @Path("/dbms/metadata")
-  @ApiOperation(value = "Retrieves the metadata information associated with the database schema", notes = "", response = ViewerMetadata.class)
+  @Operation(summary = "Retrieves the metadata information associated with the database schema")
   ViewerMetadata getMetadata(
-    @ApiParam(value = "connection parameters") final ConnectionParameters connectionParameters);
+      @Parameter(name = "connection parameters") final ConnectionParameters connectionParameters);
 
   @POST
   @Path("/run")
   @Produces(MediaType.TEXT_PLAIN)
-  @ApiOperation(value = "Performs the migration operation", notes = "", response = String.class)
-  String run(@QueryParam("databaseUUID") String databaseUUID, @ApiParam("parameters") CreateSIARDParameters parameters);
+  @Operation(summary = "Performs the migration operation")
+  String run(@QueryParam("databaseUUID") String databaseUUID,
+      @Parameter(name = "parameters") CreateSIARDParameters parameters);
 }

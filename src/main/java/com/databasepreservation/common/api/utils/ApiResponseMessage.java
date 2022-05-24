@@ -7,6 +7,8 @@
  */
 package com.databasepreservation.common.api.utils;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.xml.bind.annotation.XmlTransient;
 
 /**
@@ -55,6 +57,7 @@ public class ApiResponseMessage {
   }
 
   @XmlTransient
+  @JsonIgnore
   public int getCode() {
     return code;
   }

@@ -24,15 +24,15 @@ import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.models.structure.ViewerJob;
 import com.google.gwt.core.client.GWT;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
 @Path(".." + ViewerConstants.ENDPOINT_JOB)
-@Api(value = JobService.SWAGGER_ENDPOINT)
+@Tag(name = JobService.SWAGGER_ENDPOINT)
 public interface JobService extends DirectRestService {
   String SWAGGER_ENDPOINT = "v1 job";
 
@@ -59,7 +59,7 @@ public interface JobService extends DirectRestService {
 
   @POST
   @Path("/find")
-  @ApiOperation(value = "Find all jobs", response = IndexResult.class)
-  IndexResult<ViewerJob> find(@ApiParam(ViewerConstants.API_QUERY_PARAM_FILTER) FindRequest findRequest,
-    @QueryParam(ViewerConstants.API_QUERY_PARAM_LOCALE) String locale);
+  @Operation(summary = "Find all jobs")
+  IndexResult<ViewerJob> find(@Parameter(name = ViewerConstants.API_QUERY_PARAM_FILTER) FindRequest findRequest,
+      @QueryParam(ViewerConstants.API_QUERY_PARAM_LOCALE) String locale);
 }

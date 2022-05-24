@@ -17,7 +17,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import io.swagger.annotations.Api;
 import org.fusesource.restygwt.client.DirectRestService;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.fusesource.restygwt.client.REST;
@@ -26,13 +25,14 @@ import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultMethodCallback;
 import com.google.gwt.core.client.GWT;
 
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 @Path(".." + ViewerConstants.ENDPOINT_CONTEXT)
-@Api(value = ContextService.SWAGGER_ENDPOINT, hidden = true)
+@Tag(name = ContextService.SWAGGER_ENDPOINT)
 public interface ContextService extends DirectRestService {
   public static final String SWAGGER_ENDPOINT = "v1 context";
 
@@ -56,18 +56,18 @@ public interface ContextService extends DirectRestService {
   @GET
   @Path("/environment")
   @Produces({MediaType.TEXT_PLAIN})
-  @ApiOperation(value = "Retrieves the environment", notes = "", response = String.class)
+  @Operation(summary = "Retrieves the environment", hidden = true)
   String getEnvironment();
 
   @GET
   @Path("/clientMachineHost")
   @Produces({MediaType.TEXT_PLAIN})
-  @ApiOperation(value = "Retrieves the client machine host", notes = "", response = String.class)
+  @Operation(summary = "Retrieves the client machine host", hidden = true)
   String getClientMachine();
 
   @GET
   @Path("/shared/properties")
-  @ApiOperation(value = "Retrieves the shared properties", notes = "", response = Map.class)
+  @Operation(summary = "Retrieves the shared properties", hidden = true)
   Map<String, List<String>> getSharedProperties(
     @QueryParam(ViewerConstants.API_QUERY_PARAM_LOCALE) String localeString);
 }

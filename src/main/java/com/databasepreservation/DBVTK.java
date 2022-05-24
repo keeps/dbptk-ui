@@ -36,29 +36,11 @@ import com.databasepreservation.common.filter.OnOffFilter;
 import com.databasepreservation.common.server.BrowserServiceImpl;
 import com.databasepreservation.common.server.ViewerConfiguration;
 
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
-
 @SpringBootApplication
-@EnableSwagger2
 public class DBVTK {
   public static void main(String[] args) {
     ViewerConfiguration.getInstance();
     SpringApplication.run(DBVTK.class, args);
-  }
-
-  @Configuration
-  public static class DefaultView implements WebMvcConfigurer {
-
-    @Override
-    public void addViewControllers(ViewControllerRegistry registry) {
-      if (ViewerConstants.APPLICATION_ENV_DESKTOP
-        .equals(System.getProperty(ViewerConstants.APPLICATION_ENV_KEY, ViewerConstants.APPLICATION_ENV_SERVER))) {
-        registry.addViewController("/").setViewName("forward:/desktop.html");
-        registry.setOrder(Ordered.HIGHEST_PRECEDENCE);
-      }
-      registry.addRedirectViewController("/api-docs", "/swagger-ui.html");
-      registry.setOrder(Ordered.HIGHEST_PRECEDENCE);
-    }
   }
 
   @Bean
@@ -135,7 +117,7 @@ public class DBVTK {
 
     // Comma separated list of relative paths to exclude in filter logic (using
     // regular expressions for extra power)
-    registrationBean.addInitParameter("exclusions", "^/swagger.json,^/v1/theme/?");
+    registrationBean.addInitParameter("exclusions", "^/openapi.json,^/v1/theme/?");
 
     registrationBean.addUrlPatterns("/api/*");
 
@@ -172,9 +154,9 @@ public class DBVTK {
     registrationBean.addInitParameter("serverName", "https://localhost:8888");
     registrationBean.addInitParameter("exceptionOnValidationFailure", "false");
     registrationBean.addInitParameter("redirectAfterValidation", "false");
-    registrationBean.addInitParameter("proxyCallbackUrl", "https://localhost:8888/callback");
-    registrationBean.addInitParameter("proxyReceptorUrl", "/callback");
-    registrationBean.addInitParameter("acceptAnyProxy", "true");
+    registrationBean.addInitParameter("proxyCallbackUrl", "");
+    registrationBean.addInitParameter("proxyReceptorUrl", "");
+    registrationBean.addInitParameter("acceptAnyProxy", "false");
     registrationBean.addUrlPatterns("/*");
 
     return registrationBean;
@@ -246,6 +228,20 @@ public class DBVTK {
     dataSourceBuilder.username("sa");
     dataSourceBuilder.password("");
     return dataSourceBuilder.build();
+  }
+
+  @Configuration
+  public static class DefaultView implements WebMvcConfigurer {
+
+    @Override
+    public void addViewControllers(ViewControllerRegistry registry) {
+      if (ViewerConstants.APPLICATION_ENV_DESKTOP
+        .equals(System.getProperty(ViewerConstants.APPLICATION_ENV_KEY, ViewerConstants.APPLICATION_ENV_SERVER))) {
+        registry.addViewController("/").setViewName("forward:/desktop.html");
+        registry.setOrder(Ordered.HIGHEST_PRECEDENCE);
+      }
+      registry.setOrder(Ordered.HIGHEST_PRECEDENCE);
+    }
   }
 
   // @Bean

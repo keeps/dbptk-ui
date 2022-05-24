@@ -29,15 +29,15 @@ import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.google.gwt.core.client.GWT;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 @Path(".." + ViewerConstants.ENDPOINT_DATABASE)
-@Api(value = DatabaseService.SWAGGER_ENDPOINT)
+@Tag(name = DatabaseService.SWAGGER_ENDPOINT)
 public interface DatabaseService extends DirectRestService {
   String SWAGGER_ENDPOINT = "v1 database";
 
@@ -67,23 +67,23 @@ public interface DatabaseService extends DirectRestService {
    *******************************************************************************/
   @POST
   @Path("/find")
-  @ApiOperation(value = "Finds databases", notes = "", response = ViewerDatabase.class, responseContainer = "IndexResult")
-  IndexResult<ViewerDatabase> find(@ApiParam(ViewerConstants.API_QUERY_PARAM_FILTER) FindRequest filter,
-                                   @QueryParam(ViewerConstants.API_QUERY_PARAM_LOCALE) String localeString);
+  @Operation(summary = "Finds databases")
+  IndexResult<ViewerDatabase> find(@Parameter(name = ViewerConstants.API_QUERY_PARAM_FILTER) FindRequest filter,
+      @QueryParam(ViewerConstants.API_QUERY_PARAM_LOCALE) String localeString);
 
   @POST
   @Path("/")
   @Produces(MediaType.TEXT_PLAIN)
-  @ApiOperation(value = "Creates a database", notes = "", response = String.class)
-  String create(@ApiParam("path") String path);
+  @Operation(summary = "Creates a database")
+  String create(@Parameter(name = "path") String path);
 
   @GET
   @Path("/{databaseUUID}")
-  @ApiOperation(value = "Retrieves a specific database", notes = "", response = ViewerDatabase.class)
+  @Operation(summary = "Retrieves a specific database")
   ViewerDatabase retrieve(@PathParam("databaseUUID") String databaseUUID);
 
   @DELETE
   @Path("/{databaseUUID}")
-  @ApiOperation(value = "Deletes a specific database", notes = "", response = Boolean.class)
+  @Operation(summary = "Deletes a specific database")
   Boolean delete(@PathParam("databaseUUID") String databaseUUID);
 }

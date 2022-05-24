@@ -7,9 +7,6 @@
  */
 package com.databasepreservation.common.client.models.wizard.table;
 
-import com.google.gwt.core.client.GWT;
-import io.swagger.models.auth.In;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

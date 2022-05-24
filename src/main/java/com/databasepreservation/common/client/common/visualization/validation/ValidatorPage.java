@@ -152,7 +152,7 @@ public class ValidatorPage extends ContentPanel {
       autoUpdateTimer.run();
       result.setFinished(false);
       // runValidator();
-    }).getValidationProgressData(database.getUuid());
+    }).getValidationProgressData(database.getUuid(), database.getUuid());
   }
 
   private void runValidator() {
@@ -181,7 +181,7 @@ public class ValidatorPage extends ContentPanel {
             messages.basicActionClose(), "btn btn-link");
         }
       }
-    }).getValidationProgressData(database.getUuid());
+    }).getValidationProgressData(database.getUuid(), database.getUuid());
   }
 
   private void update(ValidationProgressData validationProgressData) {

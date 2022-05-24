@@ -29,15 +29,15 @@ import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.google.gwt.core.client.GWT;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 @Path(".." + ViewerConstants.ENDPOINT_DATABASE)
-@Api(value = SiardService.SWAGGER_ENDPOINT)
+@Tag(name = SiardService.SWAGGER_ENDPOINT)
 public interface SiardService extends DirectRestService {
   String SWAGGER_ENDPOINT = "v1 SIARD";
 
@@ -64,16 +64,16 @@ public interface SiardService extends DirectRestService {
 
   @DELETE
   @Path("/{databaseUUID}/siard/{siardUUID}")
-  @ApiOperation(value = "Deletes a specific SIARD file in the storage location", notes = "")
+  @Operation(summary = "Deletes a specific SIARD file in the storage location")
   void deleteSIARDFile(
-    @ApiParam(value = "The database unique identifier", required = true) @PathParam("databaseUUID") String databaseUUID,
+    @Parameter(name = "The database unique identifier", required = true) @PathParam("databaseUUID") String databaseUUID,
     @PathParam("siardUUID") String siardUUID);
 
   @GET
   @Path("/{databaseUUID}/siard/{siardUUID}")
-  @ApiOperation(value = "Retrieves the SIARD within a specific database", notes = "", response = ViewerDatabase.class)
+  @Operation(summary = "Retrieves the SIARD within a specific database")
   ViewerDatabase getSiard(
-    @ApiParam(value = "The database unique identifier", required = true) @PathParam("databaseUUID") String databaseUUID,
+    @Parameter(name = "The database unique identifier", required = true) @PathParam("databaseUUID") String databaseUUID,
     @PathParam("siardUUID") String siardUUID);
 
   /*******************************************************************************
@@ -81,7 +81,7 @@ public interface SiardService extends DirectRestService {
    *******************************************************************************/
   @POST
   @Path("/{databaseUUID}/siard/{siardUUID}/validation")
-  @ApiOperation(value = "Validates the SIARD file against the specification", notes = "", response = Boolean.class)
+  @Operation(summary = "Validates the SIARD file against the specification")
   Boolean validateSiard(@PathParam("databaseUUID") String databaseUUID, @PathParam("siardUUID") String siardUUID,
     @QueryParam("validationReportPath") String validationReportPath,
     @QueryParam("allowedTypePath") String allowedTypePath,
@@ -89,26 +89,29 @@ public interface SiardService extends DirectRestService {
 
   @GET
   @Path("/{databaseUUID}/siard/{siardUUID}/validation/status")
-  @ApiOperation(value = "Retrieves the validation progress", notes = "", response = ValidationProgressData.class)
-  ValidationProgressData getValidationProgressData(@PathParam("databaseUUID") String databaseUUID);
+  @Operation(summary = "Retrieves the validation progress")
+  ValidationProgressData getValidationProgressData(@PathParam("databaseUUID") String databaseUUID,
+    @PathParam("siardUUID") String siardUUID);
 
   @DELETE
   @Path("/{databaseUUID}/siard/{siardUUID}/validation")
-  @ApiOperation(value = "Deletes the report generated for the validation of a SIARD file in the storage location", notes = "")
-  void deleteValidationReport(@PathParam("databaseUUID") String databaseUUID, @QueryParam("path") String path);
+  @Operation(summary = "Deletes the report generated for the validation of a SIARD file in the storage location")
+  void deleteValidationReport(@PathParam("databaseUUID") String databaseUUID, @PathParam("siardUUID") String siardUUID,
+    @QueryParam("path") String path);
 
   /*******************************************************************************
    * Metadata Sub-resource
    *******************************************************************************/
   @PUT
   @Path("/{databaseUUID}/siard/{siardUUID}/metadata")
-  @ApiOperation(value = "Updates the SIARD metadata information", notes = "", response = ViewerMetadata.class)
+  @Operation(summary = "Updates the SIARD metadata information")
   ViewerMetadata updateMetadataInformation(@PathParam("databaseUUID") String databaseUUID,
-    @PathParam("siardUUID") String siardUUID, @QueryParam("path") String path, SIARDUpdateParameters parameters, @QueryParam("updateOnModel") boolean updateOnModel);
+    @PathParam("siardUUID") String siardUUID, @QueryParam("path") String path, SIARDUpdateParameters parameters,
+    @QueryParam("updateOnModel") boolean updateOnModel);
 
   @GET
   @Path("/{databaseUUID}/siard/{siardUUID}/metadata")
-  @ApiOperation(value = "Gets the SIARD metadata information", notes = "", response = ViewerMetadata.class)
+  @Operation(summary = "Gets the SIARD metadata information")
   ViewerMetadata getMetadataInformation(@PathParam("databaseUUID") String databaseUUID,
     @PathParam("siardUUID") String siardUUID);
 }

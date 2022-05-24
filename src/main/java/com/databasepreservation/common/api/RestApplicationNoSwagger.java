@@ -7,9 +7,9 @@
  */
 package com.databasepreservation.common.api;
 
-import com.databasepreservation.common.api.utils.CacheFilterFactory;
-import com.databasepreservation.common.api.v1.CollectionResource;
-import com.databasepreservation.common.api.v1.SiardResource;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.moxy.xml.MoxyXmlFeature;
@@ -18,76 +18,72 @@ import org.glassfish.jersey.servlet.ServletProperties;
 import org.springframework.context.annotation.Configuration;
 
 import com.databasepreservation.common.api.exceptions.RestExceptionMapper;
+import com.databasepreservation.common.api.utils.CacheFilterFactory;
 import com.databasepreservation.common.api.v1.ActivityLogResource;
 import com.databasepreservation.common.api.v1.AuthenticationResource;
 import com.databasepreservation.common.api.v1.ClientLoggerResource;
+import com.databasepreservation.common.api.v1.CollectionResource;
 import com.databasepreservation.common.api.v1.ContextResource;
 import com.databasepreservation.common.api.v1.DatabaseResource;
 import com.databasepreservation.common.api.v1.FileResource;
 import com.databasepreservation.common.api.v1.JobResource;
 import com.databasepreservation.common.api.v1.MigrationResource;
+import com.databasepreservation.common.api.v1.SiardResource;
 import com.databasepreservation.common.api.v1.ThemeResource;
 
-import io.swagger.jaxrs.config.BeanConfig;
-import io.swagger.jaxrs.config.SwaggerConfigLocator;
-import io.swagger.jaxrs.config.SwaggerContextService;
-import io.swagger.jaxrs.listing.SwaggerSerializers;
-import io.swagger.models.Contact;
-import io.swagger.models.Info;
-import io.swagger.models.License;
+import io.swagger.v3.jaxrs2.SwaggerSerializers;
+import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
+import io.swagger.v3.oas.integration.SwaggerConfiguration;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Contact;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.info.License;
 
 @Configuration
-public class RestApplicationNoSwagger {
+public class RestApplicationNoSwagger extends ResourceConfig {
+  public RestApplicationNoSwagger() {
+    super();
+    property(ServletProperties.FILTER_FORWARD_ON_404, true);
+    property(ServletProperties.FILTER_CONTEXT_PATH, "/api/*");
 
-  @Configuration
-  static class JerseyConfig extends ResourceConfig {
-    /**
-     * We just need the packages that have REST resources in them.
-     */
-    public JerseyConfig() {
-      property(ServletProperties.FILTER_FORWARD_ON_404, true);
-      property(ServletProperties.FILTER_CONTEXT_PATH, "/api/*");
-      // packages("com.databasepreservation.visualization.api");
+    OpenAPI oas = new OpenAPI();
+    Info info = new Info().title("DBPTK Enterprise API").description("REST API for the DBPTK Enterprise")
+      .contact(new Contact().email("info@keep.pt").name("KEEP SOLUTIONS")
+        .url("https://www.keep.pt/en/contacts-proposals-information-telephone-address"))
+      .license(new License().name("LGPLv3").url("http://www.gnu.org/licenses/lgpl-3.0.html")).version("1.0.0");
 
-      register(ActivityLogResource.class);
-      register(AuthenticationResource.class);
-      register(ClientLoggerResource.class);
-      register(CollectionResource.class);
-      register(ContextResource.class);
-      register(DatabaseResource.class);
-      register(FileResource.class);
-      register(JobResource.class);
-      register(MigrationResource.class);
-      register(SiardResource.class);
-      register(ThemeResource.class);
+    oas.info(info);
 
-      register(JacksonFeature.class);
-      register(MoxyXmlFeature.class);
-      register(RestExceptionMapper.class);
-      register(MultiPartFeature.class);
-      register(CacheFilterFactory.class);
+    // if (StringUtils.isNotBlank(context.getContextPath())) {
+    // oas.addServersItem(new Server().url(context.getContextPath()));
+    // }
 
-      register(MyApiListingResource.class);
-      register(SwaggerSerializers.class);
+    OpenApiResource openApiResource = new OpenApiResource();
+    SwaggerConfiguration oasConfig = new SwaggerConfiguration().openAPI(oas).prettyPrint(true)
+      .resourcePackages(Stream.of("com.databasepreservation.visualization.api").collect(Collectors.toSet()));
+    openApiResource.setOpenApiConfiguration(oasConfig);
+    register(openApiResource);
+    register(JacksonFeature.class);
+    register(MoxyXmlFeature.class);
+    register(MultiPartFeature.class);
+    register(RestExceptionMapper.class);
+    register(CacheFilterFactory.class);
 
-      BeanConfig beanConfig = new BeanConfig();
-      beanConfig.setVersion("1");
-      // beanConfig.setBasePath("");
-      beanConfig.setResourcePackage("com.databasepreservation.common.api");
-      beanConfig.setScan(true);
-      Info info = new Info();
-      info.setTitle("DBPTK Enterprise API");
-      info.setDescription("REST API for the DBPTK Enterprise");
-      License license = new License();
-      Contact contact = new Contact().email("info@keep.pt")
-        .url("https://www.keep.pt/en/contacts-proposals-information-telephone-address/").name("Keep Solutions");
-      info.setContact(contact);
-      license.name("LGPLv3").setUrl("http://www.gnu.org/licenses/lgpl-3.0.html");
-      info.setLicense(license);
+    register(ActivityLogResource.class);
+    register(AuthenticationResource.class);
+    register(ClientLoggerResource.class);
+    register(CollectionResource.class);
+    register(ContextResource.class);
+    register(DatabaseResource.class);
+    register(FileResource.class);
+    register(JobResource.class);
+    register(MigrationResource.class);
+    register(SiardResource.class);
+    register(ThemeResource.class);
+    register(SwaggerSerializers.class);
 
-      beanConfig.setInfo(info);
-      SwaggerConfigLocator.getInstance().putConfig(SwaggerContextService.CONFIG_ID_DEFAULT, beanConfig);
-    }
+    // packages("com.databasepreservation.visualization.api","com.databasepreservation.common.client.services");
+    // packages("io.swagger.v3.jaxrs2.integration.resources");
+    // register(CorsFilter.class);
   }
-
 }

@@ -36,15 +36,15 @@ import com.databasepreservation.common.client.models.status.denormalization.Deno
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.google.gwt.core.client.GWT;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 @Path(".." + ViewerConstants.ENDPOINT_DATABASE)
-@Api(value = CollectionService.SWAGGER_ENDPOINT)
+@Tag(name = CollectionService.SWAGGER_ENDPOINT)
 public interface CollectionService extends DirectRestService {
   String SWAGGER_ENDPOINT = "v1 collection";
 
@@ -75,80 +75,80 @@ public interface CollectionService extends DirectRestService {
   @POST
   @Path("{databaseUUID}/collection")
   @Produces(MediaType.TEXT_PLAIN)
-  @ApiOperation(value = "Creates a collection for a database", notes = "", response = String.class)
+  @Operation(summary = "Creates a collection for a database")
   String createCollection(@PathParam("databaseUUID") String databaseUUID);
 
   @GET
   @Path("{databaseUUID}/collection/{collectionUUID}/status")
-  @ApiOperation(value = "Retrieves the progress data associated with an action done in the database", notes = "", response = ProgressData.class)
-  ProgressData getProgressData(@PathParam("databaseUUID") String databaseUUID);
+  @Operation(summary = "Retrieves the progress data associated with an action done in the database")
+  ProgressData getProgressData(@PathParam("databaseUUID") String databaseUUID, @PathParam("collectionUUID") String collectionUUID);
 
   @DELETE
   @Path("{databaseUUID}/collection/{collectionUUID}")
-  @ApiOperation(value = "Deletes the collection for a specific database", notes = "", response = Boolean.class)
-  Boolean deleteCollection(@PathParam("databaseUUID") String databaseUUID);
+  @Operation(summary = "Deletes the collection for a specific database")
+  Boolean deleteCollection(@PathParam("databaseUUID") String databaseUUID, @PathParam("collectionUUID") String collectionUUID);
 
   /*******************************************************************************
    * Collection Resource - Config Sub-resource
    *******************************************************************************/
   @GET
   @Path("{databaseUUID}/collection/{collectionUUID}/config")
-  @ApiOperation(value = "Gets the internal collection configuration", response = CollectionStatus.class)
+  @Operation(summary = "Gets the internal collection configuration")
   List<CollectionStatus> getCollectionConfiguration(@PathParam("databaseUUID") String databaseUUID,
-    @PathParam("databaseUUID") String collectionUUID);
+      @PathParam("collectionUUID") String collectionUUID);
 
   @PUT
   @Path("{databaseUUID}/collection/{collectionUUID}/config")
-  @ApiOperation(value = "Updates the internal collection configuration", response = Boolean.class)
+  @Operation(summary = "Updates the internal collection configuration")
   Boolean updateCollectionConfiguration(@PathParam("databaseUUID") String databaseUUID,
-    @PathParam("collectionUUID") String collectionUUID,
-    @ApiParam(value = "collectionStatus", required = true) CollectionStatus status);
+      @PathParam("collectionUUID") String collectionUUID,
+      @Parameter(name = "collectionStatus", required = true) CollectionStatus status);
 
   /*******************************************************************************
    * Collection Resource - Config Sub-resource - Denormalization Sub-resource
    *******************************************************************************/
   @GET
   @Path("{databaseUUID}/collection/{collectionUUID}/config/{tableUUID}")
-  @ApiOperation(value = "Gets the denormalization configuration file for a certain table within a database", response = DenormalizeConfiguration.class)
+  @Operation(summary = "Gets the denormalization configuration file for a certain table within a database")
   DenormalizeConfiguration getDenormalizeConfigurationFile(@PathParam("databaseUUID") String databaseUUID,
-    @PathParam("collectionUUID") String collectionUUID, @PathParam("tableUUID") String tableUUID);
+      @PathParam("collectionUUID") String collectionUUID, @PathParam("tableUUID") String tableUUID);
 
   @POST
   @Path("{databaseUUID}/collection/{collectionUUID}/config/{tableUUID}")
-  @ApiOperation(value = "Creates the denormalization configuration file for a certain table within a database", response = Boolean.class)
+  @Operation(summary = "Creates the denormalization configuration file for a certain table within a database")
   Boolean createDenormalizeConfigurationFile(@PathParam("databaseUUID") String databaseUUID,
-    @PathParam("collectionUUID") String collectionUUID, @PathParam("tableUUID") String tableUUID,
-    DenormalizeConfiguration configuration);
+      @PathParam("collectionUUID") String collectionUUID, @PathParam("tableUUID") String tableUUID,
+      DenormalizeConfiguration configuration);
 
   @DELETE
   @Path("{databaseUUID}/collection/{collectionUUID}/config/{tableUUID}")
-  @ApiOperation(value = "Deletes the denormalization configuration file for a certain table within a database", response = Boolean.class)
+  @Operation(summary = "Deletes the denormalization configuration file for a certain table within a database")
   Boolean deleteDenormalizeConfigurationFile(@PathParam("databaseUUID") String databaseUUID,
-    @PathParam("collectionUUID") String collectionUUID, @PathParam("tableUUID") String tableUUID);
+      @PathParam("collectionUUID") String collectionUUID, @PathParam("tableUUID") String tableUUID);
 
   @GET
   @Path("{databaseUUID}/collection/{collectionUUID}/config/{tableUUID}/run")
-  @ApiOperation(value = "Runs a specific denormalization configuration for a certain table within a database")
+  @Operation(summary = "Runs a specific denormalization configuration for a certain table within a database")
   void run(@PathParam("databaseUUID") String databaseUUID, @PathParam("collectionUUID") String collectionUUID,
-    @PathParam("tableUUID") String tableUUID);
+      @PathParam("tableUUID") String tableUUID);
 
   /*******************************************************************************
    * Collection Resource - Data Sub-resource
    *******************************************************************************/
   @POST
   @Path("{databaseUUID}/collection/{collectionUUID}/data/{schema}/{table}/find")
-  @ApiOperation(value = "Find all rows for a specific database", notes = "", response = ViewerRow.class, responseContainer = "IndexResult")
+  @Operation(summary = "Find all rows for a specific database")
   IndexResult<ViewerRow> findRows(@PathParam("databaseUUID") String databaseUUID,
-    @PathParam("collectionUUID") String collectionUUID, @PathParam("schema") String schema,
-    @PathParam("table") String table, @ApiParam(ViewerConstants.API_QUERY_PARAM_FILTER) FindRequest findRequest,
-    @QueryParam(ViewerConstants.API_QUERY_PARAM_LOCALE) String localeString);
+      @PathParam("collectionUUID") String collectionUUID, @PathParam("schema") String schema,
+      @PathParam("table") String table, @Parameter(name = ViewerConstants.API_QUERY_PARAM_FILTER) FindRequest findRequest,
+      @QueryParam(ViewerConstants.API_QUERY_PARAM_LOCALE) String localeString);
 
   @GET
   @Path("/{databaseUUID}/collection/{collectionUUID}/data/{schema}/{table}/{rowIndex}")
-  @ApiOperation(value = "Retrieves a specific row within a specific database", notes = "", response = ViewerRow.class)
+  @Operation(summary = "Retrieves a specific row within a specific database")
   ViewerRow retrieveRow(@PathParam("databaseUUID") String databaseUUID,
-    @PathParam("collectionUUID") String collectionUUID, @PathParam("schema") String schema,
-    @PathParam("table") String table, @PathParam("rowIndex") String rowIndex);
+      @PathParam("collectionUUID") String collectionUUID, @PathParam("schema") String schema,
+      @PathParam("table") String table, @PathParam("rowIndex") String rowIndex);
 
   /*******************************************************************************
    * Collection Resource - SavedSearch Sub-resource
@@ -156,38 +156,38 @@ public interface CollectionService extends DirectRestService {
   @POST
   @Path("/{databaseUUID}/collection/{collectionUUID}/savedSearch/")
   @Produces(MediaType.TEXT_PLAIN)
-  @ApiOperation(value = "Saves a search for a specific table within a database", notes = "", response = String.class)
+  @Operation(summary = "Saves a search for a specific table within a database")
   String saveSavedSearch(@PathParam("databaseUUID") String databaseUUID,
-    @PathParam("collectionUUID") String collectionUUID, @QueryParam("tableUUID") String tableUUID,
-    @QueryParam("name") String name, @QueryParam("description") String description,
-    @ApiParam(ViewerConstants.API_QUERY_PARAM_SEARCH) SearchInfo searchInfo);
+      @PathParam("collectionUUID") String collectionUUID, @QueryParam("tableUUID") String tableUUID,
+      @QueryParam("name") String name, @QueryParam("description") String description,
+      @Parameter(name = ViewerConstants.API_QUERY_PARAM_SEARCH) SearchInfo searchInfo);
 
   @POST
   @Path("/{databaseUUID}/collection/{collectionUUID}/savedSearch/find")
-  @ApiOperation(value = "Finds all the saved search for a specific database", notes = "", response = SavedSearch.class, responseContainer = "IndexResult")
+  @Operation(summary = "Finds all the saved search for a specific database")
   IndexResult<SavedSearch> findSavedSearches(@PathParam("databaseUUID") String databaseUUID,
-    @PathParam("collectionUUID") String collectionUUID,
-    @ApiParam(ViewerConstants.API_QUERY_PARAM_FILTER) FindRequest findRequest,
-    @QueryParam(ViewerConstants.API_QUERY_PARAM_LOCALE) String localeString);
+      @PathParam("collectionUUID") String collectionUUID,
+      @Parameter(name = ViewerConstants.API_QUERY_PARAM_FILTER) FindRequest findRequest,
+      @QueryParam(ViewerConstants.API_QUERY_PARAM_LOCALE) String localeString);
 
   @GET
   @Path("/{databaseUUID}/collection/{collectionUUID}/savedSearch/{savedSearchUUID}")
-  @ApiOperation(value = "Retrieves a specific saved search for a specific database", notes = "", response = SavedSearch.class)
+  @Operation(summary = "Retrieves a specific saved search for a specific database")
   SavedSearch retrieveSavedSearch(@PathParam("databaseUUID") String databaseUUID,
-    @PathParam("collectionUUID") String collectionUUID, @PathParam("savedSearchUUID") String savedSearchUUID);
+      @PathParam("collectionUUID") String collectionUUID, @PathParam("savedSearchUUID") String savedSearchUUID);
 
   @PUT
   @Path("/{databaseUUID}/collection/{collectionUUID}/savedSearch/{savedSearchUUID}")
-  @ApiOperation(value = "Edits the content of a search", notes = "")
+  @Operation(summary = "Edits the content of a search")
   void updateSavedSearch(@PathParam("databaseUUID") String databaseUUID,
-    @PathParam("collectionUUID") String collectionUUID, @PathParam("savedSearchUUID") String savedSearchUUID,
-    @ApiParam(value = "The saved search name", required = true) @QueryParam("name") String name,
-    @ApiParam(value = "The saved search description", required = true) @QueryParam("description") String description);
+      @PathParam("collectionUUID") String collectionUUID, @PathParam("savedSearchUUID") String savedSearchUUID,
+      @Parameter(name = "The saved search name", required = true) @QueryParam("name") String name,
+      @Parameter(name = "The saved search description", required = true) @QueryParam("description") String description);
 
   @DELETE
-  @ApiOperation(value = "Deletes a specific saved search for a specific database", notes = "")
+  @Operation(summary = "Deletes a specific saved search for a specific database")
   @Path("/{databaseUUID}/collection/{collectionUUID}/savedSearch/{savedSearchUUID}")
   void deleteSavedSearch(@PathParam("databaseUUID") String databaseUUID,
-    @PathParam("collectionUUID") String collectionUUID, @PathParam("savedSearchUUID") String savedSearchUUID);
+      @PathParam("collectionUUID") String collectionUUID, @PathParam("savedSearchUUID") String savedSearchUUID);
 
 }

@@ -257,11 +257,11 @@ public class ValidationNavigationPanel {
         }
         break;
       case VALIDATION_RUNNING:
-        //if (ValidatorPage.checkInstance(database.getUuid())) {
-          navigationPanel.addButton(CommonClientUtils.wrapOnDiv(BTN_ITEM, btnOpenValidator));
-        //} else {
-          //GWT.log("ELSE!!!!!");
-        //}
+        // if (ValidatorPage.checkInstance(database.getUuid())) {
+        navigationPanel.addButton(CommonClientUtils.wrapOnDiv(BTN_ITEM, btnOpenValidator));
+        // } else {
+        // GWT.log("ELSE!!!!!");
+        // }
         break;
       case NOT_VALIDATED:
         btnValidate.setText(messages.SIARDHomePageButtonTextValidateNow());
@@ -346,7 +346,7 @@ public class ValidationNavigationPanel {
     if (!database.getValidationStatus().equals(ViewerDatabaseValidationStatus.VALIDATION_RUNNING)) {
       SiardService.Util
         .call((Void result) -> SIARDManagerPage.getInstance(database).refreshInstance(database.getUuid()))
-        .deleteValidationReport(database.getUuid(), database.getValidatorReportPath());
+        .deleteValidationReport(database.getUuid(), database.getUuid(), database.getValidatorReportPath());
     }
   }
 }

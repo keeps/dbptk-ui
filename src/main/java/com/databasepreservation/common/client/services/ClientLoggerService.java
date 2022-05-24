@@ -21,14 +21,15 @@ import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultMethodCallback;
 import com.google.gwt.core.client.GWT;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
 @Path(".." + ViewerConstants.ENDPOINT_CLIENT_LOGGER)
-@Api(value = ClientLoggerService.SWAGGER_ENDPOINT)
+@Tag(name = ClientLoggerService.SWAGGER_ENDPOINT)
 public interface ClientLoggerService extends DirectRestService {
   public static final String SWAGGER_ENDPOINT = "v1 client logger";
 
@@ -56,13 +57,13 @@ public interface ClientLoggerService extends DirectRestService {
   @POST
   @Path("/log")
   void log(
-    @ApiParam(value = "Log type", allowableValues = "debug, error, fatal, info, trace, warn", required = true) @QueryParam("type") String type,
-    @ApiParam(required = true) @QueryParam("classname") String classname, @QueryParam("object") String object);
+      @Parameter(name = "Log type", schema = @Schema(allowableValues = "debug, error, fatal, info, trace, warn"), required = true) @QueryParam("type") String type,
+      @Parameter(required = true) @QueryParam("classname") String classname, @QueryParam("object") String object);
 
   @POST
   @Path("/detailedLog")
   void detailedLog(
-    @ApiParam(value = "Log type", allowableValues = "debug, error, fatal, info, trace, warn", required = true) @QueryParam("type") String type,
-    @ApiParam(required = true) @QueryParam("classname") String classname, @QueryParam("object") String object,
-    Throwable error);
+      @Parameter(name = "Log type", schema = @Schema(allowableValues = "debug, error, fatal, info, trace, warn"), required = true) @QueryParam("type") String type,
+      @Parameter(required = true) @QueryParam("classname") String classname, @QueryParam("object") String object,
+      Throwable error);
 }

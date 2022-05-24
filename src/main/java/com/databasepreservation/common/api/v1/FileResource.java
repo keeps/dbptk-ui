@@ -49,28 +49,28 @@ import com.databasepreservation.common.server.controller.Browser;
 import com.databasepreservation.common.utils.ControllerAssistant;
 import com.google.common.io.Files;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
 @Service
 @Path(FileResource.ENDPOINT)
-@Api(value = FileResource.SWAGGER_ENDPOINT)
+@Tag(name = FileResource.SWAGGER_ENDPOINT)
 public class FileResource {
-  private static final Logger LOGGER = LoggerFactory.getLogger(FileResource.class);
   public static final String ENDPOINT = "/" + ViewerConstants.API_SERVLET + ViewerConstants.API_V1_FILE_RESOURCE;
   public static final String SWAGGER_ENDPOINT = "v1 files";
-
+  private static final Logger LOGGER = LoggerFactory.getLogger(FileResource.class);
   @Context
   private HttpServletRequest request;
 
   @GET
-  @ApiOperation(value = "Lists all the SIARD files in the server", notes = "")
+  @Operation(summary = "Lists all the SIARD files in the server")
   public List<String> list() {
     final ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
@@ -93,9 +93,9 @@ public class FileResource {
   @GET
   @Path("/download/siard")
   @Produces(MediaType.APPLICATION_OCTET_STREAM)
-  @ApiOperation(value = "Downloads a specific SIARD file from the storage location", notes = "")
+  @Operation(summary = "Downloads a specific SIARD file from the storage location")
   public Response getSIARDFile(
-    @ApiParam(required = true, value = "The name of the SIARD file to download") @QueryParam(ViewerConstants.API_PATH_PARAM_FILENAME) String filename) {
+    @Parameter(required = true, name = "The name of the SIARD file to download") @QueryParam(ViewerConstants.API_PATH_PARAM_FILENAME) String filename) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
@@ -125,9 +125,9 @@ public class FileResource {
   }
 
   @DELETE
-  @ApiOperation(value = "Deletes a SIARD file", notes = "")
+  @Operation(summary = "Deletes a SIARD file")
   public void deleteSiardFile(
-    @ApiParam(value = "Filename to be deleted", required = true) @QueryParam(value = "filename") String filename) {
+    @Parameter(name = "Filename to be deleted", required = true) @QueryParam(value = "filename") String filename) {
     final ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
@@ -150,14 +150,14 @@ public class FileResource {
   @Produces({MediaType.APPLICATION_JSON})
   @Consumes(MediaType.MULTIPART_FORM_DATA)
   @JSONP(callback = RodaConstants.API_QUERY_DEFAULT_JSONP_CALLBACK, queryParam = RodaConstants.API_QUERY_KEY_JSONP_CALLBACK)
-  @ApiOperation(value = "Creates a new SIARD file", notes = "")
-  @ApiResponses(value = {@ApiResponse(code = 204, message = "OK"),
-    @ApiResponse(code = 409, message = "Already exists", response = ApiResponseMessage.class)})
+  @Operation(summary = "Creates a new SIARD file")
+  @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "OK"),
+    @ApiResponse(responseCode = "409", description = "Already exists")})
 
   public Response createSIARDFile(@FormDataParam("upl") InputStream inputStream,
     @FormDataParam("upl") FormDataContentDisposition fileDetail,
-    @ApiParam(value = "Choose format in which to get the response", allowableValues = RodaConstants.API_POST_PUT_MEDIA_TYPES) @QueryParam(RodaConstants.API_QUERY_KEY_ACCEPT_FORMAT) String acceptFormat,
-    @ApiParam(value = "JSONP callback name", required = false, allowMultiple = false, defaultValue = RodaConstants.API_QUERY_DEFAULT_JSONP_CALLBACK) @QueryParam(RodaConstants.API_QUERY_KEY_JSONP_CALLBACK) String jsonpCallbackName) {
+    @Parameter(name = "Choose format in which to get the response", schema = @Schema(allowableValues = RodaConstants.API_POST_PUT_MEDIA_TYPES)) @QueryParam(RodaConstants.API_QUERY_KEY_ACCEPT_FORMAT) String acceptFormat,
+    @Parameter(name = "JSONP callback name", required = false, schema = @Schema(defaultValue = RodaConstants.API_QUERY_DEFAULT_JSONP_CALLBACK)) @QueryParam(RodaConstants.API_QUERY_KEY_JSONP_CALLBACK) String jsonpCallbackName) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
