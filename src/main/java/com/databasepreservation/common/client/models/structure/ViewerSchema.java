@@ -23,6 +23,8 @@ public class ViewerSchema implements Serializable {
 
   private String description;
 
+  private String folder;
+
   private List<ViewerTable> tables;
 
   private List<ViewerView> views;
@@ -55,6 +57,14 @@ public class ViewerSchema implements Serializable {
 
   public void setDescription(String description) {
     this.description = description;
+  }
+
+  public String getFolder() {
+    return folder;
+  }
+
+  public void setFolder(String folder) {
+    this.folder = folder;
   }
 
   public String getUuid() {

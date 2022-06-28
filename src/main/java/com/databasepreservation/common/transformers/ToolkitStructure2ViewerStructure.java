@@ -345,6 +345,7 @@ public class ToolkitStructure2ViewerStructure {
     result.setUuid(SolrUtils.randomUUID());
     result.setName(schema.getName());
     result.setDescription(schema.getDescription());
+    result.setFolder(schema.getFolder());
     if (!simpleMetadata) {
       result.setRoutines(getRoutines(vdb, schema.getRoutines()));
     } else {
@@ -453,6 +454,7 @@ public class ToolkitStructure2ViewerStructure {
     result.setUuid(references.getTableUUID(table.getId()));
     result.setName(table.getName());
     result.setDescription(table.getDescription());
+    result.setFolder(table.getFolder());
     result.setCountRows(table.getRows());
     result.setSchemaName(table.getSchema());
     result.setSchemaUUID(vdb.getSchema(result.getSchemaName()).getUuid());

@@ -68,14 +68,11 @@ public class StatusUtils {
   }
 
   public static TableStatus getTableStatus(ViewerMetadata metadata, ViewerTable table, boolean show) {
-    final int schemaIndex = metadata.getSchemaIndex(table.getSchemaUUID());
-    final int tableIndex = metadata.getTableIndex(table.getUuid());
-
     TableStatus status = new TableStatus();
     status.setUuid(table.getUuid());
     status.setId(table.getId());
-    status.setSchemaFolder(ViewerConstants.SIARD_SCHEMA_PREFIX + schemaIndex);
-    status.setTableFolder(ViewerConstants.SIARD_TABLE_PREFIX + tableIndex);
+    status.setSchemaFolder(metadata.getSchema(table.getSchemaUUID()).getFolder());
+    status.setTableFolder(table.getFolder());
     status.setName(table.getName());
     status.setCustomName(table.getName());
     status.setDescription(table.getDescription());

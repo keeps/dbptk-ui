@@ -27,6 +27,8 @@ public class ViewerTable implements Serializable {
 
   private String description;
 
+  private String folder;
+
   private List<ViewerColumn> columns;
 
   private ViewerPrimaryKey primaryKey;
@@ -79,6 +81,14 @@ public class ViewerTable implements Serializable {
 
   public void setDescription(String description) {
     this.description = description;
+  }
+
+  public String getFolder() {
+    return folder;
+  }
+
+  public void setFolder(String folder) {
+    this.folder = folder;
   }
 
   public List<ViewerColumn> getColumns() {
