@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -22,6 +23,7 @@ import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.request.CollectionAdminRequest;
 import org.apache.solr.client.solrj.response.UpdateResponse;
+import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
@@ -497,6 +499,23 @@ public class DatabaseRowsSolrManager {
     } catch (ViewerException e) {
       LOGGER.error("Could not update SIARD validation information for {}", databaseUUID, e);
     }
+  }
+
+  public void updateDatabasePermissions(String databaseUUID, Set<String> permissions) throws GenericException, ViewerException {
+    LOGGER.debug("Starting to update database permissions ({})", databaseUUID);
+    // create document to update this DB
+    SolrInputDocument doc = new SolrInputDocument();
+    doc.addField(ViewerConstants.INDEX_ID, databaseUUID);
+
+    try {
+      doc.addField(ViewerConstants.SOLR_DATABASES_PERMISSIONS,SolrUtils.asValueUpdate(permissions));
+      insertDocument(ViewerConstants.SOLR_INDEX_DATABASES_COLLECTION_NAME, doc);
+    } catch (ViewerException e) {
+      LOGGER.error("Could not update database metadata ({})", databaseUUID, e);
+    }
+
+    ViewerFactory.getConfigurationManager().updateDatabasePermissions(databaseUUID, permissions);
+    LOGGER.debug("Finish updating database metadata ({})", databaseUUID);
   }
 
   public void updateDatabaseMetadata(String databaseUUID, ViewerMetadata metadata) {

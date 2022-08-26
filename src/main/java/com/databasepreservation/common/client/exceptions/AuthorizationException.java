@@ -18,6 +18,10 @@ public class AuthorizationException extends RESTException {
     super(message);
   }
 
+  public AuthorizationException(String message, int statusCode) {
+    super(message);
+    setStatus(statusCode);
+  }
   public AuthorizationException(Throwable cause) {
     super(cause);
   }

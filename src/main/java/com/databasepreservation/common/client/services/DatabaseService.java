@@ -2,16 +2,18 @@
  * The contents of this file are subject to the license and copyright
  * detailed in the LICENSE file at the root of the source
  * tree and available online at
- *
+ * <p>
  * https://github.com/keeps/dbptk-ui
  */
 package com.databasepreservation.common.client.services;
 
+import java.util.Set;
 import java.util.function.Consumer;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -26,6 +28,7 @@ import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultMethodCallback;
 import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
+import com.databasepreservation.common.client.models.authorization.AuthorizationRuleList;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.google.gwt.core.client.GWT;
 
@@ -69,7 +72,7 @@ public interface DatabaseService extends DirectRestService {
   @Path("/find")
   @Operation(summary = "Finds databases")
   IndexResult<ViewerDatabase> find(@Parameter(name = ViewerConstants.API_QUERY_PARAM_FILTER) FindRequest filter,
-      @QueryParam(ViewerConstants.API_QUERY_PARAM_LOCALE) String localeString);
+    @QueryParam(ViewerConstants.API_QUERY_PARAM_LOCALE) String localeString);
 
   @POST
   @Path("/")
@@ -86,4 +89,10 @@ public interface DatabaseService extends DirectRestService {
   @Path("/{databaseUUID}")
   @Operation(summary = "Deletes a specific database")
   Boolean delete(@PathParam("databaseUUID") String databaseUUID);
+
+  @PUT
+  @Path("/{databaseUUID}/permissions")
+  @Operation(summary = "Updates database permissions")
+  Set<String> updatePermissions(@PathParam("databaseUUID") String databaseUUID,
+    @Parameter(name = ViewerConstants.API_QUERY_PARAM_FILTER) Set<String> permissions);
 }

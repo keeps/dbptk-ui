@@ -9,6 +9,8 @@ package com.databasepreservation.common.client.models.structure;
 
 import com.databasepreservation.common.client.index.IsIndexed;
 
+import java.util.Set;
+
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
@@ -31,6 +33,7 @@ public class ViewerDatabase extends IsIndexed {
   private String validationErrors;
   private String validationWarnings;
   private String validationSkipped;
+  private Set<String> permissions;
 
   public ViewerDatabase() {
   }
@@ -194,5 +197,13 @@ public class ViewerDatabase extends IsIndexed {
 
   public String getLoadedAt() {
     return loadedAt;
+  }
+
+  public Set<String> getPermissions() {
+    return permissions;
+  }
+
+  public void setPermissions(Set<String> permissions) {
+    this.permissions = permissions;
   }
 }

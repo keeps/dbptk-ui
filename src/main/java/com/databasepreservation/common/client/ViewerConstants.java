@@ -137,6 +137,7 @@ public class ViewerConstants {
   public static final String SOLR_DATABASES_VALIDATION_ERRORS = "siard_validation_errors";
   public static final String SOLR_DATABASES_VALIDATION_WARNINGS = "siard_validation_warnings";
   public static final String SOLR_DATABASES_VALIDATION_SKIPPED = "siard_validation_skipped";
+  public static final String SOLR_DATABASES_PERMISSIONS = "database_permissions";
 
   /*
    * ACTIVITY LOG FIELDS

@@ -422,6 +422,14 @@ public class BreadcrumbManager {
     return items;
   }
 
+  public static List<BreadcrumbItem> forPermissionsPage(final String databaseUUID, final String databaseName) {
+    List<BreadcrumbItem> items = forSIARDMainPage(databaseUUID, databaseName);
+    items.add(new BreadcrumbItem(
+        SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(FontAwesomeIconManager.KEY)
+            + SafeHtmlUtils.htmlEscape(messages.breadcrumbTextForPermissions()))));
+    return items;
+  }
+
   public static List<BreadcrumbItem> forTableManagement(final String databaseUUID, final String databaseName) {
     List<BreadcrumbItem> items = forAdvancedConfiguration(databaseUUID, databaseName);
     items

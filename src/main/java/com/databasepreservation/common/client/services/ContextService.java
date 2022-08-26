@@ -9,6 +9,7 @@ package com.databasepreservation.common.client.services;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import javax.ws.rs.GET;
@@ -17,6 +18,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import com.databasepreservation.common.client.models.authorization.AuthorizationRules;
 import org.fusesource.restygwt.client.DirectRestService;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.fusesource.restygwt.client.REST;
@@ -70,4 +72,10 @@ public interface ContextService extends DirectRestService {
   @Operation(summary = "Retrieves the shared properties", hidden = true)
   Map<String, List<String>> getSharedProperties(
     @QueryParam(ViewerConstants.API_QUERY_PARAM_LOCALE) String localeString);
+
+  @GET
+  @Path("/authorizations")
+  @Operation(summary = "Gets the authenticated user")
+  @Produces(MediaType.APPLICATION_JSON)
+  Set<AuthorizationRules> getAuthorizationRuleList();
 }

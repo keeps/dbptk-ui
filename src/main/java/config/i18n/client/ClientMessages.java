@@ -9,7 +9,6 @@ package config.i18n.client;
 
 import java.util.List;
 
-import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.google.gwt.i18n.client.Messages;
 import com.google.gwt.safehtml.shared.SafeHtml;
 
@@ -579,6 +578,8 @@ public interface ClientMessages extends Messages {
 
   String basicActionConfiguration();
 
+  String basicActionEditPermissions();
+
   /*********************************************
    * Sidebar Menus
    ********************************************/
@@ -634,6 +635,8 @@ public interface ClientMessages extends Messages {
   String breadcrumbTextForJobManager();
 
   String breadcrumbTextForPreferences();
+
+  String breadcrumbTextForPermissions();
 
   String breadcrumbTextForTableManagement();
 
@@ -829,6 +832,26 @@ public interface ClientMessages extends Messages {
   String SIARDHomePageTextForIngestSuccess();
 
   String SIARDHomePageTextForRequiredSIARDFile();
+
+  String SIARDHomePageOptionsHeaderForPermissions();
+
+  String SIARDHomePageOptionsDescriptionForPermissions();
+
+  String SIARDHomePageLabelForPermissionsRoles();
+
+  String SIARDHomePageLabelForPermissionsTableRuleLabel();
+
+  String SIARDHomePageLabelForPermissionsTableRuleAttributeOperator();
+
+  String SIARDHomePageLabelForPermissionsTableRuleAttributeValue();
+
+  String SIARDHomePageDialogTitleForPermissionsList();
+
+  SafeHtml SIARDHomePageDialogDescriptionForPermissionsList();
+
+  String SIARDHomePageDialogDetailsForPermissionsList();
+
+  String SIARDHomePageDialogMessageForPermissionsList();
 
   /********************************************
    * Edit Metadata

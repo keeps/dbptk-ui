@@ -787,4 +787,52 @@ public class Dialogs {
     dialogBox.center();
     dialogBox.show();
   }
+
+  public static void showCustomConfirmationDialog(String title, SafeHtml description, String width, Widget helper,
+    String cancelButtonText, String confirmButtonText, final AsyncCallback<Boolean> callback) {
+    final DialogBox dialogBox = new DialogBox(false, true);
+    final Button cancelButton = new Button(cancelButtonText);
+    final Button confirmButton = new Button(confirmButtonText);
+
+    FlowPanel layout = new FlowPanel();
+    FlowPanel footer = new FlowPanel();
+
+    footer.add(cancelButton);
+    footer.add(confirmButton);
+    footer.addStyleName(WUI_DIALOG_LAYOUT_FOOTER);
+
+    HTML messageLabel = new HTML(description);
+    messageLabel.addStyleName(WUI_DIALOG_INFORMATION);
+
+    layout.add(messageLabel);
+    layout.add(helper);
+    layout.addStyleName(WUI_DIALOG_LAYOUT);
+    layout.add(footer);
+
+    cancelButton.addStyleName(BTN_LINK_STYLE);
+    cancelButton.addClickHandler(event -> {
+      dialogBox.hide();
+      callback.onSuccess(false);
+    });
+
+    confirmButton.addStyleName(BTN_PLAY_STYLE);
+    confirmButton.addClickHandler(event -> {
+      dialogBox.hide();
+      callback.onSuccess(true);
+    });
+
+    dialogBox.setText(title);
+    dialogBox.setWidget(layout);
+    if (width != null && !width.isEmpty()) {
+      dialogBox.setWidth(width);
+    } else {
+      dialogBox.setWidth("360px");
+    }
+    dialogBox.setGlassEnabled(true);
+    dialogBox.setAnimationEnabled(false);
+    dialogBox.addStyleName(WUI_DIALOG_INFORMATION);
+
+    dialogBox.center();
+    dialogBox.show();
+  }
 }

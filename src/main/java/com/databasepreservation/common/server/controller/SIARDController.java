@@ -2,35 +2,10 @@
  * The contents of this file are subject to the license and copyright
  * detailed in the LICENSE file at the root of the source
  * tree and available online at
- *
+ * <p>
  * https://github.com/keeps/dbptk-ui
  */
 package com.databasepreservation.common.server.controller;
-
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX;
-import static com.databasepreservation.common.client.ViewerConstants.SOLR_SEARCHES_DATABASE_UUID;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
-import org.roda.core.data.exceptions.GenericException;
-import org.roda.core.data.exceptions.NotFoundException;
-import org.roda.core.data.exceptions.RequestNotValidException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.DatabaseMigration;
 import com.databasepreservation.SIARDEdition;
@@ -42,7 +17,6 @@ import com.databasepreservation.common.client.index.filter.SimpleFilterParameter
 import com.databasepreservation.common.client.models.dbptk.Module;
 import com.databasepreservation.common.client.models.parameters.PreservationParameter;
 import com.databasepreservation.common.client.models.parameters.SIARDUpdateParameters;
-import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseFromToolkit;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
@@ -67,7 +41,6 @@ import com.databasepreservation.common.server.index.factory.SolrClientFactory;
 import com.databasepreservation.common.server.index.schema.SolrDefaultCollectionRegistry;
 import com.databasepreservation.common.server.index.utils.SolrUtils;
 import com.databasepreservation.common.transformers.ToolkitStructure2ViewerStructure;
-import com.databasepreservation.common.utils.StatusUtils;
 import com.databasepreservation.model.exception.ModuleException;
 import com.databasepreservation.model.exception.SIARDVersionNotSupportedException;
 import com.databasepreservation.model.exception.UnsupportedModuleException;
@@ -88,6 +61,30 @@ import com.databasepreservation.modules.siard.SIARDEditFactory;
 import com.databasepreservation.modules.siard.SIARDValidateFactory;
 import com.databasepreservation.modules.viewer.DbvtkModuleFactory;
 import com.databasepreservation.utils.ReflectionUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
+import org.roda.core.data.exceptions.GenericException;
+import org.roda.core.data.exceptions.NotFoundException;
+import org.roda.core.data.exceptions.RequestNotValidException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static com.databasepreservation.common.client.ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX;
+import static com.databasepreservation.common.client.ViewerConstants.SOLR_SEARCHES_DATABASE_UUID;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -111,7 +108,7 @@ public class SIARDController {
   }
 
   public static List<List<String>> validateCustomViewQuery(ConnectionParameters parameters, String query)
-    throws GenericException {
+      throws GenericException {
     Reporter reporter = new NoOpReporter();
     List<List<String>> results = new ArrayList<>();
     final DatabaseMigration databaseMigration = initializeDatabaseMigration(reporter);
@@ -159,8 +156,8 @@ public class SIARDController {
   }
 
   public static boolean migrateToSIARD(String databaseUUID, String siardVersion, String siardPath,
-    TableAndColumnsParameters tableAndColumnsParameters, ExportOptionsParameters exportOptionsParameters,
-    MetadataExportOptionsParameters metadataExportOptionsParameters) throws GenericException {
+                                       TableAndColumnsParameters tableAndColumnsParameters, ExportOptionsParameters exportOptionsParameters,
+                                       MetadataExportOptionsParameters metadataExportOptionsParameters) throws GenericException {
     Reporter reporter = getReporter(databaseUUID, ReporterType.MIGRATE_TO_SIARD);
     File f = new File(siardPath);
     if (f.exists() && !f.isDirectory()) {
@@ -179,7 +176,7 @@ public class SIARDController {
       databaseMigration.importModule(importConfigurationModuleFactory);
 
       String importConfigTmpPath = SiardControllerHelper.buildModuleConfigurationForSIARD(siardVersion, siardPath,
-        tableAndColumnsParameters);
+          tableAndColumnsParameters);
       databaseMigration.importModuleParameter(ImportConfigurationModuleFactory.PARAMETER_FILE, importConfigTmpPath);
 
       // BUILD Export Module
@@ -205,12 +202,12 @@ public class SIARDController {
   }
 
   public static boolean migrateToDBMS(String databaseUUID, String siardVersion, String siardPath,
-    ConnectionParameters connectionParameters) throws GenericException {
+                                      ConnectionParameters connectionParameters) throws GenericException {
     Reporter reporter = getReporter(databaseUUID, ReporterType.MIGRATE_TO_LIVE_DBMS);
     File f = new File(siardPath);
     if (f.exists() && !f.isDirectory()) {
       LOGGER.info("starting to migrate the database to a live DBMS ("
-        + ToolkitModuleName2ViewerModuleName.transform(connectionParameters.getModuleName()) + ")");
+          + ToolkitModuleName2ViewerModuleName.transform(connectionParameters.getModuleName()) + ")");
       final DatabaseMigration databaseMigration = initializeDatabaseMigration(reporter);
 
       databaseMigration.filterFactories(new ArrayList<>());
@@ -221,7 +218,7 @@ public class SIARDController {
 
       // BUILD Export Module
       final DatabaseModuleFactory exportModuleFactory = getDatabaseExportModuleFactory(
-        connectionParameters.getModuleName());
+          connectionParameters.getModuleName());
       SiardControllerHelper.setupExportModuleSSHConfiguration(databaseMigration, connectionParameters);
 
       for (Map.Entry<String, String> entry : connectionParameters.getJdbcParameters().getConnection().entrySet()) {
@@ -255,9 +252,9 @@ public class SIARDController {
   }
 
   public static String createSIARD(String uniqueId, ConnectionParameters connectionParameters,
-    TableAndColumnsParameters tableAndColumnsParameters, CustomViewsParameters customViewsParameters,
-    MerkleTreeFilterParameters merkleTreeFilterParameters, ExportOptionsParameters exportOptionsParameters,
-    MetadataExportOptionsParameters metadataExportOptionsParameters) throws GenericException {
+                                   TableAndColumnsParameters tableAndColumnsParameters, CustomViewsParameters customViewsParameters,
+                                   MerkleTreeFilterParameters merkleTreeFilterParameters, ExportOptionsParameters exportOptionsParameters,
+                                   MetadataExportOptionsParameters metadataExportOptionsParameters) throws GenericException {
     final String databaseUUID = SolrUtils.randomUUID();
     Reporter reporter = getReporter(databaseUUID, ReporterType.CREATE);
     LOGGER.info("starting to create SIARD archive at {}", exportOptionsParameters.getSiardPath());
@@ -272,7 +269,7 @@ public class SIARDController {
       }
 
       if (tableAndColumnsParameters.isExternalLobConfigurationSet()
-        && factory.getFilterName().equals("external-lobs")) {
+          && factory.getFilterName().equals("external-lobs")) {
         filterFactories.add(factory);
       }
     }
@@ -301,7 +298,7 @@ public class SIARDController {
     }
 
     String importConfigTmpPath = SiardControllerHelper.buildModuleConfiguration(connectionParameters,
-      tableAndColumnsParameters, customViewsParameters);
+        tableAndColumnsParameters, customViewsParameters);
     databaseMigration.importModuleParameter(ImportConfigurationModuleFactory.PARAMETER_FILE, importConfigTmpPath);
 
     // Build Export Module
@@ -436,7 +433,7 @@ public class SIARDController {
 
     for (DatabaseModuleFactory factory : databaseModuleFactories) {
       if (factory.isEnabled() && factory.producesImportModules()
-        && factory.getModuleName().startsWith(ViewerConstants.SIARD)) {
+          && factory.getModuleName().startsWith(ViewerConstants.SIARD)) {
         final Parameters exportModuleParameters;
         try {
           exportModuleParameters = factory.getExportModuleParameters();
@@ -457,7 +454,7 @@ public class SIARDController {
 
     for (DatabaseModuleFactory factory : databaseModuleFactories) {
       if (factory.isEnabled() && factory.producesExportModules()
-        && factory.getModuleName().startsWith(ViewerConstants.SIARD)) {
+          && factory.getModuleName().startsWith(ViewerConstants.SIARD)) {
         final Parameters exportModuleParameters;
         try {
           exportModuleParameters = factory.getExportModuleParameters();
@@ -476,9 +473,9 @@ public class SIARDController {
     Set<DatabaseModuleFactory> databaseModuleFactories = ReflectionUtils.collectDatabaseModuleFactories();
     for (DatabaseModuleFactory factory : databaseModuleFactories) {
       if (!factory.getModuleName().equals("import-config")
-        && !factory.getModuleName().toLowerCase().contains(ViewerConstants.SIARD)
-        && !factory.getModuleName().equalsIgnoreCase("internal-dbptke-export") && factory.isEnabled()
-        && factory.producesExportModules()) {
+          && !factory.getModuleName().toLowerCase().contains(ViewerConstants.SIARD)
+          && !factory.getModuleName().equalsIgnoreCase("internal-dbptke-export") && factory.isEnabled()
+          && factory.producesExportModules()) {
         modules.add(getDatabaseModuleParameters(factory));
       }
     }
@@ -491,9 +488,9 @@ public class SIARDController {
     Set<DatabaseModuleFactory> databaseModuleFactories = ReflectionUtils.collectDatabaseModuleFactories();
     for (DatabaseModuleFactory factory : databaseModuleFactories) {
       if (!factory.getModuleName().equals("import-config")
-        && !factory.getModuleName().toLowerCase().contains(ViewerConstants.SIARD)
-        && !factory.getModuleName().equalsIgnoreCase("internal-dbptke-export") && factory.isEnabled()
-        && factory.producesExportModules()) {
+          && !factory.getModuleName().toLowerCase().contains(ViewerConstants.SIARD)
+          && !factory.getModuleName().equalsIgnoreCase("internal-dbptke-export") && factory.isEnabled()
+          && factory.producesExportModules()) {
         if (factory.getModuleName().equals(moduleName)) {
           modules.add(getDatabaseModuleParameters(factory));
         }
@@ -508,8 +505,8 @@ public class SIARDController {
     Set<DatabaseModuleFactory> databaseModuleFactories = ReflectionUtils.collectDatabaseModuleFactories();
     for (DatabaseModuleFactory factory : databaseModuleFactories) {
       if (factory.isEnabled() && factory.producesImportModules()
-        && !factory.getModuleName().toLowerCase().contains(ViewerConstants.SIARD)
-        && !factory.getModuleName().equals("import-config")) {
+          && !factory.getModuleName().toLowerCase().contains(ViewerConstants.SIARD)
+          && !factory.getModuleName().equals("import-config")) {
         modules.add(getDatabaseModuleParameters(factory));
       }
     }
@@ -522,7 +519,7 @@ public class SIARDController {
     Set<DatabaseModuleFactory> databaseModuleFactories = ReflectionUtils.collectDatabaseModuleFactories();
     for (DatabaseModuleFactory factory : databaseModuleFactories) {
       if (factory.isEnabled() && factory.producesImportModules()
-        && !factory.getModuleName().toLowerCase().contains(ViewerConstants.SIARD)) {
+          && !factory.getModuleName().toLowerCase().contains(ViewerConstants.SIARD)) {
         if (factory.getModuleName().equals(moduleName)) {
           modules.add(getDatabaseModuleParameters(factory));
         }
@@ -562,8 +559,8 @@ public class SIARDController {
     PreservationParameter preservationParameter;
     for (Parameter parameter : factory.getParameters().getParameters()) {
       preservationParameter = new PreservationParameter(parameter.longName(), parameter.description(),
-        parameter.required(), parameter.hasArgument(), parameter.getInputType().name(),
-        parameter.getDefaultSelectedIndex());
+          parameter.required(), parameter.hasArgument(), parameter.getInputType().name(),
+          parameter.getDefaultSelectedIndex());
 
       if (parameter.getPossibleValues() != null) {
         preservationParameter.setPossibleValues(parameter.getPossibleValues());
@@ -590,7 +587,7 @@ public class SIARDController {
 
   private static String loadMetadataFromLocal(String databaseUUID, String localPath) throws GenericException {
     Path basePath = Paths.get(ViewerConfiguration.getInstance().getViewerConfigurationAsString("/",
-      ViewerConfiguration.PROPERTY_BASE_UPLOAD_PATH));
+        ViewerConfiguration.PROPERTY_BASE_UPLOAD_PATH));
     Path siardPath = basePath.resolve(localPath);
     convertSIARDMetadataToSolr(siardPath, databaseUUID);
     return databaseUUID;
@@ -606,7 +603,7 @@ public class SIARDController {
       SIARDEdition siardEdition = SIARDEdition.newInstance();
 
       siardEdition.editModule(new SIARDEditFactory()).editModuleParameter(SIARDEditFactory.PARAMETER_FILE,
-        Collections.singletonList(siardPath.toAbsolutePath().toString()));
+          Collections.singletonList(siardPath.toAbsolutePath().toString()));
 
       siardEdition.reporter(reporter);
 
@@ -639,11 +636,11 @@ public class SIARDController {
 
   private static void validateSIARDLocation(Path siardPath) throws GenericException {
     if (ViewerFactory.getViewerConfiguration().getApplicationEnvironment()
-      .equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
+        .equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
       LOGGER.info("starting to check if path: {} is valid", siardPath.toAbsolutePath());
       // Checks if path is within the internal SIARD file path
       final boolean internal = ViewerConfiguration.checkPathIsWithin(siardPath,
-        ViewerConfiguration.getInstance().getSIARDFilesPath());
+          ViewerConfiguration.getInstance().getSIARDFilesPath());
 
       if (internal) {
         if (!siardPath.toFile().exists()) {
@@ -652,7 +649,7 @@ public class SIARDController {
       } else {
         // checks if is on the property base path
         final boolean onBasePath = ViewerConfiguration.checkPathIsWithin(siardPath, Paths.get(ViewerConfiguration
-          .getInstance().getViewerConfigurationAsString("/", ViewerConfiguration.PROPERTY_BASE_UPLOAD_PATH)));
+            .getInstance().getViewerConfigurationAsString("/", ViewerConfiguration.PROPERTY_BASE_UPLOAD_PATH)));
         if (onBasePath) {
           if (!siardPath.toFile().exists()) {
             throw new GenericException("File not found");
@@ -667,7 +664,7 @@ public class SIARDController {
   public static String loadFromLocal(String localPath, String databaseUUID) throws GenericException {
     LOGGER.info("Preparing the SIARD to be browsable ({})", databaseUUID);
     Path basePath = Paths.get(ViewerConfiguration.getInstance().getViewerConfigurationAsString("/",
-      ViewerConfiguration.PROPERTY_BASE_UPLOAD_PATH));
+        ViewerConfiguration.PROPERTY_BASE_UPLOAD_PATH));
     try {
       Path siardPath = basePath.resolve(localPath);
       convertSIARDtoSolr(siardPath, databaseUUID);
@@ -695,11 +692,11 @@ public class SIARDController {
       databaseMigration.filterFactories(new ArrayList<>());
 
       databaseMigration.importModule(new SIARD2ModuleFactory())
-        .importModuleParameter(SIARD2ModuleFactory.PARAMETER_FILE, siardPath.toAbsolutePath().toString())
-        .importModuleParameter(SIARD2ModuleFactory.PARAMETER_IGNORE_LOBS, "true");
+          .importModuleParameter(SIARD2ModuleFactory.PARAMETER_FILE, siardPath.toAbsolutePath().toString())
+          .importModuleParameter(SIARD2ModuleFactory.PARAMETER_IGNORE_LOBS, "true");
 
       databaseMigration.exportModule(new DbvtkModuleFactory())
-        .exportModuleParameter(DbvtkModuleFactory.PARAMETER_DATABASE_UUID, databaseUUID);
+          .exportModuleParameter(DbvtkModuleFactory.PARAMETER_DATABASE_UUID, databaseUUID);
 
       databaseMigration.filter(new ObservableFilter(new SIARDProgressObserver(databaseUUID)));
 
@@ -719,7 +716,7 @@ public class SIARDController {
   }
 
   public static ViewerMetadata updateMetadataInformation(String databaseUUID, String siardPath,
-    SIARDUpdateParameters parameters, boolean updateOnModel) throws GenericException {
+                                                         SIARDUpdateParameters parameters, boolean updateOnModel) throws GenericException {
     LOGGER.info("Start the edit metadata process for {}, siard is located at {}", databaseUUID, siardPath);
     ViewerMetadata metadata = parameters.getMetadata();
     try (Reporter reporter = getReporter(databaseUUID, ReporterType.EDIT_METADATA)) {
@@ -728,8 +725,8 @@ public class SIARDController {
         SIARDEdition siardEdition = SIARDEdition.newInstance();
 
         siardEdition.editModule(new SIARDEditFactory())
-          .editModuleParameter(SIARDEditFactory.PARAMETER_FILE, Collections.singletonList(siardPath))
-          .editModuleParameter(SIARDEditFactory.PARAMETER_SET, bundleSiard.getCommandMapAsList());
+            .editModuleParameter(SIARDEditFactory.PARAMETER_FILE, Collections.singletonList(siardPath))
+            .editModuleParameter(SIARDEditFactory.PARAMETER_SET, bundleSiard.getCommandMapAsList());
 
         siardEdition.reporter(reporter);
         siardEdition.edit();
@@ -739,7 +736,7 @@ public class SIARDController {
       // Extract updated metadata
       SIARDEdition siardEdition = SIARDEdition.newInstance();
       siardEdition.editModule(new SIARDEditFactory()).editModuleParameter(SIARDEditFactory.PARAMETER_FILE,
-        Collections.singletonList(siardPath));
+          Collections.singletonList(siardPath));
       siardEdition.reporter(new NoOpReporter());
       DatabaseStructure updatedDatabaseStructure = siardEdition.getMetadata();
 
@@ -759,15 +756,15 @@ public class SIARDController {
   }
 
   public static boolean validateSIARD(String databaseUUID, String siardPath, String validationReportPath,
-    String allowedTypesPath, boolean skipAdditionalChecks) throws GenericException {
+                                      String allowedTypesPath, boolean skipAdditionalChecks) throws GenericException {
     boolean valid;
     LOGGER.info("Start the SIARD validation process for {}, SIARD is located at {}", databaseUUID, siardPath);
     try (Reporter reporter = getReporter(databaseUUID, ReporterType.VALIDATE)) {
       SIARDValidation siardValidation = SIARDValidation.newInstance();
       siardValidation.validateModule(new SIARDValidateFactory())
-        .validateModuleParameter(SIARDValidateFactory.PARAMETER_FILE, siardPath)
-        .validateModuleParameter(SIARDValidateFactory.PARAMETER_ALLOWED, allowedTypesPath)
-        .validateModuleParameter(SIARDValidateFactory.PARAMETER_REPORT, validationReportPath);
+          .validateModuleParameter(SIARDValidateFactory.PARAMETER_FILE, siardPath)
+          .validateModuleParameter(SIARDValidateFactory.PARAMETER_ALLOWED, allowedTypesPath)
+          .validateModuleParameter(SIARDValidateFactory.PARAMETER_REPORT, validationReportPath);
 
       if (skipAdditionalChecks) {
         siardValidation.validateModuleParameter(SIARDValidateFactory.PARAMETER_SKIP_ADDITIONAL_CHECKS, "true");
@@ -779,10 +776,10 @@ public class SIARDController {
         String dbptkVersion = ViewerConfiguration.getInstance().getDBPTKVersion();
         final DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
         solrManager.updateSIARDValidationInformation(databaseUUID, ViewerDatabaseValidationStatus.VALIDATION_RUNNING,
-          validationReportPath, dbptkVersion, new DateTime().toString());
+            validationReportPath, dbptkVersion, new DateTime().toString());
 
         System.setProperty("dbptk.memory.dir",
-          ViewerConfiguration.getInstance().getMapDBPath().toAbsolutePath().toString());
+            ViewerConfiguration.getInstance().getMapDBPath().toAbsolutePath().toString());
 
         valid = siardValidation.validate();
 
@@ -795,7 +792,7 @@ public class SIARDController {
         }
 
         solrManager.updateSIARDValidationInformation(databaseUUID, status, validationReportPath, dbptkVersion,
-          new DateTime().toString());
+            new DateTime().toString());
         LOGGER.info("Finish the SIARD validation process for {}, siard is located at {}", databaseUUID, siardPath);
       } catch (IOException e) {
         updateStatusValidate(databaseUUID, ViewerDatabaseValidationStatus.ERROR);
@@ -820,7 +817,7 @@ public class SIARDController {
   }
 
   public static void updateSIARDValidatorIndicators(String databaseUUID, String passed, String failed, String errors,
-    String warnings, String skipped) {
+                                                    String warnings, String skipped) {
     final DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
     solrManager.updateSIARDValidationIndicators(databaseUUID, passed, errors, failed, warnings, skipped);
   }
@@ -830,17 +827,23 @@ public class SIARDController {
     solrManager.updateSIARDValidationInformation(databaseUUID, status, null, null, new DateTime().toString());
   }
 
+  public static Set<String> updateDatabasePermissions(String databaseUUID, Set<String> permissions) throws GenericException, ViewerException {
+    final DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
+    solrManager.updateDatabasePermissions(databaseUUID, permissions);
+    return permissions;
+  }
+
   public static boolean deleteAll(String databaseUUID)
-    throws NotFoundException, GenericException, RequestNotValidException {
+      throws NotFoundException, GenericException, RequestNotValidException {
     final DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
 
     ViewerDatabase database = solrManager.retrieve(ViewerDatabase.class, databaseUUID);
 
     if (ViewerFactory.getViewerConfiguration().getApplicationEnvironment()
-      .equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
+        .equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
       String siardPath = database.getPath();
       final boolean deleteSiard = !ViewerConfiguration.getInstance().getViewerConfigurationAsBoolean(false,
-        ViewerConfiguration.PROPERTY_DISABLE_SIARD_DELETION);
+          ViewerConfiguration.PROPERTY_DISABLE_SIARD_DELETION);
       if (StringUtils.isNotBlank(siardPath) && Paths.get(siardPath).toFile().exists() && deleteSiard) {
         deleteSIARDFileFromPath(siardPath, databaseUUID);
       }
@@ -854,12 +857,12 @@ public class SIARDController {
     }
 
     if (database.getStatus().equals(ViewerDatabaseStatus.AVAILABLE)
-      || database.getStatus().equals(ViewerDatabaseStatus.ERROR)) {
+        || database.getStatus().equals(ViewerDatabaseStatus.ERROR)) {
       final String collectionName = SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX + databaseUUID;
       if (SolrClientFactory.get().deleteCollection(collectionName)) {
         Filter savedSearchFilter = new Filter(new SimpleFilterParameter(SOLR_SEARCHES_DATABASE_UUID, databaseUUID));
         SolrUtils.delete(ViewerFactory.getSolrClient(), SolrDefaultCollectionRegistry.get(SavedSearch.class),
-          savedSearchFilter);
+            savedSearchFilter);
 
         ViewerFactory.getSolrManager().markDatabaseCollection(databaseUUID, ViewerDatabaseStatus.METADATA_ONLY);
       }
@@ -886,7 +889,7 @@ public class SIARDController {
   }
 
   public static void deleteValidatorReportFileFromPath(String validatorReportPath, String databaseUUID)
-    throws GenericException {
+      throws GenericException {
     Path path = Paths.get(validatorReportPath);
     if (!path.toFile().exists()) {
       throw new GenericException("File not found at path: " + validatorReportPath);
@@ -917,7 +920,7 @@ public class SIARDController {
   }
 
   private static void setupJDBCConnection(final DatabaseMigration databaseMigration,
-    final ConnectionParameters parameters) throws GenericException {
+                                          final ConnectionParameters parameters) throws GenericException {
     DatabaseModuleFactory factory = getDatabaseImportModuleFactory(parameters.getModuleName());
 
     if (factory != null) {
@@ -936,9 +939,9 @@ public class SIARDController {
   }
 
   private static void setupSIARDExportModule(DatabaseMigration databaseMigration,
-    ExportOptionsParameters exportOptionsParameters, MetadataExportOptionsParameters metadataExportOptionsParameters) {
+                                             ExportOptionsParameters exportOptionsParameters, MetadataExportOptionsParameters metadataExportOptionsParameters) {
     final DatabaseModuleFactory databaseExportModuleFactory = getDatabaseExportModuleFactory(
-      exportOptionsParameters.getSiardVersion());
+        exportOptionsParameters.getSiardVersion());
 
     databaseMigration.exportModule(databaseExportModuleFactory);
 
@@ -1016,7 +1019,7 @@ public class SIARDController {
       parameters = factory.getConnectionParameters();
       for (Parameter param : parameters.getParameters()) {
         preservationParameter = new PreservationParameter(param.longName(), param.description(), param.required(),
-          param.hasArgument(), param.getInputType().name());
+            param.hasArgument(), param.getInputType().name());
         if (param.getFileFilter() != null) {
           preservationParameter.setFileFilter(param.getFileFilter().name());
         }
@@ -1029,7 +1032,7 @@ public class SIARDController {
       for (ParameterGroup pg : parameters.getGroups()) {
         for (Parameter param : pg.getParameters()) {
           preservationParameter = new PreservationParameter(param.longName(), param.description(), param.required(),
-            param.hasArgument(), param.getInputType().name());
+              param.hasArgument(), param.getInputType().name());
           if (param.getFileFilter() != null) {
             preservationParameter.setFileFilter(param.getFileFilter().name());
           }
@@ -1050,8 +1053,8 @@ public class SIARDController {
     for (Parameter param : parameters.getParameters()) {
       if (param.getExportOptions() != null) {
         preservationParameter = new PreservationParameter(param.longName(), param.description(), param.required(),
-          param.hasArgument(), param.getInputType().name(), param.getExportOptions().name(),
-          param.getDefaultSelectedIndex());
+            param.hasArgument(), param.getInputType().name(), param.getExportOptions().name(),
+            param.getDefaultSelectedIndex());
         if (param.getFileFilter() != null) {
           preservationParameter.setFileFilter(param.getFileFilter().name());
         }
@@ -1060,7 +1063,7 @@ public class SIARDController {
         }
       } else {
         preservationParameter = new PreservationParameter(param.longName(), param.description(), param.required(),
-          param.hasArgument(), param.getInputType().name(), param.getDefaultSelectedIndex());
+            param.hasArgument(), param.getInputType().name(), param.getDefaultSelectedIndex());
         if (param.getFileFilter() != null) {
           preservationParameter.setFileFilter(param.getFileFilter().name());
         }

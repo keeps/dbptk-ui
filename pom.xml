@@ -251,7 +251,8 @@
                                 -Djava.net.preferIPv4Stack=true
                                 -Djavax.xml.parsers.SAXParserFactory=org.apache.xerces.jaxp.SAXParserFactoryImpl -Dgwt.codeServerPort=9876
                                 -Djavax.xml.parsers.DocumentBuilderFactory=org.apache.xerces.jaxp.DocumentBuilderFactoryImpl
-                                -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005
+                                -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5006
+                                -Dserver.port=8082
                             </jvmArguments>
                         </configuration>
                     </plugin>

@@ -9,6 +9,7 @@ package com.databasepreservation.common.server.index.schema.collections;
 
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_BROWSE_LOAD_DATE;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_METADATA;
+import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_PERMISSIONS;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_SIARD_PATH;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_SIARD_SIZE;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABASES_SIARD_VERSION;
@@ -24,7 +25,9 @@ import static com.databasepreservation.common.client.ViewerConstants.SOLR_DATABA
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
@@ -85,6 +88,7 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_VALIDATION_WARNINGS, Field.TYPE_STRING));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_VALIDATION_SKIPPED, Field.TYPE_STRING));
     fields.add(newIndexedStoredNotRequiredField(SOLR_DATABASES_BROWSE_LOAD_DATE, Field.TYPE_STRING));
+    fields.add(new Field(SOLR_DATABASES_PERMISSIONS, Field.TYPE_STRING).setIndexed(true).setMultiValued(true));
 
     return fields;
   }
@@ -114,6 +118,9 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
     doc.addField(SOLR_DATABASES_VALIDATION_ERRORS, object.getValidationWarnings());
     doc.addField(SOLR_DATABASES_VALIDATION_WARNINGS, object.getValidationWarnings());
     doc.addField(SOLR_DATABASES_VALIDATION_SKIPPED, object.getValidationSkipped());
+    if(object.getPermissions() != null && !object.getPermissions().isEmpty()){
+      doc.addField(SOLR_DATABASES_PERMISSIONS, object.getPermissions());
+    }
     doc.addField(SOLR_DATABASES_BROWSE_LOAD_DATE, object.getLoadedAt());
 
     return doc;
@@ -124,7 +131,7 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
     ViewerDatabase viewerDatabase = super.fromSolrDocument(doc);
 
     viewerDatabase.setStatus(SolrUtils.objectToEnum(doc.get(SOLR_DATABASES_STATUS), ViewerDatabaseStatus.class,
-        ViewerDatabaseStatus.INGESTING));
+      ViewerDatabaseStatus.INGESTING));
 
     String jsonMetadata = SolrUtils.objectToString(doc.get(SOLR_DATABASES_METADATA), null);
     ViewerMetadata metadata = JsonTransformer.getObjectFromJson(jsonMetadata, ViewerMetadata.class);
@@ -138,12 +145,15 @@ public class DatabasesCollection extends AbstractSolrCollection<ViewerDatabase> 
     viewerDatabase.setValidatorReportPath(SolrUtils.objectToString(doc.get(SOLR_DATABASES_VALIDATOR_REPORT_PATH), ""));
     viewerDatabase.setValidatedVersion(SolrUtils.objectToString(doc.get(SOLR_DATABASES_VALIDATE_VERSION), ""));
     viewerDatabase.setValidationStatus(SolrUtils.objectToEnum(doc.get(SOLR_DATABASES_VALIDATION_STATUS),
-        ViewerDatabaseValidationStatus.class, ViewerDatabaseValidationStatus.NOT_VALIDATED));
+      ViewerDatabaseValidationStatus.class, ViewerDatabaseValidationStatus.NOT_VALIDATED));
     viewerDatabase.setValidationPassed(SolrUtils.objectToString(doc.get(SOLR_DATABASES_VALIDATION_PASSED), ""));
     viewerDatabase.setValidationErrors(SolrUtils.objectToString(doc.get(SOLR_DATABASES_VALIDATION_ERRORS), ""));
     viewerDatabase.setValidationWarnings(SolrUtils.objectToString(doc.get(SOLR_DATABASES_VALIDATION_WARNINGS), ""));
     viewerDatabase.setValidationSkipped(SolrUtils.objectToString(doc.get(SOLR_DATABASES_VALIDATION_SKIPPED), ""));
     viewerDatabase.setLoadedAt(SolrUtils.objectToString(doc.get(SOLR_DATABASES_BROWSE_LOAD_DATE), ""));
+    Set<String> permissions = new HashSet<>();
+    permissions.addAll(SolrUtils.objectToListString(doc.get(SOLR_DATABASES_PERMISSIONS)));
+    viewerDatabase.setPermissions(permissions);
 
     return viewerDatabase;
   }

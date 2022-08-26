@@ -9,7 +9,9 @@ package com.databasepreservation.common.client.models.status.database;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -26,26 +28,30 @@ public class DatabaseStatus implements Serializable {
   private SiardStatus siardStatus;
   private ValidationStatus validationStatus;
   private List<String> collections;
+  private Set<String> permissions;
 
   public DatabaseStatus() {
     collections = new ArrayList<>();
+    permissions = new HashSet<>();
   }
 
   public DatabaseStatus(String version, String id, SiardStatus siardStatus, ValidationStatus validationStatus,
-    List<String> collections) {
+    List<String> collections, Set<String> permissions ) {
     this.version = version;
     this.id = id;
     this.siardStatus = siardStatus;
     this.validationStatus = validationStatus;
     this.collections = collections;
+    this.permissions = permissions;
   }
 
-  public DatabaseStatus(DatabaseStatus status) {
+  public DatabaseStatus(DatabaseStatus status, Set<String> permissions) {
     this.version = status.getVersion();
     this.id = status.getId();
     this.siardStatus = status.getSiardStatus();
     this.validationStatus = status.getValidationStatus();
     this.collections = status.getCollections();
+    this.permissions = status.getPermissions();
   }
 
   public String getVersion() {
@@ -92,5 +98,13 @@ public class DatabaseStatus implements Serializable {
 
   public void addBrowseCollection(String collection) {
     this.collections.add(collection);
+  }
+
+  public Set<String> getPermissions() {
+    return permissions;
+  }
+
+  public void setPermissions(Set<String> permissions) {
+    this.permissions = permissions;
   }
 }

@@ -23,7 +23,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 @JsonPropertyOrder({"version", "id", "solrCollectionPrefix", "databaseUUID", "name", "description",
-  "consolidateProperty", "tables", "savedSearches", "denormalizations"})
+  "consolidateProperty", "tables", "savedSearches", "denormalizations", "permissions"})
 public class CollectionStatus implements Serializable {
 
   private String version;

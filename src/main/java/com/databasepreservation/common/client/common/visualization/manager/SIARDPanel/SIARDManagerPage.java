@@ -10,6 +10,7 @@ package com.databasepreservation.common.client.common.visualization.manager.SIAR
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.ContentPanel;
@@ -24,11 +25,14 @@ import com.databasepreservation.common.client.common.utils.ApplicationType;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.navigation.BrowseNavigationPanel;
 import com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.navigation.MetadataNavigationPanel;
+import com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.navigation.PermissionsNavigationPanel;
 import com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.navigation.SIARDNavigationPanel;
 import com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.navigation.ValidationNavigationPanel;
 import com.databasepreservation.common.client.index.IsIndexed;
+import com.databasepreservation.common.client.models.authorization.AuthorizationRules;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
+import com.databasepreservation.common.client.services.ContextService;
 import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.tools.BreadcrumbManager;
 import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
@@ -39,9 +43,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import config.i18n.client.ClientMessages;
@@ -58,6 +60,8 @@ public class SIARDManagerPage extends ContentPanel {
   private SIARDNavigationPanel siardNavigationPanel = null;
   private ValidationNavigationPanel validationNavigationPanel = null;
   private BrowseNavigationPanel browseNavigationPanel = null;
+
+  private PermissionsNavigationPanel permissionsNavigationPanel = null;
   private Boolean populationFieldsCompleted;
   private boolean initialized = false;
 
@@ -135,6 +139,15 @@ public class SIARDManagerPage extends ContentPanel {
 
     browseNavigationPanel = BrowseNavigationPanel.getInstance(database);
     navigationPanels.add(browseNavigationPanel.build());
+
+    if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
+      ContextService.Util.call((Set<AuthorizationRules> authorizationRules) -> {
+        permissionsNavigationPanel = PermissionsNavigationPanel.getInstance(database, authorizationRules);
+        if(permissionsNavigationPanel.hasPermissionsOrRules()){
+         navigationPanels.add(permissionsNavigationPanel.build());
+        }
+      }).getAuthorizationRuleList();
+    }
   }
 
   @Override
@@ -160,6 +173,12 @@ public class SIARDManagerPage extends ContentPanel {
       browseNavigationPanel.update(database);
       validationNavigationPanel.update(database);
 
+      if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
+        if(permissionsNavigationPanel.hasPermissionsOrRules()) {
+          permissionsNavigationPanel.update(database);
+        }
+      }
+
       loading.setVisible(false);
     }).retrieve(databaseUUID);
   }
@@ -167,7 +186,7 @@ public class SIARDManagerPage extends ContentPanel {
   private void createHeader() {
     mainHeader.clear();
     mainHeader.add(CommonClientUtils.getHeader(FontAwesomeIconManager.getTag(FontAwesomeIconManager.BOX_OPEN),
-        database.getMetadata().getName(), "h1"));
+      database.getMetadata().getName(), "h1"));
   }
 
   private void setupFooterButtons() {

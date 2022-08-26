@@ -47,6 +47,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.models.authorization.AuthorizationRuleList;
+import com.databasepreservation.common.client.models.authorization.AuthorizationRules;
 import com.databasepreservation.common.server.controller.ReporterType;
 import com.databasepreservation.common.utils.FilenameUtils;
 import com.databasepreservation.common.utils.ViewerAbstractConfiguration;
@@ -99,6 +101,12 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   public static final String PROPERTY_AUTHORIZATION_EMAIL_ATTRIBUTE = "user.attribute.email";
   public static final String PROPERTY_AUTHORIZATION_ROLES_ATTRIBUTE = "user.attribute.roles";
   public static final String PROPERTY_AUTHORIZATION_ADMINISTRATORS = "user.attribute.roles.administrators";
+  public static final String PROPERTY_COLLECTIONS_AUTHORIZATION = "lists.collections.authorizationRules[]";
+  public static final String PROPERTY_COLLECTIONS_AUTHORIZATION_LABEL = "label";
+  public static final String PROPERTY_COLLECTIONS_AUTHORIZATION_OPERATOR = "attributeOperator";
+  public static final String PROPERTY_COLLECTIONS_AUTHORIZATION_VALUE = "attributeValue";
+
+  public static final String PROPERTY_COLLECTIONS_AUTHORIZATION_OPERATOR_EQUAL = "EQUAL";
 
   public static final String SHARED_PROPERTY_WHITELIST_MESSAGES_PREFIX = "ui.sharedProperties.whitelist.messages.prefix";
   public static final String SHARED_PROPERTY_WHITELIST_MESSAGES_PROPERTY = "ui.sharedProperties.whitelist.messages.property";
@@ -114,7 +122,7 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   public static final String PROPERTY_BATCH_JOBS_MAX_POOL_SIZE = "batch.jobs.maxPoolSize";
   public static final String PROPERTY_BATCH_JOBS_QUEUE_SIZE = "batch.jobs.queueSize";
 
-  public static final String PROPERTY_BLOB_PREFIX_NAME ="ui.blob.prefix.name";
+  public static final String PROPERTY_BLOB_PREFIX_NAME = "ui.blob.prefix.name";
 
   private static boolean instantiatedWithoutErrors = true;
   private static String applicationEnvironment = ViewerConstants.APPLICATION_ENV_SERVER;
@@ -460,6 +468,26 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
         ViewerConfiguration.PROPERTY_FILTER_ONOFF_ALLOW_ALL_IPS);
     }
     return cachedWhitelistAllIPs;
+  }
+
+  public AuthorizationRuleList getCollectionsAuthorizationRules() {
+    List<String> authorizationsIds = getViewerConfigurationAsList(PROPERTY_COLLECTIONS_AUTHORIZATION);
+    AuthorizationRuleList authorizationRuleList = new AuthorizationRuleList();
+
+    for (String authorizationId : authorizationsIds) {
+      AuthorizationRules authorizationRules = new AuthorizationRules();
+
+      authorizationRules.setId(authorizationId);
+      authorizationRules.setLabel(getViewerConfigurationAsString("", PROPERTY_COLLECTIONS_AUTHORIZATION,
+        authorizationId, PROPERTY_COLLECTIONS_AUTHORIZATION_LABEL));
+      authorizationRules.setAttributeOperator(getViewerConfigurationAsString("", PROPERTY_COLLECTIONS_AUTHORIZATION,
+        authorizationId, PROPERTY_COLLECTIONS_AUTHORIZATION_OPERATOR));
+      authorizationRules.setAttributeValue(getViewerConfigurationAsString("", PROPERTY_COLLECTIONS_AUTHORIZATION,
+        authorizationId, PROPERTY_COLLECTIONS_AUTHORIZATION_VALUE));
+      authorizationRuleList.add(authorizationRules);
+    }
+
+    return authorizationRuleList;
   }
 
   public String getDBPTKVersion() throws IOException {
