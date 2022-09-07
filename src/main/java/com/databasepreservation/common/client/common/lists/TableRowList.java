@@ -11,6 +11,7 @@ import static com.databasepreservation.common.client.models.structure.ViewerType
 import static com.databasepreservation.common.client.models.structure.ViewerType.dbTypes.CLOB;
 import static com.databasepreservation.common.client.models.structure.ViewerType.dbTypes.NESTED;
 
+import com.databasepreservation.common.client.tools.ViewerCelllUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -53,7 +54,6 @@ import com.databasepreservation.common.client.services.CollectionService;
 import com.databasepreservation.common.client.tools.FilterUtils;
 import com.databasepreservation.common.client.tools.Humanize;
 import com.databasepreservation.common.client.tools.JSOUtils;
-import com.databasepreservation.common.client.tools.MimeTypeUtils;
 import com.databasepreservation.common.client.tools.NumberFormatUtils;
 import com.databasepreservation.common.client.tools.RestUtils;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
@@ -511,9 +511,9 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
         if (!configColumn.getType().equals(NESTED)) {
           fieldsToSolr.add(configColumn.getId());
           if (configColumn.getType().equals(BINARY)) {
-            ;
-            fieldsToSolr.add(MimeTypeUtils.getMimeTypeSolrName(configColumn.getId()));
-            fieldsToSolr.add(MimeTypeUtils.getFileExtensionSolrName(configColumn.getId()));
+            fieldsToSolr.add(ViewerCelllUtils.getMimeTypeSolrName(configColumn.getId()));
+            fieldsToSolr.add(ViewerCelllUtils.getFileExtensionSolrName(configColumn.getId()));
+            fieldsToSolr.add(ViewerCelllUtils.getStoreTypeSolrColumnName(configColumn.getId()));
           }
         }
         fieldsToHeader.add(configColumn.getId());

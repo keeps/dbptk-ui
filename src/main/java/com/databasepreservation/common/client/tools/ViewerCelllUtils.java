@@ -1,19 +1,11 @@
-/**
- * The contents of this file are subject to the license and copyright
- * detailed in the LICENSE file at the root of the source
- * tree and available online at
- *
- * https://github.com/keeps/dbptk-ui
- */
 package com.databasepreservation.common.client.tools;
 
 import com.databasepreservation.common.client.ViewerConstants;
 
 /**
- * @author Tiago Fraga <tfraga@keep.pt>
+ * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-
-public class MimeTypeUtils {
+public class ViewerCelllUtils {
 
   public static String getRowIndexTemplate() {
     return ViewerConstants.OPEN_TEMPLATE_ENGINE + ViewerConstants.TEMPLATE_LOB_ROW_INDEX
@@ -52,4 +44,11 @@ public class MimeTypeUtils {
     return ViewerConstants.SOLR_DYN_FILE_EXTENSION + ViewerConstants.SOLR_DYN_TEXT_GENERAL;
   }
 
+  public static String getStoreTypeSolrColumnName(String solrColumnName) {
+    return solrColumnName + ViewerConstants.SOLR_DYN_LOB_STORE_TYPE + ViewerConstants.SOLR_DYN_TEXT_GENERAL;
+  }
+
+  public static String getStoreTypeColumnSuffix() {
+    return ViewerConstants.SOLR_DYN_LOB_STORE_TYPE + ViewerConstants.SOLR_DYN_TEXT_GENERAL;
+  }
 }

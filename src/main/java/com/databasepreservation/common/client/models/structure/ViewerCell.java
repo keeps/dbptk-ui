@@ -16,6 +16,7 @@ public class ViewerCell implements Serializable {
   private String value;
   private String mimeType;
   private String fileExtension;
+  private ViewerLobStoreType storeType;
 
   public ViewerCell() {
   }
@@ -24,10 +25,16 @@ public class ViewerCell implements Serializable {
     this.value = value;
   }
 
-  public ViewerCell(String value, String mimeType, String fileExtension) {
+  public ViewerCell(String value, ViewerLobStoreType storeType) {
+    this.value = value;
+    this.storeType = storeType;
+  }
+
+  public ViewerCell(String value, String mimeType, String fileExtension, ViewerLobStoreType storeType) {
     this.value = value;
     this.mimeType = mimeType;
     this.fileExtension = fileExtension;
+    this.storeType = storeType;
   }
 
   /**
@@ -59,9 +66,17 @@ public class ViewerCell implements Serializable {
     this.fileExtension = fileExtension;
   }
 
+  public ViewerLobStoreType getStoreType() {
+    return storeType;
+  }
+
+  public void setStoreType(ViewerLobStoreType storeType) {
+    this.storeType = storeType;
+  }
+
   @Override
   public String toString() {
     return "ViewerCell{" + "value='" + value + '\'' + ", mimeType='" + mimeType + '\'' + ", fileExtension='"
-      + fileExtension + '\'' + '}';
+      + fileExtension + '\'' + ", lobType=" + storeType + '}';
   }
 }

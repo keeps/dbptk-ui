@@ -27,7 +27,6 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 
-import com.databasepreservation.common.client.ViewerConstants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;

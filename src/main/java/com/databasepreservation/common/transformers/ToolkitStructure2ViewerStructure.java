@@ -7,11 +7,14 @@
  */
 package com.databasepreservation.common.transformers;
 
+import com.databasepreservation.common.client.models.structure.ViewerLobStoreType;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -806,6 +809,9 @@ public class ToolkitStructure2ViewerStructure {
             .setExternalLob(false);
           String index = getRowIndex(cell.getId());
           String lobName = ViewerConstants.SIARD_RECORD_PREFIX + index + ViewerConstants.SIARD_LOB_FILE_EXTENSION;
+          actualViewerRow.addLobType(
+              collectionConfiguration.getTableStatusByTableId(table.getId()).getColumnByIndex(colIndex).getId(),
+              ViewerLobStoreType.EXTERNALLY);
 
           detectMimeType(actualViewerRow, result, databasePath, collectionConfiguration, table, colIndex, lobName,
             true);
@@ -825,6 +831,9 @@ public class ToolkitStructure2ViewerStructure {
         String lobName = ViewerConstants.SIARD_RECORD_PREFIX + index + ViewerConstants.SIARD_LOB_FILE_EXTENSION;
         result.setValue(siardFilesPath.relativize(lobPath).normalize().toString());
         collectionConfiguration.getTableStatusByTableId(table.getId()).getColumnByIndex(colIndex).setExternalLob(true);
+        actualViewerRow.addLobType(
+            collectionConfiguration.getTableStatusByTableId(table.getId()).getColumnByIndex(colIndex).getId(),
+            ViewerLobStoreType.EXTERNALLY);
 
         detectMimeType(actualViewerRow, result, databasePath, collectionConfiguration, table, colIndex, lobName, false);
 
@@ -834,9 +843,11 @@ public class ToolkitStructure2ViewerStructure {
         String lobName = ViewerConstants.SIARD_RECORD_PREFIX + index + ViewerConstants.SIARD_LOB_FILE_EXTENSION;
         result.setValue(lobName);
         collectionConfiguration.getTableStatusByTableId(table.getId()).getColumnByIndex(colIndex).setExternalLob(false);
+        actualViewerRow.addLobType(
+          collectionConfiguration.getTableStatusByTableId(table.getId()).getColumnByIndex(colIndex).getId(),
+          ViewerLobStoreType.INTERNALLY);
 
         detectMimeType(actualViewerRow, result, databasePath, collectionConfiguration, table, colIndex, lobName, true);
-
       }
     } else if (cell instanceof ComposedCell) {
       ComposedCell composedCell = (ComposedCell) cell;
@@ -890,7 +901,9 @@ public class ToolkitStructure2ViewerStructure {
         inputStream = new ByteArrayInputStream(Base64.decodeBase64(lobCellValue.getBytes()));
       } else {
         lobCellValue = cell.getValue();
-        inputStream = new FileInputStream(lobCellValue);
+        final Path lobPath = Paths.get(lobCellValue);
+        final Path completeLobPath = ViewerFactory.getViewerConfiguration().getSIARDFilesPath().resolve(lobPath);
+        inputStream = Files.newInputStream(completeLobPath);
       }
 
       mimeType = tika.detect(inputStream);
@@ -901,7 +914,9 @@ public class ToolkitStructure2ViewerStructure {
           if (blobIsInsideSiard) {
             inputStream = zipFile.getInputStream(entry);
           } else {
-            inputStream = new FileInputStream(lobCellValue);
+            final Path lobPath = Paths.get(lobCellValue);
+            final Path completeLobPath = ViewerFactory.getViewerConfiguration().getSIARDFilesPath().resolve(lobPath);
+            inputStream = Files.newInputStream(completeLobPath);
           }
 
           AutoDetectParser parser = new AutoDetectParser();

@@ -7,6 +7,7 @@
  */
 package com.databasepreservation.common.api.utils;
 
+import com.databasepreservation.common.client.tools.ViewerCelllUtils;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -14,7 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.databasepreservation.common.client.tools.MimeTypeUtils;
 import com.databasepreservation.common.utils.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -103,7 +103,7 @@ public class HandlebarsUtils {
     Map<String, String> map = cellsToObject(row.getCells(), tableConfiguration, row.getUuid(), columnIndex);
     final String template = tableConfiguration.getColumnByIndex(columnIndex).getApplicationType();
 
-    if (ViewerStringUtils.isBlank(template) || !template.equals(MimeTypeUtils.getAutoDetectMimeTypeTemplate())) {
+    if (ViewerStringUtils.isBlank(template) || !template.equals(ViewerCelllUtils.getAutoDetectMimeTypeTemplate())) {
       return null;
     }
 

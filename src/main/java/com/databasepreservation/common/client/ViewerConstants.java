@@ -233,6 +233,8 @@ public class ViewerConstants {
   public static final String SOLR_DYN_MIMETYPE = "_mimetype";
   public static final String SOLR_DYN_FILE_EXTENSION = "_fileExtension";
 
+  public static final String SOLR_DYN_LOB_STORE_TYPE = "_store";
+
   // indexed, stored, multiValued
   public static final String SOLR_DYN_BOOLEANS = "_bs";
   public static final String SOLR_DYN_DATES = "_dts";

@@ -12,10 +12,12 @@ import static com.databasepreservation.common.client.ViewerConstants.SOLR_ROWS_N
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_ROWS_TABLE_ID;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_ROWS_TABLE_UUID;
 
+import com.databasepreservation.common.client.models.structure.ViewerLobStoreType;
+import com.databasepreservation.common.client.tools.ViewerCelllUtils;
 import java.util.*;
 
 import com.databasepreservation.common.client.models.structure.ViewerMimeType;
-import com.databasepreservation.common.client.tools.MimeTypeUtils;
+import java.util.Map.Entry;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;
@@ -97,14 +99,18 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
     for (Map.Entry<String, ViewerMimeType> cellEntry : row.getColsMimeTypeList().entrySet()) {
       String solrColumnName = cellEntry.getKey();
 
-      String mimeTypeField = MimeTypeUtils.getMimeTypeSolrName(solrColumnName);
+      String mimeTypeField = ViewerCelllUtils.getMimeTypeSolrName(solrColumnName);
       String mimeType = cellEntry.getValue().getMimeType();
 
-      String fileExtensionField = MimeTypeUtils.getFileExtensionSolrName(solrColumnName);
+      String fileExtensionField = ViewerCelllUtils.getFileExtensionSolrName(solrColumnName);
       String fileExtension = cellEntry.getValue().getFileExtension();
 
       doc.addField(mimeTypeField, mimeType);
       doc.addField(fileExtensionField, fileExtension);
+    }
+
+    for (Entry<String, ViewerLobStoreType> entry : row.getColsLobTypeList().entrySet()) {
+      doc.addField(ViewerCelllUtils.getStoreTypeSolrColumnName(entry.getKey()), entry.getValue().toString());
     }
 
     return doc;
@@ -199,17 +205,20 @@ public class RowsCollection extends AbstractSolrCollection<ViewerRow> {
         viewerCell = Optional.of(new ViewerCell(value.toString()));
       }
     } else if (columnName.startsWith(ViewerConstants.SOLR_INDEX_ROW_LOB_COLUMN_NAME_PREFIX)) {
-      if (!columnName.endsWith(MimeTypeUtils.getMimeTypeSuffix())
-        && !columnName.endsWith(MimeTypeUtils.getFileExtensionSuffix())) {
+      if (!columnName.endsWith(ViewerCelllUtils.getMimeTypeSuffix())
+        && !columnName.endsWith(ViewerCelllUtils.getFileExtensionSuffix())
+        && !columnName.endsWith(ViewerCelllUtils.getStoreTypeColumnSuffix())) {
 
-        Object mimeTypeObj = doc.get(MimeTypeUtils.getMimeTypeSolrName(columnName));
-        Object fileExtensionObj = doc.get(MimeTypeUtils.getFileExtensionSolrName(columnName));
+        Object mimeTypeObj = doc.get(ViewerCelllUtils.getMimeTypeSolrName(columnName));
+        Object fileExtensionObj = doc.get(ViewerCelllUtils.getFileExtensionSolrName(columnName));
+        ViewerLobStoreType storeType = SolrUtils.objectToEnum(doc.get(ViewerCelllUtils.getStoreTypeSolrColumnName(columnName)),
+          ViewerLobStoreType.class, ViewerLobStoreType.INTERNALLY);
 
         if (mimeTypeObj != null && fileExtensionObj != null) {
           viewerCell = Optional
-            .of(new ViewerCell(value.toString(), mimeTypeObj.toString(), fileExtensionObj.toString()));
+            .of(new ViewerCell(value.toString(), mimeTypeObj.toString(), fileExtensionObj.toString(), storeType));
         } else {
-          viewerCell = Optional.of(new ViewerCell(value.toString()));
+          viewerCell = Optional.of(new ViewerCell(value.toString(), storeType));
         }
 
       }

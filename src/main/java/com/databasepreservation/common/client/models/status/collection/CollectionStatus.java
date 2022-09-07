@@ -7,6 +7,7 @@
  */
 package com.databasepreservation.common.client.models.status.collection;
 
+import com.databasepreservation.common.client.tools.ViewerCelllUtils;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -15,7 +16,6 @@ import java.util.Set;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.search.SavedSearch;
-import com.databasepreservation.common.client.tools.MimeTypeUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
@@ -298,13 +298,13 @@ public class CollectionStatus implements Serializable {
 
   public void updateColumnMimeType(String uuid, int colIndex) {
     ColumnStatus columnStatus = getTableStatus(uuid).getColumnByIndex(colIndex);
-    columnStatus.setApplicationType(MimeTypeUtils.getAutoDetectMimeTypeTemplate());
+    columnStatus.setApplicationType(ViewerCelllUtils.getAutoDetectMimeTypeTemplate());
   }
 
   public void updateLobFileName(String uuid, int colIndex) {
     ColumnStatus columnStatus = getTableStatus(uuid).getColumnByIndex(colIndex);
-    String template = ViewerConstants.SIARD_RECORD_PREFIX + "_" + MimeTypeUtils.getRowIndexTemplate() + "_"
-      + MimeTypeUtils.getColIndexTemplate() + MimeTypeUtils.getAutoDetectedExtensionTemplate();
+    String template = ViewerConstants.SIARD_RECORD_PREFIX + "_" + ViewerCelllUtils.getRowIndexTemplate() + "_"
+      + ViewerCelllUtils.getColIndexTemplate() + ViewerCelllUtils.getAutoDetectedExtensionTemplate();
     columnStatus.getExportStatus().getTemplateStatus().setTemplate(template);
   }
 }

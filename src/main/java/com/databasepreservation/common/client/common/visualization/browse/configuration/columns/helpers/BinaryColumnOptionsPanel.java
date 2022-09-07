@@ -14,11 +14,9 @@ import com.databasepreservation.common.client.common.utils.ApplicationTypeAction
 import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.status.collection.TemplateStatus;
-import com.databasepreservation.common.client.tools.MimeTypeUtils;
+import com.databasepreservation.common.client.tools.ViewerCelllUtils;
 import com.databasepreservation.common.client.tools.ViewerStringUtils;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.*;
@@ -117,7 +115,7 @@ public class BinaryColumnOptionsPanel extends ColumnOptionsPanel {
 
   public String getApplicationType() {
     if (autoDetectRadioBtn.getValue()) {
-      return MimeTypeUtils.getAutoDetectMimeTypeTemplate();
+      return ViewerCelllUtils.getAutoDetectMimeTypeTemplate();
     } else {
       return applicationTypeValue.getText();
     }
@@ -152,7 +150,7 @@ public class BinaryColumnOptionsPanel extends ColumnOptionsPanel {
     applicationTypeBtnPanel.add(staticValueRadioBtn);
     applicationTypeBtnPanel.add(autoDetectRadioBtn);
 
-    if (MimeTypeUtils.getAutoDetectMimeTypeTemplate().equals(columnConfiguration.getApplicationType())) {
+    if (ViewerCelllUtils.getAutoDetectMimeTypeTemplate().equals(columnConfiguration.getApplicationType())) {
       autoDetectRadioBtn.setValue(true);
       applicationTypeValue.setVisible(false);
       applicationTypeValue.setText("");
@@ -164,7 +162,7 @@ public class BinaryColumnOptionsPanel extends ColumnOptionsPanel {
 
     autoDetectRadioBtn.addClickHandler(clickEvent -> {
       applicationTypeValue.setVisible(false);
-      if (MimeTypeUtils.getAutoDetectMimeTypeTemplate().equals(columnConfiguration.getApplicationType())) {
+      if (ViewerCelllUtils.getAutoDetectMimeTypeTemplate().equals(columnConfiguration.getApplicationType())) {
         applicationTypeValue.setText(ViewerConstants.MEDIA_TYPE_APPLICATION_OCTET_STREAM);
       } else {
         applicationTypeValue.setText(columnConfiguration.getApplicationType());
@@ -173,7 +171,7 @@ public class BinaryColumnOptionsPanel extends ColumnOptionsPanel {
 
     staticValueRadioBtn.addClickHandler(clickEvent -> {
       applicationTypeValue.setVisible(true);
-      if (MimeTypeUtils.getAutoDetectMimeTypeTemplate().equals(columnConfiguration.getApplicationType())) {
+      if (ViewerCelllUtils.getAutoDetectMimeTypeTemplate().equals(columnConfiguration.getApplicationType())) {
         applicationTypeValue.setText(ViewerConstants.MEDIA_TYPE_APPLICATION_OCTET_STREAM);
       } else {
         applicationTypeValue.setText(columnConfiguration.getApplicationType());

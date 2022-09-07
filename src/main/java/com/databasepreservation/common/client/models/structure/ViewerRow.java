@@ -10,12 +10,7 @@ package com.databasepreservation.common.client.models.structure;
 import java.util.*;
 
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.common.utils.JavascriptUtils;
 import com.databasepreservation.common.client.index.IsIndexed;
-import com.databasepreservation.common.client.models.status.collection.ColumnStatus;
-import com.databasepreservation.common.client.models.status.collection.TableStatus;
-import com.databasepreservation.common.client.tools.JSOUtils;
-import com.google.gwt.core.client.GWT;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -31,10 +26,13 @@ public class ViewerRow extends IsIndexed {
   private String nestedOriginalUUID;
   private Map<String, ViewerMimeType> colsMimeTypeList;
 
+  private Map<String, ViewerLobStoreType> colsLobTypeList;
+
   public ViewerRow() {
     cells = new LinkedHashMap<>();
     nestedRowList = new ArrayList<>();
     colsMimeTypeList = new HashMap<>();
+    colsLobTypeList = new HashMap<>();
   }
 
   @Override
@@ -151,12 +149,20 @@ public class ViewerRow extends IsIndexed {
     return colsMimeTypeList;
   }
 
+  public Map<String, ViewerLobStoreType> getColsLobTypeList() {
+    return colsLobTypeList;
+  }
+
   public void setColsMimeTypeList(Map<String, ViewerMimeType> colsMimeTypeList) {
     this.colsMimeTypeList = colsMimeTypeList;
   }
 
   public void addMimeTypeListEntry(String colName, ViewerMimeType viewerMimeType) {
     this.colsMimeTypeList.put(colName, viewerMimeType);
+  }
+
+  public void addLobType(String colName, ViewerLobStoreType lobType) {
+    this.colsLobTypeList.put(colName, lobType);
   }
 
 }

@@ -12,7 +12,6 @@ import java.nio.file.Path;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
-import com.databasepreservation.common.server.ViewerConfiguration;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
