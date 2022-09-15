@@ -1,5 +1,6 @@
 package com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.navigation;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -9,22 +10,27 @@ import com.databasepreservation.common.client.common.NavigationPanel;
 import com.databasepreservation.common.client.common.NoAsyncCallback;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.fields.MetadataField;
+import com.databasepreservation.common.client.common.lists.columns.TooltipColumn;
 import com.databasepreservation.common.client.common.lists.widgets.BasicTablePanel;
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
+import com.databasepreservation.common.client.common.utils.html.LabelUtils;
 import com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.SIARDManagerPage;
-import com.databasepreservation.common.client.models.authorization.AuthorizationRules;
+import com.databasepreservation.common.client.models.authorization.AuthorizationGroups;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.widgets.Alert;
 import com.databasepreservation.common.client.widgets.Toast;
 import com.google.gwt.cell.client.CheckboxCell;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.cellview.client.Column;
-import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 
+import com.google.gwt.user.client.ui.Widget;
 import config.i18n.client.ClientMessages;
 
 /**
@@ -34,147 +40,217 @@ public class PermissionsNavigationPanel {
   private static final ClientMessages messages = GWT.create(ClientMessages.class);
 
   private static Map<String, PermissionsNavigationPanel> instances = new HashMap<>();
-  private Set<AuthorizationRules> rules;
+
   private ViewerDatabase database;
-  private MetadataField permissionsList;
+  private Set<String> databasePermissions;
+  private Set<AuthorizationGroups> groups;
+  private boolean hasPermissionsOrGroups = true;
+  private FlowPanel body;
+  private FlowPanel bottom;
   private Button btnEdit;
 
-  private boolean hasPermissionsOrRules = true;
+  private boolean overrideMissingGroups = false;
 
-  public static PermissionsNavigationPanel getInstance(ViewerDatabase database,
-    Set<AuthorizationRules> authorizationRules) {
+  public static PermissionsNavigationPanel getInstance(ViewerDatabase database, Set<String> databasePermissions,
+    Set<AuthorizationGroups> authorizationGroups) {
     return instances.computeIfAbsent(database.getUuid(),
-      k -> new PermissionsNavigationPanel(database, authorizationRules));
+      k -> new PermissionsNavigationPanel(database, databasePermissions, authorizationGroups));
   }
 
-  public PermissionsNavigationPanel(ViewerDatabase database, Set<AuthorizationRules> authorizationRules) {
+  public PermissionsNavigationPanel(ViewerDatabase database, Set<String> databasePermissions,
+    Set<AuthorizationGroups> authorizationGroups) {
     this.database = database;
-    this.rules = authorizationRules;
-    if (database.getPermissions().isEmpty() && rules.isEmpty()) {
-      this.hasPermissionsOrRules = false;
+    this.groups = authorizationGroups;
+    this.databasePermissions = databasePermissions;
+    if (databasePermissions.isEmpty() && groups.isEmpty()) {
+      this.hasPermissionsOrGroups = false;
     }
   }
 
-  public boolean hasPermissionsOrRules() {
-    return hasPermissionsOrRules;
+  public boolean hasPermissionsOrGroups() {
+    return hasPermissionsOrGroups;
   }
 
   public NavigationPanel build() {
     NavigationPanel panel = NavigationPanel.createInstance(messages.SIARDHomePageOptionsHeaderForPermissions());
     panel.addToDescriptionPanel(messages.SIARDHomePageOptionsDescriptionForPermissions());
+    body = new FlowPanel();
+    bottom = new FlowPanel();
+    panel.addToInfoPanel(body);
+    panel.addButton(bottom);
 
-    btnEdit = new Button();
-    btnEdit.setText(messages.basicActionEditPermissions());
-    btnEdit.addStyleName("btn btn-outline-primary btn-edit");
-
-    btnEdit.addClickHandler(clickEvent -> {
-      Dialogs.showCustomConfirmationDialog(messages.SIARDHomePageDialogTitleForPermissionsList(),
-        messages.SIARDHomePageDialogDescriptionForPermissionsList(), "500px", getPermissionListTable(),
-        messages.basicActionCancel(), messages.basicActionConfirm(), new NoAsyncCallback<Boolean>() {
-          @Override
-          public void onSuccess(Boolean confirmation) {
-            if (confirmation) {
-              DatabaseService.Util.call((Set<String> result) -> {
-                SIARDManagerPage.getInstance(database).refreshInstance(database.getUuid());
-                Toast.showInfo(messages.SIARDHomePageDialogTitleForPermissionsList(),
-                  messages.SIARDHomePageDialogMessageForPermissionsList());
-              }).updatePermissions(database.getUuid(), database.getPermissions());
-            }
-          }
-        });
-    });
-
-    // Permission list
-    permissionsList = MetadataField.createInstance(messages.SIARDHomePageLabelForPermissionsRoles(),
-      buildPermissionList());
-    permissionsList.setCSS(null, "label-field", "value-field");
-
-    panel.addToInfoPanel(permissionsList);
-    if (rules.isEmpty()) {
-      panel.addButton(new Alert(Alert.MessageAlertType.WARNING,
-        "To edit the permissions it is necessary to configure the application with a list of authorization rules."));
-    } else {
-      panel.addButton(CommonClientUtils.wrapOnDiv("btn-item", btnEdit));
-    }
+    update(databasePermissions);
 
     return panel;
   }
 
-  public void update(ViewerDatabase database) {
-    this.database = database;
-    permissionsList.getMetadataValue().setText(buildPermissionList());
+  public void update(Set<String> databasePermissions) {
+    this.databasePermissions = databasePermissions;
+    updateBody();
+    updateBottom();
   }
 
-  private String buildPermissionList() {
-    Set<String> permissionList = new HashSet<>();
-    for (String databasePermission : database.getPermissions()) {
-      boolean foundRule = false;
-      for (AuthorizationRules rule : rules) {
-        if(databasePermission.equals(rule.getAttributeValue())){
-          permissionList.add(rule.getLabel());
-          foundRule = true;
-          break;
+  private void updateBody() {
+    body.clear();
+    if (databasePermissions.isEmpty()) {
+      body.add(new Alert(Alert.MessageAlertType.WARNING, messages.SIARDHomePageTextForMissingDatabasePermissions()));
+    } else {
+      ArrayList<String> permissionOrGroupsList = new ArrayList<>();
+      // Add the corresponding label to the permission
+      for (AuthorizationGroups authorizationGroups : groups) {
+        if (databasePermissions.contains(authorizationGroups.getAttributeValue())) {
+          permissionOrGroupsList.add(authorizationGroups.getLabel());
         }
       }
-      if(!foundRule){
-        permissionList.add(databasePermission);
-      }
-    }
 
-    return String.join(", ", permissionList);
+      SafeHtmlBuilder safeHtmlBuilder = new SafeHtmlBuilder();
+      for (String permission : permissionOrGroupsList) {
+        safeHtmlBuilder.append(LabelUtils.getDatabasePermission(permission, true));
+      }
+
+      // Add all permissions that do not contain groups
+      for (String missingGroupForPermission : retrieveMissingGroups()) {
+        safeHtmlBuilder.append(LabelUtils.getDatabasePermission(missingGroupForPermission, false));
+      }
+
+      MetadataField groupMetadataField = MetadataField.createInstance(messages.SIARDHomePageLabelForPermissionsRoles(),
+        safeHtmlBuilder.toSafeHtml());
+      groupMetadataField.setCSS(null, "label-field", "value-field metadata_field_flex");
+      body.add(groupMetadataField);
+    }
   }
 
-  private FlowPanel getPermissionListTable() {
-    FlowPanel permissionListPanel = new FlowPanel();
+  private void updateBottom() {
+    bottom.clear();
+    if (groups.isEmpty()) {
+      bottom.add(
+        new Alert(Alert.MessageAlertType.WARNING, messages.SIARDHomePageTextForMissingAuthorizationGroupsProperties()));
+    } else {
+      btnEdit = new Button();
+      btnEdit.setText(messages.basicActionEditPermissions());
+      btnEdit.addStyleName("btn btn-outline-primary btn-edit");
 
-    Column<AuthorizationRules, Boolean> checkbox = new Column<AuthorizationRules, Boolean>(
+      btnEdit.addClickHandler(clickEvent -> {
+        overrideMissingGroups = false;
+        Dialogs.showCustomConfirmationDialog(messages.SIARDHomePageDialogTitleForPermissionsList(),
+          messages.SIARDHomePageDialogDescriptionForPermissionsList(), "620px", getGroupsTable(),
+          messages.basicActionCancel(), messages.basicActionConfirm(), new NoAsyncCallback<Boolean>() {
+            @Override
+            public void onSuccess(Boolean confirmation) {
+              if (confirmation) {
+                if (overrideMissingGroups) {
+                  databasePermissions.removeAll(retrieveMissingGroups());
+                }
+                DatabaseService.Util.call((Set<String> result) -> {
+                  SIARDManagerPage.getInstance(database).refreshInstance(database.getUuid());
+                  Toast.showInfo(messages.SIARDHomePageDialogTitleForPermissionsList(),
+                    messages.SIARDHomePageDialogMessageForPermissionsList());
+                }).updateDatabasePermissions(database.getUuid(), databasePermissions);
+              }
+            }
+          });
+      });
+      bottom.add(CommonClientUtils.wrapOnDiv("btn-item", btnEdit));
+    }
+  }
+
+  private FlowPanel getGroupsTable() {
+    FlowPanel permissionListPanel = new FlowPanel();
+    permissionListPanel
+      .add(new Alert(Alert.MessageAlertType.INFO, messages.SIARDHomePageDialogDetailsForPermissionsList()));
+
+    Column<AuthorizationGroups, Boolean> checkbox = new Column<AuthorizationGroups, Boolean>(
       new CheckboxCell(true, true)) {
       @Override
-      public Boolean getValue(AuthorizationRules rule) {
-        return database.getPermissions().contains(rule.getId());
+      public Boolean getValue(AuthorizationGroups group) {
+        return databasePermissions.contains(group.getAttributeValue());
       }
     };
 
-    checkbox.setFieldUpdater((index, rule, value) -> {
+    checkbox.setFieldUpdater((index, group, value) -> {
       if (value) {
-        if (!database.getPermissions().contains(rule.getId())) {
-          database.getPermissions().add(rule.getId());
+        // Add
+        if (!databasePermissions.contains(group.getAttributeValue())) {
+          databasePermissions.add(group.getAttributeValue());
         }
       } else {
-        if (database.getPermissions().contains(rule.getId())) {
-          database.getPermissions().remove(rule.getId());
+        // Remove
+        if (databasePermissions.contains(group.getAttributeValue())) {
+          databasePermissions.remove(group.getAttributeValue());
         }
       }
     });
 
-    BasicTablePanel<AuthorizationRules> cellTable = new BasicTablePanel<>(new FlowPanel(),
-      SafeHtmlUtils.EMPTY_SAFE_HTML, rules.iterator(),
-      new BasicTablePanel.ColumnInfo<AuthorizationRules>("", 3, checkbox),
-      new BasicTablePanel.ColumnInfo<AuthorizationRules>(messages.SIARDHomePageLabelForPermissionsTableRuleLabel(), 0,
-        new TextColumn<AuthorizationRules>() {
+    BasicTablePanel<AuthorizationGroups> cellTable = new BasicTablePanel<>(new FlowPanel(),
+      SafeHtmlUtils.EMPTY_SAFE_HTML, groups.iterator(),
+      new BasicTablePanel.ColumnInfo<AuthorizationGroups>("", 3, checkbox),
+      new BasicTablePanel.ColumnInfo<AuthorizationGroups>(messages.SIARDHomePageLabelForPermissionsTableGroupLabel(), 7,
+        new TooltipColumn<AuthorizationGroups>() {
           @Override
-          public String getValue(AuthorizationRules rule) {
-            return rule.getLabel();
+          public SafeHtml getValue(AuthorizationGroups group) {
+            return SafeHtmlUtils.fromString(group.getLabel());
           }
-        }),
-      new BasicTablePanel.ColumnInfo<AuthorizationRules>(
-        messages.SIARDHomePageLabelForPermissionsTableRuleAttributeOperator(), 0, new TextColumn<AuthorizationRules>() {
+        }, "force_column_ellipsis"),
+      new BasicTablePanel.ColumnInfo<AuthorizationGroups>(
+        messages.SIARDHomePageLabelForPermissionsTableGroupAttributeName(), 7, new TooltipColumn<AuthorizationGroups>() {
           @Override
-          public String getValue(AuthorizationRules rule) {
-            return rule.getAttributeOperator();
+          public SafeHtml getValue(AuthorizationGroups group) {
+            return SafeHtmlUtils.fromString(group.getAttributeName());
           }
-        }),
-      new BasicTablePanel.ColumnInfo<AuthorizationRules>(
-        messages.SIARDHomePageLabelForPermissionsTableRuleAttributeValue(), 0, new TextColumn<AuthorizationRules>() {
+        }, "force_column_ellipsis"),
+      new BasicTablePanel.ColumnInfo<AuthorizationGroups>(
+        messages.SIARDHomePageLabelForPermissionsTableGroupAttributeOperator(), 7,
+        new TooltipColumn<AuthorizationGroups>() {
           @Override
-          public String getValue(AuthorizationRules rule) {
-            return rule.getAttributeValue();
+          public SafeHtml getValue(AuthorizationGroups group) {
+            return SafeHtmlUtils.fromString(group.getAttributeOperator());
           }
-        }));
+        }, "force_column_ellipsis"),
+      new BasicTablePanel.ColumnInfo<AuthorizationGroups>(
+        messages.SIARDHomePageLabelForPermissionsTableGroupAttributeValue(), 0, new TooltipColumn<AuthorizationGroups>() {
+          @Override
+          public SafeHtml getValue(AuthorizationGroups group) {
+            return SafeHtmlUtils.fromString(group.getAttributeValue());
+          }
+        }, "force_column_ellipsis"));
 
     permissionListPanel.add(cellTable);
-    permissionListPanel
-      .add(new Alert(Alert.MessageAlertType.INFO, messages.SIARDHomePageDialogDetailsForPermissionsList()));
+    Set<String> missingGroups = retrieveMissingGroups();
+    if (!missingGroups.isEmpty()) {
+      CheckBox checkBoxOverrideMissingGroups = new CheckBox();
+      checkBoxOverrideMissingGroups.setValue(false);
+      checkBoxOverrideMissingGroups.setText(messages.SIARDHomePageDialogActionForOverridePermissions());
+      checkBoxOverrideMissingGroups.addValueChangeHandler(event -> {
+        if (event.getValue()) {
+          overrideMissingGroups = true;
+        } else {
+          overrideMissingGroups = false;
+        }
+      });
+      Alert alert = new Alert(Alert.MessageAlertType.WARNING,
+          messages.SIARDHomePageDialogDetailsForUnknownPermissions(String.join(", ", missingGroups)), checkBoxOverrideMissingGroups);
+
+      permissionListPanel.add(alert);
+
+    }
     return permissionListPanel;
+  }
+
+  private Set<String> retrieveMissingGroups() {
+    // Checking for database permissions that doesn't have any registered groups
+    Set<String> missingGroups = new HashSet<>();
+    for (String permission : databasePermissions) {
+      boolean foundGroup = false;
+      for (AuthorizationGroups group : groups) {
+        if (group.getAttributeValue().equals(permission)) {
+          foundGroup = true;
+          break;
+        }
+      }
+      if (!foundGroup) {
+        missingGroups.add(permission);
+      }
+    }
+    return missingGroups;
   }
 }

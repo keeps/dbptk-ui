@@ -20,6 +20,7 @@ import org.jasig.cas.client.authentication.AttributePrincipal;
 import org.roda.core.data.v2.user.RodaPrincipal;
 
 import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.models.authorization.AuthorizationGroupsList;
 import com.databasepreservation.common.client.models.user.User;
 import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.utils.UserUtility;
@@ -43,15 +44,41 @@ public class UserLoginHelper {
       final String emailConfigurationValue = ViewerConfiguration.getInstance().getViewerConfigurationAsString(
         ViewerConstants.DEFAULT_ATTRIBUTE_EMAIL, ViewerConfiguration.PROPERTY_AUTHORIZATION_EMAIL_ATTRIBUTE);
 
-      if (attributes.get(rolesConfigurationValue) instanceof String) {
+      Set<String> attributeRolesToCheck = new HashSet<>();
+      attributeRolesToCheck.add(rolesConfigurationValue);
+
+      AuthorizationGroupsList authorizationGroups = ViewerConfiguration.getInstance()
+        .getCollectionsAuthorizationGroups();
+      attributeRolesToCheck.addAll(authorizationGroups.getAllAttributeNames());
+
+      for (String attributeRole : attributeRolesToCheck) {
         Set<String> roles = new HashSet<>();
-        mapCasAttributeString(attributes, rolesConfigurationValue, roles::addAll);
+        roles.addAll(user.getAllRoles());
+        roles.addAll(user.getDirectRoles());
+        if (attributes.get(attributeRole) instanceof String) {
+          mapCasAttributeString(attributes, attributeRole, roles::addAll);
+        } else if (attributes.get(attributeRole) instanceof List) {
+          mapCasAttributeList(attributes, attributeRole, roles::addAll);
+        }
         user.setAllRoles(roles);
         user.setDirectRoles(roles);
-      } else if (attributes.get(rolesConfigurationValue) instanceof List) {
-        mapCasAttributeList(user, attributes, rolesConfigurationValue, RodaPrincipal::setAllRoles);
-        mapCasAttributeList(user, attributes, rolesConfigurationValue, RodaPrincipal::setDirectRoles);
       }
+
+      // Add default roles to authenticated user
+      boolean addDefaultRoles = ViewerConfiguration.getInstance().getViewerConfigurationAsBoolean(false,
+        ViewerConfiguration.PROPERTY_AUTHENTICATED_USER_ENABLE_DEFAULT_ATTRIBUTES);
+      if (addDefaultRoles) {
+        List<String> defaultRoleList = ViewerConfiguration.getInstance()
+          .getViewerConfigurationAsList(ViewerConfiguration.PROPERTY_AUTHENTICATED_USER_DEFAULT_ATTRIBUTES);
+
+        if (!defaultRoleList.isEmpty()) {
+          Set<String> rolesWithDefault = new HashSet<>(user.getAllRoles());
+          rolesWithDefault.addAll(defaultRoleList);
+          user.setAllRoles(rolesWithDefault);
+          user.setDirectRoles(rolesWithDefault);
+        }
+      }
+
       mapCasAttributeString(user, attributes, fullNameConfigurationValue, RodaPrincipal::setFullName);
       mapCasAttributeString(user, attributes, emailConfigurationValue, User::setEmail);
     }
@@ -61,8 +88,8 @@ public class UserLoginHelper {
     return user;
   }
 
-  private static void mapCasAttributeList(User user, Map<String, Object> attributes, String attributeKey,
-    BiConsumer<User, Set<String>> mapping) {
+  private static void mapCasAttributeList(Map<String, Object> attributes, String attributeKey,
+    Consumer<Set<String>> mapping) {
     Object attributeValue = attributes.get(attributeKey);
     Set<String> result = new HashSet<>();
     if (attributeValue instanceof List) {
@@ -73,12 +100,12 @@ public class UserLoginHelper {
         }
       }
 
-      mapping.accept(user, result);
+      mapping.accept(result);
     }
   }
 
   private static void mapCasAttributeString(User user, Map<String, Object> attributes, String attributeKey,
-                                            BiConsumer<User, String> mapping) {
+    BiConsumer<User, String> mapping) {
     Object attributeValue = attributes.get(attributeKey);
     if (attributeValue instanceof String) {
       mapping.accept(user, (String) attributeValue);
@@ -86,7 +113,7 @@ public class UserLoginHelper {
   }
 
   private static void mapCasAttributeString(Map<String, Object> attributes, String attributeKey,
-                                            Consumer<Set<String>> mapping) {
+    Consumer<Set<String>> mapping) {
     Object attributeValue = attributes.get(attributeKey);
     if (attributeValue instanceof String) {
       Set<String> result = new HashSet<>();

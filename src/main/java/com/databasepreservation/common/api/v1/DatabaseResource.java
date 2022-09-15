@@ -32,6 +32,7 @@ import com.databasepreservation.common.client.index.filter.FilterParameter;
 import com.databasepreservation.common.client.index.filter.OrFiltersParameters;
 import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
 import com.databasepreservation.common.client.models.activity.logs.LogEntryState;
+import com.databasepreservation.common.client.models.status.database.DatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.models.user.User;
@@ -134,28 +135,20 @@ public class DatabaseResource implements DatabaseService {
   }
 
   private Filter getDatabaseFilterForUser(User user) {
-    ArrayList<FilterParameter> filterParameters = new ArrayList<>();
+    ArrayList<FilterParameter> permissionFilterParameters = new ArrayList<>();
     // Only retrieve databases with AVAILABLE status
     SimpleFilterParameter statusFilter = new SimpleFilterParameter(ViewerConstants.SOLR_DATABASES_STATUS,
       ViewerDatabaseStatus.AVAILABLE.name());
-
-    // Add a filter to get all databases that doesn't have permissions key
-    ArrayList<FilterParameter> emptyKeyFilterParameters = new ArrayList<>();
-    emptyKeyFilterParameters.add(statusFilter);
-    emptyKeyFilterParameters.add(new EmptyKeyFilterParameter(ViewerConstants.SOLR_DATABASES_PERMISSIONS));
-    filterParameters.add(new AndFiltersParameters(new Filter(emptyKeyFilterParameters).getParameters()));
+    permissionFilterParameters.add(statusFilter);
 
     // Add user permissions on filter
-    ArrayList<FilterParameter> permissionFilterParameters = new ArrayList<>();
-    permissionFilterParameters.add(statusFilter);
     ArrayList<FilterParameter> permissionsOrFilterParameters = new ArrayList<>();
     for (String role : user.getAllRoles()) {
       permissionsOrFilterParameters.add(new SimpleFilterParameter(ViewerConstants.SOLR_DATABASES_PERMISSIONS, role));
     }
     permissionFilterParameters.add(new OrFiltersParameters(permissionsOrFilterParameters));
-    filterParameters.add(new AndFiltersParameters(permissionFilterParameters));
 
-    return new Filter(new OrFiltersParameters(filterParameters));
+    return new Filter(new AndFiltersParameters(permissionFilterParameters));
   }
 
   @Override
@@ -199,7 +192,27 @@ public class DatabaseResource implements DatabaseService {
   }
 
   @Override
-  public Set<String> updatePermissions(String databaseUUID, Set<String> permissions) {
+  public Set<String> getDatabasePermissions(String databaseUUID) {
+    ControllerAssistant controllerAssistant = new ControllerAssistant() {};
+
+    LogEntryState state = LogEntryState.SUCCESS;
+    User user = controllerAssistant.checkRoles(request);
+
+    try {
+      DatabaseStatus databaseStatus = ViewerFactory.getConfigurationManager().getDatabaseStatus(databaseUUID);
+      return databaseStatus.getPermissions();
+    } catch (GenericException e) {
+      state = LogEntryState.FAILURE;
+      throw new RESTException(e);
+    } finally {
+      // register action
+      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_DATABASE_ID_PARAM, databaseUUID);
+    }
+
+  }
+
+  @Override
+  public Set<String> updateDatabasePermissions(String databaseUUID, Set<String> permissions) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;

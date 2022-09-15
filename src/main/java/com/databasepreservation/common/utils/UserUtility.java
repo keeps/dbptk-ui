@@ -7,32 +7,17 @@
  */
 package com.databasepreservation.common.utils;
 
-import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.common.search.SavedSearch;
-import com.databasepreservation.common.client.exceptions.AuthorizationException;
-import com.databasepreservation.common.client.index.IsIndexed;
-import com.databasepreservation.common.client.index.filter.Filter;
-import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
-import com.databasepreservation.common.client.models.authorization.AuthorizationRuleList;
-import com.databasepreservation.common.client.models.authorization.AuthorizationRules;
-import com.databasepreservation.common.client.models.status.database.DatabaseStatus;
-import com.databasepreservation.common.client.models.structure.ViewerDatabase;
-import com.databasepreservation.common.client.models.user.User;
-import com.databasepreservation.common.server.ViewerConfiguration;
-import com.databasepreservation.common.server.ViewerFactory;
-import com.google.common.collect.Sets;
-import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.lang3.StringUtils;
-import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
-import org.jasig.cas.client.util.AbstractCasFilter;
-import org.jasig.cas.client.validation.Assertion;
-import org.roda.core.data.exceptions.AuthorizationDeniedException;
-import org.roda.core.data.exceptions.GenericException;
-import org.roda.core.data.exceptions.NotFoundException;
-import org.roda.core.data.utils.JsonUtils;
-import org.roda.core.data.v2.ip.DIP;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.io.Serializable;
+import java.lang.reflect.Method;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -47,17 +32,34 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
-import java.io.Serializable;
-import java.lang.reflect.Method;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+
+import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.lang3.StringUtils;
+import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
+import org.jasig.cas.client.util.AbstractCasFilter;
+import org.jasig.cas.client.validation.Assertion;
+import org.roda.core.data.exceptions.AuthorizationDeniedException;
+import org.roda.core.data.exceptions.GenericException;
+import org.roda.core.data.exceptions.NotFoundException;
+import org.roda.core.data.utils.JsonUtils;
+import org.roda.core.data.v2.ip.DIP;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.databasepreservation.common.client.ViewerConstants;
+import com.databasepreservation.common.client.common.search.SavedSearch;
+import com.databasepreservation.common.client.exceptions.AuthorizationException;
+import com.databasepreservation.common.client.index.IsIndexed;
+import com.databasepreservation.common.client.index.filter.Filter;
+import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
+import com.databasepreservation.common.client.models.authorization.AuthorizationGroups;
+import com.databasepreservation.common.client.models.authorization.AuthorizationGroupsList;
+import com.databasepreservation.common.client.models.status.database.DatabaseStatus;
+import com.databasepreservation.common.client.models.structure.ViewerDatabase;
+import com.databasepreservation.common.client.models.user.User;
+import com.databasepreservation.common.server.ViewerConfiguration;
+import com.databasepreservation.common.server.ViewerFactory;
+import com.google.common.collect.Sets;
 
 public class UserUtility {
   private static final Logger LOGGER = LoggerFactory.getLogger(UserUtility.class);
@@ -71,16 +73,16 @@ public class UserUtility {
   }
 
   public static void checkRoles(final User user, final Class<?> invokingMethodInnerClass)
-      throws AuthorizationDeniedException {
+    throws AuthorizationDeniedException {
     checkRoles(user, invokingMethodInnerClass, null);
   }
 
   public static void checkRoles(final User user, final Class<?> invokingMethodInnerClass, final Class<?> classToReturn)
-      throws AuthorizationDeniedException {
+    throws AuthorizationDeniedException {
     final Method method = invokingMethodInnerClass.getEnclosingMethod();
     final String classParam = (classToReturn == null) ? "" : "(" + classToReturn.getSimpleName() + ")";
     final String configKey = String.format("roles.%s.%s%s", method.getDeclaringClass().getName(), method.getName(),
-        classParam);
+      classParam);
     if (ViewerFactory.getViewerConfiguration().getConfiguration().containsKey(configKey)) {
       LOGGER.trace("Testing if user '{}' has permissions to '{}'", user.getName(), configKey);
 
@@ -90,15 +92,15 @@ public class UserUtility {
 
       for (String role : rolesForTheMethod) {
         rolesToCheck
-            .addAll(ViewerConfiguration.getInstance().getViewerConfigurationAsList(ViewerConstants.ROLES_PREFIX + role));
+          .addAll(ViewerConfiguration.getInstance().getViewerConfigurationAsList(ViewerConstants.ROLES_PREFIX + role));
       }
 
       checkRoles(user, rolesToCheck);
     } else {
       LOGGER.error("Unable to determine which roles the user '{}' needs because the config. key '{}' is not defined",
-          user.getName(), configKey);
+        user.getName(), configKey);
       throw new AuthorizationDeniedException(
-          "Unable to determine which roles the user needs because the config. key '" + configKey + "' is not defined");
+        "Unable to determine which roles the user needs because the config. key '" + configKey + "' is not defined");
     }
   }
 
@@ -110,7 +112,7 @@ public class UserUtility {
       missingRoles.removeAll(rsu.getAllRoles());
 
       throw new AuthorizationDeniedException("The user '" + rsu.getId() + "' does not have all needed permissions",
-          missingRoles);
+        missingRoles);
     }
   }
 
@@ -123,50 +125,67 @@ public class UserUtility {
 
         Set<String> permissions = databaseStatus.getPermissions();
 
-        checkAuthorizationRules(user, permissions);
+        checkAuthorizationGroups(user, permissions);
       }
     } catch (GenericException e) {
       throw new AuthorizationException(
-          "Unable to load the configuration file needed to access database. Deny the access for that reason",
-          com.google.gwt.http.client.Response.SC_UNAUTHORIZED);
+        "Unable to load the configuration file needed to access database. Deny the access for that reason",
+        com.google.gwt.http.client.Response.SC_UNAUTHORIZED);
     }
   }
 
-  private static void checkAuthorizationRules(final User user, Set<String> databasePermissions)
-      throws AuthorizationException {
-    AuthorizationRuleList allAuthorizationRules = ViewerConfiguration.getInstance().getCollectionsAuthorizationRules();
-    AuthorizationRuleList authorizationRulesToCheck = new AuthorizationRuleList();
+  private static void checkAuthorizationGroups(final User user, Set<String> databasePermissions)
+    throws AuthorizationException {
+    AuthorizationGroupsList allAuthorizationGroups = ViewerConfiguration.getInstance()
+      .getCollectionsAuthorizationGroupsWithDefault();
+    AuthorizationGroupsList authorizationGroupsToCheck = new AuthorizationGroupsList();
+    Set<String> permissionWithoutGroup = new HashSet<>();
 
+    // database without any permissions cannot be accessed by non-administrative
+    // users
     if (databasePermissions.isEmpty()) {
-      return;
+      throw new AuthorizationException("This database does not have any associated permissions",
+        com.google.gwt.http.client.Response.SC_UNAUTHORIZED);
     }
 
     for (String permission : databasePermissions) {
-      AuthorizationRules authorizationRule = allAuthorizationRules.get(permission);
-      if (authorizationRule != null) {
-        authorizationRulesToCheck.add(authorizationRule);
+      AuthorizationGroups authorizationGroup = allAuthorizationGroups.get(permission);
+      if (authorizationGroup != null) {
+        // store permissions with associated groups.
+        authorizationGroupsToCheck.add(authorizationGroup);
+      } else {
+        // store permissions without group to check later.
+        permissionWithoutGroup.add(permission);
       }
     }
 
-    for (AuthorizationRules authorizationRules : authorizationRulesToCheck.getAuthorizationRulesList()) {
-      if (authorizationRules.getAttributeOperator()
-          .equals(ViewerConfiguration.PROPERTY_COLLECTIONS_AUTHORIZATION_OPERATOR_EQUAL)) {
-        if (user.getAllRoles().contains(authorizationRules.getAttributeValue())) {
+    for (AuthorizationGroups authorizationGroups : authorizationGroupsToCheck.getAuthorizationGroupsList()) {
+      if (authorizationGroups.getAttributeOperator()
+        .equals(ViewerConfiguration.PROPERTY_COLLECTIONS_AUTHORIZATION_GROUP_OPERATOR_EQUAL)) {
+        if (user.getAllRoles().contains(authorizationGroups.getAttributeValue())) {
           // User has permissions to access this database
           return;
         }
       }
     }
 
+    // If there is a permission on database that doesn't match witch any group, do a
+    // simple verification with user roles
+    for (String permission : permissionWithoutGroup) {
+      if (user.getAllRoles().contains(permission)) {
+        return;
+      }
+    }
+
     throw new AuthorizationException(
-        "The user '" + user.getId() + "' does not have the permissions needed to access database",
-        com.google.gwt.http.client.Response.SC_UNAUTHORIZED);
+      "The user '" + user.getId() + "' does not have the permissions needed to access database",
+      com.google.gwt.http.client.Response.SC_UNAUTHORIZED);
   }
 
   private static String getPasswordOrTicket(final HttpServletRequest request, User user, String databaseUUID)
-      throws AuthorizationDeniedException {
+    throws AuthorizationDeniedException {
     final boolean usingCAS = ViewerConfiguration.getInstance().getViewerConfigurationAsBoolean(false,
-        ViewerConfiguration.PROPERTY_FILTER_AUTHENTICATION_CAS);
+      ViewerConfiguration.PROPERTY_FILTER_AUTHENTICATION_CAS);
 
     if (user.isGuest()) {
       return StringUtils.EMPTY;
@@ -251,7 +270,7 @@ public class UserUtility {
   }
 
   private static boolean userCanAccessDatabase(final HttpServletRequest request, User user, String databaseUUID)
-      throws AuthorizationDeniedException {
+    throws AuthorizationDeniedException {
 
     // get current permissions object from session or create a new one
     DatabasePermissions permissions = (DatabasePermissions) request.getSession().getAttribute(RODA_USER_PERMISSIONS);
@@ -261,14 +280,14 @@ public class UserUtility {
 
     // get permissions from RODA or use permission value from session
     Boolean canAccess = permissions.canAccessDatabase(user, databaseUUID,
-        getPasswordOrTicket(request, user, databaseUUID));
+      getPasswordOrTicket(request, user, databaseUUID));
     request.getSession().setAttribute(RODA_USER_PERMISSIONS, permissions);
     return canAccess;
   }
 
   public static boolean userIsAdmin(User user) {
     final List<String> rolesToCheck = ViewerConfiguration.getInstance()
-        .getViewerConfigurationAsList(ViewerConfiguration.PROPERTY_AUTHORIZATION_ADMINISTRATORS);
+      .getViewerConfigurationAsList(ViewerConfiguration.PROPERTY_AUTHORIZATION_ADMINISTRATORS);
     return (!rolesToCheck.isEmpty() && !Sets.intersection(user.getAllRoles(), new HashSet<>(rolesToCheck)).isEmpty());
   }
 
@@ -279,7 +298,7 @@ public class UserUtility {
 
   private static boolean userIsManager(User user) {
     return ViewerConfiguration.getInstance()
-        .getViewerConfigurationAsList(ViewerConfiguration.PROPERTY_AUTHORIZATION_MANAGERS).contains(user.getName());
+      .getViewerConfigurationAsList(ViewerConfiguration.PROPERTY_AUTHORIZATION_MANAGERS).contains(user.getName());
   }
 
   private static boolean userIsAdminOrManager(User user) {
@@ -289,7 +308,7 @@ public class UserUtility {
   public static User getNoAuthenticationUser() {
     User user = new User(ViewerConstants.DEFAULT_USERNAME);
     final List<String> adminRoles = ViewerConfiguration.getInstance()
-        .getViewerConfigurationAsList(ViewerConfiguration.PROPERTY_AUTHORIZATION_ADMINISTRATORS);
+      .getViewerConfigurationAsList(ViewerConfiguration.PROPERTY_AUTHORIZATION_ADMINISTRATORS);
 
     user.setAdmin(true);
     user.setDirectRoles(new HashSet<>(adminRoles));
@@ -311,22 +330,22 @@ public class UserUtility {
 
     private static AuthorizationDeniedException error(User user, String objectType, String object) {
       return new AuthorizationDeniedException(
-          "Access to " + objectType + " '" + object + "' has been denied for user " + user.getName());
+        "Access to " + objectType + " '" + object + "' has been denied for user " + user.getName());
     }
 
     private static AuthorizationDeniedException error(User user, String objectType) {
       return new AuthorizationDeniedException(
-          "Access to " + objectType + " has been denied for user " + user.getName());
+        "Access to " + objectType + " has been denied for user " + user.getName());
     }
 
     private static AuthorizationDeniedException errorAdmin(User user, String action) {
       return new AuthorizationDeniedException("Only administrators can " + action + ", and the current user("
-          + user.getName() + ") is not an administrator.");
+        + user.getName() + ") is not an administrator.");
     }
 
     public static boolean isEnabled() {
       return ViewerConfiguration.getInstance()
-          .getViewerConfigurationAsBoolean(ViewerConfiguration.PROPERTY_AUTHORIZATION_ENABLED);
+        .getViewerConfigurationAsBoolean(ViewerConfiguration.PROPERTY_AUTHORIZATION_ENABLED);
     }
 
     public static void allowIfAdmin(final HttpServletRequest request) throws AuthorizationDeniedException {
@@ -350,7 +369,7 @@ public class UserUtility {
     }
 
     public static void checkFilteringPermission(final HttpServletRequest request, String databaseUUID, Filter filter,
-                                                Class returnClass) throws AuthorizationDeniedException, NotFoundException, GenericException {
+      Class returnClass) throws AuthorizationDeniedException, NotFoundException, GenericException {
       if (!isEnabled()) {
         return;
       }
@@ -363,7 +382,7 @@ public class UserUtility {
     }
 
     public static <T extends IsIndexed> void checkRetrievalPermission(HttpServletRequest request, String databaseUUID,
-                                                                      Class<T> resultClass, T result) throws AuthorizationDeniedException, NotFoundException, GenericException {
+      Class<T> resultClass, T result) throws AuthorizationDeniedException, NotFoundException, GenericException {
       if (!isEnabled()) {
         return;
       }
@@ -386,7 +405,7 @@ public class UserUtility {
     }
 
     public static void checkDatabaseAccessPermission(HttpServletRequest request, String databaseUUID)
-        throws AuthorizationDeniedException {
+      throws AuthorizationDeniedException {
       if (!isEnabled()) {
         return;
       }
@@ -404,7 +423,7 @@ public class UserUtility {
     }
 
     public static void checkSavedSearchPermission(HttpServletRequest request, String databaseUUID,
-                                                  SavedSearch savedSearch) throws AuthorizationDeniedException {
+      SavedSearch savedSearch) throws AuthorizationDeniedException {
       if (!isEnabled()) {
         return;
       }
@@ -418,7 +437,7 @@ public class UserUtility {
     }
 
     public static void checkDatabaseManagementPermission(HttpServletRequest request)
-        throws AuthorizationDeniedException {
+      throws AuthorizationDeniedException {
 
       String originIP = request.getRemoteAddr();
       if (ViewerConfiguration.getInstance().getWhitelistAllIPs()) {
@@ -464,13 +483,13 @@ public class UserUtility {
     String rodaAddress;
     if (useRodaCasServiceServerName) {
       rodaAddress = ViewerConfiguration.getInstance().getViewerConfigurationAsString(StringUtils.EMPTY,
-          ViewerConfiguration.PROPERTY_AUTHORIZATION_RODA_CAS_SERVICE_NAME);
+        ViewerConfiguration.PROPERTY_AUTHORIZATION_RODA_CAS_SERVICE_NAME);
     } else {
       rodaAddress = ViewerConfiguration.getInstance().getViewerConfigurationAsString(StringUtils.EMPTY,
-          ViewerConfiguration.PROPERTY_AUTHORIZATION_RODA_DIP_SERVER);
+        ViewerConfiguration.PROPERTY_AUTHORIZATION_RODA_DIP_SERVER);
     }
     String rodaDipPath = ViewerConfiguration.getInstance().getViewerConfigurationAsString(StringUtils.EMPTY,
-        ViewerConfiguration.PROPERTY_AUTHORIZATION_RODA_DIP_PATH);
+      ViewerConfiguration.PROPERTY_AUTHORIZATION_RODA_DIP_PATH);
     rodaDipPath = rodaDipPath.replaceAll("\\{dip_id\\}", databaseUUID);
 
     UriBuilder uri = client.target(rodaAddress).path(rodaDipPath).getUriBuilder();
@@ -495,7 +514,7 @@ public class UserUtility {
       // invalidate cache if we get a different user
       if (!StringUtils.equals(user.getName(), this.user.getName())) {
         LOGGER.debug("Session had user '{}' and now it has '{}', clearing permissions cache.", this.user.getName(),
-            user.getName());
+          user.getName());
         permissions.clear();
         this.user = user;
       }
@@ -507,7 +526,7 @@ public class UserUtility {
       Boolean cachedPermission = permissions.get(databaseUUID);
       if (cachedPermission != null) {
         LOGGER.debug("Using cached '{}' permission for user '{}' and database '{}'", cachedPermission, user.getName(),
-            databaseUUID);
+          databaseUUID);
         return cachedPermission;
       }
 
@@ -516,7 +535,7 @@ public class UserUtility {
       }
 
       final boolean usingCAS = ViewerConfiguration.getInstance().getViewerConfigurationAsBoolean(false,
-          ViewerConfiguration.PROPERTY_FILTER_AUTHENTICATION_CAS);
+        ViewerConfiguration.PROPERTY_FILTER_AUTHENTICATION_CAS);
 
       Client client;
       if (!user.isGuest()) {
@@ -527,9 +546,9 @@ public class UserUtility {
         }
       } else {
         String rodaGuestUsername = ViewerConfiguration.getInstance().getViewerConfigurationAsString(null,
-            ViewerConfiguration.PROPERTY_AUTHORIZATION_GUEST_USERNAME);
+          ViewerConfiguration.PROPERTY_AUTHORIZATION_GUEST_USERNAME);
         String rodaGuestPassword = ViewerConfiguration.getInstance().getViewerConfigurationAsString(null,
-            ViewerConfiguration.PROPERTY_AUTHORIZATION_GUEST_PASSWORD);
+          ViewerConfiguration.PROPERTY_AUTHORIZATION_GUEST_PASSWORD);
         client = getBasicAuthClient(rodaGuestUsername, rodaGuestPassword);
       }
 

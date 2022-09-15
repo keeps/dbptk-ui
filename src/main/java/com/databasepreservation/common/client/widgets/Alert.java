@@ -14,6 +14,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.Widget;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -33,7 +34,7 @@ public class Alert extends FlowPanel {
   }
 
   public Alert(MessageAlertType type, String message, String icon) {
-    this(type, null, message, false, icon);
+    this(type, null, message, false, icon, null);
   }
 
   public Alert(MessageAlertType type, String message, boolean dismissible) {
@@ -41,24 +42,29 @@ public class Alert extends FlowPanel {
   }
 
   public Alert(MessageAlertType type, String message, boolean dismissible, String icon) {
-    this(type, null, message, dismissible, icon);
+    this(type, null, message, dismissible, icon, null);
+  }
+
+  public Alert(MessageAlertType type, String message, Widget widget) {
+    this(type, null, message, false, null, widget);
   }
 
   private Alert(MessageAlertType type, String title, String message, boolean dismissible) {
-    this(type, title, message, dismissible, null);
+    this(type, title, message, dismissible, null, null);
   }
 
-  private Alert(MessageAlertType type, String title, String message, boolean dismissible, String iconTag) {
+  private Alert(MessageAlertType type, String title, String message, boolean dismissible, String iconTag,
+    Widget widget) {
     super();
     Label messageLabel = new Label(message);
 
-    if(iconTag != null){
+    if (iconTag != null) {
       HTML icon = new HTML(SafeHtmlUtils.fromSafeConstant(FontAwesomeIconManager.getTag(iconTag)));
       icon.setStyleName("alert-icon");
       add(icon);
     }
 
-    if(title != null){
+    if (title != null) {
       Label titleLabel = new Label(title);
       titleLabel.setStyleName("alert-heading");
       add(titleLabel);
@@ -97,12 +103,17 @@ public class Alert extends FlowPanel {
       Button button = new Button();
       button.addStyleName("close");
       SafeHtmlBuilder safeHtmlBuilder = new SafeHtmlBuilder();
-      safeHtmlBuilder.append(SafeHtmlUtils.fromSafeConstant("<span>")).appendHtmlConstant("&times").appendHtmlConstant("</span>");
+      safeHtmlBuilder.append(SafeHtmlUtils.fromSafeConstant("<span>")).appendHtmlConstant("&times")
+        .appendHtmlConstant("</span>");
       button.setHTML(safeHtmlBuilder.toSafeHtml());
       button.addClickHandler(event -> {
         this.setVisible(false);
       });
       add(button);
+    }
+
+    if (widget != null) {
+      add(widget);
     }
   }
 }

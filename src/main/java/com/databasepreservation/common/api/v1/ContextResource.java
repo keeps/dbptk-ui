@@ -18,20 +18,18 @@ import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Context;
 
-import com.databasepreservation.common.client.models.authorization.AuthorizationRules;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.exceptions.RESTException;
-import com.databasepreservation.common.client.models.authorization.AuthorizationRuleList;
+import com.databasepreservation.common.client.models.authorization.AuthorizationGroups;
+import com.databasepreservation.common.client.models.authorization.AuthorizationGroupsList;
 import com.databasepreservation.common.client.services.ContextService;
 import com.databasepreservation.common.server.ServerTools;
 import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.utils.ControllerAssistant;
-import com.google.gwt.http.client.Response;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
@@ -66,11 +64,12 @@ public class ContextResource implements ContextService {
   }
 
   @Override
-  public Set<AuthorizationRules> getAuthorizationRuleList() {
+  public Set<AuthorizationGroups> getAuthorizationGroupsList() {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
     controllerAssistant.checkRoles(request);
-    AuthorizationRuleList authorizationRuleList = ViewerConfiguration.getInstance().getCollectionsAuthorizationRules();
+    AuthorizationGroupsList authorizationGroupsList = ViewerConfiguration.getInstance()
+      .getCollectionsAuthorizationGroupsWithDefault();
 
-    return authorizationRuleList.getAuthorizationRulesList();
+    return authorizationGroupsList.getAuthorizationGroupsList();
   }
 }

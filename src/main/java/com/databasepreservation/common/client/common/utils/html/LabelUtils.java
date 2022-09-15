@@ -11,15 +11,20 @@ import com.databasepreservation.common.client.models.activity.logs.LogEntryState
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseValidationStatus;
 import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
+import com.databasepreservation.common.client.tools.FontAwesomeIconManager;
 import com.databasepreservation.common.client.tools.Humanize;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
+
+import config.i18n.client.ClientMessages;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 public class LabelUtils {
   private static final String CLOSE_SPAN = "</span>";
+  private static final ClientMessages messages = GWT.create(ClientMessages.class);
 
   public static SafeHtml getLogEntryState(LogEntryState state) {
     String style;
@@ -112,7 +117,16 @@ public class LabelUtils {
         break;
     }
 
-    return SafeHtmlUtils
-      .fromSafeConstant("<span class='" + style + "'>" + Humanize.jobStatus(status) + CLOSE_SPAN);
+    return SafeHtmlUtils.fromSafeConstant("<span class='" + style + "'>" + Humanize.jobStatus(status) + CLOSE_SPAN);
+  }
+
+  public static SafeHtml getDatabasePermission(String permission, boolean isGroup) {
+    if (isGroup) {
+      return SafeHtmlUtils.fromSafeConstant("<span class='label-info btn-margin-right'>" + permission + CLOSE_SPAN);
+    } else {
+      return SafeHtmlUtils
+        .fromSafeConstant("<span class='label-default btn-margin-right'>" + permission + " " + FontAwesomeIconManager
+          .getTag("fas fa-exclamation-circle", messages.SIARDHomePageDialogDetailsForUnknownPermission()) + CLOSE_SPAN);
+    }
   }
 }

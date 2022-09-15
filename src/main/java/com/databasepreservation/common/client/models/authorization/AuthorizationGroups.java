@@ -5,12 +5,18 @@ import java.io.Serializable;
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
-public class AuthorizationRules implements Serializable {
+public class AuthorizationGroups implements Serializable {
+  public enum Type {
+    DEFAULT, CUSTOM
+  }
+
   private static final long serialVersionUID = -8656197749258805638L;
   private String id;
   private String label;
+  private String attributeName;
   private String attributeOperator;
   private String attributeValue;
+  private Type type;
 
   public String getId() {
     return id;
@@ -28,6 +34,14 @@ public class AuthorizationRules implements Serializable {
     this.label = label;
   }
 
+  public String getAttributeName() {
+    return attributeName;
+  }
+
+  public void setAttributeName(String attributeName) {
+    this.attributeName = attributeName;
+  }
+
   public String getAttributeOperator() {
     return attributeOperator;
   }
@@ -42,5 +56,13 @@ public class AuthorizationRules implements Serializable {
 
   public void setAttributeValue(String attributeValue) {
     this.attributeValue = attributeValue;
+  }
+
+  public Type getType() {
+    return type;
+  }
+
+  public void setType(Type type) {
+    this.type = type;
   }
 }

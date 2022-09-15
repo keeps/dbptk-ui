@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -47,8 +48,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.models.authorization.AuthorizationRuleList;
-import com.databasepreservation.common.client.models.authorization.AuthorizationRules;
+import com.databasepreservation.common.client.models.authorization.AuthorizationGroups;
+import com.databasepreservation.common.client.models.authorization.AuthorizationGroupsList;
 import com.databasepreservation.common.server.controller.ReporterType;
 import com.databasepreservation.common.utils.FilenameUtils;
 import com.databasepreservation.common.utils.ViewerAbstractConfiguration;
@@ -101,12 +102,18 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
   public static final String PROPERTY_AUTHORIZATION_EMAIL_ATTRIBUTE = "user.attribute.email";
   public static final String PROPERTY_AUTHORIZATION_ROLES_ATTRIBUTE = "user.attribute.roles";
   public static final String PROPERTY_AUTHORIZATION_ADMINISTRATORS = "user.attribute.roles.administrators";
-  public static final String PROPERTY_COLLECTIONS_AUTHORIZATION = "lists.collections.authorizationRules[]";
-  public static final String PROPERTY_COLLECTIONS_AUTHORIZATION_LABEL = "label";
-  public static final String PROPERTY_COLLECTIONS_AUTHORIZATION_OPERATOR = "attributeOperator";
-  public static final String PROPERTY_COLLECTIONS_AUTHORIZATION_VALUE = "attributeValue";
 
-  public static final String PROPERTY_COLLECTIONS_AUTHORIZATION_OPERATOR_EQUAL = "EQUAL";
+  public static final String PROPERTY_AUTHENTICATED_USER_ENABLE_DEFAULT_ATTRIBUTES = "authenticated.user.enable.default.attributes";
+  public static final String PROPERTY_AUTHENTICATED_USER_DEFAULT_ATTRIBUTES = "authenticated.user.default.attributes[]";
+
+  public static final String PROPERTY_COLLECTIONS_AUTHORIZATION_DEFAULT_ROLES = "collections.authorizations.default.roles[]";
+  public static final String PROPERTY_COLLECTIONS_AUTHORIZATION_GROUPS = "lists.collections.authorization.groups[]";
+  public static final String PROPERTY_COLLECTIONS_AUTHORIZATION_GROUPS_LABEL = "label";
+
+  public static final String PROPERTY_COLLECTIONS_AUTHORIZATION_GROUP_ATTRIBUTE_NAME = "attributeName";
+  public static final String PROPERTY_COLLECTIONS_AUTHORIZATION_GROUP_ATTRIBUTE_OPERATOR = "attributeOperator";
+  public static final String PROPERTY_COLLECTIONS_AUTHORIZATION_GROUP_ATTRIBUTE_VALUE = "attributeValue";
+  public static final String PROPERTY_COLLECTIONS_AUTHORIZATION_GROUP_OPERATOR_EQUAL = "EQUAL";
 
   public static final String SHARED_PROPERTY_WHITELIST_MESSAGES_PREFIX = "ui.sharedProperties.whitelist.messages.prefix";
   public static final String SHARED_PROPERTY_WHITELIST_MESSAGES_PROPERTY = "ui.sharedProperties.whitelist.messages.property";
@@ -470,24 +477,56 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     return cachedWhitelistAllIPs;
   }
 
-  public AuthorizationRuleList getCollectionsAuthorizationRules() {
-    List<String> authorizationsIds = getViewerConfigurationAsList(PROPERTY_COLLECTIONS_AUTHORIZATION);
-    AuthorizationRuleList authorizationRuleList = new AuthorizationRuleList();
+  public Set<String> getCollectionsAuthorizationDefault() {
+    return new HashSet<>(getViewerConfigurationAsList(PROPERTY_COLLECTIONS_AUTHORIZATION_DEFAULT_ROLES));
+  }
+
+  public AuthorizationGroupsList getCollectionsAuthorizationGroups() {
+    List<String> authorizationsIds = getViewerConfigurationAsList(PROPERTY_COLLECTIONS_AUTHORIZATION_GROUPS);
+    AuthorizationGroupsList authorizationGroupsList = new AuthorizationGroupsList();
 
     for (String authorizationId : authorizationsIds) {
-      AuthorizationRules authorizationRules = new AuthorizationRules();
+      AuthorizationGroups authorizationGroups = new AuthorizationGroups();
 
-      authorizationRules.setId(authorizationId);
-      authorizationRules.setLabel(getViewerConfigurationAsString("", PROPERTY_COLLECTIONS_AUTHORIZATION,
-        authorizationId, PROPERTY_COLLECTIONS_AUTHORIZATION_LABEL));
-      authorizationRules.setAttributeOperator(getViewerConfigurationAsString("", PROPERTY_COLLECTIONS_AUTHORIZATION,
-        authorizationId, PROPERTY_COLLECTIONS_AUTHORIZATION_OPERATOR));
-      authorizationRules.setAttributeValue(getViewerConfigurationAsString("", PROPERTY_COLLECTIONS_AUTHORIZATION,
-        authorizationId, PROPERTY_COLLECTIONS_AUTHORIZATION_VALUE));
-      authorizationRuleList.add(authorizationRules);
+      authorizationGroups.setId(authorizationId);
+      authorizationGroups.setLabel(getViewerConfigurationAsString("", PROPERTY_COLLECTIONS_AUTHORIZATION_GROUPS,
+        authorizationId, PROPERTY_COLLECTIONS_AUTHORIZATION_GROUPS_LABEL));
+      authorizationGroups.setAttributeName(getViewerConfigurationAsString(ViewerConstants.DEFAULT_ATTRIBUTE_ROLES,
+        PROPERTY_COLLECTIONS_AUTHORIZATION_GROUPS, authorizationId,
+        PROPERTY_COLLECTIONS_AUTHORIZATION_GROUP_ATTRIBUTE_NAME));
+      authorizationGroups
+        .setAttributeOperator(getViewerConfigurationAsString("", PROPERTY_COLLECTIONS_AUTHORIZATION_GROUPS,
+          authorizationId, PROPERTY_COLLECTIONS_AUTHORIZATION_GROUP_ATTRIBUTE_OPERATOR));
+      authorizationGroups
+        .setAttributeValue(getViewerConfigurationAsString("", PROPERTY_COLLECTIONS_AUTHORIZATION_GROUPS,
+          authorizationId, PROPERTY_COLLECTIONS_AUTHORIZATION_GROUP_ATTRIBUTE_VALUE));
+      authorizationGroups.setType(AuthorizationGroups.Type.CUSTOM);
+      authorizationGroupsList.add(authorizationGroups);
     }
+    return authorizationGroupsList;
+  }
 
-    return authorizationRuleList;
+  public AuthorizationGroupsList getCollectionsAuthorizationGroupsWithDefault() {
+    AuthorizationGroupsList authorizationGroupsList = getCollectionsAuthorizationGroups();
+
+    Set<String> authorizationDefault = getCollectionsAuthorizationDefault();
+    if (!authorizationDefault.isEmpty()) {
+      for (String defaultPermission : authorizationDefault) {
+        if (authorizationGroupsList.get(defaultPermission) == null) {
+          AuthorizationGroups authorizationGroups = new AuthorizationGroups();
+          authorizationGroups.setId(defaultPermission);
+          authorizationGroups.setLabel(defaultPermission);
+          authorizationGroups.setAttributeName(getViewerConfigurationAsString(ViewerConstants.DEFAULT_ATTRIBUTE_ROLES,
+            ViewerConfiguration.PROPERTY_AUTHORIZATION_ROLES_ATTRIBUTE));
+          authorizationGroups.setAttributeOperator(PROPERTY_COLLECTIONS_AUTHORIZATION_GROUP_OPERATOR_EQUAL);
+          authorizationGroups.setAttributeValue(defaultPermission);
+          authorizationGroups.setType(AuthorizationGroups.Type.DEFAULT);
+
+          authorizationGroupsList.add(authorizationGroups);
+        }
+      }
+    }
+    return authorizationGroupsList;
   }
 
   public String getDBPTKVersion() throws IOException {

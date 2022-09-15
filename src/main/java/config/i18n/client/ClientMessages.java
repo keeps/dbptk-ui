@@ -837,13 +837,19 @@ public interface ClientMessages extends Messages {
 
   String SIARDHomePageOptionsDescriptionForPermissions();
 
+  String SIARDHomePageTextForMissingAuthorizationGroupsProperties();
+
+  String SIARDHomePageTextForMissingDatabasePermissions();
+
   String SIARDHomePageLabelForPermissionsRoles();
 
-  String SIARDHomePageLabelForPermissionsTableRuleLabel();
+  String SIARDHomePageLabelForPermissionsTableGroupLabel();
 
-  String SIARDHomePageLabelForPermissionsTableRuleAttributeOperator();
+  String SIARDHomePageLabelForPermissionsTableGroupAttributeName();
 
-  String SIARDHomePageLabelForPermissionsTableRuleAttributeValue();
+  String SIARDHomePageLabelForPermissionsTableGroupAttributeOperator();
+
+  String SIARDHomePageLabelForPermissionsTableGroupAttributeValue();
 
   String SIARDHomePageDialogTitleForPermissionsList();
 
@@ -852,6 +858,12 @@ public interface ClientMessages extends Messages {
   String SIARDHomePageDialogDetailsForPermissionsList();
 
   String SIARDHomePageDialogMessageForPermissionsList();
+
+  String SIARDHomePageDialogDetailsForUnknownPermission();
+
+  String SIARDHomePageDialogDetailsForUnknownPermissions(String permissions);
+
+  String SIARDHomePageDialogActionForOverridePermissions();
 
   /********************************************
    * Edit Metadata

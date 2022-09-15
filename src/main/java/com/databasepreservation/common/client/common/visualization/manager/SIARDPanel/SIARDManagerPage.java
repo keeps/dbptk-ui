@@ -29,7 +29,7 @@ import com.databasepreservation.common.client.common.visualization.manager.SIARD
 import com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.navigation.SIARDNavigationPanel;
 import com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.navigation.ValidationNavigationPanel;
 import com.databasepreservation.common.client.index.IsIndexed;
-import com.databasepreservation.common.client.models.authorization.AuthorizationRules;
+import com.databasepreservation.common.client.models.authorization.AuthorizationGroups;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
 import com.databasepreservation.common.client.services.ContextService;
@@ -141,12 +141,14 @@ public class SIARDManagerPage extends ContentPanel {
     navigationPanels.add(browseNavigationPanel.build());
 
     if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
-      ContextService.Util.call((Set<AuthorizationRules> authorizationRules) -> {
-        permissionsNavigationPanel = PermissionsNavigationPanel.getInstance(database, authorizationRules);
-        if(permissionsNavigationPanel.hasPermissionsOrRules()){
-         navigationPanels.add(permissionsNavigationPanel.build());
-        }
-      }).getAuthorizationRuleList();
+      DatabaseService.Util.call((Set<String> databasePermissions) -> {
+        ContextService.Util.call((Set<AuthorizationGroups> authorizationGroups) -> {
+          permissionsNavigationPanel = PermissionsNavigationPanel.getInstance(database, databasePermissions, authorizationGroups);
+          if (permissionsNavigationPanel.hasPermissionsOrGroups()) {
+            navigationPanels.add(permissionsNavigationPanel.build());
+          }
+        }).getAuthorizationGroupsList();
+      }).getDatabasePermissions(database.getUuid());
     }
   }
 
@@ -174,8 +176,10 @@ public class SIARDManagerPage extends ContentPanel {
       validationNavigationPanel.update(database);
 
       if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
-        if(permissionsNavigationPanel.hasPermissionsOrRules()) {
-          permissionsNavigationPanel.update(database);
+        if (permissionsNavigationPanel.hasPermissionsOrGroups()) {
+          DatabaseService.Util.call((Set<String> databasePermissions) -> {
+            permissionsNavigationPanel.update(databasePermissions);
+          }).getDatabasePermissions(database.getUuid());
         }
       }
 

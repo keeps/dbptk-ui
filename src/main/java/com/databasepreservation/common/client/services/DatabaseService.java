@@ -28,7 +28,6 @@ import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultMethodCallback;
 import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
-import com.databasepreservation.common.client.models.authorization.AuthorizationRuleList;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.google.gwt.core.client.GWT;
 
@@ -90,9 +89,14 @@ public interface DatabaseService extends DirectRestService {
   @Operation(summary = "Deletes a specific database")
   Boolean delete(@PathParam("databaseUUID") String databaseUUID);
 
+  @GET
+  @Path("/{databaseUUID}/permissions")
+  @Operation(summary = "Gets the internal database configuration")
+  Set<String> getDatabasePermissions(@PathParam("databaseUUID") String databaseUUID);
+
   @PUT
   @Path("/{databaseUUID}/permissions")
   @Operation(summary = "Updates database permissions")
-  Set<String> updatePermissions(@PathParam("databaseUUID") String databaseUUID,
+  Set<String> updateDatabasePermissions(@PathParam("databaseUUID") String databaseUUID,
     @Parameter(name = ViewerConstants.API_QUERY_PARAM_FILTER) Set<String> permissions);
 }

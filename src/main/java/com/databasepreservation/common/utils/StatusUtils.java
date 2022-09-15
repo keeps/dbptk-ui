@@ -176,6 +176,9 @@ public class StatusUtils {
     status.setId(database.getUuid());
     status.setValidationStatus(getValidationStatus(database));
     status.setSiardStatus(getSiardStatus(database));
+    if (database.getPermissions() != null && !database.getPermissions().isEmpty()){
+      status.setPermissions(database.getPermissions());
+    }
 
     return status;
   }

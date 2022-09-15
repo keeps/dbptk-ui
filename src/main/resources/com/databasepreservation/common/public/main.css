@@ -3432,3 +3432,21 @@ rgba(0, 0, 0, .125);
     top: 0;
     z-index: 1;
 }
+
+/************************************************
+* Permission Panel
+ ************************************************/
+.metadata_field_flex {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.metadata_field_flex span{
+    margin-bottom: 0.5rem
+}
+
+.force_column_ellipsis > div > div {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
