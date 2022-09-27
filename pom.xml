@@ -26,7 +26,7 @@
 
         <version.gwt>2.10.0</version.gwt>
         <scope.gwt-dev>provided</scope.gwt-dev>
-        <version.dbptk>2.10.1</version.dbptk>
+        <version.dbptk>2.10.2</version.dbptk>
         <version.roda>3.7.0</version.roda>
         <version.jersey>2.35</version.jersey>
         <version.swagger>2.2.0</version.swagger>

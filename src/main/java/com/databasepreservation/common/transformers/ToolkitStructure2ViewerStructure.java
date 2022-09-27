@@ -839,8 +839,8 @@ public class ToolkitStructure2ViewerStructure {
 
       } else {
         // BLOB is internal to the SIARD but is stored outside the table.xml (Normal)
-        String index = getRowIndex(cell.getId());
-        String lobName = ViewerConstants.SIARD_RECORD_PREFIX + index + ViewerConstants.SIARD_LOB_FILE_EXTENSION;
+        
+        String lobName = Paths.get(binaryCell.getFile()).getFileName().toString();
         result.setValue(lobName);
         collectionConfiguration.getTableStatusByTableId(table.getId()).getColumnByIndex(colIndex).setExternalLob(false);
         actualViewerRow.addLobType(
