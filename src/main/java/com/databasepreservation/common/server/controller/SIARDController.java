@@ -225,7 +225,11 @@ public class SIARDController {
       SiardControllerHelper.setupExportModuleSSHConfiguration(databaseMigration, connectionParameters);
 
       for (Map.Entry<String, String> entry : connectionParameters.getJdbcParameters().getConnection().entrySet()) {
-        LOGGER.info("Connection Options - {} -> {}", entry.getKey(), entry.getValue());
+        if ("password".equals(entry.getKey())) {
+          LOGGER.info("Connection Options - {} -> {}", entry.getKey(), "****");
+        } else {
+          LOGGER.info("Connection Options - {} -> {}", entry.getKey(), entry.getValue());
+        }
         databaseMigration.exportModuleParameter(entry.getKey(), entry.getValue());
       }
       databaseMigration.exportModule(exportModuleFactory);

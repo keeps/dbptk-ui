@@ -444,11 +444,11 @@
 
         <!-- gwt -->
         <dependency>
-            <groupId>com.google.gwt</groupId>
+            <groupId>org.gwtproject</groupId>
             <artifactId>gwt-user</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.google.gwt</groupId>
+            <groupId>org.gwtproject</groupId>
             <artifactId>gwt-dev</artifactId>
             <exclusions>
                 <exclusion>
@@ -517,6 +517,10 @@
         <dependency>
             <groupId>org.glassfish.jersey.media</groupId>
             <artifactId>jersey-media-moxy</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-jaxb</artifactId>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.media</groupId>
