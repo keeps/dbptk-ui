@@ -30,7 +30,7 @@
         <version.roda>3.7.0</version.roda>
         <version.jersey>2.35</version.jersey>
         <version.swagger>2.2.0</version.swagger>
-        <version.jackson>2.13.3</version.jackson>
+        <version.jackson>2.13.4</version.jackson>
         <version.cas-client>3.6.4</version.cas-client>
         <version.solr>8.11.1</version.solr>
         <version.springboot>2.6.8</version.springboot>
@@ -251,8 +251,8 @@
                                 -Djava.net.preferIPv4Stack=true
                                 -Djavax.xml.parsers.SAXParserFactory=org.apache.xerces.jaxp.SAXParserFactoryImpl -Dgwt.codeServerPort=9876
                                 -Djavax.xml.parsers.DocumentBuilderFactory=org.apache.xerces.jaxp.DocumentBuilderFactoryImpl
-                                -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5006
-                                -Dserver.port=8082
+                                -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005
+                                -Dserver.port=8080
                             </jvmArguments>
                         </configuration>
                     </plugin>
@@ -597,9 +597,9 @@
 
         <!-- Handlerbars -->
         <dependency>
-            <groupId>org.webjars</groupId>
+            <groupId>org.webjars.npm</groupId>
             <artifactId>handlebars</artifactId>
-            <version>4.0.2</version>
+            <version>4.7.7</version>
         </dependency>
         <!-- / Handlerbars -->
 
