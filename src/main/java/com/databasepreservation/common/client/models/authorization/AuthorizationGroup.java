@@ -12,7 +12,7 @@ import java.io.Serializable;
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
-public class AuthorizationGroups implements Serializable {
+public class AuthorizationGroup implements Serializable {
   public enum Type {
     DEFAULT, CUSTOM
   }

@@ -52,7 +52,7 @@ import com.databasepreservation.common.client.exceptions.AuthorizationException;
 import com.databasepreservation.common.client.index.IsIndexed;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.filter.SimpleFilterParameter;
-import com.databasepreservation.common.client.models.authorization.AuthorizationGroups;
+import com.databasepreservation.common.client.models.authorization.AuthorizationGroup;
 import com.databasepreservation.common.client.models.authorization.AuthorizationGroupsList;
 import com.databasepreservation.common.client.models.status.database.DatabaseStatus;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
@@ -149,7 +149,7 @@ public class UserUtility {
     }
 
     for (String permission : databasePermissions) {
-      AuthorizationGroups authorizationGroup = allAuthorizationGroups.get(permission);
+      AuthorizationGroup authorizationGroup = allAuthorizationGroups.get(permission);
       if (authorizationGroup != null) {
         // store permissions with associated groups.
         authorizationGroupsToCheck.add(authorizationGroup);
@@ -159,10 +159,10 @@ public class UserUtility {
       }
     }
 
-    for (AuthorizationGroups authorizationGroups : authorizationGroupsToCheck.getAuthorizationGroupsList()) {
-      if (authorizationGroups.getAttributeOperator()
+    for (AuthorizationGroup authorizationGroup : authorizationGroupsToCheck.getAuthorizationGroupsList()) {
+      if (authorizationGroup.getAttributeOperator()
         .equals(ViewerConfiguration.PROPERTY_COLLECTIONS_AUTHORIZATION_GROUP_OPERATOR_EQUAL)) {
-        if (user.getAllRoles().contains(authorizationGroups.getAttributeValue())) {
+        if (user.getAllRoles().contains(authorizationGroup.getAttributeValue())) {
           // User has permissions to access this database
           return;
         }

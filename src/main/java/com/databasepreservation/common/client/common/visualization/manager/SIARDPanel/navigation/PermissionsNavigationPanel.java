@@ -22,7 +22,7 @@ import com.databasepreservation.common.client.common.lists.widgets.BasicTablePan
 import com.databasepreservation.common.client.common.utils.CommonClientUtils;
 import com.databasepreservation.common.client.common.utils.html.LabelUtils;
 import com.databasepreservation.common.client.common.visualization.manager.SIARDPanel.SIARDManagerPage;
-import com.databasepreservation.common.client.models.authorization.AuthorizationGroups;
+import com.databasepreservation.common.client.models.authorization.AuthorizationGroup;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.services.DatabaseService;
 import com.databasepreservation.common.client.widgets.Alert;
@@ -37,7 +37,6 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.FlowPanel;
 
-import com.google.gwt.user.client.ui.Widget;
 import config.i18n.client.ClientMessages;
 
 /**
@@ -50,7 +49,7 @@ public class PermissionsNavigationPanel {
 
   private ViewerDatabase database;
   private Set<String> databasePermissions;
-  private Set<AuthorizationGroups> groups;
+  private Set<AuthorizationGroup> groups;
   private boolean hasPermissionsOrGroups = true;
   private FlowPanel body;
   private FlowPanel bottom;
@@ -59,13 +58,13 @@ public class PermissionsNavigationPanel {
   private boolean overrideMissingGroups = false;
 
   public static PermissionsNavigationPanel getInstance(ViewerDatabase database, Set<String> databasePermissions,
-    Set<AuthorizationGroups> authorizationGroups) {
+    Set<AuthorizationGroup> authorizationGroups) {
     return instances.computeIfAbsent(database.getUuid(),
       k -> new PermissionsNavigationPanel(database, databasePermissions, authorizationGroups));
   }
 
   public PermissionsNavigationPanel(ViewerDatabase database, Set<String> databasePermissions,
-    Set<AuthorizationGroups> authorizationGroups) {
+    Set<AuthorizationGroup> authorizationGroups) {
     this.database = database;
     this.groups = authorizationGroups;
     this.databasePermissions = databasePermissions;
@@ -104,9 +103,9 @@ public class PermissionsNavigationPanel {
     } else {
       ArrayList<String> permissionOrGroupsList = new ArrayList<>();
       // Add the corresponding label to the permission
-      for (AuthorizationGroups authorizationGroups : groups) {
-        if (databasePermissions.contains(authorizationGroups.getAttributeValue())) {
-          permissionOrGroupsList.add(authorizationGroups.getLabel());
+      for (AuthorizationGroup authorizationGroup : groups) {
+        if (databasePermissions.contains(authorizationGroup.getAttributeValue())) {
+          permissionOrGroupsList.add(authorizationGroup.getLabel());
         }
       }
 
@@ -166,10 +165,10 @@ public class PermissionsNavigationPanel {
     permissionListPanel
       .add(new Alert(Alert.MessageAlertType.INFO, messages.SIARDHomePageDialogDetailsForPermissionsList()));
 
-    Column<AuthorizationGroups, Boolean> checkbox = new Column<AuthorizationGroups, Boolean>(
+    Column<AuthorizationGroup, Boolean> checkbox = new Column<AuthorizationGroup, Boolean>(
       new CheckboxCell(true, true)) {
       @Override
-      public Boolean getValue(AuthorizationGroups group) {
+      public Boolean getValue(AuthorizationGroup group) {
         return databasePermissions.contains(group.getAttributeValue());
       }
     };
@@ -188,35 +187,35 @@ public class PermissionsNavigationPanel {
       }
     });
 
-    BasicTablePanel<AuthorizationGroups> cellTable = new BasicTablePanel<>(new FlowPanel(),
+    BasicTablePanel<AuthorizationGroup> cellTable = new BasicTablePanel<>(new FlowPanel(),
       SafeHtmlUtils.EMPTY_SAFE_HTML, groups.iterator(),
-      new BasicTablePanel.ColumnInfo<AuthorizationGroups>("", 3, checkbox),
-      new BasicTablePanel.ColumnInfo<AuthorizationGroups>(messages.SIARDHomePageLabelForPermissionsTableGroupLabel(), 7,
-        new TooltipColumn<AuthorizationGroups>() {
+      new BasicTablePanel.ColumnInfo<AuthorizationGroup>("", 3, checkbox),
+      new BasicTablePanel.ColumnInfo<AuthorizationGroup>(messages.SIARDHomePageLabelForPermissionsTableGroupLabel(), 7,
+        new TooltipColumn<AuthorizationGroup>() {
           @Override
-          public SafeHtml getValue(AuthorizationGroups group) {
+          public SafeHtml getValue(AuthorizationGroup group) {
             return SafeHtmlUtils.fromString(group.getLabel());
           }
         }, "force_column_ellipsis"),
-      new BasicTablePanel.ColumnInfo<AuthorizationGroups>(
-        messages.SIARDHomePageLabelForPermissionsTableGroupAttributeName(), 7, new TooltipColumn<AuthorizationGroups>() {
+      new BasicTablePanel.ColumnInfo<AuthorizationGroup>(
+        messages.SIARDHomePageLabelForPermissionsTableGroupAttributeName(), 7, new TooltipColumn<AuthorizationGroup>() {
           @Override
-          public SafeHtml getValue(AuthorizationGroups group) {
+          public SafeHtml getValue(AuthorizationGroup group) {
             return SafeHtmlUtils.fromString(group.getAttributeName());
           }
         }, "force_column_ellipsis"),
-      new BasicTablePanel.ColumnInfo<AuthorizationGroups>(
+      new BasicTablePanel.ColumnInfo<AuthorizationGroup>(
         messages.SIARDHomePageLabelForPermissionsTableGroupAttributeOperator(), 7,
-        new TooltipColumn<AuthorizationGroups>() {
+        new TooltipColumn<AuthorizationGroup>() {
           @Override
-          public SafeHtml getValue(AuthorizationGroups group) {
+          public SafeHtml getValue(AuthorizationGroup group) {
             return SafeHtmlUtils.fromString(group.getAttributeOperator());
           }
         }, "force_column_ellipsis"),
-      new BasicTablePanel.ColumnInfo<AuthorizationGroups>(
-        messages.SIARDHomePageLabelForPermissionsTableGroupAttributeValue(), 0, new TooltipColumn<AuthorizationGroups>() {
+      new BasicTablePanel.ColumnInfo<AuthorizationGroup>(
+        messages.SIARDHomePageLabelForPermissionsTableGroupAttributeValue(), 0, new TooltipColumn<AuthorizationGroup>() {
           @Override
-          public SafeHtml getValue(AuthorizationGroups group) {
+          public SafeHtml getValue(AuthorizationGroup group) {
             return SafeHtmlUtils.fromString(group.getAttributeValue());
           }
         }, "force_column_ellipsis"));
@@ -248,7 +247,7 @@ public class PermissionsNavigationPanel {
     Set<String> missingGroups = new HashSet<>();
     for (String permission : databasePermissions) {
       boolean foundGroup = false;
-      for (AuthorizationGroups group : groups) {
+      for (AuthorizationGroup group : groups) {
         if (group.getAttributeValue().equals(permission)) {
           foundGroup = true;
           break;

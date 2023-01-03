@@ -26,7 +26,6 @@ import com.databasepreservation.common.client.exceptions.RESTException;
 import com.databasepreservation.common.client.index.FindRequest;
 import com.databasepreservation.common.client.index.IndexResult;
 import com.databasepreservation.common.client.index.filter.AndFiltersParameters;
-import com.databasepreservation.common.client.index.filter.EmptyKeyFilterParameter;
 import com.databasepreservation.common.client.index.filter.Filter;
 import com.databasepreservation.common.client.index.filter.FilterParameter;
 import com.databasepreservation.common.client.index.filter.OrFiltersParameters;

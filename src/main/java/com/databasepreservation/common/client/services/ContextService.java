@@ -24,7 +24,7 @@ import org.fusesource.restygwt.client.REST;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultMethodCallback;
-import com.databasepreservation.common.client.models.authorization.AuthorizationGroups;
+import com.databasepreservation.common.client.models.authorization.AuthorizationGroup;
 import com.google.gwt.core.client.GWT;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -77,5 +77,5 @@ public interface ContextService extends DirectRestService {
   @Path("/authorizations")
   @Operation(summary = "Gets the authorizations group list")
   @Produces(MediaType.APPLICATION_JSON)
-  Set<AuthorizationGroups> getAuthorizationGroupsList();
+  Set<AuthorizationGroup> getAuthorizationGroupsList();
 }

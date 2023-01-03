@@ -9,9 +9,7 @@ package com.databasepreservation.common.client.models.authorization;
 
 import java.io.Serializable;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -21,29 +19,24 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public class AuthorizationGroupsList implements Serializable {
   private static final long serialVersionUID = -3730186735554294942L;
 
-  private Set<AuthorizationGroups> authorizationGroupsList = new HashSet<>();
+  private Set<AuthorizationGroup> authorizationGroupList = new HashSet<>();
 
-  public Set<AuthorizationGroups> getAuthorizationGroupsList() {
-    return authorizationGroupsList;
+  public Set<AuthorizationGroup> getAuthorizationGroupsList() {
+    return authorizationGroupList;
   }
 
   @JsonIgnore
-  public AuthorizationGroups get(String permission) {
-    for (AuthorizationGroups authorizationGroups : authorizationGroupsList) {
-      if (authorizationGroups.getAttributeValue().equals(permission)) {
-        return authorizationGroups;
+  public AuthorizationGroup get(String permission) {
+    for (AuthorizationGroup authorizationGroup : authorizationGroupList) {
+      if (authorizationGroup.getAttributeValue().equals(permission)) {
+        return authorizationGroup;
       }
     }
     return null;
   }
 
   @JsonIgnore
-  public List<String> getAllAttributeNames() {
-    return authorizationGroupsList.stream().map(AuthorizationGroups::getAttributeName).collect(Collectors.toList());
-  }
-
-  @JsonIgnore
-  public void add(AuthorizationGroups authorizationGroups) {
-    this.authorizationGroupsList.add(authorizationGroups);
+  public void add(AuthorizationGroup authorizationGroup) {
+    this.authorizationGroupList.add(authorizationGroup);
   }
 }

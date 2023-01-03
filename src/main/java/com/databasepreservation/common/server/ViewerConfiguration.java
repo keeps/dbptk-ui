@@ -48,7 +48,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.models.authorization.AuthorizationGroups;
+import com.databasepreservation.common.client.models.authorization.AuthorizationGroup;
 import com.databasepreservation.common.client.models.authorization.AuthorizationGroupsList;
 import com.databasepreservation.common.server.controller.ReporterType;
 import com.databasepreservation.common.utils.FilenameUtils;
@@ -486,22 +486,21 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     AuthorizationGroupsList authorizationGroupsList = new AuthorizationGroupsList();
 
     for (String authorizationId : authorizationsIds) {
-      AuthorizationGroups authorizationGroups = new AuthorizationGroups();
+      AuthorizationGroup authorizationGroup = new AuthorizationGroup();
 
-      authorizationGroups.setId(authorizationId);
-      authorizationGroups.setLabel(getViewerConfigurationAsString("", PROPERTY_COLLECTIONS_AUTHORIZATION_GROUPS,
+      authorizationGroup.setId(authorizationId);
+      authorizationGroup.setLabel(getViewerConfigurationAsString("", PROPERTY_COLLECTIONS_AUTHORIZATION_GROUPS,
         authorizationId, PROPERTY_COLLECTIONS_AUTHORIZATION_GROUPS_LABEL));
-      authorizationGroups.setAttributeName(getViewerConfigurationAsString(ViewerConstants.DEFAULT_ATTRIBUTE_ROLES,
+      authorizationGroup.setAttributeName(getViewerConfigurationAsString(ViewerConstants.DEFAULT_ATTRIBUTE_ROLES,
         PROPERTY_COLLECTIONS_AUTHORIZATION_GROUPS, authorizationId,
         PROPERTY_COLLECTIONS_AUTHORIZATION_GROUP_ATTRIBUTE_NAME));
-      authorizationGroups
+      authorizationGroup
         .setAttributeOperator(getViewerConfigurationAsString("", PROPERTY_COLLECTIONS_AUTHORIZATION_GROUPS,
           authorizationId, PROPERTY_COLLECTIONS_AUTHORIZATION_GROUP_ATTRIBUTE_OPERATOR));
-      authorizationGroups
-        .setAttributeValue(getViewerConfigurationAsString("", PROPERTY_COLLECTIONS_AUTHORIZATION_GROUPS,
-          authorizationId, PROPERTY_COLLECTIONS_AUTHORIZATION_GROUP_ATTRIBUTE_VALUE));
-      authorizationGroups.setType(AuthorizationGroups.Type.CUSTOM);
-      authorizationGroupsList.add(authorizationGroups);
+      authorizationGroup.setAttributeValue(getViewerConfigurationAsString("", PROPERTY_COLLECTIONS_AUTHORIZATION_GROUPS,
+        authorizationId, PROPERTY_COLLECTIONS_AUTHORIZATION_GROUP_ATTRIBUTE_VALUE));
+      authorizationGroup.setType(AuthorizationGroup.Type.CUSTOM);
+      authorizationGroupsList.add(authorizationGroup);
     }
     return authorizationGroupsList;
   }
@@ -513,19 +512,52 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     if (!authorizationDefault.isEmpty()) {
       for (String defaultPermission : authorizationDefault) {
         if (authorizationGroupsList.get(defaultPermission) == null) {
-          AuthorizationGroups authorizationGroups = new AuthorizationGroups();
-          authorizationGroups.setId(defaultPermission);
-          authorizationGroups.setLabel(defaultPermission);
-          authorizationGroups.setAttributeName(getViewerConfigurationAsString(ViewerConstants.DEFAULT_ATTRIBUTE_ROLES,
+          AuthorizationGroup authorizationGroup = new AuthorizationGroup();
+          authorizationGroup.setId(defaultPermission);
+          authorizationGroup.setLabel(defaultPermission);
+          authorizationGroup.setAttributeName(getViewerConfigurationAsString(ViewerConstants.DEFAULT_ATTRIBUTE_ROLES,
             ViewerConfiguration.PROPERTY_AUTHORIZATION_ROLES_ATTRIBUTE));
-          authorizationGroups.setAttributeOperator(PROPERTY_COLLECTIONS_AUTHORIZATION_GROUP_OPERATOR_EQUAL);
-          authorizationGroups.setAttributeValue(defaultPermission);
-          authorizationGroups.setType(AuthorizationGroups.Type.DEFAULT);
+          authorizationGroup.setAttributeOperator(PROPERTY_COLLECTIONS_AUTHORIZATION_GROUP_OPERATOR_EQUAL);
+          authorizationGroup.setAttributeValue(defaultPermission);
+          authorizationGroup.setType(AuthorizationGroup.Type.DEFAULT);
 
-          authorizationGroupsList.add(authorizationGroups);
+          authorizationGroupsList.add(authorizationGroup);
         }
       }
     }
+    return authorizationGroupsList;
+  }
+
+  public AuthorizationGroupsList getCollectionsAuthorizationGroupsWithAdminAndUserRoles() {
+    AuthorizationGroupsList authorizationGroupsList = getCollectionsAuthorizationGroups();
+
+    final List<String> adminRoles = ViewerConfiguration.getInstance()
+        .getViewerConfigurationAsList(ViewerConfiguration.PROPERTY_AUTHORIZATION_ADMINISTRATORS);
+
+    for (String adminRole : adminRoles) {
+      AuthorizationGroup authorizationGroup = new AuthorizationGroup();
+      authorizationGroup.setId("roles.administrators." + adminRole);
+      authorizationGroup.setLabel("Administrators");
+      authorizationGroup.setAttributeName(getViewerConfigurationAsString(ViewerConstants.DEFAULT_ATTRIBUTE_ROLES,
+          ViewerConfiguration.PROPERTY_AUTHORIZATION_ROLES_ATTRIBUTE));
+      authorizationGroup.setAttributeOperator(PROPERTY_COLLECTIONS_AUTHORIZATION_GROUP_OPERATOR_EQUAL);
+      authorizationGroup.setAttributeValue(adminRole);
+      authorizationGroup.setType(AuthorizationGroup.Type.DEFAULT);
+
+      authorizationGroupsList.add(authorizationGroup);
+    }
+
+    AuthorizationGroup authorizationGroup = new AuthorizationGroup();
+    authorizationGroup.setId("roles.users");
+    authorizationGroup.setLabel("Users");
+    authorizationGroup.setAttributeName(getViewerConfigurationAsString(ViewerConstants.DEFAULT_ATTRIBUTE_ROLES,
+        ViewerConfiguration.PROPERTY_AUTHORIZATION_ROLES_ATTRIBUTE));
+    authorizationGroup.setAttributeOperator(PROPERTY_COLLECTIONS_AUTHORIZATION_GROUP_OPERATOR_EQUAL);
+    authorizationGroup.setAttributeValue(getViewerConfigurationAsString("users", "user.attribute.roles.users"));
+    authorizationGroup.setType(AuthorizationGroup.Type.DEFAULT);
+
+    authorizationGroupsList.add(authorizationGroup);
+
     return authorizationGroupsList;
   }
 

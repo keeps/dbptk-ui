@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.models.authorization.AuthorizationGroups;
+import com.databasepreservation.common.client.models.authorization.AuthorizationGroup;
 import com.databasepreservation.common.client.models.authorization.AuthorizationGroupsList;
 import com.databasepreservation.common.client.services.ContextService;
 import com.databasepreservation.common.server.ServerTools;
@@ -64,7 +64,7 @@ public class ContextResource implements ContextService {
   }
 
   @Override
-  public Set<AuthorizationGroups> getAuthorizationGroupsList() {
+  public Set<AuthorizationGroup> getAuthorizationGroupsList() {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
     controllerAssistant.checkRoles(request);
     AuthorizationGroupsList authorizationGroupsList = ViewerConfiguration.getInstance()

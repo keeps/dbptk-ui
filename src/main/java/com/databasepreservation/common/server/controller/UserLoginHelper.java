@@ -20,7 +20,7 @@ import org.jasig.cas.client.authentication.AttributePrincipal;
 import org.roda.core.data.v2.user.RodaPrincipal;
 
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.models.authorization.AuthorizationGroupsList;
+import com.databasepreservation.common.client.models.authorization.AuthorizationGroup;
 import com.databasepreservation.common.client.models.user.User;
 import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.utils.UserUtility;
@@ -44,25 +44,18 @@ public class UserLoginHelper {
       final String emailConfigurationValue = ViewerConfiguration.getInstance().getViewerConfigurationAsString(
         ViewerConstants.DEFAULT_ATTRIBUTE_EMAIL, ViewerConfiguration.PROPERTY_AUTHORIZATION_EMAIL_ATTRIBUTE);
 
-      Set<String> attributeRolesToCheck = new HashSet<>();
-      attributeRolesToCheck.add(rolesConfigurationValue);
-
-      AuthorizationGroupsList authorizationGroups = ViewerConfiguration.getInstance()
-        .getCollectionsAuthorizationGroups();
-      attributeRolesToCheck.addAll(authorizationGroups.getAllAttributeNames());
-
-      for (String attributeRole : attributeRolesToCheck) {
+      if (attributes.get(rolesConfigurationValue) instanceof String) {
         Set<String> roles = new HashSet<>();
-        roles.addAll(user.getAllRoles());
-        roles.addAll(user.getDirectRoles());
-        if (attributes.get(attributeRole) instanceof String) {
-          mapCasAttributeString(attributes, attributeRole, roles::addAll);
-        } else if (attributes.get(attributeRole) instanceof List) {
-          mapCasAttributeList(attributes, attributeRole, roles::addAll);
-        }
+        mapCasAttributeString(attributes, rolesConfigurationValue, roles::addAll);
         user.setAllRoles(roles);
         user.setDirectRoles(roles);
+      } else if (attributes.get(rolesConfigurationValue) instanceof List) {
+        mapCasAttributeList(user, attributes, rolesConfigurationValue, RodaPrincipal::setAllRoles);
+        mapCasAttributeList(user, attributes, rolesConfigurationValue, RodaPrincipal::setDirectRoles);
       }
+
+      mapAuthorizedGroups(user,
+        ViewerConfiguration.getInstance().getCollectionsAuthorizationGroupsWithAdminAndUserRoles().getAuthorizationGroupsList());
 
       // Add default roles to authenticated user
       boolean addDefaultRoles = ViewerConfiguration.getInstance().getViewerConfigurationAsBoolean(false,
@@ -88,8 +81,28 @@ public class UserLoginHelper {
     return user;
   }
 
-  private static void mapCasAttributeList(Map<String, Object> attributes, String attributeKey,
-    Consumer<Set<String>> mapping) {
+  private static void mapAuthorizedGroups(User user, Set<AuthorizationGroup> authorizationGroups) {
+    Set<String> authorizedRoles = new HashSet<>();
+    for (AuthorizationGroup group : authorizationGroups) {
+      String rolesAttribute = ViewerConfiguration.getInstance().getViewerConfigurationAsString(
+        ViewerConstants.DEFAULT_ATTRIBUTE_ROLES, ViewerConfiguration.PROPERTY_AUTHORIZATION_ROLES_ATTRIBUTE);
+
+      if (ViewerConfiguration.PROPERTY_COLLECTIONS_AUTHORIZATION_GROUP_OPERATOR_EQUAL
+        .equals(group.getAttributeOperator())) {
+        if (rolesAttribute.equalsIgnoreCase(group.getAttributeName())) {
+          if (user.getAllRoles().stream().anyMatch(p -> p.equals(group.getAttributeValue()))) {
+            authorizedRoles.add(group.getAttributeValue());
+          }
+        }
+      }
+    }
+
+    user.setAllRoles(authorizedRoles);
+    user.setDirectRoles(authorizedRoles);
+  }
+
+  private static void mapCasAttributeList(User user, Map<String, Object> attributes, String attributeKey,
+    BiConsumer<User, Set<String>> mapping) {
     Object attributeValue = attributes.get(attributeKey);
     Set<String> result = new HashSet<>();
     if (attributeValue instanceof List) {
@@ -100,7 +113,7 @@ public class UserLoginHelper {
         }
       }
 
-      mapping.accept(result);
+      mapping.accept(user, result);
     }
   }
 

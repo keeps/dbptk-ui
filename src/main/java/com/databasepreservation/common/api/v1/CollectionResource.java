@@ -10,11 +10,8 @@ package com.databasepreservation.common.api.v1;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_INDEX_ROW_COLLECTION_NAME_PREFIX;
 import static com.databasepreservation.common.client.ViewerConstants.SOLR_SEARCHES_DATABASE_UUID;
 
-import com.databasepreservation.common.client.models.structure.ViewerLobStoreType;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -87,6 +84,7 @@ import com.databasepreservation.common.client.models.status.collection.TableStat
 import com.databasepreservation.common.client.models.status.denormalization.DenormalizeConfiguration;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerDatabaseStatus;
+import com.databasepreservation.common.client.models.structure.ViewerLobStoreType;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
 import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.models.structure.ViewerType;
@@ -560,7 +558,7 @@ public class CollectionResource implements CollectionService {
   }
 
   private Response handleExternalLobDownload(TableStatus tableConfiguration, ViewerRow row, int columnIndex)
-      throws IOException {
+    throws IOException {
     final String lobLocation = row.getCells().get(tableConfiguration.getColumnByIndex(columnIndex).getId()).getValue();
     final java.nio.file.Path lobPath = Paths.get(lobLocation);
     final java.nio.file.Path completeLobPath = ViewerFactory.getViewerConfiguration().getSIARDFilesPath()
@@ -612,9 +610,9 @@ public class CollectionResource implements CollectionService {
         throw new GenericException("Zip archive entry is missing");
       }
 
-        return ApiUtils.okResponse(new StreamResponse(handlebarsFilename, handlebarsMimeType,
-            DownloadUtils.stream(new BufferedInputStream(zipFile.getInputStream(entry)))));
-      }
+      return ApiUtils.okResponse(new StreamResponse(handlebarsFilename, handlebarsMimeType,
+        DownloadUtils.stream(new BufferedInputStream(zipFile.getInputStream(entry)))));
+    }
   }
 
   @GET
