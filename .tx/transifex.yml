@@ -1,0 +1,29 @@
+git:
+  filters:
+    - filter_type: file
+      file_format: UNICODEPROPERTIES
+      source_language: en
+      source_file: src/main/resources/config/i18n/ServerMessages.properties
+      translation_files_expression: src/main/resources/config/i18n/ServerMessages_<lang>.properties
+    - filter_type: file
+      file_format: UNICODEPROPERTIES
+      source_language: en
+      source_file: src/main/resources/config/i18n/client/ClientMessages.properties
+      translation_files_expression: src/main/resources/config/i18n/client/ClientMessages_<lang>.properties
+    - filter_type: file
+      file_format: HTML
+      source_file: src/main/resources/config/theme/loadOnAccess.html
+      source_language: en
+      translation_files_expression: src/main/resources/config/theme/loadOnAccess_<lang>.html
+    - filter_type: file
+      file_format: HTML
+      source_file: src/main/resources/config/theme/Footer.html
+      source_language: en
+      translation_files_expression: src/main/resources/config/theme/Footer_<lang>.html
+    - filter_type: file
+      file_format: HTML
+      source_file: src/main/resources/config/theme/Welcome.html
+      source_language: en
+      translation_files_expression: src/main/resources/config/theme/Welcome_<lang>.html
+  settings:
+    pr_branch_name: tx_translations_<br_unique_id>
