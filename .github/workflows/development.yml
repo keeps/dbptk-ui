@@ -27,8 +27,8 @@ jobs:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-maven-
-      - name: Set POM version to staging
-        run: mvn $MAVEN_CLI_OPTS versions:set -DnewVersion=staging
+      - name: Set POM version to development
+        run: mvn $MAVEN_CLI_OPTS versions:set -DnewVersion=development
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Package
