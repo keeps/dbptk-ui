@@ -922,7 +922,14 @@ public class ToolkitStructure2ViewerStructure {
           AutoDetectParser parser = new AutoDetectParser();
           Metadata metadata = new Metadata();
 
-          parser.parse(inputStream, new BodyContentHandler(), metadata, new ParseContext());
+          Boolean autoDetectParserNoLimit = ViewerFactory.getEnvBoolean("AUTO_DETECT_PARSER_NO_LIMIT", false);
+
+          if (autoDetectParserNoLimit) {
+            parser.parse(inputStream, new BodyContentHandler(-1), metadata, new ParseContext());
+          } else {
+            parser.parse(inputStream, new BodyContentHandler(), metadata, new ParseContext());
+          }
+
           mimeType = metadata.get("Content-Type");
           fileExtension = MimeTypes.getDefaultMimeTypes().forName(mimeType).getExtension();
 
