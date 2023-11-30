@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 
+import com.databasepreservation.common.server.index.schema.SolrDefaultCollectionRegistry;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -85,16 +86,14 @@ import com.databasepreservation.common.server.index.schema.collections.RowsColle
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class SolrUtils {
+  public static final String COMMON = "common";
+  public static final String CONF = "conf";
+  public static final String SCHEMA = "managed-schema";
   private static final Logger LOGGER = LoggerFactory.getLogger(SolrUtils.class);
   private static final String DEFAULT_QUERY_PARSER_OPERATOR = "AND";
   private static final Set<String> NON_REPEATABLE_FIELDS = new HashSet<>(Arrays.asList(RodaConstants.AIP_TITLE,
     RodaConstants.AIP_LEVEL, RodaConstants.AIP_DATE_INITIAL, RodaConstants.AIP_DATE_FINAL));
-
   private static Map<String, List<String>> liteFieldsForEachClass = new HashMap<>();
-
-  public static final String COMMON = "common";
-  public static final String CONF = "conf";
-  public static final String SCHEMA = "managed-schema";
 
   private SolrUtils() {
     // do nothing
@@ -198,6 +197,48 @@ public class SolrUtils {
     throws GenericException, RequestNotValidException {
     return SolrUtils.findRows(index, databaseUUID, filter, sorter, pageSize, cursorMark, fieldsToReturn,
       new HashMap<>());
+  }
+
+  public static <T extends IsIndexed> Pair<IndexResult<T>, String> find(SolrClient index, Class<T> classToRetrieve,
+    Filter filter, Sorter sorter, int pageSize, String cursorMark, List<String> fieldsToReturn,
+    Map<String, String> extraParameters) throws RequestNotValidException, GenericException {
+    Pair<IndexResult<T>, String> ret;
+    SolrQuery query = new SolrQuery();
+    query.setParam("q.op", DEFAULT_QUERY_PARSER_OPERATOR);
+    query.setQuery(parseFilter(filter));
+
+    query.set(CursorMarkParams.CURSOR_MARK_PARAM, cursorMark);
+    query.setRows(pageSize);
+    final List<SolrQuery.SortClause> sortClauses = parseSorter(sorter);
+    sortClauses.add(SolrQuery.SortClause.asc(RodaConstants.INDEX_UUID));
+    query.setSorts(sortClauses);
+
+    if (!extraParameters.isEmpty()) {
+      List<String> extraFields = new ArrayList<>();
+      for (Map.Entry<String, String> entry : extraParameters.entrySet()) {
+        query.setParam(entry.getKey(), entry.getValue());
+        extraFields.add(entry.getKey());
+      }
+    }
+
+    if (!fieldsToReturn.isEmpty()) {
+      query.setFields(fieldsToReturn.toArray(new String[0]));
+    }
+
+    try {
+      QueryResponse response = index.query(SolrDefaultCollectionRegistry.get(classToRetrieve).getIndexName(), query);
+      IndexResult<T> result = queryResponseToIndexResult(response, SolrDefaultCollectionRegistry.get(classToRetrieve),
+        Facets.NONE);
+      ret = Pair.of(result, response.getNextCursorMark());
+    } catch (SolrServerException | IOException e) {
+      throw new GenericException("Could not query index", e);
+    } catch (SolrException e) {
+      throw new RequestNotValidException(e);
+    } catch (RuntimeException e) {
+      throw new GenericException("Unexpected exception while querying index", e);
+    }
+
+    return ret;
   }
 
   public static Pair<IndexResult<ViewerRow>, String> findRows(SolrClient index, String databaseUUID, Filter filter,
