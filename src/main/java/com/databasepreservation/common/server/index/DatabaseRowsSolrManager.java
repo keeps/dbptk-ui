@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.databasepreservation.common.server.index.utils.IterableDatabaseResult;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest;
@@ -224,6 +225,11 @@ public class DatabaseRowsSolrManager {
 
   public IterableNestedIndexResult findAllRows(String databaseUUID, SolrQuery query, final Sorter sorter) {
     return new IterableNestedIndexResult(client, databaseUUID, query, sorter);
+  }
+
+  public <T extends IsIndexed> IterableDatabaseResult<T> findAll(Class<T> classToReturn, Filter filter, Sorter sorter,
+    List<String> fieldsToReturn) {
+    return new IterableDatabaseResult<>(client, classToReturn, filter, sorter, fieldsToReturn);
   }
 
   public IndexResult<ViewerRow> findRows(String databaseUUID, List<SolrQuery> queryList)
@@ -501,14 +507,15 @@ public class DatabaseRowsSolrManager {
     }
   }
 
-  public void updateDatabasePermissions(String databaseUUID, Set<String> permissions) throws GenericException, ViewerException {
+  public void updateDatabasePermissions(String databaseUUID, Set<String> permissions)
+    throws GenericException, ViewerException {
     LOGGER.debug("Starting to update database permissions ({})", databaseUUID);
     // create document to update this DB
     SolrInputDocument doc = new SolrInputDocument();
     doc.addField(ViewerConstants.INDEX_ID, databaseUUID);
 
     try {
-      doc.addField(ViewerConstants.SOLR_DATABASES_PERMISSIONS,SolrUtils.asValueUpdate(permissions));
+      doc.addField(ViewerConstants.SOLR_DATABASES_PERMISSIONS, SolrUtils.asValueUpdate(permissions));
       insertDocument(ViewerConstants.SOLR_INDEX_DATABASES_COLLECTION_NAME, doc);
     } catch (ViewerException e) {
       LOGGER.error("Could not update database metadata ({})", databaseUUID, e);
