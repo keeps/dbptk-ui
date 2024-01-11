@@ -938,6 +938,7 @@ public class ToolkitStructure2ViewerStructure {
         }
       }
 
+      inputStream.close();
       zipFile.close();
 
       cell.setMimeType(mimeType);
