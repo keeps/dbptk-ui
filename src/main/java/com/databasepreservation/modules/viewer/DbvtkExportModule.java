@@ -10,6 +10,8 @@ package com.databasepreservation.modules.viewer;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.apache.solr.client.solrj.SolrServerException;
 import org.roda.core.data.exceptions.GenericException;
@@ -37,10 +39,14 @@ import com.databasepreservation.modules.DefaultExceptionNormalizer;
 public class DbvtkExportModule implements DatabaseFilterModule {
   private final DatabaseRowsSolrManager solrManager;
   private CollectionStatus collectionConfiguration;
+  private final int rowThreshold = ViewerFactory.getEnvInt("ROW_PROGRESS_THRESHOLD", 500);
+  private int rowsProcessedByTableCounter = 0;
+  private int rowCounter = 0;
   private ViewerDatabase retrieved;
   private ViewerTable currentTable;
   private String databaseUUID;
   private long rowIndex = 1;
+  private static final Logger LOGGER = LoggerFactory.getLogger(DbvtkExportModule.class);
 
   public DbvtkExportModule(String databaseUUID) {
     solrManager = ViewerFactory.getSolrManager();
@@ -61,6 +67,7 @@ public class DbvtkExportModule implements DatabaseFilterModule {
    */
   @Override
   public void initDatabase() throws ModuleException {
+    LOGGER.info("Starting to process database {}", databaseUUID);
     // setup is done when DBVTK starts
   }
 
@@ -101,6 +108,7 @@ public class DbvtkExportModule implements DatabaseFilterModule {
    */
   @Override
   public void handleDataOpenSchema(String schemaName) throws ModuleException {
+    LOGGER.info("Starting to process schema {}", schemaName);
     // viewerDatabase.getSchema(schemaName);
   }
 
@@ -116,8 +124,10 @@ public class DbvtkExportModule implements DatabaseFilterModule {
    */
   @Override
   public void handleDataOpenTable(String tableId) throws ModuleException {
+    rowsProcessedByTableCounter = 0;
     currentTable = retrieved.getMetadata().getTableById(tableId);
     solrManager.addTable(retrieved.getUuid(), currentTable);
+    LOGGER.info("Processing table {}", tableId);
     // rowIndex = 1;
   }
 
@@ -133,6 +143,25 @@ public class DbvtkExportModule implements DatabaseFilterModule {
   public void handleDataRow(Row row) throws ModuleException {
     solrManager.addRow(retrieved.getUuid(),
       ToolkitStructure2ViewerStructure.getRow(collectionConfiguration, currentTable, row, rowIndex++,retrieved.getPath()));
+
+    rowsProcessedByTableCounter++;
+    rowCounter++;
+
+    if (shouldLogRowProgress()) {
+      LOGGER.info("Processed {} rows of {} total", rowsProcessedByTableCounter, currentTable.getCountRows());
+      rowCounter = 0;
+    }
+  }
+
+
+  /**
+   * Checks if a row process log should be done
+   *
+   */
+  private boolean shouldLogRowProgress() {
+    return rowCounter == rowThreshold ||
+      (currentTable.getCountRows() <= rowThreshold && rowsProcessedByTableCounter == currentTable.getCountRows()) ||
+      rowsProcessedByTableCounter == currentTable.getCountRows();
   }
 
   /**
@@ -145,6 +174,7 @@ public class DbvtkExportModule implements DatabaseFilterModule {
    */
   @Override
   public void handleDataCloseTable(String tableId) throws ModuleException {
+    LOGGER.info("Finished processing table {}", tableId);
     // committing + optimizing after whole database
   }
 
@@ -162,6 +192,7 @@ public class DbvtkExportModule implements DatabaseFilterModule {
 
     try {
       ViewerFactory.getSolrClient().commit(SolrRowsCollectionRegistry.get(databaseUUID).getIndexName());
+      LOGGER.info("Finished processing schema {}", schemaName);
     } catch (SolrServerException | IOException e) {
       e.printStackTrace();
     }
@@ -178,6 +209,7 @@ public class DbvtkExportModule implements DatabaseFilterModule {
     solrManager.markDatabaseAsReady(databaseUUID);
     collectionConfiguration.setConsolidateProperty(LargeObjectConsolidateProperty.NOT_CONSOLIDATED);
     ViewerFactory.getConfigurationManager().updateCollectionStatus(databaseUUID, collectionConfiguration);
+    LOGGER.info("Finished processing database {}", databaseUUID);
   }
 
   @Override

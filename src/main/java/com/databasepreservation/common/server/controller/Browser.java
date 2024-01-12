@@ -16,11 +16,14 @@ import org.roda.core.data.exceptions.AlreadyExistsException;
 import com.databasepreservation.common.server.storage.ContentPayload;
 import com.databasepreservation.common.server.storage.fs.FSPathContentPayload;
 import org.roda.core.data.exceptions.GenericException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
 public class Browser {
+  private static final Logger LOGGER = LoggerFactory.getLogger(Browser.class);
   public static void createFile(InputStream uploadedInputStream, String fileName, Path path)
           throws AlreadyExistsException, GenericException {
     try{
@@ -30,6 +33,7 @@ public class Browser {
       ContentPayload payload = new FSPathContentPayload(file);
 
       payload.writeToPath(path);
+      LOGGER.info("Created file {} in {}", fileName, path);
     } catch (FileAlreadyExistsException e){
       System.out.println("File exist on path: " + Paths.get(path.toString(), fileName));
       throw new AlreadyExistsException();
