@@ -41,7 +41,7 @@ import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.reflections.Reflections;
-import org.reflections.scanners.ResourcesScanner;
+import org.reflections.scanners.Scanners;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 import org.slf4j.Logger;
@@ -776,8 +776,8 @@ public class ViewerConfiguration extends ViewerAbstractConfiguration {
     classLoadersList.add(ClasspathHelper.contextClassLoader());
 
     Reflections reflections = new Reflections(
-      new ConfigurationBuilder().setScanners(new ResourcesScanner()).setUrls(ClasspathHelper.forPackage(classpathPrefix,
-        ClasspathHelper.contextClassLoader(), ClasspathHelper.staticClassLoader())));
+      new ConfigurationBuilder().forPackage(classpathPrefix,
+        ClasspathHelper.contextClassLoader(), ClasspathHelper.staticClassLoader()).setScanners(Scanners.Resources));
 
     Set<String> resources = reflections.getResources(Pattern.compile(".*"));
     resources = resources.stream().filter(r -> !shouldExclude(r, classpathPrefix, excludePaths))
