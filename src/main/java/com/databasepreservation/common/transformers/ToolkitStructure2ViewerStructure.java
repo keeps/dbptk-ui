@@ -9,7 +9,6 @@ package com.databasepreservation.common.transformers;
 
 import com.databasepreservation.common.client.models.structure.ViewerLobStoreType;
 import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -912,7 +911,11 @@ public class ToolkitStructure2ViewerStructure {
       if (StringUtils.isAllBlank(fileExtension)) {
         try {
           if (blobIsInsideSiard) {
-            inputStream = zipFile.getInputStream(entry);
+            if (entry != null) {
+              inputStream = zipFile.getInputStream(entry);
+            } else {
+              inputStream = new ByteArrayInputStream(lobCellValue.getBytes());
+            }
           } else {
             final Path lobPath = Paths.get(lobCellValue);
             final Path completeLobPath = ViewerFactory.getViewerConfiguration().getSIARDFilesPath().resolve(lobPath);
