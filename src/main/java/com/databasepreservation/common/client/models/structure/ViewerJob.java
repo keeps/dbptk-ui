@@ -8,6 +8,7 @@
 package com.databasepreservation.common.client.models.structure;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import com.databasepreservation.common.client.index.IsIndexed;

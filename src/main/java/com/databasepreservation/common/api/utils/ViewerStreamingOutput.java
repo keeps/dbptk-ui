@@ -9,7 +9,7 @@ package com.databasepreservation.common.api.utils;
 
 import com.databasepreservation.common.api.common.ConsumesOutputStream;
 
-import javax.ws.rs.core.StreamingOutput;
+import jakarta.ws.rs.core.StreamingOutput;
 import java.io.IOException;
 import java.io.OutputStream;
 

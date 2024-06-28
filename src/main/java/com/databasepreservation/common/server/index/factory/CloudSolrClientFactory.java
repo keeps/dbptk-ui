@@ -22,6 +22,7 @@ import java.util.concurrent.TimeoutException;
 
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CloudSolrClient;
+import org.apache.solr.client.solrj.impl.ZkClientClusterStateProvider;
 import org.apache.solr.client.solrj.request.CollectionAdminRequest;
 import org.apache.solr.client.solrj.response.CollectionAdminResponse;
 import org.apache.solr.cloud.ZkController;
@@ -30,6 +31,7 @@ import org.apache.solr.common.cloud.ClusterState;
 import org.apache.solr.common.cloud.DocCollection;
 import org.apache.solr.common.cloud.Replica;
 import org.apache.solr.common.cloud.Slice;
+import org.apache.solr.common.cloud.SolrZkClient;
 import org.apache.solr.common.cloud.ZkStateReader;
 import org.apache.zookeeper.KeeperException;
 import org.slf4j.Logger;
@@ -111,7 +113,7 @@ public class CloudSolrClientFactory extends SolrClientFactory<CloudSolrClient> {
             LOGGER.error("Could not connect to Solr Cloud", e);
         }
 
-        ZkStateReader zkStateReader = getSolrClient().getZkStateReader();
+        ZkStateReader zkStateReader = ZkClientClusterStateProvider.from(getSolrClient()).getZkStateReader();
         ClusterState clusterState = zkStateReader.getClusterState();
 
         Map<String, DocCollection> collectionStates = clusterState.getCollectionsMap();
@@ -179,13 +181,10 @@ public class CloudSolrClientFactory extends SolrClientFactory<CloudSolrClient> {
             int numShards = ViewerFactory.getEnvInt("SOLR_NUM_SHARDS", 1);
             int numReplicas = ViewerFactory.getEnvInt("SOLR_REPLICATION_FACTOR", 1);
 
-            getSolrClient().getZkStateReader().getZkClient().upConfig(configPath, collection);
+            SolrZkClient zkClient = ZkClientClusterStateProvider.from(getSolrClient()).getZkStateReader().getZkClient();
+            zkClient.upConfig(configPath, collection);
 
-            CollectionAdminRequest.Create createCollection = CollectionAdminRequest.createCollection(collection,
-                    collection, numShards, numReplicas);
-            createCollection.setMaxShardsPerNode(ViewerFactory.getEnvInt("SOLR_MAX_SHARDS_PER_NODE", 1));
-            createCollection.setAutoAddReplicas(ViewerFactory.getEnvBoolean("SOLR_AUTO_ADD_REPLICAS", false));
-
+            CollectionAdminRequest.Create createCollection = CollectionAdminRequest.createCollection(collection, collection, numShards, numReplicas);
             CollectionAdminResponse response = createCollection.process(getSolrClient());
             if (!response.isSuccess()) {
                 LOGGER.error("Could not create collection {}: {}", collection, response.getErrorMessages());

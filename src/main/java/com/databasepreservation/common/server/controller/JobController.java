@@ -21,6 +21,9 @@ import com.databasepreservation.common.client.models.structure.ViewerJobStatus;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
 
+import java.sql.Date;
+import java.time.ZoneId;
+
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
@@ -36,9 +39,9 @@ public class JobController {
     viewerJob.setTableUuid(jobExecution.getJobParameters().getString(ViewerConstants.CONTROLLER_TABLE_ID_PARAM));
     viewerJob.setJobId(jobExecution.getJobId());
     viewerJob.setName(jobExecution.getJobInstance().getJobName());
-    viewerJob.setCreateTime(jobExecution.getCreateTime());
-    viewerJob.setStartTime(jobExecution.getStartTime());
-    viewerJob.setEndTime(jobExecution.getEndTime());
+    viewerJob.setCreateTime(Date.from(jobExecution.getCreateTime().atZone(ZoneId.systemDefault()).toInstant()));
+    viewerJob.setStartTime(Date.from(jobExecution.getStartTime().atZone(ZoneId.systemDefault()).toInstant()));
+    viewerJob.setEndTime(Date.from(jobExecution.getEndTime().atZone(ZoneId.systemDefault()).toInstant()));
     viewerJob.setStatus(ViewerJobStatus.valueOf(jobExecution.getStatus().name()));
     viewerJob.setExitCode(jobExecution.getExitStatus().getExitCode());
     if (!jobExecution.getAllFailureExceptions().isEmpty()) {
