@@ -9,7 +9,7 @@ package com.databasepreservation.common.client.models.status.collection;
 
 import java.io.Serializable;
 
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MediaType;
 
 import com.databasepreservation.common.client.models.status.formatters.Formatter;
 import com.databasepreservation.common.client.models.status.formatters.NoFormatter;

@@ -16,24 +16,25 @@
     </organization>
 
     <properties>
-        <version.java>1.8</version.java>
+        <version.java>21</version.java>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <projectLocalRepository>${project.basedir}/vendor-libs/repository</projectLocalRepository>
 
         <!-- GWT needs at least java 1.6 -->
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>auto</maven.compiler.source>
+        <maven.compiler.target>auto</maven.compiler.target>
 
-        <version.gwt>2.10.0</version.gwt>
+        <version.gwt>2.11.0</version.gwt>
         <scope.gwt-dev>provided</scope.gwt-dev>
-        <version.dbptk>2.11.0</version.dbptk>
-        <version.roda>3.7.1</version.roda>
-        <version.jersey>2.35</version.jersey>
-        <version.swagger>2.2.6</version.swagger>
-        <version.jackson>2.14.1</version.jackson>
-        <version.cas-client>3.6.4</version.cas-client>
-        <version.solr>8.11.2</version.solr>
-        <version.springboot>2.7.7</version.springboot>
+        <version.dbptk>3.0.0</version.dbptk>
+        <version.roda>5.4.0</version.roda>
+        <version.jersey>3.1.6</version.jersey>
+        <version.swagger>2.2.20</version.swagger>
+        <version.jackson>2.17.0</version.jackson>
+        <version.cas-client>4.0.4</version.cas-client>
+        <version.solr>9.6.0</version.solr>
+        <version.springboot>3.2.5</version.springboot>
+        <version.logback>1.5.6</version.logback>
 
         <desktop>com.databasepreservation.desktop.Desktop</desktop>
         <server>com.databasepreservation.server.Server</server>
@@ -58,7 +59,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.6.7</version>
+        <version>3.2.5</version>
     </parent>
 
     <build>
@@ -208,7 +209,9 @@
                                 <configuration>
                                     <moduleName>${desktop}</moduleName>
                                     <systemProperties>
-                                        <javax.xml.parsers.SAXParserFactory>org.apache.xerces.jaxp.SAXParserFactoryImpl</javax.xml.parsers.SAXParserFactory>
+                                        <jakarta.xml.parsers.SAXParserFactory>
+                                            org.apache.xerces.jaxp.SAXParserFactoryImpl
+                                        </jakarta.xml.parsers.SAXParserFactory>
                                     </systemProperties>
                                 </configuration>
                                 <goals>
@@ -221,7 +224,9 @@
                                 <configuration>
                                     <moduleName>${server}</moduleName>
                                     <systemProperties>
-                                        <javax.xml.parsers.SAXParserFactory>org.apache.xerces.jaxp.SAXParserFactoryImpl</javax.xml.parsers.SAXParserFactory>
+                                        <jakarta.xml.parsers.SAXParserFactory>
+                                            org.apache.xerces.jaxp.SAXParserFactoryImpl
+                                        </jakarta.xml.parsers.SAXParserFactory>
                                     </systemProperties>
                                 </configuration>
                                 <goals>
@@ -247,10 +252,16 @@
                         <artifactId>spring-boot-maven-plugin</artifactId>
                         <version>${version.springboot}</version>
                         <configuration>
+                            <additionalClasspathElements>
+                                <additionalClasspathElement>
+                                    ${project.build.directory}/${project.build.finalName}
+                                </additionalClasspathElement>
+                            </additionalClasspathElements>
                             <jvmArguments>
+                                -Dgwt.codeServerPort=9876 -Xdebug
                                 -Djava.net.preferIPv4Stack=true
-                                -Djavax.xml.parsers.SAXParserFactory=org.apache.xerces.jaxp.SAXParserFactoryImpl -Dgwt.codeServerPort=9876
-                                -Djavax.xml.parsers.DocumentBuilderFactory=org.apache.xerces.jaxp.DocumentBuilderFactoryImpl
+                                -Djakarta.xml.parsers.SAXParserFactory=org.apache.xerces.jaxp.SAXParserFactoryImpl
+                                -Djakarta.xml.parsers.DocumentBuilderFactory=org.apache.xerces.jaxp.DocumentBuilderFactoryImpl
                                 -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005
                                 -Dserver.port=8080
                             </jvmArguments>
@@ -263,16 +274,15 @@
                         <extensions>true</extensions>
                         <configuration>
                             <moduleName>${server}</moduleName>
-                            <launcherDir>${project.build.directory}/${project.build.finalName}/WEB-INF/classes/public/</launcherDir>
+                            <launcherDir>${project.build.directory}/${project.build.finalName}</launcherDir>
+                            <classpathScope>test</classpathScope>
+                            <skipCompilation>false</skipCompilation>
+                            <draftCompile>true</draftCompile>
+                            <style>PRETTY</style>
+                            <forceCompilation>true</forceCompilation>
                             <jvmArgs>
                                 -Djavax.xml.parsers.SAXParserFactory=org.apache.xerces.jaxp.SAXParserFactoryImpl
                             </jvmArgs>
-                            <codeserverArgs>
-                                <arg>-bindAddress</arg>
-                                <arg>0.0.0.0</arg>
-                                <arg>-style</arg>
-                                <arg>PRETTY</arg>
-                            </codeserverArgs>
                         </configuration>
                         <executions>
                             <execution>
@@ -297,9 +307,10 @@
                         <configuration>
                             <jvmArguments>
                                 -Djava.net.preferIPv4Stack=true
-                                -Djavax.xml.parsers.SAXParserFactory=org.apache.xerces.jaxp.SAXParserFactoryImpl
-                                -Djavax.xml.parsers.DocumentBuilderFactory=org.apache.xerces.jaxp.DocumentBuilderFactoryImpl
-                                -Dgwt.codeServerPort=9876 -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005 -Denv=desktop
+                                -Djakarta.xml.parsers.SAXParserFactory=org.apache.xerces.jaxp.SAXParserFactoryImpl
+                                -Djakarta.xml.parsers.DocumentBuilderFactory=org.apache.xerces.jaxp.DocumentBuilderFactoryImpl
+                                -Dgwt.codeServerPort=9876 -Xdebug
+                                -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005 -Denv=desktop
                             </jvmArguments>
                         </configuration>
                     </plugin>
@@ -310,9 +321,9 @@
                         <extensions>true</extensions>
                         <configuration>
                             <moduleName>${desktop}</moduleName>
-                            <launcherDir>${project.build.directory}/${project.build.finalName}/WEB-INF/classes/public/</launcherDir>
+                            <launcherDir>${project.build.directory}/${project.build.finalName}</launcherDir>
                             <jvmArgs>
-                                -Djavax.xml.parsers.SAXParserFactory=org.apache.xerces.jaxp.SAXParserFactoryImpl
+                                -Djakarta.xml.parsers.SAXParserFactory=org.apache.xerces.jaxp.SAXParserFactoryImpl
                             </jvmArgs>
                         </configuration>
                         <executions>
@@ -332,11 +343,70 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>jakarta.servlet</groupId>
+                <artifactId>jakarta.servlet-api</artifactId>
+                <version>6.0.0</version>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.persistence</groupId>
+                <artifactId>jakarta.persistence-api</artifactId>
+                <version>3.1.0</version>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.xml.bind</groupId>
+                <artifactId>jakarta.xml.bind-api</artifactId>
+                <version>4.0.1</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>${version.jackson}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${version.jackson}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>${version.jackson}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-client</artifactId>
+                <version>10.0.19</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-http</artifactId>
+                <version>10.0.19</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-util</artifactId>
+                <version>10.0.19</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-io</artifactId>
+                <version>10.0.19</version>
+            </dependency>
+            <dependency>
                 <groupId>org.gwtproject</groupId>
-                <artifactId>gwt</artifactId>
+                <artifactId>gwt-dev</artifactId>
                 <version>${version.gwt}</version>
-                <type>pom</type>
-                <scope>import</scope>
+                <scope>${scope.gwt-dev}</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.gwtproject</groupId>
+                <artifactId>gwt-servlet-jakarta</artifactId>
+                <version>${version.gwt}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.gwtproject</groupId>
+                <artifactId>gwt-user</artifactId>
+                <version>${version.gwt}</version>
             </dependency>
             <dependency>
                 <groupId>org.glassfish.jersey</groupId>
@@ -344,6 +414,22 @@
                 <version>${version.jersey}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.jersey.bundles</groupId>
+                <artifactId>jaxrs-ri</artifactId>
+                <version>${jersey.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.jersey.ext</groupId>
+                <artifactId>jersey-spring6</artifactId>
+                <version>3.1.6</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.springframework</groupId>
+                        <artifactId>spring-context</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>com.google.guava</groupId>
@@ -360,6 +446,11 @@
                 <artifactId>mapdb</artifactId>
                 <version>3.0.10</version>
             </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-tomcat</artifactId>
+                <scope>provided</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -368,13 +459,13 @@
         <dependency>
             <groupId>com.databasepreservation</groupId>
             <artifactId>dbptk-bindings</artifactId>
-            <version>1.5.1</version>
+            <version>2.0.0</version>
             <type>pom</type>
         </dependency>
         <dependency>
             <groupId>com.databasepreservation</groupId>
             <artifactId>dbptk-bindings-siard2-1</artifactId>
-            <version>1.5.1</version>
+            <version>2.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.databasepreservation</groupId>
@@ -463,6 +554,16 @@
         <dependency>
             <groupId>org.gwtproject</groupId>
             <artifactId>gwt-user</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.servlet</groupId>
+                    <artifactId>javax.servlet-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.gwtproject</groupId>
+            <artifactId>gwt-servlet-jakarta</artifactId>
         </dependency>
         <dependency>
             <groupId>org.gwtproject</groupId>
@@ -472,8 +573,15 @@
                     <groupId>org.mortbay.jasper</groupId>
                     <artifactId>apache-jsp</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>javax.servlet</groupId>
+                    <artifactId>javax.servlet-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.eclipse.jetty</groupId>
+                    <artifactId>apache-jsp</artifactId>
+                </exclusion>
             </exclusions>
-            <scope>${scope.gwt-dev}</scope>
         </dependency>
         <!-- viewer -->
         <dependency>
@@ -492,36 +600,27 @@
             <version>3.1</version>
         </dependency>
         <dependency>
-            <groupId>org.jasig.cas.client</groupId>
+            <groupId>org.apereo.cas.client</groupId>
             <artifactId>cas-client-core</artifactId>
             <version>${version.cas-client}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>javax.servlet</groupId>
-                    <artifactId>servlet-api</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/javax.xml/jaxp-api -->
-        <dependency>
-            <groupId>javax.xml</groupId>
-            <artifactId>jaxp-api</artifactId>
-            <version>1.4.2</version>
-        </dependency>
+        <!-- https://mvnrepository.com/artifact/jakarta.xml/jaxp-api -->
 
         <dependency>
-            <groupId>javax.xml.bind</groupId>
-            <artifactId>jaxb-api</artifactId>
-            <version>2.3.1</version>
-            <classifier>sources</classifier>
-            <scope>provided</scope>
+            <groupId>jakarta.ws.rs</groupId>
+            <artifactId>jakarta.ws.rs-api</artifactId>
+            <version>3.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
         </dependency>
 
         <!-- REST API related dependencies - start -->
         <dependency>
             <groupId>org.fusesource.restygwt</groupId>
             <artifactId>restygwt</artifactId>
-            <version>2.2.7</version>
+            <version>2.2.8-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.containers</groupId>
@@ -561,17 +660,14 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-            <version>${version.jackson}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>${version.jackson}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>${version.jackson}</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.bundles.repackaged</groupId>
@@ -700,7 +796,7 @@
         </dependency>
         <dependency>
             <groupId>io.swagger.core.v3</groupId>
-            <artifactId>swagger-jaxrs2</artifactId>
+            <artifactId>swagger-jaxrs2-jakarta</artifactId>
             <version>${version.swagger}</version>
         </dependency>
         <dependency>
@@ -713,11 +809,17 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.7.7</version>
+            <version>2.0.13</version>
         </dependency>
         <dependency>
             <groupId>org.apache.solr</groupId>
             <artifactId>solr-solrj</artifactId>
+            <version>${version.solr}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.solr/solr-solrj-zookeeper -->
+        <dependency>
+            <groupId>org.apache.solr</groupId>
+            <artifactId>solr-solrj-zookeeper</artifactId>
             <version>${version.solr}</version>
         </dependency>
         <dependency>
@@ -747,9 +849,22 @@
                 </exclusion>
                 <exclusion>
                     <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>log4j-slf4j2-impl</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>log4j-core</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.logging.log4j</groupId>
                     <artifactId>log4j-api</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.zookeeper</groupId>
+            <artifactId>zookeeper</artifactId>
+            <version>3.9.2</version>
         </dependency>
         <dependency>
             <groupId>io.dropwizard.metrics</groupId>
@@ -759,7 +874,17 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.2.11</version>
+            <version>${version.logback}</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>${version.logback}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.janino</groupId>
+            <artifactId>janino</artifactId>
+            <version>3.1.8</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>

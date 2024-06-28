@@ -9,14 +9,14 @@ package com.databasepreservation.common.api.utils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import javax.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlTransient;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 // FIXME this should be renamed and only used for non-ok responses
-@javax.xml.bind.annotation.XmlRootElement
-@javax.annotation.Generated(value = "class io.swagger.codegen.languages.JaxRSServerCodegen", date = "2015-09-03T11:38:49.275+01:00")
+@jakarta.xml.bind.annotation.XmlRootElement
+@jakarta.annotation.Generated(value = "class io.swagger.codegen.languages.JaxRSServerCodegen", date = "2015-09-03T11:38:49.275+01:00")
 public class ApiResponseMessage {
   public static final int ERROR = 1;
   public static final int WARNING = 2;
