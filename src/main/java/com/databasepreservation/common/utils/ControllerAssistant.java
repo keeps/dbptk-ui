@@ -15,7 +15,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.roda.core.data.exceptions.AuthorizationDeniedException;

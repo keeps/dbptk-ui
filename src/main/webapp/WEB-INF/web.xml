@@ -247,7 +247,7 @@
         <servlet-name>rest_api</servlet-name>
         <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
         <init-param>
-            <param-name>javax.ws.rs.Application</param-name>
+            <param-name>jakarta.ws.rs.Application</param-name>
             <param-value>com.databasepreservation.common.api.RestApplicationNoSwagger</param-value>
         </init-param>
         <load-on-startup>2</load-on-startup>

@@ -12,10 +12,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import javax.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServlet;
 import javax.sql.DataSource;
 
-import org.jasig.cas.client.session.SingleSignOutHttpSessionListener;
+import org.apereo.cas.client.session.SingleSignOutHttpSessionListener;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.jdbc.DataSourceBuilder;
@@ -45,13 +45,13 @@ public class DBVTK {
 
   @Bean
   public ServletRegistrationBean<HttpServlet> browserService() {
-    ServletRegistrationBean<HttpServlet> bean;
+    ServletRegistrationBean<HttpServlet> bean = new ServletRegistrationBean<>();
+    bean.setServlet(new BrowserServiceImpl());
     if (ViewerConstants.APPLICATION_ENV_DESKTOP
       .equals(System.getProperty(ViewerConstants.APPLICATION_ENV_KEY, ViewerConstants.APPLICATION_ENV_SERVER))) {
-      bean = new ServletRegistrationBean<>(new BrowserServiceImpl(),
-        "/com.databasepreservation.desktop.Desktop/browse");
+      bean.addUrlMappings("/com.databasepreservation.desktop.Desktop/browse");
     } else {
-      bean = new ServletRegistrationBean<>(new BrowserServiceImpl(), "/com.databasepreservation.server.Server/browse");
+      bean.addUrlMappings("/com.databasepreservation.server.Server/browse");
     }
     bean.setLoadOnStartup(2);
     return bean;
@@ -220,7 +220,7 @@ public class DBVTK {
    * H2 Datasource
    *********************/
   @Bean
-  public DataSource getDataSource() {
+  public DataSource dataSource() {
     DataSourceBuilder dataSourceBuilder = DataSourceBuilder.create();
     dataSourceBuilder.driverClassName("org.h2.Driver");
     dataSourceBuilder

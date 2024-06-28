@@ -7,11 +7,10 @@
  */
 package com.databasepreservation.common.api.exceptions;
 
-import javax.inject.Inject;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Provider;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.ResponseBuilder;
+import jakarta.ws.rs.ext.ExceptionMapper;
+import jakarta.ws.rs.ext.Provider;
 
 import org.glassfish.jersey.server.ContainerRequest;
 import org.slf4j.Logger;
@@ -21,12 +20,14 @@ import com.databasepreservation.common.api.utils.ApiResponseMessage;
 import com.databasepreservation.common.api.utils.ApiUtils;
 import com.databasepreservation.common.client.exceptions.RESTException;
 
+import jakarta.inject.Inject;
+
 @Provider
 public class RestExceptionMapper implements ExceptionMapper<RESTException> {
   private static final Logger LOGGER = LoggerFactory.getLogger(RestExceptionMapper.class);
 
   @Inject
-  private javax.inject.Provider<ContainerRequest> containerRequestProvider;
+  private jakarta.inject.Provider<ContainerRequest> containerRequestProvider;
 
   @Override
   public Response toResponse(RESTException e) {

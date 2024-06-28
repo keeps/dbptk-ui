@@ -7,6 +7,12 @@
  */
 package com.databasepreservation.common.server.controller;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.Date;
+
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.slf4j.Logger;
@@ -36,9 +42,9 @@ public class JobController {
     viewerJob.setTableUuid(jobExecution.getJobParameters().getString(ViewerConstants.CONTROLLER_TABLE_ID_PARAM));
     viewerJob.setJobId(jobExecution.getJobId());
     viewerJob.setName(jobExecution.getJobInstance().getJobName());
-    viewerJob.setCreateTime(jobExecution.getCreateTime());
-    viewerJob.setStartTime(jobExecution.getStartTime());
-    viewerJob.setEndTime(jobExecution.getEndTime());
+    viewerJob.setCreateTime(convertToDate(jobExecution.getCreateTime()));
+    viewerJob.setStartTime(convertToDate(jobExecution.getStartTime()));
+    viewerJob.setEndTime(convertToDate(jobExecution.getEndTime()));
     viewerJob.setStatus(ViewerJobStatus.valueOf(jobExecution.getStatus().name()));
     viewerJob.setExitCode(jobExecution.getExitStatus().getExitCode());
     if (!jobExecution.getAllFailureExceptions().isEmpty()) {
@@ -46,6 +52,16 @@ public class JobController {
     }
 
     return viewerJob;
+  }
+
+  private static Date convertToDate(LocalDateTime localDateTime) {
+    if (localDateTime == null) {
+      return null;
+    }
+
+    ZonedDateTime zonedDateTime = localDateTime.atZone(ZoneId.systemDefault());
+    Instant instant = zonedDateTime.toInstant();
+    return Date.from(instant);
   }
 
   private static ViewerJob createMinimalViewerJob(JobParameters parameters) {

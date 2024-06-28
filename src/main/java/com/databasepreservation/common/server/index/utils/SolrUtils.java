@@ -88,7 +88,7 @@ import com.databasepreservation.common.server.index.schema.collections.RowsColle
 public class SolrUtils {
   public static final String COMMON = "common";
   public static final String CONF = "conf";
-  public static final String SCHEMA = "managed-schema";
+  public static final String SCHEMA = "managed-schema.xml";
   private static final Logger LOGGER = LoggerFactory.getLogger(SolrUtils.class);
   private static final String DEFAULT_QUERY_PARSER_OPERATOR = "AND";
   private static final Set<String> NON_REPEATABLE_FIELDS = new HashSet<>(Arrays.asList(RodaConstants.AIP_TITLE,
