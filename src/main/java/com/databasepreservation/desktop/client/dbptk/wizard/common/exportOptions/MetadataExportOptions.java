@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.api.v1.utils.StringResponse;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.fields.GenericField;
 import com.databasepreservation.common.client.models.dbptk.Module;
@@ -79,8 +80,8 @@ public class MetadataExportOptions extends WizardPanel<MetadataExportOptionsPara
       "<div class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
 
     content.add(spinner);
-    ContextService.Util.call((String client) -> {
-      clientMachine = client;
+    ContextService.Util.call((StringResponse client) -> {
+      clientMachine = client.getValue();
       if (populate) {
         DatabaseService.Util.call((ViewerDatabase result) -> {
           metadata = result.getMetadata();

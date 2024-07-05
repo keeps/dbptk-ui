@@ -7,6 +7,7 @@
  */
 package com.databasepreservation.common.client.models.structure;
 
+import java.io.Serial;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,6 +15,8 @@ import java.util.Map;
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class ViewerDatabaseFromToolkit extends ViewerDatabase {
+  @Serial
+  private static final long serialVersionUID = 3861426941265170208L;
   private Map<String, ViewerSchema> toolkitSchemas;
   private Map<String, ViewerTable> toolkitTables;
   private Map<String, ViewerView> toolkitViews;

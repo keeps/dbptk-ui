@@ -9,17 +9,15 @@ package com.databasepreservation.common.client.services;
 
 import java.util.function.Consumer;
 
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.core.MediaType;
-
 import org.fusesource.restygwt.client.DirectRestService;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.fusesource.restygwt.client.REST;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.databasepreservation.common.api.utils.ApiResponseMessage;
 import com.databasepreservation.common.client.ViewerConstants;
@@ -34,7 +32,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -42,26 +39,23 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
 
-@Path(".." + ViewerConstants.ENDPOINT_ACTIVITY_LOG)
+@RequestMapping(path = ".." + ViewerConstants.ENDPOINT_ACTIVITY_LOG)
 @Tag(name = ActivityLogService.SWAGGER_ENDPOINT)
 public interface ActivityLogService extends DirectRestService {
   public static final String SWAGGER_ENDPOINT = "v1 activity log";
 
-  @POST
-  @Path("/find")
-  @Operation(summary = "Finds logs", requestBody = @RequestBody(required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON)), responses = {
+  @RequestMapping(path = "/find", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+  @Operation(summary = "Finds logs", requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)), responses = {
     @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = IndexResult.class))),
     @ApiResponse(responseCode = "404", description = "Not found", content = @Content(schema = @Schema(implementation = ApiResponseMessage.class)))})
-  @Produces(MediaType.APPLICATION_JSON)
   IndexResult<ActivityLogEntry> find(
-    @Parameter(name = "f", description = "Find request to filter/limit the search", required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON)) FindRequest findRequest,
-    @Parameter(name = "Locale") @QueryParam(ViewerConstants.API_QUERY_PARAM_LOCALE) String locale);
+    @Parameter(name = "f", description = "Find request to filter/limit the search", required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE)) @RequestBody FindRequest findRequest,
+    @Parameter(name = ViewerConstants.API_QUERY_PARAM_LOCALE) @RequestParam(name = ViewerConstants.API_QUERY_PARAM_LOCALE) String locale);
 
-  @GET
-  @Path("/{logUUID}")
+  @RequestMapping(path = "/{logUUID}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieve a specific log detail")
-  @Produces(MediaType.APPLICATION_JSON)
-  ActivityLogWrapper retrieve(@Parameter(name = "The unique log identifier") @PathParam("logUUID") String logUUID);
+  ActivityLogWrapper retrieve(
+    @Parameter(name = "The unique log identifier") @PathVariable(name = "logUUID") String logUUID);
 
   class Util {
     /**

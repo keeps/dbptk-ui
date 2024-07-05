@@ -7,12 +7,15 @@
  */
 package com.databasepreservation.common.client.models.structure;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class ViewerReference implements Serializable {
+  @Serial
+  private static final long serialVersionUID = 8297093659033539208L;
   private Integer sourceColumnIndex;
   private Integer referencedColumnIndex;
 

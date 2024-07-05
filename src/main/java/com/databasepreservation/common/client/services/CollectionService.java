@@ -10,20 +10,17 @@ package com.databasepreservation.common.client.services;
 import java.util.List;
 import java.util.function.Consumer;
 
-import jakarta.ws.rs.DELETE;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PUT;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.core.MediaType;
-
 import org.fusesource.restygwt.client.DirectRestService;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.fusesource.restygwt.client.REST;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import com.databasepreservation.common.api.v1.utils.StringResponse;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultMethodCallback;
 import com.databasepreservation.common.client.common.search.SavedSearch;
@@ -43,7 +40,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-@Path(".." + ViewerConstants.ENDPOINT_DATABASE)
+@RequestMapping(path = ".." + ViewerConstants.ENDPOINT_DATABASE)
 @Tag(name = CollectionService.SWAGGER_ENDPOINT)
 public interface CollectionService extends DirectRestService {
   String SWAGGER_ENDPOINT = "v1 collection";
@@ -72,122 +69,110 @@ public interface CollectionService extends DirectRestService {
   /*******************************************************************************
    * Collection Resource
    *******************************************************************************/
-  @POST
-  @Path("{databaseUUID}/collection")
-  @Produces(MediaType.TEXT_PLAIN)
+  @RequestMapping(path = "/{databaseUUID}/collection", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Creates a collection for a database")
-  String createCollection(@PathParam("databaseUUID") String databaseUUID);
+  StringResponse createCollection(@PathVariable(name = "databaseUUID") String databaseUUID);
 
-  @GET
-  @Path("{databaseUUID}/collection/{collectionUUID}/status")
+  @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/status", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieves the progress data associated with an action done in the database")
-  ProgressData getProgressData(@PathParam("databaseUUID") String databaseUUID, @PathParam("collectionUUID") String collectionUUID);
+  ProgressData getProgressData(@PathVariable(name = "databaseUUID") String databaseUUID,
+    @PathVariable(name = "collectionUUID") String collectionUUID);
 
-  @DELETE
-  @Path("{databaseUUID}/collection/{collectionUUID}")
+  @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Deletes the collection for a specific database")
-  Boolean deleteCollection(@PathParam("databaseUUID") String databaseUUID, @PathParam("collectionUUID") String collectionUUID);
+  Boolean deleteCollection(@PathVariable(name = "databaseUUID") String databaseUUID,
+    @PathVariable(name = "collectionUUID") String collectionUUID);
 
   /*******************************************************************************
    * Collection Resource - Config Sub-resource
    *******************************************************************************/
-  @GET
-  @Path("{databaseUUID}/collection/{collectionUUID}/config")
+  @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/config", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Gets the internal collection configuration")
-  List<CollectionStatus> getCollectionConfiguration(@PathParam("databaseUUID") String databaseUUID,
-      @PathParam("collectionUUID") String collectionUUID);
+  List<CollectionStatus> getCollectionConfiguration(@PathVariable(name = "databaseUUID") String databaseUUID,
+    @PathVariable(name = "collectionUUID") String collectionUUID);
 
-  @PUT
-  @Path("{databaseUUID}/collection/{collectionUUID}/config")
+  @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/config", method = RequestMethod.PUT, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Updates the internal collection configuration")
-  Boolean updateCollectionConfiguration(@PathParam("databaseUUID") String databaseUUID,
-      @PathParam("collectionUUID") String collectionUUID,
-      @Parameter(name = "collectionStatus", required = true) CollectionStatus status);
+  Boolean updateCollectionConfiguration(@PathVariable(name = "databaseUUID") String databaseUUID,
+    @PathVariable(name = "collectionUUID") String collectionUUID,
+    @Parameter(name = "collectionStatus", required = true) CollectionStatus status);
 
   /*******************************************************************************
    * Collection Resource - Config Sub-resource - Denormalization Sub-resource
    *******************************************************************************/
-  @GET
-  @Path("{databaseUUID}/collection/{collectionUUID}/config/{tableUUID}")
+  @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/config/{tableUUID}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Gets the denormalization configuration file for a certain table within a database")
-  DenormalizeConfiguration getDenormalizeConfigurationFile(@PathParam("databaseUUID") String databaseUUID,
-      @PathParam("collectionUUID") String collectionUUID, @PathParam("tableUUID") String tableUUID);
+  DenormalizeConfiguration getDenormalizeConfigurationFile(@PathVariable(name = "databaseUUID") String databaseUUID,
+    @PathVariable(name = "collectionUUID") String collectionUUID, @PathVariable(name = "tableUUID") String tableUUID);
 
-  @POST
-  @Path("{databaseUUID}/collection/{collectionUUID}/config/{tableUUID}")
+  @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/config/{tableUUID}", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Creates the denormalization configuration file for a certain table within a database")
-  Boolean createDenormalizeConfigurationFile(@PathParam("databaseUUID") String databaseUUID,
-      @PathParam("collectionUUID") String collectionUUID, @PathParam("tableUUID") String tableUUID,
-      DenormalizeConfiguration configuration);
+  Boolean createDenormalizeConfigurationFile(@PathVariable(name = "databaseUUID") String databaseUUID,
+    @PathVariable(name = "collectionUUID") String collectionUUID, @PathVariable(name = "tableUUID") String tableUUID,
+    @RequestBody DenormalizeConfiguration configuration);
 
-  @DELETE
-  @Path("{databaseUUID}/collection/{collectionUUID}/config/{tableUUID}")
+  @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/config/{tableUUID}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Deletes the denormalization configuration file for a certain table within a database")
-  Boolean deleteDenormalizeConfigurationFile(@PathParam("databaseUUID") String databaseUUID,
-      @PathParam("collectionUUID") String collectionUUID, @PathParam("tableUUID") String tableUUID);
+  Boolean deleteDenormalizeConfigurationFile(@PathVariable(name = "databaseUUID") String databaseUUID,
+    @PathVariable(name = "collectionUUID") String collectionUUID, @PathVariable(name = "tableUUID") String tableUUID);
 
-  @GET
-  @Path("{databaseUUID}/collection/{collectionUUID}/config/{tableUUID}/run")
+  @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/config/{tableUUID}/run", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Runs a specific denormalization configuration for a certain table within a database")
-  void run(@PathParam("databaseUUID") String databaseUUID, @PathParam("collectionUUID") String collectionUUID,
-      @PathParam("tableUUID") String tableUUID);
+  void run(@PathVariable(name = "databaseUUID") String databaseUUID,
+    @PathVariable(name = "collectionUUID") String collectionUUID, @PathVariable(name = "tableUUID") String tableUUID);
 
   /*******************************************************************************
    * Collection Resource - Data Sub-resource
    *******************************************************************************/
-  @POST
-  @Path("{databaseUUID}/collection/{collectionUUID}/data/{schema}/{table}/find")
+  @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/data/{schema}/{table}/find", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Find all rows for a specific database")
-  IndexResult<ViewerRow> findRows(@PathParam("databaseUUID") String databaseUUID,
-      @PathParam("collectionUUID") String collectionUUID, @PathParam("schema") String schema,
-      @PathParam("table") String table, @Parameter(name = ViewerConstants.API_QUERY_PARAM_FILTER) FindRequest findRequest,
-      @QueryParam(ViewerConstants.API_QUERY_PARAM_LOCALE) String localeString);
+  IndexResult<ViewerRow> findRows(@PathVariable(name = "databaseUUID") String databaseUUID,
+    @PathVariable(name = "collectionUUID") String collectionUUID, @PathVariable(name = "schema") String schema,
+    @PathVariable(name = "table") String table,
+    @Parameter(name = ViewerConstants.API_QUERY_PARAM_FILTER) @RequestBody FindRequest findRequest,
+    @Parameter(name = ViewerConstants.API_QUERY_PARAM_LOCALE) @RequestParam(name = ViewerConstants.API_QUERY_PARAM_LOCALE) String localeString);
 
-  @GET
-  @Path("/{databaseUUID}/collection/{collectionUUID}/data/{schema}/{table}/{rowIndex}")
+  @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/data/{schema}/{table}/{rowIndex}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieves a specific row within a specific database")
-  ViewerRow retrieveRow(@PathParam("databaseUUID") String databaseUUID,
-      @PathParam("collectionUUID") String collectionUUID, @PathParam("schema") String schema,
-      @PathParam("table") String table, @PathParam("rowIndex") String rowIndex);
+  ViewerRow retrieveRow(@PathVariable(name = "databaseUUID") String databaseUUID,
+    @PathVariable(name = "collectionUUID") String collectionUUID, @PathVariable(name = "schema") String schema,
+    @PathVariable(name = "table") String table, @PathVariable(name = "rowIndex") String rowIndex);
 
   /*******************************************************************************
    * Collection Resource - SavedSearch Sub-resource
    *******************************************************************************/
-  @POST
-  @Path("/{databaseUUID}/collection/{collectionUUID}/savedSearch/")
-  @Produces(MediaType.TEXT_PLAIN)
+  @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/savedSearch/", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Saves a search for a specific table within a database")
-  String saveSavedSearch(@PathParam("databaseUUID") String databaseUUID,
-      @PathParam("collectionUUID") String collectionUUID, @QueryParam("tableUUID") String tableUUID,
-      @QueryParam("name") String name, @QueryParam("description") String description,
-      @Parameter(name = ViewerConstants.API_QUERY_PARAM_SEARCH) SearchInfo searchInfo);
+  String saveSavedSearch(@PathVariable(name = "databaseUUID") String databaseUUID,
+    @PathVariable(name = "collectionUUID") String collectionUUID, @RequestParam(name = "tableUUID") String tableUUID,
+    @RequestParam(name = "name") String name, @RequestParam(name = "description") String description,
+    @Parameter(name = ViewerConstants.API_QUERY_PARAM_SEARCH) SearchInfo searchInfo);
 
-  @POST
-  @Path("/{databaseUUID}/collection/{collectionUUID}/savedSearch/find")
+  @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/savedSearch/find", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Finds all the saved search for a specific database")
-  IndexResult<SavedSearch> findSavedSearches(@PathParam("databaseUUID") String databaseUUID,
-      @PathParam("collectionUUID") String collectionUUID,
-      @Parameter(name = ViewerConstants.API_QUERY_PARAM_FILTER) FindRequest findRequest,
-      @QueryParam(ViewerConstants.API_QUERY_PARAM_LOCALE) String localeString);
+  IndexResult<SavedSearch> findSavedSearches(@PathVariable(name = "databaseUUID") String databaseUUID,
+    @PathVariable(name = "collectionUUID") String collectionUUID,
+    @Parameter(name = ViewerConstants.API_QUERY_PARAM_FILTER) FindRequest findRequest,
+    @Parameter(name = ViewerConstants.API_QUERY_PARAM_LOCALE) @RequestParam(name = ViewerConstants.API_QUERY_PARAM_LOCALE) String localeString);
 
-  @GET
-  @Path("/{databaseUUID}/collection/{collectionUUID}/savedSearch/{savedSearchUUID}")
+  @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/savedSearch/{savedSearchUUID}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieves a specific saved search for a specific database")
-  SavedSearch retrieveSavedSearch(@PathParam("databaseUUID") String databaseUUID,
-      @PathParam("collectionUUID") String collectionUUID, @PathParam("savedSearchUUID") String savedSearchUUID);
+  SavedSearch retrieveSavedSearch(@PathVariable(name = "databaseUUID") String databaseUUID,
+    @PathVariable(name = "collectionUUID") String collectionUUID,
+    @PathVariable(name = "savedSearchUUID") String savedSearchUUID);
 
-  @PUT
-  @Path("/{databaseUUID}/collection/{collectionUUID}/savedSearch/{savedSearchUUID}")
+  @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/savedSearch/{savedSearchUUID}", method = RequestMethod.PUT)
   @Operation(summary = "Edits the content of a search")
-  void updateSavedSearch(@PathParam("databaseUUID") String databaseUUID,
-      @PathParam("collectionUUID") String collectionUUID, @PathParam("savedSearchUUID") String savedSearchUUID,
-      @Parameter(name = "The saved search name", required = true) @QueryParam("name") String name,
-      @Parameter(name = "The saved search description", required = true) @QueryParam("description") String description);
+  void updateSavedSearch(@PathVariable(name = "databaseUUID") String databaseUUID,
+    @PathVariable(name = "collectionUUID") String collectionUUID,
+    @PathVariable(name = "savedSearchUUID") String savedSearchUUID,
+    @Parameter(name = "The saved search name", required = true) @RequestParam(name = "name") String name,
+    @Parameter(name = "The saved search description", required = true) @RequestParam(name = "description") String description);
 
-  @DELETE
+  @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/savedSearch/{savedSearchUUID}", method = RequestMethod.DELETE)
   @Operation(summary = "Deletes a specific saved search for a specific database")
-  @Path("/{databaseUUID}/collection/{collectionUUID}/savedSearch/{savedSearchUUID}")
-  void deleteSavedSearch(@PathParam("databaseUUID") String databaseUUID,
-      @PathParam("collectionUUID") String collectionUUID, @PathParam("savedSearchUUID") String savedSearchUUID);
+  void deleteSavedSearch(@PathVariable(name = "databaseUUID") String databaseUUID,
+    @PathVariable(name = "collectionUUID") String collectionUUID,
+    @PathVariable(name = "savedSearchUUID") String savedSearchUUID);
 
 }

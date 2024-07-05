@@ -9,14 +9,12 @@ package com.databasepreservation.common.client.services;
 
 import java.util.function.Consumer;
 
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.MediaType;
-
 import org.fusesource.restygwt.client.DirectRestService;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.fusesource.restygwt.client.REST;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultMethodCallback;
@@ -29,7 +27,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
-@Path(".." + ViewerConstants.ENDPOINT_AUTHENTICATION)
+@RequestMapping(path = ".." + ViewerConstants.ENDPOINT_AUTHENTICATION)
 @Tag(name = AuthenticationService.SWAGGER_ENDPOINT)
 public interface AuthenticationService extends DirectRestService {
   public static final String SWAGGER_ENDPOINT = "v1 authentication";
@@ -55,14 +53,11 @@ public interface AuthenticationService extends DirectRestService {
     }
   }
 
-  @GET
-  @Path("/status")
+  @RequestMapping(path = "/status", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Checks if authentication is enabled")
   Boolean isAuthenticationEnabled();
 
-  @GET
-  @Path("/user")
+  @RequestMapping(path = "/user", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Gets the authenticated user")
-  @Produces(MediaType.APPLICATION_JSON)
   User getAuthenticatedUser();
 }

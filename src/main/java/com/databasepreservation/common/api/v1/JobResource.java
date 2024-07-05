@@ -7,14 +7,12 @@
  */
 package com.databasepreservation.common.api.v1;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.core.Context;
-
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.RequestNotValidException;
 import org.roda.core.data.utils.JsonUtils;
-import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.exceptions.RESTException;
@@ -27,15 +25,16 @@ import com.databasepreservation.common.client.services.JobService;
 import com.databasepreservation.common.server.ViewerFactory;
 import com.databasepreservation.common.utils.ControllerAssistant;
 import com.databasepreservation.common.utils.I18nUtility;
-import com.databasepreservation.common.utils.UserUtility;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
-@Service
-@Path(ViewerConstants.ENDPOINT_JOB)
+@RestController
+@RequestMapping(path = ViewerConstants.ENDPOINT_JOB)
 public class JobResource implements JobService {
-  @Context
+  @Autowired
   private HttpServletRequest request;
 
   @Override

@@ -7,12 +7,14 @@
  */
 package com.databasepreservation.common.client.index;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.databasepreservation.common.client.index.filter.Filter;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.roda.core.data.v2.index.sublist.Sublist;
 
 import com.databasepreservation.common.client.index.facets.Facets;
@@ -25,6 +27,7 @@ import com.databasepreservation.common.client.index.sort.Sorter;
  */
 public class FindRequest extends CountRequest {
 
+  @Serial
   private static final long serialVersionUID = 5997470558754294987L;
 
   /** Sorter. */

@@ -10,17 +10,15 @@ package com.databasepreservation.common.client.services;
 import java.util.List;
 import java.util.function.Consumer;
 
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.core.MediaType;
-
 import org.fusesource.restygwt.client.DirectRestService;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.fusesource.restygwt.client.REST;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import com.databasepreservation.common.api.v1.utils.StringResponse;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultMethodCallback;
 import com.databasepreservation.common.client.models.dbptk.Module;
@@ -37,7 +35,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-@Path(".." + ViewerConstants.ENDPOINT_MIGRATION)
+@RequestMapping(path = ".." + ViewerConstants.ENDPOINT_MIGRATION)
 @Tag(name = MigrationService.SWAGGER_ENDPOINT)
 public interface MigrationService extends DirectRestService {
   public static final String SWAGGER_ENDPOINT = "v1 migration";
@@ -63,43 +61,37 @@ public interface MigrationService extends DirectRestService {
     }
   }
 
-  @GET
-  @Path("/siard/modules")
+  @RequestMapping(path = "/siard/modules", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieves the DBPTK developer SIARD migration modules")
-  List<Module> getSiardModules(@QueryParam("type") String type, @QueryParam("moduleName") String moduleName);
+  List<Module> getSiardModules(@RequestParam(name = "type") String type,
+    @RequestParam(name = "moduleName") String moduleName);
 
-  @GET
-  @Path("/dbms/modules")
+  @RequestMapping(path = "/dbms/modules", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieves the DBPTK developer DBMS migration modules")
-  List<Module> getDBMSModules(@QueryParam("type") String type, @QueryParam("moduleName") String moduleName);
+  List<Module> getDBMSModules(@RequestParam(name = "type") String type,
+    @RequestParam(name = "moduleName") String moduleName);
 
-  @GET
-  @Path("/filter/modules")
+  @RequestMapping(path = "/filter/modules", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieves the DBPTK developer filter modules")
-  List<Module> getFilterModules(@QueryParam("moduleName") String moduleName);
+  List<Module> getFilterModules(@RequestParam(name = "moduleName") String moduleName);
 
-  @POST
-  @Path("/dbms/test/connection")
+  @RequestMapping(path = "/dbms/test/connection", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Tests the connection to the database")
   ConnectionResponse testConnection(
-      @Parameter(name = "DBMS connection parameters") final ConnectionParameters connectionParameters);
+    @Parameter(name = "DBMS connection parameters") final ConnectionParameters connectionParameters);
 
-  @POST
-  @Path("/dbms/test/query")
+  @RequestMapping(path = "/dbms/test/query", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieves the first 5 rows of the query execution")
   List<List<String>> testQuery(@Parameter(name = "connection parameters") ConnectionParameters parameters,
-      @QueryParam("query") String query);
+    @RequestParam(name = "query") String query);
 
-  @POST
-  @Path("/dbms/metadata")
+  @RequestMapping(path = "/dbms/metadata", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieves the metadata information associated with the database schema")
   ViewerMetadata getMetadata(
-      @Parameter(name = "connection parameters") final ConnectionParameters connectionParameters);
+    @Parameter(name = "connection parameters") final ConnectionParameters connectionParameters);
 
-  @POST
-  @Path("/run")
-  @Produces(MediaType.TEXT_PLAIN)
+  @RequestMapping(path = "/run", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Performs the migration operation")
-  String run(@QueryParam("databaseUUID") String databaseUUID,
-      @Parameter(name = "parameters") CreateSIARDParameters parameters);
+  StringResponse run(@RequestParam(name = "databaseUUID") String databaseUUID,
+    @Parameter(name = "parameters") CreateSIARDParameters parameters);
 }

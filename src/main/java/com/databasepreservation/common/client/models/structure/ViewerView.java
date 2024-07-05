@@ -7,15 +7,18 @@
  */
 package com.databasepreservation.common.client.models.structure;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class ViewerView implements Serializable {
+  @Serial
+  private static final long serialVersionUID = -5173205690996649126L;
   // mandatory in SIARD2
   private String name;
   // "columns" in SIARD metadata.xml

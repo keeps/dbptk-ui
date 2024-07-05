@@ -11,16 +11,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.core.Context;
-
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RequestNotValidException;
 import org.roda.core.data.utils.JsonUtils;
-import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
+import com.databasepreservation.common.api.v1.utils.StringResponse;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.exceptions.RESTException;
 import com.databasepreservation.common.client.index.FindRequest;
@@ -43,13 +42,15 @@ import com.databasepreservation.common.server.controller.SIARDController;
 import com.databasepreservation.common.utils.ControllerAssistant;
 import com.databasepreservation.common.utils.UserUtility;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-@Service
-@Path(ViewerConstants.ENDPOINT_DATABASE)
+@RestController
+@RequestMapping(path = ViewerConstants.ENDPOINT_DATABASE)
 public class DatabaseResource implements DatabaseService {
-  @Context
+  @Autowired
   private HttpServletRequest request;
 
   @Override
@@ -78,14 +79,14 @@ public class DatabaseResource implements DatabaseService {
   }
 
   @Override
-  public String create(String path) {
+  public StringResponse create(String path) {
     final ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
     User user = controllerAssistant.checkRoles(request);
 
     try {
-      return SIARDController.loadMetadataFromLocal(path);
+      return new StringResponse(SIARDController.loadMetadataFromLocal(path));
     } catch (GenericException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);

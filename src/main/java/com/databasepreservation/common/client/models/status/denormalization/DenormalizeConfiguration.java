@@ -7,6 +7,7 @@
  */
 package com.databasepreservation.common.client.models.status.denormalization;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +20,8 @@ import com.databasepreservation.common.client.models.structure.ViewerTable;
  * @author Gabriel Barros <gbarros@keep.pt>
  */
 public class DenormalizeConfiguration implements Serializable {
+  @Serial
+  private static final long serialVersionUID = -2179137349609216271L;
   private String id;
   private String uuid;
   private String version;

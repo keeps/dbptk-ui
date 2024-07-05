@@ -7,6 +7,7 @@
  */
 package com.databasepreservation.desktop.client.main;
 
+import com.databasepreservation.common.api.v1.utils.StringResponse;
 import com.databasepreservation.common.client.ClientLogger;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
 import com.databasepreservation.common.client.services.ContextService;
@@ -32,8 +33,8 @@ public class Main implements EntryPoint {
 
   @Override
   public void onModuleLoad() {
-    ContextService.Util.call((String env) -> {
-      ApplicationType.setType(env);
+    ContextService.Util.call((StringResponse env) -> {
+      ApplicationType.setType(env.getValue());
       // Set uncaught exception handler
       ClientLogger.setUncaughtExceptionHandler();
 

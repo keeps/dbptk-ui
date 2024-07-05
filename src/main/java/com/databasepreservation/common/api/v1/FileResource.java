@@ -8,35 +8,28 @@
 package com.databasepreservation.common.api.v1;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.DELETE;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-
-import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
-import org.glassfish.jersey.media.multipart.FormDataParam;
-import org.glassfish.jersey.server.JSONP;
-import org.roda.core.data.common.RodaConstants;
 import org.roda.core.data.exceptions.AlreadyExistsException;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.databasepreservation.common.api.utils.ApiResponseMessage;
 import com.databasepreservation.common.api.utils.ApiUtils;
@@ -44,33 +37,25 @@ import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.exceptions.RESTException;
 import com.databasepreservation.common.client.models.activity.logs.LogEntryState;
 import com.databasepreservation.common.client.models.user.User;
+import com.databasepreservation.common.client.services.FileService;
 import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.server.controller.Browser;
 import com.databasepreservation.common.utils.ControllerAssistant;
 import com.google.common.io.Files;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
-@Service
-@Path(FileResource.ENDPOINT)
-@Tag(name = FileResource.SWAGGER_ENDPOINT)
-public class FileResource {
-  public static final String ENDPOINT = "/" + ViewerConstants.API_SERVLET + ViewerConstants.API_V1_FILE_RESOURCE;
-  public static final String SWAGGER_ENDPOINT = "v1 files";
+@RestController
+@RequestMapping(path = ViewerConstants.ENDPOINT_FILE)
+public class FileResource implements FileService {
   private static final Logger LOGGER = LoggerFactory.getLogger(FileResource.class);
-  @Context
+  @Autowired
   private HttpServletRequest request;
 
-  @GET
-  @Operation(summary = "Lists all the SIARD files in the server")
+  @Override
   public List<String> list() {
     final ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
@@ -90,12 +75,8 @@ public class FileResource {
     }
   }
 
-  @GET
-  @Path("/download/siard")
-  @Produces(MediaType.APPLICATION_OCTET_STREAM)
-  @Operation(summary = "Downloads a specific SIARD file from the storage location")
-  public Response getSIARDFile(
-    @Parameter(required = true, name = "The name of the SIARD file to download") @QueryParam(ViewerConstants.API_PATH_PARAM_FILENAME) String filename) {
+  @Override
+  public ResponseEntity<Resource> getSIARDFile(String filename) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
@@ -109,13 +90,15 @@ public class FileResource {
       if (java.nio.file.Files.exists(siardPath) && !java.nio.file.Files.isDirectory(siardPath)
         && (ViewerConfiguration.checkPathIsWithin(siardPath, siardFilesPath)
           || ViewerConfiguration.checkPathIsWithin(siardPath, basePath))) {
-        Response.ResponseBuilder responseBuilder = Response.ok(siardPath.toFile());
-        responseBuilder.header("Content-Disposition", "attachment; filename=\"" + siardPath.toFile().getName() + "\"");
-        return responseBuilder.build();
+
+        InputStreamResource resource = new InputStreamResource(new FileInputStream(siardPath.toFile()));
+        return ResponseEntity.ok()
+          .header("Content-Disposition", "attachment; filename=\"" + siardPath.toFile().getName() + "\"")
+          .contentLength(siardPath.toFile().length()).contentType(MediaType.APPLICATION_OCTET_STREAM).body(resource);
       } else {
         throw new NotFoundException("SIARD file not found");
       }
-    } catch (NotFoundException e) {
+    } catch (NotFoundException | FileNotFoundException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
@@ -124,10 +107,8 @@ public class FileResource {
     }
   }
 
-  @DELETE
-  @Operation(summary = "Deletes a SIARD file")
-  public void deleteSiardFile(
-    @Parameter(name = "Filename to be deleted", required = true) @QueryParam(value = "filename") String filename) {
+  @Override
+  public void deleteSiardFile(String filename) {
     final ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
@@ -146,49 +127,38 @@ public class FileResource {
     }
   }
 
-  @POST
-  @Produces({MediaType.APPLICATION_JSON})
-  @Consumes(MediaType.MULTIPART_FORM_DATA)
-  @JSONP(callback = RodaConstants.API_QUERY_DEFAULT_JSONP_CALLBACK, queryParam = RodaConstants.API_QUERY_KEY_JSONP_CALLBACK)
-  @Operation(summary = "Creates a new SIARD file")
-  @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "OK"),
-    @ApiResponse(responseCode = "409", description = "Already exists")})
-
-  public Response createSIARDFile(@FormDataParam("upl") InputStream inputStream,
-    @FormDataParam("upl") FormDataContentDisposition fileDetail,
-    @Parameter(name = "Choose format in which to get the response", schema = @Schema(implementation = RodaConstants.APIMediaTypes.class)) @QueryParam(RodaConstants.API_QUERY_KEY_ACCEPT_FORMAT) String acceptFormat,
-    @Parameter(name = "JSONP callback name", required = false, schema = @Schema(defaultValue = RodaConstants.API_QUERY_DEFAULT_JSONP_CALLBACK)) @QueryParam(RodaConstants.API_QUERY_KEY_JSONP_CALLBACK) String jsonpCallbackName) {
+  @Override
+  public ResponseEntity<ApiResponseMessage> createSIARDFile(MultipartFile resource, String acceptFormat) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
     User user = controllerAssistant.checkRoles(request);
 
     String mediaType = ApiUtils.getMediaType(acceptFormat, request);
-    String fileExtension = Files.getFileExtension(fileDetail.getFileName());
+    String filename = resource.getOriginalFilename();
+    String fileExtension = Files.getFileExtension(filename);
 
     if (!fileExtension.equals(ViewerConstants.SIARD)) {
-      return Response.status(Response.Status.BAD_REQUEST)
-        .entity(new ApiResponseMessage(ApiResponseMessage.ERROR, "Must be a SIARD file")).build();
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        .body(new ApiResponseMessage(ApiResponseMessage.ERROR, "Must be a SIARD file"));
     }
 
-    java.nio.file.Path path = Paths.get(ViewerConfiguration.getInstance().getSIARDFilesPath().toString(),
-      fileDetail.getFileName());
+    java.nio.file.Path path = Paths.get(ViewerConfiguration.getInstance().getSIARDFilesPath().toString(), filename);
 
     // delegate action to controller
     try {
-      Browser.createFile(inputStream, fileDetail.getFileName(), path);
-      return Response.ok(new ApiResponseMessage(ApiResponseMessage.OK, path.toString()), mediaType).build();
+      Browser.createFile(resource.getInputStream(), filename, path);
+      return ResponseEntity.ok().body(new ApiResponseMessage(ApiResponseMessage.OK, path.toString()));
     } catch (AlreadyExistsException e) {
       state = LogEntryState.FAILURE;
-      return Response.status(Response.Status.CONFLICT)
-        .entity(new ApiResponseMessage(ApiResponseMessage.ERROR, "File already Exist")).build();
-    } catch (GenericException e) {
+      return ResponseEntity.status(HttpStatus.CONFLICT)
+        .body(new ApiResponseMessage(ApiResponseMessage.ERROR, "File already Exist"));
+    } catch (GenericException | IOException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
       // register action
-      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_FILENAME_PARAM,
-        fileDetail.getFileName());
+      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_FILENAME_PARAM, filename);
     }
   }
 }

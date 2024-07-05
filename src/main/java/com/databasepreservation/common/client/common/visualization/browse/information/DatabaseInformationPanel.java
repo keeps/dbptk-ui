@@ -10,6 +10,7 @@ package com.databasepreservation.common.client.common.visualization.browse.infor
 import java.util.HashMap;
 import java.util.Map;
 
+import com.databasepreservation.common.api.v1.utils.StringResponse;
 import com.databasepreservation.common.client.ClientConfigurationManager;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.RightPanel;
@@ -144,9 +145,9 @@ public class DatabaseInformationPanel extends RightPanel {
   private void loadOnAccess() {
     HistoryManager.gotoIngestSIARDData(database.getUuid(), database.getMetadata().getName());
     if (ViewerDatabaseStatus.METADATA_ONLY.equals(database.getStatus())) {
-      CollectionService.Util.call((String databaseUUID) -> {
+      CollectionService.Util.call((StringResponse databaseUUID) -> {
         instances.remove(database.getUuid());
-        HistoryManager.gotoDatabase(databaseUUID);
+        HistoryManager.gotoDatabase(databaseUUID.getValue());
         Dialogs.showInformationDialog(messages.SIARDHomePageDialogTitleForBrowsing(),
           messages.SIARDHomePageTextForIngestSuccess(), messages.basicActionClose(), "btn btn-link");
       }, (String errorMessage) -> {

@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.api.v1.utils.StringResponse;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
@@ -178,7 +179,7 @@ public class DBMSWizardManager extends WizardManager {
     progressBarPanel.setSubtitleText(messages.progressBarPanelTextForDBMSWizardSubTitle());
     wizardContent.add(progressBarPanel);
 
-    MigrationService.Util.call((String response) -> {
+    MigrationService.Util.call((StringResponse response) -> {
       Dialogs.showInformationDialog(messages.sendToWizardManagerInformationTitle(),
         messages.sendToWizardManagerInformationMessageDBMS(
           connectionParameters.getJdbcParameters().getConnection().get("database")),

@@ -12,6 +12,7 @@ import java.util.List;
 
 import org.roda.core.data.common.RodaConstants;
 
+import com.databasepreservation.common.api.v1.utils.StringResponse;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.RightPanel;
@@ -121,8 +122,8 @@ public class SIARDUpload extends RightPanel {
     SafeHtmlBuilder b = new SafeHtmlBuilder();
 
     String item = "<li class='working'>"
-        + "<input type='text' value='0' data-width='30' data-height='30' data-fgColor='#089de3' data-readOnly='1' data-bgColor='#3e4043'/>"
-        + "<p></p><span class='icon'></span></li>";
+      + "<input type='text' value='0' data-width='30' data-height='30' data-fgColor='#089de3' data-readOnly='1' data-bgColor='#3e4043'/>"
+      + "<p></p><span class='icon'></span></li>";
     return item;
   }
 
@@ -132,10 +133,10 @@ public class SIARDUpload extends RightPanel {
 
     if (uploadUrl != null) {
       SafeHtml html = SafeHtmlUtils.fromSafeConstant("<form id='upload' method='post' action='" + uploadUrl
-          + "' enctype='multipart/form-data'>" + "<div id='drop'><h4>" + messages.uploadPanelTextForLabelDropHere()
-          + "</h4><a>" + messages.uploadPanelTextForLabelBrowseFiles() + "</a>" + "<input title='"
-          + RodaConstants.API_PARAM_UPLOAD + "' type='file' name='" + RodaConstants.API_PARAM_UPLOAD
-          + "' multiple='true' />" + " </div>" + "<input title='hiddenSubmit' type='submit' hidden/> </form>");
+        + "' enctype='multipart/form-data'>" + "<div id='drop'><h4>" + messages.uploadPanelTextForLabelDropHere()
+        + "</h4><a>" + messages.uploadPanelTextForLabelBrowseFiles() + "</a>" + "<input title='"
+        + RodaConstants.API_PARAM_UPLOAD + "' type='file' name='" + "resource" + "' multiple='true' />" + " </div>"
+        + "<input title='hiddenSubmit' type='submit' hidden/> </form>");
 
       uploadForm.setHTML(html);
 
@@ -151,9 +152,9 @@ public class SIARDUpload extends RightPanel {
           Element item = Document.get().getElementById(id);
           String path = item.getAttribute("path");
           startItemLoadHandler(item);
-          DatabaseService.Util.call((String newDatabaseUUID) -> {
+          DatabaseService.Util.call((StringResponse newDatabaseUUID) -> {
             Toast.showInfo("SIARD created with success", PathUtils.getFileName(path));
-            doneItemLoadHandler(item, "", newDatabaseUUID);
+            doneItemLoadHandler(item, "", newDatabaseUUID.getValue());
           }, (String errorMessage) -> {
             Dialogs.showErrors(messages.errorMessagesOpenFile(PathUtils.getFileName(path)), errorMessage,
               messages.basicActionClose());

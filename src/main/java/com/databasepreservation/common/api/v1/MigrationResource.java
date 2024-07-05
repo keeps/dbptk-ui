@@ -10,14 +10,13 @@ package com.databasepreservation.common.api.v1;
 import java.util.Collections;
 import java.util.List;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.core.Context;
-
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
-import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
+import com.databasepreservation.common.api.v1.utils.StringResponse;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.exceptions.RESTException;
 import com.databasepreservation.common.client.models.activity.logs.LogEntryState;
@@ -34,13 +33,15 @@ import com.databasepreservation.common.server.controller.SIARDController;
 import com.databasepreservation.common.utils.ControllerAssistant;
 import com.databasepreservation.common.utils.UserUtility;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-@Service
-@Path(ViewerConstants.ENDPOINT_MIGRATION)
+@RestController
+@RequestMapping(path = ViewerConstants.ENDPOINT_MIGRATION)
 public class MigrationResource implements MigrationService {
-  @Context
+  @Autowired
   private HttpServletRequest request;
 
   @Override
@@ -183,7 +184,7 @@ public class MigrationResource implements MigrationService {
   }
 
   @Override
-  public String run(String databaseUUID, CreateSIARDParameters parameters) {
+  public StringResponse run(String databaseUUID, CreateSIARDParameters parameters) {
     final ControllerAssistant controllerAssistant = new ControllerAssistant() {};
     final User user = UserUtility.getUser(request);
 
@@ -201,11 +202,12 @@ public class MigrationResource implements MigrationService {
             parameters.getTableAndColumnsParameters(), parameters.getExportOptionsParameters(),
             parameters.getMetadataExportOptionsParameters());
         }
-        return databaseUUID;
+        return new StringResponse(databaseUUID);
       } else {
-        return SIARDController.createSIARD(parameters.getUniqueID(), parameters.getConnectionParameters(),
-          parameters.getTableAndColumnsParameters(), parameters.getCustomViewsParameters(), parameters.getMerkleTreeFilterParameters(),
-          parameters.getExportOptionsParameters(), parameters.getMetadataExportOptionsParameters());
+        return new StringResponse(SIARDController.createSIARD(parameters.getUniqueID(),
+          parameters.getConnectionParameters(), parameters.getTableAndColumnsParameters(),
+          parameters.getCustomViewsParameters(), parameters.getMerkleTreeFilterParameters(),
+          parameters.getExportOptionsParameters(), parameters.getMetadataExportOptionsParameters()));
       }
     } catch (GenericException | NotFoundException e) {
       state = LogEntryState.FAILURE;

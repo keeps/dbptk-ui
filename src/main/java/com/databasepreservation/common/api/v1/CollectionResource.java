@@ -12,8 +12,8 @@ import static com.databasepreservation.common.client.ViewerConstants.SOLR_SEARCH
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -23,16 +23,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
@@ -55,7 +45,16 @@ import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteExcep
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Service;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import com.databasepreservation.common.api.utils.ApiUtils;
 import com.databasepreservation.common.api.utils.DownloadUtils;
@@ -64,6 +63,7 @@ import com.databasepreservation.common.api.utils.StreamResponse;
 import com.databasepreservation.common.api.utils.ViewerStreamingOutput;
 import com.databasepreservation.common.api.v1.utils.IterableIndexResultsCSVOutputStream;
 import com.databasepreservation.common.api.v1.utils.ResultsCSVOutputStream;
+import com.databasepreservation.common.api.v1.utils.StringResponse;
 import com.databasepreservation.common.api.v1.utils.ZipOutputStreamMultiRow;
 import com.databasepreservation.common.api.v1.utils.ZipOutputStreamSingleRow;
 import com.databasepreservation.common.client.ViewerConstants;
@@ -110,14 +110,15 @@ import com.databasepreservation.common.utils.UserUtility;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-@Service
-@Path(ViewerConstants.ENDPOINT_DATABASE)
+@RestController
+@RequestMapping(path = ViewerConstants.ENDPOINT_DATABASE)
 public class CollectionResource implements CollectionService {
-  @Context
+  @Autowired
   private HttpServletRequest request;
 
   @Autowired
@@ -138,12 +139,10 @@ public class CollectionResource implements CollectionService {
   @Autowired
   JobExplorer jobExplorer;
 
-  @GET
-  @Path("/{databaseUUID}/collection/{collectionUUID}/report")
-  @Produces({MediaType.APPLICATION_OCTET_STREAM})
+  @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/report", method = RequestMethod.GET, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   @Operation(summary = "Downloads the migration report for a specific database")
-  public Response getReport(@PathParam("databaseUUID") String databaseUUID,
-    @PathParam("collectionUUID") String collectionUUID) {
+  public ResponseEntity<Resource> getReport(@PathVariable(name = "databaseUUID") String databaseUUID,
+    @PathVariable(name = "collectionUUID") String collectionUUID) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
@@ -157,9 +156,11 @@ public class CollectionResource implements CollectionService {
         throw new NotFoundException("Missing report file: " + filename);
       }
 
-      InputStream reportStream = Files.newInputStream(reportPath);
-
-      return ApiUtils.okResponse(DownloadUtils.getReportResourceStreamResponse(reportPath, reportStream));
+      InputStreamResource resource = new InputStreamResource(new FileInputStream(reportPath.toFile()));
+      return ResponseEntity.ok()
+        .header("Content-Disposition", "attachment; filename=\"" + reportPath.toFile().getName() + "\"")
+        .contentLength(reportPath.toFile().length())
+        .contentType(org.springframework.http.MediaType.APPLICATION_OCTET_STREAM).body(resource);
     } catch (NotFoundException | IOException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
@@ -171,7 +172,7 @@ public class CollectionResource implements CollectionService {
   }
 
   @Override
-  public String createCollection(String databaseUUID) {
+  public StringResponse createCollection(String databaseUUID) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
@@ -194,7 +195,7 @@ public class CollectionResource implements CollectionService {
 
     try {
       final ViewerDatabase database = ViewerFactory.getSolrManager().retrieve(ViewerDatabase.class, databaseUUID);
-      return SIARDController.loadFromLocal(database.getPath(), databaseUUID);
+      return new StringResponse(SIARDController.loadFromLocal(database.getPath(), databaseUUID));
     } catch (GenericException | NotFoundException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
@@ -480,13 +481,13 @@ public class CollectionResource implements CollectionService {
     }
   }
 
-  @GET
-  @Path("/{databaseUUID}/collection/{collectionUUID}/data/{schema}/{table}/{rowIndex}/{columnIndex}")
+  @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/data/{schema}/{table}/{rowIndex}/{columnIndex}", method = RequestMethod.GET, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   @Operation(summary = "Downloads a LOB for a specific row within a database")
-  public Response exportLOB(@PathParam(ViewerConstants.API_PATH_PARAM_DATABASE_UUID) String databaseUUID,
-    @PathParam(ViewerConstants.API_PATH_PARAM_COLLECTION_UUID) String collectionUUID,
-    @PathParam("schema") String schema, @PathParam("table") String table, @PathParam("rowIndex") String rowIndex,
-    @PathParam("columnIndex") Integer columnIndex) {
+  public ResponseEntity<StreamingResponseBody> exportLOB(
+    @PathVariable(name = ViewerConstants.API_PATH_PARAM_DATABASE_UUID) String databaseUUID,
+    @PathVariable(name = ViewerConstants.API_PATH_PARAM_COLLECTION_UUID) String collectionUUID,
+    @PathVariable(name = "schema") String schema, @PathVariable(name = "table") String table,
+    @PathVariable(name = "rowIndex") String rowIndex, @PathVariable(name = "columnIndex") Integer columnIndex) {
 
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
@@ -527,8 +528,8 @@ public class CollectionResource implements CollectionService {
     }
   }
 
-  private Response handleConsolidatedLobDownload(String databaseUUID, TableStatus tableConfiguration, int columnIndex,
-    ViewerRow row, String rowIndex) throws IOException {
+  private ResponseEntity<StreamingResponseBody> handleConsolidatedLobDownload(String databaseUUID,
+    TableStatus tableConfiguration, int columnIndex, ViewerRow row, String rowIndex) throws IOException {
     final java.nio.file.Path consolidatedPath = LobManagerUtils.getConsolidatedPath(
       ViewerFactory.getViewerConfiguration(), databaseUUID, tableConfiguration.getUuid(), columnIndex, rowIndex);
     String handlebarsFilename = HandlebarsUtils.applyExportTemplate(row, tableConfiguration, columnIndex);
@@ -543,7 +544,8 @@ public class CollectionResource implements CollectionService {
             databaseUUID, row.getTableId(), columnIndex, rowIndex)))));
   }
 
-  private Response handleClobDownload(TableStatus tableConfiguration, ViewerRow row, int columnIndex) {
+  private ResponseEntity<StreamingResponseBody> handleClobDownload(TableStatus tableConfiguration, ViewerRow row,
+    int columnIndex) {
     String handlebarsFilename = HandlebarsUtils.applyExportTemplate(row, tableConfiguration, columnIndex);
 
     if (ViewerStringUtils.isBlank(handlebarsFilename)) {
@@ -557,8 +559,8 @@ public class CollectionResource implements CollectionService {
       tableConfiguration.getColumnByIndex(columnIndex).getApplicationType(), DownloadUtils.stream(inputStream)));
   }
 
-  private Response handleExternalLobDownload(TableStatus tableConfiguration, ViewerRow row, int columnIndex)
-    throws IOException {
+  private ResponseEntity<StreamingResponseBody> handleExternalLobDownload(TableStatus tableConfiguration, ViewerRow row,
+    int columnIndex) throws IOException {
     final String lobLocation = row.getCells().get(tableConfiguration.getColumnByIndex(columnIndex).getId()).getValue();
     final java.nio.file.Path lobPath = Paths.get(lobLocation);
     final java.nio.file.Path completeLobPath = ViewerFactory.getViewerConfiguration().getSIARDFilesPath()
@@ -580,8 +582,8 @@ public class CollectionResource implements CollectionService {
       DownloadUtils.stream(Files.newInputStream(completeLobPath.toFile().toPath()))));
   }
 
-  private Response handleInternalLobDownload(String databasePath, TableStatus tableConfiguration, ViewerRow row,
-    int columnIndex) throws IOException, GenericException {
+  private ResponseEntity<StreamingResponseBody> handleInternalLobDownload(String databasePath,
+    TableStatus tableConfiguration, ViewerRow row, int columnIndex) throws IOException, GenericException {
     String handlebarsFilename = HandlebarsUtils.applyExportTemplate(row, tableConfiguration, columnIndex);
 
     if (ViewerStringUtils.isBlank(handlebarsFilename)) {
@@ -615,21 +617,19 @@ public class CollectionResource implements CollectionService {
     }
   }
 
-  @GET
-  @Path("{databaseUUID}/collection/{collectionUUID}/data/{schema}/{table}/find/export")
-  @Produces({MediaType.APPLICATION_OCTET_STREAM})
+  @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/data/{schema}/{table}/find/export", method = RequestMethod.GET, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   @Operation(summary = "Export the rows as CSV")
-  public Response exportFindToCSV(
-    @Parameter(name = "The database unique identifier", required = true) @PathParam("databaseUUID") String databaseUUID,
-    @Parameter(name = "The collection unique identifier", required = true) @PathParam("collectionUUID") String collectionUUID,
-    @Parameter(name = "The schema name", required = true) @PathParam("schema") String schema,
-    @Parameter(name = "The table name", required = true) @PathParam("table") String table,
-    @Parameter(name = "Find request to filter/limit the search") @QueryParam("f") String findRequestJson,
-    @Parameter(name = "The CSV filename") @QueryParam("filename") String filename,
-    @Parameter(name = "The Zip filename") @QueryParam("zipFilename") String zipFilename,
-    @Parameter(name = "Export description", schema = @Schema(allowableValues = "true, false")) @QueryParam("descriptions") boolean exportDescription,
-    @Parameter(name = "Export LOBs", schema = @Schema(allowableValues = "true, false")) @QueryParam("lobs") boolean exportLobs,
-    @Parameter(name = "Fields to export", required = true) @QueryParam("fl") String fieldsToHeader) {
+  public ResponseEntity<StreamingResponseBody> exportFindToCSV(
+    @Parameter(name = "The database unique identifier", required = true) @PathVariable(name = "databaseUUID") String databaseUUID,
+    @Parameter(name = "The collection unique identifier", required = true) @PathVariable(name = "collectionUUID") String collectionUUID,
+    @Parameter(name = "The schema name", required = true) @PathVariable(name = "schema") String schema,
+    @Parameter(name = "The table name", required = true) @PathVariable(name = "table") String table,
+    @Parameter(name = "Find request to filter/limit the search") @RequestParam(name = "f") String findRequestJson,
+    @Parameter(name = "The CSV filename") @RequestParam(name = "filename") String filename,
+    @Parameter(name = "The Zip filename") @RequestParam(name = "zipFilename", required = false) String zipFilename,
+    @Parameter(name = "Export description", schema = @Schema(allowableValues = "true, false")) @RequestParam(name = "descriptions") boolean exportDescription,
+    @Parameter(name = "Export LOBs", schema = @Schema(allowableValues = "true, false")) @RequestParam(name = "lobs") boolean exportLobs,
+    @Parameter(name = "Fields to export", required = true) @RequestParam(name = "fl") String fieldsToHeader) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
@@ -676,20 +676,18 @@ public class CollectionResource implements CollectionService {
     }
   }
 
-  @GET
-  @Path("{databaseUUID}/collection/{collectionUUID}/data/{schema}/{table}/{rowIndex}/export")
-  @Produces({MediaType.APPLICATION_OCTET_STREAM})
+  @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/data/{schema}/{table}/{rowIndex}/export", method = RequestMethod.GET, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   @Operation(summary = "Export the a single row as CSV")
-  public Response exportSingleRowToCSV(
-    @Parameter(name = "The database unique identifier", required = true) @PathParam("databaseUUID") String databaseUUID,
-    @Parameter(name = "The collection unique identifier", required = true) @PathParam("collectionUUID") String collectionUUID,
-    @Parameter(name = "The schema name", required = true) @PathParam("schema") String schema,
-    @Parameter(name = "The table name", required = true) @PathParam("table") String table,
-    @Parameter(name = "The index of the row", required = true) @PathParam("rowIndex") String rowIndex,
-    @Parameter(name = "The CSV filename", required = true) @QueryParam("filename") String filename,
-    @Parameter(name = "The Zip filename") @QueryParam("zipFilename") String zipFilename,
-    @Parameter(name = "Export description", schema = @Schema(allowableValues = "true, false"), required = true) @QueryParam("descriptions") boolean exportDescription,
-    @Parameter(name = "Export LOBs", schema = @Schema(allowableValues = "true, false"), required = true) @QueryParam("lobs") boolean exportLobs) {
+  public ResponseEntity<StreamingResponseBody> exportSingleRowToCSV(
+    @Parameter(name = "The database unique identifier", required = true) @PathVariable(name = "databaseUUID") String databaseUUID,
+    @Parameter(name = "The collection unique identifier", required = true) @PathVariable(name = "collectionUUID") String collectionUUID,
+    @Parameter(name = "The schema name", required = true) @PathVariable(name = "schema") String schema,
+    @Parameter(name = "The table name", required = true) @PathVariable(name = "table") String table,
+    @Parameter(name = "The index of the row", required = true) @PathVariable(name = "rowIndex") String rowIndex,
+    @Parameter(name = "The CSV filename", required = true) @RequestParam(name = "filename") String filename,
+    @Parameter(name = "The Zip filename") @RequestParam(name = "zipFilename", required = false) String zipFilename,
+    @Parameter(name = "Export description", schema = @Schema(allowableValues = "true, false"), required = true) @RequestParam(name = "descriptions") boolean exportDescription,
+    @Parameter(name = "Export LOBs", schema = @Schema(allowableValues = "true, false"), required = true) @RequestParam(name = "lobs") boolean exportLobs) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
     DatabaseRowsSolrManager solrManager = ViewerFactory.getSolrManager();
 
@@ -731,27 +729,27 @@ public class CollectionResource implements CollectionService {
     }
   }
 
-  private Response handleSingleCSVExportWithoutLOBs(String databaseUUID, TableStatus configTable, ViewerRow row,
-    String filename, boolean exportDescriptions) throws GenericException {
+  private ResponseEntity<StreamingResponseBody> handleSingleCSVExportWithoutLOBs(String databaseUUID,
+    TableStatus configTable, ViewerRow row, String filename, boolean exportDescriptions) throws GenericException {
     final CollectionStatus configurationCollection = ViewerFactory.getConfigurationManager()
       .getConfigurationCollection(databaseUUID, databaseUUID);
 
     final List<String> fieldsToReturn = configurationCollection.getFieldsToReturn(configTable.getId());
     return ApiUtils.okResponse(new ViewerStreamingOutput(
       new ResultsCSVOutputStream(row, configTable, filename, exportDescriptions, ',', String.join(",", fieldsToReturn)))
-        .toStreamResponse());
+      .toStreamResponse());
   }
 
-  private Response handleSingleCSVExportWithLOBs(CollectionStatus configurationCollection, ViewerDatabase database,
-    TableStatus configTable, ViewerRow row, String filename, String zipFilename, boolean exportDescriptions)
-    throws GenericException {
+  private ResponseEntity<StreamingResponseBody> handleSingleCSVExportWithLOBs(CollectionStatus configurationCollection,
+    ViewerDatabase database, TableStatus configTable, ViewerRow row, String filename, String zipFilename,
+    boolean exportDescriptions) throws GenericException {
     final List<String> fieldsToReturn = configurationCollection.getFieldsToReturn(configTable.getId());
     return ApiUtils.okResponse(new StreamResponse(new ZipOutputStreamSingleRow(configurationCollection, database,
       configTable, row, zipFilename, filename, fieldsToReturn, exportDescriptions)));
   }
 
-  private Response handleCSVExport(DatabaseRowsSolrManager solrManager, final String databaseUUID,
-    final TableStatus configTable, final FindRequest findRequest, final String filename,
+  private ResponseEntity<StreamingResponseBody> handleCSVExport(DatabaseRowsSolrManager solrManager,
+    final String databaseUUID, final TableStatus configTable, final FindRequest findRequest, final String filename,
     final boolean exportDescriptions, String fieldsToHeader) throws GenericException, RequestNotValidException {
     if (findRequest.sublist == null) {
       final IterableIndexResult allRows = solrManager.findAllRows(databaseUUID, findRequest.filter, findRequest.sorter,
@@ -764,11 +762,11 @@ public class CollectionResource implements CollectionService {
 
       return ApiUtils.okResponse(new ViewerStreamingOutput(
         new ResultsCSVOutputStream(rows, configTable, filename, exportDescriptions, ',', fieldsToHeader))
-          .toStreamResponse());
+        .toStreamResponse());
     }
   }
 
-  private Response handleCSVExportWithLobs(DatabaseRowsSolrManager solrManager,
+  private ResponseEntity<StreamingResponseBody> handleCSVExportWithLobs(DatabaseRowsSolrManager solrManager,
     CollectionStatus configurationCollection, ViewerDatabase database, final String databaseUUID,
     final TableStatus configTable, final FindRequest findRequest, final String zipFilename, final String filename,
     final boolean exportDescription, String fieldsToHeader) {

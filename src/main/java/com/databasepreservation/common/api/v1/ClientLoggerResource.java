@@ -7,24 +7,24 @@
  */
 package com.databasepreservation.common.api.v1;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.core.Context;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.services.ClientLoggerService;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
-@Service
-@Path(ViewerConstants.ENDPOINT_CLIENT_LOGGER)
+@RestController
+@RequestMapping(path = ViewerConstants.ENDPOINT_CLIENT_LOGGER)
 public class ClientLoggerResource implements ClientLoggerService {
-  @Context
+  @Autowired
   private HttpServletRequest request;
 
   private String getUserInfo() {
@@ -35,7 +35,7 @@ public class ClientLoggerResource implements ClientLoggerService {
   }
 
   @Override
-  public void log(String type, String classname, String object) {
+  public Void log(String type, String classname, String object) {
     switch (type) {
       case "trace":
         trace(classname, object);
@@ -57,10 +57,11 @@ public class ClientLoggerResource implements ClientLoggerService {
         info(classname, object);
         break;
     }
+    return null;
   }
 
   @Override
-  public void detailedLog(String type, String classname, String object, Throwable error) {
+  public Void detailedLog(String type, String classname, String object, Throwable error) {
     switch (type) {
       case "trace":
         trace(classname, object, error);
@@ -82,6 +83,7 @@ public class ClientLoggerResource implements ClientLoggerService {
         info(classname, object, error);
         break;
     }
+    return null;
   }
 
   private void trace(String classname, String object) {

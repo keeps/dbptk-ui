@@ -7,6 +7,7 @@
  */
 package com.databasepreservation.common.client.models.structure;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
@@ -14,6 +15,8 @@ import java.util.List;
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class ViewerForeignKey implements Serializable {
+  @Serial
+  private static final long serialVersionUID = -3818870877712686996L;
   private String name;
   private String referencedTableUUID;
   private String referencedTableId;

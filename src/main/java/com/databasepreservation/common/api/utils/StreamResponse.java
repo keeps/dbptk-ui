@@ -7,6 +7,8 @@
  */
 package com.databasepreservation.common.api.utils;
 
+import java.util.Date;
+
 import com.databasepreservation.common.api.common.ConsumesOutputStream;
 import com.databasepreservation.common.api.common.EntityResponse;
 
@@ -16,12 +18,15 @@ import com.databasepreservation.common.api.common.EntityResponse;
 public class StreamResponse implements EntityResponse {
   private String filename;
   private String mediaType;
+  private long fileSize = -1;
+  private Date lastModified;
   private ConsumesOutputStream stream;
 
   public StreamResponse(ConsumesOutputStream stream) {
     this.filename = stream.getFileName();
+    this.fileSize = stream.getSize();
     this.mediaType = stream.getMediaType();
-    this.mediaType = stream.getMediaType();
+    this.lastModified = stream.getLastModified();
     this.stream = stream;
   }
 
@@ -30,6 +35,8 @@ public class StreamResponse implements EntityResponse {
     this.filename = filename;
     this.mediaType = mediaType;
     this.stream = stream;
+    this.lastModified = stream.getLastModified();
+    this.fileSize = stream.getSize();
   }
 
   public String getFilename() {
@@ -56,4 +63,19 @@ public class StreamResponse implements EntityResponse {
     this.stream = stream;
   }
 
+  public long getFileSize() {
+    return fileSize;
+  }
+
+  public void setFileSize(long fileSize) {
+    this.fileSize = fileSize;
+  }
+
+  public Date getLastModified() {
+    return lastModified;
+  }
+
+  public void setLastModified(Date lastModified) {
+    this.lastModified = lastModified;
+  }
 }

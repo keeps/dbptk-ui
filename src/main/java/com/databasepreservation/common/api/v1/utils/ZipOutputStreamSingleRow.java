@@ -11,6 +11,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.util.Date;
 import java.util.List;
 import java.util.zip.ZipFile;
 
@@ -67,5 +68,15 @@ public class ZipOutputStreamSingleRow extends ZipOutputStream {
       printer.printRecord(HandlebarsUtils.getCellValues(row, getConfigTable(), getFieldsToReturn()));
     }
     return listBytes;
+  }
+
+  @Override
+  public Date getLastModified() {
+    return null;
+  }
+
+  @Override
+  public long getSize() {
+    return -1;
   }
 }

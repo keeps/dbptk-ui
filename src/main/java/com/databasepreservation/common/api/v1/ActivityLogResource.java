@@ -7,17 +7,15 @@
  */
 package com.databasepreservation.common.api.v1;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.core.Context;
-
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
 import org.roda.core.data.exceptions.RequestNotValidException;
 import org.roda.core.data.utils.JsonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.exceptions.RESTException;
@@ -33,15 +31,17 @@ import com.databasepreservation.common.server.activity.log.strategies.ActivityLo
 import com.databasepreservation.common.utils.ControllerAssistant;
 import com.databasepreservation.common.utils.I18nUtility;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-@Service
-@Path(ViewerConstants.ENDPOINT_ACTIVITY_LOG)
+@RestController
+@RequestMapping(path = ViewerConstants.ENDPOINT_ACTIVITY_LOG)
 public class ActivityLogResource implements ActivityLogService {
   private static final Logger LOGGER = LoggerFactory.getLogger(ActivityLogResource.class);
 
-  @Context
+  @Autowired
   private HttpServletRequest request;
 
   @Override

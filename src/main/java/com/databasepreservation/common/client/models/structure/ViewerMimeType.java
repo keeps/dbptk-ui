@@ -7,8 +7,7 @@
  */
 package com.databasepreservation.common.client.models.structure;
 
-import com.google.gwt.aria.client.SearchRole;
-
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -18,6 +17,8 @@ import java.util.Objects;
 
 public class ViewerMimeType implements Serializable {
 
+  @Serial
+  private static final long serialVersionUID = -4141694879328097290L;
   private String mimeType;
   private String fileExtension;
 

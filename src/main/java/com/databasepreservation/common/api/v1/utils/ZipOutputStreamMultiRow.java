@@ -11,6 +11,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -121,5 +122,15 @@ public class ZipOutputStreamMultiRow extends ZipOutputStream {
     }
 
     return listBytes;
+  }
+
+  @Override
+  public Date getLastModified() {
+    return null;
+  }
+
+  @Override
+  public long getSize() {
+    return -1;
   }
 }

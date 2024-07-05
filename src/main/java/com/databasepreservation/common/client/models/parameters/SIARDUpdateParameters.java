@@ -7,19 +7,24 @@
  */
 package com.databasepreservation.common.client.models.parameters;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 import com.databasepreservation.common.client.models.structure.ViewerMetadata;
 import com.databasepreservation.common.client.models.structure.ViewerSIARDBundle;
-
-import java.io.Serializable;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
 public class SIARDUpdateParameters implements Serializable {
+  @Serial
+  private static final long serialVersionUID = 2870008901442301577L;
+
   private ViewerMetadata metadata;
   private ViewerSIARDBundle siardBundle;
 
-  public SIARDUpdateParameters() {}
+  public SIARDUpdateParameters() {
+  }
 
   public SIARDUpdateParameters(ViewerMetadata metadata, ViewerSIARDBundle siardBundle) {
     this.metadata = metadata;

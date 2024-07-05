@@ -7,16 +7,17 @@
  */
 package com.databasepreservation.common.client.models.structure;
 
-
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class ViewerSchema implements Serializable {
+  @Serial
+  private static final long serialVersionUID = 7592122945058722126L;
   private String uuid;
 
   private String name;
