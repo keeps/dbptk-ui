@@ -7,12 +7,15 @@
  */
 package com.databasepreservation.common.client.models.structure;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class ViewerColumn implements Serializable {
+  @Serial
+  private static final long serialVersionUID = 2946612686250666077L;
   private String solrName;
 
   private String displayName;

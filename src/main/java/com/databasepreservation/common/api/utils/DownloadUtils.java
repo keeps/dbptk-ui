@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Path;
+import java.util.Date;
 
 import org.apache.commons.io.IOUtils;
 import org.roda.core.data.exceptions.NotFoundException;
@@ -39,6 +40,16 @@ public class DownloadUtils {
       @Override
       public String getMediaType() {
         return null;
+      }
+
+      @Override
+      public Date getLastModified() {
+        return null;
+      }
+
+      @Override
+      public long getSize() {
+        return -1;
       }
     };
   }
@@ -80,6 +91,16 @@ public class DownloadUtils {
       @Override
       public void consumeOutputStream(OutputStream out) throws IOException {
         IOUtils.copy(inputStream, out);
+      }
+
+      @Override
+      public Date getLastModified() {
+        return null;
+      }
+
+      @Override
+      public long getSize() {
+        return -1;
       }
     };
 

@@ -7,15 +7,16 @@
  */
 package com.databasepreservation.common.client.models.structure;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import jakarta.xml.bind.annotation.XmlRootElement;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
@@ -23,6 +24,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @XmlRootElement(name = "metadata")
 @JsonInclude(JsonInclude.Include.ALWAYS)
 public class ViewerMetadata implements Serializable {
+  @Serial
+  private static final long serialVersionUID = -2637918454047613842L;
   private String name;
 
   private String description;
@@ -230,7 +233,8 @@ public class ViewerMetadata implements Serializable {
 
   public ViewerTable getTableById(String tableId) {
     for (ViewerTable value : tables.values()) {
-      if (value.getId().equals(tableId)) return value;
+      if (value.getId().equals(tableId))
+        return value;
     }
     return null;
   }
@@ -275,7 +279,8 @@ public class ViewerMetadata implements Serializable {
     int i = 1;
 
     for (Map.Entry<String, ViewerSchema> next : schemasMap.entrySet()) {
-      if (next.getKey().equals(schemaUUID)) return i;
+      if (next.getKey().equals(schemaUUID))
+        return i;
       i++;
     }
 
@@ -287,7 +292,8 @@ public class ViewerMetadata implements Serializable {
     int i = 1;
 
     for (Map.Entry<String, ViewerTable> next : tables.entrySet()) {
-      if (next.getKey().equals(tableUUID)) return i;
+      if (next.getKey().equals(tableUUID))
+        return i;
       i++;
     }
 

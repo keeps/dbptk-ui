@@ -7,6 +7,7 @@
  */
 package com.databasepreservation.common.client.models.structure;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,6 +19,8 @@ import java.util.Map;
  */
 public class ViewerSIARDBundle implements Serializable {
 
+  @Serial
+  private static final long serialVersionUID = -2971122333883165271L;
   private Map<String, String> commandMap = new HashMap<>();
   private static final String SEPARATOR = "---";
   private static final String DESCRIPTION = "description" + SEPARATOR;

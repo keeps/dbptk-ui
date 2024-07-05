@@ -7,12 +7,15 @@
  */
 package com.databasepreservation.common.client.models.structure;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class ViewerTrigger implements Serializable {
+  @Serial
+  private static final long serialVersionUID = -3192399748468823391L;
   private String name;
   private String actionTime;
   private String triggerEvent;

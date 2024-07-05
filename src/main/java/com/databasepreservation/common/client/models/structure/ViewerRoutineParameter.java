@@ -7,12 +7,15 @@
  */
 package com.databasepreservation.common.client.models.structure;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class ViewerRoutineParameter implements Serializable {
+  @Serial
+  private static final long serialVersionUID = 1206696653694249133L;
   // mandatory in SIARD2
   private String name;
   private String mode;

@@ -7,12 +7,15 @@
  */
 package com.databasepreservation.common.client.models.structure;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class ViewerPrivilegeStructure implements Serializable {
+  @Serial
+  private static final long serialVersionUID = 1608057895274168513L;
   // mandatory in SIARD2
   private String type;
   private String grantor;

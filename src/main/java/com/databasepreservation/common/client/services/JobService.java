@@ -9,13 +9,14 @@ package com.databasepreservation.common.client.services;
 
 import java.util.function.Consumer;
 
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.QueryParam;
-
 import org.fusesource.restygwt.client.DirectRestService;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.fusesource.restygwt.client.REST;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultMethodCallback;
@@ -31,7 +32,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
-@Path(".." + ViewerConstants.ENDPOINT_JOB)
+@RequestMapping(path = ".." + ViewerConstants.ENDPOINT_JOB)
 @Tag(name = JobService.SWAGGER_ENDPOINT)
 public interface JobService extends DirectRestService {
   String SWAGGER_ENDPOINT = "v1 job";
@@ -57,9 +58,9 @@ public interface JobService extends DirectRestService {
     }
   }
 
-  @POST
-  @Path("/find")
+  @RequestMapping(path = "/find", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Find all jobs")
-  IndexResult<ViewerJob> find(@Parameter(name = ViewerConstants.API_QUERY_PARAM_FILTER) FindRequest findRequest,
-      @QueryParam(ViewerConstants.API_QUERY_PARAM_LOCALE) String locale);
+  IndexResult<ViewerJob> find(
+    @Parameter(name = ViewerConstants.API_QUERY_PARAM_FILTER) @RequestBody FindRequest findRequest,
+    @Parameter(name = ViewerConstants.API_QUERY_PARAM_LOCALE) @RequestParam(name = ViewerConstants.API_QUERY_PARAM_LOCALE) String localeString);
 }

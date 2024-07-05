@@ -10,11 +10,13 @@ package com.databasepreservation.server.client.main;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.api.v1.utils.StringResponse;
 import com.databasepreservation.common.client.ClientConfigurationManager;
 import com.databasepreservation.common.client.ClientLogger;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
 import com.databasepreservation.common.client.services.ContextService;
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.History;
@@ -42,8 +44,9 @@ public class Main implements EntryPoint {
    */
   @Override
   public void onModuleLoad() {
-    ContextService.Util.call((String env) -> {
-      ApplicationType.setType(env);
+    ContextService.Util.call((StringResponse env) -> {
+      GWT.log("Recived");
+      ApplicationType.setType(env.getValue());
       // Set uncaught exception handler
       ClientLogger.setUncaughtExceptionHandler();
 
@@ -52,7 +55,7 @@ public class Main implements EntryPoint {
 
         // Remove loading image
         RootPanel.getBodyElement().removeChild(DOM.getElementById("loading"));
-        
+
         mainPanel = new MainPanel();
         RootPanel.get().add(mainPanel);
         RootPanel.get().add(footer);

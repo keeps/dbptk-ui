@@ -46,6 +46,8 @@ public class ViewerConstants {
     + ViewerConstants.API_V1_CONFIGURATION_RESOURCE;
   public static final String ENDPOINT_JOB = ViewerConstants.API_SEP + ViewerConstants.API_SERVLET
     + ViewerConstants.API_V1_JOB_RESOURCE;
+  public static final String ENDPOINT_FILE = ViewerConstants.API_SEP + ViewerConstants.API_SERVLET
+    + ViewerConstants.API_V1_FILE_RESOURCE;
 
   /*
    * DBVTK CONFIG

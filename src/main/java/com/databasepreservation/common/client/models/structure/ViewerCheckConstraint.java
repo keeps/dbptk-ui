@@ -7,12 +7,15 @@
  */
 package com.databasepreservation.common.client.models.structure;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class ViewerCheckConstraint implements Serializable {
+  @Serial
+  private static final long serialVersionUID = -585268687650901659L;
   // mandatory in SIARD2
   private String name;
   private String condition;

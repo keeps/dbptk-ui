@@ -81,6 +81,7 @@ public class RestApplicationNoSwagger extends ResourceConfig {
     register(MigrationResource.class);
     register(SiardResource.class);
     register(ThemeResource.class);
+    register(FileResource.class);
     register(SwaggerSerializers.class);
     register(CORSFilter.class);
     // packages("com.databasepreservation.visualization.api","com.databasepreservation.common.client.services");

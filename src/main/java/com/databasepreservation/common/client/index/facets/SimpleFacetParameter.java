@@ -11,7 +11,7 @@ import java.util.List;
 
 public class SimpleFacetParameter extends FacetParameter {
 
-  private static final long serialVersionUID = -5377147008170114648L;
+  private static final long serialVersionUID = -5377147008170114649L;
 
   public static final int DEFAULT_LIMIT = 100;
 

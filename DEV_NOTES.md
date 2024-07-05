@@ -15,11 +15,20 @@ Hey devs, here are some notes that may be of use to you!
 ## Debug WUI
 
 ```bash
-# Open Spring boot
+# If never GWT compiled before, compile once and copy gwt.rpc files
+mvn -am gwt:compile -Pdebug-server -Dscope.gwt-dev=compile
+
+# Codeserver needs some dependencies installed to start
+mvn install -Pdebug-server -DskipTests
+
+# Start up dependencies (Solr, Zookeeper)
+docker compose -f deploys/docker-compose-dev.yml up -d
+
+# Run Spring boot
 mvn spring-boot:run -Pdebug-server
 
 # Open codeserver
-mvn gwt:codeserver -Dscope.gwt-dev=compile -Pdebug-server
+mvn -f dev/codeserver gwt:codeserver -Pdebug-server -DprojectPath=$(pwd)
 
 # Open codeserver http://127.0.0.1:9876/ and add bookmarks
 # Open DBPTK http://localhost:8080 and click the "Dev Mode On" bookmark

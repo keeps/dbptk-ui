@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.api.v1.utils.StringResponse;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
@@ -205,7 +206,7 @@ public class SIARDWizardManager extends WizardManager {
     progressBarPanel.setSubtitleText(messages.progressBarPanelTextForCreateWizardProgressSubTitle());
     wizardContent.add(progressBarPanel);
 
-    MigrationService.Util.call((String response) -> {
+    MigrationService.Util.call((StringResponse response) -> {
       Dialogs.showInformationDialog(messages.sendToWizardManagerInformationTitle(),
         messages.sendToWizardManagerInformationMessageSIARD(), messages.basicActionClose(), "btn btn-link",
         new DefaultAsyncCallback<Void>() {

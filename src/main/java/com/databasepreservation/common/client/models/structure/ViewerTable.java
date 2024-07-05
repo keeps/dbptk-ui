@@ -7,6 +7,7 @@
  */
 package com.databasepreservation.common.client.models.structure;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +19,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class ViewerTable implements Serializable {
+  @Serial
+  private static final long serialVersionUID = -4556417822547724671L;
   // used to identify the collection containing data from this table
   private String uuid;
 

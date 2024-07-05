@@ -9,18 +9,20 @@ package com.databasepreservation.common.api.utils;
 
 import java.io.IOException;
 import java.io.OutputStream;
-
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.CacheControl;
-import jakarta.ws.rs.core.EntityTag;
-import jakarta.ws.rs.core.HttpHeaders;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.StreamingOutput;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.roda.core.data.common.RodaConstants;
+import org.springframework.http.CacheControl;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.StreamingOutput;
 
 /**
  * API Utils
@@ -62,17 +64,17 @@ public class ApiUtils {
 
     if (StringUtils.isNotBlank(acceptFormat)) {
       if (acceptFormat.equalsIgnoreCase("XML")) {
-        mediaType = MediaType.APPLICATION_XML;
+        mediaType = MediaType.APPLICATION_XML_VALUE;
       } else if (acceptFormat.equalsIgnoreCase("JSONP")) {
         mediaType = APPLICATION_JS;
       } else if (acceptFormat.equalsIgnoreCase("bin")) {
-        mediaType = MediaType.APPLICATION_OCTET_STREAM;
+        mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
       } else if (acceptFormat.equalsIgnoreCase("html")) {
-        mediaType = MediaType.TEXT_HTML;
+        mediaType = MediaType.TEXT_HTML_VALUE;
       }
     } else if (StringUtils.isNotBlank(acceptHeaders)) {
-      if (acceptHeaders.contains(MediaType.APPLICATION_XML)) {
-        mediaType = MediaType.APPLICATION_XML;
+      if (acceptHeaders.contains(MediaType.APPLICATION_XML_VALUE)) {
+        mediaType = MediaType.APPLICATION_XML_VALUE;
       } else if (acceptHeaders.contains(APPLICATION_JS)) {
         mediaType = APPLICATION_JS;
       } else if (acceptHeaders.contains(ExtraMediaType.TEXT_CSV)) {
@@ -83,40 +85,63 @@ public class ApiUtils {
     return mediaType;
   }
 
-  public static Response okResponse(StreamResponse streamResponse, CacheControl cacheControl, EntityTag tag,
-    boolean inline) {
-    StreamingOutput so = new StreamingOutput() {
-
-      @Override
-      public void write(OutputStream output) throws IOException, WebApplicationException {
-        streamResponse.getStream().consumeOutputStream(output);
-
-      }
-    };
-    return Response.ok(so, streamResponse.getMediaType())
-      .header(HttpHeaders.CONTENT_DISPOSITION,
-        contentDisposition(inline) + CONTENT_DISPOSITION_FILENAME_ARGUMENT + "\"" + streamResponse.getFilename() + "\"")
-      .cacheControl(cacheControl).tag(tag).build();
-  }
-
-  public static Response okResponse(StreamResponse streamResponse) {
+  public static ResponseEntity<StreamingResponseBody> okResponse(StreamResponse streamResponse) {
     return okResponse(streamResponse, false);
   }
 
-  public static Response okResponse(StreamResponse streamResponse, boolean inline) {
+  public static ResponseEntity<StreamingResponseBody> okResponse(StreamResponse streamResponse, boolean inline) {
     StreamingOutput so = new StreamingOutput() {
       @Override
-      public void write(OutputStream output) throws IOException, WebApplicationException {
+      public void write(OutputStream output) throws IOException {
         streamResponse.getStream().consumeOutputStream(output);
       }
     };
-    return Response.ok(so, streamResponse.getMediaType())
-      .header(HttpHeaders.CONTENT_DISPOSITION,
-        contentDisposition(inline) + CONTENT_DISPOSITION_FILENAME_ARGUMENT + "\"" + streamResponse.getFilename() + "\"")
-      .build();
+
+    HttpHeaders responseHeaders = new HttpHeaders();
+    StreamingResponseBody responseStream = outputStream -> streamResponse.getStream().consumeOutputStream(outputStream);
+
+    responseHeaders.add("Content-Type", streamResponse.getStream().getMediaType());
+    responseHeaders.add(HttpHeaders.CONTENT_DISPOSITION,
+      contentDisposition(inline) + CONTENT_DISPOSITION_FILENAME_ARGUMENT + "\"" + streamResponse.getFilename() + "\"");
+    responseHeaders.add("Content-Length", String.valueOf(streamResponse.getStream().getSize()));
+
+    Date lastModifiedDate = streamResponse.getStream().getLastModified();
+
+    if (lastModifiedDate != null) {
+      CacheControl cacheControl = CacheControl.maxAge(1, TimeUnit.HOURS).cachePrivate().noTransform();
+      String eTag = lastModifiedDate.toInstant().toString();
+      return ResponseEntity.ok().headers(responseHeaders).cacheControl(cacheControl).eTag(eTag).body(responseStream);
+    }
+
+    return ResponseEntity.ok().headers(responseHeaders).body(responseStream);
   }
 
   private static String contentDisposition(boolean inline) {
     return inline ? CONTENT_DISPOSITION_INLINE : CONTENT_DISPOSITION_ATTACHMENT;
+  }
+
+  public static ResponseEntity<StreamingResponseBody> okResponse(StreamResponse streamResponse, WebRequest request) {
+    if (request != null && request.checkNotModified(streamResponse.getLastModified().getTime())) {
+      return ResponseEntity.status(304).build();
+    }
+
+    org.springframework.http.HttpHeaders responseHeaders = new org.springframework.http.HttpHeaders();
+    StreamingResponseBody responseStream = outputStream -> streamResponse.getStream().consumeOutputStream(outputStream);
+
+    responseHeaders.add("Content-Type", streamResponse.getStream().getMediaType());
+    responseHeaders.add(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION,
+      "attachment; filename=\"" + streamResponse.getStream().getFileName() + "\"");
+    responseHeaders.add("Content-Length", String.valueOf(streamResponse.getStream().getSize()));
+
+    Date lastModifiedDate = streamResponse.getStream().getLastModified();
+
+    if (lastModifiedDate != null) {
+      org.springframework.http.CacheControl cacheControl = org.springframework.http.CacheControl
+        .maxAge(1, TimeUnit.HOURS).cachePrivate().noTransform();
+      String eTag = lastModifiedDate.toInstant().toString();
+      return ResponseEntity.ok().headers(responseHeaders).cacheControl(cacheControl).eTag(eTag).body(responseStream);
+    }
+
+    return ResponseEntity.ok().headers(responseHeaders).body(responseStream);
   }
 }

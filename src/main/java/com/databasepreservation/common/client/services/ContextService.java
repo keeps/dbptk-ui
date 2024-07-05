@@ -12,15 +12,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
-import jakarta.ws.rs.core.MediaType;
-
+import com.databasepreservation.common.api.v1.utils.StringResponse;
 import org.fusesource.restygwt.client.DirectRestService;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.fusesource.restygwt.client.REST;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultMethodCallback;
@@ -33,7 +32,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-@Path(".." + ViewerConstants.ENDPOINT_CONTEXT)
+@RequestMapping(path = ".." + ViewerConstants.ENDPOINT_CONTEXT)
 @Tag(name = ContextService.SWAGGER_ENDPOINT)
 public interface ContextService extends DirectRestService {
   public static final String SWAGGER_ENDPOINT = "v1 context";
@@ -55,27 +54,20 @@ public interface ContextService extends DirectRestService {
     }
   }
 
-  @GET
-  @Path("/environment")
-  @Produces({MediaType.TEXT_PLAIN})
+  @RequestMapping(path = "/environment", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieves the environment", hidden = true)
-  String getEnvironment();
+  StringResponse getEnvironment();
 
-  @GET
-  @Path("/clientMachineHost")
-  @Produces({MediaType.TEXT_PLAIN})
+  @RequestMapping(path = "/clientMachineHost", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieves the client machine host", hidden = true)
-  String getClientMachine();
+  StringResponse getClientMachine();
 
-  @GET
-  @Path("/shared/properties")
+  @RequestMapping(path = "/shared/properties", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieves the shared properties", hidden = true)
   Map<String, List<String>> getSharedProperties(
-    @QueryParam(ViewerConstants.API_QUERY_PARAM_LOCALE) String localeString);
+    @RequestParam(name = ViewerConstants.API_QUERY_PARAM_LOCALE, defaultValue = "en", required = false) String localeString);
 
-  @GET
-  @Path("/authorizations")
+  @RequestMapping(path = "/authorizations", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Gets the authorizations group list")
-  @Produces(MediaType.APPLICATION_JSON)
   Set<AuthorizationGroup> getAuthorizationGroupsList();
 }

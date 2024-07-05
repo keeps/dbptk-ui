@@ -10,6 +10,7 @@ package com.databasepreservation.common.api.v1.utils;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -69,5 +70,15 @@ public class IterableIndexResultsCSVOutputStream extends CSVOutputStream {
     }
 
     writer.flush();
+  }
+
+  @Override
+  public Date getLastModified() {
+    return null;
+  }
+
+  @Override
+  public long getSize() {
+    return -1;
   }
 }

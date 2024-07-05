@@ -11,6 +11,7 @@ import java.util.Collections;
 
 import org.roda.core.data.v2.index.sublist.Sublist;
 
+import com.databasepreservation.common.api.v1.utils.StringResponse;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.dialogs.Dialogs;
@@ -55,8 +56,8 @@ public class HelperUploadSIARDFile {
 
       openSIARDPath(panel, JavascriptUtils.openFileDialog(options));
     } else {
-      Dialogs.showServerFilePathDialog(messages.managePageButtonTextForOpenSIARD(), messages.dialogOpenSIARDMessage(), messages.basicActionCancel(),
-        messages.basicActionOpen(), new DefaultAsyncCallback<String>() {
+      Dialogs.showServerFilePathDialog(messages.managePageButtonTextForOpenSIARD(), messages.dialogOpenSIARDMessage(),
+        messages.basicActionCancel(), messages.basicActionOpen(), new DefaultAsyncCallback<String>() {
           @Override
           public void onSuccess(String path) {
             openSIARDPath(panel, path);
@@ -100,13 +101,13 @@ public class HelperUploadSIARDFile {
   }
 
   private void uploadMetadataSIARD(String path, FlowPanel panel) {
-    DatabaseService.Util.call((String databaseUUID) -> {
-        panel.remove(loading);
-        HistoryManager.gotoSIARDInfo(databaseUUID);
-      }, (String errorMessage) -> {
+    DatabaseService.Util.call((StringResponse databaseUUID) -> {
+      panel.remove(loading);
+      HistoryManager.gotoSIARDInfo(databaseUUID.getValue());
+    }, (String errorMessage) -> {
       Dialogs.showErrors(messages.errorMessagesOpenFile(path), errorMessage, messages.basicActionClose());
-        //Toast.showError(messages.errorMessagesOpenFile(), errorMessage);
-        panel.remove(loading);
+      // Toast.showError(messages.errorMessagesOpenFile(), errorMessage);
+      panel.remove(loading);
     }).create(path);
   }
 

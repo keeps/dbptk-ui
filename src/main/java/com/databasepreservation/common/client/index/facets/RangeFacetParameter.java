@@ -9,7 +9,7 @@ package com.databasepreservation.common.client.index.facets;
 
 public class RangeFacetParameter extends FacetParameter {
 
-  private static final long serialVersionUID = 2190074263722637165L;
+  private static final long serialVersionUID = 2190074263722637169L;
 
   // INFO these are strings because one might pass dates or numbers
   private String start;
@@ -56,4 +56,8 @@ public class RangeFacetParameter extends FacetParameter {
     this.gap = gap;
   }
 
+  @Override
+  public String toString() {
+    return "RangeFacetParameter{" + "start='" + start + '\'' + ", end='" + end + '\'' + ", gap='" + gap + '\'' + '}';
+  }
 }

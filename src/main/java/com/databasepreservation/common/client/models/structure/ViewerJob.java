@@ -7,8 +7,8 @@
  */
 package com.databasepreservation.common.client.models.structure;
 
+import java.io.Serial;
 import java.io.Serializable;
-import java.time.LocalDateTime;
 import java.util.Date;
 
 import com.databasepreservation.common.client.index.IsIndexed;
@@ -19,6 +19,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  */
 public class ViewerJob extends IsIndexed implements Serializable {
 
+  @Serial
+  private static final long serialVersionUID = 9010552784156581100L;
   private String uuid;
   private Long jobId;
   private String databaseUuid;

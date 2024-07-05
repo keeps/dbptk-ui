@@ -7,28 +7,27 @@
  */
 package com.databasepreservation.common.client.services;
 
-import java.util.function.Consumer;
-
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.QueryParam;
-
+import com.databasepreservation.common.client.common.DefaultMethodCallback;
+import com.google.gwt.core.client.GWT;
 import org.fusesource.restygwt.client.DirectRestService;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.fusesource.restygwt.client.REST;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.common.DefaultMethodCallback;
-import com.google.gwt.core.client.GWT;
 
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import java.util.function.Consumer;
+
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
  */
-@Path(".." + ViewerConstants.ENDPOINT_CLIENT_LOGGER)
+@RequestMapping(path = ".." + ViewerConstants.ENDPOINT_CLIENT_LOGGER)
 @Tag(name = ClientLoggerService.SWAGGER_ENDPOINT)
 public interface ClientLoggerService extends DirectRestService {
   public static final String SWAGGER_ENDPOINT = "v1 client logger";
@@ -54,16 +53,19 @@ public interface ClientLoggerService extends DirectRestService {
     }
   }
 
-  @POST
-  @Path("/log")
-  void log(
-      @Parameter(name = "Log type", schema = @Schema(allowableValues = "debug, error, fatal, info, trace, warn"), required = true) @QueryParam("type") String type,
-      @Parameter(required = true) @QueryParam("classname") String classname, @QueryParam("object") String object);
+  @RequestMapping(path = "/log", method = RequestMethod.POST)
+  Void log(
+    @Parameter(name = "Log type", schema = @Schema(allowableValues = "debug, error, fatal, info, trace, warn"), required = true) @RequestParam(name = "type", required = false) String type,
+    @Parameter(required = true) @RequestParam(name = "classname") String classname,
+    @RequestParam(name = "object", required = false) String object);
 
-  @POST
-  @Path("/detailedLog")
-  void detailedLog(
-      @Parameter(name = "Log type", schema = @Schema(allowableValues = "debug, error, fatal, info, trace, warn"), required = true) @QueryParam("type") String type,
-      @Parameter(required = true) @QueryParam("classname") String classname, @QueryParam("object") String object,
-      Throwable error);
+  @RequestMapping(path = "/detailedLog", method = RequestMethod.POST)
+  Void detailedLog(
+    @Parameter(name = "Log type", schema = @Schema(allowableValues = "debug, error, fatal, info, trace, warn"), required = true) @RequestParam(name = "type") String type,
+    @Parameter(required = true) @RequestParam(name = "classname") String classname,
+    @RequestParam(name = "object") String object, Throwable error);
+
+  /**
+   * @author Gabriel Barros <gbarros@keep.pt>
+   */
 }

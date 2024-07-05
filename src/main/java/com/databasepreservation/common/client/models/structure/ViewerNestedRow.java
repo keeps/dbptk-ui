@@ -7,18 +7,14 @@
  */
 package com.databasepreservation.common.client.models.structure;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
-import com.databasepreservation.common.client.ViewerConstants;
-import com.databasepreservation.common.client.index.IsIndexed;
+import java.io.Serial;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class ViewerNestedRow extends ViewerRow {
+  @Serial
+  private static final long serialVersionUID = -60735036813821807L;
   private String nestedUUID;
   private String nestedTableId;
   private String nestedOriginalUUID;

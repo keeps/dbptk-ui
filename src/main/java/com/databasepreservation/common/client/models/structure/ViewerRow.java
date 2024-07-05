@@ -7,7 +7,12 @@
  */
 package com.databasepreservation.common.client.models.structure;
 
-import java.util.*;
+import java.io.Serial;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.index.IsIndexed;
@@ -16,6 +21,8 @@ import com.databasepreservation.common.client.index.IsIndexed;
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class ViewerRow extends IsIndexed {
+  @Serial
+  private static final long serialVersionUID = 5337660979887460340L;
   private String UUID;
   private String tableUUID;
   private String tableId;

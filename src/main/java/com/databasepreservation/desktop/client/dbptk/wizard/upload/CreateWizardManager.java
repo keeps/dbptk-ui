@@ -10,6 +10,7 @@ package com.databasepreservation.desktop.client.dbptk.wizard.upload;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.databasepreservation.common.api.v1.utils.StringResponse;
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.breadcrumb.BreadcrumbItem;
@@ -342,7 +343,7 @@ public class CreateWizardManager extends WizardManager {
     progressBarPanel.setSubtitleText(messages.progressBarPanelTextForCreateWizardProgressSubTitle());
     wizardContent.add(progressBarPanel);
 
-    MigrationService.Util.call((String done) -> {
+    MigrationService.Util.call((StringResponse done) -> {
       if (redirect) {
         final String siardPath = exportOptionsParameters.getSiardPath();
         Dialogs.showConfirmDialog(messages.createSIARDWizardManagerInformationMessagesTitle(),
@@ -492,11 +493,11 @@ public class CreateWizardManager extends WizardManager {
     final Widget loading = new HTML(SafeHtmlUtils.fromSafeConstant(
       "<div id='loading' class='spinner'><div class='double-bounce1'></div><div class='double-bounce2'></div></div>"));
     wizardContent.add(loading);
-    DatabaseService.Util.call((String result) -> {
+    DatabaseService.Util.call((StringResponse result) -> {
       clear();
       instance = null;
       wizardContent.remove(loading);
-      HistoryManager.gotoSIARDInfo(result);
+      HistoryManager.gotoSIARDInfo(result.getValue());
     }, (String errorMessage) -> {
       HistoryManager.gotoHome();
       Dialogs.showErrors(messages.createSIARDWizardManagerInformationMessagesTitle(), errorMessage,

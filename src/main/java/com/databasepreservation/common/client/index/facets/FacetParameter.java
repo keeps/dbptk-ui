@@ -19,7 +19,7 @@ import java.util.List;
 @JsonSubTypes({@Type(value = SimpleFacetParameter.class, name = "SimpleFacetParameter"),
   @Type(value = RangeFacetParameter.class, name = "RangeFacetParameter")})
 public abstract class FacetParameter implements Serializable {
-  private static final long serialVersionUID = 4927529408810091855L;
+  private static final long serialVersionUID = 4927529408810091856L;
   public static final int DEFAULT_MIN_COUNT = 1;
   public static final SORT DEFAULT_SORT = SORT.INDEX;
 

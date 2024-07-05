@@ -7,6 +7,7 @@
  */
 package com.databasepreservation.common.client.models.status.denormalization;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +18,8 @@ import com.databasepreservation.common.client.models.structure.ViewerColumn;
  * @author Gabriel Barros <gbarros@keep.pt>
  */
 public class RelatedTablesConfiguration implements Serializable {
+  @Serial
+  private static final long serialVersionUID = 4872925326093374795L;
   private String uuid;
   private String tableUUID;
   private String tableID;
@@ -114,16 +117,16 @@ public class RelatedTablesConfiguration implements Serializable {
         if (!relatedTable.getRelatedTables().isEmpty()) {
           RelatedTablesConfiguration innerRelatedTable = relatedTable.getRelatedTable(uuid);
           if (innerRelatedTable != null)
-            return innerRelatedTable; 
+            return innerRelatedTable;
         }
       }
     }
     return null;
   }
 
-  public void addRelatedTable(RelatedTablesConfiguration relatedTable){
-          relatedTables.add(relatedTable);
-      }
+  public void addRelatedTable(RelatedTablesConfiguration relatedTable) {
+    relatedTables.add(relatedTable);
+  }
 
   public void setRelatedTables(List<RelatedTablesConfiguration> relatedTables) {
     this.relatedTables = relatedTables;

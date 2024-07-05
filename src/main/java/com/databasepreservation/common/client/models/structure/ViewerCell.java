@@ -7,12 +7,15 @@
  */
 package com.databasepreservation.common.client.models.structure;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class ViewerCell implements Serializable {
+  @Serial
+  private static final long serialVersionUID = -5345114836590659380L;
   private String value;
   private String mimeType;
   private String fileExtension;

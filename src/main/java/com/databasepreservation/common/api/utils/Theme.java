@@ -82,6 +82,22 @@ public class Theme {
       public void consumeOutputStream(OutputStream out) throws IOException {
         IOUtils.copy(themeResourceInputstream.getSecond(), out);
       }
+
+      @Override
+      public Date getLastModified() {
+        Date lastModified = null;
+        try {
+          lastModified = getLastModifiedDate(resourceId);
+        } catch (IOException e) {
+          // do nothing
+        }
+        return lastModified;
+      }
+
+      @Override
+      public long getSize() {
+        return -1;
+      }
     };
 
     streamResponse = new StreamResponse(resourceId, mimeType, stream);

@@ -8,22 +8,23 @@
 package com.databasepreservation.common.api.v1;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
-import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.exceptions.RESTException;
@@ -41,14 +42,16 @@ import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
 import com.databasepreservation.common.utils.ControllerAssistant;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * @author Miguel Guimarães <mguimaraes@keep.pt>
  */
-@Service
-@Path(ViewerConstants.ENDPOINT_DATABASE)
+@RestController
+@RequestMapping(path = ViewerConstants.ENDPOINT_DATABASE)
 public class SiardResource implements SiardService {
-  @Context
+  @Autowired
   private HttpServletRequest request;
 
   @Override
@@ -123,12 +126,11 @@ public class SiardResource implements SiardService {
     }
   }
 
-  @GET
-  @Path("/{databaseUUID}/siard/{siardUUID}/download/validation")
-  @Produces(MediaType.APPLICATION_OCTET_STREAM)
+  @RequestMapping(path = "/{databaseUUID}/siard/{siardUUID}/download/validation", method = RequestMethod.GET, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
   @Operation(summary = "Downloads a specific SIARD validation report file from the storage location", description = "")
-  public Response getValidationReportFile(@PathParam("databaseUUID") String databaseUUID,
-    @PathParam("siardUUID") String siardUUID) {
+  public ResponseEntity<Resource> getValidationReportFile(
+    @Parameter(name = "The database unique identifier", required = true) @PathVariable(name = "databaseUUID") String databaseUUID,
+    @PathVariable(name = "siardUUID") String siardUUID) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
@@ -144,10 +146,10 @@ public class SiardResource implements SiardService {
         throw new RESTException(new NotFoundException("validation report file not found"));
       }
 
-      Response.ResponseBuilder responseBuilder = Response.ok(file);
-      responseBuilder.header("Content-Disposition", "attachment; filename=\"" + file.getName() + "\"");
-      return responseBuilder.build();
-    } catch (NotFoundException | GenericException e) {
+      InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
+      return ResponseEntity.ok().header("Content-Disposition", "attachment; filename=\"" + file.getName() + "\"")
+        .contentLength(file.length()).contentType(MediaType.APPLICATION_OCTET_STREAM).body(resource);
+    } catch (NotFoundException | GenericException | FileNotFoundException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {

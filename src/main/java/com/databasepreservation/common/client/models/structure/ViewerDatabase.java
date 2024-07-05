@@ -7,15 +7,18 @@
  */
 package com.databasepreservation.common.client.models.structure;
 
-import com.databasepreservation.common.client.index.IsIndexed;
-
+import java.io.Serial;
 import java.util.Set;
+
+import com.databasepreservation.common.client.index.IsIndexed;
 
 /**
  * @author Bruno Ferreira <bferreira@keep.pt>
  */
 public class ViewerDatabase extends IsIndexed {
 
+  @Serial
+  private static final long serialVersionUID = 1013133463092757934L;
   private String uuid;
   private ViewerDatabaseStatus status;
   private ViewerMetadata metadata;
@@ -30,6 +33,7 @@ public class ViewerDatabase extends IsIndexed {
   private String validatorReportPath;
   private ViewerDatabaseValidationStatus validationStatus;
   private String validationPassed;
+  private String validationFailed;
   private String validationErrors;
   private String validationWarnings;
   private String validationSkipped;
@@ -101,7 +105,6 @@ public class ViewerDatabase extends IsIndexed {
     this.metadata = metadata;
   }
 
-
   public void setPath(String path) {
     this.path = path;
   }
@@ -125,7 +128,6 @@ public class ViewerDatabase extends IsIndexed {
   public void setVersion(String version) {
     this.version = version;
   }
-
 
   public String getValidatedAt() {
     return validatedAt;
@@ -153,6 +155,14 @@ public class ViewerDatabase extends IsIndexed {
 
   public String getValidationPassed() {
     return validationPassed;
+  }
+
+  public String getValidationFailed() {
+    return validationFailed;
+  }
+
+  public void setValidationFailed(String validationFailed) {
+    this.validationFailed = validationFailed;
   }
 
   public void setValidationErrors(String validationErrors) {
