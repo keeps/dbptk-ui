@@ -79,14 +79,14 @@ public class DatabaseResource implements DatabaseService {
   }
 
   @Override
-  public StringResponse create(String path) {
+  public StringResponse create(String path, String siardVersion) {
     final ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
     User user = controllerAssistant.checkRoles(request);
 
     try {
-      return new StringResponse(SIARDController.loadMetadataFromLocal(path));
+      return new StringResponse(SIARDController.loadMetadataFromLocal(path, siardVersion));
     } catch (GenericException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);

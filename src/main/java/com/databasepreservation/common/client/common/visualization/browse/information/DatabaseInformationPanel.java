@@ -154,7 +154,7 @@ public class DatabaseInformationPanel extends RightPanel {
         instances.remove(database.getUuid());
         HistoryManager.gotoSIARDInfo(database.getUuid());
         Dialogs.showErrors(messages.SIARDHomePageDialogTitleForBrowsing(), errorMessage, messages.basicActionClose());
-      }).createCollection(database.getUuid());
+      }).createCollection(database.getUuid(), database.getVersion());
     }
   }
 

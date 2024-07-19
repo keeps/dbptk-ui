@@ -10,11 +10,14 @@ package com.databasepreservation.common.api.v1;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import org.roda.core.data.exceptions.AlreadyExistsException;
 import org.roda.core.data.exceptions.GenericException;
@@ -87,8 +90,12 @@ public class FileResource implements FileService {
       java.nio.file.Path basePath = Paths.get(ViewerConfiguration.getInstance().getViewerConfigurationAsString("/",
         ViewerConfiguration.PROPERTY_BASE_UPLOAD_PATH));
       java.nio.file.Path siardPath = siardFilesPath.resolve(filename);
-      if (java.nio.file.Files.exists(siardPath) && !java.nio.file.Files.isDirectory(siardPath)
-        && (ViewerConfiguration.checkPathIsWithin(siardPath, siardFilesPath)
+
+      if (java.nio.file.Files.isDirectory(siardPath)) {
+        siardPath = zipDirectory(siardPath);
+      }
+
+      if (java.nio.file.Files.exists(siardPath) && (ViewerConfiguration.checkPathIsWithin(siardPath, siardFilesPath)
           || ViewerConfiguration.checkPathIsWithin(siardPath, basePath))) {
 
         InputStreamResource resource = new InputStreamResource(new FileInputStream(siardPath.toFile()));
@@ -101,10 +108,30 @@ public class FileResource implements FileService {
     } catch (NotFoundException | FileNotFoundException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
+    } catch (IOException e) {
+      throw new RESTException(e);
     } finally {
       // register action
       controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_FILENAME_PARAM, filename);
     }
+  }
+
+  private java.nio.file.Path zipDirectory(java.nio.file.Path dirPath) throws IOException {
+    java.nio.file.Path zipFilePath = dirPath.resolveSibling(dirPath.getFileName().toString() + ".zip");
+    try (FileOutputStream fos = new FileOutputStream(zipFilePath.toFile());
+      ZipOutputStream zos = new ZipOutputStream(fos)) {
+      java.nio.file.Files.walk(dirPath).filter(path -> !java.nio.file.Files.isDirectory(path)).forEach(path -> {
+        ZipEntry zipEntry = new ZipEntry(dirPath.relativize(path).toString());
+        try {
+          zos.putNextEntry(zipEntry);
+          java.nio.file.Files.copy(path, zos);
+          zos.closeEntry();
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
+      });
+    }
+    return zipFilePath;
   }
 
   @Override

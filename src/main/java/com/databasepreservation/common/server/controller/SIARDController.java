@@ -82,6 +82,10 @@ import com.databasepreservation.model.structure.DatabaseStructure;
 import com.databasepreservation.modules.config.ImportConfigurationModuleFactory;
 import com.databasepreservation.modules.jdbc.in.JDBCImportModule;
 import com.databasepreservation.modules.siard.SIARD2ModuleFactory;
+import com.databasepreservation.modules.siard.SIARDDK2010EditFactory;
+import com.databasepreservation.modules.siard.SIARDDK2010ModuleFactory;
+import com.databasepreservation.modules.siard.SIARDDK2020EditFactory;
+import com.databasepreservation.modules.siard.SIARDDK2020ModuleFactory;
 import com.databasepreservation.modules.siard.SIARDEditFactory;
 import com.databasepreservation.modules.siard.SIARDValidateFactory;
 import com.databasepreservation.modules.viewer.DbvtkModuleFactory;
@@ -581,20 +585,22 @@ public class SIARDController {
     return module;
   }
 
-  public static String loadMetadataFromLocal(String localPath) throws GenericException {
+  public static String loadMetadataFromLocal(String localPath, String siardVersion) throws GenericException {
     String databaseUUID = SolrUtils.randomUUID();
-    return loadMetadataFromLocal(databaseUUID, localPath);
+    return loadMetadataFromLocal(databaseUUID, localPath, siardVersion);
   }
 
-  private static String loadMetadataFromLocal(String databaseUUID, String localPath) throws GenericException {
+  private static String loadMetadataFromLocal(String databaseUUID, String localPath, String siardVersion)
+    throws GenericException {
     Path basePath = Paths.get(ViewerConfiguration.getInstance().getViewerConfigurationAsString("/",
       ViewerConfiguration.PROPERTY_BASE_UPLOAD_PATH));
     Path siardPath = basePath.resolve(localPath);
-    convertSIARDMetadataToSolr(siardPath, databaseUUID);
+    convertSIARDMetadataToSolr(siardPath, databaseUUID, siardVersion);
     return databaseUUID;
   }
 
-  private static void convertSIARDMetadataToSolr(Path siardPath, String databaseUUID) throws GenericException {
+  private static void convertSIARDMetadataToSolr(Path siardPath, String databaseUUID, String siardVersion)
+    throws GenericException {
     validateSIARDLocation(siardPath);
 
     LOGGER.info("starting to import metadata database {}", siardPath.toAbsolutePath());
@@ -602,9 +608,21 @@ public class SIARDController {
     try {
       Reporter reporter = new NoOpReporter();
       SIARDEdition siardEdition = SIARDEdition.newInstance();
-
-      siardEdition.editModule(new SIARDEditFactory()).editModuleParameter(SIARDEditFactory.PARAMETER_FILE,
-        Collections.singletonList(siardPath.toAbsolutePath().toString()));
+      if (siardVersion.equals(ViewerConstants.SIARD_DK)) {
+        if (Files.exists(Paths.get(siardPath + ViewerConstants.SIARDDK_RESEARCH_INDEX_PATH))) {
+          siardEdition.editModule(new SIARDDK2020EditFactory()).editModuleParameter(
+            SIARDDK2020EditFactory.PARAMETER_FOLDER, Collections.singletonList(siardPath.toAbsolutePath().toString()));
+        } else {
+          siardEdition.editModule(new SIARDDK2010EditFactory()).editModuleParameter(
+            SIARDDK2010EditFactory.PARAMETER_FOLDER,
+            Collections.singletonList(siardPath.toAbsolutePath().toString()));
+        }
+      } else if (siardVersion.equals(ViewerConstants.SIARD_V21)){
+        siardEdition.editModule(new SIARDEditFactory()).editModuleParameter(SIARDEditFactory.PARAMETER_FILE,
+          Collections.singletonList(siardPath.toAbsolutePath().toString()));
+      } else {
+        throw new SIARDVersionNotSupportedException();
+      }
 
       siardEdition.reporter(reporter);
 
@@ -667,13 +685,14 @@ public class SIARDController {
     }
   }
 
-  public static String loadFromLocal(String localPath, String databaseUUID) throws GenericException {
+  public static String loadFromLocal(String localPath, String databaseUUID, String siardVersion)
+    throws GenericException {
     LOGGER.info("Preparing the SIARD to be browsable ({})", databaseUUID);
     Path basePath = Paths.get(ViewerConfiguration.getInstance().getViewerConfigurationAsString("/",
       ViewerConfiguration.PROPERTY_BASE_UPLOAD_PATH));
     try {
       Path siardPath = basePath.resolve(localPath);
-      convertSIARDtoSolr(siardPath, databaseUUID);
+      convertSIARDtoSolr(siardPath, databaseUUID, siardVersion);
       LOGGER.info("Conversion to SIARD successful, database: {}", databaseUUID);
     } catch (GenericException e) {
       LOGGER.error("Conversion to SIARD failed for database {}", databaseUUID, e);
@@ -682,7 +701,8 @@ public class SIARDController {
     return databaseUUID;
   }
 
-  private static void convertSIARDtoSolr(Path siardPath, String databaseUUID) throws GenericException {
+  private static void convertSIARDtoSolr(Path siardPath, String databaseUUID, String siardVersion)
+    throws GenericException {
     validateSIARDLocation(siardPath);
 
     LOGGER.info("starting to convert database {}", siardPath.toAbsolutePath());
@@ -697,9 +717,21 @@ public class SIARDController {
       // XXX remove this workaround after fix of NPE
       databaseMigration.filterFactories(new ArrayList<>());
 
-      databaseMigration.importModule(new SIARD2ModuleFactory())
-        .importModuleParameter(SIARD2ModuleFactory.PARAMETER_FILE, siardPath.toAbsolutePath().toString())
-        .importModuleParameter(SIARD2ModuleFactory.PARAMETER_IGNORE_LOBS, "true");
+      if (siardVersion.equals(ViewerConstants.SIARD_DK_2020)) {
+        databaseMigration.importModule(new SIARDDK2020ModuleFactory())
+          .importModuleParameter(SIARDDK2020ModuleFactory.PARAMETER_FOLDER, siardPath.toAbsolutePath().toString())
+          .importModuleParameter(SIARDDK2020ModuleFactory.PARAMETER_AS_SCHEMA, "public");
+      } else if (siardVersion.equals(ViewerConstants.SIARD_DK_2010)) {
+        databaseMigration.importModule(new SIARDDK2010ModuleFactory())
+          .importModuleParameter(SIARDDK2010ModuleFactory.PARAMETER_FOLDER, siardPath.toAbsolutePath().toString())
+          .importModuleParameter(SIARDDK2010ModuleFactory.PARAMETER_AS_SCHEMA, "public");
+      } else if (siardVersion.equals(ViewerConstants.SIARD_V21)) {
+        databaseMigration.importModule(new SIARD2ModuleFactory())
+          .importModuleParameter(SIARD2ModuleFactory.PARAMETER_FILE, siardPath.toAbsolutePath().toString())
+          .importModuleParameter(SIARD2ModuleFactory.PARAMETER_IGNORE_LOBS, "true");
+      } else {
+        throw new GenericException("SIARD version not supported");
+      }
 
       databaseMigration.exportModule(new DbvtkModuleFactory())
         .exportModuleParameter(DbvtkModuleFactory.PARAMETER_DATABASE_UUID, databaseUUID);

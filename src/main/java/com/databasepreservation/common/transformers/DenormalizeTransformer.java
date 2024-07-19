@@ -243,7 +243,7 @@ public class DenormalizeTransformer {
 
     fieldsToReturn.addAll(auxColumns);
     fieldsToReturn.addAll(columnsToDisplay);
-
+    //TODO USE NESTEDORIGINALUUID FOR LINK
     IterableIndexResult nestedRows = solrManager.findAllRows(databaseUUID, resultingFilter, null, fieldsToReturn);
     for (ViewerRow nestedRow : nestedRows) {
       for (RelatedTablesConfiguration innerRelatedTable : relatedTable.getRelatedTables()) {

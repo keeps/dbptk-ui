@@ -68,8 +68,11 @@ public class BrowseNavigationPanel {
   }
 
   private void handleBrowseAction() {
-    if (database.getStatus().equals(ViewerDatabaseStatus.METADATA_ONLY)) { // Initial state
-      if (database.getVersion().equals(ViewerConstants.SIARD_V21)) {
+    if (database.getStatus().equals(ViewerDatabaseStatus.METADATA_ONLY)) {
+      // Initial state
+      if (database.getVersion().equals(ViewerConstants.SIARD_V21)
+        || database.getVersion().equals(ViewerConstants.SIARD_DK_2010)
+        || database.getVersion().equals(ViewerConstants.SIARD_DK_2020)) {
         if (!btnIngestClicked) {
           btnIngestClicked = true;
 
@@ -86,7 +89,7 @@ public class BrowseNavigationPanel {
             HistoryManager.gotoSIARDInfo(database.getUuid());
             Dialogs.showErrors(messages.SIARDHomePageDialogTitleForBrowsing(), errorMessage,
               messages.basicActionClose());
-          }).createCollection(database.getUuid());
+          }).createCollection(database.getUuid(), database.getVersion());
         }
       } else {
         Dialogs.showInformationDialog(messages.SIARDHomePageDialogTitleForBrowsing(),
