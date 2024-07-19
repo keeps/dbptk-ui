@@ -11,6 +11,7 @@ import com.databasepreservation.common.client.models.structure.ViewerLobStoreTyp
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -365,7 +366,10 @@ public class ToolkitStructure2ViewerStructure {
     ArrayList<ViewerView> result = new ArrayList<>();
     if (views != null) {
       for (ViewStructure view : views) {
-        result.add(getView(vdb, view));
+        ViewerView viewerView = getView(vdb, view);
+        if (viewerView != null) {
+          result.add(viewerView);
+        }
       }
     }
     return result;
@@ -376,7 +380,11 @@ public class ToolkitStructure2ViewerStructure {
     result.setName(view.getName());
     result.setUuid(SolrUtils.randomUUID());
     try {
-      result.setColumns(getColumns(view.getColumns()));
+      if (view.getColumns() != null) {
+        result.setColumns(getColumns(view.getColumns()));
+      } else {
+       return null;
+      }
     } catch (ViewerException e) {
       LOGGER.error("Could not convert the columns for view {}", view, e);
       result.setColumns(new ArrayList<>());
@@ -846,7 +854,13 @@ public class ToolkitStructure2ViewerStructure {
           collectionConfiguration.getTableStatusByTableId(table.getId()).getColumnByIndex(colIndex).getId(),
           ViewerLobStoreType.INTERNALLY);
 
-        detectMimeType(actualViewerRow, result, databasePath, collectionConfiguration, table, colIndex, lobName, true);
+        String dbContainerName = databasePath.split("/")[databasePath.split("/").length - 1];
+        if (binaryCell.getFile() != null && dbContainerName.matches("AVID\\.[A-ZÆØÅ]{2,4}\\.[1-9][0-9].*")) {
+          result.setValue(binaryCell.getFile());
+          detectMimeType(actualViewerRow, result, databasePath, collectionConfiguration, table, colIndex, binaryCell.getFile(), true);
+        } else {
+          detectMimeType(actualViewerRow, result, databasePath, collectionConfiguration, table, colIndex, lobName, true);
+        }
       }
     } else if (cell instanceof ComposedCell) {
       ComposedCell composedCell = (ComposedCell) cell;
@@ -886,10 +900,21 @@ public class ToolkitStructure2ViewerStructure {
       InputStream inputStream;
 
       TableStatus tableStatus = collectionConfiguration.getTableStatusByTableId(table.getId());
-      String siardLobPath = LobManagerUtils.getZipFilePath(tableStatus, colIndex, lobName);
 
-      ZipFile zipFile = new ZipFile(databasePath);
-      ZipEntry entry = zipFile.getEntry(siardLobPath);
+      ZipFile zipFile = null;
+      ZipEntry entry = null;
+      String dbContainerName = databasePath.split("/")[databasePath.split("/").length - 1];
+      String siardLobPath;
+      boolean isSiardDK = dbContainerName.matches("AVID\\.[A-ZÆØÅ]{2,4}\\.[1-9][0-9].*");
+
+      if (!isSiardDK) {
+        siardLobPath = LobManagerUtils.getZipFilePath(tableStatus, colIndex, lobName);
+        zipFile = new ZipFile(databasePath);
+        entry = zipFile.getEntry(siardLobPath);
+      } else {
+        blobIsInsideSiard = false;
+        siardLobPath = lobName;
+      }
 
       String lobCellValue = cell.getValue();
 
@@ -898,6 +923,8 @@ public class ToolkitStructure2ViewerStructure {
       } else if (blobIsInsideSiard) {
         lobCellValue = lobCellValue.replace(ViewerConstants.SIARD_EMBEDDED_LOB_PREFIX, "");
         inputStream = new ByteArrayInputStream(Base64.decodeBase64(lobCellValue.getBytes()));
+      } else if (isSiardDK)  {
+        inputStream = Files.newInputStream(Paths.get(siardLobPath));
       } else {
         lobCellValue = cell.getValue();
         final Path lobPath = Paths.get(lobCellValue);
@@ -942,7 +969,10 @@ public class ToolkitStructure2ViewerStructure {
       }
 
       inputStream.close();
-      zipFile.close();
+
+      if (zipFile != null) {
+        zipFile.close();
+      }
 
       cell.setMimeType(mimeType);
       cell.setFileExtension(fileExtension);

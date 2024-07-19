@@ -71,7 +71,8 @@ public interface CollectionService extends DirectRestService {
    *******************************************************************************/
   @RequestMapping(path = "/{databaseUUID}/collection", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Creates a collection for a database")
-  StringResponse createCollection(@PathVariable(name = "databaseUUID") String databaseUUID);
+  StringResponse createCollection(@PathVariable(name = "databaseUUID") String databaseUUID,
+    @Parameter(name = "version") @RequestParam(name = "version") String version);
 
   @RequestMapping(path = "/{databaseUUID}/collection/{collectionUUID}/status", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieves the progress data associated with an action done in the database")

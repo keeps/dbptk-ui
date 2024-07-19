@@ -21,9 +21,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import com.databasepreservation.common.client.models.structure.ViewerCell;
+import com.databasepreservation.model.data.Cell;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.roda.core.data.exceptions.GenericException;
@@ -172,7 +175,7 @@ public class CollectionResource implements CollectionService {
   }
 
   @Override
-  public StringResponse createCollection(String databaseUUID) {
+  public StringResponse createCollection(String databaseUUID, String siardVersion) {
     ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
@@ -195,7 +198,7 @@ public class CollectionResource implements CollectionService {
 
     try {
       final ViewerDatabase database = ViewerFactory.getSolrManager().retrieve(ViewerDatabase.class, databaseUUID);
-      return new StringResponse(SIARDController.loadFromLocal(database.getPath(), databaseUUID));
+      return new StringResponse(SIARDController.loadFromLocal(database.getPath(), databaseUUID, siardVersion));
     } catch (GenericException | NotFoundException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
@@ -514,7 +517,8 @@ public class CollectionResource implements CollectionService {
           .equals(row.getCells().get(configTable.getColumnByIndex(columnIndex).getId()).getStoreType())) {
           return handleExternalLobDownload(configTable, row, columnIndex);
         } else {
-          return handleInternalLobDownload(database.getPath(), configTable, row, columnIndex);
+          String version = ViewerFactory.getSolrManager().retrieve(ViewerDatabase.class, databaseUUID).getVersion();
+          return handleInternalLobDownload(database.getPath(), configTable, row, columnIndex, version);
         }
       }
     } catch (NotFoundException | GenericException | IOException e) {
@@ -583,37 +587,44 @@ public class CollectionResource implements CollectionService {
   }
 
   private ResponseEntity<StreamingResponseBody> handleInternalLobDownload(String databasePath,
-    TableStatus tableConfiguration, ViewerRow row, int columnIndex) throws IOException, GenericException {
+    TableStatus tableConfiguration, ViewerRow row, int columnIndex, String version)
+    throws IOException, GenericException {
     String handlebarsFilename = HandlebarsUtils.applyExportTemplate(row, tableConfiguration, columnIndex);
 
     if (ViewerStringUtils.isBlank(handlebarsFilename)) {
       handlebarsFilename = ViewerConstants.SIARD_RECORD_PREFIX + row.getUuid()
         + ViewerConstants.SIARD_LOB_FILE_EXTENSION;
     }
-    String handlebarsMimeType = HandlebarsUtils.applyMimeTypeTemplate(row, tableConfiguration, columnIndex);
 
+    String handlebarsMimeType = HandlebarsUtils.applyMimeTypeTemplate(row, tableConfiguration, columnIndex);
     if (ViewerStringUtils.isBlank(handlebarsMimeType)) {
       handlebarsMimeType = tableConfiguration.getColumnByIndex(columnIndex).getApplicationType();
     }
 
-    if (LobManagerUtils.isLobEmbedded(tableConfiguration, row, columnIndex)) {
-      // handle lob as embedded
-      String lobCellValue = LobManagerUtils.getLobCellValue(tableConfiguration, row, columnIndex);
-      lobCellValue = lobCellValue.replace(ViewerConstants.SIARD_EMBEDDED_LOB_PREFIX, "");
-      String decodedString = new String(Base64.decodeBase64(lobCellValue.getBytes()));
-
+    if (version.equals(ViewerConstants.SIARD_DK_2010) || version.equals(ViewerConstants.SIARD_DK_2020)) {
+      String filePath = row.getCells().get(row.getCells().keySet().toArray()[row.getCells().size() - 1]).getValue();
       return ApiUtils.okResponse(new StreamResponse(handlebarsFilename, handlebarsMimeType,
-        DownloadUtils.stream(new BufferedInputStream(new ByteArrayInputStream(decodedString.getBytes())))));
+        DownloadUtils.stream(new BufferedInputStream(new FileInputStream(filePath)))));
     } else {
-      // handle lob as internal on separated folder
-      ZipFile zipFile = new ZipFile(databasePath);
-      final ZipEntry entry = zipFile.getEntry(LobManagerUtils.getZipFilePath(tableConfiguration, columnIndex, row));
-      if (entry == null) {
-        throw new GenericException("Zip archive entry is missing");
-      }
+      if (LobManagerUtils.isLobEmbedded(tableConfiguration, row, columnIndex)) {
+        // handle lob as embedded
+        String lobCellValue = LobManagerUtils.getLobCellValue(tableConfiguration, row, columnIndex);
+        lobCellValue = lobCellValue.replace(ViewerConstants.SIARD_EMBEDDED_LOB_PREFIX, "");
+        String decodedString = new String(Base64.decodeBase64(lobCellValue.getBytes()));
 
-      return ApiUtils.okResponse(new StreamResponse(handlebarsFilename, handlebarsMimeType,
-        DownloadUtils.stream(new BufferedInputStream(zipFile.getInputStream(entry)))));
+        return ApiUtils.okResponse(new StreamResponse(handlebarsFilename, handlebarsMimeType,
+          DownloadUtils.stream(new BufferedInputStream(new ByteArrayInputStream(decodedString.getBytes())))));
+      } else {
+        // handle lob as internal on separated folder
+        ZipFile zipFile = new ZipFile(databasePath);
+        final ZipEntry entry = zipFile.getEntry(LobManagerUtils.getZipFilePath(tableConfiguration, columnIndex, row));
+        if (entry == null) {
+          throw new GenericException("Zip archive entry is missing");
+        }
+
+        return ApiUtils.okResponse(new StreamResponse(handlebarsFilename, handlebarsMimeType,
+          DownloadUtils.stream(new BufferedInputStream(zipFile.getInputStream(entry)))));
+      }
     }
   }
 

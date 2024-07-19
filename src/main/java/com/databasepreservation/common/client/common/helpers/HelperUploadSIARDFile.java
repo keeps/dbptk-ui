@@ -108,7 +108,7 @@ public class HelperUploadSIARDFile {
       Dialogs.showErrors(messages.errorMessagesOpenFile(path), errorMessage, messages.basicActionClose());
       // Toast.showError(messages.errorMessagesOpenFile(), errorMessage);
       panel.remove(loading);
-    }).create(path);
+    }).create(path, ViewerConstants.SIARD_V21);
   }
 
   private void successHandler(Boolean confirm, FlowPanel panel, String databaseUUID, String path) {
