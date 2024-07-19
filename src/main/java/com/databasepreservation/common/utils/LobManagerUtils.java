@@ -42,12 +42,16 @@ public class LobManagerUtils {
     return "content" + "/" + siardSchemaFolder + "/" + siardTableFolder + "/" + siardLobFolder + "/" + lobCellValue;
   }
 
-  public static String getZipFilePath(TableStatus configTable, int columnIndex, String recordValue) {
+  public static String getZipFilePath(TableStatus configTable, int columnIndex, String recordValue, String siardVersion) {
     String siardSchemaFolder = configTable.getSchemaFolder();
     String siardTableFolder = configTable.getTableFolder();
     String siardLobFolder = ViewerConstants.SIARD_LOB_FOLDER_PREFIX + (columnIndex + 1);
 
-    return "content" + "/" + siardSchemaFolder + "/" + siardTableFolder + "/" + siardLobFolder + "/" + recordValue;
+    if (siardVersion.equals(ViewerConstants.SIARD_V21)) {
+      return "content" + "/" + siardSchemaFolder + "/" + siardTableFolder + "/" + siardLobFolder + "/" + recordValue;
+    } else {
+      return "content" + "/" + siardSchemaFolder + "/" + siardTableFolder + "/" + siardLobFolder + "/" + recordValue;
+    }
   }
 
   public static Path getConsolidatedPath(ViewerAbstractConfiguration configuration, String databaseUUID,

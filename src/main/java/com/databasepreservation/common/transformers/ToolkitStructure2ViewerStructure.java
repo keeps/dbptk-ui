@@ -845,7 +845,7 @@ public class ToolkitStructure2ViewerStructure {
         actualViewerRow.addLobType(
           collectionConfiguration.getTableStatusByTableId(table.getId()).getColumnByIndex(colIndex).getId(),
           ViewerLobStoreType.INTERNALLY);
-
+        //TODO binaryCell.getFile() pass it to mimetype
         detectMimeType(actualViewerRow, result, databasePath, collectionConfiguration, table, colIndex, lobName, true);
       }
     } else if (cell instanceof ComposedCell) {
@@ -886,10 +886,20 @@ public class ToolkitStructure2ViewerStructure {
       InputStream inputStream;
 
       TableStatus tableStatus = collectionConfiguration.getTableStatusByTableId(table.getId());
-      String siardLobPath = LobManagerUtils.getZipFilePath(tableStatus, colIndex, lobName);
 
-      ZipFile zipFile = new ZipFile(databasePath);
-      ZipEntry entry = zipFile.getEntry(siardLobPath);
+      ZipFile zipFile = null;
+      ZipEntry entry = null;
+      String dbContainerName = databasePath.split("/")[databasePath.split("/").length - 1];
+
+      if (!dbContainerName.matches("AVID\\.[A-ZÆØÅ]{2,4}\\.[1-9][0-9].*")) {
+        String siardLobPath = LobManagerUtils.getZipFilePath(tableStatus, colIndex, lobName, ViewerConstants.SIARD_V21);
+        zipFile = new ZipFile(databasePath);
+        entry = zipFile.getEntry(siardLobPath);
+      } else {
+        blobIsInsideSiard = false;
+        //TODO CHANGE WAY TO GET SIARDDK PATH
+        String siardLobPath = LobManagerUtils.getZipFilePath(tableStatus, colIndex, lobName, ViewerConstants.SIARD_DK);
+      }
 
       String lobCellValue = cell.getValue();
 

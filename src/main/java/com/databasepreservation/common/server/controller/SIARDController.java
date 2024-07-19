@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.databasepreservation.modules.siard.SIARDDK2020ModuleFactory;
+import com.databasepreservation.modules.siard.SIARDDKEditFactory;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
@@ -603,7 +605,7 @@ public class SIARDController {
       Reporter reporter = new NoOpReporter();
       SIARDEdition siardEdition = SIARDEdition.newInstance();
 
-      siardEdition.editModule(new SIARDEditFactory()).editModuleParameter(SIARDEditFactory.PARAMETER_FILE,
+      siardEdition.editModule(new SIARDDKEditFactory()).editModuleParameter(SIARDDKEditFactory.PARAMETER_FOLDER,
         Collections.singletonList(siardPath.toAbsolutePath().toString()));
 
       siardEdition.reporter(reporter);
@@ -697,9 +699,9 @@ public class SIARDController {
       // XXX remove this workaround after fix of NPE
       databaseMigration.filterFactories(new ArrayList<>());
 
-      databaseMigration.importModule(new SIARD2ModuleFactory())
-        .importModuleParameter(SIARD2ModuleFactory.PARAMETER_FILE, siardPath.toAbsolutePath().toString())
-        .importModuleParameter(SIARD2ModuleFactory.PARAMETER_IGNORE_LOBS, "true");
+      databaseMigration.importModule(new SIARDDK2020ModuleFactory())
+        .importModuleParameter(SIARDDK2020ModuleFactory.PARAMETER_FOLDER, siardPath.toAbsolutePath().toString())
+        .importModuleParameter(SIARDDK2020ModuleFactory.PARAMETER_AS_SCHEMA, "public");
 
       databaseMigration.exportModule(new DbvtkModuleFactory())
         .exportModuleParameter(DbvtkModuleFactory.PARAMETER_DATABASE_UUID, databaseUUID);

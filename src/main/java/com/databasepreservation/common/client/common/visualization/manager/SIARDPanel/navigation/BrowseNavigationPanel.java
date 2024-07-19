@@ -68,8 +68,9 @@ public class BrowseNavigationPanel {
   }
 
   private void handleBrowseAction() {
-    if (database.getStatus().equals(ViewerDatabaseStatus.METADATA_ONLY)) { // Initial state
-      if (database.getVersion().equals(ViewerConstants.SIARD_V21)) {
+    if (database.getStatus().equals(ViewerDatabaseStatus.METADATA_ONLY)) {
+      // Initial state
+      if (database.getVersion().equals(ViewerConstants.SIARD_V21) || database.getVersion().equals("dk")) {
         if (!btnIngestClicked) {
           btnIngestClicked = true;
 

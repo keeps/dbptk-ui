@@ -514,7 +514,9 @@ public class CollectionResource implements CollectionService {
           .equals(row.getCells().get(configTable.getColumnByIndex(columnIndex).getId()).getStoreType())) {
           return handleExternalLobDownload(configTable, row, columnIndex);
         } else {
-          return handleInternalLobDownload(database.getPath(), configTable, row, columnIndex);
+          // TODO use databaseUUID to get siard version
+          String version = ViewerConstants.SIARD2;
+          return handleInternalLobDownload(database.getPath(), configTable, row, columnIndex, version);
         }
       }
     } catch (NotFoundException | GenericException | IOException e) {
@@ -583,7 +585,8 @@ public class CollectionResource implements CollectionService {
   }
 
   private ResponseEntity<StreamingResponseBody> handleInternalLobDownload(String databasePath,
-    TableStatus tableConfiguration, ViewerRow row, int columnIndex) throws IOException, GenericException {
+    TableStatus tableConfiguration, ViewerRow row, int columnIndex, String version)
+    throws IOException, GenericException {
     String handlebarsFilename = HandlebarsUtils.applyExportTemplate(row, tableConfiguration, columnIndex);
 
     if (ViewerStringUtils.isBlank(handlebarsFilename)) {
