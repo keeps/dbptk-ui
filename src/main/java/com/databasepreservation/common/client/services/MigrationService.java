@@ -14,6 +14,7 @@ import org.fusesource.restygwt.client.DirectRestService;
 import org.fusesource.restygwt.client.MethodCallback;
 import org.fusesource.restygwt.client.REST;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -64,12 +65,12 @@ public interface MigrationService extends DirectRestService {
   @RequestMapping(path = "/siard/modules", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieves the DBPTK developer SIARD migration modules")
   List<Module> getSiardModules(@RequestParam(name = "type") String type,
-    @RequestParam(name = "moduleName") String moduleName);
+    @RequestParam(name = "moduleName", required = false) String moduleName);
 
   @RequestMapping(path = "/dbms/modules", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieves the DBPTK developer DBMS migration modules")
   List<Module> getDBMSModules(@RequestParam(name = "type") String type,
-    @RequestParam(name = "moduleName") String moduleName);
+    @RequestParam(name = "moduleName", required = false) String moduleName);
 
   @RequestMapping(path = "/filter/modules", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieves the DBPTK developer filter modules")
@@ -78,7 +79,7 @@ public interface MigrationService extends DirectRestService {
   @RequestMapping(path = "/dbms/test/connection", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Tests the connection to the database")
   ConnectionResponse testConnection(
-    @Parameter(name = "DBMS connection parameters") final ConnectionParameters connectionParameters);
+    @Parameter(name = "DBMS connection parameters") @RequestBody final ConnectionParameters connectionParameters);
 
   @RequestMapping(path = "/dbms/test/query", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieves the first 5 rows of the query execution")
@@ -88,10 +89,10 @@ public interface MigrationService extends DirectRestService {
   @RequestMapping(path = "/dbms/metadata", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieves the metadata information associated with the database schema")
   ViewerMetadata getMetadata(
-    @Parameter(name = "connection parameters") final ConnectionParameters connectionParameters);
+    @Parameter(name = "connection parameters") @RequestBody final ConnectionParameters connectionParameters);
 
   @RequestMapping(path = "/run", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Performs the migration operation")
   StringResponse run(@RequestParam(name = "databaseUUID") String databaseUUID,
-    @Parameter(name = "parameters") CreateSIARDParameters parameters);
+    @Parameter(name = "parameters") @RequestBody CreateSIARDParameters parameters);
 }

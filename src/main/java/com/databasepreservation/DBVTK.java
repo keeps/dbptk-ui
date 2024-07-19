@@ -12,7 +12,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import jakarta.servlet.http.HttpServlet;
 import javax.sql.DataSource;
 
 import org.apereo.cas.client.session.SingleSignOutHttpSessionListener;
@@ -36,6 +35,8 @@ import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.filter.OnOffFilter;
 import com.databasepreservation.common.server.BrowserServiceImpl;
 import com.databasepreservation.common.server.ViewerConfiguration;
+
+import jakarta.servlet.http.HttpServlet;
 
 @SpringBootApplication
 public class DBVTK {
@@ -246,7 +247,17 @@ public class DBVTK {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-      registry.addResourceHandler("/com.databasepreservation.server.Server/**").addResourceLocations("classpath:/com.databasepreservation.server.Server/");
+      registry.addResourceHandler("/com.databasepreservation.server.Server/**")
+        .addResourceLocations("classpath:/com.databasepreservation.server.Server/");
+
+      if (ViewerConstants.APPLICATION_ENV_DESKTOP
+        .equals(System.getProperty(ViewerConstants.APPLICATION_ENV_KEY, ViewerConstants.APPLICATION_ENV_SERVER))) {
+        registry.addResourceHandler("/com.databasepreservation.desktop.Desktop/**")
+          .addResourceLocations("classpath:/com.databasepreservation.desktop.Desktop/");
+      } else {
+        registry.addResourceHandler("/com.databasepreservation.server.Server/**")
+          .addResourceLocations("classpath:/com.databasepreservation.server.Server/");
+      }
     }
   }
 
