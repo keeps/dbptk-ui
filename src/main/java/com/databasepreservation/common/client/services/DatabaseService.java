@@ -76,7 +76,8 @@ public interface DatabaseService extends DirectRestService {
 
   @RequestMapping(path = "/create", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Creates a database")
-  StringResponse create(@Parameter(name = "path") @RequestParam(name = "path") String path);
+  StringResponse create(@Parameter(name = "path") @RequestParam(name = "path") String path,
+    @Parameter(name = "version") @RequestParam(defaultValue = "V2_1", name = "version") ViewerConstants.SiardVersion version);
 
   @RequestMapping(path = "/{databaseUUID}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
   @Operation(summary = "Retrieves a specific database")

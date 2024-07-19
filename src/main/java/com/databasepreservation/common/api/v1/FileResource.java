@@ -16,6 +16,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.databasepreservation.common.utils.LobManagerUtils;
 import org.roda.core.data.exceptions.AlreadyExistsException;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
@@ -90,9 +91,13 @@ public class FileResource implements FileService {
       java.nio.file.Path basePath = Paths.get(ViewerConfiguration.getInstance().getViewerConfigurationAsString("/",
         ViewerConfiguration.PROPERTY_BASE_UPLOAD_PATH));
       java.nio.file.Path siardPath = siardFilesPath.resolve(filename);
-      if (java.nio.file.Files.exists(siardPath) && !java.nio.file.Files.isDirectory(siardPath)
-        && (ViewerConfiguration.checkPathIsWithin(siardPath, siardFilesPath)
-          || ViewerConfiguration.checkPathIsWithin(siardPath, basePath))) {
+
+      if (java.nio.file.Files.isDirectory(siardPath)) {
+        siardPath = LobManagerUtils.zipDirectory(siardPath);
+      }
+
+      if (java.nio.file.Files.exists(siardPath) && (ViewerConfiguration.checkPathIsWithin(siardPath, siardFilesPath)
+        || ViewerConfiguration.checkPathIsWithin(siardPath, basePath))) {
 
         InputStreamResource resource = new InputStreamResource(new FileInputStream(siardPath.toFile()));
         return ResponseEntity.ok()
@@ -101,7 +106,7 @@ public class FileResource implements FileService {
       } else {
         throw new NotFoundException("SIARD file not found");
       }
-    } catch (NotFoundException | FileNotFoundException | AuthorizationException e) {
+    } catch (NotFoundException | AuthorizationException | IOException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
     } finally {
@@ -149,7 +154,7 @@ public class FileResource implements FileService {
 
       if (!fileExtension.equals(ViewerConstants.SIARD)) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ApiResponseMessage(ApiResponseMessage.ERROR, "Must be a SIARD file"));
+          .body(new ApiResponseMessage(ApiResponseMessage.ERROR, "Must be a SIARD file"));
       }
 
       java.nio.file.Path path = Paths.get(ViewerConfiguration.getInstance().getSIARDFilesPath().toString(), filename);

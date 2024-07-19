@@ -91,6 +91,7 @@ public class ViewerConstants {
   public static final String DENORMALIZATION_STATUS_PREFIX = "denormalization-";
 
   public static final String INTERNAL_ZIP_LOB_FOLDER = "lobs/";
+  public static final String SIARDDK_DEFAULT_SCHEMA_NAME = "public";
 
   /*
    * SOLR CONFIGSETS
@@ -441,7 +442,9 @@ public class ViewerConstants {
   public static final String SIARD_V10 = "1.0";
   public static final String SIARD_V20 = "2.0";
   public static final String SIARD_V21 = "2.1";
-
+  public static final String SIARD_DK = "dk";
+  public static final String SIARD_DK_1007 = "dk-1007";
+  public static final String SIARD_DK_128 = "dk-128";
   /*
    * DBPTK Metadata
    */
@@ -552,6 +555,7 @@ public class ViewerConstants {
   public static final String PROPERTY_PLUGIN_LOAD_ON_ACCESS = "ui.plugin.loadOnAccess";
 
   public static final String ALIAS_PREFIX = "alias-";
+  public static final String TEMP_PREFIX = "temp-";
 
   public static final String EMPTY_SEARCH = "";
 
@@ -565,6 +569,10 @@ public class ViewerConstants {
    * Show schema name in reference table
    */
   public static final String PROPERTY_REFERENCE_TABLE_SHOW_SCHEMA_NAME = "ui.reference.table.show.schema.name";
+
+  public enum SiardVersion {
+    V1_0, V2_0, V2_1, DK, DK_1007, DK_128;
+  }
 
   /**
    * private constructor

@@ -28,6 +28,7 @@ public final class ExtraMediaType {
    */
   public static final String TEXT_CSV = "text/csv";
   public static final String APPLICATION_ZIP = "application/zip";
+  public static final String ZIP_FILE_EXTENSION = ".zip";
   public static final String APPLICATION_JAVASCRIPT = "application/javascript";
 
 }

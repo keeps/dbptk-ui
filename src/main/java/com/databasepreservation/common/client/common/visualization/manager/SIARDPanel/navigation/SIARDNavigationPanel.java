@@ -15,6 +15,7 @@ import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.common.DefaultAsyncCallback;
 import com.databasepreservation.common.client.common.NavigationPanel;
 import com.databasepreservation.common.client.common.dialogs.CommonDialogs;
+import com.databasepreservation.common.client.common.dialogs.Dialogs;
 import com.databasepreservation.common.client.common.fields.GenericField;
 import com.databasepreservation.common.client.common.fields.MetadataField;
 import com.databasepreservation.common.client.common.utils.ApplicationType;
@@ -66,7 +67,14 @@ public class SIARDNavigationPanel {
     btnEditMetadata.setText(messages.SIARDHomePageButtonTextEditMetadata());
     btnEditMetadata.addStyleName("btn btn-outline-primary btn-edit");
     btnEditMetadata.addClickHandler(clickEvent -> {
-      HistoryManager.gotoSIARDEditMetadata(database.getUuid());
+      if (database.getVersion().equals(ViewerConstants.SIARD_DK_1007)
+        || database.getVersion().equals(ViewerConstants.SIARD_DK_128)) {
+        Dialogs.showInformationDialog(messages.SIARDHomePageButtonTitleEditMetadataNotAvailable(),
+          messages.SIARDHomePageButtonTextEditMetadataNotAvailable(ViewerConstants.SIARD_V21),
+          messages.basicActionUnderstood(), "btn btn-link");
+      } else {
+        HistoryManager.gotoSIARDEditMetadata(database.getUuid());
+      }
     });
 
     // Migration button
@@ -109,18 +117,25 @@ public class SIARDNavigationPanel {
     if (database.getPath() != null && !database.getPath().isEmpty()) {
       btnDelete.setText(messages.SIARDHomePageButtonTextForDeleteIngested());
       btnDelete.addClickHandler(event -> {
-        if (!database.getStatus().equals(ViewerDatabaseStatus.REMOVING)
-          && !database.getStatus().equals(ViewerDatabaseStatus.INGESTING)) {
-          CommonDialogs.showConfirmDialog(messages.SIARDHomePageDialogTitleForDelete(),
-            messages.SIARDHomePageTextForDeleteSIARD(), messages.basicActionCancel(), messages.basicActionConfirm(),
-            CommonDialogs.Level.DANGER, "500px", new DefaultAsyncCallback<Boolean>() {
-              @Override
-              public void onSuccess(Boolean result) {
-                if (result) {
-                  delete();
+        if (database.getVersion().equals(ViewerConstants.SIARD_DK_1007)
+          || database.getVersion().equals(ViewerConstants.SIARD_DK_128)) {
+          Dialogs.showInformationDialog(messages.SIARDHomePageTitleForDeleteSIARDNotAvailable(),
+            messages.SIARDHomePageTextForDeleteSIARDNotAvailable(ViewerConstants.SIARD_V21),
+            messages.basicActionUnderstood(), "btn btn-link");
+        } else {
+          if (!database.getStatus().equals(ViewerDatabaseStatus.REMOVING)
+            && !database.getStatus().equals(ViewerDatabaseStatus.INGESTING)) {
+            CommonDialogs.showConfirmDialog(messages.SIARDHomePageDialogTitleForDelete(),
+              messages.SIARDHomePageTextForDeleteSIARD(), messages.basicActionCancel(), messages.basicActionConfirm(),
+              CommonDialogs.Level.DANGER, "500px", new DefaultAsyncCallback<Boolean>() {
+                @Override
+                public void onSuccess(Boolean result) {
+                  if (result) {
+                    delete();
+                  }
                 }
-              }
-            });
+              });
+          }
         }
       });
     }

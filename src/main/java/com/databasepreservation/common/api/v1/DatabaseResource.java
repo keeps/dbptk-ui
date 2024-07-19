@@ -125,7 +125,7 @@ public class DatabaseResource implements DatabaseService {
   }
 
   @Override
-  public StringResponse create(String path) {
+  public StringResponse create(String path, ViewerConstants.SiardVersion siardVersion) {
     final ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
@@ -133,7 +133,7 @@ public class DatabaseResource implements DatabaseService {
 
     try {
       user = controllerAssistant.checkRoles(request);
-      return new StringResponse(SIARDController.loadMetadataFromLocal(path));
+      return new StringResponse(SIARDController.loadMetadataFromLocal(path, siardVersion));
     } catch (GenericException | AuthorizationException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
