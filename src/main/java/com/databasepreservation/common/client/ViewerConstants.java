@@ -91,7 +91,7 @@ public class ViewerConstants {
   public static final String DENORMALIZATION_STATUS_PREFIX = "denormalization-";
 
   public static final String INTERNAL_ZIP_LOB_FOLDER = "lobs/";
-
+  public static final String SIARDDK_RESEARCH_INDEX_PATH = "/Schemas/standard/researchIndex.xsd";
   /*
    * SOLR CONFIGSETS
    */
@@ -440,7 +440,9 @@ public class ViewerConstants {
   public static final String SIARD_V10 = "1.0";
   public static final String SIARD_V20 = "2.0";
   public static final String SIARD_V21 = "2.1";
-
+  public static final String SIARD_DK = "dk";
+  public static final String SIARD_DK_2010 = "dk-2010";
+  public static final String SIARD_DK_2020 = "dk-2020";
   /*
    * DBPTK Metadata
    */

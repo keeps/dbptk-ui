@@ -91,42 +91,14 @@ public class DatabaseResource implements DatabaseService {
   }
 
   @Override
-  public IndexResult<ViewerDatabase> findAll(FindRequest findRequest, String localeString) {
-    ControllerAssistant controllerAssistant = new ControllerAssistant() {};
-
-    LogEntryState state = LogEntryState.SUCCESS;
-    User user = controllerAssistant.checkRoles(request);
-
-    if (ViewerConfiguration.getInstance().getApplicationEnvironment().equals(ViewerConstants.APPLICATION_ENV_SERVER)) {
-      if (user.isAdmin() || user.isWhiteList()) {
-
-        return getCrossViewerDatabaseIndexResult(findRequest, controllerAssistant, user, state);
-      } else {
-        List<String> fieldsToReturn = new ArrayList<>();
-        fieldsToReturn.add(ViewerConstants.INDEX_ID);
-        fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_STATUS);
-        fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_METADATA);
-        fieldsToReturn.add(ViewerConstants.SOLR_DATABASES_PERMISSIONS);
-
-        FindRequest userFindRequest = new FindRequest(findRequest.classToReturn, getDatabaseFilterForUser(user),
-          findRequest.sorter, findRequest.sublist, findRequest.facets, findRequest.exportFacets, fieldsToReturn);
-        return getCrossViewerDatabaseIndexResult(userFindRequest, controllerAssistant, user, state,
-          getDatabaseFilterForUser(user));
-      }
-    } else {
-      return getCrossViewerDatabaseIndexResult(findRequest, controllerAssistant, user, state);
-    }
-  }
-
-  @Override
-  public StringResponse create(String path) {
+  public StringResponse create(String path, String siardVersion) {
     final ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
     User user = controllerAssistant.checkRoles(request);
 
     try {
-      return new StringResponse(SIARDController.loadMetadataFromLocal(path));
+      return new StringResponse(SIARDController.loadMetadataFromLocal(path, siardVersion));
     } catch (GenericException e) {
       state = LogEntryState.FAILURE;
       throw new RESTException(e);
