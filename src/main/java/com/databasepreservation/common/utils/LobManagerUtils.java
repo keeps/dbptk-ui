@@ -7,7 +7,12 @@
  */
 package com.databasepreservation.common.utils;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.models.status.collection.TableStatus;
@@ -42,16 +47,30 @@ public class LobManagerUtils {
     return "content" + "/" + siardSchemaFolder + "/" + siardTableFolder + "/" + siardLobFolder + "/" + lobCellValue;
   }
 
-  public static String getZipFilePath(TableStatus configTable, int columnIndex, String recordValue, String siardVersion) {
+  public static String getZipFilePath(TableStatus configTable, int columnIndex, String recordValue) {
     String siardSchemaFolder = configTable.getSchemaFolder();
     String siardTableFolder = configTable.getTableFolder();
     String siardLobFolder = ViewerConstants.SIARD_LOB_FOLDER_PREFIX + (columnIndex + 1);
 
-    if (siardVersion.equals(ViewerConstants.SIARD_V21)) {
-      return "content" + "/" + siardSchemaFolder + "/" + siardTableFolder + "/" + siardLobFolder + "/" + recordValue;
-    } else {
-      return "content" + "/" + siardSchemaFolder + "/" + siardTableFolder + "/" + siardLobFolder + "/" + recordValue;
+    return "content" + "/" + siardSchemaFolder + "/" + siardTableFolder + "/" + siardLobFolder + "/" + recordValue;
+
+  }
+
+  public static Path createZipFromDirectory(Path directoryPath) throws IOException {
+    Path zipFilePath = directoryPath.resolveSibling(directoryPath.getFileName().toString() + ".zip");
+    try (ZipOutputStream zos = new ZipOutputStream(Files.newOutputStream(zipFilePath))) {
+      Files.walk(directoryPath).filter(path -> !Files.isDirectory(path)).forEach(path -> {
+        ZipEntry zipEntry = new ZipEntry(directoryPath.relativize(path).toString());
+        try {
+          zos.putNextEntry(zipEntry);
+          Files.copy(path, zos);
+          zos.closeEntry();
+        } catch (IOException e) {
+          throw new UncheckedIOException(e);
+        }
+      });
     }
+    return zipFilePath;
   }
 
   public static Path getConsolidatedPath(ViewerAbstractConfiguration configuration, String databaseUUID,
