@@ -366,7 +366,10 @@ public class ToolkitStructure2ViewerStructure {
     ArrayList<ViewerView> result = new ArrayList<>();
     if (views != null) {
       for (ViewStructure view : views) {
-        result.add(getView(vdb, view));
+        ViewerView viewerView = getView(vdb, view);
+        if (viewerView != null) {
+          result.add(viewerView);
+        }
       }
     }
     return result;
@@ -377,7 +380,11 @@ public class ToolkitStructure2ViewerStructure {
     result.setName(view.getName());
     result.setUuid(SolrUtils.randomUUID());
     try {
-      result.setColumns(getColumns(view.getColumns()));
+      if (view.getColumns() != null) {
+        result.setColumns(getColumns(view.getColumns()));
+      } else {
+       return null;
+      }
     } catch (ViewerException e) {
       LOGGER.error("Could not convert the columns for view {}", view, e);
       result.setColumns(new ArrayList<>());
@@ -846,7 +853,7 @@ public class ToolkitStructure2ViewerStructure {
         actualViewerRow.addLobType(
           collectionConfiguration.getTableStatusByTableId(table.getId()).getColumnByIndex(colIndex).getId(),
           ViewerLobStoreType.INTERNALLY);
-        //TODO binaryCell.getFile() pass it to mimetype
+
         String dbContainerName = databasePath.split("/")[databasePath.split("/").length - 1];
         if (binaryCell.getFile() != null && dbContainerName.matches("AVID\\.[A-ZÆØÅ]{2,4}\\.[1-9][0-9].*")) {
           result.setValue(binaryCell.getFile());
