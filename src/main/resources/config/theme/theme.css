@@ -1,23 +1,538 @@
+@font-face {
+    font-family: RaharaldMedium;
+    src: url("/api/v1/theme?resource_id=fonts/raharald-medium-webfont.woff") format('woff');
+    src: url("/api/v1/theme?resource_id=fonts/raharald-medium-webfont.woff2") format('woff2');
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: RagornSemiBold;
+    src: url("/api/v1/theme?resource_id=fonts/ragorm-semibold-webfont.woff") format('woff');
+    src: url("/api/v1/theme?resource_id=fonts/ragorm-semibold-webfont.woff2") format('woff2');
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: RaharaldSemiBold;
+    src: url("/api/v1/theme?resource_id=fonts/raharald-semibold-webfont.woff") format('woff');
+    src: url("/api/v1/theme?resource_id=fonts/raharald-semibold-webfont.woff2") format('woff2');
+    font-weight: normal;
+}
+
+.roda {
+    font-family: RaharaldMedium;
+}
+
+.roda .h1 {
+    font-family: RaharaldSemiBold !important;
+}
+
+.data-transformation-title-label {
+    font-family: RaharaldSemiBold !important;
+}
+
 .header-logo {
-    height: 90px;
-    margin-top: 10px;
+    height: 93px;
     margin-right: 10px;
     display: inline-block;
 }
 
-.header-text {
-    height: 110px;
-    display: inline-block;
-    vertical-align: bottom;
-    line-height: 110px;
+.main .contentPanel {
+    background-color: #EEEEE7 !important;
 }
 
-.static-page .row .col_6{
-    padding-bottom: 30px;
+.metadata-edit-field {
+    font-family: RaharaldSemiBold !important;
 }
 
-@media (min-width: 768px) {
-    .max-width {
-        max-width: 1280px;
-    }
+.filePreviewToolbar {
+    background-color: #DBDAD5 !important;
+}
+
+.searchBox {
+    background-color: #DBDAD5 !important;
+}
+
+.field a {
+    color: #78BEE7 !important;
+}
+
+.roda .footer * {
+    color: #EEEEE7 !important;
+    background-color: #302A38 !important;
+} 
+
+.footer {
+    background-color: #302A38 !important;
+}
+
+.footer_logo img {
+    width: 170px;
+}
+
+#drop {
+    border: 5px dashed #EEEEE7 !important;
+    background-color: #DBDAD5 !important;
+}
+
+#drop a {
+    background-color: #302A38 !important;
+}
+
+#drop h4 {
+    color: #302A38 !important;
+}
+
+.my-asyncdatagrid-pager-pagesize a {
+    color: #EEEEE7 !important;
+    background-color: #302A38 !important; 
+}
+
+.banner {
+    background-color: #302A38 !important;
+}
+
+.row {
+    margin: 0px !important;
+}
+
+.roda {
+    font-family: RaharaldMedium;
+    background-color: #302A38 !important;
+    color: #302A38 !important;
+}
+
+.roda .btn-primary {
+    background-color: #302A38 !important;
+    color: #EEEEE7;
+}
+
+.roda .btn-primary:hover {
+    background-color: #433E49 !important;
+    color: #EEEEE7;
+}
+
+.data-transformation-toolbar-actions .btn-play {
+    background-color: #78BEE7 !important;
+    color: #EEEEE7; 
+}
+
+.data-transformation-toolbar-actions .btn-play:hover {
+    background-color: #18598A !important;
+    color: #EEEEE7; 
+}
+
+.leftSidebar-controller .btn-play {
+    background-color: #78BEE7 !important;
+    color: #EEEEE7; 
+}
+
+.leftSidebar-controller .btn-play:hover {
+    background-color: #18598A !important;
+    color: #EEEEE7; 
+}
+
+.roda .btn-link-info {
+    color: #78BEE7 !important;
+}
+
+.btn-link {
+    font-family: RaharaldMedium;
+    color: #302A38 !important;
+}
+
+.html5progress {
+    background-color: #DBDAD5 !important;
+}
+
+.progress-report {
+    background-color: #DBDAD5 !important;
+    color: #302A38 !important;
+}
+
+.roda .btn-goto-siard-info {
+    background-color: #302A38 !important;
+}
+
+.hljs {
+    background: #DBDAD5 !important;
+    color: #302A38 !important;
+}
+
+.roda .btn-goto-siard-info:hover {
+    background-color: #433E49 !important;
+}
+
+.roda .cellTableFadeOut:after {
+    display: none;
+}
+
+.roda .sidebarHyperLink-selected {
+    background: #302A38 !important;
+    color: #302A38;
+}
+
+.content .sidebarHyperLink-selected {
+    background: #302A38 !important;
+    color: #EEEEE7 !important;
+}
+
+.leftSidebar .sidebar-hyperlink a:hover {
+    color: #302A38;
+}
+
+.label-success {
+    background-color: #47BF80 !important;
+}
+
+.label-danger {
+    background-color: #F16E4B !important;
+}
+
+.label-error {
+    color: #EEEEE7 !important;
+}
+
+.user-menu .gwt-MenuItem {
+    background-color: #302A38 !important;
+    color: #EEEEE7;
+}
+
+.user-menu .gwt-MenuItem:hover {
+    background-color: #69656D !important;
+    color: #EEEEE7;
+}
+
+.gwt-MenuBar.gwt-MenuBar-vertical .gwt-MenuItem {
+    background-color: #302A38 !important;
+    color: #EEEEE7;
+}
+
+.roda .data-transformation-toolbar {
+    background-color: #DBDAD5 !important;
+}
+
+.roda .bootstrap-card-title {
+    font-family: RaharaldSemiBold !important;
+}
+
+.roda .bootstrap-card {
+    background-color: #DBDAD5 !important;
+}
+
+.switch-widget .switch:checked + .label-for-switch {
+    background: #302A38 !important;
+    border-color: #302A38 !important;
+}
+
+.navigation-card {
+    background-color: #DBDAD5 !important;
+}
+
+.navigation-panel-description {
+    color: #69656D !important;
+}
+
+.gwt-MenuBar.gwt-MenuBar-vertical .gwt-MenuItem:hover {
+    background-color: #69656D !important;
+    color: #EEEEE7;
+}
+
+.double-bounce1, .double-bounce2 {
+	background-color: #302A38 
+}
+
+.searchButton {
+    background-color: #302A38 !important;
+}
+
+.roda .card-header {
+    color: #302A38;
+}
+
+.card {
+    background-color: #DBDAD5 !important;
+} 
+
+.alert-light {
+    color: #69656D !important;
+    background-color: #DBDAD5 !important;
+    border-color:#DBDAD5 !important;
+}
+
+.roda .btn-outline-primary {
+    background-color: transparent;
+    border: solid 1px #302A38;
+    color: #302A38;
+} 
+
+.roda .btn-outline-primary:hover {
+    background-color: #302A38;
+    color: #EEEEE7;
+} 
+
+.roda .btn-outline-danger {
+    background-color: transparent;
+    border: solid 1px #F16E4B;
+    color: #F16E4B;
+}
+
+.roda .btn:disabled {
+    background-color: #B1AFAF !important;
+}
+
+.btn-close {
+    font-family: RaharaldMedium !important;
+    background-color: #302A38 !important;
+}
+
+.btn-close:hover {
+    background-color: #69656D !important;
+}
+
+.btn-back {
+    font-family: RaharaldMedium !important;
+    background-color: #302A38 !important;
+}
+
+.btn-back:hover {
+    background-color: #69656D !important;
+}
+
+.roda .btn-save {
+    background-color: #78BEE7 !important;
+}
+
+.roda .btn-save:hover {
+    background-color: #18598A !important;
+}
+
+.roda .btn-table {
+    background-color: #302A38 !important;
+}
+
+.roda .btn-table:hover {
+    background-color: #69656D !important;
+}
+
+.roda .btn-cell-action {
+    background-color: #302A38 !important;
+}
+
+.roda .btn-cell-action:hover {
+    background-color: #69656D !important;
+}
+
+.roda .btn-danger {
+    background-color: #F16E4B;
+}
+
+.roda .btn-danger:hover {
+    background-color: #69271F;
+}
+
+.roda .btn-erase {
+    background-color: #F16E4B !important;
+}
+
+.roda .btn-erase:hover {
+    background-color: #69271F !important;
+}
+
+.dialog-persist-errors .Caption {
+    background-color: #F16E4B !important;
+}
+
+.wui-dialog-message {
+    font-family: RaharaldMedium !important;
+}
+
+.link-info {
+    color: #18598A !important;
+}
+
+.roda .text-muted {
+    color: #69656D !important;
+}
+
+.static-page {
+    padding: 5px !important;
+}
+
+.roda .metadata-save {
+    background-color: #EEEEE7 !important;
+}
+
+.roda .metadata-update {
+    color: #302A38 !important;
+}
+
+.roda .table-management-schema-divider {
+    border-left-color: #302A38;
+}
+
+.roda .content .fieldTextBox, .content .form-textbox {
+    border-left: 2px solid #302A38 !important;
+}
+
+.roda .fieldTextBox, .form-textbox, .form-selectbox {
+    font-family: RaharaldMedium !important;
+    color: #69656D !important;
+    background-color: #E5E4DE !important;
+}
+
+.searchButton-html-label {
+    background: #DBDAD5 !important;
+}    
+
+.roda .searchAdvancedDisclosureButton {
+    background-color: #DBDAD5 !important;
+}
+
+.roda .searchPanelLeftInput {
+    background-color: #B1AFAF !important;
+}
+
+.browseItemMetadata .gwt-TabBarItem-selected {
+    color: #302A38 !important;
+}
+
+.browseItemMetadata .gwt-TabBarItem .gwt-Label {
+    color: #302A38 !important;
+}
+
+.browseItemMetadata .gwt-TabBarItem:hover .gwt-Label {
+    color: #69656D !important;
+}
+
+.browseItemMetadata .gwt-TabBarItem:after {
+    background-color: #302A38 !important;
+}
+
+.browseContentFilesPanel .searchPanel {
+    background-color: #B1AFAF !important;
+}
+
+.browseContentFilesPanel .searchButton .fa-stack-1x {
+    background-color: #B1AFAF !important;
+}
+
+.browseContentFilesPanel .searchBox {
+    background-color: #B1AFAF !important;
+}
+
+.browseContentFilesPanel .searchButton {
+    background-color: #302A38 !important;
+}
+
+.browseContentFilesPanel .searchBox:placeholder-shown {
+    font-family: RaharaldMedium !important;
+    color: #EEEEE7 !important;
+}
+
+.fa-stack-1x, .fa-stack-2x {
+    height: 0 !important;
+}    
+
+.browseContentFilesPanel .searchButton-html {
+    height: 0 !important;
+}
+
+.information-panel-multi-schemas-tab .gwt-TabBarItem .gwt-Label {
+    color: #302A38 !important;
+}
+
+.information-panel-multi-schemas-tab .gwt-TabBar .gwt-TabBarItem-selected {
+    background-color: #DBDAD5 !important;
+    border-top: 1px #302A38 solid !important;
+}
+
+.information-panel-multi-schemas-tab .gwt-TabBar .gwt-TabBarRest-wrapper {
+    background-color: #E5E4DE !important;
+}
+
+.information-panel-multi-schemas-tab .gwt-TabBarItem-wrapper {
+    background-color: #E5E4DE !important;
+}
+
+.main .wui-breadcrumbPanel .breadcrumb-last  {
+    color: #302A38 !important;
+}
+
+.main .wui-breadcrumbPanel .breadcrumb-last .fa {
+    color: #302A38 !important;
+}
+
+.gwt-DialogBox .Caption {
+    font-family: RaharaldMedium !important;
+    background-color: #302A38 !important;
+    color: #EEEEE7 !important;
+}
+
+.TableSearchPanel-table a {
+    color: #78BEE7 !important;
+}
+
+.my-asyncdatagrid-display-scroll-wrapper table tbody tr:nth-child(odd) {
+    background: #EEEEE7;
+}
+
+.my-asyncdatagrid-display-scroll-wrapper table tbody tr:nth-child(odd) td {
+    border: 2px solid #EEEEE7;
+}
+
+.my-asyncdatagrid-display-scroll-wrapper table tbody tr:nth-child(odd):hover {
+    background: #DBDAD5;
+}
+
+.my-asyncdatagrid-display-scroll-wrapper table tbody tr:nth-child(odd):hover td {
+    border: 2px solid #DBDAD5;
+}
+
+.my-asyncdatagrid-display-scroll-wrapper table tbody tr:nth-child(even) {
+    background-color: #E5E4DE;
+}
+
+.my-asyncdatagrid-display-scroll-wrapper table tbody tr:nth-child(even) td {
+    border: 2px solid #E5E4DE;
+}
+
+.my-asyncdatagrid-display-scroll-wrapper table tbody tr:nth-child(even):hover {
+    background-color: #DBDAD5;
+}
+
+.my-asyncdatagrid-display-scroll-wrapper table tbody tr:nth-child(even):hover td {
+    border: 2px solid #DBDAD5;
+}
+
+.metadata-edit-scroll-wrapper table tbody tr:nth-child(odd) {
+    background: #EEEEE7;
+}
+
+.metadata-edit-scroll-wrapper table tbody tr:nth-child(odd) td {
+    border: 2px solid #EEEEE7;
+}
+
+.metadata-edit-scroll-wrapper table tbody tr:nth-child(odd):hover {
+    background: #DBDAD5;
+}
+
+.metadata-edit-scroll-wrapper table tbody tr:nth-child(odd):hover td {
+    border: 2px solid #DBDAD5;
+}
+
+.metadata-edit-scroll-wrapper table tbody tr:nth-child(even) {
+    background-color: #E5E4DE;
+}
+
+.metadata-edit-scroll-wrapper table tbody tr:nth-child(even) td {
+    border: 2px solid #E5E4DE;
+}
+
+.metadata-edit-scroll-wrapper table tbody tr:nth-child(even):hover {
+    background-color: #DBDAD5;
+}
+
+.metadata-edit-scroll-wrapper table tbody tr:nth-child(even):hover td {
+    border: 2px solid #DBDAD5;
 }
