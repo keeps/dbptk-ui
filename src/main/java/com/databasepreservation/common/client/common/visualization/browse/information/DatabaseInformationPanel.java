@@ -220,7 +220,7 @@ public class DatabaseInformationPanel extends RightPanel {
     }
 
     final MetadataField instance = MetadataField.createInstance(label,
-      messages.managePageTableHeaderTextForDatabaseStatus());
+      "");
     instance.setCSS("metadata-field", "metadata-information-element-label", "metadata-information-element-value");
 
     return instance;

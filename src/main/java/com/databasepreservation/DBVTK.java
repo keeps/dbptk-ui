@@ -130,7 +130,7 @@ public class DBVTK {
     FilterRegistrationBean<OnOffFilter> registrationBean = new FilterRegistrationBean<>();
     registrationBean.setFilter(new OnOffFilter());
     registrationBean.setName("CasSingleSignOutFilter");
-    registrationBean.addInitParameter("inner-filter-class", "org.jasig.cas.client.session.SingleSignOutFilter");
+    registrationBean.addInitParameter("inner-filter-class", "org.apereo.cas.client.session.SingleSignOutFilter");
     registrationBean.addInitParameter("config-prefix", "ui.filter.cas");
     registrationBean.addInitParameter("casServerUrlPrefix", "http://localhost:8888/cas");
     registrationBean.addUrlPatterns("/*");
@@ -149,7 +149,7 @@ public class DBVTK {
     registrationBean.setFilter(new OnOffFilter());
     registrationBean.setName("CasValidationFilter");
     registrationBean.addInitParameter("inner-filter-class",
-      "org.jasig.cas.client.validation.Cas30ProxyReceivingTicketValidationFilter");
+      "org.apereo.cas.client.validation.Cas30ProxyReceivingTicketValidationFilter");
     registrationBean.addInitParameter("config-prefix", "ui.filter.cas");
     registrationBean.addInitParameter("casServerUrlPrefix", "https://localhost:8443/cas");
     registrationBean.addInitParameter("serverName", "https://localhost:8888");
@@ -168,7 +168,7 @@ public class DBVTK {
     FilterRegistrationBean<OnOffFilter> registrationBean = new FilterRegistrationBean<>();
     registrationBean.setFilter(new OnOffFilter());
     registrationBean.setName("CasAuthenticationFilter");
-    registrationBean.addInitParameter("inner-filter-class", "org.jasig.cas.client.authentication.AuthenticationFilter");
+    registrationBean.addInitParameter("inner-filter-class", "org.apereo.cas.client.authentication.AuthenticationFilter");
     registrationBean.addInitParameter("config-prefix", "ui.filter.cas");
     registrationBean.addInitParameter("casServerLoginUrl", "https://localhost:8443/cas/login");
     registrationBean.addUrlPatterns("/login");
@@ -182,7 +182,7 @@ public class DBVTK {
     registrationBean.setFilter(new OnOffFilter());
     registrationBean.setName("CasRequestWrapperFilter");
     registrationBean.addInitParameter("inner-filter-class",
-      "org.jasig.cas.client.util.HttpServletRequestWrapperFilter");
+      "org.apereo.cas.client.util.HttpServletRequestWrapperFilter");
     registrationBean.addInitParameter("config-prefix", "ui.filter.cas");
     registrationBean.addUrlPatterns("/*");
 

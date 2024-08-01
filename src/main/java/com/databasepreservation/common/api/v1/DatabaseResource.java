@@ -83,7 +83,7 @@ public class DatabaseResource implements DatabaseService {
     final ControllerAssistant controllerAssistant = new ControllerAssistant() {};
 
     LogEntryState state = LogEntryState.SUCCESS;
-    User user = controllerAssistant.checkRoles(request);
+    //User user = controllerAssistant.checkRoles(request);
 
     try {
       return new StringResponse(SIARDController.loadMetadataFromLocal(path));
@@ -92,7 +92,7 @@ public class DatabaseResource implements DatabaseService {
       throw new RESTException(e);
     } finally {
       // register action
-      controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_FILENAME_PARAM, path);
+      //controllerAssistant.registerAction(user, state, ViewerConstants.CONTROLLER_FILENAME_PARAM, path);
     }
   }
 
