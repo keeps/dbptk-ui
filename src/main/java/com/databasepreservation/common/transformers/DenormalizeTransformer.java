@@ -265,6 +265,7 @@ public class DenormalizeTransformer {
       String key = cell.getKey();
       if (columnsToDisplay.contains(key)) {
         ViewerCell cellValue = cell.getValue();
+        cellValue.setMimeType(".tif");
         fields.put(key, cellValue.getValue());
       }
     }
