@@ -517,7 +517,6 @@ public class CollectionResource implements CollectionService {
           .equals(row.getCells().get(configTable.getColumnByIndex(columnIndex).getId()).getStoreType())) {
           return handleExternalLobDownload(configTable, row, columnIndex);
         } else {
-          // TODO use databaseUUID to get siard version
           String version = ViewerFactory.getSolrManager().retrieve(ViewerDatabase.class, databaseUUID).getVersion();
           return handleInternalLobDownload(database.getPath(), configTable, row, columnIndex, version);
         }

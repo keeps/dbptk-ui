@@ -412,11 +412,29 @@ public class RowPanel extends RightPanel {
             null, false, new ArrayList<>());
           CollectionService.Util.call((IndexResult<ViewerRow> result) -> {
             if (result.getTotalCount() >= 1) {
+              RowField rowField;
               String json = JSOUtils.cellsToJson(result.getResults().get(0).getCells(), nestedTable);
               String s = JavascriptUtils.compileTemplate(template, json);
-              RowField rowField = RowField.createInstance(columnStatus.getCustomName(), new Label(s));
-              rowField.addColumnDescription(columnStatus.getCustomDescription());
+              if (columnStatus.getTypeName().contains("BINARY LARGE OBJECT")) {
+                String templateLob = "<a href=\"{{download_link}}\">{{download_label}}</a>";
+                if ((database.getPath() == null || database.getPath().isEmpty())
+                        && !status.getConsolidateProperty().equals(LargeObjectConsolidateProperty.CONSOLIDATED)) {
+                  rowField = RowField.createInstance(new Label(s).getText(), new HTML(messages.rowPanelTextForLobUnavailable()));
+                } else {
+                  SafeHtml safeHtml = SafeHtmlUtils.EMPTY_SAFE_HTML;
+                  json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_downloadLOB(),
+                          ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK, RestUtils.createExportLobUri(database.getUuid(),
+                                  nestedTable.getSchemaName(), nestedTable.getName(), "3309", columnStatus.getColumnIndex()));
+                  safeHtml = SafeHtmlUtils.fromSafeConstant(JavascriptUtils.compileTemplate(templateLob, json));
 
+
+                  rowField = RowField.createInstance(columnStatus.getCustomName(), new HTML(safeHtml));
+                }
+              } else {
+                rowField = RowField.createInstance(columnStatus.getCustomName(), new Label(s));
+              }
+
+              rowField.addColumnDescription(columnStatus.getCustomDescription());
               panel.add(rowField);
             }
           }).findRows(database.getUuid(), database.getUuid(), nestedTable.getSchemaName(), nestedTable.getName(),
