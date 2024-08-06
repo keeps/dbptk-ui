@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.databasepreservation.common.client.models.structure.ViewerTable;
 import org.apache.solr.common.SolrInputDocument;
 import org.roda.core.data.exceptions.GenericException;
 import org.roda.core.data.exceptions.NotFoundException;
@@ -243,31 +244,47 @@ public class DenormalizeTransformer {
 
     fieldsToReturn.addAll(auxColumns);
     fieldsToReturn.addAll(columnsToDisplay);
-    //TODO USE NESTEDORIGINALUUID FOR LINK
     IterableIndexResult nestedRows = solrManager.findAllRows(databaseUUID, resultingFilter, null, fieldsToReturn);
     for (ViewerRow nestedRow : nestedRows) {
       for (RelatedTablesConfiguration innerRelatedTable : relatedTable.getRelatedTables()) {
         queryOverRelatedTables(nestedRow, innerRelatedTable, nestedDocuments);
       }
       if (!columnsToDisplay.isEmpty()) {
-        createdNestedDocument(nestedRow, row.getUuid(), nestedDocuments, columnsToDisplay);
+        ViewerTable viewerTable = database.getMetadata().getTable(relatedTable.getTableUUID());
+        for (ViewerColumn viewerColumn : viewerTable.getColumns()) {
+          if (nestedRow.getCells().keySet().contains(viewerColumn.getSolrName())
+            && viewerColumn.getType().getTypeName().equals("BINARY LARGE OBJECT")) {
+            String urlPath = ViewerConstants.API_SERVLET + ViewerConstants.API_V1_DATABASE_RESOURCE + "/" + databaseUUID
+              + "/collection/" + databaseUUID + "/data/" + viewerTable.getSchemaName() + "/" + viewerTable.getName()
+              + "/" + nestedRow.getNestedOriginalUUID() + "/" + viewerColumn.getColumnIndexInEnclosingTable();
+            createdNestedDocument(nestedRow, nestedRow.getNestedOriginalUUID(), nestedDocuments, columnsToDisplay,
+              urlPath);
+          } else {
+            createdNestedDocument(nestedRow, nestedRow.getNestedOriginalUUID(), nestedDocuments, columnsToDisplay,
+              null);
+          }
+        }
       }
     }
   }
 
   private void createdNestedDocument(ViewerRow row, String parentUUID, List<SolrInputDocument> nestedDocuments,
-    List<String> columnsToDisplay) {
+    List<String> columnsToDisplay, String urlPath) {
     Map<String, ViewerCell> cells = row.getCells();
     String uuid = row.getNestedUUID();
 
     Map<String, Object> fields = new HashMap<>();
+
     for (Map.Entry<String, ViewerCell> cell : cells.entrySet()) {
       String key = cell.getKey();
-      if (columnsToDisplay.contains(key)) {
+      if (urlPath != null) {
+        fields.put(key, urlPath);
+      } else if (columnsToDisplay.contains(key)) {
         ViewerCell cellValue = cell.getValue();
         fields.put(key, cellValue.getValue());
       }
     }
+
     if (!fields.isEmpty()) {
       nestedDocuments.add(solrManager.createNestedDocument(uuid, row.getUuid(), row.getNestedOriginalUUID(), fields,
         row.getTableId(), row.getNestedUUID()));

@@ -424,7 +424,7 @@ public class RowPanel extends RightPanel {
                   SafeHtml safeHtml = SafeHtmlUtils.EMPTY_SAFE_HTML;
                   json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_downloadLOB(),
                           ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK, RestUtils.createExportLobUri(database.getUuid(),
-                                  nestedTable.getSchemaName(), nestedTable.getName(), "3309", columnStatus.getColumnIndex()));
+                                  nestedTable.getSchemaName(), nestedTable.getName(), result.getResults().get(0).getUuid(), columnStatus.getColumnIndex()));
                   safeHtml = SafeHtmlUtils.fromSafeConstant(JavascriptUtils.compileTemplate(templateLob, json));
 
 

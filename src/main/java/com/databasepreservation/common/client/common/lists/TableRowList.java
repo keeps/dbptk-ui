@@ -186,11 +186,17 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
         // this is the table of nested document
         ViewerTable nestedTable = database.getMetadata()
           .getTableById(configColumn.getNestedColumns().getOriginalTable());
-
-        Column<ViewerRow, SafeHtml> templateColumn = buildTemplateColumn(configColumn, nestedTable);
-        templateColumn.setSortable(false);
-        addColumn(configColumn, templateColumn);
-        configColumns.put(configColumn, templateColumn);
+        if (configColumn.getTypeName().contains("BINARY LARGE OBJECT")) {
+          Column<ViewerRow, SafeHtml> binaryColumn = buildTemplateColumn(configColumn, nestedTable);
+          binaryColumn.setSortable(true); // add to configuration file sortable options
+          addColumn(configColumn, binaryColumn);
+          configColumns.put(configColumn, binaryColumn);
+        } else {
+          Column<ViewerRow, SafeHtml> templateColumn = buildTemplateColumn(configColumn, nestedTable);
+          templateColumn.setSortable(false);
+          addColumn(configColumn, templateColumn);
+          configColumns.put(configColumn, templateColumn);
+        }
       }
     }
 
@@ -254,6 +260,59 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
     };
   }
 
+  private Column<ViewerRow, SafeHtml> buildNestedRowDownloadColumn(ColumnStatus configColumn, ViewerTable nestedTable) {
+    return new Column<ViewerRow, SafeHtml>(new SafeHtmlCell()) {
+      @Override
+      public void render(Cell.Context context, ViewerRow object, SafeHtmlBuilder sb) {
+        SafeHtml value = getValue(object);
+        String title = messages.row_downloadLOB();
+        if (value != null) {
+          sb.appendHtmlConstant("<div title=\"" + title + "\">");
+          sb.append(value);
+          sb.appendHtmlConstant("</div");
+        }
+      }
+
+      @Override
+      public SafeHtml getValue(ViewerRow row) {
+        List<String> aggregationList = new ArrayList<>();
+        StringBuilder sb = new StringBuilder();
+        String url;
+        SafeHtml ret = null;
+        if (row.getNestedRowList() != null) {
+          for (ViewerRow nestedRow : row.getNestedRowList()) {
+            if (nestedRow != null && nestedRow.getCells() != null && !nestedRow.getCells().isEmpty()
+                    && nestedRow.getUuid().equals(configColumn.getId())) {
+              Map<String, ViewerCell> cells = nestedRow.getCells();
+              String template = configColumn.getSearchStatus().getList().getTemplate().getTemplate();
+              if (template != null && !template.isEmpty()) {
+                String json = JSOUtils.cellsToJson(cells, nestedTable);
+                String s = JavascriptUtils.compileTemplate(template, json);
+                aggregationList.add(com.google.gwt.core.client.GWT.getHostPageBaseURL() + s);
+              }
+            }
+          }
+          String separatorText = configColumn.getSearchStatus().getList().getTemplate().getSeparator();
+          if (separatorText != null) {
+            String separator = "";
+            for (String s : aggregationList) {
+              sb.append(separator);
+              sb.append(s);
+              separator = separatorText;
+            }
+            ret = SafeHtmlUtils.fromSafeConstant(sb.toString());
+          } else {
+            String template = "<a href=\"{{download_link}}\">{{download_label}}</a>";
+            String json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_downloadLOB(),
+                    ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK, "http://localhost:8080/api/v1/database/5d33cceb-148c-4b0d-a775-caac937e68e0/collection/5d33cceb-148c-4b0d-a775-caac937e68e0/data/public/virtual_table/3309/1");
+            ret = SafeHtmlUtils.fromSafeConstant(JavascriptUtils.compileTemplate(template, json));
+          }
+        }
+        return ret;
+      }
+    };
+  }
+
   private Column<ViewerRow, SafeHtml> buildSimpleColumn(ColumnStatus configColumn) {
     return new Column<ViewerRow, SafeHtml>(new SafeHtmlCell()) {
       @Override
@@ -289,11 +348,10 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
               break;
             case NUMERIC_FLOATING_POINT:
               if (configColumn.getFormatter() instanceof NoFormatter) {
-                ret = SafeHtmlUtils
-                    .fromString(NumberFormatUtils.getFormattedValue(new NumberFormatter(), value));
+                ret = SafeHtmlUtils.fromString(NumberFormatUtils.getFormattedValue(new NumberFormatter(), value));
               } else {
-              ret = SafeHtmlUtils
-                .fromString(NumberFormatUtils.getFormattedValue((NumberFormatter) configColumn.getFormatter(), value));
+                ret = SafeHtmlUtils.fromString(
+                  NumberFormatUtils.getFormattedValue((NumberFormatter) configColumn.getFormatter(), value));
               }
               break;
             case BOOLEAN:
