@@ -187,7 +187,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
         ViewerTable nestedTable = database.getMetadata()
           .getTableById(configColumn.getNestedColumns().getOriginalTable());
         if (configColumn.getTypeName().contains("BINARY LARGE OBJECT")) {
-          Column<ViewerRow, SafeHtml> binaryColumn = buildTemplateColumn(configColumn, nestedTable);
+          Column<ViewerRow, SafeHtml> binaryColumn = buildNestedRowDownloadColumn(configColumn, nestedTable);
           binaryColumn.setSortable(true); // add to configuration file sortable options
           addColumn(configColumn, binaryColumn);
           configColumns.put(configColumn, binaryColumn);
@@ -285,10 +285,15 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
                     && nestedRow.getUuid().equals(configColumn.getId())) {
               Map<String, ViewerCell> cells = nestedRow.getCells();
               String template = configColumn.getSearchStatus().getList().getTemplate().getTemplate();
+              GWT.log(template);
               if (template != null && !template.isEmpty()) {
                 String json = JSOUtils.cellsToJson(cells, nestedTable);
+                if (template.contains("{{blob}}")) {
+                  template.
+                }
                 String s = JavascriptUtils.compileTemplate(template, json);
                 aggregationList.add(com.google.gwt.core.client.GWT.getHostPageBaseURL() + s);
+
               }
             }
           }
@@ -304,7 +309,7 @@ public class TableRowList extends AsyncTableCell<ViewerRow, TableRowListWrapper>
           } else {
             String template = "<a href=\"{{download_link}}\">{{download_label}}</a>";
             String json = JSOUtils.cellsToJson(ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LABEL, messages.row_downloadLOB(),
-                    ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK, "http://localhost:8080/api/v1/database/5d33cceb-148c-4b0d-a775-caac937e68e0/collection/5d33cceb-148c-4b0d-a775-caac937e68e0/data/public/virtual_table/3309/1");
+                    ViewerConstants.TEMPLATE_LOB_DOWNLOAD_LINK, aggregationList.get(0));
             ret = SafeHtmlUtils.fromSafeConstant(JavascriptUtils.compileTemplate(template, json));
           }
         }

@@ -7,19 +7,6 @@
  */
 package com.databasepreservation.common.transformers;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import com.databasepreservation.common.client.models.structure.ViewerTable;
-import org.apache.solr.common.SolrInputDocument;
-import org.roda.core.data.exceptions.GenericException;
-import org.roda.core.data.exceptions.NotFoundException;
-
 import com.databasepreservation.common.client.ViewerConstants;
 import com.databasepreservation.common.client.index.filter.AndFiltersParameters;
 import com.databasepreservation.common.client.index.filter.Filter;
@@ -34,6 +21,7 @@ import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
+import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.tools.FilterUtils;
 import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.server.ViewerFactory;
@@ -41,6 +29,17 @@ import com.databasepreservation.common.server.index.DatabaseRowsSolrManager;
 import com.databasepreservation.common.server.index.utils.IterableIndexResult;
 import com.databasepreservation.common.server.index.utils.JsonTransformer;
 import com.databasepreservation.model.exception.ModuleException;
+import org.apache.solr.common.SolrInputDocument;
+import org.roda.core.data.exceptions.GenericException;
+import org.roda.core.data.exceptions.NotFoundException;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Gabriel Barros <gbarros@keep.pt>
@@ -193,7 +192,7 @@ public class DenormalizeTransformer {
   }
 
   private void queryOverRelatedTables(ViewerRow row, RelatedTablesConfiguration relatedTable,
-    List<SolrInputDocument> nestedDocuments) {
+                                      List<SolrInputDocument> nestedDocuments) {
     String tableId = relatedTable.getTableID();
     Filter resultingFilter = new Filter();
     List<FilterParameter> filterParameterList = new ArrayList<>();
@@ -250,44 +249,38 @@ public class DenormalizeTransformer {
         queryOverRelatedTables(nestedRow, innerRelatedTable, nestedDocuments);
       }
       if (!columnsToDisplay.isEmpty()) {
-        ViewerTable viewerTable = database.getMetadata().getTable(relatedTable.getTableUUID());
-        for (ViewerColumn viewerColumn : viewerTable.getColumns()) {
-          if (nestedRow.getCells().keySet().contains(viewerColumn.getSolrName())
-            && viewerColumn.getType().getTypeName().equals("BINARY LARGE OBJECT")) {
-            String urlPath = ViewerConstants.API_SERVLET + ViewerConstants.API_V1_DATABASE_RESOURCE + "/" + databaseUUID
-              + "/collection/" + databaseUUID + "/data/" + viewerTable.getSchemaName() + "/" + viewerTable.getName()
-              + "/" + nestedRow.getNestedOriginalUUID() + "/" + viewerColumn.getColumnIndexInEnclosingTable();
-            createdNestedDocument(nestedRow, nestedRow.getNestedOriginalUUID(), nestedDocuments, columnsToDisplay,
-              urlPath);
-          } else {
-            createdNestedDocument(nestedRow, nestedRow.getNestedOriginalUUID(), nestedDocuments, columnsToDisplay,
-              null);
-          }
-        }
+        createdNestedDocument(nestedRow, nestedRow.getNestedOriginalUUID(), nestedDocuments, columnsToDisplay, relatedTable.getTableUUID());
       }
     }
   }
 
   private void createdNestedDocument(ViewerRow row, String parentUUID, List<SolrInputDocument> nestedDocuments,
-    List<String> columnsToDisplay, String urlPath) {
+                                     List<String> columnsToDisplay, String relatedTableUUID) {
     Map<String, ViewerCell> cells = row.getCells();
     String uuid = row.getNestedUUID();
 
     Map<String, Object> fields = new HashMap<>();
-
-    for (Map.Entry<String, ViewerCell> cell : cells.entrySet()) {
+    ViewerTable viewerTable = database.getMetadata().getTable(relatedTableUUID);
+    for (ViewerColumn viewerColumn : viewerTable.getColumns()) {
+      for (Map.Entry<String, ViewerCell> cell : cells.entrySet()) {
       String key = cell.getKey();
-      if (urlPath != null) {
-        fields.put(key, urlPath);
-      } else if (columnsToDisplay.contains(key)) {
-        ViewerCell cellValue = cell.getValue();
-        fields.put(key, cellValue.getValue());
-      }
-    }
+        String urlPath = null;
+        if (cell.getKey().equals(viewerColumn.getSolrName())
+          && viewerColumn.getType().getTypeName().equals("BINARY LARGE OBJECT")) {
+          urlPath = ViewerConstants.API_SERVLET + ViewerConstants.API_V1_DATABASE_RESOURCE + "/" + databaseUUID
+            + "/collection/" + databaseUUID + "/data/" + viewerTable.getSchemaName() + "/" + viewerTable.getName()
+            + "/" + row.getNestedOriginalUUID() + "/" + viewerColumn.getColumnIndexInEnclosingTable();
+          fields.put(key, urlPath);
 
-    if (!fields.isEmpty()) {
-      nestedDocuments.add(solrManager.createNestedDocument(uuid, row.getUuid(), row.getNestedOriginalUUID(), fields,
-        row.getTableId(), row.getNestedUUID()));
+        } else if (cell.getKey().equals(viewerColumn.getSolrName())) {
+          ViewerCell cellValue = cell.getValue();
+          fields.put(key, cellValue.getValue());
+        }
+      }
+      if (!fields.isEmpty()) {
+        nestedDocuments.add(solrManager.createNestedDocument(uuid, row.getUuid(), row.getNestedOriginalUUID(), fields,
+          row.getTableId(), row.getNestedUUID()));
+      }
     }
   }
 }
