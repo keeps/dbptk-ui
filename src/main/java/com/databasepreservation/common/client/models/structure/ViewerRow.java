@@ -36,6 +36,22 @@ public class ViewerRow extends IsIndexed {
 
   private Map<String, ViewerLobStoreType> colsLobTypeList;
 
+  @Override
+  public String toString() {
+    return "ViewerRow{" +
+      "UUID='" + UUID + '\'' +
+      ", tableUUID='" + tableUUID + '\'' +
+      ", tableId='" + tableId + '\'' +
+      ", cells=" + cells +
+      ", nestedRowList=" + nestedRowList +
+      ", nestedUUID='" + nestedUUID + '\'' +
+      ", nestedTableId='" + nestedTableId + '\'' +
+      ", nestedOriginalUUID='" + nestedOriginalUUID + '\'' +
+      ", colsMimeTypeList=" + colsMimeTypeList +
+      ", colsLobTypeList=" + colsLobTypeList +
+      '}';
+  }
+
   public ViewerRow() {
     cells = new LinkedHashMap<>();
     nestedRowList = new ArrayList<>();

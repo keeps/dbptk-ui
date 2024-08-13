@@ -33,6 +33,7 @@ import com.databasepreservation.common.client.models.structure.ViewerCell;
 import com.databasepreservation.common.client.models.structure.ViewerColumn;
 import com.databasepreservation.common.client.models.structure.ViewerDatabase;
 import com.databasepreservation.common.client.models.structure.ViewerRow;
+import com.databasepreservation.common.client.models.structure.ViewerTable;
 import com.databasepreservation.common.client.tools.FilterUtils;
 import com.databasepreservation.common.server.ViewerConfiguration;
 import com.databasepreservation.common.server.ViewerFactory;
@@ -192,7 +193,7 @@ public class DenormalizeTransformer {
   }
 
   private void queryOverRelatedTables(ViewerRow row, RelatedTablesConfiguration relatedTable,
-    List<SolrInputDocument> nestedDocuments) {
+                                      List<SolrInputDocument> nestedDocuments) {
     String tableId = relatedTable.getTableID();
     Filter resultingFilter = new Filter();
     List<FilterParameter> filterParameterList = new ArrayList<>();
@@ -243,34 +244,46 @@ public class DenormalizeTransformer {
 
     fieldsToReturn.addAll(auxColumns);
     fieldsToReturn.addAll(columnsToDisplay);
-    //TODO USE NESTEDORIGINALUUID FOR LINK
     IterableIndexResult nestedRows = solrManager.findAllRows(databaseUUID, resultingFilter, null, fieldsToReturn);
     for (ViewerRow nestedRow : nestedRows) {
       for (RelatedTablesConfiguration innerRelatedTable : relatedTable.getRelatedTables()) {
         queryOverRelatedTables(nestedRow, innerRelatedTable, nestedDocuments);
       }
       if (!columnsToDisplay.isEmpty()) {
-        createdNestedDocument(nestedRow, row.getUuid(), nestedDocuments, columnsToDisplay);
+        createdNestedDocument(nestedRow, nestedRow.getNestedOriginalUUID(), nestedDocuments, columnsToDisplay,
+          relatedTable.getTableUUID());
       }
     }
   }
 
   private void createdNestedDocument(ViewerRow row, String parentUUID, List<SolrInputDocument> nestedDocuments,
-    List<String> columnsToDisplay) {
+                                     List<String> columnsToDisplay, String relatedTableUUID) {
     Map<String, ViewerCell> cells = row.getCells();
     String uuid = row.getNestedUUID();
 
     Map<String, Object> fields = new HashMap<>();
-    for (Map.Entry<String, ViewerCell> cell : cells.entrySet()) {
-      String key = cell.getKey();
-      if (columnsToDisplay.contains(key)) {
-        ViewerCell cellValue = cell.getValue();
-        fields.put(key, cellValue.getValue());
+    ViewerTable viewerTable = database.getMetadata().getTable(relatedTableUUID);
+    for (ViewerColumn viewerColumn : viewerTable.getColumns()) {
+      for (Map.Entry<String, ViewerCell> cell : cells.entrySet()) {
+        String key = cell.getKey();
+        String urlPath = null;
+        if (cell.getKey().equals(viewerColumn.getSolrName())
+          && viewerColumn.getType().getTypeName().equals("BINARY LARGE OBJECT")) {
+          urlPath = ViewerConstants.API_SERVLET + ViewerConstants.API_V1_DATABASE_RESOURCE + "/" + databaseUUID
+            + "/collection/" + databaseUUID + "/data/" + viewerTable.getSchemaName() + "/" + viewerTable.getName() + "/"
+            + row.getNestedOriginalUUID() + "/" + viewerColumn.getColumnIndexInEnclosingTable();
+          fields.put(key, urlPath);
+
+        } else if (cell.getKey().equals(viewerColumn.getSolrName())) {
+          ViewerCell cellValue = cell.getValue();
+          fields.put(key, cellValue.getValue());
+        }
       }
     }
-    if (!fields.isEmpty()) {
-      nestedDocuments.add(solrManager.createNestedDocument(uuid, row.getUuid(), row.getNestedOriginalUUID(), fields,
-        row.getTableId(), row.getNestedUUID()));
-    }
+      if (!fields.isEmpty()) {
+        nestedDocuments.add(solrManager.createNestedDocument(uuid, row.getUuid(), row.getNestedOriginalUUID(), fields,
+          row.getTableId(), row.getNestedUUID()));
+      }
+
   }
 }
