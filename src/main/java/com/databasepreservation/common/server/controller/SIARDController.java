@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
@@ -636,7 +637,13 @@ public class SIARDController {
       viewerDatabase.setUuid(databaseUUID);
 
       viewerDatabase.setPath(siardPath.toAbsolutePath().toString());
-      viewerDatabase.setSize(siardPath.toFile().length());
+
+      if (siardVersion.equals(ViewerConstants.SIARD_DK)) {
+        viewerDatabase.setSize(FileUtils.sizeOfDirectory(siardPath.toFile()));
+      } else {
+        viewerDatabase.setSize(siardPath.toFile().length());
+      }
+
       viewerDatabase.setVersion(siardEdition.getSIARDVersion());
       viewerDatabase.setValidationStatus(ViewerDatabaseValidationStatus.NOT_VALIDATED);
 
