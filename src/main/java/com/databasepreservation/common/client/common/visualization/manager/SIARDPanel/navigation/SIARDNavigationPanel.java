@@ -67,8 +67,8 @@ public class SIARDNavigationPanel {
     btnEditMetadata.setText(messages.SIARDHomePageButtonTextEditMetadata());
     btnEditMetadata.addStyleName("btn btn-outline-primary btn-edit");
     btnEditMetadata.addClickHandler(clickEvent -> {
-      if (database.getVersion().equals(ViewerConstants.SIARD_DK_2010)
-        || database.getVersion().equals(ViewerConstants.SIARD_DK_2020)) {
+      if (database.getVersion().equals(ViewerConstants.SIARD_DK_1007)
+        || database.getVersion().equals(ViewerConstants.SIARD_DK_128)) {
         Dialogs.showInformationDialog("Edit metadata information", "Metadata edition only supports SIARD version 2.1.",
           messages.basicActionUnderstood(), "btn btn-link");
       } else {
@@ -116,8 +116,8 @@ public class SIARDNavigationPanel {
     if (database.getPath() != null && !database.getPath().isEmpty()) {
       btnDelete.setText(messages.SIARDHomePageButtonTextForDeleteIngested());
       btnDelete.addClickHandler(event -> {
-        if (database.getVersion().equals(ViewerConstants.SIARD_DK_2010)
-          || database.getVersion().equals(ViewerConstants.SIARD_DK_2020)) {
+        if (database.getVersion().equals(ViewerConstants.SIARD_DK_1007)
+          || database.getVersion().equals(ViewerConstants.SIARD_DK_128)) {
           Dialogs.showInformationDialog("Delete metadata information",
             "Metadata deletion only supports SIARD version 2.1.", messages.basicActionUnderstood(), "btn btn-link");
         } else {

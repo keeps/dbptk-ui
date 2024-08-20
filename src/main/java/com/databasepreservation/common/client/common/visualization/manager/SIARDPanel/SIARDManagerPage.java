@@ -207,7 +207,7 @@ public class SIARDManagerPage extends ContentPanel {
         if (ApplicationType.getType().equals(ViewerConstants.APPLICATION_ENV_DESKTOP)) {
           message = messages.SIARDHomePageTextForDeleteAllFromDesktop();
         }
-        if (database.getVersion().equals(ViewerConstants.SIARD_DK_2010) || database.getVersion().equals(ViewerConstants.SIARD_DK_2020)) {
+        if (database.getVersion().equals(ViewerConstants.SIARD_DK_1007) || database.getVersion().equals(ViewerConstants.SIARD_DK_128)) {
           Dialogs.showInformationDialog(messages.SIARDHomePageDialogTitleForDelete(),
             "SIARD deletion only supports SIARD version 2.1.", messages.basicActionUnderstood(), "btn btn-link");
         } else {
